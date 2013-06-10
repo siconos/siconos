@@ -45,14 +45,13 @@ using namespace RELATION;
 // --- CONSTRUCTORS ---
 
 // --- XML constructor ---
-Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet nsdsSet):
-  _initialized(false), _id("undefined"), _number(0), _interactionSize(0),
+Interaction::Interaction(SP::InteractionXML interxml):
+  _initialized(false), _number(0), _interactionSize(0),
   _sizeOfDS(0), _sizeZ(0), _interactionxml(interxml)
 {
   assert(_interactionxml && "NULL pointer");
 
   // id and number
-  if (_interactionxml->hasId()) _id = _interactionxml->getId();
   _number = _interactionxml->number();
 
   // interaction size
@@ -83,27 +82,6 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
     _nslaw.reset(new NewtonImpactFrictionNSL(_interactionxml->getNonSmoothLawXML()));
   }
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type");
-
-  // --- Dynamical Systems ---
-  _involvedDS.reset(new DynamicalSystemsSet());
-  if (!nsdsSet->isEmpty())
-  {
-    // Get a list of DS concerned from xml
-
-    if (_interactionxml->hasAllDS())
-      _involvedDS->insert(nsdsSet->begin(), nsdsSet->end());
-
-    else
-    {
-      // get numbers of DS involved in the interaction from the xml input file.
-      std::vector<int> dsNumbers;
-      _interactionxml->getDSNumbers(dsNumbers);
-      // get corresponding DS and insert them into the involvedDS set.
-      for (std::vector<int>::iterator it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
-        _involvedDS->insert(nsdsSet->getPtr(*it));
-    }
-  }
-  else std::cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" <<std::endl;
 
   // --- Relation ---
   RELATION::TYPES relationType = _interactionxml->getRelationXML()->getType();
@@ -148,49 +126,8 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
   // function, called by simulation !!)
   if (_interactionxml->hasY() ||  _interactionxml->hasLambda())
     RuntimeException::selfThrow("Interaction::xml constructor, y or lambda download is forbidden.");
-}
 
-// --- Constructors from a set of data ---
-
-Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
-                         SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _initialized(false) , _id("none"), _number(newNumber), _interactionSize(nInter),
-  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel)
-{
   _involvedDS.reset(new DynamicalSystemsSet());
-  _involvedDS->insert(ds); // Warning: insert pointer to DS!!
-
-}
-Interaction::Interaction(const std::string& newId, SP::DynamicalSystem ds,
-                         int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _initialized(false), _id(newId), _number(newNumber), _interactionSize(nInter),
-  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL),  _relation(newRel)
-{
-  _involvedDS.reset(new DynamicalSystemsSet());
-  _involvedDS->insert(ds); // Warning: insert pointer to DS!!
-}
-
-
-Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter,
-                         SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _initialized(false) , _id("none"), _number(newNumber), _interactionSize(nInter),
-  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel)
-{
-  _involvedDS.reset(new DynamicalSystemsSet());
-  DSIterator itDS;
-  for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
-    _involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
-}
-
-Interaction::Interaction(const std::string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
-                         int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _initialized(false) , _id(newId), _number(newNumber), _interactionSize(nInter),  _sizeOfDS(0), _sizeZ(0),
-  _y(2),  _nslaw(newNSL), _relation(newRel)
-{
-  _involvedDS.reset(new DynamicalSystemsSet());
-  DSIterator itDS;
-  for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
-    _involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
 }
 
 /* initialisation with empty set */
@@ -199,12 +136,6 @@ Interaction::Interaction(int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRe
   _y(2),  _nslaw(newNSL), _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
-}
-
-
-// --- DESTRUCTOR ---
-Interaction::~Interaction()
-{
 }
 
 void Interaction::initialize(double t0)
@@ -713,22 +644,6 @@ void Interaction::setLambdaOldPtr(const unsigned int  index, SP::SiconosVector n
 }
 
 
-void Interaction::setDynamicalSystems(const DynamicalSystemsSet& newSet)
-{
-  ConstDSIterator itDS;
-  for (itDS = newSet.begin(); itDS != newSet.end(); ++itDS)
-    _involvedDS->insert(*itDS); // smart ptrs
-
-  computeSizeOfDS();
-}
-
-SP::DynamicalSystem Interaction::dynamicalSystem(int nb)
-{
-  assert(_involvedDS->isIn(nb) &&  // if ds number nb is not in the set ...
-         "Interaction::dynamicalSystem(nb), DS number nb is not in the set.");
-  return _involvedDS->getPtr(nb);
-}
-
 void Interaction::setRelationPtr(SP::Relation newRelation)
 {
   _relation = newRelation;
@@ -797,20 +712,19 @@ void Interaction::display() const
   if (_initialized)
     std::cout << "The interaction is initialized" <<std::endl;
   else
-    std::cout << "The interaction is not initialized" <<std::endl;
-  std::cout << "| id : " << _id <<std::endl;
-  std::cout << "| number : " << _number <<std::endl;
-  std::cout << "| relativeDegree : " << _relativeDegree <<std::endl;
-  std::cout << "| lowerLevelForOutput : " << _lowerLevelForOutput <<std::endl;
-  std::cout << "| upperLevelForOutput : " << _upperLevelForOutput <<std::endl;
-  std::cout << "| lowerLevelForInput : " << _lowerLevelForInput <<std::endl;
-  std::cout << "| upperLevelForInput : " << _upperLevelForInput <<std::endl;
-  std::cout << "| interactionSize : " << _interactionSize <<std::endl;
-  std::cout << "|  _sizeOfDS : " << _sizeOfDS <<std::endl;
-  std::cout << "|  _sizeZ: " << _sizeZ <<std::endl;
+    cout << "The interaction is not initialized" << endl;
+  cout << "| number : " << _number << endl;
+  cout << "| relativeDegree : " << _relativeDegree << endl;
+  cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << endl;
+  cout << "| upperLevelForOutput : " << _upperLevelForOutput << endl;
+  cout << "| lowerLevelForInput : " << _lowerLevelForInput << endl;
+  cout << "| upperLevelForInput : " << _upperLevelForInput << endl;
+  cout << "| interactionSize : " << _interactionSize << endl;
+  cout << "|  _sizeOfDS : " << _sizeOfDS << endl;
+  cout << "|  _sizeZ: " << _sizeZ << endl;
 
-  std::cout << "| involved DS :" <<std::endl;
-  std::cout << _involvedDS <<std::endl;
+  cout << "| involved DS :" << endl;
+  cout << _involvedDS << endl;
   _relation->display();
   if (_initialized)
   {
@@ -861,7 +775,6 @@ void Interaction::saveInteractionToXML()
   if (_interactionxml)
   {
     //  _interactionxml->setDSConcerned( involvedDS );
-    _interactionxml->setId(_id);
     _interactionxml->setNumber(_number);
     _interactionxml->setSize(_interactionSize);
     _interactionxml->setY(*(_y[0]));
@@ -911,18 +824,15 @@ void Interaction::getLeftInteractionBlockForDS(SP::DynamicalSystem ds, SP::Sicon
 {
 
   unsigned int k = 0;
-  unsigned int NumDS = 0;
   DSIterator itDS;
-  // itDS = dynamicalSystemsBegin();
 
-  itDS =    _involvedDS->begin();
+  itDS = _involvedDS->begin();
 
   // look for ds and its position in G
   while (*itDS != ds && itDS != dynamicalSystemsEnd())
   {
     k += (*itDS)->getDim();
     itDS++;
-    NumDS++;
   }
 
   // check dimension (1)
@@ -965,10 +875,10 @@ void Interaction::getLeftInteractionBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   subPos[3] = 0;
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
+
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const
 {
   unsigned int k = 0;
-  unsigned int NumDS = 0;
   DSIterator itDS;
 
   itDS = _involvedDS->begin();
@@ -986,7 +896,6 @@ void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(SP::Dynamical
   {
     k += (std11::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
     itDS++;
-    NumDS++;
   }
 
   // check dimension (1)

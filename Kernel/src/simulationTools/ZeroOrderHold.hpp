@@ -184,11 +184,6 @@ public:
    */
   ZeroOrderHold(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList);
 
-  /** constructor from a minimum set of data
-   *  \param allDS the list of DynamicalSystems to be integrated
-   */
-  ZeroOrderHold(DynamicalSystemsSet& allDS);
-
   /** constructor from a minimum set of data: one DS
    *  \param ds the DynamicalSystem linked to the OneStepIntegrator
    */

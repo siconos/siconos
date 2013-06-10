@@ -491,8 +491,7 @@
 
 					</xsd:all>
 					<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
-					<xsd:attribute name="id" type="xsd:string" use="optional"/>
-<!--			  		<xsd:attribute name="isActive" type="boolean" use="optional"/>  -->
+				
 				</xsd:complexType>
 		
 		     <xsd:unique name="InteractionKey">

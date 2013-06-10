@@ -24,8 +24,8 @@
 
 	<!-- List of couple of DS concerned by this interaction -->			
 	<DS_Concerned size='2'>
-		<DS number='1' interactsWithDS_Number='2'/>		
-		<DS number='1' interactsWithDS_Number='3'/>				
+	  <DS number='1' interactsWithDS_Number='2'/>		
+	  <DS number='1' interactsWithDS_Number='3'/>				
 	</DS_Concerned>					
 
 	<!-- RELATION of this interaction -->

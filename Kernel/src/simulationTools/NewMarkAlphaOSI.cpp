@@ -50,30 +50,6 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double _rho_infty, b
   _IsVelocityLevel = _flag;
 }
 
-
-NewMarkAlphaOSI::NewMarkAlphaOSI(DynamicalSystemsSet& new_list_DS, double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool _flag = false):
-  OneStepIntegrator(OSI::NEWMARKALPHAOSI, new_list_DS)
-{
-  beta = new_beta;
-  gamma = new_gamma;
-  alpha_m = new_alpha_m;
-  alpha_f = new_alpha_f;
-  _orderDenseOutput = 5.0;
-  _IsVelocityLevel = _flag;
-}
-
-NewMarkAlphaOSI::NewMarkAlphaOSI(DynamicalSystemsSet& new_list_DS, double _rho_infty, bool _flag = false):
-  OneStepIntegrator(OSI::NEWMARKALPHAOSI, new_list_DS)
-{
-  alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
-  alpha_f = _rho_infty / (_rho_infty + 1);
-  gamma = 0.5 + alpha_f - alpha_m;
-  beta = 0.25 * std::pow((gamma + 0.5), 2);
-  _orderDenseOutput = 5.0;
-  _IsVelocityLevel = _flag;
-}
-
-
 NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool _flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {

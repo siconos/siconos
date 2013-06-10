@@ -70,6 +70,14 @@ Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList, 
   _sizeMem = 2;
 }
 
+Lsodar::Lsodar():
+  OneStepIntegrator(OSI::LSODAR)
+{
+  _intData.resize(9);
+  for (int i = 0; i < 9; i++) _intData[i] = 0;
+  _sizeMem = 2;
+}
+
 Lsodar::Lsodar(SP::DynamicalSystem ds):
   OneStepIntegrator(OSI::LSODAR)
 {
@@ -80,15 +88,6 @@ Lsodar::Lsodar(SP::DynamicalSystem ds):
   for (int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
 }
-
-Lsodar::Lsodar(DynamicalSystemsSet& newDS):
-  OneStepIntegrator(OSI::LSODAR, newDS)
-{
-  _intData.resize(9);
-  for (int i = 0; i < 9; i++) _intData[i] = 0;
-  _sizeMem = 2;
-}
-
 
 void Lsodar::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
 {

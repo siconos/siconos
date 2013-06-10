@@ -27,7 +27,6 @@
 #include "SiconosConst.hpp"
 #include "Tools.hpp"
 #include "SiconosPointers.hpp"
-#include "InteractionsSet.hpp"
 
 #include "SiconosSerialization.hpp"
 
@@ -100,24 +99,12 @@ public:
    *  \param std::string : the author of the Model (optional parameter)
    *  \param std::string : the description of the Model (optional
    *                  parameter)
-   *  \param std::string : the date of the Model (optional parameter)
-   *  \param std::string : the xml schema of the Model (optional parameter)
+   *  \param string : the date of the Model (optional parameter)
+   *  \param string : the xml schema of the Model (optional parameter)
    */
-  // Model(double, double = -1, const std::string& = "none",
-  //       const std::string& = "nobody", const std::string& = "none",
-  //       const std::string& = "none", const std::string& = "none");
-  Model(double newT0, double newT =-1, const std::string& newTitle = "none",
-        const std::string& newAuthor = "nobody", const std::string& newDescription = "none",
-        const std::string& newDate = "none", const std::string& newSchema = "none");
-  /** build the model from init/final times and a list of DS and
-   *   Interactions
-   *   \param double : the value for t0
-   *   \param double : the value for T; if you do not want to set the
-   *   final time, set T = -1.
-   *   \param a list of DynamicalSystems
-   *   \param a list of Interactions
-   */
-  Model(double, double, DynamicalSystemsSet&, InteractionsSet&);
+  Model(double, double = -1, const std::string& = "none",
+        const std::string& = "nobody", const std::string& = "none",
+        const std::string& = "none", const std::string& = "none");
 
   /** destructor
    */

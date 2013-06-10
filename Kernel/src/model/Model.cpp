@@ -94,21 +94,8 @@ Model::Model(double newT0, double newT, const std::string& newTitle,
     ("Model::constructor from min data: Warning, final T lower than t0");
 
   /* empty */
-  DynamicalSystemsSet allDS;
-  InteractionsSet allInteractions;
-  _nsds.reset(new NonSmoothDynamicalSystem(allDS, allInteractions));
+  _nsds.reset(new NonSmoothDynamicalSystem());
   // else no T in the model!
-}
-
-Model::Model(double newT0, double newT,
-             DynamicalSystemsSet& allDS, InteractionsSet& allInteractions):
-  _t(newT0), _t0(newT0), _T(newT), _title("none"), _author("nobody"),
-  _description("none"), _date("none"), _xmlSchema("none")
-{
-  if (newT > 0 && newT <= _t0)
-    RuntimeException::selfThrow
-    ("Model::constructor from data: Warning, final T lower than t0");
-  _nsds.reset(new NonSmoothDynamicalSystem(allDS, allInteractions));
 }
 
 void Model::setSimulationPtr(SP::Simulation newPtr)

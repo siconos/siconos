@@ -82,11 +82,14 @@ public:
    */
   D1MinusLinear(SP::DynamicalSystem newDS);
 
+<<<<<<< HEAD
   /** constructor from a list of dynamical systems
    *  \param newDSset list of DynamicalSystems to be integrated
    */
   D1MinusLinear(DynamicalSystemsSet& newDSset);
 
+=======
+>>>>>>> Update Kernel to simplify NSDS creation process and remove (as much as possible) DS/Interaction set. All tests ok. All examples ok. Todo : update mechanics.
   /** destructor */
   virtual ~D1MinusLinear() {};
 

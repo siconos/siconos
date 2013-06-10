@@ -118,12 +118,6 @@ public:
    */
   SchatzmanPaoli(SP::DynamicalSystem, double);
 
-  /** constructor from a minimum set of data
-   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
-   *  \param theta value for all these DS.
-   */
-  SchatzmanPaoli(DynamicalSystemsSet&, double);
-
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
@@ -135,13 +129,6 @@ public:
    *  \param gamma value
    */
   SchatzmanPaoli(SP::DynamicalSystem, double, double);
-
-  /** constructor from a minimum set of data
-   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
-   *  \param gamma value for all these DS.
-   *  \param theta value for all these DS.
-   */
-  SchatzmanPaoli(DynamicalSystemsSet&, double, double);
 
   /** constructor from theta value only
    *  \param theta value for all these DS.

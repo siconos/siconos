@@ -46,14 +46,6 @@ SchatzmanPaoli::SchatzmanPaoli(SP::DynamicalSystem newDS, double newTheta) :
 }
 
 // --- constructor from a set of data ---
-SchatzmanPaoli::SchatzmanPaoli(DynamicalSystemsSet& newDS, double newTheta):
-  OneStepIntegrator(OSI::SCHATZMANPAOLI, newDS), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
-{
-  _theta = newTheta;
-  _sizeMem = SCHATZMANPAOLISTEPSINMEMORY ;
-}
-
-// --- constructor from a set of data ---
 SchatzmanPaoli::SchatzmanPaoli(double newTheta):
   OneStepIntegrator(OSI::SCHATZMANPAOLI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
@@ -73,16 +65,6 @@ SchatzmanPaoli::SchatzmanPaoli(SP::DynamicalSystem newDS, double newTheta, doubl
 }
 
 // --- constructor from a set of data ---
-SchatzmanPaoli::SchatzmanPaoli(DynamicalSystemsSet& newDS, double newTheta, double newGamma):
-  OneStepIntegrator(OSI::SCHATZMANPAOLI, newDS), _useGammaForRelation(false)
-{
-  _theta = newTheta;
-  _gamma = newGamma;
-  _useGamma = true;
-  _sizeMem = SCHATZMANPAOLISTEPSINMEMORY ;
-}
-
-// --- constructor from a set of data ---
 SchatzmanPaoli::SchatzmanPaoli(double newTheta, double newGamma):
   OneStepIntegrator(OSI::SCHATZMANPAOLI), _useGammaForRelation(false)
 {
@@ -91,7 +73,6 @@ SchatzmanPaoli::SchatzmanPaoli(double newTheta, double newGamma):
   _useGamma = true;
   _sizeMem = SCHATZMANPAOLISTEPSINMEMORY ;
 }
-
 
 // Note: OSIDynamicalSystems and thetaMap must disappear
 void SchatzmanPaoli::insertDynamicalSystem(SP::DynamicalSystem ds)

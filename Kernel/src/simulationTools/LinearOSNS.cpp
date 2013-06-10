@@ -386,16 +386,6 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   unsigned int nslawSize1 = inter1->getNonSmoothLawSize();
   unsigned int nslawSize2 = inter2->getNonSmoothLawSize();
 
-  /*
-    DynamicalSystemsSet commonDS;
-    intersection(*inter1->dynamicalSystems(),*inter2->dynamicalSystems(), commonDS);
-    assert (!commonDS.isEmpty()) ;
-    for (DSIterator itDS = commonDS.begin(); itDS!=commonDS.end(); itDS++)
-    {
-    assert (*itDS == ds);
-    }
-  */
-
   SP::SiconosMatrix currentInteractionBlock;
 
   assert(index1 != index2);

@@ -112,11 +112,12 @@ private:
   * creates the corresponding Interactions and add them into _DSG
   * and _IG)
   \param  inter the Interaction to add
+  \param SP::DynamicalSystem first dynamical system linked to the interaction
+  \param SP::DynamicalSystem second dynamical system linked to the interaction (default = None)
   \return a vertex descriptor of the new vertex in IndexSet0
   */
-  std::pair<DynamicalSystemsGraph::EDescriptor,
-      InteractionsGraph::VDescriptor>
-      addInteractionInIndexSet(SP::Interaction inter);
+  std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
+  addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem, SP::DynamicalSystem = SP::DynamicalSystem());
 
   /** remove the Interactions of the interactions from _IG and
    * _DSG
@@ -131,11 +132,6 @@ public:
   /** default constructor
   */
   Topology();
-
-  /** constructor from InteractionSet
-  * \param a SP::InteractionSet
-  */
-  Topology(SP::InteractionsSet interSet);
 
   /** constructor from dynamical systems and interaction sets
   * \param newDSset a SP::DynamicalSystemsSet
@@ -158,28 +154,11 @@ public:
     return _allInteractions;
   }
 
-  /** set the Interactions of the Topology problem (saved in a set)
-   */
-  inline void setInteractionsPtr(SP::InteractionsSet newInteractions)
-  {
-    _allInteractions->clear() ;
-    _allInteractions = newInteractions;
-  }
-
-
   /** check if Interaction inter is in the set
    *  \param inter an Interaction
    *  \return a bool
    */
   bool hasInteraction(SP::Interaction inter) const;
-
-  /** add an Interaction in the topology. The interaction is both
-   *  added in Dynamical Systems graph and Interactions Graph
-   * \param a shared pointer to the interaction
-   * \return a vertex descriptor to the new vertex in IndexSet0
-   */
-  std::pair<DynamicalSystemsGraph::EDescriptor,
-      InteractionsGraph::VDescriptor> insertInteraction(SP::Interaction inter);
 
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Interactions Graph.
@@ -198,11 +177,24 @@ public:
    */
   void removeDynamicalSystem(SP::DynamicalSystem ds);
 
-  /** link a dynamical system to a relation
+  /** link two dynamical systems to a relation
    * \param inter a SP::Interaction
    * \param ds a SP::DynamicalSystem
+   * \param ds a SP::DynamicalSystem (optional)
+   \return a vertex descriptor of the new vertex in IndexSet0
    */
-  void link(SP::Interaction inter, SP::DynamicalSystem ds);
+  std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
+  link(SP::Interaction inter, SP::DynamicalSystem, SP::DynamicalSystem = SP::DynamicalSystem());
+
+  /** specify id the given Interaction is for controlling the DS
+   * \param vd the descriptor of the Interaction in InteractionGraph
+   * \param ed the descriptor of the Interaction in DynamicalSystemsGraph
+   * \param isControlInteraction true if the Interaction is used for
+   * control purposes
+   **/
+  void setControlProperty(const InteractionsGraph::VDescriptor& vd, 
+                          const DynamicalSystemsGraph::EDescriptor& ed,
+                          const bool isControlInteraction);
 
   /** get a pointer to the graph of all Interactions.
    *  \return a SP::InteractionsGraph
@@ -275,14 +267,6 @@ public:
 
   // --- isTopologyUpToDate ---
 
-  /** set isTopologyUpToDate to val
-  *  \param val a bool
-  */
-  inline void setUpToDate(const bool val)
-  {
-    _isTopologyUpToDate = val;
-  }
-
   /** check if topology has been updated since modifications occurs on nsds
   *  \return a bool
   */
@@ -335,6 +319,10 @@ public:
   /** initialize graphs properties */
   void setProperties();
 
+  /** Get a dynamical system using its number 
+   \param the required number
+  */
+  SP::DynamicalSystem getDynamicalSystem(int);
 
 };
 

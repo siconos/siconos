@@ -45,7 +45,7 @@ bool BallBowl()
     // time
     dataPlot(k, 0) =  bouncingBall->t0();
     // state q for the first dynamical system (ball)
-    SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystem(1));
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(2);

@@ -1,4 +1,3 @@
-
 /* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
@@ -92,9 +91,6 @@ private:
   /**initialization flag */
   bool _initialized;
 
-  /** name of the Interaction */
-  std::string  _id;
-
   /** number specific to each Interaction */
   int _number;
 
@@ -128,10 +124,6 @@ private:
   /** size of the interaction, ie size of y[i] and _lambda[i] */
   unsigned int _interactionSize;
 
-  // /** number of relations in the interaction ( equal to
-  //     interactionSize / nsLawSize ) */
-  // unsigned int _numberOfRelations;
-
   /** sum of all DS sizes, for DS involved in the interaction */
   unsigned int _sizeOfDS;
 
@@ -145,7 +137,6 @@ private:
   /** Absolute position in the "global" vector of constraints for the proj formulation. */
   unsigned int _absolutePositionProj;
 
-
   /** relation between constrained variables and states variables
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
@@ -156,7 +147,6 @@ private:
    * \warning : VA 24/05/2013 this has to be put into the workspace vector
    *   or we have to use the _yMemory storage
    */
-
   VectorOfVectors _yOld;
 
   /** value of the previous time-step */
@@ -200,7 +190,6 @@ private:
   /** Work vectors to save pointers to state-related data of the
       dynamical systems involved in the Interaction.*/
 
-
   /** The residu y of the newton iterations*/
   SP::SiconosVector _Residuy;
 
@@ -219,51 +208,13 @@ private:
 public:
 
   /** default constructor */
-  Interaction() {};
+  Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _sizeZ(0), _y(2) 
+  {};
 
   /** constructor with XML object of the Interaction
    *  \param InteractionXML* : the XML object corresponding
-   *  \param a set of DynamicalSystems
    */
-  Interaction(SP::InteractionXML, SP::DynamicalSystemsSet);
-
-  /** constructor with a set of data (only one DS in the Interaction)
-      - Note: no id.
-   *  \param a SP::DynamicalSystem: the DS involved in the Interaction
-   *  \param int : the number of this Interaction
-   *  \param int size of the interaction (interactionSize), i.e, the size of the input and output
-   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
-   *  \param SP::Relation : a pointer to the Relation
-   */
-  Interaction(SP::DynamicalSystem, int, int, SP::NonSmoothLaw, SP::Relation);
-  /** constructor with a set of data (only one DS in the Interaction)
-   *  \param std::string: the id of this Interaction
-   *  \param a SP::DynamicalSystem: the DS involved in the Interaction
-   *  \param int : the number of this Interaction
-   *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
-   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
-   *  \param SP::Relation : a pointer to the Relation
-   */
-  Interaction(const std::string&, SP::DynamicalSystem, int, int, SP::NonSmoothLaw, SP::Relation);
-
-  /** constructor with a set of data - Note: no id.
-   *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
-   *  \param int : the number of this Interaction
-   *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
-   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
-   *  \param SP::Relation : a pointer to the Relation
-   */
-  Interaction(DynamicalSystemsSet&, int, int, SP::NonSmoothLaw, SP::Relation);
-
-  /** constructor with a set of data
-   *  \param std::string: the id of this Interaction
-   *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
-   *  \param int : the number of this Interaction
-   *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
-   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
-   *  \param SP::Relation : a pointer to the Relation
-   */
-  Interaction(const std::string&, DynamicalSystemsSet&, int, int, SP::NonSmoothLaw, SP::Relation);
+  Interaction(SP::InteractionXML);
 
   /** constructor with no data
    *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
@@ -275,7 +226,7 @@ public:
 
   /** destructor
    */
-  ~Interaction();
+  ~Interaction() {};
 
   /** allocate memory for y[i] and _lambda[i] and set them to zero.
    * \param time for initialization.
@@ -296,31 +247,6 @@ public:
   void initializeMemory();
 
   // === GETTERS/SETTERS ===
-
-  /** get the id of this Interaction
-  *  \return the std::string, id of this Interaction
-  */
-  inline const std::string  getId() const
-  {
-    return _id;
-  }
-
-  /** set the id of this Interaction
-   *  \param the integer to set the id
-   */
-  inline void setId(const int newId)
-  {
-    _id = newId;
-  }
-
-  /** set the id of this Interaction
-   *  \param the std::string  to set the id
-   */
-  inline void setId(const std::string& newId)
-  {
-    _id = newId;
-  }
-
   /** get the value of number
    *  \return the value of number
    */
@@ -757,17 +683,6 @@ public:
   {
     return _involvedDS;
   }
-
-  /** set the _involvedDS
-  *  \param a DynamicalSystemsSet
-  */
-  void setDynamicalSystems(const DynamicalSystemsSet&) ;
-
-  /** get a specific DynamicalSystem
-  *  \param the identification number of the wanted DynamicalSystem
-  *  \return a pointer on Dynamical System
-  */
-  SP::DynamicalSystem dynamicalSystem(int);
 
   /** get the Relation of this Interaction
    *  \return a pointer on this Relation

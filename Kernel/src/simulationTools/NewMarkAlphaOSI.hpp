@@ -80,23 +80,6 @@ public:
 
   NewMarkAlphaOSI(SP::DynamicalSystem, double, bool);
 
-  /** constructor with a list of concerned Dynamical Systems and parameters beta, gamma, alpha_m, alpha_f
-  * \param listOfDS DynamicalSystemsSet : list of Dynamical Systems to be integrated
-  * \param beta double
-  * \param gamma double
-  * \param alpha_m double
-  * \param alpha_f double
-  */
-
-  NewMarkAlphaOSI(DynamicalSystemsSet&, double, double, double, double, bool);
-
-  /** constructor with a list of concerned Dynamical Systems and the parameter rho_infty
-   * \param listOfDS DynamicalSystemsSet
-   * \param rho_infty double
-   */
-
-  NewMarkAlphaOSI(DynamicalSystemsSet&, double, bool);
-
   /** constructor with only parameters beta, gamma, alpha_m, alpha_f
   * \param beta double
   * \param gamma double

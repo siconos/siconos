@@ -1861,8 +1861,8 @@ void SimpleMatrixTest::testOperators8()
 
   // Simple = Simple * Simple
   *C = prod(*A, *B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Bis: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol, true);
-
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol, true);
+  
   // Block = Simple * Simple
   *Cb = prod(*A, *B);
   DenseMat Dtmp = prod(*A->dense(), *B->dense());

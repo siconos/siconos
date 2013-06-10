@@ -55,190 +55,69 @@ Topology::Topology(): _isTopologyUpToDate(false), _hasChanged(true),
   _allInteractions.reset(new InteractionsSet());
 }
 
-Topology::Topology(SP::InteractionsSet newInteractions) :
-  _isTopologyUpToDate(false), _hasChanged(true),
-  _numberOfConstraints(0), _symmetric(false)
-{
-
-  _IG.resize(1);
-  _DSG.resize(1);
-
-  _IG[0].reset(new InteractionsGraph());
-  _DSG[0].reset(new DynamicalSystemsGraph());
-  setProperties();
-
-  _allInteractions.reset(new InteractionsSet());
-
-  for (InteractionsIterator it = newInteractions->begin();
-       it != newInteractions->end(); ++it)
-  {
-    insertInteraction(*it);
-  }
-
-  _isTopologyUpToDate = false;
-}
-
-
-// a constructor with a DS set : when some DS may not be in interactions
-Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInteractions) :
-  _isTopologyUpToDate(false), _hasChanged(true),
-  _numberOfConstraints(0), _symmetric(false)
-{
-
-  _IG.resize(1);
-  _DSG.resize(1);
-
-  _IG[0].reset(new InteractionsGraph());
-  _DSG[0].reset(new DynamicalSystemsGraph());
-  setProperties();
-
-  _allInteractions.reset(new InteractionsSet());
-
-  for (InteractionsIterator it = newInteractions->begin();
-       it != newInteractions->end(); ++it)
-  {
-    insertInteraction(*it);
-  }
-
-  for (DSIterator ids = newDSset->begin(); ids != newDSset->end() ; ++ids)
-  {
-    _DSG[0]->add_vertex(*ids);
-  }
-  _isTopologyUpToDate = false;
-}
-
 // destructor
 Topology::~Topology()
 {
   clear();
 }
 
-std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
-Topology::addInteractionInIndexSet(SP::Interaction inter)
+std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
+Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
-  // Private function
+  // !! Private function !!
   //
-  // Creates Interactions corresponding to inter and add them into
-  // _IG
+  // Add inter and ds into IG/DSG
 
-  // First, we get the number of relations in the interaction.  This
-  // corresponds to inter->getNumberOfRelations but since Interaction
-  // has not been initialized yet, this value is not set and we need
-  // to get interaction size and nsLaw size.
+  // !!!! Note FP : OBSOLETE !!!
+  assert(_allInteractions);
+  _allInteractions->insert(inter);
+  // !!!! WILL BE REMOVED SOON ...!!!
+  
+  // Compute number of constraints
   unsigned int nsLawSize = inter->nonSmoothLaw()->size();
   unsigned int m = inter->getSizeOfY() / nsLawSize;
-
   if (m > 1)
     RuntimeException::selfThrow("Topology::addInteractionInIndexSet - m > 1. Obsolete !");
 
-  // vector of the Interaction
-  InteractionsGraph::EDescriptor inter_current_edge;
-
-  InteractionsGraph::EDescriptor ds_current_edge;
-
-  SP::DynamicalSystemsSet systems = inter->dynamicalSystems();
-
-  _numberOfConstraints += m * nsLawSize;
+  _numberOfConstraints += nsLawSize;
 
   // _DSG is the hyper forest : (vertices : dynamical systems, edges :
   // Interactions)
   //
   // _IG is the hyper graph : (vertices : Interactions, edges :
   // dynamical systems)
+  assert(_DSG[0]->edges_number() == _IG[0]->size());
 
   // _IG = L(_DSG),  L is the line graph transformation
-
-
-  // for all couples of ds in the interaction
-  DEBUG_PRINTF("addInteractionInIndexSet systems->size() : %d\n", systems->size());
-  if (systems->size() == 0)
-    RuntimeException::selfThrow("There is no DS associated with this interaction");
-
-
+  // vector of the Interaction
+  DynamicalSystemsGraph::VDescriptor dsgv1, dsgv2;
+  dsgv1 = _DSG[0]->add_vertex(ds1);
+  if(ds2 != NULL)
+    dsgv2 = _DSG[0]->add_vertex(ds2);
+  else 
+    dsgv2 = dsgv1;
+  
+  // this may be a multi edges graph
+  assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
+  assert(!_IG[0]->is_vertex(inter));
   InteractionsGraph::VDescriptor ig_new_ve;
+  DynamicalSystemsGraph::EDescriptor new_ed;
+  std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
+  
+  // add self branches in vertex properties
+  // note : boost graph SEGFAULT on self branch removal
+  // see https://svn.boost.org/trac/boost/ticket/4622
+  _IG[0]->properties(ig_new_ve).source = ds1;
+  if(ds2 == NULL)
+    _IG[0]->properties(ig_new_ve).target = ds1;
+  else
+    _IG[0]->properties(ig_new_ve).target = ds2;
+  assert(_IG[0]->bundle(ig_new_ve) == inter);
+  assert(_IG[0]->is_vertex(inter));
+  assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
+  assert(_DSG[0]->edges_number() == _IG[0]->size());
 
-  // only one or two ds! (otherwise we need a hyper-graph &
-  // SiconosGraph does not provide it yet)
-  for (DSIterator i1ds = systems->begin(); i1ds != systems->end(); ++i1ds)
-  {
-    for (DSIterator i2ds = i1ds; i2ds != systems->end(); ++i2ds)
-    {
-
-      // build the Interactions
-      //      std::vector<SP::Interaction> current_interSet;
-      //      for (unsigned int i=0, pos=0; i<m; ++i, pos += nsLawSize)
-      //      {
-      //        SP::Interaction inter(new Interaction(inter,pos,i));
-      //        current_interSet.push_back(inter);
-      //      };
-
-      // one DS in the interaction is a special case : a self branch
-      if ((i1ds == i2ds) && inter->dynamicalSystems()->size() == 1)
-      {
-        DynamicalSystemsGraph::VDescriptor dsgv;
-        dsgv = _DSG[0]->add_vertex(*i1ds);
-
-        // this may be a multi edges graph
-        //        for (std::vector<SP::Interaction>::iterator itI = current_interSet.begin();
-        //             itI != current_interSet.end(); ++itI)
-        {
-          assert(!_DSG[0]->is_edge(dsgv, dsgv, inter));
-          assert(!_IG[0]->is_vertex(inter));
-
-          DynamicalSystemsGraph::EDescriptor new_ed;
-          std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, inter, *_IG[0]);
-
-          // add self branches in vertex properties
-          // note : boost graph SEGFAULT on self branch removal
-          // see https://svn.boost.org/trac/boost/ticket/4622
-          _IG[0]->properties(ig_new_ve).source = *i1ds;
-          _IG[0]->properties(ig_new_ve).target = *i1ds;
-
-          assert(_IG[0]->bundle(ig_new_ve) == inter);
-          assert(_IG[0]->is_vertex(inter));
-          assert(_DSG[0]->is_edge(dsgv, dsgv, inter));
-          return std::pair<DynamicalSystemsGraph::EDescriptor,
-                 InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
-        }
-      }
-      else
-        // multiples DS in the interaction : no self branch
-        if (i1ds != i2ds)
-        {
-          DynamicalSystemsGraph::VDescriptor dsgv1, dsgv2;
-
-          dsgv1 = _DSG[0]->add_vertex(*i1ds);
-          dsgv2 = _DSG[0]->add_vertex(*i2ds);
-
-          // this may be a multi edges graph
-          //          for (std::vector<SP::Interaction>::iterator itI = current_interSet.begin();
-          //               itI != current_interSet.end(); ++itI)
-          {
-            assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
-            assert(!_IG[0]->is_vertex(inter));
-
-            DynamicalSystemsGraph::EDescriptor new_ed;
-            std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
-
-            // add self branches in vertex properties
-            // note : boost graph SEGFAULT on self branch removal
-            // see https://svn.boost.org/trac/boost/ticket/4622
-            _IG[0]->properties(ig_new_ve).source = *i1ds;
-            _IG[0]->properties(ig_new_ve).target = *i2ds;
-
-            assert(_IG[0]->bundle(ig_new_ve) == inter);
-            assert(_IG[0]->is_vertex(inter));
-            assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
-            return std::pair<DynamicalSystemsGraph::EDescriptor,
-                   InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
-          }
-        }
-    }
-  }
-
-  // note: only one or two ds => only one vertex in IG
-
-
+  return std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
 }
 
 /* an edge is removed from _DSG graph if the corresponding vertex is
@@ -301,24 +180,13 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   _DSG[0]->add_vertex(ds);
 }
 
-std::pair<DynamicalSystemsGraph::EDescriptor,
-    InteractionsGraph::VDescriptor>
-    Topology::insertInteraction(SP::Interaction inter)
+void Topology::setControlProperty(
+  const InteractionsGraph::VDescriptor& vd, 
+  const DynamicalSystemsGraph::EDescriptor& ed,
+  const bool isControlInteraction)
 {
-  assert(_allInteractions);
-  assert(_DSG[0]->edges_number() == _IG[0]->size());
-
-  _allInteractions->insert(inter);
-
-
-  std::pair<DynamicalSystemsGraph::EDescriptor,
-      InteractionsGraph::VDescriptor> descriptors =
-        addInteractionInIndexSet(inter);
-
-  assert(_DSG[0]->edges_number() == _IG[0]->size());
-
-  return descriptors;
-
+  _IG[0]->properties(vd).forControl = isControlInteraction;
+  _DSG[0]->properties(ed).forControl = isControlInteraction;
 }
 
 void Topology::removeInteraction(SP::Interaction inter)
@@ -337,8 +205,8 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
   RuntimeException::selfThrow("remove dynamical system not implemented");
 }
 
-
-void Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)
+std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
+Topology::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
   // interactions should not know linked dynamical systems in the
   // future
@@ -351,15 +219,11 @@ void Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)
 
   DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)");
 
-  inter->insert(ds);
-
-
-  insertInteraction(inter);
-
+  inter->insert(ds1);
+  if(ds2 != NULL)
+    inter->insert(ds2);
+  return addInteractionInIndexSet(inter, ds1, ds2);
 }
-
-
-
 
 bool Topology::hasInteraction(SP::Interaction inter) const
 {
@@ -405,4 +269,22 @@ void Topology::clear()
 
   _isTopologyUpToDate = false;
 }
+
+SP::DynamicalSystem Topology::getDynamicalSystem(int requiredNumber)
+{
+  DynamicalSystemsGraph::VIterator vi, vdend;
+  SP::DynamicalSystem ds;
+  int currentNumber;
+  for (std11::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
+  {
+    ds = _DSG[0]->bundle(*vi);
+    currentNumber = ds->number();
+    if (currentNumber == requiredNumber)
+      return ds;
+  }
+  if (currentNumber != requiredNumber)
+    RuntimeException::selfThrow("Topology::getDynamicalSystem(n) ds not found.");
+  return ds;
+}
+
 

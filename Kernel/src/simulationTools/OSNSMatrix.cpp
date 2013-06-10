@@ -45,7 +45,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
     assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
 
     //    (*interactionBlocksPositions)[indexSet->bundle(*vd)] = dim;
-    indexSet->bundle(*vd)->setAbsolutePosition(dim);
+    indexSet->bundle(*vd)->setAbsolutePosition(dim); 
     dim += (indexSet->bundle(*vd)->getNonSmoothLawSize());
 
     assert(indexSet->bundle(*vd)->absolutePosition() < dim);

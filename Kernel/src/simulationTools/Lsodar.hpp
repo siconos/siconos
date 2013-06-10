@@ -72,7 +72,6 @@ private:
   SA::integer jroot;
   /** temporary vector to save x values */
   SP::BlockVector _xWork;
-  Lsodar() {};
 
   SP::SiconosVector _xtmp;
   /** nslaw effects
@@ -82,6 +81,9 @@ private:
 
 
 public:
+
+  /** Default constructor */
+  Lsodar();
 
   /** constructor from xml file
       \param OneStepIntegratorXML* : the XML object
@@ -94,11 +96,6 @@ public:
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    */
   Lsodar(SP::DynamicalSystem);
-
-  /** constructor from a list of Dynamical Systems
-   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
-   */
-  Lsodar(DynamicalSystemsSet&);
 
   /** destructor
    */

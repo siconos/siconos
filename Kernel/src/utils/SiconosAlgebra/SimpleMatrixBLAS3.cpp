@@ -186,9 +186,10 @@ dim : dim[0] number of raw, dim[1] number of col
 void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
   // To compute C = A * B
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
-  C.resetLU();
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
+  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!" );
+  if(!C.isBlock())
+    C.resetLU();
 
   if ((A.size(1) != B.size(0)))
     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
@@ -572,6 +573,7 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
         }
       }
     }
+  if(!C.isBlock())
     C.resetLU();
   }
 }
@@ -586,12 +588,10 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   if (A.size(0) != C.size(0) || B.size(1) != C.size(1))
     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
 
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
-  C.resetLU();
-
-
-
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
+  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!" );
+  if(!C.isBlock())
+    C.resetLU();
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
   unsigned int numC = C.getNum();
@@ -797,6 +797,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
         SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       }
     }
+  if(!C.isBlock())
     C.resetLU();
   }
 }
@@ -876,8 +877,9 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
 void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
 {
   // To compute B = a * A (init = true) or B += a*A (init = false).
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  B.resetLU();
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
+  if(!B.isBlock())
+    B.resetLU();
 
   if (&A == &B)
   {

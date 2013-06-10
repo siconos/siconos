@@ -117,11 +117,6 @@ public:
    */
   Hem5(SP::DynamicalSystem);
 
-  /** constructor from a list of Dynamical Systems
-   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
-   */
-  Hem5(DynamicalSystemsSet&);
-
   /** destructor
    */
   ~Hem5() {};

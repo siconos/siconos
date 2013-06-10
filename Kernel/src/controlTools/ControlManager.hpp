@@ -26,7 +26,7 @@
 
 #include "Actuator.hpp"
 
-#define getDSFromModel(nb) _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(nb)
+#define getDSFromModel(nb) _model->nonSmoothDynamicalSystem()->dynamicalSystem(nb)
 
 class Actuator;
 class Sensor;

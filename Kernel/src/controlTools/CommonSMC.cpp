@@ -77,13 +77,11 @@ void CommonSMC::initialize(SP::Model m)
     _nsLawSMC.reset(new RelayNSL(_sDim));
 
     std::string id = "interaction for control";
-    _interactionSMC.reset(new Interaction(id, _DS_SMC, _sDim, _sDim, _nsLawSMC, _relationSMC));
-    //_interactionSMC.reset(new Interaction("SMC Interation", _DS_SMC, 0, _sDim, _nsLawSMC, _relationSMC));
+    _interactionSMC.reset(new Interaction(_sDim, _nsLawSMC, _relationSMC));
     _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
-    //    _SMC->nonSmoothDynamicalSystem()->insertInteraction(_interactionSMC);
-    _SMC->nonSmoothDynamicalSystem()->insertInteraction(_interactionSMC, true);
-    //    SP::NonSmoothDynamicalSystem myNSDS(new NonSmoothDynamicalSystem(_DS_SMC, _interactionSMC));
-    //    _SMC->setNonSmoothDynamicalSystemPtr(myNSDS);
+    std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> descr =
+      _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
+    _SMC->nonSmoothDynamicalSystem()->setControlProperty(descr.second, descr.first, true);
     // Copy the TD
     _tD_SMC.reset(new TimeDiscretisation(*_timeDiscretisation));
     // Set up the simulation

@@ -36,7 +36,7 @@
 	<Interaction_Definition>
 	  <Interaction number='1' Id='test-of-rel'>
 		<size>1</size>
-		<DS_Concerned all='true'/>
+		<DS_Concerned vectorSize='2'>3 4</DS_Concerned>
 		<Interaction_Content>		
 		  <FirstOrderRelation type="Linear">
 			<C matrixPlugin="TestPlugin:C"/>

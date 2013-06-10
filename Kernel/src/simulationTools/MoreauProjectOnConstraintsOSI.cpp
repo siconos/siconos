@@ -47,15 +47,6 @@ MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(double theta) : Mor
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(DynamicalSystemsSet& dsSet, double theta) :     Moreau(dsSet, theta)
-{
-  integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
-  _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
-  _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
-  _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
-  _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
-}
-
 MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(SP::DynamicalSystem ds , double d): Moreau(ds , d)
 {
   integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
@@ -64,16 +55,8 @@ MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(SP::DynamicalSystem
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
-MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(double theta, double gamma) : Moreau(theta, gamma)
-{
-  integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
-  _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
-  _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
-  _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
-  _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
-}
 
-MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(DynamicalSystemsSet& dsSet, double theta, double gamma) :     Moreau(dsSet, theta, gamma)
+MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(double theta, double gamma) : Moreau(theta, gamma)
 {
   integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;

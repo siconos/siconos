@@ -124,13 +124,6 @@ Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta) :
 }
 
 // --- constructor from a set of data ---
-Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta):
-  OneStepIntegrator(OSI::MOREAU, newDS), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
-{
-  _theta = newTheta;
-}
-
-// --- constructor from a set of data ---
 Moreau::Moreau(double newTheta):
   OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
@@ -142,15 +135,6 @@ Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
   OneStepIntegrator(OSI::MOREAU), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
-  _theta = newTheta;
-  _gamma = newGamma;
-  _useGamma = true;
-}
-
-// --- constructor from a set of data ---
-Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta, double newGamma):
-  OneStepIntegrator(OSI::MOREAU, newDS), _useGammaForRelation(false)
-{
   _theta = newTheta;
   _gamma = newGamma;
   _useGamma = true;

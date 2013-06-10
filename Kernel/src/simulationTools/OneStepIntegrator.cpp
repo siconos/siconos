@@ -81,20 +81,6 @@ OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, SP::OneStepIntegrator
   }
 }
 
-// --- Constructors from a minimum set of data ---
-OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, const DynamicalSystemsSet& listOfDs):
-  integratorType(id), _sizeMem(1)
-{
-  OSIDynamicalSystems.reset(new DynamicalSystemsSet());
-  OSIInteractions.reset(new InteractionsSet());
-  setDynamicalSystems(listOfDs);
-}
-
-void OneStepIntegrator::setDynamicalSystems(const DynamicalSystemsSet& newSet)
-{
-  OSIDynamicalSystems->insert(newSet.begin(), newSet.end());
-}
-
 void OneStepIntegrator::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   OSIDynamicalSystems->insert(ds);

@@ -70,6 +70,32 @@ Vincent ACARY vincent.acary@inrialpes.fr -->
                                                                            </LagrangianLinearTIDS>
                                                                            </DS_Definition>
 
+		<!-- Interactions defined in the problem -->		
+		<Interaction_Definition>
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='1' Id='Ball-Ground'>
+				<size> 1 </size>
+				<!-- List of couple of DS concerned by this interaction -->
+		                <DS_Concerned vectorSize='2'>1 2</DS_Concerned>									
+				<!-- Relation of this interaction -->				
+				<Interaction_Content>		
+					<LagrangianRelation type="Scleronomous">
+					<h plugin="gTestPlugin:h0"/>
+ 					<jacobianH number="1">
+                                      	<matrix matrixPlugin="gTestPlugin:G0"/>
+                                        </jacobianH>
+					</LagrangianRelation>			
+					<!-- NS Law of this interaction	-->
+					<NewtonImpactLaw>
+						<e>0.9</e>	
+						<size>1</size>			
+					</NewtonImpactLaw>
+				</Interaction_Content>	
+			</Interaction>				
+		</Interaction_Definition>		
+	</NSDS>
+	<!-- Simulation to use in order to solve the problem -->	
+	<Simulation type='TimeStepping'>
 
                                                                            <!-- Interactions defined in the problem -->
                                                                            <Interaction_Definition>

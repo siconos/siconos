@@ -33,10 +33,6 @@ Moreau2::Moreau2(SP::DynamicalSystem newDS, double newTheta): Moreau(newDS, newT
 {
   integratorType = OSI::MOREAU2;
 }
-Moreau2::Moreau2(DynamicalSystemsSet& newDS, double newTheta): Moreau(newDS, newTheta)
-{
-  integratorType = OSI::MOREAU2;
-}
 
 Moreau2::~Moreau2()
 {

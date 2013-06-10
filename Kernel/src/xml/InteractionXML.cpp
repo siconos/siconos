@@ -128,10 +128,9 @@ void InteractionXML::setLambda(const SiconosVector& v)
 
 void InteractionXML::getDSNumbers(std::vector<int>& dsNumbers)
 {
-  if (!hasAllDS())
-    SiconosDOMTreeTools::getVector(DSConcernedNode, dsNumbers);
-  else
-    XMLException::selfThrow("InteractionXML::getDSNumbers - No list of ds, all parameter = true.");
+  SiconosDOMTreeTools::getVector(DSConcernedNode, dsNumbers);
+  if(dsNumbers.size() > 2)
+    XMLException::selfThrow("InteractionXML::getDSNumbers - Number of ds in an interaction must not exceed two.");
 }
 
 

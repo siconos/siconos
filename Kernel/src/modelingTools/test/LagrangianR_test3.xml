@@ -45,7 +45,7 @@
 				<Id>Ball-Ground</Id>
 				<size> 1 </size>
 				<!-- List of couple of DS concerned by this interaction -->
-		               <DS_Concerned all='true'></DS_Concerned>
+		               <DS_Concerned vectorSize='1'>3</DS_Concerned>
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 					<LagrangianRelation type="Compliant">

@@ -71,7 +71,6 @@ D1MinusLinear::D1MinusLinear(SP::DynamicalSystem newDS) :
   OSIDynamicalSystems->insert(newDS);
 }
 
-D1MinusLinear::D1MinusLinear(DynamicalSystemsSet& newDSset): OneStepIntegrator(OSI::D1MINUSLINEAR, newDSset) {}
 
 void D1MinusLinear::initialize()
 {
@@ -170,7 +169,8 @@ double D1MinusLinear::computeResidu()
       Mold->PLUForwardBackwardInPlace(*workFree); // contains left (right limit) acceleration without contact force
       d->addWorkVector(workFree,DynamicalSystem::free_tdg); // store the value in WorkFreeFree
     }
-    else if ((dsType == Type::NewtonEulerDS))
+
+    else if(dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
       workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force

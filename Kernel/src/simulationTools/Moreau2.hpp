@@ -73,12 +73,6 @@ public:
    */
   Moreau2(SP::DynamicalSystem, double);
 
-  /** constructor from a minimum set of data: one DS and its theta
-   *  \param DynamicalSystemSet* : the DynamicalSystem set linked to the OneStepIntegrator
-   *  \param Theta value
-   */
-  Moreau2(DynamicalSystemsSet&, double);
-
   ~Moreau2();
 
   //  SP::SiconosVector  getFfree(FirstOrderLinearDS *d);

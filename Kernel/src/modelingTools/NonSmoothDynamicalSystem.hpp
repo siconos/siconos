@@ -59,10 +59,6 @@ private:
   /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
   SP::NonSmoothDynamicalSystemXML _nsdsxml;
 
-  /** default constructor
-   */
-  NonSmoothDynamicalSystem(): _BVP(false) {};
-
   NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds);
 
   /** False is one of the interaction is non-linear.
@@ -71,32 +67,14 @@ private:
 
 public:
 
+  /** default constructor
+   */
+  NonSmoothDynamicalSystem();
+
   /** xml constructor
    *  \param: the XML object corresponding to the NonSmoothDynamicalSystem
    */
   NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemXML newNsdsxml);
-
-  /** constructor from minimum data.
-   *  \param newDS a pointer to a DynamicalSystem
-   *  \param newInteraction a pointer to ab Interaction (optional)
-   *  \param isBVP specify if the problem is a BVP or an IVP (default an IVP)
-   */
-  NonSmoothDynamicalSystem(SP::DynamicalSystem newDS, SP::Interaction newInteraction = SP::Interaction(), const bool& isBVP = false);
-
-  /** constructor from data - Warning: DS and Interactions are not copied, but links are created
-   *  between pointers of the two sets.
-   *  \param listOfDS set of DynamicalSystems
-   *  \param listOfInteractions set of Interactions
-   *  \param isBVP specify if the problem is a BVP or an IVP (default an IVP)
-   */
-  NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, InteractionsSet& listOfInteractions, const bool& isBVP = false);
-
-  /** constructor from data (only DS, no Interactions)
-   *  between pointers of the two sets.
-   *  \param listOfDS set of DynamicalSystems
-   *  \param isBVP specify if the problem is a BVO or an IVP (default an IVP)
-   *  */
-  NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP = false);
 
   /** destructor
    */
@@ -138,18 +116,17 @@ public:
     return _topology->dSG(0)->size();
   }
 
-  /** get all the DynamicalSystem of the NonSmoothDynamicalSystem
-   *  problem
-   * \return a SP::DynamicalSystemsSet
+  /** get all the dynamical systems declared in the NonSmoothDynamicalSystem.
+   * \return a SP::DynamicalSystemsGraph
    */
   inline const SP::DynamicalSystemsGraph dynamicalSystems() const
   {
     return _topology->dSG(0);
   }
-
+  
   // === Interactions management ===
 
-  /** get the number of Interactions present in the NSDS (ie in allInteractions set)
+  /** get the number of Interactions present in the NSDS.
    *  \return an unsigned int
    */
   inline unsigned int getNumberOfInteractions() const
@@ -164,13 +141,6 @@ public:
   {
     return _topology->interactions();
   }
-
-  /** add an interaction to the system
-   * \param inter a pointer to the interaction to insert
-   * \param isControlInteraction true if the interaction is used for controling a DS
-   */
-  void insertInteraction(SP::Interaction inter, const int isControlInteraction = 0);
-
 
   /** remove an interaction to the system
    * \param inter a pointer to the interaction to remove
@@ -198,22 +168,40 @@ public:
     _topology->removeDynamicalSystem(ds);
   };
 
-  /** link an interaction to a dynamical system
+  /** link an interaction to two dynamical systems
    * \param inter a SP::Interaction
-   * \param ds a SP::DynamicalSystem
+   * \param ds1 a SP::DynamicalSystem
+   * \param ds2 a SP::DynamicalSystem (optional)
+   \return a vertex descriptor of the new vertex in IndexSet0
    */
-  inline void link(SP::Interaction inter, SP::DynamicalSystem ds)
+  inline std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
+  link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem())
   {
-    _topology->link(inter, ds);
     _mIsLinear = ((inter)->relation()->isLinear() && _mIsLinear);
+    return _topology->link(inter, ds1, ds2);
   };
 
-
+    /** specify id the given Interaction is for controlling the DS
+   * \param vd the descriptor of the Interaction in InteractionGraph
+   * \param ed the descriptor of the Interaction in DynamicalSystemsGraph
+   * \param isControlInteraction true if the Interaction is used for
+   * control purposes
+   **/
+  void setControlProperty(const InteractionsGraph::VDescriptor& vd, 
+                          const DynamicalSystemsGraph::EDescriptor& ed,
+                          const bool isControlInteraction)
+  {
+    _topology->setControlProperty(vd,ed,isControlInteraction);
+  }
+  
   /** get Dynamical system number I
    * \param nb the identifier of the DynamicalSystem to get
    * \return a pointer on DynamicalSystem
    */
-  SP::DynamicalSystem dynamicalSystemNumber(int nb) const;
+  inline SP::DynamicalSystem dynamicalSystem(int nb) const
+  {
+    return _topology->getDynamicalSystem(nb);
+  }
 
   /** get the topology of the system
    *  \return a pointer on Topology
@@ -275,16 +263,6 @@ public:
   {
     topology()->setSymmetric(val);
   }
-
-  /** specify id the given Interaction is for controlling the DS
-   * \param vd the descriptor of the Interaction in InteractionGraph
-   * \param ed the descriptor of the Interaction in DynamicalSystemsGraph
-   * \param isControlInteraction true if the Interaction is used for
-   * control purposes
-   **/
-  void setControlProperty(const InteractionsGraph::VDescriptor& vd,
-                          const DynamicalSystemsGraph::EDescriptor& ed,
-                          const bool isControlInteraction);
 };
 
 #endif
