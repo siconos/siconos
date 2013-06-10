@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     // time
     dataPlot(k, 0) = t0;
     // state q for the first dynamical system (ball)
-    SP::LagrangianDS oscillo = std11::static_pointer_cast<LagrangianDS> (oscillator->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    SP::LagrangianDS oscillo = std11::static_pointer_cast<LagrangianDS> (oscillator->nonSmoothDynamicalSystem()->dynamicalSystem(1));
     dataPlot(k, 1) = ((*oscillo->q()))(0);
     // velocity for the oscillo
     dataPlot(k, 2) = ((*oscillo->velocity()))(0);

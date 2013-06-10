@@ -73,9 +73,6 @@ int main(int argc, char* argv[])
 
     // --- Interaction between linear system and non smooth system ---
 
-    DynamicalSystemsSet dsConcerned;
-    dsConcerned.insert(LSPRC);
-
     // -> Relation
     SP::SiconosMatrix Int_C(new SimpleMatrix(4, 4));
     (*Int_C)(0 , 1) = -1.0;
@@ -100,7 +97,7 @@ int main(int argc, char* argv[])
     // -> Non-smooth law
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterPRC(new Interaction("InterPRC", dsConcerned, 1, 4, nslaw, LTIRPRC));
+    SP::Interaction InterPRC(new Interaction(4, nslaw, LTIRPRC));
 
 
     // --- Model creation ---

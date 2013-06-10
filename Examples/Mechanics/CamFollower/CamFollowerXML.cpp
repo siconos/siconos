@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     DataPlot(k, 0) = t0;
 
     // state q for the Follower
-    SP::LagrangianDS Follower = std11::static_pointer_cast<LagrangianDS> (CamFollower->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    SP::LagrangianDS Follower = std11::static_pointer_cast<LagrangianDS> (CamFollower->nonSmoothDynamicalSystem()->dynamicalSystem(1));
     // Position of the Follower
     DataPlot(k, 1) = ((*Follower->q()))(0);
     // Velocity for the Follower

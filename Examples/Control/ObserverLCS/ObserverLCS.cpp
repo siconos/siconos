@@ -73,15 +73,10 @@ int main(int argc, char* argv[])
     //    SiconosVector z(new SiconosVector(1);
     observer->setzPtr(process->x());
     // The set of all DynamicalSystems
-    DynamicalSystemsSet allDS;
-    allDS.insert(process);
-    allDS.insert(observer);
-
     // --------------------
     // --- Interactions ---
     // --------------------
     unsigned int ninter = 1; // dimension of your Interaction = size of y and lambda vectors
-    unsigned int ncontrol = 1;
 
     // First relation, related to the process
     // y = Cx + Dlambda
@@ -111,33 +106,20 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw myNslaw(new ComplementarityConditionNSL(nslawSize));
 
     // The Interaction which involves the first DS (the process)
-    string nameInter = "processInteraction"; // Name
-    unsigned int numInter = 1; // Dim of the interaction = dim of y and lambda vectors
-
-    SP::Interaction myProcessInteraction(new Interaction(nameInter, process, numInter, ninter, myNslaw, myProcessRelation));
+    SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
 
     // The Interaction which involves the second DS (the observer)
-    string nameInter2 = "observerInteraction"; // Name
-    unsigned int numInter2 = 2;
-
-    SP::Interaction myObserverInteraction(new Interaction(nameInter2, observer, numInter2, ninter, myNslaw, myObserverRelation));
-
-    // The set of all Interactions
-    InteractionsSet allInteractions;
-    allInteractions.insert(myProcessInteraction);
-    allInteractions.insert(myObserverInteraction);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-    SP::NonSmoothDynamicalSystem myNSDS(new NonSmoothDynamicalSystem(allDS, allInteractions));
+    SP::Interaction myObserverInteraction(new Interaction(ninter, myNslaw, myObserverRelation));
 
     // -------------
     // --- Model ---
     // -------------
     SP::Model ObserverLCS(new Model(t0, T));
-    ObserverLCS->setNonSmoothDynamicalSystemPtr(myNSDS); // set NonSmoothDynamicalSystem of this model
-
+    ObserverLCS->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
+    ObserverLCS->nonSmoothDynamicalSystem()->insertDynamicalSystem(observer);
+    ObserverLCS->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
+    ObserverLCS->nonSmoothDynamicalSystem()->link(myObserverInteraction, observer);
+    
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -147,7 +129,10 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(td));
     // -- OneStepIntegrators --
     double theta = 0.5;
-    SP::Moreau myIntegrator(new Moreau(allDS, theta));
+    SP::Moreau myIntegrator(new Moreau(theta));
+    myIntegrator->insertDynamicalSystem(observer);
+    myIntegrator->insertDynamicalSystem(process);
+    
     s->insertIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --
@@ -195,7 +180,7 @@ int main(int argc, char* argv[])
     cout << "====> Start computation ... " << endl << endl;
 
     // *z = *(myProcessInteraction->y(0)->getVectorPtr(0));
-    int k = 0; // Current step
+    unsigned int k = 0; // Current step
 
     // Simulation loop
     boost::timer time;

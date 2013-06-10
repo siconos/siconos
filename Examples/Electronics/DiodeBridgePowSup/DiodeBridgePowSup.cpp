@@ -64,9 +64,6 @@ int main(int argc, char* argv[])
     //    LSDiodeBridgePowSup->setUSize(1);
     //    LSDiodeBridgePowSup->setComputeBFunction("./SinPoPlugin.so","SinPo");
 
-    DynamicalSystemsSet allDS;
-    allDS.insert(LSDiodeBridgePowSup);
-
     // --- Interaction between linear system and non smooth system ---
 
     SP::SimpleMatrix Int_C(new SimpleMatrix(4, 1));
@@ -109,8 +106,7 @@ int main(int argc, char* argv[])
 
     SP::ComplementarityConditionNSL nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterDiodeBridgePowSup(new Interaction("InterDiodeBridgePowSup", allDS, 1, 4, nslaw, LTIRDiodeBridgePowSup));
-
+    SP::Interaction InterDiodeBridgePowSup(new Interaction(4, nslaw, LTIRDiodeBridgePowSup));
 
     // --- Model creation ---
     SP::Model DiodeBridgePowSup(new Model(t0, T, Modeltitle));

@@ -100,10 +100,6 @@ int main(int argc, char* argv[])
 
     // --- Interaction between linear systems and non smooth system ---
 
-    DynamicalSystemsSet Inter_DS;
-    Inter_DS.insert(LS1DiodeBridgeCapFilter);
-    Inter_DS.insert(LS2DiodeBridgeCapFilter);
-
     SP::SiconosMatrix Int_C(new SimpleMatrix(4, 3));
     (*Int_C)(0 , 2) = 1.0;
     (*Int_C)(2 , 0) = -1.0;
@@ -128,14 +124,15 @@ int main(int argc, char* argv[])
     LTIRDiodeBridgeCapFilter->setDPtr(Int_D);
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterDiodeBridgeCapFilter(new Interaction("InterDiodeBridgeCapFilter", Inter_DS, 2, 4, nslaw, LTIRDiodeBridgeCapFilter));
+    SP::Interaction InterDiodeBridgeCapFilter(new Interaction(4, nslaw, LTIRDiodeBridgeCapFilter));
 
     // --- Model creation ---
     SP::Model DiodeBridgeCapFilter(new Model(t0, T, Modeltitle));
     // add the dynamical system in the non smooth dynamical system
     DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
+    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->insertDynamicalSystem(LS2DiodeBridgeCapFilter);
     // link the interaction and the dynamical system
-    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->link(InterDiodeBridgeCapFilter, LS1DiodeBridgeCapFilter);
+    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->link(InterDiodeBridgeCapFilter, LS1DiodeBridgeCapFilter, LS2DiodeBridgeCapFilter);
 
 
     // ------------------
@@ -144,7 +141,9 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     double theta = 1.0;
-    SP::Moreau aOSI(new Moreau(Inter_DS, theta));
+    SP::Moreau aOSI(new Moreau(theta));
+    aOSI->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
+    aOSI->insertDynamicalSystem(LS2DiodeBridgeCapFilter);
     // -- (2) Time discretisation --
     SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));
     // -- (3) Non smooth problem

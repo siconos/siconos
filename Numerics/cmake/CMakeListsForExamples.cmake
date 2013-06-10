@@ -1,14 +1,13 @@
 SET(EXAMPLE @EXAMPLE@)
 
-
-SET(CMAKE_SICONOS_COMPILE_OBJECT "${CMAKE_INSTALL_PREFIX}/bin/siconos --noexec <SOURCE> --build_dir <OBJECT>/siconos")
+SET(CMAKE_SICONOS_COMPILE_OBJECT "${SiconosKernel_EXE_DIR}/siconos --noexec <SOURCE> --build_dir <OBJECT>/siconos")
 SET(CMAKE_SICONOS_LINK_EXECUTABLE "")
 
 ENABLE_TESTING()
 
 MACRO(ADD_EXAMPLE _N _EX)
   MESSAGE("Adding example ${_N} (${_EX})")
-  ADD_TEST(${_N} ${CMAKE_INSTALL_PREFIX}/bin/siconos --nocomp ${_EX}.cpp)
+  ADD_TEST(${_N} ${SiconosKernel_EXE_DIR}/siconos --nocomp ${_EX}.cpp)
   SET_TESTS_PROPERTIES(${_N} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR")
 ENDMACRO(ADD_EXAMPLE _N _EX)
 

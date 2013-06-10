@@ -81,10 +81,6 @@ int main(int argc, char* argv[])
     lds->setzPtr(param);
     // 2 corresponds to the position of FExt in the stl vector of possible parameters. 0 is mass, 1 FInt and so on.
     // Now the DS number will be available in FExt plugin.
-
-    DynamicalSystemsSet allDS;
-    allDS.insert(lds);
-
     // --------------------
     // --- Interactions ---
     // --------------------
@@ -107,7 +103,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector param2(new SiconosVector(1)); // Here we only set one parameter, the DS number.
     (*param2)(0) = rpm;
 
-    SP::Interaction inter(new Interaction("Follower-Ground", dsConcerned, 0, 1, nslaw0, relation0));
+    SP::Interaction inter(new Interaction(1, nslaw0, relation0));
     InteractionsSet allInteractions;
     allInteractions.insert(inter);
 
@@ -115,7 +111,9 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model Follower(new Model(t0, T, allDS, allInteractions));
+    SP::Model Follower(new Model(t0, T));
+    Follower->nonSmoothDynamicalSystem()->insertDynamicalSystem(lds);
+    Follower->nonSmoothDynamicalSystem()->link(inter,lds);
 
     // ----------------
     // --- Simulation ---

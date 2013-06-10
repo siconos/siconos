@@ -16,10 +16,7 @@ int main(int argc, char* argv[])
     double h = 1.0e-3;      // Time step
     double Vinit = 10.0;
     unsigned int noutput = 1;
-    unsigned int ncontrol = 1;
-
-
-
+    
     // ================= Creation of the model =======================
 
     // == Creation of the NonSmoothDynamicalSystem ==
@@ -62,9 +59,6 @@ int main(int argc, char* argv[])
     (*x0)(0) = Vinit;
     SP::FirstOrderLinearDS processObserver(new FirstOrderLinearDS(x0, createSPtrSimpleMatrix(TildeA)));
     processObserver->setComputebFunction("SingleDSObserverLCSPlugin.so", "computeU");
-    DynamicalSystemsSet allDS;
-    allDS.insert(processObserver);
-
 
     // Relations
     unsigned int ninter = 2; // dimension of your Interaction = size of y and lambda vectors
@@ -93,26 +87,12 @@ int main(int argc, char* argv[])
     unsigned int nslawSize = 2;
     SP::NonSmoothLaw myNslaw(new ComplementarityConditionNSL(nslawSize));
 
-    // Choose a name and a number for your Interaction
-    string nameInter = "Interaction";
-    unsigned int numInter = 1;
-
-
-    DynamicalSystemsSet dsProcessConcerned;
-    dsProcessConcerned.insert(allDS.getPtr(0));
-
-    SP::Interaction myProcessInteraction(new Interaction(nameInter, dsProcessConcerned, numInter, ninter, myNslaw, myProcessRelation));
-
-    InteractionsSet allInteractions;
-    allInteractions.insert(myProcessInteraction);
-
-    // NonSmoothDynamicalSystem
-    SP::NonSmoothDynamicalSystem myNSDS(new NonSmoothDynamicalSystem(allDS, allInteractions));
-
-
+    SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
+    
     // Model
     SP::Model ObserverLCS(new Model(t0, T));
-    ObserverLCS->setNonSmoothDynamicalSystemPtr(myNSDS);
+    ObserverLCS->nonSmoothDynamicalSystem()->insertDynamicalSystem(processObserver);
+    ObserverLCS->nonSmoothDynamicalSystem()->link(myProcessInteraction, processObserver);
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
@@ -122,7 +102,8 @@ int main(int argc, char* argv[])
     // OneStepIntegrator
     double theta = 0.5;
     // One Step Integrator
-    SP::Moreau myIntegrator(new Moreau(allDS, theta));
+    SP::Moreau myIntegrator(new Moreau(theta));
+    myIntegrator->insertDynamicalSystem(processObserver);
     s->insertIntegrator(myIntegrator);
     // OneStepNSProblem
 

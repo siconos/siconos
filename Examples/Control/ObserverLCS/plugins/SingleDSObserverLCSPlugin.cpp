@@ -27,7 +27,6 @@ extern "C"   double computeControl2(double time)
 
   double u;
   double alpha = -50.0;
-  int oddoreven = 1 ;
   int njump;
 
   if (time <= 1) u = -0.0;
@@ -59,7 +58,6 @@ extern "C"   double computeControl(double time)
   double alpha = 50.0;
   int oddoreven = 1 ;
   int njump;
-  int N = 100;
   double a = 24 / 25.0;
 
   double timeaccu = 1 / (1.0 - a);
@@ -156,7 +154,6 @@ extern "C"   double computeControlori(double time)
 
   double u;
   double alpha = 50.0;
-  int oddoreven = 1 ;
   int njump;
 
   if (time < 1) u = -0.0;

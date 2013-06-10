@@ -79,10 +79,6 @@ int main(int argc, char* argv[])
     SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));
     //    process->setComputebFunction("ObserverLCSPlugin.so","uProcess");
 
-    // The set of all DynamicalSystems
-    DynamicalSystemsSet allDS;
-    allDS.insert(process);
-
     // --------------------
     // --- Interactions ---
     // --------------------
@@ -119,25 +115,13 @@ int main(int argc, char* argv[])
     myNslaw->display();
 
     // The Interaction which involves the first DS (the process)
-    string nameInter = "processInteraction"; // Name
-    unsigned int numInter = 1; // Dim of the interaction = dim of y and lambda vectors
-
-    SP::Interaction myProcessInteraction(new Interaction(nameInter, process, numInter, ninter, myNslaw, myProcessRelation));
-
-    // The set of all Interactions
-    InteractionsSet allInteractions;
-    allInteractions.insert(myProcessInteraction);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-    SP::NonSmoothDynamicalSystem myNSDS(new NonSmoothDynamicalSystem(allDS, allInteractions));
-
+    SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
     // -------------
     // --- Model ---
     // -------------
     SP::Model relayOscillatorWithSliding(new Model(t0, T));
-    relayOscillatorWithSliding->setNonSmoothDynamicalSystemPtr(myNSDS); // set NonSmoothDynamicalSystem of this model
+    relayOscillatorWithSliding->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
+    relayOscillatorWithSliding->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
 
     // ------------------
     // --- Simulation ---
@@ -148,7 +132,8 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(td));
     // -- OneStepIntegrators --
     double theta = 0.5;
-    SP::Moreau myIntegrator(new Moreau(allDS, theta));
+    SP::Moreau myIntegrator(new Moreau(theta));
+    myIntegrator->insertDynamicalSystem(process);
     s->insertIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --

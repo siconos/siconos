@@ -48,14 +48,14 @@ void SensorX::initialize()
   //pour y associer notre vecteur de données.
 
   //Comme on veut récuperer un vecteur a un temps donné, on créer une copie dans un autre vecteur
-  storedX.reset(new SiconosVector(model()->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->getN()));
+  storedX.reset(new SiconosVector(model()->nonSmoothDynamicalSystem()->dynamicalSystem(0)->getN()));
   (_data[_eSensor])["StoredX"] = storedX;
 }
 
 void SensorX::capture()
 {
   //capture du vecteur d'état
-  storedX = model()->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->x();
+  storedX = model()->nonSmoothDynamicalSystem()->dynamicalSystem(0)->x();
 }
 
 SensorX* SensorX::convert(Sensor* s)

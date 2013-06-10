@@ -75,7 +75,7 @@ int main(int argc, char* argv[]){
     SP::SiconosVector RadiusBalls(new SiconosVector(NumberBalls));
     for (unsigned int k = 0; k < NumberBalls; ++k)
       {
-        (*RadiusBalls)(k) = (pow((1.0 - q_taper),(k + 1)))*R_base_taper;
+        (*RadiusBalls)(k) = (pow(double(1.0 - q_taper),int(k + 1)))*R_base_taper;
       }
     // (2) Mass of balls
     SP::SiconosVector MassBalls(new SiconosVector(NumberBalls));
@@ -136,7 +136,6 @@ int main(int argc, char* argv[]){
     // --- Dynamical systems --- 
     // -------------------------
     cout << "====> Model loading ..." <<endl<<endl;
-    DynamicalSystemsSet allDS;
     std::vector<SP::DynamicalSystem> VecOfallDS;
     SP::SiconosMatrix MassBall;
     SP::SiconosVector q0Ball;
@@ -144,6 +143,16 @@ int main(int argc, char* argv[]){
     SP::LagrangianLinearTIDS ball;
     SP::SiconosVector FextBall;
     double _Rball, _massBall,_Pos0Ball, _Vel0Ball ;
+    // -------------
+    // --- Model ---
+    // -------------
+    SP::Model BallChain(new Model(t0,T));
+    // ----------------
+    // --- Simulation ---
+    // ----------------
+    // -- (1) OneStepIntegrators --
+    SP::OneStepIntegrator OSI(new Lsodar());
+
     for(unsigned int i = 0; i < NumberBalls; ++i)
 	    {
 	      _Rball = (*RadiusBalls)(i); // radius of the ball
@@ -166,7 +175,8 @@ int main(int argc, char* argv[]){
 	      ball->setFExtPtr(FextBall);
 	      //
 	      VecOfallDS.push_back(ball);
-	      allDS.insert(ball);
+        BallChain->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+        OSI->insertDynamicalSystem(ball);
 	    }
     // --------------------
     // --- Interactions ---
@@ -177,39 +187,22 @@ int main(int argc, char* argv[]){
     SP::Relation relation;
     SP::Interaction interaction;
     double ResCoef, Stiff, ElasPow;
-    DynamicalSystemsSet DSSet_interaction;
-    InteractionsSet allInteractions;
-    std::vector<SP::Interaction> VecOfallInteractions;
+    H = SP::SiconosMatrix(new SimpleMatrix(1,(nDofBall + nDofBall)));
+    (*H)(0,0) = -1.0;
+    (*H)(0,1) = 1.0;
+    E = SP::SiconosVector(new SiconosVector(1));
+
     for(unsigned int j = 0; j < NumberContacts; ++j)
 	    {
 	      ResCoef = (*ResCofContacts)(j) ;
 	      Stiff = (*StiffContacts)(j);
 	      ElasPow = (*ElasCofContacts)(j);
-	      DSSet_interaction.clear(); 
-	      H = SP::SiconosMatrix(new SimpleMatrix(1,(nDofBall + nDofBall)));
-	      (*H)(0,0) = -1.0;
-	      (*H)(0,1) = 1.0;
-	      E = SP::SiconosVector(new SiconosVector(1));
 	      (*E)(0) = -1.0*((*RadiusBalls)(j) + (*RadiusBalls)(j+1));
-	      // Set of DSs involved in this interaction
-	      DSSet_interaction.insert(VecOfallDS[j]);     // insert the DS2 involked in the contact
-	      DSSet_interaction.insert(VecOfallDS[(j+1)]); // insert the DS1 involked in the contact
-	      //
 	      nslaw = SP::NonSmoothLaw(new MultipleImpactNSL(ResCoef,Stiff,ElasPow));
 	      relation = SP::Relation(new LagrangianLinearTIR(H,E));
-	      interaction = SP::Interaction(new Interaction(DSSet_interaction, j, 1, nslaw, relation));
-	      allInteractions.insert(interaction);
-	      VecOfallInteractions.push_back(interaction);  
+	      interaction = SP::Interaction(new Interaction(1, nslaw, relation));
+        BallChain->nonSmoothDynamicalSystem()->link(interaction, VecOfallDS[j], VecOfallDS[j+1]);
 	    }
-    // -------------
-    // --- Model ---
-    // -------------
-    SP::Model BallChain(new Model(t0,T,allDS,allInteractions));
-    // ----------------
-    // --- Simulation ---
-    // ----------------
-    // -- (1) OneStepIntegrators --
-    SP::OneStepIntegrator OSI(new Lsodar(allDS));
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0,h));
     // -- (3) Non smooth problem --

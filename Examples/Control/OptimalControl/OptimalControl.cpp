@@ -73,9 +73,6 @@ int main()
   SP::MyDS aDS ;
   aDS.reset(new MyDS(*x0));
 
-  DynamicalSystemsSet  Inter_DS ;
-  Inter_DS.insert(aDS);
-
   //******BUILD THE RELATION
   SimpleMatrix* C = 0;
   SimpleMatrix* D = 0;
@@ -96,18 +93,19 @@ int main()
 
 
   //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction("LCP", Inter_DS, 1, sNSLawSize, aNSL, aR));
+  SP::Interaction aI(new Interaction(sNSLawSize, aNSL, aR));
   //****BUILD THE SYSTEM
-  SP::NonSmoothDynamicalSystem  aNSDS(new NonSmoothDynamicalSystem(aDS, aI));
   SP::Model  aM(new Model(0, sT));
-  aM->setNonSmoothDynamicalSystemPtr(aNSDS);
+  aM->nonSmoothDynamicalSystem()->insertDynamicalSystem(aDS);
+  aM->nonSmoothDynamicalSystem()->link(aI,aDS);
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));
   SP::TimeStepping aS(new TimeStepping(aTD));
   aS->setComputeResiduY(true);
   aS->setUseRelativeConvergenceCriteron(false);
   //*****BUILD THE STEP INTEGRATOR
   SP::OneStepIntegrator  aMoreau ;
-  aMoreau.reset(new Moreau(aDS, 0.5));
+  aMoreau.reset(new Moreau(0.5));
+  aMoreau->insertDynamicalSystem(aDS);
   aS->insertIntegrator(aMoreau);
 
   //**** BUILD THE STEP NS PROBLEM

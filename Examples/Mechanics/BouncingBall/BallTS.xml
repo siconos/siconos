@@ -55,9 +55,9 @@
 		<Interaction_Definition>
 			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
 			<Interaction number='1'>
-				<size>1</size>
-				<!-- List of couple of DS concerned by this interaction -->
-	                        <DS_Concerned all='true'></DS_Concerned>									
+			  <size>1</size>
+			  <!-- List of couple of DS concerned by this interaction -->
+	                        <DS_Concerned vectorSize='1'>1</DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 					<LagrangianRelation type="LinearTI">

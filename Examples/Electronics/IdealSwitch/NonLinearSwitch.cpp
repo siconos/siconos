@@ -75,9 +75,6 @@ int main()
   SP::MyDS aDS ;
   aDS.reset(new MyDS(*xti));
 
-  DynamicalSystemsSet  Inter_DS ;
-  Inter_DS.insert(aDS);
-
   //******BUILD THE RELATION
   SimpleMatrix* C = 0;
   SimpleMatrix* D = 0;
@@ -99,7 +96,7 @@ int main()
   */
 
   //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction("MLCP", Inter_DS, 1, sNSLawSize, aNSL, aR));
+  SP::Interaction aI(new Interaction(sNSLawSize, aNSL, aR));
   //  aI->insert(LSDiodeBridge);
   //****BUILD THE SYSTEM
 

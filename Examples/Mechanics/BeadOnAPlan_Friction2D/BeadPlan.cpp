@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
     SP::LagrangianDS oscillo = std11::static_pointer_cast<LagrangianDS>
-                               (oscillator->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+                               (oscillator->nonSmoothDynamicalSystem()->dynamicalSystem(1));
     SP::SiconosVector q = oscillo->q();
     SP::SiconosVector v = oscillo->velocity();
     SP::SiconosVector p = oscillo->p(1);
