@@ -101,8 +101,6 @@ int main(int argc, char* argv[])
     double h = 0.01;                // time step
     int N = 1000;
     double L1 = 1.0;
-    double L2 = 1.0;
-    double L3 = 1.0;
     double theta = 1.0;              // theta for Moreau integrator
     double g = 9.81; // Gravity
     double m = 1.;
@@ -121,11 +119,6 @@ int main(int argc, char* argv[])
 
 
     cout << "====> Model loading ..." << endl << endl;
-    DynamicalSystemsSet allDS1; // the list of DS
-    DynamicalSystemsSet allDS2; // the list of DS
-    DynamicalSystemsSet allDS3; // the list of DS
-    DynamicalSystemsSet allDS4; // the list of DS
-    DynamicalSystemsSet allDS_With_Floor;
 
     // -- Initial positions and velocities --
 
@@ -157,7 +150,6 @@ int main(int argc, char* argv[])
 
     // -- The dynamical system --
     SP::NewtonEulerDS beam1(new NewtonEulerDS(q10, v10, m, I1));
-    allDS1.insert(beam1);
     // -- Set external forces (weight) --
     SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(2) = -m * g;
@@ -166,9 +158,6 @@ int main(int argc, char* argv[])
     // --------------------
     // --- Interactions ---
     // --------------------
-
-    InteractionsSet allInteractions;
-
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
 
     SP::SiconosVector P(new SiconosVector(3));
@@ -178,13 +167,12 @@ int main(int argc, char* argv[])
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
     SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
 
-    SP::Interaction inter1(new Interaction("axis-beam1", allDS1, 0, KneeJointR::_sNbEqualities, nslaw1, relation1));
-    allInteractions.insert(inter1);
+    SP::Interaction inter1(new Interaction(KneeJointR::_sNbEqualities, nslaw1, relation1));
 
     // -------------
     // --- Model ---
     // -------------
-    SP::Model myModel(new Model(t0, T, allDS2, allInteractions));
+    SP::Model myModel(new Model(t0, T));
     // add the dynamical system in the non smooth dynamical system
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
     // link the interaction and the dynamical system

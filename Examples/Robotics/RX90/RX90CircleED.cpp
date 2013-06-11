@@ -56,7 +56,6 @@ int main(int argc, char* argv[])
     // -------------------------
 
     // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
 
     // --- DS: manipulator arm ---
 
@@ -81,16 +80,12 @@ int main(int argc, char* argv[])
     arm->setComputeJacobianFIntFunction(1, "RX90Plugin.so", "jacobFintV");
     arm->setComputeJacobianFIntFunction(0, "RX90Plugin.so", "jacobFintQ");
 
-    allDS.insert(arm);
-
     // -------------------
     // --- Interactions---
     // -------------------
 
     //  - one with Lagrangian non linear relation to define contact with ground
     //  Both with newton impact nslaw.
-
-    InteractionsSet allInteractions;
 
     // -- relations --
 
@@ -117,7 +112,7 @@ int main(int argc, char* argv[])
     b(10) = PI * 270.0 / 180.0;
     b(11) = b(10);
     SP::Relation relation(new LagrangianLinearTIR(H, b));
-    SP::Interaction inter(new Interaction("butée", allDS, 0, 12, nslaw, relation));
+    SP::Interaction inter(new Interaction(12, nslaw, relation));
 
     allInteractions.insert(inter);
 
@@ -125,8 +120,10 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model RX90(new Model(t0, T, allDS, allInteractions));
-
+    SP::Model RX90(new Model(t0, T));
+    RX90->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
+    RX90->nonSmoothDynamicalSystem()->link(inter, arm);
+    
     // ----------------
     // --- Simulation ---
     // ----------------

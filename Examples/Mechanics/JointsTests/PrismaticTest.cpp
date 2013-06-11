@@ -58,7 +58,6 @@ int main(int argc, char* argv[])
     // -------------------------
 
     cout << "====> Model loading ..." << endl << endl;
-    DynamicalSystemsSet allDS1; // the list of DS
 
     // -- Initial positions and velocities --
     SP::SiconosVector q10(new SiconosVector(qDim));
@@ -89,7 +88,6 @@ int main(int argc, char* argv[])
 
     // -- The dynamical system --
     SP::NewtonEulerDS beam1(new NewtonEulerDS(q10, v10, m, I1));
-    allDS1.insert(beam1);
     // -- Set external forces (weight) --
     SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(2) = -m * g;
@@ -103,9 +101,6 @@ int main(int argc, char* argv[])
     // --- Interactions ---
     // --------------------
 
-    InteractionsSet allInteractions;
-
-
     // Interaction ball-floor
     //
     SP::SimpleMatrix H1(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
@@ -117,12 +112,13 @@ int main(int argc, char* argv[])
 
     SP::NewtonEulerR relation1(new PrismaticJointR(beam1, axe1));
     relation1->setJachq(H1);
-    SP::Interaction inter1(new Interaction("axis-beam1", allDS1, 0, PrismaticJointR::_sNbEqualities, nslaw1, relation1));
-    allInteractions.insert(inter1);
+    SP::Interaction inter1(new Interaction(PrismaticJointR::_sNbEqualities, nslaw1, relation1));
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T, allDS1, allInteractions));
+    SP::Model bouncingBall(new Model(t0, T));
+    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
+    bouncingBall->nonSmoothDynamicalSystem()->link(inter1, beam1);
 
     // ------------------
     // --- Simulation ---

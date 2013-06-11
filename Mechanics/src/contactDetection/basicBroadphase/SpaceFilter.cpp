@@ -247,10 +247,7 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
         SP::Interaction inter(new Interaction(2,
                                               parent->_nslaw,
                                               rel, parent->_interID++));
-        inter->insert(ds1);
-        inter->insert(ds2);
-
-        parent->insertInteraction(inter);
+        parent->link(inter, ds1, ds2);
       }
     }
     else
@@ -354,10 +351,8 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
         SP::Interaction inter(new Interaction(3,
                                               parent->_nslaw,
                                               rel, parent->_interID++));
-        inter->insert(ds1);
-        inter->insert(ds2);
 
-        parent->insertInteraction(inter);
+        parent->link(inter, ds1, ds2);
       }
     }
     else
@@ -443,10 +438,7 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
                                               parent->_nslaw,
                                               rel, parent->_interID++));
 
-        // use link with ds number...
-        inter->insert(ds1);
-        inter->insert(ds2);
-        parent->insertInteraction(inter);
+        parent->link(inter, ds1, ds2);
       }
     }
     else
@@ -638,11 +630,9 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
       SP::Interaction inter(new Interaction(2,
                                             _nslaw,
                                             relp, _interID++));
-      inter->insert(ds);
-
       DEBUG_PRINTF("insert interaction : %d\n", inter->number());
 
-      insertInteraction(inter);
+      link(inter, ds);
     }
   }
   else
@@ -721,9 +711,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
       SP::Interaction inter(new Interaction(2,
                                             _nslaw,
                                             relp, _interID++));
-      inter->insert(ds);
-
-      insertInteraction(inter);
+      link(inter, ds);
     }
   }
   else
@@ -792,9 +780,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
       SP::Interaction inter(new Interaction(3,
                                             _nslaw,
                                             relp, _interID++));
-      inter->insert(ds);
-
-      insertInteraction(inter);
+      link(inter, ds);
     }
   }
   else
@@ -864,9 +850,7 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
       SP::Interaction inter(new Interaction(3,
                                             _nslaw,
                                             relp, _interID++));
-      inter->insert(ds);
-
-      insertInteraction(inter);
+      link(inter, ds);
     }
   }
   else
@@ -1165,10 +1149,10 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 };
 
 
-void SpaceFilter::insertInteraction(SP::Interaction inter)
+void SpaceFilter::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
-  DEBUG_PRINTF("insert interaction : %d\n", inter->number());
-  model()->nonSmoothDynamicalSystem()->topology()->insertInteraction(inter);
+  DEBUG_PRINTF("link interaction : %d\n", inter->number());
+  model()->nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
   model()->simulation()->computeLevelsForInputAndOutput(inter);
   inter->initialize(model()->simulation()->nextTime());
 }

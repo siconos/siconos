@@ -686,7 +686,7 @@ void EventDriven::update(unsigned int levelInput)
   // Warning: index sets are not updated in this function !!
 }
 
-void EventDriven::endlndEvent()
+void EventDriven::advanceToEvent()
 {
   _tinit = _eventsManager->startingTime();
   _tend =  _eventsManager->nextTime();

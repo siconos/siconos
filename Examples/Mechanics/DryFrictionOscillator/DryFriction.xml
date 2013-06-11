@@ -58,8 +58,7 @@
 			<Interaction number='1'>
 				<size>2</size>
 				<!-- List of couple of DS concerned by this interaction -->
-		                <DS_Concerned all='true'>
-                                </DS_Concerned>									
+		                <DS_Concerned vectorSize='1'>1</DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 				 <LagrangianRelation type="LinearTI">

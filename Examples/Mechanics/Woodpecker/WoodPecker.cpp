@@ -73,9 +73,6 @@ int main(int argc, char* argv[])
     SP::LagrangianDS dynamicalSystem(new LagrangianLinearTIDS(q0, velocity0, Mass, K, C));
     dynamicalSystem->setComputeFExtFunction("WoodPeckerPlugin.so", "FExt");
 
-    DynamicalSystemsSet allDS;
-    allDS.insert(dynamicalSystem);
-
     // --------------------
     // --- Interactions ---
     // --------------------
@@ -120,29 +117,21 @@ int main(int argc, char* argv[])
     SP::Relation relation2(new LagrangianLinearTIR(H2, b2));
     SP::Relation relation3(new LagrangianLinearTIR(H3, b3));
 
-    SP::Interaction I1(new Interaction("contact1", allDS, 0, 2, nslaw1, relation1));
+    SP::Interaction I1(new Interaction(2, nslaw1, relation1));
 
-    SP::Interaction I2(new Interaction("contact2", allDS, 1, 2, nslaw23, relation2));
+    SP::Interaction I2(new Interaction(2, nslaw23, relation2));
 
-    SP::Interaction I3(new Interaction("contact3", allDS, 1, 2, nslaw23, relation3));
-
-    InteractionsSet allInteractions;
-    allInteractions.insert(I1);
-    allInteractions.insert(I2);
-    allInteractions.insert(I3);
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-
-    bool isBVP = 0;
-    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP));
+    SP::Interaction I3(new Interaction(2, nslaw23, relation3));
 
     // -------------
     // --- Model ---
     // -------------
 
     SP::Model model(new Model(t0, T));
-    model->setNonSmoothDynamicalSystemPtr(nsds);
+    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(dynamicalSystem);
+    model->nonSmoothDynamicalSystem()->link(I1, dynamicalSystem);
+    model->nonSmoothDynamicalSystem()->link(I2, dynamicalSystem);
+    model->nonSmoothDynamicalSystem()->link(I3, dynamicalSystem);
 
     // ----------------
     // --- Simulation ---
@@ -215,7 +204,6 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("Woodpecker.ref", "ascii", dataPlotRef);
-
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;

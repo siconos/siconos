@@ -38,7 +38,6 @@ int main(int argc, char* argv[])
     //===========================================================================================================
     //                  I: Declare the dynamical systems
     //===========================================================================================================
-    DynamicalSystemsSet allDS;
     //1. Set the mass matrix
     SP::SiconosMatrix Mass(new SimpleMatrix(Nfreedom, Nfreedom));
     double InertiaBlock;
@@ -73,7 +72,6 @@ int main(int argc, char* argv[])
     (*ForceExtern)(1) = -MassBlock * GGearth;
     RockingBlock->setFExtPtr(ForceExtern);
     //
-    allDS.insert(RockingBlock);
     //----------------------------- Display variables of the dynamical system---------------------------------------
     cout << "Initial position of the rocking block:" << endl;
     PosIniBlock->display();
@@ -86,29 +84,31 @@ int main(int argc, char* argv[])
     //==================================================================================================================
     //              II: Declare the relation et interaction between dynamical systems
     //==================================================================================================================
-    InteractionsSet allInteractions;
     // Impact law
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     // Interaction at contact point 1
     SP::Relation relation1(new LagrangianScleronomousR("RockingBlockPlugin:h1", "RockingBlockPlugin:G1"));
-    SP::Interaction inter1(new Interaction("contact1", allDS, 1, 1, nslaw, relation1));
+    SP::Interaction inter1(new Interaction(1, nslaw, relation1));
     // Interaction at contact point 2
     SP::Relation relation2(new LagrangianScleronomousR("RockingBlockPlugin:h2", "RockingBlockPlugin:G2"));
-    SP::Interaction inter2(new Interaction("contact2", allDS, 2, 1, nslaw, relation2));
+    SP::Interaction inter2(new Interaction(1, nslaw, relation2));
     // Interactions for the whole dynamical system
-    allInteractions.insert(inter1);
-    allInteractions.insert(inter2);
     //================================================================================================================
     //            III. Create the "model" object
     //================================================================================================================
-    SP::Model RoBlockModel(new Model(TimeInitial, TimeFinal, allDS, allInteractions));
+    SP::Model RoBlockModel(new Model(TimeInitial, TimeFinal));
+    RoBlockModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(RockingBlock);
+    RoBlockModel->nonSmoothDynamicalSystem()->link(inter1, RockingBlock);
+    RoBlockModel->nonSmoothDynamicalSystem()->link(inter2, RockingBlock);
+
+    
     //================================================================================================================
     //            IV. Create the simulation
     //================================================================================================================
     //1. Time discretization
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(TimeInitial, StepSize));
     //2. Integration solver for one step
-    SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(allDS, 0.5001));
+    SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(RockingBlock, 0.5001));
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem impact_pos(new MLCPProjectOnConstraints());

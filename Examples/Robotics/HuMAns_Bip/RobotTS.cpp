@@ -32,8 +32,6 @@ int main(int argc, char* argv[])
     // -------------------------
 
     // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
-
     // --- DS: robot bip ---
 
     // The dof are angles between differents parts of the robot.
@@ -55,8 +53,6 @@ int main(int argc, char* argv[])
     bip->setComputeJacobianNNLFunction(0, "RobotPlugin.so", "jacobianNNLq");
     bip->setComputeJacobianNNLFunction(1, "RobotPlugin.so", "jacobianVNNL");
 
-    allDS.insert(bip);
-
     // -------------------
     // --- Interactions---
     // -------------------
@@ -66,14 +62,12 @@ int main(int argc, char* argv[])
     //  - the other to define angles limitations (articular stops), with lagrangian linear relation
     //  Both with newton impact nslaw.
 
-    InteractionsSet allInteractions;
-
     // -- relations --
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     string G = "RobotPlugin:G0";
     SP::Relation relation(new LagrangianScleronomousR("RobotPlugin:h0", G));
-    SP::Interaction inter(new Interaction("floor-feet", allDS, 0, 23, nslaw, relation));
+    SP::Interaction inter(new Interaction(23, nslaw, relation));
 
     //The linear contraint corresponding to joints limits (hq+b>0)
     SimpleMatrix H(30, 21);
@@ -142,17 +136,17 @@ int main(int argc, char* argv[])
 
 
     SP::Relation relation2(new LagrangianLinearTIR(H, b));
-    SP::Interaction inter2(new Interaction("joint-limits", allDS, 1, 30, nslaw, relation2));
-
-
-    allInteractions.insert(inter);
-    allInteractions.insert(inter2);
+    SP::Interaction inter2(new Interaction(30, nslaw, relation2));
 
     // -------------
     // --- Model ---
     // -------------
 
-    SP::Model Robot(new Model(t0, T, allDS, allInteractions));
+    SP::Model Robot(new Model(t0, T));
+    Robot->nonSmoothDynamicalSystem()->insertDynamicalSystem(bip);
+    Robot->nonSmoothDynamicalSystem()->link(inter1, bip);
+    Robot->nonSmoothDynamicalSystem()->link(inter2, bip);
+
 
     // ----------------
     // --- Simulation ---

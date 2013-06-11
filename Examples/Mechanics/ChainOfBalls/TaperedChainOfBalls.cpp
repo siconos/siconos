@@ -117,7 +117,7 @@ int main(int argc, char* argv[]){
       Rmoy = ((*RadiusBalls)(id)*(*RadiusBalls)(id+1))/((*RadiusBalls)(id) + (*RadiusBalls)(id+1));
       (*StiffContacts)(id) = pow(Rmoy,0.5)*Emoy; 
     }
-    // Display and save the configuration of the chain simulated
+    // // Display and save the configuration of the chain simulated
     // cout << "Configuation of ball chains" << endl;
     // cout.precision(15);
     // cout << "Radius of balls: " << endl;
@@ -136,6 +136,13 @@ int main(int argc, char* argv[]){
     // --- Dynamical systems --- 
     // -------------------------
     cout << "====> Model loading ..." <<endl<<endl;
+    // -------------
+    // --- Model ---
+    // -------------
+    SP::Model BallChain(new Model(t0,T));
+    // -- (1) OneStepIntegrators --
+    SP::OneStepIntegrator OSI(new Lsodar());
+
     std::vector<SP::DynamicalSystem> VecOfallDS;
     SP::SiconosMatrix MassBall;
     SP::SiconosVector q0Ball;
@@ -143,16 +150,6 @@ int main(int argc, char* argv[]){
     SP::LagrangianLinearTIDS ball;
     SP::SiconosVector FextBall;
     double _Rball, _massBall,_Pos0Ball, _Vel0Ball ;
-    // -------------
-    // --- Model ---
-    // -------------
-    SP::Model BallChain(new Model(t0,T));
-    // ----------------
-    // --- Simulation ---
-    // ----------------
-    // -- (1) OneStepIntegrators --
-    SP::OneStepIntegrator OSI(new Lsodar());
-
     for(unsigned int i = 0; i < NumberBalls; ++i)
 	    {
 	      _Rball = (*RadiusBalls)(i); // radius of the ball
@@ -177,7 +174,7 @@ int main(int argc, char* argv[]){
 	      VecOfallDS.push_back(ball);
         BallChain->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
         OSI->insertDynamicalSystem(ball);
-	    }
+      }
     // --------------------
     // --- Interactions ---
     // --------------------
@@ -201,8 +198,12 @@ int main(int argc, char* argv[]){
 	      nslaw = SP::NonSmoothLaw(new MultipleImpactNSL(ResCoef,Stiff,ElasPow));
 	      relation = SP::Relation(new LagrangianLinearTIR(H,E));
 	      interaction = SP::Interaction(new Interaction(1, nslaw, relation));
-        BallChain->nonSmoothDynamicalSystem()->link(interaction, VecOfallDS[j], VecOfallDS[j+1]);
+        BallChain->nonSmoothDynamicalSystem()->link(interaction, VecOfallDS[j],VecOfallDS[j+1]);
 	    }
+
+    // ----------------
+    // --- Simulation ---
+    // ----------------
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0,h));
     // -- (3) Non smooth problem --
@@ -229,7 +230,7 @@ int main(int argc, char* argv[]){
     SP::InteractionsGraph IndexSet0 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(0);
     SP::InteractionsGraph IndexSet1 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(1);
     SP::InteractionsGraph IndexSet2 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(2);
-    // Display topology of the system
+    // // Display topology of the system
     // cout << "Number of vectices of IndexSet0: " << IndexSet0->size() << endl;
     // cout << "Number of vectices of IndexSet1: " << IndexSet1->size() << endl;
     // cout << "Number of vectices of IndexSet2: " << IndexSet2->size() << endl;
@@ -317,8 +318,8 @@ int main(int argc, char* argv[]){
     std::cout << (dataPlot-dataPlotRef).normInf() << std::endl;
     if ((dataPlot-dataPlotRef).normInf() > 1e-12) 
       {
-	std::cout << "Warning. The results is rather different from the reference file."<< std::endl;
-	return 1;
+        std::cout << "Warning. The results is rather different from the reference file."<< std::endl;
+        return 1;
       }
   }
   catch(SiconosException e)

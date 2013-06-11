@@ -121,12 +121,6 @@ int main(int argc, char* argv[])
 
 
     cout << "====> Model loading ..." << endl << endl;
-    DynamicalSystemsSet allDS1; // the list of DS
-    DynamicalSystemsSet allDS2; // the list of DS
-    DynamicalSystemsSet allDS3; // the list of DS
-    DynamicalSystemsSet allDS4; // the list of DS
-    DynamicalSystemsSet allDS_With_Floor;
-
     // -- Initial positions and velocities --
 
     //First DS
@@ -157,7 +151,6 @@ int main(int argc, char* argv[])
     
     // -- The dynamical system --
     SP::NewtonEulerDS beam1(new NewtonEulerDS(q10, v10, m, I1));
-    allDS1.insert(beam1);
     // -- Set external forces (weight) --
     SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(2) = -m * g;
@@ -186,8 +179,6 @@ int main(int argc, char* argv[])
     q02->setValue(6, V1.getValue(2)*sin(angle / 2));
 
     SP::NewtonEulerDS beam2(new NewtonEulerDS(q02, v02, m, I2));
-    allDS2.insert(beam1);
-    allDS2.insert(beam2);
     // -- Set external forces (weight) --
     SP::SiconosVector weight2(new SiconosVector(nDof));
     (*weight2)(2) = -m * g;
@@ -214,23 +205,13 @@ int main(int argc, char* argv[])
     q03->setValue(6, V1.getValue(2)*sin(angle / 2));
 
     SP::NewtonEulerDS beam3(new NewtonEulerDS(q03, v03, m, I3));
-    allDS3.insert(beam2);
-    allDS3.insert(beam3);
     // -- Set external forces (weight) --
     SP::SiconosVector weight3(new SiconosVector(nDof));
     (*weight3)(2) = -m * g;
     beam3->setFExtPtr(weight3);
-    allDS_With_Floor.insert(beam3);
-
-
-
-
     // --------------------
     // --- Interactions ---
     // --------------------
-
-    InteractionsSet allInteractions;
-
 
     // Interaction with the floor
     double e = 0.9;
@@ -297,47 +278,31 @@ int main(int argc, char* argv[])
     axe1->zero();
     axe1->setValue(2, 1);
     SP::NewtonEulerR relation4(new PrismaticJointR(beam3, axe1));
-    allDS4.insert(beam3);
-    
     
     // relation1->setJachq(H1); // Remark V.A. Why do we need to set the Jacobian outside
     // relation2->setJachq(H2);
     // relation3->setJachq(H3);
     // relation4->setJachq(H4);
     
-    SP::Interaction inter1(new Interaction("axis-beam1", allDS1, 0, KneeJointR::_sNbEqualities, nslaw1, relation1));
-    allInteractions.insert(inter1);
-    SP::Interaction inter2(new Interaction("axis-beam2", allDS2, 1, KneeJointR::_sNbEqualities, nslaw2, relation2));
-    allInteractions.insert(inter2);
-    SP::Interaction inter3(new Interaction("axis-beam3", allDS3, 1, KneeJointR::_sNbEqualities, nslaw3, relation3));
-    allInteractions.insert(inter3);
-    SP::Interaction inter4(new Interaction("axis-beam4", allDS4, 1, PrismaticJointR::_sNbEqualities, nslaw4, relation4));
-    allInteractions.insert(inter4);
-    SP::Interaction interFloor(new Interaction("floor-ball", allDS_With_Floor , 0, 1, nslaw0, relation0));
-    allInteractions.insert(interFloor);
-
-
-
+    SP::Interaction inter1(new Interaction(KneeJointR::_sNbEqualities, nslaw1, relation1));
+    SP::Interaction inter2(new Interaction(KneeJointR::_sNbEqualities, nslaw2, relation2));
+    SP::Interaction inter3(new Interaction(KneeJointR::_sNbEqualities, nslaw3, relation3));
+    SP::Interaction inter4(new Interaction(PrismaticJointR::_sNbEqualities, nslaw4, relation4));
+    SP::Interaction interFloor(new Interaction(1, nslaw0, relation0));
 
     // -------------
     // --- Model ---
     // -------------
-    SP::Model myModel(new Model(t0, T, allDS2, allInteractions));
+    SP::Model myModel(new Model(t0, T));
     // add the dynamical system in the non smooth dynamical system
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam2);
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam3);
     // link the interaction and the dynamical system
     myModel->nonSmoothDynamicalSystem()->link(inter1, beam1);
-
-    myModel->nonSmoothDynamicalSystem()->link(inter2, beam1);
-    myModel->nonSmoothDynamicalSystem()->link(inter2, beam2);
-
-    myModel->nonSmoothDynamicalSystem()->link(inter3, beam2);
-    myModel->nonSmoothDynamicalSystem()->link(inter3, beam3);
-
+    myModel->nonSmoothDynamicalSystem()->link(inter2, beam1, beam2);
+    myModel->nonSmoothDynamicalSystem()->link(inter3, beam2, beam3);
     myModel->nonSmoothDynamicalSystem()->link(inter4, beam3);
-
     myModel->nonSmoothDynamicalSystem()->link(interFloor, beam3);
     // ------------------
     // --- Simulation ---

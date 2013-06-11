@@ -30,9 +30,7 @@
 
 using namespace std;
 
-
 int main(int argc, char* argv[])
-
 {
   try
   {
@@ -138,15 +136,18 @@ int main(int argc, char* argv[])
     // }
 
 
-    // -------------
-    // --- Model ---
-    // -------------
+    // --------------------------------------
+    // ---      Model and simulation      ---
+    // --------------------------------------
     SP::Model columnOfBeads(new Model(t0, T));
+    // --  (1) OneStepIntegrators --
+    SP::MoreauCombinedProjectionOSI OSI(new MoreauCombinedProjectionOSI(theta));
 
     // add the dynamical system in the non smooth dynamical system
     for (unsigned int i = 0; i < nBeads; i++)
     {
       columnOfBeads->nonSmoothDynamicalSystem()->insertDynamicalSystem(beads[i]);
+      OSI->insertDynamicalSystem(beads[i]);
     }
 
     // // link the interaction and the dynamical system
@@ -156,16 +157,7 @@ int main(int argc, char* argv[])
     //   columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i+1]);
     // }
 
-    // ------------------
-    // --- Simulation ---
-    // ------------------
-
-    // -- (1) OneStepIntegrators --
-    SP::MoreauCombinedProjectionOSI OSI(new MoreauCombinedProjectionOSI(theta));
-    for (unsigned int i = 0; i < nBeads; i++)
-    {
-      OSI->insertDynamicalSystem(beads[i]);
-    }
+    
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
@@ -195,7 +187,6 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 1 + nBeads * 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
-
     dataPlot(0, 0) = columnOfBeads->t0();
 
     for (unsigned int i = 0; i < nBeads; i++)
@@ -222,22 +213,13 @@ int main(int argc, char* argv[])
     bool isOSNSinitialized = false;
     while (s->hasNextEvent())
     {
-      // for( int toto=0; toto<1;toto++)
-      //   std::cout <<"============> Step Number : " << k << "======================"  <<std::endl;
-
       // Rough contact detection
       for (unsigned int i = 0; i < nBeads - 1; i++)
       {
-        //beads[i]->display();1
-        // std::cout << "Beads["<<i<<"] position "<<((beads[i])->q())->getValue(0)<<std::endl;
-        // std::cout << "Beads["<<i+1<<"] position " <<((beads[i+1])->q())->getValue(0)<<std::endl;       std::cout << "Distance between Beads["<<i<<"] and ["<<i+1<<"]  " << ((beads[i+1])->q())->getValue(0)- ((beads[i])->q())->getValue(0)<<std::endl;
-
         if (abs(((beads[i])->q())->getValue(0) - R) < alert)
         {
-
           if (!inter)
           {
-
             ncontact++;
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
@@ -273,8 +255,7 @@ int main(int argc, char* argv[])
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
             interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads[i]));
 
-            columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i]);
-            columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i + 1]);
+            columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
             s->computeLevelsForInputAndOutput(interOfBeads[i]);
             interOfBeads[i]->initialize(s->nextTime());
             if (!isOSNSinitialized)
@@ -286,24 +267,12 @@ int main(int argc, char* argv[])
             interOfBeads[i]->computeOutput(s->nextTime(), 0);
             // std::cout<< "interOfBeads["<<i<<"]->y(0)->getValue(0)" <<interOfBeads[i]->y(0)->getValue(0)   <<std::endl;
             assert(interOfBeads[i]->y(0)->getValue(0) >= 0);
-
-
-            //            relationOfBeads[i]->interaction();
-
-
-            //std::cout << "Contact declared= " << ncontact << std::endl;
-          }
-          else
-          {
           }
         }
       }
-
-
-
+      
       s->computeOneStep();
-      // osnspb->display();
-      // osnspb_pos->display();
+
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       for (unsigned int i = 0; i < nBeads; i++)

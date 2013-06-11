@@ -56,7 +56,6 @@ int main(int argc, char* argv[])
     // -------------------------
 
     // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
 
     // --- DS: manipulator arm ---
 
@@ -91,16 +90,12 @@ int main(int argc, char* argv[])
     torques->zero();
     arm->setzPtr(torques);
 
-    allDS.insert(arm);
-
     // -------------------
     // --- Interactions---
     // -------------------
 
     //  - one with linear relation to define joints limits
     //  Both with newton impact nslaw.
-
-    InteractionsSet allInteractions;
 
     // -- relations --
 
@@ -137,21 +132,23 @@ int main(int argc, char* argv[])
     (*b)(11) = (*b)(10);
     std::vector<SP::Relation> relationVector(12);
     std::vector<SP::Interaction> interactionVector(12);
+    // -------------
+    // --- Model ---
+    // -------------
+
+    SP::Model RX90(new Model(t0, T));
+    RX90->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
+
     for (unsigned int i = 0; i < 2 * nDof; i++)
     {
       bvector[i].reset(new SiconosVector(1));
       // (*(bvector[i])) (1) = *b(i);
       (bvector[i])->setValue(0, (*b)(i));
       relationVector[i].reset(new LagrangianLinearTIR(Hvector[i], bvector[i]));
-      interactionVector[i].reset(new Interaction("butée", allDS, i, 1, nslaw, relationVector[i]));
-      allInteractions.insert(interactionVector[i]);
+      interactionVector[i].reset(new Interaction(1, nslaw, relationVector[i]));
+      RX90->nonSmoothDynamicalSystem()->link(interactionVector[i], arm);
     }
-
-    // -------------
-    // --- Model ---
-    // -------------
-
-    SP::Model RX90(new Model(t0, T, allDS, allInteractions));
+   
 
     // ----------------
     // --- Simulation ---

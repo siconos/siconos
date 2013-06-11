@@ -20,11 +20,9 @@ int main(int argc, char* argv[])
 
     // déclarations
 
-    DynamicalSystemsSet allDS;
     SP::SiconosMatrix M(new SimpleMatrix(nDof, nDof));
     SP::SiconosVector q0(new SiconosVector(nDof));
     SP::SiconosVector v0(new SiconosVector(nDof));
-    InteractionsSet allInteractions;
 
     SP::NonSmoothLaw loi(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianRheonomousR("YoyoPlugin:h1", "YoyoPlugin:G11", "YoyoPlugin:G10"));
@@ -96,10 +94,6 @@ int main(int argc, char* argv[])
         (*v0)(0) = (*v)(0);
         (*v0)(2) = (*v)(2);
         (*v0)(1) = r * (*v0)(0) + (*v0)(2);
-
-
-        allDS.clear();
-        allInteractions.clear();
       }
 
       // création et insertion  du système dynamique représentant la yoyo dans le récipient allDS
@@ -110,20 +104,15 @@ int main(int argc, char* argv[])
       yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin.so", "jacobianVFInt");
       yoyo->setComputeJacobianFIntqFunction("YoyoPlugin.so", "jacobianFIntq");
 
-      allDS.insert(yoyo);
-
 
       ////////////////  loi d'impact et relations /////////////////////////////////
 
-      SP::Interaction inter(new Interaction("impact", allDS, 0, 1, loi0, relation0));
-      allInteractions.insert(inter);
-      SP::NonSmoothDynamicalSystem system(new NonSmoothDynamicalSystem(allDS, allInteractions));
-
+      SP::Interaction inter(new Interaction(1, loi0, relation0));
 
       /////////////////////////  MODEL //////////////////////////////////////////////////
       SP::Model jeu(new Model(t0, T));
-      jeu->setNonSmoothDynamicalSystemPtr(system); // set NonSmoothDynamicalSystem of this model
-
+      jeu->nonSmoothDynamicalSystem()->insertDynamicalSystem(yoyo);
+      jeu->nonSmoothDynamicalSystem()->link(inter, yoyo);
       ///////////////////// SIMULATION /////////////////////////////////
 
 
@@ -197,25 +186,17 @@ int main(int argc, char* argv[])
         (*v0)(2) = (*v)(2);
         (*v0)(1) = -r * (*v0)(0) + (*v0)(2);
   
-        // libération de mémoire
-        allDS.clear();
-        allInteractions.clear();
-  
         yoyo.reset(new LagrangianDS(q0, v0, M));
         yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_extf");
         yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_intf");
         yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin.so", "jacobianVFIntf");
         yoyo->setComputeJacobianFIntqFunction("YoyoPlugin.so", "jacobianFIntqf");
-  
-        allDS.insert(yoyo);
-  
-        inter.reset(new Interaction("impact", allDS, 0, 1, loi, relation));
-        allInteractions.insert(inter);
-  
-        system.reset(new NonSmoothDynamicalSystem(allDS, allInteractions));
+        
+        inter.reset(new Interaction(1, loi, relation));
+          
         jeu.reset(new Model(t0, T));
-        jeu->setNonSmoothDynamicalSystemPtr(system);
-  
+        jeu->nonSmoothDynamicalSystem()->insertDynamicalSystem(yoyo);
+        jeu->nonSmoothDynamicalSystem()->link(inter, yoyo);
   
         t.reset(new TimeDiscretisation(t0, h));
         s.reset(new TimeStepping(t));

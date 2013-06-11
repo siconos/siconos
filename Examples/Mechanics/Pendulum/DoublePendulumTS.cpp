@@ -61,9 +61,6 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
-    // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
-
     // --- DS: Double Pendulum ---
 
     // Initial position (angles in radian)
@@ -84,34 +81,29 @@ int main(int argc, char* argv[])
     doublependulum->setComputeJacobianFIntqDotFunction("DoublePendulumPlugin.so", "jacobianVFInt");
     doublependulum->setComputeJacobianFIntqFunction("DoublePendulumPlugin.so", "jacobianFIntq");
 
-    allDS.insert(doublependulum);
-
     // -------------------
     // --- Interactions---
     // -------------------
-
-
-    InteractionsSet allInteractions;
 
     // -- relations --
     string G = "DoublePendulumPlugin:G0";
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("DoublePendulumPlugin:h0", G));
-    SP::Interaction inter(new Interaction("floor-mass1", allDS, 1, 1, nslaw, relation));
+    SP::Interaction inter(new Interaction(1, nslaw, relation));
 
     string G1 = "DoublePendulumPlugin:G1";
     SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(e1));
     SP::Relation relation1(new LagrangianScleronomousR("DoublePendulumPlugin:h1", G1));
-    SP::Interaction inter1(new Interaction("floor-mass2", allDS, 2, 1, nslaw1, relation1));
-
-    allInteractions.insert(inter);
-    allInteractions.insert(inter1);
+    SP::Interaction inter1(new Interaction(1, nslaw1, relation1));
 
     // -------------
     // --- Model ---
     // -------------
 
-    SP::Model Pendulum(new Model(t0, T, allDS, allInteractions));
+    SP::Model Pendulum(new Model(t0, T));
+    Pendulum->nonSmoothDynamicalSystem()->insertDynamicalSystem(doublependulum);
+    Pendulum->nonSmoothDynamicalSystem()->link(inter,doublependulum);
+    Pendulum->nonSmoothDynamicalSystem()->link(inter1,doublependulum);
 
     // ----------------
     // --- Simulation ---

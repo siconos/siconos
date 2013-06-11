@@ -22,11 +22,7 @@ SICONOS_PROJECT(Examples)
 
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(SiconosKernel REQUIRED)
-
-#
-# Internals
-#
-
+COMPILE_WITH(SiconosMechanics)
 
 MACRO(ADD_EXAMPLE_DIRECTORY _N)
   MESSAGE("Adding example ${_N}")

@@ -62,7 +62,6 @@ int main(int argc, char* argv[])
     // -------------------------
 
     // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
 
     // --- DS: Simple Pendulum ---
 
@@ -85,25 +84,22 @@ int main(int argc, char* argv[])
     (*ForceExtern)(1) = m * gravity;
     simplependulum->setFExtPtr(ForceExtern);
 
-    allDS.insert(simplependulum);
-
     // -------------------
     // --- Interactions---
     // -------------------
 
 
-    InteractionsSet allInteractions;
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("SimplePendulumBilateralConstraintPlugin:h0", "SimplePendulumBilateralConstraintPlugin:G0", "SimplePendulumBilateralConstraintPlugin:G0dot"));
-    SP::Interaction inter(new Interaction("floor-mass", allDS, 1, 1, nslaw, relation));
-    allInteractions.insert(inter);
+    SP::Interaction inter(new Interaction(1, nslaw, relation));
 
     // -------------
     // --- Model ---
     // -------------
 
-    SP::Model Pendulum(new Model(t0, T, allDS, allInteractions));
-
+    SP::Model Pendulum(new Model(t0, T));
+    Pendulum->nonSmoothDynamicalSystem()->insertDynamicalSystem(simplependulum);
+    Pendulum->nonSmoothDynamicalSystem()->link(inter, simplependulum);
     // ----------------
     // --- Simulation ---
     // ----------------
@@ -111,7 +107,7 @@ int main(int argc, char* argv[])
     //1. Time discretization
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(t0, h));
     //2. Integration solver for one step
-    SP::OneStepIntegrator OSI(new NewMarkAlphaOSI(allDS, _rho, IsHandleVelConstraint));
+    SP::OneStepIntegrator OSI(new NewMarkAlphaOSI(simplependulum, _rho, IsHandleVelConstraint));
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem acceleration(new LCP());

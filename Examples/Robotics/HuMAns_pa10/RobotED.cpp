@@ -52,7 +52,6 @@ int main(int argc, char* argv[])
     // -------------------------
 
     // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
 
     // --- DS: robot arm ---
 
@@ -73,8 +72,6 @@ int main(int argc, char* argv[])
     arm->setComputeJacobianNNLFunction(1, "RobotPlugin.so", "jacobianVNNL");
     arm->setComputeJacobianNNLFunction(0, "RobotPlugin.so", "jacobianNNLq");
 
-    allDS.insert(arm);
-
     // -------------------
     // --- Interactions---
     // -------------------
@@ -84,15 +81,13 @@ int main(int argc, char* argv[])
     //  - the other to define angles limitations (articular stops), with lagrangian linear relation
     //  Both with newton impact ns laws.
 
-    InteractionsSet allInteractions; // The set of all interactions.
-
     // -- relations --
 
     // => arm-floor relation
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     string G = "RobotPlugin:G2";
     SP::Relation relation(new LagrangianScleronomousR("RobotPlugin:h2", G));
-    SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
+    SP::Interaction inter(new Interaction(2, nslaw, relation));
 
     // => angular stops
 
@@ -130,17 +125,16 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
     SP::Relation relation2(new LagrangianLinearTIR(H, b));
-    SP::Interaction inter2(new Interaction("floor-arm2", allDS, 1, 4, nslaw2, relation2));
-
-    allInteractions.insert(inter);
-    allInteractions.insert(inter2);
-
+    SP::Interaction inter2(new Interaction(4, nslaw2, relation2));
     // -------------
     // --- Model ---
     // -------------
 
-    SP::Model Robot(new Model(t0, T, allDS, allInteractions));
-
+    SP::Model Robot(new Model(t0, T));
+    Robot->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
+    
+    Robot->nonSmoothDynamicalSystem()->link(inter1, arm);
+    Robot->nonSmoothDynamicalSystem()->link(inter2, arm);
     // ----------------
     // --- Simulation ---
     // ----------------

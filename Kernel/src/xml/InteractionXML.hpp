@@ -105,27 +105,6 @@ public:
     return SiconosDOMTreeTools::hasAttributeValue(rootNode, NUMBER_ATTRIBUTE);
   };
 
-<<<<<<< HEAD
-  /** Return the id of the Interaction (rootNode attribute)
-  *   \return a std::string
-  */
-  inline const std::string getId() const
-  {
-    if (!hasId())
-      XMLException::selfThrow("InteractionXML::getId(): id attribute is unset.");
-    return SiconosDOMTreeTools::getStringAttributeValue(rootNode, ID_ATTRIBUTE);
-  }
-
-  /** to save the id of the Interaction (rootNode attribute)
-  *   \param a std::string
-  */
-  inline void setId(const std::string  newId)
-  {
-    SiconosDOMTreeTools::setStringAttributeValue(rootNode, ID_ATTRIBUTE, newId);
-  }
-
-=======
->>>>>>> Update Kernel to simplify NSDS creation process and remove (as much as possible) DS/Interaction set. All tests ok. All examples ok. Todo : update mechanics.
   /** Return the number of the Interaction (rootNode attribute)
   *   \return an int
   */

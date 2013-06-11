@@ -51,7 +51,6 @@ int main(int argc, char* argv[])
     //===========================================================================================================
     //                  I: Declare the dynamical systems
     //===========================================================================================================
-    DynamicalSystemsSet allDS;
     //1. Set the mass matrix
     SP::SiconosMatrix Mass(new SimpleMatrix(Nfreedom, Nfreedom));
     double InertiaBlock;
@@ -80,7 +79,6 @@ int main(int argc, char* argv[])
     (*ForceExtern)(1) = -MassBlock * GGearth;
     RockingBlock->setFExtPtr(ForceExtern);
     //
-    allDS.insert(RockingBlock);
     //----------------------------- Display variables of the dynamical system---------------------------------------
     cout << "Initial position of the rocking block:" << endl;
     PosIniBlock->display();
@@ -93,7 +91,6 @@ int main(int argc, char* argv[])
     //==================================================================================================================
     //              II: Declare the relation et interaction between dynamical systems
     //==================================================================================================================
-    InteractionsSet allInteractions;
     //
     /*
     SP::SiconosMatrix H(new SimpleMatrix(1,Nfreedom));
@@ -107,25 +104,26 @@ int main(int argc, char* argv[])
     // Interaction at contact point 1
     //SP::Relation relation1(new LagrangianLinearTIR(H, E));
     SP::Relation relation1(new LagrangianScleronomousR("RockingBlockPlugin:h1", "RockingBlockPlugin:G1", "RockingBlockPlugin:G1dot"));
-    SP::Interaction inter1(new Interaction("contact1", allDS, 1, 1, nslaw1, relation1));
+    SP::Interaction inter1(new Interaction(1, nslaw1, relation1));
     // Interaction at contact point 2
     //SP::Relation relation2(new LagrangianLinearTIR(H, E));
     SP::Relation relation2(new LagrangianScleronomousR("RockingBlockPlugin:h2", "RockingBlockPlugin:G2", "RockingBlockPlugin:G2dot"));
-    SP::Interaction inter2(new Interaction("contact2", allDS, 2, 1, nslaw2, relation2));
+    SP::Interaction inter2(new Interaction(1, nslaw2, relation2));
     // Interactions for the whole dynamical system
-    allInteractions.insert(inter1);
-    allInteractions.insert(inter2);
     //================================================================================================================
     //            III. Create the "model" object
     //================================================================================================================
-    SP::Model RoBlockModel(new Model(TimeInitial, TimeFinal, allDS, allInteractions));
+    SP::Model RoBlockModel(new Model(TimeInitial, TimeFinal));
+    RoBlockModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(RockingBlock);
+    RoBlockModel->nonSmoothDynamicalSystem()->link(inter1, RockingBlock);
+    RoBlockModel->nonSmoothDynamicalSystem()->link(inter2, RockingBlock);
     //================================================================================================================
     //            IV. Create the simulation
     //================================================================================================================
     //1. Time discretization
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(TimeInitial, StepSize));
     //2. Integration solver for one step
-    SP::OneStepIntegrator OSI(new Lsodar(allDS));
+    SP::OneStepIntegrator OSI(new Lsodar(RockingBlock));
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new OSNSMultipleImpact(TypeContactLaw, DelP));
     SP::OSNSMultipleImpact multiple_impact = boost::dynamic_pointer_cast<OSNSMultipleImpact>(impact);

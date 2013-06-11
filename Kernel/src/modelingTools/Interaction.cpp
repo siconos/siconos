@@ -39,7 +39,7 @@
 #include "NewtonEulerR.hpp" // ??
 #include "NewtonEulerDS.hpp" // ??
 
-
+using namespace std;
 using namespace RELATION;
 
 // --- CONSTRUCTORS ---

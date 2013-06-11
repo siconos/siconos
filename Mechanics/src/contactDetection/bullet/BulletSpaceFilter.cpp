@@ -296,16 +296,13 @@ void BulletSpaceFilter::buildInteractions(double time)
           {
             SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
 
-            inter->insert(dsa);
-            inter->insert(dsb);
             cpoint->m_userPersistentData = &*inter;
-            insertInteraction(inter);
+            link(inter, dsa, dsb);
           }
           else
           {
-            inter->insert(dsa);
             cpoint->m_userPersistentData = &*inter;
-            insertInteraction(inter);
+            link(inter, dsa);
           }
         }
 
