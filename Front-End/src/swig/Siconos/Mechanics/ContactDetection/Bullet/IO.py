@@ -8,7 +8,8 @@ from Siconos.Mechanics.ContactDetection.Bullet import \
     BulletDS, BulletWeightedShape, \
     btCollisionObject, btQuaternion, btTransform
 
-from Siconos.Mechanics.ContactDetection.Bullet import cast_BulletDS
+from Siconos.Mechanics.ContactDetection.Bullet import \
+    cast_BulletDS, cast_BulletR
 
 
 def object_id(obj):
@@ -63,6 +64,8 @@ class Dat():
         self._reference = dict()
         self._static_cobjs = []
         self._shape = VtkShapes.Collection(shape_filename)
+        self._pos_file = None
+        self._contact_forces_file = None
 
         # read data
         with open(self._input_filename, 'r') as input_file:
@@ -107,7 +110,8 @@ class Dat():
                     self._osi.insertDynamicalSystem(body)
 
     def __enter__(self):
-        self._file = open('pos.dat', 'w')
+        self._pos_file = open('pos.dat', 'w')
+        self._contact_forces_file = open('contact_forces.dat', 'w')
         return self
 
     def __exit__(self, type_, value, traceback):
@@ -119,30 +123,56 @@ class Dat():
                      nonSmoothDynamicalSystem().topology().dSG(0).vertices()]):
                 bind_file.write('{0} {1}\n'.format(object_id(collision_object),
                                 self._reference[object_id(collision_object)]))
-        self._file.close()
+
+        self._contact_forces_file.close()
+        self._pos_file.close()
 
     def outputStaticObjects(self):
-        """output positions and orientations of static objects"""
+        """
+        Outputs positions and orientations of static objects
+        """
         time = self._broadphase.model().simulation().nextTime()
         for collision_object in self._broadphase.staticObjects():
             position = collision_object.getWorldTransform().getOrigin()
             rotation = collision_object.getWorldTransform().getRotation()
-            self._file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
+            self._pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
+                                 format(time, object_id(collision_object),
+                                        position.x(),
+                                        position.y(),
+                                        position.z(),
+                                        rotation.w(),
+                                        rotation.x(),
+                                        rotation.y(),
+                                        rotation.z()))
+
+    def outputDynamicObjects(self):
+        """
+        Outputs positions and orientations of dynamic objects
+        """
+        time = self._broadphase.model().simulation().nextTime()
+        for ds in self._broadphase.model().nonSmoothDynamicalSystem().\
+                topology().dSG(0).vertices():
+            collision_object = cast_BulletDS(ds).collisionObject()
+            position = collision_object.getWorldTransform().getOrigin()
+            rotation = collision_object.getWorldTransform().getRotation()
+            self._pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
                              format(time, object_id(collision_object),
                                     position.x(), position.y(), position.z(),
                                     rotation.w(), rotation.x(), rotation.y(),
                                     rotation.z()))
 
-    def outputDynamicObjects(self):
-        """output positions and orientations of dynamic objects"""
-        time = self._broadphase.model().simulation().nextTime()
-        for ds in self._broadphase.model().nonSmoothDynamicalSystem().\
-          topology().dSG(0).vertices():
-            collision_object = cast_BulletDS(ds).collisionObject()
-            position = collision_object.getWorldTransform().getOrigin()
-            rotation = collision_object.getWorldTransform().getRotation()
-            self._file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
-                             format(time, object_id(collision_object),
-                                    position.x(), position.y(), position.z(),
-                                    rotation.w(), rotation.x(), rotation.y(),
-                                    rotation.z()))
+    def outputContactForces(self):
+        """
+        Outputs contact forces
+        """
+        for inter in self._broadphase.model().nonSmoothDynamicalSystem().\
+                topology().indexSet(1).vertices():
+            bullet_relation = cast_BulletR(inter.relation())
+            cf = bullet_relation.contactForce()
+            cp = bullet_relation.contactPoint()
+            posa = cp.getPositionWorldOnA()
+            self._contact_forces_file.write('{0} {1} {2} {3} {4} {5}\n'.
+                                            format(posa.x(),
+                                                   posa.y(),
+                                                   posa.z(),
+                                                   cf[0], cf[1], cf[2]))

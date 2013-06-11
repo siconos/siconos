@@ -59,6 +59,16 @@
 %include "BulletCollision/CollisionShapes/X.h";
 %enddef
 
+#undef PY_REGISTER_BULLET_NARROW_PHASE_COLLISION_DETECTION
+%define PY_REGISTER_BULLET_NARROW_PHASE_COLLISION_DETECTION(X)
+%inline
+%{
+#include <BulletCollision/NarrowPhaseCollision/X.h>
+%}
+%shared_ptr(X);
+%include "BulletCollision/NarrowPhaseCollision/X.h";
+%enddef
+
 #undef PY_REGISTER_BULLET_LINEAR_MATH
 %define PY_REGISTER_BULLET_LINEAR_MATH(X)
 %inline
@@ -114,6 +124,8 @@ PY_REGISTER_BULLET_LINEAR_MATH(btTransform);
 
 //%shared_ptr(std::vector< std11::shared_ptr<btCollisionShape> >);
 
+PY_REGISTER_BULLET_NARROW_PHASE_COLLISION_DETECTION(btManifoldPoint);
+
 PY_REGISTER_BULLET_COLLISION_DETECTION(btCollisionShape);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexShape);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexInternalShape);
@@ -167,6 +179,11 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
   SP::BulletDS cast_BulletDS(SP::DynamicalSystem ds)
   {
     return std11::static_pointer_cast<BulletDS>(ds);
+  };
+
+  SP::BulletR cast_BulletR(SP::Relation rel)
+  {
+    return std11::static_pointer_cast<BulletR>(rel);
   };
 }
 
