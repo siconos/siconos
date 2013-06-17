@@ -221,8 +221,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
   _T = m->finalT();
 
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-
   // === Events manager initialization ===
   _eventsManager->initialize(*this);
   _tinit = _eventsManager->startingTime();

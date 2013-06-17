@@ -52,7 +52,7 @@ void LinearChatteringSMC::actuate()
 {
   computeUeq();
 
-  prod(*_Csurface, *(_sensor->y()), *_sigma);
+  prod(*_Csurface, _sensor->y(), *_sigma);
 
   if (_D) // we are using a saturation
   {

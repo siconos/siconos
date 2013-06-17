@@ -114,9 +114,6 @@ protected:
   /** A time discretisation scheme */
   SP::TimeDiscretisation _timeDiscretisation;
 
-  /** The event which will linked this actuator to the eventsManager of the simulation */
-  SP::Event _eActuator;
-
   /** default constructor
    */
   Actuator();
@@ -221,14 +218,6 @@ public:
   inline SP::TimeDiscretisation timeDiscretisation() const
   {
     return _timeDiscretisation;
-  };
-
-  /** get the Event associated with this actuator
-   *  \return an SP::Event
-   */
-  inline SP::Event event() const
-  {
-    return _eActuator;
   };
 
   /** initialize actuator data.

@@ -69,7 +69,6 @@ void LinearSensor::initialize(SP::Model m)
   _storedY.reset(new SiconosVector(rowC));
   //  (_data[_eSensor])["StoredY"] = storedY;
   // set the dimension of the output
-  _YDim = rowC;
   _DSx = _DS->x();
   *_storedY = prod(*_matC, *_DSx);
 }
@@ -83,6 +82,11 @@ void LinearSensor::capture()
   //  (*_dataPlot)(_k, 0) = _timeDiscretisation->currentTime();
   //  _dataPlot->setSubRow(_k, 1, _storedY);
   _k++;
+
+  if (_delay > 0)
+  {
+    _bufferY.push_back(_storedY);
+  }
 }
 void  LinearSensor::setC(const SimpleMatrix& C)
 {

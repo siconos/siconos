@@ -270,11 +270,11 @@ void Topology::clear()
   _isTopologyUpToDate = false;
 }
 
-SP::DynamicalSystem Topology::getDynamicalSystem(int requiredNumber)
+SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber)
 {
   DynamicalSystemsGraph::VIterator vi, vdend;
   SP::DynamicalSystem ds;
-  int currentNumber;
+  unsigned int currentNumber;
   for (std11::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
   {
     ds = _DSG[0]->bundle(*vi);

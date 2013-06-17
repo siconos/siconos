@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
   SP::SimpleMatrix Drel(new SimpleMatrix(2, 2, 0));
 
   // Dynamical Systems
-  SP::ControlFirstOrderLinearDS controlProcess(new ControlFirstOrderLinearDS(t0, T, h, x0, A));
+  SP::ControlFirstOrderLinearS controlProcess(new ControlFirstOrderLinearS(t0, T, h, x0, A));
   SP::FirstOrderLinearDS processDS = controlProcess->processDS();
   processDS->setComputebFunction("RelayPlugin.so", "computeB");
   controlProcess->initialize();

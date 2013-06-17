@@ -78,58 +78,6 @@ protected:
   */
   ACCEPT_SERIALIZATION(ZeroOrderHold);
 
-  bool _constH;
-  /** Stl map that associates a \f$\Phi\f$ ZeroOrderHold matrix to each DynamicalSystem of the OSI */
-  MapOfDSMatrices _PhiMap;
-  /** Stl map that associates a \f$\Psi\f$ ZeroOrderHold matrix to each DynamicalSystem of the OSI */
-  MapOfDSMatrices _PsiMap;
-  MapOfDSMatrices _IntegralPhiMap;
-
-  /** Stl map that associates a vector containing \f$x_free\f$ to each DynamicalSystem of the OSI */
-  MapOfVectors _xNext;
-
-  /** Stl map used to store the DS for computing \f$\Phi\f$ */
-  MapOfDS _DSPhiMap;
-  /** Stl map used to store the DS for computing \f$\Psi\f$ */
-  MapOfDS _DSPsiMap;
-
-  MapOfDS _DSIntegralPhiMap;
-
-
-  /** Stl map used to store the TD for computing \f$\Phi\f$ */
-  MapOfTD _TDPhiMap;
-  /** Stl map used to store the TD for computing \f$\Psi\f$ */
-  MapOfTD _TDPsiMap;
-  MapOfTD _TDIntegralPhiMap;
-
-
-  /** Stl map used to store the Model for computing \f$\Phi\f$ */
-  MapOfModel _modelPhiMap;
-  /** Stl map used to store the Model for computing \f$\Psi\f$ */
-  MapOfModel _modelPsiMap;
-
-  MapOfModel _modelIntegralPhiMap;
-
-  /** Stl map used to store the OSI for computing \f$\Phi\f$ */
-  MapOfOSI _PhiOSIMap;
-  /** Stl map used to store the OSI for computing \f$\Psi\f$ */
-  MapOfOSI _PsiOSIMap;
-
-  MapOfOSI _IntegralPhiOSIMap;
-
-  /** Stl map used to store the Simulation for computing \f$\Phi\f$ */
-  MapOfSimulation _simulPhiMap;
-  /** Stl map used to store the Simulation for computing \f$\Psi\f$ */
-  MapOfSimulation _simulPsiMap;
-
-  MapOfSimulation _simulIntegralPhiMap;
-
-  MapOfBool _isPhiConst;
-
-  MapOfBool _isPsiConst;
-
-  MapOfBool _isIntegralPhiConst;
-
   /** nslaw effects */
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
@@ -141,40 +89,47 @@ protected:
    *  \param t the time
    *  \param ds a pointer to DynamicalSystem
    */
-  void initMatrixPhi(const double t, SP::DynamicalSystem ds);
+//  void initMatrixAd(const double t, SP::DynamicalSystem ds);
 
-  /** init Phi[ds] and Psi[ds], ZeroOrderHold matrices, at time t
+  /** init Ad[ds] and possibly Bd[ds] or Ld[ds] , ZeroOrderHold matrices, at time t
    *  \param t the time
    *  \param ds a pointer to DynamicalSystem
    *  \param inter the control interaction
    */
-  void initMatrices(const double t, SP::DynamicalSystem ds, const Interaction& inter);
+//  void initMatrices(const double t, SP::DynamicalSystem ds, const Interaction& inter);
+
   /** Initialize the integrators
    * \param ds the DynamicalSystem
    * \param withInteraction true if we have an Interaction
    */
-  void initIntegrators(const DynamicalSystem& ds, const bool withInteraction);
+//  void initIntegrators(const DynamicalSystem& ds, const bool withInteraction);
 
   /** compute Psi[ds], ZeroOrderHold matrix, at time t
    *  \param ds the DynamicalSystem
    *  \param rel the relation
    */
-  void computePsi(const DynamicalSystem& ds, const Relation& rel);
+//  void computeBd(const DynamicalSystem& ds, const Relation& rel);
 
   /** compute Psi[ds], ZeroOrderHold matrix, if the DS is TI
    *  \param ds the DynamicalSystem
    *  \param rel the relation
    */
-  void computePsiTI(const DynamicalSystem& ds, const Relation& rel);
+//  void computeBdTI(const DynamicalSystem& ds, const Relation& rel);
+
+  /** compute Psi[ds], ZeroOrderHold matrix, if the DS is TI
+   *  \param ds the DynamicalSystem
+   */
+//  void computeLdTI(const DynamicalSystem& ds);
+
   /** compute Phi[ds], ZeroOrderHold matrix, at time t
    *  \param ds the DynamicalSystem
    */
-  void computePhi(const DynamicalSystem& ds);
+//  void computeAd(const DynamicalSystem& ds);
 
-  /** compute IntegralPhi[ds], ZeroOrderHold matrix, at time t
+  /** compute AdInt[ds], ZeroOrderHold matrix, at time t
    *  \param ds the DynamicalSystem
    */
-  void computeIntegralPhi(const DynamicalSystem& ds);
+//  void computeAdInt(const DynamicalSystem& ds);
 
 public:
 
@@ -195,77 +150,44 @@ public:
 
   // --- GETTERS/SETTERS ---
 
-  /** get the value of \f$\Phi\f$ corresponding to DynamicalSystem ds
-   * \param ds the DynamicalSystem
-   * \return a SimpleMatrix
-   */
-  inline const SimpleMatrix getPhi(const DynamicalSystem& ds)
-  {
-    assert(_PhiMap[ds.number()] &&
-           "ZeroOrderHold::getPhi(ds): Phi[ds] == NULL.");
-    return *(_PhiMap[ds.number()]); // Copy !!
-  }
-
   /** get \f$\Phi\f$ corresponding to DynamicalSystem ds
    * \param ds the DynamicalSystem
    * \return pointer to a SiconosMatrix
    */
-  inline SP::SimpleMatrix Phi(const DynamicalSystem& ds)
-  {
-    return _PhiMap[ds.number()];
-  };
+  const SiconosMatrix& Ad(SP::DynamicalSystem ds);
 
   /** set the value of Phi[ds] to nePhi
    * \param newPhi the new matrix
    * \param ds a pointer to DynamicalSystem
    */
-  void setPhi(const SiconosMatrix& newPhi, SP::DynamicalSystem ds);
+//  void setPhi(const SiconosMatrix& newPhi, SP::DynamicalSystem ds);
 
   /** set Psi[ds] to pointer newPtr
    * \param newPtr pointer to the new matrix
    * \param ds a pointer to DynamicalSystem
    */
-  void setPhiPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
+//  void setPhiPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
 
-  /** get \f$\Psi\f$ corresponding to DynamicalSystem ds
+  /** get \f$B_d\f$ corresponding to DynamicalSystem ds
    * \param ds the DynamicalSystem
    * \return pointer to a SiconosMatrix
    */
-  inline const SimpleMatrix getPsi(const DynamicalSystem& ds)
-  {
-    assert(_PsiMap[ds.number()] &&
-           "ZeroOrderHold::getPsi(ds): Psi[ds.number()] == NULL.");
-    return *(_PsiMap[ds.number()]); // Copy !!
-  };
-
-  /** get \f$\Phi\f$ corresponding to DynamicalSystem ds
-   * \param ds the DynamicalSystem
-   * \return pointer to a SiconosMatrix
-   */
-  inline SP::SimpleMatrix Psi(const DynamicalSystem& ds)
-  {
-    return _PsiMap[ds.number()];
-  };
+  const SiconosMatrix& Bd(SP::DynamicalSystem ds);
 
   /** get \f$\int_{t_k}^{t_{k+1}}\!\Phi(t_{k+1}, \tau)\mathrm{d}\tau\f$ corresponding to DynamicalSystem ds
    * \param ds the DynamicalSystem
    * \return pointer to a SiconosMatrix
    */
-  inline SP::SimpleMatrix intPhi(const DynamicalSystem& ds)
-  {
-    assert(_IntegralPhiMap[ds.number()] &&
-           "ZeroOrderHold::intPhi(ds): _IntegralPhiMap[ds.number()] == NULL.");
-    return _IntegralPhiMap[ds.number()];
-  };
+//  inline SP::SimpleMatrix intPhi(SP::DynamicalSystem ds)
+//  {
+//    assert(_AdIntMap[ds.number()] &&
+//        "ZeroOrderHold::intPhi(ds): _AdIntMap[ds.number()] == NULL.");
+//    return _AdIntMap[ds.number()];
+//  };
   // --- OTHER FUNCTIONS ---
 
   /** initialization of the ZeroOrderHold integrator */
   void initialize();
-
-  /** Unused
-   *  \param ds the DynamicalSystem
-   */
-  void computeNextX(const DynamicalSystem& ds);
 
   /** return the maximum of all norms for the "ZeroOrderHold-discretized" residus of DS
     \return a double
@@ -330,7 +252,7 @@ public:
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds);
 
-  void updateMatrices(const DynamicalSystem& ds);
+  void updateMatrices(SP::DynamicalSystem ds);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
   *  \param osi the integrator which must be converted

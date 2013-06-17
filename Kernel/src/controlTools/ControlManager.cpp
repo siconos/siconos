@@ -23,6 +23,8 @@
 #include "Sensor.hpp"
 #include "SensorFactory.hpp"
 #include "ActuatorFactory.hpp"
+#include "Observer.hpp"
+#include "ObserverFactory.hpp"
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
 
@@ -52,6 +54,14 @@ void ControlManager::initialize()
        itA != _allActuators.end(); ++itA)
   {
     (*itA)->initialize(_model);
+  }
+
+  // Initialize all the Actuators and insert their events into the
+  // EventsManager of the Simulation.
+  for (ObserversIterator itO = _allObservers.begin();
+       itO != _allObservers.end(); ++itO)
+  {
+    (*itO)->initialize(_model);
   }
 }
 
@@ -86,6 +96,20 @@ SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisati
   return tmp;
 }
 
+SP::Observer ControlManager::addObserver(int type, SP::TimeDiscretisation t, unsigned int number)
+{
+  ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
+  return (* (_allObservers.insert(regObserver.instantiate(type, t, getDSFromModel(number)))).first);
+}
+
+SP::Observer ControlManager::addAndRecordObserver(int type, SP::TimeDiscretisation t, unsigned int number)
+{
+  ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
+  SP::Observer tmp = *(_allObservers.insert(regObserver.instantiate(type, t, getDSFromModel(number)))).first;
+  tmp->initialize(_model);
+  return tmp;
+}
+
 void ControlManager::addSensorPtr(SP::Sensor s)
 {
   _allSensors.insert(s);
@@ -108,6 +132,17 @@ void ControlManager::addAndRecordActuatorPtr(SP::Actuator act)
   act->initialize(_model);
 }
 
+void ControlManager::addObserverPtr(SP::Observer obs)
+{
+  _allObservers.insert(obs);
+}
+
+void ControlManager::addAndRecordObserverPtr(SP::Observer obs)
+{
+  _allObservers.insert(obs);
+  obs->initialize(_model);
+}
+
 void ControlManager::display() const
 {
   std::cout << "=========> ControlManager " ;
@@ -119,10 +154,12 @@ void ControlManager::display() const
   SensorsIterator itS;
   for (itS = _allSensors.begin(); itS != _allSensors.end(); ++itS)
     (*itS)->display();
-  // Initialize all the Actuators.
   ActuatorsIterator itA;
   for (itA = _allActuators.begin(); itA != _allActuators.end(); ++itA)
     (*itA)->display();
-  std::cout << "==========" <<std::endl;
-  std::cout <<std::endl;
+  ObserversIterator itO;
+  for (itO = _allObservers.begin(); itO != _allObservers.end(); ++itO)
+    (*itO)->display();
+  std::cout << "==========" << std::endl;
+  std::cout << std::endl;
 }

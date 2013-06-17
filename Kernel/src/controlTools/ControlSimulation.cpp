@@ -22,23 +22,23 @@
 #include "ControlManager.hpp"
 #include "Sensor.hpp"
 #include "Actuator.hpp"
-#include "ControlDynamicalSystem.hpp"
+#include "ControlSimulation.hpp"
 #include <boost/progress.hpp>
 #include <boost/timer.hpp>
 
 
 
-ControlDynamicalSystem::ControlDynamicalSystem(double t0, double T, double h):
+ControlSimulation::ControlSimulation(double t0, double T, double h):
   _t0(t0), _T(T), _h(h), _theta(0.5)
 {
 }
 
-void ControlDynamicalSystem::setTheta(unsigned int newTheta)
+void ControlSimulation::setTheta(unsigned int newTheta)
 {
   _theta = newTheta;
 }
 
-void ControlDynamicalSystem::initialize(SP::SiconosVector x0)
+void ControlSimulation::initialize(SP::SiconosVector x0)
 {
   _x0 = x0;
   _nDim = _x0->size();
@@ -62,17 +62,17 @@ void ControlDynamicalSystem::initialize(SP::SiconosVector x0)
 }
 
 
-void ControlDynamicalSystem::addSensorPtr(SP::Sensor newSensor)
+void ControlSimulation::addSensorPtr(SP::Sensor newSensor)
 {
   _CM->addSensorPtr(newSensor);
 }
 
-void ControlDynamicalSystem::addActuatorPtr(SP::Actuator newActuator)
+void ControlSimulation::addActuatorPtr(SP::Actuator newActuator)
 {
   _CM->addActuatorPtr(newActuator);
 }
 
-void ControlDynamicalSystem::run()
+void ControlSimulation::run()
 {
   SP::SiconosVector xProc = _processDS->x();
   SP::SiconosVector uProc = _processDS->z();

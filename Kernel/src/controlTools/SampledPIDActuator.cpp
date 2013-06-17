@@ -89,7 +89,7 @@ void SampledPIDActuator::actuate()
 
   // Compute the new error
 
-  (*_err).push_front(_ref - (*_sensor->y())(0));
+  (*_err).push_front(_ref - _sensor->y()(0));
 
   // compute the new control and update it
   (*_u)(1) += ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +

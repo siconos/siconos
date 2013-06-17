@@ -67,7 +67,7 @@ void ZOHTest::testMatrixExp0()
   SP::SiconosMatrix tmpM(new SimpleMatrix(_n, _n, 0));
   tmpM->eye();
   *tmpM = (*tmpM) * exp(_h);
-  const SiconosMatrix& Phi = _ZOH->getPhi(*_DS);
+  const SiconosMatrix& Phi = _ZOH->Ad(_DS);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(0) == _n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(1) == _n, true);
   double diff = (*tmpM - Phi).normInf();
@@ -90,7 +90,7 @@ void ZOHTest::testMatrixExp1()
   SP::SiconosMatrix tmpM(new SimpleMatrix(_n, _n, 0));
   tmpM->eye();
   (*tmpM)(0, 1) = _h;
-  const SiconosMatrix& Phi = _ZOH->getPhi(*_DS);
+  const SiconosMatrix& Phi = _ZOH->Ad(_DS);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(0) == _n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(1) == _n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", (*tmpM - Phi).normInf() < _tol, true);

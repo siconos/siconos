@@ -17,40 +17,22 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file
+#include "FirstOrderLinearDS.hpp"
 
-  Typedef for control-related objects
-  */
+#include "ControlFirstOrderLinearS.hpp"
 
-#ifndef ControlTypeDef_H
-#define ControlTypeDef_H
-
-/** Actuator types */
-#define SAMPLED_PID_ACTUATOR       100
-#define LINEAR_SMC                 101
-#define LINEAR_CHATTERING_SMC      103
-#define LINEAR_SMC_OT2             104
-#define LINEAR_SMC_IMPROVED        105
+#include "SiconosVector.hpp"
 
 
-/** Sensor types */
-#define LINEAR_SENSOR              100
 
-/** Observer types */
-#define LUENBERGER                 100
+ControlFirstOrderLinearS::ControlFirstOrderLinearS(double t0, double T, double h,
+    SP::SiconosVector x0, SP::SiconosMatrix A):
+  ControlSimulation(t0, T, h), _x0(x0), _A(A)
+{
+  _processDS.reset(new FirstOrderLinearDS(_x0, _A));
+}
 
-/** Event types
-  \warning You have also to update the
-  description in Event.hpp
-*/
-#define SENSOR_EVENT               3
-#define OBSERVER_EVENT             4
-#define ACTUATOR_EVENT             5
-
-/** Base type forward declaration */
-DEFINE_SPTR(Actuator)
-DEFINE_SPTR(Sensor)
-DEFINE_SPTR(Observer)
-DEFINE_SPTR(ControlSensor)
-
-#endif
+void ControlFirstOrderLinearS::initialize()
+{
+  ControlSimulation::initialize(_x0);
+}

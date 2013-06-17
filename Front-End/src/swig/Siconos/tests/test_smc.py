@@ -105,7 +105,7 @@ def test_smc1():
 #Same test, but with the simplified interface
 def test_smc2():
     from Siconos.Kernel import FirstOrderLinearDS, TimeDiscretisation, \
-        ControlFirstOrderLinearDS, LinearSensor, \
+        ControlFirstOrderLinearS, LinearSensor, \
         LinearSMCOT2, getMatrix, SimpleMatrix
     from numpy import eye, zeros
     from math import sin
@@ -147,7 +147,7 @@ def test_smc2():
     processDS = MyFOLDS(x0, A)
     # XXX b is not automatically created ...
     processDS.setb([0, 0])
-    controlProcess = ControlFirstOrderLinearDS(t0, T, h, x0, A)
+    controlProcess = ControlFirstOrderLinearS(t0, T, h, x0, A)
     controlProcess.setProcessDS(processDS)
     controlProcess.initialize()
     # time discretisation

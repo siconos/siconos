@@ -29,6 +29,7 @@
 #define getDSFromModel(nb) _model->nonSmoothDynamicalSystem()->dynamicalSystem(nb)
 
 class Actuator;
+class Observer;
 class Sensor;
 class Model;
 class TimeDiscretisation;
@@ -39,10 +40,13 @@ typedef std::set<SP::Actuator> Actuators;
 /** An iterator through a set of Actuators */
 typedef Actuators::iterator ActuatorsIterator;
 
-/** Return-type for Actuators insertion. */
-typedef std::pair<ActuatorsIterator, bool> ActuatorsCheckInsert;
+/** A set of Observers */
+typedef std::set<SP::Observer> Observers;
 
-/** ControlManager Class: tools to control a Model (Sensors, Actuators ...)
+/** An iterator through a set of Observers */
+typedef Observers::iterator ObserversIterator;
+
+/** ControlManager Class: tools to control a Model (Sensors, Actuators, Observers)
 
     \author SICONOS Development Team - copyright INRIA
     \version 3.0.0.
@@ -52,9 +56,9 @@ typedef std::pair<ActuatorsIterator, bool> ActuatorsCheckInsert;
     schedule them into the simulation.
 
     A ControlManager has:
-    - a list of sensors
-    - a list of actuators
-    - a link to an existing model
+    - a list of Sensor
+    - a list of Actuator
+    - a link to an existing Model
 
     The usual way to define control over a system is as follows:
     - declare a ControlManager and associate it with a Model
@@ -64,9 +68,8 @@ typedef std::pair<ActuatorsIterator, bool> ActuatorsCheckInsert;
     - optionally add some new sensor/actuator at any time but with a specific function: addAndRecord(...).
     A call to this function results in the creation of a Sensor/Actuator and in the insertion of the corresponding event
     into the simulation eventsManager.
-
-
 */
+
 class ControlManager
 {
 protected:
@@ -79,6 +82,9 @@ protected:
 
   /** A list of Actuators */
   Actuators _allActuators;
+
+  /** A list of Observers */
+  Observers _allObservers;
 
   /** The model linked to this ControlManager */
   SP::Model _model;
@@ -125,6 +131,14 @@ public:
   inline const Actuators getActuators() const
   {
     return _allActuators ;
+  };
+
+  /** get the list of Observers associated to this manager.
+   *  \return a Observers object.
+   */
+  inline const Observers getObservers() const
+  {
+    return _allObservers ;
   };
 
   /** To build and add a new Sensor in the Manager
@@ -190,6 +204,38 @@ public:
    * \param act a SP::Actuator to the Actuator we want to add
    */
   void addAndRecordActuatorPtr(SP::Actuator act);
+
+  /** To build and add a new Observer in the Manager
+   * \param name the type of the Observer
+   * \param t the SP::TimeDiscretisation of the Observer
+   * \param number the index of the DynamicalSystem we want to act on
+   * \return a SP::ACtuator to the added Observer
+   */
+  SP::Observer addObserver(int name, SP::TimeDiscretisation t, unsigned int number = 0);
+
+  /** To build, add, initialize a new Observer in the manager and
+   * record it in the simulation This function is only useful to add a
+   * new Observer after the initialization of the manager else call
+   * addObserver()
+   * \param name the type of the Observer
+   * \param t the SP::TimeDiscretisation of the Observer
+   * \param number the index of the DynamicalSystem we want to act on
+   * \return a SP::Observer to the added Observer
+   */
+  SP::Observer addAndRecordObserver(int name, SP::TimeDiscretisation t, unsigned int number = 0);
+
+  /** Add an existing Observer to the manager
+   * \param obs a SP::Observer to the Observer we want to add
+   */
+  void addObserverPtr(SP::Observer obs);
+
+  /** To add, initialize an existing Observer in the manager and record
+   * it in the simulation This function is only useful to add a new
+   * Observer after the initialization of the manager otherwise call
+   * addObserver()
+   * \param obs a SP::Observer to the Observer we want to add
+   */
+  void addAndRecordObserverPtr(SP::Observer obs);
 
 
   /** initialize sensor data.

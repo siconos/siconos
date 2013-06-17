@@ -148,7 +148,9 @@ public:
   {
     return _istate;
   }
-  /** Set value to _epsilon */
+  /** Set value to TOL_ED
+   * \param var the new tolerance
+   */
   inline void setToleranceED(double var)
   {
     TOL_ED = var;
@@ -216,7 +218,7 @@ public:
   };
 
   /** set the Default Newton tolerance
-   *  \param double: Tolerance
+   *  \param tol new tolerance
    */
   void setNewtonTolerance(double tol)
   {
@@ -224,7 +226,7 @@ public:
   };
 
   /** get the Newton tolerance
-   *  \return double: Tolerance
+   *  \return tolerance
    */
   double newtonTolerance()
   {
@@ -349,5 +351,4 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-DEFINE_SPTR(EventDriven)
 #endif // EventDriven_H

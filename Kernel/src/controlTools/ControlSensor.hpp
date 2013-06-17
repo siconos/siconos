@@ -25,7 +25,7 @@
 #define ControlSensor_H
 
 #include "Sensor.hpp"
-
+#include <boost/circular_buffer.hpp>
 
 /** \class ControlSensor
  *  \brief Generic control Sensor to get the output of the system
@@ -44,36 +44,51 @@ private:
   ACCEPT_SERIALIZATION(ControlSensor);
 
 protected:
-  /** Dimension of the output */
-  unsigned int _YDim;
   /** A vector for the current value of the output */
   SP::SiconosVector _storedY;
+
+  /** delay between the measurement on the DynamicalSystem and the avaibility of the value */
+  double _delay;
+
+  /** A buffer to store the value of \f$y_k\f$ if there is a delay */
+  boost::circular_buffer<SP::SiconosVector> _bufferY;
 
   /** Default constructor
    */
   ControlSensor() {};
-  /** Simple constructor
+
+  /** Simple Constructor
    * \param name the type of the Sensor
    * \param t the SP::TimeDiscretisation to use
    * \param ds the SP::DynamicalSystem it observes
+   * \param delay the delay between the measurement and the avaibility of the data
    */
-  ControlSensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): Sensor(name, t, ds) {}
+  ControlSensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, double delay = 0):
+    Sensor(name, t, ds), _delay(delay) {}
 
 public:
+
+  virtual void initialize(SP::Model m);
+
   /** Get the dimension of the output
    * \return an unsigned int
    */
-  inline unsigned int getYDim() const
-  {
-    return _YDim;
-  };
+  unsigned int getYDim() const ;
 
   /** Get a pointer to the output
    * \return SP::SiconosVector to the output
    */
-  inline SP::SiconosVector y() const
+  inline const SiconosVector& y() const
+  {
+    if (_delay == 0)
+      return *_storedY;
+    else
+      return *_bufferY.front();
+  };
+
+  inline SP::SiconosVector yTk() const
   {
     return _storedY;
-  };
+  }
 };
 #endif

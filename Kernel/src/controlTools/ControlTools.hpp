@@ -41,8 +41,14 @@
 #include "LinearSMCOT2.hpp"
 #include "LinearSMCimproved.hpp"
 
+// Observer - generic
+#include "Observer.hpp"
+
+// Observer - available
+#include "LuenbergerObserver.hpp"
+
 // Misc
 #include "ControlManager.hpp"
 
 // sugar
-#include "ControlFirstOrderLinearDS.hpp"
+#include "ControlFirstOrderLinearS.hpp"

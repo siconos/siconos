@@ -148,7 +148,7 @@ void CommonSMC::computeUeq()
   SP::SimpleMatrix tmpN(new SimpleMatrix(n, n));
   SP::SimpleMatrix quasiProjB_A(new SimpleMatrix(_invCB->size(0), n));
   SP::SimpleMatrix tmpW(new SimpleMatrix(n, n, 0));
-  SP::SiconosVector xTk(new SiconosVector(*(_sensor->y())));
+  SP::SiconosVector xTk(new SiconosVector(_sensor->y()));
   tmpW->eye();
   prod(*_Csurface, *_DS_SMC->A(), *tmpM1);
   prod(*_invCB, *tmpM1, *quasiProjB_A);
@@ -157,16 +157,16 @@ void CommonSMC::computeUeq()
   // equivalent part, implicit contribution
   // XXX when to call this ?
   ZeroOrderHold& zoh = *std11::static_pointer_cast<ZeroOrderHold>(_integratorSMC);
-  zoh.updateMatrices(*_DS_SMC);
+  zoh.updateMatrices(_DS_SMC);
 
-  // tmpN = B^{*})CB)^{-1}CA
-  axpy_prod(zoh.getPsi(*_DS_SMC), *quasiProjB_A, *tmpN, true);
+  // tmpN = B^{*}(CB^{*})^{-1}CA
+  axpy_prod(zoh.Bd(_DS_SMC), *quasiProjB_A, *tmpN, true);
   // W = I + \theta B^{*})CB)^{-1}CA
   scal(_thetaSMC, *tmpN, *tmpW, false);
   // compute e^{Ah}x_k
-  prod(zoh.getPhi(*_DS_SMC), *xTk, *xTk);
+  prod(zoh.Ad(_DS_SMC), *xTk, *xTk);
   // xTk = (e^{Ah}-(1-\theta)\Psi_k\Pi_B A)x_k
-  prod(_thetaSMC-1, *tmpN, *(_sensor->y()), *xTk, false);
+  prod(_thetaSMC-1, *tmpN, _sensor->y(), *xTk, false);
   // compute the solution x_{k+1} of the system W*X = xTk
   tmpW->PLUForwardBackwardInPlace(*xTk);
   // add the contribution from the implicit part to ueq

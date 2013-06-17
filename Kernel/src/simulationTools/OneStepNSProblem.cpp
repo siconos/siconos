@@ -681,7 +681,10 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
     }
     else if (osiType == OSI::ZOH)
     {
-      centralInteractionBlocks[itN] = (std11::static_pointer_cast<ZeroOrderHold>(Osi))->Phi(**itDS);
+      if (!centralInteractionBlocks[itN])
+        centralInteractionBlocks[itN].reset(new SimpleMatrix((std11::static_pointer_cast<ZeroOrderHold>(Osi))->Ad(*itDS)));
+      else
+        *centralInteractionBlocks[itN] = (std11::static_pointer_cast<ZeroOrderHold>(Osi))->Ad(*itDS);
     }
     else
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);

@@ -193,7 +193,7 @@ public:
   {
     _topology->setControlProperty(vd,ed,isControlInteraction);
   }
-  
+
   /** get Dynamical system number I
    * \param nb the identifier of the DynamicalSystem to get
    * \return a pointer on DynamicalSystem
@@ -263,6 +263,18 @@ public:
   {
     topology()->setSymmetric(val);
   }
+
+  /** use this function to add a control input to the DynamicalSystem ds. Internaly it adds
+   * an optional property to the DynamicalSystem
+   * \param ds the DynamicalSystem
+   * \param B the B matrix */
+  void setControlInput(SP::DynamicalSystem ds, SP::SiconosMatrix B);
+
+  /** use this function to flag this DynamicalSystem as an Observer. Internaly it adds
+   * an optional property to the DynamicalSystem
+   *  \param ds the DynamicalSystem
+   *  \param L the observer gain matrix */
+  void setObserverInput(SP::DynamicalSystem ds, SP::SiconosMatrix L);
 };
 
 #endif

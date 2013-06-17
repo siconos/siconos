@@ -121,7 +121,7 @@ void LinearSMCOT2::initialize(SP::Model m)
   _simulPred->insertIntegrator(_PredOSI);
   _modelPred->initialize(_simulPred);
 
-  _X = _sensor->y();
+  _X = _sensor->yTk();
 
 }
 

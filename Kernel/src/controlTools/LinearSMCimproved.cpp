@@ -53,19 +53,19 @@ void LinearSMCimproved::actuate()
 {
   SP::SimpleMatrix tmpM1(new SimpleMatrix(*_Csurface));
   SP::SimpleMatrix tmpD(new SimpleMatrix(_sDim, _sDim, 0));
-  SP::SiconosVector xTk(new SiconosVector(*(_sensor->y())));
+  SP::SiconosVector xTk(new SiconosVector(_sensor->y()));
 
   ZeroOrderHold& zoh = *std11::static_pointer_cast<ZeroOrderHold>(_integratorSMC);
 
   // equivalent part
-  zoh.updateMatrices(*_DS_SMC);
-  prod(*_Csurface, zoh.getPhi(*_DS_SMC), *tmpM1);
+  zoh.updateMatrices(_DS_SMC);
+  prod(*_Csurface, zoh.Ad(_DS_SMC), *tmpM1);
   *tmpM1 *= -1.0;
   *tmpM1 += *_Csurface;
-  prod(*_Csurface, zoh.getPsi(*_DS_SMC), *tmpD);
+  prod(*_Csurface, zoh.Bd(_DS_SMC), *tmpD);
   // compute C(I-e^{Ah})x_k
   prod(*tmpM1, *xTk, *_ueq);
-  // compute the solution x_{k+1} of the system W*X = e^{Ah}x_k
+  // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
   tmpD->PLUForwardBackwardInPlace(*_ueq);
 
   *(_DS_SMC->x()) = *xTk; // XXX this is sooo wrong

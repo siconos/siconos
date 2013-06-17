@@ -58,7 +58,8 @@ const double DEFAULT_TICK = 1e-16;
  *  1 -> TimeDiscretisation
  *  2 -> NonSmooth
  *  3 -> Sensor
- *  4 -> Actuator
+ *  4 -> Observer
+ *  5 -> Actuator
  */
 
 class Event

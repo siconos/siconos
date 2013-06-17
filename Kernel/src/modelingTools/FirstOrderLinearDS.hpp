@@ -114,30 +114,30 @@ public:
   /** === CONSTRUCTORS/DESTRUCTOR === */
 
   /** xml constructor
-   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
+   *  \param dsXML the XML object for this DynamicalSystem
    */
-  FirstOrderLinearDS(SP::DynamicalSystemXML);
+  FirstOrderLinearDS(SP::DynamicalSystemXML dsXML);
 
   /** constructor from a set of data
-   *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param std::string: plugin for A
-   *  \param std::string: plugin for b
+   *  \param newX0 the initial state of this DynamicalSystem
+   *  \param APlugin plugin for A
+   *  \param bPlugin plugin for b
    */
-  FirstOrderLinearDS(SP::SiconosVector, const std::string&, const std::string&);
-  FirstOrderLinearDS(const SiconosVector&, const std::string&, const std::string&);
+  FirstOrderLinearDS(SP::SiconosVector newX0, const std::string& APlugin, const std::string& bPlugin);
+  FirstOrderLinearDS(const SiconosVector& newX0, const std::string& APlugin, const std::string& bPlugin);
 
   /** constructor from a set of data
-   *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param SiconosMatrix : matrix A
+   *  \param newX0 the initial state of this DynamicalSystem
+   *  \param newA matrix A
    */
-  FirstOrderLinearDS(SP::SiconosVector, SP::SiconosMatrix);
+  FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA);
 
   /** constructor from a set of data
-   *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param SiconosMatrix : matrix A
-   *  \param SiconosVector : b
+   *  \param newX0 the initial state of this DynamicalSystem
+   *  \param newA matrix A
+   *  \param newB b
    */
-  FirstOrderLinearDS(SP::SiconosVector, SP::SiconosMatrix, SP::SiconosVector);
+  FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB);
 
   /** Copy constructor
    * \param FOLDS the original FirstOrderLinearDS we want to copy
@@ -161,14 +161,14 @@ public:
   }
 
   /** Initialization function for the rhs and its jacobian.
-   *  \param time of initialization.
+   *  \param time time of initialization.
    */
-  void initRhs(double) ;
+  void initRhs(double time) ;
 
   /** Call all plugged-function to initialize plugged-object values
-      \param time
+      \param time the time to give to the plugin functions
    */
-  virtual void updatePlugins(double);
+  virtual void updatePlugins(double time);
 
   // --- getter and setter ---
 
@@ -191,16 +191,16 @@ public:
     return _A;
   };
   /**  function to compute \f$ f: (x,t)\f$
-   * \param double time : current time
+   * \param time current time
    */
-  virtual void computef(double);
+  virtual void computef(double time);
 
   /** function to compute \f$ f: (x,t)\f$ with x different from
       current saved state.
-   * \param double time : current time
-   * \param SP::SiconosVector
+   * \param time current time
+   * \param x2 a SP::SiconosVector
    */
-  virtual void computef(double, SP::SiconosVector);
+  virtual void computef(double time, SP::SiconosVector x2);
 
 
   /** set the value of A to newValue
@@ -279,27 +279,29 @@ public:
 
   /** default function to compute matrix A => same action as
       computeJacobianfx
+      \param time time used to compute _A
    */
-  void computeA(double);
+  void computeA(double time);
 
   /** default function to compute vector b
+   * \param time time used to compute _b
    */
-  virtual void computeb(double);
+  virtual void computeb(double time);
 
-  /** Default function to the right-hand side term
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+  /** Default function to the right-hand side term. This is used only by
+   * Lsodar with EventDriven
+   *  \param time current time
+   *  \param isDSup flag to avoid recomputation of operators
    *  \warning z is not taken into account when computing the RHS
    */
-  void computeRhs(double, bool  = false);
+  void computeRhs(double time, bool isDSup = false);
 
   /** Default function to jacobian of the right-hand side term
-      according to x
-
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+      with respect to x
+   *  \param time current time
+   *  \param isDSup boolean to avoid recomputation of operators (unused)
    */
-  void computeJacobianRhsx(double, bool  = false);
+  void computeJacobianRhsx(double time, bool isDSup = false);
 
   // --- xml related functions ---
 

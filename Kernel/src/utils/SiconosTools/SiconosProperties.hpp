@@ -270,6 +270,27 @@ public:
     return (*_store)[v];
   };
 
+  /** find data associated with the given key
+      \param v a SiconosGraph::VDescriptor or
+      SiconosGraph::EDescriptor according to IndexMap type
+      \return an iterator
+   */
+  reference find(const key_type& v)
+  {
+    return _store->find(v);
+  };
+
+  /** check if a given property exists
+      \param v a SiconosGraph::VDescriptor or
+      SiconosGraph::EDescriptor according to IndexMap type
+      \return true if the key is a property, otherwise false
+   */
+  inline bool hasKey(const key_type& v)
+  {
+    return _store->find(v) != _store->end();
+  };
+
+
   typedef void serializable;
 
   /* Note: compilation with clang fail on this. And friend

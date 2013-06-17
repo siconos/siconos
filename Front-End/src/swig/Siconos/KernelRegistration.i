@@ -49,8 +49,8 @@
   PY_REGISTER(LinearSMCOT2)                                             \
   PY_REGISTER(LinearSMCimproved)                                        \
   PY_REGISTER(ControlManager)                                           \
-  PY_REGISTER(ControlDynamicalSystem)                                   \
-  PY_REGISTER(ControlFirstOrderLinearDS)                                \
+  PY_REGISTER(ControlSimulation)                                        \
+  PY_REGISTER(ControlFirstOrderLinearS)                                 \
   PY_REGISTER(TimeDiscretisation);                                      \
   PY_REGISTER(OneStepNSProblem);                                        \
   PY_REGISTER(OneStepIntegrator);                                       \

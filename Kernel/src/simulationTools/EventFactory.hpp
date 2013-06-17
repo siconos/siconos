@@ -104,10 +104,10 @@ public :
   Registration(int, object_creator) ;
 } ;
 
-#define AUTO_REGISTER_EVENT(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);
 }
 // end of namespace EventFactory
 
+#define AUTO_REGISTER_EVENT(class_name,class_type) EventFactory::Registration _registration_## class_type(class_name,&EventFactory::factory<class_type>);
 #endif
 
 

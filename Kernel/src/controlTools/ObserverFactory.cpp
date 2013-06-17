@@ -17,40 +17,39 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file
+#include "ObserverFactory.hpp"
+#include "RuntimeException.hpp"
 
-  Typedef for control-related objects
-  */
+namespace ObserverFactory
+{
 
-#ifndef ControlTypeDef_H
-#define ControlTypeDef_H
+Registry& Registry::get()
+{
+  static Registry instance;
+  return instance;
+}
 
-/** Actuator types */
-#define SAMPLED_PID_ACTUATOR       100
-#define LINEAR_SMC                 101
-#define LINEAR_CHATTERING_SMC      103
-#define LINEAR_SMC_OT2             104
-#define LINEAR_SMC_IMPROVED        105
+void Registry::add(int name, object_creator creator)
+{
+  factory_map[name] = creator;
+}
 
+SP::Observer Registry::instantiate(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds)
+{
+  MapFactoryIt it = factory_map.find(name) ;
 
-/** Sensor types */
-#define LINEAR_SENSOR              100
+  if (it == factory_map.end())
+    RuntimeException::selfThrow("Registry::instantiate (ObserverFactory) failed, no class named: " + name);
 
-/** Observer types */
-#define LUENBERGER                 100
+  // cout << endl << "Factory instance for class" << name << endl ; // for test purposes only
+  return (it->second)(t, ds) ;  // run our factory
+}
 
-/** Event types
-  \warning You have also to update the
-  description in Event.hpp
-*/
-#define SENSOR_EVENT               3
-#define OBSERVER_EVENT             4
-#define ACTUATOR_EVENT             5
+Registration::Registration(int name, object_creator creator)
+{
+  //  cout << endl << "Registration of " << name << endl << endl ;
+  // Add creator into the factory of Observers
+  Registry::get().add(name, creator) ;
+}
 
-/** Base type forward declaration */
-DEFINE_SPTR(Actuator)
-DEFINE_SPTR(Sensor)
-DEFINE_SPTR(Observer)
-DEFINE_SPTR(ControlSensor)
-
-#endif
+}

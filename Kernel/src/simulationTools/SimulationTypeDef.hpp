@@ -191,7 +191,16 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
 {
   /** optional properties : memory is allocated only on first access */
   INSTALL_GRAPH_PROPERTIES(DynamicalSystems,
-                           ((Vertex, SP::OneStepIntegrator, OSI))) // note : OSI not used at the moment
+                           ((Vertex, SP::MatrixIntegrator, Ad)) // for ZOH Integration
+                           ((Vertex, SP::MatrixIntegrator, AdInt)) // for ZOH Integration
+                           ((Vertex, SP::MatrixIntegrator, Ld)) // For Observer (ZOH Integration)
+                           ((Vertex, SP::MatrixIntegrator, Bd)) // For Controlled System (ZOH Integration)
+                           ((Vertex, SP::SiconosMatrix, B)) // For Controlled System
+                           ((Vertex, SP::SiconosMatrix, L)) // For Observer
+                           ((Vertex, SP::PluggedObject, pluginB)) //For Controlled System
+                           ((Vertex, SP::PluggedObject, pluginL)) // For Observer
+                           ((Vertex, SP::SiconosVector, e)) // For Observer (ZOH Integration)
+                           ((Vertex, SP::SiconosVector, u))) // For Controlled System (ZOH Integration)
   // always needed -> SystemProperties
 
   /** serialization hooks */
@@ -200,7 +209,17 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
   // to be installed with INSTALL_GRAPH_PROPERTIES
   void eraseProperties(_DynamicalSystemsGraph::VDescriptor vd)
   {
-    OSI._store->erase(vd);
+    Ad._store->erase(vd);
+    AdInt._store->erase(vd);
+    Ld._store->erase(vd);
+    Bd._store->erase(vd);
+    B._store->erase(vd);
+    L._store->erase(vd);
+    pluginB._store->erase(vd);
+    pluginL._store->erase(vd);
+    e._store->erase(vd);
+    u._store->erase(vd);
+
   }
 
 };

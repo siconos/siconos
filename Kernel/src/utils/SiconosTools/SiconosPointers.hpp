@@ -207,6 +207,7 @@ DEFINE_SPTR(RelationXML)
 
 DEFINE_SPTR(Simulation)
 DEFINE_SPTR(SimulationXML)
+DEFINE_SPTR(EventDriven)
 
 DEFINE_SPTR(LCP)
 
@@ -220,6 +221,11 @@ DEFINE_SPTR(DynamicalSystem)
 DEFINE_SPTR(Event)
 DEFINE_SPTR(NonSmoothLaw)
 DEFINE_SPTR(DynamicalSystemsSet)
+
+DEFINE_SPTR(MatrixIntegrator)
+DEFINE_SPTR(PluggedObject)
+DEFINE_SPTR(SubPluggedObject)
+
 
 TYPEDEF_SAPTR(integer)
 TYPEDEF_SPTR(integer)

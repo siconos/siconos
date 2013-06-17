@@ -4,7 +4,7 @@ import Siconos.Kernel as SK
 import numpy as np
 
 
-def compute_phi_psi(A, B, h, TV=False):
+def compute_dt_matrices(A, B, h, TV=False):
     # variable declaration
     t0 = 0.0  # start time
     T = 1  # end time
@@ -43,7 +43,7 @@ def compute_phi_psi(A, B, h, TV=False):
 
     # Main loop
     processSimulation.computeOneStep()
-    phi = processIntegrator.Phi(processDS)
-    psi = processIntegrator.Psi(processDS)
+    Ad = processIntegrator.Ad(processDS)
+    Bd = processIntegrator.Bd(processDS)
 
-    return (phi, psi)
+    return (Ad, Bd)

@@ -21,16 +21,16 @@
   \brief Define a FirstOrderLinearDS and set up common simulation objects in control.
 */
 
-#ifndef CONTROLFIRSTORDERLINEARDS_H
-#define CONTROLFIRSTORDERLINEARDS_H
+#ifndef CONTROLFIRSTORDERLINEARS_H
+#define CONTROLFIRSTORDERLINEARS_H
 
-#include "ControlDynamicalSystem.hpp"
+#include "ControlSimulation.hpp"
 
-class ControlFirstOrderLinearDS : public ControlDynamicalSystem
+class ControlFirstOrderLinearS : public ControlSimulation
 {
 private:
   /** serialization hooks */
-  ACCEPT_SERIALIZATION(ControlFirstOrderLinearDS);
+  ACCEPT_SERIALIZATION(ControlFirstOrderLinearS);
 
 protected:
   /** Initial state \f$x_0\f$ */
@@ -39,7 +39,7 @@ protected:
   SP::SiconosMatrix _A;
 
   /** default constructor */
-  ControlFirstOrderLinearDS() {};
+  ControlFirstOrderLinearS() {};
 
 public:
   /** Constructor with the minimal set of data
@@ -49,10 +49,10 @@ public:
    * \param x0 a SP::SiconosVector
    * \param A a SP::SiconosMatrix
    */
-  ControlFirstOrderLinearDS(double t0, double T, double h, SP::SiconosVector x0, SP::SiconosMatrix A);
+  ControlFirstOrderLinearS(double t0, double T, double h, SP::SiconosVector x0, SP::SiconosMatrix A);
 
   /** destructor */
-  virtual ~ControlFirstOrderLinearDS() {};
+  virtual ~ControlFirstOrderLinearS() {};
 
   /** Initialization */
   void initialize();
@@ -64,5 +64,5 @@ public:
   };
 };
 
-DEFINE_SPTR(ControlFirstOrderLinearDS)
-#endif // CONTROLFIRSTORDERLINEARDS_H
+DEFINE_SPTR(ControlFirstOrderLinearS)
+#endif // CONTROLFIRSTORDERLINEARS_H

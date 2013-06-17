@@ -179,9 +179,14 @@ public:
 
   /** set the TKVector _tk
    *  \param newTk the new value for _tk
-   *  \warning it will szitch _tdCase to 1
+   *  \warning it will switch _tdCase to 1
    */
   void setTk(const TkVector& newTk);
+
+  /** change t0 before the simulation starts (useful for delays)
+   *  \param val the new value for t0
+   */
+  void setT0(const double val);
 
   /** Get the current time instant value ( _tk[pos] )
    * \return a double : _tk[pos]

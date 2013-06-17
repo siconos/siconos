@@ -230,7 +230,7 @@ void FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct)
 }
 
 
-void FirstOrderLinearDS::computeA(const double time)
+void FirstOrderLinearDS::computeA(double time)
 {
   if (_A && _pluginA->fPtr)
   {
@@ -238,13 +238,13 @@ void FirstOrderLinearDS::computeA(const double time)
   }
 }
 
-void FirstOrderLinearDS::computeb(const double time)
+void FirstOrderLinearDS::computeb(double time)
 {
   if (_b && _pluginb->fPtr)
     ((LDSPtrFunction)_pluginb->fPtr)(time, _n, &(*_b)(0), _z->size(), &(*_z)(0));
 }
 /*This function is called only by Lsodar and eventDriven*/
-void FirstOrderLinearDS::computeRhs(const double time, const bool)
+void FirstOrderLinearDS::computeRhs(double time, bool isDSup)
 {
   // second argument is useless at the time - Used in derived classes
   // compute A=jacobianfx
@@ -274,7 +274,7 @@ void FirstOrderLinearDS::computeRhs(const double time, const bool)
   }
 }
 
-void FirstOrderLinearDS::computeJacobianRhsx(const double time, const bool)
+void FirstOrderLinearDS::computeJacobianRhsx(double time, bool isDSup)
 {
   computeA(time);
 

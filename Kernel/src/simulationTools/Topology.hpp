@@ -313,9 +313,16 @@ public:
   void setProperties();
 
   /** Get a dynamical system using its number 
-   \param the required number
+   \param requiredNumber the required number
   */
-  SP::DynamicalSystem getDynamicalSystem(int);
+  SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber);
+
+  /** Helper to get the descriptor in DSG0 from a DynamicalSystem */
+  DynamicalSystemsGraph::VDescriptor getDSG0Descriptor(SP::DynamicalSystem ds)
+  {
+    return _DSG[0]->descriptor(ds);
+  }
+
 
 };
 

@@ -299,7 +299,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       // for ZOH, we have a different formula ...
       if (osiType == OSI::ZOH && indexSet->properties(vd).forControl)
       {
-        *rightInteractionBlock = *std11::static_pointer_cast<ZeroOrderHold>(Osi)->Psi(*ds);
+        *rightInteractionBlock = std11::static_pointer_cast<ZeroOrderHold>(Osi)->Bd(ds);
         prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
       }
       else

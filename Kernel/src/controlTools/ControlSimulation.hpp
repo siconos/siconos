@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file ControlDynamicalSystem.hpp
+/*! \file ControlSimulation.hpp
   \brief Abstract class - General interface for all Control Dynamical Systems.
 */
 
@@ -38,21 +38,21 @@ DEFINE_SPTR(Moreau)
 DEFINE_SPTR(ControlManager)
 #endif
 
-class ControlDynamicalSystem : public std11::enable_shared_from_this<ControlDynamicalSystem>
+class ControlSimulation : public std11::enable_shared_from_this<ControlSimulation>
 {
 private:
   /** serialization hooks */
-  ACCEPT_SERIALIZATION(ControlDynamicalSystem);
+  ACCEPT_SERIALIZATION(ControlSimulation);
 
 protected:
   /** default constructor */
-  ControlDynamicalSystem() {};
+  ControlSimulation() {};
 
   /** Constructor with the minimal set of data
    * \param t0 the starting time \f$t_0\f$
    * \param T the end time T
    * \param h the simulation time step */
-  ControlDynamicalSystem(double t0, double T, double h);
+  ControlSimulation(double t0, double T, double h);
 
   /** Starting time */
   double _t0;
@@ -88,13 +88,13 @@ protected:
 public:
 
   /** destructor */
-  virtual ~ControlDynamicalSystem() {};
+  virtual ~ControlSimulation() {};
 
   /** Modify the value of theta (for Moreau)
    * \param newTheta the new value of theta */
   void setTheta(unsigned int newTheta);
 
-  /** Initialize the ControlDynamicalSystem, instantiate all objects
+  /** Initialize the ControlSimulation, instantiate all objects
    * \param x0 starting point
    */
   void initialize(SP::SiconosVector x0);
@@ -169,5 +169,5 @@ public:
   virtual void run();
 };
 
-DEFINE_SPTR(ControlDynamicalSystem)
+DEFINE_SPTR(ControlSimulation)
 #endif // CONTROLDYNAMICALSYSTEM_H

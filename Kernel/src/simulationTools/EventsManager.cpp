@@ -60,7 +60,7 @@ void EventsManager::preUpdate(Simulation& sim)
       (*it)->process(sim);
       // "synchronise" actuators/sensors events
       // XXX needed ???
-      if ((*it)->getType() == SENSOR_EVENT || (*it)->getType() == ACTUATOR_EVENT)
+      if ((*it)->getType() == SENSOR_EVENT || (*it)->getType() == ACTUATOR_EVENT || (*it)->getType() == OBSERVER_EVENT)
       {
         (*it)->update();
         insertEv(*it);
@@ -182,7 +182,7 @@ void EventsManager::update(Simulation& sim)
     }
   }
   // reschedule a Actuator or Sensor event if needed
-  else if ((event0Type == SENSOR_EVENT) || (event0Type == ACTUATOR_EVENT))
+  else if ((event0Type == SENSOR_EVENT) || (event0Type == ACTUATOR_EVENT) || (event0Type == OBSERVER_EVENT))
   {
     _events[0]->update();
     if (_events[0]->getDoubleTimeOfEvent() < sim.model()->finalT() + 100.0*std::numeric_limits<double>::epsilon())

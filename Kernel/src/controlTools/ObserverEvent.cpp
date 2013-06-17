@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2012.
+/* Siconos-Kernel, Copyright INRIA 2005-2013.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -15,24 +15,23 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+*/
+#include "ObserverEvent.hpp"
+#include "Observer.hpp"
+#include "EventFactory.hpp"
+#include "TimeDiscretisation.hpp"
 
-#include "FirstOrderLinearDS.hpp"
-
-#include "ControlFirstOrderLinearDS.hpp"
-
-#include "SiconosVector.hpp"
-
-
-
-ControlFirstOrderLinearDS::ControlFirstOrderLinearDS(double t0, double T, double h,
-    SP::SiconosVector x0, SP::SiconosMatrix A):
-  ControlDynamicalSystem(t0, T, h), _x0(x0), _A(A)
+void ObserverEvent::process(Simulation& sim)
 {
-  _processDS.reset(new FirstOrderLinearDS(_x0, _A));
+  _observer->process();
 }
 
-void ControlFirstOrderLinearDS::initialize()
+void ObserverEvent::update()
 {
-  ControlDynamicalSystem::initialize(_x0);
+  // Increment observer time discr. to next step
+  _observer->timeDiscretisation()->increment();
+  // set observer event time to new current time value
+  setTime(_observer->timeDiscretisation()->currentTime());
 }
+
+AUTO_REGISTER_EVENT(OBSERVER_EVENT, ObserverEvent)

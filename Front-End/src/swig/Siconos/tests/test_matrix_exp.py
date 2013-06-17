@@ -21,7 +21,7 @@
 from Siconos.Kernel import *
 import numpy as np
 from scipy.linalg import expm
-from functions import compute_phi_psi
+from functions import compute_dt_matrices
 
 
 def test_TI():
@@ -44,7 +44,7 @@ def test_TI():
             pass
         if errInv < 1.0e-12:
             try:
-                (AexpS, PsiS) = compute_phi_psi(A, B, h)
+                (AexpS, PsiS) = compute_dt_matrices(A, B, h)
             except:
                 print(n, m)
             errPhi = np.linalg.norm((Aexp - AexpS))
@@ -76,7 +76,7 @@ def test_SISO():
             pass
         if errInv < 1.0e-12:
             try:
-                (AexpS, PsiS) = compute_phi_psi(A, B, h)
+                (AexpS, PsiS) = compute_dt_matrices(A, B, h)
             except:
                 print(n, m)
             errPhi = np.linalg.norm((Aexp - AexpS))
@@ -108,7 +108,7 @@ def test_TV():
             pass
         if errInv < 1.0e-12:
             try:
-                (AexpS, PsiS) = compute_phi_psi(A, B, h, TV=True)
+                (AexpS, PsiS) = compute_dt_matrices(A, B, h, TV=True)
             except:
                 print(n, m)
             errPhi = np.linalg.norm((Aexp - AexpS))

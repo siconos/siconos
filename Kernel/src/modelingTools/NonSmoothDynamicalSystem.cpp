@@ -162,3 +162,14 @@ void NonSmoothDynamicalSystem::clear()
   _topology->clear();
 }
 
+void NonSmoothDynamicalSystem::setControlInput(SP::DynamicalSystem ds, SP::SiconosMatrix B)
+{
+  DynamicalSystemsGraph& DSG0 = *_topology->dSG(0);
+  DSG0.B[DSG0.descriptor(ds)] = B;
+}
+
+void NonSmoothDynamicalSystem::setObserverInput(SP::DynamicalSystem ds, SP::SiconosMatrix L)
+{
+  DynamicalSystemsGraph& DSG0 = *_topology->dSG(0);
+  DSG0.L[DSG0.descriptor(ds)] = L;
+}

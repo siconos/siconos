@@ -153,6 +153,21 @@ void TimeDiscretisation::setTk(const TkVector& newTk)
   _h = _tk[1] - _tk[0];
 }
 
+void TimeDiscretisation::setT0(const double val)
+{
+  if (_tdCase != 2)
+    RuntimeException::selfThrow("TimeDiscretisation::setT0 must be called only when the TimeDiscretisation is with a constant h\n \
+        Here _tdCase = " + _tdCase);
+  if (_pos == 0)
+  {
+    _tk[_pos] = val;
+    _tk[_pos+1] = val + _h;
+  }
+  else
+    RuntimeException::selfThrow("TimeDiscretisation::setT0 must be called before the simulation start\n \
+        Here _pos = " + _pos);
+}
+
 void TimeDiscretisation::increment()
 {
   _k++;

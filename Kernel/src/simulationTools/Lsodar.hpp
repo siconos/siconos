@@ -181,18 +181,18 @@ public:
   };
 
   /** set itol, rtol and atol (tolerance parameters for lsodar)
-   *  \param integer (itol value)
-   *  \param doublereal * (rtol)
-   *  \param doublereal * (atol)
+   *  \param newItol integer (itol value)
+   *  \param newRtol doublereal * (rtol)
+   *  \param newAtol doublereal * (atol)
    */
-  void setTol(integer, SA::doublereal, SA::doublereal);
+  void setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for lsodar)
-   *  \param integer (itol value)
-   *  \param double (rtol)
-   *  \param double (atol)
+   *  \param newItol integer (itol value)
+   *  \param newRtol double (rtol)
+   *  \param newAtol double (atol)
    */
-  void setTol(integer, doublereal, doublereal);
+  void setTol(integer newItol, doublereal newRtol, doublereal newAtol);
 
   /** set the maximul number of steps for one call of Lsodar
    *\param an integer

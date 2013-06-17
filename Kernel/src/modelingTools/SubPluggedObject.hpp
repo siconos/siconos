@@ -141,5 +141,4 @@ public:
   };
 
 };
-TYPEDEF_SPTR(SubPluggedObject)
 #endif
