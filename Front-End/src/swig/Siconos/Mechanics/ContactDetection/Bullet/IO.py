@@ -3,6 +3,7 @@
 import VtkShapes
 import shlex
 from itertools import chain
+import numpy as np
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
     BulletDS, BulletWeightedShape, \
@@ -165,14 +166,25 @@ class Dat():
         """
         Outputs contact forces
         """
-        for inter in self._broadphase.model().nonSmoothDynamicalSystem().\
-                topology().indexSet(1).vertices():
-            bullet_relation = cast_BulletR(inter.relation())
-            cf = bullet_relation.contactForce()
-            cp = bullet_relation.contactPoint()
-            posa = cp.getPositionWorldOnA()
-            self._contact_forces_file.write('{0} {1} {2} {3} {4} {5}\n'.
-                                            format(posa.x(),
-                                                   posa.y(),
-                                                   posa.z(),
-                                                   cf[0], cf[1], cf[2]))
+        if self._broadphase.model().nonSmoothDynamicalSystem().\
+                topology().indexSetsSize() > 1:
+            time = self._broadphase.model().simulation().nextTime()
+            for inter in self._broadphase.model().nonSmoothDynamicalSystem().\
+                  topology().indexSet(1).vertices():
+                bullet_relation = cast_BulletR(inter.relation())
+                # nslaw = inter.nslaw()
+                # cast nslaw if NewtonImpactFrictionNSL [...]
+                nc = bullet_relation.nc()
+                lambda_ = inter.lambda_(1)
+                jachqt = bullet_relation.jachqT()
+                cf = np.dot(jachqt.transpose(), lambda_)
+                cp = bullet_relation.contactPoint()
+                posa = cp.getPositionWorldOnA()
+                self._contact_forces_file.write(
+                    '{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}\n'.
+                    format(time,
+                           posa.x(),
+                           posa.y(),
+                           posa.z(),
+                           nc[0], nc[1], nc[2],
+                           cf[0], cf[1], cf[2]))

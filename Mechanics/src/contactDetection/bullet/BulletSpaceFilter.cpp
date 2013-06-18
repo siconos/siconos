@@ -63,7 +63,8 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
   _worldAabbMin(aabbMin),
   _worldAabbMax(aabbMax),
   _dynamicCollisionsObjectsInserted(false),
-  _staticCollisionsObjectsInserted(false)
+  _staticCollisionsObjectsInserted(false),
+  _closeContactsThreshold(0.)
 {
 
   _model = model;
@@ -166,9 +167,10 @@ void BulletSpaceFilter::buildInteractions(double time)
       btScalar radius;
 
       obA->getCollisionShape()->getBoundingSphere(center, radius);
-      double contactThreshold = radius * .1;
 
-      /* closed (=10% radius) contact points elimination */
+      /* closed contact points elimination */
+      double contactThreshold = radius * _closeContactsThreshold;
+
       unsigned int zone[4];
       unsigned int maxZone = 0;
       unsigned int bestContact[4];

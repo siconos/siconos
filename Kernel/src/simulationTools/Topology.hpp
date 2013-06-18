@@ -133,13 +133,6 @@ public:
   */
   Topology();
 
-  /** constructor from dynamical systems and interaction sets
-  * \param newDSset a SP::DynamicalSystemsSet
-  * \param newInteractions a SP::InteractionsSet
-  */
-  Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInteractions);
-
-
   /** destructor */
   ~Topology();
 

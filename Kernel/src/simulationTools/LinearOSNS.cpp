@@ -209,7 +209,11 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     {
       // note : at most 4 edges
       DS2 = indexSet->bundle(*oei);
-      if (DS2 != DS1) break;
+      if (DS2 != DS1) 
+      {
+        assert(false);
+        break;
+      }
     }
   }
   assert(DS1);

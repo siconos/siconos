@@ -318,6 +318,7 @@ public:
   }
   /** A buffer containing the forces due to this.
   It is an output unused for the computation.
+  Fix : is it usefull ?
   */
   inline SP::SiconosVector contactForce() const
   {

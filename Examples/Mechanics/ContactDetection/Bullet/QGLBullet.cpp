@@ -36,10 +36,10 @@ int main(int argc, char* argv[])
 
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() << std::endl;
   }
   catch (...)
   {
-    cout << "Exception caught in QGLBullet.cpp" << endl;
+    std::cout << "Exception caught in QGLBullet.cpp" << std::endl;
   }
 }

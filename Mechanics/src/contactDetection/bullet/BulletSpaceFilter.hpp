@@ -55,43 +55,74 @@ protected:
   bool _dynamicCollisionsObjectsInserted;
   bool _staticCollisionsObjectsInserted;
 
+  double _closeContactsThreshold;
+
 public:
   BulletSpaceFilter(SP::Model model, SP::NonSmoothLaw nslaw,
                     SP::btVector3 aabbMin, SP::btVector3 aabbMax);
 
+  /** get Bullet broadphase
+      \return pointer on a BulletBroadPhase
+  */
   SP::BulletBroadPhase broadphase() const
   {
     return _broadphase;
   };
 
+  /** get bullet collision world
+      \return pointer on btCollisionWorld
+  */
   SP::btCollisionWorld collisionWorld() const
   {
     return _collisionWorld;
   };
 
+  /** get static objects 
+      \return a std::vector of btCollisionObject
+  */
   std11::shared_ptr<std::vector<SP::btCollisionObject> >staticObjects() const
   {
     return _staticObjects;
   };
+
+  /** get static shapes
+      \return a std::vector of btCollisionShape
+  */
 
   std11::shared_ptr<std::vector<SP::btCollisionShape> > staticShapes() const
   {
     return _staticShapes;
   };
 
+  /** add a static object
+   * \param co a btCollisionObject
+   */
   void addStaticObject(SP::btCollisionObject co) 
   {
     _staticObjects->push_back(co);
   };
 
+  /** add a static shape
+   * \param cs a btCollisionShape
+   */
   void addStaticShape(SP::btCollisionShape cs) 
   {
     _staticShapes->push_back(cs);
   }
 
-
-
+  /** execute the broadphase contact detection and build indexSet0
+   */
   void buildInteractions(double);
+
+
+  /** set close contact parameter 
+   *  \param threshold double value that will be multiplicated by the
+   *         radius of the object bouncing box
+  */
+  void setCloseContactFilterParam(double threshold)
+  {
+    _closeContactsThreshold = threshold;
+  }
 
   ACCEPT_STD_VISITORS();
 };
