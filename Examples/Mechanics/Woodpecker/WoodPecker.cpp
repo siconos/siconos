@@ -207,6 +207,7 @@ int main(int argc, char* argv[])
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
       return 1;
     }
   }
