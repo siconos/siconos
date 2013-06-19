@@ -92,7 +92,7 @@ private:
   bool _initialized;
 
   /** number specific to each Interaction */
-  int _number;
+  unsigned int _number;
 
   /** relative degree of this interaction */
   unsigned int _relativeDegree;
@@ -217,12 +217,12 @@ public:
   Interaction(SP::InteractionXML);
 
   /** constructor with no data
-   *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
-   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
-   *  \param SP::Relation : a pointer to the Relation
-   *  \param int : the number of this Interaction (default 0)
+   *  \param interactionSize size of the interaction, i.e. the size of the input and output
+   *  \param NSL pointer to the NonSmoothLaw
+   *  \param rel a pointer to the Relation
+   *  \param number the number of this Interaction (default 0)
    */
-  Interaction(int, SP::NonSmoothLaw, SP::Relation, int = 0);
+  Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number = 0);
 
   /** destructor
    */

@@ -120,8 +120,9 @@ protected:
 
   /** copy constructor
    * Private => no copy nor pass-by value allowed.
+   * \param a an Actuator
    */
-  Actuator(const Actuator&);
+  Actuator(const Actuator& a);
 
 public:
 

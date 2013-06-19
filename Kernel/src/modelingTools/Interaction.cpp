@@ -131,9 +131,9 @@ Interaction::Interaction(SP::InteractionXML interxml):
 }
 
 /* initialisation with empty set */
-Interaction::Interaction(int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel, int newNumber):
-  _initialized(false), _number(newNumber), _interactionSize(nInter), _sizeOfDS(0), _sizeZ(0),
-  _y(2),  _nslaw(newNSL), _relation(newRel)
+Interaction::Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number):
+  _initialized(false), _number(number), _interactionSize(interactionSize), _sizeOfDS(0), _sizeZ(0),
+  _y(2),  _nslaw(NSL), _relation(rel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
 }
