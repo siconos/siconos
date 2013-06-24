@@ -28,6 +28,14 @@
   $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
                               SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0);
 }
+%typemap(directorin) const TYPE& ()
+{
+  // %typemap(directorin) (TYPE&) ()
+  // swig issue shared pointer check in wrappers even if arg is a ref
+  SPC::TYPE myptemp(createSPtrConst##TYPE($1));
+  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
+                              SWIGTYPE_p_std11__shared_ptrT_##TYPE##_const_t, 0);
+}
 %shared_ptr(TYPE);
 %enddef
 
@@ -57,6 +65,14 @@
   SP::TYPE myptemp(createSPtr##TYPE($1));
   $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
                               SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0);
+}
+%typemap(directorin) const TYPE& ()
+{
+  // %typemap(directorin) (TYPE&) ()
+  // swig issue shared pointer check in wrappers even if arg is a ref
+  SP::TYPE myptemp(createSPtrConst##TYPE($1));
+  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
+                              SWIGTYPE_p_std11__shared_ptrT_##TYPE##_const_t, 0);
 }
 %shared_ptr(TYPE);
 %include TYPE.hpp
