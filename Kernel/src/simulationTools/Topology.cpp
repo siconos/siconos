@@ -216,7 +216,7 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
 }
 
 std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
-Topology::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
+Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2)
 {
   // interactions should not know linked dynamical systems in the
   // future
@@ -229,10 +229,10 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSyst
 
   DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)");
 
-  inter->insert(ds1);
+  inter->insert(ds);
   if(ds2 != NULL)
     inter->insert(ds2);
-  return addInteractionInIndexSet(inter, ds1, ds2);
+  return addInteractionInIndexSet(inter, ds, ds2);
 }
 
 bool Topology::hasInteraction(SP::Interaction inter) const

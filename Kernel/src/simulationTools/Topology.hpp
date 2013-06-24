@@ -173,11 +173,11 @@ public:
   /** link two dynamical systems to a relation
    * \param inter a SP::Interaction
    * \param ds a SP::DynamicalSystem
-   * \param ds a SP::DynamicalSystem (optional)
+   * \param ds2 a SP::DynamicalSystem (optional)
    \return a vertex descriptor of the new vertex in IndexSet0
    */
-  std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
-  link(SP::Interaction inter, SP::DynamicalSystem, SP::DynamicalSystem = SP::DynamicalSystem());
+  std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
+  link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
   /** specify if the given Interaction is for controlling the DS
    * \param inter Interaction
