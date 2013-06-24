@@ -272,13 +272,27 @@ public:
   /** get time instant k+1 of the time discretisation - Warning: this
       instant may be different from nextTime(), if for example some
       non-smooth events or some sensor events are present
-      \return a double. If the simulation if done (t_{k+1} >= T), returns NaN
+      \return a double. If the simulation is near the end (t_{k+1} >= T), it returns NaN.
   */
   inline double getTkp1() const
   {
     double tkp1 = _timeDiscretisation->nextTime();
     if (tkp1 <= _T + 100.0*std::numeric_limits<double>::epsilon())
       return tkp1;
+    else
+      return std::numeric_limits<double>::quiet_NaN();
+  };
+
+  /** get time instant k+2 of the time discretisation - Warning: this
+      instant may be different from nextTime(), if for example some
+      non-smooth events or some sensor events are present
+      \return a double. If the simulation is near the end (t_{k+1} >= T), it returns NaN.
+  */
+  inline double getTkp2() const
+  {
+    double tkp2 = _timeDiscretisation->getTkp2();
+    if (tkp2 <= _T + 100.0*std::numeric_limits<double>::epsilon())
+      return tkp2;
     else
       return std::numeric_limits<double>::quiet_NaN();
   };

@@ -36,7 +36,9 @@ void EventsManager::initialize(const Simulation& sim)
   // to times tk and tk+1 of the simulation time-discretisation  ===
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
   _events.push_back(regEvent.instantiate(sim.getTk(), TD_EVENT));
+  _events[0]->setType(-1); // this is just a dumb event
   _events.push_back(regEvent.instantiate(sim.getTkp1(), TD_EVENT));
+  _events.push_back(regEvent.instantiate(sim.getTkp2(), TD_EVENT));
 }
 
 // Creation and insertion of a new event into the event set.
@@ -151,6 +153,8 @@ void EventsManager::processEvents(Simulation& sim)
   _events[1]->process(sim);
 
   // If last processed event is a TD event, increment TD in the simulation
+  // We have a problem at the start of the simulation, since the Event at t=t0
+  // is just here to fill the first stop
   if (_events[0]->getType() == TD_EVENT)
     sim.timeDiscretisation()->increment();
 
@@ -170,14 +174,14 @@ void EventsManager::update(Simulation& sim)
     // and the simulation will stop
     // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectivly
     // run until T
-    double tkp1 = sim.getTkp1();
+    double tkp2 = sim.getTkp2();
 #if __cplusplus >= 201103L
-    if (!::isnan(tkp1))
+    if (!::isnan(tkp2))
 #else
-    if (!std::isnan(tkp1))
+    if (!std::isnan(tkp2))
 #endif
     {
-      _events[0]->setTime(tkp1);
+      _events[0]->setTime(tkp2);
       insertEv(_events[0]);
     }
   }

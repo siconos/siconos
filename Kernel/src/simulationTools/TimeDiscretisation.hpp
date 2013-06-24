@@ -204,6 +204,14 @@ public:
     return _tk[_pos + 1];
   };
 
+  /** Get time instant value at index k+2 ( _tk[pos+2] )
+   *  \return a double : _tk[pos+2]
+   */
+  inline double getTkp2() const
+  {
+    return _tk[_pos + 2];
+  };
+
   /** get the TimeDiscretisationXML of the TimeDiscretisation
    *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation
    */

@@ -46,9 +46,10 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
   if (hasH) // T is useless
   {
     _h = _timeDiscretisationXML->geth();
-    _tk.reserve(2);
+    _tk.reserve(3);
     _tk.push_back(t0);
     _tk.push_back(t0 + _h);
+    _tk.push_back(t0 + 2*_h);
     _tdCase = 2;
   }
   else if (hasNSteps) // t0 and T are required
@@ -56,9 +57,10 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
     unsigned int nSteps = _timeDiscretisationXML->getN();
     assert(T > t0 && "TimeDiscretisation xml constructor error: final time is less or equal to initial time.");
     _h = (T - t0) / nSteps;
-    _tk.reserve(2);
+    _tk.reserve(3);
     _tk.push_back(t0);
     _tk.push_back(t0 + _h);
+    _tk.push_back(t0 + 2*_h);
     _tdCase = 2;
   }
   else if (hasTk) // neither t0 nor T is required.
@@ -93,9 +95,10 @@ TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T)
   _h(0.0), _k(0), _tdCase(2), _pos(0)
 {
   _h = (T - t0) / nSteps;
-  _tk.reserve(2);
+  _tk.reserve(3);
   _tk.push_back(t0);
   _tk.push_back(t0 + _h);
+  _tk.push_back(t0 + 2*_h);
 }
 
 // INPUTS: t0 and h
@@ -103,9 +106,10 @@ TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T)
 TimeDiscretisation::TimeDiscretisation(double t0, double newH):
   _h(newH), _k(0), _tdCase(2), _pos(0)
 {
-  _tk.reserve(2);
+  _tk.reserve(3);
   _tk.push_back(t0);
   _tk.push_back(t0 + _h);
+  _tk.push_back(t0 + 2*_h);
 }
 
 
@@ -138,9 +142,10 @@ void TimeDiscretisation::setCurrentTimeStep(double newH)
     _tdCase = 2;
     _tk[0] = _tk[_k];
     _pos = 0;
-    _tk.resize(2);
+    _tk.resize(3);
   }
   _tk[_pos + 1] = _tk[_pos] + _h;
+  _tk[_pos + 2] = _tk[_pos] + 2*_h;
 }
 
 void TimeDiscretisation::setTk(const TkVector& newTk)
@@ -180,6 +185,7 @@ void TimeDiscretisation::increment()
   {
     _tk[_pos] = _tk[_pos + 1];
     _tk[_pos + 1] = _tk[_pos] + _h;
+    _tk[_pos + 2] = _tk[_pos] + 2*_h;
   }
 }
 
@@ -187,7 +193,8 @@ void TimeDiscretisation::increment()
 void TimeDiscretisation::display() const
 {
   std::cout << "====> Time Disretisation :" <<std::endl;
-  std::cout << " current time step starts from " << _tk[_pos] << " and ends at " << _tk[_pos + 1] <<std::endl;
+  std::cout << " the current time step starts from " << _tk[_pos] << " and ends at " << _tk[_pos + 1] <<std::endl;
+  std::cout << " the current timestep is " << _h << " and the number of the current time step is " << _k <<std::endl;
   std::cout << "====" <<std::endl;
 }
 

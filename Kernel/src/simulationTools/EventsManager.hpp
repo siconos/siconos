@@ -116,7 +116,9 @@ public:
    */
   virtual ~EventsManager() {};
 
-  /** Set the gap limit between two events */
+  /** Set the gap limit between two events
+   * \param var the new _GapLimit2Events
+   */
   inline void setGapLimitEvents(unsigned long int var)
   {
     _GapLimit2Events = var;
