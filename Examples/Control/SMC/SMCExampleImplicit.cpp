@@ -24,11 +24,15 @@
   */
 
 #include "SiconosKernel.hpp"
+#include <fenv.h>
 using namespace std;
 
 // main program
 int main(int argc, char* argv[])
 {
+
+  //feenableexcept(FE_INEXACT);
+
   // User-defined parameters
   unsigned int ndof = 2;          // Number of degrees of freedom of your system
   double t0 = 0.0;                // Starting time
@@ -94,7 +98,7 @@ int main(int argc, char* argv[])
   SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
   processSimulation->setName("plant simulation");
   // -- OneStepIntegrators --
-  SP::Moreau processIntegrator(new Moreau(processDS, theta));
+  SP::ZeroOrderHold processIntegrator(new ZeroOrderHold(processDS));
   processSimulation->insertIntegrator(processIntegrator);
 
   // Control stuff
@@ -143,10 +147,11 @@ int main(int argc, char* argv[])
   time.restart();
   while (processSimulation->hasNextEvent())
   {
-    processSimulation->computeOneStep();
+    eventsManager.display();
     Event& nextEvent = *eventsManager.nextEvent();
     if (nextEvent.getType() == TD_EVENT)
     {
+      processSimulation->computeOneStep();
       k++;
       dataPlot(k, 0) = processSimulation->nextTime();
       dataPlot(k, 1) = xProc(0);
@@ -171,7 +176,7 @@ int main(int argc, char* argv[])
   if ((dataPlot - dataPlotRef).normInf() > 1e-12)
   {
     std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-    (dataPlot - dataPlotRef).display();
+    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
     return 1;
   }
 }

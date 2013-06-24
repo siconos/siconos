@@ -35,18 +35,18 @@ namespace ActuatorFactory
 
 /** A pointer to function, returning a pointer to Actuator, built
     with a SP::TimeDiscretisation and a SP::DynamicalSystem.*/
-typedef SP::Actuator(*object_creator)(SP::TimeDiscretisation, SP::DynamicalSystem);
+typedef SP::Actuator(*object_creator)(SP::TimeDiscretisation);
 
 /** The type of the factory map */
-typedef std::map<int, object_creator> MapFactory;
+typedef std::map<unsigned int, object_creator> MapFactory;
 
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> SP::Actuator factory(SP::TimeDiscretisation t, SP::DynamicalSystem ds)
+template<class SubType> SP::Actuator factory(SP::TimeDiscretisation t)
 {
-  return std11::shared_ptr<SubType>(new SubType(t, ds));
+  return std11::shared_ptr<SubType>(new SubType(t));
 }
 
 /** Registry Class for Actuators.
@@ -82,18 +82,18 @@ public :
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param name the type of the added Actuator
+   * \param type the type of the added Actuator
    * \param creator object creator
    */
-  void add(int name, object_creator creator);
+  void add(unsigned int type, object_creator creator);
 
   /** Function to instantiate a new Actuator
-   * \param name the type of the added Actuator.
+   * \param type the type of the added Actuator.
    * \param t a SP::TimeDiscretisation.
    * \param ds a SP::DynamicalSystem ds that will be linked to this Actuator
    * \return SP::Actuator to the created Actuator
    */
-  SP::Actuator instantiate(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
+  SP::Actuator instantiate(unsigned int type, SP::TimeDiscretisation t);
 } ;
 
 /** Registration Class for Actuators.
@@ -114,11 +114,12 @@ public :
    * \param name the type of the added Actuator
    * \param creator object creator
    */
-  Registration(int name, object_creator creator) ;
+  Registration(unsigned int type, object_creator creator) ;
 } ;
 
-#define AUTO_REGISTER_ACTUATOR(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);
 }
 // end of namespace ActuatorFactory
+
+#define AUTO_REGISTER_ACTUATOR(class_name, class_type) ActuatorFactory::Registration _registration_## class_type(class_name,&ActuatorFactory::factory<class_type>);
 
 #endif

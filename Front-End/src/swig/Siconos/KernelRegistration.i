@@ -42,10 +42,10 @@
   PY_REGISTER_WITHOUT_DIRECTOR(Sensor)                                  \
   PY_REGISTER(ControlSensor)                                            \
   PY_REGISTER(LinearSensor)                                             \
-  PY_REGISTER(SampledPIDActuator)                                       \
+  PY_REGISTER(PID)                                                      \
   PY_REGISTER(CommonSMC)                                                \
   PY_REGISTER(LinearSMC)                                                \
-  PY_REGISTER(LinearChatteringSMC)                                      \
+  PY_REGISTER(ExplicitLinearSMC)                                        \
   PY_REGISTER(LinearSMCOT2)                                             \
   PY_REGISTER(LinearSMCimproved)                                        \
   PY_REGISTER(ControlManager)                                           \

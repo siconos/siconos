@@ -32,18 +32,18 @@ def compute_dt_matrices(A, B, h, TV=False):
     processSimulation.insertIntegrator(processIntegrator)
 
     rel = SK.FirstOrderLinearTIR(Csurface, B)
-    idi = "interaction for control"
     nslaw = SK.RelayNSL(m)
-    inter = SK.Interaction(idi, processDS, m, m, nslaw, rel)
+    inter = SK.Interaction(m, nslaw, rel)
 
-    process.nonSmoothDynamicalSystem().insertInteraction(inter, True)
-    #process.nonSmoothDynamicalSystem().link(inter, processDS)
+    #process.nonSmoothDynamicalSystem().insertInteraction(inter, True)
+    process.nonSmoothDynamicalSystem().link(inter, processDS)
+    process.nonSmoothDynamicalSystem().setControlProperty(inter, True)
     # Initialization
     process.initialize(processSimulation)
 
     # Main loop
     processSimulation.computeOneStep()
-    Ad = processIntegrator.Ad(processDS)
-    Bd = processIntegrator.Bd(processDS)
+    Ad = SK.getMatrix(processIntegrator.Ad(processDS))
+    Bd = SK.getMatrix(processIntegrator.Bd(processDS))
 
     return (Ad, Bd)

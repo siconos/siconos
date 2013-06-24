@@ -26,7 +26,7 @@
 */
 
 #include "SiconosKernel.hpp"
-#include "SampledPIDActuator.hpp"
+#include "PID.hpp"
 #include "LinearSensor.hpp"
 
 using namespace std;
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::Moreau OSI(new Moreau(doubleIntegrator, theta));
+    SP::ZeroOrderHold OSI(new ZeroOrderHold(doubleIntegrator));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
     (*K)(0) = .25;
     (*K)(1) = .125;
     (*K)(2) = 2;
-    SP::SampledPIDActuator act = std11::static_pointer_cast<SampledPIDActuator>
+    SP::PID act = std11::static_pointer_cast<PID>
                                  (control->addActuator(100, tActuator));
     act->addSensorPtr(sens);
 
@@ -152,13 +152,13 @@ int main(int argc, char* argv[])
 
     while (s->hasNextEvent())
     {
-      s->computeOneStep();
       nextEvent = eventsManager->nextEvent();
       // --- Get values to be plotted ---
       // the following check prevents saving the same data multiple times
       // XXX what happends if we have NS Events ?
       if (nextEvent->getType() == 1)
       {
+        s->computeOneStep();
         dataPlot(k, 0) =  s->nextTime();
         dataPlot(k, 1) = (*xProc)(0);
         dataPlot(k, 2) = (*xProc)(1);

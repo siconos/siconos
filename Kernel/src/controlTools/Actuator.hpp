@@ -29,15 +29,9 @@
 #include "RuntimeException.hpp"
 #include "SiconosPointers.hpp"
 
+#include "SiconosAlgebraTypeDef.hpp"
+
 #include "ControlTypeDef.hpp"
-
-/** A set of Sensors */
-typedef std::set<SP::Sensor> Sensors;
-
-/** An iterator through a set of Sensors */
-typedef Sensors::iterator SensorsIterator;
-
-TYPEDEF_SPTR(Sensors)
 
 /** Actuators Base Class
 
@@ -91,28 +85,22 @@ protected:
   ACCEPT_SERIALIZATION(Actuator);
 
   /** type of the Actuator */
-  int _type;
-
-  /** dimension of the state space */
-  unsigned int _nDim;
+  unsigned int _type;
 
   /** id of the Actuator */
   std::string _id;
 
-  /** Sensors linked to this actuator */
-  SP::Sensors  _allSensors;
+  /** Control variable */
+  SP::SiconosVector  _u;
 
-  /** Dynamical Systems list: all the systems on which this actuator may act. */
-  SP::DynamicalSystemsSet _allDS;
-
-  /** the dynamical system we are controlling */
-  SP::DynamicalSystem _DS;
-
-  /** The model linked to this actuator */
-  SP::Model  _model;
+  /** B Matrix */
+  SP::SiconosMatrix _B;
 
   /** A time discretisation scheme */
   SP::TimeDiscretisation _timeDiscretisation;
+
+  /** ControlSensor feeding the Controller */
+  SP::ControlSensor _sensor;
 
   /** default constructor
    */
@@ -127,19 +115,10 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param name the type of the Actuator, which corresponds to the class type
+   * \param type the type of the Actuator, which corresponds to the class type
    * \param t a SP::TimeDiscretisation, (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem it acts on
    */
-  Actuator(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
-
-  /** Constructor with a TimeDiscretisation.
-   * \param name the type of the Actuator, which corresponds to the class type.
-   * \param t a SP::TimeDiscretisation, (/!\ it should not be used elsewhere !).
-   * \param ds the SP::DynamicalSystem it acts on.
-   * \param sensorList a set of Sensor linked to this Actuator.
-   */
-  Actuator(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
+  Actuator(unsigned int type, SP::TimeDiscretisation t);
 
   /** destructor
    */
@@ -169,49 +148,28 @@ public:
     return _type;
   };
 
-  /** get all the Sensors linked to this actuator.
-   *  \return a Sensors object (list of Sensor)
+  /** Get the control value
+   * \return current control value u
    */
-  inline const SP::Sensors getSensors() const
-  {
-    return _allSensors;
-  };
+  inline const SiconosVector& u() const { return *_u; };
 
-  /** Ass a set of Sensors into this actuator.
-   *  \param newSensors a Sensors object (list of Sensor)
+  /** Set the B matrix
+   * \param B the new B matrix
+  */
+  void setB(const SiconosMatrix& B);
+
+  /** Set the B matrix
+   * \param B the new B matrix
    */
-  void addSensors(const Sensors& newSensors);
+  inline void setBPtr(SP::SiconosMatrix B)
+  {
+    _B = B;
+  };
 
   /** add a Sensor in the actuator.
    *  \param newSensor a Sensor that will be connected to the Actuator
    */
-  void addSensorPtr(SP::Sensor newSensor);
-
-  /** get all the Dynamical Systems linked to this actuator.
-   *  \return a DynamicalSystemsSet.
-   */
-  inline const SP::DynamicalSystemsSet dynamicalSystems() const
-  {
-    return _allDS;
-  };
-
-  /** Add a set of DynamicalSystem into this actuator.
-   *  \param newDSs a DynamicalSystemsSet
-   */
-  void addDynamicalSystems(const DynamicalSystemsSet& newDSs);
-
-  /** add a DynamicalSystem into the actuator.
-   *  \param newDS a SP::DynamicalSystem
-   */
-  void addDynamicalSystemPtr(SP::DynamicalSystem newDS);
-
-  /** get the Model linked to this Actuator
-   *  \return SP::Model.
-   */
-  inline SP::Model model() const
-  {
-    return _model;
-  };
+  void addSensorPtr(SP::ControlSensor newSensor);
 
   /** get the TimeDiscretisation linked to this Actuator
   *  \return SP::TimeDiscretisation.
@@ -224,9 +182,9 @@ public:
   /** initialize actuator data.
    * \param m a SP::Model
    */
-  virtual void initialize(SP::Model m);
+  virtual void initialize(const Model& m);
 
-  /** capture data when the ActuatorEvent is processed => set data[ActuatorEvent]=...
+  /** capture data when the ActuatorEvent is processed
    */
   virtual void actuate() = 0;
 

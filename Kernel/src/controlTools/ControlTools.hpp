@@ -35,9 +35,9 @@
 #include "ActuatorEvent.hpp"
 #include "CommonSMC.hpp"
 // Actuator - available
-#include "SampledPIDActuator.hpp"
+#include "PID.hpp"
 #include "LinearSMC.hpp"
-#include "LinearChatteringSMC.hpp"
+#include "ExplicitLinearSMC.hpp"
 #include "LinearSMCOT2.hpp"
 #include "LinearSMCimproved.hpp"
 

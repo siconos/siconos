@@ -17,23 +17,23 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file LinearChatteringSMC.hpp
+/*! \file ExplicitLinearSMC.hpp
   \brief General interface to define an actuator
   */
 
-#ifndef LinearChatteringSMC_H
-#define LinearChatteringSMC_H
+#ifndef ExplicitLinearSMC_H
+#define ExplicitLinearSMC_H
 
 #include "CommonSMC.hpp"
 
-class LinearChatteringSMC : public CommonSMC
+class ExplicitLinearSMC : public CommonSMC
 {
 private:
   /** default constructor */
-  LinearChatteringSMC() {};
+  ExplicitLinearSMC() {};
 
   /** serialization hooks */
-  ACCEPT_SERIALIZATION(LinearChatteringSMC);
+  ACCEPT_SERIALIZATION(ExplicitLinearSMC);
 
   /** \f$\sigma = Cx\f$ */
   SP::SiconosVector _sigma;
@@ -42,22 +42,17 @@ public:
 
   /** Constructor with a TimeDiscretisation and a Model.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
    */
-  LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
-
-  /** Constructor with a TimeDiscretisation, a Model and a set of Sensor.
-   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
-   * \param sensorList a set of Sensor linked to this Actuator.
-   */
-  LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
+  ExplicitLinearSMC(SP::TimeDiscretisation t);
 
   /** destructor
   */
-  virtual ~LinearChatteringSMC();
+  virtual ~ExplicitLinearSMC();
 
-  virtual void initialize(SP::Model m);
+  /** Initializer
+   * \param m the Model of the Simulation
+   */
+  virtual void initialize(const Model& m);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:
@@ -66,5 +61,5 @@ public:
   void actuate();
 
 };
-DEFINE_SPTR(LinearChatteringSMC)
+DEFINE_SPTR(ExplicitLinearSMC)
 #endif

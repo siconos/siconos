@@ -26,7 +26,7 @@
 */
 
 #include "SiconosKernel.hpp"
-#include "SampledPIDActuator.hpp"
+#include "PID.hpp"
 #include "LinearSensor.hpp"
 
 using namespace std;
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::Moreau OSI(new Moreau(doubleIntegrator, theta));
+    SP::ZeroOrderHold OSI(new ZeroOrderHold(doubleIntegrator));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -117,12 +117,13 @@ int main(int argc, char* argv[])
     (*K)(0) = .25;
     (*K)(1) = .125;
     (*K)(2) = 2;
-//    SP::SampledPIDActuator act = std11::static_pointer_cast<SampledPIDActuator>
-//                                 (control->addActuator(100, tActuator));
-//    act->addSensorPtr(sens);
+    SP::PID act = std11::static_pointer_cast<PID>
+                                 (control->addActuator(PID_, tActuator));
+    act->addSensorPtr(sens);
 
     // To store the nextEvent
     SP::Event currentEvent;
+    SP::Event nextEvent;
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
@@ -135,8 +136,8 @@ int main(int argc, char* argv[])
     // Initialize the model and the controlManager
     process->initialize(s);
     control->initialize();
-//    act->setRef(xFinal);
-//    act->setK(*K);
+    act->setRef(xFinal);
+    act->setK(*K);
 
     SP::EventsManager eventsManager = s->eventsManager();
     unsigned int N = ceil((T - t0) / h + 10); // Number of time steps
@@ -169,11 +170,14 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       eventsManager->display();
-      s->computeOneStep();
+      nextEvent = eventsManager->nextEvent();
       currentEvent = eventsManager->currentEvent();
       // --- Get values to be plotted ---
       // the following check prevents saving the same data multiple times
       // XXX what happends if we have NS Events ?
+      if (nextEvent->getType() == TD_EVENT)
+        s->computeOneStep();
+
       if (currentEvent->getType() == OBSERVER_EVENT)
       {
         dataPlot(k, 0) =  s->nextTime();

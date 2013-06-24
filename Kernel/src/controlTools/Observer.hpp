@@ -94,21 +94,21 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param name the type of the Observer, which corresponds to the class type
+   * \param type the type of the Observer, which corresponds to the class type
    * \param t a SP::TimeDiscretisation, (/!\ it should not be used elsewhere !)
    * \param sensor the SP::Sensor to get the measurements
    * \param xHat0 the initial guess for the state
    */
-  Observer(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId = "none");
+  Observer(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId = "none");
 
   /** Constructor with a TimeDiscretisation.
-   * \param name the type of the Observer, which corresponds to the class type.
+   * \param type the type of the Observer, which corresponds to the class type.
    * \param t a SP::TimeDiscretisation, (/!\ it should not be used elsewhere !).
    * \param sensor the SP::Sensor to get the measurements
    * \param xHat0 the initial guess for the state
    * \param ds the SP::DynamicalSystem it acts on.
    */
-  Observer(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId = "none");
+  Observer(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId = "none");
 
   /** destructor
    */
@@ -149,7 +149,7 @@ public:
   /** initialize observer data.
    * \param m a SP::Model
    */
-  virtual void initialize(SP::Model m);
+  virtual void initialize(const Model& m);
 
   /** capture data when the ObserverEvent is processed
    */

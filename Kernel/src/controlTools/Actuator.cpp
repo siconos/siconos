@@ -19,98 +19,65 @@
 
 #include "Actuator.hpp"
 #include "ActuatorEvent.hpp"
-#include "Sensor.hpp"
+#include "ControlSensor.hpp"
 #include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 #include "EventFactory.hpp"
-#include "DynamicalSystemsSet.hpp"
-#include "DynamicalSystem.hpp"
 #include "Simulation.hpp"
 #include <iostream>
 
-
-
 Actuator::Actuator(): _type(0), _id("none")
 {
-  _allDS.reset(new DynamicalSystemsSet());
-  _allSensors.reset(new Sensors());
 }
 
-Actuator::Actuator(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): _type(name), _id("none"), _DS(ds), _timeDiscretisation(t)
+Actuator::Actuator(unsigned int type, SP::TimeDiscretisation t): _type(type), _id("none"), _timeDiscretisation(t)
 {
-  _allDS.reset(new DynamicalSystemsSet());
-  _allSensors.reset(new Sensors());
-  addDynamicalSystemPtr(ds);
-  _nDim = ds->getN();
-}
-
-Actuator::Actuator(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): _type(name), _id("none"), _DS(ds), _timeDiscretisation(t)
-{
-  _allDS.reset(new DynamicalSystemsSet());
-  _allSensors.reset(new Sensors());
-  addDynamicalSystemPtr(ds);
-  _nDim = ds->getN();
-  addSensors(sensorList);
 }
 
 Actuator::~Actuator()
 {
-  _allDS->clear();
-  _allSensors->clear();
 }
 
-void Actuator::addSensors(const Sensors& newSensors)
-{
-  // Add all the Sensor of newSensors into allSensors.
-  // => allSensors is not cleared and so all existing Sensors remain.
-  // => no copy of Sensors but copy of the pointers
-  for (SensorsIterator itS = newSensors.begin(); itS != newSensors.end(); ++itS)
-    _allSensors->insert(*itS);
-
-}
-
-void Actuator::addSensorPtr(SP::Sensor newSensor)
+void Actuator::addSensorPtr(SP::ControlSensor newSensor)
 {
   // Add a Sensor into allSensors set: no copy, pointer link.
-  _allSensors->insert(newSensor);
+  _sensor = newSensor;
 }
 
-void Actuator::addDynamicalSystems(const DynamicalSystemsSet& newDSs)
+void Actuator::initialize(const Model& m)
 {
-  // Add all the DS of newDSs into allDS.
-  // => allDS is not cleared and so all existing DSs remain.
-  // => no copy of DS but copy of the pointers
-  for (ConstDSIterator itDS = newDSs.begin(); itDS != newDSs.end(); ++itDS)
-    _allDS->insert(*itDS);
-}
-
-void Actuator::addDynamicalSystemPtr(SP::DynamicalSystem newDS)
-{
-  // Add a DS into allDS set: no copy, pointer link.
-  _allDS->insert(newDS);
-}
-
-void Actuator::initialize(SP::Model m)
-{
-  _model = m;
+  if (!_sensor)
+  {
+    RuntimeException::selfThrow("Actuator::initialize - No Sensor given to the Actuator");
+  }
   // == Create an event linked to the present Actuator. ==
   // Uses the events factory to insert the new event.
-  Event& ev = _model->simulation()->eventsManager()->insertEvent(ACTUATOR_EVENT, _timeDiscretisation->currentTime());
+  Event& ev = m.simulation()->eventsManager()->insertEvent(ACTUATOR_EVENT, _timeDiscretisation->currentTime());
   static_cast<ActuatorEvent&>(ev).setActuatorPtr(shared_from_this());
 
-  // Warning: no Sensors initialization. They are supposed to be up to date when added in the Actuator.
+  // Init the control variable
+  if (!_B)
+    RuntimeException::selfThrow("Actuator::initialize - the matrix _B is not initialized");
+  _u.reset(new SiconosVector(_B->size(1), 0));
+  // Add the necessary properties
+  DynamicalSystemsGraph& DSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_sensor->getDS());
+  DSG0.B[dsgVD] = _B;
+  DSG0.u[dsgVD] = _u;
+
+}
+
+void Actuator::setB(const SiconosMatrix& B)
+{
+  _B.reset(new SimpleMatrix(B));
 }
 
 void Actuator::display() const
 {
   std::cout << "=====> Actuator of type " << _type << ", named " << _id ;
   std::cout << "The associated Sensors are: " <<std::endl;
-  for (SensorsIterator itS = _allSensors->begin(); itS != _allSensors->end(); ++itS)
-    (*itS)->display();
-
-  std::cout << "The associated DynamicalSystems are: " <<std::endl;
-  for (DSIterator itDS = _allDS->begin(); itDS != _allDS->end(); ++itDS)
-    std::cout << " - Numbers : " << (*itDS)->number()  <<std::endl;
+  if (_sensor)
+    _sensor->display();
   std::cout << "======" <<std::endl;
   std::cout <<std::endl;
 }

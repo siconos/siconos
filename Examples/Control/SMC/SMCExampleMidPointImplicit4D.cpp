@@ -38,7 +38,7 @@ double hControl = 1.0e-2;
 unsigned int N = ceil((T-t0)/h + 10);
 
 unsigned int n = 4;
-unsigned int outputSize = 1+2*n+2;
+unsigned int outputSize = 1+n+2;
 
 /*
 A = [[-0.1452, 0, 0, 0.1611],
@@ -100,7 +100,7 @@ Csurface = np.array(Brel).T
   SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
   processSimulation->setName("plant simulation");
   // -- OneStepIntegrators --
-//  SP::OneStepIntegrator processIntegrator(new Moreau(processDS, theta));
+//  SP::OneStepIntegrator processIntegrator(new ZeroOrderHold(processDS, theta));
   SP::OneStepIntegrator processIntegrator(new ZeroOrderHold(processDS));
   processSimulation->insertIntegrator(processIntegrator);
 
@@ -131,7 +131,6 @@ Csurface = np.array(Brel).T
 
   // --- Get the values to be plotted ---
   SiconosVector& xProc = *processDS->x();
-  SiconosVector& zProc = *processDS->z();
   // Save data in a matrix dataPlot
   SimpleMatrix dataPlot(N, outputSize);
 
@@ -139,7 +138,6 @@ Csurface = np.array(Brel).T
   for(unsigned int i = 0; i < n; i++)
   {
     dataPlot(0, i+1) = xProc(i);
-    dataPlot(0, i+n+1) = 0;
   }
 
   EventsManager& eventsManager = *processSimulation->eventsManager();
@@ -162,10 +160,9 @@ Csurface = np.array(Brel).T
       for(unsigned int i = 0; i < n; i++)
       {
           dataPlot(k, i+1) = xProc(i);
-          dataPlot(k, i+n+1) = zProc(i);
       }
-      dataPlot(k, 2*n+1) = act.ueq()(0);
-      dataPlot(k, 2*n+2) = act.us()(0);
+      dataPlot(k, n+1) = act.ueq()(0);
+      dataPlot(k, n+2) = act.us()(0);
       ++show_progress;
     }
     processSimulation->nextStep();

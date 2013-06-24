@@ -28,13 +28,7 @@
 #include "ControlSensor.hpp"
 
 
-using namespace ActuatorFactory;
-
-LinearSMCOT2::LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(LINEAR_SMC_OT2, t, ds)
-{
-}
-
-LinearSMCOT2::LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(LINEAR_SMC_OT2, t, ds, sensorList)
+LinearSMCOT2::LinearSMCOT2(SP::TimeDiscretisation t): CommonSMC(LINEAR_SMC_OT2, t)
 {
 }
 
@@ -42,23 +36,24 @@ LinearSMCOT2::~LinearSMCOT2()
 {
 }
 
-void LinearSMCOT2::initialize(SP::Model m)
+void LinearSMCOT2::initialize(const Model& m)
 {
   Actuator::initialize(m);
 
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
   // We can use the Visitor mighty power to check if we have the right type
+  SP::DynamicalSystem DS = _sensor->getDS();
   Type::Siconos dsType;
-  dsType = Type::value(*_DS);
+  dsType = Type::value(*DS);
   if (dsType == Type::FirstOrderLinearDS)
   {
-    _DSPhi.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(_DS))));
-    _DSPred.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(_DS))));
+    _DSPhi.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    _DSPred.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
-    _DSPhi.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
-    _DSPred.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
+    _DSPhi.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
+    _DSPred.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
   }
   else
   {
@@ -70,25 +65,13 @@ void LinearSMCOT2::initialize(SP::Model m)
   _DSPred->setComputebFunction(NULL);
   // XXX What if there is more than one sensor ...
 
-  _sensor = std11::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
-  if (_sensor == NULL)
-  {
-    RuntimeException::selfThrow("LinearSMCOT2::initialize - the given sensor is not a ControlSensor");
-  }
-  else
-  {
-    _u.reset(new SiconosVector(_nDim, 0));
-
-    // XXX really stupid stuff
-    _DS->setzPtr(_u);
-  }
   _indx = 0;
   //  _Phi.reset(new SimpleMatrix(_nDim, _nDim));
   //  _Phi->eye();
   //  _Xold.reset(new SiconosVector(_nDim));
   //  *_Xold = *(_sensor->y());
-  double _t0 = _model->t0();
-  double _T = _model->finalT() + _timeDiscretisation->currentTimeStep();
+  double _t0 = m.t0();
+  double _T = m.finalT() + _timeDiscretisation->currentTimeStep();
 
   _timeDPhi.reset(new TimeDiscretisation(*_timeDiscretisation));
   _timeDPred.reset(new TimeDiscretisation(*_timeDiscretisation));
@@ -102,7 +85,9 @@ void LinearSMCOT2::initialize(SP::Model m)
   //  *_Xhat = _DS->getX0();
   // _DSPred->setXPtr(_Xhat);
   _Xhat = _DSPred->x();
-  _DSPred->setb(_u);
+  SP::SiconosVector dummyb(new SiconosVector(_B->size(0), 0));
+  _DSPred->setb(dummyb);
+  prod(*_B, *_u, *_DSPred->b());
 
   //  _Xhat.reset(new SiconosVector(_nDim, 0));
   //  _DSPred->setXPtr(_Xhat);
@@ -144,7 +129,7 @@ void LinearSMCOT2::actuate()
   _simulPhi->advanceToEvent();
   _simulPhi->processEvents();
   // XXX small hack here
-  SP::SiconosVector CS(new SiconosVector(_nDim));
+  SP::SiconosVector CS(new SiconosVector(_B->size(0)));
   _Csurface->getRow(0, *CS);
   _coeff = -1 / (CS->sum() * hCurrent);
   double uEq = inner_prod(*CS, _coeff * (*_XPhi + *_X - *_Xhat));
@@ -153,7 +138,8 @@ void LinearSMCOT2::actuate()
   // TODO this should work in more than 1D
   uEqP = std::min(uEq, 2.0);
   uEqP = std::max(uEqP, -2.0);
-  (*_u)(_nDim - 1) = uEqP;
+  (*_u)(_u->size() - 1) = uEqP;
+  prod(*_B, *_u, *_DSPred->b());
   _indx++;
   *_Xhat = *_X;
   // Compute \hat{x}_k

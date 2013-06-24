@@ -49,7 +49,7 @@ void ControlSimulation::initialize(SP::SiconosVector x0)
   _processTD.reset(new TimeDiscretisation(_t0, _h));
   _processSimulation.reset(new TimeStepping(_processTD, 0));
   _processSimulation->setName("plant simulation");
-  _processIntegrator.reset(new Moreau(_processDS, _theta));
+  _processIntegrator.reset(new ZeroOrderHold(_processDS));
   _processSimulation->insertIntegrator(_processIntegrator);
   _model->initialize(_processSimulation);
 
@@ -58,7 +58,7 @@ void ControlSimulation::initialize(SP::SiconosVector x0)
 
   // Output
   _N = ceil((_T - _t0) / _h) + 10; // Number of time steps
-  _dataM.reset(new SimpleMatrix(_N, 2 * _nDim + 1)); // we save all the states and the control
+  _dataM.reset(new SimpleMatrix(_N, _nDim + 1)); // we save the system state 
 }
 
 
@@ -75,12 +75,10 @@ void ControlSimulation::addActuatorPtr(SP::Actuator newActuator)
 void ControlSimulation::run()
 {
   SP::SiconosVector xProc = _processDS->x();
-  SP::SiconosVector uProc = _processDS->z();
   (*_dataM)(0, 0) = _t0;
   for (unsigned int i = 0; i < _nDim; i++)
   {
     (*_dataM)(0, i + 1) = (*xProc)(i);
-    (*_dataM)(0, _nDim + i + 1) = (*uProc)(i);
   }
 
   SP::EventsManager eventsManager = _processSimulation->eventsManager();
@@ -92,16 +90,15 @@ void ControlSimulation::run()
 
   while (_processSimulation->hasNextEvent())
   {
-    _processSimulation->computeOneStep();
     nextEvent = eventsManager->nextEvent();
-    if (nextEvent->getType() == 1)
+    if (nextEvent->getType() == TD_EVENT)
     {
+      _processSimulation->computeOneStep();
       k++;
       (*_dataM)(k, 0) = _processSimulation->nextTime();
       for (unsigned int i = 0; i < _nDim; i++)
       {
         (*_dataM)(k, i + 1) = (*xProc)(i);
-        (*_dataM)(k, _nDim + i + 1) = (*uProc)(i);
       }
       ++show_progress;
     }
@@ -109,5 +106,5 @@ void ControlSimulation::run()
   }
 
   _elapsedTime = time.elapsed();
-  _dataM->resize(k, 2 * _nDim + 1);
+  _dataM->resize(k, _nDim + 1);
 }

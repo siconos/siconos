@@ -30,14 +30,14 @@ Observer::Observer(): _type(0), _id("none")
 {
 }
 
-Observer::Observer(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId):
-  _type(name), _td(t), _sensor(sensor), _id(newId)
+Observer::Observer(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId):
+  _type(type), _td(t), _sensor(sensor), _id(newId)
 {
   _xHat.reset(new SiconosVector(xHat0));
 }
 
-Observer::Observer(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId):
-  _type(name), _DS(ds), _td(t), _sensor(sensor), _id(newId)
+Observer::Observer(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId):
+  _type(type), _DS(ds), _td(t), _sensor(sensor), _id(newId)
 {
   _xHat.reset(new SiconosVector(xHat0));
 }
@@ -46,7 +46,7 @@ Observer::~Observer()
 {
 }
 
-void Observer::initialize(SP::Model m)
+void Observer::initialize(const Model& m)
 {
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
@@ -56,7 +56,7 @@ void Observer::initialize(SP::Model m)
   }
   // == Create an event linked to the present Observer. ==
   // Uses the events factory to insert the new event.
-  Event& ev = m->simulation()->eventsManager()->insertEvent(OBSERVER_EVENT, _td->currentTime());
+  Event& ev = m.simulation()->eventsManager()->insertEvent(OBSERVER_EVENT, _td->currentTime());
   static_cast<ObserverEvent&>(ev).setObserverPtr(shared_from_this());
 }
 

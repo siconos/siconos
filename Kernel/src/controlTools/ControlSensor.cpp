@@ -26,7 +26,7 @@
 #include "TimeDiscretisation.hpp"
 #include "SiconosVector.hpp"
 
-void ControlSensor::initialize(SP::Model m)
+void ControlSensor::initialize(const Model& m)
 {
   Sensor::initialize(m);
   if (_delay > 0)
@@ -56,4 +56,3 @@ unsigned int ControlSensor::getYDim() const
 {
   return _storedY->size();
 }
-

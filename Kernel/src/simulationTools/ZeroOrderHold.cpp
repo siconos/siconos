@@ -584,13 +584,25 @@ void ZeroOrderHold::computeFreeState()
       // check whether we have a system with a control input
       if (DSG0.u.hasKey(dsgVD))
       {
-        assert(DSG0.Bd.hasKey(dsgVD));
+        if (!DSG0.Bd.hasKey(dsgVD))
+        {
+          assert(DSG0.B.hasKey(dsgVD));
+          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(d, *simulationLink->model(), DSG0.B[dsgVD]));
+          if (DSG0.Bd[dsgVD]->isConst())
+            DSG0.Bd[dsgVD]->integrate();
+        }
         prod(DSG0.Bd[dsgVD]->mat(), *DSG0.u[dsgVD], xfree, false); // xfree += Bd*u
       }
       // check whether the DynamicalSystem is an Observer
       if (DSG0.e.hasKey(dsgVD))
       {
-        assert(DSG0.Ld.hasKey(dsgVD));
+        if (!DSG0.Bd.hasKey(dsgVD))
+        {
+          assert(DSG0.L.hasKey(dsgVD));
+          DSG0.Ld[dsgVD].reset(new MatrixIntegrator(d, *simulationLink->model(), DSG0.L[dsgVD]));
+          if (DSG0.Ld[dsgVD]->isConst())
+            DSG0.Ld[dsgVD]->integrate();
+        }
         prod(DSG0.Ld[dsgVD]->mat(), *DSG0.e[dsgVD], xfree, false); // xfree += -Ld*e
       }
 

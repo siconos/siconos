@@ -25,8 +25,6 @@
 #include "TimeDiscretisation.hpp"
 
 
-using namespace SensorFactory;
-
 LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds): ControlSensor(LINEAR_SENSOR, t, ds)
 {}
 
@@ -38,7 +36,7 @@ LinearSensor::~LinearSensor()
   std::cout << "LinearSensor destructor called" <<std::endl;
 }
 
-void LinearSensor::initialize(SP::Model m)
+void LinearSensor::initialize(const Model& m)
 {
   // Call initialize of base class
   ControlSensor::initialize(m);
@@ -78,7 +76,7 @@ void LinearSensor::capture()
   *_storedY = prod(*_matC, *_DSx);
   // untested
   if (_matD)
-    *_storedY += prod(*_matD, *_DS->z());
+//    *_storedY += prod(*_matD, *_DS->z());
   //  (*_dataPlot)(_k, 0) = _timeDiscretisation->currentTime();
   //  _dataPlot->setSubRow(_k, 1, _storedY);
   _k++;

@@ -81,9 +81,9 @@ public:
   virtual ~LinearSensor();
 
   /** initialize sensor data
-   * \param m a SP::Model
+   * \param m the Model
    */
-  virtual void initialize(SP::Model m);
+  virtual void initialize(const Model& m);
 
   /** capture data when the SensorEvent is processed ( for example set data[SensorEvent]=... )
    */

@@ -172,26 +172,21 @@ public:
    * \param inter a SP::Interaction
    * \param ds1 a SP::DynamicalSystem
    * \param ds2 a SP::DynamicalSystem (optional)
-   \return a vertex descriptor of the new vertex in IndexSet0
    */
-  inline std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
-  link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem())
+  inline void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem())
   {
     _mIsLinear = ((inter)->relation()->isLinear() && _mIsLinear);
-    return _topology->link(inter, ds1, ds2);
+    _topology->link(inter, ds1, ds2);
   };
 
     /** specify id the given Interaction is for controlling the DS
-   * \param vd the descriptor of the Interaction in InteractionGraph
-   * \param ed the descriptor of the Interaction in DynamicalSystemsGraph
+   * \param inter the Interaction
    * \param isControlInteraction true if the Interaction is used for
    * control purposes
    **/
-  void setControlProperty(const InteractionsGraph::VDescriptor& vd, 
-                          const DynamicalSystemsGraph::EDescriptor& ed,
-                          const bool isControlInteraction)
+  void setControlProperty(SP::Interaction inter, const bool isControlInteraction)
   {
-    _topology->setControlProperty(vd,ed,isControlInteraction);
+    _topology->setControlProperty(inter, isControlInteraction);
   }
 
   /** get Dynamical system number I

@@ -180,13 +180,23 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   _DSG[0]->add_vertex(ds);
 }
 
-void Topology::setControlProperty(
-  const InteractionsGraph::VDescriptor& vd, 
-  const DynamicalSystemsGraph::EDescriptor& ed,
+void Topology::setControlProperty(SP::Interaction inter,
   const bool isControlInteraction)
 {
-  _IG[0]->properties(vd).forControl = isControlInteraction;
-  _DSG[0]->properties(ed).forControl = isControlInteraction;
+  InteractionsGraph::VDescriptor ivd = _IG[0]->descriptor(inter);
+  DynamicalSystemsGraph::VDescriptor dvd = _DSG[0]->descriptor(_IG[0]->properties(ivd).target);
+  SP::Interaction interG;
+  DynamicalSystemsGraph::OEIterator oei, oeiend;
+  for (std11::tie(oei, oeiend) = _DSG[0]->out_edges(dvd); oei != oeiend; ++oei)
+  {
+    interG = _DSG[0]->bundle(*oei);
+    if (inter == interG)
+    {
+      _DSG[0]->properties(*oei).forControl = isControlInteraction;
+      break;
+    }
+  }
+  _IG[0]->properties(ivd).forControl = isControlInteraction;
 }
 
 void Topology::removeInteraction(SP::Interaction inter)

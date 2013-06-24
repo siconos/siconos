@@ -31,35 +31,28 @@ Registry& Registry::get()
   return instance;
 }
 
-void Registry::add(int name, object_creator creator)
+void Registry::add(unsigned int type, object_creator creator)
 {
-  factory_map[name] = creator;
+  factory_map[type] = creator;
 }
 
-SP::Actuator Registry::instantiate(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds)
+SP::Actuator Registry::instantiate(unsigned int type, SP::TimeDiscretisation t)
 {
-  MapFactoryIt it = factory_map.find(name) ;
+  MapFactoryIt it = factory_map.find(type);
 
   if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (ActuatorFactory) failed, no class numbered: " + name);
+    RuntimeException::selfThrow("Registry::instantiate (ActuatorFactory) \
+        failed, no class numbered: " + type);
 
   // std::cout <<std::endl << "Factory instance for class" << name <<std::endl ; // for test purposes only
-  return (it->second)(t, ds) ;  // run our factory
+  return (it->second)(t) ;  // run our factory
 }
 
-Registration::Registration(int name, object_creator creator)
+Registration::Registration(unsigned int type, object_creator creator)
 {
   //  std::cout <<std::endl << "Registration of " << name <<std::endl <<std::endl ;
   // Add creator into the factory of Actuators
-  Registry::get().add(name, creator) ;
+  Registry::get().add(type, creator) ;
 }
 
 }
-
-
-
-
-
-
-
-

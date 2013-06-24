@@ -28,20 +28,13 @@
 #include "TimeDiscretisation.hpp"
 #include "ActuatorFactory.hpp"
 
-using namespace ActuatorFactory;
-
-LinearSMCimproved::LinearSMCimproved(SP::TimeDiscretisation t, SP::DynamicalSystem ds):
-  LinearSMC(t, ds, LINEAR_SMC_IMPROVED)
+LinearSMCimproved::LinearSMCimproved(SP::TimeDiscretisation t):
+  LinearSMC(t, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false)
 {
 }
 
-LinearSMCimproved::LinearSMCimproved(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D):
-  LinearSMC(t, ds, B, D, LINEAR_SMC_IMPROVED)
-{
-}
-
-LinearSMCimproved::LinearSMCimproved(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList):
-  LinearSMC(t, ds, sensorList, LINEAR_SMC_IMPROVED)
+LinearSMCimproved::LinearSMCimproved(SP::TimeDiscretisation t, SP::SiconosMatrix B, SP::SiconosMatrix D):
+  LinearSMC(t, B, D, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false)
 {
 }
 
@@ -49,10 +42,22 @@ LinearSMCimproved::~LinearSMCimproved()
 {
 }
 
+void LinearSMCimproved::predictionPerturbation()
+{
+  if (_us->normInf() < 1)
+  {
+    if (_inDisceteTimeSlidingPhase)
+      *_ueq += *_us;
+    else
+      _inDisceteTimeSlidingPhase = true;
+  }
+}
+
 void LinearSMCimproved::actuate()
 {
+  unsigned int sDim = _u->size();
   SP::SimpleMatrix tmpM1(new SimpleMatrix(*_Csurface));
-  SP::SimpleMatrix tmpD(new SimpleMatrix(_sDim, _sDim, 0));
+  SP::SimpleMatrix tmpD(new SimpleMatrix(sDim, sDim, 0));
   SP::SiconosVector xTk(new SiconosVector(_sensor->y()));
 
   ZeroOrderHold& zoh = *std11::static_pointer_cast<ZeroOrderHold>(_integratorSMC);
@@ -68,7 +73,7 @@ void LinearSMCimproved::actuate()
   // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
   tmpD->PLUForwardBackwardInPlace(*_ueq);
 
-  *(_DS_SMC->x()) = *xTk; // XXX this is sooo wrong
+  *(_DS_SMC->x()) = *xTk;
   prod(*_B, *_ueq, *(_DS_SMC->b()));
   _simulationSMC->computeOneStep();
   _simulationSMC->nextStep();
@@ -76,13 +81,14 @@ void LinearSMCimproved::actuate()
 
   // discontinous part
   *_us = *_lambda;
-//  double h = _timeDiscretisation->currentTimeStep();
-//  prod(h, prod(*_Csurface, *_B), *_lambda, *_us);
-//  tmpD->PLUForwardBackwardInPlace(*_us);
+
+  // prediction of the perturbation
+  if (_predictionPerturbation)
+    predictionPerturbation();
 
   // inject those in the system
-  prod(1.0, *_B, *_us, *_sampledControl);
-  prod(1.0, *_B, *_ueq, *_sampledControl, false);
+  *_u = *_us;
+  *_u += *_ueq;
   _indx++;
 
 }

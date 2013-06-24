@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
   processSimulation->setName("plant simulation");
   // -- OneStepIntegrators --
-  SP::Moreau processIntegrator(new Moreau(processDS, theta));
+  SP::ZeroOrderHold processIntegrator(new ZeroOrderHold(processDS));
   processSimulation->insertIntegrator(processIntegrator);
 
   // Control stuff
@@ -101,8 +101,8 @@ int main(int argc, char* argv[])
   SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC));
   control->addSensorPtr(sens);
   // add the sliding mode controller
-  SP::LinearChatteringSMC act = std11::static_pointer_cast<LinearChatteringSMC>
-                                (control->addActuator(LINEAR_CHATTERING_SMC, tActuator));
+  SP::ExplicitLinearSMC act = std11::static_pointer_cast<ExplicitLinearSMC>
+                                (control->addActuator(EXPLICIT_LINEAR_SMC, tActuator));
   act->setCsurfacePtr(Csurface);
   act->addSensorPtr(sens);
   act->setBPtr(Brel);
@@ -140,10 +140,10 @@ int main(int argc, char* argv[])
   time.restart();
   while (processSimulation->hasNextEvent())
   {
-    processSimulation->computeOneStep();
     Event& nextEvent = *eventsManager.nextEvent();
     if (nextEvent.getType() == TD_EVENT)
     {
+      processSimulation->computeOneStep();
       k++;
       dataPlot(k, 0) = processSimulation->nextTime();
       dataPlot(k, 1) = (*xProc)(0);

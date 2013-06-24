@@ -23,9 +23,9 @@
 
 #include "LuenbergerObserver.hpp"
 #include "ControlSensor.hpp"
+#include "ObserverFactory.hpp"
 
-
-void LuenbergerObserver::initialize(SP::Model m)
+void LuenbergerObserver::initialize(const Model& m)
 {
   if (!_C)
   {
@@ -35,7 +35,7 @@ void LuenbergerObserver::initialize(SP::Model m)
   {
     Observer::initialize(m);
   }
-  DynamicalSystemsGraph& originalDSG0 = *m->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& originalDSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor originaldsgVD;
   if (!_DS) // No DynamicalSystem was given
   {
@@ -75,9 +75,9 @@ void LuenbergerObserver::initialize(SP::Model m)
   _e.reset(new SiconosVector(_C->size(0)));
   _y.reset(new SiconosVector(_C->size(0)));
 
-  double t0 = m->t0();
-  double h = m->simulation()->timeDiscretisation()->currentTimeStep();
-  double T = m->finalT() + h;
+  double t0 = m.t0();
+  double h = m.simulation()->timeDiscretisation()->currentTimeStep();
+  double T = m.finalT() + h;
   _model.reset(new Model(t0, T));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
 
@@ -108,24 +108,31 @@ void LuenbergerObserver::initialize(SP::Model m)
 
 void LuenbergerObserver::process()
 {
-  prod(*_C, *_xHat, *_e); // e = C*xhat_k
+  if (!_pass)
+    _pass = true;
+  else
+  {
+    prod(*_C, *_xHat, *_e); // e = C*xhat_k
 
-  *_e -= *_y; // e -= y_k
+    *_e -= *_y; // e -= y_k
 
 
-  // get measurement from sensor
-  const SiconosVector& y = _sensor->y();
+    // get measurement from sensor
+    const SiconosVector& y = _sensor->y();
 
-  // TODO theta method on the error
-  _simulation->computeOneStep();
-  _simulation->nextStep();
+    // TODO theta method on the error
+    _simulation->computeOneStep();
+    _simulation->nextStep();
 
-  // update the current measured value
-  *_y = y;
-  *_xHat = _DS->getx();
+    // update the current measured value
+    *_y = y;
+    *_xHat = _DS->getx();
+  }
 }
 
 void LuenbergerObserver::setL(const SiconosMatrix& L)
 {
     _L.reset(new SimpleMatrix(L));
 }
+
+AUTO_REGISTER_OBSERVER(LUENBERGER, LuenbergerObserver);

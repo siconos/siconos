@@ -26,9 +26,9 @@
 #define ControlTypeDef_H
 
 /** Actuator types */
-#define SAMPLED_PID_ACTUATOR       100
+#define PID_                       100
 #define LINEAR_SMC                 101
-#define LINEAR_CHATTERING_SMC      103
+#define EXPLICIT_LINEAR_SMC        103
 #define LINEAR_SMC_OT2             104
 #define LINEAR_SMC_IMPROVED        105
 

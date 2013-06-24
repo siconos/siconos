@@ -179,14 +179,12 @@ public:
   std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
   link(SP::Interaction inter, SP::DynamicalSystem, SP::DynamicalSystem = SP::DynamicalSystem());
 
-  /** specify id the given Interaction is for controlling the DS
-   * \param vd the descriptor of the Interaction in InteractionGraph
-   * \param ed the descriptor of the Interaction in DynamicalSystemsGraph
+  /** specify if the given Interaction is for controlling the DS
+   * \param inter Interaction
    * \param isControlInteraction true if the Interaction is used for
    * control purposes
    **/
-  void setControlProperty(const InteractionsGraph::VDescriptor& vd, 
-                          const DynamicalSystemsGraph::EDescriptor& ed,
+  void setControlProperty(SP::Interaction inter,
                           const bool isControlInteraction);
 
   /** get a pointer to the graph of all Interactions.

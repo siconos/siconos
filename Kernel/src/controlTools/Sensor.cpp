@@ -29,7 +29,7 @@
 Sensor::Sensor(): _type(0), _id("none")
 {}
 
-Sensor::Sensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): _type(name), _id("none"), _DS(ds), _timeDiscretisation(t)
+Sensor::Sensor(unsigned int type, SP::TimeDiscretisation t, SP::DynamicalSystem ds): _type(type), _id("none"), _DS(ds), _timeDiscretisation(t)
 {
   _nDim = _DS->getN();
 }
@@ -37,11 +37,10 @@ Sensor::Sensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): _typ
 Sensor::~Sensor()
 {}
 
-void Sensor::initialize(SP::Model m)
+void Sensor::initialize(const Model& m)
 {
-  _model = m;
   // == Create an event linked to the present Sensor. ==
-  Event& ev = _model->simulation()->eventsManager()->insertEvent(SENSOR_EVENT, _timeDiscretisation->currentTime());
+  Event& ev = m.simulation()->eventsManager()->insertEvent(SENSOR_EVENT, _timeDiscretisation->currentTime());
   static_cast<SensorEvent&>(ev).setSensorPtr(shared_from_this());
 }
 

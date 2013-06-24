@@ -73,25 +73,17 @@ public:
 
   /** Constructor with a TimeDiscretisation and a Model.
    * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
    */
-  LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
-
-  /** Constructor with a TimeDiscretisation, a Model and a set of Sensor.
-   * \param t SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
-   * \param sensorList a set of Sensor linked to this Actuator.
-   */
-  LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
+  LinearSMCOT2(SP::TimeDiscretisation t);
 
   /** destructor
   */
   virtual ~LinearSMCOT2();
 
   /** initialize actuator data.
-   * \param m a SP::Model
+   * \param m the Model
   */
-  void initialize(SP::Model m);
+  void initialize(const Model& m);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:

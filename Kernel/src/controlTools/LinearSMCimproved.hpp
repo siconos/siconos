@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file LinearSMC.hpp
+/*! \file LinearSMCimproved.hpp
   \brief General interface to define an actuator
 */
 
@@ -35,28 +35,27 @@ private:
   /** default constructor */
   LinearSMCimproved() {};
 
+protected:
+
+  /** try to predict the perturbation */
+  bool _predictionPerturbation;
+
+  /** boolean to determine if we are in the discrete-time sliding phase */
+  bool _inDisceteTimeSlidingPhase;
+
 public:
 
   /** Constructor with a TimeDiscretisation and a DynamicalSystem.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
    */
-  LinearSMCimproved(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
+  LinearSMCimproved(SP::TimeDiscretisation t);
 
   /** Constructor with a TimeDiscretisation and a DynamicalSystem.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
    * \param B the B matrix in the FirstOrderLinearR
    * \param D the D matrix in the FirstOrderLinearR
    */
-  LinearSMCimproved(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D);
-
-  /** Constructor with a TimeDiscretisation, a DynamicalSystem and a set of Sensor.
-   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
-   * \param sensorList a set of Sensor linked to this Actuator.
-   */
-  LinearSMCimproved(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
+  LinearSMCimproved(SP::TimeDiscretisation t, SP::SiconosMatrix B, SP::SiconosMatrix D);
 
   /** destructor
    */
@@ -68,6 +67,14 @@ public:
    */
   virtual void actuate();
 
+  /** Enable perturbation prediction */
+  void setPerturbationPrediction()
+  {
+    _predictionPerturbation = true;
+  }
+
+  /** Predict the effect of the perturnation during the next timestep */
+  void predictionPerturbation();
 };
 DEFINE_SPTR(LinearSMCimproved)
 #endif

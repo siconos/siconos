@@ -29,23 +29,14 @@
 #include "ZeroOrderHold.hpp"
 #include "TimeDiscretisation.hpp"
 #include "ActuatorFactory.hpp"
-#include "FirstOrderLinearTIR.hpp"
-#include "RelayNSL.hpp"
 
-using namespace ActuatorFactory;
-
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, int name):
-  CommonSMC(name, t, ds)
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, unsigned int type):
+  CommonSMC(type, t)
 {
 }
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D, int name):
-  CommonSMC(name, t, ds, B, D)
-{
-}
-
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList, int name):
-  CommonSMC(name, t, ds, sensorList)
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::SiconosMatrix B, SP::SiconosMatrix D, unsigned int type):
+  CommonSMC(type, t, B, D)
 {
 }
 
@@ -59,7 +50,7 @@ void LinearSMC::actuate()
   if (!_noUeq)
     computeUeq();
 
-    *(_DS_SMC->x()) = _sensor->y(); // XXX this is sooo wrong
+    *(_DS_SMC->x()) = _sensor->y();
     prod(*_B, *_ueq, *(_DS_SMC->b()));
   _simulationSMC->computeOneStep();
 //  if (_indx > 0)
@@ -70,8 +61,8 @@ void LinearSMC::actuate()
 
   // discontinous part
   *_us = *_lambda;
-  prod(1.0, *_B, *_us, *_sampledControl);
-  prod(1.0, *_B, *_ueq, *_sampledControl, false);
+  *_u = *_us;
+  *_u += *_ueq;
   _indx++;
 
 }

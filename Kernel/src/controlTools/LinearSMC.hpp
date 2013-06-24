@@ -44,26 +44,17 @@ public:
   /** Constructor with a TimeDiscretisation and a DynamicalSystem.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
    * \param ds the SP::DynamicalSystem we are controlling
-   * \param name do not set this yourself ! this is used in derived classes
+   * \param type do not set this yourself ! this is used in derived classes
    */
-  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, int name = LINEAR_SMC);
+  LinearSMC(SP::TimeDiscretisation t, unsigned int type = LINEAR_SMC);
 
   /** Constructor with a TimeDiscretisation and a DynamicalSystem.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
    * \param B the B matrix in the FirstOrderLinearR
    * \param D the D matrix in the FirstOrderLinearR
-   * \param name do not set this yourself ! this is used in derived classes
+   * \param type do not set this yourself ! this is used in derived classes
    */
-  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D, int name = LINEAR_SMC);
-
-  /** Constructor with a TimeDiscretisation, a DynamicalSystem and a set of Sensor.
-   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
-   * \param sensorList a set of Sensor linked to this Actuator.
-   * \param name do not set this yourself ! this is used in derived classes
-   */
-  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList, int name = LINEAR_SMC);
+  LinearSMC(SP::TimeDiscretisation t, SP::SiconosMatrix B, SP::SiconosMatrix D, unsigned int type = LINEAR_SMC);
 
   /** destructor
    */

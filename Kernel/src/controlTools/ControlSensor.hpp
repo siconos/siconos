@@ -58,17 +58,17 @@ protected:
   ControlSensor() {};
 
   /** Simple Constructor
-   * \param name the type of the Sensor
+   * \param type the type of the Sensor
    * \param t the SP::TimeDiscretisation to use
    * \param ds the SP::DynamicalSystem it observes
    * \param delay the delay between the measurement and the avaibility of the data
    */
-  ControlSensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, double delay = 0):
-    Sensor(name, t, ds), _delay(delay) {}
+  ControlSensor(unsigned int type, SP::TimeDiscretisation t, SP::DynamicalSystem ds, double delay = 0):
+    Sensor(type, t, ds), _delay(delay) {}
 
 public:
 
-  virtual void initialize(SP::Model m);
+  virtual void initialize(const Model& m);
 
   /** Get the dimension of the output
    * \return an unsigned int

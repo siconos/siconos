@@ -23,40 +23,36 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "ControlSensor.hpp"
 
-#include "LinearChatteringSMC.hpp"
+#include "ExplicitLinearSMC.hpp"
 
 
-using namespace ActuatorFactory;
-
-LinearChatteringSMC::LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(LINEAR_CHATTERING_SMC, t, ds)
+ExplicitLinearSMC::ExplicitLinearSMC(SP::TimeDiscretisation t): CommonSMC(EXPLICIT_LINEAR_SMC, t)
 {
 }
 
-LinearChatteringSMC::LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(LINEAR_CHATTERING_SMC, t, ds, sensorList)
-{
-}
-
-LinearChatteringSMC::~LinearChatteringSMC()
+ExplicitLinearSMC::~ExplicitLinearSMC()
 {
   _sigma.reset();
 }
 
-void LinearChatteringSMC::initialize(SP::Model m)
+void ExplicitLinearSMC::initialize(const Model& m)
 {
   CommonSMC::initialize(m);
 
-  _sigma.reset(new SiconosVector(_sDim));
+  _sigma.reset(new SiconosVector(_u->size()));
 }
 
-void LinearChatteringSMC::actuate()
+void ExplicitLinearSMC::actuate()
 {
   computeUeq();
 
   prod(*_Csurface, _sensor->y(), *_sigma);
 
+  unsigned int sDim = _u->size();
+
   if (_D) // we are using a saturation
   {
-    for (unsigned int i = 0; i < _sDim; i++)
+    for (unsigned int i = 0; i < sDim; i++)
     {
       if ((*_sigma)(i) > (*_D)(i, i))
         (*_us)(i) = -1;
@@ -73,7 +69,7 @@ void LinearChatteringSMC::actuate()
   }
   else
   {
-    for (unsigned int i = 0; i < _sDim; i++)
+    for (unsigned int i = 0; i < sDim; i++)
     {
       if ((*_sigma)(i) > 0)
         (*_us)(i) = -1;
@@ -83,9 +79,9 @@ void LinearChatteringSMC::actuate()
         (*_us)(i) = 0;
     }
   }
-  prod(1.0, *_B, *_us, *_sampledControl);
-  prod(1.0, *_B, *_ueq, *_sampledControl, false);
-  _indx++;
+
+  *_u = *_us;
+  *_u += *_ueq;
 }
 
-AUTO_REGISTER_ACTUATOR(LINEAR_CHATTERING_SMC, LinearChatteringSMC)
+AUTO_REGISTER_ACTUATOR(EXPLICIT_LINEAR_SMC, ExplicitLinearSMC)

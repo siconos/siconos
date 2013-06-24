@@ -33,19 +33,20 @@
 namespace ObserverFactory
 {
 
-/** A pointer to function, returning a SP::Observer, built with its type (ie class name) and a SP::DynamicalSystem.*/
-typedef SP::Observer(*object_creator)(SP::TimeDiscretisation, SP::DynamicalSystem) ;
+/** A pointer to function, returning a SP::Observer, built with its type (ie class name) a ControlSensor
+ * and a SiconosVector, the initial estimate*/
+typedef SP::Observer(*object_creator)(SP::TimeDiscretisation, SP::ControlSensor, const SiconosVector&) ;
 
 /** The type of the factory map */
-typedef std::map<int, object_creator> MapFactory;
+typedef std::map<unsigned int, object_creator> MapFactory;
 
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> SP::Observer factory(SP::TimeDiscretisation t, SP::DynamicalSystem ds)
+template<class SubType> SP::Observer factory(SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
-  return std11::shared_ptr<SubType>(new SubType(t, ds));
+  return std11::shared_ptr<SubType>(new SubType(t, sensor, xHat0));
 }
 
 /** Registry Class for Observers.
@@ -77,18 +78,19 @@ public :
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param name the type of the added Observer
+   * \param type the type of the added Observer
    * \param creator object creator
    */
-  void add(int name, object_creator object);
+  void add(unsigned int type, object_creator object);
 
   /** Function to instantiate a new Observer
-   * \param name the type of the Observer we want to instantiate
+   * \param type the type of the Observer we want to instantiate
    * \param t a SP::TimeDiscretisation.
-   * \param ds a SP::DynamicalSystem that will be linked to this Observer
+   * \param sensor the ControlSensor feeding this Observer
+   * \param xHat0 the original estimate
    * \return a SP::Observer to the created Observer
    */
-  SP::Observer instantiate(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
+  SP::Observer instantiate(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0);
 
 } ;
 
@@ -107,13 +109,13 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param name the type of the added Observer
+   * \param type the type of the added Observer
    * \param creator object creator
    */
-  Registration(int name, object_creator object) ;
+  Registration(unsigned int type, object_creator object) ;
 } ;
 
-#define AUTO_REGISTER_OBSERVER(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);
+#define AUTO_REGISTER_OBSERVER(class_name,class_type) ObserverFactory::Registration _registration_## class_type(class_name, &ObserverFactory::factory<class_type>);
 }
 // end of namespace ObserverFactory
 

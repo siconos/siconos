@@ -17,26 +17,26 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file SampledPIDActuator.hpp
+/*! \file PID.hpp
   \brief General interface to define an actuator
 */
 
-#ifndef SampledPIDActuator_H
-#define SampledPIDActuator_H
+#ifndef PID_H
+#define PID_H
 
 #include "Actuator.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
 #include <boost/circular_buffer.hpp>
 
-class SampledPIDActuator : public Actuator
+class PID : public Actuator
 {
 private:
   /** default constructor */
-  SampledPIDActuator() {};
+  PID() {};
 
   /** serialization hooks
    */
-  ACCEPT_SERIALIZATION(SampledPIDActuator);
+  ACCEPT_SERIALIZATION(PID);
 
   /** error vector */
   std11::shared_ptr<boost::circular_buffer<double> > _err;
@@ -44,44 +44,24 @@ private:
   /** reference we are tracking */
   double _ref;
 
-  /** control variable */
-  SP::SiconosVector _u;
-
   /** vector of gains */
   SP::SiconosVector _K;
-
-  /** the sensor that feed the controller */
-  SP::ControlSensor _sensor;
-
-  /** boolean to determined if the controller has been correctly initialized */
-  bool _initDone;
-
-  /** current \f$ \Delta t\f$ (or timeStep) */
-  double _curDeltaT;
 
 public:
 
   /** Constructor with a TimeDiscretisation.
    * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !).
-   * \param ds the SP::DynamicalSystem we are controlling
    */
-  SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
-
-  /** Constructor with a TimeDiscretisation.
-   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !).
-   * \param ds the SP::DynamicalSystem we are controlling
-   * \param sensorList set of Sensor linked to this SampledPIDActuator.
-   */
-  SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
+  PID(SP::TimeDiscretisation t);
 
   /** destructor
    */
-  virtual ~SampledPIDActuator();
+  virtual ~PID();
 
   /** initialize actuator data.
    * \param m a SP::Model
    */
-  void initialize(SP::Model m);
+  virtual void initialize(const Model& m);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:
@@ -111,5 +91,5 @@ public:
     _ref = newValue;
   }
 };
-DEFINE_SPTR(SampledPIDActuator)
+DEFINE_SPTR(PID)
 #endif

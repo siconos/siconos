@@ -6,20 +6,15 @@ def test_smc1():
     from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
         TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2
     from numpy import eye, empty, zeros
+    import numpy as np
     from math import ceil, sin
 
     # Derive our own version of FirstOrderLinearDS
     class MyFOLDS(FirstOrderLinearDS):
         def computeb(self, time):
             t = sin(50*time)
-            tmpz = self.z()
             # XXX fix this !
-            if len(tmpz) != 2:
-                print("DEBUG z has length ", len(tmpz))
-                return
-            # XXX we need to find a smarter way to do things here
-            # we need to convert from vector (sage) to arrayish
-            u = [t, -t] + tmpz
+            u = [t, -t]
             self.setb(u)
 
     # variable declaration
@@ -31,11 +26,12 @@ def test_smc1():
     Xinit = 1.0  # initial position
     theta = 0.5
     N = ceil((T-t0)/h + 10)  # number of time steps
-    outputSize = 5  # number of variable to store at each time step
+    outputSize = 4  # number of variable to store at each time step
 
     # Matrix declaration
     A = zeros((ndof, ndof))
     x0 = [Xinit, -Xinit]
+    Brel = np.array([[0], [1]])
     sensorC = eye(ndof)
     sensorD = zeros((ndof, ndof))
     Csurface = [[0, 1.0]]
@@ -48,7 +44,7 @@ def test_smc1():
     # Declaration of the Dynamical System
     processDS = MyFOLDS(x0, A)
     # XXX b is not automatically created ...
-    processDS.setb([0, 0])
+#    processDS.setb([0, 0])
     # Model
     process = Model(t0, T)
     process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
@@ -67,9 +63,10 @@ def test_smc1():
     sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
 
     control.addSensorPtr(sens)
-    act = LinearSMCOT2(tActuator, processDS)
+    act = LinearSMCOT2(tActuator)
     act.setCsurfacePtr(Csurface)
     act.addSensorPtr(sens)
+    act.setBPtr(Brel)
     control.addActuatorPtr(act)
 
     # Initialization.
@@ -83,8 +80,7 @@ def test_smc1():
     dataPlot[0, 0] = t0
     dataPlot[0, 1] = processDS.x()[0]
     dataPlot[0, 2] = processDS.x()[1]
-    dataPlot[0, 3] = processDS.z()[0]
-    dataPlot[0, 4] = processDS.z()[1]
+    dataPlot[0, 3] = act.u()[0]
 
     # Main loop
     k = 1
@@ -93,8 +89,7 @@ def test_smc1():
         dataPlot[k, 0] = processSimulation.nextTime()
         dataPlot[k, 1] = processDS.x()[0]
         dataPlot[k, 2] = processDS.x()[1]
-        dataPlot[k, 3] = processDS.z()[0]
-        dataPlot[k, 4] = processDS.z()[1]
+        dataPlot[k, 3] = act.u()[0]
         k += 1
         processSimulation.nextStep()
     #    print processSimulation.nextTime()
@@ -105,9 +100,10 @@ def test_smc1():
 #Same test, but with the simplified interface
 def test_smc2():
     from Siconos.Kernel import FirstOrderLinearDS, TimeDiscretisation, \
-        ControlFirstOrderLinearS, LinearSensor, \
+        ControlFirstOrderLinearS, LinearSensor, ioMatrix_write, \
         LinearSMCOT2, getMatrix, SimpleMatrix
     from numpy import eye, zeros
+    import numpy as np
     from math import sin
     from numpy.linalg import norm
 
@@ -115,12 +111,7 @@ def test_smc2():
     class MyFOLDS(FirstOrderLinearDS):
         def computeb(self, time):
             t = sin(50*time)
-            tmpz = self.z()
-            # XXX fix this !
-            if len(tmpz) != 2:
-                print("DEBUG z has length ", len(tmpz))
-                return
-            u = [t, -t] + tmpz
+            u = [t, -t]
             self.setb(u)
 
     # variable declaration
@@ -136,6 +127,7 @@ def test_smc2():
     x0 = [Xinit, -Xinit]
     sensorC = eye(ndof)
     sensorD = zeros((ndof, ndof))
+    Brel = np.array([[0], [1]])
     Csurface = [[0, 1.0]]
 
     # Simple check
@@ -157,9 +149,10 @@ def test_smc2():
     control = controlProcess.CM()
     sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
     control.addSensorPtr(sens)
-    act = LinearSMCOT2(tActuator, processDS)
+    act = LinearSMCOT2(tActuator)
     act.setCsurfacePtr(Csurface)
     act.addSensorPtr(sens)
+    act.setBPtr(Brel)
     control.addActuatorPtr(act)
 
     # Initialization
@@ -172,6 +165,7 @@ def test_smc2():
     dataPlot = tmpData
     # compare with the reference
     ref = getMatrix(SimpleMatrix("smc_2.ref"))
+    np.savetxt("smc_2.dat", dataPlot)
     print("%e" % norm(dataPlot - ref))
     if (norm(dataPlot - ref) > 5e-12):
         print(dataPlot - ref)

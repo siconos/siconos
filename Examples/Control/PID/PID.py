@@ -59,7 +59,7 @@ s.insertIntegrator(OSI)
 control = ControlManager(process)
 sens = LinearSensor(tSensor, doubleIntegrator, C)
 control.addSensorPtr(sens)
-act = SampledPIDActuator(tActuator, doubleIntegrator)
+act = PID(tActuator, doubleIntegrator)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 

@@ -19,11 +19,11 @@
 
 #include "ModelingTools.hpp"
 #include "SimulationTools.hpp"
-
-
 #include "CommonSMC.hpp"
 #include "ControlSensor.hpp"
-void CommonSMC::initialize(SP::Model m)
+
+
+void CommonSMC::initialize(const Model& m)
 {
   if (_Csurface == NULL)
   {
@@ -35,8 +35,9 @@ void CommonSMC::initialize(SP::Model m)
   }
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
   // We can use the Visitor mighty power to check if we have the right type
+  SP::DynamicalSystem DS = _sensor->getDS();
   Type::Siconos dsType;
-  dsType = Type::value(*_DS);
+  dsType = Type::value(*DS);
   // create the DS for the controller
   // if the DS we use is different from the DS we are controlling
   // when we want for instant to see how well the controller behaves
@@ -44,11 +45,11 @@ void CommonSMC::initialize(SP::Model m)
   // method
   if (dsType == Type::FirstOrderLinearDS)
   {
-    _DS_SMC.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(_DS))));
+    _DS_SMC.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
-    _DS_SMC.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
+    _DS_SMC.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
   }
   else
   {
@@ -56,86 +57,65 @@ void CommonSMC::initialize(SP::Model m)
   }
   // We have to reset the _pluginb
   _DS_SMC->setComputebFunction(NULL);
-  SP::SiconosVector dummyb(new SiconosVector(_nDim, 0));
+  SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->getN(), 0));
   _DS_SMC->setb(dummyb);
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
-  _sensor = std11::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
-  if (_sensor == NULL)
-  {
-    RuntimeException::selfThrow("LinearSMC::initialize - the given sensor is not a ControlSensor");
-  }
-  else
-  {
-    double t0 = _model->t0();
-    double T = _model->finalT() + _timeDiscretisation->currentTimeStep();
-    // create the SMC Model
-    _SMC.reset(new Model(t0, T));
-    // create the interaction
-    _relationSMC.reset(new FirstOrderLinearTIR(_Csurface, _B));
-    std11::static_pointer_cast<FirstOrderLinearTIR>(_relationSMC)->setDPtr(_D);
-    _nsLawSMC.reset(new RelayNSL(_sDim));
+  double t0 = m.t0();
+  double T = m.finalT() + _timeDiscretisation->currentTimeStep();
+  // create the SMC Model
+  _SMC.reset(new Model(t0, T));
+  // create the interaction
+  _relationSMC.reset(new FirstOrderLinearTIR(_Csurface, _B));
+  std11::static_pointer_cast<FirstOrderLinearTIR>(_relationSMC)->setDPtr(_D);
+  unsigned int sDim = _Csurface->size(0);
+  _nsLawSMC.reset(new RelayNSL(sDim));
 
-    std::string id = "interaction for control";
-    _interactionSMC.reset(new Interaction(_sDim, _nsLawSMC, _relationSMC));
-    _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
-    std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> descr =
-      _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
-    _SMC->nonSmoothDynamicalSystem()->setControlProperty(descr.second, descr.first, true);
-    // Copy the TD
-    _tD_SMC.reset(new TimeDiscretisation(*_timeDiscretisation));
-    // Set up the simulation
-    _simulationSMC.reset(new TimeStepping(_tD_SMC));
-    _simulationSMC->setName("linear sliding mode controller simulation");
-//    _integratorSMC.reset(new Moreau(_DS_SMC, _thetaSMC));
-    _integratorSMC.reset(new ZeroOrderHold(_DS_SMC));
-    _simulationSMC->insertIntegrator(_integratorSMC);
-    // OneStepNsProblem
-    _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
-    _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
-    //    std::cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] <<std::endl;
-    _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);
-    // Finally we can initialize everything ...
-    _SMC->initialize(_simulationSMC);
+  std::string id = "interaction for control";
+  _interactionSMC.reset(new Interaction(sDim, _nsLawSMC, _relationSMC));
+  _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
+  _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
+  _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);
+  // Copy the TD
+  _tD_SMC.reset(new TimeDiscretisation(*_timeDiscretisation));
+  // Set up the simulation
+  _simulationSMC.reset(new TimeStepping(_tD_SMC));
+  _simulationSMC->setName("linear sliding mode controller simulation");
+    _integratorSMC.reset(new Moreau(_DS_SMC, _thetaSMC));
+  _integratorSMC.reset(new ZeroOrderHold(_DS_SMC));
+  _simulationSMC->insertIntegrator(_integratorSMC);
+  // OneStepNsProblem
+  _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
+  _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
+  //    std::cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] <<std::endl;
+  _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);
+  // Finally we can initialize everything ...
+  _SMC->initialize(_simulationSMC);
 
-    // Handy
-    _eventsManager = _simulationSMC->eventsManager();
-    _lambda.reset(new SiconosVector(_sDim));
-    _lambda = _interactionSMC->lambda(0);
-    _xController = _DS_SMC->x();
-    _u.reset(new SiconosVector(_nDim, 0));
+  // Handy
+  _eventsManager = _simulationSMC->eventsManager();
+  _lambda.reset(new SiconosVector(sDim));
+  _lambda = _interactionSMC->lambda(0);
 
-    // XXX really stupid stuff
-    _sampledControl.reset(new SiconosVector(_nDim, 0));
-    _DS->setzPtr(_sampledControl);
-  }
   _indx = 0;
   SP::SimpleMatrix tmpM(new SimpleMatrix(_Csurface->size(0), _B->size(1)));
   _invCB.reset(new SimpleMatrix(*tmpM));
   prod(*_Csurface, *_B, *tmpM);
   invertMatrix(*tmpM, *_invCB);
-  _us.reset(new SiconosVector(_sDim));
-  _ueq.reset(new SiconosVector(_sDim));
+  _us.reset(new SiconosVector(sDim));
+  _ueq.reset(new SiconosVector(sDim));
 }
 
 void CommonSMC::setCsurface(const SiconosMatrix& newValue)
 {
   // check dimensions ...
-  if (newValue.size(1) != _nDim)
+  if (_Csurface)
   {
-    RuntimeException::selfThrow("CommonSMC::setCsurface - inconstency between the dimension of the state space and Csurface");
+    *_Csurface = newValue;
   }
   else
   {
-    if (_Csurface)
-    {
-      *_Csurface = newValue;
-    }
-    else
-    {
-      _Csurface.reset(new SimpleMatrix(newValue));
-    }
-    _sDim = newValue.size(0);
+    _Csurface.reset(new SimpleMatrix(newValue));
   }
 }
 
@@ -177,21 +157,13 @@ void CommonSMC::computeUeq()
 void CommonSMC::setCsurfacePtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
-  if (newPtr->size(1) != _nDim)
-  {
-    RuntimeException::selfThrow("CommonSMC::setCsurfacePtr - inconstency between the dimension of the state space and Csurface");
-  }
-  else
-  {
-    _Csurface = newPtr;
-    _sDim = newPtr->size(0);
-  }
+  _Csurface = newPtr;
 }
 
-void CommonSMC::setSaturationMatrix(const SiconosMatrix& newValue)
+void CommonSMC::setSaturationMatrix(const SiconosMatrix& satM)
 {
   // check dimensions ...
-  if (newValue.size(1) != _nDim)
+  if (satM.size(1) != _B->size(1))
   {
     RuntimeException::selfThrow("CommonSMC::setSaturationMatrix - inconstency between the dimension of the state space and D");
   }
@@ -199,11 +171,11 @@ void CommonSMC::setSaturationMatrix(const SiconosMatrix& newValue)
   {
     if (_D)
     {
-      *_D = newValue;
+      *_D = satM;
     }
     else
     {
-      _D.reset(new SimpleMatrix(newValue));
+      _D.reset(new SimpleMatrix(satM));
     }
   }
 }
@@ -211,7 +183,7 @@ void CommonSMC::setSaturationMatrix(const SiconosMatrix& newValue)
 void CommonSMC::setSaturationMatrixPtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
-  if (newPtr->size(1) != _sDim)
+  if (newPtr->size(1) != _B->size(1))
   {
     RuntimeException::selfThrow("CommonSMC::setSaturationMatrixPtr - inconstency between the dimension of the state space and D");
   }
@@ -221,7 +193,4 @@ void CommonSMC::setSaturationMatrixPtr(SP::SiconosMatrix newPtr)
   }
 }
 
-void CommonSMC::setB(const SiconosMatrix& B)
-{
-  _B.reset(new SimpleMatrix(B));
-}
+

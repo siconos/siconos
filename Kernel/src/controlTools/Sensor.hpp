@@ -108,17 +108,17 @@ protected:
   ACCEPT_SERIALIZATION(Sensor);
 
   /** type of the Sensor */
-  int _type;
+  unsigned int _type;
 
   /** id of the Sensor */
   std::string _id;
 
-  /** SP::Model */
-  SP::Model _model;
   /** pointer to the DynamicalSystem we are measuring */
   SP::DynamicalSystem _DS;
+
   /** pointer to the state of the DynamicalSystem */
   SP::SiconosVector _DSx;
+
   /** The dimension of the state space of _DS */
   unsigned int _nDim;
   /** A time discretisation scheme */
@@ -136,11 +136,11 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param name the type of the Sensor, which corresponds to the class type.
+   * \param type the type of the Sensor, which corresponds to the class type.
    * \param t the SP::TimeDiscretisation used by this Sensor (/!\ it should not be used elsewhere !).
    * \param ds the SP::DynamicalSystem we observe.
    */
-  Sensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
+  Sensor(unsigned int type, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
   /** destructor
    */
@@ -193,9 +193,9 @@ public:
   //  {return _data;};
 
   /** initialize sensor data.
-   * \param m the SP::Model containing the EventsManager
+   * \param m the Model
    */
-  virtual void initialize(SP::Model m);
+  virtual void initialize(const Model& m);
 
   /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
    */

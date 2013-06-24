@@ -162,8 +162,8 @@ void ZOHTest::testMatrixIntegration2()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> descr = _model->nonSmoothDynamicalSystem()->link(inter, _DS);
-  _model->nonSmoothDynamicalSystem()->setControlProperty(descr.second, descr.first, true);
+  _model->nonSmoothDynamicalSystem()->link(inter, _DS);
+  _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
   _ZOH.reset(new ZeroOrderHold(_DS));
   _sim->insertIntegrator(_ZOH);
@@ -228,8 +228,8 @@ void ZOHTest::testMatrixIntegration3()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> descr = _model->nonSmoothDynamicalSystem()->link(inter, _DS);
-  _model->nonSmoothDynamicalSystem()->setControlProperty(descr.second, descr.first, true);
+  _model->nonSmoothDynamicalSystem()->link(inter, _DS);
+  _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
   _ZOH.reset(new ZeroOrderHold(_DS));
   _sim->insertIntegrator(_ZOH);
@@ -300,8 +300,8 @@ void ZOHTest::testMatrixIntegration4()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> descr = _model->nonSmoothDynamicalSystem()->link(inter, _DS);
-  _model->nonSmoothDynamicalSystem()->setControlProperty(descr.second, descr.first, true);
+  _model->nonSmoothDynamicalSystem()->link(inter, _DS);
+  _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
   _ZOH.reset(new ZeroOrderHold(_DS));
   _sim->insertIntegrator(_ZOH);

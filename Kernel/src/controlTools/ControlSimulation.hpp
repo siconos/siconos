@@ -31,8 +31,8 @@
 #ifndef TimeStepping_H
 DEFINE_SPTR(TimeStepping)
 #endif
-#ifndef Moreau_H
-DEFINE_SPTR(Moreau)
+#ifndef OneStepIntegrator_H
+//DEFINE_SPTR(OneStepIntegrator)
 #endif
 #ifndef ControlManager_H
 DEFINE_SPTR(ControlManager)
@@ -81,7 +81,7 @@ protected:
   /** TimeStepping */
   SP::TimeStepping _processSimulation;
   /** Moreau */
-  SP::Moreau _processIntegrator;
+  SP::OneStepIntegrator _processIntegrator;
   /** the ControlManager */
   SP::ControlManager _CM;
 

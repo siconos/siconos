@@ -113,7 +113,7 @@ public :
   Registration(int name, object_creator object) ;
 } ;
 
-#define AUTO_REGISTER_SENSOR(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);
+#define AUTO_REGISTER_SENSOR(class_name, class_type) SensorFactory::Registration _registration_## class_type(class_name, &SensorFactory::factory<class_type>);
 }
 // end of namespace SensorFactory
 

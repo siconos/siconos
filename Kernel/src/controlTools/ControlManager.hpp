@@ -34,6 +34,12 @@ class Sensor;
 class Model;
 class TimeDiscretisation;
 
+/** A set of Sensors */
+typedef std::set<SP::Sensor> Sensors;
+
+/** An iterator through a set of Sensors */
+typedef Sensors::iterator SensorsIterator;
+
 /** A set of Actuators */
 typedef std::set<SP::Actuator> Actuators;
 
@@ -208,10 +214,11 @@ public:
   /** To build and add a new Observer in the Manager
    * \param name the type of the Observer
    * \param t the SP::TimeDiscretisation of the Observer
-   * \param number the index of the DynamicalSystem we want to act on
+   * \param sensor the ControlSensor feeding the Observer
+   * \param xHat0 the initial guess for the state
    * \return a SP::ACtuator to the added Observer
    */
-  SP::Observer addObserver(int name, SP::TimeDiscretisation t, unsigned int number = 0);
+  SP::Observer addObserver(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0);
 
   /** To build, add, initialize a new Observer in the manager and
    * record it in the simulation This function is only useful to add a
@@ -219,10 +226,11 @@ public:
    * addObserver()
    * \param name the type of the Observer
    * \param t the SP::TimeDiscretisation of the Observer
-   * \param number the index of the DynamicalSystem we want to act on
+   * \param sensor the ControlSensor feeding the Observer
+   * \param xHat0 the initial guess for the state
    * \return a SP::Observer to the added Observer
    */
-  SP::Observer addAndRecordObserver(int name, SP::TimeDiscretisation t, unsigned int number = 0);
+  SP::Observer addAndRecordObserver(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0);
 
   /** Add an existing Observer to the manager
    * \param obs a SP::Observer to the Observer we want to add

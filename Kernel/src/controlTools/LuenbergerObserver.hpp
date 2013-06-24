@@ -59,6 +59,9 @@ protected:
 
   double _theta;
 
+  // clumsy hack to do nothing the first time this Observer is called
+  bool _pass;
+
 public:
 
   /** Constructor with a TimeDiscretisation and a Model.
@@ -83,9 +86,9 @@ public:
   virtual void process();
 
   /** Initialization
-   * \param m a SP::Model
+   * \param m the Model
    */
-  virtual void initialize(SP::Model m);
+  virtual void initialize(const Model& m);
 
   /** Set the L matrix
    * \param L the new L matrix

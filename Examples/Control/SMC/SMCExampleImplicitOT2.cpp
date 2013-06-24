@@ -66,7 +66,8 @@ int main(int argc, char* argv[])
   sensorC->eye();
   SP::SimpleMatrix Csurface(new SimpleMatrix(1, 2, 0));
   (*Csurface)(0, 1) = 1;
-
+  SP::SimpleMatrix B(new SimpleMatrix(2, 1, 0));
+  (*B)(1, 0) = 1;
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
   processDS->setComputebFunction("RelayPlugin.so", "computeB");
@@ -88,7 +89,7 @@ int main(int argc, char* argv[])
   SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
   processSimulation->setName("plant simulation");
   // -- OneStepIntegrators --
-  SP::Moreau processIntegrator(new Moreau(processDS, theta));
+  SP::ZeroOrderHold processIntegrator(new ZeroOrderHold(processDS));
   processSimulation->insertIntegrator(processIntegrator);
 
   // Control stuff
@@ -100,6 +101,7 @@ int main(int argc, char* argv[])
   SP::LinearSMCOT2 act = std11::static_pointer_cast<LinearSMCOT2>
                          (control->addActuator(LINEAR_SMC_OT2, tActuator));
   act->setCsurfacePtr(Csurface);
+  act->setBPtr(B);
   act->addSensorPtr(sens);
 
   // =========================== End of model definition ===========================
@@ -114,18 +116,17 @@ int main(int argc, char* argv[])
   control->initialize();
 
   // --- Get the values to be plotted ---
-  unsigned int outputSize = 5; // number of required data
+  unsigned int outputSize = 4; // number of required data
   unsigned int N = ceil((T - t0) / h) + 10; // Number of time steps
 
   SP::SiconosVector xProc = processDS->x();
-  SP::SiconosVector uProc = processDS->z();
+  const SiconosVector& uProc = act->u();
   // Save data in a matrix dataPlot
   SimpleMatrix dataPlot(N, outputSize);
   dataPlot(0, 0) = process->t0(); // Initial time of the model
   dataPlot(0, 1) = (*xProc)(0);
   dataPlot(0, 2) = (*xProc)(1);
-  dataPlot(0, 3) = (*uProc)(0);
-  dataPlot(0, 4) = (*uProc)(1);
+  dataPlot(0, 3) = (uProc)(0);
 
   SP::EventsManager eventsManager = processSimulation->eventsManager();
 
@@ -139,16 +140,15 @@ int main(int argc, char* argv[])
   SP::Event nextEvent;
   while (processSimulation->hasNextEvent())
   {
-    processSimulation->computeOneStep();
     nextEvent = eventsManager->nextEvent();
     if (nextEvent->getType() == TD_EVENT)
     {
+      processSimulation->computeOneStep();
       k++;
       dataPlot(k, 0) = processSimulation->nextTime();
       dataPlot(k, 1) = (*xProc)(0);
       dataPlot(k, 2) = (*xProc)(1);
-      dataPlot(k, 3) = (*uProc)(0);
-      dataPlot(k, 4) = (*uProc)(1);
+      dataPlot(k, 3) = (uProc)(0);
       ++show_progress;
     }
     processSimulation->nextStep();

@@ -50,32 +50,14 @@ protected:
   /** default constructor */
   CommonSMC() {};
 
-  /** codimension size */
-  unsigned int _sDim;
-
   /** index for saving data */
   unsigned int _indx;
-
-  /** control variable */
-  SP::SiconosVector _u;
 
   /** the vector defining the surface (\f$ s = Cx \f$) */
   SP::SiconosMatrix _Csurface;
 
-  /** the sensor that feed the controller */
-  SP::ControlSensor _sensor;
-
-  /** boolean to determined if the controller has been correctly initialized */
-  bool _initDone;
-
   /** Do not use the state-continuous equivaluent control \f$u^{eq}\f$ */
   bool _noUeq;
-
-  /** current \f$\Delta t\f$ (or timeStep) */
-  double _curDeltaT;
-
-  /** matrix describing the relation between the control value and sgn(s) */
-  SP::SiconosMatrix _B;
 
   /** matrix describing the influence of \f$lambda\f$ on s */
   SP::SiconosMatrix _D;
@@ -86,14 +68,11 @@ protected:
   /** the NonSmoothLaw for the controller */
   SP::NonSmoothLaw _sign;
 
-  /** */
+  /** Interaction for the control */
   SP::Interaction _interactionSMC;
 
   /** easy access to lambda */
   SP::SiconosVector _lambda;
-
-  /** easy access to the state */
-  SP::SiconosVector _xController;
 
   /** Relay solver type */
   int _numericsSolverId;
@@ -115,8 +94,7 @@ protected:
   double _thetaSMC;
   /** OneStepNsProblem for the controller */
   SP::Relay _OSNSPB_SMC;
-  /** SP::SiconosVector containing the control */
-  SP::SiconosVector _sampledControl;
+
   /** SP::EventsManager of the SMC Simulation */
   SP::EventsManager _eventsManager;
   /** SP::NonSmoothLaw for computing the control law */
@@ -124,38 +102,35 @@ protected:
 
   /** inverse of CB */
   SP::SimpleMatrix _invCB;
-  /** Store \f$u_{eq}\f$ */
+
+  /** Store \f$u^{eq}\f$ */
   SP::SiconosVector _ueq;
+
   /** Store \f$u^s\f$ */
   SP::SiconosVector _us;
 
 public:
 
   /** Constructor with a TimeDiscretisation and a Model.
-   * \param name the type of the SMC Actuator
+   * \param type the type of the SMC Actuator
    * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
    * \param ds the SP::DynamicalSystem we are controlling
    */
-  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): Actuator(name, t, ds),
+  CommonSMC(unsigned int type, SP::TimeDiscretisation t): Actuator(type, t),
     _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5) {}
 
   /** Constructor with a TimeDiscretisation, a Model and two matrices
-   * \param name the type of the SMC Actuator
+   * \param type the type of the SMC Actuator
    * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
+   * \param B the B matrix
+   * \param D the saturation matrix
    */
-  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D):
-    Actuator(name, t, ds), _B(B), _D(D), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5) {}
+  CommonSMC(unsigned int type, SP::TimeDiscretisation t, SP::SiconosMatrix B, SP::SiconosMatrix D):
+    Actuator(type, t), _D(D), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5)
+  {
+    _B = B;
+  }
 
-
-  /** Constructor with a TimeDiscretisation, a Model and a set of Sensor.
-   * \param name the type of the SMC Actuator
-   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
-   * \param sensorList the set of Sensor linked to this Actuator.
-   */
-  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList):
-    Actuator(name, t, ds, sensorList), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5) {}
 
   /** Compute the new control law at each event
   */
@@ -164,7 +139,7 @@ public:
   /** Initialization
    * \param m a SP::Model
    */
-  virtual void initialize(SP::Model m);
+  virtual void initialize(const Model& m);
 
   /** Set the value of _Csurface to newValue
    * \param newValue the new value for _Csurface
@@ -192,19 +167,6 @@ public:
   inline SP::SiconosVector lambda() const
   {
     return _lambda;
-  };
-
-  /** Set the B matrix
-   * \param B the new B matrix
-  */
-  void setB(const SiconosMatrix& B);
-
-  /** Set the B matrix
-   * \param B the new B matrix
-   */
-  inline void setBPtr(SP::SiconosMatrix B)
-  {
-    _B = B;
   };
 
   /** Set the solver
