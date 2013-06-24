@@ -28,6 +28,8 @@
 #include "TimeDiscretisation.hpp"
 #include "ActuatorFactory.hpp"
 
+#include <boost/circular_buffer.hpp>
+
 LinearSMCimproved::LinearSMCimproved(SP::TimeDiscretisation t):
   LinearSMC(t, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false)
 {
@@ -42,12 +44,63 @@ LinearSMCimproved::~LinearSMCimproved()
 {
 }
 
-void LinearSMCimproved::predictionPerturbation()
+void LinearSMCimproved::initialize(const Model& m)
+{
+  LinearSMC::initialize(m);
+  _up.reset(new SiconosVector(_us->size()));
+  _measuredPert.reset(new boost::circular_buffer<SP::SiconosVector>(0));
+  _predictedPert.reset(new boost::circular_buffer<SP::SiconosVector>(0));
+}
+
+void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleMatrix& CBstar)
 {
   if (_us->normInf() < 1)
   {
     if (_inDisceteTimeSlidingPhase)
-      *_ueq += *_us;
+    {
+      SiconosVector& up = *_up;
+      if (_measuredPert->full())
+      {
+        if (_measuredPert->size() > 1)
+        {
+          _measuredPert->rotate(_measuredPert->end()-1);
+          _predictedPert->rotate(_predictedPert->end()-1);
+        }
+      }
+      else
+      {
+        SP::SiconosVector sp1(new SiconosVector(_us->size(), 0));
+        SP::SiconosVector sp2(new SiconosVector(_us->size(), 0));
+        _measuredPert->push_front(sp1);
+        _predictedPert->push_front(sp2);
+      }
+      SiconosVector& predictedPertC = *(*_predictedPert)[0];
+      SiconosVector& measuredPertC = *(*_measuredPert)[0];
+
+      // Cp_k = s_k + Cp_k-tilde
+      prod(*_Csurface, xTk, measuredPertC);
+      measuredPertC += *(*_predictedPert)[std::min((long unsigned int)1,  _predictedPert->size()-1)];
+
+      switch(_measuredPert->size()-1)
+      {
+        case 0:
+          predictedPertC = measuredPertC;
+          break;
+        case 1:
+          predictedPertC = 2*measuredPertC - *(*_measuredPert)[1];
+          break;
+        case 2:
+          predictedPertC = 3*measuredPertC - 3*(*(*_measuredPert)[1]) + *(*_measuredPert)[2];
+          break;
+        default:
+          RuntimeException::selfThrow("LinearSMCimproved::predictionPerturbation: unknown order " + _measuredPert->size());
+      }
+
+      // Compute the control to counteract the perturbation
+      up = predictedPertC;
+      up *= -1;
+      CBstar.PLUForwardBackwardInPlace(up);
+    }
     else
       _inDisceteTimeSlidingPhase = true;
   }
@@ -57,7 +110,7 @@ void LinearSMCimproved::actuate()
 {
   unsigned int sDim = _u->size();
   SP::SimpleMatrix tmpM1(new SimpleMatrix(*_Csurface));
-  SP::SimpleMatrix tmpD(new SimpleMatrix(sDim, sDim, 0));
+  SP::SimpleMatrix CBstar(new SimpleMatrix(sDim, sDim, 0));
   SP::SiconosVector xTk(new SiconosVector(_sensor->y()));
 
   ZeroOrderHold& zoh = *std11::static_pointer_cast<ZeroOrderHold>(_integratorSMC);
@@ -67,11 +120,11 @@ void LinearSMCimproved::actuate()
   prod(*_Csurface, zoh.Ad(_DS_SMC), *tmpM1);
   *tmpM1 *= -1.0;
   *tmpM1 += *_Csurface;
-  prod(*_Csurface, zoh.Bd(_DS_SMC), *tmpD);
+  prod(*_Csurface, zoh.Bd(_DS_SMC), *CBstar);
   // compute C(I-e^{Ah})x_k
   prod(*tmpM1, *xTk, *_ueq);
   // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
-  tmpD->PLUForwardBackwardInPlace(*_ueq);
+  CBstar->PLUForwardBackwardInPlace(*_ueq);
 
   *(_DS_SMC->x()) = *xTk;
   prod(*_B, *_ueq, *(_DS_SMC->b()));
@@ -82,15 +135,26 @@ void LinearSMCimproved::actuate()
   // discontinous part
   *_us = *_lambda;
 
-  // prediction of the perturbation
-  if (_predictionPerturbation)
-    predictionPerturbation();
 
   // inject those in the system
   *_u = *_us;
   *_u += *_ueq;
+
+  // prediction of the perturbation
+  if (_predictionPerturbation)
+  {
+    predictionPerturbation(*xTk, *CBstar);
+    *_u += *_up;
+  }
+
   _indx++;
 
+}
+
+void LinearSMCimproved::setPredictionOrder(unsigned int order)
+{
+  _measuredPert->set_capacity(order+1);
+  _predictedPert->set_capacity(order+1);
 }
 
 AUTO_REGISTER_ACTUATOR(LINEAR_SMC_IMPROVED, LinearSMCimproved)
