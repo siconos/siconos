@@ -49,6 +49,8 @@
 
 // Misc
 #include "ControlManager.hpp"
+#include "MatrixIntegrator.hpp"
 
 // sugar
 #include "ControlFirstOrderLinearS.hpp"
+

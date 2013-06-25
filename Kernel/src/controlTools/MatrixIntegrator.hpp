@@ -72,6 +72,9 @@ protected:
   /** */
   void commonInit(const DynamicalSystem& ds, const Model& m);
 
+  /** Default constructor */
+  MatrixIntegrator() {};
+
 public:
 
   /** Constructor to compute \f$\int exp(A\tau)E\amthrm{d}\tau\f$

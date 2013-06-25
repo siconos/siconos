@@ -228,6 +228,51 @@ void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
                                        boost::serialization::base_object<SiconosMatrix>(m));
 }
 
+#include <f2c.h>
+template<typename Archive>
+void siconos_io(Archive& ar, Lsodar& osi)
+{
+  ar & boost::serialization::make_nvp("_intData", osi._intData);
+
+  if (Archive::is_loading::value)
+  {
+    osi.rtol.reset(new doublereal[osi._intData[0]]);
+    osi.atol.reset(new doublereal[osi._intData[0]]);
+    osi.iwork.reset(new integer[osi._intData[7]]);
+    osi.rwork.reset(new doublereal[osi._intData[6]]);
+    osi.jroot.reset(new integer[osi._intData[1]]);
+  }
+  {
+    boost::serialization::array<doublereal>
+      wrapper = boost::serialization::make_array(osi.rtol.get(),osi._intData[0]); 
+    ar & boost::serialization::make_nvp("rtol",wrapper); 
+  }
+  {
+    boost::serialization::array<doublereal>
+      wrapper = boost::serialization::make_array(osi.atol.get(),osi._intData[0]); 
+    ar & boost::serialization::make_nvp("atol",wrapper); 
+  }
+  {
+    boost::serialization::array<integer>
+      wrapper = boost::serialization::make_array(osi.iwork.get(),osi._intData[7]); 
+    ar & boost::serialization::make_nvp("iwork",wrapper); 
+  }
+  {
+    boost::serialization::array<doublereal>
+      wrapper = boost::serialization::make_array(osi.rwork.get(),osi._intData[6]); 
+    ar & boost::serialization::make_nvp("rwork",wrapper); 
+  }
+  {
+    boost::serialization::array<integer>
+      wrapper = boost::serialization::make_array(osi.jroot.get(),osi._intData[1]); 
+    ar & boost::serialization::make_nvp("jroot",wrapper); 
+  }
+  
+  ar & boost::serialization::make_nvp("OneStepIntegrator", 
+                                      boost::serialization::base_object<OneStepIntegrator>(osi));
+}
+
+
 template<typename Archive, typename P>
 void siconos_property_io(Archive& ar, P& p)
 {
@@ -269,12 +314,15 @@ void siconos_property_io(Archive& ar, P& p)
  
 namespace Siconos
 {
-MAKE_SICONOS_IO_PROPERTIES(SP::OneStepIntegrator);
-MAKE_SICONOS_IO_PROPERTIES(SP::SimpleMatrix);
-MAKE_SICONOS_IO_PROPERTIES(SP::SiconosVector);
-MAKE_SICONOS_IO_PROPERTIES(double);
-MAKE_SICONOS_IO_PROPERTIES(int);
-MAKE_SICONOS_IO_PROPERTIES(bool);
+  MAKE_SICONOS_IO_PROPERTIES(SP::MatrixIntegrator);
+  MAKE_SICONOS_IO_PROPERTIES(SP::PluggedObject);
+  MAKE_SICONOS_IO_PROPERTIES(SP::OneStepIntegrator);
+  MAKE_SICONOS_IO_PROPERTIES(SP::SiconosMatrix);
+  MAKE_SICONOS_IO_PROPERTIES(SP::SimpleMatrix);
+  MAKE_SICONOS_IO_PROPERTIES(SP::SiconosVector);
+  MAKE_SICONOS_IO_PROPERTIES(double);
+  MAKE_SICONOS_IO_PROPERTIES(int);
+  MAKE_SICONOS_IO_PROPERTIES(bool);
 }
 
 namespace boost
@@ -367,6 +415,13 @@ void serialize(Archive& ar, SimpleMatrix& m, unsigned int version)
 {
   siconos_io(ar, m, version);
 }
+
+template <class Archive>
+void serialize(Archive&ar, Lsodar& osi, unsigned int version)
+{
+  siconos_io(ar, osi, version);
+}
+
 
 template <class Archive, class T>
 void serialize(Archive& ar, Siconos::VertexProperties<T, _DynamicalSystemsGraph>& p, unsigned int version)
