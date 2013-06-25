@@ -79,7 +79,7 @@ void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleM
 
       // Cp_k = s_k + Cp_k-tilde
       prod(*_Csurface, xTk, measuredPertC);
-      measuredPertC += *(*_predictedPert)[std::min((long unsigned int)1,  _predictedPert->size()-1)];
+      measuredPertC += *(*_predictedPert)[std::min((unsigned int)1, (unsigned int)_predictedPert->size()-1)];
 
       switch(_measuredPert->size()-1)
       {
