@@ -191,7 +191,7 @@ protected:
   double _normRef;
 
   /** state of the system,
-   *  \f$  x \in R^{n}\f$ - With x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
+   *  \f$  x \in R^{n}\f$ - With x[0]=\f$ x \f$ , x[1]= \f$ \dot{x} \f$ . */
   VectorOfVectors _x;
 
   /** jacobian according to x of the right-hand side (\f$ \dot x =
@@ -559,14 +559,14 @@ public:
   }
 
   // -- Jacobian g --
-  /** get the value of jacobianG
+  /* get the value of jacobianG
     \param index of the desired jacobian
     *  \return a plugged-matrix
 
   inline const PMFInt getJacobianG(unsigned int i) const { return *(jacobianG[i]); }
   */
 
-  /** get jacobianG
+  /* get jacobianG
       \param index of the desired jacobian
       *  \return pointer on a plugged-matrix
       */
@@ -574,13 +574,13 @@ public:
   //  inline SP::SiconosMatrix jacobianXDotG() const { return _jacxDotG; }
   //  inline SP::SiconosMatrix jacobianZG() const { return jacobianZG; }
 
-  /** set the value of jacobianG to newValue
+  /* set the value of jacobianG to newValue
       \param index of the desired jacobian
       *  \param plugged-matrix newValue
   void setJacobianG(unsigned int, const PMFInt&);
       */
 
-  /** set jacobianG to pointer newPtr
+  /* set jacobianG to pointer newPtr
       \param index of the desired jacobian
       *  \param a plugged matrix SP
       */
@@ -590,8 +590,8 @@ public:
 
   // X memory
 
-  /** get all the values of the state vector x stored in memory
-   *  \return a memory
+  /** get all the values of the state vector x stored in a SiconosMemory object
+   *  \return a pointer to the SiconosMemory object
    */
   inline SP::SiconosMemory xMemory() const
   {

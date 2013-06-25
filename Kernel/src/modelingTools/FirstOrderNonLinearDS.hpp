@@ -150,27 +150,27 @@ protected:
   FirstOrderNonLinearDS(): DynamicalSystem() {};
 
   /** constructor from a set of data
-      \param SiconosVector : initial state of this DynamicalSystem
+      \param newX0 initial state of this DynamicalSystem
   */
-  FirstOrderNonLinearDS(SP::SiconosVector);
-  FirstOrderNonLinearDS(const SiconosVector& SiconosVector);
+  FirstOrderNonLinearDS(SP::SiconosVector newX0);
+  FirstOrderNonLinearDS(const SiconosVector& newX0);
 
 public:
 
   // ===== CONSTRUCTORS =====
 
   /** xml constructor
-   *  \param DynamicalSystemXML* : the XML object for this DynamicalSystem
+   *  \param dsXML the XML object for this DynamicalSystem
    */
   FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML);
 
   /** constructor from a set of data
-   *  \param SiconosVector : initial state of this DynamicalSystem
-   *  \param std::string : plugin name for f of this DynamicalSystem
-   *  \param std::string : plugin name for jacobianfx of this DynamicalSystem
+   *  \param newX0 initial state of this DynamicalSystem
+   *  \param fPlugin plugin name for f of this DynamicalSystem
+   *  \param jacobianfxPlugin plugin name for jacobianfx of this DynamicalSystem
    *  \
    */
-  FirstOrderNonLinearDS(const SiconosVector&, const std::string&, const std::string&);
+  FirstOrderNonLinearDS(const SiconosVector& newX0, const std::string& fPlugin, const std::string& jacobianfxPlugin);
 
   /** Copy consctructor
    * \param FONLDS the FirstOrderNonLinearDS to copy
@@ -193,7 +193,9 @@ public:
   }
 
 
-  /*Return _residur.*/
+  /* Get _residur
+   * \return _residur
+   */
   inline SP::SiconosVector residur() const
   {
     return _residur;
@@ -230,7 +232,7 @@ public:
   void setM(const PMJF&);
   */
   /** set M to pointer newPtr
-   *  \param a plugged matrix SP
+   *  \param newPtr a plugged matrix
    */
   inline void setMPtr(SP::SiconosMatrix newPtr)
   {
@@ -260,14 +262,14 @@ public:
   }
 
   /** set the value of invM to newValue
-   *  \param SimpleMatrix newValue
+   *  \param newValue the new value
    */
-  void setInvM(const SiconosMatrix&);
+  void setInvM(const SiconosMatrix& newValue);
 
   /** link invM with a new pointer
-   *  \param a pointer to SiconosMatrix
+   *  \param newPtr the new value
    */
-  void setInvMPtr(SP::SiconosMatrix);
+  void setInvMPtr(SP::SiconosMatrix newPtr);
 
   // --- f ---
 
@@ -322,7 +324,7 @@ public:
   void setJacobianfx(const PMJF&);
   */
   /** set jacobianfx to pointer newPtr
-   *  \param a plugged matrix SP
+   *  \param newPtr the new value
    */
   inline void setJacobianfxPtr(SP::SiconosMatrix newPtr)
   {
@@ -330,21 +332,21 @@ public:
   }
 
   /** Initialization function for the rhs and its jacobian.
-   *  \param time of initialization
+   *  \param time the time of initialization
    */
-  void initRhs(double) ;
+  void initRhs(double time);
 
   /** Call all plugged-function to initialize plugged-object values
-      \param time
+      \param time the time used in the computations
    */
-  virtual void updatePlugins(double);
+  virtual void updatePlugins(double time);
 
   /** dynamical system initialization function except for _r :
    *  mainly set memory and compute value for initial state values.
-   *  \param time of initialisation, default value = 0
-   *  \param the size of the memory, default size = 1.
+   *  \param time time of initialisation, default value = 0
+   *  \param sizeOfMemory the size of the memory, default size = 1.
    */
-  void initialize(double = 0, unsigned int = 1);
+  void initialize(double time = 0, unsigned int sizeOfMemory = 1);
 
   /** dynamical system initialization function for NonSmoothInput _r
    *  \param level for _r
@@ -356,9 +358,9 @@ public:
 
   /** initialize the SiconosMemory objects: reserve memory for i
       vectors in memory and reset all to zero.
-   *  \param the size of the SiconosMemory (i)
+   *  \param steps the size of the SiconosMemory (i)
    */
-  void initMemory(unsigned int) ;
+  void initMemory(unsigned int steps);
 
   /** push the current values of x and r in memory (index 0 of memory is the last inserted vector)
    *  xMemory and rMemory,
@@ -382,81 +384,81 @@ public:
   void setComputeMFunction(FPtr1 fct);
 
   /** to set a specified function to compute f(x,t)
-   *  \param std::string pluginPath : the complete path to the plugin
-   *  \param std::string functionName : the function name to use in this library
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
   void setComputeFFunction(const std::string&  pluginPath, const std::string& functionName);
 
   /** set a specified function to compute the vector f
-   *  \param FPtr1 : a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeFFunction(FPtr1 fct);
 
   /** to set a specified function to compute jacobianfx
-   *  \param std::string pluginPath : the complete path to the plugin
-   *  \param the std::string functionName : function name to use in this library
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
   void setComputeJacobianfxFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute jacobianfx
-   *  \param FPtr1 : a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeJacobianfxFunction(FPtr1 fct);
 
   // --- compute plugin functions ---
 
   /** Default function to compute \f$ M: (x,t)\f$
-   * \param double time : current time
+   * \param time time instant used in the computations
    */
-  void computeM(double);
+  void computeM(double time);
 
   /** function to compute \f$ M: (x,t)\f$ with x different from current saved state.
-   * \param double time : current time
-   * \param SP::SiconosVector
+   * \param time time instant used in the computations
+   * \param x2 a SiconosVector to store the resuting value
    */
-  void computeM(double, SP::SiconosVector);
+  void computeM(double time, SP::SiconosVector x2);
 
   /** Default function to compute \f$ f: (x,t)\f$
-   * \param double time : current time
+   * \param time time instant used in the computations
    */
-  virtual void computef(double);
+  virtual void computef(double time);
 
   /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
-   * \param double time : current time
-   * \param SP::SiconosVector
+   * \param time time instant used in the computations
+   * \param x2 a SiconosVector to store the resuting value
    */
-  virtual void computef(double, SP::SiconosVector);
+  virtual void computef(double time, SP::SiconosVector x2);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time time instant used in the computations
+   *  \param isDSup flag to avoid recomputation of operators
    *
    */
-  virtual void computeJacobianfx(double, bool  = false);
+  virtual void computeJacobianfx(double time, bool isDSup = false);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n}
    *   \times R \mapsto R^{n \times n} \f$ with x different from
    *   current saved state.
-   *  \param double time : current time
-   *  \param SP::SiconosVector
+   *  \param time instant used in the computations
+   *  \param x2 a SiconosVector to store the resuting value
    */
-  virtual void computeJacobianfx(double, SP::SiconosVector);
+  virtual void computeJacobianfx(double time, SP::SiconosVector x2);
 
   /** Default function to the right-hand side term
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time time instant used in the computations
+   *  \param isDSup flag to avoid recomputation of operators
    *
    */
-  void computeRhs(double, bool  = false);
+  void computeRhs(double time, bool isDSUp = false);
 
   /** Default function to jacobian of the right-hand side term according to x
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time instant used in the computations
+   *  \param isDSup flag to avoid recomputation of operators
    *
    */
-  void computeJacobianRhsx(double, bool  = false);
+  void computeJacobianRhsx(double time, bool isDSUp = false);
 
   // ===== XML MANAGEMENT FUNCTIONS =====
 
@@ -475,6 +477,7 @@ public:
   virtual void resetAllNonSmoothPart();
 
   /** set R to zero fo a given level
+   * \param level the level to reset
    */
   virtual void resetNonSmoothPart(unsigned int level);
   /*

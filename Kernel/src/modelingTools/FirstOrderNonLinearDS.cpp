@@ -458,7 +458,7 @@ void FirstOrderNonLinearDS::computef(double time, SP::SiconosVector x2)
   // else nothing!
 }
 
-void FirstOrderNonLinearDS::computeJacobianfx(double time, bool)
+void FirstOrderNonLinearDS::computeJacobianfx(double time, bool isDSUp)
 {
   // second argument is useless at the time - Used in derived classes
   if (_pluginJacxf->fPtr)
@@ -472,7 +472,7 @@ void FirstOrderNonLinearDS::computeJacobianfx(double time, SP::SiconosVector x2)
     ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, &((*x2)(0)), &(*_jacobianfx)(0, 0), _z->size(), &(*_z)(0));
 }
 
-void FirstOrderNonLinearDS::computeRhs(double time, bool)
+void FirstOrderNonLinearDS::computeRhs(double time, bool isDSUp)
 {
   // second argument is useless at the time - Used in derived classes
 
@@ -495,7 +495,7 @@ void FirstOrderNonLinearDS::computeRhs(double time, bool)
   }
 }
 
-void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool)
+void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool isDSUp)
 {
   // second argument is useless at the time - Used in derived classes
 

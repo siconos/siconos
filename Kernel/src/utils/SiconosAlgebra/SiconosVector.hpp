@@ -174,7 +174,7 @@ public:
    */
   double* getArray(unsigned int = 0) const;
 
-  /** get block starting at "pos" (first argument) and of size block.size() and write it in v (second arg)
+  /* get block starting at "pos" (first argument) and of size block.size() and write it in v (second arg)
    *  \param pos an int, position of the first element of the required block
    *  \param v a SiconosVector *, in-out parameter.
    */
