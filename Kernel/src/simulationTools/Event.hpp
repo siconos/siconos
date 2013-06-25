@@ -151,7 +151,7 @@ public:
   {
     dTime = time;
     mpz_clear(timeOfEvent);
-    mpz_init_set_d(timeOfEvent, ceil(dTime / tick));
+    mpz_init_set_d(timeOfEvent, rint(dTime / tick));
   };
 
   /** get a type of the present event

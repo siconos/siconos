@@ -37,6 +37,16 @@ void EventsManager::initialize(const Simulation& sim)
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
   _events.push_back(regEvent.instantiate(sim.getTk(), TD_EVENT));
   _events[0]->setType(-1); // this is just a dumb event
+#if __cplusplus >= 201103L
+  assert(!::isnan(sim.getTkp1()));
+#else
+  assert(!std::isnan(sim.getTkp1()));
+#endif
+#if __cplusplus >= 201103L
+  assert(!::isnan(sim.getTkp2()));
+#else
+  assert(!std::isnan(sim.getTkp2()));
+#endif
   _events.push_back(regEvent.instantiate(sim.getTkp1(), TD_EVENT));
   _events.push_back(regEvent.instantiate(sim.getTkp2(), TD_EVENT));
 }

@@ -26,7 +26,7 @@ double Event::tick = DEFAULT_TICK;
 Event::Event(double time, int newType): type(newType), dTime(time)
 {
   // Initialize and set timeOfEvent.
-  mpz_init_set_d(timeOfEvent, ceil(time / tick)) ;
+  mpz_init_set_d(timeOfEvent, rint(time / tick)) ;
 }
 
 Event::~Event()
