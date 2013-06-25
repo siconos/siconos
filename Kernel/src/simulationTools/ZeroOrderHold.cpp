@@ -154,21 +154,21 @@ void ZeroOrderHold::initialize()
       if (DSG0.AdInt[dsgVD]->isConst())
         DSG0.AdInt[dsgVD]->integrate();
     }
-   if (DSG0.B[dsgVD])
+   if (DSG0.B.hasKey(dsgVD))
    {
      DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.B[dsgVD]));
      if (DSG0.Bd[dsgVD]->isConst())
        DSG0.Bd[dsgVD]->integrate();
    }
-   if (DSG0.L[dsgVD])
+   if (DSG0.L.hasKey(dsgVD))
    {
      DSG0.Ld[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.L[dsgVD]));
      if (DSG0.Ld[dsgVD]->isConst())
        DSG0.Ld[dsgVD]->integrate();
    }
-   if (DSG0.pluginB[dsgVD])
+   if (DSG0.pluginB.hasKey(dsgVD))
      DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.pluginB[dsgVD], DSG0.u[dsgVD]->size()));
-   if (DSG0.pluginL[dsgVD])
+   if (DSG0.pluginL.hasKey(dsgVD))
      DSG0.Ld[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.pluginL[dsgVD], DSG0.e[dsgVD]->size()));
 
     // Now we search for an Interaction dedicated to control
@@ -596,7 +596,7 @@ void ZeroOrderHold::computeFreeState()
       // check whether the DynamicalSystem is an Observer
       if (DSG0.e.hasKey(dsgVD))
       {
-        if (!DSG0.Bd.hasKey(dsgVD))
+        if (!DSG0.Ld.hasKey(dsgVD))
         {
           assert(DSG0.L.hasKey(dsgVD));
           DSG0.Ld[dsgVD].reset(new MatrixIntegrator(d, *simulationLink->model(), DSG0.L[dsgVD]));
