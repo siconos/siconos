@@ -95,20 +95,18 @@ public:
 
   /** Constructor with a TimeDiscretisation.
    * \param type the type of the Observer, which corresponds to the class type
-   * \param t a SP::TimeDiscretisation, (/!\ it should not be used elsewhere !)
    * \param sensor the SP::Sensor to get the measurements
    * \param xHat0 the initial guess for the state
    */
-  Observer(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId = "none");
+  Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId = "none");
 
   /** Constructor with a TimeDiscretisation.
    * \param type the type of the Observer, which corresponds to the class type.
-   * \param t a SP::TimeDiscretisation, (/!\ it should not be used elsewhere !).
    * \param sensor the SP::Sensor to get the measurements
    * \param xHat0 the initial guess for the state
-   * \param ds the SP::DynamicalSystem it acts on.
+   * \param ds the SP::DynamicalSystem used as a model for the real DynamicalSystem
    */
-  Observer(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId = "none");
+  Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId = "none");
 
   /** destructor
    */
@@ -138,13 +136,11 @@ public:
     return _type;
   };
 
-  /** get the TimeDiscretisation linked to this Observer
-  *  \return SP::TimeDiscretisation.
+  /** This is derived in child classes if they need to copy the TimeDiscretisation
+   * associated with this Sensor
+  *  \param td the TimeDiscretisation for this Sensor
   */
-  inline SP::TimeDiscretisation timeDiscretisation() const
-  {
-    return _td;
-  };
+  virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
   /** initialize observer data.
    * \param m a SP::Model

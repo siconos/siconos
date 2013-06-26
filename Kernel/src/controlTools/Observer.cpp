@@ -30,14 +30,14 @@ Observer::Observer(): _type(0), _id("none")
 {
 }
 
-Observer::Observer(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId):
-  _type(type), _td(t), _sensor(sensor), _id(newId)
+Observer::Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId):
+  _type(type), _sensor(sensor), _id(newId)
 {
   _xHat.reset(new SiconosVector(xHat0));
 }
 
-Observer::Observer(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId):
-  _type(type), _DS(ds), _td(t), _sensor(sensor), _id(newId)
+Observer::Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId):
+  _type(type), _DS(ds), _sensor(sensor), _id(newId)
 {
   _xHat.reset(new SiconosVector(xHat0));
 }
@@ -54,14 +54,15 @@ void Observer::initialize(const Model& m)
   {
     RuntimeException::selfThrow("Observer::initialize - the no ControlSensor was given");
   }
-  // == Create an event linked to the present Observer. ==
-  // Uses the events factory to insert the new event.
-  Event& ev = m.simulation()->eventsManager()->insertEvent(OBSERVER_EVENT, _td->currentTime());
-  static_cast<ObserverEvent&>(ev).setObserverPtr(shared_from_this());
 }
 
 void Observer::display() const
 {
   std::cout << "=====> Observer of type " << _type << ", named " << _id ;
   std::cout << std::endl;
+}
+
+void Observer::setTimeDiscretisation(const TimeDiscretisation& td)
+{
+  _td.reset(new TimeDiscretisation(td));
 }

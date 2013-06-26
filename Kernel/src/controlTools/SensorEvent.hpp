@@ -61,7 +61,7 @@ public:
   ~SensorEvent() {};
 
   /** get the Sensor linked to this Event
-   *  \return a SP::Sensor to the Sensor
+   *  \return a pointer to the Sensor
    */
   inline SP::Sensor sensor() const
   {
@@ -81,10 +81,6 @@ public:
    */
   void process(Simulation& sim);
 
-  /** Increment time of the present event according to
-      the time discretisation of the linked Actuator
-  */
-  void update();
 };
 
 #endif // SensorEvent_H

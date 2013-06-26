@@ -51,7 +51,7 @@ private:
   /** DynamicalSystem for the computation of _XPhi*/
   SP::FirstOrderLinearDS _DSPhi;
   /** TimeDiscretisation for the computation of _XPhi*/
-  SP::TimeDiscretisation _timeDPhi;
+  SP::TimeDiscretisation _tdPhi;
   /** OneSteoIntegrator for the computation of _XPhi*/
   SP::Lsodar _PhiOSI;
   /** Simulation for the computation of _XPhi*/
@@ -59,7 +59,7 @@ private:
   /** Model for the computation of Xhat*/
   SP::Model _modelPred;
   /** TimeDiscretisation for the computation of Xhat*/
-  SP::TimeDiscretisation _timeDPred;
+  SP::TimeDiscretisation _tdPred;
   /** OneSteoIntegrator for the computation of Xhat*/
   SP::Lsodar _PredOSI;
   /** Simulation for the computation of Xhat*/
@@ -71,10 +71,10 @@ private:
 
 public:
 
-  /** Constructor with a TimeDiscretisation and a Model.
-   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+  /** Constructor
+   * \param sensor the ControlSensor feeding the Actuator
    */
-  LinearSMCOT2(SP::TimeDiscretisation t);
+  LinearSMCOT2(SP::ControlSensor sensor);
 
   /** destructor
   */
@@ -90,6 +90,16 @@ public:
    * TODO
    */
   void actuate();
+
+    /** This is derived in child classes if they need to copy the TimeDiscretisation
+   * associated with this Sensor
+  *  \param td the TimeDiscretisation for this Sensor
+  */
+  virtual void setTimeDiscretisation(const TimeDiscretisation& td)
+  { 
+    _tdPhi.reset(new TimeDiscretisation(td));
+    _tdPred.reset(new TimeDiscretisation(td));
+  };
 
 };
 DEFINE_SPTR(LinearSMCOT2)

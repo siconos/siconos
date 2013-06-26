@@ -62,19 +62,18 @@ private:
 
 public:
 
-  /** Constructor with a TimeDiscretisation and a Model.
-   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+  /** Constructor for the SensorFactory
    * \param ds the SP::DynamicalSystem it observes
    */
-  LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
+  LinearSensor(SP::DynamicalSystem ds);
 
-  /** Constructor with a TimeDiscretisation, a Model and two matrices.
-   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+  /** Constructor with the full set of data
    * \param ds the SP::DynamicalSystem it observes.
    * \param C a SP::SiconosMatrix.
    * \param D a SP::SiconosMatrix (optional).
    */
-  LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SimpleMatrix C, SP::SimpleMatrix D = SP::SimpleMatrix());
+  LinearSensor(SP::DynamicalSystem ds,
+      SP::SimpleMatrix C, SP::SimpleMatrix D = SP::SimpleMatrix());
 
   /** Destructor
    */

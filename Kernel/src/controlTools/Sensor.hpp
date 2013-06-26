@@ -119,11 +119,6 @@ protected:
   /** pointer to the state of the DynamicalSystem */
   SP::SiconosVector _DSx;
 
-  /** The dimension of the state space of _DS */
-  unsigned int _nDim;
-  /** A time discretisation scheme */
-  SP::TimeDiscretisation _timeDiscretisation;
-
   /** default constructor
    */
   Sensor();
@@ -137,10 +132,9 @@ public:
 
   /** Constructor with a TimeDiscretisation.
    * \param type the type of the Sensor, which corresponds to the class type.
-   * \param t the SP::TimeDiscretisation used by this Sensor (/!\ it should not be used elsewhere !).
    * \param ds the SP::DynamicalSystem we observe.
    */
-  Sensor(unsigned int type, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
+  Sensor(unsigned int type, SP::DynamicalSystem ds);
 
   /** destructor
    */
@@ -178,13 +172,11 @@ public:
     return _DS;
   };
 
-  /** get the TimeDiscretisation linked to this Sensor
-  *  \return SP::TimeDiscretisation.
+  /** This is derived in child classes if they need to copy the TimeDiscretisation
+   * associated with this Sensor
+  *  \param td the TimeDiscretisation for this Sensor
   */
-  inline SP::TimeDiscretisation timeDiscretisation() const
-  {
-    return _timeDiscretisation;
-  };
+  virtual void setTimeDiscretisation(const TimeDiscretisation& td) {};
 
   /** get all the data saved for this sensor
    *  \return a DataSet
@@ -195,7 +187,7 @@ public:
   /** initialize sensor data.
    * \param m the Model
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const Model& m) {};
 
   /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
    */

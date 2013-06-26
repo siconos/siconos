@@ -63,8 +63,8 @@ protected:
    * \param ds the SP::DynamicalSystem it observes
    * \param delay the delay between the measurement and the avaibility of the data
    */
-  ControlSensor(unsigned int type, SP::TimeDiscretisation t, SP::DynamicalSystem ds, double delay = 0):
-    Sensor(type, t, ds), _delay(delay) {}
+  ControlSensor(unsigned int type, SP::DynamicalSystem ds, double delay = 0):
+    Sensor(type, ds), _delay(delay) {}
 
 public:
 

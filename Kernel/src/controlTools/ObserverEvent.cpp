@@ -26,12 +26,4 @@ void ObserverEvent::process(Simulation& sim)
   _observer->process();
 }
 
-void ObserverEvent::update()
-{
-  // Increment observer time discr. to next step
-  _observer->timeDiscretisation()->increment();
-  // set observer event time to new current time value
-  setTime(_observer->timeDiscretisation()->currentTime());
-}
-
 AUTO_REGISTER_EVENT(OBSERVER_EVENT, ObserverEvent)

@@ -25,8 +25,10 @@
 #include "TimeDiscretisation.hpp"
 #include "ControlSensor.hpp"
 #include "SimpleMatrix.hpp"
+#include "Model.hpp"
+#include "Simulation.hpp"
 
-PID::PID(SP::TimeDiscretisation t): Actuator(PID_, t)
+PID::PID(SP::ControlSensor sensor): Actuator(PID_, sensor)
 {
 }
 
@@ -40,8 +42,7 @@ void PID::initialize(const Model& m)
   (*_B)(1, 0) = 1;
   Actuator::initialize(m);
 
-  // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
-  // We can use the Visitor mighty power to check if we have the right type
+  _curDeltaT = m.simulation()->timeDiscretisation()->currentTimeStep();
 
   // initialize _err
   _err.reset(new boost::circular_buffer<double> (3));
@@ -55,7 +56,6 @@ void PID::actuate()
   // TODO support the nonlinear case
 
   // Get DeltaT
-  double _curDeltaT = _timeDiscretisation->currentTimeStep();
 
   // Compute the new error
 
@@ -97,5 +97,12 @@ void PID::setKPtr(SP::SiconosVector newPtr)
   {
     _K = newPtr;
   }
+}
+
+void PID::display() const
+{
+  Actuator::display();
+  std::cout << "current error vector: ";
+  std::cout << (*_err)[0] << " "  << (*_err)[1] << " " << (*_err)[2] << std::endl;
 }
 AUTO_REGISTER_ACTUATOR(PID_, PID)

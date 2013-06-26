@@ -85,6 +85,9 @@ protected:
    */
   static double tick;
 
+  /** TimeDiscretisation for the Event (unused only in the NonSmoothEvent) */
+  SP::TimeDiscretisation _td;
+
   /** Default constructor */
   Event(): type(0), dTime(0.0)
   {
@@ -170,6 +173,14 @@ public:
     type = newType;
   };
 
+  /** Set the TimeDiscretisation
+   * \param td a TimeDiscretisation for this Event
+   */
+  inline void setTimeDiscretisation(SP::TimeDiscretisation td)
+  {
+    _td = td;
+  }
+
   /** display Event data
    */
   void display() const ;
@@ -179,7 +190,9 @@ public:
    */
   virtual void process(Simulation& sim) = 0;
 
-  /** virtual function which actions depends on event type */
+  /** virtual function which actions depends on event type.
+   * The generic implementation present in this object is to increment the
+   * TimeDiscretisation and to chamge the time of the current Event */
   virtual void update();
 
 };

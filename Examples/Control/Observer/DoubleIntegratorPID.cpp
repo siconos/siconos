@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
     SP::SiconosMatrix A(new SimpleMatrix(nDof, nDof));
     A->zero();
     (*A)(0, 1) = 1;
+    (*A)(1, 0) = -1;
 
     SP::SiconosVector B(new SiconosVector(nDof));
     B->zero();
@@ -86,40 +87,39 @@ int main(int argc, char* argv[])
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-    SP::TimeDiscretisation tSensor(new TimeDiscretisation(t0, h));
-    SP::TimeDiscretisation tActuator(new TimeDiscretisation(t0, h));
-    SP::TimeDiscretisation tObserver(new TimeDiscretisation(t0, h));
+    SP::TimeDiscretisation tSensor(new TimeDiscretisation(t0+1e-10, h));
+    SP::TimeDiscretisation tActuator(new TimeDiscretisation(t0+1e-10+2e-14, h));
+    SP::TimeDiscretisation tObserver(new TimeDiscretisation(t0+1e-10+1e-14, h));
 
     // -- (3) Simulation setup with (1) (2)
-    SP::TimeStepping s(new TimeStepping(t, 0));
-    s->insertIntegrator(OSI);
+    SP::TimeStepping processSimulation(new TimeStepping(t, 0));
+    processSimulation->insertIntegrator(OSI);
 
     // define the control manager
-    SP::ControlManager control(new ControlManager(process));
+    SP::ControlManager control(new ControlManager(processSimulation));
 
     // use a controlSensor
     SP::SimpleMatrix C(new SimpleMatrix(1, 2, 0));
     (*C)(0, 0) = 1;
-    SP::LinearSensor sens(new LinearSensor(tSensor, doubleIntegrator, C));
-    control->addSensorPtr(sens);
+    SP::LinearSensor sens(new LinearSensor(doubleIntegrator, C));
+    control->addSensorPtr(sens, tSensor);
 
     // add the Observer
     SP::SiconosMatrix L(new SimpleMatrix(2, 1));
-    (*L)(0, 0) = -17.5;
-    (*L)(1, 0) = -100;
+    (*L)(0, 0) = -17.48228858;
+    (*L)(1, 0) = -99.02083594;
     SP::SiconosVector xHat0(new SiconosVector(2));
     (*xHat0)(0) = -10;
     (*xHat0)(1) = -5;
-    SP::Observer obs(new LuenbergerObserver(tObserver, sens, *xHat0, C, L));
-    control->addObserverPtr(obs);
+    SP::Observer obs(new LuenbergerObserver(sens, *xHat0, C, L));
+    control->addObserverPtr(obs, tObserver);
     // add the PID controller
     SP::SiconosVector K(new SiconosVector(3, 0));
     (*K)(0) = .25;
     (*K)(1) = .125;
     (*K)(2) = 2;
     SP::PID act = std11::static_pointer_cast<PID>
-                                 (control->addActuator(PID_, tActuator));
-    act->addSensorPtr(sens);
+                                 (control->addActuator(PID_, tActuator, sens));
 
     // To store the nextEvent
     SP::Event currentEvent;
@@ -134,12 +134,12 @@ int main(int argc, char* argv[])
 
     cout << "====> Initialisation ..." << endl << endl;
     // Initialize the model and the controlManager
-    process->initialize(s);
-    control->initialize();
+    process->initialize(processSimulation);
+    control->initialize(*process);
     act->setRef(xFinal);
     act->setK(*K);
 
-    SP::EventsManager eventsManager = s->eventsManager();
+    SP::EventsManager eventsManager = processSimulation->eventsManager();
     unsigned int N = ceil((T - t0) / h + 10); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -167,20 +167,21 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
 
-    while (s->hasNextEvent())
+    while (processSimulation->hasNextEvent())
     {
       eventsManager->display();
       nextEvent = eventsManager->nextEvent();
-      currentEvent = eventsManager->currentEvent();
       // --- Get values to be plotted ---
       // the following check prevents saving the same data multiple times
       // XXX what happends if we have NS Events ?
       if (nextEvent->getType() == TD_EVENT)
-        s->computeOneStep();
+        processSimulation->computeOneStep();
 
+      processSimulation->nextStep();
+      currentEvent = eventsManager->currentEvent();
       if (currentEvent->getType() == OBSERVER_EVENT)
       {
-        dataPlot(k, 0) =  s->nextTime();
+        dataPlot(k, 0) =  processSimulation->startingTime();
         dataPlot(k, 1) = (xProc)(0);
         dataPlot(k, 2) = (xProc)(1);
         dataPlot(k, 3) = (u)(0);
@@ -191,7 +192,6 @@ int main(int argc, char* argv[])
         ++show_progress;
         k++;
       }
-      s->nextStep();
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;

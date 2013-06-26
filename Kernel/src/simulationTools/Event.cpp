@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "Event.hpp"
+#include "TimeDiscretisation.hpp"
 #include "RuntimeException.hpp"
 #include <cmath>
 
@@ -46,5 +47,9 @@ void Event::display() const
 
 void Event::update()
 {
-  RuntimeException::selfThrow("Event::update, not yet implemented or forbidden for this type of event.");
+  if (_td)
+  {
+    _td->increment();
+    setTime(_td->currentTime());
+  }
 }

@@ -26,7 +26,7 @@
 #include "ExplicitLinearSMC.hpp"
 
 
-ExplicitLinearSMC::ExplicitLinearSMC(SP::TimeDiscretisation t): CommonSMC(EXPLICIT_LINEAR_SMC, t)
+ExplicitLinearSMC::ExplicitLinearSMC(SP::ControlSensor sensor): CommonSMC(EXPLICIT_LINEAR_SMC, sensor)
 {
 }
 

@@ -54,7 +54,7 @@ void ControlSimulation::initialize(SP::SiconosVector x0)
   _model->initialize(_processSimulation);
 
   // Control part
-  _CM.reset(new ControlManager(_model));
+  _CM.reset(new ControlManager(_processSimulation));
 
   // Output
   _N = ceil((_T - _t0) / _h) + 10; // Number of time steps
@@ -62,14 +62,14 @@ void ControlSimulation::initialize(SP::SiconosVector x0)
 }
 
 
-void ControlSimulation::addSensorPtr(SP::Sensor newSensor)
+void ControlSimulation::addSensorPtr(SP::Sensor newSensor, SP::TimeDiscretisation td)
 {
-  _CM->addSensorPtr(newSensor);
+  _CM->addSensorPtr(newSensor, td);
 }
 
-void ControlSimulation::addActuatorPtr(SP::Actuator newActuator)
+void ControlSimulation::addActuatorPtr(SP::Actuator newActuator, SP::TimeDiscretisation td)
 {
-  _CM->addActuatorPtr(newActuator);
+  _CM->addActuatorPtr(newActuator, td);
 }
 
 void ControlSimulation::run()

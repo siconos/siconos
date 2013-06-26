@@ -94,21 +94,20 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI);
 
     // define the control manager
-    SP::ControlManager control(new ControlManager(process));
+    SP::ControlManager control(new ControlManager(s));
 
     // use a controlSensor
     SP::SimpleMatrix C(new SimpleMatrix(1, 2, 0));
     (*C)(0, 0) = 1;
-    SP::LinearSensor sens(new LinearSensor(tSensor, doubleIntegrator, C));
-    control->addSensorPtr(sens);
+    SP::LinearSensor sens(new LinearSensor(doubleIntegrator, C));
+    control->addSensorPtr(sens, tSensor);
     // add the PID controller
     SP::SiconosVector K(new SiconosVector(3, 0));
     (*K)(0) = .25;
     (*K)(1) = .125;
     (*K)(2) = 2;
     SP::PID act = std11::static_pointer_cast<PID>
-                                 (control->addActuator(100, tActuator));
-    act->addSensorPtr(sens);
+                                 (control->addActuator(100, tActuator, sens));
 
     // To store the nextEvent
     SP::Event nextEvent;
@@ -123,7 +122,7 @@ int main(int argc, char* argv[])
     cout << "====> Initialisation ..." << endl << endl;
     // Initialize the model and the controlManager
     process->initialize(s);
-    control->initialize();
+    control->initialize(*process);
     act->setRef(xFinal);
     act->setK(*K);
 
@@ -131,16 +130,15 @@ int main(int argc, char* argv[])
     unsigned int N = ceil((T - t0) / h + 10); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 5;
+    unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
-    SP::SiconosVector xProc = doubleIntegrator->x();
-    SP::SiconosVector u = doubleIntegrator->b();
+    SiconosVector& xProc = *doubleIntegrator->x();
+    const SiconosVector& u = act->u();
     dataPlot(0, 0) = process->t0();
-    dataPlot(0, 1) = (*xProc)(0);
-    dataPlot(0, 2) = (*xProc)(1);
-    dataPlot(0, 3) = (*u)(0);
-    dataPlot(0, 4) = (*u)(1);
+    dataPlot(0, 1) = (xProc)(0);
+    dataPlot(0, 2) = (xProc)(1);
+    dataPlot(0, 3) = (u)(0);
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -152,6 +150,7 @@ int main(int argc, char* argv[])
 
     while (s->hasNextEvent())
     {
+      eventsManager->display();
       nextEvent = eventsManager->nextEvent();
       // --- Get values to be plotted ---
       // the following check prevents saving the same data multiple times
@@ -160,14 +159,14 @@ int main(int argc, char* argv[])
       {
         s->computeOneStep();
         dataPlot(k, 0) =  s->nextTime();
-        dataPlot(k, 1) = (*xProc)(0);
-        dataPlot(k, 2) = (*xProc)(1);
-        dataPlot(k, 3) = (*u)(0);
-        dataPlot(k, 4) = (*u)(1);
+        dataPlot(k, 1) = (xProc)(0);
+        dataPlot(k, 2) = (xProc)(1);
+        dataPlot(k, 3) = (u)(0);
         ++show_progress;
         k++;
       }
       s->nextStep();
+      act->display();
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;

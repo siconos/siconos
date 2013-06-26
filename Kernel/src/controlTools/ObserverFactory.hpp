@@ -35,7 +35,7 @@ namespace ObserverFactory
 
 /** A pointer to function, returning a SP::Observer, built with its type (ie class name) a ControlSensor
  * and a SiconosVector, the initial estimate*/
-typedef SP::Observer(*object_creator)(SP::TimeDiscretisation, SP::ControlSensor, const SiconosVector&) ;
+typedef SP::Observer(*object_creator)(SP::ControlSensor, const SiconosVector&) ;
 
 /** The type of the factory map */
 typedef std::map<unsigned int, object_creator> MapFactory;
@@ -44,9 +44,9 @@ typedef std::map<unsigned int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> SP::Observer factory(SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0)
+template<class SubType> SP::Observer factory(SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
-  return std11::shared_ptr<SubType>(new SubType(t, sensor, xHat0));
+  return std11::shared_ptr<SubType>(new SubType(sensor, xHat0));
 }
 
 /** Registry Class for Observers.
@@ -90,7 +90,7 @@ public :
    * \param xHat0 the original estimate
    * \return a SP::Observer to the created Observer
    */
-  SP::Observer instantiate(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0);
+  SP::Observer instantiate(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0);
 
 } ;
 

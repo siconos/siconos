@@ -34,7 +34,7 @@ namespace SensorFactory
 {
 
 /** A pointer to function, returning a SP::Sensor, built with its type (ie class name) and a SP::DynamicalSystem.*/
-typedef SP::Sensor(*object_creator)(SP::TimeDiscretisation, SP::DynamicalSystem) ;
+typedef SP::Sensor(*object_creator)(SP::DynamicalSystem) ;
 
 /** The type of the factory map */
 typedef std::map<int, object_creator> MapFactory;
@@ -43,9 +43,9 @@ typedef std::map<int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> SP::Sensor factory(SP::TimeDiscretisation t, SP::DynamicalSystem ds)
+template<class SubType> SP::Sensor factory(SP::DynamicalSystem ds)
 {
-  return std11::shared_ptr<SubType>(new SubType(t, ds));
+  return std11::shared_ptr<SubType>(new SubType( ds));
 }
 
 /** Registry Class for sensors.
@@ -84,11 +84,10 @@ public :
 
   /** Function to instantiate a new Sensor
    * \param name the type of the Sensor we want to instantiate
-   * \param t a SP::TimeDiscretisation.
    * \param ds a SP::DynamicalSystem that will be linked to this Sensor
    * \param a SP::Sensor to the created Sensor
    */
-  SP::Sensor instantiate(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
+  SP::Sensor instantiate(int name, SP::DynamicalSystem ds);
 
 } ;
 

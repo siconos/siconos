@@ -101,13 +101,15 @@ public:
 
   /** Add a Sensor
    * \param newSensor the SP::Sensor to be added
+   * \param td the TimeDiscretisation associated with the Sensor
    */
-  void addSensorPtr(SP::Sensor newSensor);
+  void addSensorPtr(SP::Sensor newSensor, SP::TimeDiscretisation td);
 
   /** Add an Actuator
    * \param newActuator the SP::Actuator to be added
+   * \param td the TimeDiscretisation associated with the Actuator
    */
-  void addActuatorPtr(SP::Actuator newActuator);
+  void addActuatorPtr(SP::Actuator newActuator, SP::TimeDiscretisation td);
 
   /** Return the DynamicalSystem
    * \return the SP::DynamicalSystem

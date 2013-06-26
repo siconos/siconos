@@ -170,8 +170,6 @@ int main(int argc, char* argv[])
     while (k < N - 1)
     {
       k++;
-      cout << "step --> " << k << endl;
-
       //  osnspb->setNumericsVerboseMode(1);
 
       //  *z = *(myProcessInteraction->y(0)->getVectorPtr(0));

@@ -29,27 +29,27 @@
 void ControlSensor::initialize(const Model& m)
 {
   Sensor::initialize(m);
-  if (_delay > 0)
-  {
-    if (_timeDiscretisation->getTDCase() != 2)
-    {
-       RuntimeException::selfThrow("ControlSensor::initialize the timediscretization should be of type 2");
-    }
-    else
-    {
-       double h = _timeDiscretisation->currentTimeStep();
-       double shift = _delay;
-       if (_delay >= h)
-       {
-         unsigned int size = ceil(_delay/h);
-         shift = fmod(_delay, h);
-         _bufferY.resize(size);
-       }
-      _timeDiscretisation->setT0(_timeDiscretisation->currentTime() + h - shift);
-    }
-  }
-  else if (_delay < 0)
-    RuntimeException::selfThrow("ControlSensor::initialize the delay value should be >= 0");
+//  if (_delay > 0)
+//  {
+//    if (_timeDiscretisation->getTDCase() != 2)
+//    {
+//       RuntimeException::selfThrow("ControlSensor::initialize the timediscretization should be of type 2");
+//    }
+//    else
+//    {
+//       double h = _timeDiscretisation->currentTimeStep();
+//       double shift = _delay;
+//       if (_delay >= h)
+//       {
+//         unsigned int size = ceil(_delay/h);
+//         shift = fmod(_delay, h);
+//         _bufferY.resize(size);
+//       }
+//      _timeDiscretisation->setT0(_timeDiscretisation->currentTime() + h - shift);
+//    }
+//  }
+//  else if (_delay < 0)
+//    RuntimeException::selfThrow("ControlSensor::initialize the delay value should be >= 0");
 }
 
 unsigned int ControlSensor::getYDim() const

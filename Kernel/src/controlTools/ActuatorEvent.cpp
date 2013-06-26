@@ -29,12 +29,4 @@ void ActuatorEvent::process(Simulation& sim)
   _actuator->actuate();
 }
 
-void ActuatorEvent::update()
-{
-  // Increment actuator time discr. to next step
-  _actuator->timeDiscretisation()->increment();
-  // set actuator event time to new current time value
-  setTime(_actuator->timeDiscretisation()->currentTime());
-}
-
 AUTO_REGISTER_EVENT(ACTUATOR_EVENT, ActuatorEvent)

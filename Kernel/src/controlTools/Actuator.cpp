@@ -30,7 +30,7 @@ Actuator::Actuator(): _type(0), _id("none")
 {
 }
 
-Actuator::Actuator(unsigned int type, SP::TimeDiscretisation t): _type(type), _id("none"), _timeDiscretisation(t)
+Actuator::Actuator(unsigned int type, SP::ControlSensor sensor): _type(type), _id("none"), _sensor(sensor)
 {
 }
 
@@ -40,7 +40,6 @@ Actuator::~Actuator()
 
 void Actuator::addSensorPtr(SP::ControlSensor newSensor)
 {
-  // Add a Sensor into allSensors set: no copy, pointer link.
   _sensor = newSensor;
 }
 
@@ -50,10 +49,6 @@ void Actuator::initialize(const Model& m)
   {
     RuntimeException::selfThrow("Actuator::initialize - No Sensor given to the Actuator");
   }
-  // == Create an event linked to the present Actuator. ==
-  // Uses the events factory to insert the new event.
-  Event& ev = m.simulation()->eventsManager()->insertEvent(ACTUATOR_EVENT, _timeDiscretisation->currentTime());
-  static_cast<ActuatorEvent&>(ev).setActuatorPtr(shared_from_this());
 
   // Init the control variable
   if (!_B)
@@ -74,10 +69,12 @@ void Actuator::setB(const SiconosMatrix& B)
 
 void Actuator::display() const
 {
-  std::cout << "=====> Actuator of type " << _type << ", named " << _id ;
-  std::cout << "The associated Sensors are: " <<std::endl;
+  std::cout << "=====> Actuator of type " << _type << ", named " << _id << std::endl;;
+  std::cout << "The associated Sensors is: " << std::endl;
   if (_sensor)
     _sensor->display();
   std::cout << "======" <<std::endl;
+  std::cout << "The value of the control is: " << std::endl;
+  _u->display();
   std::cout <<std::endl;
 }

@@ -105,17 +105,16 @@ Csurface = np.array(Brel).T
   processSimulation->insertIntegrator(processIntegrator);
 
   // Control stuff
-  SP::ControlManager control(new ControlManager(process));
+  SP::ControlManager control(new ControlManager(processSimulation));
   // use a controlSensor
-  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC));
-  control->addSensorPtr(sens);
+  SP::LinearSensor sens(new LinearSensor(processDS, sensorC));
+  control->addSensorPtr(sens, tSensor);
   // add the sliding mode controller
   LinearSMC& act = *std11::static_pointer_cast<LinearSMC>(control->addActuator
-                   (LINEAR_SMC, tActuator));
+                   (LINEAR_SMC, tActuator, sens));
   act.setCsurfacePtr(Csurface);
   act.setBPtr(Brel);
   act.setDPtr(Drel);
-  act.addSensorPtr(sens);
   act.setTheta(0);
 
   // =========================== End of model definition ===========================
@@ -127,7 +126,7 @@ Csurface = np.array(Brel).T
   cout << "====> Simulation initialisation ..." << endl << endl;
   // initialise the process and the ControlManager
   process->initialize(processSimulation);
-  control->initialize();
+  control->initialize(*process);
 
   // --- Get the values to be plotted ---
   SiconosVector& xProc = *processDS->x();

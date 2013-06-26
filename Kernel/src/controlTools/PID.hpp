@@ -44,15 +44,17 @@ private:
   /** reference we are tracking */
   double _ref;
 
+  double _curDeltaT;
+
   /** vector of gains */
   SP::SiconosVector _K;
 
 public:
 
-  /** Constructor with a TimeDiscretisation.
-   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !).
+  /** Constructor.
+   * \param sensor the ControlSensor feeding the Actuator
    */
-  PID(SP::TimeDiscretisation t);
+  PID(SP::ControlSensor sensor);
 
   /** destructor
    */
@@ -90,6 +92,10 @@ public:
   {
     _ref = newValue;
   }
+  /** display the data of the Actuator on the standard output
+   */
+  virtual void display() const;
+
 };
 DEFINE_SPTR(PID)
 #endif

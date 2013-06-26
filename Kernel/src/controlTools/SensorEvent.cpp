@@ -28,12 +28,4 @@ void SensorEvent::process(Simulation& sim)
   _sensor->capture();
 }
 
-void SensorEvent::update()
-{
-  // Increment sensor time discr. to next step
-  _sensor->timeDiscretisation()->increment();
-  // set sensor event time to new current time value
-  setTime(_sensor->timeDiscretisation()->currentTime());
-}
-
 AUTO_REGISTER_EVENT(SENSOR_EVENT, SensorEvent)

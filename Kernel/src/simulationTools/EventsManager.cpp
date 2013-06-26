@@ -27,28 +27,19 @@
 
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 
-EventsManager::EventsManager()
-{}
-
-void EventsManager::initialize(const Simulation& sim)
+EventsManager::EventsManager(Simulation& sim)
 {
   //  === Creates and inserts two events corresponding
   // to times tk and tk+1 of the simulation time-discretisation  ===
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
   _events.push_back(regEvent.instantiate(sim.getTk(), TD_EVENT));
   _events[0]->setType(-1); // this is just a dumb event
-#if __cplusplus >= 201103L
-  assert(!::isnan(sim.getTkp1()));
-#else
-  assert(!std::isnan(sim.getTkp1()));
-#endif
-#if __cplusplus >= 201103L
-  assert(!::isnan(sim.getTkp2()));
-#else
-  assert(!std::isnan(sim.getTkp2()));
-#endif
-  _events.push_back(regEvent.instantiate(sim.getTkp1(), TD_EVENT));
-  _events.push_back(regEvent.instantiate(sim.getTkp2(), TD_EVENT));
+  double tkp1 = sim.getTk() + sim.timeDiscretisation()->currentTimeStep();
+  double tkp2 = sim.getTk() + 2*sim.timeDiscretisation()->currentTimeStep();
+  _events.push_back(regEvent.instantiate(tkp1, TD_EVENT));
+  _events.push_back(regEvent.instantiate(tkp2, TD_EVENT));
+  _events[1]->setTimeDiscretisation(sim.timeDiscretisation());
+  _events[2]->setTimeDiscretisation(sim.timeDiscretisation());
 }
 
 // Creation and insertion of a new event into the event set.
@@ -60,6 +51,13 @@ Event& EventsManager::insertEvent(const int type, const double& time)
   return *_events[pos];
 }
 
+Event& EventsManager::insertEvent(const int type, SP::TimeDiscretisation td)
+{
+  Event& ev = insertEvent(type, td->currentTime());
+  ev.setTimeDiscretisation(td);
+  return ev;
+}
+
 void EventsManager::preUpdate(Simulation& sim)
 {
   const mpz_t *t1 = _events[0]->getTimeOfEvent();
@@ -69,18 +67,21 @@ void EventsManager::preUpdate(Simulation& sim)
     int res = mpz_cmp(*t1, *t2);
     if (res == 0)
     {
-      (*it)->process(sim);
+      if ((*it)->getType() != SENSOR_EVENT && (*it)->getType() != ACTUATOR_EVENT && (*it)->getType() != OBSERVER_EVENT)
+      {
+        (*it)->process(sim);
       // "synchronise" actuators/sensors events
       // XXX needed ???
-      if ((*it)->getType() == SENSOR_EVENT || (*it)->getType() == ACTUATOR_EVENT || (*it)->getType() == OBSERVER_EVENT)
-      {
-        (*it)->update();
-        insertEv(*it);
-        _events.erase(it);
+//      if ((*it)->getType() == SENSOR_EVENT || (*it)->getType() == ACTUATOR_EVENT || (*it)->getType() == OBSERVER_EVENT)
+//      {
+//        (*it)->update();
+//        insertEv(*it);
+//        _events.erase(it);
+//      }
+        if (it == _events.begin())
+          continue;
+        else _events.erase(it);
       }
-      else if (it == _events.begin())
-        continue;
-      else _events.erase(it);
     }
   }
 }
@@ -165,8 +166,8 @@ void EventsManager::processEvents(Simulation& sim)
   // If last processed event is a TD event, increment TD in the simulation
   // We have a problem at the start of the simulation, since the Event at t=t0
   // is just here to fill the first stop
-  if (_events[0]->getType() == TD_EVENT)
-    sim.timeDiscretisation()->increment();
+//  if (_events[0]->getType() == TD_EVENT)
+//    sim.timeDiscretisation()->increment();
 
   // update the event stack
   update(sim);
@@ -184,6 +185,7 @@ void EventsManager::update(Simulation& sim)
     // and the simulation will stop
     // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectivly
     // run until T
+    _events[0]->update();
     double tkp2 = sim.getTkp2();
 #if __cplusplus >= 201103L
     if (!::isnan(tkp2))

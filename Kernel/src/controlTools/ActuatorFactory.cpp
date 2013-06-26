@@ -36,7 +36,7 @@ void Registry::add(unsigned int type, object_creator creator)
   factory_map[type] = creator;
 }
 
-SP::Actuator Registry::instantiate(unsigned int type, SP::TimeDiscretisation t)
+SP::Actuator Registry::instantiate(unsigned int type, SP::ControlSensor sensor)
 {
   MapFactoryIt it = factory_map.find(type);
 
@@ -45,7 +45,7 @@ SP::Actuator Registry::instantiate(unsigned int type, SP::TimeDiscretisation t)
         failed, no class numbered: " + type);
 
   // std::cout <<std::endl << "Factory instance for class" << name <<std::endl ; // for test purposes only
-  return (it->second)(t) ;  // run our factory
+  return (it->second)(sensor) ;  // run our factory
 }
 
 Registration::Registration(unsigned int type, object_creator creator)

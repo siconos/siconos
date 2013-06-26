@@ -96,9 +96,6 @@ protected:
   /** B Matrix */
   SP::SiconosMatrix _B;
 
-  /** A time discretisation scheme */
-  SP::TimeDiscretisation _timeDiscretisation;
-
   /** ControlSensor feeding the Controller */
   SP::ControlSensor _sensor;
 
@@ -116,9 +113,9 @@ public:
 
   /** Constructor with a TimeDiscretisation.
    * \param type the type of the Actuator, which corresponds to the class type
-   * \param t a SP::TimeDiscretisation, (/!\ it should not be used elsewhere !)
+   * \param sensor the ControlSensor feeding the Actuator
    */
-  Actuator(unsigned int type, SP::TimeDiscretisation t);
+  Actuator(unsigned int type, SP::ControlSensor sensor);
 
   /** destructor
    */
@@ -171,13 +168,11 @@ public:
    */
   void addSensorPtr(SP::ControlSensor newSensor);
 
-  /** get the TimeDiscretisation linked to this Actuator
-  *  \return SP::TimeDiscretisation.
+  /** This is derived in child classes if they need to copy the TimeDiscretisation
+   * associated with this Actuator
+  *  \param td the TimeDiscretisation for this Actuator
   */
-  inline SP::TimeDiscretisation timeDiscretisation() const
-  {
-    return _timeDiscretisation;
-  };
+  virtual void setTimeDiscretisation(const TimeDiscretisation& td) {};
 
   /** initialize actuator data.
    * \param m a SP::Model
@@ -190,7 +185,7 @@ public:
 
   /** display the data of the Actuator on the standard output
    */
-  void display() const;
+  virtual void display() const;
 
 };
 #endif

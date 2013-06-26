@@ -34,8 +34,8 @@ namespace ActuatorFactory
 {
 
 /** A pointer to function, returning a pointer to Actuator, built
-    with a SP::TimeDiscretisation and a SP::DynamicalSystem.*/
-typedef SP::Actuator(*object_creator)(SP::TimeDiscretisation);
+    with a SP::ControlSensor. */
+typedef SP::Actuator(*object_creator)(SP::ControlSensor);
 
 /** The type of the factory map */
 typedef std::map<unsigned int, object_creator> MapFactory;
@@ -44,9 +44,9 @@ typedef std::map<unsigned int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> SP::Actuator factory(SP::TimeDiscretisation t)
+template<class SubType> SP::Actuator factory(SP::ControlSensor sensor)
 {
-  return std11::shared_ptr<SubType>(new SubType(t));
+  return std11::shared_ptr<SubType>(new SubType(sensor));
 }
 
 /** Registry Class for Actuators.
@@ -89,11 +89,10 @@ public :
 
   /** Function to instantiate a new Actuator
    * \param type the type of the added Actuator.
-   * \param t a SP::TimeDiscretisation.
-   * \param ds a SP::DynamicalSystem ds that will be linked to this Actuator
+   * \param sensor the ControlSensor feeding the Actuator
    * \return SP::Actuator to the created Actuator
    */
-  SP::Actuator instantiate(unsigned int type, SP::TimeDiscretisation t);
+  SP::Actuator instantiate(unsigned int type, SP::ControlSensor sensor);
 } ;
 
 /** Registration Class for Actuators.

@@ -96,15 +96,14 @@ int main(int argc, char* argv[])
   processSimulation->insertIntegrator(processIntegrator);
 
   // Control stuff
-  SP::ControlManager control(new ControlManager(process));
+  SP::ControlManager control(new ControlManager(processSimulation));
   // use a controlSensor
-  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC));
-  control->addSensorPtr(sens);
+  SP::LinearSensor sens(new LinearSensor(processDS, sensorC));
+  control->addSensorPtr(sens, tSensor);
   // add the sliding mode controller
   SP::ExplicitLinearSMC act = std11::static_pointer_cast<ExplicitLinearSMC>
-                                (control->addActuator(EXPLICIT_LINEAR_SMC, tActuator));
+                                (control->addActuator(EXPLICIT_LINEAR_SMC, tActuator, sens));
   act->setCsurfacePtr(Csurface);
-  act->addSensorPtr(sens);
   act->setBPtr(Brel);
   act->setSaturationMatrixPtr(Drel);
   // =========================== End of model definition ===========================
@@ -116,7 +115,7 @@ int main(int argc, char* argv[])
   cout << "====> Simulation initialisation ..." << endl << endl;
   // initialise the process and the ControlManager
   process->initialize(processSimulation);
-  control->initialize();
+  control->initialize(*process);
 
   // --- Get the values to be plotted ---
   unsigned int outputSize = 3; // number of required data

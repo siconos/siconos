@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
-
+    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
       std::cout <<

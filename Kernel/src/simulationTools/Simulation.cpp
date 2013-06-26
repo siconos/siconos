@@ -66,7 +66,7 @@ Simulation::Simulation(SP::TimeDiscretisation td):
 
   _allOSI.reset(new OSISet());
   _allNSProblems.reset(new OneStepNSProblems());
-  _eventsManager.reset(new EventsManager()); //
+  _eventsManager.reset(new EventsManager(*this)); //
 }
 
 // --- xml constructor ---
@@ -112,7 +112,7 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
   // This depends on the type of simulation --> in derived class constructor
 
   // === Events manager creation ===
-  _eventsManager.reset(new EventsManager()); //
+  _eventsManager.reset(new EventsManager(*this)); //
   _allNSProblems.reset(new OneStepNSProblems());
 }
 
@@ -222,7 +222,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   _T = m->finalT();
 
   // === Events manager initialization ===
-  _eventsManager->initialize(*this);
+//  _eventsManager->initialize(*this);
   _tinit = _eventsManager->startingTime();
   //===
   if (withOSI)

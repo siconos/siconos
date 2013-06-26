@@ -35,7 +35,7 @@ void Registry::add(unsigned int type, object_creator creator)
   factory_map[type] = creator;
 }
 
-SP::Observer Registry::instantiate(unsigned int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0)
+SP::Observer Registry::instantiate(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
   MapFactoryIt it = factory_map.find(type) ;
 
@@ -43,7 +43,7 @@ SP::Observer Registry::instantiate(unsigned int type, SP::TimeDiscretisation t, 
     RuntimeException::selfThrow("Registry::instantiate (ObserverFactory) failed, no class named: " + type);
 
   // cout << endl << "Factory instance for class" << name << endl ; // for test purposes only
-  return (it->second)(t, sensor, xHat0) ;  // run our factory
+  return (it->second)(sensor, xHat0) ;  // run our factory
 }
 
 Registration::Registration(unsigned int type, object_creator creator)

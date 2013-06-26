@@ -65,17 +65,17 @@ protected:
 
 public:
 
-  /** Constructor with a TimeDiscretisation and a DynamicalSystem.
-   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+  /** Constructor
+   * \param sensor the ControlSensor feeding the Actuator
    */
-  LinearSMCimproved(SP::TimeDiscretisation t);
+  LinearSMCimproved(SP::ControlSensor sensor);
 
-  /** Constructor with a TimeDiscretisation and a DynamicalSystem.
-   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+  /** Constructor with all the data
+   * \param sensor the ControlSensor feeding the Actuator
    * \param B the B matrix in the FirstOrderLinearR
    * \param D the D matrix in the FirstOrderLinearR
    */
-  LinearSMCimproved(SP::TimeDiscretisation t, SP::SiconosMatrix B, SP::SiconosMatrix D);
+  LinearSMCimproved(SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D);
 
   /** destructor
    */

@@ -30,13 +30,13 @@
 #include "TimeDiscretisation.hpp"
 #include "ActuatorFactory.hpp"
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, unsigned int type):
-  CommonSMC(type, t)
+LinearSMC::LinearSMC(SP::ControlSensor sensor, unsigned int type):
+  CommonSMC(type, sensor)
 {
 }
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::SiconosMatrix B, SP::SiconosMatrix D, unsigned int type):
-  CommonSMC(type, t, B, D)
+LinearSMC::LinearSMC(SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D, unsigned int type):
+  CommonSMC(type, sensor, B, D)
 {
 }
 

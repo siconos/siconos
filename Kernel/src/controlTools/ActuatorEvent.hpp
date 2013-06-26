@@ -79,9 +79,6 @@ public:
    */
   void process(Simulation& sim);
 
-  /** Increment the time discretisation of the linked Actuator
-  */
-  void update();
 };
 
 #endif // ActuatorEvent_H

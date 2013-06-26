@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
 
-    while (processSimulation->hasNextEvent())
+    while (controllerSimulation->hasNextEvent())
     {
       kcontroller ++ ;
 //      cout << "step controller--> " << kcontroller << " at time t =" << controllerSimulation->nextTime() << endl;

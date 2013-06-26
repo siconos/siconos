@@ -122,7 +122,7 @@ void LuenbergerObserver::process()
 
     // TODO theta method on the error
     _simulation->computeOneStep();
-    _simulation->nextStep();
+//    _simulation->nextStep();
 
     // update the current measured value
     *_y = y;

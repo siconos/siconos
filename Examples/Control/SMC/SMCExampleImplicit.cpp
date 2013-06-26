@@ -102,17 +102,16 @@ int main(int argc, char* argv[])
   processSimulation->insertIntegrator(processIntegrator);
 
   // Control stuff
-  SP::ControlManager control(new ControlManager(process));
+  SP::ControlManager control(new ControlManager(processSimulation));
   // use a controlSensor
-  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC));
-  control->addSensorPtr(sens);
+  SP::LinearSensor sens(new LinearSensor(processDS, sensorC));
+  control->addSensorPtr(sens, tSensor);
   // add the sliding mode controller
   LinearSMC& act = *std11::static_pointer_cast<LinearSMC>(control->addActuator
-                   (LINEAR_SMC, tActuator));
+                   (LINEAR_SMC, tActuator, sens));
   act.setCsurfacePtr(Csurface);
   act.setBPtr(Brel);
   act.setDPtr(Drel);
-  act.addSensorPtr(sens);
 
   // =========================== End of model definition ===========================
 
@@ -123,7 +122,7 @@ int main(int argc, char* argv[])
   cout << "====> Simulation initialisation ..." << endl << endl;
   // initialise the process and the ControlManager
   process->initialize(processSimulation);
-  control->initialize();
+  control->initialize(*process);
 
   // --- Get the values to be plotted ---
   unsigned int outputSize = 3; // number of required data
@@ -166,7 +165,7 @@ int main(int argc, char* argv[])
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
   dataPlot.resize(k, outputSize);
-  ioMatrix::write("ExampleImplicit.dat", "ascii", dataPlot, "noDim");
+  ioMatrix::write("SMCExampleImplicit.dat", "ascii", dataPlot, "noDim");
 
   // Comparison with a reference file
   SimpleMatrix dataPlotRef(dataPlot);

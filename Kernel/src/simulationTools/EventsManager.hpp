@@ -109,8 +109,9 @@ protected:
 public:
 
   /**  default constructor
+   * \param sim the Simulation that owns this EventsManager
    */
-  EventsManager();
+  EventsManager(Simulation& sim);
 
   /** destructor
    */
@@ -133,7 +134,7 @@ public:
   /** initialize current, next events and the events stack.
       \param sim the simulation that owns the present eventsManager
    */
-  void initialize(const Simulation& sim);
+//  void initialize(const Simulation& sim);
 
   /** get the current event
    *  \return a pointer to Event
@@ -204,6 +205,15 @@ public:
    * \return a reference to the Event
    */
   Event& insertEvent(const int type, const double& time);
+
+  /** insert an event of a certain type. The event is created on the fly,
+   * and the SP::TimeDiscretisation given in argument is stored inside
+   * \param type the type of the event
+   * \param td a TimeDiscretisation for the Event
+   * \return a reference to the Event
+   */
+  Event& insertEvent(const int type, SP::TimeDiscretisation td);
+
 };
 
 

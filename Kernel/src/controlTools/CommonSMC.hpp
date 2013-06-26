@@ -85,7 +85,7 @@ protected:
   /** the DynamicalSystem for the controller */
   SP::FirstOrderLinearDS _DS_SMC;
   /** the TimeDiscretisation for the controller */
-  SP::TimeDiscretisation _tD_SMC;
+  SP::TimeDiscretisation _td;
   /** Simulation for the controller */
   SP::TimeStepping _simulationSMC;
   /** Integrator for the controller */
@@ -113,20 +113,19 @@ public:
 
   /** Constructor with a TimeDiscretisation and a Model.
    * \param type the type of the SMC Actuator
-   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param ds the SP::DynamicalSystem we are controlling
+   * \param sensor the ControlSensor feeding the Actuator
    */
-  CommonSMC(unsigned int type, SP::TimeDiscretisation t): Actuator(type, t),
+  CommonSMC(unsigned int type, SP::ControlSensor sensor): Actuator(type, sensor),
     _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5) {}
 
   /** Constructor with a TimeDiscretisation, a Model and two matrices
    * \param type the type of the SMC Actuator
-   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param sensor the ControlSensor feeding the Actuator
    * \param B the B matrix
    * \param D the saturation matrix
    */
-  CommonSMC(unsigned int type, SP::TimeDiscretisation t, SP::SiconosMatrix B, SP::SiconosMatrix D):
-    Actuator(type, t), _D(D), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5)
+  CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D):
+    Actuator(type, sensor), _D(D), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5)
   {
     _B = B;
   }
@@ -217,6 +216,12 @@ public:
   {
     _noUeq = b;
   };
+  /** This is derived in child classes if they need to copy the TimeDiscretisation
+   * associated with this Sensor
+  *  \param td the TimeDiscretisation for this Sensor
+  */
+  virtual void setTimeDiscretisation(const TimeDiscretisation& td);
+
 };
 DEFINE_SPTR(CommonSMC)
 #endif

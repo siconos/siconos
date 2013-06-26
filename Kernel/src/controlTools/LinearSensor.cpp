@@ -25,10 +25,11 @@
 #include "TimeDiscretisation.hpp"
 
 
-LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds): ControlSensor(LINEAR_SENSOR, t, ds)
+LinearSensor::LinearSensor(SP::DynamicalSystem ds): ControlSensor(LINEAR_SENSOR, ds)
 {}
 
-LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SimpleMatrix matC, SP::SimpleMatrix matD): ControlSensor(LINEAR_SENSOR, t, ds), _matC(matC), _matD(matD)
+LinearSensor::LinearSensor(SP::DynamicalSystem ds, SP::SimpleMatrix matC, SP::SimpleMatrix matD):
+  ControlSensor(LINEAR_SENSOR, ds), _matC(matC), _matD(matD)
 {}
 
 LinearSensor::~LinearSensor()
@@ -47,7 +48,7 @@ void LinearSensor::initialize(const Model& m)
   // What happen here if we have more than one DS ?
   // This may be unlikely to happen.
   //  _DS = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0);
-  if (colC != _nDim)
+  if (colC != _DS->getN())
   {
     RuntimeException::selfThrow(" LinearSensor::initialize - The number of column of the C matrix must be equal to the length of x");
   }
@@ -67,7 +68,6 @@ void LinearSensor::initialize(const Model& m)
   _storedY.reset(new SiconosVector(rowC));
   //  (_data[_eSensor])["StoredY"] = storedY;
   // set the dimension of the output
-  _DSx = _DS->x();
   *_storedY = prod(*_matC, *_DSx);
 }
 
@@ -77,7 +77,6 @@ void LinearSensor::capture()
   // untested
   if (_matD)
 //    *_storedY += prod(*_matD, *_DS->z());
-  //  (*_dataPlot)(_k, 0) = _timeDiscretisation->currentTime();
   //  _dataPlot->setSubRow(_k, 1, _storedY);
   _k++;
 

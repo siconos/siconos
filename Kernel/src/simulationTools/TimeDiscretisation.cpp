@@ -24,7 +24,7 @@
 
 // IO Constructors -> XML
 TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t0, double T):
-  _h(0.0), _k(0), _timeDiscretisationXML(tdXML), _tdCase(0), _pos(0)
+  _h(0.0), _k(0), _timeDiscretisationXML(tdXML), _tdCase(0), _pos(0), _t0(t0)
 {
   if (!_timeDiscretisationXML)
     RuntimeException::selfThrow("TimeDiscretisation: xml constructor - TimeDiscretisationXML = NULL");
@@ -85,6 +85,7 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
 TimeDiscretisation::TimeDiscretisation(const TkVector& newTk):
   _h(0.0), _k(0), _tdCase(1), _pos(_k)
 {
+  _t0 = _tk[0];
   _tk = newTk;
   _h = _tk[1] - _tk[0];
 }
@@ -92,9 +93,9 @@ TimeDiscretisation::TimeDiscretisation(const TkVector& newTk):
 // INPUTS: nSteps, t0, T
 // => tdCase = 2. Only two values are saved for tk.
 TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T):
-  _h(0.0), _k(0), _tdCase(2), _pos(0)
+  _h(0.0), _k(0), _tdCase(2), _pos(0), _t0(t0)
 {
-  _h = (T - t0) / nSteps;
+  _h = ceil((T - t0) / nSteps);
   _tk.reserve(3);
   _tk.push_back(t0);
   _tk.push_back(t0 + _h);
@@ -104,7 +105,7 @@ TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T)
 // INPUTS: t0 and h
 // => tdCase = 2. Only two values are saved for tk.
 TimeDiscretisation::TimeDiscretisation(double t0, double newH):
-  _h(newH), _k(0), _tdCase(2), _pos(0)
+  _h(newH), _k(0), _tdCase(3), _pos(0), _t0(t0)
 {
   _tk.reserve(3);
   _tk.push_back(t0);
@@ -119,6 +120,7 @@ TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
   _h = td.currentTimeStep();
   _k = td.getK();
   _tdCase = td.getTDCase();
+  _t0 = td.getT0();
   // the magic formula is in the header file
   _pos = _tdCase == 1 ? _k : 0;
   _tk = td.getTk();
@@ -138,12 +140,16 @@ void TimeDiscretisation::setCurrentTimeStep(double newH)
   _h = newH;
   if (_tdCase == 1)
   {
-    std::cout << "TimeDiscretisation::setCurrentTimeStep(newH) Warning: you change the time step whereas the Time Discretisation was built with a complete tk vector. This will result in a change in all future time steps: from now on, h = newH until next call to this function. " <<std::endl;
-    _tdCase = 2;
+    std::cout << "TimeDiscretisation::setCurrentTimeStep(newH) Warning: you change the time step but the TimeDiscretisation was built with a complete tk vector. This will result in a change in all future time steps: from now on, h = newH until next call to this function. " <<std::endl;
     _tk[0] = _tk[_k];
     _pos = 0;
     _tk.resize(3);
   }
+  else if (_tdCase == 3)
+  {
+    std::cout << "TimeDiscretisation::setCurrentTimeStep Warning: you change the time step but this TimeDiscretisation had a fixed h" << std::endl;
+  }
+  _tdCase = 2;
   _tk[_pos + 1] = _tk[_pos] + _h;
   _tk[_pos + 2] = _tk[_pos] + 2*_h;
 }
@@ -160,13 +166,15 @@ void TimeDiscretisation::setTk(const TkVector& newTk)
 
 void TimeDiscretisation::setT0(const double val)
 {
-  if (_tdCase != 2)
+  _t0 = val;
+  if (_tdCase == 1)
     RuntimeException::selfThrow("TimeDiscretisation::setT0 must be called only when the TimeDiscretisation is with a constant h\n \
         Here _tdCase = " + _tdCase);
   if (_pos == 0)
   {
     _tk[_pos] = val;
-    _tk[_pos+1] = val + _h;
+    _tk[_pos + 1] = val + _h;
+    _tk[_pos + 2] = val + 2*_h;
   }
   else
     RuntimeException::selfThrow("TimeDiscretisation::setT0 must be called before the simulation start\n \
@@ -181,11 +189,17 @@ void TimeDiscretisation::increment()
     _pos = _k;
     _h = _tk[_pos + 1] - _tk[_pos];
   }
-  else // tk+1 is build with tk and h
+  else if (_tdCase == 2)
   {
     _tk[_pos] = _tk[_pos + 1];
-    _tk[_pos + 1] = _tk[_pos] + _h;
-    _tk[_pos + 2] = _tk[_pos] + 2*_h;
+    _tk[_pos + 1] = _tk[_pos + 2];
+    _tk[_pos + 2] += _h;
+  }
+  else if (_tdCase == 3) // tk+1 is build with tk and h
+  {
+    _tk[_pos] = _tk[_pos + 1];
+    _tk[_pos + 1] = _tk[_pos + 2];
+    _tk[_pos + 2] = _t0 + (_k+2)*_h;
   }
 }
 

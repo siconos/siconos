@@ -28,7 +28,7 @@
 #include "ControlSensor.hpp"
 
 
-LinearSMCOT2::LinearSMCOT2(SP::TimeDiscretisation t): CommonSMC(LINEAR_SMC_OT2, t)
+LinearSMCOT2::LinearSMCOT2(SP::ControlSensor sensor): CommonSMC(LINEAR_SMC_OT2, sensor)
 {
 }
 
@@ -71,10 +71,7 @@ void LinearSMCOT2::initialize(const Model& m)
   //  _Xold.reset(new SiconosVector(_nDim));
   //  *_Xold = *(_sensor->y());
   double _t0 = m.t0();
-  double _T = m.finalT() + _timeDiscretisation->currentTimeStep();
-
-  _timeDPhi.reset(new TimeDiscretisation(*_timeDiscretisation));
-  _timeDPred.reset(new TimeDiscretisation(*_timeDiscretisation));
+  double _T = m.finalT() + _tdPhi->currentTimeStep();
 
   //  _XPhi.reset(new SiconosVector(_nDim));
   //  (*_XPhi) = _DS->getX0();
@@ -95,14 +92,14 @@ void LinearSMCOT2::initialize(const Model& m)
   _modelPhi.reset(new Model(_t0, _T));
   _modelPhi->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhi);
   _PhiOSI.reset(new Lsodar(_DSPhi));
-  _simulPhi.reset(new EventDriven(_timeDPhi, 0));
+  _simulPhi.reset(new EventDriven(_tdPhi, 0));
   _simulPhi->insertIntegrator(_PhiOSI);
   _modelPhi->initialize(_simulPhi);
   // Integration for Gamma
   _modelPred.reset(new Model(_t0, _T));
   _modelPred->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPred);
   _PredOSI.reset(new Lsodar(_DSPred));
-  _simulPred.reset(new EventDriven(_timeDPred, 0));
+  _simulPred.reset(new EventDriven(_tdPred, 0));
   _simulPred->insertIntegrator(_PredOSI);
   _modelPred->initialize(_simulPred);
 
@@ -112,7 +109,7 @@ void LinearSMCOT2::initialize(const Model& m)
 
 void LinearSMCOT2::actuate()
 {
-  double hCurrent = _timeDiscretisation->currentTimeStep();
+  double hCurrent = _tdPhi->currentTimeStep();
   // Get current value of the state
   // Update it
   *_XPhi = *_X;

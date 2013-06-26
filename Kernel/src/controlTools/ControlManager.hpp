@@ -18,7 +18,7 @@
  */
 
 /*! \file ControlManager.hpp
-  \brief Tools to control a Model: Sensors and Actuators.
+  \brief Tools to provide control in a Simulation: Sensors, Observer and Actuators.
 */
 
 #ifndef ControlManager_H
@@ -26,12 +26,10 @@
 
 #include "Actuator.hpp"
 
-#define getDSFromModel(nb) _model->nonSmoothDynamicalSystem()->dynamicalSystem(nb)
-
 class Actuator;
 class Observer;
 class Sensor;
-class Model;
+class Simulation;
 class TimeDiscretisation;
 
 /** A set of Sensors */
@@ -52,7 +50,7 @@ typedef std::set<SP::Observer> Observers;
 /** An iterator through a set of Observers */
 typedef Observers::iterator ObserversIterator;
 
-/** ControlManager Class: tools to control a Model (Sensors, Actuators, Observers)
+/** ControlManager Class: tools to provide control in a Simulation (Sensors, Actuators, Observers)
 
     \author SICONOS Development Team - copyright INRIA
     \version 3.0.0.
@@ -64,10 +62,10 @@ typedef Observers::iterator ObserversIterator;
     A ControlManager has:
     - a list of Sensor
     - a list of Actuator
-    - a link to an existing Model
+    - a link to an existing Simulation
 
     The usual way to define control over a system is as follows:
-    - declare a ControlManager and associate it with a Model
+    - declare a ControlManager and associate it with a Simulation
     - add some sensors and actuators into the ControlManager
     - initialize the ControlManager (which will result in the recording of all actuators and sensors into the
     list of events processed during the simulation)
@@ -93,7 +91,7 @@ protected:
   Observers _allObservers;
 
   /** The model linked to this ControlManager */
-  SP::Model _model;
+  SP::Simulation _sim;
 
   /** default constructor
    */
@@ -101,26 +99,45 @@ protected:
 
   /** copy constructor
    * Private => no copy nor pass-by value allowed.
+   * \param cm the ControlManager
    */
-  ControlManager(const ControlManager&) {};
+  ControlManager(const ControlManager& cm) {};
+
+  /** Create associated Event and give the opportunity to get the TimeDiscretisation
+   * \param s a Sensor
+   * \param td a TimeDiscretisation asociated with this Sensor
+   */
+  void linkSensorSimulation(SP::Sensor s, SP::TimeDiscretisation td);
+
+  /** Create associated Event and give the opportunity to get the TimeDiscretisation
+   * \param act a Sensor
+   * \param td a TimeDiscretisation asociated with this Sensor
+   */
+  void linkActuatorSimulation(SP::Actuator act, SP::TimeDiscretisation td);
+
+  /** Create associated Event and give the opportunity to get the TimeDiscretisation
+   * \param obs a Sensor
+   * \param td a TimeDiscretisation asociated with this Sensor
+   */
+  void linkObserverSimulation(SP::Observer obs, SP::TimeDiscretisation td);
 
 public:
 
-  /** Constructor with a Model, to which control will be applied.
-   * \param m the SP::Model we want to control
+  /** Constructor with a Simulation, to which control will be applied.
+   * \param sim the Simulation
    */
-  ControlManager(SP::Model m);
+  ControlManager(SP::Simulation sim);
 
   /** destructor
    */
   virtual ~ControlManager();
 
-  /** get the Model linked to this ControlManager
-   *  \return a SP::Model
+  /** get the Simulation linked to this ControlManager
+   *  \return a SP::Simulation
    */
-  inline SP::Model model() const
+  inline SP::Simulation simulation() const
   {
-    return _model;
+    return _sim;
   };
 
   /** get the list of Sensors associated to this manager.
@@ -149,43 +166,45 @@ public:
 
   /** To build and add a new Sensor in the Manager
    * \param name the type of the Sensor
-   * \param t the SP::TimeDiscretisation of the Sensor
-   * \param number the index of the DynamicalSystem we want to observe
+   * \param td the SP::TimeDiscretisation of the Sensor
+   * \param ds the DynamicalSystem used in the Sensor
    * \return a SP::Sensor to the added Sensor
    */
-  SP::Sensor addSensor(int name, SP::TimeDiscretisation t, unsigned int number = 0);
+  SP::Sensor addSensor(int name, SP::TimeDiscretisation td, SP::DynamicalSystem ds);
 
   /** To build, add, initialize a new Sensor in the Manager and record
    * it in the simulation This function is only useful to add a new
    * Sensor after the initialization of the manager else call
    * addSensor()
    * \param name the type (int) of the Sensor
-   * \param t the SP::TimeDiscretisation of the Sensor
-   * \param number the index of the DynamicalSystem we want to observe
+   * \param td the SP::TimeDiscretisation of the Sensor
+   * \param ds the DynamicalSystem used in the Sensor
    * \return a SP::Sensor to the added Sensor
    */
-  SP::Sensor addAndRecordSensor(int name, SP::TimeDiscretisation t, unsigned int number = 0);
+  SP::Sensor addAndRecordSensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
   /** Add an existing Sensor to the Manager
    * \param s a SP::Sensor to the Sensor we want to add
+   * \param td the TimeDiscretisation used for the associated Event
    */
-  void addSensorPtr(SP::Sensor s);
+  void addSensorPtr(SP::Sensor s, SP::TimeDiscretisation td);
 
   /** To add, initialize an existing Sensor in the manager and record
    * it in the simulation This function is only useful to add a new
    * Sensor after the initialization of the manager else call
    * addSensor()
    * \param s a SP::Sensor to the Sensor we want to add
+   * \param td the TimeDiscretisation used for the associated Event
    */
-  void addAndRecordSensorPtr(SP::Sensor s);
+  void addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td);
 
   /** To build and add a new Actuator in the Manager
    * \param name the type of the Actuator
    * \param t the SP::TimeDiscretisation of the Actuator
-   * \param number the index of the DynamicalSystem we want to act on
+   * \param sensor the ControlSensor used to feed the Actuator
    * \return a SP::ACtuator to the added Actuator
    */
-  SP::Actuator addActuator(int name, SP::TimeDiscretisation t, unsigned int number = 0);
+  SP::Actuator addActuator(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor);
 
   /** To build, add, initialize a new Actuator in the manager and
    * record it in the simulation This function is only useful to add a
@@ -193,62 +212,67 @@ public:
    * addActuator()
    * \param name the type of the Actuator
    * \param t the SP::TimeDiscretisation of the Actuator
-   * \param number the index of the DynamicalSystem we want to act on
+   * \param sensor the ControlSensor used to feed the Actuator
    * \return a SP::Actuator to the added Actuator
    */
-  SP::Actuator addAndRecordActuator(int name, SP::TimeDiscretisation t, unsigned int number = 0);
+  SP::Actuator addAndRecordActuator(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor);
 
   /** Add an existing Actuator to the manager
    * \param act a SP::Actuator to the Actuator we want to add
+   * \param td the TimeDiscretisation used for the associated Event
    */
-  void addActuatorPtr(SP::Actuator act);
+  void addActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td);
 
   /** To add, initialize an existing Actuator in the manager and record
    * it in the simulation This function is only useful to add a new
    * Actuator after the initialization of the manager otherwise call
    * addActuator()
    * \param act a SP::Actuator to the Actuator we want to add
+   * \param td the TimeDiscretisation used for the associated Event
    */
-  void addAndRecordActuatorPtr(SP::Actuator act);
+  void addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td);
 
   /** To build and add a new Observer in the Manager
    * \param name the type of the Observer
-   * \param t the SP::TimeDiscretisation of the Observer
+   * \param td the SP::TimeDiscretisation of the Observer
    * \param sensor the ControlSensor feeding the Observer
    * \param xHat0 the initial guess for the state
    * \return a SP::ACtuator to the added Observer
    */
-  SP::Observer addObserver(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0);
+  SP::Observer addObserver(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0);
 
   /** To build, add, initialize a new Observer in the manager and
    * record it in the simulation This function is only useful to add a
    * new Observer after the initialization of the manager else call
    * addObserver()
    * \param name the type of the Observer
-   * \param t the SP::TimeDiscretisation of the Observer
+   * \param td the SP::TimeDiscretisation of the Observer
    * \param sensor the ControlSensor feeding the Observer
    * \param xHat0 the initial guess for the state
    * \return a SP::Observer to the added Observer
    */
-  SP::Observer addAndRecordObserver(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0);
+  SP::Observer addAndRecordObserver(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0);
 
   /** Add an existing Observer to the manager
    * \param obs a SP::Observer to the Observer we want to add
+   * \param td the TimeDiscretisation used for the associated Event
    */
-  void addObserverPtr(SP::Observer obs);
+  void addObserverPtr(SP::Observer obs, SP::TimeDiscretisation td);
 
   /** To add, initialize an existing Observer in the manager and record
    * it in the simulation This function is only useful to add a new
    * Observer after the initialization of the manager otherwise call
    * addObserver()
    * \param obs a SP::Observer to the Observer we want to add
+   * \param td the TimeDiscretisation used for the associated Event
    */
-  void addAndRecordObserverPtr(SP::Observer obs);
+  void addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td);
 
 
-  /** initialize sensor data.
+  /** initialize all Sensors, Observers and Actuators.
+   * \param m the Model
    */
-  void initialize();
+  void initialize(const Model& m);
 
   /** display the data of the ControlManager on the standard output
    */

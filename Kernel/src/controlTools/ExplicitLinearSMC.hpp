@@ -40,10 +40,10 @@ private:
 
 public:
 
-  /** Constructor with a TimeDiscretisation and a Model.
-   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+  /** Constructor.
+   * \param sensor the ControlSensor feeding the Actuator
    */
-  ExplicitLinearSMC(SP::TimeDiscretisation t);
+  ExplicitLinearSMC(SP::ControlSensor sensor);
 
   /** destructor
   */

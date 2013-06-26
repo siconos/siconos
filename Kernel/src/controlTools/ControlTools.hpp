@@ -46,6 +46,7 @@
 
 // Observer - available
 #include "LuenbergerObserver.hpp"
+#include "SlidingReducedOrderObserver.hpp"
 
 // Misc
 #include "ControlManager.hpp"

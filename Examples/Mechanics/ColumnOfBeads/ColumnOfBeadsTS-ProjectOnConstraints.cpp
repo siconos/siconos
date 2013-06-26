@@ -27,6 +27,7 @@
 */
 
 #include "SiconosKernel.hpp"
+#include <sstream>
 
 using namespace std;
 
@@ -299,7 +300,11 @@ int withLevel(unsigned int mylevel)
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+
+    // This is the power of c++
+    ostringstream convert;
+    convert << mylevel;
+    ioMatrix::write("result-level" + convert.str() + ".dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();

@@ -57,7 +57,7 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
   if (dsType == Type::FirstOrderLinearTIDS)
   {
      _DS.reset(new FirstOrderLinearTIDS(static_cast<const FirstOrderLinearTIDS&>(ds)));
-     _isConst = (_TD->getTDCase() == 2) ? true : false;
+     _isConst = (_TD->getTDCase() == 2 || _TD->getTDCase() == 3) ? true : false;
   }
   else if (dsType == Type::FirstOrderLinearDS)
   {
@@ -68,7 +68,7 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
      {
        std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->setPluginA(cfolds.getPluginA());
      }
-     _isConst = (_TD->getTDCase() == 2) && !(cfolds.getPluginA()->isPlugged()) ? true : false;
+     _isConst = (_TD->getTDCase() == 2 || _TD->getTDCase() == 3) && !(cfolds.getPluginA()->isPlugged()) ? true : false;
   }
 
   // integration stuff

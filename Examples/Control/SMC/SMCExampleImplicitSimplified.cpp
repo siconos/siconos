@@ -88,15 +88,14 @@ int main(int argc, char* argv[])
   // Control stuff
   SP::ControlManager control = controlProcess->CM();
   // use a controlSensor
-  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC));
-  control->addSensorPtr(sens);
+  SP::LinearSensor sens(new LinearSensor(processDS, sensorC));
+  control->addSensorPtr(sens, tSensor);
   // add the sliding mode controller
   SP::LinearSMC act = std11::static_pointer_cast<LinearSMC>
-                      (control->addActuator(LINEAR_SMC, tActuator));
+                      (control->addActuator(LINEAR_SMC, tActuator, sens));
   act->setCsurfacePtr(Csurface);
   act->setBPtr(Brel);
   act->setDPtr(Drel);
-  act->addSensorPtr(sens);
 
   // =========================== End of model definition ===========================
 
@@ -106,7 +105,7 @@ int main(int argc, char* argv[])
 
   cout << "====> Simulation initialisation ..." << endl << endl;
   // initialise the ControlManager
-  control->initialize();
+  control->initialize(*controlProcess->model());
 
   // ==== Simulation loop =====
   cout << "====> Start computation ... " << endl << endl;

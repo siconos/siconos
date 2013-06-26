@@ -353,9 +353,10 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("NE_3DS_3Knee_1Prism_GMP.ref", "ascii", dataPlotRef);
+    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
-      (dataPlot - dataPlotRef).display();
+//      (dataPlot - dataPlotRef).display();
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       return 1;
     }

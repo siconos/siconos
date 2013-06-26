@@ -30,13 +30,13 @@
 
 #include <boost/circular_buffer.hpp>
 
-LinearSMCimproved::LinearSMCimproved(SP::TimeDiscretisation t):
-  LinearSMC(t, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false)
+LinearSMCimproved::LinearSMCimproved(SP::ControlSensor sensor):
+  LinearSMC(sensor, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false)
 {
 }
 
-LinearSMCimproved::LinearSMCimproved(SP::TimeDiscretisation t, SP::SiconosMatrix B, SP::SiconosMatrix D):
-  LinearSMC(t, B, D, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false)
+LinearSMCimproved::LinearSMCimproved(SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D):
+  LinearSMC(sensor, B, D, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false)
 {
 }
 

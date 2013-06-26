@@ -64,22 +64,21 @@ protected:
 
 public:
 
-  /** Constructor with a TimeDiscretisation and a Model.
-   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+  /** Constructor with a TimeDiscretisation, a ControlSensor and an initial estimate of the state.
    * \param sensor the SP::ControlSensor that feed us with measurements
    * \param xHat0 the initial guess for the state
    */
-  LuenbergerObserver(SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0): Observer(LUENBERGER, t, sensor, xHat0) {}
+  LuenbergerObserver(SP::ControlSensor sensor, const SiconosVector& xHat0):
+    Observer(LUENBERGER, sensor, xHat0) {}
 
-  /** Constructor with a TimeDiscretisation, a Model, two matrices and a sensor
-   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param sensor the sensor that feeds the Observer
+  /** Constructor with all the data
+   * \param sensor the ControlSensor that feeds the Observer
    * \param xHat0 the initial guess for the state
-   * \param C observation matrix
-   * \param L gain matrix
+   * \param C the observation matrix
+   * \param L the gain matrix
    */
-  LuenbergerObserver(SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::SiconosMatrix C, SP::SiconosMatrix L):
-    Observer(LUENBERGER, t, sensor, xHat0), _C(C), _L(L) {}
+  LuenbergerObserver(SP::ControlSensor sensor, const SiconosVector& xHat0, SP::SiconosMatrix C, SP::SiconosMatrix L):
+    Observer(LUENBERGER, sensor, xHat0), _C(C), _L(L) {}
 
   /** Compute the new control law at each event
   */

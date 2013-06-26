@@ -19,7 +19,7 @@
 
 #include "ControlManager.hpp"
 #include "EventsManager.hpp"
-#include "Model.hpp"
+#include "Simulation.hpp"
 #include "Sensor.hpp"
 #include "SensorFactory.hpp"
 #include "ActuatorFactory.hpp"
@@ -28,32 +28,35 @@
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
 
+#include "SensorEvent.hpp"
+#include "ActuatorEvent.hpp"
+#include "ObserverEvent.hpp"
 
 
-ControlManager::ControlManager(SP::Model m): _model(m)
+ControlManager::ControlManager(SP::Simulation sim): _sim(sim)
 {
-  if (!_model)
-    RuntimeException::selfThrow("ControlManager::constructor failed. The given Model is a NULL pointer.");
+  if (!_sim)
+    RuntimeException::selfThrow("ControlManager::constructor failed. The given Simulation is a NULL pointer.");
 }
 
 ControlManager::~ControlManager()
 {}
 
-void ControlManager::initialize()
+void ControlManager::initialize(const Model& m)
 {
   // Initialize all the Sensors and insert their events into the
   // EventsManager of the Simulation.
   for (SensorsIterator itS = _allSensors.begin();
        itS != _allSensors.end(); ++itS)
   {
-    (*itS)->initialize(*_model);
+    (*itS)->initialize(m);
   }
   // Initialize all the Actuators and insert their events into the
   // EventsManager of the Simulation.
   for (ActuatorsIterator itA = _allActuators.begin();
        itA != _allActuators.end(); ++itA)
   {
-    (*itA)->initialize(*_model);
+    (*itA)->initialize(m);
   }
 
   // Initialize all the Actuators and insert their events into the
@@ -61,95 +64,127 @@ void ControlManager::initialize()
   for (ObserversIterator itO = _allObservers.begin();
        itO != _allObservers.end(); ++itO)
   {
-    (*itO)->initialize(*_model);
+    (*itO)->initialize(m);
   }
 }
 
-SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation t, unsigned int number)
+SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds)
 {
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  return (* (_allSensors.insert(regSensor.instantiate(type, t, getDSFromModel(number)))).first);
+  SP::Sensor s = (* (_allSensors.insert(regSensor.instantiate(type, ds))).first);
+  linkSensorSimulation(s, td);
+  return s;
 }
 
-SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t, unsigned int number)
+SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds)
 {
-  double currentTime = _model->simulation()->nextTime();
-  while (t->currentTime() < currentTime)
-    t->increment();
+  double currentTime = _sim->nextTime();
+  while (td->currentTime() < currentTime)
+    td->increment();
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  SP::Sensor tmp = *(_allSensors.insert(regSensor.instantiate(type, t, getDSFromModel(number)))).first;
-  tmp->initialize(*_model);
-  return tmp;
+  SP::Sensor s = *(_allSensors.insert(regSensor.instantiate(type, ds))).first;
+  linkSensorSimulation(s, td);
+  s->initialize(*_sim->model());
+  return s;
 }
 
-SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation t, unsigned int number)
+SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  return (* (_allActuators.insert(regActuator.instantiate(type, t))).first);
+  SP::Actuator act = (* (_allActuators.insert(regActuator.instantiate(type, sensor))).first);
+  linkActuatorSimulation(act, td); 
+  return act;
 }
 
-SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation t, unsigned int number)
+SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  SP::Actuator tmp = *(_allActuators.insert(regActuator.instantiate(type, t))).first;
-  tmp->initialize(*_model);
-  return tmp;
+  SP::Actuator act = *(_allActuators.insert(regActuator.instantiate(type, sensor))).first;
+  linkActuatorSimulation(act, td);
+  act->initialize(*_sim->model());
+  return act;
 }
 
-SP::Observer ControlManager::addObserver(int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0)
+SP::Observer ControlManager::addObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
   ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
-  return (* (_allObservers.insert(regObserver.instantiate(type, t, sensor, xHat0))).first);
+  SP::Observer obs = (* (_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first);
+  linkObserverSimulation(obs, td);
+  return obs;
 }
 
-SP::Observer ControlManager::addAndRecordObserver(int type, SP::TimeDiscretisation t, SP::ControlSensor sensor, const SiconosVector& xHat0)
+SP::Observer ControlManager::addAndRecordObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
   ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
-  SP::Observer tmp = *(_allObservers.insert(regObserver.instantiate(type, t, sensor, xHat0))).first;
-  tmp->initialize(*_model);
-  return tmp;
+  SP::Observer obs = *(_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first;
+  linkObserverSimulation(obs, td);
+  obs->initialize(*_sim->model());
+  return obs;
 }
 
-void ControlManager::addSensorPtr(SP::Sensor s)
+void ControlManager::addSensorPtr(SP::Sensor s, SP::TimeDiscretisation td)
 {
   _allSensors.insert(s);
+  linkSensorSimulation(s, td);
 }
 
-void ControlManager::addAndRecordSensorPtr(SP::Sensor s)
+void ControlManager::addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td)
 {
   _allSensors.insert(s);
-  s->initialize(*_model);
+  linkSensorSimulation(s, td);
+  s->initialize(*_sim->model());
 }
 
-void ControlManager::addActuatorPtr(SP::Actuator act)
+void ControlManager::addActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td)
 {
   _allActuators.insert(act);
+  linkActuatorSimulation(act, td);
 }
 
-void ControlManager::addAndRecordActuatorPtr(SP::Actuator act)
+void ControlManager::addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td)
 {
   _allActuators.insert(act);
-  act->initialize(*_model);
+  linkActuatorSimulation(act, td);
+  act->initialize(*_sim->model());
 }
 
-void ControlManager::addObserverPtr(SP::Observer obs)
+void ControlManager::addObserverPtr(SP::Observer obs, SP::TimeDiscretisation td)
 {
   _allObservers.insert(obs);
+  linkObserverSimulation(obs, td);
 }
 
-void ControlManager::addAndRecordObserverPtr(SP::Observer obs)
+void ControlManager::addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td)
 {
   _allObservers.insert(obs);
-  obs->initialize(*_model);
+  linkObserverSimulation(obs, td);
+  obs->initialize(*_sim->model());
+}
+
+void ControlManager::linkSensorSimulation(SP::Sensor s, SP::TimeDiscretisation td)
+{
+  Event& ev = _sim->eventsManager()->insertEvent(SENSOR_EVENT, td);
+  static_cast<SensorEvent&>(ev).setSensorPtr(s);
+  s->setTimeDiscretisation(*td);
+}
+
+void ControlManager::linkActuatorSimulation(SP::Actuator act, SP::TimeDiscretisation td)
+{
+  Event& ev = _sim->eventsManager()->insertEvent(ACTUATOR_EVENT, td);
+  static_cast<ActuatorEvent&>(ev).setActuatorPtr(act);
+  act->setTimeDiscretisation(*td);
+}
+
+void ControlManager::linkObserverSimulation(SP::Observer obs, SP::TimeDiscretisation td)
+{
+  Event& ev = _sim->eventsManager()->insertEvent(OBSERVER_EVENT, td);
+  static_cast<ObserverEvent&>(ev).setObserverPtr(obs);
+  obs->setTimeDiscretisation(*td);
 }
 
 void ControlManager::display() const
 {
   std::cout << "=========> ControlManager " ;
-  if (model())
-    std::cout << "linked to model named: " << model()->title() << "." <<std::endl;
-  else
-    std::cout << "not linked to a model." <<std::endl;
   std::cout << "It handles the following objects: " <<std::endl;
   SensorsIterator itS;
   for (itS = _allSensors.begin(); itS != _allSensors.end(); ++itS)

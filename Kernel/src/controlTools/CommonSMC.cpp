@@ -62,7 +62,7 @@ void CommonSMC::initialize(const Model& m)
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
   double t0 = m.t0();
-  double T = m.finalT() + _timeDiscretisation->currentTimeStep();
+  double T = m.finalT() + _td->currentTimeStep();
   // create the SMC Model
   _SMC.reset(new Model(t0, T));
   // create the interaction
@@ -76,10 +76,8 @@ void CommonSMC::initialize(const Model& m)
   _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
   _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
   _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);
-  // Copy the TD
-  _tD_SMC.reset(new TimeDiscretisation(*_timeDiscretisation));
   // Set up the simulation
-  _simulationSMC.reset(new TimeStepping(_tD_SMC));
+  _simulationSMC.reset(new TimeStepping(_td));
   _simulationSMC->setName("linear sliding mode controller simulation");
     _integratorSMC.reset(new Moreau(_DS_SMC, _thetaSMC));
   _integratorSMC.reset(new ZeroOrderHold(_DS_SMC));
@@ -194,3 +192,7 @@ void CommonSMC::setSaturationMatrixPtr(SP::SiconosMatrix newPtr)
 }
 
 
+void CommonSMC::setTimeDiscretisation(const TimeDiscretisation& td)
+{
+  _td.reset(new TimeDiscretisation(td));
+};

@@ -81,10 +81,6 @@ public:
    */
   void process(Simulation& sim);
 
-  /** Increment time of the present event according to
-      the time discretisation of the linked Actuator
-  */
-  void update();
 };
 
 #endif // ObserverEvent_H

@@ -29,20 +29,13 @@
 Sensor::Sensor(): _type(0), _id("none")
 {}
 
-Sensor::Sensor(unsigned int type, SP::TimeDiscretisation t, SP::DynamicalSystem ds): _type(type), _id("none"), _DS(ds), _timeDiscretisation(t)
+Sensor::Sensor(unsigned int type, SP::DynamicalSystem ds): _type(type), _id("none"), _DS(ds)
 {
-  _nDim = _DS->getN();
+  _DSx = _DS->x();
 }
 
 Sensor::~Sensor()
 {}
-
-void Sensor::initialize(const Model& m)
-{
-  // == Create an event linked to the present Sensor. ==
-  Event& ev = m.simulation()->eventsManager()->insertEvent(SENSOR_EVENT, _timeDiscretisation->currentTime());
-  static_cast<SensorEvent&>(ev).setSensorPtr(shared_from_this());
-}
 
 void Sensor::display() const
 {

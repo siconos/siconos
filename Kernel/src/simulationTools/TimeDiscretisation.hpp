@@ -83,7 +83,8 @@ private:
   /** the XML object linked to the TimeDiscretisation to read XML data */
   SP::TimeDiscretisationXML _timeDiscretisationXML;
 
-  /** Indicator flag : 1 when we have a complete vector for _tk (_h may vary), 2 when _h is fixed.*/
+  /** Indicator flag : 1 when we have a complete vector for _tk (_h may vary), 2 when _h is fixed.
+   * 3 when h is fixed and cannot change */
   int _tdCase;
 
   /** index in tk which corresponds to the current time step (tk[pos] = t[k]) -
@@ -92,12 +93,23 @@ private:
   */
   int _pos;
 
+  /** Origin of time*/
+  double _t0;
+
   /** default constructor (private => no copy nor pass-by value)
    */
   TimeDiscretisation() {};
 
   /** Assignment Operator (private => forbidden) */
   TimeDiscretisation& operator =(const TimeDiscretisation&);
+
+  /** Get the origin of time t0
+   * \return the origin of time
+   */
+  inline double getT0() const
+  {
+    return _t0;
+  }
 
 public:
 
