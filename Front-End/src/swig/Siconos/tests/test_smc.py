@@ -4,7 +4,8 @@
 # this test is taken almost verbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
     from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-        TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2
+        TimeStepping, ZeroOrderHold, ControlManager, LinearSensor, LinearSMCOT2, \
+        TD_EVENT
     from numpy import eye, empty, zeros
     import numpy as np
     from math import ceil, sin
@@ -24,7 +25,6 @@ def test_smc1():
     h = 1.0e-4  # time step for simulation
     hControl = 1.0e-2  # time step for control
     Xinit = 1.0  # initial position
-    theta = 0.5
     N = ceil((T-t0)/h + 10)  # number of time steps
     outputSize = 4  # number of variable to store at each time step
 
@@ -56,22 +56,21 @@ def test_smc1():
     processSimulation = TimeStepping(processTD, 0)
     processSimulation.setName("plant simulation")
     # Declaration of the integrator
-    processIntegrator = Moreau(processDS, theta)
+    processIntegrator = ZeroOrderHold(processDS)
     processSimulation.insertIntegrator(processIntegrator)
     # Actuator, Sensor & ControlManager
-    control = ControlManager(process)
-    sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
+    control = ControlManager(processSimulation)
+    sens = LinearSensor(processDS, sensorC, sensorD)
 
-    control.addSensorPtr(sens)
-    act = LinearSMCOT2(tActuator)
+    control.addSensorPtr(sens, tSensor)
+    act = LinearSMCOT2(sens)
     act.setCsurfacePtr(Csurface)
-    act.addSensorPtr(sens)
     act.setBPtr(Brel)
-    control.addActuatorPtr(act)
+    control.addActuatorPtr(act, tActuator)
 
     # Initialization.
     process.initialize(processSimulation)
-    control.initialize()
+    control.initialize(process)
     # This is not working right now
     #eventsManager = s.eventsManager()
 
@@ -84,8 +83,9 @@ def test_smc1():
 
     # Main loop
     k = 1
-    while(processSimulation.hasNextEvent()):
-        processSimulation.computeOneStep()
+    while processSimulation.hasNextEvent():
+        if processSimulation.eventsManager().nextEvent().getType() == TD_EVENT:
+            processSimulation.computeOneStep()
         dataPlot[k, 0] = processSimulation.nextTime()
         dataPlot[k, 1] = processDS.x()[0]
         dataPlot[k, 2] = processDS.x()[1]
@@ -147,16 +147,15 @@ def test_smc2():
     tActuator = TimeDiscretisation(t0, hControl)
     # Actuator, Sensor & ControlManager
     control = controlProcess.CM()
-    sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
-    control.addSensorPtr(sens)
-    act = LinearSMCOT2(tActuator)
+    sens = LinearSensor(processDS, sensorC, sensorD)
+    control.addSensorPtr(sens, tSensor)
+    act = LinearSMCOT2(sens)
     act.setCsurfacePtr(Csurface)
-    act.addSensorPtr(sens)
     act.setBPtr(Brel)
-    control.addActuatorPtr(act)
+    control.addActuatorPtr(act, tActuator)
 
     # Initialization
-    control.initialize()
+    control.initialize(controlProcess.model())
 
     # Run the simulation
     controlProcess.run()
