@@ -87,9 +87,9 @@ int main(int argc, char* argv[])
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-    SP::TimeDiscretisation tSensor(new TimeDiscretisation(t0+1e-10, h));
-    SP::TimeDiscretisation tActuator(new TimeDiscretisation(t0+1e-10+2e-14, h));
-    SP::TimeDiscretisation tObserver(new TimeDiscretisation(t0+1e-10+1e-14, h));
+    SP::TimeDiscretisation tSensor(new TimeDiscretisation(t0, 2*h));
+    SP::TimeDiscretisation tActuator(new TimeDiscretisation(t0, 2*h));
+    SP::TimeDiscretisation tObserver(new TimeDiscretisation(t0, 2*h));
 
     // -- (3) Simulation setup with (1) (2)
     SP::TimeStepping processSimulation(new TimeStepping(t, 0));
@@ -106,8 +106,8 @@ int main(int argc, char* argv[])
 
     // add the Observer
     SP::SiconosMatrix L(new SimpleMatrix(2, 1));
-    (*L)(0, 0) = -17.48228858;
-    (*L)(1, 0) = -99.02083594;
+    (*L)(0, 0) = -8.71455866;
+    (*L)(1, 0) = -24.02084375;
     SP::SiconosVector xHat0(new SiconosVector(2));
     (*xHat0)(0) = -10;
     (*xHat0)(1) = -5;
@@ -143,21 +143,20 @@ int main(int argc, char* argv[])
     unsigned int N = ceil((T - t0) / h + 10); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 8;
+    unsigned int outputSize = 7;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SiconosVector& xProc = *doubleIntegrator->x();
-    SiconosVector& u = *doubleIntegrator->b();
+    const SiconosVector& u = act->u();
     SiconosVector& e = *obs->e();
     SiconosVector& xHat = *obs->xHat();
     dataPlot(0, 0) = process->t0();
     dataPlot(0, 1) = (xProc)(0);
     dataPlot(0, 2) = (xProc)(1);
     dataPlot(0, 3) = (u)(0);
-    dataPlot(0, 4) = (u)(1);
-    dataPlot(0, 5) = (e)(0);
-    dataPlot(0, 6) = (xHat)(0);
-    dataPlot(0, 7) = (xHat)(1);
+    dataPlot(0, 4) = (e)(0);
+    dataPlot(0, 5) = (xHat)(0);
+    dataPlot(0, 6) = (xHat)(1);
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -169,7 +168,6 @@ int main(int argc, char* argv[])
 
     while (processSimulation->hasNextEvent())
     {
-      eventsManager->display();
       nextEvent = eventsManager->nextEvent();
       // --- Get values to be plotted ---
       // the following check prevents saving the same data multiple times
@@ -185,10 +183,9 @@ int main(int argc, char* argv[])
         dataPlot(k, 1) = (xProc)(0);
         dataPlot(k, 2) = (xProc)(1);
         dataPlot(k, 3) = (u)(0);
-        dataPlot(k, 4) = (u)(1);
-        dataPlot(k, 5) = (e)(0);
-        dataPlot(k, 6) = (xHat)(0);
-        dataPlot(k, 7) = (xHat)(1);
+        dataPlot(k, 4) = (e)(0);
+        dataPlot(k, 5) = (xHat)(0);
+        dataPlot(k, 6) = (xHat)(1);
         ++show_progress;
         k++;
       }
@@ -199,21 +196,21 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("LuenbergerObserver.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-//    ioMatrix::read("result.ref", "ascii", dataPlotRef);
+    ioMatrix::read("LuenbergerObserver.ref", "ascii", dataPlotRef);
 
-//    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
+    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
 
-//    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
-//      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-//      std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
-//      return 1;
+      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
+      return 1;
     }
-//    else
+    else
     {
       return 0;
     }

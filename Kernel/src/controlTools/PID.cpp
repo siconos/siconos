@@ -99,6 +99,11 @@ void PID::setKPtr(SP::SiconosVector newPtr)
   }
 }
 
+void PID::setTimeDiscretisation(const TimeDiscretisation& td)
+{
+  _curDeltaT = td.currentTimeStep();
+}
+
 void PID::display() const
 {
   Actuator::display();

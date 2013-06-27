@@ -92,7 +92,13 @@ public:
   {
     _ref = newValue;
   }
-  /** display the data of the Actuator on the standard output
+
+  /** Get the timestep from the TimeDiscretisation associated with this PID controller
+  *  \param td the TimeDiscretisation for this Actuator
+  */
+  virtual void setTimeDiscretisation(const TimeDiscretisation& td);
+
+/** display the data of the Actuator on the standard output
    */
   virtual void display() const;
 
