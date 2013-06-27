@@ -31,7 +31,12 @@ IF(SiconosKernel_LIBRARY)
   GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS_DIR ${SiconosKernel_LIBRARY_DIRS} PATH)
   GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS_DIR_DIR ${SiconosKernel_LIBRARY_DIRS_DIR} PATH)
   
-  set(SiconosKernel_EXE_DIR ${SiconosKernel_LIBRARY_DIRS_DIR}/bin CACHE STRING "Path to siconos executable")
+  #  set(SiconosKernel_EXE_DIR ${SiconosKernel_LIBRARY_DIRS_DIR}/bin CACHE STRING "Path to siconos executable")
+
+  FIND_PATH(SiconosKernel_EXE_DIR siconos
+    HINTS ${SiconosKernel_LIBRARY_DIRS_DIR} ${SiconosKernel_LIBRARY_DIRS_DIR_DIR} 
+    ENV PATH
+    PATH_SUFFIXES bin)
 
   FIND_PATH(SiconosKernel_INCLUDE_DIRS SiconosKernel.hpp
     HINTS ${SiconosKernel_LIBRARY_DIRS_DIR} ${SiconosKernel_LIBRARY_DIRS_DIR_DIR} 
