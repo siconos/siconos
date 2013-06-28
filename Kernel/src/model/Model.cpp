@@ -197,7 +197,7 @@ void Model::savePlatformToXML()
 
   if (_strat)
   {
-    _strat->timeDiscretisation()->saveTimeDiscretisationToXML();
+    _strat->eventsManager()->timeDiscretisation()->saveTimeDiscretisationToXML();
 
     if (Type::value(*_strat) == Type::TimeStepping)
       (std11::static_pointer_cast<TimeStepping>(_strat))->saveSimulationToXML();

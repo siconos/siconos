@@ -46,7 +46,7 @@ private:
   SP::Sensor _sensor;
 
   /** Default constructor */
-  SensorEvent(): Event(0.0, 3) {};
+  SensorEvent(): Event(0.0, SENSOR_EVENT, true) {};
 
 public:
 
@@ -54,7 +54,7 @@ public:
    *  \param time the starting time of the Event
    *  \param name the type of the Event
    */
-  SensorEvent(double time, int name): Event(time, name) {};
+  SensorEvent(double time, int name): Event(time, name, true) {};
 
   /** destructor
    */

@@ -62,7 +62,7 @@ void CommonSMC::initialize(const Model& m)
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
   double t0 = m.t0();
-  double T = m.finalT() + _td->currentTimeStep();
+  double T = m.finalT() + _td->currentTimeStep(0);
   // create the SMC Model
   _SMC.reset(new Model(t0, T));
   // create the interaction

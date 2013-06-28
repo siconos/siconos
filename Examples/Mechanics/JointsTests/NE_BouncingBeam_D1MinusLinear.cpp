@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     I3->eye();
     I3->setValue(0, 0, 0.1);
     q03->zero();
-    (*q03)(2) = -L1 * sqrt(2) - L1 / 2;
+    (*q03)(2) = -L1 * sqrt(2.0) - L1 / 2;
 
     double angle = M_PI / 2;
     SiconosVector V1(3);

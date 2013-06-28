@@ -34,9 +34,7 @@ bool BallBowl()
 
     // --- Get and initialize the simulation ---
     SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
-    // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = s->timeDiscretisation();
-    int k = 0; // Current step
+    int k = 1; // Current step
     SP::SiconosMatrix dataRef(new SimpleMatrix("refBallBowl.dat", true));
     int N = dataRef->size(0);
     SimpleMatrix dataPlot(N, 6);

@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
   double t0 = 0.0;
   double T = 5.0e-3;        // Total simulation time
-  double h_step = 1.0e-6;  // Time step
+  std::string h_step = std::string("1.0e-6");  // Time step
   double Lvalue = 1e-2;   // inductance
   double Cvalue = 1e-6;   // capacitance
   double Rvalue = 1e3;    // resistance

@@ -10,10 +10,6 @@
 # SiconosMechanics_LIBRARY_DIRECTORY before FIND_PACKAGE(SiconosMechanics)
 INCLUDE(FindPackageHandleStandardArgs)
 
-IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
-  SET(CMAKE_FIND_LIBRARY_SUFFIXES .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
-ENDIF()
-
 IF(SiconosMechanics_LIBRARY_DIRECTORY)
   MESSAGE(STATUS "Looking for Mechanics library in ${SiconosMechanics_LIBRARY_DIRECTORY}")
   FIND_LIBRARY(SiconosMechanics_LIBRARY SiconosMechanics PATHS "${SiconosMechanics_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)

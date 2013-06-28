@@ -42,7 +42,7 @@ void PID::initialize(const Model& m)
   (*_B)(1, 0) = 1;
   Actuator::initialize(m);
 
-  _curDeltaT = m.simulation()->timeDiscretisation()->currentTimeStep();
+  _curDeltaT = m.simulation()->eventsManager()->timeDiscretisation()->currentTimeStep(0);
 
   // initialize _err
   _err.reset(new boost::circular_buffer<double> (3));
@@ -101,7 +101,6 @@ void PID::setKPtr(SP::SiconosVector newPtr)
 
 void PID::setTimeDiscretisation(const TimeDiscretisation& td)
 {
-  _curDeltaT = td.currentTimeStep();
 }
 
 void PID::display() const

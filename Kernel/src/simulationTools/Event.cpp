@@ -22,34 +22,52 @@
 #include <cmath>
 
 
-double Event::tick = DEFAULT_TICK;
+double Event::_tick = DEFAULT_TICK;
 
-Event::Event(double time, int newType): type(newType), dTime(time)
+Event::Event(double time, int newType, bool reschedule):
+  _type(newType), _dTime(time), _k(0), _reschedule(reschedule)
 {
   // Initialize and set timeOfEvent.
-  mpz_init_set_d(timeOfEvent, rint(time / tick)) ;
+  mpz_init_set_d(_timeOfEvent, rint(time / _tick));
+  mpz_init_set_d(_tickIncrement, 0);
 }
 
 Event::~Event()
 {
-  mpz_clear(timeOfEvent);
+  mpz_clear(_timeOfEvent);
+  mpz_clear(_tickIncrement);
+}
+
+void Event::update()
+{
+  if (_td) // if no TimeDiscretisation then do nothing
+  {
+    _k++;
+    if (_td->hGmp())
+      incrementTime();
+    else
+      setTime(_td->getTk(_k));
+  }
+}
+void Event::setTimeDiscretisation(SP::TimeDiscretisation td)
+{
+  _td = td;
+  if (_td->hGmp())
+  {
+    mpf_t tmp;
+    mpf_init_set_d(tmp, _tick);
+    mpf_div(tmp, *_td->currentTimeStep(), tmp);
+    mpz_init_set_ui(_tickIncrement, mpf_get_ui(tmp));
+    mpf_clear(tmp);
+  }
 }
 
 void Event::display() const
 {
   std::cout << "===== Event data display =====" <<std::endl;
-  std::cout << " - Type: " << type <<std::endl;
+  std::cout << " - Type: " << _type <<std::endl;
   std::cout << " - time (mpz_t format, double format): (";
-  mpz_out_str(stdout, 10, timeOfEvent);
-  std::cout << ", " << dTime << ")" <<std::endl;
+  mpz_out_str(stdout, 10, _timeOfEvent);
+  std::cout << ", " << _dTime << ")" <<std::endl;
   std::cout << "===== End of Event display =====" <<std::endl;
-}
-
-void Event::update()
-{
-  if (_td)
-  {
-    _td->increment();
-    setTime(_td->currentTime());
-  }
 }

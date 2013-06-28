@@ -76,7 +76,7 @@ void LuenbergerObserver::initialize(const Model& m)
   _y.reset(new SiconosVector(_C->size(0)));
 
   double t0 = m.t0();
-  double h = m.simulation()->timeDiscretisation()->currentTimeStep();
+  double h = m.simulation()->currentTimeStep();
   double T = m.finalT() + h;
   _model.reset(new Model(t0, T));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);

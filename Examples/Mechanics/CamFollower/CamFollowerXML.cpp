@@ -46,8 +46,6 @@ int main(int argc, char* argv[])
 
     // --- Get and initialize the simulation ---
     SP::TimeStepping S = std11::static_pointer_cast<TimeStepping>(CamFollower->simulation());
-    // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = S->timeDiscretisation();
     int k = 0;
     double T = CamFollower->finalT();
     double t0 = CamFollower->t0();

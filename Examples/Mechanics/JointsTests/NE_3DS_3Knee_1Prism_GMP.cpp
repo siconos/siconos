@@ -78,9 +78,9 @@ int main(int argc, char* argv[])
     v10->zero();
     I1->eye();
     I1->setValue(0, 0, 0.1);
-    (*q10)(0) = 0.5 * L1 / sqrt(2);
+    (*q10)(0) = 0.5 * L1 / sqrt(2.0);
     (*q10)(1) = 0;
-    (*q10)(2) = -0.5 * L1 / sqrt(2);
+    (*q10)(2) = -0.5 * L1 / sqrt(2.0);
     double angle = M_PI / 4;
     SiconosVector V1(3);
     V1.zero();
@@ -106,9 +106,9 @@ int main(int argc, char* argv[])
     v02->zero();
     I2->eye();
     I2->setValue(0, 0, 0.1);
-    (*q02)(0) = L1 / sqrt(2) - 0.5 * L2 / sqrt(2);
+    (*q02)(0) = L1 / sqrt(2.0) - 0.5 * L2 / sqrt(2.0);
     (*q02)(1) = 0;
-    (*q02)(2) = -L1 / sqrt(2) - 0.5 * L2 / sqrt(2);
+    (*q02)(2) = -L1 / sqrt(2.0) - 0.5 * L2 / sqrt(2.0);
 
     angle = -M_PI / 4;
     V1.zero();
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     I3->eye();
     I3->setValue(0, 0, 0.1);
     q03->zero();
-    (*q03)(2) = -L1 * sqrt(2) - L1 / 2;
+    (*q03)(2) = -L1 * sqrt(2.0) - L1 / 2;
 
     angle = M_PI / 2;
     V1.zero();

@@ -53,11 +53,10 @@
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an
 // --- id ---
 Simulation::Simulation(SP::TimeDiscretisation td):
-  _name("unnamed"), _timeDiscretisation(td),
-  _tinit(0.0), _tend(0.0), _tout(0.0),
+  _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false), _staticLevels(false), _levelsAreComputed(false)
 {
-  if (!_timeDiscretisation)
+  if (!td)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
   _useRelativeConvergenceCriterion = false;
   _relativeConvergenceCriterionHeld = false;
@@ -67,7 +66,7 @@ Simulation::Simulation(SP::TimeDiscretisation td):
 
   _allOSI.reset(new OSISet());
   _allNSProblems.reset(new OneStepNSProblems());
-  _eventsManager.reset(new EventsManager(*this)); //
+  _eventsManager.reset(new EventsManager(td)); //
 }
 
 // --- xml constructor ---
@@ -87,7 +86,7 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
   // === Model ===
 
   // === Time discretisation ===
-  _timeDiscretisation.reset(new TimeDiscretisation(_simulationxml->timeDiscretisationXML(), t0, T));
+  SP::TimeDiscretisation tmpTD(new TimeDiscretisation(_simulationxml->timeDiscretisationXML(), t0, T));
 
   // === OneStepIntegrators ===
   SetOfOSIXML OSIXMLList = _simulationxml->getOneStepIntegratorsXML();
@@ -113,7 +112,7 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
   // This depends on the type of simulation --> in derived class constructor
 
   // === Events manager creation ===
-  _eventsManager.reset(new EventsManager(*this)); //
+  _eventsManager.reset(new EventsManager(tmpTD)); //
   _allNSProblems.reset(new OneStepNSProblems());
 }
 
@@ -227,7 +226,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   _T = m->finalT();
 
   // === Events manager initialization ===
-//  _eventsManager->initialize(*this);
+  _eventsManager->initialize(_T);
   _tinit = _eventsManager->startingTime();
   //===
   if (withOSI)

@@ -125,6 +125,7 @@ int main(int argc, char* argv[])
     control->initialize(*process);
     act->setRef(xFinal);
     act->setK(*K);
+    act->setDeltaT(h);
 
     SP::EventsManager eventsManager = s->eventsManager();
     unsigned int N = ceil((T - t0) / h + 10); // Number of time steps

@@ -151,6 +151,7 @@ int main(int argc, char* argv[])
       ++show_progress;
     }
     processSimulation->nextStep();
+    std::cout << processSimulation->getTk() << " " << processSimulation->getTkp1() << " " << processSimulation->getTkp2() << std::endl;
   }
   cout << endl << "Computation Time " << time.elapsed()  << endl;
 

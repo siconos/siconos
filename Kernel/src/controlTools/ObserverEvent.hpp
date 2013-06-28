@@ -46,7 +46,7 @@ private:
   SP::Observer _observer;
 
   /** Default constructor */
-  ObserverEvent(): Event(0.0, OBSERVER_EVENT) {};
+  ObserverEvent(): Event(0.0, OBSERVER_EVENT, true) {};
 
 public:
 
@@ -54,7 +54,7 @@ public:
    *  \param time the starting time of the Event
    *  \param name the type of the Event
    */
-  ObserverEvent(double time, int name): Event(time, name) {};
+  ObserverEvent(double time, int name): Event(time, name, true) {};
 
   /** destructor
    */

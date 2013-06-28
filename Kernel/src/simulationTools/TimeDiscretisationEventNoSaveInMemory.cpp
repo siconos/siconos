@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "TimeDiscretisationEventNoSaveInMemory.hpp"
+#include "TimeDiscretisation.hpp"
 #include "EventFactory.hpp"
 
 using namespace EventFactory;
@@ -34,4 +35,17 @@ TimeDiscretisationEventNoSaveInMemory::~TimeDiscretisationEventNoSaveInMemory()
 void TimeDiscretisationEventNoSaveInMemory::process(Simulation& simulation)
 {}
 
+void TimeDiscretisationEventNoSaveInMemory::update(unsigned int k)
+{
+  assert(k > _k && "TimeDiscretisationEvent::update - next step has to be greater than the current one");
+  if (_td) // if no TimeDiscretisation, then do nothing
+  {
+    if (_td->hGmp())
+      incrementTime(k-_k);
+    else
+      setTime(_td->getTk(k));
+
+    _k = k;
+  }
+}
 //AUTO_REGISTER_EVENT(TD_EVENT, TimeDiscretisationEventNoSaveInMemory)

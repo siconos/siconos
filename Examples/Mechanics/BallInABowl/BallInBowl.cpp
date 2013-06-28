@@ -34,8 +34,6 @@ int main(int argc, char* argv[])
 
     // --- Get the simulation ---
     SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
-    // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = s->timeDiscretisation();
     int k = 0;
     double T = bouncingBall->finalT();
     double t0 = bouncingBall->t0();

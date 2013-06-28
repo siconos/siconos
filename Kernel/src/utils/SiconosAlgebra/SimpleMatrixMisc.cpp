@@ -53,6 +53,22 @@ double SimpleMatrix::normInf() const
     return 1;
 }
 
+void SimpleMatrix::normInfByColumn(SP::SiconosVector vIn) const
+{
+  if (num == 1)
+  {
+    if (vIn->size() != size(1))
+      RuntimeException::selfThrow("SimpleMatrix::normInfByColumn: the given vector does not have the right length");
+    DenseVect tmpV = DenseVect(size(0));
+    for (unsigned int i = 0; i < size(1); i++)
+    {
+       ublas::noalias(tmpV) = ublas::column(*mat.Dense, i);
+       (*vIn)(i) = norm_inf(tmpV);
+    }
+  }
+  else
+    RuntimeException::selfThrow("SimpleMatrix::normInfByColumn: not implemented for data other than DenseMat");
+}
 //=======================
 //       determinant
 //=======================

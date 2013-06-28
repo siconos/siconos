@@ -38,8 +38,6 @@ int main(int argc, char* argv[])
 
     // --- Get the simulation ---
     SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(oscillator->simulation());
-    // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = s->timeDiscretisation();
     int k = 0;
     double T = oscillator->finalT();
     double t0 = oscillator->t0();

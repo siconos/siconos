@@ -19,6 +19,7 @@
 #include "EventsManager.hpp"
 #include "EventFactory.hpp"
 #include "TimeDiscretisation.hpp"
+#include "TimeDiscretisationEvent.hpp"
 #include "Model.hpp"
 #include "Simulation.hpp"
 #include <cmath>
@@ -28,19 +29,27 @@
 
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 
-EventsManager::EventsManager(Simulation& sim)
+EventsManager::EventsManager(SP::TimeDiscretisation td): _k(0), _td(td),
+   _NSeventInsteadOfTD(false)
 {
   //  === Creates and inserts two events corresponding
   // to times tk and tk+1 of the simulation time-discretisation  ===
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-  _events.push_back(regEvent.instantiate(sim.getTk(), TD_EVENT));
+  _events.push_back(regEvent.instantiate(_td->getTk(0), TD_EVENT));
   _events[0]->setType(-1); // this is just a dumb event
-  double tkp1 = sim.getTk() + sim.timeDiscretisation()->currentTimeStep();
-  double tkp2 = sim.getTk() + 2*sim.timeDiscretisation()->currentTimeStep();
+  double tkp1 = _td->getTk(1);
+  double tkp2 = _td->getTk(2);
   _events.push_back(regEvent.instantiate(tkp1, TD_EVENT));
   _events.push_back(regEvent.instantiate(tkp2, TD_EVENT));
-  _events[1]->setTimeDiscretisation(sim.timeDiscretisation());
-  _events[2]->setTimeDiscretisation(sim.timeDiscretisation());
+  _events[1]->setTimeDiscretisation(_td);
+  _events[2]->setTimeDiscretisation(_td);
+  _events[1]->setK(_k+1);
+  _events[2]->setK(_k+2);
+}
+
+void EventsManager::initialize(double T)
+{
+  _T = T;
 }
 
 // Creation and insertion of a new event into the event set.
@@ -54,7 +63,7 @@ Event& EventsManager::insertEvent(const int type, const double& time)
 
 Event& EventsManager::insertEvent(const int type, SP::TimeDiscretisation td)
 {
-  Event& ev = insertEvent(type, td->currentTime());
+  Event& ev = insertEvent(type, td->getTk(_k));
   ev.setTimeDiscretisation(td);
   return ev;
 }
@@ -68,7 +77,7 @@ void EventsManager::noSaveInMemory(const Simulation& sim)
     if (ev.getType() == TD_EVENT)
     {
       (*it).reset(new TimeDiscretisationEventNoSaveInMemory(ev.getDoubleTimeOfEvent(), 0));
-      (*it)->setTimeDiscretisation(sim.timeDiscretisation());
+      (*it)->setTimeDiscretisation(ev.getTimeDiscretisation());
     }
   }
 }
@@ -154,11 +163,11 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
       continue;
     if (mpz_cmp_ui(delta_time, _GapLimit2Events) <= 0) // the two are too close
     {
-      sim.timeDiscretisation()->increment();
       // reschedule the TD event only if its time instant is less than T
-      if (!isnan(sim.getTkp1()))
+      if (!isnan(getTkp3()))
       {
-        ev.setTime(sim.getTkp1());
+        _NSeventInsteadOfTD = true;
+        static_cast<TimeDiscretisationEvent&>(ev).update(_k+3);
         insertEv(_events[j]);
       }
       // delete the TD event (that has to be done in all cases)
@@ -174,12 +183,6 @@ void EventsManager::processEvents(Simulation& sim)
   //process next event
   _events[1]->process(sim);
 
-  // If last processed event is a TD event, increment TD in the simulation
-  // We have a problem at the start of the simulation, since the Event at t=t0
-  // is just here to fill the first stop
-//  if (_events[0]->getType() == TD_EVENT)
-//    sim.timeDiscretisation()->increment();
-
   // update the event stack
   update(sim);
 }
@@ -194,26 +197,37 @@ void EventsManager::update(Simulation& sim)
     // this checks whether the next time instant is less than T or not
     // it is isn't then tkp1 is a NaN, in which case we don't reschedule the event
     // and the simulation will stop
-    // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectivly
+    // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectively
     // run until T
-    _events[0]->update();
-    double tkp2 = sim.getTkp2();
+    double tkp2 = getTkp2();
+    std11::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k+2);
     if (!isnan(tkp2))
     {
-      _events[0]->setTime(tkp2);
       insertEv(_events[0]);
     }
   }
-  // reschedule a Actuator or Sensor event if needed
-  else if ((event0Type == SENSOR_EVENT) || (event0Type == ACTUATOR_EVENT) || (event0Type == OBSERVER_EVENT))
+  // reschedule if needed
+  else if (_events[0]->reschedule())
   {
     _events[0]->update();
-    if (_events[0]->getDoubleTimeOfEvent() < sim.model()->finalT() + 100.0*std::numeric_limits<double>::epsilon())
+    if (_events[0]->getDoubleTimeOfEvent() < _T + 100.0*std::numeric_limits<double>::epsilon())
       insertEv(_events[0]);
   }
+  // An NS_EVENT was schedule close to a TD_EVENT
+  // the latter was removed, but we still need to increase
+  // the current index
+  else if (event0Type == NS_EVENT && _NSeventInsteadOfTD)
+  {
+    _NSeventInsteadOfTD = false;
+    _k++;
+  }
 
-  // remove previous processed event
+  // unconditionally remove previous processed event
   _events.erase(_events.begin());
+
+  // Now we may update _k if we have processed a TD_EVENT
+  if (_events[0]->getType() == TD_EVENT)
+    _k++;
 }
 
 unsigned int EventsManager::insertEv(SP::Event e)

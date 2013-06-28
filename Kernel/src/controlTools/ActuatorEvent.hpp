@@ -44,7 +44,7 @@ private:
   SP::Actuator _actuator;
 
   /** Default constructor */
-  ActuatorEvent(): Event(0.0, 4) {};
+  ActuatorEvent(): Event(0.0, ACTUATOR_EVENT, true) {};
 
 public:
 
@@ -52,7 +52,7 @@ public:
    *  \param time the time of the Event
    *  \param name the type of Event
    */
-  ActuatorEvent(double time, int name): Event(time, name) {};
+  ActuatorEvent(double time, int name): Event(time, name, true) {};
 
   /** destructor
    */

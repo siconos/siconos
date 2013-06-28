@@ -25,12 +25,12 @@
 
 #include "SiconosConst.hpp"
 #include "Event.hpp"
+#include "TimeDiscretisation.hpp"
 #include <gmp.h>
 #include <iostream>
 #include <set>
 
 class Simulation;
-class TimeDiscretisation;
 const unsigned long int GAPLIMIT_DEFAULT = 100;
 
 /** set of events, with an ordering based on Event time value (mpz_t) to compare Events */
@@ -88,8 +88,21 @@ protected:
   /** Placeholder for the non smooth event */
   SP::Event _eNonSmooth;
 
+  /** Current index (for time instants) */
+  unsigned int _k;
+
+  /** TimeDiscretisation for the time integration*/
+  SP::TimeDiscretisation _td;
+
+  /** End of the Simulation */
+  double _T;
+
   /** unsigned long int variable to check if two events are too close */
   static unsigned long int _GapLimit2Events;
+
+  /** boolean to remember that a TD_EVENT has been deleted since a
+   * NS_EVENT was too close */
+  bool _NSeventInsteadOfTD;
 
   /** Insert an event in the event stack
    * \param e the event to insert
@@ -112,13 +125,18 @@ protected:
 public:
 
   /**  default constructor
-   * \param sim the Simulation that owns this EventsManager
+   * \param td the TimeDiscretisation used in the Simulation
    */
-  EventsManager(Simulation& sim);
+  EventsManager(SP::TimeDiscretisation td);
 
   /** destructor
    */
   virtual ~EventsManager() {};
+
+  /** Initialize: just set the final time
+   * \param T the final time of the Simulation
+   */
+  void initialize(double T);
 
   /** Set the gap limit between two events
    * \param var the new _GapLimit2Events
@@ -133,11 +151,6 @@ public:
   {
     return _GapLimit2Events;
   };
-
-  /** initialize current, next events and the events stack.
-      \param sim the simulation that owns the present eventsManager
-   */
-//  void initialize(const Simulation& sim);
 
   /** Change TimeDiscretisationEvent to TimeDiscretisationEventNoSaveInMemory
    * \warning use this at your own risk, many integrators needs previous values
@@ -224,6 +237,68 @@ public:
    */
   Event& insertEvent(const int type, SP::TimeDiscretisation td);
 
+  double getTk()
+  {
+    return _td->getTk(_k);
+  }
+
+  /** get time instant k+1 of the time discretisation
+   * \return a double. If the simulation is near the end (t_{k+1} >= T), it returns NaN.
+   */
+  inline double getTkp1() const
+  {
+    double tkp1 = _td->getTk(_k+1);
+    if (tkp1 <= _T + 100.0*std::numeric_limits<double>::epsilon())
+      return tkp1;
+    else
+      return std::numeric_limits<double>::quiet_NaN();
+  };
+
+  /** get time instant k+2 of the time discretisation
+      \return a double. If the simulation is near the end (t_{k+2} >= T), it returns NaN.
+  */
+  inline double getTkp2() const
+  {
+    double tkp2 = _td->getTk(_k+2);
+    if (tkp2 <= _T + 100.0*std::numeric_limits<double>::epsilon())
+      return tkp2;
+    else
+      return std::numeric_limits<double>::quiet_NaN();
+  };
+
+  /** get time instant k+3 of the time discretisation.
+   *  It is used when ze have to reschedule a TD Event in scheduleNonSmoothEvent
+   *  \return a double. If the simulation is near the end (t_{k+3} >= T), it returns NaN.
+  */
+  inline double getTkp3() const
+  {
+    double tkp3 = _td->getTk(_k+3);
+    if (tkp3 <= _T + 100.0*std::numeric_limits<double>::epsilon())
+      return tkp3;
+    else
+      return std::numeric_limits<double>::quiet_NaN();
+  };
+
+  /** Get current timestep */
+  inline double currentTimeStep()
+  {
+    return _td->currentTimeStep(_k);
+  }
+
+  /** Set a new TimeDiscretisation*/
+  inline void setTimeDiscretisationPtr(SP::TimeDiscretisation td)
+  {
+    _td = td;
+    _k = 0;
+  }
+
+  /** get TimeDiscretisation
+   * \return the TimeDiscretisation in use for the time integration
+   */
+  inline SP::TimeDiscretisation timeDiscretisation() const { return _td;};
+
+  /** update time final time */
+  inline void updateT(const double& T) { _T = T; };
 };
 
 

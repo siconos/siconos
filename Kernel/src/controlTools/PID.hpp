@@ -98,6 +98,10 @@ public:
   */
   virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
+  void setDeltaT(const double deltaT)
+  {
+    _curDeltaT = deltaT;
+  }
 /** display the data of the Actuator on the standard output
    */
   virtual void display() const;

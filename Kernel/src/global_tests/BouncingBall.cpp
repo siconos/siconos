@@ -44,9 +44,6 @@ bool BouncingBall()
     SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystem(1));
     bouncingBall->initialize();
 
-    // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = s->timeDiscretisation();
-
     int N = 2000; // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot

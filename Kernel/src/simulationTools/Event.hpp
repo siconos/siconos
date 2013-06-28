@@ -36,8 +36,6 @@
 extern "C" double rint(double x);
 #endif
 
-class Simulation;
-
 // tick default value
 const double DEFAULT_TICK = 1e-16;
 
@@ -73,32 +71,40 @@ protected:
   */
   ACCEPT_SERIALIZATION(Event);
 
-
   /** Date of the present event,
    *  represented with a mpz_t */
-  mpz_t timeOfEvent;
+  mpz_t _timeOfEvent;
+
+  /** Number of ticks corresponding to a timestep */
+  mpz_t _tickIncrement;
 
   /** Id or type of the Event */
-  int type;
+  int _type;
 
   /** Date of the present event,
    *  represented with a double */
-  double dTime;
+  double _dTime;
 
   /** confidence interval used to convert double time value to mpz_t
    */
-  static double tick;
+  static double _tick;
+
+  /** index for the current Event*/
+  unsigned int _k;
 
   /** TimeDiscretisation for the Event (unused only in the NonSmoothEvent) */
   SP::TimeDiscretisation _td;
 
+  /** For automatic rescheduling */
+  bool _reschedule;
+
   /** Default constructor */
-  Event(): type(0), dTime(0.0)
+  Event(): _type(0), _dTime(0.0), _k(0)
   {
-    mpz_init(timeOfEvent);
+    mpz_init(_timeOfEvent);
   };
 
-  /** copy constructor ; private => no copy nor pass-by-value.
+    /** copy constructor ; private => no copy nor pass-by-value.
    */
   // Event(const Event&); pb python link
 
@@ -111,8 +117,9 @@ public:
   /** constructor with time value and type as input
    *  \param time the starting type (a double)
    *  \param newType the Event type (an int)
+   *  \param reschedule set this to true if the event has to be rescheduled
    */
-  Event(double time, int newType = 0);
+  Event(double time, int newType = 0, bool reschedule = false);
 
   /** destructor
    */
@@ -123,7 +130,7 @@ public:
    */
   inline double getTick() const
   {
-    return tick ;
+    return _tick;
   };
 
   /** set tick value
@@ -132,7 +139,7 @@ public:
   inline void setTick(double newTick)
   {
     std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
-    tick = newTick;
+    _tick = newTick;
   };
 
   /** get the time of the present event (mpz_t format)
@@ -140,7 +147,7 @@ public:
    */
   inline const mpz_t * getTimeOfEvent() const
   {
-    return &timeOfEvent ;
+    return &_timeOfEvent ;
   };
 
   /** get the time of the present event (double format)
@@ -148,16 +155,23 @@ public:
    */
   inline double getDoubleTimeOfEvent() const
   {
-    return dTime;
+    return _dTime;
+  }
+
+  inline void incrementTime(unsigned int step = 1)
+  {
+    for (unsigned int i = 0; i < step; i++)
+      mpz_add(_timeOfEvent, _timeOfEvent, _tickIncrement);
+    _dTime = mpz_get_d(_timeOfEvent)*_tick;
   }
 
   /** set the time of the present event (double format)
-   *  \param a double
+   *  \param time the new time
    */
   inline void setTime(double time)
   {
-    dTime = time;
-    mpz_set_d(timeOfEvent, rint(dTime / tick));
+    _dTime = time;
+    mpz_set_d(_timeOfEvent, rint(_dTime / _tick));
   };
 
   /** get a type of the present event
@@ -165,7 +179,7 @@ public:
    */
   inline int getType() const
   {
-    return type ;
+    return _type ;
   };
 
   /** set a new type for the present event
@@ -173,16 +187,23 @@ public:
    */
   inline void setType(int newType)
   {
-    type = newType;
+    _type = newType;
   };
+
+  /** Set the current step k
+   * \param newK the new value of _k
+   */
+  inline void setK(unsigned int newK) { _k = newK; };
 
   /** Set the TimeDiscretisation
    * \param td a TimeDiscretisation for this Event
    */
-  inline void setTimeDiscretisation(SP::TimeDiscretisation td)
-  {
-    _td = td;
-  }
+  void setTimeDiscretisation(SP::TimeDiscretisation td);
+
+  /** Get the TimeDiscretisation
+   * \return the TimeDiscretisation used in this Event
+   */
+  inline SP::TimeDiscretisation getTimeDiscretisation() const { return _td; };;
 
   /** display Event data
    */
@@ -198,5 +219,6 @@ public:
    * TimeDiscretisation and to chamge the time of the current Event */
   virtual void update();
 
+  inline bool reschedule() const { return _reschedule; };
 };
 #endif // Event_H

@@ -287,4 +287,16 @@ void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
 
 }
 
+void polePlacement(const SiconosMatrix& A, const SiconosVector& B, SiconosVector& P, bool transpose)
+{
+  unsigned int n = A.size(0);
+  DenseMat AA(n, n);
+  DenseMat Q(n, n);
+  DenseVect tau(n);
+  DenseVect BB(n);
+  noalias(AA) = (*A.dense());
+  lapack::gehrd(1, n, AA, tau);
+  lapack::orghr(n, 1, n, Q, tau);
+  noalias(BB) = prod(Q, *B.dense());
+
 

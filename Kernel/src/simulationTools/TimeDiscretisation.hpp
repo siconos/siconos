@@ -25,6 +25,7 @@
 
 #include "TimeDiscretisationXML.hpp"
 #include <vector>
+#include <gmp.h>
 
 /** A time discretisation scheme
 
@@ -74,27 +75,26 @@ private:
   /** Default value for the time step (tk+1 - tk) */
   double _h;
 
-  /** Number of current time step (Simulation runs between steps k and k+1) */
-  unsigned int _k;
-
   /** vector of time values at each step (=> size = n1+n2+1 - Default size = 2 - Max size= nSteps+1) */
-  TkVector _tk;
+  TkVector _tkV;
 
   /** the XML object linked to the TimeDiscretisation to read XML data */
   SP::TimeDiscretisationXML _timeDiscretisationXML;
 
-  /** Indicator flag : 1 when we have a complete vector for _tk (_h may vary), 2 when _h is fixed.
-   * 3 when h is fixed and cannot change */
-  int _tdCase;
-
-  /** index in tk which corresponds to the current time step (tk[pos] = t[k]) -
-      Required since the size of tk depends on tdCase.
-      tdCase = 1 => pos = k - tdCase = 2 => pos = 0 .
-  */
-  int _pos;
-
   /** Origin of time*/
   double _t0;
+
+  /** Timestep stored as mpf_t, for high precision computations */
+  mpf_t _hgmp;
+
+  /** Time at t_{k+1}, in mpf_t, used to compute a good timestep */
+  mpf_t _tkp1;
+
+  /** Time at t_{k+1}, in mpf_t, used to compute a good timestep */
+  mpf_t _tk;
+
+   /** Starting time, used to compute a good timestep */
+  mpf_t _t0gmp;
 
   /** default constructor (private => no copy nor pass-by value)
    */
@@ -114,31 +114,37 @@ private:
 public:
 
   /** constructor with XML
-      \param SP::TimeDiscretisationXML : the XML object corresponding
-      \param initial time
-      \param final time
+      \param tdXML the XML object corresponding
+      \param t0 initial time
+      \param T final time
   */
-  TimeDiscretisation(SP::TimeDiscretisationXML, double, double);
+  TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t0, double T);
 
   // --- Straightforward constructors ---
 
   /** constructor with tk vector of instant times values.
-   *  \param a TkVector that describes the discretisation
+   *  \param newTk a TkVector describing the discretisation
    */
-  TimeDiscretisation(const TkVector&);
-
-  /** constructor with the number of time steps
-   *  \param int (nb steps)
-   *  \param t0, initial time
-   *  \param T, final time
-   */
-  TimeDiscretisation(unsigned int, double, double);
+  TimeDiscretisation(const TkVector& newTk);
 
   /** constructor with the size of the default time step and t0
-   *  \param double, initial time value
-   *  \param double, the time step
+   *  \param t0 initial time value
+   *  \param h the time step
    */
-  TimeDiscretisation(double, double);
+  TimeDiscretisation(double t0, double h);
+
+  /** constructor with the number of steps, t0 and T
+   *  \param nSteps the number of steps
+   *  \param t0 initial time value
+   *  \param T the final time
+   */
+  TimeDiscretisation(unsigned int nSteps, double t0, double T);
+
+  /** constructor with the size of the default time step and t0
+   *  \param t0 initial time value
+   *  \param str the time step in form of a string
+   */
+  TimeDiscretisation(double t0, std::string& str);
 
   /** Copy constructor
    * \param td the TimeDiscretisation to copy
@@ -153,76 +159,43 @@ public:
   /** get the time step
    *  \return a double the value of _t[k+1] - _t[k], the current time step
    */
-  inline double currentTimeStep() const
+  double currentTimeStep(const unsigned int k);
+
+  inline const mpf_t* currentTimeStep() const
   {
-    return _h;
+    return &_hgmp;
   };
 
-  inline unsigned int getK() const
+  inline bool hConst() const
   {
-    return _k;
+    return _tkV.empty() ? true : false;
   };
 
-  inline int getTDCase() const
+  inline bool hGmp() const
   {
-    return _tdCase;
-  };
+    return ((_h == 0.0) && (_tkV.empty()))  ? true : false;
+  }
 
-  /** set current _h (ie tk+1 - tk)
-   *  \param the new value for _h.
-   *  Warning: if the TimeDiscretisation has been built
-   *  with a complete _tk vector (_tdCase = 1), a call to this function
-   *  will switch to _tdCase = 2, ie _h = newH for all future steps (until a new set of _h)
-   */
-  void setCurrentTimeStep(double);
-
-  inline const TkVector & getTk() const
-  {
-    return _tk;
-  };
   /** get the value of tk at step k
-   * \param ind the step
+   * \param indx the step
    * \return a double
    */
-  inline double getTk(unsigned int ind) const
-  {
-    return _tk.at(ind);
-  };
+  double getTk(const unsigned int indx);
 
-  /** set the TKVector _tk
-   *  \param newTk the new value for _tk
-   *  \warning it will switch _tdCase to 1
+  /** get the TkVector _tkV
+   *  \return a reference to the TkVector _tkV
    */
-  void setTk(const TkVector& newTk);
+  inline const TkVector& getTkVector() const { return _tkV; };
+
+  /** set the TkVector _tkV
+   *  \param newTk the new value for _tkV
+   */
+  void setTkVector(const TkVector& newTk);
 
   /** change t0 before the simulation starts (useful for delays)
    *  \param val the new value for t0
    */
   void setT0(const double val);
-
-  /** Get the current time instant value ( _tk[pos] )
-   * \return a double : _tk[pos]
-   */
-  inline double currentTime() const
-  {
-    return _tk[_pos];
-  };
-
-  /** Get time instant value at index k+1 ( _tk[pos+1] )
-   *  \return a double : _tk[pos+1]
-   */
-  inline double nextTime() const
-  {
-    return _tk[_pos + 1];
-  };
-
-  /** Get time instant value at index k+2 ( _tk[pos+2] )
-   *  \return a double : _tk[pos+2]
-   */
-  inline double getTkp2() const
-  {
-    return _tk[_pos + 2];
-  };
 
   /** get the TimeDiscretisationXML of the TimeDiscretisation
    *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation
@@ -239,9 +212,6 @@ public:
   {
     _timeDiscretisationXML = timediscrxml;
   }
-
-  /** Steps to next time step. */
-  void increment();
 
   // --- OTHER FUNCTIONS ---
   /** print the discretisation data to the screen

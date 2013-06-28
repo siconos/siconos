@@ -25,7 +25,6 @@
 
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
-#include "TimeDiscretisation.hpp"
 #include "InteractionsSet.hpp"
 #include "EventsManager.hpp"
 #include "SiconosPointers.hpp"
@@ -74,9 +73,6 @@ protected:
 
   /** name or id of the Simulation */
   std::string _name;
-
-  /** the default time discretisation scheme */
-  SP::TimeDiscretisation _timeDiscretisation;
 
   /** tool to manage all events */
   SP::EventsManager _eventsManager;
@@ -199,10 +195,9 @@ public:
 
 
   /** default constructor
-   *  \param a pointer to a timeDiscretisation (linked to the model
-   *  that owns this simulation)
+   *  \param td the timeDiscretisation for this Simulation
    */
-  Simulation(SP::TimeDiscretisation);
+  Simulation(SP::TimeDiscretisation td);
 
   /** constructor with XML object of the Simulation
       \param SimulationXML* : the XML object corresponding
@@ -246,58 +241,49 @@ public:
     _name = newName;
   }
 
-  /** get the TimeDiscretisation of the Simulation
-   *  \return the TimeDiscretisation
-   */
-  inline SP::TimeDiscretisation timeDiscretisation() const
-  {
-    return _timeDiscretisation;
-  };
-
   /** set the TimeDiscretisation of the Simulation
    *  \param the TimeDiscretisation
    */
   inline void setTimeDiscretisationPtr(SP::TimeDiscretisation td)
   {
-    _timeDiscretisation = td;
+    _eventsManager->setTimeDiscretisationPtr(td);
   }
 
   /** get time instant k of the time discretisation
-   *  \return a double.
+   *  \return the time instant t_k
    */
   inline double getTk() const
   {
-    return _timeDiscretisation->currentTime();
+    return _eventsManager->getTk();
   };
 
-  /** get time instant k+1 of the time discretisation - Warning: this
-      instant may be different from nextTime(), if for example some
+  /** get time instant k+1 of the time discretisation
+   * \warning: this instant may be different from nextTime(), if for example some
       non-smooth events or some sensor events are present
-      \return a double. If the simulation is near the end (t_{k+1} >= T), it returns NaN.
-  */
+     \return a double. If the simulation is near the end (t_{k+1} > T), it returns NaN.
+   */
   inline double getTkp1() const
   {
-    double tkp1 = _timeDiscretisation->nextTime();
-    if (tkp1 <= _T + 100.0*std::numeric_limits<double>::epsilon())
-      return tkp1;
-    else
-      return std::numeric_limits<double>::quiet_NaN();
+    return _eventsManager->getTkp1();
   };
 
-  /** get time instant k+2 of the time discretisation - Warning: this
-      instant may be different from nextTime(), if for example some
+  /** get time instant k+2 of the time discretisation
+   * \warning: this instant may be different from nextTime(), if for example some
       non-smooth events or some sensor events are present
-      \return a double. If the simulation is near the end (t_{k+1} >= T), it returns NaN.
-  */
+   * \return a double. If the simulation is near the end (t_{k+2} > T), it returns NaN.
+   */
   inline double getTkp2() const
   {
-    double tkp2 = _timeDiscretisation->getTkp2();
-    if (tkp2 <= _T + 100.0*std::numeric_limits<double>::epsilon())
-      return tkp2;
-    else
-      return std::numeric_limits<double>::quiet_NaN();
+    return _eventsManager->getTkp2();
   };
 
+  /** Get current timestep
+   * \return the current timestep
+   */
+  inline double currentTimeStep() const
+  {
+    return _eventsManager->currentTimeStep();
+  }
   /** get the EventsManager
    *  \return a pointer to EventsManager
    */
@@ -699,6 +685,7 @@ public:
   inline void updateT(const double& T)
   {
     _T = T;
+    _eventsManager->updateT(T);
   };
 
   /** visitors hook

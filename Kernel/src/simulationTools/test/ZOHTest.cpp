@@ -124,6 +124,7 @@ void ZOHTest::testMatrixIntegration1()
     dataPlot(k, 1) = xProc(0);
     dataPlot(k, 2) = xProc(1);
     _sim->nextStep();
+    _sim->eventsManager()->display();
   }
   dataPlot.display();
   std::cout <<std::endl <<std::endl;

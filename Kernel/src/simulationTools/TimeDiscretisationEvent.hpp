@@ -59,6 +59,11 @@ public:
   *  \param simulation the simulation that owns this Event (through the EventsManager)
   */
   void process(Simulation& simulation);
+
+  /** increment the TimeDiscretisation and to change the time of the Event
+   * \param k the next index for this event
+   */
+  void update(unsigned int k);
 };
 
 #endif // TimeDiscretisationEvent_H

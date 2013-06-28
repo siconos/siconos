@@ -78,9 +78,6 @@ SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation td, SP::Dy
 
 SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds)
 {
-  double currentTime = _sim->nextTime();
-  while (td->currentTime() < currentTime)
-    td->increment();
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
   SP::Sensor s = *(_allSensors.insert(regSensor.instantiate(type, ds))).first;
   linkSensorSimulation(s, td);

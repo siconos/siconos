@@ -399,6 +399,9 @@ public:
    */
   double normInf() const;
 
+  /** Compute the normInf for each column*/
+  void normInfByColumn(SP::SiconosVector vIn) const;
+
   /** compute the determinant of the matrix (use LU factorization)
    *  \return a double
    */

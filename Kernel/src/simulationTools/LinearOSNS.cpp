@@ -251,7 +251,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock;
 
   RELATION::TYPES relationType;
-  double h = simulation()->timeDiscretisation()->currentTimeStep();
+  double h = simulation()->currentTimeStep();
 
   // General form of the interactionBlock is : interactionBlock =
   // a*extraInteractionBlock + b * leftInteractionBlock * centralInteractionBlocks
@@ -429,7 +429,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock;
 
   RELATION::TYPES relationType1, relationType2;
-  double h = simulation()->timeDiscretisation()->currentTimeStep();
+  double h = simulation()->currentTimeStep();
 
   // General form of the interactionBlock is : interactionBlock =
   // a*extraInteractionBlock + b * leftInteractionBlock * centralInteractionBlocks

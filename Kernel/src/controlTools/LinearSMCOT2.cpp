@@ -71,7 +71,7 @@ void LinearSMCOT2::initialize(const Model& m)
   //  _Xold.reset(new SiconosVector(_nDim));
   //  *_Xold = *(_sensor->y());
   double _t0 = m.t0();
-  double _T = m.finalT() + _tdPhi->currentTimeStep();
+  double _T = m.finalT() + _tdPhi->currentTimeStep(0);
 
   //  _XPhi.reset(new SiconosVector(_nDim));
   //  (*_XPhi) = _DS->getX0();
@@ -109,7 +109,7 @@ void LinearSMCOT2::initialize(const Model& m)
 
 void LinearSMCOT2::actuate()
 {
-  double hCurrent = _tdPhi->currentTimeStep();
+  double hCurrent = _tdPhi->currentTimeStep(_indx);
   // Get current value of the state
   // Update it
   *_XPhi = *_X;

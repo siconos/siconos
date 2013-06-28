@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
         dataPlot(k, 6) = (*v)(1);
         dataPlot(k, 7) =  L + (*q)(1) - r * (*q)(0) - (*q)(2); // contrainte géométrique
         dataPlot(k, 8) = (*q)(1) - (*q)(2);
-        if (abs((*v)(0)) <= 0.05) cout << "valeur max de teta est : "  << (*q)(0) << endl;
+        if (abs((*v)(0)) <= 0.05) cout << "valeur max de theta est : "  << (*q)(0) << endl;
         k++;
         s->nextStep();
         ++show_progress;
