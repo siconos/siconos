@@ -79,7 +79,6 @@ void CommonSMC::initialize(const Model& m)
   // Set up the simulation
   _simulationSMC.reset(new TimeStepping(_td));
   _simulationSMC->setName("linear sliding mode controller simulation");
-    _integratorSMC.reset(new Moreau(_DS_SMC, _thetaSMC));
   _integratorSMC.reset(new ZeroOrderHold(_DS_SMC));
   _simulationSMC->insertIntegrator(_integratorSMC);
   // OneStepNsProblem
@@ -129,6 +128,7 @@ void CommonSMC::computeUeq()
   SP::SiconosVector xTk(new SiconosVector(_sensor->y()));
   tmpW->eye();
   prod(*_Csurface, *_DS_SMC->A(), *tmpM1);
+  // compute (CB)^{-1}CA
   prod(*_invCB, *tmpM1, *quasiProjB_A);
   prod(_thetaSMC-1, *quasiProjB_A, *xTk, *_ueq);
 
@@ -137,7 +137,7 @@ void CommonSMC::computeUeq()
   ZeroOrderHold& zoh = *std11::static_pointer_cast<ZeroOrderHold>(_integratorSMC);
   zoh.updateMatrices(_DS_SMC);
 
-  // tmpN = B^{*}(CB^{*})^{-1}CA
+  // tmpN = B^{*}(CB)^{-1}CA
   axpy_prod(zoh.Bd(_DS_SMC), *quasiProjB_A, *tmpN, true);
   // W = I + \theta B^{*})CB)^{-1}CA
   scal(_thetaSMC, *tmpN, *tmpW, false);
@@ -145,7 +145,7 @@ void CommonSMC::computeUeq()
   prod(zoh.Ad(_DS_SMC), *xTk, *xTk);
   // xTk = (e^{Ah}-(1-\theta)\Psi_k\Pi_B A)x_k
   prod(_thetaSMC-1, *tmpN, _sensor->y(), *xTk, false);
-  // compute the solution x_{k+1} of the system W*X = xTk
+  // compute the solution x_{k+1} of the system W*x_{k+1} = x_k
   tmpW->PLUForwardBackwardInPlace(*xTk);
   // add the contribution from the implicit part to ueq
   prod(-_thetaSMC, *quasiProjB_A, *xTk, *_ueq, false);

@@ -116,7 +116,8 @@ public:
    * \param sensor the ControlSensor feeding the Actuator
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor): Actuator(type, sensor),
-    _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5) {}
+    _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5),
+    _noUeq(false) {}
 
   /** Constructor with a TimeDiscretisation, a Model and two matrices
    * \param type the type of the SMC Actuator
@@ -125,7 +126,8 @@ public:
    * \param D the saturation matrix
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D):
-    Actuator(type, sensor), _D(D), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5)
+    Actuator(type, sensor), _D(D), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8),
+    _thetaSMC(0.5), _noUeq(false)
   {
     _B = B;
   }
