@@ -108,7 +108,7 @@ public:
 
   /** destructor
    */
-  ~Model() {};
+  ~Model();
 
   // --- GETTERS/SETTERS
 

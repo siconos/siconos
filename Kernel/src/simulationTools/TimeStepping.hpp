@@ -137,7 +137,7 @@ public:
 
   /** Destructor.
   */
-  ~TimeStepping();
+  virtual ~TimeStepping();
 
   /* type name because parent class needs it */
   inline std::string typeName()

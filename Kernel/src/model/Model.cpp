@@ -98,6 +98,11 @@ Model::Model(double newT0, double newT, const std::string& newTitle,
   // else no T in the model!
 }
 
+Model::~Model()
+{
+  _strat->clear();
+}
+
 void Model::setSimulationPtr(SP::Simulation newPtr)
 {
   // Warning: this function may be used carefully because of the links

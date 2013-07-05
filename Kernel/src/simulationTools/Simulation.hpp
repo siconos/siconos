@@ -225,6 +225,17 @@ public:
    */
   virtual ~Simulation();
 
+  /** clear all maps. This function should not exist, but there is a cycle
+   * with the shared_ptr: the OneStepIntegrator and OneStepNSProblem have
+   * both a link to the Simulation, and here we have all the OneStepIntegrator
+   * and OneStepNSProblem in maps. Then the memory is never freed. The clumsy
+   * way to deal with it is to call this function from the Model destructor
+   * to free the maps and then the cycle is broken
+   * \warning do not call this yourself, it is meant to be called from
+   * the desctructor of the Model
+   */
+  void clear();
+
   // GETTERS/SETTERS
 
   /* type name of the instance */

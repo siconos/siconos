@@ -119,13 +119,17 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
 // --- Destructor ---
 Simulation::~Simulation()
 {
-  _allNSProblems->clear();
-  _allOSI->clear();
-  _osiMap.clear();
-
-  _allNSProblems->clear();
+  clear();
   // -> see shared ressources for this
   if (statOut.is_open()) statOut.close();
+}
+
+// clear all maps to break shared_ptr cycle
+void Simulation::clear()
+{
+  _allOSI->clear();
+  _osiMap.clear();
+  _allNSProblems->clear();
 }
 
 // Getters/setters
