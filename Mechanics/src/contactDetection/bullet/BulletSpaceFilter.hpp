@@ -28,12 +28,6 @@
 
 #include <bullet/btBulletCollisionCommon.h>
 
-//typedef btSimpleBroadphase BulletBroadPhase;
-typedef bt32BitAxisSweep3 BulletBroadPhase;
-//typedef btDbvtBroadphase BulletBroadPhase;
-
-
-TYPEDEF_SPTR(BulletBroadPhase)
 
 class BulletSpaceFilter : public SpaceFilter
 {
@@ -51,22 +45,29 @@ protected:
   SP::btCollisionDispatcher _dispatcher;
   SP::btVector3 _worldAabbMin;
   SP::btVector3 _worldAabbMax;
-  SP::BulletBroadPhase _broadphase;
+  SP::btBroadphaseInterface _broadphase;
   bool _dynamicCollisionsObjectsInserted;
   bool _staticCollisionsObjectsInserted;
 
   double _closeContactsThreshold;
 
 public:
-  BulletSpaceFilter(SP::Model model, SP::NonSmoothLaw nslaw,
-                    SP::btVector3 aabbMin, SP::btVector3 aabbMax);
+  BulletSpaceFilter(SP::Model model, SP::NonSmoothLaw nslaw);
 
   /** get Bullet broadphase
       \return pointer on a BulletBroadPhase
   */
-  SP::BulletBroadPhase broadphase() const
+  SP::btBroadphaseInterface broadphase() const
   {
     return _broadphase;
+  };
+
+  /** set broadphase
+   * \param: broadphase a Bullet broaphase
+   */
+  void setBroadphase(SP::btBroadphaseInterface broadphase)
+  {
+    _broadphase = broadphase;
   };
 
   /** get bullet collision world
@@ -152,16 +153,12 @@ struct ForStaticShapes : public Question< std11::shared_ptr<std::vector<SP::btCo
 };
 
 
-struct ForContactPoint : public Question<SP::btManifoldPoint>
+struct ForContactManifold : public Question<SP::btPersistentManifold>
 {
   using SiconosVisitor::visit;
 
-  ANSWER(BulletR, contactPoint());
-  ANSWER(BulletFrom1DLocalFrameR, contactPoint());
+  ANSWER(BulletR, contactManifold());
+  ANSWER(BulletFrom1DLocalFrameR, contactManifold());
 };
-
-
-
-
 
 #endif

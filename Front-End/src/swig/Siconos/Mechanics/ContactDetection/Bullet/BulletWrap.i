@@ -114,6 +114,12 @@ PY_REGISTER_BULLET_LINEAR_MATH(btTransform);
 %include "BulletCollision/BroadphaseCollision/btDispatcher.h"
 
 %{
+#include <BulletCollision/BroadphaseCollision/btBroadphaseInterface.h>
+%}
+%shared_ptr(btBroadphaseInterface);
+%include "BulletCollision/BroadphaseCollision/btBroadphaseInterface.h"
+
+%{
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 %}
 %shared_ptr(btCollisionWorld);

@@ -27,9 +27,9 @@
 
 #include <btBulletCollisionCommon.h>
 
-BulletR::BulletR(SP::btManifoldPoint point, SP::btPersistentManifold contactManifold) :
+BulletR::BulletR(unsigned int contact_num, SP::btPersistentManifold contactManifold) :
   NewtonEulerFrom3DLocalFrameR(),
-  _contactPoints(point),
+  _contact_num(contact_num),
   _contactManifold(contactManifold)
 {
 }
@@ -38,52 +38,74 @@ void BulletR::computeh(const double time, Interaction& inter)
 {
   DEBUG_PRINT("start of computeh\n");
 
-  const btCollisionObject* obA =
-    static_cast<const btCollisionObject*>(_contactManifold->getBody0());
-  const btCollisionObject* obB =
-    static_cast<const btCollisionObject*>(_contactManifold->getBody1());
+  unsigned int numContacts = _contactManifold->getNumContacts();
 
-  _contactManifold->refreshContactPoints(obA->getWorldTransform(), obB->getWorldTransform());
+  DEBUG_PRINTF("contact_num : %d\n", _contact_num);
 
-  btVector3 posa = _contactPoints->getPositionWorldOnA();
-  btVector3 posb = _contactPoints->getPositionWorldOnB();
+  DEBUG_PRINTF("number of contacts : %d\n", numContacts);
 
-  (*pc1())(0) = posa[0];
-  (*pc1())(1) = posa[1];
-  (*pc1())(2) = posa[2];
-  (*pc2())(0) = posb[0];
-  (*pc2())(1) = posb[1];
-  (*pc2())(2) = posb[2];
-
-  btScalar d = sqrt((posb - posa).dot(posb - posa));
-
-  if (fabs(fabs(_contactPoints->getDistance()) - d) <= 1e-5)
+  if (_contact_num > numContacts)
   {
-    inter.y(0)->setValue(0, _contactPoints->getDistance());
-
-    (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
-    (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
-    (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
+    inter.y(0)->setValue(0, 1e30);
   }
   else
   {
-    if (_contactPoints->getDistance() < 0.) d = -d;
-    //    printf("WARNING! distance = %g != %g\n",  _contactPoints->getDistance(), d);
-    inter.y(0)->setValue(0, d);
-    btVector3 n = (posb - posa).normalize();
-    (*nc())(0) = n[0];
-    (*nc())(1) = n[1];
-    (*nc())(2) = n[2];
+
+    btManifoldPoint& cpoint = _contactManifold->getContactPoint(_contact_num-1);
+
+    const btCollisionObject* obA =
+      static_cast<const btCollisionObject*>(_contactManifold->getBody0());
+    const btCollisionObject* obB =
+      static_cast<const btCollisionObject*>(_contactManifold->getBody1());
+      
+    _contactManifold->refreshContactPoints(obA->getWorldTransform(), 
+                                           obB->getWorldTransform());
+
+    if ((cpoint.m_normalWorldOnB[0]*cpoint.m_normalWorldOnB[0] +
+         cpoint.m_normalWorldOnB[1]*cpoint.m_normalWorldOnB[1] +
+         cpoint.m_normalWorldOnB[2]*cpoint.m_normalWorldOnB[2]) > 0.)
+      
+    {
+ 
+      
+      btVector3 posa = cpoint.getPositionWorldOnA();
+      btVector3 posb = cpoint.getPositionWorldOnB();
+      
+      (*pc1())(0) = posa[0];
+      (*pc1())(1) = posa[1];
+      (*pc1())(2) = posa[2];
+      (*pc2())(0) = posb[0];
+      (*pc2())(1) = posb[1];
+      (*pc2())(2) = posb[2];
+      
+      inter.y(0)->setValue(0, cpoint.getDistance());
+      
+      (*nc())(0) = cpoint.m_normalWorldOnB[0];
+      (*nc())(1) = cpoint.m_normalWorldOnB[1];
+      (*nc())(2) = cpoint.m_normalWorldOnB[2];
+      
+      
+      DEBUG_PRINTF("%d, distance : %g\n",  _contact_num, inter.y(0)->getValue(0));
+      DEBUG_PRINTF("%d, position on A : %g,%g,%g\n", _contact_num, posa[0], posa[1], posa[2]);
+      DEBUG_PRINTF("%d, position on B : %g,%g,%g\n", _contact_num, posb[0], posb[1], posb[2]);
+      DEBUG_PRINTF("%d, normal on B   : %g,%g,%g\n", _contact_num, (*nc())(0), (*nc())(1), (*nc())(2));
+      
+    }
+    else
+    {
+      btVector3 posa = cpoint.getPositionWorldOnA();
+      btVector3 posb = cpoint.getPositionWorldOnB();
+      DEBUG_PRINTF("-> %d, distance : %g\n",  _contact_num, cpoint.getDistance());
+
+      DEBUG_PRINTF("-> %d, position on A : %g,%g,%g\n", _contact_num, posa[0], posa[1], posa[2]);
+      DEBUG_PRINTF("-> %d, position on B : %g,%g,%g\n", _contact_num, posb[0], posb[1], posb[2]);
+      DEBUG_PRINTF("-> %d, normal on B   : %g,%g,%g\n", _contact_num, (*nc())(0), (*nc())(1), (*nc())(2));
+
+      inter.y(0)->setValue(0, fmax(0.1, cpoint.getDistance()));
+    }
   }
 
-  DEBUG_PRINTF("distance : %g\n",  inter.y(0)->getValue(0));
-
-
-  DEBUG_PRINTF("position on A : %g,%g,%g\n", posa[0], posa[1], posa[2]);
-  DEBUG_PRINTF("position on B : %g,%g,%g\n", posb[0], posb[1], posb[2]);
-  DEBUG_PRINTF("normal on B   : %g,%g,%g\n", (*nc())(0), (*nc())(1), (*nc())(2));
-
   DEBUG_PRINT("end of computeh\n");
-
-
+      
+      
 }

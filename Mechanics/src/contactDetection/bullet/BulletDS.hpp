@@ -47,7 +47,7 @@ public:
 
   /** get the collision object
   **/
-  const SP::btCollisionObject& collisionObject() const
+  SP::btCollisionObject collisionObject() const
   {
     return _collisionObject;
   };

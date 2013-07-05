@@ -30,16 +30,22 @@ private:
   */
   ACCEPT_SERIALIZATION(BulletR);
 
-  SP::btManifoldPoint _contactPoints;
+  unsigned int _contact_num;
+
   SP::btPersistentManifold _contactManifold;
 
 public:
-  BulletR(SP::btManifoldPoint, SP::btPersistentManifold);
-
-  SP::btManifoldPoint contactPoint() const
+  BulletR(unsigned int contact_num, SP::btPersistentManifold);
+  
+  SP::btPersistentManifold contactManifold() const
   {
-    return _contactPoints;
+    return _contactManifold;
   };
+
+  unsigned int contact_num() const
+  {
+    return _contact_num;
+  }
 
   void computeh(const double time, Interaction& inter);
 

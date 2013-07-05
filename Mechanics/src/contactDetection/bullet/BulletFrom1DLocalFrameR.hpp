@@ -30,23 +30,27 @@ private:
   */
   ACCEPT_SERIALIZATION(BulletFrom1DLocalFrameR);
 
-  SP::btManifoldPoint _contactPoints;
+  unsigned int _contact_num;
+
+  SP::btPersistentManifold _contactManifold;
 
 public:
-  BulletFrom1DLocalFrameR(SP::btManifoldPoint);
-
-  SP::btManifoldPoint contactPoint() const
+  BulletFrom1DLocalFrameR(unsigned int contact_num, SP::btPersistentManifold);
+  
+  SP::btPersistentManifold contactManifold() const
   {
-    return _contactPoints;
+    return _contactManifold;
   };
+
+  unsigned int contact_num() const
+  {
+    return _contact_num;
+  }
 
   void computeh(const double time, Interaction& inter);
 
   ACCEPT_STD_VISITORS();
 };
 
-
-
 TYPEDEF_SPTR(BulletFrom1DLocalFrameR)
-
 #endif

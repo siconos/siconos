@@ -61,7 +61,7 @@ BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
 void BulletDS::updateCollisionObject() const
 {
 
-  DEBUG_PRINT("updateCollisionObject()");
+  DEBUG_PRINT("updateCollisionObject()\n");
 
   SiconosVector& q = *_q;
 

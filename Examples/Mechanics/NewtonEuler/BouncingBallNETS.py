@@ -28,47 +28,50 @@ from numpy import eye, empty, linalg, savetxt
 import math
 
 
-class my_NewtonEulerR(NewtonEulerFrom1DLocalFrameR):
-    
-   def __init__(self,ballRadius):
-       self._ballRadius = ballRadius
-       NewtonEulerFrom1DLocalFrameR.__init__(self)
-       #super(ballRadius, self).__init__() 
-       
-   def computeh(self, time):
-        #print "my_NewtonEulerR::computeh"
-        height  = self.q()[0] - self._ballRadius
-        #print "height=",height
-        self.interaction().y(0)[0]=height
-        #print "y=",self.interaction().y(0)
+class BouncingBallR(NewtonEulerFrom1DLocalFrameR):
+
+    def __init__(self, ballRadius):
+        self._ballRadius = ballRadius
+        NewtonEulerFrom1DLocalFrameR.__init__(self)
+        super(BouncingBallR, self).__init__()
+
+    def computeh(self, time, interaction):
+
+        q = inter.data(NewtonEulerR.q0)[0]
+
+        height = q[0] - self._ballRadius
+
+        interaction.y(0)[0] = height
+
         nnc = [1,0,0]
         self.setnc(nnc)
-        # pc1 amd pc2 seems not be influence ...
-        ppc1 = [height, self.q()[1], self.q()[2]]
+
+        ppc1 = [height, q[1], q[2]]
         self.setpc1(ppc1)
-        #ppc2 = [0.0, self.q()[1], self.q()[2]]
-        #self.setpc2(ppc2)
+
+        ppc2 = [0.0, q[1], q[2]]
+        self.setpc2(ppc2)
 
 t0 = 0      # start time
-T = 10.0      # end time
+T = 10.0    # end time
 h = 0.005   # time step
 r = 0.1     # ball radius
 g = 9.81    # gravity
 m = 1       # ball mass
 e = 0.9     # restitution coeficient
-theta = 0.5 # theta scheme
+theta = 0.5  # theta scheme
 
 #
 # dynamical system
 #
-x = [1.0,0,0,1.0,0,0,0] # initial configuration
-v = [2.0,0,0,0,0,0] # initial velocity
-inertia = eye(3)      # inertia matrix
+x = [1.0, 0, 0, 1.0, 0, 0, 0]  # initial configuration
+v = [2.0, 0, 0, 0, 0, 0]  # initial velocity
+inertia = eye(3)       # inertia matrix
 
 # the dynamical system
-ball = NewtonEulerDS(x, v,m, inertia)
+ball = NewtonEulerDS(x, v, m, inertia)
 
-# set external forces 
+# set external forces
 weight = [-m * g, 0, 0]
 ball.setFExtPtr(weight)
 
@@ -78,20 +81,20 @@ ball.setFExtPtr(weight)
 
 # ball-floor
 nslaw = NewtonImpactNSL(e)
-relation = my_NewtonEulerR(r)
+relation = BouncingBallR(r)
 
 inter = Interaction(1, nslaw, relation)
 
 #
 # Model
 #
-bouncingBall = Model(t0,T)
+bouncingBall = Model(t0, T)
 
 # add the dynamical system to the non smooth dynamical system
 bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
 
 # link the interaction and the dynamical system
-bouncingBall.nonSmoothDynamicalSystem().link(inter,ball);
+bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
 
 
 #
@@ -103,7 +106,7 @@ OSI = Moreau(theta)
 OSI.insertDynamicalSystem(ball)
 
 # (2) Time discretisation --
-t = TimeDiscretisation(t0,h)
+t = TimeDiscretisation(t0, h)
 
 # (3) one step non smooth problem
 osnspb = LCP()
@@ -122,15 +125,12 @@ s.insertNonSmoothProblem(osnspb)
 # simulation initialization
 bouncingBall.initialize(s)
 
-
 # the number of time steps
-N = (T-t0)/h
+N = (T - t0) / h
 
-# Get the values to be plotted 
+# Get the values to be plotted
 # ->saved in a matrix dataPlot
-
-dataPlot = empty((N,16))
-
+dataPlot = empty((N, 16))
 
 #
 # numpy pointers on dense Siconos vectors
@@ -139,7 +139,6 @@ q = ball.q()
 v = ball.velocity()
 p = ball.p(1)
 lambda_ = inter.lambda_(1)
-
 
 #
 # initial data
@@ -154,12 +153,12 @@ dataPlot[0, 6] = linalg.norm(relation.contactForce())
 dataPlot[0, 7] = q[0]
 dataPlot[0, 8] = q[1]
 dataPlot[0, 9] = q[2]
-dataPlot[0,10] = q[3]
-dataPlot[0,11] = q[4]
-dataPlot[0,12] = q[5]
-dataPlot[0,13] = q[6]
-dataPlot[0,14] = v[1]
-dataPlot[0,15] = v[2]
+dataPlot[0, 10] = q[3]
+dataPlot[0, 11] = q[4]
+dataPlot[0, 12] = q[5]
+dataPlot[0, 13] = q[6]
+dataPlot[0, 14] = v[1]
+dataPlot[0, 15] = v[2]
 k = 1
 
 # time loop
@@ -176,26 +175,23 @@ while(s.hasNextEvent()):
     dataPlot[k, 7] = q[0]
     dataPlot[k, 8] = q[1]
     dataPlot[k, 9] = q[2]
-    dataPlot[k,10] = q[3]
-    dataPlot[k,11] = q[4]
-    dataPlot[k,12] = q[5]
-    dataPlot[k,13] = q[6]
-    dataPlot[k,14] = v[1]
-    dataPlot[k,15] = v[2]
+    dataPlot[k, 10] = q[3]
+    dataPlot[k, 11] = q[4]
+    dataPlot[k, 12] = q[5]
+    dataPlot[k, 13] = q[6]
+    dataPlot[k, 14] = v[1]
+    dataPlot[k, 15] = v[2]
     k = k + 1
     s.nextStep()
-    print s.nextTime()
 
-
-
-savetxt("result-py.dat",dataPlot)
+savetxt("result-py.dat", dataPlot)
 #
 # comparison with the reference file
 #
 from Siconos.Kernel import SimpleMatrix, getMatrix
 
 ref = getMatrix(SimpleMatrix("resultNETS.ref"))
-err=linalg.norm(dataPlot - ref)
+err = linalg.norm(dataPlot - ref)
 print "error w.r.t reference file =", err
 
 if (err > 1e-12):
@@ -209,21 +205,18 @@ from matplotlib.pyplot import subplot, title, plot, grid, show
 
 subplot(411)
 title('position')
-plot(dataPlot[:,0], dataPlot[:,1])
+plot(dataPlot[:, 0], dataPlot[:, 1])
 grid()
 subplot(412)
 title('velocity')
-plot(dataPlot[:,0], dataPlot[:,2])
+plot(dataPlot[:, 0], dataPlot[:, 2])
 grid()
 subplot(413)
-plot(dataPlot[:,0], dataPlot[:,3])
+plot(dataPlot[:, 0], dataPlot[:, 3])
 title('reaction')
 grid()
 subplot(414)
-plot(dataPlot[:,0], dataPlot[:,4])
+plot(dataPlot[:, 0], dataPlot[:, 4])
 title('lambda')
 grid()
 show()
-
-
-    

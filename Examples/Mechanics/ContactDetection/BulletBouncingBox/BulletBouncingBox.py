@@ -24,10 +24,10 @@ from Siconos.Kernel import \
     FrictionContact, NewtonImpactFrictionNSL
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
-    btConvexHullShape, btVector3, btCollisionObject, \
-    btBoxShape, btMatrix3x3, \
-    BulletSpaceFilter, \
-    BulletWeightedShape, BulletDS, BulletTimeStepping
+     btBoxShape, btSphereShape, btConvexHullShape, btVector3, btCollisionObject, \
+     btBoxShape, btMatrix3x3, \
+     BulletSpaceFilter, \
+     BulletWeightedShape, BulletDS, BulletTimeStepping
 
 from numpy import zeros
 from numpy.linalg import norm
@@ -46,16 +46,19 @@ theta = 0.5  # theta scheme
 position_init = 10
 velocity_init = 0
 
-box = btConvexHullShape()
-box.addPoint(btVector3(-1.0, 1.0, -1.0))
-box.addPoint(btVector3(-1.0, -1.0, -1.0))
-box.addPoint(btVector3(-1.0, -1.0, 1.0))
-box.addPoint(btVector3(-1.0, 1.0, 1.0))
-box.addPoint(btVector3(1.0, 1.0, 1.0))
-box.addPoint(btVector3(1.0, 1.0, -1.0))
-box.addPoint(btVector3(1.0, -1.0, -1.0))
-box.addPoint(btVector3(1.0, -1.0, 1.0))
-
+if (True):
+    box = btConvexHullShape()
+    box.addPoint(btVector3(-1.0, 1.0, -1.0))
+    box.addPoint(btVector3(-1.0, -1.0, -1.0))
+    box.addPoint(btVector3(-1.0, -1.0, 1.0))
+    box.addPoint(btVector3(-1.0, 1.0, 1.0))
+    box.addPoint(btVector3(1.0, 1.0, 1.0))
+    box.addPoint(btVector3(1.0, 1.0, -1.0))
+    box.addPoint(btVector3(1.0, -1.0, -1.0))
+    box.addPoint(btVector3(1.0, -1.0, 1.0))
+else:
+    box = btBoxShape(btVector3(1.0, 1.0, 1.0))
+    
 # a bullet shape with a mass (1.0)
 box1 = BulletWeightedShape(box, 1.0)
 
@@ -84,7 +87,6 @@ bouncingBox.nonSmoothDynamicalSystem().insertDynamicalSystem(body)
 osi = Moreau(theta)
 osi.insertDynamicalSystem(body)
 
-
 ground = btCollisionObject()
 ground.setCollisionFlags(btCollisionObject.CF_STATIC_OBJECT)
 groundShape = btBoxShape(btVector3(30, 30, .5))
@@ -102,7 +104,6 @@ osnspb = FrictionContact(3)
 
 osnspb.numericsSolverOptions().iparam[0] = 1000
 osnspb.numericsSolverOptions().dparam[0] = 1e-5
-osnspb.setMaxSize(16384)
 osnspb.setMStorageType(1)
 osnspb.setNumericsVerboseMode(False)
 
@@ -114,11 +115,11 @@ osnspb.setKeepLambdaAndYState(True)
 nslaw = NewtonImpactFrictionNSL(0.8, 0., 0., 3)
 
 # (5) broadphase contact detection
-aabbmax = btVector3(100, 100, 100)
-aabbmin = btVector3(-100, -100, -100)
+aabbmin = btVector3(100,100,100)
+aabbmax = btVector3(100,100,100)
+
 broadphase = BulletSpaceFilter(bouncingBox, nslaw, aabbmin, aabbmax)
 
-broadphase.collisionWorld().addCollisionObject(ground)
 broadphase.addStaticObject(ground)
 broadphase.addStaticShape(groundShape)
 
@@ -157,6 +158,7 @@ k = 1
 while(simulation.hasNextEvent()):
 
     broadphase.buildInteractions(bouncingBox.currentTime())
+    print k,'numManifolds=', broadphase.collisionWorld().getDispatcher().getNumManifolds()
 
     simulation.computeOneStep()
 
@@ -165,12 +167,14 @@ while(simulation.hasNextEvent()):
     dataPlot[k, 2] = v[2]
 
     if (broadphase.collisionWorld().getDispatcher().getNumManifolds() > 0):
-        index1 = simulation.indexSet(1)
-        if (index1.size() == 4):
-            dataPlot[k, 3] = norm(index1.vertices()[0].lambda_(1)) + \
-                             norm(index1.vertices()[1].lambda_(1)) + \
-                             norm(index1.vertices()[2].lambda_(1)) + \
-                             norm(index1.vertices()[3].lambda_(1))
+        if bouncingBox.nonSmoothDynamicalSystem().topology().\
+          numberOfIndexSet() > 1:
+            index1 = simulation.indexSet(1)
+            if (index1.size() == 4):
+                dataPlot[k, 3] = norm(index1.vertices()[0].lambda_(1)) + \
+                norm(index1.vertices()[1].lambda_(1)) + \
+                norm(index1.vertices()[2].lambda_(1)) + \
+                norm(index1.vertices()[3].lambda_(1))
 
     k += 1
     simulation.nextStep()
@@ -184,7 +188,7 @@ from numpy.linalg import norm
 ref = getMatrix(SimpleMatrix("result.ref"))
 
 print "norm(dataPlot - ref) = {0}".format(norm(dataPlot - ref))
-if (norm(dataPlot - ref) > 1e-12):
+if (norm(dataPlot - ref) > 1e-11):
     print("Warning. The result is rather different from the reference file.")
 
 

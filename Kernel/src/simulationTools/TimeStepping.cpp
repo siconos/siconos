@@ -33,7 +33,7 @@
 #include "FrictionContact.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 // #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 1
+//#define DEBUG_MESSAGES 1
 
 #include <debug.h>
 
@@ -555,14 +555,25 @@ void   TimeStepping::prepareNewtonIteration()
     (*itosi)->prepareNewtonIteration(getTkp1());
   }
 
-
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  {
+   {
     (*it)->relation()->computeJach(getTkp1(), **it);
     (*it)->relation()->computeJacg(getTkp1(), **it);
-  }
+   }
 
+  /* let's consider only active Interactions */
+  // SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  // if (topo->numberOfIndexSet()>1)
+  // {
+  //   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+  //   InteractionsGraph::VIterator ui, uiend;
+  //   for(std11::tie(ui, uiend)=indexSet1->vertices(); ui != uiend; ++ui)
+  //   {
+  //     indexSet1->bundle(*ui)->relation()->computeJach(getTkp1(), *indexSet1->bundle(*ui));
+  //     indexSet1->bundle(*ui)->relation()->computeJacg(getTkp1(), *indexSet1->bundle(*ui));
+  //   }
+  // }
 
   /*reset to zero the ds buffers*/
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -576,10 +587,23 @@ void   TimeStepping::prepareNewtonIteration()
     //     (*itds)->R()->zero();
   }
   /**/
+
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
     (*it)->preparNewtonIteration();
   }
+
+  /* let's consider only active Interactions */
+//  if (topo->numberOfIndexSet()>1)
+//  {
+//    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+//    InteractionsGraph::VIterator ui, uiend;
+//    for(std11::tie(ui, uiend)=indexSet1->vertices(); ui != uiend; ++ui)
+//    {
+//      indexSet1->bundle(*ui)->preparNewtonIteration();
+//    }
+  // }
+
   bool topoHasChanged = model()->nonSmoothDynamicalSystem()->topology()->hasChanged();
   if (topoHasChanged)
   {
