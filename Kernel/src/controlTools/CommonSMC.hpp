@@ -56,9 +56,6 @@ protected:
   /** the vector defining the surface (\f$ s = Cx \f$) */
   SP::SiconosMatrix _Csurface;
 
-  /** Do not use the state-continuous equivaluent control \f$u^{eq}\f$ */
-  bool _noUeq;
-
   /** matrix describing the influence of \f$lambda\f$ on s */
   SP::SiconosMatrix _D;
 
@@ -108,6 +105,9 @@ protected:
 
   /** Store \f$u^s\f$ */
   SP::SiconosVector _us;
+
+  /** Do not use the state-continuous equivaluent control \f$u^{eq}\f$ */
+  bool _noUeq;
 
 public:
 
