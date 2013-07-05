@@ -100,7 +100,8 @@ Model::Model(double newT0, double newT, const std::string& newTitle,
 
 Model::~Model()
 {
-  _strat->clear();
+  if (_strat)
+    _strat->clear();
 }
 
 void Model::setSimulationPtr(SP::Simulation newPtr)
