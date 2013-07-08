@@ -38,6 +38,14 @@ void BulletR::computeh(const double time, Interaction& inter)
 {
   DEBUG_PRINT("start of computeh\n");
 
+  const btCollisionObject* obA =
+    static_cast<const btCollisionObject*>(_contactManifold->getBody0());
+  const btCollisionObject* obB =
+    static_cast<const btCollisionObject*>(_contactManifold->getBody1());
+      
+  _contactManifold->refreshContactPoints(obA->getWorldTransform(), 
+                                         obB->getWorldTransform());
+
   unsigned int numContacts = _contactManifold->getNumContacts();
 
   DEBUG_PRINTF("contact_num : %d\n", _contact_num);
@@ -51,15 +59,7 @@ void BulletR::computeh(const double time, Interaction& inter)
   else
   {
 
-    btManifoldPoint& cpoint = _contactManifold->getContactPoint(_contact_num-1);
-
-    const btCollisionObject* obA =
-      static_cast<const btCollisionObject*>(_contactManifold->getBody0());
-    const btCollisionObject* obB =
-      static_cast<const btCollisionObject*>(_contactManifold->getBody1());
-      
-    _contactManifold->refreshContactPoints(obA->getWorldTransform(), 
-                                           obB->getWorldTransform());
+    btManifoldPoint& cpoint = _contactManifold->getContactPoint(_contact_num);
 
     if ((cpoint.m_normalWorldOnB[0]*cpoint.m_normalWorldOnB[0] +
          cpoint.m_normalWorldOnB[1]*cpoint.m_normalWorldOnB[1] +

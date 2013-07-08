@@ -180,9 +180,11 @@ class Dat():
                         and lambda_[2] == 0.):
                     jachqt = bullet_relation.jachqT()
                     cf = np.dot(jachqt.transpose(), lambda_)
-                    cp = bullet_relation.contactPoint()
-                    posa = cp.getPositionWorldOnA()
-                    self._contact_forces_file.write(
+                    cm = bullet_relation.contactManifold()
+                    if (cm.getNumContacts() > bullet_relation.contactNum()):
+                        cp = cm.getContactPoint(bullet_relation.contactNum())
+                        posa = cp.getPositionWorldOnA()
+                        self._contact_forces_file.write(
                         '{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}\n'.
                         format(time,
                                posa.x(),

@@ -261,7 +261,7 @@ fi
 configure_src Numerics Release
 nightly_build Numerics Release
 nightly_test Numerics Release
-nightly_memcheck Numerics Release
+#nightly_memcheck Numerics Release
 nightly_submit Numerics Release
 install_1 Numerics Release
 clean_1 Numerics Release
@@ -269,7 +269,7 @@ clean_1 Numerics Release
 configure_src Kernel Release
 nightly_build Kernel Release
 nightly_test Kernel Release
-nightly_memcheck Kernel Release
+#nightly_memcheck Kernel Release
 nightly_submit Kernel Release
 install_1 Kernel Release
 clean_1 Kernel Release
@@ -277,7 +277,7 @@ clean_1 Kernel Release
 configure_src Mechanics Release
 nightly_build Mechanics Release
 nightly_test Mechanics Release
-nightly_memcheck Mechanics Release
+#nightly_memcheck Mechanics Release
 nightly_submit Mechanics Release
 install_1 Mechanics Release
 clean_1 Mechanics Release
@@ -285,7 +285,7 @@ clean_1 Mechanics Release
 configure_src IO Release
 nightly_build IO Release
 nightly_test IO Release
-nightly_memcheck IO Release
+#nightly_memcheck IO Release
 nightly_submit IO Release
 install_1 IO Release
 clean_1 IO Release
@@ -349,7 +349,7 @@ nightly_build Examples Debug
 nightly_test Examples Debug
 nightly_submit Examples Debug
 ##
-nightly_memcheck Examples Debug
+#nightly_memcheck Examples Debug
 nightly_submit Examples Debug
 # end
 date

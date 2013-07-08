@@ -87,7 +87,7 @@ def is_serializable(c):
 
 
 def unwanted(s):
-    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err|Hem5|_bufferY|_spo', s)
+    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err|Hem5|_bufferY|_spo|_measuredPert|_predictedPert', s)
     # note _err and _bufferY -> boost::circular_buffer issue with serialization
     # _spo : subpluggedobject 
     return m != None

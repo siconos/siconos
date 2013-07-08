@@ -42,7 +42,7 @@ public:
     return _contactManifold;
   };
 
-  unsigned int contact_num() const
+  unsigned int contactNum() const
   {
     return _contact_num;
   }

@@ -115,10 +115,7 @@ osnspb.setKeepLambdaAndYState(True)
 nslaw = NewtonImpactFrictionNSL(0.8, 0., 0., 3)
 
 # (5) broadphase contact detection
-aabbmin = btVector3(100,100,100)
-aabbmax = btVector3(100,100,100)
-
-broadphase = BulletSpaceFilter(bouncingBox, nslaw, aabbmin, aabbmax)
+broadphase = BulletSpaceFilter(bouncingBox, nslaw)
 
 broadphase.addStaticObject(ground)
 broadphase.addStaticShape(groundShape)
@@ -126,6 +123,7 @@ broadphase.addStaticShape(groundShape)
 
 # (6) Simulation setup with (1) (2) (3) (4) (5)
 simulation = BulletTimeStepping(timedisc, broadphase)
+#simulation.setNewtonOptions(1)
 simulation.insertIntegrator(osi)
 simulation.insertNonSmoothProblem(osnspb)
 

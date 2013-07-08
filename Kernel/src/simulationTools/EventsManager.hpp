@@ -106,6 +106,9 @@ protected:
    */
 //  EventsManager(const EventsManager&);
 
+  /** default constructor */
+  EventsManager() {};
+
 public:
 
   /**  default constructor

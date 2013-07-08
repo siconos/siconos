@@ -117,7 +117,6 @@ macro(AddSiconosProject)
 
   # do crazy thing because cmake is stubborn
   set(project_CMAKE_ARGS_sanitized)
-  message('xxxxxx ${project_CMAKE_ARGS}')
   foreach(elt ${project_CMAKE_ARGS})
     set(project_CMAKE_ARGS_sanitized ${elt}__00__${project_CMAKE_ARGS_sanitized})
   endforeach(elt)
