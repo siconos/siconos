@@ -27,7 +27,6 @@
 #ifndef _WIN32
 #include <dlfcn.h>
 #endif
-#include <vector>
 
 #ifndef _WIN32
 #define _SYS_UNX
@@ -48,15 +47,13 @@ typedef void* PluginHandle;
  *
  * \author SICONOS Development Team - copyright INRIA
  * \date (creation) 07/21/2006
- *  Matrices can be either block or Simple.
- *  See Derived classes for details.
  */
 namespace SiconosSharedLibrary
 {
 /**  loads a plugin
  * \param pluginPath full plugin path name
  * \exception SiconosSharedLibraryException if plugin fail to open
- * \return PluginHandle : plugin handle
+ * \return the plugin handle
  */
 PluginHandle loadPlugin(const std::string& pluginPath);
 
@@ -69,14 +66,10 @@ PluginHandle loadPlugin(const std::string& pluginPath);
 void * getProcAddress(PluginHandle plugin, const std::string& procedure);
 
 /**  Closes plugin
- * \param plugin the plugin handle
+ * \param pluginFile the name of the plugin to close
+ * \exception SiconosSharedLibraryException if the given plugin is not opened
  */
-void closePlugin(PluginHandle plugin);
-
-/** Closes all plugin set using the current object
- */
-void closeAllPlugins();
-
+void closePlugin(const std::string& pluginFile);
 }
 
 /** Alias for SiconosSharedLibrary */

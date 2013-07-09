@@ -96,4 +96,9 @@ void setFunction(void* fPtr, const std::string& pluginPath, const std::string& f
   *(void **)(fPtr) = SiconosSharedLibrary::getProcAddress(handle, fName.c_str());
 }
 
+void closePlugin(const std::string& pluginPath)
+{
+  SiconosSharedLibrary::closePlugin(getPluginName(pluginPath));
+}
+
 }

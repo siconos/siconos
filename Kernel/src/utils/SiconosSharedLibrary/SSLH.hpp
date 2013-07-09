@@ -33,14 +33,15 @@ namespace SSLH
 //
 // getSharedLibraryExtension
 //
-const std::string getSharedLibraryExtension(void);
+  const std::string getSharedLibraryExtension(void);
 
-const std::string getPluginName(const std::string& s);
+  const std::string getPluginName(const std::string& s);
 
-const std::string getPluginFunctionName(const std::string& s);
+  const std::string getPluginFunctionName(const std::string& s);
 
-void setFunction(void* fPtr, const std::string& pluginPath, const std::string& fName);
+  void setFunction(void* fPtr, const std::string& pluginPath, const std::string& fName);
 
+  void closePlugin(const std::string& pluginPath);
 }
 
 #endif

@@ -19,7 +19,6 @@
 
 
 #include "SSLH.hpp"
-
 #include "PluggedObject.hpp"
 
 PluggedObject::PluggedObject(): _pluginName("unplugged")
@@ -31,6 +30,20 @@ PluggedObject::PluggedObject(const std::string& name): _pluginName(name)
 {
   fPtr = 0;
   setComputeFunction();
+}
+
+PluggedObject::PluggedObject(const PluggedObject & PO):  _pluginName(PO.getPluginName())
+{
+  // we don't copy the fPtr since we need to increment the number of times we opened the plugin file in the openedPlugins multimap
+  fPtr = 0;
+  if ((_pluginName.compare("unplugged") != 0) && (_pluginName.compare("Unknown") != 0))
+    setComputeFunction();
+}
+
+PluggedObject::~PluggedObject()
+{
+  if ((_pluginName.compare("unplugged") != 0) && (_pluginName.compare("Unknown") != 0))
+    SSLH::closePlugin(_pluginName);
 }
 
 void PluggedObject::setComputeFunction(const std::string& pluginPath, const std::string& functionName)

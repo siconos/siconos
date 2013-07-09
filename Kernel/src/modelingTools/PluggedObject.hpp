@@ -58,7 +58,7 @@ public:
   /** Copy constructor
    * \param PO a PluggedObject we are going to copy
   */
-  PluggedObject(const PluggedObject & PO):  _pluginName(PO.getPluginName()), fPtr(PO.fPtr) {};
+  PluggedObject(const PluggedObject & PO);
 
   /** bool to checked if a function is properly connected to the current object
    * \return a boolean, true if fPtr is set
@@ -70,7 +70,7 @@ public:
 
   /** destructor
    */
-  ~PluggedObject() {};
+  virtual ~PluggedObject();
 
   /** Connect a function to fPtr
    \param pluginPath name of the file where the function is defined (WITH extension)

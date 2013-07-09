@@ -19,12 +19,13 @@
 #include "SiconosSharedLibrary.hpp"
 #include "SiconosSharedLibraryException.hpp"
 
-
+#include <map>
 
 namespace SiconosSharedLibrary
 {
 
-std::vector<PluginHandle> isPlugged;
+std::multimap<const std::string, PluginHandle> openedPlugins;
+typedef std::multimap<const std::string, PluginHandle>::iterator iter;
 
 PluginHandle loadPlugin(const std::string& pluginPath)
 {
@@ -46,7 +47,7 @@ PluginHandle loadPlugin(const std::string& pluginPath)
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or found " + pluginPath);
   }
 #endif
-  isPlugged.push_back(HandleRes);
+  openedPlugins.insert(std::make_pair(pluginPath, HandleRes));
   return HandleRes;
 }
 
@@ -63,29 +64,22 @@ void * getProcAddress(PluginHandle plugin, const std::string& procedure)
 #endif
 }
 
-void closePlugin(PluginHandle plugin)
+void closePlugin(const std::string& pluginFile)
 {
+  iter it = openedPlugins.find(pluginFile);
+  if (it == openedPlugins.end())
+  {
+    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::closePlugin - could not find an opened plugin named " + pluginFile);
+  }
+  PluginHandle plugin = it->second;
 #ifdef _WIN32
   FreeLibrary(plugin);
 #endif
 #ifdef _SYS_UNX
   dlclose(plugin);
 #endif
-}
 
-void closeAllPlugins()
-{
-  std::vector<PluginHandle>::iterator iter;
-  for (iter = isPlugged.begin(); iter != isPlugged.end(); ++iter)
-  {
-#ifdef _WIN32
-    FreeLibrary(*iter);
-#endif
-#ifdef _SYS_UNX
-    dlclose(*iter);
-#endif
-  }
+  openedPlugins.erase(it);
 }
-
 
 }
