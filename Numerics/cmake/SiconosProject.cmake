@@ -213,9 +213,9 @@ MACRO(SICONOS_PROJECT
   ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
 
   # NumericsConfig.h/KernelConfig.h generation
-  IF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-    CONFIGURE_FILE(config.h.cmake ${PROJECT_SHORT_NAME}Config.h)
-  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+#  IF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+#    CONFIGURE_FILE(config.h.cmake ${PROJECT_SHORT_NAME}Config.h)
+#  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
 
   # man files
   IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
@@ -303,6 +303,16 @@ MACRO(SICONOS_PROJECT
   ENDIF(WITH_CPACK)
 
 ENDMACRO(SICONOS_PROJECT)
+
+MACRO(CLOSE_PROJECT)
+  # NumericsConfig.h/KernelConfig.h generation
+  IF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/${PROJECT_SHORT_NAME}Config.h)
+  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+  
+  FEATURE_SUMMARY(WHAT ALL)
+
+ENDMACRO(CLOSE_PROJECT)
 
 MACRO(WRITE_NOTES)
   IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
