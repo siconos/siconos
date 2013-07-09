@@ -3,6 +3,8 @@
 #
 PROJECT(SiconosIO CXX)
 
+OPTION(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
+
 #
 # VERSION defined in top-level CMakeLists.txt
 #
@@ -47,6 +49,19 @@ ENDIF(SiconosMechanics_FOUND)
 COMPILE_WITH(LibXml2 REQUIRED)
 COMPILE_WITH(GMP REQUIRED)
 
+# contact detection
+IF(WITH_BULLET)
+  COMPILE_WITH(Bullet REQUIRED)
+  IF(BULLET_FOUND)
+    SET(HAVE_BULLET TRUE)
+    MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
+    SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS} contactDetection/bullet)
+    IF(BULLET_USE_DOUBLE_PRECISION)
+      APPEND_FLAGS(CMAKE_CXX_FLAGS "-DBT_USE_DOUBLE_PRECISION")
+    ENDIF(BULLET_USE_DOUBLE_PRECISION)
+  ENDIF(BULLET_FOUND)
+ENDIF(WITH_BULLET)
+
 
 IF(WITH_VTK)
   COMPILE_WITH(VTK)
@@ -82,35 +97,31 @@ SET(SiconosIO_LINK_LIBRARIES ${_LL})
 SET(SiconosIO_LINKER_LANGUAGE CXX)
 
 # header generation
-ADD_CUSTOM_COMMAND(
-  OUTPUT SiconosKernelGenerated.hpp
-  DEPENDS ${SiconosKernel_INCLUDE_DIRS}/SiconosKernel.hpp
-  COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py --target=Kernel
-  -I${SiconosNumerics_INCLUDE_DIRS} -I${SiconosKernel_INCLUDE_DIRS}
+SET(GENERATED_TARGETS --targets=Kernel)
+SET(GENERATED_HEADERS SiconosFullGenerated.hpp)
+SET(GENERATED_DEPENDENCIES ${SiconosKernel_INCLUDE_DIRS}/SiconosKernel.hpp)
+SET(GENERATED_INCLUDES -I${SiconosNumerics_INCLUDE_DIRS} -I${SiconosKernel_INCLUDE_DIRS}
   -I${LIBXML2_INCLUDE_DIR})
-
 IF(SiconosMechanics_FOUND)
-  ADD_CUSTOM_COMMAND(
-    OUTPUT SiconosMechanicsGenerated.hpp
-    DEPENDS ${SiconosMechanics_INCLUDE_DIRS}/SpaceFilter.hpp
-    COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py --target=Mechanics
-    -I${SiconosNumerics_INCLUDE_DIRS} -I${SiconosKernel_INCLUDE_DIRS} -I${SiconosMechanics_INCLUDE_DIRS}
-    -I${LIBXML2_INCLUDE_DIR})
+  SET(GENERATED_TARGETS "${GENERATED_TARGETS},Mechanics")
+  SET(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES}
+    ${SiconosMechanics_INCLUDE_DIRS}/SpaceFilter.hpp)
+  SET(GENERATED_INCLUDES ${GENERATED_INCLUDES} -I${SiconosMechanics_INCLUDE_DIRS})
 ENDIF()
+
+ADD_CUSTOM_COMMAND(
+  OUTPUT ${GENERATED_HEADERS}
+  DEPENDS ${GENERATED_DEPENDENCIES}
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py ${GENERATED_TARGETS}
+  ${GENERATED_INCLUDES})
 
 # set library target
 LIBRARY_PROJECT_SETUP()
 
 # add dependencies for header generation
-IF(SiconosMechanics_FOUND)
-  ADD_CUSTOM_TARGET(SerializersGeneration ALL
-    DEPENDS 
-    SiconosKernelGenerated.hpp 
-    SiconosMechanicsGenerated.hpp)
-ELSE()
-  ADD_CUSTOM_TARGET(SerializersGeneration ALL
-    DEPENDS SiconosKernelGenerated.hpp)
-ENDIF()
+ADD_CUSTOM_TARGET(SerializersGeneration ALL
+  DEPENDS 
+  SiconosFullGenerated.hpp)
 
 IF(BUILD_SHARED_LIBS)
   ADD_DEPENDENCIES(SiconosIO_shared SerializersGeneration)
@@ -144,5 +155,6 @@ IF(WITH_TESTING)
 
 ENDIF(WITH_TESTING)
 
-# print all features
-FEATURE_SUMMARY(WHAT ALL)
+#end
+CLOSE_PROJECT()
+

@@ -1,6 +1,7 @@
 #ifndef KERNEL_TEST_HPP
 #define KERNEL_TEST_HPP
 
+#include "IOConfig.h"
 #include <cppunit/extensions/HelperMacros.h>
 
 class KernelTest : public CppUnit::TestFixture
@@ -17,6 +18,7 @@ class KernelTest : public CppUnit::TestFixture
 
 #ifdef HAVE_SICONOS_MECHANICS
   CPPUNIT_TEST(t7);
+  CPPUNIT_TEST(t8);
 #endif
 
   CPPUNIT_TEST_SUITE_END();
@@ -31,6 +33,7 @@ class KernelTest : public CppUnit::TestFixture
 
 #ifdef HAVE_SICONOS_MECHANICS
   void t7();
+  void t8();
 #endif
 
 public:

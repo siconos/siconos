@@ -24,28 +24,29 @@ include_paths = []
 siconos_namespace = '::'
 
 
-def generated_file(targ):
-    return '../src/Siconos{0}Generated.hpp'.format(targ)
+def generated_file():
+    return '../src/SiconosFullGenerated.hpp'
 
 
 def usage():
     print '{0} [--namespace=<namespace>] -I<path> [-I<path> ...] \
-               [--target=<target> ] header'.format(myname)
+               [--targets=<Mod1>[,Mod2[,...]]] \
+               header'.format(myname)
 
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'I:', ['help', 'namespace=',
-                                                    'target='])
+                                                    'targets='])
 except getopt.GetoptError, err:
     print str(err)
     usage()
     sys.exit(2)
 
-target = 'Kernel'
+targets = []
 
 for opt, arg in opts:
-    if opt == '--target':
-        target = arg
+    if opt == '--targets':
+        targets = arg.split(',')
     if opt == '-I':
         include_paths += [arg]
     if opt == '--namespace':
@@ -76,19 +77,18 @@ input_headers['Mechanics'] = ["SpaceFilter.hpp", "ExternalBody.hpp",
                               ]
 
 
-config = parser.config_t(include_paths=include_paths)
+all_headers = [h for h in itertools.chain(*(input_headers[target]
+                                            for target in targets))]
 
-decls = parser.parse(input_headers[target], config)
-global_ns = declarations.get_global_namespace(decls)
+def is_serializable(something):
+    return 'serializable' in [_c_.name for _c_ in
+                              something.typedefs(allow_empty=True)]
 
-
-def is_serializable(c):
-    return 'serializable' in [c.name for c in c.typedefs(allow_empty=True)]
-
-
+# un processed classed or attributes : to be defined explicitely in
+# SiconosFull.hpp
 def unwanted(s):
     m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err|Hem5|_bufferY|_spo|_measuredPert|_predictedPert', s)
-    # note _err and _bufferY -> boost::circular_buffer issue with serialization
+    # note _err,_bufferY, _spo, _measuredPert, _predictedPert -> boost::circular_buffer issue with serialization
     # _spo : subpluggedobject 
     return m != None
 
@@ -99,6 +99,20 @@ def name(t):
     elif isinstance(t, declarations.typedef_t):
         return t.decl_string[2:]  # remove ::
 
+
+def replace_by_typedef(some_type):
+    if str(some_type) in typedef:
+        rep_typedef = typedef[str(some_type)]
+        if not '<' in rep_typedef:  # replace only if not a template
+            return rep_typedef
+    return str(some_type)
+
+# main loop
+config = parser.config_t(include_paths=include_paths)
+
+decls = parser.parse(all_headers, config)
+global_ns = declarations.get_global_namespace(decls)
+
 # classes in siconos_namespace
 class_names = dict()
 
@@ -106,26 +120,20 @@ class_names = dict()
 # registration)
 with_base = []
 
-
 # a typedef table to replace templated class by their typedefs in
 # macros call
 typedef = dict()
 for t in global_ns.typedefs():
     typedef[str(t._type)] = name(t)
 
-
-def replace_by_typedef(some_type):
-    if typedef.has_key(str(some_type)):
-        rep_typedef = typedef[str(some_type)]
-        if not '<' in rep_typedef:  # replace only if not a template
-            return rep_typedef
-    return str(some_type)
-
-with open(generated_file(target), 'w') as dest_file:
+with open(generated_file(), 'w') as dest_file:
 
     dest_file.write('// generated with the command : {0}\n'
                     .format(' '.join(sys.argv)))
-    for header in input_headers[target]:
+    dest_file.write('#ifndef SiconosFullGenerated_hpp\n')
+    dest_file.write('#define SiconosFullGenerated_hpp\n')
+
+    for header in all_headers:
         dest_file.write('#include "{0}"\n'.format(header))
 
     for type_ in filter(lambda c: c.parent.name == siconos_namespace,
@@ -149,7 +157,6 @@ with open(generated_file(target), 'w') as dest_file:
             is_serializable(class_) and \
             (is_typedef or not
              declarations.templates.is_instantiation(class_.name)):
-
             if not unwanted(class_.name):
 
                 if not class_.is_abstract:
@@ -183,7 +190,6 @@ with open(generated_file(target), 'w') as dest_file:
                                              in str(x._get_type()),
                                              class_.variables(
                                                  allow_empty=True))]
-
                 dest_file.write('{0})\n'
                                 .format('\n'
                                         .join('  ({0})'
@@ -198,10 +204,10 @@ with open(generated_file(target), 'w') as dest_file:
     # some leads to compilation errors.
     dest_file.write('\n')
     dest_file.write('template <class Archive>\n')
-    dest_file.write('void siconos_io_register_{0}_generated(Archive& ar)\n'
-                    .format(target))
+    dest_file.write('void siconos_io_register_generated(Archive& ar)\n')
     dest_file.write('{{\n{0}\n}}\n'
                     .format('\n'
                             .join(
                                 '  ar.register_type(static_cast<{0}*>(NULL));'
                                 .format(x) for x in with_base)))
+    dest_file.write('#endif')

@@ -5,7 +5,6 @@
 #include <boost/numeric/bindings/ublas/vector_sparse.hpp>
 #include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
 
-
 #define DEBUG_MESSAGES 1
 #include "../SiconosFull.hpp"
 
@@ -313,10 +312,11 @@ void KernelTest::t6()
     double h = bouncingBall->simulation()->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
-
+    SP::DynamicalSystemsGraph dsg = 
+      bouncingBall->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
     SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
-                            (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystem(0));
+      (dsg->bundle(*(dsg->begin())));
 
     SP::Interaction inter = *(bouncingBall->nonSmoothDynamicalSystem()->interactions()->begin());
     SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
@@ -398,6 +398,8 @@ void KernelTest::t6()
 }
 
 #ifdef HAVE_SICONOS_MECHANICS
+#include "MechanicsIO.hpp"
+
 void KernelTest::t7()
 {
 
@@ -426,5 +428,42 @@ void KernelTest::t7()
 
   CPPUNIT_ASSERT(std11::static_pointer_cast<Disk>(ds1)->getRadius() ==
                  std11::static_pointer_cast<Disk>(ds2)->getRadius());
+}
+
+void KernelTest::t8()
+{
+  SP::DynamicalSystem ds1, ds2;
+  
+  SP::SiconosVector q(new SiconosVector(3));
+  SP::SiconosVector v(new SiconosVector(3));
+  
+  (*q)(0) = 0.;
+  (*q)(1) = 1.;
+  (*q)(2) = 1.;
+
+  (*v)(0) = 0;
+  (*v)(1) = 0;
+  (*v)(2) = 10.;
+
+  SP::Model model(new Model(0,10));
+  
+  ds1.reset(new Disk(1, 1, q, v));
+  ds2.reset(new Disk(2, 2, q, v));
+
+  model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds1);
+  model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds2);
+
+  MechanicsIO IO;
+
+  SP::SimpleMatrix positions = IO.positions(model);
+  SP::SimpleMatrix velocities = IO.velocities(model);
+
+  CPPUNIT_ASSERT((*positions)(0,0) == 0.);
+  CPPUNIT_ASSERT((*velocities)(0,0) == 0.);
+  CPPUNIT_ASSERT((*positions)(0,1) == 1.);
+  CPPUNIT_ASSERT((*positions)(1,1) == 1.);
+  CPPUNIT_ASSERT((*velocities)(0,2) == 10.);
+  CPPUNIT_ASSERT((*velocities)(1,2) == 10.);
+
 }
 #endif

@@ -26,11 +26,7 @@
 
 #define NVP(X) BOOST_SERIALIZATION_NVP(X)
 
-#include "SiconosKernelGenerated.hpp"
-
-#ifdef HAVE_SICONOS_MECHANICS
-#include "SiconosMechanicsGenerated.hpp"
-#endif
+#include "SiconosFullGenerated.hpp"
 
 /* hand written */
 
@@ -230,7 +226,7 @@ void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
 
 #include <f2c.h>
 template<typename Archive>
-void siconos_io(Archive& ar, Lsodar& osi)
+void siconos_io(Archive& ar, Lsodar& osi, unsigned int version)
 {
   ar & boost::serialization::make_nvp("_intData", osi._intData);
 
@@ -455,10 +451,7 @@ void serialize(Archive& ar, Siconos::EdgeProperties<T, _InteractionsGraph>& p, u
 template <class Archive>
 void siconos_io_register(Archive& ar)
 {
-  siconos_io_register_Kernel_generated(ar);
-#ifdef HAVE_SICONOS_MECHANICS
-  siconos_io_register_Mechanics_generated(ar);
-#endif
+  siconos_io_register_generated(ar);
 
   ar.register_type(static_cast<SimpleMatrix*>(NULL));
   ar.register_type(static_cast<SiconosVector*>(NULL));
@@ -474,6 +467,7 @@ void siconos_io_register(Archive& ar)
   ar.register_type(static_cast<InteractionsSet*>(NULL));
   ar.register_type(static_cast<__mpz_struct*>(NULL));
   ar.register_type(static_cast<FrictionContact*>(NULL));
+  ar.register_type(static_cast<Lsodar*>(NULL));
 }
 
 #endif
