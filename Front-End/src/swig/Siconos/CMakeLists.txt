@@ -114,7 +114,6 @@ IF(DOXYGEN_FOUND)
   #
   SET(SWIG_MODULE_Kernel_EXTRA_DEPS
     KernelTypes.i
-    KernelBullet.i
     KernelRegistration.i
     solverOptions.i
     handleException.i
@@ -302,3 +301,5 @@ SET_TESTS_PROPERTIES(smc PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;f
 SET_TESTS_PROPERTIES(matrix_exp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
 
 SUBDIRS(tests)
+
+CLOSE_PROJECT()

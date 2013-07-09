@@ -10,6 +10,17 @@
 
 %include handleException.i
 
+%include sharedPointers.i
+
+%include KernelTypes.i
+
 %import Kernel.i
 
 %include "SiconosRestart.hpp"
+
+#ifdef HAVE_SICONOS_MECHANICS
+%include <MechanicsIO.hpp>
+%{
+#include <MechanicsIO.hpp>
+%}
+#endif
