@@ -190,7 +190,7 @@ public:
   /** get a pointer to the graph of all Interactions.
    *  \return a SP::InteractionsGraph
    */
-  inline SP::InteractionsGraph indexSet0()
+  inline SP::InteractionsGraph indexSet0() const
   {
     return _IG[0];
   }
@@ -198,7 +198,7 @@ public:
   /** get a pointer to the graph at level num of Interactions
    *  \return a SP::InteractionsGraph
    */
-  inline SP::InteractionsGraph indexSet(unsigned int num)
+  inline SP::InteractionsGraph indexSet(unsigned int num) const
   {
     assert(num < _IG.size()) ;
     return _IG[num];
@@ -207,7 +207,7 @@ public:
   /** get a pointer to the graph at level num of Interactions
    *  \return a SP::InteractionsGraph
    */
-  inline unsigned int numberOfIndexSet()
+  inline unsigned int numberOfIndexSet() const
   {
     return _IG.size();
   };

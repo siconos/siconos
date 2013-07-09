@@ -292,8 +292,9 @@ SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber)
     if (currentNumber == requiredNumber)
       return ds;
   }
-  if (currentNumber != requiredNumber)
-    RuntimeException::selfThrow("Topology::getDynamicalSystem(n) ds not found.");
+
+  RuntimeException::selfThrow("Topology::getDynamicalSystem(n) ds not found.");
+
   return ds;
 }
 

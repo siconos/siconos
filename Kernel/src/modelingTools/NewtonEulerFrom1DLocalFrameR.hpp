@@ -101,15 +101,15 @@ public:
   virtual void computeJachq(const double time, Interaction& inter);
   virtual void computeJachqT(Interaction& inter);
 
-  inline SP::SiconosVector pc1()
+  inline SP::SiconosVector pc1() const
   {
     return _Pc1;
   }
-  inline SP::SiconosVector pc2()
+  inline SP::SiconosVector pc2() const
   {
     return _Pc2;
   }
-  inline SP::SiconosVector nc()
+  inline SP::SiconosVector nc() const
   {
     return _Nc;
   }

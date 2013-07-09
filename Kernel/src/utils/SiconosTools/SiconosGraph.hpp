@@ -70,9 +70,6 @@ namespace std11 = boost;
 
 #include "SiconosSerialization.hpp"
 
-enum vertex_old_index_t { vertex_old_index };
-enum edge_old_index_t { edge_old_index };
-
 enum vertex_properties_t { vertex_properties };
 enum edge_properties_t { edge_properties };
 enum graph_properties_t { graph_properties };
@@ -85,8 +82,6 @@ enum edge_siconos_bundle_t { edge_siconos_bundle };
 
 namespace boost
 {
-BOOST_INSTALL_PROPERTY(vertex, old_index);
-BOOST_INSTALL_PROPERTY(edge, old_index);
 BOOST_INSTALL_PROPERTY(vertex, properties);
 BOOST_INSTALL_PROPERTY(edge, properties);
 BOOST_INSTALL_PROPERTY(graph, properties);
@@ -115,33 +110,29 @@ public:
 
 
   typedef boost::adjacency_list <
-  boost::listS, boost::listS, boost::undirectedS,
-        boost::property
-        < vertex_siconos_bundle_t, V,
-        boost::property <
+    boost::listS, boost::listS, boost::undirectedS,
+    boost::property
+    < vertex_siconos_bundle_t, V,
+      boost::property <
         boost::vertex_color_t ,
         boost::default_color_type ,
         boost::property < boost::vertex_index_t,
-        size_t,
-        boost::property <
-        vertex_old_index_t,
-        size_t,
-        boost::property < vertex_properties_t,
-        VProperties
-        > > > > > ,
-        boost::property
-        < edge_siconos_bundle_t, E,
-        boost::property <
+                          size_t,
+                          boost::property < vertex_properties_t,
+                                            VProperties
+                                            > > > > ,
+    boost::property
+    < edge_siconos_bundle_t, E,
+      boost::property <
         boost::edge_color_t ,
         boost::default_color_type ,
-        boost::property < boost::edge_index_t, size_t,
-        boost::property < edge_old_index_t,
-        size_t,
-        boost::property < edge_properties_t ,
-        EProperties
-        > > > > > ,
-        boost::property < graph_properties_t, GProperties > >
-        graph_t;
+        boost::property < boost::edge_index_t,
+                          size_t,
+                          boost::property < edge_properties_t ,
+                                            EProperties
+                                            > > > > ,
+    boost::property < graph_properties_t, GProperties > >
+    graph_t;
 
   typedef V vertex_t;
 
@@ -178,12 +169,6 @@ public:
   boost::property_map<graph_t, boost::vertex_color_t >::type VColorAccess;
 
   typedef typename
-  boost::property_map<graph_t, edge_old_index_t >::type OEIndexAccess;
-
-  typedef typename
-  boost::property_map<graph_t, vertex_old_index_t >::type OVIndexAccess;
-
-  typedef typename
   boost::property_map<graph_t, boost::edge_index_t >::type EIndexAccess;
 
   typedef typename
@@ -203,9 +188,6 @@ public:
 
   int _stamp;
   VMap vertex_descriptor;
-  std::vector<VDescriptor> _vertex_index_modified;
-
-  std::vector<EDescriptor> _edge_index_modified;
 
 protected:
   /** serialization hooks
@@ -236,13 +218,19 @@ public:
     g.clear();
   };
 
+  const graph_t& storage() const
+  {
+    return g;
+  }
+
+
   std::pair<EDescriptor, bool>
-  edge(VDescriptor u, VDescriptor v)
+  edge(VDescriptor u, VDescriptor v) const
   {
     return boost::edge(u, v, g);
   }
 
-  bool edge_exists(const VDescriptor& vd1, const VDescriptor& vd2)
+  bool edge_exists(const VDescriptor& vd1, const VDescriptor& vd2) const
   {
     bool ret = false;
     EDescriptor tmped;
@@ -275,7 +263,7 @@ public:
      common which correspond to the source and target in primal graph
    */
   std::pair<EDescriptor, EDescriptor>
-  edges(VDescriptor u, VDescriptor v)
+  edges(VDescriptor u, VDescriptor v) const
   {
     //    BOOST_STATIC_ASSERT((GProperties::is_adjoint_graph));
 
@@ -323,8 +311,8 @@ public:
 
   }
 
-  bool is_edge(const VDescriptor& vd1, const VDescriptor& vd2,
-               const E& e_bundle)
+  bool is_edge(const VDescriptor& vd1, const VDescriptor& vd2, 
+               const E& e_bundle) const
   {
     bool found = false;
     OEIterator oei, oeiend;
@@ -340,7 +328,7 @@ public:
     return found;
   }
 
-  bool adjacent_vertex_exists(const VDescriptor& vd)
+  bool adjacent_vertex_exists(const VDescriptor& vd) const
   {
     bool ret = false;
     VIterator vi, viend;
@@ -376,7 +364,17 @@ public:
     return boost::get(vertex_siconos_bundle, g)[vd];
   };
 
+  inline const V& bundle(const VDescriptor& vd) const
+  {
+    return boost::get(vertex_siconos_bundle, g)[vd];
+  };
+
   inline E& bundle(const EDescriptor& ed)
+  {
+    return boost::get(edge_siconos_bundle, g)[ed];
+  };
+  
+  inline const E& bundle(const EDescriptor& ed) const
   {
     return boost::get(edge_siconos_bundle, g)[ed];
   };
@@ -386,7 +384,17 @@ public:
     return boost::get(boost::vertex_color, g)[vd];
   };
 
+  inline const boost::default_color_type& color(const VDescriptor& vd) const
+  {
+    return boost::get(boost::vertex_color, g)[vd];
+  };
+
   inline boost::default_color_type& color(const EDescriptor& ed)
+  {
+    return boost::get(boost::edge_color, g)[ed];
+  };
+
+  inline const boost::default_color_type& color(const EDescriptor& ed) const
   {
     return boost::get(boost::edge_color, g)[ed];
   };
@@ -401,9 +409,9 @@ public:
     return boost::get(boost::vertex_index, g)[vd];
   };
 
-  inline size_t& old_index(const VDescriptor& vd)
+  inline const size_t& index(const VDescriptor& vd) const
   {
-    return boost::get(vertex_old_index, g)[vd];
+    return boost::get(boost::vertex_index, g)[vd];
   };
 
   inline size_t& index(const EDescriptor& ed)
@@ -411,9 +419,9 @@ public:
     return boost::get(boost::edge_index, g)[ed];
   };
 
-  inline size_t& old_index(const EDescriptor& ed)
+  inline const size_t& index(const EDescriptor& ed) const
   {
-    return boost::get(edge_old_index, g)[ed];
+    return boost::get(boost::edge_index, g)[ed];
   };
 
   inline VProperties& properties(const VDescriptor& vd)
@@ -436,58 +444,58 @@ public:
   //    return get(edge_descriptor0, g)[ed];
   //  }
 
-  inline bool is_vertex(const V& vertex)
+  inline bool is_vertex(const V& vertex) const
   {
     return (vertex_descriptor.find(vertex) != vertex_descriptor.end());
   }
 
-  inline const VDescriptor& descriptor(const V& vertex)
+  inline const VDescriptor& descriptor(const V& vertex) const
   {
     assert(size() == vertex_descriptor.size());
     assert(vertex_descriptor.find(vertex) != vertex_descriptor.end());
-    return vertex_descriptor[vertex];
+    return (*vertex_descriptor.find(vertex)).second;
   }
 
-  inline std::pair<VIterator, VIterator> vertices()
+  inline std::pair<VIterator, VIterator> vertices() const
   {
     return boost::vertices(g);
   };
 
-  inline VIterator begin()
+  inline VIterator begin() const
   {
     VIterator vi, viend;
     std11::tie(vi, viend) = vertices();
     return vi;
   }
 
-  inline VIterator end()
+  inline VIterator end() const
   {
     VIterator vi, viend;
     std11::tie(vi, viend) = vertices();
     return viend;
   }
 
-  inline std::pair<AVIterator, AVIterator> adjacent_vertices(const VDescriptor& vd)
+  inline std::pair<AVIterator, AVIterator> adjacent_vertices(const VDescriptor& vd) const
   {
     return boost::adjacent_vertices(vd, g);
   };
 
-  inline std::pair<EIterator, EIterator> edges()
+  inline std::pair<EIterator, EIterator> edges() const
   {
     return boost::edges(g);
   };
 
-  inline std::pair<OEIterator, OEIterator> out_edges(const VDescriptor& vd)
+  inline std::pair<OEIterator, OEIterator> out_edges(const VDescriptor& vd) const
   {
     return boost::out_edges(vd, g);
   };
 
-  inline VDescriptor target(const EDescriptor& ed)
+  inline VDescriptor target(const EDescriptor& ed) const
   {
     return boost::target(ed, g);
   };
 
-  inline VDescriptor source(const EDescriptor& ed)
+  inline VDescriptor source(const EDescriptor& ed) const
   {
     return boost::source(ed, g);
   };
@@ -517,7 +525,6 @@ public:
       assert(bundle(descriptor(vertex_bundle)) == vertex_bundle);
 
       index(new_vertex_descriptor) = std::numeric_limits<size_t>::max() ;
-      old_index(new_vertex_descriptor) = std::numeric_limits<size_t>::max() ;
       return new_vertex_descriptor;
     }
     else
@@ -629,7 +636,6 @@ public:
     assert(inserted);
 
     index(new_edge) = std::numeric_limits<size_t>::max();
-    old_index(new_edge) = std::numeric_limits<size_t>::max();
 
     bundle(new_edge) = e_bundle;
 
@@ -792,43 +798,19 @@ public:
   }
 
 
-  int stamp()
+  int stamp() const
   {
     return _stamp;
-  }
-
-  std::vector<VDescriptor>& vertex_index_modified()
-  {
-    return _vertex_index_modified;
-  }
-
-  std::vector<EDescriptor>& edge_index_modified()
-  {
-    return _edge_index_modified;
   }
 
   void update_vertices_indices()
   {
     VIterator vi, viend;
     size_t i;
-    _vertex_index_modified.clear();
     for (std11::tie(vi, viend) = boost::vertices(g), i = 0;
          vi != viend; ++vi, ++i)
     {
-      if (index(*vi) != i && index(*vi) != std::numeric_limits<size_t>::max())
-      {
-        _vertex_index_modified.push_back(*vi);
-        old_index(*vi) = index(*vi);
-      }
-      else
-      {
-        old_index(*vi) = std::numeric_limits<size_t>::max(); // old_index
-        // not
-        // needed
-      }
       index(*vi) = i;
-
-      assert(index(*vi) != old_index(*vi));
     }
     _stamp++;
   };
@@ -837,60 +819,26 @@ public:
   {
     EIterator ei, eiend;
     size_t i;
-    _edge_index_modified.clear();
     for (std11::tie(ei, eiend) = boost::edges(g), i = 0;
          ei != eiend; ++ei, ++i)
     {
-      if (index(*ei) != i && index(*ei) != std::numeric_limits<size_t>::max())
-      {
-        _edge_index_modified.push_back(*ei);
-        old_index(*ei) = index(*ei);
-      }
-      else
-      {
-        old_index(*ei) = std::numeric_limits<size_t>::max(); // old_index
-        // not
-        // needed
-      }
       index(*ei) = i;
-
-      assert(index(*ei) != old_index(*ei));
     }
     _stamp++;
   };
-
-  EIndexAccess edges_indices()
-  {
-    return boost::get(boost::edge_index, g);
-  }
-
-  VIndexAccess vertices_indices()
-  {
-    return boost::get(boost::vertex_index, g);
-  }
-
-  OEIndexAccess old_edges_indices()
-  {
-    return boost::get(edge_old_index, g);
-  }
-
-  OVIndexAccess old_vertices_indices()
-  {
-    return boost::get(vertex_old_index, g);
-  }
-
+  
   void clear()
   {
     g.clear();
     vertex_descriptor.clear();
   };
 
-  VMap vertex_descriptor_map()
+  VMap vertex_descriptor_map() const
   {
     return vertex_descriptor;
   };
 
-  void display()
+  void display() const
   {
 
     VIterator vi, viend;
@@ -926,7 +874,7 @@ public:
   /* debug */
 #ifndef SWIG
 #ifndef NDEBUG
-  bool state_assert()
+  bool state_assert() const
   {
     VIterator vi, viend;
     for (std11::tie(vi, viend) = vertices(); vi != viend; ++vi)
@@ -953,7 +901,7 @@ public:
 
   }
 
-  bool adjacent_vertices_ok()
+  bool adjacent_vertices_ok() const
   {
 
     VIterator vi, viend;
