@@ -199,8 +199,8 @@ void SchatzmanPaoli::initialize()
       // v0->display();
       // We first swap the initial value contained in q and v after initialization.
 
-      d->qMemory()->swap(q);
-      d->velocityMemory()->swap(velocity);
+      d->qMemory()->swap(*q);
+      d->velocityMemory()->swap(*velocity);
 
       // we compute the new state values
       double h = simulationLink->timeStep();

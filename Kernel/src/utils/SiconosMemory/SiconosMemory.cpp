@@ -26,25 +26,30 @@
 // --- CONSTRUCTORS ---
 
 
-// from data: _maxSize
-SiconosMemory::SiconosMemory(const unsigned int newValue):
-  _maxSize(newValue), _nbVectorsInMemory(0)
+// from data: _size
+SiconosMemory::SiconosMemory(const unsigned int size, const unsigned int vectorSize):
+  _size(size), _nbVectorsInMemory(0)
 {
   _vectorMemory.reset(new MemoryContainer);
-  _vectorMemory->reserve(_maxSize);
+  _vectorMemory->resize(_size);
+  _indx = _size-1;
+  for (unsigned int i = 0; i < _size; i++)
+  {
+    (*_vectorMemory)[i].reset(new SiconosVector(vectorSize));
+  }
 }
 
-// from xml file + optional value of _maxSize
+// from xml file + optional value of _size
 SiconosMemory::SiconosMemory(SP::SiconosMemoryXML memXML):
-  _maxSize(0), _nbVectorsInMemory(0), _memoryXML(memXML)
+  _size(0), _nbVectorsInMemory(0), _memoryXML(memXML)
 {
 
   if (!_memoryXML)
     SiconosMemoryException::selfThrow("SiconosMemory, xml constructor: xml file==NULL");
 
-  _maxSize = _memoryXML->getSiconosMemorySize();
+  _size = _memoryXML->getSiconosMemorySize();
   _vectorMemory.reset(new MemoryContainer);
-  _vectorMemory->reserve(_maxSize);
+  _vectorMemory->resize(_size);
 
   if (!_memoryXML->hasMemory())
     SiconosMemoryException::selfThrow("SiconosMemory, xml constructor: no memory node found.");
@@ -52,33 +57,36 @@ SiconosMemory::SiconosMemory(SP::SiconosMemoryXML memXML):
   // get memory from xml file
   _vectorMemory =  _memoryXML->getSiconosMemoryVector();
   _nbVectorsInMemory = _vectorMemory->size();
+  _indx = _size-1;
 }
 
 // copy of a std::vector of siconos vectors
 SiconosMemory::SiconosMemory(const MemoryContainer& V):
-  _maxSize(V.size()), _nbVectorsInMemory(V.size())
+  _size(V.size()), _nbVectorsInMemory(V.size())
 {
+  _indx = _size-1;
   _vectorMemory.reset(new MemoryContainer);
-  _vectorMemory->reserve(_maxSize);
-  for (unsigned int i = 0; i < _maxSize; i++)
+  _vectorMemory->resize(_size);
+  for (unsigned int i = 0; i < _size; i++)
   {
-    _vectorMemory->push_back(SP::SiconosVector(new SiconosVector(*V[i])));
+    (*_vectorMemory)[i].reset(new SiconosVector(*V[i]));
   }
 }
 
-// copy of a std::vector of siconos vectors  + _maxSize
+// copy of a std::vector of siconos vectors  + _size
 SiconosMemory::SiconosMemory(const unsigned int newMemorySize, const MemoryContainer& V):
-  _maxSize(newMemorySize), _nbVectorsInMemory(V.size())
+  _size(newMemorySize), _nbVectorsInMemory(V.size())
 {
+  _indx = _size-1;
   _vectorMemory.reset(new MemoryContainer);
-  _vectorMemory->reserve(_maxSize);
+  _vectorMemory->resize(_size);
   if (newMemorySize < V.size())
-    SiconosMemoryException::selfThrow("SiconosMemory(int _maxSize, vector<SP::SiconosVector> V) : V.size > _maxSize");
+    SiconosMemoryException::selfThrow("SiconosMemory(int _size, vector<SP::SiconosVector> V) : V.size > _size");
   else
   {
     for (unsigned int i = 0; i < V.size(); i++)
     {
-      _vectorMemory->push_back(SP::SiconosVector(new SiconosVector(*V[i])));
+      (*_vectorMemory)[i].reset(new SiconosVector(*V[i]));
     }
   }
 }
@@ -86,15 +94,16 @@ SiconosMemory::SiconosMemory(const unsigned int newMemorySize, const MemoryConta
 //Copy constructor
 SiconosMemory::SiconosMemory(const SiconosMemory& Mem)
 {
-  _maxSize = Mem.getMemorySize();
+  _size = Mem.getMemorySize();
+  _indx = _size-1;
   _nbVectorsInMemory = Mem.nbVectorsInMemory();
   _vectorMemory.reset(new MemoryContainer);
-  _vectorMemory->reserve(_maxSize);
+  _vectorMemory->resize(_size);
   // XXX is this correct ?
   const MemoryContainer VtoCopy = *(Mem.vectorMemory());
   for (unsigned int i = 0; i < VtoCopy.size(); i++)
   {
-    _vectorMemory->push_back(SP::SiconosVector(new SiconosVector(*VtoCopy[i])));
+    (*_vectorMemory)[i].reset(new SiconosVector(*VtoCopy[i]));
   }
   // this was not always initialised
   if (Mem.getSiconosMemoryXML())
@@ -112,37 +121,38 @@ SiconosMemory::~SiconosMemory()
 
 void SiconosMemory::setVectorMemory(const MemoryContainer& V)
 {
-  _maxSize = V.size();
-  _vectorMemory->reserve(_maxSize);
-  _nbVectorsInMemory = _maxSize;
+  _size = V.size();
+  _indx = _size-1;
+  _vectorMemory->resize(_size);
+  _nbVectorsInMemory = _size;
   _vectorMemory->clear();
   for (unsigned int i = 0; i < V.size(); i++)
   {
-    _vectorMemory->push_back(SP::SiconosVector(new SiconosVector(*V[i])));
+    (*_vectorMemory)[i].reset(new SiconosVector(*V[i]));
   }
 }
 
 SP::SiconosVector SiconosMemory::getSiconosVector(const unsigned int index) const
 {
   assert(index < _nbVectorsInMemory && "getSiconosVector(index) : inconsistent index value");
-  return _vectorMemory->at(index);
+  return _vectorMemory->at( (_indx + 1 + index) % _size);
 }
 
-void SiconosMemory::swap(SP::SiconosVector v)
+void SiconosMemory::swap(const SiconosVector& v)
 {
-  SP::SiconosVector tmp;
-
-  // If vectorMemory size is _maxSize, we remove its last element.
-  if (_vectorMemory->size() == _maxSize)
-    _vectorMemory->resize(_maxSize - 1);
-  _vectorMemory->insert(_vectorMemory->begin(), SP::SiconosVector(new SiconosVector(*v)));
-  _nbVectorsInMemory = _vectorMemory->size();
+  // If vectorMemory size is _size, we remove its last element.
+  *(*_vectorMemory)[_indx] = v;
+  _nbVectorsInMemory = std::min(_nbVectorsInMemory+1, _size);
+  if (_indx > 0)
+    _indx--;
+  else
+    _indx = _size-1;
 }
 
 void SiconosMemory::display() const
 {
   std::cout << " ====== Memory vector display ======= " <<std::endl;
-  std::cout << "| _maxSize : " << _maxSize <<std::endl;
+  std::cout << "| _size : " << _size <<std::endl;
   std::cout << "| _nbVectorsInMemory : " << _nbVectorsInMemory <<std::endl;
   std::cout << "| vectorMemory size : " << _vectorMemory->size() <<std::endl;
   for (unsigned int i = 0; i < _nbVectorsInMemory; i++)
@@ -155,6 +165,6 @@ void SiconosMemory::display() const
 
 void SiconosMemory::saveMemorySizeToXML()
 {
-  if (_memoryXML) _memoryXML->setSiconosMemorySize(_maxSize);
+  if (_memoryXML) _memoryXML->setSiconosMemorySize(_size);
   else SiconosMemoryException::selfThrow("SiconosMemory::saveMemorySizeToXML() - _memoryXML object == NULL");
 }

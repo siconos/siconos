@@ -211,9 +211,8 @@ void FirstOrderType2R::preparNewtonIteration(Interaction& inter)
 
   prod(*(B()), lambda, tmpV, true);
 
+  *inter.data(ds_xp) = *inter.data(g_alpha);
   *inter.data(ds_xp) -= tmpV;
-
-  *inter.data(ds_xp) += *inter.data(g_alpha);
 }
 
 void FirstOrderType2R::computeJachlambda(const double time, Interaction& inter)

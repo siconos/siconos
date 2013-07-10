@@ -466,10 +466,10 @@ void NewtonEulerDS::initMemory(unsigned int steps)
     std::cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" <<std::endl;
   else
   {
-    _qMemory.reset(new SiconosMemory(steps));
-    _vMemory.reset(new SiconosMemory(steps));
-    _forcesMemory.reset(new SiconosMemory(steps));
-    _dotqMemory.reset(new SiconosMemory(steps));
+    _qMemory.reset(new SiconosMemory(steps, _qDim));
+    _vMemory.reset(new SiconosMemory(steps, _n));
+    _forcesMemory.reset(new SiconosMemory(steps, _n));
+    _dotqMemory.reset(new SiconosMemory(steps, _qDim));
     swapInMemory();
   }
 }
@@ -478,10 +478,10 @@ void NewtonEulerDS::swapInMemory()
 {
 
   //  _xMemory->swap(_x[0]);
-  _qMemory->swap(_q);
-  _vMemory->swap(_v);
-  _dotqMemory->swap(_dotq);
-  _forcesMemory->swap(_forces);
+  _qMemory->swap(*_q);
+  _vMemory->swap(*_v);
+  _dotqMemory->swap(*_dotq);
+  _forcesMemory->swap(*_forces);
 
 }
 

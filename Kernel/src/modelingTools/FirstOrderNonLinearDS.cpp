@@ -384,13 +384,13 @@ void FirstOrderNonLinearDS::initMemory(unsigned int steps)
   if (steps == 0)
     std::cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" <<std::endl;
   else
-    _rMemory.reset(new SiconosMemory(steps));
+    _rMemory.reset(new SiconosMemory(steps, _n));
 }
 
 void FirstOrderNonLinearDS::swapInMemory()
 {
-  _xMemory->swap(_x[0]);
-  _rMemory->swap(_r);
+  _xMemory->swap(*_x[0]);
+  _rMemory->swap(*_r);
   *_fold = *_f;
 }
 

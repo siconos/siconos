@@ -330,7 +330,7 @@ void DynamicalSystem::initMemory(unsigned int steps)
   else
   {
     _stepsInMemory = steps;
-    _xMemory.reset(new SiconosMemory(steps));
+    _xMemory.reset(new SiconosMemory(steps, _n));
   }
 
 }
