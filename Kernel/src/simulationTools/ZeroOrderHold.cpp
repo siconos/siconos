@@ -515,31 +515,25 @@ double ZeroOrderHold::computeResidu()
   Type::Siconos dsType ; // Type of the current DS.
 
   double maxResidu = 0;
-  double normResidu = maxResidu;
 
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     DynamicalSystem& ds = **it; // the considered dynamical system
     dsType = Type::value(ds); // Its type
-    SiconosVector& residuFree = *ds.workspace(DynamicalSystem::freeresidu);
     // 1 - First Order Linear Systems
     if (dsType == Type::FirstOrderLinearDS)
     {
       // No residu with ZOH ...
-      residuFree.zero();
     }
     // 2 - First Order Linear Systems with Time Invariant coefficients
     else if (dsType == Type::FirstOrderLinearTIDS)
     {
       // No residu with ZOH ...
-      residuFree.zero();
     }
     else
       RuntimeException::selfThrow("ZeroOrderHold::computeResidu - not yet implemented for Dynamical system type: " + dsType);
-
-    if (normResidu > maxResidu) maxResidu = normResidu;
-
   }
+
   return maxResidu;
 }
 

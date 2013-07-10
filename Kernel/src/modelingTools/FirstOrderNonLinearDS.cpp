@@ -257,8 +257,8 @@ void FirstOrderNonLinearDS::zeroPlugin()
 }
 void FirstOrderNonLinearDS::preparStep()
 {
-  _xp->zero();
-  _r->zero();
+//  _xp->zero();
+//  _r->zero();
 }
 bool FirstOrderNonLinearDS::checkDynamicalSystem()
 {
