@@ -1,0 +1,14 @@
+{
+  Ignore dlopen bug.
+  Memcheck:Leak
+  ...
+  fun:_dlerror_run
+  ...
+}
+{
+  Ignore CPPunit misusage, see http://stackoverflow.com/questions/1644766/cppunit-leakage
+  Memcheck:Leak
+  ...
+  fun:_ZN7CppUnit19TestFactoryRegistry8makeTestEv
+  ...
+}
