@@ -259,7 +259,7 @@ public:
   /** get the TimeDiscretisation of the Simulation
    *  \return the TimeDiscretisation
    */
-  inline SP::TimeDiscretisation timeDiscretisation()
+  inline SP::TimeDiscretisation timeDiscretisation() const
   {
     return _timeDiscretisation;
   };

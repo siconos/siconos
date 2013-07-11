@@ -23,7 +23,7 @@
 #include "Simulation.hpp"
 #include <cmath>
 #include <limits> // for ULONG_MAX
-
+#include "TimeDiscretisationEventNoSaveInMemory.hpp"
 
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 
@@ -56,6 +56,20 @@ Event& EventsManager::insertEvent(const int type, SP::TimeDiscretisation td)
   Event& ev = insertEvent(type, td->currentTime());
   ev.setTimeDiscretisation(td);
   return ev;
+}
+
+void EventsManager::noSaveInMemory(const Simulation& sim)
+{
+  for (EventsContainer::iterator it = _events.begin();
+       it != _events.end(); ++it)
+  {
+    Event& ev = **it;
+    if (ev.getType() == TD_EVENT)
+    {
+      (*it).reset(new TimeDiscretisationEventNoSaveInMemory(ev.getDoubleTimeOfEvent(), 0));
+      (*it)->setTimeDiscretisation(sim.timeDiscretisation());
+    }
+  }
 }
 
 void EventsManager::preUpdate(Simulation& sim)

@@ -139,6 +139,13 @@ public:
    */
 //  void initialize(const Simulation& sim);
 
+  /** Change TimeDiscretisationEvent to TimeDiscretisationEventNoSaveInMemory
+   * \warning use this at your own risk, many integrators needs previous values
+   * to integrate properly
+   * \param sim the Simulation that owns this EventsManager
+   */
+  void noSaveInMemory(const Simulation& sim);
+
   /** get the current event
    *  \return a pointer to Event
    */
