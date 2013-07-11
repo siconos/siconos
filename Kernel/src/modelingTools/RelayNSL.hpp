@@ -71,27 +71,22 @@ private:
 
 public:
 
-  /** basic constructor
-      \param law size
-   */
-  RelayNSL(unsigned int);
-
   /** constructor with XML object of the RelayNSL
-  *  \param NonSmoothLawXML* : the XML object corresponding
+  *  \param the corresponding XML object corresponding
   */
-  RelayNSL(SP::NonSmoothLawXML);
+  RelayNSL(SP::NonSmoothLawXML nslawxml);
 
   /** constructor with the value of the RelayNSL attributes
-  *  \param a double value c
-  *  \param a double value d
-  *  \param unsigned int: size of the ns law
+  *  \param size size of the NonSmoothLaw
+  *  \param lb lower endpoint of the interval, default value is -1.0
+  *  \param ub upper endpoint of the interval, default value is 1.0
   */
-  RelayNSL(double, double, unsigned int);
+  RelayNSL(unsigned int size, double lb = -1.0, double ub = 1.0);
 
   ~RelayNSL();
 
   /** check the ns law to see if it is verified
-  *  \return a boolean value whioch determines if the NS Law is verified
+  *  \return true if the NS Law is verified, false otherwise
   */
   bool isVerified() const;
 

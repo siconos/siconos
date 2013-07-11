@@ -53,6 +53,9 @@ protected:
   /** Vector of predicted values for the perturbation */
   BufferOfVectors _predictedPert;
 
+  /** Upper bound on the norm2 of the perturbation */
+  double _ubPerturbation;
+
   /** Control input to counteract the effect of the perturbation */
   SP::SiconosVector _up;
 
@@ -93,8 +96,9 @@ public:
   virtual void actuate();
 
   /** Enable perturbation prediction */
-  void setPerturbationPrediction()
+  void setPerturbationPrediction(double ub = std::numeric_limits<double>::quiet_NaN())
   {
+    _ubPerturbation = ub;
     _predictionPerturbation = true;
   }
 

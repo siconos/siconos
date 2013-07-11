@@ -54,7 +54,7 @@ void LinearSMCimproved::initialize(const Model& m)
 
 void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleMatrix& CBstar)
 {
-  if (_us->normInf() < 1)
+  if (_us->normInf() < _alpha)
   {
     if (_inDisceteTimeSlidingPhase)
     {
@@ -100,9 +100,22 @@ void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleM
       up = predictedPertC;
       up *= -1;
       CBstar.PLUForwardBackwardInPlace(up);
-    }
+
+      // project onto feasible set
+      double norm = up.norm2();
+      if (norm > _ubPerturbation)
+      {
+        up *= _ubPerturbation/norm;
+        predictedPertC *= _ubPerturbation/norm;
+      }
+   }
     else
       _inDisceteTimeSlidingPhase = true;
+  }
+  else if (_inDisceteTimeSlidingPhase)
+  {
+    _inDisceteTimeSlidingPhase = false;
+    _up->zero();
   }
 }
 
@@ -131,10 +144,7 @@ void LinearSMCimproved::actuate()
   _simulationSMC->computeOneStep();
   _simulationSMC->nextStep();
 
-
-  // discontinous part
   *_us = *_lambda;
-
 
   // inject those in the system
   *_u = *_us;

@@ -69,7 +69,7 @@ void CommonSMC::initialize(const Model& m)
   _relationSMC.reset(new FirstOrderLinearTIR(_Csurface, _B));
   std11::static_pointer_cast<FirstOrderLinearTIR>(_relationSMC)->setDPtr(_D);
   unsigned int sDim = _Csurface->size(0);
-  _nsLawSMC.reset(new RelayNSL(sDim));
+  _nsLawSMC.reset(new RelayNSL(sDim, -_alpha, _alpha));
 
   std::string id = "interaction for control";
   _interactionSMC.reset(new Interaction(sDim, _nsLawSMC, _relationSMC));
@@ -138,7 +138,7 @@ void CommonSMC::computeUeq()
   zoh.updateMatrices(_DS_SMC);
 
   // tmpN = B^{*}(CB)^{-1}CA
-  axpy_prod(zoh.Bd(_DS_SMC), *quasiProjB_A, *tmpN, true);
+  prod(zoh.Bd(_DS_SMC), *quasiProjB_A, *tmpN, true);
   // W = I + \theta B^{*})CB)^{-1}CA
   scal(_thetaSMC, *tmpN, *tmpW, false);
   // compute e^{Ah}x_k

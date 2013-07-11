@@ -25,10 +25,6 @@
 RelayNSL::RelayNSL(): NonSmoothLaw(), _lb(-1.0), _ub(1.0)
 {}
 
-RelayNSL::RelayNSL(unsigned int newSize):
-  NonSmoothLaw(newSize), _lb(-1.0), _ub(1.0)
-{}
-
 RelayNSL::RelayNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(nslawxml), _lb(-1.0), _ub(1.0)
 {
@@ -40,8 +36,8 @@ RelayNSL::RelayNSL(SP::NonSmoothLawXML nslawxml):
   else RuntimeException::selfThrow("RelayNSL::xml constructor, xml file=NULL");
 }
 
-RelayNSL::RelayNSL(double newLb, double newUb, unsigned int newSize):
-  NonSmoothLaw(newSize), _lb(newLb), _ub(newUb)
+RelayNSL::RelayNSL(unsigned int size, double lb, double ub):
+  NonSmoothLaw(size), _lb(lb), _ub(ub)
 {}
 
 RelayNSL::~RelayNSL()

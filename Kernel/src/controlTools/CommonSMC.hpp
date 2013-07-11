@@ -59,6 +59,9 @@ protected:
   /** matrix describing the influence of \f$lambda\f$ on s */
   SP::SiconosMatrix _D;
 
+  /** scalar multiplying Sign; \f$ u^s = - \alpha Sign */
+  double _alpha;
+
   /** the Relation for the Controller */
   SP::Relation _relationSMC;
 
@@ -109,6 +112,12 @@ protected:
   /** Do not use the state-continuous equivaluent control \f$u^{eq}\f$ */
   bool _noUeq;
 
+  /** Compute the equivalent part of the control \f$u^{eq}\f$.
+   * The method used here is to discretize the continuous-time
+   * formula using a theta method
+   */
+  void computeUeq();
+
 public:
 
   /** Constructor with a TimeDiscretisation and a Model.
@@ -116,8 +125,8 @@ public:
    * \param sensor the ControlSensor feeding the Actuator
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor): Actuator(type, sensor),
-    _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8), _thetaSMC(0.5),
-    _noUeq(false) {}
+    _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8),
+    _thetaSMC(0.5), _noUeq(false) {}
 
   /** Constructor with a TimeDiscretisation, a Model and two matrices
    * \param type the type of the SMC Actuator
@@ -126,8 +135,8 @@ public:
    * \param D the saturation matrix
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D):
-    Actuator(type, sensor), _D(D), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8),
-    _thetaSMC(0.5), _noUeq(false)
+    Actuator(type, sensor), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE),
+    _precision(1e-8), _thetaSMC(0.5), _noUeq(false)
   {
     _B = B;
   }
@@ -162,6 +171,11 @@ public:
    */
   void setSaturationMatrixPtr(SP::SiconosMatrix newPtr);
 
+  /** Set _alpha
+   * \param alpha the new value for _alpha
+   */
+  inline void setAlpha(double alpha) { _alpha = alpha; };
+
   /** get _lambda
    * \return a pointer to _lambda
    */
@@ -195,21 +209,31 @@ public:
     return * _OSNSPB_SMC;
   };
 
+  /** get \f$u^{eq}\f$
+   * \return a reference to _ueq
+   */
   inline SiconosVector& ueq()
   {
     return *_ueq;
   };
+
+  /** get \f$u^{s}\f$
+   * \return a reference to _us
+   */
+
   inline SiconosVector& us()
   {
     return *_us;
   };
 
+  /** Set _theta, used in some discretization method for \f$u^{eq}\f$
+   * \param newTheta the new value for _thetaSMC
+   */
+
   inline void setTheta(const double& newTheta)
   {
     _thetaSMC = newTheta;
   };
-
-  void computeUeq();
 
   /** Disable (or enable) the use of the state-continuous control \f$u^{eq}\f$
    * \param b disable the use of Ueq if true
@@ -218,6 +242,7 @@ public:
   {
     _noUeq = b;
   };
+
   /** This is derived in child classes if they need to copy the TimeDiscretisation
    * associated with this Sensor
   *  \param td the TimeDiscretisation for this Sensor

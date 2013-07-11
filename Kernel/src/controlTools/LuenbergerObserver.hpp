@@ -69,7 +69,7 @@ public:
    * \param xHat0 the initial guess for the state
    */
   LuenbergerObserver(SP::ControlSensor sensor, const SiconosVector& xHat0):
-    Observer(LUENBERGER, sensor, xHat0) {}
+    Observer(LUENBERGER, sensor, xHat0), _pass(false) {}
 
   /** Constructor with all the data
    * \param sensor the ControlSensor that feeds the Observer
@@ -78,7 +78,7 @@ public:
    * \param L the gain matrix
    */
   LuenbergerObserver(SP::ControlSensor sensor, const SiconosVector& xHat0, SP::SiconosMatrix C, SP::SiconosMatrix L):
-    Observer(LUENBERGER, sensor, xHat0), _C(C), _L(L) {}
+    Observer(LUENBERGER, sensor, xHat0), _C(C), _L(L), _pass(false) {}
 
   /** Compute the new control law at each event
   */

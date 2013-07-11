@@ -56,7 +56,7 @@ public:
    * \param xHat0 the initial guess for the state
    */
   SlidingReducedOrderObserver(SP::ControlSensor sensor, const SiconosVector& xHat0):
-    Observer(SLIDING_REDUCED_ORDER, sensor, xHat0) {}
+    Observer(SLIDING_REDUCED_ORDER, sensor, xHat0), _pass(false) {}
 
   /** Constructor with all the data
    * \param sensor the sensor that feeds the Observer
@@ -65,7 +65,7 @@ public:
    * \param L gain matrix
    */
   SlidingReducedOrderObserver(SP::ControlSensor sensor, const SiconosVector& xHat0, SP::SiconosMatrix C, SP::SiconosMatrix L):
-    Observer(SLIDING_REDUCED_ORDER, sensor, xHat0), _C(C), _L(L) {}
+    Observer(SLIDING_REDUCED_ORDER, sensor, xHat0), _C(C), _L(L), _pass(false) {}
 
   /** Update the estimate at each event
   */
