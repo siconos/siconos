@@ -1,5 +1,10 @@
 #include "KernelTest.hpp"
 
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
+#include <boost/numeric/bindings/ublas/vector_sparse.hpp>
+#include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
+
 
 #define DEBUG_MESSAGES 1
 #include "../SiconosFull.hpp"
@@ -311,7 +316,7 @@ void KernelTest::t6()
 
 
     SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
-                            (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0));
+                            (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystem(0));
 
     SP::Interaction inter = *(bouncingBall->nonSmoothDynamicalSystem()->interactions()->begin());
     SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(bouncingBall->simulation());

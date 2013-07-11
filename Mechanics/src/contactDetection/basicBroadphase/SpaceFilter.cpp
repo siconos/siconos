@@ -1,5 +1,6 @@
-#include "SpaceFilter.hpp"
+#include <boost/numeric/bindings/ublas/matrix.hpp>
 
+#include "SpaceFilter.hpp"
 #include "ExternalBody.hpp"
 
 #include <cmath>
