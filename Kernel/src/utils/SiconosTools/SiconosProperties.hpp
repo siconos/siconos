@@ -261,13 +261,37 @@ public:
   {}
 
 
+  /** insert an element in the Property descriptor
+    * \param v a SiconosGraph::VDescriptor or
+    * SiconosGraph::EDescriptor according to IndexMap type
+    * \param t the element to be inserted
+    */
+  void insert(const key_type& v, T t)
+  {
+    (*_store)[v] = t;
+  };
+
   /** data access from a SiconosGraph vertex descriptor or edge
-      descriptor :
+      descriptor
+      \warning this operator creates an empty element if the key
+      is not in the map. Dot not use it to test if a key os present
+      or not in the map ...
       \param v a SiconosGraph::VDescriptor or
-      SiconosGraph::EDescriptor according to IndexMap type */
+      SiconosGraph::EDescriptor according to IndexMap type
+      \return the element in the vector
+    */
   reference operator[](const key_type& v)
   {
     return (*_store)[v];
+  };
+
+  /** data access from a SiconosGraph vertex descriptor or edge
+      descriptor
+      \param v a SiconosGraph::VDescriptor or
+      SiconosGraph::EDescriptor according to IndexMap type */
+  value_type at(const key_type& v)
+  {
+    return _store->at(v);
   };
 
   /** find data associated with the given key
@@ -277,7 +301,7 @@ public:
    */
   reference find(const key_type& v)
   {
-    return _store->find(v);
+    return _store->find(v).second;
   };
 
   /** check if a given property exists

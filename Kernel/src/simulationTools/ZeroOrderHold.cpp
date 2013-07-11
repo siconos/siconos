@@ -134,37 +134,39 @@ void ZeroOrderHold::initialize()
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
     dsType = Type::value(**itDS);
+    if ((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
+      RuntimeException::selfThrow("ZeroOrderHold::initialize - the DynamicalSystem does not have the right type");
     indxIter = 0;
     DynamicalSystemsGraph::AVIterator avi, aviend;
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*itDS);
-    if (!DSG0.Ad[dsgVD])
+    if (!DSG0.Ad.hasKey(dsgVD))
     {
       DSG0.Ad[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model()));
-      if (DSG0.Ad[dsgVD]->isConst())
-        DSG0.Ad[dsgVD]->integrate();
+      if (DSG0.Ad.at(dsgVD)->isConst())
+        DSG0.Ad.at(dsgVD)->integrate();
     }
     else
       RuntimeException::selfThrow("ZeroOrderHold::initialize - Ad MatrixIntegrator is already initialized for ds the DS");
 
-    if ((static_cast<const FirstOrderLinearTIDS&>(**itDS)).b())
+    if ((static_cast<const FirstOrderLinearDS&>(**itDS)).b())
     {
       SP::SiconosMatrix E(new SimpleMatrix((*itDS)->getN(), (*itDS)->getN(), 0));
       E->eye();
-      DSG0.AdInt[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), E));
-      if (DSG0.AdInt[dsgVD]->isConst())
-        DSG0.AdInt[dsgVD]->integrate();
+      DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(**itDS, *simulationLink->model(), E)));
+      if (DSG0.AdInt.at(dsgVD)->isConst())
+        DSG0.AdInt.at(dsgVD)->integrate();
     }
    if (DSG0.B.hasKey(dsgVD))
    {
      DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.B[dsgVD]));
-     if (DSG0.Bd[dsgVD]->isConst())
-       DSG0.Bd[dsgVD]->integrate();
+     if (DSG0.Bd.at(dsgVD)->isConst())
+       DSG0.Bd.at(dsgVD)->integrate();
    }
    if (DSG0.L.hasKey(dsgVD))
    {
      DSG0.Ld[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.L[dsgVD]));
-     if (DSG0.Ld[dsgVD]->isConst())
-       DSG0.Ld[dsgVD]->integrate();
+     if (DSG0.Ld.at(dsgVD)->isConst())
+       DSG0.Ld.at(dsgVD)->integrate();
    }
    if (DSG0.pluginB.hasKey(dsgVD))
      DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.pluginB[dsgVD], DSG0.u[dsgVD]->size()));
@@ -192,8 +194,8 @@ void ZeroOrderHold::initialize()
           if (!relR.isJacLgPlugged())
           {
             DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), relR.B()));
-            if (DSG0.Bd[dsgVD]->isConst())
-              DSG0.Bd[dsgVD]->integrate();
+            if (DSG0.Bd.at(dsgVD)->isConst())
+              DSG0.Bd.at(dsgVD)->integrate();
           }
           else
           {
@@ -557,23 +559,23 @@ void ZeroOrderHold::computeFreeState()
 //    updateMatrices(dsDescr);
     if (dsType == Type::FirstOrderLinearTIDS || dsType == Type::FirstOrderLinearDS)
     {
-      FirstOrderLinearTIDS& d = static_cast<FirstOrderLinearTIDS&>(ds);
+      FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&>(ds);
       // Check whether we have to recompute things
-      if (!DSG0.Ad[dsgVD]->isConst())
-        DSG0.Ad[dsgVD]->integrate();
-      if (d.b() && !DSG0.AdInt[dsgVD]->isConst())
-        DSG0.AdInt[dsgVD]->integrate();
-      if (DSG0.Bd.hasKey(dsgVD) && !DSG0.Bd[dsgVD]->isConst())
-        DSG0.Bd[dsgVD]->integrate();
-      if (DSG0.Ld.hasKey(dsgVD) && !DSG0.Ld[dsgVD]->isConst())
-        DSG0.Ld[dsgVD]->integrate();
+      if (!DSG0.Ad.at(dsgVD)->isConst())
+        DSG0.Ad.at(dsgVD)->integrate();
+      if (d.b() && !DSG0.AdInt.at(dsgVD)->isConst())
+        DSG0.AdInt.at(dsgVD)->integrate();
+      if (DSG0.Bd.hasKey(dsgVD) && !DSG0.Bd.at(dsgVD)->isConst())
+        DSG0.Bd.at(dsgVD)->integrate();
+      if (DSG0.Ld.hasKey(dsgVD) && !DSG0.Ld.at(dsgVD)->isConst())
+        DSG0.Ld.at(dsgVD)->integrate();
 
       SiconosVector& xfree = *d.workspace(DynamicalSystem::free);
-      prod(DSG0.Ad[dsgVD]->mat(), *d.x(), xfree); // xfree = Ad*xold
+      prod(DSG0.Ad.at(dsgVD)->mat(), *d.x(), xfree); // xfree = Ad*xold
       if (d.b())
       {
         assert(DSG0.AdInt.hasKey(dsgVD));
-        prod(DSG0.AdInt[dsgVD]->mat(), *d.b(), xfree, false); // xfree += AdInt*b
+        prod(DSG0.AdInt.at(dsgVD)->mat(), *d.b(), xfree, false); // xfree += AdInt*b
       }
       // check whether we have a system with a control input
       if (DSG0.u.hasKey(dsgVD))
@@ -581,11 +583,11 @@ void ZeroOrderHold::computeFreeState()
         if (!DSG0.Bd.hasKey(dsgVD))
         {
           assert(DSG0.B.hasKey(dsgVD));
-          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(d, *simulationLink->model(), DSG0.B[dsgVD]));
-          if (DSG0.Bd[dsgVD]->isConst())
-            DSG0.Bd[dsgVD]->integrate();
+          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(d, *simulationLink->model(), DSG0.B.at(dsgVD)));
+          if (DSG0.Bd.at(dsgVD)->isConst())
+            DSG0.Bd.at(dsgVD)->integrate();
         }
-        prod(DSG0.Bd[dsgVD]->mat(), *DSG0.u[dsgVD], xfree, false); // xfree += Bd*u
+        prod(DSG0.Bd.at(dsgVD)->mat(), *DSG0.u.at(dsgVD), xfree, false); // xfree += Bd*u
       }
       // check whether the DynamicalSystem is an Observer
       if (DSG0.e.hasKey(dsgVD))
@@ -593,11 +595,11 @@ void ZeroOrderHold::computeFreeState()
         if (!DSG0.Ld.hasKey(dsgVD))
         {
           assert(DSG0.L.hasKey(dsgVD));
-          DSG0.Ld[dsgVD].reset(new MatrixIntegrator(d, *simulationLink->model(), DSG0.L[dsgVD]));
-          if (DSG0.Ld[dsgVD]->isConst())
-            DSG0.Ld[dsgVD]->integrate();
+          DSG0.Ld[dsgVD].reset(new MatrixIntegrator(d, *simulationLink->model(), DSG0.L.at(dsgVD)));
+          if (DSG0.Ld.at(dsgVD)->isConst())
+            DSG0.Ld.at(dsgVD)->integrate();
         }
-        prod(DSG0.Ld[dsgVD]->mat(), *DSG0.e[dsgVD], xfree, false); // xfree += -Ld*e
+        prod(DSG0.Ld.at(dsgVD)->mat(), *DSG0.e.at(dsgVD), xfree, false); // xfree += -Ld*e
       }
 
     }
@@ -909,14 +911,14 @@ const SiconosMatrix& ZeroOrderHold::Ad(SP::DynamicalSystem ds)
 {
   DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
-  return DSG0.Ad[dsgVD]->mat();
+  return DSG0.Ad.at(dsgVD)->mat();
 }
 
 const SiconosMatrix& ZeroOrderHold::Bd(SP::DynamicalSystem ds)
 {
   DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
-  return DSG0.Bd[dsgVD]->mat();
+  return DSG0.Bd.at(dsgVD)->mat();
 }
 
 
