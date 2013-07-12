@@ -24,11 +24,12 @@
 #define __OneStepNSProblemXML__
 
 #include "SiconosPointers.hpp"
+
+#include "PointersDefs.hpp"
+
 #include "SiconosDOMTreeTools.hpp"
 
 
-class OneStepNSProblem;
-class NonSmoothSolverXML;
 /** XML management for OneStepNSProblem
  *
  *  \author SICONOS Development Team - copyright INRIA

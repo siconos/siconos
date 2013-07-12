@@ -28,6 +28,9 @@
 #include "SiconosSerialization.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosPointers.hpp"
+
+#include "PointersDefs.hpp"
+
 #include "OneStepIntegratorTypes.hpp"
 
 

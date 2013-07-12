@@ -26,6 +26,9 @@
 
 #include "RuntimeException.hpp"
 #include "SiconosPointers.hpp"
+
+#include "PointersDefs.hpp"
+
 #include "SiconosAlgebraTypeDef.hpp"
 
 #include "ControlTypeDef.hpp"

@@ -29,6 +29,8 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
+#include "PointersDefs.hpp"
+
 using RELATION::TYPES;
 using RELATION::SUBTYPES;
 

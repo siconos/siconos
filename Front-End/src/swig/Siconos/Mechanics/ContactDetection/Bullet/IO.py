@@ -12,6 +12,7 @@ from Siconos.Mechanics.ContactDetection.Bullet import \
 from Siconos.Mechanics.ContactDetection.Bullet import \
     cast_BulletDS, cast_BulletR
 
+from Siconos.IO import MechanicsIO
 
 def object_id(obj):
     """returns an unique object identifier"""
@@ -67,6 +68,7 @@ class Dat():
         self._shape = VtkShapes.Collection(shape_filename)
         self._pos_file = None
         self._contact_forces_file = None
+        self._io = MechanicsIO()
 
         # read data
         with open(self._input_filename, 'r') as input_file:
@@ -151,12 +153,10 @@ class Dat():
         Outputs positions and orientations of dynamic objects
         """
         time = self._broadphase.model().simulation().nextTime()
-        for ds in self._broadphase.model().nonSmoothDynamicalSystem().\
-                topology().dSG(0).vertices():
-            collision_object = cast_BulletDS(ds).collisionObject()
-            position = collision_object.getWorldTransform().getOrigin()
-            rotation = collision_object.getWorldTransform().getRotation()
-            self._pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
+
+        positions = self._io.positions(self._broadphase.model())
+
+        self._pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
                              format(time, object_id(collision_object),
                                     position.x(), position.y(), position.z(),
                                     rotation.w(), rotation.x(), rotation.y(),

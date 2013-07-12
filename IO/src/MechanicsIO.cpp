@@ -1,4 +1,8 @@
-#include "MechanicsIO.hpp"
+#define FROM_IMPL
+#include <IOConfig.h>
+
+#define HAVE_SICONOS_MECHANICS
+#include <VisitorMaker.hpp>
 
 #include <Disk.hpp>
 #include <Circle.hpp>
@@ -8,27 +12,35 @@
 #ifdef HAVE_BULLET
 #include <BulletDS.hpp>
 #include <BulletR.hpp>
+#include <BulletSpaceFilter.hpp>
 #include <btBulletCollisionCommon.h>
 #endif
 
+#include "MechanicsIO.hpp"
+
+
+using namespace Alternative;
 
 struct ForPosition : public SiconosVisitor
 {
-  SP::SiconosVector result;
 
+  SP::SiconosVector result;
+  
   template<typename T>
-  void polyvisit(const T& ds)
+  void operator()(const T& ds)
   {
+    ds.q()->display();
     result = ds.q();
   }
 };
 
 struct ForVelocity : public SiconosVisitor
 {
+  
   SP::SiconosVector result;
 
   template<typename T>
-  void polyvisit(const T& ds)
+  void operator()(const T& ds)
   {
     result = ds.velocity();
   }
@@ -76,20 +88,13 @@ SP::SimpleMatrix MechanicsIO::visitAllVertices(const G& graph) const
   SP::SimpleMatrix result(new SimpleMatrix());
   typename G::VIterator vi, viend;
   unsigned int current_row;
-  for(current_row=1,std11::tie(vi,viend)=graph.vertices();
+  for(current_row=0,std11::tie(vi,viend)=graph.vertices();
       vi!=viend; ++vi, ++current_row)
   {
-    Poly::Visitor<LagrangianDS, 
-                  NewtonEulerDS, 
-                  Disk, Circle, SphereLDS, SphereNEDS
-#ifdef HAVE_BULLET
-                  ,BulletDS
-#endif
-                  >::Make<T> getter;
-
+    T getter;
     graph.bundle(*vi)->accept(getter);
     const SiconosVector& data = *getter.result;
-    result->resize(current_row, data.size());
+    result->resize(current_row+1, data.size());
     result->setRow(current_row, data);
   }
   return result;
@@ -99,14 +104,22 @@ SP::SimpleMatrix MechanicsIO::visitAllVertices(const G& graph) const
 
 SP::SimpleMatrix MechanicsIO::positions(SP::Model model) const
 {
-  return visitAllVertices<ForPosition>
+  typedef
+    Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
+              ForPosition >::Make Getter;
+
+  return visitAllVertices<Getter>
     (*(model->nonSmoothDynamicalSystem()->topology()->dSG(0)));
 };
 
 
 SP::SimpleMatrix MechanicsIO::velocities(SP::Model model) const
 {
-  return visitAllVertices<ForVelocity>
+  typedef
+    Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
+              ForVelocity>::Make Getter;
+
+  return visitAllVertices<Getter>
     (*model->nonSmoothDynamicalSystem()->topology()->dSG(0));
 }
 

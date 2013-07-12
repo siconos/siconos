@@ -22,6 +22,9 @@
 
 #include <vector>
 #include "SiconosPointers.hpp"
+
+#include "PointersDefs.hpp"
+
 #include "SiconosVector.hpp"
 #include "PluggedObject.hpp"
 typedef  void (*FPtrPrescribedVelocity)(double, unsigned int, double*);

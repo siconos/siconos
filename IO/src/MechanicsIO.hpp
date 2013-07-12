@@ -19,8 +19,13 @@
 
 #ifndef MechanicsIO_hpp
 #define MechanicsIO_hpp
-#include <SiconosKernel.hpp>
 
+#ifndef FROM_IMPL
+namespace SP { 
+  class SimpleMatrix;
+  class Model;
+}
+#endif
 
 class MechanicsIO
 {
@@ -54,6 +59,5 @@ public:
   SP::SimpleMatrix contactPoints(SP::Model model) const;
 };
 
-TYPEDEF_SPTR(MechanicsIO);
 
 #endif

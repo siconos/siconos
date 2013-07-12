@@ -28,6 +28,8 @@
 #include "Tools.hpp"
 #include "SiconosPointers.hpp"
 
+#include "PointersDefs.hpp"
+
 #include "SiconosSerialization.hpp"
 
 class Simulation;

@@ -28,6 +28,9 @@
 #include "RuntimeException.hpp"
 
 #include "SiconosPointers.hpp"
+
+#include "PointersDefs.hpp"
+
 #include "SiconosVisitor.hpp"
 
 /** Non Smooth Laws Base Class

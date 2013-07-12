@@ -24,6 +24,9 @@
 #define __SIMULATIONXML__
 
 #include "SiconosPointers.hpp"
+
+#include "PointersDefs.hpp"
+
 #include "SiconosDOMTreeTools.hpp"
 #include <set>
 

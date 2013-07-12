@@ -23,6 +23,9 @@
 #define __MODELXML__
 
 #include "SiconosPointers.hpp"
+
+#include "PointersDefs.hpp"
+
 #include "SiconosDOMTreeTools.hpp"
 #include "KernelConfig.h"
 #include <libxml/parser.h>

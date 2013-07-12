@@ -125,6 +125,8 @@ public:
     return (zNode);
   }
 
+  ACCEPT_STD_VISITORS();
+
 };
 
 #endif

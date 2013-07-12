@@ -28,6 +28,8 @@
 #include "SiconosDOMTreeTools.hpp"
 #include "SiconosPointers.hpp"
 
+#include "PointersDefs.hpp"
+
 //class TimeDiscretisation;
 
 const std::string  TD_H = "h";

@@ -29,6 +29,9 @@
 
 #include "SiconosPointers.hpp"
 
+#include "PointersDefs.hpp"
+
+
 class NonSmoothDynamicalSystem;
 
 const std::string NSDS_BVP = "bvp";

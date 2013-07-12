@@ -25,6 +25,8 @@
 #include "SiconosDOMTreeTools.hpp"
 #include "SiconosVector.hpp"
 
+#include "PointersDefs.hpp"
+
 class DynamicalSystem;
 class Interaction;
 class NonSmoothLawXML;

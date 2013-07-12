@@ -72,22 +72,22 @@ namespace std11 = std;
 namespace std11 = boost;
 #endif
 
-namespace SharedPointer {}
-namespace SharedPointerConst {}
-namespace SharedArray {}
+namespace SP {}
+namespace SPC {}
+namespace SA {}
 
 /** \namespace SP Namespace for Siconos smart pointers : memory
     pointed by a Siconos smart pointers is automaticaly
     deallocated */
-namespace SP = SharedPointer;
+namespace SharedPointer = SP;
 
 /** \namespace SA Namespace for Siconos shared arrays : Siconos shared
     arrays are automaticaly deallocated */
-namespace SA = SharedArray;
+namespace SharedArray = SA;
 
 /** \namespace SPC Namespace for const shared pointers : memory
     pointed by a const shared pointers is automaticaly deallocated */
-namespace SPC = SharedPointerConst;
+namespace SharedPointerConst = SPC;
 
 
 
@@ -104,17 +104,17 @@ struct nullDeleter
 /* template namespace : no */
 
 #define NAME_SPACE_SPTR(X) \
-  namespace SharedPointer \
+  namespace SP \
   { \
     typedef SPtr##X X; \
   } \
-  namespace SharedPointerConst \
+  namespace SPC \
   { \
     typedef SPtrConst##X X;\
   }
 
 #define NAME_SPACE_SAPTR(X)                     \
-  namespace SharedArray \
+  namespace SA \
   { \
     typedef X##SAPtr X; \
   }
@@ -153,11 +153,11 @@ struct nullDeleter
 /* template with one argument */
 
 #define NAME_SPACE_TPL1_SPTR(N,X,Y)              \
-  namespace SharedPointer                        \
+  namespace SP                                   \
   {                                              \
     typedef SPtr##N N;                           \
   }                                              \
-  namespace SharedPointerConst                   \
+  namespace SPC                                  \
   {                                              \
     typedef SPtrConst##N N;                      \
   }
@@ -176,60 +176,5 @@ struct nullDeleter
     return px;                                             \
   }                                                        \
   NAME_SPACE_TPL1_SPTR(N,X,Y)
-
-
-/* *SPtr types definitions, outside class headers because of some race
-   conditions */
-
-DEFINE_SPTR(BlockCSRMatrix)
-
-DEFINE_SPTR(DynamicalSystemXML)
-
-DEFINE_SPTR(Interaction)
-DEFINE_SPTR(InteractionXML)
-
-DEFINE_SPTR(Model)
-
-
-DEFINE_SPTR(NonSmoothDynamicalSystemXML)
-DEFINE_SPTR(NonSmoothDynamicalSystem)
-
-DEFINE_SPTR(NonSmoothLawXML)
-
-DEFINE_SPTR(OneStepNSProblem)
-DEFINE_SPTR(OneStepNSProblemXML)
-
-DEFINE_SPTR(OneStepIntegrator)
-DEFINE_SPTR(OneStepIntegratorXML)
-
-DEFINE_SPTR(Relation)
-DEFINE_SPTR(RelationXML)
-
-DEFINE_SPTR(Simulation)
-DEFINE_SPTR(SimulationXML)
-DEFINE_SPTR(EventDriven)
-
-DEFINE_SPTR(LCP)
-
-DEFINE_SPTR(MixedComplementarityConditionNSL)
-TYPEDEF_SPTR(MixedLinearComplementarityProblem)
-
-DEFINE_SPTR(TimeDiscretisationXML)
-DEFINE_SPTR(TimeDiscretisation)
-
-DEFINE_SPTR(DynamicalSystem)
-DEFINE_SPTR(Event)
-DEFINE_SPTR(NonSmoothLaw)
-DEFINE_SPTR(DynamicalSystemsSet)
-
-DEFINE_SPTR(MatrixIntegrator)
-DEFINE_SPTR(PluggedObject)
-DEFINE_SPTR(SubPluggedObject)
-
-
-TYPEDEF_SAPTR(integer)
-TYPEDEF_SPTR(integer)
-TYPEDEF_SAPTR(doublereal)
-TYPEDEF_SPTR(doublereal)
 
 #endif /* SiconosPointers_hpp */

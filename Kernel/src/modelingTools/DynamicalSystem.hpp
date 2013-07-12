@@ -25,6 +25,9 @@
 #define DynamicalSystem_H
 
 #include "SiconosPointers.hpp"
+
+#include "PointersDefs.hpp"
+
 #include "SSLH.hpp"
 #include "RuntimeException.hpp"
 #include "Tools.hpp"
@@ -35,6 +38,7 @@
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
 #include "SiconosVisitor.hpp"
+
 
 
 class NonSmoothDynamicalSystem;
