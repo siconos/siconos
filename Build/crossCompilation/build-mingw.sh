@@ -70,7 +70,7 @@ build_siconos() {
 		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
 		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
 		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
-		-DSiconosKernel_INCLUDE_DIRs="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
+		-DSiconosKernel_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
 		-DSiconosKernel_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
 		-DSWIG_DIR="/usr/share/swig/2.0.9/" \
 		-DPYTHON_LIBRARY="${MXE_PREFIX}/python/python27.dll" \

@@ -876,7 +876,7 @@ bool ZeroOrderHold::addInteractionInIndexSet(SP::Interaction inter, unsigned int
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!std::isnan(y));
+  assert(!isnan(y));
 #endif
   if (y <= 0)
   {
@@ -898,7 +898,7 @@ bool ZeroOrderHold::removeInteractionInIndexSet(SP::Interaction inter, unsigned 
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!std::isnan(y));
+  assert(!isnan(y));
 #endif
   if (y > 0)
   {

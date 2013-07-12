@@ -204,7 +204,7 @@ bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction int
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!std::isnan(y));
+  assert(!isnan(y));
 #endif
 #ifdef DEBUG_MESSAGES
   if (y <= _activateYPosThreshold)
@@ -235,7 +235,7 @@ bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction 
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!std::isnan(y));
+  assert(!isnan(y));
 #endif
 #ifdef DEBUG_MESSAGES
   if (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)

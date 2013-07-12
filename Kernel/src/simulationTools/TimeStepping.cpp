@@ -456,7 +456,7 @@ void TimeStepping::computeInitialResidu()
 #if __cplusplus >= 201103L
   assert(!::isnan(tkp1));
 #else
-  assert(!std::isnan(tkp1));
+  assert(!isnan(tkp1));
 #endif
 
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();

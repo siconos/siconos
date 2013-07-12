@@ -1892,7 +1892,7 @@ bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!std::isnan(y));
+  assert(!isnan(y));
 #endif
   DEBUG_EXPR(
     if (y <= 0)
@@ -1918,7 +1918,7 @@ bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!std::isnan(y));
+  assert(!isnan(y));
 #endif
 
   DEBUG_EXPR(

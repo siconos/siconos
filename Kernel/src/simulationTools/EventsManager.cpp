@@ -25,6 +25,12 @@
 #include <limits> // for ULONG_MAX
 #include "TimeDiscretisationEventNoSaveInMemory.hpp"
 
+#ifndef _MSC_VER
+#if __cplusplus < 201103L
+using std::isnan;
+#endif
+#endif
+
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 
 EventsManager::EventsManager(Simulation& sim)
@@ -158,7 +164,7 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
 #if __cplusplus >= 201103L
       if (!::isnan(sim.getTkp1()))
 #else
-      if (!std::isnan(sim.getTkp1()))
+      if (!isnan(sim.getTkp1()))
 #endif
       {
         ev.setTime(sim.getTkp1());
@@ -204,7 +210,7 @@ void EventsManager::update(Simulation& sim)
 #if __cplusplus >= 201103L
     if (!::isnan(tkp2))
 #else
-    if (!std::isnan(tkp2))
+    if (!isnan(tkp2))
 #endif
     {
       _events[0]->setTime(tkp2);

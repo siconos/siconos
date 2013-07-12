@@ -21,7 +21,6 @@
 
 #if defined(_MSC_VER)
 #include <float.h>
-#define std::isnan(x) _isnan(x)
 #define isnan(x) _isnan(x)
 #define isinf(x) (!_finite(x) && !_isnan(x))
 inline double fmax(double x, double y)
