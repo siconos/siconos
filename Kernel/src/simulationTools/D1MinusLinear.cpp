@@ -135,7 +135,7 @@ double D1MinusLinear::computeResidu()
     SP::SiconosMatrix Mold;
 
 
-    if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
       workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
@@ -255,7 +255,7 @@ double D1MinusLinear::computeResidu()
       for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       {
         Type::Siconos dsType = Type::value(**it);
-        if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+        if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
           SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
@@ -303,7 +303,7 @@ double D1MinusLinear::computeResidu()
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
-    if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
       SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // contains acceleration without contact force
@@ -450,7 +450,7 @@ double D1MinusLinear::computeResidu()
       // type of the current DS
       Type::Siconos dsType = Type::value(**it);
       /* \warning the following conditional statement should be removed with a MechanicalDS class */
-      if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+      if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
         SP::SiconosVector residuFree = d->workspace(DynamicalSystem::freeresidu);
@@ -524,7 +524,7 @@ double D1MinusLinear::computeResidu()
       // type of the current DS
       Type::Siconos dsType = Type::value(**it);
       /* \warning the following conditional statement should be removed with a MechanicalDS class */
-      if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+      if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
       {
 
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
@@ -539,7 +539,7 @@ double D1MinusLinear::computeResidu()
         DEBUG_EXPR(q->display());
         DEBUG_EXPR(v->display());
         // Lagrangian Nonlinear Systems
-        if (dsType == Type::LagrangianDS or dsType == Type::LagrangianLinearTIDS)
+        if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
           d->computeMass();
           M->resetLU();
@@ -624,7 +624,7 @@ double D1MinusLinear::computeResidu()
       // type of the current DS
       Type::Siconos dsType = Type::value(**it);
       /* \warning the following conditional statement should be removed with a MechanicalDS class */
-      if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+      if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
         SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // contains acceleration without contact force
@@ -709,7 +709,7 @@ void D1MinusLinear::computeFreeState()
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
-    if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       // Lagrangian Systems
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
@@ -773,7 +773,7 @@ void D1MinusLinear::updateState(const unsigned int level)
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
-    if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
 
       // Lagrangian Systems
@@ -1167,7 +1167,7 @@ double D1MinusLinear::computeResidu()
     SP::SiconosMatrix Mold;
 
 
-    if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
       workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
@@ -1286,7 +1286,7 @@ double D1MinusLinear::computeResidu()
       for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       {
         Type::Siconos dsType = Type::value(**it);
-        if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+        if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
           SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
@@ -1334,7 +1334,7 @@ double D1MinusLinear::computeResidu()
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
-    if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
       SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // contains acceleration without contact force
@@ -1480,7 +1480,7 @@ double D1MinusLinear::computeResidu()
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
-    if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
@@ -1495,7 +1495,7 @@ double D1MinusLinear::computeResidu()
       DEBUG_EXPR(q->display());
       DEBUG_EXPR(v->display());
       // Lagrangian Nonlinear Systems
-      if (dsType == Type::LagrangianDS or dsType == Type::LagrangianLinearTIDS)
+      if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
         d->computeMass();
         M->resetLU();
@@ -1580,7 +1580,7 @@ double D1MinusLinear::computeResidu()
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
-    if ((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
       SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // contains acceleration without contact force

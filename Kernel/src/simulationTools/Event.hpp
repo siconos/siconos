@@ -32,6 +32,11 @@
 #include "SiconosPointers.hpp"
 #include "SiconosSerialization.hpp"
 
+// As always, MSVC miss C99
+#ifdef _MSC_VER
+double rint(double x);
+#endif
+
 class Simulation;
 
 // tick default value

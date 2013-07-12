@@ -658,7 +658,7 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
     {
       DEBUG_PRINT("OneStepNSProblem::getOSIMaps  for osiType   OSI::D1MINUSLINEAR");
       /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all OSNSP*/
-      if (dsType == Type::LagrangianDS or dsType == Type::LagrangianLinearTIDS)
+      if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
         (std11::static_pointer_cast<LagrangianDS>(*itDS))->computeMass();
         (std11::static_pointer_cast<LagrangianDS>(*itDS))->mass()->resetLU();

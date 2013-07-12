@@ -2,6 +2,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <cmath>
 
 int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 {
@@ -25,6 +26,21 @@ int snprintf(char* str, size_t size, const char* format, ...)
   va_end(ap);
 
   return count;
+}
+
+double rint(double x)
+{
+  //middle value point test
+  if (ceil(x+0.5) == floor(x+0.5))
+  {
+    int a = (int)ceil(x);
+    if (a%2 == 0)
+    {return ceil(x);}
+    else
+    {return floor(x);}
+  }
+
+  else return floor(x+0.5);
 }
 
 #endif

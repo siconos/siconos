@@ -24,6 +24,9 @@ make_component() {
 	make ExperimentalTest
 	make ExperimentalSubmit
 }
+#		-DLAPACK_LIBRARIES="/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/liblapacke.a" \
+#		-DLAPACK_INCLUDE_DIRS="/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/include" \
+#		-DBLAS_LIBRARIES="/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libcblas.a" \
 
 build_siconos() {
 	rm -rf ${BUILD_DIR}/*
@@ -39,6 +42,7 @@ build_siconos() {
 	CFLAGS='-U__STRICT_ANSI__' cmake \
 		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
+		-DLINK_STATICALLY=1 \
 		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
 		"${SICONOS_SOURCES}/Numerics"
 	make_component
@@ -49,9 +53,11 @@ build_siconos() {
 	cmake \
 		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
+		-DLINK_STATICALLY=1 \
 		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
-		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/Siconos/Numerics/" \
-		-DSiconosNumerics_FOUND="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
+		-DCMAKE_PREFIX_PATH="${INSTALL_PREFIX}" \
+		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
+		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
 		"${SICONOS_SOURCES}/Kernel"
 	make_component
 	make -i install
@@ -63,11 +69,11 @@ build_siconos() {
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
 		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
 		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
-		-DSiconosNumerics_FOUND="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
-		-DSiconosKernel_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
-		-DSiconosKernel_FOUND="${INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
-		-DSWIG_DIR="/usr/share/swig/2.0.7/" \
-		-DPYTHON_LIBRARIES="${MXE_PREFIX}/python/python27.dll" \
+		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
+		-DSiconosKernel_INCLUDE_DIRs="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
+		-DSiconosKernel_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
+		-DSWIG_DIR="/usr/share/swig/2.0.9/" \
+		-DPYTHON_LIBRARY="${MXE_PREFIX}/python/python27.dll" \
 		-DPYTHON_INCLUDE_DIR="${MXE_PREFIX}/python/" \
 		-DPYTHON_NUMPY_INCLUDE_DIR="${MXE_PREFIX}/numpy/PLATLIB/numpy/core/include" \
 		"${SICONOS_SOURCES}/Front-End"

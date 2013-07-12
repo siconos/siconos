@@ -59,7 +59,7 @@ if(NOT BLAS_FOUND)
     set(_libdir ${ARGN})
     
     set(_libraries_work TRUE)
-    set(${LIBRARIES})
+    set(${LIBRARIES} "")
     set(_combined_name)
     
     ## If no extra argument was given to the macro, default search path is
@@ -134,6 +134,10 @@ if(NOT BLAS_FOUND)
     if(_libraries_work)
       # Test this combination of libraries.
       set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_thread})
+      # add gfortran if we have static libs + gfortran
+      if (BLA_STATIC AND CMAKE_COMPILER_IS_GNUG77)
+        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} "gfortran")
+      endif()
       #else()
       ## First we check cblas interface
       check_function_exists("cblas_${_name}" ${_prefix}${_combined_name}_WORKS)
@@ -288,7 +292,7 @@ if(NOT BLAS_FOUND)
       BLAS
       sgemm
       ""
-      "blas;cblas"
+      "cblas;blas"
       "")
     
     if(BLAS_LIBRARIES)

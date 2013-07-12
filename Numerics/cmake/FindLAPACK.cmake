@@ -61,7 +61,7 @@ if(NOT LAPACK_FOUND)
     set(_libdir ${ARGN})
     
     set(_libraries_work TRUE)
-    set(${LIBRARIES})
+    set(${LIBRARIES} "")
     set(_combined_name)
     
     ## If no extra argument was given to the macro, default search path is
@@ -138,6 +138,10 @@ if(NOT LAPACK_FOUND)
 	set(CMAKE_REQUIRED_LIBRARIES ${_flags} "-Wl,--start-group" ${${LIBRARIES}} ${_blas} "-Wl,--end-group" ${_threads})
       else()
 	set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threads})
+      endif()
+      # add gfortran if we have static libs + gfortran
+      if (BLA_STATIC AND CMAKE_COMPILER_IS_GNUG77)
+        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} "gfortran")
       endif()
       ## First we check c interface
       if(${_prefix} STREQUAL "LAPACKE")
@@ -478,7 +482,7 @@ if(NOT LAPACK_FOUND)
   endfunction()
   
   
-  set(CMAKE_REQUIRED_LIBRARIES ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+  set(CMAKE_REQUIRED_LIBRARIES ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
   set(CMAKE_REQUIRED_INCLUDES ${BLAS_INCLUDE_DIRS} ${LAPACK_INCLUDE_DIRS})
   ## dgesvd ##
   unset(HAS_LAPACK_DGESVD)
