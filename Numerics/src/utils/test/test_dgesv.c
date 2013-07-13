@@ -3,6 +3,7 @@
 #include "SiconosLapack.h"
 #include <assert.h>
 #include "test_utils.h"
+#include "math.h"
 
 /* Parameters */
 #define N 5
@@ -39,23 +40,28 @@ int main() {
                 printf( "the solution could not be computed.\n" );
                 exit( 1 );
         }
-        
+
         double sol[LDB*NRHS] = {
           -0.80,  -0.7, 0.59, 1.32, 0.57,
           -0.39,  -0.55, 0.84, -0.1, 0.11,
           0.96, 0.22, 1.90, 5.36, 4.04
         };
 
-        for (int i = 0; i<LDB*NRHS;++i)
-          if(abs(b[i]- sol[i])>1e-8) exit(1);
+       unsigned int err = 0;
+       for (int i = 0; i<LDB*NRHS;++i)
+          if( fabs(b[i]- sol[i]) > 1e-8)
+          {
+              printf("err at index %i: %6.10f\n", i, b[i]);
+              err = 1;
+          }
         //return 1;
-            
+
         /* Print solution */
         print_matrix( "Solution", n, nrhs, b, ldb );
         /* Print details of LU factorization */
         print_matrix( "Details of LU factorization", n, n, a, lda );
         /* Print pivot indices */
         print_int_vector( "Pivot indices", n, ipiv );
-        exit( 0 );
+        exit( err );
 } /* End of LAPACKE_dgesv Example */
 

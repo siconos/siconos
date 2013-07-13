@@ -99,8 +99,8 @@ int main(void)
   mixedComplementarity_setDefaultSolverOptions(problem, &options);
 
   int size = problem->sizeEqualities + problem->sizeInequalities ;
-  double * z = malloc(size * sizeof(double));
-  double * w = malloc(size * sizeof(double));
+  double * z = (double *)malloc(size * sizeof(double));
+  double * w = (double *)malloc(size * sizeof(double));
   for (int i = 0 ; i < size; i++)
   {
     z[i] = 0.0;

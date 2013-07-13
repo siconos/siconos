@@ -306,7 +306,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
  *
  *and GS.
  */
-void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options)
+void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options, NumericsOptions* numerics_options)
 {
 
   SparseBlockStructuredMatrix* m = pInProblem->M->matrix1;
@@ -324,7 +324,7 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
 
   if (Me_size == 0)
   {
-    genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options);
+    genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options, numerics_options);
     free(reducedProb);
     free(Qreduced);
     free(Rreduced);
@@ -389,7 +389,7 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
   numM.size1 = nbCol;
   _pnumerics_GMP->M = &numM;
   _pnumerics_GMP->q = Qreduced;
-  genericMechanicalProblem_GS(_pnumerics_GMP, Rreduced, Vreduced, info, options);
+  genericMechanicalProblem_GS(_pnumerics_GMP, Rreduced, Vreduced, info, options, numerics_options);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   if (*info)
   {
@@ -440,7 +440,7 @@ END_GMP2:
  *Vi=(Mi_2-Mi_1 Me_1^{-1} Me_2)Ri+Qi-Mi1 Me_1^{-1} Qe
  *
  */
-void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options)
+void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options, NumericsOptions* numerics_options)
 {
 
   SparseBlockStructuredMatrix* m = pInProblem->M->matrix1;
@@ -455,7 +455,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
   buildReducedGMP(pInProblem, Me, Mi, Qe, Qi, &Me_size, &Mi_size);
   if ((Me_size == 0 || Mi_size == 0))
   {
-    genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options);
+    genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options, numerics_options);
     free(Me);
     free(Qe);
     free(Mi);
@@ -553,7 +553,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
   _pnumerics_GMP->q = Qi;
   double *Rreduced = (double *) malloc(Mi_size * sizeof(double));
   double *Vreduced = (double *) malloc(Mi_size * sizeof(double));
-  genericMechanicalProblem_GS(_pnumerics_GMP, Rreduced, Vreduced, info, options);
+  genericMechanicalProblem_GS(_pnumerics_GMP, Rreduced, Vreduced, info, options, numerics_options);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   if (*info)
   {

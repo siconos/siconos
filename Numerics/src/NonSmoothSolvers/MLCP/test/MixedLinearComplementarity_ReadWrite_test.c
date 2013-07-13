@@ -28,14 +28,15 @@ int write_newformat(char *filename)
   int info = 0;
   int sizeoffilename = strlen(filename);
   printf("sizeoffilename %d\n",  sizeoffilename);
-  char  extension[4];
-  strncpy(extension, &filename[sizeoffilename - 4], 4);
+  char  extension[4] = "ext";
+  strncpy(extension, &filename[sizeoffilename - 3], 3);
   printf("extension %s\n",  extension);
   char * basename;
 
-  if (strcmp(extension, ".dat") == 0)
+  if (strcmp(extension, "dat") == 0)
   {
-    basename = (char *)malloc((sizeoffilename + 1) * sizeof(char *));
+    basename = (char *)malloc((sizeoffilename + 5) * sizeof(char *));
+    basename[sizeoffilename + 4] = 0;
     strcpy(basename, filename);
     strncpy(&basename[sizeoffilename - 4], ".dat.tmp", 8);
     printf("basename %s\n",  basename);
@@ -57,7 +58,9 @@ int write_newformat(char *filename)
   mixedLinearComplementarity_display(problem);
 
   char  val[128];
-  fscanf(f , "%s" , val);
+  int t = 0;
+  t++;
+  t = fscanf(f , "%s" , val);
   int withSol = 0;
   int n = problem->n;
   int m = problem ->m;
@@ -73,7 +76,7 @@ int write_newformat(char *filename)
 
     for (i = 1 ; i < n + m + m ; ++i)
     {
-      fscanf(f , "%s" , val);
+      t = fscanf(f , "%s" , val);
       sol[i] = atof(val);
     }
   }
@@ -82,7 +85,6 @@ int write_newformat(char *filename)
     for (i = 0 ; i < (n + m + m) ; ++i) sol[i] = 0.0;
   }
 
-  free(sol);
 
 
   fclose(f);
@@ -99,6 +101,7 @@ int write_newformat(char *filename)
     }
   }
 
+  free(sol);
 
   fclose(foutput);
 
@@ -113,7 +116,7 @@ int write_newformat(char *filename)
 
 int main(int argc, char *argv[])
 {
-  int info;
+  int info = 0;
   printf("argc %i\n", argc);
   if (argc == 1)
   {

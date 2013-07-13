@@ -9,8 +9,8 @@
 
 void freeMixedComplementarityProblem(MixedComplementarityProblem* problem)
 {
-  free(problem->Fmcp);
-  free(problem->nablaFmcp);
+  if (problem->Fmcp) free(problem->Fmcp);
+  if (problem->nablaFmcp) free(problem->nablaFmcp);
   free(problem);
   problem = NULL;
 }

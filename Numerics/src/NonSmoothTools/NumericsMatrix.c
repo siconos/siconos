@@ -404,13 +404,16 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
       if ((i + 1) % m->size1 == 0)
         IGNORE_IO(fscanf(file, "\n"));
     }
-
-
+    m->matrix1 = NULL;
+    m->matrix2 = NULL;
+    m->matrix3 = NULL;
   }
   else if (storageType == 1)
   {
     m->matrix0 = NULL;
     m->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+    m->matrix2 = NULL;
+    m->matrix3 = NULL;
     newFromFileSBM(m->matrix1, file);
   }
 }

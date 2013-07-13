@@ -2,7 +2,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <cmath>
+#include <math.h>
 
 int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 {

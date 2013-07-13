@@ -21,7 +21,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
  *
  *and GS.
  */
-void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options);
+void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options, NumericsOptions* numerics_options);
 /*
  * It converts the solution of the reduced problem to the initial problem.
  */

@@ -53,6 +53,8 @@ int main(void)
   problem->sizeInequalities = 3;
   problem->computeFmcp = &testF ;
   problem->computeNablaFmcp = &testNablaF ;
+  problem->Fmcp = NULL;
+  problem->nablaFmcp = NULL;
 
   int size = 5;
   double z[4];

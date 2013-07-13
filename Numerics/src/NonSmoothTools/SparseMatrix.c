@@ -36,7 +36,8 @@ void printSparse(const SparseMatrix* const m)
   {
     for (int j = m->p[i]; j < m->p[i + 1] ; j++)
     {
-      /*         printf("%i,  ", m->i[j] + m->p[i] ); */
+//      printf("%i,  ", m->i[j] + m->p[i] );
+      assert(m->nzmax > m->i[j] + m->p[i]);
       printf("%12.8e,  ", m->x[ m->i[j] + m->p[i]]);
     }
     printf("\n");

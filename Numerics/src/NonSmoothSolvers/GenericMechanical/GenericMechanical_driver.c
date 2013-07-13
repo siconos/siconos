@@ -194,7 +194,8 @@ static int SScmpTotal = 0;
 #endif
 //#define GMP_WRITE_PRB
 //static double sCoefLS=1.0;
-void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info, SolverOptions* options)
+void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info,
+    SolverOptions* options, NumericsOptions* numerics_options)
 {
 #ifdef GMP_WRITE_PRB
   FILE * toto1  = fopen("GMP_CURRENT.txt", "w");
@@ -327,7 +328,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         }
         else
           rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, fcProblem->q, 0);
-        resLocalSolver = frictionContact3D_driver(fcProblem, sol, w, &options->internalSolvers[1], NULL);
+        resLocalSolver = frictionContact3D_driver(fcProblem, sol, w, &options->internalSolvers[1], numerics_options);
         //resLocalSolver=frictionContact3D_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
         break;
       }
@@ -435,7 +436,8 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
  * options->iparam[2] == 2 Equalities are assemblated in one block
  * options->iparam[2] == 3 Try to solve like a MLCP (==> No FC3d)
  */
-int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options)
+int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity,
+    SolverOptions* options, NumericsOptions* numerics_options)
 {
   // if (options == NULL )
   //  numericsError("FrictionContact3D_driver", "null input for solver options");
@@ -449,7 +451,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
 #endif
   if (!options->iparam[2])
   {
-    genericMechanicalProblem_GS(problem, reaction, velocity, &info, options);
+    genericMechanicalProblem_GS(problem, reaction, velocity, &info, options, numerics_options);
   }
   else if (options->iparam[2] == 1)
   {
@@ -457,7 +459,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   }
   else if (options->iparam[2] == 2)
   {
-    GMPReducedEqualitySolve(problem, reaction, velocity, &info, options);
+    GMPReducedEqualitySolve(problem, reaction, velocity, &info, options, numerics_options);
   }
   else if (options->iparam[2] == 3)
   {

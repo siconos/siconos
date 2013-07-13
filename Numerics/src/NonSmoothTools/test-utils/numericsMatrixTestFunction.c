@@ -87,7 +87,8 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   M2->size0 = n;
   M2->size1 = n;
   M2->matrix0 = NULL;
-
+  M2->matrix2 = NULL;
+  M2->matrix3 = NULL;
 
   SparseBlockStructuredMatrix * SBM = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   M2->matrix1 = SBM;
@@ -171,6 +172,8 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   M4->size0 = n;
   M4->size1 = 4;
   M4->matrix0 = NULL;
+  M4->matrix2 = NULL;
+  M4->matrix3 = NULL;
 
   M4->matrix1 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   SparseBlockStructuredMatrix * SBM2 = M4->matrix1;
