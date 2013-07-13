@@ -455,7 +455,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   }
   else if (options->iparam[2] == 1)
   {
-    GMPReducedSolve(problem, reaction, velocity, &info, options);
+    GMPReducedSolve(problem, reaction, velocity, &info, options, numerics_options);
   }
   else if (options->iparam[2] == 2)
   {

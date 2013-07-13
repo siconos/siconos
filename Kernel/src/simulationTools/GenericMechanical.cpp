@@ -151,7 +151,8 @@ int GenericMechanical::compute(double time)
     info = genericMechanical_driver(_pnumerics_GMP,
                                     &*_z->getArray() ,
                                     &*_w->getArray() ,
-                                    &*_numerics_solver_options);
+                                    &*_numerics_solver_options,
+                                    &*_numerics_options);
     //printf("GenericMechanical::compute : R:\n");
     //_z->display();
     postCompute();
