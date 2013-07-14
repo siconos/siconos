@@ -86,9 +86,10 @@ IF(CMAKE_CXX_COMPILER)
    endif(NOT ICCOK)
   endif(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
  endif(NOT CMAKE_COMPILER_IS_GNUCXX)
- IF(C_HAVE_WALL)
+ # way too verbose with MSVC
+ IF(C_HAVE_WALL AND NOT MSVC)
   APPEND_FLAGS(CMAKE_CXX_FLAGS "-Wall")
- ENDIF(C_HAVE_WALL)
+ ENDIF(C_HAVE_WALL AND NOT MSVC)
  IF(C_HAVE_WEXTRA)
   APPEND_FLAGS(CMAKE_CXX_FLAGS "-Wextra -Wno-unused-parameter")
  ENDIF(C_HAVE_WEXTRA)
@@ -119,11 +120,12 @@ COMPILE_WITH(LibXml2 REQUIRED)
 # When we are crosscompiling to windows, we want to link external lib statically
 # But libxml2 archive needs zlib, iconv and an obscure W32api lib. pkg-config
 # gives this information, but it is not taken into account in the cmake Module
-IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+# This doesn't work while using MSVC
+IF(CROSSCOMPILING_LINUX_TO_WINDOWS AND NOT MSVC)
   FOREACH(_EXTRA_LIB ${PC_LIBXML_LIBRARIES})
     LIST(APPEND ${PROJECT_NAME}_LINK_LIBRARIES ${_EXTRA_LIB})
   ENDFOREACH()
-ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS AND NOT MSVC)
 
 compile_with(BLAS REQUIRED)
 compile_with(LAPACK REQUIRED)

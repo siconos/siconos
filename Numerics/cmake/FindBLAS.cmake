@@ -77,21 +77,6 @@ if(NOT BLAS_FOUND)
       set(_combined_name ${_combined_name}_${_library})
       
       if(_libraries_work)
-	if (BLA_STATIC)
-	  if (WIN32)
-            set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
-	  endif ()
-	  if (APPLE)
-            set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
-	  else ()
-            set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-	  endif ()
-	else ()
-	  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-            # for ubuntu's libblas3gf and liblapack3gf packages
-            set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
-	  endif ()
-	endif ()
 	
 	# HINTS are checked before PATHS, that's why we call
 	# find_library twice, to give priority to LD_LIBRARY_PATH or user-defined paths
@@ -136,7 +121,10 @@ if(NOT BLAS_FOUND)
       set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_thread})
       # add gfortran if we have static libs + gfortran
       if (BLA_STATIC AND CMAKE_COMPILER_IS_GNUG77)
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} "gfortran")
+        if (NOT GFORTRAN_LIB)
+          set(GFORTRAN_LIB "gfortran")
+        endif()
+        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${GFORTRAN_LIB})
       endif()
       #else()
       ## First we check cblas interface
@@ -157,6 +145,21 @@ if(NOT BLAS_FOUND)
     endif()
   endmacro()
   
+  if (BLA_STATIC)
+    if (WIN32)
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    endif ()
+    if (APPLE)
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    else ()
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    endif ()
+  else ()
+    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      # for ubuntu's libblas3gf and liblapack3gf packages
+      set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
+    endif ()
+  endif ()
 
   #### Start Blas search process ####
   set(WITH_BLAS "" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]")

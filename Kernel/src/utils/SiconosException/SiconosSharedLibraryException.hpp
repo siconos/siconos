@@ -43,7 +43,7 @@ public:
 
   /**
    * constructor
-   * @param std::string which describe the exception
+   * \param report the description of the exception
    */
   SiconosSharedLibraryException(const std::string& report);
 

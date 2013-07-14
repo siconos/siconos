@@ -35,7 +35,7 @@ PluginHandle loadPlugin(const std::string& pluginPath)
   if (!HandleRes)
   {
     DWORD err = GetLastError();
-    std::cout << "Error returned : " << err <<std::endl;
+    std::cout << "SiconosSharedLibrary::loadPlugin Error returned : " << err <<std::endl;
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or found " + pluginPath);
   }
 #endif
@@ -69,6 +69,9 @@ void closePlugin(const std::string& pluginFile)
   iter it = openedPlugins.find(pluginFile);
   if (it == openedPlugins.end())
   {
+    std::cout << "SiconosSharedLibrary::closePlugin - could not find an opened plugin named " << pluginFile << std::endl;
+    std::cout << "Plugins in openedPlugins:" << std::endl;
+    for (iter it2 = openedPlugins.begin(); it2 != openedPlugins.end(); ++it2) std::cout <<  it2->first << std::endl;
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::closePlugin - could not find an opened plugin named " + pluginFile);
   }
   PluginHandle plugin = it->second;

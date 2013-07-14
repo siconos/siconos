@@ -34,7 +34,7 @@
 
 // As always, MSVC miss C99
 #ifdef _MSC_VER
-double rint(double x);
+extern "C" double rint(double x);
 #endif
 
 class Simulation;

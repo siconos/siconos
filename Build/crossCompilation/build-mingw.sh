@@ -24,9 +24,6 @@ make_component() {
 	make ExperimentalTest
 	make ExperimentalSubmit
 }
-#		-DLAPACK_LIBRARIES="/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/liblapacke.a" \
-#		-DLAPACK_INCLUDE_DIRS="/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/include" \
-#		-DBLAS_LIBRARIES="/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libcblas.a" \
 
 build_siconos() {
 	rm -rf ${BUILD_DIR}/*
@@ -42,7 +39,6 @@ build_siconos() {
 	CFLAGS='-U__STRICT_ANSI__' cmake \
 		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
-		-DLINK_STATICALLY=1 \
 		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
 		"${SICONOS_SOURCES}/Numerics"
 	make_component
@@ -53,12 +49,25 @@ build_siconos() {
 	cmake \
 		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
-		-DLINK_STATICALLY=1 \
 		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
-		-DCMAKE_PREFIX_PATH="${INSTALL_PREFIX}" \
 		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
 		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
+		-DCMAKE_PREFIX_PATH="${INSTALL_PREFIX}" \
 		"${SICONOS_SOURCES}/Kernel"
+	make_component
+	make -i install
+
+	mkdir -p "${BUILD_DIR}/Mechanics"
+	cd "${BUILD_DIR}/Mechanics"
+	cmake \
+		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
+		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
+		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
+		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
+		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
+		-DSiconosKernel_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
+		-DSiconosKernel_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
+		"${SICONOS_SOURCES}/Mechanics"
 	make_component
 	make -i install
 
@@ -77,6 +86,21 @@ build_siconos() {
 		-DPYTHON_INCLUDE_DIR="${MXE_PREFIX}/python/" \
 		-DPYTHON_NUMPY_INCLUDE_DIR="${MXE_PREFIX}/numpy/PLATLIB/numpy/core/include" \
 		"${SICONOS_SOURCES}/Front-End"
+	make_component
+	make -i install
+
+	mkdir -p "${BUILD_DIR}/Examples"
+	cd "${BUILD_DIR}/Examples"
+	cmake \
+		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
+		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
+		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
+		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
+		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
+		-DSiconosKernel_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
+		-DSiconosKernel_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
+		-DSiconosKernel_EXE_DIR="${INSTALL_PREFIX}/bin" \
+		"${SICONOS_SOURCES}/Examples"
 	make_component
 	make -i install
 
