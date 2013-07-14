@@ -72,16 +72,16 @@ int main(int argc, char* argv[])
     SP::LagrangianDS arm(new LagrangianDS(q0, v0, "RX90Plugin:mass"));
 
     // external plug-in
-    arm->setComputeNNLFunction("RX90Plugin.so", "NNL");
-    //arm->setComputeJacobianNNLFunction(1,"RX90Plugin.so","jacobianVNNL");
-    arm->setComputeJacobianNNLqDotFunction("RX90Plugin.so", "jacobianVNNL");
-    //arm->setComputeJacobianNNLFunction(0,"RX90Plugin.so","jacobianNNLq");
-    arm->setComputeJacobianNNLqFunction("RX90Plugin.so", "jacobianNNLq");
-    arm->setComputeFIntFunction("RX90Plugin.so", "U");
-    //arm->setComputeJacobianFIntFunction(1,"RX90Plugin.so","jacobFintV");
-    arm->setComputeJacobianFIntqDotFunction("RX90Plugin.so", "jacobFintV");
-    //arm->setComputeJacobianFIntFunction(0,"RX90Plugin.so","jacobFintQ");
-    arm->setComputeJacobianFIntqFunction("RX90Plugin.so", "jacobFintQ");
+    arm->setComputeNNLFunction("RX90Plugin", "NNL");
+    //arm->setComputeJacobianNNLFunction(1,"RX90Plugin","jacobianVNNL");
+    arm->setComputeJacobianNNLqDotFunction("RX90Plugin", "jacobianVNNL");
+    //arm->setComputeJacobianNNLFunction(0,"RX90Plugin","jacobianNNLq");
+    arm->setComputeJacobianNNLqFunction("RX90Plugin", "jacobianNNLq");
+    arm->setComputeFIntFunction("RX90Plugin", "U");
+    //arm->setComputeJacobianFIntFunction(1,"RX90Plugin","jacobFintV");
+    arm->setComputeJacobianFIntqDotFunction("RX90Plugin", "jacobFintV");
+    //arm->setComputeJacobianFIntFunction(0,"RX90Plugin","jacobFintQ");
+    arm->setComputeJacobianFIntqFunction("RX90Plugin", "jacobFintQ");
     // -------------------
     // --- Interactions---
     // -------------------

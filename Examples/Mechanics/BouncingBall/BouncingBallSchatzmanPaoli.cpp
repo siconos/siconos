@@ -184,11 +184,11 @@ int main(int argc, char* argv[])
     dataPlotRef.zero();
     ioMatrix::read("BouncingBallSchatzmanPaoli.ref", "ascii", dataPlotRef);
 
+    std::cout << (dataPlot - dataPlotRef).normInf()  <<  std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
 
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-      std::cout << "Error = " << (dataPlot - dataPlotRef).normInf()  <<  std::endl;
       (dataPlot - dataPlotRef).display();
       return 1;
     }

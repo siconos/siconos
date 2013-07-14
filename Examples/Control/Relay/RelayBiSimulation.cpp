@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     (*x0)(1) = -Vinit;
 
     SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
-    processDS->setComputebFunction("RelayPlugin.so", "computeB");
+    processDS->setComputebFunction("RelayPlugin", "computeB");
 
     SP::FirstOrderLinearDS controllerDS(new FirstOrderLinearDS(x0, A));
 
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 
     //     SP::FirstOrderLinearR myProcessRelation(new FirstOrderLinearR(C,B));
     //     myProcessRelation->setDPtr(D);
-    //myProcessRelation->setComputeEFunction("ObserverLCSPlugin.so","computeE");
+    //myProcessRelation->setComputeEFunction("ObserverLCSPlugin","computeE");
 
     SP::FirstOrderLinearR myControllerRelation(new FirstOrderLinearR(C, B));
     myControllerRelation->setDPtr(D);

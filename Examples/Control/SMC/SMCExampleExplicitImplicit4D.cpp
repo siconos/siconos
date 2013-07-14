@@ -81,7 +81,7 @@ Csurface = np.array(Brel).T
   SP::SimpleMatrix Drel(new SimpleMatrix(1, 1, 0));
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
-  processDS->setComputebFunction("RelayPluginUnperturbed.so", "computeB");
+  processDS->setComputebFunction("RelayPluginUnperturbed", "computeB");
 
   // -------------
   // --- Model process ---

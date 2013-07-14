@@ -52,7 +52,7 @@ if h > hControl:
 # Declaration of the Dynamical System
 controlProcess = ControlFirstOrderLinearDS(t0, T, h, x0, A)
 processDS = controlProcess.processDS()
-processDS.setComputebFunction("RelayPlugin.so", "computeB")
+processDS.setComputebFunction("RelayPlugin", "computeB")
 controlProcess.initialize()
 
 # time discretisation

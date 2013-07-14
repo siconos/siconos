@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector x0(new SiconosVector(ndof));
     (*x0)(0) = Vinit;
     SP::FirstOrderLinearDS processObserver(new FirstOrderLinearDS(x0, createSPtrSimpleMatrix(TildeA)));
-    processObserver->setComputebFunction("SingleDSObserverLCSPlugin.so", "computeU");
+    processObserver->setComputebFunction("SingleDSObserverLCSPlugin", "computeU");
 
     // Relations
     unsigned int ninter = 2; // dimension of your Interaction = size of y and lambda vectors
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 
     SP::FirstOrderLinearR myProcessRelation(new FirstOrderLinearR(createSPtrSimpleMatrix(C), createSPtrSimpleMatrix(B)));
 
-    myProcessRelation->setComputeEFunction("SingleDSObserverLCSPlugin.so", "computeE");
+    myProcessRelation->setComputeEFunction("SingleDSObserverLCSPlugin", "computeE");
 
     SimpleMatrix D(ninter, ninter);
     D(0, 0) = 1.0;

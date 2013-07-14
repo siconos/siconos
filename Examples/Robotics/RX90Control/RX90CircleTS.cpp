@@ -77,13 +77,13 @@ int main(int argc, char* argv[])
     SP::LagrangianDS arm(new LagrangianDS(q0, v0, "RX90Plugin:mass"));
 
     // external plug-in
-    //    arm->setComputeMassFunction("RX90Plugin.so","mass");
-    arm->setComputeNNLFunction("RX90Plugin.so", "NNL");
-    arm->setComputeJacobianNNLqFunction("RX90Plugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLqDotFunction("RX90Plugin.so", "jacobianNNLq");
-    arm->setComputeFIntFunction("RX90Plugin.so", "U");
-    arm->setComputeJacobianFIntqFunction("RX90Plugin.so", "jacobFintV");
-    arm->setComputeJacobianFIntqDotFunction("RX90Plugin.so", "jacobFintQ");
+    //    arm->setComputeMassFunction("RX90Plugin","mass");
+    arm->setComputeNNLFunction("RX90Plugin", "NNL");
+    arm->setComputeJacobianNNLqFunction("RX90Plugin", "jacobianVNNL");
+    arm->setComputeJacobianNNLqDotFunction("RX90Plugin", "jacobianNNLq");
+    arm->setComputeFIntFunction("RX90Plugin", "U");
+    arm->setComputeJacobianFIntqFunction("RX90Plugin", "jacobFintV");
+    arm->setComputeJacobianFIntqDotFunction("RX90Plugin", "jacobFintQ");
 
     // creating Z parameter computed in Actuators and used in FInt
     SP::SiconosVector torques(new SiconosVector(nDof));

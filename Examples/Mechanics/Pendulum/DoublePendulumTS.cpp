@@ -74,12 +74,12 @@ int main(int argc, char* argv[])
     SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumPlugin:mass"));
 
     // external plug-in
-    doublependulum->setComputeNNLFunction("DoublePendulumPlugin.so", "NNL");
-    doublependulum->setComputeJacobianNNLqDotFunction("DoublePendulumPlugin.so", "jacobianVNNL");
-    doublependulum->setComputeJacobianNNLqFunction("DoublePendulumPlugin.so", "jacobianNNLq");
-    doublependulum->setComputeFIntFunction("DoublePendulumPlugin.so", "FInt");
-    doublependulum->setComputeJacobianFIntqDotFunction("DoublePendulumPlugin.so", "jacobianVFInt");
-    doublependulum->setComputeJacobianFIntqFunction("DoublePendulumPlugin.so", "jacobianFIntq");
+    doublependulum->setComputeNNLFunction("DoublePendulumPlugin", "NNL");
+    doublependulum->setComputeJacobianNNLqDotFunction("DoublePendulumPlugin", "jacobianVNNL");
+    doublependulum->setComputeJacobianNNLqFunction("DoublePendulumPlugin", "jacobianNNLq");
+    doublependulum->setComputeFIntFunction("DoublePendulumPlugin", "FInt");
+    doublependulum->setComputeJacobianFIntqDotFunction("DoublePendulumPlugin", "jacobianVFInt");
+    doublependulum->setComputeJacobianFIntqFunction("DoublePendulumPlugin", "jacobianFIntq");
 
     // -------------------
     // --- Interactions---

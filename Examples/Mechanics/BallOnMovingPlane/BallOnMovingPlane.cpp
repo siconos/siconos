@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 
 
     SP::BoundaryCondition bd(new BoundaryCondition(bdindex));
-    bd->setComputePrescribedVelocityFunction("BallOnMovingPlanePlugin.so", "prescribedvelocity");
+    bd->setComputePrescribedVelocityFunction("BallOnMovingPlanePlugin", "prescribedvelocity");
 
 
     movingplane->setBoundaryConditions(bd);

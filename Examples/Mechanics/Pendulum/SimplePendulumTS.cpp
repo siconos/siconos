@@ -80,12 +80,12 @@ int main(int argc, char* argv[])
 
 
     // external plug-in
-    //simplependulum->setComputeMassFunction("SimplePendulumPlugin.so","mass");
+    //simplependulum->setComputeMassFunction("SimplePendulumPlugin","mass");
 
 
-    simplependulum->setComputeFIntFunction("SimplePendulumPlugin.so", "FInt");
-    simplependulum->setComputeJacobianFIntqDotFunction("SimplePendulumPlugin.so", "jacobianVFInt");
-    simplependulum->setComputeJacobianFIntqFunction("SimplePendulumPlugin.so", "jacobianFIntq");
+    simplependulum->setComputeFIntFunction("SimplePendulumPlugin", "FInt");
+    simplependulum->setComputeJacobianFIntqDotFunction("SimplePendulumPlugin", "jacobianVFInt");
+    simplependulum->setComputeJacobianFIntqFunction("SimplePendulumPlugin", "jacobianFIntq");
 
     // -------------------
     // --- Interactions---

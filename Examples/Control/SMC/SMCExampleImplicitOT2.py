@@ -48,7 +48,7 @@ if h > hControl:
 
 # Declaration of the Dynamical System
 processDS = FirstOrderLinearDS(x0, A)
-processDS.setComputebFunction("RelayPlugin.so", "computeB")
+processDS.setComputebFunction("RelayPlugin", "computeB")
 # Model
 process = Model(t0, T)
 process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)

@@ -107,13 +107,13 @@ int main(int argc, char* argv[])
     SP::LagrangianDS  arm(new LagrangianDS(createSPtrSiconosVector(q0), createSPtrSiconosVector(v0)));
 
     // external plug-in
-    arm->setComputeMassFunction("TwolinkMultiFlexPlugin.so", "mass");
-    arm->setComputeNNLFunction("TwolinkMultiFlexPlugin.so", "NNL");
-    arm->setComputeJacobianNNLqDotFunction("TwolinkMultiFlexPlugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLqFunction("TwolinkMultiFlexPlugin.so", "jacobianNNLq");
-    arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U");
-    arm->setComputeJacobianFIntqDotFunction("TwolinkMultiFlexPlugin.so", "jacobFintV");
-    arm->setComputeJacobianFIntqFunction("TwolinkMultiFlexPlugin.so", "jacobFintQ");
+    arm->setComputeMassFunction("TwolinkMultiFlexPlugin", "mass");
+    arm->setComputeNNLFunction("TwolinkMultiFlexPlugin", "NNL");
+    arm->setComputeJacobianNNLqDotFunction("TwolinkMultiFlexPlugin", "jacobianVNNL");
+    arm->setComputeJacobianNNLqFunction("TwolinkMultiFlexPlugin", "jacobianNNLq");
+    arm->setComputeFIntFunction("TwolinkMultiFlexPlugin", "U");
+    arm->setComputeJacobianFIntqDotFunction("TwolinkMultiFlexPlugin", "jacobFintV");
+    arm->setComputeJacobianFIntqFunction("TwolinkMultiFlexPlugin", "jacobFintQ");
     arm->setzPtr(z);
 
     allDS.insert(arm);
@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
         (*z)(5) = (*z)(14);
         (*z)(10) = dataPlot(k, 3);
         (*z)(7) = (*z)(9);
-        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U1");
+        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin", "U1");
         test = 1;
       }
 
@@ -278,7 +278,7 @@ int main(int argc, char* argv[])
       if (((*z)(4) > 0) && (test == 1))
       {
         (*z)(8) = dataPlot(k, 0);
-        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U2");
+        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin", "U2");
         test = 2;
       }
       if (((*z)(4) > 0) && (test == 2))
@@ -289,14 +289,14 @@ int main(int argc, char* argv[])
       {
         // L= dataPlot(k,0)-(*z)(8);
         (*z)(8) = dataPlot(k, 0);
-        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U3");
+        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin", "U3");
         test = 3;
         nimpact = 0;
       }
       //  controller during impacts accumulation phase after the first impact
       if ((dataPlot(k, 10) > 0) && (test == 3))
       {
-        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U4");
+        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin", "U4");
         test = 4;
       }
 
@@ -306,7 +306,7 @@ int main(int argc, char* argv[])
       if (((*z)(18) > 0) && (test == 4) && (dataPlot(k, 7) - dataPlot(k - 3, 7) == 3)) // && (fabs((*inter0->y(1))(0))<1e-6))
       {
         (*z)(8) = dataPlot(k, 0);
-        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U5");
+        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin", "U5");
         test = 5;
         nimpact = 0;
       }
@@ -315,7 +315,7 @@ int main(int argc, char* argv[])
       {
         (*z)(8) = dataPlot(k, 0) + h;
         (*z)(10) = (*z)(12);
-        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U6");
+        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin", "U6");
         test = 6;
         // L = 0;
       }
@@ -323,7 +323,7 @@ int main(int argc, char* argv[])
       //  controller during free-motion phase
       if (((*z)(13) >= 0) && (test == 6))
       {
-        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U");
+        arm->setComputeFIntFunction("TwolinkMultiFlexPlugin", "U");
         test = 0;
         (*z)(13) = 0;
       }

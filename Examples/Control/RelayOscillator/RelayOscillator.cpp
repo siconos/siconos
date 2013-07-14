@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     (*x0)(2) = 0.0;
 
     SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));
-    //    process->setComputebFunction("ObserverLCSPlugin.so","uProcess");
+    //    process->setComputebFunction("ObserverLCSPlugin","uProcess");
 
     // --------------------
     // --- Interactions ---
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
     (*D)(0, 0) = 0.0;
 
     myProcessRelation->setDPtr(D);
-    //myProcessRelation->setComputeEFunction("ObserverLCSPlugin.so","computeE");
+    //myProcessRelation->setComputeEFunction("ObserverLCSPlugin","computeE");
 
     // Second relation, related to the observer
     // haty = C hatX + D hatLambda + E

@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector x0(new SiconosVector(ndof));
     (*x0)(0) = Vinit;
     SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));
-    process->setComputebFunction("ObserverLCSPlugin.so", "uProcess");
+    process->setComputebFunction("ObserverLCSPlugin", "uProcess");
 
     // Second System, the observer:
     // dx/dt = A hatx + u(t) + L(y-haty)
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector obsX0(new SiconosVector(ndof));
     SP::FirstOrderLinearDS observer(new FirstOrderLinearDS(obsX0, hatA));
-    observer->setComputebFunction("ObserverLCSPlugin.so", "uObserver");
+    observer->setComputebFunction("ObserverLCSPlugin", "uObserver");
     //    SiconosVector z(new SiconosVector(1);
     observer->setzPtr(process->x());
     // The set of all DynamicalSystems
@@ -92,14 +92,14 @@ int main(int argc, char* argv[])
     (*D)(0, 0) = 1.0;
 
     myProcessRelation->setDPtr(D);
-    myProcessRelation->setComputeEFunction("ObserverLCSPlugin.so", "computeE");
+    myProcessRelation->setComputeEFunction("ObserverLCSPlugin", "computeE");
 
     // Second relation, related to the observer
     // haty = C hatX + D hatLambda + E
     // hatR = B hatLambda
     SP::FirstOrderLinearR myObserverRelation(new FirstOrderLinearR(C, B));
     myObserverRelation->setDPtr(D);
-    myObserverRelation->setComputeEFunction("ObserverLCSPlugin.so", "computeE");
+    myObserverRelation->setComputeEFunction("ObserverLCSPlugin", "computeE");
 
     // NonSmoothLaw
     unsigned int nslawSize = 1;

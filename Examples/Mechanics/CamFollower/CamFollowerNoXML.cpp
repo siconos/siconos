@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
     (*(q0[0]))(0) = position_init;
     (*(velocity0[0]))(0) = velocity_init;
     SP::LagrangianLinearTIDS lds(new LagrangianLinearTIDS(q0[0], velocity0[0], Mass, K, C));
-    lds->setComputeFExtFunction("FollowerPlugin.so", "FollowerFExtR");
+    lds->setComputeFExtFunction("FollowerPlugin", "FollowerFExtR");
 
     // Example to set a list of parameters in FExt function.
     // 1 - Create a simple vector that contains the required parameters.

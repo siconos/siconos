@@ -56,14 +56,14 @@ e2 = 0.0;
 nId=sicLagrangianDS(nDof,q0,v0);
 
 // external plug-in
-sicSetMass(nId,"RobotPlugin.so","mass");
-sicSetNNL(nId,"RobotPlugin.so", "NNL");
-sicSetJacQNNL(nId,"RobotPlugin.so", "jacobianQNNL");
-sicSetJacVelNNL(nId,"RobotPlugin.so", "jacobianVNNL");
-sicSetFInt(nId,"RobotPlugin.so", "FInt");
-sicSetJacQFInt(nId,"RobotPlugin.so", "jacobianQFInt");
-sicSetJacVelFInt(nId,"RobotPlugin.so", "jacobianQFInt");
-sicSetFExt(nId,"RobotPlugin.so", "FExt");
+sicSetMass(nId,"RobotPlugin","mass");
+sicSetNNL(nId,"RobotPlugin", "NNL");
+sicSetJacQNNL(nId,"RobotPlugin", "jacobianQNNL");
+sicSetJacVelNNL(nId,"RobotPlugin", "jacobianVNNL");
+sicSetFInt(nId,"RobotPlugin", "FInt");
+sicSetJacQFInt(nId,"RobotPlugin", "jacobianQFInt");
+sicSetJacVelFInt(nId,"RobotPlugin", "jacobianQFInt");
+sicSetFExt(nId,"RobotPlugin", "FExt");
 
 // -------------------
 // --- Interactions---

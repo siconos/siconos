@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
   SP::SimpleMatrix Drel(new SimpleMatrix(2, 2, 0));
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
-  processDS->setComputebFunction("RelayPlugin.so", "computeB");
+  processDS->setComputebFunction("RelayPlugin", "computeB");
 
   // -------------
   // --- Model process ---

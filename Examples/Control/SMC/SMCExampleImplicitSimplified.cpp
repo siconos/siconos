@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   // Dynamical Systems
   SP::ControlFirstOrderLinearS controlProcess(new ControlFirstOrderLinearS(t0, T, h, x0, A));
   SP::FirstOrderLinearDS processDS = controlProcess->processDS();
-  processDS->setComputebFunction("RelayPlugin.so", "computeB");
+  processDS->setComputebFunction("RelayPlugin", "computeB");
   controlProcess->initialize();
 
   // TimeDiscretisation

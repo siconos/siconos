@@ -99,10 +99,10 @@ int main(int argc, char* argv[])
       // création et insertion  du système dynamique représentant la yoyo dans le récipient allDS
       SP::LagrangianDS yoyo(new LagrangianDS(q0, v0, M));
 
-      yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_ext");
-      yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_int");
-      yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin.so", "jacobianVFInt");
-      yoyo->setComputeJacobianFIntqFunction("YoyoPlugin.so", "jacobianFIntq");
+      yoyo->setComputeFExtFunction("YoyoPlugin", "force_ext");
+      yoyo->setComputeFIntFunction("YoyoPlugin", "F_int");
+      yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin", "jacobianVFInt");
+      yoyo->setComputeJacobianFIntqFunction("YoyoPlugin", "jacobianFIntq");
 
 
       ////////////////  loi d'impact et relations /////////////////////////////////
@@ -187,10 +187,10 @@ int main(int argc, char* argv[])
         (*v0)(1) = -r * (*v0)(0) + (*v0)(2);
   
         yoyo.reset(new LagrangianDS(q0, v0, M));
-        yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_extf");
-        yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_intf");
-        yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin.so", "jacobianVFIntf");
-        yoyo->setComputeJacobianFIntqFunction("YoyoPlugin.so", "jacobianFIntqf");
+        yoyo->setComputeFExtFunction("YoyoPlugin", "force_extf");
+        yoyo->setComputeFIntFunction("YoyoPlugin", "F_intf");
+        yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin", "jacobianVFIntf");
+        yoyo->setComputeJacobianFIntqFunction("YoyoPlugin", "jacobianFIntqf");
         
         inter.reset(new Interaction(1, loi, relation));
           

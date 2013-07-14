@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 
     //    //  Source term "u" specification
     //    LSDiodeBridgePowSup->setUSize(1);
-    //    LSDiodeBridgePowSup->setComputeBFunction("./SinPoPlugin.so","SinPo");
+    //    LSDiodeBridgePowSup->setComputeBFunction("./SinPoPlugin","SinPo");
 
     // --- Interaction between linear system and non smooth system ---
 
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 
     SP::FirstOrderLinearR LTIRDiodeBridgePowSup(new FirstOrderLinearR(Int_C, Int_B));
     LTIRDiodeBridgePowSup->setDPtr(Int_D);
-    LTIRDiodeBridgePowSup->setComputeEFunction("./SinPoPlugin.so", "SinPo");
+    LTIRDiodeBridgePowSup->setComputeEFunction("./SinPoPlugin", "SinPo");
 
     SP::ComplementarityConditionNSL nslaw(new ComplementarityConditionNSL(4));
 

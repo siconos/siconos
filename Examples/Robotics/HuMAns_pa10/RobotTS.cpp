@@ -68,10 +68,10 @@ int main(int argc, char* argv[])
     SP::LagrangianDS arm(new LagrangianDS(q0, v0));
 
     // external plug-in
-    arm->setComputeMassFunction("RobotPlugin.so", "mass");
-    arm->setComputeNNLFunction("RobotPlugin.so", "NNL");
-    arm->setComputeJacobianNNLqDotFunction("RobotPlugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLqFunction("RobotPlugin.so", "jacobianNNLq");
+    arm->setComputeMassFunction("RobotPlugin", "mass");
+    arm->setComputeNNLFunction("RobotPlugin", "NNL");
+    arm->setComputeJacobianNNLqDotFunction("RobotPlugin", "jacobianVNNL");
+    arm->setComputeJacobianNNLqFunction("RobotPlugin", "jacobianNNLq");
 
     // -------------------
     // --- Interactions---

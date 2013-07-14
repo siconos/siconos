@@ -21,7 +21,7 @@
 #include <math.h>
 using namespace std;
 
-extern double L;
+extern "C" double L;
 
 extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {

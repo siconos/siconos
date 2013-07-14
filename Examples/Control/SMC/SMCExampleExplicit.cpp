@@ -70,11 +70,12 @@ int main(int argc, char* argv[])
   SP::SimpleMatrix Brel(new SimpleMatrix(2, 1, 0));
   (*Brel)(1, 0) = 2;
   SP::SimpleMatrix Drel(new SimpleMatrix(1, 1, 0));
+  SP::SiconosVector z(new SiconosVector(ndof));
 
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
-  processDS->setComputebFunction("RelayPlugin.so", "computeB");
-
+  processDS->setComputebFunction("RelayPlugin", "computeB");
+  processDS->setz(*z);
   // -------------
   // --- Model process ---
   // -------------

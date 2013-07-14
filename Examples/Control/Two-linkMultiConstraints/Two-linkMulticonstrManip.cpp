@@ -101,13 +101,13 @@ int main(int argc, char* argv[])
     SP::LagrangianDS  arm(new LagrangianDS(createSPtrSiconosVector(q0), createSPtrSiconosVector(v0)));
 
     // external plug-in
-    arm->setComputeMassFunction("Two-linkMultiPlugin.so", "mass");
-    arm->setComputeNNLFunction("Two-linkMultiPlugin.so", "NNL");
-    arm->setComputeJacobianNNLqDotFunction("Two-linkMultiPlugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLqFunction("Two-linkMultiPlugin.so", "jacobianNNLq");
-    arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U");
-    arm->setComputeJacobianFIntqDotFunction("Two-linkMultiPlugin.so", "jacobFintV");
-    arm->setComputeJacobianFIntqFunction("Two-linkMultiPlugin.so", "jacobFintQ");
+    arm->setComputeMassFunction("Two-linkMultiPlugin", "mass");
+    arm->setComputeNNLFunction("Two-linkMultiPlugin", "NNL");
+    arm->setComputeJacobianNNLqDotFunction("Two-linkMultiPlugin", "jacobianVNNL");
+    arm->setComputeJacobianNNLqFunction("Two-linkMultiPlugin", "jacobianNNLq");
+    arm->setComputeFIntFunction("Two-linkMultiPlugin", "U");
+    arm->setComputeJacobianFIntqDotFunction("Two-linkMultiPlugin", "jacobFintV");
+    arm->setComputeJacobianFIntqFunction("Two-linkMultiPlugin", "jacobFintQ");
     arm->setzPtr(z);
 
     allDS.insert(arm);
@@ -277,7 +277,7 @@ int main(int argc, char* argv[])
         (*z)(8) = dataPlot(k, 0);
         (*z)(5) =  0.7 + 0.5 * cos(PI / 2 + 2 * PI * ((*z)(8)) / (*z)(11));
         (*z)(7) = (*z)(9);
-        arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U10");
+        arm->setComputeFIntFunction("Two-linkMultiPlugin", "U10");
         test = 1;
       }
 
@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
       if ((dataPlot(k, 12) > 0) && (test == 1))
       {
         (*z)(8) = dataPlot(k, 0);
-        arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U11");
+        arm->setComputeFIntFunction("Two-linkMultiPlugin", "U11");
         test = 2;
       }
       if ((dataPlot(k, 12) > 0) && (test == 2))
@@ -296,14 +296,14 @@ int main(int argc, char* argv[])
       {
         // L= dataPlot(k,0)-(*z)(8);
         (*z)(8) = dataPlot(k, 0);
-        arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U20");
+        arm->setComputeFIntFunction("Two-linkMultiPlugin", "U20");
         test = 3;
         nimpact = 0;
       }
       //  controller during impacts accumulation phase after the first impact
       if (((*z)(24) > 0) && (test == 3))
       {
-        arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U21");
+        arm->setComputeFIntFunction("Two-linkMultiPlugin", "U21");
         test = 4;
       }
       if (((*z)(24) > 0) && (test == 4))
@@ -312,7 +312,7 @@ int main(int argc, char* argv[])
       if (((*z)(24) > 0) && (test == 4) && (dataPlot(k, 7) - dataPlot(k - 1, 7) == 1)) // && (fabs((*inter0->y(1))(0))<1e-6))
       {
         (*z)(8) = dataPlot(k, 0);
-        arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U22");
+        arm->setComputeFIntFunction("Two-linkMultiPlugin", "U22");
         test = 5;
         nimpact = 0;
       }
@@ -321,7 +321,7 @@ int main(int argc, char* argv[])
       {
         (*z)(8) = dataPlot(k, 0) + h;
         (*z)(10) = (*z)(12);
-        arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U3");
+        arm->setComputeFIntFunction("Two-linkMultiPlugin", "U3");
         test = 6;
         // L = 0;
       }
@@ -329,7 +329,7 @@ int main(int argc, char* argv[])
       //  controller during free-motion phase
       if (((*z)(13) - 0.1 >= 0) && (test == 6))
       {
-        arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U");
+        arm->setComputeFIntFunction("Two-linkMultiPlugin", "U");
         test = 0;
         (*z)(13) = 0;
       }

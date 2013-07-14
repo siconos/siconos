@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     (*x0)(0) = Vinit;
     (*x0)(1) = Vinit;
     SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));
-    //    process->setComputebFunction("ObserverLCSPlugin.so","uProcess");
+    //    process->setComputebFunction("ObserverLCSPlugin","uProcess");
 
     // --------------------
     // --- Interactions ---
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     (*D)(1, 1) = 0.0;
 
     myProcessRelation->setDPtr(D);
-    //myProcessRelation->setComputeEFunction("ObserverLCSPlugin.so","computeE");
+    //myProcessRelation->setComputeEFunction("ObserverLCSPlugin","computeE");
 
     // Second relation, related to the observer
     // haty = C hatX + D hatLambda + E

@@ -101,13 +101,13 @@ int main(int argc, char* argv[])
     SP::LagrangianDS  arm(new LagrangianDS(createSPtrSiconosVector(q0), createSPtrSiconosVector(v0)));
 
     // external plug-in
-    arm->setComputeMassFunction("Two-linkFlexiblePlugin.so", "mass");
-    arm->setComputeNNLFunction("Two-linkFlexiblePlugin.so", "NNL");
-    arm->setComputeJacobianNNLqDotFunction("Two-linkFlexiblePlugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLqFunction("Two-linkFlexiblePlugin.so", "jacobianNNLq");
-    arm->setComputeFIntFunction("Two-linkFlexiblePlugin.so", "U");
-    arm->setComputeJacobianFIntqDotFunction("Two-linkFlexiblePlugin.so", "jacobFintV");
-    arm->setComputeJacobianFIntqFunction("Two-linkFlexiblePlugin.so", "jacobFintQ");
+    arm->setComputeMassFunction("Two-linkFlexiblePlugin", "mass");
+    arm->setComputeNNLFunction("Two-linkFlexiblePlugin", "NNL");
+    arm->setComputeJacobianNNLqDotFunction("Two-linkFlexiblePlugin", "jacobianVNNL");
+    arm->setComputeJacobianNNLqFunction("Two-linkFlexiblePlugin", "jacobianNNLq");
+    arm->setComputeFIntFunction("Two-linkFlexiblePlugin", "U");
+    arm->setComputeJacobianFIntqDotFunction("Two-linkFlexiblePlugin", "jacobFintV");
+    arm->setComputeJacobianFIntqFunction("Two-linkFlexiblePlugin", "jacobFintQ");
     arm->setzPtr(z);
 
     allDS.insert(arm);
@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
         (*z)(5) = (*z)(14);
         // (*z)(10)= dataPlot(k,3);
         (*z)(7) = (*z)(9);
-        arm->setComputeFIntFunction("Two-linkFlexiblePlugin.so", "U1");
+        arm->setComputeFIntFunction("Two-linkFlexiblePlugin", "U1");
         test = 1;
       }
 
@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
       if ((dataPlot(k - 1, 11) > 0) && (test == 1))
       {
         //(*z)(8) = dataPlot(k-1,0);
-        arm->setComputeFIntFunction("Two-linkFlexiblePlugin.so", "U2");
+        arm->setComputeFIntFunction("Two-linkFlexiblePlugin", "U2");
         test = 2;
       }
       if ((dataPlot(k, 11) > 0) && (test == 2))
@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
       {
         // L= dataPlot(k,0)-(*z)(8);
         (*z)(8) = dataPlot(k, 0);
-        arm->setComputeFIntFunction("Two-linkFlexiblePlugin.so", "U3");
+        arm->setComputeFIntFunction("Two-linkFlexiblePlugin", "U3");
         test = 3;
         nimpact = 0;
       }
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
       {
         (*z)(8) = dataPlot(k, 0) + h;
         (*z)(10) = (*z)(12);
-        arm->setComputeFIntFunction("Two-linkFlexiblePlugin.so", "U4");
+        arm->setComputeFIntFunction("Two-linkFlexiblePlugin", "U4");
         test = 4;
         // L = 0;
       }
@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
       //  controller during free-motion phase
       if (((*z)(13) - 0.01 >= 0) && (test == 4))
       {
-        arm->setComputeFIntFunction("Two-linkFlexiblePlugin.so", "U");
+        arm->setComputeFIntFunction("Two-linkFlexiblePlugin", "U");
         test = 0;
         (*z)(13) = 0;
       }
@@ -356,11 +356,11 @@ int main(int argc, char* argv[])
 //     LagrangianDS * arm = new LagrangianDS(1, q0, v0);
 
 //     // external plug-in
-//     arm->setComputeMassFunction("Two-linkFlexiblePlugin.so","mass");
-//     arm->setComputeNNLFunction("Two-linkFlexiblePlugin.so","NNL");
-//     arm->setComputeJacobianNNLFunction(1,"Two-linkFlexiblePlugin.so","jacobianVNNL");
-//     arm->setComputeJacobianNNLFunction(0,"Two-linkFlexiblePlugin.so","jacobianNNLq");
-//     arm->setComputeFExtFunction("Two-linkFlexiblePlugin.so","U");
+//     arm->setComputeMassFunction("Two-linkFlexiblePlugin","mass");
+//     arm->setComputeNNLFunction("Two-linkFlexiblePlugin","NNL");
+//     arm->setComputeJacobianNNLFunction(1,"Two-linkFlexiblePlugin","jacobianVNNL");
+//     arm->setComputeJacobianNNLFunction(0,"Two-linkFlexiblePlugin","jacobianNNLq");
+//     arm->setComputeFExtFunction("Two-linkFlexiblePlugin","U");
 //     arm->setzPtr(z);
 
 //     allDS.insert(arm);
