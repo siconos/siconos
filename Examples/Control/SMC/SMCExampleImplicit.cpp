@@ -24,7 +24,7 @@
   */
 
 #include "SiconosKernel.hpp"
-#include <fenv.h>
+//#include <fenv.h>
 using namespace std;
 
 // main program

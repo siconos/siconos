@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 
     SP::FirstOrderLinearR LTIRDiodeBridgePowSup(new FirstOrderLinearR(Int_C, Int_B));
     LTIRDiodeBridgePowSup->setDPtr(Int_D);
-    LTIRDiodeBridgePowSup->setComputeEFunction("./SinPoPlugin", "SinPo");
+    LTIRDiodeBridgePowSup->setComputeEFunction("SinPoPlugin", "SinPo");
 
     SP::ComplementarityConditionNSL nslaw(new ComplementarityConditionNSL(4));
 

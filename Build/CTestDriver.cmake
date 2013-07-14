@@ -68,6 +68,8 @@ set(CTEST_NOTES_FILES ${CTEST_BINARY_DIRECTORY}/Testing/Notes/Build)
 
 STRING(REGEX REPLACE "__00__" " " EXTRA_CMAKE_ARGS_L "${EXTRA_CMAKE_ARGS}" )
 
+STRING(REGEX REPLACE "___" ";" EXTRA_CMAKE_ARGS_L "${EXTRA_CMAKE_ARGS_L}" )
+
 # source directory should be set by meta CMakeLists.txt
 #if(NOT EXISTS "${SOURCE_DIRECTORY}")
 #  set(CTEST_CHECKOUT_COMMAND "${CTEST_GIT_COMMAND} clone git+ssh://${GFORGE_USER}@scm.gforge.inria.fr//gitroot/siconos/siconos.git ${SOURCE_DIRECTORY}")

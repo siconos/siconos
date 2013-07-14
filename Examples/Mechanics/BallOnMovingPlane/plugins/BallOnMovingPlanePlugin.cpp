@@ -17,8 +17,12 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include <stdio.h>
+// for M_PI
+#if defined(_MSC_VER)
+#define _USE_MATH_DEFINES
+#endif
 #include <math.h>
+#include <stdio.h>
 
 extern "C" void prescribedvelocity(double time, unsigned int sizeofprescribedvelocity, double *pv)
 {
