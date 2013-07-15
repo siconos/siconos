@@ -404,8 +404,6 @@ public:
   friend void  getMin(const SiconosVector&, double &, unsigned int &);
   */
 
-  friend struct VectorNum;
-
   friend struct IsDense;
 
   friend struct IsSparse;
@@ -417,75 +415,6 @@ public:
 
 };
 
-struct VectorNum : public Question<unsigned int>
-{
-
-  using SiconosVisitor::visit;
-
-  void visit(const SiconosVector& v)
-  {
-    if (v._dense) answer = 1;
-    else answer = 4;
-  }
-
-  void visit(std11::shared_ptr<SiconosVector> v)
-  {
-    if (v->_dense) answer = 1;
-    else answer = 4;
-  }
-
-  void visit(const BlockVector& v)
-  {
-    answer = 0;
-  }
-
-};
-
-struct IsDense : public Question<bool>
-{
-  using SiconosVisitor::visit;
-
-  void visit(const SiconosVector& v)
-  {
-    answer = v._dense;
-  }
-
-  void visit(const BlockVector& v)
-  {
-    answer = false;
-  }
-};
-
-struct IsSparse : public Question<bool>
-{
-
-  using SiconosVisitor::visit;
-
-  void visit(const SiconosVector& v)
-  {
-    answer = !v._dense;
-  }
-
-  void visit(const BlockVector& v)
-  {
-    answer = false;
-  }
-};
-
-struct IsBlock : public Question<bool>
-{
-  using SiconosVisitor::visit;
-
-  void visit(const SiconosVector& v)
-  {
-    answer = false;
-  }
-
-  void visit(const BlockVector& v)
-  {
-    answer = true;
-  }
-};
 
 
 #endif

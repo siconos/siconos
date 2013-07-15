@@ -37,6 +37,55 @@ namespace siconosBindings = boost::numeric::bindings::blas;
 #include "SiconosVector.hpp"
 #include "SiconosAlgebra.hpp"
 
+#include "Question.hpp"
+
+struct IsDense : public Question<bool>
+{
+  using SiconosVisitor::visit;
+
+  void visit(const SiconosVector& v)
+  {
+    answer = v._dense;
+  }
+
+  void visit(const BlockVector& v)
+  {
+    answer = false;
+  }
+};
+
+struct IsSparse : public Question<bool>
+{
+
+  using SiconosVisitor::visit;
+
+  void visit(const SiconosVector& v)
+  {
+    answer = !v._dense;
+  }
+
+  void visit(const BlockVector& v)
+  {
+    answer = false;
+  }
+};
+
+struct IsBlock : public Question<bool>
+{
+  using SiconosVisitor::visit;
+
+  void visit(const SiconosVector& v)
+  {
+    answer = false;
+  }
+
+  void visit(const BlockVector& v)
+  {
+    answer = true;
+  }
+};
+
+
 
 // =================================================
 //                CONSTRUCTORS

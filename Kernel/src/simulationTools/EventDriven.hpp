@@ -131,12 +131,6 @@ public:
   /** Overload Simulation::initialize */
   void initialize(SP::Model, bool = true);
 
-  /* type name because parent class needs it */
-  inline std::string typeName()
-  {
-    return Type::name(*this);
-  };
-
   /* Getters and setters */
   /** Set value to _istate */
   inline void setIstate(int newValue)

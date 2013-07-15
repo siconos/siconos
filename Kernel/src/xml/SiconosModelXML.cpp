@@ -23,7 +23,7 @@
 #include "SimulationXML.hpp"
 #include "NonSmoothDynamicalSystemXML.hpp"
 
-
+#include "TypeName.hpp"
 
 SiconosModelXML::SiconosModelXML():
   rootNode(NULL), timeNode(NULL), doc(NULL), xmlSchemaFile(XML_SCHEMA),

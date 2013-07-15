@@ -24,8 +24,6 @@
 #ifndef __SiconosVectorFriends__
 #define __SiconosVectorFriends__
 
-struct VectorNum;
-
 class SimpleMatrix;
 
 /** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock

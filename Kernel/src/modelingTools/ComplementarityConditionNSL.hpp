@@ -28,8 +28,6 @@
 
 #include "NonSmoothLaw.hpp"
 
-class NonSmoothLaw;
-
 /** Complementarity NonSmoothLaw
  *
  * \author SICONOS Development Team - copyright INRIA

@@ -34,7 +34,7 @@
 #include "FirstOrderNonLinearDS.hpp"
 // #define DEBUG_STDOUT
 //#define DEBUG_MESSAGES 1
-
+#include "TypeName.hpp"
 #include <debug.h>
 
 

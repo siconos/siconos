@@ -28,7 +28,7 @@
 #include "EventDriven.hpp"
 #include "Topology.hpp"
 
-
+#include "TypeName.hpp"
 
 
 // --- CONSTRUCTORS ---

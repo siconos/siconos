@@ -25,14 +25,13 @@
 #define MODEL_H
 
 #include "SiconosConst.hpp"
-#include "Tools.hpp"
+
 #include "SiconosPointers.hpp"
-
 #include "SiconosFwd.hpp"
-
 #include "SiconosSerialization.hpp"
 
-class Simulation;
+#include <string>
+
 DEFINE_SPTR(SiconosModelXML)
 
 /** \class Model

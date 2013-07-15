@@ -139,12 +139,6 @@ public:
   */
   virtual ~TimeStepping();
 
-  /* type name because parent class needs it */
-  inline std::string typeName()
-  {
-    return Type::name(*this);
-  };
-
   /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
    *  \param a pointer to OneStepNSProblem
 

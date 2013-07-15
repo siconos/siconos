@@ -20,13 +20,8 @@
 #ifndef MechanicsIO_hpp
 #define MechanicsIO_hpp
 
-
-#include <SimpleMatrix.hpp>
-  class SiconosVector;
-  class Model;
-  class SpaceFilter&
-}
-#endif
+#include <SiconosPointers.hpp>
+#include <SiconosFwd.hpp>
 
 class MechanicsIO
 {

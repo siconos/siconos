@@ -41,6 +41,7 @@
 #include "QP.hpp"
 #include "Relay.hpp"
 
+#include "TypeName.hpp"
 // for Debug
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -302,7 +303,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     if (!statOut.is_open())
       SiconosVectorException::selfThrow("writing error : Fail to open file simulationStat.dat ");
     statOut << "============================================" <<std::endl;
-    statOut << " Siconos Simulation of type " << typeName() << "." <<std::endl;
+    statOut << " Siconos Simulation of type " << Type::name(*this) << "." <<std::endl;
     statOut <<std::endl;
     statOut << "The tolerance parameter is equal to: " << _tolerance <<std::endl;
     statOut <<std::endl <<std::endl;
@@ -430,14 +431,15 @@ void Simulation::updateOutput(unsigned int level)
 void Simulation::run()
 {
   unsigned int count = 0; // events counter.
-  std::cout << " ==== Start of " << typeName() << " simulation - This may take a while ... ====" <<std::endl;
+
+  std::cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" <<std::endl;
   while (hasNextEvent())
   {
     advanceToEvent();
     processEvents();
     count++;
   }
-  std::cout << "===== End of " << typeName() << "simulation. " << count << " events have been processed. ==== " <<std::endl;
+  std::cout << "===== End of " << Type::name(*this) << " simulation. " << count << " events have been processed. ==== " <<std::endl;
 }
 
 void Simulation::processEvents()

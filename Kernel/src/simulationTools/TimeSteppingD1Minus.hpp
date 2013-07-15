@@ -68,12 +68,6 @@ public:
   /** destructor */
   ~TimeSteppingD1Minus();
 
-  /* type name */
-  virtual std::string typeName()
-  {
-    return Type::name(*this);
-  }
-
   /** updateIndexSet using current y and lambda values of interactions
    *  \param unsigned int: number of the set to be updated
    *  0 : ALL interactions (NEVER)
