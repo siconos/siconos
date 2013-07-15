@@ -216,7 +216,7 @@ void MLCP2::computeq(double time)
   }
 }
 
-void MLCP2::preCompute(double time)
+bool MLCP2::preCompute(double time)
 {
   // This function is used to prepare data for the MixedLinearComplementarityProblem
   // - computation of M and q
@@ -257,6 +257,8 @@ void MLCP2::preCompute(double time)
 
   // Computes q of MLCP2
   computeq(time);
+
+  return true;
 
 }
 void displayNM_(const NumericsMatrix* const m)

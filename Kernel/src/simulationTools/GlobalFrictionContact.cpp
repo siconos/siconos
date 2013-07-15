@@ -333,7 +333,7 @@ void GlobalFrictionContact::computeTildeLocalVelocity(const double time)
 
 }
 
-void GlobalFrictionContact::preCompute(const double time)
+bool GlobalFrictionContact::preCompute(const double time)
 {
   // This function is used to prepare data for the GlobalFrictionContact problem
   // - computation of M, H _tildeLocalVelocity and q
@@ -399,6 +399,7 @@ void GlobalFrictionContact::preCompute(const double time)
   computeq(time);
   computeTildeLocalVelocity(time);
 
+  return true;
 }
 
 int GlobalFrictionContact::compute(double time)

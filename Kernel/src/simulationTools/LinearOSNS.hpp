@@ -281,7 +281,7 @@ public:
   /** pre-treatment for LinearOSNS
    *  \param time the current time
    */
-  virtual void preCompute(double time);
+  virtual bool preCompute(double time);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param time the current time

@@ -162,11 +162,12 @@ void displayNM(const NumericsMatrix* const m)
 
 }
 
-void MLCP::preCompute(double time)
+bool MLCP::preCompute(double time)
 {
-  LinearOSNS::preCompute(time);
+  bool res = LinearOSNS::preCompute(time);
   _numerics_problem.n = _n;
   _numerics_problem.m = _m;
+  return res;
 }
 
 int MLCP::compute(double time)

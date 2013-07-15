@@ -606,7 +606,7 @@ void LinearOSNS::computeq(double time)
 
 
 
-void LinearOSNS::preCompute(double time)
+bool LinearOSNS::preCompute(double time)
 {
   // This function is used to prepare data for the
   // LinearComplementarityProblem
@@ -628,15 +628,18 @@ void LinearOSNS::preCompute(double time)
 
   // nothing to do
   if (_levelMin == LEVELMAX)
-    return;
+    return false;
+  
+  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  assert(indexSet);
+  if (indexSet->size() == 0)
+    return false;
 
   if (!_hasBeenUpdated || !isLinear)
   {
     // Computes new _interactionBlocks if required
     updateInteractionBlocks();
 
-    // Updates matrix M
-    SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
     //    _M->fill(indexSet);
     _M->fill(indexSet, !_hasBeenUpdated);
 #ifdef LINEAROSNS_DEBUG
@@ -687,6 +690,8 @@ void LinearOSNS::preCompute(double time)
 
   // Computes q of LinearOSNS
   computeq(time);
+  
+  return true;
 
 }
 

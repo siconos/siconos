@@ -181,7 +181,7 @@ public:
     assert(false);
   }
 
-  void preCompute(double)
+  virtual bool preCompute(double time)
   {
     assert(false);
   }

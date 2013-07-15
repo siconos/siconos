@@ -113,10 +113,11 @@ public:
   void computeq(double);
 
   /** pre-treatment for MLCP
-  *  \param double : current time
-  *  \return void
+  *  \param time the current time
+  *  \return true if the computation has to be carry on, false otherwise
   */
-  virtual void preCompute(double);
+  virtual bool preCompute(double time);
+
   virtual void computeInteractionBlock(SP::Interaction, SP::Interaction);
   virtual void computeDSBlock(SP::DynamicalSystem);
   virtual void computeInteractionDSBlock(SP::Interaction , SP::DynamicalSystem);

@@ -52,12 +52,15 @@ LCP::LCP(const int newNewNumericsSolverId , const std::string& newId):
 
 int LCP::compute(double time)
 {
-  // --- Prepare data for LCP computing ---
-
-  preCompute(time);
-
 
   int info = 0;
+
+  // --- Prepare data for LCP computing ---
+  // And check if there is something to be done
+  bool cont = preCompute(time);
+  if (!cont)
+    return info;
+
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)

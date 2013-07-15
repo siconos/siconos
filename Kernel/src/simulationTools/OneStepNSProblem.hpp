@@ -467,11 +467,13 @@ public:
 
   /** save y_k, called by TimeDiscretisation::process.
    */
+
   virtual void saveInMemory();
   /** prepare data of the osns for solving
-   *  param double : current time
+   *  \param time the current time
+   *  \return true if the computation of the OSNS has to be carry on, false otherwise
    */
-  virtual void preCompute(double) = 0;
+  virtual bool preCompute(double time) = 0;
 
   /** To run the solver for ns problem
    *  \param double : current time

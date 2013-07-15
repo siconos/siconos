@@ -151,7 +151,7 @@ public:
    */
   virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&);
 
-  virtual void preCompute(double time);
+  virtual bool preCompute(double time);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
   *  \param double : current time

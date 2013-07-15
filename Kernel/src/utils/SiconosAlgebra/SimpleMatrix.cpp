@@ -425,7 +425,7 @@ double* SimpleMatrix::getArray(unsigned int, unsigned int) const
     SiconosMatrixException::selfThrow("SimpleMatrix::getArray(): not yet implemented for sparse matrix.");
 
   if (num == 1)
-    return &(((*mat.Dense).data())[0]);
+    return &(((*mat.Dense).data()).at(0));
   else if (num == 2)
     return &(((*mat.Triang).data())[0]);
   else if (num == 3)

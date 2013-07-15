@@ -354,9 +354,9 @@ public:
   void computeTildeLocalVelocity(double time);
 
   /** pre-treatment for LCP
-   *  \param double : current time
+   *  \param time current time
    */
-  void preCompute(double time);
+  virtual bool preCompute(double time);
 
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
    *  \param double current time
