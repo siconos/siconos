@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosVisitorTest.hpp"
+#include "TypeName.hpp"
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(SiconosVisitorTest);

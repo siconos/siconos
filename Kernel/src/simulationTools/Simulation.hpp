@@ -24,7 +24,6 @@
 #define SIMULATION_H
 
 #include "SiconosConst.hpp"
-#include "Tools.hpp"
 #include "SimulationTypeDef.hpp"
 #include "TimeDiscretisation.hpp"
 #include "InteractionsSet.hpp"
@@ -46,12 +45,6 @@ using namespace std::placeholders;
 #include <boost/weak_ptr.hpp>
 #endif
 
-class DynamicalSystem;
-class EventsManager;
-class OneStepIntegrator;
-class OneStepNSProblem;
-class TimeDiscretisation;
-class SimulationXML;
 
 /** Description of the simulation process (integrators, time
     discretisation and so on) - Base class for TimeStepping or
