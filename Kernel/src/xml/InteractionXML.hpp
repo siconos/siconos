@@ -25,7 +25,7 @@
 #include "SiconosDOMTreeTools.hpp"
 #include "SiconosVector.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 class DynamicalSystem;
 class Interaction;

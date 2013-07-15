@@ -26,7 +26,7 @@
 
 #include "SiconosPointers.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 #include "SSLH.hpp"
 #include "RuntimeException.hpp"

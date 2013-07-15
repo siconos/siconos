@@ -45,6 +45,9 @@
 #include "Tools.hpp"
 
 #include "SiconosPointers.hpp"
+
+#include "SiconosFwd.hpp"
+
 #include "SiconosVisitor.hpp"
 
 /** Const from old version of SiconosVector - To be reviewed */
@@ -70,11 +73,7 @@ enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTIT
 
 /** Objects used to define block matrices and vectors:*/
 
-DEFINE_SPTR(SiconosMatrix)
-DEFINE_SPTR(SimpleMatrix)
-DEFINE_SPTR(BlockMatrix)
-DEFINE_SPTR(SiconosVector)
-DEFINE_SPTR(BlockVector)
+
 
 /** Some containers for vectors - Used for example to handle x and its
     derivatives in DynamicalSystem. */

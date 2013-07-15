@@ -28,7 +28,7 @@
 #include "Tools.hpp"
 #include "SiconosPointers.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 #include "SiconosSerialization.hpp"
 

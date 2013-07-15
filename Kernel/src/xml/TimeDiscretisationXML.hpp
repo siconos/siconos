@@ -28,7 +28,7 @@
 #include "SiconosDOMTreeTools.hpp"
 #include "SiconosPointers.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 //class TimeDiscretisation;
 

@@ -23,7 +23,7 @@
 #include <vector>
 #include "SiconosPointers.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 #include "SiconosVector.hpp"
 #include "PluggedObject.hpp"

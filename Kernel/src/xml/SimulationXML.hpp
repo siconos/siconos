@@ -25,7 +25,7 @@
 
 #include "SiconosPointers.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 #include "SiconosDOMTreeTools.hpp"
 #include <set>

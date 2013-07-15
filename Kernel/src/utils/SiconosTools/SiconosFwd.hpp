@@ -1,5 +1,5 @@
-#ifndef PointersDefs_hpp
-#define PointersDefs_hpp
+#ifndef SiconosFwd_hpp
+#define SiconosFwd_hpp
 
 /* *SPtr types definitions, outside class headers because of some race
    conditions */
@@ -49,6 +49,11 @@ DEFINE_SPTR(MatrixIntegrator)
 DEFINE_SPTR(PluggedObject)
 DEFINE_SPTR(SubPluggedObject)
 
+DEFINE_SPTR(SiconosMatrix)
+DEFINE_SPTR(SimpleMatrix)
+DEFINE_SPTR(BlockMatrix)
+DEFINE_SPTR(SiconosVector)
+DEFINE_SPTR(BlockVector)
 
 TYPEDEF_SAPTR(integer)
 TYPEDEF_SPTR(integer)

@@ -29,7 +29,7 @@
 
 #include "SiconosPointers.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 #include "SiconosVisitor.hpp"
 

@@ -20,10 +20,11 @@
 #ifndef MechanicsIO_hpp
 #define MechanicsIO_hpp
 
-#ifndef FROM_IMPL
-namespace SP { 
-  class SimpleMatrix;
+
+#include <SimpleMatrix.hpp>
+  class SiconosVector;
   class Model;
+  class SpaceFilter&
 }
 #endif
 
@@ -32,31 +33,48 @@ class MechanicsIO
 protected:
 
   template<typename T, typename G>
-  SP::SimpleMatrix visitAllVertices(const G& graph) const;
+  SP::SimpleMatrix visitAllVerticesForVector(const G& graph) const;
+
+  template<typename T, typename G>
+  SP::SiconosVector visitAllVerticesForDouble(const G& graph) const;
 
 public:
   /** default constructor
    */
   MechanicsIO() {};
+  
+  /** get static objects identifications 
+   * \param broadphase a SP::SpaceFilter
+   * \return a SP::SiconosVector with ids
+   */
+  SP::SiconosVector staticIds(const SpaceFilter& broadphase) const;
+
+
+  /** get dynamical systems identifications 
+   * \param model a SP::Model
+   * \return a SP::SiconosVector with ids
+   */
+  SP::SiconosVector dynamicIds(const Model& model) const;
+
 
   /** get all positions : translation (x,y,z) + orientation quaternion
    * (qw, qx, qy, qz)
    * \param model a SP::Model
    * \return a SP::SimpleMatrix where the columns are x, y, z, qw, qx, qy, qz 
    */
-  SP::SimpleMatrix positions(SP::Model model) const;
+  SP::SimpleMatrix positions(const Model& model) const;
 
   /** get all velocities : translation (xdot, ydot, zdot) + orientation velocities 
       ox, oy, oz
       \return a SP::SimpleMatrix where the columns are xdot, ydot, zdot,
       ox, oy, oz
   */
-  SP::SimpleMatrix velocities(SP::Model model) const;
+  SP::SimpleMatrix velocities(const Model& model) const;
 
   /** get the coordinates of all contact points, normals, reactions and velocities
       \return a SP::SimpleMatrix where the columns are x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz
   */
-  SP::SimpleMatrix contactPoints(SP::Model model) const;
+  SP::SimpleMatrix contactPoints(const Model& model) const;
 };
 
 

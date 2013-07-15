@@ -14,6 +14,7 @@ from Siconos.Mechanics.ContactDetection.Bullet import \
 
 from Siconos.IO import MechanicsIO
 
+
 def object_id(obj):
     """returns an unique object identifier"""
     return obj.__hash__()
@@ -154,13 +155,14 @@ class Dat():
         """
         time = self._broadphase.model().simulation().nextTime()
 
+        ids = self._io.dynamicIds(self._broadphase)
         positions = self._io.positions(self._broadphase.model())
 
-        self._pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
-                             format(time, object_id(collision_object),
-                                    position.x(), position.y(), position.z(),
-                                    rotation.w(), rotation.x(), rotation.y(),
-                                    rotation.z()))
+        for row in positions:
+            self._pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
+                                 format(time, object_id(collision_object),
+                                        row[0], row[1], row[2], 
+                                        row[3], row[4], row[5], row[6]))
 
     def outputContactForces(self):
         """

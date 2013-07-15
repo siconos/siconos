@@ -29,7 +29,7 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 using RELATION::TYPES;
 using RELATION::SUBTYPES;

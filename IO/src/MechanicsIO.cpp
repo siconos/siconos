@@ -4,10 +4,7 @@
 #define HAVE_SICONOS_MECHANICS
 #include <VisitorMaker.hpp>
 
-#include <Disk.hpp>
-#include <Circle.hpp>
-#include <SphereLDS.hpp>
-#include <SphereNEDS.hpp>
+#include <SpaceFilter.hpp>
 
 #ifdef HAVE_BULLET
 #include <BulletDS.hpp>
@@ -21,7 +18,20 @@
 
 using namespace Alternative;
 
-struct ForPosition : public SiconosVisitor
+struct GetId : public SiconosVisitor
+{
+  
+  double result;
+  
+  template<typename T>
+  void operator()(const T& ds)
+  {
+    result = ds->number();
+  }
+};
+
+
+struct GetPosition : public SiconosVisitor
 {
 
   SP::SiconosVector result;
@@ -29,12 +39,11 @@ struct ForPosition : public SiconosVisitor
   template<typename T>
   void operator()(const T& ds)
   {
-    ds.q()->display();
     result = ds.q();
   }
 };
 
-struct ForVelocity : public SiconosVisitor
+struct GetVelocity : public SiconosVisitor
 {
   
   SP::SiconosVector result;
@@ -45,6 +54,8 @@ struct ForVelocity : public SiconosVisitor
     result = ds.velocity();
   }
 };
+
+
 
 struct ContactPointVisitor : public SiconosVisitor
 {
@@ -83,7 +94,7 @@ struct ContactPointVisitor : public SiconosVisitor
 
 
 template<typename T, typename G>
-SP::SimpleMatrix MechanicsIO::visitAllVertices(const G& graph) const
+SP::SimpleMatrix MechanicsIO::visitAllVerticesForVector(const G& graph) const
 {
   SP::SimpleMatrix result(new SimpleMatrix());
   typename G::VIterator vi, viend;
@@ -100,35 +111,99 @@ SP::SimpleMatrix MechanicsIO::visitAllVertices(const G& graph) const
   return result;
 }
 
-
-
-SP::SimpleMatrix MechanicsIO::positions(SP::Model model) const
+template<typename T, typename G>
+SP::SiconosVector MechanicsIO::visitAllVerticesForDouble(const G& graph) const
 {
-  typedef
-    Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
-              ForPosition >::Make Getter;
+  SP::SiconosVector result(new SiconosVector(graph.vertices_number()));
+  typename G::VIterator vi, viend;
+  unsigned int current_row;
+  for(current_row=0,std11::tie(vi,viend)=graph.vertices();
+      vi!=viend; ++vi, ++current_row)
+  {
+    T getter;
+    graph.bundle(*vi)->accept(getter);
+    result->setValue(current_row, *getter.result);
+  }
+  return result;
+}
 
-  return visitAllVertices<Getter>
-    (*(model->nonSmoothDynamicalSystem()->topology()->dSG(0)));
+
+#include <boost/foreach.hpp>
+SP::SiconosVector MechanicsIO::staticIds(const SpaceFilter& broadphase) const
+{
+#ifdef HAVE_BULLET
+  SP::SiconosVector result;
+
+  std11::shared_ptr<std::vector<SP::btCollisionObject> > staticObjects = 
+    ask<ForStaticObjects>(broadphase);
+  
+  if (staticObjects)
+  {
+    result.reset(new SiconosVector(staticObjects->size()));
+
+    std::vector<SP::btCollisionObject>::iterator it;
+    unsigned int current_row;
+    for(current_row = 0, it = staticObjects->begin(); 
+        it != staticObjects->end(); ++it, ++current_row)
+    {
+      result->setValue(current_row, reinterpret_cast<size_t>((*it).get()));
+    }
+  }
+
+  return result;
+#endif
+};
+
+SP::SiconosVector MechanicsIO::dynamicIds(const Model& model) const
+{
+
+  DynamicalSystemsGraph& graph = *(model.nonSmoothDynamicalSystem()->
+                                   topology()->dSG(0));
+
+  SP::SiconosVector result(new SiconosVector(graph.vertices_number()));
+
+  unsigned int current_row;
+  DynamicalSystemsGraph::VIterator vi, viend;
+  for(current_row=0,std11::tie(vi,viend)=graph.vertices();
+      vi!=viend; ++vi, ++current_row)
+  {
+    result->setValue(current_row, 
+                     reinterpret_cast<size_t>(graph.bundle(*vi).get()));
+  }
+
+  return result;
 };
 
 
-SP::SimpleMatrix MechanicsIO::velocities(SP::Model model) const
+
+SP::SimpleMatrix MechanicsIO::positions(const Model& model) const
+{
+
+  typedef
+    Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
+              GetPosition >::Make Getter;
+
+  return visitAllVerticesForVector<Getter>
+    (*(model.nonSmoothDynamicalSystem()->topology()->dSG(0)));
+};
+
+
+SP::SimpleMatrix MechanicsIO::velocities(const Model& model) const
 {
   typedef
     Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
-              ForVelocity>::Make Getter;
+              GetVelocity>::Make Getter;
 
-  return visitAllVertices<Getter>
-    (*model->nonSmoothDynamicalSystem()->topology()->dSG(0));
+  return visitAllVerticesForVector<Getter>
+    (*model.nonSmoothDynamicalSystem()->topology()->dSG(0));
 }
 
-SP::SimpleMatrix MechanicsIO::contactPoints(SP::Model model) const
+SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model) const
 {
   SP::SimpleMatrix result(new SimpleMatrix());
   DynamicalSystemsGraph::EIterator ei, eiend;
   const DynamicalSystemsGraph& graph = 
-    *model->nonSmoothDynamicalSystem()->topology()->dSG(0);
+    *model.nonSmoothDynamicalSystem()->topology()->dSG(0);
   unsigned int current_row;
   for(current_row=1,std11::tie(ei,eiend)=graph.edges();
       ei!=eiend; ++ei, ++current_row)

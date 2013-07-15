@@ -29,7 +29,7 @@
 #include "RuntimeException.hpp"
 #include "SiconosPointers.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 #include "SiconosAlgebraTypeDef.hpp"
 

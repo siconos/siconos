@@ -29,7 +29,7 @@
 #include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosPointers.hpp"
 
-#include "PointersDefs.hpp"
+#include "SiconosFwd.hpp"
 
 #include "OneStepIntegratorTypes.hpp"
 
