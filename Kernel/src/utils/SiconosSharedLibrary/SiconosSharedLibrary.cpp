@@ -35,8 +35,9 @@ PluginHandle loadPlugin(const std::string& pluginPath)
   if (!HandleRes)
   {
     DWORD err = GetLastError();
-    std::cout << "SiconosSharedLibrary::loadPlugin Error returned : " << err <<std::endl;
-    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or found " + pluginPath);
+    std::cout << "SiconosSharedLibrary::loadPlugin Error returned : " << err << std::endl;
+    std::cout << "Arguments: pluginPath = " << pluginPath << std::endl;
+    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or find " + pluginPath);
   }
 #endif
 #ifdef _SYS_UNX
@@ -44,7 +45,7 @@ PluginHandle loadPlugin(const std::string& pluginPath)
   if (!HandleRes)
   {
     std::cout << "dlerror() :" << dlerror() <<std::endl;
-    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or found " + pluginPath);
+    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or find " + pluginPath);
   }
 #endif
   openedPlugins.insert(std::make_pair(pluginPath, HandleRes));
@@ -53,15 +54,27 @@ PluginHandle loadPlugin(const std::string& pluginPath)
 
 void * getProcAddress(PluginHandle plugin, const std::string& procedure)
 {
+  void* ptr;
 #ifdef _WIN32
-  return (void*) GetProcAddress(plugin, procedure.c_str());
+  ptr = (void*) GetProcAddress(plugin, procedure.c_str());
+  if (NULL == ptr)
+  {
+    DWORD err = GetLastError();
+    std::cout << "SiconosSharedLibrary::getProcAddress Error returned : " << err << std::endl;
+    std::cout << "Arguments: procedure = " << procedure << std::endl;
+    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::getProcAddress, can not find procedure " + procedure);
+  }
 #endif
 #ifdef _SYS_UNX
-  void* ptr = dlsym(plugin, procedure.c_str());
-  if (!ptr)
-    throw SiconosSharedLibraryException(dlerror());
-  return ptr;
+  ptr = dlsym(plugin, procedure.c_str());
+  if (ptr == NULL)
+  {
+    std::cout << "SiconosSharedLibrary::getProcAddress Error returned : " << dlerror() << std::endl;
+    std::cout << "Arguments: procedure = " << procedure << std::endl;
+    throw SiconosSharedLibraryException("SiconosSharedLibrary::getProcAddress, can not find procedure " + procedure);
+  }
 #endif
+  return ptr;
 }
 
 void closePlugin(const std::string& pluginFile)

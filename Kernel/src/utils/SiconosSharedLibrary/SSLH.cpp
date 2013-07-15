@@ -60,7 +60,7 @@ const std::string getPluginName(const std::string& s)
     // return the plugin name
     int pos = s.find(":", 0);
     res = s.substr(0, pos);
-    return res;
+    return res + getSharedLibraryExtension();
   }
 }
 

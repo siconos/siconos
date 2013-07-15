@@ -48,8 +48,17 @@ PluggedObject::~PluggedObject()
 
 void PluggedObject::setComputeFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  SSLH::setFunction(&fPtr, pluginPath, functionName);
-  _pluginName = pluginPath.substr(0, pluginPath.find_last_of(".")) + ":" + functionName;
+  std::string ext = SSLH::getSharedLibraryExtension();
+  if (ext.compare(pluginPath.substr(pluginPath.size() - ext.size())) == 0)
+  {
+    SSLH::setFunction(&fPtr, pluginPath, functionName);
+    _pluginName = pluginPath.substr(0, pluginPath.find_last_of(".")) + ":" + functionName;
+  }
+  else
+  {
+    SSLH::setFunction(&fPtr, pluginPath + ext, functionName);
+    _pluginName = pluginPath + ":" + functionName;
+  }
 }
 
 void PluggedObject::setComputeFunction(const std::string& plugin)
