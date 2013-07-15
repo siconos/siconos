@@ -118,7 +118,9 @@ int GenericMechanical::compute(double time)
 {
   int info = 0;
   // --- Prepare data for GenericMechanical computing ---
-  preCompute(time);
+  bool cont = preCompute(time);
+  if (!cont)
+    return info;
   _hasBeenUpdated = true;
   /*
     La matrice _M est construite.  Ici, il faut construire les

@@ -32,7 +32,6 @@ using namespace Siconos;
 OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, int stor):
   OSNSMatrix(n, m, stor)
 {
-  convert();
 }
 
 

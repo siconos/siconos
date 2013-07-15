@@ -184,6 +184,7 @@ public:
   virtual bool preCompute(double time)
   {
     assert(false);
+    return false;
   }
 
   void postCompute()

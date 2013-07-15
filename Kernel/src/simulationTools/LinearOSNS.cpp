@@ -45,7 +45,7 @@ using namespace RELATION;
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-LinearOSNS::LinearOSNS(): _MStorageType(0), _keepLambdaAndYState(true)
+LinearOSNS::LinearOSNS(): OneStepNSProblem(), _MStorageType(0), _keepLambdaAndYState(true)
 {
 }
 // xml constructor

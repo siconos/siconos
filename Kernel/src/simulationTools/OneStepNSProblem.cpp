@@ -42,6 +42,10 @@ OneStepNSProblem::OneStepNSProblem():
   _numerics_solver_options.reset(new SolverOptions);
   _numerics_solver_options->iWork = NULL;
   _numerics_solver_options->dWork = NULL;
+  // Numerics general options
+  _numerics_options.reset(new NumericsOptions());
+  setDefaultNumericsOptions(&*_numerics_options);
+  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 }
 // --- CONSTRUCTORS/DESTRUCTOR ---
 // xml constructor
