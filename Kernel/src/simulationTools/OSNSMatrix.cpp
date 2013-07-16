@@ -18,6 +18,7 @@
  */
 #include <assert.h>
 #include "OSNSMatrix.hpp"
+#include "NonSmoothLaw.hpp"
 #include "Tools.hpp"
 //#define OSNSM_DEBUG
 
@@ -46,7 +47,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
 
     //    (*interactionBlocksPositions)[indexSet->bundle(*vd)] = dim;
     indexSet->bundle(*vd)->setAbsolutePosition(dim); 
-    dim += (indexSet->bundle(*vd)->getNonSmoothLawSize());
+    dim += (indexSet->bundle(*vd)->nonSmoothLaw()->size());
 
     assert(indexSet->bundle(*vd)->absolutePosition() < dim);
   }
@@ -99,7 +100,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
   for (std11::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
   {
     indexSet->bundle(*vd)->setAbsolutePosition(dim);
-    dim += indexSet->bundle(*vd)->getNonSmoothLawSize();
+    dim += indexSet->bundle(*vd)->nonSmoothLaw()->size();
   }
 }
 

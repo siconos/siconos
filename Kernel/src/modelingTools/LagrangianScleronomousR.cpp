@@ -24,6 +24,7 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
+#include "BlockVector.hpp"
 //#define DEBUG_MESSAGES
 //#define DEBUG_STDOUT
 #include "debug.h"

@@ -81,7 +81,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
 
   unsigned int dim = 0;
   for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
-    dim += (*it)->getNonSmoothLawSize();
+    dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
@@ -92,10 +92,10 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
-      col += (*itCol)->getNonSmoothLawSize();
+      col += (*itCol)->nonSmoothLaw()->size();
     }
     col = 0;
-    row += (*itRow)->getNonSmoothLawSize();
+    row += (*itRow)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getStorageType() == 0, true);
@@ -107,8 +107,8 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getPositionOfBlock(*it) == pos, true);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
-    pos += (*it)->getNonSmoothLawSize();
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getSizeOfDiagonalBlock(i++) == (*it)->nonSmoothLaw()->size(), true);
+    pos += (*it)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
 
@@ -125,7 +125,7 @@ void OSNSMatrixTest::testFill()
 
   unsigned int dim = 0;
   for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
-    dim += (*it)->getNonSmoothLawSize();
+    dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
@@ -136,10 +136,10 @@ void OSNSMatrixTest::testFill()
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
-      col += (*itCol)->getNonSmoothLawSize();
+      col += (*itCol)->nonSmoothLaw()->size();
     }
     col = 0;
-    row += (*itRow)->getNonSmoothLawSize();
+    row += (*itRow)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getStorageType() == 0, true);
@@ -151,8 +151,8 @@ void OSNSMatrixTest::testFill()
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getPositionOfBlock(*it) == pos, true);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
-    pos += (*it)->getNonSmoothLawSize();
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getSizeOfDiagonalBlock(i++) == (*it)->nonSmoothLaw()->size(), true);
+    pos += (*it)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
   // Start from matrix with maxSize = M and and fill it (with resize)
@@ -169,8 +169,8 @@ void OSNSMatrixTest::testFill()
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getPositionOfBlock(*it) == pos, true);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
-    pos += (*it)->getNonSmoothLawSize();
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getSizeOfDiagonalBlock(i++) == (*it)->nonSmoothLaw()->size(), true);
+    pos += (*it)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
   std::cout << "------- fill function test ended with success -------" <<std::endl;
@@ -188,7 +188,7 @@ void OSNSMatrixTest::testConvert()
   SP::NumericsMatrix NumMat = M->getNumericsMatrix();
   unsigned int dim = 0;
   for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
-    dim += (*it)->getNonSmoothLawSize();
+    dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
@@ -199,10 +199,10 @@ void OSNSMatrixTest::testConvert()
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
-      col += (*itCol)->getNonSmoothLawSize();
+      col += (*itCol)->nonSmoothLaw()->size();
     }
     col = 0;
-    row += (*itRow)->getNonSmoothLawSize();
+    row += (*itRow)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", NumMat->storageType == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", NumMat->size0 == (int)dim, true);
@@ -226,7 +226,7 @@ void OSNSMatrixTest::testFill2()
 
   unsigned int dim = 0;
   for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
-    dim += (*it)->getNonSmoothLawSize();
+    dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
@@ -237,10 +237,10 @@ void OSNSMatrixTest::testFill2()
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
-      col += (*itCol)->getNonSmoothLawSize();
+      col += (*itCol)->nonSmoothLaw()->size();
     }
     col = 0;
-    row += (*itRow)->getNonSmoothLawSize();
+    row += (*itRow)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getStorageType() == 0, true);
@@ -252,8 +252,8 @@ void OSNSMatrixTest::testFill2()
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getPositionOfBlock(*it) == pos, true);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
-    pos += (*it)->getNonSmoothLawSize();
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getSizeOfDiagonalBlock(i++) == (*it)->nonSmoothLaw()->size(), true);
+    pos += (*it)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
 
@@ -271,8 +271,8 @@ void OSNSMatrixTest::testFill2()
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getPositionOfBlock(*it) == pos, true);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
-    pos += (*it)->getNonSmoothLawSize();
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getSizeOfDiagonalBlock(i++) == (*it)->nonSmoothLaw()->size(), true);
+    pos += (*it)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
 
@@ -291,7 +291,7 @@ void OSNSMatrixTest::testConvert2()
   SP::NumericsMatrix NumMat = M->getNumericsMatrix();
   unsigned int dim = 0;
   for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
-    dim += (*it)->getNonSmoothLawSize();
+    dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
@@ -302,10 +302,10 @@ void OSNSMatrixTest::testConvert2()
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
-      col += (*itCol)->getNonSmoothLawSize();
+      col += (*itCol)->nonSmoothLaw()->size();
     }
     col = 0;
-    row += (*itRow)->getNonSmoothLawSize();
+    row += (*itRow)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", NumMat->storageType == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", NumMat->size0 == (int)dim, true);

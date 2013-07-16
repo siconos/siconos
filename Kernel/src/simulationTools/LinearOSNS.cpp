@@ -229,15 +229,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     }
   */
 
-  unsigned int nslawSize = inter->getNonSmoothLawSize();
+  unsigned int nslawSize = inter->nonSmoothLaw()->size();
 
   //   if (! indexSet->properties(vd).block)
   //   {
   //     indexSet->properties(vd).block.reset(new SimpleMatrix(nslawSize, nslawSize));
   //   }
 
-  assert(indexSet->properties(vd).block->size(0) == inter->getNonSmoothLawSize());
-  assert(indexSet->properties(vd).block->size(1) == inter->getNonSmoothLawSize());
+  assert(indexSet->properties(vd).block->size(0) == inter->nonSmoothLaw()->size());
+  assert(indexSet->properties(vd).block->size(1) == inter->nonSmoothLaw()->size());
 
   SP::SiconosMatrix currentInteractionBlock = indexSet->properties(vd).block;
 
@@ -259,7 +259,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   // matrix depending on the integrator (and on the DS), the
   // simulation type ...  left, right and extra depend on the relation
   // type and the non smooth law.
-  relationType = inter->getRelationType();
+  relationType = inter->relation()->getType();
 
   inter->getExtraInteractionBlock(currentInteractionBlock);
 
@@ -387,8 +387,8 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   unsigned int index1 = indexSet->index(indexSet->source(ed));
   unsigned int index2 = indexSet->index(indexSet->target(ed));
 
-  unsigned int nslawSize1 = inter1->getNonSmoothLawSize();
-  unsigned int nslawSize2 = inter2->getNonSmoothLawSize();
+  unsigned int nslawSize1 = inter1->nonSmoothLaw()->size();
+  unsigned int nslawSize2 = inter2->nonSmoothLaw()->size();
 
   SP::SiconosMatrix currentInteractionBlock;
 
@@ -437,8 +437,8 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   // matrix depending on the integrator (and on the DS), the
   // simulation type ...  left, right and extra depend on the relation
   // type and the non smooth law.
-  relationType1 = inter1->getRelationType();
-  relationType2 = inter2->getRelationType();
+  relationType1 = inter1->relation()->getType();
+  relationType2 = inter2->relation()->getType();
 
 
   // ==== First Order Relations - Specific treatment for diagonal
@@ -529,7 +529,7 @@ void LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)
   OSI::TYPES  osiType = Osi->getType();
 
 
-  unsigned int sizeY = inter->getNonSmoothLawSize();
+  unsigned int sizeY = inter->nonSmoothLaw()->size();
   Index coord(8);
   unsigned int relativePosition = 0;
 
@@ -571,7 +571,7 @@ void LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)
   // Add "non-smooth law effect" on q only for the case LCP at velocity level and with the NewtonImpactNSL
   if (osiType != OSI::LSODAR || ((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == this) // added by Son Nguyen
   {
-    if (inter->getRelationType() == Lagrangian || inter->getRelationType() == NewtonEuler)
+    if (inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
     {
       //    SP::SiconosVisitor nslEffectOnSim(new _NSLEffectOnSim(this, inter, pos));
       //       simulation()->accept(*nslEffectOnSim);

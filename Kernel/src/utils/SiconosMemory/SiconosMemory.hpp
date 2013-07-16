@@ -177,8 +177,5 @@ public:
   void saveMemorySizeToXML();
 
 };
-
-DEFINE_SPTR(SiconosMemory)
-
 #endif
 

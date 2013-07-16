@@ -69,7 +69,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
 #endif
   if (!_hasBeenUpdated)
   {
-    int size = inter->getNonSmoothLawSize();
+    int size = inter->nonSmoothLaw()->size();
     if (Type::value(*(inter->nonSmoothLaw()))
         == Type::EqualityConditionNSL)
     {
@@ -77,7 +77,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
 #ifdef GMP_DEBUG
       printf(" Type::EqualityConditionNSL\n");
 #endif
-      //pAux->size= inter->getNonSmoothLawSize();
+      //pAux->size= inter->nonSmoothLaw()->size();
     }
     else if (Type::value(*(inter->nonSmoothLaw()))
              == Type::NewtonImpactNSL)

@@ -20,6 +20,7 @@
 #include "LinearRXML.hpp"
 #include "Interaction.hpp"
 
+#include "BlockVector.hpp"
 
 using namespace RELATION;
 

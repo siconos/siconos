@@ -26,7 +26,7 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "OneStepIntegrator.hpp"
 #include "MLCPProjectOnConstraints.hpp"
-
+#include "NonSmoothLaw.hpp"
 
 class MLCPProjectOnConstraints;
 
@@ -665,7 +665,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
   {
     SP::Interaction interac = indexSet->bundle(*aVi);
     interac->computeOutput(getTkp1(), 0);
-    interac->computeJach(getTkp1());
+    interac->relation()->computeJach(getTkp1(), *interac);
 
 
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||

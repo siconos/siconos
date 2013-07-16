@@ -29,7 +29,7 @@
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "ZeroOrderHold.hpp"
-
+#include "NonSmoothLaw.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -213,7 +213,7 @@ void OneStepNSProblem::updateInteractionBlocks()
          vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet->bundle(*vi);
-      unsigned int nslawSize = inter->getNonSmoothLawSize();
+      unsigned int nslawSize = inter->nonSmoothLaw()->size();
       if (! indexSet->properties(*vi).block)
       {
         indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
@@ -247,8 +247,8 @@ void OneStepNSProblem::updateInteractionBlocks()
       assert(indexSet->index(ed1) <= indexSet->index(ed2));
 
       // Memory allocation if needed
-      unsigned int nslawSize1 = inter1->getNonSmoothLawSize();
-      unsigned int nslawSize2 = inter2->getNonSmoothLawSize();
+      unsigned int nslawSize1 = inter1->nonSmoothLaw()->size();
+      unsigned int nslawSize2 = inter2->nonSmoothLaw()->size();
       unsigned int isrc = indexSet->index(indexSet->source(*ei));
       unsigned int itar = indexSet->index(indexSet->target(*ei));
 
@@ -324,7 +324,7 @@ void OneStepNSProblem::updateInteractionBlocks()
          vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet->bundle(*vi);
-      unsigned int nslawSize = inter->getNonSmoothLawSize();
+      unsigned int nslawSize = inter->nonSmoothLaw()->size();
       if (! indexSet->properties(*vi).block)
       {
         indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
@@ -386,8 +386,8 @@ void OneStepNSProblem::updateInteractionBlocks()
         SP::Interaction inter2 = indexSet->bundle(indexSet->target(*oei));
 
         // Memory allocation if needed
-        unsigned int nslawSize1 = inter1->getNonSmoothLawSize();
-        unsigned int nslawSize2 = inter2->getNonSmoothLawSize();
+        unsigned int nslawSize1 = inter1->nonSmoothLaw()->size();
+        unsigned int nslawSize2 = inter2->nonSmoothLaw()->size();
         unsigned int isrc = indexSet->index(indexSet->source(*oei));
         unsigned int itar = indexSet->index(indexSet->target(*oei));
 

@@ -635,7 +635,7 @@ struct ZeroOrderHold::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.e();
     Index subCoord(4);
     subCoord[0] = 0;
-    subCoord[1] = _inter->getNonSmoothLawSize();
+    subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     subscal(e, *_inter->y_k(_osnsp->levelMin()), *(_inter->yp()), subCoord, false);
@@ -667,10 +667,10 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
 
 
   // Get relation and non smooth law types
-  RELATION::TYPES relationType = inter->getRelationType();
-  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
+  RELATION::TYPES relationType = inter->relation()->getType();
+  RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
 
-  unsigned int sizeY = inter->getNonSmoothLawSize();
+  unsigned int sizeY = inter->nonSmoothLaw()->size();
 
   unsigned int relativePosition = 0;
 

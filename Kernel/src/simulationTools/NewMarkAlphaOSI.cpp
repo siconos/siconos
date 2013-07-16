@@ -21,7 +21,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianScleronomousR.hpp"
 #include "LagrangianR.hpp"
-
+#include "NonSmoothLaw.hpp"
 using namespace RELATION;
 //#define DEBUG_NEWMARK
 
@@ -304,12 +304,12 @@ void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem 
 {
   double t = simulationLink->nextTime();
   // Get the type of relation
-  RELATION::TYPES relationType = inter->getRelationType();
-  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
+  RELATION::TYPES relationType = inter->relation()->getType();
+  RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
   // Get the set of OSNSPs
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
   // get the size of the interaction
-  unsigned int sizeY = inter->getNonSmoothLawSize();
+  unsigned int sizeY = inter->nonSmoothLaw()->size();
   // get pointer to delta q_free of Dynamical Systems concerned with the interaction
 
   SP::BlockVector q_free;
@@ -374,7 +374,7 @@ void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem 
       else if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() == osnsp) // LCP at position level
       {
         // Update Jacobian matrix
-        inter->computeJach(t);
+        inter->relation()->computeJach(t, *inter);
         // cumpute y_free = y_{n,k} + G*q_free
         if (!_IsVelocityLevel) // output at the position level y_{n,k} = g_{n,k}
         {

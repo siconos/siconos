@@ -940,7 +940,7 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.e();
     Index subCoord(4);
     subCoord[0] = 0;
-    subCoord[1] = _inter->getNonSmoothLawSize();
+    subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     // Only the normal part is multiplied by e
@@ -983,12 +983,12 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
 
   // Get relation and non smooth law types
-  RELATION::TYPES relationType = inter->getRelationType();
-  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
+  RELATION::TYPES relationType = inter->relation()->getType();
+  RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
 
   SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
 
-  unsigned int sizeY = inter->getNonSmoothLawSize();
+  unsigned int sizeY = inter->nonSmoothLaw()->size();
 
   unsigned int relativePosition = 0;
 
@@ -1087,7 +1087,7 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
 
 
 
-  if (inter->getRelationSubType() == LinearTIR)
+  if (inter->relation()->getSubType() == LinearTIR)
   {
     SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
     inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);

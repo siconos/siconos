@@ -24,7 +24,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "InteractionXML.hpp"
-
+#include "Relation.hpp"
 
 using namespace RELATION;
 
@@ -156,6 +156,13 @@ double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
   }
   return(convergenceIndicator);
 }
+
+void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
+{
+  _mIsLinear = ((inter)->relation()->isLinear() && _mIsLinear);
+  _topology->link(inter, ds1, ds2);
+};
+
 
 void NonSmoothDynamicalSystem::clear()
 {

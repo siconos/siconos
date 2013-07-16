@@ -28,7 +28,6 @@
 #include "InteractionsSet.hpp"
 #include "DynamicalSystemsSet.hpp"
 #include "Topology.hpp"
-
 class Interaction;
 class DynamicalSystem;
 class Topology;
@@ -173,11 +172,7 @@ public:
    * \param ds1 a SP::DynamicalSystem
    * \param ds2 a SP::DynamicalSystem (optional)
    */
-  inline void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem())
-  {
-    _mIsLinear = ((inter)->relation()->isLinear() && _mIsLinear);
-    _topology->link(inter, ds1, ds2);
-  };
+  void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
     /** specify id the given Interaction is for controlling the DS
    * \param inter the Interaction

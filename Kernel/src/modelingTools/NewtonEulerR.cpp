@@ -24,7 +24,7 @@
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"
 
-
+#include "BlockVector.hpp"
 
 //#define NER_DEBUG
 //#define DEBUG_STDOUT

@@ -55,6 +55,8 @@ DEFINE_SPTR(BlockMatrix)
 DEFINE_SPTR(SiconosVector)
 DEFINE_SPTR(BlockVector)
 
+DEFINE_SPTR(SiconosMemory)
+
 TYPEDEF_SAPTR(integer)
 TYPEDEF_SPTR(integer)
 TYPEDEF_SAPTR(doublereal)

@@ -63,8 +63,8 @@ void  MLCP::reset()
 void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
 {
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
-  unsigned int nslawSize1 = inter1->getNonSmoothLawSize();
-  unsigned int nslawSize2 = inter2->getNonSmoothLawSize();
+  unsigned int nslawSize1 = inter1->nonSmoothLaw()->size();
+  unsigned int nslawSize2 = inter2->nonSmoothLaw()->size();
 
   unsigned int equalitySize1 =  0;
   unsigned int equalitySize2 =  0;

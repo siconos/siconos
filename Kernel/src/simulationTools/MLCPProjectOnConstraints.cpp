@@ -595,7 +595,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     if (Type::value(*ds) == Type::LagrangianLinearTIDS ||
         Type::value(*ds) == Type::LagrangianDS)
     {
-      if (inter->getRelationType() != Lagrangian)
+      if (inter->relation()->getType() != Lagrangian)
       {
         RuntimeException::selfThrow(
           "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - relation is not of type Lagrangian with a LagrangianDS.");
@@ -648,7 +648,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     else if (Type::value(*ds) == Type::NewtonEulerDS)
     {
 
-      if (inter->getRelationType() != NewtonEuler)
+      if (inter->relation()->getType() != NewtonEuler)
       {
         RuntimeException::selfThrow("MLCPProjectOnConstraints::computeDiagonalInteractionBlock - relation is not from NewtonEulerR.");
       }
@@ -829,8 +829,8 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     // matrix depending on the integrator (and on the DS), the
     // simulation type ...  left, right and extra depend on the relation
     // type and the non smooth law.
-    relationType1 = inter1->getRelationType();
-    relationType2 = inter2->getRelationType();
+    relationType1 = inter1->relation()->getType();
+    relationType2 = inter2->relation()->getType();
     if (relationType1 == NewtonEuler &&
         relationType2 == NewtonEuler)
     {
@@ -987,7 +987,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         // Get the relative position of inter-interactionBlock in the vector w
         // or z
         pos = _M->getPositionOfInteractionBlock(inter);
-        RELATION::TYPES relationType = inter->getRelationType();
+        RELATION::TYPES relationType = inter->relation()->getType();
         if (relationType == NewtonEuler)
         {
           postComputeNewtonEulerR(inter, pos);
@@ -1137,7 +1137,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       //  printf("MLCPProjectOnConstraints::computeOptions\n");
       // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
       RELATION::TYPES relationType1;
-      relationType1 = inter1->getRelationType();
+      relationType1 = inter1->relation()->getType();
       // Retrieve size of Y (projected variable)
       unsigned int sizeY1;
       sizeY1 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>

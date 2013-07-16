@@ -33,7 +33,8 @@
 #include "EventFactory.hpp"
 #include "BlockMatrix.hpp"
 #include "NewMarkAlphaOSI.hpp"
-
+#include "Relation.hpp"
+#include "NonSmoothLaw.hpp"
 //#define DEBUG_MESSAGES
 
 #include <debug.h>
@@ -270,7 +271,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 void EventDriven::initializeInteraction(SP::Interaction inter)
 {
 
-  RELATION::TYPES pbType = inter->getRelationType();
+  RELATION::TYPES pbType = inter->relation()->getType();
   if (pbType == Lagrangian)
   {
     //    inter->setDataXFromVelocity();
@@ -447,7 +448,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
-    inter->computeJach(t);
+    inter->relation()->computeJach(t, *inter);
   }
 
   // solve a LCP at "acceleration" level if required
@@ -596,7 +597,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
-    nsLawSize = inter->getNonSmoothLawSize();
+    nsLawSize = inter->nonSmoothLaw()->size();
     y = inter->y(0);   // output y at this Interaction
     ydot = inter->y(1); // output of level 1 at this Interaction
     yddot = inter->y(2);
@@ -1046,7 +1047,7 @@ double EventDriven::detectEvents(bool _IsUpdateIstate)
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
-    double nsLawSize = inter->getNonSmoothLawSize();
+    double nsLawSize = inter->nonSmoothLaw()->size();
     if (nsLawSize != 1)
     {
       RuntimeException::selfThrow("In EventDriven::detectEvents, the interaction size > 1 has not been implemented yet!!!");

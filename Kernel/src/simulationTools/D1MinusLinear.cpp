@@ -25,7 +25,7 @@
 #include "LagrangianScleronomousR.hpp"
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactNSL.hpp"
-
+#include "BlockVector.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -54,7 +54,7 @@ struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e = nslaw.e();
     Index subCoord(4);
     subCoord[0] = 0;
-    subCoord[1] = _inter->getNonSmoothLawSize();
+    subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     subscal(e, *(_inter->y_k(_osnsp->levelMin())), *(_inter->yp()), subCoord, false);
@@ -229,8 +229,8 @@ double D1MinusLinear::computeResidu()
 
       for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
       {
-        (*it)->computeJach(told);
-        (*it)->computeJacg(told);
+        (*it)->relation()->computeJach(told, *(*it));
+        (*it)->relation()->computeJacg(told, *(*it));
       }
 
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -599,8 +599,8 @@ double D1MinusLinear::computeResidu()
 
       for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
       {
-        (*it)->computeJach(t);
-        (*it)->computeJacg(t);
+        (*it)->relation()->computeJach(t, **it);
+        (*it)->relation()->computeJacg(t, **it);
       }
 
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -835,10 +835,10 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
 
   // get relation and non smooth law information
-  RELATION::TYPES relationType = inter->getRelationType(); // relation
-  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
+  RELATION::TYPES relationType = inter->relation()->getType(); // relation
+  RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
   unsigned int relativePosition = 0;
-  unsigned int sizeY = inter->getNonSmoothLawSize(); // related NSL
+  unsigned int sizeY = inter->nonSmoothLaw()->size(); // related NSL
 
   Index coord(8);
   coord[0] = relativePosition;

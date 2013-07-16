@@ -32,9 +32,12 @@
 #include "EventsManager.hpp"
 #include "FrictionContact.hpp"
 #include "FirstOrderNonLinearDS.hpp"
+#include "NonSmoothLaw.hpp"
 // #define DEBUG_STDOUT
 //#define DEBUG_MESSAGES 1
 #include "TypeName.hpp"
+#include "Relation.hpp"
+#include "BlockVector.hpp"
 #include <debug.h>
 
 
@@ -590,7 +593,7 @@ void   TimeStepping::prepareNewtonIteration()
 
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
-    (*it)->preparNewtonIteration();
+    (*it)->relation()->preparNewtonIteration(**it);
   }
 
   /* let's consider only active Interactions */

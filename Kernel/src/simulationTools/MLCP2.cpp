@@ -144,8 +144,8 @@ void MLCP2::computeInteractionBlock(SP::Interaction inter1, SP::Interaction inte
 {
   if (!interactionBlocks[inter1][inter1])
   {
-    interactionBlocks[inter1][inter1].reset(new SimpleMatrix(inter1->getNonSmoothLawSize(), inter1->getNonSmoothLawSize()));
-    m += inter1->getNonSmoothLawSize();
+    interactionBlocks[inter1][inter1].reset(new SimpleMatrix(inter1->nonSmoothLaw()->size(), inter1->nonSmoothLaw()->size()));
+    m += inter1->nonSmoothLaw()->size();
   }
   inter1->getExtraInteractionBlock(interactionBlocks[inter1][inter1]);
 }
@@ -156,7 +156,7 @@ void MLCP2::computeInteractionDSBlock(SP::Interaction inter, SP::DynamicalSystem
 {
   if (interactionDSBlocks[inter][DS] == 0)
   {
-    interactionDSBlocks[inter][DS].reset(new SimpleMatrix(inter->getNonSmoothLawSize(), DS->getDim()));
+    interactionDSBlocks[inter][DS].reset(new SimpleMatrix(inter->nonSmoothLaw()->size(), DS->getDim()));
   }
   inter->getLeftInteractionBlockForDS(DS, interactionDSBlocks[inter][DS]);
 }
@@ -167,7 +167,7 @@ void MLCP2::computeDSInteractionBlock(SP::DynamicalSystem DS, SP::Interaction in
   double h = simulation->timeStep();
   if (!DSInteractionBlocks[DS][inter])
   {
-    DSInteractionBlocks[DS][inter].reset(new SimpleMatrix(DS->getDim(), inter->getNonSmoothLawSize()));
+    DSInteractionBlocks[DS][inter].reset(new SimpleMatrix(DS->getDim(), inter->nonSmoothLaw()->size()));
   }
   inter->getRightInteractionBlockForDS(DS, DSInteractionBlocks[DS][inter]);
   *(DSInteractionBlocks[DS][inter]) *= h;
@@ -340,7 +340,7 @@ void MLCP2::postCompute()
   for (InteractionsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
     // size of the block that corresponds to the current Interaction
-    nsLawSize = (*itCurrent)->getNonSmoothLawSize();
+    nsLawSize = (*itCurrent)->nonSmoothLaw()->size();
     // Get the relative position of inter-block in the vector w or z
     pos = M->getPositionOfInteractionBlock(*itCurrent);
 

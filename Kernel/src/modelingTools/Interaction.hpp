@@ -26,20 +26,12 @@
 #define INTERACTION_H
 
 // const
-#include "BlockVector.hpp"
 #include "DynamicalSystemsSet.hpp"
-#include "Tools.hpp"
-#include "NonSmoothLaw.hpp"
 #include "RelationNamespace.hpp"
-#include "Relation.hpp"
+
 #include "SiconosPointers.hpp"
-#include "LagrangianDS.hpp"
-#include "FirstOrderLinearTIDS.hpp"
-
-class DynamicalSystem;
-
-
-
+#include "SiconosFwd.hpp"
+#include <vector>
 typedef std::vector<SP::SiconosMemory> VectorOfMemories;
 
 /**  An Interaction describes the non-smooth interactions
@@ -714,14 +706,6 @@ public:
   */
   void setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw) ;
 
-  /** get the size of the NonSmoothLaw of this Interaction
-   * \return the size of the NonSmoothLaw
-   */
-  inline unsigned int getNonSmoothLawSize() const
-  {
-    return _nslaw->size();
-  }
-
   /** function used to sort Interaction in SiconosSet<SP::Interaction>
    *  \return a double* (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
    */
@@ -854,20 +838,6 @@ public:
   */
   void saveInteractionToXML();
 
-  /** returns the type of the embedded relation.
-   */
-  inline RELATION::TYPES getRelationType() const
-  {
-    return _relation->getType();
-  }
-
-  /** returns the subtype of the embedded relation.
-   */
-  inline RELATION::SUBTYPES getRelationSubType() const
-  {
-    return _relation->getSubType();
-  }
-
   /*
    * Return H_alpha
    *
@@ -908,18 +878,6 @@ public:
   void LinkDataFromMemory(unsigned int memoryLevel);
   void LinkDataFromMemoryLagrangian(unsigned int memoryLevel);
 
-  inline void preparNewtonIteration()
-  {
-    _relation->preparNewtonIteration(*this);
-  }
-  inline void computeJach(const double time)
-  {
-    _relation->computeJach(time, *this);
-  }
-  inline void computeJacg(const double time)
-  {
-    _relation->computeJacg(time, *this);
-  }
 };
 
 #endif // INTERACTION_H

@@ -24,6 +24,7 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
+#include "BlockVector.hpp"
 
 using namespace RELATION;
 

@@ -22,7 +22,7 @@
 #include "RelationTypes.hpp"
 #include "NewtonEulerR.hpp"
 #include "LagrangianR.hpp"
-
+#include "NonSmoothLaw.hpp"
 
 using namespace RELATION;
 using namespace Siconos;

@@ -21,7 +21,7 @@
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "BlockCSRMatrix.hpp"
-
+#include "NonSmoothLaw.hpp"
 
 
 // Default constructor: empty matrix
@@ -142,9 +142,9 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
   {
     SP::Interaction inter = indexSet->bundle(*vi);
 
-    assert(inter->getNonSmoothLawSize() > 0);
+    assert(inter->nonSmoothLaw()->size() > 0);
 
-    sizeV  += inter->getNonSmoothLawSize();
+    sizeV  += inter->nonSmoothLaw()->size();
     (*diagSizes)[indexSet->index(*vi)] = sizeV;
     assert((*diagSizes)[indexSet->index(*vi)] > 0);
 

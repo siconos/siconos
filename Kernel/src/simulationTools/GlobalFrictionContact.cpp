@@ -191,8 +191,8 @@ void GlobalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
 void GlobalFrictionContact::computeInteractionDSBlock(SP::Interaction inter, SP::DynamicalSystem DS)
 {
   unsigned int sizeDS = (DS)->getDim();
-  unsigned int nslawSize = inter->getNonSmoothLawSize();
-  RELATION::TYPES relationType = inter->getRelationType();
+  unsigned int nslawSize = inter->nonSmoothLaw()->size();
+  RELATION::TYPES relationType = inter->relation()->getType();
 
   if (relationType == Lagrangian)
   {
@@ -238,8 +238,8 @@ void GlobalFrictionContact::computeqBlockDS(SP::DynamicalSystem DS, unsigned int
 void GlobalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter, unsigned int pos)
 {
   // Get relation and non smooth law types
-  RELATION::TYPES relationType = inter->getRelationType();
-  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
+  RELATION::TYPES relationType = inter->relation()->getType();
+  RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
   std::string nslawType = inter->getNonSmoothLawType();
 
   std::string simulationType = simulation->getType();
@@ -247,7 +247,7 @@ void GlobalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
   SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
   std::string osiType = simulation->integratorOfDS(ds)->getType();
 
-  unsigned int sizeY = inter->getNonSmoothLawSize();
+  unsigned int sizeY = inter->nonSmoothLaw()->size();
   Index coord(8);
 
   unsigned int relativePosition = 0;
@@ -268,7 +268,7 @@ void GlobalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
     RuntimeException::selfThrow("GlobalFrictionContact::computeTildeLocalVelocityBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q
-  if (inter->getRelationType() == Lagrangian)
+  if (inter->relation()->getType() == Lagrangian)
   {
     double e;
     if (nslawType == NEWTONIMPACTNSLAW)
@@ -280,7 +280,7 @@ void GlobalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
       if (simulationType == "TimeStepping")
       {
         subCoord[0] = 0;
-        subCoord[1] = inter->getNonSmoothLawSize();
+        subCoord[1] = inter->nonSmoothLaw()->size();
         subCoord[2] = pos;
         subCoord[3] = pos + subCoord[1];
         subscal(e, *inter->yOld(levelMin), *q, subCoord, false);
@@ -288,7 +288,7 @@ void GlobalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
       else if (simulationType == "EventDriven")
       {
         subCoord[0] = pos;
-        subCoord[1] = pos + inter->getNonSmoothLawSize();
+        subCoord[1] = pos + inter->nonSmoothLaw()->size();
         subCoord[2] = pos;
         subCoord[3] = subCoord[1];
         subscal(e, *_tildeLocalVelocity, *_tildeLocalVelocity, subCoord, false); // _tildeLocalVelocity = _tildeLocalVelocity + e * _tildeLocalVelocity
@@ -475,7 +475,7 @@ void GlobalFrictionContact::postCompute()
   //   for(InteractionsIterator itCurrent = indexSet->begin(); itCurrent!=  indexSet->end(); ++itCurrent)
   //     {
   //       // size of the interactionBlock that corresponds to the current Interaction
-  //       nsLawSize = (*itCurrent)->getNonSmoothLawSize();
+  //       nsLawSize = (*itCurrent)->nonSmoothLaw()->size();
   //       // Get the relative position of inter-interactionBlock in the vector velocity or reaction
   //       pos = H->getPositionOfInteractionBlock(*itCurrent);
 

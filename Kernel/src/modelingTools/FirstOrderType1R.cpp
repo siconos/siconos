@@ -21,6 +21,7 @@
 #include "Interaction.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 
+#include "BlockVector.hpp"
 
 
 // xml constructor

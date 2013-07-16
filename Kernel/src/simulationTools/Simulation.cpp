@@ -40,7 +40,7 @@
 #include "LCP.hpp"
 #include "QP.hpp"
 #include "Relay.hpp"
-
+#include "NonSmoothLaw.hpp"
 #include "TypeName.hpp"
 // for Debug
 //#define DEBUG_STDOUT

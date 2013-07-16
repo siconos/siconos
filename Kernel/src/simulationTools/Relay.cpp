@@ -58,7 +58,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
   {
 
     // std::cout << "Relay::_BoundsNSLEffect visit"  <<std::endl;
-    for (unsigned int i = 0; i <  _inter->getNonSmoothLawSize(); i++)
+    for (unsigned int i = 0; i <  _inter->nonSmoothLaw()->size(); i++)
     {
       (*(_parent->lb()))(_pos + i) =
         nslaw.lb();
@@ -69,7 +69,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
 
   void visit(const ComplementarityConditionNSL& nslaw)
   {
-    for (unsigned int i = 0; i <  _inter->getNonSmoothLawSize(); i++)
+    for (unsigned int i = 0; i <  _inter->nonSmoothLaw()->size(); i++)
     {
       (*(_parent->lb()))(_pos + i) = 0.0;
       (*(_parent->ub()))(_pos + i) = 1e+24;

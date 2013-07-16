@@ -1288,7 +1288,7 @@ struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.e();
     Index subCoord(4);
     subCoord[0] = 0;
-    subCoord[1] = _inter->getNonSmoothLawSize();
+    subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     subscal(e, *_inter->y_k(_osnsp->levelMin()), *(_inter->yp()), subCoord, false);
@@ -1322,12 +1322,12 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
 
   // Get relation and non smooth law types
-  RELATION::TYPES relationType = inter->getRelationType();
-  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
+  RELATION::TYPES relationType = inter->relation()->getType();
+  RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
 
   SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
 
-  unsigned int sizeY = inter->getNonSmoothLawSize();
+  unsigned int sizeY = inter->nonSmoothLaw()->size();
 
   unsigned int relativePosition = 0;
 
@@ -1550,7 +1550,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 
   }
 
-  if (inter->getRelationType() == Lagrangian || inter->getRelationType() == NewtonEuler)
+  if (inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
   {
     _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
     inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);

@@ -24,6 +24,7 @@
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "OneStepIntegrator.hpp"
+#include "NonSmoothLaw.hpp"
 
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 //#define TSPROJ_DEBUG
@@ -467,7 +468,7 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
     SP::Interaction inter = indexSet->bundle(*aVi);
     SP::Interaction interac = inter;
     interac->computeOutput(getTkp1(), 0);
-    interac->computeJach(getTkp1());
+    interac->relation()->computeJach(getTkp1(), *interac);
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {

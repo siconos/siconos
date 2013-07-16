@@ -21,6 +21,8 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include <boost/math/quaternion.hpp>
 #include "NewtonEulerDS.hpp"
+
+#include "BlockVector.hpp"
 //#define NERI_DEBUG
 
 

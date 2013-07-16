@@ -33,11 +33,14 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "DynamicalSystem.hpp"
 
+#include "LagrangianDS.hpp"
 
 #include "FirstOrderR.hpp"
 #include "LagrangianR.hpp"
 #include "NewtonEulerR.hpp" // ??
 #include "NewtonEulerDS.hpp" // ??
+
+#include "BlockVector.hpp"
 
 using namespace std;
 using namespace RELATION;
@@ -286,6 +289,7 @@ void Interaction::initData()
 
 }
 
+#include "FirstOrderNonLinearDS.hpp"
 // It could be interesting to make Interaction a pure virtual class and to derive 3
 // classes, one for each type of relation
 void Interaction::initDataFirstOrder()
