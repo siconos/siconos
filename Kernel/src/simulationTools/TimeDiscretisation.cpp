@@ -95,7 +95,7 @@ TimeDiscretisation::TimeDiscretisation(const TkVector& newTk):
 TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T):
   _h(0.0), _k(0), _tdCase(2), _pos(0), _t0(t0)
 {
-  _h = ceil((T - t0) / nSteps);
+  _h = (T - t0) / nSteps;
   _tk.reserve(3);
   _tk.push_back(t0);
   _tk.push_back(t0 + _h);
