@@ -43,7 +43,7 @@ BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
                 pow(q(5), 2) +  pow(q(6), 2)) - 1.) >= 1e-10)
   {
     RuntimeException::selfThrow(
-      " Input quaternion is not a unit quaternion "
+      "BulletDS: quaternion in position parameter is not a unit quaternion "
     );
   }
 

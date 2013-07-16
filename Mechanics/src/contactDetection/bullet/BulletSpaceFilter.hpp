@@ -20,15 +20,13 @@
 #ifndef BulletSpaceFilter_hpp
 #define BulletSpaceFilter_hpp
 
-#include "BulletSiconos.hpp"
+#include "BulletSiconosFwd.hpp"
 #include "SpaceFilter.hpp"
+
 #include "BulletR.hpp"
 #include "BulletFrom1DLocalFrameR.hpp"
-#include "BulletDS.hpp"
+
 #include <Question.hpp>
-
-#include <bullet/btBulletCollisionCommon.h>
-
 
 class BulletSpaceFilter : public SpaceFilter
 {
@@ -128,9 +126,6 @@ public:
 
   ACCEPT_STD_VISITORS();
 };
-
-DEFINE_SPTR(BulletSpaceFilter)
-
 
 struct ForCollisionWorld : public Question<SP::btCollisionWorld>
 {

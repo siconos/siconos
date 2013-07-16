@@ -20,8 +20,8 @@
 #ifndef BulletTimeStepping_hpp
 #define BulletTimeStepping_hpp
 
+#include "BulletSiconosFwd.hpp"
 #include "TimeStepping.hpp"
-#include "BulletSpaceFilter.hpp"
 
 class BulletTimeStepping : public TimeStepping
 {
@@ -39,4 +39,3 @@ public:
 
 #endif
 
-TYPEDEF_SPTR(BulletTimeStepping)

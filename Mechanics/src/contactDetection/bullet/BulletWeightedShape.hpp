@@ -19,16 +19,13 @@
 
 #ifndef BULLET_WEIGHTED_SHAPE_HPP
 #define BULLET_WEIGHTED_SHAPE_HPP
-#include "BulletSiconos.hpp"
 
-#include "SimpleMatrix.hpp"
+#include "BulletSiconosFwd.hpp"
+#include <SiconosFwd.hpp>
 
 class BulletWeightedShape
 {
 private:
-  /** serialization hooks
-  */
-  ACCEPT_SERIALIZATION(BulletWeightedShape);
 
   double _mass;
   SP::btCollisionShape _shape;
@@ -52,7 +49,4 @@ public:
     return _inertia;
   };
 };
-
-TYPEDEF_SPTR(BulletWeightedShape)
-
 #endif

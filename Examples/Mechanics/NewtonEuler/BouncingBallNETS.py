@@ -162,7 +162,7 @@ dataPlot[0, 15] = v[2]
 k = 1
 
 # time loop
-while(s.hasNextEvent()):
+while(s.hasNextEvent() and k < 2000):
     s.computeOneStep()
 
     dataPlot[k, 0] = s.nextTime()

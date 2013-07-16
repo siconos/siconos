@@ -18,7 +18,7 @@
 */
 
 #include "BulletTimeStepping.hpp"
-#include "BulletSiconos.hpp"
+#include "BulletSiconosFwd.hpp"
 #include "BulletDS.hpp"
 #include <btBulletCollisionCommon.h>
 

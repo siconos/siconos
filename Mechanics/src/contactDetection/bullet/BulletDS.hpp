@@ -20,10 +20,7 @@
 #ifndef BulletDS_hpp
 #define BulletDS_hpp
 
-#include "SiconosPointers.hpp"
-#include "BulletSiconos.hpp"
-#include "BulletWeightedShape.hpp"
-
+#include "BulletSiconosFwd.hpp"
 #include "NewtonEulerDS.hpp"
 
 #include <Question.hpp>
@@ -100,9 +97,5 @@ struct UpdateCollisionObject : public SiconosVisitor
     bds.updateCollisionObject();
   }
 };
-
-
-TYPEDEF_SPTR(BulletDS)
-
 #endif
 

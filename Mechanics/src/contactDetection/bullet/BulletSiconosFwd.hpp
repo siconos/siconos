@@ -18,12 +18,8 @@
 */
 
 
-#ifndef BulletSiconos_hpp
-#define BulletSiconos_hpp
-
-#include <bullet/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
-#include <bullet/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h>
-#include <bullet/BulletCollision/CollisionShapes/btTriangleIndexVertexMaterialArray.h>
+#ifndef BulletSiconosFwd_hpp
+#define BulletSiconosFwd_hpp
 
 #include "SiconosPointers.hpp"
 
@@ -47,5 +43,12 @@ DEFINE_SPTR(btVector3);
 DEFINE_SPTR(btPersistentManifold);
 
 DEFINE_SPTR(btBroadphaseInterface);
+
+DEFINE_SPTR(BulletDS);
+DEFINE_SPTR(BulletWeightedShape);
+DEFINE_SPTR(BulletR);
+DEFINE_SPTR(BulletFrom1DLocalFrameR);
+DEFINE_SPTR(BulletSpaceFilter);
+DEFINE_SPTR(BulletTimeStepping);
 
 #endif

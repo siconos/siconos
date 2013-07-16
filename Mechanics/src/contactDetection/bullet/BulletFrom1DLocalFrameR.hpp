@@ -20,7 +20,7 @@
 #ifndef BulletFrom1DLocalFrameR_hpp
 #define BulletFrom1DLocalFrameR_hpp
 
-#include "BulletSiconos.hpp"
+#include "BulletSiconosFwd.hpp"
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 
 class BulletFrom1DLocalFrameR : public NewtonEulerFrom1DLocalFrameR
@@ -51,6 +51,4 @@ public:
 
   ACCEPT_STD_VISITORS();
 };
-
-TYPEDEF_SPTR(BulletFrom1DLocalFrameR)
 #endif

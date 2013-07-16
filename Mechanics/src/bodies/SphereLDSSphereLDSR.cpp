@@ -20,7 +20,7 @@
 
 #include <cmath>
 #include "SphereLDSSphereLDSR.hpp"
-
+#include <BlockVector.hpp>
 SphereLDSSphereLDSR::SphereLDSSphereLDSR(double r, double rr) : LagrangianScleronomousR()
 {
   r1 = r;

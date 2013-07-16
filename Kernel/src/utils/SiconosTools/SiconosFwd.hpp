@@ -1,9 +1,15 @@
 #ifndef SiconosFwd_hpp
 #define SiconosFwd_hpp
 
-/* *SPtr types definitions, outside class headers because of some race
-   conditions */
+#include "SiconosPointers.hpp"
 
+/* Forward declarations */
+
+/* Numerics */
+TYPEDEF_SPTR(MixedLinearComplementarityProblem)
+
+
+/* Kernel */
 DEFINE_SPTR(BlockCSRMatrix)
 
 DEFINE_SPTR(DynamicalSystemXML)
@@ -35,7 +41,6 @@ DEFINE_SPTR(EventDriven)
 DEFINE_SPTR(LCP)
 
 DEFINE_SPTR(MixedComplementarityConditionNSL)
-TYPEDEF_SPTR(MixedLinearComplementarityProblem)
 
 DEFINE_SPTR(TimeDiscretisationXML)
 DEFINE_SPTR(TimeDiscretisation)

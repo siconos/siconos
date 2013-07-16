@@ -18,7 +18,11 @@
 */
 
 #include "BulletSpaceFilter.hpp"
-#include "BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h"
+
+#include "BulletDS.hpp"
+
+#include <bullet/btBulletCollisionCommon.h>
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
@@ -96,7 +100,7 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 void BulletSpaceFilter::buildInteractions(double time)
 {
 
-  if (not _dynamicCollisionsObjectsInserted)
+  if (! _dynamicCollisionsObjectsInserted)
   {
     DynamicalSystemsGraph& dsg = *(_model->nonSmoothDynamicalSystem()->dynamicalSystems());
     DynamicalSystemsGraph::VIterator dsi, dsiend;
@@ -109,7 +113,7 @@ void BulletSpaceFilter::buildInteractions(double time)
     _dynamicCollisionsObjectsInserted = true;
   }
 
-  if (not _staticCollisionsObjectsInserted)
+  if (! _staticCollisionsObjectsInserted)
   {
     for(std::vector<SP::btCollisionObject>::iterator 
           ic = _staticObjects->begin(); ic != _staticObjects->end(); ++ic)
@@ -196,7 +200,7 @@ void BulletSpaceFilter::buildInteractions(double time)
   {
     SP::Interaction inter = indexSet0->bundle(*ui0);
     ++v0next;  // trick to iterate on a dynamic bgl graph
-    if (not contactManifolds[&*ask<ForContactManifold>(*(inter->relation()))])
+    if (! contactManifolds[&*ask<ForContactManifold>(*(inter->relation()))])
     {
       model()->nonSmoothDynamicalSystem()->removeInteraction(inter);
     }

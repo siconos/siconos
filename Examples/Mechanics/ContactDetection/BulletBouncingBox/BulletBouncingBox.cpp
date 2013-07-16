@@ -157,15 +157,11 @@ int main()
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
 
     // -- The space filter performs broadphase collsion detection
-    SP::btVector3 aabbmax(new btVector3(100, 100, 100));
-    SP::btVector3 aabbmin(new btVector3(-100, -100, -100));
-    SP::BulletSpaceFilter space_filter(new BulletSpaceFilter(model, nslaw, aabbmin, aabbmax));
+    SP::BulletSpaceFilter space_filter(new BulletSpaceFilter(model, nslaw));
 
     // -- The ground is a static object
-    space_filter->collisionWorld()->addCollisionObject(&*ground);
-    space_filter->staticObjects()->push_back(ground);
-    space_filter->staticShapes()->push_back(groundShape);
-
+    space_filter->addStaticObject(ground);
+    space_filter->addStaticShape(groundShape);
     // -- Moreau Time Stepping with Bullet Dynamical Systems
     SP::BulletTimeStepping simulation(new BulletTimeStepping(timedisc,
                                       space_filter));
@@ -191,7 +187,7 @@ int main()
 
     // --- Time loop ---
 
-    cout << "====> Start computation ... " << endl << endl;
+    std::cout << "====> Start computation ... " << std::endl << std::endl;
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 1;
     boost::progress_display show_progress(N);
@@ -252,11 +248,11 @@ int main()
     }
 
 
-    cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
-    cout << "Computation Time " << time.elapsed()  << endl;
+    std::cout << std::endl << "End of computation - Number of iterations done: " << k - 1 << std::endl;
+    std::cout << "Computation Time " << time.elapsed()  << std::endl;
 
     // --- Output files ---
-    cout << "====> Output file writing ..." << endl;
+    std::cout << "====> Output file writing ..." << std::endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 

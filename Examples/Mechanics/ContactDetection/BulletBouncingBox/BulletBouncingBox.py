@@ -46,7 +46,7 @@ theta = 0.5  # theta scheme
 position_init = 10
 velocity_init = 0
 
-if (True):
+if (False):
     box = btConvexHullShape()
     box.addPoint(btVector3(-1.0, 1.0, -1.0))
     box.addPoint(btVector3(-1.0, -1.0, -1.0))
@@ -58,7 +58,7 @@ if (True):
     box.addPoint(btVector3(1.0, -1.0, 1.0))
 else:
     box = btBoxShape(btVector3(1.0, 1.0, 1.0))
-    
+
 # a bullet shape with a mass (1.0)
 box1 = BulletWeightedShape(box, 1.0)
 

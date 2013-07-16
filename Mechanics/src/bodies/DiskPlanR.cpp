@@ -21,6 +21,7 @@
 #include <cmath>
 #include "DiskPlanR.hpp"
 #include "Disk.hpp"
+#include <BlockVector.hpp>
 
 void DiskPlanR::init(double r, double A, double B, double C,
                      double xC, double yC, double w)

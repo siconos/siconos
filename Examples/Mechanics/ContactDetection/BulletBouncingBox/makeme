@@ -1,6 +1,6 @@
 #!/bin/sh
 
-siconos -v -j 2 -DBT_USE_DOUBLE_PRECISION=1 -DWITH_BULLET `pkg-config bullet --cflags` `pkg-config bullet --lib` -lglut BulletBouncingBox.cpp
+siconos -v -g -j 2 -DBT_USE_DOUBLE_PRECISION=1 -DWITH_BULLET `pkg-config bullet --cflags` `pkg-config bullet --lib` -lglut BulletBouncingBox.cpp
 
 
 # Mac Os X (Snow Leopard)

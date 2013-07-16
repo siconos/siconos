@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include "DiskDiskR.hpp"
+#include "BlockVector.hpp"
 
 DiskDiskR::DiskDiskR(double r, double rr) : CircularR(r, rr)
 {
