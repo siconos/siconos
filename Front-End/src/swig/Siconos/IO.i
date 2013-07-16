@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // SWIG interface for Siconos IO
 %module(directors="1", allprotected="1") IO
 

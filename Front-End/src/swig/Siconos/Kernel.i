@@ -30,16 +30,57 @@
 %include start.i
 
 %{
+#include <SiconosKernel.hpp>
 #include <SiconosAlgebra.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <SiconosKernel.hpp>
 #include <SiconosVisitor.hpp>
-#include "SiconosPointers.hpp"
 #include "addons.hpp"
 #include <boost/type_traits/is_polymorphic.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/typeof/typeof.hpp>
 %}
+
+// ignores
+%ignore nullDeleter;
+
+// defined in SiconosVector.cpp
+%ignore setBlock;
+%ignore add;
+%ignore sub;
+%ignore axpby;
+%ignore axpy;
+%ignore inner_prod;
+%ignore outer_prod;
+%ignore scal;
+%ignore subscal;
+%ignore cross_product;
+
+// defined in SimpleMatrix.cpp 
+%ignore private_addprod;
+%ignore private_prod;
+%ignore prod;
+%ignore axpy_prod;
+%ignore subprod;
+%ignore axpy_prod;
+%ignore gemv;
+%ignore gemm;
+
+%ignore getWMap;
+%ignore getWBoundaryConditionsMap;
+%ignore getDSBlocks;
+%ignore getInvMSimple;
+%ignore getInvMBlock;
+
+// do not wrap visitor visit : this lead to a huge amount of wrapper
+// code generation and this fail at compile time on shared_ptr freearg
+%ignore SiconosVisitor::visit;
+
+%ignore visit;
+
+%ignore Type::str;
+
+// cannot compile wrapper
+%ignore statOut;
 
 // mandatory !
 %rename (lambda_) lambda;
@@ -161,6 +202,9 @@ namespace std
 %include "SiconosVisitables.hpp"
 
 %import "SiconosVisitor.hpp"
+%import "Question.hpp"
+%import "TypeName.hpp"
+
 %import "SiconosSerialization.hpp"
 
 %import "SiconosProperties.hpp"
@@ -192,44 +236,6 @@ namespace std
 typedef struct
 {} __mpz_struct;
 typedef __mpz_struct mpz_t[1];
-
-// ignores
-%ignore nullDeleter;
-
-// defined in SiconosVector.cpp
-%ignore setBlock;
-%ignore add;
-%ignore sub;
-%ignore axpby;
-%ignore axpy;
-%ignore inner_prod;
-%ignore outer_prod;
-%ignore scal;
-%ignore subscal;
-%ignore cross_product;
-
-// defined in SimpleMatrix.cpp 
-%ignore private_addprod;
-%ignore private_prod;
-%ignore prod;
-%ignore axpy_prod;
-%ignore subprod;
-%ignore axpy_prod;
-%ignore gemv;
-%ignore gemm;
-
-%ignore getWMap;
-%ignore getWBoundaryConditionsMap;
-%ignore getDSBlocks;
-%ignore getInvMSimple;
-%ignore getInvMBlock;
-
-// do not wrap visitor visit : this lead to a huge amount of wrapper
-// code generation and this fail at compile time on shared_ptr freearg
-%ignore SiconosVisitor::visit;
-
-// cannot compile wrapper
-%ignore statOut;
 
 %include "SiconosAlgebraTypeDef.hpp"
 %include "SiconosAlgebra.hpp"

@@ -87,6 +87,25 @@
 %enddef
 //////////////////////////////////////////////////////////////////////////////
 
+%{
+#include <Question.hpp>
+#include <SiconosVector.hpp>
+struct IsDense : public Question<bool>
+{
+  using SiconosVisitor::visit;
+
+  void visit(const SiconosVector& v)
+  {
+    answer = v._dense;
+  }
+
+  void visit(const BlockVector& v)
+  {
+    answer = false;
+  }
+};
+%}
+
 //////////////////////////////////////////////////////////////////////////////
 %define TYPEMAP_VECTOR(TYPE,SWIGTYPE)
 // numpy or TYPE on input -> TYPE 

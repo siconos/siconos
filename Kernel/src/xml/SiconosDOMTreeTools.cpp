@@ -23,8 +23,6 @@
 #include "SimpleMatrix.hpp"
 #include "RuntimeException.hpp"
 
-
-
 SiconosVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorNode)
 {
   if (!vectorNode)

@@ -25,12 +25,11 @@
 #define DynamicalSystem_H
 
 #include "SiconosPointers.hpp"
-
 #include "SiconosFwd.hpp"
 
 #include "SSLH.hpp"
 #include "RuntimeException.hpp"
-#include "Tools.hpp"
+
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosMemory.hpp"
@@ -39,22 +38,8 @@
 #include "PluginTypes.hpp"
 #include "SiconosVisitor.hpp"
 
-
-
-class NonSmoothDynamicalSystem;
-class DynamicalSystemXML;
-class SiconosVector;
-class SiconosMatrix;
-class SimpleMatrix;
-class SiconosVector;
-class SiconosMemory;
-class SiconosSharedLibrary;
-
-
 /** Pointer to function for plug-in. */
 typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
-
-
 
 /** */
 

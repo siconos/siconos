@@ -1,4 +1,4 @@
-
+// -*- c++ -*-
 // SWIG interface for Siconos Mechanics/bodies
 %module(directors="1", allprotected="1") Bodies
 

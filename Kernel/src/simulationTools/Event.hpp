@@ -24,7 +24,6 @@
 #define Event_H
 
 #include <cmath>
-#include <iostream> // Warning (FP): iostream must be included before gmp
 #include <gmp.h>
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"

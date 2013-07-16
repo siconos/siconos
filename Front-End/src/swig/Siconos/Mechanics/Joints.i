@@ -1,4 +1,4 @@
-
+// -*- c++ -*-
 // SWIG interface for Siconos Mechanics/joints
 %module(directors="1", allprotected="1") Joints
 

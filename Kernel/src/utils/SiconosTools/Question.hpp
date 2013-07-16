@@ -38,6 +38,12 @@
 
 /* use boost array for the initialization of non const reference */
 //#include <boost/type_traits.hpp>
+
+#ifndef Question_hpp
+#define Question_hpp
+
+#include "SiconosVisitor.hpp"
+
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 #include <type_traits>
 #include <array>
@@ -151,3 +157,4 @@ void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
   }
 
 
+#endif

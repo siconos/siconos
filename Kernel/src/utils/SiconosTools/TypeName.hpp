@@ -21,6 +21,10 @@
   \brief get a string name from visitable classes 
 */
 
+#ifndef TypeName_hpp
+#define TypeName_hpp
+
+#include "SiconosVisitor.hpp"
 #include <string>
 namespace Type
 {
@@ -57,3 +61,4 @@ std::string name(const C& c)
 }
 
 }
+#endif

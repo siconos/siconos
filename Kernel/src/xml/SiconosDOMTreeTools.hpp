@@ -32,13 +32,7 @@ using std::ptrdiff_t;
 #include "XMLTagsName.hpp"
 #include "XMLException.hpp"
 #include <libxml/tree.h>
-#include <vector>
-#include <map>
-#include <sstream>
 #include <fstream>
-#include <iostream>
-#include <iterator>
-#include <algorithm>
 
 const std::string FILE_STORAGE = "ascii";
 const std::string SDTT_VECTOR = "Vector";

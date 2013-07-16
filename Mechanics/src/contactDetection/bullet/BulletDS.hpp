@@ -26,6 +26,8 @@
 
 #include "NewtonEulerDS.hpp"
 
+#include <Question.hpp>
+
 class BulletDS : public NewtonEulerDS, public std11::enable_shared_from_this<BulletDS>
 {
 

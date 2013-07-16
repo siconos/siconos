@@ -99,5 +99,4 @@ struct graphAccess
   
 };
 
-
 #endif
