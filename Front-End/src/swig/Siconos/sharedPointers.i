@@ -9,8 +9,14 @@
 #define STD11 std
 #else
 #define STD11 boost
-// boost >= 1.40
 %import "boost/version.hpp"
+//  boost >= 1.53
+// this sucks and will likely not work in C++11, but it is difficult to
+// deal with this properly
+#if (BOOST_VERSION >= 105300)
+#define BOOST_NOEXCEPT
+#endif
+// boost >= 1.40
 #if (BOOST_VERSION >= 104000)
 %ignore std11::enable_shared_from_this::operator=;
 %import "boost/smart_ptr/enable_shared_from_this.hpp"
