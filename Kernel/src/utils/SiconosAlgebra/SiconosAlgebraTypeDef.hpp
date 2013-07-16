@@ -41,7 +41,13 @@
 
 #include <limits>
 #include <boost/numeric/ublas/fwd.hpp>
+
+#if __cplusplus >= 201103L
+#include <array>
+#else
 #include <boost/array.hpp>
+#endif
+
 #include "Tools.hpp"
 
 #include "SiconosPointers.hpp"

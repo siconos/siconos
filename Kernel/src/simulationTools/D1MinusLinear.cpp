@@ -26,6 +26,7 @@
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "BlockVector.hpp"
+#include "CxxStd.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -1067,11 +1068,7 @@ bool D1MinusLinear::addInteractionInIndexSet(SP::Interaction inter, unsigned int
 
   DEBUG_PRINTF("D1MinusLinear::addInteractionInIndexSet of level = %i yOld=%e, y=%e \n", i,  yOld, y);
 
-#if __cplusplus >= 201103L
-  assert(!::isnan(y));
-#else
   assert(!isnan(y));
-#endif
 
   DEBUG_EXPR(
     if ((yOld >0.0) && (y <= y))
@@ -1094,11 +1091,7 @@ bool D1MinusLinear::removeInteractionInIndexSet(SP::Interaction inter, unsigned 
   // }
   DEBUG_PRINTF("D1MinusLinear::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-#if __cplusplus >= 201103L
-  assert(!::isnan(y));
-#else
   assert(!isnan(y));
-#endif
   DEBUG_EXPR(
     if (y > 0)
     DEBUG_PRINT("D1MinusLinear::removeInteractionInIndexSet DEACTIVATE.\n");

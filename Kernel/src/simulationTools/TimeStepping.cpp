@@ -39,6 +39,7 @@
 #include "Relation.hpp"
 #include "BlockVector.hpp"
 #include <debug.h>
+#include "CxxStd.hpp"
 
 
 using namespace RELATION;
@@ -456,11 +457,7 @@ void TimeStepping::computeInitialResidu()
 {
   //  std::cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
-#if __cplusplus >= 201103L
-  assert(!::isnan(tkp1));
-#else
   assert(!isnan(tkp1));
-#endif
 
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
 

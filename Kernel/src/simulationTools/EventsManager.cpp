@@ -24,12 +24,7 @@
 #include <cmath>
 #include <limits> // for ULONG_MAX
 #include "TimeDiscretisationEventNoSaveInMemory.hpp"
-
-#ifndef _MSC_VER
-#if __cplusplus < 201103L
-using std::isnan;
-#endif
-#endif
+#include "CxxStd.hpp"
 
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 
@@ -161,11 +156,7 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
     {
       sim.timeDiscretisation()->increment();
       // reschedule the TD event only if its time instant is less than T
-#if __cplusplus >= 201103L
-      if (!::isnan(sim.getTkp1()))
-#else
       if (!isnan(sim.getTkp1()))
-#endif
       {
         ev.setTime(sim.getTkp1());
         insertEv(_events[j]);
@@ -207,11 +198,7 @@ void EventsManager::update(Simulation& sim)
     // run until T
     _events[0]->update();
     double tkp2 = sim.getTkp2();
-#if __cplusplus >= 201103L
-    if (!::isnan(tkp2))
-#else
     if (!isnan(tkp2))
-#endif
     {
       _events[0]->setTime(tkp2);
       insertEv(_events[0]);

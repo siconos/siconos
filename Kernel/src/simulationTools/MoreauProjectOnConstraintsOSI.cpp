@@ -21,6 +21,7 @@
 #include "Model.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianDS.hpp"
+#include "CxxStd.hpp"
 //#define STANDARD_ACTIVATION
 #define FIRSTWAY_ACTIVATION
 //#define SECONDWAY_ACTIVATION
@@ -201,11 +202,7 @@ bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction int
                _activateYPosThreshold ,
                _activateYVelThreshold);
 
-#if __cplusplus >= 201103L
-  assert(!::isnan(y));
-#else
   assert(!isnan(y));
-#endif
 #ifdef DEBUG_MESSAGES
   if (y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -232,11 +229,7 @@ bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction 
                _deactivateYPosThreshold ,
                _deactivateYVelThreshold);
 
-#if __cplusplus >= 201103L
-  assert(!::isnan(y));
-#else
   assert(!isnan(y));
-#endif
 #ifdef DEBUG_MESSAGES
   if (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet DEACTIVATE.\n");

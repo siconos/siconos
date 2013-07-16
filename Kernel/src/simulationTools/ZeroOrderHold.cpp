@@ -31,6 +31,7 @@
 #include "SubPluggedObject.hpp"
 #include "FirstOrderType2R.hpp"
 #include "MatrixIntegrator.hpp"
+#include "CxxStd.hpp"
 
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -873,11 +874,7 @@ bool ZeroOrderHold::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   double gamma = .5;
   DEBUG_PRINTF("ZeroOrderHold::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-#if __cplusplus >= 201103L
-  assert(!::isnan(y));
-#else
   assert(!isnan(y));
-#endif
   if (y <= 0)
   {
     DEBUG_PRINT("ZeroOrderHold::addInteractionInIndexSet ACTIVATE.\n");
@@ -895,11 +892,7 @@ bool ZeroOrderHold::removeInteractionInIndexSet(SP::Interaction inter, unsigned 
   double gamma = .5;
   DEBUG_PRINTF("ZeroOrderHold::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-#if __cplusplus >= 201103L
-  assert(!::isnan(y));
-#else
   assert(!isnan(y));
-#endif
   if (y > 0)
   {
     DEBUG_PRINT("ZeroOrderHold::removeInteractionInIndexSet DEACTIVATE.\n");
