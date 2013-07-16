@@ -16,6 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <stdio.h>
 #include <math.h>
 
@@ -30,7 +35,7 @@ extern "C" double FextFunction(double time)
 }
 
 
-extern "C" void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
@@ -38,13 +43,13 @@ extern "C" void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsign
   fExt[0] = -m * g + FextFunction(time);
 }
 
-extern "C" void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq ; i++)
     fExt[i] = 0.0;
 }
 
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   double R0 = 0.0;
   if (R * R - q[1]*q[1] < 0)
@@ -52,7 +57,7 @@ extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   y[0] = q[0] + sqrt(fabs(R * R - q[1] * q[1])) - R0;
 }
 
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = 1.0;
   G[1] = -q[1] / (sqrt(fabs(R * R - q[1] * q[1])));

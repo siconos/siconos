@@ -16,13 +16,18 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include "Robot.h"
 #include <stdio.h>
 #include <math.h>
 
 const unsigned int n0 = 7; // Real problem dimension
 
-extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
 {
   unsigned int n = sizeOfq;
   unsigned int n1 = n0 * n0;
@@ -60,7 +65,7 @@ extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsign
   }
 }
 
-extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
 {
   unsigned int n = sizeOfq;
 
@@ -100,7 +105,7 @@ extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocit
 
 }
 
-extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   unsigned int n = sizeOfq;
   unsigned int n1 = n0 * n0;
@@ -138,7 +143,7 @@ extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double
   }
 }
 
-extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   unsigned int n = sizeOfq;
   unsigned int n1 = n0 * n0;
@@ -175,30 +180,30 @@ extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  doubl
   }
 }
 
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   y[0] = 0.45 * cos(q[0]);
 }
 
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = -0.45 * sin(q[0]);
   G[1] = 0.0;
 }
 
 
-extern "C" void h1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void h1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   y[0] = 0.45 * cos(q[0]) + 0.48 * cos(q[1] + q[0]);
 }
 
-extern "C" void G1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void G1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = -0.45 * sin(q[0]) - 0.48 * sin(q[1] + q[0]);
   G[1] = -0.48 * sin(q[1] + q[0]);
 }
 
-extern "C" void h2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void h2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   //  printf("BJBJBJBJ%f\n",y[0]);
   //printf("BJBJBJBsddssdJ%f\n",y[1]);
@@ -208,7 +213,7 @@ extern "C" void h2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   //  printf("AAAAAABJBJBJBsddssdJ%f\n",y[1]);
 }
 
-extern "C" void G2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void G2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = -0.45 * sin(q[0]);
   G[1] = -0.45 * sin(q[0]) - 0.48 * sin(q[1] + q[0]);

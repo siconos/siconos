@@ -16,6 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <stdio.h>
 
 const double R = 0.1; // ball radius
@@ -30,7 +35,7 @@ extern "C" double FextFunction(double time)
 }
 
 
-extern "C" void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;

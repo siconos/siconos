@@ -17,6 +17,11 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <math.h>
 #include <sys/time.h>
 #include <iostream>
@@ -28,7 +33,7 @@
 // ===== Dynamical System =====
 
 // function to compute u
-extern "C" void computeU(double time, unsigned int sizeU, double *U, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void computeU(double time, unsigned int sizeU, double *U, unsigned int sizeZ, double* z)
 {
   double f = 55000.0;
   if (time == 0.0)

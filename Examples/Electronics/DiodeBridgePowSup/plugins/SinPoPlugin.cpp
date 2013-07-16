@@ -1,7 +1,12 @@
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <stdio.h>
 #include <math.h>
 
-extern "C"   void SinPo(double time, unsigned int sizeOfE, double* EPtr, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void SinPo(double time, unsigned int sizeOfE, double* EPtr, unsigned int sizeOfZ, double* z)
 {
 
   double omega = 1e4;

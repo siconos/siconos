@@ -16,6 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <stdio.h>
 #include <math.h>
 #include "CamState.h"
@@ -23,7 +28,7 @@
 const double g = 0; // gravity
 const double m = 1.221;
 
-extern "C" void FollowerMass(unsigned int sizeOfq, const double *q, double* mass, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerMass(unsigned int sizeOfq, const double *q, double* mass, unsigned int sizeZ, double* z)
 {
   double m = 1.221;
   // initialisation of the Mass matrix
@@ -33,7 +38,7 @@ extern "C" void FollowerMass(unsigned int sizeOfq, const double *q, double* mass
   mass[0] = m;
 }
 
-extern "C" void FollowerQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *Q, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *Q, unsigned int sizeZ, double* z)
 {
   unsigned int i;
 
@@ -41,7 +46,7 @@ extern "C" void FollowerQNLInertia(unsigned int sizeOfq, const double *q, const 
     Q[i] = 0.0;
 }
 
-extern "C" void FollowerFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fInt[i] = 0.0;
@@ -133,7 +138,7 @@ extern "C" double FextFunction(double time, double* z)
   return res;
 }
 
-extern "C" void FollowerFExtR(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerFExtR(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   //double rpm = z[0];
 
@@ -142,7 +147,7 @@ extern "C" void FollowerFExtR(double time, unsigned int sizeOfq, double *fExt, u
 
   fExt[0] = -m * g;
 }
-extern "C" void FollowerFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   double rpm = z[0];
   //  double rpm = 358;
@@ -153,25 +158,25 @@ extern "C" void FollowerFExt(double time, unsigned int sizeOfq, double *fExt, un
   fExt[0] = -m * g + FextFunction(time, &rpm);
 }
 
-extern "C" void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
 }
 
-extern "C" void ballJacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void ballJacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
     jacob[i] = 0.0;
 }
 
-extern "C" void ballJacobianVelocityFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void ballJacobianVelocityFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
     jacob[i] = 0.0;
 }
 
-extern "C" void ballJacobianQQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void ballJacobianQQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i <  sizeOfq * sizeOfq; i++)
   {
@@ -179,7 +184,7 @@ extern "C" void ballJacobianQQNLInertia(unsigned int sizeOfq, const double *q, c
   }
 }
 
-extern "C" void ballJacobianVelocityQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void ballJacobianVelocityQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   printf("Call of the function 'ballJacobianVelocityQ' of the basic plugin.\nYou have to implement this function.\n");
   for (unsigned int i = 0; i <  sizeOfq * sizeOfq; i++)
@@ -190,18 +195,18 @@ extern "C" void ballJacobianVelocityQNLInertia(unsigned int sizeOfq, const doubl
 
 
 
-extern "C" void FollowerComputeH0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerComputeH0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
 {
 
   y[0] = q[0];
 }
 
-extern "C" void FollowerComputeG0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerComputeG0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
 {
   G0[0] = 1;
 }
 
-extern "C" void FollowerComputeH1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerComputeH1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
 {
   double CamEqForce, CamPosition, CamVelocity, CamAcceleration, rpm = z[0];
 
@@ -211,13 +216,13 @@ extern "C" void FollowerComputeH1(unsigned int sizeDS, const double* q, double t
 }
 
 
-extern "C" void FollowerComputeG10(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerComputeG10(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
 {
   G0[0] = 1;
 }
 
 
-extern "C" void FollowerComputeG11(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* G1, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FollowerComputeG11(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* G1, unsigned int sizeZ, double* z)
 {
 
   double CamEqForce, CamPosition, CamVelocity, CamAcceleration, rpm = z[0];

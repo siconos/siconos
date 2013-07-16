@@ -1,9 +1,14 @@
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <stdio.h>
 #include "donnee.h"
 
 
 // forces extérieures appliquées sur le yoyo dans la phase contrainte
-extern "C" void force_ext(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void force_ext(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   fExt[0] = -m * r * g;
   fExt[1] = 0;
@@ -12,7 +17,7 @@ extern "C" void force_ext(double time, unsigned int sizeOfq, double *fExt, unsig
 }
 
 // forces extérieures appliquées sur le yoyo dans la phase libre
-extern "C" void force_extf(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void force_extf(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   fExt[0] = 0;
   fExt[1] = -m * g;
@@ -21,7 +26,7 @@ extern "C" void force_extf(double time, unsigned int sizeOfq, double *fExt, unsi
 }
 
 // forces intérieures appliquées sur le yoyo dans la phase contrainte
-extern "C" void F_int(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void F_int(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 {
   fInt[0] =  r * epsilon * (velocity[0]);
   fInt[1] =  0;
@@ -33,7 +38,7 @@ extern "C" void F_int(double time, unsigned int sizeOfq, const double *q, const 
 }
 
 
-extern "C" void jacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] =  0;
   jacob[1] =  0;
@@ -44,7 +49,7 @@ extern "C" void jacobianFIntq(double time, unsigned int sizeOfq, const double *q
   //jacob[2] =0;
 }
 
-extern "C" void jacobianVFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianVFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] = r * epsilon;
   jacob[1] =   0;
@@ -55,19 +60,19 @@ extern "C" void jacobianVFInt(double time, unsigned int sizeOfq, const double *q
   //  jacob[2] =0;
 }
 
-extern "C"  void h1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void h1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, unsigned int sizeOfZ, double* z)
 {
   y[0] = q[1] - r * q[0] + L - q[2];
 }
 
-extern "C" void G10(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void G10(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G, unsigned int sizeOfZ, double* z)
 {
   G[0] = -r;
   G[1] = 1;
   G[2] = -1;
 }
 
-extern "C" void G11(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void G11(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G, unsigned int sizeOfZ, double* z)
 {
   G[0] = 0;
   //G[0]= -vitessemain(5,A,Cy,time);
@@ -75,7 +80,7 @@ extern "C" void G11(unsigned int sizeDS, const double* q, double time, unsigned 
 
 
 // forces intérieures appliquées sur le yoyo dans la phase libre
-extern "C" void F_intf(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void F_intf(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 {
   fInt[0] =  0;
   fInt[1] =  0;
@@ -87,7 +92,7 @@ extern "C" void F_intf(double time, unsigned int sizeOfq, const double *q, const
 }
 
 
-extern "C" void jacobianFIntqf(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianFIntqf(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] =  0;
   jacob[1] =  0;
@@ -98,7 +103,7 @@ extern "C" void jacobianFIntqf(double time, unsigned int sizeOfq, const double *
   //jacob[2] =0;
 }
 
-extern "C" void jacobianVFIntf(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianVFIntf(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] = 0;
   jacob[1] =   0;

@@ -1,3 +1,8 @@
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <stdio.h>
 #include <math.h>
 
@@ -15,14 +20,14 @@ extern "C" double computeControl(double time)
   return u;
 }
 
-extern "C" void uProcess(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void uProcess(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double* z)
 {
   double u = computeControl(time);
   b[0] = u ;
   b[1] = 2.0 * u;
 }
 
-extern "C"   void uObserver(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void uObserver(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double* z)
 {
   double u = computeControl(time);
   double L[2];
@@ -36,7 +41,7 @@ extern "C"   void uObserver(double time, unsigned int sizeOfB, double* b, unsign
   b[1] = 2.0 * u + coeff;
 }
 
-extern "C"   void computeE(double time, unsigned int sizeOfB, double* e, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void computeE(double time, unsigned int sizeOfB, double* e, unsigned int sizeOfZ, double* z)
 {
   e[0] = computeControl(time);
 }

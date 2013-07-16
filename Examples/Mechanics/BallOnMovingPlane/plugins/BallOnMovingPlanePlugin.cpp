@@ -21,10 +21,15 @@
 #if defined(_MSC_VER)
 #define _USE_MATH_DEFINES
 #endif
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <math.h>
 #include <stdio.h>
 
-extern "C" void prescribedvelocity(double time, unsigned int sizeofprescribedvelocity, double *pv)
+SICONOS_EXPORT void prescribedvelocity(double time, unsigned int sizeofprescribedvelocity, double *pv)
 {
   /* the plugin implements v(t) = C + A cos(omega *t) */
 

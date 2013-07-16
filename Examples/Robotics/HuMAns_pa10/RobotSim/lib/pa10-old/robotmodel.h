@@ -1,3 +1,8 @@
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <math.h>
 
 /* link masses (kg) */
@@ -74,24 +79,24 @@
 
 #define GRAV      9.81
 
-extern void
+SICONOS_EXPORT void
 modele_nddl(int *nddl);
 
-extern void
+SICONOS_EXPORT void
 modele_coriolis(const double q[N_DOF],
                 const double qdot[N_DOF],
                 double N[N_DOF*N_DOF]);
 
-extern void
+SICONOS_EXPORT void
 modele_gravite(const double q[N_DOF],
                double G[N_DOF]);
 
-extern void
+SICONOS_EXPORT void
 modele_inertie(const double q[N_DOF],
                double M[N_DOF*N_DOF]);
 
 
-extern void
+SICONOS_EXPORT void
 modele_frottements(const double q[N_DOF],
                    const double qdot[N_DOF],
                    double F[N_DOF]);

@@ -22,6 +22,11 @@
 //
 // @brief Compute the voltage required to follow the reference trajectory
 //
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <iostream>
 #include <string>
 
@@ -41,7 +46,7 @@ extern "C" {
 
 //#include "../../../LagrangianDynamics/Complete/util.hpp" //a mettre ailleurs un jour
 
-extern "C" void controlLaw(double * t, double * q, double * qdot, int * NDOF, int * NCONT, double * torques)
+SICONOS_EXPORT void controlLaw(double * t, double * q, double * qdot, int * NDOF, int * NCONT, double * torques)
 {
   int ndof;
   int contacts;

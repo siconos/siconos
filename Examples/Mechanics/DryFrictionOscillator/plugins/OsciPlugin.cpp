@@ -16,13 +16,18 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <stdio.h>
 #include <math.h>
 const double omega = 1.4;
 const double g = 10;
 const double m = 1;
 
-extern "C" void FExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   fExt[0] = sin(omega * time);
   fExt[1] = -m * g;

@@ -42,7 +42,7 @@
  * @param[out] CC Matrix of contact <em> dim NCONTx3(xyz) </em>
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  */
-extern  void
+SICONOS_EXPORT void
 Contact(double *CC, double *q);
 
 /**
@@ -51,7 +51,7 @@ Contact(double *CC, double *q);
  * @param[out] CJ Matrix of Contact Jacobian <em> dim (3xNCONT)*NDOF </em>
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  */
-extern void
+SICONOS_EXPORT void
 ContactJacobian(double *CJ, double *q);
 
 /**
@@ -61,7 +61,7 @@ ContactJacobian(double *CJ, double *q);
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  * @param[in] qdot Articular Velocity State Vector <em> dim NDOF </em>
  */
-extern void
+SICONOS_EXPORT void
 ContactHessian(double *H, double *q, double *qdot);
 
 /**
@@ -72,7 +72,7 @@ ContactHessian(double *H, double *q, double *qdot);
  * @param[in] q joint State Vector <em> dim NDOF </em>
  * @param[in] qdot Articular Velocity State Vector <em> dim NDOF </em>
  */
-extern void
+SICONOS_EXPORT void
 NLEffects(double *N, double *q, double *qdot);
 
 /**
@@ -83,14 +83,14 @@ NLEffects(double *N, double *q, double *qdot);
  */
 
 
-extern void JacobianNLEffects(double *NJ, double *q, double *qdot);
+SICONOS_EXPORT void JacobianNLEffects(double *NJ, double *q, double *qdot);
 
-extern void JacobianVelocityNLEffects(double *NVJ, double *q, double *qdot);
-
-
+SICONOS_EXPORT void JacobianVelocityNLEffects(double *NVJ, double *q, double *qdot);
 
 
-extern void
+
+
+SICONOS_EXPORT void
 Inertia(double *M, double *q);
 
 /**
@@ -102,7 +102,7 @@ Inertia(double *M, double *q);
  * @param[out] T Matrix of contact <em> dim 60 = NTAGSx3(xyz) </em>
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  */
-extern void
+SICONOS_EXPORT void
 Tags(double *T, double *q);
 
 

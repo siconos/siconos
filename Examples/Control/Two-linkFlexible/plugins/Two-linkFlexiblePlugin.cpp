@@ -17,6 +17,11 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <stdio.h>
 #include <math.h>
 
@@ -43,7 +48,7 @@ double J1 = 0.1;
 double J2 = 0.1;
 
 
-extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
 {
   //inertia matrix using (\theta)
   mass[0]  = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(q[1]));
@@ -64,7 +69,7 @@ extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsign
   mass[15]  = J2;
 }
 
-extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
 {
   NNL[0] = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + K1 * (q[0] - q[2]);
   NNL[1] = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + K2 * (q[1] - q[3]);
@@ -72,7 +77,7 @@ extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocit
   NNL[3] = K2 * (q[3] - q[1]);
 }
 
-extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   jacob[0] = K1;
   jacob[1] = 0;
@@ -92,7 +97,7 @@ extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double
   jacob[15] = K2;
 }
 
-extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   jacob[0] = -m2 * l1 * l2 * sin(q[1]) * velocity[1];
   jacob[1] = m2 * l1 * l2 * sin(q[1]) * velocity[0];
@@ -112,7 +117,7 @@ extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  doubl
   jacob[15] = 0;
 }
 
-extern "C" void U(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void U(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
 {
 
   double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(q[1]));
@@ -320,7 +325,7 @@ extern "C" void U(double time, unsigned int sizeOfq, const double *q, const  dou
 }
 
 
-extern "C" void U1(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void U1(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
 {
   double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(q[1]));
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
@@ -587,7 +592,7 @@ extern "C" void U1(double time, unsigned int sizeOfq, const double *q, const  do
   z[17] = U[3];
 }
 
-extern "C" void U2(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void U2(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
 {
   double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(q[1]));
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
@@ -774,7 +779,7 @@ extern "C" void U2(double time, unsigned int sizeOfq, const double *q, const  do
   z[17] = U[3];
 }
 
-extern "C" void U3(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void U3(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
 {
   double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(q[1]));
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
@@ -987,7 +992,7 @@ extern "C" void U3(double time, unsigned int sizeOfq, const double *q, const  do
   z[19] = ld;
 }
 
-extern "C" void U4(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void U4(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
 {
   double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(q[1]));
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
@@ -1198,7 +1203,7 @@ extern "C" void U4(double time, unsigned int sizeOfq, const double *q, const  do
 }
 
 
-extern "C" void jacobFintQ(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *jacobFintQ, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobFintQ(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *jacobFintQ, unsigned int sizeOfZ, double* z)
 {
   jacobFintQ[0] = 0;
   jacobFintQ[1] = 0;
@@ -1218,7 +1223,7 @@ extern "C" void jacobFintQ(double time, unsigned int sizeOfq, const double *q, c
   jacobFintQ[15] = 0;
 }
 
-extern "C" void jacobFintV(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacobFintV, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobFintV(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacobFintV, unsigned int sizeOfZ, double* z)
 {
 
   jacobFintV[0] = 0;
@@ -1239,14 +1244,14 @@ extern "C" void jacobFintV(double time, unsigned int sizeOfq, const double *q, c
   jacobFintV[15] = 0;
 }
 
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeOfZ, double* z)
 {
   y[0] = 2 + l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
   y[1] = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
 
 }
 
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeOfZ, double* z)
 {
   G[0] = 0;
   G[1] = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);

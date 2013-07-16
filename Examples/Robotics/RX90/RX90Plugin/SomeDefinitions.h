@@ -37,14 +37,14 @@
  *
  * @param[in] maxq <em> dim NDOF </em>
  */
-extern void setMaxq(double *maxq);
+SICONOS_EXPORT void setMaxq(double *maxq);
 
 /**
  * get the joints max limit
  *
  * @param[out] maxq (double) <em> dim NDOF </em>
  */
-extern void getMaxq(double *maxq);
+SICONOS_EXPORT void getMaxq(double *maxq);
 
 /**
  * Global variable corresponding to the min joints limit
@@ -58,14 +58,14 @@ extern void getMaxq(double *maxq);
  *
  * @param[in] minq <em> dim NDOF </em>
  */
-extern void setMinq(double *minq);
+SICONOS_EXPORT void setMinq(double *minq);
 
 /**
  * get the joints min limit
  *
  * @param[out] minq (double) <em> dim NDOF </em>
  */
-extern void getMinq(double *minq);
+SICONOS_EXPORT void getMinq(double *minq);
 
 /**
  * Global variable storing the name of the lagrangian model used
@@ -79,14 +79,14 @@ extern void getMinq(double *minq);
  *
  * @param[in] lagrangianModelName <em> dim </em>
  */
-extern void setLagrangianModelName(char *lagrangianModelName);
+SICONOS_EXPORT void setLagrangianModelName(char *lagrangianModelName);
 
 /**
  * get the name of the lagrangian model
  *
  * @param[out] lagrangianModelName (char) <em> dim </em>
  */
-extern void getLagrangianModelName(char *lagrangianModelName);
+SICONOS_EXPORT void getLagrangianModelName(char *lagrangianModelName);
 
 /**
  * Global variable storing the name of the contact points
@@ -101,7 +101,7 @@ extern void getLagrangianModelName(char *lagrangianModelName);
  * @param[in] index (int)
  * @param[out] contactNames
  */
-extern void setContactNames(char *contactNames, int *index);
+SICONOS_EXPORT void setContactNames(char *contactNames, int *index);
 
 /**
  * get the name of the contact corresponding to the index given in input
@@ -109,7 +109,7 @@ extern void setContactNames(char *contactNames, int *index);
  * @param[in] index (int)
  * @param[out] contactNames (string)
  */
-extern void getContactNames(char *contactNames, int *index);
+SICONOS_EXPORT void getContactNames(char *contactNames, int *index);
 
 /**
  * Global variable storing the solids of contact
@@ -123,7 +123,7 @@ extern void getContactNames(char *contactNames, int *index);
  *
  * @param[in] contactSolids <em> dim </em>
  */
-extern void setContacSolids(int *contactSolids);
+SICONOS_EXPORT void setContacSolids(int *contactSolids);
 
 /**
  * get the contact solids
@@ -131,7 +131,7 @@ extern void setContacSolids(int *contactSolids);
  * @param[out] contactSolids (integer) <em> dim NbSolid*2 </em>
  *
  */
-extern void getContactSolids(int *contactSolids);
+SICONOS_EXPORT void getContactSolids(int *contactSolids);
 
 /**
  * get the number of contact solids
@@ -139,7 +139,7 @@ extern void getContactSolids(int *contactSolids);
  * @param[out] nbContactSolids (integer)
  *
  */
-extern void getNbContactSolids(int *nbContactSolids);
+SICONOS_EXPORT void getNbContactSolids(int *nbContactSolids);
 
 
 //////////////////////////////////////////////////
@@ -152,56 +152,56 @@ extern void getNbContactSolids(int *nbContactSolids);
  *
  * @param[in] modelSize Model height (in meter) <em> dim 1 </em>
  */
-extern void SetModelSize(double *subjectSize);
+SICONOS_EXPORT void SetModelSize(double *subjectSize);
 
 /**
  * get the model height
  *
  * @param[out] modelSize Model Height (in meter) <em> dim 1 </em>
  */
-extern void GetModelSize(double *subjectSize);
+SICONOS_EXPORT void GetModelSize(double *subjectSize);
 
 /**
  * set the model mass
  *
  * @param[in] modelMass  Model Mass (in kg) <em> dim 1 </em>
  */
-extern void SetModelMass(double *subjectMass);
+SICONOS_EXPORT void SetModelMass(double *subjectMass);
 
 /**
  * get the model mass
  *
  * @param[out] modelMass Model Mass (in kg) <em> dim 1 </em>
  */
-extern void GetModelMass(double *subjectMass);
+SICONOS_EXPORT void GetModelMass(double *subjectMass);
 
 /**
  * set the model anatomical lengths
  *
  * @param[in] anatLengths anatomical lengths (in meter) row vector <em> dim NLANAT </em>
  */
-extern void SetAnatomicalLengths(double *anatLengths);
+SICONOS_EXPORT void SetAnatomicalLengths(double *anatLengths);
 
 /**
  * get the model anatomical lengths
  *
  * @param[out] anatLengths anatomical lengths (in meter) row vector <em> dim NLANAT </em>
  */
-extern void GetAnatomicalLengths(double *anatLengths);
+SICONOS_EXPORT void GetAnatomicalLengths(double *anatLengths);
 
 /**
  * set the model tags positions in their attached segment frames
  *
  * @param[in] tag2JointLengths Row vector of the tags positions in their attached segment frames. The positions are given in meter <em> dim (NTAGS - 1)*3 </em>
  */
-extern void SetTag2JointLengths(double *tagLengths);
+SICONOS_EXPORT void SetTag2JointLengths(double *tagLengths);
 
 /**
  * get the model tags positions in their attached segment frames
  *
  * @param[out] tag2JointLengths Row vector of the tags positions in their attached segment frames. The positions are given in meter <em> dim (NTAGS - 1)*3 </em>
  */
-extern void GetTag2JointLengths(double *tagLengths);
+SICONOS_EXPORT void GetTag2JointLengths(double *tagLengths);
 
 
 #endif /* __LagrangianModel_SomeDefinitions_h */

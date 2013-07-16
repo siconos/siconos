@@ -38,9 +38,9 @@
  * @param[out] CC Matrix of contact <em> dim NCONTx3(xyz) </em>
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  */
-extern  void
+SICONOS_EXPORT void
 Contact(double *CC, double *q);
-extern  void
+SICONOS_EXPORT void
 ContactH36(double *CC, double *q, double *L, double *addl);
 
 /**
@@ -49,9 +49,9 @@ ContactH36(double *CC, double *q, double *L, double *addl);
  * @param[out] CJ Matrix of Contact Jacobian <em> dim (3xNCONT)*NDOF </em>
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  */
-extern void
+SICONOS_EXPORT void
 ContactJacobian(double *CJ, double *q);
-extern void
+SICONOS_EXPORT void
 ContactJacobianH36(double *CJ, double *q, double *L, double *addl);
 
 /**
@@ -61,9 +61,9 @@ ContactJacobianH36(double *CJ, double *q, double *L, double *addl);
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  * @param[in] qdot Articular Velocity State Vector <em> dim NDOF </em>
  */
-extern void
+SICONOS_EXPORT void
 ContactHessian(double *H, double *q, double *qdot);
-extern void
+SICONOS_EXPORT void
 ContactHessianH36(double *H, double *q, double *qdot, double *L, double *addl);
 
 /**
@@ -74,9 +74,9 @@ ContactHessianH36(double *H, double *q, double *qdot, double *L, double *addl);
  * @param[in] q joint State Vector <em> dim NDOF </em>
  * @param[in] qdot Articular Velocity State Vector <em> dim NDOF </em>
  */
-extern void
+SICONOS_EXPORT void
 NLEffects(double *N, double *q, double *qdot);
-extern void
+SICONOS_EXPORT void
 NLEffectsH36(double *N, double *q, double *qdot, double *L, double *addl, double mass);
 
 /**
@@ -85,9 +85,9 @@ NLEffectsH36(double *N, double *q, double *qdot, double *L, double *addl, double
  * @param[out] M Matrix of Inertia <em> dim NDOFxNDOF </em>
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  */
-extern void
+SICONOS_EXPORT void
 Inertia(double *M, double *q);
-extern void
+SICONOS_EXPORT void
 InertiaH36(double *M, double *q, double *L, double *addl, double mass);
 
 /**
@@ -99,9 +99,9 @@ InertiaH36(double *M, double *q, double *L, double *addl, double mass);
  * @param[out] T Matrix of contact <em> dim = NTAGSx3(xyz) </em>
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  */
-extern void
+SICONOS_EXPORT void
 Tags(double *T, double *q);
-extern void
+SICONOS_EXPORT void
 TagsH36(double *T, double *q, double *L, double *addl, double mass);
 
 /**
@@ -119,7 +119,7 @@ void SpringForce(double *S, double *q);
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  * @param[in] qdot Velocity Vector <em> dim NDOF </em>
  */
-extern void Friction(double *F, double *q, double *qdot);
+SICONOS_EXPORT void Friction(double *F, double *q, double *qdot);
 
 
 #endif /* __LagrangianModel_h */

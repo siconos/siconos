@@ -9,24 +9,24 @@
 
 #define GRAV      9.81
 
-extern void
+SICONOS_EXPORT void
 modele_nddl(int *nddl);
 
-extern void
+SICONOS_EXPORT void
 modele_coriolis(const double q[NDDL],
                 const double qdot[NDDL],
                 double N[NDDL*NDDL]);
 
-extern void
+SICONOS_EXPORT void
 modele_gravite(const double q[NDDL],
                double G[NDDL]);
 
-extern void
+SICONOS_EXPORT void
 modele_inertie(const double q[NDDL],
                double M[NDDL*NDDL]);
 
 
-extern void
+SICONOS_EXPORT void
 modele_frottements(const double q[NDDL],
                    const double qdot[NDDL],
                    double F[NDDL]);

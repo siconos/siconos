@@ -18,17 +18,17 @@
 #define SFRIC7     0
 
 
-extern void
+SICONOS_EXPORT void
 Ndof(int *ndof);
 
-extern void
+SICONOS_EXPORT void
 NLEffects(double N[NDOF], double q[NDOF], double qdot[NDOF]);
 
-extern void
+SICONOS_EXPORT void
 Inertia(double M[NDOF*NDOF], const double q[NDOF]);
 
 
-extern void
+SICONOS_EXPORT void
 Friction(double F[NDOF],
          const double q[NDOF],
          const double qdot[NDOF]);

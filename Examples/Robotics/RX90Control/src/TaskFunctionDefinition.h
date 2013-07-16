@@ -38,7 +38,7 @@
  * @param[out] T vector matching to the output function <em> dim NDOF </em>
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  */
-extern void TaskFunction(double *T, double *q);
+SICONOS_EXPORT void TaskFunction(double *T, double *q);
 
 /**
  * Compute the jacobian matrix of the task function for a given bipede state q
@@ -46,7 +46,7 @@ extern void TaskFunction(double *T, double *q);
  * @param[out] J Jacobian matrix of the output function <em> dim NDOFxNDOF </em>
  * @param[in] q Joint State Vector <em> dim NDOF </em>
  */
-extern void TaskJacobian(double J[441], double q[21]);
+SICONOS_EXPORT void TaskJacobian(double J[441], double q[21]);
 
 /**
  * Compute the matrix of Non Linear Effect (Coriolis + Gravity)
@@ -56,6 +56,6 @@ extern void TaskJacobian(double J[441], double q[21]);
  * @param[in] q joint State Vector <em> dim NDOF </em>
  * @param[in] qdot Articular Velocity State Vector <em> dim NDOF </em>
  */
-extern void TaskNLEffects(double H[21], double q[21], double qdot[21]);
+SICONOS_EXPORT void TaskNLEffects(double H[21], double q[21], double qdot[21]);
 #endif
 

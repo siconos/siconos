@@ -17,6 +17,11 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <iostream>
 #include <math.h>
 
@@ -345,7 +350,7 @@ void NLEffects(double *N, double *q, double *qdot)
 
 
 
-extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
 {
   double q_local[sizeOfq];
   for (unsigned int i = 0; i < sizeOfq; i++)
@@ -353,7 +358,7 @@ extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsign
   Inertia(mass, q_local);
 }
 
-extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
 {
   double q_local[sizeOfq];
   double v_local[sizeOfq];
@@ -365,17 +370,17 @@ extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocit
   NLEffects(NNL, q_local, v_local);
 }
 
-extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacobq, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacobq, unsigned int sizeOfZ, double* z)
 {
   //dummy function
 }
 
-extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacobv, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacobv, unsigned int sizeOfZ, double* z)
 {
   //dummy function
 }
 
-extern "C" void U(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void U(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
 {
   double q_local[sizeOfq];
   for (unsigned int i = 0; i < sizeOfq; i++)
@@ -388,11 +393,11 @@ extern "C" void U(double time, unsigned int sizeOfq, const double *q, const  dou
 
 }
 
-extern "C" void jacobFintQ(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *jacobFintQ, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobFintQ(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *jacobFintQ, unsigned int sizeOfZ, double* z)
 {
   //dummy function
 }
-extern "C" void jacobFintV(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacobFintV, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobFintV(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacobFintV, unsigned int sizeOfZ, double* z)
 {
   //dummy function
 }

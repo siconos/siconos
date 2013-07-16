@@ -17,6 +17,11 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <math.h>
 #include <iostream>
 
@@ -45,7 +50,7 @@ double J3 = 2.7e-6;
 double gravity = 9.81;
 
 // plugins for smooth equations of motion
-extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
 {
   // columnwise definition of mass matrix
   mass[0] = J1 + (0.25 * m1 + m2 + m3) * l1 * l1;
@@ -61,7 +66,7 @@ extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsign
   mass[8] = J3;
 }
 
-extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
 {
   // nonlinear inertia terms (negative in h according to LagrangianDS)
   NNL[0] = (0.5 * m2 + m3) * l1 * l2 * sin(q[0] - q[1]) * velocity[1] * velocity[1];
@@ -69,7 +74,7 @@ extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocit
   NNL[2] = 0.;
 }
 
-extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   // Jacobian of nonlinear inertia terms with respect to q (columnwise)
   jacob[0] = (0.5 * m2 + m3) * l1 * l2 * cos(q[0] - q[1]) * velocity[1] * velocity[1];
@@ -85,7 +90,7 @@ extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double
   jacob[8] = 0.;
 }
 
-extern "C" void jacobianNNLqDot(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianNNLqDot(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   // Jacobian of nonlinear inertia terms with respect to velocity (columnwise)
   jacob[0] =  0.;
@@ -101,7 +106,7 @@ extern "C" void jacobianNNLqDot(unsigned int sizeOfq, const double *q, const  do
   jacob[8] = 0.;
 }
 
-extern "C" void FInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 {
   // internal forces (negative in h according to LagrangianDS)
   fInt[0] = (0.5 * m1 + m2 + m3) * gravity * l1 * cos(q[0]);
@@ -109,7 +114,7 @@ extern "C" void FInt(double time, unsigned int sizeOfq, const double *q, const d
   fInt[2] = 0.;
 }
 
-extern "C" void jacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   // Jacobian of internal forces with respect to q (columnwise)
   jacob[0] = -(0.5 * m1 + m2 + m3) * gravity * l1 * sin(q[0]);
@@ -125,7 +130,7 @@ extern "C" void jacobianFIntq(double time, unsigned int sizeOfq, const double *q
   jacob[8] = 0.;
 }
 
-extern "C" void jacobianFIntqDot(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianFIntqDot(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   // Jacobian of internal forces with respect to velocity (columnwise)
   jacob[0] = 0.;
@@ -141,7 +146,7 @@ extern "C" void jacobianFIntqDot(double time, unsigned int sizeOfq, const double
   jacob[8] = 0.;
 }
 
-extern "C" void g1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void g1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
   g[0] = 0.5 * d - (l1 * sin(q[0]) + l2 * sin(q[1]) - a * sin(q[2]) + b * cos(q[2])); // normal
   // printf("a = %e\t", a);
@@ -158,7 +163,7 @@ extern "C" void g1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
     g[1] = l1 * cos(q[0]) + l2 * cos(q[1]) - a * cos(q[2]) - b * sin(q[2]); // tangential
 }
 
-extern "C" void W1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void W1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
 {
   // Jacobian of g1 (columnwise)
   if (sizeOfY == 1)
@@ -182,7 +187,7 @@ extern "C" void W1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
     RuntimeException::selfThrow("W1 - not implemented!");
 }
 
-extern "C" void W1dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void W1dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
 {
   int sizeOfY = 1;
   // Jacobian of g1 (columnwise)
@@ -207,14 +212,14 @@ extern "C" void W1dot(unsigned int sizeOfq, const double* q, unsigned int sizeOf
 //     RuntimeException::selfThrow("W1 - not implemented!");
 }
 
-extern "C" void g2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void g2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
   g[0] = 0.5 * d - (l1 * sin(q[0]) + l2 * sin(q[1]) + a * sin(q[2]) + b * cos(q[2])); // normal
   if (sizeOfY > 1)
     g[1] = l1 * cos(q[0]) + l2 * cos(q[1]) + a * cos(q[2]) - b * sin(q[2]); // tangential
 }
 
-extern "C" void W2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void W2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
 {
   // Jacobian of g2 (columnwise)
   if (sizeOfY == 1)
@@ -237,7 +242,7 @@ extern "C" void W2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   else
     RuntimeException::selfThrow("W2 - not implemented!");
 }
-extern "C" void W2dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void W2dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
 {
   int sizeOfY = 1;
   // Jacobian of g1 (columnwise)
@@ -262,14 +267,14 @@ extern "C" void W2dot(unsigned int sizeOfq, const double* q, unsigned int sizeOf
 //     RuntimeException::selfThrow("W1 - not implemented!");
 }
 
-extern "C" void g3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void g3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
   g[0] = 0.5 * d + l1 * sin(q[0]) + l2 * sin(q[1]) - a * sin(q[2]) - b * cos(q[2]); // normal
   if (sizeOfY > 1)
     g[1] = l1 * cos(q[0]) + l2 * cos(q[1]) - a * cos(q[2]) + b * sin(q[2]); // tangential
 }
 
-extern "C" void W3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void W3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
 {
   // Jacobian of g3 (columnwise)
   if (sizeOfY == 1)
@@ -292,7 +297,7 @@ extern "C" void W3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   else
     RuntimeException::selfThrow("W3 - not implemented!");
 }
-extern "C" void W3dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void W3dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
 {
   int sizeOfY = 1;
   // Jacobian of g1 (columnwise)
@@ -316,14 +321,14 @@ extern "C" void W3dot(unsigned int sizeOfq, const double* q, unsigned int sizeOf
 //   else
 //     RuntimeException::selfThrow("W1 - not implemented!");
 }
-extern "C" void g4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void g4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
   g[0] = 0.5 * d + l1 * sin(q[0]) + l2 * sin(q[1]) + a * sin(q[2]) - b * cos(q[2]); // normal
   if (sizeOfY > 1)
     g[1] = l1 * cos(q[0]) + l2 * cos(q[1]) + a * cos(q[2]) + b * sin(q[2]); // tangential
 }
 
-extern "C" void W4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void W4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
 {
   // Jacobian of g4 (columnwise)
   if (sizeOfY == 1)
@@ -346,7 +351,7 @@ extern "C" void W4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   else
     RuntimeException::selfThrow("W4 - not implemented!");
 }
-extern "C" void W4dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void W4dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
 {
   int sizeOfY = 1;
   // Jacobian of g1 (columnwise)

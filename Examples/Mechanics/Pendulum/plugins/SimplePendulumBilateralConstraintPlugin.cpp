@@ -17,24 +17,29 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
+#ifdef _WIN32 
+#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
+#else 
+#define SICONOS_EXPORT extern "C" 
+#endif  
 #include <stdio.h>
 #include <math.h>
 using namespace std;
 
 extern "C" double L;
 
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   y[0] = pow(L, 2) - (pow(q[0], 2) + pow(q[1], 2));
 }
 
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = -2.0 * q[0];
   G[1] = -2.0 * q[1];
 }
 
-extern "C" void G0dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void G0dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S, unsigned int sizeOfZ, double* z)
 {
   S[0] = -2.0 * qdot[0];
   S[1] = -2.0 * qdot[1];
