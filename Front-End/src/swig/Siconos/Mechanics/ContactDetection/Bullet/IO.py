@@ -155,12 +155,15 @@ class Dat():
         """
         time = self._broadphase.model().simulation().nextTime()
 
-        ids = self._io.dynamicIds(self._broadphase)
+        ids = self._io.dynamicIds(self._broadphase.model())
         positions = self._io.positions(self._broadphase.model())
 
+        id_= 0
         for row in positions:
+            obj_id = ids[id_]
+            id_ += 1
             self._pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
-                                 format(time, object_id(collision_object),
+                                 format(time, obj_id,
                                         row[0], row[1], row[2], 
                                         row[3], row[4], row[5], row[6]))
 

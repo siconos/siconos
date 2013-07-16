@@ -5,6 +5,7 @@
 #include <VisitorMaker.hpp>
 
 #include <SpaceFilter.hpp>
+#include <BlockVector.hpp>
 
 #ifdef HAVE_BULLET
 #include <BulletDS.hpp>
@@ -12,6 +13,7 @@
 #include <BulletSpaceFilter.hpp>
 #include <btBulletCollisionCommon.h>
 #endif
+
 
 #include "MechanicsIO.hpp"
 

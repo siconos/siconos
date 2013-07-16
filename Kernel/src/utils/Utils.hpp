@@ -24,6 +24,7 @@
 #include "BlockMatrix.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "BlockVector.hpp"
 #include "ioMatrix.hpp"
 #include "ioVector.hpp"
 

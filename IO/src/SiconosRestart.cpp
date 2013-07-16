@@ -20,6 +20,8 @@
 #include "SiconosFull.hpp"
 #include "SiconosRestart.hpp"
 
+#include <BlockVector.hpp>
+
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/bindings/ublas/vector_sparse.hpp>
