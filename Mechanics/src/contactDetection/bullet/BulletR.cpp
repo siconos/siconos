@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#define DEBUG_MESSAGES 1
+//#define DEBUG_MESSAGES 1
 #include <debug.h>
 
 #include "BulletR.hpp"

@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
     // --- Interactions ---
     // --------------------
 
-    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
+    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
 
     SP::SiconosVector P(new SiconosVector(3));
     P->zero();
@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
     // input  - the concerned DS : beam1
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
     SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
-    SP::Interaction inter1(new Interaction(KneeJointR::_sNbEqualities, nslaw1, relation1));
+    SP::Interaction inter1(new Interaction(KneeJointR::numberOfConstraints(), nslaw1, relation1));
 
     // -------------
     // --- Model ---

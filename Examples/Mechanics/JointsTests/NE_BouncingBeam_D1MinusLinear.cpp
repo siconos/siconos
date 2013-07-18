@@ -172,16 +172,16 @@ int main(int argc, char* argv[])
     // Building the prismatic joint for bouncingbeam
     // input  - the first concerned DS : bouncingbeam
     //        - an axis in the spatial frame (absolute frame)
-    // SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
+    // SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::numberOfConstraints(), qDim));
     // H4->zero();
 
-    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::_sNbEqualities));
+    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::numberOfConstraints()));
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(2, 1);
     
     SP::NewtonEulerR relation4(new PrismaticJointR(bouncingbeam, axe1));
-    SP::Interaction inter4(new Interaction(PrismaticJointR::_sNbEqualities, nslaw4, relation4));
+    SP::Interaction inter4(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw4, relation4));
     SP::Interaction interFloor(new Interaction(1, nslaw0, relation0));
 
     // -------------

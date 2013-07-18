@@ -232,17 +232,17 @@ int main(int argc, char* argv[])
 
 
     //
-    // SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::_sNbEqualities, qDim));
+    // SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::numberOfConstraints(), qDim));
     // H1->zero();
-    // SP::SimpleMatrix H2(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
-    // SP::SimpleMatrix H3(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
+    // SP::SimpleMatrix H2(new SimpleMatrix(KneeJointR::numberOfConstraints(), 2 * qDim));
+    // SP::SimpleMatrix H3(new SimpleMatrix(KneeJointR::numberOfConstraints(), 2 * qDim));
     // H2->zero();
     // H3->zero();
-    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
-    SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
-    SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
+    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
+    SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
+    SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
 
-    //SP::NonSmoothLaw nslaw3(new EqualityConditionNSLKneeJointR::_sNbEqualities());
+    //SP::NonSmoothLaw nslaw3(new EqualityConditionNSLKneeJointR::numberOfConstraints()());
     SP::SiconosVector P(new SiconosVector(3));
     P->zero();
     // Building the first knee joint for beam1
@@ -271,9 +271,9 @@ int main(int argc, char* argv[])
     // Building the prismatic joint for beam3
     // input  - the first concerned DS : beam3
     //        - an axis in the spatial frame (absolute frame)
-    // SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
+    // SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::numberOfConstraints(), qDim));
     // H4->zero();
-    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::_sNbEqualities));
+    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::numberOfConstraints()));
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(2, 1);
@@ -284,10 +284,10 @@ int main(int argc, char* argv[])
     // relation3->setJachq(H3);
     // relation4->setJachq(H4);
     
-    SP::Interaction inter1(new Interaction(KneeJointR::_sNbEqualities, nslaw1, relation1));
-    SP::Interaction inter2(new Interaction(KneeJointR::_sNbEqualities, nslaw2, relation2));
-    SP::Interaction inter3(new Interaction(KneeJointR::_sNbEqualities, nslaw3, relation3));
-    SP::Interaction inter4(new Interaction(PrismaticJointR::_sNbEqualities, nslaw4, relation4));
+    SP::Interaction inter1(new Interaction(KneeJointR::numberOfConstraints(), nslaw1, relation1));
+    SP::Interaction inter2(new Interaction(KneeJointR::numberOfConstraints(), nslaw2, relation2));
+    SP::Interaction inter3(new Interaction(KneeJointR::numberOfConstraints(), nslaw3, relation3));
+    SP::Interaction inter4(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw4, relation4));
     SP::Interaction interFloor(new Interaction(1, nslaw0, relation0));
 
     // -------------

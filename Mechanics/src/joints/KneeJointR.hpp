@@ -28,10 +28,6 @@
  */
 class KneeJointR : public NewtonEulerR
 {
-public:
-  /** Number of equalities that defines the jiont
-   */
-  static int _sNbEqualities;
 protected:
   /** serialization hooks
    */
@@ -79,6 +75,11 @@ public:
    */
   void checkInitPos();
   virtual ~KneeJointR() {};
+
+  /** Get the number of constraints defined in the joint
+      \return the number of constraints
+   */
+  static unsigned int numberOfConstraints() { return 3; }
 
   virtual void computeJachq(const double time, Interaction& inter);
 

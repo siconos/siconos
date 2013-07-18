@@ -27,7 +27,6 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-int KneeJointR::_sNbEqualities = 3;
 void KneeJointR::checkInitPos()
 {
 

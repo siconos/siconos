@@ -36,11 +36,6 @@
 class PrismaticJointR : public NewtonEulerR
 {
 public:
-  /** Number of equalities that defines the jiont
-   */
-  static int _sNbEqualities;
-
-public:
   /** Axis of the prismatic point in the inertial frame of reference
    */
   SP::SiconosVector _axis0;
@@ -146,7 +141,10 @@ public:
               double X2, double Y2, double Z2, double qdot20, double qdot21, double qdot22, double qdot23);
 
 
-
+  /** Get the number of constraints defined in the joint
+      \return the number of constraints
+   */
+  static unsigned int numberOfConstraints() { return 5; }
 
 };
 

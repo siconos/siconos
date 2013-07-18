@@ -24,7 +24,7 @@
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
-#define DEBUG_MESSAGES 1
+//#define DEBUG_MESSAGES 1
 #include <debug.h>
 
 extern btScalar gContactBreakingThreshold;
@@ -61,6 +61,15 @@ struct ForPosition : public Question<SP::SiconosVector>
 
   ANSWER(BulletDS, q());
 };
+
+struct ForContactNum : public Question<unsigned int>
+{
+  using SiconosVisitor::visit;
+
+  ANSWER(BulletR, contactNum());
+};
+
+
 
 BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
                                      SP::NonSmoothLaw nslaw) :
@@ -131,12 +140,19 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   // 2. collect old interactions from Siconos graph
   std::map<btPersistentManifold*, bool> contactManifolds;
+  std::map<btManifoldPoint*, bool> contactPoints;
+
 
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   InteractionsGraph::VIterator ui0, ui0end, v0next;
   for (std11::tie(ui0,ui0end) = indexSet0->vertices(); ui0!=ui0end ; ++ui0)
   {
-    contactManifolds[&*ask<ForContactManifold>(*(indexSet0->bundle(*ui0)->relation()))] = false;
+    Relation& relation = *(indexSet0->bundle(*ui0)->relation());
+    btPersistentManifold& manifold = *ask<ForContactManifold>(relation);
+    unsigned int contactNum = ask<ForContactNum>(relation);
+
+    contactManifolds[&manifold] = false;
+    contactPoints[&manifold.getContactPoint(contactNum)] = false;
   }
 
 
@@ -149,48 +165,38 @@ void BulletSpaceFilter::buildInteractions(double time)
     btPersistentManifold* contactManifold =
       _collisionWorld->getDispatcher()->getManifoldByIndexInternal(i);
 
-    if (contactManifolds.find(contactManifold) == contactManifolds.end())
+    for (unsigned int j = 0; j < contactManifold->getNumContacts(); ++j)
     {
-      assert(_nslaw->size() == 3); // 1D not yet
+      btManifoldPoint& cpoint = contactManifold->getContactPoint(j);
 
-      // at most 4 contact points => 4 interactions
-      SP::BulletR rel1(new BulletR(1,createSPtrbtPersistentManifold(*contactManifold), _collisionWorld));
-      SP::BulletR rel2(new BulletR(2,createSPtrbtPersistentManifold(*contactManifold), _collisionWorld));
-      SP::BulletR rel3(new BulletR(3,createSPtrbtPersistentManifold(*contactManifold), _collisionWorld));
-      SP::BulletR rel4(new BulletR(4,createSPtrbtPersistentManifold(*contactManifold), _collisionWorld));
-
-      SP::Interaction inter1(new Interaction(3, _nslaw, rel1));
-      SP::Interaction inter2(new Interaction(3, _nslaw, rel2));
-      SP::Interaction inter3(new Interaction(3, _nslaw, rel3));
-      SP::Interaction inter4(new Interaction(3, _nslaw, rel4));
-
-      const btCollisionObject* obA =
-        static_cast<const btCollisionObject*>(contactManifold->getBody0());
-      const btCollisionObject* obB =
-        static_cast<const btCollisionObject*>(contactManifold->getBody1());
-
-      assert(obA->getUserPointer());
-      SP::BulletDS dsa(static_cast<BulletDS*>(obA->getUserPointer())->shared_ptr());
- 
-      if (obB->getUserPointer())
+      if (contactPoints.find(&cpoint) == contactPoints.end())
       {
-        SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
-        link(inter1, dsa, dsb);
-        link(inter2, dsa, dsb);
-        link(inter3, dsa, dsb);
-        link(inter4, dsa, dsb);
-      }
-      else
-      {
-        link(inter1, dsa);
-        link(inter2, dsa);
-        link(inter3, dsa);
-        link(inter4, dsa);
-      }
+        assert(_nslaw->size() == 3); // 1D not yet
+        
+        SP::BulletR rel(new BulletR(j, createSPtrbtPersistentManifold(*contactManifold), _collisionWorld));
+        SP::Interaction inter(new Interaction(3, _nslaw, rel));
 
-    }
-    contactManifolds[contactManifold] = true;
-    
+        const btCollisionObject* obA =
+          static_cast<const btCollisionObject*>(contactManifold->getBody0());
+        const btCollisionObject* obB =
+          static_cast<const btCollisionObject*>(contactManifold->getBody1());
+
+        assert(obA->getUserPointer());
+        SP::BulletDS dsa(static_cast<BulletDS*>(obA->getUserPointer())->shared_ptr());
+        
+        if (obB->getUserPointer())
+        {
+          SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
+          link(inter, dsa, dsb);
+        }
+        else
+        {
+          link(inter, dsa);
+        }
+        
+      }
+      contactPoints[&cpoint] = true;
+    }    
   }
   
   // remove old interactions
@@ -200,7 +206,12 @@ void BulletSpaceFilter::buildInteractions(double time)
   {
     SP::Interaction inter = indexSet0->bundle(*ui0);
     ++v0next;  // trick to iterate on a dynamic bgl graph
-    if (! contactManifolds[&*ask<ForContactManifold>(*(inter->relation()))])
+
+    Relation& relation = *inter->relation();
+    btPersistentManifold& manifold = *ask<ForContactManifold>(relation);
+    unsigned int contactNum = ask<ForContactNum>(relation);
+    
+    if (! contactPoints[&manifold.getContactPoint(contactNum)])
     {
       model()->nonSmoothDynamicalSystem()->removeInteraction(inter);
     }

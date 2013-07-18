@@ -30,8 +30,6 @@
  */
 class PivotJointR : public KneeJointR
 {
-public:
-  static int _sNbEqualities;
 protected:
   /** serialization hooks
   */
@@ -44,7 +42,13 @@ protected:
   double _A2x, _A2y, _A2z;
   void buildA1A2();
 
+  virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
+  double AscalA1(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
+  double AscalA2(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
+
   virtual void initComponents(Interaction& inter);
+
 public:
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
@@ -65,12 +69,13 @@ public:
   virtual ~PivotJointR() {};
 
   virtual void computeh(const double time, Interaction& inter);
-protected:
 
-  virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
-  double AscalA1(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
-  double AscalA2(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
+  /** Get the number of constraints defined in the joint
+      \return the number of constraints
+   */
+  static unsigned int numberOfConstraints() { return 5; }
+
+
 
 };
 TYPEDEF_SPTR(PivotJointR)

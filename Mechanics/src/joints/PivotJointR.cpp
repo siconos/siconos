@@ -23,8 +23,6 @@
 #include "PivotJointR.hpp"
 #include <boost/math/quaternion.hpp>
 
-int PivotJointR::_sNbEqualities = 5;
-
 PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P, SP::SiconosVector A): KneeJointR(d1, d2, P)
 {
   // SP::SiconosVector q1 = d1->q0();
