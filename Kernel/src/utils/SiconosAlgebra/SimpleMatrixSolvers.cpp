@@ -298,5 +298,5 @@ void polePlacement(const SiconosMatrix& A, const SiconosVector& B, SiconosVector
   lapack::gehrd(1, n, AA, tau);
   lapack::orghr(n, 1, n, Q, tau);
   noalias(BB) = prod(Q, *B.dense());
-
+}
 
