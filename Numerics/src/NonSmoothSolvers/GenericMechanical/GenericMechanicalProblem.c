@@ -24,8 +24,6 @@
 #include "misc.h"
 
 //#define GMP_DEBUG
-unsigned int NUMERICS_GMP_FREE_MATRIX = 1 << 2;
-unsigned int NUMERICS_GMP_FREE_GMP = 1 << 3;
 
 /* void * solverFC3D; */
 /* void * solverEquality; */
@@ -80,6 +78,7 @@ void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP, unsigned int 
   }
   if (level & NUMERICS_GMP_FREE_MATRIX)
   {
+    assert(pGMP->M);
     int storageType = pGMP->M->storageType;
     if (storageType == 0)
       free(pGMP->M->matrix0);

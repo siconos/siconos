@@ -46,8 +46,8 @@ For each solver, the input argument are:
 #include "GenericMechanicalProblem.h"
 #include "SolverOptions.h"
 
-extern unsigned int NUMERICS_GMP_FREE_MATRIX;
-extern unsigned int NUMERICS_GMP_FREE_GMP;
+#define NUMERICS_GMP_FREE_MATRIX 4
+#define NUMERICS_GMP_FREE_GMP 8
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

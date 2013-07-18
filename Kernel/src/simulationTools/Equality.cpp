@@ -23,10 +23,13 @@ using namespace RELATION;
 
 int Equality::compute(double time)
 {
-  // --- Prepare data for EQUALITY computing ---
-  preCompute(time);
-
   int info = 0;
+  // --- Prepare data for EQUALITY computing ---
+  bool cont = preCompute(time);
+  if (!cont)
+    return info;
+
+
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)

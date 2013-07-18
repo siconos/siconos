@@ -109,8 +109,12 @@ void Relay::initialize(SP::Simulation sim)
 
 int Relay::compute(double time)
 {
+  int info = 0;
   // --- Prepare data for Relay computing ---
-  preCompute(time);
+  bool cont = preCompute(time);
+  if (!cont)
+    return info;
+
 
   // fill _lb and _ub wiht the value of the NonSmooth Law
 
@@ -151,7 +155,6 @@ int Relay::compute(double time)
 
 
 
-  int info = 0;
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)

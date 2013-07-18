@@ -406,7 +406,10 @@ int GlobalFrictionContact::compute(double time)
 {
   int info = 0;
   // --- Prepare data for GlobalFrictionContact computing ---
-  preCompute(time);
+  bool cont = preCompute(time);
+  if (!cont)
+    return info;
+
 
   // --- Call Numerics solver ---
   if (_sizeOutput != 0)
@@ -416,7 +419,7 @@ int GlobalFrictionContact::compute(double time)
     numerics_problem.M = M->getNumericsMatrix();
     numerics_problem.q = q->getArray();
     numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;
-    numerics_problem.mu = &((*_mu)[0]);
+    numerics_problem.mu = &(_mu->at(0));
     // Call Numerics Driver for GlobalFrictionContact
     //  {
     //    int info2 = -1;

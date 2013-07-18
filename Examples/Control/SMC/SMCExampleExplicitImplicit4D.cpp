@@ -167,7 +167,6 @@ Csurface = np.array(Brel).T
     processSimulation->nextStep();
   }
   cout << endl << "Computation Time " << time.elapsed()  << endl;
-  eventsManager.display();
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;

@@ -151,7 +151,6 @@ int main(int argc, char* argv[])
 
     while (s->hasNextEvent())
     {
-      eventsManager->display();
       nextEvent = eventsManager->nextEvent();
       // --- Get values to be plotted ---
       // the following check prevents saving the same data multiple times

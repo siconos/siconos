@@ -17,13 +17,15 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
+#if defined(_MSC_VER)
+#define _USE_MATH_DEFINES
+#endif
 #ifdef _WIN32 
 #define SICONOS_EXPORT extern "C" __declspec(dllexport) 
 #else 
 #define SICONOS_EXPORT extern "C" 
 #endif  
 #include <math.h>
-#include <sys/time.h>
 #include <iostream>
 #include <stdio.h>
 

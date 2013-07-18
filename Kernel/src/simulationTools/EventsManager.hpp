@@ -217,7 +217,9 @@ public:
    */
   void processEvents(Simulation& sim);
 
-  /** function to be called once after initialization
+  /** Function to be called once after initialization.
+   * It is used to process NonSmoothEvents at the beginning of
+   * the Simulation, if there is any.
    * \param sim the simulation that owns this EventsManager
    */
   void preUpdate(Simulation& sim);

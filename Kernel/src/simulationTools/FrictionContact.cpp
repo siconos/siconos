@@ -132,7 +132,9 @@ int FrictionContact::compute(double time)
 {
   int info = 0;
   // --- Prepare data for FrictionContact computing ---
-  preCompute(time);
+  bool cont = preCompute(time);
+  if (!cont)
+    return info;
 
   // Update mu
   _mu->clear();
@@ -168,7 +170,7 @@ int FrictionContact::compute(double time)
     numerics_problem.M = &*_M->getNumericsMatrix();
     numerics_problem.q = &*_q->getArray();
     numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;
-    numerics_problem.mu = &((*_mu)[0]);
+    numerics_problem.mu = &(_mu->at(0));
     // Call Numerics Driver for FrictionContact
     info = (*_frictionContact_driver)(&numerics_problem,
                                       &*_z->getArray() ,

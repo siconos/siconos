@@ -85,28 +85,21 @@ void EventsManager::noSaveInMemory(const Simulation& sim)
 void EventsManager::preUpdate(Simulation& sim)
 {
   const mpz_t *t1 = _events[0]->getTimeOfEvent();
-  for (EventsContainer::iterator it = _events.begin(); it != _events.end() ; ++it)
+  _events[0]->process(sim);
+  for (unsigned int i = 1; i < _events.size() ; i++)
   {
-    const  mpz_t *t2 = (*it)->getTimeOfEvent();
+    const  mpz_t *t2 =  _events[i]->getTimeOfEvent();
     int res = mpz_cmp(*t1, *t2);
     if (res == 0)
     {
-      if ((*it)->getType() != SENSOR_EVENT && (*it)->getType() != ACTUATOR_EVENT && (*it)->getType() != OBSERVER_EVENT)
+      if (_events[i]->getType() == NS_EVENT)
       {
-        (*it)->process(sim);
-      // "synchronise" actuators/sensors events
-      // XXX needed ???
-//      if ((*it)->getType() == SENSOR_EVENT || (*it)->getType() == ACTUATOR_EVENT || (*it)->getType() == OBSERVER_EVENT)
-//      {
-//        (*it)->update();
-//        insertEv(*it);
-//        _events.erase(it);
-//      }
-        if (it == _events.begin())
-          continue;
-        else _events.erase(it);
+        _events[i]->process(sim);
+        _events.erase(_events.begin()+i);
       }
     }
+    else
+      break;
   }
 }
 

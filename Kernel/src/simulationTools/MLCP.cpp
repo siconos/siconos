@@ -172,15 +172,17 @@ bool MLCP::preCompute(double time)
 
 int MLCP::compute(double time)
 {
+  int info = 0;
   // --- Prepare data for MLCP computing ---
-  preCompute(time);
+  bool cont = preCompute(time);
+  if (!cont)
+    return info;
   //  _hasBeenUpdated=true;
 #ifdef MLCP_DEBUG
   printf("MLCP::compute m n :%d,%d\n", _n, _m);
 #endif
   /*If user has not allocted the working memory, do it. */
   int allocated = mlcp_alloc_working_memory(&_numerics_problem, &*_numerics_solver_options);
-  int info = 0;
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)

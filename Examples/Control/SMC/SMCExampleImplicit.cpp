@@ -146,7 +146,6 @@ int main(int argc, char* argv[])
   time.restart();
   while (processSimulation->hasNextEvent())
   {
-    eventsManager.display();
     Event& nextEvent = *eventsManager.nextEvent();
     if (nextEvent.getType() == TD_EVENT)
     {
@@ -160,7 +159,6 @@ int main(int argc, char* argv[])
     processSimulation->nextStep();
   }
   cout << endl << "Computation Time " << time.elapsed()  << endl;
-  eventsManager.display();
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
