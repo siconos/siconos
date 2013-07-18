@@ -171,7 +171,7 @@ PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleIndexVertexMaterialArray);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleInfoMap);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btUniformScalingShape);
 
-%include "BulletSiconos.hpp"
+%include "BulletSiconosFwd.hpp"
 PY_FULL_REGISTER(BulletR);
 PY_FULL_REGISTER(BulletDS);
 PY_FULL_REGISTER(BulletSpaceFilter);

@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include "SphereNEDSSphereNEDSR.hpp"
+#include <Interaction.hpp>
 #include <BlockVector.hpp>
 
 SphereNEDSSphereNEDSR::SphereNEDSSphereNEDSR(double r,

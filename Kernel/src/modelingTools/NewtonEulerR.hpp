@@ -23,30 +23,6 @@
 #define NEWTONEULERRELATION_H
 
 #include "Relation.hpp"
-#include "Interaction.hpp"
-
-class DynamicalSystem;
-class RelationXML;
-class SimpleMatrix;
-class SiconosVector;
-
-/** NewtonEuler (Non Linear) Relation (generic interface)
- *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date Apr 27, 2004
- *
- * Relations for NewtonEuler Dynamical Systems. This class is only an interface for specific (Linear, Scleronomous ...)
- * NewtonEuler Relations (see derived classes).
- *
- *  Class name = type+subType.
- *
- * If y = h(...), all the gradients of are handled by G object.
- * For example, G[0] = \f$ \nabla_q h(q,...) \f$.
- *
- * In corresponding derived classes, h and Gi are connected to plug-in functions (user-defined).
- * For more details, see the DevNotes.pdf, chapter NewtonEuler.
- */
 
 /**Pointer to function - Plug-in utilities*/
 typedef void (*FPtr2)(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*);
@@ -57,7 +33,25 @@ typedef void (*FPtr3)(unsigned int, const double*, unsigned int, double*, unsign
 /**Pointer to function - Plug-in utilities*/
 typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);
 
-
+/** NewtonEuler (Non Linear) Relation (generic interface)
+ *
+ * \author SICONOS Development Team - copyright INRIA
+ *  \version 3.0.0.
+ *  \date Apr 27, 2004
+ *
+ * \class NewtonEulerR 
+ * Relations for NewtonEuler Dynamical Systems. This class is only an
+ * interface for specific (Linear, Scleronomous ...)  NewtonEuler
+ * Relations (see derived classes).
+ *
+ *  Class name = type+subType.
+ *
+ * If y = h(...), all the gradients of are handled by G object.
+ * For example, G[0] = \f$ \nabla_q h(q,...) \f$.
+ *
+ * In corresponding derived classes, h and Gi are connected to plug-in functions (user-defined).
+ * For more details, see the DevNotes.pdf, chapter NewtonEuler.
+ */
 class NewtonEulerR : public Relation
 {
 public:

@@ -27,13 +27,12 @@
 #include "DynamicalSystem.hpp"
 #include "BoundaryCondition.hpp"
 
-class DynamicalSystem;
-class BlockMatrix;
-
 /** Pointer to function for plug-in. For NNL and its jacobian. */
 typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
 typedef void (*FPtrMass)(unsigned int, const double*, double*, unsigned int, double*);
 typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
+
+typedef std::vector<SP::SiconosMemory> VectorOfMemories;
 
 /** Lagrangian non linear dynamical systems - Derived from DynamicalSystem -
  *
@@ -41,7 +40,7 @@ typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
  *  \version 3.0.0.
  *  \date (Creation) Apr 29, 2004
  *
- *
+ * \class LagrangianDS 
  * The class LagrangianDS  defines  and computes a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
@@ -130,10 +129,6 @@ typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
  *
  *
  */
-
-
-typedef std::vector<SP::SiconosMemory> VectorOfMemories;
-
 class LagrangianDS : public DynamicalSystem
 {
 public:

@@ -21,6 +21,7 @@
 #include "NewtonEulerFrom3DLocalFrameR.hpp"
 #include "NewtonEulerDS.hpp"
 #include <boost/math/quaternion.hpp>
+#include "Interaction.hpp"
 
 //#define NEFC3D_DEBUG
 /*

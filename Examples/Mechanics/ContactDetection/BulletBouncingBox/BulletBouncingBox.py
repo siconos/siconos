@@ -46,7 +46,7 @@ theta = 0.5  # theta scheme
 position_init = 10
 velocity_init = 0
 
-if (False):
+if (True):
     box = btConvexHullShape()
     box.addPoint(btVector3(-1.0, 1.0, -1.0))
     box.addPoint(btVector3(-1.0, -1.0, -1.0))

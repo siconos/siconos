@@ -50,7 +50,7 @@ BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
   _collisionObject.reset(new btCollisionObject());
 
   _collisionObject->setUserPointer(this);
-  _collisionObject->setCollisionFlags(_collisionObject->getCollisionFlags() |
+  _collisionObject->setCollisionFlags(_collisionObject->getCollisionFlags()|
                                       btCollisionObject::CF_KINEMATIC_OBJECT);
 
   _collisionObject->setCollisionShape(&*(weightedShape->collisionShape()));

@@ -24,7 +24,7 @@
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
-//#define DEBUG_MESSAGES 1
+#define DEBUG_MESSAGES 1
 #include <debug.h>
 
 extern btScalar gContactBreakingThreshold;
@@ -78,8 +78,8 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 
   _collisionConfiguration.reset(new btDefaultCollisionConfiguration());
 
-  _collisionConfiguration->setConvexConvexMultipointIterations();
-  _collisionConfiguration->setPlaneConvexMultipointIterations();
+//  _collisionConfiguration->setConvexConvexMultipointIterations();
+//  _collisionConfiguration->setPlaneConvexMultipointIterations();
 
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
 
@@ -91,9 +91,9 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 
   _collisionWorld->getDispatchInfo().m_useContinuous = false;
 
-//gContactBreakingThreshold = 1.0;
-  gContactProcessedCallback = &contactProcess;
-  gContactDestroyedCallback = &contactClear;
+  gContactBreakingThreshold = 1.0;
+//  gContactProcessedCallback = &contactProcess;
+//  gContactDestroyedCallback = &contactClear;
 
 }
 
@@ -154,10 +154,10 @@ void BulletSpaceFilter::buildInteractions(double time)
       assert(_nslaw->size() == 3); // 1D not yet
 
       // at most 4 contact points => 4 interactions
-      SP::BulletR rel1(new BulletR(1,createSPtrbtPersistentManifold(*contactManifold)));
-      SP::BulletR rel2(new BulletR(2,createSPtrbtPersistentManifold(*contactManifold)));
-      SP::BulletR rel3(new BulletR(3,createSPtrbtPersistentManifold(*contactManifold)));
-      SP::BulletR rel4(new BulletR(4,createSPtrbtPersistentManifold(*contactManifold)));
+      SP::BulletR rel1(new BulletR(1,createSPtrbtPersistentManifold(*contactManifold), _collisionWorld));
+      SP::BulletR rel2(new BulletR(2,createSPtrbtPersistentManifold(*contactManifold), _collisionWorld));
+      SP::BulletR rel3(new BulletR(3,createSPtrbtPersistentManifold(*contactManifold), _collisionWorld));
+      SP::BulletR rel4(new BulletR(4,createSPtrbtPersistentManifold(*contactManifold), _collisionWorld));
 
       SP::Interaction inter1(new Interaction(3, _nslaw, rel1));
       SP::Interaction inter2(new Interaction(3, _nslaw, rel2));

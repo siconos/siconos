@@ -46,8 +46,8 @@ struct GetVelocity : public SiconosVisitor
 };
 
 
-typedef Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
-                  GetVelocity >::Make getVelocity;
+Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
+          GetVelocity >::Make getVelocity;
 
 SP::SiconosVector q(new SiconosVector(3));
 SP::SiconosVector v(new SiconosVector(3));

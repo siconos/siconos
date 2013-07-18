@@ -18,6 +18,7 @@
 */
 
 #include "BulletFrom1DLocalFrameR.hpp"
+#include <Interaction.hpp>
 
 #include <bullet/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>

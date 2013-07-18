@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include "SphereNEDSPlanR.hpp"
+#include <Interaction.hpp>
 #include <BlockVector.hpp>
 
 SphereNEDSPlanR::SphereNEDSPlanR(double r, double A, double B, double C, double D)

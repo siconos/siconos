@@ -33,9 +33,12 @@ private:
   unsigned int _contact_num;
 
   SP::btPersistentManifold _contactManifold;
+  SP::btCollisionWorld _collisionWorld;
 
 public:
-  BulletR(unsigned int contact_num, SP::btPersistentManifold);
+  BulletR(unsigned int contact_num, 
+          SP::btPersistentManifold contactManifold, 
+          SP::btCollisionWorld collisionWorld);
   
   SP::btPersistentManifold contactManifold() const
   {
