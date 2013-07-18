@@ -37,20 +37,6 @@ public:
   /** default constructor
    */
   MechanicsIO() {};
-  
-  /** get static objects identifications 
-   * \param broadphase a SP::SpaceFilter
-   * \return a SP::SiconosVector with ids
-   */
-  SP::SiconosVector staticIds(const SpaceFilter& broadphase) const;
-
-
-  /** get dynamical systems identifications 
-   * \param model a SP::Model
-   * \return a SP::SiconosVector with ids
-   */
-  SP::SiconosVector dynamicIds(const Model& model) const;
-
 
   /** get all positions : translation (x,y,z) + orientation quaternion
    * (qw, qx, qy, qz)

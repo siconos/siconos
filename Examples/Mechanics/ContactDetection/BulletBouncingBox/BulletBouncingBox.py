@@ -46,7 +46,7 @@ theta = 0.5  # theta scheme
 position_init = 10
 velocity_init = 0
 
-if (True):
+if (False):
     box = btConvexHullShape()
     box.addPoint(btVector3(-1.0, 1.0, -1.0))
     box.addPoint(btVector3(-1.0, -1.0, -1.0))
@@ -153,7 +153,7 @@ dataPlot[0, 2] = v[2]
 k = 1
 
 # time loop
-while(simulation.hasNextEvent()):
+while(simulation.hasNextEvent() and k<4000):
 
     broadphase.buildInteractions(bouncingBox.currentTime())
     print k,'numManifolds=', broadphase.collisionWorld().getDispatcher().getNumManifolds()

@@ -67,69 +67,73 @@ class Dat():
         self._reference = dict()
         self._static_cobjs = []
         self._shape = VtkShapes.Collection(shape_filename)
-        self._pos_file = None
+        self._static_pos_file = None
+        self._dynamic_pos_file = None
         self._contact_forces_file = None
         self._io = MechanicsIO()
 
         # read data
         with open(self._input_filename, 'r') as input_file:
 
-            for line in input_file:
-                sline = shlex.split(line)
-                shape_id = int(sline[0])
-                group_id = int(sline[1])
-                mass = float(sline[2])
-                q0, q1, q2, w, x, y, z, v0, v1, v2, v3, v4, v5 =\
-                   [ float(i) for i in sline[3:]]
+            with open('bindings.dat', 'w') as bind_file:
 
-                if group_id < 0:
-                    # a static object
-                    static_cobj = btCollisionObject()
-                    static_cobj.setCollisionFlags(
-                        btCollisionObject.CF_STATIC_OBJECT)
-                    static_cobj.setWorldTransform(btTransform(
-                        btQuaternion(x, y, z, w)))
-                    static_cobj.setCollisionShape(
-                        self._shape.at_index(shape_id))
-                    self._reference[object_id(static_cobj)] = shape_id
-                    self._static_cobjs.append(static_cobj)
-                    broadphase.addStaticObject(static_cobj)
-                    broadphase.addStaticShape(self._shape.at_index(shape_id))
-                else:
-                    # a moving object
-                    body = BulletDS(BulletWeightedShape(
-                        self._shape.at_index(shape_id), mass),
-                        [q0, q1, q2, w, x, y, z],
-                        [v0, v1, v2, v3, v4, v5])
-                    self._reference[object_id(body.collisionObject())] = \
-                        shape_id
+                ids = -1
+                idd = 1
+                for line in input_file:
+                    sline = shlex.split(line)
+                    shape_id = int(sline[0])
+                    group_id = int(sline[1])
+                    mass = float(sline[2])
+                    q0, q1, q2, w, x, y, z, v0, v1, v2, v3, v4, v5 =\
+                       [ float(i) for i in sline[3:]]
 
-                    # set external forces
-                    set_external_forces(body)
+                    if group_id < 0:
+                        # a static object
+                        static_cobj = btCollisionObject()
+                        static_cobj.setCollisionFlags(
+                            btCollisionObject.CF_STATIC_OBJECT)
+                        static_cobj.setWorldTransform(btTransform(
+                            btQuaternion(x, y, z, w)))
+                        static_cobj.setCollisionShape(
+                            self._shape.at_index(shape_id))
+                        self._reference[ids] = shape_id
+                        self._static_cobjs.append(static_cobj)
+                        broadphase.addStaticObject(static_cobj)
+                        broadphase.addStaticShape(self._shape.at_index(shape_id))
+                        ids -= 1
 
-                    # add the dynamical system to the non smooth
-                    # dynamical system
-                    self._broadphase.model().nonSmoothDynamicalSystem().\
-                        insertDynamicalSystem(body)
-                    self._osi.insertDynamicalSystem(body)
+                        bind_file.write('{0} {1}\n'.format(ids), shape_id)
+
+                    else:
+                        # a moving object
+                        body = BulletDS(BulletWeightedShape(
+                            self._shape.at_index(shape_id), mass),
+                            [q0, q1, q2, w, x, y, z],
+                            [v0, v1, v2, v3, v4, v5])
+                        self._reference[idd] = \
+                          shape_id
+
+                        # set external forces
+                        set_external_forces(body)
+
+                        # add the dynamical system to the non smooth
+                        # dynamical system
+                        self._broadphase.model().nonSmoothDynamicalSystem().\
+                            insertDynamicalSystem(body)
+                        self._osi.insertDynamicalSystem(body)
+                        idd += 1
+                        bind_file.write('{0} {1}\n'.format(idd), shape_id)
 
     def __enter__(self):
-        self._pos_file = open('pos.dat', 'w')
-        self._contact_forces_file = open('contact_forces.dat', 'w')
+        self._static_pos_file = open('spos.dat', 'w')
+        self._dynamic_pos_file = open('dpos.dat', 'w')
+        self._contact_forces_file = open('cf.dat', 'w')
         return self
 
     def __exit__(self, type_, value, traceback):
-        with open('bindings.dat', 'w') as bind_file:
-            for collision_object in chain(
-                self._broadphase.staticObjects(),
-                    [cast_BulletDS(ds).collisionObject()
-                     for ds in self._broadphase.model().
-                     nonSmoothDynamicalSystem().topology().dSG(0).vertices()]):
-                bind_file.write('{0} {1}\n'.format(object_id(collision_object),
-                                self._reference[object_id(collision_object)]))
-
         self._contact_forces_file.close()
-        self._pos_file.close()
+        self._static_pos_file.close()
+        self._dynamic_pos_file.close()
 
     def outputStaticObjects(self):
         """
@@ -139,15 +143,15 @@ class Dat():
         for collision_object in self._broadphase.staticObjects():
             position = collision_object.getWorldTransform().getOrigin()
             rotation = collision_object.getWorldTransform().getRotation()
-            self._pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
-                                 format(time, object_id(collision_object),
-                                        position.x(),
-                                        position.y(),
-                                        position.z(),
-                                        rotation.w(),
-                                        rotation.x(),
-                                        rotation.y(),
-                                        rotation.z()))
+            self._static_pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7}\n'.
+                                        format(time,
+                                               position.x(),
+                                               position.y(),
+                                               position.z(),
+                                               rotation.w(),
+                                               rotation.x(),
+                                               rotation.y(),
+                                               rotation.z()))
 
     def outputDynamicObjects(self):
         """
@@ -155,17 +159,13 @@ class Dat():
         """
         time = self._broadphase.model().simulation().nextTime()
 
-        ids = self._io.dynamicIds(self._broadphase.model())
         positions = self._io.positions(self._broadphase.model())
 
-        id_= 0
-        for row in positions:
-            obj_id = ids[id_]
-            id_ += 1
-            self._pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
-                                 format(time, obj_id,
-                                        row[0], row[1], row[2], 
-                                        row[3], row[4], row[5], row[6]))
+        times = np.empty((positions.shape[0], 1))
+        times.fill(time)
+
+        np.savetxt(self._dynamic_pos_file, np.concatenate(times, positions))
+
 
     def outputContactForces(self):
         """

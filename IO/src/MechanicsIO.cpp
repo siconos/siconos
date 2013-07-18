@@ -17,21 +17,7 @@
 
 #include "MechanicsIO.hpp"
 
-
 using namespace Alternative;
-
-struct GetId : public SiconosVisitor
-{
-  
-  double result;
-  
-  template<typename T>
-  void operator()(const T& ds)
-  {
-    result = ds->number();
-  }
-};
-
 
 struct GetPosition : public SiconosVisitor
 {
@@ -128,54 +114,6 @@ SP::SiconosVector MechanicsIO::visitAllVerticesForDouble(const G& graph) const
   }
   return result;
 }
-
-
-#include <boost/foreach.hpp>
-SP::SiconosVector MechanicsIO::staticIds(const SpaceFilter& broadphase) const
-{
-#ifdef HAVE_BULLET
-  SP::SiconosVector result;
-
-  std11::shared_ptr<std::vector<SP::btCollisionObject> > staticObjects = 
-    ask<ForStaticObjects>(broadphase);
-  
-  if (staticObjects)
-  {
-    result.reset(new SiconosVector(staticObjects->size()));
-
-    std::vector<SP::btCollisionObject>::iterator it;
-    unsigned int current_row;
-    for(current_row = 0, it = staticObjects->begin(); 
-        it != staticObjects->end(); ++it, ++current_row)
-    {
-      result->setValue(current_row, reinterpret_cast<size_t>((*it).get()));
-    }
-  }
-
-  return result;
-#endif
-};
-
-SP::SiconosVector MechanicsIO::dynamicIds(const Model& model) const
-{
-
-  DynamicalSystemsGraph& graph = *(model.nonSmoothDynamicalSystem()->
-                                   topology()->dSG(0));
-
-  SP::SiconosVector result(new SiconosVector(graph.vertices_number()));
-
-  unsigned int current_row;
-  DynamicalSystemsGraph::VIterator vi, viend;
-  for(current_row=0,std11::tie(vi,viend)=graph.vertices();
-      vi!=viend; ++vi, ++current_row)
-  {
-    result->setValue(current_row, 
-                     reinterpret_cast<size_t>(graph.bundle(*vi).get()));
-  }
-
-  return result;
-};
-
 
 
 SP::SimpleMatrix MechanicsIO::positions(const Model& model) const
