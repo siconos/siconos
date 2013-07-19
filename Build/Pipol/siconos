@@ -2,21 +2,21 @@
 
 #PRE-PIPOL  src/git/siconos/Build/Pipol/pre-siconos
 
-#PIPOL fedora-core14 03:00
+#PIPOL fedora-core14 03:00 --silent
 
-#PIPOL fedora-core16 03:00
+#PIPOL fedora-core16 03:00 --silent
 
-#PIPOL fedora-core17 03:00
+#PIPOL fedora-core17 03:00 --silent
 
-#PIPOL ubuntu-lucid 03:00
+#PIPOL ubuntu-lucid 03:00 --silent
 
-#PIPOL ubuntu-precise 03:00
+#PIPOL ubuntu-precise 03:00 --silent
 
-#PIPOL ubuntu-quantal 03:00
+#PIPOL ubuntu-quantal 03:00 --silent
 
-#PIPOL ia64-linux-debian-squeeze 05:00
+#PIPOL ia64-linux-debian-squeeze 05:00 --silent
 
-#PIPOL mac 03:00
+#PIPOL mac 03:00 --silent
 
 release=false
 #release=true
