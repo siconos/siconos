@@ -269,7 +269,7 @@ public:
   };
 
   /** get time instant k+3 of the time discretisation.
-   *  It is used when ze have to reschedule a TD Event in scheduleNonSmoothEvent
+   *  It is used when we have to reschedule a TD Event in scheduleNonSmoothEvent
    *  \return a double. If the simulation is near the end (t_{k+3} >= T), it returns NaN.
   */
   inline double getTkp3() const

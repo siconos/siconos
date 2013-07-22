@@ -47,7 +47,12 @@ DEFINE_SPTR(SiconosModelXML)
 class Model : public std11::enable_shared_from_this<Model>
 {
 private:
-  /** current time of the simulation */
+  /** current time of the simulation 
+      Warning FP : it corresponds to the time 
+      at the end of the integration step. 
+      It means that _t corresponds to tkp1 of the
+      simulation or nextTime().
+   */
   double _t;
 
   /** initial time of the simulation */

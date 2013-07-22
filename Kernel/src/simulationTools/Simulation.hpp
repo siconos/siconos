@@ -85,7 +85,7 @@ protected:
 
   /** real ending time for integration (different from tend in case of
       stop during integrate, for example when a root is found in
-      Lsodar procedur)
+      Lsodar procedure)
   */
   double _tout;
 

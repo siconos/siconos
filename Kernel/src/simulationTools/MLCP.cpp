@@ -67,7 +67,7 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
   unsigned int nslawSize2 = inter2->nonSmoothLaw()->size();
 
   unsigned int equalitySize1 =  0;
-  unsigned int equalitySize2 =  0;
+  //unsigned int equalitySize2 =  0;
   if (Type::value(*(inter1->nonSmoothLaw()))
       == Type::MixedComplementarityConditionNSL)
     equalitySize1 =  MixedComplementarityConditionNSL::convert(inter1->nonSmoothLaw())->getEqualitySize();
@@ -75,13 +75,15 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
            == Type::EqualityConditionNSL)
     equalitySize1 = nslawSize1;
 
-  if (Type::value(*(inter2->nonSmoothLaw()))
-      == Type::MixedComplementarityConditionNSL)
-    equalitySize2 = MixedComplementarityConditionNSL::
-                    convert(inter2->nonSmoothLaw())->getEqualitySize();
-  else if (Type::value(*(inter2->nonSmoothLaw()))
-           == Type::EqualityConditionNSL)
-    equalitySize2 = nslawSize2;
+  // Note FP : equalitySize2 never used. 
+  // All the lines below seem useless. 
+  // if (Type::value(*(inter2->nonSmoothLaw()))
+  //     == Type::MixedComplementarityConditionNSL)
+  //   equalitySize2 = MixedComplementarityConditionNSL::
+  //                   convert(inter2->nonSmoothLaw())->getEqualitySize();
+  // else if (Type::value(*(inter2->nonSmoothLaw()))
+  //          == Type::EqualityConditionNSL)
+  //   equalitySize2 = nslawSize2;
 
 
   if (inter1 == inter2)

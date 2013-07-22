@@ -452,9 +452,9 @@ void Simulation::processEvents()
     {
       updateIndexSets();
     }
+    // Set Model current time
+    model()->setCurrentTime(_eventsManager->nextTime());
   }
-  // Set Model current time
-  model()->setCurrentTime(_eventsManager->startingTime());
 
   /* should be evaluated only if needed */
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();

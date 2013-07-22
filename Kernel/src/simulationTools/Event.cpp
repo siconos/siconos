@@ -38,7 +38,7 @@ Event::~Event()
   mpz_clear(_tickIncrement);
 }
 
-void Event::update()
+void Event::update(unsigned int)
 {
   if (_td) // if no TimeDiscretisation then do nothing
   {

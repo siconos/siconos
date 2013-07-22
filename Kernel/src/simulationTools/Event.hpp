@@ -216,8 +216,10 @@ public:
 
   /** virtual function which actions depends on event type.
    * The generic implementation present in this object is to increment the
-   * TimeDiscretisation and to chamge the time of the current Event */
-  virtual void update();
+   * TimeDiscretisation and to chamge the time of the current Event 
+   \param k : depends on the type of event. See derived class.
+  */
+  virtual void update(unsigned int=0);
 
   inline bool reschedule() const { return _reschedule; };
 };
