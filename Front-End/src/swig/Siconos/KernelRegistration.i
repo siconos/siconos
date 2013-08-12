@@ -61,6 +61,7 @@
   PY_REGISTER(Relay);                                                   \
   PY_REGISTER(MLCP);                                                    \
   PY_REGISTER(MLCPProjectOnConstraints);                                \
+  PY_REGISTER(GenericMechanical);                                       \
   PY_REGISTER(FrictionContact);                                         \
   PY_REGISTER(Moreau);                                                  \
   PY_REGISTER(ZeroOrderHold);                                           \
