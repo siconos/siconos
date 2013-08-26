@@ -36,7 +36,7 @@ SICONOS_PROJECT(Numerics)
 # ============= Summary =============
 # To have a full print of variables, use -DPRINT_ENV=ON
 message(STATUS "\n============================================ Summary ============================================")
-message(STATUS "${PROJECT_NAME} version ${VERSION} is now ready for compulation and installation.")
+message(STATUS "${PROJECT_NAME} version ${VERSION} is now ready for compilation and installation.")
 message(STATUS "To proceed run 'make' and 'make install' and optionaly 'make test'.")
 message(STATUS " C++ Compiler : ${CMAKE_CXX_COMPILER}")
 message(STATUS " C Compiler : ${CMAKE_C_COMPILER}")
