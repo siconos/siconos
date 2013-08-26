@@ -100,10 +100,9 @@ class Dat():
                         self._static_cobjs.append(static_cobj)
                         broadphase.addStaticObject(static_cobj)
                         broadphase.addStaticShape(self._shape.at_index(shape_id))
-                        ids -= 1
-
                         bind_file.write('{0} {1}\n'.format(ids, shape_id))
-
+                        ids -= 1
+                        
                     else:
                         # a moving object
                         body = BulletDS(BulletWeightedShape(
@@ -121,9 +120,10 @@ class Dat():
                         self._broadphase.model().nonSmoothDynamicalSystem().\
                             insertDynamicalSystem(body)
                         self._osi.insertDynamicalSystem(body)
-                        idd += 1
                         bind_file.write('{0} {1}\n'.format(idd, shape_id))
+                        idd += 1
 
+                        
     def __enter__(self):
         self._static_pos_file = open('spos.dat', 'w')
         self._dynamic_pos_file = open('dpos.dat', 'w')
@@ -140,11 +140,13 @@ class Dat():
         Outputs positions and orientations of static objects
         """
         time = self._broadphase.model().simulation().nextTime()
+        idd = -1
         for collision_object in self._broadphase.staticObjects():
             position = collision_object.getWorldTransform().getOrigin()
             rotation = collision_object.getWorldTransform().getRotation()
-            self._static_pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7}\n'.
+            self._static_pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
                                         format(time,
+                                               idd,
                                                position.x(),
                                                position.y(),
                                                position.z(),
@@ -164,7 +166,9 @@ class Dat():
         times = np.empty((positions.shape[0], 1))
         times.fill(time)
 
-        np.savetxt(self._dynamic_pos_file, np.concatenate((times, positions), 
+        tidd = np.arange(1, positions.shape[0] + 1).reshape(positions.shape[0], 1)
+
+        np.savetxt(self._dynamic_pos_file, np.concatenate((times, tidd, positions), 
                                                           axis=1))
 
 
@@ -186,11 +190,9 @@ class Dat():
                         and lambda_[2] == 0.):
                     jachqt = bullet_relation.jachqT()
                     cf = np.dot(jachqt.transpose(), lambda_)
-                    cm = bullet_relation.contactManifold()
-                    if (cm.getNumContacts() > bullet_relation.contactNum()):
-                        cp = cm.getContactPoint(bullet_relation.contactNum())
-                        posa = cp.getPositionWorldOnA()
-                        self._contact_forces_file.write(
+                    cp = bullet_relation.contactPoint()
+                    posa = cp.getPositionWorldOnA()
+                    self._contact_forces_file.write(
                         '{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}\n'.
                         format(time,
                                posa.x(),

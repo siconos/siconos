@@ -21,20 +21,18 @@
 #include <debug.h>
 
 #include "BulletR.hpp"
-#include <Interaction.hpp>
 
 #include <bullet/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 #include <btBulletCollisionCommon.h>
 
-BulletR::BulletR(unsigned int contact_num, 
-                 SP::btPersistentManifold contactManifold, 
-                 SP::btCollisionWorld collisionWorld):
+#include <Interaction.hpp>
+
+BulletR::BulletR(SP::btManifoldPoint point, SP::btPersistentManifold contactManifold) :
   NewtonEulerFrom3DLocalFrameR(),
-  _contact_num(contact_num),
-  _contactManifold(contactManifold),
-  _collisionWorld(collisionWorld)
+  _contactPoints(point),
+  _contactManifold(contactManifold)
 {
 }
 
@@ -47,73 +45,34 @@ void BulletR::computeh(const double time, Interaction& inter)
   const btCollisionObject* obB =
     static_cast<const btCollisionObject*>(_contactManifold->getBody1());
 
+  _contactManifold->refreshContactPoints(obA->getWorldTransform(), obB->getWorldTransform());
 
+  btVector3 posa = _contactPoints->getPositionWorldOnA();
+  btVector3 posb = _contactPoints->getPositionWorldOnB();
 
-  _contactManifold->refreshContactPoints(obA->getWorldTransform(), 
-                                         obB->getWorldTransform());
-
-  unsigned int numContacts = _contactManifold->getNumContacts();
-
-  btManifoldPoint* cpoint;
-
-
-  struct	MyContactResultCallback : public btCollisionWorld::ContactResultCallback
-	{
-    btManifoldPoint* contactPoint;
-
-		virtual	btScalar	addSingleResult(btManifoldPoint& cp,	
-                                      const btCollisionObjectWrapper* colObj0Wrap,
-                                      int partId0,int index0,
-                                      const btCollisionObjectWrapper* colObj1Wrap,
-                                      int partId1,int index1)
-		{
-      contactPoint = &cp;
-		}
-	};
-
-
-  DEBUG_PRINTF("contact_num : %d\n", _contact_num);
-  
-  DEBUG_PRINTF("number of contacts : %d\n", numContacts);
-
-
-  if (_contact_num > numContacts)
-  {
-
-    MyContactResultCallback result;
-    _collisionWorld->contactPairTest(const_cast<btCollisionObject*>(obA),
-                                     const_cast<btCollisionObject*>(obB),
-                                     result);
-    cpoint = result.contactPoint;
-  }
-  else
-  {
-    cpoint = &_contactManifold->getContactPoint(_contact_num);
-  }
-  
-
-  btVector3 posa = cpoint->getPositionWorldOnA();
-  btVector3 posb = cpoint->getPositionWorldOnB();
-  
   (*pc1())(0) = posa[0];
   (*pc1())(1) = posa[1];
   (*pc1())(2) = posa[2];
   (*pc2())(0) = posb[0];
   (*pc2())(1) = posb[1];
   (*pc2())(2) = posb[2];
-  
-  inter.y(0)->setValue(0, cpoint->getDistance());
-  
-  (*nc())(0) = cpoint->m_normalWorldOnB[0];
-  (*nc())(1) = cpoint->m_normalWorldOnB[1];
-  (*nc())(2) = cpoint->m_normalWorldOnB[2];
-  
-  
-  DEBUG_PRINTF("%d, distance : %g\n",  _contact_num, inter.y(0)->getValue(0));
-  DEBUG_PRINTF("%d, position on A : %g,%g,%g\n", _contact_num, posa[0], posa[1], posa[2]);
-  DEBUG_PRINTF("%d, position on B : %g,%g,%g\n", _contact_num, posb[0], posb[1], posb[2]);
-  DEBUG_PRINTF("%d, normal on B   : %g,%g,%g\n", _contact_num, (*nc())(0), (*nc())(1), (*nc())(2));
-  
+
+  {
+    inter.y(0)->setValue(0, _contactPoints->getDistance());
+
+    (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
+    (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
+    (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
+  }
+
+  DEBUG_PRINTF("distance : %g\n",  inter.y(0)->getValue(0));
+
+
+  DEBUG_PRINTF("position on A : %g,%g,%g\n", posa[0], posa[1], posa[2]);
+  DEBUG_PRINTF("position on B : %g,%g,%g\n", posb[0], posb[1], posb[2]);
+  DEBUG_PRINTF("normal on B   : %g,%g,%g\n", (*nc())(0), (*nc())(1), (*nc())(2));
+
   DEBUG_PRINT("end of computeh\n");
-      
+
+
 }

@@ -30,28 +30,20 @@ private:
   */
   ACCEPT_SERIALIZATION(BulletR);
 
-  unsigned int _contact_num;
-
+  SP::btManifoldPoint _contactPoints;
   SP::btPersistentManifold _contactManifold;
-  SP::btCollisionWorld _collisionWorld;
 
 public:
-  BulletR(unsigned int contact_num, 
-          SP::btPersistentManifold contactManifold, 
-          SP::btCollisionWorld collisionWorld);
-  
-  SP::btPersistentManifold contactManifold() const
-  {
-    return _contactManifold;
-  };
+  BulletR(SP::btManifoldPoint, SP::btPersistentManifold);
 
-  unsigned int contactNum() const
+  SP::btManifoldPoint contactPoint() const
   {
-    return _contact_num;
-  }
+    return _contactPoints;
+  };
 
   void computeh(const double time, Interaction& inter);
 
   ACCEPT_STD_VISITORS();
 };
+
 #endif

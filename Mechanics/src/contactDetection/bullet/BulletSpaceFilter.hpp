@@ -23,11 +23,6 @@
 #include "BulletSiconosFwd.hpp"
 #include "SpaceFilter.hpp"
 
-#include "BulletR.hpp"
-#include "BulletFrom1DLocalFrameR.hpp"
-
-#include <Question.hpp>
-
 class BulletSpaceFilter : public SpaceFilter
 {
 
@@ -42,8 +37,6 @@ protected:
   SP::btCollisionWorld _collisionWorld;
   SP::btDefaultCollisionConfiguration _collisionConfiguration;
   SP::btCollisionDispatcher _dispatcher;
-  SP::btVector3 _worldAabbMin;
-  SP::btVector3 _worldAabbMax;
   SP::btBroadphaseInterface _broadphase;
   bool _dynamicCollisionsObjectsInserted;
   bool _staticCollisionsObjectsInserted;
@@ -59,14 +52,6 @@ public:
   SP::btBroadphaseInterface broadphase() const
   {
     return _broadphase;
-  };
-
-  /** set broadphase
-   * \param: broadphase a Bullet broaphase
-   */
-  void setBroadphase(SP::btBroadphaseInterface broadphase)
-  {
-    _broadphase = broadphase;
   };
 
   /** get bullet collision world
@@ -127,6 +112,11 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
+
+#include <Question.hpp>
+#include "BulletR.hpp"
+#include "BulletFrom1DLocalFrameR.hpp"
+
 struct ForCollisionWorld : public Question<SP::btCollisionWorld>
 {
   using SiconosVisitor::visit;
@@ -149,12 +139,16 @@ struct ForStaticShapes : public Question< std11::shared_ptr<std::vector<SP::btCo
 };
 
 
-struct ForContactManifold : public Question<SP::btPersistentManifold>
+struct ForContactPoint : public Question<SP::btManifoldPoint>
 {
   using SiconosVisitor::visit;
 
-  ANSWER(BulletR, contactManifold());
-  ANSWER(BulletFrom1DLocalFrameR, contactManifold());
+  ANSWER(BulletR, contactPoint());
+  ANSWER(BulletFrom1DLocalFrameR, contactPoint());
 };
+
+
+
+
 
 #endif

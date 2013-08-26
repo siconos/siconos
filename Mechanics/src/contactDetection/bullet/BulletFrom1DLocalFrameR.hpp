@@ -21,7 +21,7 @@
 #define BulletFrom1DLocalFrameR_hpp
 
 #include "BulletSiconosFwd.hpp"
-#include "NewtonEulerFrom1DLocalFrameR.hpp"
+#include <NewtonEulerFrom1DLocalFrameR.hpp>
 
 class BulletFrom1DLocalFrameR : public NewtonEulerFrom1DLocalFrameR
 {
@@ -30,22 +30,15 @@ private:
   */
   ACCEPT_SERIALIZATION(BulletFrom1DLocalFrameR);
 
-  unsigned int _contact_num;
-
-  SP::btPersistentManifold _contactManifold;
+  SP::btManifoldPoint _contactPoints;
 
 public:
-  BulletFrom1DLocalFrameR(unsigned int contact_num, SP::btPersistentManifold);
-  
-  SP::btPersistentManifold contactManifold() const
-  {
-    return _contactManifold;
-  };
+  BulletFrom1DLocalFrameR(SP::btManifoldPoint);
 
-  unsigned int contact_num() const
+  SP::btManifoldPoint contactPoint() const
   {
-    return _contact_num;
-  }
+    return _contactPoints;
+  };
 
   void computeh(const double time, Interaction& inter);
 

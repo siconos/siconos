@@ -156,8 +156,6 @@ k = 1
 while(simulation.hasNextEvent() and k<4000):
 
     broadphase.buildInteractions(bouncingBox.currentTime())
-    print k,'numManifolds=', broadphase.collisionWorld().getDispatcher().getNumManifolds()
-
     simulation.computeOneStep()
 
     dataPlot[k, 0] = simulation.nextTime()
