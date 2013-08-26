@@ -119,6 +119,14 @@ void siconos_io(Archive& ar, __mpz_struct& v, unsigned int version)
   SERIALIZE_C_ARRAY(v._mp_alloc, v, _mp_d, ar);
 }
 
+template <class Archive>
+void siconos_io(Archive& ar, __mpf_struct& v, unsigned int version)
+{
+  SERIALIZE(v, (_mp_prec)(_mp_size)(_mp_exp), ar);
+  SERIALIZE_C_ARRAY(abs(v._mp_size), v, _mp_d, ar);
+}
+
+
 
 template <class Archive>
 void siconos_io(Archive& ar, _SolverOptions&v, unsigned int version)
@@ -334,6 +342,12 @@ void serialize(Archive& ar, FrictionContact& v, unsigned int version)
 
 template <class Archive>
 void serialize(Archive& ar, __mpz_struct& v, unsigned int version)
+{
+  siconos_io(ar, v, version);
+}
+
+template <class Archive>
+void serialize(Archive& ar, __mpf_struct& v, unsigned int version)
 {
   siconos_io(ar, v, version);
 }
