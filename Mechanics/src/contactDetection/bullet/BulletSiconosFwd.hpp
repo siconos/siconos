@@ -30,8 +30,6 @@ DEFINE_SPTR(btManifoldPoint);
 
 DEFINE_SPTR(btTriangleIndexVertexMaterialArray);
 
-static SP::btTriangleIndexVertexMaterialArray x;
-
 DEFINE_SPTR(btCollisionObject);
 DEFINE_SAPTR(btCollisionObject);
 

@@ -102,7 +102,7 @@ class Dat():
                         broadphase.addStaticShape(self._shape.at_index(shape_id))
                         ids -= 1
 
-                        bind_file.write('{0} {1}\n'.format(ids), shape_id)
+                        bind_file.write('{0} {1}\n'.format(ids, shape_id))
 
                     else:
                         # a moving object
@@ -122,7 +122,7 @@ class Dat():
                             insertDynamicalSystem(body)
                         self._osi.insertDynamicalSystem(body)
                         idd += 1
-                        bind_file.write('{0} {1}\n'.format(idd), shape_id)
+                        bind_file.write('{0} {1}\n'.format(idd, shape_id))
 
     def __enter__(self):
         self._static_pos_file = open('spos.dat', 'w')
@@ -164,7 +164,8 @@ class Dat():
         times = np.empty((positions.shape[0], 1))
         times.fill(time)
 
-        np.savetxt(self._dynamic_pos_file, np.concatenate(times, positions))
+        np.savetxt(self._dynamic_pos_file, np.concatenate((times, positions), 
+                                                          axis=1))
 
 
     def outputContactForces(self):

@@ -87,7 +87,7 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 
   _collisionConfiguration.reset(new btDefaultCollisionConfiguration());
 
-//  _collisionConfiguration->setConvexConvexMultipointIterations();
+  _collisionConfiguration->setConvexConvexMultipointIterations();
 //  _collisionConfiguration->setPlaneConvexMultipointIterations();
 
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
