@@ -10,7 +10,9 @@ from Siconos.Mechanics.ContactDetection.Bullet import \
     btCollisionObject, btQuaternion, btTransform
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
-    cast_BulletDS, cast_BulletR
+    cast_BulletR
+
+from Siconos.Kernel import cast_NewtonImpactFrictionNSL
 
 from Siconos.IO import MechanicsIO
 
@@ -102,7 +104,7 @@ class Dat():
                         broadphase.addStaticShape(self._shape.at_index(shape_id))
                         bind_file.write('{0} {1}\n'.format(ids, shape_id))
                         ids -= 1
-                        
+
                     else:
                         # a moving object
                         body = BulletDS(BulletWeightedShape(
@@ -123,7 +125,6 @@ class Dat():
                         bind_file.write('{0} {1}\n'.format(idd, shape_id))
                         idd += 1
 
-                        
     def __enter__(self):
         self._static_pos_file = open('spos.dat', 'w')
         self._dynamic_pos_file = open('dpos.dat', 'w')
@@ -144,16 +145,17 @@ class Dat():
         for collision_object in self._broadphase.staticObjects():
             position = collision_object.getWorldTransform().getOrigin()
             rotation = collision_object.getWorldTransform().getRotation()
-            self._static_pos_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
-                                        format(time,
-                                               idd,
-                                               position.x(),
-                                               position.y(),
-                                               position.z(),
-                                               rotation.w(),
-                                               rotation.x(),
-                                               rotation.y(),
-                                               rotation.z()))
+            self._static_pos_file.write(
+                '{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
+                format(time,
+                       idd,
+                       position.x(),
+                       position.y(),
+                       position.z(),
+                       rotation.w(),
+                       rotation.x(),
+                       rotation.y(),
+                       rotation.z()))
 
     def outputDynamicObjects(self):
         """
@@ -166,10 +168,12 @@ class Dat():
         times = np.empty((positions.shape[0], 1))
         times.fill(time)
 
-        tidd = np.arange(1, positions.shape[0] + 1).reshape(positions.shape[0], 1)
+        tidd = np.arange(1,
+                         positions.shape[0] + 1).reshape(positions.shape[0], 1)
 
-        np.savetxt(self._dynamic_pos_file, np.concatenate((times, tidd, positions), 
-                                                          axis=1))
+        np.savetxt(self._dynamic_pos_file,
+                   np.concatenate((times, tidd, positions),
+                                  axis=1))
 
 
     def outputContactForces(self):
@@ -180,9 +184,10 @@ class Dat():
                 topology().indexSetsSize() > 1:
             time = self._broadphase.model().simulation().nextTime()
             for inter in self._broadphase.model().nonSmoothDynamicalSystem().\
-                  topology().indexSet(1).vertices():
+                topology().indexSet(1).vertices():
                 bullet_relation = cast_BulletR(inter.relation())
-                # nslaw = inter.nslaw()
+                nslaw = inter.nslaw()
+                mu = cast_NewtonImpactFrictionNSL(nslaw).mu()
                 # cast nslaw if NewtonImpactFrictionNSL [...]
                 nc = bullet_relation.nc()
                 lambda_ = inter.lambda_(1)
@@ -193,8 +198,9 @@ class Dat():
                     cp = bullet_relation.contactPoint()
                     posa = cp.getPositionWorldOnA()
                     self._contact_forces_file.write(
-                        '{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}\n'.
+                        '{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}\n'.
                         format(time,
+                               mu,
                                posa.x(),
                                posa.y(),
                                posa.z(),

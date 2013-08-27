@@ -6,7 +6,7 @@ import os
 import shlex
 import vtk
 from Siconos.Mechanics.ContactDetection.Bullet import btVector3, \
-    btConvexHullShape
+    btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, btConeShape
 
 
 #
@@ -32,44 +32,53 @@ def loadConvexHullShape(shape_filename):
     return convex_hull_shape
 
 
-class Collection(dict):
+class Collection():
 
     """
-    Returns Bullet convex hull shapes from .vtp filenames given in a
-    reference file
-
-    The access is done like with dictionary with shape name (filename
-    without extension) as key
+    collect Bullet primitives or convex hull shapes from .vtp
+    filenames given in a reference file
     """
 
-    def __init__(self, ref_filename = 'ref.txt'):
+    def __init__(self, ref_filename='ref.txt'):
         self._ref_filename = ref_filename
-        self._url = dict()
+        self._url = list()
+        self._attributes = list()
         self._shape = dict()
-        self._ref = dict()
+
         with open(self._ref_filename, 'r') as ref_file:
-            index = 0
             for shape_url_line in ref_file:
-                shape_url = shlex.split(shape_url_line)[0]
-                name = os.path.splitext(os.path.basename(shape_url))[0]
-                self._url[name] = shape_url
-                self._shape[index] = name
-                self._ref[name] = index
-                index += 1
+                line_tokens = shlex.split(shape_url_line)
+                shape_url = line_tokens[0]
+                shape_attributes = [float(x) for x in (line_tokens[1:])]
+                self._url.append(shape_url)
+                self._attributes.append(shape_attributes)
 
-        super(Collection, self).__init__()
+        self._primitive = {'Cylinder': btCylinderShape,
+                           'Sphere': btSphereShape,
+                           'Box': btBoxShape,
+                           'Cone': btConeShape}
 
-    def __getitem__(self, name):
+    def at_index(self, index):
 
-        if not name in self:
-            # load shape
-            self[name] = loadConvexHullShape(
-                self._url[name])
+        if not index in self._shape:
+            # load shape if it is an existing file
+            if os.path.exists(self._url[index]):
+                self._shape[index] = loadConvexHullShape(
+                    self._url[index])
+            else:
+                # it must be a primitive with attributes
+                name = self._url[index]
+                primitive = self._primitive[name]
+                attrs = self._attributes[index]
+                if name in ['Box']:
+                    self._shape[index] = primitive(btVector3(attrs[0] / 2,
+                                                             attrs[1] / 2,
+                                                             attrs[2] / 2))
+                elif name in ['Cylinder']:
+                    self._shape[index] = primitive(btVector3(attrs[0],
+                                                             attrs[1] / 2,
+                                                             attrs[1] / 2))
+                else:
+                    self._shape[index] = primitive(*attrs)
 
-        return super(Collection, self).__getitem__(name)
-
-    def at_index(self, ind):
-        return self[self._shape[ind]]
-
-    def index(self, name):
-        return self._ref[name]
+        return self._shape[index]

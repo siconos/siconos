@@ -185,12 +185,12 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 {
   SP::BulletDS cast_BulletDS(SP::DynamicalSystem ds)
   {
-    return std11::static_pointer_cast<BulletDS>(ds);
+    return std11::dynamic_pointer_cast<BulletDS>(ds);
   };
 
   SP::BulletR cast_BulletR(SP::Relation rel)
   {
-    return std11::static_pointer_cast<BulletR>(rel);
+    return std11::dynamic_pointer_cast<BulletR>(rel);
   };
 }
 

@@ -268,6 +268,10 @@ typedef __mpz_struct mpz_t[1];
     return v;
   };
 
+  SP::NewtonImpactFrictionNSL cast_NewtonImpactFrictionNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
+  }
  
 %}
 
