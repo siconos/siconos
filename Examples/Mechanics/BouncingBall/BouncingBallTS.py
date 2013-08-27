@@ -107,7 +107,7 @@ N = (T - t0) / h
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
 
-dataPlot = empty((N, 5))
+dataPlot = empty((N+1, 5))
 
 #
 # numpy pointers on dense Siconos vectors
