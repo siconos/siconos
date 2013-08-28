@@ -6,7 +6,8 @@ import os
 import shlex
 import vtk
 from Siconos.Mechanics.ContactDetection.Bullet import btVector3, \
-    btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, btConeShape
+    btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, \
+    btConeShape, btCapsuleShape, btCompoundShape
 
 
 #
@@ -56,7 +57,9 @@ class Collection():
         self._primitive = {'Cylinder': btCylinderShape,
                            'Sphere': btSphereShape,
                            'Box': btBoxShape,
-                           'Cone': btConeShape}
+                           'Cone': btConeShape,
+                           'Compound': btCompoundShape,
+                           'Capsule': btCapsuleShape}
 
     def at_index(self, index):
 
@@ -78,6 +81,15 @@ class Collection():
                     self._shape[index] = primitive(btVector3(attrs[0],
                                                              attrs[1] / 2,
                                                              attrs[1] / 2))
+                # elif name in ['Compound']:
+                #     obj1 = attrs[0]
+                #     orig1 = attrs[1:4]
+                #     orie1 = attrs[4:8]
+                #     obj2 = attrs[8]
+                #     orig2 = attrs[9:12]
+                #     orie2 = attrs[12:16]
+                #     bcols = btCompoundShape()
+                #     bcols.addChildShape(...
                 else:
                     self._shape[index] = primitive(*attrs)
 
