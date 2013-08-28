@@ -43,8 +43,8 @@ def compute_dt_matrices(A, B, h, TV=False):
 
     # Main loop
     processSimulation.computeOneStep()
-    Ad = SK.getMatrix(processIntegrator.Ad(processDS))
-    Bd = SK.getMatrix(processIntegrator.Bd(processDS))
+    Ad = SK.getMatrix(processIntegrator.Ad(processDS)).copy()
+    Bd = SK.getMatrix(processIntegrator.Bd(processDS)).copy()
 
     return (Ad, Bd)
 
