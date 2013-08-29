@@ -138,11 +138,11 @@ void BulletSpaceFilter::buildInteractions(double time)
   for (v0next = ui0 ;
        ui0 != ui0end; ui0 = v0next)
   {
+    ++v0next;  // trick to iterate on a dynamic bgl graph
     Interaction& inter0 = *(indexSet0->bundle(*ui0));
     SP::btManifoldPoint cp = ask<ForContactPoint>(*(inter0.relation()));
     if(cp)
     {
-      ++v0next;  // trick to iterate on a dynamic bgl graph
       contactPoints[&*cp] = false;
     }
   }
