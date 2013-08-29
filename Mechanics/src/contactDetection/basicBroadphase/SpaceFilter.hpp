@@ -307,7 +307,8 @@ public:
       \param ds1 a SP::DynamicalSystem
       \param ds2 a SP::DynamicalSystem (optional)
   */
-  void link(SP::Interaction inter, SP::DynamicalSystem, SP::DynamicalSystem = SP::DynamicalSystem());
+  void link(SP::Interaction inter, SP::DynamicalSystem, 
+            SP::DynamicalSystem = SP::DynamicalSystem());
 
   /** broadphase contact detection: add interactions in indexSet 0
    *  \param the current time

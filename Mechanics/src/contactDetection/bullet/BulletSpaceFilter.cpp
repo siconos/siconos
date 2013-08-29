@@ -139,8 +139,12 @@ void BulletSpaceFilter::buildInteractions(double time)
        ui0 != ui0end; ui0 = v0next)
   {
     Interaction& inter0 = *(indexSet0->bundle(*ui0));
-    ++v0next;  // trick to iterate on a dynamic bgl graph
-    contactPoints[&*ask<ForContactPoint>(*(inter0.relation()))] = false;
+    SP::btManifoldPoint cp = ask<ForContactPoint>(*(inter0.relation()));
+    if(cp)
+    {
+      ++v0next;  // trick to iterate on a dynamic bgl graph
+      contactPoints[&*cp] = false;
+    }
   }
 
   unsigned int numManifolds =
@@ -336,18 +340,20 @@ void BulletSpaceFilter::buildInteractions(double time)
   {
     ++v0next;  // trick to iterate on a dynamic bgl graph
     SP::Interaction inter0 = indexSet0->bundle(*ui0);
-
-    if (!contactPoints[&*ask<ForContactPoint>(*(inter0->relation()))])
+    SP::btManifoldPoint cp = ask<ForContactPoint>(*(inter0->relation()));
+    if (cp)
     {
-
-      //      assert (!contactPoints[&*ask<ForContactPoint>(*(inter0->relation()))]);
-
-      DEBUG_PRINTF("remove contact %p, lifetime %d\n",
-                   &*ask<ForContactPoint>(*(inter0->relation())),
-                   ask<ForContactPoint>(*(inter0->relation()))->getLifeTime());
-      model()->nonSmoothDynamicalSystem()->removeInteraction(inter0);
+      if (!contactPoints[&*cp])
+      {
+        
+        //      assert (!contactPoints[&*ask<ForContactPoint>(*(inter0->relation()))]);
+        
+        DEBUG_PRINTF("remove contact %p, lifetime %d\n",
+                     &*ask<ForContactPoint>(*(inter0->relation())),
+                     ask<ForContactPoint>(*(inter0->relation()))->getLifeTime());
+        model()->nonSmoothDynamicalSystem()->removeInteraction(inter0);
+      }
     }
-
   }
 
   DEBUG_PRINT("-----end build interaction\n");

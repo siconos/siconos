@@ -143,6 +143,9 @@ struct ForContactPoint : public Question<SP::btManifoldPoint>
 {
   using SiconosVisitor::visit;
 
+  void visit(const NewtonEulerR&)
+  {
+  }
   ANSWER(BulletR, contactPoint());
   ANSWER(BulletFrom1DLocalFrameR, contactPoint());
 };
