@@ -188,7 +188,6 @@ class Dat():
                 bullet_relation = cast_BulletR(inter.relation())
                 nslaw = inter.nslaw()
                 mu = cast_NewtonImpactFrictionNSL(nslaw).mu()
-                # cast nslaw if NewtonImpactFrictionNSL [...]
                 nc = bullet_relation.nc()
                 lambda_ = inter.lambda_(1)
                 if not (lambda_[0] == 0. and lambda_[1] == 0. 
@@ -197,12 +196,16 @@ class Dat():
                     cf = np.dot(jachqt.transpose(), lambda_)
                     cp = bullet_relation.contactPoint()
                     posa = cp.getPositionWorldOnA()
+                    posb = cp.getPositionWorldOnB()
                     self._contact_forces_file.write(
-                        '{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}\n'.
+                        '{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}\n'.
                         format(time,
                                mu,
                                posa.x(),
                                posa.y(),
                                posa.z(),
+                               posb.x(),
+                               posb.y(),
+                               posb.z(),
                                nc[0], nc[1], nc[2],
                                cf[0], cf[1], cf[2]))
