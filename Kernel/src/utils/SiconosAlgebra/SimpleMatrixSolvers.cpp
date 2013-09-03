@@ -238,10 +238,6 @@ void SimpleMatrix::resetQR()
 //   //  return A;
 // }
 
-#define USE_OPTIMAL_WORKSPACE
-
-
-
 void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
 {
   if (B.isBlock())

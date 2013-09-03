@@ -48,6 +48,8 @@
 #include <boost/array.hpp>
 #endif
 
+#include <boost/numeric/bindings/ublas/symmetric.hpp>
+#include<complex>
 #include "Tools.hpp"
 
 #include "SiconosPointers.hpp"
@@ -144,6 +146,20 @@ TYPEDEF_SPTR(IdentityMat)
 typedef ublas::compressed_matrix<SP::SiconosMatrix> BlocksMat;
 TYPEDEF_SPTR(BlocksMat)
 
+/** To convert a DenseMat to a symmetric one.
+Usage : 
+DenseMat a;
+symmetric_type s_a(a);
+Required to call syev binding.
+ */
+typedef ublas::symmetric_adaptor<DenseMat, ublas::lower> symmetric_type ;
+TYPEDEF_SPTR(symmetric_type)
+
+/** Complex matrix
+ */
+typedef ublas::matrix<std::complex<double>, ublas::column_major> complex_matrix;
+TYPEDEF_SPTR(complex_matrix)
+
 /** Various vector types available in Siconos **/
 
 /** DenseVect is a typedef of boost::ublas::numeric::vector<double, std::vector<double> >
@@ -155,5 +171,13 @@ TYPEDEF_SPTR(DenseVect)
  */
 typedef ublas::compressed_vector<double> SparseVect;
 TYPEDEF_SPTR(SparseVect)
+
+/** Complex vector
+ */
+typedef ublas::vector<std::complex<double> > complex_vector;
+TYPEDEF_SPTR(complex_vector)
+
+// Set this to use lapack::optimal_workspace where required in lapack routines.
+#define USE_OPTIMAL_WORKSPACE
 
 #endif

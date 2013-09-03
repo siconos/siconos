@@ -614,12 +614,10 @@ public:
   */
   void resetQR();
 
-
   /** Visitors hook
    */
   ACCEPT_STD_VISITORS();
-
-
+  
   friend const SimpleMatrix operator * (const SiconosMatrix&, double);
   //  friend const SimpleMatrix operator * (const SimpleMatrix&,const SimpleMatrix&);
 

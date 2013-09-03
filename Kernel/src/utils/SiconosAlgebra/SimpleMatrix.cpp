@@ -29,6 +29,8 @@
 #include "SimpleMatrix.hpp"
 
 #include "SiconosAlgebra.hpp"
+// Useful function (print ...) from boost bindings examples.
+#include "bindings_utils.h"
 
 using namespace Siconos;
 
@@ -537,8 +539,6 @@ void SimpleMatrix::resize(unsigned int row, unsigned int col, unsigned int lower
 }
 
 
-
-
 //=====================
 // screen display
 //=====================
@@ -547,8 +547,10 @@ void SimpleMatrix::display() const
 {
   std::cout.setf(std::ios::scientific);
   std::cout.precision(6);
+  
   if (num == 1)
-    std::cout << *mat.Dense << std::endl;
+    print_m(*mat.Dense);
+    //std::cout << *mat.Dense << std::endl;
   else if (num == 2)
     std::cout << *mat.Triang << std::endl;
   else if (num == 3)
