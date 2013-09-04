@@ -36,14 +36,13 @@
 #include "SiconosVector.hpp"
 
 // Some utilities (print ...)
-#include "utils.h"
 
 namespace lapack = boost::numeric::bindings::lapack;
 
 namespace Siconos {
   namespace eigenproblems {
 
-    int syev(SiconosVector& eigenval, SiconosMatrix& eigenvec)
+    int syev(SiconosVector& eigenval, SiconosMatrix& eigenvec, bool withVect)
     {
       int info = 0;
       // Eigenvec must contains the values of the matrix from which we want
@@ -52,29 +51,48 @@ namespace Siconos {
       
       // Adaptor to symmetric_mat. Warning : no copy, eigenvec will be modified
       // by syev.
-      symmetric_type s_a(*eigenvec.dense());
+      ublas::symmetric_adaptor<DenseMat, ublas::lower> s_a(*eigenvec.dense());
+
+      char jobz;
+      if(withVect)
+        jobz = 'V';
+      else
+        jobz = 'N';
+
 #ifdef USE_OPTIMAL_WORKSPACE
-      info += lapack::syev('V', s_a, *eigenval.dense(), lapack::optimal_workspace());
+      info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::optimal_workspace());
 #endif
 #ifdef USE_MINIMAL_WORKSPACE
-      info += lapack::syev('V', s_a, *eigenval.dense(), lapack::minimal_workspace());
+      info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::minimal_workspace());
 #endif
       std::cout << "Compute eigenvalues ..." << std::endl;
       return info;
     }
 
-    int geev(complex_matrix& input_mat, complex_vector& eigenval, complex_matrix& left_eigenvec, complex_matrix& right_eigenvec)
+    int geev(SiconosMatrix& input_mat, complex_vector& eigenval, complex_matrix& left_eigenvec, complex_matrix& right_eigenvec, bool withLeft, bool withRight)
     {
-      // input_mat must contains the values of the matrix from which we want
+      int info = 0;
+      complex_matrix tmp(*input_mat.dense());
+      // tmp must contains the values of the matrix from which we want
       // to compute eigenvalues and vectors. It must be a complex matrix.
       // It will be overwritten with temp results.  
-      int info = 0;
+      
+      char jobvl, jobvr;
+      if(withLeft)
+        jobvl = 'V';
+      else
+        jobvl = 'N';
+
+      if(withRight)
+        jobvr = 'V';
+      else
+        jobvr = 'N';
       
 #ifdef USE_OPTIMAL_WORKSPACE
-      info += lapack::geev('N','V', input_mat, eigenval, left_eigenvec, right_eigenvec, lapack::optimal_workspace());
+      info += lapack::geev(jobvl, jobvr, tmp, eigenval, left_eigenvec, right_eigenvec, lapack::optimal_workspace());
 #endif
 #ifdef USE_MINIMAL_WORKSPACE
-      info += lapack::geev('N','V', input_mat, eigenval, left_eigenvec, right_eigenvec, lapack::minimal_workspace());
+      info += lapack::geev(jobvl, jobvr, tmp, eigenval, left_eigenvec, right_eigenvec, lapack::minimal_workspace());
 #endif
       return info;
     }

@@ -30,7 +30,7 @@
 
 #include "SiconosAlgebra.hpp"
 // Useful function (print ...) from boost bindings examples.
-#include "bindings_utils.h"
+#include "bindings_utils.hpp"
 
 using namespace Siconos;
 
@@ -474,6 +474,15 @@ void SimpleMatrix::zero()
   // if num == 6: nothing
 }
 
+void SimpleMatrix::randomize()
+{
+  if (num == 1)
+    Siconos::algebra::fill(*mat.Dense);
+  else 
+    SiconosMatrixException::selfThrow("SimpleMatrix::randomize(): only implemented for dense matrices.");
+  resetLU();
+}
+
 void SimpleMatrix::eye()
 {
   unsigned int size1 = dimRow;
@@ -549,7 +558,7 @@ void SimpleMatrix::display() const
   std::cout.precision(6);
   
   if (num == 1)
-    print_m(*mat.Dense);
+    Siconos::algebra::print_m(*mat.Dense);
     //std::cout << *mat.Dense << std::endl;
   else if (num == 2)
     std::cout << *mat.Triang << std::endl;

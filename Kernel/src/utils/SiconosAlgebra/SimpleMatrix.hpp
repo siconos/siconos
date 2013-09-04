@@ -385,6 +385,10 @@ public:
    */
   void zero();
 
+  /** Initialize the matrix with random values
+   */
+  void randomize();
+
   /** set an identity matrix
    */
   void eye();

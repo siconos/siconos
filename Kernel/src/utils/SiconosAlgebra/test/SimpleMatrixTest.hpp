@@ -25,8 +25,6 @@
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
 
-
-
 class SimpleMatrixTest : public CppUnit::TestFixture
 {
 

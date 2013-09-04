@@ -290,6 +290,10 @@ public:
    */
   virtual void zero() = 0;
 
+  /** Initialize the matrix with random values
+   */
+  virtual void randomize() = 0;
+
   /** set an identity matrix
    */
   virtual void eye() = 0;

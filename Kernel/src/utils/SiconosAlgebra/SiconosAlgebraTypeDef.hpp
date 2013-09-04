@@ -18,7 +18,7 @@
  */
 
 
-/** ! \file SiconosAlgebra.hpp
+/** ! \file SiconosAlgebraTypeDef.hpp
     \brief Header file for Siconos Algebra objects
 
     This file provides typedef for matrix and vector objects, const values and so on ...
@@ -48,7 +48,6 @@
 #include <boost/array.hpp>
 #endif
 
-#include <boost/numeric/bindings/ublas/symmetric.hpp>
 #include<complex>
 #include "Tools.hpp"
 
@@ -145,15 +144,6 @@ TYPEDEF_SPTR(IdentityMat)
     boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
 typedef ublas::compressed_matrix<SP::SiconosMatrix> BlocksMat;
 TYPEDEF_SPTR(BlocksMat)
-
-/** To convert a DenseMat to a symmetric one.
-Usage : 
-DenseMat a;
-symmetric_type s_a(a);
-Required to call syev binding.
- */
-typedef ublas::symmetric_adaptor<DenseMat, ublas::lower> symmetric_type ;
-TYPEDEF_SPTR(symmetric_type)
 
 /** Complex matrix
  */
