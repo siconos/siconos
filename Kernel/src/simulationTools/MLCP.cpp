@@ -179,7 +179,8 @@ int MLCP::compute(double time)
   bool cont = preCompute(time);
   if (!cont)
     return info;
-  //  _hasBeenUpdated=true;
+  // cf GenericMechanical for the explanation of this line commented
+  // _hasBeenUpdated=true;
 #ifdef MLCP_DEBUG
   printf("MLCP::compute m n :%d,%d\n", _n, _m);
 #endif

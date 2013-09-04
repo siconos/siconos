@@ -121,7 +121,13 @@ int GenericMechanical::compute(double time)
   bool cont = preCompute(time);
   if (!cont)
     return info;
-  _hasBeenUpdated = true;
+  // MB: if _hasBeenUpdated is set true then :
+  // LinearOSNS.cpp:602
+  // pos = _M->getPositionOfInteractionBlock(inter);
+  // position unitialized, pos get a wrong value then :
+  // computeqBlock(inter, pos) -> SEGFAULT
+  // so I comment this:
+  // _hasBeenUpdated = true;
   /*
     La matrice _M est construite.  Ici, il faut construire les
     sous-problemes, c'est a dire completer les champs des
