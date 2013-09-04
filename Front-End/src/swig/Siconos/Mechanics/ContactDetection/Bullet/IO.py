@@ -2,12 +2,11 @@
 
 import VtkShapes
 import shlex
-from itertools import chain
 import numpy as np
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
     BulletDS, BulletWeightedShape, \
-    btCollisionObject, btQuaternion, btTransform
+    btCollisionObject, btQuaternion, btTransform, btVector3
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
     cast_BulletR
@@ -67,6 +66,9 @@ class Dat():
         self._osi = osi
         self._input_filename = input_filename
         self._reference = dict()
+        self._static_origins = []
+        self._static_orientations = []
+        self._static_transforms = []
         self._static_cobjs = []
         self._shape = VtkShapes.Collection(shape_filename)
         self._static_pos_file = None
@@ -94,8 +96,14 @@ class Dat():
                         static_cobj = btCollisionObject()
                         static_cobj.setCollisionFlags(
                             btCollisionObject.CF_STATIC_OBJECT)
-                        static_cobj.setWorldTransform(btTransform(
-                            btQuaternion(x, y, z, w)))
+                        origin = btVector3(q0, q1, q2)
+                        self._static_origins.append(origin)
+                        orientation = btQuaternion(x, y, z, w)
+                        self._static_orientations.append(orientation)
+                        transform = btTransform(orientation)
+                        transform.setOrigin(origin)
+                        self._static_transforms.append(transform)
+                        static_cobj.setWorldTransform(transform)
                         static_cobj.setCollisionShape(
                             self._shape.at_index(shape_id))
                         self._reference[ids] = shape_id
@@ -125,6 +133,7 @@ class Dat():
                         bind_file.write('{0} {1}\n'.format(idd, shape_id))
                         idd += 1
 
+
     def __enter__(self):
         self._static_pos_file = open('spos.dat', 'w')
         self._dynamic_pos_file = open('dpos.dat', 'w')
@@ -142,9 +151,9 @@ class Dat():
         """
         time = self._broadphase.model().simulation().nextTime()
         idd = -1
-        for collision_object in self._broadphase.staticObjects():
-            position = collision_object.getWorldTransform().getOrigin()
-            rotation = collision_object.getWorldTransform().getRotation()
+        for transform in self._static_transforms:
+            position = transform.getOrigin()
+            rotation = transform.getRotation()
             self._static_pos_file.write(
                 '{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
                 format(time,
@@ -156,6 +165,7 @@ class Dat():
                        rotation.x(),
                        rotation.y(),
                        rotation.z()))
+            idd -= 1
 
     def outputDynamicObjects(self):
         """
@@ -175,7 +185,6 @@ class Dat():
                    np.concatenate((times, tidd, positions),
                                   axis=1))
 
-
     def outputContactForces(self):
         """
         Outputs contact forces
@@ -186,18 +195,19 @@ class Dat():
             for inter in self._broadphase.model().nonSmoothDynamicalSystem().\
                 topology().indexSet(1).vertices():
                 bullet_relation = cast_BulletR(inter.relation())
-                nslaw = inter.nslaw()
-                mu = cast_NewtonImpactFrictionNSL(nslaw).mu()
-                nc = bullet_relation.nc()
-                lambda_ = inter.lambda_(1)
-                if not (lambda_[0] == 0. and lambda_[1] == 0. 
-                        and lambda_[2] == 0.):
-                    jachqt = bullet_relation.jachqT()
-                    cf = np.dot(jachqt.transpose(), lambda_)
-                    cp = bullet_relation.contactPoint()
-                    posa = cp.getPositionWorldOnA()
-                    posb = cp.getPositionWorldOnB()
-                    self._contact_forces_file.write(
+                if bullet_relation is not None:
+                    nslaw = inter.nslaw()
+                    mu = cast_NewtonImpactFrictionNSL(nslaw).mu()
+                    nc = bullet_relation.nc()
+                    lambda_ = inter.lambda_(1)
+                    if not (lambda_[0] == 0. and lambda_[1] == 0.
+                            and lambda_[2] == 0.):
+                        jachqt = bullet_relation.jachqT()
+                        cf = np.dot(jachqt.transpose(), lambda_)
+                        cp = bullet_relation.contactPoint()
+                        posa = cp.getPositionWorldOnA()
+                        posb = cp.getPositionWorldOnB()
+                        self._contact_forces_file.write(
                         '{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}\n'.
                         format(time,
                                mu,
