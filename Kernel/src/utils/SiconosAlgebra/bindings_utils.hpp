@@ -232,10 +232,10 @@ namespace Siconos {
       }
     } // randomize()
 
-/** Fill a matrix with random values
+/** Fill a symmetric matrix with random values
  */
     template <typename M>
-    void fill(M& m) {
+    void fill_sym(M& m) {
       typedef typename M::size_type  size_type ;
       typedef typename M::value_type value_type ;
 
@@ -250,7 +250,20 @@ namespace Siconos {
       }
     } // randomize()
 
+/** Fill a  matrix with random values
+ */
+    template <typename M>
+    void fill(M& m) {
+      typedef typename M::size_type  size_type ;
+      typedef typename M::value_type value_type ;
+
+      for (int i=0; i<m.size1(); ++i) {
+        for (int j=0; j<m.size2(); ++j) {
+          m(i,j) = random_value<value_type>();
+        }
+      }
+    } // randomize()
+
   } // Algebra namespace
 } // Siconos namespace
-
 #endif

@@ -24,12 +24,14 @@
 #include <limits>
 #include <iostream>
 #include <boost/numeric/ublas/io.hpp>
-
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include "SiconosVector.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+
+
+// Note FP : add tests for complex matrices and geev, if needed (?)
 
 CPPUNIT_TEST_SUITE_REGISTRATION(EigenProblemsTest);
 
@@ -48,6 +50,11 @@ void EigenProblemsTest::tearDown()
 void EigenProblemsTest::testSyev()
 {
   std::cout << "--> Test: syev." <<std::endl;
+
+  // turn A to a symmetric matrix
+  A->randomize_sym();
+  *Aref = *A;
+  
   // Initialize EigenVectors with A
   SP::SiconosVector EigenValues(new SiconosVector(size));
   SP::SimpleMatrix EigenVectors(new SimpleMatrix(*A));
@@ -81,7 +88,6 @@ void EigenProblemsTest::testSyev()
 void EigenProblemsTest::testGeev1()
 {
   std::cout << "--> Test: geev1." <<std::endl;
-
   // Compute only right eigenvectors.
   complex_matrix fake(1,1), rightV(size,size);
   complex_vector eigenval(size);
@@ -113,7 +119,6 @@ void EigenProblemsTest::testGeev1()
 void EigenProblemsTest::testGeev2()
 {
   std::cout << "--> Test: geev2." <<std::endl;
-
   // Compute only left eigenvectors.
   complex_matrix fake(1,1), leftV(size,size);
   complex_vector eigenval(size);
@@ -122,10 +127,9 @@ void EigenProblemsTest::testGeev2()
   error *= 0.0;
   for( unsigned int i = 0; i < size; ++i )
   {
-    error.plus_assign(ublas::prod(column(leftV, i), *A->dense() ));
-    error.minus_assign(eigenval(i)*column(leftV,i));
+    error.plus_assign(ublas::prod(conj(column(leftV, i)), *A->dense() ));
+    error.minus_assign(eigenval(i)*conj(column(leftV,i)));
   }
-
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev2 1: ", norm_2(error) < 10 * std::numeric_limits< double >::epsilon() , true);
   // Check if A has not been modified
@@ -148,12 +152,12 @@ void EigenProblemsTest::testGeev3()
   {
     error.plus_assign(ublas::prod(*A->dense(), column(rightV, i) ));
     error.minus_assign(eigenval(i)*column(rightV,i));
-    error.plus_assign(ublas::prod(column(leftV, i), *A->dense() ));
-    error.minus_assign(eigenval(i)*column(leftV,i));
+    error.plus_assign(ublas::prod(conj(column(leftV, i)), *A->dense() ));
+    error.minus_assign(eigenval(i)*conj(column(leftV,i)));
   }
-
+  std::cout << norm_2(error) << std::endl;
   // Check ...
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev3 1: ", norm_2(error) < 10 * std::numeric_limits< double >::epsilon() , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev3 1: ", norm_2(error) < size * 10 * std::numeric_limits< double >::epsilon() , true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev3 2: ", (*A) == (*Aref) , true);
 

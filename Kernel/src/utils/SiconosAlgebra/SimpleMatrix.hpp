@@ -389,6 +389,10 @@ public:
    */
   void randomize();
 
+  /** Initialize a symmetric matrix with random values
+   */
+  void randomize_sym();
+
   /** set an identity matrix
    */
   void eye();

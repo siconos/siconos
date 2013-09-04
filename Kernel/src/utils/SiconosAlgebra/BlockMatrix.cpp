@@ -423,13 +423,18 @@ void BlockMatrix::randomize()
 {
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
-  // for (it = _mat->begin1(); it != _mat->end1(); ++it)
-  // {
-  //   for (it2 = it.begin(); it2 != it.end(); ++it2)
-  //   {
-  //     (*it2)->randomize();
-  //   }
-  // }
+  for (it = _mat->begin1(); it != _mat->end1(); ++it)
+  {
+    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    {
+      (*it2)->randomize();
+    }
+  }
+}
+
+void BlockMatrix::randomize_sym()
+{
+  SiconosMatrixException::selfThrow("BlockMatrix::randomize_sym : not yet implemented for block matrices.");
 }
 
 void BlockMatrix::eye()

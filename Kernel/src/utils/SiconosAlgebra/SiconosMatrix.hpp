@@ -294,6 +294,10 @@ public:
    */
   virtual void randomize() = 0;
 
+  /** Initialize a symmetric matrix with random values
+   */
+  virtual void randomize_sym()= 0;
+
   /** set an identity matrix
    */
   virtual void eye() = 0;

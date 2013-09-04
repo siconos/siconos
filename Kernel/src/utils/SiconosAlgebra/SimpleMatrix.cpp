@@ -483,6 +483,15 @@ void SimpleMatrix::randomize()
   resetLU();
 }
 
+void SimpleMatrix::randomize_sym()
+{
+  if (num == 1)
+    Siconos::algebra::fill_sym(*mat.Dense);
+  else 
+    SiconosMatrixException::selfThrow("SimpleMatrix::randomize_sym(): only implemented for dense matrices.");
+  resetLU();
+}
+
 void SimpleMatrix::eye()
 {
   unsigned int size1 = dimRow;
