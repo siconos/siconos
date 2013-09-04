@@ -403,6 +403,16 @@ public:
     return _allNSProblems->size();
   }
 
+  /* get a OSNSP by number.
+   * \param unsigned int number of OSNSP
+   * \return SP::Onestepnsproblem
+   */
+  inline SP::OneStepNSProblem oneStepNSProblem(unsigned int number) const
+  {
+    return (*_allNSProblems)[number];
+  }
+
+
   inline unsigned int levelMinForOutput() const
   {
     return _levelMinForOutput;
