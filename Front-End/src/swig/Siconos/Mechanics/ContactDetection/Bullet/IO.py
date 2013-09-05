@@ -74,6 +74,7 @@ class Dat():
         self._static_pos_file = None
         self._dynamic_pos_file = None
         self._contact_forces_file = None
+        self._solver_traces_file = None
         self._io = MechanicsIO()
 
         # read data
@@ -85,65 +86,67 @@ class Dat():
                 idd = 1
                 for line in input_file:
                     sline = shlex.split(line)
-                    shape_id = int(sline[0])
-                    group_id = int(sline[1])
-                    mass = float(sline[2])
-                    q0, q1, q2, w, x, y, z, v0, v1, v2, v3, v4, v5 =\
-                       [ float(i) for i in sline[3:]]
+                    if len(sline) > 3:
+                        shape_id = int(sline[0])
+                        group_id = int(sline[1])
+                        mass = float(sline[2])
+                        q0, q1, q2, w, x, y, z, v0, v1, v2, v3, v4, v5 =\
+                          [ float(i) for i in sline[3:]]
 
-                    if group_id < 0:
-                        # a static object
-                        static_cobj = btCollisionObject()
-                        static_cobj.setCollisionFlags(
-                            btCollisionObject.CF_STATIC_OBJECT)
-                        origin = btVector3(q0, q1, q2)
-                        self._static_origins.append(origin)
-                        orientation = btQuaternion(x, y, z, w)
-                        self._static_orientations.append(orientation)
-                        transform = btTransform(orientation)
-                        transform.setOrigin(origin)
-                        self._static_transforms.append(transform)
-                        static_cobj.setWorldTransform(transform)
-                        static_cobj.setCollisionShape(
-                            self._shape.at_index(shape_id))
-                        self._reference[ids] = shape_id
-                        self._static_cobjs.append(static_cobj)
-                        broadphase.addStaticObject(static_cobj)
-                        broadphase.addStaticShape(self._shape.at_index(shape_id))
-                        bind_file.write('{0} {1}\n'.format(ids, shape_id))
-                        ids -= 1
+                        if group_id < 0:
+                            # a static object
+                            static_cobj = btCollisionObject()
+                            static_cobj.setCollisionFlags(
+                                btCollisionObject.CF_STATIC_OBJECT)
+                            origin = btVector3(q0, q1, q2)
+                            self._static_origins.append(origin)
+                            orientation = btQuaternion(x, y, z, w)
+                            self._static_orientations.append(orientation)
+                            transform = btTransform(orientation)
+                            transform.setOrigin(origin)
+                            self._static_transforms.append(transform)
+                            static_cobj.setWorldTransform(transform)
+                            static_cobj.setCollisionShape(
+                                self._shape.at_index(shape_id))
+                            self._reference[ids] = shape_id
+                            self._static_cobjs.append(static_cobj)
+                            broadphase.addStaticObject(static_cobj)
+                            broadphase.addStaticShape(self._shape.at_index(shape_id))
+                            bind_file.write('{0} {1}\n'.format(ids, shape_id))
+                            ids -= 1
 
-                    else:
-                        # a moving object
-                        body = BulletDS(BulletWeightedShape(
-                            self._shape.at_index(shape_id), mass),
+                        else:
+                            # a moving object
+                            body = BulletDS(BulletWeightedShape(
+                                self._shape.at_index(shape_id), mass),
                             [q0, q1, q2, w, x, y, z],
                             [v0, v1, v2, v3, v4, v5])
-                        self._reference[idd] = \
-                          shape_id
+                            self._reference[idd] = \
+                              shape_id
 
-                        # set external forces
-                        set_external_forces(body)
+                              # set external forces
+                            set_external_forces(body)
 
-                        # add the dynamical system to the non smooth
-                        # dynamical system
-                        self._broadphase.model().nonSmoothDynamicalSystem().\
+                            # add the dynamical system to the non smooth
+                            # dynamical system
+                            self._broadphase.model().nonSmoothDynamicalSystem().\
                             insertDynamicalSystem(body)
-                        self._osi.insertDynamicalSystem(body)
-                        bind_file.write('{0} {1}\n'.format(idd, shape_id))
-                        idd += 1
-
+                            self._osi.insertDynamicalSystem(body)
+                            bind_file.write('{0} {1}\n'.format(idd, shape_id))
+                            idd += 1
 
     def __enter__(self):
         self._static_pos_file = open('spos.dat', 'w')
         self._dynamic_pos_file = open('dpos.dat', 'w')
         self._contact_forces_file = open('cf.dat', 'w')
+        self._solver_traces_file = open('solv.dat', 'w')
         return self
 
     def __exit__(self, type_, value, traceback):
         self._contact_forces_file.close()
         self._static_pos_file.close()
         self._dynamic_pos_file.close()
+        self._solver_traces_file.close()
 
     def outputStaticObjects(self):
         """
@@ -200,8 +203,7 @@ class Dat():
                     mu = cast_NewtonImpactFrictionNSL(nslaw).mu()
                     nc = bullet_relation.nc()
                     lambda_ = inter.lambda_(1)
-                    if not (lambda_[0] == 0. and lambda_[1] == 0.
-                            and lambda_[2] == 0.):
+                    if(True):
                         jachqt = bullet_relation.jachqT()
                         cf = np.dot(jachqt.transpose(), lambda_)
                         cp = bullet_relation.contactPoint()
@@ -219,3 +221,16 @@ class Dat():
                                posb.z(),
                                nc[0], nc[1], nc[2],
                                cf[0], cf[1], cf[2]))
+
+
+    def outputSolverInfos(self):
+        """
+        Outputs solver #iterations & precision reached
+        """
+
+        time = self._broadphase.model().simulation().nextTime()
+        so = self._broadphase.model().simulation().oneStepNSProblem(0).numericsSolverOptions()
+        iterations = so.iparam[3]
+        precision = so.dparam[2]
+        local_precision = so.dparam[3]
+        self._solver_traces_file.write('{0} {1} {2} {3}\n'.format(time, iterations, precision, local_precision))
