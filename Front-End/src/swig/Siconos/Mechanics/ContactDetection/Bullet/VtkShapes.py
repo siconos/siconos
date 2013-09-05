@@ -80,7 +80,7 @@ class Collection():
                 elif name in ['Cylinder']:
                     self._shape[index] = primitive(btVector3(attrs[0],
                                                              attrs[1] / 2,
-                                                             attrs[1] / 2))
+                                                             attrs[0]))
                 # elif name in ['Compound']:
                 #     obj1 = attrs[0]
                 #     orig1 = attrs[1:4]
