@@ -62,7 +62,7 @@ public:
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
      \param a SP::NewtonEulerDS d2, a dynamical system containing the intial position
-     \param a SP::SiconosVector P, P contains the coordinates of the Knee point, in the frame of d1 where the origine is G1.
+     \param a SP::SiconosVector P, P contains the coordinates of the Knee point, in the frame of d1 where the origin is G1.
                                   ie P contains the coordinates of the Knee point, in the object frame G1.
   */
   KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P);
