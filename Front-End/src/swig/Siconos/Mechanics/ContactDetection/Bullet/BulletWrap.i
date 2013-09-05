@@ -39,8 +39,8 @@
 %ignore btCapsuleShapeZ;
 %ignore btConeShapeX;
 %ignore btConeShapeZ;
-%ignore btCylinderShapeX;
-%ignore btCylinderShapeZ;
+%shared_ptr(btCylinderShapeX);
+%shared_ptr(btCylinderShapeZ);
 %ignore btBU_Simplex1to4;
 %ignore m_vertices1;
 
@@ -172,6 +172,7 @@ PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleIndexVertexMaterialArray);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleInfoMap);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btUniformScalingShape);
 
+
 %include "BulletSiconosFwd.hpp"
 PY_FULL_REGISTER(BulletR);
 PY_FULL_REGISTER(BulletDS);
@@ -192,6 +193,9 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
   {
     return std11::dynamic_pointer_cast<BulletR>(rel);
   };
+
+  extern btScalar gContactBreakingThreshold;
+  extern btScalar gContactCalcArea3Points;
 }
 
 %extend btCollisionObject
