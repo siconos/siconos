@@ -194,8 +194,7 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
     return std11::dynamic_pointer_cast<BulletR>(rel);
   };
 
-  extern btScalar gContactBreakingThreshold;
-  extern btScalar gContactCalcArea3Points;
+  extern bool gContactCalcArea3Points;
 }
 
 %extend btCollisionObject
@@ -207,4 +206,3 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
   };
 
 }
-
