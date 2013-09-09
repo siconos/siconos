@@ -63,13 +63,15 @@
 //  }}
 //#endif
 
-#include <boost/unordered_set.hpp>
-
-#include <boost/throw_exception.hpp>
-#include <boost/functional/hash.hpp>
-
 /** hash container
  */
+DEFINE_SPTR(FMatrix);
+
+DEFINE_SPTR(space_hash);
+DEFINE_SPTR(DiskDiskRDeclaredPool);
+DEFINE_SPTR(DiskPlanRDeclaredPool);
+DEFINE_SPTR(CircleCircleRDeclaredPool);
+
 class Hashed : public std11::enable_shared_from_this<Hashed>
 {
 protected:
@@ -95,30 +97,6 @@ public:
 };
 
 DEFINE_SPTR(Hashed)
-
-typedef boost::unordered_multiset < SP::Hashed,
-        boost::hash<SP::Hashed> > space_hash;
-
-typedef ublas::matrix < FTime, ublas::column_major,
-        std::vector<FTime> > FMatrix;
-
-TYPEDEF_SPTR(FMatrix)
-
-
-/* relations pool */
-typedef std::pair<double, double> CircleCircleRDeclared;
-typedef std::pair<double, double> DiskDiskRDeclared;
-typedef std11::array<double, 6> DiskPlanRDeclared;
-
-
-typedef std::map<CircleCircleRDeclared, SP::CircularR>
-CircleCircleRDeclaredPool;
-
-typedef std::map<DiskDiskRDeclared, SP::CircularR>
-DiskDiskRDeclaredPool;
-
-typedef std::map<DiskPlanRDeclared, SP::DiskPlanR>
-DiskPlanRDeclaredPool;
 
 
 class SpaceFilter : public std11::enable_shared_from_this<SpaceFilter>
@@ -153,15 +131,15 @@ protected:
   SP::FMatrix _moving_plans;
 
   /* the hash table */
-  space_hash _hash_table;
+  SP::space_hash _hash_table;
 
   /* kee track of one step ns integrator initialization */
   bool _osnsinit;
 
   /* relations pool */
-  DiskDiskRDeclaredPool diskdisk_relations;
-  DiskPlanRDeclaredPool diskplan_relations;
-  CircleCircleRDeclaredPool circlecircle_relations;
+  SP::DiskDiskRDeclaredPool  diskdisk_relations;
+  SP::DiskPlanRDeclaredPool  diskplan_relations;
+  SP::CircleCircleRDeclaredPool circlecircle_relations;
 
   void _PlanCircularFilter(double A, double B, double C,
                            double xCenter, double yCenter, double width,
@@ -219,22 +197,15 @@ public:
               SP::Model model,
               SP::NonSmoothLaw nslaw,
               SP::SiconosMatrix plans,
-              SP::FMatrix moving_plans) :
-    _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
-    _model(model), _nslaw(nslaw), _plans(plans), _moving_plans(moving_plans), _osnsinit(false)
-  {};
+              SP::FMatrix moving_plans);
 
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
               SP::Model model,
               SP::NonSmoothLaw nslaw,
-              SP::SiconosMatrix plans) :
-    _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
-    _model(model), _nslaw(nslaw), _plans(plans), _osnsinit(false)
-  {};
+              SP::SiconosMatrix plans);
 
-  SpaceFilter()
-  {};
+  SpaceFilter();
 
   /** 2D/3D objects insertion
    *
@@ -289,7 +260,7 @@ public:
 
   /** get the neighbours
    * */
-  std::pair<space_hash::iterator, space_hash::iterator> neighbours(SP::Hashed h);
+//  std::pair<space_hash::iterator, space_hash::iterator> neighbours(SP::Hashed h);
 
 
   /** just test the presence of neighbours

@@ -7,11 +7,39 @@
 #include <NonSmoothDynamicalSystem.hpp>
 #include <SimulationTypeDef.hpp>
 
+#include <boost/unordered_set.hpp>
+#include <boost/throw_exception.hpp>
+#include <boost/functional/hash.hpp>
+
 #include "ExternalBody.hpp"
 
 #include <cmath>
 //#define DEBUG_MESSAGES 1
 #include "debug.h"
+
+
+struct space_hash : public boost::unordered_multiset < SP::Hashed,
+                                                       boost::hash<SP::Hashed> > {};
+
+struct FMatrix  : public ublas::matrix < FTime, ublas::column_major,
+                                         std::vector<FTime> > {};
+
+
+/* relations pool */
+typedef std::pair<double, double> CircleCircleRDeclared;
+typedef std::pair<double, double> DiskDiskRDeclared;
+typedef std11::array<double, 6> DiskPlanRDeclared;
+
+
+struct CircleCircleRDeclaredPool : public std::map<CircleCircleRDeclared, SP::CircularR> {};
+
+
+struct DiskDiskRDeclaredPool : public std::map<DiskDiskRDeclared, SP::CircularR> {};
+
+
+struct DiskPlanRDeclaredPool : public std::map<DiskPlanRDeclared, SP::DiskPlanR> {};
+
+
 
 
 /* hash is done with encapsulation */
@@ -36,6 +64,29 @@ std::size_t hash_value(SP::Hashed const& h)
   return seed;
 }
 
+SpaceFilter::SpaceFilter(unsigned int bboxfactor,
+              unsigned int cellsize,
+              SP::Model model,
+              SP::NonSmoothLaw nslaw,
+              SP::SiconosMatrix plans,
+              SP::FMatrix moving_plans) :
+    _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
+    _model(model), _nslaw(nslaw), _plans(plans), _moving_plans(moving_plans), _osnsinit(false), _hash_table(new space_hash()), 
+    diskdisk_relations(new DiskDiskRDeclaredPool()), diskplan_relations(new DiskPlanRDeclaredPool()), circlecircle_relations(new CircleCircleRDeclaredPool())
+  {};
+
+SpaceFilter::SpaceFilter(unsigned int bboxfactor,
+              unsigned int cellsize,
+              SP::Model model,
+              SP::NonSmoothLaw nslaw,
+              SP::SiconosMatrix plans) :
+    _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
+    _model(model), _nslaw(nslaw), _plans(plans), _osnsinit(false), _hash_table(new space_hash()), 
+    diskdisk_relations(new DiskDiskRDeclaredPool()), diskplan_relations(new DiskPlanRDeclaredPool()), circlecircle_relations(new CircleCircleRDeclaredPool())
+  {};
+
+SpaceFilter::SpaceFilter() : _hash_table(new space_hash()), 
+    diskdisk_relations(new DiskDiskRDeclaredPool()), diskplan_relations(new DiskPlanRDeclaredPool()), circlecircle_relations(new CircleCircleRDeclaredPool()) {};
 
 /* the hashing is done with a visitor */
 struct SpaceFilter::_BodyHash : public SiconosVisitor
@@ -198,12 +249,12 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
       if (rmax - (d + rmin) < tol)
       {
         CircleCircleRDeclaredPool::iterator rcandid =
-          parent->circlecircle_relations.find(CircleCircleRDeclared(r1, r2));
-        if (rcandid == parent->circlecircle_relations.end())
+          parent->circlecircle_relations->find(CircleCircleRDeclared(r1, r2));
+        if (rcandid == parent->circlecircle_relations->end())
         {
           // a new relation
           rel.reset(new CircleCircleR(r1, r2));
-          parent->circlecircle_relations[CircleCircleRDeclared(r1, r2)] = rel;
+          (*(parent->circlecircle_relations))[CircleCircleRDeclared(r1, r2)] = rel;
         }
         else
         {
@@ -218,8 +269,8 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
       if (d - (r1 + r2) < tol)
       {
         DiskDiskRDeclaredPool::iterator rcandid =
-          parent->diskdisk_relations.find(DiskDiskRDeclared(r1, r2));
-        if (rcandid == parent->diskdisk_relations.end())
+          parent->diskdisk_relations->find(DiskDiskRDeclared(r1, r2));
+        if (rcandid == parent->diskdisk_relations->end())
         {
           // a new relation
           rel.reset(new DiskDiskR(r1, r2));
@@ -887,33 +938,33 @@ void SpaceFilter::insert(SP::Disk ds, int i, int j, int k)
 {
 
   SP::Hashed hashed(new Hashed(ds, i, j));
-  _hash_table.insert(hashed);
+  _hash_table->insert(hashed);
 }
 
 void SpaceFilter::insert(SP::Circle ds, int i, int j, int k)
 {
 
   SP::Hashed hashed(new Hashed(ds, i, j));
-  _hash_table.insert(hashed);
+  _hash_table->insert(hashed);
 }
 
 void SpaceFilter::insert(SP::SphereLDS ds, int i, int j, int k)
 {
 
   SP::Hashed hashed(new Hashed(ds, i, j, k));
-  _hash_table.insert(hashed);
+  _hash_table->insert(hashed);
 }
 
 void SpaceFilter::insert(SP::SphereNEDS ds, int i, int j, int k)
 {
 
   SP::Hashed hashed(new Hashed(ds, i, j, k));
-  _hash_table.insert(hashed);
+  _hash_table->insert(hashed);
 }
 
 void SpaceFilter::insert(SP::Hashed hashed)
 {
-  _hash_table.insert(hashed);
+  _hash_table->insert(hashed);
 }
 
 /* insert other objects */
@@ -994,7 +1045,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     // find all other systems that are in the same cells
     std::pair<space_hash::iterator, space_hash::iterator>
-    neighbours = parent->_hash_table.equal_range(hds1);
+    neighbours = parent->_hash_table->equal_range(hds1);
 
     unsigned int j;
     interPairs declaredInteractions;
@@ -1060,7 +1111,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     // find all other systems that are in the same cells
     std::pair<space_hash::iterator, space_hash::iterator>
-    neighbours = parent->_hash_table.equal_range(hds1);
+    neighbours = parent->_hash_table->equal_range(hds1);
 
     unsigned int j;
     interPairs declaredInteractions;
@@ -1115,7 +1166,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     // find all other systems that are in the same cells
     std::pair<space_hash::iterator, space_hash::iterator>
-    neighbours = parent->_hash_table.equal_range(hds1);
+    neighbours = parent->_hash_table->equal_range(hds1);
 
     unsigned int j;
     interPairs declaredInteractions;
@@ -1180,7 +1231,7 @@ void SpaceFilter::buildInteractions(double time)
   findInteractions(new _FindInteractions(shared_from_this(), time));
 
 
-  _hash_table.clear();
+  _hash_table->clear();
 
   // 1: rehash DS
   DynamicalSystemsGraph::VIterator vi, viend;
@@ -1202,15 +1253,15 @@ void SpaceFilter::buildInteractions(double time)
 
 }
 
-std::pair<space_hash::iterator, space_hash::iterator> SpaceFilter::neighbours(SP::Hashed h)
-{
-  return _hash_table.equal_range(h);
-}
+//std::pair<space_hash::iterator, space_hash::iterator> SpaceFilter::neighbours(SP::Hashed h)
+//{
+//  return _hash_table.equal_range(h);
+//}
 
 bool SpaceFilter::haveNeighbours(SP::Hashed h)
 {
   std::pair<space_hash::iterator, space_hash::iterator> neighbours
-    = _hash_table.equal_range(h);
+    = _hash_table->equal_range(h);
   return (neighbours.first != neighbours.second);
 }
 
@@ -1245,7 +1296,7 @@ struct SpaceFilter::_DiskDistance : public SiconosVisitor
 double SpaceFilter::minDistance(SP::Hashed h)
 {
   std::pair<space_hash::iterator, space_hash::iterator> neighbours
-    = _hash_table.equal_range(h);
+    = _hash_table->equal_range(h);
 
   SP::SiconosVector q = std11::static_pointer_cast<LagrangianDS>(h->body)->q();
 
