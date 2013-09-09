@@ -25,9 +25,7 @@
 #ifndef DiskPlanR_h
 #define DiskPlanR_h
 
-#include "Interaction.hpp"
 #include "LagrangianScleronomousR.hpp"
-
 
 /** \class DiskPlanR
  *  \brief disk - plan relation - Inherits from LagrangianScleronomousR

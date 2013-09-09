@@ -1,6 +1,12 @@
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 
 #include "SpaceFilter.hpp"
+
+#include <Model.hpp>
+#include <Simulation.hpp>
+#include <NonSmoothDynamicalSystem.hpp>
+#include <SimulationTypeDef.hpp>
+
 #include "ExternalBody.hpp"
 
 #include <cmath>

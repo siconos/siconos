@@ -22,7 +22,7 @@
 #ifndef PrismaticJointRELATION_H
 #define PrismaticJointRELATION_H
 
-#include "SiconosKernel.hpp"
+#include "NewtonEulerR.hpp"
 
 /** \class PrismaticJointR
  *  \brief This class implements a prismatic joint between one or two Newton/Euler Dynamical system

@@ -21,6 +21,8 @@
 */
 
 #include "PivotJointR.hpp"
+#include <Interaction.hpp>
+#include <NewtonEulerDS.hpp>
 #include <boost/math/quaternion.hpp>
 
 PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P, SP::SiconosVector A): KneeJointR(d1, d2, P)

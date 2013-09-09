@@ -62,6 +62,9 @@ DEFINE_SPTR(BlockVector)
 
 DEFINE_SPTR(SiconosMemory)
 
+DEFINE_SPTR(NewtonEulerR)
+DEFINE_SPTR(NewtonEulerDS)
+
 TYPEDEF_SAPTR(integer)
 TYPEDEF_SPTR(integer)
 TYPEDEF_SAPTR(doublereal)

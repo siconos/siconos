@@ -26,8 +26,6 @@
 
 #include <LagrangianDS.hpp>
 
-#include "SpaceFilter.hpp"
-
 class ExternalBody :
   public LagrangianDS,
   public std11::enable_shared_from_this<ExternalBody>

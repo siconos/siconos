@@ -21,6 +21,8 @@
 
 #include "SiconosBodies.hpp"
 
+#include <Simulation.hpp>
+
 void SiconosBodies::compute()
 {
   try

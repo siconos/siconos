@@ -21,7 +21,8 @@
 #ifndef KneeJointRELATION_H
 #define KneeJointRELATION_H
 
-#include "SiconosKernel.hpp"
+#include <SiconosFwd.hpp>
+#include <NewtonEulerR.hpp>
 /** \class KneeJointR
  *  \brief This class implements a knee joint between one or two Newton/Euler Dynamical system
  *

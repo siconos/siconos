@@ -21,6 +21,8 @@
 */
 
 #include "KneeJointR.hpp"
+#include <NewtonEulerDS.hpp>
+#include <Interaction.hpp>
 #include <boost/math/quaternion.hpp>
 
 //#define DEBUG_STDOUT

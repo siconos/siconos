@@ -36,7 +36,6 @@
 #ifndef SpaceFilter_hpp
 #define SpaceFilter_hpp
 
-#include "SiconosKernel.hpp"
 #include "Circle.hpp"
 #include "Disk.hpp"
 #include "DiskDiskR.hpp"

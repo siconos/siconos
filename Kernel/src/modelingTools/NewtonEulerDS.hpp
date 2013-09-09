@@ -24,7 +24,6 @@
 #define NEWTONEULERNLDS_H
 
 #include "DynamicalSystem.hpp"
-class DynamicalSystem;
 
 /** Pointer to function for plug-in. */
 typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
@@ -620,7 +619,4 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-
-TYPEDEF_SPTR(NewtonEulerDS)
-
 #endif // NEWTONEULERNLDS_H

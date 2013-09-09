@@ -21,6 +21,8 @@
 */
 
 #include "PrismaticJointR.hpp"
+#include <NewtonEulerDS.hpp>
+#include <Interaction.hpp>
 #include <boost/math/quaternion.hpp>
 
 /**axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/

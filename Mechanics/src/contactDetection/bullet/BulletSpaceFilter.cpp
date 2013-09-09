@@ -18,6 +18,13 @@
 */
 
 #include "BulletSpaceFilter.hpp"
+
+#include <Model.hpp>
+#include <Simulation.hpp>
+#include <NonSmoothDynamicalSystem.hpp>
+#include <SimulationTypeDef.hpp>
+#include <NonSmoothLaw.hpp>
+
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>

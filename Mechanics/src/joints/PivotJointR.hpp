@@ -21,7 +21,6 @@
 #ifndef PivotJointRELATION_H
 #define PivotJointRELATION_H
 
-#include "SiconosKernel.hpp"
 #include "KneeJointR.hpp"
 
 /** \class PivotJointR
