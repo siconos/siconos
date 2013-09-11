@@ -32,6 +32,8 @@ class Sensor;
 class Simulation;
 class TimeDiscretisation;
 
+#include <set>
+
 /** A set of Sensors */
 typedef std::set<SP::Sensor> Sensors;
 

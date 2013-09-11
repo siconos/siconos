@@ -25,7 +25,6 @@
 #define Actuator_H
 
 #include <string>
-#include <set>
 #include "RuntimeException.hpp"
 #include "SiconosPointers.hpp"
 
