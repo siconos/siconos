@@ -63,7 +63,4 @@ public:
   ~DiskDiskR() {};
 
 };
-
-TYPEDEF_SPTR(DiskDiskR)
-
 #endif /* DiskDiskR_h */

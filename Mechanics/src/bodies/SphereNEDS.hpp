@@ -74,7 +74,4 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-
-TYPEDEF_SPTR(SphereNEDS)
-
 #endif /* SphereNEDS_h */

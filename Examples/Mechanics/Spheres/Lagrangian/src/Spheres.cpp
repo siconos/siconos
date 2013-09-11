@@ -29,6 +29,9 @@
 
 #include "Spheres.hpp"
 
+#include <SphereLDS.hpp>
+#include <SpaceFilter.hpp>
+
 using namespace std;
 
 /* do nothing if solver does not converge */

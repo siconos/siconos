@@ -1,6 +1,21 @@
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 
 #include "SpaceFilter.hpp"
+#include "SpaceFilter_impl.hpp"
+
+#include "Circle.hpp"
+#include "Disk.hpp"
+#include "DiskDiskR.hpp"
+#include "CircleCircleR.hpp"
+#include "DiskPlanR.hpp"
+#include "DiskMovingPlanR.hpp"
+#include "SphereLDS.hpp"
+#include "SphereLDSSphereLDSR.hpp"
+#include "SphereNEDSSphereNEDSR.hpp"
+#include "SphereLDSPlanR.hpp"
+#include "SphereNEDS.hpp"
+#include "SphereNEDSPlanR.hpp"
+#include "ExternalBody.hpp"
 
 #include <Model.hpp>
 #include <Simulation.hpp>
@@ -11,8 +26,6 @@
 #include <boost/throw_exception.hpp>
 #include <boost/functional/hash.hpp>
 
-#include "ExternalBody.hpp"
-
 #include <cmath>
 //#define DEBUG_MESSAGES 1
 #include "debug.h"
@@ -20,10 +33,6 @@
 
 struct space_hash : public boost::unordered_multiset < SP::Hashed,
                                                        boost::hash<SP::Hashed> > {};
-
-struct FMatrix  : public ublas::matrix < FTime, ublas::column_major,
-                                         std::vector<FTime> > {};
-
 
 /* relations pool */
 typedef std::pair<double, double> CircleCircleRDeclared;

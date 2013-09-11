@@ -19,6 +19,8 @@
  */
 
 #include "BodiesViewer.hpp"
+#include <Model.hpp>
+#include <Simulation.hpp>
 
 #include <GL/gl.h>
 #include <GL/glu.h>

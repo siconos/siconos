@@ -25,12 +25,21 @@
 */
 
 // Siconos
-#include <SiconosKernel.hpp>
 #include <SiconosPointers.hpp>
 
+#include <TimeStepping.hpp>
+#include <FrictionContact.hpp>
+#include <Moreau.hpp>
+#include <NewtonImpactFrictionNSL.hpp>
 //#include <Siconos/IO/SiconosRestart.hpp>
 
 #include "Disks.hpp"
+
+#include <Disk.hpp>
+#include <Circle.hpp>
+#include <DiskPlanR.hpp>
+#include <SpaceFilter.hpp>
+
 
 using namespace std;
 

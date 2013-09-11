@@ -58,7 +58,4 @@ public:
   ACCEPT_VISITORS();
 
 };
-
-TYPEDEF_SPTR(SphereNEDSSphereNEDSR)
-
 #endif /* SphereNEDSSphereNEDSR_h */

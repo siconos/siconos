@@ -15,6 +15,7 @@ SET(SiconosMechanics_VERSION "${VERSION}")
 # Project directories 
 #
 SET(SiconosMechanics_DIRS
+  .
   bodies
   joints
   contactDetection/basicBroadphase)

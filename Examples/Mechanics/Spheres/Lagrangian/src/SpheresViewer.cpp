@@ -19,7 +19,8 @@
  */
 
 #include "SpheresViewer.hpp"
-
+#include <Model.hpp>
+#include <NonSmoothDynamicalSystem.hpp>
 using namespace qglviewer;
 
 void SpheresViewer::init()

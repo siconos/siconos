@@ -32,6 +32,7 @@
 
 typedef double(*FTime)(const double);
 
+
 #define COMPUTE(X) \
   { if (_##X##Function->fPtr) _##X=((FTime)(_##X##Function->fPtr))(t); else _##X=0.; }
 
@@ -135,9 +136,6 @@ public:
   ~DiskMovingPlanR() {};
 
 };
-
-TYPEDEF_SPTR(DiskMovingPlanR)
-
 #undef COMPUTE
 
 #endif /* DiskMovingPlanR */

@@ -36,18 +36,10 @@
 #ifndef SpaceFilter_hpp
 #define SpaceFilter_hpp
 
-#include "Circle.hpp"
-#include "Disk.hpp"
-#include "DiskDiskR.hpp"
-#include "CircleCircleR.hpp"
-#include "DiskPlanR.hpp"
-#include "DiskMovingPlanR.hpp"
-#include "SphereLDS.hpp"
-#include "SphereLDSSphereLDSR.hpp"
-#include "SphereNEDSSphereNEDSR.hpp"
-#include "SphereLDSPlanR.hpp"
-#include "SphereNEDS.hpp"
-#include "SphereNEDSPlanR.hpp"
+#include "MechanicsFwd.hpp"
+#include <SiconosFwd.hpp>
+#include <SiconosSerialization.hpp>
+#include <SiconosVisitor.hpp>
 
 //#ifndef __GCCXML__
 //#include <tr1/unordered_set>
@@ -65,7 +57,8 @@
 
 /** hash container
  */
-DEFINE_SPTR(FMatrix);
+
+
 
 DEFINE_SPTR(space_hash);
 DEFINE_SPTR(DiskDiskRDeclaredPool);
@@ -295,7 +288,5 @@ public:
    */
   ACCEPT_STD_VISITORS();
 };
-
-TYPEDEF_SPTR(SpaceFilter);
 
 #endif /* SpaceFilter_hpp */

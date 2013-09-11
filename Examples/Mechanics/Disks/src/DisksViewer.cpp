@@ -24,7 +24,8 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 
-//#include "Full.hpp"
+// FMatrix is forwarded
+#include <SpaceFilter_impl.hpp>
 
 using namespace qglviewer;
 

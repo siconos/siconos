@@ -62,8 +62,5 @@ public:
   ACCEPT_SP_VISITORS();
 
 };
-
-TYPEDEF_SPTR(Circle)
-
 #endif /* Circle_H */
 

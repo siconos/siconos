@@ -22,8 +22,6 @@
 #define BodiesViewer_hpp
 
 /* Siconos */
-#include <SiconosKernel.hpp>
-
 #include <Disk.hpp>
 #include <DiskDiskR.hpp>
 #include <DiskPlanR.hpp>
@@ -36,6 +34,7 @@
 #include <SphereNEDS.hpp>
 #include <SphereNEDSPlanR.hpp>
 #include <SphereNEDSSphereNEDSR.hpp>
+#include <Question.hpp>
 
 #if WITH_BULLET
 #include <BulletDS.hpp>
@@ -74,6 +73,8 @@ public:
 
 struct ForNdof : public Question<unsigned int>
 {
+  using SiconosVisitor::visit;
+
   ANSWER_V(Disk, 3);
   ANSWER_V(Circle, 3);
   ANSWER_V(SphereLDS, 6);
@@ -84,6 +85,7 @@ struct ForNdof : public Question<unsigned int>
 
 struct ForFExt : public Question<SP::SiconosVector>
 {
+  using SiconosVisitor::visit;
 
   ANSWER(Disk, fExt());
   ANSWER(Circle, fExt());
@@ -95,6 +97,7 @@ struct ForFExt : public Question<SP::SiconosVector>
 
 struct ForPosition : public Question<SP::SiconosVector>
 {
+  using SiconosVisitor::visit;
 
   ANSWER(Disk, q());
   ANSWER(Circle, q());
@@ -105,6 +108,7 @@ struct ForPosition : public Question<SP::SiconosVector>
 
 struct ForRadius : public Question<double>
 {
+  using SiconosVisitor::visit;
 
   ANSWER(Disk, getRadius());
   ANSWER(Circle, getRadius());
@@ -115,6 +119,8 @@ struct ForRadius : public Question<double>
 
 struct ForMassValue : public Question<double>
 {
+  using SiconosVisitor::visit;
+
   ANSWER(Disk, mass()->getValue(0, 0));
   ANSWER(Circle, mass()->getValue(0, 0));
   ANSWER(SphereLDS, mass()->getValue(0, 0));
@@ -124,6 +130,8 @@ struct ForMassValue : public Question<double>
 
 struct ForJachq : public Question<SP::SiconosMatrix>
 {
+  using SiconosVisitor::visit;
+
   ANSWER(LagrangianR, jachq());
   ANSWER(NewtonEulerR, jachq());
   ANSWER(DiskDiskR, jachq());
@@ -138,6 +146,8 @@ struct ForJachq : public Question<SP::SiconosMatrix>
 
 struct ForContactForce : public Question<SP::SiconosVector>
 {
+  using SiconosVisitor::visit;
+
   IFBULLET(ANSWER(BulletR, contactForce()));
 };
 
@@ -176,6 +186,8 @@ enum SHAPE
 
 struct ForShape : public Question<SHAPE>
 {
+  using SiconosVisitor::visit;
+
   ANSWER_V(Disk, DISK);
   ANSWER_V(Circle, CIRCLE);
   ANSWER_V(SphereLDS, SPHERE);

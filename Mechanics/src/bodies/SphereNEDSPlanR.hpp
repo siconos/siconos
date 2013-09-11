@@ -72,7 +72,4 @@ public:
   ACCEPT_VISITORS();
 
 };
-
-TYPEDEF_SPTR(SphereNEDSPlanR)
-
 #endif /* SphereNEDSPlanR_h */

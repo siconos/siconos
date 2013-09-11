@@ -47,6 +47,8 @@
 
 #include "SiconosBodies.hpp"
 
+#include "Question.hpp"
+
 /* QGLViewer */
 #include <qglviewer.h>
 #include <qapplication.h>

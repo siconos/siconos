@@ -69,6 +69,4 @@ public:
   ~CircularR() {};
 
 };
-
-TYPEDEF_SPTR(CircularR)
 #endif /* CircularR_h */

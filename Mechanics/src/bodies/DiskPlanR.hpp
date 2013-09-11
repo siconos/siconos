@@ -137,8 +137,5 @@ public:
   ~DiskPlanR() {};
 
 };
-
-TYPEDEF_SPTR(DiskPlanR)
-
 #endif /* DiskPlanR */
 

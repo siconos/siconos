@@ -25,7 +25,14 @@
 */
 
 // Siconos
-#include <SiconosKernel.hpp>
+#include <SphereNEDS.hpp>
+#include <SphereNEDSPlanR.hpp>
+#include <TimeStepping.hpp>
+#include <FrictionContact.hpp>
+#include <Moreau.hpp>
+#include <NewtonImpactFrictionNSL.hpp>
+
+#include <SpaceFilter.hpp>
 
 //#include <Siconos/IO/SiconosRestart.hpp>
 //#include <Siconos/IO/SiconosVTKOutput.hpp>

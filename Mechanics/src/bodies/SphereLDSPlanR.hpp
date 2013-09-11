@@ -69,7 +69,4 @@ public:
   ACCEPT_VISITORS();
 
 };
-
-TYPEDEF_SPTR(SphereLDSPlanR)
-
 #endif /* SphereLDSPlanR_h */

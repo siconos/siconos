@@ -22,8 +22,6 @@
 #define BodiesViewer_hpp
 
 /* Siconos */
-#include <SiconosKernel.hpp>
-
 #include <Disk.hpp>
 #include <DiskDiskR.hpp>
 #include <DiskPlanR.hpp>
@@ -36,6 +34,7 @@
 #include <SphereNEDS.hpp>
 #include <SphereNEDSPlanR.hpp>
 #include <SphereNEDSSphereNEDSR.hpp>
+#include <Question.hpp>
 
 #if WITH_BULLET
 #include <BulletDS.hpp>

@@ -22,6 +22,7 @@
 
 #include "BulletSiconosFwd.hpp"
 #include "SpaceFilter.hpp"
+#include <vector>
 
 class BulletSpaceFilter : public SpaceFilter
 {

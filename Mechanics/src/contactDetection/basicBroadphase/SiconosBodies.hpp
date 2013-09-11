@@ -24,8 +24,9 @@
 #ifndef SiconosBodies_hpp
 #define SiconosBodies_hpp
 
-#include "Model.hpp"
-#include "SpaceFilter.hpp"
+#include "MechanicsFwd.hpp"
+#include <SiconosFwd.hpp>
+#include <SiconosSerialization.hpp>
 
 /** SiconosBodies : a Siconos Model, some plans and space filtering capabilities
  */
@@ -76,7 +77,5 @@ public:
   virtual ~SiconosBodies() {};
 
 };
-
-TYPEDEF_SPTR(SiconosBodies)
 
 #endif // SiconosBodies_hpp

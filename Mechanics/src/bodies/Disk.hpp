@@ -63,8 +63,5 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-
-TYPEDEF_SPTR(Disk)
-
 #endif /* Disk_H */
 

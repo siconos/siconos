@@ -91,7 +91,4 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-
-TYPEDEF_SPTR(SphereLDS)
-
 #endif /* SphereLDS_h */

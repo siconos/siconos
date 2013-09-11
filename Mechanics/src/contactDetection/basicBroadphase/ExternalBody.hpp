@@ -24,6 +24,7 @@
 #ifndef ExternalBody_hpp
 #define ExternalBody_hpp
 
+#include "MechanicsFwd.hpp"
 #include <LagrangianDS.hpp>
 
 class ExternalBody :
@@ -39,6 +40,5 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-TYPEDEF_SPTR(ExternalBody)
 
 #endif
