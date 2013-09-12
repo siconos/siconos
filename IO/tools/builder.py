@@ -64,7 +64,8 @@ input_headers = dict()
 
 input_headers['Kernel'] = ["SiconosKernel.hpp"]
 
-input_headers['Mechanics'] = ["SpaceFilter.hpp", "ExternalBody.hpp",
+input_headers['Mechanics'] = ["SpaceFilter.hpp", "SpaceFilter_impl.hpp",
+                              "ExternalBody.hpp",
                               "Disk.hpp", "Circle.hpp", "DiskDiskR.hpp",
                               "DiskMovingPlanR.hpp",
                               "DiskPlanR.hpp", "SphereLDS.hpp",

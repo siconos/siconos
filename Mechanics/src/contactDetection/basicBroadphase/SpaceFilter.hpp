@@ -41,56 +41,12 @@
 #include <SiconosSerialization.hpp>
 #include <SiconosVisitor.hpp>
 
-//#ifndef __GCCXML__
-//#include <tr1/unordered_set>
-//#else
-///* gccxml fail to parse some gcc 4.3 builtins, so we provide a fake
-// * unordered_multiset*/
-//namespace std { namespace tr1 {
-//    template<class A, class B>
-//    class unordered_multiset {
-//    public:
-//      typedef void iterator;
-//    };
-//  }}
-//#endif
-
-/** hash container
- */
-
-
-
+/* local forwards (see SpaceFilter_impl.hpp) */
 DEFINE_SPTR(space_hash);
 DEFINE_SPTR(DiskDiskRDeclaredPool);
 DEFINE_SPTR(DiskPlanRDeclaredPool);
 DEFINE_SPTR(CircleCircleRDeclaredPool);
-
-class Hashed : public std11::enable_shared_from_this<Hashed>
-{
-protected:
-  /** serialization hooks
-   */
-  ACCEPT_SERIALIZATION(Hashed);
-
-  Hashed() {};
-
-public:
-  SP::DynamicalSystem body;
-  int i;
-  int j;
-  int k;
-  Hashed(SP::DynamicalSystem body, int i, int j, int k = 0) :
-    body(body), i(i), j(j), k(k) {};
-
-  Hashed(int i, int j, int k = 0)
-    : i(i), j(j), k(k) {};
-
-  ~Hashed() {};
-
-};
-
-DEFINE_SPTR(Hashed)
-
+DEFINE_SPTR(Hashed);
 
 class SpaceFilter : public std11::enable_shared_from_this<SpaceFilter>
 {

@@ -1,4 +1,4 @@
-#define FROM_IMPL
+
 #include <IOConfig.h>
 
 #define HAVE_SICONOS_MECHANICS
@@ -6,6 +6,7 @@
 
 #include <SpaceFilter.hpp>
 #include <BlockVector.hpp>
+#include <Interaction.hpp>
 
 #ifdef HAVE_BULLET
 #include <BulletDS.hpp>
@@ -16,6 +17,31 @@
 
 
 #include "MechanicsIO.hpp"
+
+#include <SiconosGraph.hpp>
+#include <LagrangianDS.hpp>
+#include <NewtonEulerDS.hpp>
+
+/* ... */
+/* to be fixed: forward mess with mpl::is_base_of who needs fully
+ * declared classes */
+#include <SiconosKernel.hpp>
+
+/* Mechanics visitables bodies */
+#include "Circle.hpp"
+#include "Disk.hpp"
+#include "DiskDiskR.hpp"
+#include "CircleCircleR.hpp"
+#include "DiskPlanR.hpp"
+#include "DiskMovingPlanR.hpp"
+#include "SphereLDS.hpp"
+#include "SphereLDSSphereLDSR.hpp"
+#include "SphereNEDSSphereNEDSR.hpp"
+#include "SphereLDSPlanR.hpp"
+#include "SphereNEDS.hpp"
+#include "SphereNEDSPlanR.hpp"
+#include "ExternalBody.hpp"
+
 
 using namespace Alternative;
 
@@ -74,7 +100,6 @@ struct ContactPointVisitor : public SiconosVisitor
   }
 #endif
 };
-
 
 template<typename T, typename G>
 SP::SimpleMatrix MechanicsIO::visitAllVerticesForVector(const G& graph) const

@@ -22,31 +22,10 @@
 #include <NonSmoothDynamicalSystem.hpp>
 #include <SimulationTypeDef.hpp>
 
-#include <boost/unordered_set.hpp>
-#include <boost/throw_exception.hpp>
-#include <boost/functional/hash.hpp>
-
 #include <cmath>
 //#define DEBUG_MESSAGES 1
 #include "debug.h"
 
-
-struct space_hash : public boost::unordered_multiset < SP::Hashed,
-                                                       boost::hash<SP::Hashed> > {};
-
-/* relations pool */
-typedef std::pair<double, double> CircleCircleRDeclared;
-typedef std::pair<double, double> DiskDiskRDeclared;
-typedef std11::array<double, 6> DiskPlanRDeclared;
-
-
-struct CircleCircleRDeclaredPool : public std::map<CircleCircleRDeclared, SP::CircularR> {};
-
-
-struct DiskDiskRDeclaredPool : public std::map<DiskDiskRDeclared, SP::CircularR> {};
-
-
-struct DiskPlanRDeclaredPool : public std::map<DiskPlanRDeclared, SP::DiskPlanR> {};
 
 
 
