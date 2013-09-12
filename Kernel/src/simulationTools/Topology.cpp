@@ -92,7 +92,7 @@ Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds
   // vector of the Interaction
   DynamicalSystemsGraph::VDescriptor dsgv1, dsgv2;
   dsgv1 = _DSG[0]->add_vertex(ds1);
-  if(ds2 != NULL)
+  if(ds2)
     dsgv2 = _DSG[0]->add_vertex(ds2);
   else 
     dsgv2 = dsgv1;
@@ -108,7 +108,7 @@ Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds
   // note : boost graph SEGFAULT on self branch removal
   // see https://svn.boost.org/trac/boost/ticket/4622
   _IG[0]->properties(ig_new_ve).source = ds1;
-  if(ds2 == NULL)
+  if(!ds2)
     _IG[0]->properties(ig_new_ve).target = ds1;
   else
     _IG[0]->properties(ig_new_ve).target = ds2;
@@ -230,7 +230,7 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
   DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)");
 
   inter->insert(ds);
-  if(ds2 != NULL)
+  if(ds2)
     inter->insert(ds2);
   return addInteractionInIndexSet(inter, ds, ds2);
 }
