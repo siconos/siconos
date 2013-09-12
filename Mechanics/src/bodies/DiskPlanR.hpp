@@ -115,6 +115,7 @@ public:
     return width;
   };
 
+  using LagrangianScleronomousR::computeh;
   void computeh(const double time, Interaction& inter);
 
   void computeJachq(const double time, Interaction& inter);

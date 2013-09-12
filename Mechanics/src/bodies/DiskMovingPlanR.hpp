@@ -65,10 +65,12 @@ public:
 
   void init(double);
 
+  using LagrangianRheonomousR::computeh;
   void computeh(const double time, Interaction& inter);
 
   void computeJachq(const double time, Interaction& inter);
 
+  using LagrangianRheonomousR::computehDot;
   void computehDot(const double time, Interaction& inter);
 
   double distance(double, double, double);
