@@ -268,7 +268,7 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   /*BUILD H SimpleMatrix and NSLAW*/
   if(jointType == PIVOT_0 || jointType == PIVOT_1)
   {
-    lNbEq = PivotJointR::_sNbEqualities;
+    lNbEq = PivotJointR::numberOfConstraints();
     nbDS=1;
     if(jointType == PIVOT_1)
     {
@@ -278,7 +278,7 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   else if(jointType == PRISMATIC_0)
   {
     nbDS=1;
-    lNbEq =PrismaticJointR::_sNbEqualities;
+    lNbEq =PrismaticJointR::numberOfConstraints();
   }
   SP::SimpleMatrix lH(new SimpleMatrix(lNbEq ,nbDS*qDim));
   lH->zero();
@@ -316,8 +316,10 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
     sAllDSByInter[numJ].insert(sDS[indexDS1]);
   }
   sJointRelations[numJ]->_jointR->setJachq(lH);
-  sInterJoints[numJ].reset(new Interaction(JointName, sAllDSByInter[numJ],
-                                           numJ, lNbEq , lNSL, 
+//  sInterJoints[numJ].reset(new Interaction(JointName, sAllDSByInter[numJ],
+//                                           numJ, lNbEq , lNSL, 
+//                                           sJointRelations[numJ]->_jointR));
+  sInterJoints[numJ].reset(new Interaction(lNbEq , lNSL, 
                                            sJointRelations[numJ]->_jointR));
   sAllInteractions.insert(sInterJoints[numJ]);
   sJointRelations[numJ]->_interaction = sInterJoints[numJ];
@@ -347,7 +349,8 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
     sContacts[numContact]->_et=et;
     SP::NonSmoothLaw nslaw0(new NewtonImpactFrictionNSL(en,et,mu,3));
     sInterContacts[numContact].reset(new Interaction(3,nslaw0,sContacts[numContact]->relation(),numContact));
-    sInterContacts[numContact]->setId(ContactName);
+    // MB : contactName is already in MBTB_Contact!
+    // sInterContacts[numContact]->setId(ContactName);
     sAllInteractions.insert(sInterContacts[numContact]);
     
   }
@@ -356,7 +359,7 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
     SP::NewtonImpactNSL lNSL(new NewtonImpactNSL(sContacts[numContact]->_en));
     sInterContacts[numContact].reset(new Interaction(1,lNSL,
                                                      sContacts[numContact]->relation(),numContact));
-    sInterContacts[numContact]->setId(ContactName);
+//    sInterContacts[numContact]->setId(ContactName);
     sAllInteractions.insert(sInterContacts[numContact]);
   }
 
