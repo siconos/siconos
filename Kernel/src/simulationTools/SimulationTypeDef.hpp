@@ -228,12 +228,14 @@ struct InteractionsGraph : public _InteractionsGraph
   INSTALL_GRAPH_PROPERTIES(Interactions,
                            ((Vertex, SP::SimpleMatrix, blockProj))        // ProjectOnConstraint
                            ((Edge, SP::SimpleMatrix, upper_blockProj))    // idem
-                           ((Edge, SP::SimpleMatrix, lower_blockProj)))  // idem
+                           ((Edge, SP::SimpleMatrix, lower_blockProj))  // idem
+                           ((Vertex, std::string, name)));
 
   // to be installed with INSTALL_GRAPH_PROPERTIES
   void eraseProperties(_InteractionsGraph::VDescriptor vd)
   {
     blockProj._store->erase(vd);
+    name._store->erase(vd);
   }
 
   // to be installed with INSTALL_GRAPH_PROPERTIES
