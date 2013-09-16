@@ -6,9 +6,11 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../.
 SET_SOURCE_FILES_PROPERTIES(cadmbtb.i PROPERTIES CPLUSPLUS ON)
 SWIG_ADD_MODULE(cadmbtb python cadmbtb.i)
 
-SET(OCE_TOOLKITS "TKernel" "PTKernel" "TKMath" "TKService" "TKV3d" "TKV2d" "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
 
-#find_package(OCE COMPONENTS ${OCE_TOOLKITS})
+message(STATUS "Searching for OCE ....")
+SET(OCE_TOOLKITS "TKernel" "PTKernel" "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
+
+find_package(OCE COMPONENTS ${OCE_TOOLKITS})
 
 if(OCE_FOUND)
     message(STATUS "Found OCE version ${OCE_VERSION}")
