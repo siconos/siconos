@@ -16,12 +16,15 @@
 %include sharedPointers.i
 %include KernelTypes.i
 
-%{
-#include <SiconosKernel.hpp>
-%}
 %import Kernel.i
 
 %include pyRegister.i
+
+%{
+#include <MechanicsFwd.hpp>
+%}
+%include <MechanicsFwd.hpp>
+
 
 PY_FULL_REGISTER(KneeJointR);
 PY_FULL_REGISTER(PivotJointR);

@@ -19,6 +19,11 @@
 
 %include pyRegister.i
 
+%{
+#include <MechanicsFwd.hpp>
+%}
+%include <MechanicsFwd.hpp>
+
 PY_FULL_REGISTER(Disk);
 PY_FULL_REGISTER(Circle);
 PY_FULL_REGISTER(DiskDiskR);
