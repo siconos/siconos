@@ -62,6 +62,10 @@
 #define MAX_RADIUS INFINITY
 
 #include "SiconosBodies.hpp"
+#include "Disk.hpp"
+#include "Circle.hpp"
+#include "DiskPlanR.hpp"
+#include "SpaceFilter.hpp"
 
 class Disks : public SiconosBodies, public std11::enable_shared_from_this<Disks>
 {
