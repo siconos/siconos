@@ -30,6 +30,12 @@
 #include <BulletSpaceFilter.hpp>
 #include <BulletTimeStepping.hpp>
 #include <BulletDS.hpp>
+#include <BulletWeightedShape.hpp>
+
+#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 int main()
 {
@@ -215,29 +221,31 @@ int main()
         // collision detection and an indexSet1, filled by
         // TimeStepping::updateIndexSet with the help of Bullet
         // getDistance() function
-        assert(model->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() == 2);
-        SP::InteractionsGraph index1 = simulation->indexSet(1);
-
-        // This is the narrow phase contact detection : if
-        // TimeStepping::updateIndexSet has filled indexSet1 then we
-        // have some contact forces to display
-        if (index1->size() > 0)
+        if (model->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() == 2)
         {
+          SP::InteractionsGraph index1 = simulation->indexSet(1);
 
-          // Four contact points for a cube with a side facing the
-          // ground. Note : changing Bullet margin for collision
-          // detection may lead this assertion to be false.
-          assert(index1->size() == 4);
+          // This is the narrow phase contact detection : if
+          // TimeStepping::updateIndexSet has filled indexSet1 then we
+          // have some contact forces to display
+          if (index1->size() > 0)
           {
-            InteractionsGraph::VIterator iur = index1->begin();
-
-            // different version of bullet may not gives the same
-            // contact points! So we only keep the summation.
-            dataPlot(k, 3) = 
-              index1->bundle(*iur)-> lambda(1)->norm2() +
-              index1->bundle(*++iur)->lambda(1)->norm2() +
-              index1->bundle(*++iur)->lambda(1)->norm2() +
-              index1->bundle(*++iur)->lambda(1)->norm2();
+            
+            // Four contact points for a cube with a side facing the
+            // ground. Note : changing Bullet margin for collision
+            // detection may lead this assertion to be false.
+            if (index1->size() == 4)
+            {
+              InteractionsGraph::VIterator iur = index1->begin();
+              
+              // different version of bullet may not gives the same
+              // contact points! So we only keep the summation.
+              dataPlot(k, 3) = 
+                index1->bundle(*iur)-> lambda(1)->norm2() +
+                index1->bundle(*++iur)->lambda(1)->norm2() +
+                index1->bundle(*++iur)->lambda(1)->norm2() +
+                index1->bundle(*++iur)->lambda(1)->norm2();
+            }
           }
         }
       }
@@ -263,7 +271,8 @@ int main()
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      std::cout << "Warning. The result is rather different from the reference file : " 
+                << (dataPlot - dataPlotRef).normInf() << std::endl;
       return 1;
     }
 

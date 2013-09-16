@@ -135,7 +135,7 @@ bouncingBox.initialize(simulation)
 # ->saved in a matrix dataPlot
 
 N = (T - t0) / h
-dataPlot = zeros((N, 4))
+dataPlot = zeros((N+2, 4))
 
 #
 # numpy pointers on dense Siconos vectors
@@ -153,7 +153,7 @@ dataPlot[0, 2] = v[2]
 k = 1
 
 # time loop
-while(simulation.hasNextEvent() and k<4000):
+while(simulation.hasNextEvent()):
 
     broadphase.buildInteractions(bouncingBox.currentTime())
     simulation.computeOneStep()
