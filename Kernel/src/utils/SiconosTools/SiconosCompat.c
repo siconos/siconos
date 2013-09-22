@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 {
@@ -41,6 +42,12 @@ double rint(double x)
   }
 
   else return floor(x+0.5);
+}
+
+void csqrt(void * z)
+{
+  printf("csqrt is not supported with Visual Studio\n");
+  exit(EXIT_FAILURE);
 }
 
 #endif
