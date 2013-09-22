@@ -1,0 +1,18 @@
+The continuous integration INRIA proposes is based on Jenkins.
+This file is basically a braindump on how to do some things.
+
+# Files transfers between VM (useful for testing results of cross-compilation)
+
+There are 2 plugins that can move files between VM: Publish Over SSH Plugin
+and Hudson SCP publisher plugin. We use the latter for the transfert of
+files and the former for executing commands. Beware that they require you to use
+the "Ant glob syntax" and have a limited ability to look for files. The simplest
+thing to do is to create the files you want to transfer in the workspace ... 
+If the VM cannot communicate with each other, be sure to cross the "use master"
+setting in the "Advanced" menu.
+
+
+# get the private key
+
+It is possible to execute an arbitrary command on the Jenkins master.
+But I (xhub) fails to remember where ...
