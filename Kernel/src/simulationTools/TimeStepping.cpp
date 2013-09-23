@@ -381,7 +381,13 @@ void TimeStepping::initOSNS()
     // initialization of  OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      (*itOsns)->setLevels(_levelMinForInput, _levelMaxForInput);
+      /* Default choices for the index set  (indexSet(_levelMinForInput))
+       * and input/output y[_levelMinForInput], lambda[_levelMinForInput] that is considered in osns */
+      (*itOsns)->setInputOutputLevel(_levelMinForInput);
+      (*itOsns)->setIndexSetLevel(_levelMinForInput);
+
+
+
       (*itOsns)->initialize(shared_from_this());
     }
   }

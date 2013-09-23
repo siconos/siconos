@@ -37,7 +37,7 @@
 //#define OSNS_DEBUG
 
 OneStepNSProblem::OneStepNSProblem():
-  _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
+  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
   _numerics_solver_options.reset(new SolverOptions);
   _numerics_solver_options->iWork = NULL;
@@ -52,7 +52,7 @@ OneStepNSProblem::OneStepNSProblem():
 OneStepNSProblem::OneStepNSProblem(const std::string& pbType,
                                    SP::OneStepNSProblemXML osnspbxml):
 /*_nspbType(pbType),*/ _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
-  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
+  _onestepnspbxml(osnspbxml), _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
   if (!_onestepnspbxml)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -83,7 +83,7 @@ OneStepNSProblem::OneStepNSProblem(const std::string& pbType,
 }
 OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
   _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
-  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
+  _onestepnspbxml(osnspbxml), _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
   if (!_onestepnspbxml)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -113,7 +113,8 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
 }
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(const std::string& pbType, const std::string& newId, const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId),/*_nspbType(pbType),*/ _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
+  _numerics_solver_id(newNumericsSolverId),/*_nspbType(pbType),*/ _id(newId), _sizeOutput(0),
+  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
   // Numerics general options
@@ -129,7 +130,8 @@ OneStepNSProblem::OneStepNSProblem(const std::string& pbType, const std::string&
 }
 
 OneStepNSProblem::OneStepNSProblem(const std::string& newId, const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId), _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
+  _numerics_solver_id(newNumericsSolverId), _id(newId), _sizeOutput(0),
+  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
   // Numerics general options
@@ -143,7 +145,8 @@ OneStepNSProblem::OneStepNSProblem(const std::string& newId, const int newNumeri
 
 }
 OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
+  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0), _indexSetLevel(0), _inputOutputLevel(0),
+  _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
   // Numerics general options
@@ -197,7 +200,7 @@ void OneStepNSProblem::updateInteractionBlocks()
   //
 
   // Get index set from Simulation
-  SP::InteractionsGraph indexSet = simulation()->indexSet(_levelMin);
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
 
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();

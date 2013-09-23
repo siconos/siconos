@@ -945,7 +945,7 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[3] = subCoord[1];
     // Only the normal part is multiplied by e
     SP::SiconosVector y_k_1 ;
-    y_k_1 = _inter->yMemory(_osnsp->levelMin())->getSiconosVector(1);
+    y_k_1 = _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1);
 
 
     //  std::cout << "y_k_1 " << std::endl;
@@ -959,7 +959,7 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.en();
     // Only the normal part is multiplied by e
     SP::SiconosVector y_k_1 ;
-    y_k_1 = _inter->yMemory(_osnsp->levelMin())->getSiconosVector(1);
+    y_k_1 = _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1);
     (*_inter->yp())(0) +=  e * (*y_k_1)(0);
 
   }

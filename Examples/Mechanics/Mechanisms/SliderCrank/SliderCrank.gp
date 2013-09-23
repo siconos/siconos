@@ -1,6 +1,6 @@
 set autoscale
-set term X11
-set term pdf
+#set term X11
+#set term pdf
 
 l1 = 0.1530
 l2 = 0.3060
@@ -26,7 +26,7 @@ min=1e38
 # Any expression for the 'using' will do, as long as it contains both
 # helper functions
 set output
-set term X11
+#set term X11
 plot "./simu.txt" u 1:(ismin($30)*ismax($30))
 
 print max

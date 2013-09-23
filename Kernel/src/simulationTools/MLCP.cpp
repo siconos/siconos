@@ -64,7 +64,7 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
 {
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
   unsigned int nslawSize1 = inter1->nonSmoothLaw()->size();
-  unsigned int nslawSize2 = inter2->nonSmoothLaw()->size();
+  //  unsigned int nslawSize2 = inter2->nonSmoothLaw()->size();
 
   unsigned int equalitySize1 =  0;
   //unsigned int equalitySize2 =  0;
@@ -113,7 +113,7 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
 void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 {
 
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   SP::Interaction inter1 = indexSet->bundle(indexSet->source(ed));
   SP::Interaction inter2 = indexSet->bundle(indexSet->target(ed));
 
@@ -127,7 +127,7 @@ void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 void MLCP::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
 
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
   SP::Interaction inter = indexSet->bundle(vd);

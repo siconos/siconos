@@ -113,7 +113,7 @@ void FrictionContact::initialize(SP::Simulation sim)
   {
     // Get index set from Simulation
     SP::InteractionsGraph indexSet =
-      simulation()->indexSet(levelMin());
+      simulation()->indexSet(indexSetLevel());
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
@@ -140,12 +140,12 @@ int FrictionContact::compute(double time)
   _mu->clear();
 
   // nothing to do
-  if (levelMin() == LEVELMAX)
+  if (indexSetLevel() == LEVELMAX)
   {
     return info;
   }
 
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {

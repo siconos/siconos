@@ -67,7 +67,7 @@ void Equality::updateM()
 {
   assert(0);
   // Get index set from Simulation
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
   if (!_M)
   {

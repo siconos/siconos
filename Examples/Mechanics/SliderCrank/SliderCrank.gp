@@ -1,6 +1,6 @@
 set autoscale
-set term X11
-set term pdf monochrome dashed
+#set term X11
+#set term pdf monochrome dashed
 
 l=1;
 L=1.5;

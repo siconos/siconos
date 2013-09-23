@@ -125,20 +125,13 @@ protected:
    * the class -> used only in OneStepNSProblem methods. */
   SP::InteractionsSet _OSNSInteractions;
 
-  /** minimum index set number to be taken into account */
-  unsigned int _levelMin;
+  /** level of index sets that is considered by this osnsp */
+  unsigned int _indexSetLevel;
 
-  /** minimum index set number to be taken into account - For example,
-   * if level_min = 1 and level_max = 2, first and second derivatives
-   * of y and lambda will be taken into account in the non-smooth
-   * problem. Usually, level_max depends only on the non-smooth law
-   * and is given by the relative degree, whereas level_min can also
-   * depends on the integrator. These values are computed by the
-   * Simulation and given as input arguments for the OneStepNSProblem.
-   * Classical values are (0,0) for electrical (degree 0) systems,
-   * (1,1) for mechanical ones (degree 2).
+  /** level of input ans output variables that is considered by this osnsp
+   *  We consider that the osnsp conputes y[_inputOutputLevel] and lambda[_inputOutputLevel]
    */
-  unsigned int _levelMax;
+  unsigned int _inputOutputLevel;
 
   /** maximum value for sizeOutput. Set to the number of declared
       constraints by default (topology->getNumberOfConstraints());
@@ -300,46 +293,38 @@ public:
     return _OSNSInteractions;
   }
 
-  /** get level min value
+  /** get indexSetLevel
    *  \return an unsigned int
    */
-  inline unsigned int levelMin() const
+  inline unsigned int indexSetLevel() const
   {
-    return _levelMin;
+    return _indexSetLevel;
   }
 
   /** set the value of level min
    *  \param an unsigned int
    */
-  inline void setLevelMin(unsigned int newVal)
+  inline void setIndexSetLevel(unsigned int newVal)
   {
-    _levelMin = newVal;
+    _indexSetLevel = newVal;
   }
 
-  /** get level max value
+
+
+  /** get the Input/Output level
    *  \return an unsigned int
    */
-  inline unsigned int getLevelMax() const
+  inline unsigned int inputOutputLevel() const
   {
-    return _levelMax;
+    return _inputOutputLevel;
   }
 
-  /** set the value of level  max
+  /** set the value of Input/Output level
    *  \param an unsigned int
    */
-  inline void setLevelMax(unsigned int newVal)
+  inline void setInputOutputLevel(unsigned int newVal)
   {
-    _levelMax = newVal;
-  }
-
-  /** set the values of level min and max
-   *  \param an unsigned int (levelMin value)
-   *  \param an unsigned int (levelMax value)
-   */
-  inline void setLevels(unsigned int newMin, unsigned int newMax)
-  {
-    _levelMin = newMin;
-    _levelMax = newMax;
+    _inputOutputLevel = newVal;
   }
 
   /** get maximum value allowed for the dimension of the problem

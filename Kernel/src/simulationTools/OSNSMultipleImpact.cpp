@@ -313,9 +313,9 @@ void OSNSMultipleImpact::BuildParaContact()
 void OSNSMultipleImpact::PreComputeImpact()
 {
   //1. Get the number of contacts and bodies involved in the impact
-  if (levelMin() != 1)
+  if (indexSetLevel() != 1)
     RuntimeException::selfThrow("OSNSMultipleImpact::PreComputeImpact==> the levelMin must be equal to 1 in the multiple impact model !!");
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin()); // get indexSet[1]
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel()); // get indexSet[1]
   Ncontact = indexSet->size();
   //2. Compute matrix _M
   SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
@@ -416,7 +416,7 @@ void OSNSMultipleImpact::PreComputeImpact()
 void OSNSMultipleImpact::InitializeInput()
 {
   //Loop over alls Interactioninvolved in the indexSet[1]
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin()); // get indexSet[1]
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel()); // get indexSet[1]
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
@@ -465,7 +465,7 @@ void OSNSMultipleImpact::initialize(SP::Simulation sim)
 
     else // if(_MStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
-      _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), 1));
+      _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), 1));
   }
 
 };
@@ -784,7 +784,7 @@ void OSNSMultipleImpact::ComputeEnerContact()
 void OSNSMultipleImpact::UpdateDuringImpact()
 {
   //1. Copy VelContact/DelImpulseContact into the vector y/lambda for Interactions
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   // y and lambda vectors
   SP::SiconosVector lambda;
   SP::SiconosVector y;
@@ -797,8 +797,8 @@ void OSNSMultipleImpact::UpdateDuringImpact()
     // Get the relative position of inter-interactionBlock in the vector VelContact/TolImpulseContact
     pos = _M->getPositionOfInteractionBlock(inter);
     // Get Y and Lambda for the current Interaction
-    y = inter->y(levelMin());
-    lambda = inter->lambda(levelMin());
+    y = inter->y(inputOutputLevel());
+    lambda = inter->lambda(inputOutputLevel());
     // Copy VelContact/TolImpulseContact, starting from index pos into y/lambda
     // save into y !!
     setBlock(*VelContact, y, y->size(), pos, 0);
@@ -807,7 +807,7 @@ void OSNSMultipleImpact::UpdateDuringImpact()
     //setBlock(*DelImpulseContact, lambda, lambda->size(), pos, 0);
   };
   //2. Update the Input[1], state of DS systems, Output[1]
-  simulation()->update(levelMin());
+  simulation()->update(inputOutputLevel());
   ImpulseContact_update->zero(); // reset input[1] to zero after each update
 }
 //--------------------------------------------------------------------------------------
@@ -820,7 +820,7 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
   (*_DataMatrix)(_ithPoint, 0) = Impulse_variable;
   // Save the data related to UnitaryRelations
   SP::InteractionsGraph indexSet0 = simulation()->indexSet(0);
-  SP::InteractionsGraph indexSet1 = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet1 = simulation()->indexSet(indexSetLevel());
   unsigned int pos;
   InteractionsGraph::VIterator ui, uiend;
   unsigned int col_pos = 1;
@@ -973,7 +973,7 @@ void OSNSMultipleImpact::ComputeImpact()
 void OSNSMultipleImpact::PostComputeImpact()
 {
   // === Get index set from Topology ===
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   // y and lambda vectors
   SP::SiconosVector lambda;
   SP::SiconosVector y;
@@ -986,8 +986,8 @@ void OSNSMultipleImpact::PostComputeImpact()
     // Get the relative position of inter-interactionBlock in the vector VelContact/TolImpulseContact
     pos = _M->getPositionOfInteractionBlock(inter);
     // Get Y and Lambda for the current Interaction
-    y = inter->y(levelMin());
-    lambda = inter->lambda(levelMin());
+    y = inter->y(inputOutputLevel());
+    lambda = inter->lambda(inputOutputLevel());
     // Copy VelContact/TolImpulseContact, starting from index pos into y/lambda
     // save into y !!
     setBlock(*VelContact, y, y->size(), pos, 0);// Warning: yEquivalent is

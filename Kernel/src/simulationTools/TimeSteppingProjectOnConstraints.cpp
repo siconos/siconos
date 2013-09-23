@@ -66,11 +66,11 @@ void TimeSteppingProjectOnConstraints::initOSNS()
 {
   TimeStepping::initOSNS();
 
-  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMin(_indexSetLevelForProjection);
-  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMax(_indexSetLevelForProjection);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setIndexSetLevel(_indexSetLevelForProjection);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setInputOutputLevel(0);
 
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setLevelMin(_levelMaxForInput);
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setLevelMax(_levelMaxForInput);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(_levelMaxForInput);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(_levelMaxForInput);
 }
 
 void TimeSteppingProjectOnConstraints::nextStep()

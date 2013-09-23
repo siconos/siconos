@@ -118,7 +118,7 @@ int Relay::compute(double time)
 
   // fill _lb and _ub wiht the value of the NonSmooth Law
 
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
   //cout << " _sizeOutput =" <<_sizeOutput <<std::endl;
   if (_lb->size() != _sizeOutput)

@@ -124,9 +124,9 @@ void LinearOSNS::initOSNSMatrix()
       _M.reset(new OSNSMatrix(maxSize(), _MStorageType));
     else // if(_MStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
-      if (levelMin() != LEVELMAX)
+      if (indexSetLevel() != LEVELMAX)
       {
-        _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), _MStorageType));
+        _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _MStorageType));
       }
       else
       {
@@ -171,7 +171,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   // computed through plug-in mechanism.
 
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
-  SP::InteractionsGraph indexSet = simulation()->indexSet(_levelMin);
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vd);
 
   // At most 2 DS are linked by an Interaction
@@ -378,7 +378,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   // computed through plug-in mechanism.
 
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
-  SP::InteractionsGraph indexSet = simulation()->indexSet(_levelMin);
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
   SP::DynamicalSystem ds = indexSet->bundle(ed);
   SP::Interaction inter1 = indexSet->bundle(indexSet->source(ed));
@@ -587,7 +587,7 @@ void LinearOSNS::computeq(double time)
 
   // === Get index set from Simulation ===
   SP::InteractionsGraph indexSet =
-    simulation()->indexSet(levelMin());
+    simulation()->indexSet(indexSetLevel());
   // === Loop through "active" Interactions (ie present in
   // indexSets[level]) ===
 
@@ -627,10 +627,10 @@ bool LinearOSNS::preCompute(double time)
   //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
   // nothing to do
-  if (_levelMin == LEVELMAX)
+  if (indexSetLevel() == LEVELMAX)
     return false;
   
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   assert(indexSet);
   if (indexSet->size() == 0)
     return false;
@@ -674,8 +674,8 @@ bool LinearOSNS::preCompute(double time)
         // or z
         unsigned int pos = _M->getPositionOfInteractionBlock(inter);
 
-        SPC::SiconosVector yOld = inter->yOld(levelMin());
-        SPC::SiconosVector lambdaOld = inter->lambdaOld(levelMin());
+        SPC::SiconosVector yOld = inter->yOld(inputOutputLevel());
+        SPC::SiconosVector lambdaOld = inter->lambdaOld(inputOutputLevel());
 
         setBlock(*yOld, _w, yOld->size(), 0, pos);
         setBlock(*lambdaOld, _z, lambdaOld->size(), 0, pos);
@@ -702,7 +702,7 @@ void LinearOSNS::postCompute()
   // indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
   // y and lambda vectors
   SP::SiconosVector lambda;
@@ -722,8 +722,8 @@ void LinearOSNS::postCompute()
     pos = _M->getPositionOfInteractionBlock(inter);
 
     // Get Y and Lambda for the current Interaction
-    y = inter->y(levelMin());
-    lambda = inter->lambda(levelMin());
+    y = inter->y(inputOutputLevel());
+    lambda = inter->lambda(inputOutputLevel());
     // Copy _w/_z values, starting from index pos into y/lambda.
 
     //setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is

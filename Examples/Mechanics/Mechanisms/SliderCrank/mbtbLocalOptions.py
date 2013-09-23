@@ -71,7 +71,7 @@ TSLevelOfProjection=0
 
 #solver parameters
 ## To activate the projection algorithm.
-withProj=2
+withProj=0
 ## Solver option
 withReduced=2
 

@@ -58,7 +58,7 @@ struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *(_inter->y_k(_osnsp->levelMin())), *(_inter->yp()), subCoord, false);
+    subscal(e, *(_inter->y_k(_osnsp->inputOutputLevel())), *(_inter->yp()), subCoord, false);
   }
   void visit(const EqualityConditionNSL& nslaw)
   {

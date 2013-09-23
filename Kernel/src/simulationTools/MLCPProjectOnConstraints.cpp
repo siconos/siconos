@@ -47,8 +47,8 @@ void MLCPProjectOnConstraints::initOSNSMatrix()
 MLCPProjectOnConstraints::MLCPProjectOnConstraints(const int newNumericsSolverId, double alphaval):
   MLCP(newNumericsSolverId), _alpha(alphaval)
 {
-  _levelMin = 1;
-  _levelMax = 1;
+  _indexSetLevel = 2;
+  _inputOutputLevel = 0;
 }
 
 
@@ -92,11 +92,11 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
 
 
   // Get index set from Simulation
-  SP::InteractionsGraph indexSet = simulation()->indexSet(_levelMin);
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
   // It seems that index() in not update in Index(0)
   // see comment in void Simulation::updateIndexSets()
-  if (_levelMin == 0)
+  if (indexSetLevel() == 0)
   {
     indexSet->update_vertices_indices();
     indexSet->update_edges_indices();
@@ -382,7 +382,7 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
 void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
 {
 
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
   //  std::cout<<"isLinear: "<<isLinear<<" hasTopologyChanged: "<<hasTopologyChanged<<"hasBeenUpdated: "<<_hasBeenUpdated<<endl;
@@ -512,7 +512,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
 
 void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
-  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
   SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
@@ -747,7 +747,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     std::cout << "MLCPProjectOnConstraints::computeInteractionBlock currentInteractionBlock start " << std::endl;
 #endif
     // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
-    SP::InteractionsGraph indexSet = simulation()->indexSet(_levelMin);
+    SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
     SP::DynamicalSystem ds = indexSet->bundle(ed);
     SP::Interaction inter1 = indexSet->bundle(indexSet->source(ed));
@@ -956,7 +956,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       // indexSet(leveMin) are concerned.
 
       // === Get index set from Topology ===
-      SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+      SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
       // y and lambda vectors
       SP::SiconosVector lambda;

@@ -143,12 +143,11 @@ void TimeSteppingCombinedProjection::initOSNS()
 
   SP::OneStepNSProblem osnspb_pos = (*_allNSProblems)[SICONOS_OSNSP_TS_POS];
 
-  osnspb_pos->setLevelMin(_indexSetLevelForProjection);
-  osnspb_pos->setLevelMax(_indexSetLevelForProjection);
+  osnspb_pos->setIndexSetLevel(_indexSetLevelForProjection);
+  osnspb_pos->setInputOutputLevel(0);
 
-
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setLevelMin(_levelMaxForInput);
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setLevelMax(_levelMaxForInput);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(_levelMaxForInput);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(_levelMaxForInput);
 
 
   // better with visitor but I am not able to fix it.

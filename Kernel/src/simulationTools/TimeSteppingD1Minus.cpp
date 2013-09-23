@@ -59,9 +59,12 @@ void TimeSteppingD1Minus::initOSNS()
     updateIndexSets();
 
     // set evaluation levels (first is of velocity, second of acceleration type)
-    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setLevels(1, 1);
+    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
     (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->initialize(shared_from_this());
-    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->setLevels(2, 2);
+
+    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
+    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
     (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(shared_from_this());
 
     // update output

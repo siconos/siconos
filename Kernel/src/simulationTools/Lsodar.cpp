@@ -430,7 +430,7 @@ struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter->yOld(_osnsp->levelMin()), *(_inter->yp()), subCoord, false); // q = q + e * q
+    subscal(e, *_inter->yOld(_osnsp->inputOutputLevel()), *(_inter->yp()), subCoord, false); // q = q + e * q
   }
 
   // visit function added by Son (9/11/2010)

@@ -318,7 +318,8 @@ void EventDriven::initOSNS()
         (" EventDriven::initialize, \n an EventDriven simulation associated with NewMarkAlphaOSI must have three non smooth problems.\n Here, there are "
          + _allNSProblems->size());
       // Initialize OSNSP at position level
-      (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setLevels(2, 2);
+      (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setInputOutputLevel(2);
+      (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setIndexSetLevel(2);
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->initialize(shared_from_this());
     }
     else
@@ -336,9 +337,12 @@ void EventDriven::initOSNS()
       ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
     // Initialize OSNSP for impact problem and at the acceleration level
     // WARNING: only for Lagrangian systems - To be reviewed for other ones.
-    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setLevels(1, 1);
+    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setInputOutputLevel(1);
+    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setIndexSetLevel(1);
+
     (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->initialize(shared_from_this());
-    (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->setLevels(2, 2);
+    (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->setInputOutputLevel(2);
+    (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->setIndexSetLevel(2);
     (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->initialize(shared_from_this());
     //
     // Detect NonSmoothEvent at the beginning of the simulation
