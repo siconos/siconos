@@ -1,6 +1,6 @@
-set  term X11
-set term post
-set output "ObserverLCS.ps"
+#set  term X11
+#set term post
+#set output "ObserverLCS.ps"
 set xrange [0:1.2]
 plot\
 "ObserverLCS.dat" u 1:2 t "Siconos Platform -- INRIA                                             Process x(1)" w l,\
