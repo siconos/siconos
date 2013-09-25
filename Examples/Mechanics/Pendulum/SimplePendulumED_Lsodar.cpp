@@ -203,6 +203,8 @@ int main(int argc, char* argv[])
       ++show_progress;
     }
     //----------------------- At the end of the simulation --------------------------
+    cout << " " << endl;
+ 
     cout << "End of the simulation" << endl;
     cout << "Number of events processed during simulation: " << (k + 1) << endl;
     cout << "Number of non-smooth events: " << NumberNSEvent << endl;
