@@ -179,6 +179,7 @@ int main(int argc, char* argv[])
     {
 
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+
       return 1;
     }
 
