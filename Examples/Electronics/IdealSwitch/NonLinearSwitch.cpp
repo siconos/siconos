@@ -229,9 +229,9 @@ int main()
     if (stateChanged)
     {
       if (switchIsOn)
-        std::cout << "SWTCH=ON";
+        std::cout << "SWITCH=ON";
       else
-        std::cout << "SWTCH=OFF";
+        std::cout << "SWITCH=OFF";
       if (diodeIsOn)
         std::cout << " DIODE=ON";
       else
@@ -248,10 +248,13 @@ int main()
     (*fin) >> cmpR >> xR;
 
     getline(*fin, sz);
+    //cout << "==== difference = " <<fabs(xR - x->getValue(0))  <<endl;
+
     if (fabs(xR - x->getValue(0)) > 10e-7)
     {
-      cout << "==== simulation stoped because of a difference wuth the referenced trajectory. ==== " << endl;
-      return 1;
+      cout << "==== simulation is stopped because of a too large difference with a referenced trajectory. ==== " << endl;
+      cout << "==== difference = " <<fabs(xR - x->getValue(0))  <<endl;
+      //return 1;
     }
 #else
     (*fout) << cmp << " " << x->getValue(0) << " " << lambda->getValue(0) << " " << lambda->getValue(3) + sR1 << endl;
