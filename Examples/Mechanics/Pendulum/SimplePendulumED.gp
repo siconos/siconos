@@ -5,12 +5,12 @@ set xlabel 'time (s)'
 set grid 
 
 data = 'result.dat'
-
+#data = 'result_AlphaScheme.ref'
 color = "blue"
 method = " "
 #set terminal pdf
 #set output "figure1.pdf"
-set term X11 0 
+#set term X11 0 
 set multiplot layout 2,2
 set ylabel '$x$' 
 
@@ -30,7 +30,7 @@ unset multiplot
 
 #set terminal pdf
 #set output "figure2.pdf"
-set term X11 1
+#set term X11 1
 set multiplot layout 2,2
 set ylabel '$g$'
 plot data using 1:8 t method w lines lc rgb color
