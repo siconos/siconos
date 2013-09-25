@@ -1,4 +1,4 @@
-set  term X11
+#set  term X11
 plot \
 "result.dat" u 1:2 t "Ball position" w l,\
 "result.dat" u 1:3 t "Ball Velocity" w l,\

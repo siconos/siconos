@@ -308,7 +308,7 @@ int main(int argc, char* argv[])
 
     cout << "====> Comparison with reference file ..." << endl;
     std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
       return 1;

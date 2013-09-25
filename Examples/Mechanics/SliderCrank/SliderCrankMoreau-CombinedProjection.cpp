@@ -252,10 +252,11 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("SliderCrankMoreau-CombinedProjection.ref", "ascii", dataPlotRef);
-
+    
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      std::cout <<  "error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
       return 1;
     }
 
