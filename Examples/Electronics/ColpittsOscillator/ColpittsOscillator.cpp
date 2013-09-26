@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
                 "Error with respect to  the reference file : "
               <<errRef << std::endl;
     if (errRef > 1e-12)
-    {
+    {    
       std::cout <<
                 "Warning. The result is rather different from the reference file."
                 << std::endl;
