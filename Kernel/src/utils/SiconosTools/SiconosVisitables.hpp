@@ -67,6 +67,7 @@
 
 
 #define MECHANICS_CLASSES()                       \
+  REGISTER(SpaceFilter)                           \
   REGISTER(DiskPlanR)                             \
   REGISTER(DiskMovingPlanR)                       \
     REGISTER(CircleCircleR)                       \
@@ -82,7 +83,6 @@
     REGISTER_BASE(SphereNEDS, NewtonEulerDS)      \
     
 #define BULLET_CLASSES()                          \
-  REGISTER(SpaceFilter)                           \
   REGISTER(BulletSpaceFilter)                     \
     REGISTER(BulletR)                             \
     REGISTER_BASE(BulletDS, NewtonEulerDS)  
