@@ -28,7 +28,7 @@
 #include "SphereNEDSPlanR.hpp"
 #include "SiconosKernel.hpp"
 
-#define WITH_PROJ
+//#define WITH_PROJ
 #define WITH_FC3D
 using namespace std;
 #ifdef WITH_FC3D
@@ -190,8 +190,11 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
+#ifdef WITH_PROJ
     SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(ball, theta));
-
+#else
+    SP::Moreau OSI(new Moreau(ball, theta));
+#endif
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
@@ -349,7 +352,7 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in BouncingBallTS.cpp" << endl;
+    cout << "Exception caught in BouncingBallNETS.cpp" << endl;
   }
 
 }
