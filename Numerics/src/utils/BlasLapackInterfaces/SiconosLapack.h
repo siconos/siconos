@@ -27,7 +27,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-
 #if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
 extern "C"
 {
@@ -96,7 +95,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO = *INFO;
+    int C_INFO;
     WRAP_DGESV(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -107,7 +106,7 @@ extern "C"
     int C_M = M;
     int C_N = N;
     int C_LDA = LDA;
-    int C_INFO = *INFO;
+    int C_INFO;
     WRAP_DGETRF(LAPACK_NAME(dgetrf), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -118,7 +117,7 @@ extern "C"
   {
     int C_N = N;
     int C_LDA = LDA;
-    int C_INFO = *INFO;
+    int C_INFO;
     WRAP_DGETRI(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -133,7 +132,7 @@ extern "C"
     /* int C_LDA = LDA; */
     /* int C_LDU = LDU; */
     /* int C_LDVT = LDVT; */
-    /* int C_INFO = *INFO; */
+    /* int C_INFO; */
     WRAP_DGESVD(LAPACK_NAME(dgesvd), CHAR(JOBU), CHAR(JOBVT), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), S, U, INTEGER(C_LDU), VT, INTEGER(C_LDVT), superb, INTEGER(C_INFO));
 //    *INFO = C_INFO;
   }
@@ -149,7 +148,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO = *INFO;
+    int C_INFO;
     WRAP_DGETRS(LAPACK_NAME(dgetrs), TRANS, INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -179,7 +178,7 @@ extern "C"
   {
     int C_N = N;
     int C_LDA = LDA;
-    int C_INFO = *INFO;
+    int C_INFO;
     WRAP_DPOTRF(LAPACK_NAME(dpotrf), UPLO, INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -213,7 +212,7 @@ extern "C"
     int C_LDA = LDA;
     int C_LDU = LDU;
     int C_LDVT = LDVT;
-    int C_INFO = *INFO;
+    int C_INFO;
     WRAP_DGESVD(LAPACK_NAME(dgesvd), CHAR(JOBU), CHAR(JOBVT), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), S, U, INTEGER(C_LDU), VT, INTEGER(C_LDVT), superb, INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -229,7 +228,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO = *INFO;
+    int C_INFO;
     WRAP_DGETRS(LAPACK_NAME(dgetrs), CHAR(TRANS), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -260,7 +259,7 @@ extern "C"
   {
     int C_N = N;
     int C_LDA = LDA;
-    int C_INFO = *INFO;
+    int C_INFO;
     WRAP_DPOTRF(LAPACK_NAME(dpotrf), CHAR(UPLO), INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -273,7 +272,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO = *INFO;
+    int C_INFO;
     WRAP_DTRTRS(LAPACK_NAME(dtrtrs), CHAR(UPLO), CHAR(TRANS), CHAR(DIAG), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }

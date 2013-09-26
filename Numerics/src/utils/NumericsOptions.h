@@ -30,6 +30,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __clang__
+#error __clang_static
+#define NO_RETURN  __attribute__((analyzer_noreturn))
+#else
+#define NO_RETURN
+#endif
+
 #define OUTPUT_ON_ERROR 4
 
 /** Structure used to set general options of Numerics functions,
@@ -81,7 +88,7 @@ extern "C"
      \param name of the function where error occurs
      \param output message
   */
-  void numericsError(char* functionName, char* message);
+  void numericsError(char* functionName, char* message) NO_RETURN;
 
   /* message output without exit
      \param name of the function where warning occurs
