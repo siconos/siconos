@@ -24,6 +24,7 @@
 #define __SiconosMatrixException__
 
 #include "SiconosException.hpp"
+#include <misc.h>
 
 /** Exception caused by a SiconosMatrix
  *
@@ -56,13 +57,13 @@ public:
 
   /** static function which throw a SiconosMatrixException
    */
-  static void selfThrow()  ;
+  static void selfThrow() NO_RETURN ;
 
   /** static function which throw a SiconosMatrixException with a report
    * \param std::string report : exception description
    * \exception SiconosMatrixException
    */
-  static void selfThrow(const std::string& report) ;
+  static void selfThrow(const std::string& report) NO_RETURN;
 };
 
 #endif //__SiconosMatrixException__

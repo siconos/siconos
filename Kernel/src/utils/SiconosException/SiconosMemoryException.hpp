@@ -24,6 +24,7 @@
 #define SICONOSMEMORYEXCEPTION_H
 
 #include "SiconosException.hpp"
+#include <misc.h>
 
 /** Exceptions for SiconosMemory
  *
@@ -52,9 +53,9 @@ public:
    */
   ~SiconosMemoryException();
 
-  static void selfThrow() ;
+  static void selfThrow() NO_RETURN;
 
-  static void selfThrow(const std::string& report) ;
+  static void selfThrow(const std::string& report) NO_RETURN;
 
 };
 

@@ -23,6 +23,7 @@
 #define __XMLException__
 
 #include "SiconosException.hpp"
+#include <misc.h>
 
 /** Exceptions related to XML management
  *
@@ -56,13 +57,13 @@ public:
 
   /** static function which throw a XMLException
    */
-  static void selfThrow() ;
+  static void selfThrow() NO_RETURN;
 
   /** static function which throw a XMLException with a report
    * \param std::string report : exception description
    * \exception XMLException
    */
-  static void selfThrow(const std::string& report) ;
+  static void selfThrow(const std::string& report) NO_RETURN;
 
 };
 

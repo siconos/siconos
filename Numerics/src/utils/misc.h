@@ -51,4 +51,11 @@ void printm(unsigned int nl, unsigned int nc, double *m);
     if(EXPR){};                                                         \
   } while (0)
 
+
+#ifdef __clang_analyzer__
+#define NO_RETURN  __attribute__((analyzer_noreturn))
+#else
+#define NO_RETURN
+#endif
+
 #endif

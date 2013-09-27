@@ -24,6 +24,7 @@
 #define __SiconosVectorException__
 
 #include "SiconosException.hpp"
+#include "misc.h"
 
 /** Exception caused by a SiconosVector
  *
@@ -56,13 +57,13 @@ public:
 
   /** static function which throw a SiconosVectorException
    */
-  static void selfThrow()  ;
+  static void selfThrow() NO_RETURN;
 
   /** static function which throw a SiconosVectorException with a report
    * \param std::string report : exception description
    * \exception SiconosVectorException
    */
-  static void selfThrow(const std::string& report) ;
+  static void selfThrow(const std::string& report) NO_RETURN;
 
 };
 

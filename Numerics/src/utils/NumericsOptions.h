@@ -29,12 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef __clang_analyzer__
-#define NO_RETURN  __attribute__((analyzer_noreturn))
-#else
-#define NO_RETURN
-#endif
+#include "misc.h"
 
 #define OUTPUT_ON_ERROR 4
 

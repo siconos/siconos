@@ -23,6 +23,7 @@
 #define __RuntimeException__
 
 #include "SiconosException.hpp"
+#include <misc.h>
 
 /** Runtime exceptions
  *
@@ -55,13 +56,13 @@ public:
   /** static function which throw a RuntimeException
    *
    */
-  static void selfThrow() ;
+  static void selfThrow() NO_RETURN;
 
   /** static function which throw a RuntimeException with a report
    * \param std::string report : exception description
    *
    */
-  static void selfThrow(const std::string& report) ;
+  static void selfThrow(const std::string& report) NO_RETURN;
 
 };
 

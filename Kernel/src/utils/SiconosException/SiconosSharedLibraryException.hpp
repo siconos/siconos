@@ -20,6 +20,7 @@
 #define SICONOSSHAREDLIBRARYEXCEPTION_H
 
 #include "SiconosException.hpp"
+#include <misc.h>
 
 /*! \file SiconosSharedLibraryException.hpp
 
@@ -52,9 +53,9 @@ public:
    */
   ~SiconosSharedLibraryException();
 
-  static void selfThrow() ;
+  static void selfThrow() NO_RETURN;
 
-  static void selfThrow(const std::string& report) ;
+  static void selfThrow(const std::string& report) NO_RETURN;
 
 };
 
