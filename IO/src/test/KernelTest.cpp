@@ -460,8 +460,8 @@ void KernelTest::t8()
 
   MechanicsIO IO;
 
-  SP::SimpleMatrix positions = IO.positions(model);
-  SP::SimpleMatrix velocities = IO.velocities(model);
+  SP::SimpleMatrix positions = IO.positions(*model);
+  SP::SimpleMatrix velocities = IO.velocities(*model);
 
   CPPUNIT_ASSERT((*positions)(0,0) == 0.);
   CPPUNIT_ASSERT((*velocities)(0,0) == 0.);

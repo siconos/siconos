@@ -30,8 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __clang__
-#error __clang_static
+#ifdef __clang_analyzer__
 #define NO_RETURN  __attribute__((analyzer_noreturn))
 #else
 #define NO_RETURN
