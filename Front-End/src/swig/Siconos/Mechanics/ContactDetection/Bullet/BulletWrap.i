@@ -17,6 +17,10 @@
 %{
 #include <SiconosKernel.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <MechanicsFwd.hpp>
+
+// need this one
+#include <ExternalBody.hpp>
 %}
 
 %import Kernel.i

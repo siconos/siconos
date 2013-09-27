@@ -18,12 +18,15 @@
 #include <assert.h>
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
+#include <misc.h>
 %}
 
 %include "FrontEndConfig.h"
 
 // numpy macros
 %include numpy.i 	
+
+%include <misc.h>
 
 %init %{
   import_array();
