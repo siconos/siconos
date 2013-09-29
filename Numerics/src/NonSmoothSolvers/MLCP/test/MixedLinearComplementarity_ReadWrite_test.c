@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "MixedLinearComplementarityProblem.h"
 
 int write_newformat(char *filename)
@@ -35,7 +36,7 @@ int write_newformat(char *filename)
 
   if (strcmp(extension, "dat") == 0)
   {
-    basename = (char *)malloc((sizeoffilename + 5) * sizeof(char *));
+    basename = (char *)malloc((sizeoffilename + 5) * sizeof(char));
     basename[sizeoffilename + 4] = 0;
     strcpy(basename, filename);
     strncpy(&basename[sizeoffilename - 4], ".dat.tmp", 8);
@@ -64,6 +65,8 @@ int write_newformat(char *filename)
   int withSol = 0;
   int n = problem->n;
   int m = problem ->m;
+  assert(n>0);
+  assert(m>0);
   int i;
   double *sol  = (double*)malloc((n + m + m) * sizeof(double));
 

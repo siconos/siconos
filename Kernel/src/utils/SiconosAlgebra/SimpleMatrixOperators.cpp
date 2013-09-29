@@ -49,6 +49,8 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
   else if (num == 4)
   {
     double *d = (*mat.Sparse).find_element(row, col);
+    if (d == NULL)
+      SiconosMatrixException::selfThrow("SimpleMatrix:operator(): Index out of range");
     double & ref = *d;
     return ref;
   }

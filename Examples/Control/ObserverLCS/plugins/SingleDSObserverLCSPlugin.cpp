@@ -35,8 +35,8 @@ extern "C"   double computeControl2(double time)
   int njump;
 
   if (time <= 1) u = -0.0;
-  if (time >= 3) u = -alpha;
-  if (time > 1 & time <= 3)
+  else if (time >= 3) u = -alpha;
+  else // (time > 1 && time <= 3)
   {
     njump = (int)((log(1.0 / (3.0 - time)) / log(2.0)) + 1.0);
 
@@ -70,7 +70,7 @@ extern "C"   double computeControl(double time)
 
   if (time < 1) u = 0.0;
 
-  if (time >= 1 & time < timeaccu)
+  else if ((time >= 1) && (time < timeaccu))
   {
     njump = (int)((log(1.0 - (1.0 - a) * time) / log(a)) - 1.0);
     u =  alpha / (pow(2 * njump + 1.0, 1.0 / a));
@@ -82,8 +82,8 @@ extern "C"   double computeControl(double time)
     //printf("time = %e\n",time);
     //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
     //printf("u = %e\n",u);
-  };
-  if (time >= timeaccu)
+  }
+  else // (time >= timeaccu)
   {
     oddoreven = int(time - timeaccu);
     printf("time = %e\n", time);
@@ -108,7 +108,7 @@ extern "C"   double computeControlori2(double time)
   int N = 100;
   if (time < 1) u = -0.0;
 
-  if (time >= 1 & time < 2)
+  else if ((time >= 1) && (time < 2))
   {
     njump = 0;
     u =  alpha * pow(2.0, njump + 1) * time - alpha * (1.0 + pow(2.0, njump + 1)
@@ -122,7 +122,7 @@ extern "C"   double computeControlori2(double time)
     //printf("u = %e\n",u);
   }
 
-  if ((time >= 2) && (time < 3 - pow(2.0, -N)))
+  else if ((time >= 2) && (time < 3 - pow(2.0, -N)))
   {
     njump = (int)((log(1.0 / (3.0 - time)) / log(2.0)) + 1.0);
     u =  alpha * pow(2.0, njump + 1) * time - alpha * (1.0 + pow(2.0, njump + 1)
@@ -134,12 +134,12 @@ extern "C"   double computeControlori2(double time)
     //printf("time = %e\n",time);
     //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
     //printf("u = %e\n",u);
-  };
-  if (time >= 3 - pow(2.0, -N) & time < 3)
+  }
+  else if ((time >= 3 - pow(2.0, -N)) && (time < 3))
   {
     u = 0.0;
   }
-  if (time >= 3)
+  else // (time >= 3)
   {
     oddoreven = int(time - 3);
     printf("time = %e\n", time);
@@ -162,8 +162,8 @@ extern "C"   double computeControlori(double time)
   int njump;
 
   if (time < 1) u = -0.0;
-  if (time >= 3) u = 0.0;
-  if (time >= 1 & time < 2)
+  else if (time >= 3) u = 0.0;
+  else if ((time >= 1) && (time < 2))
   {
     njump = 0;
     u =  alpha * pow(2.0, njump + 1) * time - alpha * (1.0 + pow(2.0, njump + 1)
@@ -177,7 +177,7 @@ extern "C"   double computeControlori(double time)
     //printf("u = %e\n",u);
   }
 
-  if (time >= 2 & time < 3)
+  else // (time >= 2 && time < 3)
   {
     njump = (int)((log(1.0 / (3.0 - time)) / log(2.0)) + 1.0);
     u =  alpha * pow(2.0, njump + 1) * time - alpha * (1.0 + pow(2.0, njump + 1)

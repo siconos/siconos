@@ -19,16 +19,19 @@
 
 #include "FrictionContact2D_Solvers.h"
 
+#include <assert.h>
 #include <math.h>
 #include "SiconosBlas.h"
 
 void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
+  assert(nc>0);
   double * vec = problem->M->matrix0;
   double * mu = problem->mu;
 
   int       n = 2 * nc, i, iter;
+  assert(n>0);
   int       incx = 1, incy = 1;
   int       *stat, *statusi, it_end;
 

@@ -102,6 +102,7 @@ protected:
   Event(): _type(0), _dTime(0.0), _k(0)
   {
     mpz_init(_timeOfEvent);
+    mpz_init(_tickIncrement);
   };
 
     /** copy constructor ; private => no copy nor pass-by-value.

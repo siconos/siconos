@@ -421,7 +421,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   else
   {
     printf("Step 0 ( C = alpha*A*B + beta*C, double* storage, square matrix) failed ...\n");
-    return info;
+    goto exit_1;
   }
 
 
@@ -468,7 +468,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   else
   {
     printf("Step 1 ( C = alpha*A*B + beta*C, double* storage, non square) failed ...\n");
-    return info;
+    goto exit_2;
   }
 
   NumericsMatrix C3;
@@ -519,7 +519,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   else
   {
     printf("Step 2 ( C = alpha*A*B + beta*C, sparse storage) failed ...\n");
-    return info;
+    goto exit_3;
   }
 
   NumericsMatrix C4;
@@ -564,19 +564,17 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   else
   {
     printf("Step 3 ( C = alpha*A*B + beta*C, sparse storage) failed ...\n");
-    return info;
   }
 
+  freeNumericsMatrix(&C4);
+exit_3:
+  freeNumericsMatrix(&C3);
+exit_2:
   free(C2.matrix0);
   free(C2ref);
+exit_1:
   free(Cref);
   free(C.matrix0);
-  freeNumericsMatrix(&C3);
-  freeNumericsMatrix(&C4);
-
-
-
-
   return info;
 }
 

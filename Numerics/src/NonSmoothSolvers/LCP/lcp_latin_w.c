@@ -59,7 +59,6 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
   /* char trans='T', notrans='N', uplo='U', diag='N'; */
 
-  n2 = n * n;
   incx = 1;
   incy = 1;
 

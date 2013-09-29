@@ -188,7 +188,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   int NRHS = 1;
   int * ipiv;
   int check;
-  int LAinfo;
+  int LAinfo = 0;
   *info = 0;
   sMl = problem->M->size0;
   sNn = problem->n;

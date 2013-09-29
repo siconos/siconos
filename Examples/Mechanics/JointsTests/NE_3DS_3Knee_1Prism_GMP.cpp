@@ -354,6 +354,7 @@ int main(int argc, char* argv[])
     dataPlotRef.zero();
     ioMatrix::read("NE_3DS_3Knee_1Prism_GMP.ref", "ascii", dataPlotRef);
     std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
+    fclose(pFile);
     if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
 //      (dataPlot - dataPlotRef).display();
@@ -361,7 +362,6 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    fclose(pFile);
   }
 
   catch (SiconosException e)

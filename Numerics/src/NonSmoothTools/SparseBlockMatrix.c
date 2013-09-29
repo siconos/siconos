@@ -1874,6 +1874,7 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
   /* 5: allocate memory for contiguous blocks */
   assert(A->block == NULL);
+  assert(A->nbblocks>0);
 
   A->block = (double **) malloc(A->nbblocks * sizeof(double *));
   for (unsigned int i = 0; i < A->nbblocks; i++)

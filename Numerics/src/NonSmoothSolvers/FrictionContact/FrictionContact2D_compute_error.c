@@ -28,6 +28,10 @@
 int FrictionContact2D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error)
 {
 
+  /* Checks inputs */
+  if (! problem || ! z || ! w)
+    numericsError("FrictionContact2D_compute_error", "null input for problem and/or z and/or w");
+
   int nc = problem->numberOfContacts;
 
   int n = nc * 2;
@@ -39,10 +43,6 @@ int FrictionContact2D_compute_error(FrictionContactProblem* problem, double *z ,
   double tmp[2];
 
   double normT;
-
-  /* Checks inputs */
-  if (! problem || ! z || ! w)
-    numericsError("FrictionContact2D_compute_error", "null input for problem and/or z and/or w");
 
   cblas_dcopy(n, problem->q, 1, w, 1); // w <-q
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);

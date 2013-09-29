@@ -175,7 +175,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   int NRHS = 1;
   int * ipiv;
   int check;
-  int LAinfo;
+  int LAinfo = 0;
   int useDGELS = options->iparam[4];
 
   /*OUTPUT param*/

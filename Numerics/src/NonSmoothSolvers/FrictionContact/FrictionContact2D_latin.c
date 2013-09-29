@@ -22,12 +22,14 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include <assert.h>
 
 #include "FrictionContact2D_Solvers.h"
 #include "SiconosLapack.h"
 void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
+  assert(nc>0);
   double * vec = problem->M->matrix0;
   double *qq = problem->q;
   double * mu = problem->mu;
@@ -42,6 +44,7 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
   int taille, taillet, taillen, itt;
   int *ddln;
   int *ddlt, *vectnt;
+  assert(n>0);
 
   double  errmax, alpha, beta, maxa, k_latin, res;
   double  aa, nt, wn, tc, zc0;

@@ -158,6 +158,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
   }
   default:
     printf("GenericMechanicalProblem.h addProblem : problemType unknown: %d . \n", problemType);
+    exit(EXIT_FAILURE);
   }
   return  newProblem->problem;
 }

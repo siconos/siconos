@@ -73,7 +73,6 @@ int main(int argc, char* argv[])
     SP::EventsManager eventsManager = s->eventsManager();
     unsigned int numberOfEvent = 0 ;
     int k = 0;
-    double T = bouncingBall->finalT();
     bool nonSmooth = false;
 
     while (s->hasNextEvent())

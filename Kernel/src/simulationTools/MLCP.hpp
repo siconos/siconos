@@ -115,7 +115,7 @@ public:
 
   /** destructor
   */
-  ~MLCP() {};
+  virtual ~MLCP() {reset();};
   virtual void computeOptions(SP::Interaction inter1, SP::Interaction inter2);
   virtual void updateInteractionBlocks();
   virtual void computeAllInteractionBlocks();

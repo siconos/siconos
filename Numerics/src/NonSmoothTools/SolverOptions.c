@@ -122,10 +122,13 @@ void readSolverOptions(int driverType, SolverOptions* options)
 
   case 0:
     strcat(name, "LCP_parameters.opt");
+    break;
   case 1:
     strcat(name, "dfc2D_parameters.opt");
+    break;
   case 2:
     strcat(name, "FrictionContact2D_parameters.opt");
+    break;
   case 3:
     strcat(name, "FrictionContact3D_parameters.opt");
     ficin = fopen(name, "r");

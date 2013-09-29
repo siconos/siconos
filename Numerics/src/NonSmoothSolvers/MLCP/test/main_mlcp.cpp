@@ -50,7 +50,7 @@
 #include <string.h>
 #include "NonSmoothDrivers.h"
 #include <sys/time.h>
-
+#include <cassert>
 /*only for debug functions*/
 #include "NonSmoothNewtonNeighbour.h"
 #include "MixedLinearComplementarityProblem.h"
@@ -847,7 +847,8 @@ void test_matrix(void)
 
     n = problem->n;
     m = problem->m;
-
+    assert(n>0);
+    assert(m>0);
 
     z = (double*)calloc((n + m), sizeof(double));
     w = (double*)calloc((n + m), sizeof(double));

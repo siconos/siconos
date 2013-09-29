@@ -54,6 +54,9 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
 {
 
 
+  /* Checks inputs */
+  if (problem == NULL || z == NULL)
+    numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -72,9 +75,6 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
   else
     ipiv = (int *) malloc(LinearSystem_getNbIwork(problem, options) * sizeof(int));
   int LAinfo = 0;
-  /* Checks inputs */
-  if (problem == NULL || z == NULL)
-    numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
   //displayLS(problem);
 
   assert(problem->M->matrix0);
@@ -138,6 +138,9 @@ int LinearSystem_getNbIwork(LinearSystemProblem* problem, SolverOptions* options
 }
 int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
 {
+  /* Checks inputs */
+  if (problem == NULL || z == NULL)
+    numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
   int n = problem->size;
@@ -155,9 +158,6 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
   else
     ipiv = (int *) malloc(LinearSystem_getNbIwork(problem, options) * sizeof(int));
   int LAinfo = 0;
-  /* Checks inputs */
-  if (problem == NULL || z == NULL)
-    numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
   //displayLS(problem);
 
   assert(problem->M->matrix0);
@@ -230,7 +230,10 @@ void displayLS(LinearSystemProblem* p)
 {
   printf("Numerics LinearSystem DISPLAY:\n-------------\n");
   if (!p)
+  {
     printf("p is null \n");
+    return;
+  }
   int size = p->size;
 
   printf("size :%d \n", size);

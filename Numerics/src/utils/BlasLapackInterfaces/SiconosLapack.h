@@ -247,7 +247,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO =*INFO;
+    int C_INFO;
     WRAP_DGELS(LAPACK_NAME(dgels),CHAR(trans), INTEGER(C_M), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB),INTEGER(C_INFO));
     *INFO = C_INFO;
   }

@@ -57,7 +57,7 @@ void Event::setTimeDiscretisation(SP::TimeDiscretisation td)
     mpf_t tmp;
     mpf_init_set_d(tmp, _tick);
     mpf_div(tmp, *_td->currentTimeStep(), tmp);
-    mpz_init_set_ui(_tickIncrement, mpf_get_ui(tmp));
+    mpz_set_ui(_tickIncrement, mpf_get_ui(tmp));
     mpf_clear(tmp);
   }
 }

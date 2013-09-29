@@ -30,9 +30,9 @@ SICONOS_EXPORT void uProcess(double time, unsigned int sizeOfB, double* b, unsig
 SICONOS_EXPORT void uObserver(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double* z)
 {
   double u = computeControl(time);
-  double L[2];
-  L[0] = 1.0;
-  L[1] = 1.0;
+//  double L[2];
+//  L[0] = 1.0;
+//  L[1] = 1.0;
 
   //   b[0] = u + L[0]*z[0];
   //   b[1] = 2.0* u + L[1]*z[0];

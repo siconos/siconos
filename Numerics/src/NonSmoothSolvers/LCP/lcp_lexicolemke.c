@@ -31,6 +31,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
   assert(M);
   /* size of the LCP */
   int dim = problem->size;
+  assert(dim>0);
   int dim2 = 2 * (dim + 1);
 
   int i, drive, block, Ifound;
@@ -58,13 +59,14 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
   for (ic = 0 ; ic < dim; ++ic)
     A[ic] = (double *)malloc(dim2 * sizeof(double));
 
-  for (ic = 0 ; ic < dim; ++ic)
-    for (jc = 0 ; jc < dim2; ++jc)
-      A[ic][jc] = 0.0;
-
   /* construction of A matrix such that
    * A = [ q | Id | -d | -M ] with d = (1,...1)
    */
+
+  /* We need to init only the part corresponding to Id */
+  for (ic = 0 ; ic < dim; ++ic)
+    for (jc = 1 ; jc <= dim; ++jc)
+      A[ic][jc] = 0.0;
 
   for (ic = 0 ; ic < dim; ++ic)
     for (jc = 0 ; jc < dim; ++jc)
@@ -261,15 +263,10 @@ int linearComplementarity_lexicolemke_setDefaultSolverOptions(SolverOptions* opt
   options->filterOn = 1;
   options->iSize = 5;
   options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
   options->dparam[0] = 1e-6;
   options->iparam[0] = 10000;
 

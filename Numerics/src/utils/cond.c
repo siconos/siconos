@@ -26,9 +26,8 @@
 double cond(double * A, int n, int m)
 {
 //#ifdef COMPLETE_LAPACK_LIBRARIES
-  int dimS = n;
-  if (m < n) dimS = m;
-  double * S =  (double *)malloc(dimS * sizeof(*S));
+  int dimS = m < n ? m : n;
+  double * S =  (double *)malloc(dimS * sizeof(double));
 
   char JOBU = 'N';
   int LDU = 1;
