@@ -1025,7 +1025,7 @@ bool D1MinusLinear::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   assert((i == 1) || (i==2));
   // double h = simulationLink->timeStep();
 
-  double y = 0;
+  double y = 0.0;
   double yOld ;
   SP::Relation r = inter->relation();
   RELATION::TYPES relationType = r->getType();

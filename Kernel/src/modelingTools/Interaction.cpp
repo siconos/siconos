@@ -273,6 +273,24 @@ void Interaction::initializeMemory()
   }
 
 }
+void Interaction::resetAllLambda()
+{
+   for (unsigned int i = _lowerLevelForInput ;
+       i < _upperLevelForInput + 1 ;
+       i++)
+  {
+    if (_lambda[i])
+      _lambda[i]->zero();
+  }
+
+}
+
+
+void Interaction::resetLambda(unsigned int level)
+{
+  if (_lambda[level])
+    _lambda[level]->zero();
+}
 
 void Interaction::initData()
 {

@@ -233,6 +233,14 @@ public:
     return _initialized;
   }
 
+  /** set all lambda to zero
+   */
+  void resetAllLambda() ;
+
+  /** set lambda to zero for a given level
+   * \param level
+   */
+  void resetLambda(unsigned int level);
 
   /** build Y and Lambda stl vectors.
   */

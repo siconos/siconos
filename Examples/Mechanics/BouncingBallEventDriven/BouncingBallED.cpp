@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 5;
+    unsigned int outputSize = 7;
     SimpleMatrix dataPlot(N + 1, outputSize);
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
@@ -174,6 +174,8 @@ int main(int argc, char* argv[])
         dataPlot(k, 0) = s->startingTime();
         dataPlot(k, 1) = (*ball->qMemory()->getSiconosVector(1))(0);
         dataPlot(k, 2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
+        dataPlot(k, 3) = (*p)(0);
+        dataPlot(k, 4) = (*f)(0);
         k++;
         kns++;
         nonSmooth = false;
@@ -184,6 +186,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*f)(0);
+      dataPlot(k, 5) = (*inter->lambda(1))(0);
+      dataPlot(k, 6) = (*inter->lambda(2))(0);
+
+
       ++k;
       ++numberOfEvent;
       ++show_progress;
