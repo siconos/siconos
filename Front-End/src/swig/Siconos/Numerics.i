@@ -565,8 +565,6 @@
   nummat->size0 =  array_size(array,0);
   nummat->size1 =  array_size(array,1);
 
-  if (nummat->matrix0) free(nummat->matrix0);
-
   nummat->matrix0 = (double *)array_data(array);
   $1 = nummat;
 }

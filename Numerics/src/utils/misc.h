@@ -20,6 +20,12 @@
 #define _NUMERICS_MISC_H_
 
 #include <errno.h>
+
+#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+extern "C"
+{
+#endif
+
 /** print a dense matrix or vector
  */
 void printm(unsigned int nl, unsigned int nc, double *m);
@@ -56,6 +62,10 @@ void printm(unsigned int nl, unsigned int nc, double *m);
 #define NO_RETURN  __attribute__((analyzer_noreturn))
 #else
 #define NO_RETURN
+#endif
+
+#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+}
 #endif
 
 #endif
