@@ -257,8 +257,8 @@ namespace Siconos {
       typedef typename M::size_type  size_type ;
       typedef typename M::value_type value_type ;
 
-      for (int i=0; i<m.size1(); ++i) {
-        for (int j=0; j<m.size2(); ++j) {
+      for (size_type i=0; i<m.size1(); ++i) {
+        for (size_type j=0; j<m.size2(); ++j) {
           m(i,j) = random_value<value_type>();
         }
       }
