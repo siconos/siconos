@@ -40,9 +40,9 @@
 
 
 using namespace RELATION;
-//#define LINEAROSNS_DEBUG
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define LINEAROSNS_DEBUG
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 LinearOSNS::LinearOSNS(): OneStepNSProblem(), _MStorageType(0), _keepLambdaAndYState(true)
@@ -160,6 +160,7 @@ void LinearOSNS::initialize(SP::Simulation sim)
 
 void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
+  DEBUG_PRINT("LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)\n");
 
   // Computes matrix _interactionBlocks[inter1][inter1] (and allocates memory if
   // necessary) one or two DS are concerned by inter1 .  How
@@ -180,12 +181,14 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
   if (indexSet->properties(vd).source != indexSet->properties(vd).target)
   {
-    // a two DS Interaction
+    DEBUG_PRINT("a two DS Interaction\n");
     DS1 = indexSet->properties(vd).source;
     DS2 = indexSet->properties(vd).target;
+
   }
   else
   {
+    DEBUG_PRINT("a single DS Interaction\n");
     DS1 = indexSet->properties(vd).source;
     DS2 = DS1;
 
@@ -269,6 +272,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   for (SP::DynamicalSystem ds = DS1; !endl; ds = DS2)
   {
     assert(ds == DS1 || ds == DS2);
+    DEBUG_EXPR(ds->display(););
 
     endl = (ds == DS2);
     unsigned int sizeDS = ds->getDim();
@@ -276,6 +280,8 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
     inter->getLeftInteractionBlockForDS(ds, leftInteractionBlock);
+
+    DEBUG_EXPR(leftInteractionBlock->display(););
 
     // Computing depends on relation type -> move this in Interaction method?
     if (relationType == FirstOrder)
@@ -341,15 +347,16 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
             leftInteractionBlock->setCol(*itindex, *coltmp);
           }
         }
+        DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n")
+        DEBUG_EXPR(leftInteractionBlock->display(););
+
       }
 
       // (inter1 == inter2)
-#ifdef LINEAROSNS_DEBUG
-      std::cout << "leftInteractionBlock: ";
-      leftInteractionBlock->display();
-      std::cout << "centralInteractionBlocks: ";
-      centralInteractionBlocks[ds->number()]->display();
-#endif
+
+      DEBUG_EXPR(leftInteractionBlock->display(););
+      DEBUG_EXPR(centralInteractionBlocks[ds->number()]->display(););
+
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
       work->trans();
       centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*work);
@@ -362,11 +369,13 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
     else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType);
   }
-
+  DEBUG_PRINT("LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd) ends \n");
 }
 
 void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 {
+
+  DEBUG_PRINT("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 
   // Computes matrix _interactionBlocks[inter1][inter2] (and allocates memory if
   // necessary) if inter1 and inter2 have commond DynamicalSystem.  How
@@ -642,10 +651,8 @@ bool LinearOSNS::preCompute(double time)
 
     //    _M->fill(indexSet);
     _M->fill(indexSet, !_hasBeenUpdated);
-#ifdef LINEAROSNS_DEBUG
-    std::cout << "M matrix: ";
-    _M->display();
-#endif
+    DEBUG_EXPR(_M->display(););
+
     //      updateOSNSMatrix();
     _sizeOutput = _M->size();
 
@@ -729,10 +736,7 @@ void LinearOSNS::postCompute()
     //setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
     // saved in y !!
     setBlock(*_z, lambda, lambda->size(), pos, 0);
-#ifdef LINEAROSNS_DEBUG
-    std::cout << "Contact force: ";
-    lambda->display();
-#endif
+    DEBUG_EXPR(    lambda->display(););
   }
 
 }

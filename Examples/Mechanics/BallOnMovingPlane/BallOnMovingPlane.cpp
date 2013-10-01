@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector q02(new SiconosVector(nDof));
     SP::SiconosVector v02(new SiconosVector(nDof));
     (*q02)(0) = 0.0;
-    (*v02)(0) = velocity_init;
+    (*v02)(0) = - velocity_init;
 
     // -- The dynamical system --
     SP::LagrangianLinearTIDS movingplane(new LagrangianLinearTIDS(q02, v02, Mass));
@@ -131,9 +131,9 @@ int main(int argc, char* argv[])
     bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
     bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(movingplane);
 
-    // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, movingplane);
+    // link the interaction and the dynamical systems
+    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball, movingplane);
+//    bouncingBall->nonSmoothDynamicalSystem()->link(inter, movingplane);
 
 
     // ------------------
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 12;
-    SimpleMatrix dataPlot(N, outputSize);
+    SimpleMatrix dataPlot(N+1, outputSize);
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
@@ -175,6 +175,8 @@ int main(int argc, char* argv[])
     SP::SiconosVector vplane = movingplane->velocity();
     SP::SiconosVector pplane = movingplane->p(1);
     SP::SiconosVector lambda = inter->lambda(1);
+    SP::SiconosVector y = inter->y(0);
+
     SP::SiconosVector reaction = movingplane->reactionToBoundaryConditions();
 
     dataPlot(0, 0) = bouncingBall->t0();
@@ -198,10 +200,12 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
 
-    while (s->hasNextEvent())
+    while (s->hasNextEvent() && k <5000)
     {
       s->computeOneStep();
-
+      // std::cout << "y :"<< std::endl;
+      // y->display();
+      // osnspb->display();
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
@@ -226,7 +230,17 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    cout << "====> Comparison with a reference file  ..." << endl;
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("BallOnMovingPlane.ref", "ascii", dataPlotRef);
 
+    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
+    {
+      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      std::cout << "error = " <<  (dataPlot - dataPlotRef).normInf() << std::endl;
+      return 1;
+    }
 
 
   }
