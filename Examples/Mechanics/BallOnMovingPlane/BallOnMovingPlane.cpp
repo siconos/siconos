@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
 
     // link the interaction and the dynamical systems
     bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball, movingplane);
-//    bouncingBall->nonSmoothDynamicalSystem()->link(inter, movingplane);
+
 
 
     // ------------------
