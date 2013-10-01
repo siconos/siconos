@@ -356,6 +356,17 @@ void TimeSteppingD1Minus::advanceToEvent()
   // * updated gaps and gap velocities (g_{k+1}^+)
   // * indexset (I_{k+1}^+)
 
+  // Initialize lambdas of all interactions.
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
+                                    topology()->indexSet(0);
+  InteractionsGraph::VIterator ui, uiend, vnext;
+  std11::tie(ui, uiend) = indexSet0->vertices();
+  for (vnext = ui; ui != uiend; ui = vnext)
+  {
+    ++vnext;
+    indexSet0->bundle(*ui)->resetAllLambda();
+  }
+
   // calculate residu without nonsmooth event with OSI
   // * calculate position q_{k+1} in ds->q()
   // * calculate velocity v_{k+1}^- and not free velocity in ds->velocity()

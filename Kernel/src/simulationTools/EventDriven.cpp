@@ -699,6 +699,18 @@ void EventDriven::advanceToEvent()
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
   OSI::TYPES  osiType = (*_allOSI->begin())->getType(); // Type of OSIs
   double _minConstraint = 0.0;
+
+  // Initialize lambdas of all interactions.
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
+                                    topology()->indexSet(0);
+  InteractionsGraph::VIterator ui, uiend, vnext;
+  std11::tie(ui, uiend) = indexSet0->vertices();
+  for (vnext = ui; ui != uiend; ui = vnext)
+  {
+    ++vnext;
+    indexSet0->bundle(*ui)->resetAllLambda();
+  }
+
   if (osiType == OSI::NEWMARKALPHAOSI)
   {
     newtonSolve(_newtonTolerance, _newtonMaxIteration);
@@ -759,7 +771,6 @@ void EventDriven::advanceToEvent()
     OSIIterator it;
     for (it = _allOSI->begin(); it != _allOSI->end(); ++it)
     {
-
       (*it)->resetNonSmoothPart();
       //====================================================================================
       //     cout << " Start of Lsodar integration" << endl;

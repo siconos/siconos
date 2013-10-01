@@ -542,9 +542,19 @@ void TimeStepping::advanceToEvent()
   //   update(_levelMin);
 
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
+
+    // Initialize lambdas of all interactions.
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
+                                    topology()->indexSet(0);
+  InteractionsGraph::VIterator ui, uiend, vnext;
+  std11::tie(ui, uiend) = indexSet0->vertices();
+  for (vnext = ui; ui != uiend; ui = vnext)
+  {
+    ++vnext;
+    indexSet0->bundle(*ui)->resetAllLambda();
+  }
+
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
-
-
 
 }
 

@@ -123,12 +123,12 @@ void OneStepIntegrator::computeFreeOutput(SP::Interaction inter, OneStepNSProble
 void OneStepIntegrator::resetNonSmoothPart()
 {
   for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetAllNonSmoothPart, _1));
-  for_each(OSIInteractions->begin(), OSIInteractions->end(), std11::bind(&Interaction::resetAllLambda, _1));
+//  for_each(OSIInteractions->begin(), OSIInteractions->end(), std11::bind(&Interaction::resetAllLambda, _1));
 }
 void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 {
   for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetNonSmoothPart, _1, level));
-  for_each(OSIInteractions->begin(), OSIInteractions->end(), std11::bind(&Interaction::resetLambda, _1, level));
+  // for_each(OSIInteractions->begin(), OSIInteractions->end(), std11::bind(&Interaction::resetLambda, _1, level));
 
 }
 
