@@ -543,7 +543,7 @@ void TimeStepping::advanceToEvent()
 
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
 
-    // Initialize lambdas of all interactions.
+  // Initialize lambdas of all interactions.
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
                                     topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend, vnext;
