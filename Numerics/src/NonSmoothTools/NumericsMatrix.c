@@ -184,17 +184,20 @@ void freeNumericsMatrix(NumericsMatrix* m)
       free(m->matrix0);
     m->matrix0 = NULL;
   }
-  else
+  else 
   {
     freeSBM(m->matrix1);
     free(m->matrix1);
+    m->matrix1 = NULL;
     if (m->matrix2)
     {
       cs_spfree(m->matrix2);
+      m->matrix2 = NULL;
     }
     if (m->matrix3)
     {
       cs_spfree(m->matrix3);
+      m->matrix3 = NULL;
     }
   }
 }
