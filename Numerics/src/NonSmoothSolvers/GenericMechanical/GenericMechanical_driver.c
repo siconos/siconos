@@ -479,6 +479,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
 
 void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, int id)
 {
+  options->solverId = SICONOS_GENERIC_MECHANICAL_NSGS;
   options->iSize = 5;
   options->dSize = 5;
   options->numberOfInternalSolvers = 2;
