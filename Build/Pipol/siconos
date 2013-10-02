@@ -311,7 +311,7 @@ save_packed_1 Front-End Release
 ##
 ### Coverage
 #setup_src
-configure_src Numerics Debug -DWITH_TESTS_COVERAGE=ON
+configure_src Numerics Debug
 nightly_build Numerics Debug
 nightly_coverage Numerics Debug
 nightly_submit Numerics Debug
@@ -319,21 +319,21 @@ install_1 Numerics Debug
 clean_1 Numerics Debug
 ##
 #setup_src
-configure_src Kernel Debug -DWITH_TESTS_COVERAGE=ON
+configure_src Kernel Debug
 nightly_build Kernel Debug
 nightly_coverage Kernel Debug
 nightly_submit Kernel Debug
 install_1 Kernel Debug
 clean_1 Kernel Debug
 ##
-configure_src Mechanics Debug -DWITH_TESTS_COVERAGE=ON
+configure_src Mechanics Debug
 nightly_build Mechanics Debug
 nightly_coverage Mechanics Debug
 nightly_submit Mechanics Debug
 install_1 Mechanics Debug
 clean_1 Mechanics Debug
 ##
-configure_src IO Debug -DWITH_TESTS_COVERAGE=ON
+configure_src IO Debug
 nightly_build IO Debug
 nightly_coverage IO Debug
 nightly_submit IO Debug
