@@ -40,81 +40,44 @@ FirstOrderLinearR::FirstOrderLinearR(SP::RelationXML relxml):
 }
 
 // Constructor with C and B plug-in names
-FirstOrderLinearR::FirstOrderLinearR(const std::string& CName, const std::string& BName):
+FirstOrderLinearR::FirstOrderLinearR(const std::string& Cname, const std::string& Bname):
   FirstOrderR(LinearR)
 {
   // Warning: we cannot allocate memory for C/D matrix since no interaction
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the user-defined function.
-  _pluginJachx->setComputeFunction(CName);
-  _pluginJacLg->setComputeFunction(BName);
-  //  Plugin::setFunction(_plunginJachx,CName);
-  //Plugin::setFunction(_pluginJacLg,BName);
-  //  Jach[0].reset(new PluggedMatrix(CName));
-  //  Jacg[0].reset(new PluggedMatrix(BName));
+  _pluginJachx->setComputeFunction(Cname);
+  _pluginJacLg->setComputeFunction(Bname);
 }
 
 // Constructor from a complete set of data (plugin)
-FirstOrderLinearR::FirstOrderLinearR(const std::string& CName, const std::string& DName, const std::string& FName, const std::string& EName, const std::string& BName): FirstOrderR(LinearR)
+FirstOrderLinearR::FirstOrderLinearR(const std::string& Cname, const std::string& Dname, const std::string& Fname, const std::string& Ename, const std::string& Bname): FirstOrderR(LinearR)
 {
-  _pluginJachx->setComputeFunction(CName);
-  _pluginJachlambda->setComputeFunction(DName);
-  _pluginJacLg->setComputeFunction(BName);
-  _pluginf->setComputeFunction(FName);
-  _plugine->setComputeFunction(EName);
-
-  //   Plugin::setFunction(_plunginJachx,CName);
-  //   Plugin::setFunction(_pluginJachlambda,DName);
-  //   Plugin::setFunction(_pluginJacLg,BName);
-
-  //   Plugin::setFunction(_pluginf,FName);
-  //   Plugin::setFunction(_plugine,EName);
-
-
-
+  _pluginJachx->setComputeFunction(Cname);
+  _pluginJachlambda->setComputeFunction(Dname);
+  _pluginJacLg->setComputeFunction(Bname);
+  _pluginf->setComputeFunction(Fname);
+  _plugine->setComputeFunction(Ename);
 }
 
 // Minimum data (C, B as pointers) constructor
-FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix newC, SP::SiconosMatrix newB):
+FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix B):
   FirstOrderR(LinearR)
 {
-  _jachx = newC;
-  _jacglambda = newB;
+  _jachx = C;
+  _jacglambda = B;
 }
 
 // // Constructor from a complete set of data
-FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix  newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SiconosVector newE, SP::SiconosMatrix newB):
+FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector E, SP::SiconosMatrix B):
   FirstOrderR(LinearR)
 {
-  _jachx = newC;
-  _jacglambda = newB;
-  _jachlambda = newD;
-  _F = newF;
-  _e = newE;
+  _jachx = C;
+  _jacglambda = B;
+  _jachlambda = D;
+  _F = F;
+  _e = E;
 }
-
-// Minimum data (C, B as matrices) constructor
-/*
-
-FirstOrderLinearR::FirstOrderLinearR(const SiconosMatrix& newC, const SiconosMatrix& newB):
-FirstOrderR(LinearR)
-{
-assert(false&&"FirstOrderLinearR::FirstOrderLinearR copy matrix ???\n");
-C = createSPtrSiconosMatrix(newC);
-// C.reset(new SiconosMatrix(newC));
-B.reset(new SiconosMatrix(newB));
-}
-// Constructor from a complete set of data (matrices)
-FirstOrderLinearR::FirstOrderLinearR(const SiconosMatrix& newC, const SiconosMatrix& newD, const SiconosMatrix& newF, const SiconosVector& newE, const SiconosMatrix& newB):
-FirstOrderR(LinearR)
-{
-C.reset(new SiconosMatrix(newC));
-B.reset(newB);
-D.reset(newD);
-F.reset(newF);
-e.reset(newE);
-
-}*/
 
 void FirstOrderLinearR::initialize(Interaction& inter)
 {
@@ -312,16 +275,6 @@ void FirstOrderLinearR::display() const
   std::cout << " ================================================== " <<std::endl;
 }
 
-void FirstOrderLinearR::setComputeEFunction(const std::string& pluginPath, const std::string& functionName)
-{
-  FirstOrderR::setComputeEFunction(pluginPath, functionName);
-}
-void FirstOrderLinearR::setComputeEFunction(FOVecPtr ptrFunct)
-{
-  _plugine->setComputeFunction((void*)ptrFunct);
-}
-
-
 void FirstOrderLinearR::saveRelationToXML() const
 {
   if (!_relationxml)
@@ -335,7 +288,7 @@ void FirstOrderLinearR::saveRelationToXML() const
   folrXML->setB(*_jacglambda);
 }
 
-FirstOrderLinearR* FirstOrderLinearR::convert(Relation *r)
+FirstOrderLinearR* FirstOrderLinearR::convert(Relation* r)
 {
   return dynamic_cast<FirstOrderLinearR*>(r);
 }

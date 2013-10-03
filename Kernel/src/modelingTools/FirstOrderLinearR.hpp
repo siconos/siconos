@@ -71,172 +71,102 @@ public:
   /** xml constructor
   \param SP::RelationXML : the XML object corresponding
   */
-  FirstOrderLinearR(SP::RelationXML);
+  FirstOrderLinearR(SP::RelationXML relxml);
 
-  /** Constructor with C and B plug-in names
-  \param C plug-in name
-  \param B plug-in name
+  /** Constructor with C and B plugin names
+  \param Cname the plugin name for computing the C matrix
+  \param Bname the plugin name for computing the B matrix
   **/
-  FirstOrderLinearR(const std::string&, const std::string&);
+  FirstOrderLinearR(const std::string& Cname, const std::string& Bname);
 
-  /** Constructor all plug-in names
-  \param C plug-in name
-  \param D plug-in name
-  \param F plug-in name
-  \param e plug-in name
-  \param B plug-in name
+  /** Constructor with all plugin names
+  \param Cname the plugin name for computing the C matrix
+  \param Dname the plugin name for computing the D matrix
+  \param Fname the plugin name for computing the F matrix
+  \param Ename the plugin name for computing the e vector
+  \param Bname the plugin name for computing the B matrix
   **/
-  FirstOrderLinearR(const std::string&, const std::string&, const std::string&, const std::string&, const std::string&);
+  FirstOrderLinearR(const std::string& Cname, const std::string& Dname, const std::string& Fname, const std::string& Ename, const std::string& Bname);
 
   /** create the Relation from a set of data
-  *  \param Plugged Matrix : the matrix C
-  *  \param Plugged Matrix : the matrix B
+  *  \param C the C matrix
+  *  \param B the B matrix
   */
-  FirstOrderLinearR(SP::SiconosMatrix, SP::SiconosMatrix);
+  FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix B);
 
   /** create the Relation from a set of data
-  *  \param Plugged Matrix : C
-  *  \param Plugged Matrix : D
-  *  \param Plugged Matrix : F
-  *  \param Plugged Vector : e
-  *  \param Plugged Matrix : B
+  *  \param C the C matrix
+  *  \param D the D matrix
+  *  \param F the F matrix
+  *  \param e the e matrix
+  *  \param B the B matrix
   */
-  FirstOrderLinearR(SP::SiconosMatrix , SP::SiconosMatrix, SP::SiconosMatrix , SP::SiconosVector, SP::SiconosMatrix);
+  FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix, SP::SiconosMatrix , SP::SiconosVector, SP::SiconosMatrix);
 
-  /** create the Relation from a set of data
-  *  \param  SiconosMatrix : the matrix C
-  *  \param  SiconosMatrix : the matrix B
-
-  FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix&);
-  */
-  /** create the Relation from a set of data
-  *  \param  SiconosMatrix : C
-  *  \param  SiconosMatrix : D
-  *  \param  SiconosMatrix : F
-  *  \param  SiconosVector  : e
-  *  \param  SiconosMatrix : B
-
-  FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix& , const SiconosMatrix&, const SiconosVector&, const SiconosMatrix&);
-  */
   /** destructor
   */
   ~FirstOrderLinearR() {};
 
   // GETTERS/SETTERS
 
-  // -- C --
-  /** get the value of C
-  *  \return plugged matrix
-
-  inline const PluggedMatrix getC() const { return *(Jach.at(0)); }
-  */
-  /** get C
-  *  \return pointer on a plugged matrix
-  */
-  //inline SP::SiconosMatrix C() const { return Jach.at(0); }
-
-  /** set the value of C to newValue
-  *  \param a plugged matrix
-
-  template <class U> void setC(const U& newValue)
-  {
-  setJach(newValue,0);
-  }
-  */
-  /** set C to pointer newPtr
-  *  \param a SP to plugged matrix
-
-  inline void setCPtr(SP_PluggedMatrix newPtr) {Jach[0] = newPtr;}
-  */
   /** set a specified function to compute the matrix C
-  *  \param std::string : the complete path to the plugin
-  *  \param std::string : the function name to use in this plugin
+  *  \param pluginPath the complete path to the plugin
+  *  \param functionName the function name to use in this plugin
   */
-
-
   void setComputeCFunction(const std::string& pluginPath, const std::string& functionName)
   {
     setComputeJachxFunction(pluginPath,  functionName);
   }
 
-
-  // -- D --
-
-  /** get the value of D
-  *  \return plugged matrix
-  */
-  //inline const PluggedMatrix getD() const { return *(Jach.at(1)); }
-
-  /** get D
-  *  \return pointer on a plugged matrix
-  */
-  //inline SP::SiconosMatrix D() const { return Jach.at(1); }
-
-  /** set the value of D to newValue
-  *  \param a plugged matrix
-
-  void setD(const U& newValue)
-  {
-  if(Jach.size()<2) Jach.resize(2);
-  setJach(newValue,1);
-  }
-  */
-
   /** set a specified function to compute the matrix D
-  *  \param std::string : the complete path to the plugin
-  *  \param std::string : the function name to use in this plugin
+  *  \param pluginPath the complete path to the plugin
+  *  \param functionName the function name to use in this plugin
   */
   void setComputeDFunction(const std::string& pluginPath, const std::string& functionName)
   {
     setComputeJachlambdaFunction(pluginPath,  functionName);
   }
 
+  /** set a specified function to compute the matrix B
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
+   */
+  void setComputebFunction(const std::string& pluginPath, const std::string& functionName)
+  {
+    setComputeJacglambdaFunction(pluginPath,  functionName);
+  }
+
   /** set D to pointer newPtr
-  *  \param a SP to plugged matrix
+  *  \param newPtr the D matrix
   */
   inline void setDPtr(SP::SiconosMatrix newPtr)
   {
     _jachlambda = newPtr;
   }
 
-
   /** set F to pointer newPtr
-  *  \param a SP to plugged matrix
+  *  \param newPtr the F matrix
   */
   inline void setFPtr(SP::SiconosMatrix newPtr)
   {
     _F = newPtr;
   }
 
-  /** set a specified function to compute the matrix F
-  *  \param std::string : the complete path to the plugin
-  *  \param std::string : the function name to use in this plugin
-  void setComputeFFunction(const std::string& , const std::string& );
+  /** get F
+  *  \return F matrix
   */
+  inline SP::SiconosMatrix F() const
+  {
+    return _F;
+  }
 
-  // -- e --
-  /** get the value of e
-  *  \return plugged vector
-
-  inline const Plugged_Vector_FTime getE() const { return *e; }
-  */
   /** get e
-  *  \return pointer on a plugged vector
+  *  \return e matrix
   */
   inline SP::SiconosVector e() const
   {
     return _e;
   }
-
-  //   /** set a specified function to compute the matrix B
-  //    *  \param std::string : the complete path to the plugin
-  //    *  \param std::string : the function name to use in this plugin
-  //    */
-  void setComputebFunction(const std::string& pluginPath, const std::string& functionName)
-  {
-    setComputeJacglambdaFunction(pluginPath,  functionName);
-  }
-
 
   /** Function to compute matrix C
   */
@@ -257,11 +187,6 @@ public:
   /** Function to compute matrix B
   */
   virtual void computeb(const double time, Interaction& inter);
-
-  /** initialize the relation (check sizes, memory allocation ...)
-  \param inter Interaction: the interaction that owns this relation
-  */
-  virtual void initialize(Interaction & inter);
 
   /** default function to compute h
   *  \param double : current time
@@ -285,6 +210,11 @@ public:
   */
   void computeInput(const double time, Interaction& inter, unsigned int = 0);
 
+  /** initialize the relation (check sizes, memory allocation ...)
+  *  \param inter the interaction that owns this relation
+  */
+  virtual void initialize(Interaction & inter);
+
   /** copy the data of the Relation to the XML tree
   */
   void saveRelationToXML() const;
@@ -292,23 +222,16 @@ public:
   /** print the data to the screen
   */
   void display() const;
-  virtual void setComputeEFunction(FOVecPtr ptrFunct);
-  virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
-  inline SP::SiconosMatrix F() const
-  {
-    return _F;
-  }
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param Relation * : the relation which must be converted
+  *  \param r the relation which must be converted
   * \return a pointer on the relation if it is of the right type, NULL otherwise
   */
-  static FirstOrderLinearR* convert(Relation *r);
+  static FirstOrderLinearR* convert(Relation* r);
 
-  /**
-  * return true if the relation is linear.
+  /** determine if the Relation is linear
+  * \return true if the relation is linear.
   */
-
   virtual bool isLinear()
   {
     return true;

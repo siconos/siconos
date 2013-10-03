@@ -3,34 +3,9 @@
 #include <math.h>
 using namespace std;
 static unsigned int ndof = 4;
-static SP::SiconosVector xr(new SiconosVector(2));
 /* 02/2010 --> 08/2010*/
 /*Author: Yamen ABDENNADHER */
 /*Exemple from : Rafael Ramos, Dominigo Biel, Enric Fossas and Franisco Guinjoan. Interleaving Quasi-Sliding-Mode Control of Parallel-Connected Buck-based Inverters. IEEE vol 55 N11 Novembre 2008. For more detail, please see Yamen's report.*/
-void (eLDS)(double t, unsigned int N, double* e, unsigned int z, double*zz)
-{
-  //double ndof=4;
-
-  SP::SiconosMatrix Z(new SimpleMatrix(3, 2));
-
-  (*Z)(0, 0) = -1;
-  (*Z)(0, 1) = -6e-5;
-  (*Z)(1, 0) = -1;
-  (*Z)(1, 1) = -6e-5;
-  (*Z)(2, 0) = -1;
-  (*Z)(2, 1) = -6e-5;
-  //SP::SiconosVector xr(new SiconosVector(2));
-  (*xr)(0) = 55 * sin(100 * M_PI * t);
-
-  SP::SiconosVector P(new SiconosVector(3));
-  prod(*Z, *xr, *P);
-
-  e[0] = (*P)(0);
-  e[1] = (*P)(1);
-  e[2] = (*P)(2);
-  P->display();
-}
-
 // main program
 int main(int argc, char* argv[])
 {
@@ -112,7 +87,8 @@ int main(int argc, char* argv[])
     (*x0)(3) = 4;
 
     SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));
-    //    process->setComputebFunction("ObserverLCSPlugin","uProcess");
+    SP::SiconosVector zProc(new SiconosVector(1, 0));
+    process->setzPtr(zProc);
 
     // --------------------
     // --- Interactions ---
@@ -165,7 +141,7 @@ int main(int argc, char* argv[])
     (*D)(2, 0) = 0.0;
     (*D)(2, 1) = 0.0;
     (*D)(2, 2) = 0.0;
-    myProcessRelation->setComputeEFunction(&eLDS);
+    myProcessRelation->setComputeEFunction("ParallelInverterPlugin", "eLDS");
 
     myProcessRelation->setDPtr(D);
     //myProcessRelation->setComputeEFunction("ObserverLCSPlugin","computeE");
@@ -257,8 +233,8 @@ int main(int argc, char* argv[])
     dataPlot(0, 8) = (*yProc)(0);
     dataPlot(0, 9) = (*yProc)(1);
     dataPlot(0, 10) = (*yProc)(2);
-    dataPlot(0, 11) = (*xr)(0);            //v_ref
-    dataPlot(0, 12) = (*xr)(0) / Rl;       //i_ref
+    dataPlot(0, 11) = (*zProc)(0);            //v_ref
+    dataPlot(0, 12) = (*zProc)(0) / Rl;       //i_ref
     dataPlot(0, 13) = 0;           //voltage_error
     dataPlot(0, 14) = 0;           //current_error
     dataPlot(0, 15) = 0;           //il1
@@ -286,12 +262,11 @@ int main(int argc, char* argv[])
     while (k < N - 1)
     {
       k++;
-      cout << "step --> " << k << endl;
       //    osnspb->setNumericsVerboseMode(1);
       //  *z = *(myProcessInteraction->y(0)->getVectorPtr(0));
       s->computeOneStep();
-      (*err)(0) = abs((*xr)(0) - (*xProc)(0)); //voltage error
-      (*err)(1) = abs(((*xr)(0) / Rl) - ((*xProc)(0) / Rl)); //current error
+      (*err)(0) = abs((*zProc)(0) - (*xProc)(0)); //voltage error
+      (*err)(1) = abs(((*zProc)(0) / Rl) - ((*xProc)(0) / Rl)); //current error
       (*il1)(0) = ((*xProc)(0) / Rl) - ((*xProc)(2) + (*xProc)(3)) + Cp * (*xProc)(1); //current through L_1
 
 
@@ -306,8 +281,8 @@ int main(int argc, char* argv[])
       dataPlot(k, 8) = (*yProc)(0);          //y1
       dataPlot(k, 9) = (*yProc)(1);          //y2
       dataPlot(k, 10) = (*yProc)(2);         //y3
-      dataPlot(k, 11) = (*xr)(0);            //v_ref
-      dataPlot(k, 12) = (*xr)(0) / Rl;       //i_ref
+      dataPlot(k, 11) = (*zProc)(0);            //v_ref
+      dataPlot(k, 12) = (*zProc)(0) / Rl;       //i_ref
       dataPlot(k, 13) = (*err)(0);           //voltage_error
       dataPlot(k, 14) = (*err)(1);           //current_error
       dataPlot(k, 15) = (*il1)(0);           //il1
@@ -336,7 +311,18 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("SimpleExampleRelay.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("ParallelInverter.dat", "ascii", dataPlot, "noDim");
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("ParallelInverter.ref", "ascii", dataPlotRef);
+    std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
+
+    if ((dataPlot - dataPlotRef).normInf() > 1e-10) // some data are > 1e4
+    {
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
+
   }
 
   catch (SiconosException e)
