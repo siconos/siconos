@@ -21,7 +21,7 @@
 
 #include <errno.h>
 
-#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+#if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -64,7 +64,7 @@ void printm(unsigned int nl, unsigned int nc, double *m);
 #define NO_RETURN
 #endif
 
-#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+#if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 }
 #endif
 
