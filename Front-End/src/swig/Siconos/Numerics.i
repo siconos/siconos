@@ -1769,6 +1769,15 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
 };
 
+//GenericMechanical
+//%include GMPReduced.h
+//%include GenericMechanicalProblem.h
+//%include GenericMechanical_Solvers.h
+%{
+#include <GenericMechanical_cst.h>
+%}
+%include GenericMechanical_cst.h
+
 
  // Matrices
 %include "SparseMatrix.h"
