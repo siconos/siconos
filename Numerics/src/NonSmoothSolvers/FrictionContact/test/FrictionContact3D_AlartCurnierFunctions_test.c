@@ -124,7 +124,7 @@ int main()
     OP3X3(info |= isnan(*p++));
     assert(!info);
 
-    frictionContact3D_localAlartCurnierFunctionGenerated(&reactions[k * 3], &velocities[k * 3], mus[k], &rhos[k * 3], F2, A2, B2);
+    frictionContact3D_AlartCurnierFunctionGenerated(&reactions[k * 3], &velocities[k * 3], mus[k], &rhos[k * 3], F2, A2, B2);
 
     p = F1;
     OP3(info |= isnan(*p++));

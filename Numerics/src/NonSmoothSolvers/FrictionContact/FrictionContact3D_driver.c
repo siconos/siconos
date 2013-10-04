@@ -156,18 +156,18 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     frictionContact3D_HyperplaneProjection(problem, reaction , velocity , &info , options);
     break;
   }
-  /* Global Alart Curnier */
+  /* Alart Curnier in local coordinates */
   case SICONOS_FRICTION_3D_LOCALAC:
   {
     snPrintf(1, options, 
             " ========================== Call Global Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
     if (problem->M->matrix0)
     {
-      frictionContact3D_globalAlartCurnier(problem, reaction , velocity , &info , options);
+      frictionContact3D_localAlartCurnier(problem, reaction , velocity , &info , options);
     }
     else
     {
-      frictionContact3D_sparseGlobalAlartCurnier(problem, reaction , velocity , &info , options);
+      frictionContact3D_sparseLocalAlartCurnier(problem, reaction , velocity , &info , options);
     }
     break;
   }

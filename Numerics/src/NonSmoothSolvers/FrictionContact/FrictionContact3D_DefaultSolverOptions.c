@@ -68,7 +68,7 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
   }
   case SICONOS_FRICTION_3D_LOCALAC:
   {
-    info =    frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(options);
+    info =    frictionContact3D_AlartCurnier_setDefaultSolverOptions(options);
     break;
   }
   case SICONOS_FRICTION_3D_QUARTIC:

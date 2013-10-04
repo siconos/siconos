@@ -16,13 +16,13 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT3D_GlobalAlartCurnier_H
-#define FRICTIONCONTACT3D_GlobalAlartCurnier_H
+#ifndef FRICTIONCONTACT3D_localAlartCurnier_H
+#define FRICTIONCONTACT3D_localAlartCurnier_H
 
-/*!\file FrictionContact3D_GlobalAlartCurnier.h
+/*!\file FrictionContact3D_localAlartCurnier.h
 
   \brief Typedef and functions declarations related to Alart-Curnier
-  formulation for 3 dimension frictional contact problems.
+  formulation for 3 dimension frictional contact problems in Local Coordinates.
 
   Subroutines used when the friction-contact 3D problem is written
   using Alart-Curnier formulation:
@@ -52,7 +52,7 @@ extern "C"
 {
 #endif
 
-  void frictionContact3D_globalAlartCurnierFunction(
+  void frictionContact3D_AlartCurnierFunction(
     unsigned int problemSize,
     double *reaction3D,
     double *velocity3D,
@@ -69,20 +69,20 @@ extern "C"
     double *blocklist3x3_2,
     double *output_blockarray3x3);
 
-  void frictionContact3D_globalAlartCurnier(
+  void frictionContact3D_localAlartCurnier(
     FrictionContactProblem* problem,
     double *reaction,
     double *velocity,
     int *info,
     SolverOptions *options);
 
-  int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
+  int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
     SolverOptions* options);
 
-  void frictionContact3D_sparseGlobalAlartCurnierInit(
+  void frictionContact3D_sparseLocalAlartCurnierInit(
     SolverOptions *SO);
 
-  void frictionContact3D_sparseGlobalAlartCurnier(
+  void frictionContact3D_sparseLocalAlartCurnier(
     FrictionContactProblem* problem,
     double *reaction,
     double *velocity,

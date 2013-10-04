@@ -466,7 +466,7 @@ void  globalFrictionContact3D_globalAlartCurnier_wr(GlobalFrictionContactProblem
 
 
   //
-  frictionContact3D_globalAlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
+  frictionContact3D_localAlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
 
   computeGlobalVelocity(problem, reaction, globalVelocity);
   freeLocalProblem(localproblem);
@@ -494,7 +494,7 @@ int globalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(Solver
   options->dWork = NULL;
   options->iWork = NULL;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(options->internalSolvers);
+  globalFrictionContact3D_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
 

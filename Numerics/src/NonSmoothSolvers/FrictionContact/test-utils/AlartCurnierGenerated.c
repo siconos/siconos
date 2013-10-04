@@ -647,7 +647,7 @@ void frictionContact3D_AlartCurnierCKPSABGenerated(
   result[14] = x45;
 }
 
-void frictionContact3D_localAlartCurnierFunctionGenerated(
+void frictionContact3D_AlartCurnierFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,

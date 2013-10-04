@@ -46,12 +46,12 @@ computeNonsmoothFunction  Function = &(computeAlartCurnierCKPS);
 // computeAlartCurnier[CKPS] == AC_Generated
 
 #ifdef AC_Generated
-computeNonsmoothFunction  Function = &(frictionContact3D_localAlartCurnierFunctionGenerated);
+computeNonsmoothFunction  Function = &(frictionContact3D_AlartCurnierFunctionGenerated);
 #endif
 
 // HandMade not done
 #ifdef AC_HandMade
-computeNonsmoothFunction  Function = &(frictionContact3D_localAlartCurnierFunctionHandMade);
+computeNonsmoothFunction  Function = &(frictionContact3D_AlartCurnierFunctionHandMade);
 #endif
 
 
@@ -1174,7 +1174,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     assert(*rho > 0. && *(rho + 1) > 0. && *(rho + 2) > 0.);
 
 #ifdef AC_STD
-    frictionContact3D_localAlartCurnierFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+    frictionContact3D_AlartCurnierFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
 #endif
 
 #ifdef AC_CKPS

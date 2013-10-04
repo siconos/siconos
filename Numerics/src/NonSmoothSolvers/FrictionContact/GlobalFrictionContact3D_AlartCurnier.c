@@ -258,7 +258,7 @@ void ACPsi(GlobalFrictionContactProblem* problem,
 
 
   /* compute AC function */
-  frictionContact3D_globalAlartCurnierFunction(localProblemSize,
+  frictionContact3D_AlartCurnierFunction(localProblemSize,
       reaction,
       velocity, problem->mu, rho,
       psi+globalProblemSize+
@@ -763,7 +763,7 @@ void globalFrictionContact3D_AlartCurnier(
   assert(B_.n == problem->H->size1);
   assert(B_.nz == problem->numberOfContacts * 9);
 
-  frictionContact3D_globalAlartCurnierFunction(localProblemSize,
+  frictionContact3D_AlartCurnierFunction(localProblemSize,
       reaction, velocity,
       problem->mu, rho,
       F, A, B);
@@ -811,7 +811,7 @@ void globalFrictionContact3D_AlartCurnier(
     ACPsi(problem, globalVelocity, reaction, velocity, rho, psi);
 
     /* compute A & B */
-    frictionContact3D_globalAlartCurnierFunction(localProblemSize,
+    frictionContact3D_AlartCurnierFunction(localProblemSize,
         reaction, velocity,
         problem->mu, rho,
         F, A, B);

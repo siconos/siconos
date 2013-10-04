@@ -31,7 +31,7 @@
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
 
-void frictionContact3D_globalAlartCurnierFunction(
+void frictionContact3D_AlartCurnierFunction(
   unsigned int problemSize,
   double *reaction,
   double *velocity,
@@ -69,7 +69,7 @@ void frictionContact3D_globalAlartCurnierFunction(
     double A_g[9];
     double B_g[9];
 
-    frictionContact3D_localAlartCurnierFunctionGenerated(reaction,
+    frictionContact3D_AlartCurnierFunctionGenerated(reaction,
         velocity,
         *mu,
         rho,
@@ -209,7 +209,7 @@ int globalLineSearchGP(
     cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1.,
           W, problemSize, tmp, 1, 1., velocity, 1);
 
-    frictionContact3D_globalAlartCurnierFunction(problemSize, tmp,
+    frictionContact3D_AlartCurnierFunction(problemSize, tmp,
         velocity, mu, rho, F,
         NULL, NULL);
 
@@ -260,7 +260,7 @@ int globalLineSearchGP(
   return -1;
 }
 
-void frictionContact3D_globalAlartCurnier(
+void frictionContact3D_localAlartCurnier(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,
@@ -284,7 +284,7 @@ void frictionContact3D_globalAlartCurnier(
 
   if (!problem->M->matrix0)
   {
-    frictionContact3D_sparseGlobalAlartCurnier(
+    frictionContact3D_sparseLocalAlartCurnier(
       problem,
       reaction,
       velocity,
@@ -353,7 +353,7 @@ void frictionContact3D_globalAlartCurnier(
   while (iter++ < itermax)
   {
 
-    frictionContact3D_globalAlartCurnierFunction(
+    frictionContact3D_AlartCurnierFunction(
       problemSize,
       reaction, velocity,
       problem->mu, rho,
@@ -418,7 +418,7 @@ void frictionContact3D_globalAlartCurnier(
 
     if (!(iter % erritermax))
     {
-      frictionContact3D_globalAlartCurnierFunction(problemSize,
+      frictionContact3D_AlartCurnierFunction(problemSize,
           reaction, velocity,
           problem->mu, rho,
           F, NULL, NULL);
@@ -487,7 +487,7 @@ void frictionContact3D_globalAlartCurnier(
 
 }
 
-int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
+int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
   SolverOptions* options)
 {
   if (verbose > 0)
@@ -655,7 +655,7 @@ int globalLineSearchSparseGP(
     cblas_dcopy(problemSize, qfree, 1, velocity, 1);
     prodSBM(problemSize, problemSize, 1., W, tmp, 1., velocity);
 
-    frictionContact3D_globalAlartCurnierFunction(problemSize, tmp,
+    frictionContact3D_AlartCurnierFunction(problemSize, tmp,
         velocity, mu, rho, F,
         NULL, NULL);
 
@@ -706,7 +706,7 @@ int globalLineSearchSparseGP(
   return -1;
 }
 
-void frictionContact3D_sparseGlobalAlartCurnierInit(
+void frictionContact3D_sparseLocalAlartCurnierInit(
   SolverOptions *SO)
 {
   DMUMPS_STRUC_C* mumps_id = malloc(sizeof(DMUMPS_STRUC_C));
@@ -720,6 +720,8 @@ void frictionContact3D_sparseGlobalAlartCurnierInit(
   mumps_id->sym = 0;
   mumps_id->comm_fortran = USE_COMM_WORLD;
   dmumps_c(mumps_id);
+
+  SO->iparam[8] = mumps_id->comm_fortran;
 
   if (verbose > 0)
   {
@@ -742,7 +744,7 @@ void frictionContact3D_sparseGlobalAlartCurnierInit(
   //mumps_id->CNTL(5) = ...;
 }
 
-void frictionContact3D_sparseGlobalAlartCurnier(
+void frictionContact3D_sparseLocalAlartCurnier(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,
@@ -778,19 +780,19 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
   int mumps_com = options->iparam[8];
 
-  if (mumps_com<0)
+  if (mumps_com==-1)
   {
     int ierr, myid;
     int argc = 0;
     char **argv;
     ierr = MPI_Init(&argc, &argv);
     ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    frictionContact3D_sparseGlobalAlartCurnierInit(options);
+    frictionContact3D_sparseLocalAlartCurnierInit(options);
     mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
   }
   else /* we suppose mpi init has been done */
   {
-    frictionContact3D_sparseGlobalAlartCurnierInit(options);
+    frictionContact3D_sparseLocalAlartCurnierInit(options);
     mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
     mumps_id->comm_fortran = mumps_com;
   }
@@ -857,7 +859,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   while (iter++ < itermax)
   {
 
-    frictionContact3D_globalAlartCurnierFunction(problemSize,
+    frictionContact3D_AlartCurnierFunction(problemSize,
         reaction, velocity,
         problem->mu, rho,
         F, A, B);
@@ -917,7 +919,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
 
     if (!(iter % erritermax))
     {
-      frictionContact3D_globalAlartCurnierFunction(problemSize,
+      frictionContact3D_AlartCurnierFunction(problemSize,
           reaction, velocity,
           problem->mu, rho,
           F, NULL, NULL);
@@ -992,13 +994,13 @@ void frictionContact3D_sparseGlobalAlartCurnier(
 
 #else /*WITH_MUMPS*/
 
-void frictionContact3D_sparseGlobalAlartCurnierInit(
+void frictionContact3D_sparseLocalAlartCurnierInit(
   SolverOptions *SO)
 {
   fprintf(stderr, "The sparse global Alart & Curnier solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
 }
 
-void frictionContact3D_sparseGlobalAlartCurnier(
+void frictionContact3D_sparseLocalAlartCurnier(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,
