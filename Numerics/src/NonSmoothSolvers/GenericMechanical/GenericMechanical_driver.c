@@ -25,6 +25,7 @@
 
 #include "NumericsOptions.h"
 #include "GenericMechanical_Solvers.h"
+#include "GenericMechanical_cst.h"
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_compute_error.h"
 #include "FrictionContact3D_unitary_enumerative.h"
