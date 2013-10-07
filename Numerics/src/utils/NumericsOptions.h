@@ -53,7 +53,7 @@ typedef struct
   char fileName[256];   
   char title[256];
   char description[1024];
-  char math_info[1024];
+  char mathInfo[1024];
   int counter;
 } NumericsOptions;
 

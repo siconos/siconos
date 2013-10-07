@@ -68,13 +68,13 @@ int write_test_fclib(char * filename)
   strcat(description, "Rewriting Siconos Numerics test ");
   strcat(description, filename);
   strcat(description, " in FCLIB format");
-  char * math_info = (char *)malloc(n * sizeof(char *));
-  strcpy(math_info,  "unknown");
+  char * mathInfo = (char *)malloc(n * sizeof(char *));
+  strcpy(mathInfo,  "unknown");
 
   frictionContact_fclib_write(problem,
                               title,
                               description,
-                              math_info,
+                              mathInfo,
                               basename);
 
   /* read fclib problem */
@@ -92,7 +92,7 @@ int write_test_fclib(char * filename)
   frictionContact_fclib_write(problem1,
                               title,
                               description,
-                              math_info,
+                              mathInfo,
                               basename);
 
 
@@ -117,7 +117,7 @@ int write_test_fclib(char * filename)
   free(basename);
   free(title);
   free(description);
-  free(math_info);
+  free(mathInfo);
   printf("\n End of test \n");
   return info;
 }

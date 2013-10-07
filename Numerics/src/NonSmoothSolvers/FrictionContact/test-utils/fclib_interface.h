@@ -30,7 +30,7 @@ extern "C"
   FrictionContactProblem* frictionContact_fclib_read(const char *path);
 
   int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description,
-                                  char * math_info,
+                                  char * mathInfo,
                                   const char *path);
 
 #endif

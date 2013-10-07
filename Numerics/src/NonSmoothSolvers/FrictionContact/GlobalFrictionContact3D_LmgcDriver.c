@@ -18,7 +18,7 @@ int globalFrictionContact_fclib_write(
   GlobalFrictionContactProblem* problem, 
   char * title, 
   char * description, 
-  char * math_info,
+  char * mathInfo,
   const char *path)
 {
   int rinfo = 0;
@@ -34,7 +34,7 @@ int globalFrictionContact_fclib_write(
   fclib_problem.info = &info;
   info.title = title;
   info.description = description;
-  info.math_info = math_info;
+  info.math_info = mathInfo;
 
   struct fclib_matrix M, H;
 
@@ -178,13 +178,13 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
     strcat(description, "Rewriting in hdf5 through siconos of  ");
     strcat(description, fname);
     strcat(description, " in FCLIB format");
-    char * math_info = (char *)malloc(n * sizeof(char *));
-    strcpy(math_info,  "unknown");
+    char * mathInfo = (char *)malloc(n * sizeof(char *));
+    strcpy(mathInfo,  "unknown");
 
     globalFrictionContact_fclib_write(&problem,
                                       title,
                                       description,
-                                      math_info,
+                                      mathInfo,
                                       fname);
 
 

@@ -66,7 +66,7 @@ FrictionContactProblem* frictionContact_fclib_read(const char *path)
 
 }
 
-int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description, char * math_info,
+int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description, char * mathInfo,
                                 const char *path)
 {
   int info = 0;
@@ -86,7 +86,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   fclib_problem->info = malloc(sizeof(struct fclib_info)) ;
   fclib_problem->info->title = title;
   fclib_problem->info->description = description;
-  fclib_problem->info->math_info = math_info;
+  fclib_problem->info->math_info = mathInfo;
 
   fclib_problem->W = malloc(sizeof(struct fclib_matrix));
   fclib_problem->R = NULL;

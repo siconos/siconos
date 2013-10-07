@@ -313,7 +313,7 @@ void snOutputFrictionContactProblem(FrictionContactProblem* problem,
     frictionContact_fclib_write(problem,
                                 nopts->title,
                                 nopts->description,
-                                nopts->math_info,
+                                nopts->mathInfo,
                                 fname);
 
 

@@ -60,5 +60,5 @@ void setDefaultNumericsOptions(NumericsOptions* opts)
   strcpy(opts->fileName, "NumericsDefaultOutputFile");
   strcpy(opts->title, "none");
   strcpy(opts->description, "without description");
-  strcpy(opts->math_info, "none");
+  strcpy(opts->mathInfo, "none");
 }

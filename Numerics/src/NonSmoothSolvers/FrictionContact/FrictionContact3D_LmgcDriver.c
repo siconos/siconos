@@ -118,13 +118,13 @@ int frictionContact3D_LmgcDriver(double *reaction,
     strcat(description, "Rewriting in hdf5 through siconos of  ");
     strcat(description, fname);
     strcat(description, " in FCLIB format");
-    char * math_info = (char *)malloc(n * sizeof(char *));
-    strcpy(math_info,  "unknown");
+    char * mathInfo = (char *)malloc(n * sizeof(char *));
+    strcpy(mathInfo,  "unknown");
 
     frictionContact_fclib_write(FC,
                                 title,
                                 description,
-                                math_info,
+                                mathInfo,
                                 fname);
 
 
