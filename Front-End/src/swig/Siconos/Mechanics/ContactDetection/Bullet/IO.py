@@ -15,6 +15,8 @@ from Siconos.Kernel import cast_NewtonImpactFrictionNSL
 
 from Siconos.IO import MechanicsIO
 
+import Siconos.Numerics as Numerics
+
 
 def object_id(obj):
     """returns an unique object identifier"""
@@ -222,15 +224,29 @@ class Dat():
                                nc[0], nc[1], nc[2],
                                cf[0], cf[1], cf[2]))
 
-
     def outputSolverInfos(self):
         """
         Outputs solver #iterations & precision reached
         """
 
         time = self._broadphase.model().simulation().nextTime()
-        so = self._broadphase.model().simulation().oneStepNSProblem(0).numericsSolverOptions()
-        iterations = so.iparam[3]
-        precision = so.dparam[2]
-        local_precision = so.dparam[3]
-        self._solver_traces_file.write('{0} {1} {2} {3}\n'.format(time, iterations, precision, local_precision))
+        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
+            numericsSolverOptions()
+
+        if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
+            iterations = so.iparam[3]
+            precision = so.dparam[2]
+            local_precision = so.dparam[3]
+        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
+            iterations = so.iparam[7]
+            precision = so.dparam[1]
+            local_precision = 0.
+        # maybe wrong for others
+        else:
+            iterations = so.iparam[1]
+            precision = so.dparam[1]
+            local_precision = so.dparam[2]
+
+        self._solver_traces_file.write('{0} {1} {2} {3}\n'.
+                                       format(time, iterations, precision,
+                                              local_precision))

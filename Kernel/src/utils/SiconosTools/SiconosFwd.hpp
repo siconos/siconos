@@ -39,7 +39,9 @@ DEFINE_SPTR(SimulationXML)
 DEFINE_SPTR(EventDriven)
 
 DEFINE_SPTR(LCP)
+DEFINE_SPTR(QP)
 
+DEFINE_SPTR(RelayNSL)
 DEFINE_SPTR(MixedComplementarityConditionNSL)
 
 DEFINE_SPTR(TimeDiscretisationXML)

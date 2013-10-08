@@ -154,9 +154,11 @@ namespace std
 %shared_ptr(NumericsMatrix);
 %shared_ptr(SparseMatrix);
 %shared_ptr(SparseBlockStructuredMatrix);
+%shared_ptr(FrictionContactProblem);
 
 %include NumericsOptions.h
 %include solverOptions.i
+%include FrictionContactProblem.i
 
 // access NumericsMatrix cf Numerics.i
 %typemap(out) (std11::shared_ptr<NumericsMatrix>) {
@@ -198,6 +200,8 @@ namespace std
  // segfaults...
  // we cannot share data struct
  //%import Numerics.i
+
+%include "SiconosConst.hpp"
 
 %include "SiconosVisitables.hpp"
 
@@ -272,7 +276,7 @@ typedef __mpz_struct mpz_t[1];
   {
     return std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
   }
- 
+
 %}
 
 

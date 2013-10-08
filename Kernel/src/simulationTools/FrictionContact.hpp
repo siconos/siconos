@@ -145,6 +145,10 @@ public:
     return (*_mu)[i];
   }
 
+  /** update mu vector
+   */
+  void updateMu();
+
   /** set the driver-function used to solve the problem
       \param a function of prototype Driver
   */
@@ -160,11 +164,22 @@ public:
    */
   void initialize(SP::Simulation);
 
+  /** get the friction contact problem
+   * \return the friction contact problem
+   */
+  SP::FrictionContactProblem frictionContactProblem();
+
+  /** solve a friction contact problem
+   * \param problem the friction contact problem, default current problem
+   * \return info solver information result
+   */
+  int solve(SP::FrictionContactProblem problem = SP::FrictionContactProblem());
+
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
    *  \param double current time
    *  \return int information about the solver convergence (0: ok, >0 problem, see Numerics documentation)
    */
-  int compute(double time);
+  virtual int compute(double time);
 
   /** print the data to the screen */
   void display() const;

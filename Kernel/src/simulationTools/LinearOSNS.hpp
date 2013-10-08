@@ -131,7 +131,7 @@ public:
   /** get w, the initial state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector W() const
+  inline SP::SiconosVector w() const
   {
     return _w;
   }

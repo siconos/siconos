@@ -32,6 +32,7 @@
 #include "misc.h"
 
 #define OUTPUT_ON_ERROR 4
+#define OUTPUT_ON_ITER  8
 
 /** Structure used to set general options of Numerics functions,
   * structures and so on.
@@ -39,10 +40,13 @@
   *  \param verboseMode (0: off, 1: on)
   *  \param outputMode  (0: none, 1: c file, 2: dat file, 3: fclib file) 
   *                      with OUTPUT_ON_ERROR flag : only on solver error
+  *                      with OUTPUT_ON_ITER only when iterations > outputIterMax
   *  \param fileName    output filename
 
   *  \param description experience description
-  *  \param counter     a counter for file numeration
+  *  \param mathInfo    mathematical informations
+  *  \param outputIterMax maximum iterations for output
+  *  \param counter     internal counter for file numeration
   */
 
 /* note : swig is ok with char[n] (wrapper checks string length) */
@@ -54,6 +58,7 @@ typedef struct
   char title[256];
   char description[1024];
   char mathInfo[1024];
+  int outputIterMax;
   int counter;
 } NumericsOptions;
 

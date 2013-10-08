@@ -121,30 +121,11 @@ void FrictionContact::initialize(SP::Simulation sim)
                      (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
     }
   }
-
-
-
-
-
 }
 
-int FrictionContact::compute(double time)
+void FrictionContact::updateMu()
 {
-  int info = 0;
-  // --- Prepare data for FrictionContact computing ---
-  bool cont = preCompute(time);
-  if (!cont)
-    return info;
-
-  // Update mu
   _mu->clear();
-
-  // nothing to do
-  if (indexSetLevel() == LEVELMAX)
-  {
-    return info;
-  }
-
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
@@ -152,6 +133,51 @@ int FrictionContact::compute(double time)
     _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
                    (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
   }
+}
+
+SP::FrictionContactProblem FrictionContact::frictionContactProblem()
+{
+  SP::FrictionContactProblem numerics_problem(new FrictionContactProblem());
+  numerics_problem->dimension = _contactProblemDim;
+  numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
+  numerics_problem->M = &*_M->getNumericsMatrix();
+  numerics_problem->q = &*_q->getArray();
+  numerics_problem->mu = &(_mu->at(0));
+  return numerics_problem;
+}
+
+int FrictionContact::solve(SP::FrictionContactProblem problem)
+{
+  if (!problem)
+  {
+    problem = frictionContactProblem();
+  }
+  
+  return (*_frictionContact_driver)(&*problem,
+                                    &*_z->getArray(),
+                                    &*_w->getArray(),
+                                    &*_numerics_solver_options,
+                                    &*_numerics_options);
+}
+
+
+int FrictionContact::compute(double time)
+{
+  int info = 0;
+  // --- Prepare data for FrictionContact computing ---
+  bool cont = preCompute(time);
+  if (!cont)
+  {
+    return info;
+  }
+  // nothing to do
+  if (indexSetLevel() == LEVELMAX)
+  {
+    return info;
+  }
+  
+  updateMu();
+  
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)
@@ -160,27 +186,11 @@ int FrictionContact::compute(double time)
   // - the global options for Numerics (verbose mode ...)
   if (_sizeOutput != 0)
   {
-    // The FrictionContact Problem in Numerics format
-    FrictionContactProblem numerics_problem;
-    if (_contactProblemDim == 2)
-      numerics_problem.dimension = 2;
-    else // if(_contactProblemDim == 3)
-      numerics_problem.dimension = 3;
-
-    numerics_problem.M = &*_M->getNumericsMatrix();
-    numerics_problem.q = &*_q->getArray();
-    numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;
-    numerics_problem.mu = &(_mu->at(0));
     // Call Numerics Driver for FrictionContact
-    info = (*_frictionContact_driver)(&numerics_problem,
-                                      &*_z->getArray() ,
-                                      &*_w->getArray() ,
-                                      &*_numerics_solver_options,
-                                      &*_numerics_options);
+    info = solve();
     postCompute();
-
   }
-
+  
   return info;
 }
 

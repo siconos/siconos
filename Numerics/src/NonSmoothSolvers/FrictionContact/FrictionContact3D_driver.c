@@ -50,7 +50,7 @@ char * SICONOS_FRICTION_3D_PROX_STR = "F3D_PROX";
 char * SICONOS_FRICTION_3D_QUARTIC_STR = "F3D_QUARTIC";
 char * SICONOS_FRICTION_3D_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
 
-void snOutputFrictionContactProblem(FrictionContactProblem* problem, 
+int snOutputFrictionContactProblem(FrictionContactProblem* problem, 
                                     double* velocity, double* reaction, 
                                     SolverOptions *opts, int after_solve, 
                                     int info);
@@ -71,8 +71,20 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     options->numericsOptions = global_options;
   }
 
-  snOutputFrictionContactProblem(problem, reaction, velocity, options, 
-                                 0, 0);
+  double * reaction_backup = NULL;
+  double * velocity_backup = NULL; 
+  int output_maybe = snOutputFrictionContactProblem(problem, reaction, velocity, options, 
+                                              0, 0);
+  
+  if (output_maybe)
+  {
+    /* guess backup */
+    int vector_size = problem->dimension * problem->numberOfContacts;
+    reaction_backup = (double *) malloc(vector_size*sizeof(double));
+    velocity_backup = (double *) malloc(vector_size*sizeof(double));
+    memcpy(reaction_backup, reaction, vector_size);
+    memcpy(velocity_backup, velocity, vector_size);
+  }
 
   /* If the options for solver have not been set, read default values in .opt file */
   int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
@@ -195,8 +207,14 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   }
   }
 
-  snOutputFrictionContactProblem(problem, reaction, velocity, options, 
-                                 1, info);
+  if (output_maybe)
+  {
+    snOutputFrictionContactProblem(problem, reaction_backup, velocity_backup, 
+                                   options, 1, info);
+
+    free(reaction_backup);
+    free(velocity_backup);
+  }
 
   return info;
 
@@ -254,10 +272,10 @@ void snPrintf(int level, SolverOptions* opts, const char *fmt, ...)
 #include "fclib_interface.h"
 #endif
 
-void snOutputFrictionContactProblem(FrictionContactProblem* problem, 
-                                    double* velocity, double* reaction, 
-                                    SolverOptions *opts, int after_solve, 
-                                    int info)
+int snOutputFrictionContactProblem(FrictionContactProblem* problem, 
+                                   double* velocity, double* reaction, 
+                                   SolverOptions *opts, int after_solve, 
+                                   int info)
 {
 
   assert(opts);
@@ -272,7 +290,12 @@ void snOutputFrictionContactProblem(FrictionContactProblem* problem,
     if (after_solve && info)
     {
       outputFile = nopts->outputMode & (OUTPUT_ON_ERROR - 1);
-    } /* else no output */
+    } 
+    else
+    {
+      /* else no output before solve */
+      return (1);
+    }
   }
   else
   {
@@ -323,4 +346,5 @@ void snOutputFrictionContactProblem(FrictionContactProblem* problem,
     snPrintf(0, opts, "fclib is not available, you must configure Siconos/Numerics with cmake [...] -DWITH_FCLIB=1\n");
 #endif
   }
+  return (0);
 }

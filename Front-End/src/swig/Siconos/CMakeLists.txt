@@ -2,14 +2,17 @@ SET_SOURCE_FILES_PROPERTIES(Numerics.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(Kernel.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(IO.i PROPERTIES CPLUSPLUS ON)
 
+
 IF(WITH_FCLIB)
   SET(SWIG_DEFS "${SWIG_DEFS};-DWITH_FCLIB")
+  SET_SOURCE_FILES_PROPERTIES(FCLib.i PROPERTIES CPLUSPLUS ON)
 ENDIF()
 
 SET_SOURCE_FILES_PROPERTIES(
   Numerics.i 
   Kernel.i 
-  IO.i 
+  IO.i
+  FCLib.i
   PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_SOURCE_DIR}/src/swig/Siconos;-Wall;${SWIG_DEFS}")
 
 # cf LIBRARY_PROJECT_SETUP, but we do not use it here.
@@ -116,6 +119,7 @@ IF(DOXYGEN_FOUND)
     KernelTypes.i
     KernelRegistration.i
     solverOptions.i
+    FrictionContactProblem.i
     handleException.i
     start.i
     end.i
@@ -128,6 +132,7 @@ IF(DOXYGEN_FOUND)
     KernelTypes.i
     KernelRegistration.i
     solverOptions.i
+    FrictionContactProblem.i
     start.i
     end.i
     numpy.i
@@ -150,6 +155,12 @@ IF(HAVE_SICONOS_IO)
   SET(IO_generated_file_fullname ${swig_generated_file_fullname})
   MESSAGE(STATUS "IO generated files ${swig_generated_file_fullname}")
   ADD_DEPENDENCIES(${SWIG_MODULE_IO_REAL_NAME} ${SWIG_MODULE_Kernel_REAL_NAME})
+ENDIF()
+
+IF(WITH_FCLIB)
+  SWIG_ADD_MODULE(FCLib python FCLib.i)
+  SET(FCLib_generated_file_fullname ${swig_generated_file_fullname})
+  MESSAGE(STATUS "FCLib generated files ${swig_generated_file_fullname}")
 ENDIF()
 
 IF(HAVE_SICONOS_MECHANICS)
@@ -184,12 +195,15 @@ SWIG_LINK_LIBRARIES(Numerics ${PYTHON_LIBRARIES}
 SWIG_LINK_LIBRARIES(Kernel ${PYTHON_LIBRARIES} 
   ${${PROJECT_NAME}_LINK_LIBRARIES})
 
-
 IF(HAVE_SICONOS_IO)
   SWIG_LINK_LIBRARIES(IO ${PYTHON_LIBRARIES} 
     ${${PROJECT_NAME}_LINK_LIBRARIES})
 ENDIF()
 
+IF(WITH_FCLIB)
+  SWIG_LINK_LIBRARIES(FCLib ${PYTHON_LIBRARIES} 
+    ${${PROJECT_NAME}_LINK_LIBRARIES})
+ENDIF()
 
 
 
@@ -255,6 +269,12 @@ IF(HAVE_SICONOS_IO)
     DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
 ENDIF()
 
+IF(WITH_FCLIB)
+  INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/FCLib.py 
+    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
+  INSTALL(TARGETS ${SWIG_MODULE_FCLib_REAL_NAME}
+    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
+ENDIF()
 
 
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/KernelTypes.i

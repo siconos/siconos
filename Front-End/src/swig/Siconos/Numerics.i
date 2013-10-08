@@ -29,7 +29,6 @@
 #include "SolverOptions.h"
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
-#include "FrictionContactProblem.h"
 #include "FrictionContact3D_Solvers.h"
 #include "Friction_cst.h"
 #include "frictionContact_test_function.h"
@@ -54,10 +53,6 @@
  // more convenient
  %rename (MLCP) MixedLinearComplementarityProblem;
  %rename (MCP) MixedComplementarityProblem;
-
-
-
-
 
  %apply (int DIM1 , int DIM2 , double* IN_FARRAY2)
  {(int nrows, int ncols, double* data          )};
@@ -1702,7 +1697,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 %ignore frictionContactProblem_new; // signature issue with mu param
 
 
-%include "FrictionContactProblem.h"
+%include FrictionContactProblem.i
+
 %include "FrictionContact3D_Solvers.h"
 %include "FrictionContact2D_Solvers.h"
 %include "Friction_cst.h"
