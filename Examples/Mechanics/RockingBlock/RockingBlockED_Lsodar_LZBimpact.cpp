@@ -278,7 +278,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(DataPlot);
     dataPlotRef.zero();
     ioMatrix::read("resultED_LZBmodel_Lsodar.ref", "ascii", dataPlotRef);
-    if ((DataPlot - dataPlotRef).normInf() > 1e-12)
+    if ((DataPlot - dataPlotRef).normInf() > 1e-10)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       std::cout << (DataPlot - dataPlotRef).normInf() << std::endl;
