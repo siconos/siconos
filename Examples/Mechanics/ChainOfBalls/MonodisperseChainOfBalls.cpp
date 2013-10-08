@@ -306,7 +306,7 @@ int main(int argc, char* argv[]){
 	  ++show_progress;
         }
 
-    cout << "Computation Time " << time.elapsed()  << endl;
+    cout << "\nComputation Time " << time.elapsed()  << endl;
     // --- Output files ---
     cout<<"====> Output file writing ..."<<endl;
     ioMatrix::write("result.dat", "ascii",dataPlot,"noDim");
