@@ -48,13 +48,13 @@ int main(int argc, char* argv[])
     int N = 1000;
     double L1 = 1.0;
     double L2 = 1.0;
-    double L3 = 1.0;
+    //double L3 = 1.0;
     double theta = 1.0;              // theta for Moreau integrator
     double g = 9.81; // Gravity
     double m = 1.;
-    double wx = 0.0;
-    double wz = 0.0;
-    double wy = 0.0;
+    // double wx = 0.0;
+    // double wz = 0.0;
+    // double wy = 0.0;
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -296,7 +296,6 @@ int main(int argc, char* argv[])
     SP::SiconosVector yAux(new SiconosVector(3));
     yAux->setValue(0, 1);
     SP::SimpleMatrix Jaux(new SimpleMatrix(3, 3));
-    int NewtonIt = 0;
     Index dimIndex(2);
     Index startIndex(4);
     fprintf(pFile, "double T[%d*%d]={", N + 1, outputSize);
@@ -330,9 +329,9 @@ int main(int argc, char* argv[])
       dataPlot(k, 19) = (*q3)(4);
       dataPlot(k, 20) = (*q3)(5);
       dataPlot(k, 21) = (*q3)(6);
-      printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
+//      printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
 
-      for (int jj = 0; jj < outputSize; jj++)
+      for (unsigned int jj = 0; jj < outputSize; jj++)
       {
         if ((k || jj))
           fprintf(pFile, ",");
@@ -348,7 +347,7 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot);
 
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
