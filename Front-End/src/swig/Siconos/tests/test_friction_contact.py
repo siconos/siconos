@@ -37,7 +37,7 @@ def lineSearch(problem, reaction, rho, delta_reaction, maxiter):
 
     velocity = W * reaction + problem.q
 
-    F,A,B = N.frictionContact3D_globalAlartCurnierFunction(reaction, velocity, problem.mu, rho)
+    F,A,B = N.frictionContact3D_AlartCurnierFunction(reaction, velocity, problem.mu, rho)
 
     q0 = 0.5 * inner(F.transpose(),F.transpose())
 
@@ -56,7 +56,7 @@ def lineSearch(problem, reaction, rho, delta_reaction, maxiter):
         velocity = W * reaction + problem.q
 
 
-        F,A,B = N.frictionContact3D_globalAlartCurnierFunction(reaction, velocity, problem.mu, rho)
+        F,A,B = N.frictionContact3D_AlartCurnierFunction(reaction, velocity, problem.mu, rho)
 
         q = 0.5 * inner(F.transpose(), F.transpose())
 
@@ -82,7 +82,7 @@ def lineSearch(problem, reaction, rho, delta_reaction, maxiter):
 
     return alpha
 
-def globalAlartCurnier(problem, reaction, velocity, options):
+def localAlartCurnier(problem, reaction, velocity, options):
 
     problemSize = 3 * problem.numberOfContacts
     itermax = options.iparam[0]
@@ -100,7 +100,7 @@ def globalAlartCurnier(problem, reaction, velocity, options):
 
     while (iter < itermax and error > tolerance):
 
-        F,A,B=N.frictionContact3D_globalAlartCurnierFunction(
+        F, A, B = N.frictionContact3D_AlartCurnierFunction(
             reaction,
             velocity,
             problem.mu,
@@ -139,12 +139,12 @@ def test_fc3dnsgs():
     assert not r
 
 
-def test_fc3dglobalac_simple_case():
+def test_fc3dlocalac_simple_case():
     N.setNumericsVerbose(2)
     FCP = N.FrictionContactProblem(3,M,q,mu)
     SO=N.SolverOptions(N.SICONOS_FRICTION_3D_LOCALAC)
 
-    r=N.frictionContact3D_globalAlartCurnier(FCP, reactions, velocities, SO)
+    r = N.frictionContact3D_localAlartCurnier(FCP, reactions, velocities, SO)
     assert SO.dparam[1] < 1e-10
     assert not r
 
@@ -161,12 +161,12 @@ def test_fc3dglobalac_full():
     reactions = matrix(zeros(problem.dimension*problem.numberOfContacts)).transpose()
     velocities = matrix(zeros(problem.dimension*problem.numberOfContacts)).transpose()
 
-    r,v,iter,err=globalAlartCurnier(problem, reactions, velocities, SO)
+    r, v, iter, err = localAlartCurnier(problem, reactions, velocities, SO)
 
     reactions = matrix(zeros(problem.dimension*problem.numberOfContacts)).transpose()
     velocities = matrix(zeros(problem.dimension*problem.numberOfContacts)).transpose()
 
-    i=N.frictionContact3D_globalAlartCurnier(problem,reactions,velocities, SO)
+    i = N.frictionContact3D_localAlartCurnier(problem,reactions,velocities, SO)
 
     print 'iter=', iter
     print 'iter=', SO.iparam[7]
