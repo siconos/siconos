@@ -434,7 +434,7 @@ void  MBTB_initSimu(double hTS, int withProj)
   osnspb->setKeepLambdaAndYState(true);
   //osnspb->numericsSolverOptions()->iparam[1]=0;
   osnspb->numericsSolverOptions()->dWork=(double*) malloc(512*sizeof(double));
-  //osnspb->setNumericsVerboseMode(true);
+  osnspb->setNumericsVerboseMode(true);
 
   //osnspb->numericsSolverOptions()->iparam[1]=0;
   //osnspb->numericsSolverOptions()->dparam[0]=1e-5;

@@ -211,7 +211,8 @@ void _MBTB_STEP()
   sSimu->setNewtonTolerance(1e-6);
   sSimu->setNewtonMaxIteration(15);
   sSimu->advanceToEvent();
-  //sSimu->oneStepNSProblem(0)->display();
+
+  sSimu->oneStepNSProblem(0)->display();
   ACE_times[ACE_TIMER_SICONOS].stop();
 
 
