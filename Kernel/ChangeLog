@@ -23,6 +23,16 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
+  v3.6.0 October 2013
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* Update ublas bindings.
+	* Add interface to eigenproblems solvers from boost ublas (bindings)
+	* Fix bug in interactions (lambda's reset)
+
+	
+--------------------------------------------------------------------------------
   v3.5.0 October 2012
 --------------------------------------------------------------------------------
 Main Changes:
