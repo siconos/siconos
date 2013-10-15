@@ -79,6 +79,76 @@
 %enddef
 
 
+%define PY_REGISTER_WITHOUT_DIRECTOR_REF(TYPE)
+PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
+%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
+(const TYPE&)
+{
+  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (const TYPE&)
+  $1 = 1;
+}
+
+// numpy or TYPE on input -> TYPE 
+%typemap(in,fragment="NumPy_Fragments") 
+  const TYPE &
+(PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosVector> keeper)
+{
+  // %typemap(in,fragment="NumPy_Fragments")
+  // %TYPE (PyArrayObject* array=NULL, int
+  // %is_new_object)
+  void *argp1=0;
+  int res1=0;
+  int newmem = 0;
+  TYPE temp1 ;
+  TYPE *smartarg1 = 0 ;
+ 
+  // try a conversion from TYPE
+  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0 |  0 , &newmem);
+  if (SWIG_IsOK(res1)) 
+  {
+    if (newmem & SWIG_CAST_NEW_MEMORY) 
+    {
+      // taken from generated code
+      temp1 = *reinterpret_cast< TYPE * >(argp1);
+      delete reinterpret_cast< TYPE * >(argp1);
+      $1 = &temp1;
+    } 
+    else {
+      smartarg1 = reinterpret_cast< TYPE * >(argp1);
+      $1 = smartarg1;
+    }
+  }
+  else
+  {
+    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+
+    if (!array)
+    {
+      void *argp;
+      SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
+    }
+    else
+    {
+      if (!require_dimensions(array,1) ||
+          !require_native(array) || !require_fortran(array)) SWIG_fail;
+      
+      SP::SiconosVector tmp(new SiconosVector(array_size(array,0)));
+      // copy : with SiconosVector based on resizable std::vector there is
+      // no other way
+      memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
+      $1 = &*tmp;
+      keeper.push_back(tmp);
+    }
+  }
+}
+
+%typemap(freearg) (const TYPE &)
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
+%enddef
+
 %define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
 %inline
 %{
@@ -99,3 +169,4 @@
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
 %enddef
+

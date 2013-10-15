@@ -582,3 +582,5 @@ TYPEMAP_MATRIX(std11::shared_ptr<SimpleMatrix>, SWIGTYPE_p_std11__shared_ptrT_Si
 %apply (std11::shared_ptr<SimpleMatrix>) { (SP::SimpleMatrix) };
 
 %apply (std11::shared_ptr<std::vector<unsigned int> >) { (SP::UnsignedIntVector) };
+
+

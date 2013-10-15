@@ -4,7 +4,7 @@
 #define KERNEL_REGISTRATION()                                           \
   PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix);                          \
   PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);                           \
-  PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector);                          \
+  PY_REGISTER_WITHOUT_DIRECTOR_REF(SiconosVector);                      \
   PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                            \
   PY_REGISTER(NonSmoothLaw);                                            \
   PY_REGISTER(NewtonImpactNSL);                                         \
