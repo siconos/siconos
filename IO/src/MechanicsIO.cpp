@@ -69,7 +69,10 @@ struct GetVelocity : public SiconosVisitor
   }
 };
 
-
+struct ForMu : public Question<double>
+{
+  ANSWER(NewtonImpactFrictionNSL, mu());
+};
 
 struct ContactPointVisitor : public SiconosVisitor
 {
@@ -81,22 +84,31 @@ struct ContactPointVisitor : public SiconosVisitor
 #ifdef HAVE_BULLET
   void visit(const BulletR& rel)
   {
-    answer.resize(9);
+    answer.resize(14);
     btManifoldPoint& cp = *rel.contactPoint();
     const btVector3& posa = cp.getPositionWorldOnA();
+    const btVector3& posb = cp.getPositionWorldOnB();
     const SiconosVector& nc = *rel.nc();
     const SimpleMatrix& jachqT = *rel.jachqT();
-    SiconosVector cf(7);
+    double id = (size_t) &*rel.contactPoint();
+    double mu = ask<ForMu>(*inter.nslaw());
+    SiconosVector cf(3);
     prod(*inter.lambda(1), jachqT, cf, true);
-    answer.setValue(0, posa[0]);
-    answer.setValue(1, posa[1]);
-    answer.setValue(2, posa[2]);
-    answer.setValue(3, nc(0));
-    answer.setValue(4, nc(1));
-    answer.setValue(5, nc(2));
-    answer.setValue(6, cf(0));
-    answer.setValue(7, cf(1));
-    answer.setValue(8, cf(2));
+    answer.setValue(0, mu);
+    answer.setValue(1, posa[0]);
+    answer.setValue(2, posa[1]);
+    answer.setValue(3, posa[2]);
+    answer.setValue(4, posb[0]);
+    answer.setValue(5, posb[1]);
+    answer.setValue(6, posb[2]);
+    answer.setValue(7, nc(0));
+    answer.setValue(8, nc(1));
+    answer.setValue(9, nc(2));
+    answer.setValue(10, cf(0));
+    answer.setValue(11, cf(1));
+    answer.setValue(12, cf(2));
+    answer.setValue(13, id);
+
   }
 #endif
 };

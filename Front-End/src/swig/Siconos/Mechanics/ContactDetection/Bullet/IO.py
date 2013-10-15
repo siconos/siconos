@@ -3,6 +3,7 @@
 import VtkShapes
 import shlex
 import numpy as np
+import h5py
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
     BulletDS, BulletWeightedShape, \
@@ -30,7 +31,7 @@ def apply_gravity(body):
 
 
 class Dat():
-    """a Dat object reads at instantiation the positions and
+    """a Dat context manager reads at instantiation the positions and
        orientations of collision objects from :
 
        - a ref file (default ref.txt) with shape primitives or shape
@@ -250,3 +251,246 @@ class Dat():
         self._solver_traces_file.write('{0} {1} {2} {3}\n'.
                                        format(time, iterations, precision,
                                               local_precision))
+
+
+class Hdf5():
+    """a Hdf5 context manager reads at instantiation the positions and
+       orientations of collision objects from :
+
+       - a ref file (default ref.txt) with shape primitives or shape
+         url
+
+       - an input .dat file (default is input.dat)
+
+       input format is :
+       shaped_id object_group mass px py pz ow ox oy oz vx vy vx vo1 vo2 vo3
+
+       with
+         shape_id : line number in ref file (an integer)
+         object group : an integer ; negative means a static object
+         mass : mass of the object (a float)
+         px py pz : position (float)
+         ow ox oy oz : orientation (as an unit quaternion)
+         vx vy vx vo1 vo2 vo3 : velocity
+
+       It provides functions to output position and orientation during
+       simulation (output is done by default in pos.dat)
+
+       output format is : time object_id px py pz ow ox oy oz
+
+       with: 
+         time : float
+         object_id : the object id (int)
+         px, py, pz : components of the position (float)
+         ow, ox, oy oz : components of an unit quaternion (float)
+    """
+
+    def __init__(self, broadphase, osi, shape_filename='ref.txt',
+                 input_filename='input.dat',
+                 set_external_forces=apply_gravity):
+        self._broadphase = broadphase
+        self._osi = osi
+        self._input_filename = input_filename
+        self._reference = dict()
+        self._static_origins = []
+        self._static_orientations = []
+        self._static_transforms = []
+        self._static_cobjs = []
+        self._shape = VtkShapes.Collection(shape_filename)
+        self._static_data = None
+        self._dynamic_data = None
+        self._cf_data = None
+        self._solv_data = None
+        self._out = None
+        self._data = None
+        self._io = MechanicsIO()
+
+        # read data
+        with open(self._input_filename, 'r') as input_file:
+
+            with open('bindings.dat', 'w') as bind_file:
+
+                ids = -1
+                idd = 1
+                for line in input_file:
+                    sline = shlex.split(line)
+                    if len(sline) > 3:
+                        shape_id = int(sline[0])
+                        group_id = int(sline[1])
+                        mass = float(sline[2])
+                        q0, q1, q2, w, x, y, z, v0, v1, v2, v3, v4, v5 =\
+                          [ float(i) for i in sline[3:]]
+
+                        if group_id < 0:
+                            # a static object
+                            static_cobj = btCollisionObject()
+                            static_cobj.setCollisionFlags(
+                                btCollisionObject.CF_STATIC_OBJECT)
+                            origin = btVector3(q0, q1, q2)
+                            self._static_origins.append(origin)
+                            orientation = btQuaternion(x, y, z, w)
+                            self._static_orientations.append(orientation)
+                            transform = btTransform(orientation)
+                            transform.setOrigin(origin)
+                            self._static_transforms.append(transform)
+                            static_cobj.setWorldTransform(transform)
+                            static_cobj.setCollisionShape(
+                                self._shape.at_index(shape_id))
+                            self._reference[ids] = shape_id
+                            self._static_cobjs.append(static_cobj)
+                            broadphase.addStaticObject(static_cobj)
+                            broadphase.addStaticShape(self._shape.at_index(shape_id))
+                            bind_file.write('{0} {1}\n'.format(ids, shape_id))
+                            ids -= 1
+
+                        else:
+                            # a moving object
+                            body = BulletDS(BulletWeightedShape(
+                                self._shape.at_index(shape_id), mass),
+                            [q0, q1, q2, w, x, y, z],
+                            [v0, v1, v2, v3, v4, v5])
+                            self._reference[idd] = \
+                              shape_id
+
+                              # set external forces
+                            set_external_forces(body)
+
+                            # add the dynamical system to the non smooth
+                            # dynamical system
+                            self._broadphase.model().nonSmoothDynamicalSystem().\
+                            insertDynamicalSystem(body)
+                            self._osi.insertDynamicalSystem(body)
+                            bind_file.write('{0} {1}\n'.format(idd, shape_id))
+                            idd += 1
+
+    def __enter__(self):
+        self._out = h5py.File('out.hdf5', 'w')
+        self._data = self._out.create_group('data')
+        self._static_data = self._data.create_dataset('static', (0, 9),
+                                                      maxshape=(None, 9))
+        self._dynamic_data = self._data.create_dataset('dynamic', (0, 9),
+                                                       maxshape=(None, 9))
+        self._cf_data = self._data.create_dataset('cf', (0, 14),
+                                                  maxshape=(None, 14))
+        self._solv_data = self._data.create_dataset('solv', (0, 4),
+                                                    maxshape=(None,4))
+        return self
+
+    def __exit__(self, type_, value, traceback):
+        self._out.close()
+
+    def outputStaticObjects(self):
+        """
+        Outputs positions and orientations of static objects
+        """
+        time = self._broadphase.model().simulation().nextTime()
+        idd = -1
+        p = 0
+        self._static_data.resize(len(self._static_transforms), 0)
+
+        for transform in self._static_transforms:
+            position = transform.getOrigin()
+            rotation = transform.getRotation()
+            self._static_data[p, :] = \
+                [time,
+                 idd,
+                 position.x(),
+                 position.y(),
+                 position.z(),
+                 rotation.w(),
+                 rotation.x(),
+                 rotation.y(),
+                 rotation.z()]
+            idd -= 1
+            p += 1
+
+    def outputDynamicObjects(self):
+        """
+        Outputs positions and orientations of dynamic objects
+        """
+
+        current_line = self._dynamic_data.shape[0]
+
+        time = self._broadphase.model().simulation().nextTime()
+
+        positions = self._io.positions(self._broadphase.model())
+        self._dynamic_data.resize(current_line + positions.shape[0], 0)
+
+        times = np.empty((positions.shape[0], 1))
+        times.fill(time)
+
+        tidd = np.arange(1,
+                         positions.shape[0] + 1).reshape(positions.shape[0], 1)
+
+        self._dynamic_data[current_line:, :] = np.concatenate((times, tidd,
+                                                                   positions),
+                                                                   axis=1)
+
+    def outputContactForces(self):
+        """
+        Outputs contact forces
+        """
+        if self._broadphase.model().nonSmoothDynamicalSystem().\
+                topology().indexSetsSize() > 1:
+            time = self._broadphase.model().simulation().nextTime()
+            interactions = self._broadphase.model().\
+                nonSmoothDynamicalSystem().topology().indexSet(1).vertices()
+            current_line = self._cf_data.shape[0]
+            
+            p = 0
+            for inter in interactions:
+                bullet_relation = cast_BulletR(inter.relation())
+                if bullet_relation is not None:
+                    nslaw = inter.nslaw()
+                    mu = cast_NewtonImpactFrictionNSL(nslaw).mu()
+                    nc = bullet_relation.nc()
+                    lambda_ = inter.lambda_(1)
+                    if(True):
+                        jachqt = bullet_relation.jachqT()
+                        cf = np.dot(jachqt.transpose(), lambda_)
+                        cp = bullet_relation.contactPoint()
+                        posa = cp.getPositionWorldOnA()
+                        posb = cp.getPositionWorldOnB()
+                        self._cf_data.resize(current_line + p + 1,
+                                             0)
+                        self._cf_data[current_line + p, :] = \
+                            [time,
+                             mu,
+                             posa.x(),
+                             posa.y(),
+                             posa.z(),
+                             posb.x(),
+                             posb.y(),
+                             posb.z(),
+                             nc[0], nc[1], nc[2],
+                             cf[0], cf[1], cf[2]]
+                        p += 1
+
+                        
+    def outputSolverInfos(self):
+        """
+        Outputs solver #iterations & precision reached
+        """
+
+        time = self._broadphase.model().simulation().nextTime()
+        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
+            numericsSolverOptions()
+
+        current_line = self._solv_data.shape[0]
+        self._solv_data.resize(current_line + 1, 0)
+        if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
+            iterations = so.iparam[3]
+            precision = so.dparam[2]
+            local_precision = so.dparam[3]
+        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
+            iterations = so.iparam[7]
+            precision = so.dparam[1]
+            local_precision = 0.
+        # maybe wrong for others
+        else:
+            iterations = so.iparam[1]
+            precision = so.dparam[1]
+            local_precision = so.dparam[2]
+
+        self._solv_data[current_line, :] = [time, iterations, precision,
+                                            local_precision]

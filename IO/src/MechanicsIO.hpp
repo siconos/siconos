@@ -53,7 +53,7 @@ public:
   SP::SimpleMatrix velocities(const Model& model) const;
 
   /** get the coordinates of all contact points, normals, reactions and velocities
-      \return a SP::SimpleMatrix where the columns are x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz
+      \return a SP::SimpleMatrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
   */
   SP::SimpleMatrix contactPoints(const Model& model) const;
 };
