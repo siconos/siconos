@@ -200,11 +200,13 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
+    std::cout << "Comparison with a reference file" << std::endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("Woodpecker.ref", "ascii", dataPlotRef);
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    double error = (dataPlot - dataPlotRef).normInf()/  dataPlotRef.normInf();
+    std::cout << "Error = "<< error <<std::endl;
+    if (error > 1e-12)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
