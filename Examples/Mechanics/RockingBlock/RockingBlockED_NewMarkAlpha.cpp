@@ -287,11 +287,13 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl << endl;
     ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
     // Comparison with a reference file
+    std::cout << "Comparison with a reference file" << std::endl;
     SimpleMatrix dataPlotRef(DataPlot);
     dataPlotRef.zero();
     ioMatrix::read("resultED_NewMarkAlpha.ref", "ascii", dataPlotRef);
-
-    if ((DataPlot - dataPlotRef).normInf() > 1e-12)
+    double error = (DataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
+    std::cout << "Error = "<< error << std::endl;
+    if (error > 1e-12)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       std::cout << (DataPlot - dataPlotRef).normInf() << std::endl;

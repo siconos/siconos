@@ -1,7 +1,8 @@
 set autoscale
 extension=".tex"
 resultfile='result.dat'
-resultfile="resultMonodisperseChain_LZBModel.ref"
+#resultfile="resultMonodisperseChain_LZBModel.ref"
+#resultfile="resultTaperedChain_LZBModel.ref"
 apple=1 
 
 
