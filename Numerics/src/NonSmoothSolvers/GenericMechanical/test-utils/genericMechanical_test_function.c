@@ -50,16 +50,20 @@ int genericMechanical_test_function(FILE * f, SolverOptions * options)
 
   if (!info)
   {
-    printf("test succeeded info=%i err=%e and tol=%e\n", info, err, options->dparam[0]);
     if (err > options->dparam[0])
     {
-      printf("but unsucceeded because err>tol\n");
+      printf("test failed: err>tol\n");
+      printf(" ---> info=%i err=%e and tol=%e\n", info, err, options->dparam[0]);
+
       return 1;
     }
+    else
+      printf("test passed: info=%i err=%e and tol=%e\n", info, err, options->dparam[0]);
+
   }
   else
   {
-    printf("test unsucceeded\n");
+    printf("test failed.\n");
   }
   free(reaction);
   free(velocity);

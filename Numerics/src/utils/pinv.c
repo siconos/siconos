@@ -23,65 +23,26 @@
 #include <string.h>
 #include "SiconosLapack.h"
 
-#define NUMERICS_PINV_DEBUG
 /**
  * n : row number
  * m : col number
  * Warnning n correspond to M in the LAPACK routine, and m to N.
+
+ This routine computes the pseudo inverse of A and returns its conditionning.
+ 
  */
 double pinv(double * A, int n, int m, double tolerance)
 {
-//#ifdef COMPLETE_LAPACK_LIBRARIES
-
-  int dimS = n;
-  if (m < n) dimS = m;
+  int dimS = min(n,m);
   double * S =  (double*)malloc(dimS * sizeof(*S));
-  char JOBU = 'A';
   int LDU = n;
-  double *U = (double*)malloc(n * n * sizeof(double));
-  char JOBVT = 'A'  ;
+  double *U = (double*)malloc(LDU * n * sizeof(double));
   int LDVT = m;
-  double *VT = (double*)malloc(m * m * sizeof(double));
-  /*    printf("Matrix A:\n "); */
-  /*     for (int i = 0; i< n; i++){ */
-  /*  for (int j = 0; j < m; j++){ */
-  /*      printf("%8.6e\t", A[i+j*n]) ; */
-  /*  } */
-  /*  printf("\n"); */
-  /*     }  */
-
+  double *VT = (double*)malloc(LDVT * m * sizeof(double));
   int InfoDGSVD = -1;
   double * superb = (double*)malloc((min(m, n) - 1)*sizeof(double));
+  char JOBU = 'A', JOBVT = 'A'; 
   DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);
-
-  /*    printf("Matrix U:\n "); */
-  /*     for (int i = 0; i< n; i++){ */
-  /*  for (int j = 0; j < n; j++){ */
-  /*      printf("%8.6e\t", U[i+j*n]) ; */
-  /*  } */
-  /*  printf("\n"); */
-  /*     }  */
-#ifdef NUMERICS_PINV_DEBUG
-  printf("pinv: SVD :\n ");
-  printf("[\t ");
-  for (int i = 0; i < dimS ; i++)
-  {
-    printf("%14.7e\t", S[i]);
-  }
-  /*     printf("]\n "); */
-  /*     printf("Matrix VT:\n "); */
-  /*     for (int i = 0; i< m; i++){ */
-  /*  for (int j = 0; j < m; j++){ */
-  /*      printf("%8.6e\t", VT[i+j*m]) ; */
-  /*  } */
-  /*  printf("\n"); */
-  /*     }  */
-
-#endif
-
-
-
-
 
   double conditioning =  S[0] / S[dimS - 1];
   int rank = 0;
@@ -93,13 +54,8 @@ double pinv(double * A, int n, int m, double tolerance)
       S[i] = 1.0 / S[i];
     }
   }
-#ifdef NUMERICS_PINV_DEBUG
-  printf("\n");
-  printf("pinv: Rank of A :%i\n ", rank);
-#endif
+
   /*Compute the pseudo inverse */
-
-
   /* Costly version with full DGEMM*/
   double * Utranstmp = (double*)malloc(n * m * sizeof(double));
   for (int i = 0;  i < dimS; i++)
@@ -113,37 +69,11 @@ double pinv(double * A, int n, int m, double tolerance)
   {
     for (int j = 0;  j < n; j++)
     {
-      Utranstmp[i + j * m] = 0.0 * U[j + i * n];
+      Utranstmp[i + j * m] = 0.0;
     }
   }
-  /*     printf("Matrix Utranstmp:\n "); */
-  /*     for (int i = 0; i< m; i++){ */
-  /*  for (int j = 0; j < n; j++){ */
-  /*      printf("%8.6e\t", Utranstmp[i+j*m]); */
-  /*  } */
-  /*  printf("\n"); */
-  /*     }  */
-  //DGEMM(CblasTrans,CblasNoTrans,m,n,m,1.0,VT,m,Utranstmp,m,0.0,A,m);
-  cblas_dgemm(CblasColMajor,CblasNoTrans, CblasNoTrans, n, m, n, 1.0, VT, n, Utranstmp, n, 0.0, A, n);
-#ifdef NUMERICS_PINV_DEBUG
-  printf("\nApinv=[ \n");
-  for (int i = 0; i < n ; i++)
-  {
-    printf("[");
-    for (int j = 0; j < m; j++)
-      printf("%14.7e\t", A[i + j * n]);
-    printf("];\n");
-  }
-  printf("];\n");
-//#endif
-  /*    printf("Matrix Pseudo-Inverse of A:\n "); */
-  /*     for (int i = 0; i< m; i++){ */
-  /*  for (int j = 0; j < n; j++){ */
-  /*      printf("%8.6e\t", A[i+j*m]); */
-  /*  } */
-  /*  printf("\n"); */
-  /*     }  */
 
+  cblas_dgemm(CblasColMajor,CblasTrans, CblasNoTrans, m, n, m, 1.0, VT, m, Utranstmp, m, 0.0, A, m);
   /*     for (int i = 0;  i < n; i++){ */
   /*  for (int j = 0;  j < n; j++) */
   /*      { */
@@ -168,8 +98,4 @@ double pinv(double * A, int n, int m, double tolerance)
   free(S);
   free(superb);
   return conditioning;
-#else
-  numericsError("pinv", "DGESVD not found");
-  return 0.0;
-#endif
 }

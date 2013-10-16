@@ -453,6 +453,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
   int Me_size;
   int Mi_size;
   buildReducedGMP(pInProblem, Me, Mi, Qe, Qi, &Me_size, &Mi_size);
+
   if ((Me_size == 0 || Mi_size == 0))
   {
     genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options, numerics_options);
@@ -462,21 +463,8 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
     free(Qi);
     return;
   }
+
   double * pseduInvMe1 = (double *)malloc(Me_size * Me_size * sizeof(double));
-  if (Mi_size == 0)
-  {
-    cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Me_size, -1.0, pseduInvMe1, Me_size, pInProblem->q , 1, 0.0, reaction, 1);
-    for (int i = 0; i < Me_size; i++)
-      velocity[i] = 0.0;
-
-    free(Me);
-    free(Qe);
-    free(Mi);
-    free(Qi);
-    free(pseduInvMe1);
-    return;
-
-  }
   memcpy(pseduInvMe1, Me, Me_size * Me_size * sizeof(double));
   pinv(pseduInvMe1, Me_size, Me_size, 1e-16);
   double *Mi2 = Mi + Mi_size * Me_size;

@@ -172,7 +172,7 @@ IF(WITH_TESTING)
   END_TEST()
   
   BEGIN_TEST(utils/test)
-  #  NEW_TEST(pinvtest testpinv.c)
+  NEW_TEST(pinvtest testpinv.c)
   NEW_TEST(test_op3x3 test_op3x3.c)
   NEW_TEST(test_timers_interf test_timers_interf.c)
   NEW_TEST(test_cblas test_cblas.c)

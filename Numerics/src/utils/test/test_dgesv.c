@@ -41,18 +41,17 @@ int main() {
                 exit( 1 );
         }
 
-        double sol[LDB*NRHS] = {
-          -0.80,  -0.7, 0.59, 1.32, 0.57,
-          -0.39,  -0.55, 0.84, -0.1, 0.11,
-          0.96, 0.22, 1.90, 5.36, 4.04
+        double sol[LDB*NRHS] = {-0.80071403, -0.69524338, 0.59391499, 1.32172561, 0.5657562, 
+                                -0.38962139, -0.55442713,  0.84222739, -0.10380185,  0.10571095,
+                                0.95546491, 0.22065963, 1.90063673, 5.35766149, 4.04060266
         };
 
-       unsigned int err = 0;
-       for (int i = 0; i<LDB*NRHS;++i)
+        unsigned int err = 0;
+        for (int i = 0; i<LDB*NRHS;++i)
           if( fabs(b[i]- sol[i]) > 1e-8)
           {
-              printf("err at index %i: %6.10f\n", i, b[i]);
-              err = 1;
+            printf("err at index %i: %6.10f\n", i, b[i]);
+            err = 1;
           }
         //return 1;
 
