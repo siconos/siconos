@@ -315,9 +315,10 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("ParallelInverter.ref", "ascii", dataPlotRef);
-    std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
+    SP::SiconosVector errSim = compareMatrices(dataPlot, dataPlotRef);
+    errSim->display();
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-10) // some data are > 1e4
+    if (errSim->normInf() > 1e-9) // some data are > 1e4
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       return 1;

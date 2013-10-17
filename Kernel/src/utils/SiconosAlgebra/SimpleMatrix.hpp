@@ -689,6 +689,13 @@ public:
 
   friend void invertMatrix(const SimpleMatrix&, SimpleMatrix&);
 
+  /** returns a vector of maximum relative error for each column
+   * \param data the matrix filled with simulation results
+   * \param data the matrix filled with the reference values
+   * \return a pointer filled with the maximum relative error for each value in data
+   */
+  friend SP::SiconosVector compareMatrices(const SimpleMatrix& data, const SimpleMatrix& ref);
+
 };
 
 typedef std::vector<SP::SimpleMatrix> VectorOfSimpleMatrices;

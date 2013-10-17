@@ -298,3 +298,21 @@ void invertMatrix(const SimpleMatrix& input, SimpleMatrix& output)
 {
   InvertMatrix(*input.dense(), *output.dense());
 }
+
+
+/* XXX Find out if we can use an elementwise ublas operation */
+SP::SiconosVector compareMatrices(const SimpleMatrix& data, const SimpleMatrix& ref)
+{
+  SimpleMatrix diff(data.size(0), data.size(1));
+  SP::SiconosVector res(new SiconosVector(data.size(1)));
+  diff = data - ref;
+  for (unsigned int i = 0; i < data.size(0); ++i)
+  {
+    for (unsigned int j = 0; j < data.size(1); ++j)
+      diff(i, j) /= 1 + fabs(ref(i, j));
+  }
+  diff.normInfByColumn(res);
+  return res;
+
+}
+
