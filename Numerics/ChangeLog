@@ -23,8 +23,21 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
+
+
 --------------------------------------------------------------------------------
-  v3.5.0
+  v3.6.0
+--------------------------------------------------------------------------------
+
+Changes:
+	* Cleaning Doxygen warning
+	* Numerics/src/hairer/ Add E. Hairer ode solvers (RADAU, HEM5)
+	* Numerics/src/NonSmoothSolvers/MLCP/MLCP_Solvers.h New mlcp pgs SBM solver (not stable)
+	* Numerics/src/NonSmoothSolvers/FrictionContact/GlobalFrictionContact3D rename
+	Primal Friction Cintact problem into Global Friction Contact problem
+
+--------------------------------------------------------------------------------
+  v3.5.0 25/10/2012
 --------------------------------------------------------------------------------
 
 Changes:

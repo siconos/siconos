@@ -23,5 +23,8 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v3.6.0
+  v3.6.0 - October 2013
 --------------------------------------------------------------------------------
+	* Clean doxygen warning
+	* Add computation of the second derivative in time in some joints.
+	* Brute-force import of Multibody Toolbox for mechanisms from CAD software

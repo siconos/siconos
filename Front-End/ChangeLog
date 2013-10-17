@@ -20,12 +20,15 @@ This is the changelog for the Siconos Front-End package, www.siconos.gforge.inri
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
-
+--------------------------------------------------------------------------------
+  v3.6.0 - October 2013
+--------------------------------------------------------------------------------
+	* Simple MCP test in Front-End that is solves with FB
 --------------------------------------------------------------------------------
   v3.5.0 - October 2012
 --------------------------------------------------------------------------------
 	* MixedComplementarityProblem, MixedLinearComplementarity are then
-	wrapped in Front-End.
+	wrapped in Front-End. Wrap MCP with callbacks
 	
 --------------------------------------------------------------------------------
   v3.4.0 - March 2012

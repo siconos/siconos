@@ -30,8 +30,18 @@ Main Changes:
 	* Update ublas bindings.
 	* Add interface to eigenproblems solvers from boost ublas (bindings)
 	* Fix bug in interactions (lambda's reset)
-
-	
+	* Remove using namespace std to obtain compatible signature between .hpp and *.cpp.
+	Start to clean doxygen warning
+	* Add reference files in several Examples.
+	* Add lambdaMemory in interaction and
+	rename Interaction swapInMemory --> swapInOldVariables
+	rename Interaction swapInTimeStepInMemory --> swapInMemory
+	* Complete implementation of D1MinusLinear for LagrangianDS and NewtonEulerDS.
+	work on serevral nonlinear examples. SliderCrank, RockingBLock, ...
+	* /Kernel/src/modelingTools/DynamicalSystem.cpp Rename _workspace in DS
+	* /Kernel/src/simulationTools/Hem5.hpp First HEM5 integration
+	* /Kernel/src/simulationTools/MLCP.hpp New mlcp pgs SBM solver (not stable)
+	*
 --------------------------------------------------------------------------------
   v3.5.0 October 2012
 --------------------------------------------------------------------------------
