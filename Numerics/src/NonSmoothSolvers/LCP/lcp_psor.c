@@ -39,7 +39,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
   int incxn;
   int i, iter;
 
-  double qs, err, den;
+  double qs, err;
   double *ww, *diag;
   int itermax = options->iparam[0];
   double tol = options->dparam[0];
@@ -64,8 +64,10 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   if (verbose > 0) printf("\n ||q||= %g \n", qs);
 
-  if (qs > DBL_EPSILON) den = 1.0 / qs;
-  else
+  // Note FP : den never used ...
+  //if (qs > DBL_EPSILON) den = 1.0 / qs;
+  //else
+  if (qs <= DBL_EPSILON)
   {
     for (i = 0 ; i < n ; ++i)
     {

@@ -165,12 +165,11 @@ int FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, doub
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
   *error = 0.;
-  double normUT;
   double rho = 1.0;
   for (int ic = 0 ; ic < nc ; ic++)
   {
     /* Compute the modified local velocity */
-    normUT = sqrt(w[ic * 3 + 1] * w[ic * 3 + 1] + w[ic * 3 + 2] * w[ic * 3 + 2]);
+    //normUT = sqrt(w[ic * 3 + 1] * w[ic * 3 + 1] + w[ic * 3 + 2] * w[ic * 3 + 2]);
     worktmp[0] = z[ic * 3] - rho * (w[ic * 3]);
     worktmp[1] = z[ic * 3 + 1] - rho * w[ic * 3 + 1] ;
     worktmp[2] = z[ic * 3 + 2] - rho * w[ic * 3 + 2] ;

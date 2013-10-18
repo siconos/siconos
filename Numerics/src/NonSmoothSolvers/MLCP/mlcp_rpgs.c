@@ -51,17 +51,14 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   double *u = &z[0];
   double *v = &z[n];
 
-  int incx, incy, incAx, incAy, incBx, incBy;
+  int incy, incAx, incBx;
   int i, iter;
   int itermax, verbose;
-  int incxn;
   double err, vi, viprev, uiprev;
   double tol, rho;
   double *diagA, *diagB;
   verbose = 0;
-  incx = 1;
   incy = 1;
-  incxn = n;
   /* Recup input */
 
   itermax = options->iparam[0];
@@ -78,9 +75,6 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   diagA = (double*)malloc(n * sizeof(double));
   diagB = (double*)malloc(m * sizeof(double));
 
-
-
-  incx = 1;
   incy = 1;
 
   /* Preparation of the diagonal of the inverse matrix */
@@ -136,13 +130,9 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   iter = 0;
   err  = 1.;
 
-  incx = 1;
   incy = 1;
   incAx = n;
-  incAy = 1;
   incBx = m;
-  incBy = 1;
-
 
   mlcp_compute_error(problem, z, w, tol, &err);
   printf("Error = %12.8e\n", err);
@@ -151,8 +141,6 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   {
 
     ++iter;
-
-    incx = 1;
     incy = 1;
 
 
@@ -160,7 +148,7 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
     {
       uiprev = u[i];
       u[i] = 0.0;
-      //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+      //zi = -( q[i] + cblas_ddot( n , &vec[i] , 1 , z , incy ))*diag[i];
       //u[i] = -( a[i]  - (rho*uiprev) +cblas_ddot( n , &A[i] , n , u , 1 )   + cblas_ddot( m , &C[i] , n , v , 1 )         )*diagA[i];
       u[i] = -(a[i]   - (rho * uiprev) + cblas_ddot(n , &A[i] , incAx , u , incy)   + cblas_ddot(m , &C[i] , incAx , v , incy)) * diagA[i];
     }
@@ -169,7 +157,7 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
     {
       viprev = v[i];
       v[i] = 0.0;
-      //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+      //zi = -( q[i] + cblas_ddot( n , &vec[i] , 1, z , incy ))*diag[i];
       //v[i] = -( b[i] -(rho*viprev) + cblas_ddot( n , &D[i] , m , u , 1 )   + cblas_ddot( m , &B[i] , m , v , 1 )         )*diagB[i];
       vi = -(b[i] - (rho * viprev) + cblas_ddot(n , &D[i] , incBx , u , incy)   + cblas_ddot(m , &B[i] , incBx , v , incy)) * diagB[i];
       if (vi > 0)

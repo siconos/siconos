@@ -38,7 +38,7 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   int incx, incy;
   int i, iter;
-  double qs, err, den, zi;
+  double qs, err, zi;
   double *diag;
   double Mii, ziprev;
 
@@ -71,7 +71,7 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
   incx = 1;
   qs = cblas_dnrm2(n , q , incx);
   if (verbose > 0) printf("\n ||q||= %g \n", qs);
-  den = 1.0 / qs;
+  // den = 1.0 / qs; // Note FP, den is never used.
 
   /* Initialization of z & w */
   /*

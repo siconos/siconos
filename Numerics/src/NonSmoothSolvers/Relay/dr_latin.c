@@ -45,7 +45,7 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
   int info2 = 0;
   int incx = 1, incy = 1;
 
-  double alpha, beta, mina, aa;
+  double alpha, beta, mina;
   double err1, num11, err0;
   double den11, den22;
   double *wc, *zc, *wt, *wnum1, *znum1;
@@ -226,7 +226,6 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
 
     for (i = 0; i < n; i++)
     {
-      aa = a[i];
       if (a[i] < zt[i])
       {
         mina = a[i];

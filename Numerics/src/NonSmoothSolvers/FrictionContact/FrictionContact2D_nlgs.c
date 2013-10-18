@@ -61,7 +61,7 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
 
   double alpha, beta;
   double *y, res = INFINITY;
-  double normr, eps, avn, avt, det, gplus, gmoins;
+  double normr, avn, avt, det, gplus, gmoins;
   double apn, apt, zn , zt, den1, num1;
 
   int * randomContactList;
@@ -72,12 +72,8 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
   options->dparam[1]  = 0.0;
 
   iter         = 0;
-  eps          = 1.e-08;
 
   y       = (double*) malloc(n  * sizeof(double));
-
-
-
 
   randomContactList = (int*) malloc(nc  * sizeof(int));
 

@@ -373,11 +373,9 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
   double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
   double *a, *b;
-  int nread;
-
-  nread = fscanf(MLCPfile , "%d" , &n);
-  nread = fscanf(MLCPfile , "%d" , &m);
-  nread = fscanf(MLCPfile , "%d" , &NbLines);
+  fscanf(MLCPfile , "%d" , &n);
+  fscanf(MLCPfile , "%d" , &m);
+  fscanf(MLCPfile , "%d" , &NbLines);
 
   m2 = m * m;
 
@@ -435,7 +433,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < n ; ++j)
     {
-      nread = fscanf(MLCPfile, "%s", val);
+      fscanf(MLCPfile, "%s", val);
       vecA[(NbLines - m)*j + i ] = atof(val);
       vecM[(NbLines)*j + i ] = atof(val);
     }
@@ -444,7 +442,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < m ; ++j)
     {
-      nread = fscanf(MLCPfile, "%s", val);
+      fscanf(MLCPfile, "%s", val);
       vecB[ m * j + i ] = atof(val);
       /*  vecM[ n*(m+n)+(n+m)*j+n+i ] = atof(val);*/
       vecM[ n * (NbLines) + (NbLines)*j + (NbLines - m) + i ] = atof(val);
@@ -455,7 +453,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < m ; ++j)
     {
-      nread = fscanf(MLCPfile, "%s", val);
+      fscanf(MLCPfile, "%s", val);
       vecC[(NbLines - m)*j + i ] = atof(val);
       vecM[(NbLines) * (n + j) + i ] = atof(val);
     }
@@ -464,7 +462,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < n ; ++j)
     {
-      nread = fscanf(MLCPfile, "%s", val);
+      fscanf(MLCPfile, "%s", val);
       vecD[ m * j + i ] = atof(val);
       vecM[(NbLines)*j + i + (NbLines - m) ] = atof(val);
     }
@@ -472,13 +470,13 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
   for (i = 0 ; i < NbLines - m ; ++i)
   {
-    nread = fscanf(MLCPfile , "%s" , val);
+    fscanf(MLCPfile , "%s" , val);
     a[i] = atof(val);
     vecQ[i] = atof(val);
   }
   for (i = 0 ; i < m ; ++i)
   {
-    nread = fscanf(MLCPfile , "%s" , val);
+    fscanf(MLCPfile , "%s" , val);
     b[i] = atof(val);
     vecQ[i + NbLines - m] = atof(val);
   }

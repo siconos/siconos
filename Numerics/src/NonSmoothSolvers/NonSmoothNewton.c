@@ -223,7 +223,6 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
   double * phiVector = (double*)malloc(n * sizeof(*phiVector));
   double *jacobianPhiMatrix = (double*)malloc(n2 * sizeof(*jacobianPhiMatrix));
   /** merit function and its jacobian */
-  double psi;
   double *jacobian_psi = (double*)malloc(n * sizeof(*jacobian_psi));
   int* ipiv = (int *)malloc(n * sizeof(*ipiv));
   if (phiVector == NULL || jacobianPhiMatrix == NULL ||  jacobian_psi == NULL || ipiv == NULL)
@@ -238,7 +237,7 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
       We try to keep the same notations
   */
 
-  double norm_jacobian_psi, normPhi;
+  double norm_jacobian_psi;
   double terminationCriterion = 1;
   if (jacobian_psi == NULL)
   {
@@ -258,9 +257,9 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
     norm_jacobian_psi = cblas_dnrm2(n, jacobian_psi, 1);
 
     /* Computes norm2(phi) */
-    normPhi = cblas_dnrm2(n, phiVector, 1);
+    // normPhi = cblas_dnrm2(n, phiVector, 1);
     /* Computes merit function */
-    psi = 0.5 * normPhi * normPhi;
+    //psi = 0.5 * normPhi * normPhi;
 
     /* Stops if the termination criterion is satisfied */
     terminationCriterion = norm_jacobian_psi;

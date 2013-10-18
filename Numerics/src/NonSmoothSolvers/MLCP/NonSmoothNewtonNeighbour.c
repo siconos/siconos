@@ -453,7 +453,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   int infoDGESV;
 
   /** merit function and its jacobian */
-  double psi_z, prev_psi_z;
+  double psi_z;
 
   /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
       for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
@@ -465,21 +465,17 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   double descentCondition, criterion, norm_jacobian_psi_z, normPhi_z;
   double p = 2.1;
   double terminationCriterion = 1;
-  double prev_norm_jacobian_psi_z = 0;
   double norm;
   int findNewZ, i, j, NbLookingForANewZ;
-  int lastN = 0;
   /*   int naux=0; */
   double aux = 0;
   /*   double aux1=0; */
   int ii;
-  int useNewZ = 0;
   int resls = 1;
   /*   char c; */
   /*  double * oldz; */
   /*  oldz=(double*)malloc(n*sizeof(double));*/
 
-  prev_psi_z = 0;
   NbLookingForANewZ = 0;
 
   /** Iterations ... */
@@ -523,7 +519,6 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
     if (niter > 2)
     {
-      /* if(10*(itermax)*fabs(prev_psi_z-psi_z) < psi_z){*/
       if (10 * norm_jacobian_psi_z < tolerance || !resls || NbLookingForANewZ > iterMaxWithSameZ)
       {
         NbLookingForANewZ = 0;
@@ -561,9 +556,6 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
           norm = aux;
         }
 
-
-        prev_norm_jacobian_psi_z = 0;
-        prev_psi_z = 0;
         printf("looking for a new Z...\n");
         /*may be a local minimal*/
         /*find a gradiant going out of this cul-de-sac.*/
@@ -632,7 +624,6 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
               //zaux is the new point.
               findNewZ = 1;
               cblas_dcopy(n, szaux, incx, z, incx);
-              lastN = i + 1;
               break;
             }
           }
@@ -650,7 +641,6 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
         if (! findNewZ)
         {
           printf("failed to find a new z\n");
-          useNewZ = 0;
           /* exit(1);*/
           continue;
 
@@ -659,8 +649,6 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
           continue;
       }
     }
-    prev_norm_jacobian_psi_z = norm_jacobian_psi_z;
-    prev_psi_z = psi_z;
 
     /* Stops if the termination criterion is satisfied */
     terminationCriterion = norm_jacobian_psi_z;

@@ -62,7 +62,6 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
   int incx, incy, incAx, incAy, incBx, incBy;
   int i, iter;
   int itermax, verbose;
-  int incxn;
   int pgsExplicit;
   double err, vi;
   double tol;
@@ -72,7 +71,6 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
 
   incx = 1;
   incy = 1;
-  incxn = n;
   /* Recup input */
 
   itermax = options->iparam[0];

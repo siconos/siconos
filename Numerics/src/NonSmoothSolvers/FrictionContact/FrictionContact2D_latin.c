@@ -39,14 +39,14 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
   int info77 = 0;
   int i, j, kk, iter1, ino, ddl, nrhs;
   int info2 = 0;
-  int n = 2 * nc, idim, jdim, nbno, it_end;
+  int n = 2 * nc, idim, nbno;
   int incx = 1, incy = 1;
   int taille, taillet, taillen, itt;
   int *ddln;
   int *ddlt, *vectnt;
   assert(n>0);
 
-  double  errmax, alpha, beta, maxa, k_latin, res;
+  double  errmax, alpha, beta, maxa, k_latin;
   double  aa, nt, wn, tc, zc0;
   double  err1, num11, err0;
   double  den11, den22, knz0, ktz0, *ktz, *wf;
@@ -232,9 +232,6 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
   taillet = sizeof(ddlt) / sizeof(ddlt[0]);
 
   idim = 1 +  taillen / taillet;
-  jdim = idim - 1;
-
-
 
   taille = 0;
   for (i = 0; i < n; i++)
@@ -497,9 +494,6 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
     err0   = num11 / (den11 + den22);
 
     err1   = sqrt(err0);
-
-    it_end = iter1;
-    res    = err1;
 
     options->iparam[1] = iter1;
     options->dparam[1] = err1;

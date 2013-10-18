@@ -111,8 +111,6 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   printInFileSBMForScilab(m, titi);
   fclose(titi);
 #endif
-  int currentRowNumber = 0;
-  int  posInX = 0;
   int curSize = 0;
   //  int *newIndexOfBlockI;
   // int NbCol=pInProblem->size;
@@ -215,8 +213,6 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   SBMfree(&Morder, 0);
 
   curProblem =  pInProblem->firstListElem;
-  currentRowNumber = 0;
-  posInX = 0;
   int curBlock = 0;
   int curPosIq = 0;
   int curPosEq = 0;
