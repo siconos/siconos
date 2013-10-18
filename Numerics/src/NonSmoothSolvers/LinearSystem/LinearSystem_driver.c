@@ -175,7 +175,7 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
   }
   else
   {
-    printf("Equality_driver:: LU foctorization failed:\n");
+    printf("Equality_driver:: LU factorization failed:\n");
   }
 
   //printf("LinearSystem_driver: computeError of LinearSystem : %e\n",LinearSystemComputeError(problem,z));

@@ -582,7 +582,8 @@ public:
    */
   void PLUFactorizationInPlace();
 
-  /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
+  /**  compute inverse of this thanks to LU factorization with Partial pivoting.
+   * This method inverts U and then computes inv(A) by solving the system
    *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
    */
   void PLUInverseInPlace();

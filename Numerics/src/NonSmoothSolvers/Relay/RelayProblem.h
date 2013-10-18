@@ -105,7 +105,6 @@ extern "C"
   *
   * \author Vincent Acary
   */
-
   void Relay_display(RelayProblem* p);
 
   int relay_printInFile(RelayProblem*  problem, FILE* file);

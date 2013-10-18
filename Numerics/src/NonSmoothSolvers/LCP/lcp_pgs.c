@@ -53,7 +53,7 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
   if (verbose > 0)
   {
     qs = cblas_dnrm2(n , q , 1);
-    printf("===== Starting of LCP solving with Projected Gauss Seidel algorithm.\n");
+    printf("===== Starting of LCP solving with Projected Gauss-Seidel algorithm.\n");
     printf("\n ||q||= %g \n", qs);
     printf("itermax = %d \n", itermax);
     printf("tolerance = %g \n", tol);

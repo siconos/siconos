@@ -61,7 +61,7 @@ using namespace std::placeholders;
 
 
   Rules:
-  - A Model must be given to the constructor, else => exception.
+  - A Model must be given to the constructor, oterhwise an exception is thrown.
 */
 class Simulation : public std11::enable_shared_from_this<Simulation>
 {
@@ -367,15 +367,15 @@ public:
   }
 
   /** insert an Integrator into the simulation list of integrators
-   *  \param a smart pointer to a OneStepIntegrator
+   *  \param osi the OneStepIntegrator to add
    */
-  virtual void insertIntegrator(SP::OneStepIntegrator);
+  virtual void insertIntegrator(SP::OneStepIntegrator osi);
 
   /** register a DS and its OSI into the osiMap.
-      \param a pointer to a DynamicalSystem.
-   *  \param a pointer to a OneStepIntegrator.
+      \param ds a pointer to a DynamicalSystem.
+   *  \param osi a pointer to a OneStepIntegrator.
    */
-  void addInOSIMap(SP::DynamicalSystem, SP::OneStepIntegrator);
+  void addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator osi);
 
   /** get a pointer to indexSets[i]
    *  \return a InteractionsSet
@@ -384,7 +384,6 @@ public:
   {
     return (_model.lock()->nonSmoothDynamicalSystem()->topology()->indexSet(i)) ;
   };
-
 
   /** get allNSProblems
    *  \return a pointer to OneStepNSProblems object (container of
@@ -437,28 +436,6 @@ public:
    *  \return a pointer to OneStepNSProblem
    */
   SP::OneStepNSProblem oneStepNSProblem(int);
-
-  //   /** set allNSProblems map - Warning: no copy between
-  //       OneStepNSProblem of each map, pointers links!
-  //    *  \param a OneStepNSProblems object (map of SP::OneStepNSProblem)
-  //    */
-  //   void setOneStepNSProblems(const OneStepNSProblems&);
-
-  //   /** remove all OneStepNSProblem of the Simulation
-  //    */
-  //   void clearOneStepNSProblems();
-
-  /** check if a OneStepNSProblem osns is already in the map
-   *  \param a pointer to OneStepNSProblem
-   *  \return a bool
-   */
-  //bool hasOneStepNSProblem(SP::OneStepNSProblem) const ;
-
-  /** check if a OneStepNSProblem named id is already in the map
-   *  \param a std::string ("id")
-   *  \return a bool
-   */
-  //bool hasOneStepNSProblem(const std::string&) const ;
 
   /** add a OneStepNSProblem in the Simulation (if its not the first,
       it needs to have an id clearly defined)

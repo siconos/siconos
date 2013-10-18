@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file
-  Time-Stepping simulation
-  */
+/*! \file TimeStepping.hpp
+ *  \brief Time-Stepping simulation
+ */
 #ifndef TimeStepping_H
 #define TimeStepping_H
 
@@ -36,9 +36,12 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
  *  \date (Creation) Apr 26, 2004
  *
  */
+
 #define SICONOS_TS_LINEAR 1
 #define SICONOS_TS_LINEAR_IMPLICIT 2
 #define SICONOS_TS_NONLINEAR 3
+
+
 class TimeStepping : public Simulation
 {
 protected:
@@ -138,12 +141,6 @@ public:
   /** Destructor.
   */
   virtual ~TimeStepping();
-
-  /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
-   *  \param a pointer to OneStepNSProblem
-
-   void insertNonSmoothProblem(SP::OneStepNSProblem);
-   */
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
    *  \param unsigned int: the number of the set to be updated

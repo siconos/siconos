@@ -494,7 +494,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
     {
       if (verbose)
       {
-        printf("LU foctorization failed:\n");
+        printf("LU factorization failed:\n");
       }
     }
   }
