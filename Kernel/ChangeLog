@@ -41,7 +41,10 @@ Main Changes:
 	* /Kernel/src/modelingTools/DynamicalSystem.cpp Rename _workspace in DS
 	* /Kernel/src/simulationTools/Hem5.hpp First HEM5 integration
 	* /Kernel/src/simulationTools/MLCP.hpp New mlcp pgs SBM solver (not stable)
-	*
+	* move multibodyTools in a new module : Mechanics
+	* Add VisitorMaker for the creation of visitors on base classes
+	(example of usage in Mechanics/MechanicsIO.cpp)
+
 --------------------------------------------------------------------------------
   v3.5.0 October 2012
 --------------------------------------------------------------------------------

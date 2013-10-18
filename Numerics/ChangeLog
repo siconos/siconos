@@ -35,9 +35,16 @@ Changes:
 	* Numerics/src/NonSmoothSolvers/MLCP/MLCP_Solvers.h New mlcp pgs SBM solver (not stable)
 	* Numerics/src/NonSmoothSolvers/FrictionContact/GlobalFrictionContact3D rename
 	Primal Friction Cintact problem into Global Friction Contact problem
+	* GLOBALAC -> LOCALAC: former Sparse Global Alart Curnier 3D
+	friction contact solver, added in 3.4.0, is renamed  Local Alart
+	Curnier : LOCALAC ("Global" word conflicts with Global coordinates)
+	* GlobalFrictionContact: add Sparse global Alart Curnier solver
+	(GLOBALAC) : use MUMPS if present (compilation with
+	-DWITH_MUMPS=ON) otherwise use embedded Timothy Davis lusol
+	* support for sparse matrices (coordinates and csc) in NumericsMatrix
 
 --------------------------------------------------------------------------------
-  v3.5.0 25/10/2012
+ v3.5.0 25/10/2012
 --------------------------------------------------------------------------------
 
 Changes:
@@ -45,7 +52,7 @@ Changes:
 	* MixedLinearComplementarity.* change the data structure to take into
 	account two storage types (M,q) and (A,B,C,D,a,b)
 	* Relay Fix huge bug in Relay with lb!=-1 and ub!=1
-	* FrictionContact Add LMGC driver.  Add FrictionContact2D 
+	* FrictionContact Add LMGC driver.  Add FrictionContact2D
 	solvers based on LCP reformulation and LEMKE and ENUM solvers
 	* LA.h: transform macros used to wrap LAPACK/BLAS functions into
 	static inline functions. This should not induced any loss of
@@ -54,7 +61,7 @@ Changes:
 	Studio). In this case it sets BUILD_AS_CPP.
 	* Misc changes for crosscompiling to Windows using mingw and Visual
 	Studio. The files SiconosCompat.h and SiconosCompat.c contains some
-	functions not defined by VS (most of them are C99) 
+	functions not defined by VS (most of them are C99)
 
 
 --------------------------------------------------------------------------------

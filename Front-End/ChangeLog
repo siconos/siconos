@@ -24,12 +24,17 @@ before it.
   v3.6.0 - October 2013
 --------------------------------------------------------------------------------
 	* Simple MCP test in Front-End that is solves with FB
+	* Siconos/Mechanics bindings
+	* some FClib bindings
+	* fixes in typemaps for c++ references
+	* some cs_sparse <-> scipy.sparse bindings
+
 --------------------------------------------------------------------------------
   v3.5.0 - October 2012
 --------------------------------------------------------------------------------
 	* MixedComplementarityProblem, MixedLinearComplementarity are then
 	wrapped in Front-End. Wrap MCP with callbacks
-	
+
 --------------------------------------------------------------------------------
   v3.4.0 - March 2012
 --------------------------------------------------------------------------------
