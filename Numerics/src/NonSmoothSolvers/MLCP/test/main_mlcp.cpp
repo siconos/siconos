@@ -160,7 +160,7 @@ void solTozw(int n, int m, double *z, double *w, double *sol)
 
 void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, double *w, double *sol)
 {
-  int info;
+  int info = -1;
   SolverOptions mlcpOptions;
   NumericsOptions global_options;
   setDefaultNumericsOptions(&global_options);
