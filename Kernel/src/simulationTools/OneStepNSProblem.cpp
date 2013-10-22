@@ -686,6 +686,7 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
 
 
     }
+    // for ZeroOrderHold, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
     else if (osiType == OSI::ZOH)
     {
       if (!centralInteractionBlocks[itN])

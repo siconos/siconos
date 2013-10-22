@@ -72,26 +72,6 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatr
   _e = newE;
 }
 
-// Minimum data (C, B as matrices) constructor
-FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB):
-  FirstOrderR(LinearTIR)
-{
-  _jachx = createSPtrSiconosMatrix((SiconosMatrix&) newC);
-  _jacglambda = createSPtrSiconosMatrix((SiconosMatrix&) newB);
-}
-
-
-// Constructor from a complete set of data (matrices)
-FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD, const SiconosMatrix& newF, const SiconosVector& newE, const SiconosMatrix& newB):
-  FirstOrderR(LinearTIR)
-{
-  _jachx = createSPtrSiconosMatrix((SiconosMatrix&) newC);
-  _jacglambda = createSPtrSiconosMatrix((SiconosMatrix&) newB);
-  _jachlambda = createSPtrSiconosMatrix((SiconosMatrix&) newD);
-  _F = createSPtrSiconosMatrix((SiconosMatrix&) newF);
-  _e.reset(new SiconosVector(newE));
-}
-
 void FirstOrderLinearTIR::initialize(Interaction & inter)
 {
   // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
@@ -185,15 +165,7 @@ void FirstOrderLinearTIR::display() const
 
 void FirstOrderLinearTIR::saveRelationToXML() const
 {
-  //   if(!relationxml)
   RuntimeException::selfThrow("FirstOrderLinearTIR::saveRelationToXML, no yet implemented.");
-
-  //   SP::FirstOrderLinearTIRXML folrXML = (std11::static_pointer_cast<FirstOrderLinearTIRXML>(relationxml));
-  //   folrXML->setC( *_jachx );
-  //   folrXML->setD( *_jachlambda );
-  //   folrXML->setF( *F );
-  //   folrXML->setE( *e );
-  //   folrXML->setB( *_jacglambda );
 }
 
 FirstOrderLinearTIR* FirstOrderLinearTIR::convert(Relation *r)

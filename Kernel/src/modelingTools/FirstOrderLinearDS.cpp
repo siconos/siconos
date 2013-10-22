@@ -180,28 +180,7 @@ void FirstOrderLinearDS::updatePlugins(double time)
   if (_b)
     computeb(time);
 }
-/*
-void FirstOrderLinearDS::setA(const Plugged_Matrix_FTime& newValue)
-{
-  assert(newValue.size(0)==n&&"FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
-  assert(newValue.size(1)==n&&"FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
 
-  if( ! A )
-    A.reset(new Plugged_Matrix_FTime(newValue));
-  else
-    *A = newValue;
-}
-
-void FirstOrderLinearDS::setB(const Plugged_Vector_FTime& newValue)
-{
-  assert(newValue.size()==n&&"FirstOrderLinearDS - setB: inconsistent dimensions with problem size for input vector b");
-
-  if( ! b )
-    b.reset(new Plugged_Vector_FTime(newValue));
-  else
-    *b = newValue;
-}
-*/
 void FirstOrderLinearDS::setComputeAFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginA->setComputeFunction(pluginPath, functionName);

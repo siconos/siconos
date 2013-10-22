@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     (*Int_B)(2 , 0) = 1.0 / Cfilt;
     (*Int_B)(2 , 2) = 1.0 / Cfilt;
 
-    SP::FirstOrderLinearTIR LTIRDiodeBridgeCapFilter(new FirstOrderLinearTIR(*Int_C, *Int_B));
+    SP::FirstOrderLinearTIR LTIRDiodeBridgeCapFilter(new FirstOrderLinearTIR(Int_C, Int_B));
     LTIRDiodeBridgeCapFilter->setDPtr(Int_D);
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 

@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     (*Int_B)(2, 1) = 0.0;
 
 
-    SP::FirstOrderLinearTIR LTIRCollpitts(new FirstOrderLinearTIR(*Int_C, *Int_B));
+    SP::FirstOrderLinearTIR LTIRCollpitts(new FirstOrderLinearTIR(Int_C, Int_B));
     //LTIRCollpitts->setDPtr(Int_D);
 
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(2));

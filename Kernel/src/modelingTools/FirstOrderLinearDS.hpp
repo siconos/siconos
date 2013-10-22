@@ -27,7 +27,7 @@
 typedef   void (*LDSPtrFunction)(double, unsigned int, double*, unsigned int, double*);
 
 
-/** First order linear systems - Inherits from DynamicalSystems
+/** First Order Linear Systems - \f$M \dot x = A(t)x(t)+ b(t) + r, x(t_0)=x_0\f$.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -43,11 +43,12 @@ typedef   void (*LDSPtrFunction)(double, unsigned int, double*, unsigned int, do
  *    - \f$x \in R^{n} \f$ is the state,
  *    - \f$r \in R^{n} \f$  the input due to the Non Smooth Interaction.
  *    - \f$M \in R^{n\times n} \f$ is an optional constant invertible matrix
- *  The  right-hand side is described by
- *    - \f$A \in R^{n\times n} \f$
+ *
+ *  The right-hand side is described by
+ *    - \f$A \in R^{n\times n}\f$
  *    - \f$b \in R^{n} \f$
  *
- * Specific members of this class are A and b.
+ * Specific members of this class are \f$A\f$ and \f$b\f$.
  *
  * f is not set for such system and thus calls to computeF or other
  * related functions are forbidden.
@@ -90,8 +91,6 @@ protected:
   * @param size of vector z
   * @param[in,out] z a vector of user-defined parameters
   */
-  //  LDSPtrFunction _APtr;
-  //  std::string _pluginNameAPtr;
   SP::PluggedObject _pluginA;
 
   /** FirstOrderLinearDS plug-in to compute b(t,z), id = "b"
@@ -101,8 +100,6 @@ protected:
   * @param size of vector z
   * @param[in,out] param  : a vector of user-defined parameters
   */
-  //  LDSPtrFunction _bPtr;
-  //  std::string _pluginNamebPtr;
   SP::PluggedObject _pluginb;
 
   /** default constructor
@@ -124,6 +121,12 @@ public:
    *  \param bPlugin plugin for b
    */
   FirstOrderLinearDS(SP::SiconosVector newX0, const std::string& APlugin, const std::string& bPlugin);
+
+  /** constructor from a set of data
+   *  \param newX0 the initial state of this DynamicalSystem
+   *  \param APlugin plugin for A
+   *  \param bPlugin plugin for b
+   */
   FirstOrderLinearDS(const SiconosVector& newX0, const std::string& APlugin, const std::string& bPlugin);
 
   /** constructor from a set of data
@@ -172,49 +175,39 @@ public:
 
   // --- getter and setter ---
 
-  // --- A ---
-  /** get the value of A
-   *  \return a plugged-matrix
-
-  inline const Plugged_Matrix_FTime getA() const { return *A; }
-  */
-  /** get A
-   *  \return pointer on a plugged-matrix
+  /** get the matrix \f$A\f$
+   *  \return pointer (SP) on a matrix
    */
   inline SP::SiconosMatrix A() const
   {
     return _A;
   }
 
+  /** get the matrix \f$A\f$
+   *  \return pointer (SP) on a matrix
+   */
   virtual SP::SiconosMatrix jacobianfx() const
   {
     return _A;
   };
   /**  function to compute \f$ f: (x,t)\f$
-   * \param time current time
+   * \param time time instant used in the computation of \f$f\f$
    */
   virtual void computef(double time);
 
   /** function to compute \f$ f: (x,t)\f$ with x different from
       current saved state.
-   * \param time current time
-   * \param x2 a SP::SiconosVector
+   * \param time time instant used in the computation of \f$f\f$
+   * \param x2 the state vector used for the computation of \f$f\f$
    */
   virtual void computef(double time, SP::SiconosVector x2);
 
-
-  /** set the value of A to newValue
-   *  \param plugged-matrix newValue
-
-  void setA(const Plugged_Matrix_FTime&);
-  */
-
   /** set A to pointer newPtr
-   *  \param newPtr a SP::SiconosMatrix
+   *  \param newA the new A matrix
    */
-  inline void setAPtr(SP::SiconosMatrix newPtr)
+  inline void setAPtr(SP::SiconosMatrix newA)
   {
-    _A = newPtr;
+    _A = newA;
   }
 
   /** set A to a new matrix
@@ -222,13 +215,6 @@ public:
    **/
   void setA(const SiconosMatrix& newA);
 
-  // --- b ---
-
-  /** get the value of b
-   *  \return plugged vector
-
-  inline const Plugged_Vector_FTime getB() const { return *b; }
-  */
   /** get b
    *  \return a SP::SiconosVector
    */
@@ -236,12 +222,6 @@ public:
   {
     return _b;
   }
-
-  /** set the value of b to newValue
-   *  \param a plugged vector
-
-  void setB(const Plugged_Vector_FTime&);
-  */
 
   /** set b to pointer newPtr
    *  \param a SP to plugged vector
@@ -254,37 +234,37 @@ public:
   // --- plugins related functions
 
   /** set a specified function to compute the matrix A => same action as setComputeJacobianfxFunction
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the function name to use in this plugin
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeAFunction(const std::string& , const std::string&);
+  void setComputeAFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** set a specified function to compute the matrix A
-   *  \param VectorFunctionOfTime : a pointer on the plugin function
+   *  \param fct a pointer on a function
    */
   void setComputeAFunction(LDSPtrFunction fct);
 
   /** set a specified function to compute the vector b
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the function name to use in this plugin
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
   void setComputebFunction(const std::string& , const std::string&);
 
   /** set a specified function to compute the vector b
-   *  \param VectorFunctionOfTime : a pointer on the plugin function
+   *  \param fct a pointer on a function
    */
   void setComputebFunction(LDSPtrFunction fct);
 
   /** default function to compute matrix A => same action as
       computeJacobianfx
-      \param time time used to compute _A
+      \param time time instant used to compute A
    */
   void computeA(double time);
 
   /** default function to compute vector b
-   * \param time time used to compute _b
+   * \param time time instant used to compute b
    */
   virtual void computeb(double time);
 
@@ -292,7 +272,7 @@ public:
    * Lsodar with EventDriven
    *  \param time current time
    *  \param isDSup flag to avoid recomputation of operators
-   *  \warning z is not taken into account when computing the RHS
+   *  \warning the \f$z\f$ input is not taken into account when computing the RHS
    */
   void computeRhs(double time, bool isDSup = false);
 

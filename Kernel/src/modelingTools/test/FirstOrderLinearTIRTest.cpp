@@ -100,7 +100,7 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR1()
   std::cout << "--> Constructor 1 test ended with success." <<std::endl;
 }
 
-// data constructor (5)
+// data constructor (2)
 void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR2()
 {
   std::cout << "--> Test: constructor 2." <<std::endl;
@@ -115,32 +115,6 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR2()
   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
 }
 
-// data constructor (4)
-void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR4()
-{
-  std::cout << "--> Test: constructor 4." <<std::endl;
-  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(*C, *B));
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR4a : ", folr->getC()==*C, true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR4b : ", folr->getB()==*B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR4c : ", folr->getType() == RELATION::FirstOrder, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR4d : ", folr->getSubType() == RELATION::LinearTIR, true);
-  std::cout << "--> Constructor 4 test ended with success." <<std::endl;
-}
-
-// data constructor (5)
-void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR5()
-{
-  std::cout << "--> Test: constructor 5." <<std::endl;
-  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(*C, *D, *F, *e, *B));
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR5a : ", folr->getC()==*C, true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR5b : ", folr->getD()==*D, true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR5c : ", folr->getF()==*F, true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR5d : ", folr->getE()==*e, true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR5e : ", folr->getB()==*B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR5f : ", folr->getType() == RELATION::FirstOrder, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR5g : ", folr->getSubType() == RELATION::LinearTIR, true);
-  std::cout << "--> Constructor 5 test ended with success." <<std::endl;
-}
 
 // set C as a matrix and then plug it
 
@@ -151,7 +125,7 @@ void FirstOrderLinearTIRTest::testSetCPtr()
   std::cout << "--> Test: setCPtr." <<std::endl;
   SP::SiconosMatrix tmp(new SimpleMatrix(*C));
   tmp->zero();
-  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(*tmp, *B));
+  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(tmp, B));
   folr->setCPtr(C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
   std::cout << "--> setCPtr test ended with success." <<std::endl;
@@ -163,7 +137,7 @@ void FirstOrderLinearTIRTest::testSetCPtr()
 void FirstOrderLinearTIRTest::testSetDPtr()
 {
   std::cout << "--> Test: setDPtr." <<std::endl;
-  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(*C, *B));
+  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(C, B));
   folr->setDPtr(D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", folr->D() == D, true);
   std::cout << "--> setDPtr test ended with success." <<std::endl;
@@ -175,7 +149,7 @@ void FirstOrderLinearTIRTest::testSetDPtr()
 void FirstOrderLinearTIRTest::testSetFPtr()
 {
   std::cout << "--> Test: setFPtr." <<std::endl;
-  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(*C, *B));
+  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(C, B));
   folr->setFPtr(F);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr: ", folr->F() == F, true);
   std::cout << "--> setFPtr test ended with success." <<std::endl;
@@ -188,7 +162,7 @@ void FirstOrderLinearTIRTest::testSetFPtr()
 void FirstOrderLinearTIRTest::testSetEPtr()
 {
   std::cout << "--> Test: setEPtr." <<std::endl;
-  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(*C, *B));
+  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(C, B));
   folr->setEPtr(e);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr: ", folr->e() == e, true);
   std::cout << "--> setEPtr test ended with success." <<std::endl;
@@ -203,7 +177,7 @@ void FirstOrderLinearTIRTest::testSetBPtr()
   std::cout << "--> Test: setBPtr." <<std::endl;
   SP::SiconosMatrix tmp(new SimpleMatrix(*B));
   tmp->zero();
-  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(*C, *tmp));
+  SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(C, tmp));
   folr->setBPtr(B);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr: ", folr->B() == B, true);
   std::cout << "--> setBPtr test ended with success." <<std::endl;

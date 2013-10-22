@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file ControlFirstOrderLinearDS.hpp
-  \brief Define a FirstOrderLinearDS and set up common simulation objects in control.
+/*! \file ControlFirstOrderLinearS.hpp
+  \brief Define a FirstOrderLineaDS and set up common simulation objects in control.
 */
 
 #ifndef CONTROLFIRSTORDERLINEARS_H

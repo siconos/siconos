@@ -501,6 +501,9 @@ void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool isDSUp)
 
   // compute jacobian of rhs according to x, = M-1(jacobianfx + jacobianX(T.u))
   // At the time, second term is set to zero.
+  if (!_pluginJacxf->fPtr)
+    RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianRhsx: there is no plugin to compute the jacobian of f");
+
   computeJacobianfx(time);
   // solve M*jacobianXRhS = jacobianfx
   if (_M && _jacobianfx)

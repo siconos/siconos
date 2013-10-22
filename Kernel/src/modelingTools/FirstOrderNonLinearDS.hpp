@@ -30,7 +30,7 @@ class DynamicalSystem;
 
 typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
 
-/**  General First Order Non Linear Dynamical Systems
+/**  General First Order Non Linear Dynamical Systems - \f$ M \dot x = f(x,t,z) + r, x(t_0) = x_0\f$
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -39,23 +39,24 @@ typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsign
  * This class defines and computes a generic n-dimensional
  * dynamical system of the form :
  * \f[
- * M \dot x = f(x,t,z) + r,
+ * M \dot x = f(x,t,z) + r, \quad
+ * x(t_0) = x_0
  * \f]
  * where
  *    - \f$x \in R^{n} \f$ is the state.
+ *    - \f$ M \in R^{n\times n} a "mass matrix"
  *    - \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
  *    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
- *  For example, z may be used to set some perturbation parameters, or to control the system (z will be set by some actuators) or anything else.
+ *  For example, z may be used to set some perturbation parameters, or anything else.
  *
  *  with \f$ f : R^{n} \times R  \mapsto  R^{n}   \f$ .
- *  and M a nXn matrix.
  *
  * By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
  * and the initial conditions are given by
  *  \f[
  *  x(t_0)=x_0
  * \f]
- * To define a boundary Value Problem, the pointer on  a BoundaryCondition must be set.
+ * To define a Boundary Value Problem, the pointer on  a BoundaryCondition must be set.
  *
  * \f$ f(x,t) \f$ is a plug-in function, and can be computed using computef(t).
  * Its Jacobian according to x is denoted jacobianfx, and computed thanks to computeJacobianfx(t).
@@ -117,13 +118,8 @@ protected:
    * @param[in,out] z: a vector of parameters, z
    */
   SP::PluggedObject _pluginJacxf;
-  //   FNLDSPtrfct computeJacobianfxPtr;
-  //   std::string pluginNameComputeJacobianfxPtr;
 
   SP::PluggedObject _pluginM;
-
-  //  FNLDSPtrfct  pluginComputeM;
-  //  std::string pluginNamePluginComputeM;
 
   /**  the previous r vectors */
   SP::SiconosMemory _rMemory;
@@ -149,11 +145,6 @@ protected:
    */
   FirstOrderNonLinearDS(): DynamicalSystem() {};
 
-  /** constructor from a set of data
-      \param newX0 initial state of this DynamicalSystem
-  */
-  FirstOrderNonLinearDS(SP::SiconosVector newX0);
-  FirstOrderNonLinearDS(const SiconosVector& newX0);
 
 public:
 
@@ -165,10 +156,17 @@ public:
   FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML);
 
   /** constructor from a set of data
+      \param newX0 initial state of this DynamicalSystem
+      \warning you need to set yoursel the plugin for f and also for the
+      jacobian if you use a EventDriven scheme
+  */
+  FirstOrderNonLinearDS(SP::SiconosVector newX0);
+  FirstOrderNonLinearDS(const SiconosVector& newX0);
+
+  /** constructor from a set of data
    *  \param newX0 initial state of this DynamicalSystem
    *  \param fPlugin plugin name for f of this DynamicalSystem
    *  \param jacobianfxPlugin plugin name for jacobianfx of this DynamicalSystem
-   *  \
    */
   FirstOrderNonLinearDS(const SiconosVector& newX0, const std::string& fPlugin, const std::string& jacobianfxPlugin);
 
@@ -176,7 +174,6 @@ public:
    * \param FONLDS the FirstOrderNonLinearDS to copy
    */
   FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLDS);
-  // ===== DESTRUCTOR =====
 
   /** destructor
    */
@@ -205,19 +202,13 @@ public:
   // rMemory
 
   /** get all the values of the state vector r stored in memory
-   *  \return a memory
+   *  \return a memory vector
    */
   inline SP::SiconosMemory rMemory() const
   {
     return _rMemory;
   }
 
-  // --- M ---
-  /** get the value of M
-   *  \return a plugged-matrix
-
-  inline const PMJF getM() const { return *M; }
-  */
   /** get M
    *  \return pointer on a plugged-matrix
    */
@@ -226,17 +217,12 @@ public:
     return _M;
   }
 
-  /** set the value of M to newValue
-   *  \param plugged-matrix newValue
-
-  void setM(const PMJF&);
-  */
-  /** set M to pointer newPtr
-   *  \param newPtr a plugged matrix
+  /** set M to a new value
+   *  \param newM the new M matrix
    */
-  inline void setMPtr(SP::SiconosMatrix newPtr)
+  inline void setMPtr(SP::SiconosMatrix newM)
   {
-    _M = newPtr;
+    _M = newM;
   }
 
   // --- invM ---
@@ -247,11 +233,6 @@ public:
   {
     return *_invM;
   }
-
-  /** get the value of invM
-   *  \return BlockMatrix
-   */
-  //  inline const BlockMatrix getInvMBlock() const { return *_invM; }
 
   /** get invM
    *  \return pointer on a SiconosMatrix
@@ -273,12 +254,6 @@ public:
 
   // --- f ---
 
-  /** get the value of f
-   *  \return plugged vector
-
-  inline const PVF getF() const { return *_f; }
-  */
-
   /** get f
    *  \return pointer on a plugged vector
    */
@@ -291,11 +266,6 @@ public:
     return _fold;
   }
 
-  /** set the value of f to newValue
-   *  \param a plugged vector
-
-  void setF(const PVF&);
-  */
   /** set f to pointer newPtr
    *  \param newPtr a SP::SiconosVector
    */
@@ -304,12 +274,6 @@ public:
     _f = newPtr;
   }
 
-  // --- jacobianfx ---
-  /** get the value of jacobianfx
-   *  \return a plugged-matrix
-
-  inline const PMJF getJacobianfx() const { return *jacobianfx; }
-  */
   /** get jacobianfx
    *  \return SP::SiconosMatrix
    */
@@ -318,11 +282,6 @@ public:
     return _jacobianfx;
   }
 
-  /** set the value of jacobianfx to newValue
-   *  \param plugged-matrix newValue
-
-  void setJacobianfx(const PMJF&);
-  */
   /** set jacobianfx to pointer newPtr
    *  \param newPtr the new value
    */
@@ -372,14 +331,14 @@ public:
   // --- setters for functions to compute plugins ---
 
   /** to set a specified function to compute M
-   *  \param std::string pluginPath : the complete path to the plugin
-   *  \param the std::string functionName : function name to use in this library
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeMFunction(const std::string&  pluginPath, const std::string&  functionName);
+  void setComputeMFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** set a specified function to compute M
-   *  \param FPtr1 : a pointer on the plugin function
+   *  \param FPtr1 a pointer on the plugin function
    */
   void setComputeMFunction(FPtr1 fct);
 
@@ -388,7 +347,7 @@ public:
    *  \param functionName the function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeFFunction(const std::string&  pluginPath, const std::string& functionName);
+  void setComputeFFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** set a specified function to compute the vector f
    *  \param fct a pointer on the plugin function
@@ -453,7 +412,8 @@ public:
    */
   void computeRhs(double time, bool isDSUp = false);
 
-  /** Default function to jacobian of the right-hand side term according to x
+  /** Default function to jacobian of the right-hand side term according to x.
+   *  Required when using an EventDriven Simulation.
    *  \param time instant used in the computations
    *  \param isDSup flag to avoid recomputation of operators
    *
@@ -526,10 +486,6 @@ public:
 
   /** Reset the PluggedObjects */
   virtual void zeroPlugin();
-  /*
-   * get the Xfree work vector.
-   */
-  //  inline SP::SiconosVector xfree() const { return mXfree;};
 
   /** To compute \f$\frac{|x_{i+1} - xi|}{|x_i|}\f$ where
       \f$x_{i+1}\f$ represents the present state and \f$x_i\f$ the

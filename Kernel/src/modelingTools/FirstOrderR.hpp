@@ -83,8 +83,8 @@ protected:
   FirstOrderR(RELATION::SUBTYPES newType): Relation(RELATION::FirstOrder, newType) {}
 
   /** xml constructor
-  *  \param SP::RelationXML : the XML object.
-  *  \param the type of the relation
+  *  \param relxml the XML object.
+  *  \param newType the type of the relation
   */
   FirstOrderR(SP::RelationXML relxml, RELATION::SUBTYPES newType): Relation(relxml, RELATION::FirstOrder, newType) {}
 
@@ -98,17 +98,6 @@ public:
   */
   virtual ~FirstOrderR() {};
 
-  // -- Jach --
-
-  /** set the value of Jach[index] to newValue (copy)
-  *  \param SiconosMatrix newValue
-  *  \param unsigned int: index position in Jach vector
-
-  void setJacobianH(const SiconosMatrix&, unsigned int = 0);
-  */
-
-  // -- Jacg --
-
   /** get a pointer on matrix Jacg[index]
   *  \return a pointer on a SiconosMatrix
   */
@@ -116,18 +105,6 @@ public:
   {
     return _jacglambda;
   }
-
-  /** set the value of Jacg[index] to newValue (copy)
-  *  \param SiconosMatrix newValue
-  *  \param unsigned int: index position in Jacg vector
-
-  void setJacg(const U& newValue, unsigned int index )
-  {
-  assert(index<Jacg.size()&&"FirstOrderR:: setJacg(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
-  if(Jacg[index]) Jacg[index]->resize(newValue.size(0), newValue.size(1));
-  setObject<PluggedMatrix,SP_PluggedMatrix,U>(Jacg[index],newValue);
-  };
-  */
 
   /** set Jacg[index] to pointer newPtr (pointer link)
   *  \param SP::SiconosMatrix  newPtr
@@ -137,20 +114,6 @@ public:
   {
     _jacglambda = newPtr ;
   }
-
-  /** To get the name of Jach[i] plugin
-  *  \return a std::string
-  const std::string getJachName(unsigned int i) const {return Jach[i]->getPluginName();}
-  */
-
-  /** To get the name of Jacg[i] plugin
-  *  \return a std::string
-  const std::string getJacgName(unsigned int i) const {return Jacg[i]->getPluginName();}
-  */
-
-  /** true if Jach[i] is plugged
-  *  \return a bool
-  */
 
   /** initialize the relation (check sizes, memory allocation ...)
   \param SP to Interaction: the interaction that owns this relation
