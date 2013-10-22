@@ -18,8 +18,8 @@
 
 #PIPOL mac 03:00 --silent
 
-release=false
-#release=true
+#release=false
+release=true
 
 set -x
 #set -e
@@ -119,6 +119,13 @@ setup_3_5() {
     cd $PIPOL_WDIR/siconos; { 
         git checkout 3.5.x
     };
+}
+
+setup_3_6() {
+    current_dir=$PWD
+    cd $PIPOL_WDIR/siconos; { 
+        git checkout 3.6.0-rc
+    }; 
 }
 
 make_1() {
@@ -255,7 +262,7 @@ swig_setup
 setup_src
 
 if [ $release = "true" ]; then
-    setup_3_5
+    setup_3_6
 fi
 
 configure_src Numerics Release
