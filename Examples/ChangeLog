@@ -23,10 +23,17 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
+  v3.6.0 October 2013
+--------------------------------------------------------------------------------
+Main Changes:
+	* Reference files have been added to several Examples.
+
+--------------------------------------------------------------------------------
   v3.5.0
 -------------------------------------------------------------------------------
 	* Propagate changes from Kernel: ioMatrix has moved from a class to a namespace
 	* Biology : New examples from gene regulatory networks
+
 --------------------------------------------------------------------------------
   v3.4.0
 -------------------------------------------------------------------------------

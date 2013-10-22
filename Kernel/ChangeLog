@@ -32,7 +32,6 @@ Main Changes:
 	* Fix bug in interactions (lambda's reset)
 	* Remove using namespace std to obtain compatible signature between .hpp and *.cpp.
 	Start to clean doxygen warning
-	* Add reference files in several Examples.
 	* Add lambdaMemory in interaction and
 	rename Interaction swapInMemory --> swapInOldVariables
 	rename Interaction swapInTimeStepInMemory --> swapInMemory
@@ -44,6 +43,13 @@ Main Changes:
 	* move multibodyTools in a new module : Mechanics
 	* Add VisitorMaker for the creation of visitors on base classes
 	(example of usage in Mechanics/MechanicsIO.cpp)
+	* Support boost up to version 1.53
+	* EventsManager has been rewritten and the drift in time has been
+	removed
+	* Sliding Mode Controller have been updated and improved
+	* SiconosAlgebra has been reworked: the interface has been clean up
+	and SimpleMatrix.cpp has been splitted to lower the memory used during
+	the compilation
 
 --------------------------------------------------------------------------------
   v3.5.0 October 2012
