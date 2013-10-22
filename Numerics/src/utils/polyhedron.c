@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2010.
+/* Siconos-Numerics, Copyright INRIA 2005-2013.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,31 +16,32 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include <stdio.h>
+
+#include "polyhedron.h"
 #include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "lcp_test_function.h"
+#include <assert.h>
 
-int main(void)
+void freePolyhedron(Polyhedron* poly)
 {
-  int info =0 ;
-
-  if (argc != 2)
+  assert(poly);
+  if (poly->H)
   {
-    printf("Error! No filename for data given on the commandline\n");
-    exit(EXIT_FAILURE);
+    free(poly->H);
+    poly->H = NULL;
   }
-  char filename[50] = "./data/@TEST_DATA@";
-  strcpy(argv[1], filename);
-  printf("Test on %s\n",filename);
-
-  FILE * finput  =  fopen(filename,"r");
-  if(!@TEST_SBM@)
-    info = lcp_test_function(finput,@TEST_SOLVER@);
-  else
-    info = lcp_test_function_SBM(finput,@TEST_SOLVER@);
-  
-  fclose(finput);
-  printf("\nEnd of test on %s\n", filename);
-  return info;
+  if (poly->K)
+  {
+    free(poly->K);
+    poly->K = NULL;
+  }
+  if (poly->Heq)
+  {
+    free(poly->Heq);
+    poly->Heq = NULL;
+  }
+  if (poly->Keq)
+  {
+    free(poly->Keq);
+    poly->Keq = NULL;
+  }
 }

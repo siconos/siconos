@@ -400,6 +400,14 @@ char * idToName(int Id)
     return SICONOS_LCP_PATH_STR;
   case     SICONOS_LCP_ENUM :
     return SICONOS_LCP_ENUM_STR;
+  case   SICONOS_LCP_AVI_CAOFERRIS:
+    return SICONOS_LCP_AVI_CAOFERRIS_STR;
+  case     SICONOS_LCP_PIVOT :
+    return SICONOS_LCP_PIVOT_STR;
+  case     SICONOS_LCP_BARD :
+    return SICONOS_LCP_BARD_STR;
+  case     SICONOS_LCP_MURTY :
+    return SICONOS_LCP_MURTY_STR;
     /*RELAY*/
   case SICONOS_RELAY_PGS:
     return SICONOS_RELAY_PGS_STR;
@@ -413,6 +421,8 @@ char * idToName(int Id)
     return SICONOS_RELAY_NLGS_STR;
   case SICONOS_RELAY_LATIN:
     return SICONOS_RELAY_LATIN_STR;
+  case SICONOS_RELAY_AVI_CAOFERRIS:
+    return SICONOS_RELAY_AVI_CAOFERRIS_STR;
     /*FRICTION_2D*/
   case SICONOS_FRICTION_2D_NSGS:
     return SICONOS_FRICTION_2D_NSGS_STR;
@@ -558,6 +568,14 @@ int nameToId(char * pName)
     return SICONOS_LCP_PATH;
   else if (strcmp(SICONOS_LCP_ENUM_STR, pName) == 0)
     return SICONOS_LCP_ENUM;
+  else if (strcmp(SICONOS_LCP_AVI_CAOFERRIS_STR, pName) == 0)
+    return SICONOS_LCP_AVI_CAOFERRIS;
+  else if (strcmp(SICONOS_LCP_PIVOT_STR, pName) == 0)
+    return SICONOS_LCP_PIVOT;
+  else if (strcmp(SICONOS_LCP_BARD_STR, pName) == 0)
+    return SICONOS_LCP_BARD;
+  else if (strcmp(SICONOS_LCP_MURTY_STR, pName) == 0)
+    return SICONOS_LCP_MURTY;
   /*RELAY*/
   else if (strcmp(SICONOS_RELAY_PGS_STR, pName) == 0)
     return SICONOS_RELAY_PGS;
@@ -569,6 +587,8 @@ int nameToId(char * pName)
     return SICONOS_RELAY_LEMKE;
   else if (strcmp(SICONOS_RELAY_NLGS_STR, pName) == 0)
     return SICONOS_RELAY_NLGS;
+  else if (strcmp(SICONOS_RELAY_AVI_CAOFERRIS_STR, pName) == 0)
+    return SICONOS_RELAY_AVI_CAOFERRIS;
   /*FRICTION_2D*/
   else if (strcmp(SICONOS_FRICTION_2D_NSGS_STR, pName) == 0)
     return SICONOS_FRICTION_2D_NSGS;

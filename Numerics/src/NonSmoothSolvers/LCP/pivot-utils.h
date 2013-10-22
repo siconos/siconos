@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2010.
+/* Siconos-Numerics, Copyright INRIA 2005-2013.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,31 +16,16 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "lcp_test_function.h"
 
-int main(void)
-{
-  int info =0 ;
+int pivot_init_lemke(double** mat, unsigned int size_x);
 
-  if (argc != 2)
-  {
-    printf("Error! No filename for data given on the commandline\n");
-    exit(EXIT_FAILURE);
-  }
-  char filename[50] = "./data/@TEST_DATA@";
-  strcpy(argv[1], filename);
-  printf("Test on %s\n",filename);
+int pivot_selection_lemke(double** mat, unsigned int dim, unsigned int drive);
 
-  FILE * finput  =  fopen(filename,"r");
-  if(!@TEST_SBM@)
-    info = lcp_test_function(finput,@TEST_SOLVER@);
-  else
-    info = lcp_test_function_SBM(finput,@TEST_SOLVER@);
-  
-  fclose(finput);
-  printf("\nEnd of test on %s\n", filename);
-  return info;
-}
+void init_M_lemke(double** mat, double* M, unsigned int dim, unsigned int dim2, unsigned int size_x, double* q, double* d);
+
+void do_pivot_driftless(double** mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
+
+void do_pivot_driftless2(double** mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
+
+/* Standard pivot <block, drive>  */
+void do_pivot(double** mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);

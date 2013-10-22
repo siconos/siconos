@@ -19,27 +19,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "lcp_test_function.h"
+#include "relay_test_function.h"
 
 int main(void)
 {
   int info =0 ;
 
-  if (argc != 2)
-  {
-    printf("Error! No filename for data given on the commandline\n");
-    exit(EXIT_FAILURE);
-  }
   char filename[50] = "./data/@TEST_DATA@";
-  strcpy(argv[1], filename);
   printf("Test on %s\n",filename);
 
   FILE * finput  =  fopen(filename,"r");
-  if(!@TEST_SBM@)
-    info = lcp_test_function(finput,@TEST_SOLVER@);
+  info = relay_test_function(finput,@TEST_SOLVER@);
+/*  if(!@TEST_SBM@)
+    info = relay_test_function(finput,@TEST_SOLVER@);
   else
-    info = lcp_test_function_SBM(finput,@TEST_SOLVER@);
-  
+    info = relay_test_function_SBM(finput,@TEST_SOLVER@);
+*/
   fclose(finput);
   printf("\nEnd of test on %s\n", filename);
   return info;

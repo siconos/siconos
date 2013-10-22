@@ -16,12 +16,12 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef PRSOLVERS_H
-#define PRSOLVERS_H
+#ifndef RELAY_SOLVERS_H
+#define RELAY_SOLVERS_H
 
 /*!\file Relay_Solvers.h
   \author Nineb Sheherazade and Dubois Frederic.
-  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
+  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon and Olivier Huber
   Subroutines for the resolution of relay problems.
 */
 
@@ -35,12 +35,10 @@ For each solver, the input argument are:
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a SolverOptions structure, which handles iparam and dparam
 
-Note: function names starting with dr -> dual relay, with pr: primal relay
-
 \section relayLatin Latin
 LArge Time INcrements solver
 
- function: pr_latin() or dr_latin() \n
+ function: dr_latin \n
  parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
@@ -51,12 +49,45 @@ LArge Time INcrements solver
 \section relayNLGS Non-linear Gauss Seidel
 LArge Time INcrements solver
 
- function: pr_nlgs() or dr_nlgs()\n
+ function: dr_nlgs()\n
  parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
 - dparam[0] (in): tolerance
 - dparam[1] (out): resulting error
+
+\section relayENUM enumerative solver
+The relay problem is reformulated as a LCP and solved with the enumerative solver
+
+ function: relay_enum\n
+   parameters:
+  - dparam[0] (in): tolerance
+  - iparam[0] (in) : search for multiple solutions if 1
+  - iparam[1] (out) : key of the solution
+  - iparam[3] (in) :  starting key values (seed)
+  - iparam[4] (in) :  use DGELS (1) or DGESV (0).
+
+\section relayPATH PATH solver
+The relay problem is reformulated as a LCP and solved with the PATH solver
+
+ function: relay_path\n
+- dparam[0] (in): tolerance
+
+\section relayLEMKE Lemke solver
+The relay problem is reformulated as a LCP and solved with Lemke's method
+
+ function: relay_lemke\n
+ parameters:
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+
+\section relayAVI_CaoFerris CaoFerris solver
+The relay problem is reformulated as an AVI and solved with the solver proposed by Cao and Ferris
+
+ function: relay_avi_caoferris\n
+ parameters:
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
 
 */
 
@@ -70,7 +101,7 @@ extern "C"
 {
 #endif
 
-  /** General interface to solver for primal-relay problems
+  /** General interface to solver for relay problems
       \param[in] problem the RelayProblem structure which handles the problem (M,q)
       \param[in,out] z a n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a n-vector of doubles which contains the solution of the problem.
@@ -91,7 +122,7 @@ extern "C"
   int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId);
 
 
-  /** relay_nlgs is a projected Gauss-Seidel solver for relay problems.\n
+  /** relay_pgs is a projected Gauss-Seidel solver for relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
@@ -128,7 +159,7 @@ extern "C"
   */
   int relay_lexicolemke_setDefaultSolverOptions(SolverOptions* options);
 
-  /** relay_nlgs is enum solver for  relay problems.\n
+  /** relay_enum is enum solver for  relay problems.\n
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
@@ -154,32 +185,25 @@ extern "C"
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param options SolverOptions * the pointer to options to set
    * \param[out] info an integer which returns the termination value:\n
-   0 = convergence,\n
-   1 = no convergence,\n
-   2 = Nul diagonal term\n
-   \author V. acary
-  */
+   *  0 = convergence,\n
+   *  1 = no convergence,\n
+   *  2 = Nul diagonal term\n
+   * \author V. acary
+   */
   void relay_path(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for ENUM
+  /** set the default solver parameters and perform memory allocation for PATH
       \param options the pointer to options to set
   */
   int relay_path_setDefaultSolverOptions(SolverOptions* options);
 
-  /** pr_latin is a specific latin solver for primal relay problems.
-   * \param[in] problem structure that represents the Relay (M, q...)
-   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-   * \param options the pointer to options to set
-   * \param[out] info an integer which returns the termination value:\n
-   0 = convergence,\n
-   1 = no convergence,\n
-   2 = Cholesky factorization failed,\n
-   3 = Nul diagonal term\n
-   \author Nineb Sheherazade.
-  */
-  void pr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
+  /** set the default solver parameters and perform memory allocation for
+   * AVI_CAOFERRIS
+   * \param options the pointer to options to set
+   */
+  int relay_avi_caoferris_setDefaultSolverOptions(SolverOptions* options);
 
   /** dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
@@ -206,19 +230,6 @@ extern "C"
    * \param[in,out] options :\n
   */
   void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
-
-  /** pr_gsnl is a specific gsnl (Gauss Seidel Non Linear)solver for relay problems.
-   * \param[in] problem structure that represents the Relay (M, q...)
-   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-   * \param options
-   * \param[out] info an integer which returns the termination value:\n
-   0 = convergence,\n
-   1 = no convergence,\n
-   2 = Nul diagonal term\n
-   \author Nineb Sheherazade.
-  */
-  void pr_gsnl(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n
      * of the LCP : \n
@@ -253,8 +264,6 @@ extern "C"
      * \param[out] lcp_problem A pointer to a LinearComplementarity_problem resulting from the reformulation
      * \author Vincent Acary
      */
-
-
   void relay_tolcp(RelayProblem* problem, LinearComplementarityProblem * lcp_problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

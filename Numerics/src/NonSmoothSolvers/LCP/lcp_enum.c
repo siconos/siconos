@@ -270,7 +270,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
 
       if (verbose)
       {
-        printf("lcp_enum LU foctorization success:\n");
+        printf("lcp_enum LU factorization succeeded:\n");
       }
 
       check = 1;

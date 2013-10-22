@@ -24,6 +24,11 @@
 #include <stdlib.h>
 #include "LCP_Solvers.h"
 
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
+
+
 void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , double *wlem , int *info , SolverOptions* options)
 {
   /* matrix M of the lcp */
@@ -104,6 +109,11 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
   for (ic = 0 ; ic < dim; ++ic) A[ic][ic + 1 ] =  1.0;
   for (ic = 0 ; ic < dim; ++ic) A[ic][dim + 1] = -1.0;
 
+  DEBUG_PRINT("total matrix\n");
+  DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
+      { for(unsigned int j = 0 ; j < dim2; ++j)
+      { DEBUG_PRINTF("%1.2e ", A[i][j]) }
+      DEBUG_PRINT("\n")});
   /* End of construction of A */
 
   Ifound = 0;
@@ -146,6 +156,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
   }
 
   /* Stop research of argmin lexico */
+  DEBUG_PRINTF("Pivoting %i and %i\n", block, drive);
 
   pivot = A[block][drive];
   tovip = 1.0 / pivot;
@@ -169,8 +180,18 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
     for (jc = 0 ; jc < dim2 ; ++jc) A[ic][jc] -=  tmp * A[block][jc];
   }
 
-  nobasis = basis[block];
+   nobasis = basis[block];
   basis[block] = drive;
+
+  DEBUG_EXPR_WE( DEBUG_PRINT("new basis: ")
+      for (unsigned int i = 0; i < dim; ++i)
+      { DEBUG_PRINTF("%i ", basis[i])}
+      DEBUG_PRINT("\n"));
+  DEBUG_PRINT("total matrix\n");
+  DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
+      { for(unsigned int j = 0 ; j < dim2; ++j)
+      { DEBUG_PRINTF("%1.2e ", A[i][j]) }
+      DEBUG_PRINT("\n")});
 
   while (ITER < itermax && !Ifound)
   {
@@ -180,8 +201,9 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
     if (nobasis < dim + 1)      drive = nobasis + (dim + 1);
     else if (nobasis > dim + 1) drive = nobasis - (dim + 1);
 
-    /* Start research of argmin lexico for minimum ratio test */
+    DEBUG_PRINTF("driving variable %i \n", drive);
 
+    /* Start research of argmin lexico for minimum ratio test */
     pivot = 1e20;
     block = -1;
 
@@ -213,7 +235,14 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
         }
       }
     }
-    if (block == -1) break;
+    if (block == -1)
+    {
+      Ifound = 1;
+      DEBUG_PRINTF("The pivot column is nonpositive !\n\
+          It either means that the algorithm failed or that the LCP is infeasible\n\
+          Check the class of the M matrix to find out the meaning of this\n", drive);
+      break;
+    }
 
     if (basis[block] == dim + 1) Ifound = 1;
 
@@ -242,7 +271,29 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
     nobasis = basis[block];
     basis[block] = drive;
 
+    DEBUG_EXPR_WE( DEBUG_PRINT("new basis: ")
+      for (unsigned int i = 0; i < dim; ++i)
+      { DEBUG_PRINTF("%i ", basis[i])}
+      DEBUG_PRINT("\n"));
+
+    DEBUG_PRINT("total matrix\n");
+    DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
+      { for(unsigned int j = 0 ; j < dim2; ++j)
+      { DEBUG_PRINTF("%1.2e ", A[i][j]) }
+      DEBUG_PRINT("\n")});
+
   } /* end while*/
+
+  DEBUG_EXPR_WE( DEBUG_PRINT("new basis: ")
+      for (unsigned int i = 0; i < dim; ++i)
+      { DEBUG_PRINTF("%i ", basis[i])}
+      DEBUG_PRINT("\n"));
+
+  DEBUG_PRINT("total matrix\n");
+  DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
+      { for(unsigned int j = 0 ; j < dim2; ++j)
+      { DEBUG_PRINTF("%1.2e ", A[i][j]) }
+      DEBUG_PRINT("\n")});
 
   for (ic = 0 ; ic < dim; ++ic)
   {

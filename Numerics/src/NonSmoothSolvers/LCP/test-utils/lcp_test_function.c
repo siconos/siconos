@@ -33,7 +33,12 @@ void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearCo
   case SICONOS_LCP_PGS:
   case SICONOS_LCP_CPG:
   case SICONOS_LCP_LEMKE:
+  case SICONOS_LCP_PIVOT:
+  case SICONOS_LCP_BARD:
+  case SICONOS_LCP_MURTY:
+  case SICONOS_LCP_AVI_CAOFERRIS:
   case SICONOS_LCP_NEWTONMIN:
+  case SICONOS_LCP_NEWTONFB:
   {
     options->iSize = 2;
     options->dSize = 2;
@@ -91,14 +96,6 @@ void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearCo
     options->iWork = (int*) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
     break;
   }
-  case SICONOS_LCP_NEWTONFB:
-  {
-    options->iSize = 2;
-    options->dSize = 2;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-    break;
-  }
   default:
     ;
   }
@@ -118,7 +115,12 @@ void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, Line
   case SICONOS_LCP_PGS:
   case SICONOS_LCP_CPG:
   case SICONOS_LCP_LEMKE:
+  case SICONOS_LCP_PIVOT:
+  case SICONOS_LCP_BARD:
+  case SICONOS_LCP_MURTY:
+  case SICONOS_LCP_AVI_CAOFERRIS:
   case SICONOS_LCP_NEWTONMIN:
+  case SICONOS_LCP_NEWTONFB:
   {
     options->iparam[0] = maxIter;
     options->dparam[0] = tolerance;
@@ -168,13 +170,6 @@ void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, Line
 
     break;
   }
-  case SICONOS_LCP_NEWTONFB :
-  {
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-    break;
-
-  }
   default:
     ;
   }
@@ -219,15 +214,8 @@ int lcp_test_function(FILE * f, int solverId)
 
   options->isSet = 1;
   options->filterOn = 1;
-  double * z = (double *)malloc(problem->size * sizeof(double));
-  double * w = (double *)malloc(problem->size * sizeof(double));
-  for (i = 0; i < problem->size; i++)
-  {
-    z[i] = 0.0;
-    w[i] = 0.0;
-  }
-
-
+  double * z = (double *)calloc(problem->size, sizeof(double));
+  double * w = (double *)calloc(problem->size, sizeof(double));
 
   info = linearComplementarity_driver(problem, z , w, options, &global_options);
 
@@ -261,8 +249,6 @@ int lcp_test_function(FILE * f, int solverId)
 
 
   return info;
-
-
 }
 
 int lcp_test_function_SBM(FILE * f, int solverId)

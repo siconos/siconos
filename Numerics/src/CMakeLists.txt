@@ -40,6 +40,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothTools
   NonSmoothTools/test-utils
   NonSmoothSolvers
+  NonSmoothSolvers/AVI
   NonSmoothSolvers/LCP
   NonSmoothSolvers/LCP/test-utils
   NonSmoothSolvers/MLCP
@@ -51,7 +52,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/Relay/test-utils
   NonSmoothSolvers/FrictionContact
   NonSmoothSolvers/FrictionContact/test-utils
-  NonSmoothSolvers/NCP			
+  NonSmoothSolvers/NCP
   NonSmoothSolvers/MCP
   NonSmoothSolvers/GenericMechanical
   NonSmoothSolvers/GenericMechanical/test-utils
@@ -279,79 +280,83 @@ IF(WITH_TESTING)
   NEW_TEST(SBMTest5 SBM_test5.c)
   NEW_TEST(SparseMatrix0 SparseMatrix_test0.c)
  END_TEST()
-  
+
   BEGIN_TEST(NonSmoothSolvers/LCP/test)
-  NEW_LCP_TEST(SICONOS_LCP_PGS lcp_mmc.dat)
-  NEW_LCP_TEST(SICONOS_LCP_RPGS lcp_mmc.dat)
-  NEW_LCP_TEST(SICONOS_LCP_CPG lcp_mmc.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LEMKE lcp_mmc.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN lcp_mmc.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN_W lcp_mmc.dat)
-  NEW_LCP_TEST(SICONOS_LCP_QP lcp_mmc.dat)
-  NEW_LCP_TEST(SICONOS_LCP_NSQP lcp_mmc.dat)
-  #SET(test-LCP_NEWTONMIN-lcp_mmc_PROPERTIES WILL_FAIL TRUE)
-  #NEW_LCP_TEST(SICONOS_LCP_NEWTONMIN lcp_mmc.dat)
-  
+
+  SET(DATA_SET_LCP "lcp_mmc.dat;lcp_deudeu.dat;lcp_trivial.dat;lcp_ortiz.dat")
+  LIST(APPEND DATA_SET_LCP
+   "lcp_exp_murty.dat;lcp_exp_murty2.dat;lcp_CPS_1.dat;lcp_CPS_2.dat;lcp_CPS_3.dat;lcp_CPS_4.dat;lcp_CPS_4bis.dat;lcp_CPS_5.dat")
+  SET(DATA_SET_BLOCK_LCP "lcp_deudeu_block.dat")
+  # PSOR is not working :(
+  SET(SICONOS_LCP_SOLVERS
+   "ENUM;LEMKE;CPG;PGS;RPGS;LATIN;LATIN_W;QP;NSQP;AVI_CAOFERRIS;NEWTONMIN;NEWTONFB;BARD;MURTY;PIVOT")
   IF(PATHFERRIS_FOUND)
-    NEW_LCP_TEST(SICONOS_LCP_PATH lcp_mmc.dat)
-  ENDIF(PATHFERRIS_FOUND)
- 
-  NEW_LCP_TEST(SICONOS_LCP_PGS lcp_deudeu.dat)
-  NEW_LCP_TEST(SICONOS_LCP_RPGS lcp_deudeu.dat)
+   LIST(APPEND SICONOS_LCP_SOLVERS "PATH")
+  ENDIF()
+  FOREACH(_DS ${DATA_SET_LCP})
+   FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
+     NEW_LCP_TEST(SICONOS_LCP_${_SOLVER} ${_DS})
+    ENDFOREACH()
+  ENDFOREACH()
+  FOREACH(_DS ${DATA_SET_BLOCK_LCP})
+   FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
+    NEW_LCP_TEST(SICONOS_LCP_${_SOLVER} ${_DS} 1)
+    ENDFOREACH()
+  ENDFOREACH()
+
+  # some solvers are failing
   SET(test-LCP_CPG-lcp_deudeu_PROPERTIES WILL_FAIL TRUE)
-  NEW_LCP_TEST(SICONOS_LCP_CPG lcp_deudeu.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LEMKE lcp_deudeu.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN lcp_deudeu.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN_W lcp_deudeu.dat)
-  NEW_LCP_TEST(SICONOS_LCP_QP lcp_deudeu.dat)
-  NEW_LCP_TEST(SICONOS_LCP_NSQP lcp_deudeu.dat)
-  NEW_LCP_TEST(SICONOS_LCP_NEWTONMIN lcp_deudeu.dat)
-  IF(PATHFERRIS_FOUND)
-    NEW_LCP_TEST(SICONOS_LCP_PATH lcp_deudeu.dat)
-  ENDIF(PATHFERRIS_FOUND)
-
-
-  NEW_LCP_TEST(SICONOS_LCP_PGS lcp_deudeu_block.dat 1)
-  NEW_LCP_TEST(SICONOS_LCP_RPGS lcp_deudeu_block.dat 1)
-  NEW_LCP_TEST(SICONOS_LCP_LEMKE lcp_deudeu_block.dat 1)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN lcp_deudeu_block.dat 1)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN_W lcp_deudeu_block.dat 1)
-  NEW_LCP_TEST(SICONOS_LCP_QP lcp_deudeu_block.dat 1)
-  NEW_LCP_TEST(SICONOS_LCP_NSQP lcp_deudeu_block.dat 1)
-  NEW_LCP_TEST(SICONOS_LCP_NEWTONMIN lcp_deudeu_block.dat 1)
-  NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_deudeu_block.dat 1)
-
-  NEW_LCP_TEST(SICONOS_LCP_PGS lcp_trivial.dat)
-  NEW_LCP_TEST(SICONOS_LCP_RPGS lcp_trivial.dat)
-  NEW_LCP_TEST(SICONOS_LCP_CPG lcp_trivial.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LEMKE lcp_trivial.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN lcp_trivial.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN_W lcp_trivial.dat)
-  NEW_LCP_TEST(SICONOS_LCP_QP lcp_trivial.dat)
-  NEW_LCP_TEST(SICONOS_LCP_NSQP lcp_trivial.dat)
-  NEW_LCP_TEST(SICONOS_LCP_NEWTONMIN lcp_trivial.dat)
-  NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_trivial.dat)
-
-  NEW_LCP_TEST(SICONOS_LCP_PGS lcp_ortiz.dat)
-  SET(test-LCP_RPGS-lcp_ortiz WILL_FAIL TRUE)
-  NEW_LCP_TEST(SICONOS_LCP_RPGS lcp_ortiz.dat)
   SET(test-LCP_CPG-lcp_ortiz_PROPERTIES WILL_FAIL TRUE)
-  NEW_LCP_TEST(SICONOS_LCP_CPG lcp_ortiz.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LEMKE lcp_ortiz.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN lcp_ortiz.dat)
-  NEW_LCP_TEST(SICONOS_LCP_LATIN_W lcp_ortiz.dat)
-  NEW_LCP_TEST(SICONOS_LCP_QP lcp_ortiz.dat)
-  NEW_LCP_TEST(SICONOS_LCP_NSQP lcp_ortiz.dat)
-  NEW_LCP_TEST(SICONOS_LCP_NEWTONMIN lcp_ortiz.dat)
-  NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_ortiz.dat)
 
+  SET(test-LCP_LATIN-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN_W-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN-lcp_exp_murty2_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN_W-lcp_exp_murty2_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN_W-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN-lcp_CPS_3_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN_W-lcp_CPS_3_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN_W-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_LATIN_W-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
+
+  # QP reformulation does not always work when the matrix is not symmetric
+  # Use NSQP
+  SET(test-LCP_QP-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_QP-lcp_exp_murty2_PROPERTIES WILL_FAIL TRUE)
+
+  # those test cannot be solved with an algorithm that requires non-zero
+  # diagonal elements, that is PGS, BARD and MURTY
+  SET(DATA_SET_LCP_DIAG "CPS_2;CPS_3;CPS_4;CPS_4bis")
+  SET(FAILING_ALGO "PGS;BARD;MURTY")
+  FOREACH(_DS ${DATA_SET_LCP_DIAG})
+   FOREACH(_SOLVER ${FAILING_ALGO})
+    SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
+   ENDFOREACH()
+  ENDFOREACH()
+
+  # those test cannot be solved with Lemke-based solvers (CPS_3 is for Lemke-Howson)
+  # 
+  SET(DATA_SET_LCP_DIAG "CPS_3")
+  SET(FAILING_ALGO "LEMKE;AVI_CAOFERRIS;PIVOT")
+  FOREACH(_DS ${DATA_SET_LCP_DIAG})
+   FOREACH(_SOLVER ${FAILING_ALGO})
+    SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
+   ENDFOREACH()
+  ENDFOREACH()
+
+  # lcp_mmc is of size 26, way too much for enum
+  RM_TEST("test-LCP_ENUM-lcp_mmc")
+
+  # special tests
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol.dat)
   SET(test-LCP_ENUM-lcp_Pang_isolated_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol_perturbed.dat)
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_inf_sol_perturbed.dat)
+
   NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
-  
-  
+
   END_TEST()
 
   BEGIN_TEST(NonSmoothSolvers/LinearSystem/test)
@@ -360,12 +365,26 @@ IF(WITH_TESTING)
   SET(test-LS_0-ls_inf_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
   NEW_LS_TEST(SICONOS_LS_0 ls_inf_sol_perturbed.dat)
   END_TEST()
-  
+
   BEGIN_TEST(NonSmoothSolvers/Relay/test)
-  
+
+  SET(DATA_SET "relay1.dat;relay_2x2.dat;relay_4x4.dat;relay_simple2.dat;step_1x1.dat;step_2x2.dat;step_4x4.dat")
+  SET(SICONOS_RELAY_SOLVERS "ENUM;LEMKE;PGS;AVI_CAOFERRIS")
+  IF(PATHFERRIS_FOUND)
+   LIST(APPEND SICONOS_RELAY_SOLVERS "PATH")
+  ENDIF()
+  FOREACH(_DS ${DATA_SET})
+    FOREACH(_SOLVER ${SICONOS_RELAY_SOLVERS})
+      NEW_RELAY_TEST(SICONOS_RELAY_${_SOLVER} ${_DS})
+    ENDFOREACH()
+  ENDFOREACH()
+
+  # ENUM on an LCP of size 30 is a bad idea ...
+  RM_TEST("test-RELAY_ENUM-relay1")
+
   NEW_TEST(Relaytest1 relay_test1.c)
   NEW_TEST(Relaytest2 relay_test2.c)
-  
+
   IF(PATHFERRIS_FOUND)
     NEW_TEST(Relaytest3 relay_test3.c)
   ENDIF(PATHFERRIS_FOUND)

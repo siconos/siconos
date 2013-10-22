@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2010.
+/* Siconos-Numerics, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,31 +16,20 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "lcp_test_function.h"
 
-int main(void)
+#ifndef AVI_CST_H
+#define AVI_CST_H
+/*!\file avi_cst.h
+  \brief Constants to define the list of available AVI solvers. See the solver list \ref aviSolversList
+*/
+/**\enum AVI_SOLVER
+   \brief Each SICONOS_LCP_XXX refers to number of the solver XXX for an AVI. See the solver list \ref aviSolversList
+ */
+enum AVI_SOLVER
 {
-  int info =0 ;
+  SICONOS_AVI_CAOFERRIS = 800,
+};
 
-  if (argc != 2)
-  {
-    printf("Error! No filename for data given on the commandline\n");
-    exit(EXIT_FAILURE);
-  }
-  char filename[50] = "./data/@TEST_DATA@";
-  strcpy(argv[1], filename);
-  printf("Test on %s\n",filename);
+extern char *  SICONOS_AVI_CAOFERRIS_STR;
 
-  FILE * finput  =  fopen(filename,"r");
-  if(!@TEST_SBM@)
-    info = lcp_test_function(finput,@TEST_SOLVER@);
-  else
-    info = lcp_test_function_SBM(finput,@TEST_SOLVER@);
-  
-  fclose(finput);
-  printf("\nEnd of test on %s\n", filename);
-  return info;
-}
+#endif

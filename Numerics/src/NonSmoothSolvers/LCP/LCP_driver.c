@@ -40,6 +40,10 @@ char *  SICONOS_LCP_PSOR_STR = "PSOR";
 char *  SICONOS_LCP_RPGS_STR = "RPGS";
 char *  SICONOS_LCP_PATH_STR = "PATH";
 char *  SICONOS_LCP_ENUM_STR = "ENUM";
+char *  SICONOS_LCP_AVI_CAOFERRIS_STR = "AVI CaoFerris";
+char *  SICONOS_LCP_PIVOT_STR = "Pivot based method";
+char *  SICONOS_LCP_BARD_STR = "Bard-type pivoting method";
+char *  SICONOS_LCP_MURTY_STR = "Murty's least index pivoting method";
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 
@@ -259,7 +263,25 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
   case SICONOS_LCP_ENUM:
     lcp_enum(problem, z , w , &info , options);
     break;
-    /*error */
+    /****** Reformulate as AVI and use a solver by Cao and Ferris ******/
+    /* IN:  tolerance, itermax
+       OUT: iter, error
+    */
+  case SICONOS_LCP_AVI_CAOFERRIS:
+    lcp_avi_caoferris(problem, z , w , &info , options);
+    break;
+  case SICONOS_LCP_PIVOT:
+    lcp_pivot(problem, z , w , &info , options);
+    break;
+  case SICONOS_LCP_BARD:
+    options->iparam[3] = SICONOS_LCP_PIVOT_BARD;
+    lcp_pivot(problem, z , w , &info , options);
+    break;
+  case SICONOS_LCP_MURTY:
+    options->iparam[3] = SICONOS_LCP_PIVOT_LEAST_INDEX;
+    lcp_pivot(problem, z , w , &info , options);
+    break;
+  /*error */
   default:
   {
     fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver name: %s\n", idToName(options->solverId));

@@ -51,9 +51,26 @@ int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options,
     info =    relay_path_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_RELAY_AVI_CAOFERRIS:
+  {
+    info =    relay_avi_caoferris_setDefaultSolverOptions(options);
+    break;
+  }
+/* XXX: to implement ?
+   case SICONOS_RELAY_LATIN:
+  {
+    info =    relay_latin_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_RELAY_NLGS:
+  {
+    info =    relay_nlgs_setDefaultSolverOptions(options);
+    break;
+  }
+  */
   default:
   {
-    numericsError("Relay_setDefaultSolverOptions", "Unknown Solver");
+    numericsError("Relay_setDefaultSolverOptions", " Unknown Solver");
   }
   }
 

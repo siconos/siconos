@@ -52,7 +52,24 @@ Direct solver for LCP based on pivoting method principle for degenerated problem
 
 \section lcpQP QP Solver
 
-quadratic programm formulation for solving a LCP
+quadratic programm formulation for solving a LCP with a symmetric matrix M.
+
+The QP we solve is
+
+  Minimize: \n
+  \f[
+    z^T M z + q^T x
+  \f]
+
+  subject to:\n
+  \f{eqnarray*}
+  Mz  + q  \geq  0
+  \f}
+
+  which is the classical reformulation that can be found
+  in Cottle, Pang and Stone (2009).
+
+  If the symmetry condition is not fulfilled, use the 
 
 function: lcp_qp() \n
  parameters:
@@ -60,7 +77,8 @@ function: lcp_qp() \n
 
 \section lcpNSQP NSQP Solver
 
-quadratic programm formulation for solving an non symmetric LCP
+non symmetric (and not nonsmooth as one could have thought in a plateform dedicated to nonsmooth problems)
+quadratic programm formulation for solving an LCP with a non symmetric matrix.
 
 function: lcp_nsqp() \n
  parameters:
@@ -99,7 +117,7 @@ function: lcp_rpgs() \n
 - dparam[2] (in): rho
 
 \section lcpPSOR PSOR Solver
-Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
+Projected Succesive over relaxation solver for LCP. See Cottle, Pang and Stone (2009), Chap 5 
 function: lcp_psor() \n
  parameters:
 - iparam[0] (in): maximum number of iterations allowed
@@ -119,7 +137,8 @@ function: lcp_newton_min() \n
 - dparam[1] (out): resulting error
 
 \section lcpNewtonFB  NewtonFB Solver
-a nonsmooth Newton method based based on the Fischer-Bursmeister convex function
+a nonsmooth Newton method based based on the Fischer-Burmeister convex function.
+It uses a variant of line search algorithm (VFBLSA in Facchinei-Pang 2003).
 
 function: lcp_newton_FB() \n
  parameters:
@@ -515,7 +534,7 @@ extern "C"
   1 : failed\n
   * \param[in,out] options structure used to define the solver and its parameters.
 
-  \author Olivier Bonnefon
+  \anuthor Olivier Bonnefon
   */
   void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -538,6 +557,48 @@ extern "C"
   */
   int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options);
 
+  /** lcp_avi_caoferris is a direct solver for LCP based on an Affine Variational Inequalities (AVI) reformulation\n
+   * The AVI solver is here the one from Cao and Ferris \n
+   *  Ref: "A Pivotal Method for Affine Variational Inequalities" Menglin Cao et Michael Ferris (1996)\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   * 0 : convergence\n
+   * 1 : iter = itermax\n
+   * 2 : negative diagonal term\n
+   * \param[in,out] options structure used to define the solver and its parameters.
+   *
+   *\author Olivier Huber
+   */
+  void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param options the pointer to the array of options to set
+  */
+  int linearComplementarity_avi_caoferris_setDefaultSolverOptions(SolverOptions* options);
+
+  /** lcp_pivot is a direct solver for LCP based on a pivoting method\n
+   * It can currently use Bard, Murty's least-index or Lemke rule for choosing
+   * the pivot. The default one is Lemke and it cam be changed by setting
+   * iparam[2]. The list of choices are in the enum LCP_PIVOT (see lcp_cst.h).
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   * 0 : convergence\n
+   * 1 : iter = itermax\n
+   * 2 : negative diagonal term\n
+   * \param[in,out] options structure used to define the solver and its parameters.
+   *
+   *\author Olivier Huber
+   */
+  void lcp_pivot(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param options the pointer to the array of options to set
+  */
+  int linearComplementarity_pivot_setDefaultSolverOptions(SolverOptions* options);
 
   /** generic interface used to call any LCP solver applied on a Sparse-Block structured matrix M, with a Gauss-Seidel process
    * to solve the global problem (formulation/solving of local problems for each row of blocks)

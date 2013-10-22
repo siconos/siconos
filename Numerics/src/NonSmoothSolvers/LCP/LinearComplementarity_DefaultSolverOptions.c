@@ -101,6 +101,28 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
     info =    linearComplementarity_newton_FB_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_LCP_AVI_CAOFERRIS:
+  {
+    info =    linearComplementarity_avi_caoferris_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_LCP_PIVOT:
+  {
+    info =    linearComplementarity_pivot_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_LCP_BARD:
+  {
+    info =    linearComplementarity_pivot_setDefaultSolverOptions(options);
+    options->iparam[3] = SICONOS_LCP_PIVOT_BARD;
+    break;
+  }
+  case SICONOS_LCP_MURTY:
+  {
+    info =    linearComplementarity_pivot_setDefaultSolverOptions(options);
+    options->iparam[3] = SICONOS_LCP_PIVOT_LEAST_INDEX;
+    break;
+  }
   default:
   {
     numericsError("linearComplementarity_setDefaultSolverOptions", "Unknown Solver");

@@ -91,7 +91,13 @@ int main(void)
   printSolverOptions(options);
   deleteSolverOptions(options);
 
+  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_AVI_CAOFERRIS);
+  printSolverOptions(options);
+  deleteSolverOptions(options);
 
+  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_PIVOT);
+  printSolverOptions(options);
+  deleteSolverOptions(options);
 
 
   freeLinearComplementarityProblem(problem);

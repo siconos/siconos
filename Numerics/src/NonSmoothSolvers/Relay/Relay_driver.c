@@ -26,12 +26,13 @@
 #endif
 #include <time.h>
 
-char  SICONOS_RELAY_PGS_STR[] = "RELAY_PGS";
-char  SICONOS_RELAY_PATH_STR[] = "RELAY_PATH";
-char  SICONOS_RELAY_ENUM_STR[] = "RELAY_ENUM";
-char  SICONOS_RELAY_NLGS_STR[] = "RELAY_NLGS";
-char  SICONOS_RELAY_LEMKE_STR[] = "RELAY_LEMKE";
-char  SICONOS_RELAY_LATIN_STR[] = "RELAY_LATIN";
+char*  SICONOS_RELAY_PGS_STR = "RELAY_PGS";
+char*  SICONOS_RELAY_PATH_STR = "RELAY_PATH";
+char*  SICONOS_RELAY_ENUM_STR = "RELAY_ENUM";
+char*  SICONOS_RELAY_NLGS_STR = "RELAY_NLGS";
+char*  SICONOS_RELAY_LEMKE_STR = "RELAY_LEMKE";
+char*  SICONOS_RELAY_LATIN_STR = "RELAY_LATIN";
+char*  SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
 
 int relay_driver(RelayProblem* problem, double *z , double *w,
                  SolverOptions* options, NumericsOptions* global_options)
@@ -109,6 +110,11 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   case SICONOS_RELAY_PATH:
   {
     relay_path(problem, z , w , &info , options);
+    break;
+  }
+  case SICONOS_RELAY_AVI_CAOFERRIS:
+  {
+    relay_avi_caoferris(problem, z , w , &info , options);
     break;
   }
   /*error */

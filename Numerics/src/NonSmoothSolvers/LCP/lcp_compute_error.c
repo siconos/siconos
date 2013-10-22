@@ -21,13 +21,13 @@
 #include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
 
-void lcp_compute_error_only(int n, double *z , double *w, double * error)
+void lcp_compute_error_only(unsigned int n, double *z , double *w, double * error)
 {
   /* Checks complementarity */
 
   *error = 0.;
   double zi, wi;
-  for (int i = 0 ; i < n ; i++)
+  for (unsigned int i = 0 ; i < n ; i++)
   {
     zi = z[i];
     wi = w[i];
@@ -49,12 +49,12 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
-  int n = problem->size;
+  unsigned int n = problem->size;
   cblas_dcopy(n , problem->q , incx , w , incy);  // w <-q
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
   double normq = cblas_dnrm2(n , problem->q , incx);
   lcp_compute_error_only(n, z, w, error);
-  *error = *error / (normq + 1.0);
+  *error = *error / (normq + 1.0); /* Need some comments on why this is needed */
   if (*error > tolerance)
   {
     if (verbose > 0) printf(" Numerics - lcp_compute_error : error = %g > tolerance = %g.\n", *error, tolerance);

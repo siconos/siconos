@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2010.
+/* Siconos-Numerics, Copyright INRIA 2005-2013.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,31 +16,35 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "lcp_test_function.h"
+#ifndef POLYHEDRON_H
+#define POLYHEDRON_H
 
-int main(void)
+/*!\file polyhedron.h
+ * \brief Some helpers for dealing with polyhedra and polytopes
+ *
+ * \authors Olivier Huber
+*/
+typedef struct
 {
-  int info =0 ;
+  unsigned int size;
+  double* H; /** H matrix in an (H,K) representation of a polytope Hx<=K */
+  double* K; /** K vector in an (H,K) representation of a polytope Hx<=K */
+  double* Heq; /** H matrix in an (H,K) representation of a polytope Hx=K */
+  double* Keq; /** K vector in an (H,K) representation of a polytope Hx=K */
+} Polyhedron;
 
-  if (argc != 2)
-  {
-    printf("Error! No filename for data given on the commandline\n");
-    exit(EXIT_FAILURE);
-  }
-  char filename[50] = "./data/@TEST_DATA@";
-  strcpy(argv[1], filename);
-  printf("Test on %s\n",filename);
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
 
-  FILE * finput  =  fopen(filename,"r");
-  if(!@TEST_SBM@)
-    info = lcp_test_function(finput,@TEST_SOLVER@);
-  else
-    info = lcp_test_function_SBM(finput,@TEST_SOLVER@);
-  
-  fclose(finput);
-  printf("\nEnd of test on %s\n", filename);
-  return info;
+  /** free a Polyhedron struct
+  * \param poly the Polyhedron struct to free
+  */
+  void freePolyhedron(Polyhedron* poly);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
+#endif
+
+#endif

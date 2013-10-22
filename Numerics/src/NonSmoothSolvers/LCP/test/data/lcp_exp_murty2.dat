@@ -1,0 +1,15 @@
+6
+0
+6
+6
+6	6
+1 0 0 0 0 0
+2 1 0 0 0 0
+2 2 1 0 0 0
+2 2 2 1 0 0
+2 2 2 2 1 0
+2 2 2 2 2 1
+-126 -124 -120 -112  -96  -64
+
+# from Murty (1988) chapter 6
+# this example illustrates the exponential complexity of Lemke based methods
