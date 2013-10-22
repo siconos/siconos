@@ -49,7 +49,7 @@ int main()
   DECL_TIMER(t8);
   DECL_TIMER(t9);
 
-  unsigned int i, k, k1, k2;
+  unsigned int i, k;
 
   /* b += a */
   cpy3x3(ia, a);
@@ -296,8 +296,10 @@ int main()
     }
   }
   STOP_TIMER(t8);
+#ifdef WITH_TIMERS
+  unsigned int k1;
   k1 = k;
-
+#endif
   k = 0;
   START_TIMER(t9);
   for (i = 0; i < 1000; ++i)
@@ -344,10 +346,9 @@ int main()
   }
   STOP_TIMER(t9);
 
-  k2 = k;
-
-
 #ifdef WITH_TIMERS
+  unsigned int k2;
+  k2 = k;
   printf("DGESV/solv3x3 (rand):%g\n", ELAPSED(t9) / ELAPSED(t8));
   printf("Number of pb DGESV and solv3x3 (rand):%d,%d\n", k1, k2);
   assert(ELAPSED(t9) < ELAPSED(t8));

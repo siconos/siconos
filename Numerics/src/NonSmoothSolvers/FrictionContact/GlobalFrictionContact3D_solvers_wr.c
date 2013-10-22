@@ -142,7 +142,6 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     int n = M->size0;
     int m = H->size1;
 
-    int infoInverseSBM = 0;
     assert(!Global_ipiv);
     Global_ipiv = (int *)malloc(n * sizeof(int));
 
@@ -161,8 +160,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 #endif
     //Compute Htmp   <- M^-1 HtmpSBM
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
-    infoInverseSBM = inverseDiagSBM(M->matrix1);
-    assert(!infoInverseSBM);
+    assert(!inverseDiagSBM(M->matrix1));
     Global_MisInverse = 1;
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataMinv.sci", "w");

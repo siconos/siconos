@@ -70,8 +70,9 @@ int globalFrictionContact_fclib_write(
 
 }
 #endif
-
+#ifdef WITH_FCLIB
 static int fccounter = 0;
+#endif
 
 int globalFrictionContact3D_LmgcDriver(double *reaction,
                                        double *velocity,
