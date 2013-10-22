@@ -108,14 +108,19 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
     if (verbose > 0)
+    {
       printf("----------------------------------- FC3D - Extra Gradient (EG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-
+    }
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  printf("----------------------------------- FC3D -  Extra Gradient (EG) - #Iteration %i Final Error = %14.7e\n", iter, error);
+  if (verbose > 0)
+  {
+    printf("----------------------------------- FC3D -  Extra Gradient (EG) - #Iteration %i Final Error = %14.7e\n", iter, error);
+  }
   dparam[0] = tolerance;
   dparam[1] = error;
+  iparam[7] = iter;
   free(velocitytmp);
   free(reactiontmp);
 
@@ -135,13 +140,13 @@ int frictionContact3D_ExtraGradient_setDefaultSolverOptions(SolverOptions* optio
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 8;
+  options->dSize = 8;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
