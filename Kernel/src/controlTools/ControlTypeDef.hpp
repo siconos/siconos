@@ -36,10 +36,6 @@
 /** Sensor types */
 #define LINEAR_SENSOR              100
 
-/** Observer types */
-#define LUENBERGER                 100
-#define SLIDING_REDUCED_ORDER      101
-
 /** Event types
   \warning You have also to update the
   description in Event.hpp

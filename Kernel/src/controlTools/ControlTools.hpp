@@ -44,10 +44,6 @@
 // Observer - generic
 #include "Observer.hpp"
 
-// Observer - available
-#include "LuenbergerObserver.hpp"
-#include "SlidingReducedOrderObserver.hpp"
-
 // Misc
 #include "ControlManager.hpp"
 #include "MatrixIntegrator.hpp"
