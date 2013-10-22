@@ -124,6 +124,5 @@ FirstOrderLinearR: \f$ C(t,Z), \ \ F(t,Z), \ \ , D(t,Z), \ \ e(t,Z), B(t,Z) \f$.
 LagrangianScleronomousR: \f$ h(Q,Z), \ \ G_0(Q,Z) \f$. \n
 LagrangianRheonomousR: \f$  h(Q,t,Z), \ \ G_0(Q,t,Z), \ \ hdot(Q,t,Z) \f$.\n
 LagrangianCompliantR:  \f$  h(Q,\lambda,Z), \ \ G_0(Q,\lambda,Z), \ \ G_1(Q,\lambda,Z) \f$.
-\f}
 
 */
