@@ -38,8 +38,9 @@
   PY_REGISTER(FirstOrderType1R);                                        \
   PY_REGISTER(FirstOrderType2R);                                        \
   PY_REGISTER(Interaction);                                             \
-  PY_REGISTER_WITHOUT_DIRECTOR(Actuator)                                \
   PY_REGISTER_WITHOUT_DIRECTOR(Sensor)                                  \
+  PY_REGISTER_WITHOUT_DIRECTOR(Actuator)                                \
+  PY_REGISTER_WITHOUT_DIRECTOR(Observer)                                \
   PY_REGISTER(ControlSensor)                                            \
   PY_REGISTER(LinearSensor)                                             \
   PY_REGISTER(PID)                                                      \

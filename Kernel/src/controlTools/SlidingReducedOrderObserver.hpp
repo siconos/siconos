@@ -39,10 +39,10 @@ private:
 protected:
 
   /** the vector defining the measurements (\f$ y = Cx \f$) */
-  SP::SiconosMatrix _C;
+  SP::SimpleMatrix _C;
 
   /** matrix multiplying the innovation term */
-  SP::SiconosMatrix _L;
+  SP::SimpleMatrix _L;
 
   double _theta;
 
@@ -64,7 +64,7 @@ public:
    * \param C observation matrix
    * \param L gain matrix
    */
-  SlidingReducedOrderObserver(SP::ControlSensor sensor, const SiconosVector& xHat0, SP::SiconosMatrix C, SP::SiconosMatrix L):
+  SlidingReducedOrderObserver(SP::ControlSensor sensor, const SiconosVector& xHat0, SP::SimpleMatrix C, SP::SimpleMatrix L):
     Observer(SLIDING_REDUCED_ORDER, sensor, xHat0), _C(C), _L(L), _pass(false) {}
 
   /** Update the estimate at each event
@@ -78,26 +78,16 @@ public:
 
   /** Set the L matrix
    * \param L the new L matrix
-  */
-  void setL(const SiconosMatrix& L);
-
-  /** Set the L matrix
-   * \param L the new L matrix
    */
-  inline void setLPtr(SP::SiconosMatrix L)
+  inline void setLPtr(SP::SimpleMatrix L)
   {
     _L = L;
   };
 
   /** Set the C matrix
-   * \param c the new C matrix
-  */
-  void setC(const SiconosMatrix& C);
-
-  /** Set the C matrix
    * \param C the new C matrix
    */
-  inline void setcPtr(SP::SiconosMatrix C)
+  inline void setCPtr(SP::SimpleMatrix C)
   {
     _C = C;
   };

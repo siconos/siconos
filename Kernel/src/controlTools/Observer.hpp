@@ -174,6 +174,14 @@ public:
     return _xHat;
   }
 
+  /** Set the DynamicalSystem used in the Observer
+   * \param ds the DynamicalSystem used in the Observer
+   */
+  inline void setDS(SP::DynamicalSystem ds)
+  {
+    _DS = ds;
+  }
+
 };
 
 #endif

@@ -35,6 +35,7 @@ void LuenbergerObserver::initialize(const Model& m)
   {
     Observer::initialize(m);
   }
+  bool isDSinDSG0 = true;
   DynamicalSystemsGraph& originalDSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor originaldsgVD;
   if (!_DS) // No DynamicalSystem was given
@@ -66,7 +67,10 @@ void LuenbergerObserver::initialize(const Model& m)
   else
   {
     // is it controlled ?
-    originaldsgVD = originalDSG0.descriptor(_DS);
+    if (originalDSG0.is_vertex(_DS))
+      originaldsgVD = originalDSG0.descriptor(_DS);
+    else
+      isDSinDSG0 = false;
   }
 
   // Initialize with the guessed state
@@ -89,7 +93,7 @@ void LuenbergerObserver::initialize(const Model& m)
   DSG0.e[dsgVD] = _e;
 
   // Was the original DynamicalSystem controlled ?
-  if (originalDSG0.B.hasKey(originaldsgVD))
+  if (isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD))
   {
     DSG0.B[dsgVD] = originalDSG0.B[originaldsgVD];
     assert(originalDSG0.u[originaldsgVD] && "A DynamicalSystem is controlled but its control input has not been initialized yet");
@@ -128,11 +132,6 @@ void LuenbergerObserver::process()
     *_y = y;
     *_xHat = _DS->getx();
   }
-}
-
-void LuenbergerObserver::setL(const SiconosMatrix& L)
-{
-    _L.reset(new SimpleMatrix(L));
 }
 
 AUTO_REGISTER_OBSERVER(LUENBERGER, LuenbergerObserver);

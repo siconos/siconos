@@ -91,11 +91,6 @@ public:
 
   /** Set the L matrix
    * \param L the new L matrix
-  */
-  void setL(const SiconosMatrix& L);
-
-  /** Set the L matrix
-   * \param L the new L matrix
    */
   inline void setLPtr(SP::SiconosMatrix L)
   {
@@ -103,14 +98,9 @@ public:
   };
 
   /** Set the C matrix
-   * \param c the new C matrix
-  */
-  void setC(const SiconosMatrix& C);
-
-  /** Set the C matrix
    * \param C the new C matrix
    */
-  inline void setcPtr(SP::SiconosMatrix C)
+  inline void setCPtr(SP::SiconosMatrix C)
   {
     _C = C;
   };

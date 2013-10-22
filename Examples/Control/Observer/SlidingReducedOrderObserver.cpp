@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   control->addSensorPtr(sens, tSensor);
 
   // add the Observer
-  SP::SiconosMatrix L(new SimpleMatrix(2, 1));
+  SP::SimpleMatrix L(new SimpleMatrix(2, 1));
   (*L)(0, 0) = -7.5125146;
   (*L)(1, 0) = -50.04168751;
   SP::SiconosVector xHat0(new SiconosVector(2));

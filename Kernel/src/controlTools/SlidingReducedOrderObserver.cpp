@@ -35,6 +35,7 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
   {
     Observer::initialize(m);
   }
+  bool isDSinDSG0 = true;
   DynamicalSystemsGraph& originalDSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor originaldsgVD;
   if (!_DS) // No DynamicalSystem was given
@@ -66,7 +67,10 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
   else
   {
     // is it controlled ?
-    originaldsgVD = originalDSG0.descriptor(_DS);
+    if (originalDSG0.is_vertex(_DS))
+      originaldsgVD = originalDSG0.descriptor(_DS);
+    else
+      isDSinDSG0 = false;
   }
 
   // Initialize with the guessed state
@@ -89,7 +93,7 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
   DSG0.e[dsgVD] = _e;
 
   // Was the original DynamicalSystem controlled ?
-  if (originalDSG0.B.hasKey(originaldsgVD))
+  if (isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD))
   {
     DSG0.B[dsgVD] = originalDSG0.B[originaldsgVD];
     assert(originalDSG0.u[originaldsgVD] && "A DynamicalSystem is controlled but its control input has not been initialized yet");
@@ -109,7 +113,24 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
 void SlidingReducedOrderObserver::process()
 {
   if (!_pass)
+  {
     _pass = true;
+    //update the estimate using the first value of y, such that C\hat{x}_0 = y_0
+    const SiconosVector& y = _sensor->y();
+    _e->zero();
+    prod(*_C, *_xHat, *_e);
+    *_e -= y;
+
+    SiconosVector tmpV(_DS->getN());
+    SimpleMatrix tmpC(*_C);
+    for (unsigned int i = 0; i < _e->size(); ++i)
+      tmpV(i) = (*_e)(i);
+
+    tmpC.SolveByLeastSquares(tmpV);
+    *(_xHat) -= tmpV;
+    *(_DS->x()) -= tmpV;
+    _DS->swapInMemory();
+  }
   else
   {
     // get measurement from sensor
@@ -117,12 +138,22 @@ void SlidingReducedOrderObserver::process()
     // update the current measured value
     *_y = y;
 
+////    prod(*_C, _DS->getx(), *_e);
+//    *_e -= y;
+//
+//    SiconosVector tmpV(_DS->getN());
+//    SimpleMatrix tmpC(*_C);
+//    for (unsigned int i = 0; i < _e->size(); ++i)
+//      tmpV(i) = (*_e)(i);
+//
+//    tmpC.SolveByLeastSquares(tmpV);
+//    *(_DS->x()) -= tmpV;
     // First pass, set _e to 0, integrate the system
     // and get the innovation term
     _e->zero();
     _simulation->computeOneStep();
 
-    // e = C*xhat_k - y_{k+1}
+    // e = C*xhat_{k+1} - y_{k+1}
     prod(*_C, _DS->getx(), *_e);
     *_e -= *_y;
 
@@ -141,7 +172,7 @@ void SlidingReducedOrderObserver::process()
   }
 }
 
-void SlidingReducedOrderObserver::setL(const SiconosMatrix& L)
+void SlidingReducedOrderObserver::setL(const SimpleMatrix& L)
 {
     _L.reset(new SimpleMatrix(L));
 }
