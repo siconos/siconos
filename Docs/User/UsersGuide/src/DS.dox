@@ -1,11 +1,11 @@
 /*! \page dsInSiconos Dynamical Systems formulations in Siconos
 
 \author Franck Pérignon
-\version Siconos-Kernel 3.0.0 
+\version Siconos-Kernel 3.6
 
 \section doc_dsIntro Introduction
 
-First step of any Non-Smooth problem description in Siconos consists in the definition of some Dynamical Systems, namely some sets of differential equations. 
+Any Non-Smooth problem description in Siconos starts with the definition of some Dynamical Systems, namely some sets of differential equations.
 We introduce in this part all the available formulations, say all the existing classes, for such systems.
 
 As shown on the class diagram below, there are six classes to deal with Dynamical Systems and five formulations:
@@ -37,9 +37,9 @@ where
 - t is the time
 - \f$ x \in R^{n} \f$ is the state. 
 - \f$ \dot x \f$ the derivative of the state according to time
-- \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
-For example, z may be used to set some perturbation parameters, or to control the system (z will be set by some actuators) or anything else. 
-- \f$ g : R^{n} \times R  \mapsto  R^{n}   \f$ .
+- \f$ z \in R^{s}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
+For example, z may be used to set some perturbation parameters, or anything else. 
+- \f$ g : R^{n} \times R^n \times R \times \R^s  \to  R^{n}   \f$.
 
 Under some specific conditions, we can rewrite this as:
 \f[
@@ -53,10 +53,9 @@ The aim of this class is to provide some members and functions for all dynamical
 <em>That means that all members and functions described below are also available in any of the derived classes. </em>
 
 \b Main \b class \b members:
-- each DynamicalSystem is identified thanks to a number and an id.
-- a link to the non-smooth system that owns the present dynamical system
-- x, with x[0]=\f$ x \f$ and x[1]=\f$ \dot x \f$ = rhs. 
-- x0
+- each DynamicalSystem is identified thanks to a number.
+- x, with x[0]=\f$ x \f$ and x[1]=\f$ \dot x \f$.
+- x0 the state at \f$t_0\f$
 - z
 - g, jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$, jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$. 
 
@@ -116,8 +115,8 @@ M\dot x(t) &=& f(t,x,z) + r \\
 \f}
 
 with: \n
-- M: a nxn matrix
-- f(x,t): the vector field - Vector of size n
+- \f$M \in \R^{n \times n} \f$
+- f(x,t): the vector field - \f$f: \R^{n} \times \R \to \R^n \f$
 - r: input due to non-smooth behavior - Vector of size n.
 
 - JacobianXF = \f$ \nabla_x f(t,x,z) \f$, a nX n square matrix, is also a member of the class. 

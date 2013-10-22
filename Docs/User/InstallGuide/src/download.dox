@@ -1,14 +1,16 @@
 /*! \page IG_download Downloading Siconos
 
-Four packages are available:
+Five packages are available:
 
 - \b Siconos-Numerics: shared dynamic library that provides low-level algorithms (Fortran and C).
 
-- \b Siconos-Kernel: high level C++ classes and methods, main package of the software. 
+- \b Siconos-Kernel: high level C++ classes and methods, main package of the software.
 
-- \b Siconos-Front-End: interfaces with "user-friendly" softwares, Scilab and Python
+- \b Siconos-Mecanics: mecanical primitives on top of Siconos-Kernel.
 
-- \b Siconos-Examples: a library of examples. 
+- \b Siconos-Front-End: interfaces with "user-friendly" environment, namely Python.
+
+- \b Siconos-Examples: a set of examples.
 
 For a minimal Siconos installation, Numerics and Kernel are required.
 
@@ -27,31 +29,25 @@ If you need the last version (maybe unstable ...) do not hesitate to contact us.
 
 \section binaries 2 - Binaries
 
-Binaries (rpm, deb ...) for different linux distributions are available on <a href="https://gforge.inria.fr/frs/?group_id=9">Siconos GForge</a> page.
+Binaries (rpm, deb ...) for different Linux distributions are available on <a href="https://gforge.inria.fr/frs/?group_id=9">Siconos GForge</a> page.
 
-\section svn 3 - Subversion
+\section git 3 - Git
 
-If you are a developer of the platform, you can use subversion tools to get the software.
-First you need to connect to the Gforge and add your ssh-key (see https://gforge.inria.fr/scm/?group_id=9).
+If you are a developer of the platform, you can use the git revision control and source code management system to get the software.
+First you need to log in on Gforge, join the Siconos project, add your ssh-key and follow the instructions at https://gforge.inria.fr/scm/?group_id=9 .
 
-Then run in a terminal: \n
+Some useful commands: \n
+- git pull --rebase: bring your working copy "up-to-date" with the Gforge repository.
+- git commit file1 file2: commit the new version of your file(s) to your local repository.
+- git status: show you the state of any item in your working copy
+  (option -uno: list only the files under version control)
+- git add filename: filename (file or directory) will now be under version control (after the next commit).
+- git rm name: delete name (next commit)
+- git diff: see your current changes (w.r.t. the lastest commit on your repo) in diff form.
+- git push: propagate your changes to the main repository on Gforge.
+- git \e item --help: help on item
 
-\verbatim
-svn checkout --username yourlogin https://scm.gforge.inria.fr/svn/siconos
-\endverbatim
-
-Other useful commands:
-- svn up: bring your working copy "up-to-date" with the repository.
-- svn commit: commit the new version of your file to the repository.
-- svn status: show you the state of any item in your working copy
-  (option -q: list only the files under version control)
-- svn add name: name (file or directory) will now be under version control (after the next commit).
-  Warning: if name is a directory, everything underneath name will be scheduled for addition.
-- svn delete name: delete name (next commit)  
-- svn diff: compare your version with the repository
-- svn help \e item: help on item
-
-For details on subversion see the on-line documentation at http://svnbook.red-bean.com/. 
+For details on git see the on-line documentation at http://git-scm.com/.
 
 */
 

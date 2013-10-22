@@ -2,16 +2,37 @@
 \anchor installGuide
 \section siconosInstall Foreword
 
-Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
+Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems.
 
-This manual explains how to download and install the Siconos platform. \n
+This manual explains how to download and install the Siconos platform.\n
 It also shortly describes the different required or optional libraries.\n
+
+\section sicInstPlatforms Platforms
+
+Siconos 3.6 has been successfully compiled on:
+- {i386, amd64} Fedora Core {14, 16 and 17}
+- {i386, amd64} Ubuntu {precise, quantal and raring}
+- {amd64} mac-osx Snow Leopard and Lion
+- {ia64} linux-debian {squeeze}
+- {amd64, ppc64} Gentoo
+
+The following compilers have been reported to work:
+
+\b gcc: 4.5.1, 4.6.3, 4.7.2, 4.8.1
+
+\b clang: 3.2, 3.3
+
+Visual Studio 2010
+
+If you have compiled Siconos on another platform successfully, then
+the maintainer would be glad to hear about that.
+
 
 \section IG_contents Contents:
 
-\subpage IG_prereq 
+\subpage IG_prereq
 
-\subpage IG_download 
+\subpage IG_download
 
 \subpage IG_install
 

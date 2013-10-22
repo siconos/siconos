@@ -1,14 +1,19 @@
 /*! \page IG_install Installing Siconos
 
-Three steps:
+The installation of the Siconos plateform constist of at most four steps:
 
 -# compile and install Siconos-Numerics
 -# compile and install Siconos-Kernel
+-# compile and install Siconos-Mechanics (optional)
 -# compile and install Siconos-Front-End (optional)
 
 Warnings: 
 - before that, make sure you have read the section \ref IG_prereq.
-- Packages must be installed in this order: 1-Numerics, 2-Kernel, (3-Front-End).
+- Packages must be installed in this order: 1-Numerics, 2-Kernel, (3-Mechanics), (4-Front-End).
+
+Note that you do not need to install Mechanics to install the Front-End: the latter has only an optional
+support for the former. However if you would like to use the Mechanics code in Python, you need to install
+Siconos-Mechanics before compiling the Front-End.
 
 \section IG_installsources Installing from Sources.
 
@@ -16,11 +21,11 @@ Warnings:
 
 First download all the required packages (.tgz) as explained in \ref IG_download section.\n
 Then uncompressed the downloaded archives:
-\verbatim 
+\verbatim
 tar -zxvf siconos-XXXX.tgz
 \endverbatim
 
-XXXX being Numerics, Kernel or Front-End package name. \n
+XXXX being Numerics, Kernel, Mechanics or Front-End package name. \n
 
 For each package:
 first create a directory where sources will be built (anywhere but in the sources)
@@ -69,6 +74,12 @@ make doc
 
 The resulting doc (html files) is saved in ../GeneratedDocs/XXX, XXX being Kernel or Numerics.
 
+\subsection install_windows Windows
+
+There is no official support to build Siconos on Windows. However you can find some pointers
+here: \ref WindowsInstall .
+
+
 \section IG_installBin Installing from Binaries
 
 \subsection install_fedora Fedora Core
@@ -78,7 +89,7 @@ And, as root, run:
 \verbatim
 rpm -Uvh siconos-XXXX.rpm
 \endverbatim
-XXXX being Numerics, Kernel and possibly Front-End packages names.
+XXXX being Numerics, Kernel and possibly Mechanics or Front-End packages names.
 
 \subsection install_debian Debian or Ubuntu
 
@@ -87,6 +98,6 @@ And, as root, run:
 \verbatim
 apt-get install siconos-XXXX.deb
 \endverbatim
-XXXX being Numerics, Kernel and possibly Front-End packages names.
+XXXX being Numerics, Kernel and possibly Mechanics or Front-End packages names.
 
 */

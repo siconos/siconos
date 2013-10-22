@@ -1,5 +1,68 @@
 /*! \page IG_prereq Prerequisite
 
+\section easy_install Easy Install
+An easy way to get all the required libraries is to use one of the following command.
+It will install the necessary packages for compiling all the components of Siconos.
+For a more details view of each library, see the Section \ref req_libs.
+
+\subsection installCommands Sampled commands for installing all the dependencies
+
+<b> Fedora 14</b>:
+\verbatim
+yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel libxml2 libxml2-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig python-py
+\endverbatim
+
+<b> Fedora 16 or 17</b>:
+\verbatim
+yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel libxml2 libxml2-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig pytest
+\endverbatim
+
+<b> Ubuntu Precise</b>:
+\verbatim
+apt-get install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib make g++
+\endverbatim
+
+<b> Ubuntu Quantal</b>:
+\verbatim
+apt-get install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib make g++ python-pytest
+\endverbatim
+
+<b> Debian Squeeze</b>:
+\verbatim
+apt-get install cmake gfortran gcc libboost-graph-dev libatlas-base-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib python-py swig2.0 doxygen libboost-filesystem-dev 
+\endverbatim
+You will also need to use the backport repository to have a cmake recent enough:
+\verbatim
+echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> /etc/apt/sources.list
+apt-get update
+apt-get -y --force-yes -t squeeze-backports install cmake
+\endverbatim
+
+<b> Mac Os</b>:
+We recommend you to use the macport system to install the dependencies. Even if you have clang, you will need to install gcc because some fortran code has to be compiled in Numerics.
+Here is a (probably) incomplete list of ports you have to install: wget, gcc, gmp, cppunit, doxygen, swig-python, py27-numpy, py27-py
+
+\subsection libext External libraries versions
+
+Here is a list of the minimal recommended version of the various
+external libraries used to compile Siconos. Note that it might work
+with older version but with those you should be safe.
+
+Compiler: gcc 4.5
+
+CMake: 2.8.5
+
+Boost 1.44
+
+cppunit: 1.12
+
+Python: 2.7
+
+Doxygen: 1.5.6
+
+Swig 2.0.5
+
+
 \section req_libs Required libraries
 
 \subsection cmake 1 - Cmake
@@ -38,7 +101,7 @@ About \b Blas: http://www.netlib.org/blas/
 About \b Lapack: http://www.netlib.org/lapack/
 
 About \b Atlas: http://math-atlas.sourceforge.net/
-1
+
 \subsection xml 3 - libxml2
 The XML C parser and toolkit. Required for XML file reading and writing.
 
@@ -84,12 +147,6 @@ If it is not installed, make test commands will simply be ignored and no test wi
 
 More about \b cppunit: see http://cppunit.sourceforge.net/
 
-\subsection scilab 2 - Scilab
-Scilab is an open source platform for numerical computation, used in Front-End package.
-
-Download : http://www.scilab.org/download/index_download.php
-About \b scilab:  http://www.scilab.org/en
-
 \subsection py 3 - Python
 Python® is a dynamic object-oriented programming language, used in Front-End package. 
 
@@ -108,35 +165,5 @@ It is used to generate documentation for Siconos files. \n
 
 You may also need qt, graphviz ...
 See http://www.stack.nl/~dimitri/doxygen/install.html for details.
-
-\section sicInstPlatforms Platforms
-
-Siconos v3.0.0 has been successfully compiled on:
-- {i386, amd64} linux-debian {testing, etch, lenny}
-- {i386, amd64} linux-fedora core  7-11
-- {i386, amd64} linux-ubuntu {feisty - jaunty}
-- mac-osx Leopard
-
-For: 
-
-- Windows: not available at the time, but we would be really grateful for any contribution!
-
-If you have compiled Siconos on another platform successfully, then
-the maintainer would be glad to hear about that.
-
-\section libext External libraries versions
-
-Here is a list of the minimal recommended version of the various
-external libraries used to compile Siconos (on Fedora Core 8)
-
-Compiler: gcc 4.1.2 \n
-
-Boost 1.34.1 \n
-
-cppunit: 1.12
-
-Python: 2.5.1
-
-Doxygen: 1.5.6
 
 */
