@@ -124,7 +124,7 @@ setup_3_5() {
 setup_3_6() {
     current_dir=$PWD
     cd $PIPOL_WDIR/siconos; { 
-        git checkout 3.6.0-rc
+        git checkout 3.6.x
     }; 
 }
 
