@@ -18,8 +18,8 @@
 
 #PIPOL mac 03:00 --silent
 
-#release=false
-release=true
+release=false
+#release=true
 
 set -x
 #set -e
@@ -357,7 +357,7 @@ nightly_test Examples Debug
 nightly_submit Examples Debug
 ##
 #nightly_memcheck Examples Debug
-nightly_submit Examples Debug
+#nightly_submit Examples Debug
 # end
 date
 df -k
