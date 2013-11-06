@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 // unsigned int sNSLawSize = 4;
 
 //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction("MLCP",Inter_DS,1,sNSLawSize,aNSL,aR));
+  SP::Interaction aI(new Interaction(sNSLawSize,aNSL,aR));
 
 //****BUILD THE SYSTEM
   SP::Model  aM(new Model(0,sTf));
@@ -143,6 +143,7 @@ int main(int argc, char *argv[])
   time.restart();
 
   for(int k = 0 ; k < NBStep ; k++)
+//  while(aS->hasNextEvent())
   {
 #ifdef SICONOS_DEBUG
     std::cout<<"-> Running step:"<<k<<std::endl;
@@ -150,7 +151,6 @@ int main(int argc, char *argv[])
     cmp++;
 
     aS->newtonSolve(1e-4, 200);
-    aS->nextStep();
 
     dataPlot(cmp, 0) = aS->nextTime();
     dataPlot(cmp, 1) = x->getValue(0);
@@ -171,6 +171,8 @@ int main(int argc, char *argv[])
     dataPlot(cmp, 7) = vectorfield->getValue(0);
     dataPlot(cmp, 8) = vectorfield->getValue(1);
     ++show_progress;
+    
+    aS->nextStep();
 
     // (*fout)<<cmp<<" "<<x->getValue(0)<<" "<<x->getValue(1)<<" "<<lambda->getValue(0)<<" "<<lambda->getValue(1)<<" "<<lambda->getValue(2)<<" "<<lambda->getValue(3)<<endl;
   }

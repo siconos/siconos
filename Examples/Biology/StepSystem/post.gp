@@ -7,17 +7,17 @@ set term tikz standalone monochrome  size 5in,5in font '\small\sf'
 extension=".tex"
 
 
-
-
+resultfile = "simu.1.6.log"
+#resultfile = "simu.1.6.ref"
 
 
 set autoscale
 set xrange [0:2.0]
 set output "traj".extension
-plot "simu.1.6.log" u 1:2 w l ,\
-     "simu.1.6.log" u 1:3 w l ,\
-     "simu.1.6.log" u 1:8 w l ,\
-     "simu.1.6.log" u 1:9 w l 
+plot resultfile u 1:2 w l ,\
+     resultfile u 1:3 w l ,\
+     resultfile u 1:8 w l ,\
+     resultfile u 1:9 w l 
      
 
 set output "phase".extension

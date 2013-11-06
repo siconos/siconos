@@ -9,6 +9,7 @@ ENABLE_LANGUAGE(CXX)
 ENABLE_LANGUAGE(Fortran) 
 
 SET(EXAMPLES_DIRECTORIES
+  Biology
   Control
   Electronics
   Mechanics
