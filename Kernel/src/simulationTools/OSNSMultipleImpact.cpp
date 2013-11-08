@@ -8,6 +8,7 @@
 #include "ioMatrix.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/progress.hpp>
+#include "OSNSMatrix.hpp"
 
 //Default constructor
 OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()

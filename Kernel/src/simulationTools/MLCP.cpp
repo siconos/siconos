@@ -20,7 +20,7 @@
 #include "MixedComplementarityConditionNSL.hpp"
 #include "EqualityConditionNSL.hpp"
 #include "Simulation.hpp"
-
+#include "OSNSMatrix.hpp"
 
 using namespace RELATION;
 //#define MLCP_DEBUG

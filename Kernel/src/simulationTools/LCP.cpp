@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "LCP.hpp"
+#include "OSNSMatrix.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1

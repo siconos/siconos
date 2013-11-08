@@ -26,9 +26,9 @@
 #include "OneStepNSProblem.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
-#include "BlockCSRMatrix.hpp"
 #include <time.h>
 
+#include "SiconosFwd.hpp"
 #include "SiconosPointers.hpp"
 
 /** stl vector of double */

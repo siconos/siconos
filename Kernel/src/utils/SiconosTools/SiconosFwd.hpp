@@ -62,6 +62,8 @@ DEFINE_SPTR(BlockMatrix)
 DEFINE_SPTR(SiconosVector)
 DEFINE_SPTR(BlockVector)
 
+DEFINE_SPTR(OSNSMatrix)
+
 DEFINE_SPTR(SiconosMemory)
 
 DEFINE_SPTR(NewtonEulerR)

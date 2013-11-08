@@ -36,7 +36,7 @@
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
 #include "LagrangianLinearTIDS.hpp"
-
+#include "OSNSMatrix.hpp"
 
 
 using namespace RELATION;

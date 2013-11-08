@@ -23,6 +23,8 @@
 #include "NewtonEulerR.hpp"
 #include "LagrangianR.hpp"
 #include "NonSmoothLaw.hpp"
+#include "OSNSMatrix.hpp"
+#include "BlockCSRMatrix.hpp"
 
 using namespace RELATION;
 using namespace Siconos;

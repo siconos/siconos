@@ -23,7 +23,6 @@ Definition of a compressed row sparse block matrix of SiconosMatrix*
 #ifndef BLOCKCSRMATRIX_H
 #define BLOCKCSRMATRIX_H
 
-#include <boost/shared_ptr.hpp>
 #include "SiconosNumerics.h"
 #include "SimulationTypeDef.hpp"
 
@@ -86,7 +85,7 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix)
     \f}
  *
  * with nc = 4, nbNonNullBlocks = 8, RowPos = [0 0 0 1 1 2 3 3],
- * RowCol = [0 1 3 0 1 2 0 3]\n and diagSizes = [3 6 9 12].
+ * RowCol = [0 1 3 0 1 2 0 3]\n and _diagsize0 = [3 6 9 12].
  *
  * We use stl::vector (which may seems redundent with the double* of
  * the numerics SparseBlockStructuredMatrix) because memory can be
@@ -103,21 +102,26 @@ private:
   ACCEPT_SERIALIZATION(BlockCSRMatrix);
 
   /** Number of blocks in  row*/
-  unsigned int nr;
+  unsigned int _nr;
 
   /** Number of blocks in  col*/
-  unsigned int nc;
-
-  /** Specific structure required when a (Numerics) solver block is used */
-  SP::SparseBlockStructuredMatrix numericsMatSparse;
+  unsigned int _nc;
 
   /** Sparse-Block Boost Matrix. Each block is a SiconosMatrix**/
-  SP::CompressedRowMat MBlockCSR;
+  SP::CompressedRowMat _blockCSR;
+
+  /** Specific structure required when a (Numerics) solver block is used */
+  SP::SparseBlockStructuredMatrix _sparseBlockStructuredMatrix;
+
+  /** Vector used to save the sum of rows of diagonal blocks of M:
+      _diagsize0[i] = _diagsize0[i-1] + ni, ni being the size of the
+      diagonal block at row(block) i */
+  SP::IndexInt _diagsize0;
 
   /** Vector used to save the sum of dim of diagonal blocks of M:
-      diagSizes[i] = diagSizes[i-1] + ni, ni being the size of the
+      _diagsize0[i] = _diagsize0[i-1] + ni, ni being the size of the
       diagonal block at row(block) i */
-  SP::IndexInt diagSizes;
+  SP::IndexInt _diagsize1;
 
   /** List of non null blocks positions (in row) */
   SP::IndexInt rowPos;
@@ -142,24 +146,11 @@ public:
   */
   BlockCSRMatrix(unsigned int);
 
-  /** Constructor from index set and map
+  /** Constructor from index set
       \param SP::Interaction, the index set of the active
       constraints
   */
   BlockCSRMatrix(SP::InteractionsGraph);
-
-  /** Constructor from DynamicalSystemsSet and map
-      \param DynamicalSystemsSet*, the index set of the active constraints
-      \param MapOfDSMatrices, the list of matrices linked to a couple of SP::Interaction
-  */
-  BlockCSRMatrix(SP::DynamicalSystemsSet, MapOfDSMatrices&);
-
-  /** Constructor from DynamicalSystemsSet and map
-    \param SP::Interaction, the index set of the active constraints
-     \param DynamicalSystemsSet*, the index set of the active constraints
-     \param MapOfDSMatrices, the list of matrices linked to a couple of SP::Interaction
-  */
-  BlockCSRMatrix(SP::InteractionsGraph, SP::DynamicalSystemsSet, MapOfInteractionMapOfDSMatrices&);
 
   /** destructor
    */
@@ -168,7 +159,7 @@ public:
   /** get size (in block-components) */
   inline unsigned int getNumberOfBlocksInARow() const
   {
-    return nr;
+    return _nr;
   };
 
   /** get total number of non-null blocks */
@@ -177,13 +168,13 @@ public:
   /** get the numerics-readable structure */
   inline SP::SparseBlockStructuredMatrix getNumericsMatSparse()
   {
-    return numericsMatSparse;
+    return _sparseBlockStructuredMatrix;
   };
 
   /** get the ublas sparse mat*/
   inline SP::CompressedRowMat getMSparse()
   {
-    return MBlockCSR;
+    return _blockCSR;
   };
 
   /** get the dimension of the square-diagonal block number num
@@ -191,8 +182,8 @@ public:
   */
   unsigned int getSizeOfDiagonalBlock(int i) const
   {
-    if (i == 0) return diagSizes->at(0);
-    else return (diagSizes->at(i) - diagSizes->at(i - 1));
+    if (i == 0) return _diagsize0->at(0);
+    else return (_diagsize0->at(i) - _diagsize0->at(i - 1));
   };
 
   /** get the index of blocks position (i=0 -> rows, i=1 -> columns)
@@ -205,10 +196,22 @@ public:
   };
 
   /** fill the current class using an index set
-      \param InteractionsGraph*, the index set of the active
-      constraints
+      \param indexSet set of the active constraints
   */
   void fill(SP::InteractionsGraph);
+
+
+  /** fill the matrix with the Mass matrix 
+  \warning only for NewtonEulerDS
+  \param indexSet of the active constraints
+  */
+  void fillM(SP::InteractionsGraph);
+
+  /** fill the matrix with the H matrix 
+  \warning only for NewtonEulerFrom3DLocalFrameR
+  \param indexSet of the active constraints
+  */
+  void fillH(SP::InteractionsGraph);
 
   /** fill the current class using an index set and a map of DSblocks
        \param DynamicalSystemsSet*, the set of DynamicalSystem
@@ -226,7 +229,7 @@ public:
    */
   void fill(SP::InteractionsGraph, SP::DynamicalSystemsSet, MapOfInteractionMapOfDSMatrices&);
 
-  /** fill the numerics structure numericsMatSparse using MBlockCSR */
+  /** fill the numerics structure _sparseBlockStructuredMatrix using _blockCSR */
   void convert();
 
   /** display the current matrix

@@ -27,7 +27,6 @@
 #include "SimulationTypeDef.hpp"
 #include "NumericsOptions.h"
 #include "NumericsMatrix.h"
-#include "OSNSMatrix.hpp"
 #include <ctime>
 
 class Simulation;

@@ -120,7 +120,7 @@ public:
    */
   GlobalFrictionContact(int dimPb,
                         const int newNumericsSolverId =
-                          SICONOS_FRICTION_3D_PRIMAL_NSGS_WR ,
+                        SICONOS_FRICTION_3D_GLOBAL_NSGS,
                         const std::string& newId = "unamed_primal_friction_contact_problem");
 
   /** destructor

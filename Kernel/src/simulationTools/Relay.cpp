@@ -24,7 +24,7 @@
 
 #include "Simulation.hpp"
 #include "RelayNSL.hpp"
-
+#include "OSNSMatrix.hpp"
 
 
 using namespace RELATION;

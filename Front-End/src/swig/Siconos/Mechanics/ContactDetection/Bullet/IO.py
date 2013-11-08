@@ -436,7 +436,7 @@ class Hdf5():
             interactions = self._broadphase.model().\
                 nonSmoothDynamicalSystem().topology().indexSet(1).vertices()
             current_line = self._cf_data.shape[0]
-            
+
             p = 0
             for inter in interactions:
                 bullet_relation = cast_BulletR(inter.relation())
@@ -466,7 +466,7 @@ class Hdf5():
                              cf[0], cf[1], cf[2]]
                         p += 1
 
-                        
+
     def outputSolverInfos(self):
         """
         Outputs solver #iterations & precision reached

@@ -55,3 +55,4 @@ Note that not all files from the current location are listed below, since some o
 #include "Relay.hpp"
 #include "NonSmoothEvent.hpp"
 #include "TimeDiscretisationEvent.hpp"
+#include "BlockCSRMatrix.hpp"

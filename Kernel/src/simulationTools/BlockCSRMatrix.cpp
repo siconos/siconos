@@ -23,95 +23,52 @@
 #include "BlockCSRMatrix.hpp"
 #include "NonSmoothLaw.hpp"
 
+#include "NewtonEulerDS.hpp"
+#include "NewtonEulerR.hpp"
 
 // Default constructor: empty matrix
 BlockCSRMatrix::BlockCSRMatrix():
-  nr(0)
-{
-  MBlockCSR.reset(new CompressedRowMat());
-  numericsMatSparse.reset(new SparseBlockStructuredMatrix());
-  diagSizes.reset(new IndexInt());
-  rowPos.reset(new IndexInt());
-  colPos.reset(new IndexInt());
-}
+  _nr(0), 
+  _blockCSR(new CompressedRowMat()), 
+  _sparseBlockStructuredMatrix(new SparseBlockStructuredMatrix()),
+  _diagsize0(new IndexInt()),
+  _diagsize1(new IndexInt()),
+  rowPos(new IndexInt()),
+  colPos(new IndexInt())
+{}
 
 // Constructor with dimensions
 BlockCSRMatrix::BlockCSRMatrix(unsigned int nRow):
-  nr(nRow)
-{
+  _nr(nRow),
   // Only square-blocks matrices for the moment (ie nRow = nr = nrol)
-
+  
   // Allocate memory and fill in the matrix rowPos, rowCol ... are
   // initialized with nr to reserve at first step the maximum possible
   // (according to given nr) space in memory.  Thus a future resize
   // will not require memory allocation or copy.
-
-  MBlockCSR.reset(new CompressedRowMat(nr, nr));
-  numericsMatSparse.reset(new SparseBlockStructuredMatrix);
-  diagSizes.reset(new IndexInt());
-  rowPos.reset(new IndexInt());
-  colPos.reset(new IndexInt());
-  diagSizes->reserve(nr);
-  rowPos->reserve(nr);
-  colPos->reserve(nr);
-}
+  _blockCSR(new CompressedRowMat(_nr, _nr)),
+  _sparseBlockStructuredMatrix(new SparseBlockStructuredMatrix),
+  _diagsize0(new IndexInt(_nr)),
+  _diagsize1(new IndexInt(_nr)),
+  rowPos(new IndexInt(_nr)),
+  colPos(new IndexInt(_nr))
+{}
 
 // Basic constructor
 BlockCSRMatrix::BlockCSRMatrix(SP::InteractionsGraph indexSet):
-  nr(0)
+  _nr(indexSet->size()), 
+  _blockCSR(new CompressedRowMat(_nr, _nr)),
+  _sparseBlockStructuredMatrix(new SparseBlockStructuredMatrix()),
+  _diagsize0(new IndexInt(_nr)),
+  _diagsize1(new IndexInt(_nr)),
+  rowPos(new IndexInt(_nr)),
+  colPos(new IndexInt(_nr))
 {
-  // Allocate memory and fill in the matrix
-  nr = indexSet->size();
-  MBlockCSR.reset(new CompressedRowMat(nr, nr));
-  numericsMatSparse.reset(new SparseBlockStructuredMatrix());
-  diagSizes.reset(new IndexInt());
-  diagSizes->reserve(nr);
-  rowPos.reset(new IndexInt());
-  rowPos->reserve(nr);
-  colPos.reset(new IndexInt());
-  colPos->reserve(nr);
   fill(indexSet);
 }
-BlockCSRMatrix::BlockCSRMatrix(SP::DynamicalSystemsSet DSSet,
-                               MapOfDSMatrices& DSblocks):
-  nr(0)
-{
-  // Allocate memory and fill in the matrix
-  nr = DSSet->size();
-  MBlockCSR.reset(new CompressedRowMat(nr, nr));
-  numericsMatSparse.reset(new SparseBlockStructuredMatrix());
-  diagSizes.reset(new IndexInt());
-  diagSizes->reserve(nr);
-  rowPos.reset(new IndexInt());
-  rowPos->reserve(nr);
-  colPos.reset(new IndexInt());
-  colPos->reserve(nr);
-  fill(DSSet, DSblocks);
-}
-BlockCSRMatrix::BlockCSRMatrix(SP::InteractionsGraph indexSet,
-                               SP::DynamicalSystemsSet DSSet,
-                               MapOfInteractionMapOfDSMatrices& interactionDSBlocks):
-  nr(0)
-{
-  // Allocate memory and fill in the matrix
-  nr = indexSet->size();
-  nc = DSSet->size();
-  MBlockCSR.reset(new CompressedRowMat(nr, nc));
-  numericsMatSparse.reset(new SparseBlockStructuredMatrix());
-  diagSizes.reset(new IndexInt());
-  diagSizes->reserve(nr);
-  rowPos.reset(new IndexInt());
-  rowPos->reserve(nr);
-  colPos.reset(new IndexInt());
-  colPos->reserve(nr);
-  fill(indexSet, DSSet, interactionDSBlocks);
-}
 
-// Destructor -> see smart pointers
 BlockCSRMatrix::~BlockCSRMatrix()
-{
-
-}
+{}
 
 // Fill the SparseMat
 void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
@@ -123,12 +80,13 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
   assert(indexSet);
 
   // Number of blocks in a row = number of active constraints.
-  nr = indexSet->size();
+  _nr = indexSet->size();
 
   // (re)allocate memory for ublas matrix
-  MBlockCSR->resize(nr, nr, false);
+  _blockCSR->resize(_nr, _nr, false);
 
-  diagSizes->resize(nr);
+  _diagsize0->resize(_nr);
+  _diagsize1->resize(_nr);
 
   // === Loop through "active" Interactions (ie present in
   // indexSets[level]) ===
@@ -145,10 +103,12 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
     assert(inter->nonSmoothLaw()->size() > 0);
 
     sizeV  += inter->nonSmoothLaw()->size();
-    (*diagSizes)[indexSet->index(*vi)] = sizeV;
-    assert((*diagSizes)[indexSet->index(*vi)] > 0);
+    (*_diagsize0)[indexSet->index(*vi)] = sizeV;
+    (*_diagsize1)[indexSet->index(*vi)] = sizeV;
+    assert((*_diagsize0)[indexSet->index(*vi)] > 0);
+    assert((*_diagsize1)[indexSet->index(*vi)] > 0);
 
-    (*MBlockCSR)(indexSet->index(*vi), indexSet->index(*vi)) =
+    (*_blockCSR)(indexSet->index(*vi), indexSet->index(*vi)) =
       indexSet->properties(*vi).block->getArray();
   }
 
@@ -161,8 +121,8 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
     SP::Interaction inter1 = indexSet->bundle(vd1);
     SP::Interaction inter2 = indexSet->bundle(vd2);
 
-    assert(indexSet->index(vd1) < nr);
-    assert(indexSet->index(vd2) < nr);
+    assert(indexSet->index(vd1) < _nr);
+    assert(indexSet->index(vd2) < _nr);
 
     assert(indexSet->is_vertex(inter2));
 
@@ -175,13 +135,132 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
 
     assert(pos != col);
 
-    (*MBlockCSR)(std::min(pos, col), std::max(pos, col)) =
+    (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
       indexSet->properties(*ei).upper_block->getArray();
 
-    (*MBlockCSR)(std::max(pos, col), std::min(pos, col)) =
+    (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
       indexSet->properties(*ei).lower_block->getArray();
   }
 }
+
+void BlockCSRMatrix::fillM(SP::InteractionsGraph indexSet)
+{
+  assert(indexSet);
+
+  /* on adjoint graph a dynamical system may be on several edges */
+  std::map<SP::DynamicalSystem, bool> involvedDS;
+  InteractionsGraph::EIterator ei, eiend;
+  for(std11::tie(ei, eiend) = indexSet->edges();
+      ei != eiend; ++ei)
+  {
+    if (Type::value(*indexSet->bundle(*ei)) != Type::NewtonEulerDS)
+    {
+      RuntimeException::selfThrow("BlockCSRMatrix::fillM only for Newton EulerDS");
+    }
+
+    _nr = 0;
+    
+    if (involvedDS.find(indexSet->bundle(*ei)) == involvedDS.end())
+    {
+      _nr++;
+      involvedDS[indexSet->bundle(*ei)] = true;
+      _blockCSR->resize(_nr, _nr, false);
+
+      (*_blockCSR)(_nr-1, _nr-1) = std11::static_pointer_cast<NewtonEulerDS>
+        (indexSet->bundle(*ei))->mass()->getArray();
+    }
+  }
+  
+  _diagsize0->resize(involvedDS.size());
+  _diagsize1->resize(involvedDS.size());
+
+  /* here we suppose NewtonEuler with 6 dofs */
+  /* it cannot be another case at this point */
+  unsigned int index, ac;
+  for (index = 0, ac = 6; 
+       index < involvedDS.size();
+       ++index, ac+=6)
+  {
+    (*_diagsize0)[index] = ac;
+    (*_diagsize1)[index] = ac;
+  }
+  
+}
+
+void BlockCSRMatrix::fillH(SP::InteractionsGraph indexSet)
+{
+  assert(indexSet);
+
+  /* on adjoint graph a dynamical system may be on several edges */
+  std::map<SP::DynamicalSystem, unsigned int> involvedDS;
+  InteractionsGraph::EIterator ei, eiend;
+  {
+    unsigned int index;
+    for(std11::tie(ei, eiend) = indexSet->edges(), index=0;
+        ei != eiend; ++ei, ++index)
+    {
+      if (involvedDS.find(indexSet->bundle(*ei)) == involvedDS.end())
+      {
+        if (Type::value(*indexSet->bundle(*ei)) != Type::NewtonEulerDS)
+        {
+          RuntimeException::selfThrow("BlockCSRMatrix::fillH only for Newton EulerDS");
+        }
+        involvedDS[indexSet->bundle(*ei)] = index;
+      }
+    }
+  }
+
+  _nr = involvedDS.size();
+
+  _blockCSR->resize(_nr, _nr, false);
+
+  InteractionsGraph::VIterator vi, viend;
+  for(std11::tie(vi, viend) = indexSet->vertices();
+      vi != viend; ++vi)
+  {
+
+    bool foundone = false;
+    unsigned int pos=0, col=0;
+    InteractionsGraph::EDescriptor ed1, ed2;
+    InteractionsGraph::OEIterator oei, oeiend;
+    for(std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+        oei != oeiend; ++oei)
+    {
+      if (foundone)
+      {
+        pos = involvedDS[indexSet->bundle(*oei)];
+      }
+      else
+      {
+        col = involvedDS[indexSet->bundle(*oei)];
+        pos = involvedDS[indexSet->bundle(*oei)];
+        foundone = true;
+      }
+    
+    (*_blockCSR)(std::min(pos, col), std::max(pos, col)) = 
+      std11::static_pointer_cast<NewtonEulerR>(indexSet->bundle(*vi)->relation())->jachqT()->getArray();
+    
+    (*_blockCSR)(std::max(pos, col), std::min(pos, col)) = 
+      std11::static_pointer_cast<NewtonEulerR>(indexSet->bundle(*vi)->relation())->jachqT()->getArray();
+    
+    }
+  }
+  
+  _diagsize0->resize(involvedDS.size());
+  _diagsize1->resize(involvedDS.size());
+
+  /* only NewtonEulerFrom3DLocalFrameR */
+  unsigned int index, ac0, ac1;
+  for (index= 0, ac0 = 6, ac1 = 3; 
+       index < involvedDS.size();
+       ++index, ac0 +=6, ac1 +=3)
+  {
+    (*_diagsize0)[index] = ac0;
+    (*_diagsize1)[index] = ac1;
+  }
+  
+}
+
 
 // Fill the SparseMat
 void BlockCSRMatrix::fill(SP::DynamicalSystemsSet DSSet,
@@ -200,28 +279,28 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet,
 }
 
 
-// convert MBlockCSR to numerics structure
+// convert _blockCSR to numerics structure
 void BlockCSRMatrix::convert()
 {
-  numericsMatSparse->blocknumber0 = nr;
-  numericsMatSparse->blocknumber1 = nr;  // nc not always set
-  numericsMatSparse->nbblocks = (*MBlockCSR).nnz();
+  _sparseBlockStructuredMatrix->blocknumber0 = _nr;
+  _sparseBlockStructuredMatrix->blocknumber1 = _nr;  // nc not always set
+  _sparseBlockStructuredMatrix->nbblocks = (*_blockCSR).nnz();
   // Next copies: pointer links!!
-  numericsMatSparse->blocksize0 =  &((*diagSizes)[0]);
-  numericsMatSparse->blocksize1 =  &((*diagSizes)[0]);  // nr = nc
+  _sparseBlockStructuredMatrix->blocksize0 =  &((*_diagsize0)[0]);
+  _sparseBlockStructuredMatrix->blocksize1 =  &((*_diagsize1)[0]);  // nr = nc
 
   // boost
-  numericsMatSparse->filled1 = (*MBlockCSR).filled1();
-  numericsMatSparse->filled2 = (*MBlockCSR).filled2();
-  numericsMatSparse->index1_data = &((*MBlockCSR).index1_data()[0]);
-  if (nr > 0)
+  _sparseBlockStructuredMatrix->filled1 = (*_blockCSR).filled1();
+  _sparseBlockStructuredMatrix->filled2 = (*_blockCSR).filled2();
+  _sparseBlockStructuredMatrix->index1_data = &((*_blockCSR).index1_data()[0]);
+  if (_nr > 0)
   {
-    numericsMatSparse->index2_data = &((*MBlockCSR).index2_data()[0]);
-    numericsMatSparse->block =  &((*MBlockCSR).value_data()[0]);
+    _sparseBlockStructuredMatrix->index2_data = &((*_blockCSR).index2_data()[0]);
+    _sparseBlockStructuredMatrix->block =  &((*_blockCSR).value_data()[0]);
   };
 
   //   // Loop through the non-null blocks
-  //   for (SpMatIt1 i1 = MBlockCSR->begin1(); i1 != MBlockCSR->end1(); ++i1)
+  //   for (SpMatIt1 i1 = _blockCSR->begin1(); i1 != _blockCSR->end1(); ++i1)
   //     {
   //       for (SpMatIt2 i2 = i1.begin(); i2 != i1.end(); ++i2)
   //  {
@@ -234,24 +313,25 @@ void BlockCSRMatrix::convert()
 void BlockCSRMatrix::display() const
 {
   std::cout << "----- Sparse Block Matrix with "
-            << nr << " blocks in a row/col and "
-            << MBlockCSR->nnz()
+            << _nr << " blocks in a row/col and "
+            << _blockCSR->nnz()
             << " non-null blocks" <<std::endl;
-  std::cout << "filled1:" << MBlockCSR->filled1() <<std::endl;
-  std::cout << "filled2:" << MBlockCSR->filled2() <<std::endl;
+  std::cout << "filled1:" << _blockCSR->filled1() <<std::endl;
+  std::cout << "filled2:" << _blockCSR->filled2() <<std::endl;
   std::cout << "index1_data:\n";
-  print(MBlockCSR->index1_data().begin(), MBlockCSR->index1_data().end());
+  print(_blockCSR->index1_data().begin(), _blockCSR->index1_data().end());
   std::cout <<std::endl;
   std::cout << "index2_data:\n";
-  print(MBlockCSR->index2_data().begin(), MBlockCSR->index2_data().end());
+  print(_blockCSR->index2_data().begin(), _blockCSR->index2_data().end());
   std::cout <<std::endl;
   std::cout << "Sum of sizes of the diagonal blocks:"
             <<std::endl;
-  print(diagSizes->begin(), diagSizes->end());
+  print(_diagsize0->begin(), _diagsize0->end());
+  print(_diagsize1->begin(), _diagsize1->end());
 }
 
 unsigned int BlockCSRMatrix::getNbNonNullBlocks() const
 {
-  return MBlockCSR->nnz();
+  return _blockCSR->nnz();
 };
 

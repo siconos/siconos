@@ -23,7 +23,7 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-
+#include "OSNSMatrix.hpp"
 
 using namespace RELATION;
 

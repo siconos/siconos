@@ -18,6 +18,7 @@
  */
 #include "Equality.hpp"
 #include "Simulation.hpp"
+#include "OSNSMatrix.hpp"
 
 using namespace RELATION;
 

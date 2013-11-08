@@ -23,12 +23,10 @@
 #ifndef OSNSM_H
 #define OSNSM_H
 
-#include <boost/shared_ptr.hpp>
 #include "SimpleMatrix.hpp"
 #include "SiconosNumerics.h"
 #include "SimulationTypeDef.hpp"
 #include "Topology.hpp"
-#include "BlockCSRMatrix.hpp"
 
 TYPEDEF_SPTR(NumericsMatrix)
 
@@ -192,25 +190,6 @@ public:
   */
   OSNSMatrix(SP::InteractionsGraph, int);
 
-  /** Constructor from DynamicalSystemsSet and map
-      \param InteractionsGraph* the index set of the active constraints
-      \param MapOfDSMatrices the list of matrices linked to a couple of SP::Interaction
-      \param storage type
-  */
-  OSNSMatrix(SP::DynamicalSystemsSet, MapOfDSMatrices&, int);
-
-  /** Constructor from DynamicalSystemsSet and indexSet and map
-      \param InteractionsGraph* the index set of the active constraints
-      \param MapOfMapOfInteractionMatrices the list of matrices linked to a couple of SP::Interaction
-      \param storage type
-  */
-  OSNSMatrix(SP::DynamicalSystemsSet, SP::InteractionsGraph, MapOfDSMapOfInteractionMatrices&, int);
-
-  /** Constructor from DynamicalSystemsSet and indexSet and maps of Blocks
-      \param InteractionsGraph* the index set of the active constraints
-      \param storage type
-  */
-  OSNSMatrix(SP::InteractionsGraph, SP::DynamicalSystemsSet,  MapOfDSMatrices&, MapOfDSMapOfInteractionMatrices&,  MapOfInteractionMapOfDSMatrices&, int);
 
   /** Constructor with copy of a SiconosMatrix => storageType = 0
       \param MSource matrix to be copied
@@ -271,35 +250,6 @@ public:
       \param InteractionsGraph*, the index set of the active constraints
   */
   virtual void fill(SP::InteractionsGraph, bool updateSize = true);
-  /** fill diagonal of thecurrent class using an index set and a map of interactionBlocks
-      \param InteractionsGraph*, the index set of the active constraints
-  */
-  void fillDiagonal(SP::InteractionsGraph, bool updateSize = true);
-
-  /** fill the current class using an DynamicalSystemsSet and a map of DSBlocks
-      \param DynamicalSystemsSet*, the Dynamical set
-      \param MapOfDSMatrices, the list of matrices linked to a DynamicalSystems
-  */
-  void fill(SP::DynamicalSystemsSet, MapOfDSMatrices&, bool updateSize = true);
-  /** fill the current class using an index set , a DynamicalSystemsSet and a map of interactionBlocks
-      \param InteractionsGraph*, the index set of the active constraints
-      \param DynamicalSystemsSet*, the Dynamical set
-      \param MapOfMapOfInteractionMatrices, the list of matrices linked to a couple of SP::Interaction
-  */
-  void fill(SP::DynamicalSystemsSet, SP::InteractionsGraph, MapOfDSMapOfInteractionMatrices&, bool updateSize = true);
-
-  /** fill the current class using an index set and a map of interactionBlocks
-      \param InteractionsGraph*, the index set of the active constraints
-      \param DynamicalSystemsSet*, the Dynamical set
-      \param MapOfMapOfInteractionMatrices, the list of matrices linked to a couple of SP::Interaction
-  */
-  void fill(SP::InteractionsGraph, SP::DynamicalSystemsSet, MapOfInteractionMapOfDSMatrices&, bool updateSize = true);
-
-  /** fill the current class using an index set and  maps of Blocks
-      \param InteractionsGraph*, the index set of the active constraints
-      \param DynamicalSystemsSet*, the Dynamical set
-  */
-  void fill(SP::InteractionsGraph, SP::DynamicalSystemsSet,  MapOfDSMatrices&, MapOfDSMapOfInteractionMatrices&,  MapOfInteractionMapOfDSMatrices&, bool updateSize = true);
 
   /** fill the numerics structure numericsMatSparse using MBlockCSR */
   void convert();
@@ -308,7 +258,5 @@ public:
    */
   void display() const;
 };
-
-DEFINE_SPTR(OSNSMatrix)
 
 #endif
