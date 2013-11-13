@@ -162,7 +162,6 @@ int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* op
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
-
   SolverOptions * subsubsolver = options->internalSolvers->internalSolvers;
 
 

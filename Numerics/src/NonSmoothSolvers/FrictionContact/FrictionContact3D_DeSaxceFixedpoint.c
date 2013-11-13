@@ -44,10 +44,6 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
   /* Tolerance */
   double tolerance = dparam[0];
 
-
-
-
-
   /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
@@ -57,9 +53,11 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
   dparam[0] = dparam[2]; // set the tolerance for the local solver
   double * velocitytmp = (double *)malloc(n * sizeof(double));
 
-  double rho = 0.0;
+
+  double rho = 0.0, rho_k =0.0;
   int isVariable = 0;
   double rhomax = 0.0;
+
   if (dparam[3] > 0.0)
   {
     rho = dparam[3];
@@ -72,66 +70,159 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
     rhomax = -dparam[3];
     rho = rhomax;
   }
-  double * work1tmp = 0;
-  double * work2tmp = 0;
-  double * direction = 0;
-  if (isVariable)
-  {
-    work1tmp = (double *)malloc(n * sizeof(double));
-    work2tmp = (double *)malloc(n * sizeof(double));
-    direction = (double *)malloc(n * sizeof(double));
-  }
+
   double alpha = 1.0;
   double beta = 1.0;
 
-  /*   double minusrho  = -1.0*rho; */
-  while ((iter < itermax) && (hasNotConverged > 0))
+  /* Variable for Line_search */
+  int success = 0;
+  double error_k;
+  int ls_iter = 0;
+  int ls_itermax = 10;
+  double tau=0.6, L= 0.9, Lmin =0.3, taumin=0.7;
+
+
+
+  double a1=0.0, a2=0.0;
+  double * reaction_k = 0;
+  double * velocity_k = 0;
+  double * reactiontmp = 0;
+  if (isVariable)
   {
-    ++iter;
+    reaction_k = (double *)malloc(n * sizeof(double));
+    velocity_k = (double *)malloc(n * sizeof(double));
+    reactiontmp = (double *)malloc(n * sizeof(double));
+  }
 
-    cblas_dcopy(n , q , 1 , velocitytmp, 1);
-    if (isVariable)   cblas_dcopy(n , reaction , 1 , work1tmp, 1);
-    beta = 1.0;
-    prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp);
-    // projection for each contact
-    for (contact = 0 ; contact < nc ; ++contact)
+
+
+  /*   double minusrho  = -1.0*rho; */
+
+  if (!isVariable)
+  {
+    while ((iter < itermax) && (hasNotConverged > 0))
     {
-      int pos = contact * nLocal;
-      double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
-      reaction[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
-      reaction[pos + 1] -= rho * velocitytmp[pos + 1];
-      reaction[pos + 2] -= rho * velocitytmp[pos + 2];
-      projectionOnCone(&reaction[pos], mu[contact]);
+      ++iter;
+      /* velocitytmp <- q  */
+      cblas_dcopy(n , q , 1 , velocitytmp, 1);
+
+      /* velocitytmp <- q + M * reaction  */
+      beta = 1.0;
+      prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp);
+
+      /* projection for each contact */
+      for (contact = 0 ; contact < nc ; ++contact)
+      {
+        int pos = contact * nLocal;
+        double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
+        reaction[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
+        reaction[pos + 1] -= rho * velocitytmp[pos + 1];
+        reaction[pos + 2] -= rho * velocitytmp[pos + 2];
+        projectionOnCone(&reaction[pos], mu[contact]);
+      }
+
+      /* **** Criterium convergence **** */
+      FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
+
+
+    if (verbose > 0)
+      printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+
+    if (error < tolerance) hasNotConverged = 0;
+    *info = hasNotConverged;
     }
+  }
 
-    // Compute new rho if variable
-    if (isVariable)
+
+  // Compute new rho if variable
+  if (isVariable)
+  {
+    while ((iter < itermax) && (hasNotConverged > 0))
     {
-      cblas_dcopy(n , work1tmp , 1 , direction , 1);
-      cblas_dscal(n, -1.0, direction, 1);
-      cblas_daxpy(n, 1.0, reaction, 1, direction , 1) ;  // warning compyte -d and not d
-      beta = 0.0;
-      double alpha1 = cblas_dnrm2(n, direction, 1);
-      /*    prodNumericsMatrix(n,n, alpha, M, direction, beta,work1tmp ); */
-      /*    double alpha2=cblas_ddot(n,direction,1,work1tmp,1); */
-      prodNumericsMatrix(n, n, alpha, M, work2tmp, beta, work2tmp);
-      double alpha3 = cblas_ddot(n, direction, 1, work2tmp, 1);
+      ++iter;
 
-      /*    if (alpha2 < 1e-7*alpha1) */
-      /*        rho= rhomax; */
-      /*    else */
-      /*        rho = alpha1/alpha2; */
+      /* Store the error */
+      error_k = error;
+      /* store the reaction at the beginning of the iteration */
+      cblas_dcopy(n , reaction , 1 , reaction_k, 1);
 
-      if (alpha3 < 1e-7 * alpha1)
-        rho = rhomax;
+      /* velocity_k <- q  */
+      cblas_dcopy(n , q , 1 , velocity_k, 1);
+
+      /* velocity_k <- q + M * reaction  */
+      beta = 1.0;
+      prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocity_k);
+
+      ls_iter = 0 ;
+      success =0;
+
+      while (!success && (ls_iter < ls_itermax))
+      {
+
+        rho_k = rho * pow(tau,ls_iter);
+
+        /* projection for each contact */
+        for (contact = 0 ; contact < nc ; ++contact)
+        {
+          int pos = contact * nLocal;
+          double  normUT = sqrt(velocity_k[pos + 1] * velocity_k[pos + 1] + velocity_k[pos + 2] * velocity_k[pos + 2]);
+          reaction[pos] = reaction_k[pos] -  rho_k * (velocity_k[pos] + mu[contact] * normUT);
+          reaction[pos + 1] = reaction_k[pos+1] - rho_k * velocity_k[pos + 1];
+          reaction[pos + 2] = reaction_k[pos+2] - rho_k * velocity_k[pos + 2];
+
+          /* V.A. 12/11/2013 : Why the following lines (that are false) are working better in practise ? */
+          /* reaction[pos] -= rho_k * (velocity_k[pos] + mu[contact] * normUT); */
+          /* reaction[pos + 1] -= rho_k * velocity_k[pos + 1]; */
+          /* reaction[pos + 2] -= rho_k * velocity_k[pos + 2]; */
+
+          projectionOnCone(&reaction[pos], mu[contact]);
+        }
+
+
+        /* velocity <- q  */
+        cblas_dcopy(n , q , 1 , velocity, 1);
+
+        /* velocity <- q + M * reaction  */
+        beta = 1.0;
+        prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocity);
+
+        /* velocitytmp <- velocity */
+        cblas_dcopy(n, velocity, 1, velocitytmp , 1) ;
+
+        /* velocitytmp <- velocity - velocity_k   */
+        cblas_daxpy(n, -1.0, velocity_k , 1, velocitytmp , 1) ;
+
+        a1 = cblas_dnrm2(n, velocitytmp, 1);
+
+        /* reactiontmp <- reaction */
+        cblas_dcopy(n, reaction, 1, reactiontmp , 1) ;
+
+        /* reactiontmp <- reaction - reaction_k   */
+        cblas_daxpy(n, -1.0, reaction_k , 1, reactiontmp , 1) ;
+
+        a2 = cblas_dnrm2(n, reactiontmp, 1) ;
+
+        success = (rho_k*a1 < L * a2)?1:0;
+        /* printf("rho_k = %12.8e\t", rho_k); */
+        /* printf("a1 = %12.8e\t", a1); */
+        /* printf("a2 = %12.8e\t", a2); */
+        /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, reaction, 1) ); */
+        /* printf("success = %i\n", success); */
+
+        ls_iter++;
+      }
+
+
+      /* **** Criterium convergence **** */
+      FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
+
+      /*Update rho*/
+      if ((rho_k*a1 < Lmin * a2) && (error < error_k))
+      {
+        rho =rho_k/taumin;
+      }
       else
-        rho = alpha1 / alpha3;
-      /*        printf("alpha1= %14.7e \t, alpha2=%14.7e\t  alpha3=%14.7e\t,rho = %14.7e\n",alpha1,alpha2,alpha3,rho); */
-    }
-
-
-    /* **** Criterium convergence **** */
-    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
+        rho =rho_k;
 
     if (verbose > 0)
       printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
@@ -139,6 +230,11 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
+
+  }
+
+
+
   if (verbose > 0)
     printf("----------------------------------- FC3D - DeSaxce Fixed point (DSFP) - #Iteration %i Final Error = %14.7e\n", iter, error);
   iparam[7] = iter;
@@ -147,9 +243,9 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
   free(velocitytmp);
   if (isVariable)
   {
-    free(work1tmp);
-    free(work2tmp);
-    free(direction);
+    free(reaction_k);
+    free(velocity_k);
+    free(reactiontmp);
   }
 }
 
@@ -180,7 +276,7 @@ int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* o
   }
   options->iparam[0] = 20000;
   options->dparam[0] = 1e-3;
-  options->dparam[3] = 1e-3;
+  options->dparam[3] = -1.0; /* Default value for rho (line search activated)*/
 
   options->internalSolvers = NULL;
 

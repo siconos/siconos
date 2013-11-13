@@ -396,6 +396,18 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest31 FrictionContact3D_test31.c)
   NEW_TEST(FC3Dtest32 FrictionContact3D_test32.c)
   
+  NEW_TEST(FC3Dtest33 FrictionContact3D_test33.c) # DSFP  converges with ls
+  NEW_TEST(FC3Dtest34 FrictionContact3D_test34.c) # EG converges with specific rho
+  NEW_TEST(FC3Dtest35 FrictionContact3D_test35.c) # EG with variable rho
+
+  NEW_TEST(FC3Dtest36 FrictionContact3D_test36.c) #TFP with NSGS and projection on cylinder
+
+  #NEW_TEST(FC3Dtest37 FrictionContact3D_test37.c) #TFP with ProjectedGradientOnCylinder is not working ...
+
+  #NEW_TEST(FC3Dtest38 FrictionContact3D_test38.c) # HP is not converging
+
+
+
   SET(FC3Dtest50_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest50 FrictionContact3D_test50.c)
   
@@ -403,8 +415,10 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest60 FrictionContact3D_test60.c)
 
   NEW_TEST(FC3Dtest70 FrictionContact3D_test70.c)
-  NEW_TEST(FC3Dtest71 FrictionContact3D_test71.c)	
+  NEW_TEST(FC3Dtest71 FrictionContact3D_test71.c)
   NEW_TEST(FC3Dtest72 FrictionContact3D_test72.c)	
+  NEW_TEST(FC3Dtest73 FrictionContact3D_test73.c)
+  NEW_TEST(FC3Dtest74 FrictionContact3D_test74.c)
 
   NEW_TEST(FC3DNewFromFortranData FrictionContact3D_newFromFortranData.c)
   NEW_TEST(FC3DLmgcDriver1 FrictionContact3D_LmgcDriver_test1.c)
@@ -417,8 +431,12 @@ ENDIF(MUMPS_FOUND)
 
   NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
   NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)
+
   SET(FC3Dtest120_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest120 FrictionContact3D_test120.c)
+  NEW_TEST(FC3Dtest120 FrictionContact3D_test120.c) # TFP
+  NEW_TEST(FC3Dtest121 FrictionContact3D_test121.c) # DSFP
+
+
   NEW_TEST(FC3Dtest130 FrictionContact3D_test130.c)
 
   NEW_TEST(FC3Dtest200 FrictionContact3D_test200.c)
@@ -477,6 +495,9 @@ ENDIF(MUMPS_FOUND)
   NEW_TEST(FrictionContact2D_Problemtest31 FrictionContact2D_test31.c)
   #SET(FrictionContact2D_Problemtest32 WILL_FAIL TRUE)
   #NEW_TEST(FrictionContact2D_Problemtest32 FrictionContact2D_test32.c)
+
+
+
 
   ## test 2D dense with Enum Lemke failed on 41 !!
   NEW_TEST(FrictionContact2D_Problemtest40 FrictionContact2D_test40.c)
