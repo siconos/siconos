@@ -62,16 +62,16 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
   double * reactiontmp2 = (double *)malloc(n * sizeof(double));
   double * reactiontmp3 = (double *)malloc(n * sizeof(double));
 
-  double rho = 1.0;
+  double tau = 1.0;
   double sigma = 0.99;
 
   if (dparam[3] > 0.0)
   {
-    rho = dparam[3];
+    tau = dparam[3];
   }
   else
   {
-    printf("Hyperplane Projection method. rho <=0  is not well defined\n");
+    printf("Hyperplane Projection method. tau <=0  is not well defined\n");
     printf("Hyperplane Projection method. rho is set to 1.0\n");
 
   }

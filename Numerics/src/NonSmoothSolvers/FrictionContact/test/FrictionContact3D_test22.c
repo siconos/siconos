@@ -36,7 +36,7 @@ int main(void)
   options->iparam[0] = 10000;
   options->internalSolvers->solverId = SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration;
   options->internalSolvers->iparam[0] = 10;
-  options->internalSolvers->dparam[0] = 1e-8;
+  options->internalSolvers->dparam[0] = 1e-12;
 
   info = frictionContact_test_function(finput, options);
 

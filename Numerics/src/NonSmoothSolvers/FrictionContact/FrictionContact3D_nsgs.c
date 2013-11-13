@@ -63,7 +63,7 @@ void frictionContact3D_nsgs_update(int contact, FrictionContactProblem* problem,
 
 
 }
-void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * localsolver_options)
+void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * localsolver_options)
 {
 
 
@@ -75,7 +75,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionWithDiagonalization_solve;
     *update = &frictionContact3D_projectionWithDiagonalization_update;
-    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_projection_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(problem, localproblem);
     break;
@@ -84,7 +84,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
     *update = &frictionContact3D_projection_update;
-    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_projection_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(problem, localproblem);
     break;
@@ -93,16 +93,16 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionOnConeWithLocalIteration_solve;
     *update = &frictionContact3D_projection_update;
-    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_projectionOnConeWithLocalIteration_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
-    frictionContact3D_projection_initialize(problem, localproblem);
+    frictionContact3D_projectionOnConeWithLocalIteration_initialize(problem, localproblem,localsolver_options );
     break;
   }
   case SICONOS_FRICTION_3D_projectionOnConeWithRegularization:
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
     *update = &frictionContact3D_projection_update_with_regularization;
-    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_with_regularization_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_projection_with_regularization_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize_with_regularization(problem, localproblem);
     break;
@@ -112,7 +112,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_Newton_solve;
     *update = &frictionContact3D_AC_update;
-    *freeSolver = (FreeSolverPtr)&frictionContact3D_Newton_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_Newton_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
     break;
@@ -121,7 +121,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_Newton_solve;
     *update = &frictionContact3D_AC_update;
-    *freeSolver = (FreeSolverPtr)&frictionContact3D_Newton_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_Newton_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
     break;
@@ -131,7 +131,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_Newton_solve;
     *update = &NCPGlocker_update;
-    *freeSolver = (FreeSolverPtr)&frictionContact3D_Newton_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_Newton_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     // *computeError = &fake_compute_error;
     frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
@@ -164,7 +164,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionOnCylinder_solve;
     *update = &frictionContact3D_projectionOnCylinder_update;
-    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_projection_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_Tresca_compute_error;
     frictionContact3D_projection_initialize(problem, localproblem);
     break;
@@ -173,7 +173,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_unitary_enumerative_solve;
     *update = &frictionContact3D_nsgs_update;
-    *freeSolver = (FreeSolverPtr)&frictionContact3D_unitary_enumerative_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_unitary_enumerative_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_unitary_enumerative_initialize(localproblem);
     break;
@@ -329,7 +329,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
     localproblem->M->matrix3 = NULL;
   }
 
-  initializeLocalSolver_nsgs(&local_solver, &update_localproblem, (FreeSolverPtr *)&freeSolver, &computeError, problem , localproblem, localsolver_options);
+  initializeLocalSolver_nsgs(&local_solver, &update_localproblem, (FreeSolverNSGSPtr *)&freeSolver, &computeError, problem , localproblem, localsolver_options);
 
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
@@ -362,6 +362,8 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
 
+        
+        localsolver_options->iparam[4] = contact;
         (*local_solver)(localproblem, &(reaction[3 * contact]) , localsolver_options);
 
         error += pow(reaction[3 * contact] - reactionold[0], 2) +
@@ -402,7 +404,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
       {
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-
+        localsolver_options->iparam[4] = contact;
         (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
       }
 
@@ -421,7 +423,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   iparam[7] = iter;
 
   /***** Free memory *****/
-  (*freeSolver)(localproblem);
+  (*freeSolver)(problem,localproblem,localsolver_options);
   if (problem->M->storageType == 0 && localproblem->M->matrix0 != NULL)
   {
     free(localproblem->M->matrix0);

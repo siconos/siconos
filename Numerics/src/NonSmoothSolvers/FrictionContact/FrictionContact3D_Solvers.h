@@ -72,7 +72,7 @@ typedef void (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, doubl
 typedef void (*FreeSolverPtr)();
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem*);
+typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem*, FrictionContactProblem*, SolverOptions*  );
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*internalSolverPtr)(FrictionContactProblem*, double*, double*, int *, SolverOptions *);

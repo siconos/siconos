@@ -161,6 +161,8 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
 
         rho_k = rho * pow(tau,ls_iter);
 
+        
+
         /* projection for each contact */
         for (contact = 0 ; contact < nc ; ++contact)
         {
@@ -202,7 +204,7 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
 
         a2 = cblas_dnrm2(n, reactiontmp, 1) ;
 
-        success = (rho_k*a1 < L * a2)?1:0;
+        success = (rho_k*a1 <= L * a2)?1:0;
         /* printf("rho_k = %12.8e\t", rho_k); */
         /* printf("a1 = %12.8e\t", a1); */
         /* printf("a2 = %12.8e\t", a2); */

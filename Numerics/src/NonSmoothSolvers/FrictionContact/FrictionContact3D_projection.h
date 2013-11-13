@@ -27,7 +27,6 @@
   - update: link/fill the local variables corresponding to sub-blocks of the full problem, for a specific contact
   - solve: solve the local problem
   - free
-
   We consider a "global" (ie for several contacts) problem, used to initialize the static global variables.
   Then a "local" (ie for one contact => size = 3) problem is built (update function) and solved (solve function).
 
@@ -118,6 +117,8 @@ extern "C"
    * \param options
    */
   int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options);
+  void frictionContact3D_projectionOnConeWithLocalIteration_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
+  void frictionContact3D_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
 
   /** solve friction-contact 3D problem with projection on the Cone
    * \param localproblem :  the local problem to initialize
@@ -132,10 +133,11 @@ extern "C"
    * \param options
    */
   int frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
+  
   /** free memory for friction contact 3D projection solver */
-  void frictionContact3D_projection_free(FrictionContactProblem* localproblem);
+  void frictionContact3D_projection_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
   /** free memory for friction contact 3D projection solver */
-  void frictionContact3D_projection_with_regularization_free(FrictionContactProblem* localproblem);
+  void frictionContact3D_projection_with_regularization_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
