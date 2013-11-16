@@ -219,36 +219,39 @@ void BlockCSRMatrix::fillH(SP::InteractionsGraph indexSet)
       vi != viend; ++vi)
   {
 
-    bool foundone = false;
+    SP::DynamicalSystem first = SP::DynamicalSystem();
     unsigned int pos=0, col=0;
     InteractionsGraph::EDescriptor ed1, ed2;
     InteractionsGraph::OEIterator oei, oeiend;
     for(std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
         oei != oeiend; ++oei)
     {
-      if (foundone)
+      if (!first)
       {
-        pos = involvedDS[indexSet->bundle(*oei)];
+        first = indexSet->bundle(*oei);
+        col = involvedDS[first];
+        pos = involvedDS[first];
       }
       else
       {
-        col = involvedDS[indexSet->bundle(*oei)];
-        pos = involvedDS[indexSet->bundle(*oei)];
-        foundone = true;
+        if (indexSet->bundle(*oei) != first)
+        {
+          pos = involvedDS[indexSet->bundle(*oei)];
+        }
       }
-    
+    }
+
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) = 
       std11::static_pointer_cast<NewtonEulerR>(indexSet->bundle(*vi)->relation())->jachqT()->getArray();
     
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) = 
       std11::static_pointer_cast<NewtonEulerR>(indexSet->bundle(*vi)->relation())->jachqT()->getArray();
     
-    }
   }
   
   _diagsize0->resize(involvedDS.size());
   _diagsize1->resize(involvedDS.size());
-
+  
   /* only NewtonEulerFrom3DLocalFrameR */
   unsigned int index, ac0, ac1;
   for (index= 0, ac0 = 6, ac1 = 3; 

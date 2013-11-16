@@ -90,7 +90,7 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   free(globalvelocity);
   fclose(foutput);
 
-  freeGlobalFrictionContact_problem(problem);
+  freeGlobalFrictionContactProblem(problem);
 
 
   return info;

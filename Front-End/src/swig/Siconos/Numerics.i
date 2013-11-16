@@ -163,6 +163,21 @@
   $1 = (FrictionContactProblem*) fcp;
 }
 
+%typemap(in) 
+  (GlobalFrictionContactProblem*) 
+  (npy_intp problem_size, npy_intp problem_dimension, npy_intp number_of_contacts) 
+{
+  void *fcp;
+  int res = SWIG_ConvertPtr($input, &fcp,SWIGTYPE_p_FrictionContactProblem, 0 |  0 );
+  if (!SWIG_IsOK(res)) SWIG_fail;
+
+  problem_dimension=((GlobalFrictionContactProblem *) fcp)->dimension;
+  number_of_contacts=((GlobalFrictionContactProblem *) fcp)->numberOfContacts;
+  problem_size=((GlobalFrictionContactProblem *) fcp)->numberOfContacts * problem_dimension;
+
+  $1 = (GlobalFrictionContactProblem*) fcp;
+}
+
 // vectors of size problem_size from given *Problem as first input
 // no conversion => inout array XXX FIX issue here
 %typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object=0) {
@@ -1761,6 +1776,65 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   ~FrictionContactProblem()
   {
     freeFrictionContactProblem($self);
+  }
+
+};
+
+
+%extend GlobalFrictionContactProblem
+{
+
+  GlobalFrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
+    {
+
+      int is_new_object1=0;
+      int is_new_object2=0;
+      int is_new_object3=0; 
+
+      PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
+      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
+      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3); 
+      GlobalFrictionContactProblem *FC;
+      // return pointer : free by std swig destructor
+      FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
+      NumericsMatrix *M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
+
+      M->storageType = 0;
+      M->size0 = array_size(array,0);
+      M->size1 = array_size(array,1);
+      M->matrix0 = (double *) malloc(M->size0*M->size1*sizeof(double));
+      memcpy(M->matrix0,array_data(array),M->size0*M->size1*sizeof(double));
+      FC->dimension = (int) PyInt_AsLong(dim);
+      FC->numberOfContacts = M->size0 / FC->dimension;
+      FC->M = M;
+      FC->q = (double *) malloc(M->size0*sizeof(double));
+      memcpy(FC->q,array_data(vector),M->size0*sizeof(double));
+      FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
+      memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
+   
+
+      // python mem management
+      if(is_new_object1 && array)
+      {
+        Py_DECREF(array);
+      }
+  
+      if(is_new_object2 && vector)
+      {
+        Py_DECREF(vector);
+      }
+
+      if(is_new_object3 && mu_vector)
+      {
+        Py_DECREF(mu_vector);
+      }
+
+      return FC;
+    }
+
+  ~GlobalFrictionContactProblem()
+  {
+    freeGlobalFrictionContactProblem($self);
   }
 
 };

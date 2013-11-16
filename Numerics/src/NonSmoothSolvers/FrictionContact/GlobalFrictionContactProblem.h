@@ -144,7 +144,7 @@ extern "C"
 
   int globalFrictionContact_newFromFile(GlobalFrictionContactProblem*  problem, FILE* file);
 
-  void freeGlobalFrictionContact_problem(GlobalFrictionContactProblem* problem);
+  void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

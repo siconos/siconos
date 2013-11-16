@@ -87,7 +87,7 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   return 0;
 }
 
-void freeGlobalFrictionContact_problem(GlobalFrictionContactProblem* problem)
+void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
 {
 
   freeNumericsMatrix(problem->M);
