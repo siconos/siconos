@@ -102,7 +102,7 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
 
     // projection for each contact
 
-
+    double rho = 1;
 
     for (contact = 0 ; contact < nc ; ++contact)
     {
