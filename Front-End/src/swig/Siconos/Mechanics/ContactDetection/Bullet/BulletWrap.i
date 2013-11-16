@@ -129,6 +129,7 @@ PY_REGISTER_BULLET_LINEAR_MATH(btTransform);
 %shared_ptr(btCollisionWorld);
 %include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
 
+
 %shared_ptr(std::vector< std11::shared_ptr<btCollisionObject> >);
 %template (collisionObjects) std::vector< std11::shared_ptr< btCollisionObject > >;
 
@@ -171,11 +172,24 @@ PY_REGISTER_BULLET_COLLISION_DETECTION(btStridingMeshInterface);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btTetrahedronShape);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleBuffer);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleCallback);
+PY_REGISTER_BULLET_COLLISION_DETECTION(btStridingMeshInterface);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleIndexVertexArray);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleIndexVertexMaterialArray);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleInfoMap);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btUniformScalingShape);
 
+
+
+%{
+#include <BulletCollision/Gimpact/btGImpactShape.h>
+%}
+%shared_ptr(btTetrahedronShapeEx);
+%shared_ptr(btGImpactShapeInterface);
+%shared_ptr(btGImpactCompoundShape);
+%shared_ptr(btGImpactMeshShapePart);
+%shared_ptr(btGImpactShape);
+%shared_ptr(btGImpactMeshShape);
+%include "BulletCollision/Gimpact/btGImpactShape.h"
 
 %include "BulletSiconosFwd.hpp"
 PY_FULL_REGISTER(BulletR);
@@ -199,6 +213,7 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
   };
 
   extern bool gContactCalcArea3Points;
+
 }
 
 %extend btCollisionObject
@@ -209,4 +224,38 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
     return (size_t) $self;
   };
 
+}
+
+%extend btTriangleIndexVertexArray
+{
+  btTriangleIndexVertexArray(PyObject *o1, PyObject *o2)
+  {
+    int is_new_object1=0;
+    int is_new_object2=0;
+    PyArrayObject* points = (PyArrayObject*) o1;
+    PyArrayObject* indices = (PyArrayObject*) o2;
+
+
+    int num_triangles = array_size(indices,0);
+    int num_vertices = array_size(points,0);
+
+    btTriangleIndexVertexArray* index = 
+      new btTriangleIndexVertexArray(num_triangles, (int *) &array_data(indices)[0], 
+                                     3 * sizeof(int),
+                                     num_vertices, (btScalar *) &array_data(points)[0], 
+                                     3 * sizeof(btScalar));
+
+     // python mem management
+    if(is_new_object1 && points)
+    {
+      Py_DECREF(points);
+    }
+    
+    if(is_new_object2 && indices)
+    {
+      Py_DECREF(indices);
+    }
+    
+    return index;
+  }
 }

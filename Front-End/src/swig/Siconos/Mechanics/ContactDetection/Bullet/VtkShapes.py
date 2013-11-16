@@ -7,30 +7,65 @@ import shlex
 import vtk
 from Siconos.Mechanics.ContactDetection.Bullet import btVector3, \
     btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, \
-    btConeShape, btCapsuleShape, btCompoundShape
+    btConeShape, btCapsuleShape, btCompoundShape, btTriangleIndexVertexArray, btGImpactMeshShape
 
+import numpy as np
 
 #
 # load .vtp file
 #
-def loadConvexHullShape(shape_filename):
+def loadShape(shape_filename):
     """
-    loads a vtk .vtp file and returns a Bullet convex hull shape
+    loads a vtk .vtp file and returns a Bullet concave shape
+    WARNING triangles cells assumed!
     """
+
     reader = vtk.vtkXMLPolyDataReader()
     reader.SetFileName(shape_filename)
     reader.Update()
     polydata = reader.GetOutput()
     points = polydata.GetPoints().GetData()
-    coors = dict()
-    for i in range(0, points.GetNumberOfTuples()):
-        coors[points.GetTuple(i)] = 1
+    num_points = points.GetNumberOfTuples()
+    num_triangles = polydata.GetNumberOfCells()
 
-    convex_hull_shape = btConvexHullShape()
-    for p in coors:
-        convex_hull_shape.addPoint(btVector3(*p))
+    print num_points, num_triangles
 
-    return convex_hull_shape
+    keep = None
+    shape = None
+
+    if polydata.GetCellType(0) == 5:
+        apoints = np.empty((num_points,3))
+        for i in range(0, points.GetNumberOfTuples()):
+            p = points.GetTuple(i)
+            apoints[i,0] = p[0]
+            apoints[i,1] = p[1]
+            apoints[i,2] = p[2]
+
+        aindices = np.empty((num_triangles,3), dtype=np.int32)
+
+        for i in range(0, num_triangles):
+            c = polydata.GetCell(i)
+            aindices[i,0] = c.GetPointIds().GetId(0)
+            aindices[i,1] = c.GetPointIds().GetId(1)
+            aindices[i,2] = c.GetPointIds().GetId(2)
+
+        tri = btTriangleIndexVertexArray(apoints, aindices)
+
+        shape = btGImpactMeshShape(tri)
+        shape.updateBound()
+
+        keep = tri, apoints, aindices
+
+    else:  # assume convex shape
+        coors = dict()
+        for i in range(0, points.GetNumberOfTuples()):
+            coors[points.GetTuple(i)] = 1
+
+        shape = btConvexHullShape()
+        for p in coors:
+                shape.addPoint(btVector3(*p))
+
+    return keep, shape
 
 
 class Collection():
@@ -45,6 +80,7 @@ class Collection():
         self._url = list()
         self._attributes = list()
         self._shape = dict()
+        self._tri = dict()
 
         with open(self._ref_filename, 'r') as ref_file:
             for shape_url_line in ref_file:
@@ -66,7 +102,7 @@ class Collection():
         if not index in self._shape:
             # load shape if it is an existing file
             if os.path.exists(self._url[index]):
-                self._shape[index] = loadConvexHullShape(
+                self._tri[index], self._shape[index] = loadShape(
                     self._url[index])
             else:
                 # it must be a primitive with attributes
