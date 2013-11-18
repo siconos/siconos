@@ -60,15 +60,23 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
 
   if (dparam[3] > 0.0)
   {
-    rho = dparam[3];
+    rho = dparam[3];   
+    if (verbose > 0)
+    {
+      printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Fixed stepsize with  rho = %14.7e \n", rho); 
+    }
+
   }
   else
   {
     /* Variable step in fixed*/
     isVariable = 1;
-    printf("Variable step in fixed point iterations\n");
     rhomax = -dparam[3];
-    rho = rhomax;
+    rho = rhomax; 
+    if (verbose > 0)
+    {
+      printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Variable stepsize with starting rho = %14.7e \n", rho);
+    }
   }
 
   double alpha = 1.0;

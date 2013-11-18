@@ -63,15 +63,23 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
   int isVariable = 0;
 
   if (dparam[3] > 0.0)
-  {
+  {    
     rho = dparam[3];
+    if (verbose > 0)
+    {
+      printf("----------------------------------- FC3D - Extra Gradient (EG) - Fixed stepsize with  rho = %14.7e \n", rho); 
+    }
   }
   else
   {
-    /* Variable step in fixed*/
-    isVariable = 1;
-    printf("Extragradient method. Variable stepsize with line--search.\n");
+    /* Variable step in iterations*/
+    isVariable = 1;  
     rho = -dparam[3];
+    if (verbose > 0)
+    {
+      printf("----------------------------------- FC3D - Extra Gradient (EG) - Variable stepsize with starting rho = %14.7e \n", rho);
+    }
+     
   }
 
   double alpha = 1.0;
