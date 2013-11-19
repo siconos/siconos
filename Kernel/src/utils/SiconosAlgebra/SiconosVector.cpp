@@ -216,11 +216,11 @@ SiconosVector::SiconosVector(const std::string &file, bool ascii)
   vect.Dense = new DenseVect();
   if (ascii)
   {
-    ioVector::read(file, "ascii", *this);
-  }
+    ioVector::read(file, *this, ioVector::ASCII_IN);
+   }
   else
   {
-    ioVector::read(file, "binary", *this);
+    ioVector::read(file, *this, ioVector::BINARY_IN);
   }
 }
 

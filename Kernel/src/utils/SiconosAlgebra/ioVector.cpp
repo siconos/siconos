@@ -27,68 +27,78 @@
 
 namespace ioVector
 {
-bool read(const std::string& fileName, const std::string& Mode, SiconosVector& m)
-{
-  std::ifstream infile;
-  if (Mode == "ascii")
-    infile.open(fileName.c_str(), std::ifstream::in);
-  else if (Mode == "binary")
-    infile.open(fileName.c_str(), std::ifstream::binary);
-  else
-    SiconosVectorException::selfThrow(" ioVector::read : Fail to open file \"" + fileName + "\"");
-
-  if (!infile.good())
-    SiconosVectorException::selfThrow("ioVector::read error : Fail to open \"" + fileName + "\"");
-
-  infile.precision(15);
-
-  DenseVect *p = m.dense();
-
-  // Read the dimension of the vector in the first line of the input file
-  // Just use to check that sizes are consistents.
-  unsigned int dim;
-  infile >> dim;
-
-  if (dim != p->size())
-    p->resize(dim);
-
-  copy((std::istream_iterator<double>(infile)), std::istream_iterator<double>(), (p->data()).begin());
-
-  infile.close();
-  return true;
-}
-
-bool write(const std::string& fileName, const std::string& Mode, const SiconosVector& m, const std::string& outputType)
-{
-  std::ofstream outfile;
-  if (Mode == "ascii")
-    outfile.open(fileName.c_str(), std::ofstream::out);
-  else if (Mode == "binary")
-    outfile.open(fileName.c_str(), std::ofstream::binary);
-  else
-    SiconosVectorException::selfThrow("ioVector::write - Incorrect mode for writing");
-
-  if (!outfile.good())
-    SiconosVectorException::selfThrow("ioVector:: write error : Fail to open \"" + fileName + "\"");
-
-  outfile.precision(15);
-
-  if (outputType != "noDim")
-    outfile << m.size() << std::endl;
-
-  if (m.getNum() == 1)
+  bool read(const std::string& fileName, SiconosVector& m, const openmode& mode, const std::string& inputType)
   {
-    DenseVect*  p = m.dense();
-    std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
-  }
-  else if (m.getNum() == 4)
-  {
-    SparseVect* p = m.sparse();
-    std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
+    // Note FP : .c_str() will be useless for std11
+    std::ifstream infile(fileName.c_str(), mode);
+    if (!infile.good())
+      SiconosVectorException::selfThrow("ioVector::read error : Fail to open \"" + fileName + "\"");
+    infile.precision(15);
+
+    if(mode == BINARY_IN)
+    {
+      double * x =  m.getArray();
+      if(inputType != "noDim")
+      {
+        unsigned int dim;
+        infile.read((char*)(&dim), sizeof(m.size()));
+      
+      }
+      infile.read((char*)(&x[0]), m.size() * sizeof (double));
+    }
+    else
+    {
+      DenseVect *p = m.dense();
+      // Read the dimension of the vector in the first line of the input file
+      // Just use to check that sizes are consistents.
+      if(inputType != "noDim")
+      {
+        unsigned int dim;
+        infile >> dim;
+        if (dim != p->size())
+          p->resize(dim);
+      }
+      copy((std::istream_iterator<double>(infile)), std::istream_iterator<double>(), (p->data()).begin());
+    }
+    infile.close();
+    return true;
   }
 
-  outfile.close();
-  return true;
-}
+  bool write(const std::string& fileName, const SiconosVector& m, const openmode& mode, const std::string& outputType)
+  {
+    std::ofstream outfile(fileName.c_str(), mode);
+    if (!outfile.good())
+      SiconosVectorException::selfThrow("ioVector:: write error : Fail to open \"" + fileName + "\"");
+    outfile.precision(15);
+    if(mode == BINARY_OUT)
+    {
+      double * x = m.getArray();
+      if(outputType != "noDim")
+      {
+        unsigned int dim = m.size();
+        outfile.write((char*)&dim, sizeof (dim));
+      }
+      outfile.write ((char*)(&x[0]), sizeof (double) * m.size());
+
+    }
+    else
+    {
+      if (outputType != "noDim")
+        outfile << m.size() << std::endl;
+    
+      if (m.getNum() == 1)
+      {
+        DenseVect*  p = m.dense();
+        std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
+      }
+      else if (m.getNum() == 4)
+      {
+        SparseVect* p = m.sparse();
+        std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
+      }
+   }
+    outfile.close();
+    return true;
+  }
 
 }

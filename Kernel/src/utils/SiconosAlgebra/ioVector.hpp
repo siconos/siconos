@@ -26,21 +26,42 @@
 #define __ioVector__
 
 #include <string>
+#include<iostream>
 
 class SiconosVector;
 
 
 namespace ioVector
 {
-/** Read a SiconosMatrix from a file
- * \param fileName the file containing the matrix
- * \param[in,out] m the SiconosVector containing the matrix
- * \return bool true if read ok, else false ...
- */
-bool read(const std::string& fileName, const std::string& Mode, SiconosVector& m);
 
+  typedef std::ios_base::openmode openmode;
+  /** Format to read binary data */ 
+  const openmode BINARY_IN = std::ios::in|std::ios::binary;
+  /** Format to write binary data */ 
+  const openmode BINARY_OUT = std::ios::out|std::ios::binary; //|std::ios::scientific;
+  // Note FP : ios::scientific result in file.good() always false, even if writing process goes well ...
+  // Don't know why.
+  /** Format to read ascii data */ 
+  const openmode ASCII_IN = std::ios::in;
+  /** Format to write ascii data */ 
+  const openmode ASCII_OUT = std::ios::out|std::ios::scientific;
+    
+
+/** Read a SiconosVector from a file
+    \param[in] fileName the file containing the vector
+    \param[in] ios_base::openmode, mode for reading (like  ios::in|ios:binary ...)
+    default = ascii
+    \param[in,out] m the SiconosVector to be filled
+    \param[in] inputType (see outputType in write function)
+    \return bool true if read ok, else false ...
+ */
+  bool read(const std::string& fileName, SiconosVector& m, const openmode& = ASCII_IN, const std::string& inputType = "python");
+  
 /** Write a SiconosVector to a file
-    \param[in] SiconosVector the vector to be read
+    \param[in] output file name
+    \param[in] ios_base::openmode, mode for writing (like  ios::out|ios:binary ...)
+    default = ascii
+    \param[in,out] m the SiconosVector to be written
     \param[in] std::string type of output:
     Type of Output for write function:
     - "boost": boost way: \n
@@ -53,6 +74,6 @@ bool read(const std::string& fileName, const std::string& Mode, SiconosVector& m
     Reading input format is the one corresponding to "python".
     \return bool true if read ok, else false ...
 */
-bool write(const std::string& fileName, const std::string& Mode, const SiconosVector& m, const std::string& outputType = "python");
+  bool write(const std::string& fileName, const SiconosVector& m, const openmode& = ASCII_OUT, const std::string& outputType = "python");
 }
 #endif

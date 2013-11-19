@@ -131,7 +131,7 @@ void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNodePtr siconosVect
   if (xmlHasProp((xmlNodePtr)siconosVectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
   {
     std::string file = getStringAttributeValue(siconosVectorNode, SDTT_VECTORFILE);
-    ioVector::write(file, FILE_STORAGE, v);
+    ioVector::write(file, v, ioVector::ASCII_OUT);
   }
   else
   {

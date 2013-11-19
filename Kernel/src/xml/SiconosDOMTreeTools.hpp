@@ -35,6 +35,7 @@ using std::ptrdiff_t;
 #include <fstream>
 
 const std::string FILE_STORAGE = "ascii";
+//const std::ios_base::openmode FILE_STORAGE = std::ios::ascii;
 const std::string SDTT_VECTOR = "Vector";
 const std::string SDTT_MATRIX = "Matrix";
 const std::string SDTT_VECTORSIZE = "vectorSize";
