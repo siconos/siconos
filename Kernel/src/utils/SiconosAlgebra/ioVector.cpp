@@ -27,10 +27,15 @@
 
 namespace ioVector
 {
-  bool read(const std::string& fileName, SiconosVector& m, const openmode& mode, const std::string& inputType)
+  bool read(const std::string& fileName, 
+            SiconosVector& m, 
+            const openmode& mode, 
+            const std::ios::fmtflags& flags,
+            const std::string& inputType)
   {
     // Note FP : .c_str() will be useless for std11
     std::ifstream infile(fileName.c_str(), mode);
+    infile.flags(flags);
     if (!infile.good())
       SiconosVectorException::selfThrow("ioVector::read error : Fail to open \"" + fileName + "\"");
     infile.precision(15);
@@ -64,9 +69,15 @@ namespace ioVector
     return true;
   }
 
-  bool write(const std::string& fileName, const SiconosVector& m, const openmode& mode, const std::string& outputType)
+  bool write(const std::string& fileName, 
+             const SiconosVector& m, 
+             const openmode& mode, 
+             const std::ios::fmtflags& flags,
+             const std::string& outputType)
   {
     std::ofstream outfile(fileName.c_str(), mode);
+    outfile.flags(flags);
+
     if (!outfile.good())
       SiconosVectorException::selfThrow("ioVector:: write error : Fail to open \"" + fileName + "\"");
     outfile.precision(15);

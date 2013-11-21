@@ -41,26 +41,46 @@ namespace ioVector
   const openmode BINARY_OUT = std::ios::out|std::ios::binary; //|std::ios::scientific;
   // Note FP : ios::scientific result in file.good() always false, even if writing process goes well ...
   // Don't know why.
+  // Note MB : ios::scientific -> fmtflags, std::ios:out -> openmode 
+  /* stdc++ : 
+   mode
+    Flags describing the requested i/o mode for the file.
+    This is an object of the bitmask member type openmode that consists of a combination of the following member constants:
+    member constant	stands for	access
+    in *	input	File open for reading: the internal stream buffer supports input operations.
+    out	output	File open for writing: the internal stream buffer supports output operations.
+    binary	binary	Operations are performed in binary mode rather than text.
+    ate	at end	The output position starts at the end of the file.
+    app	append	All output operations happen at the end of the file, appending to its existing contents.
+    trunc	truncate	Any contents that existed in the file before it is open are discarded.
+  */
+
   /** Format to read ascii data */ 
   const openmode ASCII_IN = std::ios::in;
   /** Format to write ascii data */ 
-  const openmode ASCII_OUT = std::ios::out|std::ios::scientific;
+  const openmode ASCII_OUT = std::ios::out; //|std::ios::scientific;
     
 
 /** Read a SiconosVector from a file
     \param[in] fileName the file containing the vector
     \param[in] ios_base::openmode, mode for reading (like  ios::in|ios:binary ...)
     default = ascii
+    \param[in] flags for reading
     \param[in,out] m the SiconosVector to be filled
     \param[in] inputType (see outputType in write function)
     \return bool true if read ok, else false ...
  */
-  bool read(const std::string& fileName, SiconosVector& m, const openmode& = ASCII_IN, const std::string& inputType = "python");
+  bool read(const std::string& fileName, 
+            SiconosVector& m, 
+            const openmode& = ASCII_IN, 
+            const std::ios::fmtflags& flags = std::cin.flags(),
+            const std::string& inputType = "python");
   
 /** Write a SiconosVector to a file
     \param[in] output file name
     \param[in] ios_base::openmode, mode for writing (like  ios::out|ios:binary ...)
     default = ascii
+    \param[in] flags
     \param[in,out] m the SiconosVector to be written
     \param[in] std::string type of output:
     Type of Output for write function:
@@ -74,6 +94,10 @@ namespace ioVector
     Reading input format is the one corresponding to "python".
     \return bool true if read ok, else false ...
 */
-  bool write(const std::string& fileName, const SiconosVector& m, const openmode& = ASCII_OUT, const std::string& outputType = "python");
+  bool write(const std::string& fileName, 
+             const SiconosVector& m, 
+             const openmode& = ASCII_OUT, 
+             const std::ios_base::fmtflags& = std::cout.flags(),
+             const std::string& outputType = "python");
 }
 #endif
