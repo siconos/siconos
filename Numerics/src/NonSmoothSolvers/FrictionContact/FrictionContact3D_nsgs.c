@@ -141,7 +141,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
   case SICONOS_FRICTION_3D_NCPGlockerFBPATH:
   {
     *solve = &frictionContact3D_Path_solve;
-    *freeSolver = &frictionContact3D_Path_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_Path_free;
     *update = &NCPGlocker_update;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     // *computeError = &fake_compute_error;
@@ -154,7 +154,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
   {
     *solve = &frictionContact3D_FixedP_solve;
     *update = &NCPGlocker_update;
-    *freeSolver = &frictionContact3D_FixedP_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_FixedP_free;
     *computeError = &fake_compute_error_nsgs;
     frictionContact3D_FixedP_initialize(problem, localproblem, localsolver_options);
     break;
