@@ -55,5 +55,5 @@ def test_display():
 
 def test_number():
     ball = K.LagrangianLinearTIDS(q,v,mass)
-    print ball.number()
+    print(ball.number())
 

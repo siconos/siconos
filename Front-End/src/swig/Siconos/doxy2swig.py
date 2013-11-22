@@ -210,13 +210,13 @@ class Doxy2SWIG:
         kind = node.attributes['kind'].value
         if kind in ('class', 'struct'):
             prot = node.attributes['prot'].value
-            if prot <> 'public':
+            if prot is not 'public':
                 return
             names = ('compoundname', 'briefdescription',
                      'detaileddescription', 'includes')
             first = self.get_specific_nodes(node, names)
             for n in names:
-                if first.has_key(n):
+                if n in first:
                     self.parse(first[n])
             self.add_text(['";','\n'])
             for n in node.childNodes:
@@ -280,7 +280,7 @@ class Doxy2SWIG:
             if name[:8] == 'operator': # Don't handle operators yet.
                 return
 
-            if not first.has_key('definition') or \
+            if 'definition ' not in first or \
                    kind in ['variable', 'typedef']:
                 return
 
@@ -372,7 +372,7 @@ class Doxy2SWIG:
             if not os.path.exists(fname):
                 fname = os.path.join(self.my_dir,  fname)
             if not self.quiet:
-                print "parsing file: %s"%fname
+                print("parsing file: %s"%fname)
             p = Doxy2SWIG(fname, self.include_function_definition, self.quiet)
             p.generate()
             self.pieces.extend(self.clean_pieces(p.pieces))

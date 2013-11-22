@@ -91,7 +91,7 @@ def test_bouncing_ball1():
         save(bouncingBall, "bouncingBall.bin")
 
     except:
-        print "Warning : could not import save from Siconos.IO"
+        print("Warning : could not import save from Siconos.IO")
 
     # the number of time steps
     N = (T-t0)/h+1
@@ -131,7 +131,7 @@ def test_bouncing_ball1():
         dataPlot[k, 4] = lambda_[0]
 
         k += 1
-        print s.nextTime()
+        print(s.nextTime())
         s.nextStep()
 
     #
@@ -187,7 +187,7 @@ def test_bouncing_ball2():
     # a ball with its own computeFExt
     class Ball(K.LagrangianLinearTIDS):
         def computeFExt(self, t):
-            print "computing FExt at t=", t
+            print("computing FExt at t=", t)
             weight = array([-m * g, 0, 0])
             self.setFExtPtr(weight)
 
@@ -310,7 +310,7 @@ def test_bouncing_ball2():
 
         assert dataPlot[k, 1] == dataPlot_d[k, 1]
 
-        print s.nextTime()
+        print(s.nextTime())
         k += 1
         s.nextStep()
         s_d.nextStep()

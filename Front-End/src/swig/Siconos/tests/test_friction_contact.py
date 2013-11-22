@@ -151,8 +151,8 @@ def test_fc3dlocalac_simple_case():
 def test_fc3dglobalac_full():
     N.setNumericsVerbose(0)
     problem = N.frictionContactProblemFromFile("Rover1039.dat")
-    print 'problem dimension :',problem.dimension
-    print 'number of contacts : ', problem.numberOfContacts
+    print('problem dimension :',problem.dimension)
+    print('number of contacts : ', problem.numberOfContacts)
 
     SO=N.SolverOptions(N.SICONOS_FRICTION_3D_LOCALAC)
 
@@ -168,6 +168,6 @@ def test_fc3dglobalac_full():
 
     i = N.frictionContact3D_localAlartCurnier(problem,reactions,velocities, SO)
 
-    print 'iter=', iter
-    print 'iter=', SO.iparam[7]
+    print('iter=', iter)
+    print('iter=', SO.iparam[7])
     assert (abs(SO.dparam[1] - err)) < 1e-7

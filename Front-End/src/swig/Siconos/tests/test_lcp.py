@@ -28,8 +28,8 @@ ztol = 1e-4
 def test_lcp_pgs():
     SO=N.SolverOptions(lcp,N.SICONOS_LCP_PGS)
     info  = N.lcp_pgs(lcp,z,w,SO)
-    print 'pgs iter =', SO.iparam[1]
-    print 'pgs error=', SO.dparam[1]
+    print('pgs iter =', SO.iparam[1])
+    print('pgs error=', SO.dparam[1])
     assert (linalg.norm(z-zsol) <= ztol)
     assert not info
 
@@ -42,7 +42,7 @@ def test_lcp_qp():
 def test_lcp_lexicolemke():
     SO=N.SolverOptions(lcp, N.SICONOS_LCP_LEMKE)
     info = N.lcp_lexicolemke(lcp, z, w, SO)
-    print 'lexicolemke iter =', SO.iparam[1]
+    print('lexicolemke iter =', SO.iparam[1])
     assert (linalg.norm(z-zsol) <= ztol)
     assert not info
 

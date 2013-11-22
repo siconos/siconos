@@ -31,8 +31,8 @@ def test_mlcp_enum():
     N.mlcp_driver_init(mlcp, SO)
     info = N.mlcp_enum(mlcp, z, w, SO)
     N.mlcp_driver_reset(mlcp, SO)
-    print "z = ", z
-    print "w = ", w
+    print("z = ", z)
+    print("w = ", w)
     assert (linalg.norm(z-zsol) <= ztol)
     assert not info
 
@@ -81,8 +81,8 @@ def test_mlcp_enum_large():
     N.mlcp_driver_init(mlcp, SO)
     info = N.mlcp_enum(mlcp, z, w, SO)
     N.mlcp_driver_reset(mlcp, SO)
-    print "z = ", z
-    print "w = ", w
+    print("z = ", z)
+    print("w = ", w)
     assert (linalg.norm(z-zsol) <= ztol)
     assert not info
 mlcp =0
@@ -95,7 +95,7 @@ def test_mlcp_enum_large_fromfile():
     N.mlcp_driver_init(mlcp, SO)
     info = N.mlcp_enum(mlcp, z, w, SO)
     N.mlcp_driver_reset(mlcp, SO)
-    print "z = ", z
-    print "w = ", w
+    print("z = ", z)
+    print("w = ", w)
     assert (linalg.norm(z-zsol) <= ztol)
     assert not info

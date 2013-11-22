@@ -13,9 +13,9 @@ def test_from_csr1():
                     [4,5,6],
                     [7,8,9]])
 
-    print M.indices
-    print M.indptr
-    print M.data
+    print(M.indices)
+    print(M.indptr)
+    print(M.data)
 
     r,SBM = sparseToSBM(3,M)
 
@@ -39,9 +39,9 @@ def test_from_csr2():
                     [4,5,6],
                     [7,8,9]])
 
-    print M.indices
-    print M.indptr
-    print M.data
+    print(M.indices)
+    print(M.indptr)
+    print(M.data)
 
     r,SBM = sparseToSBM(1,M)
 
@@ -86,7 +86,7 @@ def test_sparseToSBM1():
 
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
-            print i,j, getValueSBM(SBM,i,j), M[i,j]
+            print(i,j, getValueSBM(SBM,i,j), M[i,j])
             assert abs(getValueSBM(SBM,i,j) - M[i,j]) < eps
 
 def test_SBMtoSparseToSBM():
@@ -110,7 +110,7 @@ def test_SBMtoSparseToSBM():
 
     for i in range(SPARSE.shape[0]):
         for j in range(SPARSE.shape[1]):
-            print i,j, getValueSBM(SBM1,i,j), getValueSBM(SBM2,i,j)
+            print(i,j, getValueSBM(SBM1,i,j), getValueSBM(SBM2,i,j))
             assert (getValueSBM(SBM1,i,j) - getValueSBM(SBM2,i,j)) < eps
 
 

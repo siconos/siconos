@@ -106,9 +106,9 @@ def test_BoundaryCondition():
 
     B = BoundaryCondition([1,2,3])
 
-    print B
+    print(B)
 
-    print B.velocityIndices()
+    print(B.velocityIndices())
 
     B.velocityIndices()[2]=5
 

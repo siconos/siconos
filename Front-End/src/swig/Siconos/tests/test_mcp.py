@@ -42,8 +42,8 @@ def test_mcp_FB():
     N.mcp_driver_init(mcp, SO)
     info = N.mcp_FischerBurmeister(mcp, z, w, SO)
     N.mcp_driver_reset(mcp, SO)
-    print "z = ", z
-    print "w = ", w
+    print("z = ", z)
+    print("w = ", w)
     assert (linalg.norm(z-zsol) <= ztol)
     assert not info
 
