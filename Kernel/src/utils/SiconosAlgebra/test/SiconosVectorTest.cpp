@@ -18,8 +18,9 @@
  */
 #include "KernelConfig.h"
 
-#include "SiconosVectorTest.hpp"
+#include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosAlgebra.hpp"
+#include "SiconosVectorTest.hpp"
 
 
 using namespace boost::numeric::ublas;

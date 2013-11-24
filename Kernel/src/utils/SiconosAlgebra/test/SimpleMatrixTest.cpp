@@ -18,9 +18,9 @@
  */
 #include "KernelConfig.h"
 
-#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "SimpleMatrixTest.hpp"
 #include "SiconosAlgebra.hpp"
+#include <boost/numeric/ublas/matrix_sparse.hpp>
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);

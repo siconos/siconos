@@ -18,6 +18,7 @@
 */
 #include "KernelConfig.h"
 
+#include "SiconosAlgebraTypeDef.hpp"
 #include "BlockVectorTest.hpp"
 #include "BlockVector.hpp"
 #include "SimpleMatrix.hpp"

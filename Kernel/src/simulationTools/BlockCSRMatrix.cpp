@@ -19,8 +19,8 @@
 
 #include "KernelConfig.h"
 
-#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "BlockCSRMatrix.hpp"
+#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "NonSmoothLaw.hpp"
 
 #include "NewtonEulerDS.hpp"

@@ -19,12 +19,13 @@
 
 #include "KernelConfig.h"
 
+#include "SiconosAlgebraTypeDef.hpp"
+
 #include <boost/numeric/ublas/io.hpp>            // for >> 
 //#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/ublas/vector_sparse.hpp>
 
 
-#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
 #include <boost/numeric/bindings/ublas/vector_proxy.hpp>
 #include <boost/numeric/bindings/blas.hpp>
 #include <boost/numeric/bindings/ublas/vector.hpp>
