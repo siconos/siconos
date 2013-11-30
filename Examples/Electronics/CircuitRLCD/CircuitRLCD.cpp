@@ -183,7 +183,22 @@ int main(int argc, char* argv[])
 
     // dataPlot (ascii) output
     ioMatrix::write("CircuitRLCD.dat", "ascii", dataPlot, "noDim");
+
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("CircuitRLCD.ref", "ascii", dataPlotRef);
+    std::cout << "Error w.r.t reference file   " <<(dataPlot - dataPlotRef).normInf() << std::endl;
+    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    {
+      std::cout <<
+        "Warning. The result is rather different from the reference file."
+                << std::endl;
+      return 1;
+    }
+
+
   }
+
 
   // --- Exceptions handling ---
   catch (SiconosException e)
