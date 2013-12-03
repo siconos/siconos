@@ -78,7 +78,7 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/FCMangle.h DESTINATION include/Siconos/Numeric
 compile_with(BLAS REQUIRED)
 compile_with(LAPACK REQUIRED)
 
-include_directories(src/utils/test)
+include_directories(utils/test)
 
 COMPILE_WITH(PathFerris)
 COMPILE_WITH(MlcpSimplex)

@@ -30,7 +30,7 @@ namespace ioVector
   bool read(const std::string& fileName, 
             SiconosVector& m, 
             const openmode& mode, 
-            const std::ios::fmtflags& flags,
+            int prec, 
             const std::string& inputType)
   {
     // Note FP : .c_str() will be useless for std11
@@ -38,7 +38,7 @@ namespace ioVector
     infile.flags(flags);
     if (!infile.good())
       SiconosVectorException::selfThrow("ioVector::read error : Fail to open \"" + fileName + "\"");
-    infile.precision(15);
+    infile.precision(prec);
 
     if(mode == BINARY_IN)
     {
@@ -69,10 +69,10 @@ namespace ioVector
     return true;
   }
 
-  bool write(const std::string& fileName, 
-             const SiconosVector& m, 
+  bool write(const std::string& fileName,
+             const SiconosVector& m,
              const openmode& mode, 
-             const std::ios::fmtflags& flags,
+             int prec, 
              const std::string& outputType)
   {
     std::ofstream outfile(fileName.c_str(), mode);
@@ -80,7 +80,7 @@ namespace ioVector
 
     if (!outfile.good())
       SiconosVectorException::selfThrow("ioVector:: write error : Fail to open \"" + fileName + "\"");
-    outfile.precision(15);
+    outfile.precision(prec);
     if(mode == BINARY_OUT)
     {
       double * x = m.getArray();

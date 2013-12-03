@@ -59,21 +59,21 @@ namespace ioVector
   const openmode ASCII_IN = std::ios::in;
   /** Format to write ascii data */ 
   const openmode ASCII_OUT = std::ios::out; //|std::ios::scientific;
-    
+  const openmode ASCII_OUT = std::ios::out;
 
 /** Read a SiconosVector from a file
     \param[in] fileName the file containing the vector
+    \param[in,out] m the SiconosVector to be filled
     \param[in] ios_base::openmode, mode for reading (like  ios::in|ios:binary ...)
     default = ascii
-    \param[in] flags for reading
-    \param[in,out] m the SiconosVector to be filled
+    \param[in] precision value for float output. Default = 15.
     \param[in] inputType (see outputType in write function)
     \return bool true if read ok, else false ...
  */
   bool read(const std::string& fileName, 
             SiconosVector& m, 
-            const openmode& = ASCII_IN, 
-            const std::ios::fmtflags& flags = std::cin.flags(),
+            const openmode& = ASCII_IN,
+            int =15,
             const std::string& inputType = "python");
   
 /** Write a SiconosVector to a file
@@ -82,6 +82,7 @@ namespace ioVector
     default = ascii
     \param[in] flags
     \param[in,out] m the SiconosVector to be written
+    \param[in] precision value for float output. Default = 15.
     \param[in] std::string type of output:
     Type of Output for write function:
     - "boost": boost way: \n
@@ -94,10 +95,11 @@ namespace ioVector
     Reading input format is the one corresponding to "python".
     \return bool true if read ok, else false ...
 */
-  bool write(const std::string& fileName, 
+  bool write(const std::string& fileName,
              const SiconosVector& m, 
-             const openmode& = ASCII_OUT, 
-             const std::ios_base::fmtflags& = std::cout.flags(),
+             const openmode& = ASCII_OUT,
+             int prec=15, 
              const std::string& outputType = "python");
+  
 }
 #endif
