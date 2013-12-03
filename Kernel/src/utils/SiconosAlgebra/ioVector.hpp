@@ -66,6 +66,7 @@ namespace ioVector
     \param[in] ios_base::openmode, mode for reading (like  ios::in|ios:binary ...)
     default = ascii
     \param[in] precision value for float output. Default = 15.
+    \param[in] flags for reading
     \param[in] inputType (see outputType in write function)
     \return bool true if read ok, else false ...
  */
@@ -73,7 +74,8 @@ namespace ioVector
             SiconosVector& m, 
             const openmode& = ASCII_IN,
             int =15,
-            const std::string& inputType = "python");
+            const std::string& inputType = "python",
+            const std::ios::fmtflags& flags = std::cin.flags());
   
 /** Write a SiconosVector to a file
     \param[in] output file name
@@ -92,13 +94,15 @@ namespace ioVector
     - "noDim": \n
     a0 a1 a2 ... \n
     Reading input format is the one corresponding to "python".
+    \param[in] flags
     \return bool true if read ok, else false ...
 */
   bool write(const std::string& fileName,
              const SiconosVector& m, 
              const openmode& = ASCII_OUT,
              int prec=15, 
-             const std::string& outputType = "python");
+             const std::string& outputType = "python",
+             const std::ios_base::fmtflags& = std::cout.flags());
   
 }
 #endif

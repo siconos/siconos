@@ -31,7 +31,9 @@ namespace ioVector
             SiconosVector& m, 
             const openmode& mode, 
             int prec, 
-            const std::string& inputType)
+            const std::string& inputType,
+            const std::ios::fmtflags& flags
+    )
   {
     // Note FP : .c_str() will be useless for std11
     std::ifstream infile(fileName.c_str(), mode);
@@ -73,7 +75,8 @@ namespace ioVector
              const SiconosVector& m,
              const openmode& mode, 
              int prec, 
-             const std::string& outputType)
+             const std::string& outputType,
+             const std::ios::fmtflags& flags)
   {
     std::ofstream outfile(fileName.c_str(), mode);
     outfile.flags(flags);
