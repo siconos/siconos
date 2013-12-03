@@ -1001,7 +1001,6 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
 {
   _isNewtonConverge = false;
   _newtonNbSteps = 0; // number of Newton iterations
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   int info = 0;
   _istate = 1; // beginning of time integration
   // Prediction

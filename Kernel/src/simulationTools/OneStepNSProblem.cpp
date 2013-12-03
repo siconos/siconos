@@ -433,6 +433,7 @@ void OneStepNSProblem::updateInteractionBlocks()
 
 SP::InteractionsSet OneStepNSProblem::interactions() const
 {
+  // This function should be removed in the future .... or use interactions graph
   return _simulation->model()->nonSmoothDynamicalSystem()->interactions();
 }
 

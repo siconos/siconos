@@ -257,16 +257,14 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   _levelMinForOutput = LEVELMAX;
   _levelMaxForOutput = 0;
 
-  SP::InteractionsSet allInteractions =
-    model()->nonSmoothDynamicalSystem()->interactions();
-  if (!allInteractions->isEmpty())  // ie if some Interactions
-    //  have been declared
+  InteractionsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  computeLevelsForInputAndOutput();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    computeLevelsForInputAndOutput();
-
-    for_each(allInteractions->begin(), allInteractions->end(),
-             std11::bind(&Interaction::initialize, _1, _tinit));
+    indexSet0->bundle(*ui)->initialize(_tinit);
   }
+
   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
   // Warning FP : must be done in any case, even if the interactions set
   // is empty.
@@ -315,7 +313,6 @@ void Simulation::reset()
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart();
-  // std::cout << "     Simulation::reset()"  <<std::endl;
 }
 
 void Simulation::reset(unsigned int level)
@@ -324,7 +321,6 @@ void Simulation::reset(unsigned int level)
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart(level);
-  // std::cout << "     Simulation::reset()"  <<std::endl;
 }
 
 
@@ -355,7 +351,6 @@ void Simulation::pushInteractionsInMemory()
       indexSet0->bundle(*ui)->swapInMemory();
     }
 
-    
     //OSNSIterator itOsns;
     //for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     //{
@@ -995,15 +990,14 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
 
 void Simulation::computeLevelsForInputAndOutput()
 {
-  SP::InteractionsSet allInteractions =
-    model()->nonSmoothDynamicalSystem()->interactions();
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-
   _levelsAreComputed = true;
 
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  InteractionsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet0 = topo->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    computeLevelsForInputAndOutput(*it, true);
+    computeLevelsForInputAndOutput(indexSet0->bundle(*ui), true);
   }
 
   unsigned int indxSize = topo->indexSetsSize();

@@ -390,8 +390,6 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     bool runningProjection = false;
     _nbProjectionIteration = 0;
-    SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-
 
     if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     {

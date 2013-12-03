@@ -464,10 +464,10 @@ void TimeStepping::computeInitialResidu()
   //  std::cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
   assert(!isnan(tkp1));
-
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-
-  if (!allInteractions->isEmpty())
+  
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+    
+  if (indexSet0->size()>0)
   {
     //    assert(_levelMinForOutput >=0);
     assert(_levelMaxForOutput >= _levelMinForOutput);
@@ -489,12 +489,13 @@ void TimeStepping::computeInitialResidu()
     (*it)->computeResidu();
 
   if (_computeResiduY)
-    for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  {
+    InteractionsGraph::VIterator ui, uiend;
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      (*it)->computeResiduY(tkp1);
+      indexSet0->bundle(*ui)->computeResiduY(tkp1);
     }
-
-  //  std::cout<<"END computeInitialResidu"<<endl;
+  }
 }
 
 void TimeStepping::run()
@@ -571,13 +572,15 @@ void   TimeStepping::prepareNewtonIteration()
     (*itosi)->prepareNewtonIteration(getTkp1());
   }
 
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-   {
-    (*it)->relation()->computeJach(getTkp1(), **it);
-    (*it)->relation()->computeJacg(getTkp1(), **it);
-   }
-
+  InteractionsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  SP::Interaction inter;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    inter->relation()->computeJach(getTkp1(), *inter);
+    inter->relation()->computeJacg(getTkp1(), *inter);
+  } 
   /* let's consider only active Interactions */
   // SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
   // if (topo->numberOfIndexSet()>1)
@@ -603,10 +606,11 @@ void   TimeStepping::prepareNewtonIteration()
     //     (*itds)->R()->zero();
   }
   /**/
-
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    (*it)->relation()->preparNewtonIteration(**it);
+    inter = indexSet0->bundle(*ui);
+    inter->relation()->preparNewtonIteration(*inter);
   }
 
   /* let's consider only active Interactions */
@@ -629,6 +633,7 @@ void   TimeStepping::prepareNewtonIteration()
     }
   }
 }
+
 void TimeStepping::saveYandLambdaInOldVariables()
 {
     // Temp FP : saveInOldVar was called for each osns and each osns call 
@@ -643,6 +648,7 @@ void TimeStepping::saveYandLambdaInOldVariables()
       indexSet0->bundle(*ui)->swapInMemory();
     }
 }
+
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
   DEBUG_PRINT("TimeStepping::newtonSolve()\n");
@@ -651,7 +657,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   int info = 0;
   //cout<<"||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
 
   computeInitialResidu();
 
@@ -662,7 +668,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     DEBUG_PRINTF("TimeStepping::newtonSolve(). _newtonNbSteps = %i\n", _newtonNbSteps);
     prepareNewtonIteration();
     computeFreeState();
-    if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+    if (!_allNSProblems->empty() &&  indexSet0->size() > 0)
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
@@ -673,7 +679,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     update(_levelMaxForInput);
 
     //_isNewtonConverge = newtonCheckConvergence(criterion);
-    if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+    if (!_allNSProblems->empty() &&   indexSet0->size() > 0)
       saveYandLambdaInOldVariables();
   }
 
@@ -695,7 +701,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
       // is also relevant here.
-      if (!_allNSProblems->empty() && !allInteractions->isEmpty())
+      if (!_allNSProblems->empty() && indexSet0->size() > 0)
       {
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
       }
@@ -712,7 +718,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       if (!_isNewtonConverge && !info)
       {
-        if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+        if (!_allNSProblems->empty() &&  indexSet0->size() > 0)
           saveYandLambdaInOldVariables();
       }
     }
@@ -770,17 +776,19 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     //check residuy.
     _newtonResiduYMax = 0.0;
     residu = 0.0;
-    SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-    for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+    SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+    
+    InteractionsGraph::VIterator ui, uiend;
+    SP::Interaction inter;
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      (*it)->computeResiduY(getTkp1());
-      residu = (*it)->residuY()->norm2();
+      inter = indexSet0->bundle(*ui);
+      inter->computeResiduY(getTkp1());
+      residu = inter->residuY()->norm2();
       if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
       if (residu > criterion)
       {
-        //      std::cout<<"residuY > criteron"<<residu<<">"<<criterion<<endl;
         checkConvergence = false;
-        //break;
       }
     }
   }
@@ -789,23 +797,21 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     //check residur.
     _newtonResiduRMax = 0.0;
     residu = 0.0;
-    SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-    for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+    SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+    
+    InteractionsGraph::VIterator ui, uiend;
+    SP::Interaction inter;
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      (*it)->computeResiduR(getTkp1());
-      residu = (*it)->residuR()->norm2();
-
+      inter = indexSet0->bundle(*ui);
+      inter->computeResiduY(getTkp1());
+      residu = inter->residuY()->norm2();
       if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
       if (residu > criterion)
       {
-        //cout<<"residuR > criteron"<<residu<<">"<<criterion<<endl;
         checkConvergence = false;
-        //break;
       }
-      //else
-      //  std::cout<<"residuR ="<<residu<<"<"<<criterion<<endl;
     }
-
   }
 
   return(checkConvergence);

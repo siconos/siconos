@@ -108,11 +108,12 @@ double D1MinusLinear::computeResidu()
   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
-
-
-
-  SP::InteractionsSet allInteractions = simulationLink->model()->nonSmoothDynamicalSystem()->interactions(); // all Interactions
-
+  // Note FP : we must use graph rather than InteractionSet. I have update all the code
+  // in this file by replacing allInteractions calls with proper call to indexSet0.
+  // So it produces the same results as before my changes.
+  // Anyway, I think that in some place it will be better to call indexSet2? 
+  //SP::InteractionsSet allInteractions = simulationLink->model()->nonSmoothDynamicalSystem()->interactions(); // all Interactions
+  
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
   DEBUG_PRINTF("time step size %f\n", h);
@@ -227,11 +228,13 @@ double D1MinusLinear::computeResidu()
   {
     if (indexSet2->size() >0)
     {
-
-      for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+      InteractionsGraph::VIterator ui, uiend;
+      SP::Interaction inter;
+      for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       {
-        (*it)->relation()->computeJach(told, *(*it));
-        (*it)->relation()->computeJacg(told, *(*it));
+        inter = indexSet0->bundle(*ui);
+        inter->relation()->computeJach(told, *inter);
+        inter->relation()->computeJacg(told, *inter);
       }
 
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -601,13 +604,14 @@ double D1MinusLinear::computeResidu()
       // }
       // simulationLink->updateIndexSets();
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
-
-      for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+      InteractionsGraph::VIterator ui, uiend;
+      SP::Interaction inter;
+      for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       {
-        (*it)->relation()->computeJach(t, **it);
-        (*it)->relation()->computeJacg(t, **it);
+        inter = indexSet0->bundle(*ui);
+        inter->relation()->computeJach(t, *inter);
+        inter->relation()->computeJacg(t, *inter);
       }
-
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
         for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
@@ -1136,11 +1140,6 @@ double D1MinusLinear::computeResidu()
   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
-
-
-
-  SP::InteractionsSet allInteractions = simulationLink->model()->nonSmoothDynamicalSystem()->interactions(); // all Interactions
-
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
   DEBUG_PRINTF("time step size %f\n", h);
@@ -1254,12 +1253,20 @@ double D1MinusLinear::computeResidu()
   {
     if (indexSet2->size() >0)
     {
-
-      for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+      InteractionsGraph::VIterator ui, uiend;
+      SP::Interaction inter;
+      for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       {
-        (*it)->computeJach(told);
-        (*it)->computeJacg(told);
+        inter = indexSet0->bundle(*ui);
+        inter->computeJach(told);
+        inter->computeJacg(told);
       }
+      
+      // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+      // {
+      //   (*it)->computeJach(told);
+      //   (*it)->computeJacg(told);
+      // }
 
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
@@ -1549,12 +1556,20 @@ double D1MinusLinear::computeResidu()
     // }
     // simulationLink->updateIndexSets();
     DEBUG_PRINT("We compute lambda^-_{k+1} \n");
-    
-    for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+    InteractionsGraph::VIterator ui, uiend;
+    SP::Interaction inter;
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      (*it)->computeJach(t);
-      (*it)->computeJacg(t);
+      inter = indexSet0->bundle(*ui);
+      inter->computeJach(t);
+      inter->computeJacg(t);
     }
+
+    // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+    // {
+    //   (*it)->computeJach(t);
+    //   (*it)->computeJacg(t);
+    // }
     
     if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
     {
