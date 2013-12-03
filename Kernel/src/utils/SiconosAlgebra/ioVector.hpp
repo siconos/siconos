@@ -59,7 +59,6 @@ namespace ioVector
   const openmode ASCII_IN = std::ios::in;
   /** Format to write ascii data */ 
   const openmode ASCII_OUT = std::ios::out; //|std::ios::scientific;
-  const openmode ASCII_OUT = std::ios::out;
 
 /** Read a SiconosVector from a file
     \param[in] fileName the file containing the vector
