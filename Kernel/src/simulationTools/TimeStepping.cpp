@@ -631,11 +631,17 @@ void   TimeStepping::prepareNewtonIteration()
 }
 void TimeStepping::saveYandLambdaInOldVariables()
 {
-  // Save OSNS state (Interactions) in Memory.
-  OSNSIterator itOsns;
-  for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    (*itOsns)->saveInOldVariables();
-
+    // Temp FP : saveInOldVar was called for each osns and each osns call 
+    // swapInOldVar for all interactions in the nsds. 
+    // ==> let's do it only once, by the simu.
+    
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      initializeInteraction(indexSet0->bundle(*ui));
+      indexSet0->bundle(*ui)->swapInMemory();
+    }
 }
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {

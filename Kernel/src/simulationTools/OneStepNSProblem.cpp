@@ -160,20 +160,6 @@ OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
 
 }
 
-SP::SiconosMatrix OneStepNSProblem::dSBlock(SP::DynamicalSystem DS1) const
-{
-
-  ConstMatIterator itDS = _DSBlocks.find(DS1->number());
-  return itDS->second;
-
-}
-
-
-void OneStepNSProblem::setDSBlocks(const MapOfDSMatrices& newMap)
-{
-  RuntimeException::selfThrow("OneStepNSProblem::setDSBlocks - Not implemented: forbidden operation.");
-}
-
 void OneStepNSProblem::updateInteractionBlocks()
 {
   // The present functions checks various conditions and possibly
@@ -445,6 +431,13 @@ void OneStepNSProblem::updateInteractionBlocks()
 
 }
 
+SP::InteractionsSet OneStepNSProblem::interactions() const
+{
+  return _simulation->model()->nonSmoothDynamicalSystem()->interactions();
+}
+
+
+
 void OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet)
 {
 
@@ -562,12 +555,6 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 
   _simulation = sim;
 
-
-  // === Link to the Interactions of the Non Smooth Dynamical System
-  // (through the Simulation) === Warning: this means that all
-  // Interactions of the NSProblem are included in the OSNS !!
-  _OSNSInteractions = simulation()->model()->nonSmoothDynamicalSystem()->interactions();
-
   // === Adds this in the simulation set of OneStepNSProblem === First
   // checks the id if required.  An id is required if there is more
   // than one OneStepNSProblem in the simulation
@@ -586,21 +573,6 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
     // initialize
     _maxSize = simulation()->model()->
                nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
-
-
-}
-
-void OneStepNSProblem::saveInOldVariables()
-{
-  assert(_OSNSInteractions);
-  for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
-           std11::bind(&Interaction::swapInOldVariables, _1));
-}
-void OneStepNSProblem::saveInMemory()
-{
-  assert(_OSNSInteractions);
-  for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
-           std11::bind(&Interaction::swapInMemory, _1));
 }
 
 void OneStepNSProblem::saveNSProblemToXML()
@@ -706,17 +678,7 @@ void OneStepNSProblem::printStat()
   std::cout << " Number of iterations done: " << _nbIter <<std::endl;
 }
 
-void OneStepNSProblem::clear()
-{
-
-  _DSBlocks.clear();
-  if (_OSNSInteractions)
-    _OSNSInteractions->clear();
-}
-
 OneStepNSProblem::~OneStepNSProblem()
-{
-  clear();
-}
+{}
 
 

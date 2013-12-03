@@ -109,7 +109,7 @@ void FrictionContact::initialize(SP::Simulation sim)
   // change during simulation:
 
   //if( !topology->hasChanged() &&   !interactions()->isEmpty())
-  if (!interactions()->isEmpty())
+  if (!topology->interactions()->isEmpty())
   {
     // Get index set from Simulation
     SP::InteractionsGraph indexSet =

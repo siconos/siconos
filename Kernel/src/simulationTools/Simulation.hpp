@@ -539,6 +539,10 @@ public:
    */
   void saveInMemory();
 
+  /** save interaction states in memories. Applied to all interactions
+   of the connected topology (via model->nsds). */
+  void pushInteractionsInMemory();
+
   /** computes a one step NS problem
    *  \param a std::string, the id of the OneStepNSProblem to be computed
    *  \return an int, information about the solver convergence.

@@ -37,7 +37,6 @@ class Topology;
  *  that interact alltogether.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
  *  \date (Creation) Apr 23, 2004
  *
  */

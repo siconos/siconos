@@ -23,52 +23,52 @@
 #define SolverOptions_H
 
 /*!\file SolverOptions.h
-  \brief Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
+  Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
   \author Franck Perignon
 */
 
 /*! \page NumericsSolver Solvers definition in Numerics
 
-To define a non-smooth problem in Numerics, the structure SolverOptions is used. It handles the name of the solver and its input-output parameters.\n
-SolverOptions main components are:
- - a name
- - two lists of input-output parameters (int: iparam, double: dparam) and their sizes
+  To define a non-smooth problem in Numerics, the structure SolverOptions is used. It handles the name of the solver and its input-output parameters.\n
+  SolverOptions main components are:
+  - a name
+  - two lists of input-output parameters (int: iparam, double: dparam) and their sizes
 
-Check each type of formulation of the problem to find which solvers are available and what are the required parameters. \n
-See for example:
- - \ref LCPSolvers
- - \ref FC3DSolvers
+  Check each type of formulation of the problem to find which solvers are available and what are the required parameters. \n
+  See for example:
+  - \ref LCPSolvers
+  - \ref FC3DSolvers
 
-As an example, consider \ref LCProblem : \n
-M is a NumericsMatrix and can be saved as a double* or as a SparseBlockStructuredMatrix.\n
-One needs to define a SolverOptions, say "options", by choosing one solver among those given in \ref LCPSolvers and set:
-\code
-int nbSolvers = 1;
-SolverOptions options;
-strcpy(options.solverName,"PGS");
-int iparam[2] ={maxIter, 0};
-double dparam[2] = {tolerance,0.0};
-options.iSize = 2;
-options.dSize = 2;
-options.iparam = iparam;
-options.dparam = dparam;
-options.isSet = 1;
-\endcode
-And then call the driver:
-\code
-int info = lcp_driver(myProblem, z,w, &options, nbSolvers, &global_options);
-\endcode
-which will result in the resolution of the LCP defined in myProblem thanks to a PGS solver.
+  As an example, consider \ref LCProblem : \n
+  M is a NumericsMatrix and can be saved as a double* or as a SparseBlockStructuredMatrix.\n
+  One needs to define a SolverOptions, say "options", by choosing one solver among those given in \ref LCPSolvers and set:
+  \code
+  int nbSolvers = 1;
+  SolverOptions options;
+  strcpy(options.solverName,"PGS");
+  int iparam[2] ={maxIter, 0};
+  double dparam[2] = {tolerance,0.0};
+  options.iSize = 2;
+  options.dSize = 2;
+  options.iparam = iparam;
+  options.dparam = dparam;
+  options.isSet = 1;
+  \endcode
+  And then call the driver:
+  \code
+  int info = lcp_driver(myProblem, z,w, &options, nbSolvers, &global_options);
+  \endcode
+  which will result in the resolution of the LCP defined in myProblem thanks to a PGS solver.
 
-On the other side if M is saved as a SparseBlockStructuredMatrix, with N rows of blocks, one needs to used a \n
-"block-solver" with possibly one or more specific local solver dedicated to each local problem.\n
-In that case options must be a vector of SolverOptions, with:\n
- - options[0] the definition for the global "block" solver
- - options[i], i>0, the solvers used for each local problem.
+  On the other side if M is saved as a SparseBlockStructuredMatrix, with N rows of blocks, one needs to used a \n
+  "block-solver" with possibly one or more specific local solver dedicated to each local problem.\n
+  In that case options must be a vector of SolverOptions, with:\n
+  - options[0] the definition for the global "block" solver
+  - options[i], i>0, the solvers used for each local problem.
 
 
-Example with a LCP:
-\code
+  Example with a LCP:
+  \code
 // First define a vector of options
 int nbSolvers = 3;
 SolverOptions options[nbSolvers];
@@ -116,24 +116,25 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
 #include "NumericsOptions.h"
 
 /** \struct  SolverOptions SolverOptions.h
- Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
-    \param isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
+    Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
     \param solverId Id of the solver (see )
-    \param numberOfSolvers : the number of internal or local solvers used by the solver
-    \param iSize size of vectors iparam \n
-    \param iparam a list of int parameters (depends on each solver, see solver doc.)
+    \param isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
+    \param iSize size of vector iparam \n
+    \param iparam a list of int parameters (depends on each solver, see solver doc)
     \param dSize size of vector dparam \n
-    \param dparam a list of double parameters (depends on each solver, see solver doc.)
+    \param dparam a list of double parameters (depends on each solver, see solver doc)
     \param filterOn 1 to check solution validity after the driver call, else 0. Default = 1. (For example if \n
     filterOn = 1 for a LCP, lcp_compute_error() will be called at the end of the process)
     \param dWork is a pointer on a working memory zone (for doubles) reserved for the solver .
     \param iWork is a pointer on a working memory zone (for integers) reserved for the solver .
+    \param numberOfInternalSolvers the number of internal or local 'sub-solvers' used by the solver
+    \param internalSolvers pointer to sub-solvers
+    \param numericsOptions global options for numerics (verbose mode ...)
 */
 typedef struct _SolverOptions
 {
   int solverId;
   int isSet;
-  /*char solverName[64] ;*/
   int iSize;
   int * iparam;
   int dSize;
@@ -178,7 +179,7 @@ extern "C"
       2: FrictionContact2D\n
       3: FrictionContact3D\n
       \param[out] options structure used to save the parameters
-   */
+  */
   void readSolverOptions(int driverType, SolverOptions* options);
 
   /** screen display of solver parameters

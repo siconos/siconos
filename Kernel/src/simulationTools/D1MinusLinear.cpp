@@ -249,7 +249,11 @@ double D1MinusLinear::computeResidu()
         DEBUG_PRINT("We compute lambda^+_{k} \n");
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
         DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display());
-        (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
+
+        // Note Franck : at the time this results in a call to swapInMem of all Interactions of the NSDS
+        // So let the simu do this. 
+        //(*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
+        simulationLink->pushInteractionsInMemory();
         simulationLink->updateInput(2);
       }
 

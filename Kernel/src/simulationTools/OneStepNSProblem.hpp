@@ -33,6 +33,7 @@ class Simulation;
 class DynamicalSystem;
 class Interaction;
 class SiconosMatrix;
+
 TYPEDEF_SPTR(NumericsOptions)
 TYPEDEF_SPTR(SolverOptions)
 
@@ -93,10 +94,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(OneStepNSProblem);
 
-
-  /** Algorithm/solver name
-  std::string _numerics_solver_name;*/
-
+  /** Numerics solver id */
   int _numerics_solver_id;
   /** Numerics structure used to solve solver options */
   SP::SolverOptions _numerics_solver_options;
@@ -107,22 +105,11 @@ protected:
   /** size of the problem to solve */
   unsigned int _sizeOutput;
 
-  /** map that links each DynamicalSystem with the corresponding DSBlocks
-      map < SP::DynamicalSystem , SiconosMatrix * > */
-  MapOfDSMatrices _DSBlocks;
-
-
-
   /** link to the simulation that owns the NSPb */
   SP::Simulation _simulation;
 
   /** the XML object linked to the OneStepNSProblem to read XML data */
   SP::OneStepNSProblemXML _onestepnspbxml;
-
-  /** set of Interactions: link to the Interactions of the Non Smooth
-   * Dynamical System Note: no get or set functions for this object in
-   * the class -> used only in OneStepNSProblem methods. */
-  SP::InteractionsSet _OSNSInteractions;
 
   /** level of index sets that is considered by this osnsp */
   unsigned int _indexSetLevel;
@@ -247,27 +234,6 @@ public:
     _sizeOutput = newVal;
   }
 
-  /** get the DSBlocks matrices map
-   *  \return a MapOfDSMatrices
-   */
-  inline const MapOfDSMatrices getDSBlocks() const
-  {
-    return _DSBlocks;
-  };
-
-  /** get the DSBlock orresponding to DS1
-   *  \param a pointer to DynamicalSystem, DS1
-   *  \return a pointer to SiconosMatrix
-   */
-  SP::SiconosMatrix dSBlock(SP::DynamicalSystem) const ;
-
-  /** set the map of DS matrices
-   *  \param a MapOfDSMatrices
-   */
-  void setDSBlocks(const MapOfDSMatrices&);
-
-
-
   /** get the Simulation
    *  \return a pointer on Simulation
    */
@@ -287,10 +253,7 @@ public:
   /** get the Interactions set
    *  \return an InteractionsSet
    */
-  inline SP::InteractionsSet interactions() const
-  {
-    return _OSNSInteractions;
-  }
+  SP::InteractionsSet interactions() const;
 
   /** get indexSetLevel
    *  \return an unsigned int
@@ -437,22 +400,11 @@ public:
    */
   virtual void computeDSBlock(SP::DynamicalSystem);
 
-
-
-
   /** initialize the problem(compute topology ...)
       \param the simulation, owner of this OSNSPB
     */
   virtual void initialize(SP::Simulation);
 
-  /** save Interactions states in Memory, called to save the current state of the Newton iteration.
-   */
-  virtual void saveInOldVariables();
-
-  /** save y_k, called by TimeDiscretisation::process.
-   */
-
-  virtual void saveInMemory();
   /** prepare data of the osns for solving
    *  \param time the current time
    *  \return true if the computation of the OSNS has to be carry on, false otherwise
@@ -483,9 +435,6 @@ public:
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();
-
-  /** clear associated maps */
-  void clear();
 
 };
 

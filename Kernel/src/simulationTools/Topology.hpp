@@ -96,7 +96,6 @@ private:
       all nslaw sizes of Interactions of IndexSet0.*/
   unsigned int _numberOfConstraints;
 
-
   /** symmetry in the blocks computation */
   bool _symmetric;
 
@@ -104,7 +103,6 @@ private:
       smooth laws kind */
   struct SetupFromNslaw;
   friend struct Topology::SetupFromNslaw;
-
 
   // === PRIVATE FUNCTIONS ===
 

@@ -334,16 +334,34 @@ void Simulation::saveInMemory()
   OSIIterator it;
   for (it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->saveInMemory();
+  
+  pushInteractionsInMemory();
+}
 
+void Simulation::pushInteractionsInMemory()
+{
   // Save OSNS state (Interactions) in Memory.
   if (!model()->nonSmoothDynamicalSystem()->interactions()->isEmpty())
   {
-    OSNSIterator itOsns;
-    for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
+    // Temp FP : saveInOldVar was called for each osns and each osns call 
+    // swapInOldVar for all interactions in the nsds. 
+    // ==> let's do it only once, by the simu.
+    
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      (*itOsns)->saveInOldVariables();
-      (*itOsns)->saveInMemory();
+      indexSet0->bundle(*ui)->swapInOldVariables();
+      indexSet0->bundle(*ui)->swapInMemory();
     }
+
+    
+    //OSNSIterator itOsns;
+    //for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
+    //{
+    // (*itOsns)->saveInOldVariables();
+    //  (*itOsns)->saveInMemory();
+    //}
   }
 }
 
