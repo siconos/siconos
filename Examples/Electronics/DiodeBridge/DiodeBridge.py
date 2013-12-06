@@ -99,7 +99,7 @@ LTIRDiodeBridge.setDPtr(D)
 
 nslaw = ComplementarityConditionNSL(4)
 InterDiodeBridge = Interaction(4, nslaw, LTIRDiodeBridge, 1)
-InterDiodeBridge.insert(LSDiodeBridge)
+
 
 #
 # Model
