@@ -118,8 +118,10 @@ DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
 
 # (1) OneStepIntegrators
 theta = 0.5
-aOSI = Moreau(LSDiodeBridge, theta)
- 
+gamma = 0.5
+aOSI = Moreau(LSDiodeBridge, theta, gamma)
+#aOSI.setUseGammaForRelation(True)
+
 # (2) Time discretisation
 aTiDisc = TimeDiscretisation(t0, h_step)
 
@@ -149,7 +151,7 @@ print "Number of steps : ", N
 # ->saved in a matrix dataPlot
 
 from numpy import zeros
-dataPlot = zeros([N, 8])
+dataPlot = zeros([N, 10])
 
 x = LSDiodeBridge.x()
 print "Initial state : ", x
@@ -178,8 +180,7 @@ dataPlot[k, 5] = - lambda_[1]
 # diode F1 current
 dataPlot[k, 6] = lambda_[2]
 
-# resistor current
-dataPlot[k, 7] = y[0] + lambda_[2]
+
 
 
 
@@ -200,8 +201,6 @@ while (k < N):
     dataPlot[k, 5] = - lambda_[1]
     # diode F1 current
     dataPlot[k, 6] = lambda_[2]
-    # resistor current
-    dataPlot[k, 7] = y[0] + lambda_[2]
     k += 1
     aTS.nextStep()
 
@@ -209,10 +208,13 @@ while (k < N):
 from Siconos.Kernel import SimpleMatrix, getMatrix
 from numpy.linalg import norm
 
-ref = getMatrix(SimpleMatrix("result.ref"))
+ref = getMatrix(SimpleMatrix("DiodeBridge.ref"))
 
-assert (norm(dataPlot - ref) < 1e-12)
+error = norm(dataPlot[:,0:6] - ref[:,0:6])
+print "error = " , error
 
+#assert (error < 1e-09)
+withRef = True
 if (withPlot):
     #
     # plots
@@ -220,18 +222,27 @@ if (withPlot):
     subplot(411)
     title('inductor voltage')
     plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 1])
+    if (withRef):
+        plot(ref[0:k - 1, 0], ref[0:k - 1, 1])
     grid()
     subplot(412)
     title('inductor current')
     plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 2])
+    if (withRef):
+        plot(ref[0:k - 1, 0], ref[0:k - 1, 2])
     grid()
     subplot(413)
     title('diode R1 (blue) and F2 (green) voltage')
     plot(dataPlot[0:k - 1, 0], -dataPlot[0:k - 1, 4])
     plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 5])
+    if (withRef):
+        plot(ref[0:k - 1, 0], -ref[0:k - 1, 4])
+        plot(ref[0:k - 1, 0], ref[0:k - 1, 5])
     grid()
     subplot(414)
     title('resistor current')
-    plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 7])
+    plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 3] + dataPlot[0:k - 1, 6]  )
+    if (withRef):
+        plot(dataPlot[0:k - 1, 0], ref[0:k - 1, 3] + ref[0:k - 1, 6]  )
     grid()
     show()

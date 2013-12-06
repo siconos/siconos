@@ -256,12 +256,13 @@ int main(int argc, char* argv[])
     // dataPlot (ascii) output
     dataPlot.resize(k, 10);
     ioMatrix::write("DiodeBridge.dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
+    cout << "Comparison with a reference file ..."<< endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
 
     ioMatrix::read("DiodeBridge.ref", "ascii", dataPlotRef);
-
+    double error = (dataPlot - dataPlotRef).normInf();
+    cout << "error ="<<error << endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;

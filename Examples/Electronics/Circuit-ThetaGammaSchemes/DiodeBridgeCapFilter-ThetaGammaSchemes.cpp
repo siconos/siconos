@@ -231,8 +231,28 @@ int main(int argc, char* argv[])
     cout << "Number of iterations done: " << k << endl;
 
     // dataPlot (ascii) output
+    dataPlot.resize(k, 10);
     ioMatrix::write("DiodeBridgeCapFilter.dat", "ascii", dataPlot, "noDim");
+
+    cout << "Comparison with a reference file ..."<< endl;
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+
+    ioMatrix::read("DiodeBridgeCapFilter.ref", "ascii", dataPlotRef);
+    double error = (dataPlot - dataPlotRef).normInf();
+    cout << "error ="<<error << endl;
+    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
+    {
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
+
+
+
   }
+
+
+
 
   // --- Exceptions handling ---
   catch (SiconosException e)
