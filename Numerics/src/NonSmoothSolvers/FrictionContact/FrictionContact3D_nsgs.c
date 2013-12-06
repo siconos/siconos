@@ -416,6 +416,14 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
+
+      if (options->callback)
+      {
+        options->callback->endIteration(options->callback->env, 3 * nc, 
+                                        reaction, velocity, 
+                                        error);
+      }
+
     }
   }
   dparam[0] = tolerance;

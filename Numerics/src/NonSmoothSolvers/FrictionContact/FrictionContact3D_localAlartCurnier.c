@@ -947,6 +947,12 @@ void frictionContact3D_sparseLocalAlartCurnier(
     }
 
 
+    if (options->callback)
+    {
+      options->callback->endIteration(options->callback->env, problemSize, reaction, velocity, 
+                                      options->dparam[1]);
+    }
+
   }
 
 

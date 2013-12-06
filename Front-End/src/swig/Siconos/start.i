@@ -32,3 +32,10 @@
   import_array();
 %}
 
+%inline %{
+
+#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
+  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
+              data, 0, NPY_FARRAY, NULL)
+
+%}

@@ -19,7 +19,7 @@
 //
 
 // Siconos.i - SWIG interface for Siconos
-%module Numerics
+%module(directors="1") Numerics
 
 %include start.i
 
@@ -1073,13 +1073,6 @@
     fclose(finput);
   }
 
-
-#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
-  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
-              data, 0, NPY_FARRAY, NULL)
-
-
-
 static PyObject *my_callback_NablaFmcp = NULL;
 
 static PyObject * set_my_callback_NablaFmcp(PyObject *o)
@@ -1389,7 +1382,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       if(is_new_object2 && vector)
       {
         Py_DECREF(vector);
-      }
+       }
 
       return LC;
 

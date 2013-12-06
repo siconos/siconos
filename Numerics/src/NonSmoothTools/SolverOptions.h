@@ -115,6 +115,20 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
 
 #include "NumericsOptions.h"
 
+/** \struct Callback SolverOptions.h
+Structure used to store user callbacks inside solvers
+    \param env general user environnement. 
+    \param endIteration a pointer on a function that will have as
+arguments user env, problem size, reaction, velocity and error at end
+of solver iteration (when solver iteration has some meanings) */
+typedef struct 
+{
+  void *env;
+  void (*endIteration)(void *env, int size, double*reaction, 
+                       double*velocity, double error);  
+} Callback;
+
+
 /** \struct  SolverOptions SolverOptions.h
     Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
     \param solverId Id of the solver (see )
@@ -130,6 +144,7 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
     \param numberOfInternalSolvers the number of internal or local 'sub-solvers' used by the solver
     \param internalSolvers pointer to sub-solvers
     \param numericsOptions global options for numerics (verbose mode ...)
+    \param callback a pointer to user Callback
 */
 typedef struct _SolverOptions
 {
@@ -145,6 +160,7 @@ typedef struct _SolverOptions
   int numberOfInternalSolvers;
   struct _SolverOptions * internalSolvers;
   NumericsOptions * numericsOptions;
+  Callback * callback;
 } SolverOptions;
 
 enum SICONOS_NUMERICS_PROBLEM_TYPE

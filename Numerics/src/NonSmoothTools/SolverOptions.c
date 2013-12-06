@@ -289,6 +289,9 @@ void deleteSolverOptions(SolverOptions* op)
     if (op->dWork != NULL)
       free(op->dWork);
     op->dWork = NULL;
+    if (op->callback)
+      // fix callback->env, callback->endIteration ?
+      free(op->callback);
   }
 }
 

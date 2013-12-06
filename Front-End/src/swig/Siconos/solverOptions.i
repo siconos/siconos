@@ -28,7 +28,9 @@
 #enddef
 #endif
 
-
+#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
+  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
+              data, 0, NPY_FARRAY, NULL)
 
 // std python sequence -> C array
 
@@ -198,8 +200,57 @@ static int convert_darray(PyObject *input, double *ptr) {
   npy_intp this_dparam_dim[1];
   this_dparam_dim[0] = arg1->dSize;
 
-  $result = PyArray_SimpleNewFromData(1,this_dparam_dim,NPY_DOUBLE,pdparam);
+  $result = PyArray_SimpleNewFromData(1, this_dparam_dim,NPY_DOUBLE,pdparam);
  }
+
+%fragment("NumPy_Fragments");
+
+%{
+  
+  void endIterationCallback(void *env, 
+                            int size, double*reaction, 
+                            double*velocity, 
+                            double error)
+  {
+      npy_intp dim[1];
+      dim[0] = size;
+      
+      PyObject* py_reaction = FPyArray_SimpleNewFromData(1,dim, 
+                                                         NPY_DOUBLE, 
+                                                         reaction); 
+      
+      PyObject* py_velocity = FPyArray_SimpleNewFromData(1,dim, 
+                                                         NPY_DOUBLE, 
+                                                         velocity);
+      
+      PyObject* py_error = PyFloat_FromDouble(error);
+      
+      PyObject* py_args = PyTuple_New(3);
+      PyTuple_SetItem(py_args, 0, py_reaction);
+      PyTuple_SetItem(py_args, 1, py_velocity);
+      PyTuple_SetItem(py_args, 2, py_error);
+      
+      PyObject* py_out = PyObject_CallObject((PyObject*) env, py_args);
+      
+      /*     Py_DECREF(py_reaction);
+             Py_DECREF(py_velocity);
+             Py_DECREF(py_error);*/
+      Py_DECREF(py_args);
+      Py_DECREF(py_out);
+     
+  };
+  
+%}
+
+
+%typemap(in) (Callback* callback) (Callback* pycallback) { 
+  pycallback = new Callback();
+  pycallback->env = $input;
+  pycallback->endIteration = &endIterationCallback;
+  $1 = pycallback;
+
+ }
+
 
 %{
 #include "SolverOptions.h"

@@ -33,10 +33,6 @@
 //
 //
 // with this macro : ok
-#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
-  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
-              data, 0, NPY_FARRAY, NULL)
-
 
 // copy shared ptr reference in a base PyCObject 
 #define PYARRAY_FROM_SHARED_SICONOS_DATA(TYPE,NDIM,DIMS,NAME,RESULT)    \
