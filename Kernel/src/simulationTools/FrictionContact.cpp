@@ -28,9 +28,8 @@
 using namespace RELATION;
 
 
-FrictionContact::FrictionContact(int dimPb, const int newNumericsSolverId,
-                                 const std::string& newId):
-  LinearOSNS(newNumericsSolverId, "FrictionContact", newId), _contactProblemDim(dimPb)
+FrictionContact::FrictionContact(int dimPb, const int newNumericsSolverId):
+  LinearOSNS(newNumericsSolverId), _contactProblemDim(dimPb)
 {
   if (dimPb == 2 && newNumericsSolverId == SICONOS_FRICTION_3D_NSGS)
     _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
@@ -47,7 +46,7 @@ FrictionContact::FrictionContact(int dimPb, const int newNumericsSolverId,
 
 // xml constructor
 FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
-  LinearOSNS(osNsPbXml, "FrictionContact"), _contactProblemDim(3)
+  LinearOSNS(osNsPbXml), _contactProblemDim(3)
 {
   SP::FrictionContactXML xmlFC = std11::static_pointer_cast<FrictionContactXML>(osNsPbXml);
 

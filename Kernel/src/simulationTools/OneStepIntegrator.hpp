@@ -18,8 +18,8 @@
  */
 /*! \file
 
-Basic class to handle with dynamical system integrators over a time step.
- */
+  Basic class to handle with dynamical system integrators over a time step.
+*/
 
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
@@ -43,158 +43,158 @@ Basic class to handle with dynamical system integrators over a time step.
 class OneStepIntegrator
 {
 protected:
-  /** serialization hooks
-  */
+/** serialization hooks
+ */
   ACCEPT_SERIALIZATION(OneStepIntegrator);
 
 
-  /** type/name of the Integrator */
+/** type/name of the Integrator */
   OSI::TYPES integratorType;
 
-  /** a set of DynamicalSystem to integrate */
+/** a set of DynamicalSystem to integrate */
   SP::DynamicalSystemsSet OSIDynamicalSystems;
 
-  /** size of the memory for the integrator */
+/** size of the memory for the integrator */
   unsigned int _sizeMem;
 
-  /** A link to the simulation that owns this OSI */
+/** A link to the simulation that owns this OSI */
   SP::Simulation simulationLink;
 
-  /** Work map to save state-related data for the dynamical systems of the osi - DSVector: map<DS * , SP::SiconosVector> */
-  //  DSVectors workX;
+/** Work map to save state-related data for the dynamical systems of the osi - DSVector: map<DS * , SP::SiconosVector> */
+//  DSVectors workX;
 
-  /** the corresponding XML object */
+/** the corresponding XML object */
   SP::OneStepIntegratorXML integratorXml;
 
-  /** basic constructor with Id
-   *  \param integrator type/name
-   */
+/** basic constructor with Id
+ *  \param integrator type/name
+ */
   OneStepIntegrator(const OSI::TYPES&);
 
-  /** constructor from xml file
-      \param integrator type/name
-      \param OneStepIntegratorXML* : the corresponding XML object
-      \param the set of all DS in the NSDS
-  */
+/** constructor from xml file
+    \param integrator type/name
+    \param OneStepIntegratorXML* : the corresponding XML object
+    \param the set of all DS in the NSDS
+*/
   OneStepIntegrator(const OSI::TYPES&, SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
-  /** default constructor
-   */
+/** default constructor
+ */
   OneStepIntegrator() {};
 
 private:
 
 
-  /** copy constructor, private, no copy nor pass-by value allowed */
+/** copy constructor, private, no copy nor pass-by value allowed */
   OneStepIntegrator(const OneStepIntegrator&);
 
-  /** assignment (private => forbidden) */
+/** assignment (private => forbidden) */
   OneStepIntegrator& operator=(const OneStepIntegrator&);
 
 public:
 
-  /** destructor
-   */
+/** destructor
+ */
   virtual ~OneStepIntegrator() {};
 
-  // --- GETTERS/SETTERS ---
+// --- GETTERS/SETTERS ---
 
-  /** get the type of the OneStepIntegrator
-   *  \return std::string : the type of the OneStepIntegrator
-   */
+/** get the type of the OneStepIntegrator
+ *  \return std::string : the type of the OneStepIntegrator
+ */
   inline OSI::TYPES getType() const
   {
     return integratorType;
   }
 
-  /** set the type of the OneStepIntegrator
-   *  \return std::string : the type of the OneStepIntegrator
-   */
+/** set the type of the OneStepIntegrator
+ *  \return std::string : the type of the OneStepIntegrator
+ */
   inline void setType(const OSI::TYPES& newType)
   {
     integratorType = newType;
   }
 
-  /** get the set of DynamicalSystem associated with the Integrator
-   *  \return a DynamicalSystemsSet
-   */
+/** get the set of DynamicalSystem associated with the Integrator
+ *  \return a DynamicalSystemsSet
+ */
   inline SP::DynamicalSystemsSet dynamicalSystems() const
   {
     return OSIDynamicalSystems;
   };
 
-  /** gets an iterator to the first element of the OSIDynamicalSystems set.
-   *  \return a DSIterator.
-   */
+/** gets an iterator to the first element of the OSIDynamicalSystems set.
+ *  \return a DSIterator.
+ */
   inline DSIterator dynamicalSystemsBegin()
   {
     return OSIDynamicalSystems->begin();
   };
 
-  /** gets an iterator equal to OSIDynamicalSystems->end().
-   *  \return a DSIterator.
-   */
+/** gets an iterator equal to OSIDynamicalSystems->end().
+ *  \return a DSIterator.
+ */
   inline DSIterator dynamicalSystemsEnd()
   {
     return OSIDynamicalSystems->end();
   };
 
-  /** gets a const iterator to the first element of the OSIDynamicalSystems set.
-   *  \return a ConstDSIterator.
-   */
+/** gets a const iterator to the first element of the OSIDynamicalSystems set.
+ *  \return a ConstDSIterator.
+ */
   inline ConstDSIterator dynamicalSystemsBegin() const
   {
     return OSIDynamicalSystems->begin();
   };
 
-  /** gets a const iterator equal to OSIDynamicalSystems->end().
-   *  \return a ConstDSIterator.
-   */
+/** gets a const iterator equal to OSIDynamicalSystems->end().
+ *  \return a ConstDSIterator.
+ */
   inline ConstDSIterator dynamicalSystemsEnd() const
   {
     return OSIDynamicalSystems->end();
   };
 
-  /** insert a dynamical system in this Integrator
-   *  \param a SP::DynamicalSystem
-   */
+/** insert a dynamical system in this Integrator
+ *  \param a SP::DynamicalSystem
+ */
   virtual void insertDynamicalSystem(SP::DynamicalSystem ds);
 
-  /** get _sizeMem value
-   *  \return an unsigned int
-   */
+/** get _sizeMem value
+ *  \return an unsigned int
+ */
   inline unsigned int getSizeMem() const
   {
     return _sizeMem;
   };
 
-  /** set _sizeMem
-   *  \param newValue an unsigned int
-   */
+/** set _sizeMem
+ *  \param newValue an unsigned int
+ */
   inline void setSizeMem(unsigned int newValue)
   {
     _sizeMem = newValue;
   };
 
-  /** get the Simulation that owns the OneStepIntegrator
-   *  \return a pointer to Simulation
-   */
+/** get the Simulation that owns the OneStepIntegrator
+ *  \return a pointer to Simulation
+ */
   inline SP::Simulation simulation() const
   {
     return simulationLink;
   }
 
-  /** set the Simulation of the OneStepIntegrator
-   *  \param newS a pointer to Simulation
-   */
+/** set the Simulation of the OneStepIntegrator
+ *  \param newS a pointer to Simulation
+ */
   inline void setSimulationPtr(SP::Simulation newS)
   {
     simulationLink = newS;
   }
 
-  /** get the OneStepIntegratorXML of the OneStepIntegrator
-   *  \return a pointer on the OneStepIntegratorXML of the OneStepIntegrator
-   */
+/** get the OneStepIntegratorXML of the OneStepIntegrator
+ *  \return a pointer on the OneStepIntegratorXML of the OneStepIntegrator
+ */
   inline SP::OneStepIntegratorXML oneStepIntegratorXML() const
   {
     return integratorXml;
@@ -209,8 +209,8 @@ public:
   }
 
   /** get workX vector which corresponds to input ds
-   \param a SP::DynamicalSystem
-   \return a SP::SiconosVector
+      \param a SP::DynamicalSystem
+      \return a SP::SiconosVector
   */
   //  SP::SiconosVector getWorkX(SP::DynamicalSystem);
 
@@ -218,7 +218,7 @@ public:
 
   /** initialise the integrator
       \param the simulation that owns this OSI
-   */
+  */
   virtual void initialize() = 0;
 
   /** Save Dynamical Systems data into memory.
@@ -227,7 +227,7 @@ public:
 
   /** return the maximum of all norms for the discretized residus of DS
       \return a double
-   */
+  */
   virtual double computeResidu();
 
   /** integrates the Dynamical System linked to this integrator, without taking constraints
@@ -236,8 +236,8 @@ public:
   virtual void computeFreeState();
 
   /** integrates the Interaction linked to this integrator, without taking constraints
-    * into account.
-    */
+   * into account.
+   */
   virtual void computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
@@ -253,7 +253,7 @@ public:
   void resetNonSmoothPart();
 
   /** set to zero all the r vectors of the DynamicalSystems of the present OSI for a given level
-    */
+   */
   void resetNonSmoothPart(unsigned int level);
 
   /** update the state of the DynamicalSystem attached to this Integrator

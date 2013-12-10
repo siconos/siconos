@@ -46,11 +46,10 @@ using namespace RELATION;
 #include "debug.h"
 
 LinearOSNS::LinearOSNS(): OneStepNSProblem(), _MStorageType(0), _keepLambdaAndYState(true)
-{
-}
+{}
+
 // xml constructor
-LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
-                       const std::string & name) :
+LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml):
   OneStepNSProblem(onestepnspbxml), _MStorageType(0), _keepLambdaAndYState(true)
 {
   // Read storage type if given (optional , default = dense)
@@ -59,9 +58,8 @@ LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
 }
 
 // Constructor from a set of data
-LinearOSNS::LinearOSNS(const int numericsSolverId,  const std::string& name,
-                       const std::string& newId):
-  OneStepNSProblem(newId, numericsSolverId), _MStorageType(0), _keepLambdaAndYState(true)
+LinearOSNS::LinearOSNS(const int numericsSolverId):
+  OneStepNSProblem(numericsSolverId), _MStorageType(0), _keepLambdaAndYState(true)
 {}
 
 // Setters

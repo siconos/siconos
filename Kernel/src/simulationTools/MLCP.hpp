@@ -107,11 +107,11 @@ public:
   MLCP(SP::OneStepNSProblemXML);
 
   /** constructor from data
-  *  \param Solver* pointer to object that contains solver algorithm and formulation \n
+  *  \param id of Numerics solver
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param std::string: id of the problem (default = "unamed")
   */
-  MLCP(const int newNewNumericsSolverId = SICONOS_MLCP_ENUM);
+  MLCP(int newNewNumericsSolverId = SICONOS_MLCP_ENUM);
 
   /** destructor
   */

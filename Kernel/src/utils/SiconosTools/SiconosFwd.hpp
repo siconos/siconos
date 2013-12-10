@@ -1,6 +1,7 @@
 #ifndef SiconosFwd_hpp
 #define SiconosFwd_hpp
 
+#include "SiconosSerialization.hpp"
 #include "SiconosPointers.hpp"
 
 /* Forward declarations */

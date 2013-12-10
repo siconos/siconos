@@ -24,12 +24,6 @@
 #define LinearOSNS_H
 
 #include "OneStepNSProblem.hpp"
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
-#include <time.h>
-
-#include "SiconosFwd.hpp"
-#include "SiconosPointers.hpp"
 
 /** stl vector of double */
 typedef std::vector<double> MuStorage;
@@ -100,18 +94,13 @@ public:
 
   /** xml constructor
       \param onestepnspbxml the XML linked-object
-      \param namens problem type
   */
-  LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml, const std::string& name);
+  LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml);
 
   /** constructor from data
       \param numericsSolverId the numerics_solver identifier
-      \param name the ns problem type
-      \param newId the id of the problem (default = "unamed")
   */
-  LinearOSNS(const int numericsSolverId,
-             const std::string& name,
-             const std::string& newId = "unamed");
+  LinearOSNS(const int numericsSolverId);
 
   /** destructor
    */

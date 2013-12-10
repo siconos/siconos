@@ -26,15 +26,15 @@ using namespace RELATION;
 //#define MLCP_DEBUG
 // xml constructor
 MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
-  LinearOSNS(onestepnspbxml, "MLCP")
+  LinearOSNS(onestepnspbxml)
 {
   _n = 0;
   _m = 0;
 }
 
 // Constructor from a set of data
-MLCP::MLCP(const int newNumericsSolverId):
-  LinearOSNS(newNumericsSolverId, "MLCP", "unnamed")
+MLCP::MLCP(int newNumericsSolverId):
+  LinearOSNS(newNumericsSolverId)
 {
   _numerics_solver_options->solverId = newNumericsSolverId;
   mixedLinearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options);

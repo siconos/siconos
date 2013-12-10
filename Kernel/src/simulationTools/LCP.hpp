@@ -24,11 +24,9 @@
 #define LCP_H
 
 #include "LinearOSNS.hpp"
-#include "OneStepNSProblemXML.hpp"
-
-#define SICONOS_LCP_DEFAULT_SOLVER "Lemke"
-
 TYPEDEF_SPTR(LinearComplementarityProblem)
+class OneStepNSProblemXML;
+
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -90,12 +88,9 @@ public:
   LCP(SP::OneStepNSProblemXML onestepnspbxml);
 
   /** constructor from data
-   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
-   *  (optional, default = NULL => read .opt file in Numerics)
-   *  \param std::string: id of the problem (default = "unamed")
-   */
-  LCP(const int newNewNumericsSolverId = SICONOS_LCP_LEMKE,
-      const std::string& newId = "unamed_lcp");
+      \param int id of numerics solver
+  */
+  LCP(const int newNewNumericsSolverId = SICONOS_LCP_LEMKE);
 
   /** destructor
    */

@@ -73,17 +73,13 @@ public:
   /** xml constructor
    *  \param SP::OneStepNSProblemXML : the XML linked-object
    */
-  Equality(SP::OneStepNSProblemXML onestepnspbxml):
-    LinearOSNS(onestepnspbxml, "Equality") {};
+  Equality(SP::OneStepNSProblemXML onestepnspbxml): LinearOSNS(onestepnspbxml) {};
 
-  /** constructor from data
-   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
-   *  (optional, default = NULL => read .opt file in Numerics)
-   *  \param std::string: id of the problem (default = "unamed")
-   */
-  Equality(const int newNumericsSolverId = 0, const std::string& newId = "unamed_equality"):
-    LinearOSNS(newNumericsSolverId , "Equality", newId) {};
-
+  /** constructor
+      \param int id of numerics solver
+  */
+  Equality(const int newNumericsSolverId = 0): LinearOSNS(newNumericsSolverId) {};
+  
   /** destructor
    */
   ~Equality() {};

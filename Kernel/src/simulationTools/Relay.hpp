@@ -104,14 +104,12 @@ public:
    *  \param SP::OneStepNSProblemXML : the XML linked-object
    */
   Relay(SP::OneStepNSProblemXML onestepnspbxml):
-    LinearOSNS(onestepnspbxml, "Relay") {};
+    LinearOSNS(onestepnspbxml) {};
 
   /** constructor from data
-   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
-   *  (optional, default = NULL => read .opt file in Numerics)
-   *  \param std::string: id of the problem (default = "unamed")
+   *  \param int id of numerics solver
    */
-  Relay(const int newNumericsSolverId = SICONOS_RELAY_LEMKE, const std::string& newId = "unamed_relay");
+  Relay( int newNumericsSolverId = SICONOS_RELAY_LEMKE);
 
   /** destructor
    */

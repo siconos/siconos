@@ -124,7 +124,7 @@ Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta) :
   _theta = newTheta;
 }
 
-// --- constructor from a set of data ---
+// --- constructor with theta parameter value  ---
 Moreau::Moreau(double newTheta):
   OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {

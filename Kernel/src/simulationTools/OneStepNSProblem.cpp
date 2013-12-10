@@ -48,41 +48,10 @@ OneStepNSProblem::OneStepNSProblem():
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 }
 // --- CONSTRUCTORS/DESTRUCTOR ---
+
 // xml constructor
-OneStepNSProblem::OneStepNSProblem(const std::string& pbType,
-                                   SP::OneStepNSProblemXML osnspbxml):
-/*_nspbType(pbType),*/ _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
-  _onestepnspbxml(osnspbxml), _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
-{
-  if (!_onestepnspbxml)
-    RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
-
-  // === get dimension of the problem ===
-  if (_onestepnspbxml->hasDim())
-    _sizeOutput = _onestepnspbxml->getDimNSProblem();
-
-  // === get Id ===
-
-  if (_onestepnspbxml->hasId())
-    _id = _onestepnspbxml->getId();
-
-  if (_onestepnspbxml->hasNumericsSolverName())
-    _id = _onestepnspbxml->getNumericsSolverName();
-
-
-  // Numerics general options
-  _numerics_options.reset(new NumericsOptions());
-  setDefaultNumericsOptions(&*_numerics_options);
-  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
-
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;
-  _numerics_solver_options->dWork = NULL;
-
-  printf("OneStepNSProblem::OneStepNSProblem 1: Depressed inertface, first parameter ignored\n");
-}
 OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
-  _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
+  _sizeOutput(0),
   _onestepnspbxml(osnspbxml), _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
   if (!_onestepnspbxml)
@@ -91,15 +60,6 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
   // === get dimension of the problem ===
   if (_onestepnspbxml->hasDim())
     _sizeOutput = _onestepnspbxml->getDimNSProblem();
-
-  // === get Id ===
-
-  if (_onestepnspbxml->hasId())
-    _id = _onestepnspbxml->getId();
-
-  if (_onestepnspbxml->hasNumericsSolverName())
-    _id = _onestepnspbxml->getNumericsSolverName();
-
 
   // Numerics general options
   _numerics_options.reset(new NumericsOptions());
@@ -112,8 +72,8 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
 
 }
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
-OneStepNSProblem::OneStepNSProblem(const std::string& pbType, const std::string& newId, const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId),/*_nspbType(pbType),*/ _id(newId), _sizeOutput(0),
+OneStepNSProblem::OneStepNSProblem(int newNumericsSolverId):
+  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0),
   _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
@@ -126,38 +86,6 @@ OneStepNSProblem::OneStepNSProblem(const std::string& pbType, const std::string&
   _numerics_solver_options->iWork = NULL;
   _numerics_solver_options->dWork = NULL;
   _numerics_solver_options->solverId = newNumericsSolverId;
-  printf("OneStepNSProblem::OneStepNSProblem 2: Depressed inertface, first parameter ignored, removed it.\n");
-}
-
-OneStepNSProblem::OneStepNSProblem(const std::string& newId, const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId), _id(newId), _sizeOutput(0),
-  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
-{
-
-  // Numerics general options
-  _numerics_options.reset(new NumericsOptions());
-  setDefaultNumericsOptions(&*_numerics_options);
-  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
-
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;
-  _numerics_solver_options->dWork = NULL;
-
-}
-OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0), _indexSetLevel(0), _inputOutputLevel(0),
-  _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
-{
-
-  // Numerics general options
-  _numerics_options.reset(new NumericsOptions());
-  setDefaultNumericsOptions(&*_numerics_options);
-  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
-
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;
-  _numerics_solver_options->dWork = NULL;
-
 }
 
 bool OneStepNSProblem::hasInteractions() const

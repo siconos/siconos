@@ -23,7 +23,7 @@
 
 #ifndef OSITYPES_HPP
 #define OSITYPES_HPP
-
+#include "SiconosFwd.hpp"
 /** Namespace for user-defined types related to relations */
 namespace OSI
 {

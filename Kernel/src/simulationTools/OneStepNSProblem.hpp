@@ -23,16 +23,16 @@
 #ifndef ONESTEPNSPROBLEM_H
 #define ONESTEPNSPROBLEM_H
 
+#include "SiconosFwd.hpp"
 #include "SimulationTypeDef.hpp"
 #include "NumericsOptions.h"
 #include "NumericsMatrix.h"
-#include <ctime>
+//#include <ctime>
 
 class Simulation;
 class DynamicalSystem;
 class Interaction;
 class SiconosMatrix;
-
 TYPEDEF_SPTR(NumericsOptions)
 TYPEDEF_SPTR(SolverOptions)
 
@@ -98,9 +98,6 @@ protected:
   /** Numerics structure used to solve solver options */
   SP::SolverOptions _numerics_solver_options;
 
-  /** id/name of the problem */
-  std::string _id;
-
   /** size of the problem to solve */
   unsigned int _sizeOutput;
 
@@ -139,9 +136,7 @@ protected:
   /*During Newton it, this flag allow to update the numerics matrices only once if necessary.*/
   bool _hasBeenUpdated;
 
-
   // --- CONSTRUCTORS/DESTRUCTOR ---
-
   /** default constructor
    */
   OneStepNSProblem();
@@ -156,27 +151,16 @@ private:
   OneStepNSProblem& operator=(const OneStepNSProblem&);
 
 public:
-  OneStepNSProblem(const int newNumericsSolverId);
-  /** depressed xml constructor
-   *  \param std::string: problem type
-   *  \param SP::OneStepNSProblemXML : the XML linked-object
-   */
-  OneStepNSProblem(const std::string&, SP::OneStepNSProblemXML);
   /**  xml constructor
    *  \param SP::OneStepNSProblemXML : the XML linked-object
    */
   OneStepNSProblem(SP::OneStepNSProblemXML);
-  /** deressed constructor from data
-   *  \param std::string: problem type
-   *  \param std::string : id
-   *  \param int : solver identifier
-   */
-  OneStepNSProblem(const std::string&, const std::string&, const int);
+ 
   /**  constructor from data
-   *  \param std::string : id
-   *  \param std::string : solver identifier
+   *  \param int : id of numerics solver
    */
-  OneStepNSProblem(const std::string&, const int);
+  OneStepNSProblem(int);
+
   /** destructor
    */
   virtual ~OneStepNSProblem();
@@ -199,23 +183,6 @@ public:
   {
     return _numerics_options;
   };
-
-
-  /** to get the id of the OneStepNSProblem
-   *  \return std::string
-   */
-  inline std::string getId() const
-  {
-    return _id;
-  }
-
-  /** set the id of the OneStepNSProblem
-   *  \param: std::string
-   */
-  inline void setId(const std::string& newVal)
-  {
-    _id = newVal;
-  }
 
   /** get dimension of the problem
    *  \return an unsigned ing

@@ -23,7 +23,7 @@
 
 
 QP::QP(SP::OneStepNSProblemXML osnspbxml):
-  OneStepNSProblem("QP", osnspbxml)
+  OneStepNSProblem(osnspbxml)
 {}
 
 QP::~QP()

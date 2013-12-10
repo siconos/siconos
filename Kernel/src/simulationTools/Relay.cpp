@@ -30,8 +30,8 @@
 using namespace RELATION;
 
 
-Relay::Relay(const int newNumericsSolverId , const std::string& newId):
-  LinearOSNS(newNumericsSolverId, "Relay", newId)
+Relay::Relay(int newNumericsSolverId):
+  LinearOSNS(newNumericsSolverId)
 {
   _numerics_problem.reset(new  RelayProblem);
 

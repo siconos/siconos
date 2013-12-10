@@ -24,7 +24,6 @@
 #define Moreau_H
 
 #include "OneStepIntegrator.hpp"
-#include "SimpleMatrix.hpp"
 
 class Simulation;
 class SiconosMatrix;
@@ -89,11 +88,11 @@ protected:
    */
   double _gamma;
 
-  /** a boolean to known is the parameter must be used or not
+  /** a boolean to know if the parameter must be used or not
    */
   bool _useGamma;
 
-  /** a boolean to known is the parameter must be used or not
+  /** a boolean to know if the parameter must be used or not
    */
   bool _useGammaForRelation;
 
@@ -101,7 +100,6 @@ protected:
    */
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
-
 
 
   /** Default constructor
@@ -123,7 +121,7 @@ public:
   Moreau(SP::DynamicalSystem, double);
 
   /** constructor from theta value only
-   *  \param theta value for all these DS.
+   *  \param theta value for all DS.
    */
   Moreau(double);
 

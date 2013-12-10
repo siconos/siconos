@@ -18,16 +18,15 @@
  */
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
-
+#include "OneStepNSProblemXML.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1
 #include "debug.h"
 
-
 using namespace RELATION;
 
 LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml) :
-  LinearOSNS(onestepnspbxml, "LCP")
+  LinearOSNS(onestepnspbxml)
 {
 
   if (onestepnspbxml->hasNumericsSolverName())
@@ -40,16 +39,12 @@ LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml) :
   linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
 }
 
-LCP::LCP(const int newNewNumericsSolverId , const std::string& newId):
-  LinearOSNS(newNewNumericsSolverId, "LCP", newId)
+LCP::LCP(const int newNewNumericsSolverId):
+  LinearOSNS(newNewNumericsSolverId)
 {
-  _numerics_problem.reset(new  LinearComplementarityProblem);
-
-
+  _numerics_problem.reset(new LinearComplementarityProblem);
   linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
-
 }
-
 
 int LCP::compute(double time)
 {
