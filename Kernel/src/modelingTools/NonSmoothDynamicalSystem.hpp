@@ -25,7 +25,6 @@
 //enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 
 #include "SiconosPointers.hpp"
-#include "InteractionsSet.hpp"
 #include "DynamicalSystemsSet.hpp"
 #include "Topology.hpp"
 class Interaction;
@@ -129,16 +128,8 @@ public:
    */
   inline unsigned int getNumberOfInteractions() const
   {
-    return _topology->interactions()->size();
+    return _topology->indexSet0()->size();
   };
-
-  /** get all the Interactions of the NonSmoothDynamicalSystem problem (saved in a set)
-   *  \return an InteractionsSet *
-   */
-  inline const SP::InteractionsSet interactions() const
-  {
-    return _topology->interactions();
-  }
 
   /** remove an interaction to the system
    * \param inter a pointer to the interaction to remove

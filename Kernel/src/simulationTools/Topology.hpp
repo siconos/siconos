@@ -24,8 +24,6 @@
 #define TOPOLOGY_H
 
 #include "SiconosConst.hpp"
-#include "InteractionsSet.hpp"
-//#include "InteractionsSet.hpp"
 #include "SimulationTypeDef.hpp"
 
 class NonSmoothDynamicalSystem;
@@ -74,10 +72,6 @@ private:
 
 
   // --- MEMBERS ---
-
-  /** the set of all the interactions of the system */
-  SP::InteractionsSet _allInteractions;
-
   /** dynamical systems graphs */
   std::vector<SP::DynamicalSystemsGraph> _DSG;
 
@@ -136,14 +130,6 @@ public:
 
 
   // === GETTERS/SETTERS ===
-
-  /** get all the Interactions of the Topology problem (saved in a set)
-  *  \return an InteractionsSet
-  */
-  inline const SP::InteractionsSet interactions() const
-  {
-    return _allInteractions;
-  }
 
   /** check if Interaction inter is in the set
    *  \param inter an Interaction

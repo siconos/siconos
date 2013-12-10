@@ -73,7 +73,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
   // ===  The same process is applied for Interactions ===
   SetOfInteractionsXML  interactionsList = _nsdsxml->getInteractionsXML();
   SetOfInteractionsXMLIt it2;
-  CheckInsertInteraction checkInter;
 
   for (it2 = interactionsList.begin(); it2 != interactionsList.end(); ++it2)
   {
@@ -124,10 +123,13 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");
     }
 
-    InteractionsIterator it2;
-    for (it2 = _topology->interactions()->begin();
-         it2 != interactions()->end(); ++it2)
-      (*it2)->saveInteractionToXML();
+    // Note FP: we must use interactions graph rather than set.
+    // The following lines are obsolete and will be updated when xml
+    // will be pushed to python front-end. 
+    // InteractionsIterator it2;
+    // for (it2 = _topology->interactions()->begin();
+    //      it2 != interactions()->end(); ++it2)
+    //   (*it2)->saveInteractionToXML();
   }
   else RuntimeException::
     selfThrow("NonSmoothDynamicalSystem::saveNSDSToXML - The NonSmoothDynamicalSystemXML object doesn't exists");
@@ -138,7 +140,7 @@ void NonSmoothDynamicalSystem::display() const
   std::cout << " ===== Non Smooth Dynamical System display ===== " <<std::endl;
   std::cout << "---> isBVP = " << _BVP <<std::endl;
   dynamicalSystems()->begin();
-  _topology->interactions()->display();
+  _topology->indexSet0()->display();
   std::cout << "===================================================" <<std::endl;
 }
 

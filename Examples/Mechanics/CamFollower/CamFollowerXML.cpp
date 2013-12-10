@@ -60,6 +60,11 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
     DataPlot(k, 0) = t0;
+    SP::Interaction inter;
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0 = CamFollower->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+      inter = indexSet0->bundle(*ui);
 
     // state q for the Follower
     SP::LagrangianDS Follower = std11::static_pointer_cast<LagrangianDS> (CamFollower->nonSmoothDynamicalSystem()->dynamicalSystem(1));
@@ -68,7 +73,7 @@ int main(int argc, char* argv[])
     // Velocity for the Follower
     DataPlot(k, 2) = ((*Follower->velocity()))(0);
     // Reaction
-    DataPlot(k, 3) = (*CamFollower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(0);
+    DataPlot(k, 3) = (*inter->lambda(1))(0);
     // External Forcing
     DataPlot(k, 4) = ((*Follower->fExt()))(0);
 
@@ -83,8 +88,7 @@ int main(int argc, char* argv[])
     DataPlot(k, 6) = CamVelocity;
     // Acceleration of the Cam
     DataPlot(k, 7) = CamPosition + ((*Follower->q()))(0);
-
-
+    
     // --- Compute elapsed time ---
     boost::timer tt;
     tt.restart();
@@ -102,10 +106,9 @@ int main(int argc, char* argv[])
       DataPlot(k, 0) = S->nextTime();
       //  DataPlot(k, 1) = ((*Follower->q()))(0);
       //  DataPlot(k, 2) = ((*ball->velocity()))(0);
-      //  DataPlot(k, 3) = (bouncingBall.nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
       DataPlot(k, 1) = ((*Follower->q()))(0);
       DataPlot(k, 2) = ((*Follower->velocity()))(0);
-      DataPlot(k, 3) = (*CamFollower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(0);
+      DataPlot(k, 3) = (*inter->lambda(1))(0);
       DataPlot(k, 4) = ((*Follower->fExt()))(0);
 
       CamEqForce = CamState(S->nextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);

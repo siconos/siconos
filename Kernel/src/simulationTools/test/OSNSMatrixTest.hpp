@@ -64,7 +64,7 @@ private:
 
   unsigned int n;
   double tol;
-  SP::InteractionsSet indexSet;
+  SP::InteractionsGraph indexSet;
   MapOfMapOfInteractionMatrices blocks;
   Model * temp ;
 public:

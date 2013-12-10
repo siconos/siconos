@@ -25,10 +25,8 @@
 
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
-#include "InteractionsSet.hpp"
 #include "EventsManager.hpp"
 #include "SiconosPointers.hpp"
-#include "InteractionsSet.hpp"
 #include "DynamicalSystemsSet.hpp"
 #include <fstream>
 #include "Model.hpp"
@@ -204,10 +202,8 @@ public:
       \param initial time
       \param final time
       \param the set of all DS in the NSDS
-      \param the set of all interactions in the NSDS
   */
-  Simulation(SP::SimulationXML, double, double, SP::DynamicalSystemsSet,
-             SP::InteractionsSet);
+  Simulation(SP::SimulationXML, double, double, SP::DynamicalSystemsSet);
 
   /** destructor
    */
@@ -378,7 +374,7 @@ public:
   void addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator osi);
 
   /** get a pointer to indexSets[i]
-   *  \return a InteractionsSet
+   *  \return a graph of interactions
    */
   SP::InteractionsGraph indexSet(unsigned int i)
   {

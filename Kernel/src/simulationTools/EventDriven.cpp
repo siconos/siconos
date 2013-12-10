@@ -44,9 +44,8 @@ using namespace RELATION;
 
 // --- XML constructor ---
 EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
-                         SP::DynamicalSystemsSet dsList,
-                         SP::InteractionsSet interList):
-  Simulation(strxml, t0, T, dsList, interList), _istate(1)
+                         SP::DynamicalSystemsSet dsList):
+  Simulation(strxml, t0, T, dsList), _istate(1)
 {
   // === One Step NS Problem === We read data in the xml output
   // (mainly Interactions concerned and solver) and assign them to
@@ -458,7 +457,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   // solve a LCP at "acceleration" level if required
   if (!_allNSProblems->empty())
   {
-    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->interactions())->isEmpty())
+    if (((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions()))
     {
       // Update the state of the DS
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t);
@@ -583,7 +582,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   model()->setCurrentTime(t);
   if (!_allNSProblems->empty())
   {
-    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->interactions())->isEmpty())
+    if (((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions()))
     {
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t);
     }
@@ -822,7 +821,7 @@ void EventDriven::advanceToEvent()
       if (!_allNSProblems->empty())
       {
         // Solve LCP at acceleration level
-        if (!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->interactions())->isEmpty())
+        if (((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions()))
         {
           SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
           if (indexSet2->size() != 0)

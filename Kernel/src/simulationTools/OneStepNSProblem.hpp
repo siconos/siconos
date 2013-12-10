@@ -23,7 +23,6 @@
 #ifndef ONESTEPNSPROBLEM_H
 #define ONESTEPNSPROBLEM_H
 
-#include "InteractionsSet.hpp"
 #include "SimulationTypeDef.hpp"
 #include "NumericsOptions.h"
 #include "NumericsMatrix.h"
@@ -250,11 +249,6 @@ public:
     _simulation = newS;
   }
 
-  /** get the Interactions set
-   *  \return an InteractionsSet
-   */
-  SP::InteractionsSet interactions() const;
-
   /** get indexSetLevel
    *  \return an unsigned int
    */
@@ -336,6 +330,10 @@ public:
     _CPUtime = 0;
     _nbIter = 0;
   };
+
+  /** Check if the OSNSPb has interactions.
+   */
+  bool hasInteractions() const;
 
   /** display stat. info (CPU time and nb of iterations achieved)
    */

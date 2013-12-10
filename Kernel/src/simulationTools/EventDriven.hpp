@@ -116,9 +116,8 @@ public:
     \param initial time
     \param final time
     \param the set of all DS in the NSDS
-    \param the set of all interactions in the NSDS
     */
-  EventDriven(SP::SimulationXML, double, double, SP::DynamicalSystemsSet , SP::InteractionsSet);
+  EventDriven(SP::SimulationXML, double, double, SP::DynamicalSystemsSet);
 
   /** defaut constructor (needed for serialization)
   */

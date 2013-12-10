@@ -66,7 +66,7 @@ SimulationTools = [ 'Event', 'EventDriven', 'FrictionContact', 'LCP', 'LinearOSN
 
 siconos_classes = Utils + Model + ModelingTools + SimulationTools
 
-siconos_declarations = [ 'Plugged_Vector_FTime', 'Plugged_Matrix_FTime', 'InteractionsSet', 'DynamicalSystemsSet' ]
+siconos_declarations = [ 'Plugged_Vector_FTime', 'Plugged_Matrix_FTime', 'DynamicalSystemsSet' ]
 
 siconos_templates = [ ]
 

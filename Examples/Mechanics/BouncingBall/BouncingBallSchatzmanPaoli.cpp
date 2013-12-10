@@ -126,7 +126,6 @@ int main(int argc, char* argv[])
     cout << "====> Initialisation ..." << endl << endl;
     bouncingBall->initialize(s);
 
-    OSI->interactions()->display();
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---

@@ -51,8 +51,6 @@ Topology::Topology(): _isTopologyUpToDate(false), _hasChanged(true),
 
   _IG[0]->update_vertices_indices();
   _IG[0]->update_edges_indices();
-
-  _allInteractions.reset(new InteractionsSet());
 }
 
 // destructor
@@ -68,11 +66,6 @@ Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds
   //
   // Add inter and ds into IG/DSG
 
-  // !!!! Note FP : OBSOLETE !!!
-  assert(_allInteractions);
-  _allInteractions->insert(inter);
-  // !!!! WILL BE REMOVED SOON ...!!!
-  
   // Compute number of constraints
   unsigned int nsLawSize = inter->nonSmoothLaw()->size();
   unsigned int m = inter->getSizeOfY() / nsLawSize;
@@ -201,12 +194,8 @@ void Topology::setControlProperty(SP::Interaction inter,
 
 void Topology::removeInteraction(SP::Interaction inter)
 {
-  assert(_allInteractions);
   assert(_DSG[0]->edges_number() == _IG[0]->size());
-
-  _allInteractions->erase(inter);
   removeInteractionFromIndexSet(inter);
-
   assert(_DSG[0]->edges_number() == _IG[0]->size());
 }
 
@@ -220,10 +209,8 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
 {
   // interactions should not know linked dynamical systems in the
   // future
-  InteractionsIterator it = _allInteractions->find(inter);
-  if (it != _allInteractions->end())
+  if (indexSet0()->is_vertex(inter))
   {
-    _allInteractions->erase(*it);
     removeInteractionFromIndexSet(inter);
   }
 
@@ -237,7 +224,7 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
 
 bool Topology::hasInteraction(SP::Interaction inter) const
 {
-  return _allInteractions->isIn(inter);
+  return indexSet0()->is_vertex(inter);
 }
 
 void Topology::initialize()
@@ -272,8 +259,6 @@ void Topology::setProperties()
 
 void Topology::clear()
 {
-  _allInteractions->clear();
-
   _IG.clear();
   _DSG.clear();
 

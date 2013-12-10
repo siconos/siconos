@@ -62,9 +62,6 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
-    // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
-
     // --- DS: manipulator arm ---
 
     // The dof are angles between ground and arm and between differents parts of the arm. (See corresponding .pdf for more details)
@@ -110,8 +107,6 @@ int main(int argc, char* argv[])
     arm->setComputeJacobianFIntqFunction("Two-linkMultiPlugin", "jacobFintQ");
     arm->setzPtr(z);
 
-    allDS.insert(arm);
-
     // -------------------
     // --- Interactions---
     // -------------------
@@ -119,15 +114,13 @@ int main(int argc, char* argv[])
     //  - one with Lagrangian non linear relation to define contact with ground
     //  Both with newton impact nslaw.
 
-    InteractionsSet allInteractions;
-
     // -- relations --
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("Two-linkMultiPlugin:h0", "Two-linkMultiPlugin:G0"));
-    SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
+    SP::Interaction inter(new Interaction(2, nslaw, relation));
     SP::Relation relation0(new LagrangianScleronomousR("Two-linkMultiPlugin:h3", "Two-linkMultiPlugin:G3"));
-    SP::Interaction inter0(new Interaction("wall-arm", allDS, 1, 2, nslaw, relation0));
+    SP::Interaction inter0(new Interaction(2, nslaw, relation0));
 
     SimpleMatrix H1(2, 2);
     SiconosVector b1(2);
@@ -140,7 +133,7 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
     SP::Relation relation1(new LagrangianLinearTIR(H1, b1));
-    SP::Interaction inter1(new Interaction("floor-arm2", allDS, 2, 2, nslaw2, relation1));
+    SP::Interaction inter1(new Interaction(2, nslaw2, relation1));
 
     SimpleMatrix H2(2, 2);
     SiconosVector b2(2);
@@ -153,24 +146,21 @@ int main(int argc, char* argv[])
 
 
     SP::Relation relation2(new LagrangianLinearTIR(H2, b2));
-    SP::Interaction inter2(new Interaction("singular-points", allDS, 3, 2, nslaw2, relation2));
-
-    allInteractions.insert(inter);
-    allInteractions.insert(inter0);
-    allInteractions.insert(inter1);
-    allInteractions.insert(inter2);
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // -------------------------------
-
-    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
+    SP::Interaction inter2(new Interaction( 2, nslaw2, relation2));
 
     // -------------
     // --- Model ---
     // -------------
 
     SP::Model Manipulator(new Model(t0, T));
-    Manipulator->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    // add the dynamical system in the non smooth dynamical system
+    Manipulator->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
+
+    // link the interaction and the dynamical system
+    Manipulator->nonSmoothDynamicalSystem()->link(inter, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter0, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter1, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter2, arm);
 
     // ----------------
     // --- Simulation ---

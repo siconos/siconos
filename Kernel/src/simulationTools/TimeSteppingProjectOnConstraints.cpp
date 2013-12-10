@@ -133,7 +133,6 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
   bool runningProjection = false;
   _nbProjectionIteration = 0;
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++){
   //   double criteria = (*it)->relation()->y(0)->getValue(0);
   //   if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
@@ -524,8 +523,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
   int info = 0;
   //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-
+  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   computeInitialResidu();
 
   if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
@@ -536,7 +534,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     computeFreeState();
     // updateOutput(0);
     // updateIndexSets();
-    if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+    if (!_allNSProblems->empty() &&  indexSet->size()>0)
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutputProjectOnConstraints)
@@ -547,7 +545,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     update(_levelMaxForInput);
 
     //isNewtonConverge = newtonCheckConvergence(criterion);
-    if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+    if (!_allNSProblems->empty() &&   indexSet->size()>0)
       saveYandLambdaInOldVariables();
   }
 
@@ -570,7 +568,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 
       // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
       // is also relevant here.
-      if (!_allNSProblems->empty() && !allInteractions->isEmpty())
+      if (!_allNSProblems->empty() && indexSet->size()>0)
       {
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
       }
@@ -586,7 +584,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {
-        if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+        if (!_allNSProblems->empty() &&  indexSet->size()>0)
           saveYandLambdaInOldVariables();
       }
     }

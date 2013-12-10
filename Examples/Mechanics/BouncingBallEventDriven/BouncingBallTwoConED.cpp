@@ -52,7 +52,6 @@ int main(int argc, char* argv[])
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
-    DynamicalSystemsSet allDS;
     cout << "====> Model loading ..." << endl << endl;
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
@@ -71,7 +70,6 @@ int main(int argc, char* argv[])
     (*weight)(0) = -m * g;
     ball->setFExtPtr(weight);
     //
-    allDS.insert(ball);
     // --------------------
     // --- Interactions ---
     // --------------------
@@ -80,7 +78,6 @@ int main(int argc, char* argv[])
     double e = 0.8; // Warning this example does not work with e=0.0
 
     // Interaction ball-floor-ceiling
-    InteractionsSet allInteractions;
     //
     SP::SiconosMatrix H1(new SimpleMatrix(1, nDof));
     (*H1)(0, 0) = 1.0;
@@ -95,13 +92,10 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw  nslaw(new NewtonImpactNSL(e));
     // Interaction at contact 1 (ball-floor)
     SP::Relation relation1(new LagrangianLinearTIR(H1, E1));
-    SP::Interaction inter1(new Interaction("contact1", allDS, 1, 1, nslaw, relation1));
+    SP::Interaction inter1(new Interaction(1, nslaw, relation1));
     // Interaction at contact 2 (ball-ceiling)
     SP::Relation relation2(new LagrangianLinearTIR(H2, E2));
-    SP::Interaction inter2(new Interaction("contact2", allDS, 2, 1, nslaw, relation2));
-    // Interactions for the whole dynamical system
-    allInteractions.insert(inter1);
-    allInteractions.insert(inter2);
+    SP::Interaction inter2(new Interaction(1, nslaw, relation2));
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
@@ -110,7 +104,13 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model bouncingBall(new Model(t0, T, allDS, allInteractions));
+    SP::Model bouncingBall(new Model(t0, T));
+    // add the dynamical system in the non smooth dynamical system
+    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+
+    // link the interaction and the dynamical system
+    bouncingBall->nonSmoothDynamicalSystem()->link(inter1, ball);
+    bouncingBall->nonSmoothDynamicalSystem()->link(inter2, ball);
 
     // ----------------
     // --- Simulation ---
@@ -130,9 +130,9 @@ int main(int argc, char* argv[])
     SP::EventDriven s(new EventDriven(t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
-    s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_ACCELERATION);
+    s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
     cout << "SICONOS_OSNSP_ED_IMPACT: " << SICONOS_OSNSP_ED_IMPACT << endl;
-    cout << "SICONOS_OSNSP_ED_ACCELERATION :" << SICONOS_OSNSP_ED_ACCELERATION << endl;
+    cout << "SICONOS_OSNSP_ED_ACCELERATION :" << SICONOS_OSNSP_ED_SMOOTH_ACC << endl;
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
     boost::progress_display show_progress(N);
     s->setPrintStat(true);
     //    s->setTolerance(1e-10);
-    while (k < N)
+    while (s->hasNextEvent())
     {
       s->advanceToEvent(); // run simulation from one event to the next
       if (eventsManager->nextEvent()->getType() == 2)

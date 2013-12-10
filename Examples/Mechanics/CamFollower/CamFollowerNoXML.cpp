@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     DataPlot(k, 0) = t0;
     DataPlot(k, 1) = (*lds->q())(0);
     DataPlot(k, 2) = (*lds->velocity())(0);
-    DataPlot(k, 3) = (*Follower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+    DataPlot(k, 3) = (*inter->lambda(1))(0);
     DataPlot(k, 4) = (*lds->fExt())(0);
 
     // State of the Cam
@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
       DataPlot(k, 0) = S->nextTime();
       DataPlot(k, 1) = (*lds->q())(0);
       DataPlot(k, 2) = (*lds->velocity())(0);
-      DataPlot(k, 3) = (*Follower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+      DataPlot(k, 3) = (*inter->lambda(1))(0);
       DataPlot(k, 4) = (*lds->fExt())(0);
 
       CamEqForce = CamState(S->nextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);

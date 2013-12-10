@@ -279,34 +279,36 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     unsigned int level;
     InteractionsIterator it;
-    for (it = topo->interactions()->begin();
-         it != topo->interactions()->end(); it++)
+    SP::Interaction inter;
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-
-      (*it)->computeOutput(0);
-      (*it)->computeOutput(1);
-      //  (*it)->swapInMemory();
+      inter = indexSet0->bundle(*ui);
+      inter->computeOutput(0);
+      inter->computeOutput(1);
+      //  inter->swapInMemory();
 
       level = 0;
 
-      assert((*it)->lowerLevelForOutput() <= level);
-      assert((*it)->upperLevelForOutput() >= level);
+      assert(inter->lowerLevelForOutput() <= level);
+      assert(inter->upperLevelForOutput() >= level);
 
-      std::cout << "(*it)->getSizeOfDS()" << (*it)->getSizeOfDS()     << std::endl;
-      std::cout << "(*it)->y(" << level << ")"   << std::endl;
-      (*it)->y(level)->display();
-      std::cout << "(*it)->y_k(" << level << ")"   << std::endl;
-      (*it)->y_k(level)->display();
+      std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      std::cout << "inter->y(" << level << ")"   << std::endl;
+      inter->y(level)->display();
+      std::cout << "inter->y_k(" << level << ")"   << std::endl;
+      inter->y_k(level)->display();
 
 
       level = 1;
-      assert((*it)->lowerLevelForOutput() <= level);
-      assert((*it)->upperLevelForOutput() >= level);
-      std::cout << "(*it)->getSizeOfDS()" << (*it)->getSizeOfDS()     << std::endl;
-      std::cout << "(*it)->y(" << level << ")"   << std::endl;
-      (*it)->y(level)->display();
-      std::cout << "(*it)->y_k(" << level << ")"   << std::endl;
-      (*it)->y_k(level)->display();
+      assert(inter->lowerLevelForOutput() <= level);
+      assert(inter->upperLevelForOutput() >= level);
+      std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      std::cout << "inter->y(" << level << ")"   << std::endl;
+      inter->y(level)->display();
+      std::cout << "inter->y_k(" << level << ")"   << std::endl;
+      inter->y_k(level)->display();
     }
 
 #endif
@@ -329,39 +331,30 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
     std::cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
     std::cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
-    for (it = topo->interactions()->begin();
-         it != topo->interactions()->end(); it++)
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
     {
       level = 0;
 
-      assert((*it)->lowerLevelForOutput() <= level);
-      assert((*it)->upperLevelForOutput() >= level);
+      assert(inter->lowerLevelForOutput() <= level);
+      assert(inter->upperLevelForOutput() >= level);
 
-      std::cout << "(*it)->getSizeOfDS()" << (*it)->getSizeOfDS()     << std::endl;
-      std::cout << "(*it)->y(" << level << ")"   << std::endl;
-      (*it)->y(level)->display();
-      std::cout << "(*it)->y_k(" << level << ")"   << std::endl;
-      (*it)->y_k(level)->display();
+      std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      std::cout << "inter->y(" << level << ")"   << std::endl;
+      inter->y(level)->display();
+      std::cout << "inter->y_k(" << level << ")"   << std::endl;
+      inter->y_k(level)->display();
 
 
       level = 1;
-      assert((*it)->lowerLevelForOutput() <= level);
-      assert((*it)->upperLevelForOutput() >= level);
-      std::cout << "(*it)->getSizeOfDS()" << (*it)->getSizeOfDS()     << std::endl;
-      std::cout << "(*it)->y(" << level << ")"   << std::endl;
-      (*it)->y(level)->display();
-      std::cout << "(*it)->y_k(" << level << ")"   << std::endl;
-      (*it)->y_k(level)->display();
-    }
-    for (it = topo->interactions()->begin();
-         it != topo->interactions()->end(); it++)
-    {
-      assert((*it)->lowerLevelForOutput() <= level);
-      assert((*it)->upperLevelForOutput() >= level);
-      std::cout << "(*it)->y(" << level << ")"   << std::endl;
-      (*it)->y(level)->display();
-      std::cout << "(*it)->y_k(" << level << ")"   << std::endl;
-      (*it)->y_k(level)->display();
+      assert(inter->lowerLevelForOutput() <= level);
+      assert(inter->upperLevelForOutput() >= level);
+      std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      std::cout << "inter->y(" << level << ")"   << std::endl;
+      inter->y(level)->display();
+      std::cout << "inter->y_k(" << level << ")"   << std::endl;
+      inter->y_k(level)->display();
     }
 #endif
 
@@ -605,30 +598,30 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     }
 
     level = 0;
-    for (it = topo->interactions()->begin();
-         it != topo->interactions()->end(); it++)
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      assert((*it)->lowerLevelForOutput() <= level);
-      assert((*it)->upperLevelForOutput() >= level);
-      (*it)->computeOutput(0);
-      (*it)->computeOutput(1);
-      std::cout << "(*it)->getSizeOfDS()" << (*it)->getSizeOfDS()     << std::endl;
-      std::cout << "(*it)->y(" << level << ")"   << std::endl;
-      (*it)->y(level)->display();
-      std::cout << "(*it)->y_k(" << level << ")"   << std::endl;
-      (*it)->y_k(level)->display();
+      inter =indexSet0->bundle(*ui);
+      assert(inter->lowerLevelForOutput() <= level);
+      assert(inter->upperLevelForOutput() >= level);
+      inter->computeOutput(0);
+      inter->computeOutput(1);
+      std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      std::cout << "inter->y(" << level << ")"   << std::endl;
+      inter->y(level)->display();
+      std::cout << "inter->y_k(" << level << ")"   << std::endl;
+      inter->y_k(level)->display();
     }
     level = 1;
-    for (it = topo->interactions()->begin();
-         it != topo->interactions()->end(); it++)
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      assert((*it)->lowerLevelForOutput() <= level);
-      assert((*it)->upperLevelForOutput() >= level);
-      std::cout << "(*it)->getSizeOfDS()" << (*it)->getSizeOfDS()     << std::endl;
-      std::cout << "(*it)->y(" << level << ")"   << std::endl;
-      (*it)->y(level)->display();
-      std::cout << "(*it)->y_k(" << level << ")"   << std::endl;
-      (*it)->y_k(level)->display();
+      inter =indexSet0->bundle(*ui);
+      assert(inter->lowerLevelForOutput() <= level);
+      assert(inter->upperLevelForOutput() >= level);
+      std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      std::cout << "inter->y(" << level << ")"   << std::endl;
+      inter->y(level)->display();
+      std::cout << "inter->y_k(" << level << ")"   << std::endl;
+      inter->y_k(level)->display();
     }
 
 #endif

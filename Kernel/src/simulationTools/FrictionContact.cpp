@@ -108,8 +108,7 @@ void FrictionContact::initialize(SP::Simulation sim)
   // If the topology is TimeInvariant ie if M structure does not
   // change during simulation:
 
-  //if( !topology->hasChanged() &&   !interactions()->isEmpty())
-  if (!topology->interactions()->isEmpty())
+  if (topology->indexSet0()->size()>0)
   {
     // Get index set from Simulation
     SP::InteractionsGraph indexSet =

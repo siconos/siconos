@@ -111,8 +111,8 @@ double D1MinusLinear::computeResidu()
   // Note FP : we must use graph rather than InteractionSet. I have update all the code
   // in this file by replacing allInteractions calls with proper call to indexSet0.
   // So it produces the same results as before my changes.
-  // Anyway, I think that in some place it will be better to call indexSet2? 
-  //SP::InteractionsSet allInteractions = simulationLink->model()->nonSmoothDynamicalSystem()->interactions(); // all Interactions
+  // Anyway, I think that in some place it will be better to call indexSet2 rather than indexSet0 as it was done in
+  // the original code?
   
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
@@ -245,9 +245,8 @@ double D1MinusLinear::computeResidu()
         }
       }
       assert((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]);
-      assert((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions());
 
-      if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions()->isEmpty())) // it should be equivalent to indexSet2
+      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())) // it should be equivalent to indexSet2
       {
         DEBUG_PRINT("We compute lambda^+_{k} \n");
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
@@ -620,7 +619,7 @@ double D1MinusLinear::computeResidu()
         }
       }
 
-      if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions())->isEmpty())
+      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions()))
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
         DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display(););
@@ -1034,7 +1033,7 @@ bool D1MinusLinear::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   // double h = simulationLink->timeStep();
 
   double y = 0.0;
-  double yOld ;
+  double yOld =0.0;
   SP::Relation r = inter->relation();
   RELATION::TYPES relationType = r->getType();
   SP::LagrangianDS lds;
@@ -1276,9 +1275,8 @@ double D1MinusLinear::computeResidu()
         }
       }
       assert((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]);
-      assert((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions());
 
-      if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions()->isEmpty())) // it should be equivalent to indexSet2
+      if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteraction())) // it should be equivalent to indexSet2
       {
         DEBUG_PRINT("We compute lambda^+_{k} \n");
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
@@ -1579,7 +1577,7 @@ double D1MinusLinear::computeResidu()
       }
     }
     
-    if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions())->isEmpty())
+    if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteraction())
     {
       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
       DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display(););

@@ -46,6 +46,11 @@ int main(int argc, char* argv[])
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N + 1, 5);
+    SP::Interaction inter;
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0 = oscillator->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+      inter = indexSet0->bundle(*ui);
 
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
@@ -56,8 +61,8 @@ int main(int argc, char* argv[])
     dataPlot(k, 1) = ((*oscillo->q()))(0);
     // velocity for the oscillo
     dataPlot(k, 2) = ((*oscillo->velocity()))(0);
-    dataPlot(k, 3) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(0);
-    dataPlot(k, 4) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(1);
+    dataPlot(k, 3) = (*inter->lambda(1))(0);
+    dataPlot(k, 4) = (*inter->lambda(1))(1);
 
     // --- Compute elapsed time ---
     boost::timer tt;
@@ -79,8 +84,8 @@ int main(int argc, char* argv[])
       // Oscillo: velocity
       dataPlot(k, 2) = ((*oscillo->velocity()))(0);
 
-      dataPlot(k, 3) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(0);
-      dataPlot(k, 4) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(1);
+      dataPlot(k, 3) = (*inter->lambda(1))(0);
+      dataPlot(k, 4) = (*inter->lambda(1))(1);
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
     }

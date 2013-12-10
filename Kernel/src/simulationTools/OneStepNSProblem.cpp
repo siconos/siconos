@@ -160,6 +160,11 @@ OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
 
 }
 
+bool OneStepNSProblem::hasInteractions() const
+{
+  return _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0)->size() > 0 ;
+}
+
 void OneStepNSProblem::updateInteractionBlocks()
 {
   // The present functions checks various conditions and possibly
@@ -430,14 +435,6 @@ void OneStepNSProblem::updateInteractionBlocks()
 
 
 }
-
-SP::InteractionsSet OneStepNSProblem::interactions() const
-{
-  // This function should be removed in the future .... or use interactions graph
-  return _simulation->model()->nonSmoothDynamicalSystem()->interactions();
-}
-
-
 
 void OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet)
 {

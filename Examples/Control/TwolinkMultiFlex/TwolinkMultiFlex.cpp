@@ -61,9 +61,6 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
-    // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
-
     // --- DS: manipulator arm ---
 
     // The dof are angles between ground and arm and between differents parts of the arm. (See corresponding .pdf for more details)
@@ -116,41 +113,32 @@ int main(int argc, char* argv[])
     arm->setComputeJacobianFIntqFunction("TwolinkMultiFlexPlugin", "jacobFintQ");
     arm->setzPtr(z);
 
-    allDS.insert(arm);
-
     // -------------------
     // --- Interactions---
     // -------------------
 
     //  - one with Lagrangian non linear relation to define contact with ground
     //  Both with newton impact nslaw.
-
-    InteractionsSet allInteractions;
-
     // -- relations --
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h0", "TwolinkMultiFlexPlugin:G0"));
-    SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
+    SP::Interaction inter(new Interaction(2, nslaw, relation));
     SP::Relation relation0(new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h3", "TwolinkMultiFlexPlugin:G3"));
-    SP::Interaction inter0(new Interaction("wall-arm", allDS, 1, 2, nslaw, relation0));
-
-
-    allInteractions.insert(inter);
-    allInteractions.insert(inter0);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // -------------------------------
-
-    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
+    SP::Interaction inter0(new Interaction(2, nslaw, relation0));
 
     // -------------
     // --- Model ---
     // -------------
 
     SP::Model Manipulator(new Model(t0, T));
-    Manipulator->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+   // add the dynamical system in the non smooth dynamical system
+    Manipulator->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
+
+    // link the interaction and the dynamical system
+    Manipulator->nonSmoothDynamicalSystem()->link(inter, arm);
+    // link the interaction and the dynamical system
+    Manipulator->nonSmoothDynamicalSystem()->link(inter0, arm);
 
     // ----------------
     // --- Simulation ---

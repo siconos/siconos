@@ -93,7 +93,6 @@ void MLCP2::updateM()
 
 // void MLCP2::updateInteractionBlocks()
 // {
-//   SP::InteractionsSet indexSet;
 //   bool isTimeInvariant;
 //   InteractionsIterator itinter1, itinter2;
 //   DSIterator itDS;
@@ -188,15 +187,25 @@ void MLCP2::computeq(double time)
   unsigned int pos = 0;
   InteractionsGraph::VIterator ui, uiend;
   std::string simulationType = simulation->getType();
-  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  SP::Interaction inter;
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    // *itCurrent is a SP::Interaction.
+    inter = indexSet->bundle(*ui);
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    pos = M->getPositionOfInteractionBlock(*itCurrent);
+    pos = M->getPositionOfInteractionBlock(inter);
     //update e(ti+1)
-    SP::SiconosVector  e = std11::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->relation())->e();
+    SP::SiconosVector  e = std11::static_pointer_cast<FirstOrderLinearR>(inter->relation())->e();
     q->addBlock(pos, *e);
   }
+  // for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  // {
+  //   // *itCurrent is a SP::Interaction.
+  //   // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
+  //   pos = M->getPositionOfInteractionBlock(*itCurrent);
+  //   //update e(ti+1)
+  //   SP::SiconosVector  e = std11::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->relation())->e();
+  //   q->addBlock(pos, *e);
+  // }
   SP::DynamicalSystemsSet  allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
@@ -235,10 +244,12 @@ bool MLCP2::preCompute(double time)
     updateInteractionBlocks();
 
     // Updates matrix M
-    SP::InteractionsSet interSet = simulation->indexSet(levelMin);
+    SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(levelMin);
+
     SP::DynamicalSystemsSet DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
     //fill M block
-    M->fill(interSet, DSSet, interactionBlocks, DSBlocks, DSInteractionBlocks, interactionDSBlocks);
+    // Note FP : update this file with new fill function
+    M->fill(indexSet, DSSet, interactionBlocks, DSBlocks, DSInteractionBlocks, interactionDSBlocks);
     sizeOutput = M->size();
 
     // Checks z and w sizes and reset if necessary
@@ -327,8 +338,7 @@ void MLCP2::postCompute()
   // Only Interactions (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
-
+  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(levelMin);
   // y and lambda vectors
   SP::SiconosVector lambda, y, x;
 
@@ -336,21 +346,37 @@ void MLCP2::postCompute()
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
-
-  for (InteractionsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
+    inter = indexSet->bundle(*ui);
     // size of the block that corresponds to the current Interaction
-    nsLawSize = (*itCurrent)->nonSmoothLaw()->size();
+    nsLawSize = inter->nonSmoothLaw()->size();
     // Get the relative position of inter-block in the vector w or z
-    pos = M->getPositionOfInteractionBlock(*itCurrent);
+    pos = M->getPositionOfInteractionBlock(inter;
 
     // Get Y and Lambda for the current Interaction
-    y = (*itCurrent)->y(levelMin);
-    lambda = (*itCurrent)->lambda(levelMin);
+    y = inter->y(levelMin);
+    lambda = inter->lambda(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.
     setBlock(*(_w.get()), y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
     setBlock(*(_z.get()), lambda, lambda->size(), pos, 0);
   }
+  // for (InteractionsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  // {
+  //   // size of the block that corresponds to the current Interaction
+  //   nsLawSize = (*itCurrent)->nonSmoothLaw()->size();
+  //   // Get the relative position of inter-block in the vector w or z
+  //   pos = M->getPositionOfInteractionBlock(*itCurrent);
+
+  //   // Get Y and Lambda for the current Interaction
+  //   y = (*itCurrent)->y(levelMin);
+  //   lambda = (*itCurrent)->lambda(levelMin);
+  //   // Copy w/z values, starting from index pos into y/lambda.
+  //   setBlock(*(_w.get()), y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+  //   setBlock(*(_z.get()), lambda, lambda->size(), pos, 0);
+  // }
   SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {

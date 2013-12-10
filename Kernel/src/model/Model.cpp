@@ -68,13 +68,11 @@ Model::Model(const std::string& xmlFile):
         getSimulationXMLType() == TIMESTEPPING_TAG)
       _strat.reset(new TimeStepping
                    (_modelxml->getSimulationXML(), _t0, _T,
-                    setOfGraph<DynamicalSystemsSet>(_nsds->dynamicalSystems()),
-                    _nsds->interactions()));
+                    setOfGraph<DynamicalSystemsSet>(_nsds->dynamicalSystems())));
     else if (_modelxml->getSimulationXML()->getSimulationXMLType() == EVENTDRIVEN_TAG)
       _strat.reset(new EventDriven
                    (_modelxml->getSimulationXML(), _t0, _T,
-                    setOfGraph<DynamicalSystemsSet>(_nsds->dynamicalSystems()),
-                    _nsds->interactions()));
+                    setOfGraph<DynamicalSystemsSet>(_nsds->dynamicalSystems())));
     else RuntimeException::selfThrow
       ("Model: xml constructor, wrong type of simulation" +
        (_modelxml->getSimulationXML()->getSimulationXMLType()));

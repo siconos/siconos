@@ -27,7 +27,6 @@ Basic class to handle with dynamical system integrators over a time step.
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
 #include "DynamicalSystemsSet.hpp"
-#include "InteractionsSet.hpp"
 #include "OneStepIntegratorTypes.hpp"
 
 /**  Generic object to manage DynamicalSystem(s) time-integration
@@ -55,11 +54,6 @@ protected:
   /** a set of DynamicalSystem to integrate */
   SP::DynamicalSystemsSet OSIDynamicalSystems;
 
-  /** a set of Interactions to define a list of *
-   * dynamical systems to be integrated, with some *
-   * constraints to be taken into account */
-  SP::InteractionsSet OSIInteractions;
-
   /** size of the memory for the integrator */
   unsigned int _sizeMem;
 
@@ -81,9 +75,8 @@ protected:
       \param integrator type/name
       \param OneStepIntegratorXML* : the corresponding XML object
       \param the set of all DS in the NSDS
-      \param the set of all interactions in the NSDS
   */
-  OneStepIntegrator(const OSI::TYPES&, SP::OneStepIntegratorXML, SP::DynamicalSystemsSet , SP::InteractionsSet);
+  OneStepIntegrator(const OSI::TYPES&, SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
   /** default constructor
    */
@@ -166,19 +159,6 @@ public:
    *  \param a SP::DynamicalSystem
    */
   virtual void insertDynamicalSystem(SP::DynamicalSystem ds);
-
-  /** get the set of Interactions associated with the Integrator
-   *  \return an InteractionsSet
-   */
-  inline const SP::InteractionsSet interactions() const
-  {
-    return OSIInteractions;
-  };
-
-  /** set the Interaction list of this Integrator
-   *  \param newSet an InteractionsSet
-   */
-  void setInteractions(const InteractionsSet& newSet);
 
   /** get _sizeMem value
    *  \return an unsigned int

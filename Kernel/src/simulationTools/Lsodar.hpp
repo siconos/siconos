@@ -88,9 +88,8 @@ public:
   /** constructor from xml file
       \param OneStepIntegratorXML* : the XML object
       \param the set of all DS in the NSDS
-      \param the set of all interactions in the NSDS
   */
-  Lsodar(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet , SP::InteractionsSet);
+  Lsodar(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
   /** constructor from a minimum set of data
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator

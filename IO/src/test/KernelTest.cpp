@@ -318,8 +318,12 @@ void KernelTest::t6()
     SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
       (dsg->bundle(*(dsg->begin())));
 
-    SP::Interaction inter = *(bouncingBall->nonSmoothDynamicalSystem()->interactions()->begin());
     SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+    SP::Interaction inter;
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0 = bouncingBall->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+      inter = indexSet0->bundle(*ui);
 
 
     // --- Get the values to be plotted ---

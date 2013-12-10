@@ -70,8 +70,7 @@ Simulation::Simulation(SP::TimeDiscretisation td):
 }
 
 // --- xml constructor ---
-Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList,
-                       SP::InteractionsSet interactionsList):
+Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList):
   _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
   _simulationxml(strxml),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false), _staticLevels(false), _levelsAreComputed(false)
@@ -101,7 +100,7 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
       _allOSI->insert(SP::Moreau(new Moreau(*it, dsList)));
 
     else if (typeOfOSI == LSODAR_TAG) // if OSI is a Lsodar-type
-      _allOSI->insert(SP::Lsodar(new Lsodar(*it, dsList, interactionsList)));
+      _allOSI->insert(SP::Lsodar(new Lsodar(*it, dsList)));
 
     else RuntimeException::selfThrow("Simulation::xml constructor - unknown one-step integrator type: " + typeOfOSI);
   }
@@ -337,7 +336,8 @@ void Simulation::saveInMemory()
 void Simulation::pushInteractionsInMemory()
 {
   // Save OSNS state (Interactions) in Memory.
-  if (!model()->nonSmoothDynamicalSystem()->interactions()->isEmpty())
+  
+  if (model()->nonSmoothDynamicalSystem()->topology()->indexSet0()->size() > 0)
   {
     // Temp FP : saveInOldVar was called for each osns and each osns call 
     // swapInOldVar for all interactions in the nsds. 
@@ -400,22 +400,21 @@ void Simulation::updateInput(unsigned int level)
 {
   // To compute input(level) (ie with lambda[level]) for all Interactions.
   //  assert(level>=0);
-
   //  double time = nextTime();
   double time = model()->currentTime();
-  SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
-  InteractionsIterator it;
-
   // Set dynamical systems non-smooth part to zero.
   reset(level);
 
   // We compute input using lambda(level).
-  for (it = topology->interactions()->begin();
-       it != topology->interactions()->end(); it++)
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    assert((*it)->lowerLevelForInput() <= level);
-    assert((*it)->upperLevelForInput() >= level);
-    (*it)->computeInput(time, level);
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForInput() <= level);
+    assert(inter->upperLevelForInput() >= level);
+    inter->computeInput(time, level);
   }
 }
 
@@ -426,15 +425,15 @@ void Simulation::updateOutput(unsigned int level)
 
   DEBUG_PRINTF("Simulation::updateOutput(unsigned int level) starts for level = %i\n", level);
   double time = model()->currentTime();
-  SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
-  InteractionsIterator it;
-
-  for (it = topology->interactions()->begin();
-       it != topology->interactions()->end(); it++)
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    assert((*it)->lowerLevelForOutput() <= level);
-    assert((*it)->upperLevelForOutput() >= level);
-    (*it)->computeOutput(time , level);
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForOutput() <= level);
+    assert(inter->upperLevelForOutput() >= level);
+    inter->computeOutput(time , level);
   }
   DEBUG_PRINTF("Simulation::updateOutput(unsigned int level) ends for level = %i\n", level);
 

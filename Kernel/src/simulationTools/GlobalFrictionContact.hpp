@@ -75,7 +75,7 @@ class GlobalFrictionContact : public LinearOSNS
 private:
   /** default constructor */
   GlobalFrictionContact() {};
-
+  
 protected:
   /** serialization hooks
   */

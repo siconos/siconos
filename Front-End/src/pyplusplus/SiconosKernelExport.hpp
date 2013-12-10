@@ -37,10 +37,8 @@ namespace pyplusplus
 namespace aliases
 {
 
-typedef SiconosSet<Interaction, double*> InteractionsSet;
 typedef SiconosSet<DynamicalSystem, int> DynamicalSystemsSet;
 /*    typedef boost::shared_ptr<SiconosSet<DynamicalSystem,int > > SPtrDynamicalSystemsSet;
-typedef boost::shared_ptr<SiconosSet<Interaction,double* > > SPtrInteractionsSet;
 typedef boost::shared_ptr<SiconosSet<UnitaryRelation,double* > > SPtrUnitaryRelationsSet;*/
 }
 }

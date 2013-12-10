@@ -222,7 +222,6 @@ namespace std
 
 %include "SimulationTypeDef.hpp" 
 
-%include "InteractionsSet.hpp"
 %include "SiconosSet.hpp"
 
 %import "boost/config.hpp"
@@ -279,13 +278,6 @@ typedef __mpz_struct mpz_t[1];
   }
 
 %}
-
-
-
-
-// needed templates
-
-%template (InteractionsSet) SiconosSet<Interaction,double*>;
 
 //namespace std {
 

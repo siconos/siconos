@@ -50,7 +50,6 @@ int main(int argc, char* argv[])
     double criterion = 1e-8;
     unsigned int maxIter = 20000;
     double e = 0.0;
-    double L = 0.0;
     int test = 0;
     int nimpact = 0;
 
@@ -59,9 +58,6 @@ int main(int argc, char* argv[])
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
-
-    // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
 
     // --- DS: manipulator arm ---
 
@@ -110,8 +106,6 @@ int main(int argc, char* argv[])
     arm->setComputeJacobianFIntqFunction("Two-linkFlexiblePlugin", "jacobFintQ");
     arm->setzPtr(z);
 
-    allDS.insert(arm);
-
     // -------------------
     // --- Interactions---
     // -------------------
@@ -119,32 +113,25 @@ int main(int argc, char* argv[])
     //  - one with Lagrangian non linear relation to define contact with ground
     //  Both with newton impact nslaw.
 
-    InteractionsSet allInteractions;
-
     // -- relations --
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("Two-linkFlexiblePlugin:h0", "Two-linkFlexiblePlugin:G0"));
-    SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
+    SP::Interaction inter(new Interaction(2, nslaw, relation));
     //  Relation * relation0 = new LagrangianScleronomousR("Two-linkFlexiblePlugin:h3","Two-linkFlexiblePlugin:G3");
     //  Interaction * inter0 = new Interaction("wall-arm", allDS,1,2, nslaw, relation0);
-
-
-    allInteractions.insert(inter);
-    // allInteractions.insert(inter0);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // -------------------------------
-
-    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
-
+  
     // -------------
     // --- Model ---
     // -------------
 
     SP::Model Manipulator(new Model(t0, T));
-    Manipulator->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+
+    // add the dynamical system in the non smooth dynamical system
+    Manipulator->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
+
+    // link the interaction and the dynamical system
+    Manipulator->nonSmoothDynamicalSystem()->link(inter, arm);
 
     // ----------------
     // --- Simulation ---
@@ -181,7 +168,7 @@ int main(int argc, char* argv[])
     Manipulator->initialize(s);
     cout << "End of model initialisation" << endl;
 
-    int k = 0;
+    unsigned int k = 0;
     unsigned int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -300,7 +287,7 @@ int main(int argc, char* argv[])
     cout << endl << "End of computation - Number of iterations done: " << k << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
     // --- Output files ---
-    ioMatrix::write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
   }
 

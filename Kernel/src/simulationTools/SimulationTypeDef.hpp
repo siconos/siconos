@@ -29,19 +29,16 @@ Typedef for simulation-related objects
 #include <map>
 #include <set>
 
-#include "InteractionsSet.hpp"
-
 #include "SiconosGraph.hpp"
 #include "SiconosPointers.hpp"
 
 #include "SiconosProperties.hpp"
+#include "Interaction.hpp"
 
 /** double precision machine */
 /*  eq dlmach('e'),  DBL_EPSILON,  fabs(a-b) <  */
 const double MACHINE_PREC = std::numeric_limits<double>::epsilon();
 
-
-//#include "OneStepIntegrator.hpp"
 
 
 // ================== Objects to handle DS ==================
@@ -129,9 +126,6 @@ typedef MapOfInteractionMapOfDSMatrices::iterator InteractionDSMatrixRowIterator
 
 /** Const iterator through a MapOfInteractionMapOfDSMatrices */
 typedef MapOfInteractionMapOfDSMatrices::const_iterator ConstInteractionDSMatrixRowIterator ;
-
-/** Vector that contains a sequel of sets of Interactions*/
-typedef std::vector< SP::InteractionsSet > VectorOfSetOfInteractions;
 
 /** Map to link SP::Interaction with an int - Used for example in interactionBlocksPositions for OSNSMatrix */
 typedef std::map< SP::Interaction , unsigned int > Interaction_int;

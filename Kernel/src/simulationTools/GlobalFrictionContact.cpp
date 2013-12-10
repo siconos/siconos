@@ -319,17 +319,26 @@ void GlobalFrictionContact::computeTildeLocalVelocity(const double time)
   if (_tildeLocalVelocity->size() != _sizeLocalOutput)
     _tildeLocalVelocity->resize(_sizeLocalOutput);
   _tildeLocalVelocity->zero();
-  // === Get index set from Simulation ===
-  SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
-  // === Loop through "active" Interactions (ie present in indexSets[level]) ===
-
   unsigned int pos = 0;
-  InteractionsIterator itCurrent;
-  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  InteractionsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(levelMin);
+  SP::Interaction inter;
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    pos = H->getPositionOfInteractionBlock(*itCurrent);
-    computeTildeLocalVelocityBlock((*itCurrent), pos);
+    inter = indexSet->bundle(*ui);
+    pos = H->getPositionOfInteractionBlock(inter);
+    computeTildeLocalVelocityBlock(inter, pos);
   }
+
+  // // === Loop through "active" Interactions (ie present in indexSets[level]) ===
+
+  // unsigned int pos = 0;
+  // InteractionsIterator itCurrent;
+  // for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  // {
+  //   pos = H->getPositionOfInteractionBlock(*itCurrent);
+  //   computeTildeLocalVelocityBlock((*itCurrent), pos);
+  // }
 
 }
 
@@ -345,8 +354,7 @@ bool GlobalFrictionContact::preCompute(const double time)
   // Get topology
   SP::Topology topology = simulation->model()->nonSmoothDynamicalSystem()->topology();
   SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
-  SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
-
+  
   if (!_hasBeenUpdated)
   {
     // Computes new interactionBlocks if required
@@ -358,9 +366,12 @@ bool GlobalFrictionContact::preCompute(const double time)
 
 
     // Updates matrix M
-    SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
+    SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(levelMin);
     M->fill(allDS, DSBlocks);
-    H->fill(indexSet, allDS, interactionDSBlocks);
+    // Note FP: old version ==
+    // H->fill(indexSet, allDS, interactionDSBlocks);
+    // fill function with this signature does not exists. How can it works????
+    H->fill(indexSet); 
     _sizeOutput = M->size();
     _sizeLocalOutput = H->size();
 
@@ -388,11 +399,17 @@ bool GlobalFrictionContact::preCompute(const double time)
       _localVelocity->resize(_sizeLocalOutput);
       _localVelocity->zero();
     }
-
+ 
     // Update mu
     _mu->clear();
-    for (ConstInteractionsIterator itI = indexSet->begin(); itI != indexSet->end(); ++itI)
-      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>((*itI)->nonSmoothLaw())->getMu());
+    InteractionsGraph::VIterator ui, uiend;
+    for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    {
+      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>((indexSet->bundle(*ui))->nonSmoothLaw())->getMu());
+    }
+
+    //for (ConstInteractionsIterator itI = indexSet->begin(); itI != indexSet->end(); ++itI)
+    // _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>((*itI)->nonSmoothLaw())->getMu());
   }
 
   // Computes q
@@ -465,8 +482,7 @@ void GlobalFrictionContact::postCompute()
   // Only Interactions (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
-
+  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(levelMin);
   // y and lambda vectors
   SP::SiconosVector  y, lambda;
 

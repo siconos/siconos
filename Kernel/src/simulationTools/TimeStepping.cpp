@@ -79,9 +79,8 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
 
 // --- XML constructor ---
 TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
-                           double T, SP::DynamicalSystemsSet dsList,
-                           SP::InteractionsSet interList):
-  Simulation(strxml, t0, T, dsList, interList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0)
+                           double T, SP::DynamicalSystemsSet dsList):
+  Simulation(strxml, t0, T, dsList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0)
 {
   _computeResiduY = false;
   _computeResiduR = false;
