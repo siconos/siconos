@@ -49,8 +49,8 @@ int main(int argc, char* argv[])
     SP::Interaction inter;
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = oscillator->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-      inter = indexSet0->bundle(*ui);
+    std11::tie(ui, uiend) = indexSet0->vertices(); 
+    inter = indexSet0->bundle(*ui);
 
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:

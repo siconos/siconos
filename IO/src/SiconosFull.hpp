@@ -37,18 +37,6 @@ BOOST_TYPEOF_REGISTER_TYPE(_SolverOptions);
 BOOST_TYPEOF_REGISTER_TYPE(LinearComplementarityProblem);
 
 template <class Archive>
-void siconos_io(Archive& ar, InteractionsSet& v, unsigned int)
-{
-  if (Archive::is_loading::value)
-  {
-    v.fpt = &Interaction::getSort;
-  }
-  ar & boost::serialization::make_nvp("setOfT", v.setOfT);
-}
-
-
-
-template <class Archive>
 void siconos_io(Archive& ar, _DynamicalSystemsGraph& v, unsigned int version)
 {
 
@@ -353,13 +341,6 @@ void serialize(Archive& ar, __mpf_struct& v, unsigned int version)
   siconos_io(ar, v, version);
 }
 
-
-template <class Archive>
-void serialize(Archive& ar, InteractionsSet& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
 template <class Archive>
 void serialize(Archive& ar, _InteractionsGraph& v, unsigned int version)
 {
@@ -479,7 +460,6 @@ void siconos_io_register(Archive& ar)
   ar.register_type(static_cast<_DynamicalSystemsGraph*>(NULL));
   ar.register_type(static_cast<_InteractionsGraph*>(NULL));
   //  ar.register_type(static_cast<PluginHandle*>(NULL));
-  ar.register_type(static_cast<InteractionsSet*>(NULL));
   ar.register_type(static_cast<__mpz_struct*>(NULL));
   ar.register_type(static_cast<FrictionContact*>(NULL));
   ar.register_type(static_cast<Lsodar*>(NULL));
