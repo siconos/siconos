@@ -43,8 +43,6 @@ extern DynamicalSystemsSet sAllDSByInter[];
 extern SP::Interaction sInterJoints[];
 //!The siconos contact interactions.
 extern SP::Interaction sInterContacts[];
-//!siconos set of interation.
-extern InteractionsSet sAllInteractions;
 //!siconos model.
 extern SP::Model myModel;
 //!siconos model t0.

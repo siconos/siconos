@@ -12,7 +12,6 @@ MBTB_Contact* sContacts[MBTB_MAX_CONTACTS_NUMBER];
 DynamicalSystemsSet sAllDS;
 SP::Interaction sInterJoints[MBTB_MAX_JOINTS_NUMBER];
 SP::Interaction sInterContacts[MBTB_MAX_CONTACTS_NUMBER];
-InteractionsSet sAllInteractions;
 SP::Model myModel;
 double myt0;
 double myTf;

@@ -321,7 +321,6 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
 //                                           sJointRelations[numJ]->_jointR));
   sInterJoints[numJ].reset(new Interaction(lNbEq , lNSL, 
                                            sJointRelations[numJ]->_jointR));
-  sAllInteractions.insert(sInterJoints[numJ]);
   sJointRelations[numJ]->_interaction = sInterJoints[numJ];
   // myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
   //                                           sDS[indexDS1]);
@@ -351,8 +350,6 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
     sInterContacts[numContact].reset(new Interaction(3,nslaw0,sContacts[numContact]->relation(),numContact));
     // MB : contactName is already in MBTB_Contact!
     // sInterContacts[numContact]->setId(ContactName);
-    sAllInteractions.insert(sInterContacts[numContact]);
-    
   }
   else
   {
@@ -360,7 +357,6 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
     sInterContacts[numContact].reset(new Interaction(1,lNSL,
                                                      sContacts[numContact]->relation(),numContact));
 //    sInterContacts[numContact]->setId(ContactName);
-    sAllInteractions.insert(sInterContacts[numContact]);
   }
 
   sContacts[numContact]->setInteraction(sInterContacts[numContact]);
@@ -386,9 +382,6 @@ void MBTB_setSolverDOption(int i,double value)
 }
 void  MBTB_initSimu(double hTS, int withProj)
 {
-
-  // myModel.reset(new Model(t0, Tf, sAllDS, sAllInteractions));
-  
 
   for(int numDS =0; numDS<sNbOfBodies; numDS++)
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(sDS[numDS]);
