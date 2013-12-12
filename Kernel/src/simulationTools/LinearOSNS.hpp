@@ -104,7 +104,7 @@ public:
 
   /** destructor
    */
-  ~LinearOSNS() {};
+  virtual ~LinearOSNS() {};
 
   // --- W ---
   /** get the value of w, the initial state of the DynamicalSystem
@@ -306,7 +306,5 @@ public:
 
 
 };
-
-TYPEDEF_SPTR(LinearOSNS)
 
 #endif // LinearOSNS_H

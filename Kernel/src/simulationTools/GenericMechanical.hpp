@@ -22,8 +22,6 @@
 #ifndef GENERICMECHANICAL_H
 #define GENERICMECHANICAL_H
 
-//#define SICONOS_FRICTION_CONTACT_DEFAULT_SOLVER "NSGS"
-
 #include "LinearOSNS.hpp"
 #include "SiconosNumerics.h"
 /** Pointer to function of the type used for drivers for GenericMechanical problems in Numerics */
@@ -60,12 +58,7 @@ protected:
 
 public:
 
-  /** xml constructor
-   *  \param SP::OneStepNSProblemXML : the XML linked-object
-   */
-  //GenericMechanical(SP::OneStepNSProblemXML);
-
-  /** constructor from data
+  /** Basic constructor, from numerics solver id.
    *  \param int type of FC3D solver
    */
   GenericMechanical(int FC3D_Solver_Id = SICONOS_FRICTION_3D_QUARTIC);
@@ -102,7 +95,10 @@ public:
 
   /** print the data to the screen */
   void display() const;
-  void computeAllInteractionBlocks();
+  
+  /** compute interactionBlocks if necessary (this depends on the type of
+      OSNS, on the indexSets ...)
+   */
   void updateInteractionBlocks();
 
   /** visitors hook
@@ -112,7 +108,5 @@ public:
 
 
 };
-
-TYPEDEF_SPTR(GenericMechanical)
 
 #endif // GenericMechanical_H

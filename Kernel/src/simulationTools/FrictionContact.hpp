@@ -22,8 +22,6 @@
 #ifndef FrictionContact_H
 #define FrictionContact_H
 
-#define SICONOS_FRICTION_CONTACT_DEFAULT_SOLVER "NSGS"
-
 #include "LinearOSNS.hpp"
 
 /** Pointer to function of the type used for drivers for FrictionContact problems in Numerics */
@@ -31,41 +29,37 @@ typedef int (*Driver)(FrictionContactProblem*, double*, double*, SolverOptions*,
 TYPEDEF_SPTR(FrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Dec 15, 2005
- *
- * This class is devoted to the formalization and the resolution of
- * friction contact problems defined by :
- * \f{eqnarray*}
- * velocity =  q + M reaction \\
- * \\
- * velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
- * \f}
- * and a Coulomb friction law.
- *
- * With:
- *    - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ the unknowns,
- *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
- *
- * The dimension of the problem (2D or 3D) is given by the variable contactProblemDim and the right
- * Numerics driver will be called according to this value.
- *
- * \b Construction:
- *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
- *   - Constructor from data (inputs = Simulations*, id) - The solver is optional.
- * Main functions:
- *
- * \b Main functions:
- *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
- *  the interactionBlock-matrices saved in the field interactionBlocks.\n
- *  Functions: initialize(), computeInteractionBlock(), preCompute()
- *  - solving of the FrictionContact problem: function compute(), used to call solvers from Numerics through \n
- * the frictionContact2D_driver() or frictionContact3D_driver() interface of Numerics.
- *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
- *  ouput results from the solver (velocity,reaction); function postCompute().
- *
+ 
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) Dec 15, 2005
+ 
+  This class is devoted to the formalization and the resolution of
+  friction contact problems defined by :
+  \f{eqnarray}
+  velocity =  q + M reaction \\
+  \\
+  velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
+  \f}
+  and a Coulomb friction law.
+ 
+  With:
+     - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ the unknowns,
+     - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+ 
+  The dimension of the problem (2D or 3D) is given by the variable contactProblemDim and the proper
+  Numerics driver will be called according to this value.
+ 
+  \b Construction: just set Numerics Solver id
+
+  Main functions:
+ 
+  \b Usage:
+  - compute(time) formalize, solve and post-process the problem.
+  
+  pre- and post-pro are common to all LinearOSNS and defined in this class.
+ 
+ 
  */
 class FrictionContact : public LinearOSNS
 {
@@ -85,10 +79,6 @@ protected:
 
   SP::FrictionContactProblem _numerics_problem;
 
-  /** default constructor
-   */
-  FrictionContact() {};
-
 public:
 
   /** xml constructor
@@ -96,11 +86,11 @@ public:
    */
   FrictionContact(SP::OneStepNSProblemXML);
 
-  /** constructor from data
-      \param int dim (2D or 3D) of the friction-contact problem
-      \param int id of numerics solver
+  /**
+     \param int dim (2D or 3D) of the friction-contact problem (default = 3)
+     \param int id of numerics solver (default = NSGS)
   */
-  FrictionContact(int dimPb, const int newNumericsSolverId = SICONOS_FRICTION_3D_NSGS);
+  FrictionContact(int dimPb = 3, int newNumericsSolverId = SICONOS_FRICTION_3D_NSGS);
 
   /** destructor
    */
@@ -161,13 +151,13 @@ public:
    */
   void initialize(SP::Simulation);
 
-  /** get the friction contact problem
-   * \return the friction contact problem
+  /** 
+   * \return the friction contact problem from Numerics
    */
   SP::FrictionContactProblem frictionContactProblem();
 
   /** solve a friction contact problem
-   * \param problem the friction contact problem, default current problem
+   * \param problem the friction contact problem
    * \return info solver information result
    */
   int solve(SP::FrictionContactProblem problem = SP::FrictionContactProblem());
@@ -185,10 +175,6 @@ public:
    */
   ACCEPT_STD_VISITORS();
 
-
-
 };
-
-TYPEDEF_SPTR(FrictionContact)
 
 #endif // FrictionContact_H

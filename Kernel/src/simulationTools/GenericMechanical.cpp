@@ -47,10 +47,6 @@ void GenericMechanical::initialize(SP::Simulation sim)
 
   // General initialize for OneStepNSProblem
   LinearOSNS::initialize(sim);
-
-
-
-
 }
 
 void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
@@ -193,15 +189,7 @@ void  GenericMechanical::updateInteractionBlocks()
   }
   LinearOSNS::updateInteractionBlocks();
 }
-void  GenericMechanical::computeAllInteractionBlocks()
-{
-  assert(0);
-  //printf("GenericMechanical::updateInteractionBlocks : free and build a new GMP\n");
-  freeGenericMechanicalProblem(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
-  _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
 
-  LinearOSNS::computeAllInteractionBlocks();
-}
 GenericMechanical::~GenericMechanical()
 {
   freeGenericMechanicalProblem(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);

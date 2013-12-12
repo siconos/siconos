@@ -33,9 +33,6 @@ DEFINE_SPTR(FirstOrderLinearDS)
 #ifndef TimeStepping_H
 DEFINE_SPTR(TimeStepping)
 #endif
-#ifndef Relay_H
-DEFINE_SPTR(Relay)
-#endif
 #ifndef EventsManager_H
 DEFINE_SPTR(EventsManager)
 #endif

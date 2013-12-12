@@ -57,18 +57,18 @@ int main(int argc, char* argv[])
 
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (s->hasNextEvent())
-    {
-      // solve ...
-      s->computeOneStep();
-      // --- Get values to be plotted ---
-      dataPlot(k, 0) = s->nextTime();
-      dataPlot(k, 1) = (*oscillo->q())(0);
-      dataPlot(k, 2) = (*oscillo->velocity())(0);
-      // transfer of state i+1 into state i and time incrementation
-      s->nextStep();
-      k++;
-    }
+    // while (s->hasNextEvent())
+    // {
+    //   // solve ...
+    //   s->computeOneStep();
+    //   // --- Get values to be plotted ---
+    //   dataPlot(k, 0) = s->nextTime();
+    //   dataPlot(k, 1) = (*oscillo->q())(0);
+    //   dataPlot(k, 2) = (*oscillo->velocity())(0);
+    //   // transfer of state i+1 into state i and time incrementation
+    //   s->nextStep();
+    //   k++;
+    //   }
 
     // Number of time iterations
     cout << "Number of iterations done: " << k << endl;

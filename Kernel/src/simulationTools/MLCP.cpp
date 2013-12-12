@@ -47,7 +47,6 @@ MLCP::MLCP(int newNumericsSolverId):
 
 }
 
-
 void  MLCP::reset()
 {
   if (_numerics_problem.blocksRows)
@@ -58,7 +57,6 @@ void  MLCP::reset()
   _numerics_problem.blocksIsComp = 0;
   mlcp_driver_reset(&_numerics_problem, &*_numerics_solver_options);
 }
-
 
 void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
 {
@@ -74,17 +72,6 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
   else if (Type::value(*(inter1->nonSmoothLaw()))
            == Type::EqualityConditionNSL)
     equalitySize1 = nslawSize1;
-
-  // Note FP : equalitySize2 never used. 
-  // All the lines below seem useless. 
-  // if (Type::value(*(inter2->nonSmoothLaw()))
-  //     == Type::MixedComplementarityConditionNSL)
-  //   equalitySize2 = MixedComplementarityConditionNSL::
-  //                   convert(inter2->nonSmoothLaw())->getEqualitySize();
-  // else if (Type::value(*(inter2->nonSmoothLaw()))
-  //          == Type::EqualityConditionNSL)
-  //   equalitySize2 = nslawSize2;
-
 
   if (inter1 == inter2)
   {
@@ -272,12 +259,4 @@ void  MLCP::updateInteractionBlocks()
     _n = 0;
   }
   LinearOSNS::updateInteractionBlocks();
-}
-void  MLCP::computeAllInteractionBlocks()
-{
-  assert(0);
-  _curBlock = 0;
-  _m = 0;
-  _n = 0;
-  LinearOSNS::computeAllInteractionBlocks();
 }

@@ -28,50 +28,28 @@ TYPEDEF_SPTR(RelayProblem)
 
 class Simulation;
 /** Formalization and Resolution of a Linear Complementarity Problem (Relay)
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
- * \section Relayintro Aim of the Relay class
- *
- * This class is devoted to the formalization and the resolution of the
- * Linear Complementarity Problem (Relay) defined by :
- *  * \f[
- * w =  q + M z
- * \f]
- * \f[
- * w \geq 0, z \geq 0,  z^{T} w =0
- * \f]
- * where
- *    - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
- *    - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
- *
- *  The Relay main components are:
- *  - a problem (variables M,q and size of the problem), which directly corresponds to the LinearComplementarityProblem structure of Numerics
- *  - the unknowns z and w
- *  - a NonSmoothSolver, used to define a solver and its parameters (connected to SolverOptions structure of Numerics)
- *
- *  A Relay is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
- *  IndexSets from simulation are used to know which constraints (Interaction) are active or not. \n
- *
- * \b Construction:
- *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
- *   - Constructor from data (inputs = SP::Simulation, id, SP::NonSmoothSolver) - The solver is optional.
- * Main functions:
- *
- * \b Main functions:
- *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
- *  the interactionBlock-matrices saved in the field interactionBlocks.\n
- *  Functions: initialize(), computeInteractionBlock(), preCompute()
- *  - solving of the FrictionContact problem: function compute(), used to call solvers from Numerics through \n
- * the lcp_driver() interface of Numerics.
- *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
- *  ouput results from the solver (z,w); function postCompute().
- *
- *
- * \todo : add "recover" function to start from old values of z and w.
- */
+ 
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) Apr 26, 2004
+ 
+  \section Relayintro Aim of the Relay class
+ 
+  This class is devoted to the formalization and the resolution of the
+  Relay NonSmooth problems.
+  \f[
+  w =  q + M z
+  \f]
+  \f[
+  w \geq 0, z \geq 0,  z^{T} w =0
+  \f]
+  where
+     - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
+     - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+      
+  \todo : add "recover" function to start from old values of z and w.
+  \todo : review this introduction ...
+*/
 class Relay : public LinearOSNS
 {
 
@@ -188,7 +166,5 @@ public:
   static Relay* convert(OneStepNSProblem* osnsp);
 
 };
-
-TYPEDEF_SPTR(Relay)
 
 #endif // Relay_H

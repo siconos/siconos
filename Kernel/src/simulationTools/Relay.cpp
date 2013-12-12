@@ -20,12 +20,9 @@
 #include <iostream>
 #include <assert.h>
 #include "Tools.hpp"
-
-
 #include "Simulation.hpp"
 #include "RelayNSL.hpp"
 #include "OSNSMatrix.hpp"
-
 
 using namespace RELATION;
 
@@ -144,16 +141,6 @@ int Relay::compute(double time)
     SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, inter, pos));
     inter->nonSmoothLaw()->accept(*NSLEffect);
   }
-
-
-
-
-
-
-
-
-
-
 
   // --- Call Numerics driver ---
   // Inputs:

@@ -215,10 +215,23 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
   }
 
   DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)");
-
+  unsigned int sumOfDSSizes = 0, sumOfZSizes = 0;
+  
   inter->insert(ds);
+  sumOfDSSizes += ds->getDim();
+  if(ds->z())
+    sumOfZSizes += ds->z()->size();
+  
   if(ds2)
+  {
     inter->insert(ds2);
+    sumOfDSSizes += ds->getDim();
+    if(ds->z())
+      sumOfZSizes += ds->z()->size();
+  }
+
+  inter->setDSSizes(sumOfDSSizes, sumOfZSizes);
+
   return addInteractionInIndexSet(inter, ds, ds2);
 }
 

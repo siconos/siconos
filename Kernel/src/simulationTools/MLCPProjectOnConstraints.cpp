@@ -567,9 +567,6 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   // Warning: in the current version, if OSI!=Moreau, this fails.
   // If OSI = MOREAU, centralInteractionBlocks = W if OSI = LSODAR,
   // centralInteractionBlocks = M (mass matrices)
-  MapOfDSMatrices centralInteractionBlocks;
-  getOSIMaps(inter , centralInteractionBlocks);
-
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock, leftInteractionBlock1;
 
 
@@ -633,7 +630,8 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       if (_useMassNormalization)
       {
-        centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*work);
+        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
+        centralInteractionBlock->PLUForwardBackwardInPlace(*work);
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       }
@@ -763,20 +761,6 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     sizeY2 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
              (_M)->computeSizeForProjection(inter2);
 
-
-
-    /*
-      DynamicalSystemsSet commonDS;
-      intersection(*inter1->dynamicalSystems(),*inter2->dynamicalSystems(), commonDS);
-      assert (!commonDS.isEmpty()) ;
-      for (DSIterator itDS = commonDS.begin(); itDS!=commonDS.end(); itDS++)
-      {
-      assert (*itDS == ds);
-      }
-    */
-    MapOfDSMatrices centralInteractionBlocks;
-    getOSIMaps(inter1, centralInteractionBlocks);
-
     SP::SiconosMatrix currentInteractionBlock;
 
     assert(index1 != index2);
@@ -905,15 +889,16 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         // because right = transpose(left) and because of
         // size checking inside the getBlock function, a
         // getRight call will fail.
+        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
 #ifdef MLCPPROJ_DEBUG
-        std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : centralInteractionBlocks[ds->number()] " << std::endl;
-        centralInteractionBlocks[ds->number()]->display();
+        std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : centralInteractionBlocks " << std::endl;
+        centralInteractionBlock->display();
 #endif
         rightInteractionBlock->trans();
 
         if (_useMassNormalization)
         {
-          centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*rightInteractionBlock);
+          centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
           //*currentInteractionBlock +=  *leftInteractionBlock ** work;
           prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
         }

@@ -542,7 +542,7 @@ void TimeStepping::advanceToEvent()
   //   update(_levelMin);
 
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
-
+  
   // Initialize lambdas of all interactions.
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
                                     topology()->indexSet(0);
@@ -553,7 +553,6 @@ void TimeStepping::advanceToEvent()
     ++vnext;
     indexSet0->bundle(*ui)->resetAllLambda();
   }
-
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 
 }
@@ -562,9 +561,6 @@ void TimeStepping::advanceToEvent()
 /*discretisation of the Interactions */
 void   TimeStepping::prepareNewtonIteration()
 {
-  //  std::cout << "update the operators" <<endl ;
-
-
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
@@ -654,12 +650,10 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   _isNewtonConverge = false;
   _newtonNbSteps = 0; // number of Newton iterations
   int info = 0;
-  //cout<<"||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
 
   computeInitialResidu();
-
   if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
       || isLinear)
   {
@@ -672,6 +666,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
       DefaultCheckSolverOutput(info);
+
     else
       checkSolverOutput(info, this);
 

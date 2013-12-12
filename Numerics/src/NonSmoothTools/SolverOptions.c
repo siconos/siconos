@@ -243,12 +243,13 @@ void printSolverOptions(SolverOptions* options)
 }
 void recursive_deleteSolverOptions(SolverOptions* op)
 {
+    printf("dzdezerefinition)\n");
 
   if (op)
   {
     for (int i = 0; i < op->numberOfInternalSolvers; i++)
       recursive_deleteSolverOptions(&(op->internalSolvers[i]));
-
+   
     if (op->numberOfInternalSolvers && op->internalSolvers)
       free(op->internalSolvers);
     op->internalSolvers = 0;
@@ -290,11 +291,17 @@ void deleteSolverOptions(SolverOptions* op)
       free(op->dWork);
     op->dWork = NULL;
     if (op->callback)
+    {
       // fix callback->env, callback->endIteration ?
-      free(op->callback);
+      
+      // Note FP: I comment the line below since it results in failure in Yoyo and BeadsPlan example
+      // Don't know (neither really search) why.
+      //free(op->callback);
+      
+      op->callback = NULL;
+    }
   }
 }
-
 
 
 

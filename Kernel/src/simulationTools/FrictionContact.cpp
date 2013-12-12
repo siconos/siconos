@@ -28,20 +28,19 @@
 using namespace RELATION;
 
 
-FrictionContact::FrictionContact(int dimPb, const int newNumericsSolverId):
+FrictionContact::FrictionContact(int dimPb, int newNumericsSolverId):
   LinearOSNS(newNumericsSolverId), _contactProblemDim(dimPb)
 {
   if (dimPb == 2 && newNumericsSolverId == SICONOS_FRICTION_3D_NSGS)
     _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
   _numerics_problem.reset(new FrictionContactProblem);
 
-
   if (dimPb == 2)
     frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   else if (dimPb == 3)
     frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   else
-    RuntimeException::selfThrow("cannot set defaults solver options for other problem dimension than 2 or 3");
+    RuntimeException::selfThrow("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
 }
 
 // xml constructor

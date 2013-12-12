@@ -151,8 +151,6 @@ void Interaction::initialize(double t0)
 
     assert(nslaw() && "Interaction::initialize failed, non smooth law == NULL");
 
-    computeSizeOfDS();
-
     DSIterator itDS;
     for (itDS = dynamicalSystemsBegin(); itDS != dynamicalSystemsEnd(); ++itDS)
     {
@@ -678,20 +676,6 @@ void Interaction::setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw)
 
 // --- OTHER FUNCTIONS ---
 
-void Interaction::computeSizeOfDS()
-{
-  _sizeOfDS = 0;
-  _sizeZ = 0;
-  DSIterator it;
-  SP::SiconosVector ZP;
-  for (it = _involvedDS->begin(); it != _involvedDS->end(); it++)
-  {
-    _sizeOfDS += (*it)->getDim();
-    ZP = (*it)->z();
-    if (ZP) _sizeZ += ZP->size();
-  }
-}
-
 void Interaction::swapInOldVariables()
 {
   // i corresponds to the derivative number and j the relation number.
@@ -796,7 +780,6 @@ void Interaction::saveInteractionToXML()
 
   if (_interactionxml)
   {
-    //  _interactionxml->setDSConcerned( involvedDS );
     _interactionxml->setNumber(_number);
     _interactionxml->setSize(_interactionSize);
     _interactionxml->setY(*(_y[0]));
@@ -844,12 +827,9 @@ void Interaction::saveInteractionToXML()
 
 void Interaction::getLeftInteractionBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const
 {
-
   unsigned int k = 0;
   DSIterator itDS;
-
   itDS = _involvedDS->begin();
-
   // look for ds and its position in G
   while (*itDS != ds && itDS != dynamicalSystemsEnd())
   {
@@ -963,7 +943,6 @@ void Interaction::getRightInteractionBlockForDS(SP::DynamicalSystem ds, SP::Sico
   if ((*itDS)->getDim() != InteractionBlock->size(0))
     RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): inconsistent sizes between InteractionBlock and DS");
 
-
   SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
   RELATION::TYPES relationType = relation()->getType();
 
@@ -1004,8 +983,6 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) c
   // thanks to the nslaw (by "increasing" its dimension).
 
   SP::SiconosMatrix D = relation()->jachlambda();
-  //  if(relation()->getNumberOfJacobiansForH()>1)
-
   if (!D)
   {
     InteractionBlock->zero();

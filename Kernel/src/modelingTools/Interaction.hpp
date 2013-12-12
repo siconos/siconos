@@ -25,7 +25,6 @@
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
-// const
 #include "DynamicalSystemsSet.hpp"
 #include "RelationNamespace.hpp"
 
@@ -724,9 +723,17 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** compute sum of all interaction-involved DS sizes
+  /** set interaction 'ds-dimension', i.e. sum of all sizes of the dynamical systems linked
+      by the current interaction. This must be done by topology during call to link(inter, ds, ...).
+      \param int sum of ds sizes
+      \param int sum of sizes of z components of the ds.
   */
-  void computeSizeOfDS();
+  inline void setDSSizes(unsigned int s1, unsigned int s2)
+  {
+    _sizeOfDS = s1;
+    _sizeZ = s2;
+
+  }
 
   /**   put values of y into yOld, the same for _lambda
   */

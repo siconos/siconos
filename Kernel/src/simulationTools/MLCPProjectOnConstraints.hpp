@@ -64,7 +64,7 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param std::string: id of the problem (default = "unamed")
    */
-  MLCPProjectOnConstraints(const int newNewNumericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
+  MLCPProjectOnConstraints(int newNewNumericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
 
   /** destructor
   */
@@ -98,10 +98,7 @@ public:
   /** print the data to the screen
   */
   void display() const;
-  void saveInMemory()
-  {
-    ;
-  }
+
   virtual void initOSNSMatrix();
 
   /** compute interactionBlocks if necessary (this depends on the type of
@@ -148,5 +145,4 @@ public:
 
 };
 
-TYPEDEF_SPTR(MLCPProjectOnConstraints)
 #endif // MLCPProjectOnConstraints_H

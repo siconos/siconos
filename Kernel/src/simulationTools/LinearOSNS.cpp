@@ -176,34 +176,19 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   // At most 2 DS are linked by an Interaction
   SP::DynamicalSystem DS1;
   SP::DynamicalSystem DS2;
-
+  
+  // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex) ---
   if (indexSet->properties(vd).source != indexSet->properties(vd).target)
   {
     DEBUG_PRINT("a two DS Interaction\n");
     DS1 = indexSet->properties(vd).source;
     DS2 = indexSet->properties(vd).target;
-
   }
   else
   {
     DEBUG_PRINT("a single DS Interaction\n");
     DS1 = indexSet->properties(vd).source;
     DS2 = DS1;
-
-
-    // IFDEF LINEAROSNS_DEBUG
-    //   STD::COUT<<"\NLINEAROSNS::COMPUTEDIAGONALINTERACTIONBLOCK"<<ENDL;
-    //    STD::COUT << "LEVELMIN()" << LEVELMIN()<<STD::ENDL;
-    //    STD::COUT << "INDEXSET :"<< INDEXSET << STD::ENDL;
-    //    STD::COUT << "VD :"<< VD << STD::ENDL;
-    //   INDEXSET->DISPLAY();
-    //    STD::COUT << "DS1 :" << STD::ENDL;
-    //   DS1->DISPLAY();
-    //    STD::COUT << "DS2 :" << STD::ENDL;
-    //   DS2->DISPLAY();
-    // #ENDIF
-
-
     InteractionsGraph::OEIterator oei, oeiend;
     for (std11::tie(oei, oeiend) = indexSet->out_edges(vd);
          oei != oeiend; ++oei)
@@ -219,36 +204,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   }
   assert(DS1);
   assert(DS2);
-
-
-  /*
-    SP::DynamicalSystemsSet commonDS = inter->dynamicalSystems();
-    assert (!commonDS->isEmpty()) ;
-    for (DSIterator itDS = commonDS->begin(); itDS!=commonDS->end(); itDS++)
-    {
-    assert (*itDS == DS1 || *itDS == DS2);
-    }
-  */
-
-  unsigned int nslawSize = inter->nonSmoothLaw()->size();
-
-  //   if (! indexSet->properties(vd).block)
-  //   {
-  //     indexSet->properties(vd).block.reset(new SimpleMatrix(nslawSize, nslawSize));
-  //   }
-
+  
+  // --- Check block size ---
   assert(indexSet->properties(vd).block->size(0) == inter->nonSmoothLaw()->size());
   assert(indexSet->properties(vd).block->size(1) == inter->nonSmoothLaw()->size());
 
+  // --- Compute diagonal block ---
+  // Block to be set in OSNS Matrix, corresponding to
+  // the current interaction 
   SP::SiconosMatrix currentInteractionBlock = indexSet->properties(vd).block;
-
-  // Get the W and Theta maps of one of the Interaction -
-  // Warning: in the current version, if OSI!=Moreau, this fails.
-  // If OSI = MOREAU, centralInteractionBlocks = W if OSI = LSODAR,
-  // centralInteractionBlocks = M (mass matrices)
-  MapOfDSMatrices centralInteractionBlocks;
-  getOSIMaps(inter, centralInteractionBlocks);
-
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock;
 
   RELATION::TYPES relationType;
@@ -261,24 +225,20 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   // simulation type ...  left, right and extra depend on the relation
   // type and the non smooth law.
   relationType = inter->relation()->getType();
-
   inter->getExtraInteractionBlock(currentInteractionBlock);
 
-
-  // loop over the DS
+  unsigned int nslawSize = inter->nonSmoothLaw()->size();
+  // loop over the DS connected to the interaction.
   bool endl = false;
   for (SP::DynamicalSystem ds = DS1; !endl; ds = DS2)
   {
     assert(ds == DS1 || ds == DS2);
-    DEBUG_EXPR(ds->display(););
-
     endl = (ds == DS2);
     unsigned int sizeDS = ds->getDim();
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
     inter->getLeftInteractionBlockForDS(ds, leftInteractionBlock);
-
     DEBUG_EXPR(leftInteractionBlock->display(););
 
     // Computing depends on relation type -> move this in Interaction method?
@@ -310,13 +270,13 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       {
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
-        centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*rightInteractionBlock);
+        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
+        centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
 
         //      integration of r with theta method removed
         //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
         //gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
         *leftInteractionBlock *= h;
-
         prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
         //left = C, right = inv(W).B
       }
@@ -349,22 +309,18 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         DEBUG_EXPR(leftInteractionBlock->display(););
 
       }
-
       // (inter1 == inter2)
-
       DEBUG_EXPR(leftInteractionBlock->display(););
-      DEBUG_EXPR(centralInteractionBlocks[ds->number()]->display(););
-
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
       work->trans();
-      centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*work);
+      SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
+      DEBUG_EXPR(centralInteractionBlock->display(););
+      centralInteractionBlock->PLUForwardBackwardInPlace(*work);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
       //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       //*currentInteractionBlock *=h;
     }
-
-
     else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType);
   }
   DEBUG_PRINT("LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd) ends \n");
@@ -430,9 +386,6 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   // Warning: in the current version, if OSI!=Moreau, this fails.
   // If OSI = MOREAU, centralInteractionBlocks = W if OSI = LSODAR,
   // centralInteractionBlocks = M (mass matrices)
-  MapOfDSMatrices centralInteractionBlocks;
-  getOSIMaps(inter1, centralInteractionBlocks);
-
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock;
 
   RELATION::TYPES relationType1, relationType2;
@@ -470,7 +423,8 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     inter2->getRightInteractionBlockForDS(ds, rightInteractionBlock);
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
-    centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*rightInteractionBlock);
+    SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
+    centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
 
     //      integration of r with theta method removed
     //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
@@ -518,7 +472,8 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     // size checking inside the getBlock function, a
     // getRight call will fail.
     rightInteractionBlock->trans();
-    centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*rightInteractionBlock);
+    SP::SimpleMatrix centralInteractionBlock = getOSIMatrix(ds);
+    centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
     //*currentInteractionBlock +=  *leftInteractionBlock ** work;
     prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
   }

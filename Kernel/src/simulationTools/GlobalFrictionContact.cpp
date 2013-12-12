@@ -78,7 +78,6 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize(sim);
 
-  updateDSBlocks(); //blocks of M
   // updateInteractionDSBlocks(); This computation is not made because, we that InteractionDSBlocks =H^T
   updateInteractionDSBlocks(); // blocks of H
 
@@ -359,7 +358,6 @@ bool GlobalFrictionContact::preCompute(const double time)
   {
     // Computes new interactionBlocks if required
     updateInteractionBlocks();
-    updateDSBlocks(); //blocks of M
     // updateInteractionDSBlocks(); This computation is not made because, we that InteractionDSBlocks =H^T
     updateInteractionDSBlocks(); // blocks of H
 

@@ -25,65 +25,57 @@
 
 #include "SiconosFwd.hpp"
 #include "SimulationTypeDef.hpp"
-#include "NumericsOptions.h"
-#include "NumericsMatrix.h"
-//#include <ctime>
 
 class Simulation;
 class DynamicalSystem;
 class Interaction;
 class SiconosMatrix;
-TYPEDEF_SPTR(NumericsOptions)
-TYPEDEF_SPTR(SolverOptions)
-
-/** default name for the OneStepNSProblem of the simulation */
-const std::string DEFAULT_OSNS_NAME = "unamed";
-
 /** Non Smooth Problem Formalization and Simulation
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
- * This is an abstract class, that provides an interface to define a
- * non smooth problem:
- * -> a formulation (ie the way the problem is written)
- * -> a solver (algorithm and solving formulation, that can be
+ 
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) Apr 26, 2004
+ 
+  This is an abstract class, that provides an interface to define a
+  non smooth problem:
+  -> a formulation (ie the way the problem is written)
+  -> a solver (algorithm and solving formulation, that can be
         different from problem formulation)
- * -> routines to compute the problem solution.
- *
- * The available problem formulation, given by derived classes, are:
- *  - LCP
- *  - FrictionContact2D and 3D
- *  - QP
- *  - Relay
- *
- *  See Solver class or Numerics documentation for details on
- *  algorithm name and parameters.
- *
- *  Note: simulation is a required input for construction of a
- *  OneStepNSProblem.
- *
- * \section osns_options Options for Numerics and the driver for solvers
- *
- *  When the Numerics driver is called, two input arguments are
- *  required to set specific options:
- *  - one for general options in Numerics (verbose mode ...)
- * - the other to set the solver options (name, tolerance, max. number
-      of iterations ...)
- *
- *  The second one is a member of the NonSmoothSolver, and thus filled
- *  during its construction. The general options are set thanks to
- *  specific functions (only setNumericsVerboseMode() at the time).
- *
- *
- * Remark: InteractionMatrixRowIterator will be used to iterate through
- *  what corresponds to rows of interactionBlocks (a row for a
- *  Interaction, named interRow) and for a row,
- *  InteractionMatrixColumnIterator will be used to iterate through
- *  columns, ie through all the Interactions that are linked to
- *  interRow.
- *
+  -> routines to compute the problem solution.
+ 
+  Two types of problem formulation are available :
+   - Quadratic Problem
+   - Linear Problem 
+
+   See derived classes (QP and LinearOSNS) for details. 
+   
+   For Linear problems, the following formulations exists: 
+   - Linear Complementarity (LCP)
+   - Mixed Linear Complementarity (MLCP)
+   - FrictionContact
+   - Relay
+   - Equality
+   - GenericMechanical
+   - OSNSMultipleImpact
+   - GlobalFrictionContact (unstable)
+   
+   The usual way to build and initialize a one-step nonsmooth problem is :
+   - call constructor with the id of the required Numerics solver.
+   (see Solver class or Numerics documentation for details on algorithm name and parameters).
+   - initialize(simulation)
+   Initialize process is usually done through model->initialize(simulation). 
+   See Examples for practical details.
+   
+   \section osns_options Options for Numerics and the driver for solvers
+ 
+   When the Numerics driver is called, two input arguments are
+   required to set specific options:
+   - the global Numerics options (verbose mode ...) --> NumericsOptions
+   - the solver options (name, tolerance, max. number of iterations ...) --> _SolverOptions, \ref NumericsSolver.
+   
+   Default values are always set in solver options the OneStepNSProblem is built
+   but if you need to set them yourself, please see \ref NumericsSolver. 
+    
  */
 class OneStepNSProblem
 {
@@ -95,6 +87,7 @@ protected:
 
   /** Numerics solver id */
   int _numerics_solver_id;
+
   /** Numerics structure used to solve solver options */
   SP::SolverOptions _numerics_solver_options;
 
@@ -110,7 +103,7 @@ protected:
   /** level of index sets that is considered by this osnsp */
   unsigned int _indexSetLevel;
 
-  /** level of input ans output variables that is considered by this osnsp
+  /** level of input and output variables ofs osnsp.
    *  We consider that the osnsp conputes y[_inputOutputLevel] and lambda[_inputOutputLevel]
    */
   unsigned int _inputOutputLevel;
@@ -133,7 +126,7 @@ protected:
       Numerics functions calls */
   SP::NumericsOptions _numerics_options;
 
-  /*During Newton it, this flag allow to update the numerics matrices only once if necessary.*/
+  /*During Newton it, this flag allows to update the numerics matrices only once if necessary.*/
   bool _hasBeenUpdated;
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -163,7 +156,7 @@ public:
 
   /** destructor
    */
-  virtual ~OneStepNSProblem();
+  virtual ~OneStepNSProblem(){};
 
   // --- GETTERS/SETTERS ---
 
@@ -320,11 +313,6 @@ public:
    */
   virtual void updateInteractionBlocks();
 
-  /** computes all diagonal and extra-diagonal interactionBlock-matrices
-   *  useless ?
-   */
-  virtual void computeAllInteractionBlocks();
-
   /** compute extra-diagonal interactionBlock-matrix
    *  \param an edge descriptor
    */
@@ -334,15 +322,6 @@ public:
    * \param a vertex descriptor
    */
   virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&) = 0;
-
-  /** compute DSBlocks if necessary (this depends on the type of
-      OSNS, on the indexSets ...)
-  */
-  void updateDSBlocks();
-
-  /** computes all  DSBlock-matrices
-   */
-  void computeAllDSBlocks();
 
   /**
    * return _hasBeenUpdated
@@ -358,12 +337,6 @@ public:
   {
     _hasBeenUpdated = v;
   }
-
-  /** computes DSBlock-matrix that corresponds to DS1
-   *  Move this to Interaction class?
-   *  \param a pointer to DynamicalSystem DS1
-   */
-  virtual void computeDSBlock(SP::DynamicalSystem);
 
   /** initialize the problem(compute topology ...)
       \param the simulation, owner of this OSNSPB
@@ -391,11 +364,12 @@ public:
   virtual void saveNSProblemToXML() = 0;
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
-   * (Ex: for Moreau, W)
-   *  \param a pointer to Interaction
-   *  \param a MapOfDSMatrices(in-out parameter)
-   */
-  virtual void getOSIMaps(SP::Interaction inter, MapOfDSMatrices&);
+      (Ex: for Moreau, W)
+      \param[in] SP::DynamicalSystem, the concerned dynamical system
+      \param[in,out] SP::SicnosMatrix the required matrix (pointer, no need
+      to allocate block before call).
+  */
+  SP::SimpleMatrix getOSIMatrix(SP::DynamicalSystem ds);
 
   /** visitors hook
    */

@@ -406,73 +406,6 @@ void OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet)
   }
 }
 
-void OneStepNSProblem::computeAllInteractionBlocks()
-{
-  assert(0);
-}
-
-void OneStepNSProblem::updateDSBlocks()
-{
-  // The present functions checks various conditions and possibly compute DSBlocks matrices.
-  //
-  // Let interi and interj be two Interactions.
-  //
-  // Things to be checked are:
-  //  1 - is the topology time invariant?
-  //  2 - does DSBlocks[DSi] already exists (ie has been computed in a previous time step)?
-  //  3 - do we need to compute this DSBlock? A DSBlock is to be computed if DSi is concerned by a Interactionin IndexSet1
-  //
-  // The possible cases are:
-  //
-  //  - If 1 and 2 are true then it does nothing. 3 is not checked.
-  //  - If 1 == true, 2 == false, 3 == false, it does nothing.
-  //  - If 1 == true, 2 == false, 3 == true, it computes the interactionBlock.
-  //  - If 1==false, 2 is not checked, and the interactionBlock is computed if 3==true.
-  //
-
-  // \warning We decided to include all dynamical systems test 3 is not satisfied
-
-
-  //   bool isTimeInvariant= simulation()->model()->nonSmoothDynamicalSystem()
-  //     ->topology()->isTimeInvariant();
-  //   SP::DynamicalSystemsSet allDS = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
-  //   DSIterator itDS;
-  //   for(itDS = allDS->begin(); itDS!=allDS->end();++itDS)
-  //     {
-  //       if(!isTimeInvariant)
-  //  computeDSBlock(*itDS);
-  //       else // if(isTimeInvariant)
-  //  {
-  //    if( (DSBlocks.find(*itDS)) != DSBlocks.end())  // if interactionBlocks[inter1] exists
-  //      {
-  //        ; // do nothing
-  //      }
-  //    else computeDSBlock(*itDS);
-  //  }
-  //     }
-
-}
-
-void OneStepNSProblem::computeAllDSBlocks()
-{
-  assert(0);
-  //  SP::DynamicalSystemsSet allDS;
-  //   DSIterator itDS;
-  //   allDS = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
-  //   for(itDS = allDS->begin(); itDS!=allDS->end();++itDS)
-  //     computeDSBlock(*itDS);
-}
-
-void OneStepNSProblem::computeDSBlock(SP::DynamicalSystem)
-{
-  RuntimeException::selfThrow
-  ("OneStepNSProblem::computeDSBlock - not yet implemented for problem type ="
-  );
-}
-
-
 void OneStepNSProblem::initialize(SP::Simulation sim)
 {
   // Link with the simulation that owns this osnsp
@@ -484,13 +417,6 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   // === Adds this in the simulation set of OneStepNSProblem === First
   // checks the id if required.  An id is required if there is more
   // than one OneStepNSProblem in the simulation
-
-  //    if( !(simulation()->oneStepNSProblems())->empty() && _id ==
-  //      DEFAULT_OSNS_NAME)
-  //      RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since
-  //      the simulation has several one step non smooth problem, an
-  //      id is required for each of them.");
-
 
   // The maximum size of the problem (for example, the dim. of M in
   // LCP or Friction problems).  Set to the number of possible scalar
@@ -508,94 +434,88 @@ void OneStepNSProblem::saveNSProblemToXML()
   RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - Not yet implemented");
 }
 
-void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centralInteractionBlocks)
+SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::DynamicalSystem ds)
 {
-  // === OSI = MOREAU : gets W matrices ===
-  // === OSI = LSODAR : gets M matrices of each DS concerned by the Interaction ===
-  DEBUG_PRINT("OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centralInteractionBlocks) starts");
+  // Connect block to the OSI matrix of a dynamical system for the current simulation.
+  // Matrix depends on OSI type.
+  SP::SimpleMatrix block;
   SP::OneStepIntegrator Osi;
   OSI::TYPES osiType; // type of the current one step integrator
   Type::Siconos dsType; // type of the current Dynamical System
-  DSIterator itDS = inter->dynamicalSystemsBegin();
-  while (itDS != (inter->dynamicalSystemsEnd()))
+  
+  // get OneStepIntegrator defined for the dynamical system
+  Osi = simulation()->integratorOfDS(ds); 
+  osiType = Osi->getType();
+  dsType = Type::value(*ds);
+  
+  if (osiType == OSI::MOREAU
+      || osiType == OSI::MOREAUPROJECTONCONSTRAINTSOSI
+      || osiType == OSI::SCHATZMANPAOLI)
   {
-    Osi = simulation()->integratorOfDS(*itDS); // get OneStepIntegrator of current dynamical system
-    osiType = Osi->getType();
-    unsigned int itN = (*itDS)->number();
-    dsType = Type::value(**itDS);
+    if (dsType != Type::NewtonEulerDS)
+      block = (std11::static_pointer_cast<Moreau> (Osi))->W(ds); // get its W matrix ( pointer link!)
+    else
+      block = (std11::static_pointer_cast<NewtonEulerDS> (ds))->luW(); // get its W matrix ( pointer link!)
+  }
+  else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
+  {
+    if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Lsodar Integrator with dynamical system of type " + dsType);
 
-    if (osiType == OSI::MOREAU
-        || osiType == OSI::MOREAUPROJECTONCONSTRAINTSOSI
-        || osiType == OSI::SCHATZMANPAOLI)
+    // get lu-factorized mass
+    block = (std11::static_pointer_cast<LagrangianDS>(ds))->massLU();
+  }
+  else if (osiType == OSI::NEWMARKALPHAOSI)
+  {
+    if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
     {
-      if (dsType != Type::NewtonEulerDS)
-        centralInteractionBlocks[itN] = (std11::static_pointer_cast<Moreau> (Osi))->W(*itDS); // get its W matrix ( pointer link!)
-      else
-        centralInteractionBlocks[itN] = (std11::static_pointer_cast<NewtonEulerDS> (*itDS))->luW(); // get its W matrix ( pointer link!)
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + dsType);
     }
-    else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
+    //
+    SP::OneStepNSProblems  allOSNS  = Osi->simulation()->oneStepNSProblems();
+    // If LCP at acceleration level
+    if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this) 
     {
-      if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-        RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Lsodar Integrator with dynamical system of type " + dsType);
-
-      // get lu-factorized mass
-      centralInteractionBlocks[itN] =
-        (std11::static_pointer_cast<LagrangianDS>(*itDS))->massLU();
+      block = (std11::static_pointer_cast<LagrangianDS>(ds))->massLU();
     }
-    else if (osiType == OSI::NEWMARKALPHAOSI)
+    else // It LCP at position level
     {
-      if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      {
-        RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + dsType);
-      }
-      //
-      SP::OneStepNSProblems  allOSNS  = Osi->simulation()->oneStepNSProblems();
-      if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this) // If LCP at acceleration level
-      {
-        centralInteractionBlocks[itN] = (std11::static_pointer_cast<LagrangianDS>(*itDS))->massLU();
-      }
-      else // It LCP at position level
-      {
-        centralInteractionBlocks[itN] = (std11::static_pointer_cast<NewMarkAlphaOSI>(Osi))->W(*itDS);
-      }
+      block = (std11::static_pointer_cast<NewMarkAlphaOSI>(Osi))->W(ds);
     }
-    else if (osiType == OSI::D1MINUSLINEAR)
+  } // End Newmark OSI
+  else if (osiType == OSI::D1MINUSLINEAR)
+  {
+    DEBUG_PRINT("OneStepNSProblem::getOSIMatrix  for osiType   OSI::D1MINUSLINEAR");
+    /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all OSNSP*/
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      DEBUG_PRINT("OneStepNSProblem::getOSIMaps  for osiType   OSI::D1MINUSLINEAR");
-      /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all OSNSP*/
-      if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-      {
-        (std11::static_pointer_cast<LagrangianDS>(*itDS))->computeMass();
-        (std11::static_pointer_cast<LagrangianDS>(*itDS))->mass()->resetLU();
-        DEBUG_EXPR(((std11::static_pointer_cast<LagrangianDS>(*itDS))->mass())->display(););
-        centralInteractionBlocks[itN].reset(new SimpleMatrix(*((std11::static_pointer_cast<LagrangianDS>(*itDS))->mass())));
-      }
-      else if (dsType == Type::NewtonEulerDS)
-      {
-        SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*itDS);
-        //   d->computeMass();
-        //   d->mass()->resetLU();
-        DEBUG_EXPR(d->mass()->display(););
-        centralInteractionBlocks[itN].reset(new SimpleMatrix(*(d->mass())));
-      }
-      else
-        RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for D1MinusLinear integrator with dynamical system of type " + dsType);
-
-
-
+      (std11::static_pointer_cast<LagrangianDS>(ds))->computeMass();
+      (std11::static_pointer_cast<LagrangianDS>(ds))->mass()->resetLU();
+      DEBUG_EXPR(((std11::static_pointer_cast<LagrangianDS>(ds))->mass())->display(););
+      block.reset(new SimpleMatrix(*((std11::static_pointer_cast<LagrangianDS>(ds))->mass())));
     }
-    // for ZeroOrderHold, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
-    else if (osiType == OSI::ZOH)
+    else if (dsType == Type::NewtonEulerDS)
     {
-      if (!centralInteractionBlocks[itN])
-        centralInteractionBlocks[itN].reset(new SimpleMatrix((std11::static_pointer_cast<ZeroOrderHold>(Osi))->Ad(*itDS)));
-      else
-        *centralInteractionBlocks[itN] = (std11::static_pointer_cast<ZeroOrderHold>(Osi))->Ad(*itDS);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+      //   d->computeMass();
+      //   d->mass()->resetLU();
+      DEBUG_EXPR(d->mass()->display(););
+      block.reset(new SimpleMatrix(*(d->mass())));
     }
     else
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);
-    ++itDS;
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinear integrator with dynamical system of type " + dsType);
   }
+  // for ZeroOrderHold, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
+  else if (osiType == OSI::ZOH)
+  {
+    if (!block)
+      block.reset(new SimpleMatrix((std11::static_pointer_cast<ZeroOrderHold>(Osi))->Ad(ds)));
+    else
+      *block = (std11::static_pointer_cast<ZeroOrderHold>(Osi))->Ad(ds);
+  }
+  else
+    RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Integrator of type " + osiType);
+  return block;
 }
 
 void OneStepNSProblem::printStat()
@@ -603,8 +523,4 @@ void OneStepNSProblem::printStat()
   std::cout << " CPU time for solving : " << _CPUtime / (double)CLOCKS_PER_SEC <<std::endl;
   std::cout << " Number of iterations done: " << _nbIter <<std::endl;
 }
-
-OneStepNSProblem::~OneStepNSProblem()
-{}
-
 

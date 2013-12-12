@@ -43,7 +43,6 @@ void MLCP2::initialize(SP::Simulation simulation)
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
-  updateDSBlocks();
   updateDSInteractionBlocks();
   DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (DSSet->begin() == DSSet->end())

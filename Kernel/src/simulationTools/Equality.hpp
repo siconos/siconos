@@ -26,40 +26,27 @@
 #include "LinearOSNS.hpp"
 
 /** Formalization and Resolution of a Linear Complementarity Problem (Equality)
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
- * \section Equalityintro Aim of the Equality class
- *
- * This class is devoted to the formalization and the resolution of the
- * Linear system (Equality) defined by :
- *  \f[
- * 0 = w =  q + M z
- * \f]
- * where
- *    - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
- *    - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
- *
- *  The Equality main components are:
- *  - a problem (variables M,q and size of the problem), which directly corresponds to the LinearComplementarityProblem structure of Numerics
- *  - the unknowns z and w
- *
- *  A Equality is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
- *  IndexSets from simulation are used to know which constraints (Interaction) are active or not. \n
- *
- * \b Construction:
- *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
- *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
- * Main functions:
- *
- * \b Main functions:
- *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
- *  the interactionBlock-matrices saved in the field interactionBlocks.\n
- *
- *
- */
+ 
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) Apr 26, 2004
+ 
+  \section Equalityintro Aim of the Equality class
+ 
+  This class is devoted to the formalization and the resolution of the
+  Linear system (Equality) defined by :
+   \f[
+  0 = w =  q + M z
+  \f]
+  where
+     - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
+     - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+ 
+   The Equality main components are:
+   - a problem (variables M,q and size of the problem), which directly corresponds to the LinearComplementarityProblem structure of Numerics
+   - the unknowns z and w
+ 
+*/
 class Equality : public LinearOSNS
 {
 private:
@@ -78,7 +65,7 @@ public:
   /** constructor
       \param int id of numerics solver
   */
-  Equality(const int newNumericsSolverId = 0): LinearOSNS(newNumericsSolverId) {};
+  Equality(int newNumericsSolverId = 0): LinearOSNS(newNumericsSolverId) {};
   
   /** destructor
    */
@@ -109,7 +96,5 @@ public:
   static Equality* convert(OneStepNSProblem* osnsp);
 
 };
-
-TYPEDEF_SPTR(Equality)
 
 #endif // Equality_H

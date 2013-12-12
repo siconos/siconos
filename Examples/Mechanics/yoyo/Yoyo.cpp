@@ -118,16 +118,17 @@ int main(int argc, char* argv[])
 
       // déscrétisation du temps
       SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-      SP::TimeStepping s(new TimeStepping(t));
+
       // -- OneStepIntegrators --
       SP::Moreau OSI(new Moreau(yoyo, theta));
-      s->insertIntegrator(OSI);
+   
       // -- OneStepNsProblem --
       SP::OneStepNSProblem osnspb(new LCP());
-      s->insertNonSmoothProblem(osnspb);
+   
+      SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
+
       // --- Model initialization ---
       jeu->initialize(s);
-
 
       q = yoyo->q();
       v = yoyo->velocity();
@@ -199,11 +200,9 @@ int main(int argc, char* argv[])
         jeu->nonSmoothDynamicalSystem()->link(inter, yoyo);
   
         t.reset(new TimeDiscretisation(t0, h));
-        s.reset(new TimeStepping(t));
         OSI.reset(new Moreau(yoyo, theta));
-        s->insertIntegrator(OSI);
         osnspb.reset(new LCP());
-        s->insertNonSmoothProblem(osnspb);
+        s.reset(new TimeStepping(t, OSI, osnspb));
         jeu->initialize(s);
   
         q = yoyo->q();

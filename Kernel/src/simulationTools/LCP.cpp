@@ -39,7 +39,7 @@ LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml) :
   linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
 }
 
-LCP::LCP(const int newNewNumericsSolverId):
+LCP::LCP(int newNewNumericsSolverId):
   LinearOSNS(newNewNumericsSolverId)
 {
   _numerics_problem.reset(new LinearComplementarityProblem);

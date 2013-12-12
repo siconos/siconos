@@ -101,6 +101,7 @@ int main(int argc, char* argv[])
     // link the interaction and the dynamical system
     bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
 
+    std::cout << inter->getSizeOfDS() << std::endl;;
 
     // ------------------
     // --- Simulation ---
@@ -151,6 +152,10 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
+    
+    SP::SiconosMatrix block;
+    block = osnspb->getOSIMatrix(ball);
+    block->display();
 
     while (s->hasNextEvent())
     {

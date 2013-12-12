@@ -1,11 +1,28 @@
-//This is the header file for the class OSNSMultipleImpact
-//==========================================================================================
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
+/*! \file MLCP.hpp
+\brief Linear Complementarity Problem formulation and solving
+*/
+
 #ifndef _OSNSMULTIPLEIMPACT_
 #define _OSNSMULTIPLEIMPACT_
-//-----------------------------------------------------------------------------------------
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
-#include "SiconosPointers.hpp"
+
 #include "LinearOSNS.hpp"
 #include<fstream>
 #include <string>
@@ -15,6 +32,11 @@ using namespace RELATION;
 const double DEFAULT_TOL_IMPACT = MACHINE_PREC;
 const double DEFAULT_TOL_VEL = MACHINE_PREC;
 const double DEFAULT_TOL_ENER = MACHINE_PREC;
+
+/** Formalization and Resolution of a Multiple Impact Non-Smooth problem.
+
+\todo write a short introduction about OSNSMultipleImpact ...
+ */
 class OSNSMultipleImpact : public LinearOSNS
 {
 private:
@@ -22,215 +44,219 @@ private:
   */
   ACCEPT_SERIALIZATION(OSNSMultipleImpact);
 
-  // Time-like variable (Impulse)
+  //! Time-like variable (Impulse)
   double Impulse_variable;
-  // Time variable
+  //! Time variable
   double Time_variable;
-  // Number of contacts (only the active contacts)
+  //! Number of contacts (only the active contacts)
   unsigned int Ncontact;
-  // Maximal number of steps for each computation
+  //! Maximal number of steps for each computation
   unsigned int NstepMax;
-  // Tolerance to define zero
+  //! Tolerance to define zero
   double TOL_IMPACT;
-  // Type of the compliance model
+  //! Type of the compliance model
   std::string TypeCompLaw;
   //Velocity of bodies during impact
   //SP::SiconosVector VelAllBody;
   // Relative velocity at all Interactions (with or without contact)
   //SP::SiconosVector VelAllIteractions;
-  // Relative velocity during impact (at the end of each calculation step)
+  //! Relative velocity during impact (at the end of each calculation step)
   SP::SiconosVector VelContact;
-  // Relative velocity during impact (at the beginning of each calculation step)
+  //! Relative velocity during impact (at the beginning of each calculation step)
   SP::SiconosVector OldVelContact;
-  // Potential energy during impact (at the end of each calculation step)
+  //! Potential energy during impact (at the end of each calculation step)
   SP::SiconosVector EnerContact;
-  // Work done during the last compression phase at contact
+  //! Work done during the last compression phase at contact
   SP::SiconosVector WcContact;
-  // Distribution vector to distribute the incremental impulse at contact
+  //! Distribution vector to distribute the incremental impulse at contact
   SP::SiconosVector DistriVector;
-  // State of contacts at the beginning of impact
-  // if *StateContact[i] = 0 => no impact at this contact (at contact with positive relative velocity and no potential energy, may be the impact has been terminated at this contact)
-  // if *StateContact[i] = 1 => impact takes place at this contact without potential energy (beginning of impact or repeating impact)
-  // if *StateContact[i] = 2 => impact takes place with not-zero potential energy
+  /** State of contacts at the beginning of impact
+   if *StateContact[i] = 0 => no impact at this contact (at contact with positive relative velocity and no potential energy, may be the impact has been terminated at this contact)
+   if *StateContact[i] = 1 => impact takes place at this contact without potential energy (beginning of impact or repeating impact)
+   if *StateContact[i] = 2 => impact takes place with not-zero potential energy */
   SP::IndexInt StateContact;
-  //Stiffness at contacts
+  //!Stiffness at contacts
   SP::SiconosVector  Kcontact;
-  // Restitution coefficient of contacts
+  //! Restitution coefficient of contacts
   SP::SiconosVector ResContact;
-  // Elasticity coefficient of contacts
+  //! Elasticity coefficient of contacts
   SP::SiconosVector ElasCoefContact;
-  // Incremental impulse at contacts
+  //! Incremental impulse at contacts
   SP::SiconosVector DelImpulseContact;
-  // Total impulse at contacts
+  //! Total impulse at contacts
   SP::SiconosVector TolImpulseContact;
-  // Impulse at contacts for each update time
+  //! Impulse at contacts for each update time
   SP::SiconosVector ImpulseContact_update;
-  // Force at contacts
+  //! Force at contacts
   SP::SiconosVector ForceContact;
-  // Flag to select the primary contact based on the relative velocity or on the potential energy
-  // at contacts
-  // if SelectPrimaConInVel = true => select the primary contact according to the relative velocity
-  // at contact
-  // if SelectPrimaConInVel = false => select the primary contact according to the potential energy
-  // at contact
+  /** Flag to select the primary contact based on the relative velocity or on the potential energy
+   at contacts
+   if SelectPrimaConInVel = true => select the primary contact according to the relative velocity
+   at contact
+   if SelectPrimaConInVel = false => select the primary contact according to the potential energy
+   at contact */
   bool SelectPrimaConInVel;
-  // ID of the primary contact
+  //! ID of the primary contact
   unsigned int IdPrimaContact;
-  // Indicator about the selection of the primary contact
-  // true if primary contact is selected according to the potential energy
-  // false if primary contact is selected according to the relative velocity
+  /** Indicator about the selection of the primary contact
+      true if primary contact is selected according to the potential energy
+      false if primary contact is selected according to the relative velocity */
   bool IsPrimaConEnergy;
-  // Relative velocity at primary contact
+  //! Relative velocity at primary contact
   double VelAtPrimaCon;
-  // Potential energy at primary contact
+  //! Potential energy at primary contact
   double EnerAtPrimaCon;
-  // Step size for the iterative calculation
+  //! Step size for the iterative calculation
   double DeltaP;
-  // ofstream objet to save the data during impact
+  //! ofstream objet to save the data during impact
   std::ofstream OutputFile;
-  // Name of file into which the datat is writen
+  //! Name of file into which the datat is writen
   std::string  NameFile;
-  // YesWriteData = true ==>save the data during impact
-  // YesWriteData = false ==> not save the data during impact
+  /** YesWriteData = true ==>save the data during impact
+      YesWriteData = false ==> not save the data during impact */
   bool YesSaveData;
-  // bool variable to set the step size for multiple impact computation
-  // If IsNumberOfStepsEst = true ==> estimate the step size from the state of the dynamic system before impact and the number of step needed
-  // Number of steps after which the data is saved
-  unsigned int NstepSave; // If IsNumberOfStepsEst = false ==> user choose the step size
-  // Matrix on which the data during impact is saved
+  /** bool variable to set the step size for multiple impact computation
+      If IsNumberOfStepsEst = true ==> estimate the step size from the state of the dynamic system before impact and the number of step needed
+      Number of steps after which the data is saved */
+  unsigned int NstepSave; //! If IsNumberOfStepsEst = false ==> user choose the step size
+  //! Matrix on which the data during impact is saved
   SP::SiconosMatrix _DataMatrix;
-  // Number of points to be save during impacts
+  //! Number of points to be save during impacts
   unsigned int SizeDataSave;
-  // indicator on the termination of the multiple impact process
-  // _IsImpactEnd = true: impact is terminated
-  // _IsImpactEnd = false: otherwise
+  /** indicator on the termination of the multiple impact process
+      _IsImpactEnd = true: impact is terminated
+      _IsImpactEnd = false: otherwise */
   bool _IsImpactEnd;
-  // Tolerance to define a negligeble value for a velocity grandeur
+  //! Tolerance to define a negligeble value for a velocity grandeur
   double _Tol_Vel;
-  // Tolerance to define a negligeable value for a potential energy grandeur
+  //! Tolerance to define a negligeable value for a potential energy grandeur
   double _Tol_Ener;
-  // Epsilon to define a zero value for relative velocity in termination condition
+  //! Epsilon to define a zero value for relative velocity in termination condition
   double _ZeroVel_EndIm;
-  // Epsilon to define a zero value for potential energy in termination condition
+  //! Epsilon to define a zero value for potential energy in termination condition
   double _ZeroEner_EndIm;
-  // we start to save data from Step_min_save to Step_min_save
+  //! we start to save data from Step_min_save to Step_min_save
   unsigned int Step_min_save, Step_max_save;
 public:
-  //Default constructor
+  //!Default constructor
   OSNSMultipleImpact();
-  //Constructor from data (step size is required here)
-  //1st parameter: the type of the compliance law
-  //3rd parameter: step size estimated
+  /** Constructor from data (step size is required here)
+      \param  the type of the compliance law
+      \param step size estimated
+  */
   OSNSMultipleImpact(std::string, double);
-  //Destructor
+  //!Destructor
   ~OSNSMultipleImpact();
-  //To get the type of the compliance law at contact
+  //!To get the type of the compliance law at contact
   inline std::string getTypeCompLaw() const
   {
     return TypeCompLaw;
   };
-  //To set the type of the compliance law
+  //!To set the type of the compliance law
   void setTypeCompLaw(std::string newTypeLaw);
-  // To set the tolerance to define zero
+  //! To set the tolerance to define zero
   void setTolImpact(double newTolZero);
-  // To get the tolerance to define zero
+  //! To get the tolerance to define zero
   inline double getTolImpact()
   {
     return TOL_IMPACT;
   };
-  // To set the flag to save the data during impact or not
+  //! To set the flag to save the data during impact or not
   void SetYesSaveData(bool var);
-  // To set the name for the output file
+  //! To set the name for the output file
   void SetNameOutput(std::string file_name);
-  // To get step size
+  //! To get step size
   inline double GetStepSize()
   {
     return DeltaP;
   };
-  // To get the duration of multiple impacts process
+  //! To get the duration of multiple impacts process
   inline double DurationImpact()
   {
     return Time_variable;
   };
-  // To set the variable NstepSave
+  //! To set the variable NstepSave
   void SetNstepSave(unsigned int var);
-  // To set the maximal number of steps allowed for each computation
+  //! To set the maximal number of steps allowed for each computation
   void SetNstepMax(unsigned int var);
-  // Set number of points to be saved during impact
+  //! Set number of points to be saved during impact
   void SetSizeDataSave(unsigned int);
-  // Set tolerence to define whether or not a velocity is zero
+  //! Set tolerence to define whether or not a velocity is zero
   void SetTolVel(double);
-  // Set tolerence to define whether or not a potential energy is zero
+  //! Set tolerence to define whether or not a potential energy is zero
   void SetTolEner(double);
-  // Set epsilon _ZeroVel_EndIm
+  //! Set epsilon _ZeroVel_EndIm
   void SetZeroVelEndImp(double);
-  // Set epsilon _ZeroEner_EndIm
+  //! Set epsilon _ZeroEner_EndIm
   void SetZeroEnerEndImp(double);
-  // Set the step number to start the data save and step number to stop save
+  //! Set the step number to start the data save and step number to stop save
   void SetStepMinMaxSave(unsigned int, unsigned int);
-  // To compare a double number with zero
+  //! To compare a double number with zero
   bool isZero(const double);
-  // To compare a velocity grandeur with zero
+  //! To compare a velocity grandeur with zero
   bool isVelNegative(const double);
-  // To compare an energy grandeur with zero
+  //! To compare an energy grandeur with zero
   bool isEnerZero(const double);
-  // To select the pramary contact
+  //! To select the pramary contact
   void SelectPrimaContact();
-  // Calculate the vector of distributing rule
+  //! Calculate the vector of distributing rule
   void ComputeDistriVector();
-  // Compute the normal imulse at contacts
+  //! Compute the normal imulse at contacts
   void ComputeImpulseContact();
-  // Compute the relative velocity at contacts
+  //! Compute the relative velocity at contacts
   void ComputeVelContact();
-  // Compute the potential energy at contacts during each computation step
+  //! Compute the potential energy at contacts during each computation step
   void ComputeEnerContact();
-  // Compute the velocity of the bodies during impact
+  //! Compute the velocity of the bodies during impact
   void UpdateDuringImpact();
-  // Run the iterative procedure to solve the multiple impact problem
+  //! Run the iterative procedure to solve the multiple impact problem
   void ComputeImpact();
-  // Post-compute for multiple impacts
+  //! Post-compute for multiple impacts
   void PostComputeImpact();
-  // Check if the multiple impacts process is terminated or not
+  //! Check if the multiple impacts process is terminated or not
   bool IsMulImpactTerminate();
-  // To allocate the memory
+  //! To allocate the memory
   void AllocateMemory();
-  // To build the vector of stiffnesses and restitution coefficient at contacts
+  //! To build the vector of stiffnesses and restitution coefficient at contacts
   void BuildParaContact();
-  // To get the velocity of bodies, relative velocity and potential energy at the beginning of impact
+  //! To get the velocity of bodies, relative velocity and potential energy at the beginning of impact
   void InitializeInput();
-  // To check the state of contacts during impact
+  //! To check the state of contacts during impact
   void CheckStateContact();
-  // Pre-compute for multiple impacs
+  //! Pre-compute for multiple impacs
   void PreComputeImpact();
-  // To get the primary contact according to the relative velocity
-  // In this case, the primary contact correspond to the contact at which the relative velocity
-  // is minimum (the relative velocity for two approching bodies is negative so the magnitude of
-  // the relative velocity at the primary contact is maximum)
+  /** To get the primary contact according to the relative velocity
+      In this case, the primary contact correspond to the contact at which the relative velocity
+      is minimum (the relative velocity for two approching bodies is negative so the magnitude of
+      the relative velocity at the primary contact is maximum)
+  */
   void PrimConVelocity();
-  // To get the primary contact according to the potential energy. In this case, the primary
-  // contact corresponds to the one at which the potential energy is maximum
+  /** To get the primary contact according to the potential energy. In this case, the primary
+      contact corresponds to the one at which the potential energy is maximum
+  */
   void PrimConEnergy();
-  // To decide if the primary contact is selected according to the relative velocity or to the
-  // potential energy. The first case happens when there is no potential energy at any contact
+  /** To decide if the primary contact is selected according to the relative velocity or to the
+      potential energy. The first case happens when there is no potential energy at any contact
+  */
   bool IsEnermaxZero();
-  // Verify if the minimum relative velocity at contacts is negative or not
+  //! Verify if the minimum relative velocity at contacts is negative or not
   bool IsVcminNegative();
-  // compute the unknown post-impact relative velocity and post-impact impulse
+  //! compute the unknown post-impact relative velocity and post-impact impulse
   int compute(double);
-  //initialize
+  //!initialize
   void initialize(SP::Simulation);
-  // print the data to the screen
+  //! print the data to the screen
   void display() const;
-  // To write a SiconosVector into a matrix
-  // row and columns positions starting to write
+  //! To write a SiconosVector into a matrix
+  //! row and columns positions starting to write
   void WriteVectorIntoMatrix(const SiconosVector, const unsigned int, const unsigned int);
-  // Save data for each step
-  // parameter: ith pointer to be save
+  //! Save data for each step
+  //! parameter: ith pointer to be save
   void SaveDataOneStep(unsigned int);
-  // Estimate size of data matrix
+  //! Estimate size of data matrix
   unsigned int EstimateNdataCols();
-  //==================== Friend methods ================================
+
   ACCEPT_STD_VISITORS();
 };
-DEFINE_SPTR(OSNSMultipleImpact)
+
 #endif
