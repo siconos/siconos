@@ -6,9 +6,6 @@
 
 #include <stdlib.h>
 
-#include <limits>
-
-
 #define NDOF 3
 
 void BulletBodies::init()
@@ -22,9 +19,9 @@ void BulletBodies::init()
 
   double t0 = 0;                   // initial computation time
 
-  double T = std::numeric_limits<double>::infinity();;
+  double T = std::numeric_limits<double>::infinity();
 
-  double h = 0.005;
+  double h = 0.0005;
 
 
   // -----------------------------------------
@@ -95,10 +92,10 @@ void BulletBodies::init()
 
 
     std::vector<SP::BulletWeightedShape> shapes;
-    shapes.push_back(box1);
-    shapes.push_back(box1);
-    shapes.push_back(box1);
-    shapes.push_back(box1);
+    shapes.push_back(mshape1);
+    shapes.push_back(mshape1);
+    shapes.push_back(mshape1);
+    shapes.push_back(mshape1);
     //    shapes.push_back(box1);
     //    shapes.push_back(box2);
     //    shapes.push_back(capsule1);
@@ -155,10 +152,8 @@ void BulletBodies::init()
       }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
 
     SP::btCollisionObject ground(new btCollisionObject());
-    ground->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
     SP::btCollisionObject wall1(new btCollisionObject());
     SP::btCollisionObject wall2(new btCollisionObject());
     SP::btCollisionObject wall3(new btCollisionObject());
@@ -227,7 +222,7 @@ void BulletBodies::init()
     osnspb.reset(new FrictionContact(3));
 #endif
 
-    osnspb->numericsSolverOptions()->iparam[0] = 1000; // Max number of
+    osnspb->numericsSolverOptions()->iparam[0] = 100000; // Max number of
     // iterations
 
     osnspb->numericsSolverOptions()->dparam[0] = 1e-5; // Tolerance

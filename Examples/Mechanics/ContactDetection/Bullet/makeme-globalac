@@ -1,2 +1,0 @@
-#!/bin/sh
-siconos -j 2 -DWITH_BULLET -DWITH_SOLVER=SICONOS_FRICTION_3D_LOCALAC -DNDEBUG -ldmumps -lmumps_common -lmpi_cxx -lmpi `pkg-config bullet --cflags` `pkg-config bullet --libs`  -lglut QGLBullet.cpp

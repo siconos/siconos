@@ -1,6 +1,6 @@
 #!/bin/sh
 
-siconos -v -j 2 -DWITH_BULLET -lBulletCollision -lglut QGLBullet.cpp
+siconos -j 2 -DWITH_BULLET  -lBulletCollision -lglut QGLBullet.cpp
 
 
 # Mac Os X (Snow Leopard)
