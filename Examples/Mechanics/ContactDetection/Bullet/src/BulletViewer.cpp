@@ -23,6 +23,8 @@
 
 #include "BulletSpaceFilter.hpp"
 
+#include "SpaceFilter_impl.hpp"
+
 #include <stdio.h>
 using namespace qglviewer;
 
