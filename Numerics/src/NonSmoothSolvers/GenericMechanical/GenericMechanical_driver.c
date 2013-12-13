@@ -485,7 +485,7 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
   options->dSize = 5;
   options->numberOfInternalSolvers = 2;
   options->dWork = NULL;
-  options->iWork = NULL;
+  options->iWork = NULL;   options->callback = NULL;
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->iparam[0] = 10000;

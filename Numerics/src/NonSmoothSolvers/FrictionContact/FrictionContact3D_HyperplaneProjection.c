@@ -179,6 +179,13 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
     /* **** Criterium convergence **** */
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
+    if (options->callback)
+    {
+      options->callback->endIteration(options->callback->env, nc * 3, 
+                                      reaction, velocity, 
+                                      error);
+    }
+
     if (verbose > 0)
       printf("----------------------------------- FC3D - Hyperplane Projection (HP) - Iteration %i rho = %14.7e \t rhoequiv = %14.7e \tError = %14.7e\n", iter, rho, rhoequiv, error);
 
@@ -216,7 +223,7 @@ int frictionContact3D_HyperplaneProjection_setDefaultSolverOptions(SolverOptions
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  options->iWork = NULL;
+  options->iWork = NULL;   options->callback = NULL;
   for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;

@@ -40,7 +40,7 @@ OneStepNSProblem::OneStepNSProblem():
   _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
   _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;
+  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL; 
   _numerics_solver_options->dWork = NULL;
   // Numerics general options
   _numerics_options.reset(new NumericsOptions());
@@ -48,6 +48,7 @@ OneStepNSProblem::OneStepNSProblem():
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 }
 // --- CONSTRUCTORS/DESTRUCTOR ---
+
 
 // xml constructor
 OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
@@ -67,7 +68,7 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;
+  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
   _numerics_solver_options->dWork = NULL;
 
 }
@@ -83,7 +84,7 @@ OneStepNSProblem::OneStepNSProblem(int newNumericsSolverId):
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;
+  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
   _numerics_solver_options->dWork = NULL;
   _numerics_solver_options->solverId = newNumericsSolverId;
 }

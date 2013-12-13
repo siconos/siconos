@@ -132,12 +132,18 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
       /* **** Criterium convergence **** */
       FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
+      if (options->callback)
+      {
+        options->callback->endIteration(options->callback->env, 
+                                        nc * 3, reaction, velocity, 
+                                        error);
+    }
 
-    if (verbose > 0)
-      printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-
-    if (error < tolerance) hasNotConverged = 0;
-    *info = hasNotConverged;
+      if (verbose > 0)
+        printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+      
+      if (error < tolerance) hasNotConverged = 0;
+      *info = hasNotConverged;
     }
   }
 
@@ -278,7 +284,7 @@ int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* o
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  options->iWork = NULL;
+  options->iWork = NULL;   options->callback = NULL;
   for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;

@@ -262,7 +262,7 @@ int linearComplementarity_lexicolemke_setDefaultSolverOptions(SolverOptions* opt
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  options->iWork = NULL;
+  options->iWork = NULL;   options->callback = NULL;
   options->dparam[0] = 1e-6;
   options->iparam[0] = 10000;
   return 0;

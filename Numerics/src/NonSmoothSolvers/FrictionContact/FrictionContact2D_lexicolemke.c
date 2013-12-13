@@ -117,7 +117,7 @@ int frictionContact2D_lexicolemke_setDefaultSolverOptions(SolverOptions* options
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  options->iWork = NULL;
+  options->iWork = NULL;   options->callback = NULL;
   for (i = 0; i < 5; i++)
   {
     options->iparam[i] = 0;

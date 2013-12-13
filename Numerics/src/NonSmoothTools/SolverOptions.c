@@ -292,12 +292,8 @@ void deleteSolverOptions(SolverOptions* op)
     op->dWork = NULL;
     if (op->callback)
     {
-      // fix callback->env, callback->endIteration ?
-      
-      // Note FP: I comment the line below since it results in failure in Yoyo and BeadsPlan example
-      // Don't know (neither really search) why.
-      //free(op->callback);
-      
+      // MB: Yoyo & BeadPlan ok now.
+      free(op->callback);
       op->callback = NULL;
     }
   }
