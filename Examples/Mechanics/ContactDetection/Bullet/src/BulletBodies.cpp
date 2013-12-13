@@ -8,6 +8,7 @@
 
 #include <limits>
 
+
 #define NDOF 3
 
 void BulletBodies::init()
@@ -213,7 +214,7 @@ void BulletBodies::init()
     SP::btVector3 aabbmin(new btVector3(-100, -100, -100));
 
     _playground.reset(new BulletSpaceFilter(_model,
-                                            nslaw, aabbmin, aabbmax));
+                                            nslaw));
 
     // -- Time discretisation --
     timedisc.reset(new TimeDiscretisation(t0, h));
