@@ -52,8 +52,16 @@ typedef void (*Type1Ptr)(unsigned int, const double*, unsigned int, double*, uns
  */
 class FirstOrderType1R : public FirstOrderR
 {
+protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderType1R);
+  
 
 public:
+
+  /** default constructor */
+  FirstOrderType1R() : FirstOrderR(RELATION::Type1R) {};
 
   /** xml constructor
   *  \param RelationXML smart pointer : the XML object.

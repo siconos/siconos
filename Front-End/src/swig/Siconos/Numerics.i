@@ -41,6 +41,15 @@
 #include <boost/preprocessor/cat.hpp>
 %}
 
+#ifdef WITH_IO
+%{
+#include <SiconosFullNumerics.hpp>
+%}
+#endif
+%include "picklable.i"
+
+%include "std_string.i"
+
  // needed macros
  %include "NumericsConfig.h"
 
@@ -1347,6 +1356,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     { 
       deleteSolverOptions($self);
     }
+
 };
 
 %extend LinearComplementarityProblem
@@ -1717,6 +1727,69 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
 %extend FrictionContactProblem
 {
+  FrictionContactProblem()
+  {
+    FrictionContactProblem * FCP = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    
+    return FCP;
+  }
+
+
+  /* copy constructor */
+  FrictionContactProblem(PyObject *o)
+  {
+    void * vp;
+    FrictionContactProblem* fcp;
+    FrictionContactProblem* FCP;
+    int res = SWIG_ConvertPtr(o, &vp,SWIGTYPE_p_FrictionContactProblem, 0 |  0 );
+    if (!SWIG_IsOK(res)) return 0;
+    fcp = (FrictionContactProblem *) vp;
+    FCP = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    FCP->dimension = fcp->dimension;
+    FCP->M = fcp->M;
+    FCP->numberOfContacts = fcp->numberOfContacts;
+    FCP->q =  fcp->q;
+    FCP->mu = fcp->mu;
+
+    Py_INCREF(o);
+
+    return FCP;
+  }
+
+  /* */
+  FrictionContactProblem(PyObject *dim, PyObject *numberOfContacts, PyObject *M, PyObject *q, PyObject *mu)
+  {
+    FrictionContactProblem * FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    FC->dimension = PyInt_AsLong(dim);
+    FC->numberOfContacts = PyInt_AsLong(numberOfContacts);
+    
+    {
+      void * _M;
+      int res = SWIG_ConvertPtr(M, &_M,SWIGTYPE_p_NumericsMatrix, 0 |  0 );
+      if (!SWIG_IsOK(res)) return 0;
+      FC->M = (NumericsMatrix *) _M;
+    }
+    {
+      void * _q;
+      int res = SWIG_ConvertPtr(M, &_q,SWIGTYPE_p_double, 0 |  0 );
+      if (!SWIG_IsOK(res)) return 0;
+      FC->q = (double *) _q;
+    }
+    {
+      void * _mu;
+      int res = SWIG_ConvertPtr(M, &_mu,SWIGTYPE_p_double, 0 |  0 );
+      if (!SWIG_IsOK(res)) return 0;
+      FC->mu = (double *) _mu;
+    }
+
+    return FC;
+    
+  }
+
+  NumericsMatrix* rawM()
+  {
+    return $self->M;
+  }
 
   FrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
     {
@@ -2059,3 +2132,15 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
 }
 
 
+%{
+
+ 
+%}
+
+#ifdef WITH_IO
+%include picklable.i
+
+%make_picklable(FrictionContactProblem);
+%make_picklable(NumericsMatrix);
+%make_picklable(SparseBlockStructuredMatrix);
+#endif

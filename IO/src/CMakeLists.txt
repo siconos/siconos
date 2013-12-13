@@ -26,6 +26,9 @@ SET(SiconosIO_INSTALL_INCLUDE_DIR include/Siconos/IO)
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/IOConfig.h DESTINATION include/Siconos/IO)
 
+# Generated
+INSTALL(FILES ${CMAKE_BINARY_DIR}/src/SiconosFullGenerated.hpp DESTINATION include/Siconos/IO)
+
 # boost patch
 INSTALL(FILES 
   ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_collections_load_imp.hpp

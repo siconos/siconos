@@ -48,6 +48,8 @@
 
 #include <boost/serialization/export.hpp>
 
+#include <boost/typeof/typeof.hpp>
+
 #include <debug.h>
 
 
@@ -55,13 +57,14 @@
     \param a class name
  */
 #define REGISTER_BOOST_SERIALIZATION(C)                                 \
-  namespace boost { namespace serialization                             \
-  {                                                                     \
-    template <class Archive>                                            \
+  namespace boost { namespace serialization {                           \
+      template <class Archive>                                          \
       void serialize(Archive& ar, C& v, unsigned int version)           \
-      siconos_io(ar, v, version);                                       \
+      {                                                                 \
+        siconos_io(ar, v, version);                                     \
+      }                                                                 \
+    }                                                                   \
   }                                                                     \
- 
 
 /** internal macro */
 #define INTERNAL_SICONOS_SERIALIZATION_NVP(object,member)               \
@@ -172,7 +175,6 @@
       wrapper = boost::serialization::make_array(STRUCT . ARRAY,DIM);   \
     ARCHIVE & boost::serialization::make_nvp(BOOST_PP_STRINGIZE(ARRAY),wrapper); \
   }
-
 
 
 #endif

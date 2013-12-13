@@ -37,6 +37,7 @@
                               SWIGTYPE_p_std11__shared_ptrT_##TYPE##_const_t, 0);
 }
 %shared_ptr(TYPE);
+%make_picklable(TYPE);
 %enddef
 
 %define PY_FULL_REGISTER(TYPE)
@@ -76,6 +77,7 @@
 }
 %shared_ptr(TYPE);
 %include TYPE.hpp
+%make_picklable(TYPE);
 %enddef
 
 
@@ -168,5 +170,6 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
 %shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
+%make_picklable(TYPE);
 %enddef
 

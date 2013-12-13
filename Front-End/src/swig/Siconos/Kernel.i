@@ -40,6 +40,13 @@
 #include <boost/typeof/typeof.hpp>
 %}
 
+#ifdef WITH_IO
+%{
+#include <SiconosFull.hpp>
+%}
+#endif
+%include picklable.i
+
 // ignores
 %ignore nullDeleter;
 

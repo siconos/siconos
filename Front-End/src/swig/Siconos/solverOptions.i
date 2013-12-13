@@ -212,6 +212,9 @@ static int convert_darray(PyObject *input, double *ptr) {
                             double*velocity, 
                             double error)
   {
+    if (PyCallable_Check((PyObject*) env))
+    {
+      
       npy_intp dim[1];
       dim[0] = size;
       
@@ -230,23 +233,38 @@ static int convert_darray(PyObject *input, double *ptr) {
       PyTuple_SetItem(py_args, 1, py_velocity);
       PyTuple_SetItem(py_args, 2, py_error);
       
+      PyGILState_STATE gstate;
+      gstate = PyGILState_Ensure();
+      
       PyObject* py_out = PyObject_CallObject((PyObject*) env, py_args);
       
       /*     Py_DECREF(py_reaction);
              Py_DECREF(py_velocity);
              Py_DECREF(py_error);*/
       Py_DECREF(py_args);
-      Py_DECREF(py_out);
-     
+      Py_XDECREF(py_out);
+      
+      PyGILState_Release(gstate);
+    }
+    else  
+    {
+      PyErr_SetString(PyExc_TypeError,"Expecting a callable callback");      
+    }   
   };
   
 %}
 
 
 %typemap(in) (Callback* callback) (Callback* pycallback) { 
-  pycallback = new Callback();
+  // %typemap(in) (Callback* callback) (Callback* pycallback)
+  if ((arg1)->callback)
+  {
+    free(arg1->callback);
+  }
+  pycallback = new Callback(); // free in deleteSolverOptions
   pycallback->env = $input;
   pycallback->endIteration = &endIterationCallback;
+
   $1 = pycallback;
 
  }

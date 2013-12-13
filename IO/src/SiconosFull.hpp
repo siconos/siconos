@@ -22,19 +22,18 @@
 
 #include "Register.hpp"
 
-#include <boost/typeof/typeof.hpp>
-
 #define NVP(X) BOOST_SERIALIZATION_NVP(X)
 
 #include "SiconosFullGenerated.hpp"
+#include "SiconosFullNumerics.hpp"
 
 /* hand written */
 
-SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
 
-BOOST_TYPEOF_REGISTER_TYPE(_SolverOptions);
+//BOOST_TYPEOF_REGISTER_TYPE(_SolverOptions);
 
-BOOST_TYPEOF_REGISTER_TYPE(LinearComplementarityProblem);
+//BOOST_TYPEOF_REGISTER_TYPE(LinearComplementarityProblem);
+
 
 template <class Archive>
 void siconos_io(Archive& ar, _DynamicalSystemsGraph& v, unsigned int version)
@@ -52,6 +51,7 @@ void siconos_io(Archive& ar, _DynamicalSystemsGraph& v, unsigned int version)
   }
 
 }
+REGISTER_BOOST_SERIALIZATION(_DynamicalSystemsGraph);
 
 template <class Archive>
 void siconos_io(Archive& ar, _InteractionsGraph& v, unsigned int version)
@@ -69,7 +69,7 @@ void siconos_io(Archive& ar, _InteractionsGraph& v, unsigned int version)
   }
 
 }
-
+REGISTER_BOOST_SERIALIZATION(_InteractionsGraph);
 
 
 
@@ -79,6 +79,7 @@ void siconos_io(Archive& ar, std::basic_ofstream<char>&v , unsigned int version)
 {
   // do nothing
 }
+REGISTER_BOOST_SERIALIZATION(std::basic_ofstream<char>);
 
 template <class Archive>
 void siconos_io(Archive& ar, FrictionContact &v, unsigned int version)
@@ -97,7 +98,7 @@ void siconos_io(Archive& ar, FrictionContact &v, unsigned int version)
                                       boost::serialization::base_object<LinearOSNS>(v));
 
 }
-
+REGISTER_BOOST_SERIALIZATION(FrictionContact);
 
 
 template <class Archive>
@@ -106,6 +107,7 @@ void siconos_io(Archive& ar, __mpz_struct& v, unsigned int version)
   SERIALIZE(v, (_mp_alloc)(_mp_size), ar);
   SERIALIZE_C_ARRAY(v._mp_alloc, v, _mp_d, ar);
 }
+REGISTER_BOOST_SERIALIZATION(__mpz_struct);
 
 template <class Archive>
 void siconos_io(Archive& ar, __mpf_struct& v, unsigned int version)
@@ -113,40 +115,12 @@ void siconos_io(Archive& ar, __mpf_struct& v, unsigned int version)
   SERIALIZE(v, (_mp_prec)(_mp_size)(_mp_exp), ar);
   SERIALIZE_C_ARRAY(abs(v._mp_size), v, _mp_d, ar);
 }
+REGISTER_BOOST_SERIALIZATION(__mpf_struct);
 
 
 
-template <class Archive>
-void siconos_io(Archive& ar, _SolverOptions&v, unsigned int version)
-{
-  SERIALIZE(v, (solverId)(isSet)(iSize)(dSize)(filterOn)(numberOfInternalSolvers), ar);
 
-  SERIALIZE_C_ARRAY(v.iSize, v, iparam, ar);
-  SERIALIZE_C_ARRAY(v.dSize, v, dparam, ar);
-  SERIALIZE_C_ARRAY(v.numberOfInternalSolvers, v, internalSolvers, ar);
-}
 
-template <class Archive>
-void siconos_io(Archive& ar, LinearComplementarityProblem& v, unsigned int version)
-{
-  SERIALIZE(v, (size)(M), ar);
-  SERIALIZE_C_ARRAY(v.size, v, q, ar);
-}
-
-template <class Archive>
-void siconos_io(Archive& ar, SparseBlockStructuredMatrix& v, unsigned int version)
-{
-  SERIALIZE(v, (nbblocks)(blocknumber0)(blocknumber1)(filled1)(filled2), ar);
-  SERIALIZE_C_ARRAY(v.filled1, v, index1_data, ar);
-  SERIALIZE_C_ARRAY(v.filled2, v, index2_data, ar);
-}
-
-template <class Archive>
-void siconos_io(Archive&ar, NumericsMatrix& v, unsigned int version)
-{
-  SERIALIZE(v, (storageType)(size0)(size1)(matrix1), ar);
-  SERIALIZE_C_ARRAY(v.size0 * v.size1, v, matrix0, ar);
-}
 
 template <class Archive>
 void siconos_io(Archive& ar, DynamicalSystemsSet& v, unsigned int version)
@@ -154,6 +128,7 @@ void siconos_io(Archive& ar, DynamicalSystemsSet& v, unsigned int version)
   ar &  boost::serialization::make_nvp("ThisShouldNotBeASetAnyMore",
                                        boost::serialization::base_object< std::vector<SP::DynamicalSystem> >(v));
 }
+REGISTER_BOOST_SERIALIZATION(DynamicalSystemsSet);
 
 template <class Archive>
 void siconos_io(Archive & ar, SiconosVector & v, unsigned int version)
@@ -168,6 +143,7 @@ void siconos_io(Archive & ar, SiconosVector & v, unsigned int version)
     ar & boost::serialization::make_nvp("vect", v.vect.Sparse);
   }
 }
+REGISTER_BOOST_SERIALIZATION(SiconosVector);
 
 template <class Archive>
 void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
@@ -219,6 +195,7 @@ void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
   ar &  boost::serialization::make_nvp("SiconosMatrix",
                                        boost::serialization::base_object<SiconosMatrix>(m));
 }
+REGISTER_BOOST_SERIALIZATION(SimpleMatrix);
 
 #include <f2c.h>
 template<typename Archive>
@@ -263,6 +240,7 @@ void siconos_io(Archive& ar, Lsodar& osi, unsigned int version)
   ar & boost::serialization::make_nvp("OneStepIntegrator", 
                                       boost::serialization::base_object<OneStepIntegrator>(osi));
 }
+REGISTER_BOOST_SERIALIZATION(Lsodar);
 
 
 template<typename Archive, typename P>
@@ -318,130 +296,34 @@ namespace Siconos
   MAKE_SICONOS_IO_PROPERTIES(bool);
 }
 
-namespace boost
-{
-namespace serialization
-{
-
-template <class Archive>
-void serialize(Archive& ar, FrictionContact& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-template <class Archive>
-void serialize(Archive& ar, __mpz_struct& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-template <class Archive>
-void serialize(Archive& ar, __mpf_struct& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-template <class Archive>
-void serialize(Archive& ar, _InteractionsGraph& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-
-template <class Archive>
-void serialize(Archive& ar, _DynamicalSystemsGraph& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-
-template <class Archive>
-void serialize(Archive& ar, std::basic_ofstream<char>& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-
-
-template <class Archive>
-void serialize(Archive& ar, NumericsMatrix& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-
-template <class Archive>
-void serialize(Archive& ar, SparseBlockStructuredMatrix& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-
-template <class Archive>
-void serialize(Archive& ar, LinearComplementarityProblem& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-template <class Archive>
-void serialize(Archive& ar, _SolverOptions& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-template <class Archive>
-void serialize(Archive& ar, DynamicalSystemsSet& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-
-template <class Archive>
-void serialize(Archive& ar, SiconosVector& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
-
-template <class Archive>
-void serialize(Archive& ar, SimpleMatrix& m, unsigned int version)
-{
-  siconos_io(ar, m, version);
-}
-
-template <class Archive>
-void serialize(Archive&ar, Lsodar& osi, unsigned int version)
-{
-  siconos_io(ar, osi, version);
-}
-
-
-template <class Archive, class T>
-void serialize(Archive& ar, Siconos::VertexProperties<T, _DynamicalSystemsGraph>& p, unsigned int version)
-{
-  Siconos::siconos_io(ar, p, version);
-}
-
-template <class Archive, class T>
-void serialize(Archive& ar, Siconos::EdgeProperties<T, _DynamicalSystemsGraph>& p, unsigned int version)
-{
-  siconos_io(ar, p, version);
-}
-
-template <class Archive, class T>
-void serialize(Archive& ar, Siconos::VertexProperties<T, _InteractionsGraph>& p, unsigned int version)
-{
-  siconos_io(ar, p, version);
-}
-
-template <class Archive, class T>
-void serialize(Archive& ar, Siconos::EdgeProperties<T, _InteractionsGraph>& p, unsigned int version)
-{
-  siconos_io(ar, p, version);
-}
-
-
-} // namespace serialization
+namespace boost { namespace serialization { 
+    template <class Archive, class T>
+    void serialize(Archive& ar, Siconos::VertexProperties<T, _DynamicalSystemsGraph>& p, unsigned int version)
+    {
+      Siconos::siconos_io(ar, p, version);
+    }
+    
+    template <class Archive, class T>
+    void serialize(Archive& ar, Siconos::EdgeProperties<T, _DynamicalSystemsGraph>& p, unsigned int version)
+    {
+      siconos_io(ar, p, version);
+    }
+    
+    template <class Archive, class T>
+    void serialize(Archive& ar, Siconos::VertexProperties<T, _InteractionsGraph>& p, unsigned int version)
+    {
+      siconos_io(ar, p, version);
+    }
+    
+    template <class Archive, class T>
+    void serialize(Archive& ar, Siconos::EdgeProperties<T, _InteractionsGraph>& p, unsigned int version)
+    {
+      siconos_io(ar, p, version);
+    }
+  } // namespace serialization
 } // namespace boost
+
+
 
 
 template <class Archive>
@@ -456,6 +338,7 @@ void siconos_io_register(Archive& ar)
   ar.register_type(static_cast<LinearComplementarityProblem*>(NULL));
   ar.register_type(static_cast<SparseBlockStructuredMatrix*>(NULL));
   ar.register_type(static_cast<NumericsMatrix*>(NULL));
+  ar.register_type(static_cast<FrictionContactProblem*>(NULL));
   ar.register_type(static_cast<std::basic_ofstream<char>*>(NULL));
   ar.register_type(static_cast<_DynamicalSystemsGraph*>(NULL));
   ar.register_type(static_cast<_InteractionsGraph*>(NULL));

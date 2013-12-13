@@ -32,6 +32,7 @@ Note that not all files from the current location are listed below, since some o
 #include "Interaction.hpp"
 
 #include "RelationTypes.hpp"
+#include "FirstOrderType1R.hpp"
 #include "FirstOrderType2R.hpp"
 
 #include "LagrangianLinearTIDS.hpp"
