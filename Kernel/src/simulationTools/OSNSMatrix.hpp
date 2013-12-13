@@ -23,12 +23,19 @@
 #ifndef OSNSM_H
 #define OSNSM_H
 
-#include "SimpleMatrix.hpp"
-#include "SiconosNumerics.h"
+#include "SiconosFwd.hpp"
 #include "SimulationTypeDef.hpp"
-#include "Topology.hpp"
 
-TYPEDEF_SPTR(NumericsMatrix)
+enum SICONOS_STORAGE_TYPE
+{
+  SICONOS_DENSE = 0,
+  SICONOS_SPARSE = 1
+};
+
+/** Map of double; key = the related DS */
+#include <map>
+typedef std::map<SP::DynamicalSystem, unsigned  int> DS_int;
+TYPEDEF_SPTR(DS_int)
 
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
@@ -90,12 +97,6 @@ TYPEDEF_SPTR(NumericsMatrix)
  *  sub-interactionBlocks, only links thanks to pointers.
  *
  */
-enum SICONOS_STORAGE_TYPE
-{
-  SICONOS_DENSE = 0,
-  SICONOS_SPARSE = 1
-};
-
 class OSNSMatrix
 {
 protected:
@@ -112,14 +113,6 @@ protected:
 
   /** Storage type used for the present matrix */
   int storageType;
-
-  /** map that links each Interaction with an int that gives the
-   * position (in number of scalar elements, not interactionBlocks) \n of
-   * the corresponding interactionBlock matrix in the full matrix (M in
-   * LCP case) - Warning: it depends on the considered index set \n
-   * (ie on which constraints are "active")
-   */
-  //  SP::Interaction_int interactionBlocksPositions;
 
   /** map that links each DynamicalSystem with an int that gives the
    * position (in number of scalar elements, not DSBlocks) of the

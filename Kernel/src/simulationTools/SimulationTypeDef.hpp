@@ -64,10 +64,6 @@ typedef DSVectors::const_iterator ConstDSVectorsIterator;
 /** Map of double; key = the related DS */
 typedef std::map<SP::DynamicalSystem, double> MapOfDouble;
 
-/** Map of double; key = the related DS */
-typedef std::map<SP::DynamicalSystem, unsigned  int> DS_int;
-TYPEDEF_SPTR(DS_int)
-
 /** Iterator through a map of double */
 typedef MapOfDouble::iterator DoubleIterator;
 

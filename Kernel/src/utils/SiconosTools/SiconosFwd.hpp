@@ -10,6 +10,7 @@
 TYPEDEF_SPTR(MixedLinearComplementarityProblem)
 TYPEDEF_SPTR(NumericsOptions)
 TYPEDEF_SPTR(SolverOptions)
+TYPEDEF_SPTR(NumericsMatrix)
 // ----------------
 
 /* Kernel */
