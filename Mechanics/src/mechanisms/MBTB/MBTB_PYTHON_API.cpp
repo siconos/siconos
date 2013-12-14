@@ -387,33 +387,42 @@ void  MBTB_initSimu(double hTS, int withProj)
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(sDS[numDS]);
   for(int numJ=0; numJ<sNbOfJoints; numJ++)
   {
-    myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],sDS[sJointIndexDS[2*numJ]]);
-    if(sJointType[numJ]==PIVOT_1)
-      myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],sDS[sJointIndexDS[2*numJ+1]]);
+    if (sJointType[numJ]==PIVOT_0)
+	  myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
+						    sDS[sJointIndexDS[2*numJ]]);
+    if (sJointType[numJ]==PIVOT_1)
+      myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
+						sDS[sJointIndexDS[2*numJ]],
+						sDS[sJointIndexDS[2*numJ+1]]);
   }
   
   for(int numC=0; numC<sNbOfContacts; numC++)
   {
-    myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
-                                              sDS[sContacts[numC]->_indexBody1]);
-    // std::cout <<"link(sInterContacts[numC],       sDS[sContacts[numC]->_indexBody1]); " << std::endl;
-    // std::cout <<  "============"<<   sInterContacts[numC] <<std::endl;
-    // sInterContacts[numC]->display();
-    // std::cout << sDS[sContacts[numC]->_indexBody1] << std::endl;
-    // sDS[sContacts[numC]->_indexBody1]->display();
-    // sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody1]  );
-    // sInterContacts[numC]->display();
 
-//    sInterContacts[numC]->dynamicalSystem(0)->display();
     if(sContacts[numC]->_indexBody2!=-1)
     {
       myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
+						sDS[sContacts[numC]->_indexBody1],
                                                 sDS[sContacts[numC]->_indexBody2]);
       sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody2]  );
-
+      
     }
-  }
+    else 
+      {
+	myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
+						  sDS[sContacts[numC]->_indexBody1]);
+	// std::cout <<"link(sInterContacts[numC],       sDS[sContacts[numC]->_indexBody1]); " << std::endl;
+	// std::cout <<  "============"<<   sInterContacts[numC] <<std::endl;
+	// sInterContacts[numC]->display();
+	// std::cout << sDS[sContacts[numC]->_indexBody1] << std::endl;
+	// sDS[sContacts[numC]->_indexBody1]->display();
+	// sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody1]  );
+	// sInterContacts[numC]->display();
 
+	//    sInterContacts[numC]->dynamicalSystem(0)->display();
+      }
+  }
+  
 
 
   // -- (2) Time discretisation --
@@ -427,7 +436,7 @@ void  MBTB_initSimu(double hTS, int withProj)
   osnspb->setKeepLambdaAndYState(true);
   //osnspb->numericsSolverOptions()->iparam[1]=0;
   osnspb->numericsSolverOptions()->dWork=(double*) malloc(512*sizeof(double));
-  osnspb->setNumericsVerboseMode(true);
+  //osnspb->setNumericsVerboseMode(true);
 
   //osnspb->numericsSolverOptions()->iparam[1]=0;
   //osnspb->numericsSolverOptions()->dparam[0]=1e-5;
