@@ -243,8 +243,6 @@ void printSolverOptions(SolverOptions* options)
 }
 void recursive_deleteSolverOptions(SolverOptions* op)
 {
-    printf("dzdezerefinition)\n");
-
   if (op)
   {
     for (int i = 0; i < op->numberOfInternalSolvers; i++)

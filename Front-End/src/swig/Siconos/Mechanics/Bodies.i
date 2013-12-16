@@ -4,6 +4,15 @@
 
 %include start.i
 
+#undef WITH_IO
+
+#ifdef WITH_IO
+%{
+#include <SiconosFull.hpp>
+%}
+#endif
+%include picklable.i
+
 %include path.i
 
 %include handleException.i

@@ -42,7 +42,7 @@
   {
     std::stringstream ss;
     boost::archive::xml_oarchive ar(ss);
-    ar << BOOST_SERIALIZATION_NVP(*($self));
+    ar << ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
     return ss.str();
   }
 
@@ -50,14 +50,14 @@
   {
     std::stringstream ss(from_str);
     boost::archive::xml_iarchive ar(ss);
-    ar >> BOOST_SERIALIZATION_NVP(*($self));
+    ar >> ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
   }
   
   std::string text_export()
   {
     std::stringstream ss;
     boost::archive::text_oarchive ar(ss);
-    ar << BOOST_SERIALIZATION_NVP(*($self));
+    ar << ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
     return ss.str();
   }
   
@@ -65,7 +65,7 @@
   {
     std::stringstream ss(from_str);
     boost::archive::text_iarchive ar(ss);
-    ar >> BOOST_SERIALIZATION_NVP(*($self));
+    ar >> ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
   }
   
  }

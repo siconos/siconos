@@ -334,7 +334,7 @@ void siconos_io_register(Archive& ar)
   ar.register_type(static_cast<SimpleMatrix*>(NULL));
   ar.register_type(static_cast<SiconosVector*>(NULL));
   ar.register_type(static_cast<DynamicalSystemsSet*>(NULL));
-  //  ar.register_type(static_cast<_SolverOptions*>(NULL));
+  ar.register_type(static_cast<_SolverOptions*>(NULL));
   ar.register_type(static_cast<LinearComplementarityProblem*>(NULL));
   ar.register_type(static_cast<SparseBlockStructuredMatrix*>(NULL));
   ar.register_type(static_cast<NumericsMatrix*>(NULL));
