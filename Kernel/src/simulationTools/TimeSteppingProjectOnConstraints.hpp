@@ -26,12 +26,24 @@
 
 
 
-/** Time-Stepping scheme
+/** \class TimeSteppingProjectOn constraints
+ *  \brief Time-Stepping scheme with a direct projection onto the constraint 
+ *  thanks to the GGL augmentation of the system
+ *
+ *  For details, have a look on
+ *   Projected event-capturing time-stepping schemes for nonsmooth mechanical systems 
+ *   with unilateral contact and Coulomb's friction
+ *   Vincent Acary 
+ *   Computer Methods in Applied Mechanics and Engineering, Elsevier,
+ *   2013, 256, pp. 224-250
+ *
+ * 
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Aug 2010
- *
+ *  
+ 
  */
 class TimeSteppingProjectOnConstraints : public TimeStepping
 {

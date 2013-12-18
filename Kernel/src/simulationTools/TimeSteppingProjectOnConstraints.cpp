@@ -27,7 +27,10 @@
 #include "NonSmoothLaw.hpp"
 
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
-//#define TSPROJ_DEBUG
+
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+#include "debug.h"
 //#define CORRECTIONSVELOCITIES
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
@@ -93,29 +96,28 @@ void TimeSteppingProjectOnConstraints::nextStep()
 void TimeSteppingProjectOnConstraints::advanceToEvent()
 {
   /** First step, Solve the standard velocity formulation.*/
-#ifdef TSPROJ_DEBUG
-  std::cout << "TimeStepping::newtonSolve begin :\n";
-#endif
+
+  DEBUG_PRINT("TimeStepping::newtonSolve begin :\n");
+
+
   if (!_doOnlyProj)
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
-#ifdef TSPROJ_DEBUG
-  std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbSteps() << "\n";
-  std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
-  std::cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
-  std::cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
-#endif
+  
 
+  DEBUG_EXPR_WE(std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbSteps() << "\n";
+		std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
+		std::cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
+		std::cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
+		);
+  
   if (!_doProj)
     return;
   int info = 0;
-
-
-
-
+  
   /** Second step, Perform the projection on constraints.*/
-#ifdef TSPROJ_DEBUG
-  std::cout << "TimeSteppingProjectOnConstraints::newtonSolve begin projection:\n";
-#endif
+
+  DEBUG_PRINT("TimeSteppingProjectOnConstraints::newtonSolve begin projection:\n");
+
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
 
@@ -183,9 +185,8 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   while (runningProjection && _nbProjectionIteration < _projectionMaxIteration)
   {
     _nbProjectionIteration++;
-#ifdef TSPROJ_DEBUG
-    printf("TimeSteppingProjectOnConstraints projection step = %d\n", _nbProjectionIteration);
-#endif
+    DEBUG_PRINTF("TimeSteppingProjectOnConstraints projection step = %d\n", _nbProjectionIteration);
+
     SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
@@ -195,10 +196,15 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     }
     updateInput(0);
     info = 0;
-#ifdef TSPROJ_DEBUG
-    std::cout << "TimeSteppingProjectOnConstraint compute OSNSP." <<std::endl ;
-#endif
+
+    DEBUG_PRINT("TimeSteppingProjectOnConstraint compute OSNSP.\n");
+    
     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
+
+    DEBUG_PRINTF("IndexSet0->size() = %i\n", (int)model()->nonSmoothDynamicalSystem()->topology()->indexSet(0)->size() );
+    DEBUG_PRINTF("IndexSet1->size() = %i\n", (int)model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->size() );
+    DEBUG_EXPR(oneStepNSProblem(SICONOS_OSNSP_TS_POS)->display());
+
 
     if (info)
     {
@@ -206,25 +212,24 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       return;
     }
     updateInput(0);
-#ifdef TSPROJ_DEBUG
-
-    std ::cout << "After update input" << std::endl;
-    SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-    std ::cout << "lamda(1) in IndexSet1" << std::endl;
-    for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
-    {
-      SP::Interaction inter = indexSet1->bundle(*ui);
-      inter->lambda(1)->display();
-    }
-    SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-    std ::cout << "lamda(0) in indexSet0" << std::endl;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-    {
-      SP::Interaction inter = indexSet0->bundle(*ui);
-      inter->lambda(0)->display();
-    }
-
-#endif
+    
+    DEBUG_EXPR_WE(std ::cout << "After update input" << std::endl;
+	       SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+	       std ::cout << "lamda(1) in IndexSet1" << std::endl;
+	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+		 {
+		   SP::Interaction inter = indexSet1->bundle(*ui);
+		   inter->lambda(1)->display();
+		 }
+	       SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+	       std ::cout << "lamda(0) in indexSet0" << std::endl;
+	       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+		 {
+		   SP::Interaction inter = indexSet0->bundle(*ui);
+		   inter->lambda(0)->display();
+		 }
+	       );
+    
     // This part should be in MoreauProjectOnConstraintsOS::updateState(level =0)
     for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
@@ -235,25 +240,22 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
         SP::SiconosVector q = neds->q();
         SP::SiconosVector qtmp = neds->workspace(DynamicalSystem::qtmp);
-#ifdef TSPROJ_DEBUG
-        std ::cout << "qtmp before  update " << std::endl;
-        qtmp->display();
-        std ::cout << "p(0) before  update " << std::endl;
-        neds->p(0)->display();
 
-#endif
+	DEBUG_EXPR_WE(std ::cout << "qtmp before  update " << std::endl;
+		       qtmp->display();
+		       std ::cout << "p(0) before  update " << std::endl;
+		       neds->p(0)->display();
+		       );
+
         if (neds->p(0))
         {
           //*q = * qtmp +  *neds->p(0);
           *q += *neds->p(0); // Why it works like that and not with the previous line ?
         }
-#ifdef TSPROJ_DEBUG
-        std ::cout << "q after  update " << std::endl;
-        q->display();
-#endif
-
-
-
+	
+        DEBUG_EXPR_WE(std ::cout << "q after  update " << std::endl;
+		      q->display(););
+	
         neds->normalizeq();
         neds->updateT();
       }
@@ -282,35 +284,37 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
     //(std11::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
 
-#ifdef TSPROJ_DEBUG
-    std::cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
-    std ::cout << "After update state in position" << std::endl;
-    std ::cout << "lamda(1) in IndexSet1" << std::endl;
-    for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
-    {
-      SP::Interaction inter = indexSet1->bundle(*ui);
-      inter->lambda(1)->display();
-    }
-    std ::cout << "lamda(0) in indexSet0" << std::endl;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-    {
-      SP::Interaction inter = indexSet0->bundle(*ui);
-      inter->lambda(0)->display();
-    }
-    std ::cout << "y(1) in IndexSet1" << std::endl;
-    for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
-    {
-      SP::Interaction inter = indexSet1->bundle(*ui);
-      inter->y(1)->display();
-    }
-    std ::cout << "y(0) in indexSet0" << std::endl;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-    {
-      SP::Interaction inter = indexSet0->bundle(*ui);
-      inter->y(0)->display();
-    }
+    DEBUG_EXPR_WE(std::cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
+	       std ::cout << "After update state in position" << std::endl;
+	       std ::cout << "lamda(1) in IndexSet1" << std::endl;
+	       SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+	       SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+	       
+	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+		 {
+		   SP::Interaction inter = indexSet1->bundle(*ui);
+		   inter->lambda(1)->display();
+		 }
+	       std ::cout << "lamda(0) in indexSet0" << std::endl;
+	       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+		 {
+		   SP::Interaction inter = indexSet0->bundle(*ui);
+		   inter->lambda(0)->display();
+		 }
+	       std ::cout << "y(1) in IndexSet1" << std::endl;
+	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+		 {
+		   SP::Interaction inter = indexSet1->bundle(*ui);
+		   inter->y(1)->display();
+		 }
+	       std ::cout << "y(0) in indexSet0" << std::endl;
+	       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+		 {
+		   SP::Interaction inter = indexSet0->bundle(*ui);
+		   inter->y(0)->display();
+		 }
+	       );
 
-#endif
 
     //cout<<"during projection before normalizing of q:\n";
     //for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
@@ -328,9 +332,9 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
 
 
-#ifdef TSPROJ_DEBUG
-  std::cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
-#endif
+
+  DEBUG_PRINT("TimeSteppingProjectOnConstraints::newtonSolve end projection:\n");
+
 
   return;
   //#ifdef TSPROJ_CORRECTIONVELOCITIES
@@ -354,10 +358,8 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //     /*compute the new velocity seeing the work of fext*/
   //     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
   //     *(neds->deltaq())-=*(neds->q());
-  // #ifdef TSPROJ_DEBUG
-  //     printf("TSProj NewtonSolve :deltaq:");
-  //     (neds->deltaq())->display();
-  // #endif
+  //     DEBUG_EXPR(printf("TSProj NewtonSolve :deltaq:");
+  //     (neds->deltaq())->display(););
   //     //continue;
   //     double  n2q=neds->deltaq()->norm2();
   //     double n2=0.0;
@@ -372,12 +374,12 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //       FextNorm->setValue(0,neds->fExt()->getValue(0));
   //       FextNorm->setValue(1,neds->fExt()->getValue(1));
   //       FextNorm->setValue(2,neds->fExt()->getValue(2));
-  // #ifdef TSPROJ_DEBUG
+  // DEBUG_EXPR_WE(
   //       std::cout<<"TimeSteppingProjectOnConstraints::newtonSolve deltaQ :\n";
   //       neds->deltaq()->display();
   //       std::cout<<"TimeSteppingProjectOnConstraints::newtonSolve Fext :\n";
   //       FextNorm->display();
-  // #endif
+  //       );
 
   //       (*FextNorm)*=(1./n2);
   //       /*work of external forces.*/
@@ -416,19 +418,19 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //       //   else
   //       //     VkcFNorm=0;
   //       // }
-  // #ifdef TSPROJ_DEBUG
+  // DEBUG_EXPR_WE(
   //       printf("TimeSteppingProjectOnConstraints::newtonSolve velocity before update(prevComp=%e, newComp=%e)\n",VkFNorm,VkcFNorm);
   //       printf("VELOCITY1 ");
   //       neds->velocity()->display();
-  // #endif
+  // );
   //       neds->velocity()->setValue(0,neds->velocity()->getValue(0)+(VkcFNorm - VkFNorm)*FextNorm->getValue(0));
   //       neds->velocity()->setValue(1,neds->velocity()->getValue(1)+(VkcFNorm - VkFNorm)*FextNorm->getValue(1));
   //       neds->velocity()->setValue(2,neds->velocity()->getValue(2)+(VkcFNorm - VkFNorm)*FextNorm->getValue(2));
-  // #ifdef TSPROJ_DEBUG
+  // DEBUG_EXPR_WE(
   //       std::cout<<"TimeSteppingProjectOnConstraints::newtonSolve velocity updated\n";
   //       printf("VELOCITY2 ");
   //       neds->velocity()->display();
-  // #endif
+  // )
   //     }
   //     SP::SiconosMatrix T = neds->T();
   //     SP::SiconosVector dotq = neds->dotq();
@@ -472,46 +474,41 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
       double criteria = std::max(0.0, - interac->y(0)->getValue(0));
-#ifdef TSPROJ_DEBUG
-      printf("Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
-#endif
+
+      DEBUG_PRINTF("Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
 
       if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
       //if (criteria < minViolationUnilateral) minViolationUnilateral=criteria;
       if (maxViolationUnilateral > _constraintTolUnilateral)
       {
         *runningProjection = true;
-#ifdef TSPROJ_DEBUG
-        printf("TSProj newton criteria unilateral true %e.\n", criteria);
-#endif
+	
+        DEBUG_PRINTF("TSProj newton criteria unilateral true %e.\n", criteria);
       }
     }
     else
     {
-#ifdef TSPROJ_DEBUG
-      printf("Equality interac->y(0)->normInf() %e.\n", interac->y(0)->normInf());
-#endif
+      DEBUG_PRINTF("Equality interac->y(0)->normInf() %e.\n", interac->y(0)->normInf());
+
       if (interac->y(0)->normInf()  > maxViolationEquality) maxViolationEquality = interac->y(0)->normInf() ;
       if (interac->y(0)->normInf()  < minViolationEquality) minViolationEquality = interac->y(0)->normInf() ;
       if (interac->y(0)->normInf() > _constraintTol)
-      {
-        *runningProjection = true;
-#ifdef TSPROJ_DEBUG
-        printf("TSProj  newton criteria equality true %e.\n", interac->y(0)->normInf());
-#endif
-      }
+	{
+	  *runningProjection = true;
+	  DEBUG_PRINTF("TSProj  newton criteria equality true %e.\n", interac->y(0)->normInf());
+	}
     }
     _maxViolationUnilateral = maxViolationUnilateral;
     _maxViolationEquality = maxViolationEquality;
   }
-#ifdef TSPROJ_DEBUG
-  printf("TSProj newton min/max criteria projection\n");
-  std::cout << "             runningProjection "  << std::boolalpha << *runningProjection << std::endl;
-  printf("              min criteria equality =  %e.\n", minViolationEquality);
-  printf("              max criteria equality =  %e.\n", maxViolationEquality);
-  printf("              max criteria unilateral =  %e.\n", maxViolationUnilateral);
-  //printf("              min criteria unilateral =  %e.\n",minViolationUnilateral);
-#endif
+
+  DEBUG_PRINT("TSProj newton min/max criteria projection\n");
+  DEBUG_EXPR(std::cout << "             runningProjection "  << std::boolalpha << *runningProjection << std::endl;);
+  DEBUG_PRINTF("              min criteria equality =  %e.\n", minViolationEquality);
+  DEBUG_PRINTF("              max criteria equality =  %e.\n", maxViolationEquality);
+  DEBUG_PRINTF("              max criteria unilateral =  %e.\n", maxViolationUnilateral);
+  //DEBUG_PRINTF("              min criteria unilateral =  %e.\n",minViolationUnilateral);
+
 }
 
 

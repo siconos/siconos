@@ -1631,7 +1631,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 void Moreau::updateState(const unsigned int level)
 {
 
-
+  DEBUG_PRINT("Moreau::updateState(const unsigned int level)\n");
 
   double h = simulationLink->timeStep();
 
@@ -1878,6 +1878,8 @@ void Moreau::updateState(const unsigned int level)
 
 bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
+  DEBUG_PRINT("addInteractionInIndexSet(SP::Interaction inter, unsigned int i)\n");
+
   assert(i == 1);
   double h = simulationLink->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
