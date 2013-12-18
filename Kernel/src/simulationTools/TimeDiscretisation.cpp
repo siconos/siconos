@@ -21,11 +21,23 @@
 #include "Tools.hpp"
 #include <cmath>
 
+TimeDiscretisation::TimeDiscretisation()
+{
+  mpf_init(_hgmp);
+  mpf_init(_tkp1); 
+  mpf_init(_tk); 
+  mpf_init(_t0gmp);
+}
 
 // IO Constructors -> XML
 TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t0, double T):
   _h(0.0), _timeDiscretisationXML(tdXML), _t0(t0)
 {
+  mpf_init(_hgmp);
+  mpf_init(_tkp1); 
+  mpf_init(_tk); 
+  mpf_init(_t0gmp);
+  
   if (!_timeDiscretisationXML)
     RuntimeException::selfThrow("TimeDiscretisation: xml constructor - TimeDiscretisationXML = NULL");
 
@@ -69,6 +81,11 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
 TimeDiscretisation::TimeDiscretisation(const TkVector& tk):
   _h(0.0)
 {
+  mpf_init(_hgmp);
+  mpf_init(_tkp1); 
+  mpf_init(_tk); 
+  mpf_init(_t0gmp);
+
   _tkV = tk;
   _t0 = _tkV.at(0);
 }
@@ -77,6 +94,11 @@ TimeDiscretisation::TimeDiscretisation(const TkVector& tk):
 TimeDiscretisation::TimeDiscretisation(double t0, double h):
   _h(h), _t0(t0)
 {
+  mpf_init(_hgmp);
+  mpf_init(_tkp1); 
+  mpf_init(_tk); 
+  mpf_init(_t0gmp);
+
 }
 
 // INPUTS: t0 and h
@@ -93,6 +115,11 @@ TimeDiscretisation::TimeDiscretisation(double t0, std::string& str): _t0(t0)
 TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T):
   _t0(t0)
 {
+  mpf_init(_hgmp);
+  mpf_init(_tkp1); 
+  mpf_init(_tk); 
+  mpf_init(_t0gmp);
+
   _h = (T - t0) / nSteps;
 }
 

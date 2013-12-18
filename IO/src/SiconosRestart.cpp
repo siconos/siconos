@@ -53,14 +53,16 @@ namespace Siconos
       if (destf.extension() == ".xml")
       {
         boost::archive::xml_oarchive oa(ofs);
-        siconos_io_register(oa);
+        siconos_io_register_Numerics(oa);
+        siconos_io_register_Kernel(oa);
         oa << NVP(model);
       }
 
       else if (destf.extension() == ".bin")
       {
         boost::archive::binary_oarchive oa(ofs);
-        siconos_io_register(oa);
+        siconos_io_register_Numerics(oa);
+        siconos_io_register_Kernel(oa);
         oa << NVP(model);  // fix: NVP not necessary for binary archives
       }
     }
@@ -81,13 +83,15 @@ namespace Siconos
       if (boost::filesystem::path(filename).extension() == ".xml")
       {
         boost::archive::xml_iarchive ia(ifs);
-        siconos_io_register(ia);
+        siconos_io_register_Numerics(ia);
+        siconos_io_register_Kernel(ia);
         ia >> NVP(model);
       }
       else if (boost::filesystem::path(filename).extension() == ".bin")
       {
         boost::archive::binary_iarchive ia(ifs);
-        siconos_io_register(ia);
+        siconos_io_register_Numerics(ia);
+        siconos_io_register_Kernel(ia);
         ia >> NVP(model);
       }
     }

@@ -98,7 +98,7 @@ private:
 
   /** default constructor (private => no copy nor pass-by value)
    */
-  TimeDiscretisation() {};
+  TimeDiscretisation(); 
 
   /** Assignment Operator (private => forbidden) */
   TimeDiscretisation& operator =(const TimeDiscretisation&);
