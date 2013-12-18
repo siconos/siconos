@@ -119,7 +119,6 @@ int GenericMechanical::compute(double time)
     return info;
   // MB: if _hasBeenUpdated is set true then :
   // LinearOSNS.cpp:602
-  // pos = _M->getPositionOfInteractionBlock(inter);
   // position unitialized, pos get a wrong value then :
   // computeqBlock(inter, pos) -> SEGFAULT
   // so I comment this:

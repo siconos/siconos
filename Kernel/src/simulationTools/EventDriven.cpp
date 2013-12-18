@@ -35,6 +35,7 @@
 #include "NewMarkAlphaOSI.hpp"
 #include "Relation.hpp"
 #include "NonSmoothLaw.hpp"
+#include "NewtonEulerR.hpp"
 //#define DEBUG_MESSAGES
 
 #include <debug.h>
@@ -452,6 +453,13 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
     inter->relation()->computeJach(t, *inter);
+    if (inter->relation()->getType() == NewtonEuler)
+    {
+      SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
+      SP::DynamicalSystem ds2 = indexSet0->properties(*ui).target;
+      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
+      ner->computeJachqT(*inter, ds1, ds2);
+    }
   }
 
   // solve a LCP at "acceleration" level if required

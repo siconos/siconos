@@ -93,7 +93,7 @@ void Relation::display() const
             << _subType <<std::endl;
 }
 
-void Relation::computeg(const double time, Interaction& inter)
+void Relation::computeg(double time, Interaction& inter)
 {
   unsigned int i = inter.getRelativeDegree();
   if (i)

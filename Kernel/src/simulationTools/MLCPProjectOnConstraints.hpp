@@ -122,10 +122,10 @@ public:
   virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor&);
 
   /** To compute a part of the "q" vector of the OSNS
-   *  \param inter the Interaction which corresponds to the considered block
-   *  \param unsigned int, the position of the first element of yOut to be set
+      \param InteractionsGraph::VDescriptor, vertex (interaction) which corresponds to the considered block
+      \param pos the position of the first element of yOut to be set
   */
-  virtual void computeqBlock(SP::Interaction inter, unsigned int pos);
+  virtual void computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos);
 
   /** post-treatment for  MLCPProjectOnConstraints
    */

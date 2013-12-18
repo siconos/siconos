@@ -25,6 +25,7 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "OneStepIntegrator.hpp"
 #include "NonSmoothLaw.hpp"
+#include "NewtonEulerR.hpp"
 
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 
@@ -467,16 +468,20 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
        aVi != viend; ++aVi)
   {
     SP::Interaction inter = indexSet->bundle(*aVi);
-    SP::Interaction interac = inter;
-    interac->computeOutput(getTkp1(), 0);
-    interac->relation()->computeJach(getTkp1(), *interac);
-    if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
-        Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
+    inter->computeOutput(getTkp1(), 0);
+    inter->relation()->computeJach(getTkp1(), *inter);
+    if (inter->relation()->getType() == RELATION::NewtonEuler)
     {
-      double criteria = std::max(0.0, - interac->y(0)->getValue(0));
-
-      DEBUG_PRINTF("Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
-
+      SP::DynamicalSystem ds1 = indexSet->properties(*aVi).source;
+      SP::DynamicalSystem ds2 = indexSet->properties(*aVi).target;
+      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
+      ner->computeJachqT(*inter, ds1, ds2);
+    }
+    if (Type::value(*(inter->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
+        Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactNSL)
+    {
+      double criteria = std::max(0.0, - inter->y(0)->getValue(0));
+      DEBUG_PRINTF("Unilateral inter->y(0)->getValue(0) %e.\n", inter->y(0)->getValue(0));
       if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
       //if (criteria < minViolationUnilateral) minViolationUnilateral=criteria;
       if (maxViolationUnilateral > _constraintTolUnilateral)
@@ -488,15 +493,14 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
     }
     else
     {
-      DEBUG_PRINTF("Equality interac->y(0)->normInf() %e.\n", interac->y(0)->normInf());
-
-      if (interac->y(0)->normInf()  > maxViolationEquality) maxViolationEquality = interac->y(0)->normInf() ;
-      if (interac->y(0)->normInf()  < minViolationEquality) minViolationEquality = interac->y(0)->normInf() ;
-      if (interac->y(0)->normInf() > _constraintTol)
-	{
-	  *runningProjection = true;
-	  DEBUG_PRINTF("TSProj  newton criteria equality true %e.\n", interac->y(0)->normInf());
-	}
+      DEBUG_PRINTF("Equality inter->y(0)->normInf() %e.\n", inter->y(0)->normInf());
+      if (inter->y(0)->normInf()  > maxViolationEquality) maxViolationEquality = inter->y(0)->normInf() ;
+      if (inter->y(0)->normInf()  < minViolationEquality) minViolationEquality = inter->y(0)->normInf() ;
+      if (inter->y(0)->normInf() > _constraintTol)
+      {
+        *runningProjection = true;
+        DEBUG_PRINTF("TSProj  newton criteria equality true %e.\n", inter->y(0)->normInf());
+      }
     }
     _maxViolationUnilateral = maxViolationUnilateral;
     _maxViolationEquality = maxViolationEquality;

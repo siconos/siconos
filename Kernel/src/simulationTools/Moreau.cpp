@@ -1314,19 +1314,18 @@ struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
+void Moreau::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
 
-
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
+  SP::Interaction inter = indexSet->bundle(vertex_inter);
 
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
-
-  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
 
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 

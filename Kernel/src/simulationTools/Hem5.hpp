@@ -293,10 +293,11 @@ public:
     assert(0);
   };
 
-  /** integrates the Interaction linked to this integrator, without taking constraints
-   * into account.
+  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
+   * \param vertex of the interaction graph
+   * \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp);
+  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
   /** print the data to the screen
    */

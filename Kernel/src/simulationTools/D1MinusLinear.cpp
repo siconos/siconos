@@ -230,10 +230,17 @@ double D1MinusLinear::computeResidu()
     {
       InteractionsGraph::VIterator ui, uiend;
       SP::Interaction inter;
-      for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
-        inter = indexSet0->bundle(*ui);
+        inter = indexSet2->bundle(*ui);
         inter->relation()->computeJach(told, *inter);
+        if (inter->relation()->getType() == NewtonEuler)
+        {
+          SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
+          SP::DynamicalSystem ds2 = indexSet2->properties(*ui).target;
+          SP::NewtonEulerR ner = std11::static_pointer_cast<NewtonEulerR>(indexSet2->bundle(*ui)->relation());
+          ner->computeJachqT(*inter, ds1, ds2);
+        }
         inter->relation()->computeJacg(told, *inter);
       }
 
@@ -609,6 +616,13 @@ double D1MinusLinear::computeResidu()
       {
         inter = indexSet0->bundle(*ui);
         inter->relation()->computeJach(t, *inter);
+        if (inter->relation()->getType() == NewtonEuler)
+        {
+          SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
+          SP::DynamicalSystem ds2 = indexSet0->properties(*ui).target;
+          SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
+          ner->computeJachqT(*inter, ds1, ds2);
+        }
         inter->relation()->computeJacg(t, *inter);
       }
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -834,14 +848,13 @@ void D1MinusLinear::updateState(const unsigned int level)
 
 }
 
-void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* osnsp)
+void D1MinusLinear::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
 
   DEBUG_PRINT("D1MinusLinear::computeFreeOutput starts\n");
-
-
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
-
+  SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
+  SP::Interaction inter = indexSet->bundle(vertex_inter);
   // get relation and non smooth law information
   RELATION::TYPES relationType = inter->relation()->getType(); // relation
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -1002,7 +1015,11 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
        * \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
        *
        */
-      std11::static_pointer_cast<NewtonEulerR>(inter->relation())->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter);
+      SP::DynamicalSystem ds1 = indexSet->properties(vertex_inter).source;
+      SP::DynamicalSystem ds2 = indexSet->properties(vertex_inter).target;
+      
+      
+      std11::static_pointer_cast<NewtonEulerR>(inter->relation())->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter, ds1, ds2);
 
       DEBUG_EXPR((std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms())->display());
 
@@ -1244,9 +1261,7 @@ double D1MinusLinear::computeResidu()
     DEBUG_EXPR(workFree->display());
     DEBUG_PRINT("workFreeFree contains right limit acceleration at t^+_k without contact force :\n");
     DEBUG_EXPR(workFreeFree->display());
-
   }
-
 
   if (!allOSNS->empty())
   {
@@ -1257,8 +1272,14 @@ double D1MinusLinear::computeResidu()
       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet0->bundle(*ui);
-        inter->computeJach(told);
-        inter->computeJacg(told);
+        inter->relation()->computeJach(told, *inter);
+        if (inter->relation()->getType() == NewtonEuler)
+        {
+          SP::DynamicalSystem ds1 = indexSet->properties(ui).source;
+          SP::DynamicalSystem ds2 = indexSet->properties(ui).target;
+          inter->relation()->computeJachqT(*inter, ds1, ds2);
+        }
+        inter->relation()->computeJacg(told, *inter);
       }
       
       // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)

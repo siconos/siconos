@@ -442,16 +442,15 @@ struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
+void Lsodar::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
+  SP::Interaction inter = indexSet->bundle(vertex_inter);
 
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
-
-  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
-
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
   unsigned int relativePosition = 0;

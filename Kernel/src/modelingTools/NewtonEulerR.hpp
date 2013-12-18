@@ -25,13 +25,13 @@
 #include "Relation.hpp"
 
 /**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr2)(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*);
+typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int, double*);
 
 /**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr3)(unsigned int, const double*, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr3)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
 
 /**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
 
 /** NewtonEuler (Non Linear) Relation (generic interface)
  *
@@ -201,59 +201,58 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
   * \param: double, current time
   */
-  virtual void computeh(const double time, Interaction& inter);
+  virtual void computeh(double time, Interaction& inter);
 
   /** default function to compute jacobianH
   *  \param double : current time
   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
 
   void computeJachx(double);*/
-  virtual void computeJachlambda(const double time, Interaction& inter)
+  virtual void computeJachlambda(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJachq(const double time, Interaction& inter)
+  virtual void computeJachq(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJachqDot(const double time, Interaction& inter)
+  virtual void computeJachqDot(double time, Interaction& inter)
   {
     /* \warning. This method should never be called, since we are only considering
      * holonomic NewtonEulerR up to now
      */
     assert(0) ;
   }
-  virtual void computeDotJachq(const double time, Interaction& inter);
+  virtual void computeDotJachq(double time, Interaction& inter);
 
 
-  virtual void computeJacglambda(const double time, Interaction& inter)
+  virtual void computeJacglambda(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJacgq(const double time, Interaction& inter)
+  virtual void computeJacgq(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJacgqDot(const double time, Interaction& inter)
+  virtual void computeJacgqDot(double time, Interaction& inter)
   {
     ;
   }
 
-  /*default implementation consists in multiplying jachq and T*/
-  virtual void computeJachqT(Interaction& inter);
+  /* default implementation consists in multiplying jachq and T
+     \param inter interaction that owns the relation
+     \param dynamical system linked to this interaction (source)
+     \param second ds linked to this interaction (target). If there is 
+     only one ds in the inter, call this function with ..., ds, ds)
+     
+  */
+  virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   /* compute all the H Jacobian */
-  virtual void computeJach(const double time, Interaction& inter)
-  {
-    computeJachq(time, inter);
-    //computeJachqDot(time, inter); // This is not needed here
-    //computeDotJachq(time, inter);
-    computeJachlambda(time, inter);
-    computeJachqT(inter);
-  }
+  virtual void computeJach(double time, Interaction& inter);
 
   /* compute all the G Jacobian */
-  virtual void computeJacg(const double time, Interaction& inter)
+  virtual void computeJacg(double time, Interaction& inter)
   {
     computeJacgq(time, inter);
     computeJacgqDot(time, inter);
@@ -261,25 +260,28 @@ public:
   }
 
   /** To compute the terms of the second order time derivative of y
-   *
-   *  \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
-   *
-   * \param time double, current time
-   * \param inter interaction that owns the relation
+      
+      \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
+      
+      \param time double, current time
+      \param inter interaction that owns the relation
+      \param dynamical system linked to this interaction (source)
+      \param second ds linked to this interaction (target). If there is 
+      only one ds in the inter, call this function with ..., ds, ds)
    */
-  void computeSecondOrderTimeDerivativeTerms(const double time, Interaction& inter);
+  void computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   /** to compute output
   *  \param double : current time
   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0) ;
+  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0) ;
 
   /** to compute p
   *  \param double : current time
   *  \param unsigned int: "derivative" order of lambda used to compute input
   */
-  virtual void computeInput(const double time, Interaction& inter, unsigned int = 0) ;
+  virtual void computeInput(double time, Interaction& inter, unsigned int = 0) ;
 
   /** copy the data of the Relation to the XML tree
   */

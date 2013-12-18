@@ -66,15 +66,8 @@ void OneStepIntegrator::insertDynamicalSystem(SP::DynamicalSystem ds)
   OSIDynamicalSystems->insert(ds);
 }
 
-// SP::SiconosVector OneStepIntegrator::getWorkX(SP::DynamicalSystem ds)
-// {
-//   assert(workX.find(ds)!=workX.end()&&"OneStepIntegrator::getWorkX(ds): this vector does not exists for ds.");
-//   return workX[ds];
-// }
-
 void OneStepIntegrator::initialize()
-{
-}
+{}
 
 void OneStepIntegrator::saveInMemory()
 {
@@ -91,14 +84,17 @@ void OneStepIntegrator::computeFreeState()
 {
   RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + integratorType);
 }
-void OneStepIntegrator::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
+
+void OneStepIntegrator::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
   RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + integratorType);
 }
+
 void OneStepIntegrator::resetNonSmoothPart()
 {
   for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetAllNonSmoothPart, _1));
 }
+
 void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 {
   for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetNonSmoothPart, _1, level));

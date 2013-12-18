@@ -31,16 +31,16 @@ class SimpleMatrix;
 class SiconosVector;
 
 /**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr2)(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*);
+typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int, double*);
 
 /**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr3)(unsigned int, const double*, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr3)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
 
 /**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
 
 /**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr5bis)(unsigned int, const double*, unsigned int, const double*, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr5bis)(unsigned int, double*, unsigned int, double*, unsigned int, double*, unsigned int, double*);
 
 /** Lagrangian (Non Linear) Relation (generic interface)
  *
@@ -211,12 +211,12 @@ public:
 
   /** to compute y = h(t,q,v,z) using plug-in mechanism
    * should be used as less as possible to avoid side--effects
-   * prefer computeh(const double time, Interaction& inter,
+   * prefer computeh(double time, Interaction& inter,
                      SP::BlockVector q, SP::BlockVector v, SP::BlockVector z)
    * \param time  current time
    * \param inter interaction that owns the relation
    */
-  virtual void computeh(const double time, Interaction& inter);
+  virtual void computeh(double time, Interaction& inter);
 
   /** to compute y = h(t,q,v,z) using plug-in mechanism
   * \param time current time
@@ -225,10 +225,10 @@ public:
   * \param v the BlockVector of velocities
   * \param z the BlockVector of parameters
   */
-  void computeh(const double time, Interaction& inter,
+  void computeh(double time, Interaction& inter,
                 SP::BlockVector q, SP::BlockVector v, SP::BlockVector z);
 
-  // void computeh(const double time, Interaction& inter,
+  // void computeh(double time, Interaction& inter,
   //               SP::BlockVector q, SP::BlockVector v,
   //               SP::BLockVector lambda, SP::BlockVector z
   //               SP::SiconosVector y);
@@ -237,19 +237,19 @@ public:
   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
 
   void computeJachx(double);*/
-  virtual void computeJachlambda(const double time, Interaction& inter)
+  virtual void computeJachlambda(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJachq(const double time, Interaction& inter)
+  virtual void computeJachq(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJachqDot(const double time, Interaction& inter)
+  virtual void computeJachqDot(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeDotJachq(const double time, Interaction& inter)
+  virtual void computeDotJachq(double time, Interaction& inter)
   {
     ;
   }
@@ -257,29 +257,29 @@ public:
   /** to compute hDot using plug-in mechanism
    * using plug-in mechanism with the data vector of the interaction
    * should be used as less as possible to avoid side--effects
-   * prefer computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+   * prefer computehDot(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
    * \param time  current time
    * \param inter interaction that owns the relation
    */
-  virtual void computehDot(const double time, Interaction& inter)
+  virtual void computehDot(double time, Interaction& inter)
   {
     ;
   }
 
-  void computeJacglambda(const double time, Interaction& inter)
+  void computeJacglambda(double time, Interaction& inter)
   {
     ;
   }
-  void computeJacgq(const double time, Interaction& inter)
+  void computeJacgq(double time, Interaction& inter)
   {
     ;
   }
-  void computeJacgqDot(const double time, Interaction& inter)
+  void computeJacgqDot(double time, Interaction& inter)
   {
     ;
   }
   /* compute all the H Jacobian */
-  virtual void computeJach(const double time, Interaction& inter)
+  virtual void computeJach(double time, Interaction& inter)
   {
     computeJachq(time, inter);
     computeJachqDot(time, inter);
@@ -288,7 +288,7 @@ public:
     computehDot(time,inter);
   }
   /* compute all the G Jacobian */
-  virtual void computeJacg(const double time, Interaction& inter)
+  virtual void computeJacg(double time, Interaction& inter)
   {
     computeJacgq(time, inter);
     computeJacgqDot(time, inter);
@@ -300,13 +300,13 @@ public:
   *  \param double : current time
   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0) = 0;
+  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0) = 0;
 
   /** to compute p
   *  \param double : current time
   *  \param unsigned int: "derivative" order of lambda used to compute input
   */
-  virtual void computeInput(const double time, Interaction& inter, unsigned int = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter, unsigned int = 0) = 0;
 
   /** copy the data of the Relation to the XML tree
   */

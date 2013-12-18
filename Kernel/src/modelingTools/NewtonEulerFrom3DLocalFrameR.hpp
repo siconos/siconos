@@ -58,7 +58,7 @@ public:
   virtual void initComponents(Interaction& inter);
 
   /*default implementation consists in multiplying jachq and T*/
-  virtual void computeJachqT(Interaction& inter);
+  virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   ACCEPT_STD_VISITORS();
 };

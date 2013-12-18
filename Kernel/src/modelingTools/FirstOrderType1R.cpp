@@ -119,17 +119,17 @@ void FirstOrderType1R::initialize(Interaction& inter)
            "FirstOrderType1R::initialize inconsistent sizes between _jacg[0] matrix and the interaction.");
 }
 
-void FirstOrderType1R::computeh(const double time, Interaction& inter)
+void FirstOrderType1R::computeh(double time, Interaction& inter)
 {
   computeOutput(time, inter, 0);
 }
 
-void FirstOrderType1R::computeg(const double time, Interaction& inter)
+void FirstOrderType1R::computeg(double time, Interaction& inter)
 {
   computeInput(time, inter, 0);
 }
 
-void FirstOrderType1R::computeOutput(const double time, Interaction& inter, unsigned int)
+void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned int)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
 
@@ -145,7 +145,7 @@ void FirstOrderType1R::computeOutput(const double time, Interaction& inter, unsi
   *inter.data(z) = workZ;
 }
 
-void FirstOrderType1R::computeInput(const double time, Interaction& inter, unsigned int level)
+void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned int level)
 {
   assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
@@ -161,7 +161,7 @@ void FirstOrderType1R::computeInput(const double time, Interaction& inter, unsig
   *inter.data(z) = workZ;
 }
 
-void FirstOrderType1R::computeJachx(const double time, Interaction& inter)
+void FirstOrderType1R::computeJachx(double time, Interaction& inter)
 {
   //
   assert(_pluginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
@@ -178,7 +178,7 @@ void FirstOrderType1R::computeJachx(const double time, Interaction& inter)
   *inter.data(z) = workZ;
 }
 
-void FirstOrderType1R::computeJachz(const double time, Interaction& inter)
+void FirstOrderType1R::computeJachz(double time, Interaction& inter)
 {
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   SiconosVector workX = *inter.data(x);
@@ -193,7 +193,7 @@ void FirstOrderType1R::computeJachz(const double time, Interaction& inter)
   *inter.data(z) = workZ;
 }
 
-void FirstOrderType1R::computeJacglambda(const double time, Interaction& inter)
+void FirstOrderType1R::computeJacglambda(double time, Interaction& inter)
 {
   assert(_pluginJacLg && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
 

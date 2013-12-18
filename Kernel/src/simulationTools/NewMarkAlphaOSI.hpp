@@ -234,12 +234,12 @@ public:
   /** compute the free state of the discretized dynamical system */
   void computeFreeState();
 
-  /** compute free output (without interaction force) of the concerned interaction
-  /param SP::Interaction: pointer to the concerned interaction
-  /param OneStepNSProblem: method to solve non-smooth problem
-  */
-  void computeFreeOutput(SP::Interaction, OneStepNSProblem *);
-
+  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
+   * \param vertex of the interaction graph
+   * \param osnsp pointer to OneStepNSProblem
+   */
+  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
+  
   /** initialize */
   void initialize();
 

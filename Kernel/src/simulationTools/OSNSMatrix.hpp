@@ -127,30 +127,16 @@ protected:
 
   /** Matrix used for default storage type (storageType = 0) */
   SP::SiconosMatrix M1;
-  SP::SiconosMatrix Mt;
 
   /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix
       (storageType = 1) */
   SP::BlockCSRMatrix M2;
 
-  /** To update dim and interactionBlocksPositions for a new set of
-      Interaction
+  /** For each Interaction in the graph, compute its absolute position.      Interaction
       \param InteractionsGraph* the index set of
       the active constraints
   */
   virtual void updateSizeAndPositions(unsigned int&, SP::InteractionsGraph);
-
-  /** To update dim and DSBlocksPositions for a new set of DynamicalSystem
-      \param DynamicalSystemsSet* the DyncamicalSystemsSet
-  */
-  void updateSizeAndPositions(unsigned int&, SP::DynamicalSystemsSet);
-
-  /** To update dim, DSBlocksPositions and interactionBlocksPositions for
-      a new set of DynamicalSystem and a new set of Interaction
-      \param DynamicalSystemsSet* the DynamicalSystemsSet
-      \param InteractionsGraph* the index set of the active constraints
-  */
-  void updateSizeAndPositions(unsigned int&, SP::DynamicalSystemsSet, SP::InteractionsGraph);
 
 private:
   /** Private copy constructor => no copy nor pass by value */
@@ -182,7 +168,6 @@ public:
       \param storage type
   */
   OSNSMatrix(SP::InteractionsGraph, int);
-
 
   /** Constructor with copy of a SiconosMatrix => storageType = 0
       \param MSource matrix to be copied
@@ -217,13 +202,8 @@ public:
     storageType = i;
   };
 
-  /** get the position (real, not interactionBlock) of the first element of the interactionBlock which corresponds to the Interaction
-      \param Interaction Interaction from which position is required
-  */
-  unsigned int getPositionOfDSBlock(SP::DynamicalSystem) const;
-
-  /** get the position (real, not DSBlock) of the first element of the DSBlock which corresponds to DS
-      \param DS DynamicalSystem  from which position is required
+  /** get the absolute position of the interaction 
+      \param Interaction from which position is required
   */
   virtual unsigned int getPositionOfInteractionBlock(SP::Interaction) const;
 

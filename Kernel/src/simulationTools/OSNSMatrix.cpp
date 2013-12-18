@@ -30,13 +30,14 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
 {
   // === Description ===
 
-  // For a interactionBlock (diagonal or extra diagonal) corresponding to
-  // a Interaction, we need to know the position of its first
-  // element in the full-matrix M. This position dep`ends on the
+  // For an interactionBlock (diagonal or extra diagonal) corresponding to
+  // an Interaction, we need to know the position of its first
+  // element in the full-matrix M. This position depends on the
   // previous interactionBlocks sizes.
   //
-  // positions are saved in a map<SP::Interaction, unsigned int>,
-  // named interactionBlocksPositions.
+  // Note FP: at the time positions are saved in the Interaction
+  // but this is wrong (I think) since it prevents the inter
+  // to be present in several different osns.
   //
 
   // Computes real size of the current matrix = sum of the dim. of all
@@ -47,62 +48,10 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
   {
     assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
 
-    //    (*interactionBlocksPositions)[indexSet->bundle(*vd)] = dim;
     indexSet->bundle(*vd)->setAbsolutePosition(dim); 
     dim += (indexSet->bundle(*vd)->nonSmoothLaw()->size());
 
     assert(indexSet->bundle(*vd)->absolutePosition() < dim);
-  }
-}
-
-void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
-                                        SP::DynamicalSystemsSet DSSet)
-{
-  // === Description ===
-
-  // For a DSBlock (diagonal or extra diagonal) corresponding to a
-  // DynamicalSet, we need to know the position of its first element
-  // in the full-matrix M. This position depends on the previous
-  // DSBlocks sizes.
-  //
-  // positions are saved in a map<SP::DynamicalSystem, unsigned int>,
-  // named DSBlocksPositions.
-  //
-
-  // Computes real size of the current matrix = sum of the dim. of all
-  // Interactionin indexSet
-  dim = 0;
-  for (DSIterator it = DSSet->begin(); it != DSSet->end(); ++it)
-  {
-    (*DSBlocksPositions)[*it] = dim;
-    dim += (*it)->getDim();
-  }
-}
-
-void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
-                                        SP::DynamicalSystemsSet DSSet,
-                                        SP::InteractionsGraph indexSet)
-{
-  // === Description ===
-
-  // positions are saved in a map<SP::Interaction, unsigned int>,
-  // named interactionBlocksPositions.  positions are saved in a
-  // map<SP::DynamicalSystem, unsigned int>, named DSBlocksPositions.
-  //
-
-  // Computes real size of the current matrix = sum of the dim. of all
-  // Interactionin indexSet
-  dim = 0;
-  for (DSIterator it = DSSet->begin(); it != DSSet->end(); ++it)
-  {
-    (*DSBlocksPositions)[*it] = dim;
-    dim += (*it)->getDim();
-  }
-  InteractionsGraph::VIterator vd, vdend;
-  for (std11::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
-  {
-    indexSet->bundle(*vd)->setAbsolutePosition(dim);
-    dim += indexSet->bundle(*vd)->nonSmoothLaw()->size();
   }
 }
 
@@ -111,8 +60,6 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
 OSNSMatrix::OSNSMatrix():
   dimRow(0),  dimColumn(0), storageType(0)
 {
-  //  interactionBlocksPositions.reset(new Interaction_int());
-  DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 }
 
@@ -137,10 +84,9 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   {
     M2.reset(new BlockCSRMatrix(n));
   }
-  //  interactionBlocksPositions.reset(new Interaction_int());
-  DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 }
+
 OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
   dimRow(n),  dimColumn(m), storageType(stor)
 {
@@ -160,8 +106,6 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
   else // if(storageType == 1)
     M2.reset(new BlockCSRMatrix(n));
 
-  //  interactionBlocksPositions.reset(new Interaction_int());
-  DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 }
 
@@ -169,10 +113,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
 OSNSMatrix::OSNSMatrix(SP::InteractionsGraph indexSet, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
-  //  interactionBlocksPositions.reset(new Interaction_int());
-  DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
-
   fill(indexSet);
 }
 
@@ -181,13 +122,8 @@ OSNSMatrix::OSNSMatrix(SP::InteractionsGraph indexSet, int stor):
 OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
   dimRow(MSource.size(0)), dimColumn(MSource.size(1)), storageType(0)
 {
-  //  interactionBlocksPositions.reset(new Interaction_int());
-  DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
   M1.reset(new SimpleMatrix(MSource));
-
-  // Warning: interactionBlocksPositions remains empty since we have no
-  // information concerning indexSet and interactionBlocks in MSource
 }
 
 
@@ -198,20 +134,13 @@ OSNSMatrix::~OSNSMatrix()
 
 unsigned int OSNSMatrix::getPositionOfInteractionBlock(SP::Interaction inter) const
 {
+  // Note FP: I think the return value below is not the right one :
+  // this position does not depend on the interaction but on
+  // the OSNS and the corresponding indexSet. 
+  // One Interaction may have different absolute positions if it is present
+  // in several OSNS. ==> add this pos as a property on vertex in Interactions Graph
+  // 
   return inter->absolutePosition();
-  /*  Interaction_int::const_iterator it = interactionBlocksPositions->find(inter);
-  if (it== interactionBlocksPositions->end())
-    RuntimeException::selfThrow
-    ("OSNSMatrix::getPositionOfInteractionBlock(Interaction inter), inter does not belong to the index set used to built the OSNS matrix.");
-    return it->second;*/
-}
-unsigned int OSNSMatrix::getPositionOfDSBlock(SP::DynamicalSystem DS) const
-{
-  DS_int::const_iterator it = DSBlocksPositions->find(DS);
-  if (it == DSBlocksPositions->end())
-    RuntimeException::selfThrow
-    ("OSNSMatrix::getPositionOfDSBlock(DynamicalSystems ds), ds does not belong to the DynamicalSet used to built the OSNS matrix.");
-  return it->second;
 }
 
 // Fill the matrix
@@ -268,7 +197,6 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
 #endif
     }
 
-
     InteractionsGraph::EIterator ei, eiend;
     for (std11::tie(ei, eiend) = indexSet->edges();
          ei != eiend; ++ei)
@@ -318,7 +246,6 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
     convert();
 
 }
-
 
 // convert current matrix to NumericsMatrix structure
 void OSNSMatrix::convert()

@@ -29,7 +29,7 @@
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-
+#include "NewtonEulerR.hpp"
 
 using namespace RELATION;
 
@@ -369,6 +369,13 @@ void Hem5::fprob(integer* IFCN,
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
       inter->relation()->computeJach(t, *inter);
+      if (inter->relation()->getType() == NewtonEuler)
+      {
+        SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
+        SP::DynamicalSystem ds2 = indexSet2->properties(*ui).target;
+       SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
+       ner->computeJachqT(*inter, ds1, ds2);
+      }
       assert(0);
     }
   }
@@ -387,6 +394,13 @@ void Hem5::fprob(integer* IFCN,
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
       inter->relation()->computeJach(t, *inter);
+      if (inter->relation()->getType() == NewtonEuler)
+      {
+        SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
+        SP::DynamicalSystem ds2 = indexSet2->properties(*ui).target;
+        SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
+        ner->computeJachqT(*inter, ds1, ds2);
+      }
       assert(0);
     }
   }
@@ -807,17 +821,15 @@ struct Hem5::_NSLEffectOnFreeOutput : public SiconosVisitor
   // note : no NewtonImpactFrictionNSL
 };
 
-
-void Hem5::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
+void Hem5::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp)
 {
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
+  SP::Interaction inter = indexSet->bundle(vertex_inter);
 
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
-
-  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
-
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
   unsigned int relativePosition = 0;

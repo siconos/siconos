@@ -88,7 +88,7 @@ void FirstOrderType2R::initialize(Interaction& inter)
          "FirstOrderType2R::initialize inconsistent sizes between _jacg[0] matrix and the interaction.");
 }
 
-void FirstOrderType2R::computeh(const double time, Interaction& inter)
+void FirstOrderType2R::computeh(double time, Interaction& inter)
 {
   /* this function calls computeOutput, which in return calls this function.
    * Broken logic, put a selfthrow so people may fix it */
@@ -96,7 +96,7 @@ void FirstOrderType2R::computeh(const double time, Interaction& inter)
   computeOutput(time, inter, 0);
 }
 
-void FirstOrderType2R::computeg(const double time, Interaction& inter)
+void FirstOrderType2R::computeg(double time, Interaction& inter)
 {
   /* this function calls computeInput, which in return calls this function.
   * Broken logic, put a selfthrow so people may fix it */
@@ -104,7 +104,7 @@ void FirstOrderType2R::computeg(const double time, Interaction& inter)
   computeInput(time, inter, 0);
 }
 
-void FirstOrderType2R::computeOutput(const double time, Interaction& inter, unsigned int level)
+void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_PRINT("FirstOrderType2R::computeOutput \n");
   // compute the new y  obtained by linearisation (see DevNotes)
@@ -170,7 +170,7 @@ void FirstOrderType2R::computeOutput(const double time, Interaction& inter, unsi
 
 }
 
-void FirstOrderType2R::computeInput(const double time, Interaction& inter, unsigned int level)
+void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_PRINT("FirstOrderType2R::computeInput \n");
   // compute the new r  obtained by linearisation
@@ -216,24 +216,24 @@ void FirstOrderType2R::preparNewtonIteration(Interaction& inter)
   *inter.data(ds_xp) -= tmpV;
 }
 
-void FirstOrderType2R::computeJachlambda(const double time, Interaction& inter)
+void FirstOrderType2R::computeJachlambda(double time, Interaction& inter)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJachlambda must be overload.");
 }
-void FirstOrderType2R::computeJachx(const double time, Interaction& inter)
+void FirstOrderType2R::computeJachx(double time, Interaction& inter)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
 }
 
-void FirstOrderType2R::computeJacglambda(const double time, Interaction& inter)
+void FirstOrderType2R::computeJacglambda(double time, Interaction& inter)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
 }
-void FirstOrderType2R::computeJacgx(const double time, Interaction& inter)
+void FirstOrderType2R::computeJacgx(double time, Interaction& inter)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computejacgx must be overload.");
 }
-void FirstOrderType2R::computeJacg(const double time, Interaction& inter)
+void FirstOrderType2R::computeJacg(double time, Interaction& inter)
 {
   computeJacglambda(time, inter);
   computeJacgx(time, inter);

@@ -31,25 +31,25 @@ typedef void (*MatrixFunctionOfTime)(double, unsigned int, unsigned int, double*
 typedef void (*VectorFunctionOfTime)(double, unsigned int, double*, unsigned int, double*);
 
 /** */
-typedef void (*FPtr1)(double, unsigned int, const double*, double*, unsigned int, double*);
+typedef void (*FPtr1)(double, unsigned int, double*, double*, unsigned int, double*);
 
 /** */
-typedef void (*FPtr2)(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*);
+typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int, double*);
 
 /** */
-typedef void (*FPtr3)(unsigned int, const double*, unsigned int, double*, unsigned int, double*);
-typedef void (*FPtr4bis)(unsigned int, const double*, unsigned int, double*, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr3)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr4bis)(unsigned int, double*, unsigned int, double*, unsigned int, double*, unsigned int, double*);
 
 /** */
-typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
 
 /** */
-typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
+typedef void (*FPtr5)(unsigned int, double*, double*, double*, unsigned int, double*);
 
 /** */
-typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
+typedef void (*FPtr6)(double, unsigned int, double*, double*, double*, unsigned int, double*);
 
 /** */
-typedef void (*FPtr7)(unsigned int, const double*, double*, unsigned int, double*);
+typedef void (*FPtr7)(unsigned int, double*, double*, unsigned int, double*);
 
 #endif

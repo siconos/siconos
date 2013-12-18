@@ -974,20 +974,18 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
+void SchatzmanPaoli::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
 
-
+  SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
+  SP::Interaction inter = indexSet->bundle(vertex_inter);
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
 
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
-
-  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
-
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
   unsigned int relativePosition = 0;

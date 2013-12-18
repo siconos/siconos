@@ -102,10 +102,10 @@ public:
   virtual void computeFreeState();
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param inter pointer to Interaction
+   * \param vertex of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutput(SP::Interaction inter, OneStepNSProblem* osnsp);
+  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param ti initial time

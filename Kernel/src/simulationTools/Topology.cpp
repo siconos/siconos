@@ -101,10 +101,18 @@ Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds
   // note : boost graph SEGFAULT on self branch removal
   // see https://svn.boost.org/trac/boost/ticket/4622
   _IG[0]->properties(ig_new_ve).source = ds1;
+  _IG[0]->properties(ig_new_ve).source_pos = 0;
   if(!ds2)
+  {
     _IG[0]->properties(ig_new_ve).target = ds1;
+    _IG[0]->properties(ig_new_ve).target_pos = 0;
+  }
   else
+  {
     _IG[0]->properties(ig_new_ve).target = ds2;
+    _IG[0]->properties(ig_new_ve).target_pos = ds1->getDim();
+  }
+
   assert(_IG[0]->bundle(ig_new_ve) == inter);
   assert(_IG[0]->is_vertex(inter));
   assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
@@ -156,15 +164,12 @@ struct VertexIsRemoved
    corresponding vertices are removed from _IG */
 void Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 {
-
-  for (DSIterator ids = inter->dynamicalSystems()->begin();
-       ids != inter->dynamicalSystems()->end();
-       ++ids)
-  {
-    _DSG[0]->remove_out_edge_if
-    (_DSG[0]->descriptor(*ids),
-     VertexIsRemoved(inter, _DSG[0], _IG[0]));
-  }
+  
+  SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
+  SP::DynamicalSystem ds2 = _IG[0]->properties(_IG[0]->descriptor(inter)).target;
+  _DSG[0]->remove_out_edge_if(_DSG[0]->descriptor(ds1), VertexIsRemoved(inter, _DSG[0], _IG[0]));
+  if (ds1 != ds2)
+    _DSG[0]->remove_out_edge_if(_DSG[0]->descriptor(ds2), VertexIsRemoved(inter, _DSG[0], _IG[0]));
 }
 
 
@@ -217,14 +222,12 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
   DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)");
   unsigned int sumOfDSSizes = 0, sumOfZSizes = 0;
   
-  inter->insert(ds);
   sumOfDSSizes += ds->getDim();
   if(ds->z())
     sumOfZSizes += ds->z()->size();
   
   if(ds2)
   {
-    inter->insert(ds2);
     sumOfDSSizes += ds->getDim();
     if(ds->z())
       sumOfZSizes += ds->z()->size();

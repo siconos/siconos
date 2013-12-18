@@ -180,11 +180,6 @@ public:
     return _M;
   }
 
-  /** set the value of M to newValue
-   *  \param newValue a OSNSMatrix
-   */
-  void setM(const OSNSMatrix& newValue);
-
   /** set M to pointer newPtr
    *  \param newPtr a SP::OSNSMatrix
    */
@@ -257,10 +252,10 @@ public:
   virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
 
   /** To compute a part of the "q" vector of the OSNS
-      \param inter the SP::Interaction which corresponds to the considered block
+      \param InteractionsGraph::VDescriptor, vertex (interaction) which corresponds to the considered block
       \param pos the position of the first element of yOut to be set
   */
-  virtual void computeqBlock(SP::Interaction inter, unsigned int pos);
+  virtual void computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos);
 
   /** compute vector q
    *  \param time the current time

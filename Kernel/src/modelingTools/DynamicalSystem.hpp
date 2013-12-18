@@ -39,7 +39,7 @@
 #include "SiconosVisitor.hpp"
 
 /** Pointer to function for plug-in. */
-typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
+typedef void (*FPtr6)(double, unsigned int, double*, double*, double*, unsigned int, double*);
 
 /** */
 
@@ -349,7 +349,7 @@ public:
   /** get _normRef
    * \return a reference to _normRef
    */
-  inline const double& normRef() const
+  inline double normRef() const
   {
     return _normRef;
   };

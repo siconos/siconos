@@ -161,9 +161,6 @@ private:
    */
   VectorOfVectors _lambdaOld;
 
-  /** the Dynamical Systems concerned by this interaction */
-  SP::DynamicalSystemsSet _involvedDS;
-
   /** the Non-smooth Law of the interaction*/
   SP::NonSmoothLaw _nslaw;
 
@@ -635,54 +632,6 @@ public:
   */
   void setLambdaOldPtr(const unsigned int , SP::SiconosVector newPtr);
 
-  /** insert a Dynamical system
-   *  \param a SP::DynamicalSystem
-   */
-  void insert(SP::DynamicalSystem ds)
-  {
-    _involvedDS->insert(ds);
-  };
-
-  /** gets an iterator to the first element of the involvedDS set.
-   *  \return a DSIterator.
-   */
-  inline DSIterator dynamicalSystemsBegin()
-  {
-    return _involvedDS->begin();
-  };
-
-  /** gets an iterator equal to involvedDS->end().
-   *  \return a DSIterator.
-   */
-  inline DSIterator dynamicalSystemsEnd()
-  {
-    return _involvedDS->end();
-  };
-
-  /** gets a const iterator to the first element of the involvedDS set.
-   *  \return a ConstDSIterator.
-   */
-  inline ConstDSIterator dynamicalSystemsBegin() const
-  {
-    return _involvedDS->begin();
-  };
-
-  /** gets a const iterator equal to _involvedDS->end().
-   *  \return a ConstDSIterator.
-   */
-  inline ConstDSIterator dynamicalSystemsEnd() const
-  {
-    return _involvedDS->end();
-  };
-
-  /** get a pointer to the DynamicalSystems of this Interaction
-   *  \return a DynamicalSystemsSet*
-   */
-  inline SP::DynamicalSystemsSet dynamicalSystems()
-  {
-    return _involvedDS;
-  }
-
   /** get the Relation of this Interaction
    *  \return a pointer on this Relation
    */
@@ -789,24 +738,25 @@ public:
   }
 
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
-   *         We get only the part corresponding to ds.
-   *  \param a pointer to a dynamical system
+   *         We get only the part corresponding to one ds.
+   *  \param int, relative position of the beginning of the required block in relation matrix. 
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getLeftInteractionBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
+  void getLeftInteractionBlockForDS(unsigned int, SP::SiconosMatrix) const;
 
   /** gets the matrix used in interactionBlock computation. Used only for the formulation projecting on the constraints.
    *         We get only the part corresponding to ds.
-   *  \param a pointer to a dynamical system
+   *  \param int, relative position of the beginning of the required block in relation matrix. 
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getLeftInteractionBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const;
+  void getLeftInteractionBlockForDSProjectOnConstraints(unsigned int, SP::SiconosMatrix InteractionBlock) const;
+
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
-   *  \param a pointer to a dynamical system
+   *  \param int, relative position of the beginning of the required block in relation matrix. 
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getRightInteractionBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
+  void getRightInteractionBlockForDS(unsigned int, SP::SiconosMatrix) const;
 
   /** gets extra interactionBlock corresponding to the present Interaction (see the
    *  top of this files for extra interactionBlock meaning)
@@ -887,11 +837,17 @@ public:
   void computeResiduR(const double time) ;
 
   void initData();
+  void initDSData(SP::DynamicalSystem);
   void initDataFirstOrder();
   void initDataLagrangian();
   void initDataNewtonEuler();
-  void LinkDataFromMemory(unsigned int memoryLevel);
-  void LinkDataFromMemoryLagrangian(unsigned int memoryLevel);
+  void initDSDataFirstOrder(SP::DynamicalSystem);
+  void initDSDataLagrangian(SP::DynamicalSystem);
+  void initDSDataNewtonEuler(SP::DynamicalSystem);
+  // Note FP : the two functions belows are never used in any siconos module.
+  // Temp comment before removal
+  //void LinkDataFromMemory(unsigned int memoryLevel);
+  //void LinkDataFromMemoryLagrangian(unsigned int memoryLevel);
 
 };
 

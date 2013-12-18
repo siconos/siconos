@@ -22,6 +22,7 @@
 #include "LagrangianScleronomousR.hpp"
 #include "LagrangianR.hpp"
 #include "NonSmoothLaw.hpp"
+#include "NewtonEulerR.hpp"
 using namespace RELATION;
 //#define DEBUG_NEWMARK
 
@@ -300,9 +301,12 @@ void NewMarkAlphaOSI::computeFreeState()
 
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
+void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
   double t = simulationLink->nextTime();
+  SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
+  SP::Interaction inter = indexSet->bundle(vertex_inter);
+
   // Get the type of relation
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -375,6 +379,13 @@ void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem 
       {
         // Update Jacobian matrix
         inter->relation()->computeJach(t, *inter);
+        if (inter->relation()->getType() == NewtonEuler)
+        {
+          SP::DynamicalSystem ds1 = indexSet->properties(vertex_inter).source;
+          SP::DynamicalSystem ds2 = indexSet->properties(vertex_inter).target;
+          SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
+          ner->computeJachqT(*inter, ds1, ds2);
+        }
         // cumpute y_free = y_{n,k} + G*q_free
         if (!_IsVelocityLevel) // output at the position level y_{n,k} = g_{n,k}
         {

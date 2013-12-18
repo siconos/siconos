@@ -137,7 +137,9 @@ struct InteractionProperties
 {
   SP::SiconosMatrix block;    // diagonal block
   SP::DynamicalSystem source;
+  unsigned int source_pos;
   SP::DynamicalSystem target;
+  unsigned int target_pos;
   SP::OneStepIntegrator osi;
   bool forControl;            // true if the relation is used to control the DS
 

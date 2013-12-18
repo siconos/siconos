@@ -153,10 +153,6 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
     
-    SP::SiconosMatrix block;
-    block = osnspb->getOSIMatrix(ball);
-    block->display();
-
     while (s->hasNextEvent())
     {
       s->computeOneStep();

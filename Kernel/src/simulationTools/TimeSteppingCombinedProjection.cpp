@@ -27,6 +27,8 @@
 #include "OneStepIntegrator.hpp"
 #include "MLCPProjectOnConstraints.hpp"
 #include "NonSmoothLaw.hpp"
+#include "NewtonEulerR.hpp"
+
 
 class MLCPProjectOnConstraints;
 
@@ -656,7 +658,13 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
     SP::Interaction interac = indexSet->bundle(*aVi);
     interac->computeOutput(getTkp1(), 0);
     interac->relation()->computeJach(getTkp1(), *interac);
-
+    if (interac->relation()->getType() == RELATION::NewtonEuler)
+    {
+      SP::DynamicalSystem ds1 = indexSet->properties(*aVi).source;
+      SP::DynamicalSystem ds2 = indexSet->properties(*aVi).target;
+      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(interac->relation()));
+      ner->computeJachqT(*interac, ds1, ds2);
+    }
 
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)

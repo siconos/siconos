@@ -28,8 +28,8 @@
 #include "BoundaryCondition.hpp"
 
 /** Pointer to function for plug-in. For NNL and its jacobian. */
-typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
-typedef void (*FPtrMass)(unsigned int, const double*, double*, unsigned int, double*);
+typedef void (*FPtr5)(unsigned int, double*, double*, double*, unsigned int, double*);
+typedef void (*FPtrMass)(unsigned int, double*, double*, unsigned int, double*);
 typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
 
 typedef std::vector<SP::SiconosMemory> VectorOfMemories;
@@ -234,7 +234,7 @@ protected:
    * @param  size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  //  void (*computeMassPtr)(unsigned int, const double*, double*, unsigned int, double*);
+  //  void (*computeMassPtr)(unsigned int, double*, double*, unsigned int, double*);
   SP::PluggedObject _pluginMass;
 
 

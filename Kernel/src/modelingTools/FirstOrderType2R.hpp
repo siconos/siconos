@@ -89,40 +89,40 @@ public:
   /** default function to compute h
   *  \param double : current time
   */
-  virtual void computeh(const double time, Interaction& inter);
+  virtual void computeh(double time, Interaction& inter);
 
   /** default function to compute g
   *  \param double : current time
   */
-  virtual void computeg(const double time, Interaction& inter);
+  virtual void computeg(double time, Interaction& inter);
 
   /** default function to compute jacobianH
   *  \param double : not used
   *  \param not used
   */
-  virtual void computeJachx(const double time, Interaction& inter);
-  virtual void computeJachlambda(const double time, Interaction& inter);
+  virtual void computeJachx(double time, Interaction& inter);
+  virtual void computeJachlambda(double time, Interaction& inter);
 
   /** default function to compute jacobianG according to lambda
   *  \param double : current time
   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
   */
-  virtual void computeJacglambda(const double time, Interaction& inter);
-  virtual void computeJacgx(const double time, Interaction& inter);
+  virtual void computeJacglambda(double time, Interaction& inter);
+  virtual void computeJacgx(double time, Interaction& inter);
 
-  virtual void computeJacg(const double time, Interaction& inter);
+  virtual void computeJacg(double time, Interaction& inter);
 
   /** default function to compute y
   *  \param double: not used
   *  \param unsigned int: not used
   */
-  virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0);
+  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0);
 
   /** default function to compute r
   *  \param double : not used
   *  \param unsigned int: not used
   */
-  virtual void computeInput(const double time, Interaction& inter, unsigned int = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int = 0);
   /*
   inline SP_PluggedMatrix getB(){return Jacg.at(1);};
   */

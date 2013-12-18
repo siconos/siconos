@@ -309,11 +309,11 @@ public:
    */
   virtual void computeFreeState();
 
-  /** Compute the Output (y) which corresponds to the free state (state without
-   * taking into account the nonsmooth input) plus the possible contribution of
-   * the nslaw
+  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
+   * \param vertex of the interaction graph
+   * \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp);
+  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i

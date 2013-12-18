@@ -29,19 +29,19 @@ void FirstOrderR::initialize(Interaction& inter)
   // Update data member (links to DS variables)
 }
 
-void FirstOrderR::computeJachx(const double time, Interaction& inter)
+void FirstOrderR::computeJachx(double time, Interaction& inter)
 {
   //RuntimeException::selfThrow("FirstOrderR::computeJachx, not (yet) implemented or forbidden for relations of type "+subType);
 }
-void FirstOrderR::computeJachz(const double time, Interaction& inter)
+void FirstOrderR::computeJachz(double time, Interaction& inter)
 {
   //RuntimeException::selfThrow("FirstOrderR::computeJachx, not (yet) implemented or forbidden for relations of type "+subType);
-} void FirstOrderR::computeJachlambda(const double time, Interaction& inter)
+} void FirstOrderR::computeJachlambda(double time, Interaction& inter)
 {
   //RuntimeException::selfThrow("FirstOrderR::computeJachlambda, not (yet) implemented or forbidden for relations of type "+subType);
 }
 
-void FirstOrderR::computeJacglambda(const double time, Interaction& inter)
+void FirstOrderR::computeJacglambda(double time, Interaction& inter)
 {
   //RuntimeException::selfThrow("FirstOrderR::computeJacglambda, not (yet) implemented or forbidden for relations of type "+subType);
 }

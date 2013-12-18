@@ -27,7 +27,7 @@
 #include "FirstOrderR.hpp"
 
 /** Pointer to function for plug-in for operators related to output and its gradients.*/
-typedef void (*Type1Ptr)(unsigned int, const double*, unsigned int, double*, unsigned int, double*);
+typedef void (*Type1Ptr)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
 
 
 /** FirstOrder Non Linear Relation.
@@ -94,42 +94,42 @@ public:
   /** default function to compute h
   *  \param double : current time
   */
-  void computeh(const double time, Interaction& inter);
+  void computeh(double time, Interaction& inter);
 
   /** default function to compute g
   *  \param double : current time
   */
-  void computeg(const double time, Interaction& inter);
+  void computeg(double time, Interaction& inter);
 
   /** default function to compute jacobianH
   *  \param double : not used
   *  \param not used
   */
-  void computeJachx(const double time, Interaction& inter);
+  void computeJachx(double time, Interaction& inter);
 
   /** default function to compute \f$\nabla_z h\f$
   *  \param time not used
   *  \param inter Interaction linked with this relation
   */
-  void computeJachz(const double time, Interaction& inter);
+  void computeJachz(double time, Interaction& inter);
 
   /** default function to compute jacobianG according to lambda
   *  \param double : current time
   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
   */
-  void computeJacglambda(const double time, Interaction& inter);
+  void computeJacglambda(double time, Interaction& inter);
 
   /** default function to compute y
   *  \param double: not used
   *  \param unsigned int: not used
   */
-  void computeOutput(const double time, Interaction& inter, unsigned int = 0);
+  void computeOutput(double time, Interaction& inter, unsigned int = 0);
 
   /** default function to compute r
   *  \param double : not used
   *  \param unsigned int: not used
   */
-  void computeInput(const double time, Interaction& inter, unsigned int = 0);
+  void computeInput(double time, Interaction& inter, unsigned int = 0);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
   *  \param Relation * : the relation which must be converted

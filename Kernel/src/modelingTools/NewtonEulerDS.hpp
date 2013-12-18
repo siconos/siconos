@@ -26,7 +26,7 @@
 #include "DynamicalSystem.hpp"
 
 /** Pointer to function for plug-in. */
-typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
+typedef void (*FPtr5)(unsigned int, double*, double*, double*, unsigned int, double*);
 typedef void (*Fext)(double , double*, double*, double*);
 
 
@@ -489,12 +489,12 @@ public:
   /** default function to compute the external strengths
    *  \param time the current time
    */
-  virtual void computeFExt(const double time);
+  virtual void computeFExt(double time);
 
   /** default function to compute the external moments
    * \param time the current time
    */
-  virtual void computeMExt(const double time);
+  virtual void computeMExt(double time);
 
 
   /** Default function to compute the right-hand side term

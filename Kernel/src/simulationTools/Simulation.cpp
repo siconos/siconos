@@ -261,13 +261,37 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   _levelMaxForInput = 0;
   _levelMinForOutput = LEVELMAX;
   _levelMaxForOutput = 0;
+  
+  computeLevelsForInputAndOutput();
+
+  // Loop over all DS in the graph, to reset NS part of each DS.
+  // Note FP : this was formerly done in inter->initialize call with local levels values
+  // but I think it's ok (better?) to do it with the simulation levels values.
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  SP::DynamicalSystemsGraph DSG = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
+  {
+    assert(_levelMinForInput <= _levelMaxForInput);
+    for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+    {
+      DSG->bundle(*dsi)->initializeNonSmoothInput(k);
+    }
+  }
 
   InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  computeLevelsForInputAndOutput();
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    indexSet0->bundle(*ui)->initialize(_tinit);
+    inter = indexSet0->bundle(*ui);
+    inter->initialize(_tinit);
+    // Initialize interaction work vectors, depending on Dynamical systems
+    // linked to the interaction.
+    inter->initDSData(indexSet0->properties(*ui).source);
+    if(indexSet0->properties(*ui).source != indexSet0->properties(*ui).target)
+    {
+      inter->initDSData(indexSet0->properties(*ui).target);
+    }
   }
 
   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
@@ -964,12 +988,10 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   /** \warning. We test only for the first Dynamical of the interaction.
    * we assume that the osi(s) are consistent for one interaction
    */
-  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  SP::DynamicalSystem ds = indexSet0->properties(indexSet0->descriptor(inter)).source;
   SP::OneStepIntegrator osi =  integratorOfDS(ds);
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
-                                    topology()->indexSet(0);
   indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
-
   std11::shared_ptr<SetupLevels> setupLevels;
   setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
   osi->accept(*(setupLevels.get()));

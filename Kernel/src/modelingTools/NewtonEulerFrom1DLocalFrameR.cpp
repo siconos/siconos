@@ -169,16 +169,8 @@ void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter)
   //  _isContact=1;
 }
 
-void NewtonEulerFrom1DLocalFrameR::computeJachq(const double time, Interaction& inter)
+void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, bool has2Bodies)
 {
-  DSIterator itDS = inter.dynamicalSystemsBegin();
-  SP::DynamicalSystem aux = *itDS;
-  //assert (&(*aux)==&(*_ds1));
-  itDS++;
-
-  bool has2Bodies = false;
-  if (itDS != inter.dynamicalSystemsEnd())
-    has2Bodies = true;
   _jachq->setValue(0, 0, _Nc->getValue(0));
   _jachq->setValue(0, 1, _Nc->getValue(1));
   _jachq->setValue(0, 2, _Nc->getValue(2));
@@ -253,15 +245,13 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(const double time, Interaction& 
 #endif
 
 }
-void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter)
+void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
-  DSIterator itDS = inter.dynamicalSystemsBegin();
-  SP::NewtonEulerDS d1 =  std11::static_pointer_cast<NewtonEulerDS> (*itDS);
+  SP::NewtonEulerDS d1 =  std11::static_pointer_cast<NewtonEulerDS> (ds1);
   SP::SiconosVector Q1 = d1->q();
-  itDS++;
-  if (itDS != inter.dynamicalSystemsEnd())
-  {
-    SP::NewtonEulerDS d2 =  std11::static_pointer_cast<NewtonEulerDS> (*itDS);
+  SP::NewtonEulerDS d2 =  std11::static_pointer_cast<NewtonEulerDS> (ds2);
+  if(d1 != d2)
+  { 
     SP::SiconosVector Q2 = d2->q();
     NIcomputeJachqTFromContacts(d1, d2);
   }

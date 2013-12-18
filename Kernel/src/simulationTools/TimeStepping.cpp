@@ -40,6 +40,7 @@
 #include "BlockVector.hpp"
 #include <debug.h>
 #include "CxxStd.hpp"
+#include "NewtonEulerR.hpp"
 
 
 using namespace RELATION;
@@ -573,6 +574,13 @@ void   TimeStepping::prepareNewtonIteration()
   {
     inter = indexSet0->bundle(*ui);
     inter->relation()->computeJach(getTkp1(), *inter);
+    if (inter->relation()->getType() == NewtonEuler)
+    {
+      SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
+      SP::DynamicalSystem ds2 = indexSet0->properties(*ui).target;
+      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
+      ner->computeJachqT(*inter, ds1, ds2);
+    }
     inter->relation()->computeJacg(getTkp1(), *inter);
   } 
   /* let's consider only active Interactions */

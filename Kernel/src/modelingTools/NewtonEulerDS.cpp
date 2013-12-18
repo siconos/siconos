@@ -254,13 +254,13 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
 
 
-void NewtonEulerDS::computeFExt(const double time)
+void NewtonEulerDS::computeFExt(double time)
 {
   if (_pluginFExt->fPtr)
     ((Fext)_pluginFExt->fPtr)(time, &(*_q)(0), &(*_fExt)(0),  &(*_q0)(0));
 }
 
-void NewtonEulerDS::computeMExt(const double time)
+void NewtonEulerDS::computeMExt(double time)
 {
   if (_pluginMExt->fPtr)
     ((Fext)_pluginMExt->fPtr)(time, &(*_q)(0), &(*_mExt)(0),  &(*_q0)(0));

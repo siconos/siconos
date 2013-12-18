@@ -28,10 +28,10 @@
 #include "Interaction.hpp"
 
 /** Pointer to function for plug-in for operators related to output and its gradients.*/
-typedef void (*OutPtr)(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*);
+typedef void (*OutPtr)(unsigned int, double*, double, unsigned int, double*, double*, unsigned int, double*);
 
 /** Pointer to function for plug-in for operators related to input and its gradients.*/
-typedef void (*InPtr)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);
+typedef void (*InPtr)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
 
 /** FirstOrder Non Linear Relation.
  *  \author SICONOS Development Team - copyright INRIA
@@ -123,21 +123,21 @@ public:
   /** default function to compute h
   *  \param double : current time
   */
-  virtual void computeh(const double time, Interaction& inter) = 0;
+  virtual void computeh(double time, Interaction& inter) = 0;
 
   /** default function to compute g
   *  \param double : current time
   */
-  virtual void computeg(const double time, Interaction& inter) = 0;
+  virtual void computeg(double time, Interaction& inter) = 0;
 
   /** default function to compute jacobianH
   *  \param double : current time
   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
   */
-  virtual void computeJachx(const double time, Interaction& inter);
-  virtual void computeJachz(const double time, Interaction& inter);
-  virtual void computeJachlambda(const double time, Interaction& inter);
-  virtual void computeJach(const double time, Interaction& inter)
+  virtual void computeJachx(double time, Interaction& inter);
+  virtual void computeJachz(double time, Interaction& inter);
+  virtual void computeJachlambda(double time, Interaction& inter);
+  virtual void computeJach(double time, Interaction& inter)
   {
     computeJachx(time, inter);
     computeJachz(time, inter);
@@ -149,9 +149,9 @@ public:
   *  \param double : current time
   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
   */
-  virtual void computeJacglambda(const double time, Interaction& inter);
+  virtual void computeJacglambda(double time, Interaction& inter);
 
-  virtual void computeJacg(const double time, Interaction& inter)
+  virtual void computeJacg(double time, Interaction& inter)
   {
     computeJacglambda(time, inter);
   }

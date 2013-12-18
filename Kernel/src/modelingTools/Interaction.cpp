@@ -41,6 +41,7 @@
 #include "NewtonEulerDS.hpp" // ??
 
 #include "BlockVector.hpp"
+#include "FirstOrderNonLinearDS.hpp"
 
 using namespace std;
 using namespace RELATION;
@@ -129,17 +130,13 @@ Interaction::Interaction(SP::InteractionXML interxml):
   // function, called by simulation !!)
   if (_interactionxml->hasY() ||  _interactionxml->hasLambda())
     RuntimeException::selfThrow("Interaction::xml constructor, y or lambda download is forbidden.");
-
-  _involvedDS.reset(new DynamicalSystemsSet());
 }
 
 /* initialisation with empty set */
 Interaction::Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number):
   _initialized(false), _number(number), _interactionSize(interactionSize), _sizeOfDS(0), _sizeZ(0),
   _y(2),  _nslaw(NSL), _relation(rel)
-{
-  _involvedDS.reset(new DynamicalSystemsSet());
-}
+{}
 
 void Interaction::initialize(double t0)
 {
@@ -150,16 +147,6 @@ void Interaction::initialize(double t0)
     assert(relation() && "Interaction::initialize failed, relation() == NULL");
 
     assert(nslaw() && "Interaction::initialize failed, non smooth law == NULL");
-
-    DSIterator itDS;
-    for (itDS = dynamicalSystemsBegin(); itDS != dynamicalSystemsEnd(); ++itDS)
-    {
-      assert(_lowerLevelForInput <= _upperLevelForInput);
-      for (unsigned int k = _lowerLevelForInput ; k < _upperLevelForInput + 1; k++)
-      {
-        (*itDS)->initializeNonSmoothInput(k);
-      }
-    }
 
     // compute number of relations.
 
@@ -305,7 +292,20 @@ void Interaction::initData()
 
 }
 
-#include "FirstOrderNonLinearDS.hpp"
+void Interaction::initDSData(SP::DynamicalSystem ds)
+{
+  RELATION::TYPES relationType = _relation->getType();
+  if (relationType == FirstOrder)
+    initDSDataFirstOrder(ds);
+  else if (relationType == Lagrangian)
+    initDSDataLagrangian(ds);
+  else if (relationType == NewtonEuler)
+    initDSDataNewtonEuler(ds);
+  else
+    RuntimeException::selfThrow("Interaction::initDSData unknown initialization procedure for \
+        a relation of type: " + relationType);
+}
+
 // It could be interesting to make Interaction a pure virtual class and to derive 3
 // classes, one for each type of relation
 void Interaction::initDataFirstOrder()
@@ -320,22 +320,21 @@ void Interaction::initDataFirstOrder()
   _workspace[FirstOrderR::residu_r].reset(new BlockVector());
   _workspace[FirstOrderR::ds_xp].reset(new BlockVector());
   _workspace[FirstOrderR::g_alpha].reset(new BlockVector());
+}
 
-  for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
-  {
-    // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
-    FirstOrderNonLinearDS& ds = static_cast<FirstOrderNonLinearDS&>(**it);
-    _workspace[FirstOrderR::free]->insertPtr(ds.workspace(DynamicalSystem::free));
-    _workspace[FirstOrderR::x]->insertPtr(ds.x());
-    _workspace[FirstOrderR::xq]->insertPtr(ds.xq());
-    _workspace[FirstOrderR::deltax]->insertPtr(ds.workspace(DynamicalSystem::local_buffer));
-    _workspace[FirstOrderR::z]->insertPtr(ds.z());
-    _workspace[FirstOrderR::r]->insertPtr(ds.r());
-    _workspace[FirstOrderR::residu_r]->insertPtr(ds.residur());
-    _workspace[FirstOrderR::ds_xp]->insertPtr(ds.xp());
-    _workspace[FirstOrderR::g_alpha]->insertPtr(ds.gAlpha());
-
-  }
+void Interaction::initDSDataFirstOrder(SP::DynamicalSystem ds)
+{
+  // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
+  FirstOrderNonLinearDS& lds = static_cast<FirstOrderNonLinearDS&>(*ds);
+  _workspace[FirstOrderR::free]->insertPtr(lds.workspace(DynamicalSystem::free));
+  _workspace[FirstOrderR::x]->insertPtr(lds.x());
+  _workspace[FirstOrderR::xq]->insertPtr(lds.xq());
+  _workspace[FirstOrderR::deltax]->insertPtr(lds.workspace(DynamicalSystem::local_buffer));
+  _workspace[FirstOrderR::z]->insertPtr(lds.z());
+  _workspace[FirstOrderR::r]->insertPtr(lds.r());
+  _workspace[FirstOrderR::residu_r]->insertPtr(lds.residur());
+  _workspace[FirstOrderR::ds_xp]->insertPtr(lds.xp());
+  _workspace[FirstOrderR::g_alpha]->insertPtr(lds.gAlpha());
 }
 
 void Interaction::initDataLagrangian()
@@ -351,46 +350,42 @@ void Interaction::initDataLagrangian()
   _workspace[LagrangianR::p0].reset(new BlockVector());
   _workspace[LagrangianR::p1].reset(new BlockVector());
   _workspace[LagrangianR::p2].reset(new BlockVector());
+}
 
+void Interaction::initDSDataLagrangian(SP::DynamicalSystem ds)
+{
+  // check dynamical system type
+  assert((Type::value(*ds) == Type::LagrangianLinearTIDS ||
+          Type::value(*ds) == Type::LagrangianDS));
+  
+  // convert vDS systems into LagrangianDS and put them in vLDS
+  SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
 
+  // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
+  _workspace[LagrangianR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
+  _workspace[LagrangianR::q0]->insertPtr(lds->q());
 
-  SP::LagrangianDS lds;
-  for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+  DEBUG_PRINTF("_workspace[LagrangianR::q0]->insertPtr(lds->q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
+  DEBUG_EXPR(_workspace[LagrangianR::q0]->display());
+  DEBUG_EXPR(lds->q()->display());
+  DEBUG_EXPR(std::cout << _workspace[LagrangianR::q0] << std::endl;);
+  
+  _workspace[LagrangianR::q1]->insertPtr(lds->velocity());
+  _workspace[LagrangianR::q2]->insertPtr(lds->acceleration());
+  _workspace[LagrangianR::z]->insertPtr(lds->z());
+  
+  // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
+  for (unsigned int k = _lowerLevelForInput;
+       k < _upperLevelForInput + 1; k++)
   {
-    // check dynamical system type
-    assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
-            Type::value(**it) == Type::LagrangianDS));
-
-    // convert vDS systems into LagrangianDS and put them in vLDS
-    lds = std11::static_pointer_cast<LagrangianDS> (*it);
-
-    // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _workspace[LagrangianR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
-    _workspace[LagrangianR::q0]->insertPtr(lds->q());
-
-    DEBUG_PRINTF("_workspace[LagrangianR::q0]->insertPtr(lds->q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
-    DEBUG_EXPR(_workspace[LagrangianR::q0]->display());
-    DEBUG_EXPR(lds->q()->display());
-    DEBUG_EXPR(std::cout << _workspace[LagrangianR::q0] << std::endl;);
-
-    _workspace[LagrangianR::q1]->insertPtr(lds->velocity());
-    _workspace[LagrangianR::q2]->insertPtr(lds->acceleration());
-    _workspace[LagrangianR::z]->insertPtr(lds->z());
-
-    // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
-    for (unsigned int k = _lowerLevelForInput;
-         k < _upperLevelForInput + 1; k++)
-    {
-      assert(lds->p(k));
-      assert(_workspace[LagrangianR::p0 + k]);
-      _workspace[LagrangianR::p0 + k]->insertPtr(lds->p(k));
-    }
+    assert(lds->p(k));
+    assert(_workspace[LagrangianR::p0 + k]);
+    _workspace[LagrangianR::p0 + k]->insertPtr(lds->p(k));
   }
 }
 
 void Interaction::initDataNewtonEuler()
 {
-  DSIterator it;
   _workspace[NewtonEulerR::free].reset(new BlockVector());
   _workspace[NewtonEulerR::q0].reset(new BlockVector()); // displacement
   _workspace[NewtonEulerR::velocity].reset(new BlockVector()); // velocity
@@ -401,73 +396,73 @@ void Interaction::initDataNewtonEuler()
   _workspace[NewtonEulerR::p0].reset(new BlockVector());
   _workspace[NewtonEulerR::p1].reset(new BlockVector());
   _workspace[NewtonEulerR::p2].reset(new BlockVector());
+}
+
+void Interaction::initDSDataNewtonEuler(SP::DynamicalSystem ds)
+{
   SP::NewtonEulerDS lds;
-  unsigned int sizeForAllxInDs = 0;
-  for (it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
-  {
-    // check dynamical system type
-    assert((Type::value(**it) == Type::NewtonEulerDS) && "NewtonEulerR::initialize failed, not implemented for dynamical system of that type.\n");
-
-    // convert vDS systems into NewtonEulerDS and put them in vLDS
-    lds = std11::static_pointer_cast<NewtonEulerDS> (*it);
-    // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _workspace[NewtonEulerR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
-    _workspace[NewtonEulerR::q0]->insertPtr(lds->q());
-    _workspace[NewtonEulerR::velocity]->insertPtr(lds->velocity());
-    //  _workspace[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());
-    _workspace[NewtonEulerR::q1]->insertPtr(lds->dotq());
-    //    data[NewtonEulerR::q2]->insertPtr( lds->acceleration());
-    if (lds->p(0))
+  // check dynamical system type
+  assert((Type::value(*ds) == Type::NewtonEulerDS) && "Interaction initDSData failed, not implemented for dynamical system of that type.\n");
+  
+  // convert vDS systems into NewtonEulerDS and put them in vLDS
+  lds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+  // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
+  _workspace[NewtonEulerR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
+  _workspace[NewtonEulerR::q0]->insertPtr(lds->q());
+  _workspace[NewtonEulerR::velocity]->insertPtr(lds->velocity());
+  //  _workspace[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());
+  _workspace[NewtonEulerR::q1]->insertPtr(lds->dotq());
+  //    data[NewtonEulerR::q2]->insertPtr( lds->acceleration());
+  if (lds->p(0))
       _workspace[NewtonEulerR::p0]->insertPtr(lds->p(0));
-    if (lds->p(1))
-      _workspace[NewtonEulerR::p1]->insertPtr(lds->p(1));
-    if (lds->p(2))
-      _workspace[NewtonEulerR::p2]->insertPtr(lds->p(2));
-
-    _workspace[NewtonEulerR::z]->insertPtr(lds->z());
-    sizeForAllxInDs += lds->p(1)->size();
-  }
+  if (lds->p(1))
+    _workspace[NewtonEulerR::p1]->insertPtr(lds->p(1));
+  if (lds->p(2))
+    _workspace[NewtonEulerR::p2]->insertPtr(lds->p(2));
+  
+  _workspace[NewtonEulerR::z]->insertPtr(lds->z());
 }
 
-void Interaction::LinkDataFromMemory(unsigned int memoryLevel)
-{
-  if (_relation->getType() == Lagrangian)
-    LinkDataFromMemoryLagrangian(memoryLevel);
-  else
-    RuntimeException::selfThrow("Interaction::LinkDataFromMemory: not yet implemented for Relation of type " + _relation->getType());
-}
-
-void Interaction::LinkDataFromMemoryLagrangian(unsigned int memoryLevel)
-{
-
-  _workspace[LagrangianR::q0].reset(new BlockVector()); // displacement
-  _workspace[LagrangianR::q1].reset(new BlockVector()); // velocity
-  _workspace[LagrangianR::q2].reset(new BlockVector()); // acceleration
-  _workspace[LagrangianR::z].reset(new BlockVector()); // z vector
-  _workspace[LagrangianR::p0].reset(new BlockVector());
-  _workspace[LagrangianR::p1].reset(new BlockVector());
-  _workspace[LagrangianR::p2].reset(new BlockVector());
-
-  SP::LagrangianDS lds;
-  for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
-  {
-    // check dynamical system type
-    assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
-            Type::value(**it) == Type::LagrangianDS));
-    // convert vDS systems into LagrangianDS and put them in vLDS
-    lds = std11::static_pointer_cast<LagrangianDS> (*it);
-
-    // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _workspace[LagrangianR::q0]->insertPtr(lds->qMemory()->getSiconosVector(memoryLevel));
-    _workspace[LagrangianR::q1]->insertPtr(lds->velocityMemory()->getSiconosVector(memoryLevel));
+// void Interaction::LinkDataFromMemory(unsigned int memoryLevel)
+// {
+//   if (_relation->getType() == Lagrangian)
+//     LinkDataFromMemoryLagrangian(memoryLevel);
+//   else
+//     RuntimeException::selfThrow("Interaction::LinkDataFromMemory: not yet implemented for Relation of type " + _relation->getType());
+// }
 
 
-    // Do nothing for the remaining of data since there are no Memory
-    // An access to the content ofdata[q2] based on a link on Memory
-    //must throw an exeption
+// void Interaction::LinkDataFromMemoryLagrangian(unsigned int memoryLevel)
+// {
 
-  }
-}
+//   _workspace[LagrangianR::q0].reset(new BlockVector()); // displacement
+//   _workspace[LagrangianR::q1].reset(new BlockVector()); // velocity
+//   _workspace[LagrangianR::q2].reset(new BlockVector()); // acceleration
+//   _workspace[LagrangianR::z].reset(new BlockVector()); // z vector
+//   _workspace[LagrangianR::p0].reset(new BlockVector());
+//   _workspace[LagrangianR::p1].reset(new BlockVector());
+//   _workspace[LagrangianR::p2].reset(new BlockVector());
+
+//   SP::LagrangianDS lds;
+//   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+//   {
+//     // check dynamical system type
+//     assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
+//             Type::value(**it) == Type::LagrangianDS));
+//     // convert vDS systems into LagrangianDS and put them in vLDS
+//     lds = std11::static_pointer_cast<LagrangianDS> (*it);
+
+//     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
+//     _workspace[LagrangianR::q0]->insertPtr(lds->qMemory()->getSiconosVector(memoryLevel));
+//     _workspace[LagrangianR::q1]->insertPtr(lds->velocityMemory()->getSiconosVector(memoryLevel));
+
+
+//     // Do nothing for the remaining of data since there are no Memory
+//     // An access to the content ofdata[q2] based on a link on Memory
+//     //must throw an exeption
+
+//   }
+//}
 // --- GETTERS/SETTERS ---
 
 void Interaction::setY(const VectorOfVectors& newVector)
@@ -729,8 +724,6 @@ void Interaction::display() const
   cout << "|  _sizeOfDS : " << _sizeOfDS << endl;
   cout << "|  _sizeZ: " << _sizeZ << endl;
 
-  cout << "| involved DS :" << endl;
-  cout << _involvedDS << endl;
   _relation->display();
   if (_initialized)
   {
@@ -824,25 +817,9 @@ void Interaction::saveInteractionToXML()
 
 }
 
-
-void Interaction::getLeftInteractionBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const
+void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
-  unsigned int k = 0;
-  DSIterator itDS;
-  itDS = _involvedDS->begin();
-  // look for ds and its position in G
-  while (*itDS != ds && itDS != dynamicalSystemsEnd())
-  {
-    k += (*itDS)->getDim();
-    itDS++;
-  }
-
-  // check dimension (1)
-  if ((*itDS)->getDim() != InteractionBlock->size(1))
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS(DS, InteractionBlock, ...): inconsistent sizes between InteractionBlock and DS");
-
   SP::SiconosMatrix originalMatrix;
-
   RELATION::TYPES relationType = relation()->getType();
 
   if (relationType == FirstOrder)
@@ -872,42 +849,23 @@ void Interaction::getLeftInteractionBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   // and of first element to be set in InteractionBlock
   Index subPos(4);
   subPos[0] = 0; //_relativePosition;
-  subPos[1] = k;
+  subPos[1] = pos;
   subPos[2] = 0;
   subPos[3] = 0;
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const
+void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
-  unsigned int k = 0;
-  DSIterator itDS;
-
-  itDS = _involvedDS->begin();
-
-  Type::Siconos dsType = Type::value(*ds);
-  if (dsType != Type::NewtonEulerDS)
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject- ds is not from NewtonEulerDS.");
+  //Type::Siconos dsType = Type::value(*ds);
+  //if (dsType != Type::NewtonEulerDS)
+  //  RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject- ds is not from NewtonEulerDS.");
 
   RELATION::TYPES relationType = relation()->getType();
   if (relationType != NewtonEuler)
     RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject- relation is not from NewtonEulerR.");
 
-  // look for ds and its position in G
-  while (*itDS != ds && itDS != dynamicalSystemsEnd())
-  {
-    k += (std11::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
-    itDS++;
-  }
-
-  // check dimension (1)
-  unsigned int sizeDS = (std11::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
-  if (sizeDS != InteractionBlock->size(1))
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject(DS, InteractionBlock, ...): inconsistent sizes between InteractionBlock and DS");
-
-
   SP::SiconosMatrix originalMatrix;
-
   SP::NewtonEulerR r = std11::static_pointer_cast<NewtonEulerR> (relation());
   //proj_with_q originalMatrix = r->jachqProj();
   originalMatrix = r->jachq();
@@ -921,28 +879,14 @@ void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(SP::Dynamical
   // and of first element to be set in InteractionBlock
   Index subPos(4);
   subPos[0] = 0;//_relativePosition;
-  subPos[1] = k;
+  subPos[1] = pos;
   subPos[2] = 0;
   subPos[3] = 0;
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
-void Interaction::getRightInteractionBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const
+
+void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
-  unsigned int k = 0;
-  DSIterator itDS;
-  itDS = _involvedDS->begin();
-
-  // look for ds and its position in G
-  while (*itDS != ds && itDS != dynamicalSystemsEnd())
-  {
-    k += (*itDS)->getDim();
-    itDS++;
-  }
-
-  // check dimension (1)
-  if ((*itDS)->getDim() != InteractionBlock->size(0))
-    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): inconsistent sizes between InteractionBlock and DS");
-
   SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
   RELATION::TYPES relationType = relation()->getType();
 
@@ -968,7 +912,7 @@ void Interaction::getRightInteractionBlockForDS(SP::DynamicalSystem ds, SP::Sico
   // Position (row,col) of first element to be read in originalMatrix
   // and of first element to be set in InteractionBlock
   Index subPos(4);
-  subPos[0] = k;
+  subPos[0] = pos;
   subPos[1] = 0;//_relativePosition;
   subPos[2] = 0;
   subPos[3] = 0;
