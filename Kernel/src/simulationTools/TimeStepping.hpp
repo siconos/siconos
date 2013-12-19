@@ -53,20 +53,6 @@ protected:
   // /** compute LevelMax */
   // void initLevelMax();
 
-  /** boolean variable to known whether Newton iterations converges or not
-   */
-  bool _isNewtonConverge;
-
-  /** boolean variable to known whether the ResiduY has to be computed or not
-   *  if true, the ResiduY is computed and the convergence is checked
-   */
-  bool _computeResiduY;
-
-  /** boolean variable to known whether the ResiduR has to be computed or not
-   *  if true, the ResiduR is computed and the convergence is checked
-   */
-  bool _computeResiduR;
-
   /** Default Newton tolerance used in call of run() of ComputeOneStep() */
   double _newtonTolerance;
 
@@ -92,7 +78,19 @@ protected:
   /** Maximum Residual for the input of the relation */
   double _newtonResiduRMax;
 
+  /** boolean variable to known whether the ResiduY has to be computed or not
+   *  if true, the ResiduY is computed and the convergence is checked
+   */
+  bool _computeResiduY;
 
+  /** boolean variable to known whether the ResiduR has to be computed or not
+   *  if true, the ResiduR is computed and the convergence is checked
+   */
+  bool _computeResiduR;
+
+  /** boolean variable to known whether Newton iterations converges or not
+   */
+  bool _isNewtonConverge;
 
 
   /** initialisation specific to TimeStepping for Interactions.
@@ -102,8 +100,11 @@ protected:
 
   /** Default Constructor
    */
-  TimeStepping() {};
-
+  TimeStepping() : 
+    _computeResiduY(false), 
+    _computeResiduR(false), 
+    _isNewtonConverge(false) {};
+  
 public:
 
   /** initialisation specific to TimeStepping for OneStepNSProblem.

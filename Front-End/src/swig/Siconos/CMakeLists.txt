@@ -315,6 +315,9 @@ ADD_TEST(diode_bridge ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${C
 ADD_TEST(smc ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_smc.py)
 ADD_TEST(matrix_exp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
 
+IF(HAVE_SICONOS_IO)
+  ADD_TEST(serialization ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_serialization.py)
+ENDIF(HAVE_SICONOS_IO)
 
 SET_TESTS_PROPERTIES(lcp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
 SET_TESTS_PROPERTIES(sparse PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")

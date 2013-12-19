@@ -45,7 +45,7 @@ using namespace RELATION;
 // --- XML constructor ---
 EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
                          SP::DynamicalSystemsSet dsList):
-  Simulation(strxml, t0, T, dsList), _istate(1)
+  Simulation(strxml, t0, T, dsList), _istate(1), _isNewtonConverge(false)
 {
   // === One Step NS Problem === We read data in the xml output
   // (mainly Interactions concerned and solver) and assign them to
@@ -87,7 +87,7 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
  */
-EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1)
+EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1), _isNewtonConverge(false)
 {
   _numberOfOneStepNSproblems = 2;
   (*_allNSProblems).resize(_numberOfOneStepNSproblems);
@@ -99,7 +99,7 @@ EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1)
   _localizeEventMaxIter = 100;
 }
 
-EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _istate(1)
+EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _istate(1), _isNewtonConverge(false)
 {
   (*_allNSProblems).resize(nb);
   _numberOfOneStepNSproblems = 0;

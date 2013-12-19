@@ -126,9 +126,15 @@ Simulation::~Simulation()
 // clear all maps to break shared_ptr cycle
 void Simulation::clear()
 {
-  _allOSI->clear();
+  if (_allOSI)
+  {
+    _allOSI->clear();
+  }
   _osiMap.clear();
-  _allNSProblems->clear();
+  if (_allNSProblems)
+  {
+    _allNSProblems->clear();
+  }
 }
 
 // Getters/setters

@@ -55,12 +55,10 @@ static CheckSolverFPtr checkSolverOutput = NULL;
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
                            SP::OneStepNSProblem osnspb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0)
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false), 
+    _computeResiduR(false), 
+    _isNewtonConverge(false)
 {
-
-  _computeResiduY = false;
-  _computeResiduR = false;
-
 
   if (osi) insertIntegrator(osi);
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
@@ -69,21 +67,22 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
 }
 
 TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0)
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false), 
+    _computeResiduR(false), 
+    _isNewtonConverge(false)
 {
-  _computeResiduY = false;
-  _computeResiduR = false;
-
   (*_allNSProblems).resize(nb);
 }
 
 // --- XML constructor ---
 TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
                            double T, SP::DynamicalSystemsSet dsList):
-  Simulation(strxml, t0, T, dsList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0)
+  Simulation(strxml, t0, T, dsList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), 
+  _computeResiduY(false), 
+  _computeResiduR(false), 
+  _isNewtonConverge(false)
 {
-  _computeResiduY = false;
-  _computeResiduR = false;
+
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
   // === One Step NS Problem === For time stepping, only one non
   // smooth problem is built.

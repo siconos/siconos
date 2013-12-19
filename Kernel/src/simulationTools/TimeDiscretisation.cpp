@@ -107,6 +107,7 @@ TimeDiscretisation::TimeDiscretisation(double t0, std::string& str): _t0(t0)
   mpf_init(_hgmp);
   mpf_init(_tkp1);
   mpf_init(_tk);
+  mpf_init(_t0gmp);
   mpf_set_str(_hgmp, str.c_str(), 10);
   _h = 0.0;
   mpf_init_set_d(_t0gmp, t0);
@@ -126,11 +127,13 @@ TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T)
 // Copy constructor
 TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
 {
+  mpf_init(_hgmp);
+  mpf_init(_tkp1);
+  mpf_init(_tk);
+  mpf_init(_t0gmp);
+  
   if (td.hGmp())
   {
-    mpf_init(_hgmp);
-    mpf_init(_tkp1);
-    mpf_init(_tk);
     mpf_init_set(_hgmp, *td.currentTimeStep());
   }
   else
@@ -150,16 +153,12 @@ TimeDiscretisation::~TimeDiscretisation()
 {
   if (!_tkV.empty())
     _tkV.clear();
-  else
-  {
-    if (_h == 0.0)
-    {
-      mpf_clear(_hgmp);
-      mpf_clear(_tkp1);
-      mpf_clear(_tk);
-      mpf_clear(_t0gmp);
-    }
-  }
+  
+  mpf_clear(_hgmp);
+  mpf_clear(_tkp1);
+  mpf_clear(_tk);
+  mpf_clear(_t0gmp);
+
 }
 
 void TimeDiscretisation::setTkVector(const TkVector& newTk)

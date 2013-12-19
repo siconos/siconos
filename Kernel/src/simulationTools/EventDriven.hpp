@@ -121,7 +121,7 @@ public:
 
   /** defaut constructor (needed for serialization)
   */
-  EventDriven() {};
+  EventDriven() : _isNewtonConverge(false) {};
 
   /** destructor
   */
