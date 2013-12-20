@@ -668,6 +668,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
         break;
       }
     }
+
     if (!found)
       // no
     {
@@ -675,7 +676,6 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
                                             _nslaw,
                                             relp, _interID++));
       DEBUG_PRINTF("insert interaction : %d\n", inter->number());
-
       link(inter, ds);
     }
   }
@@ -1201,10 +1201,12 @@ void SpaceFilter::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::Dynam
   // all ds (like in simulation->initialize()) but where/when? 
   unsigned int levelMinForInput = inter->lowerLevelForInput();
   unsigned int levelMaxForInput = inter->upperLevelForInput();
+  bool has2DS = inter->has2Bodies();
   for (unsigned int k = levelMinForInput ; k < levelMaxForInput + 1; k++)
     {
       ds1->initializeNonSmoothInput(k);
-      ds2->initializeNonSmoothInput(k);
+      if(has2DS)
+        ds2->initializeNonSmoothInput(k);
     }
   inter->initialize(model()->simulation()->nextTime(), ds1, ds2);
 }
