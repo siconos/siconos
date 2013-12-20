@@ -227,9 +227,3 @@ void LagrangianRheonomousR::computeInput(const double time, Interaction& inter, 
   // data[name] += trans(G) * lambda
   prod(lambda, *_jachq, *inter.data(p0 + level), false);
 }
-
-LagrangianRheonomousR* LagrangianRheonomousR::convert(Relation *r)
-{
-  return dynamic_cast<LagrangianRheonomousR*>(r);
-}
-

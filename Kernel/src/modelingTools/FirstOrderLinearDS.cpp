@@ -292,11 +292,6 @@ void FirstOrderLinearDS::saveSpecificDataToXML()
   else RuntimeException::selfThrow("FirstOrderLinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");
 }
 
-FirstOrderLinearDS* FirstOrderLinearDS::convert(DynamicalSystem* ds)
-{
-  FirstOrderLinearDS* lsds = dynamic_cast<FirstOrderLinearDS*>(ds);
-  return lsds;
-}
 void FirstOrderLinearDS::computef(double time)
 {
   updatePlugins(time);

@@ -200,12 +200,12 @@ public:
   virtual void computeFreeState();
 
   /** Compute the Output (y) which corresponds to the free state (state without
-   * taking into account the nonsmooth input) plus the possible contribution of
-   * the nslaw
-   * \param inter a pointer to the Interaction
-   * \param osnsp a pointer to the OneStepNSProblem
+      taking into account the nonsmooth input) plus the possible contribution of
+      the nslaw
+      \param vertex of the interaction graph
+      \param osnsp a pointer to the OneStepNSProblem
    */
-  virtual void computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp);
+  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp);
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
@@ -253,12 +253,6 @@ public:
   void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   void updateMatrices(SP::DynamicalSystem ds);
-
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param osi the integrator which must be converted
-  * \return a pointer on the integrator if it is of the right type, 0 otherwise
-  */
-  static ZeroOrderHold* convert(OneStepIntegrator* osi);
 
   /** visitors hook
   */

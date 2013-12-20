@@ -312,10 +312,3 @@ void LagrangianLinearTIDS::saveSpecificDataToXML()
   (std11::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setK(*_K);
   (std11::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setC(*_C);
 }
-
-LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)
-{
-  LagrangianLinearTIDS* ltids = dynamic_cast<LagrangianLinearTIDS*>(ds);
-  return ltids;
-}
-

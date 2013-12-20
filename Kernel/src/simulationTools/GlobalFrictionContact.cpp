@@ -551,11 +551,3 @@ void GlobalFrictionContact::display() const
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "============================================================" <<std::endl;
 }
-
-GlobalFrictionContact* GlobalFrictionContact::convert(OneStepNSProblem* osnsp)
-{
-  GlobalFrictionContact* fc2d = dynamic_cast<GlobalFrictionContact*>(osnsp);
-  return fc2d;
-}
-
-

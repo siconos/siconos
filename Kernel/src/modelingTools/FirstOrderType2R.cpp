@@ -238,10 +238,3 @@ void FirstOrderType2R::computeJacg(double time, Interaction& inter)
   computeJacglambda(time, inter);
   computeJacgx(time, inter);
 }
-
-
-FirstOrderType2R* FirstOrderType2R::convert(Relation *r)
-{
-  return dynamic_cast<FirstOrderType2R*>(r);
-}
-

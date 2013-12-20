@@ -117,7 +117,7 @@ Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds
   assert(_IG[0]->is_vertex(inter));
   assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(_DSG[0]->edges_number() == _IG[0]->size());
-
+  
   return std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
 }
 
@@ -212,8 +212,6 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
 std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
 Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2)
 {
-  // interactions should not know linked dynamical systems in the
-  // future
   if (indexSet0()->is_vertex(inter))
   {
     removeInteractionFromIndexSet(inter);
@@ -225,12 +223,13 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
   sumOfDSSizes += ds->getDim();
   if(ds->z())
     sumOfZSizes += ds->z()->size();
-  
+
   if(ds2)
   {
     sumOfDSSizes += ds->getDim();
     if(ds->z())
       sumOfZSizes += ds->z()->size();
+    inter->setHas2Bodies(true);
   }
 
   inter->setDSSizes(sumOfDSSizes, sumOfZSizes);

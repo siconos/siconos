@@ -131,12 +131,6 @@ public:
   */
   void display() const;
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param NonSmoothLaw* : the law which must be converted
-  * \return a pointer on the law if it is of the right type, NULL otherwise
-  */
-  static RelayNSL* convert(NonSmoothLaw* nsl);
-
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();

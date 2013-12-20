@@ -162,11 +162,6 @@ void LagrangianLinearTIR::saveRelationToXML() const
   (std11::static_pointer_cast<LinearRXML>(_relationxml))->setF(*_F) ;
 }
 
-LagrangianLinearTIR* LagrangianLinearTIR::convert(Relation *r)
-{
-  return dynamic_cast<LagrangianLinearTIR*>(r);
-}
-
 void LagrangianLinearTIR::display() const
 {
   LagrangianR::display();

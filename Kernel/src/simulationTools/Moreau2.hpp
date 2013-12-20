@@ -86,10 +86,6 @@ public:
    *  \param level level of interest for the dynamics: not used at the time
    */
   void updateState(const unsigned int level);
-  /*  virtual SP::SiconosVector  getWorkX(SP::DynamicalSystem d);*/
-
-  static Moreau2* convert(OneStepIntegrator* osi);
-
 
 };
 

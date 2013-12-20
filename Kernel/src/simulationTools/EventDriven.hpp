@@ -292,12 +292,6 @@ public:
    */
   void advanceToEvent();
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param SP::Simulation : the Simulation which must be converted
-   * \return a pointer on the Simulation if it is of the right type, NULL otherwise
-   */
-  static EventDriven* convert(Simulation* str);
-
   /** visitors hook
   */
 

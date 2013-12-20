@@ -266,8 +266,3 @@ void Moreau2::updateState(const unsigned int level)
 {
 
 }
-Moreau2* Moreau2::convert(OneStepIntegrator* osi)
-{
-  Moreau2* moreau = dynamic_cast<Moreau2*>(osi);
-  return moreau;
-}

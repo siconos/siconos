@@ -1226,10 +1226,3 @@ void EventDriven::LocalizeFirstEvent()
     }
   }
 }
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-EventDriven* EventDriven::convert(Simulation *str)
-{
-  EventDriven* ed = dynamic_cast<EventDriven*>(str);
-  return ed;
-}

@@ -102,16 +102,13 @@ int main(int argc, char* argv[])
 
     SP::Interaction InterDiodeBridge(new Interaction(4, nslaw,
                                      LTIRDiodeBridge, 1));
-    InterDiodeBridge->insert(LSDiodeBridge);
 
     // --- Model creation ---
     SP::Model DiodeBridge(new Model(t0, T, Modeltitle));
     // add the dynamical system in the non smooth dynamical system
-    DiodeBridge->nonSmoothDynamicalSystem()->
-    insertDynamicalSystem(LSDiodeBridge);
+    DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridge);
     // link the interaction and the dynamical system
-    DiodeBridge->nonSmoothDynamicalSystem()->
-    link(InterDiodeBridge, LSDiodeBridge);
+    DiodeBridge->nonSmoothDynamicalSystem()->link(InterDiodeBridge, LSDiodeBridge);
 
     // ------------------
     // --- Simulation ---

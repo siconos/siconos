@@ -209,8 +209,3 @@ void FirstOrderType1R::computeJacglambda(double time, Interaction& inter)
   *inter.data(z) = workZ;
 }
 
-FirstOrderType1R* FirstOrderType1R::convert(Relation *r)
-{
-  return dynamic_cast<FirstOrderType1R*>(r);
-}
-

@@ -98,7 +98,7 @@ public:
   */
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
-  virtual void computeJachq(double time, Interaction& inter, bool = false);
+  virtual void computeJachq(double time, Interaction& inter);
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   inline SP::SiconosVector pc1() const

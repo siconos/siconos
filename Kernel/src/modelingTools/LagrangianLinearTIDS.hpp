@@ -246,8 +246,6 @@ public:
    */
   void display() const;
 
-  static LagrangianLinearTIDS* convert(DynamicalSystem* ds);
-
   /** overload LagrangianDS corresponding function
    * \return a double, always zero.
    */

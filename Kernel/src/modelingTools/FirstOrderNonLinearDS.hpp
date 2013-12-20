@@ -494,13 +494,6 @@ public:
    */
   /*  double dsConvergenceIndicator(); */
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param SP::DynamicalSystem : the system which must be converted
-   * \return a pointer on the system if it is of the right type, NULL otherwise
-   */
-  static FirstOrderNonLinearDS* convert(DynamicalSystem* ds);
-
-
   ACCEPT_STD_VISITORS();
 
 };

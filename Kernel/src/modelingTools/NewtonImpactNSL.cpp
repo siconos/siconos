@@ -57,11 +57,3 @@ void NewtonImpactNSL::saveNonSmoothLawToXML()
 {
   std11::static_pointer_cast<NewtonImpactNSLXML>(_nslawxml)->setE(_e);
 }
-
-NewtonImpactNSL* NewtonImpactNSL::convert(NonSmoothLaw* nsl)
-{
-  NewtonImpactNSL* nilnsl = dynamic_cast<NewtonImpactNSL*>(nsl);
-  return nilnsl;
-}
-
-

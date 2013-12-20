@@ -288,8 +288,3 @@ void FirstOrderLinearR::saveRelationToXML() const
   folrXML->setB(*_jacglambda);
 }
 
-FirstOrderLinearR* FirstOrderLinearR::convert(Relation* r)
-{
-  return dynamic_cast<FirstOrderLinearR*>(r);
-}
-

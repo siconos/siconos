@@ -88,7 +88,6 @@ public:
   void visit(SP::Disk pds)
   {
     int i, j, imin, imax, jmin, jmax;
-
     unsigned int _bboxfactor = parent.bboxfactor();
     unsigned int _cellsize = parent.cellsize();
 
@@ -319,7 +318,6 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
         parent->model()->nonSmoothDynamicalSystem()->topology()->
         removeInteraction(DSG0->bundle(*oei));
       }
-
     }
   }
 
@@ -999,7 +997,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
   void visit_circular(SP::CircularDS  ds1)
   {
     assert(parent->_plans->size(0) > 0);
-
+  
     // interactions with plans
 
     if (parent->_plans)
@@ -1063,7 +1061,6 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
       }
     }
-
   };
 
   void visit(SP::Circle circle)
@@ -1200,24 +1197,30 @@ void SpaceFilter::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::Dynam
   DEBUG_PRINTF("link interaction : %d\n", inter->number());
   model()->nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
   model()->simulation()->computeLevelsForInputAndOutput(inter);
-  inter->initialize(model()->simulation()->nextTime());
+  // Note FP : ds init should probably be done once and only once for 
+  // all ds (like in simulation->initialize()) but where/when? 
+  unsigned int levelMinForInput = inter->lowerLevelForInput();
+  unsigned int levelMaxForInput = inter->upperLevelForInput();
+  for (unsigned int k = levelMinForInput ; k < levelMaxForInput + 1; k++)
+    {
+      ds1->initializeNonSmoothInput(k);
+      ds2->initializeNonSmoothInput(k);
+    }
+  inter->initialize(model()->simulation()->nextTime(), ds1, ds2);
 }
 
 
 /* general proximity detection */
 void SpaceFilter::buildInteractions(double time)
 {
-
-  DSIterator it1;
-
   SP::DynamicalSystemsGraph
   DSG0 = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
   std11::shared_ptr<_BodyHash>
   hasher(new _BodyHash(*this));
+
   std11::shared_ptr<_FindInteractions>
   findInteractions(new _FindInteractions(shared_from_this(), time));
-
 
   _hash_table->clear();
 
@@ -1236,9 +1239,7 @@ void SpaceFilter::buildInteractions(double time)
   {
     DSG0->bundle(*vi)->acceptSP(findInteractions);
   }
-
   model()->simulation()->initOSNS();
-
 }
 
 //std::pair<space_hash::iterator, space_hash::iterator> SpaceFilter::neighbours(SP::Hashed h)

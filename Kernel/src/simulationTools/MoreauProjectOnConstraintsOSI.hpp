@@ -162,12 +162,6 @@ public:
    */
   void computeFreeState();
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepIntegrator* : the integrator which must be converted
-   * \return a pointer on the integrator if it is of the right type, 0 otherwise
-   */
-  static MoreauProjectOnConstraintsOSI* convert(OneStepIntegrator* osi);
-
   /** visitors hook
   */
   ACCEPT_STD_VISITORS();

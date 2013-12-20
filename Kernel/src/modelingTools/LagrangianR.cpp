@@ -56,10 +56,6 @@ void LagrangianR::initComponents(Interaction& inter)
   //       RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
   //   }
   // }
-
-
-
-
 }
 
 void LagrangianR::initialize(Interaction& inter)

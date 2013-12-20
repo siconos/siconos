@@ -29,11 +29,3 @@ ComplementarityConditionNSL::ComplementarityConditionNSL(SP::NonSmoothLawXML nsl
 ComplementarityConditionNSL::~ComplementarityConditionNSL()
 {}
 
-
-ComplementarityConditionNSL* ComplementarityConditionNSL::convert(NonSmoothLaw* nsl)
-{
-  ComplementarityConditionNSL* ccnsl = dynamic_cast<ComplementarityConditionNSL*>(nsl);
-  return ccnsl;
-}
-
-

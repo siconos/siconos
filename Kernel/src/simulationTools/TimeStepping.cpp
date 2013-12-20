@@ -818,12 +818,6 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
   return(checkConvergence);
 }
 
-TimeStepping* TimeStepping::convert(Simulation *str)
-{
-  TimeStepping* ts = dynamic_cast<TimeStepping*>(str);
-  return ts;
-}
-
 void TimeStepping::DefaultCheckSolverOutput(int info)
 {
   // info = 0 => ok

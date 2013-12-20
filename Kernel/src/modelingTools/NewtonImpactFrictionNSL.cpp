@@ -74,11 +74,3 @@ void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()
   std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setEt(_et);
   std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setMu(_mu);
 }
-
-NewtonImpactFrictionNSL* NewtonImpactFrictionNSL::convert(NonSmoothLaw* nsl)
-{
-  NewtonImpactFrictionNSL* nilnsl = dynamic_cast<NewtonImpactFrictionNSL*>(nsl);
-  return nilnsl;
-}
-
-

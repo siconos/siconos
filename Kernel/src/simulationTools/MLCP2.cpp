@@ -386,13 +386,6 @@ void MLCP2::postCompute()
 
 }
 
-MLCP2* MLCP2::convert(OneStepNSProblem* osnsp)
-{
-  MLCP2* lcp = dynamic_cast<MLCP2*>(osnsp);
-  return lcp;
-}
-
-
 void MLCP2::initialize(SP::Simulation sim)
 {
   // General initialize for LinearOSNS

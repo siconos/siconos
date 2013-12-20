@@ -1283,10 +1283,3 @@ void SchatzmanPaoli::display()
   }
   std::cout << "================================" <<std::endl;
 }
-
-
-SchatzmanPaoli* SchatzmanPaoli::convert(OneStepIntegrator* osi)
-{
-  SchatzmanPaoli* moreau = dynamic_cast<SchatzmanPaoli*>(osi);
-  return moreau;
-}

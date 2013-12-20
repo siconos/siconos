@@ -155,13 +155,6 @@ public:
    */
   virtual void insertDynamicalSystem(SP::DynamicalSystem ds);
 
-  /** encapsulates an operation of dynamic casting
-   *  needed by Python interface
-   *  \param osi integrator which must be converted
-   *  \return pointer to the integrator if it is of the right type, NULL otherwise
-   */
-  static D1MinusLinear* convert(OneStepIntegrator* osi);
-
   /** visitors hook */
   ACCEPT_STD_VISITORS();
 };

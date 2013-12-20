@@ -271,7 +271,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   SP::DynamicalSystemsGraph DSG = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
   {
-    assert(_levelMinForInput <= _levelMaxForInput);
+    //assert(_levelMinForInput <= _levelMaxForInput);
     for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
     {
       DSG->bundle(*dsi)->initializeNonSmoothInput(k);
@@ -284,14 +284,10 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
-    inter->initialize(_tinit);
-    // Initialize interaction work vectors, depending on Dynamical systems
-    // linked to the interaction.
-    inter->initDSData(indexSet0->properties(*ui).source);
-    if(indexSet0->properties(*ui).source != indexSet0->properties(*ui).target)
-    {
-      inter->initDSData(indexSet0->properties(*ui).target);
-    }
+    SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
+    SP::DynamicalSystem ds2 = indexSet0->properties(*ui).target;
+    
+    inter->initialize(_tinit, ds1, ds2);
   }
 
   // Initialize OneStepNSProblem(s). Depends on the type of simulation.

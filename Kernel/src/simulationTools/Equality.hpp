@@ -88,13 +88,6 @@ public:
   /** print the data to the screen
    */
   void display() const;
-
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepNSProblem* : the one step problem which must be converted
-   * \return a pointer on the problem if it is of the right type, NULL otherwise
-   */
-  static Equality* convert(OneStepNSProblem* osnsp);
-
 };
 
 #endif // Equality_H

@@ -170,10 +170,3 @@ void LagrangianCompliantR::computeInput(const double time, Interaction& inter, c
   // data[name] += trans(G) * lambda
   prod(lambda, *_jachq, *inter.data(p0 + level), false);
 }
-
-LagrangianCompliantR* LagrangianCompliantR::convert(Relation *r)
-{
-  LagrangianCompliantR* lnlr = dynamic_cast<LagrangianCompliantR*>(r);
-  return lnlr;
-}
-

@@ -485,12 +485,6 @@ void NewtonEulerDS::swapInMemory()
 
 }
 
-NewtonEulerDS* NewtonEulerDS::convert(DynamicalSystem* ds)
-{
-  NewtonEulerDS* lnlds = dynamic_cast<NewtonEulerDS*>(ds);
-  return lnlds;
-}
-
 void NewtonEulerDS::resetAllNonSmoothPart()
 {
   if (_p[1])

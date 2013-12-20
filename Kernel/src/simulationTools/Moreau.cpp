@@ -1950,9 +1950,3 @@ void Moreau::saveWToXML()
   //   else RuntimeException::selfThrow("Moreau::saveIntegratorToXML - IntegratorXML object not exists");
   RuntimeException::selfThrow("Moreau::saveWToXML -  not yet implemented.");
 }
-
-Moreau* Moreau::convert(OneStepIntegrator* osi)
-{
-  Moreau* moreau = dynamic_cast<Moreau*>(osi);
-  return moreau;
-}

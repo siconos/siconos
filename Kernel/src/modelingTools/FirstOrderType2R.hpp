@@ -127,11 +127,6 @@ public:
   inline SP_PluggedMatrix getB(){return Jacg.at(1);};
   */
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param Relation * : the relation which must be converted
-  * \return a pointer on the relation if it is of the right type, NULL otherwise
-  */
-  static FirstOrderType2R* convert(Relation *r);
   virtual void preparNewtonIteration(Interaction& inter);
   ACCEPT_STD_VISITORS();
 

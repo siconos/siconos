@@ -66,9 +66,3 @@ void RelayNSL::saveNonSmoothLawToXML()
   std11::static_pointer_cast<RelayNSLXML>(_nslawxml)->setC(_lb);
   std11::static_pointer_cast<RelayNSLXML>(_nslawxml)->setD(_ub);
 }
-
-RelayNSL* RelayNSL::convert(NonSmoothLaw* nsl)
-{
-  RelayNSL* rnsl = dynamic_cast<RelayNSL*>(nsl);
-  return rnsl;
-}

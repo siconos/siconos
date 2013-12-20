@@ -84,18 +84,16 @@ void DisksViewer::draw()
     {
       interaction = I1->bundle(*ui);
       relation = interaction->relation();
-
+      
       lbd = interaction->lambdaOld(1)->getValue(0);
 
       // screen width of interaction
       w = lbd / (2 * fmax(lbdmax, 1.)) + .03;
-
-      involvedDS = interaction->dynamicalSystems();
-
+   
       // disk/disk
-      itDS = involvedDS->begin();
-
-      SP::DynamicalSystem d1 = *itDS;
+      
+      SP::DynamicalSystem d1 = I1->properties(*ui).source;
+      SP::DynamicalSystem d2 = I1->properties(*ui).target;
 
       SP::SiconosVector q1 = ask<ForPosition>(*d1);
 
@@ -104,10 +102,8 @@ void DisksViewer::draw()
       float r1 = ask<ForRadius>(*d1);
 
 
-      if (involvedDS->size() == 2)
+      if (d1 != d2)
       {
-        SP::DynamicalSystem d2;
-        d2 = *++itDS;
         SP::SiconosVector q2 = ask<ForPosition>(*d2);
         float x2 = (*q2)(0);
         float y2 = (*q2)(1);

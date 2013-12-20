@@ -91,11 +91,3 @@ void Equality::display() const
   std::cout << "======= EQUALITY of size " << _sizeOutput << " with: " <<std::endl;
   LinearOSNS::display();
 }
-
-Equality* Equality::convert(OneStepNSProblem* osnsp)
-{
-  Equality* equality = dynamic_cast<Equality*>(osnsp);
-  return equality;
-}
-
-

@@ -661,11 +661,12 @@ struct ZeroOrderHold::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
+void ZeroOrderHold::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
   */
-
+  SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
+  SP::Interaction inter = indexSet->bundle(vertex_inter);
 
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
@@ -932,12 +933,6 @@ void ZeroOrderHold::display()
 //    else cout << "-> NULL" << endl;
   }
   std::cout << "================================" <<std::endl;
-}
-
-ZeroOrderHold* ZeroOrderHold::convert(OneStepIntegrator* osi)
-{
-  ZeroOrderHold* zeroOrderHold = dynamic_cast<ZeroOrderHold*>(osi);
-  return zeroOrderHold;
 }
 
 void ZeroOrderHold::updateMatrices(SP::DynamicalSystem ds)

@@ -51,7 +51,7 @@ using namespace RELATION;
 // --- XML constructor ---
 Interaction::Interaction(SP::InteractionXML interxml):
   _initialized(false), _number(0), _interactionSize(0),
-  _sizeOfDS(0), _sizeZ(0), _interactionxml(interxml)
+  _sizeOfDS(0), _sizeZ(0), _has2Bodies(false), _interactionxml(interxml)
 {
   assert(_interactionxml && "NULL pointer");
 
@@ -134,11 +134,11 @@ Interaction::Interaction(SP::InteractionXML interxml):
 
 /* initialisation with empty set */
 Interaction::Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number):
-  _initialized(false), _number(number), _interactionSize(interactionSize), _sizeOfDS(0), _sizeZ(0),
+  _initialized(false), _number(number), _interactionSize(interactionSize), _sizeOfDS(0), _sizeZ(0), _has2Bodies(false),
   _y(2),  _nslaw(NSL), _relation(rel)
 {}
 
-void Interaction::initialize(double t0)
+void Interaction::initialize(double t0, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
   DEBUG_PRINTF("Interaction::initialize(double t0) with t0 = %f \n", t0);
 
@@ -154,8 +154,13 @@ void Interaction::initialize(double t0)
     {
       RuntimeException::selfThrow("Interaction::initialize() - _interactionSize != nslaw()->size() . Obsolete !");
     }
-
     initData();
+    // Initialize interaction work vectors, depending on Dynamical systems
+    // linked to the interaction.
+    initDSData(ds1);
+    if(ds1 != ds2)
+      initDSData(ds2);
+    
     initializeMemory();
     _relation->initialize(*this);
 
@@ -185,7 +190,6 @@ void Interaction::initialize(double t0)
     }
     _initialized = true;
   }
-
 }
 
 // Initialize and InitializeMemory are separated in two functions

@@ -553,13 +553,6 @@ public:
    */
   void swapInMemory();
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param SP::DynamicalSystem : the system which must be converted
-   * \return a pointer on the system if it is of the right type, NULL otherwise
-   */
-  static NewtonEulerDS* convert(DynamicalSystem* ds);
-
-
   /** set p[...] to zero
    */
   void resetAllNonSmoothPart();

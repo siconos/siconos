@@ -169,12 +169,12 @@ void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter)
   //  _isContact=1;
 }
 
-void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, bool has2Bodies)
+void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter)
 {
   _jachq->setValue(0, 0, _Nc->getValue(0));
   _jachq->setValue(0, 1, _Nc->getValue(1));
   _jachq->setValue(0, 2, _Nc->getValue(2));
-  if (has2Bodies)
+  if (inter.has2Bodies())
   {
     _jachq->setValue(0, 7, -_Nc->getValue(0));
     _jachq->setValue(0, 8, -_Nc->getValue(1));
@@ -183,7 +183,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
   SP::BlockVector BlockX = inter.data(q0);
   for (int iDS = 0; iDS < 2; iDS++)
   {
-    if (!has2Bodies && iDS == 1)
+    if (!inter.has2Bodies() && iDS == 1)
       continue;
     double sign = 1.0;
     SP::SiconosVector q = (BlockX->getAllVect())[iDS];

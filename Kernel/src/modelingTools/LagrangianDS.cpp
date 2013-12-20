@@ -980,11 +980,6 @@ void LagrangianDS::swapInMemory()
   }
 }
 
-LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
-{
-  LagrangianDS* lnlds = dynamic_cast<LagrangianDS*>(ds);
-  return lnlds;
-}
 /*must be remove, replace by the RelativeConvergenceCriteron of the simulation*/
 
 /*double LagrangianDS::dsConvergenceIndicator()

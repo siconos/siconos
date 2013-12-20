@@ -167,9 +167,3 @@ void FirstOrderLinearTIR::saveRelationToXML() const
 {
   RuntimeException::selfThrow("FirstOrderLinearTIR::saveRelationToXML, no yet implemented.");
 }
-
-FirstOrderLinearTIR* FirstOrderLinearTIR::convert(Relation *r)
-{
-  return dynamic_cast<FirstOrderLinearTIR*>(r);
-}
-

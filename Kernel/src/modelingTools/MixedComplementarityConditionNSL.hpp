@@ -84,12 +84,6 @@ public:
     return EqualitySize;
   };
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param nslaw the law which must be converted
-  * \return a pointer on the law if it is of the right type, NULL otherwise
-  */
-  static SP::MixedComplementarityConditionNSL convert(SP::NonSmoothLaw nslaw);
-
   /** Visitors hook
    */
   ACCEPT_STD_VISITORS();

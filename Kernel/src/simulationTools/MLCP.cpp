@@ -68,7 +68,7 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
   //unsigned int equalitySize2 =  0;
   if (Type::value(*(inter1->nonSmoothLaw()))
       == Type::MixedComplementarityConditionNSL)
-    equalitySize1 =  MixedComplementarityConditionNSL::convert(inter1->nonSmoothLaw())->getEqualitySize();
+    equalitySize1 = std11::static_pointer_cast<MixedComplementarityConditionNSL>(inter1->nonSmoothLaw())->getEqualitySize();
   else if (Type::value(*(inter1->nonSmoothLaw()))
            == Type::EqualityConditionNSL)
     equalitySize1 = nslawSize1;
@@ -227,12 +227,6 @@ void MLCP::display() const
   std::cout << "======= MLCP of size " << _sizeOutput << " with: " <<std::endl;
   std::cout << "======= m " << _m << " _n " << _n <<std::endl;
   LinearOSNS::display();
-}
-
-MLCP* MLCP::convert(OneStepNSProblem* osnsp)
-{
-  MLCP* mlcp = dynamic_cast<MLCP*>(osnsp);
-  return mlcp;
 }
 
 void MLCP::initialize(SP::Simulation sim)

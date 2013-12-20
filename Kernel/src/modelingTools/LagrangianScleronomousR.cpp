@@ -124,6 +124,7 @@ void LagrangianScleronomousR::computeh(const double time, Interaction& inter)
 void LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z)
 {
   DEBUG_PRINT(" LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z)\n");
+
   if (_pluginh)
   {
     // arg= time. Unused in this function but required for interface.
@@ -164,9 +165,9 @@ void LagrangianScleronomousR::computeJachq(const double time, Interaction& inter
 
       // get vector lambda of the current interaction
       ((FPtr3)(_pluginJachq->fPtr))(workQ.size(), &(workQ)(0), _jachq->size(0), &(*_jachq)(0, 0), workZ.size(), &(workZ)(0));
-      // Copy data that might have been changed in the plug-in call.
+     // Copy data that might have been changed in the plug-in call.
       *inter.data(z) = workZ;
-    }
+   }
   }
 }
 
@@ -224,12 +225,13 @@ void LagrangianScleronomousR::computeOutput(const double time, Interaction& inte
 {
 
   DEBUG_PRINTF("LagrangianScleronomousR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
-
   if (derivativeNumber == 0)
+  { 
     computeh(time, inter);
+  }
   else
   {
-    computeJachq(time, inter);
+   computeJachq(time, inter);
 
     SiconosVector& y = *inter.y(derivativeNumber);
     if (derivativeNumber == 1)
@@ -263,8 +265,4 @@ const std::string LagrangianScleronomousR::getJachqName() const
     return _pluginJachq->getPluginName();
   return "unamed";
 
-}
-LagrangianScleronomousR* LagrangianScleronomousR::convert(Relation *r)
-{
-  return dynamic_cast<LagrangianScleronomousR*>(r);
 }

@@ -332,14 +332,6 @@ public:
   /** Reset all the plugins */
   virtual void zeroPlugin();
 
-  /** encapsulates an operation of dynamic casting. Needed by Python
-      interface.
-   *  \param DynamicalSystem* : the system which must be converted
-   * \return a pointer on the dynamical system if it is of the right
-   * type, NULL otherwise
-   */
-  static FirstOrderLinearDS* convert(DynamicalSystem* ds);
-
   ACCEPT_STD_VISITORS();
 
 };

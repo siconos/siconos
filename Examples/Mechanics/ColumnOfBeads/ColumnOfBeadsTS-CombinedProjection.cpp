@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
             inter.reset(new Interaction(1, nslaw, relation));
             columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
             s->computeLevelsForInputAndOutput(inter);
-            inter->initialize(s->nextTime());
+            inter->initialize(s->nextTime(), beads[0], beads[0]);
 
 
             if (!isOSNSinitialized)
@@ -257,7 +257,7 @@ int main(int argc, char* argv[])
 
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
             s->computeLevelsForInputAndOutput(interOfBeads[i]);
-            interOfBeads[i]->initialize(s->nextTime());
+            interOfBeads[i]->initialize(s->nextTime(), beads[i], beads[i+1]);
             if (!isOSNSinitialized)
             {
               s->initOSNS();

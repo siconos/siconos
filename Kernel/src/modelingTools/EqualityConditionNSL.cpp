@@ -29,11 +29,3 @@ EqualityConditionNSL::EqualityConditionNSL(SP::NonSmoothLawXML nslawxml):
 EqualityConditionNSL::~EqualityConditionNSL()
 {}
 
-
-EqualityConditionNSL* EqualityConditionNSL::convert(NonSmoothLaw* nsl)
-{
-  EqualityConditionNSL* ccnsl = dynamic_cast<EqualityConditionNSL*>(nsl);
-  return ccnsl;
-}
-
-

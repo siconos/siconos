@@ -121,6 +121,13 @@ private:
   /** sum of all z sizes, for DS involved in the interaction */
   unsigned int _sizeZ;
 
+  /** Bool to check the number of DS concerned by this interaction 
+      (1 or 2 indeed)
+      True if 2 DS.
+      Note FP : usefull in NewtonEuler jacobians computation. 
+  */ 
+  bool _has2Bodies;
+
   /** Absolute position in the "global" vector of constraints (for
       example, the one handled by lsodar) */
   unsigned int _absolutePosition;
@@ -196,7 +203,7 @@ private:
 public:
 
   /** default constructor */
-  Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _sizeZ(0), _y(2) 
+  Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _sizeZ(0), _has2Bodies(false), _y(2) 
   {};
 
   /** constructor with XML object of the Interaction
@@ -217,9 +224,12 @@ public:
   ~Interaction() {};
 
   /** allocate memory for y[i] and _lambda[i] and set them to zero.
-   * \param time for initialization.
+      \param time for initialization.
+      \param SP::DynamicalSystem : first ds linked to this interaction (i.e IG->vertex.source)
+      \param SP::DynamicalSystem : second ds linked to this interaction (i.e IG->vertex.target)
+      ds1 == ds2 is allowed.
    */
-  void initialize(double time);
+  void initialize(double time, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   /** check if Interaction is initialized
    * \return true if it is initialized
@@ -376,25 +386,38 @@ public:
     return _sizeZ;
   }
 
+  /** Set the number of dynamical systems concerned by
+      this interaction. Warning FP: this function is supposed
+      to be called only during topology->link(inter, ds1, ds2) call.
+      \param bool : true if two ds, else false     
+   */
+  void setHas2Bodies(bool val) {_has2Bodies = val;}
+
+  /** Check the number of dynamical systems concerned by
+      this interaction
+      \return bool : true if two ds, else false     
+   */
+  bool has2Bodies() const {return _has2Bodies;}
+  
   unsigned int absolutePosition()
   {
     return _absolutePosition;
   };
+
   void setAbsolutePosition(unsigned int v)
   {
     _absolutePosition = v;
   };
+
   unsigned int absolutePositionProj()
   {
     return _absolutePositionProj;
   };
+
   void setAbsolutePositionProj(unsigned int v)
   {
     _absolutePositionProj = v;
   };
-
-
-
 
   // -- y --
 

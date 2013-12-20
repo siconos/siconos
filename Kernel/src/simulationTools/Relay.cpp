@@ -186,13 +186,6 @@ void Relay::display() const
   LinearOSNS::display();
 }
 
-Relay* Relay::convert(OneStepNSProblem* osnsp)
-{
-  Relay* lcp = dynamic_cast<Relay*>(osnsp);
-  return lcp;
-}
-
-
 Relay::~Relay()
 {
   deleteSolverOptions(&*_numerics_solver_options);

@@ -113,9 +113,3 @@ void FirstOrderLinearTIDS::display() const
 
   std::cout << "============================================" <<std::endl;
 }
-
-FirstOrderLinearTIDS* FirstOrderLinearTIDS::convert(DynamicalSystem* ds)
-{
-  FirstOrderLinearTIDS* lsds = dynamic_cast<FirstOrderLinearTIDS*>(ds);
-  return lsds;
-}

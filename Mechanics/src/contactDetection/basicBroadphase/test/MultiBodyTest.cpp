@@ -305,7 +305,6 @@ void Disks::init(std::string disks_input)
     _playground.reset(new SpaceFilter(3, 6, _model, nslaw, _plans, _moving_plans));
 
     _model->initialize(simulation_);
-
   }
 
   catch (SiconosException e)

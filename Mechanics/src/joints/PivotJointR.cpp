@@ -203,17 +203,6 @@ double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, doub
 
 void PivotJointR::computeh(const double time, Interaction& inter)
 {
-  /*check order of ds:*/
-  DSIterator it;
-  SP::NewtonEulerDS lds;
-  it = inter.dynamicalSystemsBegin();
-  lds = std11::static_pointer_cast<NewtonEulerDS> (*it);
-  if(lds != _d1)
-  {
-    printf("PivotJointR::computeh order of DS1 wrong.");
-    exit(1);
-  }
-
   KneeJointR::computeh(time, inter);
   SP::SiconosVector x1 = _d1->q();
   double q10 = x1->getValue(3);
@@ -226,17 +215,6 @@ void PivotJointR::computeh(const double time, Interaction& inter)
   double q23 = 0;
   if(_d2)
   {
-    /*check order of ds:*/
-    it++;
-    lds = std11::static_pointer_cast<NewtonEulerDS> (*it);
-    if(lds != _d2)
-    {
-      printf("PivotJointR::computeh order of DS2 wrong.");
-      exit(1);
-    }
-
-
-
     SP::SiconosVector x2 = _d2->q();
     q20 = x2->getValue(3);
     q21 = x2->getValue(4);

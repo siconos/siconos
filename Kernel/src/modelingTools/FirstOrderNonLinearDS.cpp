@@ -582,9 +582,4 @@ void FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
     return (dsCvgIndic);
     }*/
 
-FirstOrderNonLinearDS* FirstOrderNonLinearDS::convert(DynamicalSystem* ds)
-{
-  FirstOrderNonLinearDS* fonlds = dynamic_cast<FirstOrderNonLinearDS*>(ds);
-  return fonlds;
-}
 

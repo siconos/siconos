@@ -1178,8 +1178,7 @@ void MLCPProjectOnConstraints::computeOptions(SP::Interaction inter1, SP::Intera
   else if (Type::value(*(inter1->nonSmoothLaw()))
            == Type::MixedComplementarityConditionNSL)
   {
-    equalitySize1 =
-      MixedComplementarityConditionNSL::convert(inter1->nonSmoothLaw())->getEqualitySize();
+    equalitySize1 = std11::static_pointer_cast<MixedComplementarityConditionNSL>(inter1->nonSmoothLaw())->getEqualitySize();
   }
 
   // Compute the number of inequalities

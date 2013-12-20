@@ -112,12 +112,6 @@ void LCP::display() const
   LinearOSNS::display();
 }
 
-LCP* LCP::convert(OneStepNSProblem* osnsp)
-{
-  LCP* lcp = dynamic_cast<LCP*>(osnsp);
-  return lcp;
-}
-
 void LCP::initialize(SP::Simulation sim)
 {
   // General initialize for LinearOSNS

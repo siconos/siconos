@@ -54,10 +54,3 @@ void QP::saveQToXML()
 {
   RuntimeException::selfThrow("QP::compute not yet implemented");
 }
-
-QP* QP::convert(OneStepNSProblem* osnsp)
-{
-  QP* qp = dynamic_cast<QP*>(osnsp);
-  return qp;
-}
-

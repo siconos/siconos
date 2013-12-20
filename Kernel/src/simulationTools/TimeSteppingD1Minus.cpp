@@ -422,8 +422,3 @@ void TimeSteppingD1Minus::computeFreeState()
 {
   for_each(_allOSI->begin(), _allOSI->end(), std11::bind(&OneStepIntegrator::computeFreeState, _1));
 }
-
-TimeSteppingD1Minus* TimeSteppingD1Minus::convert(Simulation *str)
-{
-  return dynamic_cast<TimeSteppingD1Minus*>(str);
-}

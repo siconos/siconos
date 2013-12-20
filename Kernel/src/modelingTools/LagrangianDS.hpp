@@ -981,12 +981,6 @@ public:
    */
   void swapInMemory();
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param SP::DynamicalSystem : the system which must be converted
-   * \return a pointer on the system if it is of the right type, NULL otherwise
-   */
-  static LagrangianDS* convert(DynamicalSystem* ds);
-
   /** To compute \f$\frac{|q_{i+1} - qi|}{|q_i|}\f$ where \f$ q_{i+1}\f$ represents the present state and \f$ q_i\f$ the previous one
    * \return a double
    */

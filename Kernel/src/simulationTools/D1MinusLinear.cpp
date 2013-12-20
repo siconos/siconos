@@ -1133,12 +1133,6 @@ void D1MinusLinear::insertDynamicalSystem(SP::DynamicalSystem ds)
   OSIDynamicalSystems->insert(ds);
 }
 
-D1MinusLinear* D1MinusLinear::convert(OneStepIntegrator* osi)
-{
-  return dynamic_cast<D1MinusLinear*>(osi);
-}
-
-
 #ifdef D1MINUSLINEAR_FULL
 
 

@@ -217,12 +217,6 @@ public:
    */
   void run();
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param SP::Simulation : the Simulation which must be converted
-   * \return a pointer on the Simulation if it is of the right type, NULL otherwise
-   */
-  static TimeStepping* convert(Simulation* str);
-
   /** check returning value from computeOneStepNSProblem and process
    *  \param: an int
    */

@@ -352,7 +352,7 @@ public:
   inline const std::string getJacobianFIntPlugin(unsigned int i) const
   {
     if (!isJacobianFIntPlugin(i))
-      XMLException::selfThrow("LagrangianDSXML - getJacobianFIntPlugin(i) : JacobianFInt is not calculated from a plugin ; JacobianFInt matrix is given. i=" + i);
+      XMLException::selfThrow("LagrangianDSXML - getJacobianFIntPlugin(i) : JacobianFInt is not calculated from a plugin ; JacobianFInt matrix is given.");
     return  SiconosDOMTreeTools::getStringAttributeValue(jacobianFIntNode[i], MATRIXPLUGIN);
   }
 
@@ -363,7 +363,7 @@ public:
   inline const SimpleMatrix getJacobianFIntMatrix(unsigned int i) const
   {
     if (isJacobianFIntPlugin(i))
-      XMLException::selfThrow("LagrangianDSXML - getJacobianFIntMatrix(i) : JacobianFInt matrix is not given ; JacobianFInt is calculated from a plugin. i=" + i);
+      XMLException::selfThrow("LagrangianDSXML - getJacobianFIntMatrix(i) : JacobianFInt matrix is not given ; JacobianFInt is calculated from a plugin.");
 
     return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianFIntNode[i]);
   }
@@ -403,7 +403,7 @@ public:
   inline const std::string getJacobianNNLPlugin(unsigned int i) const
   {
     if (!isJacobianNNLPlugin(i))
-      XMLException::selfThrow("LagrangianDSXML - getJacobianNNLPlugin : JacobianNNL is not calculated from a plugin ; JacobianNNL matrix is given. i=" + i);
+      XMLException::selfThrow("LagrangianDSXML - getJacobianNNLPlugin : JacobianNNL is not calculated from a plugin ; JacobianNNL matrix is given.");
     return  SiconosDOMTreeTools::getStringAttributeValue(jacobianNNLNode[i], MATRIXPLUGIN);
   }
 
@@ -414,7 +414,7 @@ public:
   inline const SimpleMatrix getJacobianNNLMatrix(unsigned int i) const
   {
     if (isJacobianNNLPlugin(i))
-      XMLException::selfThrow("LagrangianDSXML - getJacobianNNLMatrix : JacobianNNL matrix is not given ; JacobianNNL is calculated from a plugin. i=" + i);
+      XMLException::selfThrow("LagrangianDSXML - getJacobianNNLMatrix : JacobianNNL matrix is not given ; JacobianNNL is calculated from a plugin.");
 
     return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianNNLNode[i]);
   }

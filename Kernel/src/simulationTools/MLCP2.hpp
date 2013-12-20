@@ -135,8 +135,6 @@ public:
   */
   void postCompute() ;
 
-  static MLCP2* convert(OneStepNSProblem* osnsp);
-
 };
 
 #endif // MLCP2_H

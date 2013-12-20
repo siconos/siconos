@@ -100,13 +100,6 @@ public:
   /** integrate DynamicalSystems taking not into account non-smooth part */
   void computeFreeState();
 
-  /** encapsulates an operation of dynamic casting
-   *  needed by Python interface
-   *  \param simulation which must be converted
-   *  \return pointer to the Simulation if it is of the right type, NULL otherwise
-   */
-  static TimeSteppingD1Minus* convert(Simulation* str);
-
   /** visitors hook */
   ACCEPT_STD_VISITORS();
 };
