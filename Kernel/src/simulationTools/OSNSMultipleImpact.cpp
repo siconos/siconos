@@ -137,7 +137,7 @@ void OSNSMultipleImpact::WriteVectorIntoMatrix(const SiconosVector m, const unsi
   }
 }
 //----------------------------------------------------------------------------------------------------
-bool OSNSMultipleImpact::isZero(const double Var)
+bool OSNSMultipleImpact::isZero(double Var)
 {
   if (std::abs(Var) <= TOL_IMPACT)
     return true;
@@ -145,7 +145,7 @@ bool OSNSMultipleImpact::isZero(const double Var)
     return false;
 }
 //------------------------------------------------------------------------------------------------
-bool OSNSMultipleImpact::isVelNegative(const double Var)
+bool OSNSMultipleImpact::isVelNegative(double Var)
 {
   if (Var < - _Tol_Vel)
     return true;
@@ -154,7 +154,7 @@ bool OSNSMultipleImpact::isVelNegative(const double Var)
 }
 //-------------------------------------------------------------------------------------------------
 
-bool OSNSMultipleImpact::isEnerZero(const double Var)
+bool OSNSMultipleImpact::isEnerZero(double Var)
 {
   if (std::abs(Var) <= _Tol_Ener)
     return true;

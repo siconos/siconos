@@ -51,9 +51,9 @@ public:
   double distance(double, double, double, double, double, double);
 
   using LagrangianScleronomousR::computeh;
-  void computeh(const double time, Interaction& inter);
+  void computeh(double time, Interaction& inter);
 
-  void computeJachq(const double time, Interaction& inter);
+  void computeJachq(double time, Interaction& inter);
 
   /** visitors hook
    */

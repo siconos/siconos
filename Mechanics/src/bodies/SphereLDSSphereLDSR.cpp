@@ -38,7 +38,7 @@ double SphereLDSSphereLDSR::distance(double x1, double y1, double z1, double r1,
 }
 
 
-void SphereLDSSphereLDSR::computeh(const double time, Interaction& inter)
+void SphereLDSSphereLDSR::computeh(double time, Interaction& inter)
 {
 
   // Warning: temporary method to have contiguous values in memory,
@@ -54,7 +54,7 @@ void SphereLDSSphereLDSR::computeh(const double time, Interaction& inter)
 
 };
 
-void SphereLDSSphereLDSR::computeJachq(const double time, Interaction& inter)
+void SphereLDSSphereLDSR::computeJachq(double time, Interaction& inter)
 {
 
   double A, B, C;

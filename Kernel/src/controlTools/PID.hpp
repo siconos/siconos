@@ -88,7 +88,7 @@ public:
   /** Set the value of _ref to newValue
    * \param newValue
    */
-  void inline setRef(const double newValue)
+  void inline setRef(double newValue)
   {
     _ref = newValue;
   }
@@ -98,7 +98,7 @@ public:
   */
   virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
-  void setDeltaT(const double deltaT)
+  void setDeltaT(double deltaT)
   {
     _curDeltaT = deltaT;
   }

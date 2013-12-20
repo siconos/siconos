@@ -40,7 +40,6 @@ int main(int argc, char* argv[])
   double h = 1.0e-4;              // Time step for simulation
   double hControl = 1.0e-2;       // Time step for control
   double Xinit = 1.0;
-  double theta = 0.5;
 
   if (h > hControl)
   {

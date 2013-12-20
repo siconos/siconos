@@ -88,7 +88,6 @@ int main(int argc, char* argv[])
 
     // The Interaction which involves the first DS (the process)
     string nameInter = "processInteraction"; // Name
-    unsigned int numInter = 2; // Dim of the interaction = dim of y and lambda vectors
 
     SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
 

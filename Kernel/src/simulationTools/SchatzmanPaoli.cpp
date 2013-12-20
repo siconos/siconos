@@ -1103,7 +1103,7 @@ void SchatzmanPaoli::updateState(const unsigned int level)
 
   double h = simulationLink->timeStep();
 
-  const double& RelativeTol = simulationLink->relativeConvergenceTol();
+  double RelativeTol = simulationLink->relativeConvergenceTol();
   bool useRCC = simulationLink->useRelativeConvergenceCriteron();
   if (useRCC)
     simulationLink->setRelativeConvergenceCriterionHeld(true);

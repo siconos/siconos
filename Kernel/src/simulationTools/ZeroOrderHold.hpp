@@ -89,14 +89,14 @@ protected:
    *  \param t the time
    *  \param ds a pointer to DynamicalSystem
    */
-//  void initMatrixAd(const double t, SP::DynamicalSystem ds);
+//  void initMatrixAd(double t, SP::DynamicalSystem ds);
 
   /** init Ad[ds] and possibly Bd[ds] or Ld[ds] , ZeroOrderHold matrices, at time t
    *  \param t the time
    *  \param ds a pointer to DynamicalSystem
    *  \param inter the control interaction
    */
-//  void initMatrices(const double t, SP::DynamicalSystem ds, const Interaction& inter);
+//  void initMatrices(double t, SP::DynamicalSystem ds, const Interaction& inter);
 
   /** Initialize the integrators
    * \param ds the DynamicalSystem

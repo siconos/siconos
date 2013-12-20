@@ -952,7 +952,7 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) c
   setBlock(D, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::computeResiduY(const double time)
+void Interaction::computeResiduY(double time)
 {
   //Residu_y = y_alpha_k+1 - H_alpha;
   *_Residuy = *_h_alpha;
@@ -962,13 +962,13 @@ void Interaction::computeResiduY(const double time)
 
 }
 
-void Interaction::computeResiduR(const double time)
+void Interaction::computeResiduR(double time)
 {
   //Residu_r = r_alpha_k+1 - g_alpha;
   *_workspace[FirstOrderR::residu_r] = *_workspace[FirstOrderR::r];
   *_workspace[FirstOrderR::residu_r] -= *_workspace[FirstOrderR::g_alpha];
 
-  //  std::cout<< "Interaction::computeResiduR(const double time)" << std::endl;
+  //  std::cout<< "Interaction::computeResiduR(double time)" << std::endl;
   //  std::cout<< "_workspace[r] = " << std::endl ;
   // _workspace[r]->display();
   //  std::cout<< "_workspace[g_alpha] = " << std::endl ;

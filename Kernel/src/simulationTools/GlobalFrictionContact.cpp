@@ -201,7 +201,7 @@ void GlobalFrictionContact::computeInteractionDSBlock(SP::Interaction inter, SP:
   else RuntimeException::selfThrow("GlobalFrictionContact::computeInteractionDSBlock not yet implemented for relation of type " + relationType);
 }
 
-void GlobalFrictionContact::computeq(const double time)
+void GlobalFrictionContact::computeq(double time)
 {
   if (q->size() != _sizeOutput)
     q->resize(_sizeOutput);
@@ -313,7 +313,7 @@ void GlobalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
 
 
 }
-void GlobalFrictionContact::computeTildeLocalVelocity(const double time)
+void GlobalFrictionContact::computeTildeLocalVelocity(double time)
 {
   if (_tildeLocalVelocity->size() != _sizeLocalOutput)
     _tildeLocalVelocity->resize(_sizeLocalOutput);
@@ -341,7 +341,7 @@ void GlobalFrictionContact::computeTildeLocalVelocity(const double time)
 
 }
 
-bool GlobalFrictionContact::preCompute(const double time)
+bool GlobalFrictionContact::preCompute(double time)
 {
   // This function is used to prepare data for the GlobalFrictionContact problem
   // - computation of M, H _tildeLocalVelocity and q

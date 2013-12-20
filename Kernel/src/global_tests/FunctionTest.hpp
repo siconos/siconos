@@ -49,7 +49,7 @@ private:
 
 
   //  SiconosMatrix * dataOut;
-  /** name of the test function void vectorField (const double& time) */
+  /** name of the test function void vectorField (double time) */
   std::string name;
 
   /** true if test succeed */

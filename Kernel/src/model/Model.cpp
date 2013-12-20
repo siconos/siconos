@@ -319,7 +319,7 @@ void Model::display() const
   std::cout << " ============================" <<std::endl;
 }
 
-void Model::setT(const double& newValue)
+void Model::setT(double newValue)
 {
   _T = newValue;
   _strat->updateT(newValue);

@@ -435,7 +435,7 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
 
 
 
-void KneeJointR::computeJachq(const double time, Interaction& inter)
+void KneeJointR::computeJachq(double time, Interaction& inter)
 {
   _jachq->zero();
   SP::SiconosVector x1 = _d1->q();
@@ -575,9 +575,9 @@ void KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
   _dotjachq->setValue(2,13, 2.0*t21);
 
 }
-void KneeJointR::computeDotJachq(const double time, Interaction& inter)
+void KneeJointR::computeDotJachq(double time, Interaction& inter)
 {
-  DEBUG_PRINT("KneeJointR::computeDotJachq(const double time, Interaction& inter) starts \n");
+  DEBUG_PRINT("KneeJointR::computeDotJachq(double time, Interaction& inter) starts \n");
   if(! _dotjachq)
   {
     unsigned int sizeY = inter.getSizeOfY();
@@ -620,7 +620,7 @@ void KneeJointR::computeDotJachq(const double time, Interaction& inter)
   else
     DotJd1(Xdot1, Ydot1, Zdot1, qdot10, qdot11, qdot12, qdot13);
 
-  DEBUG_PRINT("KneeJointR::computeDotJachq(const double time, Interaction& inter) ends \n");
+  DEBUG_PRINT("KneeJointR::computeDotJachq(double time, Interaction& inter) ends \n");
 }
 
 
@@ -708,7 +708,7 @@ double KneeJointR::Hz(double X1, double Y1, double Z1, double q10, double q11, d
   }
 }
 
-void KneeJointR::computeh(const double time, Interaction& inter)
+void KneeJointR::computeh(double time, Interaction& inter)
 {
 
   SP::SiconosVector x1 = _d1->q();

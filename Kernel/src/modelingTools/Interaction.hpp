@@ -857,7 +857,7 @@ public:
    * default management is empty, else must be overloaded.
    *
    */
-  void computeResiduR(const double time) ;
+  void computeResiduR(double time) ;
 
   void initData();
   void initDSData(SP::DynamicalSystem);

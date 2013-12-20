@@ -103,11 +103,11 @@ public:
    */
   virtual ~PrismaticJointR() {};
 
-  virtual void computeJachq(const double time, Interaction& inter);
+  virtual void computeJachq(double time, Interaction& inter);
 
-  virtual void computeh(const double time, Interaction& inter);
+  virtual void computeh(double time, Interaction& inter);
 
-  virtual void computeDotJachq(const double time, Interaction& inter);
+  virtual void computeDotJachq(double time, Interaction& inter);
 
   /* The options were    : operatorarrow */
   double H1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,

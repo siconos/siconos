@@ -45,7 +45,6 @@ int main(int argc, char* argv[])
     double h = 0.05;                // time step
     double position_init = 10;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
-    double theta = 0.5;              // theta for Moreau integrator
     double xFinal = 0;              // final value
     // -------------------------
     // --- Dynamical systems ---

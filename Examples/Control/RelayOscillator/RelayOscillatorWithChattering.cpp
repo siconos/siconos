@@ -23,11 +23,6 @@ int main(int argc, char* argv[])
     double T = 5;        // Total simulation times
     double h = 1.0e-4;      // Time step
 
-
-
-
-    double xinit = 0.5;
-
     // ================= Creation of the model =======================
     // Steps:
     // - create some Dynamical Systems

@@ -67,7 +67,7 @@ public:
    */
   virtual ~PivotJointR() {};
 
-  virtual void computeh(const double time, Interaction& inter);
+  virtual void computeh(double time, Interaction& inter);
 
   /** Get the number of constraints defined in the joint
       \return the number of constraints

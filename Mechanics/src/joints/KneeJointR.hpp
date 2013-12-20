@@ -82,11 +82,11 @@ public:
    */
   static unsigned int numberOfConstraints() { return 3; }
 
-  virtual void computeJachq(const double time, Interaction& inter);
+  virtual void computeJachq(double time, Interaction& inter);
 
-  virtual void computeh(const double time, Interaction& inter);
+  virtual void computeh(double time, Interaction& inter);
 
-  virtual void computeDotJachq(const double time, Interaction& inter);
+  virtual void computeDotJachq(double time, Interaction& inter);
 
 protected:
 

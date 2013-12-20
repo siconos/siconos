@@ -167,7 +167,7 @@ void TimeDiscretisation::setTkVector(const TkVector& newTk)
   _tkV = newTk;
 }
 
-void TimeDiscretisation::setT0(const double val)
+void TimeDiscretisation::setT0(double val)
 {
   _t0 = val;
   if (_h == 0.0)

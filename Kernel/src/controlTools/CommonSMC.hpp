@@ -192,7 +192,7 @@ public:
   /** Set the precision
    * \param newPrecision a double
    */
-  inline void setPrecision(const double newPrecision)
+  inline void setPrecision(double newPrecision)
   {
     _precision = newPrecision;
   };
@@ -227,7 +227,7 @@ public:
    * \param newTheta the new value for _thetaSMC
    */
 
-  inline void setTheta(const double& newTheta)
+  inline void setTheta(double newTheta)
   {
     _thetaSMC = newTheta;
   };
@@ -235,7 +235,7 @@ public:
   /** Disable (or enable) the use of the state-continuous control \f$u^{eq}\f$
    * \param b disable the use of Ueq if true
    */
-  inline void noUeq(const bool b)
+  inline void noUeq(bool b)
   {
     _noUeq = b;
   };

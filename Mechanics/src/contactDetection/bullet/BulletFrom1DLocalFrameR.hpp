@@ -40,7 +40,7 @@ public:
     return _contactPoints;
   };
 
-  void computeh(const double time, Interaction& inter);
+  void computeh(double time, Interaction& inter);
 
   ACCEPT_STD_VISITORS();
 };

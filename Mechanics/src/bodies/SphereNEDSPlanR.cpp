@@ -43,7 +43,7 @@ double SphereNEDSPlanR::distance(double x, double y, double z, double rad)
 }
 
 
-void SphereNEDSPlanR::computeh(const double time, Interaction& inter)
+void SphereNEDSPlanR::computeh(double time, Interaction& inter)
 {
 
   double q_0 = (*inter.data(q0))(0);

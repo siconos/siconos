@@ -111,7 +111,7 @@ double DiskPlanR::distance(double x, double y, double rad) const
 }
 
 /* called compute H, but only the gap function is needed! */
-void DiskPlanR::computeh(const double time, Interaction& inter)
+void DiskPlanR::computeh(double time, Interaction& inter)
 {
   SiconosVector& y = *inter.y(0);
   double q_0 = (*inter.data(q0))(0);
@@ -186,7 +186,7 @@ Jach(q) =  [                                                ]
 */
 
 
-void DiskPlanR::computeJachq(const double time, Interaction& inter)
+void DiskPlanR::computeJachq(double time, Interaction& inter)
 {
 
   SimpleMatrix *g = (SimpleMatrix *) _jachq.get();

@@ -215,7 +215,7 @@ void ZeroOrderHold::initialize()
 
   }
 }
-//void ZeroOrderHold::initMatrixPhi(const double t, const DynamicalSystemsGraph::VDescriptor& dsgVD)
+//void ZeroOrderHold::initMatrixPhi(double t, const DynamicalSystemsGraph::VDescriptor& dsgVD)
 //{
 //  // This function:
 //  // - allocate memory for the matrices Phi matrix
@@ -245,7 +245,7 @@ void ZeroOrderHold::initialize()
 //
 //}
 //
-//void ZeroOrderHold::initMatrices(const double t, SP::DynamicalSystem ds, const Interaction& inter)
+//void ZeroOrderHold::initMatrices(double t, SP::DynamicalSystem ds, const Interaction& inter)
 //{
 //  // This function:
 //  // - allocate memory for the matrices Ad and Bd, Ld if needed

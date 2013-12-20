@@ -61,7 +61,7 @@ double DiskMovingPlanR::distance(double x, double y, double rad)
 }
 
 /* Called compute h, but only the gap function is needed! */
-void DiskMovingPlanR::computeh(const double time, Interaction& inter)
+void DiskMovingPlanR::computeh(double time, Interaction& inter)
 {
   init(time);
 
@@ -73,7 +73,7 @@ void DiskMovingPlanR::computeh(const double time, Interaction& inter)
 
 }
 
-void DiskMovingPlanR::computeJachq(const double time, Interaction& inter)
+void DiskMovingPlanR::computeJachq(double time, Interaction& inter)
 {
   init(time);
 
@@ -93,7 +93,7 @@ void DiskMovingPlanR::computeJachq(const double time, Interaction& inter)
   (*g)(1, 2) = -_r;
 }
 
-void DiskMovingPlanR::computehDot(const double time, Interaction& inter)
+void DiskMovingPlanR::computehDot(double time, Interaction& inter)
 {
   init(time);
 

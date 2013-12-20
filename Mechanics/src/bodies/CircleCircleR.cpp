@@ -33,7 +33,7 @@ double CircleCircleR::distance(double x1, double y1, double r1, double x2, doubl
 
 }
 
-void CircleCircleR::computeh(const double time, Interaction& inter)
+void CircleCircleR::computeh(double time, Interaction& inter)
 {
 
   double q_0 = (*inter.data(q0))(0);
@@ -46,7 +46,7 @@ void CircleCircleR::computeh(const double time, Interaction& inter)
 
 }
 
-void CircleCircleR::computeJachq(const double time, Interaction& inter)
+void CircleCircleR::computeJachq(double time, Interaction& inter)
 {
 
   SimpleMatrix *g = (SimpleMatrix *) _jachq.get();

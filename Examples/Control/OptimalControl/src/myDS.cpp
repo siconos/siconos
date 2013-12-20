@@ -109,7 +109,7 @@ void MyDS::computeRhs(double t, bool  b)
 {
   ;
 }
-void MyDS::resetNonSmoothPart() {}
+void MyDS::resetNonSmoothPart(unsigned int) {}
 
 
 void MyDS::alpha(double t, SP::SiconosVector _xvalue, SP::SiconosVector _alpha)

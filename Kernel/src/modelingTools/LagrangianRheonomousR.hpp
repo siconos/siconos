@@ -75,7 +75,7 @@
  * --> [in,out] y : pointer to the first element of y \n
  * --> sizeZ : size of vector z \n
  * --> [in,out] z: pointer to z vector(s) from DS. \n
- * Its signature must be "void userPluginH(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"\n\n
+ * Its signature must be "void userPluginH(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"\n\n
  * The plugin function to compute G0(q,t,z), gradient of h according to q, needs the following parameters: \n
  *--> sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction  \n
  *--> q : pointer to the first element of q  \n
@@ -84,7 +84,7 @@
  *--> [in,out] H : pointer to the first element of G0 (sizeY X sizeDS matrix)\n
  * --> sizeZ : size of vector z \n
  * -->[in,out] z: pointer to z vector(s) from DS.\n
- * Its signature must be "void userPluginG0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"\n\n
+ * Its signature must be "void userPluginG0(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"\n\n
  * The plugin function to compute hdot(q,t,z), needs the following parameters: \n
  *--> sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction  \n
  *--> q : pointer to the first element of q  \n
@@ -93,7 +93,7 @@
  *--> [in,out] hDot : pointer to the first element of hDot.\n
  * --> sizeZ : size of vector z \n
  * -->[in,out] z: pointer to z vector(s) from DS.\n
- * Its signature must be "void userPluginG0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"\n\n
+ * Its signature must be "void userPluginG0(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"\n\n
  *
  */
 class LagrangianRheonomousR : public LagrangianR
@@ -165,11 +165,11 @@ public:
 
   /** constructor from a set of data
   *  \param std::string : the name of the plugin to compute h.\n
-  * Its signature must be "void userPluginH(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"
+  * Its signature must be "void userPluginH(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"
   *  \param std::string : the name of the plugin to compute hDot. \n
-  * Its signature must be "void userPluginHDot(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
+  * Its signature must be "void userPluginHDot(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)
   *  \param std::string : the name of the plugin  to compute jacobian h according to q.\n
-  * Its signature must be "void userPluginG0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"
+  * Its signature must be "void userPluginG0(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"
   */
   LagrangianRheonomousR(const std::string&, const std::string&, const std::string&);
 
@@ -228,11 +228,11 @@ public:
 
   /** Compute y = h(t,q,z) using plug-in mechanism with the data vector of the interaction
    * should be used as less as possible to avoid side--effects
-   * prefer computeh(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+   * prefer computeh(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
    * \param time  current time
    * \param inter interaction that owns the relation
    */
-  virtual void computeh(const double time, Interaction& inter);
+  virtual void computeh(double time, Interaction& inter);
 
   /** to compute y = h(t,q,z) using plug-in mechanism
   * \param time current time
@@ -240,16 +240,16 @@ public:
   * \param q the BlockVector of coordinates
   * \param z the BlockVector of parameters
   */
-  virtual void computeh(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z);
+  virtual void computeh(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z);
 
   /** to compute hDot using plug-in mechanism
    * using plug-in mechanism with the data vector of the interaction
    * should be used as less as possible to avoid side--effects
-   * prefer computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+   * prefer computehDot(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
    * \param time  current time
    * \param inter interaction that owns the relation
    */
-  virtual void computehDot(const double time, Interaction& inter);
+  virtual void computehDot(double time, Interaction& inter);
 
   /** to compute hDot using plug-in mechanism
    * \param time current time
@@ -257,15 +257,15 @@ public:
    * \param q the BlockVector of coordinates
    * \param z the BlockVector of parameters
    */
-  virtual void computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z);
+  virtual void computehDot(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
   * \param: double, current time
   * \param: unsigned int
   */
-  virtual void computeJachq(const double time, Interaction& inter);
+  virtual void computeJachq(double time, Interaction& inter);
 
-  void computeJachqDot(const double time, Interaction& inter)
+  void computeJachqDot(double time, Interaction& inter)
   {
     /* \warning. This method should never be called, since we are only considering
      * rheonomic constraint
@@ -274,7 +274,7 @@ public:
   }
 
   /* compute all the H Jacobian */
-  void computeJach(const double time, Interaction& inter)
+  void computeJach(double time, Interaction& inter)
   {
     computeJachq(time, inter);
     // computeJachqDot(time, inter);
@@ -283,7 +283,7 @@ public:
     computehDot(time,inter);
   }
   /* compute all the G Jacobian */
-  void computeJacg(const double time, Interaction& inter)
+  void computeJacg(double time, Interaction& inter)
   {
     computeJacgq(time, inter);
     // computeJacgqDot(time, inter);
@@ -295,13 +295,13 @@ public:
   *  \param double : current time
   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  void computeOutput(const double time, Interaction& inter, unsigned int = 0);
+  void computeOutput(double time, Interaction& inter, unsigned int = 0);
 
   /** to compute p
   *  \param double : current time
   *  \param unsigned int: "derivative" order of lambda used to compute input
   */
-  void computeInput(const double time, Interaction& inter, unsigned int = 0);
+  void computeInput(double time, Interaction& inter, unsigned int = 0);
 
   ACCEPT_STD_VISITORS();
 

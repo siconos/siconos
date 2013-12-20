@@ -601,7 +601,7 @@ public:
    * get the relative convergence tolerence.
    *
    */
-  inline const double & relativeConvergenceTol()
+  inline double relativeConvergenceTol()
   {
     return _relativeConvergenceTol;
   };
@@ -669,7 +669,7 @@ public:
    * \warning this should be called only from the Model, to synchronise the 2 values
    * \param T the new final time
    */
-  inline void updateT(const double& T)
+  inline void updateT(double T)
   {
     _T = T;
     _eventsManager->updateT(T);

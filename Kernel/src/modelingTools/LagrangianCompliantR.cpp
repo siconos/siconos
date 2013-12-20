@@ -87,7 +87,7 @@ void LagrangianCompliantR::initComponents(Interaction& inter)
     _jachlambda->resize(sizeY, sizeY);
 }
 
-void LagrangianCompliantR::computeh(const double time, Interaction& inter)
+void LagrangianCompliantR::computeh(double time, Interaction& inter)
 {
   if (_pluginh->fPtr)
   {
@@ -106,7 +106,7 @@ void LagrangianCompliantR::computeh(const double time, Interaction& inter)
   }
 }
 
-void LagrangianCompliantR::computeJachq(const double time, Interaction& inter)
+void LagrangianCompliantR::computeJachq(double time, Interaction& inter)
 {
 
   if (_pluginJachq->fPtr)
@@ -122,7 +122,7 @@ void LagrangianCompliantR::computeJachq(const double time, Interaction& inter)
     *inter.data(z) = workZ;
   }
 }
-void LagrangianCompliantR::computeJachlambda(const double time, Interaction& inter)
+void LagrangianCompliantR::computeJachlambda(double time, Interaction& inter)
 {
 
   if (_pluginJachlambda->fPtr)
@@ -138,7 +138,7 @@ void LagrangianCompliantR::computeJachlambda(const double time, Interaction& int
   }
 }
 
-void LagrangianCompliantR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)
+void LagrangianCompliantR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
     computeh(time, inter);
@@ -161,7 +161,7 @@ void LagrangianCompliantR::computeOutput(const double time, Interaction& inter, 
   }
 }
 
-void LagrangianCompliantR::computeInput(const double time, Interaction& inter, const unsigned int level)
+void LagrangianCompliantR::computeInput(double time, Interaction& inter, const unsigned int level)
 {
   computeJachq(time, inter);
   // get lambda of the concerned interaction

@@ -76,7 +76,7 @@ void FirstOrderLinearTIDS::initRhs(double time)
   }
 }
 
-void FirstOrderLinearTIDS::computeRhs(const double time, const bool)
+void FirstOrderLinearTIDS::computeRhs(double time, const bool)
 {
 
   *_x[1] = * _r; // Warning: r update is done in Interactions/Relations
@@ -92,7 +92,7 @@ void FirstOrderLinearTIDS::computeRhs(const double time, const bool)
     _invM->PLUForwardBackwardInPlace(*_x[1]);
 }
 
-void FirstOrderLinearTIDS::computeJacobianRhsx(const double time, const bool)
+void FirstOrderLinearTIDS::computeJacobianRhsx(double time, const bool)
 {
   // Nothing to be done: _jacxRhs is constant and computed during initialize. But this function is required to avoid call to base class function.
 }

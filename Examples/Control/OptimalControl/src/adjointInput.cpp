@@ -14,7 +14,6 @@ void adjointInput::initialize(Interaction& inter)
   FirstOrderType2R::initialize(inter);
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
-  SiconosVector& y = *inter.y(0);
   SiconosVector& lambda = *inter.lambda(0);
 
   K2 = new SimpleMatrix(2, 2);
@@ -125,8 +124,6 @@ void adjointInput::computeg(double t, Interaction& inter)
  */
 void adjointInput::computeJachx(double t, Interaction& inter)
 {
-
-  SiconosVector& lambda = *inter.lambda(0);
   SiconosVector workX = *inter.data(x);
 
   double *h = &(*_jachx)(0, 0);
@@ -162,8 +159,6 @@ void adjointInput::computeJachx(double t, Interaction& inter)
 }
 void adjointInput::computeJachlambda(double t, Interaction& inter)
 {
-
-  SiconosVector& lambda = *inter.lambda(0);
   double *h = &(*_jachlambda)(0, 0);
 #ifdef SICONOS_DEBUG
   std::cout << "computeJachlambda " << " at " << " " << t << std::endl;

@@ -47,13 +47,13 @@ extern "C" DLLEXPORT void groundFExt(double time, unsigned int sizeOfq, double *
     fExt[i] = 0.0;
 }
 
-extern "C" DLLEXPORT void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
+extern "C" DLLEXPORT void h0(unsigned int sizeOfq, double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   double R0 = 0.0;
   y[0] = q[0] + sqrt(R * R - q[1] * q[1]) - R0;
 }
 
-extern "C" DLLEXPORT void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
+extern "C" DLLEXPORT void G0(unsigned int sizeOfq, double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = 1.0;
   G[1] = -q[1] / (sqrt(R * R - q[1] * q[1]));

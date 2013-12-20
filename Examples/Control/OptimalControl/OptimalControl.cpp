@@ -26,33 +26,14 @@ static int sNSLawSize = 2;
 
 int main()
 {
-  string * solverName = 0;
-  bool diodeIsOn;
-  bool switchIsOn;
-  bool stateChanged;
-
-  double* floatWorkingMem = 0;
-  int * intWorkingMem = 0;
-
-  int freq = 1000;
-  unsigned int Nfreq = 0;
   int cmp = 0;
-  int cmp10 = 0;
-
-  unsigned int NbDataMax = 10000;
-  unsigned int NData = 0;
 
   /************************************************************/
   /************************************************************/
 
 
   int dimX = 4;
-  SimpleMatrix * M = 0;
-  SimpleMatrix * A = 0;
   SiconosVector* x0 = 0;
-  SiconosVector* As = 0;
-  SiconosVector* mti = 0;
-
 
   x0 = new SiconosVector(dimX);
   //Point de départ hors arc singulier
@@ -74,15 +55,10 @@ int main()
   aDS.reset(new MyDS(*x0));
 
   //******BUILD THE RELATION
-  SimpleMatrix* C = 0;
-  SimpleMatrix* D = 0;
-  SimpleMatrix* B = 0;
   SP::adjointInput aR;
   aR.reset(new adjointInput());
 
   int sN = 2;
-  int sM = 0;
-
 
   //*****BUILD THE NSLAW
   SP::NonSmoothLaw aNSL;
@@ -143,14 +119,10 @@ int main()
   dataPlot(0, 7) = (*yOut)(0);
   dataPlot(0, 8) = (*yOut)(1);
 
-
-
-
-  unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of events manager.
   cout << " ==== Start of  simulation : " << NBStep << " steps====" << endl;
 
-  for (int k = 0 ; k < NBStep ; k++)
+  for (unsigned int k = 0 ; k < NBStep ; k++)
   {
 
     cout << " ==== Step: " << endl;

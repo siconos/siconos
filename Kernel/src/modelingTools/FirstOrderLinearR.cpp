@@ -150,7 +150,7 @@ void FirstOrderLinearR::initialize(Interaction& inter)
 
 
 
-void FirstOrderLinearR::computeC(const double time, Interaction& inter)
+void FirstOrderLinearR::computeC(double time, Interaction& inter)
 {
   if (_pluginJachx->fPtr)
   {
@@ -161,7 +161,7 @@ void FirstOrderLinearR::computeC(const double time, Interaction& inter)
   }
 }
 
-void FirstOrderLinearR::computeD(const double time, Interaction& inter)
+void FirstOrderLinearR::computeD(double time, Interaction& inter)
 {
   if (_pluginJachlambda->fPtr)
   {
@@ -172,7 +172,7 @@ void FirstOrderLinearR::computeD(const double time, Interaction& inter)
   }
 }
 
-void FirstOrderLinearR::computeF(const double time, Interaction& inter)
+void FirstOrderLinearR::computeF(double time, Interaction& inter)
 {
   if (_pluginf->fPtr)
   {
@@ -183,7 +183,7 @@ void FirstOrderLinearR::computeF(const double time, Interaction& inter)
   }
 }
 
-void FirstOrderLinearR::computeE(const double time, Interaction& inter)
+void FirstOrderLinearR::computeE(double time, Interaction& inter)
 {
 
   if (_plugine->fPtr)
@@ -195,7 +195,7 @@ void FirstOrderLinearR::computeE(const double time, Interaction& inter)
   }
 }
 
-void FirstOrderLinearR::computeb(const double time, Interaction& inter)
+void FirstOrderLinearR::computeb(double time, Interaction& inter)
 {
   if (_pluginJacLg->fPtr)
   {
@@ -206,16 +206,16 @@ void FirstOrderLinearR::computeb(const double time, Interaction& inter)
   }
 }
 
-void FirstOrderLinearR::computeh(const double time, Interaction& inter)
+void FirstOrderLinearR::computeh(double time, Interaction& inter)
 {
   computeOutput(time, inter, 0);
 }
 
-void FirstOrderLinearR::computeg(const double time, Interaction& inter)
+void FirstOrderLinearR::computeg(double time, Interaction& inter)
 {
   computeInput(time, inter, 0);
 }
-void FirstOrderLinearR::computeOutput(const double time, Interaction& inter, unsigned int level)
+void FirstOrderLinearR::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   computeC(time, inter);
   computeD(time, inter);

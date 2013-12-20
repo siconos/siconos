@@ -201,7 +201,7 @@ double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, doub
   return _A2x * aX + _A2y * aY + _A2z * aZ;
 }
 
-void PivotJointR::computeh(const double time, Interaction& inter)
+void PivotJointR::computeh(double time, Interaction& inter)
 {
   KneeJointR::computeh(time, inter);
   SP::SiconosVector x1 = _d1->q();

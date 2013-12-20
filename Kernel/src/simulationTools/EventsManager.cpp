@@ -53,7 +53,7 @@ void EventsManager::initialize(double T)
 }
 
 // Creation and insertion of a new event into the event set.
-Event& EventsManager::insertEvent(const int type, const double& time)
+Event& EventsManager::insertEvent(int type, double time)
 {
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());

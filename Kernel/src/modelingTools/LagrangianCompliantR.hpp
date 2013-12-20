@@ -103,14 +103,14 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
   * \param: double, current time
   */
-  void computeh(const double time, Interaction& inter);
+  void computeh(double time, Interaction& inter);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
   * \param: double, current time
   * \param: unsigned int
   */
-  void computeJachq(const double time, Interaction& inter);
-  void computeJachlambda(const double time, Interaction& inter);
+  void computeJachq(double time, Interaction& inter);
+  void computeJachlambda(double time, Interaction& inter);
   const std::string getJachlambdaName() const;
   const std::string getJachqName() const;
 
@@ -120,14 +120,14 @@ public:
   *  \param inter the Interaction owning y
   *  \param level number of the derivative to compute, optional, default = 0.
   */
-  void computeOutput(const double time, Interaction& inter, unsigned int level = 0);
+  void computeOutput(double time, Interaction& inter, unsigned int level = 0);
 
   /** to compute the input
   *  \param time the current time
   *  \param inter the Interaction owning lambda
   *  \param level "derivative" order of lambda used to compute input
   */
-  void computeInput(const double time, Interaction& inter, unsigned int level = 0);
+  void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   ACCEPT_STD_VISITORS();
 

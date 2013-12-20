@@ -59,7 +59,6 @@ int main(int argc, char* argv[])
   double Lvalue = 1.0;   // inductance
   double Cvalue = 1.0 / (4 * M_PI * M_PI); // capacitance
   double Rvalue = 10.0 ;    // resistance
-  double Vinit = 1.0;    // initial voltage
   string Modeltitle = "CircuitRLCD";
 
   try

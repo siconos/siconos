@@ -170,45 +170,45 @@ public:
 
   /** Function to compute matrix C
   */
-  virtual void computeC(const double time, Interaction& inter);
+  virtual void computeC(double time, Interaction& inter);
 
   /** Function to compute matrix F
   */
-  virtual void computeF(const double time, Interaction& inter);
+  virtual void computeF(double time, Interaction& inter);
 
   /** Function to compute matrix D
   */
-  virtual void computeD(const double time, Interaction& inter);
+  virtual void computeD(double time, Interaction& inter);
 
   /** Function to compute vector e
   */
-  virtual void computeE(const double time, Interaction& inter);
+  virtual void computeE(double time, Interaction& inter);
 
   /** Function to compute matrix B
   */
-  virtual void computeb(const double time, Interaction& inter);
+  virtual void computeb(double time, Interaction& inter);
 
   /** default function to compute h
   *  \param double : current time
   */
-  virtual void computeh(const double time, Interaction& inter);
+  virtual void computeh(double time, Interaction& inter);
 
   /** default function to compute g
   *  \param double : current time
   */
-  virtual void computeg(const double time, Interaction& inter);
+  virtual void computeg(double time, Interaction& inter);
 
   /** default function to compute y
   *  \param double: not used
   *  \param unsigned int: not used
   */
-  virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0);
+  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0);
 
   /** default function to compute r
   *  \param double : not used
   *  \param unsigned int: not used
   */
-  void computeInput(const double time, Interaction& inter, unsigned int = 0);
+  void computeInput(double time, Interaction& inter, unsigned int = 0);
 
   /** initialize the relation (check sizes, memory allocation ...)
   *  \param inter the interaction that owns this relation

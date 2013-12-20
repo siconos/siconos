@@ -34,7 +34,7 @@ double DiskDiskR::distance(double x1, double y1, double r1,
 }
 
 
-void DiskDiskR::computeh(const double time, Interaction& inter)
+void DiskDiskR::computeh(double time, Interaction& inter)
 {
 
   double q_0 = (*inter.data(q0))(0);
@@ -47,7 +47,7 @@ void DiskDiskR::computeh(const double time, Interaction& inter)
 
 };
 
-void DiskDiskR::computeJachq(const double time, Interaction& inter)
+void DiskDiskR::computeJachq(double time, Interaction& inter)
 {
 
   assert(_jachq);

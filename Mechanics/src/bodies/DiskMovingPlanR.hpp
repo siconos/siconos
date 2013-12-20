@@ -30,7 +30,7 @@
 
 #include "LagrangianRheonomousR.hpp"
 
-typedef double(*FTime)(const double);
+typedef double(*FTime)(double);
 
 
 #define COMPUTE(X) \
@@ -66,12 +66,12 @@ public:
   void init(double);
 
   using LagrangianRheonomousR::computeh;
-  void computeh(const double time, Interaction& inter);
+  void computeh(double time, Interaction& inter);
 
-  void computeJachq(const double time, Interaction& inter);
+  void computeJachq(double time, Interaction& inter);
 
   using LagrangianRheonomousR::computehDot;
-  void computehDot(const double time, Interaction& inter);
+  void computehDot(double time, Interaction& inter);
 
   double distance(double, double, double);
 

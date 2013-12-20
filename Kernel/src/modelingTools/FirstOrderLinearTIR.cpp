@@ -100,17 +100,17 @@ void FirstOrderLinearTIR::initialize(Interaction & inter)
     assert(_e->size() == inter.getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 }
 
-void FirstOrderLinearTIR::computeh(const double time, Interaction & inter)
+void FirstOrderLinearTIR::computeh(double time, Interaction & inter)
 {
   computeOutput(time, inter, 0);
 }
 
-void FirstOrderLinearTIR::computeg(const double time, Interaction & inter)
+void FirstOrderLinearTIR::computeg(double time, Interaction & inter)
 {
   computeInput(time, inter, 0);
 }
 
-void FirstOrderLinearTIR::computeOutput(const double time, Interaction & inter, unsigned int derivativeNumber)
+void FirstOrderLinearTIR::computeOutput(double time, Interaction & inter, unsigned int derivativeNumber)
 {
   // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
   // y[0]
@@ -135,7 +135,7 @@ void FirstOrderLinearTIR::computeOutput(const double time, Interaction & inter, 
     prod(*_F, *inter.data(z), y, false);
 }
 
-void FirstOrderLinearTIR::computeInput(const double time, Interaction & inter, unsigned int level)
+void FirstOrderLinearTIR::computeInput(double time, Interaction & inter, unsigned int level)
 {
   // We get lambda of the interaction (pointers)
   SiconosVector& lambda = *inter.lambda(level);

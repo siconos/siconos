@@ -71,7 +71,7 @@
  * --> [in,out] y : pointer to the first element of y \n
  * --> sizeZ : size of vector z \n
  * --> [in,out] z: pointer to z vector(s) from DS. \n
- * Its signature must be "void plugin(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"\n\n
+ * Its signature must be "void plugin(unsigned int, double*, unsigned int, double*, unsigned int, double*)"\n\n
  * The plugin function to compute G0(q,z), gradient of h according to q, needs the following parameters: \n
  *--> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction  \n
  *--> q : pointer to the first element of q  \n
@@ -79,7 +79,7 @@
  *--> [in,out] H : pointer to the first element of H (sizeY X sizeDS matrix)\n
  * --> sizeZ : size of vector z \n
  * -->[in,out] z: pointer to z vector(s) from DS.\n
- * Its signature must be "void plugin(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"\n
+ * Its signature must be "void plugin(unsigned int, double*, unsigned int, double*, unsigned int, double*)"\n
  *
  */
 class LagrangianScleronomousR : public LagrangianR
@@ -136,10 +136,10 @@ public:
   /** constructor from a set of data
   *  \param std::string : the name of the plugin to compute h(q,z).\n
   * The signature  of the plugged function must be:
-  *  "void pluginH(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
+  *  "void pluginH(unsigned int, double*, unsigned int, double*, unsigned int, double*)"
   *  \param std::string : the name of the plugin to compute jacobian h according to q.\n
   * The signature  of the plugged function must be:
-  *  "void pluginG0(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
+  *  "void pluginG0(unsigned int, double*, unsigned int, double*, unsigned int, double*)"
   *
   */
   LagrangianScleronomousR(const std::string&, const std::string&);
@@ -147,13 +147,13 @@ public:
   /** constructor from a set of data used for EventDriven Scheme
   *  \param std::string : the name of the plugin to compute h(q,z).\n
   * The signature  of the plugged function must be:
-  *  "void pluginH(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
+  *  "void pluginH(unsigned int, double*, unsigned int, double*, unsigned int, double*)"
   *  \param std::string : the name of the plugin to compute jacobian h according to q.\n
   * The signature  of the plugged function must be:
-  *  "void pluginG0(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
+  *  "void pluginG0(unsigned int, double*, unsigned int, double*, unsigned int, double*)"
   * \param std::string: the name of the plugin to compute the derivative of H Jacobian with respect to time
   * The signature of the plugged function must be:
-  * "void pluginS0(unsigned int, const double*,unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
+  * "void pluginS0(unsigned int, double*,unsigned int, double*, unsigned int, double*, unsigned int, double*)"
   *
   */
   LagrangianScleronomousR(const std::string&, const std::string&, const std::string&);
@@ -169,11 +169,11 @@ public:
   };
   /** Compute y = h(q,z) using plug-in mechanism with the data vector of the interaction
    * should be used as less as possible to avoid side--effects
-   * prefer computeh(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+   * prefer computeh(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
    * \param time  current time
    * \param inter interaction that owns the relation
    */
-  virtual void computeh(const double time, Interaction& inter);
+  virtual void computeh(double time, Interaction& inter);
 
 
   /** to compute y = h(q,z) using plug-in mechanism
@@ -188,16 +188,16 @@ public:
   * \param double, current time
   * \param inter interaction that owns the relation
   */
-  virtual void computeJachq(const double time, Interaction& inter);
+  virtual void computeJachq(double time, Interaction& inter);
 
   /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
    * \param time double, current time
    * \param inter interaction that owns the relation
    */
-  void computedotjacqhXqdot(const double time, Interaction& inter);
+  void computedotjacqhXqdot(double time, Interaction& inter);
 
 
-  void computeJachqDot(const double time, Interaction& inter)
+  void computeJachqDot(double time, Interaction& inter)
   {
     /* \warning. This method should never be called, since we are only considering
      * scleronomic constraint
@@ -206,7 +206,7 @@ public:
   }
 
   /* compute all the H Jacobian */
-  void computeJach(const double time, Interaction& inter)
+  void computeJach(double time, Interaction& inter)
   {
     computeJachq(time, inter);
     // computeJachqDot(time, inter);
@@ -215,7 +215,7 @@ public:
     // computehDot(time,inter);
   }
   /* compute all the G Jacobian */
-  void computeJacg(const double time, Interaction& inter)
+  void computeJacg(double time, Interaction& inter)
   {
     computeJacgq(time, inter);
     // computeJacgqDot(time, inter);
@@ -228,21 +228,21 @@ public:
   /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism
   * \param time the current time
   */
-  virtual void computeDotJachq(const double time, Interaction& inter);
+  virtual void computeDotJachq(double time, Interaction& inter);
 
   /** to compute output
   * \param time the current time
   * \param inter interaction that owns the relation
   * \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0);
+  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0);
 
   /** to compute p
   * \param time the current time
   * \param inter interaction that owns the relation
   * \param unsigned int: "derivative" order of lambda used to compute input
   */
-  void computeInput(const double time, Interaction& inter, unsigned int = 0);
+  void computeInput(double time, Interaction& inter, unsigned int = 0);
 
   const std::string getJachqName() const;
 

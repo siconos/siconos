@@ -94,10 +94,10 @@ void LagrangianScleronomousR::zeroPlugin()
   _plugindotjacqh.reset(new PluggedObject());
 }
 
-void LagrangianScleronomousR::computeh(const double time, Interaction& inter)
+void LagrangianScleronomousR::computeh(double time, Interaction& inter)
 {
 
-  DEBUG_PRINT("LagrangianScleronomousR::computeh(const double time, Interaction& inter)\n");
+  DEBUG_PRINT("LagrangianScleronomousR::computeh(double time, Interaction& inter)\n");
   computeh(inter, inter.data(q0),inter.data(z));
 
   // if (_pluginh)
@@ -153,7 +153,7 @@ void LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP
   }
   // else nothing
 }
-void LagrangianScleronomousR::computeJachq(const double time, Interaction& inter)
+void LagrangianScleronomousR::computeJachq(double time, Interaction& inter)
 {
   if (_pluginJachq)
   {
@@ -171,7 +171,7 @@ void LagrangianScleronomousR::computeJachq(const double time, Interaction& inter
   }
 }
 
-void LagrangianScleronomousR::computeDotJachq(const double time, Interaction& inter)
+void LagrangianScleronomousR::computeDotJachq(double time, Interaction& inter)
 {
   if (_plugindotjacqh)
   {
@@ -208,7 +208,7 @@ void LagrangianScleronomousR::computeDotJachq(const double time, Interaction& in
   }
 }
 
-void  LagrangianScleronomousR::computedotjacqhXqdot(const double time, Interaction& inter)
+void  LagrangianScleronomousR::computedotjacqhXqdot(double time, Interaction& inter)
 {
   DEBUG_PRINT("LagrangianScleronomousR::computeNonLinearH2dot starts");
   // Compute the H Jacobian dot
@@ -221,10 +221,10 @@ void  LagrangianScleronomousR::computedotjacqhXqdot(const double time, Interacti
   DEBUG_PRINT("LagrangianScleronomousR::computeNonLinearH2dot ends");
 }
 
-void LagrangianScleronomousR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)
+void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
 
-  DEBUG_PRINTF("LagrangianScleronomousR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
+  DEBUG_PRINTF("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
   if (derivativeNumber == 0)
   { 
     computeh(time, inter);
@@ -247,9 +247,9 @@ void LagrangianScleronomousR::computeOutput(const double time, Interaction& inte
   }
 }
 
-void LagrangianScleronomousR::computeInput(const double time, Interaction& inter, unsigned int level)
+void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsigned int level)
 {
-  DEBUG_PRINT("void LagrangianScleronomousR::computeInput(const double time, Interaction& inter, unsigned int level)\n");
+  DEBUG_PRINT("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsigned int level)\n");
   DEBUG_PRINTF("level = %i\n", level);
 
   computeJachq(time, inter);

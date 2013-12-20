@@ -119,17 +119,17 @@ const std::string LagrangianRheonomousR::gethDotName() const
   return "unamed";
 }
 
-void LagrangianRheonomousR::computeh(const double time, Interaction& inter)
+void LagrangianRheonomousR::computeh(double time, Interaction& inter)
 {
 
-  DEBUG_PRINT(" LagrangianRheonomousR::computeh(const double time, Interaction& inter)");
+  DEBUG_PRINT(" LagrangianRheonomousR::computeh(double time, Interaction& inter)");
   computeh(time, inter, inter.data(q0),inter.data(z));
 }
 
-void LagrangianRheonomousR::computeh(const double time,Interaction& inter,
+void LagrangianRheonomousR::computeh(double time,Interaction& inter,
                                      SP::BlockVector q, SP::BlockVector z)
 {
-  DEBUG_PRINT(" LagrangianRheonomousR::computeh(const double time,Interaction& inter, SP::BlockVector q, SP::BlockVector z)");
+  DEBUG_PRINT(" LagrangianRheonomousR::computeh(double time,Interaction& inter, SP::BlockVector q, SP::BlockVector z)");
   if (_pluginh)
   {
     // arg= time. Unused in this function but required for interface.
@@ -151,13 +151,13 @@ void LagrangianRheonomousR::computeh(const double time,Interaction& inter,
 }
 
 
-void LagrangianRheonomousR::computehDot(const double time, Interaction& inter)
+void LagrangianRheonomousR::computehDot(double time, Interaction& inter)
 {
   computehDot(time, inter, inter.data(q0), inter.data(z));
 }
 
 
-void LagrangianRheonomousR::computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+void LagrangianRheonomousR::computehDot(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
 {
   if (_pluginhDot->fPtr)
   {
@@ -174,7 +174,7 @@ void LagrangianRheonomousR::computehDot(const double time, Interaction& inter, S
   // else nothing
 }
 
-void LagrangianRheonomousR::computeJachq(const double time, Interaction& inter)
+void LagrangianRheonomousR::computeJachq(double time, Interaction& inter)
 {
   // Note that second input arg is useless.
   if (_pluginJachq->fPtr)
@@ -191,7 +191,7 @@ void LagrangianRheonomousR::computeJachq(const double time, Interaction& inter)
   // else nothing.
 }
 
-void LagrangianRheonomousR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)
+void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
     computeh(time, inter);
@@ -219,7 +219,7 @@ void LagrangianRheonomousR::computeOutput(const double time, Interaction& inter,
   }
 }
 
-void LagrangianRheonomousR::computeInput(const double time, Interaction& inter, unsigned int level)
+void LagrangianRheonomousR::computeInput(double time, Interaction& inter, unsigned int level)
 {
   computeJachq(time, inter);
   // get lambda of the concerned interaction

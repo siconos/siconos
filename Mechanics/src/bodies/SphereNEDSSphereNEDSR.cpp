@@ -43,7 +43,7 @@ double SphereNEDSSphereNEDSR::distance(double x1, double y1, double z1, double r
 }
 
 
-void SphereNEDSSphereNEDSR::computeh(const double time, Interaction& inter)
+void SphereNEDSSphereNEDSR::computeh(double time, Interaction& inter)
 {
 
 

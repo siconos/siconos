@@ -192,11 +192,11 @@ public:
   //! Set the step number to start the data save and step number to stop save
   void SetStepMinMaxSave(unsigned int, unsigned int);
   //! To compare a double number with zero
-  bool isZero(const double);
+  bool isZero(double);
   //! To compare a velocity grandeur with zero
-  bool isVelNegative(const double);
+  bool isVelNegative(double);
   //! To compare an energy grandeur with zero
-  bool isEnerZero(const double);
+  bool isEnerZero(double);
   //! To select the pramary contact
   void SelectPrimaContact();
   //! Calculate the vector of distributing rule

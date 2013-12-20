@@ -195,7 +195,7 @@ public:
   /** change t0 before the simulation starts (useful for delays)
    *  \param val the new value for t0
    */
-  void setT0(const double val);
+  void setT0(double val);
 
   /** get the TimeDiscretisationXML of the TimeDiscretisation
    *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation

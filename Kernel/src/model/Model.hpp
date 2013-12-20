@@ -129,7 +129,7 @@ public:
   /** set the current time
    *  \param a double
    */
-  inline void setCurrentTime(const double& newValue)
+  inline void setCurrentTime(double newValue)
   {
     _t = newValue;
   }
@@ -145,7 +145,7 @@ public:
   /** set initial time of the time discretisation
    *  \param a double
    */
-  inline void sett0(const double& newT0)
+  inline void sett0(double newT0)
   {
     _t0 = newT0;
   };
@@ -161,7 +161,7 @@ public:
   /** set final time
    *  \param newValue the new final time for the Simulatiom
    */
-  void setT(const double& newValue);
+  void setT(double newValue);
 
   /** get the Simulation of the Model
    *  \return a pointer on Simulation

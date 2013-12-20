@@ -229,7 +229,7 @@ public:
    * \param time the time of the event
    * \return a reference to the Event
    */
-  Event& insertEvent(const int type, const double& time);
+  Event& insertEvent(int type, double time);
 
   /** insert an event of a certain type. The event is created on the fly,
    * and the SP::TimeDiscretisation given in argument is stored inside
@@ -237,7 +237,7 @@ public:
    * \param td a TimeDiscretisation for the Event
    * \return a reference to the Event
    */
-  Event& insertEvent(const int type, SP::TimeDiscretisation td);
+  Event& insertEvent(int type, SP::TimeDiscretisation td);
 
   double getTk()
   {
@@ -300,7 +300,7 @@ public:
   inline SP::TimeDiscretisation timeDiscretisation() const { return _td;};
 
   /** update time final time */
-  inline void updateT(const double& T) { _T = T; };
+  inline void updateT(double T) { _T = T; };
 };
 
 

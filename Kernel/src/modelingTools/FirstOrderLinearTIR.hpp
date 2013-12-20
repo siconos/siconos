@@ -96,25 +96,25 @@ public:
   *  \param time current time
   *  \param inter the interaction that owns this relation
   */
-  void computeh(const double time, Interaction& inter);
+  void computeh(double time, Interaction& inter);
 
   /** default function to compute g
   *  \param time current time
   *  \param inter the interaction that owns this relation
   */
-  void computeg(const double time, Interaction& inter);
+  void computeg(double time, Interaction& inter);
 
   /** default function to compute y
   *  \param double: not used
   *  \param unsigned int: not used
   */
-  void computeOutput(const double time, Interaction& inter, unsigned int = 0);
+  void computeOutput(double time, Interaction& inter, unsigned int = 0);
 
   /** default function to compute r
   *  \param double : not used
   *  \param unsigned int: not used
   */
-  void computeInput(const double time, Interaction& inter, unsigned int = 0);
+  void computeInput(double time, Interaction& inter, unsigned int = 0);
 
   // GETTERS/SETTERS
 
@@ -210,9 +210,9 @@ public:
   */
   void display() const;
 
-  virtual void computeJachx(const double time, Interaction& inter) {};
-  virtual void computeJachlambda(const double time, Interaction& inter) {};
-  virtual void computeJacglambda(const double time, Interaction& inter) {};
+  virtual void computeJachx(double time, Interaction& inter) {};
+  virtual void computeJachlambda(double time, Interaction& inter) {};
+  virtual void computeJacglambda(double time, Interaction& inter) {};
 
   /**
   * return true if the relation is linear.
