@@ -330,7 +330,7 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
 
   options->dparam[0] = 1e-12;
 
-
+  options->callback = NULL;
 
 
   return 0;
