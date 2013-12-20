@@ -89,7 +89,7 @@
 
 #ifndef WITH_IO
 
-%define %make_picklable(CLASS)
+%define %make_picklable(CLASS, COMPONENT)
 %enddef
 
 #endif
