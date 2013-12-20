@@ -40,7 +40,32 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
   int nobasis;
   int itermax = options->iparam[0];
 
+  i=0;
+  int n = problem->size;
+  double *q = problem->q;
+  
+  while ((i < (n - 1)) && (q[i] >= 0.)) 
+    i++;
+  
+  if ((i == (n - 1)) && (q[n - 1] >= 0.))
+  {
 
+    /* TRIVIAL CASE : q >= 0
+     * z = 0 and w = q is solution of LCP(q,M)
+     */
+    for (int j = 0 ; j < n; j++)
+    {
+      zlem[j] = 0.0;
+      wlem[j] = q[j];
+    }
+    *info = 0;
+    options->iparam[1] = 0;   /* Number of iterations done */
+    options->dparam[1] = 0.0; /* Error */
+    if (verbose > 0)
+      printf("lcp_lexicolemke: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+    return ;
+  }
+  
   double z0, zb, dblock;
   double pivot, tovip;
   double tmp;
