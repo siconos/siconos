@@ -73,8 +73,11 @@ void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplemen
     free(pOptions->iWork);
   if (pOptions->dWork)
     free(pOptions->dWork);
-  if (pOptions->callback)
-    free(pOptions->callback);
+  // FP : I comment the lines below, that results in failures
+  // in some test-GMP-REDUCED3_3D_QUARTIC-GMP. 
+  // Todo : fix this ...
+  //if (pOptions->callback)
+  //  free(pOptions->callback);
   pOptions->iparam = NULL;
   pOptions->dparam = NULL;
   pOptions->iWork = NULL;   pOptions->callback = NULL;
