@@ -404,7 +404,7 @@ void  MBTB_initSimu(double hTS, int withProj)
       myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
 						sDS[sContacts[numC]->_indexBody1],
                                                 sDS[sContacts[numC]->_indexBody2]);
-      sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody2]  );
+      // sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody2]  );
       
     }
     else 

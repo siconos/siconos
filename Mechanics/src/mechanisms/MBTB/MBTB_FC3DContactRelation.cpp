@@ -22,18 +22,18 @@ MBTB_FC3DContactRelation::MBTB_FC3DContactRelation()
 /*This function has to compute the distance between the objects*/
 void MBTB_FC3DContactRelation::computeh(double time, Interaction & inter)
 {
-  DSIterator itDS=_pContact->interaction()->dynamicalSystemsBegin();
-  SP::DynamicalSystem aux = *itDS;
- if(sPrintDist)
-  {
-    printf("MBTB_FC3DContactRelation::computeh Start display for contact name %s\n",_pContact->_ContactName);
-  } 
-  if(sDS[_pContact->_indexBody1] != aux)
-  {
-    printf("MBTB_FC3DContactRelation::computeh wrong short of DS\n");
-    exit(1);
+ //  DSIterator itDS=_pContact->interaction()->dynamicalSystemsBegin();
+ //  SP::DynamicalSystem aux = *itDS;
+ // if(sPrintDist)
+ //  {
+ //    printf("MBTB_FC3DContactRelation::computeh Start display for contact name %s\n",_pContact->_ContactName);
+ //  } 
+ //  if(sDS[_pContact->_indexBody1] != aux)
+ //  {
+ //    printf("MBTB_FC3DContactRelation::computeh wrong short of DS\n");
+ //    exit(1);
 
-  }
+ //  }
 
   SP::SiconosVector y = _pContact->interaction()->y(0);
   //if (_pContact->_curTimeh + 1e-9 < time){
