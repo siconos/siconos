@@ -1,32 +1,42 @@
 #!/usr/bin/env python
-import mbtb
-import cadmbtb
+
+print '##################################################################'
+print '############## Siconos/Mechanics mechanisms module ###############'
+print '##################################################################'
+
+
 import numpy
 import array
 import os
 import sys
 
-SiconosMechanisms_BUILD=os.environ.get("SiconosMechanisms_BUILD")
-SiconosMechanisms_DIR=os.environ.get("SiconosMechanisms_DIR")
+
+install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
+print "install_path :", install_path
+
+build_path= "@CMAKE_BINARY_DIR@" +"/src/mechanisms/"
+print "build_path : ", build_path 
+
+SiconosMechanisms_BUILD=build_path
+#SiconosMechanisms_DIR=os.environ.get("SiconosMechanisms_DIR")
+
+sys.path.append(SiconosMechanisms_BUILD+'/frontEnd/MBTB')
+sys.path.append(SiconosMechanisms_BUILD+'/frontEnd/CADMBTB')
+
+import mbtb
+import cadmbtb
+
 my_PI=3.14159265
 
-if SiconosMechanisms_BUILD is None:
-   print "Can not find SiconosMechanisms_BUILD from the environement, need it."
-   sys.exit()
-
-
-if SiconosMechanisms_DIR is None:
-   print "Can not find SiconosMechanisms_DIR from the environement, need it."
-   sys.exit()
-
-execfile(SiconosMechanisms_DIR+"frontEnd/mbtbDefaultOptions.py")
-print "run.py: ../mbtbDefaultOptions.py loaded"
+# would be better in install_path/share ...
+execfile(install_path+"/mbtbDefaultOptions.py")
+print "siconos-mechanisms.py: ", install_path+"/mbtbDefaultOptions.py loaded"
  
 try:
    execfile("mbtbLocalOptions.py")
-   print "run.py: mbtbLocalOptions.py loaded"
+   print "siconos-mechanisms.py: mbtbLocalOptions.py loaded"
 except :
-   print "run.py, info: mbtbLocalOptions.py not defined"
+   print "siconos-mechanisms.py, info: mbtbLocalOptions.py not defined"
 
 execfile("bodydef.py")
 print "run.py: bodydef.py loaded"
@@ -68,6 +78,8 @@ for idBody in range(NBBODIES):
    cadmbtb.CADMBTB_setShapeDParam(0,idBody,bodyTrans[idBody]) # visu
 
 #build dynamical systems
+print "User plugin : ", plugin
+
 for idBody in range(NBBODIES):
     mbtb.MBTB_BodyLoadCADFile(idBody,afile[idBody],bodyDraw[idBody])
     mbtb.MBTB_BodyBuild(idBody, body[idBody], m[idBody],

@@ -199,7 +199,7 @@ void CADMBTB_moveGraphicalModelFromModel(unsigned int idGraphicModel, unsigned i
     return;
   assert(sNumberOfObj>idGraphicModel &&"CADMBTB_moveGraphicModelFromModel idGraphicModel out of range");
   assert(sNumberOfObj>idModel &&"CADMBTB_moveGraphicModelFromModel idModel out of range");
-  spAISToposDS[idGraphicModel]->SetTransformation(&(sGeomTrsf[idModel]),false,false);
+  //spAISToposDS[idGraphicModel]->SetTransformation(&(sGeomTrsf[idModel]),false,false);
   //spAISToposDS1->SetTransformation(&(sGeomTrsf1),false,false);
 }
 
