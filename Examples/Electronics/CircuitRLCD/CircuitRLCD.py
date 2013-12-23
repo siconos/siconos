@@ -61,7 +61,7 @@ if (withPlot):
 
 from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\
-                           Model, Moreau, TimeDiscretisation, LCP,  \
+                           Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
                            TimeStepping
 
 #
@@ -108,7 +108,7 @@ CircuitRLCD.nonSmoothDynamicalSystem().link(InterCircuitRLCD, LSCircuitRLCD)
 
 # (1) OneStepIntegrators
 theta = 0.5
-aOSI = Moreau(LSCircuitRLCD, theta)
+aOSI = EulerMoreauOSI(LSCircuitRLCD, theta)
 
 # (2) Time discretisation
 aTiDisc = TimeDiscretisation(t0, h_step)

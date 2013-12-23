@@ -79,10 +79,10 @@ int main()
   aS->setComputeResiduY(true);
   aS->setUseRelativeConvergenceCriteron(false);
   //*****BUILD THE STEP INTEGRATOR
-  SP::OneStepIntegrator  aMoreauJeanOSI ;
-  aMoreauJeanOSI.reset(new MoreauJeanOSI(0.5));
-  aMoreauJeanOSI->insertDynamicalSystem(aDS);
-  aS->insertIntegrator(aMoreauJeanOSI);
+  SP::OneStepIntegrator  aEulerMoreauOSI ;
+  aEulerMoreauOSI.reset(new EulerMoreauOSI(0.5));
+  aEulerMoreauOSI->insertDynamicalSystem(aDS);
+  aS->insertIntegrator(aEulerMoreauOSI);
 
   //**** BUILD THE STEP NS PROBLEM
   SP::LCP  aLCP ;

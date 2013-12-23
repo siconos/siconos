@@ -510,7 +510,8 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
 
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
 
-  if (osiType == OSI::MOREAUJEANOSI ||
+  if (osiType == OSI::EULERMOREAUOSI ||
+      osiType == OSI::MOREAUJEANOSI ||
       osiType == OSI::MOREAUDIRECTPROJECTIONOSI ||
       osiType == OSI::LSODAROSI ||
       osiType == OSI::NEWMARKALPHAOSI ||

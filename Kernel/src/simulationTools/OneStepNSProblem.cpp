@@ -450,6 +450,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::DynamicalSystem ds)
   dsType = Type::value(*ds);
   
   if (osiType == OSI::MOREAUJEANOSI
+      || osiType == OSI::EULERMOREAUOSI
       || osiType == OSI::MOREAUDIRECTPROJECTIONOSI
       || osiType == OSI::SCHATZMANPAOLIOSI)
   {

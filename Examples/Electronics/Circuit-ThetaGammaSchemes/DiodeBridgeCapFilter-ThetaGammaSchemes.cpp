@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     // -- (1) OneStepIntegrators --
     double theta = 0.5;
     double gamma = 0.5;
-    SP::MoreauJeanOSI aOSI(new MoreauJeanOSI(theta, gamma));
+    SP::EulerMoreauOSI aOSI(new EulerMoreauOSI(theta, gamma));
     aOSI->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
     aOSI->insertDynamicalSystem(LS2DiodeBridgeCapFilter);
     aOSI->setUseGammaForRelation(true);
