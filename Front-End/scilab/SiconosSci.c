@@ -1333,7 +1333,7 @@ int sicSimulationTimeSteppingInterface(char *fname)
   return 0;
 }
 
-int sicOneStepIntegratorMoreauJeanOSIInterface(char *fname)
+int sicOneStepIntegratorMoreauJeanOSI.Interface(char *fname)
 {
   static int minrhs = 1, maxrhs = 1, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;

@@ -24,8 +24,9 @@
     REGISTER(TimeSteppingProjectOnConstraints)    \
     REGISTER(TimeSteppingCombinedProjection)      \
     REGISTER(EventDriven)                         \
-    REGISTER(OneStepIntegrator)                   \
-    REGISTER(MoreauJeanOSI)                              \
+    REGISTER(OneStepIntegrator)                     \
+    REGISTER(EulerMoreauOSI)                           \
+    REGISTER(MoreauJeanOSI)                       \
     REGISTER(MoreauJeanDirectProjectionOSI)       \
     REGISTER(MoreauJeanCombinedProjectionOSI)         \
     REGISTER(LsodarOSI)                              \
