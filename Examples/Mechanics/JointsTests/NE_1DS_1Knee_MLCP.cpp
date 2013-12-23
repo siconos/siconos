@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     double h = 0.01;                // time step
     int N = 1000;
     double L1 = 1.0;
-    double theta = 1.0;              // theta for Moreau integrator
+    double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double g = 9.81; // Gravity
     double m = 1.;
 
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::Moreau OSI1(new Moreau(beam1,theta));
+    SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(beam1,theta));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

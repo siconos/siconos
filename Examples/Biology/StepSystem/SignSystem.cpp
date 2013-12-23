@@ -86,8 +86,8 @@ int main(int argc, char *argv[])
   aM->nonSmoothDynamicalSystem()->link(aI,aDS);
 
 // -- (1) OneStepIntegrators --
-  SP::OneStepIntegrator  aMoreau ;
-  aMoreau.reset(new Moreau(aDS,0.5));
+  SP::OneStepIntegrator  aMoreauJeanOSI ;
+  aMoreauJeanOSI.reset(new MoreauJeanOSI(aDS,0.5));
 
 // -- (2) Time discretisation --
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0,sStep));
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
   osnspb->setNumericsVerboseMode(0);
 
 // -- (4) Simulation setup with (1) (2) (3)
-  SP::TimeStepping aS(new TimeStepping(aTD,aMoreau,osnspb));
+  SP::TimeStepping aS(new TimeStepping(aTD,aMoreauJeanOSI,osnspb));
   aS->setComputeResiduY(true);
   aS->setUseRelativeConvergenceCriteron(false);
 

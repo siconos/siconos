@@ -119,7 +119,7 @@ bool DiodeBridge()
     double theta = 0.5;
 
     // One Step Integrator
-    SP::Moreau OSI_RLCD(new Moreau(LSDiodeBridge, theta));
+    SP::MoreauJeanOSI OSI_RLCD(new MoreauJeanOSI(LSDiodeBridge, theta));
     StratDiodeBridge->insertIntegrator(OSI_RLCD);
 
     // One Step non smooth problem

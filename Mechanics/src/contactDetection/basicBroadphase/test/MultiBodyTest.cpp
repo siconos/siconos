@@ -134,7 +134,7 @@ void Disks::init(std::string disks_input)
   double h = 0.01;                // time step
   double g = 9.81;
 
-  double theta = 0.5;              // theta for Moreau integrator
+  double theta = 0.5;              // theta for MoreauJeanOSI integrator
 
   std::string solverName = "NSGS";
 
@@ -219,7 +219,7 @@ void Disks::init(std::string disks_input)
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator osi;
-    osi.reset(new Moreau(theta));
+    osi.reset(new MoreauJeanOSI(theta));
 
     // -- Model --
     _model.reset(new Model(t0, T));

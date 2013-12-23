@@ -1155,7 +1155,7 @@ extern "C" int sicSimulationTimeStepping(int idTime)
 }
 
 
-extern "C" int sicOneStepIntegratorMoreau(double *theta)
+extern "C" int sicOneStepIntegratorMoreauJeanOSI(double *theta)
 {
   int nId = SIC_OK, i;
 
@@ -1167,7 +1167,7 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
     int  dsNumber = SetDSPtr->size();
 
     if (dsNumber == 0)
-      RuntimeException::selfThrow("siconos/C:: sicOneStepIntegratorMoreau failed due to DS empty");
+      RuntimeException::selfThrow("siconos/C:: sicOneStepIntegratorMoreauJeanOSI failed due to DS empty");
 
     // One Step integrator s
     set<OneStepIntegrator *> vOSI;
@@ -1177,7 +1177,7 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
     // Thus this part has to be reviewed -> especially the way theta values are sorted?
     for (it = SetDSPtr->begin(); it != SetDSPtr->end(); ++it)
     {
-      vOSI.insert(new Moreau(*it, theta[i], prtSimul));
+      vOSI.insert(new MoreauJeanOSI(*it, theta[i], prtSimul));
       i++;
     }
 
@@ -1190,7 +1190,7 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
   }
   catch (...)
   {
-    std::cout << "Exception caught in sicOneStepIntegratorMoreau" <<std::endl;
+    std::cout << "Exception caught in sicOneStepIntegratorMoreauJeanOSI" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -1211,7 +1211,7 @@ extern "C" int sicOneStepIntegratorLsodar()
     int  dsNumber = SetDSPtr->size();
 
     if (dsNumber == 0)
-      RuntimeException::selfThrow("siconos/C:: sicOneStepIntegratorMoreau failed due to DS empty");
+      RuntimeException::selfThrow("siconos/C:: sicOneStepIntegratorMoreauJeanOSI failed due to DS empty");
 
     // One Step integrator s
     set<OneStepIntegrator *> vOSI;

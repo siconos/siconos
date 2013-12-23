@@ -19,10 +19,10 @@
 
 
 /*!\file
-  C++ input file, Moreau-Time-Stepping version
+  C++ input file, MoreauJeanOSI-Time-Stepping version
   T. Schindler, V. Acary
 
-  Slider-crank simulation with a Moreau-Time-Stepping scheme
+  Slider-crank simulation with a MoreauJeanOSI-Time-Stepping scheme
 
   see Flores/Leine/Glocker : Modeling and analysis of planar rigid multibody systems with
   translational clearance joints based on the non-smooth dynamics approach
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     // ----------------
     // --- Simulation ---
     // ----------------
-    SP::MoreauCombinedProjectionOSI OSI(new MoreauCombinedProjectionOSI(slider, 0.5));
+    SP::MoreauJeanCombinedProjectionOSI OSI(new MoreauJeanCombinedProjectionOSI(slider, 0.5));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
     SP::OneStepNSProblem impact(new FrictionContact(2, SICONOS_FRICTION_2D_ENUM));
     impact->numericsSolverOptions()->dparam[0] = 1e-08;
@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
     cout << "====> Comparison with a reference file ..." << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("SliderCrankMoreau-CombinedProjection.ref", "ascii", dataPlotRef);
+    ioMatrix::read("SliderCrankMoreauJeanOSI-CombinedProjection.ref", "ascii", dataPlotRef);
     double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
     std::cout << "Error = "<< error << std::endl;
     if (error > 1e-12)

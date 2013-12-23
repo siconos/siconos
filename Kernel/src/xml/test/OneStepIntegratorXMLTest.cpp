@@ -56,7 +56,7 @@ void OneStepIntegratorXMLTest::testNbOneStepIntegrator()
 
 void OneStepIntegratorXMLTest::testGetR()
 {
-  // integrator 0 is a Moreau and doesn't have a attribute r !
+  // integrator 0 is a MoreauJeanOSI and doesn't have a attribute r !
   //  CPPUNIT_ASSERT_MESSAGE("testGetR : OneStepIntegator 1", oneStepIs[0]->getR() == 55);
   CPPUNIT_ASSERT_MESSAGE("testGetR : OneStepIntegator 2", oneStepIs[1]->getR() == 0);
   CPPUNIT_ASSERT_MESSAGE("testGetR : OneStepIntegator 3", oneStepIs[2]->getR() == -55);
@@ -83,7 +83,7 @@ void OneStepIntegratorXMLTest::testGetDSConcerned()
 
 void OneStepIntegratorXMLTest::testGetType()
 {
-  CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 1 : Moreau ", oneStepIs[0]->getType() == "Moreau");
+  CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 1 : MoreauJeanOSI ", oneStepIs[0]->getType() == "MoreauJeanOSI");
   CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 2 : Adams", oneStepIs[1]->getType() == "Adams");
   CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 3 : Lsodar", oneStepIs[2]->getType() == "LSODAR");
 
@@ -100,14 +100,14 @@ void OneStepIntegratorXMLTest::testAdamsXML()
   std::cout << "OneStepIntegratorXMLTest >>> testAdamsXML ........................... OK\n ";
 }
 
-void OneStepIntegratorXMLTest::testMoreauXML()
+void OneStepIntegratorXMLTest::testMoreauJeanOSIXML()
 {
-  MoreauXML* moreau = static_cast<MoreauXML*>(oneStepIs[0]);
+  MoreauJeanOSIXML* moreau = static_cast<MoreauJeanOSIXML*>(oneStepIs[0]);
 
-  CPPUNIT_ASSERT_MESSAGE("testMoreauXML type ", moreau->getType() == "Moreau");
-  //CPPUNIT_ASSERT_MESSAGE("testMoreauXML R", moreau->getR() == 55);
+  CPPUNIT_ASSERT_MESSAGE("testMoreauJeanOSIXML type ", moreau->getType() == "MoreauJeanOSI");
+  //CPPUNIT_ASSERT_MESSAGE("testMoreauJeanOSIXML R", moreau->getR() == 55);
 
-  std::cout << "OneStepIntegratorXMLTest >>> testMoreauXML .......................... OK\n ";
+  std::cout << "OneStepIntegratorXMLTest >>> testMoreauJeanOSIXML .......................... OK\n ";
 }
 
 void OneStepIntegratorXMLTest::testLsodarXML()

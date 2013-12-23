@@ -17,27 +17,27 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 /*! \file
-  Moreau Time-Integrator for Dynamical Systems
+  MoreauJeanOSI Time-Integrator for Dynamical Systems
 */
 
 #ifndef MOREAU2_H
 #define MOREAU2_H
 
-#include "Moreau.hpp"
+#include "MoreauJeanOSI.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "FirstOrderLinearDS.hpp"
 
 
-/**  Moreau Time-Integrator for Dynamical Systems
+/**  MoreauJeanOSI Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
- * See User's guide, \ref docSimuMoreauTS for details.
+ * See User's guide, \ref docSimuMoreauJeanOSITS for details.
  *
- * Moreau class is used to define some time-integrators methods for a list of dynamical systems.
+ * MoreauJeanOSI class is used to define some time-integrators methods for a list of dynamical systems.
  * Each DynamicalSystem is associated to a SiconosMatrix, named "W", and a double, "theta", through two
  * STL maps:
  * - WMap, with WMap[ds] = a pointer to a SiconosMatrix
@@ -53,17 +53,17 @@
  * - updateState():
  *
  */
-class Moreau2 : public Moreau
+class MoreauJeanOSI2 : public MoreauJeanOSI
 {
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(Moreau2);
+  ACCEPT_SERIALIZATION(MoreauJeanOSI2);
 
 
   /** Default constructor
    */
-  Moreau2() {};
+  MoreauJeanOSI2() {};
 
 public:
 
@@ -71,9 +71,9 @@ public:
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
    */
-  Moreau2(SP::DynamicalSystem, double);
+  MoreauJeanOSI2(SP::DynamicalSystem, double);
 
-  ~Moreau2();
+  ~MoreauJeanOSI2();
 
   //  SP::SiconosVector  getFfree(FirstOrderLinearDS *d);
 

@@ -30,7 +30,7 @@
 #include "SiconosModelXML.hpp"
 
 #include "AdamsXML.hpp"
-#include "MoreauXML.hpp"
+#include "MoreauJeanOSIXML.hpp"
 #include "LsodarXML.hpp"
 
 using namespace std;
@@ -59,7 +59,7 @@ private:
   CPPUNIT_TEST(testGetDSConcerned);
   CPPUNIT_TEST(testGetType);
   CPPUNIT_TEST(testAdamsXML);
-  CPPUNIT_TEST(testMoreauXML);
+  CPPUNIT_TEST(testMoreauJeanOSIXML);
   CPPUNIT_TEST(testLsodarXML);
   // exceptions
   //CPPUNIT_TEST_EXCEPTION(testGetStringAttributeValueException, XMLException);
@@ -75,7 +75,7 @@ private:
   void testGetDSConcerned();
   void testGetType();
   void testAdamsXML();
-  void testMoreauXML();
+  void testMoreauJeanOSIXML();
   void testLsodarXML();
 
 

@@ -20,7 +20,7 @@
 
 // =============================== Robot arm sample  ===============================
 //
-// Keywords: LagrangianDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// Keywords: LagrangianDS, LagrangianLinear relation, MoreauJeanOSI TimeStepping, LCP.
 //
 // =============================================================================================
 

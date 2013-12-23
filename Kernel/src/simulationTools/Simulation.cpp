@@ -29,7 +29,7 @@
 #include "LagrangianDS.hpp"
 
 // One Step Integrators
-#include "Moreau.hpp"
+#include "MoreauJeanOSI.hpp"
 #include "Lsodar.hpp"
 #include "Hem5.hpp"
 #include "NewMarkAlphaOSI.hpp"
@@ -95,9 +95,9 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
   for (it = OSIXMLList.begin(); it != OSIXMLList.end(); ++it)
   {
     typeOfOSI = (*it)->getType();
-    // if OSI is a Moreau
+    // if OSI is a MoreauJeanOSI
     if (typeOfOSI == MOREAU_TAG)
-      _allOSI->insert(SP::Moreau(new Moreau(*it, dsList)));
+      _allOSI->insert(SP::MoreauJeanOSI(new MoreauJeanOSI(*it, dsList)));
 
     else if (typeOfOSI == LSODAR_TAG) // if OSI is a Lsodar-type
       _allOSI->insert(SP::Lsodar(new Lsodar(*it, dsList)));
@@ -412,7 +412,7 @@ void Simulation::saveSimulationToXML()
     {
       typeOSI = (*it)->getType();
       if (typeOSI == OSI::MOREAU)
-        (std11::static_pointer_cast<Moreau>(*it))->saveIntegratorToXML();
+        (std11::static_pointer_cast<MoreauJeanOSI>(*it))->saveIntegratorToXML();
       else if (typeOSI == OSI::LSODAR)
         (std11::static_pointer_cast<Lsodar>(*it))->saveIntegratorToXML();
       else RuntimeException::selfThrow("Simulation::saveSimulationToXML - wrong type of OneStepIntegrator");
@@ -510,7 +510,7 @@ void Simulation::processEvents()
 // class NonSmoothLaw;
 // class DynamicalSystem;
 // class OneStepIntegrator;
-// class Moreau;
+// class MoreauJeanOSI;
 
 struct Simulation::SetupLevels : public SiconosVisitor
 {
@@ -527,7 +527,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _nonSmoothLaw = inter->nonSmoothLaw();
   };
 
-  void visit(const Moreau&)
+  void visit(const MoreauJeanOSI&)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
     unsigned int upperLevelForOutput = 0;
@@ -589,7 +589,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
 
 
-  void visit(const MoreauProjectOnConstraintsOSI& moreauCPOSI)
+  void visit(const MoreauJeanDirectProjectionOSI& moreauCPOSI)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
     unsigned int upperLevelForOutput = 0;
@@ -610,10 +610,10 @@ struct Simulation::SetupLevels : public SiconosVisitor
       }
       else
       {
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauCombinedProjectionOSI) - unknown simulation type: " + Type::name(*_parent));
+        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauJeanCombinedProjectionOSI) - unknown simulation type: " + Type::name(*_parent));
       }
     }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauCombinedProjectionOSI) - not yet implemented for Dynamical system type :" + dsType);
+    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauJeanCombinedProjectionOSI) - not yet implemented for Dynamical system type :" + dsType);
 
     _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
@@ -630,7 +630,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
   };
 
 
-  void visit(const MoreauCombinedProjectionOSI& moreauCPOSI)
+  void visit(const MoreauJeanCombinedProjectionOSI& moreauCPOSI)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
     unsigned int upperLevelForOutput = 0;
@@ -658,10 +658,10 @@ struct Simulation::SetupLevels : public SiconosVisitor
       }
       else
       {
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauCombinedProjectionOSI) - unknown simulation type: " + Type::name(*_parent));
+        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauJeanCombinedProjectionOSI) - unknown simulation type: " + Type::name(*_parent));
       }
     }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauCombinedProjectionOSI) - not yet implemented for Dynamical system type :" + dsType);
+    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauJeanCombinedProjectionOSI) - not yet implemented for Dynamical system type :" + dsType);
 
     _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);

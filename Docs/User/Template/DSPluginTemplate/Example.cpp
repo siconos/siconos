@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     // ------------------
 
     double h = 0.005;                // default time step
-    double theta = 0.5;              // theta for Moreau integrator
+    double theta = 0.5;              // theta for MoreauJeanOSI integrator
 
 
     // -- Time discretisation --
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     TimeStepping* s = new TimeStepping(t);
 
     // -- OneStepIntegrators --
-    Moreau * OSI = new Moreau(allDS, theta, s);
+    MoreauJeanOSI * OSI = new MoreauJeanOSI(allDS, theta, s);
 
     // -- OneStepNsProblem: the way the LCP or MLCP is solved
 

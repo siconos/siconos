@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     double theta = 0.5;
     double gamma = 0.5;
 
-    SP::Moreau aOSI(new Moreau(LSDiodeBridge, theta, gamma));
+    SP::MoreauJeanOSI aOSI(new MoreauJeanOSI(LSDiodeBridge, theta, gamma));
     aOSI->setUseGammaForRelation(true);
     // -- (2) Time discretisation --
     SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));

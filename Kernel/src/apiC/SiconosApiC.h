@@ -82,7 +82,7 @@ EXTERN int sicTimeDiscretisation(double h);
 
 EXTERN int sicSimulationTimeStepping(int idTime);
 
-EXTERN int sicOneStepIntegratorMoreau(double *theta);
+EXTERN int sicOneStepIntegratorMoreauJeanOSI(double *theta);
 
 EXTERN int sicOneStepNSProblemLCP(char* solverName, int maxiter, double tolerance);
 

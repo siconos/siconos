@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
     double velocity_init = 2.0;      // initial velocity for lowest bead.
     double omega_initx = 0.0;
     double omega_initz = 0.0;// initial velocity for lowest bead.
-    double theta = 0.5;              // theta for Moreau integrator
+    double theta = 0.5;              // theta for MoreauJeanOSI integrator
     double m = 1; // Ball mass
     double g = 9.81; // Gravity
     double radius = 0.1;
@@ -191,9 +191,9 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
 #ifdef WITH_PROJ
-    SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(ball, theta));
+    SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(ball, theta));
 #else
-    SP::Moreau OSI(new Moreau(ball, theta));
+    SP::MoreauJeanOSI OSI(new MoreauJeanOSI(ball, theta));
 #endif
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

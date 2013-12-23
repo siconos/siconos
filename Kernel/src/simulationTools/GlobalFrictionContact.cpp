@@ -25,7 +25,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Relation.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-#include "Moreau.hpp" // Numerics Header
+#include "MoreauJeanOSI.hpp" // Numerics Header
 #include "LagrangianDS.hpp"
 #include "NewtonImpactNSL.hpp"
 
@@ -170,7 +170,7 @@ void GlobalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
   osiType = Osi->getType();
   if (osiType == MOREAU || osiType == MOREAU2)
   {
-    DSBlocks[DS] = (std11::static_pointer_cast<Moreau> (Osi))->W(DS); // get its W matrix ( pointer link!)
+    DSBlocks[DS] = (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->W(DS); // get its W matrix ( pointer link!)
     //       std::cout << "GlobalFrictionContact::computeDSBlock(SP::DynamicalSystem DS) " <<std::endl;
     //       DSBlocks[DS]->display();
   }

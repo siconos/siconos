@@ -46,7 +46,7 @@ int withLevel(unsigned int mylevel)
     double h = 0.0005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
-    double theta = 0.5;              // theta for Moreau integrator
+    double theta = 0.5;              // theta for MoreauJeanOSI integrator
     double R = 0.1; // Ball radius
     double m = 1; // Ball mass
     double g = 9.81; // Gravity
@@ -143,7 +143,7 @@ int withLevel(unsigned int mylevel)
     // --------------------------------------
     SP::Model columnOfBeads(new Model(t0, T));
     // --  (1) OneStepIntegrators --
-    SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(theta));
+    SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(theta));
     // add the dynamical system in the non smooth dynamical system
     for (unsigned int i = 0; i < nBeads; i++)
     {

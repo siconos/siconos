@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     //1. Time discretization
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(TimeInitial, StepSize));
     //2. Integration solver for one step
-    SP::OneStepIntegrator OSI(new MoreauCombinedProjectionOSI(RockingBlock, 0.50001));
+    SP::OneStepIntegrator OSI(new MoreauJeanCombinedProjectionOSI(RockingBlock, 0.50001));
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem impact_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));

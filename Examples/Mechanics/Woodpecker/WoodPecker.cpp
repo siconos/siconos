@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     double t0 = 0;                    // initial computation time
     double T = 0.3;                   // final computation time
     double h = 0.00002;               // time step
-    double theta = 0.5;               // theta for Moreau integrator;
+    double theta = 0.5;               // theta for MoreauJeanOSI integrator;
 
     // -------------------------
     // --- Dynamical systems ---
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    SP::OneStepIntegrator vOSI(new Moreau(dynamicalSystem, theta));
+    SP::OneStepIntegrator vOSI(new MoreauJeanOSI(dynamicalSystem, theta));
     s->insertIntegrator(vOSI);
 
 

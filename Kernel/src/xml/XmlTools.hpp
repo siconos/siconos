@@ -32,7 +32,7 @@ Note that not all files from the current location are listed below, since some o
 #include "FrictionContactXML.hpp"
 #include "QPXML.hpp"
 
-#include "MoreauXML.hpp"
+#include "MoreauJeanOSIXML.hpp"
 #include "LsodarXML.hpp"
 
 #include "LinearRXML.hpp"

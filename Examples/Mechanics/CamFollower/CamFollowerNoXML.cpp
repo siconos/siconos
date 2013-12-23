@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     double h = 0.0001;                // time step
     double position_init = 0.;//;40;      // initial position for lowest bead.
     double velocity_init = 0.;//4;      // initial velocity for lowest bead.
-    double theta = 0.5;              // theta for Moreau integrator
+    double theta = 0.5;              // theta for MoreauJeanOSI integrator
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- OneStepIntegrator --
-    SP::OneStepIntegrator OSI(new Moreau(lds, theta));
+    SP::OneStepIntegrator OSI(new MoreauJeanOSI(lds, theta));
 
     // -- OneStepNsProblem --
     SP::OneStepNSProblem osnspb(new LCP(SICONOS_LCP_QP));

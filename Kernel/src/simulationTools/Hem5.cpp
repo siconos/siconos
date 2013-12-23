@@ -848,7 +848,7 @@ void Hem5::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneSt
   SP::BlockVector Xfree;
 
 
-  // All of these values should be stored in the node corrseponding to the Interactionwhen a Moreau scheme is used.
+  // All of these values should be stored in the node corrseponding to the Interactionwhen a MoreauJeanOSI scheme is used.
   Yp = inter->yp();
 
   /* V.A. 10/10/2010

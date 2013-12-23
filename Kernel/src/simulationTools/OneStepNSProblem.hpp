@@ -364,7 +364,7 @@ public:
   virtual void saveNSProblemToXML() = 0;
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
-      (Ex: for Moreau, W)
+      (Ex: for MoreauJeanOSI, W)
       \param[in] SP::DynamicalSystem, the concerned dynamical system
       \param[in,out] SP::SicnosMatrix the required matrix (pointer, no need
       to allocate block before call).

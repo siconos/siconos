@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(td));
     // -- OneStepIntegrators --
     double theta = 0.5;
-    SP::Moreau myIntegrator(new Moreau(theta));
+    SP::MoreauJeanOSI myIntegrator(new MoreauJeanOSI(theta));
     myIntegrator->insertDynamicalSystem(process);
     s->insertIntegrator(myIntegrator);
 

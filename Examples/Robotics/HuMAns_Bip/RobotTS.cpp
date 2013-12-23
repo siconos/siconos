@@ -1,7 +1,7 @@
 
 // =============================== Robot sample (Bip) ===============================
 //
-// Keywords: LagrangianDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// Keywords: LagrangianDS, LagrangianLinear relation, MoreauJeanOSI TimeStepping, LCP.
 //
 // =============================================================================================
 
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    SP::OneStepIntegrator OSI(new Moreau(bip, 0.500001));
+    SP::OneStepIntegrator OSI(new MoreauJeanOSI(bip, 0.500001));
     s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --

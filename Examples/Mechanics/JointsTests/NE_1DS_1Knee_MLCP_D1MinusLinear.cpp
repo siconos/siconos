@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     double L1 = 1.0;
     double L2 = 1.0;
     double L3 = 1.0;
-    double theta = 1.0;              // theta for Moreau integrator
+    double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double g = 9.81; // Gravity
     double m = 1.;
 

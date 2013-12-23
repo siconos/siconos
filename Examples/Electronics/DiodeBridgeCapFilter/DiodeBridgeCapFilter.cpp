@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     double theta = 1.0;
-    SP::Moreau aOSI(new Moreau(theta));
+    SP::MoreauJeanOSI aOSI(new MoreauJeanOSI(theta));
     aOSI->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
     aOSI->insertDynamicalSystem(LS2DiodeBridgeCapFilter);
     // -- (2) Time discretisation --

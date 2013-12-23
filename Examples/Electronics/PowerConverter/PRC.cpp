@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
     // ------------------
     // -- (1) OneStepIntegrators --
     double theta = 0.5;
-    SP::Moreau aOSI(new Moreau(LSPRC, theta));
+    SP::MoreauJeanOSI aOSI(new MoreauJeanOSI(LSPRC, theta));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));

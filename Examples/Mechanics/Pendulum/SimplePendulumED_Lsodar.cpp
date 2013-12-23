@@ -22,7 +22,7 @@
 //
 // Author: Vincent Acary
 //
-// Keywords: LagrangianDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// Keywords: LagrangianDS, LagrangianLinear relation, MoreauJeanOSI TimeStepping, LCP.
 //
 // =============================================================================================
 

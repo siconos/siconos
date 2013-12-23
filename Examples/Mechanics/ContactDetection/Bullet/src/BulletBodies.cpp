@@ -47,7 +47,7 @@ void BulletBodies::init()
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator osi;
-    osi.reset(new Moreau(0.5));
+    osi.reset(new MoreauJeanOSI(0.5));
 
     SP::btCollisionShape box(new btBoxShape(btVector3(1, 1, 1)));
     SP::BulletWeightedShape box1(new BulletWeightedShape(box, 1.0));

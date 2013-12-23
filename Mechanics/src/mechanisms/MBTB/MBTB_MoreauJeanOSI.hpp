@@ -2,11 +2,11 @@
 #define MBTB_MOREAU_H
 #include "SiconosKernel.hpp"
 /**
- * \brief This class implements a variant of the std Moreau TS
- * It inherits from Siconos::Moreau
+ * \brief This class implements a variant of the std MoreauJeanOSI TS
+ * It inherits from Siconos::MoreauJeanOSI
  * the main variants lies in the activation and desactivation of constraints
  */
-class MBTB_Moreau : public Moreau
+class MBTB_MoreauJeanOSI : public MoreauJeanOSI
 {
 public:
   double _deactivateYPosThreshold;
@@ -18,7 +18,7 @@ public:
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
    */
-  MBTB_Moreau(SP::DynamicalSystem, double);
+  MBTB_MoreauJeanOSI(SP::DynamicalSystem, double);
   
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
@@ -31,5 +31,5 @@ public:
   bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
   
 };
-TYPEDEF_SPTR(MBTB_Moreau);
+TYPEDEF_SPTR(MBTB_MoreauJeanOSI);
 #endif

@@ -29,7 +29,7 @@
 #include <SphereNEDSPlanR.hpp>
 #include <TimeStepping.hpp>
 #include <FrictionContact.hpp>
-#include <Moreau.hpp>
+#include <MoreauJeanOSI.hpp>
 #include <NewtonImpactFrictionNSL.hpp>
 
 #include <SpaceFilter.hpp>
@@ -65,7 +65,7 @@ void Spheres::init()
   double h = 0.005;                // time step
   double g = 9.81;
 
-  double theta = 0.5;              // theta for Moreau integrator
+  double theta = 0.5;              // theta for MoreauJeanOSI integrator
 
   std::string solverName = "NSGS";
 
@@ -92,7 +92,7 @@ void Spheres::init()
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator osi;
-    osi.reset(new Moreau(theta));
+    osi.reset(new MoreauJeanOSI(theta));
 
     // -- Model --
     _model.reset(new Model(t0, T));

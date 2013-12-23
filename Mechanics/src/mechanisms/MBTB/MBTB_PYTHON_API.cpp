@@ -16,7 +16,7 @@
 //#define MBTB_MOREAU_YES
 
 #ifdef MBTB_MOREAU_YES
-#include "MBTB_Moreau.hpp"
+#include "MBTB_MoreauJeanOSI.hpp"
 #endif
 
 #define MBTB_LOAD_CONTACT
@@ -453,27 +453,27 @@ void  MBTB_initSimu(double hTS, int withProj)
 
   // -- (4) Simulation setup with (1) (2) (3)
 #ifdef MBTB_MOREAU_YES
-  SP::MBTB_Moreau pOSI1; 
-  SP::MoreauCombinedProjectionOSI pOSI2;
+  SP::MBTB_MoreauJeanOSI pOSI1; 
+  SP::MoreauJeanCombinedProjectionOSI pOSI2;
   if (withProj==0 or withProj==1)
   {
-    pOSI1.reset(new MBTB_Moreau(sDS[0],0.5));
+    pOSI1.reset(new MBTB_MoreauJeanOSI(sDS[0],0.5));
     pOSI1->_deactivateYPosThreshold= sDParams[0];
     pOSI1->_deactivateYVelThreshold= sDParams[1];
     pOSI1->_activateYPosThreshold= sDParams[2];
     pOSI1->_activateYVelThreshold= sDParams[3];  
   }
 #else
-  SP::Moreau pOSI0;
-  SP::MoreauProjectOnConstraintsOSI pOSI1;
-  SP::MoreauCombinedProjectionOSI pOSI2;
+  SP::MoreauJeanOSI pOSI0;
+  SP::MoreauJeanDirectProjectionOSI pOSI1;
+  SP::MoreauJeanCombinedProjectionOSI pOSI2;
   if (withProj==0)
   {
-    pOSI0.reset(new Moreau(sDS[0],0.5));
+    pOSI0.reset(new MoreauJeanOSI(sDS[0],0.5));
   }
   else if(withProj==1)
   {
-    pOSI1.reset(new MoreauProjectOnConstraintsOSI(sDS[0],0.5));
+    pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDS[0],0.5));
     pOSI1->setDeactivateYPosThreshold(sDParams[0]);
     pOSI1->setDeactivateYVelThreshold(sDParams[1]);
     pOSI1->setActivateYPosThreshold(sDParams[2]);
@@ -482,7 +482,7 @@ void  MBTB_initSimu(double hTS, int withProj)
 #endif
   else if  (withProj==2)
   {
-    pOSI2.reset(new MoreauCombinedProjectionOSI(sDS[0],0.5));
+    pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDS[0],0.5));
   }
     
     
@@ -518,7 +518,7 @@ void  MBTB_initSimu(double hTS, int withProj)
 #ifdef MBTB_MOREAU_YES
     if (withProj==0 or withProj==1)
      {
-       pOSI1.reset(new MBTB_Moreau(sDS[numDS],0.5)); 
+       pOSI1.reset(new MBTB_MoreauJeanOSI(sDS[numDS],0.5)); 
        pOSI1->_deactivateYPosThreshold= sDParams[0];
        pOSI1->_deactivateYVelThreshold= sDParams[1];
        pOSI1->_activateYPosThreshold= sDParams[2];
@@ -528,12 +528,12 @@ void  MBTB_initSimu(double hTS, int withProj)
 #else
     if (withProj==0)
     {
-      pOSI0.reset(new Moreau(sDS[numDS],0.5)); 
+      pOSI0.reset(new MoreauJeanOSI(sDS[numDS],0.5)); 
       sSimu->insertIntegrator(pOSI0);
     }
     else if (withProj==1)
     {
-      pOSI1.reset(new MoreauProjectOnConstraintsOSI(sDS[numDS],0.5)); 
+      pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDS[numDS],0.5)); 
       pOSI1->setDeactivateYPosThreshold(sDParams[0]);
       pOSI1->setDeactivateYVelThreshold(sDParams[1]);
       pOSI1->setActivateYPosThreshold(sDParams[2]);
@@ -543,7 +543,7 @@ void  MBTB_initSimu(double hTS, int withProj)
 #endif
     else if  (withProj==2)
     {
-      pOSI2.reset(new MoreauCombinedProjectionOSI(sDS[numDS],0.5));
+      pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDS[numDS],0.5));
       sSimu->insertIntegrator(pOSI2);
     }
   }

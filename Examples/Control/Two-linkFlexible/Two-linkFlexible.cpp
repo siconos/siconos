@@ -22,7 +22,7 @@
 //
 // see modelRobot1.jpg for complete system view.
 //
-// Keywords: LagrangianDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// Keywords: LagrangianDS, LagrangianLinear relation, MoreauJeanOSI TimeStepping, LCP.
 //
 // =============================================================================================
 #include "SiconosKernel.hpp"
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    SP::OneStepIntegrator OSI(new Moreau(arm, 0.500001));
+    SP::OneStepIntegrator OSI(new MoreauJeanOSI(arm, 0.500001));
     s->insertIntegrator(OSI);
 
 

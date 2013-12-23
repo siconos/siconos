@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "MLCP2.hpp"
-#include "Moreau2.hpp"
+#include "MoreauJeanOSI2.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -131,7 +131,7 @@ void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
   const OSI::TYPES  osiType = Osi->getType();
   if (osiType == OSI::MOREAU2)
   {
-    DSBlocks[DS] = (std11::static_pointer_cast<Moreau2> (Osi))->W(DS); // get its W matrix ( pointer link!)
+    DSBlocks[DS] = (std11::static_pointer_cast<MoreauJeanOSI2> (Osi))->W(DS); // get its W matrix ( pointer link!)
     (*DSBlocks[DS]) *= -1.0;
     DSBlocks[DS]->display();
   }

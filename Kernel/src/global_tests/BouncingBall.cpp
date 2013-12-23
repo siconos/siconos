@@ -21,7 +21,7 @@
 //
 // Direct description of the model with XML input.
 //
-// Keywords: LagrangianLinearDS, LagrangianLinear relation, Moreau TimeStepping, LCP, XML.
+// Keywords: LagrangianLinearDS, LagrangianLinear relation, MoreauJeanOSI TimeStepping, LCP, XML.
 //
 // ======================================================================================================
 

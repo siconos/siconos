@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "Moreau.hpp"
-#include "MoreauXML.hpp"
+#include "MoreauJeanOSI.hpp"
+#include "MoreauJeanOSIXML.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -43,25 +43,25 @@
 
 using namespace RELATION;
 // --- xml constructor ---
-Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
+MoreauJeanOSI::MoreauJeanOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   // Note: we do not call xml constructor of OSI, but default one,
   // since we need to download _theta and DS at the same time.
 
   if (!osiXML)
-    RuntimeException::selfThrow("Moreau::xml constructor - OneStepIntegratorXML object == NULL.");
+    RuntimeException::selfThrow("MoreauJeanOSI::xml constructor - OneStepIntegratorXML object == NULL.");
 
   integratorXml = osiXML;
-  SP::MoreauXML moreauXml = std11::static_pointer_cast<MoreauXML>(osiXML);
+  SP::MoreauJeanOSIXML moreauXml = std11::static_pointer_cast<MoreauJeanOSIXML>(osiXML);
 
   // Required inputs: a list of DS and one _theta per DS.
   // No xml entries at the time for _sizeMem and W.
 
   if (!osiXML->hasDSList())
-    RuntimeException::selfThrow("Moreau::xml constructor - DS list is missing in xml input file.");
+    RuntimeException::selfThrow("MoreauJeanOSI::xml constructor - DS list is missing in xml input file.");
   if (!moreauXml->hasThetaList())
-    RuntimeException::selfThrow("Moreau::xml constructor - theta list is missing in xml input file.");
+    RuntimeException::selfThrow("MoreauJeanOSI::xml constructor - theta list is missing in xml input file.");
 
   std::vector<double> thetaXml;     // list of theta values
   // thetaXml[i] will correspond to the ds number i in the xml list. If "all" attribute is true in ds,
@@ -85,7 +85,7 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
       else
       {
         // should not happen
-        RuntimeException::selfThrow("Multiples theta values for Moreau integrator are not valid anymore : use several Moreau instantiation instead.");
+        RuntimeException::selfThrow("Multiples theta values for MoreauJeanOSI integrator are not valid anymore : use several MoreauJeanOSI instantiation instead.");
       }
     }
   }
@@ -107,17 +107,17 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
         _theta = thetaXml[0];
       else
       {
-        RuntimeException::selfThrow("Multiples theta values for Moreau integrator are not valid anymore : use several Moreau instantiation instead.");
+        RuntimeException::selfThrow("Multiples theta values for MoreauJeanOSI integrator are not valid anymore : use several MoreauJeanOSI instantiation instead.");
       }
     }
   }
   // W loading: not yet implemented
   if (moreauXml->hasWList())
-    RuntimeException::selfThrow("Moreau::xml constructor - W matrix loading not yet implemented.");
+    RuntimeException::selfThrow("MoreauJeanOSI::xml constructor - W matrix loading not yet implemented.");
 }
 
 // --- constructor from a minimum set of data ---
-Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta) :
+MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem newDS, double newTheta) :
   OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
@@ -125,14 +125,14 @@ Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta) :
 }
 
 // --- constructor with theta parameter value  ---
-Moreau::Moreau(double newTheta):
+MoreauJeanOSI::MoreauJeanOSI(double newTheta):
   OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   _theta = newTheta;
 }
 
 // --- constructor from a minimum set of data ---
-Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
+MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
   OneStepIntegrator(OSI::MOREAU), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
@@ -142,7 +142,7 @@ Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
 }
 
 // --- constructor from a set of data ---
-Moreau::Moreau(double newTheta, double newGamma):
+MoreauJeanOSI::MoreauJeanOSI(double newTheta, double newGamma):
   OneStepIntegrator(OSI::MOREAU), _useGammaForRelation(false)
 {
   _theta = newTheta;
@@ -152,50 +152,50 @@ Moreau::Moreau(double newTheta, double newGamma):
 
 
 // Note: OSIDynamicalSystems and thetaMap must disappear
-void Moreau::insertDynamicalSystem(SP::DynamicalSystem ds)
+void MoreauJeanOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   OSIDynamicalSystems->insert(ds);
 }
-const SimpleMatrix Moreau::getW(SP::DynamicalSystem ds)
+const SimpleMatrix MoreauJeanOSI::getW(SP::DynamicalSystem ds)
 {
   int dsN = ds->number();
   assert(ds &&
-         "Moreau::getW(ds): ds == NULL.");
+         "MoreauJeanOSI::getW(ds): ds == NULL.");
   //    return *(WMap[0]);
   assert(WMap[dsN] &&
-         "Moreau::getW(ds): W[ds] == NULL.");
+         "MoreauJeanOSI::getW(ds): W[ds] == NULL.");
   return *(WMap[dsN]); // Copy !!
 }
 
-SP::SimpleMatrix Moreau::W(SP::DynamicalSystem ds)
+SP::SimpleMatrix MoreauJeanOSI::W(SP::DynamicalSystem ds)
 {
-  assert(ds && "Moreau::W(ds): ds == NULL.");
+  assert(ds && "MoreauJeanOSI::W(ds): ds == NULL.");
   //  return WMap[0];
   //  if(WMap[ds]==NULL)
-  //    RuntimeException::selfThrow("Moreau::W(ds): W[ds] == NULL.");
+  //    RuntimeException::selfThrow("MoreauJeanOSI::W(ds): W[ds] == NULL.");
   return WMap[ds->number()];
 }
 
-void Moreau::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
+void MoreauJeanOSI::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
 {
   // Check if ds is in the OSI
   if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("Moreau::setW(newVal,ds) - ds does not belong to this Integrator ...");
+    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal,ds) - ds does not belong to this Integrator ...");
 
   // Check dimensions consistency
   unsigned int line = newValue.size(0);
   unsigned int col  = newValue.size(1);
 
   if (line != col) // Check that newValue is square
-    RuntimeException::selfThrow("Moreau::setW(newVal,ds) - newVal is not square! ");
+    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal,ds) - newVal is not square! ");
 
   if (!ds)
-    RuntimeException::selfThrow("Moreau::setW(newVal,ds) - ds == NULL.");
+    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal,ds) - ds == NULL.");
 
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
   unsigned int dsN = ds->number();
   if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("Moreau::setW(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
+    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
 
   // Memory allocation for W, if required
   if (!WMap[dsN]) // allocate a new W if required
@@ -207,51 +207,51 @@ void Moreau::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
     if (line == WMap[dsN]->size(0) && col == WMap[dsN]->size(1))
       *(WMap[dsN]) = newValue;
     else
-      RuntimeException::selfThrow("Moreau - setW: inconsistent dimensions with problem size for given input matrix W");
+      RuntimeException::selfThrow("MoreauJeanOSI - setW: inconsistent dimensions with problem size for given input matrix W");
   }
 }
 
-void Moreau::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
+void MoreauJeanOSI::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
 {
   unsigned int line = newPtr->size(0);
   unsigned int col  = newPtr->size(1);
   if (line != col) // Check that newPtr is square
-    RuntimeException::selfThrow("Moreau::setWPtr(newVal) - newVal is not square! ");
+    RuntimeException::selfThrow("MoreauJeanOSI::setWPtr(newVal) - newVal is not square! ");
 
   if (!ds)
-    RuntimeException::selfThrow("Moreau::setWPtr(newVal,ds) - ds == NULL.");
+    RuntimeException::selfThrow("MoreauJeanOSI::setWPtr(newVal,ds) - ds == NULL.");
 
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
   if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("Moreau::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
+    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
 
   WMap[ds->number()] = newPtr;                  // link with new pointer
 }
 
 
 
-const SimpleMatrix Moreau::getWBoundaryConditions(SP::DynamicalSystem ds)
+const SimpleMatrix MoreauJeanOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "Moreau::getWBoundaryConditions(ds): ds == NULL.");
+         "MoreauJeanOSI::getWBoundaryConditions(ds): ds == NULL.");
   //    return *(WBoundaryConditionsMap[0]);
   unsigned int dsN = ds->number();
   assert(_WBoundaryConditionsMap[dsN] &&
-         "Moreau::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
+         "MoreauJeanOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
   return *(_WBoundaryConditionsMap[dsN]); // Copy !!
 }
 
-SP::SiconosMatrix Moreau::WBoundaryConditions(SP::DynamicalSystem ds)
+SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 {
-  assert(ds && "Moreau::WBoundaryConditions(ds): ds == NULL.");
+  assert(ds && "MoreauJeanOSI::WBoundaryConditions(ds): ds == NULL.");
   //  return WBoundaryConditionsMap[0];
   //  if(WBoundaryConditionsMap[ds]==NULL)
-  //    RuntimeException::selfThrow("Moreau::WBoundaryConditions(ds): W[ds] == NULL.");
+  //    RuntimeException::selfThrow("MoreauJeanOSI::WBoundaryConditions(ds): W[ds] == NULL.");
   return _WBoundaryConditionsMap[ds->number()];
 }
 
 
-void Moreau::initialize()
+void MoreauJeanOSI::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
@@ -270,20 +270,20 @@ void Moreau::initialize()
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
   }
 }
-void Moreau::initW(double t, SP::DynamicalSystem ds)
+void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
 {
   // This function:
   // - allocate memory for a matrix W
   // - insert this matrix into WMap with ds as a key
 
   if (!ds)
-    RuntimeException::selfThrow("Moreau::initW(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds == NULL");
 
   if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("Moreau::initW(t,ds) - ds does not belong to the OSI.");
+    RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds does not belong to the OSI.");
   unsigned int dsN = ds->number();
   if (WMap.find(dsN) != WMap.end())
-    RuntimeException::selfThrow("Moreau::initW(t,ds) - W(ds) is already in the map and has been initialized.");
+    RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
 
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
@@ -388,7 +388,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   {
     WMap[dsN].reset(new SimpleMatrix(3, 3));
   }
-  else RuntimeException::selfThrow("Moreau::initW - not yet implemented for Dynamical system type :" + dsType);
+  else RuntimeException::selfThrow("MoreauJeanOSI::initW - not yet implemented for Dynamical system type :" + dsType);
 
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
@@ -399,17 +399,17 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
 }
 
 
-void Moreau::initWBoundaryConditions(SP::DynamicalSystem ds)
+void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
 {
   // This function:
   // - allocate memory for a matrix WBoundaryConditions
   // - insert this matrix into WBoundaryConditionsMap with ds as a key
 
   if (!ds)
-    RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - ds == NULL");
 
   if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
+    RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
 
   Type::Siconos dsType = Type::value(*ds);
   unsigned int dsN = ds->number();
@@ -419,7 +419,7 @@ void Moreau::initWBoundaryConditions(SP::DynamicalSystem ds)
 
 
     if (_WBoundaryConditionsMap.find(dsN) != _WBoundaryConditionsMap.end())
-      RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
+      RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
 
     // Memory allocation for WBoundaryConditions
     unsigned int sizeWBoundaryConditions = ds->getDim(); // n for first order systems, ndof for lagrangian.
@@ -431,11 +431,11 @@ void Moreau::initWBoundaryConditions(SP::DynamicalSystem ds)
     computeWBoundaryConditions(ds);
   }
   else
-    RuntimeException::selfThrow("Moreau::initWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
+    RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
 }
 
 
-void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
+void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 {
   // Compute WBoundaryConditions matrix of the Dynamical System ds, at
   // time t and for the current ds state.
@@ -445,14 +445,14 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
   // done during initWBoundaryConditions.
 
   assert(ds &&
-         "Moreau::computeWBoundaryConditions(t,ds) - ds == NULL");
+         "MoreauJeanOSI::computeWBoundaryConditions(t,ds) - ds == NULL");
 
   Type::Siconos dsType = Type::value(*ds);
   unsigned int dsN = ds->number();
   if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
   {
     assert((_WBoundaryConditionsMap.find(dsN) != _WBoundaryConditionsMap.end()) &&
-           "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
+           "MoreauJeanOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
     SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[dsN];
 
@@ -485,11 +485,11 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
     }
   }
   else
-    RuntimeException::selfThrow("Moreau::computeWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
+    RuntimeException::selfThrow("MoreauJeanOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
 }
 
 
-void Moreau::computeW(double t, SP::DynamicalSystem ds)
+void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
 
@@ -497,10 +497,10 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   // Memory allocation has been done during initW.
 
   assert(ds &&
-         "Moreau::computeW(t,ds) - ds == NULL");
+         "MoreauJeanOSI::computeW(t,ds) - ds == NULL");
   unsigned int dsN = ds->number();
   assert((WMap.find(dsN) != WMap.end()) &&
-         "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
+         "MoreauJeanOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
   double h = simulationLink->timeStep();
   Type::Siconos dsType = Type::value(*ds);
@@ -574,12 +574,12 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
     scal(h * thetaFL, *(d->jacobianvFL()), *(d->luW()), true);
     *(d->luW()) += *(d->mass());
 
-    //cout<<"Moreau::computeW luW before LUFact\n";
+    //cout<<"MoreauJeanOSI::computeW luW before LUFact\n";
     //d->luW()->display();
 
     d->luW()->PLUFactorizationInPlace();
   }
-  else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + dsType);
+  else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
 
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
@@ -587,10 +587,10 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
 
 
 
-double Moreau::computeResidu()
+double MoreauJeanOSI::computeResidu()
 {
-  DEBUG_PRINT("Moreau::computeResidu(), start\n");
-  // This function is used to compute the residu for each "Moreau-discretized" dynamical system.
+  DEBUG_PRINT("MoreauJeanOSI::computeResidu(), start\n");
+  // This function is used to compute the residu for each "MoreauJeanOSI-discretized" dynamical system.
   // It then computes the norm of each of them and finally return the maximum
   // value for those norms.
   //
@@ -646,9 +646,9 @@ double Moreau::computeResidu()
 
       *residuFree = *x;
       *residuFree -= *xold;
-      //       std::cout<<"Moreau: x"<<endl;
+      //       std::cout<<"MoreauJeanOSI: x"<<endl;
       //       (x)->display();
-      //       std::cout<<"Moreau: xold"<<endl;
+      //       std::cout<<"MoreauJeanOSI: xold"<<endl;
       //       (xold)->display();
 
 
@@ -673,29 +673,29 @@ double Moreau::computeResidu()
           // residuFree += coef * f_i
           scal(coef, *d->fold(), *residuFree, false);
         }
-        //          std::cout<<"Moreau: fold"<<endl;
+        //          std::cout<<"MoreauJeanOSI: fold"<<endl;
         //          (*d->fold()).display();
         // computes f(ti+1, x_k,i+1) = f(t,x)
         d->computef(t);
         coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
-        //          std::cout<<"Moreau: f"<<endl;
+        //          std::cout<<"MoreauJeanOSI: f"<<endl;
         //          (*d->f()).display();
         scal(coef, *d->f(), *residuFree, false);
       }
-      //      std::cout<<"Moreau: residu free"<<endl;
+      //      std::cout<<"MoreauJeanOSI: residu free"<<endl;
       //      (*residuFree).display();
       (*(d->workspace(DynamicalSystem::free))) = *residuFree;
       scal(-h, *d->r(), (*d->workspace(DynamicalSystem::free)), false); // residu = residu - h*r
       normResidu = d->workspace(DynamicalSystem::free)->norm2();
-      //    std::cout<<"Moreau: residu "<<endl;
+      //    std::cout<<"MoreauJeanOSI: residu "<<endl;
       //    (workX[d])->display();
-      //    std::cout<<"Moreau: norm residu :"<<normResidu<<endl;
+      //    std::cout<<"MoreauJeanOSI: norm residu :"<<normResidu<<endl;
 
 
       //(*d->residur())=(*d->r()) -(*d->gAlpha());
 
-      //      std::cout<<"Moreau Type::FirstOrderNonLinearDS: residu r"<<endl;
+      //      std::cout<<"MoreauJeanOSI Type::FirstOrderNonLinearDS: residu r"<<endl;
       //      (*d->residur()).display();
     }
     // 2 - First Order Linear Systems with Time Invariant coefficients
@@ -715,7 +715,7 @@ double Moreau::computeResidu()
       // x value at told
       SP::SiconosVector xBuffer = d->workspace(DynamicalSystem::local_buffer);
       *xBuffer = *(d->xMemory()->getSiconosVector(0));
-      //    std::cout<<"Moreau TIDS::computeResidu: x_k"<<endl;
+      //    std::cout<<"MoreauJeanOSI TIDS::computeResidu: x_k"<<endl;
       //    xBuffer->display();
 
       SP::SiconosMatrix A = d->A();
@@ -731,7 +731,7 @@ double Moreau::computeResidu()
     // 3 - Lagrangian Non Linear Systems
     else if (dsType == Type::LagrangianDS)
     {
-      DEBUG_PRINT("Moreau::computeResidu(), dsType == Type::LagrangianDS");
+      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), dsType == Type::LagrangianDS");
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
@@ -807,21 +807,21 @@ double Moreau::computeResidu()
       }
 
       *(d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
-      //       std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
+      //       std::cout << "MoreauJeanOSI::ComputeResidu LagrangianDS residufree :"  << std::endl;
       //      residuFree->display();
 
       DEBUG_EXPR(d->workspace(DynamicalSystem::free)->display());
 
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
-      //       std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
+      //       std::cout << "MoreauJeanOSI::ComputeResidu LagrangianDS residu :"  << std::endl;
       //      d->workspace(DynamicalSystem::free)->display();
       normResidu = d->workspace(DynamicalSystem::free)->norm2();
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
     {
-      DEBUG_PRINT("Moreau::computeResidu(), dsType == Type::LagrangianLinearTIDS");
+      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), dsType == Type::LagrangianLinearTIDS");
       // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
       // This formulae is only valid for the first computation of the residual for v = v_i
       // otherwise the complete formulae must be applied, that is
@@ -836,15 +836,15 @@ double Moreau::computeResidu()
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
-      DEBUG_PRINT("Moreau::computeResidu(), qold :");
+      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), qold :");
 #ifdef DEBUG_MESSAGES
       qold->display();
 #endif
-      DEBUG_PRINT("Moreau::computeResidu(), vold :");
+      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), vold :");
 #ifdef DEBUG_MESSAGES
       vold->display();
 #endif
-      DEBUG_PRINT("Moreau::computeResidu(), q :");
+      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), q :");
 #ifdef DEBUG_MESSAGES
       d->q()->display();
 #endif
@@ -946,21 +946,21 @@ double Moreau::computeResidu()
       }
 
 
-      //        std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
+      //        std::cout << "MoreauJeanOSI::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
       //       residuFree->display();
 
-      //        std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresiduFree :"  << std::endl;
+      //        std::cout << "MoreauJeanOSI::ComputeResidu LagrangianLinearTIDS realresiduFree :"  << std::endl;
       //       realresiduFree->display();
 
       (* d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
 
-      //      std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
+      //      std::cout << "MoreauJeanOSI::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       //      d->workspace(DynamicalSystem::free)->display();
 
       //      *realresiduFree-= *d->p(1);
-      //       std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresidu :"  << std::endl;
+      //       std::cout << "MoreauJeanOSI::ComputeResidu LagrangianLinearTIDS realresidu :"  << std::endl;
       //      realresiduFree->display();
 
 
@@ -1001,14 +1001,14 @@ double Moreau::computeResidu()
         scal(coef, *d->forces(), *residuFree, false);
       }
       *(d->workspace(DynamicalSystem::free)) = *residuFree;
-      //cout<<"Moreau::computeResidu :\n";
+      //cout<<"MoreauJeanOSI::computeResidu :\n";
       // residuFree->display();
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1);
       normResidu = d->workspace(DynamicalSystem::free)->norm2();
     }
     else
-      RuntimeException::selfThrow("Moreau::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("MoreauJeanOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
     if (normResidu > maxResidu) maxResidu = normResidu;
 
@@ -1016,7 +1016,7 @@ double Moreau::computeResidu()
   return maxResidu;
 }
 
-void Moreau::computeFreeState()
+void MoreauJeanOSI::computeFreeState()
 {
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
@@ -1035,13 +1035,13 @@ void Moreau::computeFreeState()
   DSIterator it; // Iterator through the set of DS.
 
   SP::DynamicalSystem ds; // Current Dynamical System.
-  SP::SiconosMatrix W; // W Moreau matrix of the current DS.
+  SP::SiconosMatrix W; // W MoreauJeanOSI matrix of the current DS.
   Type::Siconos dsType ; // Type of the current DS.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds->number()]; // Its W Moreau matrix of iteration.
+    W = WMap[ds->number()]; // Its W MoreauJeanOSI matrix of iteration.
 
     // 1 - First Order Non Linear Systems
     if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
@@ -1247,10 +1247,10 @@ void Moreau::computeFreeState()
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
-      //    std::cout<<"Moreau::computeFreeState residu free"<<endl;
+      //    std::cout<<"MoreauJeanOSI::computeFreeState residu free"<<endl;
       //    vfree->display();
       d->luW()->PLUForwardBackwardInPlace(*vfree);
-      //    std::cout<<"Moreau::computeFreeState -WRfree"<<endl;
+      //    std::cout<<"MoreauJeanOSI::computeFreeState -WRfree"<<endl;
       //    vfree->display();
       //    scal(h,*vfree,*vfree);
       // -> compute real vfree
@@ -1258,12 +1258,12 @@ void Moreau::computeFreeState()
       *vfree += *v;
     }
     else
-      RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("MoreauJeanOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
   }
 
 }
 
-void Moreau::prepareNewtonIteration(double time)
+void MoreauJeanOSI::prepareNewtonIteration(double time)
 {
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
@@ -1273,7 +1273,7 @@ void Moreau::prepareNewtonIteration(double time)
 }
 
 
-struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
+struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
@@ -1314,7 +1314,7 @@ struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void Moreau::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
+void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
@@ -1352,7 +1352,7 @@ void Moreau::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, One
 
   /** \todo VA. All of these values should be stored in a node in the interactionGraph
    * corrseponding to the Interaction
-   * when a Moreau scheme is used.
+   * when a MoreauJeanOSI scheme is used.
    */
 
   Xq = inter->dataXq();
@@ -1407,7 +1407,7 @@ void Moreau::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, One
 
     if (_useGammaForRelation)
     {
-      RuntimeException::selfThrow("Moreau::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
+      RuntimeException::selfThrow("MoreauJeanOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
     }
     H_alpha = inter->Halpha();
     assert(H_alpha);
@@ -1439,7 +1439,7 @@ void Moreau::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, One
 
     if (_useGammaForRelation)
     {
-      RuntimeException::selfThrow("Moreau::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
+      RuntimeException::selfThrow("MoreauJeanOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
     }
     H_alpha = inter->Halpha();
     assert(H_alpha);
@@ -1513,7 +1513,7 @@ void Moreau::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, One
           subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
         }
         else
-          RuntimeException::selfThrow("Moreau::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
+          RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
       }
       // For the relation of type LagrangianScleronomousR
       if (relationSubType == ScleronomousR)
@@ -1558,9 +1558,9 @@ void Moreau::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, One
 
 
 }
-void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
+void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int&)
 {
-  // Last parameter is not used (required for Lsodar but not for Moreau).
+  // Last parameter is not used (required for Lsodar but not for MoreauJeanOSI).
 
   double h = tend - tinit;
   tout = tend;
@@ -1623,14 +1623,14 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       W->PLUForwardBackwardInPlace(*v);
       *v += *vold;
     }
-    else RuntimeException::selfThrow("Moreau::integrate - not yet implemented for Dynamical system type :" + dsType);
+    else RuntimeException::selfThrow("MoreauJeanOSI::integrate - not yet implemented for Dynamical system type :" + dsType);
   }
 }
 
-void Moreau::updateState(const unsigned int level)
+void MoreauJeanOSI::updateState(const unsigned int level)
 {
 
-  DEBUG_PRINT("Moreau::updateState(const unsigned int level)\n");
+  DEBUG_PRINT("MoreauJeanOSI::updateState(const unsigned int level)\n");
 
   double h = simulationLink->timeStep();
 
@@ -1724,7 +1724,7 @@ void Moreau::updateState(const unsigned int level)
       {
 
         assert(((d->p(level)).get()) &&
-               " Moreau::updateState() *d->p(level) == NULL.");
+               " MoreauJeanOSI::updateState() *d->p(level) == NULL.");
         *v = *d->p(level); // v = p
         if (d->boundaryConditions())
           for (std::vector<unsigned int>::iterator
@@ -1803,15 +1803,15 @@ void Moreau::updateState(const unsigned int level)
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->velocity();
-      DEBUG_PRINT("Moreau::updateState()\n ")
+      DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
       DEBUG_EXPR(d->display());
-      DEBUG_PRINT("Moreau::updateState() prev v\n")
+      DEBUG_PRINT("MoreauJeanOSI::updateState() prev v\n")
       DEBUG_EXPR(v->display());
 
       // failure on bullet sims
       // d->p(level) is checked in next condition
       // assert(((d->p(level)).get()) &&
-      //       " Moreau::updateState() *d->p(level) == NULL.");
+      //       " MoreauJeanOSI::updateState() *d->p(level) == NULL.");
 
       if (level != LEVELMAX && d->p(level))
       {
@@ -1821,16 +1821,16 @@ void Moreau::updateState(const unsigned int level)
         d->luW()->PLUForwardBackwardInPlace(*v);
 
         DEBUG_EXPR(d->p(level)->display());
-        DEBUG_PRINT("Moreau::updatestate hWB lambda\n");
+        DEBUG_PRINT("MoreauJeanOSI::updatestate hWB lambda\n");
         DEBUG_EXPR(v->display());
         *v +=  * ds->workspace(DynamicalSystem::free);
       }
       else
         *v =  * ds->workspace(DynamicalSystem::free);
 
-      DEBUG_PRINT("Moreau::updatestate work free\n");
+      DEBUG_PRINT("MoreauJeanOSI::updatestate work free\n");
       DEBUG_EXPR(ds->workspace(DynamicalSystem::free)->display());
-      DEBUG_PRINT("Moreau::updatestate new v\n");
+      DEBUG_PRINT("MoreauJeanOSI::updatestate new v\n");
       DEBUG_EXPR(v->display());
 
       //compute q
@@ -1841,7 +1841,7 @@ void Moreau::updateState(const unsigned int level)
       SP::SiconosVector dotq = d->dotq();
       prod(*T, *v, *dotq, true);
 
-      DEBUG_PRINT("Moreau::updateState v\n");
+      DEBUG_PRINT("MoreauJeanOSI::updateState v\n");
       DEBUG_EXPR(v->display());
       DEBUG_EXPR(dotq->display());
 
@@ -1870,12 +1870,12 @@ void Moreau::updateState(const unsigned int level)
       dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
       d->updateT();
     }
-    else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dsType);
+    else RuntimeException::selfThrow("MoreauJeanOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
   }
 }
 
 
-bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   DEBUG_PRINT("addInteractionInIndexSet(SP::Interaction inter, unsigned int i)\n");
 
@@ -1889,18 +1889,18 @@ bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   {
     gamma = _gamma;
   }
-  DEBUG_PRINTF("Moreau::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.\n", i,  y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.\n", i,  y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
   assert(!isnan(y));
   DEBUG_EXPR(
     if (y <= 0)
-    DEBUG_PRINT("Moreau::addInteractionInIndexSet ACTIVATE.\n");
+    DEBUG_PRINT("MoreauJeanOSI::addInteractionInIndexSet ACTIVATE.\n");
   );
   return (y <= 0.0);
 }
 
 
-bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1);
   double h = simulationLink->timeStep();
@@ -1911,24 +1911,24 @@ bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   {
     gamma = _gamma;
   }
-  DEBUG_PRINTF("Moreau::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
   assert(!isnan(y));
 
   DEBUG_EXPR(
     if (y > 0)
-    DEBUG_PRINT("Moreau::removeInteractionInIndexSet DEACTIVATE.\n");
+    DEBUG_PRINT("MoreauJeanOSI::removeInteractionInIndexSet DEACTIVATE.\n");
   );
   return (y > 0.0);
 }
 
 
 
-void Moreau::display()
+void MoreauJeanOSI::display()
 {
   OneStepIntegrator::display();
 
-  std::cout << "====== Moreau OSI display ======" <<std::endl;
+  std::cout << "====== MoreauJeanOSI OSI display ======" <<std::endl;
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -1941,12 +1941,12 @@ void Moreau::display()
   std::cout << "================================" <<std::endl;
 }
 
-void Moreau::saveWToXML()
+void MoreauJeanOSI::saveWToXML()
 {
   //   if(integratorXml != NULL)
   //     {
-  //       (static_cast<MoreauXML*>(integratorXml))->setW(W);
+  //       (static_cast<MoreauJeanOSIXML*>(integratorXml))->setW(W);
   //     }
-  //   else RuntimeException::selfThrow("Moreau::saveIntegratorToXML - IntegratorXML object not exists");
-  RuntimeException::selfThrow("Moreau::saveWToXML -  not yet implemented.");
+  //   else RuntimeException::selfThrow("MoreauJeanOSI::saveIntegratorToXML - IntegratorXML object not exists");
+  RuntimeException::selfThrow("MoreauJeanOSI::saveWToXML -  not yet implemented.");
 }

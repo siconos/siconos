@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     double L1 = 1.0;
     double L2 = 1.0;
     double L3 = 1.0;
-    double theta = 1.0;              // theta for Moreau integrator
+    double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double g = 9.81; // Gravity
     double m = 1.;
 
@@ -309,9 +309,9 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    // SP::Moreau OSI1(new Moreau(beam1, theta));
-    // SP::Moreau OSI2(new Moreau(beam2, theta));
-    // SP::Moreau OSI3(new Moreau(beam3, theta));
+    // SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(beam1, theta));
+    // SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(beam2, theta));
+    // SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(beam3, theta));
 
     SP::D1MinusLinear OSI1(new D1MinusLinear(beam1));
     SP::D1MinusLinear OSI2(new D1MinusLinear(beam2));

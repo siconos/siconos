@@ -16,34 +16,34 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-#include "MoreauXML.hpp"
+#include "MoreauJeanOSIXML.hpp"
 
 
-MoreauXML::MoreauXML(): OneStepIntegratorXML(), thetaNode(NULL), WNode(NULL)
+MoreauJeanOSIXML::MoreauJeanOSIXML(): OneStepIntegratorXML(), thetaNode(NULL), WNode(NULL)
 {}
 
-MoreauXML::MoreauXML(xmlNode * MoreauNode):
-  OneStepIntegratorXML(MoreauNode), thetaNode(NULL), WNode(NULL)
+MoreauJeanOSIXML::MoreauJeanOSIXML(xmlNode * MoreauJeanOSINode):
+  OneStepIntegratorXML(MoreauJeanOSINode), thetaNode(NULL), WNode(NULL)
 {
   xmlNodePtr node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, "W")))
+  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauJeanOSINode, "W")))
     WNode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, "Theta")))
+  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauJeanOSINode, "Theta")))
     thetaNode = node;
 }
 
-MoreauXML::~MoreauXML()
+MoreauJeanOSIXML::~MoreauJeanOSIXML()
 {}
 
-void MoreauXML::getTheta(std::vector<double>& values) const
+void MoreauJeanOSIXML::getTheta(std::vector<double>& values) const
 {
   if (hasThetaList())
     SiconosDOMTreeTools::getVector(thetaNode, values);
   else
-    XMLException::selfThrow("MoreauXML::getTheta - No list of theta in xml tag.");
+    XMLException::selfThrow("MoreauJeanOSIXML::getTheta - No list of theta in xml tag.");
 }
 
-void MoreauXML::setTheta(const std::vector<double>& v)
+void MoreauJeanOSIXML::setTheta(const std::vector<double>& v)
 {
   XMLException::selfThrow("OneStepIntegratorXML::setTheta - not yet implemented.");
   //   if( !hasTheta()) // create the node if it does not exist
@@ -51,9 +51,9 @@ void MoreauXML::setTheta(const std::vector<double>& v)
   //   else SiconosDOMTreeTools::setSiconosVectorNodeValue(thetaNode, v);
 }
 
-double MoreauXML::getSingleTheta() const
+double MoreauJeanOSIXML::getSingleTheta() const
 {
   if (!hasAllTheta())
-    XMLException::selfThrow("MoreauXml getSingleTheta: the attribute all is not present in the tag theta");
+    XMLException::selfThrow("MoreauJeanOSIXml getSingleTheta: the attribute all is not present in the tag theta");
   return SiconosDOMTreeTools::getAttributeValue<double>(thetaNode, "all");
 }

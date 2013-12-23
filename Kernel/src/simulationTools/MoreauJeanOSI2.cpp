@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "Moreau2.hpp"
+#include "MoreauJeanOSI2.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -29,20 +29,20 @@
 using namespace RELATION;
 
 // --- constructor from a minimum set of data ---
-Moreau2::Moreau2(SP::DynamicalSystem newDS, double newTheta): Moreau(newDS, newTheta)
+MoreauJeanOSI2::MoreauJeanOSI2(SP::DynamicalSystem newDS, double newTheta): MoreauJeanOSI(newDS, newTheta)
 {
   integratorType = OSI::MOREAU2;
 }
 
-Moreau2::~Moreau2()
+MoreauJeanOSI2::~MoreauJeanOSI2()
 {
 }
 
-/*SP::SiconosVector  Moreau2::getWorkX(SP::DynamicalSystem d){
+/*SP::SiconosVector  MoreauJeanOSI2::getWorkX(SP::DynamicalSystem d){
   return workX[d];
   }*/
 
-void Moreau2::computeFreeState()
+void MoreauJeanOSI2::computeFreeState()
 {
 
   // This function computes "free" states of the DS belonging to this Integrator.
@@ -62,14 +62,14 @@ void Moreau2::computeFreeState()
   DSIterator it; // Iterator through the set of DS.
 
   SP::DynamicalSystem ds; // Current Dynamical System.
-  SP::SiconosMatrix  W; // W Moreau matrix of the current DS.
-  SP::SiconosMatrix  M; // W Moreau matrix of the current DS.
+  SP::SiconosMatrix  W; // W MoreauJeanOSI matrix of the current DS.
+  SP::SiconosMatrix  M; // W MoreauJeanOSI matrix of the current DS.
   Type::Siconos dsType ; // Type of the current DS.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds->number()]; // Its W Moreau matrix of iteration.
+    W = WMap[ds->number()]; // Its W MoreauJeanOSI matrix of iteration.
 
     if (dsType == Type::FirstOrderLinearDS)
     {
@@ -255,14 +255,14 @@ void Moreau2::computeFreeState()
 
     else
     {
-      RuntimeException::selfThrow("Moreau2::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("MoreauJeanOSI2::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
     }
   }
 }
 
 
 
-void Moreau2::updateState(const unsigned int level)
+void MoreauJeanOSI2::updateState(const unsigned int level)
 {
 
 }

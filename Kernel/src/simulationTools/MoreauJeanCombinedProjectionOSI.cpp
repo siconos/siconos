@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "MoreauCombinedProjectionOSI.hpp"
+#include "MoreauJeanCombinedProjectionOSI.hpp"
 #include "Simulation.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
@@ -31,10 +31,10 @@
 
 
 
-void MoreauCombinedProjectionOSI::initialize()
+void MoreauJeanCombinedProjectionOSI::initialize()
 {
 
-  Moreau::initialize();
+  MoreauJeanOSI::initialize();
 
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
@@ -52,7 +52,7 @@ void MoreauCombinedProjectionOSI::initialize()
     }
     else
     {
-      RuntimeException::selfThrow("MoreauCombinedProjectionOSI::initialize() - DS not of the right type");
+      RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initialize() - DS not of the right type");
     }
   }
 }
@@ -61,28 +61,28 @@ void MoreauCombinedProjectionOSI::initialize()
 
 
 
-bool MoreauCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1 || i == 2);
   //double h = simulationLink->timeStep();
   if (i == 1) // index set for resolution at the velocity
   {
     double y = (inter->y(0))->getValue(0); // y(0) is the position
-    DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet yref=%e \n", y);
+    DEBUG_PRINTF("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet yref=%e \n", y);
 #ifdef DEBUG_MESSAGES
     if (y <= 0)
-      DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
+      DEBUG_PRINTF("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
 #endif
     return (y <= 0);
   }
   else if (i == 2)  //  special index for the projection
   {
     double lambda = 0;
-    lambda = (inter->lambda(1))->getValue(0); // lambda(1) is the contact impulse for Moreau scheme
-    DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
+    lambda = (inter->lambda(1))->getValue(0); // lambda(1) is the contact impulse for MoreauJeanOSI scheme
+    DEBUG_PRINTF("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
 #ifdef DEBUG_MESSAGES
     if (lambda > 0)
-      DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
+      DEBUG_PRINTF("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
 #endif
     //    return (lambda > 0);
     return true;
@@ -91,7 +91,7 @@ bool MoreauCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter
 }
 
 
-bool MoreauCombinedProjectionOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanCombinedProjectionOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(0);
   return(0);

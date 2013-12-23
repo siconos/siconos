@@ -27,7 +27,7 @@
 // includes to be deleted thanks to factories ?
 
 #include "LsodarXML.hpp"
-#include "MoreauXML.hpp"
+#include "MoreauJeanOSIXML.hpp"
 #include "QPXML.hpp"
 #include "FrictionContactXML.hpp"
 
@@ -57,7 +57,7 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
       {
         typeOSI = (char*)OSINode->name;
         if (typeOSI == MOREAU_TAG)
-          OSIXMLSet.insert(SP::MoreauXML(new MoreauXML(OSINode)));
+          OSIXMLSet.insert(SP::MoreauJeanOSIXML(new MoreauJeanOSIXML(OSINode)));
 
         else if (typeOSI == LSODAR_TAG)
           OSIXMLSet.insert(SP::LsodarXML(new LsodarXML(OSINode)));
@@ -156,13 +156,13 @@ void SimulationXML::saveSimulation2XML(xmlNodePtr  node, SP::Simulation str)
   //      if (type == MOREAU_TAG)
   //        {
   //          node = xmlNewChild( integratorDefinitionNode, NULL, (xmlChar*)MOREAU_TAG.c_str(), NULL );
-  //          osixml = new MoreauXML();
+  //          osixml = new MoreauJeanOSIXML();
 
   //          // linkage between the OneStepIntegrator and his OneStepIntegratorXML
   //          str->getOneStepIntegrator(i)->setOneStepIntegratorXMLPtr( osixml );
 
   //          // creation of the OneStepIntegratorXML
-  //          static_cast<MoreauXML*>(osixml)->updateOneStepIntegratorXML( node, str->getOneStepIntegrator(i) );
+  //          static_cast<MoreauJeanOSIXML*>(osixml)->updateOneStepIntegratorXML( node, str->getOneStepIntegrator(i) );
 
   //          oneStepIntegratorXMLVector.push_back( osixml );
   //        }

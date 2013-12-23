@@ -48,7 +48,7 @@ int main()
   double velocity_init = 0.0;      // initial velocity
 
   double g = 9.81;
-  double theta = 0.5;              // theta for Moreau integrator
+  double theta = 0.5;              // theta for MoreauJeanOSI integrator
 
   // -----------------------------------------
   // --- Dynamical systems && interactions ---
@@ -66,7 +66,7 @@ int main()
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator osi;
-    osi.reset(new Moreau(theta));
+    osi.reset(new MoreauJeanOSI(theta));
 
     // -- Model --
     SP::Model model(new Model(t0, T));
@@ -168,7 +168,7 @@ int main()
     // -- The ground is a static object
     space_filter->addStaticObject(ground);
     space_filter->addStaticShape(groundShape);
-    // -- Moreau Time Stepping with Bullet Dynamical Systems
+    // -- MoreauJeanOSI Time Stepping with Bullet Dynamical Systems
     SP::BulletTimeStepping simulation(new BulletTimeStepping(timedisc,
                                       space_filter));
     simulation->insertIntegrator(osi);

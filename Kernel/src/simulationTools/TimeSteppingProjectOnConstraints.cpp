@@ -41,7 +41,7 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
   : TimeStepping(td, osi, osnspb_velo)
 {
 
-  //if (Type::value(osi) != Type::MoreauProjectOnConstraintsOSI)
+  //if (Type::value(osi) != Type::MoreauJeanDirectProjectionOSI)
   OSI::TYPES typeOSI;
   typeOSI = (osi)->getType();
   if (typeOSI != OSI::MOREAUPROJECTONCONSTRAINTSOSI)
@@ -231,7 +231,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 		 }
 	       );
     
-    // This part should be in MoreauProjectOnConstraintsOS::updateState(level =0)
+    // This part should be in MoreauJeanOSIProjectOnConstraintsOS::updateState(level =0)
     for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);

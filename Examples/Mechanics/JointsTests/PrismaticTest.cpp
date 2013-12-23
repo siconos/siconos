@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     double L1 = 1.0;
     double L2 = 2.0;
     double L3 = 1.0;
-    double theta = 1.0;              // theta for Moreau integrator
+    double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double g = 9.81; // Gravity
     double m = 1.;
     double wx = 0.0;
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     //  s->setUseRelativeConvergenceCriteron(false);
 
     // -- OneStepIntegrators --
-    SP::Moreau OSI1(new Moreau(beam1, theta));
+    SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(beam1, theta));
     s->insertIntegrator(OSI1);
 
 

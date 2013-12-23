@@ -106,8 +106,8 @@ int main()
 
 
   // -- (1) OneStepIntegrators --
-  SP::OneStepIntegrator  aMoreau ;
-  aMoreau.reset(new Moreau(aDS, 0.5));
+  SP::OneStepIntegrator  aMoreauJeanOSI ;
+  aMoreauJeanOSI.reset(new MoreauJeanOSI(aDS, 0.5));
 
   // -- (2) Time discretisation --
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));
@@ -118,7 +118,7 @@ int main()
 
 
   // -- (4) Simulation setup with (1) (2) (3)
-  SP::TimeStepping aS(new TimeStepping(aTD, aMoreau, aMLCP));
+  SP::TimeStepping aS(new TimeStepping(aTD, aMoreauJeanOSI, aMLCP));
   aS->setComputeResiduY(true);
   aS->setUseRelativeConvergenceCriteron(false);
 

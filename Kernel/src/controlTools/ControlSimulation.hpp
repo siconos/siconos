@@ -60,7 +60,7 @@ protected:
   double _T;
   /** Simulation step */
   double _h;
-  /** Theta for Moreau */
+  /** Theta for MoreauJeanOSI */
   double _theta;
   /** Time spent computing */
   double _elapsedTime;
@@ -80,7 +80,7 @@ protected:
   SP::TimeDiscretisation _processTD;
   /** TimeStepping */
   SP::TimeStepping _processSimulation;
-  /** Moreau */
+  /** MoreauJeanOSI */
   SP::OneStepIntegrator _processIntegrator;
   /** the ControlManager */
   SP::ControlManager _CM;
@@ -90,7 +90,7 @@ public:
   /** destructor */
   virtual ~ControlSimulation() {};
 
-  /** Modify the value of theta (for Moreau)
+  /** Modify the value of theta (for MoreauJeanOSI)
    * \param newTheta the new value of theta */
   void setTheta(unsigned int newTheta);
 

@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
       SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
       // -- OneStepIntegrators --
-      SP::Moreau OSI(new Moreau(yoyo, theta));
+      SP::MoreauJeanOSI OSI(new MoreauJeanOSI(yoyo, theta));
    
       // -- OneStepNsProblem --
       SP::OneStepNSProblem osnspb(new LCP());
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
         jeu->nonSmoothDynamicalSystem()->link(inter, yoyo);
   
         t.reset(new TimeDiscretisation(t0, h));
-        OSI.reset(new Moreau(yoyo, theta));
+        OSI.reset(new MoreauJeanOSI(yoyo, theta));
         osnspb.reset(new LCP());
         s.reset(new TimeStepping(t, OSI, osnspb));
         jeu->initialize(s);

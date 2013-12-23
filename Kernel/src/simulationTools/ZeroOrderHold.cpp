@@ -502,7 +502,7 @@ void ZeroOrderHold::initialize()
 double ZeroOrderHold::computeResidu()
 {
 
-  // This function is used to compute the residu for each "Moreau-discretized" dynamical system.
+  // This function is used to compute the residu for each "MoreauJeanOSI-discretized" dynamical system.
   // It then computes the norm of each of them and finally return the maximum
   // value for those norms.
   //
@@ -687,7 +687,7 @@ void ZeroOrderHold::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   coord[7] = sizeY;
 
 
-  // All of these values should be stored in the node corrseponding to the UR when a Moreau scheme is used.
+  // All of these values should be stored in the node corrseponding to the UR when a MoreauJeanOSI scheme is used.
   SP::BlockVector Xq;
   Xq = inter->dataXq();
   SP::SiconosVector Yp = inter->yp();

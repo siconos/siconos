@@ -25,19 +25,19 @@
 #include "SiconosPointers.hpp"
 #include "OneStepIntegratorXML.hpp"
 
-/** XML management for Moreau
+/** XML management for MoreauJeanOSI
  *
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 3.0.0.
  *   \date 05/17/2004
  *
  */
-class MoreauXML: public OneStepIntegratorXML
+class MoreauJeanOSIXML: public OneStepIntegratorXML
 {
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(MoreauXML);
+  ACCEPT_SERIALIZATION(MoreauJeanOSIXML);
 
 
   /** theta list node */
@@ -47,16 +47,16 @@ private:
   xmlNode * WNode;
 
 public:
-  MoreauXML();
+  MoreauJeanOSIXML();
 
-  /** Build a MoreauXML object from a DOM tree describing Moreau OneStepIntegrator
-  *   \param xmlNode * MoreauNode : the Moreau DOM tree
-  *   \exception XMLException : if the W property of the Moreau lacks in the DOM tree
+  /** Build a MoreauJeanOSIXML object from a DOM tree describing MoreauJeanOSI OneStepIntegrator
+  *   \param xmlNode * MoreauJeanOSINode : the MoreauJeanOSI DOM tree
+  *   \exception XMLException : if the W property of the MoreauJeanOSI lacks in the DOM tree
   */
-  MoreauXML(xmlNode * MoreauNode);
+  MoreauJeanOSIXML(xmlNode * MoreauJeanOSINode);
 
   /** Destructor */
-  ~MoreauXML();
+  ~MoreauJeanOSIXML();
 
   /** return true if wNode is defined
    *  \return true if wNode is defined
@@ -119,5 +119,5 @@ public:
 
 };
 
-DEFINE_SPTR(MoreauXML)
+DEFINE_SPTR(MoreauJeanOSIXML)
 #endif

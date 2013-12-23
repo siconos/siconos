@@ -22,7 +22,7 @@
 //
 // Author: Vincent Acary
 //
-// Keywords: LagrangianDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// Keywords: LagrangianDS, LagrangianLinear relation, MoreauJeanOSI TimeStepping, LCP.
 //
 // =============================================================================================
 
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     //double theta=0.500001;
     double theta = 0.500001;
 
-    SP::Moreau OSI(new Moreau(doublependulum, theta));
+    SP::MoreauJeanOSI OSI(new MoreauJeanOSI(doublependulum, theta));
     s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --

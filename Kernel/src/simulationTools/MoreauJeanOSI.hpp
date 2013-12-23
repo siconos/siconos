@@ -17,11 +17,11 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 /*! \file
-  Moreau Time-Integrator for Dynamical Systems
+  MoreauJeanOSI Time-Integrator for Dynamical Systems
 */
 
-#ifndef Moreau_H
-#define Moreau_H
+#ifndef MoreauJeanOSI_H
+#define MoreauJeanOSI_H
 
 #include "OneStepIntegrator.hpp"
 
@@ -30,18 +30,18 @@ class SiconosMatrix;
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
 
-/**  Moreau Time-Integrator for Dynamical Systems
+/**  MoreauJeanOSI Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
- * See User's guide, \ref docSimuMoreauTS for details.
+ * See User's guide, \ref docSimuMoreauJeanOSITS for details.
  *
- * Moreau class is used to define some time-integrators methods for a
+ * MoreauJeanOSI class is used to define some time-integrators methods for a
  * list of dynamical systems.
 
- * A Moreau instance is defined by the value of theta and the list of
+ * A MoreauJeanOSI instance is defined by the value of theta and the list of
  * concerned dynamical systems.  Each DynamicalSystem is associated to
  * a SiconosMatrix, named "W"
  *
@@ -50,7 +50,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  * state (x).
  *
  * For first order systems, the implementation uses _r for storing the
- * the input due to the nonsmooth law. This Moreau scheme assumes that the
+ * the input due to the nonsmooth law. This MoreauJeanOSI scheme assumes that the
  * relative degree is zero or one and one level for _r is sufficient
  *
  * For Lagrangian systems, the implementation uses _p[1] for storing the
@@ -65,18 +65,18 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  *    states.
  *
  */
-class Moreau : public OneStepIntegrator
+class MoreauJeanOSI : public OneStepIntegrator
 {
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(Moreau);
+  ACCEPT_SERIALIZATION(MoreauJeanOSI);
 
 
-  /** Stl map that associates a W Moreau matrix to each DynamicalSystem of the OSI */
+  /** Stl map that associates a W MoreauJeanOSI matrix to each DynamicalSystem of the OSI */
   MapOfDSMatrices WMap;
 
-  /** Stl map that associates the columns of  W Moreau matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
+  /** Stl map that associates the columns of  W MoreauJeanOSI matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
   MapOfDSMatrices _WBoundaryConditionsMap;
 
   /** Stl map that associates a theta parameter for the integration
@@ -104,7 +104,7 @@ protected:
 
   /** Default constructor
    */
-  Moreau() {};
+  MoreauJeanOSI() {};
 
 public:
 
@@ -112,35 +112,35 @@ public:
    *  \param OneStepIntegratorXML* : the XML object corresponding
    *  \param DynamicalSystemsSet: set of all DS in the NSDS
    */
-  Moreau(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
+  MoreauJeanOSI(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param theta value of the parameter
    */
-  Moreau(SP::DynamicalSystem, double);
+  MoreauJeanOSI(SP::DynamicalSystem, double);
 
   /** constructor from theta value only
    *  \param theta value for all DS.
    */
-  Moreau(double);
+  MoreauJeanOSI(double);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
    *  \param gamma value
    */
-  Moreau(SP::DynamicalSystem, double, double);
+  MoreauJeanOSI(SP::DynamicalSystem, double, double);
 
   /** constructor from theta value only
    *  \param theta value for all these DS.
    *  \param gamma value for all these DS.
    */
-  Moreau(double, double);
+  MoreauJeanOSI(double, double);
 
   /** destructor
    */
-  virtual ~Moreau() {};
+  virtual ~MoreauJeanOSI() {};
 
   // --- GETTERS/SETTERS ---
 
@@ -270,36 +270,36 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** initialization of the Moreau integrator; for linear time
+  /** initialization of the MoreauJeanOSI integrator; for linear time
       invariant systems, we compute time invariant operator (example :
       W)
    */
   virtual void initialize();
 
-  /** init WMap[ds] Moreau matrix at time t
+  /** init WMap[ds] MoreauJeanOSI matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
   void initW(double, SP::DynamicalSystem);
 
-  /** compute WMap[ds] Moreau matrix at time t
+  /** compute WMap[ds] MoreauJeanOSI matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
   void computeW(double, SP::DynamicalSystem);
 
-  /** compute WBoundaryConditionsMap[ds] Moreau matrix at time t
+  /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
   void computeWBoundaryConditions(SP::DynamicalSystem);
 
-  /** init WBoundaryConditionsMap[ds] Moreau
+  /** init WBoundaryConditionsMap[ds] MoreauJeanOSI
    *  \param a pointer to DynamicalSystem
    */
   void initWBoundaryConditions(SP::DynamicalSystem);
 
-  /** return the maximum of all norms for the "Moreau-discretized" residus of DS
+  /** return the maximum of all norms for the "MoreauJeanOSI-discretized" residus of DS
       \return a double
    */
   double computeResidu();
@@ -335,7 +335,7 @@ public:
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
-   *  \param int: useless flag (for Moreau, used in Lsodar)
+   *  \param int: useless flag (for MoreauJeanOSI, used in Lsodar)
    */
   void integrate(double&, double&, double&, int&);
 
@@ -348,7 +348,7 @@ public:
    */
   void saveWToXML();
 
-  /** Displays the data of the Moreau's integrator
+  /** Displays the data of the MoreauJeanOSI's integrator
    */
   void display();
 
@@ -363,6 +363,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(Moreau)
+TYPEDEF_SPTR(MoreauJeanOSI)
 
-#endif // Moreau_H
+#endif // MoreauJeanOSI_H

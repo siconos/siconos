@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "MoreauProjectOnConstraintsOSI.hpp"
+#include "MoreauJeanDirectProjectionOSI.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "NewtonEulerDS.hpp"
@@ -39,7 +39,7 @@
 #define SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD 0.0
 
 
-MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(double theta) : Moreau(theta)
+MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta) : MoreauJeanOSI(theta)
 {
   integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
@@ -48,7 +48,7 @@ MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(double theta) : Mor
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(SP::DynamicalSystem ds , double d): Moreau(ds , d)
+MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds , double d): MoreauJeanOSI(ds , d)
 {
   integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
@@ -57,7 +57,7 @@ MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(SP::DynamicalSystem
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(double theta, double gamma) : Moreau(theta, gamma)
+MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, double gamma) : MoreauJeanOSI(theta, gamma)
 {
   integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
@@ -66,7 +66,7 @@ MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(double theta, doubl
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(SP::DynamicalSystem ds , double d, double gamma): Moreau(ds , d, gamma)
+MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds , double d, double gamma): MoreauJeanOSI(ds , d, gamma)
 {
   integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
@@ -76,10 +76,10 @@ MoreauProjectOnConstraintsOSI::MoreauProjectOnConstraintsOSI(SP::DynamicalSystem
 }
 
 
-void MoreauProjectOnConstraintsOSI::initialize()
+void MoreauJeanDirectProjectionOSI::initialize()
 {
 
-  Moreau::initialize();
+  MoreauJeanOSI::initialize();
 
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
@@ -97,14 +97,14 @@ void MoreauProjectOnConstraintsOSI::initialize()
     }
     else
     {
-      RuntimeException::selfThrow("MoreauProjectOnConstraintsOSI::initialize() - DS not of the right type");
+      RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initialize() - DS not of the right type");
     }
   }
 }
 
-void MoreauProjectOnConstraintsOSI::computeFreeState()
+void MoreauJeanDirectProjectionOSI::computeFreeState()
 {
-  Moreau::computeFreeState();
+  MoreauJeanOSI::computeFreeState();
 
 
   // Compute qfree
@@ -113,7 +113,7 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
   //   DSIterator it; // Iterator through the set of DS.
 
   //   SP::DynamicalSystem ds; // Current Dynamical System.
-  //   SP::SiconosMatrix W; // W Moreau matrix of the current DS.
+  //   SP::SiconosMatrix W; // W MoreauJeanOSI matrix of the current DS.
   //   Type::Siconos dsType ; // Type of the current DS.
   //   for (it=OSIDynamicalSystems->begin(); it!= OSIDynamicalSystems->end(); ++it)
   //   {
@@ -129,7 +129,7 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
   //       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
   //       SP::SiconosVector q = d->q();
   // #ifdef DEBUG_MESSAGES
-  //       DEBUG_PRINT("MoreauProjectOnConstraintsOSI::computeFreeState() q before.\n");
+  //       DEBUG_PRINT("MoreauJeanDirectProjectionOSI::computeFreeState() q before.\n");
   //       q->display();
   // #endif
   //       // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
@@ -139,7 +139,7 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
   //       scal(coeff,*vold,*q,false); // q += h(1-theta)*vold
   //       *q += *qold;
   // #ifdef DEBUG_MESSAGES
-  //       DEBUG_PRINT("MoreauProjectOnConstraintsOSI::computeFreeState() q after (qfree).\n");
+  //       DEBUG_PRINT("MoreauJeanDirectProjectionOSI::computeFreeState() q after (qfree).\n");
   //       q->display();
   // #endif
   //     }
@@ -167,20 +167,20 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
 }
 
 #ifdef STANDARD_ACTIVATION
-bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  return Moreau::addInteractionInIndexSet(inter, i);
+  return MoreauJeanOSI::addInteractionInIndexSet(inter, i);
 }
 
-bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  return Moreau::removeInteractionInIndexSet(inter, i);
+  return MoreauJeanOSI::removeInteractionInIndexSet(inter, i);
 }
 #endif
 
 
 #ifdef FIRSTWAY_ACTIVATION
-bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
 
   assert(i == 1);
@@ -192,25 +192,25 @@ bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction int
   {
     gamma = _gamma;
   }
-  DEBUG_PRINTF("Moreau::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
 
 
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
 
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
                _activateYPosThreshold ,
                _activateYVelThreshold);
 
   assert(!isnan(y));
 #ifdef DEBUG_MESSAGES
   if (y <= _activateYPosThreshold)
-    DEBUG_PRINT("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet ACTIVATE.\n");
+    DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
 #endif
   return (y <= _activateYPosThreshold);
 }
 
-bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 
 {
   assert(i == 1);
@@ -222,17 +222,17 @@ bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction 
   {
     gamma = _gamma;
   }
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet yref=%e, yDot=%e .\n", y, yDot);
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet yref=%e, yDot=%e .\n", y, yDot);
   y += gamma * h * yDot;
 
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet  _deactivateYPosThreshold =%e, _deactivateYVelThreshold=%e\n",
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet  _deactivateYPosThreshold =%e, _deactivateYVelThreshold=%e\n",
                _deactivateYPosThreshold ,
                _deactivateYVelThreshold);
 
   assert(!isnan(y));
 #ifdef DEBUG_MESSAGES
   if (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)
-    DEBUG_PRINT("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet DEACTIVATE.\n");
+    DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet DEACTIVATE.\n");
 #endif
   return (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold);
 }
@@ -242,7 +242,7 @@ bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction 
 
 
 #ifdef SECONDWAY_ACTIVATION
-bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
 
   assert(i == 1);
@@ -250,20 +250,20 @@ bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction int
 #ifdef DEBUG_MESSAGES
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 #endif
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
 
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
                _activateYPosThreshold ,
                _activateYVelThreshold);
 
   assert(!isnan(y));
 
   if (y <= _activateYPosThreshold)
-    DEBUG_PRINT("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet ACTIVATE.\n");
+    DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
   return (y <= _activateYPosThreshold);
 }
 
-bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 
 {
   assert(i == 1);
@@ -271,22 +271,22 @@ bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction 
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double lambda = (inter->lambda(i))->getValue(0); // for i=1 y(i) is the velocity
 
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet yref=%e, yDot=%e .\n", y, yDot);
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet yref=%e, yDot=%e .\n", y, yDot);
 
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet  _deactivateYPosThreshold =%e, _deactivateYVelThreshold=%e\n",
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet  _deactivateYPosThreshold =%e, _deactivateYVelThreshold=%e\n",
                _deactivateYPosThreshold ,
                _deactivateYVelThreshold);
 
   assert(!isnan(y));
   if (y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold)
-    DEBUG_PRINT("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet DEACTIVATE.\n");
+    DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold);
 }
 
 #endif
 
 #ifdef QFREE_ACTIVATION
-bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
 
   assert(i == 1);
@@ -294,20 +294,20 @@ bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction int
 #ifdef DEBUG_MESSAGES
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 #endif
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
 
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
                _activateYPosThreshold ,
                _activateYVelThreshold);
 
   assert(!isnan(y));
 
   if (y <= _activateYPosThreshold)
-    DEBUG_PRINT("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet ACTIVATE.\n");
+    DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
   return (y <= _activateYPosThreshold);
 }
 
-bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 
 {
   assert(i == 1);
@@ -315,15 +315,15 @@ bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction 
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 
 
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet yref=%e, yDot=%e .\n", y, yDot);
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet yref=%e, yDot=%e .\n", y, yDot);
 
-  DEBUG_PRINTF("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet  _deactivateYPosThreshold =%e, _deactivateYVelThreshold=%e\n",
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet  _deactivateYPosThreshold =%e, _deactivateYVelThreshold=%e\n",
                _deactivateYPosThreshold ,
                _deactivateYVelThreshold);
 
   assert(!isnan(y));
   if (y > _deactivateYPosThreshold)
-    DEBUG_PRINT("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet DEACTIVATE.\n");
+    DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold);
 }
 

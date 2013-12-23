@@ -37,7 +37,7 @@
  *
  * !!! This is a virtual class, interface for some specific integrators !!!
  *
- * At the time, available integrators are: Moreau and Lsodar
+ * At the time, available integrators are: MoreauJeanOSI and Lsodar
  *
  */
 class OneStepIntegrator

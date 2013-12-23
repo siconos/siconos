@@ -21,7 +21,7 @@
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "Model.hpp"
-#include "Moreau.hpp"
+#include "MoreauJeanOSI.hpp"
 #include "Lsodar.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "ZeroOrderHold.hpp"
@@ -249,9 +249,9 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       if (osiType == OSI::MOREAU)
       {
-        if ((std11::static_pointer_cast<Moreau> (Osi))->useGamma() || (std11::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
+        if ((std11::static_pointer_cast<MoreauJeanOSI> (Osi))->useGamma() || (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->useGammaForRelation())
         {
-          *rightInteractionBlock *= (std11::static_pointer_cast<Moreau> (Osi))->gamma();
+          *rightInteractionBlock *= (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->gamma();
         }
       }
 

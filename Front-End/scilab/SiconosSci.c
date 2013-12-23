@@ -1333,7 +1333,7 @@ int sicSimulationTimeSteppingInterface(char *fname)
   return 0;
 }
 
-int sicOneStepIntegratorMoreauInterface(char *fname)
+int sicOneStepIntegratorMoreauJeanOSIInterface(char *fname)
 {
   static int minrhs = 1, maxrhs = 1, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
@@ -1341,7 +1341,7 @@ int sicOneStepIntegratorMoreauInterface(char *fname)
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
-  printf("sicOneStepIntegratorMoreauInterface\n");
+  printf("sicOneStepIntegratorMoreauJeanOSIInterface\n");
 #endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=1) */
@@ -1352,7 +1352,7 @@ int sicOneStepIntegratorMoreauInterface(char *fname)
   GetRhsVar(1, "d", &dim1, &dim2, &theta);
   if (!(dim1 * dim2 > 0))
   {
-    sciprint("Wrong parameter in ssicOneStepIntegratorMoreau (theta has wrong size!)\r\n");
+    sciprint("Wrong parameter in ssicOneStepIntegratorMoreauJeanOSI (theta has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -1360,7 +1360,7 @@ int sicOneStepIntegratorMoreauInterface(char *fname)
   CreateVar(2, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicOneStepIntegratorMoreau(stk(theta));
+  *istk(st) = sicOneStepIntegratorMoreauJeanOSI(stk(theta));
 
   /*  Return variable  */
   LhsVar(1) = 2;

@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     double position_init = 0.00005;      // initial position
     double velocity_init =  -.1;      // initial velocity
     double epsilon = 0.5;//1e-1;
-    double theta = 1/2.0 + epsilon;              // theta for Moreau integrator
+    double theta = 1/2.0 + epsilon;              // theta for MoreauJeanOSI integrator
     double E = 210e9; // young Modulus
     double S = 0.000314; //  Beam Section 1 cm  for the diameter
 
@@ -150,16 +150,16 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
 #ifdef TS_PROJ
-    SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(beam,theta));
+    SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(beam,theta));
     OSI->setDeactivateYPosThreshold(1e-05);
     OSI->setDeactivateYVelThreshold(0.0);
     OSI->setActivateYPosThreshold(1e-09);
     OSI->setActivateYVelThreshold(100.0);
 #else
 #ifdef TS_COMBINED
-    SP::OneStepIntegrator OSI(new MoreauCombinedProjectionOSI(beam,theta));
+    SP::OneStepIntegrator OSI(new MoreauJeanCombinedProjectionOSI(beam,theta));
 #else
-    SP::Moreau OSI(new Moreau(beam,theta,0.5));
+    SP::MoreauJeanOSI OSI(new MoreauJeanOSI(beam,theta,0.5));
 #endif
 #endif
     // -- (2) Time discretisation --

@@ -17,14 +17,14 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 /*! \file
-  Moreau Time-Integrator for Dynamical Systems for Combined Projection Algorithm
+  MoreauJeanOSI Time-Integrator for Dynamical Systems for Combined Projection Algorithm
 */
 
 #ifndef MOREAUPROJECTONCONSTRAINTSOSI_H
 #define MOREAUPROJECTONCONSTRAINTSOSI_H
 
 #include "OneStepIntegrator.hpp"
-#include "Moreau.hpp"
+#include "MoreauJeanOSI.hpp"
 #include "SimpleMatrix.hpp"
 
 class Simulation;
@@ -32,15 +32,15 @@ class SiconosMatrix;
 
 const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
 
-/**  Moreau Time-Integrator for Dynamical Systems for Combined Projection Algorithm
+/**  MoreauJeanOSI Time-Integrator for Dynamical Systems for Combined Projection Algorithm
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.4.0.
  *  \date (Creation) May 02, 2012
  *
- * See User's guide, \ref docSimuMoreauTS for details.
+ * See User's guide, \ref docSimuMoreauJeanOSITS for details.
  *
- * Moreau class is used to define some time-integrators methods for a
+ * MoreauJeanOSI class is used to define some time-integrators methods for a
  * list of dynamical systems.
  *
  * This class reimplement a special activation of constraints
@@ -48,16 +48,16 @@ const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
  *
  *
  */
-class MoreauProjectOnConstraintsOSI : public Moreau
+class MoreauJeanDirectProjectionOSI : public MoreauJeanOSI
 {
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(MoreauProjectOnConstraintsOSI);
+  ACCEPT_SERIALIZATION(MoreauJeanDirectProjectionOSI);
 
   /** Default constructor
    */
-  MoreauProjectOnConstraintsOSI() {};
+  MoreauJeanDirectProjectionOSI() {};
 
   double _deactivateYPosThreshold;
   double _deactivateYVelThreshold;
@@ -73,28 +73,28 @@ public:
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
-  explicit MoreauProjectOnConstraintsOSI(double theta);
+  explicit MoreauJeanDirectProjectionOSI(double theta);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param theta value of the parameter
    */
-  MoreauProjectOnConstraintsOSI(SP::DynamicalSystem ds, double theta);
+  MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds, double theta);
 
   /** constructor from theta value only
     *  \param theta value for all these DS.
     */
-  explicit MoreauProjectOnConstraintsOSI(double theta, double gamma);
+  explicit MoreauJeanDirectProjectionOSI(double theta, double gamma);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param theta value of the parameter
    */
-  MoreauProjectOnConstraintsOSI(SP::DynamicalSystem ds, double theta, double gamma);
+  MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds, double theta, double gamma);
 
   /** destructor
    */
-  virtual ~MoreauProjectOnConstraintsOSI() {};
+  virtual ~MoreauJeanDirectProjectionOSI() {};
 
   // --- OTHER FUNCTIONS ---
 

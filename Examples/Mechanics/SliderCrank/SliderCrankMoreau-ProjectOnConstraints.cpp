@@ -19,10 +19,10 @@
 
 
 /*!\file
-  C++ input file, Moreau-Time-Stepping version
+  C++ input file, MoreauJeanOSI-Time-Stepping version
   T. Schindler, V. Acary
 
-  Slider-crank simulation with a Moreau-Time-Stepping scheme
+  Slider-crank simulation with a MoreauJeanOSI-Time-Stepping scheme
 
   see Flores/Leine/Glocker : Modeling and analysis of planar rigid multibody systems with
   translational clearance joints based on the non-smooth dynamics approach
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     // ----------------
     // --- Simulation ---
     // ----------------
-    SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(slider, 0.5, 0.0));
+    SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(slider, 0.5, 0.0));
     OSI->setDeactivateYPosThreshold(1e-07);
     OSI->setDeactivateYVelThreshold(0.0);
     OSI->setActivateYPosThreshold(1e-06);

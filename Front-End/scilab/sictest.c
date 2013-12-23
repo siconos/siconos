@@ -170,7 +170,7 @@ void testBouncingBallTS()
   double t0 = 0;                   /* initial computation time*/
   double T = 10;                   /* final computation time */
   double position_init = 1.0;      /* initial position for lowest bead.*/
-  double theta[1]  = {0.5};        /* theta for Moreau integrator */
+  double theta[1]  = {0.5};        /* theta for MoreauJeanOSI integrator */
   double R = 0.1;                  /* Ball radius */
   double m = 1;                    /* Ball mass */
   double g = 9.81;                 /* Gravity */
@@ -248,7 +248,7 @@ void testBouncingBallTS()
     error("BouncingBallED::sicTimeDiscretisation construction");
 
   sicSimulationTimeStepping(idTime);
-  sicOneStepIntegratorMoreau(theta);
+  sicOneStepIntegratorMoreauJeanOSI(theta);
   sicOneStepNSProblemLCP("Lemke", 101, 0.0001);
 
 

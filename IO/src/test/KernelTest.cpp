@@ -203,7 +203,7 @@ void KernelTest::t5()
   double h = 0.005;                // time step
   double position_init = 1.0;      // initial position for lowest bead.
   double velocity_init = 0.0;      // initial velocity for lowest bead.
-  double theta = 0.5;              // theta for Moreau integrator
+  double theta = 0.5;              // theta for MoreauJeanOSI integrator
   double R = 0.1; // Ball radius
   double m = 1; // Ball mass
   double g = 9.81; // Gravity
@@ -266,7 +266,7 @@ void KernelTest::t5()
   // ------------------
 
   // -- (1) OneStepIntegrators --
-  SP::Moreau OSI(new Moreau(ball, theta));
+  SP::MoreauJeanOSI OSI(new MoreauJeanOSI(ball, theta));
 
   // -- (2) Time discretisation --
   SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

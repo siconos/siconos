@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     // OneStepIntegrator
     double theta = 0.5;
     // One Step Integrator
-    SP::Moreau myIntegrator(new Moreau(theta));
+    SP::MoreauJeanOSI myIntegrator(new MoreauJeanOSI(theta));
     myIntegrator->insertDynamicalSystem(processObserver);
     s->insertIntegrator(myIntegrator);
     // OneStepNSProblem

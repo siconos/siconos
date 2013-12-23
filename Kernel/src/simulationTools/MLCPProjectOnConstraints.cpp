@@ -567,7 +567,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   // computed through plug-in mechanism.
 
   // Get the W and Theta maps of one of the Interaction -
-  // Warning: in the current version, if OSI!=Moreau, this fails.
+  // Warning: in the current version, if OSI!=MoreauJeanOSI, this fails.
   // If OSI = MOREAU, centralInteractionBlocks = W if OSI = LSODAR,
   // centralInteractionBlocks = M (mass matrices)
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock, leftInteractionBlock1;
@@ -1081,7 +1081,7 @@ void MLCPProjectOnConstraints::postComputeLagrangianR(SP::Interaction inter, uns
 
   // // \warning aBuff should normally be in lambda[0]
   // // The update of the position in DS should be made
-  // //  in Moreau::upateState or ProjectedMoreau::updateState
+  // //  in MoreauJeanOSI::upateState or ProjectedMoreauJeanOSI::updateState
   // SP::SiconosMatrix J=lr->jachq();
   // SP::SimpleMatrix aux(new SimpleMatrix(*J));
   // aux->trans();
@@ -1098,7 +1098,7 @@ void MLCPProjectOnConstraints::postComputeLagrangianR(SP::Interaction inter, uns
   // tmp->display();
 
 
-  // // The following step should be done on Moreau::upateState or ProjectedMoreau::updateState
+  // // The following step should be done on MoreauJeanOSI::upateState or ProjectedMoreauJeanOSI::updateState
   // DSIterator itDS = inter->dynamicalSystemsBegin();
   // while(itDS!=inter->dynamicalSystemsEnd())
   // {
