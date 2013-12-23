@@ -89,7 +89,7 @@ LTIRCircuitRLCD.setDPtr(D)
 
 nslaw = ComplementarityConditionNSL(1)
 InterCircuitRLCD = Interaction(1, nslaw, LTIRCircuitRLCD, 1)
-InterCircuitRLCD.insert(LSCircuitRLCD)
+
 
 #
 # Model

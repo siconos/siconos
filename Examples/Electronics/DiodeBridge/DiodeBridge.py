@@ -64,7 +64,7 @@ if (withPlot):
 
 from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\
-                           Model, Moreau, TimeDiscretisation, LCP,  \
+                           Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
                            TimeStepping
 
 #
@@ -118,7 +118,7 @@ DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
 
 # (1) OneStepIntegrators
 theta = 0.5
-aOSI = Moreau(LSDiodeBridge, theta)
+aOSI = EulerMoreauOSI(LSDiodeBridge, theta)
  
 # (2) Time discretisation
 aTiDisc = TimeDiscretisation(t0, h_step)

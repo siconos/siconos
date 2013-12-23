@@ -23,7 +23,7 @@
 from matplotlib.pyplot import subplot, title, plot, grid, show
 from numpy import array, eye, empty, zeros, savetxt
 from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL, \
-NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, Moreau, \
+NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
 Interaction, Relay
 from math import ceil
 
@@ -53,9 +53,12 @@ myNslaw = RelayNSL(2)
 myNslaw.display()
 
 nameInter = 'processInteraction'
-myProcessInteraction = Interaction(nameInter, process, numInter, ninter, myNslaw,
+myProcessInteraction = Interaction(ninter, myNslaw,
         myProcessRelation)
-myNSDS = NonSmoothDynamicalSystem(process, myProcessInteraction)
+myNSDS = NonSmoothDynamicalSystem()
+myNSDS.insertDynamicalSystem(process)
+myNSDS.link(myProcessInteraction,process)
+
 
 filippov = Model(t0,T)
 filippov.setNonSmoothDynamicalSystemPtr(myNSDS)
@@ -63,7 +66,7 @@ filippov.setNonSmoothDynamicalSystemPtr(myNSDS)
 td = TimeDiscretisation(t0, h)
 s = TimeStepping(td)
 
-myIntegrator = Moreau(process, theta)
+myIntegrator = EulerMoreauOSI(process, theta)
 s.insertIntegrator(myIntegrator)
 
 
@@ -91,7 +94,8 @@ while(s.hasNextEvent()):
      dataPlot[k, 3] = myProcessInteraction.lambda_(0)[0]
      k += 1
      s.nextStep()
-     print s.nextTime()
+     #print s.nextTime()
+     
 # save to disk
 savetxt('output.txt', dataPlot)
 # plot interesting stuff

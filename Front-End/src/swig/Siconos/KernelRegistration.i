@@ -64,6 +64,7 @@
   PY_REGISTER(MLCPProjectOnConstraints);                                \
   PY_REGISTER(GenericMechanical);                                       \
   PY_REGISTER(FrictionContact);                                         \
+  PY_REGISTER(EulerMoreauOSI);                                          \
   PY_REGISTER(MoreauJeanOSI);                                           \
   PY_REGISTER(ZeroOrderHoldOSI);                                        \
   PY_REGISTER(Simulation);                                              \
