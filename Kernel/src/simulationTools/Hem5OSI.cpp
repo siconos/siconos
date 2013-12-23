@@ -103,7 +103,7 @@ extern "C" void Hem5OSI_solout_wrapper(integer* MODE,
 
 
 Hem5OSI::Hem5OSI(SP::DynamicalSystem ds):
-  OneStepIntegrator(OSI::LSODAR)
+  OneStepIntegrator(OSI::HEM5OSI)
 {
   // add ds in the set
   OSIDynamicalSystems->insert(ds);
@@ -719,7 +719,7 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
               &_idid);
 
   // === Post ===
-  if (_idid < 0) // if istate < 0 => LSODAR failed
+  if (_idid < 0) // if istate < 0 => HEM2 failed
   {
     std::cout << "Hem5OSI::integrate(...) failed - idid = " << _idid <<std::endl;
     std::cout << " -1 means input is not consistent" <<std::endl;

@@ -449,16 +449,16 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::DynamicalSystem ds)
   osiType = Osi->getType();
   dsType = Type::value(*ds);
   
-  if (osiType == OSI::MOREAU
-      || osiType == OSI::MOREAUPROJECTONCONSTRAINTSOSI
-      || osiType == OSI::SCHATZMANPAOLI)
+  if (osiType == OSI::MOREAUJEANOSI
+      || osiType == OSI::MOREAUDIRECTPROJECTIONOSI
+      || osiType == OSI::SCHATZMANPAOLIOSI)
   {
     if (dsType != Type::NewtonEulerDS)
       block = (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
     else
       block = (std11::static_pointer_cast<NewtonEulerDS> (ds))->luW(); // get its W matrix ( pointer link!)
   }
-  else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
+  else if (osiType == OSI::LSODAROSI) // Warning: LagrangianDS only at the time !!!
   {
     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + dsType);
@@ -484,7 +484,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::DynamicalSystem ds)
       block = (std11::static_pointer_cast<NewMarkAlphaOSI>(Osi))->W(ds);
     }
   } // End Newmark OSI
-  else if (osiType == OSI::D1MINUSLINEAR)
+  else if (osiType == OSI::D1MINUSLINEAROSI)
   {
     DEBUG_PRINT("OneStepNSProblem::getOSIMatrix  for osiType   OSI::D1MINUSLINEAR");
     /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all OSNSP*/
@@ -507,7 +507,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::DynamicalSystem ds)
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinearOSI integrator with dynamical system of type " + dsType);
   }
   // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
-  else if (osiType == OSI::ZOH)
+  else if (osiType == OSI::ZOHOSI)
   {
     if (!block)
       block.reset(new SimpleMatrix((std11::static_pointer_cast<ZeroOrderHoldOSI>(Osi))->Ad(ds)));

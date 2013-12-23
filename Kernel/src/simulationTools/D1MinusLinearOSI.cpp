@@ -67,7 +67,7 @@ struct D1MinusLinearOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 D1MinusLinearOSI::D1MinusLinearOSI(SP::DynamicalSystem newDS) :
-  OneStepIntegrator(OSI::D1MINUSLINEAR)
+  OneStepIntegrator(OSI::D1MINUSLINEAROSI)
 {
   OSIDynamicalSystems->insert(newDS);
 }

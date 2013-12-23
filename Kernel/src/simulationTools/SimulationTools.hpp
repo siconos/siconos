@@ -45,6 +45,7 @@ Note that not all files from the current location are listed below, since some o
 #include "LsodarOSI.hpp"
 #include "Hem5OSI.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "EulerMoreauOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "MoreauJeanDirectProjectionOSI.hpp"
 #include "MoreauJeanCombinedProjectionOSI.hpp"

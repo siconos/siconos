@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
     double theta = 0.5000000000001;
 
     // -- (1) OneStepIntegrators --
-    SP::MoreauJeanOSI OSI_RLCD(new MoreauJeanOSI(LSCircuitRLCD, theta));
+    SP::EulerMoreauOSI OSI_RLCD(new EulerMoreauOSI(LSCircuitRLCD, theta));
     // -- (2) Time discretisation --
     SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
     // --- (3) one step non smooth problem

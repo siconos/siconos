@@ -41,7 +41,7 @@
 
 MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta) : MoreauJeanOSI(theta)
 {
-  integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
+  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
   _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
@@ -50,7 +50,7 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta) : Mor
 
 MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds , double d): MoreauJeanOSI(ds , d)
 {
-  integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
+  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
   _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
@@ -59,7 +59,7 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(SP::DynamicalSystem
 
 MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, double gamma) : MoreauJeanOSI(theta, gamma)
 {
-  integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
+  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
   _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
@@ -68,7 +68,7 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, doubl
 
 MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds , double d, double gamma): MoreauJeanOSI(ds , d, gamma)
 {
-  integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
+  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
   _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;

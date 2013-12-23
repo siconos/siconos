@@ -44,7 +44,7 @@
 using namespace RELATION;
 // --- xml constructor ---
 MoreauJeanOSI::MoreauJeanOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
-  OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::MOREAUJEANOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   // Note: we do not call xml constructor of OSI, but default one,
   // since we need to download _theta and DS at the same time.
@@ -118,7 +118,7 @@ MoreauJeanOSI::MoreauJeanOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSyste
 
 // --- constructor from a minimum set of data ---
 MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem newDS, double newTheta) :
-  OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::MOREAUJEANOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
   _theta = newTheta;
@@ -126,14 +126,14 @@ MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem newDS, double newTheta) :
 
 // --- constructor with theta parameter value  ---
 MoreauJeanOSI::MoreauJeanOSI(double newTheta):
-  OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::MOREAUJEANOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   _theta = newTheta;
 }
 
 // --- constructor from a minimum set of data ---
 MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
-  OneStepIntegrator(OSI::MOREAU), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
   _theta = newTheta;
@@ -143,7 +143,7 @@ MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem newDS, double newTheta, double 
 
 // --- constructor from a set of data ---
 MoreauJeanOSI::MoreauJeanOSI(double newTheta, double newGamma):
-  OneStepIntegrator(OSI::MOREAU), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false)
 {
   _theta = newTheta;
   _gamma = newGamma;

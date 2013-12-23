@@ -41,20 +41,20 @@
 using namespace RELATION;
 // --- constructor from a set of data ---
 //ZeroOrderHoldOSI::ZeroOrderHoldOSI():
-//  OneStepIntegrator(OSI::ZOH)
+//  OneStepIntegrator(OSI::ZOHOSI)
 //{
 //}
 
 // --- xml constructor ---
 ZeroOrderHoldOSI::ZeroOrderHoldOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
-  OneStepIntegrator(OSI::ZOH), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false)
 {
   RuntimeException::selfThrow("ZeroOrderHoldOSI::xml constructor - not yet implemented.");
 }
 
 // --- constructor from a minimum set of data ---
 ZeroOrderHoldOSI::ZeroOrderHoldOSI(SP::DynamicalSystem ds):
-  OneStepIntegrator(OSI::ZOH), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(ds);
 }

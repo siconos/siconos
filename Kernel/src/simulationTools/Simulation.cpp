@@ -29,6 +29,7 @@
 #include "LagrangianDS.hpp"
 
 // One Step Integrators
+#include "EulerMoreauOSI.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "LsodarOSI.hpp"
 #include "Hem5OSI.hpp"
@@ -411,9 +412,9 @@ void Simulation::saveSimulationToXML()
     for (it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     {
       typeOSI = (*it)->getType();
-      if (typeOSI == OSI::MOREAU)
+      if (typeOSI == OSI::MOREAUJEANOSI)
         (std11::static_pointer_cast<MoreauJeanOSI>(*it))->saveIntegratorToXML();
-      else if (typeOSI == OSI::LSODAR)
+      else if (typeOSI == OSI::LSODAROSI)
         (std11::static_pointer_cast<LsodarOSI>(*it))->saveIntegratorToXML();
       else RuntimeException::selfThrow("Simulation::saveSimulationToXML - wrong type of OneStepIntegrator");
     }

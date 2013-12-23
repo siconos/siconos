@@ -62,7 +62,7 @@ extern "C" void LsodarOSI_jacobianf_wrapper(integer* sizeOfX, doublereal* time, 
 }
 
 LsodarOSI::LsodarOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
-  OneStepIntegrator(OSI::LSODAR, osiXML, dsList)
+  OneStepIntegrator(OSI::LSODAROSI, osiXML, dsList)
 {
   // local time discretisation is set by default to those of the simulation.
   _intData.resize(9);
@@ -71,7 +71,7 @@ LsodarOSI::LsodarOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet ds
 }
 
 LsodarOSI::LsodarOSI():
-  OneStepIntegrator(OSI::LSODAR)
+  OneStepIntegrator(OSI::LSODAROSI)
 {
   _intData.resize(9);
   for (int i = 0; i < 9; i++) _intData[i] = 0;
@@ -79,7 +79,7 @@ LsodarOSI::LsodarOSI():
 }
 
 LsodarOSI::LsodarOSI(SP::DynamicalSystem ds):
-  OneStepIntegrator(OSI::LSODAR)
+  OneStepIntegrator(OSI::LSODAROSI)
 {
   // add ds in the set
   OSIDynamicalSystems->insert(ds);
@@ -225,7 +225,7 @@ void LsodarOSI::initialize()
     else
       _xWork->insertPtr((*itDS)->x());
   }
-  //   Integer parameters for LSODAR are saved in vector intParam.
+  //   Integer parameters for LSODAROSI are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
 
   // 1 - Neq; x vector size.
@@ -270,8 +270,8 @@ void LsodarOSI::initialize()
   // memory allocation for doublereal*, according to _intData values ...
   updateData();
 
-  // set the optional input flags of LSODAR to 0
-  // LSODAR will take the default values
+  // set the optional input flags of LSODAROSI to 0
+  // LSODAROSI will take the default values
 
   // Set the flag to generate extra printing at method switches.
   iwork[4] = 0;
@@ -287,7 +287,7 @@ void LsodarOSI::initialize()
   rtol[0] = RTOL_DEFAULT ; // rtol
   atol[0] = ATOL_DEFAULT ;  // atol
 
-  // === Error handling in LSODAR===
+  // === Error handling in LSODAROSI===
 
   //   parameters: itol, rtol, atol.
   //   Control vector E = (E(i)) of estimated local errors in y:
@@ -360,7 +360,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
   // jroot: jroot[i] = 1 if g(i) has a root at t, else jroot[i] = 0.
 
   // === Post ===
-  if (_intData[4] < 0) // if istate < 0 => LSODAR failed
+  if (_intData[4] < 0) // if istate < 0 => LSODAROSI failed
   {
     std::cout << "LSodar::integrate(...) failed - Istate = " << _intData[4] <<std::endl;
     std::cout << " -1 means excess work done on this call (perhaps wrong JT, or so small tolerance (ATOL and RTOL), or small maximum number of steps for one call (MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP" <<std::endl;

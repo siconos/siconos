@@ -28,7 +28,7 @@
 class Simulation;
 class SiconosMatrix;
 
-const unsigned int MOREAUSTEPSINMEMORY = 1;
+const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
 
 /**  EulerMoreauOSI Time-Integrator for Dynamical Systems
  *

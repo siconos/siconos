@@ -308,7 +308,7 @@ void EventDriven::initOSNS()
   if (!_allNSProblems->empty()) // ie if at least a non smooth problem has been built.
   {
     OSI::TYPES  osiType = (*_allOSI->begin())->getType();
-    if (osiType == OSI::LSODAR) //EventDriven associated with LsodarOSI OSI
+    if (osiType == OSI::LSODAROSI) //EventDriven associated with LsodarOSI OSI
     {      
     }
     else if (osiType == OSI::NEWMARKALPHAOSI) // EventDrivent asscociated with NewMarkAlpha
@@ -437,7 +437,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   // dynamical systems belonging to the osi
 
   // Check osi type: only lsodar is allowed.
-  if (osi->getType() != OSI::LSODAR)
+  if (osi->getType() != OSI::LSODAROSI)
     RuntimeException::selfThrow("EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   LsodarOSI& lsodar = static_cast<LsodarOSI&>(*osi);
@@ -511,7 +511,7 @@ void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
                                     doublereal *x,
                                     doublereal *jacob)
 {
-  if (osi->getType() != OSI::LSODAR)
+  if (osi->getType() != OSI::LSODAROSI)
     RuntimeException::selfThrow("EventDriven::computeJacobianfx(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(osi);
@@ -756,7 +756,7 @@ void EventDriven::advanceToEvent()
       model()->setCurrentTime(_tout);
     }
   }
-  else if (osiType == OSI::LSODAR)
+  else if (osiType == OSI::LSODAROSI)
   {
     // WARNING: this is supposed to work for only one OSI, including all
     // the DS.  To be reviewed for multiple OSI case (if it has sense?).

@@ -22,6 +22,7 @@
 #include "Topology.hpp"
 #include "Model.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "EulerMoreauOSI.hpp"
 #include "LsodarOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "ZeroOrderHoldOSI.hpp"
@@ -247,7 +248,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
       OSI::TYPES  osiType = Osi->getType();
 
-      if (osiType == OSI::MOREAU)
+      if (osiType == OSI::MOREAUJEANOSI)
       {
         if ((std11::static_pointer_cast<MoreauJeanOSI> (Osi))->useGamma() || (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->useGammaForRelation())
         {
@@ -256,7 +257,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       }
 
       // for ZOH, we have a different formula ...
-      if (osiType == OSI::ZOH && indexSet->properties(vd).forControl)
+      if (osiType == OSI::ZOHOSI && indexSet->properties(vd).forControl)
       {
         *rightInteractionBlock = std11::static_pointer_cast<ZeroOrderHoldOSI>(Osi)->Bd(ds);
         prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
@@ -509,19 +510,19 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
 
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
 
-  if (osiType == OSI::MOREAU ||
-      osiType == OSI::MOREAUPROJECTONCONSTRAINTSOSI ||
-      osiType == OSI::LSODAR ||
+  if (osiType == OSI::MOREAUJEANOSI ||
+      osiType == OSI::MOREAUDIRECTPROJECTIONOSI ||
+      osiType == OSI::LSODAROSI ||
       osiType == OSI::NEWMARKALPHAOSI ||
-      osiType == OSI::D1MINUSLINEAR ||
-      osiType == OSI::SCHATZMANPAOLI ||
-      osiType == OSI::ZOH)
+      osiType == OSI::D1MINUSLINEAROSI ||
+      osiType == OSI::SCHATZMANPAOLIOSI ||
+      osiType == OSI::ZOHOSI)
   {
     Osi->computeFreeOutput(vertex_inter, this);
     setBlock(*inter->yp(), _q, sizeY , 0, pos);
     DEBUG_EXPR(_q->display());
   }
-  else if (osiType == OSI::MOREAU2)
+  else if (osiType == OSI::MOREAUJEANOSI2)
   {
 
   }
@@ -529,7 +530,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
     RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q only for the case LCP at velocity level and with the NewtonImpactNSL
-  if (osiType != OSI::LSODAR || ((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == this) // added by Son Nguyen
+  if (osiType != OSI::LSODAROSI || ((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == this) // added by Son Nguyen
   {
     if (inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
     {

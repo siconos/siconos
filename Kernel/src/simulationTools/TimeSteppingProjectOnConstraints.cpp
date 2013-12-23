@@ -44,7 +44,7 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
   //if (Type::value(osi) != Type::MoreauJeanDirectProjectionOSI)
   OSI::TYPES typeOSI;
   typeOSI = (osi)->getType();
-  if (typeOSI != OSI::MOREAUPROJECTONCONSTRAINTSOSI)
+  if (typeOSI != OSI::MOREAUDIRECTPROJECTIONOSI)
     RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints.  wrong type of OneStepIntegrator");
 
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);

@@ -23,7 +23,7 @@ MBTB_ContactRelation::MBTB_ContactRelation(MBTB_Contact *pC): NewtonEulerFrom1DL
 
 void MBTB_ContactRelation::computeh(double time, Interaction& inter)
 {
-  printf("sPrintDist=\t",sPrintDist);
+  printf("sPrintDist=%d\t",sPrintDist);
   if(sPrintDist)
   {
     printf("MBTB_ContactRelation::computeh Start display for contact name %s\n",_pContact->_ContactName);

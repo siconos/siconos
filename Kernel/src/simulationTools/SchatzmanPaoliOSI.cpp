@@ -38,7 +38,7 @@ using namespace RELATION;
 
 // --- constructor from a minimum set of data ---
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(SP::DynamicalSystem newDS, double newTheta) :
-  OneStepIntegrator(OSI::SCHATZMANPAOLI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
   _theta = newTheta;
@@ -47,7 +47,7 @@ SchatzmanPaoliOSI::SchatzmanPaoliOSI(SP::DynamicalSystem newDS, double newTheta)
 
 // --- constructor from a set of data ---
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(double newTheta):
-  OneStepIntegrator(OSI::SCHATZMANPAOLI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   _theta = newTheta;
   _sizeMem = SCHATZMANPAOLISTEPSINMEMORY ;
@@ -55,7 +55,7 @@ SchatzmanPaoliOSI::SchatzmanPaoliOSI(double newTheta):
 
 // --- constructor from a minimum set of data ---
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
-  OneStepIntegrator(OSI::SCHATZMANPAOLI), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
   _theta = newTheta;
@@ -66,7 +66,7 @@ SchatzmanPaoliOSI::SchatzmanPaoliOSI(SP::DynamicalSystem newDS, double newTheta,
 
 // --- constructor from a set of data ---
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(double newTheta, double newGamma):
-  OneStepIntegrator(OSI::SCHATZMANPAOLI), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _useGammaForRelation(false)
 {
   _theta = newTheta;
   _gamma = newGamma;

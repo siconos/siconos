@@ -579,7 +579,7 @@ void _MBTB_printHeader(FILE *fp)
   }
   for(int numC=0; numC<sNbOfContacts; numC++)
   {
-    fprintf(fp,"ContactForce_%s_%d_%d\t",sContacts[numC]->contactName(),cmp,cmp+6-1,numC);
+    fprintf(fp,"ContactForce_%s_%d_%d,%d\t",sContacts[numC]->contactName(),cmp,cmp+6-1,numC);
     cmp+=6;
     
   }

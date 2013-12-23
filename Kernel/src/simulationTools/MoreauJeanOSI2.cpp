@@ -31,7 +31,7 @@ using namespace RELATION;
 // --- constructor from a minimum set of data ---
 MoreauJeanOSI2::MoreauJeanOSI2(SP::DynamicalSystem newDS, double newTheta): MoreauJeanOSI(newDS, newTheta)
 {
-  integratorType = OSI::MOREAU2;
+  integratorType = OSI::MOREAUJEANOSI2;
 }
 
 MoreauJeanOSI2::~MoreauJeanOSI2()

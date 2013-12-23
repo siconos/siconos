@@ -37,7 +37,7 @@ using namespace RELATION;
 
 // --- constructor from a minimum set of data ---
 EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem newDS, double newTheta) :
-  OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::EULERMOREAUOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
   _theta = newTheta;
@@ -45,14 +45,14 @@ EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem newDS, double newTheta) :
 
 // --- constructor with theta parameter value  ---
 EulerMoreauOSI::EulerMoreauOSI(double newTheta):
-  OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::EULERMOREAUOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   _theta = newTheta;
 }
 
 // --- constructor from a minimum set of data ---
 EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
-  OneStepIntegrator(OSI::MOREAU), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::EULERMOREAUOSI), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
   _theta = newTheta;
@@ -62,7 +62,7 @@ EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem newDS, double newTheta, doubl
 
 // --- constructor from a set of data ---
 EulerMoreauOSI::EulerMoreauOSI(double newTheta, double newGamma):
-  OneStepIntegrator(OSI::MOREAU), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::EULERMOREAUOSI), _useGammaForRelation(false)
 {
   _theta = newTheta;
   _gamma = newGamma;
