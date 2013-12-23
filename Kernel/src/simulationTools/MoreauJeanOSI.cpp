@@ -23,16 +23,11 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
-#include "FirstOrderLinearTIDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "LagrangianRheonomousR.hpp"
-#include "FirstOrderLinearTIR.hpp"
-#include "FirstOrderLinearR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-#include "FirstOrderType2R.hpp"
-#include "FirstOrderType1R.hpp"
 #include "CxxStd.hpp"
 
 //#define DEBUG_STDOUT
@@ -266,7 +261,7 @@ void MoreauJeanOSI::initialize()
     // W initialization
     initW(t0, *itDS);
 
-    //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
+
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
   }
 }
@@ -286,62 +281,15 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
     RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
 
-  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
   // Memory allocation for W
   //  WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
   //   SP::SiconosMatrix W = WMap[ds];
 
   double h = simulationLink->timeStep();
   Type::Siconos dsType = Type::value(*ds);
-
-  // 1 - First order non linear systems
-  if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-  {
-    //    // Memory allocation for W
-    //     WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
-    //     SP::SiconosMatrix W = WMap[ds];
-
-    // W =  M - h*_theta* [jacobian_x f(t,x,z)]
-    SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
-
-    // Copy M or I if M is Null into W
-
-
-    //    SP::SiconosMatrix W = WMap[ds];
-
-    if (d->M())
-      //      *W = *d->M();
-      WMap[dsN].reset(new SimpleMatrix(*d->M()));
-
-    else
-    {
-      //W->eye();
-      // WMap[ds].reset(new SimpleMatrix(sizeW,sizeW,Siconos::IDENTITY));
-      WMap[dsN].reset(new SimpleMatrix(sizeW, sizeW)); // Warning if the Jacobian is a sparse matrix
-      WMap[dsN]->eye();
-    }
-    SP::SiconosMatrix W = WMap[dsN];
-
-
-    // d->computeJacobianfx(t); // Computation of JacxF is not required here
-    // since it must have been done in OSI->initialize, before a call to this function.
-
-    // Add -h*_theta*jacobian_XF to W
-    scal(-h * _theta, *d->jacobianfx(), *W, false);
-  }
-  // 2 - First order linear systems
-  //   else if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-  //     {
-  //       SP::FirstOrderLinearDS d = std11::static_pointer_cast<FirstOrderLinearDS> (ds);
-  //       if( d->M() )
-  //  *W = *d->M();
-  //       else
-  //  W->eye();
-
-  //       scal(-h*_theta, *d->A(),*W,false);
-  //     }
-  // 3 - Lagrangian non linear systems
-  else if (dsType == Type::LagrangianDS)
+  
+  
+  if (dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
@@ -361,7 +309,7 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
       initWBoundaryConditions(d);
 
   }
-  // 4 - Lagrangian linear systems
+  // 2 - Lagrangian linear systems
   else if (dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
@@ -507,59 +455,7 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
 
   SP::SiconosMatrix W = WMap[dsN];
 
-  // 1 - First order non linear systems
-  if (dsType == Type::FirstOrderNonLinearDS)
-  {
-    // W =  M - h*_theta* [jacobian_x f(t,x,z)]
-    SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
-
-    // Copy M or I if M is Null into W
-    if (d->M())
-      *W = *d->M();
-    else
-      W->eye();
-
-    d->computeJacobianfx(t);
-    // Add -h*_theta*jacobian_XF to W
-    scal(-h * _theta, *d->jacobianfx(), *W, false);
-  }
-  // 2 - First order linear systems
-  else if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-  {
-    SP::FirstOrderLinearDS d = std11::static_pointer_cast<FirstOrderLinearDS> (ds);
-    if (dsType == Type::FirstOrderLinearDS)
-      d->computeA(t);
-
-    if (d->M())
-      *W = *d->M();
-    else
-      W->eye();
-    scal(-h * _theta, *d->A(), *W, false);
-  }
-  // 3 - Lagrangian non linear systems
-  else if (dsType == Type::LagrangianDS)
-  {
-    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
-    SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
-
-    d->computeMass();
-    *W = *d->mass();
-
-    if (C)
-    {
-      d->computeJacobianqDotForces(t);
-      scal(-h * _theta, *C, *W, false); // W -= h*_theta*C
-    }
-
-    if (K)
-    {
-      d->computeJacobianqForces(t);
-      scal(-h * h * _theta * _theta, *K, *W, false); //*W -= h*h*_theta*_theta**K;
-    }
-  }
-  // 4 - Lagrangian linear systems
-  else if (dsType == Type::LagrangianLinearTIDS)
+  if (dsType == Type::LagrangianLinearTIDS)
   {
     // Nothing: W does not depend on time.
   }
@@ -623,113 +519,9 @@ double MoreauJeanOSI::computeResidu()
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
     SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu);
-    // 1 - First Order Non Linear Systems
-    if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS)
-    {
-      // ResiduFree = M(x_k,i+1 - x_i) - h*theta*f(t,x_k,i+1) - h*(1-theta)*f(ti,xi)
-      // Residu = Residu - h*r^k_i+1
-      //  $\mathcal R(x,r) = M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
-      //  $\mathcal R_{free}(x,r) = M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
 
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // Index k stands for Newton iteration and thus corresponds to the last computed
-      // value, ie the one saved in the DynamicalSystem.
-      // "i" values are saved in memory vectors.
-
-      SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector xold = d->xMemory()->getSiconosVector(0); // xi
-
-      SP::SiconosVector x = d->x(); // last saved value for x
-      SP::SiconosMatrix M = d->M();
-
-      *residuFree = *x;
-      *residuFree -= *xold;
-      //       std::cout<<"MoreauJeanOSI: x"<<endl;
-      //       (x)->display();
-      //       std::cout<<"MoreauJeanOSI: xold"<<endl;
-      //       (xold)->display();
-
-
-
-      if (M)
-        prod(*M, *residuFree, *residuFree, true);
-
-      if (d->f())
-      {
-
-        double coef = -h * (1 - _theta);
-        if (dsType == Type::FirstOrderLinearDS)
-        {
-          // computes f(ti,xi)
-          //This computation is done since fold not  is up to date.
-          d->computef(told, xold);
-          // residuFree += coef * f_i
-          scal(coef, *d->f(), *residuFree, false);
-        }
-        else
-        {
-          // residuFree += coef * f_i
-          scal(coef, *d->fold(), *residuFree, false);
-        }
-        //          std::cout<<"MoreauJeanOSI: fold"<<endl;
-        //          (*d->fold()).display();
-        // computes f(ti+1, x_k,i+1) = f(t,x)
-        d->computef(t);
-        coef = -h * _theta;
-        // residuFree += coef * fL_k,i+1
-        //          std::cout<<"MoreauJeanOSI: f"<<endl;
-        //          (*d->f()).display();
-        scal(coef, *d->f(), *residuFree, false);
-      }
-      //      std::cout<<"MoreauJeanOSI: residu free"<<endl;
-      //      (*residuFree).display();
-      (*(d->workspace(DynamicalSystem::free))) = *residuFree;
-      scal(-h, *d->r(), (*d->workspace(DynamicalSystem::free)), false); // residu = residu - h*r
-      normResidu = d->workspace(DynamicalSystem::free)->norm2();
-      //    std::cout<<"MoreauJeanOSI: residu "<<endl;
-      //    (workX[d])->display();
-      //    std::cout<<"MoreauJeanOSI: norm residu :"<<normResidu<<endl;
-
-
-      //(*d->residur())=(*d->r()) -(*d->gAlpha());
-
-      //      std::cout<<"MoreauJeanOSI Type::FirstOrderNonLinearDS: residu r"<<endl;
-      //      (*d->residur()).display();
-    }
-    // 2 - First Order Linear Systems with Time Invariant coefficients
-    else if (dsType == Type::FirstOrderLinearTIDS)
-    {
-      SP::FirstOrderLinearTIDS d = std11::static_pointer_cast<FirstOrderLinearTIDS>(ds);
-      //Don't use W because it is LU factorized
-      //Residu : R_{free} = M(x^{\alpha}_{k+1} - x_{k}) -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1})
-      // because x_k+1=x_k:
-      //Residu : R_{free} = -hAx_k -hb_{k+1}
-      SP::SiconosVector b = d->b();
-      if (b)
-        *residuFree = *b;
-      else
-        residuFree->zero();
-
-      // x value at told
-      SP::SiconosVector xBuffer = d->workspace(DynamicalSystem::local_buffer);
-      *xBuffer = *(d->xMemory()->getSiconosVector(0));
-      //    std::cout<<"MoreauJeanOSI TIDS::computeResidu: x_k"<<endl;
-      //    xBuffer->display();
-
-      SP::SiconosMatrix A = d->A();
-      if (A)
-        prod(*A, *xBuffer, *residuFree, false); // residuFree -= -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1}
-
-
-      *residuFree *= -h;
-
-
-
-    }
     // 3 - Lagrangian Non Linear Systems
-    else if (dsType == Type::LagrangianDS)
+    if (dsType == Type::LagrangianDS)
     {
       DEBUG_PRINT("MoreauJeanOSI::computeResidu(), dsType == Type::LagrangianDS");
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi) - pi+1
@@ -1022,8 +814,6 @@ void MoreauJeanOSI::computeFreeState()
   // "Free" means without taking non-smooth effects into account.
 
   double t = simulationLink->nextTime(); // End of the time step
-  double told = simulationLink->startingTime(); // Beginning of the time step
-  double h = t - told; // time step length
 
   // Operators computed at told have index i, and (i+1) at t.
 
@@ -1042,100 +832,8 @@ void MoreauJeanOSI::computeFreeState()
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
     W = WMap[ds->number()]; // Its W MoreauJeanOSI matrix of iteration.
-
-    // 1 - First Order Non Linear Systems
-    if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-    {
-      // xFree = x_k,i+1  - [W_k,i+1]^{-1} * ResiduFree_k,i+1
-      // with ResiduFree_k,i+1 = = M(x_k,i+1 - x_i) - h*theta*f(t,x_k,i+1) - h*(1-theta)*f(ti,xi)
-
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // Index k stands for Newton iteration and thus corresponds to the last computed
-      // value, ie the one saved in the DynamicalSystem.
-      // "i" values are saved in memory vectors.
-
-      // IN to be updated at current time: W, f
-      // IN at told: f
-      // IN, not time dependant: M
-      SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      //    SP::SiconosVector xold = d->xMemory()->getSiconosVector(0); // xi
-
-      // --- ResiduFree computation ---
-      // ResiduFree = M(x-xold) - h*[theta*f(t) + (1-theta)*f(told)]
-      //
-      // xFree pointer is used to compute and save ResiduFree in this first step.
-      SP::SiconosVector xfree = d->workspace(DynamicalSystem::free);//workX[d];
-      *xfree = *(d->workspace(DynamicalSystem::freeresidu));
-
-      if (_useGamma)
-      {
-        SP::SiconosVector rold = d->rMemory()->getSiconosVector(0);
-        double coeff = -h * (1 - _gamma);
-        scal(coeff, *rold, *xfree, false); //  residuFree += h(1-gamma)*rold
-      }
-
-      SP::SiconosVector x = d->x(); // last saved value for x
-
-      // -- xfree =  x - W^{-1} ResiduFree --
-      // At this point xfree = residuFree
-      // -> Solve WX = xfree and set xfree = X
-      // -- Update W --
-      if (dsType != Type::FirstOrderLinearTIDS)
-        computeW(t, d);
-
-      W->PLUForwardBackwardInPlace(*xfree);
-
-      // -> compute real xfree
-      *xfree *= -1.0;
-      *xfree += *x;
-      //    std::cout<<" moreau::computefreestate xfree"<<endl;
-      //    xfree->display();
-
-      //       if (!simulationLink->model()->nonSmoothDynamicalSystem()->isLinear())
-      //       {
-      SP::SiconosVector xp = d->xp();
-      //      std::cout<<"before moreau::computefreestate xp"<<endl;
-      //      xp->display();
-      W->PLUForwardBackwardInPlace(*xp);
-      scal(h, *xp, *xp);
-      *xp += *xfree;
-      //      std::cout<<"after moreau::computefreestate xp"<<endl;
-      //      xp->display();
-      SP::SiconosVector xq = d->xq();
-      *xq = *xp;
-      *xq -= *x;
-
-      //          std::cout <<boolalpha << _useGamma << std::endl;
-      //          std::cout <<boolalpha << _useGammaForRelation << std::endl;
-      //          std::cout <<_gamma << std::endl;
-
-      if (_useGammaForRelation)
-      {
-        *xq = *xfree;
-        //            std::cout << "xq before" << std::endl;
-        //           xq->display();
-
-        scal(_gamma, *xq, *xq);
-        SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
-        //            std::cout << "xold" << std::endl;
-        //           xold->display();
-
-        scal(1.0 - _gamma, *xold, *xq, false);
-        //           std::cout << "xq after" << std::endl;
-        //           xq->display();
-
-      }
-
-
-      //      }
-
-    }
-
-
     // 3 - Lagrangian Non Linear Systems
-    else if (dsType == Type::LagrangianDS)
+    if (dsType == Type::LagrangianDS)
     {
       // IN to be updated at current time: W, M, q, v, fL
       // IN at told: qi,vi, fLi
@@ -1358,11 +1056,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   Xq = inter->dataXq();
   Yp = inter->yp();
 
-  if (relationType == FirstOrder)
-  {
-    Xfree = inter->data(FirstOrderR::free);
-  }
-  else if (relationType == NewtonEuler)
+  if (relationType == NewtonEuler)
   {
     Xfree = inter->data(NewtonEulerR::free);
   }
@@ -1377,76 +1071,8 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   SP::Interaction mainInteraction = inter;
   assert(mainInteraction);
   assert(mainInteraction->relation());
-
-  if (relationType == FirstOrder && relationSubType == Type2R)
-  {
-
-
-    SP::SiconosVector lambda;
-    lambda = inter->lambda(0);
-    FirstOrderType2R& rel = *std11::static_pointer_cast<FirstOrderType2R>(mainInteraction->relation());
-    C = rel.C();
-    D = rel.D();
-    assert(lambda);
-
-    if (D)
-    {
-      coord[3] = D->size(1);
-      coord[5] = D->size(1);
-      subprod(*D, *lambda, *Yp, coord, true);
-
-      *Yp *= -1.0;
-    }
-    if (C)
-    {
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
-      subprod(*C, *Xq, *Yp, coord, false);
-
-    }
-
-    if (_useGammaForRelation)
-    {
-      RuntimeException::selfThrow("MoreauJeanOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
-    }
-    H_alpha = inter->Halpha();
-    assert(H_alpha);
-    *Yp += *H_alpha;
-  }
-
-  else if (relationType == FirstOrder && relationSubType == Type1R)
-  {
-    FirstOrderType1R& rel = *std11::static_pointer_cast<FirstOrderType1R>(mainInteraction->relation());
-    C = rel.C();
-    F = rel.F();
-    assert(Xfree);
-    assert(Xq);
-
-    if (F)
-    {
-      coord[3] = F->size(1);
-      coord[5] = F->size(1);
-      subprod(*F, *inter->dataZ(), *Yp, coord, true);
-
-    }
-    if (C)
-    {
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
-      subprod(*C, *Xfree, *Yp, coord, false);
-
-    }
-
-    if (_useGammaForRelation)
-    {
-      RuntimeException::selfThrow("MoreauJeanOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
-    }
-    H_alpha = inter->Halpha();
-    assert(H_alpha);
-    *Yp += *H_alpha;
-  }
-
-  else if (relationType == NewtonEuler)
+  
+  if (relationType == NewtonEuler)
   {
     SP::SiconosMatrix CT =  std11::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
 
@@ -1519,32 +1145,6 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       if (relationSubType == ScleronomousR)
       {
 
-      }
-    }
-    if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
-    {
-      // In the first order linear case it may be required to add e + FZ to q.
-      // q = HXfree + e + FZ
-      SP::SiconosVector e;
-      if (relationSubType == LinearTIR)
-      {
-        e = std11::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->e();
-        F = std11::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->F();
-      }
-      else
-      {
-        e = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
-        F = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
-      }
-
-      if (e)
-        *Yp += *e;
-
-      if (F)
-      {
-        coord[3] = F->size(1);
-        coord[5] = F->size(1);
-        subprod(*F, *inter->dataZ(), *Yp, coord, false);
       }
     }
 
@@ -1649,68 +1249,8 @@ void MoreauJeanOSI::updateState(const unsigned int level)
 
     Type::Siconos dsType = Type::value(*ds);
 
-    // 1 - First Order Systems
-    if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-    {
-      SP::FirstOrderNonLinearDS fonlds = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-      SP::SiconosVector x = ds->x();
-      bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && simulationLink->relativeConvergenceCriterionHeld());
-      if (level != LEVELMAX)
-      {
-
-        //    SP::SiconosVector xFree = fonlds->xFree();
-
-        // Save value of q in local_buffer for relative convergence computation
-        if (baux)
-          ds->addWorkVector(x, DynamicalSystem::local_buffer);
-
-        //        std::cout <<boolalpha << _useGamma << std::endl;
-        //        std::cout <<_gamma << std::endl;
-        if (_useGamma)
-        {
-          //SP::SiconosVector rold =d->rMemory()->getSiconosVector(0);
-          // Solve W(x-xfree) = hr
-          scal(_gamma * h, *fonlds->r(), *x); // x = gamma*h*r
-          // scal((1.0-_gamma)*h,*rold,*x,false)// x += (1-gamma)*h*rold
-        }
-        else
-        {
-          // Solve W(x-xfree) = hr
-          scal(h, *fonlds->r(), *x); // x = h*r
-          //      scal(h,*fonlds->gAlpha(),*x); // x = h*gApha
-        }
-
-        W->PLUForwardBackwardInPlace(*x); // x =h* W^{-1} *r
-
-        *x += *(fonlds->workspace(DynamicalSystem::free)); //*workX[ds]; // x+=xfree
-      }
-      else
-      {
-        *x = *(fonlds->workspace(DynamicalSystem::free)); //*workX[ds]; // x=xfree
-      }
-
-      if (baux)
-      {
-        ds->subWorkVector(x, DynamicalSystem::local_buffer);
-        double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
-        if (aux > RelativeTol)
-          simulationLink->setRelativeConvergenceCriterionHeld(false);
-      }
-
-
-      //  }else if (dsType == Type::FirstOrderLinearTIDS){
-      //    SP::FirstOrderNonLinearDS fonlds = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-      //    SP::SiconosVector x = ds->x();
-      //    // Solve W(x-xfree) = hr
-      //    *x=*fonlds->r();
-      //    W->PLUForwardBackwardInPlace(*x); // x = W^{-1} *r
-      //    scal(h,*x,*x); // x = h*W^{-1}*r
-      //    *x +=*(fonlds->xfree());//*workX[ds]; // x+=xfree
-      //    //    std::cout<<"X alpha+1"<<endl;
-      //    //    x->display();
-    }
     // 3 - Lagrangian Systems
-    else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       // get dynamical system
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
