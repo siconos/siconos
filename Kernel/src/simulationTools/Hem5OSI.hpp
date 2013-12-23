@@ -16,22 +16,21 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  *
- * WARNING: at the time mainly written for Lagrangian systems !!!
  */
-/*! \file
-  Lsodar solver (from odepack)
-*/
-#ifndef Lsodar_H
-#define Lsodar_H
+/*! \file Hem5OSI.cpp
+ * Hem5OSI solver (from E. Hairer software lists)
+ */
+#ifndef Hem5OSI_H
+#define Hem5OSI_H
 
 #include"OneStepIntegrator.hpp"
 #include"SiconosNumerics.h"
 #include<vector>
-const doublereal ATOL_DEFAULT = 100 * MACHINE_PREC;
-const doublereal RTOL_DEFAULT = 10 * MACHINE_PREC;
+const doublereal HEM5_ATOL_DEFAULT = 100 * MACHINE_PREC;
+const doublereal HEM5_RTOL_DEFAULT = 10 * MACHINE_PREC;
 class BlockVector;
 
-/** Lsodar solver (odepack)
+/** Hem5OSI solver (odepack)
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -48,18 +47,30 @@ class BlockVector;
  *    RTOL   = a relative error tolerance parameter, either a scalar or array of length NEQ. \n
  *    ATOL   = an absolute error tolerance parameter, either a scalar or an array of length NEQ.  Input only.
  */
-class Lsodar : public OneStepIntegrator, public std11::enable_shared_from_this<Lsodar>
+class Hem5OSI : public OneStepIntegrator, public std11::enable_shared_from_this<Hem5OSI>
 {
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(Lsodar);
+  ACCEPT_SERIALIZATION(Hem5OSI);
 
-
-  /** neq, ng, itol, itask, istate, iopt, lrw, liw, jt
-   * See opkdmain.f and lsodar routine for details on those variables.
+  /** vector of integer data for the integrator
+   * _intData[0] NQ size of the position vector q
+   * _intData[1] NV size of the velocity  vector v NQ >= NQ
+   * _intData[2] NU size of the external dynamic vector u
+   * _intData[3] NL size of the Lagrange multiplier vector lambda
+   * _intData[4] ITOL indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
+   *             dimension NQ + NV + NU (ITOL=1)
+   * _intData[5] IOUT selects the dense output formula
+   * _intData[6] LWK length of real array rwork
+   * _intData[7] LIWK length of integer array iwork
+   * See hem5.f
    */
   std::vector<integer> _intData;
+
+
+  integer _idid;
+
   /** relative tolerance */
   SA::doublereal rtol;
   /** absolute tolerance */
@@ -68,12 +79,32 @@ private:
   SA::doublereal rwork;
   /** integer work array */
   SA::integer iwork;
-  /** integer array used for output of root information */
-  SA::integer jroot;
-  /** temporary vector to save x values */
-  SP::BlockVector _xWork;
 
-  SP::SiconosVector _xtmp;
+
+  doublereal _timeStep; // initial step size guess
+
+  /** temporary vector to save q values */
+  SP::BlockVector _qWork;
+  /** temporary vector to save v values */
+  SP::BlockVector _vWork;
+  /** temporary vector to save v values */
+  SP::BlockVector _uWork;
+  /** temporary vector to save a values */
+  SP::BlockVector _aWork;
+  /** temporary vector to save lambda values */
+  SP::BlockVector _lambdaWork;
+  /** temporary vector to save forces values */
+  SP::BlockVector _forcesWork;
+
+  Hem5OSI() {};
+
+  SP::SiconosVector _qtmp;
+  SP::SiconosVector _vtmp;
+  SP::SiconosVector _utmp;
+  SP::SiconosVector _atmp;
+  SP::SiconosVector _lambdatmp;
+  SP::SiconosVector _forcestmp;
+
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
@@ -81,24 +112,14 @@ private:
 
 
 public:
-
-  /** Default constructor */
-  Lsodar();
-
-  /** constructor from xml file
-      \param OneStepIntegratorXML* : the XML object
-      \param the set of all DS in the NSDS
-  */
-  Lsodar(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
-
   /** constructor from a minimum set of data
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    */
-  Lsodar(SP::DynamicalSystem);
+  Hem5OSI(SP::DynamicalSystem);
 
   /** destructor
    */
-  ~Lsodar() {};
+  ~Hem5OSI() {};
 
   /** get vector of integer parameters for lsodar
    *  \return a vector<integer>
@@ -144,7 +165,7 @@ public:
   */
   inline  int getMaxNstep()const
   {
-    return iwork[5];
+    return iwork[11];
   }
 
   /** get real work vector parameter for lsodar
@@ -163,62 +184,49 @@ public:
     return iwork;
   }
 
-  /** get output of root information
-   *  \return a pointer to integer
-   */
-  inline SA::integer getJroot() const
-  {
-    return jroot;
-  }
-
-  /** set Jt value, Jacobian type indicator
-   *  \param pointer to integer
-   */
-  inline void setJT(integer newValue)
-  {
-    _intData[8] = newValue;
-  };
-
   /** set itol, rtol and atol (tolerance parameters for lsodar)
-   *  \param newItol integer (itol value)
-   *  \param newRtol doublereal * (rtol)
-   *  \param newAtol doublereal * (atol)
+   *  \param integer (itol value)
+   *  \param doublereal * (rtol)
+   *  \param doublereal * (atol)
    */
-  void setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol);
+  void setTol(integer, SA::doublereal, SA::doublereal);
 
   /** set itol, rtol and atol (scalar tolerance parameters for lsodar)
-   *  \param newItol integer (itol value)
-   *  \param newRtol double (rtol)
-   *  \param newAtol double (atol)
+   *  \param integer (itol value)
+   *  \param double (rtol)
+   *  \param double (atol)
    */
-  void setTol(integer newItol, doublereal newRtol, doublereal newAtol);
+  void setTol(integer, doublereal, doublereal);
 
-  /** set the maximul number of steps for one call of Lsodar
+  /** set the maximul number of steps for one call of Hem5OSI
    *\param an integer
    */
   void setMaxNstep(integer);
 
   /** set the minimum and maximum step sizes
-   *\param double (minimum step size)
    *\param double (maximul step size)
    */
-  void setMinMaxStepSizes(doublereal, doublereal);
+  void setMaxStepSize(doublereal);
 
-  /** set maximum method order
-   *\param integer (maximum order for nonstiff method)
-   *\param integer (maximum order for stiff method)
+  /** update _intData
    */
-  void setMaxOrder(integer, integer);
+  void updateIntData();
 
   /** update doubleData and iwork memory size, when changes occur in _intData.
    */
   void updateData();
 
-  /** fill xWork with a doublereal
+  /** fill qWork with a doublereal
    *  \param integer*, size of x array
    *  \param doublereal* x:array of double
    */
-  void fillXWork(integer*, doublereal*) ;
+  void fillqWork(integer*, doublereal*) ;
+
+  /** fill vWork with a doublereal
+   *  \param integer*, size of x array
+   *  \param doublereal* x:array of double
+   */
+  void fillvWork(integer*, doublereal*) ;
 
   /** compute rhs(t) for all dynamical systems in the set
    */
@@ -227,6 +235,35 @@ public:
   /** compute jacobian of the rhs at time t for all dynamical systems in the set
    */
   void computeJacobianRhs(double) ;
+
+  unsigned int numberOfConstraints();
+
+  void fprob(integer* IFCN,
+             integer* NQ,
+             integer* NV,
+             integer* NU,
+             integer* NL,
+             integer* LDG, integer* LDF, integer* LDA,
+             integer* NBLK, integer* NMRC,
+             integer* NPGP, integer* NPFL,
+             integer* INDGR, integer* INDGC, integer * INDFLR, integer * INDFLC,
+             doublereal* time,
+             doublereal* q, doublereal* v, doublereal* u,  doublereal* xl,
+             doublereal* G, doublereal* GQ, doublereal * F,
+             doublereal* GQQ, doublereal* GT, doublereal * FL,
+             doublereal* QDOT, doublereal* UDOT, doublereal * AM);
+
+  void solout(integer* MODE,
+              integer* NSTEP,
+              integer* NQ,
+              integer* NV,
+              integer* NU,
+              integer* NL,
+              integer* LDG, integer* LDF, integer* LDA,
+              integer* LRDO, integer* LIDO,
+              fprobpointer FPROB,
+              doublereal* q, doublereal* v, doublereal* u,
+              doublereal *DOWK, integer* IDOWK);
 
   void f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot);
 
@@ -251,12 +288,6 @@ public:
    */
   void updateState(const unsigned int level);
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepIntegrator* : the integrator which must be converted
-   * \return a pointer on the integrator if it is of the right type, NULL otherwise
-   */
-  //static Lsodar* convert (OneStepIntegrator* osi);
-
   void prepareNewtonIteration(double time)
   {
     assert(0);
@@ -277,4 +308,4 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-#endif // Lsodar_H
+#endif // Hem5OSI_H

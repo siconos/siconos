@@ -19,10 +19,10 @@
 
 
 /*!\file
-  C++ input file, D1MinusLinear-Time-Stepping version
+  C++ input file, D1MinusLinearOSI-Time-Stepping version
   T. Schindler, V. Acary
 
-  Slider-crank simulation with a D1MinusLinear-Time-Stepping scheme
+  Slider-crank simulation with a D1MinusLinearOSI-Time-Stepping scheme
 
   see Flores/Leine/Glocker : Modeling and analysis of planar rigid multibody systems with
   translational clearance joints based on the non-smooth dynamics approach
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     // ----------------
     // --- Simulation ---
     // ----------------
-    SP::D1MinusLinear OSI(new D1MinusLinear(slider));
+    SP::D1MinusLinearOSI OSI(new D1MinusLinearOSI(slider));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem force(new LCP());
@@ -312,7 +312,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("SliderCrankD1MinusLinear.ref", "ascii", dataPlotRef);
+    ioMatrix::read("SliderCrankD1MinusLinearOSI.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
@@ -329,6 +329,6 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in SliderCrankD1MinusLinear.cpp" << endl;
+    cout << "Exception caught in SliderCrankD1MinusLinearOSI.cpp" << endl;
   }
 }

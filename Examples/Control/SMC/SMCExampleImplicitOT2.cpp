@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
   SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
   processSimulation->setName("plant simulation");
   // -- OneStepIntegrators --
-  SP::ZeroOrderHold processIntegrator(new ZeroOrderHold(processDS));
+  SP::ZeroOrderHoldOSI processIntegrator(new ZeroOrderHoldOSI(processDS));
   processSimulation->insertIntegrator(processIntegrator);
 
   // Control stuff

@@ -18,7 +18,7 @@
  */
 
 #include "TimeSteppingD1Minus.hpp"
-#include "D1MinusLinear.hpp"
+#include "D1MinusLinearOSI.hpp"
 #include "TimeDiscretisation.hpp"
 #include "Topology.hpp"
 //#include "Interaction.hpp"
@@ -112,9 +112,9 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
 
   DEBUG_PRINTF("\nINDEXSETS BEFORE UPDATE for level = %i\n",i);
-  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
-  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
-  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
 
   // DEBUG_EXPR(indexSet0->display());
   // DEBUG_PRINT("\n");
@@ -265,9 +265,9 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   }
 
   DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);
-  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
-  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
-  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
   // DEBUG_EXPR(indexSet0->display());
   // DEBUG_PRINT("\n");
   // DEBUG_EXPR(indexSet1->display());

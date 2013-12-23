@@ -37,7 +37,7 @@
  *
  * !!! This is a virtual class, interface for some specific integrators !!!
  *
- * At the time, available integrators are: MoreauJeanOSI and Lsodar
+ * At the time, available integrators are: MoreauJeanOSI and LsodarOSI
  *
  */
 class OneStepIntegrator
@@ -245,7 +245,7 @@ public:
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
-   *  \param int: flag used in Lsodar.
+   *  \param int: flag used in LsodarOSI.
    */
   virtual void integrate(double&, double&, double&, int&) = 0;
 

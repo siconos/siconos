@@ -269,7 +269,7 @@ public:
   virtual void computeb(double time);
 
   /** Default function to the right-hand side term. This is used only by
-   * Lsodar with EventDriven
+   * LsodarOSI with EventDriven
    *  \param time current time
    *  \param isDSup flag to avoid recomputation of operators
    *  \warning the \f$z\f$ input is not taken into account when computing the RHS

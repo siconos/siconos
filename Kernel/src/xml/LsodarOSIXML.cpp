@@ -16,42 +16,12 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file
-*/
+#include "LsodarOSIXML.hpp"
 
-#ifndef __LsodarXML__
-#define __LsodarXML__
 
-#include "SiconosPointers.hpp"
-#include "OneStepIntegratorXML.hpp"
+LsodarOSIXML::LsodarOSIXML() : OneStepIntegratorXML()
+{}
 
-/** XML management for Lsodar
- *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date 05/17/2004
- *
- *
- *
- * LsodarXML allows to manage data of a Lsodar DOM tree.
- */
-class LsodarXML : public OneStepIntegratorXML
-{
-public:
+LsodarOSIXML::LsodarOSIXML(xmlNode * LsodarOSINode) : OneStepIntegratorXML(LsodarOSINode)
+{}
 
-  LsodarXML();
-
-  /** Build a LsodarXML object from a DOM tree describing Lsodar OneStepIntegrator
-  *   \param LsodarNode : the Lsodar DOM tree
-  *   \param map<int, bool> definedDSNumbers : to know if DS numbers are not used by another OneStepIntegrator
-  */
-  LsodarXML(xmlNode * LsodarNode);
-private:
-  /** serialization hooks
-  */
-  ACCEPT_SERIALIZATION(LsodarXML);
-
-};
-
-DEFINE_SPTR(LsodarXML)
-#endif

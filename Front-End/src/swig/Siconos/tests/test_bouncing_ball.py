@@ -4,7 +4,7 @@
 def test_bouncing_ball1():
 
     from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL, \
-        LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
+        LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
 
     from numpy import array, eye, empty
 
@@ -59,7 +59,7 @@ def test_bouncing_ball1():
     #
 
     # (1) OneStepIntegrators
-    OSI = Moreau(theta)
+    OSI = MoreauJeanOSI(theta)
     OSI.insertDynamicalSystem(ball)
 
     # (2) Time discretisation --
@@ -231,10 +231,10 @@ def test_bouncing_ball2():
     #
 
     # (1) OneStepIntegrators
-    OSI = K.Moreau(theta)
+    OSI = K.MoreauJeanOSI(theta)
     OSI.insertDynamicalSystem(ball)
 
-    OSI_d = K.Moreau(theta)
+    OSI_d = K.MoreauJeanOSI(theta)
     OSI_d.insertDynamicalSystem(ball_d)
 
     # (2) Time discretisation --

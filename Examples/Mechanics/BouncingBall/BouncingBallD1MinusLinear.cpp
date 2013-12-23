@@ -18,12 +18,12 @@
  */
 
 /*!\file
-  C++ input file, D1MinusLinear-Time-Stepping version
+  C++ input file, D1MinusLinearOSI-Time-Stepping version
   T. Schindler, V. Acary
 
   A Ball bouncing on the ground.
   Direct description of the model without XML input.
-  Simulation with a D1MinusLinear-Time-Stepping scheme.
+  Simulation with a D1MinusLinearOSI-Time-Stepping scheme.
   */
 
 #include "SiconosKernel.hpp"
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     // --- Simulation ---
     // ------------------
     // -- (1) OneStepIntegrators --
-    SP::D1MinusLinear OSI(new D1MinusLinear(ball));
+    SP::D1MinusLinearOSI OSI(new D1MinusLinearOSI(ball));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -205,6 +205,6 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in BouncingBallD1MinusLinear.cpp" << endl;
+    cout << "Exception caught in BouncingBallD1MinusLinearOSI.cpp" << endl;
   }
 }

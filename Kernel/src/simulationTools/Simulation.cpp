@@ -30,12 +30,12 @@
 
 // One Step Integrators
 #include "MoreauJeanOSI.hpp"
-#include "Lsodar.hpp"
-#include "Hem5.hpp"
+#include "LsodarOSI.hpp"
+#include "Hem5OSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
-#include "D1MinusLinear.hpp"
-#include "SchatzmanPaoli.hpp"
-#include "ZeroOrderHold.hpp"
+#include "D1MinusLinearOSI.hpp"
+#include "SchatzmanPaoliOSI.hpp"
+#include "ZeroOrderHoldOSI.hpp"
 // One Step Non Smooth Problems
 #include "LCP.hpp"
 #include "QP.hpp"
@@ -99,8 +99,8 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
     if (typeOfOSI == MOREAU_TAG)
       _allOSI->insert(SP::MoreauJeanOSI(new MoreauJeanOSI(*it, dsList)));
 
-    else if (typeOfOSI == LSODAR_TAG) // if OSI is a Lsodar-type
-      _allOSI->insert(SP::Lsodar(new Lsodar(*it, dsList)));
+    else if (typeOfOSI == LSODAR_TAG) // if OSI is a LsodarOSI-type
+      _allOSI->insert(SP::LsodarOSI(new LsodarOSI(*it, dsList)));
 
     else RuntimeException::selfThrow("Simulation::xml constructor - unknown one-step integrator type: " + typeOfOSI);
   }
@@ -414,7 +414,7 @@ void Simulation::saveSimulationToXML()
       if (typeOSI == OSI::MOREAU)
         (std11::static_pointer_cast<MoreauJeanOSI>(*it))->saveIntegratorToXML();
       else if (typeOSI == OSI::LSODAR)
-        (std11::static_pointer_cast<Lsodar>(*it))->saveIntegratorToXML();
+        (std11::static_pointer_cast<LsodarOSI>(*it))->saveIntegratorToXML();
       else RuntimeException::selfThrow("Simulation::saveSimulationToXML - wrong type of OneStepIntegrator");
     }
 
@@ -679,7 +679,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
 
 
-  void visit(const SchatzmanPaoli&)
+  void visit(const SchatzmanPaoliOSI&)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
     unsigned int upperLevelForOutput = 0;
@@ -716,7 +716,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
     _interaction->setSteps(2);
   };
-  void visit(const D1MinusLinear&)
+  void visit(const D1MinusLinearOSI&)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
     unsigned int upperLevelForOutput = 0;
@@ -741,9 +741,9 @@ struct Simulation::SetupLevels : public SiconosVisitor
         upperLevelForInput = 2;
       }
       else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const D1MinusLinear&) - unknown simulation type: " + Type::name(*_parent));
+        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const D1MinusLinearOSI&) - unknown simulation type: " + Type::name(*_parent));
     }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const D1MinusLinear&) - not yet implemented for Dynamical system type :" + dsType);
+    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const D1MinusLinearOSI&) - not yet implemented for Dynamical system type :" + dsType);
 
     _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
@@ -761,7 +761,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
 
 
-  void visit(const Lsodar&)
+  void visit(const LsodarOSI&)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
     unsigned int upperLevelForOutput = 0;
@@ -821,7 +821,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
 
 
-  void visit(const Hem5&)
+  void visit(const Hem5OSI&)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
     unsigned int upperLevelForOutput = 0;
@@ -939,7 +939,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
 
 
-  void visit(const ZeroOrderHold&)
+  void visit(const ZeroOrderHoldOSI&)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
     unsigned int upperLevelForOutput = 0;

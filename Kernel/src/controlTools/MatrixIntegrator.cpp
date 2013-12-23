@@ -23,7 +23,7 @@
 #include "Model.hpp"
 #include "EventDriven.hpp"
 #include "SubPluggedObject.hpp"
-#include "Lsodar.hpp"
+#include "LsodarOSI.hpp"
 
 MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m, SP::SiconosMatrix E): _E(E)
 {
@@ -74,7 +74,7 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
   // integration stuff
   _model.reset(new Model(m.t0(), m.finalT()));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _OSI.reset(new Lsodar(_DS));
+  _OSI.reset(new LsodarOSI(_DS));
   _sim.reset(new EventDriven(_TD, 0));
   _sim->insertIntegrator(_OSI);
   _model->initialize(_sim);
@@ -103,7 +103,7 @@ void MatrixIntegrator::integrate()
       _spo->setIndex(i);
     else
       x(i) = 1;
-    //Reset Lsodar
+    //Reset LsodarOSI
     _sim->setIstate(3);
     _sim->advanceToEvent();
     _mat->setCol(i, x);

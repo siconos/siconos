@@ -26,7 +26,7 @@
 
 #include "SiconosVector.hpp"
 #include "ControlSensor.hpp"
-#include "ZeroOrderHold.hpp"
+#include "ZeroOrderHoldOSI.hpp"
 #include "TimeDiscretisation.hpp"
 #include "ActuatorFactory.hpp"
 

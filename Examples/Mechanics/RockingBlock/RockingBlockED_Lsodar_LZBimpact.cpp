@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
     //1. Time discretization
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(TimeInitial, StepSize));
     //2. Integration solver for one step
-    SP::OneStepIntegrator OSI(new Lsodar(RockingBlock));
+    SP::OneStepIntegrator OSI(new LsodarOSI(RockingBlock));
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new OSNSMultipleImpact(TypeContactLaw, DelP));
     SP::OSNSMultipleImpact multiple_impact = boost::dynamic_pointer_cast<OSNSMultipleImpact>(impact);
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     RoBlockModel->initialize(EDscheme); // initialize the model
 
 
-    //SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(OSI);
+    //SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(OSI);
     //lsodar->setMinMaxStepSizes(1.0e-3,1.0e-3);
     //lsodar->setTol(1,1.0e-3,1.0e-6);
     //lsodar->setMaxOrder(2, 2);
@@ -278,7 +278,7 @@ int main(int argc, char* argv[])
     std::cout << "Comparison with a reference file" << std::endl;
     SimpleMatrix dataPlotRef(DataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("resultED_LZBmodel_Lsodar.ref", "ascii", dataPlotRef);
+    ioMatrix::read("resultED_LZBmodel_LsodarOSI.ref", "ascii", dataPlotRef);
 
     double error = (DataPlot - dataPlotRef).normInf()/dataPlotRef.normInf();
     std::cout << "Error = "<< error << std::endl;

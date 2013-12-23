@@ -28,12 +28,12 @@
     REGISTER(MoreauJeanOSI)                              \
     REGISTER(MoreauJeanDirectProjectionOSI)       \
     REGISTER(MoreauJeanCombinedProjectionOSI)         \
-    REGISTER(Lsodar)                              \
-    REGISTER(Hem5)                                \
+    REGISTER(LsodarOSI)                              \
+    REGISTER(Hem5OSI)                                \
     REGISTER(NewMarkAlphaOSI)                     \
-    REGISTER(D1MinusLinear)                       \
-    REGISTER(SchatzmanPaoli)                       \
-    REGISTER(ZeroOrderHold)                        \
+    REGISTER(D1MinusLinearOSI)                       \
+    REGISTER(SchatzmanPaoliOSI)                       \
+    REGISTER(ZeroOrderHoldOSI)                        \
     REGISTER(OneStepNSProblem)                     \
     REGISTER(LinearOSNS)                           \
     REGISTER(LCP)                                  \

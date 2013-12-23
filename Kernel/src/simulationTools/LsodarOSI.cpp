@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "Lsodar.hpp"
+#include "LsodarOSI.hpp"
 #include "EventDriven.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockVector.hpp"
@@ -41,27 +41,27 @@ using namespace RELATION;
 // ===== Out of class objects and functions =====
 
 // global object and wrapping functions -> required for function plug-in and call in fortran routine.
-SP::Lsodar global_object;
+SP::LsodarOSI global_object;
 
 // This first function must have the same signature as argument F (arg 1) in DLSODAR (see opkdmain.f in Numerics)
-extern "C" void Lsodar_f_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
+extern "C" void LsodarOSI_f_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
   return global_object->f(sizeOfX, time, x, xdot);
 }
 
 // Function to wrap g: same signature as argument G (arg 18) in DLSODAR (see opkdmain.f in Numerics)
-extern "C" void Lsodar_g_wrapper(integer* nEq, doublereal* time, doublereal* x, integer* ng, doublereal* gOut)
+extern "C" void LsodarOSI_g_wrapper(integer* nEq, doublereal* time, doublereal* x, integer* ng, doublereal* gOut)
 {
   return global_object->g(nEq, time, x, ng, gOut);
 }
 
 // Function to wrap jacobianf: same signature as argument JAC (arg 16) in DLSODAR (see opkdmain.f in Numerics)
-extern "C" void Lsodar_jacobianf_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
+extern "C" void LsodarOSI_jacobianf_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
   return global_object->jacobianfx(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
 
-Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
+LsodarOSI::LsodarOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   OneStepIntegrator(OSI::LSODAR, osiXML, dsList)
 {
   // local time discretisation is set by default to those of the simulation.
@@ -70,7 +70,7 @@ Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   _sizeMem = 2;
 }
 
-Lsodar::Lsodar():
+LsodarOSI::LsodarOSI():
   OneStepIntegrator(OSI::LSODAR)
 {
   _intData.resize(9);
@@ -78,7 +78,7 @@ Lsodar::Lsodar():
   _sizeMem = 2;
 }
 
-Lsodar::Lsodar(SP::DynamicalSystem ds):
+LsodarOSI::LsodarOSI(SP::DynamicalSystem ds):
   OneStepIntegrator(OSI::LSODAR)
 {
   // add ds in the set
@@ -89,7 +89,7 @@ Lsodar::Lsodar(SP::DynamicalSystem ds):
   _sizeMem = 2;
 }
 
-void Lsodar::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
+void LsodarOSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
 {
   //            The input parameters ITOL, RTOL, and ATOL determine
   //         the error control performed by the solver.  The solver will
@@ -113,34 +113,34 @@ void Lsodar::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newA
   atol = newAtol;
 }
 
-void Lsodar::setMinMaxStepSizes(doublereal _minStep, doublereal _maxStep)
+void LsodarOSI::setMinMaxStepSizes(doublereal _minStep, doublereal _maxStep)
 {
   _intData[5] = 1; // set IOPT = 1
   rwork[5] = _minStep;
   rwork[6] = _maxStep;
 }
 
-void Lsodar::setMaxNstep(integer _maxNumberSteps)
+void LsodarOSI::setMaxNstep(integer _maxNumberSteps)
 {
   _intData[5] = 1; // set IOPT = 1
   iwork[5] = _maxNumberSteps;
 }
 
-void Lsodar::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
+void LsodarOSI::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
 {
   _intData[2] = newItol; // itol
   rtol[0] = newRtol; // rtol
   atol[0] = newRtol;  // atol
 }
 
-void Lsodar::setMaxOrder(integer _maxorderNonStiff, integer _maxorderStiff)
+void LsodarOSI::setMaxOrder(integer _maxorderNonStiff, integer _maxorderStiff)
 {
   _intData[5] = 1; // set IOPT = 1
   iwork[7] = _maxorderNonStiff;
   iwork[8] = _maxorderStiff;
 }
 
-void Lsodar::updateData()
+void LsodarOSI::updateData()
 {
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
@@ -170,43 +170,43 @@ void Lsodar::updateData()
 
 }
 
-void Lsodar::fillXWork(integer* sizeOfX, doublereal* x)
+void LsodarOSI::fillXWork(integer* sizeOfX, doublereal* x)
 {
   unsigned int sizeX = (unsigned int)(*sizeOfX);
   for (unsigned int i = 0; i < sizeX ; ++i)
     (*_xWork)(i) = x[i];
 }
 
-void Lsodar::computeRhs(double t)
+void LsodarOSI::computeRhs(double t)
 {
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     (*it)->computeRhs(t);
 }
 
-void Lsodar::computeJacobianRhs(double t)
+void LsodarOSI::computeJacobianRhs(double t)
 {
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     (*it)->computeJacobianRhsx(t);
 }
 
-void Lsodar::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
+void LsodarOSI::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
   std11::static_pointer_cast<EventDriven>(simulationLink)->computef(shared_from_this(), sizeOfX, time, x, xdot);
 }
 
-void Lsodar::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
+void LsodarOSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 {
   std11::static_pointer_cast<EventDriven>(simulationLink)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
-void Lsodar::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
+void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
   std11::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 }
 
-void Lsodar::initialize()
+void LsodarOSI::initialize()
 {
   OneStepIntegrator::initialize();
   _xWork.reset(new BlockVector());
@@ -302,10 +302,10 @@ void Lsodar::initialize()
   //   4     array      array      RTOL(i)*ABS(Y(i)) + ATOL(i)
 }
 
-void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
+void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate)
 {
 
-  DEBUG_PRINT("Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate) with \n");
+  DEBUG_PRINT("LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate) with \n");
   DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend,  tout, istate);
 
   // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
@@ -314,17 +314,17 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
-  global_object = std11::static_pointer_cast<Lsodar>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
+  global_object = std11::static_pointer_cast<LsodarOSI>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
 
   // function to compute the righ-hand side of xdot = f(x,t) + Tu
-  fpointer pointerToF = Lsodar_f_wrapper;
+  fpointer pointerToF = LsodarOSI_f_wrapper;
 
   // function to compute the Jacobian/x of the rhs.
-  jacopointer pointerToJacobianF = Lsodar_jacobianf_wrapper; // function to compute the Jacobian/x of the rhs.
+  jacopointer pointerToJacobianF = LsodarOSI_jacobianf_wrapper; // function to compute the Jacobian/x of the rhs.
 
   // function to compute the constraints
   gpointer pointerToG;
-  pointerToG = Lsodar_g_wrapper; // function to compute the constraints
+  pointerToG = LsodarOSI_g_wrapper; // function to compute the constraints
 
   // === LSODAR CALL ===
 
@@ -370,7 +370,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
     std::cout << " -5 means repeated convergence failures (perhaps bad Jacobian supplied or wrong choice of JT or tolerances)." <<std::endl;
     std::cout << " -6 means error weight became zero during problem. (Solution component i vanished, and ATOL or ATOL(i) = 0.)" <<std::endl;
     std::cout << " -7 means work space insufficient to finish (see messages)." <<std::endl;
-    RuntimeException::selfThrow("Lsodar, integration failed");
+    RuntimeException::selfThrow("LsodarOSI, integration failed");
   }
 
   *_xWork = *_xtmp;
@@ -389,7 +389,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 }
 
 
-void Lsodar::updateState(const unsigned int level)
+void LsodarOSI::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   DSIterator it;
@@ -408,10 +408,10 @@ void Lsodar::updateState(const unsigned int level)
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       (*it)->update(time);
   }
-  else RuntimeException::selfThrow("Lsodar::updateState(index), index is out of range. Index = " + level);
+  else RuntimeException::selfThrow("LsodarOSI::updateState(index), index is out of range. Index = " + level);
 }
 
-struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
+struct LsodarOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
@@ -442,7 +442,7 @@ struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void Lsodar::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
+void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
@@ -534,7 +534,7 @@ void Lsodar::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, One
     {
       if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
       {
-        RuntimeException::selfThrow("Lsodar::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
+        RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
       }
       else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
@@ -542,7 +542,7 @@ void Lsodar::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, One
         subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
       }
       else
-        RuntimeException::selfThrow("Lsodar::computeFreeOutput not implemented for SICONOS_OSNSP ");
+        RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
     }
     // For the relation of type LagrangianScleronomousR
     if (relationSubType == ScleronomousR)
@@ -555,7 +555,7 @@ void Lsodar::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, One
     }
   }
   else
-    RuntimeException::selfThrow("Lsodar::computeFreeOutput not yet implemented for Relation of type " + relationType);
+    RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for Relation of type " + relationType);
   if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
     if (inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
@@ -566,10 +566,10 @@ void Lsodar::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, One
   }
 
 }
-void Lsodar::display()
+void LsodarOSI::display()
 {
   OneStepIntegrator::display();
-  std::cout << " --- > Lsodar specific values: " <<std::endl;
+  std::cout << " --- > LsodarOSI specific values: " <<std::endl;
   std::cout << "Number of equations: " << _intData[0] <<std::endl;
   std::cout << "Number of constraints: " << _intData[1] <<std::endl;
   std::cout << "itol, itask, istate, iopt, lrw, liw, jt: (for details on what are these variables see opkdmain.f)" <<std::endl;

@@ -1002,7 +1002,7 @@ public:
   void resetNonSmoothPart(unsigned int level);
 
   /** Computes post-impact velocity, using pre-impact velocity and impulse (p) value.
-   * Used in EventDriven (Lsodar->updateState)
+   * Used in EventDriven (LsodarOSI->updateState)
    */
   void computePostImpactVelocity();
   /** set Boundary Conditions

@@ -279,7 +279,7 @@ void LagrangianLinearTIDS::computeJacobianRhsx(double time, bool)
 {
   // Nothing to be done since jacobianRhsx is constant and filled
   // during initialize.  But this function is required, since it is
-  // called from Lsodar (if not present, the one of LagrangianDS will
+  // called from LsodarOSI (if not present, the one of LagrangianDS will
   // be called)
 }
 

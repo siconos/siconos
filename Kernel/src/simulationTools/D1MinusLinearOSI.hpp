@@ -18,7 +18,7 @@
  */
 
 /*!\file
- * D1MinusLinear Time-Integrator for Dynamical Systems
+ * D1MinusLinearOSI Time-Integrator for Dynamical Systems
  * T. Schindler, V. Acary
  */
 
@@ -33,7 +33,7 @@
 #include "SimpleMatrix.hpp"
 
 class SiconosMatrix;
-/** D1MinusLinear Time-Integrator for Dynamical Systems
+/** D1MinusLinearOSI Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.6.0.
@@ -42,7 +42,7 @@ class SiconosMatrix;
  *  see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
  *  on Discontinuous Galerkin Methods: Definition and Outlook
  *
- *  A D1MinusLinear instance is defined by the list of concerned dynamical systems.
+ *  A D1MinusLinearOSI instance is defined by the list of concerned dynamical systems.
  *
  *  Main functions:
  *
@@ -64,7 +64,7 @@ class SiconosMatrix;
  * \end{cases}
  * \f]
  */
-class D1MinusLinear : public OneStepIntegrator
+class D1MinusLinearOSI : public OneStepIntegrator
 {
 protected:
 
@@ -73,19 +73,19 @@ protected:
   friend struct _NSLEffectOnFreeOutput;
   bool _isThereImpactInTheTimeStep ;
   /** Default constructor */
-  D1MinusLinear() {};
+  D1MinusLinearOSI() {};
 
 public:
 
   /** constructor from one dynamical system
    *  \param newDS DynamicalSystem to be integrated
    */
-  D1MinusLinear(SP::DynamicalSystem newDS);
+  D1MinusLinearOSI(SP::DynamicalSystem newDS);
 
   /** destructor */
-  virtual ~D1MinusLinear() {};
+  virtual ~D1MinusLinearOSI() {};
 
-  /** initialization of the D1MinusLinear integrator; for linear time
+  /** initialization of the D1MinusLinearOSI integrator; for linear time
   c   *  invariant systems, we compute time invariant operator
    */
   virtual void initialize();
@@ -111,11 +111,11 @@ public:
    *  \param ti initial time
    *  \param tf end time
    *  \param t real end time
-   *  \param flag useless flag (for D1MinusLinear, used in Lsodar)
+   *  \param flag useless flag (for D1MinusLinearOSI, used in LsodarOSI)
    */
   virtual void integrate(double& ti, double& tf, double& t , int& flag)
   {
-    RuntimeException::selfThrow("D1MinusLinear::integrate - not implemented!");
+    RuntimeException::selfThrow("D1MinusLinearOSI::integrate - not implemented!");
   }
 
   /** updates the state of the Dynamical Systems
@@ -138,16 +138,16 @@ public:
 
 
 
-  /** displays the data of the D1MinusLinear's integrator */
+  /** displays the data of the D1MinusLinearOSI's integrator */
   virtual void display()
   {
-    RuntimeException::selfThrow("D1MinusLinear::display - not implemented!");
+    RuntimeException::selfThrow("D1MinusLinearOSI::display - not implemented!");
   }
 
   /** preparations for Newton iteration */
   virtual void prepareNewtonIteration(double time)
   {
-    RuntimeException::selfThrow("D1MinusLinear::prepareNewtonIteration - not implemented!");
+    RuntimeException::selfThrow("D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
   }
 
   /** insert a dynamical system in this Integrator

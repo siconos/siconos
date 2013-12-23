@@ -33,7 +33,7 @@ Note that not all files from the current location are listed below, since some o
 #include "QPXML.hpp"
 
 #include "MoreauJeanOSIXML.hpp"
-#include "LsodarXML.hpp"
+#include "LsodarOSIXML.hpp"
 
 #include "LinearRXML.hpp"
 

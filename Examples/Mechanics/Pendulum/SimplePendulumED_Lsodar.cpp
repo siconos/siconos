@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
     //1. Time discretization
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(t0, h));
     //2. Integration solver for one step
-    SP::OneStepIntegrator OSI(new Lsodar(simplependulum));
+    SP::OneStepIntegrator OSI(new LsodarOSI(simplependulum));
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem acceleration(new LCP());
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     Pendulum->initialize(EDscheme); // initialize the model
     cout << "End of simulation initialisation" << endl;
 
-    // SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(OSI);
+    // SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(OSI);
     // lsodar->setMinMaxStepSizes(9.5e-4,1.0e-3);
     // lsodar->setTol(1,1.0e-3,1.0e-6);
     // lsodar->setMaxOrder(2, 2);
@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(DataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("result_Lsodar.ref", "ascii", dataPlotRef);
+    ioMatrix::read("result_LsodarOSI.ref", "ascii", dataPlotRef);
     std::cout << (DataPlot - dataPlotRef).normInf() << std::endl;
     if ((DataPlot - dataPlotRef).normInf() > 1e-12)
     {

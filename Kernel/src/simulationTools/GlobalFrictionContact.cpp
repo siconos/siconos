@@ -176,7 +176,7 @@ void GlobalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
   }
   else if (osiType == LSODAR) // Warning: LagrangianDS only at the time !!!
   {
-    RuntimeException::selfThrow("GlobalFrictionContact::computeDSBlocks. Not yet implemented for Lsodar Integrator");
+    RuntimeException::selfThrow("GlobalFrictionContact::computeDSBlocks. Not yet implemented for LsodarOSI Integrator");
   }
   else
     RuntimeException::selfThrow("GlobalFrictionContact::computeDSBlocks. nNot yet implemented for Integrator of type " + osiType);

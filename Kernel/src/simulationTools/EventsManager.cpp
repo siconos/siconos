@@ -133,7 +133,7 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
   }
 
   // NonsmoothEvent is special, we need to take care of it.
-  // If a NS event is scheduled too close to a TD event, Lsodar will refuse to
+  // If a NS event is scheduled too close to a TD event, LsodarOSI will refuse to
   // integrate from the NS event to the TD event. Thus we just delete the TD event.
   // In fact we just skip a t_k in this case
   //

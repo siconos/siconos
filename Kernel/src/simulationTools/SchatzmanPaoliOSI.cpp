@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "SchatzmanPaoli.hpp"
-//#include "SchatzmanPaoliXML.hpp"
+#include "SchatzmanPaoliOSI.hpp"
+//#include "SchatzmanPaoliOSIXML.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -37,7 +37,7 @@
 using namespace RELATION;
 
 // --- constructor from a minimum set of data ---
-SchatzmanPaoli::SchatzmanPaoli(SP::DynamicalSystem newDS, double newTheta) :
+SchatzmanPaoliOSI::SchatzmanPaoliOSI(SP::DynamicalSystem newDS, double newTheta) :
   OneStepIntegrator(OSI::SCHATZMANPAOLI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
@@ -46,7 +46,7 @@ SchatzmanPaoli::SchatzmanPaoli(SP::DynamicalSystem newDS, double newTheta) :
 }
 
 // --- constructor from a set of data ---
-SchatzmanPaoli::SchatzmanPaoli(double newTheta):
+SchatzmanPaoliOSI::SchatzmanPaoliOSI(double newTheta):
   OneStepIntegrator(OSI::SCHATZMANPAOLI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   _theta = newTheta;
@@ -54,7 +54,7 @@ SchatzmanPaoli::SchatzmanPaoli(double newTheta):
 }
 
 // --- constructor from a minimum set of data ---
-SchatzmanPaoli::SchatzmanPaoli(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
+SchatzmanPaoliOSI::SchatzmanPaoliOSI(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
   OneStepIntegrator(OSI::SCHATZMANPAOLI), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
@@ -65,7 +65,7 @@ SchatzmanPaoli::SchatzmanPaoli(SP::DynamicalSystem newDS, double newTheta, doubl
 }
 
 // --- constructor from a set of data ---
-SchatzmanPaoli::SchatzmanPaoli(double newTheta, double newGamma):
+SchatzmanPaoliOSI::SchatzmanPaoliOSI(double newTheta, double newGamma):
   OneStepIntegrator(OSI::SCHATZMANPAOLI), _useGammaForRelation(false)
 {
   _theta = newTheta;
@@ -75,50 +75,50 @@ SchatzmanPaoli::SchatzmanPaoli(double newTheta, double newGamma):
 }
 
 // Note: OSIDynamicalSystems and thetaMap must disappear
-void SchatzmanPaoli::insertDynamicalSystem(SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   OSIDynamicalSystems->insert(ds);
 }
-const SimpleMatrix SchatzmanPaoli::getW(SP::DynamicalSystem ds)
+const SimpleMatrix SchatzmanPaoliOSI::getW(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "SchatzmanPaoli::getW(ds): ds == NULL.");
+         "SchatzmanPaoliOSI::getW(ds): ds == NULL.");
   //    return *(WMap[0]);
   unsigned int dsN = ds->number();
   assert(WMap[dsN] &&
-         "SchatzmanPaoli::getW(ds): W[ds] == NULL.");
+         "SchatzmanPaoliOSI::getW(ds): W[ds] == NULL.");
   return *(WMap[dsN]); // Copy !!
 }
 
-SP::SimpleMatrix SchatzmanPaoli::W(SP::DynamicalSystem ds)
+SP::SimpleMatrix SchatzmanPaoliOSI::W(SP::DynamicalSystem ds)
 {
-  assert(ds && "SchatzmanPaoli::W(ds): ds == NULL.");
+  assert(ds && "SchatzmanPaoliOSI::W(ds): ds == NULL.");
   //  return WMap[0];
   //  if(WMap[ds]==NULL)
-  //    RuntimeException::selfThrow("SchatzmanPaoli::W(ds): W[ds] == NULL.");
+  //    RuntimeException::selfThrow("SchatzmanPaoliOSI::W(ds): W[ds] == NULL.");
   return WMap[ds->number()];
 }
 
-void SchatzmanPaoli::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
 {
   // Check if ds is in the OSI
   if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("SchatzmanPaoli::setW(newVal,ds) - ds does not belong to this Integrator ...");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal,ds) - ds does not belong to this Integrator ...");
 
   // Check dimensions consistency
   unsigned int line = newValue.size(0);
   unsigned int col  = newValue.size(1);
 
   if (line != col) // Check that newValue is square
-    RuntimeException::selfThrow("SchatzmanPaoli::setW(newVal,ds) - newVal is not square! ");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal,ds) - newVal is not square! ");
 
   if (!ds)
-    RuntimeException::selfThrow("SchatzmanPaoli::setW(newVal,ds) - ds == NULL.");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal,ds) - ds == NULL.");
 
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
   unsigned int dsN = ds->number();
   if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("SchatzmanPaoli::setW(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
 
   // Memory allocation for W, if required
   if (!WMap[dsN]) // allocate a new W if required
@@ -130,50 +130,50 @@ void SchatzmanPaoli::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
     if (line == WMap[dsN]->size(0) && col == WMap[dsN]->size(1))
       *(WMap[dsN]) = newValue;
     else
-      RuntimeException::selfThrow("SchatzmanPaoli - setW: inconsistent dimensions with problem size for given input matrix W");
+      RuntimeException::selfThrow("SchatzmanPaoliOSI - setW: inconsistent dimensions with problem size for given input matrix W");
   }
 }
 
-void SchatzmanPaoli::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
 {
   unsigned int line = newPtr->size(0);
   unsigned int col  = newPtr->size(1);
   if (line != col) // Check that newPtr is square
-    RuntimeException::selfThrow("SchatzmanPaoli::setWPtr(newVal) - newVal is not square! ");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::setWPtr(newVal) - newVal is not square! ");
 
   if (!ds)
-    RuntimeException::selfThrow("SchatzmanPaoli::setWPtr(newVal,ds) - ds == NULL.");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::setWPtr(newVal,ds) - ds == NULL.");
 
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
   if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("SchatzmanPaoli::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
 
   WMap[ds->number()] = newPtr;                  // link with new pointer
 }
 
 
 
-const SimpleMatrix SchatzmanPaoli::getWBoundaryConditions(SP::DynamicalSystem ds)
+const SimpleMatrix SchatzmanPaoliOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "SchatzmanPaoli::getWBoundaryConditions(ds): ds == NULL.");
+         "SchatzmanPaoliOSI::getWBoundaryConditions(ds): ds == NULL.");
   //    return *(WBoundaryConditionsMap[0]);
   assert(_WBoundaryConditionsMap[ds->number()] &&
-         "SchatzmanPaoli::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
+         "SchatzmanPaoliOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
   return *(_WBoundaryConditionsMap[ds->number()]); // Copy !!
 }
 
-SP::SiconosMatrix SchatzmanPaoli::WBoundaryConditions(SP::DynamicalSystem ds)
+SP::SiconosMatrix SchatzmanPaoliOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 {
-  assert(ds && "SchatzmanPaoli::WBoundaryConditions(ds): ds == NULL.");
+  assert(ds && "SchatzmanPaoliOSI::WBoundaryConditions(ds): ds == NULL.");
   //  return WBoundaryConditionsMap[0];
   //  if(WBoundaryConditionsMap[ds]==NULL)
-  //    RuntimeException::selfThrow("SchatzmanPaoli::WBoundaryConditions(ds): W[ds] == NULL.");
+  //    RuntimeException::selfThrow("SchatzmanPaoliOSI::WBoundaryConditions(ds): W[ds] == NULL.");
   return _WBoundaryConditionsMap[ds->number()];
 }
 
 
-void SchatzmanPaoli::initialize()
+void SchatzmanPaoliOSI::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
@@ -233,21 +233,21 @@ void SchatzmanPaoli::initialize()
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
   }
 }
-void SchatzmanPaoli::initW(double t, SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds)
 {
   // This function:
   // - allocate memory for a matrix W
   // - insert this matrix into WMap with ds as a key
 
   if (!ds)
-    RuntimeException::selfThrow("SchatzmanPaoli::initW(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - ds == NULL");
 
   if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("SchatzmanPaoli::initW(t,ds) - ds does not belong to the OSI.");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - ds does not belong to the OSI.");
 
   unsigned int dsN = ds->number();
   if (WMap.find(dsN) != WMap.end())
-    RuntimeException::selfThrow("SchatzmanPaoli::initW(t,ds) - W(ds) is already in the map and has been initialized.");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
 
   //unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
@@ -278,7 +278,7 @@ void SchatzmanPaoli::initW(double t, SP::DynamicalSystem ds)
     // // WBoundaryConditions initialization
     // if (d->boundaryConditions())
     //   initWBoundaryConditions(d);
-    RuntimeException::selfThrow("SchatzmanPaoli::initW - not yet implemented for Dynamical system type :" + dsType);
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initW - not yet implemented for Dynamical system type :" + dsType);
 
   }
   // 4 - Lagrangian linear systems
@@ -307,9 +307,9 @@ void SchatzmanPaoli::initW(double t, SP::DynamicalSystem ds)
   else if (dsType == Type::NewtonEulerDS)
   {
     //WMap[ds].reset(new SimpleMatrix(3,3));
-    RuntimeException::selfThrow("SchatzmanPaoli::initW - not yet implemented for Dynamical system type :" + dsType);
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initW - not yet implemented for Dynamical system type :" + dsType);
   }
-  else RuntimeException::selfThrow("SchatzmanPaoli::initW - not yet implemented for Dynamical system type :" + dsType);
+  else RuntimeException::selfThrow("SchatzmanPaoliOSI::initW - not yet implemented for Dynamical system type :" + dsType);
 
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
@@ -317,17 +317,17 @@ void SchatzmanPaoli::initW(double t, SP::DynamicalSystem ds)
 }
 
 
-void SchatzmanPaoli::initWBoundaryConditions(SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
 {
   // This function:
   // - allocate memory for a matrix WBoundaryConditions
   // - insert this matrix into WBoundaryConditionsMap with ds as a key
 
   if (!ds)
-    RuntimeException::selfThrow("SchatzmanPaoli::initWBoundaryConditions(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initWBoundaryConditions(t,ds) - ds == NULL");
 
   if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("SchatzmanPaoli::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
 
   Type::Siconos dsType = Type::value(*ds);
 
@@ -338,7 +338,7 @@ void SchatzmanPaoli::initWBoundaryConditions(SP::DynamicalSystem ds)
 
 
   //   if (_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end())
-  //     RuntimeException::selfThrow("SchatzmanPaoli::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
+  //     RuntimeException::selfThrow("SchatzmanPaoliOSI::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
 
   //   // Memory allocation for WBoundaryConditions
   //   unsigned int sizeWBoundaryConditions = ds->getDim(); // n for first order systems, ndof for lagrangian.
@@ -350,11 +350,11 @@ void SchatzmanPaoli::initWBoundaryConditions(SP::DynamicalSystem ds)
   //   computeWBoundaryConditions(ds);
   // }
   // else
-  RuntimeException::selfThrow("SchatzmanPaoli::initWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
+  RuntimeException::selfThrow("SchatzmanPaoliOSI::initWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
 }
 
 
-void SchatzmanPaoli::computeWBoundaryConditions(SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 {
   // Compute WBoundaryConditions matrix of the Dynamical System ds, at
   // time t and for the current ds state.
@@ -364,7 +364,7 @@ void SchatzmanPaoli::computeWBoundaryConditions(SP::DynamicalSystem ds)
   // done during initWBoundaryConditions.
 
   assert(ds &&
-         "SchatzmanPaoli::computeWBoundaryConditions(t,ds) - ds == NULL");
+         "SchatzmanPaoliOSI::computeWBoundaryConditions(t,ds) - ds == NULL");
 
   Type::Siconos dsType = Type::value(*ds);
 
@@ -372,7 +372,7 @@ void SchatzmanPaoli::computeWBoundaryConditions(SP::DynamicalSystem ds)
   // {
 
   //   assert((_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end()) &&
-  //          "SchatzmanPaoli::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
+  //          "SchatzmanPaoliOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
   //   SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
 
@@ -405,11 +405,11 @@ void SchatzmanPaoli::computeWBoundaryConditions(SP::DynamicalSystem ds)
   //   }
   // }
   // else
-  RuntimeException::selfThrow("SchatzmanPaoli::computeWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
+  RuntimeException::selfThrow("SchatzmanPaoliOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
 }
 
 
-void SchatzmanPaoli::computeW(double t, SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::computeW(double t, SP::DynamicalSystem ds)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
 
@@ -417,10 +417,10 @@ void SchatzmanPaoli::computeW(double t, SP::DynamicalSystem ds)
   // Memory allocation has been done during initW.
 
   assert(ds &&
-         "SchatzmanPaoli::computeW(t,ds) - ds == NULL");
+         "SchatzmanPaoliOSI::computeW(t,ds) - ds == NULL");
   unsigned int dsN = ds->number();
   assert((WMap.find(dsN) != WMap.end()) &&
-         "SchatzmanPaoli::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
+         "SchatzmanPaoliOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
   //double h = simulationLink->timeStep();
   Type::Siconos dsType = Type::value(*ds);
@@ -448,7 +448,7 @@ void SchatzmanPaoli::computeW(double t, SP::DynamicalSystem ds)
     //   d->computeJacobianqForces(t);
     //   scal(-h*h*_theta*_theta,*K,*W,false); //*W -= h*h*_theta*_theta**K;
     // }
-    RuntimeException::selfThrow("SchatzmanPaoli::computeW - not yet implemented for Dynamical system type :" + dsType);
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
 
   }
   // 4 - Lagrangian linear systems
@@ -467,13 +467,13 @@ void SchatzmanPaoli::computeW(double t, SP::DynamicalSystem ds)
     // scal(h*thetaFL,*(d->jacobianvFL()),*(d->luW()),true);
     // *(d->luW())+=*(d->massMatrix());
 
-    // //cout<<"SchatzmanPaoli::computeW luW before LUFact\n";
+    // //cout<<"SchatzmanPaoliOSI::computeW luW before LUFact\n";
     // //d->luW()->display();
 
     // d->luW()->PLUFactorizationInPlace();
-    RuntimeException::selfThrow("SchatzmanPaoli::computeW - not yet implemented for Dynamical system type :" + dsType);
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
   }
-  else RuntimeException::selfThrow("SchatzmanPaoli::computeW - not yet implemented for Dynamical system type :" + dsType);
+  else RuntimeException::selfThrow("SchatzmanPaoliOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
 
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
@@ -482,10 +482,10 @@ void SchatzmanPaoli::computeW(double t, SP::DynamicalSystem ds)
 
 
 
-double SchatzmanPaoli::computeResidu()
+double SchatzmanPaoliOSI::computeResidu()
 {
 
-  // This function is used to compute the residu for each "SchatzmanPaoli-discretized" dynamical system.
+  // This function is used to compute the residu for each "SchatzmanPaoliOSI-discretized" dynamical system.
   // It then computes the norm of each of them and finally return the maximum
   // value for those norms.
   //
@@ -589,14 +589,14 @@ double SchatzmanPaoli::computeResidu()
       //       }
 
       //       *(d->workspace(DynamicalSystem::free))=*residuFree; // copy residuFree in Workfree
-      // //       std::cout << "SchatzmanPaoli::ComputeResidu LagrangianDS residufree :"  << std::endl;
+      // //       std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianDS residufree :"  << std::endl;
       // //      residuFree->display();
       //       if (d->p(1))
       //         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
-      // //       std::cout << "SchatzmanPaoli::ComputeResidu LagrangianDS residu :"  << std::endl;
+      // //       std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianDS residu :"  << std::endl;
       // //      d->workspace(DynamicalSystem::free)->display();
       //         normResidu = d->workspace(DynamicalSystem::free)->norm2();
-      RuntimeException::selfThrow("SchatzmanPaoli::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("SchatzmanPaoliOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
     }
     // 2 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
@@ -615,11 +615,11 @@ double SchatzmanPaoli::computeResidu()
       SP::SiconosVector q_k = d->qMemory()->getSiconosVector(0); // q_k
       SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
       SP::SiconosVector v_k = d->velocityMemory()->getSiconosVector(0); //v_k
-      //  std::cout << "SchatzmanPaoli::computeResidu - q_k_1 =" <<std::endl;
+      //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k_1 =" <<std::endl;
       // q_k_1->display();
-      //  std::cout << "SchatzmanPaoli::computeResidu - q_k =" <<std::endl;
+      //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k =" <<std::endl;
       // q_k->display();
-      //  std::cout << "SchatzmanPaoli::computeResidu - v_k =" <<std::endl;
+      //  std::cout << "SchatzmanPaoliOSI::computeResidu - v_k =" <<std::endl;
       // v_k->display();
 
       // --- ResiduFree computation Equation (1) ---
@@ -686,7 +686,7 @@ double SchatzmanPaoli::computeResidu()
       // }
 
 
-      //  std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
+      //  std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
       // residuFree->display();
 
 
@@ -694,12 +694,12 @@ double SchatzmanPaoli::computeResidu()
       if (d->p(0))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(0); // Compute Residu in Workfree Notation !!
 
-      //  std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
+      //  std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
       //  if (d->p(0))
       //    d->p(0)->display();
       //  else
       //     std::cout << " p(0) :"  << std::endl;
-      //  std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
+      //  std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       // d->workspace(DynamicalSystem::free)->display();
 
 
@@ -741,15 +741,15 @@ double SchatzmanPaoli::computeResidu()
       //       scal(coef, *d->forces(), *residuFree, false);
       //     }
       //     *(d->workspace(DynamicalSystem::free))=*residuFree;
-      //     //cout<<"SchatzmanPaoli::computeResidu :\n";
+      //     //cout<<"SchatzmanPaoliOSI::computeResidu :\n";
       //     // residuFree->display();
       //     if ( d->p(1) )
       //     *(d->workspace(DynamicalSystem::free)) -= *d->p(1);
       //     normResidu = d->workspace(DynamicalSystem::free)->norm2();
-      RuntimeException::selfThrow("SchatzmanPaoli::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("SchatzmanPaoliOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
     }
     else
-      RuntimeException::selfThrow("SchatzmanPaoli::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("SchatzmanPaoliOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
     if (normResidu > maxResidu) maxResidu = normResidu;
 
@@ -757,7 +757,7 @@ double SchatzmanPaoli::computeResidu()
   return maxResidu;
 }
 
-void SchatzmanPaoli::computeFreeState()
+void SchatzmanPaoliOSI::computeFreeState()
 {
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
@@ -776,13 +776,13 @@ void SchatzmanPaoli::computeFreeState()
   DSIterator it; // Iterator through the set of DS.
 
   SP::DynamicalSystem ds; // Current Dynamical System.
-  SP::SiconosMatrix W; // W SchatzmanPaoli matrix of the current DS.
+  SP::SiconosMatrix W; // W SchatzmanPaoliOSI matrix of the current DS.
   Type::Siconos dsType ; // Type of the current DS.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds->number()]; // Its W SchatzmanPaoli matrix of iteration.
+    W = WMap[ds->number()]; // Its W SchatzmanPaoliOSI matrix of iteration.
 
     //1 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
@@ -825,7 +825,7 @@ void SchatzmanPaoli::computeFreeState()
       //       // -> compute real vfree
       //       *vfree *= -1.0;
       //       *vfree += *v;
-      RuntimeException::selfThrow("SchatzmanPaoli::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("SchatzmanPaoliOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
     }
     // 2 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
@@ -898,24 +898,24 @@ void SchatzmanPaoli::computeFreeState()
       // // -- vfree =  v - W^{-1} ResiduFree --
       // // At this point vfree = residuFree
       // // -> Solve WX = vfree and set vfree = X
-      // //   std::cout<<"SchatzmanPaoli::computeFreeState residu free"<<endl;
+      // //   std::cout<<"SchatzmanPaoliOSI::computeFreeState residu free"<<endl;
       // //   vfree->display();
       // d->luW()->PLUForwardBackwardInPlace(*vfree);
-      // //   std::cout<<"SchatzmanPaoli::computeFreeState -WRfree"<<endl;
+      // //   std::cout<<"SchatzmanPaoliOSI::computeFreeState -WRfree"<<endl;
       // //   vfree->display();
       // //   scal(h,*vfree,*vfree);
       // // -> compute real vfree
       // *vfree *= -1.0;
       // *vfree += *v;
-      RuntimeException::selfThrow("SchatzmanPaoli::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("SchatzmanPaoliOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
     }
     else
-      RuntimeException::selfThrow("SchatzmanPaoli::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("SchatzmanPaoliOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
   }
 
 }
 
-void SchatzmanPaoli::prepareNewtonIteration(double time)
+void SchatzmanPaoliOSI::prepareNewtonIteration(double time)
 {
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
@@ -924,7 +924,7 @@ void SchatzmanPaoli::prepareNewtonIteration(double time)
   }
 }
 
-struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
+struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
@@ -974,7 +974,7 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void SchatzmanPaoli::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
+void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
@@ -1010,7 +1010,7 @@ void SchatzmanPaoli::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   SP::SiconosVector H_alpha;
 
 
-  // All of these values should be stored in the node corrseponding to the Interactionwhen a SchatzmanPaoli scheme is used.
+  // All of these values should be stored in the node corrseponding to the Interactionwhen a SchatzmanPaoliOSI scheme is used.
   Xq = inter->dataXq();
   Yp = inter->yp();
 
@@ -1041,7 +1041,7 @@ void SchatzmanPaoli::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   {
 
     if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() != osnsp)
-      RuntimeException::selfThrow("SchatzmanPaoli::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
+      RuntimeException::selfThrow("SchatzmanPaoliOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
 
     C = mainInteraction->relation()->C();
 
@@ -1081,7 +1081,7 @@ void SchatzmanPaoli::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
   }
   else
-    RuntimeException::selfThrow("SchatzmanPaoli::ComputeFreeOutput not yet implemented  for relation of Type : " + relationType);
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::ComputeFreeOutput not yet implemented  for relation of Type : " + relationType);
 
 
 
@@ -1093,12 +1093,12 @@ void SchatzmanPaoli::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
 
 }
-void SchatzmanPaoli::integrate(double& tinit, double& tend, double& tout, int&)
+void SchatzmanPaoliOSI::integrate(double& tinit, double& tend, double& tout, int&)
 {
-  RuntimeException::selfThrow("SchatzmanPaoli::integrate - not yet implemented :");
+  RuntimeException::selfThrow("SchatzmanPaoliOSI::integrate - not yet implemented :");
 }
 
-void SchatzmanPaoli::updateState(const unsigned int level)
+void SchatzmanPaoliOSI::updateState(const unsigned int level)
 {
 
   double h = simulationLink->timeStep();
@@ -1155,13 +1155,13 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       SP::SiconosVector v = d->velocity();
       SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
 
-      //  std::cout << "SchatzmanPaoli::updateState - q_k_1 =" <<std::endl;
+      //  std::cout << "SchatzmanPaoliOSI::updateState - q_k_1 =" <<std::endl;
       // q_k_1->display();
-      //  std::cout << "SchatzmanPaoli::updateState - q =" <<std::endl;
+      //  std::cout << "SchatzmanPaoliOSI::updateState - q =" <<std::endl;
       // q->display();
 
       *v = 1.0 / (2.0 * h) * (*q - *q_k_1);
-      //  std::cout << "SchatzmanPaoli::updateState - v =" <<std::endl;
+      //  std::cout << "SchatzmanPaoliOSI::updateState - v =" <<std::endl;
       // v->display();
 
       // int bc=0;
@@ -1200,7 +1200,7 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       //       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       //       SP::SiconosVector v = d->velocity();
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
-      //       std::cout<<"SchatzmanPaoli::updatestate prev v"<<endl;
+      //       std::cout<<"SchatzmanPaoliOSI::updatestate prev v"<<endl;
       //       v->display();
       // #endif
 
@@ -1210,16 +1210,16 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       //       d->luW()->PLUForwardBackwardInPlace(*v);
 
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
-      //       std::cout<<"SchatzmanPaoli::updatestate hWB lambda"<<endl;
+      //       std::cout<<"SchatzmanPaoliOSI::updatestate hWB lambda"<<endl;
       //       v->display();
       // #endif
 
       //       *v +=  * ds->workspace(DynamicalSystem::free);
 
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
-      //       std::cout<<"SchatzmanPaoli::updatestate work free"<<endl;
+      //       std::cout<<"SchatzmanPaoliOSI::updatestate work free"<<endl;
       //       ds->workspace(DynamicalSystem::free)->display();
-      //       std::cout<<"SchatzmanPaoli::updatestate new v"<<endl;
+      //       std::cout<<"SchatzmanPaoliOSI::updatestate new v"<<endl;
       //       v->display();
       // #endif
       //       //compute q
@@ -1229,9 +1229,9 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       //       SP::SiconosMatrix T = d->T();
       //       SP::SiconosVector dotq = d->dotq();
       //       prod(*T,*v,*dotq,true);
-      //       // std::cout<<"SchatzmanPaoli::updateState v"<<endl;
+      //       // std::cout<<"SchatzmanPaoliOSI::updateState v"<<endl;
       //       // v->display();
-      //       // std::cout<<"SchatzmanPaoli::updateState dotq"<<endl;
+      //       // std::cout<<"SchatzmanPaoliOSI::updateState dotq"<<endl;
       //       // dotq->display();
 
 
@@ -1260,18 +1260,18 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       //       dotq->setValue(5,(q->getValue(5)-qold->getValue(5))/h);
       //       dotq->setValue(6,(q->getValue(6)-qold->getValue(6))/h);
       //       d->updateT();
-      RuntimeException::selfThrow("SchatzmanPaoli::updateState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("SchatzmanPaoliOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
     }
-    else RuntimeException::selfThrow("SchatzmanPaoli::updateState - not yet implemented for Dynamical system type: " + dsType);
+    else RuntimeException::selfThrow("SchatzmanPaoliOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
   }
 }
 
 
-void SchatzmanPaoli::display()
+void SchatzmanPaoliOSI::display()
 {
   OneStepIntegrator::display();
 
-  std::cout << "====== SchatzmanPaoli OSI display ======" <<std::endl;
+  std::cout << "====== SchatzmanPaoliOSI OSI display ======" <<std::endl;
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {

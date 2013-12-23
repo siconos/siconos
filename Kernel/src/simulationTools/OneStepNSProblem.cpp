@@ -28,7 +28,7 @@
 #include "NewMarkAlphaOSI.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
-#include "ZeroOrderHold.hpp"
+#include "ZeroOrderHoldOSI.hpp"
 #include "NonSmoothLaw.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -461,7 +461,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::DynamicalSystem ds)
   else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
   {
     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Lsodar Integrator with dynamical system of type " + dsType);
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + dsType);
 
     // get lu-factorized mass
     block = (std11::static_pointer_cast<LagrangianDS>(ds))->massLU();
@@ -504,15 +504,15 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::DynamicalSystem ds)
       block.reset(new SimpleMatrix(*(d->mass())));
     }
     else
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinear integrator with dynamical system of type " + dsType);
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinearOSI integrator with dynamical system of type " + dsType);
   }
-  // for ZeroOrderHold, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
+  // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
   else if (osiType == OSI::ZOH)
   {
     if (!block)
-      block.reset(new SimpleMatrix((std11::static_pointer_cast<ZeroOrderHold>(Osi))->Ad(ds)));
+      block.reset(new SimpleMatrix((std11::static_pointer_cast<ZeroOrderHoldOSI>(Osi))->Ad(ds)));
     else
-      *block = (std11::static_pointer_cast<ZeroOrderHold>(Osi))->Ad(ds);
+      *block = (std11::static_pointer_cast<ZeroOrderHoldOSI>(Osi))->Ad(ds);
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Integrator of type " + osiType);

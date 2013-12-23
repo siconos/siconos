@@ -1560,7 +1560,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 }
 void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int&)
 {
-  // Last parameter is not used (required for Lsodar but not for MoreauJeanOSI).
+  // Last parameter is not used (required for LsodarOSI but not for MoreauJeanOSI).
 
   double h = tend - tinit;
   tout = tend;

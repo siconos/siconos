@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
     SP::EventDriven s(new EventDriven(t));
 
     // -- OneStepIntegrators --
-    SP::Lsodar OSI(new Lsodar(arm));
+    SP::LsodarOSI OSI(new LsodarOSI(arm));
     s->insertIntegrator(OSI);
     // -- OneStepNsProblem --
     IntParameters iparam(5);

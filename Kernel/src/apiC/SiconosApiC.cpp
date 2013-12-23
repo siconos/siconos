@@ -1199,7 +1199,7 @@ extern "C" int sicOneStepIntegratorMoreauJeanOSI(double *theta)
 }
 
 /* TBV by Franck */
-extern "C" int sicOneStepIntegratorLsodar()
+extern "C" int sicOneStepIntegratorLsodarOSI()
 {
   int nId = SIC_OK, i;
 
@@ -1221,7 +1221,7 @@ extern "C" int sicOneStepIntegratorLsodar()
     // Thus this part has to be reviewed -> especially the way theta values are sorted?
     for (it = SetDSPtr->begin(); it != SetDSPtr->end(); ++it)
     {
-      vOSI.insert(new Lsodar(*it, prtSimul));
+      vOSI.insert(new LsodarOSI(*it, prtSimul));
       i++;
     }
 
@@ -1234,7 +1234,7 @@ extern "C" int sicOneStepIntegratorLsodar()
   }
   catch (...)
   {
-    std::cout << "Exception caught in sicOneStepIntegratorLsodar" <<std::endl;
+    std::cout << "Exception caught in sicOneStepIntegratorLsodarOSI" <<std::endl;
     nId = SIC_ERROR;
   }
 

@@ -56,7 +56,7 @@
   PY_REGISTER(OneStepNSProblem);                                        \
   PY_REGISTER(OneStepIntegrator);                                       \
   PY_REGISTER(LinearOSNS);                                              \
-  PY_REGISTER(Lsodar);                                                  \
+  PY_REGISTER(LsodarOSI);                                              \
   PY_REGISTER(LCP);                                                     \
   PY_REGISTER(QP);                                                      \
   PY_REGISTER(Relay);                                                   \
@@ -65,7 +65,7 @@
   PY_REGISTER(GenericMechanical);                                       \
   PY_REGISTER(FrictionContact);                                         \
   PY_REGISTER(MoreauJeanOSI);                                           \
-  PY_REGISTER(ZeroOrderHold);                                           \
+  PY_REGISTER(ZeroOrderHoldOSI);                                        \
   PY_REGISTER(Simulation);                                              \
   PY_REGISTER(TimeStepping);                                            \
   PY_REGISTER(EventDriven);                                             \

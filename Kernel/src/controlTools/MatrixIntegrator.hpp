@@ -69,8 +69,8 @@ protected:
   /** Simulation (of EventDriven type) */
   SP::EventDriven _sim;
 
-  /** OneStepIntegrator of type Lsodar */
-  SP::Lsodar _OSI;
+  /** OneStepIntegrator of type LsodarOSI */
+  SP::LsodarOSI _OSI;
 
   /** */
   void commonInit(const DynamicalSystem& ds, const Model& m);

@@ -100,8 +100,8 @@ Csurface = np.array(Brel).T
   SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
   processSimulation->setName("plant simulation");
   // -- OneStepIntegrators --
-//  SP::OneStepIntegrator processIntegrator(new ZeroOrderHold(processDS, theta));
-  SP::OneStepIntegrator processIntegrator(new ZeroOrderHold(processDS));
+//  SP::OneStepIntegrator processIntegrator(new ZeroOrderHoldOSI(processDS, theta));
+  SP::OneStepIntegrator processIntegrator(new ZeroOrderHoldOSI(processDS));
   processSimulation->insertIntegrator(processIntegrator);
 
   // Control stuff

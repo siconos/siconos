@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     SP::EventDriven s(new EventDriven(t));
 
     // -- OneStepIntegrators --
-    SP::OneStepIntegrator OSI(new Lsodar(arm));
+    SP::OneStepIntegrator OSI(new LsodarOSI(arm));
 
     IntParameters iparam(5);
     iparam[0] = 1000; // Max number of iteration

@@ -53,7 +53,7 @@ private:
   /** TimeDiscretisation for the computation of _XPhi*/
   SP::TimeDiscretisation _tdPhi;
   /** OneSteoIntegrator for the computation of _XPhi*/
-  SP::Lsodar _PhiOSI;
+  SP::LsodarOSI _PhiOSI;
   /** Simulation for the computation of _XPhi*/
   SP::EventDriven _simulPhi;
   /** Model for the computation of Xhat*/
@@ -61,7 +61,7 @@ private:
   /** TimeDiscretisation for the computation of Xhat*/
   SP::TimeDiscretisation _tdPred;
   /** OneSteoIntegrator for the computation of Xhat*/
-  SP::Lsodar _PredOSI;
+  SP::LsodarOSI _PredOSI;
   /** Simulation for the computation of Xhat*/
   SP::EventDriven _simulPred;
   /** DynamicalSystem for the computation of _Xhat*/

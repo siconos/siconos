@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
 
-    SP::D1MinusLinear OSI3(new D1MinusLinear(bouncingbeam));
+    SP::D1MinusLinearOSI OSI3(new D1MinusLinearOSI(bouncingbeam));
 
 
     // -- (2) Time discretisation --
@@ -314,8 +314,8 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("NE_BouncingBeam_D1MinusLinear.dat", "ascii", dataPlot, "noDim");
-    ioMatrix::write("NE_BouncingBeam_D1MinusLinear_beam.dat", "ascii", bouncingbeamPlot, "noDim");
+    ioMatrix::write("NE_BouncingBeam_D1MinusLinearOSI.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("NE_BouncingBeam_D1MinusLinearOSI_beam.dat", "ascii", bouncingbeamPlot, "noDim");
 
     // SimpleMatrix dataPlotRef(dataPlot);
     // dataPlotRef.zero();

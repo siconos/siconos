@@ -79,7 +79,7 @@ void CommonSMC::initialize(const Model& m)
   // Set up the simulation
   _simulationSMC.reset(new TimeStepping(_td));
   _simulationSMC->setName("linear sliding mode controller simulation");
-  _integratorSMC.reset(new ZeroOrderHold(_DS_SMC));
+  _integratorSMC.reset(new ZeroOrderHoldOSI(_DS_SMC));
   _simulationSMC->insertIntegrator(_integratorSMC);
   // OneStepNsProblem
   _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
@@ -134,7 +134,7 @@ void CommonSMC::computeUeq()
 
   // equivalent part, implicit contribution
   // XXX when to call this ?
-  ZeroOrderHold& zoh = *std11::static_pointer_cast<ZeroOrderHold>(_integratorSMC);
+  ZeroOrderHoldOSI& zoh = *std11::static_pointer_cast<ZeroOrderHoldOSI>(_integratorSMC);
   zoh.updateMatrices(_DS_SMC);
 
   // tmpN = B^{*}(CB)^{-1}CA

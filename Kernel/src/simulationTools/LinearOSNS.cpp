@@ -22,9 +22,9 @@
 #include "Topology.hpp"
 #include "Model.hpp"
 #include "MoreauJeanOSI.hpp"
-#include "Lsodar.hpp"
+#include "LsodarOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
-#include "ZeroOrderHold.hpp"
+#include "ZeroOrderHoldOSI.hpp"
 #include "NewtonEulerR.hpp"
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
@@ -258,7 +258,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       // for ZOH, we have a different formula ...
       if (osiType == OSI::ZOH && indexSet->properties(vd).forControl)
       {
-        *rightInteractionBlock = std11::static_pointer_cast<ZeroOrderHold>(Osi)->Bd(ds);
+        *rightInteractionBlock = std11::static_pointer_cast<ZeroOrderHoldOSI>(Osi)->Bd(ds);
         prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
       }
       else

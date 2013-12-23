@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*!\file BouncingBallSchatzmanPaoli.cpp
+/*!\file BouncingBallSchatzmanPaoliOSI.cpp
   \brief
 
   A Ball bouncing on the ground.
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
     // ------------------x
 
     // -- (1) OneStepIntegrators --
-    SP::SchatzmanPaoli OSI(new SchatzmanPaoli(ball, theta));
+    SP::SchatzmanPaoliOSI OSI(new SchatzmanPaoliOSI(ball, theta));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("BouncingBallSchatzmanPaoli.ref", "ascii", dataPlotRef);
+    ioMatrix::read("BouncingBallSchatzmanPaoliOSI.ref", "ascii", dataPlotRef);
     SP::SiconosVector err(new SiconosVector(outputSize));
     (dataPlot - dataPlotRef).normInfByColumn(err);
     err->display();

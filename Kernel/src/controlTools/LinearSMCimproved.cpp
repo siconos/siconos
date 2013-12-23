@@ -24,7 +24,7 @@
 #include "LinearSMCimproved.hpp"
 #include "SiconosVector.hpp"
 #include "ControlSensor.hpp"
-#include "ZeroOrderHold.hpp"
+#include "ZeroOrderHoldOSI.hpp"
 #include "TimeDiscretisation.hpp"
 #include "ActuatorFactory.hpp"
 
@@ -126,7 +126,7 @@ void LinearSMCimproved::actuate()
   SP::SimpleMatrix CBstar(new SimpleMatrix(sDim, sDim, 0));
   SP::SiconosVector xTk(new SiconosVector(_sensor->y()));
 
-  ZeroOrderHold& zoh = *std11::static_pointer_cast<ZeroOrderHold>(_integratorSMC);
+  ZeroOrderHoldOSI& zoh = *std11::static_pointer_cast<ZeroOrderHoldOSI>(_integratorSMC);
 
   // equivalent part
   zoh.updateMatrices(_DS_SMC);

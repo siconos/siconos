@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::D1MinusLinear OSI1(new D1MinusLinear(beam1));
+    SP::D1MinusLinearOSI OSI1(new D1MinusLinearOSI(beam1));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -286,8 +286,8 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("NE_1DS_1Knee_MLCP_D1MinusLinear.dat", "ascii", dataPlot, "noDim");
-    ioMatrix::write("NE_1DS_1Knee_MLCP_D1MinusLinear_beam1.dat", "ascii", beam1Plot, "noDim");
+    ioMatrix::write("NE_1DS_1Knee_MLCP_D1MinusLinearOSI.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("NE_1DS_1Knee_MLCP_D1MinusLinearOSI_beam1.dat", "ascii", beam1Plot, "noDim");
 
     // SimpleMatrix dataPlotRef(dataPlot);
     // dataPlotRef.zero();

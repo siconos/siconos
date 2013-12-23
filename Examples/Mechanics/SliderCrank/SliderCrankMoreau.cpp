@@ -305,6 +305,6 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in SliderCrankD1MinusLinear.cpp" << endl;
+    cout << "Exception caught in SliderCrankD1MinusLinearOSI.cpp" << endl;
   }
 }

@@ -199,7 +199,7 @@ REGISTER_BOOST_SERIALIZATION(SimpleMatrix);
 
 #include <f2c.h>
 template<typename Archive>
-void siconos_io(Archive& ar, Lsodar& osi, unsigned int version)
+void siconos_io(Archive& ar, LsodarOSI& osi, unsigned int version)
 {
   ar & boost::serialization::make_nvp("_intData", osi._intData);
 
@@ -240,7 +240,7 @@ void siconos_io(Archive& ar, Lsodar& osi, unsigned int version)
   ar & boost::serialization::make_nvp("OneStepIntegrator", 
                                       boost::serialization::base_object<OneStepIntegrator>(osi));
 }
-REGISTER_BOOST_SERIALIZATION(Lsodar);
+REGISTER_BOOST_SERIALIZATION(LsodarOSI);
 
 
 template<typename Archive, typename P>
@@ -341,7 +341,7 @@ void siconos_io_register_Kernel(Archive& ar)
   //  ar.register_type(static_cast<PluginHandle*>(NULL));
   ar.register_type(static_cast<__mpz_struct*>(NULL));
   ar.register_type(static_cast<FrictionContact*>(NULL));
-  ar.register_type(static_cast<Lsodar*>(NULL));
+  ar.register_type(static_cast<LsodarOSI*>(NULL));
 
 
 }

@@ -21,7 +21,7 @@
 #include "SimulationXML.hpp"
 #include "OneStepNSProblemXML.hpp"
 #include "SimulationXML.hpp"
-#include "Lsodar.hpp"
+#include "LsodarOSI.hpp"
 #include "LCP.hpp"
 #include "Model.hpp"
 #include "Interaction.hpp"
@@ -308,7 +308,7 @@ void EventDriven::initOSNS()
   if (!_allNSProblems->empty()) // ie if at least a non smooth problem has been built.
   {
     OSI::TYPES  osiType = (*_allOSI->begin())->getType();
-    if (osiType == OSI::LSODAR) //EventDriven associated with Lsodar OSI
+    if (osiType == OSI::LSODAR) //EventDriven associated with LsodarOSI OSI
     {      
     }
     else if (osiType == OSI::NEWMARKALPHAOSI) // EventDrivent asscociated with NewMarkAlpha
@@ -440,7 +440,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   if (osi->getType() != OSI::LSODAR)
     RuntimeException::selfThrow("EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
-  Lsodar& lsodar = static_cast<Lsodar&>(*osi);
+  LsodarOSI& lsodar = static_cast<LsodarOSI&>(*osi);
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   lsodar.fillXWork(sizeOfX, x);
 
@@ -514,7 +514,7 @@ void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
   if (osi->getType() != OSI::LSODAR)
     RuntimeException::selfThrow("EventDriven::computeJacobianfx(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
-  SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(osi);
+  SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(osi);
 
   // Remark A: according to DLSODAR doc, each call to jacobian is
   // preceded by a call to f with the same arguments NEQ, T, and Y.
@@ -582,7 +582,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   unsigned int nsLawSize, k = 0 ;
   SP::SiconosVector y, ydot, yddot, lambda;
-  SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(osi);
+  SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(osi);
   // Solve LCP at acceleration level to calculate the lambda[2] at Interaction of indexSet[2]
   lsodar->fillXWork(sizeOfX, x);
   //
@@ -764,7 +764,7 @@ void EventDriven::advanceToEvent()
     // ---> Step 1: integrate the smooth dynamics from current event to
     // next event; Starting event = last accessed event.  Next event =
     // next time step or first root of the 'g' function found by
-    // integrator (Lsodar)
+    // integrator (LsodarOSI)
 
     // if _istate == 1 => first call. It this case we suppose that _tinit
     // and _tend have been initialized before
@@ -780,11 +780,11 @@ void EventDriven::advanceToEvent()
     {
       (*it)->resetNonSmoothPart();
       //====================================================================================
-      //     cout << " Start of Lsodar integration" << endl;
+      //     cout << " Start of LsodarOSI integration" << endl;
       (*it)->integrate(_tinit, _tend, _tout, _istate); // integrate must
 
-      //  cout << " End of Lsodar integration" << endl;
-      // SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(*it);
+      //  cout << " End of LsodarOSI integration" << endl;
+      // SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(*it);
       // SA::integer iwork = lsodar->getIwork();
       // SA::doublereal rwork = lsodar->getRwork();
       //  cout << "Number of steps used: " << iwork[10] <<endl;
@@ -809,7 +809,7 @@ void EventDriven::advanceToEvent()
       }
       // if(_printStat)
       //   {
-      //     SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(*it);
+      //     SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(*it);
       //     statOut << "Results at time " << _tout << ":" <<endl;
       //     SA::integer iwork = lsodar->getIwork();
       //     SA::doublereal Rwork = lsodar->getRwork();

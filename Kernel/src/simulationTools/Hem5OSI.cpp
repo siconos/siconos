@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "Hem5.hpp"
+#include "Hem5OSI.hpp"
 #include "EventDriven.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockVector.hpp"
@@ -41,10 +41,10 @@ using namespace RELATION;
 // ===== Out of class objects and functions =====
 
 // global object and wrapping functions -> required for function plug-in and call in fortran routine.
-SP::Hem5 hem5_global_object;
+SP::Hem5OSI hem5_global_object;
 
 // This first function must have the same signature as argument FPROB  in HEM5
-extern "C" void Hem5_fprob_wrapper(integer* IFCN,
+extern "C" void Hem5OSI_fprob_wrapper(integer* IFCN,
                                    integer* NQ,
                                    integer* NV,
                                    integer* NU,
@@ -76,7 +76,7 @@ extern "C" void Hem5_fprob_wrapper(integer* IFCN,
 }
 
 // This first function must have the same signature as argument SOLOUT in HEM5
-extern "C" void Hem5_solout_wrapper(integer* MODE,
+extern "C" void Hem5OSI_solout_wrapper(integer* MODE,
                                     integer* NSTEP,
                                     integer* NQ,
                                     integer* NV,
@@ -102,7 +102,7 @@ extern "C" void Hem5_solout_wrapper(integer* MODE,
 }
 
 
-Hem5::Hem5(SP::DynamicalSystem ds):
+Hem5OSI::Hem5OSI(SP::DynamicalSystem ds):
   OneStepIntegrator(OSI::LSODAR)
 {
   // add ds in the set
@@ -112,14 +112,14 @@ Hem5::Hem5(SP::DynamicalSystem ds):
   _sizeMem = 2;
 }
 
-void Hem5::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
+void Hem5OSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
 {
   _intData[4] = newItol; // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
   //           dimension NQ + NV + NU (ITOL=1)
   rtol = newRtol;
   atol = newAtol;
 }
-void Hem5::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
+void Hem5OSI::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
 {
   _intData[4] = newItol; // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
   //           dimension NQ + NV + NU (ITOL=1)
@@ -127,17 +127,17 @@ void Hem5::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
   atol[0] = newRtol;  // atol
 }
 
-void Hem5::setMaxStepSize(doublereal _maxStep)
+void Hem5OSI::setMaxStepSize(doublereal _maxStep)
 {
   rwork[5] = _maxStep;
 }
 
-void Hem5::setMaxNstep(integer _maxNumberSteps)
+void Hem5OSI::setMaxNstep(integer _maxNumberSteps)
 {
   iwork[11] = _maxNumberSteps;
 }
 
-void Hem5::updateIntData()
+void Hem5OSI::updateIntData()
 {
   //   Integer parameters for HEM5 are saved in vector intData.
 
@@ -189,7 +189,7 @@ void Hem5::updateIntData()
   }
   if (MODE >3)
   {
-    RuntimeException::selfThrow("Hem5::updateIntData(), MODE >3 Sparse case not implemented ...");
+    RuntimeException::selfThrow("Hem5OSI::updateIntData(), MODE >3 Sparse case not implemented ...");
   }
 
   // 5 - LWK length of real array rwork
@@ -201,7 +201,7 @@ void Hem5::updateIntData()
   _intData[7] *= 2;
 }
 
-void Hem5::updateData()
+void Hem5OSI::updateData()
 {
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
@@ -227,35 +227,35 @@ void Hem5::updateData()
 
 }
 
-void Hem5::fillqWork(integer* NQ, doublereal* q)
+void Hem5OSI::fillqWork(integer* NQ, doublereal* q)
 {
   unsigned int sizeQ = (unsigned int)(*NQ);
   for (unsigned int i = 0; i < sizeQ ; ++i)
     (*_qWork)(i) = q[i];
 }
 
-void Hem5::fillvWork(integer* NV, doublereal* v)
+void Hem5OSI::fillvWork(integer* NV, doublereal* v)
 {
   unsigned int sizeV = (unsigned int)(*NV);
   for (unsigned int i = 0; i < sizeV ; ++i)
     (*_vWork)(i) = v[i];
 }
 
-void Hem5::computeRhs(double t)
+void Hem5OSI::computeRhs(double t)
 {
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     (*it)->computeRhs(t);
 }
 
-void Hem5::computeJacobianRhs(double t)
+void Hem5OSI::computeJacobianRhs(double t)
 {
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     (*it)->computeJacobianRhsx(t);
 }
 
-void Hem5::fprob(integer* IFCN,
+void Hem5OSI::fprob(integer* IFCN,
                  integer* NQ,
                  integer* NV,
                  integer* NU,
@@ -270,7 +270,7 @@ void Hem5::fprob(integer* IFCN,
                  doublereal* GQQ, doublereal* GT, doublereal * FL,
                  doublereal* QDOT, doublereal* UDOT, doublereal * AM)
 {
-  DEBUG_PRINTF("Hem5::fprob(integer* IFCN,...) with IFCN = %i \n", (int)*IFCN);
+  DEBUG_PRINTF("Hem5OSI::fprob(integer* IFCN,...) with IFCN = %i \n", (int)*IFCN);
   DEBUG_PRINTF("NQ = %i\t NV = %i \t NU = %i, NL = %i \n", (int)*NQ, (int)*NV, (int)*NU, (int)*NL);
   DEBUG_PRINTF("LDG = %i\t LDF = %i \t LDA = %i \n", (int)*LDG, (int)*LDF, (int)*LDA);
 
@@ -309,7 +309,7 @@ void Hem5::fprob(integer* IFCN,
       }
       else
       {
-        RuntimeException::selfThrow("Hem5::fprob(), Only integration of Lagrangian DS is allowed");
+        RuntimeException::selfThrow("Hem5OSI::fprob(), Only integration of Lagrangian DS is allowed");
       }
       DEBUG_EXPR(
         for (int kk =0 ; kk < (int)(*NV)* (int)(*NV); kk ++)
@@ -334,11 +334,11 @@ void Hem5::fprob(integer* IFCN,
       }
       else if (Type::value(*ds) == Type::NewtonEulerDS)
       {
-        RuntimeException::selfThrow("Hem5::fprob(), Integration of Newton Euler DS not yet implemented.");
+        RuntimeException::selfThrow("Hem5OSI::fprob(), Integration of Newton Euler DS not yet implemented.");
       }
       else
       {
-        RuntimeException::selfThrow("Hem5::fprob(), Only integration of Lagrangian DS is allowed");
+        RuntimeException::selfThrow("Hem5OSI::fprob(), Only integration of Lagrangian DS is allowed");
       }
     }
     for (unsigned int ii =0 ; ii < (unsigned int)(*NV); ii ++)
@@ -382,8 +382,8 @@ void Hem5::fprob(integer* IFCN,
 
   if ((ifcn == 5) || (ifcn == 7))  // compute GPP ( Hessian of the constraints)
   {
-    //RuntimeException::selfThrow("Hem5::fprob(), G_qq is not available");
-    std::cout << "Hem5::fprob(), G_qq is not available " << std::endl;
+    //RuntimeException::selfThrow("Hem5OSI::fprob(), G_qq is not available");
+    std::cout << "Hem5OSI::fprob(), G_qq is not available " << std::endl;
   }
 
   if ((ifcn == 3) || (ifcn == 6) || (ifcn >= 10))  // compute GT (partial time derivative of the constraints)
@@ -432,11 +432,11 @@ void Hem5::fprob(integer* IFCN,
       }
       else if (Type::value(*ds) == Type::NewtonEulerDS)
       {
-        RuntimeException::selfThrow("Hem5::fprob(), Integration of Newton Euler DS not yet implemented.");
+        RuntimeException::selfThrow("Hem5OSI::fprob(), Integration of Newton Euler DS not yet implemented.");
       }
       else
       {
-        RuntimeException::selfThrow("Hem5::fprob(), Only integration of Mechanical DS is allowed");
+        RuntimeException::selfThrow("Hem5OSI::fprob(), Only integration of Mechanical DS is allowed");
       }
 
     }
@@ -448,22 +448,22 @@ void Hem5::fprob(integer* IFCN,
     );
   }
 
-  DEBUG_PRINTF("END : Hem5::fprob(integer* IFCN,...) with IFCN = %i \n \n", (int)*IFCN);
+  DEBUG_PRINTF("END : Hem5OSI::fprob(integer* IFCN,...) with IFCN = %i \n \n", (int)*IFCN);
 }
-// void Hem5::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
+// void Hem5OSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 // {
 //   std11::static_pointer_cast<EventDriven>(simulationLink)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 // }
 
-// void Hem5::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
+// void Hem5OSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 // {
 //   std11::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 // }
 
-void Hem5::initialize()
+void Hem5OSI::initialize()
 {
 
-  DEBUG_PRINT("Hem5::initialize()\n");
+  DEBUG_PRINT("Hem5OSI::initialize()\n");
 
   OneStepIntegrator::initialize();
   _qWork.reset(new BlockVector());
@@ -495,7 +495,7 @@ void Hem5::initialize()
     }
     else
     {
-      RuntimeException::selfThrow("Hem5::initialize(), Only integration of Lagrangian DS is allowed");
+      RuntimeException::selfThrow("Hem5OSI::initialize(), Only integration of Lagrangian DS is allowed");
     }
   }
 
@@ -513,7 +513,7 @@ void Hem5::initialize()
   _timeStep = 1.e-3; // initial step size guess (typical value 1e-3)
 
 }
-void Hem5::solout(integer* MODE,
+void Hem5OSI::solout(integer* MODE,
                   integer* NSTEP,
                   integer* NQ,
                   integer* NV,
@@ -528,9 +528,9 @@ void Hem5::solout(integer* MODE,
 {
 }
 
-unsigned int Hem5::numberOfConstraints()
+unsigned int Hem5OSI::numberOfConstraints()
 {
-  DEBUG_PRINT("Hem5::updateConstraints() \n");
+  DEBUG_PRINT("Hem5OSI::updateConstraints() \n");
   InteractionsGraph::VIterator ui, uiend;
   SP::InteractionsGraph indexSet2
     = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
@@ -545,10 +545,10 @@ unsigned int Hem5::numberOfConstraints()
   return n;
 }
 
-void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
+void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
 {
 
-  DEBUG_PRINT("Hem5::integrate(double& tinit, double& tend, double& tout, int& idid) with \n");
+  DEBUG_PRINT("Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid) with \n");
   DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, idid = %i\n", tinit, tend,  tout, idid);
 
   doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
@@ -556,13 +556,13 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
 
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
-  hem5_global_object = std11::static_pointer_cast<Hem5>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
+  hem5_global_object = std11::static_pointer_cast<Hem5OSI>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
 
   // function to compute the system to simulation
-  fprobpointer pointerToFPROB = Hem5_fprob_wrapper;
+  fprobpointer pointerToFPROB = Hem5OSI_fprob_wrapper;
 
   // function to compute the system to simulation
-  soloutpointer pointerToSOLOUT = Hem5_solout_wrapper;
+  soloutpointer pointerToSOLOUT = Hem5OSI_solout_wrapper;
 
   // === HEM5 CALL ===
 
@@ -575,7 +575,7 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
   else
     _qtmp->resize((int)_intData[0],true);
 
-  DEBUG_PRINTF("Hem5::integrate() _intData[0] (NQ) = %i \n",_intData[0]);
+  DEBUG_PRINTF("Hem5OSI::integrate() _intData[0] (NQ) = %i \n",_intData[0]);
 
   if (!_vtmp)
   {
@@ -586,7 +586,7 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
 
 
   _utmp.reset(new SiconosVector(1));
-  DEBUG_PRINTF("Hem5::integrate() _intData[2] (NU) = %i \n",_intData[2]);
+  DEBUG_PRINTF("Hem5OSI::integrate() _intData[2] (NU) = %i \n",_intData[2]);
 
   if (!_atmp)
   {
@@ -601,12 +601,12 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
   }
   else
     _lambdatmp->resize((int)_intData[3],true);
-  DEBUG_PRINTF("Hem5::integrate() _intData[3] (NL) = %i \n",_intData[3]);
+  DEBUG_PRINTF("Hem5OSI::integrate() _intData[3] (NL) = %i \n",_intData[3]);
 
-  DEBUG_PRINTF("Hem5::integrate() _intData[6] (LWK) = %i \n",_intData[6]);
-  DEBUG_PRINTF("Hem5::integrate() _intData[7] (LIWK) = %i \n",_intData[7]);
+  DEBUG_PRINTF("Hem5OSI::integrate() _intData[6] (LWK) = %i \n",_intData[6]);
+  DEBUG_PRINTF("Hem5OSI::integrate() _intData[7] (LIWK) = %i \n",_intData[7]);
 
-  Hem5::updateData();
+  Hem5OSI::updateData();
 
   rwork[0] = MACHINE_PREC ; // WK(1)   UROUND, THE ROUNDING UNIT, DEFAULT 1.D-16.
 
@@ -721,13 +721,13 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
   // === Post ===
   if (_idid < 0) // if istate < 0 => LSODAR failed
   {
-    std::cout << "Hem5::integrate(...) failed - idid = " << _idid <<std::endl;
+    std::cout << "Hem5OSI::integrate(...) failed - idid = " << _idid <<std::endl;
     std::cout << " -1 means input is not consistent" <<std::endl;
     std::cout << " -2 means larger NMAX needed." <<std::endl;
     std::cout << " -3 means step size becomes too small." <<std::endl;
     std::cout << " -4 means matrix is singular" <<std::endl;
     std::cout << " -5 means initial projection: no convergence" <<std::endl;
-    RuntimeException::selfThrow("Hem5::integrate(), integration failed");
+    RuntimeException::selfThrow("Hem5OSI::integrate(), integration failed");
   }
 
   DEBUG_EXPR_WE(std::cout << "HEM5 Statitics : " <<std::endl;
@@ -769,7 +769,7 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
 }
 
 
-void Hem5::updateState(const unsigned int level)
+void Hem5OSI::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   DSIterator it;
@@ -788,10 +788,10 @@ void Hem5::updateState(const unsigned int level)
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       (*it)->update(time);
   }
-  else RuntimeException::selfThrow("Hem5::updateState(index), index is out of range. Index = " + level);
+  else RuntimeException::selfThrow("Hem5OSI::updateState(index), index is out of range. Index = " + level);
 }
 
-struct Hem5::_NSLEffectOnFreeOutput : public SiconosVisitor
+struct Hem5OSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
@@ -821,7 +821,7 @@ struct Hem5::_NSLEffectOnFreeOutput : public SiconosVisitor
   // note : no NewtonImpactFrictionNSL
 };
 
-void Hem5::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp)
+void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp)
 {
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
@@ -914,7 +914,7 @@ void Hem5::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneSt
     {
       if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
       {
-        RuntimeException::selfThrow("Hem5::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
+        RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
       }
       else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
@@ -922,7 +922,7 @@ void Hem5::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneSt
         subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
       }
       else
-        RuntimeException::selfThrow("Hem5::computeFreeOutput not implemented for SICONOS_OSNSP ");
+        RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
     }
     // For the relation of type LagrangianScleronomousR
     if (relationSubType == ScleronomousR)
@@ -935,7 +935,7 @@ void Hem5::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneSt
     }
   }
   else
-    RuntimeException::selfThrow("Hem5::computeFreeOutput not yet implemented for Relation of type " + relationType);
+    RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for Relation of type " + relationType);
   if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
     if (inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
@@ -946,10 +946,10 @@ void Hem5::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneSt
   }
 
 }
-void Hem5::display()
+void Hem5OSI::display()
 {
   OneStepIntegrator::display();
-  std::cout << " --- > Hem5 specific values: " <<std::endl;
+  std::cout << " --- > Hem5OSI specific values: " <<std::endl;
   std::cout << "Number of equations: " << _intData[0] <<std::endl;
   std::cout << "Number of constraints: " << _intData[1] <<std::endl;
   std::cout << "itol, itask, istate, iopt, lrw, liw, jt: (for details on what are these variables see opkdmain.f)" <<std::endl;

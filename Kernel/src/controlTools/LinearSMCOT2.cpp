@@ -24,7 +24,7 @@
 
 #include "ActuatorFactory.hpp"
 #include "SiconosVector.hpp"
-#include "Lsodar.hpp"
+#include "LsodarOSI.hpp"
 #include "ControlSensor.hpp"
 
 
@@ -91,14 +91,14 @@ void LinearSMCOT2::initialize(const Model& m)
 
   _modelPhi.reset(new Model(_t0, _T));
   _modelPhi->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhi);
-  _PhiOSI.reset(new Lsodar(_DSPhi));
+  _PhiOSI.reset(new LsodarOSI(_DSPhi));
   _simulPhi.reset(new EventDriven(_tdPhi, 0));
   _simulPhi->insertIntegrator(_PhiOSI);
   _modelPhi->initialize(_simulPhi);
   // Integration for Gamma
   _modelPred.reset(new Model(_t0, _T));
   _modelPred->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPred);
-  _PredOSI.reset(new Lsodar(_DSPred));
+  _PredOSI.reset(new LsodarOSI(_DSPred));
   _simulPred.reset(new EventDriven(_tdPred, 0));
   _simulPred->insertIntegrator(_PredOSI);
   _modelPred->initialize(_simulPred);
@@ -116,7 +116,7 @@ void LinearSMCOT2::actuate()
 
   // We change the values of the state each time, so we need to change istate to 3
   // The first time, istate has to be 1 for initialization purposes
-  // See Lsodar.cpp for the meaning of istate
+  // See LsodarOSI.cpp for the meaning of istate
   if (_indx > 0)
   {
     _simulPhi->setIstate(3);

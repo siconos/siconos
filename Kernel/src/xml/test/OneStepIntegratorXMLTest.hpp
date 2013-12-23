@@ -31,7 +31,7 @@
 
 #include "AdamsXML.hpp"
 #include "MoreauJeanOSIXML.hpp"
-#include "LsodarXML.hpp"
+#include "LsodarOSIXML.hpp"
 
 using namespace std;
 
@@ -60,7 +60,7 @@ private:
   CPPUNIT_TEST(testGetType);
   CPPUNIT_TEST(testAdamsXML);
   CPPUNIT_TEST(testMoreauJeanOSIXML);
-  CPPUNIT_TEST(testLsodarXML);
+  CPPUNIT_TEST(testLsodarOSIXML);
   // exceptions
   //CPPUNIT_TEST_EXCEPTION(testGetStringAttributeValueException, XMLException);
 
@@ -76,7 +76,7 @@ private:
   void testGetType();
   void testAdamsXML();
   void testMoreauJeanOSIXML();
-  void testLsodarXML();
+  void testLsodarOSIXML();
 
 
 public:

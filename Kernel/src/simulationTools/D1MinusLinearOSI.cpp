@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "D1MinusLinear.hpp"
+#include "D1MinusLinearOSI.hpp"
 #include "Simulation.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
@@ -40,7 +40,7 @@
                                   */
 using namespace RELATION;
 
-struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
+struct D1MinusLinearOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
 
   using SiconosVisitor::visit;
@@ -66,14 +66,14 @@ struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
   }
 };
 
-D1MinusLinear::D1MinusLinear(SP::DynamicalSystem newDS) :
+D1MinusLinearOSI::D1MinusLinearOSI(SP::DynamicalSystem newDS) :
   OneStepIntegrator(OSI::D1MINUSLINEAR)
 {
   OSIDynamicalSystems->insert(newDS);
 }
 
 
-void D1MinusLinear::initialize()
+void D1MinusLinearOSI::initialize()
 {
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -89,16 +89,16 @@ void D1MinusLinear::initialize()
 
     }
     else
-      RuntimeException::selfThrow("D1MinusLinear::initialize - not implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::initialize - not implemented for Dynamical system type: " + dsType);
   }
 }
 
 
 #ifdef D1MINUSLINEAR_STD
-double D1MinusLinear::computeResidu()
+double D1MinusLinearOSI::computeResidu()
 {
 
-  DEBUG_PRINT("\n D1MinusLinear::computeResidu(), start\n");
+  DEBUG_PRINT("\n D1MinusLinearOSI::computeResidu(), start\n");
   double t = simulationLink->nextTime(); // end of the time step
   double told = simulationLink->startingTime(); // beginning of the time step
   double h = simulationLink->timeStep(); // time step length
@@ -212,7 +212,7 @@ double D1MinusLinear::computeResidu()
     }
     else
     {
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
     }
 
 
@@ -296,7 +296,7 @@ double D1MinusLinear::computeResidu()
 
         }
         else
-          RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+          RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
       }
     }
@@ -404,7 +404,7 @@ double D1MinusLinear::computeResidu()
 
     }
     else
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
 
     /** At this step, we obtain
@@ -525,7 +525,7 @@ double D1MinusLinear::computeResidu()
         DEBUG_EXPR(residuFree->display());
       }
       else
-        RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
     }
   }
   else
@@ -566,7 +566,7 @@ double D1MinusLinear::computeResidu()
         }
         else
           RuntimeException::selfThrow
-          ("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+          ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
         M->PLUForwardBackwardInPlace(*workFree); // contains right (left limit) acceleration without contact force
         DEBUG_PRINT("workFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
@@ -597,7 +597,7 @@ double D1MinusLinear::computeResidu()
         DEBUG_EXPR(workFree->display());
       }
       else
-        RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
     }
 
@@ -696,7 +696,7 @@ double D1MinusLinear::computeResidu()
         DEBUG_EXPR(residuFree->display());
       }
       else
-        RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
       /**
        * \f[
@@ -716,14 +716,14 @@ double D1MinusLinear::computeResidu()
 
   } // No impact
 
-  DEBUG_PRINT("D1MinusLinear::computeResidu() ends\n");
+  DEBUG_PRINT("D1MinusLinearOSI::computeResidu() ends\n");
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
 }
 #endif
 
-void D1MinusLinear::computeFreeState()
+void D1MinusLinearOSI::computeFreeState()
 {
-  DEBUG_PRINT("\n D1MinusLinear::computeFreeState(), start\n");
+  DEBUG_PRINT("\n D1MinusLinearOSI::computeFreeState(), start\n");
 
 
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -776,19 +776,19 @@ void D1MinusLinear::computeFreeState()
 
     }
     else
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
   }
 
 
-  DEBUG_PRINT("D1MinusLinear::computeFreeState(), end\n");
+  DEBUG_PRINT("D1MinusLinearOSI::computeFreeState(), end\n");
 
 
 }
 
-void D1MinusLinear::updateState(const unsigned int level)
+void D1MinusLinearOSI::updateState(const unsigned int level)
 {
-  DEBUG_PRINTF("\n D1MinusLinear::updateState(const unsigned int level) start for level = %i\n",level);
+  DEBUG_PRINTF("\n D1MinusLinearOSI::updateState(const unsigned int level) start for level = %i\n",level);
 
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -840,18 +840,18 @@ void D1MinusLinear::updateState(const unsigned int level)
       DEBUG_EXPR(d->velocity()->display());
     }
     else
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
   }
 
-  DEBUG_PRINT("\n D1MinusLinear::updateState(const unsigned int level) end\n");
+  DEBUG_PRINT("\n D1MinusLinearOSI::updateState(const unsigned int level) end\n");
 
 }
 
-void D1MinusLinear::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
+void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
 
-  DEBUG_PRINT("D1MinusLinear::computeFreeOutput starts\n");
+  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput starts\n");
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
@@ -887,7 +887,7 @@ void D1MinusLinear::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       Xfree = inter->data(NewtonEulerR::velocity);
     }
     else
-      RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - unknown relation type.");
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
 
   }
   else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
@@ -902,13 +902,13 @@ void D1MinusLinear::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       Xfree = inter->data(NewtonEulerR::free);
     }
     else
-      RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - unknown relation type.");
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
     DEBUG_PRINT("Xfree = inter->data(LagrangianR::free);\n");
     DEBUG_EXPR(Xfree->display());
     assert(Xfree);
   }
   else
-    RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
+    RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
 
   // calculate data of interaction
   SP::Interaction mainInteraction = inter;
@@ -953,12 +953,12 @@ void D1MinusLinear::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
         subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false);
       }
       else
-        RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput is only implemented  at velocity level for LagrangianRheonomousR.");
+        RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput is only implemented  at velocity level for LagrangianRheonomousR.");
     }
 
     if (relationSubType == ScleronomousR) // acceleration term involving Hessian matrix of Relation with respect to degree is added
     {
-      DEBUG_PRINT("D1MinusLinear::computeFreeOutput. acceleration term involving Hessian matrix of Relation\n");
+      DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput. acceleration term involving Hessian matrix of Relation\n");
       DEBUG_EXPR(Yp->display(););
 
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
@@ -1007,7 +1007,7 @@ void D1MinusLinear::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       xcoord[6] = 0;
       xcoord[7] = sizeY;
 
-      DEBUG_PRINT("D1MinusLinear::computeFreeOutput.\n Adding the additional terms of the second order time derivative of constraints.\n");
+      DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput.\n Adding the additional terms of the second order time derivative of constraints.\n");
       DEBUG_EXPR(Yp->display(););
 
       /** Compute additional terms of the second order time derivative of constraints
@@ -1037,15 +1037,15 @@ void D1MinusLinear::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   }
 
   else
-    RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - not implemented for Relation of type " + relationType);
-  DEBUG_PRINT("D1MinusLinear::computeFreeOutput ends\n");
+    RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " + relationType);
+  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput ends\n");
 
 }
 
 
-bool D1MinusLinear::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  DEBUG_PRINT("D1MinusLinear::addInteractionInIndexSet.\n");
+  DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSet.\n");
   assert((i == 1) || (i==2));
   // double h = simulationLink->timeStep();
 
@@ -1090,19 +1090,19 @@ bool D1MinusLinear::addInteractionInIndexSet(SP::Interaction inter, unsigned int
     y = (inter->y(0))->getValue(0);
   }
 
-  DEBUG_PRINTF("D1MinusLinear::addInteractionInIndexSet of level = %i yOld=%e, y=%e \n", i,  yOld, y);
+  DEBUG_PRINTF("D1MinusLinearOSI::addInteractionInIndexSet of level = %i yOld=%e, y=%e \n", i,  yOld, y);
 
   assert(!isnan(y));
 
   DEBUG_EXPR(
     if ((yOld >0.0) && (y <= y))
-    DEBUG_PRINT("D1MinusLinear::addInteractionInIndexSet contact are closing ((yOld >0.0) && (y <= y)).\n");
+    DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSet contact are closing ((yOld >0.0) && (y <= y)).\n");
   );
   return ((yOld >0.0) && (y <= y));
 }
 
 
-bool D1MinusLinear::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1);
   double h = simulationLink->timeStep();
@@ -1113,12 +1113,12 @@ bool D1MinusLinear::removeInteractionInIndexSet(SP::Interaction inter, unsigned 
   // {
   //   gamma = _gamma;
   // }
-  DEBUG_PRINTF("D1MinusLinear::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("D1MinusLinearOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
   assert(!isnan(y));
   DEBUG_EXPR(
     if (y > 0)
-    DEBUG_PRINT("D1MinusLinear::removeInteractionInIndexSet DEACTIVATE.\n");
+    DEBUG_PRINT("D1MinusLinearOSI::removeInteractionInIndexSet DEACTIVATE.\n");
   );
 
   return (y > 0.0);
@@ -1128,7 +1128,7 @@ bool D1MinusLinear::removeInteractionInIndexSet(SP::Interaction inter, unsigned 
 
 
 
-void D1MinusLinear::insertDynamicalSystem(SP::DynamicalSystem ds)
+void D1MinusLinearOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   OSIDynamicalSystems->insert(ds);
 }
@@ -1137,10 +1137,10 @@ void D1MinusLinear::insertDynamicalSystem(SP::DynamicalSystem ds)
 
 
 
-double D1MinusLinear::computeResidu()
+double D1MinusLinearOSI::computeResidu()
 {
 
-  DEBUG_PRINT("\n D1MinusLinear::computeResidu(), starts (FULL VERSION)\n");
+  DEBUG_PRINT("\n D1MinusLinearOSI::computeResidu(), starts (FULL VERSION)\n");
   double t = simulationLink->nextTime(); // end of the time step
   double told = simulationLink->startingTime(); // beginning of the time step
   double h = simulationLink->timeStep(); // time step length
@@ -1247,7 +1247,7 @@ double D1MinusLinear::computeResidu()
     }
     else
     {
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
     }
 
 
@@ -1330,7 +1330,7 @@ double D1MinusLinear::computeResidu()
 
         }
         else
-          RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+          RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
       }
     }
@@ -1438,7 +1438,7 @@ double D1MinusLinear::computeResidu()
 
     }
     else
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
 
     /** At this step, we obtain
@@ -1525,7 +1525,7 @@ double D1MinusLinear::computeResidu()
       }
       else
         RuntimeException::selfThrow
-          ("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+          ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
       
       M->PLUForwardBackwardInPlace(*workFree); // contains right (left limit) acceleration without contact force
       DEBUG_PRINT("workFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
@@ -1556,7 +1556,7 @@ double D1MinusLinear::computeResidu()
       DEBUG_EXPR(workFree->display());
     }
     else
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
     
   }
   
@@ -1655,7 +1655,7 @@ double D1MinusLinear::computeResidu()
       DEBUG_EXPR(residuFree->display());
     }
     else
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
     
     /**
      * \f[
@@ -1674,7 +1674,7 @@ double D1MinusLinear::computeResidu()
   }
 
 
-  DEBUG_PRINT("D1MinusLinear::computeResidu() ends (FULL VERSION)\n");
+  DEBUG_PRINT("D1MinusLinearOSI::computeResidu() ends (FULL VERSION)\n");
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
 }
 #endif

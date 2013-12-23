@@ -141,7 +141,7 @@ int main(int argc, char* argv[]){
     // -------------
     SP::Model BallChain(new Model(t0,T));
     // -- (1) OneStepIntegrators --
-    SP::OneStepIntegrator OSI(new Lsodar());
+    SP::OneStepIntegrator OSI(new LsodarOSI());
 
     std::vector<SP::DynamicalSystem> VecOfallDS;
     SP::SiconosMatrix MassBall;

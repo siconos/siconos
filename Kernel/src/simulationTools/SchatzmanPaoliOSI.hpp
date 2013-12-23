@@ -17,11 +17,11 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 /*! \file
-  SchatzmanPaoli Time-Integrator for Dynamical Systems
+  SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
 */
 
-#ifndef SCHATZMANPAOLI_H
-#define SCHATZMANPAOLI_H
+#ifndef SCHATZMANPAOLIOSI_H
+#define SCHATZMANPAOLIOSI_H
 
 #include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"
@@ -31,17 +31,17 @@ class SiconosMatrix;
 
 const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 
-/**  SchatzmanPaoli Time-Integrator for Dynamical Systems
+/**  SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
  *
- * SchatzmanPaoli class is used to define some time-integrators methods for a
+ * SchatzmanPaoliOSI class is used to define some time-integrators methods for a
  * list of dynamical systems.
 
- * A SchatzmanPaoli instance is defined by the value of theta and the list of
+ * A SchatzmanPaoliOSI instance is defined by the value of theta and the list of
  * concerned dynamical systems.  Each DynamicalSystem is associated to
  * a SiconosMatrix, named "W"
  *
@@ -62,18 +62,18 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
  *    states.
  *
  */
-class SchatzmanPaoli : public OneStepIntegrator
+class SchatzmanPaoliOSI : public OneStepIntegrator
 {
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(SchatzmanPaoli);
+  ACCEPT_SERIALIZATION(SchatzmanPaoliOSI);
 
 
-  /** Stl map that associates a W SchatzmanPaoli matrix to each DynamicalSystem of the OSI */
+  /** Stl map that associates a W SchatzmanPaoliOSI matrix to each DynamicalSystem of the OSI */
   MapOfDSMatrices WMap;
 
-  /** Stl map that associates the columns of  W SchatzmanPaoli matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
+  /** Stl map that associates the columns of  W SchatzmanPaoliOSI matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
   MapOfDSMatrices _WBoundaryConditionsMap;
 
   /** Stl map that associates a theta parameter for the integration
@@ -102,7 +102,7 @@ protected:
 
   /** Default constructor
    */
-  SchatzmanPaoli() {};
+  SchatzmanPaoliOSI() {};
 
 public:
 
@@ -110,35 +110,35 @@ public:
    *  \param OneStepIntegratorXML* : the XML object corresponding
    *  \param DynamicalSystemsSet: set of all DS in the NSDS
    */
-  //SchatzmanPaoli(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
+  //SchatzmanPaoliOSI(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
    */
-  SchatzmanPaoli(SP::DynamicalSystem, double);
+  SchatzmanPaoliOSI(SP::DynamicalSystem, double);
 
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
-  SchatzmanPaoli(double);
+  SchatzmanPaoliOSI(double);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
    *  \param gamma value
    */
-  SchatzmanPaoli(SP::DynamicalSystem, double, double);
+  SchatzmanPaoliOSI(SP::DynamicalSystem, double, double);
 
   /** constructor from theta value only
    *  \param theta value for all these DS.
    *  \param gamma value for all these DS.
    */
-  SchatzmanPaoli(double, double);
+  SchatzmanPaoliOSI(double, double);
 
   /** destructor
    */
-  virtual ~SchatzmanPaoli() {};
+  virtual ~SchatzmanPaoliOSI() {};
 
   // --- GETTERS/SETTERS ---
 
@@ -268,36 +268,36 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** initialization of the SchatzmanPaoli integrator; for linear time
+  /** initialization of the SchatzmanPaoliOSI integrator; for linear time
       invariant systems, we compute time invariant operator (example :
       W)
    */
   void initialize();
 
-  /** init WMap[ds] SchatzmanPaoli matrix at time t
+  /** init WMap[ds] SchatzmanPaoliOSI matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
   void initW(double, SP::DynamicalSystem);
 
-  /** compute WMap[ds] SchatzmanPaoli matrix at time t
+  /** compute WMap[ds] SchatzmanPaoliOSI matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
   void computeW(double, SP::DynamicalSystem);
 
-  /** compute WBoundaryConditionsMap[ds] SchatzmanPaoli matrix at time t
+  /** compute WBoundaryConditionsMap[ds] SchatzmanPaoliOSI matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
   void computeWBoundaryConditions(SP::DynamicalSystem);
 
-  /** init WBoundaryConditionsMap[ds] SchatzmanPaoli
+  /** init WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
    *  \param a pointer to DynamicalSystem
    */
   void initWBoundaryConditions(SP::DynamicalSystem);
 
-  /** return the maximum of all norms for the "SchatzmanPaoli-discretized" residus of DS
+  /** return the maximum of all norms for the "SchatzmanPaoliOSI-discretized" residus of DS
       \return a double
    */
   double computeResidu();
@@ -319,7 +319,7 @@ public:
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
-   *  \param int: useless flag (for SchatzmanPaoli, used in Lsodar)
+   *  \param int: useless flag (for SchatzmanPaoliOSI, used in LsodarOSI)
    */
   void integrate(double&, double&, double&, int&);
 
@@ -328,7 +328,7 @@ public:
    */
   virtual void updateState(const unsigned int level);
 
-  /** Displays the data of the SchatzmanPaoli's integrator
+  /** Displays the data of the SchatzmanPaoliOSI's integrator
    */
   void display();
 
@@ -343,4 +343,4 @@ public:
 
 };
 
-#endif // SCHATZMANPAOLI_H
+#endif // SCHATZMANPAOLIOSI_H

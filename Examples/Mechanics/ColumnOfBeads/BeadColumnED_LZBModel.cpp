@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
     // --- Simulation ---
     // ----------------
     // -- (1) OneStepIntegrators --
-    SP::OneStepIntegrator OSI(new Lsodar());
+    SP::OneStepIntegrator OSI(new LsodarOSI());
 
     for (unsigned int i = 0; i < NumberBalls; ++i)
     {

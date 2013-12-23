@@ -49,7 +49,7 @@ void ControlSimulation::initialize(SP::SiconosVector x0)
   _processTD.reset(new TimeDiscretisation(_t0, _h));
   _processSimulation.reset(new TimeStepping(_processTD, 0));
   _processSimulation->setName("plant simulation");
-  _processIntegrator.reset(new ZeroOrderHold(_processDS));
+  _processIntegrator.reset(new ZeroOrderHoldOSI(_processDS));
   _processSimulation->insertIntegrator(_processIntegrator);
   _model->initialize(_processSimulation);
 

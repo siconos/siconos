@@ -313,9 +313,9 @@ int main(int argc, char* argv[])
     // SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(beam2, theta));
     // SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(beam3, theta));
 
-    SP::D1MinusLinear OSI1(new D1MinusLinear(beam1));
-    SP::D1MinusLinear OSI2(new D1MinusLinear(beam2));
-    SP::D1MinusLinear OSI3(new D1MinusLinear(beam3));
+    SP::D1MinusLinearOSI OSI1(new D1MinusLinearOSI(beam1));
+    SP::D1MinusLinearOSI OSI2(new D1MinusLinearOSI(beam2));
+    SP::D1MinusLinearOSI OSI3(new D1MinusLinearOSI(beam3));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -460,14 +460,14 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinear.dat", "ascii", dataPlot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinear_beam1.dat", "ascii", beam1Plot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinear_beam2.dat", "ascii", beam2Plot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinear_beam3.dat", "ascii", beam3Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinearOSI.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinearOSI_beam1.dat", "ascii", beam1Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinearOSI_beam2.dat", "ascii", beam2Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinearOSI_beam3.dat", "ascii", beam3Plot, "noDim");
 
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinear.ref", "ascii", dataPlotRef);
+    ioMatrix::read("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinearOSI.ref", "ascii", dataPlotRef);
     if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
       (dataPlot - dataPlotRef).display();

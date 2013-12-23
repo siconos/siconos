@@ -335,7 +335,7 @@ public:
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
-   *  \param int: useless flag (for MoreauJeanOSI, used in Lsodar)
+   *  \param int: useless flag (for MoreauJeanOSI, used in LsodarOSI)
    */
   void integrate(double&, double&, double&, int&);
 

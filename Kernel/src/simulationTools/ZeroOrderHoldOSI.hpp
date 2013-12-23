@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 /*! \file
-  ZeroOrderHold Time-Integrator for Dynamical Systems
+  ZeroOrderHoldOSI Time-Integrator for Dynamical Systems
   */
 
 #ifndef ZEROORDERHOLD_H
@@ -31,18 +31,18 @@ class SiconosMatrix;
 
 const unsigned int ZOHSTEPSINMEMORY = 1;
 
-/**  ZeroOrderHold Time-Integrator for Dynamical Systems
+/**  ZeroOrderHoldOSI Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
- * See User's guide, \ref docSimuZeroOrderHoldTS for details.
+ * See User's guide, \ref docSimuZeroOrderHoldOSITS for details.
  *
- * ZeroOrderHold class is used to define some time-integrators methods for a
+ * ZeroOrderHoldOSI class is used to define some time-integrators methods for a
  * list of dynamical systems.
 
- * A ZeroOrderHold instance is defined by the value of theta and the list of
+ * A ZeroOrderHoldOSI instance is defined by the value of theta and the list of
  * concerned dynamical systems.  Each DynamicalSystem is associated to
  * a SiconosMatrix, named "W"
  *
@@ -51,7 +51,7 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
  * state (x).
  *
  * For first order systems, the implementation uses _r for storing the
- * the input due to the nonsmooth law. This ZeroOrderHold scheme assumes that the
+ * the input due to the nonsmooth law. This ZeroOrderHoldOSI scheme assumes that the
  * relative degree is zero or one and one level for _r is sufficient
  *
  * For Lagrangian systems, the implementation uses _p[1] for storing the
@@ -66,17 +66,17 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
  *    states.
  *
  */
-class ZeroOrderHold : public OneStepIntegrator
+class ZeroOrderHoldOSI : public OneStepIntegrator
 {
 private:
   /** default constructor
    */
-  ZeroOrderHold() {};
+  ZeroOrderHoldOSI() {};
 
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(ZeroOrderHold);
+  ACCEPT_SERIALIZATION(ZeroOrderHoldOSI);
 
   /** nslaw effects */
   struct _NSLEffectOnFreeOutput;
@@ -85,13 +85,13 @@ protected:
   /** Unused for now */
   bool _useGammaForRelation;
 
-  /** init Phi[ds], ZeroOrderHold matrix, at time t
+  /** init Phi[ds], ZeroOrderHoldOSI matrix, at time t
    *  \param t the time
    *  \param ds a pointer to DynamicalSystem
    */
 //  void initMatrixAd(double t, SP::DynamicalSystem ds);
 
-  /** init Ad[ds] and possibly Bd[ds] or Ld[ds] , ZeroOrderHold matrices, at time t
+  /** init Ad[ds] and possibly Bd[ds] or Ld[ds] , ZeroOrderHoldOSI matrices, at time t
    *  \param t the time
    *  \param ds a pointer to DynamicalSystem
    *  \param inter the control interaction
@@ -104,29 +104,29 @@ protected:
    */
 //  void initIntegrators(const DynamicalSystem& ds, const bool withInteraction);
 
-  /** compute Psi[ds], ZeroOrderHold matrix, at time t
+  /** compute Psi[ds], ZeroOrderHoldOSI matrix, at time t
    *  \param ds the DynamicalSystem
    *  \param rel the relation
    */
 //  void computeBd(const DynamicalSystem& ds, const Relation& rel);
 
-  /** compute Psi[ds], ZeroOrderHold matrix, if the DS is TI
+  /** compute Psi[ds], ZeroOrderHoldOSI matrix, if the DS is TI
    *  \param ds the DynamicalSystem
    *  \param rel the relation
    */
 //  void computeBdTI(const DynamicalSystem& ds, const Relation& rel);
 
-  /** compute Psi[ds], ZeroOrderHold matrix, if the DS is TI
+  /** compute Psi[ds], ZeroOrderHoldOSI matrix, if the DS is TI
    *  \param ds the DynamicalSystem
    */
 //  void computeLdTI(const DynamicalSystem& ds);
 
-  /** compute Phi[ds], ZeroOrderHold matrix, at time t
+  /** compute Phi[ds], ZeroOrderHoldOSI matrix, at time t
    *  \param ds the DynamicalSystem
    */
 //  void computeAd(const DynamicalSystem& ds);
 
-  /** compute AdInt[ds], ZeroOrderHold matrix, at time t
+  /** compute AdInt[ds], ZeroOrderHoldOSI matrix, at time t
    *  \param ds the DynamicalSystem
    */
 //  void computeAdInt(const DynamicalSystem& ds);
@@ -137,16 +137,16 @@ public:
    *  \param osiXML the corresponding XML object
    *  \param dsList the set of all DS in the NSDS
    */
-  ZeroOrderHold(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList);
+  ZeroOrderHoldOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList);
 
   /** constructor from a minimum set of data: one DS
    *  \param ds the DynamicalSystem linked to the OneStepIntegrator
    */
-  ZeroOrderHold(SP::DynamicalSystem ds);
+  ZeroOrderHoldOSI(SP::DynamicalSystem ds);
 
   /** destructor
   */
-  virtual ~ZeroOrderHold() {};
+  virtual ~ZeroOrderHoldOSI() {};
 
   // --- GETTERS/SETTERS ---
 
@@ -181,15 +181,15 @@ public:
 //  inline SP::SimpleMatrix intPhi(SP::DynamicalSystem ds)
 //  {
 //    assert(_AdIntMap[ds.number()] &&
-//        "ZeroOrderHold::intPhi(ds): _AdIntMap[ds.number()] == NULL.");
+//        "ZeroOrderHoldOSI::intPhi(ds): _AdIntMap[ds.number()] == NULL.");
 //    return _AdIntMap[ds.number()];
 //  };
   // --- OTHER FUNCTIONS ---
 
-  /** initialization of the ZeroOrderHold integrator */
+  /** initialization of the ZeroOrderHoldOSI integrator */
   void initialize();
 
-  /** return the maximum of all norms for the "ZeroOrderHold-discretized" residus of DS
+  /** return the maximum of all norms for the "ZeroOrderHoldOSI-discretized" residus of DS
     \return a double
     */
   double computeResidu();
@@ -234,7 +234,7 @@ public:
    *  \param tinit initial time
    *  \param tend end time
    *  \param tout real end time
-   *  \param notUsed useless flag (for ZeroOrderHold, used in Lsodar)
+   *  \param notUsed useless flag (for ZeroOrderHoldOSI, used in LsodarOSI)
    */
   void integrate(double& tinit, double& tend, double& tout, int& notUsed);
 
@@ -243,7 +243,7 @@ public:
    */
   virtual void updateState(const unsigned int level);
 
-  /** Displays the data of the ZeroOrderHold's integrator
+  /** Displays the data of the ZeroOrderHoldOSI's integrator
   */
   void display();
 
@@ -260,5 +260,5 @@ public:
 
 };
 
-//TYPEDEF_SPTR(ZeroOrderHold)
+//TYPEDEF_SPTR(ZeroOrderHoldOSI)
 #endif // ZEROORDERHOLD_H

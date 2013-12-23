@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "ZeroOrderHold.hpp"
+#include "ZeroOrderHoldOSI.hpp"
 #include "EventDriven.hpp"
 #include "Model.hpp"
-#include "Lsodar.hpp"
+#include "LsodarOSI.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
@@ -40,20 +40,20 @@
 
 using namespace RELATION;
 // --- constructor from a set of data ---
-//ZeroOrderHold::ZeroOrderHold():
+//ZeroOrderHoldOSI::ZeroOrderHoldOSI():
 //  OneStepIntegrator(OSI::ZOH)
 //{
 //}
 
 // --- xml constructor ---
-ZeroOrderHold::ZeroOrderHold(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
+ZeroOrderHoldOSI::ZeroOrderHoldOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   OneStepIntegrator(OSI::ZOH), _useGammaForRelation(false)
 {
-  RuntimeException::selfThrow("ZeroOrderHold::xml constructor - not yet implemented.");
+  RuntimeException::selfThrow("ZeroOrderHoldOSI::xml constructor - not yet implemented.");
 }
 
 // --- constructor from a minimum set of data ---
-ZeroOrderHold::ZeroOrderHold(SP::DynamicalSystem ds):
+ZeroOrderHoldOSI::ZeroOrderHoldOSI(SP::DynamicalSystem ds):
   OneStepIntegrator(OSI::ZOH), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(ds);
@@ -61,20 +61,20 @@ ZeroOrderHold::ZeroOrderHold(SP::DynamicalSystem ds):
 
 
 // Note: OSIDynamicalSystems must disappear
-void ZeroOrderHold::insertDynamicalSystem(SP::DynamicalSystem ds)
+void ZeroOrderHoldOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   OSIDynamicalSystems->insert(ds);
 }
 
 
-//void ZeroOrderHold::setPhi(const SiconosMatrix& newPhi, SP::DynamicalSystem ds)
+//void ZeroOrderHoldOSI::setPhi(const SiconosMatrix& newPhi, SP::DynamicalSystem ds)
 //{
 //  if (!ds)
-//    RuntimeException::selfThrow("ZeroOrderHold::setPhi(newVal, ds) - ds == NULL.");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal, ds) - ds == NULL.");
 //
 //  // Check if ds is in the OSI
 //  if (!OSIDynamicalSystems->isIn(ds))
-//    RuntimeException::selfThrow("ZeroOrderHold::setPhi(newVal, ds) - ds does not belong to this Integrator ...");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal, ds) - ds does not belong to this Integrator ...");
 //
 //  unsigned int dsN = ds->number();
 //  // Check dimensions consistency
@@ -82,11 +82,11 @@ void ZeroOrderHold::insertDynamicalSystem(SP::DynamicalSystem ds)
 //  unsigned int col  = newPhi.size(1);
 //
 //  if (line != col) // Check that newValue is square
-//    RuntimeException::selfThrow("ZeroOrderHold::setPhi(newVal,ds) - newVal is not square! ");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal,ds) - newVal is not square! ");
 //
 //  unsigned int sizePhi = ds->getDim(); // n for first order systems, ndof for lagrangian.
 //  if (line != sizePhi) // check consistency between newValue and dynamical system size
-//    RuntimeException::selfThrow("ZeroOrderHold::setPhi(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
 //
 //  // Memory allocation for W, if required
 //  if (!_PhiMap[dsN]) // allocate a new W if required
@@ -98,23 +98,23 @@ void ZeroOrderHold::insertDynamicalSystem(SP::DynamicalSystem ds)
 //    if (line == _PhiMap[dsN]->size(0) && col == _PhiMap[dsN]->size(1))
 //      *(_PhiMap[dsN]) = newPhi;
 //    else
-//      RuntimeException::selfThrow("ZeroOrderHold::setPhi: inconsistent dimensions with problem size for given input matrix W");
+//      RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi: inconsistent dimensions with problem size for given input matrix W");
 //  }
 //}
 //
-//void ZeroOrderHold::setPhiPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
+//void ZeroOrderHoldOSI::setPhiPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
 //{
 //  unsigned int line = newPtr->size(0);
 //  unsigned int col  = newPtr->size(1);
 //  if (line != col) // Check that newPtr is square
-//    RuntimeException::selfThrow("ZeroOrderHold::setPhiPtr(newVal, ds) - newVal is not square! ");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhiPtr(newVal, ds) - newVal is not square! ");
 //
 //  if (!ds)
-//    RuntimeException::selfThrow("ZeroOrderHold::setPhiPtr(newVal, ds) - ds == NULL.");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhiPtr(newVal, ds) - ds == NULL.");
 //
 //  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
 //  if (line != sizeW) // check consistency between newValue and dynamical system size
-//    RuntimeException::selfThrow("ZeroOrderHold::setPhi(newVal, ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal, ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
 //
 //  _PhiMap[ds->number()] = newPtr;                  // link with new pointer
 //}
@@ -122,7 +122,7 @@ void ZeroOrderHold::insertDynamicalSystem(SP::DynamicalSystem ds)
 
 
 
-void ZeroOrderHold::initialize()
+void ZeroOrderHoldOSI::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
@@ -136,7 +136,7 @@ void ZeroOrderHold::initialize()
   {
     dsType = Type::value(**itDS);
     if ((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
-      RuntimeException::selfThrow("ZeroOrderHold::initialize - the DynamicalSystem does not have the right type");
+      RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the DynamicalSystem does not have the right type");
     indxIter = 0;
     DynamicalSystemsGraph::AVIterator avi, aviend;
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*itDS);
@@ -147,7 +147,7 @@ void ZeroOrderHold::initialize()
         DSG0.Ad.at(dsgVD)->integrate();
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHold::initialize - Ad MatrixIntegrator is already initialized for ds the DS");
+      RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - Ad MatrixIntegrator is already initialized for ds the DS");
 
     if ((static_cast<const FirstOrderLinearDS&>(**itDS)).b())
     {
@@ -186,7 +186,7 @@ void ZeroOrderHold::initialize()
         Interaction& inter = *DSG0.bundle(ed1);
         Relation& rel = *inter.relation();
         if (rel.getType() != RELATION::FirstOrder)
-          RuntimeException::selfThrow("ZeroOrderHold::initialize - the Integrator can only deal with FirstOrder Relation");
+          RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the Integrator can only deal with FirstOrder Relation");
         FirstOrderR& relR = static_cast<FirstOrderR&>(rel);
 
         if (indxIter == 0)
@@ -205,7 +205,7 @@ void ZeroOrderHold::initialize()
         }
         else
         {
-          //        RuntimeException::selfThrow("ZeroOrderHold::initialize - DS linked with more that one iteraction");
+          //        RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - DS linked with more that one iteraction");
           DEBUG_PRINTF("number of iteraction attached to the process : %d\n", indxIter);
         }
       }
@@ -215,18 +215,18 @@ void ZeroOrderHold::initialize()
 
   }
 }
-//void ZeroOrderHold::initMatrixPhi(double t, const DynamicalSystemsGraph::VDescriptor& dsgVD)
+//void ZeroOrderHoldOSI::initMatrixPhi(double t, const DynamicalSystemsGraph::VDescriptor& dsgVD)
 //{
 //  // This function:
 //  // - allocate memory for the matrices Phi matrix
 //  // - insert this matrix into the DS properties
 //
 //  //  if (!ds)
-//  //    RuntimeException::selfThrow("ZeroOrderHold::initMatrices(t,ds) - ds == NULL");
+//  //    RuntimeException::selfThrow("ZeroOrderHoldOSI::initMatrices(t,ds) - ds == NULL");
 //
 //
 //  if (DSG0.Ad.hasKey(dsgVD))
-//    RuntimeException::selfThrow("ZeroOrderHold::initMatrixPhi(t,ds) - initMatrixPhi(ds) is already in the map and has been initialized.");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::initMatrixPhi(t,ds) - initMatrixPhi(ds) is already in the map and has been initialized.");
 //
 //  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 //  DynamicalSystem& ds = DSG0.bundle(dsgVD);
@@ -241,11 +241,11 @@ void ZeroOrderHold::initialize()
 //    DSG0.Ad[dsgVD].isConst = false;
 //    DSG0.Ad[dsgVD].mat.reset(new SimpleMatrix(sizeN, sizeN));
 //  }
-//  else RuntimeException::selfThrow("ZeroOrderHold::initMatrixPhi - not yet implemented for Dynamical system type: " + dsType);
+//  else RuntimeException::selfThrow("ZeroOrderHoldOSI::initMatrixPhi - not yet implemented for Dynamical system type: " + dsType);
 //
 //}
 //
-//void ZeroOrderHold::initMatrices(double t, SP::DynamicalSystem ds, const Interaction& inter)
+//void ZeroOrderHoldOSI::initMatrices(double t, SP::DynamicalSystem ds, const Interaction& inter)
 //{
 //  // This function:
 //  // - allocate memory for the matrices Ad and Bd, Ld if needed
@@ -266,11 +266,11 @@ void ZeroOrderHold::initialize()
 //    _isPsiConst[dsN] = false;
 //
 //  }
-//  else RuntimeException::selfThrow("ZeroOrderHold::initMatrices - not yet implemented for Dynamical system type: " + dsType);
+//  else RuntimeException::selfThrow("ZeroOrderHoldOSI::initMatrices - not yet implemented for Dynamical system type: " + dsType);
 //
 //}
 //
-//void ZeroOrderHold::initIntegrators(const DynamicalSystem& ds, const bool withInteraction)
+//void ZeroOrderHoldOSI::initIntegrators(const DynamicalSystem& ds, const bool withInteraction)
 //{
 //  unsigned int dsN = ds.number();
 //  double t0 = simulationLink->model()->t0();
@@ -309,7 +309,7 @@ void ZeroOrderHold::initialize()
 //
 //  _modelPhiMap[dsN].reset(new Model(t0, T));
 //  _modelPhiMap[dsN]->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhiMap[dsN]);
-//  _PhiOSIMap[dsN].reset(new Lsodar(_DSPhiMap[dsN]));
+//  _PhiOSIMap[dsN].reset(new LsodarOSI(_DSPhiMap[dsN]));
 //  _TDPhiMap[dsN].reset(new TimeDiscretisation(*simulationLink->timeDiscretisation()));
 //  _simulPhiMap[dsN].reset(new EventDriven(_TDPhiMap[dsN], 0));
 //  _simulPhiMap[dsN]->insertIntegrator(_PhiOSIMap[dsN]);
@@ -317,7 +317,7 @@ void ZeroOrderHold::initialize()
 //
 //  _modelAdIntMap[dsN].reset(new Model(t0, T));
 //  _modelAdIntMap[dsN]->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSAdIntMap[dsN]);
-//  _AdIntOSIMap[dsN].reset(new Lsodar(_DSAdIntMap[dsN]));
+//  _AdIntOSIMap[dsN].reset(new LsodarOSI(_DSAdIntMap[dsN]));
 //  _TDAdIntMap[dsN].reset(new TimeDiscretisation(*simulationLink->timeDiscretisation()));
 //  _simulAdIntMap[dsN].reset(new EventDriven(_TDAdIntMap[dsN], 0));
 //  _simulAdIntMap[dsN]->insertIntegrator(_AdIntOSIMap[dsN]);
@@ -328,7 +328,7 @@ void ZeroOrderHold::initialize()
 //    std11::static_pointer_cast<FirstOrderLinearDS>(_DSPsiMap[dsN])->setb(tmpb);
 //    _modelPsiMap[dsN].reset(new Model(t0, T));
 //    _modelPsiMap[dsN]->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPsiMap[dsN]);
-//    _PsiOSIMap[dsN].reset(new Lsodar(_DSPsiMap[dsN]));
+//    _PsiOSIMap[dsN].reset(new LsodarOSI(_DSPsiMap[dsN]));
 //    _TDPsiMap[dsN].reset(new TimeDiscretisation(*simulationLink->timeDiscretisation()));
 //    _simulPsiMap[dsN].reset(new EventDriven(_TDPsiMap[dsN], 0));
 //    _simulPsiMap[dsN]->insertIntegrator(_PsiOSIMap[dsN]);
@@ -336,7 +336,7 @@ void ZeroOrderHold::initialize()
 //  }
 //}
 //
-//void ZeroOrderHold::computeAd(const DynamicalSystemsGraph::VDescriptor& dsgVD)
+//void ZeroOrderHoldOSI::computeAd(const DynamicalSystemsGraph::VDescriptor& dsgVD)
 //{
 //  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 //  DynamicalSystem& ds = DSG.bundle(dsgVD);
@@ -351,7 +351,7 @@ void ZeroOrderHold::initialize()
 //  {
 //    (*canonicalVector)(i) = 1;
 //    x = *canonicalVector;
-//    //Reset Lsodar
+//    //Reset LsodarOSI
 //    sim.setIstate(3);
 //    sim.advanceToEvent();
 //    phi.setCol(i, x);
@@ -361,7 +361,7 @@ void ZeroOrderHold::initialize()
 //  delete canonicalVector;
 //}
 //
-//void ZeroOrderHold::computeAdInt(const DynamicalSystemsGraph::VDescriptor& dsgVD)
+//void ZeroOrderHoldOSI::computeAdInt(const DynamicalSystemsGraph::VDescriptor& dsgVD)
 //{
 //  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 //  DynamicalSystem& ds = DSG.bundle(dsgVD);
@@ -384,7 +384,7 @@ void ZeroOrderHold::initialize()
 //    (*canonicalVector)(i) = 1;
 //    x.zero();
 //    *Bcol = *canonicalVector;
-//    //Reset Lsodar
+//    //Reset LsodarOSI
 //    sim.setIstate(3);
 //    sim.advanceToEvent();
 //    intPhi.setCol(i, x);
@@ -394,7 +394,7 @@ void ZeroOrderHold::initialize()
 //  delete canonicalVector;
 //}
 //
-//void ZeroOrderHold::computeBdTI(const DynamicalSystemsGraph::VDescriptor& dsgVD, const Relation& rel)
+//void ZeroOrderHoldOSI::computeBdTI(const DynamicalSystemsGraph::VDescriptor& dsgVD, const Relation& rel)
 //{
 //  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 //  DynamicalSystem& ds = DSG.bundle(dsgVD);
@@ -402,7 +402,7 @@ void ZeroOrderHold::initialize()
 //  RELATION::TYPES relationType = rel.getType();
 //  RELATION::SUBTYPES relationSubType = rel.getSubType();
 //  if ((relationType != FirstOrder) || (relationSubType != LinearTIR))
-//    RuntimeException::selfThrow("ZeroOrderHold::computeBdTI - the associated Relation is not of type FirstOrderLinearTIR");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::computeBdTI - the associated Relation is not of type FirstOrderLinearTIR");
 //  unsigned int dsN = ds.number();
 //  EventDriven& sim = static_cast<EventDriven&>(*_simulPsiMap[dsN]);
 //  SimpleMatrix& Bd = *DSG0.Bd[dsgVD];
@@ -415,7 +415,7 @@ void ZeroOrderHold::initialize()
 //    //compute the vector \int \Phi(t, \tau)\,\mathrm{d}\tau B_i
 //    x.zero();
 //    B.getCol(i, Bcol);
-//    //Reset Lsodar
+//    //Reset LsodarOSI
 //    sim.setIstate(3);
 //    //Compute
 //    sim.processEvents();
@@ -424,7 +424,7 @@ void ZeroOrderHold::initialize()
 //  }
 //}
 //
-//void ZeroOrderHold::computeLdTI(const DynamicalSystemsGraph::VDescriptor& dsgVD, const Relation& rel)
+//void ZeroOrderHoldOSI::computeLdTI(const DynamicalSystemsGraph::VDescriptor& dsgVD, const Relation& rel)
 //{
 //  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 //  DynamicalSystem& ds = DSG.bundle(dsgVD);
@@ -441,7 +441,7 @@ void ZeroOrderHold::initialize()
 //    //compute the vector \int \Phi(t, \tau)\,\mathrm{d}\tau B_i
 //    x.zero();
 //    L.getCol(i, Lcol);
-//    //Reset Lsodar
+//    //Reset LsodarOSI
 //    sim.setIstate(3);
 //    //Compute
 //    sim.processEvents();
@@ -450,7 +450,7 @@ void ZeroOrderHold::initialize()
 //  }
 //}
 //
-//void ZeroOrderHold::computeBd(const DynamicalSystemsGraph::VDescriptor& dsgVD, const Relation& rel)
+//void ZeroOrderHoldOSI::computeBd(const DynamicalSystemsGraph::VDescriptor& dsgVD, const Relation& rel)
 //{
 //  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 //  DynamicalSystem& ds = DSG.bundle(dsgVD);
@@ -458,7 +458,7 @@ void ZeroOrderHold::initialize()
 //  RELATION::TYPES relationType = rel.getType();
 //  RELATION::SUBTYPES relationSubType = rel.getSubType();
 //  if ((relationType != FirstOrder) || (relationSubType != LinearTIR))
-//    RuntimeException::selfThrow("ZeroOrderHold::computeBd - the associated Relation is not of type FirstOrderLinearTIR");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::computeBd - the associated Relation is not of type FirstOrderLinearTIR");
 //  unsigned int dsN = ds.number();
 //  EventDriven& sim = static_cast<EventDriven&>(*_simulPsiMap[dsN]);
 //  SimpleMatrix& Bd = *DSG0.Bd[dsgVD];
@@ -472,7 +472,7 @@ void ZeroOrderHold::initialize()
 //  bool isBPlugged = rel.isJacLgPlugged();
 //  if (isAPlugged)
 //  {
-//    RuntimeException::selfThrow("ZeroOrderHold::computeBd - Phi has to be constant for now");
+//    RuntimeException::selfThrow("ZeroOrderHoldOSI::computeBd - Phi has to be constant for now");
 //  }
 //  SP::SubPluggedObject spo;
 //  if (isBPlugged)
@@ -489,7 +489,7 @@ void ZeroOrderHold::initialize()
 //    else
 //      B.getCol(i, Bcol);
 //
-//    //Reset Lsodar
+//    //Reset LsodarOSI
 //    sim.setIstate(3);
 //    //Compute
 //    sim.advanceToEvent();
@@ -499,7 +499,7 @@ void ZeroOrderHold::initialize()
 //
 //}
 
-double ZeroOrderHold::computeResidu()
+double ZeroOrderHoldOSI::computeResidu()
 {
 
   // This function is used to compute the residu for each "MoreauJeanOSI-discretized" dynamical system.
@@ -534,13 +534,13 @@ double ZeroOrderHold::computeResidu()
       // No residu with ZOH ...
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHold::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("ZeroOrderHoldOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
   }
 
   return maxResidu;
 }
 
-void ZeroOrderHold::computeFreeState()
+void ZeroOrderHoldOSI::computeFreeState()
 {
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
@@ -605,12 +605,12 @@ void ZeroOrderHold::computeFreeState()
 
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHold::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("ZeroOrderHoldOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
   }
 
 }
 
-void ZeroOrderHold::prepareNewtonIteration(double time)
+void ZeroOrderHoldOSI::prepareNewtonIteration(double time)
 {
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
@@ -620,7 +620,7 @@ void ZeroOrderHold::prepareNewtonIteration(double time)
 }
 
 
-struct ZeroOrderHold::_NSLEffectOnFreeOutput : public SiconosVisitor
+struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
@@ -661,7 +661,7 @@ struct ZeroOrderHold::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void ZeroOrderHold::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp)
+void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
   */
@@ -742,7 +742,7 @@ void ZeroOrderHold::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 
       if (_useGammaForRelation)
       {
-        RuntimeException::selfThrow("ZeroOrderHold::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
+        RuntimeException::selfThrow("ZeroOrderHoldOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
       }
       SP::SiconosVector H_alpha = inter->Halpha();
       assert(H_alpha);
@@ -808,13 +808,13 @@ void ZeroOrderHold::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 
 
 }
-void ZeroOrderHold::integrate(double& tinit, double& tend, double& tout, int&)
+void ZeroOrderHoldOSI::integrate(double& tinit, double& tend, double& tout, int&)
 {
   // This function should not be used
-  RuntimeException::selfThrow("ZeroOrderHold::integrate - should not be used");
+  RuntimeException::selfThrow("ZeroOrderHoldOSI::integrate - should not be used");
 }
 
-void ZeroOrderHold::updateState(const unsigned int level)
+void ZeroOrderHoldOSI::updateState(const unsigned int level)
 {
   bool useRCC = simulationLink->useRelativeConvergenceCriteron();
   if (useRCC)
@@ -861,54 +861,54 @@ void ZeroOrderHold::updateState(const unsigned int level)
       }
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHold::updateState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("ZeroOrderHoldOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
   }
 }
 
 
-bool ZeroOrderHold::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool ZeroOrderHoldOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1);
   double h = simulationLink->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = .5;
-  DEBUG_PRINTF("ZeroOrderHold::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("ZeroOrderHoldOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
   assert(!isnan(y));
   if (y <= 0)
   {
-    DEBUG_PRINT("ZeroOrderHold::addInteractionInIndexSet ACTIVATE.\n");
+    DEBUG_PRINT("ZeroOrderHoldOSI::addInteractionInIndexSet ACTIVATE.\n");
   }
   return (y <= 0);
 }
 
 
-bool ZeroOrderHold::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool ZeroOrderHoldOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1);
   double h = simulationLink->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = .5;
-  DEBUG_PRINTF("ZeroOrderHold::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("ZeroOrderHoldOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
   assert(!isnan(y));
   if (y > 0)
   {
-    DEBUG_PRINT("ZeroOrderHold::removeInteractionInIndexSet DEACTIVATE.\n");
+    DEBUG_PRINT("ZeroOrderHoldOSI::removeInteractionInIndexSet DEACTIVATE.\n");
   }
   return (y > 0);
 }
 
-const SiconosMatrix& ZeroOrderHold::Ad(SP::DynamicalSystem ds)
+const SiconosMatrix& ZeroOrderHoldOSI::Ad(SP::DynamicalSystem ds)
 {
   DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
   return DSG0.Ad.at(dsgVD)->mat();
 }
 
-const SiconosMatrix& ZeroOrderHold::Bd(SP::DynamicalSystem ds)
+const SiconosMatrix& ZeroOrderHoldOSI::Bd(SP::DynamicalSystem ds)
 {
   DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
@@ -916,7 +916,7 @@ const SiconosMatrix& ZeroOrderHold::Bd(SP::DynamicalSystem ds)
 }
 
 
-void ZeroOrderHold::display()
+void ZeroOrderHoldOSI::display()
 {
   OneStepIntegrator::display();
 
@@ -935,7 +935,7 @@ void ZeroOrderHold::display()
   std::cout << "================================" <<std::endl;
 }
 
-void ZeroOrderHold::updateMatrices(SP::DynamicalSystem ds)
+void ZeroOrderHoldOSI::updateMatrices(SP::DynamicalSystem ds)
 {
 //  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 //  if (!DSG0.Ad[dsgVD]->isConst())

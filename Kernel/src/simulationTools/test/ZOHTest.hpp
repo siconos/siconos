@@ -21,7 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "FirstOrderLinearTIDS.hpp"
-#include "ZeroOrderHold.hpp"
+#include "ZeroOrderHoldOSI.hpp"
 #include "Model.hpp"
 #include "TimeStepping.hpp"
 #include "TimeDiscretisation.hpp"
@@ -74,7 +74,7 @@ private:
   SP::TimeStepping _sim;
   SP::FirstOrderLinearDS _DS;
   SP::TimeDiscretisation _TD;
-  SP::ZeroOrderHold _ZOH;
+  SP::ZeroOrderHoldOSI _ZOH;
   SP::SiconosMatrix _A;
   SP::SiconosVector _b;
   SP::SiconosVector _x0;

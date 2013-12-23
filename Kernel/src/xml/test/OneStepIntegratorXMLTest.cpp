@@ -85,7 +85,7 @@ void OneStepIntegratorXMLTest::testGetType()
 {
   CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 1 : MoreauJeanOSI ", oneStepIs[0]->getType() == "MoreauJeanOSI");
   CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 2 : Adams", oneStepIs[1]->getType() == "Adams");
-  CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 3 : Lsodar", oneStepIs[2]->getType() == "LSODAR");
+  CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 3 : LsodarOSI", oneStepIs[2]->getType() == "LSODAR");
 
   std::cout << "OneStepIntegratorXMLTest >>> testGetType ............................ OK\n ";
 }
@@ -110,12 +110,12 @@ void OneStepIntegratorXMLTest::testMoreauJeanOSIXML()
   std::cout << "OneStepIntegratorXMLTest >>> testMoreauJeanOSIXML .......................... OK\n ";
 }
 
-void OneStepIntegratorXMLTest::testLsodarXML()
+void OneStepIntegratorXMLTest::testLsodarOSIXML()
 {
-  LsodarXML* lsodar = static_cast<LsodarXML*>(oneStepIs[2]);
+  LsodarOSIXML* lsodar = static_cast<LsodarOSIXML*>(oneStepIs[2]);
 
-  CPPUNIT_ASSERT_MESSAGE("testLsodarXML type ", lsodar->getType() == "LSODAR");
-  CPPUNIT_ASSERT_MESSAGE("testLsodarXML R", lsodar->getR() == -55);
+  CPPUNIT_ASSERT_MESSAGE("testLsodarOSIXML type ", lsodar->getType() == "LSODAR");
+  CPPUNIT_ASSERT_MESSAGE("testLsodarOSIXML R", lsodar->getR() == -55);
 
-  std::cout << "OneStepIntegratorXMLTest >>> testLsodarXML .......................... OK\n ";
+  std::cout << "OneStepIntegratorXMLTest >>> testLsodarOSIXML .......................... OK\n ";
 }
