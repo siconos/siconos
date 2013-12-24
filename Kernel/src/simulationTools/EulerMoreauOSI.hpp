@@ -16,9 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file
-  EulerMoreauOSI Time-Integrator for Dynamical Systems
-*/
+
+/** \file EulerMoreauOSI.hpp */
 
 #ifndef EulerMoreauOSI_H
 #define EulerMoreauOSI_H
@@ -30,29 +29,75 @@ class SiconosMatrix;
 
 const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
 
-/**  EulerMoreauOSI Time-Integrator for Dynamical Systems
- *
+/** \class EulerMoreauOSI Time-Integrator for Dynamical Systems
+ *  \brief One Step time Integrator for First Order Dynamical Systems.
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.7.0.
  *  \date (Creation) Dec 26, 2013
  *
- * See User's guide, for details.
+ * This integrator is the work horse of the event--capturing time stepping schemes
+ * for first order systems.
+ * It is mainly based on some extensions of the Backward Euler and \f$\theta-\gamma\f$
+ * schemes proposed in the pionnering work of J.J. Moreau for the sweeping process
+ * 
+ * J.J. Moreau. Evolution problem associated with a moving convex set in a Hilbert space.
+ * Journal of Differential Equations, 26, pp 347--374, 1977.
+ *
+ * Variants are now used to integrate LCS, Relay systems, Higher order sweeping process see 
+ * for instance
+ *
+ *
+ * Consistency of a time-stepping method for a class of piecewise linear networks\br
+ * M.K. Camlibel, W.P.M.H. Heemels, and J.M. Schumacher
+ * IEEE Transactions on Circuits and Systems I, 2002, 49(3):349--357
+ *
+ * Numerical methods for nonsmooth dynamical systems: applications in mechanics and electronics\br
+ * V Acary, B Brogliato Springer Verlag 2008
+ *
+ * Convergence of time-stepping schemes for passive and extended linear complementarity systems
+ * L. Han, A. Tiwari, M.K. Camlibel, and J.-S. Pang SIAM Journal on Numerical Analysis 2009, 47(5):3768-3796
+ *
+ * On preserving dissipativity properties of linear complementarity dynamical systems with the &theta-method\br
+ * Greenhalgh Scott, Acary Vincent, Brogliato Bernard Numer. Math., , 2013.
+ *
+ * Main time--integration schemes are based on the following \f$\theta-\gamma\f$ scheme
+ *
+ * \f{equation}{
+ *  \begin{cases}
+ *   \label{eq:toto1}
+ *     M x_{k+1} = M x_{k} +h\theta f(x_{k+1},t_{k+1})+h(1-\theta) f(x_k,t_k) + h \gamma r(t_{k+1})
+ *   + h(1-\gamma)r(t_k)  \\[2mm]
+ *   y_{k+1} =  h(t_{k+1},x_{k+1},\lambda _{k+1}) \\[2mm]
+ *   r_{k+1} = g(x_{k+1},\lambda_{k+1},t_{k+1})\\[2mm]
+ *    \mbox{nslaw} ( y_{k+1} , \lambda_{k+1})
+ * \end{cases}
+ * \f}
+ * where \f$\theta = [0,1]\f$ and \f$\gamma \in [0,1]\f$. 
+ * As in Acary & Brogliato 2008, we call the previous problem  the ``one--step nonsmooth problem''.
+ *
+ * Another variant can also be used (FullThetaGamma scheme)
+ *  \f{equation}{
+ *   \begin{cases}
+ *     M x_{k+1} = M x_{k} +h f(x_{k+\theta},t_{k+1}) + h r(t_{k+\gamma}) \\[2mm]
+ *     y_{k+\gamma} =  h(t_{k+\gamma},x_{k+\gamma},\lambda _{k+\gamma}) \\[2mm]
+ *     r_{k+\gamma} = g(x_{k+\gamma},\lambda_{k+\gamma},t_{k+\gamma})\\[2mm]
+ *     \mbox{nslaw} ( y_{k+\gamma} , \lambda_{k+\gamma})
+ *   \end{cases}
+ * \f}
+ * 
  *
  * EulerMoreauOSI class is used to define some time-integrators methods for a
- * list of dynamical systems.
-
- * A EulerMoreauOSI instance is defined by the value of theta and the list of
- * concerned dynamical systems.  Each DynamicalSystem is associated to
- * a SiconosMatrix, named "W"
+ * list of first order dynamical systems. A EulerMoreauOSI instance is defined by 
+ * the value of theta  and possibly gamma and the list of
+ * concerned dynamical systems.  
  *
- * W matrices are initialized and computed in initW and
- * computeW. Depending on the DS type, they may depend on time and DS
- * state (x).
+ * Each DynamicalSystem is associated to a SiconosMatrix, named "W", which is the "iteration" matrix.
+ * W matrices are initialized and computed in initW and computeW. Depending on the DS type, they may
+ * depend on time t and DS state x.
  *
  * For first order systems, the implementation uses _r for storing the
  * the input due to the nonsmooth law. This EulerMoreauOSI scheme assumes that the
  * relative degree is zero or one and one level for _r is sufficient
- *
  *
  * Main functions:
  *
@@ -62,7 +107,10 @@ const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
  * - updateState(): computes x (q,v), the complete dynamical systems
  *    states.
  *
+ * See User's guide, for details.
+ *
  */
+
 class EulerMoreauOSI : public OneStepIntegrator
 {
 protected:

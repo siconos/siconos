@@ -3,7 +3,7 @@
 #include "SiconosKernel.hpp"
 /**
  * \brief This class implements the time stepping with projection of a multi-bodies system.
- * It inherits from Siconos::TimeSteppingProjectOnConstraints.
+ * It inherits from Siconos::TimeSteppingDirectProjection.
  * It consists in update the CAD word during the simulation.
  */
 class MBTB_TimeSteppingCombinedProj : public TimeSteppingCombinedProjection

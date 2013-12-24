@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "BulletTimeSteppingProjectOnConstraints.hpp"
+#include "BulletTimeSteppingDirectProjection.hpp"
 #include "BulletSiconosFwd.hpp"
 #include "BulletDS.hpp"
 #include <btBulletCollisionCommon.h>
@@ -29,7 +29,7 @@
 #include <debug.h>
 
 
-void BulletTimeSteppingProjectOnConstraints::updateWorldFromDS()
+void BulletTimeSteppingDirectProjection::updateWorldFromDS()
 {
   DynamicalSystemsGraph& dsg = *model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;

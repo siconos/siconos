@@ -16,9 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file
-  MoreauJeanOSI Time-Integrator for Dynamical Systems
-*/
+
+/*! \file  MoreauJeanOSI.hpp */
 
 #ifndef MoreauJeanOSI_H
 #define MoreauJeanOSI_H
@@ -30,28 +29,72 @@ class SiconosMatrix;
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
 
-/**  MoreauJeanOSI Time-Integrator for Dynamical Systems
+/**  \class MoreauJeanOSI 
+ *   \brief One Step time Integrator for First Order Dynamical Systems  for
+ *    mechanical Systems (LagrangianDS and NewtonEulerDS)
+ *   \author SICONOS Development Team - copyright INRIA
+ *   \version 3.0.0.
+ *   \date (Creation) Apr 26, 2004
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
+ * This integrator is the work horse of the event--capturing time stepping schemes
+ * for mechanical systems.  It is mainly based on the pioneering works of M. Jean and
+ * J.J. Moreau for the time integration of mechanical systems
+ * with unilateral contact, impact and Coulomb's friction with \f$\theta\f$ scheme
  *
- * See User's guide, \ref docSimuMoreauJeanOSITS for details.
+ * For the linear Lagrangina system, the scheme reads as
+ * \f{equation}{
+ * \begin{cases}
+ *  M (v_{k+1}-v_k)
+ *  + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G P_{k+1},\label{eq:MoreauTS-motion}\\[1mm] 
+ *  q_{k+1} = q_{k} + h v_{k+\theta}, \quad \\[1mm]
+ *  U_{k+1} = G^\top\, v_{k+1}, \\[1mm]
+ *  \begin{array}{lcl}
+ *    0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\[1mm]
+ *    P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,
+ * \end{array}
+ * \end{cases} \f}
+ * with  \f$\theta \in [0,1]\f$. The index set \f$\mathcal I_1\f$ is the discrete equivalent
+ * to the rule that allows us to apply the Signorini  condition at the velocity level. 
+ * In the numerical practice, we choose to define this set by
+ * \f{equation}{
+ *   \label{eq:index-set1}
+ *  \mathcal I_1 = \{\alpha \in \mathcal I \mid G^\top (q_{k} + h v_{k}) + w \leq 0\text{ and } U_k \leq 0 \}.
+ * \f}.
  *
+ * For more details, we refer to
+ *
+ * M. Jean and J.J. Moreau. Dynamics in the presence of unilateral contacts and dry friction: a numerical approach.
+ * In G. Del Pietro and F. Maceri, editors, Unilateral problems in structural analysis. 
+ * II, pages 151–196. CISM 304, Spinger Verlag, 1987.
+ *
+ * J.J. Moreau. Unilateral contact and dry friction in finite freedom dynamics. 
+ * In J.J. Moreau and Panagiotopoulos P.D., editors, Nonsmooth Mechanics and Applications, 
+ * number 302 in CISM, Courses and lectures, pages 1–82. CISM 302, Spinger Verlag, Wien- New York, 1988a.
+ *
+ * J.J. Moreau. Numerical aspects of the sweeping process. 
+ * Computer Methods in Applied Mechanics and Engineering, 177:329–349, 1999. 
+ *
+ * M. Jean. The non smooth contact dynamics method. 
+ * Computer Methods in Applied Mechanics and Engineering, 177:235–257, 1999.
+ *
+ * and for a review :
+ *
+ * V. Acary and B. Brogliato. Numerical Methods for Nonsmooth Dynamical Systems: 
+ * Applications in Mechanics and Electronics, volume 35 of Lecture Notes in
+ * Applied and Computational Mechanics. Springer Verlag, 2008.
+ *
+ * 
  * MoreauJeanOSI class is used to define some time-integrators methods for a
- * list of dynamical systems.
-
- * A MoreauJeanOSI instance is defined by the value of theta and the list of
- * concerned dynamical systems.  Each DynamicalSystem is associated to
- * a SiconosMatrix, named "W"
+ * list of dynamical systems. A MoreauJeanOSI instance is defined by the value
+ * of theta and the list of concerned dynamical systems.
  *
- * W matrices are initialized and computed in initW and
- * computeW. Depending on the DS type, they may depend on time and DS
- * state (x).
+ * Each DynamicalSystem is associated to a SiconosMatrix, named "W", the "iteration" matrix"
+ * W matrices are initialized and computed in initW and computeW. Depending on the DS type, 
+ * they may depend on time t and DS state x.
  *
- * For first order systems, the implementation uses _r for storing the
+ * For mechanical systems, the implementation uses _p for storing the
  * the input due to the nonsmooth law. This MoreauJeanOSI scheme assumes that the
- * relative degree is zero or one and one level for _r is sufficient
+ * relative degree is two. 
  *
  * For Lagrangian systems, the implementation uses _p[1] for storing the
  * discrete impulse.
@@ -63,6 +106,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  *
  * - updateState(): computes x (q,v), the complete dynamical systems
  *    states.
+ * See User's guide, \ref docSimuMoreauJeanOSITS for details.
  *
  */
 class MoreauJeanOSI : public OneStepIntegrator

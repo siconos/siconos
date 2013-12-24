@@ -328,7 +328,7 @@
 		<!-- One Step Integrators -->				
 		<OneStepIntegrator_Definition>
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
-			<Moreau>
+			<MoreauJeanOSI>
 				<DS_Concerned size='1'>
 					<DS number='2'/>			
 <!--					<DS number='1'/>	-->
@@ -336,7 +336,7 @@
 <!--				<r>4</r> -->
 				<Theta> 0.5</Theta>
 <!--				<W matrixFile = 'matrix.dat'/>  -->
-			</Moreau>					
+			</MoreauJeanOSI>					
 
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->					
 			<Adams>
@@ -347,12 +347,12 @@
 			</Adams>
 					
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->										
-			<LSODAR>
+			<LSODAROSI>
 				<DS_Concerned size='1'>
 					<DS number='1'/>
 				</DS_Concerned>
 				<r>-55</r>
-			</LSODAR>
+			</LSODAROSI>
 
 		</OneStepIntegrator_Definition>
 

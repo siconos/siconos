@@ -19,8 +19,8 @@
 /*! \file
   Time-Stepping simulation with projections on constraints
 */
-#ifndef TIMESTEPPINGPROJECTONCONSTRAINTS_H
-#define TIMESTEPPINGPROJECTONCONSTRAINTS_H
+#ifndef TIMESTEPPINGDIRECTPROJECTION_H
+#define TIMESTEPPINGDIRECTPROJECTION_H
 
 #include "TimeStepping.hpp"
 
@@ -45,12 +45,12 @@
  *  
  
  */
-class TimeSteppingProjectOnConstraints : public TimeStepping
+class TimeSteppingDirectProjection : public TimeStepping
 {
 protected:
   /** serialization hooks
    */
-  ACCEPT_SERIALIZATION(TimeSteppingProjectOnConstraints);
+  ACCEPT_SERIALIZATION(TimeSteppingDirectProjection);
 
 
   /** level of IndexSet on which we project (default =1 (activated contact))
@@ -98,7 +98,7 @@ public:
      \param a one step non smooth problem for the velocity formulation
      \param a one step non smooth problem for the position formulation
   */
-  TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
+  TimeSteppingDirectProjection(SP::TimeDiscretisation td,
                                    SP::OneStepIntegrator osi,
                                    SP::OneStepNSProblem osnspb_velo,
                                    SP::OneStepNSProblem osnspb_pos,
@@ -108,9 +108,9 @@ public:
 
   /** default constructor
    */
-  TimeSteppingProjectOnConstraints() {};
+  TimeSteppingDirectProjection() {};
 
-  virtual ~TimeSteppingProjectOnConstraints();
+  virtual ~TimeSteppingDirectProjection();
 
 
 
@@ -180,9 +180,9 @@ public:
 
 };
 
-DEFINE_SPTR(TimeSteppingProjectOnConstraints)
+DEFINE_SPTR(TimeSteppingDirectProjection)
 
-#endif // TIMESTEPPINGPROJECTONCONSTRAINTS_H
+#endif // TIMESTEPPINGDIRECTPROJECTION_H
 
 
 

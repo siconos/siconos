@@ -32,20 +32,22 @@ class SiconosMatrix;
 
 const unsigned int MOREAUCOMBINEDPROJECTIONOSISTEPSINMEMORY = 1;
 
-/**  MoreauJeanOSI Time-Integrator for Dynamical Systems for Combined Projection Algorithm
- *
+/**  \class MoreauJeanCombinedProjectionOSI 
+ *   \brief One Step time Integrator for First Order Dynamical Systems  for
+ *    mechanical Systems (LagrangianDS and NewtonEulerDS) with  Combined Projection Algorithm
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.4.0.
  *  \date (Creation) May 02, 2012
  *
- * See User's guide, \ref docSimuMoreauJeanOSITS for details.
- *
- * MoreauJeanOSI class is used to define some time-integrators methods for a
- * list of dynamical systems.
- *
  * This class reimplement a special activation of constraints
- * for the Combined Projection Algorithm
+ * in the MoreauJeanOSI for the Combined Projection Algorithm
  *
+ * References :
+ *
+ * V. Acary. Projected event-capturing time-stepping schemes for nonsmooth mechanical systems with unilateral contact 
+ * and coulomb’s friction. 
+ * Computer Methods in Applied Mechanics and Engineering, 256:224 – 250, 2013. ISSN 0045-7825. 
+ * URL http://www.sciencedirect.com/science/article/pii/S0045782512003829.
  *
  */
 class MoreauJeanCombinedProjectionOSI : public MoreauJeanOSI

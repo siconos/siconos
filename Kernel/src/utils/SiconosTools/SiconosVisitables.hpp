@@ -21,7 +21,7 @@
     REGISTER(Simulation)                          \
     REGISTER(TimeStepping)                        \
     REGISTER(TimeSteppingD1Minus)                 \
-    REGISTER(TimeSteppingProjectOnConstraints)    \
+    REGISTER(TimeSteppingDirectProjection)    \
     REGISTER(TimeSteppingCombinedProjection)      \
     REGISTER(EventDriven)                         \
     REGISTER(OneStepIntegrator)                     \

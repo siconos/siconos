@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem impact_pos(new MLCPProjectOnConstraints());
     //4. Simulation with (1), (2), (3)
-    SP::TimeStepping TSscheme(new TimeSteppingProjectOnConstraints(TimeDiscret, OSI, impact, impact_pos, 0));
+    SP::TimeStepping TSscheme(new TimeSteppingDirectProjection(TimeDiscret, OSI, impact, impact_pos, 0));
     //==================================================================================================================
     //                    V. Process the simulation
     //==================================================================================================================

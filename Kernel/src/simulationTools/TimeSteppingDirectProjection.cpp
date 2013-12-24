@@ -19,7 +19,7 @@
 
 #include "TimeStepping.hpp"
 
-#include "TimeSteppingProjectOnConstraints.hpp"
+#include "TimeSteppingDirectProjection.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
@@ -33,7 +33,7 @@ static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 //#define DEBUG_MESSAGES
 #include "debug.h"
 //#define CORRECTIONSVELOCITIES
-TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
+TimeSteppingDirectProjection::TimeSteppingDirectProjection(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
     SP::OneStepNSProblem osnspb_velo,
     SP::OneStepNSProblem osnspb_pos,
@@ -45,7 +45,7 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
   OSI::TYPES typeOSI;
   typeOSI = (osi)->getType();
   if (typeOSI != OSI::MOREAUDIRECTPROJECTIONOSI)
-    RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints.  wrong type of OneStepIntegrator");
+    RuntimeException::selfThrow("TimeSteppingDirectProjection::TimeSteppingDirectProjection.  wrong type of OneStepIntegrator");
 
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
@@ -62,11 +62,11 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
 }
 
 // --- Destructor ---
-TimeSteppingProjectOnConstraints::~TimeSteppingProjectOnConstraints()
+TimeSteppingDirectProjection::~TimeSteppingDirectProjection()
 {
 }
 
-void TimeSteppingProjectOnConstraints::initOSNS()
+void TimeSteppingDirectProjection::initOSNS()
 {
   TimeStepping::initOSNS();
 
@@ -77,7 +77,7 @@ void TimeSteppingProjectOnConstraints::initOSNS()
   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(_levelMaxForInput);
 }
 
-void TimeSteppingProjectOnConstraints::nextStep()
+void TimeSteppingDirectProjection::nextStep()
 {
   TimeStepping::nextStep();
 
@@ -94,7 +94,7 @@ void TimeSteppingProjectOnConstraints::nextStep()
 
 }
 
-void TimeSteppingProjectOnConstraints::advanceToEvent()
+void TimeSteppingDirectProjection::advanceToEvent()
 {
   /** First step, Solve the standard velocity formulation.*/
 
@@ -117,7 +117,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   
   /** Second step, Perform the projection on constraints.*/
 
-  DEBUG_PRINT("TimeSteppingProjectOnConstraints::newtonSolve begin projection:\n");
+  DEBUG_PRINT("TimeSteppingDirectProjection::newtonSolve begin projection:\n");
 
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
@@ -180,13 +180,13 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       d->addWorkVector(d->q(), DynamicalSystem::qtmp);
     }
     else
-      RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+      RuntimeException::selfThrow("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
   }
 
   while (runningProjection && _nbProjectionIteration < _projectionMaxIteration)
   {
     _nbProjectionIteration++;
-    DEBUG_PRINTF("TimeSteppingProjectOnConstraints projection step = %d\n", _nbProjectionIteration);
+    DEBUG_PRINTF("TimeSteppingDirectProjection projection step = %d\n", _nbProjectionIteration);
 
     SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
@@ -209,7 +209,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
     if (info)
     {
-      std::cout << " TimeSteppingProjectOnConstraints::advanceToEvent() project on constraints. solver failed." <<std::endl ;
+      std::cout << " TimeSteppingDirectProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
       return;
     }
     updateInput(0);
@@ -273,7 +273,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
         }
       }
       else
-        RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+        RuntimeException::selfThrow("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
 
     }
 
@@ -285,7 +285,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
     //(std11::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
 
-    DEBUG_EXPR_WE(std::cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
+    DEBUG_EXPR_WE(std::cout << "TimeSteppingDirectProjection::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
 	       std ::cout << "After update state in position" << std::endl;
 	       std ::cout << "lamda(1) in IndexSet1" << std::endl;
 	       SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
@@ -325,7 +325,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   }// end while(runningProjection && _nbProjectionIteration < _projectionMaxIteration)
   if (_nbProjectionIteration == _projectionMaxIteration)
   {
-    std::cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
+    std::cout << "TimeSteppingDirectProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
     printf("              max criteria equality =  %e.\n", _maxViolationEquality);
     printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
     RuntimeException::selfThrow("youyou");
@@ -334,7 +334,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
 
 
-  DEBUG_PRINT("TimeSteppingProjectOnConstraints::newtonSolve end projection:\n");
+  DEBUG_PRINT("TimeSteppingDirectProjection::newtonSolve end projection:\n");
 
 
   return;
@@ -376,9 +376,9 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //       FextNorm->setValue(1,neds->fExt()->getValue(1));
   //       FextNorm->setValue(2,neds->fExt()->getValue(2));
   // DEBUG_EXPR_WE(
-  //       std::cout<<"TimeSteppingProjectOnConstraints::newtonSolve deltaQ :\n";
+  //       std::cout<<"TimeSteppingDirectProjection::newtonSolve deltaQ :\n";
   //       neds->deltaq()->display();
-  //       std::cout<<"TimeSteppingProjectOnConstraints::newtonSolve Fext :\n";
+  //       std::cout<<"TimeSteppingDirectProjection::newtonSolve Fext :\n";
   //       FextNorm->display();
   //       );
 
@@ -420,7 +420,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //       //     VkcFNorm=0;
   //       // }
   // DEBUG_EXPR_WE(
-  //       printf("TimeSteppingProjectOnConstraints::newtonSolve velocity before update(prevComp=%e, newComp=%e)\n",VkFNorm,VkcFNorm);
+  //       printf("TimeSteppingDirectProjection::newtonSolve velocity before update(prevComp=%e, newComp=%e)\n",VkFNorm,VkcFNorm);
   //       printf("VELOCITY1 ");
   //       neds->velocity()->display();
   // );
@@ -428,7 +428,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //       neds->velocity()->setValue(1,neds->velocity()->getValue(1)+(VkcFNorm - VkFNorm)*FextNorm->getValue(1));
   //       neds->velocity()->setValue(2,neds->velocity()->getValue(2)+(VkcFNorm - VkFNorm)*FextNorm->getValue(2));
   // DEBUG_EXPR_WE(
-  //       std::cout<<"TimeSteppingProjectOnConstraints::newtonSolve velocity updated\n";
+  //       std::cout<<"TimeSteppingDirectProjection::newtonSolve velocity updated\n";
   //       printf("VELOCITY2 ");
   //       neds->velocity()->display();
   // )
@@ -446,12 +446,12 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //   }
   //#endif
 #ifdef TSPROJ_DEBUG
-  std::cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
+  std::cout << "TimeSteppingDirectProjection::newtonSolve end projection:\n";
 #endif
 
 }
 
-void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
+void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
 {
 
   SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
@@ -517,7 +517,7 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
 
 
 
-void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned int maxStep)
+void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int maxStep)
 {
   bool isNewtonConverge = false;
   _newtonNbSteps = 0; // number of Newton iterations

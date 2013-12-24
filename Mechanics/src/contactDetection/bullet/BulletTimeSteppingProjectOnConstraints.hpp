@@ -17,32 +17,32 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#ifndef BulletTimeSteppingProjectOnConstraints_hpp
-#define BulletTimeSteppingProjectOnConstraints_hpp
+#ifndef BulletTimeSteppingDirectProjection_hpp
+#define BulletTimeSteppingDirectProjection_hpp
 
-#include "TimeSteppingProjectOnConstraints.hpp"
+#include "TimeSteppingDirectProjection.hpp"
 #include "BulletSpaceFilter.hpp"
 
-class BulletTimeSteppingProjectOnConstraints : public TimeSteppingProjectOnConstraints
+class BulletTimeSteppingDirectProjection : public TimeSteppingDirectProjection
 {
 
   SP::BulletSpaceFilter _spaceFilter;
 
 public:
-  BulletTimeSteppingProjectOnConstraints(SP::BulletSpaceFilter sf,
+  BulletTimeSteppingDirectProjection(SP::BulletSpaceFilter sf,
                                          SP::TimeDiscretisation t,
                                          SP::OneStepIntegrator osi,
                                          SP::OneStepNSProblem osnspb_velo,
                                          SP::OneStepNSProblem osnspb_pos,
                                          unsigned int level = 1) :
-    TimeSteppingProjectOnConstraints(t, osi, osnspb_velo, osnspb_pos),
+    TimeSteppingDirectProjection(t, osi, osnspb_velo, osnspb_pos),
     _spaceFilter(sf) {};
 
 
   void updateWorldFromDS();
 };
 
-TYPEDEF_SPTR(BulletTimeSteppingProjectOnConstraints)
+TYPEDEF_SPTR(BulletTimeSteppingDirectProjection)
 #endif
 
 

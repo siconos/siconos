@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
     impact->numericsSolverOptions()->iparam[2] = 1; // random
     SP::MLCPProjectOnConstraints position(new MLCPProjectOnConstraints());
 
-    SP::TimeSteppingProjectOnConstraints s(new TimeSteppingProjectOnConstraints(t, OSI, impact, position, 0));
+    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t, OSI, impact, position, 0));
     s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);

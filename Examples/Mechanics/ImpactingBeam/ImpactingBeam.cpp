@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
     // -- (4) Simulation setup with (1) (2) (3)
 #ifdef TS_PROJ
     SP::MLCPProjectOnConstraints position(new MLCPProjectOnConstraints());
-    SP::TimeSteppingProjectOnConstraints s(new TimeSteppingProjectOnConstraints(t,OSI, osnspb, position,0));
+    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t,OSI, osnspb, position,0));
     s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);

@@ -547,7 +547,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
         lowerLevelForInput = 1;
         upperLevelForInput = 1;
       }
-      else if (Type::value(*_parent) == Type::TimeSteppingProjectOnConstraints)
+      else if (Type::value(*_parent) == Type::TimeSteppingDirectProjection)
       {
         // Warning : we never enter this case !!!
         lowerLevelForOutput = 0;
@@ -625,7 +625,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
     {
-      if (Type::value(*_parent) == Type::TimeSteppingProjectOnConstraints)
+      if (Type::value(*_parent) == Type::TimeSteppingDirectProjection)
       {
         // Warning : we never enter this case !!!
         lowerLevelForOutput = 0;

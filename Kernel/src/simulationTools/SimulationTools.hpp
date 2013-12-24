@@ -31,7 +31,7 @@ Note that not all files from the current location are listed below, since some o
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "TimeSteppingD1Minus.hpp"
-#include "TimeSteppingProjectOnConstraints.hpp"
+#include "TimeSteppingDirectProjection.hpp"
 #include "TimeSteppingCombinedProjection.hpp"
 #include "Equality.hpp"
 #include "LCP.hpp"

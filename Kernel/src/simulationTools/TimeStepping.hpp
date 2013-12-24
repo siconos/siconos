@@ -27,11 +27,20 @@
 /** type of function used to post-treat output info from solver. */
 typedef void (*CheckSolverFPtr)(int, Simulation*);
 
-/** Time-Stepping scheme
- *
+/** \class TimeStepping 
+    \brief Event-capturing Time-Stepping simulation
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
+ *
+ * This class implements the basic algorithm for Event-capturing Time-Stepping 
+ * simulations.
+ *
+ * References :
+ *
+ * V. Acary and B. Brogliato. Numerical Methods for Nonsmooth Dynamical Systems: 
+ * Applications in Mechanics and Electronics, volume 35 of Lecture Notes in
+ * Applied and Computational Mechanics. Springer Verlag, 2008.
  *
  */
 

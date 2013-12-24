@@ -3,10 +3,10 @@
 #include "SiconosKernel.hpp"
 /**
  * \brief This class implements the time stepping with projection of a multi-bodies system.
- * It inherits from Siconos::TimeSteppingProjectOnConstraints.
+ * It inherits from Siconos::TimeSteppingDirectProjection.
  * It consists in update the CAD word during the simulation.
  */
-class MBTB_TimeSteppingProj : public TimeSteppingProjectOnConstraints
+class MBTB_TimeSteppingProj : public TimeSteppingDirectProjection
 {
 public:
   //! builder.
@@ -15,7 +15,7 @@ public:
                         SP::OneStepNSProblem osnspb_velo,
                         SP::OneStepNSProblem osnspb_pos,
                         unsigned int level)
-    :TimeSteppingProjectOnConstraints(td,osi,osnspb_velo,osnspb_pos,level) {};
+    :TimeSteppingDirectProjection(td,osi,osnspb_velo,osnspb_pos,level) {};
   //! Overloading of updateWorldFromDS.
   /*!
     It consists in updating the cad model from siconos.
