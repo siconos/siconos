@@ -55,6 +55,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/MCP
   NonSmoothSolvers/GenericMechanical
   NonSmoothSolvers/GenericMechanical/test-utils
+  NonSmoothSolvers/VI
 )
 #
 # Unstable sources
@@ -573,7 +574,9 @@ ENDIF(MUMPS_FOUND)
   #BEGIN_TEST(NonSmoothSolvers/GenericMechanical/test)
   #NEW_TEST(GMP_FAILED GenericMechanical_test1.c)
   #END_TEST()
-  
+  BEGIN_TEST(NonSmoothSolvers/VI/test)
+  NEW_TEST(VI_test1 VI_test.c)
+  END_TEST()
 ENDIF(WITH_TESTING)
 
 IF(MSVC)
