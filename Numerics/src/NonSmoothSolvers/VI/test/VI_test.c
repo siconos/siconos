@@ -33,12 +33,12 @@ int main(void)
   VariationalInequality vi;
   
   vi.size=10;
-  vi.Callback = (CallbackVI *)malloc(sizeof(CallbackVI));
+  //vi.Callback = (CallbackVI *)malloc(sizeof(CallbackVI));
   
-  vi.Callback->vi = &vi;
+  vi.self = &vi;
   
-  vi.Callback->F = &Ftest;
-  vi.Callback->ProjectionOnX = &PXtest ;
+  vi.F = &Ftest;
+  vi.ProjectionOnX = &PXtest ;
   
   /* Call the callback */
   double x[10], F[10], PX[10];
@@ -47,8 +47,8 @@ int main(void)
   {
     x[i] = i-5;
   }
-  vi.Callback->F(&vi,x,F);
-  vi.Callback->ProjectionOnX(&vi,x,PX);
+  vi.F(&vi,x,F);
+  vi.ProjectionOnX(&vi,x,PX);
   for (i =0; i< n ; i++)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("F[%i]=%f\t",i,F[i]);    printf("PX[%i]=%f\n",i,PX[i]);

@@ -15,136 +15,63 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef VARIATIONALINEQUALITY_H
-#define VARIATIONALINEQUALITY_H
-
-/*! \page fcProblem Friction-contact problems (2D or 3D)
- *
- * \section fcIntro Problem statement
- *  Given
- * <ul>
- *   <li> a symmetric positive semi--definite  matrix \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$ </li>
- *   <li> a vector \f$ {q} \in {{\mathrm{I\!R}}}^n\f$</li>
- *   <li> a vector of coefficients of friction \f$\mu \in{{\mathrm{I\!R}}}^{n_c}\f$</li>
- *</ul>
- * the (reduced or dual) frictional contact problem  is to find two vectors \f$u\in{{\mathrm{I\!R}}}^n\f$,
- * the relative local velocity and \f$r\in {{\mathrm{I\!R}}}^n\f$,
- * the contact forces denoted by \f$\mathrm{FC}(M,q,\mu)\f$  such that
- * \f{eqnarray*}{
- * \begin{cases}
- *   u = M r + q \\
- *    \hat u = u +\left[
- *      \left[\begin{array}{c}
- *          \mu^\alpha \|u^\alpha_{T}\|\\
- *         0 \\
- *         0
- *        \end{array}\right]^T, \alpha = 1 \ldots n_c
- *    \right]^T \\ \                                \
- *    C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
- * \end{cases}
- * \f}
- * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
- *
- * The modified local velocity \f$\widehat u \f$ is not considered as an unknown since it can obtained uniquely
- * from the local velocity \f$u\f$.
- * Coulomb's friction law with Signorini's condition for the unilateral contact written in terms
- * of second order complementarity condition
- * \f{eqnarray}{
- *    C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
- * \f}
- * can be interpreted in a more usual form
- *
- * \f{eqnarray}{
- * \begin{cases}
- *  0 \leq u_{N} \perp r_N \geq 0  \quad\quad\text{ Signorini condition}\\
- *  u_T = 0 \Rightarrow \|r_T\| \leq \mu |r_n|  \quad\quad\text{ Sticking mode} \\
- *  u_T \neq 0 \Rightarrow r_T = - \mu |r_n| \frac{u_T }{\|u_T\|}  \quad\quad\text{ Sliding mode}
- * \end{cases}
- * \f}
- *
- * This problem models any instance of discretized frictional contact problem obtained from
- * <ul>
- * <li>the time-discretization  of dynamics contact problems with event-capturing of event-tracking schemes, </li>
- * <li>the time-discretization  of quasi-static contact problems, </li>
- * <li>the modeling  of static contact problems. In this last case, \f$u\f$ plays the role of the relative displacement at contact  </li>
- * </ul>
- *
- * The problem is stored and given to the solver in Siconos/Numerics thanks to
- *  a C structure FrictionContactProblem .
- *
- *  \section fc3DSolversList Available solvers for Friction Contact 3D (see Friction_cst.h)
- * Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
- *
- * <ul>
- *
- * <li> frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver.
- *       SolverId : SICONOS_FRICTION_3D_NSGS =500, </li>
- *
- * <li> frictionContact3D_nsgs_velocity() : non-smooth Gauss-Seidel solver  based on velocity updates
- *       SolverId : SICONOS_FRICTION_3D_NSGSV =501, </li>
- *
- * <li> frictionContact3D_proximal() : Proximal point solver for friction-contact 3D problem
- *       SolverId : SICONOS_FRICTION_3D_PROX =502,</li>
- *
- * <li> frictionContact3D_TrescaFixedPoint() : Fixed point solver for friction-contact
- *      3D problem based on the Tresca problem with fixed friction threshold
- *       SolverId : SICONOS_FRICTION_3D_TFP =503,</li>
- *
- * <li> frictionContact3D_globalAlartCurnier() : Global Alart--Curnier solver
- *       SolverId : SICONOS_FRICTION_3D_LOCALAC =504,</li>
- *
- * <li> frictionContact3D_DeSaxceFixedPoint() : Fixed Point solver for friction-contact 3D problem
- *      based on the De Saxce Formulation
- *        SolverId : SICONOS_FRICTION_3D_DSFP=505, </li>
- *
- * <li> frictionContact3D_ExtraGradient() : Extra Gradient solver for friction-contact 3D problem
- *        based on the De Saxce Formulation</li>
- *        SolverId : SICONOS_FRICTION_3D_EG=506, </li>
- *
- * <li> frictionContact3D_HyperplaneProjection() : Hyperplane Projection solver for friction-contact 3D
- *         problem based on the De Saxce Formulation
- *        SolverId : SICONOS_FRICTION_3D_HP=507, </li>
- *
- * </ul>
- * (see the functions/solvers list in FrictionContact3D_Solvers.h)
- *
- * \section fc3DParam Required and optional parameters
- * FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver()
- * function thanks to a SolverOptions structure. \n
- *
- * \section fc2DSolversList Available solvers for Friction Contact 2D
- * <ul>
- * <li> FrictionContact2D_nsgs(), Non Linear Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_NSGS =400,
- * </li>
- * <li> FrictionContact2D_cpg(), conjugate projected gradient SolverId SICONOS_FRICTION_2D_CPG =401,
- * </li>
- * <li> FrictionContact2D_pgs(), projected Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_PGS =402,
- * </li>
- * <li> FrictionContact2D_latin(), latin solver. SolverId SICONOS_FRICTION_2D_LATIN =403, </li>
- * </li>
- * <li> FrictionContact2D_lexicolemke(), lemke solver. SolverId SICONOS_FRICTION_2D_LMEKE =404, </li>
- * </ul>
- *
- */
-
 
 /*!\file VariationalInequality.h
   \brief Definition of a structure to handle with variational inequality problems.
 */
 
-#include "NumericsMatrix.h"
-
-/** \struct CallbackVI
+/** \page viProblem Variational Inequality
+ *
+ * \section viIntro Problem statement
+ *  Given
+ * <ul>
+ *   <li> an integer \f$n\f$, the dimension of the ambient space,</li>
+ *   <li> a mapping \f$F:{\mathrm{I\!R}^n \rightarrow {\mathrm{I\!R}^n, \f$</li>
+ *   <li> a set  \f$ {X} \in {{\mathrm{I\!R}}}^n\f$</li>
+ * </ul>
+ * the variational inequality problem  is to find a vector \f$z\in{{\mathrm{I\!R}}}^n \in X\f$,
+ * \f{eqnarray*}{
+ * \begin{cases}
+ * F(z)(y-z) \geq 0,\quad \text{ for all} y \in X
+ * \end{cases}
+ * \f}
+ * or equivalently,
+ * \f{eqnarray*}{
+ * \begin{cases}
+ * - F(z) \in N_X(z)
+ * \end{cases}
+ * \f}
+ * where \f$N_X is the normal cone to X$.
+ *
+ * Reference
+ *
+ * Facchinei, Francisco; Pang, Jong-Shi (2003), 
+ * Finite Dimensional Variational Inequalities and Complementarity Problems, Vol. 1 & 2,
+ * Springer Series in Operations Research, Berlin-Heidelberg-New York: Springer-Verlag,
+ *
+ * The problem is stored and given to the solver in Siconos/Numerics thanks to
+ *  a C structure VariationalProblem .
+ *
+ *  \section viSolversList Available solvers for Variational Inequality (see VI_cst.h)
+ * Use the generic function variationalInequality_driver() to call one the the specific solvers listed below:
+ *
+ * <ul>
+ *
+ * <li> variationalInequality_ExtraGradient() :Extra gradient solver.
+ *       SolverId : SICONOS_VI_EG =1000, </li>
+ *
+ * </ul>
+ * (see the functions/solvers list in VariationalInequality_Solvers.h)
+ *
  *
  */
-typedef struct 
-{
-  void *vi;
-  /** Function of the VI */
-  void (* F)(void *vi, double *,double *);  
-  /** Projection on X of the VI */
-  void ( *ProjectionOnX)(void *vi, double *,double *); 
-} CallbackVI;
+
+
+
+#ifndef VARIATIONALINEQUALITY_H
+#define VARIATIONALINEQUALITY_H
+
+#include "NumericsMatrix.h"
 
 /** \struct VariationalInequality
  *
@@ -153,8 +80,16 @@ typedef struct
 {
   /** size of the VI \f$ n \f$ */
   int size;
-  /**  */
-  CallbackVI * Callback;
+  
+  /** pointer onto self structure*/
+  void *self;
+  
+  /** Function of the VI */
+  void (*F)(void *self, double * x ,double *fx);  
+  
+  /** Projection on X of the VI */
+  void (*ProjectionOnX)(void *self, double *x, double *projectionOnX); 
+
 } VariationalInequality;
 
 
@@ -185,10 +120,10 @@ extern "C"
   void freeVariationalInequalityProblem(VariationalInequality* problem);
 
 
-  /** new VariationalInequality  from minimal set of data
-   *
-   */
-  VariationalInequality* variationalInequality_new(int size, CallbackVI * callback);
+  /* /\** new VariationalInequality  from minimal set of data */
+  /*  * */
+  /*  *\/ */
+  /* VariationalInequality* variationalInequality_new(int size, CallbackVI * callback); */
 
 
 

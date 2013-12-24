@@ -54,11 +54,11 @@ void freeVariationalInequality(VariationalInequality* problem)
 
 }
 
-VariationalInequality* variationalInequalityProblem_new(int dim, CallbackVI * Callback )
-{
-  VariationalInequality* fvi = (VariationalInequality*) malloc(sizeof(VariationalInequality));
+/* VariationalInequality* variationalInequalityProblem_new( int dim, void (* F)(void *vi, double *,double *)  ) */
+/* { */
+/*   VariationalInequality* fvi = (VariationalInequality*) malloc(sizeof(VariationalInequality)); */
 
-  fvi->size =dim;
-  fvi->Callback = Callback;
-  return fvi;
-}
+/*   fvi->size = dim; */
+/*   fvi->F = Callback; */
+/*   return fvi; */
+/* } */

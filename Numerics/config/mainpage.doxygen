@@ -19,6 +19,7 @@ Numerics package proposes a set of non-smooth solvers dedicated to some specific
 \subpage globalFcProblem \n\n
 \subpage RelayProblem \n\n
 \subpage QPSolvers\n\n
+\subpage viProblem\n\n
 
 For each type of problem, a generic interface function (driver) is provided. \n
 
