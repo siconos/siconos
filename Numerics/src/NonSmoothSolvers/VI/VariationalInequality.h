@@ -20,28 +20,24 @@
   \brief Definition of a structure to handle with variational inequality problems.
 */
 
-/** \page viProblem Variational Inequality
+/** \page viProblem Variational Inequality (VI)
  *
  * \section viIntro Problem statement
  *  Given
  * <ul>
  *   <li> an integer \f$n\f$, the dimension of the ambient space,</li>
- *   <li> a mapping \f$F:{\mathrm{I\!R}^n \rightarrow {\mathrm{I\!R}^n, \f$</li>
+ *   <li> a mapping \f$ F:{\mathrm{I\!R}^n \rightarrow {\mathrm{I\!R}^n, \f$</li>
  *   <li> a set  \f$ {X} \in {{\mathrm{I\!R}}}^n\f$</li>
  * </ul>
  * the variational inequality problem  is to find a vector \f$z\in{{\mathrm{I\!R}}}^n \in X\f$,
  * \f{eqnarray*}{
- * \begin{cases}
- * F(z)(y-z) \geq 0,\quad \text{ for all} y \in X
- * \end{cases}
+ * F(z)(y-z) \geq 0,\quad \text{ for all } y \in X
  * \f}
  * or equivalently,
  * \f{eqnarray*}{
- * \begin{cases}
  * - F(z) \in N_X(z)
- * \end{cases}
  * \f}
- * where \f$N_X is the normal cone to X$.
+ * where \f$N_X\f$ is the normal cone to \f$X\f$.
  *
  * Reference
  *
