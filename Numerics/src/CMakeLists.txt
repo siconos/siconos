@@ -575,7 +575,9 @@ ENDIF(MUMPS_FOUND)
   #NEW_TEST(GMP_FAILED GenericMechanical_test1.c)
   #END_TEST()
   BEGIN_TEST(NonSmoothSolvers/VI/test)
-  NEW_TEST(VI_test1 VI_test.c)
+  NEW_TEST(VI_test0 VI_test.c)
+  NEW_TEST(VI_test1 VI_test1.c)
+  
   END_TEST()
 ENDIF(WITH_TESTING)
 

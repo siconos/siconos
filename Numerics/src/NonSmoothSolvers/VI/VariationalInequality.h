@@ -62,12 +62,15 @@
  *
  */
 
-
-
 #ifndef VARIATIONALINEQUALITY_H
 #define VARIATIONALINEQUALITY_H
 
 #include "NumericsMatrix.h"
+
+typedef void * (FVIPtr)(void*, double *, double *);
+
+
+
 
 /** \struct VariationalInequality
  *

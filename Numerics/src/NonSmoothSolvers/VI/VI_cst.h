@@ -1,7 +1,7 @@
-#ifndef FRICTION_CST_H
-#define FRICTION_CST_H
+#ifndef VI_CST_H
+#define VI_CST_H
 /** \file VI_cst.h */
-/** \enum VI_SOLVER Friction_cst.h
+/** \enum VI_SOLVER VI_cst.h
  * Enum that allows one to encode the list of solvers in a proper to avoid mispelling
  * with char * variables
  */

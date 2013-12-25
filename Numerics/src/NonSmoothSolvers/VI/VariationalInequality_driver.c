@@ -31,9 +31,9 @@ char *  SICONOS_VI_EG_STR = "VI_EG";
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
 int variationalInequality_driver(VariationalInequality* problem, 
-                                 double *x, double *fx, 
+                                 double *x, double *w, 
                                  SolverOptions* options, 
-                             NumericsOptions* global_options)
+                                 NumericsOptions* global_options)
 {
   if (options == NULL)
     numericsError("variationalInequality_driver", "null input for solver and/or global options");
@@ -59,7 +59,7 @@ int variationalInequality_driver(VariationalInequality* problem,
   int info = -1 ;
 
   /* Check for trivial case */
-  info = checkTrivialCase_vi(problem, x, fx, options);
+  info = checkTrivialCase_vi(problem, x, w, options);
 
   if (info == 0)
     return info;
@@ -73,7 +73,7 @@ int variationalInequality_driver(VariationalInequality* problem,
   {
     snPrintf(1, options, 
              " ========================== Call ExtraGradient (EG) solver for VI problem ==========================\n");
-    variationalInequality_ExtraGradient(problem, x , fx , &info , options);
+    variationalInequality_ExtraGradient(problem, x , w , &info , options);
     break;
   }
   default:
@@ -89,10 +89,21 @@ int variationalInequality_driver(VariationalInequality* problem,
 }
 
 int checkTrivialCase_vi(VariationalInequality* problem, double* x, 
-                     double* fx, SolverOptions* options)
+                        double* w, SolverOptions* options)
 {
+  int n = problem->size;
+  problem->ProjectionOnX(problem,x,w);
+  cblas_daxpy(n, -1.0,x, 1, w , 1);
+  double nnorm = cblas_dnrm2(n,w,1);
+  if (nnorm < 1e-12)
+    return 1;
+  
+  problem->F(problem,x,w);
+  nnorm = cblas_dnrm2(n,w,1);
+  if (nnorm < 1e-12)
+    return 1;
   
   if (verbose == 1)
-    printf("variationalInequality driver, take off, trivial solution reaction = 0, velocity = q.\n");
+    printf("variationalInequality driver, trivial solution F(x) = 0, x in X.\n");
   return 0;
 }

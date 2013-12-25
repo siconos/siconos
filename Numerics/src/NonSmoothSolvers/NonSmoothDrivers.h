@@ -31,6 +31,9 @@
 #include "mlcp_cst.h"
 #include "MCP_cst.h"
 #include "lcp_cst.h"
+#include "friction_cst.h"
+#include "VI_cst.h"
+#include "VariationalInequality_Solvers.h"
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
 #include "MLCP_Solvers.h"
@@ -96,6 +99,16 @@ extern "C"
    *  \return result (0 if successful otherwise 1).
    */
   int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
+
+ /** General interface to solvers for friction-contact 3D problem
+   *  \param[in] problem the structure which handles the Friction-Contact problem
+   *  \param[in,out] reaction global vector (n)
+   *  \param[in,out] velocity global vector (n)
+   *  \param[in,out] options structure used to define the solver(s) and their parameters
+   *  \param[in] global_options for Numerics (verbose mode ...)
+   *  \return result (0 if successful otherwise 1).
+   */
+  int variationalInequality_driver(VariationalInequality* problem, double *x , double *w, SolverOptions* options, NumericsOptions* global_options);
 
   /** General interface to solver for MCP problems
       \param[in] problem the MixedComplementarityProblem structure which handles the problem

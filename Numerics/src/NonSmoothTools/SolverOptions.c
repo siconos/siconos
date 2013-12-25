@@ -27,6 +27,7 @@
 #include "lcp_cst.h"
 #include "relay_cst.h"
 #include "Friction_cst.h"
+#include "VI_cst.h"
 #include "misc.h"
 
 char * SICONOS_NUMERICS_PROBLEM_LCP_STR = "LCP";
@@ -36,6 +37,7 @@ char * SICONOS_NUMERICS_PROBLEM_MCP_STR = "MCP";
 char * SICONOS_NUMERICS_PROBLEM_EQUALITY_STR = "EQUALITY";
 char * SICONOS_NUMERICS_PROBLEM_FC2D_STR = "FC2D";
 char * SICONOS_NUMERICS_PROBLEM_FC3D_STR = "FC3D";
+char * SICONOS_NUMERICS_PROBLEM_VI_STR = "VI";
 
 
 char * idProblemToChar(int id)
@@ -75,6 +77,11 @@ char * idProblemToChar(int id)
   case (SICONOS_NUMERICS_PROBLEM_FC3D):
   {
     return SICONOS_NUMERICS_PROBLEM_FC3D_STR;
+    break;
+  }
+  case (SICONOS_NUMERICS_PROBLEM_VI):
+  {
+    return SICONOS_NUMERICS_PROBLEM_VI_STR;
     break;
   }
   default:
