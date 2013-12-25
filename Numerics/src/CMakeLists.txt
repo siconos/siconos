@@ -577,6 +577,7 @@ ENDIF(MUMPS_FOUND)
   BEGIN_TEST(NonSmoothSolvers/VI/test)
   NEW_TEST(VI_test0 VI_test.c)
   NEW_TEST(VI_test1 VI_test1.c)
+  NEW_TEST(VI_testFC3D1 VI_testFC3D1.c)
   
   END_TEST()
 ENDIF(WITH_TESTING)

@@ -38,7 +38,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   global_options.verboseMode = 1; // turn verbose mode to off by default
 
   int NC = problem->numberOfContacts;
-  int dim = problem->dimension;
+  int dim = problem->numberOfContacts;
   double *reaction = (double*)malloc(dim * NC * sizeof(double));
   double *velocity = (double*)malloc(dim * NC * sizeof(double));
   for (k = 0 ; k < dim * NC; k++)

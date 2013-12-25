@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-
 void variationalInequality_ExtraGradient(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
 {
   /* /\* int and double parameters *\/ */
@@ -102,21 +101,27 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       cblas_dcopy(n , x , 1 , xtmp, 1);
 
       /* wtmp <- F(xtmp) */
-      problem->F(problem,xtmp,wtmp);    
+      problem->F(problem,xtmp,wtmp);
       
       /* xtmp <- xtmp - F(xtmp) */
       cblas_daxpy(n, -1.0, wtmp , 1, xtmp , 1) ;
       
       /* wtmp <-  ProjectionOnX(xtmp) */
-      problem->ProjectionOnX(problem,xtmp,wtmp);    
+      problem->ProjectionOnX(problem,xtmp,wtmp);
       
       /* x <- x - wtmp */
       cblas_daxpy(n, -1.0, wtmp , 1, x , 1) ;
       
-      /* x <-  ProjectionOnX(x) */ 
+      /* x <-  ProjectionOnX(x) */
       cblas_dcopy(n , xtmp , 1 , x, 1);
 
-      problem->ProjectionOnX(problem,xtmp,x);    
+      problem->ProjectionOnX(problem,xtmp,x);
+
+
+      /* problem->F(problem,x,w); */
+      /* cblas_daxpy(n, -1.0, w , 1, x , 1) ; */
+      /* cblas_dcopy(n , x , 1 , xtmp, 1); */
+      /* problem->ProjectionOnX(problem,xtmp,x); */
 
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);

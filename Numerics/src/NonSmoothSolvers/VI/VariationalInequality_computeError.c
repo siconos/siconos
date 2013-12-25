@@ -42,10 +42,29 @@ int variationalInequality_computeError(
   int n = problem->size;
 
   *error = 0.;
+  double *ztmp = (double*)malloc(n* sizeof(double));
+  cblas_dcopy(n , z , 1 , ztmp, 1);
 
+  problem->F(problem,ztmp,w);
+  double normq = cblas_dnrm2(n , w , incx);
+  
+  
+  cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
+  
+  problem->ProjectionOnX(problem,ztmp,w);
+  
+  cblas_dcopy(n , z , 1 , ztmp, 1);
+
+  cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
+
+  *error = cblas_dnrm2(n , ztmp , incx);
+  free(ztmp);
+  
+  problem->F(problem,z,w);
+
+
+  
   /* Computes error */
-  double normq = 1.0;//cblas_dnrm2(n , problem->q , incx);
-
   *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
