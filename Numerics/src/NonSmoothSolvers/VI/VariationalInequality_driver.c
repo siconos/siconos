@@ -25,8 +25,10 @@
 #include "NumericsOptions.h"
 #include "VariationalInequality_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "SiconosBlas.h"
 
 char *  SICONOS_VI_EG_STR = "VI_EG";
+char *  SICONOS_VI_FPP_STR = "VI_FPP";
 
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
@@ -74,6 +76,13 @@ int variationalInequality_driver(VariationalInequality* problem,
     snPrintf(1, options, 
              " ========================== Call ExtraGradient (EG) solver for VI problem ==========================\n");
     variationalInequality_ExtraGradient(problem, x , w , &info , options);
+    break;
+  }
+  case SICONOS_VI_FPP:
+  {
+    snPrintf(1, options, 
+             " ========================== Call Fixed Point Projection (FPP) solver for VI problem ==========================\n");
+    variationalInequality_FixedPointProjection(problem, x , w , &info , options);
     break;
   }
   default:

@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-void variationalInequality_ExtraGradient(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
+void variationalInequality_FixedPointProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
 {
   /* /\* int and double parameters *\/ */
   int* iparam = options->iparam;
@@ -56,7 +56,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
     rho = dparam[3];
     if (verbose > 0)
     {
-      printf("----------------------------------- VI - Extra Gradient (EG) - Fixed stepsize with  rho = %14.7e \n", rho);
+      printf("----------------------------------- VI - Fixed Point Projection (FPP) - Fixed stepsize with  rho = %14.7e \n", rho);
     }
   }
   else
@@ -66,7 +66,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
     rho = -dparam[3];
     if (verbose > 0)
     {
-      printf("----------------------------------- VI - Extra Gradient (EG) - Variable stepsize with starting rho = %14.7e \n", rho);
+      printf("----------------------------------- VI - Fixed Point Projection (FPP) - Variable stepsize with starting rho = %14.7e \n", rho);
     }
      
   }
@@ -95,31 +95,10 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
     {
       ++iter;
 
-      /* xtmp <- x  */
+      problem->F(problem,x,w);
+      cblas_daxpy(n, -1.0, w , 1, x , 1) ;
       cblas_dcopy(n , x , 1 , xtmp, 1);
-
-      /* wtmp <- F(xtmp) */
-      problem->F(problem,xtmp,wtmp);
-      
-      /* xtmp <- xtmp - F(xtmp) */
-      cblas_daxpy(n, -1.0, wtmp , 1, xtmp , 1) ;
-      
-      /* wtmp <-  ProjectionOnX(xtmp) */
-      problem->ProjectionOnX(problem,xtmp,wtmp);
-      
-      /* x <- x - wtmp */
-      cblas_daxpy(n, -1.0, wtmp , 1, x , 1) ;
-      
-      /* x <-  ProjectionOnX(x) */
-      cblas_dcopy(n , xtmp , 1 , x, 1);
-
       problem->ProjectionOnX(problem,xtmp,x);
-
-
-      /* problem->F(problem,x,w); */
-      /* cblas_daxpy(n, -1.0, w , 1, x , 1) ; */
-      /* cblas_dcopy(n , x , 1 , xtmp, 1); */
-      /* problem->ProjectionOnX(problem,xtmp,x); */
 
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
@@ -135,7 +114,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
       if (verbose > 0)
       {
-        printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+        printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
       }
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
@@ -201,21 +180,9 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
         ls_iter++;
       }
-      /* velocitytmp <- q  */
-      /* cblas_dcopy(n , q , 1 , velocitytmp, 1); */
+       /* problem->F(problem,x,w); */
 
-      /* prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp); */
 
-      problem->F(problem,x,wtmp);
-
-      /* x <- x - rho_k*  wtmp */
-      cblas_daxpy(n, -rho_k, wtmp , 1, x , 1) ;
-      
-      /* wtmp <-  ProjectionOnX(xtmp) */
-      cblas_dcopy(n , x , 1 , xtmp, 1);
-      problem->ProjectionOnX(problem,xtmp,x);
-
-     
 
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
@@ -231,7 +198,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
       if (verbose > 0)
       {
-        printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+        printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
       }
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
@@ -241,7 +208,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
   if (verbose > 0)
   {
-    printf("----------------------------------- VI - Extra Gradient (EG) - #Iteration %i Final Error = %14.7e\n", iter, error);
+    printf("----------------------------------- VI - Fixed Point Projection (FPP) - #Iteration %i Final Error = %14.7e\n", iter, error);
   }
   dparam[0] = tolerance;
   dparam[1] = error;
@@ -252,15 +219,15 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 }
 
 
-int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
+int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default SolverOptions for the ExtraGradient Solver\n");
+    printf("Set the Default SolverOptions for the FixedPointProjection Solver\n");
   }
 
-  options->solverId = SICONOS_VI_EG;
+  options->solverId = SICONOS_VI_FPP;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

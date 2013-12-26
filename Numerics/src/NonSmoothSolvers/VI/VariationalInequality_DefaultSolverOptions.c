@@ -44,9 +44,14 @@ int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int so
     info =    variationalInequality_ExtraGradient_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_VI_FPP:
+  {
+    info =    variationalInequality_FixedPointProjection_setDefaultSolverOptions(options);
+    break;
+  }
   default:
   {
-    numericsError("frictionContact3D_setDefaultSolverOptions", "Unknown Solver");
+    numericsError("variationalInequality_setDefaultSolverOptions", "Unknown Solver");
 
   }
   }

@@ -78,7 +78,23 @@ extern "C"
   /** set the default solver parameters and perform memory allocation for EG
     \param options the pointer to the array of options to set
   */
+  
   int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
+  /**Extra Gradient solver for friction-contact 3D problem based on the De Saxce Formulation
+      \param problem the friction-contact 3D problem to solve
+      \param x global vector (n), in-out parameter
+      \param fx global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options :
+      iparam[0] : Maximum iteration number
+      dparam[3] : rho >0
+  */
+  void variationalInequality_FixedPointProjection(VariationalInequality* problem, double *x, double *fx, int* info, SolverOptions* options);
+
+  /** set the default solver parameters and perform memory allocation for EG
+    \param options the pointer to the array of options to set
+  */
+  int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
 
   /** Check for trivial solution in the friction-contact 3D problem
       \param problem VariationalInequality*  the problem
