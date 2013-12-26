@@ -80,8 +80,8 @@ typedef struct
   /** size of the VI \f$ n \f$ */
   int size;
   
-  /** pointer onto self structure*/
-  void *self;
+  /** pointer onto env object (which is self is the simplest case)*/
+  void *env;
   
   /** Function of the VI */
   void (*F)(void *self, double * x ,double *fx);  

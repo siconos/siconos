@@ -35,7 +35,7 @@ int main(void)
   vi.size=10;
   //vi.Callback = (CallbackVI *)malloc(sizeof(CallbackVI));
   
-  vi.self = &vi;
+  vi.env = &vi;
   
   vi.F = &Ftest;
   vi.ProjectionOnX = &PXtest ;

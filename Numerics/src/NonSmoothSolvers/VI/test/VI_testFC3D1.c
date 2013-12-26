@@ -16,7 +16,7 @@ typedef struct {
 void Ftest(void * self, double *x, double *F)
 {
   VariationalInequality * vi = (VariationalInequality *) self;
-  Problems* pb = (Problems *)vi->self;             
+  Problems* pb = (Problems *)vi->env;             
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
  
@@ -40,7 +40,7 @@ void Ftest(void * self, double *x, double *F)
 void PXtest(void *viIn, double *x, double *PX)
 {
   VariationalInequality * vi = (VariationalInequality *) viIn;
-  Problems* pb = (Problems *)vi->self;             
+  Problems* pb = (Problems *)vi->env;             
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
   
@@ -81,7 +81,7 @@ int main(void)
   // frictionContact_display(problem);
 
   Problems *pb= (Problems *)malloc(sizeof(Problems));
-  vi.self = pb;
+  vi.env = pb;
 
 
   pb->vi = &vi;

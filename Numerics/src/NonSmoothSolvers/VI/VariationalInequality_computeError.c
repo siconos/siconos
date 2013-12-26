@@ -37,7 +37,7 @@ int variationalInequality_computeError(
   assert(w);
   assert(error);
   
-  int incx = 1, incy = 1;
+  int incx = 1;
 
   int n = problem->size;
 
