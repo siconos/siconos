@@ -49,6 +49,11 @@ int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int so
     info =    variationalInequality_FixedPointProjection_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_VI_HP:
+  {
+    info =    variationalInequality_HyperplaneProjection_setDefaultSolverOptions(options);
+    break;
+  }
   default:
   {
     numericsError("variationalInequality_setDefaultSolverOptions", "Unknown Solver");

@@ -29,6 +29,7 @@
 
 char *  SICONOS_VI_EG_STR = "VI_EG";
 char *  SICONOS_VI_FPP_STR = "VI_FPP";
+char *  SICONOS_VI_HP_STR = "VI_HP";
 
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
@@ -83,6 +84,13 @@ int variationalInequality_driver(VariationalInequality* problem,
     snPrintf(1, options, 
              " ========================== Call Fixed Point Projection (FPP) solver for VI problem ==========================\n");
     variationalInequality_FixedPointProjection(problem, x , w , &info , options);
+    break;
+  }
+  case SICONOS_VI_HP:
+  {
+    snPrintf(1, options, 
+             " ========================== Call Hyperplane Projection (HP) solver for VI problem ==========================\n");
+    variationalInequality_HyperplaneProjection(problem, x , w , &info , options);
     break;
   }
   default:

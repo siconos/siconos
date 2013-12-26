@@ -51,12 +51,12 @@ extern "C"
   /** General interface to solvers for variational inequality problem
   \param[in] problem the structure which handles the variational inequality problem
   \param[in,out] x global vector (n)
-  \param[in,out] fx global vector (n)
+  \param[in,out] w global vector (n)
   \param[in,out] options structure used to define the solver(s) and their parameters
   \param[in] global_options for Numerics (verbose mode ...)
   \return result (0 if successful otherwise 1).
   */
-  int variationalInequality_driver(VariationalInequality* problem, double *x , double *fx, SolverOptions* options, NumericsOptions* global_options);
+  int variationalInequality_driver(VariationalInequality* problem, double *x , double *w, SolverOptions* options, NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for VariationalInequality
       \param options the pointer to the options to set
@@ -64,39 +64,67 @@ extern "C"
   */
   int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
-  /**Extra Gradient solver for friction-contact 3D problem based on the De Saxce Formulation
-      \param problem the friction-contact 3D problem to solve
+  /**Extra Gradient solver forvariational inequality problem based on the De Saxce Formulation
+      \param problem the variational inequality problem to solve
       \param x global vector (n), in-out parameter
-      \param fx global vector (n), in-out parameters
+      \param w global vector (n), in-out parameters
       \param info return 0 if the solution is found
       \param options the solver options :
       iparam[0] : Maximum iteration number
       dparam[3] : rho >0
   */
-  void variationalInequality_ExtraGradient(VariationalInequality* problem, double *x, double *fx, int* info, SolverOptions* options);
+  void variationalInequality_ExtraGradient(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for EG
     \param options the pointer to the array of options to set
   */
   
   int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
-  /**Extra Gradient solver for friction-contact 3D problem based on the De Saxce Formulation
-      \param problem the friction-contact 3D problem to solve
+
+
+
+  /** Fixed Point Projection solver for variational inequality problem based on the De Saxce Formulation
+      \param problem the variational inequality problem to solve
       \param x global vector (n), in-out parameter
-      \param fx global vector (n), in-out parameters
+      \param w global vector (n), in-out parameters
       \param info return 0 if the solution is found
       \param options the solver options :
       iparam[0] : Maximum iteration number
       dparam[3] : rho >0
   */
-  void variationalInequality_FixedPointProjection(VariationalInequality* problem, double *x, double *fx, int* info, SolverOptions* options);
+  void variationalInequality_FixedPointProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options);
+
 
   /** set the default solver parameters and perform memory allocation for EG
     \param options the pointer to the array of options to set
   */
   int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
 
-  /** Check for trivial solution in the friction-contact 3D problem
+
+  /** Hyperplane Projection solver for variational inequality problem based on the De Saxce Formulation
+      \param problem the variational inequality problem to solve
+      \param x global vector (n), in-out parameter
+      \param w global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options :
+      iparam[0] : Maximum iteration number
+      dparam[3] : rho >0
+  */
+  void variationalInequality_HyperplaneProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options);
+
+
+  /** set the default solver parameters and perform memory allocation for EG
+    \param options the pointer to the array of options to set
+  */
+  int variationalInequality_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options);
+
+
+
+
+
+
+
+  /** Check for trivial solution in the variational inequality problem
       \param problem VariationalInequality*  the problem
       \param x global vector (n), in-out parameter
       \param fx global vector (n), in-out parameters

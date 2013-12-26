@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-//#define VERBOSE_DEBUG
+#define VERBOSE_DEBUG
 
 void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -84,9 +84,7 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
     printf("Hyperplane Projection method. 0<sigma <1  is not well defined\n");
     printf("Hyperplane Projection method. sigma is set to 0.99\n");
   }
-  double alpha = 1.0;
-  double beta = 1.0;
-
+ 
   /*   double minusrho  = -1.0*rho; */
   while ((iter < itermax) && (hasNotConverged > 0))
   {
@@ -95,9 +93,7 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
     cblas_dcopy(n , q , 1 , velocitytmp, 1);
     cblas_dcopy(n , reaction , 1 , reactiontmp, 1);
 
-    prodNumericsMatrix(n, n, alpha, M, reactiontmp, beta, velocitytmp);
-
-
+    prodNumericsMatrix(n, n, 1.0, M, reactiontmp, 1.0, velocitytmp);
 
 
     // projection for each contact
@@ -138,8 +134,13 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
       alpha  = 1.0 - alpha;
 
       cblas_daxpy(n, alpha, reaction, 1, reactiontmp2, 1);
+
       cblas_dcopy(n , q , 1 , velocitytmp, 1);
-      prodNumericsMatrix(n, n, alpha, M, reactiontmp2, beta, velocitytmp);
+
+      prodNumericsMatrix(n, n, 1.0, M, reactiontmp2, 1.0, velocitytmp);
+
+
+
       /* #ifdef VERBOSE_DEBUG */
       /*     for (contact = 0 ; contact < nc ; ++contact) */
       /*     { */
