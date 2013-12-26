@@ -31,7 +31,7 @@
 #include "mlcp_cst.h"
 #include "MCP_cst.h"
 #include "lcp_cst.h"
-#include "friction_cst.h"
+#include "Friction_cst.h"
 #include "VI_cst.h"
 #include "VariationalInequality_Solvers.h"
 #include "Relay_Solvers.h"
