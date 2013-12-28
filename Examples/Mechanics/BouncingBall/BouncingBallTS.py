@@ -20,7 +20,7 @@
 #
 
 from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
-     LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation,\
+     LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI, TimeDiscretisation,\
      LCP, TimeStepping
 
 from numpy import eye, empty
@@ -77,7 +77,7 @@ bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
 #
 
 # (1) OneStepIntegrators
-OSI = Moreau(theta)
+OSI = MoreauJeanOSI(theta)
 OSI.insertDynamicalSystem(ball)
 
 # (2) Time discretisation --
