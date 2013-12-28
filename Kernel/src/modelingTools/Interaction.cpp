@@ -158,9 +158,10 @@ void Interaction::initialize(double t0, SP::DynamicalSystem ds1, SP::DynamicalSy
     // Initialize interaction work vectors, depending on Dynamical systems
     // linked to the interaction.
     initDSData(ds1);
-    if(ds1 != ds2)
+    if(ds2 && ds1 != ds2)
+    {
       initDSData(ds2);
-    
+    }
     initializeMemory();
     _relation->initialize(*this);
 
