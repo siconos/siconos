@@ -18,7 +18,7 @@
  */
 //#include "projectionOnCone.h"
 #include "VariationalInequality_Solvers.h"
-#include "VariationalInequality_computeerror.h"
+#include "VariationalInequality_computeError.h"
 #include "SiconosBlas.h"
 
 #include <stdio.h>

@@ -21,7 +21,7 @@
 #include "NumericsOptions.h" // for global options
 #include "VariationalInequality.h"
 #include "SolverOptions.h"
-#include "Variationalinequality_computeerror.h"
+#include "VariationalInequality_computeError.h"
 #include "SiconosLapack.h"
 
 #include <math.h>
