@@ -1,7 +1,7 @@
 #ifndef NONLINEARRELATIONWITHSIGNINVERSED_CPP
 #define NONLINEARRELATIONWITHSIGNINVERSED_CPP
 
-#include "NonlinearrelationWithSignInversed.h"
+#include "NonlinearRelationWithSignInversed.h"
 
 //#include "const.h"
 #define SICONOS_DEBUG
