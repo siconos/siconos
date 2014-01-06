@@ -84,6 +84,38 @@ MACRO(LIBRARY_PROJECT_SETUP)
     ENDFOREACH(_DIR ${_ALL_DIRS})
   ENDIF(${PROJECT_NAME}_SRCS)
   #
+  # doxygen warnings
+  #
+  IF(WITH_DOXYGEN_WARNINGS)
+    ADD_LIBRARY(myObjects OBJECT ${_ALL_FILES})
+    FIND_PACKAGE(Doxygen)
+    FOREACH(_F ${_ALL_FILES})
+      GET_FILENAME_COMPONENT(_FP ${_F} PATH)
+      GET_FILENAME_COMPONENT(_FWE1 ${_F} NAME_WE)
+      SET(_FWE ${_FP}/${_FWE1})
+      IF(EXISTS ${_FWE}.hpp)
+        SET(CURRENT_SICONOS_SOURCE_FILE ${_FWE}.hpp)
+      ELSE()
+        IF(EXISTS ${_FWE}.h)
+          SET(CURRENT_SICONOS_SOURCE_FILE ${_FWE}.h)
+        ENDIF()
+      ENDIF()
+      FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doxygen_warnings)
+      CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/filedoxy.config.in 
+        ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.config)
+      ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.doxresult 
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.config
+        COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.doxresult
+        DEPENDS ${_F} # not enough!
+        DEPENDS ${CURRENT_SICONOS_SOURCE_FILE}
+        )
+      SET_SOURCE_FILES_PROPERTIES(${_F} OBJECT_DEPENDS  ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.doxresult)
+      SET_SOURCE_FILES_PROPERTIES(${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.config PROPERTIES GENERATED TRUE)
+      SET_SOURCE_FILES_PROPERTIES(${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.doxresult PROPERTIES GENERATED TRUE)
+    ENDFOREACH()
+  ENDIF()
+    
+  #
   # headers
   #
   IF(NOT ${PROJECT_NAME}_HDRS)
@@ -94,7 +126,7 @@ MACRO(LIBRARY_PROJECT_SETUP)
       ENDIF(_HDRS)
     ENDFOREACH(_DIR ${_ALL_DIRS})
   ENDIF(NOT ${PROJECT_NAME}_HDRS)
-  
+
   #
   # Unstable sources
   #
@@ -253,5 +285,9 @@ MACRO(LIBRARY_PROJECT_SETUP)
     MESSAGE(STATUS "")
     
   ENDIF(_ALL_FILES)
+
+#  SET_TARGET_PROPERTIES(${PROJECT_NAME}_shared PROPERTIES RULE_LAUNCH_LINK
+#    "${CMAKE_COMMAND} -E echo [ <OBJECTS> ]")
+
 ENDMACRO(LIBRARY_PROJECT_SETUP)
 

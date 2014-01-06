@@ -27,6 +27,12 @@ MACRO(SICONOS_PROJECT
   OPTION(WITH_FCLIB "link with fclib when this mode is enable. Default = off." OFF)
   OPTION(WITH_SYSTEM_INFO "Print some CMake variables. Default = off." OFF)
   OPTION(WITH_CPACK "Configuration for cpack. Default = on." ON)
+  OPTION(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings." ON) # ON for developpers, OFF for distributed version
+  OPTION(FUCK_DOXYGEN "At your convenience." OFF) 
+
+  IF(FUCK_DOXYGEN)
+    SET(WITH_DOXYGEN_WARNINGS OFF)
+  ENDIF(FUCK_DOXYGEN)
 
   # get system architecture 
   # https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake
