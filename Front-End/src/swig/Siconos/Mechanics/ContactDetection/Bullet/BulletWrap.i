@@ -205,7 +205,7 @@ PY_FULL_REGISTER(BulletR);
 PY_FULL_REGISTER(BulletDS);
 PY_FULL_REGISTER(BulletSpaceFilter);
 PY_FULL_REGISTER(BulletTimeStepping);
-PY_FULL_REGISTER(BulletTimeSteppingProjectOnConstraints);
+PY_FULL_REGISTER(BulletTimeSteppingDirectProjection);
 PY_FULL_REGISTER(BulletWeightedShape);
 PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 
@@ -248,10 +248,10 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
     int num_triangles = array_size(indices,0);
     int num_vertices = array_size(points,0);
 
-    btTriangleIndexVertexArray* index = 
-      new btTriangleIndexVertexArray(num_triangles, (int *) &array_data(indices)[0], 
+    btTriangleIndexVertexArray* index =
+      new btTriangleIndexVertexArray(num_triangles, (int *) &array_data(indices)[0],
                                      3 * sizeof(int),
-                                     num_vertices, (btScalar *) &array_data(points)[0], 
+                                     num_vertices, (btScalar *) &array_data(points)[0],
                                      3 * sizeof(btScalar));
 
      // python mem management
@@ -259,12 +259,12 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
     {
       Py_DECREF(points);
     }
-    
+
     if(is_new_object2 && indices)
     {
       Py_DECREF(indices);
     }
-    
+
     return index;
   }
 }
