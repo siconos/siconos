@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
     cout << "====> Comparison with a reference file ..." << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("SliderCrankMoreauJeanOSI-CombinedProjection.ref", "ascii", dataPlotRef);
+    ioMatrix::read("SliderCrankMoreauJeanCombinedProjectionOSI.ref", "ascii", dataPlotRef);
     double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
     std::cout << "Error = "<< error << std::endl;
     if (error > 1e-12)
