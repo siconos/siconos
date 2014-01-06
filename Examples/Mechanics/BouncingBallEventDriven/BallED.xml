@@ -84,9 +84,9 @@
 		<!-- One Step Integrators -->				
 		<OneStepIntegrator_Definition>
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
-			<Lsodar>
+			<LsodarOSI>
 				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
-			</Lsodar>					
+			</LsodarOSI>					
 		</OneStepIntegrator_Definition>
 
 		<!-- One Step NS Problem of the Simulation-->

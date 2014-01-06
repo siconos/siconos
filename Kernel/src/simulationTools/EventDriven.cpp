@@ -308,7 +308,7 @@ void EventDriven::initOSNS()
   if (!_allNSProblems->empty()) // ie if at least a non smooth problem has been built.
   {
     OSI::TYPES  osiType = (*_allOSI->begin())->getType();
-    if (osiType == OSI::LSODAROSI) //EventDriven associated with LsodarOSI OSI
+    if (osiType == OSI::LSODAROSI || osiType == OSI::HEM5OSI) //EventDriven associated with LsodarOSI OSI
     {      
     }
     else if (osiType == OSI::NEWMARKALPHAOSI) // EventDrivent asscociated with NewMarkAlpha
@@ -756,7 +756,7 @@ void EventDriven::advanceToEvent()
       model()->setCurrentTime(_tout);
     }
   }
-  else if (osiType == OSI::LSODAROSI)
+  else if (osiType == OSI::LSODAROSI || osiType == OSI::HEM5OSI)
   {
     // WARNING: this is supposed to work for only one OSI, including all
     // the DS.  To be reviewed for multiple OSI case (if it has sense?).
