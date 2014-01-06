@@ -91,10 +91,10 @@
      		</TimeDiscretisation>				
 		<!-- One Step Integrators -->				
 		<OneStepIntegrator_Definition>
-			<Moreau>
+			<MoreauJeanOSI>
 				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
 				<Theta all="0.5"></Theta>
-			</Moreau>					
+			</MoreauJeanOSI>					
 		</OneStepIntegrator_Definition>
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblems_List>
