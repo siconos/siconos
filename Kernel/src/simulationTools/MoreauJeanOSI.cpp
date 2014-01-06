@@ -459,7 +459,27 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
   {
     // Nothing: W does not depend on time.
   }
+  else if (dsType == Type::LagrangianDS)
+  {
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+    SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
+    SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
 
+    d->computeMass();
+    *W = *d->mass();
+
+    if (C)
+    {
+      d->computeJacobianqDotForces(t);
+      scal(-h * _theta, *C, *W, false); // W -= h*_theta*C
+    }
+
+    if (K)
+    {
+      d->computeJacobianqForces(t);
+      scal(-h * h * _theta * _theta, *K, *W, false); //*W -= h*h*_theta*_theta**K;
+    }
+  }
   // === ===
   else if (dsType == Type::NewtonEulerDS)
   {
