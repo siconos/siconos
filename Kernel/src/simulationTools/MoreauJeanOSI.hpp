@@ -225,7 +225,7 @@ public:
   };
 
   /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
