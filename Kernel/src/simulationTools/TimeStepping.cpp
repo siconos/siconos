@@ -647,7 +647,8 @@ void TimeStepping::saveYandLambdaInOldVariables()
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       initializeInteraction(indexSet0->bundle(*ui));
-      indexSet0->bundle(*ui)->swapInMemory();
+      //indexSet0->bundle(*ui)->swapInMemory();
+      indexSet0->bundle(*ui)->swapInOldVariables();;
     }
 }
 
