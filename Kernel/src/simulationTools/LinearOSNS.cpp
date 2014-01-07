@@ -248,11 +248,11 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
       OSI::TYPES  osiType = Osi->getType();
 
-      if (osiType == OSI::MOREAUJEANOSI)
+      if (osiType == OSI::EULERMOREAUOSI)
       {
-        if ((std11::static_pointer_cast<MoreauJeanOSI> (Osi))->useGamma() || (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->useGammaForRelation())
+        if ((std11::static_pointer_cast<EulerMoreauOSI> (Osi))->useGamma() || (std11::static_pointer_cast<EulerMoreauOSI> (Osi))->useGammaForRelation())
         {
-          *rightInteractionBlock *= (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->gamma();
+          *rightInteractionBlock *= (std11::static_pointer_cast<EulerMoreauOSI> (Osi))->gamma();
         }
       }
 

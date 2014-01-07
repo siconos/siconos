@@ -489,7 +489,7 @@ double EulerMoreauOSI::computeResidu()
 
       *residuFree *= -h;
 
-
+      DEBUG_EXPR(residuFree->display(););
 
     }
     else
@@ -505,6 +505,7 @@ void EulerMoreauOSI::computeFreeState()
 {
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
+  DEBUG_PRINT("EulerMoreauOSI::computeFreeState()");
 
   double t = simulationLink->nextTime(); // End of the time step
   double told = simulationLink->startingTime(); // Beginning of the time step
@@ -612,6 +613,9 @@ void EulerMoreauOSI::computeFreeState()
         //           xq->display();
 
       }
+      DEBUG_EXPR(xfree->display(););
+      DEBUG_EXPR(xp->display(););
+      DEBUG_EXPR(xq->display(););
 
 
       //      }
