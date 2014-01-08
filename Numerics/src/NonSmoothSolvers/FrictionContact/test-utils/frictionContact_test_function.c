@@ -38,7 +38,9 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   global_options.verboseMode = 1; // turn verbose mode to off by default
 
   int NC = problem->numberOfContacts;
-  int dim = problem->numberOfContacts;
+  int dim = problem->dimension;
+  //int dim = problem->numberOfContacts;
+  
   double *reaction = (double*)malloc(dim * NC * sizeof(double));
   double *velocity = (double*)malloc(dim * NC * sizeof(double));
   for (k = 0 ; k < dim * NC; k++)
@@ -58,6 +60,10 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
     info = frictionContact3D_driver(problem,
                                     reaction , velocity,
                                     options, &global_options);
+  }
+  else
+  {
+    info = 1;
   }
   printf("\n");
   for (k = 0 ; k < dim * NC; k++)

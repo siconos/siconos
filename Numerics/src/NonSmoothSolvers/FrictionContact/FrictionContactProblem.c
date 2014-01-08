@@ -21,6 +21,9 @@
 #include "FrictionContactProblem.h"
 #include "misc.h"
 
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+#include "debug.h"
 
 void frictionContact_display(FrictionContactProblem* problem)
 {
@@ -90,10 +93,12 @@ int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file)
 
 int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
 {
+  DEBUG_PRINT("Start -- int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
   int nc = 0, d = 0;
   int i;
   CHECK_IO(fscanf(file, "%d\n", &d));
   problem->dimension = d;
+  DEBUG_PRINTF("problem->dimension = %i \n",problem->dimension );
   CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
@@ -114,7 +119,9 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
-  IGNORE_IO(fscanf(file, "\n"));
+  IGNORE_IO(fscanf(file, "\n")); 
+  DEBUG_PRINT("End --  int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
+
   return 0;
 }
 
