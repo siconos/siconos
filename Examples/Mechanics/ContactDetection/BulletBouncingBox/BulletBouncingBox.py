@@ -20,7 +20,7 @@
 #
 
 from Siconos.Kernel import \
-    Model, Moreau, TimeDiscretisation, \
+    Model, MoreauJeanOSI, TimeDiscretisation, \
     FrictionContact, NewtonImpactFrictionNSL
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
@@ -84,7 +84,7 @@ bouncingBox.nonSmoothDynamicalSystem().insertDynamicalSystem(body)
 #
 
 # (1) OneStepIntegrators
-osi = Moreau(theta)
+osi = MoreauJeanOSI(theta)
 osi.insertDynamicalSystem(body)
 
 ground = btCollisionObject()
