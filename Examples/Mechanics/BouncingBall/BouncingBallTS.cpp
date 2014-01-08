@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
-    cout << "====> Model loading ..." << endl << endl;
+    cout << "====> Model loading ..." <<  endl;
 
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
@@ -101,8 +101,6 @@ int main(int argc, char* argv[])
     // link the interaction and the dynamical system
     bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
 
-    std::cout << inter->getSizeOfDS() << std::endl;;
-
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -125,7 +123,7 @@ int main(int argc, char* argv[])
 
     // --- Simulation initialization ---
 
-    cout << "====> Initialisation ..." << endl << endl;
+    cout << "====> Initialisation ..." << endl;
     bouncingBall->initialize(s);
     int N = ceil((T - t0) / h); // Number of time steps
 
@@ -145,7 +143,7 @@ int main(int argc, char* argv[])
     dataPlot(0, 3) = (*p)(0);
     dataPlot(0, 4) = (*lambda)(0);
     // --- Time loop ---
-    cout << "====> Start computation ... " << endl << endl;
+    cout << "====> Start computation ... " << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 1;
     boost::progress_display show_progress(N);
@@ -166,19 +164,21 @@ int main(int argc, char* argv[])
       ++show_progress;
       k++;
     }
-    cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
+    cout  << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
+    std::cout << "Comparison with a reference file" << std::endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
+    double error = (dataPlot - dataPlotRef).normInf();
+    std::cout << "error =" << error << std::endl;
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    if (error> 1e-12)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
       return 1;

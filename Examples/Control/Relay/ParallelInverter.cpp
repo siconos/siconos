@@ -1,4 +1,3 @@
-
 #include "SiconosKernel.hpp"
 #include <math.h>
 using namespace std;
@@ -312,13 +311,16 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("ParallelInverter.dat", "ascii", dataPlot, "noDim");
+    std::cout << "Comparison with a reference file" << std::endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("ParallelInverter.ref", "ascii", dataPlotRef);
     SP::SiconosVector errSim = compareMatrices(dataPlot, dataPlotRef);
+    std::cout << "errSim display :" << std::endl;
     errSim->display();
-
-    if (errSim->normInf() > 1e-9) // some data are > 1e4
+    double error = (dataPlot - dataPlotRef).normInf();
+    std::cout << "error =" << error << std::endl;
+    if (errSim->normInf() > 1e-8) // some data are > 1e4
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       return 1;
