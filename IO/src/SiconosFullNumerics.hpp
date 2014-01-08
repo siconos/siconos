@@ -55,7 +55,7 @@ template <class Archive>
 void siconos_io(Archive& ar, FrictionContactProblem& p, const unsigned int file_version)
 {
   SERIALIZE(p, (dimension)(numberOfContacts)(M), ar);
-  
+
   if (Archive::is_loading::value)
   {
     p.q = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
@@ -78,10 +78,10 @@ void siconos_io(Archive& ar, SparseBlockStructuredMatrix& v, unsigned int versio
     v.blocksize0 = (unsigned int *) malloc (v.blocknumber0* sizeof(unsigned int));
     SERIALIZE_C_ARRAY(v.blocknumber1, v, blocksize1, ar);
     SERIALIZE_C_ARRAY(v.blocknumber0, v, blocksize0, ar);
-    int diagonalblocknumber  = v.blocknumber1 + 
-      ((v.blocknumber0 - v.blocknumber1) & -(v.blocknumber0 < v.blocknumber1)); 
+    int diagonalblocknumber  = v.blocknumber1 +
+      ((v.blocknumber0 - v.blocknumber1) & -(v.blocknumber0 < v.blocknumber1));
     for (unsigned int i=0; i< diagonalblocknumber; ++i)
-    { 
+    {
       unsigned int size0 = v.blocksize0[i];
       if (i != 0) size0 -= v.blocksize0[i - 1];
       unsigned int size1 = v.blocksize1[i];
@@ -97,13 +97,20 @@ void siconos_io(Archive& ar, SparseBlockStructuredMatrix& v, unsigned int versio
     SERIALIZE_C_ARRAY(v.blocknumber0, v, blocksize0, ar);
   }
 
-  for (unsigned int i=0; i<v.nbblocks; ++i)
+  int diagonalblocknumber  = v.blocknumber1 +
+      ((v.blocknumber0 - v.blocknumber1) & -(v.blocknumber0 < v.blocknumber1));
+
+  for (unsigned int i=0; i< v.nbblocks; ++i)
+  {
+    ar & ::boost::serialization::make_nvp("block", (long&) v.block[i]);
+  }
+
+  for (unsigned int i=0; i< diagonalblocknumber; ++i)
   {
     unsigned int size0 = v.blocksize0[i];
     if (i != 0) size0 -= v.blocksize0[i - 1];
     unsigned int size1 = v.blocksize1[i];
     if (i != 0) size1 -= v.blocksize1[i - 1];
-    ar & ::boost::serialization::make_nvp("block", (long&) v.block[i]);
     for (unsigned int k=0; k<size0 * size1; ++k)
     {
       ar & ::boost::serialization::make_nvp("item", v.block[i][k]);
@@ -154,7 +161,7 @@ void siconos_io_register_Numerics(Archive& ar)
   ar.register_type(static_cast<NumericsMatrix*>(NULL));
   ar.register_type(static_cast<SparseBlockStructuredMatrix*>(NULL));
   ar.register_type(static_cast<FrictionContactProblem*>(NULL));
-    
+
 }
 
 #endif
