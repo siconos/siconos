@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <limits>
 
+//#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
@@ -212,12 +213,12 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
 std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
 Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2)
 {
+  DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2)");
   if (indexSet0()->is_vertex(inter))
   {
     removeInteractionFromIndexSet(inter);
   }
-
-  DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)");
+  
   unsigned int sumOfDSSizes = 0, sumOfZSizes = 0;
   
   sumOfDSSizes += ds->getDim();
@@ -226,12 +227,13 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
 
   if(ds2)
   {
-    sumOfDSSizes += ds->getDim();
+    sumOfDSSizes += ds2->getDim();
     if(ds->z())
-      sumOfZSizes += ds->z()->size();
+      sumOfZSizes += ds2->z()->size();
     inter->setHas2Bodies(true);
   }
-
+  DEBUG_PRINTF("sumOfDSSizes = %i\t, sumOfZSizes = %i\n ", sumOfDSSizes, sumOfZSizes);
+  
   inter->setDSSizes(sumOfDSSizes, sumOfZSizes);
 
   return addInteractionInIndexSet(inter, ds, ds2);

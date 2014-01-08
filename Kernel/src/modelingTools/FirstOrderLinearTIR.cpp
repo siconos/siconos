@@ -21,6 +21,10 @@
 #include "Interaction.hpp"
 
 
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+#include "debug.h"
+
 using namespace RELATION;
 
 // xml constructor
@@ -74,6 +78,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatr
 
 void FirstOrderLinearTIR::initialize(Interaction & inter)
 {
+  DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");
   // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
   if (!_jachx)
@@ -83,6 +88,9 @@ void FirstOrderLinearTIR::initialize(Interaction & inter)
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
+
+  DEBUG_PRINTF("_jachx->size(0) = %i,\t inter.getSizeOfY() = %i\n ",_jachx->size(0),inter.getSizeOfY() );
+  DEBUG_PRINTF("_jachx->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_jachx->size(1),inter.getSizeOfDS() );
 
   assert((_jachx->size(0) == inter.getSizeOfY() && _jachx->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 

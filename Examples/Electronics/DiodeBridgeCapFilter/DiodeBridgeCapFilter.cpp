@@ -83,8 +83,8 @@ int main(int argc, char* argv[])
     (*LS1_A)(0 , 1) = -1.0 / Cvalue;
     (*LS1_A)(1 , 0) = 1.0 / Lvalue;
 
-    cout << " LS1 matrice A = " << endl;
-    LS1_A->display();
+    // cout << " LS1 matrice A = " << endl;
+    // LS1_A->display();
     SP::FirstOrderLinearDS LS1DiodeBridgeCapFilter(new FirstOrderLinearDS(init_stateLS1, LS1_A));
 
     // --- Linear system 2 (load and filter) specification ---
@@ -94,8 +94,8 @@ int main(int argc, char* argv[])
     SP::SimpleMatrix LS2_A(new SimpleMatrix(1, 1));
     (*LS2_A)(0 , 0) = -1.0 / (Rvalue * Cfilt);
 
-    cout << " LS2 matrice A = " << endl;
-    LS2_A->display();
+    // cout << " LS2 matrice A = " << endl;
+    // LS2_A->display();
     SP::FirstOrderLinearDS LS2DiodeBridgeCapFilter(new FirstOrderLinearDS(init_stateLS2, LS2_A));
 
     // --- Interaction between linear systems and non smooth system ---
@@ -235,6 +235,23 @@ int main(int argc, char* argv[])
 
     // dataPlot (ascii) output
     ioMatrix::write("DiodeBridgeCapFilter.dat", "ascii", dataPlot, "noDim");
+
+    // Comparison with a reference file
+    std::cout << "Comparison with a reference file" << std::endl;
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("DiodeBridgeCapFilter.ref", "ascii", dataPlotRef);
+    double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
+    std::cout << "Error = "<< error << std::endl;
+    if (error > 1e-12)
+    {
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
+
+
+
+
   }
 
   // --- Exceptions handling ---
