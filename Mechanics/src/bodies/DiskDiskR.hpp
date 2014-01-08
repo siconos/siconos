@@ -44,11 +44,10 @@ private:
 public:
 
   /** Constructor
-
   \param disk1 radius
   \param disk2 radius
   */
-  DiskDiskR(double, double);
+  DiskDiskR(double disk1, double disk2);
 
   double distance(double, double, double, double, double, double);
 

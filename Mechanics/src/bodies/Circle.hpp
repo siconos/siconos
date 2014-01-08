@@ -48,11 +48,11 @@ public:
   /** Constructor
       \param radius
       \param mass
-      \param postion vector
+      \param position vector
       \param velocity vector
   */
 
-  Circle(double, double, SP::SiconosVector, SP::SiconosVector);
+  Circle(double radius, double mass, SP::SiconosVector position, SP::SiconosVector velocity);
 
   /** destructor
    */
