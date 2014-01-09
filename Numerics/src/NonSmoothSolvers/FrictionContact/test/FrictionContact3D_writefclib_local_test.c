@@ -124,7 +124,7 @@ int write_test_fclib(char * filename)
 
 int main(int argc, char *argv[])
 {
-  int info;
+  int info=-1;
   printf("argc %i\n", argc);
   if (argc == 1)
   {

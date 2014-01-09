@@ -4,7 +4,7 @@
 # this test is taken almost verbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
     from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-        TimeStepping, ZeroOrderHold, ControlManager, LinearSensor, LinearSMCOT2, \
+        TimeStepping, ZeroOrderHoldOSI, ControlManager, LinearSensor, LinearSMCOT2, \
         TD_EVENT
     from numpy import eye, empty, zeros
     import numpy as np
@@ -56,7 +56,7 @@ def test_smc1():
     processSimulation = TimeStepping(processTD, 0)
     processSimulation.setName("plant simulation")
     # Declaration of the integrator
-    processIntegrator = ZeroOrderHold(processDS)
+    processIntegrator = ZeroOrderHoldOSI(processDS)
     processSimulation.insertIntegrator(processIntegrator)
     # Actuator, Sensor & ControlManager
     control = ControlManager(processSimulation)

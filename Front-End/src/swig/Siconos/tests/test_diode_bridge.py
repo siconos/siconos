@@ -4,7 +4,7 @@
 def test_diodebridge1():
     from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                                ComplementarityConditionNSL, Interaction,\
-                               Model, Moreau, TimeDiscretisation, LCP,  \
+                               Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
                                TimeStepping
     from numpy import empty
     from Siconos.Kernel import SimpleMatrix, getMatrix
@@ -71,7 +71,7 @@ def test_diodebridge1():
 
     # (1) OneStepIntegrators
     theta = 0.5
-    aOSI = Moreau(LSDiodeBridge, theta)
+    aOSI = EulerMoreauOSI(LSDiodeBridge, theta)
 
     # (2) Time discretisation
     aTiDisc = TimeDiscretisation(t0, h_step)
@@ -170,7 +170,7 @@ def test_diodebridge1():
 def test_diodebridge2():
     from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearR, \
                                ComplementarityConditionNSL, Interaction,\
-                               Model, Moreau, TimeDiscretisation, LCP,  \
+                               Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
                                TimeStepping, SiconosVector
     from numpy import empty
     from Siconos.Kernel import SimpleMatrix, getMatrix
@@ -253,7 +253,7 @@ def test_diodebridge2():
 
     # (1) OneStepIntegrators
     theta = 0.5
-    aOSI = Moreau(LSDiodeBridge, theta)
+    aOSI = EulerMoreauOSI(LSDiodeBridge, theta)
 
     # (2) Time discretisation
     aTiDisc = TimeDiscretisation(t0, h_step)
