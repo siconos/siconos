@@ -3,9 +3,9 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = "Siconos - v 3.6.0 - FrontEnd Package"
+PROJECT_NAME           = "Siconos - Doxygen Warnings"
 PROJECT_NUMBER         = 3.6.0
-OUTPUT_DIRECTORY       = /home/build/maurice/Debug/Front-End/src/swig/Siconos/FrontEnd
+OUTPUT_DIRECTORY       = @CMAKE_BINARY_DIR@
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 #USE_WINDOWS_ENCODING   = NO
@@ -161,14 +161,14 @@ RTF_EXTENSIONS_FILE    =
 #---------------------------------------------------------------------------
 # configuration options related to the man page output
 #---------------------------------------------------------------------------
-GENERATE_MAN           = YES
+GENERATE_MAN           = NO
 MAN_OUTPUT             = man
 MAN_EXTENSION          = .3
 MAN_LINKS              = NO
 #---------------------------------------------------------------------------
 # configuration options related to the XML output
 #---------------------------------------------------------------------------
-GENERATE_XML           = YES
+GENERATE_XML           = NO
 XML_OUTPUT             = xml
 XML_SCHEMA             = 
 XML_DTD                = 
@@ -199,9 +199,6 @@ SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
 # Configuration::additions related to external references   
 #---------------------------------------------------------------------------
-#TAGFILES               = /home/build/maurice/Debug/Front-End/src/swig/Siconos/HomePage.tag=../ \
-#                         /home/build/maurice/Debug/Front-End/src/swig/Siconos/InstallGuide.tag=../InstallGuide
-#GENERATE_TAGFILE       = /home/build/maurice/Debug/Front-End/src/swig/Siconos/FrontEnd.tag
 ALLEXTERNALS           = NO
 #EXTERNAL_GROUPS        = YES
 PERL_PATH              = /usr/bin/perl
