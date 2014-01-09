@@ -52,7 +52,7 @@ def test_diodebridge1():
 
     nslaw=ComplementarityConditionNSL(4)
     InterDiodeBridge=Interaction(4, nslaw, LTIRDiodeBridge, 1)
-    InterDiodeBridge.insert(LSDiodeBridge)
+
 
     #
     # Model
@@ -234,7 +234,7 @@ def test_diodebridge2():
 
     nslaw=ComplementarityConditionNSL(4)
     InterDiodeBridge=Interaction(4, nslaw, LTIRDiodeBridge, 1)
-    InterDiodeBridge.insert(LSDiodeBridge)
+
 
     #
     # Model
