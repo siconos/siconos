@@ -84,10 +84,10 @@
 		<!-- One Step Integrators -->				
 		<OneStepIntegrator_Definition>
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
-			<Moreau>
+			<MoreauJeanOSI>
 				<DS_Concerned vectorSize='1'>3</DS_Concerned>		
 				<Theta all="0.5"></Theta>
-			</Moreau>					
+			</MoreauJeanOSI>					
 		</OneStepIntegrator_Definition>
 
 		<!-- One Step NS Problem of th Simulation-->
