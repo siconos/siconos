@@ -28,7 +28,7 @@ def compute_dt_matrices(A, B, h, TV=False):
     processSimulation = SK.TimeStepping(processTD, 0)
     processSimulation.setName("plant simulation")
     # Declaration of the integrator
-    processIntegrator = SK.ZeroOrderHold(processDS)
+    processIntegrator = SK.ZeroOrderHoldOSI(processDS)
     processSimulation.insertIntegrator(processIntegrator)
 
     rel = SK.FirstOrderLinearTIR(Csurface, B)

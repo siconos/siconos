@@ -493,10 +493,10 @@ void NewMarkAlphaOSI::prediction()
       _a->display();
 #endif
       //
-      *_q = *_q + (*_dotq) * h + (*_a) * (pow(h, 2.0) * (0.5 - beta)); // q_{n+1} = q_n + (h^2)*(0.5 - beta)*a_n
+      *_q = *_q + (*_dotq) * h + (*_a) * (h*h * (0.5 - beta)); // q_{n+1} = q_n + (h^2)*(0.5 - beta)*a_n
       *_dotq = *_dotq + (*_a) * (h * (1 - gamma));              // dotq_{n+1} = dotq_n + h*(1 - gamma)*a_n
       *_a = (alpha_f / (1 - alpha_m)) * (*_ddotq) - (alpha_m / (1 - alpha_m)) * (*_a); // a_{n+1} = (alpha_f*ddotq_n - alpha_m*a_n)/(1 - alpha_m)
-      *_q = *_q + (pow(h, 2.0) * beta) * (*_a);
+      *_q = *_q + (h*h * beta) * (*_a);
       *_dotq = *_dotq + (h * gamma) * (*_a);
       _ddotq->zero();
       // Display message for debug
@@ -546,9 +546,9 @@ void NewMarkAlphaOSI::correction()
       // Correction q_{n+1,k+1}, dotq_{n+1,k+1}, ddotq_{n+1,k+1}
       *(d->q()) += *delta_q; // q_{n+1,k+1} = q_{n+1,k} + delta_q
       *(d->velocity()) += (gamma_prime / h) * (*delta_q); // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q
-      *(d->acceleration()) += (beta_prime / pow(h, 2.0)) * (*delta_q); // ddotq_{n+1,k+1} = ddotq_{n+1,k} + (beta_prime/h^2)*delta_q
+      *(d->acceleration()) += beta_prime / (h*h) * (*delta_q); // ddotq_{n+1,k+1} = ddotq_{n+1,k} + (beta_prime/h^2)*delta_q
       //a_{n+1,k+1} = a_{n+1,k} + ((1-alpha_f)/(1-alpha_m))*(beta_prime/h^2)*delta_q
-      *(d->workspace(DynamicalSystem::acce_like)) += ((1 - alpha_f) / (1 - alpha_m)) * ((beta_prime / pow(h, 2.0)) * (*delta_q));
+      *(d->workspace(DynamicalSystem::acce_like)) += ((1 - alpha_f) / (1 - alpha_m)) * ((beta_prime / (h*h)) * (*delta_q));
       //
 #ifdef DEBUG_NEWMARK
       std::cout.precision(15);
@@ -632,22 +632,22 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
     std::cout << "a1: ";
     _vec->display();
     //a2 = 0.5*h^2*ddotq_n
-    (*_vec) = (0.5 * std::pow(h, 2)) * (*ddotq_n);
+    (*_vec) = (0.5 * h * h) * (*ddotq_n);
     _CoeffsDense->setCol(2, (*_vec));
     std::cout << "a2: ";
     _vec->display();
     //a3 = -10*q_n - 6*h*dotq_n - 1.5*h^2*ddotq_n + 10*q_{n+1} - 4*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
-    (*_vec) = (-10.0) * (*q_n) - (6.0 * h) * (*dotq_n) - (1.5 * std::pow(h, 2)) * (*ddotq_n) + 10.0 * (*q_np1) - (4.0 * h) * (*dotq_np1) + (0.5 * std::pow(h, 2)) * (*ddotq_np1);
+    (*_vec) = (-10.0) * (*q_n) - (6.0 * h) * (*dotq_n) - (1.5 * h * h) * (*ddotq_n) + 10.0 * (*q_np1) - (4.0 * h) * (*dotq_np1) + (0.5 * h *h ) * (*ddotq_np1);
     _CoeffsDense->setCol(3, (*_vec));
     std::cout << "a3: ";
     _vec->display();
     //a4 = 15*q_n + 8*h*dotq_n + 1.5*h^2*ddotq_n - 15*q_{n+1} + 7*h*dotq_{n+1} - h^2*ddotq_{n+1}
-    (*_vec) = 15.0 * (*q_n) + (8.0 * h) * (*dotq_n) + (1.5 * std::pow(h, 2)) * (*ddotq_n) - 15.0 * (*q_np1) + (7.0 * h) * (*dotq_np1) - (std::pow(h, 2)) * (*ddotq_np1);
+    (*_vec) = 15.0 * (*q_n) + (8.0 * h) * (*dotq_n) + (1.5 * h *h) * (*ddotq_n) - 15.0 * (*q_np1) + (7.0 * h) * (*dotq_np1) - h*h * (*ddotq_np1);
     _CoeffsDense->setCol(4, (*_vec));
     std::cout << "a4: ";
     _vec->display();
     //a5 = -6*q_n - 3*h*dotq_n - 0.5*h^2*ddotq_n + 6*q_{n+1} - 3*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
-    (*_vec) = (-6.0) * (*q_n) - (3.0 * h) * (*dotq_n) - (0.5 * std::pow(h, 2)) * (*ddotq_n) + 6.0 * (*q_np1) - (3.0 * h) * (*dotq_np1) + (0.5 * std::pow(h, 2)) * (*ddotq_np1);
+    (*_vec) = (-6.0) * (*q_n) - (3.0 * h) * (*dotq_n) - (0.5 * h*h) * (*ddotq_n) + 6.0 * (*q_np1) - (3.0 * h) * (*dotq_np1) + (0.5 * h*h) * (*ddotq_np1);
     _CoeffsDense->setCol(5, (*_vec));
     std::cout << "a5: ";
     _vec->display();

@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     //1. Set the mass matrix
     SP::SiconosMatrix Mass(new SimpleMatrix(Nfreedom, Nfreedom));
     double InertiaBlock;
-    InertiaBlock = (MassBlock / 12.0) * (pow(HeightBlock, 2) + pow(LengthBlock, 2)); // moment of inertia
+    InertiaBlock = (MassBlock / 12.0) * ((HeightBlock*HeightBlock) + (LengthBlock*LengthBlock)); // moment of inertia
     (*Mass)(0, 0) = MassBlock;
     (*Mass)(1, 1) = MassBlock;
     (*Mass)(2, 2) = InertiaBlock;
@@ -195,8 +195,8 @@ int main(int argc, char* argv[])
         {
           alpha_m = 0.0;
           alpha_f = 0.0;
-          gamma = 0.5 + 0.1;
-          beta = 0.25 * std::pow(gamma + 0.5, 2);
+          gamma = 1.0/2.0 + 1.0/10.0;
+          beta = 1.0/4.0 * (gamma + 1.0/2.0) *(gamma + 1.0/2.0)  ;
           _NewMarkAlpha->setAlpha_m(alpha_m);
           _NewMarkAlpha->setAlpha_f(alpha_f);
           _NewMarkAlpha->setBeta(beta);
@@ -206,8 +206,8 @@ int main(int argc, char* argv[])
         {
           alpha_m = 0.0;
           alpha_f = -1.0 / 3.0; // -1/3 <= alpha_f <= 0
-          gamma = 0.5 - alpha_f;
-          beta = 0.25 * std::pow(1.0 - alpha_f, 2);
+          gamma = 1.0/2.0 - alpha_f;
+          beta = 1.0/4.0 * (1.0 - alpha_f)*(1.0 - alpha_f);
           _NewMarkAlpha->setAlpha_m(alpha_m);
           _NewMarkAlpha->setAlpha_f(alpha_f);
           _NewMarkAlpha->setBeta(beta);
@@ -293,10 +293,17 @@ int main(int argc, char* argv[])
     ioMatrix::read("resultED_NewMarkAlpha.ref", "ascii", dataPlotRef);
     double error = (DataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
     std::cout << "Error = "<< error << std::endl;
+    std::cout << "Error by column = "<< std::endl;
+
+    SP::SiconosVector errCol(new SiconosVector(SizeOutput));
+    (DataPlot - dataPlotRef).normInfByColumn(errCol);
+    errCol->display();
+    
     if (error > 1e-12)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       std::cout << (DataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf() << std::endl;
+      
       return 1;
     }
   }
