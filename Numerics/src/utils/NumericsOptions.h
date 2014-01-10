@@ -21,7 +21,7 @@
 #define NumericsOptions_H
 
 /*!\file NumericsOptions.h
-  \brief General options for Numerics functions, structures and so on 
+  \brief General options for Numerics functions, structures and so on
          (mainly used to send information from Kernel to Numerics).
   \author Franck Perignon
 */
@@ -38,7 +38,7 @@
   * structures and so on.
   *
   *  \param verboseMode (0: off, 1: on)
-  *  \param outputMode  (0: none, 1: c file, 2: dat file, 3: fclib file) 
+  *  \param outputMode  (0: none, 1: c file, 2: dat file, 3: fclib file)
   *                      with OUTPUT_ON_ERROR flag : only on solver error
   *                      with OUTPUT_ON_ITER only when iterations > outputIterMax
   *  \param fileName    output filename
@@ -54,7 +54,7 @@ typedef struct
 {
   int verboseMode;
   int outputMode;
-  char fileName[256];   
+  char fileName[256];
   char title[256];
   char description[1024];
   char mathInfo[1024];

@@ -30,6 +30,10 @@
 #include "VI_cst.h"
 #include "misc.h"
 
+//#define DEBUG_MESSAGES 1
+#include "debug.h"
+
+
 char * SICONOS_NUMERICS_PROBLEM_LCP_STR = "LCP";
 char * SICONOS_NUMERICS_PROBLEM_MLCP_STR = "MLCP";
 char * SICONOS_NUMERICS_PROBLEM_NCP_STR = "NCP";
@@ -253,23 +257,54 @@ void recursive_deleteSolverOptions(SolverOptions* op)
   if (op)
   {
     for (int i = 0; i < op->numberOfInternalSolvers; i++)
+    {
       recursive_deleteSolverOptions(&(op->internalSolvers[i]));
-   
+    }
     if (op->numberOfInternalSolvers && op->internalSolvers)
+    {
+      DEBUG_PRINT("free(op->internalSolvers);");
       free(op->internalSolvers);
+    }
     op->internalSolvers = 0;
     if (op->iparam)
+    {
+      DEBUG_PRINT("free(op->iparam);");
       free(op->iparam);
+    }
     op->iparam = 0;
     if (op->dparam)
+    {
+      DEBUG_PRINTF("free(op->dparam= %d);",op->dparam);
       free(op->dparam);
+    }
     op->dparam = 0;
     if (op->iWork)
+    {
+      DEBUG_PRINT("free(op->iWork);");
       free(op->iWork);
+    }
     op->iWork = 0;
     if (op->dWork)
+    {
+      DEBUG_PRINTF("free(op->dWork=%l);",op->dWork);
       free(op->dWork);
+    }
     op->dWork = 0;
+
+    if (op->numericsOptions)
+    {
+      DEBUG_PRINT("free(op->numericsOptions);");
+      free(op->numericsOptions);
+      op->numericsOptions = NULL;
+    }
+
+    if (op->callback)
+    {
+      DEBUG_PRINT("free(op->callback);");
+      // MB: Yoyo & BeadPlan ok now.
+      free(op->callback);
+      op->callback = NULL;
+    }
   }
 }
 

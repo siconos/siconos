@@ -160,7 +160,7 @@ void lcp_enum_reset(LinearComplementarityProblem* problem, SolverOptions* option
     free(options->iWork);
   }
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL;
+  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
 }
 
 
@@ -330,7 +330,7 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
 
   options->dparam[0] = 1e-12;
 
-  options->callback = NULL;
+  options->callback = NULL; options->numericsOptions = NULL;
 
 
   return 0;

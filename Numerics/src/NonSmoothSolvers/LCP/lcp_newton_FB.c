@@ -276,7 +276,7 @@ int linearComplementarity_newton_FB_setDefaultSolverOptions(SolverOptions* optio
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL;
+  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
   for (i = 0; i < 5; i++)
   {
     options->iparam[i] = 0;

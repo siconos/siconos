@@ -202,7 +202,7 @@ int lcp_test_function(FILE * f, int solverId)
   SolverOptions * options ;
   options = (SolverOptions *) malloc(sizeof(*options));
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL;
+  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
   options->numberOfInternalSolvers = 0;
   options->solverId = solverId;
   printf("solverName ==> %s\n", idToName(solverId));

@@ -504,7 +504,7 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
   options->iparam = (int *) malloc(options->iSize * sizeof(int));
   options->dparam = (double *) malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL;
+  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
   for (unsigned int i = 0; i < 9; i++)
   {
     options->iparam[i] = 0;
@@ -940,12 +940,6 @@ void frictionContact3D_sparseLocalAlartCurnier(
     if (verbose > 0)
       printf("LOCALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
 
-    if (options->dparam[1] < tolerance)
-    {
-      info[0] = 0;
-      break;
-    }
-
 
     if (options->callback)
     {
@@ -953,9 +947,13 @@ void frictionContact3D_sparseLocalAlartCurnier(
                                       options->dparam[1]);
     }
 
+    if (options->dparam[1] < tolerance)
+    {
+      info[0] = 0;
+      break;
+    }
+
   }
-
-
 
   if (verbose > 0)
   {

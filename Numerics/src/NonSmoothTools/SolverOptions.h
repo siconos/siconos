@@ -190,7 +190,7 @@ extern "C"
 #endif
 
   /** Read default parameters values for a solver and save them in a SolverOptions structure
-      \param[in] int, type of the considered problem.
+      \param[in] driverType, type of the considered problem.
       Only the following solvers ids are allowed :\n
       0: LCP\n
       1: MLCP\n
