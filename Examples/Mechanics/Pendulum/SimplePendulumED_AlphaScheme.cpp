@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
     ioMatrix::read("result_AlphaScheme.ref", "ascii", dataPlotRef);
     double error = (DataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
     std::cout << "Error = "<< error << std::endl;
-    if (error > 1e-12)
+    if (error > 1e-05)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
 

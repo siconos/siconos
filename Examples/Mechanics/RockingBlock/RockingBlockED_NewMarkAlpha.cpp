@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
     (DataPlot - dataPlotRef).normInfByColumn(errCol);
     errCol->display();
     
-    if (error > 1e-12)
+    if (error > 1e-06)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       std::cout << (DataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf() << std::endl;
