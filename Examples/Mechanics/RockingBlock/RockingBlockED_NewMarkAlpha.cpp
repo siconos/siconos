@@ -129,6 +129,12 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem position(new LCP());
     SP::OneStepNSProblem acceleration(new LCP());
+
+    position->numericsSolverOptions()->dparam[0] = 1e-12;
+    impact->numericsSolverOptions()->dparam[0] = 1e-12;
+    acceleration->numericsSolverOptions()->dparam[0] = 1e-12;
+   
+
     //4. Simulation with (1), (2), (3)
     SP::Simulation EDscheme(new EventDriven(TimeDiscret));
     EDscheme->insertIntegrator(OSI);
