@@ -37,7 +37,7 @@
 //#define OSNS_DEBUG
 
 OneStepNSProblem::OneStepNSProblem():
-  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
+  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
 {
   _numerics_solver_options.reset(new SolverOptions);
   _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL; 
@@ -53,7 +53,7 @@ OneStepNSProblem::OneStepNSProblem():
 // xml constructor
 OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
   _sizeOutput(0),
-  _onestepnspbxml(osnspbxml), _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
+  _onestepnspbxml(osnspbxml), _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
 {
   if (!_onestepnspbxml)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -75,7 +75,7 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(int newNumericsSolverId):
   _numerics_solver_id(newNumericsSolverId), _sizeOutput(0),
-  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
+  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
   // Numerics general options
@@ -522,7 +522,6 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::DynamicalSystem ds)
 
 void OneStepNSProblem::printStat()
 {
-  std::cout << " CPU time for solving : " << _CPUtime / (double)CLOCKS_PER_SEC <<std::endl;
   std::cout << " Number of iterations done: " << _nbIter <<std::endl;
 }
 

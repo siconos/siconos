@@ -116,9 +116,6 @@ protected:
   */
   unsigned int _maxSize;
 
-  /** Timer: cpu time spent in solver */
-  clock_t _CPUtime;
-
   /** Number of calls to the solver */
   unsigned int _nbIter;
 
@@ -259,14 +256,6 @@ public:
     _maxSize = newVal;
   }
 
-  /** get the total (CPU) time spent in the solver
-   *  \return: a double
-   */
-  inline double getCPUtime() const
-  {
-    return _CPUtime / (double)CLOCKS_PER_SEC;
-  };
-
   /** get the number of call to ns solver
    *  \return: an unsigned int
    */
@@ -287,7 +276,6 @@ public:
    */
   inline void resetStat()
   {
-    _CPUtime = 0;
     _nbIter = 0;
   };
 
