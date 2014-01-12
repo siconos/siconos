@@ -100,6 +100,7 @@ public:
    * \param type the type of the Observer, which corresponds to the class type
    * \param sensor the SP::Sensor to get the measurements
    * \param xHat0 the initial guess for the state
+   * \param newId the id of the Observer
    */
   Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId = "none");
 
@@ -108,6 +109,7 @@ public:
    * \param sensor the SP::Sensor to get the measurements
    * \param xHat0 the initial guess for the state
    * \param ds the SP::DynamicalSystem used as a model for the real DynamicalSystem
+   * \param newId the id of the Observer
    */
   Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId = "none");
 

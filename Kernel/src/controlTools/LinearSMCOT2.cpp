@@ -28,7 +28,7 @@
 #include "ControlSensor.hpp"
 
 
-LinearSMCOT2::LinearSMCOT2(SP::ControlSensor sensor): CommonSMC(LINEAR_SMC_OT2, sensor)
+LinearSMCOT2::LinearSMCOT2(SP::ControlSensor sensor): CommonSMC(LINEAR_SMC_OT2, sensor), _coeff(0.0)
 {
 }
 

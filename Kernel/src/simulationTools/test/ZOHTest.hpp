@@ -81,6 +81,8 @@ private:
 
 
 public:
+
+  ZOHTest(): _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12) {}
   void setUp();
   void tearDown();
 

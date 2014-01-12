@@ -56,7 +56,7 @@ protected:
   /** matrix describing the influence of \f$lambda\f$ on s */
   SP::SiconosMatrix _D;
 
-  /** scalar multiplying Sign; \f$ u^s = - \alpha Sign */
+  /** scalar multiplying Sign; \f$ u^s = - \alpha Sign \f$ */
   double _alpha;
 
   /** the Relation for the Controller */
@@ -122,7 +122,7 @@ public:
    * \param sensor the ControlSensor feeding the Actuator
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor): Actuator(type, sensor),
-    _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8),
+    _indx(0), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8),
     _thetaSMC(0.5), _noUeq(false) {}
 
   /** Constructor with a TimeDiscretisation, a Model and two matrices
@@ -132,7 +132,7 @@ public:
    * \param D the saturation matrix
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D):
-    Actuator(type, sensor), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE),
+    Actuator(type, sensor), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE),
     _precision(1e-8), _thetaSMC(0.5), _noUeq(false)
   {
     _B = B;

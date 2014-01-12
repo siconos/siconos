@@ -28,12 +28,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ZOHTest);
 
 void ZOHTest::setUp()
 {
-  _t0 = 0;
-  _T = 10;
-  _h = 0.1;
-  _n = 2;
-  _tol = 1e-12;
-  // Download a Model from Template.xml file
   _A.reset(new SimpleMatrix(_n, _n, 0));
   _b.reset(new SiconosVector(_n, 0));
   _x0.reset(new SiconosVector(_n, 0));

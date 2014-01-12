@@ -27,12 +27,12 @@
 using namespace RELATION;
 
 
-Relay::Relay(int newNumericsSolverId):
-  LinearOSNS(newNumericsSolverId)
+Relay::Relay(int numericsSolverId):
+  LinearOSNS(numericsSolverId)
 {
-  _numerics_problem.reset(new  RelayProblem);
+  _numerics_problem.reset(new RelayProblem);
 
-  relay_setDefaultSolverOptions(NULL, &*_numerics_solver_options, newNumericsSolverId);
+  relay_setDefaultSolverOptions(NULL, &*_numerics_solver_options, numericsSolverId);
 
 
 }
@@ -104,7 +104,7 @@ void Relay::initialize(SP::Simulation sim)
 }
 
 
-int Relay::compute(double time)
+int Relay::compute(const double time)
 {
   int info = 0;
   // --- Prepare data for Relay computing ---
@@ -129,7 +129,6 @@ int Relay::compute(double time)
     _ub->zero();
   }
 
-  unsigned int pos = 0;
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
@@ -137,7 +136,7 @@ int Relay::compute(double time)
 
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
-    pos = _M->getPositionOfInteractionBlock(inter);
+    unsigned int pos = _M->getPositionOfInteractionBlock(inter);
     SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, inter, pos));
     inter->nonSmoothLaw()->accept(*NSLEffect);
   }

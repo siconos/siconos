@@ -25,11 +25,11 @@
 #include "TimeDiscretisation.hpp"
 
 
-LinearSensor::LinearSensor(SP::DynamicalSystem ds): ControlSensor(LINEAR_SENSOR, ds)
+LinearSensor::LinearSensor(SP::DynamicalSystem ds): ControlSensor(LINEAR_SENSOR, ds), _k(0), _nSteps(0)
 {}
 
 LinearSensor::LinearSensor(SP::DynamicalSystem ds, SP::SimpleMatrix matC, SP::SimpleMatrix matD):
-  ControlSensor(LINEAR_SENSOR, ds), _matC(matC), _matD(matD)
+  ControlSensor(LINEAR_SENSOR, ds), _k(0), _matC(matC), _matD(matD), _nSteps(0)
 {}
 
 LinearSensor::~LinearSensor()
@@ -63,7 +63,6 @@ void LinearSensor::initialize(const Model& m)
 
   // --- Get the values ---
   // -> saved in a matrix data
-  _k = 0;
   // -> event
   _storedY.reset(new SiconosVector(rowC));
   //  (_data[_eSensor])["StoredY"] = storedY;

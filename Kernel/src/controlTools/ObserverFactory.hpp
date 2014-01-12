@@ -43,7 +43,11 @@ typedef std::map<unsigned int, object_creator> MapFactory;
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
-/** Template function to return a new object of type SubType*/
+/** Template function to return a new object of type SubType
+ * \param sensor ControlSensor used by this Observer
+ * \param xHat0 initial state estimate
+ * \return an Observer
+ */
 template<class SubType> SP::Observer factory(SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
   return std11::shared_ptr<SubType>(new SubType(sensor, xHat0));
@@ -74,18 +78,19 @@ private :
 
 public :
 
-  /** Access function to the Registry */
+  /** Access function to the Registry
+   * \return reference to the registry
+   */
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
    * \param type the type of the added Observer
    * \param creator object creator
    */
-  void add(unsigned int type, object_creator object);
+  void add(unsigned int type, object_creator creator);
 
   /** Function to instantiate a new Observer
    * \param type the type of the Observer we want to instantiate
-   * \param t a SP::TimeDiscretisation.
    * \param sensor the ControlSensor feeding this Observer
    * \param xHat0 the original estimate
    * \return a SP::Observer to the created Observer
@@ -112,7 +117,7 @@ public :
    * \param type the type of the added Observer
    * \param creator object creator
    */
-  Registration(unsigned int type, object_creator object) ;
+  Registration(unsigned int type, object_creator creator) ;
 } ;
 
 #define AUTO_REGISTER_OBSERVER(class_name,class_type) ObserverFactory::Registration _registration_## class_type(class_name, &ObserverFactory::factory<class_type>);

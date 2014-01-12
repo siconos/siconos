@@ -156,34 +156,12 @@ public:
    */
   const SiconosMatrix& Ad(SP::DynamicalSystem ds);
 
-  /** set the value of Phi[ds] to nePhi
-   * \param newPhi the new matrix
-   * \param ds a pointer to DynamicalSystem
-   */
-//  void setPhi(const SiconosMatrix& newPhi, SP::DynamicalSystem ds);
-
-  /** set Psi[ds] to pointer newPtr
-   * \param newPtr pointer to the new matrix
-   * \param ds a pointer to DynamicalSystem
-   */
-//  void setPhiPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
-
   /** get \f$B_d\f$ corresponding to DynamicalSystem ds
    * \param ds the DynamicalSystem
    * \return pointer to a SiconosMatrix
    */
   const SiconosMatrix& Bd(SP::DynamicalSystem ds);
 
-  /** get \f$\int_{t_k}^{t_{k+1}}\!\Phi(t_{k+1}, \tau)\mathrm{d}\tau\f$ corresponding to DynamicalSystem ds
-   * \param ds the DynamicalSystem
-   * \return pointer to a SiconosMatrix
-   */
-//  inline SP::SimpleMatrix intPhi(SP::DynamicalSystem ds)
-//  {
-//    assert(_AdIntMap[ds.number()] &&
-//        "ZeroOrderHoldOSI::intPhi(ds): _AdIntMap[ds.number()] == NULL.");
-//    return _AdIntMap[ds.number()];
-//  };
   // --- OTHER FUNCTIONS ---
 
   /** initialization of the ZeroOrderHoldOSI integrator */
@@ -223,12 +201,10 @@ public:
    */
   virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
-
   /** Unused
    * \param time current time
    */
   void prepareNewtonIteration(double time);
-
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param tinit initial time

@@ -131,13 +131,12 @@ void ZeroOrderHoldOSI::initialize()
   InteractionsGraph& IG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   DynamicalSystemsGraph::OEIterator oei, oeiend;
   Type::Siconos dsType;
-  unsigned int indxIter;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
     dsType = Type::value(**itDS);
     if ((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
       RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the DynamicalSystem does not have the right type");
-    indxIter = 0;
+    unsigned int indxIter = 0;
     DynamicalSystemsGraph::AVIterator avi, aviend;
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*itDS);
     if (!DSG0.Ad.hasKey(dsgVD))

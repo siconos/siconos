@@ -111,13 +111,9 @@ protected:
   unsigned int insertEv(SP::Event e);
 
   /** Update the set of events
+   * \param sim the Simulation using this EventsManager
    */
   void update(Simulation& sim);
-
-  /** copy constructor => private: no copy nor pass-by-value.
-   *  \param the eventsManager to be copied
-   */
-//  EventsManager(const EventsManager&);
 
   /** default constructor */
   EventsManager() {};
@@ -146,7 +142,9 @@ public:
     _GapLimit2Events = var;
   };
 
-  /** Get the gap limit between two events  */
+  /** Get the gap limit between two events
+   * \return the gap limit
+   */
   inline unsigned long int getGapLimitEvents() const
   {
     return _GapLimit2Events;
@@ -281,13 +279,17 @@ public:
       return std::numeric_limits<double>::quiet_NaN();
   };
 
-  /** Get current timestep */
+  /** Get current timestep
+   * \return the current timestep
+   */
   inline double currentTimeStep()
   {
     return _td->currentTimeStep(_k);
   }
 
-  /** Set a new TimeDiscretisation*/
+  /** Set a new TimeDiscretisation
+   * \param td the new TimeDiscretisation
+   */
   inline void setTimeDiscretisationPtr(SP::TimeDiscretisation td)
   {
     _td = td;
@@ -299,7 +301,9 @@ public:
    */
   inline SP::TimeDiscretisation timeDiscretisation() const { return _td;};
 
-  /** update time final time */
+  /** update final time
+   * \param T the new final time
+   * */
   inline void updateT(double T) { _T = T; };
 };
 

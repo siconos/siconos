@@ -79,15 +79,15 @@ protected:
 public:
 
   /** xml constructor
-   *  \param SP::OneStepNSProblemXML : the XML linked-object
+   *  \param onestepnspbxml the XML linked-object
    */
   Relay(SP::OneStepNSProblemXML onestepnspbxml):
     LinearOSNS(onestepnspbxml) {};
 
   /** constructor from data
-   *  \param int id of numerics solver
+   *  \param numericsSolverId id of numerics solver
    */
-  Relay( int newNumericsSolverId = SICONOS_RELAY_LEMKE);
+  Relay(int numericsSolverId = SICONOS_RELAY_LEMKE);
 
   /** destructor
    */
@@ -112,11 +112,11 @@ public:
   }
 
   /** set lb to pointer newPtr
-   *  \param SP::SiconosVector  newPtr
+   *  \param newLb new lower bound
    */
-  inline void setLb(SP::SiconosVector newPtr)
+  inline void setLb(SP::SiconosVector newLb)
   {
-    _lb = newPtr;
+    _lb = newLb;
   }
 
 
@@ -139,21 +139,21 @@ public:
     return _ub;
   }
 
-  /** set lb to pointer newPtr
-   *  \param SP::SiconosVector  newPtr
+  /** set ub to pointer newPtr
+   *  \param newUb new upper bound
    */
-  inline void setUb(SP::SiconosVector newPtr)
+  inline void setUb(SP::SiconosVector newUb)
   {
-    _ub = newPtr;
+    _ub = newUb;
   }
 
   void initialize(SP::Simulation sim) ;
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
-   *  \param double : current time
-   *  \return int, information about the solver convergence.
+   *  \param time current time
+   *  \return information about the solver convergence.
    */
-  int compute(double);
+  int compute(const double time);
 
   /** print the data to the screen
    */

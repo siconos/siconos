@@ -27,12 +27,12 @@
 
 ControlFirstOrderLinearS::ControlFirstOrderLinearS(double t0, double T, double h,
     SP::SiconosVector x0, SP::SiconosMatrix A):
-  ControlSimulation(t0, T, h), _x0(x0), _A(A)
+  ControlSimulation(t0, T, h, _x0), _A(A)
 {
   _processDS.reset(new FirstOrderLinearDS(_x0, _A));
 }
 
 void ControlFirstOrderLinearS::initialize()
 {
-  ControlSimulation::initialize(_x0);
+  ControlSimulation::initialize();
 }

@@ -51,8 +51,10 @@ protected:
   /** Constructor with the minimal set of data
    * \param t0 the starting time \f$t_0\f$
    * \param T the end time T
-   * \param h the simulation time step */
-  ControlSimulation(double t0, double T, double h);
+   * \param h the simulation time step
+   * \param x0 the initial state
+   * */
+  ControlSimulation(double t0, double T, double h, SP::SiconosVector x0);
 
   /** Starting time */
   double _t0;
@@ -65,9 +67,9 @@ protected:
   /** Time spent computing */
   double _elapsedTime;
   /** rough estimation of the number of points to save */
-  double _N;
+  unsigned int _N;
   /** Dimension of the state space */
-  double _nDim;
+  unsigned int _nDim;
   /** Starting point */
   SP::SiconosVector _x0;
   /** Matrix for saving result */
@@ -97,7 +99,7 @@ public:
   /** Initialize the ControlSimulation, instantiate all objects
    * \param x0 starting point
    */
-  void initialize(SP::SiconosVector x0);
+  void initialize();
 
   /** Add a Sensor
    * \param newSensor the SP::Sensor to be added

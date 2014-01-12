@@ -97,13 +97,13 @@ protected:
 
   /** default constructor
    */
-  ControlManager() {};
+  ControlManager(): _sim(SP::Simulation()) {};
 
   /** copy constructor
    * Private => no copy nor pass-by value allowed.
    * \param cm the ControlManager
    */
-  ControlManager(const ControlManager& cm) {};
+  ControlManager(const ControlManager& cm): _sim(SP::Simulation()) {};
 
   /** Create associated Event and give the opportunity to get the TimeDiscretisation
    * \param s a Sensor
@@ -183,7 +183,7 @@ public:
    * \param ds the DynamicalSystem used in the Sensor
    * \return a SP::Sensor to the added Sensor
    */
-  SP::Sensor addAndRecordSensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
+  SP::Sensor addAndRecordSensor(int name, SP::TimeDiscretisation td, SP::DynamicalSystem ds);
 
   /** Add an existing Sensor to the Manager
    * \param s a SP::Sensor to the Sensor we want to add
@@ -202,7 +202,7 @@ public:
 
   /** To build and add a new Actuator in the Manager
    * \param name the type of the Actuator
-   * \param t the SP::TimeDiscretisation of the Actuator
+   * \param td the SP::TimeDiscretisation of the Actuator
    * \param sensor the ControlSensor used to feed the Actuator
    * \return a SP::ACtuator to the added Actuator
    */

@@ -42,7 +42,11 @@ typedef std::map<int, object_creator> MapFactory;
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
-/** Template function to return a new object of type SubType*/
+/** Template function to return a new object of type SubType
+ * \param time time of the Event
+ * \param type type of the Event
+ * \return an Event
+ */
 template<class SubType> SP::Event factory(double time, int type)
 {
   SP::Event e(new SubType(time, type));
@@ -66,20 +70,23 @@ private :
 
 public :
 
-  /** */
+  /** get access to the Registry
+   * \return reference to the registry
+   */
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param an int which identifies the type of the object added
-   * \param an object creator
+   * \param type the type of the object added
+   * \param creator object creator
    */
-  void add(int, object_creator);
+  void add(int type, object_creator creator);
 
   /**
-   *  \param a double, time of Event
-   *  \param an int, type of Event
+   *  \param time time of Event
+   *  \param type type of Event
+   *  \return an Event
    */
-  SP::Event instantiate(double, int);
+  SP::Event instantiate(double time, int type);
 
 } ;
 
@@ -98,10 +105,10 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param an int which identifies the type of the object added
-   * \param an object creator
+   * \param type the type of the object added
+   * \param creator object creator
    */
-  Registration(int, object_creator) ;
+  Registration(int type, object_creator creator);
 } ;
 
 }

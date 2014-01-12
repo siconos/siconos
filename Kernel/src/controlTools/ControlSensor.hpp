@@ -59,7 +59,6 @@ protected:
 
   /** Simple Constructor
    * \param type the type of the Sensor
-   * \param t the SP::TimeDiscretisation to use
    * \param ds the SP::DynamicalSystem it observes
    * \param delay the delay between the measurement and the avaibility of the data
    */

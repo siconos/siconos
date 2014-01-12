@@ -131,7 +131,7 @@ TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
   mpf_init(_tkp1);
   mpf_init(_tk);
   mpf_init(_t0gmp);
-  
+
   if (td.hGmp())
   {
     mpf_init_set(_hgmp, *td.currentTimeStep());

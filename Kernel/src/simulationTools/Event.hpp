@@ -99,7 +99,7 @@ protected:
   bool _reschedule;
 
   /** Default constructor */
-  Event(): _type(0), _dTime(0.0), _k(0)
+  Event(): _type(0), _dTime(0.0), _k(0), _reschedule(false)
   {
     mpz_init(_timeOfEvent);
     mpz_init(_tickIncrement);
@@ -135,7 +135,7 @@ public:
   };
 
   /** set tick value
-   *  \param a double
+   *  \param newTick the new tick value
    */
   inline void setTick(double newTick)
   {
@@ -183,8 +183,8 @@ public:
     return _type ;
   };
 
-  /** set a new type for the present event
-   *  \param a std::string
+  /** set a new type for the present Event
+   *  \param newType the new Event type
    */
   inline void setType(int newType)
   {
@@ -218,9 +218,9 @@ public:
   /** virtual function which actions depends on event type.
    * The generic implementation present in this object is to increment the
    * TimeDiscretisation and to chamge the time of the current Event 
-   \param k : depends on the type of event. See derived class.
+   \param k meaning depends on the type of event. See derived class.
   */
-  virtual void update(unsigned int=0);
+  virtual void update(unsigned int k = 0);
 
   inline bool reschedule() const { return _reschedule; };
 };

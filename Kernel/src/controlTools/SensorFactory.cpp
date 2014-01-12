@@ -31,27 +31,25 @@ Registry& Registry::get()
   return instance;
 }
 
-void Registry::add(int name, object_creator creator)
+void Registry::add(int type, object_creator creator)
 {
-  factory_map[name] = creator;
+  factory_map[type] = creator;
 }
 
-SP::Sensor Registry::instantiate(int name, SP::DynamicalSystem ds)
+SP::Sensor Registry::instantiate(int type, SP::DynamicalSystem ds)
 {
-  MapFactoryIt it = factory_map.find(name) ;
+  MapFactoryIt it = factory_map.find(type) ;
 
   if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (SensorFactory) failed, no class named: " + name);
+    RuntimeException::selfThrow("Registry::instantiate (SensorFactory) failed, no class named: " + type);
 
-  // std::cout <<std::endl << "Factory instance for class" << name <<std::endl ; // for test purposes only
   return (it->second)(ds) ;  // run our factory
 }
 
-Registration::Registration(int name, object_creator creator)
+Registration::Registration(int type, object_creator creator)
 {
-  //  std::cout <<std::endl << "Registration of " << name <<std::endl <<std::endl ;
   // Add creator into the factory of Sensors
-  Registry::get().add(name, creator) ;
+  Registry::get().add(type, creator) ;
 }
 
 }

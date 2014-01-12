@@ -71,7 +71,6 @@ void CommonSMC::initialize(const Model& m)
   unsigned int sDim = _Csurface->size(0);
   _nsLawSMC.reset(new RelayNSL(sDim, -_alpha, _alpha));
 
-  std::string id = "interaction for control";
   _interactionSMC.reset(new Interaction(sDim, _nsLawSMC, _relationSMC));
   _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
   _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
@@ -94,7 +93,6 @@ void CommonSMC::initialize(const Model& m)
   _lambda.reset(new SiconosVector(sDim));
   _lambda = _interactionSMC->lambda(0);
 
-  _indx = 0;
   SP::SimpleMatrix tmpM(new SimpleMatrix(_Csurface->size(0), _B->size(1)));
   _invCB.reset(new SimpleMatrix(*tmpM));
   prod(*_Csurface, *_B, *tmpM);

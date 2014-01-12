@@ -100,7 +100,9 @@ private:
    */
   TimeDiscretisation(); 
 
-  /** Assignment Operator (private => forbidden) */
+  /** Assignment Operator (private => forbidden)
+   * \param TimeDiscretisation unused
+   */
   TimeDiscretisation& operator =(const TimeDiscretisation&);
 
   /** Get the origin of time t0
@@ -156,21 +158,31 @@ public:
 
   // --- GETTERS/SETTERS ---
 
-  /** get the time step
-   *  \return a double the value of _t[k+1] - _t[k], the current time step
+  /** get the timestep \f$t_{k+1} - t_k\f$
+   * \param k the index of the timestep
+   * \return the current time step
    */
   double currentTimeStep(const unsigned int k);
 
+  /** get the timestep in gmp format
+   * \return a pointer to the timestep in mpf_t format
+   */
   inline const mpf_t* currentTimeStep() const
   {
     return &_hgmp;
   };
 
+  /** determine whether the timestep is constant
+   * \return true if the timestep is constant
+   */
   inline bool hConst() const
   {
     return _tkV.empty() ? true : false;
   };
 
+  /** determine whether the TimeDiscretisation is using GMP
+   * \return true if the TimeDiscretisation is using GMP
+   */
   inline bool hGmp() const
   {
     return ((_h == 0.0) && (_tkV.empty()))  ? true : false;

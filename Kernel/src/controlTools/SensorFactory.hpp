@@ -42,7 +42,10 @@ typedef std::map<int, object_creator> MapFactory;
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
-/** Template function to return a new object of type SubType*/
+/** Template function to return a new object of type SubType
+ * \param ds the DynamicalSystem for the Sensor
+ * \return a Sensor
+ */
 template<class SubType> SP::Sensor factory(SP::DynamicalSystem ds)
 {
   return std11::shared_ptr<SubType>(new SubType( ds));
@@ -73,21 +76,23 @@ private :
 
 public :
 
-  /** Access function to the Registry */
+  /** Access function to the Registry
+   * \return a reference to the registry
+   */
   static Registry& get() ;
 
-  /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param name the type of the added Sensor
+  /** Add an object_creator into the factory_map
+   * \param type the type of the added Sensor
    * \param creator object creator
    */
-  void add(int name, object_creator object);
+  void add(int type, object_creator creator);
 
   /** Function to instantiate a new Sensor
-   * \param name the type of the Sensor we want to instantiate
+   * \param type the type of the Sensor we want to instantiate
    * \param ds a SP::DynamicalSystem that will be linked to this Sensor
-   * \param a SP::Sensor to the created Sensor
+   * \return a Sensor
    */
-  SP::Sensor instantiate(int name, SP::DynamicalSystem ds);
+  SP::Sensor instantiate(int type, SP::DynamicalSystem ds);
 
 } ;
 
@@ -106,10 +111,10 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param name the type of the added Sensor
+   * \param type the type of the added Sensor
    * \param creator object creator
    */
-  Registration(int name, object_creator object) ;
+  Registration(int type, object_creator creator) ;
 } ;
 
 #define AUTO_REGISTER_SENSOR(class_name, class_type) SensorFactory::Registration _registration_## class_type(class_name, &SensorFactory::factory<class_type>);

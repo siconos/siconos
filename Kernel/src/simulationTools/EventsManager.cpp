@@ -30,7 +30,7 @@
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 
 EventsManager::EventsManager(SP::TimeDiscretisation td): _k(0), _td(td),
-   _NSeventInsteadOfTD(false)
+  _T(std::numeric_limits<double>::infinity()), _NSeventInsteadOfTD(false)
 {
   //  === Creates and inserts two events corresponding
   // to times tk and tk+1 of the simulation time-discretisation  ===
@@ -227,7 +227,6 @@ unsigned int EventsManager::insertEv(SP::Event e)
 {
   const mpz_t *t1 = e->getTimeOfEvent();
   const unsigned int eType = e->getType();
-  int res;
   bool inserted = false;
   unsigned int pos = 0;
   // Find a place for the event in the vector
@@ -236,7 +235,7 @@ unsigned int EventsManager::insertEv(SP::Event e)
   {
     Event& ev = **it;
     const mpz_t *t2 = ev.getTimeOfEvent();
-    res = mpz_cmp(*t1, *t2);
+    int res = mpz_cmp(*t1, *t2);
     if (res == 0)
       res = eType - ev.getType();
     if (res < 0)

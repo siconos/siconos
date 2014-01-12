@@ -43,7 +43,10 @@ typedef std::map<unsigned int, object_creator> MapFactory;
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
-/** Template function to return a new object of type SubType*/
+/** Template function to return a new object of type SubType
+ * \param sensor the ControlSensor used by the Actuator
+ * \return an Actuator
+ */
 template<class SubType> SP::Actuator factory(SP::ControlSensor sensor)
 {
   return std11::shared_ptr<SubType>(new SubType(sensor));
@@ -78,7 +81,9 @@ private :
 
 public :
 
-  /** Access function to the Registry */
+  /** Access function to the Registry
+   * \return a reference to the registry
+   */
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
@@ -110,7 +115,7 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param name the type of the added Actuator
+   * \param type the type of the added Actuator
    * \param creator object creator
    */
   Registration(unsigned int type, object_creator creator) ;

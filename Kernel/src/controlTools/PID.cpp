@@ -28,7 +28,7 @@
 #include "Model.hpp"
 #include "Simulation.hpp"
 
-PID::PID(SP::ControlSensor sensor): Actuator(PID_, sensor)
+PID::PID(SP::ControlSensor sensor): Actuator(PID_, sensor), _ref(0), _curDeltaT(0)
 {
 }
 

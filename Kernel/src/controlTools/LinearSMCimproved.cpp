@@ -31,12 +31,12 @@
 #include <boost/circular_buffer.hpp>
 
 LinearSMCimproved::LinearSMCimproved(SP::ControlSensor sensor):
-  LinearSMC(sensor, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false)
+  LinearSMC(sensor, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false), _ubPerturbation(0.0)
 {
 }
 
 LinearSMCimproved::LinearSMCimproved(SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D):
-  LinearSMC(sensor, B, D, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false)
+  LinearSMC(sensor, B, D, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false),_ubPerturbation(0.0)
 {
 }
 
