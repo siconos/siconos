@@ -70,6 +70,14 @@ public:
    */
   SiconosVector();
 
+  /** constructor from a shared ptr (for python)
+   *  \param a SiconosVector shared ptr
+   */
+  SiconosVector(std11::shared_ptr<SiconosVector> v)
+  {
+    shared_from_this() = v;
+  }
+
   /***************************** CONSTRUCTORS ****************************/
 
   /** constructor with the type and the dimension of the Boost vector

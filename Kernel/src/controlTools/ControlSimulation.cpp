@@ -29,7 +29,7 @@
 
 
 ControlSimulation::ControlSimulation(double t0, double T, double h, SP::SiconosVector x0):
-  _t0(t0), _T(T), _h(h), _theta(0.5), _elapsedTime(0.0), _N(0), _nDim(0), _x0(x0)
+  _t0(t0), _T(T), _h(h), _theta(0.5), _elapsedTime(0.0), _N(0), _nDim(x0->size()), _x0(x0)
 {
 }
 
@@ -40,8 +40,6 @@ void ControlSimulation::setTheta(unsigned int newTheta)
 
 void ControlSimulation::initialize()
 {
-  _nDim = _x0->size();
-
   // Simulation part
   _model.reset(new Model(_t0, _T));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_processDS);
