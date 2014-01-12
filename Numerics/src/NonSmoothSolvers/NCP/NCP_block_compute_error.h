@@ -33,7 +33,13 @@ extern "C"
 #endif
 
   /** Computation of the error
-
+   * \param[in] n
+   * \param[in] M
+   * \param[in] q
+   * \param[in] z
+   * \param[in] verbose
+   * \param[out] w
+   * \param[out] err
    */
   void NCP_block_compute_error(int n, SparseBlockStructuredMatrix *M , double *q , double *z , int verbose, double *w, double *err);
 

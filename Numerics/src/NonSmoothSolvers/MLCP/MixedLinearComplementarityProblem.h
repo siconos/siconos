@@ -173,6 +173,7 @@ extern "C"
    *  \brief function to write in a file a MixedLinearComplementarityProblem
    *  \param problem pointer to a MixedLinearComplementarityProblem to print
    *  \param file pointer to a FILE
+   *  \return 0 if ok
    */
   int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem*  problem, FILE* file);
 
@@ -182,22 +183,25 @@ extern "C"
    *   from a file
    *  \param problem pointer to a MixedLinearComplementarityProblem to create
    *  \param file pointer to a FILE
+   *  \return 0 if ok
    */
-  int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem, FILE* MLCPfile);
+  int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem, FILE* file);
 
   /** \fn  int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem* problem, FILE* file)
    *  \brief function to read and create a MixedLinearComplementarityProblem
    *   from a file
    *  \param problem pointer to a MixedLinearComplementarityProblem to create
    *  \param file pointer to a FILE
+   *  \return 0 if ok
    */
-  int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem* problem, FILE* MLCPfile);
+  int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem* problem, FILE* file);
 
   /** \fn  int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, FILE* MLCPfile)
    *  \brief function to read and create a MixedLinearComplementarityProblem
    *   from a file
    *  \param problem pointer to a MixedLinearComplementarityProblem to create
    *  \param filename that contains the mlcp
+   *  \return 0 if ok
    */
   int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename);
 

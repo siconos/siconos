@@ -102,8 +102,8 @@ extern "C"
 
  /** General interface to solvers for friction-contact 3D problem
    *  \param[in] problem the structure which handles the Friction-Contact problem
-   *  \param[in,out] reaction global vector (n)
-   *  \param[in,out] velocity global vector (n)
+   *  \param[in,out] x global vector (n)
+   *  \param[in,out] w global vector (n)
    *  \param[in,out] options structure used to define the solver(s) and their parameters
    *  \param[in] global_options for Numerics (verbose mode ...)
    *  \return result (0 if successful otherwise 1).
@@ -167,7 +167,7 @@ extern "C"
    *  \param[in] Hdata the sparse matrix in coordinate format
    *  \param[in] nzH number of non zeros in Hdata
    *  \param[in] rowH  row indices of H
-   *  \param[in] columnH  column indices of H
+   *  \param[in] colH  column indices of H
    *  \param[in] n size of global velocity
    *  \param[in] nc number of contacts
    *  \param[in] solver_id id an int to be mapped to actual solver in Numerics

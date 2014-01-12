@@ -104,12 +104,14 @@ extern "C"
   /** print a VariationalInequalityProblem in a file (numerics .dat format)
    * \param problem the problem to print out
    * \param file the dest file
+   * \return ok if successfull
    */
   int variationalInequality_printInFile(VariationalInequality*  problem, FILE* file);
 
   /** read a VariationalInequalityProblem in a file (numerics .dat format)
    * \param problem the problem to read
    * \param file the target file
+   * \return ok if successfull
    */
   int variationalInequality_newFromFile(VariationalInequality*  problem, FILE* file);
 

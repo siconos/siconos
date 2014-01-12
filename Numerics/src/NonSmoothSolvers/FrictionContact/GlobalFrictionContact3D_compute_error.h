@@ -20,11 +20,10 @@
 #ifndef GlobalFrictionContact3D_compute_error_H
 #define GlobalFrictionContact3D_compute_error_H
 #include "GlobalFrictionContactProblem.h"
-/*!\file FrictionContact3D_compute_error.h
+
+/*!\file GlobalFrictionContact3D_compute_error.h
   \brief functions related to error computation for friction-contact problems
-
   \author Vincent Acary, 26/05/2008
-
 */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -33,12 +32,13 @@ extern "C"
 #endif
 
   /** Error computation for friction-contact 3D problem
-      \param problem the structure which defines the friction-contact problem
-      \param reaction
-      \param velocity
-      \param globalVelocity
-      \param tolerance value for error computation
-      \param[in,out] error value
+   * \param problem the structure which defines the friction-contact problem
+   * \param reaction
+   * \param velocity
+   * \param globalVelocity
+   * \param tolerance value for error computation
+   * \param[in,out] error value
+   * \return 0 if successfull
    */
   int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error);
 

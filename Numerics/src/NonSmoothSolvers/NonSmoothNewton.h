@@ -62,6 +62,7 @@ extern "C"
    \param dparam vector of double parameters:\n
      - [0]: tolerance
      - [1]: error
+   \return 0 if ok
   */
   int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi,
                       NewtonFunctionPtr* jacobianPhi,
@@ -78,6 +79,8 @@ extern "C"
   \param dparam vector of double parameters:\n
    - [0]: tolerance
    - [1]: error
+  \return 0 if ok
+
   */
   int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
                             NewtonFunctionPtr* jacobianPhi,

@@ -105,6 +105,7 @@ extern "C"
    *  \brief function to write in a file a LinearComplementarityProblem
    *  \param problem pointer to a LinearComplementarityProblem to print
    *  \param file pointer to a FILE
+   *  \return 0 if ok
    */
   int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file);
 
@@ -113,6 +114,7 @@ extern "C"
    *   from a file
    *  \param problem pointer to a LinearComplementarityProblem to create
    *  \param file pointer to a FILE
+   *  \return 0 if ok
    */
   int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file);
 
@@ -121,7 +123,8 @@ extern "C"
    *   from a file
    *  \param problem pointer to a LinearComplementarityProblem to create
    *  \param filename that contains the lcp
-   */
+   *  \return 0 if ok
+  */
   int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, char* filename);
 
   /** \fn  void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)

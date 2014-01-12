@@ -48,6 +48,7 @@ extern "C"
    * \param localproblem to solve
    * \param reaction
    * \param options of the solver
+   * \return if sucessfull
    */
   int frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions* options);
 

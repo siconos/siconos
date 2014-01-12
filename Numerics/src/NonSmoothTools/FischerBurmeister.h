@@ -57,39 +57,39 @@ extern "C"
 #endif
 
   /** Fischer Burmeister function, \f$ \phi(z,F(z)) \f$
-      \param[in] : size of vector z
-      \param[in] : vector z
-      \param[in] : vector F(z)
-      \param[in,out] : phi vector \f$ \phi(z,F(z)) \f$
+      \param[in] size of vector z
+      \param[in] z vector \f$ z \f$
+      \param[in] F vector \f$ F(z) \f$
+      \param[in,out]  phi vector \f$ \phi(z,F(z)) \f$
   */
   void phi_FB(int size, double* z, double* F, double* phi);
 
   /** Jacobian of the Fischer Burmeister function, \f$ \nabla_z \phi(z,F(z)) \f$
-      \param[in] : size of vector z
-      \param[in] : vector z
-      \param[in] : vector F(z)
-      \param[in] : \f$ \nabla_z F(z) \f$
-      \param[in,out] : \f$ \nabla_z \phi(z,F(z)) \f$.
+      \param[in] size of vector \f$ z \f$
+      \param[in] z vector \f$ z \f$
+      \param[in] F vector \f$ F(z) \f$
+      \param[in] jacobianF \f$ \nabla_z F(z) \f$
+      \param[in,out]  jacobianPhi \f$ \nabla_z \phi(z,F(z)) \f$.
   */
   void jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* jacobianPhi);
 
   /** Mixed Fischer Burmeister function,
       \f[ \phi(z,F(z)) = \left\lbrace \begin{array}{c} F(z) \\ \sqrt( z^2 + F(z)^2) - z - F(z) \end{array}\right. \f], the upper for equalities and the rest for inequalities.
-      \param[in] : number of equality constraints.
-      \param[in] : number of complementarity constraints.
-      \param[in] : vector z (size = sizeEq + sizeIneq)
-      \param[in] : vector F(z)
-      \param[in,out] : \f$ \phi(z,F(z)) \f$.
+      \param[in] sizeEq number of equality constraints.
+      \param[in] sizeIneq number of complementarity constraints.
+      \param[in] z vector z (size = sizeEq + sizeIneq)
+      \param[in] F vector F(z)
+      \param[in,out] phi \f$ \phi(z,F(z)) \f$.
   */
   void phi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* phi);
 
   /** Jacobian of the mixed Fischer Burmeister function, \f$ \nabla_z \phi(z,F(z)) \f$
-      \param[in] : number of equality constraints.
-      \param[in] : number of complementarity constraints.
-      \param[in] : vector z
-      \param[in] : vector F(z)
-      \param[in] : \f$ \nabla_z F(z) \f$
-      \param[in,out] : \f$ \nabla_z \phi(z,F(z)) \f$ .
+      \param[in] sizeEq number of equality constraints.
+      \param[in] sizeIneq number of complementarity constraints.
+      \param[in] z vector \f$z\f$
+      \param[in] F(z) vector \f$F(z)\f$
+      \param[in] jacobianF \f$ \nabla_z F(z) \f$
+      \param[in,out] jacobianPhi \f$ \nabla_z \phi(z,F(z)) \f$ .
   */
   void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* jacobianF, double* jacobianPhi);
 

@@ -38,6 +38,7 @@ extern "C"
       \param w vector
       \param tolerance value for error computation
       \param[in,out] error value
+      \return 0 if ok
    */
   int FrictionContact2D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error);
 

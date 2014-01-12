@@ -94,11 +94,26 @@ extern "C"
   */
   void computeJacobianFGlocker(double ** jacobianFOut, int up2Date);
 
-  /** compute NCP error for Fischer-Burmeister formulation **/
+  /** compute NCP error for Fischer-Burmeister formulation
+   * \param contact
+   * \param error
+   * \return error ?
+   */
+
   double Compute_NCP_error1(int contact, double error);
+
+  /** compute NCP error for Fischer-Burmeister formulation
+   * \param contact
+   * \param error
+   * \return error ?
+   */
   double Compute_NCP_error2(int contact, double error);
 
-  /** compute Fixed Point Solution for the NCP formulation  **/
+  /** compute Fixed Point Solution for the NCP formulation
+   * \param contact
+   * \param reactionstep
+   */
+
   void compute_Z_GlockerFixedP(int contact, double *reactionstep);
 
   /** free memory for friction contact to NCP-Glocker */

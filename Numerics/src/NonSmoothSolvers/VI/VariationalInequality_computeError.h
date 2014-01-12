@@ -20,7 +20,7 @@
 #ifndef VariationalInequality_compute_error_H
 #define VariationalInequality_compute_error_H
 
-/*!\file VariationalInequality_compute_error.h
+/*!\file VariationalInequality_computeError.h
   \brief functions related to error computation for friction-contact problems
 
   \author Vincent Acary, 26/05/2008
@@ -39,6 +39,7 @@ extern "C"
       \param tolerance value for error computation
       \param options
       \param[in,out] error value
+      \return 0 if ok
    */
   int variationalInequality_computeError(VariationalInequality* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 

@@ -46,6 +46,7 @@ extern "C"
       \param jacobianF pointer to function used to compute \f$ \nabla_zF(z) \f$
       \param iparam vector of int parameters (useless at the time)
       \param dparam vector of double parameters (useless at the time)
+      \return 0 if successfull
   */
   int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam, double* dparam);
 

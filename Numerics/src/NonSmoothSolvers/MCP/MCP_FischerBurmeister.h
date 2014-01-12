@@ -35,15 +35,15 @@ extern "C"
 
 
   /** Initialisation of the MCP Fischer solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_driver.
-      \param[in] : the description of the MCP
-      \param[in] : options for the solver
-  */
+   *   \param[in] problem  description of the MCP
+   *   \param[in] options for the solver
+   */
   void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOptions* options);
 
   /** Reset of the MCP Fischer solver (free local variable)
-      \param[in] : the description of the MCP
-      \param[in] : options for the solver
-  */
+   *  \param[in] problem  description of the MCP
+   *  \param[in] options for the solver
+   */
   void mcp_FischerBurmeister_reset(MixedComplementarityProblem * problem, SolverOptions* options);
 
 

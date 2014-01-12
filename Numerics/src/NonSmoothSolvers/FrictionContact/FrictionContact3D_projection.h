@@ -79,6 +79,7 @@ extern "C"
    * \param localproblem :  the local problem to initialize
    * \param reaction
    * \param options
+   * \return 0 if successfull
    */
   int frictionContact3D_projectionWithDiagonalization_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
 
@@ -96,6 +97,7 @@ extern "C"
    * \param localproblem :  the local problem to initialize
    * \param reaction
    * \param options
+   * \return 0 if successfull
    */
   int frictionContact3D_projectionOnCone_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions *options);
 
@@ -115,6 +117,7 @@ extern "C"
    * \param localproblem :  the local problem to initialize
    * \param reaction
    * \param options
+   * \return 0 if successfull
    */
   int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options);
   void frictionContact3D_projectionOnConeWithLocalIteration_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
@@ -124,6 +127,7 @@ extern "C"
    * \param localproblem :  the local problem to initialize
    * \param reaction
    * \param options
+   * \return 0 if successfull
    */
   int frictionContact3D_projectionOnCone_velocity_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
 
@@ -131,12 +135,22 @@ extern "C"
    * \param localproblem :  the local problem to initialize
    * \param reaction
    * \param options
+   * \return 0 if successfull
    */
   int frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
   
-  /** free memory for friction contact 3D projection solver */
+  /** free memory for friction contact 3D projection solver
+   * \param problem :  the  problem to free
+   * \param localproblem :  the  problem to free
+   * \param localsolver_options
+   */
   void frictionContact3D_projection_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
-  /** free memory for friction contact 3D projection solver */
+
+  /** free memory for friction contact 3D projection solver
+   * \param problem :  the  problem to free
+   * \param localproblem :  the  problem to free
+   * \param localsolver_options
+   */
   void frictionContact3D_projection_with_regularization_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

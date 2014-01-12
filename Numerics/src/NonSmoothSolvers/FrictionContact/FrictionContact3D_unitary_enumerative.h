@@ -19,7 +19,7 @@
 #ifndef FRICTIONCONTACT3DUNITARY_ENUMERATIVE_H
 #define FRICTIONCONTACT3DUNITARY_ENUMERATIVE_H
 
-/*!\file FrictionContact3D_Path.h
+/*!\file FrictionContact3D_unitary_enumerative.h
   \brief Typedef and functions declarations related to the quartic solver for 3 dimension frictional contact problems.
 
   Each solver must have 4 functions in its interface:

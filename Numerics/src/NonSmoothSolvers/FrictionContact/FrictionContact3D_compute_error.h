@@ -39,6 +39,7 @@ extern "C"
       \param tolerance value for error computation
       \param options
       \param[in,out] error value
+      \return 0 if ok
    */
   int FrictionContact3D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
@@ -56,6 +57,7 @@ extern "C"
       \param options
       \param tolerance value for error computation
       \param[in,out] error value
+      \return 0 if ok
    */
   int FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
@@ -68,6 +70,7 @@ extern "C"
       \param tolerance value for error computation
       \param options
       \param[in,out] error value
+      \return 0 if ok
    */
   int FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 

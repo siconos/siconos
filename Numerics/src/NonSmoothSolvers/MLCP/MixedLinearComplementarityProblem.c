@@ -365,7 +365,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
 }
 
 
-int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem* problem, FILE* MLCPfile)
+int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem* problem, FILE* file)
 {
   int n = 0, m = 0, NbLines = 0;
   int i, j,  m2;
@@ -373,9 +373,9 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
   double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
   double *a, *b;
-  fscanf(MLCPfile , "%d" , &n);
-  fscanf(MLCPfile , "%d" , &m);
-  fscanf(MLCPfile , "%d" , &NbLines);
+  fscanf(file , "%d" , &n);
+  fscanf(file , "%d" , &m);
+  fscanf(file , "%d" , &NbLines);
 
   m2 = m * m;
 
@@ -433,7 +433,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < n ; ++j)
     {
-      fscanf(MLCPfile, "%s", val);
+      fscanf(file, "%s", val);
       vecA[(NbLines - m)*j + i ] = atof(val);
       vecM[(NbLines)*j + i ] = atof(val);
     }
@@ -442,7 +442,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < m ; ++j)
     {
-      fscanf(MLCPfile, "%s", val);
+      fscanf(file, "%s", val);
       vecB[ m * j + i ] = atof(val);
       /*  vecM[ n*(m+n)+(n+m)*j+n+i ] = atof(val);*/
       vecM[ n * (NbLines) + (NbLines)*j + (NbLines - m) + i ] = atof(val);
@@ -453,7 +453,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < m ; ++j)
     {
-      fscanf(MLCPfile, "%s", val);
+      fscanf(file, "%s", val);
       vecC[(NbLines - m)*j + i ] = atof(val);
       vecM[(NbLines) * (n + j) + i ] = atof(val);
     }
@@ -462,7 +462,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < n ; ++j)
     {
-      fscanf(MLCPfile, "%s", val);
+      fscanf(file, "%s", val);
       vecD[ m * j + i ] = atof(val);
       vecM[(NbLines)*j + i + (NbLines - m) ] = atof(val);
     }
@@ -470,13 +470,13 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
   for (i = 0 ; i < NbLines - m ; ++i)
   {
-    fscanf(MLCPfile , "%s" , val);
+    fscanf(file , "%s" , val);
     a[i] = atof(val);
     vecQ[i] = atof(val);
   }
   for (i = 0 ; i < m ; ++i)
   {
-    fscanf(MLCPfile , "%s" , val);
+    fscanf(file , "%s" , val);
     b[i] = atof(val);
     vecQ[i + NbLines - m] = atof(val);
   }

@@ -47,14 +47,14 @@ extern "C"
 {
 #endif
   /** Initialisation of the MCP solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_driver.
-      \param[in] : the description of the MCP
-      \param[in] : options for the solver
+      \param[in] problem the description of the MCP
+      \param[in] options for the solver
   */
   void mcp_driver_init(MixedComplementarityProblem * problem, SolverOptions* options);
 
   /** Reset of the MCP solver
-     \param[in] : the description of the MCP
-     \param[in] : options for the solver
+     \param[in] problem the description of the MCP
+     \param[in] options for the solver
   */
   void mcp_driver_reset(MixedComplementarityProblem * problem, SolverOptions* options);
 
@@ -82,7 +82,7 @@ extern "C"
 
   /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
       \param problem  the pointer to the array of options to set.
-      \param pOptions the pointer to the SolverOptions stucture.
+      \param pSolver the pointer to the SolverOptions stucture.
   */
   int mixedComplementarity_FB_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pSolver);
 

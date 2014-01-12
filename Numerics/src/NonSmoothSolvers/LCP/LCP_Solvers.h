@@ -25,7 +25,8 @@
   \author siconos-team@lists.gforge.inria.fr
 */
 
-/*! \page LCPSolvers Linear Complementarity Problems Solvers
+/** \page LCPSolvers Linear Complementarity Problems Solvers
+ *  \tableofcontents
 
 This page gives an overview of the available solvers for LCP and their required parameters.
 

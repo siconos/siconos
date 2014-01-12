@@ -5,7 +5,7 @@
 #define sign(x) copysign(1.,x)
 
 // this file consists of generated code
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+//#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 void frictionContact3D_AlartCurnierFABGenerated(
   double rn,

@@ -21,7 +21,7 @@
 
 #include "NonSmoothNewton.h"
 
-/*!\file NonSmoothNewton.h
+/*!\file NonSmoothNewtonNeighbour.h
   Typedef and functions declarations related to non-smooth Newton solver
 
   Solve \f$ \phi(z) = 0 \f$ using a Newton method.

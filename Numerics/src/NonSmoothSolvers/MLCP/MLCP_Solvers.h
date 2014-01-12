@@ -457,10 +457,13 @@ extern "C"
    * \author Vincent Acary
    */
   void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double *w, int* info, SolverOptions* options);
+
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param problem structure that represents the MLCP (M, q...). M must be a SparseBlockStructuredMatrix
       \param options the pointer to  the array of options to set
   */
   int mixedLinearComplementarity_pgs_SBM_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* options);
+
   // need a svn add mlcp_GaussSeidel_SBM ...
   //  void mlcp_GaussSeidel_SBM(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options, int numberOfSolvers);
 

@@ -28,6 +28,7 @@
 */
 
 /*! \page NumericsSolver Solvers definition in Numerics
+  \tableofcontents
 
   To define a non-smooth problem in Numerics, the structure SolverOptions is used. It handles the name of the solver and its input-output parameters.\n
   SolverOptions main components are:
@@ -190,7 +191,7 @@ extern "C"
 #endif
 
   /** Read default parameters values for a solver and save them in a SolverOptions structure
-      \param[in] driverType, type of the considered problem.
+      \param[in] driverType  type of the considered problem.
       Only the following solvers ids are allowed :\n
       0: LCP\n
       1: MLCP\n

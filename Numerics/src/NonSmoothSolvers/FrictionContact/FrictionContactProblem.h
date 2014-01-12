@@ -187,12 +187,14 @@ extern "C"
   /** print a FrictionContactProblem in a file (numerics .dat format)
    * \param problem the problem to print out
    * \param file the dest file
+   * \return 0 if successfull
    */
   int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file);
 
   /** read a FrictionContactProblem in a file (numerics .dat format)
    * \param problem the problem to read
    * \param file the target file
+   * \return 0 if successfull
    */
   int frictionContact_newFromFile(FrictionContactProblem*  problem, FILE* file);
 
@@ -208,6 +210,7 @@ extern "C"
    * \param[in] M the NumericsMatrix
    * \param[in] q the q vector
    * \param[in] mu the mu vector
+   * \return a pointer to a FrictionContactProblem structure
    */
   FrictionContactProblem* frictionContactProblem_new(int dim, int nc,
       NumericsMatrix* M, double* q, double* mu);

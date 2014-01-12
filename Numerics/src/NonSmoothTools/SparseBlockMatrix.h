@@ -298,6 +298,7 @@ extern "C"
     \param[in] A the SparseBlockStructuredMatrix matrix to be copied
     \param[out]  B the SparseBlockStructuredMatrix matrix copy of A
     \param[in] copyBlock if copyBlock then the content of block are copied, else only the pointers are copied.
+    \return 0 if ok
   */
   int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B, unsigned int copyBlock);
 
@@ -305,11 +306,13 @@ extern "C"
   /** Transpose  by copy of a SBM  A into B
     \param[in] A the SparseBlockStructuredMatrix matrix to be copied
     \param[out]  B the SparseBlockStructuredMatrix matrix copy of transpose A
+    \return 0 if ok
   */
   int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B);
 
   /** Inverse (in place) a square diagonal block matrix
   \param[in,out] M the SparseBlockStructuredMatrix matrix to be inversed
+  \return 0 ik ok
   */
   int inverseDiagSBM(const SparseBlockStructuredMatrix*  M);
 
@@ -319,8 +322,9 @@ extern "C"
    * \param[in] n the number of colums
    * \param[in] nbblocks the number of blocks
    * \param[in] row a pointer to row of each block
-   * \param[in] colums a pointer to column of each block
+   * \param[in] column a pointer to column of each block
    * \param[in] block a pointer to each block
+   * \return a pointer to a SparseBlockCoordinateMatrix structure
    */
   SparseBlockCoordinateMatrix* newSparseBlockCoordinateMatrix3x3fortran(unsigned int m, unsigned int n,
       unsigned int nbblocks,
@@ -333,16 +337,19 @@ extern "C"
 
   /** copy a SparseBlockCoordinateMatrix to a SparseBlockStructuredMatrix
    * \param[in] MC the SparseBlockCoordinateMatrix matrix
+   * \return a pointer to a SparseBlockCoordinateMatrix structure
    */
   SparseBlockStructuredMatrix* SBCMToSBM(SparseBlockCoordinateMatrix* MC);
 
   /** free a SparseBlockStructuredMatrix created with SBCMToSBM
    * \param[in,out] M a SparseBlockStructuredMatrix to free*/
   void freeSBMFromSBCM(SparseBlockStructuredMatrix* M);
+
   /** Copy a Sparse Matrix into a SBM, with fixed blocksize
       \param[in] blocksize the blocksize
       \param[in] sparseMat pointer on the Sparse Matrix
       \param[in,out] outSBM pointer on an empty SparseBlockStructuredMatrix
+      \return 0 in ok
   */
   int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* outSBM);
 
@@ -355,12 +362,14 @@ extern "C"
   /** Copy a SBM into a Sparse (CSR) Matrix
   \param[in] A the SparseBlockStructuredMatrix matrix
   \param[in] outSparseMat pointer on the filled sparse Matrix
+  \return 0 if ok
   */
   int SBMtoSparse(const SparseBlockStructuredMatrix* const A, SparseMatrix *outSparseMat);
 
   /** initMemory of a Sparse (CSR) Matrix form a SBM matrix
   \param[in] A the SparseBlockStructuredMatrix matrix
   \param[in] sparseMat pointer on the initialized sparse Matrix
+  \return 0 if ok
   */
   int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, SparseMatrix *sparseMat);
 
@@ -377,24 +386,24 @@ extern "C"
 
 
   /** To free a SBM matrix (for example allocated by newFromFile).
-   * param[in] A the SparseBlockStructuredMatrix that mus be de-allocated.
-   * param[in] level use NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM
+   * \param[in] A the SparseBlockStructuredMatrix that mus be de-allocated.
+   * \param[in] level use NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM
    */
   void SBMfree(SparseBlockStructuredMatrix* A, unsigned int level);
 
   /*
-   * param [in] rowIndex: permutation: the row numC of C is the row rowIndex[numC] of A.
-   * param [in] A The source SBM.
-   * param [out] C The target SBM. It assumes the structure SBM has been allocated.
+   * \param [in] rowIndex: permutation: the row numC of C is the row rowIndex[numC] of A.
+   * \param [in] A The source SBM.
+   * \param [out] C The target SBM. It assumes the structure SBM has been allocated.
    * The memory allocation for its menber is done inside.
    * NB : The blocks are not copied.
    */
   void RowPermutationSBM(unsigned int *rowIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
 
   /*
-  * param [in] colIndex: permutation: the col numC of C is the col colIndex[numC] of A.
-  * param [in] A The source SBM.
-  * param [out] C The target SBM. It assumes the structure SBM has been allocated.
+  * \param [in] colIndex: permutation: the col numC of C is the col colIndex[numC] of A.
+  * \param [in] A The source SBM.
+  * \param [out] C The target SBM. It assumes the structure SBM has been allocated.
   * The memory allocation for its menber is done inside.
   * NB : The blocks are not copied.
   */

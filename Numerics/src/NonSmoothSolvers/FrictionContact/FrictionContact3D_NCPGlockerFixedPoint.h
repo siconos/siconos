@@ -52,7 +52,7 @@ extern "C"
       \param localproblem to solve
       \param reaction (only the block corresponding to the current contact will be modified,
       \param  options of the solver
-      return 0 iff successful
+      \return 0 iff successful
    */
   int frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* reaction , SolverOptions * options);
 

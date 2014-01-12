@@ -183,7 +183,7 @@ extern "C"
   void freeNumericsMatrix(NumericsMatrix* m);
 
   /** Screen display of the matrix content stored as a double * array in Fortran style
-      \param M the matrix to be displayed
+      \param m the matrix to be displayed
       \param nRow the number of rows
       \param nCol the number of columns
       \param lDim the leading dimesion of M
@@ -263,6 +263,7 @@ extern "C"
    * \param[in] size0 number of rows
    * \param[in] size1 number of columns
    * \param[in] m1 the SparseBlockStructuredMatrix
+   * \return  a pointer to a NumericsMatrix
    */
   NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1);
 
