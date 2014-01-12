@@ -50,11 +50,6 @@ char * SICONOS_FRICTION_3D_PROX_STR = "F3D_PROX";
 char * SICONOS_FRICTION_3D_QUARTIC_STR = "F3D_QUARTIC";
 char * SICONOS_FRICTION_3D_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
 
-int snOutputFrictionContactProblem(FrictionContactProblem* problem, 
-                                    double* velocity, double* reaction, 
-                                    SolverOptions *opts, int after_solve, 
-                                    int info);
-
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
 int frictionContact3D_driver(FrictionContactProblem* problem, 
@@ -68,25 +63,10 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   if (global_options)
   {
     setNumericsOptions(global_options);
-    options->numericsOptions = global_options;
+    options->numericsOptions = (NumericsOptions*) malloc(sizeof(NumericsOptions));
+    options->numericsOptions->verboseMode = global_options->verboseMode;
   }
 
-  double * reaction_backup = NULL;
-  double * velocity_backup = NULL; 
-  int output_maybe = snOutputFrictionContactProblem(problem, reaction, velocity, options, 
-                                              0, 0);
-  
-  if (output_maybe)
-  {
-    /* guess backup */
-    int vector_size = problem->dimension * problem->numberOfContacts;
-    reaction_backup = (double *) malloc(vector_size*sizeof(double));
-    velocity_backup = (double *) malloc(vector_size*sizeof(double));
-    memcpy(reaction_backup, reaction, vector_size);
-    memcpy(velocity_backup, velocity, vector_size);
-  }
-
-  /* If the options for solver have not been set, read default values in .opt file */
   int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
   if (!NoDefaultOptions)
@@ -207,15 +187,6 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   }
   }
 
-  if (output_maybe)
-  {
-    snOutputFrictionContactProblem(problem, reaction_backup, velocity_backup, 
-                                   options, 1, info);
-
-    free(reaction_backup);
-    free(velocity_backup);
-  }
-
   return info;
 
 }
@@ -268,83 +239,3 @@ void snPrintf(int level, SolverOptions* opts, const char *fmt, ...)
 }
 
 
-#ifdef WITH_FCLIB
-#include "fclib_interface.h"
-#endif
-
-int snOutputFrictionContactProblem(FrictionContactProblem* problem, 
-                                   double* velocity, double* reaction, 
-                                   SolverOptions *opts, int after_solve, 
-                                   int info)
-{
-
-  assert(opts);
-  assert(opts->numericsOptions);
-
-  NumericsOptions *nopts = opts->numericsOptions;
-
-  int outputFile = -1;
-
-  if (nopts && nopts->outputMode & OUTPUT_ON_ERROR)
-  {
-    if (after_solve && info)
-    {
-      outputFile = nopts->outputMode & (OUTPUT_ON_ERROR - 1);
-    } 
-    else
-    {
-      /* else no output before solve */
-      return (1);
-    }
-  }
-  else
-  {
-    outputFile = nopts->outputMode;
-  }
-
-  if (outputFile == 1)
-  {
-    char fname[256];
-    sprintf(fname, "%s%.5d.c", nopts->fileName, nopts->counter++);
-    snPrintf(1, opts, "dump of %s (not implemented!) \n", fname);
-
-/*    FILE * file = fopen(fname, "w");*/
-    
-    assert(0);
-    
-  }
-  else if (outputFile == 2)
-  {
-    char fname[256];
-    sprintf(fname, "%s%.5d.dat", nopts->fileName, nopts->counter++);
-    snPrintf(1, opts, "dump of %s\n", fname);
-
-    FILE * foutput  =  fopen(fname, "w");
-    frictionContact_printInFile(problem, foutput);
-    fclose(foutput);
-  }
-  else if (outputFile == 3)
-  {
-#ifdef WITH_FCLIB
-    char fname[256];
-    
-    sprintf(fname, "%s%.5d.hdf5", nopts->fileName, nopts->counter++);
-    snPrintf(1, opts, "dump of %s\n", fname);
-
-    FILE * foutput  =  fopen(fname, "w");
-
-    frictionContact_fclib_write(problem,
-                                nopts->title,
-                                nopts->description,
-                                nopts->mathInfo,
-                                fname);
-
-
-
-    fclose(foutput);
-#else
-    snPrintf(0, opts, "fclib is not available, you must configure Siconos/Numerics with cmake [...] -DWITH_FCLIB=1\n");
-#endif
-  }
-  return (0);
-}

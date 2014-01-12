@@ -55,10 +55,4 @@ void numericsWarning(char * functionName, char* message)
 void setDefaultNumericsOptions(NumericsOptions* opts)
 {
   opts->verboseMode = 0;
-  opts->outputMode = 0;
-  opts->counter = 0;
-  strcpy(opts->fileName, "NumericsDefaultOutputFile");
-  strcpy(opts->title, "none");
-  strcpy(opts->description, "without description");
-  strcpy(opts->mathInfo, "none");
 }

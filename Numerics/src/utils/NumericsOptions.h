@@ -53,13 +53,6 @@
 typedef struct
 {
   int verboseMode;
-  int outputMode;
-  char fileName[256];
-  char title[256];
-  char description[1024];
-  char mathInfo[1024];
-  int outputIterMax;
-  int counter;
 } NumericsOptions;
 
 

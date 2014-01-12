@@ -571,7 +571,7 @@ int frictionContact3D_unitary_enumerative_setDefaultSolverOptions(
 {
   if (verbose > 0)
   {
-    printf("Set the default solver options for the LOCALAC Solver\n");
+    printf("Setting default options for unitary enumerative solver.\n");
   }
 
   options->solverId =  SICONOS_FRICTION_3D_QUARTIC;
