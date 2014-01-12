@@ -275,6 +275,12 @@ MACRO(LIBRARY_PROJECT_SETUP)
         ENDIF()
       ENDIF()
 
+      IF(WITH_DOXYGEN_WARNINGS_INFILE)
+        SET(DOXYGEN_WARN_FILE ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.warnings)
+      ELSE(WITH_DOXYGEN_WARNINGS_INFILE)
+        SET(DOXYGEN_WARN_FILE)
+      ENDIF()
+
       CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/filedoxy.config.in 
         ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.config)
 
