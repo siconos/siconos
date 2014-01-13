@@ -424,14 +424,14 @@ void KernelTest::t7()
   std::ofstream ofs("Kernelt7.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    siconos_io_register(oa);
+    siconos_io_register_Kernel(oa);
     oa << NVP(ds1);
   }
 
   std::ifstream ifs("Kernelt7.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    siconos_io_register(ia);
+    siconos_io_register_Kernel(ia);
     ia >> NVP(ds2);
   }
 
