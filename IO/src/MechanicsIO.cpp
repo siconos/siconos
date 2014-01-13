@@ -8,6 +8,8 @@
 #include <BlockVector.hpp>
 #include <Interaction.hpp>
 
+#include <Question.hpp>
+
 #ifdef HAVE_BULLET
 #include <BulletDS.hpp>
 #include <BulletR.hpp>

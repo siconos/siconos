@@ -23,7 +23,7 @@
 #include "Register.hpp"
 
 
-SICONOS_IO_REGISTER(NumericsOptions, (verboseMode)(outputMode)(fileName)(title)(description)(mathInfo)(outputIterMax)(counter));
+SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
 
 
 template <class Archive>
