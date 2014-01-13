@@ -90,15 +90,6 @@ protected:
 
 public:
 
-  /** constructor from a shared ptr (for python)
-   *  \param a SiconosMatrix shared ptr
-   */
-  SiconosMatrix(std11::shared_ptr<SiconosMatrix> m)
-  {
-    shared_from_this() = m;
-  }
-
-
   /** Destructor. */
   virtual ~SiconosMatrix() {};
 
