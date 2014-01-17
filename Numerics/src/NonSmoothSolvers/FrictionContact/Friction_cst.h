@@ -7,7 +7,7 @@
  */
 enum FRICTION_SOLVER
 {
-  /** 2D Frcitional Contact solvers */
+  /** 2D Frictional Contact solvers */
   SICONOS_FRICTION_2D_NSGS = 400,
   SICONOS_FRICTION_2D_PGS = 401,
   SICONOS_FRICTION_2D_CPG = 402,
@@ -15,7 +15,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_2D_LEMKE = 404,
   SICONOS_FRICTION_2D_ENUM = 405,
   
-  /** 3D Frictional Contact global  solvers */
+  /** 3D frictional contact solvers on local formulation */
   SICONOS_FRICTION_3D_NSGS = 500,
   SICONOS_FRICTION_3D_NSGSV = 501,
   SICONOS_FRICTION_3D_PROX = 502,
@@ -26,7 +26,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_HP = 507,
   SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint = 510,
 
-  /** 3D Frictional Contact local solvers */
+  /** 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
   SICONOS_FRICTION_3D_AlartCurnierNewton = 550,
   SICONOS_FRICTION_3D_NCPGlockerFBNewton = 551,
   SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization = 552,
@@ -42,7 +42,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_QUARTIC = 562,
   SICONOS_FRICTION_3D_QUARTIC_NU = 563,
 
-  /** 3D Global Frictional Contact local solvers */
+  /** 3D Frictional contact local solvers on global formulation */
   SICONOS_FRICTION_3D_GLOBAL_NSGS_WR = 600,
   SICONOS_FRICTION_3D_GLOBAL_NSGSV_WR = 601,
   SICONOS_FRICTION_3D_GLOBAL_PROX_WR = 602,

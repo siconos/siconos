@@ -19,9 +19,10 @@
 
 #ifndef GenericMechanical_cst_h
 #define GenericMechanical_cst_h
+
 /*!\file GenericMechanical_cst.h
   \brief Constants to define the list of available GenericMechanical solvers. 
-         See the solver list \ref genericSolversList
+  See the solver list \ref genericSolversList
 */
 /**\enum GENERIC_MECHANICAL_SOLVER
    \brief Each SICONOS_GENERIC_MECHANICAL_XXX refers to number of the solver XXX 
