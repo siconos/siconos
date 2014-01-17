@@ -38,6 +38,11 @@
 
 #include "GlobalFrictionContact3D_compute_error.h"
 #include "SiconosBlas.h"
+
+//#define DEBUG_MESSAGES 1
+#include <debug.h>
+
+
 #ifdef WITH_MUMPS
 #include <mpi.h>
 #include <dmumps_c.h>
@@ -297,6 +302,7 @@ int initACPsiJacobian(
   /* - M */
   for(unsigned int e = 0; e < M->nz; ++e)
   {
+    DEBUG_PRINTF("e=%d, M->i[e]=%d, M->p[e]=%d, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]);
     CHECK(cs_zentry(J, M->i[e], M->p[e], - M->x[e]));
   }
 
@@ -636,14 +642,14 @@ void globalFrictionContact3D_AlartCurnier(
   assert(problem->H);
 
   assert(!problem->M->matrix0);
-  assert(problem->M->matrix1);
+//  assert(problem->M->matrix1);
 
   assert(!options->iparam[4]); // only host
 
   /* M is square */
   assert(problem->M->size0 == problem->M->size1);
 
-  assert(problem->M->size0 = problem->H->size1);
+  assert(problem->M->size0 == problem->H->size0);
 
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[0];

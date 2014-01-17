@@ -101,6 +101,12 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
 
   SparseMatrix _M, _H;
 
+  M.matrix0 = NULL;
+  M.matrix1 = NULL;
+  M.matrix2 = NULL;
+  M.matrix3 = NULL;
+  M.matrix4 = NULL;
+
   M.storageType = 2;
   M.size0 = n;
   M.size1 = n;
@@ -112,6 +118,13 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   _M.p = (int *) rowM;
   _M.i = (int *) colM;
   _M.x = Mdata;
+
+
+  H.matrix0 = NULL;
+  H.matrix1 = NULL;
+  H.matrix2 = NULL;
+  H.matrix3 = NULL;
+  H.matrix4 = NULL;
 
   H.storageType = 2;
   H.size0 = M.size0;
@@ -143,7 +156,7 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
 
   SolverOptions numerics_solver_options;
 
-  frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, solver_id);
+  globalFrictionContact3D_setDefaultSolverOptions(&numerics_solver_options, solver_id);
 
   numerics_solver_options.dparam[0] = tolerance;
   numerics_solver_options.iparam[0] = itermax;
