@@ -25,6 +25,7 @@
 #include "ControlSimulation.hpp"
 #include <boost/progress.hpp>
 #include <boost/timer.hpp>
+#include "Model.hpp"
 
 
 

@@ -26,7 +26,8 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "LagrangianLinearTIDS.hpp"
-
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
 using namespace RELATION;
 using namespace Siconos;
@@ -517,6 +518,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
   SP::Interaction inter = indexSet->bundle(vd);
+  SP::OneStepIntegrator Osi = indexSet->properties(vd).osi;
   unsigned int pos1, pos2;
   pos1 = indexSet->properties(vd).source_pos;
   pos2 = indexSet->properties(vd).target_pos;
@@ -634,7 +636,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       if (_useMassNormalization)
       {
-        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
+        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
         centralInteractionBlock->PLUForwardBackwardInPlace(*work);
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
@@ -766,6 +768,7 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
   unsigned int pos1, pos2;
   // source of inter1 :
   vertex_inter = indexSet->source(ed);
+  SP::OneStepIntegrator Osi = indexSet->properties(vertex_inter).osi;
   SP::DynamicalSystem tmpds = indexSet->properties(vertex_inter).source;
   if (tmpds == ds)
     pos1 =  indexSet->properties(vertex_inter).source_pos;
@@ -923,7 +926,7 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
     // because right = transpose(left) and because of
     // size checking inside the getBlock function, a
     // getRight call will fail.
-    SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
+    SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
 #ifdef MLCPPROJ_DEBUG
     std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : centralInteractionBlocks " << std::endl;
     centralInteractionBlock->display();

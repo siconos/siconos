@@ -100,11 +100,7 @@ public:
    * associated with this Sensor
   *  \param td the TimeDiscretisation for this Sensor
   */
-  virtual void setTimeDiscretisation(const TimeDiscretisation& td)
-  { 
-    _tdPhi.reset(new TimeDiscretisation(td));
-    _tdPred.reset(new TimeDiscretisation(td));
-  };
+  virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
 };
 DEFINE_SPTR(LinearSMCOT2)

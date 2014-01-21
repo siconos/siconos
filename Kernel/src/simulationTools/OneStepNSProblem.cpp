@@ -30,6 +30,8 @@
 #include "NewtonEulerDS.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 #include "NonSmoothLaw.hpp"
+#include "Simulation.hpp"
+
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -435,17 +437,14 @@ void OneStepNSProblem::saveNSProblemToXML()
   RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - Not yet implemented");
 }
 
-SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::DynamicalSystem ds)
+SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::DynamicalSystem ds)
 {
   // Connect block to the OSI matrix of a dynamical system for the current simulation.
   // Matrix depends on OSI type.
   SP::SimpleMatrix block;
-  SP::OneStepIntegrator Osi;
   OSI::TYPES osiType; // type of the current one step integrator
   Type::Siconos dsType; // type of the current Dynamical System
   
-  // get OneStepIntegrator defined for the dynamical system
-  Osi = simulation()->integratorOfDS(ds); 
   osiType = Osi->getType();
   dsType = Type::value(*ds);
   

@@ -27,6 +27,7 @@
 #include "TimeStepping.hpp"
 #include "EventDriven.hpp"
 #include "Topology.hpp"
+#include "EventsManager.hpp"
 
 #include "TypeName.hpp"
 

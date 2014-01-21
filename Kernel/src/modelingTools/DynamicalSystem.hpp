@@ -836,14 +836,6 @@ public:
    */
   virtual void resetNonSmoothPart(unsigned int level) = 0;
 
-  /**
-   * overwrite these methods to do the specific work that must be done
-   * at the beginning or the end of a computation step.  It could be
-   * reset some buffer vector.(like the function resetNonSmoothPart).
-   *
-   */
-  virtual void preparStep() {};
-
   virtual void endStep() {};
 
   /** Get _pluging

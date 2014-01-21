@@ -307,7 +307,4 @@ public:
   inline void updateT(double T) { _T = T; };
 };
 
-
-DEFINE_SPTR(EventsManager)
-
 #endif // EventsManager_H

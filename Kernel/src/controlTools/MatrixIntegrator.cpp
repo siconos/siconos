@@ -24,6 +24,9 @@
 #include "EventDriven.hpp"
 #include "SubPluggedObject.hpp"
 #include "LsodarOSI.hpp"
+#include "TimeDiscretisation.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "EventsManager.hpp"
 
 MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m, SP::SiconosMatrix E): _E(E)
 {

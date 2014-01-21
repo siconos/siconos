@@ -387,30 +387,6 @@ void EventDriven::initialize(SP::Model m, bool withOSI)
   initOSIRhs();
 }
 
-
-
-// void EventDriven::initLevelMin()
-// {
-//   // At the time, we consider that for all systems, levelMin is
-//   // equal to the minimum value of the relative degree
-//   _levelMin = model()->nonSmoothDynamicalSystem()
-//               ->topology()->minRelativeDegree();
-//   if(_levelMin==0)
-//     _levelMin++;
-// }
-
-
-
-// void EventDriven::initLevelMax()
-// {
-//   _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
-//   // Interactions initialization (here, since level depends on the
-//   // type of simulation) level corresponds to the number of Y and
-//   // Lambda derivatives computed.
-//   if(_levelMax==0)
-//     _levelMax++;
-// }
-
 void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
   // computeF is supposed to fill xdot in, using the definition of the

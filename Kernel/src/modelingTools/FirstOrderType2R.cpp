@@ -203,10 +203,11 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned in
 
 
 }
+
 void FirstOrderType2R::preparNewtonIteration(Interaction& inter)
 {
 
-  /* compute the comtribution in xp, for the next iteration */
+  /* compute the contribution in xp, for the next iteration */
   SiconosVector& lambda = *inter.lambda(0);
   SiconosVector tmpV = SiconosVector(inter.data(ds_xp)->size());
 

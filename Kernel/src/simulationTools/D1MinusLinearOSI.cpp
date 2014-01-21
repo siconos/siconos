@@ -27,6 +27,9 @@
 #include "NewtonImpactNSL.hpp"
 #include "BlockVector.hpp"
 #include "CxxStd.hpp"
+#include "Topology.hpp"
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES

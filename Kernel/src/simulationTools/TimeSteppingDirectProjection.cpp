@@ -26,6 +26,8 @@
 #include "OneStepIntegrator.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 

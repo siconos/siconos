@@ -27,6 +27,7 @@
 #include "SimpleMatrix.hpp"
 #include "Model.hpp"
 #include "Simulation.hpp"
+#include "EventsManager.hpp"
 
 PID::PID(SP::ControlSensor sensor): Actuator(PID_, sensor), _ref(0), _curDeltaT(0)
 {

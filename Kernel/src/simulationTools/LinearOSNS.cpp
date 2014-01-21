@@ -166,6 +166,12 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vd);
+  // Get osi property from interaction
+  // We assume that all ds in vertex_inter have the same osi.
+  SP::OneStepIntegrator Osi = indexSet->properties(vd).osi;
+  //SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
+  OSI::TYPES  osiType = Osi->getType();
+
 
   // At most 2 DS are linked by an Interaction
   SP::DynamicalSystem DS1;
@@ -245,9 +251,6 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       inter->getRightInteractionBlockForDS(pos, rightInteractionBlock);
 
-      SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
-      OSI::TYPES  osiType = Osi->getType();
-
       if (osiType == OSI::EULERMOREAUOSI)
       {
         if ((std11::static_pointer_cast<EulerMoreauOSI> (Osi))->useGamma() || (std11::static_pointer_cast<EulerMoreauOSI> (Osi))->useGammaForRelation())
@@ -266,7 +269,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       {
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
-        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
+        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
         centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
 
         //      integration of r with theta method removed
@@ -309,7 +312,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       DEBUG_EXPR(leftInteractionBlock->display(););
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
       work->trans();
-      SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
+      SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
       DEBUG_EXPR(centralInteractionBlock->display(););
       centralInteractionBlock->PLUForwardBackwardInPlace(*work);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
@@ -340,10 +343,12 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
-
   SP::DynamicalSystem ds = indexSet->bundle(ed);
   SP::Interaction inter1 = indexSet->bundle(indexSet->source(ed));
   SP::Interaction inter2 = indexSet->bundle(indexSet->target(ed));
+  // Once again we assume that inter1 and inter2 have the same osi ...
+  SP::OneStepIntegrator Osi = indexSet->properties(indexSet->source(ed)).osi;
+  
   // For the edge 'ds', we need to find relative position of this ds
   // in inter1 and inter2 relation matrices (--> pos1 and pos2 below)
   // - find if ds is source or target in inter_i
@@ -431,7 +436,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     inter2->getRightInteractionBlockForDS(pos2, rightInteractionBlock);
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
-    SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(ds);
+    SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
     centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
 
     //      integration of r with theta method removed
@@ -480,7 +485,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     // size checking inside the getBlock function, a
     // getRight call will fail.
     rightInteractionBlock->trans();
-    SP::SimpleMatrix centralInteractionBlock = getOSIMatrix(ds);
+    SP::SimpleMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
     centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
     //*currentInteractionBlock +=  *leftInteractionBlock ** work;
     prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
@@ -494,7 +499,11 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   DEBUG_PRINT("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   SP::DynamicalSystem ds = indexSet->properties(vertex_inter).source;
-  SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
+  
+  // Get the osi for the concerned interaction. Note FP: this must be a property
+  // of ds rather than interaction?
+  SP::OneStepIntegrator Osi = indexSet->properties(vertex_inter).osi;
+  //SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   OSI::TYPES  osiType = Osi->getType();
   unsigned int sizeY = inter->nonSmoothLaw()->size();

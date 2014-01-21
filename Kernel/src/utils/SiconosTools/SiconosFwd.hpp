@@ -54,6 +54,7 @@ DEFINE_SPTR(RelationXML)
 DEFINE_SPTR(Simulation)
 DEFINE_SPTR(SimulationXML)
 DEFINE_SPTR(EventDriven)
+DEFINE_SPTR(EventsManager)
 
 DEFINE_SPTR(RelayNSL)
 DEFINE_SPTR(MixedComplementarityConditionNSL)

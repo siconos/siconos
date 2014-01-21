@@ -42,7 +42,8 @@ protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(MLCPProjectOnConstraints);
-
+  
+  /** ?? */
   double _alpha;
 
   /** disabled or enabled projection On Equality (or Unilateral) for unilateral constraints */
@@ -53,16 +54,17 @@ protected:
 public:
 
   /** compute the number of inequality and equality for a given tuple of Interactions
-   * update the global number of equality(_n) and inequality (_m)
-   * set up _numerics_problem parameters (blocksRows and blocksIsComp )
-   */
+      update the global number of equality(_n) and inequality (_m)
+      set up _numerics_problem parameters (blocksRows and blocksIsComp )
+      \param inter1 first interaction considered
+      \param inter2 second interaction
+  */
   virtual void computeOptions(SP::Interaction inter1, SP::Interaction inter2);
 
 
   /** constructor from data
-   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
-   *  (optional, default = NULL => read .opt file in Numerics)
-   *  \param std::string: id of the problem (default = "unamed")
+   \param newNewNumericsSolverId solver id
+   \param alpha alpha parameter value
    */
   MLCPProjectOnConstraints(int newNewNumericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
 
@@ -70,7 +72,8 @@ public:
   */
   ~MLCPProjectOnConstraints() {};
 
-  /** getter for alpha
+  /** 
+      \return alpha value
   */
   double alpha()
   {
@@ -78,6 +81,7 @@ public:
   };
 
   /** setter for alpha
+      \param[in] newval new value for alpha parameter
   */
   void setAlpha(double newval)
   {
@@ -92,6 +96,7 @@ public:
 
 
   /** Display the set of blocks for  a given indexSet
+      \param indexSet the graph of interactions
    */
   void displayBlocks(SP::InteractionsGraph indexSet);
 
@@ -112,32 +117,36 @@ public:
   virtual void updateInteractionBlocksOLD();
 
   /** compute diagonal Interaction block
-   * \param const InteractionsGraph::VDescriptor a vertex descriptor
-   */
-  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&);
+      \param vd a vertex (interaction) descriptor
+  */
+  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
 
   /** compute diagonal Interaction block
-   * \param const InteractionsGraph::VDescriptor a vertex descriptor
-   */
-  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor&);
+      \param vd a vertex (interaction) descriptor
+  */
+  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor& vd);
 
   /** To compute a part of the "q" vector of the OSNS
-      \param InteractionsGraph::VDescriptor, vertex (interaction) which corresponds to the considered block
+      \param vd vertex (interaction) which corresponds to the considered block
       \param pos the position of the first element of yOut to be set
   */
-  virtual void computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos);
+  virtual void computeqBlock(InteractionsGraph::VDescriptor& vd, unsigned int pos);
 
   /** post-treatment for  MLCPProjectOnConstraints
    */
   virtual void postCompute();
 
   /** post-treatment for  MLCPProjectOnConstraints for LagrangianR
-   */
-  virtual void postComputeLagrangianR(SP::Interaction, unsigned int);
+      \param inter the considered interaction
+      \param pos interaction position in the global vector
+  */
+  virtual void postComputeLagrangianR(SP::Interaction inter, unsigned int pos);
 
   /** post-treatment for  MLCPProjectOnConstraints for NewtonEulerR
+      \param inter the considered interaction
+      \param pos interaction position in the global vector
    */
-  virtual void postComputeNewtonEulerR(SP::Interaction, unsigned int);
+  virtual void postComputeNewtonEulerR(SP::Interaction inter, unsigned int pos);
 
   /** visitors hook
    */

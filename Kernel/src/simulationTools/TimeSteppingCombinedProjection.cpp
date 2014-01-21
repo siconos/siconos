@@ -28,7 +28,9 @@
 #include "MLCPProjectOnConstraints.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "Topology.hpp"
 
 class MLCPProjectOnConstraints;
 

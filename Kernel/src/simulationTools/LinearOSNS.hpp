@@ -128,7 +128,7 @@ public:
   /** set the value of w to newValue
    *  \param newValue the new SiconosVector
    */
-  void setW(const SiconosVector&);
+  void setW(const SiconosVector& newValue);
 
   /** set w to pointer newPtr
    *  \param newPtr the new SP::SiconosVector
@@ -252,10 +252,10 @@ public:
   virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
 
   /** To compute a part of the "q" vector of the OSNS
-      \param InteractionsGraph::VDescriptor, vertex (interaction) which corresponds to the considered block
+      \param vertex, vertex (interaction) which corresponds to the considered block
       \param pos the position of the first element of yOut to be set
   */
-  virtual void computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos);
+  virtual void computeqBlock(InteractionsGraph::VDescriptor& vertex, unsigned int pos);
 
   /** compute vector q
    *  \param time the current time
@@ -263,7 +263,8 @@ public:
   void computeq(double time);
 
   /** pre-treatment for LinearOSNS
-   *  \param time the current time
+      \param time the current time
+      \return true if succeeded
    */
   virtual bool preCompute(double time);
 

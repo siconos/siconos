@@ -21,7 +21,7 @@
 #include "SimulationTools.hpp"
 #include "CommonSMC.hpp"
 #include "ControlSensor.hpp"
-
+#include "Model.hpp"
 
 void CommonSMC::initialize(const Model& m)
 {

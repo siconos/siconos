@@ -255,11 +255,7 @@ void FirstOrderNonLinearDS::zeroPlugin()
   _pluginJacxf.reset(new PluggedObject());
   _pluginM.reset(new PluggedObject());
 }
-void FirstOrderNonLinearDS::preparStep()
-{
-//  _xp->zero();
-//  _r->zero();
-}
+
 bool FirstOrderNonLinearDS::checkDynamicalSystem()
 {
   DynamicalSystem::checkDynamicalSystem();

@@ -47,6 +47,8 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include <debug.h>
+#include "Model.hpp"
+
 
 
 
@@ -124,6 +126,47 @@ Simulation::~Simulation()
   if (statOut.is_open()) statOut.close();
 }
 
+void Simulation::setTimeDiscretisationPtr(SP::TimeDiscretisation td)
+{
+  _eventsManager->setTimeDiscretisationPtr(td);
+}
+
+double Simulation::getTk() const
+{
+  return _eventsManager->getTk();
+}
+
+double Simulation::getTkp1() const
+{
+  return _eventsManager->getTkp1();
+}
+
+double Simulation::getTkp2() const
+{
+  return _eventsManager->getTkp2();
+}
+
+double Simulation::currentTimeStep() const
+{
+  return _eventsManager->currentTimeStep();
+}
+
+double Simulation::startingTime() const
+{
+  return _eventsManager->startingTime();
+}
+
+double Simulation::nextTime() const
+{
+  return _eventsManager->nextTime();
+}
+
+bool Simulation::hasNextEvent() const
+{
+  return _eventsManager->hasNextEvent();
+}
+
+
 // clear all maps to break shared_ptr cycle
 void Simulation::clear()
 {
@@ -140,39 +183,6 @@ void Simulation::clear()
 
 // Getters/setters
 
-void Simulation::setOneStepIntegrators(const OSISet& newSet)
-{
-  _allOSI->clear();
-  _allOSI->insert(newSet.begin(), newSet.end());
-}
-
-SP::OneStepIntegrator Simulation::integratorOfDS(int numberDS) const
-{
-
-  DSOSIConstIterator it = _osiMap.begin();
-  bool found = false;
-
-  while (!found || it != _osiMap.end())
-  {
-    if ((it->first)->number() == numberDS)
-      found = true;
-    else ++it;
-  }
-
-  return (it->second);
-}
-
-
-
-SP::OneStepIntegrator Simulation::integratorOfDS(SP::DynamicalSystem ds) const
-{
-  DSOSIConstIterator it = _osiMap.find(ds);
-  if (it == _osiMap.end())
-    RuntimeException::selfThrow("Simulation::integratorOfDS(ds), ds not found in the integrator set.");
-  return it->second;
-}
-
-
 void Simulation::insertIntegrator(SP::OneStepIntegrator osi)
 {
   _allOSI->insert(osi);
@@ -188,6 +198,11 @@ void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
     // integrator
     RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");
   _osiMap[ds] = osi;
+}
+
+SP::InteractionsGraph Simulation::indexSet(unsigned int i)
+{
+  return (_model.lock()->nonSmoothDynamicalSystem()->topology()->indexSet(i)) ;
 }
 
 SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
@@ -256,7 +271,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
     }
   }
-
+ 
   // This is the default
   _levelMinForInput = LEVELMAX;
   _levelMaxForInput = 0;
@@ -512,7 +527,6 @@ void Simulation::processEvents()
 // class DynamicalSystem;
 // class OneStepIntegrator;
 // class MoreauJeanOSI;
-
 struct Simulation::SetupLevels : public SiconosVisitor
 {
   using SiconosVisitor::visit;
@@ -1011,12 +1025,13 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
    */
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   SP::DynamicalSystem ds = indexSet0->properties(indexSet0->descriptor(inter)).source;
-  SP::OneStepIntegrator osi =  integratorOfDS(ds);
+  // Note FP :  we should probably connect osi and graph before, in simulation->initialize?
+  DSOSIConstIterator it = _osiMap.find(ds);
+  SP::OneStepIntegrator osi = it->second;
   indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
   std11::shared_ptr<SetupLevels> setupLevels;
   setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
   osi->accept(*(setupLevels.get()));
-
   if (!init) // We are not computing the levels at the initialization
   {
     SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
@@ -1062,4 +1077,11 @@ void Simulation::computeLevelsForInputAndOutput()
   DEBUG_PRINTF("_levelMinForOutput =%d\n", _levelMinForInput);
   DEBUG_PRINTF("_levelMaxForOutput =%d\n", _levelMaxForInput);
 }
+
+void Simulation::updateT(double T)
+{
+  _T = T;
+  _eventsManager->updateT(T);
+}
+
 

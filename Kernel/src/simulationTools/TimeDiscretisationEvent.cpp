@@ -19,6 +19,7 @@
 #include "TimeDiscretisationEvent.hpp"
 #include "EventFactory.hpp"
 #include "Simulation.hpp"
+#include "TimeDiscretisation.hpp"
 
 using namespace EventFactory;
 

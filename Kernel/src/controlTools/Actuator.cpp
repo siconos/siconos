@@ -25,6 +25,7 @@
 #include "EventFactory.hpp"
 #include "Simulation.hpp"
 #include <iostream>
+#include "NonSmoothDynamicalSystem.hpp"
 
 Actuator::Actuator(): _type(0), _id("none")
 {

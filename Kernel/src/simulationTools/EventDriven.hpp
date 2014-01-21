@@ -62,12 +62,6 @@ protected:
    */
   static double TOL_ED;
 
-  // /** compute LevelMin */
-  // void initLevelMin();
-
-  // /** compute LevelMax */
-  // void initLevelMax();
-
   /** boolean variable to known whether Newton iterations converges or not */
   bool _isNewtonConverge;
 

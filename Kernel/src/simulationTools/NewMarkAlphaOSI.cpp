@@ -23,6 +23,9 @@
 #include "LagrangianR.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+
 using namespace RELATION;
 //#define DEBUG_NEWMARK
 

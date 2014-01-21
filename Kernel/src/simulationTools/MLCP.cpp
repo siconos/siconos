@@ -21,6 +21,8 @@
 #include "EqualityConditionNSL.hpp"
 #include "Simulation.hpp"
 #include "OSNSMatrix.hpp"
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
 using namespace RELATION;
 //#define MLCP_DEBUG

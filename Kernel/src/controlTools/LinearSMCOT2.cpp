@@ -26,7 +26,9 @@
 #include "SiconosVector.hpp"
 #include "LsodarOSI.hpp"
 #include "ControlSensor.hpp"
-
+#include "Model.hpp"
+#include "TimeDiscretisation.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
 LinearSMCOT2::LinearSMCOT2(SP::ControlSensor sensor): CommonSMC(LINEAR_SMC_OT2, sensor), _coeff(0.0)
 {
@@ -143,5 +145,12 @@ void LinearSMCOT2::actuate()
   _simulPred->advanceToEvent();
   _simulPred->processEvents();
 }
+
+void LinearSMCOT2::setTimeDiscretisation(const TimeDiscretisation& td)
+{ 
+  _tdPhi.reset(new TimeDiscretisation(td));
+  _tdPred.reset(new TimeDiscretisation(td));
+}
+
 
 AUTO_REGISTER_ACTUATOR(LINEAR_SMC_OT2, LinearSMCOT2)

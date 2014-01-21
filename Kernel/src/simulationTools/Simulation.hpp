@@ -25,13 +25,14 @@
 
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
-#include "EventsManager.hpp"
-#include "SiconosPointers.hpp"
-#include "DynamicalSystemsSet.hpp"
+#include "SiconosFwd.hpp"
+// #include "EventsManager.hpp"
+// #include "SiconosPointers.hpp"
+// #include "DynamicalSystemsSet.hpp"
 #include <fstream>
-#include "Model.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
-#include "Topology.hpp"
+// #include "Model.hpp"
+// #include "NonSmoothDynamicalSystem.hpp"
+// #include "Topology.hpp"
 
 
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
@@ -41,7 +42,6 @@ using namespace std::placeholders;
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #endif
-
 
 /** Description of the simulation process (integrators, time
     discretisation and so on) - Base class for TimeStepping or
@@ -184,7 +184,7 @@ private:
    */
   Simulation(const Simulation&);
 
-  /** assignment of simulation. Private => no copy nor pass-by value.
+  /* assignment of simulation. Private => no copy nor pass-by value.
    */
   Simulation& operator=(const Simulation&);
 
@@ -231,6 +231,7 @@ public:
   }
 
   /** set the name of the Simulation
+      \param newName the new name
    */
   inline void setName(const std::string& newName)
   {
@@ -238,48 +239,34 @@ public:
   }
 
   /** set the TimeDiscretisation of the Simulation
-   *  \param the TimeDiscretisation
+   *  \param[in] td the new TimeDiscretisation
    */
-  inline void setTimeDiscretisationPtr(SP::TimeDiscretisation td)
-  {
-    _eventsManager->setTimeDiscretisationPtr(td);
-  }
+  void setTimeDiscretisationPtr(SP::TimeDiscretisation td);
 
   /** get time instant k of the time discretisation
    *  \return the time instant t_k
    */
-  inline double getTk() const
-  {
-    return _eventsManager->getTk();
-  };
+  double getTk() const;
 
   /** get time instant k+1 of the time discretisation
    * \warning: this instant may be different from nextTime(), if for example some
       non-smooth events or some sensor events are present
      \return a double. If the simulation is near the end (t_{k+1} > T), it returns NaN.
    */
-  inline double getTkp1() const
-  {
-    return _eventsManager->getTkp1();
-  };
+  double getTkp1() const;
 
   /** get time instant k+2 of the time discretisation
    * \warning: this instant may be different from nextTime(), if for example some
       non-smooth events or some sensor events are present
    * \return a double. If the simulation is near the end (t_{k+2} > T), it returns NaN.
    */
-  inline double getTkp2() const
-  {
-    return _eventsManager->getTkp2();
-  };
+  double getTkp2() const;
 
   /** Get current timestep
    * \return the current timestep
    */
-  inline double currentTimeStep() const
-  {
-    return _eventsManager->currentTimeStep();
-  }
+  double currentTimeStep() const;
+
   /** get the EventsManager
    *  \return a pointer to EventsManager
    */
@@ -288,8 +275,8 @@ public:
     return _eventsManager;
   };
 
-  /** get the EventsManager
-   *  \return a pointer to EventsManager
+  /** set the EventsManager
+   *  \param newEM a pointer to EventsManager
    */
   inline void setEventsManager(SP::EventsManager newEM)
   {
@@ -300,19 +287,13 @@ public:
       time of currentEvent of eventsManager.)
    *  \return a double.
    */
-  inline double startingTime() const
-  {
-    return _eventsManager->startingTime();
-  };
+  double startingTime() const;
 
   /** get "next time" (ie ending point for current integration, time
       of nextEvent of eventsManager.)
    *  \return a double.
    */
-  inline double nextTime() const
-  {
-    return _eventsManager->nextTime();
-  };
+  double nextTime() const;
 
   /** get the current time step size ("next time"-"current time")
    *  \return a double.
@@ -326,10 +307,7 @@ public:
       events remain in the eventsManager).
    *  \return a bool.
    */
-  inline bool hasNextEvent() const
-  {
-    return _eventsManager->hasNextEvent();
-  };
+  bool hasNextEvent() const;
 
   /** get all the Integrators of the Simulation
    *  \return an OSISset
@@ -338,21 +316,6 @@ public:
   {
     return _allOSI;
   };
-
-  /** set the Integrators of the Simulation
-   *  \param an OSISset
-   */
-  void setOneStepIntegrators(const OSISet&);
-
-  /** searchs the integrator of the DS number "numberDS"
-   * \param an int ("numberDS")
-   */
-  SP::OneStepIntegrator integratorOfDS(int) const ;
-
-  /** get the integrator of "ds"
-   * \param a pointer to DynamicalSystem ("ds")
-   */
-  SP::OneStepIntegrator integratorOfDS(SP::DynamicalSystem) const ;
 
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
    *  \return an unsigned int
@@ -374,12 +337,10 @@ public:
   void addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator osi);
 
   /** get a pointer to indexSets[i]
-   *  \return a graph of interactions
+      \param i number of the required index set
+      \return a graph of interactions
    */
-  SP::InteractionsGraph indexSet(unsigned int i)
-  {
-    return (_model.lock()->nonSmoothDynamicalSystem()->topology()->indexSet(i)) ;
-  };
+  SP::InteractionsGraph indexSet(unsigned int i);
 
   /** get allNSProblems
    *  \return a pointer to OneStepNSProblems object (container of
@@ -428,16 +389,17 @@ public:
   };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
-   *  \param a std::string, the name of the osns
-   *  \return a pointer to OneStepNSProblem
+      \param id number of the required osnspb
+      \return a pointer to OneStepNSProblem
    */
-  SP::OneStepNSProblem oneStepNSProblem(int);
+  SP::OneStepNSProblem oneStepNSProblem(int id);
 
   /** add a OneStepNSProblem in the Simulation (if its not the first,
       it needs to have an id clearly defined)
-   *  \param a smart pointer to OneStepNSProblem
+      \param osns the new OneStepNSProblem
+      \param Id its id
    */
-  virtual void insertNonSmoothProblem(SP::OneStepNSProblem, int Id = SICONOS_OSNSP_DEFAULT);
+  virtual void insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id = SICONOS_OSNSP_DEFAULT);
 
   /** get the SimulationXML* of the Simulation
    *  \return a pointer on the SimulationXML of the Simulation
@@ -448,7 +410,7 @@ public:
   }
 
   /** set the SimulationXML of the Simulation
-   *  \param SimulationXML* : the pointer to set the SimulationXML
+   *  \param strxml the pointer to set the SimulationXML
    */
   inline void setSimulationXMLPtr(SP::SimulationXML strxml)
   {
@@ -456,7 +418,7 @@ public:
   }
 
   /** get the Model which contains the Simulation
-   *  \return SP::Model : the Model which the Simulation
+   *  \return the Model of this simulation
    */
   inline SP::Model model() const
   {
@@ -464,7 +426,7 @@ public:
   }
 
   /** set the Model which contains the Simulation
-   *  \param SP::Model : the Model to set
+      \param m the new Model
    */
   inline void setModelPtr(SP::Model m)
   {
@@ -481,7 +443,7 @@ public:
 
   /** set the value of offset for q dof vector in dynamical systems
       (to avoid events accumulation)
-   *  \param a double;
+      \param inputVal new tolerance
    */
   void setTolerance(double inputVal)
   {
@@ -489,7 +451,7 @@ public:
   };
 
   /** set printStat value: if true, print solver stats.
-   * \param a bool
+      \param newVal true to activate stats
    */
   inline void setPrintStat(const bool& newVal)
   {
@@ -497,6 +459,7 @@ public:
   };
 
   /** get printStat value
+      \return true if stats are activated
    */
   inline bool getPrintStat() const
   {
@@ -510,16 +473,16 @@ public:
 
   /** update indexSets[i] of the topology, using current y and lambda
       values of Interactions.
-   *  \param unsigned int: the number of the set to be updated
+      \param level the number of the set to be updated
    */
-  virtual void updateIndexSet(unsigned int) = 0;
+  virtual void updateIndexSet(unsigned int level) = 0;
 
   /** Complete initialisation of the Simulation (OneStepIntegrators,
       OneStepNSProblem, TImediscretisation).
-      \param the model, which will own the Simulation
-      \param optional flag for partial initialisation
+      \param m the model to be linked to this Simulation
+      \param init optional flag for partial initialization
   */
-  virtual void initialize(SP::Model, bool = true);
+  virtual void initialize(SP::Model m, bool init = true);
 
   /** Set OSI (DS) non-smooth part to zero.
    */
@@ -540,15 +503,15 @@ public:
   void pushInteractionsInMemory();
 
   /** computes a one step NS problem
-   *  \param a std::string, the id of the OneStepNSProblem to be computed
-   *  \return an int, information about the solver convergence.
+   *  \param nb the id of the OneStepNSProblem to be computed
+   *  \return information about the solver convergence.
    */
-  int computeOneStepNSProblem(int);
+  int computeOneStepNSProblem(int nb);
 
   /** update input, state of each dynamical system and output
-   *  \param lambda order used to compute input
+   *  \param level lambda order used to compute input
    */
-  virtual void update(unsigned int) = 0;
+  virtual void update(unsigned int level) = 0;
 
   /** update input, state of each dynamical system and output for all
       levels between levelMin and levelMax
@@ -570,27 +533,24 @@ public:
   virtual void advanceToEvent() = 0;
 
 
-  /**
-   * set the option to specify if a relative convergence citeron must
-   * be used to stop the Newton iterations.
-   *
-   */
+  /* Set the option to specify if a relative convergence criterion must
+   be used to stop the Newton iterations.
+   \param use true if relative critarion activated
+  */
   inline void setUseRelativeConvergenceCriteron(bool use)
   {
     _useRelativeConvergenceCriterion = use;
   };
   /**
-   * return true iff the relative convergence criteron is activated.
-   *
+     \return true if the relative convergence criterion is activated.
    */
   inline bool useRelativeConvergenceCriteron()
   {
     return _useRelativeConvergenceCriterion;
   };
 
-  /**
-   * set the relative convergence tolerence
-   *
+  /** Set the relative convergence tolerance
+      \param v tolerance value
    */
   inline void setRelativeConvergenceTol(double v)
   {
@@ -598,7 +558,7 @@ public:
   };
 
   /**
-   * get the relative convergence tolerence.
+   \return the relative convergence tolerence.
    *
    */
   inline double relativeConvergenceTol()
@@ -607,7 +567,7 @@ public:
   };
 
   /**
-   * To specify if the relative convergence criteron held.
+   \param newVal a new relative convergence criterion
    *
    */
   inline void setRelativeConvergenceCriterionHeld(bool newVal)
@@ -615,7 +575,7 @@ public:
     _relativeConvergenceCriterionHeld = newVal;
   };
   /**
-   * return true iff the relative convergence criteron held.
+     \return true if the relative convergence criterion held.
    *
    */
   inline bool relativeConvergenceCriterionHeld()
@@ -631,14 +591,14 @@ public:
   virtual void saveSimulationToXML();
 
   /** compute r thanks to lambda[level] for all Interactions
-   *  \param unsigned int: lambda level
+      \param level lambda level
    */
-  virtual void updateInput(unsigned int);
+  virtual void updateInput(unsigned int level);
 
   /** compute output for all the interactions
-   *  \param  unsigned int: y min order to be computed default 0
+      \param level y min order to be computed
    */
-  void updateOutput(unsigned int = 0);
+  void updateOutput(unsigned int level = 0);
 
   /** call eventsManager processEvents.
    */
@@ -669,11 +629,7 @@ public:
    * \warning this should be called only from the Model, to synchronise the 2 values
    * \param T the new final time
    */
-  inline void updateT(double T)
-  {
-    _T = T;
-    _eventsManager->updateT(T);
-  };
+  void updateT(double T);
 
   /** visitors hook
    */

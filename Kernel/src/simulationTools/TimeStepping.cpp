@@ -359,35 +359,10 @@ void TimeStepping::initOSNS()
        * and input/output y[_levelMinForInput], lambda[_levelMinForInput] that is considered in osns */
       (*itOsns)->setInputOutputLevel(_levelMinForInput);
       (*itOsns)->setIndexSetLevel(_levelMinForInput);
-
-
-
       (*itOsns)->initialize(shared_from_this());
     }
   }
 }
-
-// void TimeStepping::initLevelMin()
-// {
-//   assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree()>=0);
-
-//   _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
-
-//   if(_levelMin!=0)
-//     _levelMin--;
-// }
-
-// void TimeStepping::initLevelMax()
-// {
-//   _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
-//   // Interactions initialization (here, since level depends on the
-//   // type of simulation) level corresponds to the number of Y and
-//   // Lambda derivatives computed.
-
-//   if(_levelMax!=0)
-//     _levelMax--;
-//   // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for _levelMax
-// }
 
 void TimeStepping::nextStep()
 {
@@ -480,16 +455,6 @@ void TimeStepping::run()
   std::cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" <<std::endl;
   while (_eventsManager->hasNextEvent())
   {
-
-    //  if (_newtonOptions=="linear" || )
-    //       advanceToEvent();
-
-    //     else if (_newtonOptions=="Newton")
-    //       newtonSolve(criterion,maxIter);
-
-    //     else
-    //       RuntimeException::selfThrow("TimeStepping::run(opt) failed. Unknow simulation option: "+opt);
-
     advanceToEvent();
 
     processEvents();
@@ -500,22 +465,6 @@ void TimeStepping::run()
 
 void TimeStepping::advanceToEvent()
 {
-  //   computeInitialResidu();
-  //   /*advance To Event consists of one Newton iteration, here the jacobians are updated.*/
-  //   prepareNewtonIteration();
-  //   // solve ...
-  //   computeFreeState();
-  //   int info = 0;
-  //   if (!_allNSProblems->empty())
-  //     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
-  //   // Check output from solver (convergence or not ...)
-  //   if (!checkSolverOutput)
-  //     DefaultCheckSolverOutput(info);
-  //   else
-  //     checkSolverOutput(info, this);
-  //   // Update
-  //   update(_levelMin);
-
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
   
   // Initialize lambdas of all interactions.
@@ -557,49 +506,11 @@ void   TimeStepping::prepareNewtonIteration()
       ner->computeJachqT(*inter, ds1, ds2);
     }
     inter->relation()->computeJacg(getTkp1(), *inter);
-  } 
-  /* let's consider only active Interactions */
-  // SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-  // if (topo->numberOfIndexSet()>1)
-  // {
-  //   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
-  //   InteractionsGraph::VIterator ui, uiend;
-  //   for(std11::tie(ui, uiend)=indexSet1->vertices(); ui != uiend; ++ui)
-  //   {
-  //     indexSet1->bundle(*ui)->relation()->computeJach(getTkp1(), *indexSet1->bundle(*ui));
-  //     indexSet1->bundle(*ui)->relation()->computeJacg(getTkp1(), *indexSet1->bundle(*ui));
-  //   }
-  // }
 
-  /*reset to zero the ds buffers*/
-  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
-
-  /* should be evaluated only if needed */
-  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-  {
-    dsGraph->bundle(*vi)->preparStep();
-    //     (*itds)->xp()->zero();
-    //     (*itds)->R()->zero();
-  }
-  /**/
-  
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    inter = indexSet0->bundle(*ui);
+    // Note FP : prepar call below is only useful for FirstOrderType2R. 
+    // We should check if we really need this ...
     inter->relation()->preparNewtonIteration(*inter);
   }
-
-  /* let's consider only active Interactions */
-//  if (topo->numberOfIndexSet()>1)
-//  {
-//    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
-//    InteractionsGraph::VIterator ui, uiend;
-//    for(std11::tie(ui, uiend)=indexSet1->vertices(); ui != uiend; ++ui)
-//    {
-//      indexSet1->bundle(*ui)->preparNewtonIteration();
-//    }
-  // }
 
   bool topoHasChanged = model()->nonSmoothDynamicalSystem()->topology()->hasChanged();
   if (topoHasChanged)
@@ -654,7 +565,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
     update(_levelMaxForInput);
 
-    //_isNewtonConverge = newtonCheckConvergence(criterion);
     if (!_allNSProblems->empty() &&   indexSet0->size() > 0)
       saveYandLambdaInOldVariables();
   }
@@ -681,8 +591,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       {
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
       }
-      //if(info)
-      //  std::cout<<"info!"<<endl;
       // Check output from solver (convergence or not ...)
       if (!checkSolverOutput)
         DefaultCheckSolverOutput(info);
@@ -703,10 +611,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
       if (info)
         std::cout << "TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
-    }
-    else
-    {
-      //      std::cout << "TimeStepping::newtonSolve succeed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
     }
   }
   else

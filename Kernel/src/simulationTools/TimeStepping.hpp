@@ -56,12 +56,6 @@ protected:
   */
   ACCEPT_SERIALIZATION(TimeStepping);
 
-  // /** compute LevelMin */
-  // void initLevelMin();
-
-  // /** compute LevelMax */
-  // void initLevelMax();
-
   /** Default Newton tolerance used in call of run() of ComputeOneStep() */
   double _newtonTolerance;
 

@@ -440,10 +440,6 @@ public:
    * \param level the level to reset
    */
   virtual void resetNonSmoothPart(unsigned int level);
-  /*
-   * reset work vectors.
-   */
-  virtual void preparStep();
 
   /*
    * get the Xp work vector.

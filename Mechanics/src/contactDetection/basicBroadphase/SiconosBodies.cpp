@@ -22,6 +22,7 @@
 #include "SiconosBodies.hpp"
 
 #include <Simulation.hpp>
+#include <Model.hpp>
 #include "SpaceFilter.hpp"
 
 void SiconosBodies::compute()

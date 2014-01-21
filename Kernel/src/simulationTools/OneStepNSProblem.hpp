@@ -353,11 +353,12 @@ public:
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
       (Ex: for MoreauJeanOSI, W)
-      \param[in] SP::DynamicalSystem, the concerned dynamical system
-      \param[in,out] SP::SicnosMatrix the required matrix (pointer, no need
-      to allocate block before call).
+      \param[in] osi, the OSI of the concerned dynamical system
+      
+      \param[in] ds, the concerned dynamical system
+      \return pointer to the required matrix.
   */
-  SP::SimpleMatrix getOSIMatrix(SP::DynamicalSystem ds);
+  SP::SimpleMatrix getOSIMatrix(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
 
   /** visitors hook
    */

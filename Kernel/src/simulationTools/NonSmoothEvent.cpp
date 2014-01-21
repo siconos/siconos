@@ -21,6 +21,8 @@
 #include "EventDriven.hpp"
 #include "OneStepIntegrator.hpp"
 #include "LagrangianDS.hpp"
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
 
 using namespace EventFactory;
