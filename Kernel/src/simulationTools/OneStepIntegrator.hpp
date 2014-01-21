@@ -284,15 +284,14 @@ public:
   }
   ;
 
-  /** Apply the rule to one Interaction to known if is it should be removed
-   * in the IndexSet of level i
+  /** Apply the rule to one Interaction to know if is it should be removed
+   * from the IndexSet of level i
    */
   virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   {
-    RuntimeException::selfThrow("OneStepIntegrator::removeInteractionInIndexSet - Should be called at this level");
+    RuntimeException::selfThrow("OneStepIntegrator::removeInteractionInIndexSet - Should not be called at this level");
     return 0;
   };
-
 
   /** visitors hook
    */

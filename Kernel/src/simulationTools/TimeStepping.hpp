@@ -101,12 +101,6 @@ protected:
    */
   bool _isNewtonConverge;
 
-
-  /** initialisation specific to TimeStepping for Interactions.
-   */
-  void initializeInteraction(SP::Interaction inter);
-
-
   /** Default Constructor
    */
   TimeStepping() : 

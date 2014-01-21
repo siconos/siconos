@@ -23,6 +23,7 @@
 #define NEWTONEULERRELATION_H
 
 #include "Relation.hpp"
+class SimpleMatrix;
 
 /**Pointer to function - Plug-in utilities*/
 typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int, double*);
@@ -69,7 +70,7 @@ protected:
   /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
    *  i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
    */
-  SP::SimpleMatrix _jachq;
+  SP::SiconosMatrix _jachq;
 
   /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
    *  i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
@@ -125,15 +126,14 @@ public:
   /** get a pointer on matrix Jach[index]
   *  \return a pointer on a SiconosMatrix
   */
-  inline SP::SimpleMatrix jachq() const
+  inline SP::SiconosMatrix jachq() const
   {
     return _jachq;
   }
+
   //proj_with_q  inline SP::SimpleMatrix jachqProj() const { return _jachqProj; }
-  inline void setJachq(SP::SimpleMatrix newJachq)
-  {
-    _jachq = newJachq;
-  }
+  inline void setJachq(SP::SimpleMatrix newJachq);
+
   inline SP::SiconosMatrix jachqDot() const
   {
     return _jachqDot;
@@ -176,10 +176,8 @@ public:
   *  \param SP::SiconosMatrix  newPtr
   *  \param unsigned int: index position in Jach vector
   */
-  inline void setJachqPtr(SP::SimpleMatrix newPtr)
-  {
-    _jachq = newPtr ;
-  }
+  void setJachqPtr(SP::SimpleMatrix newPtr);
+
   /** Plugin object for the time--derivative of Jacobian i.e.
   * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
   * stored in _dotjachq

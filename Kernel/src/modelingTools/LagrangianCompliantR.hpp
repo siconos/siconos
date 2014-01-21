@@ -71,7 +71,6 @@ protected:
   * @param sizeZ : size of vector z.
   * @param[in,out] z : a vector of user-defined parameters
   */
-
   SP::PluggedObject _pluginJachlambda;
 
   /** default constructor

@@ -41,13 +41,6 @@ void TimeSteppingD1Minus::initOSNS()
   // initialize OSNS for InteractionsGraph from Topology
   assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
   SP::Topology topo =  model()->nonSmoothDynamicalSystem()->topology();
-  // SP::InteractionsGraph indexSet0 = topo->indexSet(0);
-
-  // InteractionsGraph::VIterator ui, uiend;
-  // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  // {
-  //   initializeInteraction(indexSet0->bundle(*ui));
-  // }
 
   // there is at least one OSNP
   if (!_allNSProblems->empty())

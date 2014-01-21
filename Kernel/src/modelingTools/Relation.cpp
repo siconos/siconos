@@ -18,7 +18,7 @@
  */
 #include "Relation.hpp"
 #include "Interaction.hpp"
-
+#include "PluggedObject.hpp"
 
 
 // Default constructor
@@ -92,6 +92,42 @@ void Relation::display() const
             << " and subtype "
             << _subType <<std::endl;
 }
+
+bool Relation::ishPlugged() const
+{
+  return _pluginh->isPlugged();
+}
+
+bool Relation::isJachxPlugged() const
+{
+  return _pluginJachx->isPlugged();
+}
+
+bool Relation::isJachlambdaPlugged() const
+{
+  return _pluginJachlambda->isPlugged();
+}
+
+bool Relation::isgPlugged() const
+{
+  return _pluging->isPlugged();
+}
+
+bool Relation::isJacLgPlugged() const
+{
+  return _pluginJacLg->isPlugged();
+}
+
+bool Relation::isfPlugged() const
+{
+  return _pluginf->isPlugged();
+}
+
+bool Relation::isePlugged() const
+{
+  return _plugine->isPlugged();
+}
+
 
 void Relation::computeg(double time, Interaction& inter)
 {

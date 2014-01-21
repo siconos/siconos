@@ -15,49 +15,48 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
+ */
 /*! \file RelationNamespace.hpp
   \brief Namespace related to relations
 */
 
 #ifndef RELATIONNAMESPACE_HPP
 #define RELATIONNAMESPACE_HPP
-#include "PluggedObject.hpp"
 
 /** Namespace for types related to relations */
 namespace RELATION
 {
 /** List of possible Relations types*/
-enum TYPES
-{
-  /** First Order */
-  FirstOrder,
-  /** Lagrangian */
-  Lagrangian,
-  /** Lagrangian */
-  NewtonEuler
-};
+  enum TYPES
+  {
+    /** First Order */
+    FirstOrder,
+    /** Lagrangian */
+    Lagrangian,
+    /** Lagrangian */
+    NewtonEuler
+  };
 
 /** List of possible Relations subtypes*/
-enum SUBTYPES
-{
-  /** non linear */
-  NonLinearR,
-  /** linear */
-  LinearR,
-  /** Linear and time invariant */
-  LinearTIR,
-  /** Scleronomous (lagrangian only) */
-  ScleronomousR,
-  /** Rheonomous (lagrangian only) */
-  RheonomousR,
-  /** Compliant (lagrangian only) */
-  CompliantR,
-  /** */
-  Type1R,
-  /** */
-  Type2R
-};
+  enum SUBTYPES
+  {
+    /** non linear */
+    NonLinearR,
+    /** linear */
+    LinearR,
+    /** Linear and time invariant */
+    LinearTIR,
+    /** Scleronomous (lagrangian only) */
+    ScleronomousR,
+    /** Rheonomous (lagrangian only) */
+    RheonomousR,
+    /** Compliant (lagrangian only) */
+    CompliantR,
+    /** */
+    Type1R,
+    /** */
+    Type2R
+  };
 }
 
 #endif

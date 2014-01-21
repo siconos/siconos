@@ -23,21 +23,14 @@
 
 #ifndef RELATION_H
 #define RELATION_H
-
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
-#include "RuntimeException.hpp"
-#include "Tools.hpp"
-#include "SiconosPointers.hpp"
-#include "PluginTypes.hpp"
+#include "SiconosFwd.hpp"
 #include "RelationNamespace.hpp"
-#include "PluggedObject.hpp"
-#include "DynamicalSystemsSet.hpp"
-//#include "Interaction.hpp"
+#include "SiconosVisitor.hpp"
 
 class SiconosVector;
 class SimpleMatrix;
 class Interaction;
+class PluggedObject;
 
 /** General Non Linear Relation (Virtual Base class for Relations).
  *  \author SICONOS Development Team - copyright INRIA
@@ -54,7 +47,7 @@ class Interaction;
  * Each relation must have the two following functions:
  *
  *  - computeOutput(...) to compute y using DS global variables.
- * - computeInput(...) to compute non-smooth DS part (r or p) using
+ *  - computeInput(...) to compute non-smooth DS part (r or p) using
  *   lambda.
  *
  * Depending on the DS class and the link type, various relations (ie
@@ -122,15 +115,15 @@ protected:
   SP::RelationXML _relationxml;
 
   /** basic constructor
-   *  \param a std::string that gives the type of the relation
-   *  \param a std::string that gives the subtype of the relation
+   *  \param : std::string that gives the type of the relation
+   *  \param : std::string that gives the subtype of the relation
    */
   Relation(RELATION::TYPES, RELATION::SUBTYPES);
 
   /** xml constructor
-   *  \param RelationXML* : the XML object corresponding
-   *  \param a std::string that gives the type of the relation
-   *  \param a std::string that gives the subtype of the relation
+   *  \param : RelationXML* : the XML object corresponding
+   *  \param : std::string that gives the type of the relation
+   *  \param : std::string that gives the subtype of the relation
    */
   Relation(SP::RelationXML, RELATION::TYPES, RELATION::SUBTYPES);
 
@@ -145,7 +138,7 @@ private:
    */
   Relation(const Relation&);
 
-  /** Assignment  => private, forbidden
+  /* Assignment  => private, forbidden
    */
   Relation& operator=(const Relation&);
 
@@ -165,7 +158,7 @@ public:
   }
 
   /** To set the RelationXML* of the Relation
-   *  \param RelationXML* : the pointer to set
+   *  \param rxml :RelationXML* the pointer to set
    */
   inline void setRelationXML(SP::RelationXML rxml)
   {
@@ -204,9 +197,10 @@ public:
   virtual const std::string getJachxName() const ;
 
   /** To get the name of Jacg[i] plugin
-   *  \return a std::string
-   */
-  virtual const std::string getJacgName(unsigned int) const;
+      \param i index number of the required plugin
+      \return : a std::string
+  */
+  virtual const std::string getJacgName(unsigned int i) const;
 
   /** To set a plug-in function to compute output function h
    *  \param pluginPath the complete path to the plugin
@@ -310,20 +304,17 @@ public:
     return _jachlambda;
   }
 
-
   virtual SP::SiconosMatrix C() const = 0;
 
-
-  /**
-   * return true if the relation is linear.
+  /** return true if the relation is linear.
+      \return bool
    */
-
   virtual bool isLinear()
   {
     return false;
   }
 
-  /** main relation members display
+  /** main relation members display 
    */
   virtual void display() const;
 
@@ -331,90 +322,98 @@ public:
    */
   virtual void saveRelationToXML() const;
 
-  /** Check if _pluginh is correctly set */
-  inline bool ishPlugged() const
-  {
-    return _pluginh->isPlugged();
-  };
+  /** Check if _pluginh is correctly set 
+      \return a bool
+   */
+  bool ishPlugged() const;
 
-  /** Check if _pluginJachx is correctly set */
-  inline bool isJachxPlugged() const
-  {
-    return _pluginJachx->isPlugged();
-  };
+  /** Check if _pluginJachx is correctly set
+      \return a bool
+  */
+  bool isJachxPlugged() const;
 
-  /** Check if _pluginJachlambda is correctly set */
-  inline bool isJachlambdaPlugged() const
-  {
-    return _pluginJachlambda->isPlugged();
-  };
+  /** Check if _pluginJachlambda is correctly set
+      \return a bool
+  */
+  bool isJachlambdaPlugged() const;
 
-  /** Check if _pluging is correctly set */
-  inline bool isgPlugged() const
-  {
-    return _pluging->isPlugged();
-  };
+  /** Check if _pluging is correctly set
+      \return a bool
+   */
+  bool isgPlugged() const;
 
-  /** Check if _pluginJacLg is correctly set */
-  inline bool isJacLgPlugged() const
-  {
-    return _pluginJacLg->isPlugged();
-  };
+  /** Check if _pluginJacLg is correctly set
+      \return a bool
+  */
+  bool isJacLgPlugged() const;
 
-  /** Check if _pluginf is correctly set */
-  inline bool isfPlugged() const
-  {
-    return _pluginf->isPlugged();
-  };
+  /** Check if _pluginf is correctly set
+      \return a bool
+  */
+  bool isfPlugged() const;
 
-  /** Check if _plugine is correctly set */
-  inline bool isePlugged() const
-  {
-    return _plugine->isPlugged();
-  };
+  /** Check if _plugine is correctly set
+      \return a bool
+  */
+  bool isePlugged() const;
 
-  /** Get _pluginh */
+  /** Get _pluginh 
+      \return a shared pointer to the plugin
+  */
   inline SP::PluggedObject getPluginh() const
   {
     return _pluginh;
   };
 
-  /** Get _pluginJachx */
+  /** Get _pluginJachx
+      \return a shared pointer to the plugin
+   */
   inline SP::PluggedObject getPluginJachx() const
   {
     return _pluginJachx;
   };
 
-  /** Get _pluginJachlambda */
+  /** Get _pluginJachlambda
+      \return a shared pointer to the plugin
+  */
   inline SP::PluggedObject getPluginJachlambda() const
   {
     return _pluginJachlambda;
   };
 
-  /** Get _pluging */
+  /** Get _pluging
+      \return a shared pointer to the plugin
+  */
   inline SP::PluggedObject getPluging() const
   {
     return _pluging;
   };
 
-  /** Get _pluginJacLg */
+  /** Get _pluginJacLg
+      \return a shared pointer to the plugin
+  */
   inline SP::PluggedObject getPluginJacLg() const
   {
     return _pluginJacLg;
   };
 
-  /** Get _pluginf */
+  /** Get _pluginf
+      \return a shared pointer to the plugin
+  */
   inline SP::PluggedObject getPluginf() const
   {
     return _pluginf;
   };
 
-  /** Get _plugine */
+  /** Get _plugine
+      \return a shared pointer to the plugin
+  */
   inline SP::PluggedObject getPlugine() const
   {
     return _plugine;
   };
   /** visitors hook
+      \param inter : interaction 
    */
   virtual void preparNewtonIteration(Interaction& inter)
   {

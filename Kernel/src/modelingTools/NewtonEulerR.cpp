@@ -77,6 +77,17 @@ void NewtonEulerR::initComponents(Interaction& inter)
   DEBUG_PRINT("NewtonEulerR::initComponents(Interaction& inter) ends\n");
 }
 
+void NewtonEulerR::setJachq(SP::SimpleMatrix newJachq)
+{
+  _jachq = newJachq;
+}
+
+void NewtonEulerR::setJachqPtr(SP::SimpleMatrix newPtr)
+{
+  _jachq = newPtr ;
+}
+
+
 void NewtonEulerR::initialize(Interaction& inter)
 {
   // Memory allocation for G[i], if required (depends on the chosen constructor).

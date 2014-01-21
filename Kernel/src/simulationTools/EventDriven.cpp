@@ -268,19 +268,6 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
   }
 }
 
-void EventDriven::initializeInteraction(SP::Interaction inter)
-{
-
-  RELATION::TYPES pbType = inter->relation()->getType();
-  if (pbType == Lagrangian)
-  {
-    //    inter->setDataXFromVelocity();
-  }
-  else
-    RuntimeException::selfThrow("EventDriven::initializeInteractions(SP::interaction inter) - not implemented for Relation of type " + pbType);
-
-}
-
 void EventDriven::initOSNS()
 {
   assert(!_model.expired());
@@ -293,13 +280,6 @@ void EventDriven::initOSNS()
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
   SP::InteractionsGraph indexSet0 = topo->indexSet(0);
-
-  // For each Interaction in I0 ...
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    // indexSet0->bundle(*ui)->initialize("EventDriven");
-    initializeInteraction(indexSet0->bundle(*ui));
-  }
 
   // === update all index sets ===
   updateIndexSets();

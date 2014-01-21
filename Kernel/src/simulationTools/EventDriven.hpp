@@ -61,10 +61,6 @@ protected:
   /** an epsilon to define the contraint g for Urs in IndexSet[1]
    */
   static double TOL_ED;
-  /** initialisation specific to EventDriven for Interactions.
-   */
-  void initializeInteraction(SP::Interaction inter);
-
 
   // /** compute LevelMin */
   // void initLevelMin();

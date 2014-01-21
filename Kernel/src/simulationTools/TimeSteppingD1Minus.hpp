@@ -37,7 +37,6 @@ const double DEFAULT_TOL_D1MINUS  = 1e-8;
  *  see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
  *  on Discontinuous Galerkin Methods: Definition and Outlook
  */
-
 class TimeSteppingD1Minus : public Simulation
 {
 private:
@@ -53,9 +52,6 @@ private:
 protected:
   /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
   virtual void initOSNS();
-
-  // /** initialisation specific to TimeSteppingD1Minus for Interaction */
-  // void initializeInteraction(SP::Interaction inter);
 
 public:
 

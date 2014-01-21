@@ -322,18 +322,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
 //   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY] = osns;
 // }
 
-void TimeStepping::initializeInteraction(SP::Interaction inter)
-{
-
-
-  RELATION::TYPES pbType = inter->relation()->getType();
-  if (pbType == FirstOrder)
-  {
-  }
-}
-
-
-
 void TimeStepping::initOSNS()
 {
   // === creates links between work vector in OSI and work vector in
@@ -346,19 +334,6 @@ void TimeStepping::initOSNS()
   SP::InteractionsGraph indexSet0 = topo->indexSet(0);
 
   InteractionsGraph::VIterator ui, uiend;
-
-  // For each Interaction in I0 ...
-  for (std11::tie(ui, uiend) = indexSet0->vertices();
-       ui != uiend; ++ui)
-  {
-    SP::Interaction inter = indexSet0->bundle(*ui);
-    // indexSet0->bundle(*ui)->initialize("TimeStepping");
-    initializeInteraction(indexSet0->bundle(*ui));
-
-
-
-  }
-
 
   if (!_allNSProblems->empty()) // ie if some Interactions have been
     // declared and a Non smooth problem
@@ -646,7 +621,6 @@ void TimeStepping::saveYandLambdaInOldVariables()
     SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      initializeInteraction(indexSet0->bundle(*ui));
       //indexSet0->bundle(*ui)->swapInMemory();
       indexSet0->bundle(*ui)->swapInOldVariables();;
     }

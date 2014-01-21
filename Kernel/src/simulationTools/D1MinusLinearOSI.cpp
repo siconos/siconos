@@ -1113,7 +1113,7 @@ bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsign
   // {
   //   gamma = _gamma;
   // }
-  DEBUG_PRINTF("D1MinusLinearOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("D1MinusLinearOSI::removeInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
   assert(!isnan(y));
   DEBUG_EXPR(
