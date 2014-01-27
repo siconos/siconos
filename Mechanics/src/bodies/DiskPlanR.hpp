@@ -49,12 +49,12 @@ public:
 
   /** Infinite Plan
 
-  \param disk radius
-  \param A
-  \param B
-  \param C
+  \param r disk radius
+  \param A component of line equation Ax + By + C = 0
+  \param B component of line equation Ax + By + C = 0
+  \param C component of line equation Ax + By + C = 0
   */
-  DiskPlanR(double, double, double, double);
+  DiskPlanR(double r, double A, double B, double C);
 
   /** Finite or infinite Plan (segment)
 
