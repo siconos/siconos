@@ -132,7 +132,7 @@ public:
   }
 
   //proj_with_q  inline SP::SimpleMatrix jachqProj() const { return _jachqProj; }
-  inline void setJachq(SP::SimpleMatrix newJachq);
+  void setJachq(SP::SimpleMatrix newJachq);
 
   inline SP::SiconosMatrix jachqDot() const
   {
