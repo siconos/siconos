@@ -25,10 +25,10 @@
  * <ul>
  *   <li> a symmetric positive semi--definite  matrix \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$ </li>
  *   <li> a matrix \f${H} \in {{\mathrm{I\!R}}}^{n \times {d\, n_c}} \f$ </li>
- *   <li> a vector \f$ {q} \in {{\mathrm{I\!R}}}^n\f$</li>
- *   <li> a vector \f$ {b} \in {{\mathrm{I\!R}}}^{d\, n_c}\f$</li>
+ *   <li> a vector \f${q} \in {{\mathrm{I\!R}}}^n\f$</li>
+ *   <li> a vector \f${b} \in {{\mathrm{I\!R}}}^{d\, n_c}\f$</li>
  *   <li> a vector of coefficients of friction \f$\mu \in{{\mathrm{I\!R}}}^{n_c}\f$</li>
- *</ul>
+ * </ul>
  * the (global or global) frictional contact problem  is to find three vectors \f$v\in{{\mathrm{I\!R}}}^n\f$,
  * the (global) velocity \f$u\in{{\mathrm{I\!R}}}^{d\,n_c}\f$,
  * the relative local velocity and \f$r\in {{\mathrm{I\!R}}}^{d,n_c}\f$,
