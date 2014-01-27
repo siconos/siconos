@@ -9,15 +9,18 @@
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
 
+//#define DEBUG_MESSAGES 1
+#include "debug.h"
+
 #ifdef WITH_FCLIB
 #include <fclib.h>
 #endif
 
 #ifdef WITH_FCLIB
 int globalFrictionContact_fclib_write(
-  GlobalFrictionContactProblem* problem, 
-  char * title, 
-  char * description, 
+  GlobalFrictionContactProblem* problem,
+  char * title,
+  char * description,
   char * mathInfo,
   const char *path)
 {
@@ -74,6 +77,22 @@ int globalFrictionContact_fclib_write(
 static int fccounter = 0;
 #endif
 
+double * alloc_memory_double(unsigned int size, double *p)
+{
+  double * r = (double *) malloc (size * sizeof(double));
+  memcpy(r, p, size * sizeof(double));
+  return r;
+}
+
+unsigned int * alloc_memory_int(unsigned int size, unsigned int *p)
+{
+  unsigned int * r = (unsigned int *) malloc (size * sizeof(int));
+  memcpy(r, p, size * sizeof(int));
+  return r;
+}
+
+
+
 int globalFrictionContact3D_LmgcDriver(double *reaction,
                                        double *velocity,
                                        double *globalVelocity,
@@ -91,8 +110,10 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
                                        unsigned int n,
                                        unsigned int nc,
                                        int solver_id,
-                                       double tolerance,
-                                       int itermax,
+                                       int isize,
+                                       int *iparam,
+                                       int dsize,
+                                       double *dparam,
                                        int verbose,
                                        int outputFile)
 {
@@ -101,13 +122,20 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
 
   SparseMatrix _M, _H;
 
+  unsigned int * _colM = alloc_memory_int(nzM, colM);
+  unsigned int * _rowM = alloc_memory_int(nzM, rowM);
+
+  unsigned int * _colH = alloc_memory_int(nzH, colH);
+  unsigned int * _rowH = alloc_memory_int(nzH, rowH);
+
+
   M.matrix0 = NULL;
   M.matrix1 = NULL;
   M.matrix2 = NULL;
   M.matrix3 = NULL;
   M.matrix4 = NULL;
 
-  M.storageType = 2;
+  M.storageType = 2; /* csc */
   M.size0 = n;
   M.size1 = n;
 
@@ -115,8 +143,8 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   _M.nz = nzM;
   _M.m = M.size0;
   _M.n = M.size1;
-  _M.p = (int *) rowM;
-  _M.i = (int *) colM;
+  _M.p = (int *) _colM;
+  _M.i = (int *) _rowM;
   _M.x = Mdata;
 
 
@@ -134,12 +162,30 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   _H.nz = nzH;
   _H.m = H.size0;
   _H.n = H.size1;
-  _H.p = (int *) rowH;
-  _H.i = (int *) colH;
+
+  _H.p = (int *) _colH;
+  _H.i = (int *) _rowH;
   _H.x = Hdata;
 
   M.matrix2 = &_M;
   H.matrix2 = &_H;
+
+  for (unsigned int i=0; i< _M.nz; ++i)
+  {
+    _M.p[i] --;
+    _M.i[i] --;
+  }
+
+  for (unsigned int i=0; i< _H.nz; ++i)
+  {
+    _H.p[i] --;
+
+    _H.i[i] --;
+
+    DEBUG_PRINTF("%d -> %d,%d\n", i, _H.p[i], _H.i[i]);
+
+  }
+
 
   problem.dimension = 3;
   problem.numberOfContacts = nc;
@@ -150,7 +196,7 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   problem.b = b;
   problem.mu = mu;
 
-  NumericsOptions numerics_options; 
+  NumericsOptions numerics_options;
   setDefaultNumericsOptions(&numerics_options);
   numerics_options.verboseMode = verbose;
 
@@ -158,11 +204,17 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
 
   globalFrictionContact3D_setDefaultSolverOptions(&numerics_solver_options, solver_id);
 
-  numerics_solver_options.dparam[0] = tolerance;
-  numerics_solver_options.iparam[0] = itermax;
+  assert(isize <= numerics_solver_options.iSize);
+  assert(dsize <= numerics_solver_options.dSize);
+
+  for (unsigned int i=0; i<isize; ++i)
+    numerics_solver_options.iparam[i] = iparam[i];
+
+  for (unsigned int i=0; i<dsize; ++i)
+    numerics_solver_options.dparam[i] = dparam[i];
 
   int rinfo = globalFrictionContact3D_driver(&problem,
-                                             reaction, 
+                                             reaction,
                                              velocity,
                                              globalVelocity,
                                              &numerics_solver_options,
@@ -202,7 +254,6 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
                                       fname);
 
 
-
     fclose(foutput);
 #else
     printf("Fclib is not available ...\n");
@@ -210,6 +261,36 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
 
   }
 
-  return rinfo; 
+  if (M.matrix3)
+  {
+    cs_free(M.matrix3);
+    M.matrix3 = NULL;
+  }
+
+  if (M.matrix4)
+  {
+    cs_free(M.matrix4);
+    M.matrix4 = NULL;
+  }
+
+  if (H.matrix3)
+  {
+    cs_free(H.matrix3);
+    H.matrix3 = NULL;
+  }
+
+  if (H.matrix4)
+  {
+    cs_free(H.matrix4);
+    H.matrix4 = NULL;
+  }
+
+  free(_colM);
+  free(_colH);
+
+  free(_rowM);
+  free(_rowH);
+
+  return rinfo;
 }
 

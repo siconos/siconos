@@ -118,7 +118,8 @@ int cs_zentry(SparseMatrix *T, int i, int j, double x)
 }
 
 /* y = alpha*A*x+beta*y */
-int cs_aaxpy(const double alpha, const cs *A, const double *x, double *y)
+int cs_aaxpy(const double alpha, const cs *A, const double *x,
+             const double beta, double *y)
 {
   int p, j, n, *Ap, *Ai ;
   double *Ax ;
@@ -131,6 +132,7 @@ int cs_aaxpy(const double alpha, const cs *A, const double *x, double *y)
   {
     for(p = Ap [j] ; p < Ap [j+1] ; p++)
     {
+      y [Ai [p]] *= beta;
       y [Ai [p]] += alpha * Ax [p] * x [j] ;
     }
   }
@@ -164,14 +166,14 @@ SparseMatrix* NM_trans(NumericsMatrix* A)
 void NM_aaxpy(const double alpha, NumericsMatrix* A, const double *x,
               double *y)
 {
-  CHECK(cs_aaxpy(alpha, NM_csc(A), x, y));
+  CHECK(cs_aaxpy(alpha, NM_csc(A), x, 1, y));
 }
 
 /* Numerics Matrix wrapper for y += alpha transpose(A) x + y */
 void NM_aatxpy(const double alpha, NumericsMatrix* A, const double *x,
                double *y)
 {
-  CHECK(cs_aaxpy(alpha, NM_trans(A), x, y));
+  CHECK(cs_aaxpy(alpha, NM_trans(A), x, 1, y));
 }
 
 /* NumericsMatrix : initialize csc storage from sparse block storage */
@@ -310,6 +312,8 @@ int initACPsiJacobian(
   assert(M->n == H->m);
   for(unsigned int e = 0; e < H->nz; ++e)
   {
+    DEBUG_PRINTF("e=%d, H->i[e]=%d, H->p[e] + M->n + A->n=%d, H->x[e]=%g\n", 
+                 e, H->i[e], H->p[e] + M->n + A->n , H->x[e]);
     CHECK(cs_zentry(J, H->i[e], H->p[e] + M->n + A->n, H->x[e]));
   }
 
@@ -497,7 +501,7 @@ int _globalLineSearchSparseGP(
 
     if(C1 && C2)
     {
-      if(verbose > 1)
+      if(verbose > 0)
       {
         printf("global line search success.\n");
         printf("Number of iteration = %i  alpha = %.10e, q = %.10e\n",
@@ -528,7 +532,7 @@ int _globalLineSearchSparseGP(
     }
 
   }
-  if(verbose > 1)
+  if(verbose > 0)
   {
     printf("global line search failed.\n");
     printf("max number of iteration reached  = %i  with alpha = %.10e \n",
@@ -596,7 +600,7 @@ void globalFrictionContact3D_sparseGlobalAlartCurnierInit(
   mumps_id->comm_fortran = USE_COMM_WORLD;
   dmumps_c(mumps_id);
 
-  if(verbose > 0)
+  if(verbose > 1)
   {
     mumps_id->ICNTL(4) = 0;
     mumps_id->ICNTL(10) = 1;
@@ -654,6 +658,12 @@ void globalFrictionContact3D_AlartCurnier(
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[0];
   unsigned int erritermax = options->iparam[7];
+
+  if (erritermax == 0)
+  {
+    /* output a warning here */
+    erritermax = 1;
+  }
 
 #ifdef WITH_MUMPS
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
@@ -864,7 +874,7 @@ void globalFrictionContact3D_AlartCurnier(
              mumps_id->info[0], mumps_id->info[1]);
 
 
-    if(verbose > 0)
+    if(verbose > 1)
     {
 
       printf("mumps : condition number %g\n", mumps_id->rinfog[9]);

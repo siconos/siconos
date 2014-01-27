@@ -44,6 +44,12 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix
   {
     prodSBM(sizeX, sizeY, alpha, A->matrix1, x, beta, y);
   }
+  /* coordinate */
+  else if (storage == 2)
+  {
+    cs_aaxpy(alpha, A->matrix2, x, beta, y);
+  }
+
   else
   {
     fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage type for A.\n");

@@ -25,6 +25,7 @@
 #include "SiconosLapack.h"
 #include <math.h>
 #include <assert.h>
+#include <float.h>
 extern int *Global_ipiv;
 extern int  Global_MisInverse;
 extern int  Global_MisLU;
@@ -33,7 +34,7 @@ int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem,
 {
   /* Checks inputs */
   if (problem == NULL || reaction == NULL || velocity == NULL || globalVelocity == NULL)
-    numericsError("FrictionContact3D_compute_error", "null input");
+    numericsError("GlobalFrictionContact3D_compute_error", "null input");
 
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int incx = 1;
@@ -53,7 +54,17 @@ int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem,
   double beta = 1.0;
   prodNumericsMatrix(m, n, alpha, H, reaction , beta, qtmp);
 
-  if (M->storageType == 1)
+  /* dense */
+  if (M->storageType == 0)
+  {
+    int infoDGETRS = -1;
+    cblas_dcopy(n, qtmp, 1, globalVelocitytmp, 1);
+    assert(Global_MisLU);
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocitytmp , n, &infoDGETRS);
+    assert(!infoDGETRS);
+  }
+  /* SBM */
+  else if (M->storageType == 1)
   {
     beta = 0.0;
     if (!Global_MisInverse)
@@ -64,14 +75,18 @@ int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem,
     prodNumericsMatrix(n, n, alpha, M, qtmp , beta, globalVelocitytmp);
 
   }
-  else if (M->storageType == 0)
+  /* coordinate */
+  else if (M->storageType == 2)
   {
-    int infoDGETRS = -1;
     cblas_dcopy(n, qtmp, 1, globalVelocitytmp, 1);
-    assert(Global_MisLU);
-    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocitytmp , n, &infoDGETRS);
-    assert(!infoDGETRS);
+    /* => need to store LU ! */
+    if (!M->matrix3 )
+    {
+      M->matrix3 = cs_triplet(M->matrix2);
+    }
+    cs_lusol(M->matrix3, globalVelocitytmp, 1, DBL_EPSILON);
   }
+
 
   cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
   *error =   cblas_dnrm2(n , globalVelocitytmp , 1);

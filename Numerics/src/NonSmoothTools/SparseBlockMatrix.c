@@ -1532,8 +1532,8 @@ int sparseMatrixNext(sparse_matrix_iterator* it)
     {
       assert(it->counter1 >= 0);
 
-      it->first = it->mat->p[it->counter1];
-      it->second = it->mat->i[it->counter1];
+      it->first = it->mat->i[it->counter1];
+      it->second = it->mat->p[it->counter1];
       it->third = it->mat->x[it->counter1];
 
       it->counter1++;

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file Restart.hpp
+/*! \file SiconosRestart.hpp
   \brief provides pre-compiled functions for a full Siconos Model
   serialization through libSiconosIO library */
 

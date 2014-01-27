@@ -171,8 +171,10 @@ extern "C"
    *  \param[in] n size of global velocity
    *  \param[in] nc number of contacts
    *  \param[in] solver_id id an int to be mapped to actual solver in Numerics
-   *  \param[in] tolerance
-   *  \param[in] itermax the maximum number of iteration
+   *  \param[in] isize sive of integer parameters array
+   *  \param[in] iparam integer parameters array
+   *  \param[in] dsize sive of double parameters array
+   *  \param[in] dparam double parameters array
    *  \param[in] verbose level 0 : nothing, 1: mid level 2: high level
    *  \param[in] outputFile outputFile option 0 : nothing 1 : C file , 1 :  dat file 3: FCLIB HDF5 file if FCLIB is found
    *  \return result (0 if successful otherwise 1).
@@ -195,8 +197,10 @@ extern "C"
                                          unsigned int n,
                                          unsigned int nc,
                                          int solver_id,
-                                         double tolerance,
-                                         int itermax,
+                                         int isize,
+                                         int *iparam,
+                                         int dsize,
+                                         double *dparam,
                                          int verbose,
                                          int outputFile);
 
