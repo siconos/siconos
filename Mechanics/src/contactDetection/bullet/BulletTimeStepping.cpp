@@ -28,6 +28,8 @@
 
 #include <debug.h>
 
+#include <Model.hpp>
+#include <NonSmoothDynamicalSystem.hpp>
 
 void BulletTimeStepping::updateWorldFromDS()
 {
