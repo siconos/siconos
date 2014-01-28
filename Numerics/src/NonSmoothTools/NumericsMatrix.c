@@ -22,6 +22,7 @@
 #include "NumericsMatrix.h"
 #include "SiconosLapack.h"
 #include "misc.h"
+#include "GlobalFrictionContact3D_AlartCurnier.h"
 
 void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y)
 {

@@ -112,9 +112,9 @@ const SimpleMatrix operator -(const SiconosMatrix& A, const SiconosMatrix& B);
 void sub(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
 
 /**: A==B when (A-B).normInf()<tolerance
- * \param A a SiconosMatrix
- * \param B a SiconosMatrix
- * \return a boolean
+   \param A a SiconosMatrix
+   \param B a SiconosMatrix
+   \return a boolean
  */
 bool operator == (const SiconosMatrix& A, const SiconosMatrix& B);
 

@@ -28,6 +28,7 @@
 #include "EventDriven.hpp"
 #include "Topology.hpp"
 #include "EventsManager.hpp"
+#include "SiconosGraph.hpp" // For setOfGraph
 
 #include "TypeName.hpp"
 
