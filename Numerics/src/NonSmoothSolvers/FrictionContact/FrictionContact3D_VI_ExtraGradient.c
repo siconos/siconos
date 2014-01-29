@@ -26,6 +26,8 @@
 #include "FrictionContactProblem_as_VI.h"
 #include "VariationalInequality_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
+#include "FrictionContact3D_compute_error.h"
+
 #include "SolverOptions.h"
 
 
@@ -34,7 +36,7 @@
 void frictionContact3D_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* Number of contacts */
-  int nc = problem->numberOfContacts;  int nLocal =  problem->dimension;
+  int nc = problem->numberOfContacts;  
   /* Dimension of the problem */
   int n = 3 * nc;
 
@@ -88,13 +90,17 @@ void frictionContact3D_VI_ExtraGradient(FrictionContactProblem* problem, double 
   /* **** Criterium convergence **** */
   FrictionContact3D_compute_error(problem, reaction , velocity, options->dparam[0], options, &error);
 
-  for (i =0; i< n ; i++)
-  {
-    printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]);
-  }
+  /* for (i =0; i< n ; i++) */
+  /* { */
+  /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
+  /* } */
 
   error = visolver_options->dparam[1];
   iter = visolver_options->iparam[7];
+  
+  options->dparam[1] = error;
+  options->iparam[7] = iter;
+
 
   if (verbose > 0)
   {
