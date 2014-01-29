@@ -45,6 +45,7 @@ char * SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR = "F3D_ProjectionOnCone
 char * SICONOS_FRICTION_3D_PGoC_STR = "F3D_PGoC";
 char * SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR = "F3D_DeSaxceFixedPoint";
 char * SICONOS_FRICTION_3D_EG_STR = "F3D_ExtraGradient";
+char * SICONOS_FRICTION_3D_VI_EG_STR = "F3D_VI_ExtraGradient";
 char * SICONOS_FRICTION_3D_HP_STR = "F3D_HyperplaneProjection";
 char * SICONOS_FRICTION_3D_PROX_STR = "F3D_PROX";
 char * SICONOS_FRICTION_3D_QUARTIC_STR = "F3D_QUARTIC";
@@ -138,6 +139,14 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     snPrintf(1, options, 
             " ========================== Call ExtraGradient (EG) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_ExtraGradient(problem, reaction , velocity , &info , options);
+    break;
+  }
+  /* VI Extra Gradient algorithm */
+  case SICONOS_FRICTION_3D_VI_EG:
+  {
+    snPrintf(1, options,
+            " ========================== Call VI_ExtraGradient (VI_EG) solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_VI_ExtraGradient(problem, reaction , velocity , &info , options);
     break;
   }
   /* Hyperplane Projection algorithm */

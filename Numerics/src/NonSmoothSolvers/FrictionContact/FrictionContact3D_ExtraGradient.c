@@ -25,6 +25,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
 
 void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -173,9 +176,9 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
       /* velocity_k <- q  */
       cblas_dcopy(n , q , 1 , velocity_k, 1);
 
-      /* velocity_k <- q + M * reaction  */
+      /* velocity_k <- q + M * reaction_k  */
       beta = 1.0;
-      prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocity_k);
+      prodNumericsMatrix(n, n, alpha, M, reaction_k, beta, velocity_k);
 
       ls_iter = 0 ;
       success =0;
@@ -190,33 +193,53 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
         {
           int pos = contact * nLocal;
           double  normUT = sqrt(velocity_k[pos + 1] * velocity_k[pos + 1] + velocity_k[pos + 2] * velocity_k[pos + 2]);
-          reaction[pos] = reaction_k[pos] -  rho_k * (velocity_k[pos] + mu[contact] * normUT);
-          reaction[pos + 1] = reaction_k[pos+1] - rho_k * velocity_k[pos + 1];
-          reaction[pos + 2] = reaction_k[pos+2] - rho_k * velocity_k[pos + 2];
+          /* reaction[pos] = reaction_k[pos] -  rho_k * (velocity_k[pos] + mu[contact] * normUT); */
+          /* reaction[pos + 1] = reaction_k[pos+1] - rho_k * velocity_k[pos + 1]; */
+          /* reaction[pos + 2] = reaction_k[pos+2] - rho_k * velocity_k[pos + 2]; */
 
           /* V.A. 12/11/2013 : Why the following lines (that are false) are working better in practise ? */
-          /* reaction[pos] -= rho_k * (velocity_k[pos] + mu[contact] * normUT); */
-          /* reaction[pos + 1] -= rho_k * velocity_k[pos + 1]; */
-          /* reaction[pos + 2] -= rho_k * velocity_k[pos + 2]; */
-
+          reaction[pos] -= rho_k * (velocity_k[pos] + mu[contact] * normUT);
+          reaction[pos + 1] -= rho_k * velocity_k[pos + 1];
+          reaction[pos + 2] -= rho_k * velocity_k[pos + 2];
           projectionOnCone(&reaction[pos], mu[contact]);
         }
 
 
-        /* velocity <- q  */
-        cblas_dcopy(n , q , 1 , velocity, 1);
-
         /* velocity <- q + M * reaction  */
         beta = 1.0;
+        cblas_dcopy(n , q , 1 , velocity, 1);
         prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocity);
 
-        /* velocitytmp <- velocity */
-        cblas_dcopy(n, velocity, 1, velocitytmp , 1) ;
 
-        /* velocitytmp <- velocity - velocity_k   */
+        /* velocitytmp <- velocity */
+
+        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
+                       {
+                         printf("reaction[%i]=%12.8e\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%12.8e\n",i,i,velocity[i]);
+                       }
+          );
+        cblas_dcopy(n, velocity, 1, velocitytmp , 1) ;
+        /* velocitytmp <- modified velocity - velocity_k   */
+        for (contact = 0 ; contact < nc ; ++contact)
+        {
+          int pos = contact * nLocal;
+          double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1]
+                                + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
+          double  normUT_k = sqrt(velocity_k[pos + 1] * velocity_k[pos + 1] + velocity_k[pos + 2] * velocity_k[pos + 2]);
+          velocitytmp[pos] += mu[contact] * (normUT -normUT_k)  ;
+        }
+
+        /* for (contact = 0 ; contact < nc ; ++contact) */
+        /* { */
+        /*   int pos = contact * nLocal; */
+        /*   double  normUT = sqrt(velocity_k[pos + 1] * velocity_k[pos + 1] + velocity_k[pos + 2] * velocity_k[pos + 2]); */
+        /*   velocity_k[pos] += mu[contact] * normUT; */
+        /* } */
+
         cblas_daxpy(n, -1.0, velocity_k , 1, velocitytmp , 1) ;
 
         a1 = cblas_dnrm2(n, velocitytmp, 1);
+        DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
         /* reactiontmp <- reaction */
         cblas_dcopy(n, reaction, 1, reactiontmp , 1) ;
@@ -225,6 +248,7 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
         cblas_daxpy(n, -1.0, reaction_k , 1, reactiontmp , 1) ;
 
         a2 = cblas_dnrm2(n, reactiontmp, 1) ;
+        DEBUG_PRINTF("a2 = %12.8e\n", a2);
 
         success = (rho_k*a1 < L * a2)?1:0;
 
@@ -236,31 +260,33 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
 
         ls_iter++;
       }
-      /* velocitytmp <- q  */
+      /* velocitytmp <- M* reaction* q  */
       cblas_dcopy(n , q , 1 , velocitytmp, 1);
-
       prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp);
-
 
       // projection for each contact
       for (contact = 0 ; contact < nc ; ++contact)
       {
         int pos = contact * nLocal;
-        double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
-        /* reaction[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT); */
-        /* reaction[pos + 1] -= rho * velocitytmp[pos + 1]; */
-        /* reaction[pos + 2] -= rho * velocitytmp[pos + 2]; */
-        reaction[pos] = reaction_k[pos] -  rho_k * (velocity_k[pos] + mu[contact] * normUT);
-        reaction[pos + 1] = reaction_k[pos+1] - rho_k * velocity_k[pos + 1];
-        reaction[pos + 2] = reaction_k[pos+2] - rho_k * velocity_k[pos + 2];
-
-
+        double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] +
+                              velocitytmp[pos + 2] * velocitytmp[pos + 2]);
+        reaction[pos] -= rho_k * (velocitytmp[pos] + mu[contact] * normUT);
+        reaction[pos + 1] -= rho_k * velocitytmp[pos + 1];
+        reaction[pos + 2] -= rho_k * velocitytmp[pos + 2];
+        /* reaction[pos] = reaction_k[pos] -  rho_k * (velocitytmp[pos] + mu[contact] * normUT); */
+        /* reaction[pos + 1] = reaction_k[pos+1] - rho_k * velocitytmp[pos + 1]; */
+        /* reaction[pos + 2] = reaction_k[pos+2] - rho_k * velocitytmp[pos + 2]; */
         projectionOnCone(&reaction[pos], mu[contact]);
       }
+      DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
+                     {
+                       printf("reaction[%i]=%12.8e\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%12.8e\n",i,i,velocity[i]);
+                     }
+        );
 
       /* **** Criterium convergence **** */
       FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
-
+      DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
       /*Update rho*/
       if ((rho_k*a1 < Lmin * a2) && (error < error_k))
       {

@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include <math.h>
 
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
 void variationalInequality_ExtraGradient(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
 {
   /* /\* int and double parameters *\/ */
@@ -123,9 +127,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
-      
 
-      
       if (options->callback)
       {
         options->callback->endIteration(options->callback->env, n,
@@ -175,21 +177,25 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
         problem->F(problem,x,w);
 
         /* velocitytmp <- velocity */
-        cblas_dcopy(n, w, 1, wtmp , 1) ;
-
+        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
+                       {
+                         printf("x[%i]=%12.8e\t",i,x[i]);    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+                       }
+          );
 
         /* velocitytmp <- velocity - velocity_k   */
+        cblas_dcopy(n, w, 1, wtmp , 1) ;
         cblas_daxpy(n, -1.0, w_k , 1, wtmp , 1) ;
-
         a1 = cblas_dnrm2(n, wtmp, 1);
+        DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
         /* reactiontmp <- reaction */
         cblas_dcopy(n, x, 1,xtmp , 1) ;
 
         /* reactiontmp <- reaction - reaction_k   */
         cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
-
         a2 = cblas_dnrm2(n, xtmp, 1) ;
+        DEBUG_PRINTF("a2 = %12.8e\n", a2);
 
         success = (rho_k*a1 < L * a2)?1:0;
 
@@ -203,7 +209,6 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       }
       /* velocitytmp <- q  */
       /* cblas_dcopy(n , q , 1 , velocitytmp, 1); */
-
       /* prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp); */
 
       problem->F(problem,x,wtmp);
@@ -214,12 +219,17 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       /* wtmp <-  ProjectionOnX(xtmp) */
       cblas_dcopy(n , x , 1 , xtmp, 1);
       problem->ProjectionOnX(problem,xtmp,x);
+      DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
+                     {
+                       printf("x[%i]=%12.8e\t",i,x[i]);    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+                     }
+        );
 
-     
+
 
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
-
+      DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
       /*Update rho*/
       if ((rho_k*a1 < Lmin * a2) && (error < error_k))
       {

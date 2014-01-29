@@ -22,9 +22,10 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_TFP = 503,
   SICONOS_FRICTION_3D_LOCALAC = 504,
   SICONOS_FRICTION_3D_DSFP = 505,
-  SICONOS_FRICTION_3D_EG = 506,
+  SICONOS_FRICTION_3D_VI_EG = 506,
   SICONOS_FRICTION_3D_HP = 507,
   SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint = 510,
+  SICONOS_FRICTION_3D_EG = 511,
 
   /** 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
   SICONOS_FRICTION_3D_AlartCurnierNewton = 550,
@@ -69,6 +70,7 @@ extern char *  SICONOS_FRICTION_3D_TFP_STR ;
 extern char *  SICONOS_FRICTION_3D_LOCALAC_STR ;
 extern char *  SICONOS_FRICTION_3D_DSFP_STR ;
 extern char *  SICONOS_FRICTION_3D_EG_STR ;
+extern char *  SICONOS_FRICTION_3D_VI_EG_STR ;
 extern char *  SICONOS_FRICTION_3D_HP_STR ;
 extern char *  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR;
 extern char *  SICONOS_FRICTION_3D_AlartCurnierNewton_STR;

@@ -31,7 +31,7 @@ int main(void)
 
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_VI_EG);
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_EG);
   options->dparam[3] = -3e3; // optimal guessed value
   options->dparam[0] = 1e-8; //
 

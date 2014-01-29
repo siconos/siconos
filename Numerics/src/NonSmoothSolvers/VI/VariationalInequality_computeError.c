@@ -26,6 +26,11 @@
 
 #include <math.h>
 #include <assert.h>
+
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
+
 int variationalInequality_computeError(
   VariationalInequality* problem,
   double *z , double *w, double tolerance,

@@ -29,6 +29,10 @@
 
 #include <math.h>
 #include <assert.h>
+
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
 void FrictionContact3D_unitary_compute_and_add_error(double *z , double *w, double mu, double * error)
 {
 
@@ -53,7 +57,6 @@ int FrictionContact3D_compute_error(
   double *z , double *w, double tolerance,
   SolverOptions * options, double * error)
 {
-
   assert(problem);
   assert(z);
   assert(w);
@@ -68,6 +71,7 @@ int FrictionContact3D_compute_error(
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
+
 
   *error = 0.;
 

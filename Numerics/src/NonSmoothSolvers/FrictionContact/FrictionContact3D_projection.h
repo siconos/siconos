@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #ifndef FRICTIONCONTACT3DProjection_H
-#define FRICTIONCONTACT3Projection_H
+#define FRICTIONCONTACT3DProjection_H
 
 /*!\file FrictionContact3D_projection.h
   \brief Typedef and functions declarations related to projection solver for 3 dimension frictional contact problems
