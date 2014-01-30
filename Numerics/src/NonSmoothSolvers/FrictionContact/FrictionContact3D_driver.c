@@ -60,12 +60,16 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
 {
   if (options == NULL)
     numericsError("FrictionContact3D_driver", "null input for solver and/or global options");
+  
+  int setnumericsoptions=0;
+  
   /* Set global options */
   if (global_options)
   {
     setNumericsOptions(global_options);
     options->numericsOptions = (NumericsOptions*) malloc(sizeof(NumericsOptions));
     options->numericsOptions->verboseMode = global_options->verboseMode;
+    setnumericsoptions=1;
   }
 
   int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
@@ -194,6 +198,11 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     exit(EXIT_FAILURE);
 
   }
+  }
+  
+  if (setnumericsoptions)
+  {
+      free(options->numericsOptions);
   }
 
   return info;

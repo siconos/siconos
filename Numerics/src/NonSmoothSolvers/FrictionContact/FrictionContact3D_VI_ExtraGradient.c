@@ -107,6 +107,8 @@ void frictionContact3D_VI_ExtraGradient(FrictionContactProblem* problem, double 
     printf("----------------------------------- FC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Error = %14.7e\n", iter, error);
   }
   free(vi);
+
+  deleteSolverOptions(visolver_options);
   free(visolver_options);
   free(fc3d_as_vi);
 

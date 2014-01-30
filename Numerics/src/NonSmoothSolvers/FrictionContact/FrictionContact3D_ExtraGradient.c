@@ -318,7 +318,11 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
   iparam[7] = iter;
   free(velocitytmp);
   free(reactiontmp);
-
+  if (isVariable)
+  {
+    free(reaction_k);
+    free(velocity_k);
+  }
 }
 
 
