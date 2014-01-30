@@ -69,6 +69,11 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
     info =    frictionContact3D_ExtraGradient_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_VI_FPP:
+  {
+    info =    frictionContact3D_VI_FixedPointProjection_setDefaultSolverOptions(options);
+    break;
+  }
   case SICONOS_FRICTION_3D_VI_EG:
   {
     info =    frictionContact3D_VI_ExtraGradient_setDefaultSolverOptions(options);

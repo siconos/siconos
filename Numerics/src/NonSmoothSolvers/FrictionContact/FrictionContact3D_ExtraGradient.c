@@ -197,7 +197,6 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
           /* reaction[pos + 1] = reaction_k[pos+1] - rho_k * velocity_k[pos + 1]; */
           /* reaction[pos + 2] = reaction_k[pos+2] - rho_k * velocity_k[pos + 2]; */
 
-          /* V.A. 12/11/2013 : Why the following lines (that are false) are working better in practise ? */
           reaction[pos] -= rho_k * (velocity_k[pos] + mu[contact] * normUT);
           reaction[pos + 1] -= rho_k * velocity_k[pos + 1];
           reaction[pos + 2] -= rho_k * velocity_k[pos + 2];

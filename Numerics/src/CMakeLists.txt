@@ -397,8 +397,8 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest32 FrictionContact3D_test32.c)
   
   NEW_TEST(FC3Dtest33 FrictionContact3D_test33.c) # DSFP  converges with ls
-  NEW_TEST(FC3Dtest34 FrictionContact3D_test34.c) # EG converges with specific rho
-  NEW_TEST(FC3Dtest3400 FrictionContact3D_test3400.c) # EG converges with specific rho
+
+  NEW_TEST(FC3Dtest3400 FrictionContact3D_test3400.c) # old EG converges with specific rho
   NEW_TEST(FC3Dtest35 FrictionContact3D_test35.c) # EG with variable rho
 
   NEW_TEST(FC3Dtest36 FrictionContact3D_test36.c) #TFP with NSGS and projection on cylinder
@@ -407,7 +407,8 @@ IF(WITH_TESTING)
 
   #NEW_TEST(FC3Dtest38 FrictionContact3D_test38.c) # HP is not converging
 
-
+  NEW_TEST(FC3Dtest40 FrictionContact3D_test40.c) # VI_EG 
+  NEW_TEST(FC3Dtest41 FrictionContact3D_test41.c) # VI_FPP
 
   SET(FC3Dtest50_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest50 FrictionContact3D_test50.c)

@@ -176,7 +176,6 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
         
         problem->F(problem,x,w);
 
-        /* velocitytmp <- velocity */
         DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
                        {
                          printf("x[%i]=%12.8e\t",i,x[i]);    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);

@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
 
 void variationalInequality_FixedPointProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
 {
@@ -152,7 +155,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         problem->ProjectionOnX(problem,xtmp,x);
         
         problem->F(problem,x,w);
-
+        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);   
+                                                    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
         /* velocitytmp <- velocity */
         cblas_dcopy(n, w, 1, wtmp , 1) ;
 
@@ -161,7 +165,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         cblas_daxpy(n, -1.0, w_k , 1, wtmp , 1) ;
 
         a1 = cblas_dnrm2(n, wtmp, 1);
-
+        DEBUG_PRINTF("a1 = %12.8e\n", a1);
+ 
         /* reactiontmp <- reaction */
         cblas_dcopy(n, x, 1,xtmp , 1) ;
 
@@ -169,7 +174,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
 
         a2 = cblas_dnrm2(n, xtmp, 1) ;
-
+        DEBUG_PRINTF("a2 = %12.8e\n", a2);
+       
         success = (rho_k*a1 < L * a2)?1:0;
 
         /* printf("rho_k = %12.8e\t", rho_k); */
@@ -181,7 +187,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         ls_iter++;
       }
        /* problem->F(problem,x,w); */
-
+      DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);   
+          printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
+ 
 
 
       /* **** Criterium convergence **** */
