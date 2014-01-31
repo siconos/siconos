@@ -40,15 +40,19 @@ void Function_VI_FC3D(void * self, double *x, double *F)
   int n = fc3d->numberOfContacts *  fc3d->dimension;
 
   cblas_dcopy(n , fc3d->q , 1 , F, 1);
-  prodNumericsMatrix(n, n, 1.0, fc3d->M, x, 1.0, F);
+  if (cblas_dnrm2(n, x, 1) > 1e-24) /* A tricks to retrieve q*/
+  {
+    prodNumericsMatrix(n, n, 1.0, fc3d->M, x, 1.0, F);
+  }
   int contact =0;
 
   for (contact = 0 ; contact <  fc3d->numberOfContacts ; ++contact)
   {
     double  normUT = sqrt(F[contact * nLocal + 1] * F[contact * nLocal + 1]
-                          + F[contact * nLocal + 2] * F[contact * nLocal + 2]);
+                            + F[contact * nLocal + 2] * F[contact * nLocal + 2]);
     F[contact * nLocal] +=  (fc3d->mu[contact] * normUT);
   }
+
 }
 
 

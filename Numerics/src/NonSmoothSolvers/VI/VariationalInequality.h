@@ -84,10 +84,11 @@ typedef struct
   void *env;
   
   /** Function of the VI */
-  void (*F)(void *self, double * x ,double *fx);  
-  
+  void (*F)(void *self, double * x ,double *fx);
+
   /** Projection on X of the VI */
-  void (*ProjectionOnX)(void *self, double *x);
+  void (*ProjectionOnX)(void *self, double *x, double * PX);
+
 
 } VariationalInequality;
 

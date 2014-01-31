@@ -48,9 +48,11 @@ int variationalInequality_computeError(
   *error = 0.;
   if (!options->dWork)
   {
-    options->dWork = (double*)malloc(n* sizeof(double));
+    options->dWork = (double*)malloc(2*n* sizeof(double));
   }
   double *ztmp =  options->dWork;
+  double *wtmp =  &(options->dWork[n]);
+
   for (int i=0; i<n ; i++)
   {
     ztmp[i]=0.0;
@@ -60,21 +62,16 @@ int variationalInequality_computeError(
   double normq = cblas_dnrm2(n , w , incx);
 
   DEBUG_PRINTF("normq = %12.8e\n", normq);
-  cblas_dcopy(n , z , 1 , ztmp, 1);
-  problem->F(problem,ztmp,w);
-
-  cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
-  
-  problem->ProjectionOnX(problem,ztmp,w);
-  
-  cblas_dcopy(n , z , 1 , ztmp, 1);
-
-  cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
-
-  *error = cblas_dnrm2(n , ztmp , incx);
 
   problem->F(problem,z,w);
+  cblas_dcopy(n , z , 1 , ztmp, 1);
 
+  cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
+
+  problem->ProjectionOnX(problem,ztmp,wtmp);
+
+  cblas_daxpy(n, -1.0, wtmp , 1, ztmp , 1) ;
+  *error = cblas_dnrm2(n , ztmp , incx);
 
   /* Computes error */
   *error = *error / (normq + 1.0);
