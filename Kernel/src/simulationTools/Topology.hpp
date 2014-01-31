@@ -104,12 +104,12 @@ private:
   * creates the corresponding Interactions and add them into _DSG
   * and _IG)
   \param  inter the Interaction to add
-  \param SP::DynamicalSystem first dynamical system linked to the interaction
-  \param SP::DynamicalSystem second dynamical system linked to the interaction (default = None)
+  \param ds1 a SP::DynamicalSystem first dynamical system linked to the interaction
+  \param ds2 a SP::DynamicalSystem second dynamical system linked to the interaction (default = None)
   \return a vertex descriptor of the new vertex in IndexSet0
   */
-  std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
-  addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem, SP::DynamicalSystem = SP::DynamicalSystem());
+  std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
+  addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
   /** remove the Interactions of the interactions from _IG and
    * _DSG
@@ -180,7 +180,8 @@ public:
   }
 
   /** get a pointer to the graph at level num of Interactions
-   *  \return a SP::InteractionsGraph
+   * \param num the number of indexSet
+   * \return a SP::InteractionsGraph
    */
   inline SP::InteractionsGraph indexSet(unsigned int num) const
   {
@@ -294,9 +295,10 @@ public:
   /** initialize graphs properties */
   void setProperties();
 
-  /** Get a dynamical system using its number 
+  /** Get a dynamical system using its number
    \param requiredNumber the required number
-  */
+   \return a DynamicalSystem
+*/
   SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber);
 
   /** Helper to get the descriptor in DSG0 from a DynamicalSystem */
@@ -304,6 +306,12 @@ public:
   {
     return _DSG[0]->descriptor(ds);
   }
+
+  /** get the number of DynamicalSystem currently involved in an indexSet
+   * \param inumber the indexSet number
+   * \return the number of DynamicalSystem involved
+   */
+  unsigned int numberOfInvolvedDS(unsigned int inumber);
 
 
 };

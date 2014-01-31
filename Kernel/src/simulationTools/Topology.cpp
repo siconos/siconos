@@ -60,7 +60,7 @@ Topology::~Topology()
   clear();
 }
 
-std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
+std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
 Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
   // !! Private function !!
@@ -88,16 +88,16 @@ Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds
   dsgv1 = _DSG[0]->add_vertex(ds1);
   if(ds2)
     dsgv2 = _DSG[0]->add_vertex(ds2);
-  else 
+  else
     dsgv2 = dsgv1;
-  
+
   // this may be a multi edges graph
   assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(!_IG[0]->is_vertex(inter));
   InteractionsGraph::VDescriptor ig_new_ve;
   DynamicalSystemsGraph::EDescriptor new_ed;
   std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
-  
+
   // add self branches in vertex properties
   // note : boost graph SEGFAULT on self branch removal
   // see https://svn.boost.org/trac/boost/ticket/4622
@@ -118,7 +118,7 @@ Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds
   assert(_IG[0]->is_vertex(inter));
   assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(_DSG[0]->edges_number() == _IG[0]->size());
-  
+
   return std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
 }
 
@@ -165,7 +165,7 @@ struct VertexIsRemoved
    corresponding vertices are removed from _IG */
 void Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 {
-  
+
   SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
   SP::DynamicalSystem ds2 = _IG[0]->properties(_IG[0]->descriptor(inter)).target;
   _DSG[0]->remove_out_edge_if(_DSG[0]->descriptor(ds1), VertexIsRemoved(inter, _DSG[0], _IG[0]));
@@ -210,7 +210,7 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
   RuntimeException::selfThrow("remove dynamical system not implemented");
 }
 
-std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor> 
+std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
 Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2)
 {
   DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2)");
@@ -218,9 +218,9 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
   {
     removeInteractionFromIndexSet(inter);
   }
-  
+
   unsigned int sumOfDSSizes = 0, sumOfZSizes = 0;
-  
+
   sumOfDSSizes += ds->getDim();
   if(ds->z())
     sumOfZSizes += ds->z()->size();
@@ -233,7 +233,7 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
     inter->setHas2Bodies(true);
   }
   DEBUG_PRINTF("sumOfDSSizes = %i\t, sumOfZSizes = %i\n ", sumOfDSSizes, sumOfZSizes);
-  
+
   inter->setDSSizes(sumOfDSSizes, sumOfZSizes);
 
   return addInteractionInIndexSet(inter, ds, ds2);
@@ -300,4 +300,54 @@ SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber)
   return ds;
 }
 
+unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
+{
+   if (inumber >= _IG.size())
+  {
+    RuntimeException::selfThrow("index number must be inferior to the number of indexSets");
+  }
+
+  /* on an adjoint graph a dynamical system may be on several edges */
+  std::map<SP::DynamicalSystem, bool> flag;
+
+  unsigned int return_value = 0;
+
+  SP::InteractionsGraph indexSet = _IG[inumber];
+
+  InteractionsGraph::VIterator vi, viend;
+  for(std11::tie(vi, viend) = indexSet->vertices();
+      vi != viend; ++vi)
+  {
+    if(indexSet->properties(*vi).source)
+    {
+      if (flag.find(indexSet->properties(*vi).source) == flag.end())
+      {
+        flag[indexSet->properties(*vi).source] = true;
+        return_value++;
+      }
+    }
+    if(indexSet->properties(*vi).target)
+    {
+      if (flag.find(indexSet->properties(*vi).target) == flag.end())
+      {
+        flag[indexSet->properties(*vi).target] = true;
+        return_value++;
+      }
+    }
+  }
+
+  InteractionsGraph::EIterator ei, eiend;
+
+  for(std11::tie(ei, eiend) = indexSet->edges();
+      ei != eiend; ++ei)
+  {
+    if (flag.find(indexSet->bundle(*ei)) == flag.end())
+    {
+      flag[indexSet->bundle(*ei)] = true;
+      return_value++;
+    }
+  }
+
+  return return_value;
+}
 
