@@ -36,21 +36,18 @@ void Function_VI_FC3D(void * self, double *x, double *F)
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
 
-  int nc = fc3d->numberOfContacts;
   int nLocal =  fc3d->dimension;
-  int n = nc * nLocal;
-
-
+  int n = fc3d->numberOfContacts *  fc3d->dimension;
 
   cblas_dcopy(n , fc3d->q , 1 , F, 1);
   prodNumericsMatrix(n, n, 1.0, fc3d->M, x, 1.0, F);
   int contact =0;
 
-  for (contact = 0 ; contact < nc ; ++contact)
+  for (contact = 0 ; contact <  fc3d->numberOfContacts ; ++contact)
   {
-    int pos = contact * nLocal;
-    double  normUT = sqrt(F[pos + 1] * F[pos + 1] + F[pos + 2] * F[pos + 2]);
-    F[pos] +=  (fc3d->mu[contact] * normUT);
+    double  normUT = sqrt(F[contact * nLocal + 1] * F[contact * nLocal + 1]
+                          + F[contact * nLocal + 2] * F[contact * nLocal + 2]);
+    F[contact * nLocal] +=  (fc3d->mu[contact] * normUT);
   }
 }
 
@@ -61,20 +58,15 @@ void Projection_VI_FC3D(void *viIn, double *x, double *PX)
 
   VariationalInequality * vi = (VariationalInequality *) viIn;
   FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
-
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
 
   int contact =0;
-  int nc = fc3d->numberOfContacts;
   int nLocal =  fc3d->dimension;
-  int n = nc * nLocal;
-
+  int n = fc3d->numberOfContacts* nLocal;
   cblas_dcopy(n , x , 1 , PX, 1);
-
-  for (contact = 0 ; contact < nc ; ++contact)
+  for (contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
   {
-    int pos = contact * nLocal;
-    projectionOnCone(&PX[pos], fc3d->mu[contact]);
+    projectionOnCone(&PX[ contact * nLocal ], fc3d->mu[contact]);
   }
 }

@@ -149,26 +149,24 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         /* x <- x - rho_k*  w_k */
         cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
+        /* xtmp <-  ProjectionOnX(x) */
+        problem->ProjectionOnX(problem,x,xtmp);
         
-        /* wtmp <-  ProjectionOnX(xtmp) */
-        cblas_dcopy(n , x , 1 , xtmp, 1);
-        problem->ProjectionOnX(problem,xtmp,x);
-        
-        problem->F(problem,x,w);
-        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);   
+        problem->F(problem,xtmp,w);
+
+        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
                                                     printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
         /* velocitytmp <- velocity */
-        cblas_dcopy(n, w, 1, wtmp , 1) ;
+        /* cblas_dcopy(n, w, 1, wtmp , 1) ; */
 
+        /* velocity <- velocity - velocity_k   */
+        cblas_daxpy(n, -1.0, w_k , 1, w , 1) ;
 
-        /* velocitytmp <- velocity - velocity_k   */
-        cblas_daxpy(n, -1.0, w_k , 1, wtmp , 1) ;
-
-        a1 = cblas_dnrm2(n, wtmp, 1);
+        a1 = cblas_dnrm2(n, w, 1);
         DEBUG_PRINTF("a1 = %12.8e\n", a1);
  
         /* reactiontmp <- reaction */
-        cblas_dcopy(n, x, 1,xtmp , 1) ;
+        cblas_dcopy(n, xtmp, 1,x , 1) ;
 
         /* reactiontmp <- reaction - reaction_k   */
         cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
@@ -186,12 +184,11 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         ls_iter++;
       }
-       /* problem->F(problem,x,w); */
+
+      /* problem->F(problem,x,w); */
       DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);   
           printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
  
-
-
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
 

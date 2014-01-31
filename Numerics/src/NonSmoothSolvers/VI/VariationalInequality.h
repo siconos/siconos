@@ -87,7 +87,7 @@ typedef struct
   void (*F)(void *self, double * x ,double *fx);  
   
   /** Projection on X of the VI */
-  void (*ProjectionOnX)(void *self, double *x, double *projectionOnX); 
+  void (*ProjectionOnX)(void *self, double *x);
 
 } VariationalInequality;
 
