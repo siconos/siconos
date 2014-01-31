@@ -191,12 +191,26 @@ extern "C"
    */
   int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file);
 
+  /** print a FrictionContactProblem in a file (numerics .dat format) from its filename
+   * \param problem the problem to print out
+   * \param filename the dest file
+   * \return 0 if successfull
+   */
+  int frictionContact_printInFilename(FrictionContactProblem*  problem, char * filename);
+
   /** read a FrictionContactProblem in a file (numerics .dat format)
    * \param problem the problem to read
    * \param file the target file
    * \return 0 if successfull
    */
   int frictionContact_newFromFile(FrictionContactProblem*  problem, FILE* file);
+  
+  /** read a FrictionContactProblem in a file (numerics .dat format) from its filename
+   * \param problem the problem to read
+   * \param filename the name of the target file
+   * \return 0 if successfull
+   */
+  int frictionContact_newFromFilename(FrictionContactProblem*  problem, char * filename);
 
   /** free a FrictionContactProblem
    * \param problem the problem to free

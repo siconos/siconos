@@ -200,6 +200,7 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
         cblas_dcopy(n , q , 1 , velocity, 1);
         beta = 1.0;
         prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocity);
+        
         DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
                        {
                          printf("reaction[%i]=%12.8e\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%12.8e\n",i,i,velocity[i]);

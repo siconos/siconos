@@ -91,6 +91,22 @@ int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file)
   return 0;
 }
 
+int frictionContact_printInFilename(FrictionContactProblem* problem, char* filename)
+{
+  int info = 0;
+  FILE * file = fopen(filename, "w");
+  
+  if (!file)
+  {
+    return errno;
+  }
+
+  info = frictionContact_printInFile(problem, file);
+
+  fclose(file);
+  return info;
+}
+
 int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
 {
   DEBUG_PRINT("Start -- int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
@@ -123,6 +139,22 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   DEBUG_PRINT("End --  int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
 
   return 0;
+}
+
+int frictionContact_newFromFilename(FrictionContactProblem* problem, char* filename)
+{
+  int info = 0;
+  FILE * file = fopen(filename, "r");
+  
+  if (!file)
+  {
+    return errno;
+  }
+
+  info = frictionContact_newFromFile(problem, file);
+
+  fclose(file);
+  return info;
 }
 
 void freeFrictionContactProblem(FrictionContactProblem* problem)

@@ -409,6 +409,10 @@ IF(WITH_TESTING)
 
   NEW_TEST(FC3Dtest40 FrictionContact3D_test40.c) # VI_EG 
   NEW_TEST(FC3Dtest41 FrictionContact3D_test41.c) # VI_FPP
+  NEW_TEST(FC3Dtest42 FrictionContact3D_test42.c) # VI_DSFP
+  NEW_TEST(FC3Dtest43 FrictionContact3D_test43.c) # VI_FPP
+  NEW_TEST(FC3Dtest44 FrictionContact3D_test44.c) # EG
+  NEW_TEST(FC3Dtest45 FrictionContact3D_test45.c) # VI_EG
 
   SET(FC3Dtest50_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest50 FrictionContact3D_test50.c)

@@ -799,7 +799,7 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
       fprintf(file, "%i\n", blockNum);
       for (unsigned int i = 0; i < nbRows * nbColumns; i++)
       {
-        fprintf(file, "%32le\n", m->block[blockNum][i]);
+        fprintf(file, "%32.24e\n", m->block[blockNum][i]);
       }
 
     }

@@ -30,8 +30,8 @@
 #include <math.h>
 #include <assert.h>
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 void FrictionContact3D_unitary_compute_and_add_error(double *z , double *w, double mu, double * error)
 {
@@ -87,6 +87,7 @@ int FrictionContact3D_compute_error(
 
   /* Computes error */
   double normq = cblas_dnrm2(n , problem->q , incx);
+  DEBUG_PRINTF("normq = %12.8e\n", normq);
   *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
