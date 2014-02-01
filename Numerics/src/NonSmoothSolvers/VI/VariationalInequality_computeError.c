@@ -53,25 +53,31 @@ int variationalInequality_computeError(
   double *ztmp =  options->dWork;
   double *wtmp =  &(options->dWork[n]);
 
-  for (int i=0; i<n ; i++)
+  
+  if (!problem->istheNormVIset)
   {
-    ztmp[i]=0.0;
+    for (int i=0;i<n;i++)
+    {
+      ztmp[i]=0.0 ;
+    }
+    problem->F(problem,ztmp,w);
+    problem->normVI= cblas_dnrm2(n , w , 1);
+    DEBUG_PRINTF("problem->normVI = %12.8e\n", problem->normVI);
+    problem->istheNormVIset=1;
   }
 
-  problem->F(problem,ztmp,w);
-  double normq = cblas_dnrm2(n , w , incx);
-
+  double normq =problem->normVI;
   DEBUG_PRINTF("normq = %12.8e\n", normq);
 
   problem->F(problem,z,w);
+  
   cblas_dcopy(n , z , 1 , ztmp, 1);
-
   cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
 
   problem->ProjectionOnX(problem,ztmp,wtmp);
 
-  cblas_daxpy(n, -1.0, wtmp , 1, ztmp , 1) ;
-  *error = cblas_dnrm2(n , ztmp , incx);
+  cblas_daxpy(n, -1.0, z , 1, wtmp , 1) ;
+  *error = cblas_dnrm2(n , wtmp , incx);
 
   /* Computes error */
   *error = *error / (normq + 1.0);

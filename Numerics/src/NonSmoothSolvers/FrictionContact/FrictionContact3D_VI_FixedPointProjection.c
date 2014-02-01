@@ -53,6 +53,11 @@ void frictionContact3D_VI_FixedPointProjection(FrictionContactProblem* problem, 
   FrictionContactProblem_as_VI *fc3d_as_vi= (FrictionContactProblem_as_VI*)malloc(sizeof(FrictionContactProblem_as_VI));
   vi->env =fc3d_as_vi ;
   vi->size =  n;
+
+  /*set the norm of the VI to the norm of problem->q  */
+  vi->normVI= cblas_dnrm2(n , problem->q , 1);
+  vi->istheNormVIset=1;
+
   fc3d_as_vi->vi = vi;
   fc3d_as_vi->fc3d = problem;
   /* frictionContact_display(fc3d_as_vi->fc3d); */

@@ -248,17 +248,24 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
       DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
                      {
                        printf("reaction[%i]=%12.8e\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%12.8e\n",i,i,velocity[i]);
-                     }
+                     };
         );
       
 
       /* **** Criterium convergence **** */
       FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
-
+      DEBUG_EXPR_WE(
+        if ((error < error_k))
+        {
+          printf("(error < error_k) is satisfied\n");
+        }
+        );
       /*Update rho*/
       if ((rho_k*a1 < Lmin * a2) && (error < error_k))
       {
         rho =rho_k/taumin;
+        DEBUG_PRINTF("We compute a new rho_k = \n", rho_k);
+
       }
       else
         rho =rho_k;

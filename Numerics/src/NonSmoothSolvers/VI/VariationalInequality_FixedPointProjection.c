@@ -71,8 +71,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
     {
       printf("----------------------------------- VI - Fixed Point Projection (FPP) - Variable stepsize with starting rho = %14.7e \n", rho);
     }
-     
   }
+
 
   /* Variable for Line_search */
   int success =0;
@@ -192,10 +192,20 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
 
+      DEBUG_EXPR_WE(
+        if ((error < error_k))
+        {
+          printf("(error < error_k) is satisfied\n");
+        };
+        );
+
+
       /*Update rho*/
       if ((rho_k*a1 < Lmin * a2) && (error < error_k))
       {
         rho =rho_k/taumin;
+        DEBUG_PRINTF("We compute a new rho_k = \n", rho_k);
+                     
       }
       else
         rho =rho_k;

@@ -89,7 +89,15 @@ typedef struct
   /** Projection on X of the VI */
   void (*ProjectionOnX)(void *self, double *x, double * PX);
 
+  /** Norm of the VI problem to compute relative solution */
+  double normVI;
 
+  /** Boolean to know if the norm is set 
+   *  If not (istheNormVIset=0) it will be computed in the first call of variationalInequality_computeError
+   *  By default, set istheNormVIset =0
+   */
+  int  istheNormVIset;
+  
 } VariationalInequality;
 
 
