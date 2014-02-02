@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#define max(a,b) (a>=b?a:b)
 //#define VERBOSE_DEBUG
 #include "Friction_cst.h"
 void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
@@ -105,6 +106,8 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
     for (int ic = 0 ; ic < nc ; ic++) printf("problem->mu[%i] = %le\n", ic, problem->mu[ic]);
     for (int ic = 0 ; ic < nc ; ic++) printf("mu[%i] = %le \n", ic, mu[ic]);
 #endif
+    //internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]);
+
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
     /* **** Criterium convergence **** */

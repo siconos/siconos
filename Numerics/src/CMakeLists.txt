@@ -432,6 +432,9 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest82 FrictionContact3D_test82.c) # Proximal
 
 
+ # NEW_TEST(FC3Dtest90 FrictionContact3D_test90.c) # TFP
+
+
 
   NEW_TEST(FC3DNewFromFortranData FrictionContact3D_newFromFortranData.c)
   NEW_TEST(FC3DLmgcDriver1 FrictionContact3D_LmgcDriver_test1.c)
