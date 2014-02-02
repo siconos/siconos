@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
 
 
 void frictionContact3D_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
@@ -55,35 +58,43 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-
-
-
-
-
-
   double rho = dparam[3];
-  double minusrho = -1.0 * rho;
+  if (dparam[3] < 1e-12)
+  {
+    dparam[3] = 1.0;
+  }
+    
 
   double * reactionold = (double *)malloc(n * sizeof(double));
   cblas_dcopy(n , reaction , 1 , reactionold , 1);
 
 
-  internalSolverPtr internalsolver;
 
+  internalSolverPtr internalsolver =0;
+  options->iparam[6]= 0;
   if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS) internalsolver = &frictionContact3D_nsgs;
-  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_DeSaxceFixedPoint)internalsolver = &frictionContact3D_DeSaxceFixedPoint;
+  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_DeSaxceFixedPoint) internalsolver = &frictionContact3D_DeSaxceFixedPoint;
+  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_EG) internalsolver = &frictionContact3D_ExtraGradient;
   else  internalsolver = &frictionContact3D_nsgs;
 
+
+  FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
+  
+  internalsolver_options->dparam[0] = error;
+  internalsolver_options->dparam[0] = options->dparam[0];
+  
+  DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
+  DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
 
 
 
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
-
     cblas_dcopy(n , reaction , 1 , reactionold , 1);
     //Add proximal regularization on q
-    cblas_daxpy(n, minusrho, reactionold, 1, problem->q , 1) ;
+    cblas_daxpy(n, -rho, reactionold, 1, problem->q , 1) ;
+
     //Add proximal regularization on M
     if (M->storageType == 0)
     {
@@ -99,8 +110,13 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     }
     // internal solver for the regularized problem
     /*       frictionContact3D_nsgs(problem, reaction , velocity , info , internalsolver_options); */
-    (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
+    internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]);
+    //internalsolver_options->dparam[0] = options->dparam[0];
+    DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
+    (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
+    
+ 
 
     /* **** Criterium convergence **** */
     //substract proximal regularization on q
@@ -120,6 +136,27 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     }
 
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
+   //update the rho with respect to the number of internal iterations.
+    
+    int iter_internalsolver = internalsolver_options->iparam[7];
+    options->iparam[6] +=iter_internalsolver;
+    DEBUG_PRINTF("iter_internalsolver = %i\n",iter_internalsolver);
+    DEBUG_PRINTF("info = %i\n",*info);
+    DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
+    DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
+
+    
+    if (iter_internalsolver < options->iparam[2])// || (*info == 0)) 
+    {
+      rho = rho/10.0;
+      DEBUG_PRINTF("we decrease rho = %8.4e\n",rho);
+    }
+    else if (iter_internalsolver > options->iparam[3])
+    {
+      rho = 10.0 *rho;
+      DEBUG_PRINTF("we increase rho = %8.4e\n",rho);
+   }
+    DEBUG_PRINTF("rho = %8.4e\n",rho);
 
     if (options->callback)
     {
@@ -129,13 +166,16 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     }
 
     if (verbose > 0)
-      printf("------------------------ FC3D - PROXIMAL - Iteration %i Error = %14.7e\n", iter, error);
+      printf("------------------------ FC3D - PROXIMAL - Iteration %i Error = %14.7e with rho = %12.8e\n\n", iter, error, rho);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
   if (verbose > 0)
-    printf("------------------------ FC3D - PROXIMAL - # Iteration %i Final Error = %14.7e\n", iter, error);
+  {
+    printf("------------------------ FC3D - PROXIMAL - # Iteration %i Final Error = %14.7e  \n", iter, error);
+    printf("------------------------ FC3D - PROXIMAL - # Iteration of internal solver %i \n", options->iparam[6]);
+  }
 
   iparam[7] = iter;
   dparam[0] = tolerance;
@@ -172,10 +212,19 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000;
+  options->iparam[0] = 1000; 
+  options->iparam[2] = 15;   // Default Mimimun iteration of the internal solver for decreasing rho
+  options->iparam[3] = 20;  // Default Maximum iteration of the internal solver for increasing rho
+  
   options->dparam[0] = 1e-4;
+  options->dparam[3] = 1.e4; // default value for proximal parameter;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
+//  frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
+  frictionContact3D_ExtraGradient_setDefaultSolverOptions(options->internalSolvers);
+  
+  options->internalSolvers->iparam[0] = 21; // Default Maximum iteration
 
+  
+  
   return 0;
 }

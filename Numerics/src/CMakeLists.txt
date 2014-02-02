@@ -413,6 +413,7 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest43 FrictionContact3D_test43.c) # VI_FPP
   NEW_TEST(FC3Dtest44 FrictionContact3D_test44.c) # EG
   NEW_TEST(FC3Dtest45 FrictionContact3D_test45.c) # VI_EG
+  #NEW_TEST(FC3Dtest46 FrictionContact3D_test46.c) # VI_FPP with std ls FAIL
 
   SET(FC3Dtest50_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest50 FrictionContact3D_test50.c)
@@ -425,6 +426,12 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest72 FrictionContact3D_test72.c)	
   NEW_TEST(FC3Dtest73 FrictionContact3D_test73.c)
   NEW_TEST(FC3Dtest74 FrictionContact3D_test74.c)
+
+  NEW_TEST(FC3Dtest80 FrictionContact3D_test80.c) # Proximal
+  NEW_TEST(FC3Dtest81 FrictionContact3D_test81.c) # Proximal
+  NEW_TEST(FC3Dtest82 FrictionContact3D_test82.c) # Proximal
+
+
 
   NEW_TEST(FC3DNewFromFortranData FrictionContact3D_newFromFortranData.c)
   NEW_TEST(FC3DLmgcDriver1 FrictionContact3D_LmgcDriver_test1.c)

@@ -26,16 +26,15 @@ int main(void)
 {
   int info = 0 ;
 
-  char filename[50] = "./data/Example1_Fc3D_SBM.dat";
+  char filename[50] = "./data/BoxesStack1-i100000-32.hdf5.dat";
   printf("Test on %s\n", filename);
 
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PROX);
-  /*  options->internalSolvers->solverId=SICONOS_FRICTION_3D_AlartCurnierNewton;  */
-  /*   options->internalSolvers->iparam[1]=0; */
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_VI_FPP);
   options->dparam[0] = 1e-8; //
-
+  options->iparam[0] = 100000; //
+  options->iparam[1] = 1; //
 
   info = frictionContact_test_function(finput, options);
 
