@@ -34,7 +34,9 @@
 //#include <Siconos/IO/SiconosRestart.hpp>
 
 #include "Disks.hpp"
-
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "TimeDiscretisation.hpp"
 #include <Disk.hpp>
 #include <Circle.hpp>
 #include <DiskPlanR.hpp>
