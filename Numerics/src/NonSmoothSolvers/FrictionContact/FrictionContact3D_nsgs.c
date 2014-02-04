@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include <time.h>
 
 void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error)
 {
@@ -271,6 +272,21 @@ void frictionContact3D_nsgs_fillMLocal(FrictionContactProblem * problem, Frictio
 }
 
 
+/* swap two indices */
+void uint_swap (unsigned int *a, unsigned int *b)
+{
+    unsigned int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+/* shuffle an unsigned array */
+void uint_shuffle (unsigned int *a, int n) {
+  for (unsigned int i = 0; i < n - 1; i++)
+  {
+    uint_swap  (&a[i], &a[i + rand()%(n - i)]);
+  }
+}
 
 
 void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
@@ -337,6 +353,18 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   int hasNotConverged = 1;
   int contact; /* Number of the current row of blocks in M */
 
+  unsigned int *scontacts = NULL;
+
+  if (iparam[9]) /* shuffle */
+  {
+    scontacts = (unsigned int *) malloc(nc * sizeof(unsigned int));
+    for (unsigned int i = 0; i<nc ; ++i)
+    {
+      scontacts[i] = i;
+    }
+    uint_shuffle(scontacts, nc);
+  }
+
 
 
 
@@ -353,8 +381,17 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
       //cblas_dcopy( n , q , incx , velocity , incy );
       error = 0.0;
 
-      for (contact = 0 ; contact < nc ; ++contact)
+      for (unsigned int i= 0 ; i < nc ; ++i)
       {
+        if (iparam[9])
+        {
+          contact = scontacts[i];
+        }
+        else
+        {
+          contact = i;
+        }
+
 
         reactionold[0] = reaction[3 * contact];
         reactionold[1] = reaction[3 * contact + 1];
@@ -362,7 +399,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
 
-        
+
         localsolver_options->iparam[4] = contact;
         (*local_solver)(localproblem, &(reaction[3 * contact]) , localsolver_options);
 
@@ -371,6 +408,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
                  pow(reaction[3 * contact + 2] - reactionold[2], 2);
 
       }
+
 
       /* **** Criterium convergence **** */
       error = sqrt(error);
@@ -400,8 +438,17 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
       ++iter;
       /* Loop through the contact points */
       //cblas_dcopy( n , q , incx , velocity , incy );
-      for (contact = 0 ; contact < nc ; ++contact)
+      for (unsigned int i= 0 ; i < nc ; ++i)
       {
+        if (iparam[9])
+        {
+          contact = scontacts[i];
+        }
+        else
+        {
+          contact = i;
+        }
+
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
         localsolver_options->iparam[4] = contact;
@@ -419,8 +466,8 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
       if (options->callback)
       {
-        options->callback->endIteration(options->callback->env, 3 * nc, 
-                                        reaction, velocity, 
+        options->callback->endIteration(options->callback->env, 3 * nc,
+                                        reaction, velocity,
                                         error);
       }
 
@@ -439,6 +486,11 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   localproblem->M->matrix0 = NULL;
   freeFrictionContactProblem(localproblem);
 
+  if (scontacts) /* shuffle */
+  {
+    free(scontacts);
+  }
+
 }
 
 int frictionContact3D_nsgs_setDefaultSolverOptions(SolverOptions* options)
@@ -454,13 +506,13 @@ int frictionContact3D_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
+  options->iSize = 10;
+  options->dSize = 10;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < 10; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
