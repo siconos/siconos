@@ -64,18 +64,23 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     dparam[3] = 1.0;
   }
     
+  double sigma = 5.0;
 
   double * reactionold = (double *)malloc(n * sizeof(double));
   cblas_dcopy(n , reaction , 1 , reactionold , 1);
 
 
-
   internalSolverPtr internalsolver =0;
+  int iter_iparam =7;
   options->iparam[6]= 0;
   if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS) internalsolver = &frictionContact3D_nsgs;
   else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_DeSaxceFixedPoint) internalsolver = &frictionContact3D_DeSaxceFixedPoint;
   else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_EG) internalsolver = &frictionContact3D_ExtraGradient;
-  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALAC) internalsolver = &frictionContact3D_sparseLocalAlartCurnier;
+  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALAC)
+  {
+    internalsolver = &frictionContact3D_sparseLocalAlartCurnier;
+    iter_iparam =1;
+  }
   else  internalsolver = &frictionContact3D_nsgs;
 
 
@@ -112,7 +117,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     // internal solver for the regularized problem
     /*       frictionContact3D_nsgs(problem, reaction , velocity , info , internalsolver_options); */
 
-    internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]);
+    /* internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]); */
     //internalsolver_options->dparam[0] = options->dparam[0];
     DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
@@ -139,24 +144,26 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
    //update the rho with respect to the number of internal iterations.
     
-    int iter_internalsolver = internalsolver_options->iparam[7];
+    int iter_internalsolver = internalsolver_options->iparam[iter_iparam];
     options->iparam[6] +=iter_internalsolver;
     DEBUG_PRINTF("iter_internalsolver = %i\n",iter_internalsolver);
     DEBUG_PRINTF("info = %i\n",*info);
+    DEBUG_PRINTF("options->iparam[1] = %i\n",options->iparam[1]);
     DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
     DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
 
     
+
     if (iter_internalsolver < options->iparam[2])// || (*info == 0)) 
     {
-      rho = rho/10.0;
-      DEBUG_PRINTF("we decrease rho = %8.4e\n",rho);
+      rho = rho/sigma;
+      DEBUG_PRINTF("We decrease rho = %8.4e\n",rho);
     }
     else if (iter_internalsolver > options->iparam[3])
     {
-      rho = 10.0 *rho;
-      DEBUG_PRINTF("we increase rho = %8.4e\n",rho);
-   }
+      rho = sigma *rho;
+      DEBUG_PRINTF("We increase rho = %8.4e\n",rho);
+    }
     DEBUG_PRINTF("rho = %8.4e\n",rho);
 
     if (options->callback)
@@ -214,8 +221,8 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
     options->dparam[i] = 0.0;
   }
   options->iparam[0] = 1000; 
-  options->iparam[2] = 3;   // Default Mimimun iteration of the internal solver for decreasing rho
-  options->iparam[3] = 10;  // Default Maximum iteration of the internal solver for increasing rho
+  options->iparam[2] = 5;   // Default Mimimun iteration of the internal solver for decreasing rho
+  options->iparam[3] = 15;  // Default Maximum iteration of the internal solver for increasing rho
   
   options->dparam[0] = 1e-4;
   options->dparam[3] = 1.e4; // default value for proximal parameter;
@@ -223,9 +230,7 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
 //  frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
   frictionContact3D_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   
-  options->internalSolvers->iparam[0] = 11; // Default Maximum iteration
+  options->internalSolvers->iparam[0] = 16; // Default Maximum iteration
 
-  
-  
   return 0;
 }
