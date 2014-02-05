@@ -26,7 +26,7 @@ int main(void)
 {
   int info = 0 ;
 
-  char filename[50] = "./data/KaplasTower-i1061-4.hdf5.dat";
+  char filename[50] = "./data/OneObject-i1028-138.hdf5.dat";
   printf("Test on %s\n", filename);
 
   FILE * finput  =  fopen(filename, "r");

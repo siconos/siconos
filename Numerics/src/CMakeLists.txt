@@ -429,8 +429,10 @@ IF(WITH_TESTING)
 
   NEW_TEST(FC3Dtest80 FrictionContact3D_test80.c) # Proximal
   NEW_TEST(FC3Dtest81 FrictionContact3D_test81.c) # Proximal
-  NEW_TEST(FC3Dtest82 FrictionContact3D_test82.c) # Proximal
+  NEW_TEST(FC3Dtest83 FrictionContact3D_test83.c) # Proximal
+ 
 
+ # NEW_TEST(FC3Dtest82 FrictionContact3D_test82.c) # Proximal
 
  # NEW_TEST(FC3Dtest90 FrictionContact3D_test90.c) # TFP
 
