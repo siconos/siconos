@@ -24,8 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 
@@ -63,9 +63,9 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   {
     dparam[3] = 1.0;
   }
-    
-  double sigma = 5.0;
 
+
+  double sigma = 5.0;
   double * reactionold = (double *)malloc(n * sizeof(double));
   cblas_dcopy(n , reaction , 1 , reactionold , 1);
 
@@ -83,11 +83,13 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   }
   else  internalsolver = &frictionContact3D_nsgs;
 
-
   FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
   
   internalsolver_options->dparam[0] = error;
   internalsolver_options->dparam[0] = options->dparam[0];
+  
+  rho = sigma*error;
+
   
   DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
   DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
@@ -119,6 +121,8 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
 
     /* internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]); */
     //internalsolver_options->dparam[0] = options->dparam[0];
+    
+    internalsolver_options->dparam[0] = rho*error;
     DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
     
@@ -142,7 +146,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     }
 
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
-   //update the rho with respect to the number of internal iterations.
+    //update the rho with respect to the number of internal iterations.
     
     int iter_internalsolver = internalsolver_options->iparam[iter_iparam];
     options->iparam[6] +=iter_internalsolver;
@@ -152,18 +156,20 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
     DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
 
-    
+    /* if (iter_internalsolver < options->iparam[2])// || (*info == 0))  */
+    /* { */
+    /*   rho = rho/sigma; */
+    /*   DEBUG_PRINTF("We decrease rho = %8.4e\n",rho); */
+    /* } */
+    /* else if (iter_internalsolver > options->iparam[3]) */
+    /* { */
+    /*   rho = sigma *rho; */
+    /*   DEBUG_PRINTF("We increase rho = %8.4e\n",rho); */
+    /* } */
 
-    if (iter_internalsolver < options->iparam[2])// || (*info == 0)) 
-    {
-      rho = rho/sigma;
-      DEBUG_PRINTF("We decrease rho = %8.4e\n",rho);
-    }
-    else if (iter_internalsolver > options->iparam[3])
-    {
-      rho = sigma *rho;
-      DEBUG_PRINTF("We increase rho = %8.4e\n",rho);
-    }
+    rho = sigma*error;
+
+
     DEBUG_PRINTF("rho = %8.4e\n",rho);
 
     if (options->callback)
