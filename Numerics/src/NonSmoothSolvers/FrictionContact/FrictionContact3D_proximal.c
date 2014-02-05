@@ -24,8 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 
