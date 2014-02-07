@@ -987,7 +987,7 @@ void frictionContact3D_sparseLocalAlartCurnier(
   {
     assert(buffer);
     free(buffer);
-
+    options->dWork = NULL;
   }
   else
   {
