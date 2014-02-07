@@ -245,6 +245,8 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
+    free(x_k);
+    free(w_k);
   }
 
 
@@ -257,11 +259,6 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   iparam[7] = iter;
   free(xtmp);
   free(wtmp);
-  if (isVariable)
-  {
-      free(x_k);
-      free(w_k);
-  }
 
 
 }

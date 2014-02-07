@@ -36,7 +36,7 @@
 void frictionContact3D_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* Number of contacts */
-  int nc = problem->numberOfContacts;  
+  int nc = problem->numberOfContacts;
   /* Dimension of the problem */
   int n = 3 * nc;
 
@@ -53,12 +53,12 @@ void frictionContact3D_VI_ExtraGradient(FrictionContactProblem* problem, double 
   FrictionContactProblem_as_VI *fc3d_as_vi= (FrictionContactProblem_as_VI*)malloc(sizeof(FrictionContactProblem_as_VI));
   vi->env =fc3d_as_vi ;
   vi->size =  n;
-  
-  
+
+
   /*Set the norm of the VI to the norm of problem->q  */
   vi->normVI= cblas_dnrm2(n , problem->q , 1);
   vi->istheNormVIset=1;
-  
+
   fc3d_as_vi->vi = vi;
   fc3d_as_vi->fc3d = problem;
   /* frictionContact_display(fc3d_as_vi->fc3d); */
@@ -71,6 +71,7 @@ void frictionContact3D_VI_ExtraGradient(FrictionContactProblem* problem, double 
   int dsize = options->dSize;
   int vi_isize = visolver_options->iSize;
   int vi_dsize = visolver_options->dSize;
+
   if (isize != vi_isize )
   {
     printf("size prolem in frictionContact3D_VI_ExtraGradient\n");
@@ -103,7 +104,7 @@ void frictionContact3D_VI_ExtraGradient(FrictionContactProblem* problem, double 
 
   error = visolver_options->dparam[1];
   iter = visolver_options->iparam[7];
-  
+
   options->dparam[1] = error;
   options->iparam[7] = iter;
 
@@ -116,6 +117,7 @@ void frictionContact3D_VI_ExtraGradient(FrictionContactProblem* problem, double 
 
   deleteSolverOptions(visolver_options);
   free(visolver_options);
+  visolver_options=NULL;
   free(fc3d_as_vi);
 
 
@@ -151,7 +153,6 @@ int frictionContact3D_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* op
   options->dparam[0] = 1e-3;
   options->dparam[3] = 1e-3;
   options->dparam[3] = -1.0; // rho is variable by default
-
   options->internalSolvers = NULL;
 
   return 0;

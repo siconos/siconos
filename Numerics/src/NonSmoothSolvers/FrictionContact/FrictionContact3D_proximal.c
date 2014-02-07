@@ -34,11 +34,11 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
-  
+
   /* Number of contacts */
   int nc = problem->numberOfContacts;
   NumericsMatrix* M = problem->M;
-  
+
   /* Dimension of the problem */
   int n = 3 * nc;
 
@@ -53,19 +53,19 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     numericsError("frictionContact3D_proximal", "The PROX method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
   SolverOptions *internalsolver_options = options->internalSolvers;
-  
+
 
   /*****  PROXIMAL Iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-  
+
   double rho = dparam[3];
   if (dparam[3] < 1e-12)
   {
     dparam[3] = 1.0;
   }
-  
+
   double sigma = 5.0;
   double * reactionold = (double *)malloc(n * sizeof(double));
   cblas_dcopy(n , reaction , 1 , reactionold , 1);
@@ -74,19 +74,19 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   internalSolverPtr internalsolver =0;
   int iter_iparam =7;
   options->iparam[6]= 0;
-  
+
 
   if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS)
   {
     frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
-    internalsolver = &frictionContact3D_nsgs; 
+    internalsolver = &frictionContact3D_nsgs;
   }
-  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_DeSaxceFixedPoint) 
+  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_DeSaxceFixedPoint)
   {
     frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options->internalSolvers);
     internalsolver = &frictionContact3D_DeSaxceFixedPoint;
   }
-  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_EG) 
+  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_EG)
   {
     frictionContact3D_ExtraGradient_setDefaultSolverOptions(options->internalSolvers);
     internalsolver = &frictionContact3D_ExtraGradient;
@@ -106,14 +106,14 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   options->internalSolvers->iparam[0] = options->iparam[3]+1; // Default Maximum iteration
 
   FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
-  
+
 
   internalsolver_options->dparam[0] = options->dparam[0];
   internalsolver_options->dparam[0] = error;
-  
+
   rho = sigma*error;
 
-  
+
   DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
   DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
 
@@ -144,12 +144,12 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
 
     /* internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]); */
     //internalsolver_options->dparam[0] = options->dparam[0];
-    
+
     internalsolver_options->dparam[0] = rho*error;
     DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
-    
- 
+
+
 
     /* **** Criterium convergence **** */
     //substract proximal regularization on q
@@ -170,7 +170,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
 
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
     //update the rho with respect to the number of internal iterations.
-    
+
     int iter_internalsolver = internalsolver_options->iparam[iter_iparam];
     options->iparam[6] +=iter_internalsolver;
     DEBUG_PRINTF("iter_internalsolver = %i\n",iter_internalsolver);
@@ -197,8 +197,8 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
 
     if (options->callback)
     {
-      options->callback->endIteration(options->callback->env, nc * 3, 
-                                      reaction, velocity, 
+      options->callback->endIteration(options->callback->env, nc * 3,
+                                      reaction, velocity,
                                       error);
     }
 
@@ -249,10 +249,10 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000; 
+  options->iparam[0] = 1000;
   options->iparam[2] = 5;   // Default Mimimun iteration of the internal solver for decreasing rho
   options->iparam[3] = 15;  // Default Maximum iteration of the internal solver for increasing rho
-  
+
   options->dparam[0] = 1e-4;
   options->dparam[3] = 1.e4; // default value for proximal parameter;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));

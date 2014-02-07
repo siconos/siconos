@@ -105,9 +105,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
-      
 
-      
+
+
       if (options->callback)
       {
         options->callback->endIteration(options->callback->env, n,
@@ -153,11 +153,11 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         /* xtmp <-  ProjectionOnX(x) */
         problem->ProjectionOnX(problem,x,xtmp);
-        
+
         problem->F(problem,xtmp,w);
 
         DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
-                                                    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
+            printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
         /* velocitytmp <- velocity */
         /* cblas_dcopy(n, w, 1, wtmp , 1) ; */
 
@@ -166,7 +166,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         a1 = cblas_dnrm2(n, w, 1);
         DEBUG_PRINTF("a1 = %12.8e\n", a1);
- 
+
         /* reactiontmp <- reaction */
         cblas_dcopy(n, xtmp, 1,x , 1) ;
 
@@ -175,7 +175,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         a2 = cblas_dnrm2(n, xtmp, 1) ;
         DEBUG_PRINTF("a2 = %12.8e\n", a2);
-       
+
         success = (rho_k*a1 < L * a2)?1:0;
 
         /* printf("rho_k = %12.8e\t", rho_k); */
@@ -188,9 +188,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
 
       /* problem->F(problem,x,w); */
-      DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);   
+      DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);
           printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
- 
+
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
 
@@ -207,7 +207,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       {
         rho =rho_k/taumin;
         DEBUG_PRINTF("We compute a new rho_k = \n", rho_k);
-                     
+
       }
       else
         rho =rho_k;
@@ -246,9 +246,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       {
 
         rho_k = rho * pow(tau,ls_iter);
-        
+
         /* x <- x - rho_k*  w_k */
-        cblas_dcopy(n, x_k, 1, x , 1) ; 
+        cblas_dcopy(n, x_k, 1, x , 1) ;
         cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
 
         /* xtmp <-  ProjectionOnX(x) */
@@ -256,7 +256,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         problem->F(problem,xtmp,w);
 
         DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
-                                                    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
+            printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
         /* velocitytmp <- velocity */
         /* cblas_dcopy(n, w, 1, wtmp , 1) ; */
 
@@ -265,7 +265,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         a1 = cblas_dnrm2(n, w, 1);
         DEBUG_PRINTF("a1 = %12.8e\n", a1);
- 
+
         /* reactiontmp <- reaction */
         cblas_dcopy(n, xtmp, 1,x , 1) ;
 
@@ -274,7 +274,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         a2 = cblas_dnrm2(n, xtmp, 1) ;
         DEBUG_PRINTF("a2 = %12.8e\n", a2);
-       
+
         success = (rho_k*a1 < L * a2)?1:0;
 
         /* printf("rho_k = %12.8e\t", rho_k); */
@@ -287,9 +287,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
 
       /* problem->F(problem,x,w); */
-      DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);   
+      DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);
           printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
- 
+
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
 
@@ -306,7 +306,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       {
         rho =rho_k/taumin;
         DEBUG_PRINTF("We compute a new rho_k = \n", rho_k);
-                     
+
       }
       else
         rho =rho_k;
@@ -319,6 +319,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
+    free(x_k);
+    free(w_k);
   }
 
 
@@ -362,7 +364,7 @@ int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOpt
   options->dparam[0] = 1e-3;
   options->dparam[3] = 1e-3;
   options->dparam[3] = -1.0; // rho is variable by default
-  
+
   options->internalSolvers = NULL;
 
   return 0;
