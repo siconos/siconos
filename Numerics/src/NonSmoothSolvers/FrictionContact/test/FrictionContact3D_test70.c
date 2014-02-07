@@ -34,7 +34,7 @@ int main(void)
   info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_DSFP);
   options->dparam[0] = 1e-8; // optimal guessed value with the nose.
   options->dparam[3] = 2.0; // optimal guessed value with the nose.
-  options->dparam[3] = -1.0; // variable rho
+  options->dparam[3] = 1.0; // variable rho
 
   info = frictionContact_test_function(finput, options);
 

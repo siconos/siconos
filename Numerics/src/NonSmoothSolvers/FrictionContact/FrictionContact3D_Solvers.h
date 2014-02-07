@@ -209,6 +209,22 @@ extern "C"
     \param options the pointer to the array of options to set
   */
   int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options);
+ 
+  /**Fixed Point Projection solver for friction-contact 3D problem based on the De Saxce Formulation
+      \param problem : the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options :
+      iparam[0] : Maximum iteration number
+      dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed.
+  */
+  void frictionContact3D_fixedPointProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+  /** set the default solver parameters and perform memory allocation for DSFP
+    \param options the pointer to the array of options to set
+  */
+  int frictionContact3D_fixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
 
   /**Fixed Point solver for friction-contact 3D problem based on the VI reformulation
       \param problem : the friction-contact 3D problem to solve

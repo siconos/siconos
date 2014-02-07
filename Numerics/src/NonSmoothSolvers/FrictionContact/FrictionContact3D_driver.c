@@ -134,10 +134,19 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   case SICONOS_FRICTION_3D_DSFP:
   {
     snPrintf(1, options, 
-            " ========================== Call DeSaxce Fized Point (DSFP) solver for Friction-Contact 3D problem ==========================\n");
+            " ========================== Call DeSaxce Fixed Point (DSFP) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_DeSaxceFixedPoint(problem, reaction , velocity , &info , options);
     break;
   }
+  /* Fixed point projection algorithm */
+  case SICONOS_FRICTION_3D_FPP:
+  {
+    snPrintf(1, options, 
+            " ========================== Call Fixed Point Projection (FPP) solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_fixedPointProjection(problem, reaction , velocity , &info , options);
+    break;
+  }
+
   /* Extra Gradient algorithm */
   case SICONOS_FRICTION_3D_EG:
   {

@@ -26,13 +26,14 @@ int main(void)
 {
   int info = 0 ;
 
-  char filename[50] = "./data/Confeti-ex03-Fc3D-SBM.dat";
+  char filename[50] = "./data/BoxesStack1-i100000-32.hdf5.dat";
   printf("Test on %s\n", filename);
 
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_DSFP);
-  options->dparam[3]=1e2;
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_FPP);
+  options->dparam[0] = 1e-8; //
+  options->iparam[0] = 100000; //
 
   info = frictionContact_test_function(finput, options);
 

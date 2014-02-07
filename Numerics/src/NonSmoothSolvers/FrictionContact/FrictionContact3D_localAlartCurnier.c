@@ -252,7 +252,7 @@ int globalLineSearchGP(
     }
 
   }
-  if (verbose > 1)
+  if (verbose > 0)
   {
     printf("global line search failed. max number of iteration reached  = %i  with alpha = %.10e \n", maxiter_ls, alpha[0]);
   }
@@ -670,7 +670,7 @@ int globalLineSearchSparseGP(
 
     if (C1 && C2)
     {
-      if (verbose > 1)
+      if (verbose > 0)
       {
         printf("global line search success. Number of iteration = %i  alpha = %.10e, q = %.10e\n", iter, alpha[0], q);
       }
@@ -698,7 +698,7 @@ int globalLineSearchSparseGP(
     }
 
   }
-  if (verbose > 1)
+  if (verbose > 0)
   {
     printf("global line search failed. max number of iteration reached  = %i  with alpha = %.10e \n", maxiter_ls, alpha[0]);
   }
@@ -723,7 +723,7 @@ void frictionContact3D_sparseLocalAlartCurnierInit(
 
   SO->iparam[8] = mumps_id->comm_fortran;
 
-  if (verbose > 0)
+  if (verbose > 1)
   {
     mumps_id->ICNTL(4) = 0;
     mumps_id->ICNTL(10) = 1;

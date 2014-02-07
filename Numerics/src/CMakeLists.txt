@@ -396,10 +396,10 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest31 FrictionContact3D_test31.c)
   NEW_TEST(FC3Dtest32 FrictionContact3D_test32.c)
   
-  NEW_TEST(FC3Dtest33 FrictionContact3D_test33.c) # DSFP  converges with ls
+  NEW_TEST(FC3Dtest33 FrictionContact3D_test33.c) # DSFP converges with specific rho
 
-  NEW_TEST(FC3Dtest3400 FrictionContact3D_test3400.c) # old EG converges with specific rho
-  NEW_TEST(FC3Dtest35 FrictionContact3D_test35.c) # EG with variable rho
+  NEW_TEST(FC3Dtest3400 FrictionContact3D_test3400.c) # EG 
+  NEW_TEST(FC3Dtest35 FrictionContact3D_test35.c)     # EG
 
   NEW_TEST(FC3Dtest36 FrictionContact3D_test36.c) #TFP with NSGS and projection on cylinder
 
@@ -409,11 +409,13 @@ IF(WITH_TESTING)
 
   NEW_TEST(FC3Dtest40 FrictionContact3D_test40.c) # VI_EG 
   NEW_TEST(FC3Dtest41 FrictionContact3D_test41.c) # VI_FPP
-  NEW_TEST(FC3Dtest42 FrictionContact3D_test42.c) # VI_DSFP
-  NEW_TEST(FC3Dtest43 FrictionContact3D_test43.c) # VI_FPP
-  NEW_TEST(FC3Dtest44 FrictionContact3D_test44.c) # EG
+  NEW_TEST(FC3Dtest42 FrictionContact3D_test42.c) # VI_FPP
+  NEW_TEST(FC3Dtest43 FrictionContact3D_test43.c) # DSFP converges with specific rho
+  NEW_TEST(FC3Dtest44 FrictionContact3D_test44.c) # VI_EG
   NEW_TEST(FC3Dtest45 FrictionContact3D_test45.c) # VI_EG
-  #NEW_TEST(FC3Dtest46 FrictionContact3D_test46.c) # VI_FPP with std ls FAIL
+  
+  NEW_TEST(FC3Dtest46 FrictionContact3D_test46.c) # FPP
+  NEW_TEST(FC3Dtest47 FrictionContact3D_test47.c) # EG
 
   SET(FC3Dtest50_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest50 FrictionContact3D_test50.c)
@@ -421,8 +423,8 @@ IF(WITH_TESTING)
 
   NEW_TEST(FC3Dtest60 FrictionContact3D_test60.c)
 
-  NEW_TEST(FC3Dtest70 FrictionContact3D_test70.c)
-  NEW_TEST(FC3Dtest71 FrictionContact3D_test71.c)
+  NEW_TEST(FC3Dtest70 FrictionContact3D_test70.c) # DSFP
+  NEW_TEST(FC3Dtest71 FrictionContact3D_test71.c) # DSFP
   NEW_TEST(FC3Dtest72 FrictionContact3D_test72.c)	
   NEW_TEST(FC3Dtest73 FrictionContact3D_test73.c)
   NEW_TEST(FC3Dtest74 FrictionContact3D_test74.c)

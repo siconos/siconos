@@ -32,8 +32,9 @@ int main(void)
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_DSFP);
-  options->dparam[0] = 1e-8; //
+  options->dparam[0] = 1e-6;   //
   options->iparam[0] = 100000; //
+  options->dparam[3] = 8e-4;   // Guess value with the nose
 
   info = frictionContact_test_function(finput, options);
 

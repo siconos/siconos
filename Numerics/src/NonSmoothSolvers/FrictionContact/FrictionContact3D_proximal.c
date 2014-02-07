@@ -75,34 +75,41 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   int iter_iparam =7;
   options->iparam[6]= 0;
 
-
-  if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS)
+  if (internalsolver_options) /* we assume that the solver option has been coherently set*/
   {
-    frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
-    internalsolver = &frictionContact3D_nsgs;
-  }
-  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_DeSaxceFixedPoint)
-  {
-    frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options->internalSolvers);
-    internalsolver = &frictionContact3D_DeSaxceFixedPoint;
-  }
-  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_EG)
-  {
-    frictionContact3D_ExtraGradient_setDefaultSolverOptions(options->internalSolvers);
-    internalsolver = &frictionContact3D_ExtraGradient;
-  }
-  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALAC)
-  {
-    frictionContact3D_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
-    internalsolver = &frictionContact3D_sparseLocalAlartCurnier;
-    iter_iparam =1;
-    options->internalSolvers->iparam[3]=1000000;
+    if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS)
+    {
+      internalsolver = &frictionContact3D_nsgs;
+    }
+    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_DeSaxceFixedPoint)
+    {
+      internalsolver = &frictionContact3D_DeSaxceFixedPoint;
+    }
+    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_EG)
+    {
+      internalsolver = &frictionContact3D_ExtraGradient;
+    }
+    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALAC)
+    {
+      if (problem->M->matrix0)
+      {
+        internalsolver = &frictionContact3D_localAlartCurnier;
+      }
+      else
+      {
+        internalsolver = &frictionContact3D_sparseLocalAlartCurnier;
+      }
+      iter_iparam =1;
+    }
   }
   else
   {
-    frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
-    internalsolver = &frictionContact3D_nsgs;
+    numericsError("frictionContact3D_proximal", "The PROX method needs options for the internal solvers, soptions->internalSolvers should be diffrent from NULL");
   }
+
+
+
+
   options->internalSolvers->iparam[0] = options->iparam[3]+1; // Default Maximum iteration
 
   FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
@@ -257,5 +264,6 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
   options->dparam[3] = 1.e4; // default value for proximal parameter;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   options->internalSolvers->solverId = SICONOS_FRICTION_3D_LOCALAC;
+  frictionContact3D_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
