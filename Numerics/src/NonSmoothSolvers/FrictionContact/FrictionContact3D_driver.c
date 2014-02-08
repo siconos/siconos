@@ -45,6 +45,7 @@ char * SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR = "F3D_ProjectionOnCone
 char * SICONOS_FRICTION_3D_PGoC_STR = "F3D_PGoC";
 char * SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR = "F3D_DeSaxceFixedPoint";
 char * SICONOS_FRICTION_3D_EG_STR = "F3D_ExtraGradient";
+char * SICONOS_FRICTION_3D_FPP_STR = "F3D_FixedPointProjection";
 char * SICONOS_FRICTION_3D_VI_EG_STR = "F3D_VI_ExtraGradient";
 char * SICONOS_FRICTION_3D_VI_FPP_STR = "F3D_VI_FixedPointProjection";
 char * SICONOS_FRICTION_3D_HP_STR = "F3D_HyperplaneProjection";

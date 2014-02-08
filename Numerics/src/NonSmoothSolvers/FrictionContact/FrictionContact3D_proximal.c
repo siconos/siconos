@@ -65,8 +65,17 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   {
     dparam[3] = 1.0;
   }
+  /* parameters to set the value of rho */
+  double sigma = options->dparam[4];
+  double nu = options->dparam[5];
 
-  double sigma = 5.0;
+  DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
+  DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
+  DEBUG_PRINTF("options->dparam[4] = %i\n",options->dparam[4]);
+  DEBUG_PRINTF("options->dparam[5] = %i\n",options->dparam[5]);
+
+
+
   double * reactionold = (double *)malloc(n * sizeof(double));
   cblas_dcopy(n , reaction , 1 , reactionold , 1);
 
@@ -118,7 +127,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   internalsolver_options->dparam[0] = options->dparam[0];
   internalsolver_options->dparam[0] = error;
 
-  rho = sigma*error;
+  rho = sigma*pow(error,nu);
 
 
   DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
@@ -156,8 +165,6 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
-
-
     /* **** Criterium convergence **** */
     //substract proximal regularization on q
     cblas_daxpy(n, rho, reactionold, 1, problem->q, 1) ;
@@ -183,8 +190,6 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     DEBUG_PRINTF("iter_internalsolver = %i\n",iter_internalsolver);
     DEBUG_PRINTF("info = %i\n",*info);
     DEBUG_PRINTF("options->iparam[1] = %i\n",options->iparam[1]);
-    DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
-    DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
 
     /* if (iter_internalsolver < options->iparam[2])// || (*info == 0))  */
     /* { */
@@ -197,7 +202,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     /*   DEBUG_PRINTF("We increase rho = %8.4e\n",rho); */
     /* } */
 
-    rho = sigma*error;
+    rho = sigma*pow(error,nu);
 
 
     DEBUG_PRINTF("rho = %8.4e\n",rho);
@@ -262,6 +267,8 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
 
   options->dparam[0] = 1e-4;
   options->dparam[3] = 1.e4; // default value for proximal parameter;
+  options->dparam[4] = 5.0; // default value for sigma;
+  options->dparam[5] = 1.0; // default value for nu;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   options->internalSolvers->solverId = SICONOS_FRICTION_3D_LOCALAC;
   frictionContact3D_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
