@@ -117,6 +117,11 @@ nslaw = NewtonImpactFrictionNSL(0.8, 0., 0., 3)
 # (5) broadphase contact detection
 broadphase = BulletSpaceFilter(bouncingBox, nslaw)
 
+# add multipoint iterations to gather at least 3 contact points and
+# avoid object penetration
+broadphase.collisionConfiguration().setConvexConvexMultipointIterations()
+broadphase.collisionConfiguration().setPlaneConvexMultipointIterations()
+
 broadphase.addStaticObject(ground)
 broadphase.addStaticShape(groundShape)
 

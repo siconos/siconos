@@ -36,6 +36,7 @@
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+#include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 
 int main()
 {
@@ -164,6 +165,12 @@ int main()
 
     // -- The space filter performs broadphase collsion detection
     SP::BulletSpaceFilter space_filter(new BulletSpaceFilter(model, nslaw));
+
+    // -- add multipoint iterations, this is needed to gather at least
+    // -- 3 contact points and avoid objects penetration, see Bullet
+    // -- documentation
+    space_filter->collisionConfiguration()->setConvexConvexMultipointIterations();
+    space_filter->collisionConfiguration()->setPlaneConvexMultipointIterations();
 
     // -- The ground is a static object
     space_filter->addStaticObject(ground);
