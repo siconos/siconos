@@ -41,7 +41,7 @@ typedef std::vector<SP::SiconosMemory> VectorOfMemories;
  *  \date (Creation) Apr 29, 2004
  *
  * An interaction represents the "link" between a set of Dynamical
- * Systems (stored in involvedDS).
+ * Systems.
  * The state variables and inputs of the DynamicalSystem (x,R)
  * are related to the interaction variables (y,lambda) thanks to the
  * interaction with the help of the relation
@@ -49,9 +49,6 @@ typedef std::vector<SP::SiconosMemory> VectorOfMemories;
  * of law between y and lambda.
  *
  * Thus, the interaction main members are:
- *
- * - a set of Dynamical Systems (from 1 to ...) that interacts, named
- *    involvedDS.
  *
  * - relation: a pointer to a Relation object that determines the type
  *   of relation and so the way it is computed. Warning: there is only
@@ -121,11 +118,11 @@ private:
   /** sum of all z sizes, for DS involved in the interaction */
   unsigned int _sizeZ;
 
-  /** Bool to check the number of DS concerned by this interaction 
+  /** Bool to check the number of DS concerned by this interaction
       (1 or 2 indeed)
       True if 2 DS.
-      Note FP : usefull in NewtonEuler jacobians computation. 
-  */ 
+      Note FP : usefull in NewtonEuler jacobians computation.
+  */
   bool _has2Bodies;
 
   /** Absolute position in the "global" vector of constraints (for
@@ -203,7 +200,7 @@ private:
 public:
 
   /** default constructor */
-  Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _sizeZ(0), _has2Bodies(false), _y(2) 
+  Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _sizeZ(0), _has2Bodies(false), _y(2)
   {};
 
   /** constructor with XML object of the Interaction
@@ -389,16 +386,16 @@ public:
   /** Set the number of dynamical systems concerned by
       this interaction. Warning FP: this function is supposed
       to be called only during topology->link(inter, ds1, ds2) call.
-      \param bool : true if two ds, else false     
+      \param bool : true if two ds, else false
    */
   void setHas2Bodies(bool val) {_has2Bodies = val;}
 
   /** Check the number of dynamical systems concerned by
       this interaction
-      \return bool : true if two ds, else false     
+      \return bool : true if two ds, else false
    */
   bool has2Bodies() const {return _has2Bodies;}
-  
+
   unsigned int absolutePosition()
   {
     return _absolutePosition;
@@ -762,21 +759,21 @@ public:
 
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to one ds.
-   *  \param int, relative position of the beginning of the required block in relation matrix. 
+   *  \param int, relative position of the beginning of the required block in relation matrix.
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
   void getLeftInteractionBlockForDS(unsigned int, SP::SiconosMatrix) const;
 
   /** gets the matrix used in interactionBlock computation. Used only for the formulation projecting on the constraints.
    *         We get only the part corresponding to ds.
-   *  \param int, relative position of the beginning of the required block in relation matrix. 
+   *  \param int, relative position of the beginning of the required block in relation matrix.
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
   void getLeftInteractionBlockForDSProjectOnConstraints(unsigned int, SP::SiconosMatrix InteractionBlock) const;
 
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
-   *  \param int, relative position of the beginning of the required block in relation matrix. 
+   *  \param int, relative position of the beginning of the required block in relation matrix.
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
   void getRightInteractionBlockForDS(unsigned int, SP::SiconosMatrix) const;

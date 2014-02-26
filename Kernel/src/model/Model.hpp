@@ -78,6 +78,7 @@ private:
   //  Model(const Model&){};
 
   /** assignment operator => forbidden
+      \return Model&
    */
   Model& operator=(const Model&);
 
@@ -93,24 +94,24 @@ public:
   Model();
 
   /** create the Model from an xml file
-   *  \param char * : the input XML file (optional parameter)
+   *  \param xmlFile * : the input XML file (optional parameter)
    *  \
    */
   Model(const std::string& xmlFile);
 
   /** create the Model from a set of data
-   *  \param double : the value for t0
-   *  \param double : the value for T (optional parameter)
-   *  \param std::string : the title of the Model (optional parameter)
-   *  \param std::string : the author of the Model (optional parameter)
-   *  \param std::string : the description of the Model (optional
+   *  \param t0 : the value for t0
+   *  \param T : the value for T (optional parameter)
+   *  \param title the title of the Model (optional parameter)
+   *  \param author : the author of the Model (optional parameter)
+   *  \param description : the description of the Model (optional
    *                  parameter)
-   *  \param string : the date of the Model (optional parameter)
-   *  \param string : the xml schema of the Model (optional parameter)
+   *  \param date : the date of the Model (optional parameter)
+   *  \param schema : the xml schema of the Model (optional parameter)
    */
-  Model(double, double = -1, const std::string& = "none",
-        const std::string& = "nobody", const std::string& = "none",
-        const std::string& = "none", const std::string& = "none");
+  Model(double t0, double T = -1, const std::string& title = "none",
+        const std::string& author = "nobody", const std::string& description = "none",
+        const std::string& date = "none", const std::string& schema = "none");
 
   /** destructor
    */
@@ -127,7 +128,7 @@ public:
   }
 
   /** set the current time
-   *  \param a double
+   *  \param newValue the new time
    */
   inline void setCurrentTime(double newValue)
   {
@@ -143,7 +144,7 @@ public:
   }
 
   /** set initial time of the time discretisation
-   *  \param a double
+   *  \param newT0
    */
   inline void sett0(double newT0)
   {
@@ -185,7 +186,7 @@ public:
   }
 
   /** set the NonSmoothDynamicalSystem of the Model
-   *  \param a pointer on NonSmoothDynamicalSystem
+   *  \param newPtr a pointer on NonSmoothDynamicalSystem
    */
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr);
 
@@ -198,7 +199,7 @@ public:
   }
 
   /** set the SiconosModelXML of the Model
-   *  \param a pointer on SiconosModelXML
+   *  \param newPtr a pointer on SiconosModelXML
    */
   void setSiconosModelXMLPtr(SP::SiconosModelXML newPtr);
 
@@ -211,7 +212,7 @@ public:
   }
 
   /** set the title of the simulation
-   *  \param std::string : the title
+   *  \param s : the title
    */
   inline void setTitle(const std::string & s)
   {
@@ -227,7 +228,7 @@ public:
   }
 
   /** set the author of the simulation
-   *  \param std::string : the author
+   *  \param s std::string : the author
    */
   inline void setAuthor(const std::string & s)
   {
@@ -243,7 +244,7 @@ public:
   }
 
   /** set the author of the simulation
-   *  \param std::string : the author
+   *  \param s std::string : the author
    */
   inline void setDescription(const std::string & s)
   {
@@ -258,8 +259,8 @@ public:
     return _date;
   }
 
-  /** set the author of the simulation
-   *  \param std::string : the author
+  /** set the date of the simulation
+   *  \param s std::string : the date
    */
   inline void setDate(const std::string & s)
   {
@@ -274,8 +275,8 @@ public:
     return _xmlSchema;
   }
 
-  /** set the author of the simulation
-   *  \param std::string : the author
+  /** set the schema of the simulation
+   *  \param s std::string : the schema
    */
   inline void setXmlSchema(const std::string & s)
   {
@@ -284,27 +285,29 @@ public:
 
   /** Complete initialization of the model (NonSmoothDynamicalSystem,
       Simulation)
-      \param a smart pointer to simulation (option, default = empty)
+      \param sim a smart pointer to simulation (option, default = empty)
    */
-  void initialize(SP::Simulation = SP::Simulation());
+  void initialize(SP::Simulation sim = SP::Simulation());
 
   // --- XML related functions ---
 
   /** saves into output file the data of the system
-   *  \param char* : the data file which must be written
+   *  \param filename char* : the data file which must be written
    */
-  void saveToXMLFile(char*);
+  void saveToXMLFile(char* filename);
 
   /** saves into the DOM tree all the data of the system
+      \return void
    */
   void saveToDOMTree();
 
   /** copy the data of the plateform to the XML DOM tree
+      \return void
    */
   void savePlatformToXML();
 
   /** check if the DOM tree respect the XML schema
-   *  return bool : true if the DOM tree respect the XML schema
+   *  \return bool : true if the DOM tree respect the XML schema
    */
   bool checkXMLDOMTree();
 
@@ -319,13 +322,14 @@ public:
   void checkModelCoherency();
 
   /** checks if the xmlFile given respects the xmlSchema given
-   *  \param std::string : the xml input file to check
-   *  \param std::string : the xml schema
+   *  \param xmlFile std::string : the xml input file to check
+   *  \param xmlSchema std::string : the xml schema
    *  \return int : 1 if the xml file respects the schema
    */
   int xmlSchemaValidated(std::string  xmlFile, std::string  xmlSchema = "");
 
   /** display the data of the Model
+      \return void
    */
   void display() const ;
 
