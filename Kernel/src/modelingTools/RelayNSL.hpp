@@ -72,7 +72,7 @@ private:
 public:
 
   /** constructor with XML object of the RelayNSL
-  *  \param the corresponding XML object corresponding
+  *  \param nslawxml the corresponding XML object corresponding
   */
   RelayNSL(SP::NonSmoothLawXML nslawxml);
 
@@ -99,7 +99,7 @@ public:
   };
 
   /** to set c
-  *  \param a double
+  *  \param newVal a double
   */
   inline void setLb(double newVal)
   {
@@ -116,7 +116,7 @@ public:
 
 
   /** to set ub
-  *  \param a double
+  *  \param newVal a double
   */
   inline void setUb(double newVal)
   {

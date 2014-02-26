@@ -40,7 +40,7 @@ typedef std::vector<SP::SiconosMemory> VectorOfMemories;
  *  \version 3.0.0.
  *  \date (Creation) Apr 29, 2004
  *
- * \class LagrangianDS 
+ * \class LagrangianDS
  * The class LagrangianDS  defines  and computes a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
@@ -322,29 +322,30 @@ public:
   // === CONSTRUCTORS - DESTRUCTOR ===
 
   /** constructor from a minimum set of data
-   *  \param SiconosVector : initial coordinates of this DynamicalSystem
-   *  \param SiconosVector : initial velocity of this DynamicalSystem
+   *  \param position SiconosVector : initial coordinates of this DynamicalSystem
+   *  \param velocity SiconosVector : initial velocity of this DynamicalSystem
    */
-  LagrangianDS(SP::SiconosVector, SP::SiconosVector);
+  LagrangianDS(SP::SiconosVector position, SP::SiconosVector velocity);
 
   /** constructor from an xml file
-   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
+   *  \param obj DynamicalSystemXML * : the XML object for this DynamicalSystem
    */
-  LagrangianDS(SP::DynamicalSystemXML);
+  LagrangianDS(SP::DynamicalSystemXML obj);
 
   /** constructor from a minimum set of data
-   *  \param SiconosVector : initial coordinates of this DynamicalSystem
-   *  \param SiconosVector : initial velocity of this DynamicalSystem
-   *  \param SiconosMatrix : mass matrix
+   *  \param position SiconosVector : initial coordinates of this DynamicalSystem
+   *  \param velocity SiconosVector : initial velocity of this DynamicalSystem
+   *  \param mass SiconosMatrix : mass matrix
    */
-  LagrangianDS(SP::SiconosVector, SP::SiconosVector, SP::SiconosMatrix);
+  LagrangianDS(SP::SiconosVector position,
+               SP::SiconosVector velocity, SP::SiconosMatrix mass);
 
   /** constructor from a minimum set of data
-   *  \param SiconosVector : initial coordinates of this DynamicalSystem
-   *  \param SiconosVector : initial velocity of this DynamicalSystem
-   *  \param std::string: plugin path to compute mass matrix
+   *  \param position SiconosVector : initial coordinates of this DynamicalSystem
+   *  \param velocity SiconosVector : initial velocity of this DynamicalSystem
+   *  \param plugin std::string: plugin path to compute mass matrix
    */
-  LagrangianDS(SP::SiconosVector , SP::SiconosVector, const std::string&);
+  LagrangianDS(SP::SiconosVector position, SP::SiconosVector velocity, const std::string& plugin);
 
   /** destructor */
   virtual ~LagrangianDS();
@@ -361,14 +362,14 @@ public:
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization
    */
-  void initRhs(double) ;
+  void initRhs(double time) ;
 
   /** dynamical system initialization function except for _p:
    *  mainly set memory and compute plug-in for initial state values.
    *  \param time of initialisation, default value = 0
-   *  \param the size of the memory, default size = 1.
+   *  \param size the size of the memory, default size = 1.
    */
-  void initialize(double = 0, unsigned int = 1) ;
+  void initialize(double time = 0, unsigned int size = 1) ;
 
   /** dynamical system initialization function for _p
    *  \param level for _p
@@ -386,7 +387,7 @@ public:
   };
 
   /** to set ndof
-   *  \param unsigned int ndof : the value to set ndof
+   *  \param newNdof unsigned int : the value to set ndof
    */
   inline void setNdof(unsigned int newNdof)
   {
@@ -412,12 +413,12 @@ public:
   }
 
   /** set the value of q to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue
    */
-  void setQ(const SiconosVector&);
+  void setQ(const SiconosVector& newValue);
 
   /** set Q to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr
    */
   void setQPtr(SP::SiconosVector newPtr);
 
@@ -432,12 +433,12 @@ public:
   }
 
   /** set the value of q0 to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue
    */
-  void setQ0(const SiconosVector&);
+  void setQ0(const SiconosVector& newValue);
 
   /** set Q0 to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr
    */
   void setQ0Ptr(SP::SiconosVector newPtr);
 
@@ -462,12 +463,12 @@ public:
   }
 
   /** set the value of velocity to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue
    */
-  void setVelocity(const SiconosVector&);
+  void setVelocity(const SiconosVector& newValue);
 
   /** set Velocity to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr
    */
   void setVelocityPtr(SP::SiconosVector newPtr);
 
@@ -482,12 +483,12 @@ public:
   }
 
   /** set the value of velocity0 to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue
    */
-  void setVelocity0(const SiconosVector&);
+  void setVelocity0(const SiconosVector& newValue);
 
   /** set Velocity0 to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr
    */
   void setVelocity0Ptr(SP::SiconosVector newPtr) ;
 
@@ -511,7 +512,7 @@ public:
   // -- p --
 
   /** get p
-   *  \param unsigned int, required level for p
+   *  \param level unsigned int, required level for p
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector p(unsigned int level) const
@@ -520,18 +521,19 @@ public:
   }
 
   /** set the value of p to newValue
-   *  \param unsigned int, required level for p,
-   *  \param SiconosVector newValue
+   *  \param newValue
+   *  \param level required level for p
    */
-  void setP(const SiconosVector&, unsigned int level);
+  void setP(const SiconosVector& newValue, unsigned int level);
 
   /** set P to pointer newPtr
-   *  \param unsigned int, required level for p, default
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr
+   *  \param level required level for p, default
    */
   void setPPtr(SP::SiconosVector newPtr, unsigned int level);
 
   /** get all the values of the state vector p stored in memory
+   * \param level
    *  \return a memory
    */
   inline SP::SiconosMemory pMemory(unsigned int level) const
@@ -550,7 +552,7 @@ public:
   }
 
   /** set mass to pointer newPtr
-   *  \param a plugged matrix SP
+   *  \param newPtr a plugged matrix SP
    */
   inline void setMassPtr(SP::SiconosMatrix newPtr)
   {
@@ -577,7 +579,7 @@ public:
 
 
   /** set fInt to pointer newPtr
-   *  \param a SP to plugged vector
+   *  \param newPtr a SP to plugged vector
    */
   inline void setFIntPtr(SP::SiconosVector newPtr)
   {
@@ -596,7 +598,7 @@ public:
 
 
   /** set fExt to pointer newPtr
-   *  \param a SP to a Simple vector
+   *  \param newPtr a SP to a Simple vector
    */
   inline void setFExtPtr(SP::SiconosVector newPtr)
   {
@@ -615,7 +617,7 @@ public:
 
 
   /** set NNL to pointer newPtr
-   *  \param a SP to plugged vector
+   *  \param newPtr a SP to plugged vector
    */
   inline void setNNLPtr(SP::SiconosVector newPtr)
   {
@@ -643,14 +645,14 @@ public:
 
 
   /** set jacobianFIntq to pointer newPtr
-   *  \param a SP SiconosMatrix
+   *  \param newPtr a SP SiconosMatrix
    */
   inline void setJacobianFIntqPtr(SP::SiconosMatrix newPtr)
   {
     _jacobianFIntq = newPtr;
   }
   /** set jacobianFIntqDot to pointer newPtr
-   *  \param a SP SiconosMatrix
+   *  \param newPtr a SP SiconosMatrix
    */
   inline void setJacobianFIntqDotPtr(SP::SiconosMatrix newPtr)
   {
@@ -677,14 +679,14 @@ public:
 
 
   /** set jacobianNNLq to pointer newPtr
-   *  \param a SP SiconosMatrix
+   *  \param newPtr a SP SiconosMatrix
    */
   inline void setJacobianNNLqPtr(SP::SiconosMatrix newPtr)
   {
     _jacobianNNLq = newPtr;
   }
   /** set jacobianNNLqDot to pointer newPtr
-   *  \param a SP SiconosMatrix
+   *  \param newPtr a SP SiconosMatrix
    */
   inline void setJacobianNNLqDotPtr(SP::SiconosMatrix newPtr)
   {
@@ -732,8 +734,8 @@ public:
   // --- PLUGINS RELATED FUNCTIONS ---
 
   /** allow to set a specified function to compute the mass
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the name of the function to use in this plugin
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
    */
   void setComputeMassFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
@@ -742,7 +744,7 @@ public:
   }
 
   /** set a specified function to compute Mass
-   *  \param a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeMassFunction(FPtr7 fct)
   {
@@ -751,8 +753,8 @@ public:
   }
 
   /** allow to set a specified function to compute FInt
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the name of the function to use in this plugin
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
    */
   void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
@@ -762,7 +764,7 @@ public:
   }
 
   /** set a specified function to compute fInt
-   *  \param a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeFIntFunction(FPtr6 fct)
   {
@@ -771,8 +773,8 @@ public:
   }
 
   /** allow to set a specified function to compute Fext
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the name of the function to use in this plugin
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
    */
   void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName)
   {
@@ -782,7 +784,7 @@ public:
   }
 
   /** set a specified function to compute fExt
-   *  \param a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeFExtFunction(VectorFunctionOfTime fct)
   {
@@ -791,59 +793,59 @@ public:
   }
 
   /** allow to set a specified function to compute the inertia
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the name of the function to use in this plugin
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
    */
   void setComputeNNLFunction(const std::string& pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute NNL
-   *  \param a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeNNLFunction(FPtr5 fct);
 
   /** allow to set a specified function to compute the jacobian w.r.t q of the internal forces
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the name of the function to use in this plugin
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
    */
   void setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName);
   /** allow to set a specified function to compute the jacobian following qDot of the internal forces w.r.t.
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the name of the function to use in this plugin
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
    */
   void setComputeJacobianFIntqDotFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute jacobian following q of the FInt
-   *  \param a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeJacobianFIntqFunction(FPtr6 fct);
   /** set a specified function to compute jacobian following qDot of the FInt
-   *  \param a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeJacobianFIntqDotFunction(FPtr6 fct);
 
   /** allow to set a specified function to compute the jacobian w.r.t q of the the external forces
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the name of the function to use in this plugin
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
    */
   void setComputeJacobianNNLqFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** allow to set a specified function to compute the jacobian w.r.t qDot of the the external strength
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the name of the function to use in this plugin
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
    */
   void setComputeJacobianNNLqDotFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute the jacobian following q of NNL
-   *  \param a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeJacobianNNLqFunction(FPtr5 fct);
   /** set a specified function to compute the jacobian following qDot of NNL
-   *  \param a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeJacobianNNLqDotFunction(FPtr5 fct);
 
   /** get the value of the gradient according to \f$ x \f$ of the right-hand side
-   *  \return SimpleMatrix
+   *  \return BlockMatrix&
    */
   inline const BlockMatrix& getJacobianRhsx() const
   {
@@ -863,25 +865,29 @@ public:
   virtual void computeMass();
 
   /** function to compute the mass
-   *  \param double time : the current time, SP::SiconosVector: pointer on the state vector q
+   *  \param time double : the current time
    */
-  virtual void computeMass(SP::SiconosVector);
+  virtual void computeMass(SP::SiconosVector time);
 
   /** default function to compute the internal strengths
-   *  \param double time : the current time
+   *  \param time double : the current time
    */
-  virtual void computeFInt(double);
+  virtual void computeFInt(double time);
 
   /** function to compute the internal strengths
-   *  with some specific values for q and velocity (ie not those of the current state).
-   *  \param double time : the current time, SP::SiconosVector: pointers on the state vectors q and velocity
+   *  with some specific values for position and velocity (ie not those of the current state).
+   *  \param time double : the current time,
+   *  \param position SP::SiconosVector
+   *  \param velocity SP::SiconosVector
    */
-  virtual void computeFInt(double , SP::SiconosVector, SP::SiconosVector);
+  virtual void computeFInt(double time,
+                           SP::SiconosVector position,
+                           SP::SiconosVector velocity);
 
   /** default function to compute the external strengths
-   *  \param double time : the current time
+   *  \param time double : the current time
    */
-  virtual void computeFExt(double);
+  virtual void computeFExt(double time);
 
   /** default function to compute the inertia
    */
@@ -889,76 +895,93 @@ public:
 
   /** function to compute the inertia
    *  with some specific values for q and velocity (ie not those of the current state).
-   *  \param SP::SiconosVector: pointers on the state vectors q and velocity
+   *  \param position SP::SiconosVector
+   *  \param velocity SP::SiconosVector
    */
-  virtual void computeNNL(SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeNNL(SP::SiconosVector position,
+                          SP::SiconosVector velocity);
 
   /** To compute the jacobian w.r.t q of the internal forces
-   *  \param double time : the current time
+   *  \param time double : the current time
    */
-  virtual void computeJacobianFIntq(double);
+  virtual void computeJacobianFIntq(double time);
   /** To compute the jacobian w.r.t qDot of the internal forces
-   *  \param double time : the current time
+   *  \param time double : the current time
    */
-  virtual void computeJacobianFIntqDot(double);
+  virtual void computeJacobianFIntqDot(double time);
 
   /** To compute the jacobian w.r.t q of the internal forces
-   *  \param double time : the current time, SP::SiconosVector: pointers on the state vectors q and velocity
+   *  \param time double : the current time,
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
    */
-  virtual void computeJacobianFIntq(double , SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianFIntq(double time,
+                                    SP::SiconosVector position,
+                                    SP::SiconosVector velocity);
+
   /** To compute the jacobian w.r.t. qDot of the internal forces
-   *  \param double time : the current time, SP::SiconosVector: pointers on the state vectors q and velocity
+   *  \param time double: the current time
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
    */
-  virtual void computeJacobianFIntqDot(double , SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianFIntqDot(double time,
+                                       SP::SiconosVector position,
+                                       SP::SiconosVector velocity);
 
   /** function to compute the jacobian w.r.t. q of the inertia forces
    */
   virtual void computeJacobianNNLq();
+
   /** function to compute the jacobian w.r.t. qDot of the inertia forces
    */
   virtual void computeJacobianNNLqDot();
 
   /** function to compute the jacobian w.r.t. q of the inertia forces
-   *  \param SP::SiconosVector: pointers on the state vectors q and velocity
+   * \param q SP::SiconosVector
+   * \param velocity SP::SiconosVector
    */
   virtual void computeJacobianNNLq(SP::SiconosVector q, SP::SiconosVector velocity);
+
   /** function to compute the jacobian w.r.t. qDot of the inertia forces
-   *  \param SP::SiconosVector: pointers on the state vectors q and velocity
+   * \param q SP::SiconosVector
+   * \param velocity SP::SiconosVector
    */
   virtual void computeJacobianNNLqDot(SP::SiconosVector q, SP::SiconosVector velocity);
 
   /** Default function to compute the right-hand side term
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time double : current time
+   *  \param isDSup bool : flag to avoid recomputation of operators
    */
-  virtual void computeRhs(double, bool  = false);
+  virtual void computeRhs(double time, bool isDSup = false);
 
   /** Default function to compute jacobian of the right-hand side term according to x
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time double : current time
+   *  \param isDSup bool : flag to avoid recomputation of operators
    */
-  virtual void computeJacobianRhsx(double, bool  = false);
+  virtual void computeJacobianRhsx(double time, bool isDSup = false);
 
   /** Default function to compute forces
-   *  \param double, the current time
+   *  \param time double, the current time
    */
-  virtual void computeForces(double);
+  virtual void computeForces(double time);
 
   /** function to compute forces with some specific values for q and velocity (ie not those of the current state).
-   *  \param double time : the current time
-   *  \param SP::SiconosVector: pointers on q
-   *  \param SP::SiconosVector: pointers on velocity
+   *  \param time double : the current time
+   *  \param q SP::SiconosVector: pointers on q
+   *  \param velocity SP::SiconosVector: pointers on velocity
    */
-  virtual void computeForces(double , SP::SiconosVector, SP::SiconosVector);
+  virtual void computeForces(double time,
+                             SP::SiconosVector q,
+                             SP::SiconosVector velocity);
 
   /** Default function to compute the jacobian w.r.t. q of forces
-   *  \param double, the current time
+   *  \param time double, the current time
    */
-  virtual void computeJacobianqForces(double);
+  virtual void computeJacobianqForces(double time);
   /** Default function to compute the jacobian w.r.t. qDot of forces
-   *  \param double, the current time
+   *  \param time double, the current time
    */
-  virtual void computeJacobianqDotForces(double);
+  virtual void computeJacobianqDotForces(double time);
 
   // --- miscellaneous ---
 
@@ -971,9 +994,9 @@ public:
   void display() const;
 
   /** initialize the SiconosMemory objects with a positive size.
-   *  \param the size of the SiconosMemory. must be >= 0
+   *  \param size the size of the SiconosMemory. must be >= 0
    */
-  void initMemory(unsigned int);
+  void initMemory(unsigned int size);
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,
@@ -986,18 +1009,12 @@ public:
    */
   /*  double dsConvergenceIndicator(); */
 
-  /** function to compute derivative number level of qFree
-   *  \param double: current time
-   *  \param unsigned int: derivative number
-   *  \param SP::SiconosVector: in-out parameter, qFree
-   */
-  //  void computeqFree(double, unsigned int, SP::SiconosVector);
-
   /** set p[...] to zero
    */
   void resetAllNonSmoothPart();
 
   /** set p[...] to zero for a given level
+      \param level
    */
   void resetNonSmoothPart(unsigned int level);
 
@@ -1006,7 +1023,7 @@ public:
    */
   void computePostImpactVelocity();
   /** set Boundary Conditions
-   *  \param BoundaryConditions
+   *  \param newbd BoundaryConditions
    */
   inline void setBoundaryConditions(SP::BoundaryCondition newbd)
   {
@@ -1014,16 +1031,15 @@ public:
   };
 
   /** get Boundary Conditions
-   *  \return pointer on a BoundaryConditions
+   *  \return SP::BoundaryCondition pointer on a BoundaryConditions
    */
   inline SP::BoundaryCondition boundaryConditions()
   {
     return _boundaryConditions;
   };
 
-
   /** set Reaction to Boundary Conditions
-   *  \param BoundaryConditions
+   *  \param newrbd BoundaryConditions pointer
    */
   inline void setReactionToBoundaryConditions(SP::SiconosVector newrbd)
   {
@@ -1040,8 +1056,9 @@ public:
 
 
   /** to allocate memory for a new tmp matrix
-   *  \param the id of the SimpleMatrix
-   *  \param an int to set the size
+   *  \param id the id of the SimpleMatrix
+   *  \param sizeOfRows an int to set the size of rows
+   *  \param sizeOfCols an int to set the size of cols
    */
   inline void allocateWorkMatrix(const WorkMatrixNames & id, int sizeOfRows, int sizeOfCols)
   {
@@ -1049,8 +1066,8 @@ public:
   }
 
   /** get a temporary saved matrix
-   * \param the id of the SimpleMatrix
-   *  \return a SP::Simple
+   * \param id the id of the SimpleMatrix
+   *  \return a SP::SimpleMatrix
    */
   inline SP::SimpleMatrix getWorkMatrix(const WorkMatrixNames & id) const
   {
