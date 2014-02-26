@@ -113,6 +113,11 @@ PY_REGISTER_BULLET_LINEAR_MATH(btQuadWord);
 PY_REGISTER_BULLET_LINEAR_MATH(btQuaternion);
 PY_REGISTER_BULLET_LINEAR_MATH(btTransform);
 
+%{
+#include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
+%}
+%shared_ptr(btDefaultCollisionConfiguration);
+%include "BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h"
 
 %{
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>

@@ -47,6 +47,14 @@ protected:
 public:
   BulletSpaceFilter(SP::Model model, SP::NonSmoothLaw nslaw);
 
+  /** get Bullet collision configuration
+      \return a pointer on a Bullet collision configuration
+  */
+  SP::btDefaultCollisionConfiguration collisionConfiguration() const
+  {
+    return _collisionConfiguration;
+  }
+
   /** get Bullet broadphase
       \return pointer on a BulletBroadPhase
   */
@@ -63,7 +71,7 @@ public:
     return _collisionWorld;
   };
 
-  /** get static objects 
+  /** get static objects
       \return a std::vector of btCollisionObject
   */
   std11::shared_ptr<std::vector<SP::btCollisionObject> >staticObjects() const
@@ -83,7 +91,7 @@ public:
   /** add a static object
    * \param co a btCollisionObject
    */
-  void addStaticObject(SP::btCollisionObject co) 
+  void addStaticObject(SP::btCollisionObject co)
   {
     _staticObjects->push_back(co);
   };
@@ -91,7 +99,7 @@ public:
   /** add a static shape
    * \param cs a btCollisionShape
    */
-  void addStaticShape(SP::btCollisionShape cs) 
+  void addStaticShape(SP::btCollisionShape cs)
   {
     _staticShapes->push_back(cs);
   }
@@ -101,7 +109,7 @@ public:
   void buildInteractions(double);
 
 
-  /** set close contact parameter 
+  /** set close contact parameter
    *  \param threshold double value that will be multiplicated by the
    *         radius of the object bouncing box
   */
@@ -111,6 +119,14 @@ public:
   }
 
   ACCEPT_STD_VISITORS();
+
+  /** set a new collision configuration
+   * \param collisionConfig the new bullet collision configuration
+   */
+  void setCollisionConfiguration(
+    SP::btDefaultCollisionConfiguration collisionConfig);
+
+
 };
 
 
@@ -150,9 +166,5 @@ struct ForContactPoint : public Question<SP::btManifoldPoint>
   ANSWER(BulletR, contactPoint());
   ANSWER(BulletFrom1DLocalFrameR, contactPoint());
 };
-
-
-
-
 
 #endif

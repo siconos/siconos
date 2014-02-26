@@ -81,14 +81,19 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 
   _collisionConfiguration.reset(new btDefaultCollisionConfiguration());
 
-  _collisionConfiguration->setConvexConvexMultipointIterations();
-  _collisionConfiguration->setPlaneConvexMultipointIterations();
+  /* not done by default anymore */
+  /* one have to get collision configuration and call explicitely
+   * these methods */
+
+/*  _collisionConfiguration->setConvexConvexMultipointIterations();
+    _collisionConfiguration->setPlaneConvexMultipointIterations();*/
 
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
 
   _broadphase.reset(new btDbvtBroadphase());
 
-  _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase, &*_collisionConfiguration));
+  _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase,
+                                             &*_collisionConfiguration));
 
   btGImpactCollisionAlgorithm::registerAlgorithm(&*_dispatcher);
 
@@ -101,6 +106,14 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 
 }
 
+void BulletSpaceFilter::setCollisionConfiguration(
+  SP::btDefaultCollisionConfiguration collisionConfig)
+{
+  _collisionConfiguration = collisionConfig;
+  _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
+  _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase, &*_collisionConfiguration));
+  _dynamicCollisionsObjectsInserted = false;
+}
 
 void BulletSpaceFilter::buildInteractions(double time)
 {
@@ -114,13 +127,13 @@ void BulletSpaceFilter::buildInteractions(double time)
     {
       _collisionWorld->addCollisionObject(&*(ask<ForCollisionObject>(*(dsg.bundle(*dsi)))));
     }
-    
+
     _dynamicCollisionsObjectsInserted = true;
   }
 
   if (! _staticCollisionsObjectsInserted)
   {
-    for(std::vector<SP::btCollisionObject>::iterator 
+    for(std::vector<SP::btCollisionObject>::iterator
           ic = _staticObjects->begin(); ic != _staticObjects->end(); ++ic)
     {
       _collisionWorld->addCollisionObject((*ic).get());
@@ -352,9 +365,9 @@ void BulletSpaceFilter::buildInteractions(double time)
     {
       if (!contactPoints[&*cp])
       {
-        
+
         //      assert (!contactPoints[&*ask<ForContactPoint>(*(inter0->relation()))]);
-        
+
         DEBUG_PRINTF("remove contact %p, lifetime %d\n",
                      &*ask<ForContactPoint>(*(inter0->relation())),
                      ask<ForContactPoint>(*(inter0->relation()))->getLifeTime());

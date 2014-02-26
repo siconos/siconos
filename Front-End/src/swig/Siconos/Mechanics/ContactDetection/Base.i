@@ -38,6 +38,6 @@
 %}
 %include <MechanicsFwd.hpp>
 
-PY_FULL_REGISTER(SpaceFilter);                                             
+PY_FULL_REGISTER(SpaceFilter);
 PY_FULL_REGISTER(SiconosBodies);
 PY_FULL_REGISTER(ExternalBody);

@@ -39,13 +39,13 @@ BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
 {
   SiconosVector& q = *_q;
 
-  if (fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
+/*  if (fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
                 pow(q(5), 2) +  pow(q(6), 2)) - 1.) >= 1e-10)
   {
     RuntimeException::selfThrow(
       "BulletDS: quaternion in position parameter is not a unit quaternion "
     );
-  }
+    }*/
 
   _collisionObject.reset(new btCollisionObject());
 
