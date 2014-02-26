@@ -169,8 +169,6 @@ void BulletViewer::draw()
 
   float lbdmax = 0., w;
 
-  DSIterator itDS;
-  SP::DynamicalSystemsSet involvedDS;
   SP::Interaction interaction;
   SP::Relation relation;
 
@@ -216,14 +214,6 @@ void BulletViewer::draw()
     {
       interaction = I1->bundle(*ui);
       relation = interaction->relation();
-
-      involvedDS = interaction->dynamicalSystems();
-
-      itDS = involvedDS->begin();
-
-      SP::DynamicalSystem d1 = *itDS;
-
-      SP::SiconosVector q1 = ask<ForPosition>(*d1);
 
       {
         SiconosVector& cf = *ask<ForContactForce>(*relation);

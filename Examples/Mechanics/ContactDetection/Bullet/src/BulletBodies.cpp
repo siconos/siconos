@@ -8,6 +8,7 @@
 
 #include <limits>
 
+#include <bullet/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 
 #define NDOF 3
 
@@ -215,6 +216,9 @@ void BulletBodies::init()
 
     _playground.reset(new BulletSpaceFilter(_model,
                                             nslaw));
+
+    std11::static_pointer_cast<BulletSpaceFilter>(_playground)->collisionConfiguration()->setConvexConvexMultipointIterations();
+    std11::static_pointer_cast<BulletSpaceFilter>(_playground)->collisionConfiguration()->setPlaneConvexMultipointIterations();
 
     // -- Time discretisation --
     timedisc.reset(new TimeDiscretisation(t0, h));
