@@ -66,7 +66,8 @@ public:
     \param yCenter
     \param width
     */
-  DiskPlanR(double, double, double, double, double, double, double);
+  DiskPlanR(double disk, double A, double B, double C,
+            double xCenter, double yCenter, double width);
 
   /** Finite Plan
   */

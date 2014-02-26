@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
  */
-/** \file NewtonEulerR.hpp
+/** \file KneeJointR.hpp
  */
 #ifndef KneeJointRELATION_H
 #define KneeJointRELATION_H

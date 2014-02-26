@@ -42,17 +42,34 @@ private:
 public:
 
   /** Constructor
-
-  \param disk1 radius
-  \param disk2 radius
+  \param rdisk1 radius
+  \param rdisk2 radius
   */
-  CircleCircleR(double, double);
+  CircleCircleR(double rdisk1, double rdisk2);
 
-  double distance(double, double, double, double, double, double);
+  /** compute distance between 2 disks
+      \param x1 x position of first disk
+      \param y1 y position of first disk
+      \param r1 radius of first disk
+      \param x2 x position of second disk
+      \param y2 y position of second disk
+      \param r2 radius of second disk
+  */
+  double distance(double x1, double y1, double r1,
+                  double x2, double y2, double r2);
 
   using LagrangianScleronomousR::computeh;
+
+  /** computeh implementation, see LagrangianScleronomousR
+      \param time
+      \param inter
+  */
   void computeh(double time, Interaction& inter);
 
+  /** computeh implementation, see LagrangianScleronomousR
+      \param time
+      \param inter
+  */
   void computeJachq(double time, Interaction& inter);
 
   /** visitors hook

@@ -113,21 +113,40 @@ public:
 
   bool equal(FTime, FTime, FTime, double) const;
 
+  /** compute A
+      \param t the time
+  */
   void computeA(double t)
   COMPUTE(A)
 
+  /** compute B
+      \param t the time
+  */
   void computeB(double t)
   COMPUTE(B)
 
+  /** compute C
+      \param t the time
+  */
   void computeC(double t)
   COMPUTE(C)
-
+    
+  /** compute ADot
+    \param t the time
+  */
   inline void computeADot(double t)
   COMPUTE(ADot)
 
+  /** compute BDot
+      \param t the time
+  */
   inline void computeBDot(double t)
   COMPUTE(BDot)
 
+
+  /** compute CDot
+      \param t the time
+  */
   inline void computeCDot(double t)
   COMPUTE(CDot)
 

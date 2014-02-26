@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
  */
-/*! \file NewtonEulerR.hpp
+/*! \file PrismaticJointR.hpp
 
 */
 #ifndef PrismaticJointRELATION_H
@@ -90,7 +90,7 @@ public:
    * \param axis SiconosVector of size 3 that defines the prismatic axis
    *  in the inertial frame of reference
    */
-  PrismaticJointR(SP::NewtonEulerDS d2, SP::SiconosVector axis);
+  PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis);
 
 
   void computeFromInitialPosition();

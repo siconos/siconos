@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
  */
-/*! \file NewtonEulerR.hpp
+/*! \file PivotJointR.hpp
 */
 #ifndef PivotJointRELATION_H
 #define PivotJointRELATION_H
