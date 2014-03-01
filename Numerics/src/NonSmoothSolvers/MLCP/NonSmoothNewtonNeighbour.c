@@ -57,6 +57,14 @@ static double* sZsol = 0;
 static NewtonFunctionPtr* sFphi;
 static NewtonFunctionPtr* sFjacobianPhi;
 
+
+static void plotMerit(double *z, double psi_k, double descentCondition);
+static void plotMeritToZsol(double *z);
+static int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition);
+static int lineSearch_Wolfe(double *z, double qp_0);
+static int NonMonotomnelineSearch(double *z, double Rk);
+
+
 /************************************************************************/
 /*useful for debug*/
 void NSNN_thisIsTheSolution(int n, double * z)
@@ -697,18 +705,18 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     exit(1);
     }*/
 
-    if ((infoDGESV != 0 || descentCondition > criterion) && 0)
-    {
-      printf("no a desc dir, get grad psy\n");
+//    if ((infoDGESV != 0 || descentCondition > criterion) && 0)
+//    {
+//      printf("no a desc dir, get grad psy\n");
       /* dk = - jacobian_psi (remind that dk is saved in phi_z) */
-      cblas_dcopy(n, sgrad_psi_z, 1, sdir_descent, 1);
-      cblas_dscal(n , -1.0 , sdir_descent, incx);
+//      cblas_dcopy(n, sgrad_psi_z, 1, sdir_descent, 1);
+//      cblas_dscal(n , -1.0 , sdir_descent, incx);
       /*DEBUG ONLY*/
       /*printf("begin plot new descent dir\n");
       plotMerit(z);
       printf("end\n");
        gets(&c);*/
-    }
+//    }
     /*      coef=fabs(norm_jacobian_psi_z*norm_jacobian_psi_z/descentCondition);
     if (coef <1){
     cblas_dscal(n,coef,sdir_descent,incx);

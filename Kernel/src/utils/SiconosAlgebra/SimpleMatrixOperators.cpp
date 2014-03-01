@@ -314,8 +314,8 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
   default:
     SiconosMatrixException::selfThrow("SimpleMatrix::op= (const SimpleMatrix): invalid type of matrix");
     break;
-    resetLU();
   }
+  resetLU();
   return *this;
 }
 

@@ -26,7 +26,7 @@
 #include "NonSmoothNewton.h"
 #include "FischerBurmeister.h"
 #include "MCP_Solvers.h"
-
+#include "MCP_FischerBurmeister.h"
 
 /* Static object which contains the MCP problem description.
 Ugly but required to deal with function pointer connection

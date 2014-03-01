@@ -290,7 +290,6 @@ BlockVector& BlockVector::operator = (const BlockVector& vIn)
     }
     return *this;
   }
-  return *this;
 }
 
 BlockVector& BlockVector::operator -= (const BlockVector& vIn)

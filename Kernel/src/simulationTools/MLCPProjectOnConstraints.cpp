@@ -677,26 +677,26 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 #else
       if (0) //(std11::static_pointer_cast<NewtonEulerR> inter->relation())->_isConstact){
       {
-        unsigned int sizeDS = neds->getDim();
-        SP::SimpleMatrix T = neds->T();
-        SP::SimpleMatrix workT(new SimpleMatrix(*T));
-        workT->trans();
-        SP::SimpleMatrix workT2(new SimpleMatrix(6, 6));
-        prod(*workT, *T, *workT2, true);
-        leftInteractionBlock1.reset(new SimpleMatrix(sizeY, sizeDS));
-        inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
-        leftInteractionBlock.reset(new SimpleMatrix(1, sizeDS));
-        for (unsigned int ii = 0; ii < sizeDS; ii++)
-          leftInteractionBlock->setValue(1, ii, leftInteractionBlock1->getValue(1, ii));
-
-        SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
-        //cout<<"LinearOSNS : leftUBlock\n";
-        //work->display();
-        work->trans();
-        //cout<<"LinearOSNS::computeInteractionBlock workT2"<<endl;
-        //workT2->display();
-        workT2->PLUForwardBackwardInPlace(*work);
-        prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
+//        unsigned int sizeDS = neds->getDim();
+//        SP::SimpleMatrix T = neds->T();
+//        SP::SimpleMatrix workT(new SimpleMatrix(*T));
+//        workT->trans();
+//        SP::SimpleMatrix workT2(new SimpleMatrix(6, 6));
+//        prod(*workT, *T, *workT2, true);
+//        leftInteractionBlock1.reset(new SimpleMatrix(sizeY, sizeDS));
+//        inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
+//        leftInteractionBlock.reset(new SimpleMatrix(1, sizeDS));
+//        for (unsigned int ii = 0; ii < sizeDS; ii++)
+//          leftInteractionBlock->setValue(1, ii, leftInteractionBlock1->getValue(1, ii));
+//
+//        SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
+//        //cout<<"LinearOSNS : leftUBlock\n";
+//        //work->display();
+//        work->trans();
+//        //cout<<"LinearOSNS::computeInteractionBlock workT2"<<endl;
+//        //workT2->display();
+//        workT2->PLUForwardBackwardInPlace(*work);
+//        prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
       }
       else
       {

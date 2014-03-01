@@ -57,7 +57,7 @@ extern "C"
   int frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* reaction , SolverOptions * options);
 
   /** free memory for friction contact 3D Fixed Point solver */
-  void frictionContact3D_FixedP_free();
+  void frictionContact3D_FixedP_free(void);
 
   /** compute error for friction-contact 3D problem with Fixed Point
    * \param dimension of the global problem

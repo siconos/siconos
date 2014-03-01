@@ -18,6 +18,7 @@
 */
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 #include "FrictionContactProblem_as_VI.h"
 
 #include "projectionOnCone.h"

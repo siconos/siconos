@@ -53,7 +53,6 @@ int mlcp_alloc_working_memory(MixedLinearComplementarityProblem* problem, Solver
   {
   case SICONOS_MLCP_ENUM :
     return mlcp_enum_alloc_working_memory(problem, options);
-    break;
   default:
     return 0;/*Nothing to do*/
   }
@@ -147,28 +146,20 @@ int mlcp_driver_get_iwork(MixedLinearComplementarityProblem* problem, SolverOpti
   {
   case SICONOS_MLCP_DIRECT_ENUM:
     return  mlcp_direct_enum_getNbIWork(problem, options);
-    break;
   case SICONOS_MLCP_PATH_ENUM:
     return  mlcp_path_enum_getNbIWork(problem, options);
-    break;
   case SICONOS_MLCP_DIRECT_PATH_ENUM:
     return mlcp_direct_path_enum_getNbIWork(problem, options);
-    break;
   case SICONOS_MLCP_ENUM:
     return  mlcp_enum_getNbIWork(problem, options);
-    break;
   case SICONOS_MLCP_DIRECT_SIMPLEX:
     return  mlcp_direct_simplex_getNbIWork(problem, options);
-    break;
   case SICONOS_MLCP_DIRECT_PATH:
     return  mlcp_direct_path_getNbIWork(problem, options);
-    break;
   case SICONOS_MLCP_FB:
     return  mlcp_FB_getNbIWork(problem, options);
-    break;
   case SICONOS_MLCP_DIRECT_FB:
     return  mlcp_direct_FB_getNbIWork(problem, options);
-    break;
   default :
     return 0;
   }
@@ -181,28 +172,20 @@ int mlcp_driver_get_dwork(MixedLinearComplementarityProblem* problem, SolverOpti
   {
   case SICONOS_MLCP_DIRECT_ENUM:
     return  mlcp_direct_enum_getNbDWork(problem, options);
-    break;
   case SICONOS_MLCP_PATH_ENUM:
     return  mlcp_path_enum_getNbDWork(problem, options);
-    break;
   case SICONOS_MLCP_DIRECT_PATH_ENUM:
     return mlcp_direct_path_enum_getNbDWork(problem, options);
-    break;
   case SICONOS_MLCP_ENUM:
     return  mlcp_enum_getNbDWork(problem, options);
-    break;
   case SICONOS_MLCP_DIRECT_SIMPLEX:
     return  mlcp_direct_simplex_getNbDWork(problem, options);
-    break;
   case SICONOS_MLCP_DIRECT_PATH:
     return  mlcp_direct_path_getNbDWork(problem, options);
-    break;
   case SICONOS_MLCP_FB:
     return  mlcp_FB_getNbDWork(problem, options);
-    break;
   case SICONOS_MLCP_DIRECT_FB:
     return  mlcp_direct_FB_getNbDWork(problem, options);
-    break;
   default :
     return 0;
   }

@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "SiconosLapack.h"
-
+#include "pinv.h"
 /**
  * n : row number
  * m : col number

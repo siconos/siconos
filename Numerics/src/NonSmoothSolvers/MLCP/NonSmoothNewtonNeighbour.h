@@ -49,7 +49,7 @@ extern "C"
 
   /*only for debug*/
   void NSNN_thisIsTheSolution(int n, double * z);
-  void  NSNN_reset();
+  void  NSNN_reset(void);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

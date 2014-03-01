@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include <math.h>
+#include "projectionOnCylinder.h"
 
 void projectionOnCylinder(double* r, double  R)
 {

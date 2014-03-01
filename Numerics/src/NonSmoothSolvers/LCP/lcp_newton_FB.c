@@ -51,7 +51,6 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
 
   printf("The Algorithm lcp_newton_FB is not reliable yet, report to siconos.gforge.inria.fr if you need it soon \n");
-  return ;
 
 
   incx = 1;

@@ -23,6 +23,8 @@
 #include <string.h>
 #include "SiconosLapack.h"
 
+#include "cond.h"
+
 double cond(double * A, int n, int m)
 {
 //#ifdef COMPLETE_LAPACK_LIBRARIES

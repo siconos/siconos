@@ -26,6 +26,11 @@
 #include "SiconosLapack.h"
 static int LWORK = 0;
 int SICONOS_LS_0 = 0;
+
+static int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOptions* options);
+static int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options);
+static void displayLS(LinearSystemProblem* p);
+
 //#define LINEARSYSTEM_DEBUG
 
 /*

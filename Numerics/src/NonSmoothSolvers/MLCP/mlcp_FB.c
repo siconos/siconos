@@ -32,6 +32,12 @@ static int sM = 0;
 static MixedLinearComplementarityProblem* sProblem;
 static double* sFz = 0;
 static double sMaxError = 0;
+
+static void computeFz(double* z);
+static void F_MCPFischerBurmeister(int size, double* z, double* FBz, int a);
+static void jacobianF_MCPFischerBurmeister(int size, double* z, double* jacobianFMatrix, int a);
+
+
 int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
 {
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);

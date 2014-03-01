@@ -207,7 +207,7 @@ void genericMechanical_printInFile(GenericMechanicalProblem*  pGMP, FILE* file)
 
 GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
 {
-  int nsubProb = 0;
+  size_t nsubProb = 0;
   int prbType = 0;
   int i, posInX, localSize;
   void * prb;
@@ -227,7 +227,7 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
   }
   nsubProb = m->filled1 - 1;
   posInX = 0;
-  for (int ii = 0; ii < nsubProb; ii++)
+  for (size_t ii = 0; ii < nsubProb; ii++)
   {
     if (ii)
       posInX = m->blocksize0[ii - 1];

@@ -18,6 +18,9 @@
 
 #define FC3D_UE_TEST_NULL(EXPR)  (fabs(EXPR)<1e-15)
 
+static void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c1, double *x, double *y);
+
+
 void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
 {
   double r[3][5];
@@ -243,7 +246,6 @@ int frictionContact3D_unitary_enumerative_test_non_sliding(FrictionContactProble
       }
   }
   return 1;
-  assert(0);
 
 }
 /*API for the nsgs*/

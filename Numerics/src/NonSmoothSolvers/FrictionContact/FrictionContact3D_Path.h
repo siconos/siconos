@@ -53,7 +53,7 @@ extern "C"
   int frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions* options);
 
   /** free memory for friction contact 3D Path solver */
-  void frictionContact3D_Path_free();
+  void frictionContact3D_Path_free(void);
 
   /**  compute error for  friction-contact 3D problem with Path
    * \param dimension of the global problem

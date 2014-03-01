@@ -46,10 +46,8 @@ int variationalInequality_newFromFile(VariationalInequality* problem, FILE* file
   return 0;
 }
 
-void freeVariationalInequality(VariationalInequality* problem)
+void freeVariationalInequalityProblem(VariationalInequality* problem)
 {
-
-  
   problem = NULL;
 
 }

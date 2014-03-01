@@ -219,7 +219,6 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.dense() + *B.banded());
       else // if(numB ==7)
         return (DenseMat)(*A.dense() + *B.identity());
-      SiconosMatrixException::selfThrow("Matrix operator +: invalid type of matrix");
     }
     else if (numA == 2)
     {
@@ -356,7 +355,6 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.dense() - *B.banded());
       else // if(numB ==7)
         return (DenseMat)(*A.dense() - *B.identity());
-      SiconosMatrixException::selfThrow("Matrix operator +: invalid type of matrix");
     }
     else if (numA == 2)
     {

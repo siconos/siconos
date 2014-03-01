@@ -16,6 +16,6 @@ int mlcp_direct_enum_getNbIWork(MixedLinearComplementarityProblem* problem, Solv
 int mlcp_direct_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 
 void mlcp_direct_enum_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-void mlcp_direct_enum_reset();
+void mlcp_direct_enum_reset(void);
 
 #endif //MLCP_DIRECT_ENUM_H

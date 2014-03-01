@@ -94,7 +94,7 @@ int variationalInequality_computeError(
 
 
 
-
+/*
 int variationalInequality_computeError_wait(
   VariationalInequality* problem,
   double *z , double *w, double tolerance,
@@ -133,7 +133,7 @@ int variationalInequality_computeError_wait(
 
 
   
-  /* Computes error */
+  // Computes error
   *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
@@ -145,3 +145,4 @@ int variationalInequality_computeError_wait(
   else
     return 0;
 }
+*/

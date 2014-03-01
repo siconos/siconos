@@ -8,6 +8,7 @@ static unsigned long long int sNbCase = 0;
 static double sProgress = 0;
 static int sMm = 0;
 
+static void affectW2V(int * W2V);
 
 void initEnum(int M)
 {

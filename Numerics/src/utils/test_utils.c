@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include "test_utils.h"
+
 /* Auxiliary routine: printing a matrix */
 void print_matrix( char* desc, int m, int n, double* a, int lda ) {
         int i, j;

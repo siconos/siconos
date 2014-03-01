@@ -23,6 +23,7 @@
 
 #include <math.h>
 #include "SiconosBlas.h"
+#include "NCP_Solvers.h"
 
 void NCP_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err)
 {

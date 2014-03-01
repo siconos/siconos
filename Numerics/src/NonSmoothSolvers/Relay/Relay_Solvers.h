@@ -226,7 +226,7 @@ extern "C"
      *   -(Mz + q) \in  N_{[lb,ub]}(z)
      * \f$
      * The criterion is based on \f$ error = \|z- proj_{[lb,ub]}(z - \rho * (M*z+q)) \|, \rho >0\f$ \n
-     * This error is divided by \f$ \|q\| \f$ and then compared to tol.\n
+     * This error is divided by \f$ \|q\| \f$ and then compared to tol.
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.

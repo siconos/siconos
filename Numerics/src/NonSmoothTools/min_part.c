@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+#include "NSSTools.h"
 
 void min_part(double* x, double* sol, int n)
 

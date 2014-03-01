@@ -67,6 +67,9 @@ static double* sV;
 /*sU is a pointer on the output u*/
 static double* sU;
 
+static void buildQ(void);
+static void printCurrentSystem(void);
+static void printRefSystem(void);
 
 /*case defined with sCurrentEnum
  *if sW2V[i]==0

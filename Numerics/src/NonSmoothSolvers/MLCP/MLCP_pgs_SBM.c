@@ -28,6 +28,8 @@
 #include "SiconosBlas.h"
 #include <assert.h>
 
+static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z);
+
 void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
 

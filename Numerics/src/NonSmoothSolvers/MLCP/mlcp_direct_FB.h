@@ -13,7 +13,7 @@
  */
 
 void mlcp_direct_FB_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-void mlcp_direct_FB_reset();
+void mlcp_direct_FB_reset(void);
 
 int mlcp_direct_FB_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 int mlcp_direct_FB_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);

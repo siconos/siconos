@@ -109,7 +109,7 @@ extern "C"
   void computeFGlobal_AC(double* reaction, double* FGlobal);
 
   /** free memory for friction contact 3D Alart-Curnier solver */
-  void frictionContact3D_AC_free();
+  void frictionContact3D_AC_free(void);
 
 
   void computeAlartCurnierSTD(double reaction[3], double velocity[3],

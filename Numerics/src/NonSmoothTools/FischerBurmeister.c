@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "FischerBurmeister.h"
 
 /* Computation of  Fischer-Burmeister function, phi(z,F(z)) = sqrt(z*z + F(z)*F(z)) - z - F(z) */
 void phi_FB(int size, double* z, double* F, double* phiVector)

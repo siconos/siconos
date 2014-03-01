@@ -32,10 +32,7 @@
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
-/* in lcp_nsgs_SBM.c */
-void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat,
-                       LinearComplementarityProblem* local_problem,
-                       double* q, double* z);
+static int frictionContact2DLocalSolve(double *W, double *q, double mu, double *P, double *U);
 
 int frictionContact2DLocalSolve(double *W, double *q, double mu, double *P, double *U)
 {
@@ -178,7 +175,7 @@ void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, d
     for (pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
     {
       /* Local problem formalization */
-      buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+      lcp_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
 
       /* Solve local problem */
       infoLocal = frictionContact2DLocalSolve(local_problem->M->matrix0,

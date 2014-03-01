@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <math.h>
 #include "op3x3.h"
-
+#include "AlartCurnierGenerated.h"
 #define sign(x) copysign(1.,x)
 
 // this file consists of generated code

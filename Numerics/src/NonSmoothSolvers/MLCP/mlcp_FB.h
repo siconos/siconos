@@ -2,7 +2,7 @@
 #define MLCP_FB_H
 
 void mlcp_FB_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-void mlcp_FB_reset();
+void mlcp_FB_reset(void);
 
 
 int mlcp_FB_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);

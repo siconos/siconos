@@ -17,6 +17,6 @@ int mlcp_direct_simplex_getNbIWork(MixedLinearComplementarityProblem* problem, S
 int mlcp_direct_simplex_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 
 void mlcp_direct_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-void mlcp_direct_simplex_reset();
+void mlcp_direct_simplex_reset(void);
 
 #endif //MLCP_DIRECT_SIMPLEX_H

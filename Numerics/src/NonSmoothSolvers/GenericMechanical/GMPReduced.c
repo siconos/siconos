@@ -1,6 +1,7 @@
 #include "NonSmoothDrivers.h"
 #include "pinv.h"
 #include "SiconosBlas.h"
+#include "GMPReduced.h"
 
 //#define GMP_DEBUG_REDUCED
 //#define GMP_DEBUG_GMPREDUCED_SOLVE
@@ -658,7 +659,6 @@ void GMPasMLCP(GenericMechanicalProblem* pInProblem, double *reaction , double *
       printf("GMPasMLCP Numerics ERROR: GMPasMLCP doesn't deal with FC3D.\n");
       *info = 1;
       return;
-      break;
     }
     default:
       printf("GMPasMLCP Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);

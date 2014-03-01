@@ -60,7 +60,7 @@ extern "C"
   /* Build an empty GenericMechanicalProblem
      \return a pointer on the built GenericMechanicalProblem.
    */
-  GenericMechanicalProblem * buildEmptyGenericMechanicalProblem();
+  GenericMechanicalProblem * buildEmptyGenericMechanicalProblem(void);
   /* Free the list of the contained sub-problem, coherently with the memory allocated in the addProblem function, it also free the pGMP.
    */
   void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP, unsigned int level);

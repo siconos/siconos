@@ -41,6 +41,8 @@ char *  SICONOS_LCP_RPGS_STR = "RPGS";
 char *  SICONOS_LCP_PATH_STR = "PATH";
 char *  SICONOS_LCP_ENUM_STR = "ENUM";
 
+static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
+
 int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
 {
   /* Checks storage type for the matrix M of the LCP */

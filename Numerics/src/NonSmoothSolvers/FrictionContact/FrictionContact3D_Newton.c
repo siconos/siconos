@@ -35,6 +35,9 @@ static FreeSolverPtr freeSolver = NULL;
 /* size of a block */
 static int Fsize;
 
+static void F_GlockerFischerBurmeister(int sizeF, double* reaction, double* FVector, int up2Date);
+static void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jacobianFMatrix, int up2Date);
+
 /** writes \f$ F(z) \f$ using Glocker formulation and the Fischer-Burmeister function.
  */
 void F_GlockerFischerBurmeister(int sizeF, double* reaction, double* FVector, int up2Date)

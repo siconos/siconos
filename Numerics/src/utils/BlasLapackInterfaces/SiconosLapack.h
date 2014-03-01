@@ -20,6 +20,9 @@
 #ifndef SiconosLAPACK_H
 #define SiconosLAPACK_H
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 // Definition of the interface to cblas library. 
 #include "SiconosBlas.h"
 
@@ -95,7 +98,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DGESV(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -106,7 +109,7 @@ extern "C"
     int C_M = M;
     int C_N = N;
     int C_LDA = LDA;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DGETRF(LAPACK_NAME(dgetrf), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -117,7 +120,7 @@ extern "C"
   {
     int C_N = N;
     int C_LDA = LDA;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DGETRI(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -132,7 +135,7 @@ extern "C"
     /* int C_LDA = LDA; */
     /* int C_LDU = LDU; */
     /* int C_LDVT = LDVT; */
-    /* int C_INFO; */
+    /* int C_INFO = 0; */
     WRAP_DGESVD(LAPACK_NAME(dgesvd), CHAR(JOBU), CHAR(JOBVT), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), S, U, INTEGER(C_LDU), VT, INTEGER(C_LDVT), superb, INTEGER(C_INFO));
 //    *INFO = C_INFO;
   }
@@ -148,7 +151,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DGETRS(LAPACK_NAME(dgetrs), TRANS, INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -166,7 +169,7 @@ extern "C"
     /* int C_NRHS = NRHS; */
     /* int C_LDA = LDA; */
     /* int C_LDB = LDB; */
-    /* int C_INFO =*INFO; */
+    /* int C_INFO = 0 =*INFO; */
     WRAP_DGELS(LAPACK_NAME(dgels),trans, INTEGER(C_M), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB),INTEGER(C_INFO));
     /* *INFO = C_INFO; */
   }
@@ -178,7 +181,7 @@ extern "C"
   {
     int C_N = N;
     int C_LDA = LDA;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DPOTRF(LAPACK_NAME(dpotrf), UPLO, INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -212,7 +215,7 @@ extern "C"
     int C_LDA = LDA;
     int C_LDU = LDU;
     int C_LDVT = LDVT;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DGESVD(LAPACK_NAME(dgesvd), CHAR(JOBU), CHAR(JOBVT), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), S, U, INTEGER(C_LDU), VT, INTEGER(C_LDVT), superb, INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -228,7 +231,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DGETRS(LAPACK_NAME(dgetrs), CHAR(TRANS), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -247,7 +250,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DGELS(LAPACK_NAME(dgels),CHAR(trans), INTEGER(C_M), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB),INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -259,7 +262,7 @@ extern "C"
   {
     int C_N = N;
     int C_LDA = LDA;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DPOTRF(LAPACK_NAME(dpotrf), CHAR(UPLO), INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -272,7 +275,7 @@ extern "C"
     int C_NRHS = NRHS;
     int C_LDA = LDA;
     int C_LDB = LDB;
-    int C_INFO;
+    int C_INFO = 0;
     WRAP_DTRTRS(LAPACK_NAME(dtrtrs), CHAR(UPLO), CHAR(TRANS), CHAR(DIAG), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -283,6 +286,6 @@ extern "C"
 }
 #endif
 
-
+#pragma GCC diagnostic pop
 
 #endif // SICONOSLAPACK_H

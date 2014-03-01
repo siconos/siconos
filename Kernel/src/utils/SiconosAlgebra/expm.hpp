@@ -46,7 +46,7 @@
 
 namespace boost { namespace numeric { namespace ublas {
 
-template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const int p = 6)
+template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p = 6)
 {
 	typedef typename MATRIX::value_type value_type;
         typedef typename MATRIX::size_type size_type;
@@ -60,7 +60,7 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const int p = 6)
 // Calcuate Pade coefficients  (1-based instead of 0-based as in the c vector)
 	vector<real_value_type> c(p+2);
 	c(1)=1;  
-	for(size_type i = 1; i <= p; ++i) 
+	for(size_type i = 1; i <= p; ++i)
 		c(i+1) = c(i) * ((p + 1.0 - i)/(i * (2.0 * p + 1 - i)));
 // Calcuate the infinty norm of H, which is defined as the largest row sum of a matrix
 	for(size_type i=0; i<n; ++i)
@@ -76,7 +76,7 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const int p = 6)
 		exit(0);
 	}
 // Scaling, seek s such that || H*2^(-s) || < 1/2, and set scale = 2^(-s)
- 	int s = 0;
+ 	unsigned int s = 0;
 	real_value_type scale = 1.0;
 	if(norm > 0.5)
 	{
@@ -134,7 +134,7 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const int p = 6)
  	else
 		U.assign( I + 2.0 * prod(H2, P));
 // Squaring 
-	for(size_t i = 0; i < s; ++i)
+	for(unsigned int i = 0; i < s; ++i)
 	{
 		U = (prod(U,U));
 	}

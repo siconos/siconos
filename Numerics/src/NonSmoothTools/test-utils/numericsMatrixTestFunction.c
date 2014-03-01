@@ -28,6 +28,7 @@
 #include "NumericsMatrix.h"
 #include "SiconosLapack.h"
 #include <math.h>
+#include "numericsMatrixTestFunction.h"
 
 int test_BuildNumericsMatrix(NumericsMatrix** MM)
 {

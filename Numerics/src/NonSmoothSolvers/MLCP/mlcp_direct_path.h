@@ -17,6 +17,6 @@ int mlcp_direct_path_getNbIWork(MixedLinearComplementarityProblem* problem, Solv
 int mlcp_direct_path_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 
 void mlcp_direct_path_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-void mlcp_direct_path_reset();
+void mlcp_direct_path_reset(void);
 
 #endif //MLCP_DIRECT_PATH_H

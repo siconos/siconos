@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "FrictionContact2D_Solvers.h"
 
 
 void FrictionContact2D_projc(double xi[], int *nn, int statusi[], double pi[], double fric[], double *projc1, int *projc2)

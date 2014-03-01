@@ -556,6 +556,14 @@ extern "C"
   */
   int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(SolverOptions* options);
 
+  /** Construct local problem from a "global" one
+   * \param rowNumber index of the local problem
+   * \param blmat matrix containing the problem
+   * \param local_problem problem to fill
+   * \param q big q
+   * \param z big z
+   */
+  void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z);
 
   /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n
    * of the LCP : \n

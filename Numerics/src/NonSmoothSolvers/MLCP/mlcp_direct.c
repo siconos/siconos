@@ -71,6 +71,13 @@ static int sNpM;
 static int* spIntBuf;
 static int sProblemChanged = 0;
 
+static double * mydMalloc(int n);
+static int * myiMalloc(int n);
+static int internalPrecompute(MixedLinearComplementarityProblem* problem);
+static int internalAddConfig(MixedLinearComplementarityProblem* problem, int * zw, int init);
+static int solveWithCurConfig(MixedLinearComplementarityProblem* problem);
+static int nbConfig(struct dataComplementarityConf * pC);
+
 double * mydMalloc(int n)
 {
   double * aux = spCurDouble;

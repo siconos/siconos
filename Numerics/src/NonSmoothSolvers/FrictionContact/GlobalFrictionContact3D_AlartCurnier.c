@@ -187,11 +187,11 @@ void NM_setup(NumericsMatrix* A)
     /* iteration on row, cr : current row */
     for(unsigned int cr = 0; cr < A->matrix1->filled1-1; ++cr)
     {
-      for(unsigned int bn = A->matrix1->index1_data[cr];
+      for(size_t bn = A->matrix1->index1_data[cr];
           bn < A->matrix1->index1_data[cr + 1]; ++bn)
       {
         /* cc : current column */
-        unsigned int cc = A->matrix1->index2_data[bn];
+        size_t cc = A->matrix1->index2_data[bn];
         unsigned int inbr = A->matrix1->blocksize0[cr];
         unsigned int roffset = 0;
         unsigned int coffset = 0;

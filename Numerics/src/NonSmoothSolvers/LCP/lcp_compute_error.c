@@ -19,6 +19,8 @@
 #include "SiconosBlas.h"
 #include "NumericsOptions.h" // for global options
 #include "LinearComplementarityProblem.h"
+#include "LCP_Solvers.h"
+
 void lcp_compute_error_only(int n, double *z , double *w, double * error)
 {
   /* Checks complementarity */

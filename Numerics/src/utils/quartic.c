@@ -16,6 +16,9 @@ Assume p[0]<>0 (overflows otherwise)
 */
 #include <stdio.h>
 #include <math.h>
+#include "quartic.h"
+
+
 int QUADROOTS(double p[5], double r[3][5])
 {
   /*

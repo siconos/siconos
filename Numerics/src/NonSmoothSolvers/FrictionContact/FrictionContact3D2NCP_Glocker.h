@@ -117,7 +117,7 @@ extern "C"
   void compute_Z_GlockerFixedP(int contact, double *reactionstep);
 
   /** free memory for friction contact to NCP-Glocker */
-  void NCPGlocker_free();
+  void NCPGlocker_free(void);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

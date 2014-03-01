@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include <math.h>
+#include "projectionOnCone.h"
 
 void projectionOnCone(double* r, double  mu)
 {

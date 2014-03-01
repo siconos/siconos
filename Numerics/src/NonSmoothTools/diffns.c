@@ -21,6 +21,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "NSSTools.h"
+
 void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
 {
 

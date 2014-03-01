@@ -27,7 +27,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
-
+#include <math.h>
 
 void frictionContact3D_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {

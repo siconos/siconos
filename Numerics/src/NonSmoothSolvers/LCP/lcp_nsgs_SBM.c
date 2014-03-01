@@ -25,7 +25,9 @@
 #endif
 #include <assert.h>
 #include "SiconosBlas.h"
-void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
+
+
+void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
 
   assert(blmat->blocksize0[rowNumber] > 0);
@@ -150,7 +152,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
     for (rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
     {
       /* Local problem formalization */
-      buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+      lcp_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
       /* Solve local problem */
       infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], &internalSolvers[localSolverNum]);
       pos += local_problem->size;

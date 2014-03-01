@@ -22,6 +22,7 @@
 #include <math.h>
 #include "LCP_Solvers.h"
 #include "SiconosLapack.h"
+#include "lcp_enum.h"
 static unsigned long  int sCurrentEnum = 0;
 static unsigned long  int sCmpEnum = 0;
 static unsigned long  int sNbCase = 0;
@@ -34,6 +35,15 @@ static double * sQref = 0;
 static double * sColNul = 0;
 static int sSize = 0;
 static int LWORK = 0;
+
+
+static void affectWZ();
+static void lcp_buildM(int * zw, double * M, double * Mref, int size);
+static void lcp_fillSolution(double*  z, double * w, int size, int* zw, double * Q);
+static void lcp_initEnum();
+static int lcp_nextEnum();
+static void lcp_buildQ();
+
 /*case defined with sCurrentEnum
  *if sWZ[i]==0
  *  w[i] null
@@ -284,7 +294,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
 
 
         lcp_fillSolution(z, w, sSize, sWZ, sQ);
-        options->iparam[1] = sCurrentEnum - 1;
+        options->iparam[1] = (int) sCurrentEnum - 1;
         options->iparam[2] = numberofSolutions;
         if (!multipleSolutions)  return;
       }
