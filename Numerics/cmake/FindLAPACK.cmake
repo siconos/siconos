@@ -424,11 +424,13 @@ if(NOT LAPACK_FOUND)
   endif()
 
    if(LAPACK_FOUND) # NumericsConfig.h setup
-     ## If lapack was found as "generic" but is part of atlas. 
-     if(LAPACK_LIBRARIES MATCHES "atlas.*") 
-       set(WITH_LAPACK "atlas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
+     if(NOT LAPACK_LIBRARIES MATCHES "lapacke.*") # atlas can be the BLAS provider
+      ## If lapack was found as "generic" but is part of atlas. 
+      if(LAPACK_LIBRARIES MATCHES "atlas.*") 
+         set(WITH_LAPACK "atlas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
+       endif()
      endif()
- 
+
     if(WITH_LAPACK STREQUAL "mkl")
       set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
       set(LAPACK_SUFFIX)
@@ -454,7 +456,7 @@ if(NOT LAPACK_FOUND)
 	set(LAPACK_PREFIX "clapack_")
       endif()
     else()
-      set(HAS_GenericCLAPACK 1 CACHE BOOL "Blas is available from an unknown version.")
+      set(HAS_GenericCLAPACK 1 CACHE BOOL "Lapack is available from an unknown version.")
       if(HAS_LAPACKE)
 	set(LAPACK_PREFIX "LAPACKE_")
       else()
