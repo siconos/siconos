@@ -322,7 +322,6 @@ if(NOT LAPACK_FOUND)
 	"")
       if (LAPACK_LIBRARIES)
 	set(WITH_LAPACK "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
-	set(LAPACKE_HEADER lapacke.h)
 	set(CLAPACK_HEADER clapack.h)
 	set(LAPACK_INCLUDE_SUFFIXES atlas) # For debian or ubuntu ...
       endif (LAPACK_LIBRARIES)
