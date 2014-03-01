@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # ./builder.py -I/usr/local/include/Siconos/Kernel \
 #    -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2
@@ -29,16 +29,16 @@ def generated_file():
 
 
 def usage():
-    print '{0} [--namespace=<namespace>] -I<path> [-I<path> ...] \
+    print('{0} [--namespace=<namespace>] -I<path> [-I<path> ...] \
                [--targets=<Mod1>[,Mod2[,...]]] \
-               header'.format(myname)
+               header'.format(myname))
 
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'I:', ['help', 'namespace=',
                                                     'targets='])
-except getopt.GetoptError, err:
-    print str(err)
+except getopt.GetoptError as err:
+    print(str(err))
     usage()
     sys.exit(2)
 
@@ -81,18 +81,20 @@ input_headers['Mechanics'] = ["SpaceFilter.hpp", "SpaceFilter_impl.hpp",
 all_headers = [h for h in itertools.chain(*(input_headers[target]
                                             for target in targets))]
 
+
 def is_serializable(something):
     return 'serializable' in [_c_.name for _c_ in
                               something.typedefs(allow_empty=True)]
+
 
 # un processed classed or attributes : to be defined explicitely in
 # SiconosFull.hpp
 def unwanted(s):
     m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err|Hem5|_bufferY|_spo|_measuredPert|_predictedPert|_blockCSR', s)
     # note _err,_bufferY, _spo, _measuredPert, _predictedPert -> boost::circular_buffer issue with serialization
-    # _spo : subpluggedobject 
+    # _spo : subpluggedobject
     #_blockCSR -> double * serialization needed by hand (but uneeded anyway for a full restart)
-    return m != None
+    return m is not None
 
 
 def name(t):
@@ -178,11 +180,10 @@ with open(generated_file(), 'w') as dest_file:
                                else r, class_.bases, [])
                     if len(serializable_bases) > 0:
                         dest_file.write(
-                        'SICONOS_IO_REGISTER_WITH_BASES({0},{1},\n'
-                        .format(name(type_),
-                              ''.join(['({0})'
-                                       .format(replace_by_typedef(c.name))
-                                       for c in serializable_bases])))
+                            'SICONOS_IO_REGISTER_WITH_BASES({0},{1},\n'
+                            .format(name(type_), ''.join(['({0})'
+                                .format(replace_by_typedef(c.name))
+                                for c in serializable_bases])))
                     else:
                         dest_file.write('SICONOS_IO_REGISTER({0},\n'
                                         .format(name(type_)))
