@@ -49,6 +49,8 @@
   PY_REGISTER(ExplicitLinearSMC)                                        \
   PY_REGISTER(LinearSMCOT2)                                             \
   PY_REGISTER(LinearSMCimproved)                                        \
+  PY_REGISTER(LuenbergerObserver)                                       \
+  PY_REGISTER(SlidingReducedOrderObserver)                              \
   PY_REGISTER(ControlManager)                                           \
   PY_REGISTER(ControlSimulation)                                        \
   PY_REGISTER(ControlFirstOrderLinearS)                                 \

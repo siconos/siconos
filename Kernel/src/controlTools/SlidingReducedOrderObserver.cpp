@@ -172,9 +172,4 @@ void SlidingReducedOrderObserver::process()
   }
 }
 
-void SlidingReducedOrderObserver::setL(const SimpleMatrix& L)
-{
-    _L.reset(new SimpleMatrix(L));
-}
-
 AUTO_REGISTER_OBSERVER(SLIDING_REDUCED_ORDER, SlidingReducedOrderObserver);
