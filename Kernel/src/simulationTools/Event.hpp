@@ -204,7 +204,7 @@ public:
   /** Get the TimeDiscretisation
    * \return the TimeDiscretisation used in this Event
    */
-  inline SP::TimeDiscretisation getTimeDiscretisation() const { return _td; };;
+  inline SP::TimeDiscretisation getTimeDiscretisation() const { return _td; };
 
   /** display Event data
    */

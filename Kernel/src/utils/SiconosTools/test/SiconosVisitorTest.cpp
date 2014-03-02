@@ -34,7 +34,7 @@ void SiconosVisitorTest::tearDown()
 class DynamicalSystem
 {
 public:
-  VIRTUAL_ACCEPT_VISITORS();
+  VIRTUAL_ACCEPT_VISITORS(DynamicalSystem);
   virtual ~DynamicalSystem() {}
 };
 

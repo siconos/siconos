@@ -51,5 +51,11 @@ inline double fmin(double x, double y)
 #define snprintf _snprintf
 
 #endif
+
+#if defined(__SUNPRO_CC)
+#define INFINITY (DBL_MAX+DBL_MAX)
+#define NAN (INFINITY-INFINITY)
+#endif
+
 #endif
 

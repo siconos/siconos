@@ -454,7 +454,7 @@ public:
 
   /** Visitors hook
    */
-  VIRTUAL_ACCEPT_VISITORS();
+  VIRTUAL_ACCEPT_VISITORS(SiconosMatrix);
 
 };
 
