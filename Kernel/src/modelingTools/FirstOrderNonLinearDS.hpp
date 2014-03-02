@@ -30,7 +30,7 @@ class DynamicalSystem;
 
 typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
 
-/**  General First Order Non Linear Dynamical Systems - \f$ M \dot x = f(x,t,z) + r, x(t_0) = x_0\f$
+/**  General First Order Non Linear Dynamical Systems - \f$ M \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0\f$
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -43,13 +43,13 @@ typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsign
  * x(t_0) = x_0
  * \f]
  * where
- *    - \f$x \in R^{n} \f$ is the state.
- *    - \f$ M \in R^{n\times n} a "mass matrix"
+ *    - \f$ x \in R^{n} \f$ is the state.
+ *    - \f$ M \in R^{n\times n}\f$ a "mass matrix"
  *    - \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
- *    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
- *  For example, z may be used to set some perturbation parameters, or anything else.
+ *    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discrete state.
+ *      For example, z may be used to set some perturbation parameters, or anything else.
  *
- *  with \f$ f : R^{n} \times R  \mapsto  R^{n}   \f$ .
+ *  with \f$ f : R^{n} \times R  \mapsto  R^{n}   \f$ the vector field.
  *
  * By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
  * and the initial conditions are given by
@@ -71,7 +71,7 @@ typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsign
  * Its Jacobian according to x is jacobianRhsx:
  *
  *  \f[
- *   jacobianRhsx = \nabla_xrhs(x,t,z) = M^{-1}\nabla_xf(x,t,z)
+ *   jacobianRhsx = \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
  *  \f]
  *
  * At the time:
@@ -90,7 +90,7 @@ protected:
   /** Matrix coefficient of \f$ \dot x \f$ */
   SP::SiconosMatrix _M;
 
-  /** f(x,t,z) */
+  /** value of f(x,t,z) */
   SP::SiconosVector _f;
 
   /** to store f(x_k,t_k,z_k)*/
@@ -99,23 +99,23 @@ protected:
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
   SP::SiconosMatrix _jacobianfx;
 
-  /** DynamicalSystem plug-in to compute f(x,t,z) - id="f".
-    *  @param  : current time
-    *  @param  : the size of the vector x
-    *  @param  : the pointer to the first element of the vector x
-    *  @param  : the pointer to the first element of the vector f(x,t)
-    *  @param  : the size of the vector z
-    *  @param  : a vector of parameters, z
+  /** DynamicalSystem plug-in to compute f(x,t,z)
+    *  \param current time
+    *  \param size of the vector _x
+    *  \param[in,out] pointer to the first element of the vector _x
+    *  \param[in,out] the pointer to the first element of the vector _f
+    *  \param the size of the vector _z
+    *  \param a vector of parameters _z
     */
   SP::PluggedObject _pluginf;
 
   /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state: \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   * @param time : current time
-   * @param sizeOfX : size of vector x
-   * @param x : pointer to the first element of x
-   * @param[in,out] jacob : pointer to the first element of jacobianfx matrix
-   * @param  : the size of the vector z
-   * @param[in,out] z: a vector of parameters, z
+   * \param time current time
+   * \param sizeOfX size of vector x
+   * \param x pointer to the first element of x
+   * \param[in,out] jacob pointer to the first element of jacobianfx matrix
+   * \param  the size of the vector z
+   * \param[in,out]  a vector of parameters, z
    */
   SP::PluggedObject _pluginJacxf;
 

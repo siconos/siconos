@@ -113,17 +113,17 @@ void LsodarOSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal n
   atol = newAtol;
 }
 
-void LsodarOSI::setMinMaxStepSizes(doublereal _minStep, doublereal _maxStep)
+void LsodarOSI::setMinMaxStepSizes(doublereal minStep, doublereal maxStep)
 {
   _intData[5] = 1; // set IOPT = 1
-  rwork[5] = _minStep;
-  rwork[6] = _maxStep;
+  rwork[5] = minStep;
+  rwork[6] = maxStep;
 }
 
-void LsodarOSI::setMaxNstep(integer _maxNumberSteps)
+void LsodarOSI::setMaxNstep(integer maxNumberSteps)
 {
   _intData[5] = 1; // set IOPT = 1
-  iwork[5] = _maxNumberSteps;
+  iwork[5] = maxNumberSteps;
 }
 
 void LsodarOSI::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
@@ -133,11 +133,11 @@ void LsodarOSI::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
   atol[0] = newRtol;  // atol
 }
 
-void LsodarOSI::setMaxOrder(integer _maxorderNonStiff, integer _maxorderStiff)
+void LsodarOSI::setMaxOrder(integer maxorderNonStiff, integer maxorderStiff)
 {
   _intData[5] = 1; // set IOPT = 1
-  iwork[7] = _maxorderNonStiff;
-  iwork[8] = _maxorderStiff;
+  iwork[7] = maxorderNonStiff;
+  iwork[8] = maxorderStiff;
 }
 
 void LsodarOSI::updateData()

@@ -69,11 +69,14 @@ void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleM
       }
       else
       {
+        // inject new vector in the case where the measurement vector is not full.
         SP::SiconosVector sp1(new SiconosVector(_us->size(), 0));
         SP::SiconosVector sp2(new SiconosVector(_us->size(), 0));
         _measuredPert->push_front(sp1);
         _predictedPert->push_front(sp2);
       }
+
+      // inject new measured value and also perturbation prediction
       SiconosVector& predictedPertC = *(*_predictedPert)[0];
       SiconosVector& measuredPertC = *(*_measuredPert)[0];
 
@@ -81,6 +84,7 @@ void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleM
       prod(*_Csurface, xTk, measuredPertC);
       measuredPertC += *(*_predictedPert)[std::min((unsigned int)1, (unsigned int)_predictedPert->size()-1)];
 
+      // compute prediction
       switch(_measuredPert->size()-1)
       {
         case 0:

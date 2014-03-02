@@ -47,6 +47,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   _xq.reset(new SiconosVector(getDim()));
   _workspace[free].reset(new SiconosVector(getDim()));
   _fold.reset(new SiconosVector(getDim()));
+  _f.reset(new SiconosVector(_n));
 
   // == r ==
 
@@ -75,6 +76,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0):
   _xq.reset(new SiconosVector(getDim()));
   _workspace[free].reset(new SiconosVector(getDim()));
   _fold.reset(new SiconosVector(getDim()));
+  _f.reset(new SiconosVector(_n));
 
   // == r ==
 
@@ -326,7 +328,7 @@ void FirstOrderNonLinearDS::initRhs(double time)
 
     // else no allocation, jacobian is equal to 0.
   }
-  computeJacobianRhsx(time);
+//  computeJacobianRhsx(time);
 }
 
 void FirstOrderNonLinearDS::updatePlugins(double time)

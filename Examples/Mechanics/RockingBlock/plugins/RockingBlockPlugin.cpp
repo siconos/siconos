@@ -5,7 +5,7 @@
 #else 
 #define SICONOS_EXPORT extern "C" 
 #endif  
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 using namespace std;
 //===========================================================================================================

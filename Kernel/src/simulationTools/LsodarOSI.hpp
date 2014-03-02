@@ -92,9 +92,9 @@ public:
   LsodarOSI(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
   /** constructor from a minimum set of data
-   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param ds the DynamicalSystem to integrate
    */
-  LsodarOSI(SP::DynamicalSystem);
+  LsodarOSI(SP::DynamicalSystem ds);
 
   /** destructor
    */
@@ -142,7 +142,7 @@ public:
   /** get the maximum number of steps for one call
   *\return an interger
   */
-  inline  int getMaxNstep()const
+  inline int getMaxNstep() const
   {
     return iwork[5];
   }
@@ -171,44 +171,44 @@ public:
     return jroot;
   }
 
-  /** set Jt value, Jacobian type indicator
-   *  \param pointer to integer
+  /** set Jt value, Jacobian type indicator (see the documentation of the lsodar subroutine)
+   *  \param newJT new value for the jt parameter
    */
-  inline void setJT(integer newValue)
+  inline void setJT(integer newJT)
   {
-    _intData[8] = newValue;
+    _intData[8] = newJT;
   };
 
   /** set itol, rtol and atol (tolerance parameters for lsodar)
-   *  \param newItol integer (itol value)
-   *  \param newRtol doublereal * (rtol)
-   *  \param newAtol doublereal * (atol)
+   *  \param newItol itol value
+   *  \param newRtol rtol value
+   *  \param newAtol atol value
    */
   void setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for lsodar)
-   *  \param newItol integer (itol value)
-   *  \param newRtol double (rtol)
-   *  \param newAtol double (atol)
+   *  \param newItol itol value
+   *  \param newRtol rtol value
+   *  \param newAtol atol value
    */
   void setTol(integer newItol, doublereal newRtol, doublereal newAtol);
 
-  /** set the maximul number of steps for one call of LsodarOSI
-   *\param an integer
+  /** set the maximum number of steps for one call of Lsodar
+   * \param maxNumberSteps the maximum number of steps
    */
-  void setMaxNstep(integer);
+  void setMaxNstep(integer maxNumberSteps);
 
   /** set the minimum and maximum step sizes
-   *\param double (minimum step size)
-   *\param double (maximul step size)
+   *\param minStep minimum step size
+   *\param maxStep maximum step size
    */
-  void setMinMaxStepSizes(doublereal, doublereal);
+  void setMinMaxStepSizes(doublereal minStep, doublereal maxStep);
 
   /** set maximum method order
-   *\param integer (maximum order for nonstiff method)
-   *\param integer (maximum order for stiff method)
+   *\param maxorderNonStiff maximum order for nonstiff methods
+   *\param maxorderStiff maximum order for stiff methods
    */
-  void setMaxOrder(integer, integer);
+  void setMaxOrder(integer maxorderNonStiff, integer maxorderStiff);
 
   /** update doubleData and iwork memory size, when changes occur in _intData.
    */
