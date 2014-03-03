@@ -93,7 +93,7 @@ void EigenProblemsTest::testGeev1()
   complex_vector eigenval(size);
   Siconos::eigenproblems::geev(*A, eigenval, fake, rightV);
   complex_vector error(size);
-  error *= 0.0;
+  for( unsigned int i = 0; i < size; ++i ) error(i) = 0.0;
   for( unsigned int i = 0; i < size; ++i )
   {
     error.plus_assign(ublas::prod(*A->dense(), column(rightV, i) ));
@@ -124,7 +124,7 @@ void EigenProblemsTest::testGeev2()
   complex_vector eigenval(size);
   Siconos::eigenproblems::geev(*A, eigenval, leftV, fake, true, false);
   complex_vector error(size);
-  error *= 0.0;
+  for( unsigned int i = 0; i < size; ++i ) error(i) = 0.0;
   for( unsigned int i = 0; i < size; ++i )
   {
     error.plus_assign(ublas::prod(conj(column(leftV, i)), *A->dense() ));
@@ -147,7 +147,7 @@ void EigenProblemsTest::testGeev3()
   complex_vector eigenval(size);
   Siconos::eigenproblems::geev(*A, eigenval, leftV, rightV, true, true);
   complex_vector error(size);
-  error *= 0.0;
+  for( unsigned int i = 0; i < size; ++i ) error(i) = 0.0;
   for( unsigned int i = 0; i < size; ++i )
   {
     error.plus_assign(ublas::prod(*A->dense(), column(rightV, i) ));
