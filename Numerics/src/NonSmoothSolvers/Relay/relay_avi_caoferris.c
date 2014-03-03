@@ -102,6 +102,7 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   free(avi_pb.d);
   freeNumericsMatrix(avi_pb.M);
   free(avi_pb.q);
+  free(b_bar);
 }
 
 int relay_avi_caoferris_setDefaultSolverOptions(SolverOptions* options)
