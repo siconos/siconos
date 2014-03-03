@@ -105,8 +105,8 @@ extern "C"
       \param[in] problem the RelayProblem structure which handles the problem (M,q)
       \param[in,out] z a n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \param[in,out] global_options
+      \param[in,out] options structure used to define the solver(s) and its (their) parameters
+      \param[in,out] global_options non solver-specific options
       \return info termination value
       - 0 : successful\n
       - >0 : otherwise see each solver for more information about the log info
@@ -117,7 +117,7 @@ extern "C"
   /** set the default solver parameters and perform memory allocation for Relay
       \param[in] problem the RelayProblem structure which handles the problem (M,q)
       \param options the pointer to options to set
-      \param solverId int the identifier of the solver
+      \param solverId the identifier of the solver
   */
   int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId);
 
@@ -144,8 +144,8 @@ extern "C"
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-     * \param options
-     * \param global_options
+     * \param options struct used to define the solver(s) and its (their) parameters
+     * \param global_options non solver-specific options
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
@@ -163,8 +163,8 @@ extern "C"
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-     * \param options
-     * \param global_options
+     * \param options struct used to define the solver(s) and its (their) parameters
+     * \param global_options non solver-specific options
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
@@ -183,7 +183,7 @@ extern "C"
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-   * \param options SolverOptions * the pointer to options to set
+   * \param options struct used to define the solver(s) and its (their) parameters
    * \param[out] info an integer which returns the termination value:\n
    *  0 = convergence,\n
    *  1 = no convergence,\n
@@ -201,7 +201,7 @@ extern "C"
 
   /** set the default solver parameters and perform memory allocation for
    * AVI_CAOFERRIS
-   * \param options the pointer to options to set
+   * \param options struct used to define the solver(s) and its (their) parameters
    */
   int relay_avi_caoferris_setDefaultSolverOptions(SolverOptions* options);
 
@@ -214,7 +214,7 @@ extern "C"
    1 = no convergence,\n
    2 = Cholesky factorization failed,\n
    3 = Nul diagonal term\n
-   \param options
+   * \param options struct used to define the solver(s) and its (their) parameters
    \author Nineb Sheherazade.
   */
   void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)  ;
@@ -227,7 +227,7 @@ extern "C"
    0 = convergence,\n
    1 = no convergence,\n
    2 = Nul diagonal term\n
-   * \param[in,out] options :\n
+   * \param options struct used to define the solver(s) and its (their) parameters
   */
   void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -241,8 +241,8 @@ extern "C"
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-     * \param[in] tolerance
-     * \param[in,out] error
+     * \param[in] tolerance threshold used to validate the solution: if the error is less than this value, the solution is accepted
+     * \param[in,out] error the actual error of the solution with respect to the problem
      * \return status: 0 : convergence, 1: error > tolerance
      * \author Vincent Acary
      */

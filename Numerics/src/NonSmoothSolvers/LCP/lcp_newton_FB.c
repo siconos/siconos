@@ -32,6 +32,8 @@
 void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
+  assert(problem);
+  assert(problem->M);
   double * M = problem->M->matrix0;
   double * q = problem->q;
 
@@ -78,7 +80,7 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
   F_FB = (double *)malloc(n * sizeof(double));
   H = (double *)malloc(nn * sizeof(double));
-  JacThetaFB   = (double *)malloc(nn * sizeof(double));
+  JacThetaFB = (double *)malloc(nn * sizeof(double));
 
   ipiv = (int *)malloc(n * sizeof(int));
 

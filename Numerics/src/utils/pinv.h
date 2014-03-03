@@ -28,7 +28,7 @@ extern "C"
   \param A the matrix to be inversed
   \param n the number of rows of A
   \param m the number of columns of A
-  \param tolerance
+  \param tolerance threshold used to validate the computation: if the error is less than this value, the computation is considered valid
   */
   double pinv(double * A, int n, int m, double tolerance);
 

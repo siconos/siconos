@@ -23,7 +23,7 @@
   \brief Constants to define the list of available MCP solvers. See the solver list \ref mcpSolversList
 */
 /**\enum MCP_SOLVER
-   \brief Each SICONOS_MCP_XXX refers to number of the solver XXX for MCP. See the solver list \ref mcpSolversList
+   Each SICONOS_MCP_XXX refers to number of the solver XXX for MCP. See the solver list \ref mcpSolversList
  */
 enum MCP_SOLVER
 {

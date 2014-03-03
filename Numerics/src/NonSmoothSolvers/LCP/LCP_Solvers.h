@@ -525,7 +525,7 @@ extern "C"
   int linearComplementarity_path_setDefaultSolverOptions(SolverOptions* options);
 
 
-  /**
+  /** enumerative solver
   * \param[in] problem structure that represents the LCP (M, q...)
   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
@@ -534,7 +534,7 @@ extern "C"
   1 : failed\n
   * \param[in,out] options structure used to define the solver and its parameters.
 
-  \anuthor Olivier Bonnefon
+  \author Olivier Bonnefon
   */
   void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -637,8 +637,8 @@ extern "C"
    * \param[in] problem structure that represents the LCP (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-   * \param[in] tolerance
-   * \param[in,out] error
+   * \param[in] tolerance threshold used to validate the solution: if the error is less than this value, the solution is accepted
+   * \param[out] error the actual error of the solution with respect to the problem
    * \return status: 0 : convergence, 1: error > tolerance
    * \author Pascal Denoyelle, Franck Perignon
    */
@@ -655,10 +655,10 @@ extern "C"
   * \param[in] n size of the LCP
   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-  * \param[in,out] error
+  * \param[out] error the result of the computation
   * \author Pascal Denoyelle, Franck Perignon
   */
-  void lcp_compute_error_only(int n,  double *z , double *w, double * error);
+  void lcp_compute_error_only(unsigned int n,  double *z , double *w, double * error);
 
   /*   /\** Function used to extract from LCP matrix the part which corresponds to non null z */
   /*    *\/ */

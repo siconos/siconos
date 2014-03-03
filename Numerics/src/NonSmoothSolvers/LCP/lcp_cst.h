@@ -23,7 +23,7 @@
   \brief Constants to define the list of available LCP solvers. See the solver list \ref lcpSolversList
 */
 /**\enum LCP_SOLVER
-   \brief Each SICONOS_LCP_XXX refers to number of the solver XXX for LCP. See the solver list \ref lcpSolversList
+   Each SICONOS_LCP_XXX refers to number of the solver XXX for LCP. See the solver list \ref lcpSolversList
  */
 enum LCP_SOLVER
 {

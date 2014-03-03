@@ -23,7 +23,7 @@
   \brief Constants to define the list of available AVI solvers. See the solver list \ref aviSolversList
 */
 /**\enum AVI_SOLVER
-   \brief Each SICONOS_LCP_XXX refers to number of the solver XXX for an AVI. See the solver list \ref aviSolversList
+   Each SICONOS_AVI_XXX refers to number of the solver XXX for an AVI. See the solver list \ref aviSolversList
  */
 enum AVI_SOLVER
 {

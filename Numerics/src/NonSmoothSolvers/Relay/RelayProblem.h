@@ -81,28 +81,23 @@
 #include "NumericsMatrix.h"
 
 /** Relay Problem elements
-    \param size dim of the problem
-    \param M matrix of the LCP
-    \param q vector
-    \param lb upper bound
-    \param ub lower bound
  */
 typedef struct
 {
-  int size;
-  NumericsMatrix* M;
-  double * q;
-  double * lb;
-  double * ub;
+  int size;          /**< size dim of the problem */
+  NumericsMatrix* M; /**< M matrix of the LCP */
+  double * q;        /**< q vector */
+  double * lb;       /**< lb upper bound */
+  double * ub;       /**< ub lower bound */
 } RelayProblem;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
+
   /** Relay_display displays on screen a Relay_problem
   * \param[in] p Relay_problem to be displayed
-  *
   * \author Vincent Acary
   */
   void Relay_display(RelayProblem* p);

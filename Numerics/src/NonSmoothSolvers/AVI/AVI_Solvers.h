@@ -98,9 +98,9 @@ extern "C"
    * 2 : negative diagonal term\n
    * \param[in,out] options structure used to define the solver and its parameters.
    *
-   *\author Mathieu Renouf
+   *\author Olivier Huber
    */
-  void avi_caoferris(AffineVariationalInequalities* problem, double *sol, double *value, int *info, SolverOptions* options);
+//  void avi_caoferris(AffineVariationalInequalities* problem, double *sol, double *value, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param options the pointer to the array of options to set
@@ -118,10 +118,11 @@ extern "C"
    * \param[in] problem structure that represents the AVI (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-   * \param[in] tolerance
+   * \param[in] tolerance threshold used to validate the solution: if the error
+   * is less than this value, the solution is accepted
    * \param[in,out] error
    * \return status: 0 : convergence, 1: error > tolerance
-   * \author Pascal Denoyelle, Franck Perignon
+   * \author Olivier Huber
    */
   //int avi_compute_error(AffineVariationalInequalities* problem, double *z , double *w, double tolerance, double* error);
 
@@ -137,32 +138,9 @@ extern "C"
   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
   * \param[in,out] error
-  * \author Pascal Denoyelle, Franck Perignon
+  * \author Olivier Huber
   */
 //  void avi_compute_error_only(int n,  double *z , double *w, double * error);
-
-  /*   /\** Function used to extract from AVI matrix the part which corresponds to non null z */
-  /*    *\/ */
-  /*   int extractAVI( NumericsMatrix* MGlobal, double *z , int *indic, int *indicop, double *submatlcp , double *submatlcpop, */
-  /*     int *ipiv , int *sizesublcp , int *sizesublcpop); */
-
-  /*   /\** Function used to solve the problem with sub-matrices from extractAVI */
-  /*    *\/ */
-  /*   int predictAVI(int sizeAVI, double* q, double *z , double *w , double tol, */
-  /*   int *indic , int *indicop , double *submatlcp , double *submatlcpop , */
-  /*    int *ipiv , int *sizesublcp , int *sizesublcpop , double *subq , double *bufz , double *newz); */
-
-  /** Interface to solvers for Linear Complementarity Problems, dedicated to dense matrix storage
-      \param[in] problem the AffineVariationalInequalities structure which handles the problem (M,q)
-      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \return info termination value
-      - 0 : successful\n
-      - >0 : otherwise see each solver for more information about the log info
-      \author Nineb Sheherazade, Mathieu Renouf, Franck Perignon
-  */
-//  int avi_driver_DenseMatrix(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

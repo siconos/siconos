@@ -131,7 +131,7 @@ extern "C"
    *  \param[in] nc number of contacts
    *  \param[in] nb number of blocks
    *  \param[in] solver_id id an int to be mapped to actual solver in Numerics
-   *  \param[in] tolerance
+   *  \param[in] tolerance threshold used to validate the solution: if the error is less than this value, the solution is accepted
    *  \param[in] itermax the maximum number of iteration
    *  \param[in] verbose level 0 : nothing, 1: mid level 2: high level
    *  \param[in] outputFile outputFile option 0 : nothing 1 : dat file 2: FCLIB HDF5 file if FCLIB is found

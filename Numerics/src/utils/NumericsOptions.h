@@ -34,25 +34,14 @@
 #define OUTPUT_ON_ERROR 4
 #define OUTPUT_ON_ITER  8
 
-/** Structure used to set general options of Numerics functions,
-  * structures and so on.
-  *
-  *  \param verboseMode (0: off, 1: on)
-  *  \param outputMode  (0: none, 1: c file, 2: dat file, 3: fclib file)
-  *                      with OUTPUT_ON_ERROR flag : only on solver error
-  *                      with OUTPUT_ON_ITER only when iterations > outputIterMax
-  *  \param fileName    output filename
-
-  *  \param description experience description
-  *  \param mathInfo    mathematical informations
-  *  \param outputIterMax maximum iterations for output
-  *  \param counter     internal counter for file numeration
-  */
-
 /* note : swig is ok with char[n] (wrapper checks string length) */
+
+
+/** Structure used to set general options of Numerics functions,
+*/
 typedef struct
 {
-  int verboseMode;
+  int verboseMode; /**< 0: off, 1: on */
 } NumericsOptions;
 
 
@@ -67,12 +56,12 @@ extern "C"
 #endif
 
   /* Set verbose mode in numerics
-     \param newVerboseMode, 0 no verbose, 1 verbose.
+     \param newVerboseMode 0 no verbose, 1 verbose.
    */
   void setNumericsVerbose(int newVerboseMode);
 
   /* Set global option for numerics
-     \param opt, a NumericsOptions structure
+     \param opt a NumericsOptions structure
    */
   void setNumericsOptions(NumericsOptions* opt);
 

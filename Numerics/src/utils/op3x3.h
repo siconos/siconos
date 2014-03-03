@@ -494,7 +494,7 @@ static inline int equal3(double* a, double* b)
 /** scalar product : c <- a.b
  * \param[in] a double a[3]
  * \param[in] b double b[3]
- * \return  c double
+ * \return the scalar product
  */
 static inline double dot3(double* a, double* b)
 {
@@ -641,17 +641,17 @@ void print3x3(double* mat);
  */
 void print3(double* v);
 
-/** orthoBaseFromVector : From A, build (A,A1,A2) such that it was an
- * orthonormal base.
- * \param[in,out] Ax
- * \param[in,out] Ay
- * \param[in,out] Az
- * \param[out] A1x
- * \param[out] A1y
- * \param[out] A1z
- * \param[out] A2x
- * \param[out] A2y
- * \param[out] A2z
+/** orthoBaseFromVector : From a vector A, build a matrix (A,A1,A2) such that it is an
+ * orthonormal.
+ * \param[in,out] Ax first component of the vector A
+ * \param[in,out] Ay second component of the vector A
+ * \param[in,out] Az third component of the vector A
+ * \param[out] A1x first component of the vector A
+ * \param[out] A1y second component of the vector A
+ * \param[out] A1z third component of the vector A
+ * \param[out] A2x first component of the vector A
+ * \param[out] A2y second component of the vector A
+ * \param[out] A2z third component of the vector A
 */
 static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az,
                                        double *A1x, double *A1y, double *A1z,

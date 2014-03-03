@@ -494,7 +494,7 @@ extern "C"
      \param[in] problem structure that represents the MLCP (n,m,M, q... or (A,B,C...))
      \param[in,out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
      \param[in,out] w a m+n-vector of doubles which returns the solution of the problem.
-     \param[in] tolerance
+     \param[in] tolerance threshold used to validate the solution: if the error is less than this value, the solution is accepted
      \param[in,out] error
      \return status: 0 : convergence, 1: error > tolerance
     \author Vincent Acary form the routine  filter_result_LCP.c of Pascal Denoyelle
