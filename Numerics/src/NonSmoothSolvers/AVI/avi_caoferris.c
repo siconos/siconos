@@ -348,6 +348,8 @@ int avi_caoferris_setDefaultSolverOptions(SolverOptions* options)
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;
+  options->callback = NULL;
+  options->numericsOptions = NULL;
   options->dparam[0] = 1e-6;
   options->iparam[0] = 10000;
 
