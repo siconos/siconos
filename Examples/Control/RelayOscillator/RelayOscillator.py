@@ -35,7 +35,7 @@ if (withPlot) :
 
 from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            RelayNSL, Interaction,\
-                           Model, Moreau, TimeDiscretisation, Relay,  \
+                           Model, EulerMoreauOSI, TimeDiscretisation, Relay,  \
                            TimeStepping
 
 #
@@ -86,7 +86,7 @@ RelayOscillator.nonSmoothDynamicalSystem().link(InterRelayOscillator,LSRelayOsci
 
 # (1) OneStepIntegrators
 theta = 0.5
-aOSI = Moreau(LSRelayOscillator,theta)
+aOSI = EulerMoreauOSI(LSRelayOscillator,theta)
  
 # (2) Time discretisation
 aTiDisc = TimeDiscretisation(t0,h_step)

@@ -47,7 +47,7 @@ doubleIntegrator = FirstOrderLinearTIDS(x0, A, B)
 process = Model(t0, T)
 process.nonSmoothDynamicalSystem().insertDynamicalSystem(doubleIntegrator)
 # Declaration of the integrator
-OSI = Moreau(doubleIntegrator, theta)
+OSI = EulerMoreauOSI(doubleIntegrator, theta)
 # time discretisation
 t = TimeDiscretisation(t0, h)
 tSensor = TimeDiscretisation(t0, h)

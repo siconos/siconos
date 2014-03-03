@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::ZeroOrderHold OSI(new ZeroOrderHold(doubleIntegrator));
+    SP::ZeroOrderHoldOSI OSI(new ZeroOrderHoldOSI(doubleIntegrator));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

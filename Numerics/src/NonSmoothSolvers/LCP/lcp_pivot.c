@@ -26,8 +26,8 @@
 #include "LCP_Solvers.h"
 #include "pivot-utils.h"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 int pivot_selection_bard(double** mat, unsigned int dim)

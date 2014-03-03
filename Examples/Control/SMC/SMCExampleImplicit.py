@@ -19,7 +19,7 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
 from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-    TimeStepping, ZeroOrderHold, ControlManager, LinearSensor, LinearSMC
+    TimeStepping, ZeroOrderHoldOSI, ControlManager, LinearSensor, LinearSMC
 from matplotlib.pyplot import subplot, title, plot, grid, show, xlabel, ylabel
 from numpy import eye, empty, zeros, savetxt
 from math import ceil
@@ -67,7 +67,7 @@ tActuator = TimeDiscretisation(t0, hControl)
 processSimulation = TimeStepping(processTD, 0)
 processSimulation.setName("plant simulation")
 # Declaration of the integrator
-processIntegrator = ZeroOrderHold(processDS)
+processIntegrator = ZeroOrderHoldOSI(processDS)
 processSimulation.insertIntegrator(processIntegrator)
 # Actuator, Sensor & ControlManager
 control = ControlManager(process)

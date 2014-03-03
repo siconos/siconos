@@ -25,8 +25,8 @@
 #include "AVI_Solvers.h"
 #include "pivot-utils.h"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , double* s, unsigned int size_x, unsigned int* A, int *info , SolverOptions* options)

@@ -1,7 +1,7 @@
 /** \page EMTwo-linkManipulator Tracking control of the trajectory described by the end point of a two-link planar manipulator
 \authors Bernard Brogliato, Irinel-Constantin Morarescu
 
-\b Keywords: LagrangianLinearTIDS, LagrangianLinearR, NewtonImpactNSL, TimeStepping, Moreau, LCP
+\b Keywords: LagrangianLinearTIDS, LagrangianLinearR, NewtonImpactNSL, TimeStepping, EulerMoreauOSI, LCP
 
 \b Location: Control/Two-linkManipulator, Control/Two-linkMultiConstraints/
 
