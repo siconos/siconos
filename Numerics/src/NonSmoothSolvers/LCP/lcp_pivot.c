@@ -297,12 +297,19 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
         {
           drive = leaving - (dim + 1);
         }
-        DEBUG_PRINTF("driving variable %i \n", drive);
         block = pivot_selection_lemke(mat, dim, drive);
-        if (basis[block] == dim + 1) has_sol = 1;
     }
 
-    if (block == -1) break;
+    if (block == -1)
+    {
+      DEBUG_PRINT("The pivot column is nonpositive !\n"
+          "It either means that the algorithm failed or that the LCP is infeasible\n"
+          "Check the class of the M matrix to find out the meaning of this\n");
+      break;
+    }
+
+    DEBUG_PRINTF("driving variable %i \n", drive);
+    if (basis[block] == dim + 1) has_sol = 1;
 
     /* Pivot < block , drive > */
     DEBUG_PRINTF("Pivoting %i and %i\n", block, drive);

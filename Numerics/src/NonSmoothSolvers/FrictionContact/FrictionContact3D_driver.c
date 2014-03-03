@@ -221,6 +221,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   if (setnumericsoptions)
   {
       free(options->numericsOptions);
+      options->numericsOptions = NULL;
   }
 
   return info;

@@ -76,7 +76,7 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p 
 		exit(0);
 	}
 // Scaling, seek s such that || H*2^(-s) || < 1/2, and set scale = 2^(-s)
- 	unsigned int s = 0;
+ 	int s = 0;
 	real_value_type scale = 1.0;
 	if(norm > 0.5)
 	{
@@ -134,7 +134,7 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p 
  	else
 		U.assign( I + 2.0 * prod(H2, P));
 // Squaring 
-	for(unsigned int i = 0; i < s; ++i)
+	for(int i = 0; i < s; ++i)
 	{
 		U = (prod(U,U));
 	}
