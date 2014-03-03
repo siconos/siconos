@@ -198,7 +198,7 @@ public:
   };
 
   /** reset graph at level num of Interactions
-   *  \return a SP::InteractionsGraph
+   *  \param num the indexSet to reset
    */
   inline void resetIndexSetPtr(unsigned int num)
   {

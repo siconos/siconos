@@ -180,7 +180,7 @@ public:
   /** Compute the Output (y) which corresponds to the free state (state without
       taking into account the nonsmooth input) plus the possible contribution of
       the nslaw
-      \param vertex of the interaction graph
+      \param vertex_inter of the interaction graph
       \param osnsp a pointer to the OneStepNSProblem
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp);

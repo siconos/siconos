@@ -84,11 +84,11 @@ public:
   virtual ~NonSmoothLaw();
 
   /** check if the NS law is verified
-  *  \return a boolean value whioch determines if the NS Law is verified
+  *  \return a boolean value which determines if the NS Law is verified
   */
   virtual bool isVerified() const
   {
-    RuntimeException::selfThrow("NonSmoothLaw:: isVerified, not yet implemented!");
+    RuntimeException::selfThrow("NonSmoothLaw::isVerified, not yet implemented!");
     return false;
   }
 
@@ -109,21 +109,21 @@ public:
   }
 
   /** to get the size
-  *  \return an unsigned int
+  *  \return the size of the NS law
   */
   inline unsigned int size() const
   {
     return _size;
   }
-  /** to get the signifiant size for the projection on constraints.
-  *  \return an unsigned int
+  /** to get the signifiant size for the projection on constraints
+  *  \return the signifiant size for the projection on constraints
   */
   inline unsigned int sizeProjectOnConstraints() const
   {
     return _sizeProjectOnConstraints;
   }
   /** set the size of the nsLaw
-  *  \param an unsigned int
+  *  \param newVal the new size
   */
   inline void setSize(unsigned int newVal)
   {

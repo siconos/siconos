@@ -35,6 +35,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
+#include "eigenproblems.hpp"
 // Some utilities (print ...)
 
 namespace lapack = boost::numeric::bindings::lapack;

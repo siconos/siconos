@@ -150,7 +150,7 @@ public:
 
 
   /** remove a dynamical system
-   * \param a shared pointer to a dynamical system
+   * \param ds the dynamical system to remove
    */
   inline void removeDynamicalSystem(SP::DynamicalSystem ds)
   {
