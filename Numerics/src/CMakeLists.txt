@@ -281,24 +281,24 @@ IF(WITH_TESTING)
   NEW_TEST(SparseMatrix0 SparseMatrix_test0.c)
  END_TEST()
 
-  BEGIN_TEST(NonSmoothSolvers/LCP/test)
+ BEGIN_TEST2(NonSmoothSolvers/LCP/test)
 
-  SET(DATA_SET_LCP "lcp_mmc.dat;lcp_deudeu.dat;lcp_trivial.dat;lcp_ortiz.dat")
-  LIST(APPEND DATA_SET_LCP
+  SET(DATASET_LCP "lcp_mmc.dat;lcp_deudeu.dat;lcp_trivial.dat;lcp_ortiz.dat")
+  LIST(APPEND DATASET_LCP
    "lcp_exp_murty.dat;lcp_exp_murty2.dat;lcp_CPS_1.dat;lcp_CPS_2.dat;lcp_CPS_3.dat;lcp_CPS_4.dat;lcp_CPS_4bis.dat;lcp_CPS_5.dat")
-  SET(DATA_SET_BLOCK_LCP "lcp_deudeu_block.dat")
+  SET(DATASET_BLOCK_LCP "lcp_deudeu_block.dat")
   # PSOR is not working :(
   SET(SICONOS_LCP_SOLVERS
    "ENUM;LEMKE;CPG;PGS;RPGS;LATIN;LATIN_W;QP;NSQP;AVI_CAOFERRIS;NEWTONMIN;NEWTONFB;BARD;MURTY;PIVOT")
   IF(PATHFERRIS_FOUND)
    LIST(APPEND SICONOS_LCP_SOLVERS "PATH")
   ENDIF()
-  FOREACH(_DS ${DATA_SET_LCP})
-   FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
+  FOREACH(_DS ${DATASET_LCP})
+    FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
      NEW_LCP_TEST(SICONOS_LCP_${_SOLVER} ${_DS})
     ENDFOREACH()
   ENDFOREACH()
-  FOREACH(_DS ${DATA_SET_BLOCK_LCP})
+  FOREACH(_DS ${DATASET_BLOCK_LCP})
    FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
     NEW_LCP_TEST(SICONOS_LCP_${_SOLVER} ${_DS} 1)
     ENDFOREACH()
@@ -328,9 +328,9 @@ IF(WITH_TESTING)
 
   # those test cannot be solved with an algorithm that requires non-zero
   # diagonal elements, that is PGS, BARD and MURTY
-  SET(DATA_SET_LCP_DIAG "CPS_2;CPS_3;CPS_4;CPS_4bis")
+  SET(DATASET_LCP_DIAG "CPS_2;CPS_3;CPS_4;CPS_4bis")
   SET(FAILING_ALGO "PGS;BARD;MURTY")
-  FOREACH(_DS ${DATA_SET_LCP_DIAG})
+  FOREACH(_DS ${DATASET_LCP_DIAG})
    FOREACH(_SOLVER ${FAILING_ALGO})
     SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
    ENDFOREACH()
@@ -338,26 +338,26 @@ IF(WITH_TESTING)
 
   # those test cannot be solved with Lemke-based solvers (CPS_3 is for Lemke-Howson)
   # 
-  SET(DATA_SET_LCP_DIAG "CPS_3")
+  SET(DATASET_LCP_DIAG "CPS_3")
   SET(FAILING_ALGO "LEMKE;AVI_CAOFERRIS;PIVOT")
-  FOREACH(_DS ${DATA_SET_LCP_DIAG})
+  FOREACH(_DS ${DATASET_LCP_DIAG})
    FOREACH(_SOLVER ${FAILING_ALGO})
     SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
    ENDFOREACH()
   ENDFOREACH()
 
   # lcp_mmc is of size 26, way too much for enum
-  RM_TEST("test-LCP_ENUM-lcp_mmc")
+  RM_TEST2(SICONOS_LCP_ENUM "lcp_mmc.dat")
 
   # special tests
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol.dat)
-  SET(test-LCP_ENUM-lcp_Pang_isolated_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol_perturbed.dat)
+  SET(test-LCP_ENUM-lcp_Pang_isolated_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_inf_sol_perturbed.dat)
 
   NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
 
-  END_TEST()
+  END_TEST(NonSmoothSolvers/LCP/test)
 
   BEGIN_TEST(NonSmoothSolvers/LinearSystem/test)
 
@@ -366,7 +366,7 @@ IF(WITH_TESTING)
   NEW_LS_TEST(SICONOS_LS_0 ls_inf_sol_perturbed.dat)
   END_TEST()
 
-  BEGIN_TEST(NonSmoothSolvers/Relay/test)
+  BEGIN_TEST2(NonSmoothSolvers/Relay/test)
 
   SET(DATA_SET "relay1.dat;relay_2x2.dat;relay_4x4.dat;relay_simple2.dat;step_1x1.dat;step_2x2.dat;step_4x4.dat")
   SET(SICONOS_RELAY_SOLVERS "ENUM;LEMKE;PGS;AVI_CAOFERRIS")
@@ -380,7 +380,7 @@ IF(WITH_TESTING)
   ENDFOREACH()
 
   # ENUM on an LCP of size 30 is a bad idea ...
-  RM_TEST("test-RELAY_ENUM-relay1")
+  RM_TEST2(RELAY_ENUM "relay1.dat")
 
   NEW_TEST(Relaytest1 relay_test1.c)
   NEW_TEST(Relaytest2 relay_test2.c)
@@ -388,7 +388,7 @@ IF(WITH_TESTING)
   IF(PATHFERRIS_FOUND)
     NEW_TEST(Relaytest3 relay_test3.c)
   ENDIF(PATHFERRIS_FOUND)
-  
+
   NEW_TEST(Relaytest10 relay_test10.c)
   NEW_TEST(Relaytest11 relay_test11.c)
   NEW_TEST(Relaytest12 relay_test12.c)
@@ -398,10 +398,9 @@ IF(WITH_TESTING)
   NEW_TEST(Steptest2 step_test2.c)
   NEW_TEST(Steptest3 step_test3.c)
   NEW_TEST(Steptest4 step_test4.c)
- 
 
   END_TEST()
-  
+
 
   BEGIN_TEST(NonSmoothSolvers/MLCP/test)
   NEW_TEST(MLCPtest main_mlcp.cpp)

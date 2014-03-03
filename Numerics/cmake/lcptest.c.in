@@ -21,25 +21,27 @@
 #include "NonSmoothDrivers.h"
 #include "lcp_test_function.h"
 
-int main(void)
+int main(int argc, char ** argv)
 {
-  int info =0 ;
+  int info = 0;
 
   if (argc != 2)
   {
     printf("Error! No filename for data given on the commandline\n");
     exit(EXIT_FAILURE);
   }
-  char filename[50] = "./data/@TEST_DATA@";
-  strcpy(argv[1], filename);
-  printf("Test on %s\n",filename);
+  char filename[50];
+  strncpy(filename, argv[1], 49);
+  printf("Test on %s\n", filename);
 
-  FILE * finput  =  fopen(filename,"r");
-  if(!@TEST_SBM@)
-    info = lcp_test_function(finput,@TEST_SOLVER@);
-  else
-    info = lcp_test_function_SBM(finput,@TEST_SOLVER@);
-  
+  FILE * finput  =  fopen(filename, "r");
+  if (finput == NULL)
+  {
+    printf("Error! Could not open filename %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
+  info = lcp_test_function(finput, @TEST_SOLVER@);
+
   fclose(finput);
   printf("\nEnd of test on %s\n", filename);
   return info;
