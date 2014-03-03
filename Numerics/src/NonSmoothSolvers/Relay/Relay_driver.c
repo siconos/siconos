@@ -24,6 +24,7 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
+#include "relay_cst.h"
 #include <time.h>
 
 char*  SICONOS_RELAY_PGS_STR = "RELAY_PGS";

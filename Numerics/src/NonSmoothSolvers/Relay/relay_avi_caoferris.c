@@ -24,11 +24,11 @@ Ferris solves the subsequent AVI.
 */
 
 #include "AVI_Solvers.h"
-#include "RelayProblem.h"
+#include "Relay_Solvers.h"
 #include "avi_caoferris.h"
 #include "relay_cst.h"
 
-void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, NumericsOptions* global_options)
+void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   unsigned int n = problem->size;
   unsigned int s = 2*n;
@@ -93,7 +93,7 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   avi_caoferris_stage3(&avi_pb, u_vec, s_vec, n, A, info, options);
 
   /* Update z  */
-  /* XXX why no u ?  */
+  /* XXX why no w ?  */
   for (unsigned int i = 0; i<n; ++i) z[i] = s_vec[A[i]-1] + problem->lb[i];
   /* free allocated stuff */
   free(u_vec);

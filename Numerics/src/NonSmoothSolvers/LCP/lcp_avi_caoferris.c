@@ -23,9 +23,10 @@ Ferris solves the subsequent AVI.
  \author Olivier Huber
 */
 
-#include "AVI_Solvers.h"
 #include "LinearComplementarityProblem.h"
 #include "avi_caoferris.h"
+#include "AVI_Solvers.h"
+#include "LCP_Solvers.h"
 
 void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -52,7 +53,7 @@ void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double 
   free(avi_pb.d);
 }
 
-int linearComplementarity_avi_caoferris_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options)
+int linearComplementarity_avi_caoferris_setDefaultSolverOptions(SolverOptions* options)
 {
   return avi_caoferris_setDefaultSolverOptions(options);
 }

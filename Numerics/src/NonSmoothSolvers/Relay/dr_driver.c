@@ -24,6 +24,7 @@
 #include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
 #endif
+#include "relay_cst.h"
 
 int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options, NumericsOptions* global_options)
 {

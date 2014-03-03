@@ -24,6 +24,7 @@
 #include "NumericsOptions.h"
 #include "Relay_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "relay_cst.h"
 
 int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId)
 {

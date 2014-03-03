@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2012.
+/* Siconos-Numerics, Copyright INRIA 2005-2014.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -55,7 +55,7 @@ Direct solver for AVI based on pivoting method principle for (degenerated) probl
 #include "NumericsOptions.h"
 #include "AffineVariationalInequalities.h"
 #include "SolverOptions.h"
-#include "avi_cst.h"
+#include "AVI_cst.h"
 #include "SiconosCompat.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -78,12 +78,13 @@ extern "C"
   */
   int avi_driver(AffineVariationalInequalities* problem, double *sol, double *value, SolverOptions* options,  NumericsOptions* global_options);
 
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-      \param[in] problem the AffineVariationalInequalities struct which handles the problem (M,q)
+  /** set the default solver parameters and perform memory allocation for an AVI resolution
+      \param[in] problem the AffineVariationalInequalities struct which handles the AVI
       \param options the pointer to the array of options to set
+      \param solverId the solver to invoke
       \return info termination value
   */
-  int avi_setDefaultSolverOptions(AffineVariationalInequalities* problem, SolverOptions* options, int);
+  int avi_setDefaultSolverOptions(AffineVariationalInequalities* problem, SolverOptions* options, int solverId);
 
 
   /** avi_caoferris is a direct solver for AVI based on pivoting method principle for degenerate problem \n

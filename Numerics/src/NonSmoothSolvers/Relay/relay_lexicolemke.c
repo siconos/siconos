@@ -24,6 +24,8 @@
 #include <float.h>
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
+#include "relay_cst.h"
+
 #include <assert.h>
 
 void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options,  NumericsOptions* global_options)

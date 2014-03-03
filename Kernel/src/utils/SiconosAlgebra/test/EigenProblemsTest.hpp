@@ -21,7 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "SimpleMatrix.hpp"
-#include "eigenproblems.hpp"
+#include "EigenProblems.hpp"
 
 class EigenProblemsTest : public CppUnit::TestFixture
 {

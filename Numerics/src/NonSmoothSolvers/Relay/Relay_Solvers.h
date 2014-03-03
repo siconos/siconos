@@ -94,7 +94,6 @@ The relay problem is reformulated as an AVI and solved with the solver proposed 
 #include "RelayProblem.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
-#include "relay_cst.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -197,6 +196,17 @@ extern "C"
   */
   int relay_path_setDefaultSolverOptions(SolverOptions* options);
 
+  /** Solve a Relay problem using the AVI framework and the solver by Cao
+   * and Ferris.
+   * \param[in] problem structure that represents the Relay (M, q, ...)
+   * \param[in,out] z vector which on call is the initial point and on exit is the solution of the problem.
+   * \param[in,out] w vector for computations
+   * \param options struct used to define the solver(s) and its (their) parameters
+   * \param[out] info an integer which returns the termination value:\n
+   *  0 = convergence,\n
+   *  1 = no convergence,\n
+   * \author Olivier Huber
+   */
   void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for

@@ -23,6 +23,7 @@
 #include <math.h>
 #include <float.h>
 #include "Relay_Solvers.h"
+#include "relay_cst.h"
 #include <assert.h>
 #include "SiconosBlas.h"
 
