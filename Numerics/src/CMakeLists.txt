@@ -513,7 +513,9 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest50 FrictionContact3D_test50.c)
   
 
-  NEW_TEST(FC3Dtest60 FrictionContact3D_test60.c)
+  IF(WITH_MUMPS) # uses sparse Alart & Curnier
+    NEW_TEST(FC3Dtest60 FrictionContact3D_test60.c)
+  ENDIF(WITH_MUMPS)
 
   NEW_TEST(FC3Dtest70 FrictionContact3D_test70.c) # DSFP
   NEW_TEST(FC3Dtest71 FrictionContact3D_test71.c) # DSFP
@@ -521,10 +523,12 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest73 FrictionContact3D_test73.c)
   NEW_TEST(FC3Dtest74 FrictionContact3D_test74.c)
 
-  NEW_TEST(FC3Dtest80 FrictionContact3D_test80.c) # Proximal
-  NEW_TEST(FC3Dtest81 FrictionContact3D_test81.c) # Proximal
-  NEW_TEST(FC3Dtest83 FrictionContact3D_test83.c) # Proximal
- 
+  IF(WITH_MUMPS) # uses sparse Alart & Curnier
+    NEW_TEST(FC3Dtest80 FrictionContact3D_test80.c) # Proximal
+    NEW_TEST(FC3Dtest81 FrictionContact3D_test81.c) # Proximal
+    NEW_TEST(FC3Dtest83 FrictionContact3D_test83.c) # Proximal
+  ENDIF(WITH_MUMPS)
+
 
  # NEW_TEST(FC3Dtest82 FrictionContact3D_test82.c) # Proximal
 
