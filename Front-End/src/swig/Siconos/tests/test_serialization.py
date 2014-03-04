@@ -29,11 +29,11 @@ def test_serialization2():
 
     assert(v2.getValue(0) == 1)
     assert(v2.getValue(1) == 2)
-    assert(v2.getValue(2) == 3)    
+    assert(v2.getValue(2) == 3)
 
 def test_serialization3():
     from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL, \
-        LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
+        LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
 
     from numpy import array, eye, empty
 
@@ -88,7 +88,7 @@ def test_serialization3():
     #
 
     # (1) OneStepIntegrators
-    OSI = Moreau(theta)
+    OSI = MoreauJeanOSI(theta)
     OSI.insertDynamicalSystem(ball)
 
     # (2) Time discretisation --

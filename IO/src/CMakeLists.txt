@@ -66,6 +66,9 @@ IF(WITH_BULLET)
 ENDIF(WITH_BULLET)
 
 
+compile_with(BLAS REQUIRED)
+compile_with(LAPACK REQUIRED)
+
 IF(WITH_VTK)
   COMPILE_WITH(VTK)
   IF(VTK_FOUND)
@@ -78,8 +81,6 @@ IF(WITH_VTK)
     SET(SiconosIO_LINK_LIBRARIES "${SiconosIO_LINK_LIBRARIES};vtkIO;vtkCommon;vtkGraphics;vtkRendering")
   ENDIF()
 ENDIF()
-compile_with(BLAS REQUIRED)
-compile_with(LAPACK REQUIRED)
 
 FIND_PACKAGE(Boost 1.47 COMPONENTS serialization REQUIRED)
 
