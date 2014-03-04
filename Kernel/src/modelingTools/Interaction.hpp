@@ -85,25 +85,25 @@ private:
   /** relative degree of this interaction */
   unsigned int _relativeDegree;
 
-  /** Lowel level for storing output y
+  /** Minimum required 'level' for output y
    *  y will be initialized from
    *  y[_lowerLevelForOutput] to y[_upperLevelForOutput]
    */
   unsigned int _lowerLevelForOutput;
 
-  /** Upper level for storing output y
+  /** Maximum required 'level' for output y
     *  y will be initialized from
     *  y[_lowerLevelForOutput] to y[_upperLevelForOutput]
     */
   unsigned int _upperLevelForOutput;
 
-  /** Lowel level for storing input lambda
+  /** Minimum required 'level' for input lambda
    *  lambda will be initialized from
    *  lambda[_lowerLevelForIntput] to lambda[_upperLevelForInput]
    */
   unsigned int _lowerLevelForInput;
 
-  /** Upper level for storing input lambda
+  /** Maximum required 'level' for input lambda
    *  lambda will be initialized from
    *  lambda[_lowerLevelForIntput] to lambda[_upperLevelForInput]
    */
@@ -864,11 +864,6 @@ public:
   void initDSDataFirstOrder(SP::DynamicalSystem);
   void initDSDataLagrangian(SP::DynamicalSystem);
   void initDSDataNewtonEuler(SP::DynamicalSystem);
-  // Note FP : the two functions belows are never used in any siconos module.
-  // Temp comment before removal
-  //void LinkDataFromMemory(unsigned int memoryLevel);
-  //void LinkDataFromMemoryLagrangian(unsigned int memoryLevel);
-
 };
 
 #endif // INTERACTION_H

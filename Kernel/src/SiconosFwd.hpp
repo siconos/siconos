@@ -62,7 +62,11 @@ DEFINE_SPTR(MixedComplementarityConditionNSL)
 DEFINE_SPTR(TimeDiscretisationXML)
 DEFINE_SPTR(TimeDiscretisation)
 
+// Dynamical systems
 DEFINE_SPTR(DynamicalSystem)
+DEFINE_SPTR(LagrangianLinearTIDS)
+DEFINE_SPTR(NewtonEulerDS)
+
 DEFINE_SPTR(Event)
 DEFINE_SPTR(NonSmoothLaw)
 DEFINE_SPTR(DynamicalSystemsSet)
@@ -82,7 +86,6 @@ DEFINE_SPTR(OSNSMatrix)
 DEFINE_SPTR(SiconosMemory)
 
 DEFINE_SPTR(NewtonEulerR)
-DEFINE_SPTR(NewtonEulerDS)
 
 TYPEDEF_SAPTR(integer)
 TYPEDEF_SPTR(integer)

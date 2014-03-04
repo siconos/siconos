@@ -76,7 +76,7 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p 
 		exit(0);
 	}
 // Scaling, seek s such that || H*2^(-s) || < 1/2, and set scale = 2^(-s)
- 	int s = 0;
+ 	size_type s = 0;
 	real_value_type scale = 1.0;
 	if(norm > 0.5)
 	{

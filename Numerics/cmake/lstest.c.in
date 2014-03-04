@@ -29,7 +29,8 @@ int main(void)
   printf("Test on %s\n",filename);
 
   FILE * finput  =  fopen(filename,"r");
-  if(!@TEST_SBM@)
+  int testSBM =  @TEST_SBM@;
+  if(!testSBM)
     info = ls_test_function(finput,@TEST_SOLVER@);
   else
     info = ls_test_function_SBM(finput,@TEST_SOLVER@);

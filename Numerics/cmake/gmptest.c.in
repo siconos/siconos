@@ -32,7 +32,8 @@ int main(void)
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
   genericMechanicalProblem_setDefaultSolverOptions(options,@TEST_SOLVER@);
-  if (@TEST_TOLERANCE@)
+  double testTolerance = @TEST_TOLERANCE@;
+  if (testTolerance)
   {
     options->dparam[0]=@TEST_TOLERANCE@;
     options->iparam[0]=@TEST_MAXITER@;

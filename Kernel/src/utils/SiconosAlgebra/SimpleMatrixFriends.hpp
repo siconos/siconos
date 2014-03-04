@@ -147,7 +147,7 @@ const SimpleMatrix prod(const SiconosMatrix& A, const SiconosMatrix& B);
   */
 void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init = true);
 
-/** prod(A, B, C) computes C = A*B in an optimal way (= if init = true, else +=).
+/** prod(A, B, C) computes C = A*B in an optimal way (if init = true, else +=).
   \param A a SiconosMatrix
   \param B a SiconosMatrix
   \param[in,out] C a SiconosMatrix

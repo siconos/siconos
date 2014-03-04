@@ -26,14 +26,18 @@ namespace Siconos {
   namespace algebra {
     namespace tools {
 
-      void expm(SiconosMatrix& A, SiconosMatrix& Exp)
+      void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd)
       {
         // Implemented only for dense matrices.
-        // Maybe it works for others but it has not been
+        // Note FP : Maybe it works for others but it has not been
         // tested here --> to be done
-        assert(Exp.getNum() == 1);
-        assert(A.getNum() == 1);
-        *Exp.dense() = expm_pad(*A.dense());
+        // Do not work with sparse.
+        assert(Exp.getNum() == 1 || A.getNum() == 1); 
+        if(computeAndAdd)
+          *Exp.dense() += expm_pad(*A.dense());
+        else
+          *Exp.dense() = expm_pad(*A.dense());
+          
       }
     } // namespace tools
   } // namespace algebra

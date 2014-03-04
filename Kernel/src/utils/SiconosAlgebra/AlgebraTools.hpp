@@ -34,8 +34,11 @@ namespace Siconos {
 
 /** Compute the matrix exponential Exp = exp(A) for general matrices,
     using scaling and Padé approximation. See expm.hpp.
+    \param A : input matrix
+    \param Exp : result = exp(A)
+    \param computeAndAdd : if true, result = result + exp(A)
 **/
-      void expm(SiconosMatrix& A, SiconosMatrix& Exp);
+      void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool = false);
     
     } // namespace tools
   } // namespace algebra

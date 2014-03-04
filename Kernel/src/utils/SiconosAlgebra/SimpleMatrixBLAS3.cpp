@@ -27,7 +27,7 @@
 #include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/bindings/std/vector.hpp>
-
+#include <boost/numeric/ublas/io.hpp>
 // Note Franck : sounds useless. It seems it's defined in bindings
 // (to be checked, especially on windows)
 
@@ -254,8 +254,10 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
         {
         case 1:
           if (numB == 1)
-            //*C.dense() = prod(*A.dense(),*B.dense());
-            siconosBindings::blas::gemm(1.0, *A.dense(), *B.dense(), 1.0, *C.dense());
+          {
+            *C.dense()  = prod(*A.dense(), *B.dense());
+            //siconosBindings::blas::gemm(1.0, *A.dense(), *B.dense(), 0.0, *C.dense());
+          }
           else if (numB == 2)
             *C.dense()  = prod(*A.dense(), *B.triang());
           else if (numB == 3)
@@ -825,12 +827,17 @@ void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, dou
 
 void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 {
+  std::cout<< "compute gemm .JKJKJK.." << std::endl;
+
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
   unsigned int numC = C.getNum();
   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
   C.resetLU();
+
+  // At the time, only dense output allowed 
+  DenseMat * tmpC = NULL;
   if (numA == 0 || numB == 0 || numC == 0)
     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
 
@@ -838,39 +845,14 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
     siconosBindings::blas::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
   else if (numA == 1 && numB == 1 && numC != 1)
   {
-    // To be improved ...
-
-    DenseMat * tmpA = NULL;
-    DenseMat * tmpB = NULL;
-    DenseMat * tmpC = NULL;
-
-    if (numA != 1)
-      tmpA = new DenseMat(*A.dense());
-    else
-      tmpA = A.dense();
-
-    if (numB != 1)
-      tmpB = new DenseMat(*B.dense());
-    else
-      tmpB = B.dense();
-
-    if (numC != 1)
-      tmpC = new DenseMat(*C.dense());
-    else
-      tmpC = C.dense();
-
-    siconosBindings::blas::gemm(a, *tmpA, *tmpB, b, *tmpC);
-    if (numC != 1)
-    {
-      noalias(*C.dense()) = *tmpC;
-      delete tmpC;
-    }
-
-    if (numA != 1)
-      delete tmpA;
-    if (numB != 1)
-      delete tmpB;
+    // Copy C into tmpC ... 
+    tmpC = new DenseMat(*C.dense());    
+    siconosBindings::blas::gemm(a, *A.dense(), *B.dense(), b, *tmpC);
+    std::cout << *tmpC << std::endl;
+    noalias(*C.dense()) = *tmpC;
   }
+  else
+    SiconosMatrixException::selfThrow("gemm(...) not yet implemented for these kinds of matrices.");
   C.resetLU();
 }
 

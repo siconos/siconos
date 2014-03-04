@@ -97,27 +97,25 @@ protected:
 public:
 
   /** constructor from an xml file
-   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
+   *  \param dsxml : the XML object for this DynamicalSystem
    */
-  LagrangianLinearTIDS(SP::DynamicalSystemXML);
+  LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml);
 
   /** constructor from a set of data
-   *  \param SiconosVector: initial coordinates of this DynamicalSystem
-   *  \param SiconosVector : initial velocity of this DynamicalSystem
-   *  \param SiconosMatrix : mass matrix of this DynamicalSystem
-   *  \param SiconosMatrix : matrix K of this DynamicalSystem
-   *  \param SiconosMatrix : matrix C of this DynamicalSystem
+   *  \param q0 initial coordinates of this DynamicalSystem
+   *  \param v0 initial velocity of this DynamicalSystem
+   *  \param M mass matrix of the DynamicalSystem
+   *  \param K stiffness matrix of the DynamicalSystem
+   *  \param C damping matrix of the DynamicalSystem
    */
-  //  LagrangianLinearTIDS(const SiconosVector&, const SiconosVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
-  LagrangianLinearTIDS(SP::SiconosVector, SP::SiconosVector, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix);
+  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M, SP::SiconosMatrix K, SP::SiconosMatrix C);
 
   /** constructor from a set of data
-   *  \param SiconosVector: initial coordinates of this DynamicalSystem
-   *  \param SiconosVector : initial velocity of this DynamicalSystem
-   *  \param SiconosMatrix : mass matrix of this DynamicalSystem
+   *  \param q0 : initial coordinates of this DynamicalSystem
+   *  \param v0 : initial velocity of this DynamicalSystem
+   *  \param M : mass matrix of this DynamicalSystem
    */
-  LagrangianLinearTIDS(SP::SiconosVector, SP::SiconosVector, SP::SiconosMatrix);
-  //  LagrangianLinearTIDS(const SiconosVector&, const SiconosVector&, const SiconosMatrix&);
+  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M);
 
   /** destructor */
   ~LagrangianLinearTIDS();
@@ -128,7 +126,7 @@ public:
   bool checkDynamicalSystem();
 
   /**
-   * return true if the Dynamical system is linear.
+   * \return true if the Dynamical system is linear.
    */
   virtual bool isLinear()
   {
@@ -138,23 +136,16 @@ public:
 
 
   /** Initialization function for the rhs and its jacobian.
-   *  \param time of initialization
+   *  \param t time of initialization
    */
-  void initRhs(double) ;
+  void initRhs(double t) ;
 
   /** dynamical system initialization function except for _p:
    *  mainly set memory and compute plug-in for initial state values.
-   *  \param time of initialisation, default value = 0
-   *  \param the size of the memory, default size = 1.
+   *  \param t time of initialisation, default value = 0
+   *  \param n the size of the memory, default size = 1.
    */
-  void initialize(double = 0, unsigned int = 1) ;
-
-  /** dynamical system initialization function for _p
-   *  \param time of initialisation, default value = 0
-   *  \param the size of the memory, default size = 1.
-   */
-  //void initializeNonSmoothInput(double = 0, unsigned int = 1) ;
-
+  void initialize(double t = 0, unsigned int n = 1) ;
 
   // --- GETTERS AND SETTERS ---
 
@@ -176,12 +167,12 @@ public:
   }
 
   /** set the value of K to newValue
-   *  \param SiconosMatrix newValue
+   *  \param K new stiffness matrix
    */
-  void setK(const SiconosMatrix&);
+  void setK(const SiconosMatrix& K);
 
   /** set K to pointer newPtr
-   *  \param SP::SiconosMatrix  newPtr
+   *  \param newPtr pointer to the new Stiffness matrix
    */
   void setKPtr(SP::SiconosMatrix newPtr);
 
@@ -206,35 +197,35 @@ public:
   */
 
   /** set C to pointer newPtr
-   *  \param SP::SiconosMatrix  newPtr
+   *  \param newPtr pointer to the new damping matrix
    */
   void setCPtr(SP::SiconosMatrix newPtr) ;
 
   /** Default function to the right-hand side term
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param t current time
+   *  \param isDup flag to avoid recomputation of operators
    *
    */
-  void computeRhs(double, bool  = false);
+  void computeRhs(double t, bool isDup = false);
 
   /** function to compute forces with some specific values for q and velocity (ie not those of the current state).
-   *  \param double time : the current time
-   *  \param SP::SiconosVector: pointers on q
-   *  \param SP::SiconosVector: pointers on velocity
+   *  \param t : the current time
+   *  \param q : pointer to positions vector
+   *  \param v : pointer to velocities vector
    */
-  void computeForces(double , SP::SiconosVector, SP::SiconosVector);
+  void computeForces(double t, SP::SiconosVector q, SP::SiconosVector v);
 
   /** Default function to compute forces
-   *  \param double, the current time
+   *  \param t the current time
    */
-  void computeForces(double);
+  void computeForces(double t);
 
   /** Default function to jacobian of the right-hand side term according to x
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param t current time
+   *  \param isDup flag to avoid recomputation of operators
    *
    */
-  void computeJacobianRhsx(double, bool  = false);
+  void computeJacobianRhsx(double t, bool isDup = false);
 
   // --- Miscellaneous ---
 
@@ -257,7 +248,4 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-
-TYPEDEF_SPTR(LagrangianLinearTIDS)
-
 #endif // LAGRANGIANTIDS_H

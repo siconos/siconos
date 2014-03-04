@@ -30,15 +30,16 @@ int main(void)
 
   FILE * finput  =  fopen(filename,"r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
+  double testTolerance = @TEST_TOLERANCE@;
+  int testInternalSolver = @TEST_INTERNAL_SOLVER@;
   info=frictionContact3D_setDefaultSolverOptions(options,@TEST_SOLVER@);
-  if (@TEST_TOLERANCE@)
+  if (testTolerance)
   {
     options->dparam[0]=@TEST_TOLERANCE@;
     options->iparam[0]=@TEST_MAXITER@;
   }
 
-  if (@TEST_INTERNAL_SOLVER@)
+  if (testInternalSolver)
   {
     options->internalSolvers->solverId=@TEST_INTERNAL_SOLVER@;
     options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
