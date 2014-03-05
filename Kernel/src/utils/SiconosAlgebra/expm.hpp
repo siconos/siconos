@@ -81,7 +81,7 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p 
 	if(norm > 0.5)
 	{
 		s = std::max<int>(0, static_cast<int>((log(norm) / log(2.0) + 2.0)));
-		scale /= static_cast<real_value_type>(std::pow(2.0, s));
+		scale /= static_cast<real_value_type>(std::pow(2.0, (double)s));
 		U.assign(scale * H); // Here U is used as temp value due to that H is const
 	}
 // Horner evaluation of the irreducible fraction, see the following ref above.

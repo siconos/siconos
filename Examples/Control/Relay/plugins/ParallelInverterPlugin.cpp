@@ -1,4 +1,6 @@
 
+// for M_PI
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 extern "C"  void eLDS(double t, unsigned int N, double* e, unsigned int z, double*zz)
