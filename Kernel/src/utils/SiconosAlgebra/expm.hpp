@@ -46,7 +46,7 @@
 
 namespace boost { namespace numeric { namespace ublas {
 
-template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p = 6)
+template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p = 13)
 {
 	typedef typename MATRIX::value_type value_type;
         typedef typename MATRIX::size_type size_type;
@@ -78,7 +78,9 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p 
 // Scaling, seek s such that || H*2^(-s) || < 1/2, and set scale = 2^(-s)
  	size_type s = 0;
 	real_value_type scale = 1.0;
-	if(norm > 0.5)
+
+  
+	//if(norm > 0.5)
 	{
 		s = std::max<int>(0, static_cast<int>((log(norm) / log(2.0) + 2.0)));
 		scale /= static_cast<real_value_type>(std::pow(2.0, (double)s));

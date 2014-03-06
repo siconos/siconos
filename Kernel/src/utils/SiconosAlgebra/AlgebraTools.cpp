@@ -32,12 +32,13 @@ namespace Siconos {
         // Note FP : Maybe it works for others but it has not been
         // tested here --> to be done
         // Do not work with sparse.
+        A.resetLU();
+        Exp.resetLU();
         assert(Exp.getNum() == 1 || A.getNum() == 1); 
         if(computeAndAdd)
           *Exp.dense() += expm_pad(*A.dense());
         else
           *Exp.dense() = expm_pad(*A.dense());
-          
       }
     } // namespace tools
   } // namespace algebra
