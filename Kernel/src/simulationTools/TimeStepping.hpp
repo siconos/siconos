@@ -109,38 +109,38 @@ public:
   virtual void initOSNS();
 
   /** Constructor with the time-discretisation.
-   *  \param a pointer to a timeDiscretisation (linked to the model
-   *  that owns this simulation)
-   \param a one step integrator (default none)
-   \param a one step non smooth problem (default none)
+   *  \param td pointer to a timeDiscretisation used in the integration 
+   *  (linked to the model that owns this simulation)
+   *  \param osi one step integrator (default none)
+   *  \param osnspb one step non smooth problem (default none)
    */
-  TimeStepping(SP::TimeDiscretisation,
-               SP::OneStepIntegrator = SP::OneStepIntegrator(),
-               SP::OneStepNSProblem = SP::OneStepNSProblem());
+  TimeStepping(SP::TimeDiscretisation td,
+               SP::OneStepIntegrator osi = SP::OneStepIntegrator(),
+               SP::OneStepNSProblem osnspb = SP::OneStepNSProblem());
 
   /** Constructor with the time-discretisation.
-   *  \param a pointer to a timeDiscretisation (linked to the model
-   *  that owns this simulation)
-   \param number of non smooth problem
+   *  \param td pointer to a timeDiscretisation used in the integration 
+   *  (linked to the model that owns this simulation)
+   *  \param nb number of non smooth problem
    */
-  TimeStepping(SP::TimeDiscretisation, int nb);
+  TimeStepping(SP::TimeDiscretisation td, int nb);
 
   /** constructor with XML object for TimeStepping
-    \param SimulationXML* : the XML object corresponding
-    \param initial time
-    \param final time
-    \param the set of all DS in the NSDS
+    \param strxml the XML object corresponding
+    \param t0 the initial time
+    \param T final time
+    \param dsList the set of all DS in the NSDS
     */
-  TimeStepping(SP::SimulationXML, double, double, SP::DynamicalSystemsSet);
+  TimeStepping(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList);
 
   /** Destructor.
   */
   virtual ~TimeStepping();
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
-   *  \param unsigned int: the number of the set to be updated
+   *  \param i the number of the set to be updated
    */
-  virtual void updateIndexSet(unsigned int);
+  virtual void updateIndexSet(unsigned int i);
 
   // /** Used by the updateIndexSet function in order to deactivate SP::Interaction.
   //  * \param SP::Interaction: SP::Interaction to be activated.
@@ -162,9 +162,9 @@ public:
   using Simulation::update;
 
   /** update input, state of each dynamical system and output
-   *  \param lambda order used to compute input
+   *  \param levelInput lambda order used to compute input
    */
-  void update(unsigned int);
+  void update(unsigned int levelInput);
 
   /** integrates all the DynamicalSystems taking not into account nslaw, reactions (ie non-smooth part) ...
   */
@@ -179,10 +179,10 @@ public:
   void computeOneStep();
 
   /** newton algorithm
-   * \param double, convergence criterion
-   * \param unsigned int: maximum number of Newton steps
+   * \param criterion convergence criterion
+   * \param maxStep maximum number of Newton steps
    */
-  virtual void newtonSolve(double, unsigned int);
+  virtual void newtonSolve(double criterion, unsigned int maxStep);
 
   /** To known the number of steps performed by the Newton algorithm.
    *
@@ -202,9 +202,9 @@ public:
   void prepareNewtonIteration();
 
   /** check the convergence of Newton algorithm according to criterion
-   * \param double, convergence criterion
+   * \param criterion convergence criterion
    */
-  bool newtonCheckConvergence(double);
+  bool newtonCheckConvergence(double criterion);
 
   /*save y_k^p, the current Newton iteration*/
   void saveYandLambdaInOldVariables();
@@ -215,12 +215,15 @@ public:
   void run();
 
   /** check returning value from computeOneStepNSProblem and process
-   *  \param: an int
+   *  \param info solver-specific error code return by the nonsmooth solver
    */
-  void DefaultCheckSolverOutput(int);
+  void DefaultCheckSolverOutput(int info);
 
-  /** Set CheckSolverOutput function */
-  void setCheckSolverFunction(CheckSolverFPtr);
+  /** Set CheckSolverOutput function
+   *  \param newF pointer to function steering the behavior of simulation when
+   *  nonsmooth solver failed
+   */
+  void setCheckSolverFunction(CheckSolverFPtr newF);
 
   /**  */
   bool isNewtonConverge()
@@ -228,14 +231,14 @@ public:
     return _isNewtonConverge;
   };
   /** To specify if the output interaction residu must be computed.
-   *  \param: a bool
+   *  \param v set to true when the output interaction residu must be computed
    */
   void setComputeResiduY(bool v)
   {
     _computeResiduY = v;
   };
 
-  /** To known if the output interaction residu must be computed. */
+  /** To know if the output interaction residu must be computed. */
   bool computeResiduY()
   {
     return _computeResiduY;
@@ -243,7 +246,7 @@ public:
 
 
   /** To specify if the input interaction residu must be computed.
-   *  \param: a bool
+   *  \param v set to true when the input interaction residu must be computed
    */
   void setComputeResiduR(bool v)
   {
@@ -258,7 +261,7 @@ public:
 
 
   /** set the Default Newton tolerance
-   *  \param: double
+   *  \param tol Newton solver tolerance
    */
   void setNewtonTolerance(double tol)
   {
@@ -266,7 +269,7 @@ public:
   };
 
   /** get the Newton tolerance
-   *  \return double
+   *  \return default Newton solver tolerance
    */
   double newtonTolerance()
   {
@@ -274,7 +277,7 @@ public:
   };
 
   /** set the maximum number of Newton iteration
-   *  \param: unsigned int
+   *  \param maxStep maximum number of Newton solver iterations
    */
   void setNewtonMaxIteration(unsigned int maxStep)
   {
@@ -282,7 +285,7 @@ public:
   };
 
   /** get the maximum number of Newton iteration
-   *  \return unsigned int
+   *  \return maximum number of Newton solver iterations
    */
   double newtonMaxIteration()
   {
@@ -290,7 +293,7 @@ public:
   };
 
   /** set the NewtonOptions
-   *  \param: std::string
+   *  \param v Newton solver options
    */
   void setNewtonOptions(unsigned int v)
   {
@@ -298,7 +301,8 @@ public:
   };
 
   /** get the NewtonOptions
-   *  \return unsigned int
+   *  \return Newton solver options - SICONOS_TS_LINEAR 1,
+   *  SICONOS_TS_LINEAR_IMPLICIT 2, SICONOS_TS_NONLINEAR 3
    */
   unsigned int newtonOptions()
   {

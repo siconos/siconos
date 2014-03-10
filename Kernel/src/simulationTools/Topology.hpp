@@ -227,7 +227,9 @@ public:
     return _DSG[num];
   };
 
-  /** get the number of Interactions Graphs */
+  /** get the number of Interactions Graphs
+   *  \return the number of Interactions Graphs
+   */
   inline unsigned int indexSetsSize() const
   {
     return _IG.size();
@@ -301,7 +303,10 @@ public:
 */
   SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber);
 
-  /** Helper to get the descriptor in DSG0 from a DynamicalSystem */
+  /** Helper to get the descriptor in DSG0 from a DynamicalSystem
+   *  \param ds DynamicalSystem of which we want the descriptor
+   *  \return the descriptor in DSG0 from a DynamicalSystem
+   */
   DynamicalSystemsGraph::VDescriptor getDSG0Descriptor(SP::DynamicalSystem ds)
   {
     return _DSG[0]->descriptor(ds);
