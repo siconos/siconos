@@ -2,6 +2,8 @@
 #ifndef MechanicsFwd_hpp
 #define MechanicsFwd_hpp
 #include <SiconosPointers.hpp>
+DEFINE_SPTR(LagrangianBody);
+DEFINE_SPTR(NewtonEulerBody);
 DEFINE_SPTR(SpaceFilter);
 DEFINE_SPTR(SiconosBodies);
 DEFINE_SPTR(ExternalBody);
@@ -20,4 +22,5 @@ DEFINE_SPTR(SphereNEDSSphereNEDSR);
 DEFINE_SPTR(SphereLDSPlanR);
 DEFINE_SPTR(SphereLDSSphereLDSR);
 DEFINE_SPTR(FMatrix);
+DEFINE_SPTR(NSLawMatrix);
 #endif

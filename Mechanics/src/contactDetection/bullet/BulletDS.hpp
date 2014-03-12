@@ -34,7 +34,7 @@ private:
   ACCEPT_SERIALIZATION(BulletDS);
 
   SP::BulletWeightedShape _weightedShape;
-  SP::btCollisionObject _collisionObject;
+  SP::CollisionObjects _collisionObjects;
 
 public:
 
@@ -44,42 +44,49 @@ public:
            SP::SiconosVector position,
            SP::SiconosVector velocity);
 
-  /** get the collision object
-  **/
-  SP::btCollisionObject collisionObject() const
-  {
-    return _collisionObject;
-  };
 
-  /** get the shape
+  /** get the number of collision objects
+      \return unsigned int the number of collision objects
+   */
+  unsigned int numberOfCollisionObjects() const;
+
+  /** get collision objects
+      \return SP::CollisionObjects a pointer on collision objects
+  **/
+  SP::CollisionObjects collisionObjects() const;
+
+  /** get the shape responsible of the mass matrix
+      \return SP::BulletWeightedShape a pointer on the shape
   **/
   SP::BulletWeightedShape weightedShape() const
   {
     return _weightedShape;
   };
 
-  /** get a shared_ptr from this
+  /** update Bullet collision objects positions and orientations
+   */
+  void updateCollisionObjects() const;
+
+  /** visitor hook
+   */
+  ACCEPT_STD_VISITORS();
+
+  /** return the shared pointer associated
+   * \return std11::shared_ptr<BulletDS>
    */
   std11::shared_ptr<BulletDS> shared_ptr()
   {
     return shared_from_this();
   };
 
-  /** update Bullet positions
-   */
-  void updateCollisionObject() const;
-
-  /** visitor hook
-   */
-  ACCEPT_STD_VISITORS();
 };
 
-struct ForCollisionObject : public Question<SP::btCollisionObject>
+struct ForCollisionObjects : public Question<SP::CollisionObjects>
 {
   using SiconosVisitor::visit;
-
-  ANSWER(BulletDS, collisionObject());
+  ANSWER(BulletDS, collisionObjects());
 };
+
 
 struct ForWeightedShape : public Question<SP::BulletWeightedShape>
 {
@@ -88,13 +95,13 @@ struct ForWeightedShape : public Question<SP::BulletWeightedShape>
   ANSWER(BulletDS, weightedShape());
 };
 
-struct UpdateCollisionObject : public SiconosVisitor
+struct UpdateCollisionObjects : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
   void visit(const BulletDS& bds)
   {
-    bds.updateCollisionObject();
+    bds.updateCollisionObjects();
   }
 };
 #endif

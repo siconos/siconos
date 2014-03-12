@@ -18,6 +18,8 @@
 */
 
 #include "BulletSpaceFilter.hpp"
+#include "BulletSpaceFilter_impl.hpp"
+#include "SpaceFilter_impl.hpp"
 
 #include <Model.hpp>
 #include <Simulation.hpp>
@@ -28,6 +30,10 @@
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
+
+#include <Question.hpp>
+#include "BulletDS.hpp"
+#include "BulletDS_impl.hpp"
 
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
@@ -65,8 +71,7 @@ struct ForPosition : public Question<SP::SiconosVector>
   ANSWER(BulletDS, q());
 };
 
-BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
-                                     SP::NonSmoothLaw nslaw) :
+BulletSpaceFilter::BulletSpaceFilter(SP::Model model) :
   SpaceFilter(),
   _dynamicCollisionsObjectsInserted(false),
   _staticCollisionsObjectsInserted(false),
@@ -74,10 +79,8 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 {
 
   _model = model;
-  _nslaw = nslaw;
-
-  _staticObjects.reset(new std::vector<SP::btCollisionObject>());
-  _staticShapes.reset(new std::vector<SP::btCollisionShape>());
+  _nslaws.reset(new NSLawMatrix());
+  _staticObjects.reset(new StaticObjects());
 
   _collisionConfiguration.reset(new btDefaultCollisionConfiguration());
 
@@ -125,7 +128,13 @@ void BulletSpaceFilter::buildInteractions(double time)
     std11::tie(dsi, dsiend) = dsg.vertices();
     for (; dsi != dsiend; ++dsi)
     {
-      _collisionWorld->addCollisionObject(&*(ask<ForCollisionObject>(*(dsg.bundle(*dsi)))));
+      CollisionObjects& collisionObjects = *ask<ForCollisionObjects>(*dsg.bundle(*dsi));
+
+      for (CollisionObjects::iterator ico = collisionObjects.begin();
+           ico != collisionObjects.end(); ++ico)
+      {
+        _collisionWorld->addCollisionObject(const_cast<btCollisionObject*>((*ico).first));
+      }
     }
 
     _dynamicCollisionsObjectsInserted = true;
@@ -133,10 +142,10 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   if (! _staticCollisionsObjectsInserted)
   {
-    for(std::vector<SP::btCollisionObject>::iterator
+    for(StaticObjects::iterator
           ic = _staticObjects->begin(); ic != _staticObjects->end(); ++ic)
     {
-      _collisionWorld->addCollisionObject((*ic).get());
+      _collisionWorld->addCollisionObject(const_cast<btCollisionObject*>((*ic).first));
     }
 
     _staticCollisionsObjectsInserted = true;
@@ -175,10 +184,8 @@ void BulletSpaceFilter::buildInteractions(double time)
     btPersistentManifold* contactManifold =
       _collisionWorld->getDispatcher()->getManifoldByIndexInternal(i);
 
-    const btCollisionObject* obA =
-      static_cast<const btCollisionObject*>(contactManifold->getBody0());
-    const btCollisionObject* obB =
-      static_cast<const btCollisionObject*>(contactManifold->getBody1());
+    const btCollisionObject* obA = contactManifold->getBody0();
+    const btCollisionObject* obB = contactManifold->getBody1();
 
     //    contactManifold->refreshContactPoints(obA->getWorldTransform(),obB->getWorldTransform());
 
@@ -296,27 +303,51 @@ void BulletSpaceFilter::buildInteractions(double time)
         std::map<btManifoldPoint*, bool>::iterator itc;
         itc = contactPoints.find(&*cpoint);
 
+        SP::DynamicalSystemsGraph DSG0 = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+
+        // should no be mixed with something else that use UserPointer!
+        assert(obA->getUserPointer());
+
+        SP::BulletDS dsa(static_cast<BulletDS*>(obA->getUserPointer())->shared_ptr());
+
+        assert(dsa->collisionObjects()->find(contactManifold->getBody0()) !=
+               dsa->collisionObjects()->end());
+
+        SP::NonSmoothLaw nslaw;
+        if (obB->getUserPointer())
+        {
+          SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
+
+          assert(dsb->collisionObjects()->find(contactManifold->getBody0()) !=
+                 dsb->collisionObjects()->end());
+
+          nslaw = (*_nslaws)(boost::get<2>((*dsa->collisionObjects())[obA]),
+                             boost::get<2>((*dsb->collisionObjects())[obB]));
+
+        }
+        else
+        {
+          nslaw = (*_nslaws)(boost::get<2>((*dsa->collisionObjects())[obA]),
+                             (*_staticObjects->find(obB)).second.second);
+        }
+
+
         if (itc == contactPoints.end())
         {
           SP::Interaction inter;
-          if (_nslaw->size() == 3)
+          if (nslaw->size() == 3)
           {
             SP::BulletR rel(new BulletR(cpoint, createSPtrbtPersistentManifold(*contactManifold)));
-            inter.reset(new Interaction(3, _nslaw, rel, 4 * i + z));
+            inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
           }
           else
           {
-            if (_nslaw->size() == 1)
+            if (nslaw->size() == 1)
             {
               SP::BulletFrom1DLocalFrameR rel(new BulletFrom1DLocalFrameR(cpoint));
-              inter.reset(new Interaction(1, _nslaw, rel, 4 * i + z));
+              inter.reset(new Interaction(1, nslaw, rel, 4 * i + z));
             }
           }
-
-          // should no be mixed with something else that use UserPointer!
-          assert(obA->getUserPointer());
-
-          SP::BulletDS dsa(static_cast<BulletDS*>(obA->getUserPointer())->shared_ptr());
 
           if (obB->getUserPointer())
           {
@@ -380,4 +411,9 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   model()->simulation()->initOSNS();
 
+}
+
+void BulletSpaceFilter::addStaticObject(SP::btCollisionObject co, unsigned int id)
+{
+  (*_staticObjects)[&*co]= std::pair<SP::btCollisionObject, int>(co, id);
 }

@@ -32,13 +32,18 @@
 #include <boost/functional/hash.hpp>
 
 struct FMatrix  : public ublas::matrix < FTime, ublas::column_major,
-                                         std::vector<FTime> > 
+                                         std::vector<FTime> >
 {
   ACCEPT_SERIALIZATION(FMatrix);
 };
 
+struct NSLawMatrix : public ublas::matrix < SP::NonSmoothLaw >
+{
+  ACCEPT_SERIALIZATION(NSLawMatrix);
+};
+
 struct space_hash : public boost::unordered_multiset < SP::Hashed,
-                                                       boost::hash<SP::Hashed> > 
+                                                       boost::hash<SP::Hashed> >
 {
   ACCEPT_SERIALIZATION(space_hash);
 };
@@ -49,19 +54,19 @@ typedef std::pair<double, double> DiskDiskRDeclared;
 typedef std11::array<double, 6> DiskPlanRDeclared;
 
 
-struct CircleCircleRDeclaredPool : public std::map<CircleCircleRDeclared, SP::CircularR> 
+struct CircleCircleRDeclaredPool : public std::map<CircleCircleRDeclared, SP::CircularR>
 {
   ACCEPT_SERIALIZATION(CircleCircleRDeclaredPool);
 };
 
 
-struct DiskDiskRDeclaredPool : public std::map<DiskDiskRDeclared, SP::CircularR> 
+struct DiskDiskRDeclaredPool : public std::map<DiskDiskRDeclared, SP::CircularR>
 {
   ACCEPT_SERIALIZATION(DiskDiskRDeclaredPool);
 };
 
 
-struct DiskPlanRDeclaredPool : public std::map<DiskPlanRDeclared, SP::DiskPlanR> 
+struct DiskPlanRDeclaredPool : public std::map<DiskPlanRDeclared, SP::DiskPlanR>
 {
   ACCEPT_SERIALIZATION(DiskPlanRDeclaredPool);
 };

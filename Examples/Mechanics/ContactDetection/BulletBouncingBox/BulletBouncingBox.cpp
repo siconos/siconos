@@ -104,6 +104,8 @@ int main()
     (*v0)(2) = velocity_init;
 
     // -- The dynamical system --
+    // -- the default contactor is the shape given in the constructor
+    // -- the contactor id is 0
     SP::BulletDS body(new BulletDS(box1, q0, v0));
 
     // -- Set external forces (weight) --
@@ -161,10 +163,14 @@ int main()
 
     int N = ceil((T - t0) / h); // Number of time steps
 
+
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
 
-    // -- The space filter performs broadphase collsion detection
-    SP::BulletSpaceFilter space_filter(new BulletSpaceFilter(model, nslaw));
+    // -- The space filter performs broadphase collision detection
+    SP::BulletSpaceFilter space_filter(new BulletSpaceFilter(model));
+
+    // -- insert a non smooth law for contactors id 0
+    space_filter->insert(nslaw, 0, 0);
 
     // -- add multipoint iterations, this is needed to gather at least
     // -- 3 contact points and avoid objects penetration, see Bullet
@@ -173,8 +179,9 @@ int main()
     space_filter->collisionConfiguration()->setPlaneConvexMultipointIterations();
 
     // -- The ground is a static object
-    space_filter->addStaticObject(ground);
-    space_filter->addStaticShape(groundShape);
+    // -- we give it a group contactor id : 0
+    space_filter->addStaticObject(ground, 0);
+
     // -- MoreauJeanOSI Time Stepping with Bullet Dynamical Systems
     SP::BulletTimeStepping simulation(new BulletTimeStepping(timedisc,
                                       space_filter));
@@ -237,17 +244,17 @@ int main()
           // have some contact forces to display
           if (index1->size() > 0)
           {
-            
+
             // Four contact points for a cube with a side facing the
             // ground. Note : changing Bullet margin for collision
             // detection may lead this assertion to be false.
             if (index1->size() == 4)
             {
               InteractionsGraph::VIterator iur = index1->begin();
-              
+
               // different version of bullet may not gives the same
               // contact points! So we only keep the summation.
-              dataPlot(k, 3) = 
+              dataPlot(k, 3) =
                 index1->bundle(*iur)-> lambda(1)->norm2() +
                 index1->bundle(*++iur)->lambda(1)->norm2() +
                 index1->bundle(*++iur)->lambda(1)->norm2() +
@@ -278,7 +285,7 @@ int main()
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
-      std::cout << "Warning. The result is rather different from the reference file : " 
+      std::cout << "Warning. The result is rather different from the reference file : "
                 << (dataPlot - dataPlotRef).normInf() << std::endl;
       return 1;
     }

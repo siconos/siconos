@@ -70,8 +70,8 @@ protected:
   /** the siconos model */
   SP::Model _model;
 
-  /** only one nslaw */
-  SP::NonSmoothLaw _nslaw;
+  /** nslaws */
+  SP::NSLawMatrix _nslaws;
 
   /** plans */
   SP::SiconosMatrix _plans;
@@ -144,14 +144,14 @@ public:
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
               SP::Model model,
-              SP::NonSmoothLaw nslaw,
+              SP::NSLawMatrix nslaws,
               SP::SiconosMatrix plans,
               SP::FMatrix moving_plans);
 
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
               SP::Model model,
-              SP::NonSmoothLaw nslaw,
+              SP::NSLawMatrix nslaws,
               SP::SiconosMatrix plans);
 
   SpaceFilter();
@@ -170,6 +170,14 @@ public:
   /** general hashed object
    */
   void insert(SP::Hashed);
+
+  /* insert a NonSmoothLaw between contactors i & contactors j
+   * \param nslaw the non smooth law
+   * \param class1 contactor id
+   * \param class2 contactor id
+   */
+  void insert(SP::NonSmoothLaw nslaw, long unsigned int class1,
+              long unsigned int class2);
 
 
   /** get parameters
@@ -192,15 +200,17 @@ public:
   };
 
 
-  /** get non smooth law
+  /** get non smooth laws
+      \return SP::NSLawMatrix
    */
-  SP::NonSmoothLaw nslaw()
+  SP::NSLawMatrix nslaws()
   {
-    return _nslaw;
+    return _nslaws;
   };
 
 
   /** get an interaction id
+      \return unsigned int
    * */
   unsigned int newInteractionId()
   {
@@ -226,7 +236,7 @@ public:
       \param ds1 a SP::DynamicalSystem
       \param ds2 a SP::DynamicalSystem (optional)
   */
-  void link(SP::Interaction inter, SP::DynamicalSystem, 
+  void link(SP::Interaction inter, SP::DynamicalSystem,
             SP::DynamicalSystem = SP::DynamicalSystem());
 
   /** broadphase contact detection: add interactions in indexSet 0

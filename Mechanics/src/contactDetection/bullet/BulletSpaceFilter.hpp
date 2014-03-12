@@ -22,7 +22,6 @@
 
 #include "BulletSiconosFwd.hpp"
 #include "SpaceFilter.hpp"
-#include <vector>
 
 class BulletSpaceFilter : public SpaceFilter
 {
@@ -32,8 +31,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(BulletSpaceFilter);
 
-  std11::shared_ptr<std::vector<SP::btCollisionObject> > _staticObjects;
-  std11::shared_ptr<std::vector<SP::btCollisionShape> > _staticShapes;
+  SP::StaticObjects _staticObjects;
 
   SP::btCollisionWorld _collisionWorld;
   SP::btDefaultCollisionConfiguration _collisionConfiguration;
@@ -45,7 +43,7 @@ protected:
   double _closeContactsThreshold;
 
 public:
-  BulletSpaceFilter(SP::Model model, SP::NonSmoothLaw nslaw);
+  BulletSpaceFilter(SP::Model model);
 
   /** get Bullet collision configuration
       \return a pointer on a Bullet collision configuration
@@ -74,35 +72,16 @@ public:
   /** get static objects
       \return a std::vector of btCollisionObject
   */
-  std11::shared_ptr<std::vector<SP::btCollisionObject> >staticObjects() const
+  SP::StaticObjects staticObjects() const
   {
     return _staticObjects;
   };
 
-  /** get static shapes
-      \return a std::vector of btCollisionShape
-  */
-
-  std11::shared_ptr<std::vector<SP::btCollisionShape> > staticShapes() const
-  {
-    return _staticShapes;
-  };
-
   /** add a static object
    * \param co a btCollisionObject
+   * \param id contactor id of the collision object for non smooth law selection
    */
-  void addStaticObject(SP::btCollisionObject co)
-  {
-    _staticObjects->push_back(co);
-  };
-
-  /** add a static shape
-   * \param cs a btCollisionShape
-   */
-  void addStaticShape(SP::btCollisionShape cs)
-  {
-    _staticShapes->push_back(cs);
-  }
+  void addStaticObject(SP::btCollisionObject co, unsigned int id);
 
   /** execute the broadphase contact detection and build indexSet0
    */
@@ -141,19 +120,8 @@ struct ForCollisionWorld : public Question<SP::btCollisionWorld>
   ANSWER(BulletSpaceFilter, collisionWorld());
 };
 
-struct ForStaticObjects : public Question< std11::shared_ptr<std::vector<SP::btCollisionObject> > >
-{
-  using SiconosVisitor::visit;
 
-  ANSWER(BulletSpaceFilter, staticObjects());
-};
 
-struct ForStaticShapes : public Question< std11::shared_ptr<std::vector<SP::btCollisionShape> > >
-{
-  using SiconosVisitor::visit;
-
-  ANSWER(BulletSpaceFilter, staticShapes());
-};
 
 
 struct ForContactPoint : public Question<SP::btManifoldPoint>

@@ -18,6 +18,7 @@
 */
 
 #include "BulletDS.hpp"
+#include "BulletDS_impl.hpp"
 #include "BulletWeightedShape.hpp"
 
 #ifdef DEBUG_BULLETDS
@@ -27,57 +28,86 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-
-
-
 BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
                    SP::SiconosVector position,
                    SP::SiconosVector velocity) :
   NewtonEulerDS(position, velocity, weightedShape->mass(),
                 weightedShape->inertiaMatrix()),
-  _weightedShape(weightedShape)
+  _weightedShape(weightedShape),
+  _collisionObjects(new CollisionObjects())
 {
   SiconosVector& q = *_q;
 
-/*  if (fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
-                pow(q(5), 2) +  pow(q(6), 2)) - 1.) >= 1e-10)
+  if (fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
+                pow(q(5), 2) + pow(q(6), 2)) - 1.) >= 1e-10)
   {
     RuntimeException::selfThrow(
       "BulletDS: quaternion in position parameter is not a unit quaternion "
     );
-    }*/
+  }
 
-  _collisionObject.reset(new btCollisionObject());
+  /* initialisation is done with the weighted shape as the only one
+   * collision object */
+  SP::btCollisionObject collisionObject(new btCollisionObject());
 
-  _collisionObject->setUserPointer(this);
-  _collisionObject->setCollisionFlags(_collisionObject->getCollisionFlags()|
-                                      btCollisionObject::CF_KINEMATIC_OBJECT);
+  collisionObject->setUserPointer(this);
+  collisionObject->setCollisionFlags(collisionObject->getCollisionFlags()|
+                                     btCollisionObject::CF_KINEMATIC_OBJECT);
 
-  _collisionObject->setCollisionShape(&*(weightedShape->collisionShape()));
+  collisionObject->setCollisionShape(&*(weightedShape->collisionShape()));
 
-  updateCollisionObject();
+  boost::array<double, 7> centerOfMass = { 0,0,0,1,0,0,0 };
+
+  (*_collisionObjects)[&*collisionObject] =
+    boost::tuple<SP::btCollisionObject, OffSet , int>
+    (collisionObject,centerOfMass,0);
+
+  updateCollisionObjects();
 }
 
-void BulletDS::updateCollisionObject() const
+unsigned int BulletDS::numberOfCollisionObjects() const
+{
+  return _collisionObjects->size();
+}
+
+SP::CollisionObjects BulletDS::collisionObjects() const
+{
+  return _collisionObjects;
+}
+
+
+void BulletDS::updateCollisionObjects() const
 {
 
-  DEBUG_PRINT("updateCollisionObject()\n");
+  for(CollisionObjects::iterator ico = _collisionObjects->begin();
+      ico != _collisionObjects->end(); ++ ico)
 
-  SiconosVector& q = *_q;
+  {
 
-  DEBUG_EXPR(q.display());
+    SP::btCollisionObject collisionObject = boost::get<0>((*ico).second);
+    OffSet offset = boost::get<1>((*ico).second);
 
-  assert(fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
+    SiconosVector& q = *_q;
+
+    DEBUG_EXPR(q.display());
+
+    assert(fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
                    pow(q(5), 2) +  pow(q(6), 2)) - 1.) < 1e-10);
 
-  _collisionObject->getWorldTransform().setOrigin(btVector3(q(0), q(1), q(2)));
-  _collisionObject->getWorldTransform().getBasis().setRotation(btQuaternion(q(4), q(5),
-      q(6), q(3)));
+    collisionObject->getWorldTransform().setOrigin(btVector3(q(0)+offset[0],
+                                                             q(1)+offset[1],
+                                                             q(2)+offset[2]));
+    collisionObject->getWorldTransform().getBasis().
+      setRotation(btQuaternion(offset[4], offset[5],
+                               offset[6], offset[3]) *
+                  btQuaternion(q(4), q(5),
+                               q(6), q(3)));
 
-  _collisionObject->setActivationState(ACTIVE_TAG);
-  _collisionObject->activate();
+    /* is this needed ? */
+    collisionObject->setActivationState(ACTIVE_TAG);
+    collisionObject->activate();
 
   //_collisionObject->setContactProcessingThreshold(BT_LARGE_FLOAT);
 
-
+  }
 }

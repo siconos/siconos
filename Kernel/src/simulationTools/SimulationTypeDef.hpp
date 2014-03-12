@@ -192,12 +192,16 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
                            ((Vertex, SP::PluggedObject, pluginB)) //For Controlled System
                            ((Vertex, SP::PluggedObject, pluginL)) // For Observer
                            ((Vertex, SP::SiconosVector, e)) // For Observer (ZOH Integration)
-                           ((Vertex, SP::SiconosVector, u))) // For Controlled System (ZOH Integration)
+                           ((Vertex, SP::SiconosVector, u)) // For Controlled System (ZOH Integration)
+                           // For group manipulations (example assign
+                           // a material id for contact law
+                           // determination
+                           ((Vertex, unsigned int, groupId)))
   // always needed -> SystemProperties
-  
+
   /** serialization hooks */
   ACCEPT_SERIALIZATION(DynamicalSystemsGraph);
-  
+
   // to be installed with INSTALL_GRAPH_PROPERTIES
   void eraseProperties(_DynamicalSystemsGraph::VDescriptor vd)
   {
@@ -211,6 +215,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
     pluginL._store->erase(vd);
     e._store->erase(vd);
     u._store->erase(vd);
+    groupId._store->erase(vd);
   }
 };
 

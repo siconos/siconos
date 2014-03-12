@@ -37,7 +37,7 @@ void BulletTimeSteppingDirectProjection::updateWorldFromDS()
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   std11::tie(dsi, dsiend) = dsg.vertices();
 
-  static UpdateCollisionObject up;
+  static UpdateCollisionObjects up;
 
   for (; dsi != dsiend; ++dsi)
   {
