@@ -182,7 +182,8 @@ if(NOT LAPACK_FOUND)
   
   if(BLAS_FOUND)
     #### Start Lapack search process ####
-    set(WITH_LAPACK "" CACHE STRING "Lapack implementation type [mkl/openblas/atlas/accelerate/generic]")
+    # I'm not sure what this is supposed to achieve, but it prevents us from using an hint on the command line ... -- xhub
+    #    set(WITH_LAPACK "" CACHE STRING "Lapack implementation type [mkl/openblas/atlas/accelerate/generic]")
     set(LAPACK_DIR "" CACHE PATH "lapack implementation location.")
     
     ## We first check the blas implementation : if it is mkl or accelerate
@@ -270,7 +271,7 @@ if(NOT LAPACK_FOUND)
     
     ## Generic LAPACKE library ##
     if((NOT LAPACK_LIBRARIES)
-	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "generic")))
+	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "lapacke")))
       message(STATUS "Try to find a generic lapacke ...")
       check_lapack_libraries(
 	LAPACK_LIBRARIES

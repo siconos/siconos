@@ -50,11 +50,11 @@ int pivot_selection_bard(double** mat, unsigned int dim)
         for (unsigned int j = 1; j <= dim; ++j)
         {
           dblock = mat[i][j]/zb - mat[block][j]/z0;
-          if (dblock < 0)
+          if (dblock < 0.0)
           {
             break;
           }
-          else if (dblock > 0)
+          else if (dblock > 0.0)
           {
             block = i;
             break;
@@ -90,10 +90,10 @@ void init_M_bard(double** mat, double* M, unsigned int dim, double* q)
   /*  Copy M but mat[dim+1:, :] = -M */
   for (unsigned int i = 0; i < dim; ++i)
   {
-    for (unsigned int j = 0; j < dim; ++j)
+    for (unsigned int j = 1; j <= dim; ++j)
     {
       mat[i][j] = 0.0; /* We need to init only the part corresponding to Id */
-      mat[i][j + dim + 1] = -M[dim*j + i]; /* Siconos is in column major */
+      mat[i][j + dim] = -M[dim*(j-1) + i]; /* Siconos is in column major */
     }
   }
 
@@ -167,7 +167,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
       dim2 = 2 * (dim + 1);
   }
 
-  for (unsigned i = 0 ; i < dim; ++i)
+  for (unsigned int i = 0 ; i < dim; ++i)
     mat[i] = (double *)malloc(dim2 * sizeof(double));
 
   assert(problem->q);
@@ -300,11 +300,16 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
         block = pivot_selection_lemke(mat, dim, drive);
     }
 
+    /* We stop here: it either mean that the algorithm stops here or that there
+     * is an issue with the LCP */
     if (block == -1)
     {
-      DEBUG_PRINT("The pivot column is nonpositive !\n"
+      if (pivot_selection_rule == SICONOS_LCP_PIVOT_LEMKE || pivot_selection_rule == 0)
+      {
+        DEBUG_PRINT("The pivot column is nonpositive !\n"
           "It either means that the algorithm failed or that the LCP is infeasible\n"
           "Check the class of the M matrix to find out the meaning of this\n");
+      }
       break;
     }
 
@@ -314,7 +319,6 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
     /* Pivot < block , drive > */
     DEBUG_PRINTF("Pivoting %i and %i\n", block, drive);
 
-    pivot = mat[block][drive];
     pivot = mat[block][drive];
     if (fabs(pivot) < DBL_EPSILON)
     {
@@ -413,6 +417,11 @@ exit_lcp_pivot:
       /** one basic variable is leaving and the driving one enters the basis */
       if (has_sol) *info = 0;
       else *info = 1;
+  }
+
+  if (info > 0)
+  {
+    DEBUG_PRINT("No solution found !\n");
   }
 
   free(basis);

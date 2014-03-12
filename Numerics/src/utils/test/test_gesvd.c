@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "SiconosLapack.h"
 #include "test_utils.h"
 /* Parameters */

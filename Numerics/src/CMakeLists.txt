@@ -283,7 +283,7 @@ IF(WITH_TESTING)
 
  BEGIN_TEST2(NonSmoothSolvers/LCP/test)
 
-  SET(DATASET_LCP "lcp_mmc.dat;lcp_deudeu.dat;lcp_trivial.dat;lcp_ortiz.dat")
+  SET(DATASET_LCP "lcp_mmc.dat;lcp_deudeu.dat;lcp_trivial.dat;lcp_ortiz.dat;lcp_enum_fails.dat")
   LIST(APPEND DATASET_LCP
    "lcp_exp_murty.dat;lcp_exp_murty2.dat;lcp_CPS_1.dat;lcp_CPS_2.dat;lcp_CPS_3.dat;lcp_CPS_4.dat;lcp_CPS_4bis.dat;lcp_CPS_5.dat")
   SET(DATASET_BLOCK_LCP "lcp_deudeu_block.dat")

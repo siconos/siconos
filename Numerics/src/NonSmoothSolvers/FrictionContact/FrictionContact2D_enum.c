@@ -106,7 +106,7 @@ int frictionContact2D_enum_setDefaultSolverOptions(SolverOptions* options)
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default SolverOptions for the Lemke Solver for FrictionContact2D\n");
+    printf("Set the Default SolverOptions for the Enumerative Solver for FrictionContact2D\n");
   }
   /*  strcpy(options->solverName,"Lemke");*/
   options->solverId = SICONOS_FRICTION_2D_ENUM;

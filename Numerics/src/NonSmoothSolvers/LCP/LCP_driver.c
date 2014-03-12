@@ -135,7 +135,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     printSolverOptions(options);
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
-  int info = 1;
+  int info = -1;
   /******************************************
    *  1 - Check for trivial solution
    ******************************************/
@@ -292,7 +292,11 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
    *  3 - Computes w = Mz + q and checks validity
    *************************************************/
   if (options->filterOn > 0)
-    lcp_compute_error(problem, z, w, options->dparam[0], &(options->dparam[1]));
+  {
+    int info_ = lcp_compute_error(problem, z, w, options->dparam[0], &(options->dparam[1]));
+    if (info <= 0) /* info was not setor the solver was happy */
+      info = info_;
+  }
 
   return info;
 

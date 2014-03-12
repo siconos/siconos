@@ -363,7 +363,7 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
 
 
 
-  if (err1 > errmax)
+  if (isnan(err1) || (err1 > errmax))
   {
     if (verbose > 0) printf("No convergence of LATIN after %d iterations, the residue is %g\n", iter1, err1);
     *info = 1;

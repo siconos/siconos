@@ -225,8 +225,8 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
           {
             assert(block >=0 && "lcp_lexicolemke: block <0");
             dblock = A[block][jc] / pivot - A[ic][jc] / zb;
-            if (dblock < 0) break;
-            else if (dblock > 0)
+            if (dblock < 0.0) break;
+            else if (dblock > 0.0)
             {
               block = ic;
               break;
