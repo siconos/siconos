@@ -115,16 +115,19 @@ osnspb.setKeepLambdaAndYState(True)
 nslaw = NewtonImpactFrictionNSL(0.8, 0., 0., 3)
 
 # (5) broadphase contact detection
-broadphase = BulletSpaceFilter(bouncingBox, nslaw)
+broadphase = BulletSpaceFilter(bouncingBox)
+
+# insert a non smooth law for contactors id 0
+broadphase.insert(nslaw, 0, 0)
 
 # add multipoint iterations to gather at least 3 contact points and
 # avoid object penetration
 broadphase.collisionConfiguration().setConvexConvexMultipointIterations()
 broadphase.collisionConfiguration().setPlaneConvexMultipointIterations()
 
-broadphase.addStaticObject(ground)
-broadphase.addStaticShape(groundShape)
-
+# The ground is a static object
+# we give it a group contactor id : 0
+broadphase.addStaticObject(ground, 0)
 
 # (6) Simulation setup with (1) (2) (3) (4) (5)
 simulation = BulletTimeStepping(timedisc, broadphase)
