@@ -193,10 +193,9 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
                            ((Vertex, SP::PluggedObject, pluginL)) // For Observer
                            ((Vertex, SP::SiconosVector, e)) // For Observer (ZOH Integration)
                            ((Vertex, SP::SiconosVector, u)) // For Controlled System (ZOH Integration)
-                           // For group manipulations (example assign
-                           // a material id for contact law
-                           // determination
-                           ((Vertex, unsigned int, groupId)))
+                           ((Vertex, unsigned int, groupId))) // For group manipulations (example assign
+                                                              // a material id for contact law
+                                                              // determination
   // always needed -> SystemProperties
 
   /** serialization hooks */
