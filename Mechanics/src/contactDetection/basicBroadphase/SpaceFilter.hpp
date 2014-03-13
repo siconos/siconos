@@ -144,14 +144,12 @@ public:
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
               SP::Model model,
-              SP::NSLawMatrix nslaws,
               SP::SiconosMatrix plans,
               SP::FMatrix moving_plans);
 
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
               SP::Model model,
-              SP::NSLawMatrix nslaws,
               SP::SiconosMatrix plans);
 
   SpaceFilter();
