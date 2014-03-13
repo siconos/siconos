@@ -478,43 +478,51 @@ if(NOT LAPACK_FOUND)
   ## Check if FuncName is available in lapack lib (i.e in one of LAPACK_LIBRARIES)
   ## and if FuncName symbol is present in file Header. 
   # If both are true, result is true.
-  function(check_lapack_has_function genericName FuncName Header result)
-    
+  function(check_clapack_has_function genericName FuncName Header result)
+
     check_function_exists(${FuncName} TEST_FUNC)
     check_symbol_exists(${FuncName} ${Header} TEST_HEAD)
-    
+
     if(TEST_HEAD AND TEST_FUNC)
       set(${result} 1 CACHE BOOL "${genericName} is available in lapack.")
     endif()
-    
+
+    unset(TEST_HEAD)
+    unset(TEST_FUNC)
   endfunction()
-  
-  
+
+
   set(CMAKE_REQUIRED_LIBRARIES ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
   set(CMAKE_REQUIRED_INCLUDES ${BLAS_INCLUDE_DIRS} ${LAPACK_INCLUDE_DIRS})
-  if (BLA_STATIC AND CMAKE_COMPILER_IS_GNUG77)
+  if (BLA_STATIC AND CMAKE_COMPILER_IS_GNUG77 AND NOT MSVC)
     if (NOT GFORTRAN_LIB)
       set(GFORTRAN_LIB "gfortran")
     endif()
     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${GFORTRAN_LIB})
   endif()
+
+  if(MSVC AND HAS_LAPACKE)
+    SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} "-DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE")
+    SET(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${EXTRA_LAPACK_LIB})
+  endif(MSVC AND HAS_LAPACKE)
+
   ## dgesvd ##
   unset(HAS_LAPACK_DGESVD)
   set(GENERIC_NAME "DGESVD")
   set(FUNC_NAME "${LAPACK_PREFIX}dgesvd${LAPACK_SUFFIX}")
-  check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACK_HEADER} HAS_LAPACK_DGESVD)
+  check_clapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACK_HEADER} HAS_LAPACK_DGESVD)
 
   ## dgels ##
   unset(HAS_LAPACK_DGELS)
   set(GENERIC_NAME "DGELS")
   set(FUNC_NAME "${LAPACK_PREFIX}dgels${LAPACK_SUFFIX}")
-  check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACK_HEADER} HAS_LAPACK_DGELS)
+  check_clapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACK_HEADER} HAS_LAPACK_DGELS)
 
   ## dtrtrs ##
   unset(HAS_LAPACK_DTRTRS)
   set(GENERIC_NAME "DTRTRS")
   set(FUNC_NAME "${LAPACK_PREFIX}dtrtrs${LAPACK_SUFFIX}")
-  check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACK_HEADER} HAS_LAPACK_DTRTRS)
+  check_clapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACK_HEADER} HAS_LAPACK_DTRTRS)
 
   ## Final settings ...
   set(LAPACK_LIBRARIES ${LAPACK_LIBRARIES} CACHE INTERNAL "Lapack libraries.")

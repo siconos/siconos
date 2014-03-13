@@ -28,6 +28,10 @@ Another big issue is that you cannot put the include dir from the mxe toochain i
 In this case it will mix the header from the mingw std lib and those from VS, resulting in a mess.
 So you have to copy those in a separate dir and give it to cmake (see the build-vc.sh script).
 
+For the LAPACK detection to work, you need to provide an implementation for some C99 function used in lapack
+The simplest way to do that is to compile Numerics/src/utils/SiconosCompat.c into an archive and give the location
+of this archive to cmake via -DEXTRA_LAPACK_LIB=...
+
 ## Bugs
 
 * There is an issue with some operator test (especially the prod test). A debug c++ assert fails !
