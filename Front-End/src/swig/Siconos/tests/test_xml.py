@@ -4,7 +4,13 @@
 Test the xml input
 '''
 
-import pytest
+try:
+    import pytest
+    xfail = pytest.mark.xfail
+except:
+    import py.test
+    xfail = py.test.mark.xfail
+
 from fromXml import buildModelXML
 import Siconos.Kernel as SK
 import numpy as np
@@ -185,7 +191,7 @@ def test_xml3():
     # dataPlot (ascii) output
     np.savetxt("result.dat",  dataPlot)
 
-@pytest.mark.xfail
+@xfail
 def test_xml4():
     ''' CamFollower '''
     # --- buildModelXML loading from xml file ---

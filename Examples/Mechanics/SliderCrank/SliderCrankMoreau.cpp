@@ -30,6 +30,7 @@
 
 #include "SiconosKernel.hpp"
 //#define WITH_FRICTION
+//#define DISPLAY_INTER
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -271,8 +272,7 @@ int main(int argc, char* argv[])
         impact->display();
       }
       //      if (s->nextTime() > 0.035 and (*inter1->lambda(1))(0) >0.0)
-      if (0)
-      {
+#ifdef DISPLAY_INTER
         std::cout << "=============== Step k =" << k << std::endl;
         std::cout << "Time " << s->nextTime() << std::endl;
 
@@ -281,9 +281,7 @@ int main(int argc, char* argv[])
         std::cout << " (*inter2->lambda(1))(0) " << (*inter2->lambda(1))(0) << std:: endl;
         std::cout << " (*inter3->lambda(1))(0) " << (*inter3->lambda(1))(0) << std:: endl;
         std::cout << " (*inter4->lambda(1))(0) " << (*inter4->lambda(1))(0) << std:: endl;
-
-      }
-
+#endif
 
       s->processEvents();
       ++show_progress;
