@@ -105,6 +105,9 @@
 	</xsd:restriction>			  
 </xsd:simpleType>
 
+<xsd:complexType name="emptyType">
+  <xsd:attribute name="all" type="xsd:double"/>
+</xsd:complexType>
 
 <xsd:complexType name="pluginDef">
 	<xsd:simpleContent>
@@ -271,7 +274,7 @@
 				</xsd:sequence>
 			</xsd:complexType>
 		</xsd:element>
-		
+
 		<xsd:element name="DS_Definition" minOccurs="1" maxOccurs="1">
 			<xsd:complexType>
 				<xsd:sequence>
@@ -282,37 +285,43 @@
 					<xsd:all>
 						<xsd:element name="x0" type="vector" minOccurs='1' maxOccurs='1'/>
 						<xsd:element name="x" type="vector" minOccurs='0' maxOccurs='1'/>
+						<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="xMemory" type="memory" minOccurs='0' maxOccurs='1'/>
-						<xsd:element name="f" type="matrix" minOccurs="1" maxOccurs="1"/>
-						<xsd:element name="jacobianXF" type="matrix" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="f" type="vector" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="Jacobianfx" type="matrix" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
+				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
-						
+
 			<xsd:element name="FirstOrderLinearDS">
 				<xsd:complexType>
 					<xsd:all>
 						<xsd:element name="x0" type="vector" minOccurs='1' maxOccurs='1'/>
 						<xsd:element name="x" type="vector" minOccurs='0' maxOccurs='1'/>
+						<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="xMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="A" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="b" type="vector" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
+				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
-						
+
 			<xsd:element name="FirstOrderLinearTIDS">
 				<xsd:complexType>
 					<xsd:all>
 						<xsd:element name="x0" type="vector" minOccurs='1' maxOccurs='1'/>
 						<xsd:element name="x" type="vector" minOccurs='0' maxOccurs='1'/>
+						<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="xMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="A" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="b" type="vector" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
+				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
 
@@ -335,8 +344,10 @@
 						<xsd:element name="JacobianQNNL" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="JacobianVelocityNNL" type="matrix" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
+				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
+
 			<xsd:element name="LagrangianLinearTIDS">
 				<xsd:complexType>
 					<xsd:all>
@@ -352,6 +363,7 @@
 						<xsd:element name="K" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="C" type="matrix" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
+				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
 		</xsd:choice>
@@ -378,7 +390,7 @@
 						<xsd:element name="lambda" type="vector" minOccurs='0' maxOccurs='1'/>
 						<!--~~~~~~ DS_Concerned ~~~~~~-->
 						<xsd:element name="DS_Concerned" type="vector" minOccurs='1' maxOccurs="1"/>
-						
+
 				<!--~~~~~~~~ Relation ~~~~~~~~-->
 				<xsd:element name="Interaction_Content" minOccurs="1" maxOccurs="1">
 					<xsd:complexType>
@@ -423,8 +435,9 @@
 							<xsd:element name="LagrangianRelation">
 								<xsd:complexType>
 									<xsd:all>
-                                                                  		<xsd:element name="h" type="pluginDef" minOccurs="1" maxOccurs="1"/>
-										<xsd:element name="G" type="listOfMatrices" minOccurs="1" maxOccurs="1"/>
+										<xsd:element name="h" type="pluginDef" minOccurs="1" maxOccurs="1"/>
+										<xsd:element name="jacobianH" type="listOfMatrices" minOccurs="1" maxOccurs="1"/>
+										<xsd:element name="C" type="matrix" minOccurs="0" maxOccurs="1"/>
 									</xsd:all>
 								       	<xsd:attribute name="type" type="xsd:string" use="optional" default="Undefined"/>
 									</xsd:complexType>
@@ -440,9 +453,7 @@
 							 	<xsd:attribute name="type" type="xsd:string" use="optional" default="Undefined"/>
 								</xsd:complexType>
 							</xsd:element>
-							
 						</xsd:choice>
-					
 
 			<!--~~~~~~~ NS_Law ~~~~~~~~~~~-->
 						<xsd:choice minOccurs="1" maxOccurs="1">
@@ -455,7 +466,7 @@
 									</xsd:all>
 								</xsd:complexType>
 							</xsd:element>
-							
+
 							<xsd:element name="NewtonImpactLaw">
 								<xsd:complexType>
 									<xsd:all>
@@ -464,7 +475,7 @@
 									</xsd:all>
 								</xsd:complexType>
 							</xsd:element>
-							
+
 							<xsd:element name="NewtonImpactFrictionLaw">
 								<xsd:complexType>
 									<xsd:all>
@@ -475,14 +486,13 @@
 									</xsd:all>
 								</xsd:complexType>
 							</xsd:element>
-							
+
 							<xsd:element name="ComplementarityCondition">
-<!--								<xsd:complexType>
+								<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="size" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
-										<xsd:element name="empty" type="xsd:double" minOccurs='0' maxOccurs='0'/>
 									</xsd:all>
-								</xsd:complexType> -->
+								</xsd:complexType> 
 							</xsd:element>
 						</xsd:choice>
 					</xsd:sequence>
@@ -538,23 +548,22 @@
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
-			
+
 			<xsd:element name="OneStepIntegrator_Definition" minOccurs='1' maxOccurs="1">
 				<xsd:complexType>
 					<xsd:sequence>
 		                        <!--~~~~~~~~~~~ OneStepIntegrator ~~~~~~~~~~~-->
- 					<xsd:choice minOccurs='1' maxOccurs='unbounded'>
-					<xsd:element name="Moreau">
+					<xsd:choice minOccurs='1' maxOccurs='unbounded'>
+					<xsd:element name="MoreauJeanOSI">
 					<xsd:complexType>
 						<xsd:all>
 							<xsd:element name="DS_Concerned" type="vector" minOccurs='0' maxOccurs="1"/>
 							<xsd:element name="Interactions_Concerned" type="vector" minOccurs='0' maxOccurs="1"/>
-							<xsd:element name="Theta" type="vector" minOccurs="1" maxOccurs="1"/>
-						<!--	<xsd:element name="W" type="matrix" minOccurs="0" maxOccurs="1"/>-->
+							<xsd:element name="Theta" type="emptyType" minOccurs="1" maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 					</xsd:element>
-					<xsd:element name="Lsodar">
+					<xsd:element name="LsodarOSI">
 					<xsd:complexType>
 						<xsd:all>
 							<xsd:element name="DS_Concerned" type="vector" minOccurs="0" maxOccurs="1"/>
@@ -573,7 +582,7 @@
 	<xsd:element name="OneStepNSProblems_List" minOccurs="0" maxOccurs="1">
 	<xsd:complexType>
 		<xsd:sequence>
-	 		<xsd:choice minOccurs="1" maxOccurs="1">
+	 		<xsd:choice minOccurs="1" maxOccurs="2">
 				<xsd:element name="LCP">
 					<xsd:complexType>
 						<xsd:all>
@@ -582,11 +591,11 @@
                						<xsd:element name="Interactions_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
 							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
-    						<xsd:attribute name="StorageType" type="xsd:positiveInteger" use="optional"/>
+    						<xsd:attribute name="StorageType" type="xsd:nonNegativeInteger" use="optional"/>
    						<xsd:attribute name="Id" type="xsd:string" use="optional"/>
 					</xsd:complexType>
 				</xsd:element>
-				
+
 				<xsd:element name="FrictionContact">
 					<xsd:complexType>
 						<xsd:all>
@@ -595,12 +604,12 @@
                						<xsd:element name="Interactions_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
 							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
-    						<xsd:attribute name="StorageType" type="xsd:positiveInteger" use="optional"/>
+   						<xsd:attribute name="StorageType" type="xsd:nonNegativeInteger" use="optional"/>
    						<xsd:attribute name="Id" type="xsd:string" use="optional"/>
    						<xsd:attribute name="Type" type="xsd:positiveInteger" use="required"/>
 					</xsd:complexType>
 				</xsd:element>
-	
+
 				<xsd:element name="QP">
 					<xsd:complexType>
 						<xsd:all>
@@ -611,7 +620,7 @@
                						<xsd:element name="Interactions_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
 							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
-    						<xsd:attribute name="StorageType" type="xsd:positiveInteger" use="optional"/>
+    						<xsd:attribute name="StorageType" type="xsd:nonNegativeInteger" use="optional"/>
    						<xsd:attribute name="Id" type="xsd:string" use="optional"/>
 					</xsd:complexType>
 				</xsd:element>
@@ -625,7 +634,7 @@
                						<xsd:element name="Interactions_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
 							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
-    						<xsd:attribute name="StorageType" type="xsd:positiveInteger" use="optional"/>
+    						<xsd:attribute name="StorageType" type="xsd:nonNegativeInteger" use="optional"/>
    						<xsd:attribute name="Id" type="xsd:string" use="optional"/>
 					</xsd:complexType>
 				</xsd:element>
@@ -633,7 +642,7 @@
 		</xsd:sequence>
 	</xsd:complexType>
 	</xsd:element>
-	
+
 			</xsd:sequence>
 			<xsd:attribute name="type" type="PossibleSimulationValues" use="required"/>
 		</xsd:complexType>
