@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Siconos-sample , Copyright INRIA 2005-2011.-->
+<!-- Siconos is a program dedicated to modeling, simulation and control-->
+<!-- of non smooth dynamical systems.	-->
+<!-- Siconos is a free software; you can redistribute it and/or modify-->
+<!-- it under the terms of the GNU General Public License as published by-->
+<!-- the Free Software Foundation; either version 2 of the License, or-->
+<!-- (at your option) any later version.-->
+<!-- Siconos is distributed in the hope that it will be useful,-->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of-->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the-->
+<!-- GNU General Public License for more details.-->
+<!---->
+<!-- You should have received a copy of the GNU General Public License-->
+<!-- along with Siconos; if not, write to the Free Software-->
+<!-- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA-->
+<!---->
+<!-- Contact: Vincent ACARY vincent.acary@inrialpes.fr -->
+<!--	-->
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+	<Title>Dry Friction Oscillator</Title>
+  <Author>F.Perignon</Author>
+  <Description>Oscillator with Coulomb friction </Description>
+  <Date>date</Date>
+	<Time>
+		<t0>0.0</t0>
+		<T>40.0</T>
+	</Time>
+	<NSDS bvp='false'>
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<LagrangianLinearTIDS number='1'>
+				<Id>Oscillator </Id>				
+				<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='3'>
+					0.1 0.0 0.0
+				</q0>
+				<Velocity0  vectorSize='3'>
+					0.0 0.0 10.0
+				</Velocity0>
+				<FExt vectorPlugin="BeadPlugin:FExt"/>
+				<Mass matrixRowSize='3' matrixColSize='3'>
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</Mass>
+				<K matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</K>
+				<C matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</C>
+			</LagrangianLinearTIDS>
+		</DS_Definition>
+		<!-- Interactions defined in the problem -->		
+		<Interaction_Definition>
+			<Interaction number='1'>
+				<size>2</size>
+				<!-- List of couple of DS concerned by this interaction -->
+		                <DS_Concerned vectorSize='1'>1</DS_Concerned>									
+				<!-- Relation of this interaction -->				
+				<Interaction_Content>		
+				 <LagrangianRelation type="LinearTI">
+				  <C matrixRowSize='2' matrixColSize='3'>
+  	                            <row> 0.0 1.0 0.0 </row>
+  	                            <row> 1.0 0.0 0.0</row>
+                                  </C>
+  				 </LagrangianRelation>			
+				<!-- NS Law of this interaction	-->
+				<NewtonImpactFrictionLaw>
+  				  <en>0.0</en>				
+                                  <mu>0.08</mu>
+				  <size>2</size>
+				</NewtonImpactFrictionLaw>
+				</Interaction_Content>	
+			</Interaction>				
+		</Interaction_Definition>		
+	</NSDS>
+	<!-- Simulation to use in order to solve the problem -->	
+	<Simulation type='TimeStepping'>
+		<TimeDiscretisation isConstant='true'>	
+			<h>0.005</h>
+     		</TimeDiscretisation>				
+		<!-- One Step Integrators -->				
+		<OneStepIntegrator_Definition>
+			<MoreauJeanOSI>
+				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
+				<Theta all="0.5"></Theta>
+			</MoreauJeanOSI>					
+		</OneStepIntegrator_Definition>
+		<!-- One Step NS Problem of th Simulation-->
+		<OneStepNSProblems_List>
+		 	<FrictionContact Type='2'>
+		 	</FrictionContact>
+		 </OneStepNSProblems_List>
+	</Simulation>	
+</SiconosModel>

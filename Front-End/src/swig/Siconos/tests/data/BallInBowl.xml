@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Siconos-sample , Copyright INRIA 2005-2011.-->
+<!-- Siconos is a program dedicated to modeling, simulation and control-->
+<!-- of non smooth dynamical systems.	-->
+<!-- Siconos is a free software; you can redistribute it and/or modify-->
+<!-- it under the terms of the GNU General Public License as published by-->
+<!-- the Free Software Foundation; either version 2 of the License, or-->
+<!-- (at your option) any later version.-->
+<!-- Siconos is distributed in the hope that it will be useful,-->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of-->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the-->
+<!-- GNU General Public License for more details.-->
+<!---->
+<!-- You should have received a copy of the GNU General Public License-->
+<!-- along with Siconos; if not, write to the Free Software-->
+<!-- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA-->
+<!---->
+<!-- Contact: Vincent ACARY vincent.acary@inrialpes.fr -->
+<!--	-->
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+	<Title>title</Title>
+  <Author>author</Author>
+  <Description>description</Description>
+  <Date>date</Date>
+	<Time>
+		<t0>0.0</t0>
+		<T>1.50</T>
+	</Time>
+	<NSDS bvp='false'>
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<LagrangianLinearTIDS number='1'>
+				<Id> Ball </Id>				
+				<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='3'>
+					0.4 0.2 0.0
+				</q0>
+				<Velocity0  vectorSize='3'>
+					0.0 0.0 0.0
+				</Velocity0>
+				<FExt vectorPlugin="BallInBowlPlugin:ballFExt"/>
+				<Mass matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</Mass>			
+			</LagrangianLinearTIDS>
+			<LagrangianLinearTIDS number='2'> 
+				<Id> Ground </Id>
+				<q0 vectorSize='1'>
+					0.0
+				</q0>	
+				<Velocity0 vectorSize='1'>
+					0.0
+				</Velocity0>
+				<Mass matrixRowSize='1' matrixColSize='1'>	
+					<row>1.0 </row>
+				</Mass>			
+			</LagrangianLinearTIDS>	
+		</DS_Definition>
+
+
+		<!-- Interactions defined in the problem -->		
+		<Interaction_Definition>
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='1'>
+				<size> 1 </size>
+				<!-- List of couple of DS concerned by this interaction -->
+		                <DS_Concerned vectorSize='1'>1</DS_Concerned>									
+				<!-- Relation of this interaction -->				
+				<Interaction_Content>		
+					<LagrangianRelation type="Scleronomous">
+					<h plugin="BallInBowlPlugin:h0"/>
+ 					<jacobianH number="1">
+                                      	<matrix matrixPlugin="BallInBowlPlugin:G0"/>
+                                        </jacobianH>
+					</LagrangianRelation>			
+					<!-- NS Law of this interaction	-->
+					<NewtonImpactLaw>
+				  <size>1</size>
+						<e>0.9</e>				
+					</NewtonImpactLaw>
+				</Interaction_Content>	
+			</Interaction>				
+		</Interaction_Definition>		
+	</NSDS>
+	<!-- Simulation to use in order to solve the problem -->	
+	<Simulation type='TimeStepping'>
+
+		<TimeDiscretisation isConstant='true'>	
+			<h>0.001</h>
+     		</TimeDiscretisation>				
+
+		<!-- One Step Integrators -->				
+		<OneStepIntegrator_Definition>
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			<MoreauJeanOSI>
+				<DS_Concerned vectorSize='2'>1 2</DS_Concerned>
+				<Theta all="0.5"></Theta>
+			</MoreauJeanOSI>
+			</OneStepIntegrator_Definition>
+		<!-- One Step NS Problem of th Simulation-->
+		<OneStepNSProblems_List>
+		 	<LCP StorageType="0" Id="myLCP">
+			   <NonSmoothSolver Name="Lemke">
+			      <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
+			      <dparam  vectorSize='5'>1e-6 0 0 0 0</dparam>
+			   </NonSmoothSolver>
+	                 </LCP>
+		 </OneStepNSProblems_List>
+	</Simulation>	
+</SiconosModel>

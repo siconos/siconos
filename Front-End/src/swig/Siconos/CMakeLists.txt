@@ -311,6 +311,9 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/smc_2.ref smc_2.ref COPYONLY)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/result.ref result.ref COPYONLY)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/diode_bridge.ref diode_bridge.ref COPYONLY)
 
+FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests/data DESTINATION
+	${CMAKE_BINARY_DIR}/src/swig/Siconos)
+
 IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
   SET(DRIVE_LETTER "Z:")
 ELSE()
@@ -325,6 +328,7 @@ ADD_TEST(bouncing_ball ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${
 ADD_TEST(diode_bridge ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diode_bridge.py)
 ADD_TEST(smc ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_smc.py)
 ADD_TEST(matrix_exp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
+ADD_TEST(xml ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
 
 IF(HAVE_SICONOS_IO)
   ADD_TEST(serialization ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_serialization.py)
