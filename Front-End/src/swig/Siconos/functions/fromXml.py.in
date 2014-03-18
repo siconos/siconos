@@ -5,7 +5,7 @@ import SiconosXMLParser
 import numpy as np
 import sys
 
-xsdfile = '/home/chaslim/siconos/Kernel/config/xmlschema/SiconosModelSchema-V1.2.xsd'
+xsdfile = '${SiconosKernel_XML_SCHEMA}/SiconosModelSchema-V1.2.xsd'
 
 # we should get those directly from the schema
 pluginsDS = {
