@@ -394,10 +394,11 @@ public:
    */
   SP::OneStepNSProblem oneStepNSProblem(int id);
 
-  /** add a OneStepNSProblem in the Simulation (if its not the first,
-      it needs to have an id clearly defined)
-      \param osns the new OneStepNSProblem
-      \param Id its id
+  /** add a OneStepNSProblem in the Simulation
+      \param osns the OneStepNSProblem to insert
+      \param Id its id: default is SICONOS_OSNSP_DEFAULT,
+      at impact level SICONOS_OSNSP_ED_IMPACT, at acceleration level
+      SICONOS_OSNSP_ED_ACCELERATION
    */
   virtual void insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id = SICONOS_OSNSP_DEFAULT);
 

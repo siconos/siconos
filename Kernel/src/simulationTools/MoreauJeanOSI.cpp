@@ -93,7 +93,7 @@ MoreauJeanOSI::MoreauJeanOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSyste
     // get corresponding ds and insert them into the set.
     std::vector<int>::iterator it;
     SP::DynamicalSystem ds;
-    for_each(dsList->begin(), dsList->end(), std11::bind(&DynamicalSystem::number, _1));
+    std::for_each(dsList->begin(), dsList->end(), std11::bind(&DynamicalSystem::number, _1));
     for (it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
     {
       ds = dsList->getPtr(*it);
@@ -112,45 +112,47 @@ MoreauJeanOSI::MoreauJeanOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSyste
 }
 
 // --- constructor from a minimum set of data ---
-MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem newDS, double newTheta) :
-  OneStepIntegrator(OSI::MOREAUJEANOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
-{
-  OSIDynamicalSystems->insert(newDS);
-  _theta = newTheta;
-}
-
-// --- constructor with theta parameter value  ---
-MoreauJeanOSI::MoreauJeanOSI(double newTheta):
-  OneStepIntegrator(OSI::MOREAUJEANOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
-{
-  _theta = newTheta;
-}
-
-// --- constructor from a minimum set of data ---
-MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
+MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem ds, double theta, double gamma) :
   OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false)
 {
-  OSIDynamicalSystems->insert(newDS);
-  _theta = newTheta;
-  _gamma = newGamma;
-  _useGamma = true;
+  OSIDynamicalSystems->insert(ds);
+  _theta = theta;
+  if (!isnan(gamma))
+  {
+    _gamma = gamma;
+    _useGamma = true;
+  }
+  else
+  {
+    _gamma = 1.0;
+    _useGamma = false;
+  }
 }
 
 // --- constructor from a set of data ---
-MoreauJeanOSI::MoreauJeanOSI(double newTheta, double newGamma):
+MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false)
 {
-  _theta = newTheta;
-  _gamma = newGamma;
-  _useGamma = true;
+  _theta = theta;
+  if (!isnan(gamma))
+  {
+    _gamma = gamma;
+    _useGamma = true;
+  }
+  else
+  {
+    _gamma = 1.0;
+    _useGamma = false;
+  }
 }
 
 
-// Note: OSIDynamicalSystems and thetaMap must disappear
+// Note: OSIDynamicalSystems must disappear
 void MoreauJeanOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   OSIDynamicalSystems->insert(ds);
 }
+
 const SimpleMatrix MoreauJeanOSI::getW(SP::DynamicalSystem ds)
 {
   int dsN = ds->number();
@@ -1178,7 +1180,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 
 
 }
-void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int&)
+void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& notUsed)
 {
   // Last parameter is not used (required for LsodarOSI but not for MoreauJeanOSI).
 

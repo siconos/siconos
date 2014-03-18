@@ -135,6 +135,11 @@ public:
    */
   FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA);
 
+  /** constructor from the minimum set of data
+   *  \param newX0 the initial state of this DynamicalSystem
+   */
+  FirstOrderLinearDS(SP::SiconosVector newX0);
+
   /** constructor from a set of data
    *  \param newX0 the initial state of this DynamicalSystem
    *  \param newA matrix A

@@ -101,7 +101,7 @@ public:
   *  \param e the e matrix
   *  \param B the B matrix
   */
-  FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix, SP::SiconosMatrix , SP::SiconosVector, SP::SiconosMatrix);
+  FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e, SP::SiconosMatrix B);
 
   /** destructor
   */

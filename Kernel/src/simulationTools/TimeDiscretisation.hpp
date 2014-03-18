@@ -142,7 +142,8 @@ public:
    */
   TimeDiscretisation(unsigned int nSteps, double t0, double T);
 
-  /** constructor with the size of the default time step and t0
+  /** Constructor with the size of the default timestep and t0.
+   * It creates a TimeDiscretisation using GMP for all its computation
    *  \param t0 initial time value
    *  \param str the time step in form of a string
    */

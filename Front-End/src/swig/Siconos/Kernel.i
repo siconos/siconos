@@ -29,6 +29,7 @@
 
 %include start.i
 
+
 %{
 #include <SiconosKernel.hpp>
 #include <SiconosAlgebra.hpp>
@@ -332,4 +333,5 @@ KERNEL_REGISTRATION()
 %fragment("StdSequenceTraits");
 
 %fragment("StdMapTraits");
+
 

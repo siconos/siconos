@@ -181,18 +181,16 @@ public:
   }
 
   /** set M to pointer newPtr
-   *  \param newPtr a SP::OSNSMatrix
+   *  \param newM the new M matrix
    */
-  inline void setMPtr(SP::OSNSMatrix newPtr)
+  inline void setMPtr(SP::OSNSMatrix newM)
   {
-    _M = newPtr;
+    _M = newM;
   }
 
   // --- Q ---
   /** get the value of q, the constant vector in the LinearOSNS
    *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an
-   *  lvalue => return SiconosVector
    */
   inline const SiconosVector getQ() const
   {
@@ -208,11 +206,11 @@ public:
   }
 
   /** set q to pointer newPtr
-   *  \param newPtr a SP::SiconosVector
+   *  \param newQ the new q vector
    */
-  inline void setq(SP::SiconosVector newPtr)
+  inline void setQPtr(SP::SiconosVector newQ)
   {
-    _q = newPtr;
+    _q = newQ;
   }
 
   /** get the type of storage for M */

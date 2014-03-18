@@ -34,16 +34,18 @@ class SiconosMatrix;
 namespace ioMatrix
 {
 /** Specialization to read a SiconosMatrix
-    \param[in] SiconosMatrix the matrix to be read
-    \return bool true if read ok, else false ...
+    \param[in] fileName the name of the file to read
+    \param[in] mode the storage type used in the file (either ascii or binary)
+    \param[in,out] m the SiconosMatrix to be filled
+    \return true if read ok, else false ...
 */
-bool read(const std::string& fileName, const std::string& Mode, SiconosMatrix& m);
+bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m);
 
 /** Specialization to write a SiconosMatrix
-    \param[in] SiconosMatrix the matrix to be read
-    \param[in] std::string type of output:
-    - "boost": boost way:
-    [row,col] ((a00,a01,...),(a10,...),...
+    \param[in] fileName the name of the file to write in
+    \param[in] mode the storage type used in the file (either ascii or binary)
+    \param[in] m the SiconosMatrix to write
+    \param[in] outputType type of output:
     - "python"(default):
     row col
     a00 a01 a02 ...
@@ -52,9 +54,9 @@ bool read(const std::string& fileName, const std::string& Mode, SiconosMatrix& m
     a00 a01 a02 ...
     a10 ...
     Reading input format is the one corresponding to "python".
-    \return bool true if read ok, else false ...
+    \return true if read ok, else false ...
 */
-bool write(const std::string& fileName, const std::string& Mode, const SiconosMatrix& m, const std::string& outputType = "python");
+bool write(const std::string& fileName, const std::string& mode, const SiconosMatrix& m, const std::string& outputType = "python");
 
 }
 

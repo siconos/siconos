@@ -57,13 +57,13 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
 }
 
 // constructor from a set of data
-LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, const std::string& strcomputeJachq):
+LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacHq):
   LagrangianR(ScleronomousR)
 {
   zeroPlugin();
-  setComputehFunction(SSLH::getPluginName(computeh), SSLH::getPluginFunctionName(computeh));
+  setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
 
-  _pluginJachq->setComputeFunction(strcomputeJachq);
+  _pluginJachq->setComputeFunction(pluginJacHq);
 
   //  unsigned int sizeY = inter.getSizeOfY();
   //  unsigned int sizeQ = workX->size();
@@ -74,15 +74,15 @@ LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, co
   // We only set the name of the plugin-function and connect it to the user-defined function.
 }
 // constructor from a data used for EventDriven scheme
-LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, const std::string& strcomputeJachq, const std::string& computeDotJachq):
+LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacHq, const std::string& pluginDotJacHq):
   LagrangianR(ScleronomousR)
 {
   zeroPlugin();
-  setComputehFunction(SSLH::getPluginName(computeh), SSLH::getPluginFunctionName(computeh));
+  setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
 
-  _pluginJachq->setComputeFunction(strcomputeJachq);
+  _pluginJachq->setComputeFunction(pluginJacHq);
 
-  _plugindotjacqh->setComputeFunction(computeDotJachq);
+  _plugindotjacqh->setComputeFunction(pluginDotJacHq);
 }
 
 
@@ -100,56 +100,31 @@ void LagrangianScleronomousR::computeh(double time, Interaction& inter)
   DEBUG_PRINT("LagrangianScleronomousR::computeh(double time, Interaction& inter)\n");
   computeh(inter, inter.data(q0),inter.data(z));
 
-  // if (_pluginh)
-  // {
-  //   // arg= time. Unused in this function but required for interface.
-  //   if (_pluginh->fPtr)
-  //   {
-  //     // get vector y of the current interaction
-  //     SiconosVector& y = *inter.y(0);
-
-  //     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  //     SiconosVector workQ = *inter.data(q0);
-  //     SiconosVector workZ = *inter.data(z);
-
-  //     ((FPtr3)(_pluginh->fPtr))(workQ.size(), &(workQ(0)) , y.size(), &(y(0)), workZ.size(), &(workZ(0)));
-
-  //     // Copy data that might have been changed in the plug-in call.
-  //     *inter.data(z) = workZ;
-  //   }
-  // }
-  // else nothing
 }
 
 void LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z)
 {
   DEBUG_PRINT(" LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z)\n");
 
-  if (_pluginh)
+  if (_pluginh && _pluginh->fPtr)
   {
     // arg= time. Unused in this function but required for interface.
-    if (_pluginh->fPtr)
-    {
-      // get vector y of the current interaction
-      SiconosVector& y = *inter.y(0);
+    // get vector y of the current interaction
+    SiconosVector& y = *inter.y(0);
 
-      // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-      SiconosVector workQ = *q;
-      SiconosVector workZ = *z;
+    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+    SiconosVector workQ = *q;
+    SiconosVector workZ = *z;
 
-      ((FPtr3)(_pluginh->fPtr))(workQ.size(), &(workQ(0)) , y.size(), &(y(0)), workZ.size(), &(workZ(0)));
+    ((FPtr3)(_pluginh->fPtr))(workQ.size(), &(workQ(0)) , y.size(), &(y(0)), workZ.size(), &(workZ(0)));
 
-      // Copy data that might have been changed in the plug-in call.
-      *z = workZ;
+    // Copy data that might have been changed in the plug-in call.
+    *z = workZ;
 
-      DEBUG_EXPR(q->display());
-      DEBUG_EXPR(z->display());
-      DEBUG_EXPR(y.display());
+    DEBUG_EXPR(q->display());
+    DEBUG_EXPR(z->display());
+    DEBUG_EXPR(y.display());
 
-
-
-
-    }
   }
   // else nothing
 }

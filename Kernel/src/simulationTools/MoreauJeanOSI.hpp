@@ -145,11 +145,6 @@ protected:
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
 
-
-  /** Default constructor
-   */
-  MoreauJeanOSI() {};
-
 public:
 
   /** constructor from xml file
@@ -159,28 +154,17 @@ public:
   MoreauJeanOSI(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
   /** constructor from a minimum set of data: one DS and its theta
-   *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param theta value of the parameter
+   *  \param ds the DynamicalSystem integrated by this integrator
+   *  \param theta value for the theta parameter (default = 0.5)
+   *  \param gamma value for the gamma parameter (default = NaN and gamma is not used)
    */
-  MoreauJeanOSI(SP::DynamicalSystem, double);
+  MoreauJeanOSI(SP::DynamicalSystem ds, double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN());
 
   /** constructor from theta value only
-   *  \param theta value for all DS.
+   *  \param theta value for the theta parameter (default = 0.5)
+   *  \param gamma value for the gamma parameter (default = NaN and gamma is not used)
    */
-  MoreauJeanOSI(double);
-
-  /** constructor from a minimum set of data: one DS and its theta
-   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param Theta value
-   *  \param gamma value
-   */
-  MoreauJeanOSI(SP::DynamicalSystem, double, double);
-
-  /** constructor from theta value only
-   *  \param theta value for all these DS.
-   *  \param gamma value for all these DS.
-   */
-  MoreauJeanOSI(double, double);
+  MoreauJeanOSI(double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN());
 
   /** destructor
    */
@@ -361,11 +345,15 @@ public:
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
+   * \param inter the Interaction to test
+   * \param i level of the IndexSet
    */
   virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
+   * \param inter the Interaction to test
+   * \param i level of the IndexSet
    */
   virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
@@ -376,12 +364,12 @@ public:
 
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param double: tinit, initial time
-   *  \param double: tend, end time
-   *  \param double: tout, real end time
+   *  \param tinit the initial time
+   *  \param tend the end time
+   *  \param tout the real end time
    *  \param int: useless flag (for MoreauJeanOSI, used in LsodarOSI)
    */
-  void integrate(double&, double&, double&, int&);
+  void integrate(double& tinit, double& tend, double& tout, int& notUsed);
 
   /** updates the state of the Dynamical Systems
    *  \param level the level of interest for the dynamics: not used at the time
@@ -397,7 +385,7 @@ public:
   void display();
 
   /** insert a dynamical system in this Integrator
-   *  \param a SP::DynamicalSystem
+   *  \param ds the DynamicalSystem to integrate
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds);
 

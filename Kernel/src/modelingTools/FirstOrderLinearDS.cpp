@@ -119,6 +119,14 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
   checkDynamicalSystem();
 }
 
+FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0):
+  FirstOrderNonLinearDS(newX0)
+{
+  _f.reset(new SiconosVector(getDim()));
+  _pluginb.reset(new PluggedObject());
+  _pluginA.reset(new PluggedObject());
+  checkDynamicalSystem();
+}
 // From a minimum set of data, A from a given matrix
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
   FirstOrderNonLinearDS(newX0)

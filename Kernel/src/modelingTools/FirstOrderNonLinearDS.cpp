@@ -292,28 +292,7 @@ void FirstOrderNonLinearDS::setInvMPtr(SP::SiconosMatrix newPtr)
 {
   _invM = newPtr;
 }
-/*
-void FirstOrderNonLinearDS::setF(const PVF& newValue)
-{
-  assert(newValue.size()==n&&"FirstOrderNonLinearDS - setF: inconsistent dimensions with problem size for input vector f");
 
-  if( ! _f )
-    _f.reset(new PVF(newValue));
-  else
-    *_f = newValue;
-    }*/
-/*
-void FirstOrderNonLinearDS::setJacobianfx(const PMJF& newValue)
-{
- assert(newValue.size(0)==n&&"FirstOrderNonLinearDS - setJacobianfx: inconsistent dimensions with problem size for input matrix M.");
- assert(newValue.size(1)==n&&"FirstOrderNonLinearDS - setJacobianfx: inconsistent dimensions with problem size for input matrix M.");
-
- if( ! jacobianfx )
-   jacobianfx.reset(new PMJF(newValue));
- else
-   *jacobianfx = newValue;
-}
-*/
 void FirstOrderNonLinearDS::initRhs(double time)
 {
   // compute initial values for f and jacobianfx, initialize right-hand side.

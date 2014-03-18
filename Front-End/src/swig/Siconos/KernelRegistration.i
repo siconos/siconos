@@ -6,6 +6,7 @@
   PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);                           \
   PY_REGISTER_WITHOUT_DIRECTOR_REF(SiconosVector);                      \
   PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                            \
+  PY_REGISTER(SiconosMemory)                                            \
   PY_REGISTER(NonSmoothLaw);                                            \
   PY_REGISTER(NewtonImpactNSL);                                         \
   PY_REGISTER(NewtonImpactFrictionNSL);                                 \
@@ -58,7 +59,7 @@
   PY_REGISTER(OneStepNSProblem);                                        \
   PY_REGISTER(OneStepIntegrator);                                       \
   PY_REGISTER(LinearOSNS);                                              \
-  PY_REGISTER(LsodarOSI);                                              \
+  PY_REGISTER(LsodarOSI);                                               \
   PY_REGISTER(LCP);                                                     \
   PY_REGISTER(QP);                                                      \
   PY_REGISTER(Relay);                                                   \

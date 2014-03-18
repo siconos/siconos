@@ -54,8 +54,8 @@
  * To define a boundary Value Problem, the pointer on  a BoundaryCondition must be set.
  *
  * \f$ f(x,t) \f$ is a plug-in function, and can be computed using computeF(t).
- * Its Jacobian according to x is denoted jacobianXF, and computed thanks to computeJacobianXF(t).
- * f and jacobianXF can be plugged to external functions thanks to setComputeFFunction/setComputeJacobianXFFunction.
+ * Its Jacobian according to x is denoted jacobianfx, and computed thanks to computeJacobianXF(t).
+ * f and jacobianfx can be plugged to external functions thanks to setComputeFFunction/setComputeJacobianXFFunction.
  *
  * Right-hand side of the equation is computed thanks to computeRhs(t).
  *

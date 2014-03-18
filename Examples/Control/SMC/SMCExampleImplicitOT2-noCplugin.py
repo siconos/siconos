@@ -79,7 +79,7 @@ processSimulation.setName("plant simulation")
 processIntegrator = ZeroOrderHoldOSI(processDS)
 processSimulation.insertIntegrator(processIntegrator)
 # Actuator, Sensor & ControlManager
-control = ControlManager(process)
+control = ControlManager()
 sens = LinearSensor(tSensor, processDS, sensorC)
 control.addSensorPtr(sens)
 act = LinearSMCOT2(tActuator, processDS)

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-                             <!-- Siconos-sample version 3.0.0, Copyright INRIA 2005-2008.-->
-                             <!-- Siconos is a program dedicated to modeling, simulation and control-->
-                             <!-- of non smooth dynamical systems.	-->
-                             <!-- Siconos is a free software;
+<!-- Siconos-sample version 3.0.0, Copyright INRIA 2005-2008.-->
+									  <!-- Siconos is a program dedicated to modeling, simulation and control-->
+									  <!-- of non smooth dynamical systems.	-->
+									  <!-- Siconos is a free software;
 you can redistribute it and/or modify-->
 <!-- it under the terms of the GNU General Public License as published by-->
 <!-- the Free Software Foundation;
@@ -26,49 +26,49 @@ Vincent ACARY vincent.acary@inrialpes.fr -->
 <!-- SICONOS Model XML file -->
 
 <SiconosModel>
-<Title>title</Title>
-<Author>author</Author>
-<Description>description</Description>
-<Date>date</Date>
-<SchemaXML>../../config/xmlschema/SiconosModelSchema-V1.2.xsd</SchemaXML>
-<Time>
-<t0>0.0</t0>
-<T>1.5</T>
-</Time>
-<NSDS bvp='false'>
+	<Title>title</Title>
+	<Author>author</Author>
+	<Description>description</Description>
+	<Date>date</Date>
+	<SchemaXML>../../config/xmlschema/SiconosModelSchema-V1.2.xsd</SchemaXML>
+	<Time>
+		<t0>0.0</t0>
+		<T>1.5</T>
+	</Time>
+	<NSDS bvp='false'>
 
-          <!-- DSs defined in the problem -->
-          <DS_Definition>
-          <LagrangianLinearTIDS number='1'>
-                                       <Id> Ball </Id>
-                                       <StepsInMemory>1</StepsInMemory>
-                                       <q0 vectorSize='3'>
-                                           0.4 0.2 0.0
-                                           </q0>
-                                           <Velocity0  vectorSize='3'>
-                                               0.0 0.0 0.0
-                                               </Velocity0>
-                                               <FExt vectorPlugin="gTestPlugin:ballFExt"/>
-                                                   <Mass matrixRowSize='3' matrixColSize='3'>
-                                                       <row>1.0 0.0 0.0</row>
-                                                       <row>0.0 1.0 0.0</row>
-                                                       <row>0.0 0.0 1.0</row>
-                                                       </Mass>
-                                                       </LagrangianLinearTIDS>
-                                                       <LagrangianLinearTIDS number='2'>
-                                                           <Id> Ground </Id>
-                                                           <q0 vectorSize='1'>
-                                                               0.0
-                                                               </q0>
-                                                               <Velocity0 vectorSize='1'>
-                                                                   0.0
-                                                                   </Velocity0>
-                                                                   <FExt vectorPlugin="gTestPlugin:groundFExt"/>
-                                                                       <Mass matrixRowSize='1' matrixColSize='1'>
-                                                                           <row>1.0 </row>
-                                                                           </Mass>
-                                                                           </LagrangianLinearTIDS>
-                                                                           </DS_Definition>
+		<!-- DSs defined in the problem -->
+		<DS_Definition>
+			<LagrangianLinearTIDS number='1'>
+				<Id> Ball </Id>
+				<StepsInMemory>1</StepsInMemory>
+				<q0 vectorSize='3'>
+					0.4 0.2 0.0
+				</q0>
+				<Velocity0  vectorSize='3'>
+					0.0 0.0 0.0
+				</Velocity0>
+				<FExt vectorPlugin="gTestPlugin:ballFExt"/>
+				<Mass matrixRowSize='3' matrixColSize='3'>
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</Mass>
+			</LagrangianLinearTIDS>
+			<LagrangianLinearTIDS number='2'>
+				<Id> Ground </Id>
+				<q0 vectorSize='1'>
+					0.0
+				</q0>
+				<Velocity0 vectorSize='1'>
+					0.0
+				</Velocity0>
+				<FExt vectorPlugin="gTestPlugin:groundFExt"/>
+				<Mass matrixRowSize='1' matrixColSize='1'>
+					<row>1.0 </row>
+				</Mass>
+			</LagrangianLinearTIDS>
+		</DS_Definition>
 
 		<!-- Interactions defined in the problem -->		
 		<Interaction_Definition>
@@ -76,14 +76,14 @@ Vincent ACARY vincent.acary@inrialpes.fr -->
 			<Interaction number='1' Id='Ball-Ground'>
 				<size> 1 </size>
 				<!-- List of couple of DS concerned by this interaction -->
-		                <DS_Concerned vectorSize='2'>1 2</DS_Concerned>									
+				<DS_Concerned vectorSize='2'>1 2</DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 					<LagrangianRelation type="Scleronomous">
-					<h plugin="gTestPlugin:h0"/>
- 					<jacobianH number="1">
-                                      	<matrix matrixPlugin="gTestPlugin:G0"/>
-                                        </jacobianH>
+						<h plugin="gTestPlugin:h0"/>
+						<jacobianH number="1">
+							<matrix matrixPlugin="gTestPlugin:G0"/>
+						</jacobianH>
 					</LagrangianRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
@@ -97,53 +97,26 @@ Vincent ACARY vincent.acary@inrialpes.fr -->
 	<!-- Simulation to use in order to solve the problem -->	
 	<Simulation type='TimeStepping'>
 
-                                                                           <!-- Interactions defined in the problem -->
-                                                                           <Interaction_Definition>
-                                                                           <!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->
-                                                                           <Interaction number='1' Id='Ball-Ground'>
-                                                                               <size> 1 </size>
-                                                                               <!-- List of couple of DS concerned by this interaction -->
-                                                                               <DS_Concerned all='true'></DS_Concerned>
-                                                                                   <!-- Relation of this interaction -->
-                                                                                   <Interaction_Content>
-                                                                                   <LagrangianRelation type="Scleronomous">
-                                                                                       <h plugin="gTestPlugin:h0"/>
-                                                                                           <jacobianH number="1">
-                                                                                               <matrix matrixPlugin="gTestPlugin:G0"/>
-                                                                                                   </jacobianH>
-                                                                                                   </LagrangianRelation>
-                                                                                                   <!-- NS Law of this interaction	-->
-                                                                                                   <NewtonImpactLaw>
-                                                                                                   <e>0.9</e>
-                                                                                                   <size>1</size>
-                                                                                                   </NewtonImpactLaw>
-                                                                                                   </Interaction_Content>
-                                                                                                   </Interaction>
-                                                                                                   </Interaction_Definition>
-                                                                                                   </NSDS>
-                                                                                                   <!-- Simulation to use in order to solve the problem -->
-                                                                                                   <Simulation type='TimeStepping'>
+		<TimeDiscretisation isConstant='true'>
+			<h>0.001</h>
+		</TimeDiscretisation>
 
-                                                                                                       <TimeDiscretisation isConstant='true'>
-                                                                                                           <h>0.001</h>
-                                                                                                           </TimeDiscretisation>
-
-                                                                                                           <!-- One Step Integrators -->
-                                                                                                           <OneStepIntegrator_Definition>
-                                                                                                           <!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->
-                                                                                                           <Moreau>
-                                                                                                           <DS_Concerned vectorSize='2'>1 2</DS_Concerned>
-                                                                                                               <Theta vectorSize='2'>0.5 1.0</Theta>
-                                                                                                                   </Moreau>
-                                                                                                                   </OneStepIntegrator_Definition>
-                                                                                                                   <!-- One Step NS Problem of th Simulation-->
-                                                                                                                   <OneStepNSProblems_List>
-                                                                                                                   <LCP StorageType="0" Id="myLCP">
-                                                                                                                       <NonSmoothSolver Name="Lemke">
-                                                                                                                           <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
-                                                                                                                               <dparam  vectorSize='5'>1e-6 0 0 0 0</dparam>
-                                                                                                                                   </NonSmoothSolver>
-                                                                                                                                   </LCP>
-                                                                                                                                   </OneStepNSProblems_List>
-                                                                                                                                   </Simulation>
-                                                                                                                                   </SiconosModel>
+		<!-- One Step Integrators -->
+		<OneStepIntegrator_Definition>
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->
+			<Moreau>
+				<DS_Concerned vectorSize='2'>1 2</DS_Concerned>
+				<Theta vectorSize='2'>0.5 1.0</Theta>
+			</Moreau>
+		</OneStepIntegrator_Definition>
+		<!-- One Step NS Problem of th Simulation-->
+		<OneStepNSProblems_List>
+			<LCP StorageType="0" Id="myLCP">
+				<NonSmoothSolver Name="Lemke">
+					<iparam  vectorSize='5'>1000 0 0 0 0</iparam>
+					<dparam  vectorSize='5'>1e-6 0 0 0 0</dparam>
+				</NonSmoothSolver>
+			</LCP>
+		</OneStepNSProblems_List>
+	</Simulation>
+</SiconosModel>

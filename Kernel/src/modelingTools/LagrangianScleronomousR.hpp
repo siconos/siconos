@@ -56,8 +56,10 @@
  * with
  *
  * \f[
- * H^\top(q,z) = \nabla_q h(q,z) is the pure Lagrangian setting
+ * H^\top(q,z) = \nabla_q h(q,z)
  * \f]
+ *
+ * is the pure Lagrangian setting.
  *
  *  y (or its discrete approximation) is stored in y[0]
  * \f$ \dot y \f$ (or its discrete approximation) is  stored in y[1]
@@ -116,15 +118,15 @@ protected:
 
   /** Product of  the time--derivative of Jacobian with the velocity qdot */
   SP::SiconosVector _dotjacqhXqdot;
-  /** basic constructor
-      \param the sub-type of the relation
-  */
+
+  /** reset all plugins */
+  virtual void zeroPlugin();
+
+  /** basic constructor */
   LagrangianScleronomousR(): LagrangianR(RELATION::ScleronomousR)
   {
-    ;
+    zeroPlugin();
   }
-
-  virtual void zeroPlugin();
 
 public:
 
@@ -134,29 +136,29 @@ public:
   LagrangianScleronomousR(SP::RelationXML);
 
   /** constructor from a set of data
-  *  \param std::string : the name of the plugin to compute h(q,z).\n
+  *  \param pluginh the name of the plugin to compute h(q,z).
   * The signature  of the plugged function must be:
   *  "void pluginH(unsigned int, double*, unsigned int, double*, unsigned int, double*)"
-  *  \param std::string : the name of the plugin to compute jacobian h according to q.\n
+  *  \param pluginJacHq the name of the plugin to compute jacobian h according to q.\n
   * The signature  of the plugged function must be:
   *  "void pluginG0(unsigned int, double*, unsigned int, double*, unsigned int, double*)"
   *
   */
-  LagrangianScleronomousR(const std::string&, const std::string&);
+  LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacHq);
 
   /** constructor from a set of data used for EventDriven Scheme
-  *  \param std::string : the name of the plugin to compute h(q,z).\n
+  *  \param pluginh the name of the plugin to compute h(q,z).
   * The signature  of the plugged function must be:
   *  "void pluginH(unsigned int, double*, unsigned int, double*, unsigned int, double*)"
-  *  \param std::string : the name of the plugin to compute jacobian h according to q.\n
+  *  \param pluginJacHq the name of the plugin to compute jacobian h according to q.\n
   * The signature  of the plugged function must be:
   *  "void pluginG0(unsigned int, double*, unsigned int, double*, unsigned int, double*)"
-  * \param std::string: the name of the plugin to compute the derivative of H Jacobian with respect to time
+  * \param pluginDotJacHq the name of the plugin to compute the derivative of H Jacobian with respect to time
   * The signature of the plugged function must be:
   * "void pluginS0(unsigned int, double*,unsigned int, double*, unsigned int, double*, unsigned int, double*)"
   *
   */
-  LagrangianScleronomousR(const std::string&, const std::string&, const std::string&);
+  LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacHq, const std::string& pluginDotJacHq);
 
   /** destructor
   */
@@ -167,6 +169,7 @@ public:
   {
     return _dotjacqhXqdot;
   };
+
   /** Compute y = h(q,z) using plug-in mechanism with the data vector of the interaction
    * should be used as less as possible to avoid side--effects
    * prefer computeh(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
@@ -185,7 +188,7 @@ public:
 
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
-  * \param double, current time
+  * \param time the current time
   * \param inter interaction that owns the relation
   */
   virtual void computeJachq(double time, Interaction& inter);
@@ -221,9 +224,6 @@ public:
     // computeJacgqDot(time, inter);
     // computeJacglambda(time, inter);
   }
-
-
-
 
   /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism
   * \param time the current time

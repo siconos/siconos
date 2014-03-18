@@ -48,28 +48,28 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::RelationXML relxml):
 }
 
 // Minimum data (C as pointer) constructor
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C):
   LagrangianR(LinearTIR)
 {
-  _jachq = newC;
+  _jachq = C;
 }
 
 // Constructor from a complete set of data
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SiconosVector newE):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e):
   LagrangianR(LinearTIR)
 {
-  _jachq = newC;
-  _jachlambda = newD;
-  _F = newF;
-  _e = newE;
+  _jachq = C;
+  _jachlambda = D;
+  _F = F;
+  _e = e;
 }
 
 // Minimum data (C, e as pointers) constructor
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosVector newE):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosVector e):
   LagrangianR(LinearTIR)
 {
-  _jachq = newC;
-  _e = newE;
+  _jachq = C;
+  _e = e;
 }
 
 // Minimum data (C as matrix) constructor

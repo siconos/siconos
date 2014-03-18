@@ -252,6 +252,8 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   //===
   if (withOSI)
   {
+    if (numberOfOSI() == 0)
+      RuntimeException::selfThrow("Simulation::initialize No OSI !");
     // === OneStepIntegrators initialization ===
     for (OSIIterator itosi = _allOSI->begin();
          itosi != _allOSI->end(); ++itosi)
@@ -1028,6 +1030,8 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   // Note FP :  we should probably connect osi and graph before, in simulation->initialize?
   DSOSIConstIterator it = _osiMap.find(ds);
   SP::OneStepIntegrator osi = it->second;
+  if (!osi)
+    RuntimeException::selfThrow("Simulation::computeLevelsForInputAndOutput osi does not exists");
   indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
   std11::shared_ptr<SetupLevels> setupLevels;
   setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));

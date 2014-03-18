@@ -396,7 +396,7 @@ void TimeStepping::update(unsigned int levelInput)
 
 void TimeStepping::computeFreeState()
 {
-  for_each(_allOSI->begin(), _allOSI->end(), std11::bind(&OneStepIntegrator::computeFreeState, _1));
+  std::for_each(_allOSI->begin(), _allOSI->end(), std11::bind(&OneStepIntegrator::computeFreeState, _1));
 }
 
 // compute simulation between current and next event.  Initial

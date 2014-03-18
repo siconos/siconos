@@ -46,7 +46,7 @@ private:
 
 
   /** contains the Q matrix of a QP problem */
-  SP::SiconosMatrix Q;
+  SP::SiconosMatrix _Q;
 
   /** contains the p vector of a QP problem */
   SP::SiconosVector _p;
@@ -75,7 +75,7 @@ public:
    */
   inline const SimpleMatrix getQ() const
   {
-    return *Q;
+    return *_Q;
   }
 
   /** get Q
@@ -83,7 +83,7 @@ public:
    */
   inline SP::SiconosMatrix q() const
   {
-    return Q;
+    return _Q;
   }
 
   /** set the value of Q to newValue
@@ -91,7 +91,7 @@ public:
    */
   inline void setQ(const SiconosMatrix& newValue)
   {
-    *Q = newValue;
+    *_Q = newValue;
   }
 
   /** set Q to pointer newPtr
@@ -99,7 +99,7 @@ public:
    */
   inline void setQPtr(SP::SiconosMatrix newPtr)
   {
-    Q = newPtr;
+    _Q = newPtr;
   }
 
   // --- P ---
@@ -131,7 +131,7 @@ public:
   /** set p to pointer newPtr
    *  \param SiconosVector * newPtr
    */
-  inline void setp(SP::SiconosVector newPtr)
+  inline void setPPtr(SP::SiconosVector newPtr)
   {
     _p = newPtr;
   }

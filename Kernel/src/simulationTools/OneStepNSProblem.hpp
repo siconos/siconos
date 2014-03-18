@@ -145,11 +145,11 @@ public:
    *  \param SP::OneStepNSProblemXML : the XML linked-object
    */
   OneStepNSProblem(SP::OneStepNSProblemXML);
- 
-  /**  constructor from data
-   *  \param int : id of numerics solver
+
+  /**  constructor with a solver from Numerics
+   *  \param newNumericsSolverId id of numerics solver, see Numerics for the meaning
    */
-  OneStepNSProblem(int);
+  OneStepNSProblem(int newNumericsSolverId);
 
   /** destructor
    */

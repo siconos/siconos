@@ -126,7 +126,7 @@ with: \n
 - initial conditions are given by the member x0, vector of size n. This corresponds to x value when simulation is starting, 
 \e ie after a call to simulation initialize() function. \n
 
-- There are plug-in functions in this class for f and its Jacobian, jacobianXF.
+- There are plug-in functions in this class for f and its Jacobian, jacobianfx.
 
 We have:
 \f{eqnarray*}

@@ -31,12 +31,12 @@
 
 namespace ioMatrix
 {
-bool read(const std::string& fileName, const std::string& Mode, SiconosMatrix& m)
+bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m)
 {
   std::ifstream infile;
-  if (Mode == "ascii")
+  if (mode == "ascii")
     infile.open(fileName.c_str(), std::ifstream::in);
-  else if (Mode == "binary")
+  else if (mode == "binary")
     infile.open(fileName.c_str(), std::ifstream::binary);
   else
     SiconosMatrixException::selfThrow("ioMatrix::read Incorrect mode for reading");
@@ -87,13 +87,13 @@ bool read(const std::string& fileName, const std::string& Mode, SiconosMatrix& m
   return true;
 }
 
-bool write(const std::string& fileName, const std::string& Mode, const SiconosMatrix& m, const std::string& outputType)
+bool write(const std::string& fileName, const std::string& mode, const SiconosMatrix& m, const std::string& outputType)
 {
   // Open file and various checks
   std::ofstream outfile;
-  if (Mode == "ascii")
+  if (mode == "ascii")
     outfile.open(fileName.c_str(), std::ofstream::out);
-  else if (Mode == "binary")
+  else if (mode == "binary")
     outfile.open(fileName.c_str(), std::ofstream::binary);
   else
     SiconosMatrixException::selfThrow("ioMatrix::write Incorrect mode for writing");

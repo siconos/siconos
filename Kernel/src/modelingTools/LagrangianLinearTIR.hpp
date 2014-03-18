@@ -70,11 +70,11 @@ protected:
   /** e*/
   SP::SiconosVector _e;
 
+public:
+
   /** Default constructor
   */
-  LagrangianLinearTIR(): LagrangianR(RELATION::LinearTIR) {};
-
-public:
+  LagrangianLinearTIR() : LagrangianR(RELATION::LinearTIR) {};
 
   /** constructor with XML object of the parent class Relation
   *  \param RelationXML* : the XML object corresponding
@@ -82,23 +82,23 @@ public:
   LagrangianLinearTIR(SP::RelationXML);
 
   /** create the Relation from a set of data
-  *  \param SP::SiconosMatrix : the matrix C
+  *  \param C the matrix C
   */
-  LagrangianLinearTIR(SP::SiconosMatrix);
+  LagrangianLinearTIR(SP::SiconosMatrix C);
 
   /** create the Relation from a set of data
-  *  \param SP::SiconosMatrix : C
-  *  \param SP::SiconosMatrix : D
-  *  \param SP::SiconosMatrix : F
-  *  \param SP::SiconosVector : e
+  *  \param C the matrix C
+  *  \param D the matrix D
+  *  \param F the matrix F
+  *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosVector);
+  LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e);
 
   /** create the Relation from a set of data
-  *  \param SP::SiconosMatrix : C
-  *  \param SP::SiconosVector : e
+  *  \param C the matrix C
+  *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SiconosMatrix, SP::SiconosVector);
+  LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosVector e);
 
   /** create the Relation from a set of data
   *  \param SiconosMatrix : the matrix C

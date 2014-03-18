@@ -19,7 +19,7 @@
 #include "ComplementarityConditionNSL.hpp"
 
 
-ComplementarityConditionNSL::ComplementarityConditionNSL(unsigned int newSize): NonSmoothLaw(newSize)
+ComplementarityConditionNSL::ComplementarityConditionNSL(unsigned int size): NonSmoothLaw(size)
 {}
 
 ComplementarityConditionNSL::ComplementarityConditionNSL(SP::NonSmoothLawXML nslawxml):

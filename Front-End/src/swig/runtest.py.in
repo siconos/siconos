@@ -11,9 +11,12 @@ def returnWinePrefix():
     else:
         return os.environ['HOME'] + ".wine"
 
+call("${CMAKE_BINARY_DIR}/src/swig/pysiconos " + sys.argv[1] + " ${CMAKE_BINARY_DIR}/src/swig/Siconos/plugins/", shell=True)
+
 retcode = call("${EMULATOR}py.test${EXE_EXT} " + sys.argv[1], shell=True,
                env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/src/swig:${CMAKE_CURRENT_SOURCE_DIR}/Siconos/functions",
                     "PYTHONDONTWRITEBYTECODE": "1",
+                    "LD_LIBRARY_PATH": "${CMAKE_BINARY_DIR}/src/swig/Siconos/plugins/",
                     "HOME": os.environ['HOME'],
                     "WINEPREFIX": returnWinePrefix(),
                     "Path": "${SICONOS_NUMERICS_PATH}"})

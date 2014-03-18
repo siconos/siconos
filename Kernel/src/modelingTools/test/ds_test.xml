@@ -39,8 +39,8 @@
 				<x0 vectorSize='3'>
 					2.0 4.0 6.0
 				</x0>
-				<f vectorPlugin="TestPlugin:computeF"/>
-				<jacobianXF matrixPlugin="TestPlugin:computeJacobianXF"/>
+				<F vectorPlugin="TestPlugin:computeF"/>
+				<Jacobianfx matrixPlugin="TestPlugin:computeJacobianXF"/>
 			</FirstOrderNonLinearDS>
 		</DS_Definition>
 	</NSDS>

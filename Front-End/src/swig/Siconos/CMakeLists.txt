@@ -290,6 +290,17 @@ INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/KernelTypes.i
 #INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/KernelRegistration.i DESTINATION include/Siconos/FrontEnd)
 #INSTALL(FILES ${CMAKE_BINARY_DIR}/src/swig/Siconos/Kernel-docstrings.i DESTINATION include/Siconos/FrontEnd)
 
+GET_FILENAME_COMPONENT(SiconosKernel_DIR ${SiconosKernel_EXE_DIR} PATH)
+SET(SiconosKernel_XML_SCHEMA "${SiconosKernel_DIR}/share/siconos-kernel")
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/functions/fromXml.py.in
+	${CMAKE_BINARY_DIR}/src/swig/fromXml.py)
+
+INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/functions/SiconosXMLParser.py
+  DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/functions)
+
+INSTALL(PROGRAMS ${CMAKE_BINARY_DIR}/fromXml.py
+  DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/functions)
 
 
 ENABLE_TESTING()

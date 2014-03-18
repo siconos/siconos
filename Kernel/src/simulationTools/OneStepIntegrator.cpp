@@ -71,7 +71,7 @@ void OneStepIntegrator::initialize()
 
 void OneStepIntegrator::saveInMemory()
 {
-  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::swapInMemory, _1));
+  std::for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::swapInMemory, _1));
 }
 
 double OneStepIntegrator::computeResidu()
@@ -92,12 +92,12 @@ void OneStepIntegrator::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
 
 void OneStepIntegrator::resetNonSmoothPart()
 {
-  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetAllNonSmoothPart, _1));
+  std::for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetAllNonSmoothPart, _1));
 }
 
 void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 {
-  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetNonSmoothPart, _1, level));
+  std::for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetNonSmoothPart, _1, level));
 }
 
 void OneStepIntegrator::display()

@@ -28,7 +28,7 @@
 #if __cplusplus >= 201103L
 using ::isnan;
 #else
-#ifndef _MSC_VER || __SUNPRO_CC
+#if ((!defined(_MSC_VER)) && (!defined( __SUNPRO_CC)))
 using std::isnan;
 #endif
 #endif

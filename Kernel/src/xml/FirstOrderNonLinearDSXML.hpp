@@ -33,7 +33,7 @@ const std::string DS_R = "R";
 const std::string DS_XMEMORY = "xMemory";
 const std::string DS_M = "M";
 const std::string DS_F = "f";
-const std::string DS_JACOBIANXF = "jacobianfx";
+const std::string DS_JACOBIANXF = "Jacobianfx";
 
 class SiconosMemory;
 class SiconosMemoryXML;
