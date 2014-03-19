@@ -185,6 +185,10 @@ public:
    */
   inline SP::InteractionsGraph indexSet(unsigned int num) const
   {
+    if (num >= _IG.size())
+    {
+      RuntimeException::selfThrow("Topology::indexSet : indexSet does not exist");
+    }
     assert(num < _IG.size()) ;
     return _IG[num];
   };
