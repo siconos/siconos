@@ -28,17 +28,12 @@
 class BulletDS : public NewtonEulerDS, public std11::enable_shared_from_this<BulletDS>
 {
 
-private:
-  /** serialization hooks
-  */
-  ACCEPT_SERIALIZATION(BulletDS);
-
-  SP::BulletWeightedShape _weightedShape;
-  SP::CollisionObjects _collisionObjects;
-
 public:
 
-  /** Constructor from a BulletBodyShape
+  /** constructor from a BulletWeightedShape
+   * \param weightedShape the bullet
+   * \param position the initial position (vector length: 3)
+   * \param velocity the inital velocity  (vector length: 3)
    */
   BulletDS(SP::BulletWeightedShape weightedShape,
            SP::SiconosVector position,
@@ -63,6 +58,17 @@ public:
     return _weightedShape;
   };
 
+  /** add a collision object
+   * \param cobj the collision object
+   * \param pos the position (x, y, z) relative to the center of mass
+   * \param ori the orientation (quaternion) relative to the center of mass
+   * \param group the contactor group id
+   */
+  void addCollisionObject(SP::btCollisionObject cobj,
+                          SP::SiconosVector pos,
+                          SP::SiconosVector ori,
+                          int group);
+
   /** update Bullet collision objects positions and orientations
    */
   void updateCollisionObjects() const;
@@ -79,11 +85,21 @@ public:
     return shared_from_this();
   };
 
+
+private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BulletDS);
+
+  SP::BulletWeightedShape _weightedShape;
+  SP::CollisionObjects _collisionObjects;
+
 };
 
 struct ForCollisionObjects : public Question<SP::CollisionObjects>
 {
   using SiconosVisitor::visit;
+
   ANSWER(BulletDS, collisionObjects());
 };
 
