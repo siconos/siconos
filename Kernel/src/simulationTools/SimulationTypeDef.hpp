@@ -193,6 +193,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
                            ((Vertex, SP::PluggedObject, pluginL)) // For Observer
                            ((Vertex, SP::SiconosVector, e)) // For Observer (ZOH Integration)
                            ((Vertex, SP::SiconosVector, u)) // For Controlled System (ZOH Integration)
+                           ((Vertex, std::string, name)) // a name for a dynamical system
                            ((Vertex, unsigned int, groupId))); // For group manipulations (example assign
                                                                // a material id for contact law
                                                                // determination
@@ -214,6 +215,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
     pluginL._store->erase(vd);
     e._store->erase(vd);
     u._store->erase(vd);
+    name._store->erase(vd);
     groupId._store->erase(vd);
   }
 };
