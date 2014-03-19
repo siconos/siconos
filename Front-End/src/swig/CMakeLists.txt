@@ -15,11 +15,16 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   ENDIF()
 ENDIF()
 
+IF(NOT WITH_PY3)
+  # we only support python2 for now
+  SET(PythonInterp_FIND_VERSION "2")
+ELSE(NOT WITH_PY3)
+  SET(PythonInterp_FIND_VERSION "3")
+ENDIF(NOT WITH_PY3)
+
 FIND_PACKAGE(PythonInterp)
 
-# on ubuntu precise with cmake >= 2.8.8 pythonlibs find python 3.0
-# before python 2.7 (in Release but not in Debug ...)
-SET(Python_ADDITIONAL_VERSIONS "2.7;2.6")
+SET(PythonLibs_FIND_VERSION ${PYTHON_VERSION_STRING})
 
 FIND_PACKAGE(PythonLibs)
 
