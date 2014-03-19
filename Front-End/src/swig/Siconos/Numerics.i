@@ -706,7 +706,13 @@
 %typemap(in) (FILE *file=NULL)
 {
   // %typemap(in) (FILE *file)
+  %#if PY_MAJOR_VERSION < 3
   $1 = fopen(PyString_AsString($input), "r");
+  %#else
+  PyObject* tmp_ascii = PyUnicode_AsASCIIString($input);
+  $1 = fopen(PyBytes_AsString(tmp_ascii), "r");
+  Py_DECREF(tmp_ascii);
+  %#endif
   if (!$1)
   {
     SWIG_exception_fail(SWIG_IOError, 
@@ -819,7 +825,11 @@
   if(!out_nnz) SWIG_fail;
 
   /* call the class inside the csr module */
+  %#if PY_MAJOR_VERSION < 3
   PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyString_FromString((char *)"csr_matrix"), out_shape, NULL);
+  %#else
+  PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyUnicode_FromString((char *)"csr_matrix"), out_shape, NULL);
+  %#endif
 
   if(out_csr)
   {
@@ -1147,7 +1157,7 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
     { 
 
       int is_new_object0=0;      
-      make_fortran((PyArrayObject *)result, &is_new_object0,0,0);
+      make_fortran((PyArrayObject *)result, &is_new_object0);
       // if (is_new_object0)
       // {
       //   Py_DECREF(result);
@@ -1985,7 +1995,11 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
         if (i < self->size0-1) result << "," << std::endl;
       }
     result << " ]" << std::endl;
+    %#if PY_MAJOR_VERSION < 3
     return PyString_FromString(result.str().c_str());
+    %#else
+    return PyUnicode_FromString(result.str().c_str());
+    %#endif
   }
   
 }; 

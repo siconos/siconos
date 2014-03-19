@@ -34,17 +34,34 @@
 //
 // with this macro : ok
 
-// copy shared ptr reference in a base PyCObject 
-#define PYARRAY_FROM_SHARED_SICONOS_DATA(TYPE,NDIM,DIMS,NAME,RESULT)    \
-  PyObject* pyarray = FPyArray_SimpleNewFromData(NDIM,                  \
-                                                 DIMS,                  \
-                                                 TYPE,                  \
-                                                 NAME->getArray());     \
-  SharedPointerKeeper* savedSharedPointer = new                         \
-    SharedPointerKeeper(std11::static_pointer_cast<void>(NAME));        \
-  reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \
-    PyCObject_FromVoidPtr((void*) savedSharedPointer,                   \
-                          &sharedPointerKeeperDelete);                  \
+// set the base of the pyarray to a PyCapsule or PyCObject created from the hared_ptr
+%{
+static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* savedSharedPointer)
+{
+  PyObject* cap =
+#ifdef SWIGPY_USE_CAPSULE
+    PyCapsule_New((void*)( savedSharedPointer), SWIGPY_CAPSULE_NAME, sharedPointerKeeperDeleteCap);
+#else
+    PyCObject_FromVoidPtr((void*)(savedSharedPointer), sharedPointerKeeperDelete);
+#endif
+
+#if NPY_API_VERSION < 0x00000007
+  PyArray_BASE((PyArrayObject*)pyarray) = cap;
+#else
+  PyArray_SetBaseObject((PyArrayObject*) pyarray,cap);
+#endif
+}
+%}
+
+// copy shared ptr reference in a base PyCObject || PyCapsule
+#define PYARRAY_FROM_SHARED_SICONOS_DATA(TYPE,NDIM,DIMS,NAME,RESULT)\
+  PyObject* pyarray = FPyArray_SimpleNewFromData(NDIM,              \
+                                                 DIMS,              \
+                                                 TYPE,              \
+                                                 NAME->getArray()); \
+  SharedPointerKeeper* savedSharedPointer = new                     \
+    SharedPointerKeeper(std11::static_pointer_cast<void>(NAME));    \
+  fillBasePyarray(pyarray, savedSharedPointer);                         \
   RESULT = pyarray
 
 #define PYARRAY_FROM_SHARED_STL_VECTOR(TYPE,NDIM,DIMS,NAME,RESULT)      \
@@ -54,9 +71,7 @@
                                                  &(*NAME)[0]);          \
   SharedPointerKeeper* savedSharedPointer = new                         \
     SharedPointerKeeper(std11::static_pointer_cast<void>(NAME));        \
-  reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \
-    PyCObject_FromVoidPtr((void*) savedSharedPointer,                   \
-                          &sharedPointerKeeperDelete);                  \
+  fillBasePyarray(pyarray, savedSharedPointer);                             \
   RESULT = pyarray
 
 

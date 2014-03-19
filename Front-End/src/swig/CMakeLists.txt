@@ -16,7 +16,7 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 ENDIF()
 
 IF(NOT WITH_PY3)
-  # we only support python2 for now
+  # we still prefer python2 for now
   SET(PythonInterp_FIND_VERSION "2")
 ELSE(NOT WITH_PY3)
   SET(PythonInterp_FIND_VERSION "3")

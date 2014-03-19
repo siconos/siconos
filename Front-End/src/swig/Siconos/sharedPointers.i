@@ -76,6 +76,14 @@
     return;
   };
 
+  static  void sharedPointerKeeperDeleteCap(PyObject * cap)
+  {
+    DEBUG_PRINT("sharedPointerKeeperDeleteCap\n");
+    void* o = (void*) PyCapsule_GetPointer(cap,SWIGPY_CAPSULE_NAME);
+    delete static_cast<SharedPointerKeeper *>(o);
+    return;
+  };
+
 %}
 
 

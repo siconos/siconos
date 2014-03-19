@@ -18,7 +18,7 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
-from Siconos.Kernel import *
+import Siconos.Kernel as SK
 import numpy as np
 from scipy.linalg import expm
 from functions import compute_dt_matrices

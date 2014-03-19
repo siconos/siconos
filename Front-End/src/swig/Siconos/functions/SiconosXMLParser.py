@@ -16,7 +16,7 @@ Verbose_import_ = False
 (
     XMLParser_import_none, XMLParser_import_lxml,
     XMLParser_import_elementtree
-) = range(3)
+) = list(range(3))
 XMLParser_import_library = None
 try:
     # lxml
@@ -75,7 +75,7 @@ def parsexml_(*args, **kwargs):
 
 try:
     from generatedssuper import GeneratedsSuper
-except ImportError, exp:
+except ImportError as exp:
 
     class GeneratedsSuper(object):
         tzoff_pattern = re_.compile(r'(\+|-)((0\d|1[0-3]):[0-5]\d|14:00)$')
@@ -351,7 +351,7 @@ except ImportError, exp:
             return None
         @classmethod
         def gds_reverse_node_mapping(cls, mapping):
-            return dict(((v, k) for k, v in mapping.iteritems()))
+            return dict(((v, k) for k, v in mapping.items()))
 
 
 #
@@ -392,7 +392,7 @@ def showIndent(outfile, level, pretty_print=True):
 def quote_xml(inStr):
     if not inStr:
         return ''
-    s1 = (isinstance(inStr, basestring) and inStr or
+    s1 = (isinstance(inStr, str) and inStr or
           '%s' % inStr)
     s1 = s1.replace('&', '&amp;')
     s1 = s1.replace('<', '&lt;')
@@ -401,7 +401,7 @@ def quote_xml(inStr):
 
 
 def quote_attrib(inStr):
-    s1 = (isinstance(inStr, basestring) and inStr or
+    s1 = (isinstance(inStr, str) and inStr or
           '%s' % inStr)
     s1 = s1.replace('&', '&amp;')
     s1 = s1.replace('<', '&lt;')
@@ -679,7 +679,7 @@ class emptyType(GeneratedsSuper):
             already_processed.add('all')
             try:
                 self.all = float(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise ValueError('Bad float/double attribute (all): %s' % exp)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
@@ -875,7 +875,7 @@ class vector(GeneratedsSuper):
             already_processed.add('vectorSize')
             try:
                 self.vectorSize = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.vectorSize < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -1028,7 +1028,7 @@ class matrix(GeneratedsSuper):
             already_processed.add('matrixColSize')
             try:
                 self.matrixColSize = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.matrixColSize < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -1046,7 +1046,7 @@ class matrix(GeneratedsSuper):
             already_processed.add('matrixRowSize')
             try:
                 self.matrixRowSize = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.matrixRowSize < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -1151,7 +1151,7 @@ class listOfMatrices(GeneratedsSuper):
             already_processed.add('number')
             try:
                 self.number = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.number < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -1266,7 +1266,7 @@ class matrixData(GeneratedsSuper):
             already_processed.add('matrixColSize')
             try:
                 self.matrixColSize = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.matrixColSize < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -1275,7 +1275,7 @@ class matrixData(GeneratedsSuper):
             already_processed.add('matrixRowSize')
             try:
                 self.matrixRowSize = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.matrixRowSize < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -1529,7 +1529,7 @@ class memory(GeneratedsSuper):
             already_processed.add('sizeMax')
             try:
                 self.sizeMax = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.sizeMax < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -1636,7 +1636,7 @@ class ModelTime(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 't')
             self.t = fval_
@@ -1645,7 +1645,7 @@ class ModelTime(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 't0')
             self.t0 = fval_
@@ -1654,7 +1654,7 @@ class ModelTime(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'T')
             self.T = fval_
@@ -2346,7 +2346,7 @@ class NLinearType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'empty1')
             self.empty1 = fval_
@@ -2429,7 +2429,7 @@ class PeriodicType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'empty2')
             self.empty2 = fval_
@@ -2988,7 +2988,7 @@ class FirstOrderNonLinearDSType(GeneratedsSuper):
             already_processed.add('number')
             try:
                 self.number = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.number <= 0:
                 raise_parse_error(node, 'Invalid PositiveInteger')
@@ -3009,7 +3009,7 @@ class FirstOrderNonLinearDSType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ < 0:
                 raise_parse_error(child_, 'requires nonNegativeInteger')
@@ -3181,7 +3181,7 @@ class FirstOrderLinearDSType(GeneratedsSuper):
             already_processed.add('number')
             try:
                 self.number = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.number <= 0:
                 raise_parse_error(node, 'Invalid PositiveInteger')
@@ -3202,7 +3202,7 @@ class FirstOrderLinearDSType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ < 0:
                 raise_parse_error(child_, 'requires nonNegativeInteger')
@@ -3374,7 +3374,7 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
             already_processed.add('number')
             try:
                 self.number = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.number <= 0:
                 raise_parse_error(node, 'Invalid PositiveInteger')
@@ -3395,7 +3395,7 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ < 0:
                 raise_parse_error(child_, 'requires nonNegativeInteger')
@@ -3663,7 +3663,7 @@ class LagrangianDSType(GeneratedsSuper):
             already_processed.add('number')
             try:
                 self.number = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.number <= 0:
                 raise_parse_error(node, 'Invalid PositiveInteger')
@@ -3672,7 +3672,7 @@ class LagrangianDSType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ < 0:
                 raise_parse_error(child_, 'requires nonNegativeInteger')
@@ -3936,7 +3936,7 @@ class LagrangianLinearTIDSType(GeneratedsSuper):
             already_processed.add('number')
             try:
                 self.number = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.number <= 0:
                 raise_parse_error(node, 'Invalid PositiveInteger')
@@ -3945,7 +3945,7 @@ class LagrangianLinearTIDSType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ < 0:
                 raise_parse_error(child_, 'requires nonNegativeInteger')
@@ -4209,7 +4209,7 @@ class InteractionType(GeneratedsSuper):
             already_processed.add('number')
             try:
                 self.number = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.number <= 0:
                 raise_parse_error(node, 'Invalid PositiveInteger')
@@ -4218,7 +4218,7 @@ class InteractionType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -5236,7 +5236,7 @@ class RelayType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'c')
             self.c = fval_
@@ -5244,7 +5244,7 @@ class RelayType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'd')
             self.d = fval_
@@ -5252,7 +5252,7 @@ class RelayType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -5343,7 +5343,7 @@ class NewtonImpactLawType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'e')
             self.e = fval_
@@ -5351,7 +5351,7 @@ class NewtonImpactLawType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -5462,7 +5462,7 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'en')
             self.en = fval_
@@ -5470,7 +5470,7 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'et')
             self.et = fval_
@@ -5478,7 +5478,7 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'mu')
             self.mu = fval_
@@ -5486,7 +5486,7 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -5567,7 +5567,7 @@ class ComplementarityConditionType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -5853,7 +5853,7 @@ class TimeDiscretisationType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'h')
             self.h = fval_
@@ -5862,7 +5862,7 @@ class TimeDiscretisationType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -5876,7 +5876,7 @@ class TimeDiscretisationType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'hMin')
             self.hMin = fval_
@@ -5885,7 +5885,7 @@ class TimeDiscretisationType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'hMax')
             self.hMax = fval_
@@ -6567,7 +6567,7 @@ class LCPType(GeneratedsSuper):
             already_processed.add('StorageType')
             try:
                 self.StorageType = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.StorageType < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -6580,7 +6580,7 @@ class LCPType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -6720,7 +6720,7 @@ class FrictionContactType(GeneratedsSuper):
             already_processed.add('StorageType')
             try:
                 self.StorageType = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.StorageType < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -6729,7 +6729,7 @@ class FrictionContactType(GeneratedsSuper):
             already_processed.add('Type')
             try:
                 self.Type = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.Type <= 0:
                 raise_parse_error(node, 'Invalid PositiveInteger')
@@ -6742,7 +6742,7 @@ class FrictionContactType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -6896,7 +6896,7 @@ class QPType(GeneratedsSuper):
             already_processed.add('StorageType')
             try:
                 self.StorageType = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.StorageType < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -6909,7 +6909,7 @@ class QPType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -7071,7 +7071,7 @@ class RelayType1(GeneratedsSuper):
             already_processed.add('StorageType')
             try:
                 self.StorageType = int(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.StorageType < 0:
                 raise_parse_error(node, 'Invalid NonNegativeInteger')
@@ -7084,7 +7084,7 @@ class RelayType1(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ <= 0:
                 raise_parse_error(child_, 'requires positiveInteger')
@@ -7201,7 +7201,7 @@ Usage: python <Parser>.py [ -s ] <in_xml_file>
 
 
 def usage():
-    print USAGE_TEXT
+    print(USAGE_TEXT)
     sys.exit(1)
 
 
@@ -7257,7 +7257,7 @@ def parseEtree(inFileName, silence=False):
 
 
 def parseString(inString, silence=False):
-    from StringIO import StringIO
+    from io import StringIO
     doc = parsexml_(StringIO(inString))
     rootNode = doc.getroot()
     roots = get_root_tag(rootNode)
