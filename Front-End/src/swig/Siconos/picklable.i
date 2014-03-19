@@ -2,7 +2,7 @@
 #ifndef PICKLABLE_i
 #define PICKLABLE_i
 
-#ifdef WITH_IO
+#ifdef WITH_SERIALIZATION
 %{
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
@@ -19,13 +19,9 @@
 %extend CLASS {
   std::string __getstate__()
   {
-    std::stringstream ss;
-    boost::archive::binary_oarchive ar(ss);
-    siconos_io_register_ ## COMPONENT(ar);
-    ar << ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
-    return ss.str();
+    return binary_export();
   }
-  
+
   %pythoncode %{
     def __setstate__(self, from_str):
         self.__init__()
@@ -49,23 +45,6 @@
     ar >> ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
   }
   
-  std::string text_export()
-  {
-    std::stringstream ss;
-    boost::archive::text_oarchive ar(ss);
-    siconos_io_register_ ## COMPONENT(ar);
-    ar << ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
-    return ss.str();
-  }
-  
-  void text_import(std::string const& from_str)
-  {
-    std::stringstream ss(from_str);
-    boost::archive::text_iarchive ar(ss);
-    siconos_io_register_ ## COMPONENT(ar);
-    ar >> ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
-  }
-
   std::string binary_export()
   {
     std::stringstream ss;
@@ -87,7 +66,7 @@
 %enddef
 #endif
 
-#ifndef WITH_IO
+#ifndef WITH_SERIALIZATION
 
 %define %make_picklable(CLASS, COMPONENT)
 %enddef
