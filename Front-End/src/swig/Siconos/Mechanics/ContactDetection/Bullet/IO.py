@@ -199,7 +199,7 @@ class Dat():
                 topology().indexSetsSize() > 1:
             time = self._broadphase.model().simulation().nextTime()
             for inter in self._broadphase.model().nonSmoothDynamicalSystem().\
-                topology().indexSet(1).vertices():
+                topology().indexSet(1).interactions():
                 bullet_relation = cast_BulletR(inter.relation())
                 if bullet_relation is not None:
                     nslaw = inter.nslaw()
@@ -434,7 +434,7 @@ class Hdf5():
                 topology().indexSetsSize() > 1:
             time = self._broadphase.model().simulation().nextTime()
             interactions = self._broadphase.model().\
-                nonSmoothDynamicalSystem().topology().indexSet(1).vertices()
+                nonSmoothDynamicalSystem().topology().indexSet(1).interactions()
             current_line = self._cf_data.shape[0]
 
             p = 0
