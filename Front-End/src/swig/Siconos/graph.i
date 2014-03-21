@@ -9,27 +9,27 @@
 %extend InteractionsGraph
 {
 
-  const std::vector<InteractionsGraph::VDescriptor> vertices()
-  {
-    std::vector<InteractionsGraph::VDescriptor> r;
-    InteractionsGraph::VIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
-    {
-      r.push_back(*ui);
-    };
-    return r;
-  };
+  // const std::vector<InteractionsGraph::VDescriptor> vertices()
+  // {
+  //   std::vector<InteractionsGraph::VDescriptor> r;
+  //   InteractionsGraph::VIterator ui, uiend;
+  //   for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
+  //   {
+  //     r.push_back(*ui);
+  //   };
+  //   return r;
+  // };
 
-  const std::vector<InteractionsGraph::EDescriptor> edges()
-  {
-    std::vector<InteractionsGraph::EDescriptor> r;
-    InteractionsGraph::EIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
-    {
-      r.push_back(*ui);
-    };
-    return r;
-  };
+  // const std::vector<InteractionsGraph::EDescriptor> edges()
+  // {
+  //   std::vector<InteractionsGraph::EDescriptor> r;
+  //   InteractionsGraph::EIterator ui, uiend;
+  //   for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
+  //   {
+  //     r.push_back(*ui);
+  //   };
+  //   return r;
+  // };
 
   const std::vector<SP::Interaction> interactions()
   {
@@ -60,28 +60,28 @@
 %extend DynamicalSystemsGraph
 {
 
-  const std::vector<DynamicalSystemsGraph::VDescriptor> vertices()
-  {
-    std::vector<DynamicalSystemsGraph::VDescriptor> r;
-    DynamicalSystemsGraph::VIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
-    {
-      r.push_back(*ui);
-    };
-    return r;
-  };
+  // const std::vector<DynamicalSystemsGraph::VDescriptor> vertices()
+  // {
+  //   std::vector<DynamicalSystemsGraph::VDescriptor> r;
+  //   DynamicalSystemsGraph::VIterator ui, uiend;
+  //   for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
+  //   {
+  //     r.push_back(*ui);
+  //   };
+  //   return r;
+  // };
 
 
-  const std::vector<DynamicalSystemsGraph::EDescriptor> edges()
-  {
-    std::vector<DynamicalSystemsGraph::EDescriptor> r;
-    DynamicalSystemsGraph::EIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
-    {
-      r.push_back(*ui);
-    };
-    return r;
-  };
+  // const std::vector<DynamicalSystemsGraph::EDescriptor> edges()
+  // {
+  //   std::vector<DynamicalSystemsGraph::EDescriptor> r;
+  //   DynamicalSystemsGraph::EIterator ui, uiend;
+  //   for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
+  //   {
+  //     r.push_back(*ui);
+  //   };
+  //   return r;
+  // };
 
   const std::vector<SP::DynamicalSystem> dynamicalSystems()
   {
@@ -114,17 +114,17 @@
 #define INSTALL_GRAPH_PROPERTIES(X,Y)
 
 %include "SiconosGraph.hpp"
-%import <boost/config.hpp>
-%import <boost/version.hpp>
-%import <boost/graph/graph_utility.hpp>
-%import <boost/graph/adjacency_list.hpp>
+// %import <boost/config.hpp>
+// %import <boost/version.hpp>
+// %import <boost/graph/graph_utility.hpp>
+// %import <boost/graph/adjacency_list.hpp>
 // #if (BOOST_VERSION >= 104000)
 // %import <boost/property_map/property_map.hpp>
 // #else
 // %import <boost/property_map.hpp>
 // #endif
 
-%import <boost/static_assert.hpp>
+ //%import <boost/static_assert.hpp>
 
 TYPEDEF_SPTR(_DynamicalSystemsGraph);
 %feature("director") _DynamicalSystemsGraph;
@@ -183,30 +183,30 @@ TYPEDEF_SPTR(InteractionsGraph);
 
 
 /* missing in generated file, why ? */
-%{
-  namespace swig {
-    template<>
-    struct traits<void>
-    {
-      typedef value_category category;
-      static const char* type_name() { return "void"; }
-    };
-  }
-%}
+// %{
+//   namespace swig {
+//     template<>
+//     struct traits<void>
+//     {
+//       typedef value_category category;
+//       static const char* type_name() { return "void"; }
+//     };
+//   }
+// %}
 
 
-/* this 2 should be sufficients */
-%template (dsg_edescr) std::vector<
-  SiconosGraph<std11::shared_ptr<DynamicalSystem>,
-               std11::shared_ptr<Interaction>,
-               SystemProperties, InteractionProperties,
-               GraphProperties >::EDescriptor >;
+// /* this 2 should be sufficients */
+// %template (dsg_edescr) std::vector<
+//   SiconosGraph<std11::shared_ptr<DynamicalSystem>,
+//                std11::shared_ptr<Interaction>,
+//                SystemProperties, InteractionProperties,
+//                GraphProperties >::EDescriptor >;
 
-%template (ig_vdescr) std::vector<
-  SiconosGraph<std11::shared_ptr<Interaction>,
-               std11::shared_ptr<DynamicalSystem>,
-               InteractionProperties, SystemProperties,
-               GraphProperties >::VDescriptor >;
+// %template (ig_vdescr) std::vector<
+//   SiconosGraph<std11::shared_ptr<Interaction>,
+//                std11::shared_ptr<DynamicalSystem>,
+//                InteractionProperties, SystemProperties,
+//                GraphProperties >::VDescriptor >;
 
 
 
