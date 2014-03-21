@@ -44,7 +44,10 @@ void ExplicitLinearSMC::initialize(const Model& m)
 
 void ExplicitLinearSMC::actuate()
 {
-  computeUeq();
+  if (!_noUeq)
+  {
+    computeUeq();
+  }
 
   prod(*_Csurface, _sensor->y(), *_sigma);
 
@@ -55,9 +58,9 @@ void ExplicitLinearSMC::actuate()
     for (unsigned int i = 0; i < sDim; i++)
     {
       if ((*_sigma)(i) > (*_D)(i, i))
-        (*_us)(i) = -1;
+        (*_us)(i) = -_alpha;
       else if ((*_sigma)(i) < -(*_D)(i, i))
-        (*_us)(i) = 1;
+        (*_us)(i) = _alpha;
       else
       {
         if ((*_D)(i, i) != 0)
@@ -72,9 +75,9 @@ void ExplicitLinearSMC::actuate()
     for (unsigned int i = 0; i < sDim; i++)
     {
       if ((*_sigma)(i) > 0)
-        (*_us)(i) = -1;
+        (*_us)(i) = -_alpha;
       else if ((*_sigma)(i) < 0)
-        (*_us)(i) = 1;
+        (*_us)(i) = _alpha;
       else
         (*_us)(i) = 0;
     }

@@ -141,7 +141,7 @@ public:
   virtual void actuate() = 0;
 
   /** Initialization
-   * \param m a SP::Model
+   * \param m the Model
    */
   virtual void initialize(const Model& m);
 

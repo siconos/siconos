@@ -46,6 +46,7 @@ void CommonSMC::initialize(const Model& m)
   if (dsType == Type::FirstOrderLinearDS)
   {
     _DS_SMC.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    _DS_SMC->setComputebFunction(NULL);
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
@@ -56,7 +57,6 @@ void CommonSMC::initialize(const Model& m)
     RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + dsType);
   }
   // We have to reset the _pluginb
-  _DS_SMC->setComputebFunction(NULL);
   SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->getN(), 0));
   _DS_SMC->setb(dummyb);
   // Get the dimension of the output
