@@ -1,0 +1,187 @@
+#!/usr/bin/env python
+
+# documentation publication on http://siconos.gforge.inria.fr
+
+# ./publish [-r<sha>] [-u <gforge_user>] [-d]
+
+# -r followed by some git sha
+# -u followed by gforge login
+# -d : publish devel version
+
+# example:
+
+# to update site with current documentation
+# ./publish -u bremond -d
+
+# to update site with 3.5.x (=rev 3194) documentation
+# ./publish -r3194 -u bremond
+
+# Note: some rsync error may occurs due to some files modes on remote site
+
+
+import sys
+import os
+import shutil
+import tempfile
+import re
+from subprocess import check_call
+from getpass import getuser
+from getopt import gnu_getopt, GetoptError
+
+
+#
+# exit only if not imported
+#
+def stop(n):
+    import __main__ as main
+
+    if hasattr(main, '__file__'):
+        sys.exit(n)
+    else:
+        raise Exception('stop', n)
+
+
+# a tempdir class to be used like 'with TempDir() as tmpdir:'
+# i.e. the temp directory is erased ad the end of the block
+class WorkDir():
+    def __init__(self, prefix, tmp=False):
+        self.name = None
+        self.prefix = prefix
+        self.tmp = tmp
+
+    def __enter__(self):
+        # just create prefix
+        if not os.path.exists(self.prefix):
+            os.makedirs(self.prefix)
+
+        # The user of mkdtemp() is responsible for deleting the
+        # temporary directory and its contents when done with it.
+        if self.tmp:
+            self.name = tempfile.mkdtemp(prefix=self.prefix)
+            return self.name
+        else:
+            return self.prefix
+
+    def __exit__(self, xtype, value, traceback):
+        # So we remove directory here
+        if self.tmp:
+            shutil.rmtree(self.name)
+        else:
+            pass
+
+devel = False
+user = getuser()
+
+mods = ['Docs', 'Numerics', 'Kernel', 'Front-End', 'IO', 'Mechanics', 'Examples']
+
+revision = 'HEAD'
+
+workdir_path = '/tmp/{0}/publish'.format(getuser())
+
+try:
+    opts, args = gnu_getopt(sys.argv[1:], 'r:u:d', ['workdir='])
+
+    for o, a in opts:
+        if o == '-r':
+            revision = a
+
+        elif o == '-u':
+            user = a
+
+        elif o == '-d':
+            devel = True
+
+        elif o == '--workdir':
+            workdir_path = a
+
+except GetoptError, err:
+    # print help information and exit:
+    sys.stderr.write(str(err))  # will print something like 'option
+    # -a not recognized'
+    stop(2)
+
+
+class pathdict(dict):
+    def __init__(self, prefix):
+        self.prefix = prefix
+        dict.__init__(self)
+
+    def __getitem__(self, k):
+        if not os.path.exists(os.path.join(self.prefix, k)):
+            os.makedirs(os.path.join(self.prefix, k))
+        return os.path.join(self.prefix, dict(self).__getitem__(k))
+
+
+def get_version(path):
+
+    with open(os.path.join(path, 'cmake', 'SiconosVersion.cmake')) as cmakefile:
+        cmakefile_as_str = cmakefile.read()
+        majorm = re.findall(r"MAJOR_VERSION (\w+).*",cmakefile_as_str)
+        minorm = re.findall(r"MINOR_VERSION (\w+).*",cmakefile_as_str)
+        patchm = re.findall(r"PATCH_VERSION (\w+).*",cmakefile_as_str)
+        if len(majorm) > 0:
+            return '{0}.{1}.{2}'.format(majorm[0],
+                                        minorm[0],
+                                        patchm[0])
+        else:
+            return None
+
+with WorkDir(workdir_path) as workdir:
+
+    builddir = pathdict(os.path.join(workdir, 'build'))
+    bsrcdir = pathdict(os.path.join(workdir,'src'))
+    srcdir = pathdict(os.path.join(workdir, 'src', 'siconos'))
+
+    try:
+        os.mkdir(os.path.join(workdir, 'build'))
+        os.mkdir(os.path.join(workdir, 'src'))
+        os.mkdir(os.path.join(workdir, 'src/siconos'))
+    except OSError:
+        pass
+
+    # get sources
+    try:
+        check_call(["git", "clone",
+                    "git+ssh://{0}@scm.gforge.inria.fr//gitroot/siconos/siconos.git".
+                    format(user)], cwd=bsrcdir.prefix)
+    except:
+        pass
+
+    check_call(["git", "checkout", revision], cwd=srcdir.prefix)
+
+    if not devel:
+        version = get_version(os.path.join(srcdir.prefix, 'Numerics'))
+        assert(version is not None)
+    else:
+        version = ''
+    
+    for mod in mods:
+
+        builddir[mod] = mod
+        srcdir[mod] = mod
+ 
+        # make documentation
+        check_call(["cmake", srcdir[mod], "-DWITH_DOCUMENTATION=TRUE"],
+                   cwd=builddir[mod])
+        check_call(["make", "doc"], cwd=builddir[mod])
+
+    # second pass for make doc
+    for mod in mods:
+
+        check_call(["make", "doc"], cwd=builddir[mod])
+
+    # change local modes
+    for root, dirs, files in os.walk(os.path.join(builddir.prefix,
+                                                'GeneratedDocs')):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), 0o775)
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o664)
+
+    os.chmod(os.path.join(builddir.prefix, 'GeneratedDocs'), 0o775)
+
+    # upload
+    check_call(["rsync", "-rlvp",
+                os.path.join(builddir.prefix, 'GeneratedDocs/'),
+                '{0}@scm.gforge.inria.fr:/home/groups/siconos/htdocs/{1}'
+                .format(user, version)])
