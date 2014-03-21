@@ -3,17 +3,20 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Siconos's documentation!
-===================================
+Welcome to Siconos Front-End's documentation!
+=============================================
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
-   :glob:
 
-   modules/*
-
+   Introduction           
+   modules/Numerics
+   modules/Kernel
+   modules/Mechanics
+   modules/IO
+  
 
 Indices and tables
 ==================
