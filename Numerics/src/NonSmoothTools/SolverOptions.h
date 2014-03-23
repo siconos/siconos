@@ -118,50 +118,36 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
 
 /** \struct Callback SolverOptions.h
 Structure used to store user callbacks inside solvers
-    \param env general user environnement. 
-    \param endIteration a pointer on a function that will have as
-arguments user env, problem size, reaction, velocity and error at end
-of solver iteration (when solver iteration has some meanings) */
-typedef struct 
+*/
+typedef struct
 {
-  void *env;
-  void (*endIteration)(void *env, int size, double*reaction, 
-                       double*velocity, double error);  
+  void *env; /**< general user environnement */
+  void (*endIteration)(void *env, int size, double*reaction,
+                       double*velocity, double error);/**< pointer on a function
+* Its signature is: user env, problem size, reaction,
+* velocity and error at end of solver iteration (when this makes sense) */
 } Callback;
 
 
-/** \struct  SolverOptions SolverOptions.h
-    Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
-    \param solverId Id of the solver (see )
-    \param isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
-    \param iSize size of vector iparam \n
-    \param iparam a list of int parameters (depends on each solver, see solver doc)
-    \param dSize size of vector dparam \n
-    \param dparam a list of double parameters (depends on each solver, see solver doc)
-    \param filterOn 1 to check solution validity after the driver call, else 0. Default = 1. (For example if \n
-    filterOn = 1 for a LCP, lcp_compute_error() will be called at the end of the process)
-    \param dWork is a pointer on a working memory zone (for doubles) reserved for the solver .
-    \param iWork is a pointer on a working memory zone (for integers) reserved for the solver .
-    \param numberOfInternalSolvers the number of internal or local 'sub-solvers' used by the solver
-    \param internalSolvers pointer to sub-solvers
-    \param numericsOptions global options for numerics (verbose mode ...)
-    \param callback a pointer to user Callback
+/** \struct _SolverOptions SolverOptions.h
+    Structure used to send options (name, parameters and so on) to a specific solver (mainly from Kernel to Numerics).
 */
 typedef struct _SolverOptions
 {
-  int solverId;
-  int isSet;
-  int iSize;
-  int * iparam;
-  int dSize;
-  double * dparam;
-  int filterOn;
-  double * dWork;
-  int * iWork;
-  int numberOfInternalSolvers;
-  struct _SolverOptions * internalSolvers;
-  NumericsOptions * numericsOptions;
-  Callback * callback;
+  int solverId;                            /**< solverId Id of the solver (see ) */
+  int isSet;                               /**< isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)*/
+  int iSize;                               /**< iSize size of vector iparam */
+  int * iparam;                            /**< iparam a list of int parameters (depends on each solver, see solver doc)*/
+  int dSize;                               /**< dSize size of vector dparam */
+  double * dparam;                         /**< dparam a list of double parameters (depends on each solver, see solver doc)*/
+  int filterOn;                            /**< filterOn 1 to check solution validity after the driver call, else 0. Default = 1. (For example if
+                                            * filterOn = 1 for a LCP, lcp_compute_error() will be called at the end of the process) */
+  double * dWork;                          /**< dWork is a pointer on a working memory zone (for doubles) reserved for the solver .*/
+  int * iWork;                             /**< iWork is a pointer on a working memory zone (for integers) reserved for the solver .*/
+  int numberOfInternalSolvers;             /**< numberOfInternalSolvers the number of internal or local 'sub-solvers' used by the solver*/
+  struct _SolverOptions * internalSolvers; /**< internalSolvers pointer to sub-solvers*/
+  NumericsOptions * numericsOptions;       /**< numericsOptions global options for numerics (verbose mode ...)*/
+  Callback * callback;                     /**< callback a pointer to user Callback*/
 } SolverOptions;
 
 enum SICONOS_NUMERICS_PROBLEM_TYPE

@@ -22,15 +22,19 @@
 /*!\file polyhedron.h
  * \brief Some helpers for dealing with polyhedra and polytopes
  *
- * \authors Olivier Huber
+ * \author Olivier Huber
 */
-typedef struct
+
+/** \struct Polyhedron polyhedron.h
+ * Definition of a polytope in terms of (H,K) representation
+ */
+typedef struct Polyhedron
 {
   unsigned int size;
-  double* H; /** H matrix in an (H,K) representation of a polytope Hx<=K */
-  double* K; /** K vector in an (H,K) representation of a polytope Hx<=K */
-  double* Heq; /** H matrix in an (H,K) representation of a polytope Hx=K */
-  double* Keq; /** K vector in an (H,K) representation of a polytope Hx=K */
+  double* H; /**< H matrix in an (H,K) representation of a polytope H x <= K */
+  double* K; /**< K vector in an (H,K) representation of a polytope H x <= K */
+  double* Heq; /**< H matrix in an (H,K) representation of a polytope Heq x = Keq */
+  double* Keq; /**< K vector in an (H,K) representation of a polytope Heq x = Keq */
 } Polyhedron;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
