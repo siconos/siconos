@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Mon Mar 17 20:27:38 2014 by generateDS.py version 2.12b.
+# Generated Sun Mar 23 02:03:52 2014 by generateDS.py version 2.12b.
 #
 
 import sys
@@ -611,81 +611,6 @@ def _cast(typ, value):
 #
 
 
-class emptyType(GeneratedsSuper):
-    subclass = None
-    superclass = None
-    def __init__(self, all=None):
-        self.all = _cast(float, all)
-        pass
-    def factory(*args_, **kwargs_):
-        if emptyType.subclass:
-            return emptyType.subclass(*args_, **kwargs_)
-        else:
-            return emptyType(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_all(self): return self.all
-    def set_all(self, all): self.all = all
-    def hasContent_(self):
-        if (
-
-        ):
-            return True
-        else:
-            return False
-    def export(self, outfile, level, namespace_='', name_='emptyType', namespacedef_='', pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
-        showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='emptyType')
-        if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='emptyType', pretty_print=pretty_print)
-            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
-        else:
-            outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='emptyType'):
-        if self.all is not None and 'all' not in already_processed:
-            already_processed.add('all')
-            outfile.write(' all="%s"' % self.gds_format_double(self.all, input_name='all'))
-    def exportChildren(self, outfile, level, namespace_='', name_='emptyType', fromsubclass_=False, pretty_print=True):
-        pass
-    def exportLiteral(self, outfile, level, name_='emptyType'):
-        level += 1
-        already_processed = set()
-        self.exportLiteralAttributes(outfile, level, already_processed, name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.all is not None and 'all' not in already_processed:
-            already_processed.add('all')
-            showIndent(outfile, level)
-            outfile.write('all=%e,\n' % (self.all,))
-    def exportLiteralChildren(self, outfile, level, name_):
-        pass
-    def build(self, node):
-        already_processed = set()
-        self.buildAttributes(node, node.attrib, already_processed)
-        for child in node:
-            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
-            self.buildChildren(child, node, nodeName_)
-        return self
-    def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('all', node)
-        if value is not None and 'all' not in already_processed:
-            already_processed.add('all')
-            try:
-                self.all = float(value)
-            except ValueError as exp:
-                raise ValueError('Bad float/double attribute (all): %s' % exp)
-    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        pass
-# end class emptyType
-
-
 class pluginDef(GeneratedsSuper):
     subclass = None
     superclass = None
@@ -766,6 +691,81 @@ class pluginDef(GeneratedsSuper):
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
 # end class pluginDef
+
+
+class emptyType(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, all=None):
+        self.all = _cast(float, all)
+        pass
+    def factory(*args_, **kwargs_):
+        if emptyType.subclass:
+            return emptyType.subclass(*args_, **kwargs_)
+        else:
+            return emptyType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_all(self): return self.all
+    def set_all(self, all): self.all = all
+    def hasContent_(self):
+        if (
+
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='emptyType', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='emptyType')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='emptyType', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='emptyType'):
+        if self.all is not None and 'all' not in already_processed:
+            already_processed.add('all')
+            outfile.write(' all="%s"' % self.gds_format_double(self.all, input_name='all'))
+    def exportChildren(self, outfile, level, namespace_='', name_='emptyType', fromsubclass_=False, pretty_print=True):
+        pass
+    def exportLiteral(self, outfile, level, name_='emptyType'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.all is not None and 'all' not in already_processed:
+            already_processed.add('all')
+            showIndent(outfile, level)
+            outfile.write('all=%e,\n' % (self.all,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        pass
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('all', node)
+        if value is not None and 'all' not in already_processed:
+            already_processed.add('all')
+            try:
+                self.all = float(value)
+            except ValueError as exp:
+                raise ValueError('Bad float/double attribute (all): %s' % exp)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        pass
+# end class emptyType
 
 
 class vector(GeneratedsSuper):
@@ -1055,6 +1055,7 @@ class matrix(GeneratedsSuper):
             row_ = child_.text
             row_ = self.gds_validate_double_list(row_, node, 'row')
             self.row.append(row_.split())
+            self.row = self.row
             self.validate_doubleList(self.row)    # validate type doubleList
 # end class matrix
 
@@ -1437,35 +1438,37 @@ class matrixFile(GeneratedsSuper):
 # end class matrixFile
 
 
-class memory(GeneratedsSuper):
+class OSI(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, sizeMax=None, Memory=None):
-        self.sizeMax = _cast(int, sizeMax)
-        if Memory is None:
-            self.Memory = []
-        else:
-            self.Memory = Memory
+    def __init__(self, DS_Concerned=None, Interactions_Concerned=None, extensiontype_=None):
+        self.DS_Concerned = DS_Concerned
+        self.Interactions_Concerned = Interactions_Concerned
+        self.extensiontype_ = extensiontype_
     def factory(*args_, **kwargs_):
-        if memory.subclass:
-            return memory.subclass(*args_, **kwargs_)
+        if OSI.subclass:
+            return OSI.subclass(*args_, **kwargs_)
         else:
-            return memory(*args_, **kwargs_)
+            return OSI(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_Memory(self): return self.Memory
-    def set_Memory(self, Memory): self.Memory = Memory
-    def add_Memory(self, value): self.Memory.append(value)
-    def insert_Memory(self, index, value): self.Memory[index] = value
-    def get_sizeMax(self): return self.sizeMax
-    def set_sizeMax(self, sizeMax): self.sizeMax = sizeMax
+    def get_DS_Concerned(self): return self.DS_Concerned
+    def set_DS_Concerned(self, DS_Concerned): self.DS_Concerned = DS_Concerned
+    def get_Interactions_Concerned(self): return self.Interactions_Concerned
+    def set_Interactions_Concerned(self, Interactions_Concerned): self.Interactions_Concerned = Interactions_Concerned
+    def get_extensiontype_(self): return self.extensiontype_
+    def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
+    def validate_strList(self, value):
+        # Validate type strList, a restriction on xsd:string.
+        pass
     def hasContent_(self):
         if (
-            self.Memory
+            self.DS_Concerned is not None or
+            self.Interactions_Concerned is not None
         ):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='memory', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='OSI', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -1473,49 +1476,52 @@ class memory(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='memory')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='OSI')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='memory', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='OSI', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='memory'):
-        if self.sizeMax is not None and 'sizeMax' not in already_processed:
-            already_processed.add('sizeMax')
-            outfile.write(' sizeMax="%s"' % self.gds_format_integer(self.sizeMax, input_name='sizeMax'))
-    def exportChildren(self, outfile, level, namespace_='', name_='memory', fromsubclass_=False, pretty_print=True):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='OSI'):
+        if self.extensiontype_ is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            outfile.write(' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
+            outfile.write(' xsi:type="%s"' % self.extensiontype_)
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='OSI', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        for Memory_ in self.Memory:
-            Memory_.export(outfile, level, namespace_, name_='Memory', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='memory'):
+        if self.DS_Concerned is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sDS_Concerned>%s</%sDS_Concerned>%s' % (namespace_, self.gds_format_string(quote_xml(' '.join(self.DS_Concerned)).encode(ExternalEncoding), input_name='DS_Concerned'), namespace_, eol_))
+        if self.Interactions_Concerned is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sInteractions_Concerned>%s</%sInteractions_Concerned>%s' % (namespace_, self.gds_format_string(quote_xml(' '.join(self.Interactions_Concerned)).encode(ExternalEncoding), input_name='Interactions_Concerned'), namespace_, eol_))
+    def exportLiteral(self, outfile, level, name_='OSI'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.sizeMax is not None and 'sizeMax' not in already_processed:
-            already_processed.add('sizeMax')
-            showIndent(outfile, level)
-            outfile.write('sizeMax=%d,\n' % (self.sizeMax,))
+        pass
     def exportLiteralChildren(self, outfile, level, name_):
-        showIndent(outfile, level)
-        outfile.write('Memory=[\n')
-        level += 1
-        for Memory_ in self.Memory:
+        if self.DS_Concerned is not None:
             showIndent(outfile, level)
-            outfile.write('model_.vector(\n')
-            Memory_.exportLiteral(outfile, level, name_='vector')
+            if self.DS_Concerned:
+                outfile.write('DS_Concerned=%s,\n' % quote_python(' '.join(self.DS_Concerned)).encode(ExternalEncoding))
+            else:
+                outfile.write('DS_Concerned=None,\n')
+        if self.Interactions_Concerned is not None:
             showIndent(outfile, level)
-            outfile.write('),\n')
-        level -= 1
-        showIndent(outfile, level)
-        outfile.write('],\n')
+            if self.Interactions_Concerned:
+                outfile.write('Interactions_Concerned=%s,\n' % quote_python(' '.join(self.Interactions_Concerned)).encode(ExternalEncoding))
+            else:
+                outfile.write('Interactions_Concerned=None,\n')
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1524,28 +1530,233 @@ class memory(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('sizeMax', node)
-        if value is not None and 'sizeMax' not in already_processed:
-            already_processed.add('sizeMax')
+        value = find_attr_value_('xsi:type', node)
+        if value is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            self.extensiontype_ = value
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'DS_Concerned':
+            DS_Concerned_ = child_.text
+            self.DS_Concerned = DS_Concerned_
+            self.DS_Concerned = self.DS_Concerned.split()
+            self.validate_strList(self.DS_Concerned)    # validate type strList
+        elif nodeName_ == 'Interactions_Concerned':
+            Interactions_Concerned_ = child_.text
+            self.Interactions_Concerned = Interactions_Concerned_
+            self.Interactions_Concerned = self.Interactions_Concerned.split()
+            self.validate_strList(self.Interactions_Concerned)    # validate type strList
+# end class OSI
+
+
+class NSL(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, size=None, extensiontype_=None):
+        self.size = _cast(int, size)
+        self.extensiontype_ = extensiontype_
+    def factory(*args_, **kwargs_):
+        if NSL.subclass:
+            return NSL.subclass(*args_, **kwargs_)
+        else:
+            return NSL(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_size(self): return self.size
+    def set_size(self, size): self.size = size
+    def get_extensiontype_(self): return self.extensiontype_
+    def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
+    def hasContent_(self):
+        if (
+
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='NSL', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='NSL')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='NSL', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='NSL'):
+        if self.size is not None and 'size' not in already_processed:
+            already_processed.add('size')
+            outfile.write(' size="%s"' % self.gds_format_integer(self.size, input_name='size'))
+        if self.extensiontype_ is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            outfile.write(' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
+            outfile.write(' xsi:type="%s"' % self.extensiontype_)
+    def exportChildren(self, outfile, level, namespace_='', name_='NSL', fromsubclass_=False, pretty_print=True):
+        pass
+    def exportLiteral(self, outfile, level, name_='NSL'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.size is not None and 'size' not in already_processed:
+            already_processed.add('size')
+            showIndent(outfile, level)
+            outfile.write('size=%d,\n' % (self.size,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        pass
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('size', node)
+        if value is not None and 'size' not in already_processed:
+            already_processed.add('size')
             try:
-                self.sizeMax = int(value)
+                self.size = int(value)
             except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.sizeMax < 0:
-                raise_parse_error(node, 'Invalid NonNegativeInteger')
+            if self.size <= 0:
+                raise_parse_error(node, 'Invalid PositiveInteger')
+        value = find_attr_value_('xsi:type', node)
+        if value is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            self.extensiontype_ = value
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'Memory':
-            obj_ = vector.factory()
+        pass
+# end class NSL
+
+
+class OSNSP(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, StorageType=None, Id=None, NonSmoothSolver=None, extensiontype_=None):
+        self.StorageType = _cast(int, StorageType)
+        self.Id = _cast(None, Id)
+        self.NonSmoothSolver = NonSmoothSolver
+        self.extensiontype_ = extensiontype_
+    def factory(*args_, **kwargs_):
+        if OSNSP.subclass:
+            return OSNSP.subclass(*args_, **kwargs_)
+        else:
+            return OSNSP(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_NonSmoothSolver(self): return self.NonSmoothSolver
+    def set_NonSmoothSolver(self, NonSmoothSolver): self.NonSmoothSolver = NonSmoothSolver
+    def get_StorageType(self): return self.StorageType
+    def set_StorageType(self, StorageType): self.StorageType = StorageType
+    def get_Id(self): return self.Id
+    def set_Id(self, Id): self.Id = Id
+    def get_extensiontype_(self): return self.extensiontype_
+    def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
+    def hasContent_(self):
+        if (
+            self.NonSmoothSolver is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='OSNSP', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='OSNSP')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='OSNSP', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='OSNSP'):
+        if self.StorageType is not None and 'StorageType' not in already_processed:
+            already_processed.add('StorageType')
+            outfile.write(' StorageType="%s"' % self.gds_format_integer(self.StorageType, input_name='StorageType'))
+        if self.Id is not None and 'Id' not in already_processed:
+            already_processed.add('Id')
+            outfile.write(' Id=%s' % (self.gds_format_string(quote_attrib(self.Id).encode(ExternalEncoding), input_name='Id'), ))
+        if self.extensiontype_ is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            outfile.write(' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
+            outfile.write(' xsi:type="%s"' % self.extensiontype_)
+    def exportChildren(self, outfile, level, namespace_='', name_='OSNSP', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.NonSmoothSolver is not None:
+            self.NonSmoothSolver.export(outfile, level, namespace_, name_='NonSmoothSolver', pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='OSNSP'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.StorageType is not None and 'StorageType' not in already_processed:
+            already_processed.add('StorageType')
+            showIndent(outfile, level)
+            outfile.write('StorageType=%d,\n' % (self.StorageType,))
+        if self.Id is not None and 'Id' not in already_processed:
+            already_processed.add('Id')
+            showIndent(outfile, level)
+            outfile.write('Id="%s",\n' % (self.Id,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.NonSmoothSolver is not None:
+            showIndent(outfile, level)
+            outfile.write('NonSmoothSolver=model_.NonSmoothSolver(\n')
+            self.NonSmoothSolver.exportLiteral(outfile, level)
+            showIndent(outfile, level)
+            outfile.write('),\n')
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('StorageType', node)
+        if value is not None and 'StorageType' not in already_processed:
+            already_processed.add('StorageType')
+            try:
+                self.StorageType = int(value)
+            except ValueError as exp:
+                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
+            if self.StorageType < 0:
+                raise_parse_error(node, 'Invalid NonNegativeInteger')
+        value = find_attr_value_('Id', node)
+        if value is not None and 'Id' not in already_processed:
+            already_processed.add('Id')
+            self.Id = value
+        value = find_attr_value_('xsi:type', node)
+        if value is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            self.extensiontype_ = value
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'NonSmoothSolver':
+            obj_ = NonSmoothSolver.factory()
             obj_.build(child_)
-            self.Memory.append(obj_)
-# end class memory
+            self.NonSmoothSolver = obj_
+# end class OSNSP
 
 
 class ModelTime(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, t=None, t0=None, T=None):
-        self.t = t
+    def __init__(self, t0=None, T=None):
         self.t0 = t0
         self.T = T
     def factory(*args_, **kwargs_):
@@ -1554,8 +1765,6 @@ class ModelTime(GeneratedsSuper):
         else:
             return ModelTime(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_t(self): return self.t
-    def set_t(self, t): self.t = t
     def get_t0(self): return self.t0
     def set_t0(self, t0): self.t0 = t0
     def get_T(self): return self.T
@@ -1565,7 +1774,6 @@ class ModelTime(GeneratedsSuper):
         pass
     def hasContent_(self):
         if (
-            self.t is not None or
             self.t0 is not None or
             self.T is not None
         ):
@@ -1595,9 +1803,6 @@ class ModelTime(GeneratedsSuper):
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.t is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%st>%s</%st>%s' % (namespace_, self.gds_format_double(self.t, input_name='t'), namespace_, eol_))
         if self.t0 is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%st0>%s</%st0>%s' % (namespace_, self.gds_format_double(self.t0, input_name='t0'), namespace_, eol_))
@@ -1613,9 +1818,6 @@ class ModelTime(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
         pass
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.t is not None:
-            showIndent(outfile, level)
-            outfile.write('t=%e,\n' % self.t)
         if self.t0 is not None:
             showIndent(outfile, level)
             outfile.write('t0=%e,\n' % self.t0)
@@ -1632,16 +1834,7 @@ class ModelTime(GeneratedsSuper):
     def buildAttributes(self, node, attrs, already_processed):
         pass
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 't':
-            sval_ = child_.text
-            try:
-                fval_ = float(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires float or double: %s' % exp)
-            fval_ = self.gds_validate_float(fval_, node, 't')
-            self.t = fval_
-            self.validate_positiveDouble(self.t)    # validate type positiveDouble
-        elif nodeName_ == 't0':
+        if nodeName_ == 't0':
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
@@ -2840,13 +3033,10 @@ class DS_DefinitionType(GeneratedsSuper):
 class FirstOrderNonLinearDSType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, number=None, x0=None, x=None, M=None, StepsInMemory=None, xMemory=None, f=None, Jacobianfx=None):
-        self.number = _cast(int, number)
+    def __init__(self, Name=None, x0=None, M=None, f=None, Jacobianfx=None):
+        self.Name = _cast(None, Name)
         self.x0 = x0
-        self.x = x
         self.M = M
-        self.StepsInMemory = StepsInMemory
-        self.xMemory = xMemory
         self.f = f
         self.Jacobianfx = Jacobianfx
     def factory(*args_, **kwargs_):
@@ -2857,27 +3047,18 @@ class FirstOrderNonLinearDSType(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_x0(self): return self.x0
     def set_x0(self, x0): self.x0 = x0
-    def get_x(self): return self.x
-    def set_x(self, x): self.x = x
     def get_M(self): return self.M
     def set_M(self, M): self.M = M
-    def get_StepsInMemory(self): return self.StepsInMemory
-    def set_StepsInMemory(self, StepsInMemory): self.StepsInMemory = StepsInMemory
-    def get_xMemory(self): return self.xMemory
-    def set_xMemory(self, xMemory): self.xMemory = xMemory
     def get_f(self): return self.f
     def set_f(self, f): self.f = f
     def get_Jacobianfx(self): return self.Jacobianfx
     def set_Jacobianfx(self, Jacobianfx): self.Jacobianfx = Jacobianfx
-    def get_number(self): return self.number
-    def set_number(self, number): self.number = number
+    def get_Name(self): return self.Name
+    def set_Name(self, Name): self.Name = Name
     def hasContent_(self):
         if (
             self.x0 is not None or
-            self.x is not None or
             self.M is not None or
-            self.StepsInMemory is not None or
-            self.xMemory is not None or
             self.f is not None or
             self.Jacobianfx is not None
         ):
@@ -2901,9 +3082,9 @@ class FirstOrderNonLinearDSType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderNonLinearDSType'):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            outfile.write(' number="%s"' % self.gds_format_integer(self.number, input_name='number'))
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            outfile.write(' Name=%s' % (self.gds_format_string(quote_attrib(self.Name).encode(ExternalEncoding), input_name='Name'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderNonLinearDSType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -2911,15 +3092,8 @@ class FirstOrderNonLinearDSType(GeneratedsSuper):
             eol_ = ''
         if self.x0 is not None:
             self.x0.export(outfile, level, namespace_, name_='x0', pretty_print=pretty_print)
-        if self.x is not None:
-            self.x.export(outfile, level, namespace_, name_='x', pretty_print=pretty_print)
         if self.M is not None:
             self.M.export(outfile, level, namespace_, name_='M', pretty_print=pretty_print)
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%sStepsInMemory>%s</%sStepsInMemory>%s' % (namespace_, self.gds_format_integer(self.StepsInMemory, input_name='StepsInMemory'), namespace_, eol_))
-        if self.xMemory is not None:
-            self.xMemory.export(outfile, level, namespace_, name_='xMemory', pretty_print=pretty_print)
         if self.f is not None:
             self.f.export(outfile, level, namespace_, name_='f', pretty_print=pretty_print)
         if self.Jacobianfx is not None:
@@ -2931,10 +3105,10 @@ class FirstOrderNonLinearDSType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
             showIndent(outfile, level)
-            outfile.write('number=%d,\n' % (self.number,))
+            outfile.write('Name="%s",\n' % (self.Name,))
     def exportLiteralChildren(self, outfile, level, name_):
         if self.x0 is not None:
             showIndent(outfile, level)
@@ -2942,25 +3116,10 @@ class FirstOrderNonLinearDSType(GeneratedsSuper):
             self.x0.exportLiteral(outfile, level, name_='x0')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.x is not None:
-            showIndent(outfile, level)
-            outfile.write('x=model_.vector(\n')
-            self.x.exportLiteral(outfile, level, name_='x')
-            showIndent(outfile, level)
-            outfile.write('),\n')
         if self.M is not None:
             showIndent(outfile, level)
             outfile.write('M=model_.matrix(\n')
             self.M.exportLiteral(outfile, level, name_='M')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('StepsInMemory=%d,\n' % self.StepsInMemory)
-        if self.xMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('xMemory=model_.memory(\n')
-            self.xMemory.exportLiteral(outfile, level, name_='xMemory')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.f is not None:
@@ -2983,42 +3142,19 @@ class FirstOrderNonLinearDSType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('number', node)
-        if value is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            try:
-                self.number = int(value)
-            except ValueError as exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.number <= 0:
-                raise_parse_error(node, 'Invalid PositiveInteger')
+        value = find_attr_value_('Name', node)
+        if value is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            self.Name = value
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'x0':
             obj_ = vector.factory()
             obj_.build(child_)
             self.x0 = obj_
-        elif nodeName_ == 'x':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.x = obj_
         elif nodeName_ == 'M':
             obj_ = matrix.factory()
             obj_.build(child_)
             self.M = obj_
-        elif nodeName_ == 'StepsInMemory':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ < 0:
-                raise_parse_error(child_, 'requires nonNegativeInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'StepsInMemory')
-            self.StepsInMemory = ival_
-        elif nodeName_ == 'xMemory':
-            obj_ = memory.factory()
-            obj_.build(child_)
-            self.xMemory = obj_
         elif nodeName_ == 'f':
             obj_ = vector.factory()
             obj_.build(child_)
@@ -3033,15 +3169,12 @@ class FirstOrderNonLinearDSType(GeneratedsSuper):
 class FirstOrderLinearDSType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, number=None, x0=None, x=None, M=None, StepsInMemory=None, xMemory=None, A=None, b=None):
-        self.number = _cast(int, number)
+    def __init__(self, Name=None, x0=None, A=None, b=None, M=None):
+        self.Name = _cast(None, Name)
         self.x0 = x0
-        self.x = x
-        self.M = M
-        self.StepsInMemory = StepsInMemory
-        self.xMemory = xMemory
         self.A = A
         self.b = b
+        self.M = M
     def factory(*args_, **kwargs_):
         if FirstOrderLinearDSType.subclass:
             return FirstOrderLinearDSType.subclass(*args_, **kwargs_)
@@ -3050,29 +3183,20 @@ class FirstOrderLinearDSType(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_x0(self): return self.x0
     def set_x0(self, x0): self.x0 = x0
-    def get_x(self): return self.x
-    def set_x(self, x): self.x = x
-    def get_M(self): return self.M
-    def set_M(self, M): self.M = M
-    def get_StepsInMemory(self): return self.StepsInMemory
-    def set_StepsInMemory(self, StepsInMemory): self.StepsInMemory = StepsInMemory
-    def get_xMemory(self): return self.xMemory
-    def set_xMemory(self, xMemory): self.xMemory = xMemory
     def get_A(self): return self.A
     def set_A(self, A): self.A = A
     def get_b(self): return self.b
     def set_b(self, b): self.b = b
-    def get_number(self): return self.number
-    def set_number(self, number): self.number = number
+    def get_M(self): return self.M
+    def set_M(self, M): self.M = M
+    def get_Name(self): return self.Name
+    def set_Name(self, Name): self.Name = Name
     def hasContent_(self):
         if (
             self.x0 is not None or
-            self.x is not None or
-            self.M is not None or
-            self.StepsInMemory is not None or
-            self.xMemory is not None or
             self.A is not None or
-            self.b is not None
+            self.b is not None or
+            self.M is not None
         ):
             return True
         else:
@@ -3094,9 +3218,9 @@ class FirstOrderLinearDSType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderLinearDSType'):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            outfile.write(' number="%s"' % self.gds_format_integer(self.number, input_name='number'))
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            outfile.write(' Name=%s' % (self.gds_format_string(quote_attrib(self.Name).encode(ExternalEncoding), input_name='Name'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderLinearDSType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -3104,19 +3228,12 @@ class FirstOrderLinearDSType(GeneratedsSuper):
             eol_ = ''
         if self.x0 is not None:
             self.x0.export(outfile, level, namespace_, name_='x0', pretty_print=pretty_print)
-        if self.x is not None:
-            self.x.export(outfile, level, namespace_, name_='x', pretty_print=pretty_print)
-        if self.M is not None:
-            self.M.export(outfile, level, namespace_, name_='M', pretty_print=pretty_print)
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%sStepsInMemory>%s</%sStepsInMemory>%s' % (namespace_, self.gds_format_integer(self.StepsInMemory, input_name='StepsInMemory'), namespace_, eol_))
-        if self.xMemory is not None:
-            self.xMemory.export(outfile, level, namespace_, name_='xMemory', pretty_print=pretty_print)
         if self.A is not None:
             self.A.export(outfile, level, namespace_, name_='A', pretty_print=pretty_print)
         if self.b is not None:
             self.b.export(outfile, level, namespace_, name_='b', pretty_print=pretty_print)
+        if self.M is not None:
+            self.M.export(outfile, level, namespace_, name_='M', pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='FirstOrderLinearDSType'):
         level += 1
         already_processed = set()
@@ -3124,36 +3241,15 @@ class FirstOrderLinearDSType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
             showIndent(outfile, level)
-            outfile.write('number=%d,\n' % (self.number,))
+            outfile.write('Name="%s",\n' % (self.Name,))
     def exportLiteralChildren(self, outfile, level, name_):
         if self.x0 is not None:
             showIndent(outfile, level)
             outfile.write('x0=model_.vector(\n')
             self.x0.exportLiteral(outfile, level, name_='x0')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.x is not None:
-            showIndent(outfile, level)
-            outfile.write('x=model_.vector(\n')
-            self.x.exportLiteral(outfile, level, name_='x')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.M is not None:
-            showIndent(outfile, level)
-            outfile.write('M=model_.matrix(\n')
-            self.M.exportLiteral(outfile, level, name_='M')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('StepsInMemory=%d,\n' % self.StepsInMemory)
-        if self.xMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('xMemory=model_.memory(\n')
-            self.xMemory.exportLiteral(outfile, level, name_='xMemory')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.A is not None:
@@ -3168,6 +3264,12 @@ class FirstOrderLinearDSType(GeneratedsSuper):
             self.b.exportLiteral(outfile, level, name_='b')
             showIndent(outfile, level)
             outfile.write('),\n')
+        if self.M is not None:
+            showIndent(outfile, level)
+            outfile.write('M=model_.matrix(\n')
+            self.M.exportLiteral(outfile, level, name_='M')
+            showIndent(outfile, level)
+            outfile.write('),\n')
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -3176,42 +3278,15 @@ class FirstOrderLinearDSType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('number', node)
-        if value is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            try:
-                self.number = int(value)
-            except ValueError as exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.number <= 0:
-                raise_parse_error(node, 'Invalid PositiveInteger')
+        value = find_attr_value_('Name', node)
+        if value is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            self.Name = value
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'x0':
             obj_ = vector.factory()
             obj_.build(child_)
             self.x0 = obj_
-        elif nodeName_ == 'x':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.x = obj_
-        elif nodeName_ == 'M':
-            obj_ = matrix.factory()
-            obj_.build(child_)
-            self.M = obj_
-        elif nodeName_ == 'StepsInMemory':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ < 0:
-                raise_parse_error(child_, 'requires nonNegativeInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'StepsInMemory')
-            self.StepsInMemory = ival_
-        elif nodeName_ == 'xMemory':
-            obj_ = memory.factory()
-            obj_.build(child_)
-            self.xMemory = obj_
         elif nodeName_ == 'A':
             obj_ = matrix.factory()
             obj_.build(child_)
@@ -3220,20 +3295,21 @@ class FirstOrderLinearDSType(GeneratedsSuper):
             obj_ = vector.factory()
             obj_.build(child_)
             self.b = obj_
+        elif nodeName_ == 'M':
+            obj_ = matrix.factory()
+            obj_.build(child_)
+            self.M = obj_
 # end class FirstOrderLinearDSType
 
 
 class FirstOrderLinearTIDSType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, number=None, x0=None, x=None, M=None, StepsInMemory=None, xMemory=None, A=None, b=None):
-        self.number = _cast(int, number)
+    def __init__(self, Name=None, x0=None, A=None, M=None, b=None):
+        self.Name = _cast(None, Name)
         self.x0 = x0
-        self.x = x
-        self.M = M
-        self.StepsInMemory = StepsInMemory
-        self.xMemory = xMemory
         self.A = A
+        self.M = M
         self.b = b
     def factory(*args_, **kwargs_):
         if FirstOrderLinearTIDSType.subclass:
@@ -3243,28 +3319,19 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_x0(self): return self.x0
     def set_x0(self, x0): self.x0 = x0
-    def get_x(self): return self.x
-    def set_x(self, x): self.x = x
-    def get_M(self): return self.M
-    def set_M(self, M): self.M = M
-    def get_StepsInMemory(self): return self.StepsInMemory
-    def set_StepsInMemory(self, StepsInMemory): self.StepsInMemory = StepsInMemory
-    def get_xMemory(self): return self.xMemory
-    def set_xMemory(self, xMemory): self.xMemory = xMemory
     def get_A(self): return self.A
     def set_A(self, A): self.A = A
+    def get_M(self): return self.M
+    def set_M(self, M): self.M = M
     def get_b(self): return self.b
     def set_b(self, b): self.b = b
-    def get_number(self): return self.number
-    def set_number(self, number): self.number = number
+    def get_Name(self): return self.Name
+    def set_Name(self, Name): self.Name = Name
     def hasContent_(self):
         if (
             self.x0 is not None or
-            self.x is not None or
-            self.M is not None or
-            self.StepsInMemory is not None or
-            self.xMemory is not None or
             self.A is not None or
+            self.M is not None or
             self.b is not None
         ):
             return True
@@ -3287,9 +3354,9 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderLinearTIDSType'):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            outfile.write(' number="%s"' % self.gds_format_integer(self.number, input_name='number'))
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            outfile.write(' Name=%s' % (self.gds_format_string(quote_attrib(self.Name).encode(ExternalEncoding), input_name='Name'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderLinearTIDSType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -3297,17 +3364,10 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
             eol_ = ''
         if self.x0 is not None:
             self.x0.export(outfile, level, namespace_, name_='x0', pretty_print=pretty_print)
-        if self.x is not None:
-            self.x.export(outfile, level, namespace_, name_='x', pretty_print=pretty_print)
-        if self.M is not None:
-            self.M.export(outfile, level, namespace_, name_='M', pretty_print=pretty_print)
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%sStepsInMemory>%s</%sStepsInMemory>%s' % (namespace_, self.gds_format_integer(self.StepsInMemory, input_name='StepsInMemory'), namespace_, eol_))
-        if self.xMemory is not None:
-            self.xMemory.export(outfile, level, namespace_, name_='xMemory', pretty_print=pretty_print)
         if self.A is not None:
             self.A.export(outfile, level, namespace_, name_='A', pretty_print=pretty_print)
+        if self.M is not None:
+            self.M.export(outfile, level, namespace_, name_='M', pretty_print=pretty_print)
         if self.b is not None:
             self.b.export(outfile, level, namespace_, name_='b', pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='FirstOrderLinearTIDSType'):
@@ -3317,10 +3377,10 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
             showIndent(outfile, level)
-            outfile.write('number=%d,\n' % (self.number,))
+            outfile.write('Name="%s",\n' % (self.Name,))
     def exportLiteralChildren(self, outfile, level, name_):
         if self.x0 is not None:
             showIndent(outfile, level)
@@ -3328,31 +3388,16 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
             self.x0.exportLiteral(outfile, level, name_='x0')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.x is not None:
+        if self.A is not None:
             showIndent(outfile, level)
-            outfile.write('x=model_.vector(\n')
-            self.x.exportLiteral(outfile, level, name_='x')
+            outfile.write('A=model_.matrix(\n')
+            self.A.exportLiteral(outfile, level, name_='A')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.M is not None:
             showIndent(outfile, level)
             outfile.write('M=model_.matrix(\n')
             self.M.exportLiteral(outfile, level, name_='M')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('StepsInMemory=%d,\n' % self.StepsInMemory)
-        if self.xMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('xMemory=model_.memory(\n')
-            self.xMemory.exportLiteral(outfile, level, name_='xMemory')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.A is not None:
-            showIndent(outfile, level)
-            outfile.write('A=model_.matrix(\n')
-            self.A.exportLiteral(outfile, level, name_='A')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.b is not None:
@@ -3369,46 +3414,23 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('number', node)
-        if value is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            try:
-                self.number = int(value)
-            except ValueError as exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.number <= 0:
-                raise_parse_error(node, 'Invalid PositiveInteger')
+        value = find_attr_value_('Name', node)
+        if value is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            self.Name = value
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'x0':
             obj_ = vector.factory()
             obj_.build(child_)
             self.x0 = obj_
-        elif nodeName_ == 'x':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.x = obj_
-        elif nodeName_ == 'M':
-            obj_ = matrix.factory()
-            obj_.build(child_)
-            self.M = obj_
-        elif nodeName_ == 'StepsInMemory':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ < 0:
-                raise_parse_error(child_, 'requires nonNegativeInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'StepsInMemory')
-            self.StepsInMemory = ival_
-        elif nodeName_ == 'xMemory':
-            obj_ = memory.factory()
-            obj_.build(child_)
-            self.xMemory = obj_
         elif nodeName_ == 'A':
             obj_ = matrix.factory()
             obj_.build(child_)
             self.A = obj_
+        elif nodeName_ == 'M':
+            obj_ = matrix.factory()
+            obj_.build(child_)
+            self.M = obj_
         elif nodeName_ == 'b':
             obj_ = vector.factory()
             obj_.build(child_)
@@ -3419,15 +3441,10 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
 class LagrangianDSType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, number=None, StepsInMemory=None, q=None, q0=None, qMemory=None, Velocity=None, Velocity0=None, VelocityMemory=None, Mass=None, FInt=None, FExt=None, NNL=None, JacobianQFInt=None, JacobianVelocityFInt=None, JacobianQNNL=None, JacobianVelocityNNL=None):
-        self.number = _cast(int, number)
-        self.StepsInMemory = StepsInMemory
-        self.q = q
+    def __init__(self, Name=None, q0=None, Velocity0=None, Mass=None, FInt=None, FExt=None, NNL=None, JacobianQFInt=None, JacobianVelocityFInt=None, JacobianQNNL=None, JacobianVelocityNNL=None):
+        self.Name = _cast(None, Name)
         self.q0 = q0
-        self.qMemory = qMemory
-        self.Velocity = Velocity
         self.Velocity0 = Velocity0
-        self.VelocityMemory = VelocityMemory
         self.Mass = Mass
         self.FInt = FInt
         self.FExt = FExt
@@ -3442,20 +3459,10 @@ class LagrangianDSType(GeneratedsSuper):
         else:
             return LagrangianDSType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_StepsInMemory(self): return self.StepsInMemory
-    def set_StepsInMemory(self, StepsInMemory): self.StepsInMemory = StepsInMemory
-    def get_q(self): return self.q
-    def set_q(self, q): self.q = q
     def get_q0(self): return self.q0
     def set_q0(self, q0): self.q0 = q0
-    def get_qMemory(self): return self.qMemory
-    def set_qMemory(self, qMemory): self.qMemory = qMemory
-    def get_Velocity(self): return self.Velocity
-    def set_Velocity(self, Velocity): self.Velocity = Velocity
     def get_Velocity0(self): return self.Velocity0
     def set_Velocity0(self, Velocity0): self.Velocity0 = Velocity0
-    def get_VelocityMemory(self): return self.VelocityMemory
-    def set_VelocityMemory(self, VelocityMemory): self.VelocityMemory = VelocityMemory
     def get_Mass(self): return self.Mass
     def set_Mass(self, Mass): self.Mass = Mass
     def get_FInt(self): return self.FInt
@@ -3472,17 +3479,12 @@ class LagrangianDSType(GeneratedsSuper):
     def set_JacobianQNNL(self, JacobianQNNL): self.JacobianQNNL = JacobianQNNL
     def get_JacobianVelocityNNL(self): return self.JacobianVelocityNNL
     def set_JacobianVelocityNNL(self, JacobianVelocityNNL): self.JacobianVelocityNNL = JacobianVelocityNNL
-    def get_number(self): return self.number
-    def set_number(self, number): self.number = number
+    def get_Name(self): return self.Name
+    def set_Name(self, Name): self.Name = Name
     def hasContent_(self):
         if (
-            self.StepsInMemory is not None or
-            self.q is not None or
             self.q0 is not None or
-            self.qMemory is not None or
-            self.Velocity is not None or
             self.Velocity0 is not None or
-            self.VelocityMemory is not None or
             self.Mass is not None or
             self.FInt is not None or
             self.FExt is not None or
@@ -3512,29 +3514,18 @@ class LagrangianDSType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LagrangianDSType'):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            outfile.write(' number="%s"' % self.gds_format_integer(self.number, input_name='number'))
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            outfile.write(' Name=%s' % (self.gds_format_string(quote_attrib(self.Name).encode(ExternalEncoding), input_name='Name'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='LagrangianDSType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%sStepsInMemory>%s</%sStepsInMemory>%s' % (namespace_, self.gds_format_integer(self.StepsInMemory, input_name='StepsInMemory'), namespace_, eol_))
-        if self.q is not None:
-            self.q.export(outfile, level, namespace_, name_='q', pretty_print=pretty_print)
         if self.q0 is not None:
             self.q0.export(outfile, level, namespace_, name_='q0', pretty_print=pretty_print)
-        if self.qMemory is not None:
-            self.qMemory.export(outfile, level, namespace_, name_='qMemory', pretty_print=pretty_print)
-        if self.Velocity is not None:
-            self.Velocity.export(outfile, level, namespace_, name_='Velocity', pretty_print=pretty_print)
         if self.Velocity0 is not None:
             self.Velocity0.export(outfile, level, namespace_, name_='Velocity0', pretty_print=pretty_print)
-        if self.VelocityMemory is not None:
-            self.VelocityMemory.export(outfile, level, namespace_, name_='VelocityMemory', pretty_print=pretty_print)
         if self.Mass is not None:
             self.Mass.export(outfile, level, namespace_, name_='Mass', pretty_print=pretty_print)
         if self.FInt is not None:
@@ -3558,48 +3549,21 @@ class LagrangianDSType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
             showIndent(outfile, level)
-            outfile.write('number=%d,\n' % (self.number,))
+            outfile.write('Name="%s",\n' % (self.Name,))
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('StepsInMemory=%d,\n' % self.StepsInMemory)
-        if self.q is not None:
-            showIndent(outfile, level)
-            outfile.write('q=model_.vector(\n')
-            self.q.exportLiteral(outfile, level, name_='q')
-            showIndent(outfile, level)
-            outfile.write('),\n')
         if self.q0 is not None:
             showIndent(outfile, level)
             outfile.write('q0=model_.vector(\n')
             self.q0.exportLiteral(outfile, level, name_='q0')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.qMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('qMemory=model_.memory(\n')
-            self.qMemory.exportLiteral(outfile, level, name_='qMemory')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.Velocity is not None:
-            showIndent(outfile, level)
-            outfile.write('Velocity=model_.vector(\n')
-            self.Velocity.exportLiteral(outfile, level, name_='Velocity')
-            showIndent(outfile, level)
-            outfile.write('),\n')
         if self.Velocity0 is not None:
             showIndent(outfile, level)
             outfile.write('Velocity0=model_.vector(\n')
             self.Velocity0.exportLiteral(outfile, level, name_='Velocity0')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.VelocityMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('VelocityMemory=model_.memory(\n')
-            self.VelocityMemory.exportLiteral(outfile, level, name_='VelocityMemory')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.Mass is not None:
@@ -3658,50 +3622,19 @@ class LagrangianDSType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('number', node)
-        if value is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            try:
-                self.number = int(value)
-            except ValueError as exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.number <= 0:
-                raise_parse_error(node, 'Invalid PositiveInteger')
+        value = find_attr_value_('Name', node)
+        if value is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            self.Name = value
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'StepsInMemory':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ < 0:
-                raise_parse_error(child_, 'requires nonNegativeInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'StepsInMemory')
-            self.StepsInMemory = ival_
-        elif nodeName_ == 'q':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.q = obj_
-        elif nodeName_ == 'q0':
+        if nodeName_ == 'q0':
             obj_ = vector.factory()
             obj_.build(child_)
             self.q0 = obj_
-        elif nodeName_ == 'qMemory':
-            obj_ = memory.factory()
-            obj_.build(child_)
-            self.qMemory = obj_
-        elif nodeName_ == 'Velocity':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.Velocity = obj_
         elif nodeName_ == 'Velocity0':
             obj_ = vector.factory()
             obj_.build(child_)
             self.Velocity0 = obj_
-        elif nodeName_ == 'VelocityMemory':
-            obj_ = memory.factory()
-            obj_.build(child_)
-            self.VelocityMemory = obj_
         elif nodeName_ == 'Mass':
             obj_ = matrix.factory()
             obj_.build(child_)
@@ -3740,17 +3673,12 @@ class LagrangianDSType(GeneratedsSuper):
 class LagrangianLinearTIDSType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, number=None, StepsInMemory=None, q=None, q0=None, qMemory=None, Velocity=None, Velocity0=None, VelocityMemory=None, FExt=None, Mass=None, K=None, C=None):
-        self.number = _cast(int, number)
-        self.StepsInMemory = StepsInMemory
-        self.q = q
+    def __init__(self, Name=None, q0=None, Velocity0=None, Mass=None, FExt=None, K=None, C=None):
+        self.Name = _cast(None, Name)
         self.q0 = q0
-        self.qMemory = qMemory
-        self.Velocity = Velocity
         self.Velocity0 = Velocity0
-        self.VelocityMemory = VelocityMemory
-        self.FExt = FExt
         self.Mass = Mass
+        self.FExt = FExt
         self.K = K
         self.C = C
     def factory(*args_, **kwargs_):
@@ -3759,41 +3687,26 @@ class LagrangianLinearTIDSType(GeneratedsSuper):
         else:
             return LagrangianLinearTIDSType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_StepsInMemory(self): return self.StepsInMemory
-    def set_StepsInMemory(self, StepsInMemory): self.StepsInMemory = StepsInMemory
-    def get_q(self): return self.q
-    def set_q(self, q): self.q = q
     def get_q0(self): return self.q0
     def set_q0(self, q0): self.q0 = q0
-    def get_qMemory(self): return self.qMemory
-    def set_qMemory(self, qMemory): self.qMemory = qMemory
-    def get_Velocity(self): return self.Velocity
-    def set_Velocity(self, Velocity): self.Velocity = Velocity
     def get_Velocity0(self): return self.Velocity0
     def set_Velocity0(self, Velocity0): self.Velocity0 = Velocity0
-    def get_VelocityMemory(self): return self.VelocityMemory
-    def set_VelocityMemory(self, VelocityMemory): self.VelocityMemory = VelocityMemory
-    def get_FExt(self): return self.FExt
-    def set_FExt(self, FExt): self.FExt = FExt
     def get_Mass(self): return self.Mass
     def set_Mass(self, Mass): self.Mass = Mass
+    def get_FExt(self): return self.FExt
+    def set_FExt(self, FExt): self.FExt = FExt
     def get_K(self): return self.K
     def set_K(self, K): self.K = K
     def get_C(self): return self.C
     def set_C(self, C): self.C = C
-    def get_number(self): return self.number
-    def set_number(self, number): self.number = number
+    def get_Name(self): return self.Name
+    def set_Name(self, Name): self.Name = Name
     def hasContent_(self):
         if (
-            self.StepsInMemory is not None or
-            self.q is not None or
             self.q0 is not None or
-            self.qMemory is not None or
-            self.Velocity is not None or
             self.Velocity0 is not None or
-            self.VelocityMemory is not None or
-            self.FExt is not None or
             self.Mass is not None or
+            self.FExt is not None or
             self.K is not None or
             self.C is not None
         ):
@@ -3817,33 +3730,22 @@ class LagrangianLinearTIDSType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LagrangianLinearTIDSType'):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            outfile.write(' number="%s"' % self.gds_format_integer(self.number, input_name='number'))
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            outfile.write(' Name=%s' % (self.gds_format_string(quote_attrib(self.Name).encode(ExternalEncoding), input_name='Name'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='LagrangianLinearTIDSType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%sStepsInMemory>%s</%sStepsInMemory>%s' % (namespace_, self.gds_format_integer(self.StepsInMemory, input_name='StepsInMemory'), namespace_, eol_))
-        if self.q is not None:
-            self.q.export(outfile, level, namespace_, name_='q', pretty_print=pretty_print)
         if self.q0 is not None:
             self.q0.export(outfile, level, namespace_, name_='q0', pretty_print=pretty_print)
-        if self.qMemory is not None:
-            self.qMemory.export(outfile, level, namespace_, name_='qMemory', pretty_print=pretty_print)
-        if self.Velocity is not None:
-            self.Velocity.export(outfile, level, namespace_, name_='Velocity', pretty_print=pretty_print)
         if self.Velocity0 is not None:
             self.Velocity0.export(outfile, level, namespace_, name_='Velocity0', pretty_print=pretty_print)
-        if self.VelocityMemory is not None:
-            self.VelocityMemory.export(outfile, level, namespace_, name_='VelocityMemory', pretty_print=pretty_print)
-        if self.FExt is not None:
-            self.FExt.export(outfile, level, namespace_, name_='FExt', pretty_print=pretty_print)
         if self.Mass is not None:
             self.Mass.export(outfile, level, namespace_, name_='Mass', pretty_print=pretty_print)
+        if self.FExt is not None:
+            self.FExt.export(outfile, level, namespace_, name_='FExt', pretty_print=pretty_print)
         if self.K is not None:
             self.K.export(outfile, level, namespace_, name_='K', pretty_print=pretty_print)
         if self.C is not None:
@@ -3855,36 +3757,15 @@ class LagrangianLinearTIDSType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
             showIndent(outfile, level)
-            outfile.write('number=%d,\n' % (self.number,))
+            outfile.write('Name="%s",\n' % (self.Name,))
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.StepsInMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('StepsInMemory=%d,\n' % self.StepsInMemory)
-        if self.q is not None:
-            showIndent(outfile, level)
-            outfile.write('q=model_.vector(\n')
-            self.q.exportLiteral(outfile, level, name_='q')
-            showIndent(outfile, level)
-            outfile.write('),\n')
         if self.q0 is not None:
             showIndent(outfile, level)
             outfile.write('q0=model_.vector(\n')
             self.q0.exportLiteral(outfile, level, name_='q0')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.qMemory is not None:
-            showIndent(outfile, level)
-            outfile.write('qMemory=model_.memory(\n')
-            self.qMemory.exportLiteral(outfile, level, name_='qMemory')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.Velocity is not None:
-            showIndent(outfile, level)
-            outfile.write('Velocity=model_.vector(\n')
-            self.Velocity.exportLiteral(outfile, level, name_='Velocity')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.Velocity0 is not None:
@@ -3893,22 +3774,16 @@ class LagrangianLinearTIDSType(GeneratedsSuper):
             self.Velocity0.exportLiteral(outfile, level, name_='Velocity0')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.VelocityMemory is not None:
+        if self.Mass is not None:
             showIndent(outfile, level)
-            outfile.write('VelocityMemory=model_.memory(\n')
-            self.VelocityMemory.exportLiteral(outfile, level, name_='VelocityMemory')
+            outfile.write('Mass=model_.matrix(\n')
+            self.Mass.exportLiteral(outfile, level, name_='Mass')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.FExt is not None:
             showIndent(outfile, level)
             outfile.write('FExt=model_.vector(\n')
             self.FExt.exportLiteral(outfile, level, name_='FExt')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.Mass is not None:
-            showIndent(outfile, level)
-            outfile.write('Mass=model_.matrix(\n')
-            self.Mass.exportLiteral(outfile, level, name_='Mass')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.K is not None:
@@ -3931,58 +3806,27 @@ class LagrangianLinearTIDSType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('number', node)
-        if value is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            try:
-                self.number = int(value)
-            except ValueError as exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.number <= 0:
-                raise_parse_error(node, 'Invalid PositiveInteger')
+        value = find_attr_value_('Name', node)
+        if value is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            self.Name = value
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'StepsInMemory':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ < 0:
-                raise_parse_error(child_, 'requires nonNegativeInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'StepsInMemory')
-            self.StepsInMemory = ival_
-        elif nodeName_ == 'q':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.q = obj_
-        elif nodeName_ == 'q0':
+        if nodeName_ == 'q0':
             obj_ = vector.factory()
             obj_.build(child_)
             self.q0 = obj_
-        elif nodeName_ == 'qMemory':
-            obj_ = memory.factory()
-            obj_.build(child_)
-            self.qMemory = obj_
-        elif nodeName_ == 'Velocity':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.Velocity = obj_
         elif nodeName_ == 'Velocity0':
             obj_ = vector.factory()
             obj_.build(child_)
             self.Velocity0 = obj_
-        elif nodeName_ == 'VelocityMemory':
-            obj_ = memory.factory()
-            obj_.build(child_)
-            self.VelocityMemory = obj_
-        elif nodeName_ == 'FExt':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.FExt = obj_
         elif nodeName_ == 'Mass':
             obj_ = matrix.factory()
             obj_.build(child_)
             self.Mass = obj_
+        elif nodeName_ == 'FExt':
+            obj_ = vector.factory()
+            obj_.build(child_)
+            self.FExt = obj_
         elif nodeName_ == 'K':
             obj_ = matrix.factory()
             obj_.build(child_)
@@ -4085,11 +3929,9 @@ class Interaction_DefinitionType(GeneratedsSuper):
 class InteractionType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, number=None, size=None, y=None, lambda_=None, DS_Concerned=None, Interaction_Content=None):
-        self.number = _cast(int, number)
-        self.size = size
-        self.y = y
-        self.lambda_ = lambda_
+    def __init__(self, Name=None, size=None, DS_Concerned=None, Interaction_Content=None):
+        self.Name = _cast(None, Name)
+        self.size = _cast(int, size)
         self.DS_Concerned = DS_Concerned
         self.Interaction_Content = Interaction_Content
     def factory(*args_, **kwargs_):
@@ -4098,23 +3940,19 @@ class InteractionType(GeneratedsSuper):
         else:
             return InteractionType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_size(self): return self.size
-    def set_size(self, size): self.size = size
-    def get_y(self): return self.y
-    def set_y(self, y): self.y = y
-    def get_lambda(self): return self.lambda_
-    def set_lambda(self, lambda_): self.lambda_ = lambda_
     def get_DS_Concerned(self): return self.DS_Concerned
     def set_DS_Concerned(self, DS_Concerned): self.DS_Concerned = DS_Concerned
     def get_Interaction_Content(self): return self.Interaction_Content
     def set_Interaction_Content(self, Interaction_Content): self.Interaction_Content = Interaction_Content
-    def get_number(self): return self.number
-    def set_number(self, number): self.number = number
+    def get_Name(self): return self.Name
+    def set_Name(self, Name): self.Name = Name
+    def get_size(self): return self.size
+    def set_size(self, size): self.size = size
+    def validate_strList(self, value):
+        # Validate type strList, a restriction on xsd:string.
+        pass
     def hasContent_(self):
         if (
-            self.size is not None or
-            self.y is not None or
-            self.lambda_ is not None or
             self.DS_Concerned is not None or
             self.Interaction_Content is not None
         ):
@@ -4138,23 +3976,20 @@ class InteractionType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='InteractionType'):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
-            outfile.write(' number="%s"' % self.gds_format_integer(self.number, input_name='number'))
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            outfile.write(' Name=%s' % (self.gds_format_string(quote_attrib(self.Name).encode(ExternalEncoding), input_name='Name'), ))
+        if self.size is not None and 'size' not in already_processed:
+            already_processed.add('size')
+            outfile.write(' size="%s"' % self.gds_format_integer(self.size, input_name='size'))
     def exportChildren(self, outfile, level, namespace_='', name_='InteractionType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.size is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssize>%s</%ssize>%s' % (namespace_, self.gds_format_integer(self.size, input_name='size'), namespace_, eol_))
-        if self.y is not None:
-            self.y.export(outfile, level, namespace_, name_='y', pretty_print=pretty_print)
-        if self.lambda_ is not None:
-            self.lambda_.export(outfile, level, namespace_, name_='lambda', pretty_print=pretty_print)
         if self.DS_Concerned is not None:
-            self.DS_Concerned.export(outfile, level, namespace_, name_='DS_Concerned', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sDS_Concerned>%s</%sDS_Concerned>%s' % (namespace_, self.gds_format_string(quote_xml(' '.join(self.DS_Concerned)).encode(ExternalEncoding), input_name='DS_Concerned'), namespace_, eol_))
         if self.Interaction_Content is not None:
             self.Interaction_Content.export(outfile, level, namespace_, name_='Interaction_Content', pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='InteractionType'):
@@ -4164,32 +3999,21 @@ class InteractionType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.number is not None and 'number' not in already_processed:
-            already_processed.add('number')
+        if self.Name is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
             showIndent(outfile, level)
-            outfile.write('number=%d,\n' % (self.number,))
+            outfile.write('Name="%s",\n' % (self.Name,))
+        if self.size is not None and 'size' not in already_processed:
+            already_processed.add('size')
+            showIndent(outfile, level)
+            outfile.write('size=%d,\n' % (self.size,))
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.size is not None:
-            showIndent(outfile, level)
-            outfile.write('size=%d,\n' % self.size)
-        if self.y is not None:
-            showIndent(outfile, level)
-            outfile.write('y=model_.vector(\n')
-            self.y.exportLiteral(outfile, level, name_='y')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.lambda_ is not None:
-            showIndent(outfile, level)
-            outfile.write('lambda_=model_.vector(\n')
-            self.lambda_.exportLiteral(outfile, level, name_='lambda')
-            showIndent(outfile, level)
-            outfile.write('),\n')
         if self.DS_Concerned is not None:
             showIndent(outfile, level)
-            outfile.write('DS_Concerned=model_.vector(\n')
-            self.DS_Concerned.exportLiteral(outfile, level, name_='DS_Concerned')
-            showIndent(outfile, level)
-            outfile.write('),\n')
+            if self.DS_Concerned:
+                outfile.write('DS_Concerned=%s,\n' % quote_python(' '.join(self.DS_Concerned)).encode(ExternalEncoding))
+            else:
+                outfile.write('DS_Concerned=None,\n')
         if self.Interaction_Content is not None:
             showIndent(outfile, level)
             outfile.write('Interaction_Content=model_.Interaction_ContentType(\n')
@@ -4204,38 +4028,25 @@ class InteractionType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('number', node)
-        if value is not None and 'number' not in already_processed:
-            already_processed.add('number')
+        value = find_attr_value_('Name', node)
+        if value is not None and 'Name' not in already_processed:
+            already_processed.add('Name')
+            self.Name = value
+        value = find_attr_value_('size', node)
+        if value is not None and 'size' not in already_processed:
+            already_processed.add('size')
             try:
-                self.number = int(value)
+                self.size = int(value)
             except ValueError as exp:
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.number <= 0:
+            if self.size <= 0:
                 raise_parse_error(node, 'Invalid PositiveInteger')
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'size':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ <= 0:
-                raise_parse_error(child_, 'requires positiveInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'size')
-            self.size = ival_
-        elif nodeName_ == 'y':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.y = obj_
-        elif nodeName_ == 'lambda':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.lambda_ = obj_
-        elif nodeName_ == 'DS_Concerned':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.DS_Concerned = obj_
+        if nodeName_ == 'DS_Concerned':
+            DS_Concerned_ = child_.text
+            self.DS_Concerned = DS_Concerned_
+            self.DS_Concerned = self.DS_Concerned.split()
+            self.validate_strList(self.DS_Concerned)    # validate type strList
         elif nodeName_ == 'Interaction_Content':
             obj_ = Interaction_ContentType.factory()
             obj_.build(child_)
@@ -4246,51 +4057,59 @@ class InteractionType(GeneratedsSuper):
 class Interaction_ContentType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, FirstOrderRelation=None, FirstOrderLinearRelation=None, FirstOrderLinearTimeInvariantRelation=None, LagrangianRelation=None, LagrangianLinearRelation=None, Relay=None, NewtonImpactLaw=None, NewtonImpactFrictionLaw=None, ComplementarityCondition=None):
-        self.FirstOrderRelation = FirstOrderRelation
-        self.FirstOrderLinearRelation = FirstOrderLinearRelation
-        self.FirstOrderLinearTimeInvariantRelation = FirstOrderLinearTimeInvariantRelation
-        self.LagrangianRelation = LagrangianRelation
-        self.LagrangianLinearRelation = LagrangianLinearRelation
-        self.Relay = Relay
-        self.NewtonImpactLaw = NewtonImpactLaw
-        self.NewtonImpactFrictionLaw = NewtonImpactFrictionLaw
-        self.ComplementarityCondition = ComplementarityCondition
+    def __init__(self, FirstOrderR=None, FirstOrderLinearR=None, FirstOrderLinearTIR=None, LagrangianCompliantR=None, LagrangianRheonomousR=None, LagrangianScleronomousR=None, LagrangianLinearTIR=None, RelayNSL=None, NewtonImpactNSL=None, NewtonImpactFrictionNSL=None, ComplementarityConditionNSL=None):
+        self.FirstOrderR = FirstOrderR
+        self.FirstOrderLinearR = FirstOrderLinearR
+        self.FirstOrderLinearTIR = FirstOrderLinearTIR
+        self.LagrangianCompliantR = LagrangianCompliantR
+        self.LagrangianRheonomousR = LagrangianRheonomousR
+        self.LagrangianScleronomousR = LagrangianScleronomousR
+        self.LagrangianLinearTIR = LagrangianLinearTIR
+        self.RelayNSL = RelayNSL
+        self.NewtonImpactNSL = NewtonImpactNSL
+        self.NewtonImpactFrictionNSL = NewtonImpactFrictionNSL
+        self.ComplementarityConditionNSL = ComplementarityConditionNSL
     def factory(*args_, **kwargs_):
         if Interaction_ContentType.subclass:
             return Interaction_ContentType.subclass(*args_, **kwargs_)
         else:
             return Interaction_ContentType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_FirstOrderRelation(self): return self.FirstOrderRelation
-    def set_FirstOrderRelation(self, FirstOrderRelation): self.FirstOrderRelation = FirstOrderRelation
-    def get_FirstOrderLinearRelation(self): return self.FirstOrderLinearRelation
-    def set_FirstOrderLinearRelation(self, FirstOrderLinearRelation): self.FirstOrderLinearRelation = FirstOrderLinearRelation
-    def get_FirstOrderLinearTimeInvariantRelation(self): return self.FirstOrderLinearTimeInvariantRelation
-    def set_FirstOrderLinearTimeInvariantRelation(self, FirstOrderLinearTimeInvariantRelation): self.FirstOrderLinearTimeInvariantRelation = FirstOrderLinearTimeInvariantRelation
-    def get_LagrangianRelation(self): return self.LagrangianRelation
-    def set_LagrangianRelation(self, LagrangianRelation): self.LagrangianRelation = LagrangianRelation
-    def get_LagrangianLinearRelation(self): return self.LagrangianLinearRelation
-    def set_LagrangianLinearRelation(self, LagrangianLinearRelation): self.LagrangianLinearRelation = LagrangianLinearRelation
-    def get_Relay(self): return self.Relay
-    def set_Relay(self, Relay): self.Relay = Relay
-    def get_NewtonImpactLaw(self): return self.NewtonImpactLaw
-    def set_NewtonImpactLaw(self, NewtonImpactLaw): self.NewtonImpactLaw = NewtonImpactLaw
-    def get_NewtonImpactFrictionLaw(self): return self.NewtonImpactFrictionLaw
-    def set_NewtonImpactFrictionLaw(self, NewtonImpactFrictionLaw): self.NewtonImpactFrictionLaw = NewtonImpactFrictionLaw
-    def get_ComplementarityCondition(self): return self.ComplementarityCondition
-    def set_ComplementarityCondition(self, ComplementarityCondition): self.ComplementarityCondition = ComplementarityCondition
+    def get_FirstOrderR(self): return self.FirstOrderR
+    def set_FirstOrderR(self, FirstOrderR): self.FirstOrderR = FirstOrderR
+    def get_FirstOrderLinearR(self): return self.FirstOrderLinearR
+    def set_FirstOrderLinearR(self, FirstOrderLinearR): self.FirstOrderLinearR = FirstOrderLinearR
+    def get_FirstOrderLinearTIR(self): return self.FirstOrderLinearTIR
+    def set_FirstOrderLinearTIR(self, FirstOrderLinearTIR): self.FirstOrderLinearTIR = FirstOrderLinearTIR
+    def get_LagrangianCompliantR(self): return self.LagrangianCompliantR
+    def set_LagrangianCompliantR(self, LagrangianCompliantR): self.LagrangianCompliantR = LagrangianCompliantR
+    def get_LagrangianRheonomousR(self): return self.LagrangianRheonomousR
+    def set_LagrangianRheonomousR(self, LagrangianRheonomousR): self.LagrangianRheonomousR = LagrangianRheonomousR
+    def get_LagrangianScleronomousR(self): return self.LagrangianScleronomousR
+    def set_LagrangianScleronomousR(self, LagrangianScleronomousR): self.LagrangianScleronomousR = LagrangianScleronomousR
+    def get_LagrangianLinearTIR(self): return self.LagrangianLinearTIR
+    def set_LagrangianLinearTIR(self, LagrangianLinearTIR): self.LagrangianLinearTIR = LagrangianLinearTIR
+    def get_RelayNSL(self): return self.RelayNSL
+    def set_RelayNSL(self, RelayNSL): self.RelayNSL = RelayNSL
+    def get_NewtonImpactNSL(self): return self.NewtonImpactNSL
+    def set_NewtonImpactNSL(self, NewtonImpactNSL): self.NewtonImpactNSL = NewtonImpactNSL
+    def get_NewtonImpactFrictionNSL(self): return self.NewtonImpactFrictionNSL
+    def set_NewtonImpactFrictionNSL(self, NewtonImpactFrictionNSL): self.NewtonImpactFrictionNSL = NewtonImpactFrictionNSL
+    def get_ComplementarityConditionNSL(self): return self.ComplementarityConditionNSL
+    def set_ComplementarityConditionNSL(self, ComplementarityConditionNSL): self.ComplementarityConditionNSL = ComplementarityConditionNSL
     def hasContent_(self):
         if (
-            self.FirstOrderRelation is not None or
-            self.FirstOrderLinearRelation is not None or
-            self.FirstOrderLinearTimeInvariantRelation is not None or
-            self.LagrangianRelation is not None or
-            self.LagrangianLinearRelation is not None or
-            self.Relay is not None or
-            self.NewtonImpactLaw is not None or
-            self.NewtonImpactFrictionLaw is not None or
-            self.ComplementarityCondition is not None
+            self.FirstOrderR is not None or
+            self.FirstOrderLinearR is not None or
+            self.FirstOrderLinearTIR is not None or
+            self.LagrangianCompliantR is not None or
+            self.LagrangianRheonomousR is not None or
+            self.LagrangianScleronomousR is not None or
+            self.LagrangianLinearTIR is not None or
+            self.RelayNSL is not None or
+            self.NewtonImpactNSL is not None or
+            self.NewtonImpactFrictionNSL is not None or
+            self.ComplementarityConditionNSL is not None
         ):
             return True
         else:
@@ -4318,24 +4137,28 @@ class Interaction_ContentType(GeneratedsSuper):
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.FirstOrderRelation is not None:
-            self.FirstOrderRelation.export(outfile, level, namespace_, name_='FirstOrderRelation', pretty_print=pretty_print)
-        if self.FirstOrderLinearRelation is not None:
-            self.FirstOrderLinearRelation.export(outfile, level, namespace_, name_='FirstOrderLinearRelation', pretty_print=pretty_print)
-        if self.FirstOrderLinearTimeInvariantRelation is not None:
-            self.FirstOrderLinearTimeInvariantRelation.export(outfile, level, namespace_, name_='FirstOrderLinearTimeInvariantRelation', pretty_print=pretty_print)
-        if self.LagrangianRelation is not None:
-            self.LagrangianRelation.export(outfile, level, namespace_, name_='LagrangianRelation', pretty_print=pretty_print)
-        if self.LagrangianLinearRelation is not None:
-            self.LagrangianLinearRelation.export(outfile, level, namespace_, name_='LagrangianLinearRelation', pretty_print=pretty_print)
-        if self.Relay is not None:
-            self.Relay.export(outfile, level, namespace_, name_='Relay', pretty_print=pretty_print)
-        if self.NewtonImpactLaw is not None:
-            self.NewtonImpactLaw.export(outfile, level, namespace_, name_='NewtonImpactLaw', pretty_print=pretty_print)
-        if self.NewtonImpactFrictionLaw is not None:
-            self.NewtonImpactFrictionLaw.export(outfile, level, namespace_, name_='NewtonImpactFrictionLaw', pretty_print=pretty_print)
-        if self.ComplementarityCondition is not None:
-            self.ComplementarityCondition.export(outfile, level, namespace_, name_='ComplementarityCondition', pretty_print=pretty_print)
+        if self.FirstOrderR is not None:
+            self.FirstOrderR.export(outfile, level, namespace_, name_='FirstOrderR', pretty_print=pretty_print)
+        if self.FirstOrderLinearR is not None:
+            self.FirstOrderLinearR.export(outfile, level, namespace_, name_='FirstOrderLinearR', pretty_print=pretty_print)
+        if self.FirstOrderLinearTIR is not None:
+            self.FirstOrderLinearTIR.export(outfile, level, namespace_, name_='FirstOrderLinearTIR', pretty_print=pretty_print)
+        if self.LagrangianCompliantR is not None:
+            self.LagrangianCompliantR.export(outfile, level, namespace_, name_='LagrangianCompliantR', pretty_print=pretty_print)
+        if self.LagrangianRheonomousR is not None:
+            self.LagrangianRheonomousR.export(outfile, level, namespace_, name_='LagrangianRheonomousR', pretty_print=pretty_print)
+        if self.LagrangianScleronomousR is not None:
+            self.LagrangianScleronomousR.export(outfile, level, namespace_, name_='LagrangianScleronomousR', pretty_print=pretty_print)
+        if self.LagrangianLinearTIR is not None:
+            self.LagrangianLinearTIR.export(outfile, level, namespace_, name_='LagrangianLinearTIR', pretty_print=pretty_print)
+        if self.RelayNSL is not None:
+            self.RelayNSL.export(outfile, level, namespace_, name_='RelayNSL', pretty_print=pretty_print)
+        if self.NewtonImpactNSL is not None:
+            self.NewtonImpactNSL.export(outfile, level, namespace_, name_='NewtonImpactNSL', pretty_print=pretty_print)
+        if self.NewtonImpactFrictionNSL is not None:
+            self.NewtonImpactFrictionNSL.export(outfile, level, namespace_, name_='NewtonImpactFrictionNSL', pretty_print=pretty_print)
+        if self.ComplementarityConditionNSL is not None:
+            self.ComplementarityConditionNSL.export(outfile, level, namespace_, name_='ComplementarityConditionNSL', pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='Interaction_ContentType'):
         level += 1
         already_processed = set()
@@ -4345,58 +4168,70 @@ class Interaction_ContentType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
         pass
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.FirstOrderRelation is not None:
+        if self.FirstOrderR is not None:
             showIndent(outfile, level)
-            outfile.write('FirstOrderRelation=model_.FirstOrderRelationType(\n')
-            self.FirstOrderRelation.exportLiteral(outfile, level, name_='FirstOrderRelation')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.FirstOrderLinearRelation is not None:
-            showIndent(outfile, level)
-            outfile.write('FirstOrderLinearRelation=model_.FirstOrderLinearRelationType(\n')
-            self.FirstOrderLinearRelation.exportLiteral(outfile, level, name_='FirstOrderLinearRelation')
+            outfile.write('FirstOrderR=model_.FirstOrderRType(\n')
+            self.FirstOrderR.exportLiteral(outfile, level, name_='FirstOrderR')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.FirstOrderLinearTimeInvariantRelation is not None:
+        if self.FirstOrderLinearR is not None:
             showIndent(outfile, level)
-            outfile.write('FirstOrderLinearTimeInvariantRelation=model_.FirstOrderLinearTimeInvariantRelationType(\n')
-            self.FirstOrderLinearTimeInvariantRelation.exportLiteral(outfile, level, name_='FirstOrderLinearTimeInvariantRelation')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.LagrangianRelation is not None:
-            showIndent(outfile, level)
-            outfile.write('LagrangianRelation=model_.LagrangianRelationType(\n')
-            self.LagrangianRelation.exportLiteral(outfile, level, name_='LagrangianRelation')
+            outfile.write('FirstOrderLinearR=model_.FirstOrderLinearRType(\n')
+            self.FirstOrderLinearR.exportLiteral(outfile, level, name_='FirstOrderLinearR')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.LagrangianLinearRelation is not None:
+        if self.FirstOrderLinearTIR is not None:
             showIndent(outfile, level)
-            outfile.write('LagrangianLinearRelation=model_.LagrangianLinearRelationType(\n')
-            self.LagrangianLinearRelation.exportLiteral(outfile, level, name_='LagrangianLinearRelation')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.Relay is not None:
-            showIndent(outfile, level)
-            outfile.write('Relay=model_.RelayType(\n')
-            self.Relay.exportLiteral(outfile, level, name_='Relay')
+            outfile.write('FirstOrderLinearTIR=model_.FirstOrderLinearTIRType(\n')
+            self.FirstOrderLinearTIR.exportLiteral(outfile, level, name_='FirstOrderLinearTIR')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.NewtonImpactLaw is not None:
+        if self.LagrangianCompliantR is not None:
             showIndent(outfile, level)
-            outfile.write('NewtonImpactLaw=model_.NewtonImpactLawType(\n')
-            self.NewtonImpactLaw.exportLiteral(outfile, level, name_='NewtonImpactLaw')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.NewtonImpactFrictionLaw is not None:
-            showIndent(outfile, level)
-            outfile.write('NewtonImpactFrictionLaw=model_.NewtonImpactFrictionLawType(\n')
-            self.NewtonImpactFrictionLaw.exportLiteral(outfile, level, name_='NewtonImpactFrictionLaw')
+            outfile.write('LagrangianCompliantR=model_.LagrangianCompliantRType(\n')
+            self.LagrangianCompliantR.exportLiteral(outfile, level, name_='LagrangianCompliantR')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.ComplementarityCondition is not None:
+        if self.LagrangianRheonomousR is not None:
             showIndent(outfile, level)
-            outfile.write('ComplementarityCondition=model_.ComplementarityConditionType(\n')
-            self.ComplementarityCondition.exportLiteral(outfile, level, name_='ComplementarityCondition')
+            outfile.write('LagrangianRheonomousR=model_.LagrangianRheonomousRType(\n')
+            self.LagrangianRheonomousR.exportLiteral(outfile, level, name_='LagrangianRheonomousR')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.LagrangianScleronomousR is not None:
+            showIndent(outfile, level)
+            outfile.write('LagrangianScleronomousR=model_.LagrangianScleronomousRType(\n')
+            self.LagrangianScleronomousR.exportLiteral(outfile, level, name_='LagrangianScleronomousR')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.LagrangianLinearTIR is not None:
+            showIndent(outfile, level)
+            outfile.write('LagrangianLinearTIR=model_.LagrangianLinearTIRType(\n')
+            self.LagrangianLinearTIR.exportLiteral(outfile, level, name_='LagrangianLinearTIR')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.RelayNSL is not None:
+            showIndent(outfile, level)
+            outfile.write('RelayNSL=model_.RelayNSLType(\n')
+            self.RelayNSL.exportLiteral(outfile, level, name_='RelayNSL')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.NewtonImpactNSL is not None:
+            showIndent(outfile, level)
+            outfile.write('NewtonImpactNSL=model_.NewtonImpactNSLType(\n')
+            self.NewtonImpactNSL.exportLiteral(outfile, level, name_='NewtonImpactNSL')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.NewtonImpactFrictionNSL is not None:
+            showIndent(outfile, level)
+            outfile.write('NewtonImpactFrictionNSL=model_.NewtonImpactFrictionNSLType(\n')
+            self.NewtonImpactFrictionNSL.exportLiteral(outfile, level, name_='NewtonImpactFrictionNSL')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.ComplementarityConditionNSL is not None:
+            showIndent(outfile, level)
+            outfile.write('ComplementarityConditionNSL=model_.ComplementarityConditionNSLType(\n')
+            self.ComplementarityConditionNSL.exportLiteral(outfile, level, name_='ComplementarityConditionNSL')
             showIndent(outfile, level)
             outfile.write('),\n')
     def build(self, node):
@@ -4409,46 +4244,54 @@ class Interaction_ContentType(GeneratedsSuper):
     def buildAttributes(self, node, attrs, already_processed):
         pass
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'FirstOrderRelation':
-            obj_ = FirstOrderRelationType.factory()
+        if nodeName_ == 'FirstOrderR':
+            obj_ = FirstOrderRType.factory()
             obj_.build(child_)
-            self.FirstOrderRelation = obj_
-        elif nodeName_ == 'FirstOrderLinearRelation':
-            obj_ = FirstOrderLinearRelationType.factory()
+            self.FirstOrderR = obj_
+        elif nodeName_ == 'FirstOrderLinearR':
+            obj_ = FirstOrderLinearRType.factory()
             obj_.build(child_)
-            self.FirstOrderLinearRelation = obj_
-        elif nodeName_ == 'FirstOrderLinearTimeInvariantRelation':
-            obj_ = FirstOrderLinearTimeInvariantRelationType.factory()
+            self.FirstOrderLinearR = obj_
+        elif nodeName_ == 'FirstOrderLinearTIR':
+            obj_ = FirstOrderLinearTIRType.factory()
             obj_.build(child_)
-            self.FirstOrderLinearTimeInvariantRelation = obj_
-        elif nodeName_ == 'LagrangianRelation':
-            obj_ = LagrangianRelationType.factory()
+            self.FirstOrderLinearTIR = obj_
+        elif nodeName_ == 'LagrangianCompliantR':
+            obj_ = LagrangianCompliantRType.factory()
             obj_.build(child_)
-            self.LagrangianRelation = obj_
-        elif nodeName_ == 'LagrangianLinearRelation':
-            obj_ = LagrangianLinearRelationType.factory()
+            self.LagrangianCompliantR = obj_
+        elif nodeName_ == 'LagrangianRheonomousR':
+            obj_ = LagrangianRheonomousRType.factory()
             obj_.build(child_)
-            self.LagrangianLinearRelation = obj_
-        elif nodeName_ == 'Relay':
-            obj_ = RelayType.factory()
+            self.LagrangianRheonomousR = obj_
+        elif nodeName_ == 'LagrangianScleronomousR':
+            obj_ = LagrangianScleronomousRType.factory()
             obj_.build(child_)
-            self.Relay = obj_
-        elif nodeName_ == 'NewtonImpactLaw':
-            obj_ = NewtonImpactLawType.factory()
+            self.LagrangianScleronomousR = obj_
+        elif nodeName_ == 'LagrangianLinearTIR':
+            obj_ = LagrangianLinearTIRType.factory()
             obj_.build(child_)
-            self.NewtonImpactLaw = obj_
-        elif nodeName_ == 'NewtonImpactFrictionLaw':
-            obj_ = NewtonImpactFrictionLawType.factory()
+            self.LagrangianLinearTIR = obj_
+        elif nodeName_ == 'RelayNSL':
+            obj_ = RelayNSLType.factory()
             obj_.build(child_)
-            self.NewtonImpactFrictionLaw = obj_
-        elif nodeName_ == 'ComplementarityCondition':
-            obj_ = ComplementarityConditionType.factory()
+            self.RelayNSL = obj_
+        elif nodeName_ == 'NewtonImpactNSL':
+            obj_ = NewtonImpactNSLType.factory()
             obj_.build(child_)
-            self.ComplementarityCondition = obj_
+            self.NewtonImpactNSL = obj_
+        elif nodeName_ == 'NewtonImpactFrictionNSL':
+            obj_ = NewtonImpactFrictionNSLType.factory()
+            obj_.build(child_)
+            self.NewtonImpactFrictionNSL = obj_
+        elif nodeName_ == 'ComplementarityConditionNSL':
+            obj_ = ComplementarityConditionNSLType.factory()
+            obj_.build(child_)
+            self.ComplementarityConditionNSL = obj_
 # end class Interaction_ContentType
 
 
-class FirstOrderRelationType(GeneratedsSuper):
+class FirstOrderRType(GeneratedsSuper):
     subclass = None
     superclass = None
     def __init__(self, type_='Undefined', h=None, g=None, jacobianG=None, jacobianH=None):
@@ -4458,10 +4301,10 @@ class FirstOrderRelationType(GeneratedsSuper):
         self.jacobianG = jacobianG
         self.jacobianH = jacobianH
     def factory(*args_, **kwargs_):
-        if FirstOrderRelationType.subclass:
-            return FirstOrderRelationType.subclass(*args_, **kwargs_)
+        if FirstOrderRType.subclass:
+            return FirstOrderRType.subclass(*args_, **kwargs_)
         else:
-            return FirstOrderRelationType(*args_, **kwargs_)
+            return FirstOrderRType(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_h(self): return self.h
     def set_h(self, h): self.h = h
@@ -4483,7 +4326,7 @@ class FirstOrderRelationType(GeneratedsSuper):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='FirstOrderRelationType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='FirstOrderRType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -4491,19 +4334,19 @@ class FirstOrderRelationType(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='FirstOrderRelationType')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='FirstOrderRType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='FirstOrderRelationType', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='FirstOrderRType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderRelationType'):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderRType'):
         if self.type_ is not None and 'type_' not in already_processed:
             already_processed.add('type_')
             outfile.write(' type=%s' % (self.gds_format_string(quote_attrib(self.type_).encode(ExternalEncoding), input_name='type'), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderRelationType', fromsubclass_=False, pretty_print=True):
+    def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderRType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -4516,7 +4359,7 @@ class FirstOrderRelationType(GeneratedsSuper):
             self.jacobianG.export(outfile, level, namespace_, name_='jacobianG', pretty_print=pretty_print)
         if self.jacobianH is not None:
             self.jacobianH.export(outfile, level, namespace_, name_='jacobianH', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='FirstOrderRelationType'):
+    def exportLiteral(self, outfile, level, name_='FirstOrderRType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
@@ -4581,24 +4424,23 @@ class FirstOrderRelationType(GeneratedsSuper):
             obj_ = listOfMatrices.factory()
             obj_.build(child_)
             self.jacobianH = obj_
-# end class FirstOrderRelationType
+# end class FirstOrderRType
 
 
-class FirstOrderLinearRelationType(GeneratedsSuper):
+class FirstOrderLinearRType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, type_='Undefined', C=None, D=None, F=None, e=None, B=None):
-        self.type_ = _cast(None, type_)
+    def __init__(self, C=None, D=None, F=None, e=None, B=None):
         self.C = C
         self.D = D
         self.F = F
         self.e = e
         self.B = B
     def factory(*args_, **kwargs_):
-        if FirstOrderLinearRelationType.subclass:
-            return FirstOrderLinearRelationType.subclass(*args_, **kwargs_)
+        if FirstOrderLinearRType.subclass:
+            return FirstOrderLinearRType.subclass(*args_, **kwargs_)
         else:
-            return FirstOrderLinearRelationType(*args_, **kwargs_)
+            return FirstOrderLinearRType(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_C(self): return self.C
     def set_C(self, C): self.C = C
@@ -4610,8 +4452,6 @@ class FirstOrderLinearRelationType(GeneratedsSuper):
     def set_e(self, e): self.e = e
     def get_B(self): return self.B
     def set_B(self, B): self.B = B
-    def get_type(self): return self.type_
-    def set_type(self, type_): self.type_ = type_
     def hasContent_(self):
         if (
             self.C is not None or
@@ -4623,7 +4463,7 @@ class FirstOrderLinearRelationType(GeneratedsSuper):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='FirstOrderLinearRelationType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='FirstOrderLinearRType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -4631,19 +4471,17 @@ class FirstOrderLinearRelationType(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='FirstOrderLinearRelationType')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='FirstOrderLinearRType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='FirstOrderLinearRelationType', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='FirstOrderLinearRType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderLinearRelationType'):
-        if self.type_ is not None and 'type_' not in already_processed:
-            already_processed.add('type_')
-            outfile.write(' type=%s' % (self.gds_format_string(quote_attrib(self.type_).encode(ExternalEncoding), input_name='type'), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderLinearRelationType', fromsubclass_=False, pretty_print=True):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderLinearRType'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderLinearRType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -4658,17 +4496,14 @@ class FirstOrderLinearRelationType(GeneratedsSuper):
             self.e.export(outfile, level, namespace_, name_='e', pretty_print=pretty_print)
         if self.B is not None:
             self.B.export(outfile, level, namespace_, name_='B', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='FirstOrderLinearRelationType'):
+    def exportLiteral(self, outfile, level, name_='FirstOrderLinearRType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.type_ is not None and 'type_' not in already_processed:
-            already_processed.add('type_')
-            showIndent(outfile, level)
-            outfile.write('type_="%s",\n' % (self.type_,))
+        pass
     def exportLiteralChildren(self, outfile, level, name_):
         if self.C is not None:
             showIndent(outfile, level)
@@ -4708,10 +4543,7 @@ class FirstOrderLinearRelationType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('type', node)
-        if value is not None and 'type' not in already_processed:
-            already_processed.add('type')
-            self.type_ = value
+        pass
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'C':
             obj_ = matrix.factory()
@@ -4733,24 +4565,23 @@ class FirstOrderLinearRelationType(GeneratedsSuper):
             obj_ = matrix.factory()
             obj_.build(child_)
             self.B = obj_
-# end class FirstOrderLinearRelationType
+# end class FirstOrderLinearRType
 
 
-class FirstOrderLinearTimeInvariantRelationType(GeneratedsSuper):
+class FirstOrderLinearTIRType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, type_='Undefined', C=None, D=None, F=None, e=None, B=None):
-        self.type_ = _cast(None, type_)
+    def __init__(self, C=None, D=None, F=None, e=None, B=None):
         self.C = C
         self.D = D
         self.F = F
         self.e = e
         self.B = B
     def factory(*args_, **kwargs_):
-        if FirstOrderLinearTimeInvariantRelationType.subclass:
-            return FirstOrderLinearTimeInvariantRelationType.subclass(*args_, **kwargs_)
+        if FirstOrderLinearTIRType.subclass:
+            return FirstOrderLinearTIRType.subclass(*args_, **kwargs_)
         else:
-            return FirstOrderLinearTimeInvariantRelationType(*args_, **kwargs_)
+            return FirstOrderLinearTIRType(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_C(self): return self.C
     def set_C(self, C): self.C = C
@@ -4762,8 +4593,6 @@ class FirstOrderLinearTimeInvariantRelationType(GeneratedsSuper):
     def set_e(self, e): self.e = e
     def get_B(self): return self.B
     def set_B(self, B): self.B = B
-    def get_type(self): return self.type_
-    def set_type(self, type_): self.type_ = type_
     def hasContent_(self):
         if (
             self.C is not None or
@@ -4775,7 +4604,7 @@ class FirstOrderLinearTimeInvariantRelationType(GeneratedsSuper):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='FirstOrderLinearTimeInvariantRelationType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='FirstOrderLinearTIRType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -4783,19 +4612,17 @@ class FirstOrderLinearTimeInvariantRelationType(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='FirstOrderLinearTimeInvariantRelationType')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='FirstOrderLinearTIRType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='FirstOrderLinearTimeInvariantRelationType', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='FirstOrderLinearTIRType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderLinearTimeInvariantRelationType'):
-        if self.type_ is not None and 'type_' not in already_processed:
-            already_processed.add('type_')
-            outfile.write(' type=%s' % (self.gds_format_string(quote_attrib(self.type_).encode(ExternalEncoding), input_name='type'), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderLinearTimeInvariantRelationType', fromsubclass_=False, pretty_print=True):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderLinearTIRType'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderLinearTIRType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -4810,17 +4637,14 @@ class FirstOrderLinearTimeInvariantRelationType(GeneratedsSuper):
             self.e.export(outfile, level, namespace_, name_='e', pretty_print=pretty_print)
         if self.B is not None:
             self.B.export(outfile, level, namespace_, name_='B', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='FirstOrderLinearTimeInvariantRelationType'):
+    def exportLiteral(self, outfile, level, name_='FirstOrderLinearTIRType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.type_ is not None and 'type_' not in already_processed:
-            already_processed.add('type_')
-            showIndent(outfile, level)
-            outfile.write('type_="%s",\n' % (self.type_,))
+        pass
     def exportLiteralChildren(self, outfile, level, name_):
         if self.C is not None:
             showIndent(outfile, level)
@@ -4860,10 +4684,7 @@ class FirstOrderLinearTimeInvariantRelationType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('type', node)
-        if value is not None and 'type' not in already_processed:
-            already_processed.add('type')
-            self.type_ = value
+        pass
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'C':
             obj_ = matrix.factory()
@@ -4885,41 +4706,38 @@ class FirstOrderLinearTimeInvariantRelationType(GeneratedsSuper):
             obj_ = matrix.factory()
             obj_.build(child_)
             self.B = obj_
-# end class FirstOrderLinearTimeInvariantRelationType
+# end class FirstOrderLinearTIRType
 
 
-class LagrangianRelationType(GeneratedsSuper):
+class LagrangianCompliantRType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, type_='Undefined', h=None, jacobianH=None, C=None):
-        self.type_ = _cast(None, type_)
+    def __init__(self, h=None, Jacobianhq=None, Jacobianhlambda=None):
         self.h = h
-        self.jacobianH = jacobianH
-        self.C = C
+        self.Jacobianhq = Jacobianhq
+        self.Jacobianhlambda = Jacobianhlambda
     def factory(*args_, **kwargs_):
-        if LagrangianRelationType.subclass:
-            return LagrangianRelationType.subclass(*args_, **kwargs_)
+        if LagrangianCompliantRType.subclass:
+            return LagrangianCompliantRType.subclass(*args_, **kwargs_)
         else:
-            return LagrangianRelationType(*args_, **kwargs_)
+            return LagrangianCompliantRType(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_h(self): return self.h
     def set_h(self, h): self.h = h
-    def get_jacobianH(self): return self.jacobianH
-    def set_jacobianH(self, jacobianH): self.jacobianH = jacobianH
-    def get_C(self): return self.C
-    def set_C(self, C): self.C = C
-    def get_type(self): return self.type_
-    def set_type(self, type_): self.type_ = type_
+    def get_Jacobianhq(self): return self.Jacobianhq
+    def set_Jacobianhq(self, Jacobianhq): self.Jacobianhq = Jacobianhq
+    def get_Jacobianhlambda(self): return self.Jacobianhlambda
+    def set_Jacobianhlambda(self, Jacobianhlambda): self.Jacobianhlambda = Jacobianhlambda
     def hasContent_(self):
         if (
             self.h is not None or
-            self.jacobianH is not None or
-            self.C is not None
+            self.Jacobianhq is not None or
+            self.Jacobianhlambda is not None
         ):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='LagrangianRelationType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='LagrangianCompliantRType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -4927,40 +4745,35 @@ class LagrangianRelationType(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='LagrangianRelationType')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='LagrangianCompliantRType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='LagrangianRelationType', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='LagrangianCompliantRType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LagrangianRelationType'):
-        if self.type_ is not None and 'type_' not in already_processed:
-            already_processed.add('type_')
-            outfile.write(' type=%s' % (self.gds_format_string(quote_attrib(self.type_).encode(ExternalEncoding), input_name='type'), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='LagrangianRelationType', fromsubclass_=False, pretty_print=True):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LagrangianCompliantRType'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='LagrangianCompliantRType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
         if self.h is not None:
             self.h.export(outfile, level, namespace_, name_='h', pretty_print=pretty_print)
-        if self.jacobianH is not None:
-            self.jacobianH.export(outfile, level, namespace_, name_='jacobianH', pretty_print=pretty_print)
-        if self.C is not None:
-            self.C.export(outfile, level, namespace_, name_='C', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='LagrangianRelationType'):
+        if self.Jacobianhq is not None:
+            self.Jacobianhq.export(outfile, level, namespace_, name_='Jacobianhq', pretty_print=pretty_print)
+        if self.Jacobianhlambda is not None:
+            self.Jacobianhlambda.export(outfile, level, namespace_, name_='Jacobianhlambda', pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='LagrangianCompliantRType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.type_ is not None and 'type_' not in already_processed:
-            already_processed.add('type_')
-            showIndent(outfile, level)
-            outfile.write('type_="%s",\n' % (self.type_,))
+        pass
     def exportLiteralChildren(self, outfile, level, name_):
         if self.h is not None:
             showIndent(outfile, level)
@@ -4968,16 +4781,16 @@ class LagrangianRelationType(GeneratedsSuper):
             self.h.exportLiteral(outfile, level, name_='h')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.jacobianH is not None:
+        if self.Jacobianhq is not None:
             showIndent(outfile, level)
-            outfile.write('jacobianH=model_.listOfMatrices(\n')
-            self.jacobianH.exportLiteral(outfile, level, name_='jacobianH')
+            outfile.write('Jacobianhq=model_.pluginDef(\n')
+            self.Jacobianhq.exportLiteral(outfile, level, name_='Jacobianhq')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.C is not None:
+        if self.Jacobianhlambda is not None:
             showIndent(outfile, level)
-            outfile.write('C=model_.matrix(\n')
-            self.C.exportLiteral(outfile, level, name_='C')
+            outfile.write('Jacobianhlambda=model_.pluginDef(\n')
+            self.Jacobianhlambda.exportLiteral(outfile, level, name_='Jacobianhlambda')
             showIndent(outfile, level)
             outfile.write('),\n')
     def build(self, node):
@@ -4988,62 +4801,52 @@ class LagrangianRelationType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('type', node)
-        if value is not None and 'type' not in already_processed:
-            already_processed.add('type')
-            self.type_ = value
+        pass
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'h':
             obj_ = pluginDef.factory()
             obj_.build(child_)
             self.h = obj_
-        elif nodeName_ == 'jacobianH':
-            obj_ = listOfMatrices.factory()
+        elif nodeName_ == 'Jacobianhq':
+            obj_ = pluginDef.factory()
             obj_.build(child_)
-            self.jacobianH = obj_
-        elif nodeName_ == 'C':
-            obj_ = matrix.factory()
+            self.Jacobianhq = obj_
+        elif nodeName_ == 'Jacobianhlambda':
+            obj_ = pluginDef.factory()
             obj_.build(child_)
-            self.C = obj_
-# end class LagrangianRelationType
+            self.Jacobianhlambda = obj_
+# end class LagrangianCompliantRType
 
 
-class LagrangianLinearRelationType(GeneratedsSuper):
+class LagrangianRheonomousRType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, type_='Undefined', H=None, b=None, D=None, F=None):
-        self.type_ = _cast(None, type_)
-        self.H = H
-        self.b = b
-        self.D = D
-        self.F = F
+    def __init__(self, h=None, Jacobianhq=None, JacobianDoth=None):
+        self.h = h
+        self.Jacobianhq = Jacobianhq
+        self.JacobianDoth = JacobianDoth
     def factory(*args_, **kwargs_):
-        if LagrangianLinearRelationType.subclass:
-            return LagrangianLinearRelationType.subclass(*args_, **kwargs_)
+        if LagrangianRheonomousRType.subclass:
+            return LagrangianRheonomousRType.subclass(*args_, **kwargs_)
         else:
-            return LagrangianLinearRelationType(*args_, **kwargs_)
+            return LagrangianRheonomousRType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_H(self): return self.H
-    def set_H(self, H): self.H = H
-    def get_b(self): return self.b
-    def set_b(self, b): self.b = b
-    def get_D(self): return self.D
-    def set_D(self, D): self.D = D
-    def get_F(self): return self.F
-    def set_F(self, F): self.F = F
-    def get_type(self): return self.type_
-    def set_type(self, type_): self.type_ = type_
+    def get_h(self): return self.h
+    def set_h(self, h): self.h = h
+    def get_Jacobianhq(self): return self.Jacobianhq
+    def set_Jacobianhq(self, Jacobianhq): self.Jacobianhq = Jacobianhq
+    def get_JacobianDoth(self): return self.JacobianDoth
+    def set_JacobianDoth(self, JacobianDoth): self.JacobianDoth = JacobianDoth
     def hasContent_(self):
         if (
-            self.H is not None or
-            self.b is not None or
-            self.D is not None or
-            self.F is not None
+            self.h is not None or
+            self.Jacobianhq is not None or
+            self.JacobianDoth is not None
         ):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='LagrangianLinearRelationType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='LagrangianRheonomousRType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -5051,53 +4854,264 @@ class LagrangianLinearRelationType(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='LagrangianLinearRelationType')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='LagrangianRheonomousRType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='LagrangianLinearRelationType', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='LagrangianRheonomousRType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LagrangianLinearRelationType'):
-        if self.type_ is not None and 'type_' not in already_processed:
-            already_processed.add('type_')
-            outfile.write(' type=%s' % (self.gds_format_string(quote_attrib(self.type_).encode(ExternalEncoding), input_name='type'), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='LagrangianLinearRelationType', fromsubclass_=False, pretty_print=True):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LagrangianRheonomousRType'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='LagrangianRheonomousRType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.H is not None:
-            self.H.export(outfile, level, namespace_, name_='H', pretty_print=pretty_print)
-        if self.b is not None:
-            self.b.export(outfile, level, namespace_, name_='b', pretty_print=pretty_print)
-        if self.D is not None:
-            self.D.export(outfile, level, namespace_, name_='D', pretty_print=pretty_print)
-        if self.F is not None:
-            self.F.export(outfile, level, namespace_, name_='F', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='LagrangianLinearRelationType'):
+        if self.h is not None:
+            self.h.export(outfile, level, namespace_, name_='h', pretty_print=pretty_print)
+        if self.Jacobianhq is not None:
+            self.Jacobianhq.export(outfile, level, namespace_, name_='Jacobianhq', pretty_print=pretty_print)
+        if self.JacobianDoth is not None:
+            self.JacobianDoth.export(outfile, level, namespace_, name_='JacobianDoth', pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='LagrangianRheonomousRType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.type_ is not None and 'type_' not in already_processed:
-            already_processed.add('type_')
-            showIndent(outfile, level)
-            outfile.write('type_="%s",\n' % (self.type_,))
+        pass
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.H is not None:
+        if self.h is not None:
             showIndent(outfile, level)
-            outfile.write('H=model_.matrix(\n')
-            self.H.exportLiteral(outfile, level, name_='H')
+            outfile.write('h=model_.pluginDef(\n')
+            self.h.exportLiteral(outfile, level, name_='h')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.b is not None:
+        if self.Jacobianhq is not None:
             showIndent(outfile, level)
-            outfile.write('b=model_.vector(\n')
-            self.b.exportLiteral(outfile, level, name_='b')
+            outfile.write('Jacobianhq=model_.pluginDef(\n')
+            self.Jacobianhq.exportLiteral(outfile, level, name_='Jacobianhq')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.JacobianDoth is not None:
+            showIndent(outfile, level)
+            outfile.write('JacobianDoth=model_.pluginDef(\n')
+            self.JacobianDoth.exportLiteral(outfile, level, name_='JacobianDoth')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'h':
+            obj_ = pluginDef.factory()
+            obj_.build(child_)
+            self.h = obj_
+        elif nodeName_ == 'Jacobianhq':
+            obj_ = pluginDef.factory()
+            obj_.build(child_)
+            self.Jacobianhq = obj_
+        elif nodeName_ == 'JacobianDoth':
+            obj_ = pluginDef.factory()
+            obj_.build(child_)
+            self.JacobianDoth = obj_
+# end class LagrangianRheonomousRType
+
+
+class LagrangianScleronomousRType(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, h=None, Jacobianhq=None, JacobianDothq=None):
+        self.h = h
+        self.Jacobianhq = Jacobianhq
+        self.JacobianDothq = JacobianDothq
+    def factory(*args_, **kwargs_):
+        if LagrangianScleronomousRType.subclass:
+            return LagrangianScleronomousRType.subclass(*args_, **kwargs_)
+        else:
+            return LagrangianScleronomousRType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_h(self): return self.h
+    def set_h(self, h): self.h = h
+    def get_Jacobianhq(self): return self.Jacobianhq
+    def set_Jacobianhq(self, Jacobianhq): self.Jacobianhq = Jacobianhq
+    def get_JacobianDothq(self): return self.JacobianDothq
+    def set_JacobianDothq(self, JacobianDothq): self.JacobianDothq = JacobianDothq
+    def hasContent_(self):
+        if (
+            self.h is not None or
+            self.Jacobianhq is not None or
+            self.JacobianDothq is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='LagrangianScleronomousRType', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='LagrangianScleronomousRType')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='LagrangianScleronomousRType', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LagrangianScleronomousRType'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='LagrangianScleronomousRType', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.h is not None:
+            self.h.export(outfile, level, namespace_, name_='h', pretty_print=pretty_print)
+        if self.Jacobianhq is not None:
+            self.Jacobianhq.export(outfile, level, namespace_, name_='Jacobianhq', pretty_print=pretty_print)
+        if self.JacobianDothq is not None:
+            self.JacobianDothq.export(outfile, level, namespace_, name_='JacobianDothq', pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='LagrangianScleronomousRType'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.h is not None:
+            showIndent(outfile, level)
+            outfile.write('h=model_.pluginDef(\n')
+            self.h.exportLiteral(outfile, level, name_='h')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.Jacobianhq is not None:
+            showIndent(outfile, level)
+            outfile.write('Jacobianhq=model_.pluginDef(\n')
+            self.Jacobianhq.exportLiteral(outfile, level, name_='Jacobianhq')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.JacobianDothq is not None:
+            showIndent(outfile, level)
+            outfile.write('JacobianDothq=model_.pluginDef(\n')
+            self.JacobianDothq.exportLiteral(outfile, level, name_='JacobianDothq')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'h':
+            obj_ = pluginDef.factory()
+            obj_.build(child_)
+            self.h = obj_
+        elif nodeName_ == 'Jacobianhq':
+            obj_ = pluginDef.factory()
+            obj_.build(child_)
+            self.Jacobianhq = obj_
+        elif nodeName_ == 'JacobianDothq':
+            obj_ = pluginDef.factory()
+            obj_.build(child_)
+            self.JacobianDothq = obj_
+# end class LagrangianScleronomousRType
+
+
+class LagrangianLinearTIRType(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, C=None, D=None, F=None, e=None):
+        self.C = C
+        self.D = D
+        self.F = F
+        self.e = e
+    def factory(*args_, **kwargs_):
+        if LagrangianLinearTIRType.subclass:
+            return LagrangianLinearTIRType.subclass(*args_, **kwargs_)
+        else:
+            return LagrangianLinearTIRType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_C(self): return self.C
+    def set_C(self, C): self.C = C
+    def get_D(self): return self.D
+    def set_D(self, D): self.D = D
+    def get_F(self): return self.F
+    def set_F(self, F): self.F = F
+    def get_e(self): return self.e
+    def set_e(self, e): self.e = e
+    def hasContent_(self):
+        if (
+            self.C is not None or
+            self.D is not None or
+            self.F is not None or
+            self.e is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='LagrangianLinearTIRType', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='LagrangianLinearTIRType')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='LagrangianLinearTIRType', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LagrangianLinearTIRType'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='LagrangianLinearTIRType', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.C is not None:
+            self.C.export(outfile, level, namespace_, name_='C', pretty_print=pretty_print)
+        if self.D is not None:
+            self.D.export(outfile, level, namespace_, name_='D', pretty_print=pretty_print)
+        if self.F is not None:
+            self.F.export(outfile, level, namespace_, name_='F', pretty_print=pretty_print)
+        if self.e is not None:
+            self.e.export(outfile, level, namespace_, name_='e', pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='LagrangianLinearTIRType'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.C is not None:
+            showIndent(outfile, level)
+            outfile.write('C=model_.matrix(\n')
+            self.C.exportLiteral(outfile, level, name_='C')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.D is not None:
@@ -5112,6 +5126,12 @@ class LagrangianLinearRelationType(GeneratedsSuper):
             self.F.exportLiteral(outfile, level, name_='F')
             showIndent(outfile, level)
             outfile.write('),\n')
+        if self.e is not None:
+            showIndent(outfile, level)
+            outfile.write('e=model_.vector(\n')
+            self.e.exportLiteral(outfile, level, name_='e')
+            showIndent(outfile, level)
+            outfile.write('),\n')
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -5120,19 +5140,12 @@ class LagrangianLinearRelationType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('type', node)
-        if value is not None and 'type' not in already_processed:
-            already_processed.add('type')
-            self.type_ = value
+        pass
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'H':
+        if nodeName_ == 'C':
             obj_ = matrix.factory()
             obj_.build(child_)
-            self.H = obj_
-        elif nodeName_ == 'b':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.b = obj_
+            self.C = obj_
         elif nodeName_ == 'D':
             obj_ = matrix.factory()
             obj_.build(child_)
@@ -5141,38 +5154,40 @@ class LagrangianLinearRelationType(GeneratedsSuper):
             obj_ = matrix.factory()
             obj_.build(child_)
             self.F = obj_
-# end class LagrangianLinearRelationType
+        elif nodeName_ == 'e':
+            obj_ = vector.factory()
+            obj_.build(child_)
+            self.e = obj_
+# end class LagrangianLinearTIRType
 
 
-class RelayType(GeneratedsSuper):
+class RelayNSLType(NSL):
     subclass = None
-    superclass = None
-    def __init__(self, c=None, d=None, size=None):
-        self.c = c
-        self.d = d
-        self.size = size
+    superclass = NSL
+    def __init__(self, size=None, ub=None, lb=None):
+        super(RelayNSLType, self).__init__(size, )
+        self.ub = ub
+        self.lb = lb
     def factory(*args_, **kwargs_):
-        if RelayType.subclass:
-            return RelayType.subclass(*args_, **kwargs_)
+        if RelayNSLType.subclass:
+            return RelayNSLType.subclass(*args_, **kwargs_)
         else:
-            return RelayType(*args_, **kwargs_)
+            return RelayNSLType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_c(self): return self.c
-    def set_c(self, c): self.c = c
-    def get_d(self): return self.d
-    def set_d(self, d): self.d = d
-    def get_size(self): return self.size
-    def set_size(self, size): self.size = size
+    def get_ub(self): return self.ub
+    def set_ub(self, ub): self.ub = ub
+    def get_lb(self): return self.lb
+    def set_lb(self, lb): self.lb = lb
     def hasContent_(self):
         if (
-            self.c is not None or
-            self.d is not None or
-            self.size is not None
+            self.ub is not None or
+            self.lb is not None or
+            super(RelayNSLType, self).hasContent_()
         ):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='RelayType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='RelayNSLType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -5180,48 +5195,44 @@ class RelayType(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='RelayType')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='RelayNSLType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='RelayType', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='RelayNSLType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='RelayType'):
-        pass
-    def exportChildren(self, outfile, level, namespace_='', name_='RelayType', fromsubclass_=False, pretty_print=True):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='RelayNSLType'):
+        super(RelayNSLType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='RelayNSLType')
+    def exportChildren(self, outfile, level, namespace_='', name_='RelayNSLType', fromsubclass_=False, pretty_print=True):
+        super(RelayNSLType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.c is not None:
+        if self.ub is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sc>%s</%sc>%s' % (namespace_, self.gds_format_double(self.c, input_name='c'), namespace_, eol_))
-        if self.d is not None:
+            outfile.write('<%sub>%s</%sub>%s' % (namespace_, self.gds_format_double(self.ub, input_name='ub'), namespace_, eol_))
+        if self.lb is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sd>%s</%sd>%s' % (namespace_, self.gds_format_double(self.d, input_name='d'), namespace_, eol_))
-        if self.size is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssize>%s</%ssize>%s' % (namespace_, self.gds_format_integer(self.size, input_name='size'), namespace_, eol_))
-    def exportLiteral(self, outfile, level, name_='RelayType'):
+            outfile.write('<%slb>%s</%slb>%s' % (namespace_, self.gds_format_double(self.lb, input_name='lb'), namespace_, eol_))
+    def exportLiteral(self, outfile, level, name_='RelayNSLType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
+        super(RelayNSLType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.c is not None:
+        super(RelayNSLType, self).exportLiteralChildren(outfile, level, name_)
+        if self.ub is not None:
             showIndent(outfile, level)
-            outfile.write('c=%e,\n' % self.c)
-        if self.d is not None:
+            outfile.write('ub=%e,\n' % self.ub)
+        if self.lb is not None:
             showIndent(outfile, level)
-            outfile.write('d=%e,\n' % self.d)
-        if self.size is not None:
-            showIndent(outfile, level)
-            outfile.write('size=%d,\n' % self.size)
+            outfile.write('lb=%e,\n' % self.lb)
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -5230,62 +5241,51 @@ class RelayType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        pass
+        super(RelayNSLType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'c':
+        if nodeName_ == 'ub':
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
             except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
-            fval_ = self.gds_validate_float(fval_, node, 'c')
-            self.c = fval_
-        elif nodeName_ == 'd':
+            fval_ = self.gds_validate_float(fval_, node, 'ub')
+            self.ub = fval_
+        elif nodeName_ == 'lb':
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
             except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
-            fval_ = self.gds_validate_float(fval_, node, 'd')
-            self.d = fval_
-        elif nodeName_ == 'size':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ <= 0:
-                raise_parse_error(child_, 'requires positiveInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'size')
-            self.size = ival_
-# end class RelayType
+            fval_ = self.gds_validate_float(fval_, node, 'lb')
+            self.lb = fval_
+        super(RelayNSLType, self).buildChildren(child_, node, nodeName_, True)
+# end class RelayNSLType
 
 
-class NewtonImpactLawType(GeneratedsSuper):
+class NewtonImpactNSLType(NSL):
     subclass = None
-    superclass = None
-    def __init__(self, e=None, size=None):
+    superclass = NSL
+    def __init__(self, size=None, e=None):
+        super(NewtonImpactNSLType, self).__init__(size, )
         self.e = e
-        self.size = size
     def factory(*args_, **kwargs_):
-        if NewtonImpactLawType.subclass:
-            return NewtonImpactLawType.subclass(*args_, **kwargs_)
+        if NewtonImpactNSLType.subclass:
+            return NewtonImpactNSLType.subclass(*args_, **kwargs_)
         else:
-            return NewtonImpactLawType(*args_, **kwargs_)
+            return NewtonImpactNSLType(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_e(self): return self.e
     def set_e(self, e): self.e = e
-    def get_size(self): return self.size
-    def set_size(self, size): self.size = size
     def hasContent_(self):
         if (
             self.e is not None or
-            self.size is not None
+            super(NewtonImpactNSLType, self).hasContent_()
         ):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='NewtonImpactLawType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='NewtonImpactNSLType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -5293,17 +5293,18 @@ class NewtonImpactLawType(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='NewtonImpactLawType')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='NewtonImpactNSLType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='NewtonImpactLawType', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='NewtonImpactNSLType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='NewtonImpactLawType'):
-        pass
-    def exportChildren(self, outfile, level, namespace_='', name_='NewtonImpactLawType', fromsubclass_=False, pretty_print=True):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='NewtonImpactNSLType'):
+        super(NewtonImpactNSLType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='NewtonImpactNSLType')
+    def exportChildren(self, outfile, level, namespace_='', name_='NewtonImpactNSLType', fromsubclass_=False, pretty_print=True):
+        super(NewtonImpactNSLType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
             eol_ = '\n'
         else:
@@ -5311,24 +5312,19 @@ class NewtonImpactLawType(GeneratedsSuper):
         if self.e is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%se>%s</%se>%s' % (namespace_, self.gds_format_double(self.e, input_name='e'), namespace_, eol_))
-        if self.size is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssize>%s</%ssize>%s' % (namespace_, self.gds_format_integer(self.size, input_name='size'), namespace_, eol_))
-    def exportLiteral(self, outfile, level, name_='NewtonImpactLawType'):
+    def exportLiteral(self, outfile, level, name_='NewtonImpactNSLType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
+        super(NewtonImpactNSLType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
+        super(NewtonImpactNSLType, self).exportLiteralChildren(outfile, level, name_)
         if self.e is not None:
             showIndent(outfile, level)
             outfile.write('e=%e,\n' % self.e)
-        if self.size is not None:
-            showIndent(outfile, level)
-            outfile.write('size=%d,\n' % self.size)
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -5337,7 +5333,7 @@ class NewtonImpactLawType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        pass
+        super(NewtonImpactNSLType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'e':
             sval_ = child_.text
@@ -5347,32 +5343,23 @@ class NewtonImpactLawType(GeneratedsSuper):
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'e')
             self.e = fval_
-        elif nodeName_ == 'size':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ <= 0:
-                raise_parse_error(child_, 'requires positiveInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'size')
-            self.size = ival_
-# end class NewtonImpactLawType
+        super(NewtonImpactNSLType, self).buildChildren(child_, node, nodeName_, True)
+# end class NewtonImpactNSLType
 
 
-class NewtonImpactFrictionLawType(GeneratedsSuper):
+class NewtonImpactFrictionNSLType(NSL):
     subclass = None
-    superclass = None
-    def __init__(self, en=None, et=None, mu=None, size=None):
+    superclass = NSL
+    def __init__(self, size=None, en=None, et=None, mu=None):
+        super(NewtonImpactFrictionNSLType, self).__init__(size, )
         self.en = en
         self.et = et
         self.mu = mu
-        self.size = size
     def factory(*args_, **kwargs_):
-        if NewtonImpactFrictionLawType.subclass:
-            return NewtonImpactFrictionLawType.subclass(*args_, **kwargs_)
+        if NewtonImpactFrictionNSLType.subclass:
+            return NewtonImpactFrictionNSLType.subclass(*args_, **kwargs_)
         else:
-            return NewtonImpactFrictionLawType(*args_, **kwargs_)
+            return NewtonImpactFrictionNSLType(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_en(self): return self.en
     def set_en(self, en): self.en = en
@@ -5380,19 +5367,17 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
     def set_et(self, et): self.et = et
     def get_mu(self): return self.mu
     def set_mu(self, mu): self.mu = mu
-    def get_size(self): return self.size
-    def set_size(self, size): self.size = size
     def hasContent_(self):
         if (
             self.en is not None or
             self.et is not None or
             self.mu is not None or
-            self.size is not None
+            super(NewtonImpactFrictionNSLType, self).hasContent_()
         ):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='NewtonImpactFrictionLawType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='NewtonImpactFrictionNSLType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -5400,17 +5385,18 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='NewtonImpactFrictionLawType')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='NewtonImpactFrictionNSLType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='NewtonImpactFrictionLawType', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='NewtonImpactFrictionNSLType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='NewtonImpactFrictionLawType'):
-        pass
-    def exportChildren(self, outfile, level, namespace_='', name_='NewtonImpactFrictionLawType', fromsubclass_=False, pretty_print=True):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='NewtonImpactFrictionNSLType'):
+        super(NewtonImpactFrictionNSLType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='NewtonImpactFrictionNSLType')
+    def exportChildren(self, outfile, level, namespace_='', name_='NewtonImpactFrictionNSLType', fromsubclass_=False, pretty_print=True):
+        super(NewtonImpactFrictionNSLType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
             eol_ = '\n'
         else:
@@ -5424,18 +5410,16 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
         if self.mu is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%smu>%s</%smu>%s' % (namespace_, self.gds_format_double(self.mu, input_name='mu'), namespace_, eol_))
-        if self.size is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssize>%s</%ssize>%s' % (namespace_, self.gds_format_integer(self.size, input_name='size'), namespace_, eol_))
-    def exportLiteral(self, outfile, level, name_='NewtonImpactFrictionLawType'):
+    def exportLiteral(self, outfile, level, name_='NewtonImpactFrictionNSLType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
+        super(NewtonImpactFrictionNSLType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
+        super(NewtonImpactFrictionNSLType, self).exportLiteralChildren(outfile, level, name_)
         if self.en is not None:
             showIndent(outfile, level)
             outfile.write('en=%e,\n' % self.en)
@@ -5445,9 +5429,6 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
         if self.mu is not None:
             showIndent(outfile, level)
             outfile.write('mu=%e,\n' % self.mu)
-        if self.size is not None:
-            showIndent(outfile, level)
-            outfile.write('size=%d,\n' % self.size)
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -5456,7 +5437,7 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        pass
+        super(NewtonImpactFrictionNSLType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'en':
             sval_ = child_.text
@@ -5482,40 +5463,30 @@ class NewtonImpactFrictionLawType(GeneratedsSuper):
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'mu')
             self.mu = fval_
-        elif nodeName_ == 'size':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ <= 0:
-                raise_parse_error(child_, 'requires positiveInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'size')
-            self.size = ival_
-# end class NewtonImpactFrictionLawType
+        super(NewtonImpactFrictionNSLType, self).buildChildren(child_, node, nodeName_, True)
+# end class NewtonImpactFrictionNSLType
 
 
-class ComplementarityConditionType(GeneratedsSuper):
+class ComplementarityConditionNSLType(NSL):
     subclass = None
-    superclass = None
+    superclass = NSL
     def __init__(self, size=None):
-        self.size = size
+        super(ComplementarityConditionNSLType, self).__init__(size, )
+        pass
     def factory(*args_, **kwargs_):
-        if ComplementarityConditionType.subclass:
-            return ComplementarityConditionType.subclass(*args_, **kwargs_)
+        if ComplementarityConditionNSLType.subclass:
+            return ComplementarityConditionNSLType.subclass(*args_, **kwargs_)
         else:
-            return ComplementarityConditionType(*args_, **kwargs_)
+            return ComplementarityConditionNSLType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_size(self): return self.size
-    def set_size(self, size): self.size = size
     def hasContent_(self):
         if (
-            self.size is not None
+            super(ComplementarityConditionNSLType, self).hasContent_()
         ):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='ComplementarityConditionType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='ComplementarityConditionNSLType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -5523,36 +5494,29 @@ class ComplementarityConditionType(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='ComplementarityConditionType')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='ComplementarityConditionNSLType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='ComplementarityConditionType', pretty_print=pretty_print)
-            showIndent(outfile, level, pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='ComplementarityConditionNSLType', pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='ComplementarityConditionType'):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='ComplementarityConditionNSLType'):
+        super(ComplementarityConditionNSLType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='ComplementarityConditionNSLType')
+    def exportChildren(self, outfile, level, namespace_='', name_='ComplementarityConditionNSLType', fromsubclass_=False, pretty_print=True):
+        super(ComplementarityConditionNSLType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         pass
-    def exportChildren(self, outfile, level, namespace_='', name_='ComplementarityConditionType', fromsubclass_=False, pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
-        if self.size is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssize>%s</%ssize>%s' % (namespace_, self.gds_format_integer(self.size, input_name='size'), namespace_, eol_))
-    def exportLiteral(self, outfile, level, name_='ComplementarityConditionType'):
+    def exportLiteral(self, outfile, level, name_='ComplementarityConditionNSLType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
+        super(ComplementarityConditionNSLType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.size is not None:
-            showIndent(outfile, level)
-            outfile.write('size=%d,\n' % self.size)
+        super(ComplementarityConditionNSLType, self).exportLiteralChildren(outfile, level, name_)
+        pass
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -5561,19 +5525,11 @@ class ComplementarityConditionType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        pass
+        super(ComplementarityConditionNSLType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'size':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ <= 0:
-                raise_parse_error(child_, 'requires positiveInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'size')
-            self.size = ival_
-# end class ComplementarityConditionType
+        super(ComplementarityConditionNSLType, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class ComplementarityConditionNSLType
 
 
 class SimulationType(GeneratedsSuper):
@@ -5719,44 +5675,30 @@ class SimulationType(GeneratedsSuper):
 class TimeDiscretisationType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, isConstant=None, h=None, N=None, tk=None, hMin=None, hMax=None):
-        self.isConstant = _cast(None, isConstant)
+    def __init__(self, tk=None, h=None, N=None):
+        self.tk = tk
         self.h = h
         self.N = N
-        self.tk = tk
-        self.hMin = hMin
-        self.hMax = hMax
     def factory(*args_, **kwargs_):
         if TimeDiscretisationType.subclass:
             return TimeDiscretisationType.subclass(*args_, **kwargs_)
         else:
             return TimeDiscretisationType(*args_, **kwargs_)
     factory = staticmethod(factory)
+    def get_tk(self): return self.tk
+    def set_tk(self, tk): self.tk = tk
     def get_h(self): return self.h
     def set_h(self, h): self.h = h
     def get_N(self): return self.N
     def set_N(self, N): self.N = N
-    def get_tk(self): return self.tk
-    def set_tk(self, tk): self.tk = tk
-    def get_hMin(self): return self.hMin
-    def set_hMin(self, hMin): self.hMin = hMin
-    def get_hMax(self): return self.hMax
-    def set_hMax(self, hMax): self.hMax = hMax
-    def get_isConstant(self): return self.isConstant
-    def set_isConstant(self, isConstant): self.isConstant = isConstant
     def validate_positiveDouble(self, value):
         # Validate type positiveDouble, a restriction on xsd:double.
         pass
-    def validate_boolean(self, value):
-        # Validate type boolean, a restriction on xsd:boolean.
-        pass
     def hasContent_(self):
         if (
-            self.h is not None or
-            self.N is not None or
             self.tk is not None or
-            self.hMin is not None or
-            self.hMax is not None
+            self.h is not None or
+            self.N is not None
         ):
             return True
         else:
@@ -5778,28 +5720,20 @@ class TimeDiscretisationType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='TimeDiscretisationType'):
-        if self.isConstant is not None and 'isConstant' not in already_processed:
-            already_processed.add('isConstant')
-            outfile.write(' isConstant=%s' % (quote_attrib(self.isConstant), ))
+        pass
     def exportChildren(self, outfile, level, namespace_='', name_='TimeDiscretisationType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
+        if self.tk is not None:
+            self.tk.export(outfile, level, namespace_, name_='tk', pretty_print=pretty_print)
         if self.h is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%sh>%s</%sh>%s' % (namespace_, self.gds_format_double(self.h, input_name='h'), namespace_, eol_))
         if self.N is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%sN>%s</%sN>%s' % (namespace_, self.gds_format_integer(self.N, input_name='N'), namespace_, eol_))
-        if self.tk is not None:
-            self.tk.export(outfile, level, namespace_, name_='tk', pretty_print=pretty_print)
-        if self.hMin is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%shMin>%s</%shMin>%s' % (namespace_, self.gds_format_double(self.hMin, input_name='hMin'), namespace_, eol_))
-        if self.hMax is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%shMax>%s</%shMax>%s' % (namespace_, self.gds_format_double(self.hMax, input_name='hMax'), namespace_, eol_))
     def exportLiteral(self, outfile, level, name_='TimeDiscretisationType'):
         level += 1
         already_processed = set()
@@ -5807,29 +5741,20 @@ class TimeDiscretisationType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.isConstant is not None and 'isConstant' not in already_processed:
-            already_processed.add('isConstant')
-            showIndent(outfile, level)
-            outfile.write('isConstant=%s,\n' % (self.isConstant,))
+        pass
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.h is not None:
-            showIndent(outfile, level)
-            outfile.write('h=%e,\n' % self.h)
-        if self.N is not None:
-            showIndent(outfile, level)
-            outfile.write('N=%d,\n' % self.N)
         if self.tk is not None:
             showIndent(outfile, level)
             outfile.write('tk=model_.vector(\n')
             self.tk.exportLiteral(outfile, level, name_='tk')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.hMin is not None:
+        if self.h is not None:
             showIndent(outfile, level)
-            outfile.write('hMin=%e,\n' % self.hMin)
-        if self.hMax is not None:
+            outfile.write('h=%e,\n' % self.h)
+        if self.N is not None:
             showIndent(outfile, level)
-            outfile.write('hMax=%e,\n' % self.hMax)
+            outfile.write('N=%d,\n' % self.N)
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -5838,18 +5763,13 @@ class TimeDiscretisationType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('isConstant', node)
-        if value is not None and 'isConstant' not in already_processed:
-            already_processed.add('isConstant')
-            if value in ('true', '1'):
-                self.isConstant = True
-            elif value in ('false', '0'):
-                self.isConstant = False
-            else:
-                raise_parse_error(node, 'Bad boolean attribute')
-            self.validate_boolean(self.isConstant)    # validate type boolean
+        pass
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'h':
+        if nodeName_ == 'tk':
+            obj_ = vector.factory()
+            obj_.build(child_)
+            self.tk = obj_
+        elif nodeName_ == 'h':
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
@@ -5868,28 +5788,6 @@ class TimeDiscretisationType(GeneratedsSuper):
                 raise_parse_error(child_, 'requires positiveInteger')
             ival_ = self.gds_validate_integer(ival_, node, 'N')
             self.N = ival_
-        elif nodeName_ == 'tk':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.tk = obj_
-        elif nodeName_ == 'hMin':
-            sval_ = child_.text
-            try:
-                fval_ = float(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires float or double: %s' % exp)
-            fval_ = self.gds_validate_float(fval_, node, 'hMin')
-            self.hMin = fval_
-            self.validate_positiveDouble(self.hMin)    # validate type positiveDouble
-        elif nodeName_ == 'hMax':
-            sval_ = child_.text
-            try:
-                fval_ = float(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires float or double: %s' % exp)
-            fval_ = self.gds_validate_float(fval_, node, 'hMax')
-            self.hMax = fval_
-            self.validate_positiveDouble(self.hMax)    # validate type positiveDouble
 # end class TimeDiscretisationType
 
 
@@ -6083,12 +5981,11 @@ class OneStepIntegrator_DefinitionType(GeneratedsSuper):
 # end class OneStepIntegrator_DefinitionType
 
 
-class MoreauJeanOSIType(GeneratedsSuper):
+class MoreauJeanOSIType(OSI):
     subclass = None
-    superclass = None
+    superclass = OSI
     def __init__(self, DS_Concerned=None, Interactions_Concerned=None, Theta=None):
-        self.DS_Concerned = DS_Concerned
-        self.Interactions_Concerned = Interactions_Concerned
+        super(MoreauJeanOSIType, self).__init__(DS_Concerned, Interactions_Concerned, )
         self.Theta = Theta
     def factory(*args_, **kwargs_):
         if MoreauJeanOSIType.subclass:
@@ -6096,17 +5993,12 @@ class MoreauJeanOSIType(GeneratedsSuper):
         else:
             return MoreauJeanOSIType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_DS_Concerned(self): return self.DS_Concerned
-    def set_DS_Concerned(self, DS_Concerned): self.DS_Concerned = DS_Concerned
-    def get_Interactions_Concerned(self): return self.Interactions_Concerned
-    def set_Interactions_Concerned(self, Interactions_Concerned): self.Interactions_Concerned = Interactions_Concerned
     def get_Theta(self): return self.Theta
     def set_Theta(self, Theta): self.Theta = Theta
     def hasContent_(self):
         if (
-            self.DS_Concerned is not None or
-            self.Interactions_Concerned is not None or
-            self.Theta is not None
+            self.Theta is not None or
+            super(MoreauJeanOSIType, self).hasContent_()
         ):
             return True
         else:
@@ -6128,16 +6020,13 @@ class MoreauJeanOSIType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='MoreauJeanOSIType'):
-        pass
+        super(MoreauJeanOSIType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='MoreauJeanOSIType')
     def exportChildren(self, outfile, level, namespace_='', name_='MoreauJeanOSIType', fromsubclass_=False, pretty_print=True):
+        super(MoreauJeanOSIType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.DS_Concerned is not None:
-            self.DS_Concerned.export(outfile, level, namespace_, name_='DS_Concerned', pretty_print=pretty_print)
-        if self.Interactions_Concerned is not None:
-            self.Interactions_Concerned.export(outfile, level, namespace_, name_='Interactions_Concerned', pretty_print=pretty_print)
         if self.Theta is not None:
             self.Theta.export(outfile, level, namespace_, name_='Theta', pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='MoreauJeanOSIType'):
@@ -6147,20 +6036,9 @@ class MoreauJeanOSIType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
+        super(MoreauJeanOSIType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.DS_Concerned is not None:
-            showIndent(outfile, level)
-            outfile.write('DS_Concerned=model_.vector(\n')
-            self.DS_Concerned.exportLiteral(outfile, level, name_='DS_Concerned')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.Interactions_Concerned is not None:
-            showIndent(outfile, level)
-            outfile.write('Interactions_Concerned=model_.vector(\n')
-            self.Interactions_Concerned.exportLiteral(outfile, level, name_='Interactions_Concerned')
-            showIndent(outfile, level)
-            outfile.write('),\n')
+        super(MoreauJeanOSIType, self).exportLiteralChildren(outfile, level, name_)
         if self.Theta is not None:
             showIndent(outfile, level)
             outfile.write('Theta=model_.emptyType(\n')
@@ -6175,43 +6053,31 @@ class MoreauJeanOSIType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        pass
+        super(MoreauJeanOSIType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'DS_Concerned':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.DS_Concerned = obj_
-        elif nodeName_ == 'Interactions_Concerned':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.Interactions_Concerned = obj_
-        elif nodeName_ == 'Theta':
+        if nodeName_ == 'Theta':
             obj_ = emptyType.factory()
             obj_.build(child_)
             self.Theta = obj_
+        super(MoreauJeanOSIType, self).buildChildren(child_, node, nodeName_, True)
 # end class MoreauJeanOSIType
 
 
-class LsodarOSIType(GeneratedsSuper):
+class LsodarOSIType(OSI):
     subclass = None
-    superclass = None
+    superclass = OSI
     def __init__(self, DS_Concerned=None, Interactions_Concerned=None):
-        self.DS_Concerned = DS_Concerned
-        self.Interactions_Concerned = Interactions_Concerned
+        super(LsodarOSIType, self).__init__(DS_Concerned, Interactions_Concerned, )
+        pass
     def factory(*args_, **kwargs_):
         if LsodarOSIType.subclass:
             return LsodarOSIType.subclass(*args_, **kwargs_)
         else:
             return LsodarOSIType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_DS_Concerned(self): return self.DS_Concerned
-    def set_DS_Concerned(self, DS_Concerned): self.DS_Concerned = DS_Concerned
-    def get_Interactions_Concerned(self): return self.Interactions_Concerned
-    def set_Interactions_Concerned(self, Interactions_Concerned): self.Interactions_Concerned = Interactions_Concerned
     def hasContent_(self):
         if (
-            self.DS_Concerned is not None or
-            self.Interactions_Concerned is not None
+            super(LsodarOSIType, self).hasContent_()
         ):
             return True
         else:
@@ -6233,16 +6099,9 @@ class LsodarOSIType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LsodarOSIType'):
-        pass
+        super(LsodarOSIType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='LsodarOSIType')
     def exportChildren(self, outfile, level, namespace_='', name_='LsodarOSIType', fromsubclass_=False, pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
-        if self.DS_Concerned is not None:
-            self.DS_Concerned.export(outfile, level, namespace_, name_='DS_Concerned', pretty_print=pretty_print)
-        if self.Interactions_Concerned is not None:
-            self.Interactions_Concerned.export(outfile, level, namespace_, name_='Interactions_Concerned', pretty_print=pretty_print)
+        super(LsodarOSIType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='LsodarOSIType'):
         level += 1
         already_processed = set()
@@ -6250,20 +6109,9 @@ class LsodarOSIType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
+        super(LsodarOSIType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.DS_Concerned is not None:
-            showIndent(outfile, level)
-            outfile.write('DS_Concerned=model_.vector(\n')
-            self.DS_Concerned.exportLiteral(outfile, level, name_='DS_Concerned')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.Interactions_Concerned is not None:
-            showIndent(outfile, level)
-            outfile.write('Interactions_Concerned=model_.vector(\n')
-            self.Interactions_Concerned.exportLiteral(outfile, level, name_='Interactions_Concerned')
-            showIndent(outfile, level)
-            outfile.write('),\n')
+        super(LsodarOSIType, self).exportLiteralChildren(outfile, level, name_)
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -6272,16 +6120,10 @@ class LsodarOSIType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        pass
+        super(LsodarOSIType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'DS_Concerned':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.DS_Concerned = obj_
-        elif nodeName_ == 'Interactions_Concerned':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.Interactions_Concerned = obj_
+        super(LsodarOSIType, self).buildChildren(child_, node, nodeName_, True)
+        pass
 # end class LsodarOSIType
 
 
@@ -6418,8 +6260,8 @@ class OneStepNSProblems_ListType(GeneratedsSuper):
         level += 1
         for Relay_ in self.Relay:
             showIndent(outfile, level)
-            outfile.write('model_.RelayType1(\n')
-            Relay_.exportLiteral(outfile, level, name_='RelayType1')
+            outfile.write('model_.RelayType(\n')
+            Relay_.exportLiteral(outfile, level, name_='RelayType')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -6448,42 +6290,27 @@ class OneStepNSProblems_ListType(GeneratedsSuper):
             obj_.build(child_)
             self.QP.append(obj_)
         elif nodeName_ == 'Relay':
-            obj_ = RelayType1.factory()
+            obj_ = RelayType.factory()
             obj_.build(child_)
             self.Relay.append(obj_)
 # end class OneStepNSProblems_ListType
 
 
-class LCPType(GeneratedsSuper):
+class LCPType(OSNSP):
     subclass = None
-    superclass = None
-    def __init__(self, StorageType=None, Id=None, size=None, Interactions_Concerned=None, NonSmoothSolver=None):
-        self.StorageType = _cast(int, StorageType)
-        self.Id = _cast(None, Id)
-        self.size = size
-        self.Interactions_Concerned = Interactions_Concerned
-        self.NonSmoothSolver = NonSmoothSolver
+    superclass = OSNSP
+    def __init__(self, StorageType=None, Id=None, NonSmoothSolver=None):
+        super(LCPType, self).__init__(StorageType, Id, NonSmoothSolver, )
+        pass
     def factory(*args_, **kwargs_):
         if LCPType.subclass:
             return LCPType.subclass(*args_, **kwargs_)
         else:
             return LCPType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_size(self): return self.size
-    def set_size(self, size): self.size = size
-    def get_Interactions_Concerned(self): return self.Interactions_Concerned
-    def set_Interactions_Concerned(self, Interactions_Concerned): self.Interactions_Concerned = Interactions_Concerned
-    def get_NonSmoothSolver(self): return self.NonSmoothSolver
-    def set_NonSmoothSolver(self, NonSmoothSolver): self.NonSmoothSolver = NonSmoothSolver
-    def get_StorageType(self): return self.StorageType
-    def set_StorageType(self, StorageType): self.StorageType = StorageType
-    def get_Id(self): return self.Id
-    def set_Id(self, Id): self.Id = Id
     def hasContent_(self):
         if (
-            self.size is not None or
-            self.Interactions_Concerned is not None or
-            self.NonSmoothSolver is not None
+            super(LCPType, self).hasContent_()
         ):
             return True
         else:
@@ -6505,24 +6332,9 @@ class LCPType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='LCPType'):
-        if self.StorageType is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            outfile.write(' StorageType="%s"' % self.gds_format_integer(self.StorageType, input_name='StorageType'))
-        if self.Id is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            outfile.write(' Id=%s' % (self.gds_format_string(quote_attrib(self.Id).encode(ExternalEncoding), input_name='Id'), ))
+        super(LCPType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='LCPType')
     def exportChildren(self, outfile, level, namespace_='', name_='LCPType', fromsubclass_=False, pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
-        if self.size is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssize>%s</%ssize>%s' % (namespace_, self.gds_format_integer(self.size, input_name='size'), namespace_, eol_))
-        if self.Interactions_Concerned is not None:
-            self.Interactions_Concerned.export(outfile, level, namespace_, name_='Interactions_Concerned', pretty_print=pretty_print)
-        if self.NonSmoothSolver is not None:
-            self.NonSmoothSolver.export(outfile, level, namespace_, name_='NonSmoothSolver', pretty_print=pretty_print)
+        super(LCPType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='LCPType'):
         level += 1
         already_processed = set()
@@ -6530,30 +6342,9 @@ class LCPType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.StorageType is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            showIndent(outfile, level)
-            outfile.write('StorageType=%d,\n' % (self.StorageType,))
-        if self.Id is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            showIndent(outfile, level)
-            outfile.write('Id="%s",\n' % (self.Id,))
+        super(LCPType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.size is not None:
-            showIndent(outfile, level)
-            outfile.write('size=%d,\n' % self.size)
-        if self.Interactions_Concerned is not None:
-            showIndent(outfile, level)
-            outfile.write('Interactions_Concerned=model_.index_list(\n')
-            self.Interactions_Concerned.exportLiteral(outfile, level, name_='Interactions_Concerned')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.NonSmoothSolver is not None:
-            showIndent(outfile, level)
-            outfile.write('NonSmoothSolver=model_.NonSmoothSolver(\n')
-            self.NonSmoothSolver.exportLiteral(outfile, level)
-            showIndent(outfile, level)
-            outfile.write('),\n')
+        super(LCPType, self).exportLiteralChildren(outfile, level, name_)
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -6562,74 +6353,31 @@ class LCPType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('StorageType', node)
-        if value is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            try:
-                self.StorageType = int(value)
-            except ValueError as exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.StorageType < 0:
-                raise_parse_error(node, 'Invalid NonNegativeInteger')
-        value = find_attr_value_('Id', node)
-        if value is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            self.Id = value
+        super(LCPType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'size':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ <= 0:
-                raise_parse_error(child_, 'requires positiveInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'size')
-            self.size = ival_
-        elif nodeName_ == 'Interactions_Concerned':
-            obj_ = index_list.factory()
-            obj_.build(child_)
-            self.Interactions_Concerned = obj_
-        elif nodeName_ == 'NonSmoothSolver':
-            obj_ = NonSmoothSolver.factory()
-            obj_.build(child_)
-            self.NonSmoothSolver = obj_
+        super(LCPType, self).buildChildren(child_, node, nodeName_, True)
+        pass
 # end class LCPType
 
 
-class FrictionContactType(GeneratedsSuper):
+class FrictionContactType(OSNSP):
     subclass = None
-    superclass = None
-    def __init__(self, StorageType=None, Type=None, Id=None, size=None, Interactions_Concerned=None, NonSmoothSolver=None):
-        self.StorageType = _cast(int, StorageType)
+    superclass = OSNSP
+    def __init__(self, StorageType=None, Id=None, NonSmoothSolver=None, Type=None):
+        super(FrictionContactType, self).__init__(StorageType, Id, NonSmoothSolver, )
         self.Type = _cast(int, Type)
-        self.Id = _cast(None, Id)
-        self.size = size
-        self.Interactions_Concerned = Interactions_Concerned
-        self.NonSmoothSolver = NonSmoothSolver
+        pass
     def factory(*args_, **kwargs_):
         if FrictionContactType.subclass:
             return FrictionContactType.subclass(*args_, **kwargs_)
         else:
             return FrictionContactType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_size(self): return self.size
-    def set_size(self, size): self.size = size
-    def get_Interactions_Concerned(self): return self.Interactions_Concerned
-    def set_Interactions_Concerned(self, Interactions_Concerned): self.Interactions_Concerned = Interactions_Concerned
-    def get_NonSmoothSolver(self): return self.NonSmoothSolver
-    def set_NonSmoothSolver(self, NonSmoothSolver): self.NonSmoothSolver = NonSmoothSolver
-    def get_StorageType(self): return self.StorageType
-    def set_StorageType(self, StorageType): self.StorageType = StorageType
     def get_Type(self): return self.Type
     def set_Type(self, Type): self.Type = Type
-    def get_Id(self): return self.Id
-    def set_Id(self, Id): self.Id = Id
     def hasContent_(self):
         if (
-            self.size is not None or
-            self.Interactions_Concerned is not None or
-            self.NonSmoothSolver is not None
+            super(FrictionContactType, self).hasContent_()
         ):
             return True
         else:
@@ -6651,27 +6399,12 @@ class FrictionContactType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FrictionContactType'):
-        if self.StorageType is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            outfile.write(' StorageType="%s"' % self.gds_format_integer(self.StorageType, input_name='StorageType'))
+        super(FrictionContactType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='FrictionContactType')
         if self.Type is not None and 'Type' not in already_processed:
             already_processed.add('Type')
             outfile.write(' Type="%s"' % self.gds_format_integer(self.Type, input_name='Type'))
-        if self.Id is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            outfile.write(' Id=%s' % (self.gds_format_string(quote_attrib(self.Id).encode(ExternalEncoding), input_name='Id'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='FrictionContactType', fromsubclass_=False, pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
-        if self.size is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssize>%s</%ssize>%s' % (namespace_, self.gds_format_integer(self.size, input_name='size'), namespace_, eol_))
-        if self.Interactions_Concerned is not None:
-            self.Interactions_Concerned.export(outfile, level, namespace_, name_='Interactions_Concerned', pretty_print=pretty_print)
-        if self.NonSmoothSolver is not None:
-            self.NonSmoothSolver.export(outfile, level, namespace_, name_='NonSmoothSolver', pretty_print=pretty_print)
+        super(FrictionContactType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='FrictionContactType'):
         level += 1
         already_processed = set()
@@ -6679,34 +6412,13 @@ class FrictionContactType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.StorageType is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            showIndent(outfile, level)
-            outfile.write('StorageType=%d,\n' % (self.StorageType,))
         if self.Type is not None and 'Type' not in already_processed:
             already_processed.add('Type')
             showIndent(outfile, level)
             outfile.write('Type=%d,\n' % (self.Type,))
-        if self.Id is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            showIndent(outfile, level)
-            outfile.write('Id="%s",\n' % (self.Id,))
+        super(FrictionContactType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.size is not None:
-            showIndent(outfile, level)
-            outfile.write('size=%d,\n' % self.size)
-        if self.Interactions_Concerned is not None:
-            showIndent(outfile, level)
-            outfile.write('Interactions_Concerned=model_.index_list(\n')
-            self.Interactions_Concerned.exportLiteral(outfile, level, name_='Interactions_Concerned')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.NonSmoothSolver is not None:
-            showIndent(outfile, level)
-            outfile.write('NonSmoothSolver=model_.NonSmoothSolver(\n')
-            self.NonSmoothSolver.exportLiteral(outfile, level)
-            showIndent(outfile, level)
-            outfile.write('),\n')
+        super(FrictionContactType, self).exportLiteralChildren(outfile, level, name_)
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -6715,15 +6427,6 @@ class FrictionContactType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('StorageType', node)
-        if value is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            try:
-                self.StorageType = int(value)
-            except ValueError as exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.StorageType < 0:
-                raise_parse_error(node, 'Invalid NonNegativeInteger')
         value = find_attr_value_('Type', node)
         if value is not None and 'Type' not in already_processed:
             already_processed.add('Type')
@@ -6733,70 +6436,35 @@ class FrictionContactType(GeneratedsSuper):
                 raise_parse_error(node, 'Bad integer attribute: %s' % exp)
             if self.Type <= 0:
                 raise_parse_error(node, 'Invalid PositiveInteger')
-        value = find_attr_value_('Id', node)
-        if value is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            self.Id = value
+        super(FrictionContactType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'size':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ <= 0:
-                raise_parse_error(child_, 'requires positiveInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'size')
-            self.size = ival_
-        elif nodeName_ == 'Interactions_Concerned':
-            obj_ = index_list.factory()
-            obj_.build(child_)
-            self.Interactions_Concerned = obj_
-        elif nodeName_ == 'NonSmoothSolver':
-            obj_ = NonSmoothSolver.factory()
-            obj_.build(child_)
-            self.NonSmoothSolver = obj_
+        super(FrictionContactType, self).buildChildren(child_, node, nodeName_, True)
+        pass
 # end class FrictionContactType
 
 
-class QPType(GeneratedsSuper):
+class QPType(OSNSP):
     subclass = None
-    superclass = None
-    def __init__(self, StorageType=None, Id=None, size=None, Q=None, p=None, Interactions_Concerned=None, NonSmoothSolver=None):
-        self.StorageType = _cast(int, StorageType)
-        self.Id = _cast(None, Id)
-        self.size = size
+    superclass = OSNSP
+    def __init__(self, StorageType=None, Id=None, NonSmoothSolver=None, Q=None, p=None):
+        super(QPType, self).__init__(StorageType, Id, NonSmoothSolver, )
         self.Q = Q
         self.p = p
-        self.Interactions_Concerned = Interactions_Concerned
-        self.NonSmoothSolver = NonSmoothSolver
     def factory(*args_, **kwargs_):
         if QPType.subclass:
             return QPType.subclass(*args_, **kwargs_)
         else:
             return QPType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_size(self): return self.size
-    def set_size(self, size): self.size = size
     def get_Q(self): return self.Q
     def set_Q(self, Q): self.Q = Q
     def get_p(self): return self.p
     def set_p(self, p): self.p = p
-    def get_Interactions_Concerned(self): return self.Interactions_Concerned
-    def set_Interactions_Concerned(self, Interactions_Concerned): self.Interactions_Concerned = Interactions_Concerned
-    def get_NonSmoothSolver(self): return self.NonSmoothSolver
-    def set_NonSmoothSolver(self, NonSmoothSolver): self.NonSmoothSolver = NonSmoothSolver
-    def get_StorageType(self): return self.StorageType
-    def set_StorageType(self, StorageType): self.StorageType = StorageType
-    def get_Id(self): return self.Id
-    def set_Id(self, Id): self.Id = Id
     def hasContent_(self):
         if (
-            self.size is not None or
             self.Q is not None or
             self.p is not None or
-            self.Interactions_Concerned is not None or
-            self.NonSmoothSolver is not None
+            super(QPType, self).hasContent_()
         ):
             return True
         else:
@@ -6818,28 +6486,17 @@ class QPType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='QPType'):
-        if self.StorageType is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            outfile.write(' StorageType="%s"' % self.gds_format_integer(self.StorageType, input_name='StorageType'))
-        if self.Id is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            outfile.write(' Id=%s' % (self.gds_format_string(quote_attrib(self.Id).encode(ExternalEncoding), input_name='Id'), ))
+        super(QPType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='QPType')
     def exportChildren(self, outfile, level, namespace_='', name_='QPType', fromsubclass_=False, pretty_print=True):
+        super(QPType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.size is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssize>%s</%ssize>%s' % (namespace_, self.gds_format_integer(self.size, input_name='size'), namespace_, eol_))
         if self.Q is not None:
             self.Q.export(outfile, level, namespace_, name_='Q', pretty_print=pretty_print)
         if self.p is not None:
             self.p.export(outfile, level, namespace_, name_='p', pretty_print=pretty_print)
-        if self.Interactions_Concerned is not None:
-            self.Interactions_Concerned.export(outfile, level, namespace_, name_='Interactions_Concerned', pretty_print=pretty_print)
-        if self.NonSmoothSolver is not None:
-            self.NonSmoothSolver.export(outfile, level, namespace_, name_='NonSmoothSolver', pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='QPType'):
         level += 1
         already_processed = set()
@@ -6847,18 +6504,9 @@ class QPType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.StorageType is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            showIndent(outfile, level)
-            outfile.write('StorageType=%d,\n' % (self.StorageType,))
-        if self.Id is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            showIndent(outfile, level)
-            outfile.write('Id="%s",\n' % (self.Id,))
+        super(QPType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.size is not None:
-            showIndent(outfile, level)
-            outfile.write('size=%d,\n' % self.size)
+        super(QPType, self).exportLiteralChildren(outfile, level, name_)
         if self.Q is not None:
             showIndent(outfile, level)
             outfile.write('Q=model_.matrix(\n')
@@ -6871,18 +6519,6 @@ class QPType(GeneratedsSuper):
             self.p.exportLiteral(outfile, level, name_='p')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.Interactions_Concerned is not None:
-            showIndent(outfile, level)
-            outfile.write('Interactions_Concerned=model_.index_list(\n')
-            self.Interactions_Concerned.exportLiteral(outfile, level, name_='Interactions_Concerned')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.NonSmoothSolver is not None:
-            showIndent(outfile, level)
-            outfile.write('NonSmoothSolver=model_.NonSmoothSolver(\n')
-            self.NonSmoothSolver.exportLiteral(outfile, level)
-            showIndent(outfile, level)
-            outfile.write('),\n')
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -6891,31 +6527,9 @@ class QPType(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('StorageType', node)
-        if value is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            try:
-                self.StorageType = int(value)
-            except ValueError as exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.StorageType < 0:
-                raise_parse_error(node, 'Invalid NonNegativeInteger')
-        value = find_attr_value_('Id', node)
-        if value is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            self.Id = value
+        super(QPType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'size':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ <= 0:
-                raise_parse_error(child_, 'requires positiveInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'size')
-            self.size = ival_
-        elif nodeName_ == 'Q':
+        if nodeName_ == 'Q':
             obj_ = matrix.factory()
             obj_.build(child_)
             self.Q = obj_
@@ -6923,60 +6537,37 @@ class QPType(GeneratedsSuper):
             obj_ = vector.factory()
             obj_.build(child_)
             self.p = obj_
-        elif nodeName_ == 'Interactions_Concerned':
-            obj_ = index_list.factory()
-            obj_.build(child_)
-            self.Interactions_Concerned = obj_
-        elif nodeName_ == 'NonSmoothSolver':
-            obj_ = NonSmoothSolver.factory()
-            obj_.build(child_)
-            self.NonSmoothSolver = obj_
+        super(QPType, self).buildChildren(child_, node, nodeName_, True)
 # end class QPType
 
 
-class RelayType1(GeneratedsSuper):
+class RelayType(OSNSP):
     subclass = None
-    superclass = None
-    def __init__(self, StorageType=None, Id=None, size=None, M=None, q=None, Interactions_Concerned=None, NonSmoothSolver=None):
-        self.StorageType = _cast(int, StorageType)
-        self.Id = _cast(None, Id)
-        self.size = size
+    superclass = OSNSP
+    def __init__(self, StorageType=None, Id=None, NonSmoothSolver=None, M=None, q=None):
+        super(RelayType, self).__init__(StorageType, Id, NonSmoothSolver, )
         self.M = M
         self.q = q
-        self.Interactions_Concerned = Interactions_Concerned
-        self.NonSmoothSolver = NonSmoothSolver
     def factory(*args_, **kwargs_):
-        if RelayType1.subclass:
-            return RelayType1.subclass(*args_, **kwargs_)
+        if RelayType.subclass:
+            return RelayType.subclass(*args_, **kwargs_)
         else:
-            return RelayType1(*args_, **kwargs_)
+            return RelayType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_size(self): return self.size
-    def set_size(self, size): self.size = size
     def get_M(self): return self.M
     def set_M(self, M): self.M = M
     def get_q(self): return self.q
     def set_q(self, q): self.q = q
-    def get_Interactions_Concerned(self): return self.Interactions_Concerned
-    def set_Interactions_Concerned(self, Interactions_Concerned): self.Interactions_Concerned = Interactions_Concerned
-    def get_NonSmoothSolver(self): return self.NonSmoothSolver
-    def set_NonSmoothSolver(self, NonSmoothSolver): self.NonSmoothSolver = NonSmoothSolver
-    def get_StorageType(self): return self.StorageType
-    def set_StorageType(self, StorageType): self.StorageType = StorageType
-    def get_Id(self): return self.Id
-    def set_Id(self, Id): self.Id = Id
     def hasContent_(self):
         if (
-            self.size is not None or
             self.M is not None or
             self.q is not None or
-            self.Interactions_Concerned is not None or
-            self.NonSmoothSolver is not None
+            super(RelayType, self).hasContent_()
         ):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='RelayType1', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='RelayType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -6984,56 +6575,36 @@ class RelayType1(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='RelayType1')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='RelayType')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='RelayType1', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='RelayType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='RelayType1'):
-        if self.StorageType is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            outfile.write(' StorageType="%s"' % self.gds_format_integer(self.StorageType, input_name='StorageType'))
-        if self.Id is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            outfile.write(' Id=%s' % (self.gds_format_string(quote_attrib(self.Id).encode(ExternalEncoding), input_name='Id'), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='RelayType1', fromsubclass_=False, pretty_print=True):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='RelayType'):
+        super(RelayType, self).exportAttributes(outfile, level, already_processed, namespace_, name_='RelayType')
+    def exportChildren(self, outfile, level, namespace_='', name_='RelayType', fromsubclass_=False, pretty_print=True):
+        super(RelayType, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.size is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssize>%s</%ssize>%s' % (namespace_, self.gds_format_integer(self.size, input_name='size'), namespace_, eol_))
         if self.M is not None:
             self.M.export(outfile, level, namespace_, name_='M', pretty_print=pretty_print)
         if self.q is not None:
             self.q.export(outfile, level, namespace_, name_='q', pretty_print=pretty_print)
-        if self.Interactions_Concerned is not None:
-            self.Interactions_Concerned.export(outfile, level, namespace_, name_='Interactions_Concerned', pretty_print=pretty_print)
-        if self.NonSmoothSolver is not None:
-            self.NonSmoothSolver.export(outfile, level, namespace_, name_='NonSmoothSolver', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='RelayType1'):
+    def exportLiteral(self, outfile, level, name_='RelayType'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.StorageType is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            showIndent(outfile, level)
-            outfile.write('StorageType=%d,\n' % (self.StorageType,))
-        if self.Id is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            showIndent(outfile, level)
-            outfile.write('Id="%s",\n' % (self.Id,))
+        super(RelayType, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.size is not None:
-            showIndent(outfile, level)
-            outfile.write('size=%d,\n' % self.size)
+        super(RelayType, self).exportLiteralChildren(outfile, level, name_)
         if self.M is not None:
             showIndent(outfile, level)
             outfile.write('M=model_.matrix(\n')
@@ -7046,18 +6617,6 @@ class RelayType1(GeneratedsSuper):
             self.q.exportLiteral(outfile, level, name_='q')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.Interactions_Concerned is not None:
-            showIndent(outfile, level)
-            outfile.write('Interactions_Concerned=model_.index_list(\n')
-            self.Interactions_Concerned.exportLiteral(outfile, level, name_='Interactions_Concerned')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.NonSmoothSolver is not None:
-            showIndent(outfile, level)
-            outfile.write('NonSmoothSolver=model_.NonSmoothSolver(\n')
-            self.NonSmoothSolver.exportLiteral(outfile, level)
-            showIndent(outfile, level)
-            outfile.write('),\n')
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -7066,31 +6625,9 @@ class RelayType1(GeneratedsSuper):
             self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('StorageType', node)
-        if value is not None and 'StorageType' not in already_processed:
-            already_processed.add('StorageType')
-            try:
-                self.StorageType = int(value)
-            except ValueError as exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
-            if self.StorageType < 0:
-                raise_parse_error(node, 'Invalid NonNegativeInteger')
-        value = find_attr_value_('Id', node)
-        if value is not None and 'Id' not in already_processed:
-            already_processed.add('Id')
-            self.Id = value
+        super(RelayType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'size':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ <= 0:
-                raise_parse_error(child_, 'requires positiveInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'size')
-            self.size = ival_
-        elif nodeName_ == 'M':
+        if nodeName_ == 'M':
             obj_ = matrix.factory()
             obj_.build(child_)
             self.M = obj_
@@ -7098,69 +6635,63 @@ class RelayType1(GeneratedsSuper):
             obj_ = vector.factory()
             obj_.build(child_)
             self.q = obj_
-        elif nodeName_ == 'Interactions_Concerned':
-            obj_ = index_list.factory()
-            obj_.build(child_)
-            self.Interactions_Concerned = obj_
-        elif nodeName_ == 'NonSmoothSolver':
-            obj_ = NonSmoothSolver.factory()
-            obj_.build(child_)
-            self.NonSmoothSolver = obj_
-# end class RelayType1
+        super(RelayType, self).buildChildren(child_, node, nodeName_, True)
+# end class RelayType
 
 
 GDSClassesMapping = {
-    'jacobianH': listOfMatrices,
-    'LCP': LCPType,
     'QP': QPType,
     'indexList': vector,
-    'MoreauJeanOSI': MoreauJeanOSIType,
     'Velocity0': vector,
-    'Memory': vector,
+    'MoreauJeanOSI': MoreauJeanOSIType,
+    'FirstOrderLinearR': FirstOrderLinearRType,
+    'NewtonImpactNSL': NewtonImpactNSLType,
     'iparam': vector,
     'LsodarOSI': LsodarOSIType,
     'NNL': vector,
     'Interaction': InteractionType,
+    'LagrangianRheonomousR': LagrangianRheonomousRType,
     'LagrangianLinearTIDS': LagrangianLinearTIDSType,
-    'FirstOrderRelation': FirstOrderRelationType,
+    'OneStepIntegrator_LMGC90': OneStepIntegrator_LMGC90Type,
     'Theta': emptyType,
     'NSDS': NSDSType,
-    'VelocityMemory': memory,
-    'NewtonImpactLaw': NewtonImpactLawType,
+    'JacobianDothq': pluginDef,
+    'Jacobianhq': pluginDef,
+    'ComplementarityConditionNSL': ComplementarityConditionNSLType,
     'D': matrix,
     'FirstOrderLinearDS': FirstOrderLinearDSType,
     'q0': vector,
     'FirstOrderLinearTIDS': FirstOrderLinearTIDSType,
-    'NewtonImpactFrictionLaw': NewtonImpactFrictionLawType,
     'Linear': LinearType,
     'FirstOrderNonLinearDS': FirstOrderNonLinearDSType,
-    'Velocity': vector,
+    'NewtonImpactFrictionNSL': NewtonImpactFrictionNSLType,
     'F': matrix,
-    'jacobianG': listOfMatrices,
-    'FirstOrderLinearRelation': FirstOrderLinearRelationType,
+    'JacobianDoth': pluginDef,
     'Omega0': matrix,
-    'FirstOrderLinearTimeInvariantRelation': FirstOrderLinearTimeInvariantRelationType,
+    'jacobianG': listOfMatrices,
     'Q': matrix,
     'tk': vector,
+    'RelayNSL': RelayNSLType,
     'DS_Definition': DS_DefinitionType,
     'OmegaT': matrix,
     'OneStepIntegrator_Definition': OneStepIntegrator_DefinitionType,
     'Omega': vector,
-    'DS_Concerned': vector,
+    'LagrangianCompliantR': LagrangianCompliantRType,
     'A': matrix,
-    'LagrangianLinearRelation': LagrangianLinearRelationType,
     'C': matrix,
     'Jacobianfx': matrix,
     'FrictionContact': FrictionContactType,
     'Interaction_Content': Interaction_ContentType,
     'Interaction_Definition': Interaction_DefinitionType,
     'FExt': vector,
-    'H': matrix,
+    'Jacobianhlambda': pluginDef,
+    'FirstOrderLinearTIR': FirstOrderLinearTIRType,
     'K': matrix,
     'M': matrix,
     'FInt': vector,
     'Simulation': SimulationType,
     'JacobianQFInt': matrix,
+    'LagrangianScleronomousR': LagrangianScleronomousRType,
     'Periodic': PeriodicType,
     'Mass': matrix,
     'NLinear': NLinearType,
@@ -7170,28 +6701,23 @@ GDSClassesMapping = {
     'DS_LMGC90': DS_LMGC90Type,
     'OneStepNSProblems_List': OneStepNSProblems_ListType,
     'LagrangianDS': LagrangianDSType,
+    'Relay': RelayType,
     'JacobianQNNL': matrix,
-    'xMemory': memory,
     'b': vector,
-    'LagrangianRelation': LagrangianRelationType,
-    'Relay': RelayType1,
+    'e': vector,
+    'LCP': LCPType,
     'g': pluginDef,
     'f': vector,
     'h': pluginDef,
     'TimeDiscretisation': TimeDiscretisationType,
     'q': vector,
     'p': vector,
-    'ComplementarityCondition': ComplementarityConditionType,
-    'qMemory': memory,
-    'e': vector,
-    'OneStepIntegrator_LMGC90': OneStepIntegrator_LMGC90Type,
-    'Interactions_Concerned': index_list,
-    'y': vector,
-    'x': vector,
+    'jacobianH': listOfMatrices,
+    'LagrangianLinearTIR': LagrangianLinearTIRType,
+    'FirstOrderR': FirstOrderRType,
     'B': matrix,
     'JacobianVelocityFInt': matrix,
     'JacobianVelocityNNL': matrix,
-    'lambda': vector,
 }
 
 
@@ -7218,8 +6744,8 @@ def parse(inFileName, silence=False):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'emptyType'
-        rootClass = emptyType
+        rootTag = 'pluginDef'
+        rootClass = pluginDef
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
@@ -7238,8 +6764,8 @@ def parseEtree(inFileName, silence=False):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'emptyType'
-        rootClass = emptyType
+        rootTag = 'pluginDef'
+        rootClass = pluginDef
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
@@ -7263,7 +6789,7 @@ def parseString(inString, silence=False):
     roots = get_root_tag(rootNode)
     rootClass = roots[1]
     if rootClass is None:
-        rootClass = emptyType
+        rootClass = pluginDef
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
@@ -7271,7 +6797,7 @@ def parseString(inString, silence=False):
     if not silence:
         sys.stdout.write('<?xml version="1.0" ?>\n')
         rootObj.export(
-            sys.stdout, 0, name_="emptyType",
+            sys.stdout, 0, name_="pluginDef",
             namespacedef_='')
     return rootObj
 
@@ -7281,8 +6807,8 @@ def parseLiteral(inFileName, silence=False):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'emptyType'
-        rootClass = emptyType
+        rootTag = 'pluginDef'
+        rootClass = pluginDef
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
@@ -7311,40 +6837,45 @@ if __name__ == '__main__':
 
 __all__ = [
     "BoundaryCondition",
-    "ComplementarityConditionType",
+    "ComplementarityConditionNSLType",
     "DS_DefinitionType",
     "DS_LMGC90Type",
     "FirstOrderLinearDSType",
-    "FirstOrderLinearRelationType",
+    "FirstOrderLinearRType",
     "FirstOrderLinearTIDSType",
-    "FirstOrderLinearTimeInvariantRelationType",
+    "FirstOrderLinearTIRType",
     "FirstOrderNonLinearDSType",
-    "FirstOrderRelationType",
+    "FirstOrderRType",
     "FrictionContactType",
     "InteractionType",
     "Interaction_ContentType",
     "Interaction_DefinitionType",
     "LCPType",
+    "LagrangianCompliantRType",
     "LagrangianDSType",
-    "LagrangianLinearRelationType",
     "LagrangianLinearTIDSType",
-    "LagrangianRelationType",
+    "LagrangianLinearTIRType",
+    "LagrangianRheonomousRType",
+    "LagrangianScleronomousRType",
     "LinearType",
     "LsodarOSIType",
     "ModelTime",
     "MoreauJeanOSIType",
     "NLinearType",
     "NSDSType",
-    "NewtonImpactFrictionLawType",
-    "NewtonImpactLawType",
+    "NSL",
+    "NewtonImpactFrictionNSLType",
+    "NewtonImpactNSLType",
     "NonSmoothSolver",
+    "OSI",
+    "OSNSP",
     "OneStepIntegrator_DefinitionType",
     "OneStepIntegrator_LMGC90Type",
     "OneStepNSProblems_ListType",
     "PeriodicType",
     "QPType",
+    "RelayNSLType",
     "RelayType",
-    "RelayType1",
     "SiconosModel",
     "SimulationType",
     "TimeDiscretisationType",
@@ -7355,7 +6886,6 @@ __all__ = [
     "matrixData",
     "matrixFile",
     "matrixPlugin",
-    "memory",
     "pluginDef",
     "vector"
 ]

@@ -164,14 +164,14 @@ public:
   LagrangianRheonomousR(SP::RelationXML);
 
   /** constructor from a set of data
-  *  \param std::string : the name of the plugin to compute h.\n
+  *  \param pluginh name of the plugin to compute h.\n
   * Its signature must be "void userPluginH(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"
-  *  \param std::string : the name of the plugin to compute hDot. \n
-  * Its signature must be "void userPluginHDot(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)
-  *  \param std::string : the name of the plugin  to compute jacobian h according to q.\n
+  *  \param pluginJacobianhq name of the plugin  to compute jacobian h according to q.\n
   * Its signature must be "void userPluginG0(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"
+  *  \param pluginDoth name of the plugin to compute hDot. \n
+  * Its signature must be "void userPluginHDot(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)
   */
-  LagrangianRheonomousR(const std::string&, const std::string&, const std::string&);
+  LagrangianRheonomousR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginDoth);
 
   /** destructor
   */
@@ -192,15 +192,6 @@ public:
   {
     return _hDot;
   }
-
-  /** set the value of hDot to newValue (copy)
-  *  \param SiconosVector newValue
-
-  void setHDot(const SiconosVector& newValue)
-  {
-  setObject<PVT2,SPPVT2,SiconosVector>(hDot,newValue);
-  }
-  */
 
   /** set hDot to pointer newPtr (pointer link)
   *  \param SP::SiconosVector  newPtr

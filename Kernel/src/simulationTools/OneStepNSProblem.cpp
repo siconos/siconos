@@ -75,8 +75,8 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
 
 }
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
-OneStepNSProblem::OneStepNSProblem(int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0),
+OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
+  _numerics_solver_id(numericsSolverId), _sizeOutput(0),
   _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
@@ -88,7 +88,7 @@ OneStepNSProblem::OneStepNSProblem(int newNumericsSolverId):
   _numerics_solver_options.reset(new SolverOptions);
   _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
   _numerics_solver_options->dWork = NULL;
-  _numerics_solver_options->solverId = newNumericsSolverId;
+  _numerics_solver_options->solverId = numericsSolverId;
 }
 
 bool OneStepNSProblem::hasInteractions() const

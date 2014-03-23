@@ -179,11 +179,11 @@ public:
   };
 
   /** Set the solver
-   * \param newNumericsSolverId the solver for the relay
+   * \param numericsSolverId the solver for the relay
    */
-  inline void setSolver(const int newNumericsSolverId)
+  inline void setSolver(const int numericsSolverId)
   {
-    _numericsSolverId = newNumericsSolverId;
+    _numericsSolverId = numericsSolverId;
   };
 
   /** Set the precision

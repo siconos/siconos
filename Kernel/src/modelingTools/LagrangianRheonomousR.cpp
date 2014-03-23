@@ -62,17 +62,17 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
 }
 
 // constructor from a set of data
-LagrangianRheonomousR::LagrangianRheonomousR(const std::string& computeh, const std::string& computehDot, const std::string& strcomputeJachq):
+LagrangianRheonomousR::LagrangianRheonomousR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginDoth):
   LagrangianR(RheonomousR)
 {
   zeroPlugin();
   // h
-  setComputehFunction(SSLH::getPluginName(computeh), SSLH::getPluginFunctionName(computeh));
+  setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
+
+  _pluginJachq->setComputeFunction(pluginJacobianhq);
 
   // hDot
-  setComputehDotFunction(SSLH::getPluginName(computehDot), SSLH::getPluginFunctionName(computehDot));
-  _pluginJachq->setComputeFunction(strcomputeJachq);
-
+  setComputehDotFunction(SSLH::getPluginName(pluginDoth), SSLH::getPluginFunctionName(pluginDoth));
 }
 
 void LagrangianRheonomousR::initComponents(Interaction& inter)

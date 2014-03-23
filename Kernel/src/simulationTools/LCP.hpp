@@ -73,7 +73,7 @@ public:
   /** Constructor with Numerics solver id (default = Lemke)
       \param int id of numerics solver
   */
-  LCP(int newNewNumericsSolverId = SICONOS_LCP_LEMKE);
+  LCP(int numericsSolverId = SICONOS_LCP_LEMKE);
 
   /** destructor
    */

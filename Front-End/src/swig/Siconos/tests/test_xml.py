@@ -22,7 +22,7 @@ def test_xml1():
     # --- Get the simulation ---
     s = bouncingBall.simulation()
 
-    dsN = bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0).vertices()[0].number()
+    dsN = bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
     ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
 
     N = 2000  # Number of time steps
@@ -86,7 +86,7 @@ def test_xml2():
     # time
     dataPlot[k, 0] =  bouncingBall.t0()
     # state q for the first dynamical system (ball)
-    dsN = bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0).vertices()[0].number()
+    dsN = bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
     ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
 
     q = ball.q()
@@ -153,9 +153,9 @@ def test_xml3():
     # time
     dataPlot[k, 0] = t0
     # state q for the first dynamical system (ball)
-    dsN = oscillator.nonSmoothDynamicalSystem().topology().dSG(0).vertices()[0].number()
+    dsN = oscillator.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
     oscillo = oscillator.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
-    inter = oscillator.nonSmoothDynamicalSystem().topology().dSG(0).edges()[0]
+    inter = oscillator.nonSmoothDynamicalSystem().topology().dSG(0).interactions()[0]
 
     dataPlot[k, 1] = oscillo.q()[0]
     # velocity for the oscillo
@@ -215,9 +215,9 @@ def test_xml4():
     dataPlot[k, 0] = t0
 
     # state q for the Follower
-    dsN = CamFollower.nonSmoothDynamicalSystem().topology().dSG(0).vertices()[0].number()
+    dsN = CamFollower.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
     Follower = CamFollower.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
-    inter = CamFollower.nonSmoothDynamicalSystem().topology().dSG(0).edges()[0]
+    inter = CamFollower.nonSmoothDynamicalSystem().topology().dSG(0).interactions()[0]
     # Position of the Follower
     dataPlot[k, 1] = Follower.q()[0]
     # Velocity for the Follower
@@ -277,7 +277,7 @@ def test_xml5():
 
     # --- Get and initialize the simulation ---
     s = bouncingBall.simulation()
-    dsN = bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0).vertices()[0].number()
+    dsN = bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
     ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
 
     # --- Get the values to be plotted ---
@@ -360,7 +360,7 @@ def test_xml6():
     print( "Prepare data for plotting ... ")
     # For the initi)al time step:
     # XXX fix this crap
-    dsN = oscillator.nonSmoothDynamicalSystem().topology().dSG(0).vertices()[0].number()
+    dsN = oscillator.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
     oscillo = oscillator.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
     q = oscillo.q()
     v = oscillo.velocity()

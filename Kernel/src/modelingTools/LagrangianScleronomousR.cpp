@@ -57,32 +57,28 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
 }
 
 // constructor from a set of data
-LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacHq):
+LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacobianhq):
   LagrangianR(ScleronomousR)
 {
   zeroPlugin();
   setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
 
-  _pluginJachq->setComputeFunction(pluginJacHq);
+  _pluginJachq->setComputeFunction(pluginJacobianhq);
 
-  //  unsigned int sizeY = inter.getSizeOfY();
-  //  unsigned int sizeQ = workX->size();
-  //  _jachq.reset(new SimpleMatrix(sizeY,sizeQ));
-
-  // Warning: we cannot allocate memory for Jach[0] matrix since no interaction
+ // Warning: we cannot allocate memory for Jach[0] matrix since no interaction
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the user-defined function.
 }
 // constructor from a data used for EventDriven scheme
-LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacHq, const std::string& pluginDotJacHq):
+LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginDotJacobianhq):
   LagrangianR(ScleronomousR)
 {
   zeroPlugin();
   setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
 
-  _pluginJachq->setComputeFunction(pluginJacHq);
+  _pluginJachq->setComputeFunction(pluginJacobianhq);
 
-  _plugindotjacqh->setComputeFunction(pluginDotJacHq);
+  _plugindotjacqh->setComputeFunction(pluginDotJacobianhq);
 }
 
 

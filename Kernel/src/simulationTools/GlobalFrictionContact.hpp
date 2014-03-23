@@ -119,7 +119,7 @@ public:
    *  \param std::string id of the problem (optional)
    */
   GlobalFrictionContact(int dimPb,
-                        const int newNumericsSolverId =
+                        const int numericsSolverId =
                         SICONOS_FRICTION_3D_GLOBAL_NSGS,
                         const std::string& newId = "unamed_primal_friction_contact_problem");
 

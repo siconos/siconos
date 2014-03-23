@@ -189,7 +189,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
                            ((Vertex, SP::MatrixIntegrator, Bd)) // For Controlled System (ZOH Integration)
                            ((Vertex, SP::SiconosMatrix, B)) // For Controlled System
                            ((Vertex, SP::SiconosMatrix, L)) // For Observer
-                           ((Vertex, SP::PluggedObject, pluginB)) //For Controlled System
+                           ((Vertex, SP::PluggedObject, pluginB)) // For Controlled System
                            ((Vertex, SP::PluggedObject, pluginL)) // For Observer
                            ((Vertex, SP::SiconosVector, e)) // For Observer (ZOH Integration)
                            ((Vertex, SP::SiconosVector, u)) // For Controlled System (ZOH Integration)

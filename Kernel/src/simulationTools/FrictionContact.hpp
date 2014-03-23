@@ -90,7 +90,7 @@ public:
      \param int dim (2D or 3D) of the friction-contact problem (default = 3)
      \param int id of numerics solver (default = NSGS)
   */
-  FrictionContact(int dimPb = 3, int newNumericsSolverId = SICONOS_FRICTION_3D_NSGS);
+  FrictionContact(int dimPb = 3, int numericsSolverId = SICONOS_FRICTION_3D_NSGS);
 
   /** destructor
    */

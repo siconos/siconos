@@ -45,8 +45,8 @@ void MLCPProjectOnConstraints::initOSNSMatrix()
 
 
 // Constructor from a set of data
-MLCPProjectOnConstraints::MLCPProjectOnConstraints(const int newNumericsSolverId, double alphaval):
-  MLCP(newNumericsSolverId), _alpha(alphaval)
+MLCPProjectOnConstraints::MLCPProjectOnConstraints(const int numericsSolverId, double alphaval):
+  MLCP(numericsSolverId), _alpha(alphaval)
 {
   _indexSetLevel = 2;
   _inputOutputLevel = 0;

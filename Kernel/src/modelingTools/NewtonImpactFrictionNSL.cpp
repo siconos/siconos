@@ -25,8 +25,8 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():
   NonSmoothLaw(), _en(0.0), _et(0.0), _mu(0.0)
 {}
 
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(unsigned int newSize):
-  NonSmoothLaw(newSize), _en(0.0), _et(0.0), _mu(0.0)
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(unsigned int size):
+  NonSmoothLaw(size), _en(0.0), _et(0.0), _mu(0.0)
 {}
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(SP::NonSmoothLawXML nslawxml):

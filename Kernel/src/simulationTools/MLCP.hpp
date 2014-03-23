@@ -88,7 +88,7 @@ public:
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param std::string: id of the problem (default = "unamed")
   */
-  MLCP(int newNewNumericsSolverId = SICONOS_MLCP_ENUM);
+  MLCP(int numericsSolverId = SICONOS_MLCP_ENUM);
 
   /** destructor
   */

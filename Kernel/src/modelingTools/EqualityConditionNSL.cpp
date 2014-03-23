@@ -19,7 +19,7 @@
 #include "EqualityConditionNSL.hpp"
 
 
-EqualityConditionNSL::EqualityConditionNSL(unsigned int newSize): NonSmoothLaw(newSize)
+EqualityConditionNSL::EqualityConditionNSL(unsigned int size): NonSmoothLaw(size)
 {}
 
 EqualityConditionNSL::EqualityConditionNSL(SP::NonSmoothLawXML nslawxml):

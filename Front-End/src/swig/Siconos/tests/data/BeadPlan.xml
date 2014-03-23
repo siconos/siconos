@@ -22,20 +22,18 @@
 
 <SiconosModel>
 	<Title>Dry Friction Oscillator</Title>
-  <Author>F.Perignon</Author>
-  <Description>Oscillator with Coulomb friction </Description>
-  <Date>date</Date>
+	<Author>F.Perignon</Author>
+	<Description>Oscillator with Coulomb friction </Description>
+	<Date>date</Date>
 	<Time>
 		<t0>0.0</t0>
 		<T>40.0</T>
 	</Time>
 	<NSDS bvp='false'>
-	
+
 		<!-- DSs defined in the problem -->
-		<DS_Definition>		
-			<LagrangianLinearTIDS number='1'>
-				<Id>Oscillator </Id>				
-				<StepsInMemory>1</StepsInMemory>				
+		<DS_Definition>
+			<LagrangianLinearTIDS Name='Oscillator'>
 				<q0 vectorSize='3'>
 					0.1 0.0 0.0
 				</q0>
@@ -60,46 +58,44 @@
 				</C>
 			</LagrangianLinearTIDS>
 		</DS_Definition>
-		<!-- Interactions defined in the problem -->		
+		<!-- Interactions defined in the problem -->
 		<Interaction_Definition>
-			<Interaction number='1'>
-				<size>2</size>
+			<Interaction Name='1'>
 				<!-- List of couple of DS concerned by this interaction -->
-		                <DS_Concerned vectorSize='1'>1</DS_Concerned>									
-				<!-- Relation of this interaction -->				
-				<Interaction_Content>		
-				 <LagrangianRelation type="LinearTI">
-				  <C matrixRowSize='2' matrixColSize='3'>
-  	                            <row> 0.0 1.0 0.0 </row>
-  	                            <row> 1.0 0.0 0.0</row>
-                                  </C>
-  				 </LagrangianRelation>			
-				<!-- NS Law of this interaction	-->
-				<NewtonImpactFrictionLaw>
-  				  <en>0.0</en>				
-                                  <mu>0.08</mu>
-				  <size>2</size>
-				</NewtonImpactFrictionLaw>
-				</Interaction_Content>	
-			</Interaction>				
-		</Interaction_Definition>		
+				<DS_Concerned>Oscillator</DS_Concerned>
+				<!-- Relation of this interaction -->
+				<Interaction_Content>
+					<LagrangianLinearTIR>
+						<C matrixRowSize='2' matrixColSize='3'>
+							<row> 0.0 1.0 0.0 </row>
+							<row> 1.0 0.0 0.0</row>
+						</C>
+					</LagrangianLinearTIR>
+					<!-- NS Law of this interaction	-->
+					<NewtonImpactFrictionNSL size='2'>
+						<en>0.0</en>
+						<mu>0.08</mu>
+					</NewtonImpactFrictionNSL>
+				</Interaction_Content>
+			</Interaction>
+		</Interaction_Definition>
 	</NSDS>
-	<!-- Simulation to use in order to solve the problem -->	
+	<!-- Simulation to use in order to solve the problem -->
 	<Simulation type='TimeStepping'>
-		<TimeDiscretisation isConstant='true'>	
+		<TimeDiscretisation>
 			<h>0.005</h>
-     		</TimeDiscretisation>				
-		<!-- One Step Integrators -->				
+		</TimeDiscretisation>
+		<!-- One Step Integrators -->
 		<OneStepIntegrator_Definition>
 			<MoreauJeanOSI>
-				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
+				<DS_Concerned>Oscillator</DS_Concerned>
 				<Theta all="0.5"></Theta>
-			</MoreauJeanOSI>					
+			</MoreauJeanOSI>
 		</OneStepIntegrator_Definition>
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblems_List>
-		 	<FrictionContact Type='2'>
-		 	</FrictionContact>
-		 </OneStepNSProblems_List>
-	</Simulation>	
+			<FrictionContact Type='2'>
+			</FrictionContact>
+		</OneStepNSProblems_List>
+	</Simulation>
 </SiconosModel>

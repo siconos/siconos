@@ -179,6 +179,13 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   _DSG[0]->add_vertex(ds);
 }
 
+void Topology::insertDynamicalSystem(SP::DynamicalSystem ds, const std::string& name)
+{
+  DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->add_vertex(ds);
+  _DSG[0]->name.insert(dsgv, name);
+}
+
+
 void Topology::setControlProperty(SP::Interaction inter,
   const bool isControlInteraction)
 {

@@ -24,7 +24,7 @@
 
 #include "LagrangianR.hpp"
 
-/** Lagrangian (Non Linear) Compliant Relation: Scleronomous, Non-Holonomic (function of lambda).
+/** Lagrangian Compliant Relation: Scleronomous, Non-Holonomic (function of lambda).
  *
  * \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -90,26 +90,34 @@ public:
   LagrangianCompliantR(SP::RelationXML);
 
   /** constructor from a set of data
-  *  \param std::string : the name of the plugin to computeh
-  *  \param vector<string> : a list of names for the plugin to compute the jacobians of h
+  *  \param pluginh the name of the plugin to compute h
+  *  \param computeJacobianhq the name of the plugin to compute the gradient of h w.r.t q
+  *  \param computeJacobianhlambda the name of the plugin to compute the gradient of h w.r.t \f$\lambda\f$
   */
-  LagrangianCompliantR(const std::string&, const std::vector<std::string>&);
+  LagrangianCompliantR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginJacobianhlambda);
 
   /** destructor
   */
   virtual ~LagrangianCompliantR() {};
 
-  /** to compute y = h(q,v,t) using plug-in mechanism
-  * \param: double, current time
+  /** compute y = h(q,v,t) using plug-in mechanism
+  * \param time current time
+  * \param inter the Interaction
   */
   void computeh(double time, Interaction& inter);
 
-  /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
-  * \param: double, current time
-  * \param: unsigned int
+  /** compute the jacobian of h w.r.t. q using plug-in mechanism
+  * \param time current time
+  * \param inter the Interaction
   */
   void computeJachq(double time, Interaction& inter);
+
+  /** compute the jacobian of h w.r.t. \f$\lambda\f$ using plug-in mechanism
+  * \param time current time
+  * \param inter the Interaction
+  */
   void computeJachlambda(double time, Interaction& inter);
+
   const std::string getJachlambdaName() const;
   const std::string getJachqName() const;
 

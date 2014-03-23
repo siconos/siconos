@@ -26,29 +26,25 @@
 #include "SiconosFwd.hpp"
 #include "SimulationTypeDef.hpp"
 
-class Simulation;
-class DynamicalSystem;
-class Interaction;
-class SiconosMatrix;
 /** Non Smooth Problem Formalization and Simulation
- 
+
    \author SICONOS Development Team - copyright INRIA
    \version 3.0.0.
    \date (Creation) Apr 26, 2004
- 
+
   This is an abstract class, that provides an interface to define a
   non smooth problem:
-  -> a formulation (ie the way the problem is written)
-  -> a solver (algorithm and solving formulation, that can be
+  - a formulation (ie the way the problem is written)
+  - a solver (algorithm and solving formulation, that can be
         different from problem formulation)
-  -> routines to compute the problem solution.
- 
+  - routines to compute the problem solution.
+
   Two types of problem formulation are available :
    - Quadratic Problem
    - Linear Problem 
 
    See derived classes (QP and LinearOSNS) for details. 
-   
+
    For Linear problems, the following formulations exists: 
    - Linear Complementarity (LCP)
    - Mixed Linear Complementarity (MLCP)
@@ -58,24 +54,24 @@ class SiconosMatrix;
    - GenericMechanical
    - OSNSMultipleImpact
    - GlobalFrictionContact (unstable)
-   
+
    The usual way to build and initialize a one-step nonsmooth problem is :
    - call constructor with the id of the required Numerics solver.
    (see Solver class or Numerics documentation for details on algorithm name and parameters).
    - initialize(simulation)
    Initialize process is usually done through model->initialize(simulation). 
    See Examples for practical details.
-   
+
    \section osns_options Options for Numerics and the driver for solvers
- 
+
    When the Numerics driver is called, two input arguments are
    required to set specific options:
    - the global Numerics options (verbose mode ...) --> NumericsOptions
    - the solver options (name, tolerance, max. number of iterations ...) --> _SolverOptions, \ref NumericsSolver.
-   
+
    Default values are always set in solver options the OneStepNSProblem is built
    but if you need to set them yourself, please see \ref NumericsSolver. 
-    
+
  */
 class OneStepNSProblem
 {
@@ -147,9 +143,9 @@ public:
   OneStepNSProblem(SP::OneStepNSProblemXML);
 
   /**  constructor with a solver from Numerics
-   *  \param newNumericsSolverId id of numerics solver, see Numerics for the meaning
+   *  \param numericsSolverId id of numerics solver, see Numerics for the meaning
    */
-  OneStepNSProblem(int newNumericsSolverId);
+  OneStepNSProblem(int numericsSolverId);
 
   /** destructor
    */
@@ -353,10 +349,9 @@ public:
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
       (Ex: for MoreauJeanOSI, W)
-      \param[in] osi, the OSI of the concerned dynamical system
-      
-      \param[in] ds, the concerned dynamical system
-      \return pointer to the required matrix.
+      \param osi the OSI of the concerned dynamical system
+      \param ds the concerned dynamical system
+      \return the required matrix.
   */
   SP::SimpleMatrix getOSIMatrix(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
 

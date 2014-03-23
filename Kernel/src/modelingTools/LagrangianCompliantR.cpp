@@ -47,12 +47,12 @@ LagrangianCompliantR::LagrangianCompliantR(SP::RelationXML LRxml): LagrangianR(L
 }
 
 // constructor from a set of data
-LagrangianCompliantR::LagrangianCompliantR(const std::string& computeh, const std::vector<std::string> & computeg): LagrangianR(CompliantR)
+LagrangianCompliantR::LagrangianCompliantR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginJacobianhlambda) : LagrangianR(CompliantR)
 {
   zeroPlugin();
-  setComputehFunction(SSLH::getPluginName(computeh), SSLH::getPluginFunctionName(computeh));
-  _pluginJachq->setComputeFunction(SSLH::getPluginName(computeg[0]), SSLH::getPluginFunctionName(computeg[0]));
-  _pluginJachlambda->setComputeFunction(SSLH::getPluginName(computeg[1]), SSLH::getPluginFunctionName(computeg[1]));
+  setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
+  _pluginJachq->setComputeFunction(SSLH::getPluginName(pluginJacobianhq), SSLH::getPluginFunctionName(pluginJacobianhq));
+  _pluginJachlambda->setComputeFunction(SSLH::getPluginName(pluginJacobianhlambda), SSLH::getPluginFunctionName(pluginJacobianhlambda));
 }
 
 void LagrangianCompliantR::zeroPlugin()

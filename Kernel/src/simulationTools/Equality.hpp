@@ -65,7 +65,7 @@ public:
   /** constructor
       \param int id of numerics solver
   */
-  Equality(int newNumericsSolverId = 0): LinearOSNS(newNumericsSolverId) {};
+  Equality(int numericsSolverId = 0): LinearOSNS(numericsSolverId) {};
   
   /** destructor
    */

@@ -48,9 +48,9 @@ GlobalFrictionContact::GlobalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
 // Required input: simulation
 // Optional: newNumericsSolverName
 GlobalFrictionContact::GlobalFrictionContact(int dimPb,
-    const int newNumericsSolverId,
+    const int numericsSolverId,
     const std::string& newId):
-  LinearOSNS(newNumericsSolverId, "GlobalFrictionContact", newId), _contactProblemDim(dimPb)
+  LinearOSNS(numericsSolverId, "GlobalFrictionContact", newId), _contactProblemDim(dimPb)
 {}
 
 void GlobalFrictionContact::setLocalVelocity(const SiconosVector& newValue)

@@ -18,7 +18,7 @@
 */
 
 /*! \file NonSmoothLaw.hpp
-
+	\brief Base (abstract) class for a nonsmooth law
 */
 
 #ifndef NSLAW_H
@@ -33,14 +33,28 @@
 
 #include "SiconosVisitor.hpp"
 
-/** Non Smooth Laws Base Class
+/** Non Smooth Laws (NSL) Base Class
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) May 05, 2004
  *
+ * This class is the base class for all nonsmooth laws in Siconos.
+ * A nonsmooth law characterize the (nonsmooth) relationship between 2 variables,
+ * usually designated by \f$y\f$ and \f$\lambda\f$. \f$y\f$ is most of time seen as the
+ * "input" from DynamicalSystems and is given by a Relation linked to this nonsmoothlaw.
+ * \f$\lambda\f$ is then the "output" and through the same Relation feed back to one or more
+ * DynamicalSystem.
  *
+ * classical examples of nonsmooth law include:
+ * - RelayNSL: \f$y \in -\mathcal{N}_{[-1,1]}(\lambda)\quad \Longleftrightarrow \lambda \in -\mbox{sgn} (y)\f$
+ * - ComplementarityConditionNSL: \f$0\leq y \perp \lambda \geq 0\f$
+ * - NewtonImpactNSL and NewtonImpactFrictionNSL for impact, with possible friction
+ * - MultipleImpactNSL for a multiple impact law
+ * - MixedComplementarityConditionNSL
  *
+ * The computation of both \f$y\f$ and \f$\lambda\f$ is carried on by a solver in Numerics
+ * through a OneStepNSProblem object.
  */
 class NonSmoothLaw
 {
@@ -70,9 +84,9 @@ protected:
 
 public:
   /** basic constructor
-  * \param unsigned int, the non smooth law size
+  * \param size the nonsmooth law size
   */
-  NonSmoothLaw(unsigned int);
+  NonSmoothLaw(unsigned int size);
 
   /** constructor with XML object of the NonSmoothLaw
   *  \param NonSmoothLawXML* : the XML object corresponding
@@ -121,13 +135,6 @@ public:
   inline unsigned int sizeProjectOnConstraints() const
   {
     return _sizeProjectOnConstraints;
-  }
-  /** set the size of the nsLaw
-  *  \param newVal the new size
-  */
-  inline void setSize(unsigned int newVal)
-  {
-    _size = newVal;
   }
 
   /** copy the data of the NonSmoothLaw to the XML tree

@@ -102,7 +102,7 @@ TimeDiscretisation::TimeDiscretisation(double t0, double h):
 }
 
 // INPUTS: t0 and h
-TimeDiscretisation::TimeDiscretisation(double t0, std::string& str): _t0(t0)
+TimeDiscretisation::TimeDiscretisation(double t0, const std::string& str): _t0(t0)
 {
   mpf_init(_hgmp);
   mpf_init(_tkp1);

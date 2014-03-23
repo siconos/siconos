@@ -22,79 +22,75 @@
 
 <SiconosModel>
 	<Title>title</Title>
-  <Author>author</Author>
-  <Description>description</Description>
-  <Date>date</Date>
+	<Author>author</Author>
+	<Description>description</Description>
+	<Date>date</Date>
 	<Time>
 		<t0>0.0</t0>
 		<T>8.5</T>
 	</Time>
 
 	<NSDS bvp='false'>
-	
+
 		<!-- DSs defined in the problem -->
-		<DS_Definition>		
-			<LagrangianLinearTIDS number='1'>
-				<Id> Ball </Id>				
-				<StepsInMemory>1</StepsInMemory>				
+		<DS_Definition>
+			<LagrangianLinearTIDS Name='Ball'>
 				<q0 vectorSize='3'>
 					1.0 0.0 0.0
 				</q0>
 				<Velocity0  vectorSize='3'>
 					0.0 0.0 0.0
 				</Velocity0>
-                                <FExt vectorPlugin="BallPlugin:ballFExt"/> 
-				<Mass matrixRowSize='3' matrixColSize='3'>	
+				<FExt vectorPlugin="BallPlugin:ballFExt"/>
+				<Mass matrixRowSize='3' matrixColSize='3'>
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
-				</Mass>			
+				</Mass>
 			</LagrangianLinearTIDS>
 		</DS_Definition>
-		<!-- Interactions defined in the problem -->		
+		<!-- Interactions defined in the problem -->
 		<Interaction_Definition>
-			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
-			<Interaction number='1' Id='Ball-Ground'>
-				<size> 1 </size>
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->
+			<Interaction Name='Ball-Ground'>
 				<!-- List of couple of DS concerned by this interaction -->
-	                        <DS_Concerned vectorSize='1'>1</DS_Concerned>									
-				<!-- Relation of this interaction -->				
-				<Interaction_Content>		
-					<LagrangianRelation type="Linear">
-					  <C matrixRowSize='1' matrixColSize='3'>
-         	                            <row> 1.0  0.0  0.0</row>
-					  </C>              
-					</LagrangianRelation>			
+				<DS_Concerned>Ball</DS_Concerned>
+				<!-- Relation of this interaction -->
+				<Interaction_Content>
+					<LagrangianLinearTIR>
+						<C matrixRowSize='1' matrixColSize='3'>
+							<row> 1.0  0.0  0.0</row>
+						</C>
+					</LagrangianLinearTIR>
 					<!-- NS Law of this interaction	-->
-					<NewtonImpactLaw>
-					  <size>1</size>
-					  <e>0.9</e>				
-					</NewtonImpactLaw>
-				</Interaction_Content>	
-			</Interaction>				
-		</Interaction_Definition>		
+					<NewtonImpactNSL size='1'>
+						<e>0.9</e>
+					</NewtonImpactNSL>
+				</Interaction_Content>
+			</Interaction>
+		</Interaction_Definition>
 	</NSDS>
-	<!-- Simulation to use in order to solve the problem -->	
+	<!-- Simulation to use in order to solve the problem -->
 	<Simulation type='EventDriven'>
 
-		<TimeDiscretisation isConstant='true'>	
+		<TimeDiscretisation>
 			<h>0.05</h>
-     		</TimeDiscretisation>				
+		</TimeDiscretisation>
 
-		<!-- One Step Integrators -->				
+		<!-- One Step Integrators -->
 		<OneStepIntegrator_Definition>
-			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->
 			<LsodarOSI>
-				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
-			</LsodarOSI>					
+				<DS_Concerned>Ball</DS_Concerned>
+			</LsodarOSI>
 		</OneStepIntegrator_Definition>
 
 		<!-- One Step NS Problem of the Simulation-->
 		<OneStepNSProblems_List>
-		  <LCP StorageType="0" Id="impact">
-	          </LCP>
-		  <LCP StorageType="0" Id="acceleration">
-	          </LCP>
+			<LCP StorageType="0" Id="impact">
+			</LCP>
+			<LCP StorageType="0" Id="acceleration">
+			</LCP>
 		</OneStepNSProblems_List>
-	</Simulation>	
+	</Simulation>
 </SiconosModel>

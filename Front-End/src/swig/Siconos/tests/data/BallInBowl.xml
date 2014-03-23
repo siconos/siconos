@@ -22,20 +22,18 @@
 
 <SiconosModel>
 	<Title>title</Title>
-  <Author>author</Author>
-  <Description>description</Description>
-  <Date>date</Date>
+	<Author>author</Author>
+	<Description>description</Description>
+	<Date>date</Date>
 	<Time>
 		<t0>0.0</t0>
 		<T>1.50</T>
 	</Time>
 	<NSDS bvp='false'>
-	
+
 		<!-- DSs defined in the problem -->
-		<DS_Definition>		
-			<LagrangianLinearTIDS number='1'>
-				<Id> Ball </Id>				
-				<StepsInMemory>1</StepsInMemory>				
+		<DS_Definition>
+			<LagrangianLinearTIDS Name='Ball'>
 				<q0 vectorSize='3'>
 					0.4 0.2 0.0
 				</q0>
@@ -43,74 +41,69 @@
 					0.0 0.0 0.0
 				</Velocity0>
 				<FExt vectorPlugin="BallInBowlPlugin:ballFExt"/>
-				<Mass matrixRowSize='3' matrixColSize='3'>	
+				<Mass matrixRowSize='3' matrixColSize='3'>
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
-				</Mass>			
+				</Mass>
 			</LagrangianLinearTIDS>
-			<LagrangianLinearTIDS number='2'> 
-				<Id> Ground </Id>
+			<LagrangianLinearTIDS Name='Ground'>
 				<q0 vectorSize='1'>
 					0.0
-				</q0>	
+				</q0>
 				<Velocity0 vectorSize='1'>
 					0.0
 				</Velocity0>
-				<Mass matrixRowSize='1' matrixColSize='1'>	
+				<Mass matrixRowSize='1' matrixColSize='1'>
 					<row>1.0 </row>
-				</Mass>			
-			</LagrangianLinearTIDS>	
+				</Mass>
+			</LagrangianLinearTIDS>
 		</DS_Definition>
 
 
-		<!-- Interactions defined in the problem -->		
+		<!-- Interactions defined in the problem -->
 		<Interaction_Definition>
-			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
-			<Interaction number='1'>
-				<size> 1 </size>
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->
+			<Interaction Name='1'>
 				<!-- List of couple of DS concerned by this interaction -->
-		                <DS_Concerned vectorSize='1'>1</DS_Concerned>									
-				<!-- Relation of this interaction -->				
-				<Interaction_Content>		
-					<LagrangianRelation type="Scleronomous">
-					<h plugin="BallInBowlPlugin:h0"/>
- 					<jacobianH number="1">
-                                      	<matrix matrixPlugin="BallInBowlPlugin:G0"/>
-                                        </jacobianH>
-					</LagrangianRelation>			
+				<DS_Concerned>Ball</DS_Concerned>
+				<!-- Relation of this interaction -->
+				<Interaction_Content>
+					<LagrangianScleronomousR>
+						<h plugin="BallInBowlPlugin:h0"/>
+						<Jacobianhq plugin="BallInBowlPlugin:G0"/>
+					</LagrangianScleronomousR>
 					<!-- NS Law of this interaction	-->
-					<NewtonImpactLaw>
-				  <size>1</size>
-						<e>0.9</e>				
-					</NewtonImpactLaw>
-				</Interaction_Content>	
-			</Interaction>				
-		</Interaction_Definition>		
+					<NewtonImpactNSL size='1'>
+						<e>0.9</e>
+					</NewtonImpactNSL>
+				</Interaction_Content>
+			</Interaction>
+		</Interaction_Definition>
 	</NSDS>
-	<!-- Simulation to use in order to solve the problem -->	
+	<!-- Simulation to use in order to solve the problem -->
 	<Simulation type='TimeStepping'>
 
-		<TimeDiscretisation isConstant='true'>	
+		<TimeDiscretisation>
 			<h>0.001</h>
-     		</TimeDiscretisation>				
+		</TimeDiscretisation>
 
-		<!-- One Step Integrators -->				
+		<!-- One Step Integrators -->
 		<OneStepIntegrator_Definition>
-			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->
 			<MoreauJeanOSI>
-				<DS_Concerned vectorSize='2'>1 2</DS_Concerned>
+				<DS_Concerned>Ball Ground</DS_Concerned>
 				<Theta all="0.5"></Theta>
 			</MoreauJeanOSI>
-			</OneStepIntegrator_Definition>
+		</OneStepIntegrator_Definition>
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblems_List>
-		 	<LCP StorageType="0" Id="myLCP">
-			   <NonSmoothSolver Name="Lemke">
-			      <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
-			      <dparam  vectorSize='5'>1e-6 0 0 0 0</dparam>
-			   </NonSmoothSolver>
-	                 </LCP>
-		 </OneStepNSProblems_List>
-	</Simulation>	
+			<LCP StorageType="0">
+				<NonSmoothSolver Name="Lemke">
+					<iparam  vectorSize='5'>1000 0 0 0 0</iparam>
+					<dparam  vectorSize='5'>1e-6 0 0 0 0</dparam>
+				</NonSmoothSolver>
+			</LCP>
+		</OneStepNSProblems_List>
+	</Simulation>
 </SiconosModel>

@@ -101,9 +101,9 @@ private:
   TimeDiscretisation(); 
 
   /** Assignment Operator (private => forbidden)
-   * \param TimeDiscretisation unused
+   * \param td unused
    */
-  TimeDiscretisation& operator =(const TimeDiscretisation&);
+  TimeDiscretisation& operator =(const TimeDiscretisation& td);
 
   /** Get the origin of time t0
    * \return the origin of time
@@ -147,7 +147,7 @@ public:
    *  \param t0 initial time value
    *  \param str the time step in form of a string
    */
-  TimeDiscretisation(double t0, std::string& str);
+  TimeDiscretisation(double t0, const std::string& str);
 
   /** Copy constructor
    * \param td the TimeDiscretisation to copy

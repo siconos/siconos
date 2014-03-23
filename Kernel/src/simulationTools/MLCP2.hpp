@@ -31,7 +31,7 @@
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
- * \section MLCPintro Aim of the MLCP class
+ * \section MLCP2intro Aim of the MLCP2 class
  *
  * This class is devoted to the formalization and the resolution of the
  * Mixed Linear Complementarity Problem (MLCP) defined by :

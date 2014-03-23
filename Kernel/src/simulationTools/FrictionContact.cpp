@@ -28,10 +28,10 @@
 using namespace RELATION;
 
 
-FrictionContact::FrictionContact(int dimPb, int newNumericsSolverId):
-  LinearOSNS(newNumericsSolverId), _contactProblemDim(dimPb)
+FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
+  LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
 {
-  if (dimPb == 2 && newNumericsSolverId == SICONOS_FRICTION_3D_NSGS)
+  if (dimPb == 2 && numericsSolverId == SICONOS_FRICTION_3D_NSGS)
     _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
   _numerics_problem.reset(new FrictionContactProblem);
 

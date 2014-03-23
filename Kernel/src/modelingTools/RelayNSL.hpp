@@ -38,10 +38,10 @@
  * \f]
  * where \f$lb\f$ is the lower bound and   \f$ub\f$ is the upper bound of the Relay law.
  *
- * In this default case, the lower bound is set to \f$lb=-1\f$ and the upper bound ub is set to \f$ub=1\f$. We get  the well-known form of the Relay as
- * the multi-valued sign function, i.e.
+ * In this default case, the lower bound is set to \f$lb=-1\f$ and the upper bound ub is set to \f$ub=1\f$. We get  the well-known form of the RelayNSL as
+ * the multivalued sign function, i.e.
  * \f[
- * \left\{\begin{array}{l}
+ * \begin{array}{l}
  * -y \in N_{[-1,1]}(\lambda)\quad\quad \Longleftrightarrow -\lambda \in \mbox{sgn} (y)
  * \end{array}\right.
  * \f]
@@ -49,9 +49,9 @@
  * \f[
  *  \mbox{sgn} (y) =
  *  \left\{\begin{array}{lcl}
- *  1 &,\quad& y >0 \\
- *  \,[-1,1] &,\quad& y =0 \\
- *  -1 &,\quad& y <0 \\
+ *  1 &\quad& y >0 \\
+ *  \,[-1,1] &\quad& y =0 \\
+ *  -1 &\quad& y <0 \\
  *  \end{array}\right.
  *  \f]
  * \todo Build the Sgn NonSmoothLaw as the default instance of Relay
@@ -63,6 +63,12 @@ private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(RelayNSL);
+
+  /** represent the lower bound of the Relay */
+  double _lb;
+
+  /** represent the upper bound of the Relay*/
+  double _ub;
 
 
   /** default constructor
@@ -98,12 +104,12 @@ public:
     return _lb;
   };
 
-  /** to set c
-  *  \param newVal a double
+  /** to set the lower bound
+  *  \param lb the new lower bound
   */
-  inline void setLb(double newVal)
+  inline void setLb(double lb)
   {
-    _lb = newVal;
+    _lb = lb;
   };
 
   /** to get ub
@@ -116,11 +122,11 @@ public:
 
 
   /** to set ub
-  *  \param newVal a double
+  *  \param ub the new upper bound
   */
-  inline void setUb(double newVal)
+  inline void setUb(double ub)
   {
-    _ub = newVal;
+    _ub = ub;
   };
 
   /** copy the data of the NonSmoothLaw to the XML tree
@@ -134,13 +140,6 @@ public:
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();
-
-private:
-  /** represent the lower bound of the Relay */
-  double _lb;
-
-  /** represent the upper bound of the Relay*/
-  double _ub;
 
 };
 

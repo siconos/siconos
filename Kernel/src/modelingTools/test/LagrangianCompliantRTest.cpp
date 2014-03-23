@@ -79,11 +79,7 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
 // data constructor:
 void LagrangianCompliantRTest::testBuildLagrangianCompliantR2()
 {
-  std::vector<std::string> names;
-  names.push_back("TestPlugin:G0Compl");
-  names.push_back("TestPlugin:G1Compl");
-
-  SP::LagrangianCompliantR R1(new LagrangianCompliantR("TestPlugin:hCompl", names));
+  SP::LagrangianCompliantR R1(new LagrangianCompliantR("TestPlugin:hCompl", "TestPlugin:G0Compl", "TestPlugin:G1Compl"));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3b : ", R1->getSubType() == RELATION::CompliantR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3c : ", R1->gethName() == "TestPlugin:hCompl", true);

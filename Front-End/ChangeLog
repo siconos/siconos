@@ -1,4 +1,4 @@
-# Siconos-Front-End version 3.3.0, Copyright INRIA 2005-2011.
+# Siconos-Front-End version 3.7.0, Copyright INRIA 2005-2014
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 # Siconos is a free software; you can redistribute it and/or modify
@@ -20,6 +20,14 @@ This is the changelog for the Siconos Front-End package, www.siconos.gforge.inri
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
+--------------------------------------------------------------------------------
+  v3.7.0 - 
+--------------------------------------------------------------------------------
+	* The bindings can now be build with python3
+	* numpy.i was updated
+	* New XML input feature: based on an XML description a Model can be
+	instantiated using python
+
 --------------------------------------------------------------------------------
   v3.6.0 - October 2013
 --------------------------------------------------------------------------------

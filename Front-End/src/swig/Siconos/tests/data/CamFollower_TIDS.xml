@@ -22,31 +22,29 @@
 
 <SiconosModel>
 	<Title>CamFollower Sample</Title>
-  <Author>Gustavo Osorio</Author>
-  <Description>Generalized lagrangian Follower with a moving constraint modelled as an external force</Description>
-  <Date>March, 2006</Date>
+	<Author>Gustavo Osorio</Author>
+	<Description>Generalized lagrangian Follower with a moving constraint modelled as an external force</Description>
+	<Date>March, 2006</Date>
 	<Time>
 		<t0>0.0</t0>
 		<T>1.0</T>
 	</Time>
 
 	<NSDS bvp='false'>
-	
+
 		<!-- DSs defined in the problem -->
-		<DS_Definition>		
-			<LagrangianLinearTIDS number='1'>
-				<!--				<Id> Follower </Id> -->
-				<StepsInMemory>1</StepsInMemory>				
+		<DS_Definition>
+			<LagrangianLinearTIDS Name='Follower'>
 				<q0 vectorSize='1'>
 					0.0
 				</q0>
 				<Velocity0  vectorSize='1'>
 					0.0
 				</Velocity0>
-				<FExt vectorPlugin="FollowerPlugin:FollowerFExt"/> 
-				<Mass matrixRowSize='1' matrixColSize='1'>	
+				<FExt vectorPlugin="FollowerPlugin:FollowerFExt"/>
+				<Mass matrixRowSize='1' matrixColSize='1'>
 					<row>1.221</row>
-				</Mass>			
+				</Mass>
 				<K matrixRowSize='1' matrixColSize='1'>
 					<row>1430.8</row>
 				</K>
@@ -55,49 +53,47 @@
 				</C>
 			</LagrangianLinearTIDS>
 		</DS_Definition>
-		<!-- Interactions defined in the problem -->		
+		<!-- Interactions defined in the problem -->
 		<Interaction_Definition>
-			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
-			<Interaction number='1' Id='Follower-Ground'>
-				<size> 1 </size>
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->
+			<Interaction Name='Follower-Ground'>
 				<!-- List of couple of DS concerned by this interaction -->
-	                        <DS_Concerned vectorSize='1'>1</DS_Concerned>									
-				<!-- Relation of this interaction -->				
-				<Interaction_Content>		
-					<LagrangianRelation type="LinearTI">
+				<DS_Concerned>Follower</DS_Concerned>
+				<!-- Relation of this interaction -->
+				<Interaction_Content>
+					<LagrangianLinearTIR>
 						<C matrixRowSize='1' matrixColSize='1'>
-         	                                <row> 1.0</row>
-						</C>              
-					</LagrangianRelation>			
+							<row> 1.0</row>
+						</C>
+					</LagrangianLinearTIR>
 					<!-- NS Law of this interaction	-->
-					<NewtonImpactLaw>
+					<NewtonImpactNSL size='1'>
 						<e>0.8</e>
-						<size>1</size>				
-					</NewtonImpactLaw>
-				</Interaction_Content>	
-			</Interaction>				
-		</Interaction_Definition>		
+					</NewtonImpactNSL>
+				</Interaction_Content>
+			</Interaction>
+		</Interaction_Definition>
 	</NSDS>
-	<!-- Simulation to use in order to solve the problem -->	
+	<!-- Simulation to use in order to solve the problem -->
 	<Simulation type='TimeStepping'>
 
-		<TimeDiscretisation isConstant='true'>	
+		<TimeDiscretisation>
 			<h>0.0001</h>
-     		</TimeDiscretisation>				
+		</TimeDiscretisation>
 
-		<!-- One Step Integrators -->				
+		<!-- One Step Integrators -->
 		<OneStepIntegrator_Definition>
-			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->
 			<MoreauJeanOSI>
-				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
-				<Theta all="0.5"></Theta>
-			</MoreauJeanOSI>					
+				<DS_Concerned>Follower</DS_Concerned>
+				<Theta all="0.5" />
+			</MoreauJeanOSI>
 		</OneStepIntegrator_Definition>
 
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblems_List>
-		 	<LCP>
-	                </LCP>
-		 </OneStepNSProblems_List>
-		 </Simulation>	
+			<LCP>
+			</LCP>
+		</OneStepNSProblems_List>
+	</Simulation>
 </SiconosModel>

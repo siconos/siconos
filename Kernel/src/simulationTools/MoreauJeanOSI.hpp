@@ -24,8 +24,7 @@
 
 #include "OneStepIntegrator.hpp"
 
-class Simulation;
-class SiconosMatrix;
+#include <limits>
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
 

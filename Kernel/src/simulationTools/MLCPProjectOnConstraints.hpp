@@ -63,10 +63,10 @@ public:
 
 
   /** constructor from data
-   \param newNewNumericsSolverId solver id
+   \param numericsSolverId solver id
    \param alpha alpha parameter value
    */
-  MLCPProjectOnConstraints(int newNewNumericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
+  MLCPProjectOnConstraints(int numericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
 
   /** destructor
   */

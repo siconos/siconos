@@ -23,7 +23,15 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
+--------------------------------------------------------------------------------
+  v3.7.0 
+--------------------------------------------------------------------------------
+Main Changes:
 
+	* rework LCP Solvers: fix some of them (FB and min merit functions) and add
+	new algorithm like Bard-type and Murty's rule.
+	* new AVI solver based on the work by Cao & Ferris. It is also used to
+	solve Relay problem
 
 --------------------------------------------------------------------------------
   v3.6.0

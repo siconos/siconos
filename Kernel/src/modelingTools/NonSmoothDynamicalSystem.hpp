@@ -17,12 +17,10 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 /*! \file NonSmoothDynamicalSystem.hpp
+ * \brief container for DynamicalDystem and Interaction
  */
 #ifndef NSDS_H
 #define NSDS_H
-
-/** Available Dynamical Systems types*/
-//enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 
 #include "SiconosPointers.hpp"
 #include "DynamicalSystemsSet.hpp"
@@ -32,8 +30,10 @@ class DynamicalSystem;
 class Topology;
 
 
-/** the Non Smooth Dynamical System composed with dynamical systems
- *  that interact alltogether.
+/** the Non Smooth Dynamical System consists of DynamicalDystem
+ *  and Interaction regrouped together in a Topology object,
+ *  in the form of a graph of DynamicalDystem as nodes and Interaction as edges
+ *  and its dual.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \date (Creation) Apr 23, 2004
@@ -120,7 +120,7 @@ public:
   {
     return _topology->dSG(0);
   }
-  
+
   // === Interactions management ===
 
   /** get the number of Interactions present in the NSDS.
@@ -140,11 +140,21 @@ public:
   };
 
   /** add a dynamical system
-   * \param ds a pointer to the system to remove
+   * \param ds a pointer to the system to add
    */
   inline void insertDynamicalSystem(SP::DynamicalSystem ds)
   {
     _topology->insertDynamicalSystem(ds);
+    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+  };
+
+  /** add a dynamical system and add its name as a property
+   * \param ds the DynamicalSystem to add to the system
+   * \param name the name of the DynamicalSystem
+   */
+  inline void insertDynamicalSystem(SP::DynamicalSystem ds, const std::string& name)
+  {
+    _topology->insertDynamicalSystem(ds, name);
     _mIsLinear = ((ds)->isLinear() && _mIsLinear);
   };
 
@@ -158,9 +168,9 @@ public:
   };
 
   /** link an interaction to two dynamical systems
-   * \param inter a SP::Interaction
-   * \param ds1 a SP::DynamicalSystem
-   * \param ds2 a SP::DynamicalSystem (optional)
+   * \param inter the interaction
+   * \param ds1 a DynamicalSystem
+   * \param ds2 a DynamicalSystem (optional)
    */
   void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 

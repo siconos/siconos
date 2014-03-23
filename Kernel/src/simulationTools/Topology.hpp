@@ -18,19 +18,13 @@
 */
 
 /*! \file Topology.hpp
-
+  \brief Describes the topology of the DynamicalSystem and Interaction in the Simulation
 */
 #ifndef TOPOLOGY_H
 #define TOPOLOGY_H
 
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
-
-class NonSmoothDynamicalSystem;
-class Interaction;
-class DynamicalSystem;
-class SiconosMatrix;
-class Interaction;
 
 
 /**  This class describes the topology of the non-smooth dynamical
@@ -145,9 +139,15 @@ public:
   void removeInteraction(SP::Interaction inter);
 
   /** add a dynamical system
-   * \param ds the dynamical system to add
+   * \param ds the DynamicalSystem to add
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds);
+
+  /** add a dynamical system
+   * \param ds the DynamicalSystem to add
+   * \param name the name of the DynamicalSystem
+   */
+  void insertDynamicalSystem(SP::DynamicalSystem ds, const std::string& name);
 
   /** remove a dynamical system
    * \param ds the dynamical system to remove

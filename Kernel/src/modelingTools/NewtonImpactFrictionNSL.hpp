@@ -42,7 +42,7 @@ private:
   */
   ACCEPT_SERIALIZATION(NewtonImpactFrictionNSL);
 
-  /*/** The Newton coefficient of restitution
+  /** The Newton coefficient of restitution
    */
   double _en;
   double _et;
@@ -56,9 +56,9 @@ private:
 public:
 
   /** basic constructor
-   *  \param unsigned int: size of the ns law
+   *  \param size size of the ns law
    */
-  NewtonImpactFrictionNSL(unsigned int);
+  NewtonImpactFrictionNSL(unsigned int size);
 
   /** constructor with XML object of the NewtonImpactFrictionNSL
    *  \param NonSmoothLawXML* : the XML object corresponding

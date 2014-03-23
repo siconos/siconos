@@ -51,9 +51,9 @@ private:
 
 public:
   /** basic constructor
-  *  \param: size of the non smooth law
+  *  \param size of the non smooth law
   */
-  EqualityConditionNSL(unsigned int);
+  EqualityConditionNSL(unsigned int size);
 
   /** constructor with XML object of the parent class NonSmoothLaw
   *  \param NonSmoothLawXML* : the XML object corresponding
