@@ -63,20 +63,10 @@ protected:
 /** Work map to save state-related data for the dynamical systems of the osi - DSVector: map<DS * , SP::SiconosVector> */
 //  DSVectors workX;
 
-/** the corresponding XML object */
-  SP::OneStepIntegratorXML integratorXml;
-
 /** basic constructor with Id
  *  \param integrator type/name
  */
   OneStepIntegrator(const OSI::TYPES&);
-
-/** constructor from xml file
-    \param integrator type/name
-    \param OneStepIntegratorXML* : the corresponding XML object
-    \param the set of all DS in the NSDS
-*/
-  OneStepIntegrator(const OSI::TYPES&, SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
 /** default constructor
  */
@@ -192,28 +182,6 @@ public:
     simulationLink = newS;
   }
 
-/** get the OneStepIntegratorXML of the OneStepIntegrator
- *  \return a pointer on the OneStepIntegratorXML of the OneStepIntegrator
- */
-  inline SP::OneStepIntegratorXML oneStepIntegratorXML() const
-  {
-    return integratorXml;
-  }
-
-  /** set the OneStepIntegratorXML of the OneStepIntegrator
-   *  \param newIntegratorXml OneStepIntegratorXML* : the pointer to set the OneStepIntegratorXML
-   */
-  inline void setOneStepIntegratorXMLPtr(SP::OneStepIntegratorXML newIntegratorXml)
-  {
-    integratorXml = newIntegratorXml;
-  }
-
-  /** get workX vector which corresponds to input ds
-      \param a SP::DynamicalSystem
-      \return a SP::SiconosVector
-  */
-  //  SP::SiconosVector getWorkX(SP::DynamicalSystem);
-
   // --- OTHERS ... ---
 
   /** initialise the integrator
@@ -265,10 +233,6 @@ public:
   /** print the data to the screen
    */
   virtual void display() = 0;
-
-  /** copy the data of the OneStepNSProblem to the XML tree
-   */
-  void saveIntegratorToXML();
 
   /**
    */

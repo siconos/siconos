@@ -49,8 +49,6 @@ public:
   void setElasCoeff(double _newElasCoef);
   //
   bool isVerified() const;
-  //
-  void saveNonSmoothLawToXML();
   // Display the information about the multiple impact law
   void display() const;
   //Visitors hook

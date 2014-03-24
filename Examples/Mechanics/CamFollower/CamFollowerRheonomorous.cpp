@@ -22,7 +22,7 @@
 // The Cam Follower system is modelled as a Generalised Langrangian System impacting against a fixed wall
 // the moving constraint (i.e. a rotational cam) is modelled as an input force
 //
-// Direct description of the model without XML input.
+// Direct description of the model.
 //
 // Keywords: LagrangianLinearDS, LagrangianLinear relation, MoreauJeanOSI TimeStepping, LCP.
 //

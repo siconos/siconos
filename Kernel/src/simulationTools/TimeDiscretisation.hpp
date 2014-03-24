@@ -23,9 +23,11 @@
 #ifndef TIMEDISCRETISATION_H
 #define TIMEDISCRETISATION_H
 
-#include "TimeDiscretisationXML.hpp"
 #include <vector>
 #include <gmp.h>
+#include "SiconosFwd.hpp"
+
+typedef std::vector<double> TkVector;
 
 /** A time discretisation scheme
 
@@ -78,9 +80,6 @@ private:
   /** vector of time values at each step (=> size = n1+n2+1 - Default size = 2 - Max size= nSteps+1) */
   TkVector _tkV;
 
-  /** the XML object linked to the TimeDiscretisation to read XML data */
-  SP::TimeDiscretisationXML _timeDiscretisationXML;
-
   /** Origin of time*/
   double _t0;
 
@@ -114,13 +113,6 @@ private:
   }
 
 public:
-
-  /** constructor with XML
-      \param tdXML the XML object corresponding
-      \param t0 initial time
-      \param T final time
-  */
-  TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t0, double T);
 
   // --- Straightforward constructors ---
 
@@ -210,35 +202,11 @@ public:
    */
   void setT0(double val);
 
-  /** get the TimeDiscretisationXML of the TimeDiscretisation
-   *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation
-   */
-  inline SP::TimeDiscretisationXML timeDiscretisationXML() const
-  {
-    return _timeDiscretisationXML;
-  }
-
-  /** set the TimeDiscretisationXML of the TimeDiscretisation
-   *  \param timediscrxml a SP::TimeDiscretisationXML
-   */
-  inline void setTimeDiscretisationXMLPtr(SP::TimeDiscretisationXML timediscrxml)
-  {
-    _timeDiscretisationXML = timediscrxml;
-  }
-
   // --- OTHER FUNCTIONS ---
   /** print the discretisation data to the screen
    */
   void display() const;
 
-  // --- XML Functions ---
-
-  /** saves the TimeDiscretisation to the XML tree
-   *
-   */
-  void saveTimeDiscretisationToXML();
 };
-
-//DEFINE_SPTR(TimeDiscretisation)
 
 #endif // TIMEDISCRETISATION_H

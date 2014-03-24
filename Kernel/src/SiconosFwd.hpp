@@ -16,17 +16,11 @@ TYPEDEF_SPTR(NumericsMatrix)
 /* Kernel */
 DEFINE_SPTR(BlockCSRMatrix)
 
-DEFINE_SPTR(DynamicalSystemXML)
-
 DEFINE_SPTR(Interaction)
-DEFINE_SPTR(InteractionXML)
 
 DEFINE_SPTR(Model)
 
-DEFINE_SPTR(NonSmoothDynamicalSystemXML)
 DEFINE_SPTR(NonSmoothDynamicalSystem)
-
-DEFINE_SPTR(NonSmoothLawXML)
 
 // --- Non-Smooth problems ---
 DEFINE_SPTR(OneStepNSProblem)
@@ -43,23 +37,17 @@ DEFINE_SPTR(OSNSMultipleImpact)
 // ----------------------------
 
 
-DEFINE_SPTR(OneStepNSProblemXML)
-
 DEFINE_SPTR(OneStepIntegrator)
-DEFINE_SPTR(OneStepIntegratorXML)
 
 DEFINE_SPTR(Relation)
-DEFINE_SPTR(RelationXML)
 
 DEFINE_SPTR(Simulation)
-DEFINE_SPTR(SimulationXML)
 DEFINE_SPTR(EventDriven)
 DEFINE_SPTR(EventsManager)
 
 DEFINE_SPTR(RelayNSL)
 DEFINE_SPTR(MixedComplementarityConditionNSL)
 
-DEFINE_SPTR(TimeDiscretisationXML)
 DEFINE_SPTR(TimeDiscretisation)
 
 // Dynamical systems

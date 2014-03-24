@@ -17,7 +17,6 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderR.hpp"
-#include "RelationXML.hpp"
 #include "Interaction.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 

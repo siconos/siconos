@@ -21,7 +21,7 @@
   \brief \ref EMNE_MULTIBIDY - C++ input file, Time-Stepping version - O.B.
 
   A multiby example.
-  Direct description of the model without XML input.
+  Direct description of the model.
   Simulation with a Time-Stepping scheme.
 */
 

@@ -58,15 +58,10 @@ public:
    */
   NewtonImpactNSL();
 
-  /** constructor with XML object of the NewtonImpactNSL
-  *  \param NonSmoothLawXML* : the XML object corresponding
-  */
-  NewtonImpactNSL(SP::NonSmoothLawXML);
-
   /** constructor with the value of the NewtonImpactNSL attributes
-  *  \param a double value e
+  *  \param e the value of the coefficient of restitution
   */
-  NewtonImpactNSL(double);
+  NewtonImpactNSL(double e);
 
   /** destructor
    */
@@ -92,10 +87,6 @@ public:
   {
     _e = newVal;
   };
-
-  /** copy the data of the NonSmoothLaw in the XML tree
-  */
-  void saveNonSmoothLawToXML();
 
   /** print the data to the screen
   */

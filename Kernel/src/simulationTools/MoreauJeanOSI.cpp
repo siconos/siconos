@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "MoreauJeanOSI.hpp"
-#include "MoreauJeanOSIXML.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -37,80 +36,6 @@
 
 
 using namespace RELATION;
-// --- xml constructor ---
-MoreauJeanOSI::MoreauJeanOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
-  OneStepIntegrator(OSI::MOREAUJEANOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
-{
-  // Note: we do not call xml constructor of OSI, but default one,
-  // since we need to download _theta and DS at the same time.
-
-  if (!osiXML)
-    RuntimeException::selfThrow("MoreauJeanOSI::xml constructor - OneStepIntegratorXML object == NULL.");
-
-  integratorXml = osiXML;
-  SP::MoreauJeanOSIXML moreauXml = std11::static_pointer_cast<MoreauJeanOSIXML>(osiXML);
-
-  // Required inputs: a list of DS and one _theta per DS.
-  // No xml entries at the time for _sizeMem and W.
-
-  if (!osiXML->hasDSList())
-    RuntimeException::selfThrow("MoreauJeanOSI::xml constructor - DS list is missing in xml input file.");
-  if (!moreauXml->hasThetaList())
-    RuntimeException::selfThrow("MoreauJeanOSI::xml constructor - theta list is missing in xml input file.");
-
-  std::vector<double> thetaXml;     // list of theta values
-  // thetaXml[i] will correspond to the ds number i in the xml list. If "all" attribute is true in ds,
-  // then theta values are sorted so to correspond to growing ds numbers order.
-
-  if (moreauXml->hasAllTheta()) // if one single value for all theta
-    thetaXml.push_back(moreauXml->getSingleTheta());
-  else
-    moreauXml->getTheta(thetaXml);
-
-  if (osiXML->hasAllDS()) // if flag all=true is present -> get all ds from the nsds
-  {
-    //unsigned int i=0;
-    for (DSIterator it = dsList->begin(); it != dsList->end(); ++it)
-    {
-      OSIDynamicalSystems->insert(*it);
-      // get corresponding theta. In xml they must be sorted in an
-      // order that corresponds to growing DS-numbers order.
-      if (moreauXml->hasAllTheta()) // if one single value for all theta
-        _theta = thetaXml[0];
-      else
-      {
-        // should not happen
-        RuntimeException::selfThrow("Multiples theta values for MoreauJeanOSI integrator are not valid anymore : use several MoreauJeanOSI instantiation instead.");
-      }
-    }
-  }
-  else
-  {
-    // get list of ds numbers implicated in the OSI
-    std::vector<int> dsNumbers;
-    osiXML->getDSNumbers(dsNumbers);
-    //unsigned int i= 0;
-    // get corresponding ds and insert them into the set.
-    std::vector<int>::iterator it;
-    SP::DynamicalSystem ds;
-    std::for_each(dsList->begin(), dsList->end(), std11::bind(&DynamicalSystem::number, _1));
-    for (it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
-    {
-      ds = dsList->getPtr(*it);
-      OSIDynamicalSystems->insert(ds);
-      if (moreauXml->hasAllTheta()) // if one single value for all theta
-        _theta = thetaXml[0];
-      else
-      {
-        RuntimeException::selfThrow("Multiples theta values for MoreauJeanOSI integrator are not valid anymore : use several MoreauJeanOSI instantiation instead.");
-      }
-    }
-  }
-  // W loading: not yet implemented
-  if (moreauXml->hasWList())
-    RuntimeException::selfThrow("MoreauJeanOSI::xml constructor - W matrix loading not yet implemented.");
-}
-
 // --- constructor from a minimum set of data ---
 MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem ds, double theta, double gamma) :
   OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false)
@@ -1501,14 +1426,4 @@ void MoreauJeanOSI::display()
     std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
   }
   std::cout << "================================" <<std::endl;
-}
-
-void MoreauJeanOSI::saveWToXML()
-{
-  //   if(integratorXml != NULL)
-  //     {
-  //       (static_cast<MoreauJeanOSIXML*>(integratorXml))->setW(W);
-  //     }
-  //   else RuntimeException::selfThrow("MoreauJeanOSI::saveIntegratorToXML - IntegratorXML object not exists");
-  RuntimeException::selfThrow("MoreauJeanOSI::saveWToXML -  not yet implemented.");
 }

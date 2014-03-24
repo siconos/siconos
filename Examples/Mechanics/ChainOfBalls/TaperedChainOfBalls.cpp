@@ -21,7 +21,7 @@
   \brief \ref EMBouncingBall - C++ input file, Event-Driven version - V. Acary, F. Perignon.
 
   A Ball bouncing on the ground. 
-  Direct description of the model without XML input. 
+  Direct description of the model. 
   Simulation with an Event-Driven scheme.
 */
 

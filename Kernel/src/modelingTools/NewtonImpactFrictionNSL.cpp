@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "NewtonImpactFrictionNSL.hpp"
-#include "NewtonImpactFrictionNSLXML.hpp"
 
 
 // Default (private)
@@ -28,21 +27,6 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(unsigned int size):
   NonSmoothLaw(size), _en(0.0), _et(0.0), _mu(0.0)
 {}
-
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(nslawxml), _en(0.0), _et(0.0), _mu(0.0)
-{
-  assert((nslawxml->hasSize()) && // size is a required input for Friction
-         "NewtonImpactFrictionNSL:: xml constructor, size is a required xml input.");
-
-  assert((size() == 2 || size() == 3) &&
-         "NewtonImpactFrictionNSL:: xml constructor, wrong size value = " + size());
-
-  _en = (std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEn();
-  if ((std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->hasEt())
-    _et = (std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEt();
-  _mu = (std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getMu();
-}
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(double newEn, double newEt, double newMu, unsigned int newSize):
   NonSmoothLaw(newSize), _en(newEn), _et(newEt), _mu(newMu)
@@ -66,11 +50,4 @@ void NewtonImpactFrictionNSL::display() const
   std::cout << " Tangential Newton coefficient of restitution: " << _et <<std::endl;
   std::cout << "Friction coefficient: " << _mu <<std::endl;
   std::cout << "==========================================================" <<std::endl;
-}
-
-void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()
-{
-  std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setEn(_en);
-  std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setEt(_et);
-  std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setMu(_mu);
 }

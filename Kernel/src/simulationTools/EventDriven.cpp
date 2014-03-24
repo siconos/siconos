@@ -18,9 +18,6 @@
  */
 
 #include "EventDriven.hpp"
-#include "SimulationXML.hpp"
-#include "OneStepNSProblemXML.hpp"
-#include "SimulationXML.hpp"
 #include "LsodarOSI.hpp"
 #include "LCP.hpp"
 #include "Model.hpp"
@@ -43,48 +40,6 @@
 using namespace std;
 using namespace RELATION;
 
-// --- XML constructor ---
-EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
-                         SP::DynamicalSystemsSet dsList):
-  Simulation(strxml, t0, T, dsList), _istate(1), _isNewtonConverge(false)
-{
-  // === One Step NS Problem === We read data in the xml output
-  // (mainly Interactions concerned and solver) and assign them to
-  // both one step ns problems ("acceleration" and "impact").  At the
-  // time, only LCP is available for Event Driven.
-
-  if (_simulationxml->hasOneStepNSProblemXML()) // ie if OSNSList is not empty
-  {
-    SetOfOSNSPBXML OSNSList = _simulationxml->getOneStepNSProblemsXML();
-    SP::OneStepNSProblemXML osnsXML;
-    string type;
-    // For EventDriven, two OSNSPb are required, "acceleration" and
-    // "impact"
-    _numberOfOneStepNSproblems = 2;
-    (*_allNSProblems).resize(_numberOfOneStepNSproblems);
-    if (OSNSList.size() != 2)
-      RuntimeException::selfThrow("EventDriven::xml constructor - Wrong number of OSNS problems: 2 are required.");
-    int id = SICONOS_OSNSP_ED_IMPACT;
-    for (SetOfOSNSPBXMLIt it = OSNSList.begin(); it != OSNSList.end(); ++it)
-    {
-      osnsXML = *it;
-      type = osnsXML->getNSProblemType();
-      if (type == LCP_TAG)  // LCP
-      {
-        (*_allNSProblems)[id].reset(new LCP(osnsXML));
-      }
-      else
-        RuntimeException::selfThrow("EventDriven::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
-      id = SICONOS_OSNSP_ED_SMOOTH_ACC;
-    }
-  }
-  _newtonTolerance = DEFAULT_TOL_ED;
-  _newtonMaxIteration = 50;
-  _newtonNbSteps = 0;
-  _newtonResiduDSMax = 0.0;
-  _newtonResiduYMax = 0.0;
-  _localizeEventMaxIter = 100;
-}
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
  */

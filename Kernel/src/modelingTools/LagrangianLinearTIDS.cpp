@@ -17,39 +17,9 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianLinearTIDS.hpp"
-#include "LagrangianLinearTIDSXML.hpp"
 #include "BlockMatrix.hpp"
 #include "debug.h"
 
-
-
-// --- Constructor from an xml file---
-LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): LagrangianDS(dsxml)
-{
-  SP::LagrangianLinearTIDSXML lltidsxml = std11::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml);
-
-  // If FInt or NNL is given: ignored.
-  if (lltidsxml->hasFInt() ||  lltidsxml->hasNNL())
-    std::cout << "!!!!! Warning : LagrangianLinearTIDS: xml constructor, FInt or NNL input will be ignored in xml file." <<std::endl;
-
-  // K and C
-
-  if (lltidsxml->hasK())
-  {
-    _K.reset(new SimpleMatrix(lltidsxml->getK()));
-  }
-  if (lltidsxml->hasC())
-  {
-    _C.reset(new SimpleMatrix(lltidsxml->getC()));
-  }
-
-  if (lltidsxml->hasFExt())
-  {
-    std::string plugin = lltidsxml->getFExtPlugin();
-    setComputeFExtFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
-    _fExt.reset(new SiconosVector(_ndof));
-  }
-}
 
 // --- Constructor from a set of data - _Mass, K and C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0,
@@ -281,34 +251,4 @@ void LagrangianLinearTIDS::computeJacobianRhsx(double time, bool)
   // during initialize.  But this function is required, since it is
   // called from LsodarOSI (if not present, the one of LagrangianDS will
   // be called)
-}
-
-void LagrangianLinearTIDS::saveSpecificDataToXML()
-{
-  assert(_dsxml &&
-         "LagrangianLinearTIDS::saveDSToXML - object DynamicalSystemXML does not exist");
-
-  SP::LagrangianDSXML lgptr = std11::static_pointer_cast <LagrangianDSXML>(_dsxml);
-  lgptr->setMassMatrix(*_mass);
-  lgptr->setQ(*_q[0]);
-  lgptr->setQ0(*_q0);
-  lgptr->setQMemory(*_qMemory);
-  lgptr->setVelocity(*_q[1]);
-  lgptr->setVelocity0(*_velocity0);
-  lgptr->setVelocityMemory(*_velocityMemory);
-
-  // FExt
-  if (lgptr->hasFExt())
-  {
-    if (!lgptr->isFExtPlugin())
-    {
-      lgptr->setFExtVector(*_fExt);
-    }
-  }
-  else
-  {
-    lgptr->setFExtPlugin(_pluginFExt->getPluginName());
-  }
-  (std11::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setK(*_K);
-  (std11::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setC(*_C);
 }

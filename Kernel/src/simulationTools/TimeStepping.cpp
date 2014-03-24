@@ -18,8 +18,6 @@
  */
 
 #include "TimeStepping.hpp"
-#include "SimulationXML.hpp"
-#include "OneStepNSProblemXML.hpp"
 #include "Topology.hpp"
 #include "LCP.hpp"
 #include "Relay.hpp"
@@ -73,44 +71,6 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
     _isNewtonConverge(false)
 {
   (*_allNSProblems).resize(nb);
-}
-
-// --- XML constructor ---
-TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
-                           double T, SP::DynamicalSystemsSet dsList):
-  Simulation(strxml, t0, T, dsList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), 
-  _computeResiduY(false), 
-  _computeResiduR(false), 
-  _isNewtonConverge(false)
-{
-
-  (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
-  // === One Step NS Problem === For time stepping, only one non
-  // smooth problem is built.
-  if (_simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is
-    // not empty
-  {
-    SetOfOSNSPBXML OSNSList = _simulationxml->getOneStepNSProblemsXML();
-    if (OSNSList.size() != 1)
-      RuntimeException::selfThrow("TimeStepping::xml constructor - Two many inputs for OSNS problems (only one problem is required).");
-    SP::OneStepNSProblemXML osnsXML = *(OSNSList.begin());
-    // OneStepNSProblem - Memory allocation/construction
-    std::string type = osnsXML->getNSProblemType();
-    if (type == LCP_TAG)  // LCP
-    {
-      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY].reset(new LCP(osnsXML));
-    }
-    else if (type == FRICTIONCONTACT_TAG)
-    {
-      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY].reset(new FrictionContact(osnsXML));
-    }
-    else RuntimeException::selfThrow("TimeStepping::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
-
-    //      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setId("timeStepping");
-
-    // Add QP and Relay cases when these classes will be fully
-    // implemented.
-  }
 }
 
 // --- Destructor ---

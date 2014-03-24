@@ -27,53 +27,11 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianScleronomousRTest);
 
 
 void LagrangianScleronomousRTest::setUp()
-{
-  // parse xml file:
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  doc = xmlParseFile("LagrangianScleronomous_test.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
+{}
 
-  // get rootNode
-
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-
-  // look for NSDS node
-  node = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  xmlNode * nodetmp = SiconosDOMTreeTools::findNodeChild(node, "Interaction");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
-  // get relation
-  xmlNode * node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianRelation");
-  tmpxml1.reset(new RelationXML(node1));
-}
 
 void LagrangianScleronomousRTest::tearDown()
 {}
-
-// xml constructor (scleronomic case)
-void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR0()
-{
-  std::cout << "==============================================" <<std::endl;
-  std::cout << "=== LagrangianScleronomousR tests start ...=== " <<std::endl;
-  std::cout << "==============================================" <<std::endl;
-  SP::LagrangianScleronomousR R1(new LagrangianScleronomousR(tmpxml1));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1a : ", R1->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1b : ", R1->getSubType() == RELATION::ScleronomousR, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1c : ", R1->gethName() == "TestPlugin:hSclero", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1d : ", R1->getJachqName() == "TestPlugin:G0Sclero", true);
-  std::cout << " xml Constructor (1) LagrangianScleronomousR ok" <<std::endl;
-}
 
 // data constructor:
 void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2()

@@ -59,11 +59,6 @@ public:
   */
   MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize);
 
-  /** constructor with XML object of the parent class NonSmoothLaw
-  *  \param nslawxml the corresponding XML object
-  */
-  MixedComplementarityConditionNSL(SP::NonSmoothLawXML nslawxml);
-
   /** Destructor */
   ~MixedComplementarityConditionNSL();
 
@@ -71,10 +66,6 @@ public:
   /** print the data to the screen
   */
   inline void display()const {};
-
-  /** copy the data of the NonSmoothLaw to the XML tree
-  */
-  inline void saveNonSmoothLawToXML() {};
 
   /** get the number of equality present in the MLCP
    *  \return an unsigned int

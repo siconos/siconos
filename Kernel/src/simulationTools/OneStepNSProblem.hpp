@@ -93,9 +93,6 @@ protected:
   /** link to the simulation that owns the NSPb */
   SP::Simulation _simulation;
 
-  /** the XML object linked to the OneStepNSProblem to read XML data */
-  SP::OneStepNSProblemXML _onestepnspbxml;
-
   /** level of index sets that is considered by this osnsp */
   unsigned int _indexSetLevel;
 
@@ -137,11 +134,6 @@ private:
   OneStepNSProblem& operator=(const OneStepNSProblem&);
 
 public:
-  /**  xml constructor
-   *  \param SP::OneStepNSProblemXML : the XML linked-object
-   */
-  OneStepNSProblem(SP::OneStepNSProblemXML);
-
   /**  constructor with a solver from Numerics
    *  \param numericsSolverId id of numerics solver, see Numerics for the meaning
    */
@@ -342,10 +334,6 @@ public:
   /** post treatment for output of the solver
    */
   virtual void postCompute() = 0;
-
-  /** copy the data of the OneStepNSProblem to the XML tree
-   */
-  virtual void saveNSProblemToXML() = 0;
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
       (Ex: for MoreauJeanOSI, W)

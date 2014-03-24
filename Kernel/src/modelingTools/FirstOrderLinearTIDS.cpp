@@ -17,29 +17,9 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderLinearTIDS.hpp"
-#include "FirstOrderLinearDSXML.hpp"
 
 
 // --- Constructors ---
-
-// From xml file
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::DynamicalSystemXML dsXML): FirstOrderLinearDS(dsXML)
-{
-  // Everything is done during the call to FirstOrderLinearDS constructor. In the present one, we just reject cases
-  // where A or b are given as plug-in rather than as matrices.
-
-  // pointer to xml
-
-  SP::FirstOrderLinearDSXML ldsxml = (std11::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml));
-
-  // reject case where A or b is a plug-in
-  if (ldsxml->isAPlugin())
-    RuntimeException::selfThrow("FirstOrderLinearTIDS - xml constructor, A is given as a plug-in, which should not be.");
-  if (ldsxml->isBPlugin())
-    RuntimeException::selfThrow("FirstOrderLinearTIDS - xml constructor, b is given as a plug-in, which should not be.");
-
-  checkDynamicalSystem();
-}
 
 // From a minimum set of data: A
 FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):

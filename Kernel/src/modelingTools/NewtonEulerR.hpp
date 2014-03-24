@@ -104,12 +104,6 @@ protected:
   */
   NewtonEulerR(RELATION::SUBTYPES lagType): Relation(RELATION::NewtonEuler, lagType) {}
 
-  /** constructor from xml file
-  *  \param relationXML
-  *  \param std::string: relation subType
-  */
-  NewtonEulerR(SP::RelationXML relxml, RELATION::SUBTYPES newSubType): Relation(relxml, RELATION::NewtonEuler, newSubType) {}
-
   /** initialize components specific to derived classes.
   */
   virtual void initComponents(Interaction& inter);
@@ -280,10 +274,6 @@ public:
   *  \param unsigned int: "derivative" order of lambda used to compute input
   */
   virtual void computeInput(double time, Interaction& inter, unsigned int = 0) ;
-
-  /** copy the data of the Relation to the XML tree
-  */
-  void saveRelationToXML() const;
 
   /**
   * return a SP on the C matrix.

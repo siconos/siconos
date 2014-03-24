@@ -60,11 +60,6 @@ public:
    */
   NewtonImpactFrictionNSL(unsigned int size);
 
-  /** constructor with XML object of the NewtonImpactFrictionNSL
-   *  \param NonSmoothLawXML* : the XML object corresponding
-   */
-  NewtonImpactFrictionNSL(SP::NonSmoothLawXML);
-
   /** constructor with the value of the NewtonImpactFrictionNSL attributes
    *  \param double : normal e coefficient
    *  \param double : tangent e coefficient
@@ -132,10 +127,6 @@ public:
   };
 
   // OTHER FUNCTIONS
-
-  /** copy the data of the NonSmoothLaw in the XML tree
-   */
-  void saveNonSmoothLawToXML();
 
   /** print the data to the screen
    */

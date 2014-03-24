@@ -120,11 +120,6 @@ protected:
 
 public:
 
-  /** constructor from xml file
-  *  \param relationXML
-  */
-  LagrangianScleronomousR(SP::RelationXML);
-
   /** constructor from a set of data
   *  \param pluginh the name of the plugin to compute h(q,z).
   * The signature  of the plugged function must be:

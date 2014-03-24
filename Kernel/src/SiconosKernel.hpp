@@ -28,7 +28,6 @@ Include files related to Siconos Kernel
 #include "ModelingTools.hpp"
 #include "SimulationTools.hpp"
 #include "ControlTools.hpp"
-#include "XmlTools.hpp"
 #include "PluginTypes.hpp"
 #include <time.h>
 #include <boost/timer.hpp>

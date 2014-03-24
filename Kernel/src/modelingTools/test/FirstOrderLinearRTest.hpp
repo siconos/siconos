@@ -20,11 +20,8 @@
 #define __FirstOrderLinearRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "RelationXML.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NonSmoothDynamicalSystemXML.hpp"
 #include "FirstOrderLinearR.hpp"
-#include "LinearRXML.hpp"
 
 class FirstOrderLinearRTest : public CppUnit::TestFixture
 {
@@ -40,7 +37,6 @@ private:
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildFirstOrderLinearR0);
   CPPUNIT_TEST(testBuildFirstOrderLinearR1);
   CPPUNIT_TEST(testBuildFirstOrderLinearR3);
   CPPUNIT_TEST(testBuildFirstOrderLinearR4);
@@ -62,7 +58,6 @@ private:
 
   // \todo exception test
 
-  void testBuildFirstOrderLinearR0();
   void testBuildFirstOrderLinearR1();
   void testBuildFirstOrderLinearR3();
   void testBuildFirstOrderLinearR4();
@@ -84,8 +79,6 @@ private:
 
   SP::SiconosMatrix C, B, F, D;
   SP::SiconosVector e;
-  xmlNodePtr node1;
-  SP::RelationXML tmpxml1;
   SP::NonSmoothDynamicalSystem nsds;
 
 public:

@@ -17,54 +17,11 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderType1R.hpp"
-#include "RelationXML.hpp"
 #include "Interaction.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 
 #include "BlockVector.hpp"
 
-
-// xml constructor
-FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
-  FirstOrderR(FORxml, RELATION::Type1R)
-{
-  // input g
-  if (FORxml->hasG())
-  {
-    setComputegFunction(SSLH::getPluginName(FORxml->getgPlugin()), SSLH::getPluginFunctionName(FORxml->getgPlugin()));
-    // Gradients
-    if (!FORxml->hasJacobianG())
-      RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradient(s) of g function.");
-
-    if (FORxml->isJacobianGPlugin(0))
-    {
-      //Jacg[0].reset(new PluggedMatrix(FORxml->getJacobianGPlugin(0)));
-      setComputeJacglambdaFunction(SSLH::getPluginName(FORxml->getgPlugin()), SSLH::getPluginFunctionName(FORxml->getgPlugin()));
-    }
-    else
-    {
-      _jacglambda.reset(new SimpleMatrix(FORxml->getJacobianGMatrix(0)));
-    }
-  }
-
-  // output h
-  if (FORxml->hasH())
-  {
-    setComputehFunction(SSLH::getPluginName(FORxml->gethPlugin()), SSLH::getPluginFunctionName(FORxml->gethPlugin()));
-    // Gradients
-    if (!FORxml->hasJacobianH())
-      RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradients of h function.");
-    if (FORxml->isJacobianHPlugin(0))
-    {
-      setComputeJachxFunction(SSLH::getPluginName(FORxml->getgPlugin()), SSLH::getPluginFunctionName(FORxml->getgPlugin()));
-      //Jach[0].reset(new PluggedMatrix(FORxml->getJacobianHPlugin(0)));
-    }
-    else
-    {
-      _jachx.reset(new SimpleMatrix(FORxml->getJacobianHMatrix(0)));
-    }
-  }
-}
 
 FirstOrderType1R::FirstOrderType1R(const std::string& computeOut, const std::string& computeIn):
   FirstOrderR(RELATION::Type1R)
@@ -96,8 +53,6 @@ void FirstOrderType1R::initialize(Interaction& inter)
   unsigned int sizeDS = inter.getSizeOfDS();
   unsigned int sizeZ = inter.data(z)->size();
 
-  // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
-  // was read from xml or not
   if (!_jachx)
     _jachx.reset(new SimpleMatrix(sizeY, sizeDS));
   if (!_jachz)

@@ -85,12 +85,6 @@ public:
   /** Default constructor */
   LsodarOSI();
 
-  /** constructor from xml file
-      \param OneStepIntegratorXML* : the XML object
-      \param the set of all DS in the NSDS
-  */
-  LsodarOSI(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
-
   /** constructor from a minimum set of data
    *  \param ds the DynamicalSystem to integrate
    */

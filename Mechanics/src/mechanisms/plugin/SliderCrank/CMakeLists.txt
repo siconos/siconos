@@ -10,10 +10,9 @@ COMPILE_WITH(LAPACK REQUIRED COMPLETE)
 
 
 
-FIND_PACKAGE(LibXml2 REQUIRED)
 
 
-include_directories (${SiconosKernel_INCLUDE_DIRS} ${SiconosNumerics_INCLUDE_DIRS}  ${LIBXML2_INCLUDE_DIR} ${CBLAS_INCLUDE_PATH} )
+include_directories (${SiconosKernel_INCLUDE_DIRS} ${SiconosNumerics_INCLUDE_DIRS}  ${CBLAS_INCLUDE_PATH} )
 
 
 

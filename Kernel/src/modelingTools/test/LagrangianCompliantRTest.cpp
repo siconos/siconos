@@ -27,57 +27,14 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianCompliantRTest);
 
 
 void LagrangianCompliantRTest::setUp()
-{
-  // parse xml file:
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  doc = xmlParseFile("LagrangianCompliant_test.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
+{}
 
-  // get rootNode
-
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-
-  // look for NSDS node
-  node = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  xmlNode * nodetmp = SiconosDOMTreeTools::findNodeChild(node, "Interaction");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
-  // get relation
-  xmlNode * node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianRelation");
-  tmpxml1.reset(new RelationXML(node1));
-}
 
 void LagrangianCompliantRTest::tearDown()
 {}
 
-// xml constructor (scleronomic case)
-void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
-{
-  std::cout << "==============================================" <<std::endl;
-  std::cout << "=== LagrangianCompliantR tests start ...=== " <<std::endl;
-  std::cout << "==============================================" <<std::endl;
-  SP::LagrangianCompliantR R1(new LagrangianCompliantR(tmpxml1));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1a : ", R1->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1b : ", R1->getSubType() == RELATION::CompliantR, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1c : ", R1->gethName() == "TestPlugin:hCompl", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1d : ", R1->getJachqName() == "TestPlugin:G0Compl", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1e : ", R1->getJachlambdaName() == "TestPlugin:G1Compl", true);
-  std::cout << " xml Constructor (1) LagrangianCompliantR ok" <<std::endl;
-}
-
 // data constructor:
-void LagrangianCompliantRTest::testBuildLagrangianCompliantR2()
+void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
 {
   SP::LagrangianCompliantR R1(new LagrangianCompliantR("TestPlugin:hCompl", "TestPlugin:G0Compl", "TestPlugin:G1Compl"));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3a : ", R1->getType() == RELATION::Lagrangian, true);

@@ -21,9 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "FirstOrderLinearDS.hpp"
-#include "FirstOrderLinearDSXML.hpp"
 #include "RuntimeException.hpp"
-#include "XMLException.hpp"
 
 class FirstOrderLinearDSTest : public CppUnit::TestFixture
 {
@@ -40,8 +38,6 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildFirstOrderLinearDS1);
-  CPPUNIT_TEST(testBuildFirstOrderLinearDS2);
-  CPPUNIT_TEST(testBuildFirstOrderLinearDS3);
   //  CPPUNIT_TEST(testSetA);
   CPPUNIT_TEST(testSetAPtr);
   //  CPPUNIT_TEST(testSetB);
@@ -53,8 +49,6 @@ private:
   // \todo exception test
 
   void testBuildFirstOrderLinearDS1();
-  void testBuildFirstOrderLinearDS2();
-  void testBuildFirstOrderLinearDS3();
   //  void testSetA();
   void testSetAPtr();
   //  void testSetB();
@@ -66,9 +60,6 @@ private:
   SP::SiconosVector x0;
   SP::SiconosVector b0;
   SP::SiconosMatrix A0;
-  SP::SiconosMatrix A0p;
-  xmlNodePtr node1, node2;
-  SP::FirstOrderLinearDSXML tmpxml1, tmpxml2;
 public:
   void setUp();
   void tearDown();

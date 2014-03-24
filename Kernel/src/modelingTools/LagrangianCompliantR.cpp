@@ -20,31 +20,12 @@
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianCompliantR.hpp"
-#include "RelationXML.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
 #include "BlockVector.hpp"
 
 using namespace RELATION;
-
-// xml constructor
-LagrangianCompliantR::LagrangianCompliantR(SP::RelationXML LRxml): LagrangianR(LRxml, CompliantR)
-{
-  zeroPlugin();
-  if (!LRxml->hasH())
-    RuntimeException::selfThrow("LagrangianCompliantR:: xml constructor failed, can not find a definition for h.");
-
-  setComputehFunction(SSLH::getPluginName(LRxml->gethPlugin()), SSLH::getPluginFunctionName(LRxml->gethPlugin()));
-
-  if (!LRxml->hasJacobianH())
-    RuntimeException::selfThrow("LagrangianCompliantR:: xml constructor failed, can not find a definition for Jach0.");
-  //   Jach.resize(2);
-  if (LRxml->isJacobianHPlugin(0))
-    _pluginJachq->setComputeFunction(SSLH::getPluginName(LRxml->getJacobianHPlugin(0)), SSLH::getPluginFunctionName(LRxml->getJacobianHPlugin(0)));
-  if (LRxml->isJacobianHPlugin(1))
-    _pluginJachlambda->setComputeFunction(SSLH::getPluginName(LRxml->getJacobianHPlugin(1)), SSLH::getPluginFunctionName(LRxml->getJacobianHPlugin(1)));
-}
 
 // constructor from a set of data
 LagrangianCompliantR::LagrangianCompliantR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginJacobianhlambda) : LagrangianR(CompliantR)

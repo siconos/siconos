@@ -18,7 +18,6 @@
  */
 #include "SiconosPointers.hpp"
 #include "GlobalFrictionContact.hpp"
-#include "FrictionContactXML.hpp"
 #include "Simulation.hpp"
 //#include "Interaction.hpp"
 #include "Model.hpp"
@@ -29,20 +28,6 @@
 #include "LagrangianDS.hpp"
 #include "NewtonImpactNSL.hpp"
 
-
-// xml constructor
-GlobalFrictionContact::GlobalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
-  LinearOSNS(osNsPbXml, "GlobalFrictionContact"), _contactProblemDim(3)
-{
-  SP::FrictionContactXML xmlFC = std11::static_pointer_cast<FrictionContactXML>(osNsPbXml);
-
-  // Read dimension of the problem (required parameter)
-  if (!xmlFC->hasProblemDim())
-    RuntimeException::selfThrow(
-      "GlobalFrictionContact: xml constructor failed, attribute for dimension of the problem (2D or 3D) is missing.");
-
-  _contactProblemDim = xmlFC->getProblemDim();
-}
 
 // Constructor from a set of data
 // Required input: simulation

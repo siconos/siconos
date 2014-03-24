@@ -33,9 +33,9 @@ int main()
 
 
   int dimX = 4;
-  SiconosVector* x0 = 0;
 
-  x0 = new SiconosVector(dimX);
+  SP::SiconosVector x0(new SiconosVector(dimX));
+
   //Point de départ hors arc singulier
   x0->setValue(0, 3.4999939172);
   x0->setValue(1, -2.2788416237);
@@ -52,7 +52,7 @@ int main()
   //  NBStep = 3;
   //*****BUILD THE DYNAMIC SYSTEM
   SP::MyDS aDS ;
-  aDS.reset(new MyDS(*x0));
+  aDS.reset(new MyDS(x0));
 
   //******BUILD THE RELATION
   SP::adjointInput aR;
@@ -125,13 +125,11 @@ int main()
   for (unsigned int k = 0 ; k < NBStep ; k++)
   {
 
-    cout << " ==== Step: " << endl;
     //      if (cmp==150)
     // setNumericsVerbose(à);
     //      else if (cmp==151)
     setNumericsVerbose(0);
 
-    cout << "..." << cmp << endl; // a garder
 
 
     cmp++;

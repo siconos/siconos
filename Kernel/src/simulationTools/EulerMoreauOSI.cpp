@@ -1006,13 +1006,3 @@ void EulerMoreauOSI::display()
   }
   std::cout << "================================" <<std::endl;
 }
-
-void EulerMoreauOSI::saveWToXML()
-{
-  //   if(integratorXml != NULL)
-  //     {
-  //       (static_cast<EulerMoreauOSIXML*>(integratorXml))->setW(W);
-  //     }
-  //   else RuntimeException::selfThrow("EulerMoreauOSI::saveIntegratorToXML - IntegratorXML object not exists");
-  RuntimeException::selfThrow("EulerMoreauOSI::saveWToXML -  not yet implemented.");
-}

@@ -28,51 +28,11 @@ CPPUNIT_TEST_SUITE_REGISTRATION(NonSmoothDynamicalSystemTest);
 
 void NonSmoothDynamicalSystemTest::setUp()
 {
-  // parse xml file:
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  doc = xmlParseFile("nsds_test.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
 
-  // get rootNode
-
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-
-  // look for NSDS node
-  node = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  tmpxml.reset(new NonSmoothDynamicalSystemXML(node));
-}
 
 void NonSmoothDynamicalSystemTest::tearDown()
 {}
 
-// xml constructor
-void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
-{
-  std::cout << "====================================================" <<std::endl;
-  std::cout << " ===== NonSmoothDynamicalSystem tests start ...===== " <<std::endl;
-  std::cout << "====================================================" <<std::endl;
-  std::cout << "------- Xml Constructor test -------" <<std::endl;
-  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(tmpxml));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemA : ", nsds->getDSVectorSize() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemB : ", nsds->dynamicalSystem(0)->number() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemC : ", nsds->dynamicalSystem(1)->number() == 8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemD : ", nsds->getInteractionVectorSize() == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemE : ", nsds->interaction(0)->number() == 12, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemF : ", nsds->isBVP() == false, true);
-  std::cout << " ------- Constructor xml NonSmoothDynamicalSystem ok -------" <<std::endl;
-}
 // copy constructor
 void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
 {

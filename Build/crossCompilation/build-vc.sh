@@ -76,8 +76,6 @@ build_Kernel_VS() {
 		-DCMAKE_INSTALL_PREFIX=$HOME/siconos-windows-VC/install \
 		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll.a" \
 		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
-		-DLIBXML2_LIBRARIES="$HOME/mxe/usr/i686-pc-mingw32/lib/libxml2.a;$HOME/mxe/usr/i686-pc-mingw32/lib/libz.a;$HOME/mxe/usr/i686-pc-mingw32/lib/libws2_32.a;$HOME/mxe/usr/lib/gcc/i686-pc-mingw32/${GCC_VER_MXE}/libgcc.a;$HOME/mxe/usr/i686-pc-mingw32/lib/liblzma.a" \
-		-DLIBXML2_INCLUDE_DIR=${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/include-VC/libxml2 \
 		-DGMP_LIBRARY=$HOME/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
 		-DGMP_LIBRARIES=$HOME/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
 		-DGMP_INCLUDE_DIRS=$HOME/mxe/usr/i686-pc-mingw32/include-VC \
@@ -120,8 +118,6 @@ build_FE_VS() {
 		-DPYTHON_NUMPY_INCLUDE_DIR="${LIBS_PREFIX}/numpy/PLATLIB/numpy/core/include" \
 		-DBOOST_ROOT="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/" \
 		-DBoost_INCLUDE_DIR=$HOME/mxe/usr/i686-pc-mingw32/include-VC/ \
-		-DLIBXML2_LIBRARIES="$HOME/mxe/usr/i686-pc-mingw32/lib/libxml2.a;$HOME/mxe/usr/i686-pc-mingw32/lib/libz.a;$HOME/mxe/usr/i686-pc-mingw32/lib/libws2_32.a;$HOME/mxe/usr/lib/gcc/i686-pc-mingw32/$GCC_VER_MXE/libgcc.a;$HOME/mxe/usr/i686-pc-mingw32/lib/liblzma.a" \
-		-DLIBXML2_INCLUDE_DIR=${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/include-VC/libxml2 \
 		-DGMP_LIBRARY=$HOME/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
 		-DGMP_LIBRARIES=$HOME/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
 		-DGMP_INCLUDE_DIRS=$HOME/mxe/usr/i686-pc-mingw32/include-VC \

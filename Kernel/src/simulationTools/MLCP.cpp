@@ -26,13 +26,6 @@
 
 using namespace RELATION;
 //#define MLCP_DEBUG
-// xml constructor
-MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
-  LinearOSNS(onestepnspbxml)
-{
-  _n = 0;
-  _m = 0;
-}
 
 // Constructor from a set of data
 MLCP::MLCP(int numericsSolverId):

@@ -21,9 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianLinearTIDS.hpp"
-#include "LagrangianLinearTIDSXML.hpp"
 #include "RuntimeException.hpp"
-#include "XMLException.hpp"
 
 class LagrangianLinearTIDSTest : public CppUnit::TestFixture
 {
@@ -59,8 +57,6 @@ private:
 
   SP::SiconosVector q0, velocity0;
   SP::SiconosMatrix mass, K, C;
-  xmlNodePtr node1;
-  SP::LagrangianLinearTIDSXML tmpxml1;
 
 public:
   void setUp();

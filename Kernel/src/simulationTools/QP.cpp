@@ -18,13 +18,8 @@
 */
 
 #include "QP.hpp"
-#include "QPXML.hpp"
 
 
-
-QP::QP(SP::OneStepNSProblemXML osnspbxml):
-  OneStepNSProblem(osnspbxml)
-{}
 
 QP::~QP()
 {}
@@ -36,21 +31,6 @@ int QP::compute(double)
 }
 
 void QP::display() const
-{
-  RuntimeException::selfThrow("QP::compute not yet implemented");
-}
-
-void QP::saveNSProblemToXML()
-{
-  RuntimeException::selfThrow("QP::compute not yet implemented");
-}
-
-void QP::savePToXML()
-{
-  RuntimeException::selfThrow("QP::compute not yet implemented");
-}
-
-void QP::saveQToXML()
 {
   RuntimeException::selfThrow("QP::compute not yet implemented");
 }

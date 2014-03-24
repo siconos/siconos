@@ -24,7 +24,6 @@ through impacts with a rotational cam.
 
 Available input files are :
 
-	- CamFollowerXML.cpp: input file using XML loading (BouncingBall_TIDS.xml)
 	- CamFollower.cpp: input file using direct C++ description of the model
 	- CamFollower.py : python input file, using xml.
 

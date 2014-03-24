@@ -103,9 +103,6 @@ protected:
       its id) */
   SP::OneStepNSProblems _allNSProblems;
 
-  /** the XML object linked to the Simulation to read XML data */
-  SP::SimulationXML _simulationxml;
-
   /** A link to the Model which contains the Simulation */
   std11::weak_ptr<Model> _model;
 
@@ -196,14 +193,6 @@ public:
    *  \param td the timeDiscretisation for this Simulation
    */
   Simulation(SP::TimeDiscretisation td);
-
-  /** constructor with XML object of the Simulation
-      \param SimulationXML* : the XML object corresponding
-      \param initial time
-      \param final time
-      \param the set of all DS in the NSDS
-  */
-  Simulation(SP::SimulationXML, double, double, SP::DynamicalSystemsSet);
 
   /** destructor
    */
@@ -402,22 +391,6 @@ public:
    */
   virtual void insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id = SICONOS_OSNSP_DEFAULT);
 
-  /** get the SimulationXML* of the Simulation
-   *  \return a pointer on the SimulationXML of the Simulation
-   */
-  inline SP::SimulationXML simulationXML() const
-  {
-    return _simulationxml;
-  }
-
-  /** set the SimulationXML of the Simulation
-   *  \param strxml the pointer to set the SimulationXML
-   */
-  inline void setSimulationXMLPtr(SP::SimulationXML strxml)
-  {
-    _simulationxml = strxml;
-  }
-
   /** get the Model which contains the Simulation
    *  \return the Model of this simulation
    */
@@ -583,13 +556,6 @@ public:
   {
     return _relativeConvergenceCriterionHeld;
   };
-
-  // --- XML RELATED FUNCTIONS ---
-
-  /** copys the data of the Simulation to the XML tree
-   *
-   */
-  virtual void saveSimulationToXML();
 
   /** compute r thanks to lambda[level] for all Interactions
       \param level lambda level

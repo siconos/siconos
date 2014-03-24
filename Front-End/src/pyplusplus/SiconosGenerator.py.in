@@ -17,18 +17,18 @@ logger.setLevel(logging.DEBUG)
 Utils = [
     # Siconos Algebra
     'SiconosVector', 'SiconosMatrix',
-    'SimpleVector', 'SimpleMatrix', 'BlockVector', 
-    'BlockMatrix', 'ioMatrix', 'ioVector', 'ioObject', 
-    
+    'SimpleVector', 'SimpleMatrix', 'BlockVector',
+    'BlockMatrix', 'ioMatrix', 'ioVector', 'ioObject',
+
     # Siconos Exception
-    'RuntimeException', 'SiconosException', 
-    'SiconosMatrixException', 'SiconosMemoryException', 
-    'SiconosSharedLibraryException', 
+    'RuntimeException', 'SiconosException',
+    'SiconosMatrixException', 'SiconosMemoryException',
+    'SiconosSharedLibraryException',
     'SiconosVectorException', 'XMLException',
-    
+
     # Siconos Memory
     'SiconosMemory',
-    
+
     # Siconos shared library
     'SiconosSharedLibrary'
     ]
@@ -36,13 +36,13 @@ Utils = [
 
 Model = [ 'Model' ]
 
-ModelingTools = [ 'ComplementarityConditionNSL', 'DynamicalSystem', 
-                  'FirstOrderLinearDS', 'FirstOrderLinearR', 
+ModelingTools = [ 'ComplementarityConditionNSL', 'DynamicalSystem',
+                  'FirstOrderLinearDS', 'FirstOrderLinearR',
                   'FirstOrderLinearTIDS', 'FirstOrderLinearTIR',
-                  'FirstOrderNonLinearDS', 
+                  'FirstOrderNonLinearDS',
                   'Interaction',
                   'LagrangianCompliantR',
-                  'LagrangianDS', 
+                  'LagrangianDS',
                   'LagrangianLinearTIDS',
                   'LagrangianLinearTIR',
                   'LagrangianRheonomousR',
@@ -50,17 +50,17 @@ ModelingTools = [ 'ComplementarityConditionNSL', 'DynamicalSystem',
                   'MixedComplementarityConditionNSL',
                   'NewtonImpactFrictionNSL',
                   'NewtonImpactNSL',
-                  'NonSmoothDynamicalSystem', 
+                  'NonSmoothDynamicalSystem',
                   'NonSmoothLaw',
                   'Relation',
                   'RelayNSL'
-                   
+
                   ]
 
 SimulationTools = [ 'Event', 'EventDriven', 'FrictionContact', 'LCP', 'LinearOSNS', 'Lsodar',
-                    'MLCP', 'Moreau', 'NonSmoothEvent', 'NonSmoothSolver', 
+                    'MLCP', 'Moreau', 'NonSmoothEvent', 'NonSmoothSolver',
                     'OneStepIntegrator', 'OneStepNSProblem', 'QP',
-                    'Relay' , 'Simulation', 'BlockCSRMatrix', 'TimeDiscretisation', 
+                    'Relay' , 'Simulation', 'BlockCSRMatrix', 'TimeDiscretisation',
                     'TimeDiscretisation', 'TimeDiscretisationEvent', 'TimeStepping', 'Topology',
                     'UnitaryRelation' ]
 
@@ -73,26 +73,25 @@ siconos_templates = [ ]
 siconos_headers = [ 'SiconosKernelExport.hpp' ]
 #map(lambda name: name + '.h', siconos_classes)
 
- 
-def generate_code():  
+
+def generate_code():
     # py++ main class
 
     print 'Generating boost python code ...'
 
-    mb = module_builder.module_builder_t( siconos_headers, 
-                                          include_paths=['@SiconosNumerics_INCLUDE_DIRS@', 
-                                                         '@SiconosKernel_INCLUDE_DIRS@', 
-                                                         '@ATLAS_INCLUDE_DIR@', 
-                                                         '@LIBXML2_INCLUDE_DIR@' ],
-                                          working_directory = r".", 
+    mb = module_builder.module_builder_t( siconos_headers,
+                                          include_paths=['@SiconosNumerics_INCLUDE_DIRS@',
+                                                         '@SiconosKernel_INCLUDE_DIRS@',
+                                                         '@ATLAS_INCLUDE_DIR@']
+                                          working_directory = r".",
                                           indexing_suite_version = 2 )
 
 
     # Global settings
-    
+
     #Set max number of arguments
-    mb.BOOST_PYTHON_MAX_ARITY = 25                       
-    
+    mb.BOOST_PYTHON_MAX_ARITY = 25
+
 
 
     mb.classes().always_expose_using_scope = True
@@ -119,11 +118,11 @@ def generate_code():
 #    - the code looks like regular C++ code after all :-)
 #
 #By default, this property is set to False. Also, `Py++` knows pretty well
-#when it have to ignore this property and generate right code 
+#when it have to ignore this property and generate right code
 
-    mb.constructors().allow_implicit_conversion = True         
-    
-    messages.disable( 
+    mb.constructors().allow_implicit_conversion = True
+
+    messages.disable(
         #           Warnings 1020 - 1031 are all about why Py++ generates wrapper for class X
         messages.W1020
         , messages.W1021
@@ -138,8 +137,8 @@ def generate_code():
         , messages.W1030
         , messages.W1031
         #         , messages.W1035
-        #         , messages.W1040 
-        #         , messages.W1038        
+        #         , messages.W1040
+        #         , messages.W1038
         #         , messages.W1041
         , messages.W1036 # pointer to Python immutable member
         , messages.W1033 # unnamed variables
@@ -147,13 +146,13 @@ def generate_code():
         , messages.W1049 # returns reference to local variable
         , messages.W1014 # unsupported '=' operator
         )
-    
+
 
 
     # Selective inclusion
 #    mb.decls( recursive=True ).exclude()
 
-    
+
     for class_name in siconos_classes:
         print "Including class : " + class_name
         mb.global_ns.class_(class_name).include()
@@ -170,7 +169,7 @@ def generate_code():
     for template_name in siconos_templates:
         templates = mb.classes( lambda cls: cls.name.find( template_name ) >= 0 )
         for t in templates:
-            if len(t.name) < 100: 
+            if len(t.name) < 100:
                 print "Including template : " + t.name
                 t.include()
 
@@ -179,8 +178,8 @@ def generate_code():
         print "Including :" + d.name
         d.include()
 
-    typedefs = mb.global_ns.typedefs( lambda td: td.name == 'CheckInsertT' 
-                                      or td.name == 'ConstTIterator' or td.name == 'TIterator' ) 
+    typedefs = mb.global_ns.typedefs( lambda td: td.name == 'CheckInsertT'
+                                      or td.name == 'ConstTIterator' or td.name == 'TIterator' )
     for td in typedefs:
         decls = mb.decls( lambda decl: decl.alias == td.name )
         for d in decls:
@@ -209,7 +208,7 @@ def generate_code():
 
 
 
-    # functions and operators exclusions 
+    # functions and operators exclusions
     for cl in mb.global_ns.classes( recursive=True ):
         cl.mem_funs('getArray', allow_empty=True).exclude()
         cl.mem_funs('begin', allow_empty=True).exclude()
@@ -226,7 +225,7 @@ def generate_code():
               decl.name.find('extract_value') >=0 or
                decl.name.startswith('BaseClass') or
               decl.name.startswith('MapOfMapOfUnitaryMatrices') ).exclude()
-    
+
      # set default call policy for reference and pointer
     funs = mb.calldefs()
 
@@ -234,18 +233,18 @@ def generate_code():
     for fun in funs:
         if fun.call_policies:
             continue
-        
+
         # References and pointers
-        if (not fun.call_policies) and (declarations.is_reference(fun.return_type) or 
+        if (not fun.call_policies) and (declarations.is_reference(fun.return_type) or
                                              (declarations.is_pointer (fun.return_type)) ):
-            print 'Setting call policy for %s to reference' % fun.name 
+            print 'Setting call policy for %s to reference' % fun.name
             fun.call_policies = call_policies.return_value_policy(call_policies.reference_existing_object )
-            
-            
+
+
     #Creating code creator. After this step you should not
     #modify/customize declarations.
     mb.build_code_creator( module_name='Siconos', doc_extractor=doxygen_doc_extractor() )
-            
+
     mb.code_creator.license = """/*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -263,10 +262,10 @@ def generate_code():
  *
  */
  """
-            
+
 #Writing code to files.
     mb.split_module( os.path.join( os.path.abspath('.'), 'Siconos' ) )
-                
+
 if __name__ == '__main__':
     start_time = time.clock()
     generate_code()

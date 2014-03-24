@@ -106,12 +106,6 @@ protected:
 
 public:
 
-  /** constructor from xml file
-   *  \param OneStepIntegratorXML* : the XML object corresponding
-   *  \param DynamicalSystemsSet: set of all DS in the NSDS
-   */
-  //SchatzmanPaoliOSI(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
-
   /** constructor from a minimum set of data: one DS and its theta
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value

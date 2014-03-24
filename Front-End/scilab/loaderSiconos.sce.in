@@ -31,8 +31,6 @@ setenv("LD_LIBRARY_PATH",strLD_LIBRARY_PATH);
 // FC core 3
 link("/usr/lib/libstdc++.so.6");
 link("/usr/lib/libdl.so");
-// xml
-link("/usr/lib/libxml2.so");
 // lapack++
 link("//usr/lib/atlas/liblapack.so");
 // Numerics and Siconos

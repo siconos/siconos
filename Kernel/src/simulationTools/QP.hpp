@@ -59,11 +59,6 @@ private:
 
 public:
 
-  /** xml constructor
-   *  \param SP::OneStepNSProblemXML : the XML linked-object
-   */
-  QP(SP::OneStepNSProblemXML);
-
   /** Destructor */
   ~QP();
 
@@ -143,21 +138,6 @@ public:
    *  \return int, information about the solver convergence.
    */
   int compute(double);
-
-  /** copy the data of the OneStepNSProblem to the XML tree
-   *
-   */
-  void saveNSProblemToXML();
-
-  /** copy the matrix Q of the OneStepNSProblem to the XML tree
-   *
-   */
-  void saveQToXML();
-
-  /** copy the vector p of the OneStepNSProblem to the XML tree
-   *
-   */
-  void savePToXML();
 
   /** print the data to the screen
    */

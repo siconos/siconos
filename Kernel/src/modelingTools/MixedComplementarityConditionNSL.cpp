@@ -24,9 +24,5 @@ MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(unsigned int 
   EqualitySize = equalitySize;
 }
 
-MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(nslawxml)
-{}
-
 MixedComplementarityConditionNSL::~MixedComplementarityConditionNSL()
 {}

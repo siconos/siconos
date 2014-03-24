@@ -53,9 +53,6 @@ private:
   /** the topology of the system */
   SP::Topology _topology;
 
-  /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
-  SP::NonSmoothDynamicalSystemXML _nsdsxml;
-
   NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds);
 
   /** False is one of the interaction is non-linear.
@@ -67,11 +64,6 @@ public:
   /** default constructor
    */
   NonSmoothDynamicalSystem();
-
-  /** xml constructor
-   *  \param: the XML object corresponding to the NonSmoothDynamicalSystem
-   */
-  NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemXML newNsdsxml);
 
   /** destructor
    */
@@ -200,30 +192,6 @@ public:
   {
     return _topology;
   }
-
-  /** get the xml linked object
-   *  \return a pointer on NonSmoothDynamicalSystemXML
-   */
-  inline SP::NonSmoothDynamicalSystemXML nonSmoothDynamicalSystemXML()
-  const
-  {
-    return _nsdsxml;
-  }
-
-  /** set the xml linked object
-   *  \param newNsdsxml a pointer on NonSmoothDynamicalSystemXML to link
-   */
-  inline void setNonSmoothDynamicalSystemXMLPtr(SP::NonSmoothDynamicalSystemXML newNsdsxml)
-  {
-    _nsdsxml = newNsdsxml;
-  }
-
-  // --- OTHER FUNCTIONS ---
-
-  /** copy the data of the NonSmoothDynamicalSystem to the XML tree
-   *
-   */
-  void saveNSDSToXML();
 
   /** display the data of the Non Smooth Dynamical System
    */

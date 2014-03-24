@@ -18,26 +18,11 @@
  */
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
-#include "OneStepNSProblemXML.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1
 #include "debug.h"
 
 using namespace RELATION;
-
-LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml) :
-  LinearOSNS(onestepnspbxml)
-{
-
-  if (onestepnspbxml->hasNumericsSolverName())
-    _numerics_solver_id = nameToId((char *)onestepnspbxml->getNumericsSolverName().c_str());
-  else
-    _numerics_solver_id = SICONOS_LCP_LEMKE;
-
-  _numerics_problem.reset(new LinearComplementarityProblem);
-
-  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
-}
 
 LCP::LCP(int numericsSolverId):
   LinearOSNS(numericsSolverId)

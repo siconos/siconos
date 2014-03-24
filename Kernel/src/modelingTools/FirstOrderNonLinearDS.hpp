@@ -150,11 +150,6 @@ public:
 
   // ===== CONSTRUCTORS =====
 
-  /** xml constructor
-   *  \param dsXML the XML object for this DynamicalSystem
-   */
-  FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML);
-
   /** constructor from a set of data
       \param newX0 initial state of this DynamicalSystem
       \warning you need to set yoursel the plugin for f and also for the
@@ -419,12 +414,6 @@ public:
    *
    */
   void computeJacobianRhsx(double time, bool isDSUp = false);
-
-  // ===== XML MANAGEMENT FUNCTIONS =====
-
-  /** copy the data common to each system in the XML tree
-   */
-  void saveSpecificDataToXML();
 
   // ===== MISCELLANEOUS ====
 

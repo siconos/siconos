@@ -18,13 +18,11 @@
  */
 #include "Simulation.hpp"
 #include "EventDriven.hpp"
-#include "SimulationXML.hpp"
 #include "DynamicalSystem.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Topology.hpp"
 #include "Interaction.hpp"
 #include "Relation.hpp"
-#include "OneStepIntegratorXML.hpp"
 #include "EventsManager.hpp"
 #include "LagrangianDS.hpp"
 
@@ -70,52 +68,6 @@ Simulation::Simulation(SP::TimeDiscretisation td):
   _allOSI.reset(new OSISet());
   _allNSProblems.reset(new OneStepNSProblems());
   _eventsManager.reset(new EventsManager(td)); //
-}
-
-// --- xml constructor ---
-Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList):
-  _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
-  _simulationxml(strxml),
-  _tolerance(DEFAULT_TOLERANCE), _printStat(false), _staticLevels(false), _levelsAreComputed(false)
-{
-  if (!_simulationxml)
-    RuntimeException::selfThrow("Simulation:: xml constructor - xml file = NULL");
-  _useRelativeConvergenceCriterion = false;
-  _relativeConvergenceCriterionHeld = false;
-  _relativeConvergenceTol = 10e-3;
-
-
-  // === Model ===
-
-  // === Time discretisation ===
-  SP::TimeDiscretisation tmpTD(new TimeDiscretisation(_simulationxml->timeDiscretisationXML(), t0, T));
-
-  // === OneStepIntegrators ===
-  SetOfOSIXML OSIXMLList = _simulationxml->getOneStepIntegratorsXML();
-  SetOfOSIXMLIt it;
-  std::string typeOfOSI;
-  _allOSI.reset(new OSISet());
-  for (it = OSIXMLList.begin(); it != OSIXMLList.end(); ++it)
-  {
-    typeOfOSI = (*it)->getType();
-    // if OSI is a MoreauJeanOSI
-    if (typeOfOSI == MOREAU_TAG)
-      _allOSI->insert(SP::MoreauJeanOSI(new MoreauJeanOSI(*it, dsList)));
-
-    else if (typeOfOSI == LSODAR_TAG) // if OSI is a LsodarOSI-type
-      _allOSI->insert(SP::LsodarOSI(new LsodarOSI(*it, dsList)));
-
-    else RuntimeException::selfThrow("Simulation::xml constructor - unknown one-step integrator type: " + typeOfOSI);
-  }
-
-  // === indexSets : computed during initialization ===
-
-  // === OneStepNSProblems  ===
-  // This depends on the type of simulation --> in derived class constructor
-
-  // === Events manager creation ===
-  _eventsManager.reset(new EventsManager(tmpTD)); //
-  _allNSProblems.reset(new OneStepNSProblems());
 }
 
 // --- Destructor ---
@@ -418,26 +370,6 @@ void Simulation::update()
   assert(0);
   // for(unsigned int i = 1; i<_levelMax; ++i)
   //   update(i);
-}
-
-void Simulation::saveSimulationToXML()
-{
-  if (_simulationxml)
-  {
-    OSI::TYPES typeOSI;
-    OSIIterator it;
-    for (it = _allOSI->begin(); it != _allOSI->end() ; ++it)
-    {
-      typeOSI = (*it)->getType();
-      if (typeOSI == OSI::MOREAUJEANOSI)
-        (std11::static_pointer_cast<MoreauJeanOSI>(*it))->saveIntegratorToXML();
-      else if (typeOSI == OSI::LSODAROSI)
-        (std11::static_pointer_cast<LsodarOSI>(*it))->saveIntegratorToXML();
-      else RuntimeException::selfThrow("Simulation::saveSimulationToXML - wrong type of OneStepIntegrator");
-    }
-
-  }
-  else RuntimeException::selfThrow("Simulation::saveSimulationToXML - SimulationXML = NULL");
 }
 
 void Simulation::updateInput(unsigned int level)

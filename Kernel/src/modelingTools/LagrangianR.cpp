@@ -20,7 +20,6 @@
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianR.hpp"
-#include "RelationXML.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
@@ -31,8 +30,6 @@ void LagrangianR::initComponents(Interaction& inter)
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
 
-  // The initialization of Jach[0] depends on the way the Relation was built ie if the matrix
-  // was read from xml or not
   if (! _jachq)
     _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
   else
@@ -76,11 +73,6 @@ void LagrangianR::computeh(double time, Interaction& inter,
     "LagrangianR::computeh(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector v, SP::BlockVector z);: not yet implemented (or useless) for Lagrangian relation of type " + _subType);
 }
 
-
-void LagrangianR::saveRelationToXML() const
-{
-  RuntimeException::selfThrow("LagrangianR::saveRelationToXML - not yet implemented.");
-}
 
 void LagrangianR::zeroPlugin()
 {

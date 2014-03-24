@@ -59,7 +59,6 @@ class PluggedObject;
  *  "subType". \n
  *
  * The relation holds also:
- *  - a pointer to an xml object
  *  - a VectorMap to handle links to DS variables (no copy!!!). Filled
  *    in during initialize.
  *
@@ -111,22 +110,11 @@ protected:
   /** sub-type of the Relation (exple: LinearTIR or ScleronomousR ...) */
   RELATION::SUBTYPES _subType;
 
-  /** the object linked this Relation to read XML data */
-  SP::RelationXML _relationxml;
-
   /** basic constructor
    *  \param : std::string that gives the type of the relation
    *  \param : std::string that gives the subtype of the relation
    */
   Relation(RELATION::TYPES, RELATION::SUBTYPES);
-
-  /** xml constructor
-   *  \param : RelationXML* : the XML object corresponding
-   *  \param : std::string that gives the type of the relation
-   *  \param : std::string that gives the subtype of the relation
-   */
-  Relation(SP::RelationXML, RELATION::TYPES, RELATION::SUBTYPES);
-
 
 private:
 
@@ -148,22 +136,6 @@ public:
   /** destructor
    */
   virtual ~Relation();
-
-  /** To get the RelationXML* of the Relation
-   *  \return a pointer on the RelationXML of the Relation
-   */
-  inline SP::RelationXML getRelationXML()
-  {
-    return _relationxml;
-  }
-
-  /** To set the RelationXML* of the Relation
-   *  \param rxml :RelationXML* the pointer to set
-   */
-  inline void setRelationXML(SP::RelationXML rxml)
-  {
-    _relationxml = rxml;
-  }
 
   /** To get the type of the Relation (FirstOrder or Lagrangian)
    *  \return the type of the Relation
@@ -317,10 +289,6 @@ public:
   /** main relation members display 
    */
   virtual void display() const;
-
-  /** copy the data of the Relation to the XML tree
-   */
-  virtual void saveRelationToXML() const;
 
   /** Check if _pluginh is correctly set 
       \return a bool

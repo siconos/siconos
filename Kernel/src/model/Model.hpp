@@ -32,8 +32,6 @@
 
 #include <string>
 
-DEFINE_SPTR(SiconosModelXML)
-
 /** \class Model
  * \brief  Model: object that links the NonSmoothDynamicalSystem with a
  * Simulation.
@@ -67,11 +65,8 @@ private:
   /** The NonSmoothDynamicalSystem of the simulation */
   SP::NonSmoothDynamicalSystem _nsds;
 
-  /** XML object linked to the Model */
-  SP::SiconosModelXML _modelxml;
-
   /** information concerning the Model */
-  std::string _title, _author, _description, _date, _xmlSchema;
+  std::string _title, _author, _description, _date;
 
   /** Copy constructor => private, no copy nor pass-by value for Model
    */
@@ -93,13 +88,7 @@ public:
    */
   Model();
 
-  /** create the Model from an xml file
-   *  \param xmlFile * : the input XML file (optional parameter)
-   *  \
-   */
-  Model(const std::string& xmlFile);
-
-  /** create the Model from a set of data
+     /** create the Model from a set of data
    *  \param t0 : the value for t0
    *  \param T : the value for T (optional parameter)
    *  \param title the title of the Model (optional parameter)
@@ -107,11 +96,10 @@ public:
    *  \param description : the description of the Model (optional
    *                  parameter)
    *  \param date : the date of the Model (optional parameter)
-   *  \param schema : the xml schema of the Model (optional parameter)
    */
   Model(double t0, double T = -1, const std::string& title = "none",
         const std::string& author = "nobody", const std::string& description = "none",
-        const std::string& date = "none", const std::string& schema = "none");
+        const std::string& date = "none");
 
   /** destructor
    */
@@ -190,19 +178,6 @@ public:
    */
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr);
 
-  /** get the SiconosModelXML of the Model
-   *  \return a pointer on SiconosModelXML
-   */
-  inline SP::SiconosModelXML siconosModelXML() const
-  {
-    return _modelxml;
-  }
-
-  /** set the SiconosModelXML of the Model
-   *  \param newPtr a pointer on SiconosModelXML
-   */
-  void setSiconosModelXMLPtr(SP::SiconosModelXML newPtr);
-
   /** get the title of the simulation
    *  \return std::string : the title
    */
@@ -267,68 +242,13 @@ public:
     _date = s;
   }
 
-  /** allows to get the xmlSchema of the simulation
-   *  \return std::string : the xmlSchema
-   */
-  inline const std::string  getXmlSchema() const
-  {
-    return _xmlSchema;
-  }
-
-  /** set the schema of the simulation
-   *  \param s std::string : the schema
-   */
-  inline void setXmlSchema(const std::string & s)
-  {
-    _xmlSchema = s;
-  }
-
   /** Complete initialization of the model (NonSmoothDynamicalSystem,
       Simulation)
-      \param sim a smart pointer to simulation (option, default = empty)
+      \param sim Simulation for this Model
    */
-  void initialize(SP::Simulation sim = SP::Simulation());
+  void initialize(SP::Simulation sim);
 
-  // --- XML related functions ---
-
-  /** saves into output file the data of the system
-   *  \param filename char* : the data file which must be written
-   */
-  void saveToXMLFile(char* filename);
-
-  /** saves into the DOM tree all the data of the system
-      \return void
-   */
-  void saveToDOMTree();
-
-  /** copy the data of the plateform to the XML DOM tree
-      \return void
-   */
-  void savePlatformToXML();
-
-  /** check if the DOM tree respect the XML schema
-   *  \return bool : true if the DOM tree respect the XML schema
-   */
-  bool checkXMLDOMTree();
-
-  /** check if the XML objects of XML managment exist
-   */
-  void checkXMLPlatform();
-
-  /** check if the Model is complete. That's to say if the objects of
-      the platform are coherent and if data of the XML are coherent
-   *
-   */
-  void checkModelCoherency();
-
-  /** checks if the xmlFile given respects the xmlSchema given
-   *  \param xmlFile std::string : the xml input file to check
-   *  \param xmlSchema std::string : the xml schema
-   *  \return int : 1 if the xml file respects the schema
-   */
-  int xmlSchemaValidated(std::string  xmlFile, std::string  xmlSchema = "");
-
-  /** display the data of the Model
+   /** display the data of the Model
       \return void
    */
   void display() const ;

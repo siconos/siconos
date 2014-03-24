@@ -68,11 +68,6 @@ public:
   */
   FirstOrderLinearR();
 
-  /** xml constructor
-  \param SP::RelationXML : the XML object corresponding
-  */
-  FirstOrderLinearR(SP::RelationXML relxml);
-
   /** Constructor with C and B plugin names
   \param Cname the plugin name for computing the C matrix
   \param Bname the plugin name for computing the B matrix
@@ -214,10 +209,6 @@ public:
   *  \param inter the interaction that owns this relation
   */
   virtual void initialize(Interaction & inter);
-
-  /** copy the data of the Relation to the XML tree
-  */
-  void saveRelationToXML() const;
 
   /** print the data to the screen
   */

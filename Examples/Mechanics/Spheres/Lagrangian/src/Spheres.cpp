@@ -20,7 +20,7 @@
 /*!\file Disks.cpp
 
   Some Disks (2D), friction, and walls.
-  Direct description of the model without XML input.  Simulation with
+  Direct description of the model.  Simulation with
   a Time-Stepping scheme.
 */
 

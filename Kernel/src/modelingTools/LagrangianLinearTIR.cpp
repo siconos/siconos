@@ -17,35 +17,12 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianLinearTIR.hpp"
-#include "LinearRXML.hpp"
 #include "Interaction.hpp"
 //
 #include "LagrangianDS.hpp"
 
 
 using namespace RELATION;
-
-// Xml constructor
-LagrangianLinearTIR::LagrangianLinearTIR(SP::RelationXML relxml):
-  LagrangianR(relxml, LinearTIR)
-{
-  SP::LinearRXML folrXML = std11::static_pointer_cast<LinearRXML>(relxml);
-  // get matrices values. All are optional.
-
-  if (folrXML->hasC())
-    _jachq.reset(new SimpleMatrix(folrXML->getC()));
-  else
-    RuntimeException::selfThrow("LagrangianLinearTIR:: xml constructor failed, can not find a definition for C.");
-
-  if (folrXML->hasD())
-    _jachlambda.reset(new SimpleMatrix(folrXML->getD()));
-
-  if (folrXML->hasF())
-    _F.reset(new SimpleMatrix(folrXML->getF()));
-
-  if (folrXML->hasE())
-    _e.reset(new SiconosVector(folrXML->getE()));
-}
 
 // Minimum data (C as pointer) constructor
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C):
@@ -149,17 +126,6 @@ void LagrangianLinearTIR::computeInput(double time, Interaction& inter, unsigned
   SiconosVector& lambda = *inter.lambda(level);
   // computation of p = Ht lambda
   prod(lambda, *_jachq, *inter.data(p0 + level), false);
-}
-
-void LagrangianLinearTIR::saveRelationToXML() const
-{
-  assert(_relationxml &&
-         "LagrangianLinearTIR::saveRelationToXML - object RelationXML does not exist");
-
-  (std11::static_pointer_cast<LinearRXML>(_relationxml))->setC(*_jachq) ;
-  (std11::static_pointer_cast<LinearRXML>(_relationxml))->setE(*_e) ;
-  (std11::static_pointer_cast<LinearRXML>(_relationxml))->setD(*_jachlambda) ;
-  (std11::static_pointer_cast<LinearRXML>(_relationxml))->setF(*_F) ;
 }
 
 void LagrangianLinearTIR::display() const

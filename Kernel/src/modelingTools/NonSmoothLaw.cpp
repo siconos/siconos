@@ -18,7 +18,6 @@
 */
 
 #include "NonSmoothLaw.hpp"
-#include "NonSmoothLawXML.hpp"
 
 
 // Constructors
@@ -27,21 +26,6 @@
 
 NonSmoothLaw::NonSmoothLaw(unsigned int size): _size(size), _sizeProjectOnConstraints(size)
 {}
-
-NonSmoothLaw::NonSmoothLaw(SP::NonSmoothLawXML newNsLawXml):
-  _size(1), _nslawxml(newNsLawXml), _sizeProjectOnConstraints(1)
-{
-  assert(_nslawxml &&
-         "NonSmoothLaw:: xml constructor, xml file==NULL");
-
-  // Read size of the non smooth law
-  assert(_nslawxml->hasSize() &&
-         "NonSmoothLaw:: xml constructor, an input is required for the nslaw size.");
-
-  _size = _nslawxml->getSize();
-  _sizeProjectOnConstraints = _size;
-}
-
 
 NonSmoothLaw::~NonSmoothLaw()
 {}

@@ -123,58 +123,6 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver2()
   std::cout << "------- Constructor copy NonSmoothSolver ok -------" <<std::endl;
 }
 
-// XML constructor
-void NonSmoothSolverTest::testBuildNonSmoothSolver3()
-{
-  std::cout << "------- XML constructor test -------" <<std::endl;
-
-  // parse xml file:
-  xmlDocPtr doc = xmlParseFile("NonSmoothSolverTest.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-
-  xmlNodePtr cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
-
-  // get rootNode
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-
-  // look for NonSmoothSolver node
-  xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(cur, "NonSmoothSolver");
-  SP::NonSmoothSolverXML solvXML(new NonSmoothSolverXML(node));
-  SP::NonSmoothSolver NSS(new NonSmoothSolver(solvXML));
-  std::vector<int> i0 = *NSS->intParameters();
-  std::vector<double> d0 = *NSS->doubleParameters();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->name() == "NSGS", true);
-  for (unsigned int i = 0; i < NB_PARAM; ++i)
-  {
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverD : ", d0[i] == dparam[i], true);
-  }
-  SP::SolverOptions opt = NSS->numericsSolverOptions();
-  int * i1 = opt->iparam;
-  double * d1 = opt->dparam;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverE : ", opt->isSet == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverF : ", strcmp(opt->solverName, "NSGS") == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverG : ", opt->nbParam == (int)NB_PARAM, true);
-  for (unsigned int i = 0; i < NB_PARAM; ++i)
-  {
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", i1[i] == iparam[i], true);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", d1[i] == dparam[i], true);
-  }
-  std::cout << "------- XML Constructor NonSmoothSolver ok -------" <<std::endl;
-}
-
 void NonSmoothSolverTest::End()
 {
   std::cout << "==========================================" <<std::endl;

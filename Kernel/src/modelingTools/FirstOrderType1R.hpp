@@ -63,11 +63,6 @@ public:
   /** default constructor */
   FirstOrderType1R() : FirstOrderR(RELATION::Type1R) {};
 
-  /** xml constructor
-  *  \param RelationXML smart pointer : the XML object.
-  */
-  FirstOrderType1R(SP::RelationXML);
-
   /** data constructor
   *  \param a std::string with computeOutput function name.
   *  \param a std::string with computeInput function name.

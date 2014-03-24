@@ -22,7 +22,7 @@
 
 //#define SICONOS_DEBUG
 
-MyDS::MyDS(const SiconosVector& x0): FirstOrderNonLinearDS(x0)
+MyDS::MyDS(SP::SiconosVector x0): FirstOrderNonLinearDS(x0)
 {
   _jacobianfx.reset(new SimpleMatrix(4, 4));
   _f.reset(new SiconosVector(4));
@@ -36,12 +36,9 @@ MyDS::MyDS(const SiconosVector& x0): FirstOrderNonLinearDS(x0)
   K1->setValue(0, 1, 1.0 / 2.0);
   K1->setValue(1, 0, -1.0 / 2.0);
   K1->setValue(1, 1, +1.0);
-
-
-
 }
 
-void MyDS::computeF(double t)
+void MyDS::computef(double t)
 {
 
 
@@ -70,9 +67,9 @@ void MyDS::computeF(double t)
   _f->setValue(2, -QX->getValue(0) + K1P->getValue(0));
   _f->setValue(3, -QX->getValue(1) + K1P->getValue(1));
 }
-void  MyDS::computeF(double t, SP::SiconosVector _xvalue) {}
+void  MyDS::computef(double t, SP::SiconosVector _xvalue) {}
 
-void MyDS::computeJacobianXF(double t, bool  b)
+void MyDS::computeJacobianfx(double t, bool  b)
 {
 
 
@@ -103,7 +100,7 @@ void MyDS::computeJacobianXF(double t, bool  b)
 
 }
 
-void MyDS::computeJacobianXF(double t, SP::SiconosVector v) {}
+void MyDS::computeJacobianfx(double t, SP::SiconosVector v) {}
 
 void MyDS::computeRhs(double t, bool  b)
 {

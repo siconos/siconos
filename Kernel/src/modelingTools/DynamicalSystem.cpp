@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "DynamicalSystem.hpp"
-#include "DynamicalSystemXML.hpp"
 
 
 
@@ -32,36 +31,6 @@ DynamicalSystem::DynamicalSystem():
   zeroPlugin();
   _normRef = 1;
   _x.resize(2);
-  _workspace.resize(sizeWorkV);
-}
-
-// From XML file
-DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
-  _number(dsXML->number()), _n(0), _stepsInMemory(1), _dsxml(dsXML)
-{
-  _normRef = 1;
-  assert(dsXML && "DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
-
-  // Update count: must be at least equal to number for future DS creation
-  count = number();
-  zeroPlugin();
-  // Only the following data are set in this general constructor:
-  //  - DSTye
-  //  - _number
-  //  - z
-  //  - stepsInMemory
-  // All others are dependent of the derived class type.
-
-  // === Initial conditions ===
-  // Warning: n is set thanks to vector of initial conditions size. That will be set in derived classes constructor.
-
-  _x.resize(2);
-
-  // z - Optional parameter.
-  if (_dsxml->hasz())
-    _z.reset(new SiconosVector(_dsxml->getz()));
-
-  if (_dsxml->hasStepsInMemory()) _stepsInMemory = _dsxml->getStepsInMemory();
   _workspace.resize(sizeWorkV);
 }
 
@@ -103,8 +72,6 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
     _z.reset(new SiconosVector(*(ds.z())));
   if (ds.g())
     _g.reset(new SiconosVector(*(ds.g())));
-  if (ds.dynamicalSystemXML())
-    _dsxml.reset(new DynamicalSystemXML(*(ds.dynamicalSystemXML())));
 
   if (_pluging)
     _pluging.reset(new PluggedObject(*(ds.getPluginG())));
@@ -375,21 +342,6 @@ void DynamicalSystem::computeg(double time)
 //   if (pluginJacobianXGPtr)
 //     pluginJacobianZGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianG[i])(0,0), z->size(), &(*z)(0));
 // }
-
-// ===== XML MANAGEMENT FUNCTIONS =====
-
-void DynamicalSystem::saveDSToXML()
-{
-  RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - Not yet tested for DS: do not use it.");
-
-  if (!_dsxml)
-    RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
-
-  // --- Specific (depending on derived class) DS data ---
-  saveSpecificDataToXML();
-
-  // --- other data ---
-}
 
 // ===== MISCELLANEOUS ====
 

@@ -31,9 +31,6 @@
 #include <deque>
 #include "SiconosAlgebraTypeDef.hpp"
 
-DEFINE_SPTR(SiconosMemoryXML)
-
-
 /** Container used to save vectors in SiconosMemory */
 typedef std::deque<SP::SiconosVector> MemoryContainer;
 TYPEDEF_SPTR(MemoryContainer)
@@ -67,9 +64,6 @@ private:
   /** index to avoid removal and creation of vectors */
   unsigned int _indx;
 
-  /** link to the XML for SiconosMemory objects */
-  SP::SiconosMemoryXML _memoryXML;
-
   /** default constructor, private. */
   SiconosMemory() {};
 
@@ -83,11 +77,6 @@ public:
    * \param vectorSize the size of the SiconosVector to store
    */
   SiconosMemory(const unsigned int size, const unsigned int vectorSize);
-
-  /** xml constructor + (optional) size of memory; if not set, size is read in xml file.
-   * \param SiconosMemoryXML * : the XML object which contains the data of the memory
-   */
-  SiconosMemory(SP::SiconosMemoryXML);
 
   /** constructor with deque parameter.
    * \param MemoryContainer, the deque of siconosVector which must be stored
@@ -156,14 +145,6 @@ public:
     return _vectorMemory;
   };
 
-  /** Allows to get the SiconosMemoryXML of the SiconosMemory
-   *  \return the object SiconosMemoryXML of the SiconosMemory
-   */
-  inline SP::SiconosMemoryXML getSiconosMemoryXML() const
-  {
-    return _memoryXML;
-  }
-
   /** puts a SiconosVector into the memory
    * \param v the SiconosVector we want to put in memory
    */
@@ -172,9 +153,6 @@ public:
   /** displays the data of the memory object
    */
   void display() const;
-
-  /** Copy the max size of the SiconosMemory to the XML DOM tree */
-  void saveMemorySizeToXML();
 
 };
 #endif

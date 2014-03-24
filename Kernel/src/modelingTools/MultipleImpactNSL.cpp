@@ -53,8 +53,3 @@ bool MultipleImpactNSL::isVerified() const
   RuntimeException::selfThrow("MultipleImpactNSL::isVerified is not yet implemented!");
   return res;
 }
-//
-void MultipleImpactNSL::saveNonSmoothLawToXML()
-{
-  RuntimeException::selfThrow("MultipleImpactNSL::saveNonSmoothLawToXML is not yet implemented!");
-}

@@ -18,23 +18,11 @@
 */
 
 #include "RelayNSL.hpp"
-#include "RelayNSLXML.hpp"
 
 
 // Default (private)
 RelayNSL::RelayNSL(): NonSmoothLaw(), _lb(-1.0), _ub(1.0)
 {}
-
-RelayNSL::RelayNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(nslawxml), _lb(-1.0), _ub(1.0)
-{
-  if (nslawxml)
-  {
-    _lb = (std11::static_pointer_cast<RelayNSLXML>(nslawxml))->getC();
-    _ub = (std11::static_pointer_cast<RelayNSLXML>(nslawxml))->getD();
-  }
-  else RuntimeException::selfThrow("RelayNSL::xml constructor, xml file=NULL");
-}
 
 RelayNSL::RelayNSL(unsigned int size, double lb, double ub):
   NonSmoothLaw(size), _lb(lb), _ub(ub)
@@ -59,10 +47,4 @@ void RelayNSL::display() const
   std::cout << "| ub : " << _ub <<std::endl;
   std::cout << "____________________________" <<std::endl;
   std::cout << "------------------------------------" <<std::endl;
-}
-
-void RelayNSL::saveNonSmoothLawToXML()
-{
-  std11::static_pointer_cast<RelayNSLXML>(_nslawxml)->setC(_lb);
-  std11::static_pointer_cast<RelayNSLXML>(_nslawxml)->setD(_ub);
 }

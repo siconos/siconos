@@ -21,9 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianScleronomousR.hpp"
-#include "RelationXML.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NonSmoothDynamicalSystemXML.hpp"
 
 class LagrangianScleronomousRTest : public CppUnit::TestFixture
 {
@@ -39,7 +37,6 @@ private:
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildLagrangianScleronomousR0);
   CPPUNIT_TEST(testBuildLagrangianScleronomousR2);
   CPPUNIT_TEST(End);
 
@@ -50,11 +47,6 @@ private:
   void testBuildLagrangianScleronomousR0();
   void testBuildLagrangianScleronomousR2();
   void End();
-
-  // Members
-
-  xmlNode * node;
-  SP::RelationXML tmpxml1;
 
 public:
   void setUp();

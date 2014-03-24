@@ -55,11 +55,6 @@ public:
   */
   EqualityConditionNSL(unsigned int size);
 
-  /** constructor with XML object of the parent class NonSmoothLaw
-  *  \param NonSmoothLawXML* : the XML object corresponding
-  */
-  EqualityConditionNSL(SP::NonSmoothLawXML);
-
   /** Destructor */
   ~EqualityConditionNSL();
 
@@ -67,10 +62,6 @@ public:
   /** print the data to the screen
   */
   inline void display()const {};
-
-  /** copy the data of the NonSmoothLaw to the XML tree
-  */
-  inline void saveNonSmoothLawToXML() {};
 
   /** Visitors hook
    */

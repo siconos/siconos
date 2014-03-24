@@ -53,10 +53,6 @@ public:
   */
   ComplementarityConditionNSL(unsigned int size);
 
-  /** constructor with XML object of the parent class NonSmoothLaw
-  *  \param NonSmoothLawXML* : the XML object corresponding
-  */
-  ComplementarityConditionNSL(SP::NonSmoothLawXML);
 
   /** Destructor */
   ~ComplementarityConditionNSL();
@@ -65,11 +61,6 @@ public:
   /** print the data to the screen
   */
   inline void display()const {};
-
-  /** copy the data of the NonSmoothLaw to the XML tree
-  *
-  */
-  inline void saveNonSmoothLawToXML() {};
 
   /** Visitors hook
    */

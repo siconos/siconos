@@ -78,11 +78,6 @@ protected:
 
 public:
 
-  /** xml constructor
-  *  \param SP::OneStepNSProblemXML : the XML linked-object
-  */
-  MLCP(SP::OneStepNSProblemXML);
-
   /** constructor from data
   *  \param id of Numerics solver
   *  (optional, default = NULL => read .opt file in Numerics)

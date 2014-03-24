@@ -84,11 +84,6 @@ protected:
 
 public:
 
-  /** constructor from xml file
-  *  \param relationXML
-  */
-  LagrangianCompliantR(SP::RelationXML);
-
   /** constructor from a set of data
   *  \param pluginh the name of the plugin to compute h
   *  \param computeJacobianhq the name of the plugin to compute the gradient of h w.r.t q

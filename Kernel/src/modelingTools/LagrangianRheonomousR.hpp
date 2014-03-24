@@ -158,11 +158,6 @@ protected:
   void zeroPlugin();
 public:
 
-  /** constructor from xml file
-  *  \param relationXML
-  */
-  LagrangianRheonomousR(SP::RelationXML);
-
   /** constructor from a set of data
   *  \param pluginh name of the plugin to compute h.\n
   * Its signature must be "void userPluginH(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"
@@ -193,11 +188,6 @@ public:
     return _hDot;
   }
 
-  /** set hDot to pointer newPtr (pointer link)
-  *  \param SP::SiconosVector  newPtr
-
-  inline void setHDot(SPPVT2 newPtr) {hDot = newPtr ;}
-  */
   /** To get the name of hDot plugin
   *  \return a std::string
   */

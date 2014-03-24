@@ -22,10 +22,6 @@
 EqualityConditionNSL::EqualityConditionNSL(unsigned int size): NonSmoothLaw(size)
 {}
 
-EqualityConditionNSL::EqualityConditionNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(nslawxml)
-{}
-
 EqualityConditionNSL::~EqualityConditionNSL()
 {}
 

@@ -20,7 +20,7 @@
 /*!\file Spheres.cpp
 
   Some Spheres (3D), friction, and walls.
-  Direct description of the model without XML input.  Simulation with
+  Direct description of the model.  Simulation with
   a Time-Stepping scheme.
 */
 
@@ -202,7 +202,6 @@ void Spheres::init()
 
 void Spheres::compute()
 {
-  //  static SiconosVTKOutput output = SiconosVTKOutput(_model,"Spheres.xml");
 
   try
   {

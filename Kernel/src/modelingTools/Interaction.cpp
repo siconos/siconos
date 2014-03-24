@@ -23,9 +23,6 @@
 #include "debug.h"
 
 #include "Interaction.hpp"
-#include "InteractionXML.hpp"
-#include "NonSmoothLawXML.hpp"
-#include "RelationXML.hpp"
 #include "RelationTypes.hpp"
 #include "ComplementarityConditionNSL.hpp"
 #include "RelayNSL.hpp"
@@ -47,90 +44,6 @@ using namespace std;
 using namespace RELATION;
 
 // --- CONSTRUCTORS ---
-
-// --- XML constructor ---
-Interaction::Interaction(SP::InteractionXML interxml):
-  _initialized(false), _number(0), _interactionSize(0),
-  _sizeOfDS(0), _sizeZ(0), _has2Bodies(false), _interactionxml(interxml)
-{
-  assert(_interactionxml && "NULL pointer");
-
-  // id and number
-  _number = _interactionxml->number();
-
-  // interaction size
-  _interactionSize = _interactionxml->getSize();
-
-  // --- Non smooth law ---
-  std::string NslawType = _interactionxml->getNonSmoothLawXML()->getType();
-  // ComplementarityConditionNSL
-  if (NslawType == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
-  {
-    _nslaw.reset(new ComplementarityConditionNSL(_interactionxml->getNonSmoothLawXML()));
-  }
-
-  // RelayNSL
-  else if (NslawType == RELAY_NSLAW_TAG)
-  {
-    _nslaw.reset(new RelayNSL(_interactionxml->getNonSmoothLawXML()));
-  }
-
-  // NewtonImpactNSL
-  else if (NslawType == NEWTON_IMPACT_NSLAW_TAG)
-  {
-    _nslaw.reset(new NewtonImpactNSL(_interactionxml->getNonSmoothLawXML()));
-  }
-  // Newton impact friction law
-  else if (NslawType == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
-  {
-    _nslaw.reset(new NewtonImpactFrictionNSL(_interactionxml->getNonSmoothLawXML()));
-  }
-  else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type");
-
-  // --- Relation ---
-  RELATION::TYPES relationType = _interactionxml->getRelationXML()->getType();
-
-  // First Order Non Linear Relation
-  if (relationType == FirstOrder)
-  {
-    RELATION::SUBTYPES relationSubType = _interactionxml->getRelationXML()->getSubType();
-    if (relationSubType == Type1R)
-      _relation.reset(new FirstOrderType1R(_interactionxml->getRelationXML()));
-    // Linear relation
-    else if (relationSubType == LinearR)
-      _relation.reset(new FirstOrderLinearR(_interactionxml->getRelationXML()));
-    // Linear time-invariant coef. relation
-    else if (relationSubType == LinearTIR)
-      _relation.reset(new FirstOrderLinearTIR(_interactionxml->getRelationXML()));
-  }
-  // Lagrangian non-linear relation
-  else if (relationType == Lagrangian)
-  {
-    RELATION::SUBTYPES relationSubType = _interactionxml->getRelationXML()->getSubType();
-    // \todo create a factory to avoid "if" list for Relation
-    // construction according to subType.
-    if (relationSubType == ScleronomousR)
-      _relation.reset(new LagrangianScleronomousR(_interactionxml->getRelationXML()));
-    else if (relationSubType == RheonomousR)
-      _relation.reset(new LagrangianRheonomousR(_interactionxml->getRelationXML()));
-    else if (relationSubType == CompliantR)
-      _relation.reset(new LagrangianCompliantR(_interactionxml->getRelationXML()));
-    // Lagrangian linear relation
-    else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      _relation.reset(new LagrangianLinearTIR(_interactionxml->getRelationXML()));
-  }
-  else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + _relation->getType());
-
-  // check coherence between interactionSize and nsLawSize
-  if ((_interactionSize % _nslaw->size()) != 0)
-    RuntimeException::selfThrow("Interaction::xml constructor, inconsistency between interaction size and non smooth law size.");
-
-  // download xml values for y[0] and lambda[0] forbidden since y and
-  // lambda are not allocated yet (this is done in initialize
-  // function, called by simulation !!)
-  if (_interactionxml->hasY() ||  _interactionxml->hasLambda())
-    RuntimeException::selfThrow("Interaction::xml constructor, y or lambda download is forbidden.");
-}
 
 /* initialisation with empty set */
 Interaction::Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number):
@@ -767,60 +680,6 @@ void Interaction::computeInput(double time, unsigned int level)
 
 
 
-
-// --- XML RELATED FUNCTIONS ---
-
-void Interaction::saveInteractionToXML()
-{
-  /*
-   * save the data of the Interaction
-   */
-
-  if (_interactionxml)
-  {
-    _interactionxml->setNumber(_number);
-    _interactionxml->setSize(_interactionSize);
-    _interactionxml->setY(*(_y[0]));
-    _interactionxml->setLambda(*(_lambda[0]));
-  }
-  else RuntimeException::selfThrow("Interaction::saveInteractionToXML - object InteractionXML does not exist");
-
-  /*
-   * save the data of the Relation
-   */
-  // Main type of the relation: FirstOrder or Lagrangian
-  RELATION::TYPES type = relation()->getType();
-  // Subtype of the relation
-  RELATION::SUBTYPES subType = relation()->getSubType();
-
-  if (type == FirstOrder)
-  {
-    if (subType == NonLinearR)
-      relation()->saveRelationToXML();
-    else if (subType == LinearR)
-      (std11::static_pointer_cast<FirstOrderLinearR>(relation()))->saveRelationToXML();
-    else if (subType == LinearTIR)
-      (std11::static_pointer_cast<FirstOrderLinearTIR>(relation()))->saveRelationToXML();
-    else
-      RuntimeException::selfThrow("Interaction::saveInteractionToXML - Unknown relation subtype: " + subType);
-  }
-  else if (type == Lagrangian)
-  {
-    if (subType == LinearTIR)
-      (std11::static_pointer_cast<LagrangianLinearTIR>(relation()))->saveRelationToXML();
-    else
-      RuntimeException::selfThrow("Interaction::saveInteractionToXML - Not yet implemented for relation subtype " + subType);
-  }
-  else
-    RuntimeException::selfThrow("Interaction::saveInteractionToXML - Unknown relation type: " + type);
-
-  /*
-   * save the data of the NonSmoothLaw
-   */
-
-  nslaw()->saveNonSmoothLawToXML();
-
-}
 
 void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {

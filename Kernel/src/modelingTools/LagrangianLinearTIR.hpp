@@ -76,11 +76,6 @@ public:
   */
   LagrangianLinearTIR() : LagrangianR(RELATION::LinearTIR) {};
 
-  /** constructor with XML object of the parent class Relation
-  *  \param RelationXML* : the XML object corresponding
-  */
-  LagrangianLinearTIR(SP::RelationXML);
-
   /** create the Relation from a set of data
   *  \param C the matrix C
   */
@@ -283,10 +278,6 @@ public:
   /** get a pointer on matrix Jach[index]
   *  \return a pointer on a SiconosMatrix
   */
-
-  /** copy the data of the Relation to the XML tree
-  */
-  void saveRelationToXML() const;
 
   /** print the data to the screen
   */

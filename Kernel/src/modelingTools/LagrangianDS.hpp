@@ -26,6 +26,7 @@
 
 #include "DynamicalSystem.hpp"
 #include "BoundaryCondition.hpp"
+#include "SiconosConst.hpp"
 
 /** Pointer to function for plug-in. For NNL and its jacobian. */
 typedef void (*FPtr5)(unsigned int, double*, double*, double*, unsigned int, double*);
@@ -326,11 +327,6 @@ public:
    *  \param velocity SiconosVector : initial velocity of this DynamicalSystem
    */
   LagrangianDS(SP::SiconosVector position, SP::SiconosVector velocity);
-
-  /** constructor from an xml file
-   *  \param obj DynamicalSystemXML * : the XML object for this DynamicalSystem
-   */
-  LagrangianDS(SP::DynamicalSystemXML obj);
 
   /** constructor from a minimum set of data
    *  \param position SiconosVector : initial coordinates of this DynamicalSystem
@@ -984,10 +980,6 @@ public:
   virtual void computeJacobianqDotForces(double time);
 
   // --- miscellaneous ---
-
-  /** copy the data of the DS into the XML tree
-   */
-  void saveSpecificDataToXML();
 
   /** print the data to the screen
    */

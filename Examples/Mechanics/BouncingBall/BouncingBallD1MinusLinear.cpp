@@ -22,7 +22,7 @@
   T. Schindler, V. Acary
 
   A Ball bouncing on the ground.
-  Direct description of the model without XML input.
+  Direct description of the model
   Simulation with a D1MinusLinearOSI-Time-Stepping scheme.
   */
 

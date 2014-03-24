@@ -57,10 +57,6 @@ protected:
   SP::SimpleMatrix _jacgx;
 
 public:
-  /** xml constructor
-  *  \param RelationXML smart pointer : the XML object.
-  */
-  FirstOrderType2R(SP::RelationXML);
 
   FirstOrderType2R();
   /** data constructor

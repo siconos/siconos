@@ -53,10 +53,7 @@ private:
   void testinsertDynamicalSystem();
   void testinsertInteraction();
   void End();
-  // Members
 
-  xmlNodePtr node;
-  SP::NonSmoothDynamicalSystemXML tmpxml;
 public:
   void setUp();
   void tearDown();

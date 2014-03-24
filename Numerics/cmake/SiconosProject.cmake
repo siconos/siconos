@@ -164,7 +164,7 @@ MACRO(SICONOS_PROJECT
 
   # Link external lib statically. This comes handy when we want to distribute
   # Siconos on Mac or Windows
-  # TODO complete this for other lib (libxml2, gmp, boost, ...)
+  # TODO complete this for other lib (gmp, boost, ...)
   IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
     OPTION(LINK_STATICALLY "Link external libraries statically (on if crosscompiling from linux to windows)" ON)
   ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)

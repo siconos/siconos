@@ -29,17 +29,6 @@ Relation::Relation(RELATION::TYPES newType,
   zeroPlugin();
 }
 
-// xml constructor
-Relation::Relation(SP::RelationXML relxml,
-                   RELATION::TYPES newType,
-                   RELATION::SUBTYPES newSub):
-  _relationType(newType), _subType(newSub),
-  _relationxml(relxml)
-{
-  zeroPlugin();
-  if (! _relationxml)
-    RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
-}
 void Relation::zeroPlugin()
 {
   _pluginh.reset(new PluggedObject());
@@ -171,9 +160,4 @@ void Relation::setComputeJacglambdaFunction(const std::string& pluginPath, const
 void Relation::setComputehFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginh->setComputeFunction(pluginPath, functionName);
-}
-
-void Relation::saveRelationToXML() const
-{
-  RuntimeException::selfThrow("Relation - saveRelationToXML: not yet implemented for relation of type " + getType());
 }

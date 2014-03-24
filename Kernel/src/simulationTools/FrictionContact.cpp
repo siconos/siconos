@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "FrictionContact.hpp"
-#include "FrictionContactXML.hpp"
 #include "Topology.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
@@ -41,37 +40,6 @@ FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
     frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   else
     RuntimeException::selfThrow("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
-}
-
-// xml constructor
-FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
-  LinearOSNS(osNsPbXml), _contactProblemDim(3)
-{
-  SP::FrictionContactXML xmlFC = std11::static_pointer_cast<FrictionContactXML>(osNsPbXml);
-
-
-  if (osNsPbXml->hasNumericsSolverName())
-    _numerics_solver_id = nameToId((char *)osNsPbXml->getNumericsSolverName().c_str());
-  else
-    _numerics_solver_id = SICONOS_FRICTION_3D_NSGS;
-
-  _numerics_problem.reset(new  FrictionContactProblem);
-
-  // Read dimension of the problem (required parameter)
-  if (!xmlFC->hasProblemDim())
-    RuntimeException::selfThrow("FrictionContact: xml constructor failed, attribute for dimension of the problem (2D or 3D) is missing.");
-
-  _contactProblemDim = xmlFC->getProblemDim();
-  if (_contactProblemDim == 2 && _numerics_solver_id == SICONOS_FRICTION_3D_NSGS) _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
-
-  // initialize the _numerics_solver_options
-
-
-  if (_contactProblemDim == 2)
-    frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
-  else // if(_contactProblemDim == 3)
-    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
-
 }
 
 void FrictionContact::initialize(SP::Simulation sim)

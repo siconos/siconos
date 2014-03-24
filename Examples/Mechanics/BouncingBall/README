@@ -35,7 +35,6 @@ ___________o_____________o_________o___oooooo
 Available input files are :
 
 	- BouncingBallTS.cpp: input file using direct C++ description of the model, with TimeStepping.
-	- BouncingBallTSXml.cpp: c++ file using xml loading
 	- BouncingBallTS.py : python input file (Front-End required)
 	- BouncingBallNETS.cpp : using the NewtonEulerDS implementation
 	- BouncingBallTS-Scleronomous.cpp : using a  LagrangianScleronomousR Relation defined in the plugin

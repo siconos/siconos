@@ -77,11 +77,6 @@ private:
 
 public:
 
-  /** constructor with XML object of the RelayNSL
-  *  \param nslawxml the corresponding XML object corresponding
-  */
-  RelayNSL(SP::NonSmoothLawXML nslawxml);
-
   /** constructor with the value of the RelayNSL attributes
   *  \param size size of the NonSmoothLaw
   *  \param lb lower endpoint of the interval, default value is -1.0
@@ -128,10 +123,6 @@ public:
   {
     _ub = ub;
   };
-
-  /** copy the data of the NonSmoothLaw to the XML tree
-  */
-  void saveNonSmoothLawToXML();
 
   /** print the data to the screen
   */

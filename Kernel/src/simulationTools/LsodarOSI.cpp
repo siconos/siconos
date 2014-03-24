@@ -61,15 +61,6 @@ extern "C" void LsodarOSI_jacobianf_wrapper(integer* sizeOfX, doublereal* time, 
   return global_object->jacobianfx(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
 
-LsodarOSI::LsodarOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
-  OneStepIntegrator(OSI::LSODAROSI, osiXML, dsList)
-{
-  // local time discretisation is set by default to those of the simulation.
-  _intData.resize(9);
-  for (int i = 0; i < 9; i++) _intData[i] = 0;
-  _sizeMem = 2;
-}
-
 LsodarOSI::LsodarOSI():
   OneStepIntegrator(OSI::LSODAROSI)
 {

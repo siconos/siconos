@@ -82,12 +82,6 @@ protected:
   */
   FirstOrderR(RELATION::SUBTYPES newType): Relation(RELATION::FirstOrder, newType) {}
 
-  /** xml constructor
-  *  \param relxml the XML object.
-  *  \param newType the type of the relation
-  */
-  FirstOrderR(SP::RelationXML relxml, RELATION::SUBTYPES newType): Relation(relxml, RELATION::FirstOrder, newType) {}
-
   SP::SiconosMatrix _jachx;
   SP::SiconosMatrix _jachz;
   SP::SiconosMatrix _jacglambda;

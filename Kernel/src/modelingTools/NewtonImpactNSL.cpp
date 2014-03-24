@@ -17,22 +17,13 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "NewtonImpactNSL.hpp"
-#include "NewtonImpactNSLXML.hpp"
 
 
 NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), _e(0.0)
 {}
 
-NewtonImpactNSL::NewtonImpactNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(nslawxml), _e(0.0)
-{
-  if (nslawxml)
-    _e = (std11::static_pointer_cast<NewtonImpactNSLXML>(nslawxml))->getE();
-  else RuntimeException::selfThrow("NewtonImpactNSL:: xml constructor, xml file=NULL");
-}
-
-NewtonImpactNSL::NewtonImpactNSL(double newE):
-  NonSmoothLaw(1), _e(newE)
+NewtonImpactNSL::NewtonImpactNSL(double e):
+  NonSmoothLaw(1), _e(e)
 {}
 
 NewtonImpactNSL::~NewtonImpactNSL()
@@ -51,9 +42,4 @@ void NewtonImpactNSL::display() const
   std::cout << "===============================================================================" <<std::endl;
   std::cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: " << _e <<std::endl;
   std::cout << "===============================================================================" <<std::endl;
-}
-
-void NewtonImpactNSL::saveNonSmoothLawToXML()
-{
-  std11::static_pointer_cast<NewtonImpactNSLXML>(_nslawxml)->setE(_e);
 }

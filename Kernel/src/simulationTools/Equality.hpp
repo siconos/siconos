@@ -57,11 +57,6 @@ private:
   LinearSystemProblem _numerics_problem;
 public:
 
-  /** xml constructor
-   *  \param SP::OneStepNSProblemXML : the XML linked-object
-   */
-  Equality(SP::OneStepNSProblemXML onestepnspbxml): LinearOSNS(onestepnspbxml) {};
-
   /** constructor
       \param int id of numerics solver
   */

@@ -21,9 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianDS.hpp"
-#include "LagrangianDSXML.hpp"
 #include "RuntimeException.hpp"
-#include "XMLException.hpp"
 
 class LagrangianDSTest : public CppUnit::TestFixture
 {
@@ -63,8 +61,6 @@ private:
 
   SP::SiconosVector q0, velocity0, u0;
   SP::SiconosMatrix mass;
-  xmlNodePtr node1 , *node2, *node3;
-  SP::LagrangianDSXML tmpxml1, tmpxml2, tmpxml3;
 
 public:
   void setUp();

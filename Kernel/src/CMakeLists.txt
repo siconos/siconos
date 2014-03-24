@@ -26,7 +26,6 @@ SET(SiconosKernel_DIRS
   utils/SiconosMemory
   utils/SiconosSharedLibrary
   utils/SiconosTools
-  xml
   model
   plugin
   modelingTools
@@ -132,18 +131,6 @@ IF(NOT Boost_GRAPH_FOUND)
   MESSAGE(STATUS "WARNING boost graph library not found.")
 ENDIF(NOT Boost_GRAPH_FOUND)
 
-COMPILE_WITH(LibXml2 REQUIRED)
-# This is needed to overcome some shortcomings in the FindXml2 Module
-# When we are crosscompiling to windows, we want to link external lib statically
-# But libxml2 archive needs zlib, iconv and an obscure W32api lib. pkg-config
-# gives this information, but it is not taken into account in the cmake Module
-# This doesn't work while using MSVC
-IF(CROSSCOMPILING_LINUX_TO_WINDOWS AND NOT MSVC)
-  FOREACH(_EXTRA_LIB ${PC_LIBXML_LIBRARIES})
-    LIST(APPEND ${PROJECT_NAME}_LINK_LIBRARIES ${_EXTRA_LIB})
-  ENDFOREACH()
-ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS AND NOT MSVC)
-
 compile_with(BLAS REQUIRED)
 compile_with(LAPACK REQUIRED)
 
@@ -170,6 +157,10 @@ SET_TARGET_PROPERTIES(TestPlugin
 #  LIBRARY DESTINATION share/${PROJECT_PACKAGE_NAME})
 
 SET(SiconosKernel_LINKER_LANGUAGE CXX)
+
+# for dlopen or equivalent (used for plugins)
+SET(SiconosKernel_LINK_LIBRARIES ${SiconosKernel_LINK_LIBRARIES}
+ ${CMAKE_DL_LIBS})
 
 LIBRARY_PROJECT_SETUP()
 
@@ -228,25 +219,17 @@ IF(WITH_TESTING)
   END_TEST()
   #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
   #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
-    
-    
-  
-  # xml
-  BEGIN_TEST(xml/test)
-  NEW_TEST(testXMLTools )
-  
-  END_TEST()
-  
+
   # Global tests
   BEGIN_TEST(global_tests)
-  
+
   ADD_LIBRARY(gTestPlugin MODULE global_tests/gTestPlugin.cpp)
   SET_TARGET_PROPERTIES(gTestPlugin 
     PROPERTIES PREFIX "" 
     OUTPUT_NAME global_tests/gTestPlugin)
   
   NEW_TEST(testGlobal
-    DiodeBridge.cpp BallBowl.cpp BouncingBall.cpp FunctionTest.cpp  GlobalTests.cpp)
+    DiodeBridge.cpp FunctionTest.cpp  GlobalTests.cpp)
   
   END_TEST()
   

@@ -20,7 +20,6 @@
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "NewtonEulerR.hpp"
-#include "RelationXML.hpp"
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"
 
@@ -39,10 +38,6 @@ void NewtonEulerR::initComponents(Interaction& inter)
   unsigned int ySize = inter.getSizeOfY();
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
-
-  // The initialization of Jach[0] depends on the way the Relation was built ie if the matrix
-  // was read from xml or not
-
 
   if (! _jachq)
     _jachq.reset(new SimpleMatrix(ySize, qSize));
@@ -106,13 +101,6 @@ void NewtonEulerR::computeh(double time, Interaction& inter)
   if (_e)
     y += *_e;
 }
-
-
-void NewtonEulerR::saveRelationToXML() const
-{
-  RuntimeException::selfThrow("NewtonEulerR1::saveRelationToXML - not yet implemented.");
-}
-
 
 void NewtonEulerR::computeDotJachq(double time, Interaction& inter)
 {

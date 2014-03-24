@@ -146,12 +146,6 @@ protected:
 
 public:
 
-  /** constructor from xml file
-   *  \param OneStepIntegratorXML* : the XML object corresponding
-   *  \param DynamicalSystemsSet: set of all DS in the NSDS
-   */
-  MoreauJeanOSI(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
-
   /** constructor from a minimum set of data: one DS and its theta
    *  \param ds the DynamicalSystem integrated by this integrator
    *  \param theta value for the theta parameter (default = 0.5)
@@ -374,10 +368,6 @@ public:
    *  \param level the level of interest for the dynamics: not used at the time
    */
   virtual void updateState(const unsigned int level);
-
-  /** copy the matrix W of the OneStepNSProblem to the XML tree
-   */
-  void saveWToXML();
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */

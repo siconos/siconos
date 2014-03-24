@@ -9,27 +9,27 @@ For a more details view of each library, see the Section \ref req_libs.
 
 <b> Fedora 14</b>:
 \verbatim
-yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel libxml2 libxml2-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig python-py
+yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig python-py
 \endverbatim
 
 <b> Fedora 16 or 17</b>:
 \verbatim
-yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel libxml2 libxml2-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig pytest
+yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig pytest
 \endverbatim
 
 <b> Ubuntu Precise</b>:
 \verbatim
-apt-get install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib make g++
+apt-get install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib make g++
 \endverbatim
 
 <b> Ubuntu Quantal</b>:
 \verbatim
-apt-get install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib make g++ python-pytest
+apt-get install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib make g++ python-pytest
 \endverbatim
 
 <b> Debian Squeeze</b>:
 \verbatim
-apt-get install cmake gfortran gcc libboost-graph-dev libatlas-base-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib python-py swig2.0 doxygen libboost-filesystem-dev 
+apt-get install cmake gfortran gcc libboost-graph-dev libatlas-base-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib python-py swig2.0 doxygen libboost-filesystem-dev 
 \endverbatim
 You will also need to use the backport repository to have a cmake recent enough:
 \verbatim
@@ -102,14 +102,7 @@ About \b Lapack: http://www.netlib.org/lapack/
 
 About \b Atlas: http://math-atlas.sourceforge.net/
 
-\subsection xml 3 - libxml2
-The XML C parser and toolkit. Required for XML file reading and writing.
-
-Usually available as rpm or pre-compiled binaries. 
-
-About \b libxml2: http://xmlsoft.org/
-
-\subsection boost 4 - Boost
+\subsection boost 3 - Boost
 Boost provides a lot of useful C++ binaries, especially \b Ublas, a C++ template class library that provides BLAS level 1, 2, 3 functionalities \n
 for dense, packed and sparse matrices. 
 
@@ -132,7 +125,7 @@ Note that we also use boost-bindings:\n
 They are distributed and installed with the Siconos but you can also get the last version here: \n
 http://mathema.tician.de/software/boost-bindings
 
-\subsection gmp 5 - GMP
+\subsection gmp 4 - GMP
 
 "GMP is a free library for arbitrary precision arithmetic, operating on signed integers, rational numbers, and floating point numbers ... "
 
@@ -147,7 +140,7 @@ If it is not installed, make test commands will simply be ignored and no test wi
 
 More about \b cppunit: see http://cppunit.sourceforge.net/
 
-\subsection py 3 - Python
+\subsection py 5 - Python
 Python® is a dynamic object-oriented programming language, used in Front-End package. 
 
 About \b Python: http://www.python.org/
@@ -158,7 +151,7 @@ If you want to use Python, Swig is also required: Swig is a software development
 
 About \b swig: http://www.swig.org/
 
-\subsection doxy 4 - Doxygen
+\subsection doxy 6 - Doxygen
 
 Doxygen is a documentation system for C++, C, Java, Objective-C, Python, IDL (Corba and Microsoft flavors) and to some extent PHP, C#, and D. \n
 It is used to generate documentation for Siconos files. \n

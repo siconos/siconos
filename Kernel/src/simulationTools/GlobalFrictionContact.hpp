@@ -56,7 +56,6 @@ typedef int (*PFC_Driver)(GlobalFrictionContactProblem*, double*, double*, Solve
  * Numerics driver will be called according to this value.
  *
  * \b Construction:
- *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
  *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
  * Main functions:
  *
@@ -107,11 +106,6 @@ protected:
   PFC_Driver primalFrictionContact_driver;
 
 public:
-
-  /** xml constructor
-   *  \param SP::OneStepNSProblemXML : the XML linked-object
-   */
-  GlobalFrictionContact(SP::OneStepNSProblemXML);
 
   /** constructor from data
    *  \param int dim (2D or 3D) of the friction-contact problem

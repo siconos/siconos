@@ -18,7 +18,6 @@
  */
 
 #include "OneStepIntegrator.hpp"
-#include "OneStepIntegratorXML.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "DynamicalSystem.hpp"
@@ -30,35 +29,6 @@ OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
   integratorType(id), _sizeMem(1)
 {
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
-}
-
-// --- Xml constructor ---
-OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, SP::OneStepIntegratorXML osixml,
-                                     SP::DynamicalSystemsSet dsList):
-  integratorType(id), _sizeMem(1), integratorXml(osixml)
-{
-  if (!integratorXml)
-    RuntimeException::selfThrow("OneStepIntegrator::xml constructor - OneStepIntegratorXML object == NULL");
-
-  OSIDynamicalSystems.reset(new DynamicalSystemsSet());
-
-  // load DS list if present
-  if (osixml->hasDSList())
-  {
-    assert(dsList && "OneStepIntegrator xml constructor: empty ds list from NSDS.");
-    if (osixml->hasAllDS()) // if flag all=true is present -> get all ds from the nsds
-      OSIDynamicalSystems->insert(dsList->begin(), dsList->end());
-
-    else
-    {
-      // get list of ds numbers implicate in the OSI
-      std::vector<int> dsNumbers;
-      osixml->getDSNumbers(dsNumbers);
-      // get corresponding ds and insert them into the set.
-      for (std::vector<int>::iterator it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
-        OSIDynamicalSystems->insert(dsList->getPtr(*it));
-    }
-  }
 }
 
 void OneStepIntegrator::insertDynamicalSystem(SP::DynamicalSystem ds)
@@ -107,17 +77,3 @@ void OneStepIntegrator::display()
   std::cout << "| _sizeMem: " << _sizeMem <<std::endl;
   std::cout << "====================================" <<std::endl;
 }
-
-void OneStepIntegrator::saveIntegratorToXML()
-{
-  //   if(integratorXml != 0)
-  //     {
-  //       vector<int> dsConcerned;
-  //       dsConcerned.push_back(ds->getNumber());
-  //       integratorXml->setDSConcerned( &dsConcerned );
-  //     }
-  //   else
-  //RuntimeException::selfThrow("OneStepIntegrator::saveIntegratorToXML - OneStepIntegratorXML object = NULL");
-  RuntimeException::selfThrow("OneStepIntegrator::saveIntegratorToXML - Not yet implemented.");
-}
-

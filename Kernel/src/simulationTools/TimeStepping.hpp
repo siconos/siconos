@@ -125,14 +125,6 @@ public:
    */
   TimeStepping(SP::TimeDiscretisation td, int nb);
 
-  /** constructor with XML object for TimeStepping
-    \param strxml the XML object corresponding
-    \param t0 the initial time
-    \param T final time
-    \param dsList the set of all DS in the NSDS
-    */
-  TimeStepping(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList);
-
   /** Destructor.
   */
   virtual ~TimeStepping();

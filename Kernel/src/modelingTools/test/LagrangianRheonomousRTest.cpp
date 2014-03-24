@@ -27,59 +27,16 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianRheonomousRTest);
 
 
 void LagrangianRheonomousRTest::setUp()
-{
-  // parse xml file:
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  doc = xmlParseFile("LagrangianRheonomous_test.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
+{}
 
-  // get rootNode
-
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-
-  // look for NSDS node
-  node = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  xmlNode * nodetmp = SiconosDOMTreeTools::findNodeChild(node, "Interaction");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
-  // get relation
-  xmlNode * node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianRelation");
-  tmpxml1.reset(new RelationXML(node1));
-}
 
 void LagrangianRheonomousRTest::tearDown()
 {}
 
-// xml constructor (scleronomic case)
+// data constructor:
 void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0()
 {
-  std::cout << "==============================================" <<std::endl;
-  std::cout << "=== LagrangianRheonomousR tests start ...=== " <<std::endl;
-  std::cout << "==============================================" <<std::endl;
-  SP::LagrangianRheonomousR R1(new LagrangianRheonomousR(tmpxml1));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1a : ", R1->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1b : ", R1->getSubType() == RELATION::RheonomousR, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1c : ", R1->gethName() == "TestPlugin:hRheo", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1d : ", R1->getJachqName() == "TestPlugin:G0Rheo", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1d : ", R1->gethDotName() == "TestPlugin:hDot", true);
-  std::cout << " xml Constructor (1) LagrangianRheonomousR ok" <<std::endl;
-}
-
-// data constructor:
-void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR2()
-{
-  SP::LagrangianRheonomousR R1(new LagrangianRheonomousR("TestPlugin:hRheo", "TestPlugin:hDot", "TestPlugin:G0Rheo"));
+  SP::LagrangianRheonomousR R1(new LagrangianRheonomousR("TestPlugin:hRheo", "TestPlugin:G0Rheo", "TestPlugin:hDot"));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3b : ", R1->getSubType() == RELATION::RheonomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3c : ", R1->gethName() == "TestPlugin:hRheo", true);

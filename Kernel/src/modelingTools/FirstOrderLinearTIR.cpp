@@ -17,7 +17,6 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderLinearTIR.hpp"
-#include "LinearRXML.hpp"
 #include "Interaction.hpp"
 
 
@@ -27,36 +26,12 @@
 
 using namespace RELATION;
 
-// xml constructor
-FirstOrderLinearTIR::FirstOrderLinearTIR(SP::RelationXML relxml):
-  FirstOrderR(relxml, LinearTIR)
-{
-  SP::LinearRXML folrXML = std11::static_pointer_cast<LinearRXML>(_relationxml);
-  // get matrices values. All are optional.
 
-  if (folrXML->hasC())
-    _jachx.reset(new SimpleMatrix(folrXML->getC()));
-  else
-    RuntimeException::selfThrow("FirstOrderLinearTIR:: xml constructor failed, can not find a definition for C.");
-
-  if (folrXML->hasD())
-    _jachlambda.reset(new SimpleMatrix(folrXML->getD()));
-
-  if (folrXML->hasF())
-    _F.reset(new SimpleMatrix(folrXML->getF()));
-
-  if (folrXML->hasE())
-    _e.reset(new SiconosVector(folrXML->getE()));
-
-  if (folrXML->hasB())
-    _jacglambda.reset(new SimpleMatrix(folrXML->getB()));
-  else
-    RuntimeException::selfThrow("FirstOrderLinearTIR:: xml constructor failed, can not find a definition for B.");
-}
 FirstOrderLinearTIR::FirstOrderLinearTIR():
   FirstOrderR(LinearTIR)
 {
 }
+
 // Minimum data (C, B as pointers) constructor
 FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newB):
   FirstOrderR(LinearTIR)
@@ -169,9 +144,4 @@ void FirstOrderLinearTIR::display() const
   if (_jacglambda) _jacglambda->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << " ================================================== " <<std::endl;
-}
-
-void FirstOrderLinearTIR::saveRelationToXML() const
-{
-  RuntimeException::selfThrow("FirstOrderLinearTIR::saveRelationToXML, no yet implemented.");
 }

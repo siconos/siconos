@@ -46,59 +46,10 @@ void LagrangianLinearTIDSTest::setUp()
   C.reset(new SimpleMatrix("C.dat", true));
 
 
-  // parse xml file:
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  doc = xmlParseFile("lagtids_test.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
 
-  // get rootNode
-
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-
-  // look for NSDS node
-  xmlNodePtr nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "DS_Definition");
-  // get first ds
-  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianLinearTIDS");
-  tmpxml1(new LagrangianLinearTIDSXML(node1, false));
-}
 
 void LagrangianLinearTIDSTest::tearDown()
 {}
-
-// xml constructor (1), without plugin
-void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
-{
-  std::cout << "===========================================" <<std::endl;
-  std::cout << "=== LagrangianLinearTIDS tests start ...===" <<std::endl;
-  std::cout << "===========================================" <<std::endl;
-  std::cout << "--> Test: constructor xml." <<std::endl;
-  SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(tmpxml1))
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1A : ", Type::value(*ds) == Type::LagrangianLinearTIDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1B : ", ds->number() == 13, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1D : ", ds->getStepsInMemory() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1D : ", ds->getNdof() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1E : ", ds->getQ0() == *q0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1F : ", ds->getVelocity0() == *velocity0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1G : ", ds->getQ() == *q0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1H : ", ds->getVelocity() == *velocity0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1I : ", ds->getMass() == *mass, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1J : ", ds->getK() == *K, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1K : ", ds->getC() == *C, true);
-  std::cout << "--> Constructor xml test ended with success." <<std::endl;
-}
 
 
 // Mass, K, C

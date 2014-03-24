@@ -17,7 +17,6 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderType2R.hpp"
-#include "RelationXML.hpp"
 #include "Interaction.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 
@@ -32,12 +31,6 @@
 FirstOrderType2R::FirstOrderType2R():
   FirstOrderR(RELATION::Type2R)
 {}
-// xml constructor
-FirstOrderType2R::FirstOrderType2R(SP::RelationXML FORxml):
-  FirstOrderR(FORxml, RELATION::Type2R)
-{
-  RuntimeException::selfThrow("FirstOrderR::FirstOrderType2R xml constructor not implemented.");
-}
 
 FirstOrderType2R::FirstOrderType2R(const std::string& computeOut, const std::string& computeIn):
   FirstOrderR(RELATION::Type2R)
@@ -69,8 +62,6 @@ void FirstOrderType2R::initialize(Interaction& inter)
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
 
-  // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
-  // was read from xml or not
   if (!_jachx)
     _jachx.reset(new SimpleMatrix(sizeY, sizeDS));
   if (!_jachlambda)

@@ -1,12 +1,12 @@
 #!/usr/bin/env python2
 
 # ./builder.py -I/usr/local/include/Siconos/Kernel \
-#    -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2
+#    -I/usr/local/include/Siconos/Numerics
 
 # Mechanics
 # ./builder.py -I/usr/local/include/Siconos/Kernel \
 # -I/usr/local/include/Siconos/Mechanics \
-# -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 \
+# -I/usr/local/include/Siconos/Numerics \
 # --target=Mechanics
 
 # we use pygccxml from Roman Yakovenko.

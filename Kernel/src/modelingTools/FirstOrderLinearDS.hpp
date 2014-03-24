@@ -110,11 +110,6 @@ public:
 
   /** === CONSTRUCTORS/DESTRUCTOR === */
 
-  /** xml constructor
-   *  \param dsXML the XML object for this DynamicalSystem
-   */
-  FirstOrderLinearDS(SP::DynamicalSystemXML dsXML);
-
   /** constructor from a set of data
    *  \param newX0 the initial state of this DynamicalSystem
    *  \param APlugin plugin for A
@@ -287,12 +282,6 @@ public:
    *  \param isDSup boolean to avoid recomputation of operators (unused)
    */
   void computeJacobianRhsx(double time, bool isDSup = false);
-
-  // --- xml related functions ---
-
-  /** copy the data specific to each system into the XML tree
-   */
-  void saveSpecificDataToXML();
 
   /** data display on screen
    */

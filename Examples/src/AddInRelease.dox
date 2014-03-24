@@ -5,7 +5,7 @@ Siconos-Example, please do:
 
 -# Create a new directory for your example
 -# In this directory write either a .cpp, a .py or a .sci input file, depending on the process type you choose (C++, Python or Scilab). For details on how to write an input file, see \ref gettingStarted "Getting Started with Siconos". 
--# Add the optional files ( plugin, xml ...)
+-# Add the optional files ( plugin, ...)
 -# propose a proper way to treat the results (for example write a result.gp file, to automate plots of some results of the simulation with gnuplot (see example in Mechanics/BouncingBall/ location)). 
 -# Write a documentation file (.dox, see \ref EMWriteDocExample)
 

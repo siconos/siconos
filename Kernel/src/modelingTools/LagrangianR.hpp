@@ -26,7 +26,6 @@
 #include "Interaction.hpp"
 
 class DynamicalSystem;
-class RelationXML;
 class SimpleMatrix;
 class SiconosVector;
 
@@ -118,12 +117,6 @@ protected:
   \param the sub-type of the relation
   */
   LagrangianR(RELATION::SUBTYPES lagType): Relation(RELATION::Lagrangian, lagType) {}
-
-  /** constructor from xml file
-  *  \param relationXML
-  *  \param std::string: relation subType
-  */
-  LagrangianR(SP::RelationXML relxml, RELATION::SUBTYPES newSubType): Relation(relxml, RELATION::Lagrangian, newSubType) {}
 
   /** initialize components specific to derived classes.
   */
@@ -307,10 +300,6 @@ public:
   *  \param unsigned int: "derivative" order of lambda used to compute input
   */
   virtual void computeInput(double time, Interaction& inter, unsigned int = 0) = 0;
-
-  /** copy the data of the Relation to the XML tree
-  */
-  void saveRelationToXML() const;
 
   /** main relation members display
   */

@@ -17,7 +17,6 @@ debian>apt-get install g++
 debian>apt-get install gfortran
 debian>apt-get install subversion
 debian>apt-get install atlas3-base atlas3-headers atlas3-base-dev atlas3-sse2-dev refblas3-dev
-debian>apt-get install libxml2-dev
 debian>apt-get install libboost-date-time-dev libboost-date-time1.33.1 libboost-dev   
 libboost-doc libboost-filesystem-dev libboost-filesystem1.33.1 libboost-graph-dev   
 libboost-graph1.33.1 libboost-iostreams-dev libboost-iostreams1.33.1 libboost-program-options-dev   

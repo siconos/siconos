@@ -22,7 +22,7 @@
   V. Acary, O. Bonnefon.
 
   A Ball bouncing on the ground.
-  Direct description of the model without XML input.
+  Direct description of the model.
   Simulation with a Time-Stepping scheme.
 */
 #include "SphereNEDSPlanR.hpp"

@@ -532,10 +532,6 @@ public:
 
   // --- miscellaneous ---
 
-  /** copy the data of the DS into the XML tree
-   */
-  void saveSpecificDataToXML();
-
   /** print the data to the screen
    */
   void display() const;

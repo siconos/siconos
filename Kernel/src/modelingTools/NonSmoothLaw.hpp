@@ -67,10 +67,7 @@ protected:
   /** "size" of the NonSmoothLaw */
   unsigned int _size;
 
-  /** the XML pbject linked to the NonSmoothLaw to read XML data */
-  SP::NonSmoothLawXML _nslawxml;
-
-  /** size of the NonSmoothLaw to project on the constarints. It is not equal to _size in the case of friction.*/
+  /** size of the NonSmoothLaw to project on the constraints. It is not equal to _size in the case of friction.*/
   unsigned int _sizeProjectOnConstraints;
 
 
@@ -79,19 +76,15 @@ protected:
   NonSmoothLaw() {};
 
   /** copy constructor (private=> no copy nor pass-by value allowed)
+   * \param notUsed notused
    */
-  NonSmoothLaw(const NonSmoothLaw&) {};
+  NonSmoothLaw(const NonSmoothLaw& notUsed) {};
 
 public:
   /** basic constructor
   * \param size the nonsmooth law size
   */
   NonSmoothLaw(unsigned int size);
-
-  /** constructor with XML object of the NonSmoothLaw
-  *  \param NonSmoothLawXML* : the XML object corresponding
-  */
-  NonSmoothLaw(SP::NonSmoothLawXML);
 
   /** destructor
   */
@@ -106,22 +99,6 @@ public:
     return false;
   }
 
-  /** get the NonSmoothLawXML of the NonSmoothLaw
-  *  \return the pointer on the NonSmoothLawXML of the NonSmoothLaw
-  */
-  inline SP::NonSmoothLawXML xml()
-  {
-    return _nslawxml;
-  }
-
-  /** set the NonSmoothLawXML of the NonSmoothLaw
-  *  \param NonSmoothLawXML* : the pointer to set nslawxml
-  */
-  inline void setNonSmoothLawXML(SP::NonSmoothLawXML newNslawxml)
-  {
-    _nslawxml = newNslawxml;
-  }
-
   /** to get the size
   *  \return the size of the NS law
   */
@@ -129,18 +106,13 @@ public:
   {
     return _size;
   }
-  /** to get the signifiant size for the projection on constraints
-  *  \return the signifiant size for the projection on constraints
+  /** to get the significant size for the projection on constraints
+  *  \return the significant size for the projection on constraints
   */
   inline unsigned int sizeProjectOnConstraints() const
   {
     return _sizeProjectOnConstraints;
   }
-
-  /** copy the data of the NonSmoothLaw to the XML tree
-  *
-  */
-  virtual void saveNonSmoothLawToXML() = 0;
 
   /** display the data of the NonSmoothLaw on the standard output
   *

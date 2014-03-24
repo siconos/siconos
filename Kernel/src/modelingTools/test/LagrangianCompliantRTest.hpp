@@ -21,9 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianCompliantR.hpp"
-#include "RelationXML.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NonSmoothDynamicalSystemXML.hpp"
 
 class LagrangianCompliantRTest : public CppUnit::TestFixture
 {
@@ -40,7 +38,6 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianCompliantR0);
-  CPPUNIT_TEST(testBuildLagrangianCompliantR2);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -48,13 +45,9 @@ private:
   // \todo exception test
 
   void testBuildLagrangianCompliantR0();
-  void testBuildLagrangianCompliantR2();
   void End();
 
   // Members
-
-  xmlNode * node;
-  SP::RelationXML tmpxml1;
 
 public:
   void setUp();

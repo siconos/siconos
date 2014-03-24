@@ -28,9 +28,7 @@ The installation of Siconos Numerics is required.
 
 ---++ Required external libraries
 
-   * libxml2
-
-   * Atlas
+   * CBLAS and LAPACK provider (like Atlas). LAPACKE is a must
 
    * Boost (version >=1.41)
 

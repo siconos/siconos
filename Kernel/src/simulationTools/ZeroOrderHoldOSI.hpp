@@ -133,12 +133,6 @@ protected:
 
 public:
 
-  /** constructor from xml file
-   *  \param osiXML the corresponding XML object
-   *  \param dsList the set of all DS in the NSDS
-   */
-  ZeroOrderHoldOSI(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList);
-
   /** constructor from a minimum set of data: one DS
    *  \param ds the DynamicalSystem linked to the OneStepIntegrator
    */

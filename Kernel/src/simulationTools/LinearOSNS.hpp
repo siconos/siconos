@@ -92,11 +92,6 @@ protected:
 
 public:
 
-  /** xml constructor
-      \param onestepnspbxml the XML linked-object
-  */
-  LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml);
-
   /** constructor from data
       \param numericsSolverId the numerics_solver identifier
   */
@@ -279,10 +274,6 @@ public:
   /** print the data to the screen
    */
   virtual void display() const;
-
-  /** copy the data of the OneStepNSProblem to the XML tree
-    */
-  void saveNSProblemToXML();
 
   /** set if if _w and _z vectors are initialized with
       previous values of Y and Lambda when a change occurs in problem

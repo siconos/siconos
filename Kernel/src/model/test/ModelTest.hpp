@@ -21,7 +21,6 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "Model.hpp"
-#include "SiconosModelXML.hpp"
 
 class ModelTest : public CppUnit::TestFixture
 {
@@ -41,7 +40,6 @@ private:
   CPPUNIT_TEST(testBuildModel0);
   CPPUNIT_TEST(testBuildModel1);
   CPPUNIT_TEST(testBuildModel2);
-  CPPUNIT_TEST(testBuildModel3);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test

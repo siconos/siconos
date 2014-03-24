@@ -36,78 +36,10 @@ void FirstOrderNonLinearDSTest::setUp()
   J0.reset(new SimpleMatrix("matJ0.dat", true));
   M.reset(new SimpleMatrix("matM.dat", true));
 
-  // parse xml file:
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  doc = xmlParseFile("ds_test.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
-
-  // get rootNode
-
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-
-  // look for NSDS node
-  xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "DS_Definition");
-  // get first ds
-  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderNonLinearDS");
-  tmpxml1.reset(new FirstOrderNonLinearDSXML(node1, false));
-  // get second ds
-  node2 = SiconosDOMTreeTools::findFollowNode(node1, "FirstOrderNonLinearDS");
-  tmpxml2.reset(new FirstOrderNonLinearDSXML(node2, false));
 }
 
 void FirstOrderNonLinearDSTest::tearDown()
 {}
-
-// xml constructor (1), without plugin
-void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
-{
-  std::cout << "======================================" <<std::endl;
-  std::cout << "=== FirstOrderNonLinearDS tests start ...=== " <<std::endl;
-  std::cout << "======================================" <<std::endl;
-  std::cout << "--> Test: constructor xml." <<std::endl;
-  SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(tmpxml1));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1A : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1D : ", ds->getStepsInMemory() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1D : ", ds->getN() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1E : ", ds->getX0() == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1E : ", ds->getM() == *M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1H : ", ds->F()->isPlugged(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1I : ", ds->jacobianfx()->isPlugged(), false);
-
-  std::cout << "--> Constructor xml test ended with success." <<std::endl;
-}
-
-
-// xml constructor (2), with plugins
-void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
-{
-  std::cout << "--> Test: constructor xml 2." <<std::endl;
-  SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(tmpxml2));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2A : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2D : ", ds->getN() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2E : ", ds->getX0() == 2 * *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2F : ", ds->F()->isPlugged(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2G : ", ds->jacobianfx()->isPlugged(), true);
-  ds->initialize("TimeStepping", 0.5);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianfx() == *J0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", !ds->M(), false);
-  std::cout << "--> Constructor xml 2 test ended with success." <<std::endl;
-}
-
 
 // constructor from data
 void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()

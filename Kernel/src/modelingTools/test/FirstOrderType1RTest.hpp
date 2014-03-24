@@ -20,9 +20,7 @@
 #define __FirstOrderType1RTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "RelationXML.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NonSmoothDynamicalSystemXML.hpp"
 #include "FirstOrderType1R.hpp"
 
 class FirstOrderType1RTest : public CppUnit::TestFixture
@@ -41,7 +39,6 @@ private:
 
   CPPUNIT_TEST(testBuildFirstOrderType1R1);
   CPPUNIT_TEST(testBuildFirstOrderType1R2);
-  CPPUNIT_TEST(testBuildFirstOrderType1R3);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -50,13 +47,10 @@ private:
 
   void testBuildFirstOrderType1R1();
   void testBuildFirstOrderType1R2();
-  void testBuildFirstOrderType1R3();
   void End();
 
   // Members
 
-  xmlNodePtr node1;
-  SP::RelationXML tmpxml1;
   SP::NonSmoothDynamicalSystem nsds;
 
 public:

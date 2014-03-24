@@ -21,12 +21,12 @@ well-identified problems.")
 
 IF(PIPOL_IMAGE MATCHES "etch")
   SET(DEBIAN_PACKAGE_DEPENDS 
-    "g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers, libxml2-dev, libboost-dev, libboost-graph-dev, libgfortran1-dev, libgmp3-dev, siconos-numerics")
+    "g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers, libboost-dev, libboost-graph-dev, libgfortran1-dev, libgmp3-dev, siconos-numerics")
 ENDIF(PIPOL_IMAGE MATCHES "etch")
 
 IF(PIPOL_IMAGE MATCHES "lenny\\|ubuntu")
   SET(DEBIAN_PACKAGE_DEPENDS
-    "g++, gfortran, libatlas-base-dev, libatlas-headers, libboost-dev, libboost-graph-dev, libgmp3-dev, libxml2-dev, siconos-numerics")
+    "g++, gfortran, libatlas-base-dev, libatlas-headers, libboost-dev, libboost-graph-dev, libgmp3-dev, siconos-numerics")
 ENDIF(PIPOL_IMAGE MATCHES "lenny\\|ubuntu")  
 
 #IF(APPLE)

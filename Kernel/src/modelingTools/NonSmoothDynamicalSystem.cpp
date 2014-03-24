@@ -17,13 +17,10 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NonSmoothDynamicalSystemXML.hpp"
-#include "DynamicalSystemXML.hpp"
 #include "Topology.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
-#include "InteractionXML.hpp"
 #include "Relation.hpp"
 
 using namespace RELATION;
@@ -38,102 +35,12 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(): _BVP(false), _mIsLinear(tr
 };
 
 
-// xml constuctor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemXML newNsdsxml):
-  _BVP(false), _nsdsxml(newNsdsxml), _mIsLinear(true)
-{
-  assert(_nsdsxml && "NonSmoothDynamicalSystem:: xml constructor, xml file=NULL");
-
-  // === DS Vector fill-in: we sweep the list of DSXML and for each of
-  // them, add a new DynamicalSystem in the set allDS. ===
-  SetOfDSXML dsList = _nsdsxml->getDynamicalSystemsXML();
-  SetOfDSXML::iterator it;
-  Type::Siconos type;
-  // === Builds an empty topology ===
-  _topology.reset(new Topology());
-
-  // Add dynamical systems into the nsds (i.e. into the topology and its graphs).
-  for (it = dsList.begin(); it != dsList.end(); ++it)
-  {
-    type = (*it)->getType();
-    if (type  == Type::LagrangianDS)  // LagrangianDS
-      insertDynamicalSystem(SP::LagrangianDS(new LagrangianDS(*it)));
-    else if (type == Type::LagrangianLinearTIDS)  // Lagrangian Linear Time Invariant
-      insertDynamicalSystem(SP::LagrangianLinearTIDS(new LagrangianLinearTIDS(*it)));
-    else if (type == Type::FirstOrderLinearDS)  // Linear DS
-      insertDynamicalSystem(SP::FirstOrderLinearDS(new FirstOrderLinearDS(*it)));
-    else if (type == Type::FirstOrderLinearTIDS)  // Linear Time Invariant DS
-      insertDynamicalSystem(SP::FirstOrderLinearTIDS(new FirstOrderLinearTIDS(*it)));
-    else if (type == Type::FirstOrderNonLinearDS)  // Non linear DS
-      insertDynamicalSystem(SP::FirstOrderNonLinearDS(new FirstOrderNonLinearDS(*it)));
-    else RuntimeException::
-      selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
-  }
-  
-  // ===  The same process is applied for Interactions ===
-  SetOfInteractionsXML  interactionsList = _nsdsxml->getInteractionsXML();
-  SetOfInteractionsXMLIt it2;
-
-  for (it2 = interactionsList.begin(); it2 != interactionsList.end(); ++it2)
-  {
-    // Create an interaction
-    SP::Interaction inter(new Interaction(*it2));
-    SP::DynamicalSystem ds1, ds2;
-    std::vector<int> dsNumbers;
-    // Get the numbers of ds involved in the interaction (max == 2)
-    (*it2)->getDSNumbers(dsNumbers);
-    ds1 = dynamicalSystem(dsNumbers[0]);
-    if(dsNumbers.size() == 2)
-    {
-      ds2 =  dynamicalSystem(dsNumbers[1]);
-      link(inter, ds1, ds2);
-    }
-    else
-      link(inter,ds1);
-  }
-}
-
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
   clear();
 }
 
 // === DynamicalSystems management ===
-
-void NonSmoothDynamicalSystem::saveNSDSToXML()
-{
-  if (_nsdsxml)
-  {
-    _nsdsxml->setBVP(_BVP);// no need to change the value of BVP, it mustn't change anyway
-
-    DynamicalSystemsGraph::VIterator vi;
-    for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
-    {
-      SP::DynamicalSystem ds = dynamicalSystems()->bundle(*vi);
-      if (Type::value(*ds) == Type::LagrangianDS)
-        (std11::static_pointer_cast<LagrangianDS>(ds))->saveDSToXML();
-      else if (Type::value(*ds) == Type::LagrangianLinearTIDS)
-        (std11::static_pointer_cast<LagrangianLinearTIDS>(ds))->saveDSToXML();
-      else if (Type::value(*ds) == Type::FirstOrderLinearDS)
-        (std11::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
-      else if (Type::value(*ds) == Type::FirstOrderLinearTIDS)
-        (std11::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
-      else if (Type::value(*ds) == Type::FirstOrderNonLinearDS)
-        ds->saveDSToXML();
-      else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");
-    }
-
-    // Note FP: we must use interactions graph rather than set.
-    // The following lines are obsolete and will be updated when xml
-    // will be pushed to python front-end. 
-    // InteractionsIterator it2;
-    // for (it2 = _topology->interactions()->begin();
-    //      it2 != interactions()->end(); ++it2)
-    //   (*it2)->saveInteractionToXML();
-  }
-  else RuntimeException::
-    selfThrow("NonSmoothDynamicalSystem::saveNSDSToXML - The NonSmoothDynamicalSystemXML object doesn't exists");
-}
 
 void NonSmoothDynamicalSystem::display() const
 {

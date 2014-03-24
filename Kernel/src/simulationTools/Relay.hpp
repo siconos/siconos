@@ -78,12 +78,6 @@ protected:
 
 public:
 
-  /** xml constructor
-   *  \param onestepnspbxml the XML linked-object
-   */
-  Relay(SP::OneStepNSProblemXML onestepnspbxml):
-    LinearOSNS(onestepnspbxml) {};
-
   /** constructor from data
    *  \param numericsSolverId id of numerics solver
    */

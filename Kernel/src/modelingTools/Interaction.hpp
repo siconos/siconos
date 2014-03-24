@@ -171,9 +171,6 @@ private:
   /** the type of Relation of the interaction */
   SP::Relation _relation;
 
-  /** the XML object linked to the Interaction to read XML data */
-  SP::InteractionXML _interactionxml;
-
   /** A map of vectors, used to save links (pointers) to DS objects of
       the interaction */
   typedef std11::array<SP::BlockVector, 15> dataR;
@@ -203,12 +200,7 @@ public:
   Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _sizeZ(0), _has2Bodies(false), _y(2)
   {};
 
-  /** constructor with XML object of the Interaction
-   *  \param InteractionXML* : the XML object corresponding
-   */
-  Interaction(SP::InteractionXML);
-
-  /** constructor with no data
+   /** constructor with no data
    *  \param interactionSize size of the interaction, i.e. the size of the input and output
    *  \param NSL pointer to the NonSmoothLaw
    *  \param rel a pointer to the Relation
@@ -800,28 +792,6 @@ public:
     // get the single value used to build indexSets
     return (*_lambda[i])(0);
   }
-
-  // --- XML RELATED FUNCTIONS ---
-
-  /** get the InteractionXML* of the Interaction
-   *  \return InteractionXML* : the pointer on the InteractionXML
-   */
-  inline SP::InteractionXML interactionXML() const
-  {
-    return _interactionxml;
-  }
-
-  /** set the InteractionXML* of the Interaction
-  *  \param InteractionXML* :  the pointer to set
-  */
-  inline void setInteractionXMLPtr(SP::InteractionXML interxml)
-  {
-    _interactionxml = interxml;
-  }
-
-  /** copy the data of the Interaction to the XML tree
-  */
-  void saveInteractionToXML();
 
   /*
    * Return H_alpha

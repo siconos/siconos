@@ -60,7 +60,6 @@
  *  IndexSets from simulation are used to know which constraints (Interaction) are active or not. \n
  *
  * \b Construction:
- *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
  *   - Constructor from data (inputs = Simulations*, id, NumericsSolverName) - The solver is optional.
  * Main functions:
  *

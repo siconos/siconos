@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "FirstOrderNonLinearDS.hpp"
-#include "FirstOrderNonLinearDSXML.hpp"
 //#include "Plugin.hpp"
 #include "PluginTypes.hpp"
 
@@ -84,93 +83,6 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0):
 
   checkDynamicalSystem();
 
-}
-
-// From XML file
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
-  DynamicalSystem(dsXML)
-{
-  zeroPlugin();
-  // -- Type::FirstOrderNonLinearDS xml object --
-  SP::FirstOrderNonLinearDSXML fonlds = std11::static_pointer_cast <FirstOrderNonLinearDSXML>(dsXML);
-
-  // === Initial conditions ===
-  // Warning: n is set thanks to x0 size
-  if (! fonlds->hasX0())
-    RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, x0 is a required input");
-
-  _x0.reset(new SiconosVector(fonlds->getX0()));
-
-  _n = _x0->size();
-
-  // === Current state (optional input) ===
-  // x is composed of two blocks of size n, (*x)[0] = \f$ x \f$ and (*x)[1]=\f$ \dot x \f$.
-
-  if (fonlds->hasx())
-    _x[0].reset(new SiconosVector(fonlds->getx()));
-  else // (*x)[0] initialize with x0.
-    _x[0].reset(new SiconosVector(*_x0));
-  // build and initialize right-hand side
-  _x[1].reset(new SiconosVector(_n));
-  // r
-
-  _r.reset(new SiconosVector(_n));
-
-  std::string plugin;
-
-  // f and jacobianfx are required for DynamicalSystem but not for derived class.
-  // Then we can not set exception if they are not given.
-  if (fonlds->hasM())
-  {
-    if (fonlds->isMPlugin())
-    {
-      plugin = fonlds->getMPlugin();
-      setComputeMFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
-    }
-    else // This means that M is constant
-    {
-      _M.reset(new SimpleMatrix(fonlds->getMMatrix()));
-      if (_M->size(0) != _n || _M->size(1) != _n)
-        RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, M size differs from n!");
-    }
-  }
-
-  if (fonlds->hasF())
-  {
-    if (fonlds->isFPlugin())
-    {
-      plugin = fonlds->getFPlugin();
-      setComputeFFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
-    }
-    else
-    {
-      if (fonlds->getFVector().size() != _n)
-        RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, f size differs from n!");
-
-      _f.reset(new SiconosVector(fonlds->getFVector()));
-    }
-  }
-
-  if (fonlds->hasJacobianfx())
-  {
-    if (fonlds->isJacobianfxPlugin())
-    {
-      plugin = fonlds->getJacobianfxPlugin();
-      setComputeJacobianfxFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
-    }
-    else // This means that jacobianfx is constant
-    {
-      _jacobianfx.reset(new SimpleMatrix(fonlds->getJacobianfxMatrix()));
-      if (_jacobianfx->size(0) != _n || _jacobianfx->size(1) != _n)
-        RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, jacobianfx size differs from n!");
-    }
-  }
-
-  // Memory
-  if (fonlds->hasXMemory())
-    _xMemory.reset(new SiconosMemory(fonlds->getXMemoryXML()));
-
-  checkDynamicalSystem();
 }
 
 // From a minimum set of data
@@ -494,22 +406,6 @@ void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool isDSUp)
   }
   // else jacobianRhsx = jacobianfx, pointers equality set in initRhs
 
-}
-
-// ===== XML MANAGEMENT FUNCTIONS =====
-
-void FirstOrderNonLinearDS::saveSpecificDataToXML()
-{
-  // -- FirstOrderNonLinearDS  xml object --
-  SP::FirstOrderNonLinearDSXML fonlds = std11::static_pointer_cast <FirstOrderNonLinearDSXML>(_dsxml);
-  // --- other data ---
-  if (!fonlds)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::saveSpecificDataToXML - The DynamicalSystemXML object doesn't exists");
-
-  if (_pluginf->fPtr)
-    fonlds->setFPlugin(_pluginf->getPluginName());
-  if (_pluginJacxf->fPtr)
-    fonlds->setJacobianfxPlugin(_pluginJacxf->getPluginName());
 }
 
 // ===== MISCELLANEOUS ====

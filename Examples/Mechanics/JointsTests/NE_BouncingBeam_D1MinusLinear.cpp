@@ -21,7 +21,7 @@
   \brief \ref EMNE_MULTIBODY - C++ input file, Time-Stepping version - O.B.
 
   A multibody example.
-  Direct description of the model without XML input.
+  Direct description of the model.
   Simulation with a Time-Stepping scheme.
 */
 

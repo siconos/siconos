@@ -8,7 +8,6 @@
 
 #define KERNEL_CLASSES()                          \
   REGISTER(DynamicalSystem)                       \
-  REGISTER(DynamicalSystemXML)                    \
     REGISTER(Relation)                            \
     REGISTER(NonSmoothLaw)                        \
     REGISTER(MixedComplementarityConditionNSL)    \

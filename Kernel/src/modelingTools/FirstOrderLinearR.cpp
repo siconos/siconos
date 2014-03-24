@@ -17,7 +17,6 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderLinearR.hpp"
-#include "LinearRXML.hpp"
 #include "Interaction.hpp"
 
 #include "BlockVector.hpp"
@@ -30,13 +29,6 @@ FirstOrderLinearR::FirstOrderLinearR():
   FirstOrderR(LinearR)
 {
   ;
-}
-
-// xml constructor
-FirstOrderLinearR::FirstOrderLinearR(SP::RelationXML relxml):
-  FirstOrderR(relxml, LinearR)
-{
-
 }
 
 // Constructor with C and B plug-in names
@@ -96,8 +88,6 @@ void FirstOrderLinearR::initialize(Interaction& inter)
   // Check if various operators sizes are consistent.
   // Reference: interaction.
 
-  // The initialization of each matrix/vector depends on the way the Relation was built ie if the matrix/vector
-  // was read from xml or not
   if (_jachx->size(0) == 0)
     _jachx->resize(sizeX, sizeY);
   else
@@ -274,17 +264,3 @@ void FirstOrderLinearR::display() const
   else std::cout << "->NULL" <<std::endl;
   std::cout << " ================================================== " <<std::endl;
 }
-
-void FirstOrderLinearR::saveRelationToXML() const
-{
-  if (!_relationxml)
-    RuntimeException::selfThrow("FirstOrderLinearR::saveRelationToXML, no yet implemented.");
-
-  SP::LinearRXML folrXML = (std11::static_pointer_cast<LinearRXML>(_relationxml));
-  folrXML->setC(*_jachx);
-  folrXML->setD(*_jachlambda);
-  folrXML->setF(*_F);
-  folrXML->setE(*_e);
-  folrXML->setB(*_jacglambda);
-}
-

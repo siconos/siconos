@@ -118,7 +118,7 @@ OSNSMatrix::OSNSMatrix(SP::InteractionsGraph indexSet, int stor):
 }
 
 
-// Copy of a SiconosMatrix (used when OSNS xml constructor is called with M input in XML file)
+// construct by copy of SiconosMatrix
 OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
   dimRow(MSource.size(0)), dimColumn(MSource.size(1)), storageType(0)
 {

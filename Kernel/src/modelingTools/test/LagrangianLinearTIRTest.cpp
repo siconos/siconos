@@ -33,54 +33,10 @@ void LagrangianLinearTIRTest::setUp()
   F.reset(new SimpleMatrix("matF.dat", true));
   e.reset(new SiconosVector(1));
   (*e)(0) = 0.1;
-  // parse xml file:
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  doc = xmlParseFile("LagrangianLinearTIR_test.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
-  // get rootNode
-
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-
-  // look for NSDS, Interaction and relation node
-  xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  SP::NonSmoothDynamicalSystemXML nsdsxml(new NonSmoothDynamicalSystemXML(nodetmp));
-  nsds.reset(new NonSmoothDynamicalSystem(nsdsxml));
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Definition");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
-
-  // get relation
-  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianRelation");
-  tmpxml1.reset(new LinearRXML(node1));
-
 }
 
 void LagrangianLinearTIRTest::tearDown()
 {}
-
-// xml constructor
-void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR0()
-{
-  std::cout << "==========================================" <<std::endl;
-  std::cout << "==== LagrangianLinearTIR tests start ...====" <<std::endl;
-  std::cout << "==========================================" <<std::endl;
-  SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(tmpxml1));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR0 : ", folr->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR0 : ", folr->getSubType() == RELATION::LinearTIR, true);
-  std::cout << "--> Constructor xml test ended with success." <<std::endl;
-}
 
 // data constructor (1)
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1()
@@ -124,27 +80,6 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR4d : ", folr->getSubType() == RELATION::LinearTIR, true);
   std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
-
-// // data constructor (5)
-// void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR5()
-// {
-//   std::cout << "--> Test: constructor 5: obsolet" <<std::endl;
-// //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*D,*F,*e));
-// //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5f : ", folr->getType()==RELATION::Lagrangian, true);
-// //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5g : ", folr->getSubType()==RELATION::LinearTIR, true);
-//    std::cout << "--> Constructor 5 test ended with success." <<std::endl;
-// }
-
-// // data constructor (6)
-// void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR6()
-// {
-//   std::cout << "--> Test: constructor 6: obsolet" <<std::endl;
-// //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*e));
-// //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6f : ", folr->getType()==RELATION::Lagrangian, true);
-// //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6g : ", folr->getSubType()==RELATION::LinearTIR, true);
-//   std::cout << "--> Constructor 5 test ended with success." <<std::endl;
-// }
-
 // set C as a matrix and then plug it
 
 

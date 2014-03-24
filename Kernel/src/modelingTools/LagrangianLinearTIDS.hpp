@@ -96,11 +96,6 @@ protected:
 
 public:
 
-  /** constructor from an xml file
-   *  \param dsxml : the XML object for this DynamicalSystem
-   */
-  LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml);
-
   /** constructor from a set of data
    *  \param q0 initial coordinates of this DynamicalSystem
    *  \param v0 initial velocity of this DynamicalSystem
@@ -228,10 +223,6 @@ public:
   void computeJacobianRhsx(double t, bool isDup = false);
 
   // --- Miscellaneous ---
-
-  /** copy the data of the DS into the XML tree
-   */
-  void saveSpecificDataToXML();
 
   /** print the data onto the screen
    */

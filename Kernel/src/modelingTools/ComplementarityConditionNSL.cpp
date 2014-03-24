@@ -22,10 +22,6 @@
 ComplementarityConditionNSL::ComplementarityConditionNSL(unsigned int size): NonSmoothLaw(size)
 {}
 
-ComplementarityConditionNSL::ComplementarityConditionNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(nslawxml)
-{}
-
 ComplementarityConditionNSL::~ComplementarityConditionNSL()
 {}
 

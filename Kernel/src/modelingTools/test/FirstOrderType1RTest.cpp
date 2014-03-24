@@ -17,8 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-// \Warning these tests are not complete: add xml constructor.
-
 #include "Interaction.hpp"
 #include "FirstOrderType1RTest.hpp"
 #include "SSLH.hpp"
@@ -74,55 +72,6 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R2()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ", R2->getJachName(0)=="TestPlugin:Jh0T1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2g : ", R2->getJacgName(0)=="TestPlugin:Jg0T1", true);
   std::cout << "--> Constructor2 test ended with success." <<std::endl;
-}
-
-// xml constructor
-void FirstOrderType1RTest::testBuildFirstOrderType1R3()
-{
-  std::cout << "--> Test: constructor xml ." <<std::endl;
-  // parse xml file:
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  doc = xmlParseFile("FOT1R.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
-  // get rootNode
-  std::cout << "--> Constructor xml test ended with success." <<std::endl;
-
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-  std::cout << "--> Constructor xml test ended with success." <<std::endl;
-
-  // look for NSDS, Interaction and relation node
-  xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  SP::NonSmoothDynamicalSystemXML nsdsxml(new NonSmoothDynamicalSystemXML(nodetmp));
-  nsds.reset(new NonSmoothDynamicalSystem(nsdsxml));
-  std::cout << "--> Constructor xml test ended with success." <<std::endl;
-
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Definition");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
-
-  // get relation
-  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderRelation");
-  tmpxml1.reset(new RelationXML(node1));
-  SP::FirstOrderType1R R1(new FirstOrderType1R(tmpxml1));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3a : ", R1->getType() == RELATION::FirstOrder, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3b : ", R1->getSubType() == RELATION::Type1R, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3c : ", R1->gethName()=="TestPlugin:hT1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3d : ", R1->getgName()=="TestPlugin:gT1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3e : ", R1->getJachName(0)=="TestPlugin:Jh0T1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3g : ", R1->getJacgName(0)=="TestPlugin:Jg0T1", true);
-  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 }
 
 void FirstOrderType1RTest::End()

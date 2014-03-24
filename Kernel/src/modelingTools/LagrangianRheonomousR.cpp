@@ -20,7 +20,6 @@
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianRheonomousR.hpp"
-#include "RelationXML.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
@@ -32,34 +31,6 @@
 
 
 using namespace RELATION;
-
-// xml constructor
-LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR(LRxml, RheonomousR)
-{
-  zeroPlugin();
-  // h plug-in
-  if (!LRxml->hasH())
-    RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for h.");
-  setComputehFunction(SSLH::getPluginName(LRxml->gethPlugin()), SSLH::getPluginFunctionName(LRxml->gethPlugin()));
-
-  // Read hDot
-  if (!LRxml->hasHDot())
-    RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for hDot.");
-  if (LRxml->isHDotPlugin())
-  {
-    //    hDot.reset(new PVT2(LRxml->gethDotPlugin()));
-    _pluginhDot->setComputeFunction(SSLH::getPluginName(LRxml->gethDotPlugin()), SSLH::getPluginFunctionName(LRxml->gethDotPlugin()));
-  }
-  else
-    _hDot.reset(new SiconosVector(LRxml->gethDotVector()));
-
-  if (!LRxml->hasJacobianH())
-    RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for G0.");
-  if (LRxml->isJacobianHPlugin(0))
-    _pluginJachq->setComputeFunction(LRxml->getJacobianHPlugin(0));
-  else
-    _jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
-}
 
 // constructor from a set of data
 LagrangianRheonomousR::LagrangianRheonomousR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginDoth):

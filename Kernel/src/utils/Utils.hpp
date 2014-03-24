@@ -30,7 +30,6 @@
 
 #include "RuntimeException.hpp"
 #include "SiconosMatrixException.hpp"
-#include "XMLException.hpp"
 #include "SiconosVectorException.hpp"
 
 #include "SiconosMemory.hpp"

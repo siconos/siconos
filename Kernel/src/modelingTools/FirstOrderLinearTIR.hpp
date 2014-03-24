@@ -63,11 +63,6 @@ public:
   */
   FirstOrderLinearTIR();
 
-  /** constructor with XML object of the parent class Relation
-  *  \param relxml the XML corresponding object
-  */
-  FirstOrderLinearTIR(SP::RelationXML relxml);
-
   /** create the Relation from a set of data
   *  \param C the matrix C
   *  \param B the matrix B
@@ -201,10 +196,6 @@ public:
   {
     _jacglambda = newPtr;
   }
-
-  /** copy the data of the Relation to the XML tree
-  */
-  void saveRelationToXML() const;
 
   /** print the data to the screen
   */

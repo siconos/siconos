@@ -422,11 +422,6 @@ void NewtonEulerDS::computeJacobianqDotForces(double time)
 //    RuntimeException::selfThrow("NewtonEulerDS::computeJacobianZFL - not implemented");
 // }
 
-void NewtonEulerDS::saveSpecificDataToXML()
-{
-
-}
-
 void NewtonEulerDS::display() const
 {
   std::cout << "=====> NewtonEuler System display (number: " << _number << ")." <<std::endl;

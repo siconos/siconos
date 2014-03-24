@@ -19,7 +19,6 @@
 #include "SiconosMemory.hpp"
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosMemoryXML.hpp"
 
 
 
@@ -37,27 +36,6 @@ SiconosMemory::SiconosMemory(const unsigned int size, const unsigned int vectorS
   {
     (*_vectorMemory)[i].reset(new SiconosVector(vectorSize));
   }
-}
-
-// from xml file + optional value of _size
-SiconosMemory::SiconosMemory(SP::SiconosMemoryXML memXML):
-  _size(0), _nbVectorsInMemory(0), _memoryXML(memXML)
-{
-
-  if (!_memoryXML)
-    SiconosMemoryException::selfThrow("SiconosMemory, xml constructor: xml file==NULL");
-
-  _size = _memoryXML->getSiconosMemorySize();
-  _vectorMemory.reset(new MemoryContainer);
-  _vectorMemory->resize(_size);
-
-  if (!_memoryXML->hasMemory())
-    SiconosMemoryException::selfThrow("SiconosMemory, xml constructor: no memory node found.");
-
-  // get memory from xml file
-  _vectorMemory =  _memoryXML->getSiconosMemoryVector();
-  _nbVectorsInMemory = _vectorMemory->size();
-  _indx = _size-1;
 }
 
 // copy of a std::vector of siconos vectors
@@ -105,9 +83,6 @@ SiconosMemory::SiconosMemory(const SiconosMemory& Mem)
   {
     (*_vectorMemory)[i].reset(new SiconosVector(*VtoCopy[i]));
   }
-  // this was not always initialised
-  if (Mem.getSiconosMemoryXML())
-    _memoryXML.reset(new SiconosMemoryXML(*(Mem.getSiconosMemoryXML())));
 
 }
 
@@ -161,10 +136,4 @@ void SiconosMemory::display() const
     (*_vectorMemory)[i]->display();
   }
   std::cout << " ===================================== " <<std::endl;
-}
-
-void SiconosMemory::saveMemorySizeToXML()
-{
-  if (_memoryXML) _memoryXML->setSiconosMemorySize(_size);
-  else SiconosMemoryException::selfThrow("SiconosMemory::saveMemorySizeToXML() - _memoryXML object == NULL");
 }

@@ -25,7 +25,6 @@
 
 #include "LinearOSNS.hpp"
 TYPEDEF_SPTR(LinearComplementarityProblem)
-class OneStepNSProblemXML;
 
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  
@@ -64,11 +63,6 @@ protected:
   SP::LinearComplementarityProblem _numerics_problem;
 
 public:
-
-  /** xml constructor
-   *  \param SP::OneStepNSProblemXML : the XML linked-object
-   */
-  LCP(SP::OneStepNSProblemXML onestepnspbxml);
 
   /** Constructor with Numerics solver id (default = Lemke)
       \param int id of numerics solver

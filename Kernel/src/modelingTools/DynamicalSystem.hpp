@@ -120,11 +120,7 @@ typedef void (*FPtr6)(double, unsigned int, double*, double*, double*, unsigned 
    - A VectorOfVectors, x, is used to saved the state: x[0]=\f$ x \f$
      and x[1]=\f$ \dot x \f$ = right-hand side.
 
-   - number is set automatically using count static variable except in
-     the case of XML loading, where number is read in the xml file,
-     because it's to be given explicitely by user to set the list of
-     DS in the Interactions.
-
+   - number is set automatically using count static variable except
    Warning:
 
    - At the time, nothing is implemented in simulation to proceed with
@@ -234,9 +230,6 @@ protected:
    * No get-set functions at the time. Only used as a protected member.*/
   VectorOfSimpleMatrices _workMatrix;
 
-  /** the XML object linked to the DynamicalSystem  */
-  SP::DynamicalSystemXML _dsxml;
-
   // ===== CONSTRUCTORS =====
 
   /** default constructors/destructor
@@ -249,14 +242,6 @@ protected:
 //  SP::SiconosVector _workFree;
 
 public:
-
-  /*! @name Constructors */
-  //@{
-
-  /** xml constructor
-   *  \param dsXML DynamicalSystemXML* : the XML object for this DynamicalSystem
-   */
-  DynamicalSystem(SP::DynamicalSystemXML dsXML);
 
   /** constructor from a set of data
    *  \param newN int : size of the system (n)
@@ -605,24 +590,6 @@ public:
     _stepsInMemory = steps;
   }
 
-  // --- dsxml ---
-
-  /** get the object DynamicalSystemXML of the DynamicalSystem
-   *  \return a pointer on the DynamicalSystemXML of the DynamicalSystem
-   */
-  inline const SP::DynamicalSystemXML dynamicalSystemXML() const
-  {
-    return _dsxml;
-  }
-
-  /** set the DynamicalSystemXML of the DynamicalSystem
-   *  \param newDsxml DynamicalSystemXML* dsxml : the address of theDynamicalSystemXML to set
-   */
-  inline void setDynamicalSystemXMLPtr(SP::DynamicalSystemXML newDsxml)
-  {
-    _dsxml = newDsxml;
-  }
-
   // ===== WORK VECTOR =====
 
   /** get the vector of temporary saved vector
@@ -803,17 +770,6 @@ public:
    */
   virtual void computeJacobianRhsx(double time , bool isDSup = false) = 0;
 
-  //@}
-
-  /*! @name XML */
-  //@{
-  /** copy the data of the DS into the XML tree
-   */
-  virtual void saveDSToXML();
-
-  /** copy the data specific to each system into the XML tree
-   */
-  virtual void saveSpecificDataToXML() = 0;
   //@}
 
   // ===== MISCELLANEOUS ====

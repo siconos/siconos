@@ -39,59 +39,10 @@ void FirstOrderLinearRTest::setUp()
   //   Fp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:F"));
   //  ep.reset(new Plugged_Vector_FTime("TestPlugin:e"));
   (*e)(0) = 0.1;
-  // parse xml file:
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  doc = xmlParseFile("firstOrderLinearR_test.xml");
-  if (!doc)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur = xmlDocGetRootElement(doc);
-  if (!cur)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc);
-  }
-  // get rootNode
-
-  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc);
-  }
-
-  // look for NSDS, Interaction and relation node
-  xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  SP::NonSmoothDynamicalSystemXML nsdsxml(new NonSmoothDynamicalSystemXML(nodetmp));
-  nsds.reset(new NonSmoothDynamicalSystem(nsdsxml));
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Definition");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
-  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
-
-  // get relation
-  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderRelation");
-  tmpxml1.reset(new LinearRXML(node1));
-
 }
 
 void FirstOrderLinearRTest::tearDown()
 {}
-
-// xml constructor
-void FirstOrderLinearRTest::testBuildFirstOrderLinearR0()
-{
-  std::cout << "==========================================" <<std::endl;
-  std::cout << "==== FirstOrderLinearR tests start ...====" <<std::endl;
-  std::cout << "==========================================" <<std::endl;
-  SP::FirstOrderLinearR folr(new FirstOrderLinearR(tmpxml1));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->getType() == RELATION::FirstOrder, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->getSubType() == RELATION::LinearR, true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->C()->getPluginName()=="TestPlugin:C", true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->D()->getPluginName()=="TestPlugin:D", true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->F()->getPluginName()=="TestPlugin:F", true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->e()->getPluginName()=="TestPlugin:e", true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->B()->getPluginName()=="TestPlugin:B", true);
-  std::cout << "--> Constructor xml test ended with success." <<std::endl;
-}
 
 // data constructor (1)
 void FirstOrderLinearRTest::testBuildFirstOrderLinearR1()

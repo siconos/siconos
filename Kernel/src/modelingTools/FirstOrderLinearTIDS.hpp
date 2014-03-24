@@ -74,11 +74,6 @@ public:
 
   /** === CONSTRUCTORS/DESTRUCTOR === */
 
-  /** xml constructor
-   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-   */
-  FirstOrderLinearTIDS(SP::DynamicalSystemXML);
-
   /** constructor from a set of data
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix: A

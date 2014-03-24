@@ -20,11 +20,8 @@
 #define __LagrangianLinearTIRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "RelationXML.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NonSmoothDynamicalSystemXML.hpp"
 #include "LagrangianLinearTIR.hpp"
-#include "LinearRXML.hpp"
 
 class LagrangianLinearTIRTest : public CppUnit::TestFixture
 {
@@ -40,8 +37,6 @@ private:
 
   // tests to be done ...
 
-  //CPPUNIT_TEST(testBuildLagrangianLinearTIR);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIR0);
   CPPUNIT_TEST(testBuildLagrangianLinearTIR1);
   CPPUNIT_TEST(testBuildLagrangianLinearTIR2);
   CPPUNIT_TEST(testBuildLagrangianLinearTIR3);
@@ -64,8 +59,7 @@ private:
   void testBuildLagrangianLinearTIR2();
   void testBuildLagrangianLinearTIR3();
   void testBuildLagrangianLinearTIR4();
-  //void testBuildLagrangianLinearTIR5();
-  //  void testBuildLagrangianLinearTIR6();
+
   void testSetCPtr();
   void testSetDPtr();
   void testSetFPtr();
@@ -77,8 +71,6 @@ private:
 
   SP::SiconosMatrix C, B, F, D;
   SP::SiconosVector e;
-  xmlNodePtr node1;
-  SP::RelationXML tmpxml1;
   SP::NonSmoothDynamicalSystem nsds;
 
 public:

@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "OneStepNSProblem.hpp"
-#include "OneStepNSProblemXML.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 //#include "Interaction.hpp"
 #include "Interaction.hpp"
@@ -52,28 +51,6 @@ OneStepNSProblem::OneStepNSProblem():
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 
-// xml constructor
-OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
-  _sizeOutput(0),
-  _onestepnspbxml(osnspbxml), _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
-{
-  if (!_onestepnspbxml)
-    RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
-
-  // === get dimension of the problem ===
-  if (_onestepnspbxml->hasDim())
-    _sizeOutput = _onestepnspbxml->getDimNSProblem();
-
-  // Numerics general options
-  _numerics_options.reset(new NumericsOptions());
-  setDefaultNumericsOptions(&*_numerics_options);
-  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
-
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
-  _numerics_solver_options->dWork = NULL;
-
-}
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
   _numerics_solver_id(numericsSolverId), _sizeOutput(0),
@@ -428,13 +405,6 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
     // initialize
     _maxSize = simulation()->model()->
                nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
-}
-
-void OneStepNSProblem::saveNSProblemToXML()
-{
-  // OUT OF DATE - TO BE REVIEWED
-
-  RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - Not yet implemented");
 }
 
 SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::DynamicalSystem ds)

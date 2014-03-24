@@ -17,56 +17,11 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderLinearDS.hpp"
-#include "FirstOrderLinearDSXML.hpp"
 //#include "Plugin.hpp"
 
 typedef void (*computeAfct)(double, unsigned int, unsigned int, double*, unsigned int, double*);
 
 // --- Constructors ---
-
-// From xml file
-FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
-  : FirstOrderNonLinearDS(dsXML)
-{
-
-  // pointer to xml
-  SP::FirstOrderLinearDSXML foldsxml = (std11::static_pointer_cast <FirstOrderLinearDSXML>(dsXML));
-  _pluginb.reset(new PluggedObject());
-  _pluginA.reset(new PluggedObject());
-
-  // Check if f is given as a plug-in in xml input file.
-  if (foldsxml->hasF() || foldsxml->hasJacobianfx())
-    RuntimeException::selfThrow("FirstOrderLinearDS - xml constructor, you give a f or its jacobian as a plug-in for a FirstOrderLinearDS -> set rather A and b plug-in.");
-
-  std::string plugin;
-  // A
-  if (foldsxml->hasA())
-  {
-    if (foldsxml->isAPlugin())
-    {
-      plugin = foldsxml->getAPlugin();
-      _A.reset(new SimpleMatrix(_n, _n));
-      setComputeAFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
-    }
-    else
-      _A.reset(new SimpleMatrix(foldsxml->getA()));
-  }
-
-  // b
-  if (foldsxml->hasB())
-  {
-    if (foldsxml->isBPlugin())
-    {
-      _b.reset(new SiconosVector(_n));
-      plugin = foldsxml->getBPlugin();
-      setComputebFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
-    }
-    else
-      _b.reset(new SiconosVector(foldsxml->getBVector()));
-  }
-
-  checkDynamicalSystem();
-}
 
 // From a minimum set of data, A and b connected to a plug-in
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::string& APlugin, const std::string& bPlugin):
@@ -282,22 +237,6 @@ void FirstOrderLinearDS::display() const
 {
   std::cout << "=== Linear system display, " << _number << std::endl;
   std::cout << "=============================" << std::endl;
-}
-
-void FirstOrderLinearDS::saveSpecificDataToXML()
-{
-  if (!_dsxml)
-    RuntimeException::selfThrow("FirstOrderLinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");
-  std11::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setA(*_A);
-
-  // b
-  if (_b)
-  {
-    if (!(std11::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml))->isBPlugin())
-      std11::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setB(*_b);
-  }
-
-  else RuntimeException::selfThrow("FirstOrderLinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");
 }
 
 void FirstOrderLinearDS::computef(double time)

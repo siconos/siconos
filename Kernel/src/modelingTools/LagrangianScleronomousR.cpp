@@ -20,7 +20,6 @@
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianScleronomousR.hpp"
-#include "RelationXML.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
@@ -33,28 +32,6 @@
 
 
 using namespace RELATION;
-
-// xml constructor
-LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): LagrangianR(LRxml, ScleronomousR)
-{
-  zeroPlugin();
-  // h plug-in
-  if (!LRxml->hasH())
-    RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for h.");
-
-  setComputehFunction(SSLH::getPluginName(LRxml->gethPlugin()), SSLH::getPluginFunctionName(LRxml->gethPlugin()));
-
-  if (!LRxml->hasJacobianH())
-    RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for Jach0.");
-  //  LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(Jach[0], LRxml, 0);
-  if (LRxml->isJacobianHPlugin(0))
-  {
-    _pluginJachq->setComputeFunction(LRxml->getJacobianHPlugin(0));
-  }
-  else
-    _jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
-
-}
 
 // constructor from a set of data
 LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacobianhq):

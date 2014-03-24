@@ -383,10 +383,6 @@ public:
    */
   virtual void updateState(const unsigned int level);
 
-  /** copy the matrix W of the OneStepNSProblem to the XML tree
-   */
-  void saveWToXML();
-
   /** Displays the data of the EulerMoreauOSI's integrator
    */
   void display();

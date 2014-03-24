@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "LinearOSNS.hpp"
-#include "OneStepNSProblemXML.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "Model.hpp"
@@ -48,15 +47,6 @@ using namespace RELATION;
 
 LinearOSNS::LinearOSNS(): OneStepNSProblem(), _MStorageType(0), _keepLambdaAndYState(true)
 {}
-
-// xml constructor
-LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml):
-  OneStepNSProblem(onestepnspbxml), _MStorageType(0), _keepLambdaAndYState(true)
-{
-  // Read storage type if given (optional , default = dense)
-  if (onestepnspbxml->hasStorageType())
-    _MStorageType = onestepnspbxml->getStorageType();
-}
 
 // Constructor from a set of data
 LinearOSNS::LinearOSNS(const int numericsSolverId):
@@ -719,15 +709,3 @@ void LinearOSNS::display() const
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "==========================" <<std::endl;
 }
-
-void LinearOSNS::saveNSProblemToXML()
-{
-  //   if(onestepnspbxml != NULL)
-  //     {
-  // //       (std11::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setM(*_M);
-  //       (std11::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setQ(*q);
-  //     }
-  //   else RuntimeException::selfThrow("LinearOSNS::saveNSProblemToXML - OneStepNSProblemXML object not exists");
-  RuntimeException::selfThrow("LinearOSNS::saveNSProblemToXML - Not yet implemented.");
-}
-

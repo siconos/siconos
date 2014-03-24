@@ -20,10 +20,8 @@
 #define __FirstOrderNonLinearDSTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "FirstOrderNonLinearDSXML.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 #include "RuntimeException.hpp"
-#include "XMLException.hpp"
 
 class FirstOrderNonLinearDSTest : public CppUnit::TestFixture
 {
@@ -77,8 +75,6 @@ private:
 
   SP::SiconosVector x0;
   SP::SiconosMatrix J0, M;
-  xmlNodePtr node1, node2;
-  SP::FirstOrderNonLinearDSXML tmpxml1, tmpxml2;
 public:
   void setUp();
   void tearDown();

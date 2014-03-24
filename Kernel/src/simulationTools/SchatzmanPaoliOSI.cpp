@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "SchatzmanPaoliOSI.hpp"
-//#include "SchatzmanPaoliOSIXML.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"

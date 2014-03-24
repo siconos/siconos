@@ -29,53 +29,6 @@ TimeDiscretisation::TimeDiscretisation()
   mpf_init(_t0gmp);
 }
 
-// IO Constructors -> XML
-TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t0, double T):
-  _h(0.0), _timeDiscretisationXML(tdXML), _t0(t0)
-{
-  mpf_init(_hgmp);
-  mpf_init(_tkp1); 
-  mpf_init(_tk); 
-  mpf_init(_t0gmp);
-  
-  if (!_timeDiscretisationXML)
-    RuntimeException::selfThrow("TimeDiscretisation: xml constructor - TimeDiscretisationXML = NULL");
-
-  // XML inputs: 3 possibilities
-  //  - vector input for tk
-  //  - input for h
-
-  // --- Check what are the given data ---
-  bool hasNSteps = _timeDiscretisationXML->hasN();
-  bool hasH = _timeDiscretisationXML->hasH();
-  bool hasTk = _timeDiscretisationXML->hasTk();
-
-  // Eliminate cases with too many inputs
-  if ((hasTk && hasH) || (hasTk && hasNSteps) || (hasH && hasNSteps))
-    RuntimeException::selfThrow("TimeDiscretisation: xml constructor - Too many input data, some of them are useless.");
-
-  // --- Read the data ---
-  if (hasH) // T is useless
-  {
-    _h = _timeDiscretisationXML->geth();
-  }
-  else if (hasNSteps) // t0 and T are required
-  {
-    unsigned int nSteps = _timeDiscretisationXML->getN();
-    assert(T > t0 && "TimeDiscretisation xml constructor error: final time is less or equal to initial time.");
-    _h = (T - t0) / nSteps;
-  }
-  else if (hasTk) // neither t0 nor T is required.
-  {
-    // Read tk
-    _timeDiscretisationXML->getTk(_tkV);
-    _h = _tkV[1] - _tkV[0];
-  }
-  else
-    RuntimeException::selfThrow("TimeDiscretisation: xml constructor - No input data.");
-
-}
-
 // --- Straightforward constructors ---
 
 TimeDiscretisation::TimeDiscretisation(const TkVector& tk):
@@ -143,8 +96,6 @@ TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
   }
   _t0 = td.getT0();
   _tkV = td.getTkVector();
-  if (td.timeDiscretisationXML())
-    _timeDiscretisationXML.reset(new TimeDiscretisationXML(*(td.timeDiscretisationXML())));
 }
 
 
@@ -219,18 +170,3 @@ void TimeDiscretisation::display() const
   std::cout << " the current timestep is " << _h << std::endl;
   std::cout << "====" <<std::endl;
 }
-
-// --- XML functions ---
-
-void TimeDiscretisation::saveTimeDiscretisationToXML()
-{
-  RuntimeException::selfThrow("TimeDiscretisation::saveTimeDiscretisationToXML -Not yet properly implemented");
-
-  if (_timeDiscretisationXML)
-  {
-    _timeDiscretisationXML->setH(_h);
-    //_timeDiscretisationXML->setTkNode(*tk);
-  }
-  else RuntimeException::selfThrow("TimeDiscretisation::saveTimeDiscretisationToXML - TimeDiscretisationXML object not exists");
-}
-

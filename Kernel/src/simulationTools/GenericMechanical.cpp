@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "GenericMechanical.hpp"
-#include "FrictionContactXML.hpp"
 #include "Topology.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
