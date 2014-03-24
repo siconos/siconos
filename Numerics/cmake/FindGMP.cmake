@@ -10,7 +10,7 @@
 #
 # Note FP : see http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
 INCLUDE(FindPackageHandleStandardArgs)
-
+find_package(PkgConfig)
 include(LibFindMacros)
 
 # Use pkg-config to get hints about paths
