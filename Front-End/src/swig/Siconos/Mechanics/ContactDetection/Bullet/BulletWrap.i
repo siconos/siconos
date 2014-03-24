@@ -254,9 +254,9 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
     int num_vertices = array_size(points,0);
 
     btTriangleIndexVertexArray* index =
-      new btTriangleIndexVertexArray(num_triangles, (int *) &array_data(indices)[0],
+      new btTriangleIndexVertexArray(num_triangles, (int *) array_data(indices),
                                      3 * sizeof(int),
-                                     num_vertices, (btScalar *) &array_data(points)[0],
+                                     num_vertices, (btScalar *) array_data(points),
                                      3 * sizeof(btScalar));
 
      // python mem management
