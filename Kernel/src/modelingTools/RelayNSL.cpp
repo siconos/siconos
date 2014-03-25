@@ -19,6 +19,7 @@
 
 #include "RelayNSL.hpp"
 
+#include <iostream>
 
 // Default (private)
 RelayNSL::RelayNSL(): NonSmoothLaw(), _lb(-1.0), _ub(1.0)

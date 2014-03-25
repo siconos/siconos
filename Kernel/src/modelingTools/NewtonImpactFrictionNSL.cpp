@@ -18,6 +18,7 @@
 */
 #include "NewtonImpactFrictionNSL.hpp"
 
+#include <iostream>
 
 // Default (private)
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():

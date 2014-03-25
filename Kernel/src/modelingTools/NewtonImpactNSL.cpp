@@ -18,6 +18,7 @@
 */
 #include "NewtonImpactNSL.hpp"
 
+#include <iostream>
 
 NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), _e(0.0)
 {}
