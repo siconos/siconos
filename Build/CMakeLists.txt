@@ -33,7 +33,7 @@ include(ExternalProject)
 # the ';' are for the separation of each items : command and arguments.
 
 if(NOT INSTALL_COMMAND)
-  set(INSTALL_COMMAND sudo make install)
+  set(INSTALL_COMMAND sudo ${CMAKE_COMMAND} --build . --target install)
 endif()
 
 # default is HEAD
@@ -46,13 +46,14 @@ if(NOT GIT_REPOSITORY)
   set(GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/..)
 endif()
 
-option(FROM_REPO "Build Siconos from repository. Default = ON" ON)
+option(FROM_REPO "Build Siconos from repository. Default = OFF" OFF)
 option(WITH_KERNEL "Build Kernel. Default = ON" ON)
 option(WITH_MECHANICS "Build Mechanics. Default = off" OFF)
 option(WITH_IO "Build IO. Default = off" OFF)
 option(WITH_FRONTEND "Build FrontEnd. Default = ON" ON)
 option(WITH_EXAMPLES "Build Examples. Default = OFF" OFF) # not tested
-option(WITH_DOC "Build Doc. Default = OFF" OFF) # not yet...
+option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" OFF) # 
+option(ONLY_DOCUMENTATION "Build only the documentation. Default = OFF" OFF)
 option(WITH_TESTING "Build and run tests. Default = ON" ON)
 option(ON_DASHBOARD "Send results on a dasboard. Default = OFF" OFF)
 option(WITH_DEBUG "Debug mode. Default = OFF" OFF)
@@ -65,6 +66,12 @@ if(WITH_TESTING)
   list(APPEND ARGS -DWITH_TESTING=1)
 else()
   list(APPEND ARGS -DWITH_TESTING=0)
+endif()
+
+if(WITH_DOCUMENTATION)
+  list(APPEND ARGS -DWITH_DOCUMENTATION=1)
+else()
+  list(APPEND ARGS -DWITH_DOCUMENTATION=0)
 endif()
 
 if(INSTALL_PREFIX)
@@ -125,6 +132,7 @@ macro(AddSiconosProject)
   message(STATUS "Sources are in ${SOURCE_DIR}/${_project}")
   message(STATUS "Binaries are in ${CMAKE_BINARY_DIR}/${_project}")
 
+  # Note ONLY_DOCUMENTATION => without dashboard (need a cmake . -DON_DASHBOARD=0 before)
   if(ON_DASHBOARD)
     ExternalProject_Add(${_project}
       DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo "sources are in ${SOURCE_DIR}/${_project}"
@@ -150,13 +158,24 @@ macro(AddSiconosProject)
       TEST_BEFORE_INSTALL ${project_TEST_BEFORE_INSTALL}
       TEST_AFTER_INSTALL ${project_TEST_AFTER_INSTALL})
   else()
+    message(STATUS "configuring ${_project}")
+    if (WITH_DOCUMENTATION)
+      set(_build_target --target doc) # the effective build step is required by install
+    endif()
+    if (ONLY_DOCUMENTATION)
+      set(_install_command ${CMAKE_COMMAND} -E echo "documentation is installed under GeneratedDocs/")
+    else()
+      set(_install_command ${INSTALL_COMMAND})
+    endif()
     ExternalProject_Add(${_project}
       DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo "sources are in ${SOURCE_DIR}/${_project}"
+      BUILD_COMMAND  ${CMAKE_COMMAND} --build . ${_build_target}
       DEPENDS ${project_DEPENDS}
       SOURCE_DIR ${SOURCE_DIR}/${_project}
-      CMAKE_ARGS ${project_CMAKE_ARGS_sanitized}
+      BINARY_DIR ${CMAKE_BINARY_DIR}/${_project}
+      CMAKE_ARGS ${project_CMAKE_ARGS}
       INSTALL_DIR ${INSTALL_PREFIX}
-      INSTALL_COMMAND ${INSTALL_COMMAND}
+      INSTALL_COMMAND ${_install_command}
       TEST_BEFORE_INSTALL ${WITH_TESTING})
   endif()
 
@@ -165,7 +184,14 @@ macro(AddSiconosProject)
     DEPENDEES configure
     DEPENDERS build
     ALWAYS 1)
+  
 endmacro()
+
+if(WITH_DOCUMENTATION)
+  # Add Docs module
+  AddSiconosProject(Docs CMAKE_ARGS ${ARGS})
+endif()
+
 
 AddSiconosProject(Numerics DEPENDS ${numerics_depends} CMAKE_ARGS ${ARGS})
 
