@@ -42,8 +42,8 @@ typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsign
  * x(t_0) = x_0
  * \f]
  * where
- *    - \f$ x \in R^{n} \f$ is the state.
- *    - \f$ M \in R^{n\times n}\f$ a "mass matrix"
+ *    - \f[ x \in R^{n} \f] is the state.
+ *    - \f$ M \in R^{n\times n} a "mass matrix"
  *    - \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
  *    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discrete state.
  *      For example, z may be used to set some perturbation parameters, or anything else.

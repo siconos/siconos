@@ -20,7 +20,9 @@
 //#include "Plugin.hpp"
 #include "PluginTypes.hpp"
 
-
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+#include "debug.h"
 
 // ===== CONSTRUCTORS =====
 
@@ -28,6 +30,10 @@
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   DynamicalSystem(newX0->size())
 {
+  DEBUG_PRINT("FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0)\n");
+  DEBUG_EXPR( newX0->display(););
+
+
   zeroPlugin();
   // == Initial conditions ==
   _x0 = newX0;
@@ -201,6 +207,11 @@ void FirstOrderNonLinearDS::updatePlugins(double time)
 
 void FirstOrderNonLinearDS::initialize(double time, unsigned int sizeOfMemory)
 {
+  DEBUG_PRINT("FirstOrderNonLinearDS::initialize(double time, unsigned int sizeOfMemory)" );
+  DEBUG_EXPR( _x0->display(););
+  DEBUG_EXPR( _x[0]->display(););
+
+
   // reset x to x0.
   *(_x[0]) = *_x0;
 
