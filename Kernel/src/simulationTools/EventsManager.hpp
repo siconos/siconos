@@ -30,7 +30,6 @@
 #include <iostream>
 #include <set>
 
-class Simulation;
 const unsigned long int GAPLIMIT_DEFAULT = 100;
 
 /** set of events, with an ordering based on Event time value (mpz_t) to compare Events */

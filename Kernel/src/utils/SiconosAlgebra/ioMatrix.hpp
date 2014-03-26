@@ -26,8 +26,7 @@
 #define __ioMatrix__
 
 #include <string>
-
-class SiconosMatrix;
+#include "SiconosFwd.hpp"
 
 /** io object specialization */
 

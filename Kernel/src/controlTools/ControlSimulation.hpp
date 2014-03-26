@@ -27,16 +27,7 @@
 #include "SiconosPointers.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
 #include "ControlTypeDef.hpp"
-
-#ifndef TimeStepping_H
-DEFINE_SPTR(TimeStepping)
-#endif
-#ifndef OneStepIntegrator_H
-//DEFINE_SPTR(OneStepIntegrator)
-#endif
-#ifndef ControlManager_H
-DEFINE_SPTR(ControlManager)
-#endif
+#include "SiconosControlFwd.hpp"
 
 class ControlSimulation : public std11::enable_shared_from_this<ControlSimulation>
 {
@@ -173,5 +164,4 @@ public:
   virtual void run();
 };
 
-DEFINE_SPTR(ControlSimulation)
 #endif // CONTROLDYNAMICALSYSTEM_H

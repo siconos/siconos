@@ -58,14 +58,11 @@ int main()
   int dimX = 1;
   SimpleMatrix * M = 0;
   SimpleMatrix * A = 0;
-  SiconosVector* X0 = 0;
   SiconosVector* As = 0;
   SiconosVector* mti = 0;
-  SiconosVector* xti = 0;
 
 
-  X0 = new SiconosVector(dimX);
-  xti = new SiconosVector(dimX);
+  SP::SiconosVector xti(new SiconosVector(dimX));
   xti->setValue(0, 0);
 
   int NBStep = (int) floor(sTf / sStep);
@@ -73,7 +70,7 @@ int main()
   //  NBStep = 3;
   //*****BUILD THE DYNAMIC SYSTEM
   SP::MyDS aDS ;
-  aDS.reset(new MyDS(*xti));
+  aDS.reset(new MyDS(xti));
 
   //******BUILD THE RELATION
   SimpleMatrix* C = 0;

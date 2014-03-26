@@ -23,7 +23,7 @@
 #define SensorEvent_H
 
 #include "Event.hpp"
-#include "Sensor.hpp"
+#include "SiconosControlFwd.hpp"
 
 /** Events when sensor data capture is done.
  *

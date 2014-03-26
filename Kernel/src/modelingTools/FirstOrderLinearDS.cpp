@@ -39,28 +39,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::strin
 
   checkDynamicalSystem();
 }
-FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::string& APlugin, const std::string& bPlugin):
-  FirstOrderNonLinearDS(createSPtrSiconosVector((SiconosVector&) newX0))
-{
-  //  SP::SiconosVector sp_aux = createSPtrSiconosVector ((SiconosVector&) newX0);
-  //  FirstOrderNonLinearDS::FirstOrderNonLinearDS();
-
-  _pluginb.reset(new PluggedObject());
-  _pluginA.reset(new PluggedObject());
-  _pluginA->setComputeFunction(APlugin);
-  _pluginb->setComputeFunction(bPlugin);
-
-  _f.reset(new SiconosVector(getDim()));
-  _A.reset(new SimpleMatrix(getDim(), getDim()));
-  _b.reset(new SiconosVector(getDim()));
-
-
-  checkDynamicalSystem();
-
-}
 
 // From a minimum set of data, A from a given matrix
-
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
   FirstOrderNonLinearDS(newX0)
 {

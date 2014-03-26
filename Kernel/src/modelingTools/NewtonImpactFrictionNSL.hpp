@@ -24,7 +24,6 @@
 #define NEWTONIMPACTFRICTIONNSLAW_H
 
 #include "NonSmoothLaw.hpp"
-class NonSmoothLaw;
 
 /** Newton Impact-Friction Non Smooth Law
  *

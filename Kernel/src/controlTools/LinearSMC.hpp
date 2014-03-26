@@ -81,5 +81,4 @@ public:
 
 
 };
-DEFINE_SPTR(LinearSMC)
 #endif

@@ -26,8 +26,6 @@
 #include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"
 
-class Simulation;
-class SiconosMatrix;
 
 const unsigned int ZOHSTEPSINMEMORY = 1;
 

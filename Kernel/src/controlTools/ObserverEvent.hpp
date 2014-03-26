@@ -23,7 +23,7 @@
 #define ObserverEvent_H
 
 #include "Event.hpp"
-#include "Observer.hpp"
+#include "SiconosControlFwd.hpp"
 
 /** Events when the observer updates the state estimate
  *

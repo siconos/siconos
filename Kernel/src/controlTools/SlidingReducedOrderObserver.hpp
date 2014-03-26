@@ -93,5 +93,4 @@ public:
   };
 
 };
-DEFINE_SPTR(SlidingReducedOrderObserver)
 #endif

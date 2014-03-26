@@ -1,6 +1,7 @@
 %{
 #include <SiconosPointers.hpp>
 #include <SiconosFwd.hpp>
+#include <SiconosControlFwd.hpp>
 %}
 #define SWIG_SHARED_PTR_NAMESPACE std11
 %include boost_shared_ptr.i
@@ -89,3 +90,4 @@
 
 %include SiconosPointers.hpp
 %include SiconosFwd.hpp
+%include <SiconosControlFwd.hpp>

@@ -29,12 +29,6 @@
 #include "CommonSMC.hpp"
 #include "OneStepIntegratorTypes.hpp"
 
-#ifndef FirstOrderLinearDS_H
-DEFINE_SPTR(FirstOrderLinearDS)
-#endif
-#ifndef EventDriven_H
-DEFINE_SPTR(EventDriven)
-#endif
 class LinearSMCOT2 : public CommonSMC
 {
 private:
@@ -103,5 +97,4 @@ public:
   virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
 };
-DEFINE_SPTR(LinearSMCOT2)
 #endif

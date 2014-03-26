@@ -33,10 +33,7 @@
 
 #include "SiconosAlgebraTypeDef.hpp"
 #include "ControlTypeDef.hpp"
-
-#ifndef TimeStepping_H
-DEFINE_SPTR(TimeStepping)
-#endif
+#include "SiconosControlFwd.hpp"
 
 /** Observers Base Class
 

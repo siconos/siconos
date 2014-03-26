@@ -25,7 +25,6 @@
 
 #include "LagrangianDS.hpp"
 
-class LagrangianDS;
 
 /** Lagrangian Linear Systems with time invariant coefficients - Derived from LagrangianDS
  *

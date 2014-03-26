@@ -23,7 +23,6 @@
 #define NEWTONEULERRELATION_H
 
 #include "Relation.hpp"
-class SimpleMatrix;
 
 /**Pointer to function - Plug-in utilities*/
 typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int, double*);

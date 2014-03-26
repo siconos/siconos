@@ -25,8 +25,6 @@
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
 
-class SimpleMatrix;
-class SiconosVector;
 
 /** Quadratic Problem
  *

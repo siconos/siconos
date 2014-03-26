@@ -62,5 +62,4 @@ public:
   };
 };
 
-DEFINE_SPTR(ControlFirstOrderLinearS)
 #endif // CONTROLFIRSTORDERLINEARS_H

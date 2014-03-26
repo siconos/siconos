@@ -27,13 +27,6 @@
 #include "Actuator.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
 
-#ifndef FirstOrderLinearDS_H
-DEFINE_SPTR(FirstOrderLinearDS)
-#endif
-#ifndef TimeStepping_H
-DEFINE_SPTR(TimeStepping)
-#endif
-
 class CommonSMC : public Actuator
 {
 private:
@@ -244,5 +237,4 @@ public:
   virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
 };
-DEFINE_SPTR(CommonSMC)
 #endif

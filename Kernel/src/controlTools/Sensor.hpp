@@ -32,7 +32,7 @@
 #include "SiconosAlgebraTypeDef.hpp"
 
 #include "ControlTypeDef.hpp"
-
+#include "SiconosControlFwd.hpp"
 /** A map that links a std::string to a pointer to SiconosVector. */
 //typedef std::map<std::string, SP::SiconosVector> VectorMap;
 

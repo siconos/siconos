@@ -28,7 +28,6 @@
 
 #include "NonSmoothLaw.hpp"
 
-class NonSmoothLaw;
 
 /** Equality NonSmoothLaw
  *

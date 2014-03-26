@@ -32,7 +32,6 @@
 #include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"
 
-class SiconosMatrix;
 /** D1MinusLinearOSI Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA

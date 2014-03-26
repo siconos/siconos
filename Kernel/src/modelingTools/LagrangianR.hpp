@@ -25,9 +25,6 @@
 #include "Relation.hpp"
 #include "Interaction.hpp"
 
-class DynamicalSystem;
-class SimpleMatrix;
-class SiconosVector;
 
 /**Pointer to function - Plug-in utilities*/
 typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int, double*);

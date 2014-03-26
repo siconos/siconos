@@ -54,44 +54,14 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
 
   checkDynamicalSystem();
 }
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0):
-  DynamicalSystem(newX0.size())
-{
-  zeroPlugin();
-  // == Initial conditions ==
-  _x0 = createSPtrSiconosVector((SiconosVector&)newX0);
-
-  // == Current state ==
-  // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
-  // x[0] initialized with x0.
-
-  _x[0].reset(new SiconosVector(*_x0));
-  _x[1].reset(new SiconosVector(_n));
-
-  //mG
-  _g_alpha.reset(new SiconosVector(_n));
-  _residur.reset(new SiconosVector(_n));
-  _xp.reset(new SiconosVector(getDim()));
-  _xq.reset(new SiconosVector(getDim()));
-  _workspace[free].reset(new SiconosVector(getDim()));
-  _fold.reset(new SiconosVector(getDim()));
-  _f.reset(new SiconosVector(_n));
-
-  // == r ==
-
-  _r.reset(new SiconosVector(_n));
-
-  checkDynamicalSystem();
-
-}
 
 // From a minimum set of data
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const std::string& fPlugin, const std::string& jacobianfxPlugin):
-  DynamicalSystem(newX0.size())
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0, const std::string& fPlugin, const std::string& jacobianfxPlugin):
+  DynamicalSystem(newX0->size())
 {
   zeroPlugin();
   // == Initial conditions ==
-  _x0.reset(new SiconosVector(newX0));
+  _x0 = newX0;
 
   // == Current state ==
   // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.

@@ -29,7 +29,6 @@
 #include <string>
 #include <map>
 
-class DynamicalSystem;
 
 /** Namespace for DynamicalSystem factory related objects. */
 namespace DynamicalSystemFactory

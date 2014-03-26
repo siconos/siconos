@@ -81,7 +81,7 @@ public:
   /** default constructor
    * \param the type of the system
    */
-  MyDS(const SiconosVector& x0);
+  MyDS(SP::SiconosVector x0);
 
 
   // ===== DESTRUCTOR =====

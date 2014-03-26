@@ -48,11 +48,11 @@ void FirstOrderLinearDSTest::tearDown()
 void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
 {
   std::cout << "--> Test: constructor 1." <<std::endl;
-  SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(*x0, "TestPlugin:computeA", "TestPlugin:computeb"));
+  SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(x0, "TestPlugin:computeA", "TestPlugin:computeb"));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1A : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1B : ", ds->getN() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1C : ", ds->getX0() == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1C : ", ds->x0() == x0, true);
 
   double time = 1.5;
   ds->initialize(time);

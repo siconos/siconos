@@ -26,7 +26,6 @@
 
 #include "SiconosFwd.hpp"
 
-class SiconosMatrix;
 
 namespace Siconos {
   namespace algebra {

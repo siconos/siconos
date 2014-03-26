@@ -33,6 +33,7 @@
 #include "SiconosAlgebraTypeDef.hpp"
 
 #include "ControlTypeDef.hpp"
+#include "SiconosControlFwd.hpp"
 
 /** Actuators Base Class
 

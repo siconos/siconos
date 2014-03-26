@@ -26,9 +26,8 @@
 #define __ioVector__
 
 #include <string>
-#include<iostream>
-
-class SiconosVector;
+#include <iostream>
+#include "SiconosFwd.hpp"
 
 
 namespace ioVector

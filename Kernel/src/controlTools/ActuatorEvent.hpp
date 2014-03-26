@@ -23,6 +23,7 @@
 #define ActuatorEvent_H
 
 #include "Event.hpp"
+#include "SiconosControlFwd.hpp"
 
 /** Events when sensor data capture is done.
  *

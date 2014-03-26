@@ -26,7 +26,6 @@
 
 #include "DynamicalSystem.hpp"
 
-class DynamicalSystem;
 
 typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
 
@@ -156,14 +155,13 @@ public:
       jacobian if you use a EventDriven scheme
   */
   FirstOrderNonLinearDS(SP::SiconosVector newX0);
-  FirstOrderNonLinearDS(const SiconosVector& newX0);
 
   /** constructor from a set of data
    *  \param newX0 initial state of this DynamicalSystem
    *  \param fPlugin plugin name for f of this DynamicalSystem
    *  \param jacobianfxPlugin plugin name for jacobianfx of this DynamicalSystem
    */
-  FirstOrderNonLinearDS(const SiconosVector& newX0, const std::string& fPlugin, const std::string& jacobianfxPlugin);
+  FirstOrderNonLinearDS(SP::SiconosVector newX0, const std::string& fPlugin, const std::string& jacobianfxPlugin);
 
   /** Copy consctructor
    * \param FONLDS the FirstOrderNonLinearDS to copy

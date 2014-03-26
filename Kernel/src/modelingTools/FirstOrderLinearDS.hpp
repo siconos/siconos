@@ -119,13 +119,6 @@ public:
 
   /** constructor from a set of data
    *  \param newX0 the initial state of this DynamicalSystem
-   *  \param APlugin plugin for A
-   *  \param bPlugin plugin for b
-   */
-  FirstOrderLinearDS(const SiconosVector& newX0, const std::string& APlugin, const std::string& bPlugin);
-
-  /** constructor from a set of data
-   *  \param newX0 the initial state of this DynamicalSystem
    *  \param newA matrix A
    */
   FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA);

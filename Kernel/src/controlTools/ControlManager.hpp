@@ -26,11 +26,6 @@
 
 #include "Actuator.hpp"
 
-class Actuator;
-class Observer;
-class Sensor;
-class Simulation;
-class TimeDiscretisation;
 
 #include <set>
 
@@ -282,5 +277,4 @@ public:
 
 
 };
-DEFINE_SPTR(ControlManager)
 #endif

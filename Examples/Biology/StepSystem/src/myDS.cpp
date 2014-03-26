@@ -20,7 +20,7 @@
 
 #define SICONOS_DEBUG
 
-MyDS::MyDS(const SiconosVector& x0): FirstOrderNonLinearDS(x0)
+MyDS::MyDS(SP::SiconosVector x0): FirstOrderNonLinearDS(x0)
 {
   _jacobianfx.reset(new SimpleMatrix(2, 2));
   _f.reset(new SiconosVector(2));

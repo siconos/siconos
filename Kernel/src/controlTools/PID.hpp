@@ -107,5 +107,4 @@ public:
   virtual void display() const;
 
 };
-DEFINE_SPTR(PID)
 #endif

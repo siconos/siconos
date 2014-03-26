@@ -29,7 +29,6 @@
 #include<vector>
 const doublereal ATOL_DEFAULT = 100 * MACHINE_PREC;
 const doublereal RTOL_DEFAULT = 10 * MACHINE_PREC;
-class BlockVector;
 
 /** LsodarOSI solver (odepack)
  *

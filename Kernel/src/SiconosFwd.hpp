@@ -43,6 +43,7 @@ DEFINE_SPTR(Relation)
 
 DEFINE_SPTR(Simulation)
 DEFINE_SPTR(EventDriven)
+DEFINE_SPTR(TimeStepping)
 DEFINE_SPTR(EventsManager)
 
 DEFINE_SPTR(RelayNSL)

@@ -30,7 +30,6 @@
 
 #include "SiconosPointers.hpp"
 
-class NonSmoothLaw;
 
 /** Complementarity NonSmoothLaw
  *

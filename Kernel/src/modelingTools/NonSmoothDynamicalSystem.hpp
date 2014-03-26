@@ -25,9 +25,6 @@
 #include "SiconosPointers.hpp"
 #include "DynamicalSystemsSet.hpp"
 #include "Topology.hpp"
-class Interaction;
-class DynamicalSystem;
-class Topology;
 
 
 /** the Non Smooth Dynamical System consists of DynamicalDystem

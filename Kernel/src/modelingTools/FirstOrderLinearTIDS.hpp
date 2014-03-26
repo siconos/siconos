@@ -24,7 +24,6 @@
 
 #include "FirstOrderLinearDS.hpp"
 
-class FirstOrderLinearDS;
 
 /** First order linear systems - Inherits from DynamicalSystems
  *

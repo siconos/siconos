@@ -28,7 +28,6 @@
 #include<vector>
 const doublereal HEM5_ATOL_DEFAULT = 100 * MACHINE_PREC;
 const doublereal HEM5_RTOL_DEFAULT = 10 * MACHINE_PREC;
-class BlockVector;
 
 /** Hem5OSI solver (odepack)
  *

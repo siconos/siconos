@@ -27,10 +27,6 @@
 #include "RelationNamespace.hpp"
 #include "SiconosVisitor.hpp"
 
-class SiconosVector;
-class SimpleMatrix;
-class Interaction;
-class PluggedObject;
 
 /** General Non Linear Relation (Virtual Base class for Relations).
  *  \author SICONOS Development Team - copyright INRIA

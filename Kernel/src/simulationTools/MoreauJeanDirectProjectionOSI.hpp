@@ -27,8 +27,6 @@
 #include "MoreauJeanOSI.hpp"
 #include "SimpleMatrix.hpp"
 
-class Simulation;
-class SiconosMatrix;
 
 const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
 

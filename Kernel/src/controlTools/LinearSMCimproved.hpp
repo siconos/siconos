@@ -115,5 +115,4 @@ public:
    */
   void setPredictionOrder(unsigned int order);
 };
-DEFINE_SPTR(LinearSMCimproved)
 #endif

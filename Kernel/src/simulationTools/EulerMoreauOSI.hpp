@@ -24,8 +24,6 @@
 
 #include "OneStepIntegrator.hpp"
 
-class Simulation;
-class SiconosMatrix;
 
 const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
 

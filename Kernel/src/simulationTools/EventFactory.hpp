@@ -27,7 +27,6 @@
 # include "Event.hpp"
 # include <map>
 
-class Event;
 
 /** Namespace for Events factory related objects. */
 namespace EventFactory

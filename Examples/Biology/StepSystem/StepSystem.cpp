@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   char  filename[50] = "simu.";
 
 //***** Set the initial condition
-  SiconosVector* xti= new SiconosVector(dimX);
+  SP::SiconosVector xti(new SiconosVector(dimX));
   if (argc==1)
   {
     xti->setValue(0,1);
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 //*****BUILD THE DYNAMICAL SYSTEM
 
   SP::MyDS aDS ;
-  aDS.reset(new MyDS(*xti));
+  aDS.reset(new MyDS(xti));
 
   DynamicalSystemsSet  Inter_DS ;
   Inter_DS.insert(aDS);

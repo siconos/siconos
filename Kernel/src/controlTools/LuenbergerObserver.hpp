@@ -27,19 +27,6 @@
 #include "Observer.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
 
-#ifndef FirstOrderLinearDS_H
-DEFINE_SPTR(FirstOrderLinearDS)
-#endif
-#ifndef TimeStepping_H
-DEFINE_SPTR(TimeStepping)
-#endif
-#ifndef Relay_H
-DEFINE_SPTR(Relay)
-#endif
-#ifndef EventsManager_H
-DEFINE_SPTR(EventsManager)
-#endif
-
 class LuenbergerObserver : public Observer
 {
 private:
@@ -106,5 +93,4 @@ public:
   };
 
 };
-DEFINE_SPTR(LuenbergerObserver)
 #endif

@@ -49,9 +49,5 @@
 #define ACTUATOR_EVENT             5
 
 /** Base type forward declaration */
-DEFINE_SPTR(Actuator)
-DEFINE_SPTR(Sensor)
-DEFINE_SPTR(Observer)
-DEFINE_SPTR(ControlSensor)
 
 #endif

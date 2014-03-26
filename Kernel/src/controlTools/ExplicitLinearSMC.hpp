@@ -61,5 +61,4 @@ public:
   void actuate();
 
 };
-DEFINE_SPTR(ExplicitLinearSMC)
 #endif

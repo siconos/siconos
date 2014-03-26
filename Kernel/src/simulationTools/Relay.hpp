@@ -26,7 +26,6 @@
 #include "LinearOSNS.hpp"
 TYPEDEF_SPTR(RelayProblem)
 
-class Simulation;
 /** Formalization and Resolution of a Linear Complementarity Problem (Relay)
  
    \author SICONOS Development Team - copyright INRIA

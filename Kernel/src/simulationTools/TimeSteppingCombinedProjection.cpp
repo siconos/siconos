@@ -32,7 +32,6 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Topology.hpp"
 
-class MLCPProjectOnConstraints;
 
 
 
