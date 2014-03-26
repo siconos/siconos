@@ -38,6 +38,9 @@ namespace siconosBindings = boost::numeric::bindings::blas;
 #include "SiconosVector.hpp"
 #include "SiconosAlgebra.hpp"
 
+
+// Do not document
+/// @cond
 #include "Question.hpp"
 
 struct IsDense : public Question<bool>
@@ -86,6 +89,7 @@ struct IsBlock : public Question<bool>
   }
 };
 
+/// @endcond
 
 
 // =================================================

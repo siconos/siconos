@@ -1,5 +1,4 @@
 
-
 //
 //  Copyright (c) 2007
 //  Tsai, Dung-Bang	
@@ -39,6 +38,8 @@
 
 #ifndef _BOOST_UBLAS_EXPM_
 #define _BOOST_UBLAS_EXPM_
+/// @cond
+
 #include <complex>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -145,5 +146,5 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p 
 
 }}}
 
-
+/// @endcond
 #endif

@@ -1,5 +1,10 @@
+
+
+
 #ifndef BINDING_UTILS_HPP
 #define BINDING_UTILS_HPP
+
+/// @cond
 
 #include <stddef.h>
 #include <iostream>
@@ -9,7 +14,7 @@
 #include "random.hpp"
 
 /* \file binding_utils.hpp 
-   Some useful functions to handle ublas matrices and vectors.
+   \brief Some useful functions to handle ublas matrices and vectors.
    Source = boost bindings examples.
 */
 
@@ -266,4 +271,7 @@ namespace Siconos {
 
   } // Algebra namespace
 } // Siconos namespace
+
+/// @endcond
+
 #endif

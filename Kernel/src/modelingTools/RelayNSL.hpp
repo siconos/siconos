@@ -30,10 +30,10 @@
  *  \version 3.0.0.
  *  \date (Creation) Apr 27, 2004 (documentation) Nov 25, 2009
  *
- * This class formalizes the Relay nonsmmoth law  i.e.
+ * This class formalizes the Relay nonsmooth law  i.e.
  * \f[
  * \begin{array}{l}
- * -y \in N_{[lb,ub]}(\lambda),
+ * -y \in \mathcal{N}_{[lb,ub]}(\lambda),
  * \end{array}
  * \f]
  * where \f$lb\f$ is the lower bound and   \f$ub\f$ is the upper bound of the Relay law.
@@ -42,13 +42,13 @@
  * the multivalued sign function, i.e.
  * \f[
  * \begin{array}{l}
- * -y \in N_{[-1,1]}(\lambda)\quad\quad \Longleftrightarrow -\lambda \in \mbox{sgn} (y)
- * \end{array}\right.
+ * y \in -\mathcal{N}_{[-1,1]}(\lambda)\quad \Longleftrightarrow \quad\lambda \in -\mbox{sgn} (y)
+ * \end{array}
  * \f]
  * where the multi-valued sign function is defined as
  * \f[
  *  \mbox{sgn} (y) =
- *  \left\{\begin{array}{lcl}
+ *  \left\{ \begin{array}{lcl}
  *  1 &\quad& y >0 \\
  *  \,[-1,1] &\quad& y =0 \\
  *  -1 &\quad& y <0 \\
