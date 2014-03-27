@@ -1335,8 +1335,9 @@ void SpaceFilter::insert(SP::NonSmoothLaw nslaw,
 {
   NSLawMatrix& nslaws = *_nslaws;
 
-  nslaws.resize (std::max(nslaws.size1(), id1+1),
-                 std::max(nslaws.size2(), id2+1));
+  // ublas::matrix size type is not the same on 32 bits and 64 bits
+  nslaws.resize (std::max((unsigned int) nslaws.size1(), (unsigned int) id1+1),
+                 std::max((unsigned int) nslaws.size2(), (unsigned int) id2+1));
 
   nslaws(id1, id2) = nslaw;
 }
