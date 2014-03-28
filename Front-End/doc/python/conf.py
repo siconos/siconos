@@ -12,6 +12,7 @@
 # serve to show the default.
 
 import sys, os
+import glob
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -25,7 +26,22 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax', 'breathe']
+
+# DOXY_XML_DIR=/home/build/maurice/Release/Front-End/src/swig/Siconos/FrontEnd/xml make html
+build_dir = os.getenv('DOXY_XML_DIR')
+
+# breathe config
+breathe_projects = { "Siconos": os.path.join(build_dir, 'processed') }
+
+for fname in glob.glob(os.path.join(build_dir, '*.xml')):
+    bfname = os.path.basename(fname)
+    if not os.path.exists(os.path.join(build_dir,'processed',bfname)):
+        os.link(fname, os.path.join(build_dir,'processed',bfname))
+    
+
+breathe_default_project = "Siconos"
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

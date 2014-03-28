@@ -1,5 +1,5 @@
 Siconos.IO
 ==========
 
-.. automodule:: Siconos.IO
-   :members:
+.. doxygenfunction:: Siconos::save
+   :project: Siconos

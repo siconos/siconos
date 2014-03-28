@@ -33,8 +33,8 @@ We must also provide a solver options object::
 
 That object brings the decision to use a Lemke method. It also allows
 the manipulation of the different solver parameters such as the wanted
-precision. The ``integer`` parameters are in an ``iparam`` array and
-the ``double`` parameters are in a ``dparam`` array.
+precision. The ``integer`` option parameters are in an ``iparam`` array and
+the ``double`` option parameters are in a ``dparam`` array.
 
 For the Lemke method the default precision is the first element of ``SO.dparam`` array::
 
@@ -55,14 +55,28 @@ a correct solution for the asked precision::
   >>> w
   array([ 0.,  0.])
 
+
 We may then compute the error::
 
   d = Numerics.lcp_compute_error(lcp, z, w, 1e-6)
 
 
+.. doxygenstruct:: LinearComplementarityProblem
+   :project: Siconos
+
+
+The FrictionContactProblem
+--------------------------
+
+
+The MCP Problem
+---------------
+
+
+The MLCP Problem
+----------------
+
 
 API reference
 -------------
 
-.. automodule:: Siconos.Numerics
-   :members:
