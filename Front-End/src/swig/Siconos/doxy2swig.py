@@ -210,7 +210,7 @@ class Doxy2SWIG:
         kind = node.attributes['kind'].value
         if kind in ('class', 'struct'):
             prot = node.attributes['prot'].value
-            if prot is not 'public':
+            if prot != 'public':
                 return
             names = ('compoundname', 'briefdescription',
                      'detaileddescription', 'includes')
@@ -280,9 +280,9 @@ class Doxy2SWIG:
             if name[:8] == 'operator': # Don't handle operators yet.
                 return
 
-            if 'definition ' not in first or \
-                   kind in ['variable', 'typedef']:
-                return
+            #if 'definition ' not in first or \
+            #       kind in ['variable', 'typedef']:
+            #    return
 
             if self.include_function_definition:
                 defn = first['definition'].firstChild.data
