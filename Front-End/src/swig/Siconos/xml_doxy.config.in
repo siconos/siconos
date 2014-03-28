@@ -83,7 +83,9 @@ WARN_LOGFILE           =
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = @SiconosNumerics_INCLUDE_DIRS@ \
-                         @SiconosKernel_INCLUDE_DIRS@
+                         @SiconosKernel_INCLUDE_DIRS@ \
+                         @SiconosMechanics_INCLUDE_DIRS@ \
+                         @SiconosIO_INCLUDE_DIRS@
 FILE_PATTERNS          = *.h \
                          *.hpp
 RECURSIVE              = YES
