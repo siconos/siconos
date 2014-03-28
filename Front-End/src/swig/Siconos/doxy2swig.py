@@ -29,6 +29,7 @@ output will be written (the file will be clobbered).
 #
 ######################################################################
 
+import shlex
 from xml.dom import minidom
 import re
 import textwrap
@@ -69,6 +70,7 @@ class Doxy2SWIG:
 
         """
         f = my_open_read(src)
+        self.src = src
         self.my_dir = os.path.dirname(f.name)
         self.xmldoc = minidom.parse(f).documentElement
         f.close()
@@ -118,6 +120,7 @@ class Doxy2SWIG:
         txt = node.data
         txt = txt.replace('\\', r'\\\\')
         txt = txt.replace('"', r'\"')
+
         # ignore pure whitespace
         m = self.space_re.match(txt)
         if m and len(m.group()) == len(txt):
@@ -239,6 +242,7 @@ class Doxy2SWIG:
                 elif val == 'exception': text = 'Exceptions'
                 else: text = val
                 break
+
         self.add_text(['\n', '\n', text, ':', '\n'])
         self.generic_parse(node, pad=1)
 
@@ -273,7 +277,6 @@ class Doxy2SWIG:
         tmp = node.parentNode.parentNode.parentNode
         compdef = tmp.getElementsByTagName('compounddef')[0]
         cdef_kind = compdef.attributes['kind'].value
-        
         if prot == 'public':
             first = self.get_specific_nodes(node, ('definition', 'name'))
             name = first['name'].firstChild.data
@@ -286,6 +289,10 @@ class Doxy2SWIG:
 
             if self.include_function_definition:
                 defn = first['definition'].firstChild.data
+
+                # remove return type information
+                defn = '.'.join(shlex.split(defn)[-1].split('::'))
+                first['definition'].firstChild.data = defn
             else:
                 defn = ""
             self.add_text('\n')
@@ -355,7 +362,19 @@ class Doxy2SWIG:
             self.generic_parse(node)
 
     def do_argsstring(self, node):
-        self.generic_parse(node, pad=1)
+        args = node.firstChild.data
+        # remove chars after closing parent
+        a1 = args.split(')')[0]
+        a2 = [ shlex.split(a) for a in a1.split('(')[1].split(',') ]
+        a3 = []
+        for l in a2:
+            if len(l) > 0:
+                a3 += [ l[-1].strip('&*').replace('false','False').replace('true','True') ]
+            else:
+                a3 += [ '' ]
+        a4 = ','.join(a3)
+        node.firstChild.data = a4
+        self.add_text('({0})'.format(a4))
 
     def do_member(self, node):
         kind = node.attributes['kind'].value
@@ -424,8 +443,23 @@ class Doxy2SWIG:
 def convert(input, output, include_function_definition=True, quiet=False):
     p = Doxy2SWIG(input, include_function_definition, quiet)
     p.generate()
-    p.write(output)
+    dir_input = os.path.dirname(input)
+    pdir = os.path.join(dir_input,'processed')
 
+    try:
+        os.mkdir(pdir)
+    except:
+        pass
+    base_input = os.path.basename(input)
+
+    try:
+        with open(os.path.join(pdir,'{0}'.format(base_input)), 'w') as pxml_file:
+                pxml_file.write(p.xmldoc.toxml())
+                p.write(output)
+    except Exception as e:
+        print 'doxy2swig.py: {0}'.format(e)
+
+    
 def main():
     usage = __doc__
     parser = optparse.OptionParser(usage)
