@@ -117,10 +117,23 @@ class Doxy2SWIG:
         self.parse(node.documentElement)
 
     def parse_Text(self, node):
+
+        # replacements for swig docstrings and processed xml
         txt = node.data
+        txt = txt.replace('SP::', '')
+        txt = txt.replace('SA::', '')
+        txt = txt.replace('SPC::', '')
+        txt = txt.replace('std::', '')
+        txt = txt.replace('std11::', '')
+        txt = txt.replace('boost::', '')
+
+        # processed xml update
+        node.data = txt
+
+        # replacements for swig docstrings only
         txt = txt.replace('\\', r'\\\\')
         txt = txt.replace('"', r'\"')
-
+        
         # ignore pure whitespace
         m = self.space_re.match(txt)
         if m and len(m.group()) == len(txt):
@@ -399,9 +412,9 @@ class Doxy2SWIG:
     def write(self, fname):
         o = my_open_write(fname)
         if self.multi:
-            o.write("".join(self.pieces))
+            o.write("".join(self.pieces).encode('ascii', 'ignore').strip())
         else:
-            o.write("".join(self.clean_pieces(self.pieces)))
+            o.write("".join(self.clean_pieces(self.pieces)).encode('ascii', 'ignore').strip())
         o.close()
 
     def clean_pieces(self, pieces):
@@ -454,7 +467,7 @@ def convert(input, output, include_function_definition=True, quiet=False):
 
     try:
         with open(os.path.join(pdir,'{0}'.format(base_input)), 'w') as pxml_file:
-                pxml_file.write(p.xmldoc.toxml())
+                pxml_file.write(p.xmldoc.toxml().encode('ascii', 'ignore').strip())
                 p.write(output)
     except Exception as e:
         print 'doxy2swig.py: {0}'.format(e)

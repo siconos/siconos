@@ -32,16 +32,21 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.coverage',
 build_dir = os.getenv('DOXY_XML_DIR')
 
 # breathe config
-breathe_projects = { "Siconos": os.path.join(build_dir, 'processed') }
+breathe_projects = {"Siconos": os.path.join(build_dir, 'processed')}
 
 for fname in glob.glob(os.path.join(build_dir, '*.xml')):
-    bfname = os.path.basename(fname)
-    if not os.path.exists(os.path.join(build_dir,'processed',bfname)):
-        os.link(fname, os.path.join(build_dir,'processed',bfname))
-    
+   bfname = os.path.basename(fname)
+   pfilename = os.path.join(build_dir, 'processed', bfname)
+   try:
+       if os.stat(pfilename)[6] == 0:
+               os.remove(pfilename)
+   except:
+       pass
+   # produce pfilename
+   if not os.path.exists(pfilename):
+       os.system('../../src/swig/Siconos/doxy2swig.py {0} tmp.i'.format(fname))
 
 breathe_default_project = "Siconos"
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

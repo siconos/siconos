@@ -1,5 +1,5 @@
 Siconos.IO
 ==========
 
-.. doxygenfunction:: Siconos::save
+.. doxygenfile:: SiconosRestart.hpp
    :project: Siconos

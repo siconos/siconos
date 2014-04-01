@@ -11,6 +11,9 @@ The available ``Siconos Numerics`` data structures are :
 The LinearComplementarityProblem
 --------------------------------
 
+Usage
+^^^^^
+
 In ``Front-End`` the LinearComplementarityProblem of ``Numerics`` C
 API is renamed in ``LCP``.
 
@@ -61,9 +64,14 @@ We may then compute the error::
   d = Numerics.lcp_compute_error(lcp, z, w, 1e-6)
 
 
+API description
+^^^^^^^^^^^^^^^
+
 .. doxygenstruct:: LinearComplementarityProblem
    :project: Siconos
 
+.. doxygenfile:: LCP_Solvers.h
+   :project: Siconos
 
 The FrictionContactProblem
 --------------------------
