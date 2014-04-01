@@ -61,7 +61,7 @@ Topology::~Topology()
 }
 
 std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
-Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
+Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
   // !! Private function !!
   //
@@ -71,7 +71,7 @@ Topology::addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds
   unsigned int nsLawSize = inter->nonSmoothLaw()->size();
   unsigned int m = inter->getSizeOfY() / nsLawSize;
   if (m > 1)
-    RuntimeException::selfThrow("Topology::addInteractionInIndexSet - m > 1. Obsolete !");
+    RuntimeException::selfThrow("Topology::addInteractionInIndexSet0 - m > 1. Obsolete !");
 
   _numberOfConstraints += nsLawSize;
 
@@ -243,7 +243,7 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
 
   inter->setDSSizes(sumOfDSSizes, sumOfZSizes);
 
-  return addInteractionInIndexSet(inter, ds, ds2);
+  return addInteractionInIndexSet0(inter, ds, ds2);
 }
 
 bool Topology::hasInteraction(SP::Interaction inter) const

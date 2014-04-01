@@ -50,7 +50,7 @@
  *    - insertion of the relations of all the Interaction into indexSet0
  *
  * Insertion of an Interaction into the set indexSet0:
- * addInteractionInIndexSet(SP::Interaction inter) for each relation
+ * addInteractionInIndexSet0(SP::Interaction inter) for each relation
  * of the interaction, it creates a new Interaction and inserts it
  * into indexSet0 It also counts the total number of "constraints" in
  * the system.
@@ -103,7 +103,7 @@ private:
   \return a vertex descriptor of the new vertex in IndexSet0
   */
   std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
-  addInteractionInIndexSet(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+  addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
   /** remove the Interactions of the interactions from _IG and
    * _DSG
