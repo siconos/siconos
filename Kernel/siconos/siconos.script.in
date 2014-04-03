@@ -56,11 +56,11 @@ Options are:
  -a : to find and compile all sources files in YourExample.cpp
       directory.
 
- -build_dir <dir> : build is done in <dir>. Under /tmp, a temp
+ -build-dir <dir> : build is done in <dir>. Under /tmp, a temp
                     directory is created
 
  
- -clean_build : clean build directory.
+ -clean-build : clean build directory.
 
  -c | -clean : to clean the current directory (deletes binary files,
                etc.).
@@ -92,17 +92,17 @@ Options are:
                      etc.).
 
 
- -plugin_dir <plugin_directory> (default = plugin): create
+ -plugin-dir <plugin_directory> (default = plugin): create
     <plugin_directory>.so with plugin sources under
     <plugin_directory>.
 
  
- -plugins_dir <plugins_directory> (default = plugins): for each source
+ -plugins-dir <plugins_directory> (default = plugins): for each source
     file <name_src>.[c|f|cpp] under <plugins_directory> it creates a
     plugin <name_src>.so
 
 
- -src_dir <source_directory> (default = src): all sources files under
+ -src-dir <source_directory> (default = src): all sources files under
     <source_directory> (Warning: absolute path!!)  to the executable.
 
  -v : to print 'make' commands as they are executed.
@@ -124,7 +124,7 @@ cartridge
 if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     args=`getopt -n $myname -a \
  -o acghO:I:j:l:L:D:P:v \
- -l build_dir:,clean_build,clean,help,noexec,nocomp,src_dir:,opt:,ldopt:,plugin_dir:,plugins_dir: \
+ -l build-dir:,clean-build,clean,help,noexec,nocomp,src-dir:,opt:,ldopt:,plugin-dir:,plugins-dir: \
  -- "$@"`
     if test $? -ne 0; then
         usage
@@ -152,12 +152,12 @@ clean_build=false
 while test $# -gt 0 ; do
     case "$1" in
         -a) all_srcs=true;;
-        --build_dir) with_arg $@; shift;
+        --build-dir) with_arg $@; shift;
             case :$1 in 
                 :/tmp) tmp_directory=true; build_directory=$1;;
                 :*) build_directory=$1;;
             esac;;
-        --clean_build) clean_build=true;;
+        --clean-build) clean_build=true;;
         --clean|-c) make_args=clean; clean_build=true; exec=false;;
         -D) with_arg $@; shift; definitions="$definitions $1";;
         -g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
@@ -197,17 +197,17 @@ while test $# -gt 0 ; do
                 :*,:) linker_options=$1;;
                 :*,:*) linker_options="$linker_options;$1";;
             esac;;
-        --plugin_dir) with_arg $@; shift
+        --plugin-dir) with_arg $@; shift
             case :$1,:$plugin_directories in
                 :*,:) plugin_directories=$1;;
                 :*,:*) plugin_directories="$plugin_directories;$1";;
             esac;;
-        --plugins_dir) with_arg $@; shift
+        --plugins-dir) with_arg $@; shift
             case :$1,:$plugins_directories in
                 :*,:) plugins_directories=$1;;
                 :*,:*) plugins_directories="$plugins_directories;$1";;
             esac;;
-        --src_dir) with_arg $@; shift
+        --src-dir) with_arg $@; shift
             all_srcs=true
             case :$1,:$sources_directories in
                 :*,:) sources_directories=$1;;

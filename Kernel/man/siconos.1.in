@@ -9,11 +9,11 @@ siconos \- Siconos C++ Compilation.
 .B \-a
 ]
 [
-.B \-build_dir
+.B \-build-dir
 .I DIRECTORY
 ]
 [
-.B \-clean_build
+.B \-clean-build
 ]
 [
 .B \-clean
@@ -58,15 +58,15 @@ siconos \- Siconos C++ Compilation.
 .I PREFIX COMMAND
 ]
 [
-.B \-plugin_dir
+.B \-plugin-dir
 .I PLUGIN DIRECTORY
 ]
 [
-.B \-plugins_dir
+.B \-plugins-dir
 .I PLUGINS DIRECTORY
 ]
 [
-.B \-src_dir
+.B \-src-dir
 .I SOURCES DIRECTORY
 ]
 [
@@ -98,11 +98,11 @@ The following command-line options are recognized by
 .I sample.cpp
  directory.
 .TP
-.BI \-build_dir
+.BI \-build-dir
 .I DIRECTORY
  Compile inside specified directory. If /tmp, temp directories are created.
 .TP
-.BI \-clean_build
+.BI \-clean-build
  Clean build directory.
 .TP
 .BI \-clean
@@ -150,16 +150,16 @@ The following command-line options are recognized by
 .I PREFIX COMMAND
  Run a prefix command (time, valgrind, gdb, etc.).
 .TP
-.BI \-plugin_dir
+.BI \-plugin-dir
 .I PLUGIN DIRECTORY
  Compile a plugin with the sources under the specified plugin directory.
  The name of the compiled plugin is the name of the directory. The default is a directory named plugin.
 .TP
-.BI \-plugins_dir
+.BI \-plugins-dir
 .I PLUGINS DIRECTORY
  For each source file under the specified directory, compile a plugin. The default is a directory named plugins.
 .TP
-.BI \-src_dir
+.BI \-src-dir
 .I SOURCES DIRECTORY
  add all source files under the specified directory to the compilation of the executable.
 .TP
