@@ -164,8 +164,8 @@ if __name__ == '__main__':
                                         'help', 'noexec', 'nocomp', 'src-dir=',
                                         'opt=', 'ldopt=', 'plugin-dir=',
                                         'plugins-dir='])
-    except getopt.GetoptError, err:
-        sys.stderr.write('{0}\n'.format(str(err)))
+    except (getopt.GetoptError, err):
+        sys.stderr.write('{0} : {1}\n'.format(myname, str(err)))
         usage()
         exit(2)
 
@@ -271,8 +271,8 @@ if __name__ == '__main__':
         try:
             os.chdir(work_dir)
 
-        except OSError, e:
-            print e
+        except (OSError, e):
+            sys.stderr.write('{0} : {1}\n'.format(myname, str(e)))
             exit(2)
 
         assert(len(args) > 0)
@@ -337,7 +337,7 @@ if __name__ == '__main__':
                         extra_defs)
                 except Exception as exception:
                     sys.stderr.write(
-                        '{0}: {1} build configuration failed, {2}'.format(
+                        '{0}: {1} build configuration failed, {2}\n'.format(
                             myname, exe, exception))
                     exit(1)
 
@@ -348,7 +348,7 @@ if __name__ == '__main__':
                                  '--target', make_targets[0], '--'] + make_args
                 subprocess.check_call(build_command)
             except Exception as exception:
-                sys.stderr.write('{0}: {1} build failed, {2}'.format(myname,
+                sys.stderr.write('{0}: {1} build failed, {2}\n'.format(myname,
                                                                      exe,
                                                                      exception))
                 exit(1)
@@ -367,7 +367,7 @@ if __name__ == '__main__':
                                   [os.path.join('.', exe)] +
                                   args[1:])
         except Exception as exception:
-            sys.stderr.write('{0}: {1} failed, {2}'.format(myname,
+            sys.stderr.write('{0}: {1} failed, {2}\n'.format(myname,
                                                            exe,
                                                            exception))
             exit(1)
