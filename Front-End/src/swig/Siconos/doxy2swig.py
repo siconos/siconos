@@ -457,7 +457,7 @@ def convert(input, output, include_function_definition=True, quiet=False):
     p = Doxy2SWIG(input, include_function_definition, quiet)
     p.generate()
     dir_input = os.path.dirname(input)
-    pdir = os.path.join(dir_input,'processed')
+    pdir = os.path.join(dir_input, 'processed')
 
     try:
         os.mkdir(pdir)

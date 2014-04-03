@@ -35,16 +35,17 @@ build_dir = os.getenv('DOXY_XML_DIR')
 breathe_projects = {"Siconos": os.path.join(build_dir, 'processed')}
 
 for fname in glob.glob(os.path.join(build_dir, '*.xml')):
-   bfname = os.path.basename(fname)
-   pfilename = os.path.join(build_dir, 'processed', bfname)
-   try:
-       if os.stat(pfilename)[6] == 0:
-               os.remove(pfilename)
-   except:
-       pass
-   # produce pfilename
-   if not os.path.exists(pfilename):
-       os.system('../../src/swig/Siconos/doxy2swig.py {0} tmp.i'.format(fname))
+    bfname = os.path.basename(fname)
+    pfilename = os.path.join(build_dir, 'processed', bfname)
+    try:
+        if os.stat(pfilename)[6] == 0:
+                os.remove(pfilename)
+    except:
+        pass
+    # produce pfilename
+    if not os.path.exists(pfilename):
+        os.system(
+            '../../src/swig/Siconos/doxy2swig.py {0} tmp.i'.format(fname))
 
 breathe_default_project = "Siconos"
 
@@ -99,7 +100,7 @@ exclude_patterns = ['_build']
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
-#show_authors = False
+show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
