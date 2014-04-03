@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env python
+
 # Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2010.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
@@ -17,30 +18,74 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 
-NUMERICS_PREFIX=${NUMERICSPATH:-@SiconosNumerics_LIBRARY_DIRS_DIR@}
-KERNEL_PREFIX=${SICONOSPATH:-@CMAKE_INSTALL_PREFIX@}
-exec=true
-comp=true
-myname=`basename $0`
-call_pwd=`pwd`
+import os
+import sys
+import shutil
+import platform
+import subprocess
+import getopt
+import tempfile
 
-cartridge() {
-    echo;
-    echo "|=============================================================================|";
-    echo "|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2010.           |";
-    echo "|                                                                             |";
-    echo "|                 Free software under GNU General Public License.             |";
-    echo "|=============================================================================|"; 
-    echo;
-}
+numerics_prefix = os.getenv('NUMERICSPATH',
+                            default='@SiconosNumerics_LIBRARY_DIRS_DIR@')
+kernel_prefix = os.getenv('SICONOSPATH',
+                          default='@CMAKE_INSTALL_PREFIX@')
 
-usage() { 
-cat<<EOF
+msvc = '@MSVC@' != ''
+exec_ = True
+comp = True
+myname = sys.argv[0]
+call_pwd = os.getcwd()
 
+
+# a context manager for a workdir that may be temporary
+class WorkDir():
+    def __init__(self, directory, tmp=False):
+        self.directory = directory
+        self.tmp = tmp
+
+    def __enter__(self):
+
+        if self.tmp:
+            self.name = tempfile.mkdtemp()
+            return self.name
+
+        else:
+            if not os.path.exists(self.directory):
+                os.makedirs(self.directory)
+            return self.directory
+
+    def __exit__(self, xtype, value, traceback):
+
+        if self.tmp:
+            shutil.rmtree(self.name)
+
+
+def silent_try(command, *_args):
+    try:
+        command(*_args)
+    except Exception as e:
+        sys.stderr.write('{0} : {1}'.format(myname, e))
+
+
+def cartridge():
+    sys.stdout.write(
+"""
+|=============================================================================|
+|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2010.         |
+|                                                                             |
+|                 Free software under GNU General Public License.             |
+|=============================================================================|
+""")
+
+
+def usage():
+    sys.stdout.write(
+"""
 The siconos command compiles, links and runs a Siconos program.
 
-Usage: $myname [options] [YourExample.cpp|location/YourExample.cpp] [Arguments]
- 
+Usage: {0} [options] [YourExample.cpp|location/YourExample.cpp] [Arguments]
+
 
  --> To use other source files (*.c, *.cpp, *.f), put them in ./src or
      -see option src_dir below
@@ -51,16 +96,16 @@ Usage: $myname [options] [YourExample.cpp|location/YourExample.cpp] [Arguments]
  --> To create some libraries and link them with the siconos program,
      create a ./plugins directory or use -plugins_dir option below.
 
-Options are: 
+Options are:
 
  -a : to find and compile all sources files in YourExample.cpp
       directory.
 
- -build-dir <dir> : build is done in <dir>. Under /tmp, a temp
+ -build_dir <dir> : build is done in <dir>. Under /tmp, a temp
                     directory is created
 
- 
- -clean-build : clean build directory.
+
+ -clean_build : clean build directory.
 
  -c | -clean : to clean the current directory (deletes binary files,
                etc.).
@@ -71,271 +116,258 @@ Options are:
 
  -h | -help : to print this help.
 
- -j<n>   : parrallel compilation with n jobs 
- 
+ -j<n>   : parrallel compilation with n jobs
+
  -L<dir> : add directory <dir> to the list from with the linker search
            for libraries.
- 
+
  -l<lib> : link with library <lib>.
- 
+
  -noexec : compile only.
 
  -nocomp : execute only.
 
  -O<n> : set compiler optimization.
- 
- -opt <opt> : add option <opt> to compiler. 
- 
- -ldopt <opt> : add option <opt> to linker. 
- 
+
+ -opt <opt> : add option <opt> to compiler.
+
+ -ldopt <opt> : add option <opt> to linker.
+
  -P prefix_command : to add a prefix command (time, valgrind, gdb,
                      etc.).
 
 
- -plugin-dir <plugin_directory> (default = plugin): create
+ -plugin_dir <plugin_directory> (default = plugin): create
     <plugin_directory>.so with plugin sources under
     <plugin_directory>.
 
- 
- -plugins-dir <plugins_directory> (default = plugins): for each source
+
+ -plugins_dir <plugins_directory> (default = plugins): for each source
     file <name_src>.[c|f|cpp] under <plugins_directory> it creates a
     plugin <name_src>.so
 
 
- -src-dir <source_directory> (default = src): all sources files under
+ -src_dir <source_directory> (default = src): all sources files under
     <source_directory> (Warning: absolute path!!)  to the executable.
 
  -v : to print 'make' commands as they are executed.
-     
-EOF
-}
+ """.format(myname))
 
-with_arg() { 
-    if test -z "$2"; then
-        usage
-        exit 1
-    else
-        return 0
-    fi
-}
 
-cartridge
+if __name__ == '__main__':
 
-if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
-    args=`getopt -n $myname -a \
- -o acghO:I:j:l:L:D:P:v \
- -l build-dir:,clean-build,clean,help,noexec,nocomp,src-dir:,opt:,ldopt:,plugin-dir:,plugins-dir: \
- -- "$@"`
-    if test $? -ne 0; then
-        usage
-        exit 1
-    fi
-    eval set -- "$args"
-else
-    echo "Warning getopt test is not conclusive and argument parsing is limited. Please consider installing GNU getopt." >&2
-    no_parsing=true
-    true
-fi
+    cartridge()
 
-definitions=
-linker_libraries=
-linker_directories=
-exec_prefix=
-compiler_options=
-plugin_directories=
-plugins_directories=
-sources_directories=
-tmp_directory=false
-build_directory=.siconos
-clean_build=false
+    try:
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'acghO:I:j:l:L:D:P:v',
+                                       ['build-dir=', 'clean-build', 'clean',
+                                        'help', 'noexec', 'nocomp', 'src-dir=',
+                                        'opt=', 'ldopt=', 'plugin-dir=',
+                                        'plugins-dir='])
+    except getopt.GetoptError, err:
+        sys.stderr.write('{0}\n'.format(str(err)))
+        usage()
+        exit(2)
 
-while test $# -gt 0 ; do
-    case "$1" in
-        -a) all_srcs=true;;
-        --build-dir) with_arg $@; shift;
-            case :$1 in 
-                :/tmp) tmp_directory=true; build_directory=$1;;
-                :*) build_directory=$1;;
-            esac;;
-        --clean-build) clean_build=true;;
-        --clean|-c) make_args=clean; clean_build=true; exec=false;;
-        -D) with_arg $@; shift; definitions="$definitions $1";;
-        -g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
-        -h|-help) usage; exit 0;;
-        --noexec) exec=false;;
-        --nocomp) comp=false;; 
-        -I) with_arg $@; shift; 
-            case :$1,:$compiler_options in
-                :*,:) compiler_options=-I$1;;
-                :*,:*) compiler_options="$compiler_options;-I$1";;
-            esac;;
-        -j) with_arg $@; shift; 
-            make_args="$make_args -j $1";;
-        -l) with_arg $@; shift; 
-            case :$1,:$linker_libraries in
-                :*,:) linker_libraries=$1;;
-                :*,:*) linker_libraries="$linker_libraries;$1";;
-            esac;;
-        -L) with_arg $@; shift; 
-            case :$1,:$linker_directories in
-                :*,:) linker_directories=$1;;
-                :*,:*) linker_directories="$linker_directories;$1";;
-            esac;;
-        -P) with_arg $@; shift; exec_prefix=$1;;
-        -O) with_arg $@; shift; 
-            case :$1,:$compiler_options in
-                :*,:) compiler_options=-O$1;;
-                :*,:*) compiler_options="$compiler_options;-O$1";;
-            esac;;
-        --opt) with_arg $@; shift;
-            case :$1,:$compiler_options in
-                :*,:) compiler_options=$1;;
-                :*,:*) compiler_options="$compiler_options;$1";;
-            esac;;
-        --ldopt) with_arg $@; shift;
-            case :$1,:$linker_options in
-                :*,:) linker_options=$1;;
-                :*,:*) linker_options="$linker_options;$1";;
-            esac;;
-        --plugin-dir) with_arg $@; shift
-            case :$1,:$plugin_directories in
-                :*,:) plugin_directories=$1;;
-                :*,:*) plugin_directories="$plugin_directories;$1";;
-            esac;;
-        --plugins-dir) with_arg $@; shift
-            case :$1,:$plugins_directories in
-                :*,:) plugins_directories=$1;;
-                :*,:*) plugins_directories="$plugins_directories;$1";;
-            esac;;
-        --src-dir) with_arg $@; shift
-            all_srcs=true
-            case :$1,:$sources_directories in
-                :*,:) sources_directories=$1;;
-                :*,:*) sources_directories="$sources_directories;$1";;
-            esac;;
-        -v) make_args="$make_args VERBOSE=1";;
-        --) shift; break;;
-        *) case $no_parsing in true) break;; *) usage; exit 1;; esac
-    esac
-    shift
-done
+    if len(args) == 0:
+        usage()
+        exit(1)
 
-# build directory setup : ./.siconos/build is the default
-if test $tmp_directory = true; then
-    build_directory=`mktemp -d -p $build_directory siconosXXXXX`
-fi
+    definitions = []
+    linker_libraries = []
+    linker_directories = []
+    linker_options = []
+    exec_prefix = []
+    compiler_options = []
+    plugin_directories = []
+    plugins_directories = []
+    plugins_sources = []
+    sources_directories = []
+    tmp_build = False
+    build_directory = '.siconos'
+    clean_build = False
+    all_srcs = False
+    main_source = None
+    make_targets = ['install']
+    make_args = []
 
-SICONOS_BUILD_DIR=${SICONOS_BUILD_DIR:-$build_directory}
+    for o, a in opts:
 
-if test ! -d ${SICONOS_BUILD_DIR}; then
-    mkdir -p ${SICONOS_BUILD_DIR} 
-fi
+        if o == '-a':
+            all_srcs = True
 
-cd ${SICONOS_BUILD_DIR} || { 
-    echo $myname: Cannot change directory to ${SICONOS_BUILD_DIR} >&2
-    exit 1
-}
+        if o == '--build-dir':
+            if os.path.commonprefix([a, '/tmp']) == '/tmp':
+                tmp_build = True
+            build_directory = a
 
-if test ! "$make_args" = "clean"; then
+        if o == '--clean-build':
+            tmp_build = True
 
-    case :$1,:$sources_directories in
-        :,:) usage; exit 1;;
-        :/*,*) main_source=$1;;
-        :*,*) main_source=$call_pwd/$1;;
-    esac
+        if o == '-c' or o == '--clean':
+            make_targets = ['clean']
+            clean_build = True
+            exec_ = False
 
-    shift
+        if o == '-D':
+            definitions.append(a)
 
-    case :$plugin_directories in
-        /*|:);;
-        *) plugin_directories=$call_pwd/$plugin_directories;;
-    esac
+        if o == '--g':
+            definitions.append('CMAKE_BUILD_TYPE=Debug')
 
-    case :$plugins_directories in
-        /*|:);;
-        *) plugins_directories=$call_pwd/$plugins_directories;;
-    esac
+        if o == '-h' or o == '--help':
+            usage()
+            exit(0)
 
-    if test -z "$sources_directories"; then 
-        if test "$all_srcs" = "true"; then
-            sources_directories=`dirname $main_source`
-        fi
-    fi
+        if o == '--noexec':
+            exec_ = False
 
-    if test ! -z "$main_source"; then
-        exe=`expr "\`basename $main_source\`" : "\(.*\)\..*"`
-    else
-        exe=`basename $sources_directory`
-    fi
+        if o == '--nocomp':
+            comp = False
 
-    case :$ext_plugin_source,:$plugins_sources in
-        :,:*);;
-        :*,:) plugins_sources=$ext_plugin_source;;
-        :*,:*) plugins_sources="$ext_plugin_source;$ext_plugin_source";;
-    esac
+        if o == '-I':
+            compiler_options.append('-I{0}'.format(a))
 
-    for d in $definitions; do
-        case $d in
-            *=*) 
-                extra_defs="$extra_defs -D$d" 
-                ndef=`expr "$d" : "\(.*\)=.*"`
-                all_extra_defs="$all_extra_defs;$ndef";;
-            *)  extra_defs="$extra_defs -D$d=1"
-                all_extra_defs="$all_extra_defs;$d";;
-        esac
-    done
+        if o == '-j':
+            make_args.append('-j{0}'.format(a))
 
-    if [ $comp = true ]; then
-        
-        # for macos : the linker doesn't allow undefined symbol by default -- xhub
-        test `uname` = "Darwin" && linker_options="$linker_options;-undefined;dynamic_lookup"
-        test "@MSVC@" != "" && linker_options="$linker_options;/FORCE"
-        if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
-            -DCALL_PWD=$call_pwd \
-            -DMAIN_SOURCE=$main_source \
-            -DPLUGINS_SOURCES=$plugins_sources \
-            -DPLUGINS_DIRECTORIES=$plugins_directories \
-            -DPLUGIN_DIRECTORIES=$plugin_directories \
-            -DSOURCES_DIRECTORIES=$sources_directories \
-            -DCOMPILER_OPTIONS=$compiler_options \
-            -DCOMMAND_LINE_LINKER_OPTIONS=$linker_options \
-            -DLINKER_DIRECTORIES=$linker_directories \
-            -DLINKER_LIBRARIES=$linker_libraries \
-            -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
-            -DCMAKE_INSTALL_PREFIX=$KERNEL_PREFIX \
-            $extra_defs; then
-            echo "$myname: $exe build configuration failed" >&2
-            exit 1
-        fi
-    fi
-fi
+        if o == '-l':
+            linker_libraries.append(a)
 
-if [ $comp = true ]; then
-    if test -f ./Makefile; then
-        make $make_args || exit 1
-        case $make_args in 
-            clean);;
-            *) make install || exit 1;;
-        esac
-    else
-        echo "$myname: nothing to clean" 
-    fi
-fi
+        if o == '-L':
+            linker_directories.append(a)
 
-if test $clean_build = true; then
-    if test -f Makefile; then
-        make clean
-    fi
-    rm -f CMakeCache.txt
-    rm -rf CMakeFiles
-    rm -f Makefile
-    rm -f cmake_install.cmake
-    rm -f install_manifest.txt
-    cd $call_pwd
-    rmdir $build_directory
-fi
+        if o == '-P':
+            exec_prefix.append(a)
 
-if test $exec = true; then
-    cd $call_pwd
-    eval LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NUMERICS_PREFIX/lib:$KERNEL_PREFIX/lib:$KERNEL_PREFIX/share/siconos-kernel:. $exec_prefix ./$exe $@
-fi
+        if o == '-O':
+            compiler_options.append('-O{0}'.format(a))
+
+        if o == '--opt':
+            compiler_options.append(a)
+
+        if o == '--ldopt':
+            linker_options.append(a)
+
+        if o == '--plugin-dir':
+            plugin_directories.append(a)
+
+        if o == '--plugins-dir':
+            plugins_directories.append(a)
+
+        if o == '--src-dir':
+            all_srcs = True
+            sources_directories.append(a)
+
+        if o == '-v':
+            make_args.append('VERBOSE=1')
+
+    siconos_build_dir = os.getenv('SICONOS_BUILD_DIR', default=build_directory)
+
+    with WorkDir(directory=siconos_build_dir, tmp=tmp_build) as work_dir:
+
+        # work_dir may be siconos_build_dir or a temp directory if
+        # tmp_build is True
+        try:
+            os.chdir(work_dir)
+
+        except OSError, e:
+            print e
+            exit(2)
+
+        assert(len(args) > 0)
+        main_source = os.path.join(call_pwd, args[0])
+        exe = os.path.splitext(os.path.basename(main_source))[0]
+
+        if 'install' in make_targets:
+
+            plugin_directories = \
+                [os.path.join(call_pwd, d) for d in plugin_directories]
+
+            plugins_directories = \
+                [os.path.join(call_pwd, d) for d in plugins_directories]
+
+            if len(sources_directories) == 0:
+                if all_srcs:
+                    sources_directories = [os.path.dirname(main_source)]
+
+            full_definitions = []
+            kwd_definitions = []
+            for d in definitions:
+                if '=' not in d:
+                    full_definitions.append('{0}=1'.format(d))
+                    kwd_definitions.append(d)
+                else:
+                    full_definitions.append(d)
+                    kwd_definitions.append(d.split('=')[0])
+
+            extra_defs = ['-D{0}'.format(d) for d in full_definitions]
+            all_extra_defs = kwd_definitions
+
+            if comp:
+                # for macos : the linker doesn't allow undefined
+                # symbol by default -- xhub
+                if 'Darwin' in platform.uname():
+                    linker_options.append('-undefined', 'dynamic_lookup')
+                if msvc:
+                    linker_options.append('/FORCE')
+                try:
+                    subprocess.check_call([
+                        'cmake', os.path.join(kernel_prefix,
+                                              'share',
+                                              'siconos-kernel'),
+                        '-DCALL_PWD={0}'.format(call_pwd),
+                        '-DMAIN_SOURCE={0}'.format(main_source),
+                        '-DPLUGINS_SOURCES={0}'.format(plugins_sources),
+                        '-DPLUGINS_DIRECTORIES={0}'.format(
+                            ';'.join(plugins_directories)),
+                        '-DSOURCES_DIRECTORIES={0}'.format(
+                            ';'.join(sources_directories)),
+                        '-DCOMPILER_OPTIONS={0}'.format(
+                            ';'.join(compiler_options)),
+                        '-DCOMMAND_LINE_LINKER_OPTIONS={0}'.format(
+                            ';'.join(linker_options)),
+                        '-DLINKER_DIRECTORIES={0}'.format(
+                            ';'.join(linker_directories)),
+                        '-DLINKER_LIBRARIES={0}'.format(
+                            ';'.join(linker_libraries)),
+                        '-DALL_EXTRA_DEFINITIONS={0}'.format(
+                            ';'.join(all_extra_defs)),
+                        '-DCMAKE_INSTALL_PREFIX={0}'.format(kernel_prefix)] +
+                        extra_defs)
+                except Exception as exception:
+                    sys.stderr.write(
+                        '{0}: {1} build configuration failed, {2}'.format(
+                            myname, exe, exception))
+                    exit(1)
+
+        if comp:
+            try:
+                assert(len(make_targets) > 0)
+                build_command = ['cmake', '--build', '.',
+                                 '--target', make_targets[0], '--'] + make_args
+                subprocess.check_call(build_command)
+            except Exception as exception:
+                sys.stderr.write('{0}: {1} build failed, {2}'.format(myname,
+                                                                     exe,
+                                                                     exception))
+                exit(1)
+
+    # execution
+    if exec_:
+        os.chdir(call_pwd)
+        env = os.environ
+        env['LD_LIBRARY_PATH'] = \
+            '{0}:{1}/lib:{2}/lib:{2}/share/siconos-kernel:.'.\
+            format(os.getenv('LD_LIBRARY_PATH'),
+                   numerics_prefix,
+                   kernel_prefix)
+        try:
+            subprocess.check_call(exec_prefix +
+                                  [os.path.join('.', exe)] +
+                                  args[1:])
+        except Exception as exception:
+            sys.stderr.write('{0}: {1} failed, {2}'.format(myname,
+                                                           exe,
+                                                           exception))
+            exit(1)
