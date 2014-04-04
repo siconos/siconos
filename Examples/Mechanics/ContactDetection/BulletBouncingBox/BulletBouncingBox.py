@@ -175,10 +175,10 @@ while(simulation.hasNextEvent()):
           numberOfIndexSet() > 1:
             index1 = simulation.indexSet(1)
             if (index1.size() == 4):
-                dataPlot[k, 3] = norm(index1.vertices()[0].lambda_(1)) + \
-                norm(index1.vertices()[1].lambda_(1)) + \
-                norm(index1.vertices()[2].lambda_(1)) + \
-                norm(index1.vertices()[3].lambda_(1))
+                dataPlot[k, 3] = norm(index1.interactions()[0].lambda_(1)) + \
+                norm(index1.interactions()[1].lambda_(1)) + \
+                norm(index1.interactions()[2].lambda_(1)) + \
+                norm(index1.interactions()[3].lambda_(1))
 
     k += 1
     simulation.nextStep()
