@@ -60,7 +60,6 @@ class WorkDir():
         if self.tmp:
             shutil.rmtree(self.name)
 
-
 def silent_try(command, *_args):
     try:
         command(*_args)
@@ -277,8 +276,15 @@ if __name__ == '__main__':
 
         assert(len(args) > 0)
         main_source = os.path.join(call_pwd, args[0])
-        exe = os.path.splitext(os.path.basename(main_source))[0]
-
+        main_source_splitext = os.path.splitext(os.path.basename(main_source))
+        if len(main_source_splitext)>1:
+            if main_source_splitext[1] == '.py':
+                exe = os.path.basename(main_source)
+            else:
+                exe = main_source_splitext[0]
+        else:
+            exe = main_source
+                
         if 'install' in make_targets:
 
             plugin_directories = \
@@ -312,12 +318,15 @@ if __name__ == '__main__':
                 if msvc:
                     linker_options.append('/FORCE')
                 try:
+                    cmake_boolean = { True: '1', False: '0' }
                     subprocess.check_call([
                         'cmake', os.path.join(kernel_prefix,
                                               'share',
                                               'siconos-kernel'),
                         '-DCALL_PWD={0}'.format(call_pwd),
                         '-DMAIN_SOURCE={0}'.format(main_source),
+                        '-DBUILD_MAIN={0}'.format(cmake_boolean[
+                            exe != os.path.basename(main_source)]),
                         '-DPLUGINS_SOURCES={0}'.format(plugins_sources),
                         '-DPLUGINS_DIRECTORIES={0}'.format(
                             ';'.join(plugins_directories)),

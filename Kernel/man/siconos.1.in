@@ -73,7 +73,7 @@ siconos \- Siconos C++ Compilation.
 .B \-v
 ]
 [
-.I sample.cpp
+.I sample[.cpp|.py]
 ]
 [
 .I arguments
@@ -83,7 +83,8 @@ siconos \- Siconos C++ Compilation.
 
 The
 .BR siconos (1)
-command compiles, links and runs a Siconos C++ input file.
+command compiles, links and runs a Siconos C++ input file. It compiles also
+C plugins and runs a python script.
 
 Siconos is a free (GNU license) software, dedicated to modeling,
 simulation and control of Non Smooth Dynamical Systems.
@@ -95,7 +96,7 @@ The following command-line options are recognized by
 .TP
 .BI \-a
  Find and compile all sources files in 
-.I sample.cpp
+.I sample[.cpp|.py]
  directory.
 .TP
 .BI \-build-dir
