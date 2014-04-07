@@ -516,6 +516,7 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
   options->iparam[5] = 1;  
   options->iparam[7] = 1;      /* erritermax */
   options->dparam[0] = 1e-3;
+  options->dparam[3] = 1;      /* default rho */
 
   options->iparam[8] = -1;     /* mpi com fortran */
   options->internalSolvers = NULL;
@@ -833,9 +834,7 @@ void frictionContact3D_sparseLocalAlartCurnier(
   int nz[1];
 
   // compute rho here
-  for (unsigned int i = 0; i < problemSize; ++i) rho[i] = 1.;
-
-
+  for (unsigned int i = 0; i < problemSize; ++i) rho[i] = options->dparam[3];
 
   mumps_id->n = problemSize;
   mumps_id->nz = nz[0];

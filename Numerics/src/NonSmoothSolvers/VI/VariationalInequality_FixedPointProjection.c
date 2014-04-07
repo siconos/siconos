@@ -309,7 +309,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
       }
       else
-        rho =rho_k;
+        rho = rho_k;
 
 
       if (verbose > 0)
@@ -328,8 +328,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   {
     printf("----------------------------------- VI - Fixed Point Projection (FPP) - #Iteration %i Final Error = %14.7e\n", iter, error);
   }
+
   dparam[0] = tolerance;
   dparam[1] = error;
+  dparam[3] = rho;
   iparam[7] = iter;
   free(xtmp);
   free(wtmp);

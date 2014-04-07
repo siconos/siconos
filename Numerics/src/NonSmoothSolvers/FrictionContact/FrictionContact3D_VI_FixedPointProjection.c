@@ -104,6 +104,7 @@ void frictionContact3D_VI_FixedPointProjection(FrictionContactProblem* problem, 
   iter = visolver_options->iparam[7];
 
   options->dparam[1] = error;
+  options->dparam[3] = visolver_options->dparam[3];
   options->iparam[7] = iter;
 
 
