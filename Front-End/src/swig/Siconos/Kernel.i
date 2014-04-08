@@ -1,7 +1,7 @@
 // -*- C++ -*-
 // Siconos-Front-End , Copyright INRIA 2005-2012.
 // Siconos is a program dedicated to modeling, simulation and control
-// of non smooth dynamical systems.	
+// of non smooth dynamical systems.
 // Siconos is a free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -15,8 +15,8 @@
 // along with Siconos; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-// Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr 
-//	
+// Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+//
 
 // SWIG interface for Siconos Kernel
 %module(directors="1", allprotected="1") Kernel
@@ -63,7 +63,7 @@
 %ignore subscal;
 %ignore cross_product;
 
-// defined in SimpleMatrix.cpp 
+// defined in SimpleMatrix.cpp
 %ignore private_addprod;
 %ignore private_prod;
 %ignore prod;
@@ -109,7 +109,7 @@
 
 
 // boost namespace (can be fixed with a correct import)
-namespace boost 
+namespace boost
 {
   namespace numeric
   {
@@ -126,14 +126,14 @@ namespace boost
 };
 
 // a std::size_t definition (otherwise swig complains about it)
-namespace std 
+namespace std
 {
   typedef size_t size_t;
 }
 
 
 
-// SimpleMatrix operators 
+// SimpleMatrix operators
 %rename  (__add__) operator+;
 %rename  (__less__) operator-;
 %rename  (__mul__) operator*;
@@ -173,7 +173,7 @@ namespace std
 %typemap(out) (std11::shared_ptr<NumericsMatrix>) {
   npy_intp dims[2];
 
-  if (!$1) 
+  if (!$1)
   {
     Py_INCREF(Py_None);
     $result = Py_None;
@@ -182,7 +182,7 @@ namespace std
   {
     dims[0] = $1->size0;
     dims[1] = $1->size1;
-    
+
     if ($1->matrix0)
     {
       PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1->matrix0);
@@ -224,11 +224,11 @@ namespace std
 
 %include graph.i
 
-%rename (ioMatrix_read) ioMatrix::read; 
-%rename (ioMatrix_write) ioMatrix::write; 
+%rename (ioMatrix_read) ioMatrix::read;
+%rename (ioMatrix_write) ioMatrix::write;
 %include "ioMatrix.hpp"
 
-%include "SimulationTypeDef.hpp" 
+%include "SimulationTypeDef.hpp"
 
 %include "SiconosSet.hpp"
 
@@ -259,11 +259,11 @@ typedef __mpz_struct mpz_t[1];
 
 %inline
 %{
-  
+
   /* Note: without the PyCObject stuff the python
    * wrapper fail on this, the numpy vector points on a deleted
    * memory!*/
-  
+
   const SP::SiconosVector getVector(SP::SiconosVector v)
   {
     return v;
@@ -273,7 +273,7 @@ typedef __mpz_struct mpz_t[1];
   {
     return v;
   };
-  
+
   /* to make swig define SWIGTYPE_p_PyArrayObject */
   const PyArrayObject* getVector(PyArrayObject* v)
   {
@@ -289,7 +289,7 @@ typedef __mpz_struct mpz_t[1];
 
 //namespace std {
 
-  %template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>, 
+  %template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>,
                                          std11::shared_ptr<DynamicalSystem> > >;
 
   %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
@@ -297,7 +297,7 @@ typedef __mpz_struct mpz_t[1];
 
   %template (dsi) std::pair<unsigned int, unsigned int >;
 
-  %template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>, 
+  %template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>,
                             std11::shared_ptr<DynamicalSystem> >;
 
 //}
