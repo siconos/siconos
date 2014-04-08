@@ -356,7 +356,7 @@ struct IsDense : public Question<bool>
   // call from python : return numpy from SiconosMatrix
   else
   {
-    if ($1)
+    if ($1 && $1->size(0)>0 && $1->size(1)>0)
     {
       // /!\ need check for a dense matrix!
 

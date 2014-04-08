@@ -51,7 +51,7 @@ struct GetPosition : public SiconosVisitor
 {
 
   SP::SiconosVector result;
-  
+
   template<typename T>
   void operator()(const T& ds)
   {
@@ -61,7 +61,7 @@ struct GetPosition : public SiconosVisitor
 
 struct GetVelocity : public SiconosVisitor
 {
-  
+
   SP::SiconosVector result;
 
   template<typename T>
@@ -94,7 +94,7 @@ struct ContactPointVisitor : public SiconosVisitor
     const SimpleMatrix& jachqT = *rel.jachqT();
     double id = (size_t) &*rel.contactPoint();
     double mu = ask<ForMu>(*inter.nslaw());
-    SiconosVector cf(3);
+    SiconosVector cf(inter.data(NewtonEulerR::p1)->size());
     prod(*inter.lambda(1), jachqT, cf, true);
     answer.setValue(0, mu);
     answer.setValue(1, posa[0]);
@@ -154,7 +154,7 @@ SP::SimpleMatrix MechanicsIO::positions(const Model& model) const
 {
 
   typedef
-    Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
+    Visitor < Classes < LagrangianDS, NewtonEulerDS >,
               GetPosition >::Make Getter;
 
   return visitAllVerticesForVector<Getter>
@@ -165,7 +165,7 @@ SP::SimpleMatrix MechanicsIO::positions(const Model& model) const
 SP::SimpleMatrix MechanicsIO::velocities(const Model& model) const
 {
   typedef
-    Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
+    Visitor < Classes < LagrangianDS, NewtonEulerDS >,
               GetVelocity>::Make Getter;
 
   return visitAllVerticesForVector<Getter>
@@ -176,7 +176,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model) const
 {
   SP::SimpleMatrix result(new SimpleMatrix());
   DynamicalSystemsGraph::EIterator ei, eiend;
-  const DynamicalSystemsGraph& graph = 
+  const DynamicalSystemsGraph& graph =
     *model.nonSmoothDynamicalSystem()->topology()->dSG(0);
   unsigned int current_row;
   for(current_row=1,std11::tie(ei,eiend)=graph.edges();
@@ -186,9 +186,8 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model) const
     ContactPointVisitor visitor(inter);
     inter.relation()->accept(visitor);
     const SiconosVector& data = visitor.answer;
-    result->resize(current_row, data.size());
+    result->resize(current_row+1, data.size());
     result->setRow(current_row, data);
   }
   return result;
 }
-

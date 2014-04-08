@@ -55,7 +55,7 @@ class Dat():
 
        output format is : time object_id px py pz ow ox oy oz
 
-       with: 
+       with:
          time : float
          object_id : the object id (int)
          px, py, pz : components of the position (float)
@@ -113,8 +113,7 @@ class Dat():
                                 self._shape.at_index(shape_id))
                             self._reference[ids] = shape_id
                             self._static_cobjs.append(static_cobj)
-                            broadphase.addStaticObject(static_cobj)
-                            broadphase.addStaticShape(self._shape.at_index(shape_id))
+                            broadphase.addStaticObject(static_cobj, abs(group_id)-1)
                             bind_file.write('{0} {1}\n'.format(ids, shape_id))
                             ids -= 1
 
@@ -278,7 +277,7 @@ class Hdf5():
 
        output format is : time object_id px py pz ow ox oy oz
 
-       with: 
+       with:
          time : float
          object_id : the object id (int)
          px, py, pz : components of the position (float)
@@ -338,8 +337,7 @@ class Hdf5():
                                 self._shape.at_index(shape_id))
                             self._reference[ids] = shape_id
                             self._static_cobjs.append(static_cobj)
-                            broadphase.addStaticObject(static_cobj)
-                            broadphase.addStaticShape(self._shape.at_index(shape_id))
+                            broadphase.addStaticObject(static_cobj, abs(group_id)-1)
                             bind_file.write('{0} {1}\n'.format(ids, shape_id))
                             ids -= 1
 
@@ -370,8 +368,8 @@ class Hdf5():
                                                       maxshape=(None, 9))
         self._dynamic_data = self._data.create_dataset('dynamic', (0, 9),
                                                        maxshape=(None, 9))
-        self._cf_data = self._data.create_dataset('cf', (0, 14),
-                                                  maxshape=(None, 14))
+        self._cf_data = self._data.create_dataset('cf', (0, 15),
+                                                  maxshape=(None, 15))
         self._solv_data = self._data.create_dataset('solv', (0, 4),
                                                     maxshape=(None,4))
         return self
@@ -433,39 +431,18 @@ class Hdf5():
         if self._broadphase.model().nonSmoothDynamicalSystem().\
                 topology().indexSetsSize() > 1:
             time = self._broadphase.model().simulation().nextTime()
-            interactions = self._broadphase.model().\
-                nonSmoothDynamicalSystem().topology().indexSet(1).interactions()
+            contact_points = self._io.contactPoints(self._broadphase.model())
+
+            assert(contact_points is not None)
+
             current_line = self._cf_data.shape[0]
+            self._cf_data.resize(current_line + contact_points.shape[0], 0)
+            times = np.empty((contact_points.shape[0], 1))
+            times.fill(time)
 
-            p = 0
-            for inter in interactions:
-                bullet_relation = cast_BulletR(inter.relation())
-                if bullet_relation is not None:
-                    nslaw = inter.nslaw()
-                    mu = cast_NewtonImpactFrictionNSL(nslaw).mu()
-                    nc = bullet_relation.nc()
-                    lambda_ = inter.lambda_(1)
-                    if(True):
-                        jachqt = bullet_relation.jachqT()
-                        cf = np.dot(jachqt.transpose(), lambda_)
-                        cp = bullet_relation.contactPoint()
-                        posa = cp.getPositionWorldOnA()
-                        posb = cp.getPositionWorldOnB()
-                        self._cf_data.resize(current_line + p + 1,
-                                             0)
-                        self._cf_data[current_line + p, :] = \
-                            [time,
-                             mu,
-                             posa.x(),
-                             posa.y(),
-                             posa.z(),
-                             posb.x(),
-                             posb.y(),
-                             posb.z(),
-                             nc[0], nc[1], nc[2],
-                             cf[0], cf[1], cf[2]]
-                        p += 1
-
+            self._cf_data[current_line:, :] = np.concatenate((times,
+                                                              contact_points),
+                                                             axis=1)
 
     def outputSolverInfos(self):
         """
