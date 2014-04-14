@@ -104,7 +104,7 @@ void Relay::initialize(SP::Simulation sim)
 }
 
 
-int Relay::compute(const double time)
+int Relay::compute(double time)
 {
   int info = 0;
   // --- Prepare data for Relay computing ---

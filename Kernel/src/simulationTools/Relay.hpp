@@ -146,7 +146,7 @@ public:
    *  \param time current time
    *  \return information about the solver convergence.
    */
-  int compute(const double time);
+  int compute(double time);
 
   /** print the data to the screen
    */
