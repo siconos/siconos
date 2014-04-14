@@ -166,7 +166,7 @@ class Doxy2SWIG:
 
     def add_text(self, value):
         """Adds text corresponding to `value` into `self.pieces`."""
-        if type(value) in (types.ListType, types.TupleType):
+        if hasattr(value, '__iter__'):
             self.pieces.extend(value)
         else:
             self.pieces.append(value)
@@ -414,7 +414,7 @@ class Doxy2SWIG:
         if self.multi:
             o.write("".join(self.pieces).encode('ascii', 'ignore').strip())
         else:
-            o.write("".join(self.clean_pieces(self.pieces)).encode('ascii', 'ignore').strip())
+            o.write(str("".join(self.clean_pieces(self.pieces)).encode('ascii', 'ignore').strip()))
         o.close()
 
     def clean_pieces(self, pieces):
@@ -465,12 +465,12 @@ def convert(input, output, include_function_definition=True, quiet=False):
         pass
     base_input = os.path.basename(input)
 
-    try:
-        with open(os.path.join(pdir,'{0}'.format(base_input)), 'w') as pxml_file:
-                pxml_file.write(p.xmldoc.toxml().encode('ascii', 'ignore').strip())
+    #    try:
+    with open(os.path.join(pdir,'{0}'.format(base_input)), 'w') as pxml_file:
+                pxml_file.write(str(p.xmldoc.toxml().encode('ascii', 'ignore').strip()))
                 p.write(output)
-    except Exception as e:
-        print 'doxy2swig.py: {0}'.format(e)
+                #except Exception as e:
+                #print ('doxy2swig.py: {0}'.format(e))
 
     
 def main():
