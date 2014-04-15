@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 
     // Interaction ball-plane
     //
-    SP::SiconosMatrix H(new SimpleMatrix(1, 2 * nDof));
+    SP::SimpleMatrix H(new SimpleMatrix(1, 2 * nDof));
     (*H)(0, 0) = 1.0;
     (*H)(0, 3) = -1.0;
 

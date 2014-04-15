@@ -41,10 +41,10 @@ protected:
   unsigned int _indx;
 
   /** the vector defining the surface (\f$ s = Cx \f$) */
-  SP::SiconosMatrix _Csurface;
+  SP::SimpleMatrix _Csurface;
 
   /** matrix describing the influence of \f$lambda\f$ on s */
-  SP::SiconosMatrix _D;
+  SP::SimpleMatrix _D;
 
   /** scalar multiplying Sign; \f$ u^s = - \alpha Sign \f$ */
   double _alpha;
@@ -121,7 +121,7 @@ public:
    * \param B the B matrix
    * \param D the saturation matrix
    */
-  CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D):
+  CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D):
     Actuator(type, sensor), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE),
     _precision(1e-8), _thetaSMC(0.5), _noUeq(false)
   {
@@ -141,22 +141,22 @@ public:
   /** Set the value of _Csurface to newValue
    * \param newValue the new value for _Csurface
    */
-  void setCsurface(const SiconosMatrix& newValue);
+  void setCsurface(const SimpleMatrix& newValue);
 
   /** Set _Csurface to pointer newPtr
-   * \param newPtr a SP::SiconosMatrix containing the new value for _Csurface
+   * \param newPtr a SP::SimpleMatrix containing the new value for _Csurface
    */
-  void setCsurfacePtr(SP::SiconosMatrix newPtr);
+  void setCsurfacePtr(SP::SimpleMatrix newPtr);
 
   /** Set the value of _D to newValue
    * \param newValue the new value for _D
    */
-  void setSaturationMatrix(const SiconosMatrix& newValue);
+  void setSaturationMatrix(const SimpleMatrix& newValue);
 
   /** Set _D to pointer newPtr
-   * \param newPtr a SP::SiconosMatrix containing the new value for _D
+   * \param newPtr a SP::SimpleMatrix containing the new value for _D
    */
-  void setSaturationMatrixPtr(SP::SiconosMatrix newPtr);
+  void setSaturationMatrixPtr(SP::SimpleMatrix newPtr);
 
   /** Set _alpha
    * \param alpha the new value for _alpha

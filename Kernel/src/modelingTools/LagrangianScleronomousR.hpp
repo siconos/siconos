@@ -118,6 +118,8 @@ protected:
     zeroPlugin();
   }
 
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 public:
 
   /** constructor from a set of data
@@ -155,34 +157,25 @@ public:
     return _dotjacqhXqdot;
   };
 
-  /** Compute y = h(q,z) using plug-in mechanism with the data vector of the interaction
-   * should be used as less as possible to avoid side--effects
-   * prefer computeh(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
-   * \param time  current time
-   * \param inter interaction that owns the relation
-   */
-  virtual void computeh(double time, Interaction& inter);
-
-
   /** to compute y = h(q,z) using plug-in mechanism
   * \param inter interaction that owns the relation
   * \param q the BlockVector of coordinates
   * \param z the BlockVector of parameters
   */
-  virtual void computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z);
+  void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
   * \param time the current time
   * \param inter interaction that owns the relation
   */
-  virtual void computeJachq(double time, Interaction& inter);
+  void computeJachq(SiconosVector& q, SiconosVector& z);
 
   /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
    * \param time double, current time
    * \param inter interaction that owns the relation
    */
-  void computedotjacqhXqdot(double time, Interaction& inter);
+  void computedotjacqhXqdot(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
 
 
   void computeJachqDot(double time, Interaction& inter)
@@ -194,16 +187,9 @@ public:
   }
 
   /* compute all the H Jacobian */
-  void computeJach(double time, Interaction& inter)
-  {
-    computeJachq(time, inter);
-    // computeJachqDot(time, inter);
-    computeDotJachq(time, inter);
-    // computeJachlambda(time, inter);
-    // computehDot(time,inter);
-  }
+  void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
   /* compute all the G Jacobian */
-  void computeJacg(double time, Interaction& inter)
+  void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
     computeJacgq(time, inter);
     // computeJacgqDot(time, inter);
@@ -213,21 +199,21 @@ public:
   /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism
   * \param time the current time
   */
-  virtual void computeDotJachq(double time, Interaction& inter);
+  virtual void computeDotJachq(SiconosVector& q, SiconosVector& z, SiconosVector& qDot);
 
   /** to compute output
   * \param time the current time
   * \param inter interaction that owns the relation
   * \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0);
+  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
 
   /** to compute p
   * \param time the current time
   * \param inter interaction that owns the relation
   * \param unsigned int: "derivative" order of lambda used to compute input
   */
-  void computeInput(double time, Interaction& inter, unsigned int = 0);
+  void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
   const std::string getJachqName() const;
 

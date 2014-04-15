@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw loi(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianRheonomousR("YoyoPlugin:h1", "YoyoPlugin:G10", "YoyoPlugin:G11"));
 
-    SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
+    SP::SimpleMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 0;
     (*H)(0, 1) = 0;
     (*H)(0, 2) = 0;

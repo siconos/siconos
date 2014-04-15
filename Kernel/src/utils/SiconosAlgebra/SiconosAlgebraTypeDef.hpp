@@ -86,9 +86,17 @@ enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTIT
     derivatives in DynamicalSystem. */
 typedef std::vector<SP::SiconosVector> VectorOfVectors;
 
+/** Some containers for vectors - Used for example in Relation to compute y and r
+ * when there are 2 DS*/
+typedef std::vector<SP::BlockVector> VectorOfBlockVectors;
+
 /** Some containers for matrices - Used for example to handle the
     various jacobian in LagrangianDS. */
 typedef std::vector<SP::SiconosMatrix> VectorOfMatrices;
+
+/** Some containers for matrices - Used for example to handle the
+    various jacobian in LagrangianDS. */
+typedef std::vector<SP::SimpleMatrix> VectorOfSMatrices;
 
 /** Iterator through vector of matrices */
 typedef VectorOfMatrices::iterator VectorOfMatricesIterator;

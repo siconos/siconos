@@ -39,6 +39,7 @@
 #include <debug.h>
 #include "CxxStd.hpp"
 #include "NewtonEulerR.hpp"
+#include "FirstOrderR.hpp"
 
 
 using namespace RELATION;
@@ -373,9 +374,9 @@ void TimeStepping::computeInitialResidu()
   //  std::cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
   assert(!isnan(tkp1));
-  
+
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
-    
+
   if (indexSet0->size()>0)
   {
     //    assert(_levelMinForOutput >=0);
@@ -457,7 +458,10 @@ void   TimeStepping::prepareNewtonIteration()
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
-    inter->relation()->computeJach(getTkp1(), *inter);
+    VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
+    VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
+    VectorOfSMatrices& workM = *indexSet0->properties(*ui).workMatrices;
+    inter->relation()->computeJach(getTkp1(), *inter, DSlink, workV, workM);
     if (inter->relation()->getType() == NewtonEuler)
     {
       SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
@@ -465,11 +469,11 @@ void   TimeStepping::prepareNewtonIteration()
       SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
       ner->computeJachqT(*inter, ds1, ds2);
     }
-    inter->relation()->computeJacg(getTkp1(), *inter);
+    inter->relation()->computeJacg(getTkp1(), *inter, DSlink, workV, workM);
 
     // Note FP : prepar call below is only useful for FirstOrderType2R. 
     // We should check if we really need this ...
-    inter->relation()->preparNewtonIteration(*inter);
+    inter->relation()->preparNewtonIteration(*inter, DSlink, workV, workM);
   }
 
   bool topoHasChanged = model()->nonSmoothDynamicalSystem()->topology()->hasChanged();
@@ -566,7 +570,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
         if (hasNSProblems)
           saveYandLambdaInOldVariables();
       }
-      std::cout << _newtonResiduDSMax << " " << _newtonResiduYMax << " " <<_newtonResiduRMax << std::endl;
+      std::cout << "# steps: " << _newtonNbSteps << _newtonResiduDSMax << " " << _newtonResiduYMax << " " <<_newtonResiduRMax << std::endl;
     }
     if (!_isNewtonConverge)
     {
@@ -640,14 +644,18 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     _newtonResiduRMax = 0.0;
     residu = 0.0;
     SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
-    
+
     InteractionsGraph::VIterator ui, uiend;
     SP::Interaction inter;
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       inter = indexSet0->bundle(*ui);
-      inter->computeResiduR(getTkp1());
-      residu = inter->residuR()->norm2();
+      VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
+      VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
+
+      inter->computeResiduR(getTkp1(), DSlink, workV);
+      // TODO support other DS
+      residu = workV[FirstOrderRVec::residuR]->norm2();
       if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
       if (residu > criterion)
       {

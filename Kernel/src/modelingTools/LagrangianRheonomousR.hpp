@@ -147,7 +147,7 @@ protected:
 
   /** initialize G matrices or components specific to derived classes.
   */
-  void initComponents(Interaction& inter);
+  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** default constructor
   */
@@ -206,31 +206,13 @@ public:
   void setComputehDotFunction(const std::string& , const std::string&);
   //  virtual void setComputehFunction(const std::string& pluginPath, const std::string& functionName);
 
-
-  /** Compute y = h(t,q,z) using plug-in mechanism with the data vector of the interaction
-   * should be used as less as possible to avoid side--effects
-   * prefer computeh(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
-   * \param time  current time
-   * \param inter interaction that owns the relation
-   */
-  virtual void computeh(double time, Interaction& inter);
-
   /** to compute y = h(t,q,z) using plug-in mechanism
   * \param time current time
   * \param inter interaction that owns the relation
   * \param q the BlockVector of coordinates
   * \param z the BlockVector of parameters
   */
-  virtual void computeh(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z);
-
-  /** to compute hDot using plug-in mechanism
-   * using plug-in mechanism with the data vector of the interaction
-   * should be used as less as possible to avoid side--effects
-   * prefer computehDot(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
-   * \param time  current time
-   * \param inter interaction that owns the relation
-   */
-  virtual void computehDot(double time, Interaction& inter);
+  virtual void computeh(double time, SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
   /** to compute hDot using plug-in mechanism
    * \param time current time
@@ -238,13 +220,13 @@ public:
    * \param q the BlockVector of coordinates
    * \param z the BlockVector of parameters
    */
-  virtual void computehDot(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z);
+  virtual void computehDot(double time, SiconosVector& q, SiconosVector& z);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
   * \param: double, current time
   * \param: unsigned int
   */
-  virtual void computeJachq(double time, Interaction& inter);
+  virtual void computeJachq(double time, SiconosVector& q, SiconosVector& z);
 
   void computeJachqDot(double time, Interaction& inter)
   {
@@ -255,16 +237,19 @@ public:
   }
 
   /* compute all the H Jacobian */
-  void computeJach(double time, Interaction& inter)
+  void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
-    computeJachq(time, inter);
+    SiconosVector q = *DSlink[LagrangianRDS::q0];
+    SiconosVector z = *DSlink[LagrangianRDS::z];
+    computeJachq(time, q, z);
     // computeJachqDot(time, inter);
-    computeDotJachq(time, inter);
+//    computeDotJachq(time, q, z);
     // computeJachlambda(time, inter);
-    computehDot(time,inter);
+    computehDot(time, q, z);
   }
+
   /* compute all the G Jacobian */
-  void computeJacg(double time, Interaction& inter)
+  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
     computeJacgq(time, inter);
     // computeJacgqDot(time, inter);
@@ -276,13 +261,13 @@ public:
   *  \param double : current time
   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  void computeOutput(double time, Interaction& inter, unsigned int = 0);
+  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
 
   /** to compute p
   *  \param double : current time
   *  \param unsigned int: "derivative" order of lambda used to compute input
   */
-  void computeInput(double time, Interaction& inter, unsigned int = 0);
+  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
   ACCEPT_STD_VISITORS();
 

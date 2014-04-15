@@ -55,7 +55,7 @@ public:
   virtual ~NewtonEulerFrom3DLocalFrameR() {};
   /** initialize components specific to derived classes.
   */
-  virtual void initComponents(Interaction& inter);
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /*default implementation consists in multiplying jachq and T*/
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);

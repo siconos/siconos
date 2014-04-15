@@ -67,7 +67,7 @@ void MyDS::computef(double t)
   _f->setValue(2, -QX->getValue(0) + K1P->getValue(0));
   _f->setValue(3, -QX->getValue(1) + K1P->getValue(1));
 }
-void  MyDS::computef(double t, SP::SiconosVector _xvalue) {}
+void  MyDS::computef(double t, SiconosVector& xvalue) {}
 
 void MyDS::computeJacobianfx(double t, bool  b)
 {

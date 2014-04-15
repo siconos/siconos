@@ -61,6 +61,8 @@ typedef void (*Fext)(double , double*, double*, double*);
  */
 class NewtonEulerDS : public DynamicalSystem
 {
+public:
+  enum WorkNames {xfree, sizeWorkVec};
 protected:
   /** serialization hooks
   */

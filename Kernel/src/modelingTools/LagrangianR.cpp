@@ -25,52 +25,26 @@
 
 
 
-void LagrangianR::initComponents(Interaction& inter)
+void LagrangianR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
+  // do nothing here, overload this if you need something done
+}
+
+void LagrangianR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+{
+  // Memory allocation for G[i], if required (depends on the chosen constructor).
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
 
   if (! _jachq)
     _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
-  else
-  {
-    if (_jachq->size(0) == 0) // if the matrix dim are null
-      _jachq->resize(sizeY, sizeDS);
-    else
-      assert((_jachq->size(1) == sizeDS && _jachq->size(0) == sizeY) &&
-             "LagrangianR::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
-  }
-  // Added by Son Nguyen (8/12/2010) --> VA try to replace by a lazy initialization
-  // if (! _jachqDot)
-  //   _jachqDot.reset(new SimpleMatrix(sizeY, sizeDS));
-  // else
-  // {
-  //   if (_jachqDot->size(0) == 0) // if the matrix dimension are null
-  //     _jachqDot->resize(sizeY, sizeDS);
-  //   else
-  //   {
-  //     if ((_jachqDot->size(1) != sizeDS && _jachqDot->size(0) != sizeY))
-  //       RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
-  //   }
-  // }
+  initComponents(inter, DSlink, workV, workM);
 }
 
-void LagrangianR::initialize(Interaction& inter)
-{
-  // Memory allocation for G[i], if required (depends on the chosen constructor).
-  initComponents(inter);
-}
-
-void LagrangianR::computeh(double time, Interaction& inter)
-{
-  RuntimeException::selfThrow("LagrangianR::computeh(double time, Interaction& inter): not yet implemented (or useless) for Lagrangian relation of type " + _subType);
-}
-
-void LagrangianR::computeh(double time, Interaction& inter,
-                           SP::BlockVector q, SP::BlockVector v, SP::BlockVector z)
+void LagrangianR::computeh(double time, SiconosVector& q, SiconosVector& v, SiconosVector& z, SiconosVector& y)
 {
   RuntimeException::selfThrow(
-    "LagrangianR::computeh(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector v, SP::BlockVector z);: not yet implemented (or useless) for Lagrangian relation of type " + _subType);
+    "LagrangianR::computeh: not yet implemented (or useless) for Lagrangian relation of type " + _subType);
 }
 
 

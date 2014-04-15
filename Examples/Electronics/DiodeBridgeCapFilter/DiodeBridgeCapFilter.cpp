@@ -100,13 +100,13 @@ int main(int argc, char* argv[])
 
     // --- Interaction between linear systems and non smooth system ---
 
-    SP::SiconosMatrix Int_C(new SimpleMatrix(4, 3));
+    SP::SimpleMatrix Int_C(new SimpleMatrix(4, 3));
     (*Int_C)(0 , 2) = 1.0;
     (*Int_C)(2 , 0) = -1.0;
     (*Int_C)(2 , 2) = 1.0;
     (*Int_C)(3 , 0) = 1.0;
 
-    SP::SiconosMatrix Int_D(new SimpleMatrix(4, 4));
+    SP::SimpleMatrix Int_D(new SimpleMatrix(4, 4));
     (*Int_D)(0 , 1) = -1.0;
     (*Int_D)(1 , 0) = 1.0;
     (*Int_D)(1 , 2) = 1.0;
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     (*Int_D)(2 , 1) = -1.0;
     (*Int_D)(3 , 1) = 1.0;
 
-    SP::SiconosMatrix Int_B(new SimpleMatrix(3, 4));
+    SP::SimpleMatrix Int_B(new SimpleMatrix(3, 4));
     (*Int_B)(0 , 2) = -1.0 / Cvalue;
     (*Int_B)(0 , 3) = 1.0 / Cvalue;
     (*Int_B)(2 , 0) = 1.0 / Cfilt;

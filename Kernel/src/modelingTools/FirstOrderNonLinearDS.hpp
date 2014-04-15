@@ -29,6 +29,10 @@
 
 typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
 
+namespace FirstOrderDS {
+  enum WorkNames {residu, residuFree, xfree, xPartialNS, deltaxForRelation, xBuffer, sizeWorkV};
+}
+
 /**  General First Order Non Linear Dynamical Systems - \f$ M \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0\f$
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -331,7 +335,7 @@ public:
   void setComputeMFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** set a specified function to compute M
-   *  \param FPtr1 a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputeMFunction(FPtr1 fct);
 
@@ -379,9 +383,9 @@ public:
 
   /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
    * \param time time instant used in the computations
-   * \param x2 a SiconosVector to store the resuting value
+   * \param x2 the value of the state at which we want to compute f.
    */
-  virtual void computef(double time, SP::SiconosVector x2);
+  virtual void computef(double time, SiconosVector& x2);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param time time instant used in the computations
@@ -400,7 +404,7 @@ public:
 
   /** Default function to the right-hand side term
    *  \param time time instant used in the computations
-   *  \param isDSup flag to avoid recomputation of operators
+   *  \param isDSUp flag to avoid recomputation of operators
    *
    */
   void computeRhs(double time, bool isDSUp = false);
@@ -408,7 +412,7 @@ public:
   /** Default function to jacobian of the right-hand side term according to x.
    *  Required when using an EventDriven Simulation.
    *  \param time instant used in the computations
-   *  \param isDSup flag to avoid recomputation of operators
+   *  \param isDSUp flag to avoid recomputation of operators
    *
    */
   void computeJacobianRhsx(double time, bool isDSUp = false);
@@ -470,12 +474,11 @@ public:
   /** Reset the PluggedObjects */
   virtual void zeroPlugin();
 
-  /** To compute \f$\frac{|x_{i+1} - xi|}{|x_i|}\f$ where
-      \f$x_{i+1}\f$ represents the present state and \f$x_i\f$ the
-      previous one
-   * \return a double
+  /** Initialize the workspace elements
+   * \param workVector the vectors needed for the integration
+   * \param workMatrices the matrices needed for the integration
    */
-  /*  double dsConvergenceIndicator(); */
+  virtual void initWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices);
 
   ACCEPT_STD_VISITORS();
 

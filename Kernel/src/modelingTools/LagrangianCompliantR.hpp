@@ -79,7 +79,7 @@ protected:
 
   /** initialize G matrices or components specific to derived classes.
   */
-  void initComponents(Interaction& inter);
+  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
   void zeroPlugin();
 
 public:
@@ -99,19 +99,19 @@ public:
   * \param time current time
   * \param inter the Interaction
   */
-  void computeh(double time, Interaction& inter);
+  void computeh(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
 
   /** compute the jacobian of h w.r.t. q using plug-in mechanism
   * \param time current time
   * \param inter the Interaction
   */
-  void computeJachq(double time, Interaction& inter);
+  void computeJachq(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z);
 
   /** compute the jacobian of h w.r.t. \f$\lambda\f$ using plug-in mechanism
   * \param time current time
   * \param inter the Interaction
   */
-  void computeJachlambda(double time, Interaction& inter);
+  void computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z);
 
   const std::string getJachlambdaName() const;
   const std::string getJachqName() const;
@@ -122,14 +122,14 @@ public:
   *  \param inter the Interaction owning y
   *  \param level number of the derivative to compute, optional, default = 0.
   */
-  void computeOutput(double time, Interaction& inter, unsigned int level = 0);
+  void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
 
   /** to compute the input
   *  \param time the current time
   *  \param inter the Interaction owning lambda
   *  \param level "derivative" order of lambda used to compute input
   */
-  void computeInput(double time, Interaction& inter, unsigned int level = 0);
+  void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
   ACCEPT_STD_VISITORS();
 

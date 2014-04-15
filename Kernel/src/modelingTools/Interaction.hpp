@@ -115,9 +115,6 @@ private:
   /** sum of all DS sizes, for DS involved in the interaction */
   unsigned int _sizeOfDS;
 
-  /** sum of all z sizes, for DS involved in the interaction */
-  unsigned int _sizeZ;
-
   /** Bool to check the number of DS concerned by this interaction
       (1 or 2 indeed)
       True if 2 DS.
@@ -171,22 +168,14 @@ private:
   /** the type of Relation of the interaction */
   SP::Relation _relation;
 
-  /** A map of vectors, used to save links (pointers) to DS objects of
-      the interaction */
-  typedef std11::array<SP::BlockVector, 15> dataR;
-  dataR _workspace;
-
-  /** Work vectors to save pointers to state-related data of the
-      dynamical systems involved in the Interaction.*/
-
   /** The residu y of the newton iterations*/
-  SP::SiconosVector _Residuy;
+  SP::SiconosVector _residuY;
 
   /*value of h at the current newton iteration*/
   SP::SiconosVector _h_alpha;
 
   /* work vector to compute qblock, XXX maybe it shouldn't exist */
-  SP::SiconosVector _workYp;
+  SP::SiconosVector _yForNSsolver;
 
   // === PRIVATE FUNCTIONS ===
 
@@ -197,7 +186,7 @@ private:
 public:
 
   /** default constructor */
-  Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _sizeZ(0), _has2Bodies(false), _y(2)
+  Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2)
   {};
 
    /** constructor with no data
@@ -212,13 +201,20 @@ public:
    */
   ~Interaction() {};
 
-  /** allocate memory for y[i] and _lambda[i] and set them to zero.
-      \param time for initialization.
-      \param SP::DynamicalSystem : first ds linked to this interaction (i.e IG->vertex.source)
-      \param SP::DynamicalSystem : second ds linked to this interaction (i.e IG->vertex.target)
-      ds1 == ds2 is allowed.
+  /** initialize this relation
+      \param time time for initialization.
+      \param DSlink set of BlockVector to link to the data in DynamicalSystem
+      \param workVInter set of work vectors for this Interaction
+      \param workMInter set of work matrices for this Interaction
+      \param osnsMInter matrix used in the OSNS for this Interaction
+      \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
+      \param workV1 work vectors of ds1
+      \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is allowed.
+      \param workV2 work vectors of ds2
+      \param computeResiduY if true allocate vectors for the computation of the residu on y
+      \param computeResiduR if true allocate vectors for the computation of the residu on r
    */
-  void initialize(double time, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
+  void initialize(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workVInter, VectorOfSMatrices& workMInter, SiconosMatrix& osnsMInter, DynamicalSystem& ds1, VectorOfVectors& workV1, DynamicalSystem& ds2, VectorOfVectors& workV2, bool computeResiduY = false, bool computeResiduR = false);
 
   /** check if Interaction is initialized
    * \return true if it is initialized
@@ -237,9 +233,10 @@ public:
    */
   void resetLambda(unsigned int level);
 
-  /** build Y and Lambda stl vectors.
+  /** build y and \f$\lambda\f$ vectors
+   * \param computeResiduY if true the residu on y is computed and memory allocation is done for _residuY and _h_alpha
   */
-  void initializeMemory();
+  void initializeMemory(bool computeResiduY);
 
   // === GETTERS/SETTERS ===
   /** get the value of number
@@ -365,14 +362,6 @@ public:
   inline unsigned int getSizeOfDS() const
   {
     return _sizeOfDS;
-  }
-
-  /** get the sum of z sizes, for DS involved in interaction
-   *  \return an unsigned int
-   */
-  inline unsigned int getSizez() const
-  {
-    return _sizeZ;
   }
 
   /** Set the number of dynamical systems concerned by
@@ -652,11 +641,6 @@ public:
     return _relation;
   }
 
-  /** set the Relation of this Interaction
-  *  \param the SP::relation to set
-  */
-  void setRelationPtr(SP::Relation newRelation) ;
-
   /** get the NonSmoothLaw of this Interaction
   *  \return a pointer on this NonSmoothLaw
   */
@@ -668,11 +652,6 @@ public:
   {
     return _nslaw;
   }
-
-  /** set the NonSmoothLaw of this Interaction
-  *  \param the SP::NonSmoothLaw to set
-  */
-  void setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw) ;
 
   /** function used to sort Interaction in SiconosSet<SP::Interaction>
    *  \return a double* (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
@@ -692,7 +671,6 @@ public:
   inline void setDSSizes(unsigned int s1, unsigned int s2)
   {
     _sizeOfDS = s1;
-    _sizeZ = s2;
 
   }
 
@@ -703,50 +681,31 @@ public:
   /** Must be call to fill _y_k. (after convergence of the Newton iterations)
    */
   void swapInMemory();
+
   /** print the data to the screen
   */
   void display() const;
 
   /** Computes output y; depends on the relation type.
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute,
+   *  \param time current time
+   *  \param derivativeNumber number of the derivative to compute,
    *  optional, default = 0.
    */
-  void computeOutput(double, unsigned int = 0);
+  void computeOutput(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
 
   /** Compute input r of all Dynamical Systems involved in the present
    *   Interaction.
-   *  \param double : current time
-   *  \param unsigned int: order of _lambda used to compute input.
+   *  \param time current time
+   *  \param level order of _lambda used to compute input.
    */
-  void computeInput(double, unsigned int);
+  void computeInput(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
-  /** Get the _workYp vector */
-  inline SP::SiconosVector yp() const
-  {
-    return _workYp;
-  }
-
-
-
-
-  // THe following accessor should suppressed
-  //   SP::BlockVector dataFree() const;
-  //   SP::BlockVector dataX() const;
-  SP::BlockVector dataXq() const;
-  SP::BlockVector dataZ() const;
-  SP::BlockVector dataQ1() const;
-  //void setDataXFromVelocity();
-
-
-  /** Access to an element of data
-   * \warning this function returns a BlockVector, which should be used with parsimoniousness!
-   * \param indx the index
-   * \return a SP::BlockVector
+  /** Get the _yForNssolver vector
+   * \return the y part used in the solver
    */
-  inline SP::BlockVector data(unsigned int indx) const
+  inline SP::SiconosVector yForNSsolver() const
   {
-    return _workspace[indx];
+    return _yForNSsolver;
   }
 
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
@@ -754,7 +713,7 @@ public:
    *  \param int, relative position of the beginning of the required block in relation matrix.
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getLeftInteractionBlockForDS(unsigned int, SP::SiconosMatrix) const;
+  void getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
 
   /** gets the matrix used in interactionBlock computation. Used only for the formulation projecting on the constraints.
    *         We get only the part corresponding to ds.
@@ -768,13 +727,15 @@ public:
    *  \param int, relative position of the beginning of the required block in relation matrix.
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getRightInteractionBlockForDS(unsigned int, SP::SiconosMatrix) const;
+  void getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
 
   /** gets extra interactionBlock corresponding to the present Interaction (see the
    *  top of this files for extra interactionBlock meaning)
    * \param[in,out] InteractionBlock SP::SiconosMatrix
    */
-  void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const;
+  void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
+
+void doExtraForCentralInteractionBlockForDS(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
 
   inline double getYRef(unsigned int i) const
   {
@@ -793,24 +754,17 @@ public:
     return (*_lambda[i])(0);
   }
 
-  /*
-   * Return H_alpha
-   *
-   */
-  SP::SiconosVector Halpha() const
-  {
-    return _h_alpha;
-  };
-
-
   // --- Residu functions
 
   inline SP::SiconosVector residuY() const
   {
-    return _Residuy;
+    return _residuY;
   }
 
-  SP::BlockVector residuR() const;
+  inline SP::SiconosVector Halpha() const
+  {
+    return _h_alpha;
+  }
 
   /*
    *  Compute the residuY.
@@ -819,21 +773,60 @@ public:
    */
   void computeResiduY(double time);
 
-  /*
-   * Compute the residuR.
-   * default management is empty, else must be overloaded.
-   *
+  /* Compute the residuR.
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   * \param the work vectors of the DynamicalSystem
    */
-  void computeResiduR(double time) ;
+  void computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV) ;
 
-  void initData();
-  void initDSData(SP::DynamicalSystem);
-  void initDataFirstOrder();
-  void initDataLagrangian();
-  void initDataNewtonEuler();
-  void initDSDataFirstOrder(SP::DynamicalSystem);
-  void initDSDataLagrangian(SP::DynamicalSystem);
-  void initDSDataNewtonEuler(SP::DynamicalSystem);
+
+  /** Instantiate the link with the DynamicalSystem
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void initData(VectorOfBlockVectors& DSlink);
+
+  /** Initialize the link with the DynamicalSystem
+   * \param ds a DynamicalSystem concerned by this Interaction
+   * \param workVDS the work vectors of the DynamicalSystem
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void initDSData(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink);
+  /** Instantiate the link with the DynamicalSystem, FirstOrderDS variant
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void initDataFirstOrder(VectorOfBlockVectors& DSlink);
+
+  /** Initialize the link with the DynamicalSystem, FirstOrderDS variant
+   * \param ds a DynamicalSystem concerned by this Interaction
+   * \param workVDS the work vectors of the DynamicalSystem
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void initDSDataFirstOrder(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink);
+
+  /** Instantiate the link with the DynamicalSystem, LagrangianDS variant
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void initDataLagrangian(VectorOfBlockVectors& DSlink);
+
+  /** Initialize the link with the DynamicalSystem, LagrangianDS variant
+   * \param ds a DynamicalSystem concerned by this Interaction
+   * \param workVDS the work vectors of the DynamicalSystem
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink);
+
+  /** Instantiate the link with the DynamicalSystem, NewtonEulerDS variant
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void initDataNewtonEuler(VectorOfBlockVectors& DSlink);
+
+  /** Initialize the link with the DynamicalSystem, NewtonEulerDS variant
+   * \param ds a DynamicalSystem concerned by this Interaction
+   * \param workVDS the work vectors of the DynamicalSystem
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink);
+
 };
 
 #endif // INTERACTION_H

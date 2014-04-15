@@ -58,10 +58,10 @@ void ZOHTest::testMatrixExp0()
   init();
   _sim->computeOneStep();
   _sim->nextStep();
-  SP::SiconosMatrix tmpM(new SimpleMatrix(_n, _n, 0));
+  SP::SimpleMatrix tmpM(new SimpleMatrix(_n, _n, 0));
   tmpM->eye();
   *tmpM = (*tmpM) * exp(_h);
-  const SiconosMatrix& Phi = _ZOH->Ad(_DS);
+  const SimpleMatrix& Phi = _ZOH->Ad(_DS);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(0) == _n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(1) == _n, true);
   double diff = (*tmpM - Phi).normInf();
@@ -81,10 +81,10 @@ void ZOHTest::testMatrixExp1()
   init();
   _sim->computeOneStep();
   _sim->nextStep();
-  SP::SiconosMatrix tmpM(new SimpleMatrix(_n, _n, 0));
+  SP::SimpleMatrix tmpM(new SimpleMatrix(_n, _n, 0));
   tmpM->eye();
   (*tmpM)(0, 1) = _h;
-  const SiconosMatrix& Phi = _ZOH->Ad(_DS);
+  const SimpleMatrix& Phi = _ZOH->Ad(_DS);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(0) == _n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(1) == _n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", (*tmpM - Phi).normInf() < _tol, true);
@@ -144,8 +144,8 @@ void ZOHTest::testMatrixIntegration2()
   _x0->zero();
   (*_x0)(0) = 1;
   (*_x0)(1) = -1;
-  SP::SiconosMatrix B(new SimpleMatrix(_n, _n));
-  SP::SiconosMatrix C(new SimpleMatrix(_n, _n));
+  SP::SimpleMatrix B(new SimpleMatrix(_n, _n));
+  SP::SimpleMatrix C(new SimpleMatrix(_n, _n));
   B->eye();
   C->eye();
   SP::FirstOrderLinearTIR rel(new FirstOrderLinearTIR(C, B));
@@ -209,8 +209,8 @@ void ZOHTest::testMatrixIntegration3()
   _x0->zero();
   (*_x0)(0) = 1;
   (*_x0)(1) = 1;
-  SP::SiconosMatrix B(new SimpleMatrix(_n, _n, 0));
-  SP::SiconosMatrix C(new SimpleMatrix(_n, _n));
+  SP::SimpleMatrix B(new SimpleMatrix(_n, _n, 0));
+  SP::SimpleMatrix C(new SimpleMatrix(_n, _n));
   (*B)(1, 0) = 2;
   (*B)(1, 1) = 1;
   C->eye();
@@ -281,8 +281,8 @@ void ZOHTest::testMatrixIntegration4()
   _x0->zero();
   (*_x0)(0) = 1;
   (*_x0)(1) = 1;
-  SP::SiconosMatrix B(new SimpleMatrix(_n, _n, 0));
-  SP::SiconosMatrix C(new SimpleMatrix(_n, _n));
+  SP::SimpleMatrix B(new SimpleMatrix(_n, _n, 0));
+  SP::SimpleMatrix C(new SimpleMatrix(_n, _n));
   (*B)(1, 0) = 2;
   (*B)(1, 1) = 1;
   C->eye();

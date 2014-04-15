@@ -74,19 +74,19 @@ int main(int argc, char* argv[])
     // --- Interaction between linear system and non smooth system ---
 
     // -> Relation
-    SP::SiconosMatrix Int_C(new SimpleMatrix(4, 4));
+    SP::SimpleMatrix Int_C(new SimpleMatrix(4, 4));
     (*Int_C)(0 , 1) = -1.0;
     (*Int_C)(1 , 1) = 1.0;
     (*Int_C)(2 , 2) = 1.0;
     (*Int_C)(3 , 2) = 1.0;
 
-    SP::SiconosMatrix Int_D(new SimpleMatrix(4, 4));
+    SP::SimpleMatrix Int_D(new SimpleMatrix(4, 4));
     (*Int_D)(0 , 2) = 1.0;
     (*Int_D)(1 , 3) = 1.0;
     (*Int_D)(2 , 0) = -1.0;
     (*Int_D)(3 , 1) = -1.0;
 
-    SP::SiconosMatrix Int_B(new SimpleMatrix(4, 4));
+    SP::SimpleMatrix Int_B(new SimpleMatrix(4, 4));
     (*Int_B)(1 , 0) = -1.0 / Crvalue;
     (*Int_B)(1 , 1) = 1.0 / Crvalue;
     (*Int_B)(2 , 2) = 1.0 / Lfvalue;

@@ -18,7 +18,7 @@
 */
 #include "FirstOrderLinearTIR.hpp"
 #include "Interaction.hpp"
-
+#include "BlockVector.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -33,106 +33,104 @@ FirstOrderLinearTIR::FirstOrderLinearTIR():
 }
 
 // Minimum data (C, B as pointers) constructor
-FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newB):
+FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B):
   FirstOrderR(LinearTIR)
 {
-  _jachx = newC;
-  _jacglambda = newB;
+  _C = C;
+  _B = B;
 }
 
 // Constructor from a complete set of data
-FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SiconosVector newE, SP::SiconosMatrix newB):
+FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e, SP::SimpleMatrix B):
   FirstOrderR(LinearTIR)
 {
-  _jachx = newC;
-  _jacglambda = newB;
-  _jachlambda = newD;
-  _F = newF;
-  _e = newE;
+  _C = C;
+  _B = B;
+  _D = D;
+  _F = F;
+  _e = e;
 }
 
-void FirstOrderLinearTIR::initialize(Interaction & inter)
+void FirstOrderLinearTIR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
+  unsigned int sizeZ = DSlink[FirstOrderRDS::z]->size();
+
   DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");
   // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
-  if (!_jachx)
+  if (!_C)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() C is null and is a required input.");
-  if (!_jacglambda)
+  if (!_B)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() B is null and is a required input.");
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
 
-  DEBUG_PRINTF("_jachx->size(0) = %i,\t inter.getSizeOfY() = %i\n ",_jachx->size(0),inter.getSizeOfY() );
-  DEBUG_PRINTF("_jachx->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_jachx->size(1),inter.getSizeOfDS() );
+  DEBUG_PRINTF("_C->size(0) = %i,\t inter.getSizeOfY() = %i\n ",_C->size(0),inter.getSizeOfY() );
+  DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_C->size(1),inter.getSizeOfDS() );
 
-  assert((_jachx->size(0) == inter.getSizeOfY() && _jachx->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
+  assert((_C->size(0) == inter.getSizeOfY() && _C->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 
-  assert((_jacglambda->size(1) == inter.getSizeOfY() && _jacglambda->size(0) ==  inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
+  assert((_B->size(1) == inter.getSizeOfY() && _B->size(0) ==  inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
 
   // C and B are the minimum inputs. The others may remain null.
 
-  if (_jachlambda)
-    assert((_jachlambda->size(0) == inter.getSizeOfY() || _jachlambda->size(1) == inter.getSizeOfY()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
+  if (_D)
+    assert((_D->size(0) == inter.getSizeOfY() || _D->size(1) == inter.getSizeOfY()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
 
 
   if (_F)
-    assert(((_F->size(0) != inter.getSizeOfY()) && (_F->size(1) != inter.getSizez())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
+    assert(((_F->size(0) != inter.getSizeOfY()) && (_F->size(1) != sizeZ)) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
   if (_e)
     assert(_e->size() == inter.getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 }
 
-void FirstOrderLinearTIR::computeh(double time, Interaction & inter)
+void FirstOrderLinearTIR::computeh(BlockVector& x, SiconosVector& lambda, BlockVector& z, SiconosVector& y)
 {
-  computeOutput(time, inter, 0);
-}
 
-void FirstOrderLinearTIR::computeg(double time, Interaction & inter)
-{
-  computeInput(time, inter, 0);
-}
-
-void FirstOrderLinearTIR::computeOutput(double time, Interaction & inter, unsigned int derivativeNumber)
-{
-  // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
-  // y[0]
-
-  // We get y and lambda of the interaction (pointers)
-  SiconosVector& y = *inter.y(0);
-  SiconosVector& lambda = *inter.lambda(0);
-
-  // compute y
-  if (_jachx)
-    prod(*_jachx, *inter.data(x), y);
+  if (_C)
+    prod(*_C, x, y, true);
   else
     y.zero();
 
-  if (_jachlambda)
-    prod(*_jachlambda, lambda, y, false);
+  if (_D)
+    prod(*_D, lambda, y, false);
 
   if (_e)
     y += *_e;
 
   if (_F)
-    prod(*_F, *inter.data(z), y, false);
+    prod(*_F, z, y, false);
+
 }
 
-void FirstOrderLinearTIR::computeInput(double time, Interaction & inter, unsigned int level)
+void FirstOrderLinearTIR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
 {
-  // We get lambda of the interaction (pointers)
-  SiconosVector& lambda = *inter.lambda(level);
-  prod(*_jacglambda, lambda, *inter.data(r), false);
+  // We get y and lambda of the interaction (pointers)
+  SiconosVector& y = *inter.y(0);
+  SiconosVector& lambda = *inter.lambda(0);
+
+  computeh(*DSlink[FirstOrderRDS::x], lambda, *DSlink[FirstOrderRDS::z], y);
+}
+
+void FirstOrderLinearTIR::computeg(SiconosVector& lambda, BlockVector& r)
+{
+  prod(*_B, lambda, r, false);
+}
+
+void FirstOrderLinearTIR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+{
+  computeg(*inter.lambda(level), *DSlink[FirstOrderRDS::r]);
 }
 
 void FirstOrderLinearTIR::display() const
 {
   std::cout << " ===== Linear Time Invariant relation display ===== " <<std::endl;
   std::cout << "| C " <<std::endl;
-  if (_jachx) _jachx->display();
+  if (_C) _C->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << "| D " <<std::endl;
-  if (_jachlambda) _jachlambda->display();
+  if (_D) _D->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << "| F " <<std::endl;
   if (_F) _F->display();
@@ -141,7 +139,7 @@ void FirstOrderLinearTIR::display() const
   if (_e) _e->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << "| B " <<std::endl;
-  if (_jacglambda) _jacglambda->display();
+  if (_B) _B->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << " ================================================== " <<std::endl;
 }

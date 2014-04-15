@@ -74,7 +74,7 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR2()
 void FirstOrderLinearTIRTest::testSetCPtr()
 {
   std::cout << "--> Test: setCPtr." <<std::endl;
-  SP::SiconosMatrix tmp(new SimpleMatrix(*C));
+  SP::SimpleMatrix tmp(new SimpleMatrix(*C));
   tmp->zero();
   SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(tmp, B));
   folr->setCPtr(C);
@@ -114,7 +114,7 @@ void FirstOrderLinearTIRTest::testSetEPtr()
 {
   std::cout << "--> Test: setEPtr." <<std::endl;
   SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(C, B));
-  folr->setEPtr(e);
+  folr->setePtr(e);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr: ", folr->e() == e, true);
   std::cout << "--> setEPtr test ended with success." <<std::endl;
 }
@@ -126,7 +126,7 @@ void FirstOrderLinearTIRTest::testSetEPtr()
 void FirstOrderLinearTIRTest::testSetBPtr()
 {
   std::cout << "--> Test: setBPtr." <<std::endl;
-  SP::SiconosMatrix tmp(new SimpleMatrix(*B));
+  SP::SimpleMatrix tmp(new SimpleMatrix(*B));
   tmp->zero();
   SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(C, tmp));
   folr->setBPtr(B);
@@ -141,9 +141,9 @@ void FirstOrderLinearTIRTest::testGetJacPtr()
   std::cout << "--> Test: jac." <<std::endl;
   SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(C, B));
   folr->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->jachx() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->jachlambda() == D, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->jacglambda() == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->D() == D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->B() == B, true);
 
   std::cout << "--> setBPtr test ended with success." <<std::endl;
 }

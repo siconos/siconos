@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     // --- Interactions ---
     // --------------------
 
-    SP::SiconosMatrix H1(new SimpleMatrix(2, nDof));
+    SP::SimpleMatrix H1(new SimpleMatrix(2, nDof));
     (*H1)(0, 0) = 0;
     (*H1)(0, 1) = 0;
     (*H1)(0, 2) = -h_S;
@@ -91,14 +91,14 @@ int main(int argc, char* argv[])
 
     SP::Relation relation1(new LagrangianLinearTIR(H1, b1));
 
-    SP::SiconosMatrix H2(new SimpleMatrix(2, nDof));
+    SP::SimpleMatrix H2(new SimpleMatrix(2, nDof));
     (*H2)(0, 0) = 0;
     (*H2)(0, 1) = h_M;
     (*H2)(0, 2) = 0;
     (*H2)(1, 0) = 1;
     (*H2)(1, 1) = r_M;
     (*H2)(1, 2) = 0;
-    SP::SiconosMatrix H3(new SimpleMatrix(2, nDof));
+    SP::SimpleMatrix H3(new SimpleMatrix(2, nDof));
     (*H3)(0, 0) = 0;
     (*H3)(0, 1) = -h_M;
     (*H3)(0, 2) = 0;

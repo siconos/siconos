@@ -105,7 +105,7 @@ public:
    * \param double time : current time
    * \param SP::SiconosVector
    */
-  virtual void computef(double, SP::SiconosVector);
+  virtual void computef(double, SiconosVector&);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time

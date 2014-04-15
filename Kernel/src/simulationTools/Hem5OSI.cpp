@@ -355,7 +355,11 @@ void Hem5OSI::fprob(integer* IFCN,
     for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->computeOutput(t,0);
+      VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
+      VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
+      VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
+      SiconosMatrix& osnsM = *indexSet2->properties(*ui).block;
+      inter->computeOutput(t, DSlink, workV, workM, osnsM, 0);
       assert(0);
     }
 
@@ -368,7 +372,10 @@ void Hem5OSI::fprob(integer* IFCN,
     for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->relation()->computeJach(t, *inter);
+      VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
+      VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
+      VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
+      inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
       if (inter->relation()->getType() == NewtonEuler)
       {
         SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
@@ -393,7 +400,10 @@ void Hem5OSI::fprob(integer* IFCN,
     for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->relation()->computeJach(t, *inter);
+      VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
+      VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
+      VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
+      inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
       if (inter->relation()->getType() == NewtonEuler)
       {
         SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
@@ -810,7 +820,7 @@ struct Hem5OSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter->yOld(_osnsp->inputOutputLevel()), *(_inter->yp()), subCoord, false); // q = q + e * q
+    subscal(e, *_inter->yOld(_osnsp->inputOutputLevel()), *(_inter->yForNSsolver()), subCoord, false); // q = q + e * q
   }
 
   // visit function added by Son (9/11/2010)
@@ -827,6 +837,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
+  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -844,12 +855,9 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   SP::SiconosMatrix  C;
   //   SP::SiconosMatrix  D;
   //   SP::SiconosMatrix  F;
-  SP::SiconosVector Yp;
+  SiconosVector& yForNSsolver = *inter->yForNSsolver();
   SP::BlockVector Xfree;
 
-
-  // All of these values should be stored in the node corrseponding to the Interactionwhen a MoreauJeanOSI scheme is used.
-  Yp = inter->yp();
 
   /* V.A. 10/10/2010
        * Following the type of OSNS  we need to retrieve the velocity or the acceleration
@@ -862,7 +870,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   {
     if (relationType == Lagrangian)
     {
-      Xfree = inter->data(LagrangianR::free);
+      Xfree = DSlink[LagrangianRDS::xfree];
     }
     // else if  (relationType == NewtonEuler)
     // {
@@ -875,7 +883,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
 
-    Xfree = inter->dataQ1();
+    Xfree = DSlink[LagrangianRDS::q1];
     //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
     //       Xfree->display();
 
@@ -889,12 +897,11 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
     if (C)
     {
       assert(Xfree);
-      assert(Yp);
 
       coord[3] = C->size(1);
       coord[5] = C->size(1);
 
-      subprod(*C, *Xfree, *Yp, coord, true);
+      subprod(*C, *Xfree, yForNSsolver, coord, true);
     }
 
     SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
@@ -918,8 +925,11 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
       }
       else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
+        SiconosVector q = *DSlink[LagrangianRDS::q0];
+        SiconosVector z = *DSlink[LagrangianRDS::z];
+        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
+        *DSlink[LagrangianRDS::z] = z;
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
       }
       else
         RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
@@ -929,8 +939,8 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
     {
       if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
       {
-        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), *Yp, xcoord, false); // y += NonLinearPart
+        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), yForNSsolver, xcoord, false); // y += NonLinearPart
       }
     }
   }

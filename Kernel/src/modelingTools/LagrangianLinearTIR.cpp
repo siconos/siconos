@@ -20,19 +20,19 @@
 #include "Interaction.hpp"
 //
 #include "LagrangianDS.hpp"
-
+#include "BlockVector.hpp"
 
 using namespace RELATION;
 
 // Minimum data (C as pointer) constructor
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C):
   LagrangianR(LinearTIR)
 {
   _jachq = C;
 }
 
 // Constructor from a complete set of data
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e):
   LagrangianR(LinearTIR)
 {
   _jachq = C;
@@ -42,7 +42,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix 
 }
 
 // Minimum data (C, e as pointers) constructor
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosVector e):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e):
   LagrangianR(LinearTIR)
 {
   _jachq = C;
@@ -50,14 +50,14 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosVector 
 }
 
 // Minimum data (C as matrix) constructor
-LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC):
+LagrangianLinearTIR::LagrangianLinearTIR(const SimpleMatrix& newC):
   LagrangianR(LinearTIR)
 {
   _jachq.reset(new SimpleMatrix(newC));
 }
 
 // Constructor from a complete set of data (matrices)
-LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD, const SiconosMatrix& newF, const SiconosVector& newE):
+LagrangianLinearTIR::LagrangianLinearTIR(const SimpleMatrix& newC, const SiconosMatrix& newD, const SiconosMatrix& newF, const SiconosVector& newE):
   LagrangianR(LinearTIR)
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
@@ -68,7 +68,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
 }
 
 // Constructor from C and e as matrix/vector
-LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const SiconosVector& newE):
+LagrangianLinearTIR::LagrangianLinearTIR(const SimpleMatrix& newC, const SiconosVector& newE):
   LagrangianR(LinearTIR)
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
@@ -76,7 +76,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   _e.reset(new SiconosVector(newE));
 }
 
-void LagrangianLinearTIR::initComponents(Interaction& inter)
+void LagrangianLinearTIR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   unsigned int sizeY = inter.getSizeOfY();
 
@@ -89,26 +89,27 @@ void LagrangianLinearTIR::initComponents(Interaction& inter)
   if ((_e) && _e->size() != sizeY)
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
 
+  unsigned int sizeZ = DSlink[LagrangianRDS::z]->size();
   if ((_F) && (
-        _F->size(0) != inter.getSizez() || _F->size(1) != inter.getSizez()))
+        _F->size(0) != sizeZ || _F->size(1) != sizeZ))
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
 
 
 }
 
-void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
+void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
   SiconosVector& y = *inter.y(derivativeNumber);
 
-  prod(*_jachq, *inter.data(q0 + derivativeNumber), y);
+  prod(*_jachq, *DSlink[LagrangianRDS::q0 + derivativeNumber], y);
 
   if (derivativeNumber == 0)
   {
     if (_e)
       y += *_e;
     if (_F)
-      prod(*_F, *inter.data(z), y, false);
+      prod(*_F, *DSlink[LagrangianRDS::z], y, false);
   }
 
   if (_jachlambda)
@@ -120,12 +121,12 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigne
 
 }
 
-void LagrangianLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)
+void LagrangianLinearTIR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
 {
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
   // computation of p = Ht lambda
-  prod(lambda, *_jachq, *inter.data(p0 + level), false);
+  prod(lambda, *_jachq, *DSlink[LagrangianRDS::p0 + level], false);
 }
 
 void LagrangianLinearTIR::display() const

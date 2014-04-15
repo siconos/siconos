@@ -231,7 +231,7 @@ public:
   };
 
   /** To know if the output interaction residu must be computed. */
-  bool computeResiduY()
+  virtual bool computeResiduY()
   {
     return _computeResiduY;
   };
@@ -246,7 +246,7 @@ public:
   };
 
   /** To known if the input interaction residu must be computed. */
-  bool computeResiduR()
+  virtual bool computeResiduR()
   {
     return _computeResiduR;
   };

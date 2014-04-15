@@ -121,7 +121,7 @@ public:
    *  \exception RuntimeException
    */
   virtual void computeRhs(double, bool  = false);
-  virtual void resetNonSmoothPart();
+  virtual void resetNonSmoothPart(unsigned int level);
 
 };
 

@@ -46,7 +46,7 @@ public:
 
   my_NewtonEulerR(double radius): R_CLASS(), _sBallRadius(radius) { };
 
-  virtual void computeh(double t, Interaction& inter)
+  virtual void computeOutput(double t, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, unsigned int level)
   {
     SP::SiconosVector y = inter.y(0);
     double height = fabs(inter.data(q0)->getValue(0)) - _sBallRadius;

@@ -320,10 +320,10 @@ public:
   void initW(double, SP::DynamicalSystem);
 
   /** compute WMap[ds] EulerMoreauOSI matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param time the current time
+   *  \param ds the DynamicalSystem
    */
-  void computeW(double, SP::DynamicalSystem);
+  void computeW(double time, DynamicalSystem& ds);
 
   /** compute WBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t
    *  \param the time (double)
@@ -336,13 +336,13 @@ public:
    */
   void initWBoundaryConditions(SP::DynamicalSystem);
 
-  /** return the maximum of all norms for the "EulerMoreauOSI-discretized" residus of DS
-      \return a double
+  /** Computes the residuFree and residu of all the DynamicalSystems
+      \return the maximum of the 2-norm over all the residu
    */
   double computeResidu();
 
   /** Perform the integration of the dynamical systems linked to this integrator
-   *  without taking into account the nonsmooth input (_r or _p)
+   *  without taking into account the nonsmooth input r
    */
   virtual void computeFreeState();
 
@@ -363,7 +363,8 @@ public:
   //virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
 
-  /**
+  /** computes all the W matrices
+   * \param time current time
    */
   void prepareNewtonIteration(double time);
 

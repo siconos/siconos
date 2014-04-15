@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
     double e = 0.9;
 
     // Interaction ball-floor
-    SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
+    SP::SimpleMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 1.0;
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));

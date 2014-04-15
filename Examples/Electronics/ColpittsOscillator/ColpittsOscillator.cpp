@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     SP::FirstOrderLinearDS LSCollpitts(new FirstOrderLinearDS(init_state,LS_A,LS_b));
 
     // --- Interaction between linear system and non smooth system ---
-    SP::SiconosMatrix Int_C(new SimpleMatrix(2, 3));
+    SP::SimpleMatrix Int_C(new SimpleMatrix(2, 3));
 
     (*Int_C)(0, 0) = 1.0;
     (*Int_C)(1, 0) = 0.0;
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     // (*Int_D)(2, 0) = 1.0;
     // (*Int_D)(3, 1) = 1.0;
 
-    SP::SiconosMatrix Int_B(new SimpleMatrix(3, 2));
+    SP::SimpleMatrix Int_B(new SimpleMatrix(3, 2));
     (*Int_B)(0, 0) = 1.0 /C1 ;
     (*Int_B)(1, 0) = (1.0-alphaR) / C2;
     (*Int_B)(2, 0) = 0.0;

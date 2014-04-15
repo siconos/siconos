@@ -363,7 +363,10 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
-    inter->relation()->computeJach(t, *inter);
+    VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
+    VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
+    VectorOfSMatrices& workM = *indexSet0->properties(*ui).workMatrices;
+    inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
     if (inter->relation()->getType() == NewtonEuler)
     {
       SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
@@ -779,16 +782,20 @@ double EventDriven::computeResiduConstraints()
       bool _flag = osi_NewMark->getFlagVelocityLevel();
       for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
-        SP::Interaction inter = indexSet2->bundle(*ui);
+        Interaction& inter = *indexSet2->bundle(*ui);
+        VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
+        VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
+        VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
+        SiconosMatrix& osnsM = *indexSet2->properties(*ui).block;
         if (!_flag) // constraints at the position level
         {
-          inter->computeOutput(t, 0); // compute y[0] for the interaction at the end time
-          _y = (*inter->y(0))(0);
+          inter.computeOutput(t, DSlink, workV, workM, osnsM, 0); // compute y[0] for the interaction at the end time
+          _y = (*inter.y(0))(0);
         }
         else // constraints at the velocity level
         {
-          inter->computeOutput(t, 1); // compute y[1] for the interaction at the end time
-          _y = (*inter->y(1))(0);
+          inter.computeOutput(t, DSlink, workV, workM, osnsM, 1); // compute y[1] for the interaction at the end time
+          _y = (*inter.y(1))(0);
         }
 
         if (_maxResiduGap < abs(_y))
@@ -883,14 +890,18 @@ void EventDriven::predictionNewtonIteration()
   }
   // Prediction of the output and lambda for all Interactions before Newton iteration
   double t = nextTime(); // time at the end of the step
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  InteractionsGraph& indexSet0 = *model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   // Loop over all interactions
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet0->bundle(*ui);
-    inter->computeOutput(t, 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
-    inter->lambda(2)->zero(); // reset lambda[2] to zero
+    Interaction& inter = *indexSet0.bundle(*ui);
+    VectorOfBlockVectors& DSlink = *indexSet0.properties(*ui).DSlink;
+    VectorOfVectors& workV = *indexSet0.properties(*ui).workVectors;
+    VectorOfSMatrices& workM = *indexSet0.properties(*ui).workMatrices;
+    SiconosMatrix& osnsM = *indexSet0.properties(*ui).block;
+    inter.computeOutput(t, DSlink, workV, workM, osnsM, 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
+    inter.lambda(2)->zero(); // reset lambda[2] to zero
   }
 }
 

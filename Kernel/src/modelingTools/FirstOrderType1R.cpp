@@ -23,144 +23,149 @@
 #include "BlockVector.hpp"
 
 
-FirstOrderType1R::FirstOrderType1R(const std::string& computeOut, const std::string& computeIn):
+FirstOrderType1R::FirstOrderType1R(const std::string& pluginh, const std::string& pluging):
   FirstOrderR(RELATION::Type1R)
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputehFunction(SSLH::getPluginName(computeOut), SSLH::getPluginFunctionName(computeOut));
-  setComputegFunction(SSLH::getPluginName(computeIn), SSLH::getPluginFunctionName(computeIn));
+  setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
+  setComputegFunction(SSLH::getPluginName(pluging), SSLH::getPluginFunctionName(pluging));
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
 
-FirstOrderType1R::FirstOrderType1R(const std::string& computeOut, const std::string& computeIn, const std::string& computeJX, const std::string& computeJL):
+FirstOrderType1R::FirstOrderType1R(const std::string& pluginh, const std::string& pluging, const std::string& pluginJachx, const std::string& pluginJacglambda):
   FirstOrderR(RELATION::Type1R)
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputehFunction(SSLH::getPluginName(computeOut), SSLH::getPluginFunctionName(computeOut));
-  setComputegFunction(SSLH::getPluginName(computeIn), SSLH::getPluginFunctionName(computeIn));
-  setComputeJachxFunction(SSLH::getPluginName(computeJX), SSLH::getPluginFunctionName(computeJX));
-  setComputeJacglambdaFunction(SSLH::getPluginName(computeJL), SSLH::getPluginFunctionName(computeJL));
+  setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
+  setComputegFunction(SSLH::getPluginName(pluging), SSLH::getPluginFunctionName(pluging));
+  setComputeJachxFunction(SSLH::getPluginName(pluginJachx), SSLH::getPluginFunctionName(pluginJachx));
+  setComputeJacglambdaFunction(SSLH::getPluginName(pluginJacglambda), SSLH::getPluginFunctionName(pluginJacglambda));
 }
 
-void FirstOrderType1R::initialize(Interaction& inter)
+void FirstOrderType1R::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  FirstOrderR::initialize(inter);
 
   // Check if an Interaction is connected to the Relation.
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
-  unsigned int sizeZ = inter.data(z)->size();
+  unsigned int sizeZ = DSlink[FirstOrderRDS::z]->size();
 
-  if (!_jachx)
-    _jachx.reset(new SimpleMatrix(sizeY, sizeDS));
-  if (!_jachz)
-    _jachz.reset(new SimpleMatrix(sizeY, sizeZ));
-  if (!_jacglambda)
-    _jacglambda.reset(new SimpleMatrix(sizeDS, sizeY));
 
-  if (_jachx->size(0) == 0) // if the matrix dim are null
-    _jachx->resize(sizeY, sizeDS);
-  else
-    assert((_jachx->size(1) == sizeDS && _jachx->size(0) == sizeY) &&
-           "FirstOrderType1R::initialize inconsistent sizes between _jach[0] matrix and the interaction.");
+  workV.resize(FirstOrderRVec::workVecSize);
+  workV[FirstOrderRVec::z].reset(new SiconosVector(sizeZ));
+  workV[FirstOrderRVec::x].reset(new SiconosVector(sizeDS));
+  workV[FirstOrderRVec::r].reset(new SiconosVector(sizeDS));
 
-  // Same work for jacobianLambdaG
-  if (_jacglambda->size(0) == 0) // if the matrix dim are null
-    _jacglambda->resize(sizeDS, sizeY);
-  else
-    assert((_jacglambda->size(0) == sizeDS && _jacglambda->size(1) == sizeY) &&
-           "FirstOrderType1R::initialize inconsistent sizes between _jacg[0] matrix and the interaction.");
+  workM.resize(FirstOrderRMat::workMatSize);
+
+  if (!_C)
+    workM[FirstOrderRMat::C].reset(new SimpleMatrix(sizeY, sizeDS));
+  if (!_D)
+    workM[FirstOrderRMat::D].reset(new SimpleMatrix(sizeY, sizeY));
+  if (!_F)
+    workM[FirstOrderRMat::F].reset(new SimpleMatrix(sizeY, sizeZ));
+  if (!_B)
+    workM[FirstOrderRMat::B].reset(new SimpleMatrix(sizeDS, sizeY));
 }
 
-void FirstOrderType1R::computeh(double time, Interaction& inter)
-{
-  computeOutput(time, inter, 0);
-}
-
-void FirstOrderType1R::computeg(double time, Interaction& inter)
-{
-  computeInput(time, inter, 0);
-}
-
-void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned int)
+void FirstOrderType1R::computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
 
+  ((Type1Ptr)(_pluginh->fPtr))(x.size(), &(x)(0), y.size(), &(y)(0), z.size(), &(z)(0));
+
+}
+
+void FirstOrderType1R::computeg(double time, SiconosVector& lambda, SiconosVector& z, SiconosVector& r)
+{
+  assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
+
+  ((Type1Ptr)(_pluging->fPtr))(lambda.size(), &(lambda)(0), r.size(), &(r)(0), z.size(), &(z)(0));
+
+}
+
+void FirstOrderType1R::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+{
   SiconosVector& y = *inter.y(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
-  SiconosVector workX = *inter.data(x);
-  SiconosVector workZ = *inter.data(z);
+  SiconosVector& workX = *workV[FirstOrderRVec::x];
+  workX = *DSlink[FirstOrderRDS::x];
+  SiconosVector& workZ = *workV[FirstOrderRVec::z];
+  workZ = *DSlink[FirstOrderRDS::z];
 
-  ((Type1Ptr)(_pluginh->fPtr))(workX.size(), &(workX)(0), y.size(), &(y)(0), workZ.size(), &(workZ)(0));
+  computeh(time, workX, workZ, y);
 
-  // Rebuilt z from Tmp
-  *inter.data(z) = workZ;
+  *DSlink[FirstOrderRDS::z] = workZ;
 }
 
-void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned int level)
+void FirstOrderType1R::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
 {
   assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
   SiconosVector& lambda = *inter.lambda(level);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
-  SiconosVector workR = *inter.data(r);
-  SiconosVector workZ = *inter.data(z);
+  SiconosVector& workR = *workV[FirstOrderRVec::r];
+  workR = *DSlink[FirstOrderRDS::r];
+  SiconosVector& workZ = *workV[FirstOrderRVec::z];
+  workZ = *DSlink[FirstOrderRDS::z];
 
-  ((Type1Ptr)(_pluging->fPtr))(lambda.size(), &(lambda)(0), workR.size(), &(workR)(0), workZ.size(), &(workZ)(0));
+  computeg(time, lambda, workZ, workR);
 
-  *inter.data(r) = workR;
-  *inter.data(z) = workZ;
+  *DSlink[FirstOrderRDS::r] = workR;
+  *DSlink[FirstOrderRDS::z] = workZ;
 }
 
-void FirstOrderType1R::computeJachx(double time, Interaction& inter)
+void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C)
 {
   //
   assert(_pluginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
 
-  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  SiconosVector workX = *inter.data(x);
-  SiconosVector workZ = *inter.data(z);
+  ((Type1Ptr)(_pluginJachx->fPtr))(x.size(), &(x)(0), C.size(0), C.getArray(), z.size(), &(z)(0));
 
-  unsigned int sizeY = inter.getSizeOfY();
-
-  ((Type1Ptr)(_pluginJachx->fPtr))(workX.size(), &(workX)(0), sizeY, &(*(_jachx))(0, 0), workZ.size(), &(workZ)(0));
-
-  // Rebuilt z from Tmp
-  *inter.data(z) = workZ;
 }
 
-void FirstOrderType1R::computeJachz(double time, Interaction& inter)
+void FirstOrderType1R::computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& D)
 {
-  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  SiconosVector workX = *inter.data(x);
-  SiconosVector workZ = *inter.data(z);
-
-  unsigned int sizeZ = inter.data(z)->size();
-
   if (_pluginJachz && _pluginJachz->fPtr)
-    ((Type1Ptr)(_pluginJachz->fPtr))(workX.size(), &(workX)(0), sizeZ, &(*(_jachz))(0, 0), workZ.size(), &(workZ)(0));
+    ((Type1Ptr)(_pluginJachz->fPtr))(x.size(), &(x)(0), D.size(0), D.getArray(), z.size(), &(z)(0));
 
-  // Rebuilt z from Tmp
-  *inter.data(z) = workZ;
 }
 
-void FirstOrderType1R::computeJacglambda(double time, Interaction& inter)
+void FirstOrderType1R::computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
 {
   assert(_pluginJacLg && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
 
-  SiconosVector& lambda = *inter.lambda(0);
-  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  SiconosVector workZ = *inter.data(z);
-
-  unsigned int sizeX = inter.data(x)->size();
-
-  ((Type1Ptr)(_pluginJacLg->fPtr))(lambda.size(), &(lambda)(0), sizeX, &(*(_jacglambda))(0, 0), workZ.size(), &(workZ)(0));
-
-  // Rebuilt z from Tmp
-  *inter.data(z) = workZ;
+  ((Type1Ptr)(_pluginJacLg->fPtr))(lambda.size(), &(lambda)(0), B.size(0), B.getArray(), z.size(), &(z)(0));
 }
 
+void FirstOrderType1R::computeJach(double time, Interaction& inter,VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+{
+  SiconosVector& x = *workV[FirstOrderRVec::x];
+  x = *DSlink[FirstOrderRDS::x];
+  SiconosVector& z = *workV[FirstOrderRVec::z];
+  z = *DSlink[FirstOrderRDS::z];
+  if (!_C)
+  {
+    computeJachx(time, x, z, *workM[FirstOrderRMat::C]);
+  }
+  if (!_F)
+  {
+    computeJachz(time, x, z, *workM[FirstOrderRMat::F]);
+  }
+  *DSlink[FirstOrderRDS::z] = z;
+}
+
+void FirstOrderType1R::computeJacg(double time, Interaction& inter,VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+{
+  SiconosVector& z = *workV[FirstOrderRVec::z];
+  z = *DSlink[FirstOrderRDS::z];
+  if (!_B)
+  {
+    computeJacglambda(time, *inter.lambda(0), z, *workM[FirstOrderRMat::B]);
+  }
+  *DSlink[FirstOrderRDS::z] = z;
+}

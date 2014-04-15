@@ -47,14 +47,11 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderLinearTIR);
 
+  /** initialize the relation (check sizes, memory allocation ...)
+   * \param inter the interaction that owns this relation
+  */
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
-
-
-
-  /** F matrix, coefficient of z */
-  SP::SiconosMatrix _F;
-
-  /** e*/
   SP::SiconosVector _e;
 
 public:
@@ -67,7 +64,7 @@ public:
   *  \param C the matrix C
   *  \param B the matrix B
   */
-  FirstOrderLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix B);
+  FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B);
 
   /** create the Relation from a set of data
   *  \param C the C matrix
@@ -76,134 +73,74 @@ public:
   *  \param e the e matrix
   *  \param B the B matrix
   */
-  FirstOrderLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e, SP::SiconosMatrix B);
+  FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e, SP::SimpleMatrix B);
 
   /** destructor
   */
   virtual ~FirstOrderLinearTIR() {};
 
-  /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction that owns this relation
-  */
-  void initialize(Interaction& inter);
+  // GETTERS/SETTERS
 
   /** default function to compute h
   *  \param time current time
-  *  \param inter the interaction that owns this relation
+  *  \param xXXX
+  *  \param zXXX
+  *  \param y value of h
   */
-  void computeh(double time, Interaction& inter);
+  void computeh(BlockVector& x, SiconosVector& lambda, BlockVector& z, SiconosVector& y);
 
   /** default function to compute g
-  *  \param time current time
-  *  \param inter the interaction that owns this relation
+  *  \param lambdaXXX
+  *  \param r non-smooth input
   */
-  void computeg(double time, Interaction& inter);
+  void computeg(SiconosVector& lambda, BlockVector& r);
 
   /** default function to compute y
-  *  \param double: not used
-  *  \param unsigned int: not used
+  *  \param time current time
+  *  \param inter Interaction using this Relation
+  *  \param DSlink
+  *  \param workV
+  *  \param workM
+  *  \param level not used
   */
-  void computeOutput(double time, Interaction& inter, unsigned int = 0);
+  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
   /** default function to compute r
-  *  \param double : not used
-  *  \param unsigned int: not used
+  *  \param time current time
+  *  \param inter Interaction using this Relation
+  *  \param DSlink
+  *  \param workM
+  *  \param level not used
   */
-  void computeInput(double time, Interaction& inter, unsigned int = 0);
-
-  // GETTERS/SETTERS
-
-  /** get C
-  *  \return pointer on a plugged matrix
-  */
-  inline SP::SiconosMatrix C() const
-  {
-    return _jachx;
-  }
-
-  /** set C to pointer newPtr
-  *  \param a SP to plugged matrix
-  */
-  inline void setCPtr(SP::SiconosMatrix newPtr)
-  {
-    _jachx = newPtr;
-  }
-
-  /** get D
-  *  \return pointer on a plugged matrix
-  */
-  inline SP::SiconosMatrix D() const
-  {
-    return _jachlambda;
-  }
-
-  /** set D to pointer newPtr
-  *  \param a SP to plugged matrix
-  */
-  inline void setDPtr(SP::SiconosMatrix newPtr)
-  {
-    _jachlambda = newPtr;
-  }
-
-  // -- F --
-
-  /** get the value of F
-  *  \return plugged matrix
-  */
-
-  inline SP::SiconosMatrix F() const
-  {
-    return _F;
-  }
-
-  /** set F to pointer newPtr
-  *  \param a SP to plugged matrix
-  */
-  inline void setFPtr(SP::SiconosMatrix newPtr)
-  {
-    _F = newPtr;
-  }
-
-  /** get e
-  *  \return pointer on a plugged vector
-  */
-  inline SP::SiconosVector e() const
-  {
-    return _e;
-  }
-
-
-  /** set e to pointer newPtr
-  *  \param a SP to plugged vector
-  */
-  inline void setEPtr(SP::SiconosVector newPtr)
-  {
-    _e = newPtr;
-  }
-
-  /** get B
-  *  \return pointer on a plugged matrix
-  */
-  inline SP::SiconosMatrix B() const
-  {
-    return _jacglambda;
-  }
-
-  /** set B to pointer newPtr
-  *  \param a SP to plugged matrix
-  */
-  inline void setBPtr(SP::SiconosMatrix newPtr)
-  {
-    _jacglambda = newPtr;
-  }
+  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
   /** print the data to the screen
   */
   void display() const;
 
-  virtual void computeJachx(double time, Interaction& inter) {};
-  virtual void computeJachlambda(double time, Interaction& inter) {};
-  virtual void computeJacglambda(double time, Interaction& inter) {};
+  /** compute the jacobian of h: nothing to be done here
+   */
+  virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) {};
+
+  /** compute the jacobian of g: nothing to be done here
+   */
+  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) {};
+
+  /** set e
+  *  \param  newe the new value of e
+  */
+  inline void setePtr(SP::SiconosVector newe)
+  {
+    _e = newe;
+  }
+
+  /** get e
+  *  \return e matrix
+  */
+  inline SP::SiconosVector e() const
+  {
+    return _e;
+  }
 
   /**
   * return true if the relation is linear.

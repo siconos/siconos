@@ -96,7 +96,7 @@ protected:
   SP::SiconosVector  _u;
 
   /** B Matrix */
-  SP::SiconosMatrix _B;
+  SP::SimpleMatrix _B;
 
   /** ControlSensor feeding the Controller */
   SP::ControlSensor _sensor;
@@ -155,12 +155,12 @@ public:
   /** Set the B matrix
    * \param B the new B matrix
   */
-  void setB(const SiconosMatrix& B);
+  void setB(const SimpleMatrix& B);
 
   /** Set the B matrix
    * \param B the new B matrix
    */
-  inline void setBPtr(SP::SiconosMatrix B)
+  inline void setBPtr(SP::SimpleMatrix B)
   {
     _B = B;
   };

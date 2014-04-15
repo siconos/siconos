@@ -35,7 +35,7 @@ LinearSMC::LinearSMC(SP::ControlSensor sensor, unsigned int type):
 {
 }
 
-LinearSMC::LinearSMC(SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D, unsigned int type):
+LinearSMC::LinearSMC(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D, unsigned int type):
   CommonSMC(type, sensor, B, D)
 {
 }
@@ -67,7 +67,7 @@ void LinearSMC::actuate()
 
 }
 
-void LinearSMC::setD(const SiconosMatrix& D)
+void LinearSMC::setD(const SimpleMatrix& D)
 {
   _D.reset(new SimpleMatrix(D));
 }

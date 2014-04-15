@@ -66,12 +66,13 @@ variables are required in g.
 
  *
  */
+namespace FirstOrderRDS {enum {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};}
+namespace FirstOrderRVec {enum {xfree, z, x, r, e, g_alpha, residuR, workVecSize};}
+namespace FirstOrderRMat {enum {C, D, F, B, K, Ktilde, Khat, workMatSize};}
+
+
 class FirstOrderR : public Relation
 {
-public:
-
-  enum DataNames {free, z, x, xq, r, deltax, g_alpha, residu_r, ds_xp, sizeDataNames};
-
 protected:
   /** serialization hooks
   */
@@ -82,9 +83,14 @@ protected:
   */
   FirstOrderR(RELATION::SUBTYPES newType): Relation(RELATION::FirstOrder, newType) {}
 
-  SP::SiconosMatrix _jachx;
-  SP::SiconosMatrix _jachz;
-  SP::SiconosMatrix _jacglambda;
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
+
+  SP::SimpleMatrix _C;
+  SP::SimpleMatrix _D;
+  SP::SimpleMatrix _F;
+
+  SP::SimpleMatrix _B;
+  SP::SimpleMatrix _K;
 
 public:
 
@@ -92,102 +98,81 @@ public:
   */
   virtual ~FirstOrderR() {};
 
-  /** get a pointer on matrix Jacg[index]
-  *  \return a pointer on a SiconosMatrix
-  */
-  virtual SP::SiconosMatrix jacglambda() const
-  {
-    return _jacglambda;
-  }
-
-  /** set Jacg[index] to pointer newPtr (pointer link)
-  *  \param SP::SiconosMatrix  newPtr
-  *  \param unsigned int: index position in Jacg vector
-  */
-  inline void setJacglambdaPtr(SP::SiconosMatrix newPtr)
-  {
-    _jacglambda = newPtr ;
-  }
-
   /** initialize the relation (check sizes, memory allocation ...)
   \param SP to Interaction: the interaction that owns this relation
   */
-  virtual void initialize(Interaction& inter);
+  virtual void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
-  /** default function to compute h
-  *  \param double : current time
+  /** set C to pointer newC
+  *  \param newC the C matrix
   */
-  virtual void computeh(double time, Interaction& inter) = 0;
-
-  /** default function to compute g
-  *  \param double : current time
-  */
-  virtual void computeg(double time, Interaction& inter) = 0;
-
-  /** default function to compute jacobianH
-  *  \param double : current time
-  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
-  */
-  virtual void computeJachx(double time, Interaction& inter);
-  virtual void computeJachz(double time, Interaction& inter);
-  virtual void computeJachlambda(double time, Interaction& inter);
-  virtual void computeJach(double time, Interaction& inter)
+  inline void setCPtr(SP::SimpleMatrix newC)
   {
-    computeJachx(time, inter);
-    computeJachz(time, inter);
-    computeJachlambda(time, inter);
+    _C = newC;
   }
 
-
-  /** default function to compute jacobianG according to lambda
-  *  \param double : current time
-  *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+  /** set B to pointer newB
+  *  \param newPtr the B matrix
   */
-  virtual void computeJacglambda(double time, Interaction& inter);
-
-  virtual void computeJacg(double time, Interaction& inter)
+  inline void setBPtr(SP::SimpleMatrix newB)
   {
-    computeJacglambda(time, inter);
+    _B = newB;
   }
 
-  SP::SiconosMatrix jachx() const
+  /** set D to pointer newPtr
+  *  \param newD the D matrix
+  */
+  inline void setDPtr(SP::SimpleMatrix newD)
   {
-    return _jachx;
+    _D = newD;
   }
 
-  /**
-  * return a SP on the C matrix.
-  * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
-  *
+  /** set F to pointer newPtr
+  *  \param newF the F matrix
   */
-  inline SP::SiconosMatrix C() const
+  inline void setFPtr(SP::SimpleMatrix newF)
   {
-    return _jachx;
+    _F = newF;
   }
-  /**
-  * return a SP on the F matrix.
-  * The matrix F in the linear case, else it returns Jacobian of the output with respect to z.
-  *
+
+  /** get C
+  *  \return C matrix
   */
-  inline SP::SiconosMatrix F() const
+  inline SP::SimpleMatrix C() const
   {
-    return _jachz;
+    return _C;
   }
-  /**
-  * return a SP on the D matrix.
-  * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
+
+  /** get D
+  *  \return D matrix
   */
-  inline SP::SiconosMatrix D() const
+  inline SP::SimpleMatrix D() const
   {
-    return _jachlambda;
+    return _D;
   }
-  /**
-  * return a SP on the B matrix.
-  * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
+
+  /** get F
+  *  \return F matrix
   */
-  inline SP::SiconosMatrix B() const
+  inline SP::SimpleMatrix F() const
   {
-    return _jacglambda;
+    return _F;
+  }
+
+  /** get B
+  *  \return B matrix
+  */
+  inline SP::SimpleMatrix B() const
+  {
+    return _B;
+  }
+
+  /** get K
+  *  \return K matrix
+  */
+  inline SP::SimpleMatrix K() const
+  {
+    return _K;
   }
 
 };

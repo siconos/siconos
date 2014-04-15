@@ -117,15 +117,6 @@ bool Relation::isePlugged() const
   return _plugine->isPlugged();
 }
 
-
-void Relation::computeg(double time, Interaction& inter)
-{
-  unsigned int i = inter.getRelativeDegree();
-  if (i)
-    i--;
-  computeInput(time, inter, i);
-}
-
 void Relation::setComputeJachlambdaFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJachlambda->setComputeFunction(pluginPath, functionName);

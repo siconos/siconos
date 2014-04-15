@@ -642,8 +642,6 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
   // SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
   SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
 
-
-
   InteractionsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
@@ -657,8 +655,13 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
        aVi != viend; ++aVi)
   {
     SP::Interaction interac = indexSet->bundle(*aVi);
-    interac->computeOutput(getTkp1(), 0);
-    interac->relation()->computeJach(getTkp1(), *interac);
+
+    VectorOfBlockVectors& DSlink = *indexSet->properties(*aVi).DSlink;
+    VectorOfVectors& workV = *indexSet->properties(*aVi).workVectors;
+    VectorOfSMatrices& workM = *indexSet->properties(*aVi).workMatrices;
+    SiconosMatrix& osnsM = *indexSet->properties(*aVi).block;
+    interac->computeOutput(getTkp1(), DSlink, workV, workM, osnsM, 0);
+    interac->relation()->computeJach(getTkp1(), *interac, DSlink, workV, workM);
     if (interac->relation()->getType() == RELATION::NewtonEuler)
     {
       SP::DynamicalSystem ds1 = indexSet->properties(*aVi).source;

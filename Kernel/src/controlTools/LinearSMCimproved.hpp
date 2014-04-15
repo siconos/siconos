@@ -78,7 +78,7 @@ public:
    * \param B the B matrix in the FirstOrderLinearR
    * \param D the D matrix in the FirstOrderLinearR
    */
-  LinearSMCimproved(SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D);
+  LinearSMCimproved(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D);
 
   /** destructor
    */

@@ -59,7 +59,7 @@ protected:
   // /*because set is not sorted!*/
   // SP::NewtonEulerDS _ds1;
   // SP::NewtonEulerDS _ds2;
-  virtual void initComponents(Interaction& inter);
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /*Matrix converting  the absolute coordinate to the contact coordinate.*/
   SP::SimpleMatrix _Mabs_C;
@@ -89,16 +89,11 @@ public:
     /*_ds1=NULL;_ds2=NULL;*/
   }
 
-  // inline void setDs1(SP::NewtonEulerDS ds1){_ds1=ds1;}
-  // inline void setDs2(SP::NewtonEulerDS ds2){_ds2=ds2;}
-  // inline SP::NewtonEulerDS ds1(){return _ds1;}
-  // inline SP::NewtonEulerDS ds2(){return _ds2;}
-
   /** destructor
   */
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
-  virtual void computeJachq(double time, Interaction& inter);
+  virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   inline SP::SiconosVector pc1() const

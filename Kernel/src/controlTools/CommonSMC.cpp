@@ -101,7 +101,7 @@ void CommonSMC::initialize(const Model& m)
   _ueq.reset(new SiconosVector(sDim));
 }
 
-void CommonSMC::setCsurface(const SiconosMatrix& newValue)
+void CommonSMC::setCsurface(const SimpleMatrix& newValue)
 {
   // check dimensions ...
   if (_Csurface)
@@ -150,13 +150,13 @@ void CommonSMC::computeUeq()
 
 }
 
-void CommonSMC::setCsurfacePtr(SP::SiconosMatrix newPtr)
+void CommonSMC::setCsurfacePtr(SP::SimpleMatrix newPtr)
 {
   // check dimensions ...
   _Csurface = newPtr;
 }
 
-void CommonSMC::setSaturationMatrix(const SiconosMatrix& satM)
+void CommonSMC::setSaturationMatrix(const SimpleMatrix& satM)
 {
   // check dimensions ...
   if (satM.size(1) != _B->size(1))
@@ -176,7 +176,7 @@ void CommonSMC::setSaturationMatrix(const SiconosMatrix& satM)
   }
 }
 
-void CommonSMC::setSaturationMatrixPtr(SP::SiconosMatrix newPtr)
+void CommonSMC::setSaturationMatrixPtr(SP::SimpleMatrix newPtr)
 {
   // check dimensions ...
   if (newPtr->size(1) != _B->size(1))

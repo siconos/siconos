@@ -39,8 +39,8 @@ typedef void (*Type1Ptr)(unsigned int, double*, unsigned int, double*, unsigned 
  *
  *  Relation for First Order Dynamical Systems, with:
  * \f{eqnarray}
- * y &=& h(X,Z)\\
- * r &=& g(\lambda,Z)
+ * y &=& h(x,z)\\
+ * r &=& g(\lambda,z)
  * \f}
  *
  * Operators (and their corresponding plug-in):
@@ -64,69 +64,96 @@ public:
   FirstOrderType1R() : FirstOrderR(RELATION::Type1R) {};
 
   /** data constructor
-  *  \param a std::string with computeOutput function name.
-  *  \param a std::string with computeInput function name.
+  *  \param pluginh the plugin to compute h
+  *  \param pluging the plugin to compute g
   */
-  FirstOrderType1R(const std::string&, const std::string&);
+  FirstOrderType1R(const std::string& pluginh, const std::string& pluging);
 
   /** data constructor
-  *  \param a std::string with computeOutput function name.
-  *  \param a std::string with computeInput function name.
-  *  \param a std::string: name of the function to compute the jacobian of h according to x
-  *  \param a std::string: name of the function to compute the jacobian of g according to lambda
+  *  \param pluginh the plugin to compute h
+  *  \param pluging the plugin to compute g
+  *  \param pluginJachx the plugin to compute \f$\nabla_x h\f$
+  *  \param pluginJacglambda the plugin to compute \f$\nabla_{\lambda} g\f$
   */
-  FirstOrderType1R(const std::string&, const std::string&, const std::string&, const std::string&);
+  FirstOrderType1R(const std::string& pluginh, const std::string& pluging, const std::string& pluginJachx, const std::string& pluginJacglambda);
 
   /** destructor
   */
   ~FirstOrderType1R() {};
 
   /** initialize the relation (check sizes, memory allocation ...)
-  \param SP to Interaction: the interaction that owns this relation
+   * \param inter the interaction that owns this relation
+   * \param DSlink link to DS variable
+   * \param workV work vectors to initialize
+   * \param workM work matrices to initialize
   */
-  virtual void initialize(Interaction& inter);
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
-  /** default function to compute h
-  *  \param double : current time
+  /** default function to compute y = h(x, z, t)
+  * \param time the current time
+  * \param x the state vector
+  * \param z the external input
+  * \param y the "output" vector
   */
-  void computeh(double time, Interaction& inter);
+void computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y);
 
   /** default function to compute g
-  *  \param double : current time
+  * \param time the current time
+  * \param lambda the lambda vector
+  * \param z the external input
+  * \param r the nonsmooth "input" vector
   */
-  void computeg(double time, Interaction& inter);
+void computeg(double time, SiconosVector& lambda, SiconosVector& z, SiconosVector& r);
 
-  /** default function to compute jacobianH
-  *  \param double : not used
-  *  \param not used
+  /** default function to compute \f$\nabla_x h\f$
+  *  \param time current time (not used)
+  *  \param x the state used to evaluate the jacobian
+  *  \param z the extra input used to evaluate the jacobian
+  *  \param C the matrix used to store the jacobian
   */
-  void computeJachx(double time, Interaction& inter);
+void computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C);
 
   /** default function to compute \f$\nabla_z h\f$
-  *  \param time not used
-  *  \param inter Interaction linked with this relation
+  *  \param time current time (not used)
+  *  \param x the state used to evaluate the jacobian
+  *  \param z the extra input used to evaluate the jacobian
+  *  \param D the matrix used to store the jacobian
   */
-  void computeJachz(double time, Interaction& inter);
+void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& D);
 
   /** default function to compute jacobianG according to lambda
-  *  \param double : current time
-  *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+  *  \param time current time (not used)
+  *  \param lambda the nonsmooth input used to evaluate the jacobian
+  *  \param z the extra input used to evaluate the jacobian
+  *  \param B the matrix used to store the jacobian
   */
-  void computeJacglambda(double time, Interaction& inter);
+void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
 
-  /** default function to compute y
-  *  \param double: not used
-  *  \param unsigned int: not used
+  /** default function to compute y, using the data from the Interaction and DS
+  *  \param time current time (not used)
+  *  \param inter Interaction using this Relation
+  *  \param DSlink
+  *  \param workV
+  *  \param workM
+  *  \param level not used
   */
-  void computeOutput(double time, Interaction& inter, unsigned int = 0);
+virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
-  /** default function to compute r
-  *  \param double : not used
-  *  \param unsigned int: not used
+  /** default function to compute r, using the data from the Interaction and DS
+  *  \param time current time (not used)
+  *  \param inter Interaction using this Relation
+  *  \param DSlink
+  *  \param workV
+  *  \param workM
+  *  \param level not used
   */
-  void computeInput(double time, Interaction& inter, unsigned int = 0);
+virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
-  ACCEPT_STD_VISITORS();
+    virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+    virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+    ACCEPT_STD_VISITORS();
 
 };
 

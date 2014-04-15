@@ -3,42 +3,42 @@
 
 #include "SiconosKernel.hpp"
 
-class adjointInput : public FirstOrderType2R
+class adjointInput : public FirstOrderNonLinearR
 {
 protected:
-  SimpleMatrix   * K2 ;
+  SP::SimpleMatrix  K2;
 
 public:
   adjointInput();
   virtual ~adjointInput() {};
 
 
-  virtual void initialize(Interaction& inter);
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 
   /** default function to compute h
    *  \param double : current time
    */
-  virtual void computeh(double time, Interaction& inter) ;
+  virtual void computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y);
 
   /** default function to compute g
    *  \param double time, Interaction& inter : current time
    */
-  virtual void computeg(double time, Interaction& inter) ;
+  virtual void computeg(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y);
 
-  /** default function to compute jacobianH
+   /** default function to compute jacobianH
    *  \param double time, Interaction& inter : current time
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  virtual void computeJachx(double time, Interaction& inter);
-  virtual void computeJachlambda(double time, Interaction& inter);
+  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
+  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
 
   /** default function to compute jacobianG according to lambda
    *  \param double time, Interaction& inter : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  virtual void computeJacgx(double time, Interaction& inter);
-  virtual void computeJacglambda(double time, Interaction& inter);
+  virtual void computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& K);
+  virtual void computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& B);
 
 
   double source(double t);

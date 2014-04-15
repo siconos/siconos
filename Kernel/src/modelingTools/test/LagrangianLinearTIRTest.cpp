@@ -87,7 +87,7 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR4()
 void LagrangianLinearTIRTest::testSetCPtr()
 {
   std::cout << "--> Test: setCPtr." <<std::endl;
-  SP::SiconosMatrix tmp(new SimpleMatrix(*C));
+  SP::SimpleMatrix tmp(new SimpleMatrix(*C));
   tmp->zero();
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*tmp));
   folr->setCPtr(C);

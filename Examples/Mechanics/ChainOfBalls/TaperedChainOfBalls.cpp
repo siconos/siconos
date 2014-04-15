@@ -178,13 +178,12 @@ int main(int argc, char* argv[]){
     // --------------------
     // --- Interactions ---
     // --------------------
-    SP::SiconosMatrix H;
+    SP::SimpleMatrix H(new SimpleMatrix(1,(nDofBall + nDofBall)));
     SP::SiconosVector E;
     SP::NonSmoothLaw  nslaw;
     SP::Relation relation;
     SP::Interaction interaction;
     double ResCoef, Stiff, ElasPow;
-    H = SP::SiconosMatrix(new SimpleMatrix(1,(nDofBall + nDofBall)));
     (*H)(0,0) = -1.0;
     (*H)(0,1) = 1.0;
     E = SP::SiconosVector(new SiconosVector(1));

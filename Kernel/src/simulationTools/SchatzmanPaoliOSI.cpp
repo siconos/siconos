@@ -949,7 +949,7 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
     //  std::cout << "y_k_1 " << std::endl;
     // y_k_1->display();
-    subscal(e, *y_k_1, *(_inter->yp()), subCoord, false);
+    subscal(e, *y_k_1, *(_inter->yForNSsolver()), subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -959,7 +959,7 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     // Only the normal part is multiplied by e
     SP::SiconosVector y_k_1 ;
     y_k_1 = _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1);
-    (*_inter->yp())(0) +=  e * (*y_k_1)(0);
+    (*_inter->yForNSsolver())(0) +=  e * (*y_k_1)(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -982,6 +982,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
 
+  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -1001,30 +1002,23 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
   SP::SiconosMatrix  C;
   SP::SiconosMatrix  D;
   SP::SiconosMatrix  F;
-  SP::BlockVector Xq;
-  SP::SiconosVector Yp;
+  SP::BlockVector deltax;
+  SiconosVector& yForNSsolver = *inter->yForNSsolver();
   SP::SiconosVector e;
   SP::BlockVector Xfree;
 
-  SP::SiconosVector H_alpha;
-
-
-  // All of these values should be stored in the node corrseponding to the Interactionwhen a SchatzmanPaoliOSI scheme is used.
-  Xq = inter->dataXq();
-  Yp = inter->yp();
-
-
   if (relationType == FirstOrder)
   {
-    Xfree = inter->data(FirstOrderR::free);
+    Xfree = DSlink[FirstOrderRDS::xfree];
+    deltax = DSlink[FirstOrderRDS::deltax];
   }
   else if (relationType == NewtonEuler)
   {
-    Xfree = inter->data(NewtonEulerR::free);
+    Xfree = DSlink[NewtonEulerRDS::xfree];
   }
   else if (relationType == Lagrangian)
   {
-    Xfree = inter->data(LagrangianR::free);
+    Xfree = DSlink[LagrangianRDS::xfree];
   }
 
   assert(Xfree);
@@ -1048,7 +1042,6 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
     {
 
       assert(Xfree);
-      assert(Xq);
 
       coord[3] = C->size(1);
       coord[5] = C->size(1);
@@ -1058,11 +1051,12 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
 
       if (_useGammaForRelation)
       {
-        subprod(*C, *Xq, *Yp, coord, true);
+        assert(deltax);
+        subprod(*C, *deltax, yForNSsolver, coord, true);
       }
       else
       {
-        subprod(*C, *Xfree, *Yp, coord, true);
+        subprod(*C, *Xfree, yForNSsolver, coord, true);
         //        subprod(*C,*(*(mainInteraction->dynamicalSystemsBegin()))->workspace(DynamicalSystem::free),*Yp,coord,true);
         //        if (mainInteraction->dynamicalSystems()->size() == 2)
         //        {
@@ -1075,7 +1069,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
     e = ltir->e();
     if (e)
     {
-      *Yp += *e;
+      yForNSsolver += *e;
     }
 
   }

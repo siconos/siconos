@@ -26,7 +26,7 @@
 #include "SiconosFwd.hpp"
 #include "RelationNamespace.hpp"
 #include "SiconosVisitor.hpp"
-
+#include "SiconosAlgebraTypeDef.hpp"
 
 /** General Non Linear Relation (Virtual Base class for Relations).
  *  \author SICONOS Development Team - copyright INRIA
@@ -97,8 +97,6 @@ protected:
   /** To initialize all the plugin functions with NULL.
    */
   virtual void zeroPlugin();
-
-  SP::SiconosMatrix _jachlambda;
 
   /** type of the Relation: FirstOrder or Lagrangian */
   RELATION::TYPES _relationType;
@@ -220,37 +218,18 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
       \param inter the interaction using this relation
   */
-  virtual void initialize(Interaction& inter) = 0;
-
-  /** default function to compute h
-   *  \param time the current time
-   *  \param inter the interaction using this relation
-   */
-  virtual void computeh(double time, Interaction& inter) = 0;
-
-  /** default function to compute g
-   *  \param time the current time
-   *  \param inter the interaction using this relation
-   */
-  virtual void computeg(double time, Interaction& inter);
-
-  /** default function to compute jacobianG according to lambda
-   *  \param time the current time
-   *  \param inter the interaction using this relation
-   */
-  virtual void computeJacglambda(double time, Interaction& inter) = 0;
-
+  virtual void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
   /** compute all the H Jacobian
       \param time the current time
       \param inter the interaction using this relation
   */
-  virtual void computeJach(double time, Interaction& inter) = 0;
+  virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
 
   /* compute all the G Jacobian
    *  \param time the current time
    *  \param inter the interaction using this relation
    */
-  virtual void computeJacg(double time, Interaction& inter) = 0;
+  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
 
 
   /** default function to compute y
@@ -258,21 +237,16 @@ public:
    *  \param inter the interaction using this relation
    *  \param derivativeNumber number of the derivative to compute (optional, default = 0)
    */
-  virtual void computeOutput(double time, Interaction& inter, unsigned int derivativeNumber = 0) = 0;
+  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0) = 0;
 
   /** default function to compute r
    *  \param time the current time
    *  \param inter the interaction using this relation
    *  \param level the input "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0) = 0;
 
-  virtual inline SP::SiconosMatrix jachlambda() const
-  {
-    return _jachlambda;
-  }
-
-  virtual SP::SiconosMatrix C() const = 0;
+  virtual SP::SimpleMatrix C() const = 0;
 
   /** return true if the relation is linear.
       \return bool
@@ -379,7 +353,7 @@ public:
   /** visitors hook
       \param inter : interaction 
    */
-  virtual void preparNewtonIteration(Interaction& inter)
+  virtual void preparNewtonIteration(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
     ;
   };

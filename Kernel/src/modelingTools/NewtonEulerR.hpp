@@ -52,11 +52,14 @@ typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsi
  * In corresponding derived classes, h and Gi are connected to plug-in functions (user-defined).
  * For more details, see the DevNotes.pdf, chapter NewtonEuler.
  */
+
+// add deltaq ??? -- xhub 30/03/2014
+namespace NewtonEulerRDS {enum {xfree, z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};}
+namespace NewtonEulerRVec {enum {xfree, z, q0, dotq, p0, p1, p2, workVecSize};}
+namespace NewtonEulerRMat {enum {C, D, F, workMatSize};}
+
 class NewtonEulerR : public Relation
 {
-public:
-
-  enum DataNames {free, z, q0, q1, q2, p0, p1, p2, velocity, deltaq, sizeDataNames};
 
 protected:
   /** serialization hooks
@@ -69,7 +72,7 @@ protected:
   /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
    *  i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
    */
-  SP::SiconosMatrix _jachq;
+  SP::SimpleMatrix _jachq;
 
   /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
    *  i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
@@ -84,6 +87,7 @@ protected:
    */
   SP::SiconosMatrix _dotjachq;
 
+  SP::SiconosMatrix _jachlambda;
   SP::SiconosMatrix _jacglambda;
 
   /**vector e*/
@@ -105,7 +109,7 @@ protected:
 
   /** initialize components specific to derived classes.
   */
-  virtual void initComponents(Interaction& inter);
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 public:
   NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR) {}
@@ -119,7 +123,7 @@ public:
   /** get a pointer on matrix Jach[index]
   *  \return a pointer on a SiconosMatrix
   */
-  inline SP::SiconosMatrix jachq() const
+  inline SP::SimpleMatrix jachq() const
   {
     return _jachq;
   }
@@ -187,12 +191,12 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
   \param SP to Interaction: the interaction that owns this relation
   */
-  void initialize(Interaction& inter);
+  void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
   * \param: double, current time
   */
-  virtual void computeh(double time, Interaction& inter);
+  void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   /** default function to compute jacobianH
   *  \param double : current time
@@ -203,7 +207,7 @@ public:
   {
     ;
   }
-  virtual void computeJachq(double time, Interaction& inter)
+  virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
   {
     ;
   }
@@ -214,7 +218,7 @@ public:
      */
     assert(0) ;
   }
-  virtual void computeDotJachq(double time, Interaction& inter);
+  virtual void computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot);
 
 
   virtual void computeJacglambda(double time, Interaction& inter)
@@ -240,10 +244,10 @@ public:
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   /* compute all the H Jacobian */
-  virtual void computeJach(double time, Interaction& inter);
+  virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /* compute all the G Jacobian */
-  virtual void computeJacg(double time, Interaction& inter)
+  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
     computeJacgq(time, inter);
     computeJacgqDot(time, inter);
@@ -260,26 +264,26 @@ public:
       \param second ds linked to this interaction (target). If there is 
       only one ds in the inter, call this function with ..., ds, ds)
    */
-  void computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
+  void computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, VectorOfBlockVectors& DSlink, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   /** to compute output
   *  \param double : current time
   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0) ;
+  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
 
   /** to compute p
   *  \param double : current time
   *  \param unsigned int: "derivative" order of lambda used to compute input
   */
-  virtual void computeInput(double time, Interaction& inter, unsigned int = 0) ;
+  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
   /**
   * return a SP on the C matrix.
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
   *
   */
-  virtual inline SP::SiconosMatrix C() const
+  virtual inline SP::SimpleMatrix C() const
   {
     return _jachq;
   }

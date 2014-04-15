@@ -119,37 +119,37 @@ double inner_prod(const SiconosVector&, const SiconosVector&);
 SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
 
 /** multiplication of a vector by a scalar, y = a*x (init = true) or y += a*x (init = false)
- *  \param a, a double
- *  \param x, a SiconosVector (IN)
- *  \param y, a SiconosVector (IN-OUT)
- *  \param init, a bool, default = true
+ *  \param a a double
+ *  \param[in] x a SiconosVector
+ *  \param[in,out] y a SiconosVector
+ *  \param init if true y = a*x else y += a*x (default = true)
  */
-void scal(double, const SiconosVector&, SiconosVector&, bool = true);
+void scal(double a, const SiconosVector& x, SiconosVector& y, bool init = true);
 
 /** multiplication of a vector by a scalar, sub_y = a*sub_x (init = true) or sub_y += a*sub_x (init = false)
- *  \param a, a double
- *  \param x, a SiconosVector (IN)
- *  \param y, a SiconosVector (IN-OUT)
- \param an Index  = [r0x r1x r0y r1y];
+ * \param a a double
+ * \param x a SiconosVector (IN)
+ * \param y a SiconosVector (IN-OUT)
+ * \param coord an Index  = [r0x r1x r0y r1y];
  subX is the sub-vector of x, for row numbers between r0x and r1x-1.
  The same for y with riy.
- *  \param init, a bool, default = true
+ * \param init if true sub_y = a*sub_x else sub_y += a*sub_x (default true)
  */
-void subscal(double, const SiconosVector&, SiconosVector&, const Index&, bool = true);
+void subscal(double a, const SiconosVector& x, SiconosVector& y, const Index& coord, bool init = true);
 
 /** cross product
- *  \param V1, a SiconosVector of dimention 3.
- *  \param V2, aSiconosVector of dimention 3.
- *  \param VOUT, aSiconosVector of dimention 3, the resulting cross product between V1 and V2.
+ *  \param V1 a SiconosVector of dimention 3.
+ *  \param V2 aSiconosVector of dimention 3.
+ *  \param VOUT aSiconosVector of dimention 3, the resulting cross product between V1 and V2.
  */
-void cross_product(const SiconosVector&, const SiconosVector&, SiconosVector&);
+void cross_product(const SiconosVector& V1, const SiconosVector& V2, SiconosVector& VOUT);
 
 /** get an absolute vector
- *  \param 1, a SiconosVector (Input).
- *  \param 2, a SiconosVector (Output).
+ *  \param V a SiconosVector (Input).
+ *  \param Vabs a SiconosVector (Output)
  */
 
-void abs_wise(const SiconosVector&, SiconosVector&);
+void abs_wise(const SiconosVector& V, SiconosVector& Vabs);
 
 /** get maximal element of a vector
  *  \param 1, a SiconosVector (Input).

@@ -29,6 +29,8 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "CxxStd.hpp"
 
+#include "BlockVector.hpp"
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -937,7 +939,7 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter->y_k(_osnsp->inputOutputLevel()), *(_inter->yp()), subCoord, false);
+    subscal(e, *_inter->y_k(_osnsp->inputOutputLevel()), *(_inter->yForNSsolver()), subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -945,7 +947,7 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*_inter->yp())(0) +=  e * (*_inter->y_k(_osnsp->inputOutputLevel()))(0);
+    (*_inter->yForNSsolver())(0) +=  e * (*_inter->y_k(_osnsp->inputOutputLevel()))(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -968,6 +970,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
+  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -988,28 +991,24 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   SP::SiconosMatrix  C;
   SP::SiconosMatrix  D;
   SP::SiconosMatrix  F;
-  SP::BlockVector Xq;
-  SP::SiconosVector Yp;
+//  SP::BlockVector deltax;
+  SiconosVector& yForNSsolver = *inter->yForNSsolver();
   SP::BlockVector Xfree;
-
-  SP::SiconosVector H_alpha;
-
 
   /** \todo VA. All of these values should be stored in a node in the interactionGraph
    * corrseponding to the Interaction
    * when a MoreauJeanOSI scheme is used.
    */
 
-  Xq = inter->dataXq();
-  Yp = inter->yp();
+//  deltax = DSlink[FirstOrderRDS::deltax];;
 
   if (relationType == NewtonEuler)
   {
-    Xfree = inter->data(NewtonEulerR::free);
+    Xfree = DSlink[NewtonEulerRDS::xfree];
   }
   else if (relationType == Lagrangian)
   {
-    Xfree = inter->data(LagrangianR::free);
+    Xfree = DSlink[LagrangianRDS::xfree];
   }
 
   assert(Xfree);
@@ -1027,13 +1026,12 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
     {
       coord[3] = CT->size(1);
       coord[5] = CT->size(1);
-      assert(Yp);
       assert(Xfree);
       // creates a POINTER link between workX[ds] (xfree) and the
       // corresponding interactionBlock in each Interaction for each ds of the
       // current Interaction.
       // XXX Big quirks !!! -- xhub
-      subprod(*CT, *Xfree, *Yp, coord, true);
+      subprod(*CT, *Xfree, yForNSsolver, coord, true);
     }
 
   }
@@ -1045,7 +1043,6 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
     {
 
       assert(Xfree);
-      assert(Xq);
 
       coord[3] = C->size(1);
       coord[5] = C->size(1);
@@ -1054,11 +1051,12 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       // current Interaction.
       if (_useGammaForRelation)
       {
-        subprod(*C, *Xq, *Yp, coord, true);
+        RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput Configuration not possible");
+//        subprod(*C, *deltax, yForNSsolver, coord, true);
       }
       else
       {
-        subprod(*C, *Xfree, *Yp, coord, true);
+        subprod(*C, *Xfree, yForNSsolver, coord, true);
       }
     }
 
@@ -1082,8 +1080,12 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       {
         if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
         {
-          std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
-          subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
+          SiconosVector q = *DSlink[LagrangianRDS::q0];
+          SiconosVector z = *DSlink[LagrangianRDS::z];
+
+          std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
+          *DSlink[LagrangianRDS::z] = z;
+          subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
         }
         else
           RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");

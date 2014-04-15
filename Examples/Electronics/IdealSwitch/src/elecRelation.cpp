@@ -11,9 +11,8 @@ elecRelation::elecRelation():
 }
 
 
-void elecRelation::initialize(Interaction& inter)
+void elecRelation::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  FirstOrderType2R::initialize(inter);
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
   SiconosVector& y = *inter.y(0);
@@ -21,12 +20,15 @@ void elecRelation::initialize(Interaction& inter)
 
   //  SiconosVector workX = *inter.data(x);
   double t0 = 0;
+  workV.resize(FirstOrderRVec::workVecSize);
+  workM.resize(FirstOrderRMat::workMatSize);
+  workV[FirstOrderRVec::r].reset(new SiconosVector(sizeDS));
+  workV[FirstOrderRVec::x].reset(new SiconosVector(sizeDS));
 
-  _jachx->resize(sizeY, sizeDS);
-  _jachlambda->resize(sizeY, sizeY);
+  workM[FirstOrderRMat::C].reset(new SimpleMatrix(sizeY, sizeDS));
+  workM[FirstOrderRMat::D].reset(new SimpleMatrix(sizeY, sizeY));
 
-  _jacgx->resize(sizeDS, sizeDS);
-  _jacglambda->resize(sizeDS, sizeY);
+  workM[FirstOrderRMat::B].reset(new SimpleMatrix(sizeDS, sizeY));
 
 #ifdef CLSC_CIRCUIT
   //  workX.setValue(0,0);
@@ -58,13 +60,14 @@ void elecRelation::initialize(Interaction& inter)
 #endif
 
   //  computeH(t0);
-  computeg(t0, inter);
-  computeJach(t0, inter);
-  computeJacg(t0, inter);
-  *inter.data(r) = *inter.data(g_alpha);
+  workV[FirstOrderRVec::g_alpha].reset(new SiconosVector(sizeDS));
+  computeg(t0, lambda, *workV[FirstOrderRVec::g_alpha]);
+  *DSlink[FirstOrderRDS::r] = *workV[FirstOrderRVec::g_alpha];
+  computeJach(t0, inter, DSlink, workV, workM);
+  computeJacg(t0, inter, DSlink, workV, workM);
 #ifdef SICONOS_DEBUG
   std::cout << "data[r (g_alpha)] init\n";
-  inter.data(r)->display();
+  r.display();
 #endif
 
 }
@@ -92,59 +95,46 @@ double elecRelation::source(double t)
 }
 
 /*y = h(X,lambda)*/
-void elecRelation::computeh(double t, Interaction& inter)
+void elecRelation::computeh(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
 {
 
-  SiconosVector workX = *inter.data(x);
-  SiconosVector& lambda = *inter.lambda(0);
 
-#ifdef SICONOS_DEBUGc
-  std::cout << "********         computeh at " << t << std::endl;
-#endif
-  SP::SiconosVector Heval = inter.Halpha();
 #ifdef CLSC_CIRCUIT
-  Heval->setValue(0, lambda(4) - source(t));
-  Heval->setValue(1, workX(0) - (lambda(3)) / sR);
-  Heval->setValue(2, lambda(2) - 20 + lambda(0) * (lambda(6) + sR1s));
-  Heval->setValue(3, lambda(2) + lambda(1) * (lambda(8) + sR1d));
-  Heval->setValue(4, workX(0) - lambda(0) - lambda(1));
-  Heval->setValue(5, sR2 - lambda(6) - sR1s);
-  Heval->setValue(6, sAmpli * (lambda(4) - lambda(3)) + lambda(5));
-  Heval->setValue(7, sR2 - lambda(8) - sR1d);
-  Heval->setValue(8, -lambda(2) + lambda(7));
+  y(0) = lambda(4) - source(t);
+  y(1) = x(0) - (lambda(3)) / sR;
+  y(2) = lambda(2) - 20 + lambda(0) * (lambda(6) + sR1s);
+  y(3) = lambda(2) + lambda(1) * (lambda(8) + sR1d);
+  y(4) = x(0) - lambda(0) - lambda(1);
+  y(5) = sR2 - lambda(6) - sR1s;
+  y(6) = sAmpli * (lambda(4) - lambda(3)) + lambda(5);
+  y(7) = sR2 - lambda(8) - sR1d;
+  y(8) = -lambda(2) + lambda(7);
 #else
-  Heval->setValue(0, - lambda(0) + source(t));
-  Heval->setValue(1, -lambda(0) + workX(0) + (lambda(3) + sR1)* lambda(1));
-  Heval->setValue(2, sR2 - lambda(3) - sR1);
-  Heval->setValue(3, lambda(0) + lambda(2));
-#endif
-
-#ifdef SICONOS_DEBUG
-  std::cout << "modif heval : \n";
-  Heval->display();
+  y(0) = - lambda(0) + source(t);
+  y(1) = -lambda(0) + x(0) + (lambda(3) + sR1)* lambda(1);
+  y(2) = sR2 - lambda(3) - sR1;
+  y(3) = lambda(0) + lambda(2);
 #endif
 
 }
 
 
 
-void elecRelation::computeg(double t, Interaction& inter)
+void elecRelation::computeg(double t, SiconosVector& lambda, SiconosVector& r)
 {
-  SiconosVector& lambda = *inter.lambda(0);
-
 #ifdef SICONOS_DEBUG
   std::cout << "************      computeg at: " << t << std::endl;
 #endif
 
 #ifdef CLSC_CIRCUIT
-  inter.data(g_alpha)->setValue(0, (lambda(2) - lambda(3)) / sL);
+  r(0) = (lambda(2) - lambda(3)) / sL;
 #else
-  inter.data(g_alpha)->setValue(0, lambda(1) / sC);
+  r(0) = lambda(1) / sC;
 #endif
 
 #ifdef SICONOS_DEBUG
   std::cout << "modif g_alpha : \n";
-  inter.data(g_alpha)->display();
+  r.display();
 #endif
 }
 
@@ -152,11 +142,10 @@ void elecRelation::computeg(double t, Interaction& inter)
  *  \param double : current time
  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
  */
-void elecRelation::computeJachx(double t, Interaction& inter)
+void elecRelation::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
 
-  SP::SiconosVector lambda = inter.lambda(0);
-  double *h = &(*_jachx)(0, 0);
+  double* h = C.getArray();
 #ifdef SICONOS_DEBUG
   std::cout << "computeJachx " << " at " << " " << t << std::endl;
 #endif
@@ -179,11 +168,10 @@ void elecRelation::computeJachx(double t, Interaction& inter)
 #endif
 
 }
-void elecRelation::computeJachlambda(double t, Interaction& inter)
+void elecRelation::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
 
-  SiconosVector& lambda = *inter.lambda(0);
-  double *h = &(*_jachlambda)(0, 0);
+  double* h = D.getArray();
 #ifdef SICONOS_DEBUG
   std::cout << "computeJachlambda " << " at " << " " << t << std::endl;
 #endif
@@ -290,27 +278,11 @@ void elecRelation::computeJachlambda(double t, Interaction& inter)
 #endif
 
 }
-/** default function to compute jacobianG according to lambda
- *  \param double : current time
- *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
- */
-void elecRelation::computeJacgx(double t, Interaction& inter)
+
+void elecRelation::computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B)
 {
 
-  double *g = &(*_jacgx)(0, 0);
-#ifdef SICONOS_DEBUG
-  std::cout << "computeJacgx " << " at " << " " << t << std::endl;
-#endif
-#ifdef CLSC_CIRCUIT
-  g[0] = 0;
-#else
-  g[0] = 0;
-#endif
-}
-void elecRelation::computeJacglambda(double t, Interaction& inter)
-{
-
-  double *g = &(*_jacglambda)(0, 0);
+  double *g = B.getArray();
 #ifdef SICONOS_DEBUG
   std::cout << "computeJacglambda " << " at " << " " << t << std::endl;
 #endif

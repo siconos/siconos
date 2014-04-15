@@ -35,7 +35,7 @@ LinearSMCimproved::LinearSMCimproved(SP::ControlSensor sensor):
 {
 }
 
-LinearSMCimproved::LinearSMCimproved(SP::ControlSensor sensor, SP::SiconosMatrix B, SP::SiconosMatrix D):
+LinearSMCimproved::LinearSMCimproved(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D):
   LinearSMC(sensor, B, D, LINEAR_SMC_IMPROVED), _predictionPerturbation(false), _inDisceteTimeSlidingPhase(false),_ubPerturbation(0.0)
 {
 }

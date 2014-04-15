@@ -598,6 +598,10 @@ public:
    */
   void updateT(double T);
 
+  virtual bool computeResiduY() { return false; };
+
+  virtual bool computeResiduR() { return false; };
+
   /** visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(Simulation);

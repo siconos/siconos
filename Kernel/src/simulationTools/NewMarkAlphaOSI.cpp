@@ -310,6 +310,8 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
+  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+
   // Get the type of relation
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -322,23 +324,14 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   SP::BlockVector q_free;
   if (relationType == Lagrangian)
   {
-    q_free = inter->data(LagrangianR::free);
+    q_free = DSlink[LagrangianRDS::xfree];
   }
-  // else if (relationType == FirstOrder)
-  // {
-  //   q_free = inter->data(FirstOrderR::free);
-  // }
-  // else if  (relationType == NewtonEuler)
-  // {
-  //   q_free = inter->data(NewtonEulerR::free);
-  // }
   assert(q_free);
 
 
-  // get pointer to y_free vector
-  SP::SiconosVector y_free = inter->yp();
+  // get pointer to yForNSsolver vector
+  SiconosVector& yForNSsolver = *inter->yForNSsolver();
   assert(q_free && "In NewMarkAlphaOSI::computeFreeOutput: pointer q_free has not initialized yet");
-  assert(y_free && "In NewMarkAlphaOSI::computeFreeOutput: pointer y_free has not initialized yet");
   assert(inter->relation() && "In NewMarkAlphaOSI::computeFreeOutput, relation associated with the interaction does not exist.");
   SP::SiconosMatrix C = inter->relation()->C();
   assert(C && "In NewMarkAlphaOSI::computeFreeOutput: Jacobian matrix does not exist");
@@ -362,7 +355,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
       coord[7] = sizeY;
       if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) // LCP at acceleration level
       {
-        subprod(*C, *q_free, *y_free, coord, true);
+        subprod(*C, *q_free, yForNSsolver, coord, true);
         SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
         ID->eye();
         Index xcoord(8);
@@ -375,13 +368,17 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
         xcoord[6] = 0;
         xcoord[7] = sizeY;
         SP::LagrangianScleronomousR _SclerR = std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation());
-        _SclerR->computedotjacqhXqdot(t, *inter);
-        subprod(*ID, *(_SclerR->dotjacqhXqdot()), *y_free, xcoord, false); // y += NonLinearPart
+        _SclerR->computedotjacqhXqdot(t, *inter, DSlink);
+        subprod(*ID, *(_SclerR->dotjacqhXqdot()), yForNSsolver, xcoord, false); // y += NonLinearPart
       }
       else if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() == osnsp) // LCP at position level
       {
         // Update Jacobian matrix
-        inter->relation()->computeJach(t, *inter);
+        VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+        VectorOfVectors& workV = *indexSet->properties(vertex_inter).workVectors;
+        VectorOfSMatrices& workM = *indexSet->properties(vertex_inter).workMatrices;
+        SiconosMatrix& osnsM = *indexSet->properties(vertex_inter).block;
+        inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
         if (inter->relation()->getType() == NewtonEuler)
         {
           SP::DynamicalSystem ds1 = indexSet->properties(vertex_inter).source;
@@ -389,20 +386,20 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
           SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
           ner->computeJachqT(*inter, ds1, ds2);
         }
-        // cumpute y_free = y_{n,k} + G*q_free
+        // cumpute yForNSsolver = y_{n,k} + G*q_free
         if (!_IsVelocityLevel) // output at the position level y_{n,k} = g_{n,k}
         {
-          inter->computeOutput(t, 0); // Update output of level 0
-          *y_free = *(inter->y(0)); //g_{n,k}
+          inter->computeOutput(t, DSlink, workV, workM, osnsM, 0); // Update output of level 0
+          yForNSsolver = *(inter->y(0)); //g_{n,k}
         }
         else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
         {
           double h = simulationLink->nextTime() - simulationLink->startingTime();
           double gamma_prime = gamma / beta;
-          inter->computeOutput(t, 1); // Update output of level 1
-          *y_free = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
+          inter->computeOutput(t, DSlink, workV, workM, osnsM, 1); // Update output of level 1
+          yForNSsolver = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
         }
-        subprod(*C, *q_free, *y_free, coord, false);
+        subprod(*C, *q_free, yForNSsolver, coord, false);
       }
       else
       {
@@ -410,8 +407,8 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
       }
     }
 #ifdef DEBUG_NEWMARK
-    std::cout << "Free output y_free: ";
-    y_free->display();
+    std::cout << "Free output yForNSsolver: ";
+    yForNSsolver.display();
 #endif
   }
   else

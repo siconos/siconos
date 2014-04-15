@@ -77,6 +77,7 @@ int main()
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));
   SP::TimeStepping aS(new TimeStepping(aTD));
   aS->setComputeResiduY(true);
+  //aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
   //*****BUILD THE STEP INTEGRATOR
   SP::OneStepIntegrator  aEulerMoreauOSI ;
@@ -128,15 +129,15 @@ int main()
     //      if (cmp==150)
     // setNumericsVerbose(à);
     //      else if (cmp==151)
-    setNumericsVerbose(0);
-
+    setNumericsVerbose(1);
 
 
     cmp++;
+    printf("%d ", cmp);
     // solve ...
-    /*aS->computeOneStep();*/
+    aS->computeOneStep();
 
-    aS-> newtonSolve(1e-4, 200);
+//    aS-> newtonSolve(1e-8, 200);
     aS->nextStep();
     x = aDS->x();
     lambda = aI->lambda(0);

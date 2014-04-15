@@ -470,8 +470,12 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
        aVi != viend; ++aVi)
   {
     SP::Interaction inter = indexSet->bundle(*aVi);
-    inter->computeOutput(getTkp1(), 0);
-    inter->relation()->computeJach(getTkp1(), *inter);
+    VectorOfBlockVectors& DSlink = *indexSet->properties(*aVi).DSlink;
+    VectorOfVectors& workV = *indexSet->properties(*aVi).workVectors;
+    VectorOfSMatrices& workM = *indexSet->properties(*aVi).workMatrices;
+    SiconosMatrix& osnsM = *indexSet->properties(*aVi).block;
+    inter->computeOutput(getTkp1(), DSlink, workV, workM, osnsM, 0);
+    inter->relation()->computeJach(getTkp1(), *inter, DSlink, workV, workM);
     if (inter->relation()->getType() == RELATION::NewtonEuler)
     {
       SP::DynamicalSystem ds1 = indexSet->properties(*aVi).source;
@@ -489,7 +493,7 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
       if (maxViolationUnilateral > _constraintTolUnilateral)
       {
         *runningProjection = true;
-	
+
         DEBUG_PRINTF("TSProj newton criteria unilateral true %e.\n", criteria);
       }
     }

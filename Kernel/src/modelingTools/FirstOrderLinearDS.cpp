@@ -92,7 +92,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstO
   if (Type::value(FOLDS) == Type::FirstOrderLinearDS)
   {
     _pluginA.reset(new PluggedObject(*(FOLDS.getPluginA())));
-    _pluginb.reset(new PluggedObject(*(FOLDS.getPluginB())));
+    _pluginb.reset(new PluggedObject(*(FOLDS.getPluginb())));
   }
 }
 
@@ -230,13 +230,13 @@ void FirstOrderLinearDS::computef(double time)
   }
 }
 
-void FirstOrderLinearDS::computef(double time, SP::SiconosVector x2)
+void FirstOrderLinearDS::computef(double time, SiconosVector& x2)
 {
-  //  RuntimeException::selfThrow("FirstOrderLinearDS::computeF - Must not be used");
   updatePlugins(time);
-  prod(*_A, *x2, *_f);
+  prod(*_A, x2, *_f);
   if (_b)
   {
+    computeb(time);
     *_f += *_b;
   }
 }

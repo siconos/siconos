@@ -59,7 +59,14 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderLinearR);
 
-  SP::SiconosMatrix _F;
+  /** initialize the relation (check sizes, memory allocation in workV and workM ...)
+  *  \param inter Interaction using this Relation
+  *  \param DSlink
+  *  \param workV
+  *  \param workM
+  */
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
   SP::SiconosVector _e;
 
 public:
@@ -87,7 +94,7 @@ public:
   *  \param C the C matrix
   *  \param B the B matrix
   */
-  FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix B);
+  FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix B);
 
   /** create the Relation from a set of data
   *  \param C the C matrix
@@ -96,7 +103,7 @@ public:
   *  \param e the e matrix
   *  \param B the B matrix
   */
-  FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e, SP::SiconosMatrix B);
+  FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e, SP::SimpleMatrix B);
 
   /** destructor
   */
@@ -131,28 +138,91 @@ public:
     setComputeJacglambdaFunction(pluginPath,  functionName);
   }
 
-  /** set D to pointer newPtr
-  *  \param newPtr the D matrix
+  /** Function to compute the matrix C
+   * \param time the current time
+   * \param z the auxiliary input vector
+   * \param C the C matrix
   */
-  inline void setDPtr(SP::SiconosMatrix newPtr)
-  {
-    _jachlambda = newPtr;
-  }
+  void computeC(double time, SiconosVector& z, SimpleMatrix& C);
 
-  /** set F to pointer newPtr
-  *  \param newPtr the F matrix
+  /** Function to compute the matrix D
+   * \param time the current time
+   * \param z the auxiliary input vector
+   * \param D the D matrix
   */
-  inline void setFPtr(SP::SiconosMatrix newPtr)
-  {
-    _F = newPtr;
-  }
+  void computeD(double time, SiconosVector& z, SimpleMatrix& D);
 
-  /** get F
-  *  \return F matrix
+  /** Function to compute the matrix F
+   * \param time the current time
+   * \param z the auxiliary input vector
+   * \param F the F matrix
   */
-  inline SP::SiconosMatrix F() const
+  void computeF(double time, SiconosVector& z, SimpleMatrix& F);
+
+  /** Function to compute the vector e
+   * \param time the current time
+   * \param z the auxiliary input vector
+   * \param e the e vector
+  */
+  void computee(double time, SiconosVector& z, SiconosVector& e);
+
+  /** Function to compute the matrix B
+   * \param time the current time
+   * \param z the auxiliary input vector
+   * \param B the B matrix
+  */
+  void computeB(double time, SiconosVector& z, SimpleMatrix& B);
+
+  /** default function to compute h
+  *  \param time current time
+  *  \param inter Interaction using this Relation
+  *  \param workV
+  *  \param workM
+  *  \param xXXX
+  *  \param zXXX
+  *  \param y value of h
+  */
+  void computeh(double time, VectorOfVectors& workV, VectorOfSMatrices& workM, BlockVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
+
+  /** default function to compute g
+  *  \param time current time
+  *  \param inter Interaction using this Relation
+  *  \param workM
+  *  \param lambdaXXX
+  *  \param zXXX
+  *  \param r non-smooth input
+  */
+  void computeg(double time, VectorOfSMatrices& workM, SiconosVector& lambda, SiconosVector& z, BlockVector& r);
+
+  /** default function to compute y
+  *  \param time current time
+  *  \param inter Interaction using this Relation
+  *  \param DSlink
+  *  \param workV
+  *  \param workM
+  *  \param level not used
+  */
+  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+
+  /** default function to compute r
+  *  \param time current time
+  *  \param inter Interaction using this Relation
+  *  \param DSlink
+  *  \param workM
+  *  \param level not used
+  */
+  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+
+  /** print the data to the screen
+  */
+  void display() const;
+
+  /** set e
+  *  \param  newe the new value of e
+  */
+  inline void setePtr(SP::SiconosVector newe)
   {
-    return _F;
+    _e = newe;
   }
 
   /** get e
@@ -163,57 +233,6 @@ public:
     return _e;
   }
 
-  /** Function to compute matrix C
-  */
-  virtual void computeC(double time, Interaction& inter);
-
-  /** Function to compute matrix F
-  */
-  virtual void computeF(double time, Interaction& inter);
-
-  /** Function to compute matrix D
-  */
-  virtual void computeD(double time, Interaction& inter);
-
-  /** Function to compute vector e
-  */
-  virtual void computeE(double time, Interaction& inter);
-
-  /** Function to compute matrix B
-  */
-  virtual void computeb(double time, Interaction& inter);
-
-  /** default function to compute h
-  *  \param double : current time
-  */
-  virtual void computeh(double time, Interaction& inter);
-
-  /** default function to compute g
-  *  \param double : current time
-  */
-  virtual void computeg(double time, Interaction& inter);
-
-  /** default function to compute y
-  *  \param double: not used
-  *  \param unsigned int: not used
-  */
-  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0);
-
-  /** default function to compute r
-  *  \param double : not used
-  *  \param unsigned int: not used
-  */
-  void computeInput(double time, Interaction& inter, unsigned int = 0);
-
-  /** initialize the relation (check sizes, memory allocation ...)
-  *  \param inter the interaction that owns this relation
-  */
-  virtual void initialize(Interaction & inter);
-
-  /** print the data to the screen
-  */
-  void display() const;
-
   /** determine if the Relation is linear
   * \return true if the relation is linear.
   */
@@ -221,6 +240,11 @@ public:
   {
     return true;
   }
+
+  virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) {};
+  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) {};
+
+
   ACCEPT_STD_VISITORS();
 
 };

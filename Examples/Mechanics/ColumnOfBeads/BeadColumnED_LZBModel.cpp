@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
     // --------------------
     // --- Interactions ---
     // --------------------
-    SP::SiconosMatrix H;
+    SP::SimpleMatrix H;
     SP::SiconosVector E;
     SP::NonSmoothLaw  nslaw;
     SP::Relation relation;
@@ -216,14 +216,14 @@ int main(int argc, char* argv[])
       DSSet_interaction.clear();
       if (j == 0) // for contact wall-ball
       {
-        H = SP::SiconosMatrix(new SimpleMatrix(1, nDofBall));
+        H = SP::SimpleMatrix(new SimpleMatrix(1, nDofBall));
         (*H)(0, 0) = 1.0;
         E = SP::SiconosVector(new SiconosVector(1));
         (*E)(0) = -(*RadiusBalls)(j);
       }
       else // For ball-ball contact
       {
-        H = SP::SiconosMatrix(new SimpleMatrix(1, (nDofBall + nDofBall)));
+        H = SP::SimpleMatrix(new SimpleMatrix(1, (nDofBall + nDofBall)));
         (*H)(0, 0) = -1.0;
         (*H)(0, 1) = 1.0;
         E = SP::SiconosVector(new SiconosVector(1));

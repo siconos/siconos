@@ -77,12 +77,13 @@ typedef void (*FPtr5bis)(unsigned int, double*, unsigned int, double*, unsigned 
  * In corresponding derived classes, h and Jacobians are connected to plug-in functions (user-defined).
  *
  */
+
+namespace LagrangianRDS {enum {xfree, z, q0, q1, q2, p0, p1, p2, DSlinkSize};}
+namespace LagrangianRVec {enum {xfree, z, q0, q1, q2, p0, p1, p2, workVecSize};}
+namespace LagrangianRMat {enum {C, D, F, workMatSize};}
+
 class LagrangianR : public Relation
 {
-public:
-
-  enum DataNames {free, z, q0, q1, q2, p0, p1, p2, sizeDataNames};
-
 protected:
   /** serialization hooks
   */
@@ -90,10 +91,12 @@ protected:
 
   /** Jacobian matrices of \f$y = h(t,q,\dot q,\ldots)\f$ */
 
+  SP::SiconosMatrix _jachlambda;
+
   /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
    *  i.e. \f[\nabla^\top_q h(t,q,\dot q,\ldots)\f]
    */
-  SP::SiconosMatrix _jachq;
+  SP::SimpleMatrix _jachq;
 
   /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
    *  i.e. \f[\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f]
@@ -117,7 +120,7 @@ protected:
 
   /** initialize components specific to derived classes.
   */
-  virtual void initComponents(Interaction& inter);
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
   virtual void zeroPlugin();
 
 public:
@@ -169,7 +172,7 @@ public:
   *  \param SP::SiconosMatrix  newPtr
   *  \param unsigned int: index position in Jach vector
   */
-  inline void setJachqPtr(SP::SiconosMatrix newPtr)
+  inline void setJachqPtr(SP::SimpleMatrix newPtr)
   {
     _jachq = newPtr ;
   }
@@ -189,24 +192,16 @@ public:
   inline unsigned int numberOfJacobiansForH() const { return Jach.size();}
   */
 
-  inline SP::SiconosMatrix C() const
+  inline SP::SimpleMatrix C() const
   {
     return _jachq;
   }
 
   /** initialize the relation (check sizes, memory allocation ...)
-  \param SP to Interaction: the interaction that owns this relation
+   * \param inter the interaction using this relation
+   * \param workM work matrices
   */
-  void initialize(Interaction& inter);
-
-  /** to compute y = h(t,q,v,z) using plug-in mechanism
-   * should be used as less as possible to avoid side--effects
-   * prefer computeh(double time, Interaction& inter,
-                     SP::BlockVector q, SP::BlockVector v, SP::BlockVector z)
-   * \param time  current time
-   * \param inter interaction that owns the relation
-   */
-  virtual void computeh(double time, Interaction& inter);
+  void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** to compute y = h(t,q,v,z) using plug-in mechanism
   * \param time current time
@@ -214,32 +209,23 @@ public:
   * \param q the BlockVector of coordinates
   * \param v the BlockVector of velocities
   * \param z the BlockVector of parameters
+  * \param[out] y the return value of the function call
   */
-  void computeh(double time, Interaction& inter,
-                SP::BlockVector q, SP::BlockVector v, SP::BlockVector z);
+  void computeh(double time, SiconosVector& q, SiconosVector& v, SiconosVector& z, SiconosVector& y);
 
-  // void computeh(double time, Interaction& inter,
-  //               SP::BlockVector q, SP::BlockVector v,
-  //               SP::BLockVector lambda, SP::BlockVector z
-  //               SP::SiconosVector y);
-  /** default function to compute jacobianH
-  *  \param double : current time
-  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
-
-  void computeJachx(double);*/
-  virtual void computeJachlambda(double time, Interaction& inter)
+  void computeJachlambda(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJachq(double time, Interaction& inter)
+  void computeJachq(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJachqDot(double time, Interaction& inter)
+  void computeJachqDot(double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeDotJachq(double time, Interaction& inter)
+  void computeDotJachq(double time, Interaction& inter)
   {
     ;
   }
@@ -251,7 +237,7 @@ public:
    * \param time  current time
    * \param inter interaction that owns the relation
    */
-  virtual void computehDot(double time, Interaction& inter)
+  void computehDot(double time, Interaction& inter)
   {
     ;
   }
@@ -269,7 +255,7 @@ public:
     ;
   }
   /* compute all the H Jacobian */
-  virtual void computeJach(double time, Interaction& inter)
+  virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
     computeJachq(time, inter);
     computeJachqDot(time, inter);
@@ -278,7 +264,7 @@ public:
     computehDot(time,inter);
   }
   /* compute all the G Jacobian */
-  virtual void computeJacg(double time, Interaction& inter)
+  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
     computeJacgq(time, inter);
     computeJacgqDot(time, inter);
@@ -290,13 +276,13 @@ public:
   *  \param double : current time
   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0) = 0;
+  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0) = 0;
 
   /** to compute p
   *  \param double : current time
   *  \param unsigned int: "derivative" order of lambda used to compute input
   */
-  virtual void computeInput(double time, Interaction& inter, unsigned int = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0) = 0;
 
   /** main relation members display
   */

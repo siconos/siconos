@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
     // Interaction ball-floor
     //
-    SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
+    SP::SimpleMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 1.0;
     SP::SiconosVector b(new SiconosVector(1));
     (*b)(0) = -R;
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 
 
     // beads/beads interactions
-    SP::SiconosMatrix HOfBeads(new SimpleMatrix(1, 2 * nDof));
+    SP::SimpleMatrix HOfBeads(new SimpleMatrix(1, 2 * nDof));
     (*HOfBeads)(0, 0) = -1.0;
     (*HOfBeads)(0, 3) = 1.0;
     SP::SiconosVector bOfBeads(new SiconosVector(1));

@@ -739,12 +739,6 @@ public:
    */
   void computeg(double time);
 
-  /** default function to compute the gradient of g
-   *  \param double time : the current time
-   */
-  //  void computeJacobianXG(double);
-  //  void computeJacobianDotXG(double);
-
   /**default function to update the plugins functions using a new time:
    * \param time  the current time
    */
@@ -817,6 +811,13 @@ public:
   {
     return _pluginJacxDotG;
   };
+
+  /** Initialize the workspace elements
+   * \param workVector the vectors needed for the integration
+   * \param workMatrices the matrices needed for the integration
+   */
+  virtual void initWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices) {};
+//  virtual void initWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices) = 0;
 
   /** visitors hook
    */

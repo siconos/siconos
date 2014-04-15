@@ -41,6 +41,8 @@
                                   * even if there is an impact. The unique modification is in the computeResidu
                                   * method that is redevelopped.
                                   */
+
+/// @cond
 using namespace RELATION;
 
 struct D1MinusLinearOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
@@ -61,13 +63,15 @@ struct D1MinusLinearOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *(_inter->y_k(_osnsp->inputOutputLevel())), *(_inter->yp()), subCoord, false);
+    subscal(e, *(_inter->y_k(_osnsp->inputOutputLevel())), *(_inter->yForNSsolver()), subCoord, false);
   }
   void visit(const EqualityConditionNSL& nslaw)
   {
     ;
   }
 };
+/// @endcond
+
 
 D1MinusLinearOSI::D1MinusLinearOSI(SP::DynamicalSystem newDS) :
   OneStepIntegrator(OSI::D1MINUSLINEAROSI)
@@ -236,7 +240,10 @@ double D1MinusLinearOSI::computeResidu()
       for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet2->bundle(*ui);
-        inter->relation()->computeJach(told, *inter);
+        VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
+        VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
+        VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
+        inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
         if (inter->relation()->getType() == NewtonEuler)
         {
           SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
@@ -244,7 +251,7 @@ double D1MinusLinearOSI::computeResidu()
           SP::NewtonEulerR ner = std11::static_pointer_cast<NewtonEulerR>(indexSet2->bundle(*ui)->relation());
           ner->computeJachqT(*inter, ds1, ds2);
         }
-        inter->relation()->computeJacg(told, *inter);
+        inter->relation()->computeJacg(told, *inter, DSlink, workV, workM);
       }
 
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -618,7 +625,10 @@ double D1MinusLinearOSI::computeResidu()
       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet0->bundle(*ui);
-        inter->relation()->computeJach(t, *inter);
+        VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
+        VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
+        VectorOfSMatrices& workM = *indexSet0->properties(*ui).workMatrices;
+        inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
         if (inter->relation()->getType() == NewtonEuler)
         {
           SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
@@ -626,7 +636,7 @@ double D1MinusLinearOSI::computeResidu()
           SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
           ner->computeJachqT(*inter, ds1, ds2);
         }
-        inter->relation()->computeJacg(t, *inter);
+        inter->relation()->computeJacg(t, *inter, DSlink, workV, workM);
       }
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
@@ -858,6 +868,7 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
+  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
   // get relation and non smooth law information
   RELATION::TYPES relationType = inter->relation()->getType(); // relation
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -875,7 +886,7 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
   coord[7] = sizeY;
   SP::SiconosMatrix C; // Jacobian of Relation with respect to degree of freedom
   SP::BlockVector Xfree; // free degree of freedom
-  SP::SiconosVector Yp = inter->yp(); // POINTER CONSTRUCTOR : contains output
+  SiconosVector& yForNSsolver = *inter->yForNSsolver();
 
   // define Xfree for velocity and acceleration level
   if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
@@ -883,11 +894,11 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
     //Xfree = inter->dataX();
     if (relationType == Lagrangian)
     {
-      Xfree = inter->data(LagrangianR::q1);
+      Xfree = DSlink[LagrangianRDS::q1];
     }
     else if (relationType == NewtonEuler)
     {
-      Xfree = inter->data(NewtonEulerR::velocity);
+      Xfree = DSlink[NewtonEulerRDS::velocity];
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
@@ -898,15 +909,15 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
 
     if (relationType == Lagrangian)
     {
-      Xfree = inter->data(LagrangianR::free);
+      Xfree = DSlink[LagrangianRDS::xfree];
     }
     else if (relationType == NewtonEuler)
     {
-      Xfree = inter->data(NewtonEulerR::free);
+      Xfree = DSlink[NewtonEulerRDS::xfree];
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
-    DEBUG_PRINT("Xfree = inter->data(LagrangianR::free);\n");
+    DEBUG_PRINT("Xfree = DSlink[LagrangianRDS::xfree];\n");
     DEBUG_EXPR(Xfree->display());
     assert(Xfree);
   }
@@ -921,20 +932,19 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
   // only Lagrangian Systems
   if (relationType == Lagrangian)
   {
-    // in Yp the linear part of velocity or acceleration relation will be saved
+    // in yForNSsolver the linear part of velocity or acceleration relation will be saved
     C = std11::static_pointer_cast<LagrangianR>(mainInteraction->relation())->C();
 
     if (C)
     {
       assert(Xfree);
-      assert(Yp);
 
       coord[3] = C->size(1);
       coord[5] = C->size(1);
-      subprod(*C, *Xfree, *Yp, coord, true);
+      subprod(*C, *Xfree, yForNSsolver, coord, true);
     }
 
-    // in Yp corrections have to be added
+    // in yForNSsolver corrections have to be added
     SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
     ID->eye();
 
@@ -952,8 +962,12 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false);
+        SiconosVector q = *DSlink[LagrangianRDS::q0];
+        SiconosVector z = *DSlink[LagrangianRDS::z];
+
+        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
+        *DSlink[LagrangianRDS::z] = z;
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false);
       }
       else
         RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput is only implemented  at velocity level for LagrangianRheonomousR.");
@@ -962,14 +976,14 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
     if (relationSubType == ScleronomousR) // acceleration term involving Hessian matrix of Relation with respect to degree is added
     {
       DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput. acceleration term involving Hessian matrix of Relation\n");
-      DEBUG_EXPR(Yp->display(););
+      DEBUG_EXPR(yForNSsolver.display(););
 
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
       {
-        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), *Yp, xcoord, false);
+        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), yForNSsolver, xcoord, false);
       }
-      DEBUG_EXPR(Yp->display(););
+      DEBUG_EXPR(yForNSsolver.display(););
     }
 
 
@@ -983,20 +997,19 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
     {
       coord[3] = CT->size(1);
       coord[5] = CT->size(1);
-      assert(Yp);
       assert(Xfree);
       // creates a POINTER link between workX[ds] (xfree) and the
       // corresponding interactionBlock in each Interaction for each ds of the
       // current Interaction.
       // XXX Big quirks !!! -- xhub
-      subprod(*CT, *Xfree, *Yp, coord, true);
+      subprod(*CT, *Xfree, yForNSsolver, coord, true);
     }
 
 
 
     if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
     {
-      // in Yp corrections have to be added
+      // in yForNSsolver corrections have to be added
       SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
       ID->eye();
 
@@ -1011,7 +1024,7 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
       xcoord[7] = sizeY;
 
       DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput.\n Adding the additional terms of the second order time derivative of constraints.\n");
-      DEBUG_EXPR(Yp->display(););
+      DEBUG_EXPR(yForNSsolver.display(););
 
       /** Compute additional terms of the second order time derivative of constraints
        *
@@ -1020,18 +1033,17 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
        */
       SP::DynamicalSystem ds1 = indexSet->properties(vertex_inter).source;
       SP::DynamicalSystem ds2 = indexSet->properties(vertex_inter).target;
-      
-      
-      std11::static_pointer_cast<NewtonEulerR>(inter->relation())->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter, ds1, ds2);
+
+      std11::static_pointer_cast<NewtonEulerR>(inter->relation())->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter, DSlink, ds1, ds2);
 
       DEBUG_EXPR((std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms())->display());
 
-      subprod(*ID, *(std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms()), *Yp, xcoord, false);
-      DEBUG_EXPR(Yp->display(););
+      subprod(*ID, *(std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms()), yForNSsolver, xcoord, false);
+      DEBUG_EXPR(yForNSsolver.display(););
 
 
     }
-    DEBUG_EXPR(Yp->display(););
+    DEBUG_EXPR(yForNSsolver.display(););
     if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) // impact terms are added
     {
       SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
@@ -1061,12 +1073,12 @@ bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
   {
 
     // compute yold
-    SP::BlockVector qold(new BlockVector());
-    SP::BlockVector vold(new BlockVector());
-    SP::BlockVector zold(new BlockVector());
-    SP::BlockVector q(new BlockVector());
-    SP::BlockVector v(new BlockVector());
-    SP::BlockVector z(new BlockVector());
+    SP::BlockVector qoldB(new BlockVector());
+    SP::BlockVector voldB(new BlockVector());
+    SP::BlockVector zoldB(new BlockVector());
+    SP::BlockVector qB(new BlockVector());
+    SP::BlockVector vB(new BlockVector());
+    SP::BlockVector zB(new BlockVector());
 
     for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
     {
@@ -1077,19 +1089,24 @@ bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
       // convert vDS systems into LagrangianDS and put them in vLDS
       lds = std11::static_pointer_cast<LagrangianDS> (*it);
 
-      qold->insertPtr(lds->qMemory()->getSiconosVector(0));
-      vold->insertPtr(lds->velocityMemory()->getSiconosVector(0));
+      qoldB->insertPtr(lds->qMemory()->getSiconosVector(0));
+      voldB->insertPtr(lds->velocityMemory()->getSiconosVector(0));
       /** \warning Warning the value of z of not stored. */
-      zold->insertPtr(lds->z());
-      q->insertPtr(lds->q());
-      v->insertPtr(lds->velocity());
-      z->insertPtr(lds->z());
+      zoldB->insertPtr(lds->z());
+      qB->insertPtr(lds->q());
+      vB->insertPtr(lds->velocity());
+      zB->insertPtr(lds->z());
     }
-    std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(*inter,qold,zold);
+    SiconosVector qold = *qoldB;
+    SiconosVector zold = *zoldB;
+    SiconosVector q = *qB;
+    SiconosVector z = *zB;
+
+    std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(qold, zold, *inter->y(0));
     yOld = (inter->y(0))->getValue(0);
     // Compute current y (we assume that q stores q_{k,1} and v stores v_{k,1})
     // If not sure we have to store it into a new date in Interaction.
-    std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(*inter,q,z);
+    std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(q, z, *inter->y(0));
     y = (inter->y(0))->getValue(0);
   }
 

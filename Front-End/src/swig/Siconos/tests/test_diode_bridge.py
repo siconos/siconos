@@ -50,6 +50,7 @@ def test_diodebridge1():
     LTIRDiodeBridge=FirstOrderLinearTIR(C, B)
     LTIRDiodeBridge.setDPtr(D)
 
+    LTIRDiodeBridge.display()
     nslaw=ComplementarityConditionNSL(4)
     InterDiodeBridge=Interaction(4, nslaw, LTIRDiodeBridge, 1)
 
@@ -159,7 +160,8 @@ def test_diodebridge1():
     #
     # comparison with the reference file
     #
-
+    from numpy import savetxt
+    savetxt('/tmp/diode_bridge.dat', dataPlot)
     ref = getMatrix(SimpleMatrix("diode_bridge.ref"))
 
     print(norm(dataPlot - ref))
@@ -221,12 +223,11 @@ def test_diodebridge2():
         def __init__(self, *args):
             super(VoltageSource, self).__init__(*args)
 
-        def initialize(self, inter):
-            super(VoltageSource, self).initialize(inter)
+        def initcomponents(self, inter, DSlink, workV, workM):
+            super(VoltageSource, self).initcomponents(inter, DSlink, workV, workM)
             self._e = SiconosVector(inter.getSizeOfY())
 
-        def computeE(self, time, inter):
-            workZ = inter.data(1)
+#        def computee(self, z, e):
             # then compute self._e
 
     LTIRDiodeBridge=VoltageSource(C, B)
@@ -345,3 +346,7 @@ def test_diodebridge2():
     ref = getMatrix(SimpleMatrix("diode_bridge.ref"))
 
     assert (norm(dataPlot - ref) < 1e-12)
+
+#test_diodebridge2()
+
+test_diodebridge1()

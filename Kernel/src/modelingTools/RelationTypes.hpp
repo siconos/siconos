@@ -29,7 +29,9 @@ Include files related to the different types of relations
 #ifndef RelationTypes_hpp
 #define RelationTypes_hpp
 
+#include "FirstOrderNonLinearR.hpp"
 #include "FirstOrderType1R.hpp"
+#include "FirstOrderType2R.hpp"
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "LagrangianLinearTIR.hpp"

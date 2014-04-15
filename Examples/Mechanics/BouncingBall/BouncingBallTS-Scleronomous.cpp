@@ -82,11 +82,8 @@ int main(int argc, char* argv[])
 
     // Interaction ball-floor
     //
-    //SP::SiconosMatrix H(new SimpleMatrix(1,nDof));
-    //(*H)(0,0) = 1.0;
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
-    //SP::Relation relation(new LagrangianLinearTIR(H));
 
     SP::Relation relation(new LagrangianScleronomousR("BouncingBallPlugin:h0", "BouncingBallPlugin:G0"));
     SP::Interaction inter(new Interaction(1, nslaw, relation));

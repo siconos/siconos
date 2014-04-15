@@ -52,6 +52,7 @@ void MyDS::computeRhs(double t, bool  b)
 {
   ;
 }
-void MyDS::resetNonSmoothPart()
+void MyDS::resetNonSmoothPart(unsigned int level)
 {
+  _r->zero();
 }

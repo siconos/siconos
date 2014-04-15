@@ -296,52 +296,51 @@ void EulerMoreauOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void EulerMoreauOSI::computeW(double t, SP::DynamicalSystem ds)
+void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
 
   // When this function is called, WMap[ds] is supposed to exist and not to be null
   // Memory allocation has been done during initW.
 
-  assert(ds &&
-         "EulerMoreauOSI::computeW(t,ds) - ds == NULL");
-  unsigned int dsN = ds->number();
+  unsigned int dsN = ds.number();
   assert((WMap.find(dsN) != WMap.end()) &&
          "EulerMoreauOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
   double h = simulationLink->timeStep();
-  Type::Siconos dsType = Type::value(*ds);
+  Type::Siconos dsType = Type::value(ds);
 
-  SP::SiconosMatrix W = WMap[dsN];
+  SiconosMatrix& W = *WMap[dsN];
 
   // 1 - First order non linear systems
   if (dsType == Type::FirstOrderNonLinearDS)
   {
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
-    SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
+    FirstOrderNonLinearDS& d = static_cast<FirstOrderNonLinearDS&> (ds);
 
     // Copy M or I if M is Null into W
-    if (d->M())
-      *W = *d->M();
+    if (d.M())
+      W = *d.M();
     else
-      W->eye();
+      W.eye();
 
-    d->computeJacobianfx(t);
-    // Add -h*_theta*jacobian_XF to W
-    scal(-h * _theta, *d->jacobianfx(), *W, false);
+    d.computeJacobianfx(t);
+    // Add -h*_theta*jacobianfx to W
+    scal(-h * _theta, *d.jacobianfx(), W, false);
   }
   // 2 - First order linear systems
   else if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
-    SP::FirstOrderLinearDS d = std11::static_pointer_cast<FirstOrderLinearDS> (ds);
+    FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&> (ds);
     if (dsType == Type::FirstOrderLinearDS)
-      d->computeA(t);
+      d.computeA(t);
 
-    if (d->M())
-      *W = *d->M();
+    if (d.M())
+      W = *d.M();
     else
-      W->eye();
-    scal(-h * _theta, *d->A(), *W, false);
+      W.eye();
+
+    scal(-h * _theta, *d.A(), W, false);
   }
   else RuntimeException::selfThrow("EulerMoreauOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
 
@@ -382,118 +381,133 @@ double EulerMoreauOSI::computeResidu()
   double maxResidu = 0;
   double normResidu = maxResidu;
 
+  // XXX TMP hack -- xhub
+  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+  DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
+
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu);
+    // XXX TMP hack -- xhub
+    // we have to iterate over the edges of the DSG0 -> the following won't be necessary anymore
+    // Maurice will do that with subgraph :)
+    DynamicalSystemsGraph::VDescriptor dsgVD = topo.getDSG0Descriptor(ds);
+    VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
+    SiconosVector& residuFree = *workVectors[FirstOrderDS::residuFree];
+    SiconosVector& residu = *workVectors[FirstOrderDS::residu];
     // 1 - First Order Non Linear Systems
     if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS)
     {
       // ResiduFree = M(x_k,i+1 - x_i) - h*theta*f(t,x_k,i+1) - h*(1-theta)*f(ti,xi)
-      // Residu = Residu - h*r^k_i+1
       //  $\mathcal R(x,r) = M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
       //  $\mathcal R_{free}(x,r) = M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
 
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // Index k stands for Newton iteration and thus corresponds to the last computed
-      // value, ie the one saved in the DynamicalSystem.
-      // "i" values are saved in memory vectors.
+      // Note: indices k/k+1 corresponds to value at the beginning/end of the time step.
+      // Newton iterate are x and r
 
-      SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      FirstOrderNonLinearDS& d = *std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
 
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector xold = d->xMemory()->getSiconosVector(0); // xi
+      // 1 - Compute the free residu (purely on the "smooth" dynamics)
 
-      SP::SiconosVector x = d->x(); // last saved value for x
-      SP::SiconosMatrix M = d->M();
+      residuFree = *d.x(); // last saved value for x: could be x_k or x_{k+1}^alpha
+      SiconosVector& xold = *d.xMemory()->getSiconosVector(0);
+      residuFree -= xold; // state x_k (at previous time step)
 
-      *residuFree = *x;
-      *residuFree -= *xold;
-      //       std::cout<<"EulerMoreauOSI: x"<<endl;
-      //       (x)->display();
-      //       std::cout<<"EulerMoreauOSI: xold"<<endl;
-      //       (xold)->display();
-
-
-
+      SP::SiconosMatrix M = d.M();
       if (M)
-        prod(*M, *residuFree, *residuFree, true);
+        prod(*M, residuFree, residuFree, true);
+      // at this step, we have residuFree = M(x - x_k)
+      DEBUG_PRINT("EulerMoreauOSI::computeResidu residuFree = M(x - x_k)\n");
+      DEBUG_EXPR(residuFree.display());
 
-      if (d->f())
+      if (d.f())
       {
-
         double coef = -h * (1 - _theta);
         if (dsType == Type::FirstOrderLinearDS)
         {
-          // computes f(ti,xi)
+          // computes f(t_k,x_k)
           //This computation is done since fold not  is up to date.
-          d->computef(told, xold);
-          // residuFree += coef * f_i
-          scal(coef, *d->f(), *residuFree, false);
+          d.computef(told, xold);
+          // residuFree += -h * (1 - _theta) * f(t_k,x_k)
+          scal(coef, *d.f(), residuFree, false);
         }
-        else
+        else // FirstOrderNonLinearDS
         {
-          // residuFree += coef * f_i
-          scal(coef, *d->fold(), *residuFree, false);
+          // residuFree += -h * (1 - _theta) * f(t_k,x_k)
+          scal(coef, *d.fold(), residuFree, false);
         }
-        //          std::cout<<"EulerMoreauOSI: fold"<<endl;
-        //          (*d->fold()).display();
-        // computes f(ti+1, x_k,i+1) = f(t,x)
-        d->computef(t);
+
+         // computes f(t_{x+1}, x_{k+1}^alpha)
+        d.computef(t);
         coef = -h * _theta;
-        // residuFree += coef * fL_k,i+1
-        //          std::cout<<"EulerMoreauOSI: f"<<endl;
-        //          (*d->f()).display();
-        scal(coef, *d->f(), *residuFree, false);
+        // residuFree += -h * _theta * f(t_{x+1}, x_{k+1}^alpha)
+        scal(coef, *d.f(), residuFree, false);
       }
-      //      std::cout<<"EulerMoreauOSI: residu free"<<endl;
-      //      (*residuFree).display();
-      (*(d->workspace(DynamicalSystem::free))) = *residuFree;
-      scal(-h, *d->r(), (*d->workspace(DynamicalSystem::free)), false); // residu = residu - h*r
-      normResidu = d->workspace(DynamicalSystem::free)->norm2();
-      //    std::cout<<"EulerMoreauOSI: residu "<<endl;
-      //    (workX[d])->display();
-      //    std::cout<<"EulerMoreauOSI: norm residu :"<<normResidu<<endl;
 
+      // now compute the residu = residuFree - h*gamma*r - h*(1-gamma)r_k
+      residu = residuFree;
 
-      //(*d->residur())=(*d->r()) -(*d->gAlpha());
+      if (!_useGamma) // no gamma
+      {
+        scal(-h, *d.r(), residu, false); // residu = residu - h*r
+      }
+      else
+      {
+        scal(-h*_gamma, *d.r(), residu, false);
+        scal(-h*(1-_gamma), *d.rMemory()->getSiconosVector(0), residu, false);
+      }
 
-      //      std::cout<<"EulerMoreauOSI Type::FirstOrderNonLinearDS: residu r"<<endl;
-      //      (*d->residur()).display();
+      normResidu = residu.norm2();
+      DEBUG_EXPR(residu.display());
     }
     // 2 - First Order Linear Systems with Time Invariant coefficients
     else if (dsType == Type::FirstOrderLinearTIDS)
     {
-      SP::FirstOrderLinearTIDS d = std11::static_pointer_cast<FirstOrderLinearTIDS>(ds);
+      FirstOrderLinearTIDS& d = *std11::static_pointer_cast<FirstOrderLinearTIDS>(ds);
       //Don't use W because it is LU factorized
       //Residu : R_{free} = M(x^{\alpha}_{k+1} - x_{k}) -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1})
-      // because x_k+1=x_k:
-      //Residu : R_{free} = -hAx_k -hb_{k+1}
-      SP::SiconosVector b = d->b();
+      SP::SiconosVector b = d.b();
       if (b)
-        *residuFree = *b;
+        residuFree = *b;
       else
-        residuFree->zero();
+        residuFree.zero();
 
-      // x value at told
-      SP::SiconosVector xBuffer = d->workspace(DynamicalSystem::local_buffer);
-      *xBuffer = *(d->xMemory()->getSiconosVector(0));
-      //    std::cout<<"EulerMoreauOSI TIDS::computeResidu: x_k"<<endl;
-      //    xBuffer->display();
+      SiconosVector& xBuffer = *workVectors[FirstOrderDS::xBuffer];
+      SP::SiconosMatrix A = d.A();
 
-      SP::SiconosMatrix A = d->A();
-      if (A)
-        prod(*A, *xBuffer, *residuFree, false); // residuFree -= -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1}
+      if (A) // residuFree += -h( A (\theta x_{k+1}^{\alpha} + (1-\theta) x_k)
+      {
 
+        prod(*A, *d.xMemory()->getSiconosVector(0), xBuffer, true);
+        double coef = -h * (1 - _theta);
+        scal(coef, xBuffer, residuFree, false);
 
-      *residuFree *= -h;
+        prod(*A, *d.x(), xBuffer, true);
+        coef = -h * _theta;
+        scal(coef, xBuffer, residuFree, false);
+      }
 
-      DEBUG_EXPR(residuFree->display(););
+      // final touch, residuFree += M(x_{k+1}^{\alpha} - x_k)
+      xBuffer = *d.x() - *d.xMemory()->getSiconosVector(0);
+      SP::SiconosMatrix M = d.M();
+      if (M)
+      {
+        prod(*M, xBuffer, residuFree, false);
+      }
+      else
+      {
+        residuFree += xBuffer;
+      }
+
 
     }
     else
       RuntimeException::selfThrow("EulerMoreauOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+
+    DEBUG_PRINT("EulerMoreauOSI::computeResidu final residuFree\n");
+    DEBUG_EXPR(residuFree.display());
+
 
     if (normResidu > maxResidu) maxResidu = normResidu;
 
@@ -505,7 +519,7 @@ void EulerMoreauOSI::computeFreeState()
 {
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
-  DEBUG_PRINT("EulerMoreauOSI::computeFreeState()");
+  DEBUG_PRINT("EulerMoreauOSI::computeFreeState() starts\n");
 
   double t = simulationLink->nextTime(); // End of the time step
   double told = simulationLink->startingTime(); // Beginning of the time step
@@ -514,136 +528,178 @@ void EulerMoreauOSI::computeFreeState()
   // Operators computed at told have index i, and (i+1) at t.
 
   //  Note: integration of r with a theta method has been removed
-  //  SiconosVector *rold = static_cast<SiconosVector*>(d->rMemory()->getSiconosVector(0));
+  //  SiconosVector *rold = static_cast<SiconosVector*>(d.rMemory()->getSiconosVector(0));
 
   // Iteration through the set of Dynamical Systems.
   //
   DSIterator it; // Iterator through the set of DS.
 
   SP::DynamicalSystem ds; // Current Dynamical System.
-  SP::SiconosMatrix W; // W EulerMoreauOSI matrix of the current DS.
   Type::Siconos dsType ; // Type of the current DS.
+
+  // XXX to be removed -- xhub
+  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+  DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
+  InteractionsGraph& indexSet = *topo.indexSet(0);
+
+
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
+
+    // XXX TMP hack -- xhub
+    // we have to iterate over the edges of the DSG0 -> the following won't be necessary anymore
+    // Maurice will do that with subgraph :)
+    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
+    VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
+    DynamicalSystemsGraph::OEIterator oei, oeiend;
+    InteractionsGraph::VDescriptor ivd;
+    // this surely explodse when there is more than 1 interaction involvded.
+    // But we don't care for now -- xhub
+    for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
+    {
+      ivd = indexSet.descriptor(DSG0.bundle(*oei));
+    }
+    SP::SimpleMatrix K = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::K];
+    SP::SimpleMatrix Ktilde = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::Ktilde];
+
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds->number()]; // Its W EulerMoreauOSI matrix of iteration.
+    SiconosMatrix& W = *WMap[ds->number()]; // Its W EulerMoreauOSI matrix of iteration.
 
     // 1 - First Order Non Linear Systems
     if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
-      // xFree = x_k,i+1  - [W_k,i+1]^{-1} * ResiduFree_k,i+1
-      // with ResiduFree_k,i+1 = = M(x_k,i+1 - x_i) - h*theta*f(t,x_k,i+1) - h*(1-theta)*f(ti,xi)
+      // xfree =  x - W^{-1} (ResiduFree - h(1-gamma)*rold)
+      // with ResiduFree = = M(x - x_k) - h*theta*f(t_{k+1}, x) - h*(1-theta)*f(t_k, x_k)
 
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // Index k stands for Newton iteration and thus corresponds to the last computed
-      // value, ie the one saved in the DynamicalSystem.
-      // "i" values are saved in memory vectors.
-
-      // IN to be updated at current time: W, f
-      // IN at told: f
-      // IN, not time dependant: M
-      SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      // to be updated at current time: W, f
+      // fold is f at t_k
+      // not time dependant: M
+      FirstOrderNonLinearDS& d = *std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       //    SP::SiconosVector xold = d->xMemory()->getSiconosVector(0); // xi
 
-      // --- ResiduFree computation ---
-      // ResiduFree = M(x-xold) - h*[theta*f(t) + (1-theta)*f(told)]
-      //
-      // xFree pointer is used to compute and save ResiduFree in this first step.
-      SP::SiconosVector xfree = d->workspace(DynamicalSystem::free);//workX[d];
-      *xfree = *(d->workspace(DynamicalSystem::freeresidu));
+      SiconosVector& x = *d.x(); // x = x_k or x = x_{k+1}^{\alpha}
+      // xfree gets ResiduFree at first
+      SiconosVector& xfree = *workVectors[FirstOrderDS::xfree];
+      xfree = *workVectors[FirstOrderDS::residuFree];
+
+      DEBUG_PRINT("EulerMoreauOSI::computeFreeState xfree <- residuFree\n");
+      DEBUG_EXPR(xfree.display());
 
       if (_useGamma)
       {
-        SP::SiconosVector rold = d->rMemory()->getSiconosVector(0);
+        SiconosVector& rold = *d.rMemory()->getSiconosVector(0);
         double coeff = -h * (1 - _gamma);
-        scal(coeff, *rold, *xfree, false); //  residuFree += h(1-gamma)*rold
+        scal(coeff, rold, xfree, false); //  xfree += -h(1-gamma)*rold
       }
 
-      SP::SiconosVector x = d->x(); // last saved value for x
 
-      // -- xfree =  x - W^{-1} ResiduFree --
-      // At this point xfree = residuFree
+      // At this point xfree = (ResiduFree - h(1-gamma)*rold)
       // -> Solve WX = xfree and set xfree = X
       // -- Update W --
       if (dsType != Type::FirstOrderLinearTIDS)
         computeW(t, d);
 
-      W->PLUForwardBackwardInPlace(*xfree);
+      W.PLUForwardBackwardInPlace(xfree);
 
-      // -> compute real xfree
-      *xfree *= -1.0;
-      *xfree += *x;
-      //    std::cout<<" moreau::computefreestate xfree"<<endl;
-      //    xfree->display();
+      // at this point, xfree = W^{-1} (ResiduFree - h(1-gamma)*rold)
+      // -> compute real xfree = x - W^{-1} (ResiduFree - h(1-gamma)*rold)
+      xfree *= -1.0;
+      xfree += x;
 
-      //       if (!simulationLink->model()->nonSmoothDynamicalSystem()->isLinear())
-      //       {
-      SP::SiconosVector xp = d->xp();
-      //      std::cout<<"before moreau::computefreestate xp"<<endl;
-      //      xp->display();
-      W->PLUForwardBackwardInPlace(*xp);
-      scal(h, *xp, *xp);
-      *xp += *xfree;
-      //      std::cout<<"after moreau::computefreestate xp"<<endl;
-      //      xp->display();
-      SP::SiconosVector xq = d->xq();
-      *xq = *xp;
-      *xq -= *x;
+      DEBUG_EXPR(xfree.display());
 
-      //          std::cout <<boolalpha << _useGamma << std::endl;
-      //          std::cout <<boolalpha << _useGammaForRelation << std::endl;
-      //          std::cout <<_gamma << std::endl;
+      // now the crazy intermediate variables
+      // xPartialNS was updated before this fonction call
+      // It constains either 0 (first Newton iterate)
+      // or g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
+      SiconosVector& xPartialNS = *workVectors[FirstOrderDS::xPartialNS];
+      DEBUG_PRINT("EulerMoreauOSI::computeFreeState xPartialNS from Interaction\n");
+      DEBUG_EXPR(xPartialNS.display());
 
+      // -> Solve WX = g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
+      // and set xPartialNS = X
+      W.PLUForwardBackwardInPlace(xPartialNS);
+      scal(h, xPartialNS, xPartialNS);
+
+      // compute real xPartialNS = xfree + ...
+      xPartialNS += xfree;
+      DEBUG_PRINT("EulerMoreauOSI::computeFreeState xPartialNS real value\n");
+      DEBUG_EXPR(xPartialNS.display());
+
+      // deltaxForRelation = (\widetilde{K}_{k+1}^{\alpha})^{-1} xPartialNS - x
+      SiconosVector& deltaxForRelation = *workVectors[FirstOrderDS::deltaxForRelation];
+      deltaxForRelation = xPartialNS;
+
+      // first do some crazy things
+      if (K)
+      {
+        // update Ktilde
+        Ktilde->eye();
+        SimpleMatrix tmpM = *K;
+        W.PLUForwardBackwardInPlace(tmpM);
+        // XXX TODO gamma case -- xhub
+        scal(-h, tmpM, *Ktilde, false);
+
+        // solve Ktilde X = xPartialNS
+        Ktilde->PLUForwardBackwardInPlace(deltaxForRelation);
+      }
+
+      deltaxForRelation -= x;
+
+      DEBUG_EXPR(deltaxForRelation.display());
+
+      // where does this come from ? Could not find the equations in the DevNotes -- xhub
       if (_useGammaForRelation)
       {
+        RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState - _useGammaForRelation = true is not well tested neither checked -- xhub");
+        deltaxForRelation = xfree;
 
+        scal(_gamma, deltaxForRelation, deltaxForRelation);
+        SiconosVector& xold = *d.xMemory()->getSiconosVector(0);
 
-        // This part is ony valid for the linear case. See comments in Dev Notes.
-
-        if (dsType != Type::FirstOrderLinearDS && dsType != Type::FirstOrderLinearTIDS)
-        {
-          RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState with _useGammaForRelation  - not yet implemented for Dynamical system type: " + dsType);
-        }
-          *xq = *xfree;
-        //            std::cout << "xq before" << std::endl;
-        //           xq->display();
-
-        scal(_gamma, *xq, *xq);
-        SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
-        //            std::cout << "xold" << std::endl;
-        //           xold->display();
-
-        scal(1.0 - _gamma, *xold, *xq, false);
-        //           std::cout << "xq after" << std::endl;
-        //           xq->display();
-
+        scal(1.0 - _gamma, xold, deltaxForRelation, false);
       }
-      DEBUG_EXPR(xfree->display(););
-      DEBUG_EXPR(xp->display(););
-      DEBUG_EXPR(xq->display(););
 
-
-      //      }
+      // some output
+      DEBUG_EXPR(xfree.display(););
+      DEBUG_EXPR(xPartialNS.display(););
+      DEBUG_EXPR(deltaxForRelation.display(););
 
     }
     else
       RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
   }
-
 }
+
+/* void EulerMoreauOSI::prepareNewtonLoop()
+{
+  // XXX TMP hack -- xhub
+  // we have to iterate over the edges of the DSG0 -> the following won't be necessary anymore
+  // Maurice will do that with subgraph :)
+  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  ConstDSIterator itDS;
+  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  {
+    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*itDS);
+    VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
+    workVectors[FirstOrderDS::xPartialNS]->zero();
+  }
+}
+*/
 
 void EulerMoreauOSI::prepareNewtonIteration(double time)
 {
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
-    computeW(time, *itDS);
+    computeW(time, **itDS);
   }
 }
 
+/// @cond
 
 struct EulerMoreauOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
@@ -665,6 +721,7 @@ struct EulerMoreauOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
   }
 };
 
+/// @endcond
 
 void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
@@ -675,6 +732,9 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
+  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  VectorOfVectors& workV = *indexSet->properties(vertex_inter).workVectors;
+  VectorOfSMatrices& workM = *indexSet->properties(vertex_inter).workMatrices;
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -695,25 +755,15 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   SP::SiconosMatrix  C;
   SP::SiconosMatrix  D;
   SP::SiconosMatrix  F;
-  SP::BlockVector Xq;
-  SP::SiconosVector Yp;
+  SP::BlockVector deltax;
   SP::BlockVector Xfree;
 
   SP::SiconosVector H_alpha;
 
+  deltax = DSlink[FirstOrderRDS::deltax];
+  SiconosVector& yForNSsolver = *inter->yForNSsolver();
 
-  /** \todo VA. All of these values should be stored in a node in the interactionGraph
-   * corrseponding to the Interaction
-   * when a EulerMoreauOSI scheme is used.
-   */
-
-  Xq = inter->dataXq();
-  Yp = inter->yp();
-
-  if (relationType == FirstOrder)
-  {
-    Xfree = inter->data(FirstOrderR::free);
-  }
+  Xfree = DSlink[FirstOrderRDS::xfree];
 
   assert(Xfree);
 
@@ -726,58 +776,105 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   {
 
 
-    SP::SiconosVector lambda;
-    lambda = inter->lambda(0);
+    SiconosVector& lambda = *inter->lambda(0);
     FirstOrderType2R& rel = *std11::static_pointer_cast<FirstOrderType2R>(mainInteraction->relation());
     C = rel.C();
+    if (!C) C = workM[FirstOrderRMat::C];
     D = rel.D();
-    assert(lambda);
+    if (!D) D = workM[FirstOrderRMat::D];
 
     if (D)
     {
       coord[3] = D->size(1);
       coord[5] = D->size(1);
-      subprod(*D, *lambda, *Yp, coord, true);
+      subprod(*D, lambda, yForNSsolver, coord, true);
 
-      *Yp *= -1.0;
+      yForNSsolver *= -1.0;
     }
+    else
+    {
+      subscal(0, yForNSsolver, yForNSsolver, coord, true);
+    }
+
     if (C)
     {
       coord[3] = C->size(1);
       coord[5] = C->size(1);
-      subprod(*C, *Xq, *Yp, coord, false);
+      subprod(*C, *deltax, yForNSsolver, coord, false);
 
     }
 
     if (_useGammaForRelation)
     {
-      RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
+      RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Type2R and H_alpha->getValue() should return the mid-point value");
     }
+
     H_alpha = inter->Halpha();
     assert(H_alpha);
-    *Yp += *H_alpha;
+    yForNSsolver += *H_alpha;
   }
 
+  else if (relationType == FirstOrder && relationSubType == NonLinearR)
+  {
+    SiconosVector& lambda = *inter->lambda(0);
+    FirstOrderR& rel = *std11::static_pointer_cast<FirstOrderR>(mainInteraction->relation());
+    C = rel.C();
+    if (!C) C = workM[FirstOrderRMat::C];
+    D = rel.D();
+    if (!D) D = workM[FirstOrderRMat::D];
+
+    if (D)
+    {
+      coord[3] = D->size(1);
+      coord[5] = D->size(1);
+      subprod(*D, lambda, yForNSsolver, coord, true);
+
+      yForNSsolver *= -1.0;
+    }
+    else
+    {
+      subscal(0, yForNSsolver, yForNSsolver, coord, true);
+    }
+
+    if (C)
+    {
+      coord[3] = C->size(1);
+      coord[5] = C->size(1);
+      subprod(*C, *deltax, yForNSsolver, coord, false);
+
+    }
+
+    if (_useGammaForRelation)
+    {
+      RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Type2R and H_alpha->getValue() should return the mid-point value");
+    }
+
+    H_alpha = inter->Halpha();
+    assert(H_alpha);
+    yForNSsolver += *H_alpha;
+  }
   else if (relationType == FirstOrder && relationSubType == Type1R)
   {
     FirstOrderType1R& rel = *std11::static_pointer_cast<FirstOrderType1R>(mainInteraction->relation());
     C = rel.C();
+    if (!C) C = workM[FirstOrderRMat::C];
     F = rel.F();
+    if (!F) F = workM[FirstOrderRMat::F];
     assert(Xfree);
-    assert(Xq);
+    assert(deltax);
 
     if (F)
     {
       coord[3] = F->size(1);
       coord[5] = F->size(1);
-      subprod(*F, *inter->dataZ(), *Yp, coord, true);
+      subprod(*F, *DSlink[FirstOrderRDS::z], yForNSsolver, coord, true);
 
     }
     if (C)
     {
       coord[3] = C->size(1);
       coord[5] = C->size(1);
-      subprod(*C, *Xfree, *Yp, coord, false);
+      subprod(*C, *Xfree, yForNSsolver, coord, false);
 
     }
 
@@ -786,31 +883,32 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
       RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
     }
     H_alpha = inter->Halpha();
-    assert(H_alpha);
-    *Yp += *H_alpha;
+    if(H_alpha)
+    {
+      yForNSsolver += *H_alpha;
+    }
   }
   else
   {
     C = mainInteraction->relation()->C();
+    if (!C) C = workM[FirstOrderRMat::C];
 
     if (C)
     {
 
       assert(Xfree);
-      assert(Xq);
+      assert(deltax);
 
       coord[3] = C->size(1);
       coord[5] = C->size(1);
-      // creates a POINTER link between workX[ds] (xfree) and the
-      // corresponding interactionBlock in each Interactionfor each ds of the
-      // current Interaction.
+
       if (_useGammaForRelation)
       {
-        subprod(*C, *Xq, *Yp, coord, true);
+        subprod(*C, *deltax, yForNSsolver, coord, true);
       }
       else
       {
-        subprod(*C, *Xfree, *Yp, coord, true);
+        subprod(*C, *Xfree, yForNSsolver, coord, true);
       }
     }
 
@@ -827,24 +925,25 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
       else
       {
         e = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
+        if (!e) e = workV[FirstOrderRVec::e];
         F = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
+        if (!F) F = workM[FirstOrderRMat::F];
       }
 
       if (e)
-        *Yp += *e;
+        yForNSsolver += *e;
 
       if (F)
       {
         coord[3] = F->size(1);
         coord[5] = F->size(1);
-        subprod(*F, *inter->dataZ(), *Yp, coord, false);
+        subprod(*F, *DSlink[FirstOrderRDS::z], yForNSsolver, coord, false);
       }
     }
 
   }
-
- 
 }
+
 void EulerMoreauOSI::integrate(double& tinit, double& tend, double& tout, int&)
 {
   // Last parameter is not used (required for LsodarOSI but not for EulerMoreauOSI).
@@ -866,7 +965,7 @@ void EulerMoreauOSI::integrate(double& tinit, double& tend, double& tout, int&)
 void EulerMoreauOSI::updateState(const unsigned int level)
 {
 
-  DEBUG_PRINT("EulerMoreauOSI::updateState(const unsigned int level)\n");
+  DEBUG_PRINT("EulerMoreauOSI::updateState\n");
 
   double h = simulationLink->timeStep();
 
@@ -876,127 +975,75 @@ void EulerMoreauOSI::updateState(const unsigned int level)
     simulationLink->setRelativeConvergenceCriterionHeld(true);
 
   DSIterator it;
-  SP::SiconosMatrix W;
+  // XXX TMP hack -- xhub
+  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+  DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
+
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     SP::DynamicalSystem ds = *it;
-    W = WMap[ds->number()];
+    SiconosMatrix& W = *WMap[ds->number()];
+
     // Get the DS type
-
     Type::Siconos dsType = Type::value(*ds);
+    DynamicalSystemsGraph::VDescriptor dsgVD = topo.getDSG0Descriptor(ds);
+    VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
 
-    // 1 - First Order Systems
     if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
-      SP::FirstOrderNonLinearDS fonlds = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-      SP::SiconosVector x = ds->x();
+      FirstOrderNonLinearDS& d = *std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      SiconosVector& x = *ds->x();
+      DEBUG_PRINT("EulerMoreauOSI::updateState Old value of x\n");
+      DEBUG_EXPR(x.display());
+      DEBUG_PRINT("EulerMoreauOSI::updateState residu value\n");
+      DEBUG_EXPR(d.r()->display());
+
+      // TODO ???
       bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && simulationLink->relativeConvergenceCriterionHeld());
       if (level != LEVELMAX)
       {
 
-        //    SP::SiconosVector xFree = fonlds->xFree();
+        //    SP::SiconosVector xFree = d->xFree();
 
         // Save value of q in local_buffer for relative convergence computation
         if (baux)
-          ds->addWorkVector(x, DynamicalSystem::local_buffer);
+          *workVectors[FirstOrderDS::xBuffer] = x;
 
         //        std::cout <<boolalpha << _useGamma << std::endl;
         //        std::cout <<_gamma << std::endl;
         if (_useGamma)
         {
-          //SP::SiconosVector rold =d->rMemory()->getSiconosVector(0);
-          // Solve W(x-xfree) = hr
-          scal(_gamma * h, *fonlds->r(), *x); // x = gamma*h*r
-          // scal((1.0-_gamma)*h,*rold,*x,false)// x += (1-gamma)*h*rold
+          // XXX UseGamma broken ? -- xhub
+          scal(_gamma * h, *d.r(), x); // x = gamma*h*r
         }
         else
         {
-          // Solve W(x-xfree) = hr
-          scal(h, *fonlds->r(), *x); // x = h*r
-          //      scal(h,*fonlds->gAlpha(),*x); // x = h*gApha
+          scal(h, *d.r(), x); // x = h*r
         }
 
-        W->PLUForwardBackwardInPlace(*x); // x =h* W^{-1} *r
+        W.PLUForwardBackwardInPlace(x); // x = h* W^{-1} *r
 
-        *x += *(fonlds->workspace(DynamicalSystem::free)); //*workX[ds]; // x+=xfree
+        x += *workVectors[FirstOrderDS::xfree]; // x+=xfree
       }
       else
       {
-        *x = *(fonlds->workspace(DynamicalSystem::free)); //*workX[ds]; // x=xfree
+        RuntimeException::selfThrow("EulerMoreauOSI::updateState - level != LEVELMAX is not supposed to happen !");
+        x = *workVectors[FirstOrderDS::xfree]; // x = xfree
       }
 
       if (baux)
       {
-        ds->subWorkVector(x, DynamicalSystem::local_buffer);
-        double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
+        *workVectors[FirstOrderDS::xBuffer] -= x;
+        double aux = (workVectors[FirstOrderDS::xBuffer]->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
-
-
-      //  }else if (dsType == Type::FirstOrderLinearTIDS){
-      //    SP::FirstOrderNonLinearDS fonlds = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-      //    SP::SiconosVector x = ds->x();
-      //    // Solve W(x-xfree) = hr
-      //    *x=*fonlds->r();
-      //    W->PLUForwardBackwardInPlace(*x); // x = W^{-1} *r
-      //    scal(h,*x,*x); // x = h*W^{-1}*r
-      //    *x +=*(fonlds->xfree());//*workX[ds]; // x+=xfree
-      //    //    std::cout<<"X alpha+1"<<endl;
-      //    //    x->display();
+      DEBUG_PRINT("EulerMoreauOSI::updateState New value of x\n");
+      DEBUG_EXPR(x.display());
     }
     else RuntimeException::selfThrow("EulerMoreauOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
   }
 }
-
-
-// bool EulerMoreauOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
-// {
-//   DEBUG_PRINT("addInteractionInIndexSet(SP::Interaction inter, unsigned int i)\n");
-
-//   assert(i == 1);
-//   double h = simulationLink->timeStep();
-//   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-//   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
-
-//   double gamma = 1.0 / 2.0;
-//   if (_useGamma)
-//   {
-//     gamma = _gamma;
-//   }
-//   DEBUG_PRINTF("EulerMoreauOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.\n", i,  y, yDot, y + gamma * h * yDot);
-//   y += gamma * h * yDot;
-//   assert(!isnan(y));
-//   DEBUG_EXPR(
-//     if (y <= 0)
-//     DEBUG_PRINT("EulerMoreauOSI::addInteractionInIndexSet ACTIVATE.\n");
-//   );
-//   return (y <= 0.0);
-// }
-
-
-// bool EulerMoreauOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
-// {
-//   assert(i == 1);
-//   double h = simulationLink->timeStep();
-//   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-//   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
-//   double gamma = 1.0 / 2.0;
-//   if (_useGamma)
-//   {
-//     gamma = _gamma;
-//   }
-//   DEBUG_PRINTF("EulerMoreauOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
-//   y += gamma * h * yDot;
-//   assert(!isnan(y));
-
-//   DEBUG_EXPR(
-//     if (y > 0)
-//     DEBUG_PRINT("EulerMoreauOSI::removeInteractionInIndexSet DEACTIVATE.\n");
-//   );
-//   return (y > 0.0);
-// }
-
 
 void EulerMoreauOSI::display()
 {

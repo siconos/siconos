@@ -69,7 +69,7 @@ private:
 
   // Members
 
-  SP::SiconosMatrix C, B, F, D;
+  SP::SimpleMatrix C, B, F, D;
   SP::SiconosVector e;
   SP::NonSmoothDynamicalSystem nsds;
 

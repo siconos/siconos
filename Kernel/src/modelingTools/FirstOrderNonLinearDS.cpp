@@ -321,10 +321,10 @@ void FirstOrderNonLinearDS::computef(double time)
     ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, &((*(_x[0]))(0)) , &(*_f)(0), _z->size(), &(*_z)(0));
 }
 
-void FirstOrderNonLinearDS::computef(double time, SP::SiconosVector x2)
+void FirstOrderNonLinearDS::computef(double time, SiconosVector& x2)
 {
   if (_pluginf->fPtr)
-    ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, &((*x2)(0)) , &(*_f)(0), _z->size(), &(*_z)(0));
+    ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, &((x2)(0)) , &(*_f)(0), _z->size(), &(*_z)(0));
   // else nothing!
 }
 
@@ -418,22 +418,14 @@ void FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
   //assert(0);
   _r->zero();
 }
-
-
-/*must be remove, replace by the RelativeConvergenceCriteron of the simulation*/
-/*double FirstOrderNonLinearDS::dsConvergenceIndicator()
+void FirstOrderNonLinearDS::initWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices)
 {
-    double dsCvgIndic;
-  // Velocity is used to calculate the indicator.
-  SP::SiconosVector diff(new SiconosVector(x[0]->size()));
-  // Compute difference between present and previous Newton steps
-  SP::SiconosVector valRef = workV[NewtonSave];
-  *diff =  *(x[0]) - *valRef;
-  if (valRef->norm2()!=0)
-    dsCvgIndic= diff->norm2()/(valRef->norm2());
-  else
-    dsCvgIndic= diff->norm2();
-    return (dsCvgIndic);
-    }*/
-
+  workVector.resize(FirstOrderDS::sizeWorkV);
+  workVector[FirstOrderDS::residu].reset(new SiconosVector(_n));
+  workVector[FirstOrderDS::residuFree].reset(new SiconosVector(_n));
+  workVector[FirstOrderDS::xfree].reset(new SiconosVector(_n));
+  workVector[FirstOrderDS::xPartialNS].reset(new SiconosVector(_n));
+  workVector[FirstOrderDS::deltaxForRelation].reset(new SiconosVector(_n));
+  workVector[FirstOrderDS::xBuffer].reset(new SiconosVector(_n));
+}
 

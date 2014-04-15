@@ -79,7 +79,7 @@ public:
   /** create the Relation from a set of data
   *  \param C the matrix C
   */
-  LagrangianLinearTIR(SP::SiconosMatrix C);
+  LagrangianLinearTIR(SP::SimpleMatrix C);
 
   /** create the Relation from a set of data
   *  \param C the matrix C
@@ -87,18 +87,18 @@ public:
   *  \param F the matrix F
   *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e);
+  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e);
 
   /** create the Relation from a set of data
   *  \param C the matrix C
   *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosVector e);
+  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e);
 
   /** create the Relation from a set of data
   *  \param SiconosMatrix : the matrix C
   */
-  LagrangianLinearTIR(const SiconosMatrix&);
+  LagrangianLinearTIR(const SimpleMatrix&);
 
   /** create the Relation from a set of data
   *  \param SiconosMatrix : C
@@ -106,13 +106,13 @@ public:
   *  \param SiconosMatrix : F
   *  \param SiconosVector : e
   */
-  LagrangianLinearTIR(const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&, const SiconosVector&);
+  LagrangianLinearTIR(const SimpleMatrix&, const SiconosMatrix&, const SiconosMatrix&, const SiconosVector&);
 
   /** create the Relation from a set of data
   *  \param SiconosMatrix : C
   *  \param SiconosVector : e
   */
-  LagrangianLinearTIR(const SiconosMatrix&, const SiconosVector&);
+  LagrangianLinearTIR(const SimpleMatrix&, const SiconosVector&);
 
   /** destructor
   */
@@ -121,7 +121,7 @@ public:
   /** initialize LagrangianLinearTIR specific operators.
   * \param inter an Interaction using this relation
   */
-  void initComponents(Interaction& inter);
+  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 
   /** default function to compute y
@@ -129,14 +129,14 @@ public:
   *  \param inter the Interaction we want to update
   *  \param derivativeNumber the derivative of y we want to compute
   */
-  void computeOutput(double time, Interaction& inter, unsigned int derivativeNumber = 0);
+  void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
 
   /** default function to compute r
   *  \param time not used
   *  \param inter the Interaction we want to update
   *  \param level the derivative of lambda we want to compute
   */
-  void computeInput(double time, Interaction& inter, unsigned int level = 0);
+  void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
   // GETTERS/SETTERS
 
@@ -149,7 +149,7 @@ public:
   /** get C
   *  \return pointer on a plugged matrix
   */
-  inline SP::SiconosMatrix C() const
+  inline SP::SimpleMatrix C() const
   {
     return _jachq;
   }
@@ -166,7 +166,7 @@ public:
   /** set C to pointer newPtr
   *  \param a SP to plugged matrix
   */
-  inline void setCPtr(SP::SiconosMatrix newPtr)
+  inline void setCPtr(SP::SimpleMatrix newPtr)
   {
     _jachq = newPtr;
   }

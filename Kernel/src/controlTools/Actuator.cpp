@@ -63,7 +63,7 @@ void Actuator::initialize(const Model& m)
 
 }
 
-void Actuator::setB(const SiconosMatrix& B)
+void Actuator::setB(const SimpleMatrix& B)
 {
   _B.reset(new SimpleMatrix(B));
 }

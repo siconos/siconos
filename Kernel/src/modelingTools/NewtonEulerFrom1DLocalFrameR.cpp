@@ -155,9 +155,9 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::NewtonEulerDS
     _jachqT->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
 }
 
-void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter)
+void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  NewtonEulerR::initComponents(inter);
+  NewtonEulerR::initComponents(inter, DSlink, workV, workM);
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   _jachq.reset(new SimpleMatrix(1, qSize));
@@ -169,7 +169,7 @@ void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter)
   //  _isContact=1;
 }
 
-void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter)
+void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
 {
   _jachq->setValue(0, 0, _Nc->getValue(0));
   _jachq->setValue(0, 1, _Nc->getValue(1));
@@ -180,7 +180,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter)
     _jachq->setValue(0, 8, -_Nc->getValue(1));
     _jachq->setValue(0, 9, -_Nc->getValue(2));
   }
-  SP::BlockVector BlockX = inter.data(q0);
+  SP::BlockVector BlockX = DSlink[NewtonEulerRDS::q0];
   for (int iDS = 0; iDS < 2; iDS++)
   {
     if (!inter.has2Bodies() && iDS == 1)

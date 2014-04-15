@@ -18,7 +18,7 @@
  */
 
 /*! \file FirstOrderType2R.hpp
-\brief non linear relations, with y depending on dynamical systems state and r on lambda.
+  \brief non linear relations: \f$y=h(x,\lambda,z)\quadr=g(\lambda,z)\f$
  */
 
 #ifndef FirstOrderType2R_H
@@ -26,18 +26,20 @@
 
 #include "FirstOrderR.hpp"
 
+typedef void (*Type2PtrH)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
+typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
 
 /** FirstOrder Non Linear Relation.
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004
+ *  \date (Creation) Apr 27
  *
  * Derived from FirstOrderR - See this class for more comments.
  *
  *  Relation for First Order Dynamical Systems, with:
  * \f{eqnarray}
- * y &=& h(X,\lambda,Z)\\
- * r &=& g(\lambda,Z)
+ * y &=& h(x,\lambda,z)\\
+ * r &=& g(\lambda,z)
  * \f}
  *
  * Operators (and their corresponding plug-in):
@@ -54,76 +56,109 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderType2R);
 
-  SP::SimpleMatrix _jacgx;
+//  /** \f$\nabla_x g\f$ aka K*/
+//  SP::SimpleMatrix _jacgx;
 
 public:
 
   FirstOrderType2R();
   /** data constructor
-  *  \param a std::string with computeOutput function name.
-  *  \param a std::string with computeInput function name.
+  *  \param pluginh name of the plugin to compute h
+  *  \param pluging name of the plugin to compute g
   */
-  FirstOrderType2R(const std::string&, const std::string&);
+  FirstOrderType2R(const std::string& pluginh, const std::string& pluhing);
 
   /** data constructor
-  *  \param a std::string with computeOutput function name.
-  *  \param a std::string with computeInput function name.
-  *  \param a std::string: name of the function to compute the jacobian of h according to x
-  *  \param a std::string: name of the function to compute the jacobian of g according to lambda
+  *  \param pluginh name of the plugin to compute h
+  *  \param pluging name of the plugin to compute g
+  *  \param pluginJacobianhx name of the plugin to compute the Jacobian of h according to x \f$\nabla_x h\f$
+  *  \param pluginJacobianglambda name of the plugin to compute the jacobian of g according to lambda
   */
-  FirstOrderType2R(const std::string&, const std::string&, const std::string&, const std::string&);
+  FirstOrderType2R(const std::string& pluginh, const std::string& pluging, const std::string& pluginJacobianhx, const std::string& pluginJacobianglambda);
 
   /** destructor
   */
   ~FirstOrderType2R() {};
 
-  /** initialize the relation (check sizes, memory allocation ...)
-  \param SP to Interaction: the interaction that owns this relation
-  */
-  virtual void initialize(Interaction& inter);
 
-  /** default function to compute h
-  *  \param double : current time
+  /** initialize the relation (check sizes, memory allocation ...)
+   * \param inter the interaction that owns this relation
+   * \param DSlink link to DS variable
+   * \param workV work vectors to initialize
+   * \param workM work matrices to initialize
   */
-  virtual void computeh(double time, Interaction& inter);
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  /** default function to compute y = h(x, lambda, t)
+  * \param time the current time
+  * \param x the state vector
+  * \param lambdaXXX
+  * \param y the "output" vector
+  */
+  virtual void computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y);
 
   /** default function to compute g
-  *  \param double : current time
+  * \param time the current time
+  * \param lambdaXXX
+  * \param r the nonsmooth "input" vector
   */
-  virtual void computeg(double time, Interaction& inter);
+  virtual void computeg(double time, SiconosVector& lambda, SiconosVector& r);
 
-  /** default function to compute jacobianH
-  *  \param double : not used
-  *  \param not used
+  /** default function to compute \f$\nabla_x h\f$
+  *  \param time current time (not used)
+  *  \param x the state used to evaluate the jacobian
+  *  \param z the extra input used to evaluate the jacobian
+  *  \param C the matrix used to store the jacobian
   */
-  virtual void computeJachx(double time, Interaction& inter);
-  virtual void computeJachlambda(double time, Interaction& inter);
+  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
+//  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C);
+
+  /** default function to compute \f$\nabla_z h\f$
+  *  \param time current time (not used)
+  *  \param x the state used to evaluate the jacobian
+  *  \param z the extra input used to evaluate the jacobian
+  *  \param D the matrix used to store the jacobian
+  */
+//  virtual void computeJachz(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+//  virtual void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& D);
 
   /** default function to compute jacobianG according to lambda
-  *  \param double : current time
-  *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+  *  \param time current time (not used)
+  *  \param lambda the nonsmooth input used to evaluate the jacobian
+  *  \param z the extra input used to evaluate the jacobian
+  *  \param B the matrix used to store the jacobian
   */
-  virtual void computeJacglambda(double time, Interaction& inter);
-  virtual void computeJacgx(double time, Interaction& inter);
+  virtual void computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B);
+//  virtual void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
 
-  virtual void computeJacg(double time, Interaction& inter);
-
-  /** default function to compute y
-  *  \param double: not used
-  *  \param unsigned int: not used
+  /** default function to compute y, using the data from the Interaction and DS
+  *  \param time current time (not used)
+  *  \param inter Interaction using this Relation
+  *  \param DSlink
+  *  \param workV
+  *  \param workM
+  *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, unsigned int = 0);
+  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
-  /** default function to compute r
-  *  \param double : not used
-  *  \param unsigned int: not used
+  /** default function to compute r, using the data from the Interaction and DS
+  *  \param time current time (not used)
+  *  \param inter Interaction using this Relation
+  *  \param DSlink
+  *  \param workV
+  *  \param workM
+  *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, unsigned int = 0);
-  /*
-  inline SP_PluggedMatrix getB(){return Jacg.at(1);};
-  */
+  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
 
-  virtual void preparNewtonIteration(Interaction& inter);
+  virtual void preparNewtonIteration(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
+
+    virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+    virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
   ACCEPT_STD_VISITORS();
 
 };

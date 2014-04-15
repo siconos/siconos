@@ -117,6 +117,7 @@ int main()
   // -- (4) Simulation setup with (1) (2) (3)
   SP::TimeStepping aS(new TimeStepping(aTD, aEulerMoreauOSI, aMLCP));
   aS->setComputeResiduY(true);
+  aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
 
 
@@ -181,7 +182,7 @@ int main()
     // solve ...
     /*aS->computeOneStep();*/
 
-    aS-> newtonSolve(1e-4, 20);
+    aS-> newtonSolve(1e-4, 200);
     aS->nextStep();
     x = aDS->x();
     lambda = aI->lambda(0);

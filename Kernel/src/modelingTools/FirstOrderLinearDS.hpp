@@ -148,8 +148,8 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /**
-   * return true if the Dynamical system is linear.
+  /** say that the system is linear
+   * \return true if the DynamicalSystem is linear.
    */
   virtual bool isLinear()
   {
@@ -193,7 +193,7 @@ public:
    * \param time time instant used in the computation of \f$f\f$
    * \param x2 the state vector used for the computation of \f$f\f$
    */
-  virtual void computef(double time, SP::SiconosVector x2);
+  virtual void computef(double time, SiconosVector& x2);
 
   /** set A to pointer newPtr
    *  \param newA the new A matrix
@@ -216,12 +216,12 @@ public:
     return _b;
   }
 
-  /** set b to pointer newPtr
-   *  \param a SP to plugged vector
+  /** set b
+   *  \param b a SiconosVector
    */
-  inline void setb(SP::SiconosVector newPtr)
+  inline void setb(SP::SiconosVector b)
   {
-    _b = newPtr;
+    _b = b;
   }
 
   // --- plugins related functions
@@ -239,11 +239,11 @@ public:
   void setComputeAFunction(LDSPtrFunction fct);
 
   /** set a specified function to compute the vector b
-   *  \param pluginPath the complete path to the plugin
+   *  \param pluginPath the complete path to the plugin file
    *  \param functionName the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputebFunction(const std::string& , const std::string&);
+  void setComputebFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** set a specified function to compute the vector b
    *  \param fct a pointer on a function
@@ -288,14 +288,18 @@ public:
     return 1.0;
   }
 
-  /** Get _pluginA */
+  /** Get _pluginA
+   * \return the plugin for A
+   */
   inline SP::PluggedObject getPluginA() const
   {
     return _pluginA;
   };
 
-  /** Get _pluginB */
-  inline SP::PluggedObject getPluginB() const
+  /** Get _pluginb
+   * \return the plugin for b
+   */
+  inline SP::PluggedObject getPluginb() const
   {
     return _pluginb;
   };

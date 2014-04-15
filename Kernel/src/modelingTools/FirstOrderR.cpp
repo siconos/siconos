@@ -17,31 +17,10 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderR.hpp"
-#include "Interaction.hpp"
-#include "FirstOrderNonLinearDS.hpp"
 
-
-
-
-void FirstOrderR::initialize(Interaction& inter)
+void FirstOrderR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  // Update data member (links to DS variables)
+  initComponents(inter, DSlink, workV, workM);
 }
 
-void FirstOrderR::computeJachx(double time, Interaction& inter)
-{
-  //RuntimeException::selfThrow("FirstOrderR::computeJachx, not (yet) implemented or forbidden for relations of type "+subType);
-}
-void FirstOrderR::computeJachz(double time, Interaction& inter)
-{
-  //RuntimeException::selfThrow("FirstOrderR::computeJachx, not (yet) implemented or forbidden for relations of type "+subType);
-} void FirstOrderR::computeJachlambda(double time, Interaction& inter)
-{
-  //RuntimeException::selfThrow("FirstOrderR::computeJachlambda, not (yet) implemented or forbidden for relations of type "+subType);
-}
-
-void FirstOrderR::computeJacglambda(double time, Interaction& inter)
-{
-  //RuntimeException::selfThrow("FirstOrderR::computeJacglambda, not (yet) implemented or forbidden for relations of type "+subType);
-}
 

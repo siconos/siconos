@@ -52,45 +52,6 @@ typedef MapOfDSMatrices::iterator MatIterator;
 /** Const iterator through a map of matrices */
 typedef MapOfDSMatrices::const_iterator ConstMatIterator;
 
-/** Map of SiconosVector; key = the related DS*/
-typedef std::map<SP::DynamicalSystem, SP::SiconosVector> DSVectors;
-
-/** Iterator through a map of matrices */
-typedef DSVectors::iterator DSVectorsIterator;
-
-/** Const iterator through a map of matrices */
-typedef DSVectors::const_iterator ConstDSVectorsIterator;
-
-/** Map of double; key = the related DS */
-typedef std::map<SP::DynamicalSystem, double> MapOfDouble;
-
-/** Iterator through a map of double */
-typedef MapOfDouble::iterator DoubleIterator;
-
-// ================== Objects that should not exists (used in ZOH) ==================
-
-/** Map of TimeDiscretisation; key = the number of the related DS*/
-typedef std::map<unsigned int, SP::TimeDiscretisation> MapOfTD;
-
-/** Map of Model; key = the number of the related DS*/
-typedef std::map<unsigned int, SP::Model> MapOfModel;
-
-/** Map of OSI; key = the number of the related DS*/
-typedef std::map<unsigned int, SP::OneStepIntegrator> MapOfOSI;
-
-/** Map of Simulation; key = the number of the related DS*/
-typedef std::map<unsigned int, SP::Simulation> MapOfSimulation;
-
-/* * Map of DynamicalSystem; key = the number of the related DS*/
-typedef std::map<unsigned int, SP::DynamicalSystem> MapOfDS;
-
-typedef std::map<unsigned int, SP::SiconosVector> MapOfVectors;
-
-typedef std::map<unsigned int, SP::Relation> MapOfRelation;
-
-/** Map of boolean; key = the number of the related DS*/
-typedef std::map<unsigned int, bool> MapOfBool;
-
 // ================== Objects to handle Interactions ==================
 
 /** Map of SiconosMatrices with a Interactions as a key - Used for diagonal interactionBlock-terms in assembled matrices of LCP etc ...*/
@@ -123,16 +84,15 @@ typedef MapOfInteractionMapOfDSMatrices::iterator InteractionDSMatrixRowIterator
 /** Const iterator through a MapOfInteractionMapOfDSMatrices */
 typedef MapOfInteractionMapOfDSMatrices::const_iterator ConstInteractionDSMatrixRowIterator ;
 
-/** Map to link SP::Interaction with an int - Used for example in interactionBlocksPositions for OSNSMatrix */
-typedef std::map< SP::Interaction , unsigned int > Interaction_int;
-TYPEDEF_SPTR(Interaction_int)
-
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;
 TYPEDEF_SPTR(IndexInt)
+TYPEDEF_SPTR(VectorOfBlockVectors)
+TYPEDEF_SPTR(VectorOfVectors)
+TYPEDEF_SPTR(VectorOfMatrices)
+TYPEDEF_SPTR(VectorOfSMatrices)
 
-
-/** properties that are always needed */
+/** \struct InteractionProperties mandatory properties for an Interaction  */
 struct InteractionProperties
 {
   SP::SiconosMatrix block;    // diagonal block
@@ -141,15 +101,23 @@ struct InteractionProperties
   SP::DynamicalSystem target;
   unsigned int target_pos;
   SP::OneStepIntegrator osi;
-  bool forControl;            // true if the relation is used to control the DS
+  bool forControl;            /**< true if the relation is used to control the DS */
+  SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly x (or q), z, r (or p) */
+  SP::VectorOfVectors workVectors;     /**< set of SiconosVector, mostly to have continuous memory vectors (not the case with BlockVector in DSlink) */
+  SP::VectorOfSMatrices workMatrices;   /**< To store jacobians */
+
 
   ACCEPT_SERIALIZATION(InteractionProperties);
 };
 
+/** \struct SystemProperties mandatory properties for a DynamicalSystems */
 struct SystemProperties
 {
-  SP::SiconosMatrix upper_block;   // i,j block i<j
-  SP::SiconosMatrix lower_block;   // i,j block i>j
+  SP::SiconosMatrix upper_block;   /**< i,j block i<j */
+  SP::SiconosMatrix lower_block;   /**< i,j block i>j */
+  SP::VectorOfVectors workVectors;     /**< Used for instance in Newton iteration */
+  SP::VectorOfMatrices workMatrices;   /**< Mostly for Lagrangian system */
+//  SP::SiconosMemory _xMemory       /**< old value of x, TBD */
 
   ACCEPT_SERIALIZATION(SystemProperties);
 };
@@ -261,13 +229,6 @@ typedef std::set<SP::OneStepIntegrator> OSISet;
 
 /** Iterator through vector of OSI*/
 typedef OSISet::iterator OSIIterator;
-
-/** Const iterator through vector of OSI*/
-typedef OSISet::const_iterator ConstOSIIterator;
-
-/** Return type value for insert function - bool = false if insertion failed. */
-typedef std::pair<OSISet::iterator, bool> CheckInsertOSI;
-
 /** A map that links DynamicalSystems and their OneStepIntegrator. */
 typedef std::map<SP::DynamicalSystem, SP::OneStepIntegrator> DSOSIMap;
 

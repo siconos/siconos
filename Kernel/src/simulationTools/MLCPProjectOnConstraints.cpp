@@ -583,7 +583,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   // type and the non smooth law.
 
 
-
+  VectorOfSMatrices& workMInter = *indexSet->properties(vd).workMatrices;
 
   currentInteractionBlock->zero();
 
@@ -608,7 +608,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       SP::LagrangianDS lds = (std11::static_pointer_cast<LagrangianDS>(ds));
       unsigned int sizeDS = lds->getDim();
       leftInteractionBlock.reset(new SimpleMatrix(sizeY, sizeDS));
-      inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
+      inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock, workMInter);
 
       if (lds->boundaryConditions()) // V.A. Should we do that ?
       {
@@ -768,6 +768,7 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
   unsigned int pos1, pos2;
   // source of inter1 :
   vertex_inter = indexSet->source(ed);
+  VectorOfSMatrices& workMInter1 = *indexSet->properties(vertex_inter).workMatrices;
   SP::OneStepIntegrator Osi = indexSet->properties(vertex_inter).osi;
   SP::DynamicalSystem tmpds = indexSet->properties(vertex_inter).source;
   if (tmpds == ds)
@@ -779,6 +780,7 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
   }
   // now, inter2
   vertex_inter = indexSet->target(ed);
+  VectorOfSMatrices& workMInter2 = *indexSet->properties(vertex_inter).workMatrices;
   tmpds = indexSet->properties(vertex_inter).source;
   if (tmpds == ds)
     pos2 =  indexSet->properties(vertex_inter).source_pos;
@@ -890,7 +892,7 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
   {
     unsigned int sizeDS =  ds->getDim();
     leftInteractionBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
-    inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
+    inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock, workMInter1);
 
     Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
@@ -917,7 +919,7 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
 #endif
     // inter1 != inter2
     rightInteractionBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
-    inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
+    inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock, workMInter2);
 #ifdef MLCPPROJ_DEBUG
     std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : rightInteractionBlock" << std::endl;
     rightInteractionBlock->display();

@@ -87,12 +87,6 @@ int main(int argc, char* argv[])
     //              II: Declare the relation et interaction between dynamical systems
     //==================================================================================================================
     //
-    /*
-    SP::SiconosMatrix H(new SimpleMatrix(1,Nfreedom));
-    (*H)(0,1) = 1.0;
-    SP::SiconosVector E(new SiconosVector(1));
-    (*E)(0) = -0.5*HeightBlock;
-    */
     // Impact law
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     // Interaction at contact point 1
