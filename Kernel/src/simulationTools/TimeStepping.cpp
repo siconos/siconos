@@ -504,7 +504,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   _newtonNbSteps = 0; // number of Newton iterations
   int info = 0;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph& indexSet0 = *model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
 
   computeInitialResidu();
   if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
@@ -514,7 +515,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     DEBUG_PRINTF("TimeStepping::newtonSolve(). _newtonNbSteps = %i\n", _newtonNbSteps);
     prepareNewtonIteration();
     computeFreeState();
-    if (!_allNSProblems->empty() &&  indexSet0->size() > 0)
+    if (hasNSProblems)
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
@@ -525,7 +526,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
     update(_levelMaxForInput);
 
-    if (!_allNSProblems->empty() &&   indexSet0->size() > 0)
+    if (hasNSProblems)
       saveYandLambdaInOldVariables();
   }
 
@@ -547,7 +548,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
       // is also relevant here.
-      if (!_allNSProblems->empty() && indexSet0->size() > 0)
+      if (hasNSProblems)
       {
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
       }
@@ -562,9 +563,10 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       if (!_isNewtonConverge && !info)
       {
-        if (!_allNSProblems->empty() &&  indexSet0->size() > 0)
+        if (hasNSProblems)
           saveYandLambdaInOldVariables();
       }
+      std::cout << _newtonResiduDSMax << " " << _newtonResiduYMax << " " <<_newtonResiduRMax << std::endl;
     }
     if (!_isNewtonConverge)
     {
@@ -644,8 +646,8 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       inter = indexSet0->bundle(*ui);
-      inter->computeResiduY(getTkp1());
-      residu = inter->residuY()->norm2();
+      inter->computeResiduR(getTkp1());
+      residu = inter->residuR()->norm2();
       if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
       if (residu > criterion)
       {
