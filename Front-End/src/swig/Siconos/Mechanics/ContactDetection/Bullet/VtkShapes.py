@@ -16,6 +16,7 @@ from operator import itemgetter
 import tempfile
 from contextlib import contextmanager
 
+import h5py
 
 #
 # a context manager for a *named* temp file
@@ -31,7 +32,7 @@ def tmpfile():
 #
 # load .vtp file
 #
-def loadShape(shape_filename):
+def loadMesh(shape_filename):
     """
     loads a vtk .vtp file and returns a Bullet concave shape
     WARNING triangles cells assumed!
@@ -145,16 +146,22 @@ class Collection():
 
             # load shape if it is an existing file
             if not isinstance(self._url[index], str):
-                # assume hdf5 dataset
-                with tmpfile() as tmpf:
-                    data = self._url[index][:][0]
-                    tmpf[0].write(data)
-                    tmpf[0].flush()
-                    self._tri[index], self._shape[index] = loadShape(
-                        tmpf[1])
-
+                if self._url[index].dtype == h5py.new_vlen(str):
+                    with tmpfile() as tmpf:
+                        data = self._url[index][:][0]
+                        tmpf[0].write(data)
+                        tmpf[0].flush()
+                        self._tri[index], self._shape[index] = loadMesh(
+                            tmpf[1])
+                else:
+                    convex = btConvexHullShape()
+                    for points in self._url[index]:
+                        convex.addPoint(btVector3(float(points[0]),
+                                                  float(points[1]),
+                                                  float(points[2])))
+                    self._shape[index] = convex
             elif os.path.exists(self._url[index]):
-                self._tri[index], self._shape[index] = loadShape(
+                self._tri[index], self._shape[index] = loadMesh(
                     self._url[index])
             else:
                 # it must be a primitive with attributes

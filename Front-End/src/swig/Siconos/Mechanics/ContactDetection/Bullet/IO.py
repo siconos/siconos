@@ -16,6 +16,8 @@ from Siconos.Mechanics.ContactDetection.Bullet import \
 
 from Siconos.Kernel import cast_NewtonImpactFrictionNSL
 
+import Siconos.Kernel as Kernel
+
 from Siconos.IO import MechanicsIO
 
 import Siconos.Numerics as Numerics
@@ -326,6 +328,7 @@ class Hdf5():
         self._cf_data = None
         self._solv_data = None
         self._input = None
+        self._nslaws = None
         self._out = None
         self._data = None
         self._io = MechanicsIO()
@@ -344,6 +347,7 @@ class Hdf5():
         self._cf_data = data(self._data, 'cf', 15)
         self._solv_data = data(self._data, 'solv', 4)
         self._input = group(self._data, 'input')
+        self._nslaws = group(self._data, 'nslaws')
 
         if self._shape_filename is None:
             self._shape = VtkShapes.Collection(self._out)
@@ -355,6 +359,17 @@ class Hdf5():
 
     def __exit__(self, type_, value, traceback):
         self._out.close()
+
+    def importNonSmoothLaw(self, name):
+        if self._broadphase is not None:
+            nslawClass = getattr(Kernel, self._nslaws[name].attrs['type'])
+            # only this one at the moment
+            assert(nslawClass == Kernel.NewtonImpactFrictionNSL)
+            nslaw = nslawClass(float(self._nslaws[name].attrs['e']), 0.,
+                               float(self._nslaws[name].attrs['mu']), 3)
+            self._broadphase.insert(nslaw,
+                                    int(self._nslaws[name].attrs['gid1']),
+                                    int(self._nslaws[name].attrs['gid2']))
 
     def importObject(self, position, orientation, velocity, contactors, mass):
 
@@ -424,7 +439,7 @@ class Hdf5():
         def floatv(v):
             return [float(x) for x in v]
 
-        # read data
+        # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
             for (name, obj) in self._input.items():
                 mass = obj.attrs['mass']
@@ -439,6 +454,10 @@ class Hdf5():
 
                 self.importObject(floatv(position), floatv(orientation),
                                   floatv(velocity), contactors, float(mass))
+
+        # import nslaws
+        for name in self._nslaws:
+            self.importNonSmoothLaw(name)
 
     def outputStaticObjects(self):
         """
@@ -499,16 +518,17 @@ class Hdf5():
             time = self._broadphase.model().simulation().nextTime()
             contact_points = self._io.contactPoints(self._broadphase.model())
 
-            assert(contact_points is not None)
+            if contact_points is not None:
 
-            current_line = self._cf_data.shape[0]
-            self._cf_data.resize(current_line + contact_points.shape[0], 0)
-            times = np.empty((contact_points.shape[0], 1))
-            times.fill(time)
+                current_line = self._cf_data.shape[0]
+                self._cf_data.resize(current_line + contact_points.shape[0], 0)
+                times = np.empty((contact_points.shape[0], 1))
+                times.fill(time)
 
-            self._cf_data[current_line:, :] = np.concatenate((times,
-                                                              contact_points),
-                                                             axis=1)
+                self._cf_data[current_line:, :] = \
+                    np.concatenate((times,
+                                    contact_points),
+                                   axis=1)
 
     def outputSolverInfos(self):
         """
@@ -539,42 +559,84 @@ class Hdf5():
                                             local_precision]
 
     def insertShapeFromFile(self, name, filename):
-        shape = self._ref.require_dataset(name, (1,), dtype=h5py.new_vlen(str),
-                                          exact=True)
-        shape[:] = str_of_file(filename)
-        shape.attrs['id'] = self._number_of_shapes
-        self._shapeid[name] = shape.attrs['id']
-        self._shape = VtkShapes.Collection(self._out)
-        self._number_of_shapes += 1
+        """
+        Insert a mesh shape from a file.
+        Accepted format : mesh encoded in VTK .vtp file
+        """
+        if name not in self._ref:
+            shape = self._ref.create_dataset(name, (1,),
+                                             dtype=h5py.new_vlen(str))
+            shape[:] = str_of_file(filename)
+            shape.attrs['id'] = self._number_of_shapes
+            self._shapeid[name] = shape.attrs['id']
+            self._shape = VtkShapes.Collection(self._out)
+            self._number_of_shapes += 1
 
-    def createContactor(self, shape_name, group,
-                        position=[0, 0, 0],
-                        orientation=[1, 0, 0, 0]):
-        return Contactor(shape_name, group, position, orientation)
+    def insertConvexShape(self, name, points):
+        """
+        Insert a convex shape defined by points.
+        """
+        if name not in self._ref:
+            apoints = np.array(points)
+            shape = self._ref.create_dataset(name,
+                                             (apoints.shape[0],
+                                              apoints.shape[1]))
+            shape[:] = points[:]
+            shape.attrs['id'] = self._number_of_shapes
+            self._shapeid[name] = shape.attrs['id']
+            self._shape = VtkShapes.Collection(self._out)
+            self._number_of_shapes += 1
 
     def insertObject(self, name, contactors,
                      position,
                      orientation=[1, 0, 0, 0],
                      velocity=[0, 0, 0, 0, 0, 0],
                      mass=0):
+        """
+        Insertion of an object.
+        Contact detection is defined by a list of contactors.
+        The initial position is mandatory : [x, y z]
+        if the mass is zero this a static object.
+        """
+        if name not in self._input:
+            obj = group(self._input, name)
+            obj.attrs['mass'] = mass
+            obj.attrs['position'] = position
+            obj.attrs['orientation'] = orientation
+            obj.attrs['velocity'] = velocity
+            for contactor in contactors:
+                dat = data(obj, contactor.name, 0)
+                dat.attrs['group'] = contactor.group
+                dat.attrs['position'] = contactor.position
+                dat.attrs['orientation'] = contactor.orientation
 
-        obj = group(self._input, name)
-        obj.attrs['mass'] = mass
-        obj.attrs['position'] = position
-        obj.attrs['orientation'] = orientation
-        obj.attrs['velocity'] = velocity
-        for contactor in contactors:
-            dat = data(obj, contactor.name, 0)
-            dat.attrs['group'] = contactor.group
-            dat.attrs['position'] = contactor.position
-            dat.attrs['orientation'] = contactor.orientation
+            self.importObject(position, orientation, velocity, contactors,
+                              mass)
 
-        self.importObject(position, orientation, velocity, contactors, mass)
+            if mass == 0:
+                obj.attrs['id'] = - (self._number_of_static_objects + 1)
+                self._number_of_static_objects += 1
 
-        if mass == 0:
-            obj.attrs['id'] = - (self._number_of_static_objects + 1)
-            self._number_of_static_objects += 1
+            else:
+                obj.attrs['id'] = (self._number_of_dynamic_objects + 1)
+                self._number_of_dynamic_objects += 1
 
-        else:
-            obj.attrs['id'] = (self._number_of_dynamic_objects + 1)
-            self._number_of_dynamic_objects += 1
+    def insertNewtonImpactFrictionNSL(self, name, mu, e=0, gid1=0, gid2=0):
+        """
+        Insert a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactFrictionNSL are supported.
+        name is a user identifiant and must be unique,
+        mu is the coefficient of friction,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiants.
+
+        """
+        if name not in self._nslaws:
+            nslaw = self._nslaws.create_dataset(name, (0,))
+            nslaw.attrs['type'] = 'NewtonImpactFrictionNSL'
+            nslaw.attrs['mu'] = mu
+            nslaw.attrs['e'] = e
+            nslaw.attrs['gid1'] = gid1
+            nslaw.attrs['gid2'] = gid2
+
+            self.importNonSmoothLaw(name)
