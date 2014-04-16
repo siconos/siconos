@@ -145,7 +145,9 @@ class Collection():
         if not index in self._shape:
 
             # load shape if it is an existing file
-            if not isinstance(self._url[index], str):
+            if not isinstance(self._url[index], str) and \
+                not 'primitive' in self._url[index].attrs:
+                # assume a vtp file (xml) stored in a string buffer
                 if self._url[index].dtype == h5py.new_vlen(str):
                     with tmpfile() as tmpf:
                         data = self._url[index][:][0]
@@ -154,20 +156,28 @@ class Collection():
                         self._tri[index], self._shape[index] = loadMesh(
                             tmpf[1])
                 else:
+                    # a convex point set
                     convex = btConvexHullShape()
                     for points in self._url[index]:
                         convex.addPoint(btVector3(float(points[0]),
                                                   float(points[1]),
                                                   float(points[2])))
                     self._shape[index] = convex
-            elif os.path.exists(self._url[index]):
+
+            elif isinstance(self._url[index], str) and \
+                os.path.exists(self._url[index]):
                 self._tri[index], self._shape[index] = loadMesh(
                     self._url[index])
             else:
                 # it must be a primitive with attributes
-                name = self._url[index]
+                if isinstance(self._url[index], str):
+                    name = self._url[index]
+                    attrs = [float(x) for x in self._attributes[index]]
+                else:
+                    name = self._url[index].attrs['primitive']
+                    attrs = [float(x) for x in self._attributes[index][0]]
                 primitive = self._primitive[name]
-                attrs = self._attributes[index]
+
                 if name in ['Box']:
                     self._shape[index] = primitive(btVector3(attrs[0] / 2,
                                                              attrs[1] / 2,

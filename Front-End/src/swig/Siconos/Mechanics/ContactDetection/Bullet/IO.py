@@ -587,6 +587,19 @@ class Hdf5():
             self._shape = VtkShapes.Collection(self._out)
             self._number_of_shapes += 1
 
+    def insertPrimitiveShape(self, name, primitive, params):
+        """
+        Insert a primitive shape.
+        """
+        if name not in self._ref:
+            shape = self._ref.create_dataset(name, (1, len(params)))
+            shape.attrs['id'] = self._number_of_shapes
+            shape.attrs['primitive'] = primitive
+            shape[:] = params
+            self._shapeid[name] = shape.attrs['id']
+            self._shape = VtkShapes.Collection(self._out)
+            self._number_of_shapes += 1
+
     def insertObject(self, name, contactors,
                      position,
                      orientation=[1, 0, 0, 0],
