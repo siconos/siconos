@@ -599,7 +599,15 @@ void EulerMoreauOSI::computeFreeState()
 
       if (_useGammaForRelation)
       {
-        *xq = *xfree;
+
+
+        // This part is ony valid for the linear case. See comments in Dev Notes.
+
+        if (dsType != Type::FirstOrderLinearDS && dsType != Type::FirstOrderLinearTIDS)
+        {
+          RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState with _useGammaForRelation  - not yet implemented for Dynamical system type: " + dsType);
+        }
+          *xq = *xfree;
         //            std::cout << "xq before" << std::endl;
         //           xq->display();
 

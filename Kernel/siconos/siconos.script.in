@@ -314,7 +314,7 @@ if __name__ == '__main__':
                 # for macos : the linker doesn't allow undefined
                 # symbol by default -- xhub
                 if 'Darwin' in platform.uname():
-                    linker_options.append('-undefined', 'dynamic_lookup')
+                    linker_options.append('-undefined dynamic_lookup')
                 if msvc:
                     linker_options.append('/FORCE')
                 try:
