@@ -41,7 +41,7 @@ M \dot{x}(t) = f(x(t),t) + r(t)  \\[2mm]
 y(t) = h(t,x(t)) \\[2mm]
 r(t) = g(t,\lambda (t) ) \\[2mm]
 \end{array}
-\label{first-DS2}
+\label{first-DS1}
 \end{equation}
 This case is implemented in Siconos with the relation {\tt FirstOrderType1R}.
 
@@ -84,11 +84,14 @@ Let us now proceed with the time discretization of (\ref{first-DS3}) by a fully 
     \label{eq:toto1}
      M x_{k+1} = M x_{k} +h\theta f(x_{k+1},t_{k+1})+h(1-\theta) f(x_k,t_k) + h \gamma r(t_{k+1})
      + h(1-\gamma)r(t_k)  \\[2mm]
-     y_{k+1} =  h(t_{k+1},x_{k+1},\lambda _{k+1}) \\[2mm]
-     r_{k+1} = g(x_{k+1},\lambda_{k+1},t_{k+1})\\[2mm]
+     y_{k+1} =  h(t_{k+1},x_{k+1},\lambda_{k+1}) \\[2mm]
+     r_{k+1} =  g(t_{k+1},x_{k+1},\lambda_{k+1})\\[2mm]
+     \mbox{NsLaw} ( y_{k+1} , \lambda_{k+1})
   \end{array}
 \end{equation}
 where $\theta = [0,1]$ and $\gamma \in [0,1]$. As in \cite{acary2008}, we call the problem \eqref{eq:toto1} the ``one--step nonsmooth problem''.
+
+In the Siconos/Kernel module, the use of $\gamma$  is activated in the class {\tt EulerMoreauOSI} by the boolean {\tt \_useGamma}.
 
 
 
@@ -96,20 +99,35 @@ where $\theta = [0,1]$ and $\gamma \in [0,1]$. As in \cite{acary2008}, we call t
 
 \subsection{Full $\theta-\gamma$ scheme}
 
-  \begin{equation}
-    \begin{array}{l}
-      \label{eq:toto1-ter}
-      M x_{k+1} = M x_{k} +h f(x_{k+\theta},t_{k+1}) + h r(t_{k+\gamma}) \\[2mm]
-      y_{k+\gamma} =  h(t_{k+\gamma},x_{k+\gamma},\lambda _{k+\gamma}) \\[2mm]
-      r_{k+\gamma} = g(x_{k+\gamma},\lambda_{k+\gamma},t_{k+\gamma})\\[2mm]
-      \mbox{NsLaw} ( y_{k+\gamma} , \lambda_{k+\gamma})
-    \end{array}
+Another possible time--discretization is as follows.
+\begin{equation}
+  \begin{array}{l}
+    \label{eq:toto1-ter}
+    M x_{k+1} = M x_{k} + h\theta f(x_{k+1},t_{k+1})+h(1-\theta) f(x_k,t_k) + h r(t_{k+\gamma}) \\[2mm]
+    y_{k+\gamma} = h(t_{k+\gamma},x_{k+\gamma},\lambda _{k+\gamma}) \\[2mm]
+    r_{k+\gamma} = g(t_{k+\gamma},x_{k+\gamma},\lambda _{k+\gamma})\\[2mm]
+    \mbox{NsLaw} ( y_{k+\gamma} , \lambda_{k+\gamma})
+  \end{array}
 \end{equation}
+We call the scheme~(\ref{eq:toto1-ter}) the full $\theta-\gamma$ scheme since it uses also the evaluation at $t_{k+\gamma}$ for the relation.
+
+In the Siconos/Kernel module, the time--stepping scheme is activated in the class {\tt EulerMoreauOSI} by the boolean {\tt \_useGammaForRelation}.
+
+
+Another possibility for the time discretization in the nonlinear case would be
+\begin{equation}
+  \begin{array}{l}
+    \label{eq:toto1-quat}
+    M x_{k+1} = M x_{k} +h f(x_{k+\theta},t_{k+\theta}) + h r(t_{k+\gamma}) \\[2mm]
+    y_{k+\gamma} =  h(t_{k+\gamma},x_{k+\gamma},\lambda _{k+\gamma}) \\[2mm]
+    r_{k+\gamma} = g(t_{k+\gamma},x_{k+\gamma},\lambda _{k+\gamma})\\[2mm]
+    \mbox{NsLaw} ( y_{k+\gamma} , \lambda_{k+\gamma})
+  \end{array}
+\end{equation}
+This scheme has not been yet implemented in Siconos/Kernel.
 
 \clearpage
 \section{Newton's linearization of~(\ref{eq:toto1})} 
-
-
 \input{MCP_linearized.tex}
 \input{MCP_linearized_2.tex}
 \input{MCP_linearized_linear.tex}
@@ -117,7 +135,7 @@ where $\theta = [0,1]$ and $\gamma \in [0,1]$. As in \cite{acary2008}, we call t
 
 \section{Newton's linearization of~ (\ref{eq:toto1-ter}) }
 
-\input{MCP_linearized-FullThetaGamma.tex}
+\input{MCP-FullThetaGamma.tex}
 
 %%% Local Variables: 
 %%% mode: latex
