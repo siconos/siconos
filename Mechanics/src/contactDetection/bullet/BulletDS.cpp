@@ -97,9 +97,13 @@ void BulletDS::updateCollisionObjects() const
     assert(fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
                    pow(q(5), 2) +  pow(q(6), 2)) - 1.) < 1e-7);
 
-    collisionObject->getWorldTransform().setOrigin(btVector3(q(0)+offset[0],
-                                                             q(1)+offset[1],
-                                                             q(2)+offset[2]));
+    btQuaternion rbase = btQuaternion(q(4), q(5), q(6), q(3));
+    btVector3 boffset = btVector3(offset[0], offset[1], offset[2]);
+    btVector3 rboffset = quatRotate(rbase, boffset);
+
+    collisionObject->getWorldTransform().setOrigin(btVector3(q(0)+rboffset[0],
+                                                             q(1)+rboffset[1],
+                                                             q(2)+rboffset[2]));
     collisionObject->getWorldTransform().getBasis().
       setRotation(btQuaternion(offset[4], offset[5],
                                offset[6], offset[3]) *
@@ -126,4 +130,20 @@ void BulletDS::addCollisionObject(SP::btCollisionObject cobj,
   (*_collisionObjects)[&*cobj] =  boost::tuple<SP::btCollisionObject,
                                                OffSet , int>
     (cobj, xpos, group);
+
+  updateCollisionObjects();
+}
+
+void BulletDS::addCollisionShape(SP::btCollisionShape shape,
+                                 SP::SiconosVector pos,
+                                 SP::SiconosVector ori,
+                                 int group)
+{
+  SP::btCollisionObject collisionObject(new btCollisionObject());
+  collisionObject->setUserPointer(this);
+  collisionObject->setCollisionFlags(collisionObject->getCollisionFlags()|
+                                     btCollisionObject::CF_KINEMATIC_OBJECT);
+  collisionObject->setCollisionShape(&*shape);
+
+  addCollisionObject(collisionObject, pos, ori, group);
 }

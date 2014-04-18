@@ -69,6 +69,17 @@ public:
                           SP::SiconosVector ori,
                           int group);
 
+  /** add a collision shape
+   * \param shape the collision shape
+   * \param pos the position (x, y, z) relative to the center of mass
+   * \param ori the orientation (quaternion) relative to the center of mass
+   * \param group the contactor group id
+  */
+  void addCollisionShape(SP::btCollisionShape shape,
+                         SP::SiconosVector pos,
+                         SP::SiconosVector ori,
+                         int group);
+
   /** update Bullet collision objects positions and orientations
    */
   void updateCollisionObjects() const;

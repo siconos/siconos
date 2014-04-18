@@ -191,7 +191,7 @@ void BulletSpaceFilter::buildInteractions(double time)
 
     unsigned int numContacts = contactManifold->getNumContacts();
 
-    if (obA->getUserPointer())
+    if (obA->getUserPointer() && obA->getUserPointer() != obB->getUserPointer())
     {
 
       btVector3 center;
@@ -331,6 +331,7 @@ void BulletSpaceFilter::buildInteractions(double time)
                              (*_staticObjects->find(obB)).second.second);
         }
 
+        assert(nslaw);
 
         if (itc == contactPoints.end())
         {
@@ -338,7 +339,7 @@ void BulletSpaceFilter::buildInteractions(double time)
           if (nslaw->size() == 3)
           {
             SP::BulletR rel(new BulletR(cpoint, createSPtrbtPersistentManifold(*contactManifold)));
-            inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
+            inter.reset(new Interaction(3, nslaw, rel));
           }
           else
           {
@@ -354,7 +355,11 @@ void BulletSpaceFilter::buildInteractions(double time)
             SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
 
             cpoint->m_userPersistentData = &*inter;
-            link(inter, dsa, dsb);
+            if (dsa != dsb)
+            {
+              link(inter, dsa, dsb);
+            }
+            /* else collision shapes belong to the same object do nothing */
           }
           else
           {

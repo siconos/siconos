@@ -308,7 +308,7 @@ class Hdf5():
          ow, ox, oy oz : components of an unit quaternion (float)
     """
 
-    def __init__(self, io_filename = 'io.hdf5', mode = 'a',
+    def __init__(self, io_filename = 'io.hdf5', mode = 'w',
                  broadphase=None, osi=None, shape_filename=None,
                  input_filename='input.dat',
                  set_external_forces=apply_gravity):
@@ -410,10 +410,10 @@ class Hdf5():
                 for contactor in contactors[1:]:
                     shape_id = self._shapeid[contactors[0].name]
 
-                    body.addCollisionObject(self._shape.at_index(shape_id),
-                                            contactor.position,
-                                            contactor.orientation,
-                                            contactor.collision_group)
+                    body.addCollisionShape(self._shape.at_index(shape_id),
+                                           contactor.position,
+                                           contactor.orientation,
+                                           contactor.group)
 
                 # set external forces
                 self._set_external_forces(body)
@@ -446,11 +446,11 @@ class Hdf5():
                 position = obj.attrs['position']
                 orientation = obj.attrs['orientation']
                 velocity = obj.attrs['velocity']
-                contactors = [Contactor(ctr_name,
-                                        ctr.attrs['group'],
+                contactors = [Contactor(ctr.attrs['name'],
+                                        int(ctr.attrs['group']),
                                         floatv(ctr.attrs['position']),
                                         floatv(ctr.attrs['orientation']))
-                              for ctr_name, ctr in obj.items()]
+                              for name, ctr in obj.items()]
 
                 self.importObject(floatv(position), floatv(orientation),
                                   floatv(velocity), contactors, float(mass))
@@ -617,8 +617,9 @@ class Hdf5():
             obj.attrs['position'] = position
             obj.attrs['orientation'] = orientation
             obj.attrs['velocity'] = velocity
-            for contactor in contactors:
-                dat = data(obj, contactor.name, 0)
+            for num, contactor in enumerate(contactors):
+                dat = data(obj, '{0}-{1}'.format(contactor.name, num), 0)
+                dat.attrs['name'] = contactor.name
                 dat.attrs['group'] = contactor.group
                 dat.attrs['position'] = contactor.position
                 dat.attrs['orientation'] = contactor.orientation

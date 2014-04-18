@@ -26,7 +26,7 @@
 
 #include <SpaceFilter.hpp>
 #include "DiskMovingPlanR.hpp"
-#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/functional/hash.hpp>
@@ -37,7 +37,7 @@ struct FMatrix  : public ublas::matrix < FTime, ublas::column_major,
   ACCEPT_SERIALIZATION(FMatrix);
 };
 
-struct NSLawMatrix : public ublas::matrix < SP::NonSmoothLaw >
+struct NSLawMatrix : public ublas::symmetric_matrix < SP::NonSmoothLaw >
 {
   ACCEPT_SERIALIZATION(NSLawMatrix);
 };
