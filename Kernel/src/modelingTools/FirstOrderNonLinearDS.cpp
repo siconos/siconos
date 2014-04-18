@@ -53,7 +53,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   _workspace[free].reset(new SiconosVector(getDim()));
   _fold.reset(new SiconosVector(getDim()));
   _f.reset(new SiconosVector(_n));
-
+  _jacobianfx.reset(new SimpleMatrix(_n, _n));
   // == r ==
 
   _r.reset(new SiconosVector(_n));
