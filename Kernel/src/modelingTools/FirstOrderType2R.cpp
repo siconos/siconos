@@ -61,12 +61,11 @@ void FirstOrderType2R::initComponents(Interaction& inter, VectorOfBlockVectors& 
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
 
-  workV.resize(FirstOrderRVec::workVecSize);
 //  workV[FirstOrderRVec::z].reset(new SiconosVector(sizeZ));
   workV[FirstOrderRVec::x].reset(new SiconosVector(sizeDS));
   workV[FirstOrderRVec::r].reset(new SiconosVector(sizeDS));
+  workV[FirstOrderRVec::g_alpha].reset(new SiconosVector(sizeDS));
 
-  workM.resize(FirstOrderRMat::workMatSize);
   if (!_C)
     workM[FirstOrderRMat::C].reset(new SimpleMatrix(sizeY, sizeDS));
   if (!_D)
@@ -80,11 +79,6 @@ void FirstOrderType2R::initComponents(Interaction& inter, VectorOfBlockVectors& 
     workM[FirstOrderRMat::B].reset(new SimpleMatrix(sizeDS, sizeY));
 
 
-  assert((_C->size(1) == sizeDS && _C->size(0) == sizeY) &&
-         "FirstOrderType2R::initComponents inconsistent sizes between _jach[0] matrix and the interaction.");
-
-  assert((_D->size(0) == sizeDS && _D->size(1) == sizeY) &&
-         "FirstOrderType2R::initComponents inconsistent sizes between _jacg[0] matrix and the interaction.");
 }
 
 void FirstOrderType2R::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)

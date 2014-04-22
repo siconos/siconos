@@ -556,12 +556,14 @@ void EulerMoreauOSI::computeFreeState()
     InteractionsGraph::VDescriptor ivd;
     // this surely explodse when there is more than 1 interaction involvded.
     // But we don't care for now -- xhub
+    SP::SimpleMatrix K;
+    SP::SimpleMatrix Ktilde;
     for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
     {
       ivd = indexSet.descriptor(DSG0.bundle(*oei));
+      K = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::K];
+      Ktilde = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::Ktilde];
     }
-    SP::SimpleMatrix K = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::K];
-    SP::SimpleMatrix Ktilde = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::Ktilde];
 
     dsType = Type::value(*ds); // Its type
     SiconosMatrix& W = *WMap[ds->number()]; // Its W EulerMoreauOSI matrix of iteration.

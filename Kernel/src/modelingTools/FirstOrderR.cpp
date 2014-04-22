@@ -20,6 +20,8 @@
 
 void FirstOrderR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
+  workV.resize(FirstOrderRVec::workVecSize);
+  workM.resize(FirstOrderRMat::workMatSize);
   initComponents(inter, DSlink, workV, workM);
 }
 

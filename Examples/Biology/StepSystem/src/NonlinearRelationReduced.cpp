@@ -11,140 +11,73 @@ NonlinearRelationReduced::NonlinearRelationReduced():
 {
 }
 
-void NonlinearRelationReduced::initialize(Interaction& inter)
+void NonlinearRelationReduced::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  FirstOrderType2R::initialize(inter);
+  FirstOrderType2R::initComponents(inter, DSlink, workV, workM);
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
-  //SiconosVector& y = *inter.y(0);
-  //SiconosVector& lambda = *inter.lambda(0);
+
+  SiconosVector& lambda = *inter.lambda(0);
+
+  SiconosVector& x = *workV[FirstOrderRVec::x];
+  x = *DSlink[FirstOrderRDS::x];
 
   double t0 = 0;
 
-  _jachx->resize(sizeY, sizeDS);
-  _jachlambda->resize(sizeY, sizeY);
+  computeh(t0, x, lambda, *inter.Halpha());
+  computeg(t0, lambda, *workV[FirstOrderRVec::g_alpha]);
+  *DSlink[FirstOrderRDS::r] = *workV[FirstOrderRVec::g_alpha];
+  computeJach(t0, inter, DSlink, workV, workM);
+  computeJacg(t0, inter, DSlink, workV, workM);
 
-  _jacgx->resize(sizeDS, sizeDS);
-  _jacglambda->resize(sizeDS, sizeY);
-
-
-  //  SiconosVector workX = *inter.data(x);
-  //_workX->setValue(0,0);
-  // y.setValue(0,0);
-  // y.setValue(1,0);
-  // y.setValue(2,0);
-  // y.setValue(3,0);
-  // lambda.setValue(0,0);
-  // lambda.setValue(1,0);
-  // lambda.setValue(2,0);
-  // lambda.setValue(3,0);
-
-
-  computeh(t0, inter);
-  computeg(t0, inter);
-  computeJach(t0, inter);
-  computeJacg(t0, inter);
-  //*inter.data(r)=*inter.data(g_alpha);
-
-  /*
-  #ifdef SICONOS_DEBUG
-    std::cout<<"data[r (g_alpha)] init\n";
-    data[r]->display();
-  #endif
-  */
 
 }
 
 /*y = h(X)*/
-void NonlinearRelationReduced::computeh(double t, Interaction& inter)
+void NonlinearRelationReduced::computeh(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
 {
 
-  SiconosVector workX = *inter.data(x);
-  //SiconosVector& lambda = *inter.lambda(0);
-
-  /*
-  #ifdef SICONOS_DEBUG
-    std::cout<<"******** NonlinearRelationReduced::computeh computeh at "<<t<<std::endl;
-  #endif
-  */
-  SP::SiconosVector Heval = inter.Halpha();
-
-  Heval->setValue(0, 8.0 - workX(1));
+  y(0) =  8.0 - x(1);
 
 }
+
+
+
+  /** default function to compute jacobianH
+   *  \param double : current time
+   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+   */
+
+  /** default function to compute jacobianG according to lambda
+   *  \param double : current time
+   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+   */
+
 
 /*g=g(lambda)*/
-void NonlinearRelationReduced::computeg(double t, Interaction& inter)
+void NonlinearRelationReduced::computeg(double t, SiconosVector& lambda, SiconosVector& r)
 {
-  SiconosVector& lambda = *inter.lambda(0);
-  /*
-  #ifdef SICONOS_DEBUG
-    std::cout<<"*** NonlinearRelationReduced::computeg     computeg at: "<<t<<std::endl;
-  #endif
-  */
+  r(1) = 40.0 * (1 - lambda(0));
+  r(0) =  0.0;
+}
 
-  inter.data(g_alpha)->setValue(1, 40.0 * (1 - lambda(0)));
-  inter.data(g_alpha)->setValue(0, 0.0);
-  /*
-  #ifdef SICONOS_DEBUG
-    std::cout<<"NonlinearRelationReduced::computeg with lambda="<<std::endl;
-    lambda.display();
-    std::cout<<std::endl;
-    std::cout<<"NonlinearRelationReduced::computeg modif g_alpha : \n";
-    inter.data(g_alpha)->display();
-    std::cout<<std::endl;
-  #endif
-  */
+void NonlinearRelationReduced::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
+{
+  D.zero();
+}
+
+void NonlinearRelationReduced::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
+{
+
+  C(0, 0) =  0;
+  C(0, 1) = -1;
 
 }
 
-void NonlinearRelationReduced::computeJachlambda(double t, Interaction& inter)
+void NonlinearRelationReduced::computeJacglambda(double t, SiconosVector& lambda, SimpleMatrix& B)
 {
-  //    double *h = &(*_jachlambda)(0,0);
-  /*
-    #ifdef SICONOS_DEBUG
-    std::cout<<"NonlinearRelationReduced::computeJachlambda " <<" at " <<" "<<t<<std::endl;
-    #endif
-  */
-  _jachlambda->zero();
-}
-
-void NonlinearRelationReduced::computeJachx(double t, Interaction& inter)
-{
-
-  _jachx->setValue(0, 0, 0);
-  _jachx->setValue(0, 1, -1);
-
-  /*
-  #ifdef SICONOS_DEBUG
-    std::cout<<"NonlinearRelationReduced::computeJachx computeJachx " <<" at " <<" "<<t<<":"<<std::endl;
-    Jachx->display();
-    std::cout<<std::endl;
-  #endif
-  */
-}
-
-void NonlinearRelationReduced::computeJacgx(double t, Interaction& inter)
-{
-  //   double *g = &(*jacgx)(0,0);
-  _jacgx->zero();
-
-  /*
-  #ifdef SICONOS_DEBUG
-    std::cout<<"NonlinearRelationReduced::computeJacgx " <<" at " <<" "<<t<<std::endl;
-  #endif
-  */
-
-}
-
-void NonlinearRelationReduced::computeJacglambda(double t, Interaction& inter)
-{
-
-  //SiconosVector& lambda = *inter.lambda(0);
-
-  //  double *g = &(*Jacglambda)(0,0);
-  _jacglambda->setValue(0, 0, 0.0);
-  _jacglambda->setValue(1, 0, -40.0);
+  B(0, 0) =  0.0;
+  B(1, 0) = -40.0;
 }
 #endif
 

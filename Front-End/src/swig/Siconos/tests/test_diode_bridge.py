@@ -349,4 +349,4 @@ def test_diodebridge2():
 
 #test_diodebridge2()
 
-test_diodebridge1()
+#test_diodebridge1()

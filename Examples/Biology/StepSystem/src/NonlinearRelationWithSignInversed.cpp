@@ -11,25 +11,19 @@ NonlinearRelationWithSignInversed::NonlinearRelationWithSignInversed():
 {
 }
 
-void NonlinearRelationWithSignInversed::initialize(Interaction& inter)
+void NonlinearRelationWithSignInversed::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  FirstOrderType2R::initialize(inter);
+    FirstOrderType2R::initComponents(inter, DSlink, workV, workM);
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
   SiconosVector& y = *inter.y(0);
   SiconosVector& lambda = *inter.lambda(0);
 
+  SiconosVector& x = *workV[FirstOrderRVec::x];
+  x = *DSlink[FirstOrderRDS::x];
+
   double t0 = 0;
 
-  _jachx->resize(sizeY, sizeDS);
-  _jachlambda->resize(sizeY, sizeY);
-
-  _jacgx->resize(sizeDS, sizeDS);
-  _jacglambda->resize(sizeDS, sizeY);
-
-
-  //  SiconosVector workX = *inter.data(x);
-  //_workX->setValue(0,0);
   y.setValue(0, 0);
   y.setValue(1, 0);
   y.setValue(2, 0);
@@ -40,128 +34,101 @@ void NonlinearRelationWithSignInversed::initialize(Interaction& inter)
   lambda.setValue(3, 0);
 
 
-  //  computeH(t0);
-  computeg(t0, inter);
-  computeJach(t0, inter);
-  computeJacg(t0, inter);
-  *inter.data(r) = *inter.data(g_alpha);
-
-
-#ifdef SICONOS_DEBUG
-  std::cout << "data[r (g_alpha)] init\n";
-  inter.data(r)->display();
-#endif
+  computeh(t0, x, lambda, *inter.Halpha());
+  computeg(t0, lambda, *workV[FirstOrderRVec::g_alpha]);
+  *DSlink[FirstOrderRDS::r] = *workV[FirstOrderRVec::g_alpha];
+  computeJach(t0, inter, DSlink, workV, workM);
+  computeJacg(t0, inter, DSlink, workV, workM);
 
 
 }
 
 /*y = h(X)*/
-void NonlinearRelationWithSignInversed::computeh(double t, Interaction& inter)
+void NonlinearRelationWithSignInversed::computeh(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
 {
 
-  SiconosVector workX = *inter.data(x);
-  //SiconosVector& lambda = *inter.lambda(0);
 
 #ifdef SICONOS_DEBUG
   std::cout << "******** NonlinearRelationWithSignInversed::computeh computeh at " << t << std::endl;
 #endif
 
-  SP::SiconosVector Heval = inter.Halpha();
 
-  Heval->setValue(0, workX(0) - 4);
-  Heval->setValue(1, workX(1) - 4);
-  Heval->setValue(2, workX(0) - 8);
-  Heval->setValue(3, workX(1) - 8);
+  y.setValue(0, x(0) - 4);
+  y.setValue(1, x(1) - 4);
+  y.setValue(2, x(0) - 8);
+  y.setValue(3, x(1) - 8);
 #ifdef SICONOS_DEBUG
   std::cout << "modif heval : \n";
-  Heval->display();
+  y.display();
 #endif
 }
 
 /*g=g(lambda)*/
-void NonlinearRelationWithSignInversed::computeg(double t, Interaction& inter)
+void NonlinearRelationWithSignInversed::computeg(double t, SiconosVector& lambda, SiconosVector& r)
 {
-  SiconosVector& lambda = *inter.lambda(0);
 
 #ifdef SICONOS_DEBUG
   std::cout << "*** NonlinearRelationWithSignInversed::computeg     computeg at: " << t << std::endl;
 #endif
 
 
-  inter.data(g_alpha)->setValue(0, 10.0 * (1 + lambda(2)) * (1 - lambda(1)));
-  inter.data(g_alpha)->setValue(1, 10.0 * (1 - lambda(0)) * (1 + lambda(3)));
+  r.setValue(0, 10.0 * (1 + lambda(2)) * (1 - lambda(1)));
+  r.setValue(1, 10.0 * (1 - lambda(0)) * (1 + lambda(3)));
 
 #ifdef SICONOS_DEBUG
   std::cout << "NonlinearRelationWithSignInversed::computeg with lambda=" << std::endl;
   lambda.display();
   std::cout << std::endl;
   std::cout << "NonlinearRelationWithSignInversed::computeg modif g_alpha : \n";
-  inter.data(g_alpha)->display();
+  r.display();
   std::cout << std::endl;
 #endif
 
 }
 
-void NonlinearRelationWithSignInversed::computeJachlambda(double t, Interaction& inter)
+void NonlinearRelationWithSignInversed::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
   //    double *h = &(*_jachlambda)(0,0);
 #ifdef SICONOS_DEBUG
   std::cout << "NonlinearRelationWithSignInversed::computeJachlambda " << " at " << " " << t << std::endl;
 #endif
-  _jachlambda->zero();
+  D.zero();
 
 }
 
-void NonlinearRelationWithSignInversed::computeJachx(double t, Interaction& inter)
+void NonlinearRelationWithSignInversed::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
-  _jachx->setValue(0, 0, 1);
-  _jachx->setValue(0, 1, 0);
-  _jachx->setValue(1, 0, 0);
-  _jachx->setValue(1, 1, 1);
-  _jachx->setValue(2, 0, 1);
-  _jachx->setValue(2, 1, 0);
-  _jachx->setValue(3, 0, 0);
-  _jachx->setValue(3, 1, 1);
+  C.setValue(0, 0, 1);
+  C.setValue(0, 1, 0);
+  C.setValue(1, 0, 0);
+  C.setValue(1, 1, 1);
+  C.setValue(2, 0, 1);
+  C.setValue(2, 1, 0);
+  C.setValue(3, 0, 0);
+  C.setValue(3, 1, 1);
 
 #ifdef SICONOS_DEBUG
   std::cout << "NonlinearRelationWithSignInversed::computeJachx computeJachx " << " at " << " " << t << ":" << std::endl;
-  _jachx->display();
+  C.display();
   std::cout << std::endl;
 #endif
 
 }
 
-void NonlinearRelationWithSignInversed::computeJacgx(double t, Interaction& inter)
+void NonlinearRelationWithSignInversed::computeJacglambda(double t, SiconosVector& lambda, SimpleMatrix& B)
 {
-  //   double *g = &(*jacgx)(0,0);
-  _jacgx->zero();
+  B.setValue(0, 0, 0);
+  B.setValue(1, 0, -10.0 * (1 + lambda(3)));
+  B.setValue(0, 1, -10.0 * (1 + lambda(2)));
+  B.setValue(1, 1, 0);
+  B.setValue(0, 2, 10.0 * (1 - lambda(1)));
+  B.setValue(1, 2, 0);
+  B.setValue(0, 3, 0);
+  B.setValue(1, 3, 10.0 * (1 - lambda(0)));
 
 #ifdef SICONOS_DEBUG
   std::cout << "NonlinearRelationWithSignInversed::computeJacgx " << " at " << " " << t << std::endl;
-  _jacgx->display();
-  std::cout << std::endl;
-#endif
-
-}
-
-void NonlinearRelationWithSignInversed::computeJacglambda(double t, Interaction& inter)
-{
-
-  SiconosVector& lambda = *inter.lambda(0);
-
-  //  double *g = &(*Jacglambda)(0,0);
-  _jacglambda->setValue(0, 0, 0);
-  _jacglambda->setValue(1, 0, -10.0 * (1 + lambda(3)));
-  _jacglambda->setValue(0, 1, -10.0 * (1 + lambda(2)));
-  _jacglambda->setValue(1, 1, 0);
-  _jacglambda->setValue(0, 2, 10.0 * (1 - lambda(1)));
-  _jacglambda->setValue(1, 2, 0);
-  _jacglambda->setValue(0, 3, 0);
-  _jacglambda->setValue(1, 3, 10.0 * (1 - lambda(0)));
-
-#ifdef SICONOS_DEBUG
-  std::cout << "NonlinearRelationWithSignInversed::computeJacgx " << " at " << " " << t << std::endl;
-  _jacglambda->display();
+  B.display();
   std::cout << std::endl;
 #endif
 
