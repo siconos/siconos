@@ -1,10 +1,13 @@
 
+In this section, we deal with only with the FirstOrderType2R case.
+
+
   \begin{equation}
     \begin{array}{l}
       \label{eq:full-toto1-ter}
       M x_{k+1} = M x_{k} +h \theta f(x_{k+1},t_{k+1}) +h(1-\theta)f(x_{k},t_{k}) + h r_{k+\gamma} \\[2mm]
       y_{k+\gamma} =  h(t_{k+\gamma},x_{k+\gamma},\lambda _{k+\gamma}) \\[2mm]
-      r_{k+\gamma} = g(\lambda_{k+\gamma},t_{k+\gamma})\\[2mm]
+      r_{k+\gamma} = g(t_{k+\gamma},\lambda_{k+\gamma})\\[2mm]
     \end{array}
 \end{equation}
 
@@ -13,7 +16,7 @@
   \label{eq:full-NL3}
   \mathcal R (x_{k+1},r _{k+\gamma}) =0
 \end{equation}
-with $\mathcal R(x,r) = M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r $
+with $$\mathcal R(x,r) = M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r. $$
 The solution of this system of nonlinear equations is sought as a limit of the sequence $\{ x^{\alpha}_{k+1},r^{\alpha}_{k+\gamma} \}_{\alpha \in \NN}$ such that
  \begin{equation}
    \label{eq:full-NL7}
@@ -31,14 +34,14 @@ The solution of this system of nonlinear equations is sought as a limit of the s
 \end{ndrva}
 
 The residu free is also defined (useful for implementation only):
-\[\mathcal R _{free}(x) \stackrel{\Delta}{=}  M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k).\]
+\[\mathcal R _{\free}(x) \stackrel{\Delta}{=}  M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k).\]
 We get
 \begin{equation}
-  \mathcal R (x^{\alpha}_{k+1},r^{\alpha}_{k+\gamma}) = \fbox{$\mathcal R^{\alpha}_{k+1} \stackrel{\Delta}{=}  \mathcal R_{free}(x^{\alpha}_{k+1} )  - h r^{\alpha}_{k+\gamma}$}\label{eq:full-rfree-1}
+  \mathcal R (x^{\alpha}_{k+1},r^{\alpha}_{k+\gamma}) = \fbox{$\mathcal R^{\alpha}_{k+1} \stackrel{\Delta}{=}  \mathcal R_{\free}(x^{\alpha}_{k+1} )  - h r^{\alpha}_{k+\gamma}$}\label{eq:full-rfree-1}
 \end{equation}
 
 \[  \mathcal R
-_{free}(x^{\alpha}_{k+1} )=\fbox{$ \mathcal R _{free, k+1} ^{\alpha} \stackrel{\Delta}{=}  M(x^{\alpha}_{k+1} - x_{k}) -h\theta f( x^{\alpha}_{k+1} , t_{k+1}) - h(1-\theta)f(x_k,t_k)$}\]
+_{\free}(x^{\alpha}_{k+1} )=\fbox{$ \mathcal R _{\free, k+1} ^{\alpha} \stackrel{\Delta}{=}  M(x^{\alpha}_{k+1} - x_{k}) -h\theta f( x^{\alpha}_{k+1} , t_{k+1}) - h(1-\theta)f(x_k,t_k)$}\]
  
 The computation of the Jacobian of $\mathcal R$ with respect to $x$, denoted by $   W^{\alpha}_{k+1}$ leads to 
 \begin{equation}
@@ -56,26 +59,27 @@ At each time--step, we have to solve the following linearized problem,
 By using (\ref{eq:full-rfree-1}), we get
 \begin{equation}
   \label{eq:full-rfree-2}
-  \mathcal R _{free}(x^{\alpha}_{k+1})  - h  r^{\alpha+1}_{k+\gamma}   + W^{\alpha}_{k+1} (x^{\alpha+1}_{k+1} -
+  \mathcal R _{\free}(x^{\alpha}_{k+1})  - h  r^{\alpha+1}_{k+\gamma}   + W^{\alpha}_{k+1} (x^{\alpha+1}_{k+1} -
     x^{\alpha}_{k+1})  =0 
 \end{equation}
 
 %\fbox
 {
   \begin{equation}
-    \boxed{ x^{\alpha+1}_{k+1} = h(W^{\alpha}_{k+1})^{-1}r^{\alpha+1}_{k+1} +x^\alpha_{free}}
+    \boxed{ x^{\alpha+1}_{k+1} = h(W^{\alpha}_{k+1})^{-1}r^{\alpha+1}_{\gamma+1} +x^\alpha_{\free}}
   \end{equation}
 }
 with :
 \begin{equation}
-  \boxed{x^\alpha_{free}\stackrel{\Delta}{=}x^{\alpha}_{k+1}-(W^{\alpha}_{k+1})^{-1}\mathcal R_{freek+1}^{\alpha} \label{eq:full-rfree-12}}
+  \boxed{x^\alpha_{\free}\stackrel{\Delta}{=}x^{\alpha}_{k+1}-(W^{\alpha}_{k+1})^{-1}\mathcal R_{\free,k+1}^{\alpha} \label{eq:full-rfree-12}}
 \end{equation}
 
 The matrix $W$ is clearly non singular for small $h$.
 
+Note that the linearization is equivalent to the case (\ref{eq:rfree-11}) and (\ref{eq:rfree-12}) with $\gamma=1$ and replacing $r_{k+1}$ by $r_{k+\gamma}$.
 
- \paragraph{Newton's linearization of the second  line of~(\ref{eq:full-toto1})}
-The same operation is performed with the second equation of (\ref{eq:full-toto1})
+ \paragraph{Newton's linearization of the second  line of~(\ref{eq:full-toto1-ter})}
+The same operation is performed with the second equation of (\ref{eq:full-toto1-ter})
 \begin{equation}
   \begin{array}{l}
     \mathcal R_y(x,y,\lambda)=y-h(t_{k+\gamma},\gamma x + (1-\gamma) x_k ,\lambda) =0\\ \\
@@ -110,8 +114,11 @@ and
 \begin{equation}\fbox{$
 \mathcal R^{\alpha}_{yk+1} \stackrel{\Delta}{=} y^{\alpha}_{k+\gamma} - h(x^{\alpha}_{k+\gamma},\lambda^{\alpha}_{k+\gamma})$}
  \end{equation}
- \paragraph{Newton's linearization of the third  line of~(\ref{eq:full-toto1})}
-The same operation is performed with the third equation of (\ref{eq:full-toto1})
+
+Note that the linearization is equivalent to the case (\ref{eq:NL11y}) by replacing $\lambda_{k+1}$ by $\lambda_{k+\gamma}$ and $x_{k+1}$ by $x_{k+\gamma}$.
+
+ \paragraph{Newton's linearization of the third  line of~(\ref{eq:full-toto1-ter})}
+The same operation is performed with the third equation of (\ref{eq:full-toto1-ter})
 \begin{equation}
   \begin{array}{l}
     \mathcal R_r(r,\lambda)=r-g(\lambda,t_{k+1}) =0\\ \\  \end{array}
@@ -143,7 +150,7 @@ and the  residue for $r$:
 \boxed{\mathcal
       R_{rk+\gamma}^{\alpha} = r^{\alpha}_{k+\gamma} - g(\lambda ^{\alpha}_{k+\gamma},t_{k+\gamma})}
   \end{equation}
-
+Note that the linearization is equivalent to the case (\ref{eq:rrL}) by replacing $\lambda_{k+1}$ by $\lambda_{k+\gamma}$ and $x_{k+1}$ by $x_{k+\gamma}$.
 
 \paragraph{Reduction to a linear relation between  $x^{\alpha+1}_{k+1}$ and
 $\lambda^{\alpha+1}_{k+\gamma}$}
