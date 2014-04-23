@@ -19,8 +19,8 @@ void NonlinearRelationWithSignInversed::initComponents(Interaction& inter, Vecto
   SiconosVector& y = *inter.y(0);
   SiconosVector& lambda = *inter.lambda(0);
 
-  SiconosVector& x = *workV[FirstOrderRVec::x];
-  x = *DSlink[FirstOrderRDS::x];
+  SiconosVector& x = *workV[FirstOrderR::vec_x];
+  x = *DSlink[FirstOrderR::x];
 
   double t0 = 0;
 
@@ -35,8 +35,8 @@ void NonlinearRelationWithSignInversed::initComponents(Interaction& inter, Vecto
 
 
   computeh(t0, x, lambda, *inter.Halpha());
-  computeg(t0, lambda, *workV[FirstOrderRVec::g_alpha]);
-  *DSlink[FirstOrderRDS::r] = *workV[FirstOrderRVec::g_alpha];
+  computeg(t0, lambda, *workV[FirstOrderR::g_alpha]);
+  *DSlink[FirstOrderR::r] = *workV[FirstOrderR::g_alpha];
   computeJach(t0, inter, DSlink, workV, workM);
   computeJacg(t0, inter, DSlink, workV, workM);
 
