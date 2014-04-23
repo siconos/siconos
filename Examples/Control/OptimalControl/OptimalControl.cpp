@@ -44,8 +44,8 @@ int main()
 
 
 
-  double sT = 1;
-  double sStep = 0.1e-4;
+  double sT = 10;
+  double sStep = 2e-3;
   unsigned int NBStep = floor(sT / sStep);
   //NBStep =2;
 
@@ -77,7 +77,7 @@ int main()
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));
   SP::TimeStepping aS(new TimeStepping(aTD));
   aS->setComputeResiduY(true);
-  //aS->setComputeResiduR(true);
+  aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
   //*****BUILD THE STEP INTEGRATOR
   SP::OneStepIntegrator  aEulerMoreauOSI ;
@@ -90,6 +90,7 @@ int main()
 
 
   aLCP.reset(new LCP(SICONOS_LCP_ENUM));
+//  aLCP.reset(new LCP(SICONOS_LCP_NEWTONFB));
 
   aS->insertNonSmoothProblem(aLCP);
   aM->initialize(aS);
@@ -100,11 +101,10 @@ int main()
   SP::SiconosVector  x = aDS->x();
   SP::SiconosVector  y = aI->y(0);
   SP::SiconosVector  lambda = aI->lambda(0);
-  ofstream * fout = new ofstream("simu.log");
 
 
-  unsigned int outputSize = 10; // number of required data
-  SimpleMatrix dataPlot(NBStep, outputSize);
+  unsigned int outputSize = 9; // number of required data
+  SimpleMatrix dataPlot(NBStep+10, outputSize);
 
   SP::SiconosVector z = aDS->x();
   SP::SiconosVector lambdaOut = aI->lambda(0);
@@ -123,9 +123,10 @@ int main()
   // do simulation while events remains in the "future events" list of events manager.
   cout << " ==== Start of  simulation : " << NBStep << " steps====" << endl;
 
-  for (unsigned int k = 0 ; k < NBStep ; k++)
+  unsigned int k = 0;
+  while (aS->hasNextEvent())
   {
-
+    k++;
     //      if (cmp==150)
     // setNumericsVerbose(à);
     //      else if (cmp==151)
@@ -135,10 +136,9 @@ int main()
     cmp++;
     printf("%d ", cmp);
     // solve ...
-    aS->computeOneStep();
+//    aS->computeOneStep();
 
-//    aS-> newtonSolve(1e-8, 200);
-    aS->nextStep();
+    aS->newtonSolve(1.1e-11, 50);
     x = aDS->x();
     lambda = aI->lambda(0);
     dataPlot(k, 0) = aS->nextTime(); // Initial time of the model
@@ -150,16 +150,28 @@ int main()
     dataPlot(k, 6) = (*lambda)(1);
     dataPlot(k, 7) = (*yOut)(0);
     dataPlot(k, 8) = (*yOut)(1);
+    aS->nextStep();
 
 
   }
 
+  dataPlot.resize(k+1, 9);
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
   ioMatrix::write("OptimalControl.dat", "ascii", dataPlot, "noDim");
 
-  delete fout;
+  // Comparison with a reference file
+  SimpleMatrix dataPlotRef(dataPlot);
+  dataPlotRef.zero();
+  ioMatrix::read("OptimalControl.ref", "ascii", dataPlotRef);
+  std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
+  if ((dataPlot - dataPlotRef).normInf() > 5e-11)
+  {
+    std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    return 1;
+  }
+
   cout << "===== End of simulation. ==== " << endl;
   return 0;
 

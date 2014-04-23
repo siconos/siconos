@@ -570,7 +570,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
         if (hasNSProblems)
           saveYandLambdaInOldVariables();
       }
-      std::cout << "# steps: " << _newtonNbSteps << _newtonResiduDSMax << " " << _newtonResiduYMax << " " <<_newtonResiduRMax << std::endl;
+      std::cout << "# steps: " << _newtonNbSteps << " " << _newtonResiduDSMax << " " << _newtonResiduYMax << " " <<_newtonResiduRMax << std::endl;
     }
     if (!_isNewtonConverge)
     {

@@ -263,7 +263,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         // centralInteractionBlock * X = rightInteractionBlock with PLU
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
         centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
-        inter->doExtraForCentralInteractionBlockForDS(*rightInteractionBlock, workMInter, h); // if Ktilde is not eye
+        inter->computeKhat(*rightInteractionBlock, workMInter, h); // if K is non 0
 
         //      integration of r with theta method removed
         //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B

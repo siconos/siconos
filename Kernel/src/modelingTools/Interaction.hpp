@@ -735,7 +735,7 @@ public:
    */
   void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
 
-void doExtraForCentralInteractionBlockForDS(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
+  void computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
 
   inline double getYRef(unsigned int i) const
   {

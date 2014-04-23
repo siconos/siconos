@@ -40,7 +40,6 @@ void FirstOrderNonLinearR::initComponents(Interaction& inter, VectorOfBlockVecto
   workM[FirstOrderRMat::D].reset(new SimpleMatrix(sizeY, sizeY));
   workM[FirstOrderRMat::B].reset(new SimpleMatrix(sizeDS, sizeY));
   workM[FirstOrderRMat::K].reset(new SimpleMatrix(sizeDS, sizeDS));
-  workM[FirstOrderRMat::Ktilde].reset(new SimpleMatrix(sizeDS, sizeDS));
   workM[FirstOrderRMat::Khat].reset(new SimpleMatrix(sizeDS, sizeY));
 
 
@@ -113,7 +112,7 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, Vector
   else
     prod(*workM[FirstOrderRMat::C], deltax, y, false);
 
-  // osnsM = h * C * Ktilde^-1* W^-1 * B + D
+  // osnsM = h * C * W^-1 * B + D
   prod(osnsM, *inter.lambda(level), y, false);
   DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : new linearized y \n");
   DEBUG_EXPR(y.display());
@@ -152,6 +151,7 @@ void FirstOrderNonLinearR::computeInput(double time, Interaction& inter, VectorO
   else
     prod(*workM[FirstOrderRMat::K], deltax, g_alpha, false);
 
+  // Khat = h * K * W^-1 * B
   prod(*workM[FirstOrderRMat::Khat], *inter.lambda(level), g_alpha, false);
 
   *DSlink[FirstOrderRDS::r] += g_alpha;
@@ -178,12 +178,6 @@ void FirstOrderNonLinearR::preparNewtonIteration(Interaction& inter, VectorOfBlo
 
   xPartialNS -= *workV[FirstOrderRVec::x];
 
-  if (_K)
-    prod(*_K, *DSlink[FirstOrderRDS::x], *workV[FirstOrderRVec::x], true);
-  else
-    prod(*workM[FirstOrderRMat::K], *DSlink[FirstOrderRDS::x], *workV[FirstOrderRVec::x], true);
-
-  xPartialNS -= *workV[FirstOrderRVec::x];
 }
 
 

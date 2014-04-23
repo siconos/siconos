@@ -102,13 +102,6 @@ void MyDS::computeJacobianfx(double t, bool  b)
 
 void MyDS::computeJacobianfx(double t, SP::SiconosVector v) {}
 
-void MyDS::computeRhs(double t, bool  b)
-{
-  ;
-}
-void MyDS::resetNonSmoothPart(unsigned int) {}
-
-
 void MyDS::alpha(double t, SP::SiconosVector _xvalue, SP::SiconosVector _alpha)
 {
   _alpha->setValue(0, 1.0 / 2.0 * _xvalue->getValue(1) + 1.0 / 2.0) ;

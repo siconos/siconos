@@ -323,7 +323,7 @@ public:
    *  \param time the current time
    *  \param ds the DynamicalSystem
    */
-  void computeW(double time, DynamicalSystem& ds);
+  void computeW(double time, DynamicalSystem& ds, DynamicalSystemsGraph::VDescriptor& dsgVD);
 
   /** compute WBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t
    *  \param the time (double)

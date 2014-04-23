@@ -810,13 +810,12 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
   setBlock(D, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::doExtraForCentralInteractionBlockForDS(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const
+void Interaction::computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const
 {
   RELATION::TYPES relationType = relation()->getType();
-  if ((relationType == FirstOrder) && (workM[FirstOrderRMat::Ktilde]))
+  if ((relationType == FirstOrder) && (workM[FirstOrderRMat::Khat]))
   {
-    workM[FirstOrderRMat::Ktilde]->PLUForwardBackwardInPlace(m);
-    SP::SimpleMatrix K = std11::static_pointer_cast<FirstOrderR>(_relation)->K();
+    SP::SiconosMatrix K = std11::static_pointer_cast<FirstOrderR>(_relation)->K();
     if (!K) K = workM[FirstOrderRMat::K];
     prod(*K, m, *workM[FirstOrderRMat::Khat], true);
     *workM[FirstOrderRMat::Khat] *= h;

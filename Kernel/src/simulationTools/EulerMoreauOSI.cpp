@@ -296,7 +296,7 @@ void EulerMoreauOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds)
+void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGraph::VDescriptor& dsgVD)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
 
@@ -344,6 +344,25 @@ void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds)
   }
   else RuntimeException::selfThrow("EulerMoreauOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
 
+  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+  DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
+  InteractionsGraph& indexSet = *topo.indexSet(0);
+  DynamicalSystemsGraph::OEIterator oei, oeiend;
+  InteractionsGraph::VDescriptor ivd;
+  SP::SimpleMatrix K;
+  SP::Interaction inter;
+  for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
+  {
+      inter = DSG0.bundle(*oei);
+      ivd = indexSet.descriptor(inter);
+      FirstOrderR& rel = static_cast<FirstOrderR&>(*inter->relation());
+      K = rel.K();
+      if (!K) K = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::K];
+      if (K)
+      {
+        scal(-h * _gamma, *K, W, false);
+      }
+    }
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
 }
@@ -540,7 +559,6 @@ void EulerMoreauOSI::computeFreeState()
   // XXX to be removed -- xhub
   Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
   DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
-  InteractionsGraph& indexSet = *topo.indexSet(0);
 
 
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -552,18 +570,6 @@ void EulerMoreauOSI::computeFreeState()
     // Maurice will do that with subgraph :)
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
-    DynamicalSystemsGraph::OEIterator oei, oeiend;
-    InteractionsGraph::VDescriptor ivd;
-    // this surely explodse when there is more than 1 interaction involvded.
-    // But we don't care for now -- xhub
-    SP::SimpleMatrix K;
-    SP::SimpleMatrix Ktilde;
-    for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
-    {
-      ivd = indexSet.descriptor(DSG0.bundle(*oei));
-      K = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::K];
-      Ktilde = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::Ktilde];
-    }
 
     dsType = Type::value(*ds); // Its type
     SiconosMatrix& W = *WMap[ds->number()]; // Its W EulerMoreauOSI matrix of iteration.
@@ -602,7 +608,7 @@ void EulerMoreauOSI::computeFreeState()
       // -> Solve WX = xfree and set xfree = X
       // -- Update W --
       if (dsType != Type::FirstOrderLinearTIDS)
-        computeW(t, d);
+        computeW(t, d, dsgVD);
 
       W.PLUForwardBackwardInPlace(xfree);
 
@@ -635,20 +641,6 @@ void EulerMoreauOSI::computeFreeState()
       SiconosVector& deltaxForRelation = *workVectors[FirstOrderDS::deltaxForRelation];
       deltaxForRelation = xPartialNS;
 
-      // first do some crazy things
-      if (K)
-      {
-        // update Ktilde
-        Ktilde->eye();
-        SimpleMatrix tmpM = *K;
-        W.PLUForwardBackwardInPlace(tmpM);
-        // XXX TODO gamma case -- xhub
-        scal(-h, tmpM, *Ktilde, false);
-
-        // solve Ktilde X = xPartialNS
-        Ktilde->PLUForwardBackwardInPlace(deltaxForRelation);
-      }
-
       deltaxForRelation -= x;
 
       DEBUG_EXPR(deltaxForRelation.display());
@@ -676,7 +668,7 @@ void EulerMoreauOSI::computeFreeState()
   }
 }
 
-/* void EulerMoreauOSI::prepareNewtonLoop()
+void EulerMoreauOSI::prepareNewtonIteration(double time)
 {
   // XXX TMP hack -- xhub
   // we have to iterate over the edges of the DSG0 -> the following won't be necessary anymore
@@ -686,18 +678,7 @@ void EulerMoreauOSI::computeFreeState()
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*itDS);
-    VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
-    workVectors[FirstOrderDS::xPartialNS]->zero();
-  }
-}
-*/
-
-void EulerMoreauOSI::prepareNewtonIteration(double time)
-{
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
-  {
-    computeW(time, **itDS);
+    computeW(time, **itDS, dsgVD);
   }
 }
 

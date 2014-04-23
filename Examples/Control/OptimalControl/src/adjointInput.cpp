@@ -27,6 +27,7 @@ void adjointInput::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
   lambda.setValue(0, 0);
   lambda.setValue(1, 0);
 
+  computeh(t0, x, lambda, *inter.Halpha());
   computeg(t0, x, lambda, *workV[FirstOrderRVec::g_alpha]);
   *DSlink[FirstOrderRDS::r] = *workV[FirstOrderRVec::g_alpha];
   computeJach(t0, inter, DSlink, workV, workM);
@@ -55,9 +56,7 @@ void adjointInput::computeh(double t, SiconosVector& x, SiconosVector& lambda, S
 
   double betap = 2.0 * ((betatmp->getValue(0)) * x(2) + (betatmp->getValue(1)) * x(3));
 
-
-
-  y(0) = lambda(1) + betap;   //y_barre =Heval(x,lambda)
+  y(0) = lambda(1) + betap;
   y(1) =  2.0 - lambda(0);
 
 #ifdef SICONOS_DEBUG
@@ -102,7 +101,6 @@ void adjointInput::computeg(double t, SiconosVector& x, SiconosVector& lambda, S
 void adjointInput::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
 
-  double *h = C.getArray();
 #ifdef SICONOS_DEBUG
   std::cout << "computeJachx " << " at " << " " << t << std::endl;
 #endif
@@ -115,14 +113,14 @@ void adjointInput::computeJachx(double t, SiconosVector& x, SiconosVector& lambd
   JacobianXbeta(t, x, jacbetaXtmp);
 
 
-  h[0] = x(3);
-  h[2] = -x(2) ;
-  h[4] = (-x(1) + 1.0) ;
-  h[6] = x(0);
-  h[1] = 0.0;
-  h[3] = 0.0 ;
-  h[5] = 0.0 ;
-  h[7] = 0.0;
+  C(0, 0) = x(3);
+  C(0, 1) = -x(2) ;
+  C(0, 2) = (-x(1) + 1.0) ;
+  C(0, 3) = x(0);
+  C(1, 0) = 0.0;
+  C(1, 1) = 0.0 ;
+  C(1, 2) = 0.0 ;
+  C(1, 3) = 0.0;
 
 
 
@@ -135,15 +133,14 @@ void adjointInput::computeJachx(double t, SiconosVector& x, SiconosVector& lambd
 }
 void adjointInput::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
-  double *h = D.getArray();
 #ifdef SICONOS_DEBUG
   std::cout << "computeJachlambda " << " at " << " " << t << std::endl;
 #endif
 
-  h[0] = 0.0              ;
-  h[2] = 1.0 ;
-  h[1] = -1.0             ;
-  h[3] = 0.0 ;
+  D(0, 0) = 0.0              ;
+  D(0, 1) = 1.0 ;
+  D(1, 0) = -1.0             ;
+  D(1, 1) = 0.0 ;
 
 #ifdef SICONOS_DEBUG
   std::cout << "modif Jachlambda : \n";
@@ -158,7 +155,6 @@ void adjointInput::computeJachlambda(double t, SiconosVector& x, SiconosVector& 
 void adjointInput::computeJacgx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& K)
 {
 
-  double *g = K.getArray();
 #ifdef SICONOS_DEBUG
   std::cout << "computeJacgx " << " at " << " " << t << std::endl;
 #endif
@@ -168,22 +164,22 @@ void adjointInput::computeJacgx(double t, SiconosVector& x, SiconosVector& lambd
 
   JacobianXbeta(t, x, jacbetaXtmp);
 
-  g[0] = jacbetaXtmp->getValue(0, 0) * (lambda(0) - 1.0) ;
-  g[4] = jacbetaXtmp->getValue(0, 1) * (lambda(0) - 1.0)  ;
-  g[8] = 0.0;
-  g[12] = 0.0;
-  g[1] = jacbetaXtmp->getValue(1, 0) * (lambda(0) - 1.0) ;
-  g[5] = jacbetaXtmp->getValue(1, 1) * (lambda(0) - 1.0)  ;
-  g[9] = 0.0  ;
-  g[13] = 0.0 ;
-  g[2] = 0.0;
-  g[6] = 0.0;
-  g[10] = K2->getValue(0, 0) * (lambda(0) - 1.0);
-  g[14] = K2->getValue(0, 1) * (lambda(0) - 1.0);
-  g[3] = 0.0;
-  g[7] = 0.0;
-  g[11] = K2->getValue(1, 0) * (lambda(0) - 1.0);
-  g[15] = K2->getValue(1, 1) * (lambda(0) - 1.0);
+  K(0, 0) = jacbetaXtmp->getValue(0, 0) * (lambda(0) - 1.0) ;
+  K(0, 1) = jacbetaXtmp->getValue(0, 1) * (lambda(0) - 1.0)  ;
+  K(0, 2) = 0.0;
+  K(0, 3) = 0.0;
+  K(1, 0) = jacbetaXtmp->getValue(1, 0) * (lambda(0) - 1.0) ;
+  K(1, 1) = jacbetaXtmp->getValue(1, 1) * (lambda(0) - 1.0)  ;
+  K(1, 2) = 0.0  ;
+  K(1, 3) = 0.0 ;
+  K(2, 0) = 0.0;
+  K(2, 1) = 0.0;
+  K(2, 2) = K2->getValue(0, 0) * (lambda(0) - 1.0);
+  K(2, 3) = K2->getValue(0, 1) * (lambda(0) - 1.0);
+  K(3, 0) = 0.0;
+  K(3, 1) = 0.0;
+  K(3, 2) = K2->getValue(1, 0) * (lambda(0) - 1.0);
+  K(3, 3) = K2->getValue(1, 1) * (lambda(0) - 1.0);
 
 #ifdef SICONOS_DEBUG
   std::cout << "modif Jacgx : \n";

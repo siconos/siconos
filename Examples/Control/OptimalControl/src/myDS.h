@@ -125,8 +125,6 @@ public:
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  virtual void computeRhs(double, bool  = false);
-  virtual void resetNonSmoothPart(unsigned int = 0);
 
 
 
