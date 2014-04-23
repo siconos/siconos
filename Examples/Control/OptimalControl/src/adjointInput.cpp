@@ -12,8 +12,8 @@ void adjointInput::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
 {
   FirstOrderNonLinearR::initComponents(inter, DSlink, workV, workM);
 
-  SiconosVector& x = *workV[FirstOrderRVec::x];
-  x = *DSlink[FirstOrderRDS::x];
+  SiconosVector& x = *workV[FirstOrderR::vec_x];
+  x = *DSlink[FirstOrderR::x];
   SiconosVector& lambda = *inter.lambda(0);
 
   K2.reset(new SimpleMatrix(2, 2));
@@ -28,8 +28,8 @@ void adjointInput::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
   lambda.setValue(1, 0);
 
   computeh(t0, x, lambda, *inter.Halpha());
-  computeg(t0, x, lambda, *workV[FirstOrderRVec::g_alpha]);
-  *DSlink[FirstOrderRDS::r] = *workV[FirstOrderRVec::g_alpha];
+  computeg(t0, x, lambda, *workV[FirstOrderR::g_alpha]);
+  *DSlink[FirstOrderR::r] = *workV[FirstOrderR::g_alpha];
   computeJach(t0, inter, DSlink, workV, workM);
   computeJacg(t0, inter, DSlink, workV, workM);
 
