@@ -33,28 +33,27 @@ double CircleCircleR::distance(double x1, double y1, double r1, double x2, doubl
 
 }
 
-void CircleCircleR::computeh(double time, Interaction& inter)
+void CircleCircleR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
 {
 
-  double q_0 = (*inter.data(q0))(0);
-  double q_1 = (*inter.data(q0))(1);
-  double q_3 = (*inter.data(q0))(3);
-  double q_4 = (*inter.data(0))(4);
+  double q_0 = q(0);
+  double q_1 = q(1);
+  double q_3 = q(3);
+  double q_4 = q(4);
 
-  SiconosVector& y = *inter.y(0);
   y(0) = distance(q_0, q_1, _r1, q_3, q_4, _r2);
 
 }
 
-void CircleCircleR::computeJachq(double time, Interaction& inter)
+void CircleCircleR::computeJachq(SiconosVector& q, SiconosVector& z)
 {
 
   SimpleMatrix *g = (SimpleMatrix *) _jachq.get();
 
-  double x1 = (*inter.data(q0))(0);
-  double y1 = (*inter.data(q0))(1);
-  double x2 = (*inter.data(q0))(3);
-  double y2 = (*inter.data(q0))(4);
+  double x1 = q(0);
+  double y1 = q(1);
+  double x2 = q(3);
+  double y2 = q(4);
 
   double dx = x2 - x1;
   double dy = y2 - y1;

@@ -46,7 +46,7 @@ protected:
   double AscalA1(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
   double AscalA2(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
 
-  virtual void initComponents(Interaction& inter);
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& work);
 
 public:
   /* constructor,

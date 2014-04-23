@@ -655,7 +655,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 
       inter->computeResiduR(getTkp1(), DSlink, workV);
       // TODO support other DS
-      residu = workV[FirstOrderRVec::residuR]->norm2();
+      residu = workV[FirstOrderR::vec_residuR]->norm2();
       if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
       if (residu > criterion)
       {

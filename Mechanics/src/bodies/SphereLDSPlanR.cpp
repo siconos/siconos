@@ -52,14 +52,12 @@ double SphereLDSPlanR::distance(double x, double y, double z, double rad)
 }
 
 
-void SphereLDSPlanR::computeh(double time, Interaction& inter)
+void SphereLDSPlanR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
 {
 
-  double q_0 = (*inter.data(q0))(0);
-  double q_1 = (*inter.data(q0))(1);
-  double q_2 = (*inter.data(q0))(2);
-
-  SiconosVector& y = *inter.y(0);
+  double q_0 = q(0);
+  double q_1 = q(1);
+  double q_2 = q(2);
 
   y.setValue(0, distance(q_0, q_1, q_2, r));
 
@@ -67,12 +65,12 @@ void SphereLDSPlanR::computeh(double time, Interaction& inter)
 
 void normalize(SP::SiconosVector, unsigned int);
 
-void SphereLDSPlanR::computeJachq(double time, Interaction& inter)
+void SphereLDSPlanR::computeJachq(SiconosVector& q, SiconosVector& z)
 {
   SimpleMatrix *g = (SimpleMatrix *)_jachq.get();
 
-  double theta = (*inter.data(q0))(3);
-  double phi   = (*inter.data(q0))(4);
+  double theta = q(3);
+  double phi   = q(4);
 
   double cthe = cos(theta);
   double sthe = sin(theta);

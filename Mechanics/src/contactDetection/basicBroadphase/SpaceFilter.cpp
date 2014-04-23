@@ -21,6 +21,8 @@
 #include <Simulation.hpp>
 #include <NonSmoothDynamicalSystem.hpp>
 #include <SimulationTypeDef.hpp>
+#include <NonSmoothLaw.hpp>
+
 
 #include <cmath>
 //#define DEBUG_MESSAGES 1
@@ -1211,7 +1213,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 };
 
 
-void SpaceFilter::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
+void SpaceFilter::link(SP::Interaction inter, SP::DynamicalSystem ds1,
+                       SP::DynamicalSystem ds2)
 {
   DEBUG_PRINTF("link interaction : %d\n", inter->number());
   model()->nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
@@ -1227,7 +1230,28 @@ void SpaceFilter::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::Dynam
       if(has2DS)
         ds2->initializeNonSmoothInput(k);
     }
-  inter->initialize(model()->simulation()->nextTime(), ds1, ds2);
+
+  SP::DynamicalSystemsGraph DSG = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+
+  VectorOfVectors& workVds1 = *DSG->properties(DSG->descriptor(ds1)).workVectors;
+  VectorOfVectors& workVds2 = *DSG->properties(DSG->descriptor(ds2)).workVectors;
+
+
+  InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
+
+  VectorOfBlockVectors& DSlink = *indexSet0->properties(ui).DSlink;
+  VectorOfVectors& workVInter = *indexSet0->properties(ui).workVectors;
+  VectorOfSMatrices& workMInter = *indexSet0->properties(ui).workMatrices;
+  unsigned int nslawSize = inter->nonSmoothLaw()->size();
+  indexSet0->properties(ui).block.reset(new SimpleMatrix(nslawSize, nslawSize));
+  SiconosMatrix& osnsMInter = *indexSet0->properties(ui).block;
+
+  inter->initialize(model()->simulation()->nextTime(), DSlink, workVInter,  workMInter,
+                    osnsMInter, *ds1, workVds1, *ds2, workVds2,
+                    model()->simulation()->computeResiduY(),
+                    model()->simulation()->computeResiduR());
+  //inter->initialize(model()->simulation()->nextTime(), ds1, ds2);
 }
 
 

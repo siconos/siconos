@@ -571,6 +571,7 @@ void EulerMoreauOSI::computeFreeState()
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
 
+
     dsType = Type::value(*ds); // Its type
     SiconosMatrix& W = *WMap[ds->number()]; // Its W EulerMoreauOSI matrix of iteration.
 
@@ -743,10 +744,10 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
   SP::SiconosVector H_alpha;
 
-  deltax = DSlink[FirstOrderRDS::deltax];
+  deltax = DSlink[FirstOrderR::deltax];
   SiconosVector& yForNSsolver = *inter->yForNSsolver();
 
-  Xfree = DSlink[FirstOrderRDS::xfree];
+  Xfree = DSlink[FirstOrderR::xfree];
 
   assert(Xfree);
 
@@ -762,9 +763,9 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
     SiconosVector& lambda = *inter->lambda(0);
     FirstOrderType2R& rel = *std11::static_pointer_cast<FirstOrderType2R>(mainInteraction->relation());
     C = rel.C();
-    if (!C) C = workM[FirstOrderRMat::C];
+    if (!C) C = workM[FirstOrderR::mat_C];
     D = rel.D();
-    if (!D) D = workM[FirstOrderRMat::D];
+    if (!D) D = workM[FirstOrderR::mat_D];
 
     if (D)
     {
@@ -802,9 +803,9 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
     SiconosVector& lambda = *inter->lambda(0);
     FirstOrderR& rel = *std11::static_pointer_cast<FirstOrderR>(mainInteraction->relation());
     C = rel.C();
-    if (!C) C = workM[FirstOrderRMat::C];
+    if (!C) C = workM[FirstOrderR::mat_C];
     D = rel.D();
-    if (!D) D = workM[FirstOrderRMat::D];
+    if (!D) D = workM[FirstOrderR::mat_D];
 
     if (D)
     {
@@ -840,9 +841,9 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   {
     FirstOrderType1R& rel = *std11::static_pointer_cast<FirstOrderType1R>(mainInteraction->relation());
     C = rel.C();
-    if (!C) C = workM[FirstOrderRMat::C];
+    if (!C) C = workM[FirstOrderR::mat_C];
     F = rel.F();
-    if (!F) F = workM[FirstOrderRMat::F];
+    if (!F) F = workM[FirstOrderR::mat_F];
     assert(Xfree);
     assert(deltax);
 
@@ -850,7 +851,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
     {
       coord[3] = F->size(1);
       coord[5] = F->size(1);
-      subprod(*F, *DSlink[FirstOrderRDS::z], yForNSsolver, coord, true);
+      subprod(*F, *DSlink[FirstOrderR::z], yForNSsolver, coord, true);
 
     }
     if (C)
@@ -874,7 +875,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   else
   {
     C = mainInteraction->relation()->C();
-    if (!C) C = workM[FirstOrderRMat::C];
+    if (!C) C = workM[FirstOrderR::mat_C];
 
     if (C)
     {
@@ -908,9 +909,9 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
       else
       {
         e = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
-        if (!e) e = workV[FirstOrderRVec::e];
+        if (!e) e = workV[FirstOrderR::e];
         F = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
-        if (!F) F = workM[FirstOrderRMat::F];
+        if (!F) F = workM[FirstOrderR::mat_F];
       }
 
       if (e)
@@ -920,7 +921,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
       {
         coord[3] = F->size(1);
         coord[5] = F->size(1);
-        subprod(*F, *DSlink[FirstOrderRDS::z], yForNSsolver, coord, false);
+        subprod(*F, *DSlink[FirstOrderR::z], yForNSsolver, coord, false);
       }
     }
 

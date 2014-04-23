@@ -53,7 +53,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D,
 
 void FirstOrderLinearTIR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  unsigned int sizeZ = DSlink[FirstOrderRDS::z]->size();
+  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 
   DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");
   // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
@@ -110,7 +110,7 @@ void FirstOrderLinearTIR::computeOutput(double time, Interaction& inter, VectorO
   SiconosVector& y = *inter.y(0);
   SiconosVector& lambda = *inter.lambda(0);
 
-  computeh(*DSlink[FirstOrderRDS::x], lambda, *DSlink[FirstOrderRDS::z], y);
+  computeh(*DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], y);
 }
 
 void FirstOrderLinearTIR::computeg(SiconosVector& lambda, BlockVector& r)
@@ -120,7 +120,7 @@ void FirstOrderLinearTIR::computeg(SiconosVector& lambda, BlockVector& r)
 
 void FirstOrderLinearTIR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
 {
-  computeg(*inter.lambda(level), *DSlink[FirstOrderRDS::r]);
+  computeg(*inter.lambda(level), *DSlink[FirstOrderR::r]);
 }
 
 void FirstOrderLinearTIR::display() const

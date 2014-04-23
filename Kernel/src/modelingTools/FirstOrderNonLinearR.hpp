@@ -114,12 +114,12 @@ public:
   virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
   virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
-    SiconosVector& x = *workV[FirstOrderRVec::x];
-    x = *DSlink[FirstOrderRDS::x];
+    SiconosVector& x = *workV[FirstOrderR::vec_x];
+    x = *DSlink[FirstOrderR::x];
     SiconosVector& lambda = *inter.lambda(0);
 
-    computeJachx(time, x, lambda, *workM[FirstOrderRMat::C]);
-    computeJachlambda(time, x, lambda, *workM[FirstOrderRMat::D]);
+    computeJachx(time, x, lambda, *workM[FirstOrderR::mat_C]);
+    computeJachlambda(time, x, lambda, *workM[FirstOrderR::mat_D]);
   }
 
 
@@ -132,16 +132,16 @@ public:
 
   virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
-    SiconosVector& x = *workV[FirstOrderRVec::x];
-    x = *DSlink[FirstOrderRDS::x];
+    SiconosVector& x = *workV[FirstOrderR::vec_x];
+    x = *DSlink[FirstOrderR::x];
     SiconosVector& lambda = *inter.lambda(0);
     if (!_B)
     {
-      computeJacglambda(time, x, lambda, *workM[FirstOrderRMat::B]);
+      computeJacglambda(time, x, lambda, *workM[FirstOrderR::mat_B]);
     }
     if (!_K)
     {
-      computeJacgx(time, x, lambda, *workM[FirstOrderRMat::K]);
+      computeJacgx(time, x, lambda, *workM[FirstOrderR::mat_K]);
     }
   }
 

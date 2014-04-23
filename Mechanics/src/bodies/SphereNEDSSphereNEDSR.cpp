@@ -43,18 +43,16 @@ double SphereNEDSSphereNEDSR::distance(double x1, double y1, double z1, double r
 }
 
 
-void SphereNEDSSphereNEDSR::computeh(double time, Interaction& inter)
+void SphereNEDSSphereNEDSR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
 
 
-  double q_0 = (*inter.data(q0))(0);
-  double q_1 = (*inter.data(q0))(1);
-  double q_2 = (*inter.data(q0))(2);
-  double q_7 = (*inter.data(q0))(7);
-  double q_8 = (*inter.data(q0))(8);
-  double q_9 = (*inter.data(q0))(9);
-
-  SiconosVector& y = *inter.y(0);
+  double q_0 = q0(0);
+  double q_1 = q0(1);
+  double q_2 = q0(2);
+  double q_7 = q0(7);
+  double q_8 = q0(8);
+  double q_9 = q0(9);
 
   y.setValue(0, distance(q_0, q_1, q_2, r1, q_7, q_8, q_9, r2));
   //Approximation _Pc1=_Pc2

@@ -38,23 +38,16 @@ double SphereLDSSphereLDSR::distance(double x1, double y1, double z1, double r1,
 }
 
 
-void SphereLDSSphereLDSR::computeh(double time, Interaction& inter)
+void SphereLDSSphereLDSR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
 {
 
-  // Warning: temporary method to have contiguous values in memory,
-  // copy of block to simple.
-
-  SiconosVector workX = *inter.data(q0);
-  double *q = &(workX)(0);
-
-  SiconosVector& y = *inter.y(0);
-
-  y.setValue(0, distance(q[0], q[1], q[2], r1, q[6], q[7], q[8], r2));
+  y.setValue(0, distance(q(0), q(1), q(2), r1,
+                         q(6), q(7), q(8), r2));
   y.setValue(1, 0.);
 
 };
 
-void SphereLDSSphereLDSR::computeJachq(double time, Interaction& inter)
+void SphereLDSSphereLDSR::computeJachq(SiconosVector& q, SiconosVector& z)
 {
 
   double A, B, C;
@@ -63,21 +56,21 @@ void SphereLDSSphereLDSR::computeJachq(double time, Interaction& inter)
 
   SimpleMatrix *g = (SimpleMatrix *)_jachq.get();
 
-  double q_0 = (*inter.data(q0))(0);
-  double q_1 = (*inter.data(q0))(1);
-  double q_2 = (*inter.data(q0))(2);
+  double q_0 = q(0);
+  double q_1 = q(1);
+  double q_2 = q(2);
 
-  double theta1 = (*inter.data(q0))(3);
-  double phi1 = (*inter.data(q0))(4);
-
-
-  double q_6 = (*inter.data(q0))(6);
-  double q_7 = (*inter.data(q0))(7);
-  double q_8 = (*inter.data(q0))(8);
+  double theta1 = q(3);
+  double phi1 = q(4);
 
 
-  double theta2 = (*inter.data(q0))(9);
-  double phi2 = (*inter.data(q0))(10);
+  double q_6 = q(6);
+  double q_7 = q(7);
+  double q_8 = q(8);
+
+
+  double theta2 = q(9);
+  double phi2 = q(10);
 
 
   A = -(q_6 - q_0);

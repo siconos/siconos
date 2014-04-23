@@ -89,7 +89,7 @@ void LagrangianLinearTIR::initComponents(Interaction& inter, VectorOfBlockVector
   if ((_e) && _e->size() != sizeY)
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
 
-  unsigned int sizeZ = DSlink[LagrangianRDS::z]->size();
+  unsigned int sizeZ = DSlink[LagrangianR::z]->size();
   if ((_F) && (
         _F->size(0) != sizeZ || _F->size(1) != sizeZ))
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
@@ -102,14 +102,14 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, VectorO
   // get y and lambda of the interaction
   SiconosVector& y = *inter.y(derivativeNumber);
 
-  prod(*_jachq, *DSlink[LagrangianRDS::q0 + derivativeNumber], y);
+  prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
 
   if (derivativeNumber == 0)
   {
     if (_e)
       y += *_e;
     if (_F)
-      prod(*_F, *DSlink[LagrangianRDS::z], y, false);
+      prod(*_F, *DSlink[LagrangianR::z], y, false);
   }
 
   if (_jachlambda)
@@ -126,7 +126,7 @@ void LagrangianLinearTIR::computeInput(double time, Interaction& inter, VectorOf
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
   // computation of p = Ht lambda
-  prod(lambda, *_jachq, *DSlink[LagrangianRDS::p0 + level], false);
+  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 }
 
 void LagrangianLinearTIR::display() const

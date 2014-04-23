@@ -59,7 +59,7 @@ void LagrangianRheonomousR::initComponents(Interaction& inter, VectorOfBlockVect
   if (_pluginJachq->fPtr && !_jachq)
   {
     unsigned int sizeY = inter.getSizeOfY();
-    unsigned int sizeQ = DSlink[LagrangianRDS::q0]->size();
+    unsigned int sizeQ = DSlink[LagrangianR::q0]->size();
     _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
   }
 }
@@ -128,8 +128,8 @@ void LagrangianRheonomousR::computeJachq(double time,  SiconosVector& q, Siconos
 
 void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber)
 {
-  SiconosVector q = *DSlink[LagrangianRDS::q0];
-  SiconosVector z = *DSlink[LagrangianRDS::z];
+  SiconosVector q = *DSlink[LagrangianR::q0];
+  SiconosVector z = *DSlink[LagrangianR::z];
   SiconosVector& y = *inter.y(derivativeNumber);
   if (derivativeNumber == 0)
     computeh(time, q, z, y);
@@ -141,12 +141,12 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, Vecto
       // Computation of the partial derivative w.r.t time of h(q,t)
       computehDot(time, q, z);
       // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
-      prod(*_jachq, *DSlink[LagrangianRDS::q1], y);
+      prod(*_jachq, *DSlink[LagrangianR::q1], y);
       // Sum of the terms
       y += *_hDot;
     }
     else if (derivativeNumber == 2)
-      prod(*_jachq, *DSlink[LagrangianRDS::q2], y); // Approx:,  ...
+      prod(*_jachq, *DSlink[LagrangianR::q2], y); // Approx:,  ...
     // \warning : the computation of y[2] (in event-driven
     // simulation for instance) is approximated by y[2] =
     // Jach[0]q[2]. For the moment, other terms are neglected
@@ -154,17 +154,17 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, Vecto
     else
       RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber) index >2  not yet implemented.");
   }
-  *DSlink[LagrangianRDS::z] = z;
+  *DSlink[LagrangianR::z] = z;
 }
 
 void LagrangianRheonomousR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
 {
-  SiconosVector q = *DSlink[LagrangianRDS::q0];
-  SiconosVector z = *DSlink[LagrangianRDS::z];
+  SiconosVector q = *DSlink[LagrangianR::q0];
+  SiconosVector z = *DSlink[LagrangianR::z];
   computeJachq(time, q, z);
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
-  prod(lambda, *_jachq, *DSlink[LagrangianRDS::p0 + level], false);
-  *DSlink[LagrangianRDS::z] = z;
+  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  *DSlink[LagrangianR::z] = z;
 }

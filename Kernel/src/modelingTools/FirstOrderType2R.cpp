@@ -61,22 +61,23 @@ void FirstOrderType2R::initComponents(Interaction& inter, VectorOfBlockVectors& 
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
 
-//  workV[FirstOrderRVec::z].reset(new SiconosVector(sizeZ));
-  workV[FirstOrderRVec::x].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderRVec::r].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderRVec::g_alpha].reset(new SiconosVector(sizeDS));
+
+//  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
+  workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
+  workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
+  workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
 
   if (!_C)
-    workM[FirstOrderRMat::C].reset(new SimpleMatrix(sizeY, sizeDS));
+    workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
   if (!_D)
-    workM[FirstOrderRMat::D].reset(new SimpleMatrix(sizeY, sizeY));
+    workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
 //  if (!_jacgx)
 //  {
-//    workM[FirstOrderRMat::K].reset(new SimpleMatrix(sizeDS, sizeDS));
+//    workM[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
     // TODO add this back to workV of the DS -> needed for X partial NS
 //  }
   if (!_B)
-    workM[FirstOrderRMat::B].reset(new SimpleMatrix(sizeDS, sizeY));
+    workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
 
 
 }
@@ -91,7 +92,6 @@ void FirstOrderType2R::computeg(double time, SiconosVector& lambda, SiconosVecto
   ((Type2PtrG)(_pluging->fPtr))(lambda.size(), lambda.getArray(), r.size(), r.getArray());
 }
 
-void FirstOrderType2R::computeg(double time, SiconosVector& lambda, SiconosVector& r);
 
 void FirstOrderType2R::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
 {
@@ -110,7 +110,7 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, VectorOfBl
   if (_D)
     prod(*_D, *(inter.lambdaOld(level)), y, true);
   else
-    prod(*workM[FirstOrderRMat::D], *(inter.lambdaOld(level)), y, true);
+    prod(*workM[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
 
   y *= -1.0;
   //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
@@ -126,23 +126,23 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, VectorOfBl
   DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
   DEBUG_EXPR(y.display());
 
-  BlockVector& deltax = *DSlink[FirstOrderRDS::deltax];
-  //  deltax -= *(DSlink[FirstOrderRDS::xold)];
+  BlockVector& deltax = *DSlink[FirstOrderR::deltax];
+  //  deltax -= *(DSlink[FirstOrderR::xold)];
   DEBUG_PRINT("FirstOrderType2R::computeOutput : deltax \n");
   DEBUG_EXPR(deltax.display());
 
   if (_C)
     prod(*_C, deltax, y, false);
   else
-    prod(*workM[FirstOrderRMat::C], deltax, y, false);
+    prod(*workM[FirstOrderR::mat_C], deltax, y, false);
 
 
   prod(osnsM, *inter.lambda(level), y, false);
   DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
   DEBUG_EXPR(y.display());
 
-  SiconosVector& x = *workV[FirstOrderRVec::x];
-  x = *DSlink[FirstOrderRDS::x];
+  SiconosVector& x = *workV[FirstOrderR::vec_x];
+  x = *DSlink[FirstOrderR::x];
 
   computeh(time, x, *inter.lambda(level), *inter.Halpha());
 
@@ -166,16 +166,16 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, VectorOfBlo
   //  std::cout<<"FirstOrderType2R::computeInput : g_alpha"<<endl;
   //  _workX->display();
   if (_B)
-    prod(*_B, lambda, *workV[FirstOrderRVec::g_alpha], false);
+    prod(*_B, lambda, *workV[FirstOrderR::g_alpha], false);
   else
-    prod(*workM[FirstOrderRMat::B], lambda, *workV[FirstOrderRVec::g_alpha], false);
+    prod(*workM[FirstOrderR::mat_B], lambda, *workV[FirstOrderR::g_alpha], false);
   //  std::cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
   //  _workX->display();
 
-  *DSlink[FirstOrderRDS::r] += *workV[FirstOrderRVec::g_alpha];
+  *DSlink[FirstOrderR::r] += *workV[FirstOrderR::g_alpha];
 
   //compute the new g_alpha
-  computeg(time, *inter.lambda(level), *workV[FirstOrderRVec::g_alpha]);
+  computeg(time, *inter.lambda(level), *workV[FirstOrderR::g_alpha]);
 
 
 
@@ -187,12 +187,12 @@ void FirstOrderType2R::preparNewtonIteration(Interaction& inter, VectorOfBlockVe
   /* compute the contribution in xPartialNS for the next iteration */
   DEBUG_PRINT("FirstOrderType2R::preparNewtonIteration\n");
   if (_B)
-    prod(*_B, *inter.lambda(0), *workV[FirstOrderRVec::x], true);
+    prod(*_B, *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
   else
-    prod(*workM[FirstOrderRMat::B], *inter.lambda(0), *workV[FirstOrderRVec::x], true);
+    prod(*workM[FirstOrderR::mat_B], *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
 
-  *DSlink[FirstOrderRDS::xPartialNS] = *workV[FirstOrderRVec::g_alpha];
-  *DSlink[FirstOrderRDS::xPartialNS] -= *workV[FirstOrderRVec::x];
+  *DSlink[FirstOrderR::xPartialNS] = *workV[FirstOrderR::g_alpha];
+  *DSlink[FirstOrderR::xPartialNS] -= *workV[FirstOrderR::vec_x];
 }
 
 void FirstOrderType2R::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
@@ -208,15 +208,15 @@ void FirstOrderType2R::computeJach(double time, Interaction& inter, VectorOfBloc
 {
   if (!_C)
   {
-    SiconosVector& x = *workV[FirstOrderRVec::x];
-    x = *DSlink[FirstOrderRDS::x];
-    computeJachx(time, x, *inter.lambda(0), *workM[FirstOrderRMat::C]);
+    SiconosVector& x = *workV[FirstOrderR::vec_x];
+    x = *DSlink[FirstOrderR::x];
+    computeJachx(time, x, *inter.lambda(0), *workM[FirstOrderR::mat_C]);
   }
   if (!_D)
   {
-    SiconosVector& x = *workV[FirstOrderRVec::x];
-    x = *DSlink[FirstOrderRDS::x];
-    computeJachlambda(time, x, *inter.lambda(0), *workM[FirstOrderRMat::D]);
+    SiconosVector& x = *workV[FirstOrderR::vec_x];
+    x = *DSlink[FirstOrderR::x];
+    computeJachlambda(time, x, *inter.lambda(0), *workM[FirstOrderR::mat_D]);
   }
 }
 
@@ -229,6 +229,6 @@ void FirstOrderType2R::computeJacg(double time, Interaction& inter, VectorOfBloc
 {
   if (!_B)
   {
-    computeJacglambda(time, *inter.lambda(0), *workM[FirstOrderRMat::B]);
+    computeJacglambda(time, *inter.lambda(0), *workM[FirstOrderR::mat_B]);
   }
 }

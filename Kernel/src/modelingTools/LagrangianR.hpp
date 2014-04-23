@@ -78,12 +78,15 @@ typedef void (*FPtr5bis)(unsigned int, double*, unsigned int, double*, unsigned 
  *
  */
 
-namespace LagrangianRDS {enum {xfree, z, q0, q1, q2, p0, p1, p2, DSlinkSize};}
-namespace LagrangianRVec {enum {xfree, z, q0, q1, q2, p0, p1, p2, workVecSize};}
-namespace LagrangianRMat {enum {C, D, F, workMatSize};}
 
 class LagrangianR : public Relation
 {
+public:
+  enum LagrangianRDS  {xfree, z, q0, q1, q2, p0, p1, p2, DSlinkSize};
+  // enum LagrangianRVec {vec_xfree, vec_z, vec_q0, vec_q1, vec_q2, vec_p0, vec_p1, vec_p2, vec_workVecSize};
+  // enum LagrangianRMat {mat_C, mat_D, mat_F, mat_workMatSize};
+
+
 protected:
   /** serialization hooks
   */

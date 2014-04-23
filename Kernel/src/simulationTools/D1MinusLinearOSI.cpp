@@ -894,11 +894,11 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
     //Xfree = inter->dataX();
     if (relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianRDS::q1];
+      Xfree = DSlink[LagrangianR::q1];
     }
     else if (relationType == NewtonEuler)
     {
-      Xfree = DSlink[NewtonEulerRDS::velocity];
+      Xfree = DSlink[NewtonEulerR::velocity];
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
@@ -909,15 +909,15 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
 
     if (relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianRDS::xfree];
+      Xfree = DSlink[LagrangianR::xfree];
     }
     else if (relationType == NewtonEuler)
     {
-      Xfree = DSlink[NewtonEulerRDS::xfree];
+      Xfree = DSlink[NewtonEulerR::xfree];
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
-    DEBUG_PRINT("Xfree = DSlink[LagrangianRDS::xfree];\n");
+    DEBUG_PRINT("Xfree = DSlink[LagrangianR::xfree];\n");
     DEBUG_EXPR(Xfree->display());
     assert(Xfree);
   }
@@ -962,11 +962,11 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        SiconosVector q = *DSlink[LagrangianRDS::q0];
-        SiconosVector z = *DSlink[LagrangianRDS::z];
+        SiconosVector q = *DSlink[LagrangianR::q0];
+        SiconosVector z = *DSlink[LagrangianR::z];
 
         std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
-        *DSlink[LagrangianRDS::z] = z;
+        *DSlink[LagrangianR::z] = z;
         subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false);
       }
       else

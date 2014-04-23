@@ -180,7 +180,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
     _jachq->setValue(0, 8, -_Nc->getValue(1));
     _jachq->setValue(0, 9, -_Nc->getValue(2));
   }
-  SP::BlockVector BlockX = DSlink[NewtonEulerRDS::q0];
+  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
   for (int iDS = 0; iDS < 2; iDS++)
   {
     if (!inter.has2Bodies() && iDS == 1)

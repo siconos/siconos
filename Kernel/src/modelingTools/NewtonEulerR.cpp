@@ -88,7 +88,7 @@ void NewtonEulerR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, 
   // Memory allocation for G[i], if required (depends on the chosen constructor).
   initComponents(inter, DSlink, workV, workM);
 
-  _contactForce.reset(new SiconosVector(DSlink[NewtonEulerRDS::p1]->size()));
+  _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
   _contactForce->zero();
 }
 
@@ -126,9 +126,9 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
     _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
   }
   // Compute the product of the time derivative of the Jacobian with dotq
-  SiconosVector workQdot = *DSlink[NewtonEulerRDS::dotq]; // we assume that dotq is up to date !
-  SiconosVector workQ = *DSlink[NewtonEulerRDS::q0]; // we assume that dotq is up to date !
-  SiconosVector workZ = *DSlink[NewtonEulerRDS::z]; // we assume that dotq is up to date !
+  SiconosVector workQdot = *DSlink[NewtonEulerR::dotq]; // we assume that dotq is up to date !
+  SiconosVector workQ = *DSlink[NewtonEulerR::q0]; // we assume that dotq is up to date !
+  SiconosVector workZ = *DSlink[NewtonEulerR::z]; // we assume that dotq is up to date !
   DEBUG_EXPR(workQdot.display(););
   computeDotJachq(time, workQ, workZ, workQdot);
   _secondOrderTimeDerivativeTerms.reset(new SiconosVector(_dotjachq->size(0)));
@@ -188,13 +188,13 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   }
 
   // compute the product of jachqTdot and v
-  SiconosVector workVelocity = *DSlink[NewtonEulerRDS::velocity];
+  SiconosVector workVelocity = *DSlink[NewtonEulerR::velocity];
   DEBUG_EXPR(workVelocity.display(););
   prod(1.0, *jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
   DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
 
-  *DSlink[NewtonEulerRDS::z] = workZ;
+  *DSlink[NewtonEulerR::z] = workZ;
 }
 
 
@@ -209,7 +209,7 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, VectorOfBlockV
   SiconosVector& y = *inter.y(derivativeNumber);
   if (derivativeNumber == 0)
   {
-    computeh(time, *DSlink[NewtonEulerRDS::q0], y);
+    computeh(time, *DSlink[NewtonEulerR::q0], y);
   }
   else
   {
@@ -224,9 +224,9 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, VectorOfBlockV
     if (derivativeNumber == 1)
     {
       assert(_jachqT);
-      assert(DSlink[NewtonEulerRDS::velocity]);
+      assert(DSlink[NewtonEulerR::velocity]);
       DEBUG_EXPR(_jachqT->display(););
-      prod(*_jachqT, *DSlink[NewtonEulerRDS::velocity], y);
+      prod(*_jachqT, *DSlink[NewtonEulerR::velocity], y);
     }
     else if (derivativeNumber == 2)
     {
@@ -257,7 +257,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, VectorOfBlockVe
   SiconosVector& lambda = *inter.lambda(level);
 
   DEBUG_EXPR(lambda.display(););
-  DEBUG_EXPR(DSlink[NewtonEulerRDS::p0 + level]->display(););
+  DEBUG_EXPR(DSlink[NewtonEulerR::p0 + level]->display(););
 
   if (level == 1) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
@@ -271,20 +271,20 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, VectorOfBlockVe
 
     /*data is a pointer of memory associated to a dynamical system*/
     /** false because it consists in doing a sum*/
-    prod(lambda, *_jachqT, *DSlink[NewtonEulerRDS::p0 + level], false);
+    prod(lambda, *_jachqT, *DSlink[NewtonEulerR::p0 + level], false);
 
 #ifdef NER_DEBUG
     {
       std::cout << "_jachqT" << std::endl;
       _jachqT->display();
-      std::cout << "data[p0+level]" << DSlink[NewtonEulerRDS::p0 + level] <<  std::endl;
-      std::cout << "data[p0+level]->vector(0)" << DSlink[NewtonEulerRDS::p0 + level]->vector(0) <<  std::endl;
-      if (DSlink[NewtonEulerRDS::p0 + level]->getNumberOfBlocks() > 1)
-        std::cout << "data[p0+level]->vector(1)" << DSlink[NewtonEulerRDS::p0 + level]->vector(1) <<  std::endl;
-      DSlink[NewtonEulerRDS::p0 + level]->display();
+      std::cout << "data[p0+level]" << DSlink[NewtonEulerR::p0 + level] <<  std::endl;
+      std::cout << "data[p0+level]->vector(0)" << DSlink[NewtonEulerR::p0 + level]->vector(0) <<  std::endl;
+      if (DSlink[NewtonEulerR::p0 + level]->getNumberOfBlocks() > 1)
+        std::cout << "data[p0+level]->vector(1)" << DSlink[NewtonEulerR::p0 + level]->vector(1) <<  std::endl;
+      DSlink[NewtonEulerR::p0 + level]->display();
 
 
-      SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerRDS::p0 + level]->size()));
+      SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerR::p0 + level]->size()));
       prod(lambda, *_jachqT, *buffer, true);
       std::cout << "added part to p" << buffer <<  std::endl;
       buffer->display();
@@ -301,19 +301,19 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, VectorOfBlockVe
 
     /*data is a pointer of memory associated to a dynamical system*/
     /** false because it consists in doing a sum*/
-    assert(DSlink[NewtonEulerRDS::p0 + level]);
-    prod(lambda, *_jachqT, *DSlink[NewtonEulerRDS::p0 + level], false);
+    assert(DSlink[NewtonEulerR::p0 + level]);
+    prod(lambda, *_jachqT, *DSlink[NewtonEulerR::p0 + level], false);
 
 #ifdef NER_DEBUG
     {
       DEBUG_EXPR(_jachqT->display(););
-      //  std::cout << "data[p0+level]" << DSlink[NewtonEulerRDS::p0 + level] <<  std::endl;
-      //  std::cout << "data[p0+level]->vector(0)" << DSlink[NewtonEulerRDS::p0 + level]->vector(0) <<  std::endl;
-      // if (DSlink[NewtonEulerRDS::p0 + level]->getNumberOfBlocks() > 1)
-      //    std::cout << "data[p0+level]->vector(1)" << DSlink[NewtonEulerRDS::p0 + level]->vector(1) <<  std::endl;
-      DEBUG_EXPR(DSlink[NewtonEulerRDS::p0 + level]->display(););
+      //  std::cout << "data[p0+level]" << DSlink[NewtonEulerR::p0 + level] <<  std::endl;
+      //  std::cout << "data[p0+level]->vector(0)" << DSlink[NewtonEulerR::p0 + level]->vector(0) <<  std::endl;
+      // if (DSlink[NewtonEulerR::p0 + level]->getNumberOfBlocks() > 1)
+      //    std::cout << "data[p0+level]->vector(1)" << DSlink[NewtonEulerR::p0 + level]->vector(1) <<  std::endl;
+      DEBUG_EXPR(DSlink[NewtonEulerR::p0 + level]->display(););
 
-      SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerRDS::p0 + level]->size()));
+      SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerR::p0 + level]->size()));
       prod(lambda, *_jachqT, *buffer, true);
       std::cout << "added part to p   " << buffer <<  std::endl;
       buffer->display();
@@ -324,18 +324,18 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, VectorOfBlockVe
   }
   else if (level == 0)
   {
-    prod(lambda, *_jachq, *DSlink[NewtonEulerRDS::p0 + level], false);
+    prod(lambda, *_jachq, *DSlink[NewtonEulerR::p0 + level], false);
 #ifdef NER_DEBUG
     std::cout << "_jachq" << std::endl;
     _jachq->display();
-    std::cout << "data[p0+level]" << DSlink[NewtonEulerRDS::p0 + level] <<  std::endl;
-    std::cout << "data[p0+level]->vector(0)" << DSlink[NewtonEulerRDS::p0 + level]->vector(0) <<  std::endl;
-    if (DSlink[NewtonEulerRDS::p0 + level]->getNumberOfBlocks() > 1)
-      std::cout << "data[p0+level]->vector(1)" << DSlink[NewtonEulerRDS::p0 + level]->vector(1) <<  std::endl;
-    DSlink[NewtonEulerRDS::p0 + level]->display();
+    std::cout << "data[p0+level]" << DSlink[NewtonEulerR::p0 + level] <<  std::endl;
+    std::cout << "data[p0+level]->vector(0)" << DSlink[NewtonEulerR::p0 + level]->vector(0) <<  std::endl;
+    if (DSlink[NewtonEulerR::p0 + level]->getNumberOfBlocks() > 1)
+      std::cout << "data[p0+level]->vector(1)" << DSlink[NewtonEulerR::p0 + level]->vector(1) <<  std::endl;
+    DSlink[NewtonEulerR::p0 + level]->display();
 
 
-    SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerRDS::p0 + level]->size()));
+    SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerR::p0 + level]->size()));
     prod(lambda, *_jachq, *buffer, true);
     std::cout << "added part to p" << buffer <<  std::endl;
     buffer->display();

@@ -117,9 +117,9 @@ public:
   };
 
   using LagrangianScleronomousR::computeh;
-  void computeh(double time, Interaction& inter);
+  void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
-  void computeJachq(double time, Interaction& inter);
+  void computeJachq(SiconosVector& q, SiconosVector& z);
 
   bool equal(double, double, double, double) const;
 

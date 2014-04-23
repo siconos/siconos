@@ -53,13 +53,14 @@ typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsi
  * For more details, see the DevNotes.pdf, chapter NewtonEuler.
  */
 
-// add deltaq ??? -- xhub 30/03/2014
-namespace NewtonEulerRDS {enum {xfree, z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};}
-namespace NewtonEulerRVec {enum {xfree, z, q0, dotq, p0, p1, p2, workVecSize};}
-namespace NewtonEulerRMat {enum {C, D, F, workMatSize};}
 
 class NewtonEulerR : public Relation
 {
+public:
+// add deltaq ??? -- xhub 30/03/2014
+  enum NewtonEulerRDS  {xfree, z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
+  // enum NewtonEulerRVec {xfree, z, q0, dotq, p0, p1, p2, workVecSize};
+  // enum NewtonEulerRMat {C, D, F, workMatSize};
 
 protected:
   /** serialization hooks

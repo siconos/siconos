@@ -64,13 +64,13 @@ public:
       \param time
       \param inter
   */
-  void computeh(double time, Interaction& inter);
+  void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
   /** computeh implementation, see LagrangianScleronomousR
       \param time
       \param inter
   */
-  void computeJachq(double time, Interaction& inter);
+  void computeJachq(SiconosVector& q, SiconosVector& z);
 
   /** visitors hook
    */

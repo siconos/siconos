@@ -474,7 +474,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   {
     if (relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianRDS::xfree];
+      Xfree = DSlink[LagrangianR::xfree];
     }
     // else if  (relationType == NewtonEuler)
     // {
@@ -486,7 +486,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   }
   else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
-    Xfree = DSlink[LagrangianRDS::q1];
+    Xfree = DSlink[LagrangianR::q1];
     //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
     //       Xfree->display();
 
@@ -528,11 +528,11 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
       }
       else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        SiconosVector q = *DSlink[LagrangianRDS::q0];
-        SiconosVector z = *DSlink[LagrangianRDS::z];
+        SiconosVector q = *DSlink[LagrangianR::q0];
+        SiconosVector z = *DSlink[LagrangianR::z];
 
         std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
-        *DSlink[LagrangianRDS::z] = z;
+        *DSlink[LagrangianR::z] = z;
         subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
       }
       else

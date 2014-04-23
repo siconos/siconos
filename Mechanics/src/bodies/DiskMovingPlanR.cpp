@@ -61,26 +61,25 @@ double DiskMovingPlanR::distance(double x, double y, double rad)
 }
 
 /* Called compute h, but only the gap function is needed! */
-void DiskMovingPlanR::computeh(double time, Interaction& inter)
+void DiskMovingPlanR::computeh(double time, SiconosVector& q, SiconosVector& z, SiconosVector& y)
 {
   init(time);
 
-  SiconosVector& y = *inter.y(0);
-  double q_0 = (*inter.data(q0))(0);
-  double q_1 = (*inter.data(q0))(1);
+  double q_0 = q(0);
+  double q_1 = q(1);
 
   y(0) = distance(q_0, q_1, _r);
 
 }
 
-void DiskMovingPlanR::computeJachq(double time, Interaction& inter)
+void DiskMovingPlanR::computeJachq(double time, SiconosVector& q, SiconosVector& z)
 {
   init(time);
 
   SimpleMatrix *g = (SimpleMatrix *) _jachq.get();
 
-  double x = (*inter.data(q0))(0);
-  double y = (*inter.data(q0))(1);
+  double x = q(0);
+  double y = q(1);
 
   double D1 = _A * x + _B * y + _C;
   double signD1 = copysign(1, D1);
@@ -93,12 +92,12 @@ void DiskMovingPlanR::computeJachq(double time, Interaction& inter)
   (*g)(1, 2) = -_r;
 }
 
-void DiskMovingPlanR::computehDot(double time, Interaction& inter)
+void DiskMovingPlanR::computehDot(double time, SiconosVector& q, SiconosVector& z)
 {
   init(time);
 
-  double x = (*inter.data(q0))(0);
-  double y = (*inter.data(q0))(1);
+  double x = q(0);
+  double y = q(1);
 
   double D1 = _A * x + _B * y + _C;
   double signD1 = copysign(1, D1);

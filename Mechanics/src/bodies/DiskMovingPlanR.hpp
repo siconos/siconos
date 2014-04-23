@@ -66,12 +66,12 @@ public:
   void init(double);
 
   using LagrangianRheonomousR::computeh;
-  void computeh(double time, Interaction& inter);
+  void computeh(double time, SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
-  void computeJachq(double time, Interaction& inter);
+  void computeJachq(double time, SiconosVector& q, SiconosVector& z);
 
   using LagrangianRheonomousR::computehDot;
-  void computehDot(double time, Interaction& inter);
+  void computehDot(double time, SiconosVector& q, SiconosVector& z);
 
   double distance(double, double, double);
 

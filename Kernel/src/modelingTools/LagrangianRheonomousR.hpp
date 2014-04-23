@@ -239,8 +239,8 @@ public:
   /* compute all the H Jacobian */
   void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
   {
-    SiconosVector q = *DSlink[LagrangianRDS::q0];
-    SiconosVector z = *DSlink[LagrangianRDS::z];
+    SiconosVector q = *DSlink[LagrangianR::q0];
+    SiconosVector z = *DSlink[LagrangianR::z];
     computeJachq(time, q, z);
     // computeJachqDot(time, inter);
 //    computeDotJachq(time, q, z);

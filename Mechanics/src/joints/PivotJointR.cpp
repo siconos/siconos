@@ -55,9 +55,9 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, SP::Siconos
   buildA1A2();
 }
 
-void PivotJointR::initComponents(Interaction& inter)
+void PivotJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  KneeJointR::initComponents(inter);
+  KneeJointR::initComponents(inter,DSlink,workV,workM);
   //if (_d2){
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(7,14));
   //proj_with_q    _yProj.reset(new SiconosVector(7));

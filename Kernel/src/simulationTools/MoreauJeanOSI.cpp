@@ -1000,15 +1000,15 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
    * when a MoreauJeanOSI scheme is used.
    */
 
-//  deltax = DSlink[FirstOrderRDS::deltax];;
+//  deltax = DSlink[FirstOrderR::deltax];;
 
   if (relationType == NewtonEuler)
   {
-    Xfree = DSlink[NewtonEulerRDS::xfree];
+    Xfree = DSlink[NewtonEulerR::xfree];
   }
   else if (relationType == Lagrangian)
   {
-    Xfree = DSlink[LagrangianRDS::xfree];
+    Xfree = DSlink[LagrangianR::xfree];
   }
 
   assert(Xfree);
@@ -1080,11 +1080,11 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       {
         if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
         {
-          SiconosVector q = *DSlink[LagrangianRDS::q0];
-          SiconosVector z = *DSlink[LagrangianRDS::z];
+          SiconosVector q = *DSlink[LagrangianR::q0];
+          SiconosVector z = *DSlink[LagrangianR::z];
 
           std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
-          *DSlink[LagrangianRDS::z] = z;
+          *DSlink[LagrangianR::z] = z;
           subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
         }
         else

@@ -49,7 +49,7 @@ public:
 
   double distance(double, double, double, double, double, double, double, double);
 
-  void computeh(double time, Interaction& inter);
+  void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   //void computeJachq(double);
 

@@ -56,9 +56,9 @@ public:
   double distance(double, double, double, double);
 
   using LagrangianScleronomousR::computeh;
-  void computeh(double time, Interaction& inter);
+  void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
-  void computeJachq(double time, Interaction& inter);
+  void computeJachq(SiconosVector& q, SiconosVector& z);
 
   bool equal(double _A, double _B, double _C, double _D, double _r) const
   {

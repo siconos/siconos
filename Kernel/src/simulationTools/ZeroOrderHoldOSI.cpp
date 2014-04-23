@@ -400,13 +400,13 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
 
   // All of these values should be stored in the node corrseponding to the UR when a MoreauJeanOSI scheme is used.
   SP::BlockVector deltax;
-  deltax = DSlink[FirstOrderRDS::deltax];
+  deltax = DSlink[FirstOrderR::deltax];
   SiconosVector& yForNSsolver = *inter->yForNSsolver();
 
   SP::BlockVector Xfree;
   if (relationType == FirstOrder)
   {
-    Xfree = DSlink[FirstOrderRDS::xfree];
+    Xfree = DSlink[FirstOrderR::xfree];
   }
   assert(Xfree);
 
@@ -498,7 +498,7 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
         {
           coord[3] = F->size(1);
           coord[5] = F->size(1);
-          subprod(*F, *DSlink[FirstOrderRDS::z], yForNSsolver, coord, false);
+          subprod(*F, *DSlink[FirstOrderR::z], yForNSsolver, coord, false);
         }
       }
 

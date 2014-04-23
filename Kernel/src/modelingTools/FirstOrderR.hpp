@@ -66,13 +66,19 @@ variables are required in g.
 
  *
  */
-namespace FirstOrderRDS {enum {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};}
-namespace FirstOrderRVec {enum {xfree, z, x, r, e, g_alpha, residuR, workVecSize};}
-namespace FirstOrderRMat {enum {C, D, F, B, K, Ktilde, Khat, workMatSize};}
+// namespace FirstOrderR {enum {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};}
+// namespace FirstOrderRVec {enum {xfree, z, x, r, e, g_alpha, residuR, workVecSize};}
+// namespace FirstOrderRMat {enum {C, D, F, B, K, Ktilde, Khat, workMatSize};}
 
 
 class FirstOrderR : public Relation
 {
+public:
+  enum FirstOrderRDS {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};
+  enum FirstOrderRVec {vec_xfree, vec_z, vec_x, vec_r, e, g_alpha, vec_residuR, workVecSize};
+  enum FirstOrderRMat  {mat_C, mat_D, mat_F, mat_B, mat_K, mat_Ktilde, mat_Khat, mat_workMatSize};
+
+
 protected:
   /** serialization hooks
   */

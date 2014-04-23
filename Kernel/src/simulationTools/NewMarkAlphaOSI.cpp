@@ -324,7 +324,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   SP::BlockVector q_free;
   if (relationType == Lagrangian)
   {
-    q_free = DSlink[LagrangianRDS::xfree];
+    q_free = DSlink[LagrangianR::xfree];
   }
   assert(q_free);
 

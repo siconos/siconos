@@ -51,7 +51,12 @@ Interaction::Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP:
   _y(2),  _nslaw(NSL), _relation(rel)
 {}
 
-void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink, VectorOfVectors& workVInter, VectorOfSMatrices& workMInter, SiconosMatrix& osnsMInter, DynamicalSystem& ds1, VectorOfVectors& workV1, DynamicalSystem& ds2, VectorOfVectors& workV2, bool computeResiduY, bool computeResiduR)
+void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink,
+                             VectorOfVectors& workVInter, VectorOfSMatrices& workMInter,
+                             SiconosMatrix& osnsMInter,
+                             DynamicalSystem& ds1, VectorOfVectors& workV1,
+                             DynamicalSystem& ds2, VectorOfVectors& workV2,
+                             bool computeResiduY, bool computeResiduR)
 {
   DEBUG_PRINTF("Interaction::initialize(double t0) with t0 = %f \n", t0);
 
@@ -88,10 +93,10 @@ void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink, VectorOfVe
       RELATION::TYPES relationType = _relation->getType();
       if (relationType == FirstOrder)
       {
-        if (!workVInter[FirstOrderRVec::g_alpha])
-          workVInter[FirstOrderRVec::g_alpha].reset(new SiconosVector(_sizeOfDS));
-        if (!workVInter[FirstOrderRVec::residuR])
-          workVInter[FirstOrderRVec::residuR].reset(new SiconosVector(_sizeOfDS));
+        if (!workVInter[FirstOrderR::g_alpha])
+          workVInter[FirstOrderR::g_alpha].reset(new SiconosVector(_sizeOfDS));
+        if (!workVInter[FirstOrderR::vec_residuR])
+          workVInter[FirstOrderR::vec_residuR].reset(new SiconosVector(_sizeOfDS));
       }
       else if (relationType == Lagrangian)
         RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for LagrangianR is not implemented");
@@ -251,40 +256,40 @@ void Interaction::initDSData(DynamicalSystem& ds, VectorOfVectors& workVDS, Vect
 void Interaction::initDataFirstOrder(VectorOfBlockVectors& DSlink)
 {
   // Get the DS concerned by the interaction of this relation
-  DSlink.resize(FirstOrderRDS::DSlinkSize);
-  DSlink[FirstOrderRDS::x].reset(new BlockVector());
-  DSlink[FirstOrderRDS::xfree].reset(new BlockVector());
-  DSlink[FirstOrderRDS::xPartialNS].reset(new BlockVector());
-  DSlink[FirstOrderRDS::deltax].reset(new BlockVector()); // displacements
-  DSlink[FirstOrderRDS::r].reset(new BlockVector());
-  DSlink[FirstOrderRDS::z].reset(new BlockVector());
+  DSlink.resize(FirstOrderR::DSlinkSize);
+  DSlink[FirstOrderR::x].reset(new BlockVector());
+  DSlink[FirstOrderR::xfree].reset(new BlockVector());
+  DSlink[FirstOrderR::xPartialNS].reset(new BlockVector());
+  DSlink[FirstOrderR::deltax].reset(new BlockVector()); // displacements
+  DSlink[FirstOrderR::r].reset(new BlockVector());
+  DSlink[FirstOrderR::z].reset(new BlockVector());
 }
 
 void Interaction::initDSDataFirstOrder(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)
 {
   // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
   FirstOrderNonLinearDS& lds = static_cast<FirstOrderNonLinearDS&>(ds);
-  DSlink[FirstOrderRDS::x]->insertPtr(lds.x());
-  DSlink[FirstOrderRDS::xfree]->insertPtr(workVDS[FirstOrderDS::xfree]);
-  DSlink[FirstOrderRDS::xPartialNS]->insertPtr(workVDS[FirstOrderDS::xPartialNS]);
-  DSlink[FirstOrderRDS::deltax]->insertPtr(workVDS[FirstOrderDS::deltaxForRelation]);
-  DSlink[FirstOrderRDS::r]->insertPtr(lds.r());
-  DSlink[FirstOrderRDS::z]->insertPtr(lds.z());
+  DSlink[FirstOrderR::x]->insertPtr(lds.x());
+  DSlink[FirstOrderR::xfree]->insertPtr(workVDS[FirstOrderDS::xfree]);
+  DSlink[FirstOrderR::xPartialNS]->insertPtr(workVDS[FirstOrderDS::xPartialNS]);
+  DSlink[FirstOrderR::deltax]->insertPtr(workVDS[FirstOrderDS::deltaxForRelation]);
+  DSlink[FirstOrderR::r]->insertPtr(lds.r());
+  DSlink[FirstOrderR::z]->insertPtr(lds.z());
 }
 
 void Interaction::initDataLagrangian(VectorOfBlockVectors& DSlink)
 {
 
   DEBUG_PRINT("Interaction::initDataLagrangian()\n");
-  DSlink.resize(LagrangianRDS::DSlinkSize);
-  DSlink[LagrangianRDS::xfree].reset(new BlockVector());
-  DSlink[LagrangianRDS::q0].reset(new BlockVector()); // displacement
-  DSlink[LagrangianRDS::q1].reset(new BlockVector()); // velocity
-  DSlink[LagrangianRDS::q2].reset(new BlockVector()); // acceleration
-  DSlink[LagrangianRDS::p0].reset(new BlockVector());
-  DSlink[LagrangianRDS::p1].reset(new BlockVector());
-  DSlink[LagrangianRDS::p2].reset(new BlockVector());
-  DSlink[LagrangianRDS::z].reset(new BlockVector());
+  DSlink.resize(LagrangianR::DSlinkSize);
+  DSlink[LagrangianR::xfree].reset(new BlockVector());
+  DSlink[LagrangianR::q0].reset(new BlockVector()); // displacement
+  DSlink[LagrangianR::q1].reset(new BlockVector()); // velocity
+  DSlink[LagrangianR::q2].reset(new BlockVector()); // acceleration
+  DSlink[LagrangianR::p0].reset(new BlockVector());
+  DSlink[LagrangianR::p1].reset(new BlockVector());
+  DSlink[LagrangianR::p2].reset(new BlockVector());
+  DSlink[LagrangianR::z].reset(new BlockVector());
 }
 
 void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)
@@ -297,42 +302,42 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
   LagrangianDS& lds = static_cast<LagrangianDS&> (ds);
 
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-//  DSlink[LagrangianRDS::xfree]->insertPtr(workVDS[LagrangianDS::xfree]);
-  DSlink[LagrangianRDS::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
-  DSlink[LagrangianRDS::q0]->insertPtr(lds.q());
+//  DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::xfree]);
+  DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
+  DSlink[LagrangianR::q0]->insertPtr(lds.q());
 
-  DEBUG_PRINTF("DSlink[LagrangianRDS::q0]->insertPtr(lds.q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
-  DEBUG_EXPR(DSlink[LagrangianRDS::q0]->display());
+  DEBUG_PRINTF("DSlink[LagrangianR::q0]->insertPtr(lds.q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
+  DEBUG_EXPR(DSlink[LagrangianR::q0]->display());
   DEBUG_EXPR(lds.q()->display());
-  DEBUG_EXPR(std::cout << DSlink[LagrangianRDS::q0] << std::endl;);
+  DEBUG_EXPR(std::cout << DSlink[LagrangianR::q0] << std::endl;);
 
-  DSlink[LagrangianRDS::q1]->insertPtr(lds.velocity());
-  DSlink[LagrangianRDS::q2]->insertPtr(lds.acceleration());
-  DSlink[LagrangianRDS::z]->insertPtr(lds.z());
+  DSlink[LagrangianR::q1]->insertPtr(lds.velocity());
+  DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
+  DSlink[LagrangianR::z]->insertPtr(lds.z());
 
   // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
   for (unsigned int k = _lowerLevelForInput;
        k < _upperLevelForInput + 1; k++)
   {
     assert(lds.p(k));
-    assert(DSlink[LagrangianRDS::p0 + k]);
-    DSlink[LagrangianRDS::p0 + k]->insertPtr(lds.p(k));
+    assert(DSlink[LagrangianR::p0 + k]);
+    DSlink[LagrangianR::p0 + k]->insertPtr(lds.p(k));
   }
 }
 
 void Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)
 {
-  DSlink.resize(NewtonEulerRDS::DSlinkSize);
-  DSlink[NewtonEulerRDS::xfree].reset(new BlockVector());
-  DSlink[NewtonEulerRDS::q0].reset(new BlockVector()); // displacement
-  DSlink[NewtonEulerRDS::velocity].reset(new BlockVector()); // velocity
-//  DSlink[NewtonEulerRDS::deltaq].reset(new BlockVector());
-  DSlink[NewtonEulerRDS::dotq].reset(new BlockVector()); // qdot
-  //  data[NewtonEulerRDS::q2].reset(new BlockVector()); // acceleration
-  DSlink[NewtonEulerRDS::z].reset(new BlockVector()); // z vector
-  DSlink[NewtonEulerRDS::p0].reset(new BlockVector());
-  DSlink[NewtonEulerRDS::p1].reset(new BlockVector());
-  DSlink[NewtonEulerRDS::p2].reset(new BlockVector());
+  DSlink.resize(NewtonEulerR::DSlinkSize);
+  DSlink[NewtonEulerR::xfree].reset(new BlockVector());
+  DSlink[NewtonEulerR::q0].reset(new BlockVector()); // displacement
+  DSlink[NewtonEulerR::velocity].reset(new BlockVector()); // velocity
+//  DSlink[NewtonEulerR::deltaq].reset(new BlockVector());
+  DSlink[NewtonEulerR::dotq].reset(new BlockVector()); // qdot
+  //  data[NewtonEulerR::q2].reset(new BlockVector()); // acceleration
+  DSlink[NewtonEulerR::z].reset(new BlockVector()); // z vector
+  DSlink[NewtonEulerR::p0].reset(new BlockVector());
+  DSlink[NewtonEulerR::p1].reset(new BlockVector());
+  DSlink[NewtonEulerR::p2].reset(new BlockVector());
 }
 
 void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)
@@ -343,21 +348,21 @@ void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& wo
   // convert vDS systems into NewtonEulerDS and put them in vLDS
   NewtonEulerDS& lds = static_cast<NewtonEulerDS&>(ds);
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-//  DSlink[NewtonEulerRDS::xfree]->insertPtr(workVDS[NewtonEulerDS::xfree]);
-  DSlink[NewtonEulerRDS::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
-  DSlink[NewtonEulerRDS::q0]->insertPtr(lds.q());
-  DSlink[NewtonEulerRDS::velocity]->insertPtr(lds.velocity());
-  //  DSlink[NewtonEulerRDS::deltaq]->insertPtr(lds.deltaq());
-  DSlink[NewtonEulerRDS::dotq]->insertPtr(lds.dotq());
-  //    data[NewtonEulerRDS::q2]->insertPtr( lds.acceleration());
+//  DSlink[NewtonEulerR::xfree]->insertPtr(workVDS[NewtonEulerDS::xfree]);
+  DSlink[NewtonEulerR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
+  DSlink[NewtonEulerR::q0]->insertPtr(lds.q());
+  DSlink[NewtonEulerR::velocity]->insertPtr(lds.velocity());
+  //  DSlink[NewtonEulerR::deltaq]->insertPtr(lds.deltaq());
+  DSlink[NewtonEulerR::dotq]->insertPtr(lds.dotq());
+  //    data[NewtonEulerR::q2]->insertPtr( lds.acceleration());
   if (lds.p(0))
-      DSlink[NewtonEulerRDS::p0]->insertPtr(lds.p(0));
+      DSlink[NewtonEulerR::p0]->insertPtr(lds.p(0));
   if (lds.p(1))
-    DSlink[NewtonEulerRDS::p1]->insertPtr(lds.p(1));
+    DSlink[NewtonEulerR::p1]->insertPtr(lds.p(1));
   if (lds.p(2))
-    DSlink[NewtonEulerRDS::p2]->insertPtr(lds.p(2));
+    DSlink[NewtonEulerR::p2]->insertPtr(lds.p(2));
 
-  DSlink[NewtonEulerRDS::z]->insertPtr(lds.z());
+  DSlink[NewtonEulerR::z]->insertPtr(lds.z());
 }
 // --- GETTERS/SETTERS ---
 
@@ -660,7 +665,7 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
     if (CMat)
       originalMatrix = CMat;
     else if (relationSubType != LinearTIR)
-      originalMatrix = workM[FirstOrderRMat::C];
+      originalMatrix = workM[FirstOrderR::mat_C];
   }
   else if (relationType == Lagrangian)
   {
@@ -732,7 +737,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
     if (BMat)
       originalMatrix = BMat;
     else if (relationSubType != LinearTIR)
-      originalMatrix = workM[FirstOrderRMat::B];
+      originalMatrix = workM[FirstOrderR::mat_B];
   }
   else if (relationType == Lagrangian || relationType == NewtonEuler)
   {
@@ -776,7 +781,7 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
     if (DMat)
       D = DMat;
     else if (relationSubType != LinearTIR)
-      D = workM[FirstOrderRMat::D];
+      D = workM[FirstOrderR::mat_D];
   }
   else if (relationType == Lagrangian)
   {
@@ -813,12 +818,13 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
 void Interaction::computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const
 {
   RELATION::TYPES relationType = relation()->getType();
-  if ((relationType == FirstOrder) && (workM[FirstOrderRMat::Khat]))
+
+  if ((relationType == FirstOrder) && (workM[FirstOrderR::mat_Khat]))
   {
     SP::SiconosMatrix K = std11::static_pointer_cast<FirstOrderR>(_relation)->K();
-    if (!K) K = workM[FirstOrderRMat::K];
-    prod(*K, m, *workM[FirstOrderRMat::Khat], true);
-    *workM[FirstOrderRMat::Khat] *= h;
+    if (!K) K = workM[FirstOrderR::mat_K];
+    prod(*K, m, *workM[FirstOrderR::mat_Khat], true);
+    *workM[FirstOrderR::mat_Khat] *= h;
   }
 }
 
@@ -835,8 +841,8 @@ void Interaction::computeResiduY(double time)
 void Interaction::computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV)
 {
   //Residu_r = r_alpha_k+1 - g_alpha;
-  *workV[FirstOrderRVec::residuR] = *DSlink[FirstOrderRDS::r];
-  *workV[FirstOrderRVec::residuR] -= *workV[FirstOrderRVec::g_alpha];
+  *workV[FirstOrderR::vec_residuR] = *DSlink[FirstOrderR::r];
+  *workV[FirstOrderR::vec_residuR] -= *workV[FirstOrderR::g_alpha];
 
 //RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");
 }

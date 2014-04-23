@@ -134,16 +134,16 @@ void  LagrangianScleronomousR::computedotjacqhXqdot(double time, Interaction& in
 {
   DEBUG_PRINT("LagrangianScleronomousR::computeNonLinearH2dot starts");
   // Compute the H Jacobian dot
-  SiconosVector q = *DSlink[LagrangianRDS::q0];
-  SiconosVector z = *DSlink[LagrangianRDS::z];
-  SiconosVector qDot = *DSlink[LagrangianRDS::q1];
+  SiconosVector q = *DSlink[LagrangianR::q0];
+  SiconosVector z = *DSlink[LagrangianR::z];
+  SiconosVector qDot = *DSlink[LagrangianR::q1];
   LagrangianScleronomousR::computeDotJachq(q, z, qDot);
   _dotjacqhXqdot.reset(new SiconosVector(_dotjachq->size(0)));
   DEBUG_EXPR(qDot.display(););
   DEBUG_EXPR(_dotjachq->display(););
   prod(*_dotjachq, qDot, *_dotjacqhXqdot);
   DEBUG_PRINT("LagrangianScleronomousR::computeNonLinearH2dot ends");
-  *DSlink[LagrangianRDS::z] = z;
+  *DSlink[LagrangianR::z] = z;
 }
 
 void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber)
@@ -151,8 +151,8 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, Vec
 
   DEBUG_PRINTF("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
   SiconosVector& y = *inter.y(derivativeNumber);
-  SiconosVector q = *DSlink[LagrangianRDS::q0];
-  SiconosVector z = *DSlink[LagrangianRDS::z];
+  SiconosVector q = *DSlink[LagrangianR::q0];
+  SiconosVector z = *DSlink[LagrangianR::z];
   if (derivativeNumber == 0)
   { 
     computeh(q, z, y);
@@ -162,18 +162,18 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, Vec
    computeJachq(q, z);
 
     if (derivativeNumber == 1)
-      prod(*_jachq, *DSlink[LagrangianRDS::q1], y);
+      prod(*_jachq, *DSlink[LagrangianR::q1], y);
     else if (derivativeNumber == 2)
     {
-      SiconosVector qDot = *DSlink[LagrangianRDS::q1];
+      SiconosVector qDot = *DSlink[LagrangianR::q1];
       computeDotJachq(q, z, qDot);
-      prod(*_jachq, *DSlink[LagrangianRDS::q2], y);
-      prod(*_dotjachq, *DSlink[LagrangianRDS::q1], y, false);
+      prod(*_jachq, *DSlink[LagrangianR::q2], y);
+      prod(*_dotjachq, *DSlink[LagrangianR::q1], y, false);
     }
     else
       RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber), index out of range");
   }
-  *DSlink[LagrangianRDS::z] = z;
+  *DSlink[LagrangianR::z] = z;
 }
 
 void LagrangianScleronomousR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
@@ -182,28 +182,28 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, Vect
 
   DEBUG_PRINTF("level = %i\n", level);
 
-  SiconosVector q = *DSlink[LagrangianRDS::q0];
-  SiconosVector z = *DSlink[LagrangianRDS::z];
+  SiconosVector q = *DSlink[LagrangianR::q0];
+  SiconosVector z = *DSlink[LagrangianR::z];
   computeJachq(q, z);
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
-  prod(lambda, *_jachq, *DSlink[LagrangianRDS::p0 + level], false);
-  DEBUG_EXPR(DSlink[LagrangianRDS::p0 + level]->display(););
-  *DSlink[LagrangianRDS::z] = z;
+  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
+  *DSlink[LagrangianR::z] = z;
 }
 
 void LagrangianScleronomousR::computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-    SiconosVector q = *DSlink[LagrangianRDS::q0];
-    SiconosVector z = *DSlink[LagrangianRDS::z];
-    SiconosVector qDot = *DSlink[LagrangianRDS::q1];
+    SiconosVector q = *DSlink[LagrangianR::q0];
+    SiconosVector z = *DSlink[LagrangianR::z];
+    SiconosVector qDot = *DSlink[LagrangianR::q1];
     computeJachq(q, z);
     // computeJachqDot(time, inter);
     computeDotJachq(q, z, qDot);
     // computeJachlambda(time, inter);
     // computehDot(time,inter);
-    *DSlink[LagrangianRDS::z] = z;
+    *DSlink[LagrangianR::z] = z;
 }
 
 const std::string LagrangianScleronomousR::getJachqName() const

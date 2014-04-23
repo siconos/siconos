@@ -1009,16 +1009,16 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
 
   if (relationType == FirstOrder)
   {
-    Xfree = DSlink[FirstOrderRDS::xfree];
-    deltax = DSlink[FirstOrderRDS::deltax];
+    Xfree = DSlink[FirstOrderR::xfree];
+    deltax = DSlink[FirstOrderR::deltax];
   }
   else if (relationType == NewtonEuler)
   {
-    Xfree = DSlink[NewtonEulerRDS::xfree];
+    Xfree = DSlink[NewtonEulerR::xfree];
   }
   else if (relationType == Lagrangian)
   {
-    Xfree = DSlink[LagrangianRDS::xfree];
+    Xfree = DSlink[LagrangianR::xfree];
   }
 
   assert(Xfree);
