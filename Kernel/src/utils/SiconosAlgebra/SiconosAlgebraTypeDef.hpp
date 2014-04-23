@@ -94,9 +94,12 @@ typedef std::vector<SP::BlockVector> VectorOfBlockVectors;
     various jacobian in LagrangianDS. */
 typedef std::vector<SP::SiconosMatrix> VectorOfMatrices;
 
+
 /** Some containers for matrices - Used for example to handle the
     various jacobian in LagrangianDS. */
 typedef std::vector<SP::SimpleMatrix> VectorOfSMatrices;
+
+//typedef std::vector<SP::SimpleMatrix> VectorOfSimpleMatrices;
 
 /** Iterator through vector of matrices */
 typedef VectorOfMatrices::iterator VectorOfMatricesIterator;

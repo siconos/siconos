@@ -28,7 +28,7 @@ Interaction, Relay
 from math import ceil
 
 
-import MyR
+import MyR, MyNonLinearR
 
 
 # variables
@@ -51,6 +51,7 @@ D = zeros((2,2))
 # dynamical systems
 process = FirstOrderLinearDS(x0, A)
 myProcessRelation = MyR.MyR(C,B)
+myProcessRelation = MyNonLinearR.MyNonLinearR(C,B)
 myProcessRelation.setDPtr = D
 
 myNslaw = RelayNSL(2)

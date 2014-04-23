@@ -36,6 +36,7 @@
   PY_REGISTER(FirstOrderR);                                             \
   PY_REGISTER(FirstOrderLinearR);                                       \
   PY_REGISTER(FirstOrderLinearTIR);                                     \
+  PY_REGISTER(FirstOrderNonLinearR);                                    \
   PY_REGISTER(FirstOrderType1R);                                        \
   PY_REGISTER(FirstOrderType2R);                                        \
   PY_REGISTER(Interaction);                                             \

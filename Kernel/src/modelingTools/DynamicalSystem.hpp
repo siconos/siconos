@@ -228,7 +228,7 @@ protected:
 
   /** A container of matrices to save temporary values (zeroMatrix, idMatrix, inverse of Mass or any tmp work matrix ...)
    * No get-set functions at the time. Only used as a protected member.*/
-  VectorOfSimpleMatrices _workMatrix;
+  VectorOfSMatrices _workMatrix;
 
   // ===== CONSTRUCTORS =====
 
