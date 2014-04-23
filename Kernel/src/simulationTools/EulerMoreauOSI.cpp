@@ -357,7 +357,7 @@ void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGra
       ivd = indexSet.descriptor(inter);
       FirstOrderR& rel = static_cast<FirstOrderR&>(*inter->relation());
       K = rel.K();
-      if (!K) K = (*indexSet.properties(ivd).workMatrices)[FirstOrderRMat::K];
+      if (!K) K = (*indexSet.properties(ivd).workMatrices)[FirstOrderR::mat_K];
       if (K)
       {
         scal(-h * _gamma, *K, W, false);
