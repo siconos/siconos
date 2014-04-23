@@ -50,7 +50,7 @@ D = zeros((2,2))
 
 # dynamical systems
 process = FirstOrderLinearDS(x0, A)
-myProcessRelation = MyR.MyR(C,B)
+#myProcessRelation = MyR.MyR(C,B)
 myProcessRelation = MyNonLinearR.MyNonLinearR(C,B)
 myProcessRelation.setDPtr = D
 
