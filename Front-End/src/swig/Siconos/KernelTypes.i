@@ -630,7 +630,7 @@ if (!dcast) {
 %typemap(out) SP::Relation
 {
    int dcast = 0;
-   %formacro(%_factory_dispatch_SP, FirstOrderLinearTIR, FirstOrderLinearR, FirstOrderType1R, FirstOrderType2R, FirstOrderR)
+   %formacro(%_factory_dispatch_SP, FirstOrderLinearTIR, FirstOrderLinearR, FirstOrderType1R, FirstOrderType2R, FirstOrderNonLinearR, FirstOrderR)
    %formacro(%_factory_dispatch_SP, LagrangianLinearTIR, LagrangianCompliantR, LagrangianRheonomousR, LagrangianScleronomousR, LagrangianR)
    %formacro(%_factory_dispatch_SP, NewtonEulerFrom3DLocalFrameR, NewtonEulerFrom1DLocalFrameR, NewtonEulerR)
    if (!dcast) {
