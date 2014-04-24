@@ -74,6 +74,13 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
   fillBasePyarray(pyarray, savedSharedPointer);                             \
   RESULT = pyarray
 
+#define PYARRAY_FROM_SHARED_SICONOS_DATA_REF(TYPE,NDIM,DIMS,NAME,RESULT)\
+  PyObject* pyarray = FPyArray_SimpleNewFromData(NDIM,              \
+                                                 DIMS,              \
+                                                 TYPE,              \
+                                                 NAME.getArray()); \
+  RESULT = pyarray
+
 
 
 %typemap(in) PyArrayObject* {
@@ -87,7 +94,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
 (TYPE)
 {
-  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (std11::shared_ptr<SiconosVector>)
+  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (TYPE)
   TYPE * ptr;
 
   int res = SWIG_ConvertPtr($input, (void **) (&ptr), SWIGTYPE, 0);
@@ -250,6 +257,166 @@ struct IsDense : public Question<bool>
 %enddef
 //////////////////////////////////////////////////////////////////////////////
 
+// director input : TYPE -> numpy
+%typemap(out, fragment="NumPy_Fragments") SiconosVector & ()
+{
+  // %typemap(out, fragment="NumPy_Fragments") SiconosVector& ()
+    npy_intp this_vector_dim[1];
+    this_vector_dim[0]=$1->size();
+
+    PYARRAY_FROM_SHARED_SICONOS_DATA_REF(NPY_DOUBLE,1,this_vector_dim,(*$1),$result);
+}
+// director input : TYPE -> numpy
+%typemap(directorin, fragment="NumPy_Fragments") SiconosVector & ()
+{
+  //%typemap(directorin, fragment="NumPy_Fragments") SiconosVector & ()
+  npy_intp this_vector_dim[1];
+  this_vector_dim[0]=$1.size();
+
+  PYARRAY_FROM_SHARED_SICONOS_DATA_REF(NPY_DOUBLE,1,this_vector_dim,$1_name,$input);
+}
+
+//// director input : TYPE -> numpy
+%typemap(directorin, fragment="NumPy_Fragments") SimpleMatrix & ()
+{
+  // %typemap(directorin, fragment="NumPy_Fragments") SimpleMatrix& ()
+    if (($1_name).getNum() == 1)
+    {
+      npy_intp this_matrix_dim[2];
+      this_matrix_dim[0]=$1.size(0);
+      this_matrix_dim[1]=$1.size(1);
+
+      PYARRAY_FROM_SHARED_SICONOS_DATA_REF(NPY_DOUBLE,2,this_matrix_dim,$1_name,$input);
+    }
+    else
+    {
+      // not a dense matrix : no conversion
+      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), $descriptor(SimpleMatrix *),  0 );  
+    }
+}
+//
+//// director input : TYPE -> numpy
+%typemap(directorin, fragment="NumPy_Fragments") SiconosMatrix & ()
+{
+  // %typemap(in, fragment="NumPy_Fragments") SiconosMatrix& ()
+    if (($1_name).getNum() == 1)
+    {
+      npy_intp this_matrix_dim[2];
+      this_matrix_dim[0]=$1.size(0);
+      this_matrix_dim[1]=$1.size(1);
+
+      PYARRAY_FROM_SHARED_SICONOS_DATA_REF(NPY_DOUBLE,2,this_matrix_dim,$1_name,$input);
+    }
+    else
+    {
+      // not a dense matrix : no conversion
+      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), $descriptor(SiconosMatrix *),  0 );  
+    }
+}
+%define TYPEMAP_VECTOR2(TYPE)
+
+// numpy or TYPE on input -> TYPE 
+%typemap(in,fragment="NumPy_Fragments") TYPE (PyArrayObject* array=NULL, int is_new_object)
+{
+  // %typemap(in,fragment="NumPy_Fragments")
+  // %TYPE (PyArrayObject* array=NULL, int
+  // %is_new_object)
+  void *argp1=0;
+  int res1=0;
+  int newmem = 0;
+  TYPE tempshared1 ;
+  TYPE *smartarg1 = 0 ;
+ 
+  // try a conversion from TYPE
+  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, $descriptor(TYPE *), 0 |  0 , &newmem);
+  if (SWIG_IsOK(res1)) 
+  {
+    if (newmem & SWIG_CAST_NEW_MEMORY) 
+    {
+      // taken from generated code
+      tempshared1 = *reinterpret_cast< TYPE * >(argp1);
+      delete reinterpret_cast< TYPE * >(argp1);
+      $1 = tempshared1;
+    } 
+    else {
+      smartarg1 = reinterpret_cast< TYPE * >(argp1);
+      $1 = *smartarg1;
+    }
+  }
+  else
+  {
+    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+
+    if (!array)
+    {
+      void *argp;
+      SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
+    }
+    else
+    {
+      if (!require_dimensions(array,1) ||
+          !require_native(array) || !require_fortran(array)) SWIG_fail;
+      
+      SP::SiconosVector tmp;
+      tmp.reset(new SiconosVector(array_size(array,0)));
+      // copy : with SiconosVector based on resizable std::vector there is
+      // no other way
+      memcpy(&*tmp->getArray(),array_data(array),array_size(array,`0)*sizeof(double));
+      $1 = tmp;
+    }
+  }
+}
+
+%enddef
+
+//%typemap(directorout, fragment="NumPy_Fragments") (SiconosMatrix&) ()
+//{
+//  // %typemap(directorout, fragment="NumPy_Fragments") SiconosMatrix& ()
+//  void * swig_argp;
+//  int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_SiconosMatrix,  0  | 0);
+//
+//  if (!SWIG_IsOK(swig_res))
+//  {
+//    // try a conversion from numpy
+//    PyArrayObject* array = NULL;
+//    int is_new_object;
+//    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+//    if (!require_dimensions(array,2) ||
+//        !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
+//    
+//
+//    SP::SimpleMatrix tmp;
+//    tmp.reset(new SimpleMatrix(array_size(array,0), array_size(array,1)));
+//    // copy this is due to SimpleMatrix based on resizable std::vector
+//    memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*array_size(array,1)*sizeof(double));
+//    return *tmp;
+//  }
+//
+//  if (!swig_argp)
+//  {  
+//    return (SiconosMatrix) c_result;
+//  }
+//  else
+//  {
+//    c_result = *(reinterpret_cast< SP::SiconosMatrix * >(swig_argp));
+//    if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
+//    return (SP::SiconosMatrix) c_result;
+//  }
+//}
+//
+
+//%typemap(directorin) VectorOfSMatrices& ()
+//{
+//  // %typemap(directorin) (VectorOfSMatrices&) ()
+//  // swig issue shared pointer check in wrappers even if arg is a ref
+//  SP::VectorOfSMatrices myptemp(createSPtrVectorOfSMatrices($1));
+//  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
+//                              SWIGTYPE_p_std__vectorT_std11__shared_ptrT_SimpleMatrix_t_std__allocatorT_std11__shared_ptrT_SimpleMatrix_t_t_t, 0);
+//}
+//
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 %define TYPEMAP_MATRIX(TYPE,SWIGTYPE)
 // numpy or TYPE on input -> TYPE
@@ -303,7 +470,7 @@ struct IsDense : public Question<bool>
 // director input : TYPE -> numpy
 %typemap(directorin, fragment="NumPy_Fragments") TYPE ()
 {
-  // %typemap(directorin, fragment="NumPy_Fragments") std11::shared_ptr<SiconosMatrix> ()
+  // %typemap(directorin, fragment="NumPy_Fragments") TYPE ()
   if ($1_name)
   {
     if (($1_name)->getNum() == 1)
@@ -414,7 +581,7 @@ struct IsDense : public Question<bool>
   }
 }
 
-// director output : PyObject -> SP::SiconosVector 
+// director output : PyObject -> SP::SiconosMatrix
 %typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SiconosMatrix> ()
 {
   // %typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SiconosMatrix> ()
@@ -447,6 +614,42 @@ struct IsDense : public Question<bool>
     c_result = *(reinterpret_cast< SP::SiconosMatrix * >(swig_argp));
     if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
     return (SP::SiconosMatrix) c_result;
+  }
+}
+
+// director output : PyObject -> SP::SimpleMatrix
+%typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SimpleMatrix> ()
+{
+  // %typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SimpleMatrix> ()
+  void * swig_argp;
+  int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_std11__shared_ptrT_SimpleMatrix_t,  0  | 0);
+
+  if (!SWIG_IsOK(swig_res))
+  {
+    // try a conversion from numpy
+    PyArrayObject* array = NULL;
+    int is_new_object;
+    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+    if (!require_dimensions(array,2) ||
+        !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
+    
+
+    SP::SimpleMatrix tmp;
+    tmp.reset(new SimpleMatrix(array_size(array,0), array_size(array,1)));
+    // copy this is due to SimpleMatrix based on resizable std::vector
+    memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*array_size(array,1)*sizeof(double));
+    return tmp;
+  }
+
+  if (!swig_argp)
+  {  
+    return (SP::SimpleMatrix) c_result;
+  }
+  else
+  {
+    c_result = *(reinterpret_cast< SP::SimpleMatrix * >(swig_argp));
+    if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SimpleMatrix * >(swig_argp);
+    return (SP::SimpleMatrix) c_result;
   }
 }
 

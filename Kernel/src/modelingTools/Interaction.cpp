@@ -104,6 +104,9 @@ void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink,
         RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for NewtonEulerR is not implemented");
     }
 
+    // prepare the gradients
+
+    _relation->computeJach(t0, *this, DSlink, workVInter, workMInter);
     if (_steps > 1) // Multi--step methods
     {
       // Comoyte the old Values of Output with stored values in Memory
@@ -170,11 +173,12 @@ void Interaction::initializeMemory(bool computeResiduY)
 
   // get the dimension of the non smooth law, ie the size of an Interaction blocks (one per relation)
   unsigned int nslawSize = nslaw()->size();
-  if (computeResiduY)
-  {
+  // XXX hm hm -- xhub
+//  if (computeResiduY)
+//  {
     _h_alpha.reset(new SiconosVector(nslawSize));
     _residuY.reset(new SiconosVector(nslawSize));
-  }
+//  }
   _yForNSsolver.reset(new SiconosVector(nslawSize));
 
   for (unsigned int i = _lowerLevelForOutput ;

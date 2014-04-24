@@ -181,28 +181,6 @@ public:
     return _K;
   }
 
-  /** default function to compute y, using the data from the Interaction and DS
-  *  \param time current time (not used)
-  *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
-  *  \param level not used
-  */
-  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0) = 0;
-
-  /** default function to compute r, using the data from the Interaction and DS
-  *  \param time current time (not used)
-  *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
-  *  \param level not used
-  */
-  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0) = 0 ;
-
-
-
 
 };
 TYPEDEF_SPTR(FirstOrderR)

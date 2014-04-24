@@ -50,14 +50,13 @@ D = zeros((2,2))
 
 # dynamical systems
 process = FirstOrderLinearDS(x0, A)
-#myProcessRelation = MyR.MyR(C,B)
-myProcessRelation = MyNonLinearR.MyNonLinearR(C,B)
-myProcessRelation.setDPtr = D
+myProcessRelation = MyR.MyR(C,B)
+#myProcessRelation = MyNonLinearR.MyNonLinearR(C,B)
+#myProcessRelation.setDPtr(D)
 
 myNslaw = RelayNSL(2)
 myNslaw.display()
 
-nameInter = 'processInteraction'
 myProcessInteraction = Interaction(ninter, myNslaw,
         myProcessRelation)
 myNSDS = NonSmoothDynamicalSystem()
@@ -80,6 +79,8 @@ s.insertIntegrator(myIntegrator)
 
 osnspb = Relay()
 s.insertNonSmoothProblem(osnspb)
+s.setComputeResiduY(True)
+s.setComputeResiduR(True)
 
 filippov.initialize(s);
 
@@ -100,7 +101,7 @@ while(s.hasNextEvent()):
      k += 1
      s.nextStep()
      #print s.nextTime()
-     
+
 # save to disk
 savetxt('output.txt', dataPlot)
 # plot interesting stuff

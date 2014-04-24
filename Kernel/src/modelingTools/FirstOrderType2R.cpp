@@ -22,8 +22,8 @@
 
 #include "BlockVector.hpp"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES 1
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES 1
 
 #include <debug.h>
 
@@ -137,6 +137,8 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, VectorOfBl
     prod(*workM[FirstOrderR::mat_C], deltax, y, false);
 
 
+  DEBUG_PRINT("FirstOrderType2R::computeOutput : y before osnsM\n");
+  DEBUG_EXPR(y.display());
   prod(osnsM, *inter.lambda(level), y, false);
   DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
   DEBUG_EXPR(y.display());
@@ -145,6 +147,8 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, VectorOfBl
   x = *DSlink[FirstOrderR::x];
 
   computeh(time, x, *inter.lambda(level), *inter.Halpha());
+  DEBUG_PRINT("FirstOrderType2R::computeOutput : new Halpha \n");
+  DEBUG_EXPR(inter.Halpha()->display());
 
 }
 
