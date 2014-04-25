@@ -7,14 +7,14 @@ except (ImportError):
 
 import numpy
 
-class MyR(SK.FirstOrderNonLinearR):
+class ZhuravlevTwistingR(SK.FirstOrderNonLinearR):
     ## \brief Constructor
     #
     # \param  is a  (optional)
     def __init__(self, C, B):
         SK.FirstOrderNonLinearR.__init__(self)
-        self._kappa = 0.5
-	self._g = 9.81
+        self._kappa = .5
+	self._mu1 = 2
         self.setCPtr(C)
         return
 
@@ -32,7 +32,7 @@ class MyR(SK.FirstOrderNonLinearR):
         #print(l)
         #print(R)
         R[0] = -self._kappa*l[0]*l[1]*x[1]
-	R[1] = self._g*l[0]/(1-self._kappa*l[0]*l[1])
+	R[1] = (self._mu1*l[0]+l[1])/(1-self._kappa*l[0]*l[1])
         #print(R)
         #print('computeg done')
         pass
@@ -50,8 +50,8 @@ class MyR(SK.FirstOrderNonLinearR):
         #print(B)
         B[0, 0] = -self._kappa*l[1]*x[1]
 	B[0, 1] = -self._kappa*l[0]*x[1]
-	B[1, 0] = self._g/(1-self._kappa*l[0]*l[1])**2
-	B[1, 1] = (self._g*self._kappa*l[0])/(1-self._kappa*l[0]*l[1])**2
+	B[1, 0] = (self._mu1+self._kappa*l[1]**2)/(1-self._kappa*l[0]*l[1])**2
+	B[1, 1] = (1+self._kappa*l[0]**2)/(1-self._kappa*l[0]*l[1])**2
         pass
 
     def computeJacgx(self,time, x, l, K):
@@ -68,7 +68,5 @@ class MyR(SK.FirstOrderNonLinearR):
         #print(D)
         D[:]=numpy.zeros(2)
         pass
-
-
 
 

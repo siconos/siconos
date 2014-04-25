@@ -20,7 +20,6 @@
 #
 
 
-from matplotlib.pyplot import subplot, title, plot, grid, show
 import matplotlib.pyplot as plt
 from numpy import array, eye, empty, zeros, savetxt
 import numpy as np
@@ -30,7 +29,7 @@ Interaction, Relay
 from math import ceil
 
 
-import MyR
+from ZhuravlevTwistingR import ZhuravlevTwistingR
 
 
 # variables
@@ -54,7 +53,7 @@ D = zeros((2,2))
 
 # dynamical systems
 process = FirstOrderLinearDS(x0, A)
-myProcessRelation = MyR.MyR(C,B)
+myProcessRelation = ZhuravlevTwistingR(C,B)
 
 #myProcessRelation.setDPtr(D)
 
@@ -97,7 +96,7 @@ dataPlot[0, 4] = myProcessInteraction.lambda_(0)[1]
 # time loop
 k = 1
 while(s.hasNextEvent()):
-     s.newtonSolve(1e-10, 40)
+     s.newtonSolve(1e-14, 30)
      dataPlot[k, 0] = s.nextTime()
      dataPlot[k, 1] = process.x()[0]
      dataPlot[k, 2] = process.x()[1]
@@ -108,47 +107,47 @@ while(s.hasNextEvent()):
      #print s.nextTime()
 
 # save to disk
-savetxt('output.txt', dataPlot)
+np.savetxt('output.txt', dataPlot)
 # plot interesting stuff
-subplot(411)
-title('s')
-plot(dataPlot[:,0], dataPlot[:,1])
-grid()
-subplot(412)
-title('v')
-plot(dataPlot[:,0], dataPlot[:,2])
-grid()
-subplot(413)
-plot(dataPlot[:,0], dataPlot[:,3])
-title('lambda1')
-grid()
-subplot(414)
-plot(dataPlot[:,0], dataPlot[:,4])
-title('lambda2')
-grid()
-show()
+plt.subplot(411)
+plt.title('s')
+plt.plot(dataPlot[:,0], dataPlot[:,1])
+plt.grid()
+plt.subplot(412)
+plt.title('v')
+plt.plot(dataPlot[:,0], dataPlot[:,2])
+plt.grid()
+plt.subplot(413)
+plt.plot(dataPlot[:,0], dataPlot[:,3])
+plt.title('lambda1')
+plt.grid()
+plt.subplot(414)
+plt.plot(dataPlot[:,0], dataPlot[:,4])
+plt.title('lambda2')
+plt.grid()
+plt.show()
 
-plot(dataPlot[:,1], dataPlot[:,2])
+plt.plot(dataPlot[:,1], dataPlot[:,2])
 plt.xlabel('s')
 plt.xlabel('v')
-grid()
-show()
+plt.grid()
+plt.show()
 
-plot(dataPlot[:,3], dataPlot[:,4])
+plt.plot(dataPlot[:,3], dataPlot[:,4])
 plt.xlabel('lambda1')
 plt.xlabel('lambda2')
-grid()
-show()
+plt.grid()
+plt.show()
 
 pos = np.abs(dataPlot[:,1])
 velocity = (1-myProcessRelation._kappa*np.sign(dataPlot[:,1]*dataPlot[:,2]))*dataPlot[:, 2]*np.sign(dataPlot[:,1])
 
-subplot(211)
-title('position')
-plot(dataPlot[:,0], pos)
-grid()
-subplot(212)
-title('velocity')
-plot(dataPlot[:,0], velocity)
-grid()
-show()
+plt.subplot(211)
+plt.title('position')
+plt.plot(dataPlot[:,0], pos)
+plt.grid()
+plt.subplot(212)
+plt.title('velocity')
+plt.plot(dataPlot[:,0], velocity)
+plt.grid()
+plt.show()

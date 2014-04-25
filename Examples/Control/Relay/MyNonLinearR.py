@@ -51,6 +51,7 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
     def computeJacglambda(self,time, x, l, B):
         print('call computeJacglambda')
         print(B)
+        B[:] = self.B()[:]
 #        numpy.copyto(SK.getMatrix(B), self.B())
         #print 'self.jacglambda() = ', self.jacglambda()
         #self.setJachglambdaPtr(self._B) not callable in that form ?
@@ -59,6 +60,7 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
     def computeJacgx(self,time, x, l, K):
         print('call computeJacgx')
         print(K)
+        K[:] = numpy.zeros(2)[:]
 #        numpy.copyto(SK.getMatrix(B), self.B())
         #print 'self.jacglambda() = ', self.jacglambda()
         #self.setJachglambdaPtr(self._B) not callable in that form ?
@@ -67,6 +69,7 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
     def computeJachlambda(self, time, x, l, D):
         print('call computeJachlambda')
         print(D)
+        D[:] = numpy.zeros(2)[:]
 #        numpy.copyto(SK.getMatrix(B), self.B())
         #print 'self.jacglambda() = ', self.jacglambda()
         #self.setJachglambdaPtr(self._B) not callable in that form ?

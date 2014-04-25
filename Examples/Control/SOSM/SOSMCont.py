@@ -21,46 +21,56 @@
 
 
 from matplotlib.pyplot import subplot, title, plot, grid, show
-import matplotlib.pyplot as plt
 from numpy import array, eye, empty, zeros, savetxt
-import numpy as np
-from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL, \
+from Siconos.Kernel import FirstOrderNonLinearDS, FirstOrderLinearTIR, RelayNSL, \
 NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
 Interaction, Relay
 from math import ceil
 
-
-import MyR
-
-
 # variables
 t0 = 0.0   # start time
-T = 100.0     # end time
+T = 10      # end time
 h = 1.0e-3   # time step
 numInter = 2
 ninter = 2
 theta = 0.5
-alpha = .01
 N = ceil((T-t0)/h)
+mu1 = 2
+mu2 = 3
 
 # matrices
 A = zeros((2,2))
-A[0, 1] = 1
+A[0,1] = 1
+#x0 = array([10.,0.])
+x0 = ([10.,0.])
+#x0 = 10
 
-x0 = array([1.,10.])
-B = 500*array([[alpha,1-alpha],[-(1-alpha),alpha]])
+#B = 500*array([[0,0],[mu2,mu1]])
+B = ([0,0],[mu2,mu1])
+#B = mu2
+
 C = eye(2)
+#C = 1
 D = zeros((2,2))
+#D = 0
 
 # dynamical systems
-process = FirstOrderLinearDS(x0, A)
-myProcessRelation = MyR.MyR(C,B)
+process = FirstOrderNonLinearDS(x0)
+process.setComputeFFunction('PluginF', 'computef1')
+process.setComputeJacobianfxFunction('PluginF', 'computeJacf1')
 
-#myProcessRelation.setDPtr(D)
+
+#process = FirstOrderNonLinearDS(x0,'PluginF:computef1','PluginF:computeJacf1'  )
+
+process.display()
+
+myProcessRelation = FirstOrderLinearTIR(C,B)
+myProcessRelation.setDPtr = D
 
 myNslaw = RelayNSL(2)
 myNslaw.display()
 
+nameInter = 'processInteraction'
 myProcessInteraction = Interaction(ninter, myNslaw,
         myProcessRelation)
 myNSDS = NonSmoothDynamicalSystem()
@@ -77,78 +87,52 @@ s = TimeStepping(td)
 myIntegrator = EulerMoreauOSI(process, theta)
 s.insertIntegrator(myIntegrator)
 
-
+print 'initialization'
 #TODO python <- SICONOS_RELAY_LEMKE
 # access dparam
 
 osnspb = Relay()
 s.insertNonSmoothProblem(osnspb)
-s.setComputeResiduY(True)
-s.setComputeResiduR(True)
 
 filippov.initialize(s);
 
+print 'end of initialization'
 # matrix to save data
-dataPlot = empty((N+1,5))
+dataPlot = empty((N+1,4))
 dataPlot[0, 0] = t0
 dataPlot[0, 1:3] = process.x()
 dataPlot[0, 3] = myProcessInteraction.lambda_(0)[0]
-dataPlot[0, 4] = myProcessInteraction.lambda_(0)[1]
+
 # time loop
 k = 1
 while(s.hasNextEvent()):
-     s.newtonSolve(1e-10, 40)
+     #print 'iteration k'			
+     s.computeOneStep()
      dataPlot[k, 0] = s.nextTime()
      dataPlot[k, 1] = process.x()[0]
      dataPlot[k, 2] = process.x()[1]
      dataPlot[k, 3] = myProcessInteraction.lambda_(0)[0]
-     dataPlot[k, 4] = myProcessInteraction.lambda_(0)[1]
      k += 1
      s.nextStep()
-     #print s.nextTime()
-
+     
 # save to disk
 savetxt('output.txt', dataPlot)
 # plot interesting stuff
-subplot(411)
-title('s')
+subplot(311)
+title('position')
 plot(dataPlot[:,0], dataPlot[:,1])
 grid()
-subplot(412)
-title('v')
+subplot(312)
+title('velocity')
 plot(dataPlot[:,0], dataPlot[:,2])
 grid()
-subplot(413)
+subplot(313)
 plot(dataPlot[:,0], dataPlot[:,3])
-title('lambda1')
-grid()
-subplot(414)
-plot(dataPlot[:,0], dataPlot[:,4])
-title('lambda2')
+title('lambda')
 grid()
 show()
 
 plot(dataPlot[:,1], dataPlot[:,2])
-plt.xlabel('s')
-plt.xlabel('v')
 grid()
 show()
 
-plot(dataPlot[:,3], dataPlot[:,4])
-plt.xlabel('lambda1')
-plt.xlabel('lambda2')
-grid()
-show()
-
-pos = np.abs(dataPlot[:,1])
-velocity = (1-myProcessRelation._kappa*np.sign(dataPlot[:,1]*dataPlot[:,2]))*dataPlot[:, 2]*np.sign(dataPlot[:,1])
-
-subplot(211)
-title('position')
-plot(dataPlot[:,0], pos)
-grid()
-subplot(212)
-title('velocity')
-plot(dataPlot[:,0], velocity)
-grid()
-show()
