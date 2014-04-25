@@ -35,7 +35,7 @@ import MyR
 
 # variables
 t0 = 0.0   # start time
-T = 100.0     # end time
+T = 10.0     # end time
 h = 1.0e-3   # time step
 numInter = 2
 ninter = 2
@@ -97,7 +97,7 @@ dataPlot[0, 4] = myProcessInteraction.lambda_(0)[1]
 # time loop
 k = 1
 while(s.hasNextEvent()):
-     s.newtonSolve(1e-10, 40)
+     s.newtonSolve(1e-12, 40)
      dataPlot[k, 0] = s.nextTime()
      dataPlot[k, 1] = process.x()[0]
      dataPlot[k, 2] = process.x()[1]

@@ -89,6 +89,7 @@ filippov.initialize(s);
 
 # matrix to save data
 dataPlot = empty((N+1,5))
+control = empty((N+1,))
 dataPlot[0, 0] = t0
 dataPlot[0, 1:3] = process.x()
 dataPlot[0, 3] = myProcessInteraction.lambda_(0)[0]
@@ -102,6 +103,7 @@ while(s.hasNextEvent()):
      dataPlot[k, 2] = process.x()[1]
      dataPlot[k, 3] = myProcessInteraction.lambda_(0)[0]
      dataPlot[k, 4] = myProcessInteraction.lambda_(0)[1]
+     control[k] = process.r()[1]
      k += 1
      s.nextStep()
      #print s.nextTime()
@@ -142,12 +144,33 @@ plt.show()
 pos = np.abs(dataPlot[:,1])
 velocity = (1-myProcessRelation._kappa*np.sign(dataPlot[:,1]*dataPlot[:,2]))*dataPlot[:, 2]*np.sign(dataPlot[:,1])
 
-plt.subplot(211)
+plt.subplot(311)
 plt.title('position')
 plt.plot(dataPlot[:,0], pos)
 plt.grid()
-plt.subplot(212)
+plt.subplot(312)
 plt.title('velocity')
 plt.plot(dataPlot[:,0], velocity)
+plt.grid()
+plt.subplot(313)
+plt.title('control input')
+plt.plot(dataPlot[:,0], control)
+plt.grid()
+plt.show()
+
+indx = np.nonzero(dataPlot[:, 0]>30)
+ttt = dataPlot[indx, 0].flatten()
+
+plt.subplot(311)
+plt.title('position')
+plt.plot(ttt, pos[indx])
+plt.grid()
+plt.subplot(312)
+plt.title('velocity')
+plt.plot(ttt, velocity[indx])
+plt.grid()
+plt.subplot(313)
+plt.title('control input')
+plt.plot(ttt, control[indx])
 plt.grid()
 plt.show()

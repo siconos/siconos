@@ -13,7 +13,7 @@ class MyR(SK.FirstOrderNonLinearR):
     # \param  is a  (optional)
     def __init__(self, C, B):
         SK.FirstOrderNonLinearR.__init__(self)
-        self._kappa = 0.5
+        self._kappa = .5
 	self._g = 9.81
         self.setCPtr(C)
         return
@@ -51,7 +51,7 @@ class MyR(SK.FirstOrderNonLinearR):
         B[0, 0] = -self._kappa*l[1]*x[1]
 	B[0, 1] = -self._kappa*l[0]*x[1]
 	B[1, 0] = self._g/(1-self._kappa*l[0]*l[1])**2
-	B[1, 1] = (self._g*self._kappa*l[0])/(1-self._kappa*l[0]*l[1])**2
+	B[1, 1] = (self._g*self._kappa*l[0]**2)/(1-self._kappa*l[0]*l[1])**2
         pass
 
     def computeJacgx(self,time, x, l, K):
