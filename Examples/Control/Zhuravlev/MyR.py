@@ -7,7 +7,7 @@ except (ImportError):
 
 import numpy
 
-class MyNonLinearR(SK.FirstOrderNonLinearR):
+class MyR(SK.FirstOrderNonLinearR):
     ## \brief Constructor
     #
     # \param  is a  (optional)
