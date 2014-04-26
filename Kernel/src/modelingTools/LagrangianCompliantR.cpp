@@ -24,6 +24,7 @@
 #include "LagrangianDS.hpp"
 
 #include "BlockVector.hpp"
+#include "SimulationTypeDef.hpp"
 
 using namespace RELATION;
 
@@ -102,8 +103,9 @@ void LagrangianCompliantR::computeJachlambda(double time, SiconosVector& q0, Sic
   }
 }
 
-void LagrangianCompliantR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber)
+void LagrangianCompliantR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
 {
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
   SiconosVector workZ = *DSlink[LagrangianR::z];
   if (derivativeNumber == 0)
   {
@@ -135,10 +137,11 @@ void LagrangianCompliantR::computeOutput(double time, Interaction& inter, Vector
   *DSlink[LagrangianR::z] = workZ;
 }
 
-void LagrangianCompliantR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void LagrangianCompliantR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
   SiconosVector workQ = *DSlink[LagrangianR::q0];
   SiconosVector workZ = *DSlink[LagrangianR::z];

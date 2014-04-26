@@ -75,6 +75,7 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
 
   _numberOfConstraints += nsLawSize;
 
+  SP::DynamicalSystem ds2_ = ds2;
   // _DSG is the hyper forest : (vertices : dynamical systems, edges :
   // Interactions)
   //
@@ -86,24 +87,32 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   // vector of the Interaction
   DynamicalSystemsGraph::VDescriptor dsgv1, dsgv2;
   dsgv1 = _DSG[0]->add_vertex(ds1);
-  if (!_DSG[0]->properties(dsgv1).workVectors)
+
+  SP::VectorOfVectors workVds1 = _DSG[0]->properties(dsgv1).workVectors;
+  SP::VectorOfVectors workVds2;
+  if (!workVds1)
   {
-    _DSG[0]->properties(dsgv1).workVectors.reset(new VectorOfVectors());
+    workVds1.reset(new VectorOfVectors());
     _DSG[0]->properties(dsgv1).workMatrices.reset(new VectorOfMatrices());
-    ds1->initWorkSpace(*_DSG[0]->properties(dsgv1).workVectors, *_DSG[0]->properties(dsgv1).workMatrices);
+    ds1->initWorkSpace(*workVds1, *_DSG[0]->properties(dsgv1).workMatrices);
   }
   if(ds2)
   {
     dsgv2 = _DSG[0]->add_vertex(ds2);
-    if (!_DSG[0]->properties(dsgv2).workVectors)
+    workVds2 = _DSG[0]->properties(dsgv2).workVectors;
+    if (!workVds2)
     {
-      _DSG[0]->properties(dsgv2).workVectors.reset(new VectorOfVectors());
+      workVds2.reset(new VectorOfVectors());
       _DSG[0]->properties(dsgv2).workMatrices.reset(new VectorOfMatrices());
-      ds2->initWorkSpace(*_DSG[0]->properties(dsgv2).workVectors, *_DSG[0]->properties(dsgv2).workMatrices);
+      ds2->initWorkSpace(*workVds2, *_DSG[0]->properties(dsgv2).workMatrices);
     }
   }
   else
+  {
     dsgv2 = dsgv1;
+    ds2_ = ds1;
+    workVds2 = workVds1;
+  }
 
   // this may be a multi edges graph
   assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
@@ -111,9 +120,13 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   InteractionsGraph::VDescriptor ig_new_ve;
   DynamicalSystemsGraph::EDescriptor new_ed;
   std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
-  _IG[0]->properties(ig_new_ve).DSlink.reset(new VectorOfBlockVectors);
-  _IG[0]->properties(ig_new_ve).workVectors.reset(new VectorOfVectors);
-  _IG[0]->properties(ig_new_ve).workMatrices.reset(new VectorOfSMatrices);
+  InteractionProperties& interProp = _IG[0]->properties(ig_new_ve);
+  interProp.DSlink.reset(new VectorOfBlockVectors);
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+  unsigned int nslawSize = inter->nonSmoothLaw()->size();
+  interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));
+  inter->setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2_, *workVds2);
 
   // add self branches in vertex properties
   // note : boost graph SEGFAULT on self branch removal

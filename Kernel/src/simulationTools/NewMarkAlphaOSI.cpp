@@ -374,11 +374,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
       else if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() == osnsp) // LCP at position level
       {
         // Update Jacobian matrix
-        VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
-        VectorOfVectors& workV = *indexSet->properties(vertex_inter).workVectors;
-        VectorOfSMatrices& workM = *indexSet->properties(vertex_inter).workMatrices;
-        SiconosMatrix& osnsM = *indexSet->properties(vertex_inter).block;
-        inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
+        inter->relation()->computeJach(t, *inter, indexSet->properties(vertex_inter));
         if (inter->relation()->getType() == NewtonEuler)
         {
           SP::DynamicalSystem ds1 = indexSet->properties(vertex_inter).source;
@@ -389,14 +385,14 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
         // cumpute yForNSsolver = y_{n,k} + G*q_free
         if (!_IsVelocityLevel) // output at the position level y_{n,k} = g_{n,k}
         {
-          inter->computeOutput(t, DSlink, workV, workM, osnsM, 0); // Update output of level 0
+          inter->computeOutput(t, indexSet->properties(vertex_inter), 0); // Update output of level 0
           yForNSsolver = *(inter->y(0)); //g_{n,k}
         }
         else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
         {
           double h = simulationLink->nextTime() - simulationLink->startingTime();
           double gamma_prime = gamma / beta;
-          inter->computeOutput(t, DSlink, workV, workM, osnsM, 1); // Update output of level 1
+          inter->computeOutput(t, indexSet->properties(vertex_inter), 1); // Update output of level 1
           yForNSsolver = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
         }
         subprod(*C, *q_free, yForNSsolver, coord, false);

@@ -203,7 +203,8 @@ double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, doub
 
 void PivotJointR::computeh(double time, Interaction& inter)
 {
-  KneeJointR::computeh(time, inter);
+  SiconosVector& y = *inter.y(0);
+  KneeJointR::computeh(time, y);
   SP::SiconosVector x1 = _d1->q();
   double q10 = x1->getValue(3);
   double q11 = x1->getValue(4);
@@ -222,7 +223,6 @@ void PivotJointR::computeh(double time, Interaction& inter)
     q23 = x2->getValue(6);
   }
 
-  SiconosVector& y = *inter.y(0);
   y.setValue(3, AscalA1(q10, q11, q12, q13, q20, q21, q22, q23));
   y.setValue(4, AscalA2(q10, q11, q12, q13, q20, q21, q22, q23));
 

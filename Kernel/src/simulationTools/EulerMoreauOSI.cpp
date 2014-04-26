@@ -646,10 +646,12 @@ void EulerMoreauOSI::computeFreeState()
 
       DEBUG_EXPR(deltaxForRelation.display());
 
-      // where does this come from ? Could not find the equations in the DevNotes -- xhub
+      // have a look at the end of the DevNotes for this part
       if (_useGammaForRelation)
       {
-        RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState - _useGammaForRelation = true is not well tested neither checked -- xhub");
+        if (!(dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS))
+          RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState - _useGammaForRelation == true is only implemented for FirstOrderLinearDS or FirstOrderLinearTIDS");
+
         deltaxForRelation = xfree;
 
         scal(_gamma, deltaxForRelation, deltaxForRelation);
@@ -756,49 +758,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   assert(mainInteraction);
   assert(mainInteraction->relation());
 
-  if (relationType == FirstOrder && relationSubType == Type2R)
-  {
-
-
-    SiconosVector& lambda = *inter->lambda(0);
-    FirstOrderType2R& rel = *std11::static_pointer_cast<FirstOrderType2R>(mainInteraction->relation());
-    C = rel.C();
-    if (!C) C = workM[FirstOrderR::mat_C];
-    D = rel.D();
-    if (!D) D = workM[FirstOrderR::mat_D];
-
-    if (D)
-    {
-      coord[3] = D->size(1);
-      coord[5] = D->size(1);
-      subprod(*D, lambda, yForNSsolver, coord, true);
-
-      yForNSsolver *= -1.0;
-    }
-    else
-    {
-      subscal(0, yForNSsolver, yForNSsolver, coord, true);
-    }
-
-    if (C)
-    {
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
-      subprod(*C, *deltax, yForNSsolver, coord, false);
-
-    }
-
-    if (_useGammaForRelation)
-    {
-      RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Type2R and H_alpha->getValue() should return the mid-point value");
-    }
-
-    H_alpha = inter->Halpha();
-    assert(H_alpha);
-    yForNSsolver += *H_alpha;
-  }
-
-  else if (relationType == FirstOrder && relationSubType == NonLinearR)
+  if (relationType == FirstOrder && (relationSubType == Type2R || relationSubType == NonLinearR))
   {
     SiconosVector& lambda = *inter->lambda(0);
     FirstOrderR& rel = *std11::static_pointer_cast<FirstOrderR>(mainInteraction->relation());

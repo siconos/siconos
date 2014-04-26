@@ -1225,32 +1225,16 @@ void SpaceFilter::link(SP::Interaction inter, SP::DynamicalSystem ds1,
   unsigned int levelMaxForInput = inter->upperLevelForInput();
   bool has2DS = inter->has2Bodies();
   for (unsigned int k = levelMinForInput ; k < levelMaxForInput + 1; k++)
-    {
-      ds1->initializeNonSmoothInput(k);
-      if(has2DS)
-        ds2->initializeNonSmoothInput(k);
-    }
+  {
+    ds1->initializeNonSmoothInput(k);
+    if(has2DS)
+      ds2->initializeNonSmoothInput(k);
+  }
 
-  SP::DynamicalSystemsGraph DSG = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
-
-  VectorOfVectors& workVds1 = *DSG->properties(DSG->descriptor(ds1)).workVectors;
-  VectorOfVectors& workVds2 = *DSG->properties(DSG->descriptor(ds2)).workVectors;
-
-
   InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
 
-  VectorOfBlockVectors& DSlink = *indexSet0->properties(ui).DSlink;
-  VectorOfVectors& workVInter = *indexSet0->properties(ui).workVectors;
-  VectorOfSMatrices& workMInter = *indexSet0->properties(ui).workMatrices;
-  unsigned int nslawSize = inter->nonSmoothLaw()->size();
-  indexSet0->properties(ui).block.reset(new SimpleMatrix(nslawSize, nslawSize));
-  SiconosMatrix& osnsMInter = *indexSet0->properties(ui).block;
-
-  inter->initialize(model()->simulation()->nextTime(), DSlink, workVInter,  workMInter,
-                    osnsMInter, *ds1, workVds1, *ds2, workVds2,
-                    model()->simulation()->computeResiduY(),
-                    model()->simulation()->computeResiduR());
+  inter->initialize(model()->simulation()->nextTime(), indexSet0->properties(ui));
   //inter->initialize(model()->simulation()->nextTime(), ds1, ds2);
 }
 

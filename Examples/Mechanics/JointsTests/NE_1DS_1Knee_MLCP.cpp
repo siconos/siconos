@@ -217,8 +217,6 @@ int main(int argc, char* argv[])
     SP::SiconosVector y= inter1->y(0);
     SP::SiconosVector ydot= inter1->y(1);
 
-    std::cout << "computeH1\n";
-    relation1->computeh(0., *inter1);
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;

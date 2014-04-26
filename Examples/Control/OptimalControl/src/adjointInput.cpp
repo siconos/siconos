@@ -12,27 +12,11 @@ void adjointInput::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
 {
   FirstOrderNonLinearR::initComponents(inter, DSlink, workV, workM);
 
-  SiconosVector& x = *workV[FirstOrderR::vec_x];
-  x = *DSlink[FirstOrderR::x];
-  SiconosVector& lambda = *inter.lambda(0);
-
   K2.reset(new SimpleMatrix(2, 2));
   K2->setValue(0, 0, 0.0);
   K2->setValue(0, 1, -1.0 / 2.0);
   K2->setValue(1, 0, 1.0 / 2.0);
   K2->setValue(1, 1, 0.0);
-
-  double t0 = 0;
-
-  lambda.setValue(0, 0);
-  lambda.setValue(1, 0);
-
-  computeh(t0, x, lambda, *inter.Halpha());
-  computeg(t0, x, lambda, *workV[FirstOrderR::g_alpha]);
-  *DSlink[FirstOrderR::r] = *workV[FirstOrderR::g_alpha];
-  computeJach(t0, inter, DSlink, workV, workM);
-  computeJacg(t0, inter, DSlink, workV, workM);
-
 }
 
 

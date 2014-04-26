@@ -19,6 +19,7 @@
 #include "FirstOrderLinearTIR.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
+#include "SimulationTypeDef.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -104,12 +105,13 @@ void FirstOrderLinearTIR::computeh(BlockVector& x, SiconosVector& lambda, BlockV
 
 }
 
-void FirstOrderLinearTIR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void FirstOrderLinearTIR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   // We get y and lambda of the interaction (pointers)
   SiconosVector& y = *inter.y(0);
   SiconosVector& lambda = *inter.lambda(0);
 
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
   computeh(*DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], y);
 }
 
@@ -118,8 +120,9 @@ void FirstOrderLinearTIR::computeg(SiconosVector& lambda, BlockVector& r)
   prod(*_B, lambda, r, false);
 }
 
-void FirstOrderLinearTIR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void FirstOrderLinearTIR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
   computeg(*inter.lambda(level), *DSlink[FirstOrderR::r]);
 }
 

@@ -58,6 +58,7 @@ protected:
   double _G2P0x;
   double _G2P0y;
   double _G2P0z;
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 public:
   /* constructor,
@@ -82,11 +83,11 @@ public:
    */
   static unsigned int numberOfConstraints() { return 3; }
 
-  virtual void computeJachq(double time, Interaction& inter);
+  virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
 
-  virtual void computeh(double time, Interaction& inter);
+  void computeh(double time, SiconosVector& y);
 
-  virtual void computeDotJachq(double time, Interaction& inter);
+  virtual void computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot);
 
 protected:
 

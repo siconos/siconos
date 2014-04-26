@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 #endif
     cmp++;
 
-    aS->newtonSolve(1e-4, 200);
+    aS->newtonSolve(5e-14, 20);
 
     dataPlot(cmp, 0) = aS->nextTime();
     dataPlot(cmp, 1) = x->getValue(0);

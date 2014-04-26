@@ -21,6 +21,7 @@
 #include "FirstOrderNonLinearDS.hpp"
 
 #include "BlockVector.hpp"
+#include "SimulationTypeDef.hpp"
 
 
 FirstOrderType1R::FirstOrderType1R(const std::string& pluginh, const std::string& pluging):
@@ -86,10 +87,13 @@ void FirstOrderType1R::computeg(double time, SiconosVector& lambda, SiconosVecto
 
 }
 
-void FirstOrderType1R::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void FirstOrderType1R::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   SiconosVector& y = *inter.y(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
 
   SiconosVector& workX = *workV[FirstOrderR::vec_x];
   workX = *DSlink[FirstOrderR::x];
@@ -101,12 +105,14 @@ void FirstOrderType1R::computeOutput(double time, Interaction& inter, VectorOfBl
   *DSlink[FirstOrderR::z] = workZ;
 }
 
-void FirstOrderType1R::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void FirstOrderType1R::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
   SiconosVector& lambda = *inter.lambda(level);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
 
   SiconosVector& workR = *workV[FirstOrderR::vec_r];
   workR = *DSlink[FirstOrderR::r];
@@ -142,8 +148,11 @@ void FirstOrderType1R::computeJacglambda(double time, SiconosVector& lambda, Sic
   ((Type1Ptr)(_pluginJacLg->fPtr))(lambda.size(), &(lambda)(0), B.size(0), B.getArray(), z.size(), &(z)(0));
 }
 
-void FirstOrderType1R::computeJach(double time, Interaction& inter,VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderType1R::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
   SiconosVector& x = *workV[FirstOrderR::vec_x];
   x = *DSlink[FirstOrderR::x];
   SiconosVector& z = *workV[FirstOrderR::vec_z];
@@ -159,8 +168,11 @@ void FirstOrderType1R::computeJach(double time, Interaction& inter,VectorOfBlock
   *DSlink[FirstOrderR::z] = z;
 }
 
-void FirstOrderType1R::computeJacg(double time, Interaction& inter,VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderType1R::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
 {
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
   SiconosVector& z = *workV[FirstOrderR::vec_z];
   z = *DSlink[FirstOrderR::z];
   if (!_B)

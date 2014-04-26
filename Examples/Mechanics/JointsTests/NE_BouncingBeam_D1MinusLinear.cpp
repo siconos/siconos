@@ -241,10 +241,6 @@ int main(int argc, char* argv[])
     SP::SiconosVector ydot= interFloor->y(1);
     SP::SiconosVector lambda= interFloor->lambda(2);
     SP::SiconosVector lambda1= interFloor->lambda(1);
-    std::cout << "computeH0\n";
-    relation0->computeh(0., *interFloor);
-    //    std::cout<<"computeH4\n";
-    //    relation4->computeh(0.);
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;

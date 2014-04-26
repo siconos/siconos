@@ -249,30 +249,18 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   }
 
   InteractionsGraph::VIterator ui, uiend;
-  SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    inter = indexSet0->bundle(*ui);
-    SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
-    SP::DynamicalSystem ds2 = indexSet0->properties(*ui).target;
-
-    VectorOfVectors& workVds1 = *DSG->properties(DSG->descriptor(ds1)).workVectors;
-    VectorOfVectors& workVds2 = *DSG->properties(DSG->descriptor(ds2)).workVectors;
-    VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
-    VectorOfVectors& workVInter = *indexSet0->properties(*ui).workVectors;
-    VectorOfSMatrices& workMInter = *indexSet0->properties(*ui).workMatrices;
-    unsigned int nslawSize = inter->nonSmoothLaw()->size();
-    indexSet0->properties(*ui).block.reset(new SimpleMatrix(nslawSize, nslawSize));
-    SiconosMatrix& osnsMInter = *indexSet0->properties(*ui).block;
-    inter->initialize(_tinit, DSlink, workVInter, workMInter, osnsMInter, *ds1, workVds1, *ds2, workVds2, computeResiduY(), computeResiduR());
+    Interaction& inter = *indexSet0->bundle(*ui);
+    inter.initialize(_tinit, indexSet0->properties(*ui));
   }
 
   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
   // Warning FP : must be done in any case, even if the interactions set
   // is empty.
   initOSNS();
-  
+
   // Process events at time _tinit. Useful to save values in memories
   // for example.  Warning: can not be called during
   // eventsManager->initialize, because it needs the initialization of
@@ -398,11 +386,7 @@ void Simulation::updateInput(unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForInput() <= level);
     assert(inter->upperLevelForInput() >= level);
-    VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
-    VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
-    VectorOfSMatrices& workM = *indexSet0->properties(*ui).workMatrices;
-    SiconosMatrix& osnsM = *indexSet0->properties(*ui).block;
-    inter->computeInput(time, DSlink, workV, workM, osnsM, level);
+    inter->computeInput(time, indexSet0->properties(*ui), level);
   }
 }
 
@@ -421,11 +405,7 @@ void Simulation::updateOutput(unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
-    VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
-    VectorOfSMatrices& workM = *indexSet0->properties(*ui).workMatrices;
-    SiconosMatrix& osnsM = *indexSet0->properties(*ui).block;
-    inter->computeOutput(time, DSlink, workV, workM, osnsM, level);
+    inter->computeOutput(time, indexSet0->properties(*ui), level);
   }
   DEBUG_PRINTF("Simulation::updateOutput(unsigned int level) ends for level = %i\n", level);
 

@@ -21,6 +21,7 @@
 //
 #include "LagrangianDS.hpp"
 #include "BlockVector.hpp"
+#include "SimulationTypeDef.hpp"
 
 using namespace RELATION;
 
@@ -97,10 +98,11 @@ void LagrangianLinearTIR::initComponents(Interaction& inter, VectorOfBlockVector
 
 }
 
-void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber)
+void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
   SiconosVector& y = *inter.y(derivativeNumber);
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
   prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
 
@@ -121,10 +123,11 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, VectorO
 
 }
 
-void LagrangianLinearTIR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void LagrangianLinearTIR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // computation of p = Ht lambda
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 }

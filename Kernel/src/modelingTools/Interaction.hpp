@@ -201,20 +201,20 @@ public:
    */
   ~Interaction() {};
 
-  /** initialize this relation
-      \param time time for initialization.
-      \param DSlink set of BlockVector to link to the data in DynamicalSystem
-      \param workVInter set of work vectors for this Interaction
-      \param workMInter set of work matrices for this Interaction
-      \param osnsMInter matrix used in the OSNS for this Interaction
+  /** set the links to the DynamicalSystem(s) and allocate the workspace
+   *  \param interProp the InteractionProperties of this Interaction
       \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
       \param workV1 work vectors of ds1
       \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is allowed.
       \param workV2 work vectors of ds2
-      \param computeResiduY if true allocate vectors for the computation of the residu on y
-      \param computeResiduR if true allocate vectors for the computation of the residu on r
    */
-  void initialize(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workVInter, VectorOfSMatrices& workMInter, SiconosMatrix& osnsMInter, DynamicalSystem& ds1, VectorOfVectors& workV1, DynamicalSystem& ds2, VectorOfVectors& workV2, bool computeResiduY = false, bool computeResiduR = false);
+  void setDSLinkAndWorkspace(InteractionProperties& interProp, DynamicalSystem& ds1, VectorOfVectors& workV1, DynamicalSystem& ds2, VectorOfVectors& workV2);
+
+  /** initialize this relation
+   * \param t0 initial time for this Interaction
+   * \param interProp the InteractionProperties of this Interaction
+   */
+  void initialize(double t0, InteractionProperties& interProp);
 
   /** check if Interaction is initialized
    * \return true if it is initialized
@@ -691,14 +691,14 @@ public:
    *  \param derivativeNumber number of the derivative to compute,
    *  optional, default = 0.
    */
-  void computeOutput(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
+  void computeOutput(double time, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
   /** Compute input r of all Dynamical Systems involved in the present
    *   Interaction.
    *  \param time current time
    *  \param level order of _lambda used to compute input.
    */
-  void computeInput(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+  void computeInput(double time, InteractionProperties& interProp, unsigned int level = 0);
 
   /** Get the _yForNssolver vector
    * \return the y part used in the solver

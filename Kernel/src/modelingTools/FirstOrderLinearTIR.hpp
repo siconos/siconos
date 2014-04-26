@@ -103,7 +103,7 @@ public:
   *  \param workM
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   /** default function to compute r
   *  \param time current time
@@ -112,7 +112,7 @@ public:
   *  \param workM
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   /** print the data to the screen
   */
@@ -120,11 +120,11 @@ public:
 
   /** compute the jacobian of h: nothing to be done here
    */
-  virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) {};
+  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) {};
 
   /** compute the jacobian of g: nothing to be done here
    */
-  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) {};
+  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) {};
 
   /** set e
   *  \param  newe the new value of e

@@ -40,6 +40,8 @@
 #include "BlockVector.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 
+#include "SimulationTypeDef.hpp"
+
 using namespace std;
 using namespace RELATION;
 
@@ -51,17 +53,11 @@ Interaction::Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP:
   _y(2),  _nslaw(NSL), _relation(rel)
 {}
 
-void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink,
-                             VectorOfVectors& workVInter, VectorOfSMatrices& workMInter,
-                             SiconosMatrix& osnsMInter,
+void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
                              DynamicalSystem& ds1, VectorOfVectors& workV1,
-                             DynamicalSystem& ds2, VectorOfVectors& workV2,
-                             bool computeResiduY, bool computeResiduR)
+                             DynamicalSystem& ds2, VectorOfVectors& workV2)
 {
-  DEBUG_PRINTF("Interaction::initialize(double t0) with t0 = %f \n", t0);
 
-  if (!_initialized)
-  {
     assert(relation() && "Interaction::initialize failed, relation() == NULL");
 
     assert(nslaw() && "Interaction::initialize failed, non smooth law == NULL");
@@ -73,6 +69,10 @@ void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink,
       RuntimeException::selfThrow("Interaction::initialize() - _interactionSize != nslaw()->size() . Obsolete !");
     }
 
+    VectorOfBlockVectors& DSlink = *interProp.DSlink;
+    VectorOfVectors& workVInter = *interProp.workVectors;
+    VectorOfSMatrices& workMInter = *interProp.workMatrices;
+
     initData(DSlink);
     // Initialize interaction work vectors, depending on Dynamical systems
     // linked to the interaction.
@@ -83,12 +83,12 @@ void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink,
       initDSData(ds2, workV2, DSlink);
     }
 
-    initializeMemory(computeResiduY);
+    bool computeResidu = _relation->requireResidu();
 
     // Relation initializes the work vectors and matrices
     _relation->initialize(*this, DSlink, workVInter, workMInter);
 
-    if (computeResiduR)
+    if (computeResidu)
     {
       RELATION::TYPES relationType = _relation->getType();
       if (relationType == FirstOrder)
@@ -103,10 +103,19 @@ void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink,
       else if (relationType == NewtonEuler)
         RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for NewtonEulerR is not implemented");
     }
+}
+
+void Interaction::initialize(double t0, InteractionProperties& interProp)
+{
+  if (!_initialized)
+  {
+  DEBUG_PRINTF("Interaction::initialize(double t0) with t0 = %f \n", t0);
+
+    bool computeResidu = _relation->requireResidu();
+    initializeMemory(computeResidu);
 
     // prepare the gradients
-
-    _relation->computeJach(t0, *this, DSlink, workVInter, workMInter);
+    _relation->computeJach(t0, *this, interProp);
     if (_steps > 1) // Multi--step methods
     {
       // Comoyte the old Values of Output with stored values in Memory
@@ -119,7 +128,7 @@ void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink,
         //        relation()->LinkDataFromMemory(k);
         for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
         {
-          computeOutput(t0, DSlink, workVInter, workMInter, osnsMInter, i);
+          computeOutput(t0, interProp, i);
           _yMemory[i]->swap(*_y[i]);
         }
       }
@@ -128,7 +137,7 @@ void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink,
     // Compute y values for t0
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
     {
-      computeOutput(t0, DSlink, workVInter, workMInter, osnsMInter, i);
+      computeOutput(t0, interProp, i);
     }
     _initialized = true;
   }
@@ -138,7 +147,7 @@ void Interaction::initialize(double t0, VectorOfBlockVectors& DSlink,
 // since we need to know the relative degree to know
 // "numberOfDerivatives", while numberOfRelations and the size of the
 // non smooth law are required inputs to compute the relative degree.
-void Interaction::initializeMemory(bool computeResiduY)
+void Interaction::initializeMemory(bool computeResidu)
 {
 
   DEBUG_PRINT("Interaction::initializeMemory() \n");
@@ -174,11 +183,11 @@ void Interaction::initializeMemory(bool computeResiduY)
   // get the dimension of the non smooth law, ie the size of an Interaction blocks (one per relation)
   unsigned int nslawSize = nslaw()->size();
   // XXX hm hm -- xhub
-//  if (computeResiduY)
-//  {
+  if (computeResidu)
+  {
     _h_alpha.reset(new SiconosVector(nslawSize));
     _residuY.reset(new SiconosVector(nslawSize));
-//  }
+  }
   _yForNSsolver.reset(new SiconosVector(nslawSize));
 
   for (unsigned int i = _lowerLevelForOutput ;
@@ -320,8 +329,7 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
   DSlink[LagrangianR::z]->insertPtr(lds.z());
 
   // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
-  for (unsigned int k = _lowerLevelForInput;
-       k < _upperLevelForInput + 1; k++)
+  for (unsigned int k = 0; k < 3; k++)
   {
     assert(lds.p(k));
     assert(DSlink[LagrangianR::p0 + k]);
@@ -644,14 +652,14 @@ void Interaction::display() const
   std::cout << "===================================" <<std::endl;
 }
 
-void Interaction::computeOutput(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber)
+void Interaction::computeOutput(double time, InteractionProperties& interProp, unsigned int derivativeNumber)
 {
-  relation()->computeOutput(time, *this, DSlink, workV, workM, osnsM, derivativeNumber);
+  relation()->computeOutput(time, *this, interProp, derivativeNumber);
 }
 
-void Interaction::computeInput(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void Interaction::computeInput(double time, InteractionProperties& interProp, unsigned int level)
 {
-  relation()->computeInput(time, *this, DSlink, workV, workM, osnsM, level);
+  relation()->computeInput(time, *this, interProp, level);
 }
 
 

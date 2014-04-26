@@ -50,6 +50,7 @@ DEFINE_SPTR(RelayNSL)
 DEFINE_SPTR(MixedComplementarityConditionNSL)
 
 DEFINE_SPTR(TimeDiscretisation)
+DEFINE_SPTR(InteractionProperties)
 
 // Dynamical systems
 DEFINE_SPTR(DynamicalSystem)

@@ -32,6 +32,7 @@ DynamicalSystem::DynamicalSystem():
   _normRef = 1;
   _x.resize(2);
   _workspace.resize(sizeWorkV);
+  _z.reset(new SiconosVector(1));
 }
 
 // From a minimum set of data
@@ -44,6 +45,7 @@ DynamicalSystem::DynamicalSystem(unsigned int newN):
   _workspace.resize(sizeWorkV);
   _workspace[freeresidu].reset(new SiconosVector(getDim()));
   _r.reset(new SiconosVector(getDim()));
+  _z.reset(new SiconosVector(1));
 }
 
 // Copy constructor

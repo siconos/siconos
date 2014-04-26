@@ -24,6 +24,7 @@
 #include "NewtonEulerDS.hpp"
 
 #include "BlockVector.hpp"
+#include "SimulationTypeDef.hpp"
 
 //#define NER_DEBUG
 //#define DEBUG_STDOUT
@@ -198,11 +199,12 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
 }
 
 
-void NewtonEulerR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber)
+void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
 {
 
   /*\warning : implemented for the bouncing ball !!!!*/
 
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
   DEBUG_PRINT("NewtonEulerR::computeOutput");
   DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber);
 
@@ -231,12 +233,12 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, VectorOfBlockV
     else if (derivativeNumber == 2)
     {
 
-      std::cout << "Warning: we attempt to call NewtonEulerR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber) for derivativeNumber=2" << std::endl;
+      std::cout << "Warning: we attempt to call NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) for derivativeNumber=2" << std::endl;
     }
     else
-      RuntimeException::selfThrow("NewtonEulerR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber) derivativeNumber out of range or not yet implemented.");
+      RuntimeException::selfThrow("NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) derivativeNumber out of range or not yet implemented.");
   }
-  DEBUG_PRINT("NewtonEulerR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber)  ends\n")
+  DEBUG_PRINT("NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)  ends\n")
 
 }
 
@@ -244,11 +246,12 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, VectorOfBlockV
 *  \param double : current time
 *  \Param unsigned int: "derivative" order of lambda used to compute input
 */
-void NewtonEulerR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   /*\warning : implemented for the bouncing ball !!!!*/
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
-  DEBUG_PRINT("NewtonEulerR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level) starts\n")
+  DEBUG_PRINT("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) starts\n")
   DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level);
   DEBUG_EXPR(printf("interaction %p\n",&inter););
   DEBUG_EXPR(inter.display(););
@@ -346,8 +349,8 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, VectorOfBlockVe
 
   }
   else
-    RuntimeException::selfThrow("NewtonEulerR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)  not yet implemented for level > 1");
-  DEBUG_PRINT("NewtonEulerR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level) ends\n");
+    RuntimeException::selfThrow("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)  not yet implemented for level > 1");
+  DEBUG_PRINT("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) ends\n");
 }
 
 /*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEulerFrom3DLocalFrameR and NewtonEulerFrom1DLocalFrameR)*/
@@ -400,8 +403,9 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP
   DEBUG_PRINT("NewtonEulerR::computeJachqT(Interaction& inter) ends \n")
 }
 
-void NewtonEulerR::computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
   computeJachq(time, inter, DSlink);
   //computeJachqDot(time, inter); // This is not needed here
   //computeDotJachq(time, inter);

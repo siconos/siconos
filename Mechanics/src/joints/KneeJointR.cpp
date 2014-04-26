@@ -29,6 +29,20 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+{
+  NewtonEulerR::initComponents(inter, DSlink, workV, workM);
+  if (!_dotjachq)
+  {
+    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int xSize = inter.getSizeOfDS();
+    unsigned int qSize = 7 * (xSize / 6);
+
+    _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
+  }
+}
+
+
 void KneeJointR::checkInitPos()
 {
 
@@ -435,7 +449,7 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
 
 
 
-void KneeJointR::computeJachq(double time, Interaction& inter)
+void KneeJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
 {
   _jachq->zero();
   SP::SiconosVector x1 = _d1->q();
@@ -575,18 +589,9 @@ void KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
   _dotjachq->setValue(2,13, 2.0*t21);
 
 }
-void KneeJointR::computeDotJachq(double time, Interaction& inter)
+void KneeJointR::computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot)
 {
   DEBUG_PRINT("KneeJointR::computeDotJachq(double time, Interaction& inter) starts \n");
-  if(! _dotjachq)
-  {
-    unsigned int sizeY = inter.getSizeOfY();
-    unsigned int xSize = inter.getSizeOfDS();
-    unsigned int qSize = 7 * (xSize / 6);
-
-    _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
-  }
-
   _dotjachq->zero();
   SP::SiconosVector x1 = _d1->dotq();
   double Xdot1 = x1->getValue(0);
@@ -708,7 +713,7 @@ double KneeJointR::Hz(double X1, double Y1, double Z1, double q10, double q11, d
   }
 }
 
-void KneeJointR::computeh(double time, Interaction& inter)
+void KneeJointR::computeh(double time, SiconosVector& y)
 {
 
   SP::SiconosVector x1 = _d1->q();
@@ -737,7 +742,6 @@ void KneeJointR::computeh(double time, Interaction& inter)
     q22 = x2->getValue(5);
     q23 = x2->getValue(6);
   }
-  SiconosVector& y = *inter.y(0);
   y.setValue(0, Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(1, Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(2, Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));

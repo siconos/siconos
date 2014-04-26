@@ -233,10 +233,6 @@ int main(int argc, char* argv[])
     SP::SiconosVector q3 = bouncingbeam->q();
     SP::SiconosVector y= interFloor->y(0);
     SP::SiconosVector ydot= interFloor->y(1);
-    std::cout << "computeH0\n";
-    relation0->computeh(0., *interFloor);
-    //    std::cout<<"computeH4\n";
-    //    relation4->computeh(0.);
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;

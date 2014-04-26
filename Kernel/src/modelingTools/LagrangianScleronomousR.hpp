@@ -187,9 +187,9 @@ public:
   }
 
   /* compute all the H Jacobian */
-  void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
   /* compute all the G Jacobian */
-  void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+  void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
   {
     computeJacgq(time, inter);
     // computeJacgqDot(time, inter);
@@ -206,14 +206,14 @@ public:
   * \param inter interaction that owns the relation
   * \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
+  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
   /** to compute p
   * \param time the current time
   * \param inter interaction that owns the relation
   * \param unsigned int: "derivative" order of lambda used to compute input
   */
-  void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+  void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   const std::string getJachqName() const;
 

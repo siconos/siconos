@@ -192,7 +192,7 @@ from Siconos.Kernel import SimpleMatrix, getMatrix
 
 ref = getMatrix(SimpleMatrix("resultNETS.ref"))
 err = linalg.norm(dataPlot - ref)
-print "error w.r.t reference file =", err
+print("error w.r.t reference file =", err)
 
 if (err > 1e-12):
     print("Warning. The result is rather different from the reference file.")

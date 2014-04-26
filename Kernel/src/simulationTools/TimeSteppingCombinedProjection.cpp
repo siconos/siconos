@@ -656,12 +656,8 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
   {
     SP::Interaction interac = indexSet->bundle(*aVi);
 
-    VectorOfBlockVectors& DSlink = *indexSet->properties(*aVi).DSlink;
-    VectorOfVectors& workV = *indexSet->properties(*aVi).workVectors;
-    VectorOfSMatrices& workM = *indexSet->properties(*aVi).workMatrices;
-    SiconosMatrix& osnsM = *indexSet->properties(*aVi).block;
-    interac->computeOutput(getTkp1(), DSlink, workV, workM, osnsM, 0);
-    interac->relation()->computeJach(getTkp1(), *interac, DSlink, workV, workM);
+    interac->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
+    interac->relation()->computeJach(getTkp1(), *interac, indexSet->properties(*aVi));
     if (interac->relation()->getType() == RELATION::NewtonEuler)
     {
       SP::DynamicalSystem ds1 = indexSet->properties(*aVi).source;

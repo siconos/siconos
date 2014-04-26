@@ -126,7 +126,7 @@ void PrismaticJointR::computeV1V2FromAxis()
 
 
 
-void PrismaticJointR::computeJachq(double time, Interaction& inter)
+void PrismaticJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
 {
   _jachq->zero();
   SP::SiconosVector x2 = _d2->q();
@@ -758,7 +758,7 @@ void PrismaticJointR::Jd2(double X1, double Y1, double Z1, double q10, double q1
 
 
 
-void PrismaticJointR::computeDotJachq(double time, Interaction& inter)
+void PrismaticJointR::computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot)
 {
 }
 

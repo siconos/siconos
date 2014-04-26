@@ -46,19 +46,31 @@ public:
 
   my_NewtonEulerR(double radius): R_CLASS(), _sBallRadius(radius) { };
 
-  virtual void computeOutput(double t, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, unsigned int level)
+  virtual void computeOutput(double t, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
   {
-    SP::SiconosVector y = inter.y(0);
-    double height = fabs(inter.data(q0)->getValue(0)) - _sBallRadius;
+    VectorOfBlockVectors& DSlink = *interProp.DSlink;
+    if (derivativeNumber == 0)
+    {
+      computeh(*DSlink[NewtonEulerR::q0], *inter.y(0));
+    }
+    else
+    {
+      R_CLASS::computeOutput(t, inter, interProp, derivativeNumber);
+    }
+
+  }
+  void computeh(BlockVector& q0, SiconosVector& y)
+  {
+    double height = fabs(q0.getValue(0)) - _sBallRadius;
     // std::cout <<"my_NewtonEulerR:: computeh _jachq" << std:: endl;
     // _jachq->display();
-    y->setValue(0, height);
+    y.setValue(0, height);
     _Nc->setValue(0, 1);
     _Nc->setValue(1, 0);
     _Nc->setValue(2, 0);
     _Pc1->setValue(0, height);
-    _Pc1->setValue(1, inter.data(q0)->getValue(1));
-    _Pc1->setValue(2, inter.data(q0)->getValue(2));
+    _Pc1->setValue(1, q0.getValue(1));
+    _Pc1->setValue(2, q0.getValue(2));
 
     //_Pc2->setValue(0,hpc);
     //_Pc2->setValue(1,data[q0]->getValue(1));
@@ -212,7 +224,7 @@ int main(int argc, char* argv[])
 #else
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
 #endif
-    s->setNewtonTolerance(1e-4);
+    s->setNewtonTolerance(1e-10);
     s->setNewtonMaxIteration(10);
 
     // =========================== End of model definition ===========================

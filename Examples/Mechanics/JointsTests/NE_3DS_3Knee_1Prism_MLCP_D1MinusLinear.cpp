@@ -356,17 +356,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector q1 = beam1->q();
     SP::SiconosVector q2 = beam2->q();
     SP::SiconosVector q3 = beam3->q();
-    std::cout << "computeH1\n";
-    relation1->computeh(0., *inter1);
-    std::cout << "computeH2\n";
-    relation2->computeh(0., *inter2);
-    std::cout << "computeH3\n";
-    relation3->computeh(0., *inter3);
 
-    std::cout << "computeH0\n";
-    relation0->computeh(0., *interFloor);
-    //    std::cout<<"computeH4\n";
-    //    relation4->computeh(0.);
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;

@@ -470,12 +470,8 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
        aVi != viend; ++aVi)
   {
     SP::Interaction inter = indexSet->bundle(*aVi);
-    VectorOfBlockVectors& DSlink = *indexSet->properties(*aVi).DSlink;
-    VectorOfVectors& workV = *indexSet->properties(*aVi).workVectors;
-    VectorOfSMatrices& workM = *indexSet->properties(*aVi).workMatrices;
-    SiconosMatrix& osnsM = *indexSet->properties(*aVi).block;
-    inter->computeOutput(getTkp1(), DSlink, workV, workM, osnsM, 0);
-    inter->relation()->computeJach(getTkp1(), *inter, DSlink, workV, workM);
+    inter->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
+    inter->relation()->computeJach(getTkp1(), *inter, indexSet->properties(*aVi));
     if (inter->relation()->getType() == RELATION::NewtonEuler)
     {
       SP::DynamicalSystem ds1 = indexSet->properties(*aVi).source;

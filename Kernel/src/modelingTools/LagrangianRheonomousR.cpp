@@ -24,6 +24,7 @@
 #include "LagrangianDS.hpp"
 
 #include "BlockVector.hpp"
+#include "SimulationTypeDef.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -126,8 +127,9 @@ void LagrangianRheonomousR::computeJachq(double time,  SiconosVector& q, Siconos
   // else nothing.
 }
 
-void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber)
+void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
 {
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   SiconosVector& y = *inter.y(derivativeNumber);
@@ -152,13 +154,14 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, Vecto
     // Jach[0]q[2]. For the moment, other terms are neglected
     // (especially, partial derivatives with respect to time).
     else
-      RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber) index >2  not yet implemented.");
+      RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) index >2  not yet implemented.");
   }
   *DSlink[LagrangianR::z] = z;
 }
 
-void LagrangianRheonomousR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void LagrangianRheonomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   computeJachq(time, q, z);
@@ -167,4 +170,15 @@ void LagrangianRheonomousR::computeInput(double time, Interaction& inter, Vector
   // data[name] += trans(G) * lambda
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
   *DSlink[LagrangianR::z] = z;
+}
+void LagrangianRheonomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+{
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  SiconosVector q = *DSlink[LagrangianR::q0];
+  SiconosVector z = *DSlink[LagrangianR::z];
+  computeJachq(time, q, z);
+  // computeJachqDot(time, inter);
+  //    computeDotJachq(time, q, z);
+  // computeJachlambda(time, inter);
+  computehDot(time, q, z);
 }

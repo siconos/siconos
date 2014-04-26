@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
   processDS->setComputebFunction("RelayPlugin", "computeB");
-  processDS->setz(*z);
+  processDS->setzPtr(z);
   // -------------
   // --- Model process ---
   // -------------

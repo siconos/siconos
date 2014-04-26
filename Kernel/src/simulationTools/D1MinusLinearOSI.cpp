@@ -240,10 +240,7 @@ double D1MinusLinearOSI::computeResidu()
       for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet2->bundle(*ui);
-        VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
-        VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
-        VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
-        inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
+        inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
         if (inter->relation()->getType() == NewtonEuler)
         {
           SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
@@ -251,7 +248,7 @@ double D1MinusLinearOSI::computeResidu()
           SP::NewtonEulerR ner = std11::static_pointer_cast<NewtonEulerR>(indexSet2->bundle(*ui)->relation());
           ner->computeJachqT(*inter, ds1, ds2);
         }
-        inter->relation()->computeJacg(told, *inter, DSlink, workV, workM);
+        inter->relation()->computeJacg(told, *inter, indexSet2->properties(*ui));
       }
 
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -625,10 +622,7 @@ double D1MinusLinearOSI::computeResidu()
       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet0->bundle(*ui);
-        VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
-        VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
-        VectorOfSMatrices& workM = *indexSet0->properties(*ui).workMatrices;
-        inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
+        inter->relation()->computeJach(t, *inter, indexSet0->properties(*ui));
         if (inter->relation()->getType() == NewtonEuler)
         {
           SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
@@ -636,7 +630,7 @@ double D1MinusLinearOSI::computeResidu()
           SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
           ner->computeJachqT(*inter, ds1, ds2);
         }
-        inter->relation()->computeJacg(t, *inter, DSlink, workV, workM);
+        inter->relation()->computeJacg(t, *inter, indexSet0->properties(*ui));
       }
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
@@ -1286,14 +1280,14 @@ double D1MinusLinearOSI::computeResidu()
       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet0->bundle(*ui);
-        inter->relation()->computeJach(told, *inter);
+        inter->relation()->computeJach(told, *inter, indexSet0->properties(*ui));
         if (inter->relation()->getType() == NewtonEuler)
         {
           SP::DynamicalSystem ds1 = indexSet->properties(ui).source;
           SP::DynamicalSystem ds2 = indexSet->properties(ui).target;
           inter->relation()->computeJachqT(*inter, ds1, ds2);
         }
-        inter->relation()->computeJacg(told, *inter);
+        inter->relation()->computeJacg(told, *inter, indexSet0->properties(*ui));
       }
       
       // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)

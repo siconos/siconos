@@ -458,10 +458,8 @@ void   TimeStepping::prepareNewtonIteration()
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
-    VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
-    VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
-    VectorOfSMatrices& workM = *indexSet0->properties(*ui).workMatrices;
-    inter->relation()->computeJach(getTkp1(), *inter, DSlink, workV, workM);
+    InteractionProperties& interProp = indexSet0->properties(*ui);
+    inter->relation()->computeJach(getTkp1(), *inter, interProp);
     if (inter->relation()->getType() == NewtonEuler)
     {
       SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
@@ -469,11 +467,11 @@ void   TimeStepping::prepareNewtonIteration()
       SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
       ner->computeJachqT(*inter, ds1, ds2);
     }
-    inter->relation()->computeJacg(getTkp1(), *inter, DSlink, workV, workM);
+    inter->relation()->computeJacg(getTkp1(), *inter, interProp);
 
     // Note FP : prepar call below is only useful for FirstOrderType2R. 
     // We should check if we really need this ...
-    inter->relation()->preparNewtonIteration(*inter, DSlink, workV, workM);
+    inter->relation()->prepareNewtonIteration(*inter, interProp);
   }
 
   bool topoHasChanged = model()->nonSmoothDynamicalSystem()->topology()->hasChanged();

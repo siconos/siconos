@@ -237,19 +237,9 @@ public:
   }
 
   /* compute all the H Jacobian */
-  void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-  {
-    SiconosVector q = *DSlink[LagrangianR::q0];
-    SiconosVector z = *DSlink[LagrangianR::z];
-    computeJachq(time, q, z);
-    // computeJachqDot(time, inter);
-//    computeDotJachq(time, q, z);
-    // computeJachlambda(time, inter);
-    computehDot(time, q, z);
-  }
-
+  void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
   /* compute all the G Jacobian */
-  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
   {
     computeJacgq(time, inter);
     // computeJacgqDot(time, inter);
@@ -261,13 +251,13 @@ public:
   *  \param double : current time
   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
-  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
+  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
   /** to compute p
   *  \param double : current time
   *  \param unsigned int: "derivative" order of lambda used to compute input
   */
-  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   ACCEPT_STD_VISITORS();
 

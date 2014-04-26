@@ -182,7 +182,7 @@ int main()
     // solve ...
     /*aS->computeOneStep();*/
 
-    aS-> newtonSolve(1e-4, 200);
+    aS-> newtonSolve(1e-11, 20);
     aS->nextStep();
     x = aDS->x();
     lambda = aI->lambda(0);

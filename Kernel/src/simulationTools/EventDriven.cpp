@@ -363,10 +363,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
-    VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
-    VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
-    VectorOfSMatrices& workM = *indexSet0->properties(*ui).workMatrices;
-    inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
+    inter->relation()->computeJach(t, *inter, indexSet0->properties(*ui));
     if (inter->relation()->getType() == NewtonEuler)
     {
       SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
@@ -783,18 +780,14 @@ double EventDriven::computeResiduConstraints()
       for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         Interaction& inter = *indexSet2->bundle(*ui);
-        VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
-        VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
-        VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
-        SiconosMatrix& osnsM = *indexSet2->properties(*ui).block;
         if (!_flag) // constraints at the position level
         {
-          inter.computeOutput(t, DSlink, workV, workM, osnsM, 0); // compute y[0] for the interaction at the end time
+          inter.computeOutput(t, indexSet2->properties(*ui), 0); // compute y[0] for the interaction at the end time
           _y = (*inter.y(0))(0);
         }
         else // constraints at the velocity level
         {
-          inter.computeOutput(t, DSlink, workV, workM, osnsM, 1); // compute y[1] for the interaction at the end time
+          inter.computeOutput(t, indexSet2->properties(*ui), 1); // compute y[1] for the interaction at the end time
           _y = (*inter.y(1))(0);
         }
 
@@ -896,11 +889,7 @@ void EventDriven::predictionNewtonIteration()
   for (std11::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0.bundle(*ui);
-    VectorOfBlockVectors& DSlink = *indexSet0.properties(*ui).DSlink;
-    VectorOfVectors& workV = *indexSet0.properties(*ui).workVectors;
-    VectorOfSMatrices& workM = *indexSet0.properties(*ui).workMatrices;
-    SiconosMatrix& osnsM = *indexSet0.properties(*ui).block;
-    inter.computeOutput(t, DSlink, workV, workM, osnsM, 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
+    inter.computeOutput(t, indexSet0.properties(*ui), 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
     inter.lambda(2)->zero(); // reset lambda[2] to zero
   }
 }

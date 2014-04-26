@@ -139,7 +139,7 @@ public:
   *  \param workM
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
@@ -149,15 +149,23 @@ public:
   *  \param workM
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
-  virtual void preparNewtonIteration(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  /** return true if the relation requires the computation of residu
+      \return true if residu are required, false otherwise
+   */
+  virtual bool requireResidu()
+  {
+    return true;
+  }
+
+  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
 
   virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
 
-    virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
-    virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
 
   ACCEPT_STD_VISITORS();
 

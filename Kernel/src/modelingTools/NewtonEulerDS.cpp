@@ -44,6 +44,9 @@ Velocity0 : contains the initial velocity of center of mass and the omega initia
 NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
 {
   _p.resize(3);
+  _p[0].reset(new SiconosVector());
+  _p[1].reset(new SiconosVector(_n)); // Needed in NewtonEulerR
+  _p[2].reset(new SiconosVector());
   zeroPlugin();
   //assert(0);
   // --- NEWTONEULER INHERITED CLASS MEMBERS ---
@@ -61,6 +64,7 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
 
   _dotq.reset(new SiconosVector(_qDim));
   _workspace[freeresidu].reset(new SiconosVector(_n));
+  _workspace[free].reset(new SiconosVector(getDim()));
   _massMatrix.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
   _massMatrix->zero();
@@ -70,6 +74,9 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
 void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix)
 {
   _p.resize(3);
+  _p[0].reset(new SiconosVector());
+  _p[1].reset(new SiconosVector(_n)); // Needed in NewtonEulerR
+  _p[2].reset(new SiconosVector());
   zeroPlugin();
   // --- NEWTONEULER INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
@@ -90,7 +97,6 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _v.reset(new SiconosVector(_n));
   (*_q) = (*_q0);
   _dotq.reset(new SiconosVector(_qDim));
-  _workspace[freeresidu].reset(new SiconosVector(_n));
   _massMatrix.reset(new SimpleMatrix(_n, _n));
   _jacobianvFL.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
@@ -108,6 +114,8 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   startIndex[2] = 3;
   startIndex[3] = 3;
   setBlock(_I, _massMatrix, dimIndex, startIndex);
+  _workspace[freeresidu].reset(new SiconosVector(_n));
+  _workspace[free].reset(new SiconosVector(getDim()));
 
   _T.reset(new SimpleMatrix(_qDim, _n));
   _T->zero();
@@ -167,15 +175,16 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 {
   DEBUG_PRINTF("NewtonEulerDS::initializeNonSmoothInput(unsigned int level) for level = %i\n",level);
 
-  if (level == 0)
+  if (_p[level]->size() == 0)
   {
-    if (!_p[0])
-      _p[0].reset(new SiconosVector(_qDim));
-  }
-  else
-  {
-    if (!_p[level])
-      _p[level].reset(new SiconosVector(_n));
+    if (level == 0)
+    {
+      _p[0]->resize(_qDim);
+    }
+    else
+    {
+      _p[level]->resize(_n);
+    }
   }
 
 
@@ -236,8 +245,6 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
 
   //
-  if (!_workspace[free])
-    _workspace[free].reset(new SiconosVector(getDim()));
   // Memory allocation for fL and its jacobians.
 
   // Set links to variables of top-class DynamicalSystem.
@@ -458,7 +465,7 @@ void NewtonEulerDS::initMemory(unsigned int steps)
   DynamicalSystem::initMemory(steps);
 
   if (steps == 0)
-    std::cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" <<std::endl;
+    std::cout << "Warning : NewtonEulerDS::initMemory with size equal to zero" <<std::endl;
   else
   {
     _qMemory.reset(new SiconosMemory(steps, _qDim));
@@ -489,7 +496,7 @@ void NewtonEulerDS::resetAllNonSmoothPart()
 }
 void NewtonEulerDS::resetNonSmoothPart(unsigned int level)
 {
-  if (_p[level])
+  if (_p[level]->size() > 0)
     _p[level]->zero();
 }
 

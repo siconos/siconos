@@ -47,16 +47,18 @@ private:
 
   void FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1);
   void FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2);
+
+protected:
+  /** initialize components specific to derived classes.
+  */
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 public:
   NewtonEulerFrom3DLocalFrameR(): NewtonEulerFrom1DLocalFrameR() {}
 
   /** destructor
   */
   virtual ~NewtonEulerFrom3DLocalFrameR() {};
-  /** initialize components specific to derived classes.
-  */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-
   /*default implementation consists in multiplying jachq and T*/
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 

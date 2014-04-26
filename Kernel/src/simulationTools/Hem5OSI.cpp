@@ -355,11 +355,7 @@ void Hem5OSI::fprob(integer* IFCN,
     for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
-      VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
-      VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
-      SiconosMatrix& osnsM = *indexSet2->properties(*ui).block;
-      inter->computeOutput(t, DSlink, workV, workM, osnsM, 0);
+      inter->computeOutput(t, indexSet2->properties(*ui), 0);
       assert(0);
     }
 
@@ -372,10 +368,7 @@ void Hem5OSI::fprob(integer* IFCN,
     for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
-      VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
-      VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
-      inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
+      inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
       if (inter->relation()->getType() == NewtonEuler)
       {
         SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
@@ -400,10 +393,7 @@ void Hem5OSI::fprob(integer* IFCN,
     for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      VectorOfBlockVectors& DSlink = *indexSet2->properties(*ui).DSlink;
-      VectorOfVectors& workV = *indexSet2->properties(*ui).workVectors;
-      VectorOfSMatrices& workM = *indexSet2->properties(*ui).workMatrices;
-      inter->relation()->computeJach(t, *inter, DSlink, workV, workM);
+      inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
       if (inter->relation()->getType() == NewtonEuler)
       {
         SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;

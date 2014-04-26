@@ -21,6 +21,7 @@
 #include "FirstOrderNonLinearDS.hpp"
 
 #include "BlockVector.hpp"
+#include "SimulationTypeDef.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES 1
@@ -93,7 +94,7 @@ void FirstOrderType2R::computeg(double time, SiconosVector& lambda, SiconosVecto
 }
 
 
-void FirstOrderType2R::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void FirstOrderType2R::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   DEBUG_PRINT("FirstOrderType2R::computeOutput \n");
   // compute the new y  obtained by linearisation (see DevNotes)
@@ -106,6 +107,10 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, VectorOfBl
   //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
   SiconosVector& y = *inter.y(level);
   DEBUG_EXPR(y.display());
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+  SiconosMatrix& osnsM = *interProp.block;
 
   if (_D)
     prod(*_D, *(inter.lambdaOld(level)), y, true);
@@ -152,13 +157,16 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, VectorOfBl
 
 }
 
-void FirstOrderType2R::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void FirstOrderType2R::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   DEBUG_PRINT("FirstOrderType2R::computeInput \n");
   // compute the new r  obtained by linearisation
   // r_{alpha+1}_{k+1} = g(lambda_{k+1}^{alpha},t_k+1)
   //                     + B_{k+1}^alpha ( lambda_{k+1}^{alpha+1}- lambda_{k+1}^{alpha} )
 
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
 
   SiconosVector lambda = *inter.lambda(level);
   lambda -= *(inter.lambdaOld(level));
@@ -185,10 +193,13 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, VectorOfBlo
 
 }
 
-void FirstOrderType2R::preparNewtonIteration(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderType2R::prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
 {
 
   /* compute the contribution in xPartialNS for the next iteration */
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
   DEBUG_PRINT("FirstOrderType2R::preparNewtonIteration\n");
   if (_B)
     prod(*_B, *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
@@ -208,8 +219,11 @@ void FirstOrderType2R::computeJachx(double time, SiconosVector& x, SiconosVector
   RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
 }
 
-void FirstOrderType2R::computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderType2R::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
   if (!_C)
   {
     SiconosVector& x = *workV[FirstOrderR::vec_x];
@@ -229,10 +243,11 @@ void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, Sim
   RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
 }
 
-void FirstOrderType2R::computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderType2R::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
 {
   if (!_B)
   {
+    VectorOfSMatrices& workM = *interProp.workMatrices;
     computeJacglambda(time, *inter.lambda(0), *workM[FirstOrderR::mat_B]);
   }
 }

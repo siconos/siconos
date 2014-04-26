@@ -122,14 +122,14 @@ public:
   *  \param inter the Interaction owning y
   *  \param level number of the derivative to compute, optional, default = 0.
   */
-  void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0);
+  void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
   /** to compute the input
   *  \param time the current time
   *  \param inter the Interaction owning lambda
   *  \param level "derivative" order of lambda used to compute input
   */
-  void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
+  void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   ACCEPT_STD_VISITORS();
 

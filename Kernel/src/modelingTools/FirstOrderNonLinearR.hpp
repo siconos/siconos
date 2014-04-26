@@ -112,16 +112,7 @@ public:
   void computeJachz(double time, Interaction& inter);
   virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
   virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
-  virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-  {
-    SiconosVector& x = *workV[FirstOrderR::vec_x];
-    x = *DSlink[FirstOrderR::x];
-    SiconosVector& lambda = *inter.lambda(0);
-
-    computeJachx(time, x, lambda, *workM[FirstOrderR::mat_C]);
-    computeJachlambda(time, x, lambda, *workM[FirstOrderR::mat_D]);
-  }
-
+  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
   /** default function to compute jacobianG according to lambda
   *  \param double : current time
@@ -130,26 +121,21 @@ public:
   virtual void computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& B);
   virtual void computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& K);
 
-  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+
+  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+
+  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
+
+  /** return true if the relation requires the computation of residu
+      \return true if residu are required, false otherwise
+   */
+  virtual bool requireResidu()
   {
-    SiconosVector& x = *workV[FirstOrderR::vec_x];
-    x = *DSlink[FirstOrderR::x];
-    SiconosVector& lambda = *inter.lambda(0);
-    if (!_B)
-    {
-      computeJacglambda(time, x, lambda, *workM[FirstOrderR::mat_B]);
-    }
-    if (!_K)
-    {
-      computeJacgx(time, x, lambda, *workM[FirstOrderR::mat_K]);
-    }
+    return true;
   }
 
-  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
-
-  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0);
-
-  virtual void preparNewtonIteration(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 };
 TYPEDEF_SPTR(FirstOrderNonLinearR)

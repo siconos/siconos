@@ -14,22 +14,6 @@ NonlinearRelationReduced2::NonlinearRelationReduced2():
 void NonlinearRelationReduced2::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   FirstOrderType2R::initComponents(inter, DSlink, workV, workM);
-  unsigned int sizeY = inter.getSizeOfY();
-  unsigned int sizeDS = inter.getSizeOfDS();
-
-  SiconosVector& lambda = *inter.lambda(0);
-
-  SiconosVector& x = *workV[FirstOrderR::vec_x];
-  x = *DSlink[FirstOrderR::x];
-
-  double t0 = 0;
-
-  computeh(t0, x, lambda, *inter.Halpha());
-  computeg(t0, lambda, *workV[FirstOrderR::g_alpha]);
-  *DSlink[FirstOrderR::r] = *workV[FirstOrderR::g_alpha];
-  computeJach(t0, inter, DSlink, workV, workM);
-  computeJacg(t0, inter, DSlink, workV, workM);
-
 }
 
 /*y = h(X)*/

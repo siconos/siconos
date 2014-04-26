@@ -223,13 +223,13 @@ public:
       \param time the current time
       \param inter the interaction using this relation
   */
-  virtual void computeJach(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
+  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) = 0;
 
   /* compute all the G Jacobian
    *  \param time the current time
    *  \param inter the interaction using this relation
    */
-  virtual void computeJacg(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
+  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0;
 
 
   /** default function to compute y
@@ -237,14 +237,14 @@ public:
    *  \param inter the interaction using this relation
    *  \param derivativeNumber number of the derivative to compute (optional, default = 0)
    */
-  virtual void computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int derivativeNumber = 0) = 0;
+  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
 
   /** default function to compute r
    *  \param time the current time
    *  \param inter the interaction using this relation
    *  \param level the input "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
 
   virtual SP::SimpleMatrix C() const = 0;
 
@@ -252,6 +252,14 @@ public:
       \return bool
    */
   virtual bool isLinear()
+  {
+    return false;
+  }
+
+  /** return true if the relation requires the computation of residu
+      \return true if residu are required, false otherwise
+   */
+  virtual bool requireResidu()
   {
     return false;
   }
@@ -353,7 +361,7 @@ public:
   /** visitors hook
       \param inter : interaction 
    */
-  virtual void preparNewtonIteration(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
   {
     ;
   };

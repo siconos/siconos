@@ -13,63 +13,7 @@ elecRelation::elecRelation():
 
 void elecRelation::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  unsigned int sizeY = inter.getSizeOfY();
-  unsigned int sizeDS = inter.getSizeOfDS();
-  SiconosVector& y = *inter.y(0);
-  SiconosVector& lambda = *inter.lambda(0);
-
-  //  SiconosVector workX = *inter.data(x);
-  double t0 = 0;
-  workV.resize(FirstOrderR::workVecSize);
-  workM.resize(FirstOrderR::mat_workMatSize);
-  workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
-
-  workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
-  workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-
-  workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
-
-#ifdef CLSC_CIRCUIT
-  //  workX.setValue(0,0);
-  lambda.setValue(0, 20.0 / (sR2 + sR1s));
-  lambda.setValue(1, -20.0 / (sR2 + sR1d));
-  lambda.setValue(2, 20 - 20 * ((sR1s) / (sR2 + sR1s)));
-  lambda.setValue(3, 0);
-  lambda.setValue(4, sE_plus);
-  lambda.setValue(5, 0);
-  lambda.setValue(6, 0);
-  lambda.setValue(7, 20 - 20 * ((sR1s) / (sR2 + sR1s)));
-  lambda.setValue(8, sR2 - sR1d);
-  y.setValue(0, 0);
-  y.setValue(1, 0);
-  y.setValue(2, 0);
-  y.setValue(3, 0);
-  y.setValue(4, 0);
-  y.setValue(5, sR2 - sR1s);
-  y.setValue(6, sE_plus);
-  y.setValue(7, 0);
-  y.setValue(8, 0);
-
-#else
-  //  workX.setValue(0,0);
-  lambda.setValue(0, 0);
-  lambda.setValue(1, 0);
-  lambda.setValue(2, 0);
-  lambda.setValue(3, 0);
-#endif
-
-  //  computeH(t0);
-  workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
-  computeg(t0, lambda, *workV[FirstOrderR::g_alpha]);
-  *DSlink[FirstOrderR::r] = *workV[FirstOrderR::g_alpha];
-  computeJach(t0, inter, DSlink, workV, workM);
-  computeJacg(t0, inter, DSlink, workV, workM);
-#ifdef SICONOS_DEBUG
-  std::cout << "data[r (g_alpha)] init\n";
-  r.display();
-#endif
-
+  FirstOrderType2R::initComponents(inter, DSlink, workV, workM);
 }
 
 

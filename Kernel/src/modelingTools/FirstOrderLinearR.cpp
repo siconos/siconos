@@ -20,6 +20,7 @@
 #include "Interaction.hpp"
 
 #include "BlockVector.hpp"
+#include "SimulationTypeDef.hpp"
 
 using namespace RELATION;
 
@@ -230,8 +231,11 @@ void FirstOrderLinearR::computeh(double time, VectorOfVectors& workV, VectorOfSM
 
 }
 
-void FirstOrderLinearR::computeOutput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void FirstOrderLinearR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
   SiconosVector& z = *workV[FirstOrderR::vec_z];
   z = *DSlink[FirstOrderR::z];
   // We get y and lambda of the interaction (pointers)
@@ -258,9 +262,12 @@ void FirstOrderLinearR::computeg(double time, VectorOfSMatrices& workM, SiconosV
 }
 
 
-void FirstOrderLinearR::computeInput(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM, SiconosMatrix& osnsM, unsigned int level)
+void FirstOrderLinearR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   SiconosVector& lambda = *inter.lambda(level);
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
   SiconosVector& z = *workV[FirstOrderR::z];
   z = *DSlink[FirstOrderR::z];
 
