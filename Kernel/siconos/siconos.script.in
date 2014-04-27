@@ -189,6 +189,7 @@ if __name__ == '__main__':
     main_source = None
     make_targets = ['install']
     make_args = []
+    source_is_python = False
 
     for o, a in opts:
 
@@ -280,11 +281,12 @@ if __name__ == '__main__':
         if len(main_source_splitext)>1:
             if main_source_splitext[1] == '.py':
                 exe = os.path.basename(main_source)
+                source_is_python = True
             else:
                 exe = main_source_splitext[0]
         else:
             exe = main_source
-                
+
         if 'install' in make_targets:
 
             plugin_directories = \
@@ -371,6 +373,8 @@ if __name__ == '__main__':
             format(os.getenv('LD_LIBRARY_PATH'),
                    numerics_prefix,
                    kernel_prefix)
+        if source_is_python:
+            exec_prefix.append('python')
         try:
             subprocess.check_call(exec_prefix +
                                   [os.path.join('.', exe)] +
