@@ -9,11 +9,11 @@ import Siconos.Numerics as N
 def mcp_function (z) :
     M = array([[2., 1.],
                [1., 2.]])
-    
+
     q = array([-5., -6.])
     return dot(M,z) + q
 
-def mcp_Nablafunction (z) : 
+def mcp_Nablafunction (z) :
     M = array([[2., 1.],
                [1., 2.]])
     return M
@@ -37,7 +37,7 @@ def test_mcp_FB():
     mcp=N.MCP(1,1,mcp_function,mcp_Nablafunction)
     z = array([0., 0.])
     w = array([0., 0.])
-    
+
     SO=N.SolverOptions(mcp,N.SICONOS_MCP_FB)
     N.mcp_driver_init(mcp, SO)
     info = N.mcp_FischerBurmeister(mcp, z, w, SO)

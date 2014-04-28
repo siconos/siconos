@@ -32,7 +32,7 @@
 Ugly but required to deal with function pointer connection
 in  FischerFunc_MCP and its jacobian.
 */
-static MixedComplementarityProblem * localProblem = 0;
+static MixedComplementarityProblem * localProblem = NULL;
 
 
 void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOptions* options)
@@ -54,8 +54,8 @@ void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOpt
 
 void mcp_FischerBurmeister_reset(MixedComplementarityProblem * problem, SolverOptions* options)
 {
-  localProblem->nablaFmcp = NULL;
   freeMixedComplementarityProblem(localProblem);
+  localProblem = NULL;
 }
 
 // Must corresponds to a NewtonFunctionPtr

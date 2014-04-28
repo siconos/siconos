@@ -56,6 +56,8 @@ int main(void)
   problem->Fmcp = NULL;
   problem->nablaFmcp = NULL;
 
+  mixedComplementarity_setDefaultSolverOptions(problem, &options);
+
   int size = 5;
   double z[4];
   double F[4];
@@ -71,6 +73,7 @@ int main(void)
   printf("End of MCP solvers test. \n");
   mcp_driver_reset(problem, &options);
   freeMixedComplementarityProblem(problem);
+  deleteSolverOptions(&options);
 
   return info;
 }

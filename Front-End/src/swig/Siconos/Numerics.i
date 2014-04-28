@@ -1133,10 +1133,12 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
   {
     PyErr_SetString(PyExc_TypeError, "parameter must be callable");
   }
-  
-   Py_DECREF(pyarray);
+
+   // PyTuple_SetItem steals a reference to the object
+   // I'm leaving this commented so that people don't do the mistake twice -- xhub
+   //Py_DECREF(pyarray);
    Py_DECREF(tuple);
-  
+
 //Comment :  it will be safier to use  obj_to_array_fortran_allow_conversion
 
   if (is_array(result))
@@ -1224,10 +1226,12 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   {
     PyErr_SetString(PyExc_TypeError, "parameter must be callable");
   }
-  
-  Py_DECREF(pyarray);
+
+  // PyTuple_SetItem steals a reference to the object
+  // I'm leaving this commented so that people don't do the mistake twice -- xhub
+  //Py_DECREF(pyarray);
   Py_DECREF(tuple);
-  
+
   if (is_array(result))
   {
     if (array_size(result,0) != size)
@@ -1653,6 +1657,10 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
      else
      {
        PyErr_SetString(PyExc_TypeError, "argument 3 must be callable");
+       free(MCP->Fmcp);
+       free(MCP->nablaFmcp);
+       MCP->Fmcp = NULL;
+       MCP->nablaFmcp = NULL;
        freeMixedComplementarityProblem(MCP);
        return NULL;
      }
@@ -1666,6 +1674,10 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
      else
      {
        PyErr_SetString(PyExc_TypeError, "argument 4 must be callable");
+       free(MCP->Fmcp);
+       free(MCP->nablaFmcp);
+       MCP->Fmcp = NULL;
+       MCP->nablaFmcp = NULL;
        freeMixedComplementarityProblem(MCP);
        return NULL;
      }
@@ -1675,6 +1687,10 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
   ~MixedComplementarityProblem()
   {
+    free($self->Fmcp);
+    free($self->nablaFmcp);
+    $self->Fmcp = NULL;
+    $self->nablaFmcp = NULL;
     freeMixedComplementarityProblem($self);
   }
 };

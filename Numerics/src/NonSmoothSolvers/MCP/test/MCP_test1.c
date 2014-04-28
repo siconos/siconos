@@ -128,8 +128,7 @@ int main(void)
     printf("w[%i]= %lf\t", i, w[i]);
   }
   printf("\n");
-  free(options.iparam);
-  free(options.dparam);
+  deleteSolverOptions(&options);
   free(z);
   free(w);
   free(problem);
