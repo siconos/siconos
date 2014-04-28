@@ -50,7 +50,6 @@ DEFINE_SPTR(RelayNSL)
 DEFINE_SPTR(MixedComplementarityConditionNSL)
 
 DEFINE_SPTR(TimeDiscretisation)
-DEFINE_SPTR(InteractionProperties)
 
 // Dynamical systems
 DEFINE_SPTR(DynamicalSystem)
@@ -81,5 +80,8 @@ TYPEDEF_SAPTR(integer)
 TYPEDEF_SPTR(integer)
 TYPEDEF_SAPTR(doublereal)
 TYPEDEF_SPTR(doublereal)
+
+// Custom - struct
+struct InteractionProperties;
 
 #endif
