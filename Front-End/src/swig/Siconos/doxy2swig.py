@@ -266,9 +266,15 @@ class Doxy2SWIG:
     def do_parametername(self, node):
         self.add_text('\n')
         try:
-            data=node.firstChild.data
+            data = node.firstChild.data
         except AttributeError: # perhaps a <ref> tag in it
-            data=node.firstChild.firstChild.data
+            if hasattr(node, 'firstChild'):
+                if hasattr(node.firstChild, 'firstChild'):
+                    data = node.firstChild.firstChild.data
+                else:
+                    return
+            else:
+                return
         if data.find('Exception') != -1:
             self.add_text(data)
         else:
