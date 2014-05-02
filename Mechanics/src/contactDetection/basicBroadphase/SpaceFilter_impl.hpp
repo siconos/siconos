@@ -42,6 +42,30 @@ struct NSLawMatrix : public ublas::symmetric_matrix < SP::NonSmoothLaw >
   ACCEPT_SERIALIZATION(NSLawMatrix);
 };
 
+class Hashed : public std11::enable_shared_from_this<Hashed>
+{
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(Hashed);
+
+  Hashed() {};
+
+public:
+  SP::DynamicalSystem body;
+  int i;
+  int j;
+  int k;
+  Hashed(SP::DynamicalSystem body, int i, int j, int k = 0) :
+    body(body), i(i), j(j), k(k) {};
+
+  Hashed(int i, int j, int k = 0)
+    : i(i), j(j), k(k) {};
+
+  ~Hashed() {};
+
+};
+
 struct space_hash : public boost::unordered_multiset < SP::Hashed,
                                                        boost::hash<SP::Hashed> >
 {
@@ -70,32 +94,5 @@ struct DiskPlanRDeclaredPool : public std::map<DiskPlanRDeclared, SP::DiskPlanR>
 {
   ACCEPT_SERIALIZATION(DiskPlanRDeclaredPool);
 };
-
-
-class Hashed : public std11::enable_shared_from_this<Hashed>
-{
-protected:
-  /** serialization hooks
-   */
-  ACCEPT_SERIALIZATION(Hashed);
-
-  Hashed() {};
-
-public:
-  SP::DynamicalSystem body;
-  int i;
-  int j;
-  int k;
-  Hashed(SP::DynamicalSystem body, int i, int j, int k = 0) :
-    body(body), i(i), j(j), k(k) {};
-
-  Hashed(int i, int j, int k = 0)
-    : i(i), j(j), k(k) {};
-
-  ~Hashed() {};
-
-};
-
-
 
 #endif

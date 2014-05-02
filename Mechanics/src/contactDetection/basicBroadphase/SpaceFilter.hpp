@@ -79,11 +79,11 @@ protected:
   /** moving plans */
   SP::FMatrix _moving_plans;
 
-  /* the hash table */
-  SP::space_hash _hash_table;
-
   /* kee track of one step ns integrator initialization */
   bool _osnsinit;
+
+  /* the hash table */
+  SP::space_hash _hash_table;
 
   /* relations pool */
   SP::DiskDiskRDeclaredPool  diskdisk_relations;

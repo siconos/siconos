@@ -22,6 +22,7 @@
 
 static double _2PI = 2 * M_PI;
 
+void normalize(SP::SiconosVector q, unsigned int i);
 
 void normalize(SP::SiconosVector q, unsigned int i)
 {

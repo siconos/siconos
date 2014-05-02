@@ -46,6 +46,7 @@ extern ContactProcessedCallback gContactProcessedCallback;
 
 std::vector<int> gOrphanedInteractions;
 
+bool contactClear(void* userPersistentData);
 bool contactClear(void* userPersistentData)
 {
   //  DEBUG_PRINTF("gContactDestroyedCallback : push Interaction number %d, distance %g\n", static_cast<Interaction *>(userPersistentData)->number(),  static_cast<Interaction *>(userPersistentData)->y(0)->getValue(0));
@@ -53,6 +54,7 @@ bool contactClear(void* userPersistentData)
   return true;
 }
 
+bool contactProcess(btManifoldPoint& cp, void *body0, void *body1);
 bool contactProcess(btManifoldPoint& cp, void *body0, void *body1)
 {
   if (true)

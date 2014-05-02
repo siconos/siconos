@@ -36,6 +36,7 @@
 
 
 /* needed by boost hash */
+bool operator ==(SP::Hashed const& a, SP::Hashed const& b);
 bool operator ==(SP::Hashed const& a, SP::Hashed const& b)
 {
   return (a->i == b->i &&
@@ -44,7 +45,7 @@ bool operator ==(SP::Hashed const& a, SP::Hashed const& b)
 }
 
 
-
+std::size_t hash_value(SP::Hashed const& h);
 std::size_t hash_value(SP::Hashed const& h)
 {
   std::size_t seed = 0;
