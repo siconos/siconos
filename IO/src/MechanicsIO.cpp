@@ -79,9 +79,12 @@ struct ForMu : public Question<double>
 struct ContactPointVisitor : public SiconosVisitor
 {
   const Interaction& inter;
+  const VectorOfVectors& workVectors;
   SiconosVector answer;
 
-  ContactPointVisitor(Interaction& inter) : inter(inter) {};
+  ContactPointVisitor(const Interaction& inter,
+                      const VectorOfVectors& workVectors) :
+    inter(inter), workVectors(workVectors) {};
 
 #ifdef HAVE_BULLET
   void visit(const BulletR& rel)
@@ -94,7 +97,7 @@ struct ContactPointVisitor : public SiconosVisitor
     const SimpleMatrix& jachqT = *rel.jachqT();
     double id = (size_t) &*rel.contactPoint();
     double mu = ask<ForMu>(*inter.nslaw());
-    SiconosVector cf(inter.data(NewtonEulerR::p1)->size());
+    SiconosVector cf(workVectors[NewtonEulerR::p1]->size());
     prod(*inter.lambda(1), jachqT, cf, true);
     answer.setValue(0, mu);
     answer.setValue(1, posa[0]);
@@ -175,19 +178,23 @@ SP::SimpleMatrix MechanicsIO::velocities(const Model& model) const
 SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model) const
 {
   SP::SimpleMatrix result(new SimpleMatrix());
-  DynamicalSystemsGraph::EIterator ei, eiend;
-  const DynamicalSystemsGraph& graph =
-    *model.nonSmoothDynamicalSystem()->topology()->dSG(0);
-  unsigned int current_row;
-  for(current_row=1,std11::tie(ei,eiend)=graph.edges();
-      ei!=eiend; ++ei, ++current_row)
+  InteractionsGraph::VIterator vi, viend;
+  if (model.nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > 0)
   {
-    Interaction& inter = *graph.bundle(*ei);
-    ContactPointVisitor visitor(inter);
-    inter.relation()->accept(visitor);
-    const SiconosVector& data = visitor.answer;
-    result->resize(current_row+1, data.size());
-    result->setRow(current_row, data);
+    InteractionsGraph& graph =
+      *model.nonSmoothDynamicalSystem()->topology()->indexSet(1);
+    unsigned int current_row;
+    result->resize(graph.vertices_number(), 14);
+    for(current_row=1, std11::tie(vi,viend) = graph.vertices();
+        vi!=viend; ++vi, ++current_row)
+    {
+      const Interaction& inter = *graph.bundle(*vi);
+      const VectorOfVectors& workVectors = *graph.properties(*vi).workVectors;
+      ContactPointVisitor visitor(inter, workVectors);
+      inter.relation()->accept(visitor);
+      const SiconosVector& data = visitor.answer;
+      result->setRow(current_row, data);
+    }
   }
   return result;
 }
