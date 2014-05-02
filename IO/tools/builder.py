@@ -18,6 +18,7 @@ import re
 import itertools
 from pygccxml import parser
 from pygccxml import declarations
+from pygccxml.parser import COMPILATION_MODE
 
 myname = sys.argv[0]
 include_paths = []
@@ -74,7 +75,7 @@ input_headers['Mechanics'] = ["SpaceFilter.hpp", "SpaceFilter_impl.hpp",
                               "SphereNEDSPlanR.hpp",
                               "SphereNEDSSphereNEDSR.hpp",
                               "SiconosBodies.hpp",
-                              "CircleCircleR.hpp", "CircularDS.hpp",
+                              "CircleCircleR.hpp", "CircularDS.hpp"
                               ]
 
 
@@ -114,7 +115,7 @@ def replace_by_typedef(some_type):
 # main loop
 config = parser.config_t(include_paths=include_paths)
 
-decls = parser.parse(all_headers, config)
+decls = parser.parse(all_headers, config,  compilation_mode=COMPILATION_MODE.ALL_AT_ONCE)
 global_ns = declarations.get_global_namespace(decls)
 
 # classes in siconos_namespace
