@@ -1159,15 +1159,16 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
     { 
 
       int is_new_object0=0;      
-      make_fortran((PyArrayObject *)result, &is_new_object0);
+      PyArrayObject* result2 = make_fortran((PyArrayObject *)result, &is_new_object0);
       // if (is_new_object0)
       // {
       //   Py_DECREF(result);
       //   printf ("the object is new !!\n");
       // }
-      memcpy(nablaF, (double *)array_data(result), size*size * sizeof(double));
+      memcpy(nablaF, (double *)array_data(result2), size*size * sizeof(double));
       
     }
+   Py_DECREF(result);
   }
   else
   {      
@@ -1176,10 +1177,9 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
     PyErr_Format(PyExc_TypeError,
                  "Array of type '%s' required as return value fo callback function. A '%s' was returned",
                    desired_type, actual_type);
-    
+    if (result != NULL) Py_DECREF(result); // things can go really south ...
   }
-  
-  Py_DECREF(result);
+
   return;
 
 }
@@ -1248,12 +1248,11 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     }
     else
     { 
-      if (array_is_contiguous(result))
-      {
-        memcpy(F, (double *)array_data(result), size * sizeof(double));
-      }
-      else PyErr_SetString(PyExc_RuntimeError, "Return value of callback function is not contiguous");
+      int is_new_object0=0;      
+      PyArrayObject* result2 = make_fortran((PyArrayObject *)result, &is_new_object0);
+      memcpy(F, (double *)array_data(result2), size * sizeof(double));
     }
+    Py_DECREF(result);
   }
   else
   {
@@ -1262,9 +1261,9 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     PyErr_Format(PyExc_TypeError,
                  "Array of type '%s' required as return value fo callback function. A '%s' was returned",
                    desired_type, actual_type);
+    if (result != NULL) Py_DECREF(result); // things can go really south ...
   }
   
-  Py_DECREF(result);
   return;
 
 }
