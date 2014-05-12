@@ -83,9 +83,17 @@ ENDIF()
 
 FIND_PACKAGE(Boost 1.47 COMPONENTS serialization REQUIRED)
 
+# cmake 2.8.12.2 (ubuntu 14.04) need this
+SET(SiconosIO_LINK_LIBRARIES  "${SiconosIO_LINK_LIBRARIES};${Boost_LIBRARIES}")
+
 FIND_PACKAGE(Boost 1.47 COMPONENTS filesystem REQUIRED)
 
+# cmake 2.8.12.2 (ubuntu 14.04) need this
+SET(SiconosIO_LINK_LIBRARIES  "${SiconosIO_LINK_LIBRARIES};${Boost_LIBRARIES}")
+
 COMPILE_WITH(Boost REQUIRED)
+
+
 
 # remove debug & optimized inside LINK_LIBRARIES...
 FOREACH(_L ${SiconosIO_LINK_LIBRARIES})
