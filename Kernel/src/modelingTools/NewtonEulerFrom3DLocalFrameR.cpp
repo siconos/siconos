@@ -50,7 +50,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   double G1y = d1->q()->getValue(1);
   double G1z = d1->q()->getValue(2);
 
-  assert(_Nc->norm2() >0.0 && "NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Normal vector not consitent ") ;
+  assert(_Nc->norm2() >0.0 && "NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Normal vector not consistent ") ;
 
 
 #ifdef NEFC3D_DEBUG

@@ -17,7 +17,7 @@ SET(EXAMPLES_DIRECTORIES
   Robotics/HuMAns_pa10
 )
 
-SET(NO_TEST_FILES QGL Two SliderCrankD1MinusLinear)
+SET(NO_TEST_FILES QGL)
 
 SICONOS_PROJECT(Examples)
 
