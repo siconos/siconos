@@ -1209,7 +1209,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->relativeConvergenceCriterionHeld();
 
       // level == LEVELMAX => p(level) does not even exists (segfault)
-      if (level != LEVELMAX && d->p(level))
+      if (level != LEVELMAX && d->p(level) && d->p(level)->size() > 0)
       {
 
         assert(((d->p(level)).get()) &&
@@ -1302,7 +1302,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       // assert(((d->p(level)).get()) &&
       //       " MoreauJeanOSI::updateState() *d->p(level) == NULL.");
 
-      if (level != LEVELMAX && d->p(level))
+      if (level != LEVELMAX && d->p(level) && d->p(level)->size() > 0)
       {
         /*d->p has been fill by the Relation->computeInput, it contains
           B \lambda _{k+1}*/

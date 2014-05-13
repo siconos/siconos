@@ -55,7 +55,7 @@
 // --- id ---
 Simulation::Simulation(SP::TimeDiscretisation td):
   _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
-  _tolerance(DEFAULT_TOLERANCE), _printStat(false), _staticLevels(false), _levelsAreComputed(false)
+  _tolerance(DEFAULT_TOLERANCE), _printStat(false), _staticLevels(false)
 {
   if (!td)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
@@ -986,7 +986,6 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
 void Simulation::computeLevelsForInputAndOutput()
 {
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-  _levelsAreComputed = true;
 
   InteractionsGraph::VIterator ui, uiend;
   SP::InteractionsGraph indexSet0 = topo->indexSet0();

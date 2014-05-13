@@ -138,10 +138,6 @@ protected:
    * initialized */
   bool _staticLevels;
 
-  /** _levelsAreComputed : to keep track of levels initialization
-   * initialized */
-  bool _levelsAreComputed;
-
   /**Output file for stats*/
   std::ofstream statOut;
 

@@ -34,6 +34,9 @@ BulletR::BulletR(SP::btManifoldPoint point, SP::btPersistentManifold contactMani
   _contactPoints(point),
   _contactManifold(contactManifold)
 {
+  (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
+  (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
+  (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
 }
 
 void BulletR::computeh(double time, Interaction& inter)

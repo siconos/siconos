@@ -75,7 +75,7 @@ bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m
     for (unsigned int j = 0; j < s2; j++)
     {
       infile >> p(i, j);
-      assert(infile.good());
+      /* fail on ubuntu 14.04 assert(infile.good());*/
     }
   }
 
