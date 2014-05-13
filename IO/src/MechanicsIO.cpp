@@ -79,12 +79,10 @@ struct ForMu : public Question<double>
 struct ContactPointVisitor : public SiconosVisitor
 {
   const Interaction& inter;
-  const VectorOfVectors& workVectors;
   SiconosVector answer;
 
-  ContactPointVisitor(const Interaction& inter,
-                      const VectorOfVectors& workVectors) :
-    inter(inter), workVectors(workVectors) {};
+  ContactPointVisitor(const Interaction& inter) :
+    inter(inter) {};
 
 #ifdef HAVE_BULLET
   void visit(const BulletR& rel)
@@ -97,7 +95,7 @@ struct ContactPointVisitor : public SiconosVisitor
     const SimpleMatrix& jachqT = *rel.jachqT();
     double id = (size_t) &*rel.contactPoint();
     double mu = ask<ForMu>(*inter.nslaw());
-    SiconosVector cf(workVectors[NewtonEulerR::p1]->size());
+    SiconosVector cf(6);
     prod(*inter.lambda(1), jachqT, cf, true);
     answer.setValue(0, mu);
     answer.setValue(1, posa[0]);
@@ -113,7 +111,6 @@ struct ContactPointVisitor : public SiconosVisitor
     answer.setValue(11, cf(1));
     answer.setValue(12, cf(2));
     answer.setValue(13, id);
-
   }
 #endif
 };
@@ -185,12 +182,11 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model) const
       *model.nonSmoothDynamicalSystem()->topology()->indexSet(1);
     unsigned int current_row;
     result->resize(graph.vertices_number(), 14);
-    for(current_row=1, std11::tie(vi,viend) = graph.vertices();
+    for(current_row=0, std11::tie(vi,viend) = graph.vertices();
         vi!=viend; ++vi, ++current_row)
     {
       const Interaction& inter = *graph.bundle(*vi);
-      const VectorOfVectors& workVectors = *graph.properties(*vi).workVectors;
-      ContactPointVisitor visitor(inter, workVectors);
+      ContactPointVisitor visitor(inter);
       inter.relation()->accept(visitor);
       const SiconosVector& data = visitor.answer;
       result->setRow(current_row, data);
