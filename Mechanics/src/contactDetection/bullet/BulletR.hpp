@@ -41,7 +41,7 @@ public:
     return _contactPoints;
   };
 
-  void computeh(double time, Interaction& inter);
+  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   ACCEPT_STD_VISITORS();
 };

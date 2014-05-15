@@ -34,13 +34,25 @@ BulletR::BulletR(SP::btManifoldPoint point, SP::btPersistentManifold contactMani
   _contactPoints(point),
   _contactManifold(contactManifold)
 {
+  btVector3 posa = _contactPoints->getPositionWorldOnA();
+  btVector3 posb = _contactPoints->getPositionWorldOnB();
+
+  (*pc1())(0) = posa[0];
+  (*pc1())(1) = posa[1];
+  (*pc1())(2) = posa[2];
+  (*pc2())(0) = posb[0];
+  (*pc2())(1) = posb[1];
+  (*pc2())(2) = posb[2];
+
   (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
   (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
   (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
 }
 
-void BulletR::computeh(double time, Interaction& inter)
+void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
+  NewtonEulerR::computeh(time, q0, y);
+
   DEBUG_PRINT("start of computeh\n");
 
   btVector3 posa = _contactPoints->getPositionWorldOnA();
@@ -54,14 +66,14 @@ void BulletR::computeh(double time, Interaction& inter)
   (*pc2())(2) = posb[2];
 
   {
-    inter.y(0)->setValue(0, _contactPoints->getDistance());
+    y.setValue(0, _contactPoints->getDistance());
 
     (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
     (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
     (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
   }
 
-  DEBUG_PRINTF("distance : %g\n",  inter.y(0)->getValue(0));
+  DEBUG_PRINTF("distance : %g\n",  y.getValue(0));
 
 
   DEBUG_PRINTF("position on A : %g,%g,%g\n", posa[0], posa[1], posa[2]);

@@ -214,21 +214,21 @@ public:
   * \param z the BlockVector of parameters
   * \param[out] y the return value of the function call
   */
-  void computeh(double time, SiconosVector& q, SiconosVector& v, SiconosVector& z, SiconosVector& y);
+  virtual void computeh(double time, SiconosVector& q, SiconosVector& v, SiconosVector& z, SiconosVector& y);
 
-  void computeJachlambda(double time, Interaction& inter)
+  virtual void computeJachlambda(double time, Interaction& inter)
   {
     ;
   }
-  void computeJachq(double time, Interaction& inter)
+  virtual void computeJachq(double time, Interaction& inter)
   {
     ;
   }
-  void computeJachqDot(double time, Interaction& inter)
+  virtual void computeJachqDot(double time, Interaction& inter)
   {
     ;
   }
-  void computeDotJachq(double time, Interaction& inter)
+  virtual void computeDotJachq(double time, Interaction& inter)
   {
     ;
   }
@@ -240,20 +240,20 @@ public:
    * \param time  current time
    * \param inter interaction that owns the relation
    */
-  void computehDot(double time, Interaction& inter)
+  virtual void computehDot(double time, Interaction& inter)
   {
     ;
   }
 
-  void computeJacglambda(double time, Interaction& inter)
+  virtual void computeJacglambda(double time, Interaction& inter)
   {
     ;
   }
-  void computeJacgq(double time, Interaction& inter)
+  virtual void computeJacgq(double time, Interaction& inter)
   {
     ;
   }
-  void computeJacgqDot(double time, Interaction& inter)
+  virtual void computeJacgqDot(double time, Interaction& inter)
   {
     ;
   }

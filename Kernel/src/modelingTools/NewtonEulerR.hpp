@@ -197,7 +197,7 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
   * \param: double, current time
   */
-  void computeh(double time, BlockVector& q0, SiconosVector& y);
+  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   /** default function to compute jacobianH
   *  \param double : current time
