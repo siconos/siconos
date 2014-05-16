@@ -206,16 +206,6 @@ public:
   */
   void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
-  /** to compute y = h(t,q,v,z) using plug-in mechanism
-  * \param time current time
-  * \param inter interaction that owns the relation
-  * \param q the BlockVector of coordinates
-  * \param v the BlockVector of velocities
-  * \param z the BlockVector of parameters
-  * \param[out] y the return value of the function call
-  */
-  virtual void computeh(double time, SiconosVector& q, SiconosVector& v, SiconosVector& z, SiconosVector& y);
-
   virtual void computeJachlambda(double time, Interaction& inter)
   {
     ;
@@ -257,6 +247,7 @@ public:
   {
     ;
   }
+
   /* compute all the H Jacobian */
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp)
   {
@@ -266,6 +257,7 @@ public:
     computeJachlambda(time, inter);
     computehDot(time,inter);
   }
+
   /* compute all the G Jacobian */
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
   {
@@ -273,7 +265,6 @@ public:
     computeJacgqDot(time, inter);
     computeJacglambda(time, inter);
   }
-
 
   /** to compute output
   *  \param double : current time

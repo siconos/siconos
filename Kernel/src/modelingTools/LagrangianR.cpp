@@ -41,13 +41,6 @@ void LagrangianR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, V
   initComponents(inter, DSlink, workV, workM);
 }
 
-void LagrangianR::computeh(double time, SiconosVector& q, SiconosVector& v, SiconosVector& z, SiconosVector& y)
-{
-  RuntimeException::selfThrow(
-    "LagrangianR::computeh: not yet implemented (or useless) for Lagrangian relation of type " + _subType);
-}
-
-
 void LagrangianR::zeroPlugin()
 {
   Relation::zeroPlugin();
