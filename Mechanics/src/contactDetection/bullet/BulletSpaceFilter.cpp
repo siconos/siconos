@@ -136,6 +136,7 @@ void BulletSpaceFilter::buildInteractions(double time)
            ico != collisionObjects.end(); ++ico)
       {
         _collisionWorld->addCollisionObject(const_cast<btCollisionObject*>((*ico).first));
+        DEBUG_PRINTF("add dynamic collision object %p\n", const_cast<btCollisionObject*>((*ico).first));
       }
     }
 
@@ -148,6 +149,7 @@ void BulletSpaceFilter::buildInteractions(double time)
           ic = _staticObjects->begin(); ic != _staticObjects->end(); ++ic)
     {
       _collisionWorld->addCollisionObject(const_cast<btCollisionObject*>((*ic).first));
+      DEBUG_PRINTF("add static collision object %p\n", const_cast<btCollisionObject*>((*ic).first));
     }
 
     _staticCollisionsObjectsInserted = true;
@@ -181,13 +183,20 @@ void BulletSpaceFilter::buildInteractions(double time)
   unsigned int numManifolds =
     _collisionWorld->getDispatcher()->getNumManifolds();
 
+  DEBUG_PRINTF("number of manifolds : %d\n", numManifolds);
+
   for (unsigned int i = 0; i < numManifolds; ++i)
   {
     btPersistentManifold* contactManifold =
       _collisionWorld->getDispatcher()->getManifoldByIndexInternal(i);
 
+    DEBUG_PRINTF("processing manifold %d : %p\n", i, contactManifold);
+
     const btCollisionObject* obA = contactManifold->getBody0();
     const btCollisionObject* obB = contactManifold->getBody1();
+
+
+    DEBUG_PRINTF("object A : %p, object B: %p\n", obA, obB);
 
     //    contactManifold->refreshContactPoints(obA->getWorldTransform(),obB->getWorldTransform());
 
@@ -359,12 +368,14 @@ void BulletSpaceFilter::buildInteractions(double time)
             cpoint->m_userPersistentData = &*inter;
             if (dsa != dsb)
             {
+              DEBUG_PRINTF("LINK %p %p\n", obA, obB);
               link(inter, dsa, dsb);
             }
             /* else collision shapes belong to the same object do nothing */
           }
           else
           {
+            DEBUG_PRINTF("LINK %p\n", obA);
             cpoint->m_userPersistentData = &*inter;
             link(inter, dsa);
           }

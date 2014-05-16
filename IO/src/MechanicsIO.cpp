@@ -45,6 +45,9 @@
 #include "ExternalBody.hpp"
 
 
+//#define DEBUG_MESSAGES 1
+#include <debug.h>
+
 using namespace Alternative;
 
 struct GetPosition : public SiconosVisitor
@@ -185,6 +188,8 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model) const
     for(current_row=0, std11::tie(vi,viend) = graph.vertices();
         vi!=viend; ++vi, ++current_row)
     {
+      DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
+
       const Interaction& inter = *graph.bundle(*vi);
       ContactPointVisitor visitor(inter);
       inter.relation()->accept(visitor);
