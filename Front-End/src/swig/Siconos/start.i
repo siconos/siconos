@@ -1,3 +1,7 @@
+// named parameters
+%feature("kwargs");
+
+
 // head declarations
 
 // to avoid name conflicts
