@@ -36,6 +36,7 @@
 #include "FrictionContact3D_localAlartCurnier.h"
 #include "FrictionContact3D_compute_error.h"
 #include "fclib_interface.h"
+#include "Numerics_functions.h"
 
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/preprocessor/cat.hpp>
@@ -190,6 +191,7 @@
 // vectors of size problem_size from given *Problem as first input
 // no conversion => inout array XXX FIX issue here
 %typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object=0) {
+  //typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object=0)
 
   array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
 
@@ -212,6 +214,35 @@
  }
 
 %typemap(freearg) (double *z)
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
+
+%typemap(in) (double* Fmcp) (PyArrayObject* array=NULL, int is_new_object=0) {
+  //typemap(in) (double* Fmcp) (PyArrayObject* array=NULL, int is_new_object=0)
+
+  array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
+
+  if (!array 
+      || !require_native(array) ) 
+    SWIG_fail;
+
+  npy_intp array_len[2] = {0,0};
+
+  array_len[0] = array_size(array,0);
+
+  if (array_numdims(array) > 1)
+    array_len[1] = array_size(array,1);
+
+  if(!require_size(array, array_len, array_numdims(array))) 
+    SWIG_fail;
+
+  $1 = (double *) array_data(array);
+
+ }
+
+%typemap(freearg) (double* Fmcp)
 {
   if (is_new_object$argnum && array$argnum)
     { Py_DECREF(array$argnum); }
@@ -1346,6 +1377,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     mixedLinearComplementarity_setDefaultSolverOptions(mlcp, SO);
     return SO;
   }
+
   SolverOptions(MixedComplementarityProblem* mlcp, MCP_SOLVER id)
   {
     SolverOptions *SO;
@@ -1354,7 +1386,16 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     mixedComplementarity_setDefaultSolverOptions(mlcp, SO);
     return SO;
   }
- 
+
+  SolverOptions(MixedComplementarityProblem2* mcp, MCP_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    SO->solverId=id;
+    mixedComplementarity_setDefaultSolverOptions((MixedComplementarityProblem*)mcp, SO);
+    return SO;
+  }
+
   // SolverOptions(FRICTION_SOLVER id)
   // {
   //   return BOOST_PP_CAT(FE_SWIG_INTERNAL_MEMBER,SolverOptions_makeSolverOptions)(NULL, NULL, id);
@@ -1694,6 +1735,161 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   }
 };
 
+%{
+
+  static void call_py_compute_Fmcp(void *env, int n1, int n2, double* z, double* Fmcp)
+  {
+    if (PyCallable_Check((PyObject*) env))
+    {
+
+      npy_intp dim[1];
+      dim[0] = n1 + n2;
+
+
+      PyObject* py_z = FPyArray_SimpleNewFromData(1, dim, NPY_DOUBLE, z);
+      PyObject* py_Fmcp = FPyArray_SimpleNewFromData(1, dim, NPY_DOUBLE, Fmcp);
+
+      PyObject* py_n1 = PyInt_FromLong(n1);
+      PyObject* py_n2 = PyInt_FromLong(n2);
+
+      PyObject* py_args = PyTuple_New(4);
+      PyTuple_SetItem(py_args, 0, py_n1);
+      PyTuple_SetItem(py_args, 1, py_n2);
+      PyTuple_SetItem(py_args, 2, py_z);
+      PyTuple_SetItem(py_args, 3, py_Fmcp);
+
+      PyGILState_STATE gstate;
+      gstate = PyGILState_Ensure();
+
+      PyObject* py_out = PyObject_CallObject((PyObject*) env, py_args);
+
+      Py_DECREF(py_args);
+      Py_XDECREF(py_out);
+
+      PyGILState_Release(gstate);
+    }
+    else
+    {
+      PyErr_SetString(PyExc_TypeError,"Expecting a callable function");
+    }
+  };
+
+  static void call_py_compute_nabla_Fmcp(void *env, int n1, int n2, double* z, double* nabla_Fmcp)
+  {
+    if (PyCallable_Check((PyObject*) env))
+    {
+
+      npy_intp dim[1];
+      dim[0] = n1 + n2;
+
+      npy_intp dim2[2];
+      dim2[0] = n1 + n2;
+      dim2[1] = n1 + n2;
+
+
+      PyObject* py_z = FPyArray_SimpleNewFromData(1, dim, NPY_DOUBLE, z);
+      PyObject* py_nabla_Fmcp = FPyArray_SimpleNewFromData(2, dim2, NPY_DOUBLE, nabla_Fmcp);
+
+      PyObject* py_n1 = PyInt_FromLong(n1);
+      PyObject* py_n2 = PyInt_FromLong(n2);
+
+      PyObject* py_args = PyTuple_New(4);
+      PyTuple_SetItem(py_args, 0, py_n1);
+      PyTuple_SetItem(py_args, 1, py_n2);
+      PyTuple_SetItem(py_args, 2, py_z);
+      PyTuple_SetItem(py_args, 3, py_nabla_Fmcp);
+
+      PyGILState_STATE gstate;
+      gstate = PyGILState_Ensure();
+
+      PyObject* py_out = PyObject_CallObject((PyObject*) env, py_args);
+
+      Py_DECREF(py_args);
+      Py_XDECREF(py_out);
+
+      PyGILState_Release(gstate);
+    }
+    else
+    {
+      PyErr_SetString(PyExc_TypeError,"Expecting a callable function");
+    }
+  };
+
+
+%}
+
+
+%extend MixedComplementarityProblem2_
+{
+  MixedComplementarityProblem2()
+   {
+     MixedComplementarityProblem2* MCP;
+     MCP = (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
+     MCP->nabla_Fmcp = NULL;
+     MCP->compute_Fmcp = &call_py_compute_Fmcp;
+     MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
+     MCP->env_compute_Fmcp = NULL;
+     MCP->env_compute_nabla_Fmcp = NULL;
+
+     return MCP;
+   }
+
+  MixedComplementarityProblem2(PyObject* n1, PyObject* n2, PyObject* py_compute_Fmcp, PyObject* py_compute_nabla_Fmcp)
+  {
+     MixedComplementarityProblem2* MCP;
+     MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
+
+     MCP->compute_Fmcp = &call_py_compute_Fmcp;
+     MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
+     MCP->n1 = (int) PyInt_AsLong(n1);
+     MCP->n2 = (int) PyInt_AsLong(n2);
+     int size =  MCP->n1 +  MCP->n2;
+
+     if (size<1)
+     {
+       PyErr_SetString(PyExc_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
+       free(MCP);
+       return NULL;
+     }
+     else
+     {
+       MCP->nabla_Fmcp = (double *) malloc(size*size*sizeof(double));
+     }
+
+     if (PyCallable_Check(py_compute_Fmcp)) 
+     {
+       MCP->env_compute_Fmcp = (void*) py_compute_Fmcp;
+     }
+     else
+     {
+       PyErr_SetString(PyExc_TypeError, "argument 3 must be callable");
+       free(MCP->nabla_Fmcp);
+       free(MCP);
+       return NULL;
+     }
+
+
+     if (PyCallable_Check(py_compute_nabla_Fmcp))
+     {
+       MCP->env_compute_nabla_Fmcp = (void *)py_compute_nabla_Fmcp;
+     }
+     else
+     {
+       PyErr_SetString(PyExc_TypeError, "argument 4 must be callable");
+       free(MCP->nabla_Fmcp);
+       free(MCP);
+       return NULL;
+     }
+
+     return MCP;
+   }
+
+  ~MixedComplementarityProblem2()
+  {
+    free($self->nabla_Fmcp);
+    free($self);
+  }
+};
 
 %typemap(out) (double* q) {
   npy_intp dims[2];

@@ -25,7 +25,7 @@
   \section ncpIntro The problem
   Find \f$z \in \mathcal{R}^n\f$ such that:\n\n
   \f$
-  0 \le F(z) \perp z \ge 0 \\
+  0 \le z \perp F(z) \ge 0 \\
   \f$
 
   \section ncpSolvers Available solvers/formulations:
@@ -52,12 +52,12 @@ extern "C"
    * This function checks the validity of the vector z as a solution \n
    * of the NCP : \n
    * \f$
-   *    0 \le z \perp Mz + q \ge 0
+   *    0 \le z \perp w = F(z) \ge 0
    * \f$
    * \author Houari Khenous
    \warning temporary function - To be reviewed
   */
-  void NCP_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err);
+  void NCP_compute_error(int n, double *w, double *z, int verbose, double *err);
 
   /** This function adapts the NCP_compute_error routine for M saved as a SparseBlockStructuredMatrix.
    * TEMPORARY FUNCTION, used to compare pfc3D and FrictionContact3D functions.

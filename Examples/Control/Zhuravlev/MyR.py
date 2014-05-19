@@ -3,7 +3,7 @@ try:
     import Siconos.Numerics as N
 
 except (ImportError):
-    print 'Could not import Siconos.* module'
+    print('Could not import Siconos.* module')
 
 import numpy
 
@@ -14,7 +14,7 @@ class MyR(SK.FirstOrderNonLinearR):
     def __init__(self, C, B):
         SK.FirstOrderNonLinearR.__init__(self)
         self._kappa = .5
-	self._g = 9.81
+        self._g = 9.81
         self.setCPtr(C)
         return
 
@@ -32,7 +32,7 @@ class MyR(SK.FirstOrderNonLinearR):
         #print(l)
         #print(R)
         R[0] = -self._kappa*l[0]*l[1]*x[1]
-	R[1] = self._g*l[0]/(1-self._kappa*l[0]*l[1])
+        R[1] = self._g*l[0]/(1-self._kappa*l[0]*l[1])
         #print(R)
         #print('computeg done')
         pass
@@ -49,18 +49,18 @@ class MyR(SK.FirstOrderNonLinearR):
         #print('call computeJacglambda')
         #print(B)
         B[0, 0] = -self._kappa*l[1]*x[1]
-	B[0, 1] = -self._kappa*l[0]*x[1]
-	B[1, 0] = self._g/(1-self._kappa*l[0]*l[1])**2
-	B[1, 1] = (self._g*self._kappa*l[0]**2)/(1-self._kappa*l[0]*l[1])**2
+        B[0, 1] = -self._kappa*l[0]*x[1]
+        B[1, 0] = self._g/(1-self._kappa*l[0]*l[1])**2
+        B[1, 1] = (self._g*self._kappa*l[0]**2)/(1-self._kappa*l[0]*l[1])**2
         pass
 
     def computeJacgx(self,time, x, l, K):
         #print('call computeJacgx')
 
         K[:]=numpy.zeros(2)
-	K[0, 1] = -self._kappa*l[0]*l[1]
+        K[0, 1] = -self._kappa*l[0]*l[1]
 
-        #print(K)        
+        #print(K)
         pass
 
     def computeJachlambda(self, time, x, l, D):

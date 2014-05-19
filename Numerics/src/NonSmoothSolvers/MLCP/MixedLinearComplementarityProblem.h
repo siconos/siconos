@@ -139,8 +139,8 @@ typedef struct
                          is saved using (M,q),  0 otherwise */
   int isStorageType2; /**< boolean for storageType2 1 if the problem
                          is saved using (A,B,C,D,a,b), 0 otherwise*/
-  int n; /**< number of the linear constraints*/
-  int m; /**< number of the complementarity constraints*/
+  int n; /**< number of equality constraints */
+  int m; /**< number of complementarity constraints */
   int * blocksRows;  /**< The rows from blocksRows[i] to blocksRows[i+1]-1
                         forms a block of equalities iif bloksIsComp[i]=0,
                         else the block is a complementarity block.
@@ -151,8 +151,8 @@ typedef struct
                          else the block is a complementarity block.
                       */
   NumericsMatrix* M; /**< M matrix of the MLCP */
-  /** NumericsMatrix* Bblock;*/ /**< Bblock  ?*/
   double *q; /**< q vector of the MLCP */
+  /** NumericsMatrix* Bblock;*/ /**< Bblock  ?*/
   double *A; /**< A matrix of the MLCP */
   double *B; /**< B matrix of the MLCP */
   double *C; /**< C matrix of the MLCP */

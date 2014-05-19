@@ -122,6 +122,16 @@ extern "C"
   */
   int mcp_driver(MixedComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
 
+  /** General interface to solver for MCP problems -- new version
+      \param[in] problem the MixedComplementarityProblem2 structure which handles the problem
+      \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and its(their) parameters
+      \param[in] global_options  general options for Numerics (verbose mode ...)
+      \return info termination value  0 : successful, else error.\n
+  */
+  int mcp_driver2(MixedComplementarityProblem2* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
+
   /** LMGC interface to solvers for friction-contact 3D problem
    *  \param[in,out] reaction global vector (nc*3)
    *  \param[in,out] velocity global vector (nc*3)

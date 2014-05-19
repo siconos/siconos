@@ -36,6 +36,7 @@ char *  SICONOS_LCP_QP_STR = "QP";
 char *  SICONOS_LCP_NSQP_STR = "NSQP";
 char *  SICONOS_LCP_NEWTONMIN_STR = "NewtonMin";
 char *  SICONOS_LCP_NEWTONFB_STR = "NewtonFB";
+char *  SICONOS_LCP_NEWTONMINFB_STR = "NewtonMinFB";
 char *  SICONOS_LCP_PSOR_STR = "PSOR";
 char *  SICONOS_LCP_RPGS_STR = "RPGS";
 char *  SICONOS_LCP_PATH_STR = "PATH";
@@ -234,6 +235,13 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     */
   case SICONOS_LCP_NEWTONFB:
     lcp_newton_FB(problem, z , w , &info , options);
+    break;
+    /****** Newton min + Fischer-Burmeister ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error
+    */
+  case SICONOS_LCP_NEWTONMINFB:
+    lcp_newton_minFB(problem, z , w , &info , options);
     break;
     /****** PSOR Solver ******/
     /* IN: itermax, tolerance, relax

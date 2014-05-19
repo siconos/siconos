@@ -55,6 +55,7 @@
     things will be clearer ...
  */
 typedef void (*ptrFunctionMCP)(int size , double* z, double * F);
+typedef void (*ptrFunctionMCP2)(void* env, int n1, int n2, double* z, double * F);
 
 //ptrFunctionMCP Fmcp = NULL;
 
@@ -93,6 +94,21 @@ typedef struct
   double * nablaFmcp ;
 
 } MixedComplementarityProblem;
+
+/** \struct MixedComplementarityProblem2_ MixedComplementarityProblem.h
+ * Structure that contains and defines a MixedComplementarityProblem
+ */
+typedef struct MixedComplementarityProblem2_
+{
+  int n1; /**< number of equalities constraints */
+  int n2; /**< size of complementary variables */
+  ptrFunctionMCP2 compute_Fmcp; /**< pointer to the function used to compute Fmcp(z) = (G(z), H(z))*/
+  ptrFunctionMCP2 compute_nabla_Fmcp; /**< pointer to the function used to compute \f$\nabla_z Fmcp\f$*/
+  double* nabla_Fmcp; /**< storage for \f$\nabla_z Fmcp\f$*/
+  void* env_compute_Fmcp; /**< environment for the compute_Fmcp (useful for Python bindings)*/
+  void* env_compute_nabla_Fmcp; /**< environment for the compute_nabla_Fmcp (useful for Python bindings)*/
+
+} MixedComplementarityProblem2;
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

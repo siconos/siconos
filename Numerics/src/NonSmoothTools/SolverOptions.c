@@ -392,6 +392,8 @@ char * idToName(int Id)
     return SICONOS_LCP_NEWTONMIN_STR ;
   case    SICONOS_LCP_NEWTONFB :
     return SICONOS_LCP_NEWTONFB_STR;
+  case    SICONOS_LCP_NEWTONMINFB :
+    return SICONOS_LCP_NEWTONMINFB_STR;
   case    SICONOS_LCP_PSOR :
     return SICONOS_LCP_PSOR_STR;
   case    SICONOS_LCP_RPGS :
@@ -560,6 +562,8 @@ int nameToId(char * pName)
     return SICONOS_LCP_NEWTONMIN;
   else if (strcmp(SICONOS_LCP_NEWTONFB_STR, pName) == 0)
     return SICONOS_LCP_NEWTONFB;
+  else if (strcmp(SICONOS_LCP_NEWTONMINFB_STR, pName) == 0)
+    return SICONOS_LCP_NEWTONMINFB;
   else if (strcmp(SICONOS_LCP_PSOR_STR, pName) == 0)
     return SICONOS_LCP_PSOR;
   else if (strcmp(SICONOS_LCP_RPGS_STR, pName) == 0)

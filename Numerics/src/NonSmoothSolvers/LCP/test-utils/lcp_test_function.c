@@ -39,6 +39,7 @@ void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearCo
   case SICONOS_LCP_AVI_CAOFERRIS:
   case SICONOS_LCP_NEWTONMIN:
   case SICONOS_LCP_NEWTONFB:
+  case SICONOS_LCP_NEWTONMINFB:
   {
     options->iSize = 2;
     options->dSize = 2;
@@ -121,6 +122,7 @@ void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, Line
   case SICONOS_LCP_AVI_CAOFERRIS:
   case SICONOS_LCP_NEWTONMIN:
   case SICONOS_LCP_NEWTONFB:
+  case SICONOS_LCP_NEWTONMINFB:
   {
     options->iparam[0] = maxIter;
     options->dparam[0] = tolerance;

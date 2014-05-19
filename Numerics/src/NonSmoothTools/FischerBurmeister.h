@@ -70,6 +70,7 @@ extern "C"
       \param[in] F vector \f$ F(z) \f$
       \param[in] jacobianF \f$ \nabla_z F(z) \f$
       \param[in,out]  jacobianPhi \f$ \nabla_z \phi(z,F(z)) \f$.
+      \warning this function looks broken !
   */
   void jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* jacobianPhi);
 
@@ -90,9 +91,21 @@ extern "C"
       \param[in] F(z) vector \f$F(z)\f$
       \param[in] jacobianF \f$ \nabla_z F(z) \f$
       \param[in,out] jacobianPhi \f$ \nabla_z \phi(z,F(z)) \f$ .
+      \warning this function looks broken !
   */
   void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* jacobianF, double* jacobianPhi);
 
+  /** Computes an element of \f$Jac \mathbf{F}_{\mathrm{FB}}\f$ (possibly mixed) Fischer-Burmeister function, see Facchinei--Pang (2003) p. 808
+      \param[in] n1 number of equality constraints.
+      \param[in] n2 number of complementarity constraints.
+      \param[in] z vector \f$z\f$
+      \param[in] F vector \f$F(z)\f$
+      \param[in] workV1 work vector (value gets overwritten)
+      \param[in] workV2 work vector (value gets overwritten)
+      \param[in] nabla_F \f$ \nabla_z F(z) \f$
+      \param[in,out] H element of Jac_F_merit
+  */
+void Jac_F_FB(int n1, int n2, double* z, double* F, double* workV1, double* workV2, double* nabla_F, double* H);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

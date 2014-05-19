@@ -28,22 +28,10 @@ def computeg(x, lpm):
     #print('computeg done')
     return r
 
-def computeJachx(x, l):
-    #print('call computeJachx')
-    #print('x=',x)
-    #print(l)
-    #print(C)
-    C = np.zeros((4, 2))
-    C[0, 0] = 1 if x[0] < 0.0 else 0.0
-    C[1, 0] = 1 if x[0] > 0.0 else 0.0
-    C[2, 1] = 1 if x[1] < 0.0 else 0.0
-    C[3, 1] = 1 if x[1] > 0.0 else 0.0
-    return C
-
+B = np.empty((2, 4))
 def computeJacglambda(x, lpm):
     #print('call computeJacglambda')
     #print(B)
-    B = np.empty((2, 4))
     l = (lpm[0] - lpm[1], lpm[2] - lpm[3])
     B[0, 0] = -_kappa*l[1]*x[1]
     B[0, 1] = -B[0, 0]
@@ -55,12 +43,13 @@ def computeJacglambda(x, lpm):
     B[1, 3] = -B[1, 2]
     return B
 
+K = np.zeros((2, 4))
 def computeJacgx(x, lpm):
     #print('call computeJacgx')
 
-    K = np.zeros((2, 2))
     l = (lpm[0] - lpm[1], lpm[2] - lpm[3])
-    K[0, 1] = -_kappa*l[0]*l[1]
+    K[0, 2] = -_kappa*l[0]*l[1]
+    K[0, 3] = -K[0, 2]
     return K
 
 def computeJachlambda(x, l):
@@ -73,30 +62,54 @@ A = np.array(((1, h), (0, 1)))
 xk = np.empty((2,))
 xkp1 = np.empty((2,))
 lmp = np.empty((4,))
-F = np.zeros((6,))
-JacF = np.zeros((6,6))
+JacF = np.zeros((8,8))
 
-def mcp_function(z):
-    xkp1[:] = z[0:2]
-    lmp[:] = z[2:]
+def mcp_function(n1, n2, z, F):
+#    print("z --------------------------------------")
+#    print(z)
+    xkp1[0] = z[0] - z[1]
+    xkp1[1] = z[2] - z[3]
+    lmp[:] = z[4:]
     F[0:2] = xkp1
+#    print('xkp1')
+#    print(xkp1)
     F[0:2] -= A.dot(xk)
+#    print('xk')
+#    print(xk)
+#    print(F[0:2])
     F[0:2] -= computeg(xkp1, lmp)
-    F[2:5:2] = np.min(xkp1, 0)
-    F[3:6:2] = np.max(xkp1, 0)
-    res = np.copy(F)
-    return res
+    F[2] = lmp[0] + lmp[1] - 1.0
+    F[3] = lmp[2] + lmp[3] - 1.0
+    F[4] = z[0]
+    F[5] = z[1]
+    F[6] = z[2]
+    F[7] = z[3]
+#    print("F --------------------------------------")
+#    print(F)
+    pass
 
-def mcp_Nablafunction(z):
-    xkp1[:] = z[0:2]
-    lmp[:] = z[2:]
-    JacF[0:2, 0:2] = np.eye(2)
-    JacF[0:2, 0:2] -= computeJacgx(xkp1, lmp)
-    JacF[0:2, 2:] -= computeJacglambda(xkp1, lmp)
-    JacF[2:, 0:2] = computeJachx(xkp1, lmp)
-    JacF[2:, 2:] = np.zeros((4,4))
-    res = np.copy(JacF)
-    return res
+def mcp_Nablafunction(n1, n2, z, nabla_Fmcp):
+    xkp1[0] = z[0] - z[1]
+    xkp1[1] = z[2] - z[3]
+    lmp[:] = z[4:]
+    JacF[0, 0] = 1.0
+    JacF[0, 1] = -1.0
+    JacF[0, 2:4] = 0.0
+    JacF[1, 0:2] = 0.0
+    JacF[1, 2] = 1.0
+    JacF[1, 3] = -1.0
+    JacF[0:2, 0:4] -= computeJacgx(xkp1, lmp)
+    JacF[2:4, 0:4] = 0.0
+    JacF[0:2, 4:] = -computeJacglambda(xkp1, lmp)
+    JacF[2, 4:6] = 1.0
+    JacF[2, 6:8] = 0.0
+    JacF[3, 4:6] = 0.0
+    JacF[3, 6:8] = 1.0
+    JacF[4:, 0:4] = np.eye(4)
+    JacF[4:, 4:] = 0.0
+    #nabla_Fmcp[:] = np.transpose(JacF)
+    #print(JacF)
+    nabla_Fmcp[:] = JacF
 
 
 if __name__ == '__main__':
@@ -105,48 +118,55 @@ if __name__ == '__main__':
 
     T = 10.
     t = 0.
-    z = np.zeros((6,))
-    w = np.empty((6,))
-    z[0:2] = xk
+    z = np.zeros((8,))
+    w = np.empty((8,))
+    z[0] = np.max(xk[0], 0.0)
+    z[1] = np.min(xk[0], 0.0)
+    z[2] = np.max(xk[1], 0.0)
+    z[3] = np.min(xk[1], 0.0)
 
-    mcp_function(z)
-    mcp_Nablafunction(z)
+#    mcp_function(z)
+#    mcp_Nablafunction(z)
     N = int(T/h + 10)
     print(N)
-    mcp = SN.MCP(2,4, mcp_function, mcp_Nablafunction)
-    SO=SN.SolverOptions(mcp, SN.SICONOS_MCP_FB)
-    SN.mcp_driver_init(mcp, SO)
+    mcp = SN.MixedComplementarityProblem2(4, 4, mcp_function, mcp_Nablafunction)
+    SO=SN.SolverOptions(mcp, SN.SICONOS_MCP_NEWTON_FBLSA)
 
     lambdaPM = np.empty((N, 4))
     signs = np.empty((N, 2))
     sol = np.empty((N, 2))
-    sol[0, :2] = xk
+    sol[0, :] = xk
 
     k = 0
 
     while t <= T:
         k += 1
-        info = SN.mcp_FischerBurmeister(mcp, z, w, SO)
+        info = SN.mcp_newton_minFBLSA(mcp, z, w, SO)
+        #info = SN.mcp_newton_FBLSA(mcp, z, w, SO)
+        print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
         if info > 0:
-            print('MCP solver failed !')
+            print('MCP solver failed ! info = {:}'.format(info))
 
-        print('before sol')
-        sol[k, :] = z[0:2]
-        print('before xk')
-        xk[:] = z[0:2]
-        print('before lambdaPM')
-        lambdaPM[k, :] = z[2:]
-        print('before signs')
-        signs[k, 0] = z[2] - z[3]
-        print('before signs2')
-        signs[k, 1] = z[4] - z[5]
+        sol[k, 0] = z[0] - z[1]
+        sol[k, 1] = z[2] - z[3]
+        xk[:] = sol[k, :]
+        lambdaPM[k, :] = z[4:]
+        signs[k, 0] = z[4] - z[5]
+        signs[k, 1] = z[6] - z[7]
         t += h
 
 
-    np.savetxt("dataZIsol.txt", sol)
-    np.savetxt("dataZIlambdaPM.txt", lambdaPM)
-    np.savetxt("dataZIsign.txt", signs)
+#    np.savetxt("dataZIsol.txt", sol)
+#    np.savetxt("dataZIlambdaPM.txt", lambdaPM)
+#    np.savetxt("dataZIsign.txt", signs)
 
     plt.figure()
     plt.plot(sol[:, 0], sol[:, 1])
+    plt.figure()
+    plt.plot(sol[:, 0])
+    plt.plot(sol[:, 1])
+    plt.figure()
+    plt.plot(signs[:, 0])
+    plt.plot(signs[:, 1])
+    plt.show()
 

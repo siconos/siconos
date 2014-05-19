@@ -147,6 +147,18 @@ function: lcp_newton_FB() \n
 - dparam[0] (in): tolerance
 - dparam[1] (out): resulting error
 
+\section lcpNewtonminFB  Newton min + FB Solver \n
+a nonsmooth Newton method based based on the minFBLSA algorithm : the descent direction is given
+by a min reformulation but the linesearch is done with Fischer-Burmeister.
+
+function: lcp_newton_minFB() \n
+ parameters:
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+
+
 \section lcpPath Path (Ferris) Solver
 
  function: lcp_path() \n
@@ -489,10 +501,10 @@ extern "C"
    * \param[out] info an integer which returns the termination value:\n
    *                0 - convergence\n
    *                1 - iter = itermax\n
-   *                2 - negative diagonal term\n
+   *                2 - failure in the descent direction search (in LAPACK) \n
    *
    * \param[in,out] options structure used to define the solver and its parameters.
-   * \author Vincent Acary
+   * \author Vincent Acary and Olivier Huber
    *
    * \todo Optimizing the memory allocation (Try to avoid the copy of JacH into A)
    * \todo Add rules for the computation of the penalization rho
@@ -505,6 +517,21 @@ extern "C"
   */
   int linearComplementarity_newton_FB_setDefaultSolverOptions(SolverOptions* options);
 
+  /** lcp_newton_minFB use a nonsmooth newton method based on both a min and Fischer-Bursmeister reformulation
+   * References: Facchinei--Pang (2003)
+   *
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   *                0 - convergence\n
+   *                1 - iter = itermax\n
+   *                2 - failure in the descent direction search (in LAPACK) \n
+   *
+   * \param[in,out] options structure used to define the solver and its parameters.
+   * \author Olivier Huber
+   */
+  void lcp_newton_minFB(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /**
    * \param[in] problem structure that represents the LCP (M, q...)
