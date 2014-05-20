@@ -43,22 +43,35 @@ class WorkDir():
     def __init__(self, directory, tmp=False):
         self.directory = directory
         self.tmp = tmp
+        self.enter_wdir = os.getcwd()
 
     def __enter__(self):
 
         if self.tmp:
-            self.name = tempfile.mkdtemp()
-            return self.name
+            self.directory = tempfile.mkdtemp()
 
         else:
             if not os.path.exists(self.directory):
                 os.makedirs(self.directory)
-            return self.directory
+
+        try:
+            os.chdir(self.directory)
+        except OSError as e:
+            sys.stderr.write('{0} : {1}\n'.format(myname, str(e)))
+            exit(2)
+
+        return self.directory
 
     def __exit__(self, xtype, value, traceback):
 
+        os.chdir(self.enter_wdir)
+
+        if os.listdir(self.directory) == []:
+
+            os.rmdir(self.directory)
+
         if self.tmp:
-            shutil.rmtree(self.name)
+            shutil.rmtree(self.directory)
 
 def silent_try(command, *_args):
     try:
@@ -100,11 +113,11 @@ Options are:
  -a : to find and compile all sources files in YourExample.cpp
       directory.
 
- -build_dir <dir> : build is done in <dir>. Under /tmp, a temp
-                    directory is created
+ --build-dir <dir> : build is done in <dir>. Under /tmp, a temp
+                     directory is created
 
 
- -clean_build : clean build directory.
+ --clean-build : clean build directory.
 
  -c | -clean : to clean the current directory (deletes binary files,
                etc.).
@@ -122,31 +135,31 @@ Options are:
 
  -l<lib> : link with library <lib>.
 
- -noexec : compile only.
+ --noexec : compile only.
 
- -nocomp : execute only.
+ --nocomp : execute only.
 
  -O<n> : set compiler optimization.
 
- -opt <opt> : add option <opt> to compiler.
+ --opt <opt> : add option <opt> to compiler.
 
- -ldopt <opt> : add option <opt> to linker.
+ --ldopt <opt> : add option <opt> to linker.
 
  -P prefix_command : to add a prefix command (time, valgrind, gdb,
                      etc.).
 
 
- -plugin_dir <plugin_directory> (default = plugin): create
+ --plugin-dir <plugin_directory> (default = plugin): create
     <plugin_directory>.so with plugin sources under
     <plugin_directory>.
 
 
- -plugins_dir <plugins_directory> (default = plugins): for each source
+ --plugins-dir <plugins_directory> (default = plugins): for each source
     file <name_src>.[c|f|cpp] under <plugins_directory> it creates a
     plugin <name_src>.so
 
 
- -src_dir <source_directory> (default = src): all sources files under
+ --src-dir <source_directory> (default = src): all sources files under
     <source_directory> (Warning: absolute path!!)  to the executable.
 
  -v : to print 'make' commands as they are executed.
@@ -167,10 +180,6 @@ if __name__ == '__main__':
         sys.stderr.write('{0} : {1}\n'.format(myname, str(err)))
         usage()
         exit(2)
-
-    if len(args) == 0:
-        usage()
-        exit(1)
 
     definitions = []
     linker_libraries = []
@@ -206,6 +215,8 @@ if __name__ == '__main__':
 
         if o == '-c' or o == '--clean':
             make_targets = ['clean']
+            if len(args) == 0:
+                args = ['.']  # as : siconos -c .
             clean_build = True
             exec_ = False
 
@@ -262,18 +273,19 @@ if __name__ == '__main__':
         if o == '-v':
             make_args.append('VERBOSE=1')
 
+    if len(args) == 0:
+        sys.stderr.write('{0} : need a file\n'.format(myname))
+        usage()
+        exit(1)
+
+    if not os.path.exists(args[0]):
+        sys.stderr.write('{0} : cannot open {1}\n'.format(myname, args[0]))
+        usage()
+        exit(1)
+
     siconos_build_dir = os.getenv('SICONOS_BUILD_DIR', default=build_directory)
 
     with WorkDir(directory=siconos_build_dir, tmp=tmp_build) as work_dir:
-
-        # work_dir may be siconos_build_dir or a temp directory if
-        # tmp_build is True
-        try:
-            os.chdir(work_dir)
-
-        except (OSError, e):
-            sys.stderr.write('{0} : {1}\n'.format(myname, str(e)))
-            exit(2)
 
         assert(len(args) > 0)
         main_source = os.path.join(call_pwd, args[0])
@@ -311,6 +323,13 @@ if __name__ == '__main__':
 
             extra_defs = ['-D{0}'.format(d) for d in full_definitions]
             all_extra_defs = kwd_definitions
+
+            if source_is_python and \
+                plugins_directories == [] and \
+                plugin_directories == [] and \
+                not os.path.exists(os.path.join(call_pwd, 'plugins')) and \
+                not os.path.exists(os.path.join(call_pwd, 'plugin')):
+                comp = False
 
             if comp:
                 # for macos : the linker doesn't allow undefined
