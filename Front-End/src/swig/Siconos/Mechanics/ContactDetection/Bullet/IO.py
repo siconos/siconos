@@ -26,6 +26,8 @@ import Siconos.Numerics as Numerics
 
 from scipy import constants
 
+import time
+
 class Timer():
     def __init__(self):
         self._t0 = time.clock()
@@ -687,11 +689,13 @@ class Hdf5():
             self.importNonSmoothLaw(name)
 
     def run(self,
+            with_timer=False,
             t0=0,
             T=10,
             h=0.0005,
-            multipointIterations=False,
+            multipointIterations=True,
             theta=0.50001,
+            set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             NewtonMaxIter=20,
             itermax=100000,
@@ -707,14 +711,15 @@ class Hdf5():
             BulletSpaceFilter, cast_BulletR, \
             BulletWeightedShape, BulletDS, BulletTimeStepping
 
+        if set_external_forces is not None:
+            self._set_external_forces = set_external_forces
+
         # Model
         #
         model = Model(t0, T)
 
         # (1) OneStepIntegrators
         self._osi = MoreauJeanOSI(theta)
-
-        static_cobjs = []
 
         # (2) Time discretisation --
         timedisc = TimeDiscretisation(t0, h)
@@ -757,21 +762,22 @@ class Hdf5():
         self.outputStaticObjects()
         self.outputDynamicObjects()
 
-        while(simulation.hasNextEvent()):
+        while simulation.hasNextEvent():
 
             print ('step', k)
 
-            log(self._broadphase.buildInteractions)(model.currentTime())
+            log(self._broadphase.buildInteractions, with_timer)\
+                (model.currentTime())
 
-            log(simulation.computeOneStep)()
+            log(simulation.computeOneStep, with_timer)()
 
-            log(self.outputDynamicObjects)()
+            log(self.outputDynamicObjects, with_timer)()
 
-            log(self.outputContactForces)()
+            log(self.outputContactForces, with_timer)()
 
-            log(self.outputSolverInfos)()
+            log(self.outputSolverInfos, with_timer)()
 
-            log(simulation.nextStep)()
+            log(simulation.nextStep, with_timer)()
 
             log(self._out.flush)()
 
