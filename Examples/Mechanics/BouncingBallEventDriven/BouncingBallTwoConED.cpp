@@ -79,12 +79,12 @@ int main(int argc, char* argv[])
 
     // Interaction ball-floor-ceiling
     //
-    SP::SiconosMatrix H1(new SimpleMatrix(1, nDof));
+    SP::SimpleMatrix H1(new SimpleMatrix(1, nDof));
     (*H1)(0, 0) = 1.0;
     SP::SiconosVector E1(new SiconosVector(1));
     (*E1)(0) = 0.0;//-1.0*R;
     //
-    SP::SiconosMatrix H2(new SimpleMatrix(1, nDof));
+    SP::SimpleMatrix H2(new SimpleMatrix(1, nDof));
     (*H2)(0, 0) = -1.0;
     SP::SiconosVector E2(new SiconosVector(1));
     (*E2)(0) = Heightbox ;//- R;

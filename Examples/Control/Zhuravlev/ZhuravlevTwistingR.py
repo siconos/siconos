@@ -5,7 +5,7 @@ try:
 except (ImportError):
     print 'Could not import Siconos.* module'
 
-import numpy
+import numpy as np
 
 class ZhuravlevTwistingR(SK.FirstOrderNonLinearR):
     ## \brief Constructor
@@ -14,7 +14,7 @@ class ZhuravlevTwistingR(SK.FirstOrderNonLinearR):
     def __init__(self, C, B):
         SK.FirstOrderNonLinearR.__init__(self)
         self._kappa = .5
-	self._mu1 = 2
+        self._mu1 = 2
         self.setCPtr(C)
         return
 
@@ -32,8 +32,8 @@ class ZhuravlevTwistingR(SK.FirstOrderNonLinearR):
         #print(l)
         #print(R)
         R[0] = -self._kappa*l[0]*l[1]*x[1]
-	R[1] = (self._mu1*l[0]+l[1])/(1-self._kappa*l[0]*l[1])
-        #print(R)
+        R[1] = (self._mu1*l[0]+l[1])/(1-self._kappa*l[0]*l[1])
+        print(R)
         #print('computeg done')
         pass
 
@@ -42,31 +42,33 @@ class ZhuravlevTwistingR(SK.FirstOrderNonLinearR):
         #print('x=',x)
         #print(l)
         #print(C)
-        C[:] = numpy.eye(2)
+        C[:] = np.eye(2)
         pass
 
     def computeJacglambda(self,time, x, l, B):
         #print('call computeJacglambda')
-        #print(B)
+        print(x)
         B[0, 0] = -self._kappa*l[1]*x[1]
-	B[0, 1] = -self._kappa*l[0]*x[1]
-	B[1, 0] = (self._mu1+self._kappa*l[1]**2)/(1-self._kappa*l[0]*l[1])**2
-	B[1, 1] = (1+self._kappa*l[0]**2)/(1-self._kappa*l[0]*l[1])**2
+        B[0, 1] = -self._kappa*l[0]*x[1]
+        B[1, 0] = (self._mu1+self._kappa*l[1]**2)/(1-self._kappa*l[0]*l[1])**2
+        B[1, 1] = (1+self._kappa*l[0]**2)/(1-self._kappa*l[0]*l[1])**2
+        print(B)
+        print(np.linalg.cond(B))
         pass
 
     def computeJacgx(self,time, x, l, K):
         #print('call computeJacgx')
 
-        K[:]=numpy.zeros(2)
-	K[0, 1] = -self._kappa*l[0]*l[1]
+        K[:]=np.zeros(2)
+        K[0, 1] = -self._kappa*l[0]*l[1]
 
-        #print(K)        
+        #print(K)
         pass
 
     def computeJachlambda(self, time, x, l, D):
         #print('call computeJachlambda')
         #print(D)
-        D[:]=numpy.zeros(2)
+        D[:]=np.zeros(2)
         pass
 
 

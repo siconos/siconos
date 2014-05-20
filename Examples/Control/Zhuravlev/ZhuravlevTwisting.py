@@ -55,8 +55,6 @@ D = zeros((2,2))
 process = FirstOrderLinearDS(x0, A)
 myProcessRelation = ZhuravlevTwistingR(C,B)
 
-#myProcessRelation.setDPtr(D)
-
 myNslaw = RelayNSL(2)
 myNslaw.display()
 

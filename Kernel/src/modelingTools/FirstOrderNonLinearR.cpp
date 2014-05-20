@@ -49,24 +49,24 @@ void FirstOrderNonLinearR::initComponents(Interaction& inter, VectorOfBlockVecto
 
 void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
-  //RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachx, not (yet) implemented or forbidden for relations of type "+subType);
+  RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachx, you need to derive this function in order to use it");
 }
 void FirstOrderNonLinearR::computeJachz(double time, Interaction& inter)
 {
-  //RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachx, not (yet) implemented or forbidden for relations of type "+subType);
+  RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachx, you need to derive this function in order to use it");
 }
 void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
-  //RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachlambda, not (yet) implemented or forbidden for relations of type "+subType);
+  RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachlambda, you need to derive this function in order to use it");
 }
 
 void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& B)
 {
-  //RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacglambda, not (yet) implemented or forbidden for relations of type "+subType);
+  RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacglambda, you need to derive this function in order to use it");
 }
 void FirstOrderNonLinearR::computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& K)
 {
-  //RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacglambda, not (yet) implemented or forbidden for relations of type "+subType);
+  RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacglambda, you need to derive this function in order to use it");
 }
 
 
