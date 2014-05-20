@@ -22,12 +22,15 @@
 
 #include "SolverOptions.h"
 
+typedef void (*compute_F_ptr) (void* data_opaque, double* z, double* w);
+typedef void (*compute_F_merit_ptr) (void* data_opaque, double* z, double* F, double* F_merit);
+
 /** \struct _functions_FBLSA Newton_Methods.h
  * Struct holding the necessary pointer to functions
  */
 typedef struct _functions_FBLSA {
-  void (*compute_F)(void* data_opaque, double* z, double* w); /**< function to evaluate w = F(z) */
-  void (*compute_F_merit)(void* data_opaque, double* z, double* F, double* F_merit); /**< function to evaluate F_merit(z) (e.g. F_FB, F_{min}, ...) */
+  compute_F_ptr compute_F; /**< function to evaluate w = F(z) */
+  compute_F_merit_ptr compute_F_merit; /**< function to evaluate F_merit(z) (e.g. F_FB, F_{min}, ...) */
   void (*compute_H)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H); /**< function to get an element H of T */
   void (*compute_error)(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err); /**< function to compute the error */
   void (*compute_RHS_desc)(void* data_opaque, double* z, double* w, double* F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min}, ...), optional */

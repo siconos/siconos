@@ -25,8 +25,12 @@
 
 #include "SiconosLapack.h"
 #include "Newton_Methods.h"
+#include "LineSearch.h"
 
 #define FBLSA_DWORK_KEEP 2
+#define FBLSA_NONMONOTONE_LS 3
+#define FBLSA_NONMONOTONE_LS_M 4
+
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -37,12 +41,13 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
   /* size of the CP */
   assert(n>0);
 
-  unsigned int iter, done;
+  unsigned int iter;
   unsigned int nn = n*n;
 
   int incx, incy;
   double theta, preRHS, gamma, sigma, tau, threshold, p, rho;
-  double theta_iter, err;
+  double theta_iter = 0.0;
+  double err;
 
   int *ipiv;
   double *workV1, *workV2;
@@ -68,7 +73,7 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
   options->dparam[1] = 0.0;
 
   // Maybe there is a better way to initialize
-  for (unsigned int i = 0; i < n; i++) z[i] = 0.0;
+//  for (unsigned int i = 0; i < n; i++) z[i] = 0.0;
 
   // if we keep the work space across calls
   if (options->iparam[FBLSA_DWORK_KEEP] && (options->dWork == NULL))
@@ -97,6 +102,31 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
     workV2 = (double *)malloc(n * sizeof(double));
   }
 
+  linesearch_data ls_data;
+  ls_data.compute_F = functions->compute_F;
+  ls_data.compute_F_merit = functions->compute_F_merit;
+  ls_data.z = z;
+  ls_data.zc = workV2;
+  ls_data.F = F;
+  ls_data.F_merit = F_merit;
+  ls_data.desc_dir = workV1;
+  ls_data.data = data;
+
+  if (options->iparam[FBLSA_NONMONOTONE_LS] > 0)
+  {
+    ls_data.nonmonotone = options->iparam[FBLSA_NONMONOTONE_LS];
+    ls_data.M = options->iparam[FBLSA_NONMONOTONE_LS_M];
+    ls_data.m = 0;
+    ls_data.previous_theta = calloc(ls_data.M, sizeof(double));
+  }
+  else
+  {
+    ls_data.nonmonotone = 0;
+    ls_data.M = 0;
+    ls_data.m = 0;
+    ls_data.previous_theta = NULL;
+  }
+
   // if error based on the norm of JacThetaF_merit, do something not too stupid
   // here
   JacThetaF_merit[0] = 1e20;
@@ -118,6 +148,7 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
     ++iter;
 
     functions->compute_F(data, z, F);
+
     DEBUG_PRINT("z ");
     DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
         { DEBUG_PRINTF("% 2.2e ", z[i]) }
@@ -257,78 +288,11 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
 
       }
       preRHS *= gamma;
-      done = 0;
-      tau = 2.0; // XXX xhub :: this has to be checked
 
       // Line search
-      // xhub :: if we reuse of tau, we may be hit hard by numerical issues
-      // TODO: at the end reset tau to a good value of 2**-i
-      do
-      {
-        // workV1 contains the direction d
-        cblas_dcopy(n, z, incx, workV2, incy);
-        cblas_daxpy(n, tau, workV1, incx, workV2, incy);     //  z + tau*d --> z
-
-        // compute new F_merit
-        functions->compute_F(data, workV2, F);
-        functions->compute_F_merit(data, workV2, F, F_merit);
-
-        DEBUG_PRINT("z ");
-        DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-            { DEBUG_PRINTF("% 2.2e ", workV2[i]) }
-            DEBUG_PRINT("\n"));
-
-        DEBUG_PRINT("F ");
-        DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-            { DEBUG_PRINTF("% 2.2e ", F[i]) }
-            DEBUG_PRINT("\n"));
-
-        DEBUG_PRINT("F_merit ");
-        DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-            { DEBUG_PRINTF("% 2.2e ", F_merit[i]) }
-            DEBUG_PRINT("\n"));
-
-        theta_iter = cblas_dnrm2(n, F_merit, incx);
-        theta_iter = 0.5 * theta_iter * theta_iter;
-
-        DEBUG_PRINTF("newton_FBLSA :: tau %g\n", tau);
-        DEBUG_PRINTF("newton_FBLSA :: theta_iter %.*e ; theta %.*e  \n", DECIMAL_DIG, theta_iter, DECIMAL_DIG, theta);
-        if (theta_iter <= theta + tau*preRHS)
-        {
-          done = 1;
-          if (verbose > 1)
-            printf("newton_FBLSA :: tau %g\n", tau);
-        }
-        else
-        {
-          // tau too large, decrease it
-          tau /= 2.0;
-        }
-
-        // xhub :: tentative reuse of the previous tau
-        //       if (theta_iter <= theta + tau*preRHS)
-        //       {
-        //         if (alreadyFeasible == 0) // it is the first feasible tau => win
-        //           done = 1;
-        //         else if (tau < 1.9)
-        //           tau *= 2.0;
-        //         alreadyFeasible = 1;
-        //       }
-        //       else
-        //       {
-        //         // tau too large, decrease it
-        //         tau /= 2.0;
-        //         if (alreadyFeasible == 1) // first time tau is too large
-        //           done = 1;
-        //         alreadyFeasible = 0;
-        //       }
-        // 
-      }
-      while(!done);
-
+      tau = linesearch_Armijo2(n, theta, preRHS, &ls_data);
     }
 
-    // update
     cblas_daxpy(n , tau, workV1 , incx , z , incy);     //  z + tau*d --> z
 
     // Construction of the RHS for the next iterate
@@ -377,6 +341,10 @@ newton_FBLSA_free:
     free(workV1);
     free(workV2);
     free(ipiv);
+  }
+  if (ls_data.previous_theta)
+  {
+    free(ls_data.previous_theta);
   }
 }
 
