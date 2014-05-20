@@ -1,5 +1,7 @@
 # simple bullet input and output
 
+from __future__ import print_function
+
 import VtkShapes
 import shlex
 import numpy as np
@@ -22,6 +24,35 @@ from Siconos.IO import MechanicsIO
 
 import Siconos.Numerics as Numerics
 
+from scipy import constants
+
+class Timer():
+    def __init__(self):
+        self._t0 = time.clock()
+
+    def elapsed(self):
+        return time.clock() - self._t0
+
+    def update(self):
+        self._t0 = time.clock()
+
+def warn(msg):
+    sys.stderr.write('{0}: {1}'.format(sys.argv[0], msg))
+
+def log(fun, with_timer=False):
+    if with_timer:
+        t = Timer()
+
+        def logged(*args):
+            t.update()
+            print('{0} ...'.format(fun.__name__), end='')
+            fun(*args)
+            print('..... {0} s'.format(t.elapsed()))
+        return logged
+    else:
+        def silent(*args):
+            fun(*args)
+        return silent
 
 def object_id(obj):
     """returns an unique object identifier"""
@@ -29,7 +60,7 @@ def object_id(obj):
 
 
 def apply_gravity(body):
-    g = 9.81
+    g = constants.g
     weight = [0, 0, - body.massValue() * g]
     body.setFExtPtr(weight)
 
@@ -654,3 +685,95 @@ class Hdf5():
             nslaw.attrs['gid2'] = gid2
 
             self.importNonSmoothLaw(name)
+
+    def run(self,
+            t0=0,
+            T=10,
+            h=0.0005,
+            multipointIterations=False,
+            theta=0.50001,
+            solver=Numerics.SICONOS_FRICTION_3D_NSGS,
+            NewtonMaxIter=20,
+            itermax=100000,
+            tolerance=1e-8):
+
+        from Siconos.Kernel import \
+            Model, MoreauJeanOSI, TimeDiscretisation,\
+            FrictionContact, NewtonImpactFrictionNSL, BlockCSRMatrix
+
+        from Siconos.Mechanics.ContactDetection.Bullet import IO, \
+            btConvexHullShape, btCollisionObject, \
+            btBoxShape, btQuaternion, btTransform, btConeShape, \
+            BulletSpaceFilter, cast_BulletR, \
+            BulletWeightedShape, BulletDS, BulletTimeStepping
+
+        # Model
+        #
+        model = Model(t0, T)
+
+        # (1) OneStepIntegrators
+        self._osi = MoreauJeanOSI(theta)
+
+        static_cobjs = []
+
+        # (2) Time discretisation --
+        timedisc = TimeDiscretisation(t0, h)
+
+        osnspb = FrictionContact(3, solver)
+
+        osnspb.numericsSolverOptions().iparam[0] = itermax
+        osnspb.numericsSolverOptions().dparam[0] = tolerance
+        osnspb.setMaxSize(16384)
+        osnspb.setMStorageType(1)
+        #osnspb.setNumericsVerboseMode(False)
+
+        # keep previous solution
+        osnspb.setKeepLambdaAndYState(True)
+
+        # (5) broadphase contact detection
+        self._broadphase = BulletSpaceFilter(model)
+        if not multipointIterations:
+            print("""
+            ConvexConvexMultipointIterations and PlaneConvexMultipointIterations are unset
+            """)
+        else:
+            self._broadphase.collisionConfiguration().\
+                setConvexConvexMultipointIterations()
+            self._broadphase.collisionConfiguration().\
+                setPlaneConvexMultipointIterations()
+
+        # (6) Simulation setup with (1) (2) (3) (4) (5)
+        simulation = BulletTimeStepping(timedisc, self._broadphase)
+        simulation.insertIntegrator(self._osi)
+        simulation.insertNonSmoothProblem(osnspb)
+        simulation.setNewtonMaxIteration(NewtonMaxIter)
+
+        k = 1
+
+        self.importScene()
+
+        model.initialize(simulation)
+
+        self.outputStaticObjects()
+        self.outputDynamicObjects()
+
+        while(simulation.hasNextEvent()):
+
+            print ('step', k)
+
+            log(self._broadphase.buildInteractions)(model.currentTime())
+
+            log(simulation.computeOneStep)()
+
+            log(self.outputDynamicObjects)()
+
+            log(self.outputContactForces)()
+
+            log(self.outputSolverInfos)()
+
+            log(simulation.nextStep)()
+
+            log(self._out.flush)()
+
+            print ('')
+            k += 1
