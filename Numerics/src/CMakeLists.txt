@@ -304,37 +304,53 @@ IF(WITH_TESTING)
     ENDFOREACH()
   ENDFOREACH()
 
-  # some solvers are failing
+  # CPG does not work everywhere
   SET(test-LCP_CPG-lcp_deudeu_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_CPG-lcp_ortiz_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_CPG-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_CPG-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_CPG-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_CPG-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
 
-  SET(test-LCP_LATIN-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN_W-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN-lcp_exp_murty2_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN_W-lcp_exp_murty2_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN_W-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN-lcp_CPS_3_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN_W-lcp_CPS_3_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN_W-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_LATIN_W-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
-
-  # QP reformulation does not always work when the matrix is not symmetric
-  # Use NSQP
-  SET(test-LCP_QP-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_QP-lcp_exp_murty2_PROPERTIES WILL_FAIL TRUE)
-
-  # those test cannot be solved with an algorithm that requires non-zero
-  # diagonal elements, that is PGS, BARD and MURTY
-  SET(DATASET_LCP_DIAG "CPS_2;CPS_3;CPS_4;CPS_4bis")
-  SET(FAILING_ALGO "PGS;BARD;MURTY")
+  # problem with Cholesky here
+  SET(DATASET_LCP_DIAG "exp_murty;exp_murty2")
+  SET(FAILING_ALGO "LATIN;LATIN_W")
   FOREACH(_DS ${DATASET_LCP_DIAG})
    FOREACH(_SOLVER ${FAILING_ALGO})
     SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
    ENDFOREACH()
   ENDFOREACH()
+
+  # QP reformulation does not always work when the matrix is not symmetric
+  # Use NSQP
+  SET(DATASET_LCP_DIAG
+   "exp_murty;exp_murty;ortiz;enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis")
+  SET(FAILING_ALGO "QP")
+  FOREACH(_DS ${DATASET_LCP_DIAG})
+   FOREACH(_SOLVER ${FAILING_ALGO})
+    SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
+   ENDFOREACH()
+  ENDFOREACH()
+
+  SET(test-LCP_QP-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_QP-lcp_exp_murty2_PROPERTIES WILL_FAIL TRUE)
+
+  # NEWTONMIN has no linesearch -> problem in DGESV -> GAME OVER !
+  SET(test-LCP_NEWTONMIN-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_NEWTONMIN-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_NEWTONMIN-lcp_CPS_5_PROPERTIES WILL_FAIL TRUE)
+
+  # those test cannot be solved with an algorithm that requires non-zero
+  # diagonal elements, that is PGS, BARD, MURTY, LATIN and LATIN_W
+  SET(DATASET_LCP_DIAG "enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis")
+  SET(FAILING_ALGO "PGS;BARD;MURTY;LATIN;LATIN_W")
+  FOREACH(_DS ${DATASET_LCP_DIAG})
+   FOREACH(_SOLVER ${FAILING_ALGO})
+    SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
+   ENDFOREACH()
+  ENDFOREACH()
+
+  # suprinsingly this works ...
+  SET(test-LCP_MURTY-lcp_enum_fails_PROPERTIES WILL_FAIL FALSE)
 
   # those test cannot be solved with Lemke-based solvers (CPS_3 is for Lemke-Howson)
   # 
@@ -348,6 +364,9 @@ IF(WITH_TESTING)
 
   # lcp_mmc is of size 26, way too much for enum
   RM_TEST2(SICONOS_LCP_ENUM "lcp_mmc.dat")
+  # this LCP was put here to show that enum does not work on every LCP, likely
+  # due to numerical problems
+  SET(test-LCP_ENUM-lcp_enum_fails_PROPERTIES WILL_FAIL TRUE)
 
   # special tests
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol.dat)

@@ -42,9 +42,8 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
   double tol = options->dparam[0];
   double k_latin = options->dparam[2];
   double alpha, beta;
-  double  err1, num11, err0;
+  double err1;
   double res, errmax;
-  double den11, den22;
   double  *wc, *zc, *kinvden1, *kinvden2, *wt;
   double *maxwt, *wnum1, *znum1, *ww, *zz;
   double *num1, *kinvnum1, *den1, *den2, *wden1, *zden1;
@@ -318,10 +317,6 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
     cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, kinv, n, wnum1, incx, beta, kinvnum1, incy);
 
 
-    num11 = cblas_ddot(n, wnum1, incx, kinvnum1, incy);
-
-
-
 
     cblas_dcopy(n, z, incx, zz, incy);
     cblas_dcopy(n, w, incx, ww, incy);
@@ -336,20 +331,15 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
     cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, zz, incx, beta, kzden1, incy);
 
 
-    den22 = cblas_ddot(n, zz, incx, kzden1, incy);
-
     beta = 0.;
     alpha = 1.;
     cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, kinv, n, ww, incx, beta, kinvwden1, incy);
 
-    den11 = cblas_ddot(n, ww, incx, kinvwden1, incy);
 
 
 
 
-
-    err0   = num11 / (den11 + den22);
-    err1   = sqrt(err0);
+    lcp_compute_error_only(n, z, w, &err1);
 
     it_end = iter1;
     res    = err1;

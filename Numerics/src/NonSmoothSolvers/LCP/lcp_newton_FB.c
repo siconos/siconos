@@ -73,7 +73,7 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
   functions_FBLSA_lcp.compute_H = &FB_compute_H_lcp;
   functions_FBLSA_lcp.compute_error = &FB_compute_error_lcp;
   functions_FBLSA_lcp.compute_H_desc = NULL;
-  functions_FBLSA_lcp.compute_F_desc = NULL;
+  functions_FBLSA_lcp.compute_RHS_desc = NULL;
 
   newton_FBLSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
 }

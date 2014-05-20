@@ -69,7 +69,7 @@ void mcp_newton_FBLSA(MixedComplementarityProblem2* problem, double *z, double* 
   functions_FBLSA_lcp.compute_H = &FB_compute_H_mcp;
   functions_FBLSA_lcp.compute_error = &FB_compute_error_mcp;
   functions_FBLSA_lcp.compute_H_desc = NULL;
-  functions_FBLSA_lcp.compute_F_desc = NULL;
+  functions_FBLSA_lcp.compute_RHS_desc = NULL;
 
   newton_FBLSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_FBLSA_lcp);
 }

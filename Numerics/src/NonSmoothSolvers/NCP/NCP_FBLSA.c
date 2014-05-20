@@ -22,7 +22,6 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include <stdbool.h>
 
 #include "SiconosLapack.h"
 #include "Newton_Methods.h"
@@ -132,12 +131,11 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
 
     // Construction of the directional derivatives of F_merit, JacThetaF_merit
 
-    bool minFBLSA = functions->compute_F_desc == NULL ? false : true;
     // Construction of H and F_desc
-    if (minFBLSA) // different merit function for the descent calc.(usually min)
+    if (functions->compute_RHS_desc) // different merit function for the descent calc.(usually min)
     {
       functions->compute_H_desc(data, z, F, workV1, workV2, H);
-      functions->compute_F_desc(data, z, F, F_merit);
+      functions->compute_RHS_desc(data, z, F, F_merit);
     }
     else
     {
@@ -171,7 +169,7 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
 
     // Computation of JacThetaF_merit
     // JacThetaF_merit = H^T * F_merit
-    if (minFBLSA) // need to compute H and F_merit for the merit
+    if (functions->compute_RHS_desc) // need to compute H and F_merit for the merit
     {
       // /!\ maide! workV1 cannot be used since it contains the descent
       // direction ...
@@ -190,9 +188,9 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
     // xhub :: we should be able to continue even if DGESV fails!
     if (infoDGESV)
     {
-      if (minFBLSA) // we are safe here
+      if (functions->compute_RHS_desc) // we are safe here
       {
-        DEBUG_PRINT("minFBLSA : no min descent direction ! searching for FB descent direction\n");
+        DEBUG_PRINT("functions->compute_RHS_desc : no min descent direction ! searching for FB descent direction\n");
         cblas_dcopy(n, F_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
         infoDGESV = 0;
@@ -233,7 +231,7 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
     }
 
     tau = 1.0;
-    if ((theta_iter > sigma * theta) || (infoDGESV > 0 && minFBLSA)) // Newton direction not good enough or min part failed
+    if ((theta_iter > sigma * theta) || (infoDGESV > 0 && functions->compute_RHS_desc)) // Newton direction not good enough or min part failed
     {
       if (verbose > 1)
         printf("newton_FBLSA :: Newton direction not acceptable %g %g\n", theta_iter, theta);

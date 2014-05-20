@@ -31,7 +31,7 @@
 
 static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w);
 static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H);
-static void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double tol, double* err);
+static void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err);
 
 void FB_compute_F_mlcp(void* data_opaque, double* z, double* w)
 {
@@ -119,7 +119,7 @@ void mlcp_mixed_FB(void* data_opaque, double* z, double* F, double* F_FB)
   phi_Mixed_FB(((MixedLinearComplementarityProblem *)data_opaque)->n, ((MixedLinearComplementarityProblem *)data_opaque)->m, z, F, F_FB);
 }
 
-void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double tol, double* err)
+void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err)
 {
   mlcp_compute_error((MixedLinearComplementarityProblem *)data_opaque, z, w, tol, err);
 }
@@ -132,7 +132,7 @@ void mlcp_newton_FB(MixedLinearComplementarityProblem* problem, double *z, doubl
   functions_FBLSA_mlcp.compute_H = &FB_compute_H_mlcp;
   functions_FBLSA_mlcp.compute_error = &FB_compute_error_mlcp;
   functions_FBLSA_mlcp.compute_H_desc = NULL;
-  functions_FBLSA_mlcp.compute_F_desc = NULL;
+  functions_FBLSA_mlcp.compute_RHS_desc = NULL;
 
   newton_FBLSA(problem->n + problem->m, z, w, info, (void *)problem, options, &functions_FBLSA_mlcp);
 }

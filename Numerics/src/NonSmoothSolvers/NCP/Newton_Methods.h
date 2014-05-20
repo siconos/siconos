@@ -30,7 +30,7 @@ typedef struct _functions_FBLSA {
   void (*compute_F_merit)(void* data_opaque, double* z, double* F, double* F_merit); /**< function to evaluate F_merit(z) (e.g. F_FB, F_{min}, ...) */
   void (*compute_H)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H); /**< function to get an element H of T */
   void (*compute_error)(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err); /**< function to compute the error */
-  void (*compute_F_desc)(void* data_opaque, double* z, double* w, double* F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min}, ...), optional */
+  void (*compute_RHS_desc)(void* data_opaque, double* z, double* w, double* F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min}, ...), optional */
   void (*compute_H_desc)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H_desc); /**< function to get an element H_desc of T_desc, optional */
 } functions_FBLSA;
 

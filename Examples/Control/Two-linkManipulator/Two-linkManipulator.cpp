@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     arm->setComputeFIntFunction("Two-linkPlugin", "U");
     arm->setComputeJacobianFIntqDotFunction("Two-linkPlugin", "jacobFintV");
     arm->setComputeJacobianFIntqFunction("Two-linkPlugin", "jacobFintQ");
-    arm->setZPtr(z);
+    arm->setzPtr(z);
 
     // -------------------
     // --- Interactions---

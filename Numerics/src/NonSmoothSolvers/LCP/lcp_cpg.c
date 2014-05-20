@@ -42,7 +42,6 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   double err, a1, b1 , qs;
 
   double alpha, beta, rp, pMp;
-  double den, num;
   double tol = options->dparam[0];
 
   int *status;
@@ -59,8 +58,6 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   qs = cblas_dnrm2(n , q , incx);
 
   /*printf( " Norm: %g \n", qs );*/
-
-  den = 1.0 / qs;
 
   /* Allocations */
 
@@ -134,8 +131,9 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
       if (verbose > 0)
       {
-        printf(" Operation no conform at the iteration %d \n", iter);
+        printf(" Operation not conform at the iteration %d \n", iter);
         printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
+        printf(" The residue is : %g \n", err);
       }
 
       free(Mp);
@@ -228,10 +226,11 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     /* **** Criterium convergence **** */
 
+    cblas_dcopy(n, rr, incx, w, incy);
     qs   = -1.0;
-    cblas_daxpy(n, qs, rr, incx, w, incy);
-    num = cblas_dnrm2(n, w, incx);
-    err = num * den;
+    cblas_dscal(n, qs, w, incx);
+
+    lcp_compute_error_only(n, z, w, &err);
 
   }
 
