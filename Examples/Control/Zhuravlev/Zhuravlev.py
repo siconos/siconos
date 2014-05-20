@@ -39,7 +39,8 @@ T = 10.0     # end time
 h = 1.0e-3   # time step
 numInter = 2
 ninter = 2
-theta = 0.5
+#theta = 0.5
+theta = 1.0
 alpha = .01
 N = ceil((T-t0)/h)
 
@@ -152,3 +153,16 @@ title('velocity')
 plot(dataPlot[:,0], velocity)
 grid()
 show()
+
+indx = np.nonzero(dataPlot[:, 0]>3)
+ttt = dataPlot[indx, 0].flatten()
+
+plt.subplot(211)
+plt.title('position')
+plt.plot(ttt, pos[indx])
+plt.grid()
+plt.subplot(212)
+plt.title('velocity')
+plt.plot(ttt, velocity[indx])
+plt.grid()
+plt.show()
