@@ -26,28 +26,28 @@ import glob
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax', 'breathe']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax']
 
 # DOXY_XML_DIR=/home/build/maurice/Release/Front-End/src/swig/Siconos/FrontEnd/xml make html
-build_dir = os.getenv('DOXY_XML_DIR')
+#build_dir = os.getenv('DOXY_XML_DIR')
 
-# breathe config
-breathe_projects = {"Siconos": os.path.join(build_dir, 'processed')}
 
-for fname in glob.glob(os.path.join(build_dir, '*.xml')):
-    bfname = os.path.basename(fname)
-    pfilename = os.path.join(build_dir, 'processed', bfname)
-    try:
-        if os.stat(pfilename)[6] == 0:
-                os.remove(pfilename)
-    except:
-        pass
+#breathe_projects = {"Siconos": os.path.join(build_dir, 'processed')}
+
+#for fname in glob.glob(os.path.join(build_dir, '*.xml')):
+#    bfname = os.path.basename(fname)
+#    pfilename = os.path.join(build_dir, 'processed', bfname)
+#    try:
+#        if os.stat(pfilename)[6] == 0:
+#                os.remove(pfilename)
+#    except:
+#        pass
     # produce pfilename
-    if not os.path.exists(pfilename):
-        os.system(
-            '../../src/swig/Siconos/doxy2swig.py {0} tmp.i'.format(fname))
+#    if not os.path.exists(pfilename):
+#        os.system(
+#            '../../src/swig/Siconos/doxy2swig.py {0} tmp.i'.format(fname))
 
-breathe_default_project = "Siconos"
+#breathe_default_project = "Siconos"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

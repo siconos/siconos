@@ -66,12 +66,10 @@ We may then compute the error::
 
 API description
 ^^^^^^^^^^^^^^^
+.. py:module:: Siconos.Numerics
 
-.. doxygenstruct:: LinearComplementarityProblem
-   :project: Siconos
+.. autoclass:: LCP
 
-.. doxygenfile:: LCP_Solvers.h
-   :project: Siconos
 
 The FrictionContactProblem
 --------------------------

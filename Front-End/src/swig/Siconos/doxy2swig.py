@@ -126,6 +126,7 @@ class Doxy2SWIG:
         txt = txt.replace('std::', '')
         txt = txt.replace('std11::', '')
         txt = txt.replace('boost::', '')
+        txt = txt.replace('boost::', '')
 
         # processed xml update
         node.data = txt
@@ -215,7 +216,13 @@ class Doxy2SWIG:
     do_emphasis = space_parse
     do_bold = space_parse
     do_computeroutput = space_parse
-    do_formula = space_parse
+
+    def do_formula(self, node):
+        self.add_text(' ')
+        data = node.firstChild.data
+        self.add_text(':math:')
+        self.add_text(r'`{0}`'.format(data).replace('\\', r'\\\\').replace('"', r'\"'))
+        self.add_text('\n')
 
     def do_compoundname(self, node):
         self.add_text('\n\n')
@@ -244,8 +251,9 @@ class Doxy2SWIG:
                 self.parse(n)
 
     def do_includes(self, node):
-        self.add_text('C++ includes: ')
-        self.generic_parse(node, pad=1)
+        pass
+#        self.add_text('C++ includes: ')
+#        self.generic_parse(node, pad=1)
 
     def do_parameterlist(self, node):
         text='unknown'
@@ -391,7 +399,7 @@ class Doxy2SWIG:
                 a3 += [ l[-1].strip('&*').replace('false','False').replace('true','True') ]
             else:
                 a3 += [ '' ]
-        a4 = ','.join(a3)
+        a4 = ', '.join(a3)
         node.firstChild.data = a4
         self.add_text('({0})'.format(a4))
 
