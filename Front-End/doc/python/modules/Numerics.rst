@@ -3,13 +3,13 @@ Siconos.Numerics
 
 The available ``Siconos Numerics`` data structures are : 
 
-  - LinearComplementarityProblem
+  - LCP
   - FrictionContactProblem
   - MCP
   - MLCP
 
-The LinearComplementarityProblem
---------------------------------
+LCP
+---
 
 Usage
 ^^^^^
@@ -64,25 +64,8 @@ We may then compute the error::
   d = Numerics.lcp_compute_error(lcp, z, w, 1e-6)
 
 
-API description
-^^^^^^^^^^^^^^^
-.. py:module:: Siconos.Numerics
+Siconos Numerics API
+^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: LCP
-
-
-The FrictionContactProblem
---------------------------
-
-
-The MCP Problem
----------------
-
-
-The MLCP Problem
-----------------
-
-
-API reference
--------------
-
+.. automodule:: Siconos.Numerics
+  :members:

@@ -120,13 +120,14 @@ class Doxy2SWIG:
 
         # replacements for swig docstrings and processed xml
         txt = node.data
-        txt = txt.replace('SP::', '')
-        txt = txt.replace('SA::', '')
-        txt = txt.replace('SPC::', '')
-        txt = txt.replace('std::', '')
-        txt = txt.replace('std11::', '')
-        txt = txt.replace('boost::', '')
-        txt = txt.replace('boost::', '')
+
+#        txt = txt.replace('SP::', '')
+#        txt = txt.replace('SA::', '')
+#        txt = txt.replace('SPC::', '')
+#        txt = txt.replace('std::', '')
+#        txt = txt.replace('std11::', '')
+#        txt = txt.replace('boost::', '')
+#        txt = txt.replace('boost::', '')
 
         # processed xml update
         node.data = txt
@@ -221,7 +222,8 @@ class Doxy2SWIG:
         self.add_text(' ')
         data = node.firstChild.data
         self.add_text(':math:')
-        self.add_text(r'`{0}`'.format(data).replace('\\', r'\\\\').replace('"', r'\"'))
+        self.add_text(r'`{0}`'.format(data).replace('\\', r'\\\\').
+                      replace('"', r'\"').replace('$', ''))
         self.add_text('\n')
 
     def do_compoundname(self, node):
@@ -389,19 +391,20 @@ class Doxy2SWIG:
             self.generic_parse(node)
 
     def do_argsstring(self, node):
-        args = node.firstChild.data
+        pass
+#        args = node.firstChild.data
         # remove chars after closing parent
-        a1 = args.split(')')[0]
-        a2 = [ shlex.split(a) for a in a1.split('(')[1].split(',') ]
-        a3 = []
-        for l in a2:
-            if len(l) > 0:
-                a3 += [ l[-1].strip('&*').replace('false','False').replace('true','True') ]
-            else:
-                a3 += [ '' ]
-        a4 = ', '.join(a3)
-        node.firstChild.data = a4
-        self.add_text('({0})'.format(a4))
+#        a1 = args.split(')')[0]
+#        a2 = [ shlex.split(a) for a in a1.split('(')[1].split(',') ]
+#        a3 = []
+#        for l in a2:
+#            if len(l) > 0:
+#                a3 += [ l[-1].strip('&*').replace('false','False').replace('true','True') ]
+#            else:
+#                a3 += [ '' ]
+#        a4 = ', '.join(a3)
+#        node.firstChild.data = a4
+#        self.add_text('({0})'.format(a4))
 
     def do_member(self, node):
         kind = node.attributes['kind'].value
