@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2012.
+/* Siconos-Numerics, Copyright INRIA 2005-2013.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -9,50 +9,45 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACTPROBLEM_AS_VI_H
-#define FRICTIONCONTACTPROBLEM_AS_VI_H
+#ifndef BOX_H
+#define BOX_H
 
-/*! \page fcProblem Friction-contact problems (2D or 3D) as VI
+/*!\file box.h
+ * \brief Some helpers for dealing with polyhedra and polytopes
  *
- *
- */
-
-
-/*!\file FrictionContactProblem_as_VI.h
-  \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
+ * \author Olivier Huber
 */
 
-#include "NumericsMatrix.h"
-#include "FrictionContactProblem.h"
-#include "VariationalInequality.h"
+typedef struct {
+  int id;
+} generic_set;
 
-/** \struct FrictionContactProblem_as_VI FrictionContactProblem_as_VI.h
- *
+/** \struct box box.h
+ * Definition of a polytope in terms of (H,K) representation
  */
-typedef struct
+typedef struct box_constraints
 {
-  /* the VI associated with the FC3D probelem */
-  VariationalInequality * vi;
-  /* the FC3D associated with the VI  */
-  FrictionContactProblem * fc3d;
-} FrictionContactProblem_as_VI;
-
-
+  int id; /**< id of the structure, usually solver specific */
+  double* lb; /**< lower bounds */
+  double* ub; /**< upper bounds */
+} box_constraints;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-  void Function_VI_FC3D(void * self, int n, double *x, double *F);
-
-  void Projection_VI_FC3D(void *viIn, double *x, double *PX);
+  /** free a box struct
+  * \param b the box struct to free
+  */
+  void free_box(box_constraints* b);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

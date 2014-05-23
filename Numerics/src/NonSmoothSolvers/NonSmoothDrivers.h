@@ -35,6 +35,7 @@
 #include "Friction_cst.h"
 #include "VI_cst.h"
 #include "AVI_cst.h"
+#include "VariationalInequality.h"
 #include "VariationalInequality_Solvers.h"
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"

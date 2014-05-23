@@ -116,9 +116,8 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
 
     if (options->callback)
     {
-      options->callback->endIteration(options->callback->env, nc * 3, 
-                                      reaction, velocity, 
-                                      error);
+      options->callback->collectStatsIteration(options->callback->env, nc * 3, 
+                                      reaction, velocity, error, NULL);
     }
 
     if (verbose > 0)

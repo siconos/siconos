@@ -105,8 +105,9 @@ typedef struct MixedComplementarityProblem2_
   ptrFunctionMCP2 compute_Fmcp; /**< pointer to the function used to compute Fmcp(z) = (G(z), H(z))*/
   ptrFunctionMCP2 compute_nabla_Fmcp; /**< pointer to the function used to compute \f$\nabla_z Fmcp\f$*/
   double* nabla_Fmcp; /**< storage for \f$\nabla_z Fmcp\f$*/
-  void* env_compute_Fmcp; /**< environment for the compute_Fmcp (useful for Python bindings)*/
-  void* env_compute_nabla_Fmcp; /**< environment for the compute_nabla_Fmcp (useful for Python bindings)*/
+  void* env; /**< environment for the compute_Fmcp and compute_nabla_Fmcp function.
+               When called from Python, it contains an object with compute_Fmcp and compute_nabla_Fmcp as methods.
+               When called from C, it can reference a data struct containing variables needed for the computations.*/
 
 } MixedComplementarityProblem2;
 

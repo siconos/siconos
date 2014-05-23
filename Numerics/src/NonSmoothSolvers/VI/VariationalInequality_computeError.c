@@ -23,6 +23,7 @@
 #include "SolverOptions.h"
 #include "VariationalInequality_computeError.h"
 #include "SiconosLapack.h"
+#include "box.h"
 
 #include <math.h>
 #include <assert.h>
@@ -60,7 +61,7 @@ int variationalInequality_computeError(
     {
       ztmp[i]=0.0 ;
     }
-    problem->F(problem,ztmp,w);
+    problem->F(problem,n,ztmp,w);
     problem->normVI= cblas_dnrm2(n , w , 1);
     DEBUG_PRINTF("problem->normVI = %12.8e\n", problem->normVI);
     problem->istheNormVIset=1;
@@ -69,7 +70,7 @@ int variationalInequality_computeError(
   double normq =problem->normVI;
   DEBUG_PRINTF("normq = %12.8e\n", normq);
 
-  problem->F(problem,z,w);
+  problem->F(problem,n,z,w);
   
   cblas_dcopy(n , z , 1 , ztmp, 1);
   cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
@@ -84,7 +85,7 @@ int variationalInequality_computeError(
   if (*error > tolerance)
   {
     if (verbose > 1)
-      printf(" Numerics - variotionalInequality_compute_error: error = %g > tolerance = %g.\n",
+      printf(" Numerics - variationalInequality_compute_error: error = %g > tolerance = %g.\n",
              *error, tolerance);
     return 1;
   }
@@ -92,7 +93,50 @@ int variationalInequality_computeError(
     return 0;
 }
 
+int variationalInequality_compute_error_box(
+  VariationalInequality* problem,
+  double* x, double* F, double tolerance, double * error)
+{
+  assert(problem);
+  assert(x);
+  assert(F);
+  assert(error);
+  assert(problem->set);
 
+  double* lb = ((box_constraints*) problem->set)->lb;
+  double* ub = ((box_constraints*) problem->set)->ub;
+  double diff;
+  double err = 0;
+
+  // compute componentwise \Pi_box(x-F(x)) - x
+  for (int i = 0; i < problem->size; ++i)
+  {
+    diff = x[i] - F[i];
+    if (diff < lb[i])
+    {
+      diff = lb[i] - x[i];
+    }
+    else if (diff > ub[i])
+    {
+      diff = ub[i] - x[i];
+    }
+    else
+    {
+      diff = F[i]; // should be -F, but we square it anyway ...
+    }
+    err += diff*diff;
+  }
+  error[0] = err;
+
+  if (err > tolerance)
+  {
+    if (verbose > 1)
+      printf(" Numerics - variationalInequality_compute_error: error = %g > tolerance = %g.\n", *error, tolerance);
+    return 1;
+  }
+  else
+    return 0;
+}
 
 /*
 int variationalInequality_computeError_wait(

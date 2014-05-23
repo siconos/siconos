@@ -182,9 +182,9 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
 
     if (options->callback)
     {
-      options->callback->endIteration(options->callback->env, nc * 3, 
+      options->callback->collectStatsIteration(options->callback->env, nc * 3, 
                                       reaction, velocity, 
-                                      error);
+                                      error, NULL);
     }
 
     if (verbose > 0)

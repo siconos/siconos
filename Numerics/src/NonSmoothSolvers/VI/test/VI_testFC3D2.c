@@ -13,7 +13,7 @@ typedef struct {
 } Problems;
 
 
-void Ftest(void * self, double *x, double *F)
+void Ftest(void * self, int n_unused, double *x, double *F)
 {
   VariationalInequality * vi = (VariationalInequality *) self;
   Problems* pb = (Problems *)vi->env;             

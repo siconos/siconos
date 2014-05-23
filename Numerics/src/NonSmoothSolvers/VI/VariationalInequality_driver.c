@@ -30,6 +30,7 @@
 char *  SICONOS_VI_EG_STR = "VI_EG";
 char *  SICONOS_VI_FPP_STR = "VI_FPP";
 char *  SICONOS_VI_HP_STR = "VI_HP";
+char *  SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-function";
 
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
@@ -93,6 +94,13 @@ int variationalInequality_driver(VariationalInequality* problem,
     variationalInequality_HyperplaneProjection(problem, x , w , &info , options);
     break;
   }
+  case SICONOS_VI_BOX_QI:
+  {
+    snPrintf(1, options, 
+             " ========================== Call solver based on merit function (Qi) for Box VI problem ==========================\n");
+    variationalInequality_box_newton_QiLSA(problem, x, w, &info, options);
+    break;
+  }
   default:
   {
     fprintf(stderr, "Numerics, variationalInequality_driver failed. Unknown solver.\n");
@@ -115,7 +123,7 @@ int checkTrivialCase_vi(VariationalInequality* problem, double* x,
   if (nnorm < 1e-12)
     return 1;
   
-  problem->F(problem,x,w);
+  problem->F(problem,n,x,w);
   nnorm = cblas_dnrm2(n,w,1);
   if (nnorm < 1e-12)
     return 1;

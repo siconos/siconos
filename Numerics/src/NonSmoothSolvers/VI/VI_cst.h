@@ -9,11 +9,13 @@ enum VI_SOLVER
 {
   SICONOS_VI_EG = 1000,
   SICONOS_VI_FPP = 1001,
-  SICONOS_VI_HP = 1002
+  SICONOS_VI_HP = 1002,
+  SICONOS_VI_BOX_QI = 1003
 };
 
 extern char *  SICONOS_VI_EG_STR ;
 extern char *  SICONOS_VI_FPP_STR ;
 extern char *  SICONOS_VI_HP_STR ;
+extern char *  SICONOS_VI_BOX_QI_STR ;
 
 #endif

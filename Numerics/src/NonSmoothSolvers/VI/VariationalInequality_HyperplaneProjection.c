@@ -88,14 +88,14 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
       /** xtmp <-- x */
       cblas_dcopy(n , x , 1 , xtmp, 1);   
 
-      problem->F(problem,xtmp,wtmp);
+      problem->F(problem, n, xtmp, wtmp);
 
       double rho = 1;
       cblas_daxpy(n, -rho, wtmp , 1, xtmp , 1) ;
       
 
       cblas_dcopy(n , xtmp, 1 , xtmp2, 1);   
-      problem->ProjectionOnX(problem,xtmp2,xtmp);
+      problem->ProjectionOnX(problem, xtmp2,xtmp);
 
       // Armijo line search
       
@@ -123,7 +123,7 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
         alpha  = 1.0 - alpha;
         
         cblas_daxpy(n, alpha, x, 1, xtmp2, 1);
-        problem->F(problem,xtmp2,wtmp);
+        problem->F(problem, n, xtmp2,wtmp);
 
         lhs = cblas_ddot(n, wtmp, 1, xtmp3, 1);
         rhs = cblas_dnrm2(n,xtmp3, 1);
@@ -148,16 +148,16 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
       cblas_daxpy(n, -rhoequiv, wtmp, 1, x  , 1);
       
       cblas_dcopy(n , x, 1 , xtmp, 1);        
-      problem->ProjectionOnX(problem,xtmp,x);
+      problem->ProjectionOnX(problem, xtmp,x);
       
       /* **** Criterium convergence **** */
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
   
       if (options->callback)
       {
-        options->callback->endIteration(options->callback->env, n,
+        options->callback->collectStatsIteration(options->callback->env, n,
                                         x, w,
-                                        error);
+                                        error, NULL);
       }
 
       if (verbose > 0)

@@ -30,7 +30,8 @@
  */
 typedef struct Polyhedron
 {
-  unsigned int size;
+  int id; /**< id of the structure, usually solver specific */
+  unsigned int size; /**< dimension of the space */
   double* H; /**< H matrix in an (H,K) representation of a polytope H x <= K */
   double* K; /**< K vector in an (H,K) representation of a polytope H x <= K */
   double* Heq; /**< H matrix in an (H,K) representation of a polytope Heq x = Keq */

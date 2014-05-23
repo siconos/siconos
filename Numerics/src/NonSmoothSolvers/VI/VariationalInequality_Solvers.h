@@ -119,8 +119,15 @@ extern "C"
   int variationalInequality_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options);
 
 
+  void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, double *x, double *F, int* info, SolverOptions* options);
 
 
+  /**  set the default solver parameters and perform memory allocation for a VI
+   * solver
+   * \param options the SolverOptions to set
+   * \param solverId the id of the solver
+   */
+  int variationalInequality_common_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
 
 

@@ -101,9 +101,9 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
 
       if (options->callback)
       {
-        options->callback->endIteration(options->callback->env,
+        options->callback->collectStatsIteration(options->callback->env,
                                         nc * 3, reaction, velocity,
-                                        error);
+                                        error, NULL);
     }
 
       if (verbose > 0)

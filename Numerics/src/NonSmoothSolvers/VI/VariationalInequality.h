@@ -69,35 +69,25 @@
 
 typedef void * (FVIPtr)(void*, double *, double *);
 
-
+enum VI_SET_TYPE { VI_SET_IS_BOX, VI_SET_IS_POLYHEDRON };
 
 
 /** \struct VariationalInequality
  *
  */
-typedef struct
+typedef struct VariationalInequality_
 {
-  /** size of the VI \f$ n \f$ */
-  int size;
-  
-  /** pointer onto env object (which is self is the simplest case)*/
-  void *env;
-  
-  /** Function of the VI */
-  void (*F)(void *self, double * x ,double *fx);
-
-  /** Projection on X of the VI */
-  void (*ProjectionOnX)(void *self, double *x, double * PX);
-
-  /** Norm of the VI problem to compute relative solution */
-  double normVI;
-
-  /** Boolean to know if the norm is set 
-   *  If not (istheNormVIset=0) it will be computed in the first call of variationalInequality_computeError
-   *  By default, set istheNormVIset =0
-   */
-  int  istheNormVIset;
-  
+  int size; /**< size of the VI \f$ n \f$ */
+  void *env; /**< pointer onto env object (which is self is the simplest case)*/
+  void (*F)(void *self, int n, double* x ,double* fx); /**< Function of the VI */
+  void (*compute_nabla_F)(void* env, int n, double* x ,double* nabla_F); /**< Function to compute the jacobian of F */
+  void (*ProjectionOnX)(void *self, double *x, double * PX); /**< Projection on X of the VI */
+  double normVI; /**< Norm of the VI problem to compute relative solution */
+  int istheNormVIset; /**< Boolean to know if the norm is set 
+   * If not (istheNormVIset=0) it will be computed in the first call of variationalInequality_computeError
+   * By default, set istheNormVIset =0 */
+  void* set; /**< opaque struct that represent the set K (possibly empty) */
+  double* nabla_F; /**< storage for \f$\nabla_x F\f$*/
 } VariationalInequality;
 
 

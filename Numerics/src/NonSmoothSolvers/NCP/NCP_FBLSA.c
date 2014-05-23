@@ -94,12 +94,19 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
   }
   else
   {
-    F_merit = (double *)malloc(n * sizeof(double));
-    H = (double *)malloc(nn * sizeof(double));
-    JacThetaF_merit = (double *)malloc(nn * sizeof(double));
-    ipiv = (int *)malloc(n * sizeof(int));
-    workV1 = (double *)malloc(n * sizeof(double));
-    workV2 = (double *)malloc(n * sizeof(double));
+    F_merit = (double *)calloc(n,  sizeof(double));
+    H = (double *)calloc(nn, sizeof(double));
+    JacThetaF_merit = (double *)calloc(nn, sizeof(double));
+    workV1 = (double *)calloc(n, sizeof(double));
+    workV2 = (double *)calloc(n, sizeof(double));
+
+    ipiv = (int *)calloc(n, sizeof(int));
+  }
+
+  newton_stats stats_iteration;
+  if (options->callback)
+  {
+    stats_iteration.id = NEWTON_STATS_ITERATION;
   }
 
   linesearch_data ls_data;
@@ -265,7 +272,7 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
     if ((theta_iter > sigma * theta) || (infoDGESV > 0 && functions->compute_RHS_desc)) // Newton direction not good enough or min part failed
     {
       if (verbose > 1)
-        printf("newton_FBLSA :: Newton direction not acceptable %g %g\n", theta_iter, theta);
+        printf("newton_FBLSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);
 
       // Computations for the linear search
       // preRHS = gamma * <JacThetaF_merit, d>
@@ -277,7 +284,7 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
       if (preRHS > threshold)
       {
         if (verbose > 1)
-          printf("newton_FBLSA :: direction not acceptable %g %g\n", preRHS, threshold);
+          printf("newton_FBLSA :: direction not acceptable %g > %g\n", preRHS, threshold);
         cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
         preRHS = cblas_ddot(n, JacThetaF_merit, incx, workV1, incy);
@@ -305,6 +312,15 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
 
     // Error Evaluation
     functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
+
+    if (options->callback)
+    {
+      stats_iteration.merit_value = theta;
+      stats_iteration.alpha = tau;
+      stats_iteration.status = 0;
+      options->callback->collectStatsIteration(options->callback->env, n, z, F, err, &stats_iteration);
+    }
+
   }
 
   options->iparam[1] = iter;

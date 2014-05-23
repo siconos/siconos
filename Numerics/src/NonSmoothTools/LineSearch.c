@@ -21,6 +21,8 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
+#include "float.h"
+
 #include "SiconosBlas.h"
 #include "LineSearch.h"
 
@@ -65,9 +67,9 @@ double linesearch_Armijo2(int n, double theta, double preRHS, linesearch_data* l
       ;
   }
 
-  while (1)
+  while (alpha >= 1e-12)
   {
-     // workV1 contains the direction d
+     // desc_dir contains the direction d
      cblas_dcopy(n, z, 1, zc, 1);
      cblas_daxpy(n, alpha, desc_dir, 1, zc, 1);     //  z + alpha*d --> z
  
@@ -77,7 +79,7 @@ double linesearch_Armijo2(int n, double theta, double preRHS, linesearch_data* l
  
      DEBUG_PRINT("z ");
      DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-         { DEBUG_PRINTF("% 2.2e ", workV[i]) }
+         { DEBUG_PRINTF("% 2.2e ", zc[i]) }
          DEBUG_PRINT("\n"));
  
      DEBUG_PRINT("F ");

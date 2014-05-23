@@ -122,10 +122,11 @@ Structure used to store user callbacks inside solvers
 typedef struct
 {
   void *env; /**< general user environnement */
-  void (*endIteration)(void *env, int size, double*reaction,
-                       double*velocity, double error);/**< pointer on a function
+  void (*collectStatsIteration)(void *env, int size, double*reaction,
+                       double*velocity, double error, void* extra_data);/**< pointer on a function
 * Its signature is: user env, problem size, reaction,
-* velocity and error at end of solver iteration (when this makes sense) */
+* velocity, error at end of solver iteration (when this makes sense) and an
+* extra data structur */
 } Callback;
 
 
@@ -159,7 +160,8 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE
   SICONOS_NUMERICS_PROBLEM_FC3D = 4,
   SICONOS_NUMERICS_PROBLEM_NCP = 5,
   SICONOS_NUMERICS_PROBLEM_MCP = 6,
-  SICONOS_NUMERICS_PROBLEM_VI = 7
+  SICONOS_NUMERICS_PROBLEM_VI = 7,
+  SICONOS_NUMERICS_PROBLEM_AVI = 8
 };
 
 extern char * SICONOS_NUMERICS_PROBLEM_LCP_STR;
@@ -170,6 +172,7 @@ extern char * SICONOS_NUMERICS_PROBLEM_EQUALITY_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_FC2D_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_FC3D_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_VI_STR;
+extern char * SICONOS_NUMERICS_PROBLEM_AVI_STR;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

@@ -37,6 +37,21 @@ typedef struct _functions_FBLSA {
   void (*compute_H_desc)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H_desc); /**< function to get an element H_desc of T_desc, optional */
 } functions_FBLSA;
 
+// id of the stat structure 
+#define NEWTON_STATS_ITERATION 1
+
+/** */
+typedef struct _newton_stats {
+  int id; /**< id of this structur */
+  double merit_value; /**< value of the merit function at the end of the iteration */
+  double alpha; /**< value of the LS */
+  unsigned int status; /**< status of this newton iteration */
+} newton_stats;
+
+// status of the newton step
+#define NEWTON_STATS_NEWTON_STEP 1
+#define NEWTON_STATS_DESC_DIR 2
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

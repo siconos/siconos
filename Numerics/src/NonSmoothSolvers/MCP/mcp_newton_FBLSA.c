@@ -19,31 +19,25 @@
 
 
 #include <stdio.h>
-#include <math.h>
-#include <float.h>
 
 #include "MCP_Solvers.h"
 #include "MCP_cst.h"
-#include "SiconosLapack.h"
+#include "SiconosBlas.h"
 #include "Newton_Methods.h"
 #include "FischerBurmeister.h"
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
 
 void FB_compute_F_mcp(void* data_opaque, double* z, double* Fmcp)
 {
   // Computation of the new value F(z)
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
-  data->compute_Fmcp(data->env_compute_Fmcp, data->n1, data->n2, z, Fmcp);
+  data->compute_Fmcp(data->env, data->n1, data->n2, z, Fmcp);
 }
 
 void FB_compute_H_mcp(void* data_opaque, double* z, double* Fmcp, double* workV1, double* workV2, double* H)
 {
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
 
-  data->compute_nabla_Fmcp(data->env_compute_nabla_Fmcp, data->n1, data->n2, z, data->nabla_Fmcp);
+  data->compute_nabla_Fmcp(data->env, data->n1, data->n2, z, data->nabla_Fmcp);
 
   Jac_F_FB(data->n1, data->n2, z, Fmcp, workV1, workV2, data->nabla_Fmcp, H);
 }

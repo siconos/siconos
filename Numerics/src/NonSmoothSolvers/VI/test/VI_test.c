@@ -1,7 +1,7 @@
 #include "VariationalInequality.h"
 #include "stdlib.h"
 
-void Ftest(void * viIn, double *x, double *F)
+void Ftest(void * viIn, int n, double *x, double *F)
 {
   int i;
   VariationalInequality * vi = (VariationalInequality* ) viIn;
@@ -47,7 +47,7 @@ int main(void)
   {
     x[i] = i-5;
   }
-  vi.F(&vi,x,F);
+  vi.F(&vi,n,x,F);
   vi.ProjectionOnX(&vi,x,PX);
   for (i =0; i< n ; i++)
   {

@@ -45,7 +45,7 @@ void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* workV1, 
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
   assert(data->nabla_Fmcp);
 
-  data->compute_nabla_Fmcp(data->env_compute_nabla_Fmcp, data->n1, data->n2, z, data->nabla_Fmcp);
+  data->compute_nabla_Fmcp(data->env, data->n1, data->n2, z, data->nabla_Fmcp);
 
   Jac_F_min(data->n1, data->n2, z, F, data->nabla_Fmcp, H);
 }

@@ -29,7 +29,7 @@
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
 
-void Function_VI_FC3D(void * self, double *x, double *F)
+void Function_VI_FC3D(void * self, int n_notused, double *x, double *F)
 {
   DEBUG_PRINT("Function_VI_FC3D(void * self, double *x, double *F)\n")
   VariationalInequality * vi = (VariationalInequality *) self;

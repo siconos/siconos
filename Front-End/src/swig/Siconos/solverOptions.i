@@ -28,6 +28,10 @@
 #enddef
 #endif
 
+%{
+#include "Newton_Methods.h"
+%}
+
 #define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
   PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
               data, 0, NPY_ARRAY_FARRAY, NULL)
@@ -68,7 +72,7 @@ static int convert_darray(PyObject *input, double *ptr) {
       return 0;
   }
 
-  for (i =0; i < PyObject_Length(input); i++) {
+  for (i =0; i < PyObject_Length(input); ++i) {
       PyObject *o = PySequence_GetItem(input,i);
       if (!PyFloat_Check(o)) {
          Py_XDECREF(o);
@@ -206,52 +210,104 @@ static int convert_darray(PyObject *input, double *ptr) {
 %fragment("NumPy_Fragments");
 
 %{
-  
-  void endIterationCallback(void *env, 
-                            int size, double*reaction, 
-                            double*velocity, 
-                            double error)
+
+  void collectStatsIterationCallback(void *env,
+                            int size, double* z,
+                            double* Fz,
+                            double error,
+                            void* extra_data)
   {
+    // A little bit of black magic
+    PyObject* py_tuple;
+    if (extra_data)
+    {
+      switch (*(int*)extra_data)
+      {
+        case NEWTON_STATS_ITERATION:
+        {
+          newton_stats* stats = (newton_stats*) extra_data;
+          py_tuple = PyTuple_New(3);
+          PyObject* py_merit_value = PyFloat_FromDouble(stats->merit_value);
+          PyTuple_SetItem(py_tuple, 0, py_merit_value);
+          PyObject* py_alpha =  PyFloat_FromDouble(stats->alpha);
+          PyTuple_SetItem(py_tuple, 1, py_alpha);
+          PyObject* py_status = PyTuple_New(2);
+          PyObject* py_newton_step;
+          if (stats->status & NEWTON_STATS_NEWTON_STEP)
+          {
+            Py_INCREF(Py_True);
+            py_newton_step = Py_True;
+          }
+          else
+          {
+            Py_INCREF(Py_False);
+            py_newton_step = Py_False;
+          }
+          PyTuple_SetItem(py_status, 0, py_newton_step);
+
+          PyObject* py_desc_dir;
+          if (stats->status & NEWTON_STATS_DESC_DIR)
+          {
+            Py_INCREF(Py_True);
+            py_desc_dir = Py_True;
+          }
+          else
+          {
+            Py_INCREF(Py_False);
+            py_desc_dir = Py_False;
+          }
+          PyTuple_SetItem(py_status, 1, py_desc_dir);
+
+          PyTuple_SetItem(py_tuple, 2, py_status);
+          break;
+        }
+
+        default:
+          py_tuple = PyTuple_New(0);
+      }
+    }
+    else
+    {
+      py_tuple = PyTuple_New(0);
+    }
     if (PyCallable_Check((PyObject*) env))
     {
-      
+
       npy_intp dim[1];
       dim[0] = size;
-      
-      PyObject* py_reaction = FPyArray_SimpleNewFromData(1,dim, 
-                                                         NPY_DOUBLE, 
-                                                         reaction); 
-      
-      PyObject* py_velocity = FPyArray_SimpleNewFromData(1,dim, 
-                                                         NPY_DOUBLE, 
-                                                         velocity);
-      
+
+      PyObject* py_z = FPyArray_SimpleNewFromData(1, dim,
+                                                  NPY_DOUBLE,
+                                                  z);
+
+      PyObject* py_Fz = FPyArray_SimpleNewFromData(1, dim,
+                                                   NPY_DOUBLE,
+                                                   Fz);
+
       PyObject* py_error = PyFloat_FromDouble(error);
-      
-      PyObject* py_args = PyTuple_New(3);
-      PyTuple_SetItem(py_args, 0, py_reaction);
-      PyTuple_SetItem(py_args, 1, py_velocity);
+
+      PyObject* py_args = PyTuple_New(4);
+      PyTuple_SetItem(py_args, 0, py_z);
+      PyTuple_SetItem(py_args, 1, py_Fz);
       PyTuple_SetItem(py_args, 2, py_error);
-      
+      PyTuple_SetItem(py_args, 3, py_tuple);
+
       PyGILState_STATE gstate;
       gstate = PyGILState_Ensure();
-      
+
       PyObject* py_out = PyObject_CallObject((PyObject*) env, py_args);
-      
-      /*     Py_DECREF(py_reaction);
-             Py_DECREF(py_velocity);
-             Py_DECREF(py_error);*/
+
       Py_DECREF(py_args);
       Py_XDECREF(py_out);
-      
+
       PyGILState_Release(gstate);
     }
-    else  
+    else
     {
-      PyErr_SetString(PyExc_TypeError,"Expecting a callable callback");      
-    }   
+      PyErr_SetString(PyExc_TypeError,"Expecting a callable callback");
+    }
   };
-  
+
 %}
 
 
@@ -263,7 +319,7 @@ static int convert_darray(PyObject *input, double *ptr) {
   }
   pycallback = new Callback(); // free in deleteSolverOptions
   pycallback->env = $input;
-  pycallback->endIteration = &endIterationCallback;
+  pycallback->collectStatsIteration = &collectStatsIterationCallback;
 
   $1 = pycallback;
 

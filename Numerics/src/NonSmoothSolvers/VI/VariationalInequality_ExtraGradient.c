@@ -103,7 +103,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       cblas_dcopy(n , x , 1 , xtmp, 1);
 
       /* wtmp <- F(xtmp) */
-      problem->F(problem,xtmp,wtmp);
+      problem->F(problem, n, xtmp,wtmp);
       
       /* xtmp <- xtmp - F(xtmp) */
       cblas_daxpy(n, -1.0, wtmp , 1, xtmp , 1) ;
@@ -130,9 +130,9 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
       if (options->callback)
       {
-        options->callback->endIteration(options->callback->env, n,
+        options->callback->collectStatsIteration(options->callback->env, n,
                                         x, w,
-                                        error);
+                                        error, NULL);
       }
 
       if (verbose > 0)
@@ -157,7 +157,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       /* x_k <-- x store the x at the beginning of the iteration */
       cblas_dcopy(n , x , 1 , x_k, 1);
 
-      problem->F(problem,x,w_k);
+      problem->F(problem, n, x, w_k);
 
       ls_iter = 0 ;
       success =0;
@@ -174,7 +174,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
         cblas_dcopy(n , x , 1 , xtmp, 1);
         problem->ProjectionOnX(problem,xtmp,x);
         
-        problem->F(problem,x,w);
+        problem->F(problem, n, x, w);
 
         DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
                        {
@@ -210,7 +210,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       /* cblas_dcopy(n , q , 1 , velocitytmp, 1); */
       /* prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp); */
 
-      problem->F(problem,x,wtmp);
+      problem->F(problem, n, x,wtmp);
 
       /* x <- x - rho_k*  wtmp */
       cblas_daxpy(n, -rho_k, wtmp , 1, x , 1) ;

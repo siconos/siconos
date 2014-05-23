@@ -32,7 +32,8 @@ extern "C"
 {
 #endif
 
-  /** Error computation for VI problem
+  /** Error computation for a VI problem. This function requires dWork to point to
+   * at least 2*n double of allocated memory or it malloc this memory
       \param problem the structure which defines the VI problem
       \param z vector
       \param w vector
@@ -42,6 +43,18 @@ extern "C"
       \return 0 if ok
    */
   int variationalInequality_computeError(VariationalInequality* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+
+  /** Error computation for a box VI problem, that is\f$ \Pi_box(x-F(x)) - x\f$
+      \param problem the structure which defines the VI problem
+      \param x vector
+      \param F vector
+      \param tolerance value for error computation
+      \param[in,out] error value
+      \return 0 if ok
+   */
+  int variationalInequality_compute_error_box(
+  VariationalInequality* problem,
+  double *z , double *w, double tolerance, double* error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

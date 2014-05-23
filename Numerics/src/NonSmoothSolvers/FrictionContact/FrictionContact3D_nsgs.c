@@ -466,9 +466,9 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
       if (options->callback)
       {
-        options->callback->endIteration(options->callback->env, 3 * nc,
+        options->callback->collectStatsIteration(options->callback->env, 3 * nc,
                                         reaction, velocity,
-                                        error);
+                                        error, NULL);
       }
 
     }

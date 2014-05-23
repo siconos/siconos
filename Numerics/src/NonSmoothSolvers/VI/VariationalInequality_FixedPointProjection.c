@@ -98,7 +98,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
     {
       ++iter;
 
-      problem->F(problem,x,w);
+      problem->F(problem,n,x,w);
       cblas_daxpy(n, -1.0, w , 1, x , 1) ;
       cblas_dcopy(n , x , 1 , xtmp, 1);
       problem->ProjectionOnX(problem,xtmp,x);
@@ -110,9 +110,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
       if (options->callback)
       {
-        options->callback->endIteration(options->callback->env, n,
+        options->callback->collectStatsIteration(options->callback->env, n,
                                         x, w,
-                                        error);
+                                        error, NULL);
       }
 
       if (verbose > 0)
@@ -138,7 +138,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       /* x_k <-- x store the x at the beginning of the iteration */
       cblas_dcopy(n , x , 1 , x_k, 1);
 
-      problem->F(problem,x,w_k);
+      problem->F(problem,n,x,w_k);
 
       ls_iter = 0 ;
       success =0;
@@ -154,7 +154,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         /* xtmp <-  ProjectionOnX(x) */
         problem->ProjectionOnX(problem,x,xtmp);
 
-        problem->F(problem,xtmp,w);
+        problem->F(problem,n,xtmp,w);
 
         DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
             printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
@@ -237,7 +237,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       cblas_dcopy(n , x , 1 , x_k, 1);
 
       /* comopute w_k =F(x_k) */
-      problem->F(problem,x_k,w_k);
+      problem->F(problem,n,x_k,w_k);
 
       ls_iter = 0 ;
       success =0;
@@ -253,7 +253,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         /* xtmp <-  ProjectionOnX(x) */
         problem->ProjectionOnX(problem,x,xtmp);
-        problem->F(problem,xtmp,w);
+        problem->F(problem,n,xtmp,w);
 
         DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
             printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});

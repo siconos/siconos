@@ -42,6 +42,7 @@ char * SICONOS_NUMERICS_PROBLEM_EQUALITY_STR = "EQUALITY";
 char * SICONOS_NUMERICS_PROBLEM_FC2D_STR = "FC2D";
 char * SICONOS_NUMERICS_PROBLEM_FC3D_STR = "FC3D";
 char * SICONOS_NUMERICS_PROBLEM_VI_STR = "VI";
+char * SICONOS_NUMERICS_PROBLEM_AVI_STR = "AVI";
 
 static void recursive_printSolverOptions(SolverOptions* options, int level);
 static void recursive_deleteSolverOptions(SolverOptions* op);
@@ -81,6 +82,10 @@ char * idProblemToChar(int id)
   case (SICONOS_NUMERICS_PROBLEM_VI):
   {
     return SICONOS_NUMERICS_PROBLEM_VI_STR;
+  }
+  case (SICONOS_NUMERICS_PROBLEM_AVI):
+  {
+    return SICONOS_NUMERICS_PROBLEM_AVI_STR;
   }
   default:
     printf("Numerics:idProblemToChar, id unknown : %d \n", id);

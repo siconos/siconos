@@ -54,6 +54,11 @@ int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int so
     info =    variationalInequality_HyperplaneProjection_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_VI_BOX_QI:
+  {
+    info =    variationalInequality_common_setDefaultSolverOptions(options, solverId);
+    break;
+  }
   default:
   {
     numericsError("variationalInequality_setDefaultSolverOptions", "Unknown Solver");
@@ -62,4 +67,35 @@ int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int so
   }
 
   return info;
+}
+
+int variationalInequality_common_setDefaultSolverOptions(SolverOptions* options, int solverId)
+{
+  int i;
+  if (verbose > 0)
+  {
+    printf("Set the Default SolverOptions for a VI Solver\n");
+  }
+
+  options->solverId = solverId;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 8;
+  options->dSize = 8;
+  options->iparam = (int *)malloc(options->iSize * sizeof(int));
+  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->dWork = NULL;
+  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
+  for (i = 0; i < 8; i++)
+  {
+    options->iparam[i] = 0;
+    options->dparam[i] = 0.0;
+  }
+  options->iparam[0] = 1000;
+  options->dparam[0] = 1e-10;
+
+  options->internalSolvers = NULL;
+
+  return 0;
 }
