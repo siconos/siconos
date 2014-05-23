@@ -1,6 +1,8 @@
-// named parameters
-%feature("kwargs");
+// signatures
+%feature("autodoc", 2);
 
+// named parameters (broken with overloaded function)
+// %feature("kwargs");
 
 // head declarations
 

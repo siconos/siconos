@@ -21,13 +21,12 @@
 // SWIG interface for Siconos Kernel
 %module(directors="1", allprotected="1") Kernel
 
- // signatures
-%feature("autodoc", 1);
+%include start.i
 
 // generated docstrings from doxygen xml output
 %include Kernel-docstrings.i
 
-%include start.i
+
 
 
 %{

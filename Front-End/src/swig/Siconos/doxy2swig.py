@@ -220,11 +220,17 @@ class Doxy2SWIG:
 
     def do_formula(self, node):
         self.add_text(' ')
-        data = node.firstChild.data
-        self.add_text(':math:')
-        self.add_text(r'`{0}`'.format(data).replace('\\', r'\\\\').
-                      replace('"', r'\"').replace('$', ''))
-        self.add_text('\n')
+        data = '{0}'.format(node.firstChild.data).strip().\
+               replace('\\', r'\\\\').\
+               replace('"', r'\"').replace('$', '').strip()
+        if len(data) <= 20:
+            self.add_text(' :math:`{0}` '.format(data))
+        else:
+            self.add_text("""
+
+            .. math:: {0}
+
+""".format(data))
 
     def do_compoundname(self, node):
         self.add_text('\n\n')
@@ -464,7 +470,7 @@ class Doxy2SWIG:
             elif i.find('// File:') > -1: # leave comments alone.
                 ret.extend([i, '\n'])
             else:
-                _tmp = textwrap.fill(i.strip(), break_long_words=False)
+                _tmp = i.strip()
                 _tmp = self.lead_spc.sub(r'\1"\2', _tmp)
                 ret.extend([_tmp, '\n\n'])
         return ret

@@ -13,6 +13,8 @@
 
 import sys, os
 import glob
+import shlex
+import re
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -262,3 +264,21 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+
+
+def starting_with(prefixes):
+    return ','.join([','.join([
+        fun for fun in dir(__import__("Siconos.Numerics").Numerics)
+        if fun.startswith(prefix)]) for prefix in prefixes])
+
+
+def source_read(app, docname, source):
+    m = re.search(':eval:`(.*)`.*', source[0])
+    if m is not None:
+        r = eval(m.group(1))
+        source[0] = re.sub(':eval:`(.*)`.*', r, source[0])
+
+
+def setup(app):
+    app.connect('source-read', source_read)

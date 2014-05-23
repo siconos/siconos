@@ -1,13 +1,8 @@
 Siconos.Kernel
 ==============
 
-
-Usage
-^^^^^
-
-Siconos Kernel API
-^^^^^^^^^^^^^^^^^^
-
-.. automodule:: Siconos.Kernel
-   :members:
-
+.. toctree::
+   Kernel/Modelisation.rst
+   Kernel/Simulation.rst
+   Kernel/Control.rst
+   Kernel/Utils.rst

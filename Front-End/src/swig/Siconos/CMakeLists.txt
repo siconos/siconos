@@ -55,7 +55,10 @@ FIND_PACKAGE(Doxygen REQUIRED)
 
 # find all siconos headers
 FILE(GLOB _HDRS ${SiconosNumerics_INCLUDE_DIRS}/*.h)
-FILE(GLOB _HPPDRS ${SiconosKernel_INCLUDE_DIRS}/*.hpp)
+FILE(GLOB _HPPDRS 
+  ${SiconosKernel_INCLUDE_DIRS}/*.hpp 
+  ${SiconosMechanics_INCLUDE_DIRS}/*.hpp 
+  ${SiconosIO_INCLUDE_DIRS}/*.hpp)
 
 SET(DOXYGEN_OUTPUT ${CMAKE_CURRENT_BINARY_DIR})
 

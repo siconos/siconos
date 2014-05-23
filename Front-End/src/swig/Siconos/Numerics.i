@@ -1,7 +1,7 @@
 // -*- C++ -*-
 // Siconos-Front-End , Copyright INRIA 2005-2012.
 // Siconos is a program dedicated to modeling, simulation and control
-// of non smooth dynamical systems.	
+// of non smooth dynamical systems.
 // Siconos is a free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -15,13 +15,16 @@
 // along with Siconos; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-// Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr 
+// Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 //
 
 // Siconos.i - SWIG interface for Siconos
 %module(directors="1") Numerics
 
 %include start.i
+
+// generated docstrings from doxygen xml output
+%include Numerics-docstrings.i
 
 %{
 #include "SiconosNumerics.h"
@@ -148,19 +151,19 @@
 
  // problemSize given as first arg => set by first numpy array length
  // in remaining args
- %typemap(in, numinputs=0) 
-   (unsigned int problemSize) 
+ %typemap(in, numinputs=0)
+   (unsigned int problemSize)
    (unsigned int *p_problem_size, npy_intp number_of_contacts)
  {
    // the first array length sets problemSize
    p_problem_size = &$1;
    *p_problem_size = 0;
-   number_of_contacts = 0;  
+   number_of_contacts = 0;
  }
 
-%typemap(in) 
-  (FrictionContactProblem*) 
-  (npy_intp problem_size, npy_intp problem_dimension, npy_intp number_of_contacts) 
+%typemap(in)
+  (FrictionContactProblem*)
+  (npy_intp problem_size, npy_intp problem_dimension, npy_intp number_of_contacts)
 {
   void *fcp;
   int res = SWIG_ConvertPtr($input, &fcp,SWIGTYPE_p_FrictionContactProblem, 0 |  0 );
@@ -173,9 +176,9 @@
   $1 = (FrictionContactProblem*) fcp;
 }
 
-%typemap(in) 
-  (GlobalFrictionContactProblem*) 
-  (npy_intp problem_size, npy_intp problem_dimension, npy_intp number_of_contacts) 
+%typemap(in)
+  (GlobalFrictionContactProblem*)
+  (npy_intp problem_size, npy_intp problem_dimension, npy_intp number_of_contacts)
 {
   void *fcp;
   int res = SWIG_ConvertPtr($input, &fcp,SWIGTYPE_p_FrictionContactProblem, 0 |  0 );
@@ -195,10 +198,10 @@
 
   array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
 
-  if (!array 
-      || !require_native(array) ) 
+  if (!array
+      || !require_native(array) )
     SWIG_fail;
-  
+
   npy_intp array_len[2] = {0,0};
 
   array_len[0] = array_size(array,0);
@@ -206,9 +209,9 @@
   if (array_numdims(array) > 1)
     array_len[1] = array_size(array,1);
 
-  if(!require_size(array, array_len, array_numdims(array))) 
+  if(!require_size(array, array_len, array_numdims(array)))
     SWIG_fail;
-  
+
   $1 = (double *) array_data(array);
 
  }
@@ -224,8 +227,8 @@
 
   array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
 
-  if (!array 
-      || !require_native(array) ) 
+  if (!array
+      || !require_native(array) )
     SWIG_fail;
 
   npy_intp array_len[2] = {0,0};
@@ -235,7 +238,7 @@
   if (array_numdims(array) > 1)
     array_len[1] = array_size(array,1);
 
-  if(!require_size(array, array_len, array_numdims(array))) 
+  if(!require_size(array, array_len, array_numdims(array)))
     SWIG_fail;
 
   $1 = (double *) array_data(array);
@@ -271,30 +274,30 @@
       SWIG_fail;
 
     if (*p_problem_size1 % 3 != 0) SWIG_fail;
-    
+
     if (*p_problem_size1 / 3 == 0) SWIG_fail;
-    
+
     number_of_contacts1 = *p_problem_size1 / 3;
-    
+
   }
 
   assert (*p_problem_size1);
-  
+
 
   if (array_numdims(array) > 1)
   {
     array_len[0] = *p_problem_size1 * 3;
     array_len[1] = 1;
-  } 
-  else 
+  }
+  else
   {
     array_len[0] = *p_problem_size1 * 3;
   }
-    
-  if (!array 
+
+  if (!array
       || !require_native(array) || !require_contiguous(array)
       || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
-  
+
   $1 = (double *) array_data(array);
 
  }
@@ -326,15 +329,15 @@
     else
       SWIG_fail;
 
-    
+
     if (*p_problem_size1 % 3 != 0) SWIG_fail;
-    
+
     if (*p_problem_size1 / 3 == 0) SWIG_fail;
-    
+
     number_of_contacts1 = *p_problem_size1 / 3;
-    
-  }    
-  
+
+  }
+
   assert (*p_problem_size1);
 
   if (array_numdims(array) > 1)
@@ -342,15 +345,15 @@
     array_len[0] = *p_problem_size1;
     array_len[1] = *p_problem_size1;
   }
-  else 
+  else
   {
     array_len[0] = *p_problem_size1 * *p_problem_size1;
   }
 
-  if (!array 
+  if (!array
       || !require_native(array) || !require_fortran(array)
       || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
-  
+
   $1 = (double *) array_data(array);
 
  }
@@ -377,17 +380,17 @@
     else if (array_numdims(array) > 1)
     {
       *p_problem_size1 = fmax(array_size(array,0), array_size(array,1));
-    } 
-    
+    }
+
     if (*p_problem_size1 % 3 != 0) SWIG_fail;
-    
+
     if (*p_problem_size1 / 3 == 0) SWIG_fail;
-    
-    
+
+
     number_of_contacts1 = *p_problem_size1 / 3;
-    
+
   }
-  
+
   assert (*p_problem_size1);
 
   if (array_numdims(array) == 1)
@@ -400,10 +403,10 @@
     array_len[1] = 1;
   }
 
-  if (!array 
+  if (!array
       || !require_native(array) || !require_contiguous(array)
       || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
-  
+
   $1 = (double *) array_data(array);
 
  }
@@ -425,18 +428,18 @@
 }
 
 // 2 : check must be done after in
-%typemap(check) (double *output_blocklist3) 
+%typemap(check) (double *output_blocklist3)
 {
   if (*p_problem_size1)
   {
-    
+
     npy_intp dims[2] = { *p_problem_size1, 1};
-    
+
     array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     if (!array$argnum) SWIG_fail;
     $1 = ($1_ltype) array_data(array$argnum);
   }
-  
+
 }
 
 // 3 : return arg
@@ -446,7 +449,7 @@
   {
      $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
   }
-  
+
 }
 
 // info param
@@ -475,13 +478,13 @@
 }
 
 // 2 : check must be done after in
-%typemap(check) (double *output_blocklist3x3) 
+%typemap(check) (double *output_blocklist3x3)
 {
   if (*p_problem_size1)
   {
-    
+
     npy_intp dims[2] = { *p_problem_size1 * 3, 1 };
-    
+
     array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     // block list : require_fortran useless?
     if (!array$argnum) SWIG_fail;
@@ -489,22 +492,22 @@
     if (!array || !require_fortran(array)) SWIG_fail;
     $1 = ($1_ltype) array_data(array);
   }
-  
+
 }
 
-%typemap(check) (double *output_blockarray3x3) 
+%typemap(check) (double *output_blockarray3x3)
 {
   if (*p_problem_size1)
   {
-    
+
     npy_intp dims[2] = { *p_problem_size1, *p_problem_size1};
-    
+
     array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     PyArrayObject *array = (PyArrayObject*) array$argnum;
     if (!array || !require_fortran(array)) SWIG_fail;
     $1 = ($1_ltype) array_data(array);
   }
-  
+
 }
 
 // 3 : return arg
@@ -514,7 +517,7 @@
   {
     $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
   }
-  
+
 }
 
 %typemap(argout) (double *output_blockarray3x3)
@@ -537,13 +540,13 @@
     array_len[1] = 1;
 
     array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-    
+
     if (!array
         || !require_native(array) || !require_contiguous(array) || !require_fortran(array)
         || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
-    
+
     $1 = (double *) array_data(array);
-    
+
   }
  }
 
@@ -555,7 +558,7 @@
 
 
 // other names that must be transformed this way
-%apply (double *z) { (double *w) }; 
+%apply (double *z) { (double *w) };
 
 %apply (double *z) { (double *zlem) };
 
@@ -598,9 +601,9 @@
 %apply (double *output_blocklist3x3) { (double *output_blocklist3x3_2) };
 
 // Numpy array -> NumericsMatrix (dense storage only!)
-%typemap(in) 
-(NumericsMatrix* A) 
-(PyArrayObject* array=NULL, 
+%typemap(in)
+(NumericsMatrix* A)
+(PyArrayObject* array=NULL,
  int is_new_object=0,
 
  // free in typemap(freearg)
@@ -621,7 +624,7 @@
 
 %typemap(freearg) (double *z)
 {
- 
+
 }
 
 %typemap(freearg) (NumericsMatrix* A) {
@@ -673,17 +676,17 @@
 // SBM handling
 
 
-%typemap(in) (const SparseBlockStructuredMatrix* const A) 
+%typemap(in) (const SparseBlockStructuredMatrix* const A)
   (npy_intp dims[2])
 {
   int res1=0;
   int newmem = 0;
   void* temp = 0;
   res1 = SWIG_ConvertPtr($input, &temp, SWIGTYPE_p_SparseBlockStructuredMatrix, 0 |  0);
-  if (!SWIG_IsOK(res1)) 
+  if (!SWIG_IsOK(res1))
   {
-    SWIG_exception_fail(SWIG_ArgError(res1), 
-                        "in method '" 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
                         BOOST_PP_STRINGIZE($symname)
                         "', argument " "1"" of type '" "SparseBlockStructuredMatrix *""'");
   };
@@ -698,14 +701,14 @@
 %typemap(in, numinputs=0) (double *denseMat)
 {
   // %typemap(in, numinputs=0) (double *denseMat)
-  // before %typemap(in) (const SparseBlockStructuredMatrix* const A) 
+  // before %typemap(in) (const SparseBlockStructuredMatrix* const A)
   // ... but
 }
 
-%typemap(check) (double *denseMat) 
+%typemap(check) (double *denseMat)
 {
-  // yes! ...  %typemap(check) (double *denseMat) 
-  // before %typemap(in) (const SparseBlockStructuredMatrix* const A) 
+  // yes! ...  %typemap(check) (double *denseMat)
+  // before %typemap(in) (const SparseBlockStructuredMatrix* const A)
   // ... what a mess
   $1 = (double *) malloc(dims1[0] * dims1[1] * sizeof(double));
 }
@@ -723,12 +726,12 @@
 }
 
 
-%typemap(argout) (double *denseMat) 
+%typemap(argout) (double *denseMat)
 {
-  
-  PyObject* pyarray = FPyArray_SimpleNewFromData(2,                
-                                                 dims1,                  
-                                                 NPY_DOUBLE,            
+
+  PyObject* pyarray = FPyArray_SimpleNewFromData(2,
+                                                 dims1,
+                                                 NPY_DOUBLE,
                                                  $1);
   $result = pyarray;
 }
@@ -746,8 +749,8 @@
   %#endif
   if (!$1)
   {
-    SWIG_exception_fail(SWIG_IOError, 
-                        "in method '" 
+    SWIG_exception_fail(SWIG_IOError,
+                        "in method '"
                         BOOST_PP_STRINGIZE($symname)
                         "cannot fopen file");
   }
@@ -762,7 +765,7 @@
   }
 }
 
-%typemap(in, numinputs=0) (SparseBlockStructuredMatrix* outSBM) 
+%typemap(in, numinputs=0) (SparseBlockStructuredMatrix* outSBM)
 {
   $1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
   if(!$1) SWIG_fail;
@@ -778,7 +781,7 @@
   if(!$1) SWIG_fail;
 
   $result = SWIG_Python_AppendOutput($result,
-                                     SWIG_NewPointerObj(SWIG_as_voidptr($1), 
+                                     SWIG_NewPointerObj(SWIG_as_voidptr($1),
                                                         SWIGTYPE_p_SparseBlockStructuredMatrix, 0));
 }
 
@@ -827,10 +830,10 @@
 
   /* get sys.modules dict */
   PyObject* sys_mod_dict = PyImport_GetModuleDict();
-  
+
   /* get the csr module object */
   PyObject* csr_mod = PyMapping_GetItemString(sys_mod_dict, (char *)"scipy.sparse.csr");
-  
+
   npy_intp this_M_x_dims[1];
   this_M_x_dims[0] = M->nzmax;
 
@@ -883,13 +886,13 @@
 
 }
 
-%typemap(in) (cs_sparse* M) 
+%typemap(in) (cs_sparse* M)
   (PyObject *shape_ = NULL,
    PyObject *nnz_ = NULL,
    PyObject *data_ = NULL,
    PyObject *indices_ = NULL,
    PyObject *indptr_ = NULL,
-   int is_new_object1=0, 
+   int is_new_object1=0,
    int is_new_object2=0,
    int is_new_object3=0,
    PyArrayObject *array_data_ = NULL,
@@ -899,11 +902,11 @@
 {
   try
   {
-    M = (cs_sparse *) malloc(sizeof(cs_sparse));      
+    M = (cs_sparse *) malloc(sizeof(cs_sparse));
     if(!M) SWIG_fail;
 
     PyObject *obj = $input;
-    
+
     shape_ = PyObject_GetAttrString(obj,"shape");
     nnz_ = PyObject_GetAttrString(obj,"nnz");
     data_ = PyObject_GetAttrString(obj,"data");
@@ -915,18 +918,18 @@
     GET_INTS(shape_,1,dim1);
 //      GET_INT(nnz,nzmax); fail: type is numpy.int32!
     nzmax = PyInt_AsLong(nnz_);
-    
+
     array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, &is_new_object1);
     array_indices_ = obj_to_array_allow_conversion(indices_, NPY_INT32, &is_new_object2);
     array_indptr_ = obj_to_array_allow_conversion(indptr_, NPY_INT32, &is_new_object3);
-    
+
     M->m = dim0;
     M->n = dim1;
-    
+
     M->nzmax = nzmax;
-    
+
     M->nz = -2; // csr only for the moment
-    
+
     M->p = (int *) malloc((M->m+1) * sizeof(int));
     if(!M->p) SWIG_fail;
 
@@ -940,14 +943,14 @@
     {
       M->p[i] = ((int *) array_data(array_indptr_)) [i];
     }
-    
+
     for(unsigned int i = 0; i < M->nzmax; i++)
     {
       M->i[i] = ((int *) array_data(array_indices_)) [i];
     }
-    
+
     memcpy(M->x, (double *) array_data(array_data_), M->nzmax * sizeof(double));
-    
+
     $1 = M;
   }
   catch (const std::invalid_argument& e)
@@ -964,17 +967,17 @@
   Py_XDECREF(data_$argnum);
   Py_XDECREF(indices_$argnum);
   Py_XDECREF(indptr_$argnum);
-  
+
   if (array_data_$argnum && is_new_object1$argnum)
   {
     Py_DECREF(array_data_$argnum);
   }
-  
+
   if (array_indptr_$argnum && is_new_object2$argnum)
   {
     Py_DECREF(array_indptr_$argnum);
   }
-  
+
   if (array_indices_$argnum && is_new_object3$argnum)
   {
     Py_DECREF(array_indices_$argnum);
@@ -1025,12 +1028,8 @@
   }
 %}
 
-// signatures
-%feature("autodoc", 1);
 
-// generated docstrings from doxygen xml output
-%include Numerics-docstrings.i
- 
+
 %fragment("NumPy_Fragments");
 
 // LCP
@@ -1077,9 +1076,9 @@
     (const char * filename)
   {
     FILE * finput = fopen(filename, "r");
-    if (finput) 
+    if (finput)
     {
-      FrictionContactProblem* problem = 
+      FrictionContactProblem* problem =
         (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
       if (frictionContact_newFromFile(problem,finput))
       {
@@ -1097,14 +1096,14 @@
     }
     fclose(finput);
   }
-  
+
   MixedLinearComplementarityProblem* mixedLinearComplementarityProblemFromFile
     (const char * filename)
   {
     FILE * finput = fopen(filename, "r");
-    if (finput) 
+    if (finput)
     {
-      MixedLinearComplementarityProblem* problem = 
+      MixedLinearComplementarityProblem* problem =
         (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
       if (mixedLinearComplementarity_newFromFile(problem,finput))
       {
@@ -1136,7 +1135,7 @@ static PyObject * set_my_callback_NablaFmcp(PyObject *o)
   Py_XINCREF(o);         /* Add a reference to new callback */
   Py_XDECREF(my_callback_NablaFmcp);  /* Dispose of previous callback */
   my_callback_NablaFmcp = o;       /* Remember new callback */
-  
+
   /* Boilerplate to return "None" */
   Py_INCREF(Py_None);
   result = Py_None;
@@ -1145,16 +1144,16 @@ static PyObject * set_my_callback_NablaFmcp(PyObject *o)
 }
 
 static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
-{  
+{
 //  printf("I am in my_call_to_callback_NablaFmcp (int size, double *z, double *NablaF)\n");
 
   npy_intp this_matrix_dim[1];
   this_matrix_dim[0]=size;
-  
-  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);   
+
+  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);
   PyObject* tuple = PyTuple_New(1);
-  PyTuple_SetItem(tuple, 0, pyarray);  
-  PyObject* result; 
+  PyTuple_SetItem(tuple, 0, pyarray);
+  PyObject* result;
 
   if (PyCallable_Check(my_callback_NablaFmcp))
   {
@@ -1187,9 +1186,9 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
       PyErr_SetString(PyExc_RuntimeError,message);
     }
     else
-    { 
+    {
 
-      int is_new_object0=0;      
+      int is_new_object0=0;
       PyArrayObject* result2 = make_fortran((PyArrayObject *)result, &is_new_object0);
       // if (is_new_object0)
       // {
@@ -1197,12 +1196,12 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
       //   printf ("the object is new !!\n");
       // }
       memcpy(nablaF, (double *)array_data(result2), size*size * sizeof(double));
-      
+
     }
    Py_DECREF(result);
   }
   else
-  {      
+  {
     const char * desired_type = typecode_string(NPY_DOUBLE);
     const char * actual_type  = pytype_string(result);
     PyErr_Format(PyExc_TypeError,
@@ -1228,7 +1227,7 @@ static PyObject * set_my_callback_Fmcp(PyObject *o1)
   Py_XINCREF(o1);         /* Add a reference to new callback */
   Py_XDECREF(my_callback_Fmcp);  /* Dispose of previous callback */
   my_callback_Fmcp = o1;       /* Remember new callback */
-  
+
   /* Boilerplate to return "None" */
   Py_INCREF(Py_None);
   result = Py_None;
@@ -1243,11 +1242,11 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
   npy_intp this_matrix_dim[1];
   this_matrix_dim[0]=size;
-  
-  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);   
+
+  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);
   PyObject* tuple = PyTuple_New(1);
-  PyTuple_SetItem(tuple, 0, pyarray);  
-  PyObject* result; 
+  PyTuple_SetItem(tuple, 0, pyarray);
+  PyObject* result;
 
   if (PyCallable_Check(my_callback_Fmcp))
   {
@@ -1278,8 +1277,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       PyErr_SetString(PyExc_RuntimeError,message);
     }
     else
-    { 
-      int is_new_object0=0;      
+    {
+      int is_new_object0=0;
       PyArrayObject* result2 = make_fortran((PyArrayObject *)result, &is_new_object0);
       memcpy(F, (double *)array_data(result2), size * sizeof(double));
     }
@@ -1294,7 +1293,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
                    desired_type, actual_type);
     if (result != NULL) Py_DECREF(result); // things can go really south ...
   }
-  
+
   return;
 
 }
@@ -1306,7 +1305,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
 
 
-// MCP 
+// MCP
 %include "MixedComplementarityProblem.h"
 %include "MCP_Solvers.h"
 %include "MCP_cst.h"
@@ -1336,21 +1335,21 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     switch(id)
     {
     case SICONOS_FRICTION_2D_NSGS:
-   
+
     case SICONOS_FRICTION_2D_PGS:
     case SICONOS_FRICTION_2D_CPG:
     case SICONOS_FRICTION_2D_LATIN:
     {
       frictionContact2D_setDefaultSolverOptions(SO, id);
       break;
-    }      
+    }
     // 3D
     default:
     {
       frictionContact3D_setDefaultSolverOptions(SO, id);
     }
     }
-    
+
     return SO;
   }
 
@@ -1368,7 +1367,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     linearComplementarity_setDefaultSolverOptions(lcp, SO, id);
     return SO;
   }
-  
+
   SolverOptions(MixedLinearComplementarityProblem* mlcp, MLCP_SOLVER id)
   {
     SolverOptions *SO;
@@ -1406,8 +1405,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   //   return BOOST_PP_CAT(FE_SWIG_INTERNAL_MEMBER,SolverOptions_makeSolverOptions)(NULL, fcp, id);
   // }
 
-  ~SolverOptions() 
-    { 
+  ~SolverOptions()
+    {
       deleteSolverOptions($self);
     }
 
@@ -1421,7 +1420,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       int is_new_object1=0;
       int is_new_object2=0;
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
-      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2); 
+      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
       LinearComplementarityProblem *LC;
       // return pointer : free by std swig destructor
       LC = (LinearComplementarityProblem *) malloc(sizeof(LinearComplementarityProblem));
@@ -1451,7 +1450,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       return LC;
 
     }
-  
+
 
   ~LinearComplementarityProblem()
   {
@@ -1482,9 +1481,9 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       int is_new_object2=0;
 
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
-      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2); 
-      
-      
+      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
+
+
       MixedLinearComplementarityProblem *MLCP;
       // return pointer : free by std swig destructor
       MLCP = (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
@@ -1499,7 +1498,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
                      "A non square matrix (%ld,%ld) has been given",
                      array_size(array,0), array_size(array,1));
       }
-      
+
       M->matrix0 = (double *) malloc(M->size0*M->size1*sizeof(double));
       memcpy(M->matrix0,array_data(array),M->size0*M->size1*sizeof(double));
 
@@ -1507,16 +1506,16 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       MLCP->m = M->size0 - MLCP->n;
       MLCP->blocksRows = (int *) malloc(3*sizeof(int));
       MLCP->blocksIsComp = (int *) malloc(2*sizeof(int));
-       
-      
+
+
       MLCP->blocksRows[0]=0;
       MLCP->blocksRows[1]=MLCP->n;
       MLCP->blocksRows[2]=MLCP->n+MLCP->m;
       MLCP->blocksIsComp[0]=0;
       MLCP->blocksIsComp[1]=1;
-      
- 
-      MLCP->isStorageType1 = 1;     
+
+
+      MLCP->isStorageType1 = 1;
       MLCP->isStorageType2 = 0;
       MLCP->M = M;
       MLCP->A = NULL;
@@ -1530,7 +1529,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       {
         //printf("size of q = %i\n",  array_size(vector,0));
         //printf("size of M = %i\n",  array_size(array,0));
-        
+
         PyErr_Format(PyExc_ValueError,
                      "Matrix and vector of incompatible lengths (%ld != %ld) ",
                      array_size(array,0), array_size(vector,0) );
@@ -1552,26 +1551,26 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       return MLCP;
 
     }
-  
- 
+
+
 
   ~MixedLinearComplementarityProblem()
   {
     freeMixedLinearComplementarityProblem($self);
   }
-  
+
   // MixedLinearComplementarityProblem * newFromFilename(PyObject * o1)
   // {
   //   int result;
   //   MixedLinearComplementarityProblem *MLCP;
   //   // return pointer : free by std swig destructor
   //   MLCP = (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
-    
+
   //   char *arg1 = (char *) 0 ;
   //   int res1 ;
   //   char *buf1 = 0 ;
   //   int alloc1 = 0 ;
-    
+
   //   res1 = SWIG_AsCharPtrAndSize(o1, &buf1, NULL, &alloc1);
   //   // if (!SWIG_IsOK(res1)) {
   //   //   SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MixedLinearComplementarity_newFromFilename" "', argument " "1"" of type '" "char *""'");
@@ -1587,9 +1586,9 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   //       // SWIG_exception(SWIG_ValueError, e.what());
   //     }
   //   }
-    
+
   //   return MLCP;
-    
+
   // }
 
 };
@@ -1604,7 +1603,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 %extend MixedComplementarityProblem
 {
 
- 
+
 
   MixedComplementarityProblem()
    {
@@ -1622,24 +1621,24 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     set_my_callback_Fmcp(o);
     $self->computeFmcp = (my_call_to_callback_Fmcp);
   }
-  
+
   void set_computeNablaFmcp(PyObject *o)
   {
 
     set_my_callback_NablaFmcp(o);
     $self->computeNablaFmcp = (my_call_to_callback_NablaFmcp);
   }
-  
+
   void test_call_to_callback()
   {
     printf("I am in test_call_to_callback()\n");
-    
+
     int size =   $self->sizeEqualities +  $self->sizeInequalities;
 
     double * z = (double *)malloc(size*sizeof(double));
     double * F = (double *)malloc(size*sizeof(double));
     double * nablaF = (double *)malloc(size*size*sizeof(double));
-    
+
     for (int i=0; i < size; i++) z[i]=i;
     printf("Input \n");
     for (int i=0; i < size; i++) printf("z[%i] = %lf\t", i, z[i]);
@@ -1650,20 +1649,20 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       $self->computeNablaFmcp(size,z,nablaF);
     }
     printf("Output \n");
-    for (int i=0; i < size; i++) printf("F[%i] =  %lf\t", i, F[i]); 
+    for (int i=0; i < size; i++) printf("F[%i] =  %lf\t", i, F[i]);
     printf("\n");
     for (int i=0; i < size*size; i++) printf("nablaF[%i] =  %lf\t", i, nablaF[i]);
-    
+
     printf("\n");
     free(z);
     free(F);
     free(nablaF);
-    
-    
+
+
 
     printf("I leave test_call_to_callback()\n");
   }
- 
+
 
 
   MixedComplementarityProblem(PyObject *sizeEq, PyObject *sizeIneq, PyObject *o1, PyObject *o2)
@@ -1674,7 +1673,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
      MCP->sizeEqualities = (int) PyInt_AsLong(sizeEq);
      MCP->sizeInequalities = (int) PyInt_AsLong(sizeIneq);
      int size =  MCP->sizeEqualities +  MCP->sizeInequalities;
-     
+
      if (size<1)
      {
        PyErr_SetString(PyExc_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
@@ -1688,8 +1687,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
        MCP->Fmcp = (double *) malloc(size*sizeof(double));
        MCP->nablaFmcp = (double *) malloc(size*size*sizeof(double));
      }
-     
-     if (PyCallable_Check(o1)) 
+
+     if (PyCallable_Check(o1))
      {
        set_my_callback_Fmcp(o1);
        MCP->computeFmcp = (my_call_to_callback_Fmcp);
@@ -1705,7 +1704,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
        return NULL;
      }
 
-     
+
      if (PyCallable_Check(o2))
      {
        set_my_callback_NablaFmcp(o2);
@@ -1856,7 +1855,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
        MCP->nabla_Fmcp = (double *) malloc(size*size*sizeof(double));
      }
 
-     if (PyCallable_Check(py_compute_Fmcp)) 
+     if (PyCallable_Check(py_compute_Fmcp))
      {
        MCP->env_compute_Fmcp = (void*) py_compute_Fmcp;
      }
@@ -1951,7 +1950,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   FrictionContactProblem()
   {
     FrictionContactProblem * FCP = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-    
+
     return FCP;
   }
 
@@ -1983,7 +1982,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     FrictionContactProblem * FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
     FC->dimension = PyInt_AsLong(dim);
     FC->numberOfContacts = PyInt_AsLong(numberOfContacts);
-    
+
     {
       void * _M;
       int res = SWIG_ConvertPtr(M, &_M,SWIGTYPE_p_NumericsMatrix, 0 |  0 );
@@ -2004,7 +2003,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     }
 
     return FC;
-    
+
   }
 
   NumericsMatrix* rawM()
@@ -2017,11 +2016,11 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
       int is_new_object1=0;
       int is_new_object2=0;
-      int is_new_object3=0; 
+      int is_new_object3=0;
 
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
-      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3); 
+      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3);
       FrictionContactProblem *FC;
       // return pointer : free by std swig destructor
       FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
@@ -2039,14 +2038,14 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       memcpy(FC->q,array_data(vector),M->size0*sizeof(double));
       FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
       memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
-   
+
 
       // python mem management
       if(is_new_object1 && array)
       {
         Py_DECREF(array);
       }
-  
+
       if(is_new_object2 && vector)
       {
         Py_DECREF(vector);
@@ -2076,11 +2075,11 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
       int is_new_object1=0;
       int is_new_object2=0;
-      int is_new_object3=0; 
+      int is_new_object3=0;
 
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
-      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3); 
+      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3);
       GlobalFrictionContactProblem *FC;
       // return pointer : free by std swig destructor
       FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
@@ -2098,14 +2097,14 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       memcpy(FC->q,array_data(vector),M->size0*sizeof(double));
       FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
       memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
-   
+
 
       // python mem management
       if(is_new_object1 && array)
       {
         Py_DECREF(array);
       }
-  
+
       if(is_new_object2 && vector)
       {
         Py_DECREF(vector);
@@ -2141,14 +2140,14 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 %include "SparseBlockMatrix.h"
 %include "NumericsMatrix.h"
 
-// some extensions but numpy arrays should be used instead 
+// some extensions but numpy arrays should be used instead
 %extend NumericsMatrix
 {
 
   NumericsMatrix(int nrows, int ncols, double *data)
     {
       NumericsMatrix *M;
-      
+
       // return pointer : free by std swig destructor
       M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
       M->storageType = 0;
@@ -2212,8 +2211,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     return PyUnicode_FromString(result.str().c_str());
     %#endif
   }
-  
-}; 
+
+};
 
 
 #define GET_ATTR(OBJ,ATTR)                                              \
@@ -2252,14 +2251,14 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
     try
     {
 
-      M = (cs_sparse *) malloc(sizeof(cs_sparse));      
-      
+      M = (cs_sparse *) malloc(sizeof(cs_sparse));
+
       GET_ATTR(obj,shape);
       GET_ATTR(obj,nnz);
       GET_ATTR(obj,data);
       GET_ATTR(obj,indices);
       GET_ATTR(obj,indptr);
-      
+
       int dim0, dim1, nzmax;
 
       GET_INTS(shape,0,dim0);
@@ -2270,14 +2269,14 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
       array_data = obj_to_array_allow_conversion(data, NPY_DOUBLE, &is_new_object1);
       array_indices = obj_to_array_allow_conversion(indices, NPY_INT32, &is_new_object2);
       array_indptr = obj_to_array_allow_conversion(indptr, NPY_INT32, &is_new_object3);
-      
+
       M->m = dim0;
       M->n = dim1;
 
       M->nzmax = nzmax;
 
       M->nz = -2; // csr only for the moment
-      
+
       M->p = (int *) malloc((M->m+1) * sizeof(int));
       M->i = (int *) malloc(M->nzmax * sizeof(int));
       M->x = (double *) malloc(M->nzmax * sizeof(double));
@@ -2291,7 +2290,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
       {
         M->i[i] = ((int *) array_data(array_indices)) [i];
       }
-     
+
       memcpy(M->x, (double *) array_data(array_data), M->nzmax * sizeof(double));
 
       Py_DECREF(shape);
@@ -2314,7 +2313,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
       {
         Py_DECREF(array_indices);
       }
-      
+
 
       return M;
     }
@@ -2330,17 +2329,17 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
       {
         Py_DECREF(array_data);
       }
-      
+
       if (array_indptr && is_new_object2)
       {
         Py_DECREF(array_indptr);
       }
-      
+
       if (array_indices && is_new_object3)
       {
         Py_DECREF(array_indices);
       }
-      
+
       assert(!M->p);
       assert(!M->i);
       assert(!M->x);
@@ -2359,7 +2358,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
 
 %{
 
- 
+
 %}
 
 #ifdef WITH_IO
