@@ -19,17 +19,19 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
 import Siconos.Kernel as SK
+import Siconos.Numerics as SN
 import numpy as np
 from scipy.linalg import expm
 from functions import compute_dt_matrices
 
+kmax = 10 if SN.compiled_in_debug_mode() else 100
 
 def test_TI():
     h = 1.0e-4
     k = 0
     err = False
-    while k < 100:
-        n = np.random.randint(2, 100)
+    while k < kmax:
+        n = np.random.randint(2, kmax)
         m = np.random.randint(1, n)
         A = np.random.random((n, n))
         B = np.random.random((n, m))
@@ -60,8 +62,8 @@ def test_SISO():
     h = 1.0e-4
     k = 0
     err = False
-    while k < 100:
-        n = np.random.randint(2, 100)
+    while k < kmax:
+        n = np.random.randint(2, kmax)
         m = 1
         A = np.random.random((n, n))
         B = np.random.random((n, m))
@@ -93,7 +95,7 @@ def test_TV():
     k = 0
     err = False
     while k < 10:
-        n = np.random.randint(2, 100)
+        n = np.random.randint(2, kmax)
         m = np.random.randint(1, n)
         A = np.random.random((n, n))
         B = np.random.random((n, m))

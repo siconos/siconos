@@ -334,6 +334,7 @@ ADD_TEST(lcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURR
 ADD_TEST(mlcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mlcp.py)
 ADD_TEST(mcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mcp.py)
 ADD_TEST(mcp2 ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mcp2.py)
+ADD_TEST(vi ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_vi.py)
 ADD_TEST(sparse ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_sparse.py)
 ADD_TEST(Kernel ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_Kernel.py)
 ADD_TEST(friction_contact ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
