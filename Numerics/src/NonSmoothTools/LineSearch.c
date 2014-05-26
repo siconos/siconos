@@ -101,9 +101,9 @@ double linesearch_Armijo2(int n, double theta, double preRHS, linesearch_data* l
      // acceptance test
      if (theta_iter <= theta_ref + alpha*preRHS)
      {
-       break;
        if (verbose > 1)
          printf("newton_FBLSA :: alpha %g\n", alpha);
+       break;
      }
      else
      {
