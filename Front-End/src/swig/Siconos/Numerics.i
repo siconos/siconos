@@ -23,6 +23,10 @@
 
 %include start.i
 
+// generated docstrings from doxygen xml output
+%include Numerics-docstrings.i
+
+
 %{
 #include "SiconosNumerics.h"
 #include "NumericsConfig.h"
@@ -174,12 +178,6 @@
   }
 %}
 
-// signatures
-%feature("autodoc", 1);
-
-// generated docstrings from doxygen xml output
-%include Numerics-docstrings.i
- 
 %fragment("NumPy_Fragments");
 
 // LCP
