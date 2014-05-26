@@ -27,7 +27,7 @@
 #endif
 
 #ifdef _WIN32
-#include <WinBase.h>
+#include <windows.h>
 #define DLEXPORT __declspec(dllexport)
 typedef HMODULE PluginHandle;
 #else
@@ -42,7 +42,7 @@ void* open_library(const char* lib_name)
   HandleRes = (void*) LoadLibrary(lib_name);
   if (!HandleRes)
   {
-    DWORD err = (int*)GetLastError();
+    int err = (int)GetLastError();
     printf("dlopen error number %d while trying to open %s\n", err, lib_name);
     exit(err);
   }
@@ -61,7 +61,7 @@ void* get_function_address(void* plugin, const char* func)
   void* ptr;
 #ifdef _WIN32
   HMODULE pluginW = (HMODULE) plugin;
-  ptr = (void*) GetProcAddress(pluginW func);
+  ptr = (void*) GetProcAddress(pluginW, func);
   if (NULL == ptr)
   {
     DWORD err = GetLastError();
