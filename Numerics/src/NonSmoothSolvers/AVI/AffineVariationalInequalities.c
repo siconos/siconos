@@ -87,7 +87,7 @@ int AVI_newFromFile(AffineVariationalInequalities* problem, FILE* file)
   int n = 0;
   int i;
 
-  int nread = fscanf(file, "%d\n", &n);
+  fscanf(file, "%d\n", &n);
   problem->size = n;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
@@ -96,7 +96,7 @@ int AVI_newFromFile(AffineVariationalInequalities* problem, FILE* file)
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
-    nread = fscanf(file, "%lf ", &(problem->q[i]));
+    fscanf(file, "%lf ", &(problem->q[i]));
   }
   return 1;
 }

@@ -192,6 +192,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
     Py_DECREF(py_n1);
     Py_DECREF(py_n2);
+    Py_DECREF(py_z);
+    Py_DECREF(py_Fmcp);
 
   };
 
@@ -213,6 +215,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     PY_CALL_METHOD_OR_FUNCTION(env, "compute_nabla_Fmcp", env_compute_jacobian, py_n1, py_n2, py_z, py_nabla_Fmcp)
     Py_DECREF(py_n1);
     Py_DECREF(py_n2);
+    Py_DECREF(py_z);
+    Py_DECREF(py_nabla_Fmcp);
 
   };
 
@@ -229,6 +233,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
     PY_CALL_METHOD_OR_FUNCTION(env, "compute_Fmcp", env_compute_function, py_n, py_z, py_F)
 
+    Py_DECREF(py_z);
+    Py_DECREF(py_F);
     Py_DECREF(py_n);
   };
 
@@ -249,10 +255,62 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
     PY_CALL_METHOD_OR_FUNCTION(env, "compute_nabla_Fmcp", env_compute_jacobian, py_n, py_z, py_nabla_F)
 
+    Py_DECREF(py_z);
+    Py_DECREF(py_nabla_F);
     Py_DECREF(py_n);
   };
 
+  static void* get_c_functions(PyObject* lib_name, PyObject* f1_name, PyObject* f2_name, void** void_ptr1, void** void_ptr2)
+  {
 
+    // implementation note: if something related to the library opening fails,
+    // the called functions "handle" it and exit.
+
+    char* name_str;
+    PyObject* tmp_ascii;
+    void* handle_lib;
+
+#if PY_MAJOR_VERSION < 3
+    name_str = PyString_AsString(lib_name);
+#else
+    tmp_ascii = PyUnicode_AsASCIIString(lib_name);
+    name_str = PyBytes_AsString(tmp_ascii);
+#endif
+
+    handle_lib = open_library(name_str);
+
+#if PY_MAJOR_VERSION < 3
+    name_str = PyString_AsString(f1_name);
+#else
+    Py_DECREF(tmp_ascii);
+    tmp_ascii = PyUnicode_AsASCIIString(f1_name);
+    name_str = PyBytes_AsString(tmp_ascii);
+#endif
+
+    *void_ptr1 = get_function_address(handle_lib, name_str);
+
+#if PY_MAJOR_VERSION < 3
+    name_str = PyString_AsString(f2_name);
+#else
+    Py_DECREF(tmp_ascii);
+    tmp_ascii = PyUnicode_AsASCIIString(f2_name);
+    name_str = PyBytes_AsString(tmp_ascii);
+#endif
+
+    *void_ptr2 = get_function_address(handle_lib, name_str);
+
+    Py_DECREF(tmp_ascii);
+
+    return handle_lib;
+  }
+
+/*  if (ptr == NULL)
+  {
+    PyErr_SetString("can not find procedure " + procedure);
+    PyErr_PrintEx(0);
+    exit(err);
+  }
+*/
 %}
 
 

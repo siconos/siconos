@@ -68,7 +68,7 @@
 #include "NumericsMatrix.h"
 
 typedef void * (FVIPtr)(void*, double *, double *);
-
+typedef void (*ptrFunctionVI)(void *self, int n, double* x ,double* fx);
 enum VI_SET_TYPE { VI_SET_IS_BOX, VI_SET_IS_POLYHEDRON };
 
 
@@ -79,8 +79,8 @@ typedef struct VariationalInequality_
 {
   int size; /**< size of the VI \f$ n \f$ */
   void *env; /**< pointer onto env object (which is self is the simplest case)*/
-  void (*F)(void *self, int n, double* x ,double* fx); /**< Function of the VI */
-  void (*compute_nabla_F)(void* env, int n, double* x ,double* nabla_F); /**< Function to compute the jacobian of F */
+  ptrFunctionVI F; /**< Function of the VI */
+  ptrFunctionVI compute_nabla_F; /**< Function to compute the jacobian of F */
   void (*ProjectionOnX)(void *self, double *x, double * PX); /**< Projection on X of the VI */
   double normVI; /**< Norm of the VI problem to compute relative solution */
   int istheNormVIset; /**< Boolean to know if the norm is set 

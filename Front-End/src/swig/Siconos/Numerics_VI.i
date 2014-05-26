@@ -17,7 +17,7 @@
      return vi;
    }
 
-  VariationalInequality(PyObject* n, PyObject* py_compute)
+  VariationalInequality(PyObject* n)
   {
      VariationalInequality* vi;
      vi =  (VariationalInequality *) malloc(sizeof(VariationalInequality));
@@ -36,9 +36,18 @@
      {
        PyErr_SetString(PyExc_RuntimeError, "the size of the VI has to be positive");
        free(vi);
-       return NULL;
+       PyErr_PrintEx(0);
+       exit(1);
      }
 
+     return vi;
+  }
+
+
+  VariationalInequality(PyObject* n, PyObject* py_compute)
+  {
+
+     VariationalInequality* vi = new_VariationalInequality___SWIG_1(n);
 
      PyObject* method_compute_F = PyObject_GetAttrString(py_compute, "compute_F");
      PyObject* method_compute_nabla_F = PyObject_GetAttrString(py_compute, "compute_nabla_F");
@@ -59,7 +68,7 @@
          vi->F = &call_py_compute_F;
          vi->env = (void*) malloc(sizeof(functions_env_python));
          functions_env_python* vi_env_python = (functions_env_python*) vi->env;
-         vi_env_python->id = -1;
+         vi_env_python->id = 0;
          vi_env_python->env_compute_function = py_compute;
        }
        else
@@ -67,7 +76,6 @@
          Py_XDECREF(method_compute_F);
          Py_XDECREF(method_compute_nabla_F);
          PyErr_SetString(PyExc_TypeError, "argument 2 must either be an object with a method compute_F and a method compute_nabla_F or a callable function");
-         free(vi->nabla_F);
          free(vi);
          PyErr_PrintEx(0);
          exit(1);
@@ -119,7 +127,35 @@
      }
    }
 
+  void set_compute_F_and_nabla_F_as_C_functions(PyObject* lib_name, PyObject* compute_F_name, PyObject* compute_nabla_F_name)
+  {
+%#if PY_MAJOR_VERSION < 3
+    if(PyString_Check(lib_name) && PyString_Check(compute_F_name) && PyString_Check(compute_nabla_F_name))
+%#else
+    if(PyUnicode_Check(lib_name) && PyUnicode_Check(compute_F_name) && PyUnicode_Check(compute_nabla_F_name))
+%#endif
+    {
+    void* p_compute_F;
+    void* p_compute_nabla_F;
 
+    // TODO: save this lib_handle somewhere and close it !
+    void* lib_handle = get_c_functions(lib_name, compute_F_name, compute_nabla_F_name, &p_compute_F, &p_compute_nabla_F);
+
+    $self->F = (ptrFunctionVI)p_compute_F;
+    $self->compute_nabla_F = (ptrFunctionVI)p_compute_nabla_F;
+
+    $self->nabla_F = (double*) calloc($self->size*$self->size, sizeof(double));
+    }
+    else
+    {
+      PyErr_SetString(PyExc_TypeError, "All arguments should be strings");
+    }
+  }
+
+    PyObject* get_env_as_long(void)
+    {
+      return PyInt_FromLong((uintptr_t)&$self->env);
+    }
 
   ~VariationalInequality()
   {
@@ -143,6 +179,13 @@
       }
       free($self->set);
       $self->set = NULL;
+    }
+    if ($self->env)
+    {
+      if(((env_python*)$self->env)->id > 0)
+      {
+        free($self->env);
+      }
     }
     free($self);
   }

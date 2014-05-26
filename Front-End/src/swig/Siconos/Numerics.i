@@ -38,6 +38,7 @@
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
 #include "box.h"
+#include "open_lib.h"
 
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/preprocessor/cat.hpp>
@@ -167,6 +168,10 @@
 #endif
   }
 
+  extern "C" void set_cstruct(uintptr_t p_env, void* p_struct)
+  {
+    *(void**)p_env = p_struct;
+  }
 %}
 
 // signatures
@@ -382,6 +387,7 @@
   ~SolverOptions() 
     { 
       deleteSolverOptions($self);
+      free($self);
     }
 
 };

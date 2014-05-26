@@ -44,9 +44,9 @@ double linesearch_Armijo2(int n, double theta, double preRHS, linesearch_data* l
     case 1: // classical nonmonotone theta_ref = max theta_j
       for (int i = 0; i < ls_data->m; ++i)
       {
-        if (ls_data->previous_theta[i] > theta_ref)
+        if (ls_data->previous_thetas[i] > theta_ref)
         {
-          theta_ref = ls_data->previous_theta[i];
+          theta_ref = ls_data->previous_thetas[i];
         }
       }
       break;
@@ -54,7 +54,7 @@ double linesearch_Armijo2(int n, double theta, double preRHS, linesearch_data* l
     case 2: // mean like value : theta_ref = max { theta, mean(theta) }
       for (int i = 0; i < ls_data->m; ++i)
       {
-        theta_ref += ls_data->previous_theta[i];
+        theta_ref += ls_data->previous_thetas[i];
       }
       theta_ref /= (double)(ls_data->m+1);
       if (theta_ref < theta)
@@ -114,13 +114,13 @@ double linesearch_Armijo2(int n, double theta, double preRHS, linesearch_data* l
 
   if (ls_data->m < ls_data->M)
   {
-    ls_data->previous_theta[ls_data->m] = theta_iter;
+    ls_data->previous_thetas[ls_data->m] = theta_iter;
     ls_data->m++;
   }
   else if (ls_data->M > 0)
   {
-    for (int i = 0; i < ls_data->M-1; ++i) ls_data->previous_theta[i] = ls_data->previous_theta[i+1];
-    ls_data->previous_theta[ls_data->m] = theta_iter;
+    for (int i = 0; i < ls_data->M-1; ++i) ls_data->previous_thetas[i] = ls_data->previous_thetas[i+1];
+    ls_data->previous_thetas[ls_data->M-1] = theta_iter;
   }
   return alpha;
 }

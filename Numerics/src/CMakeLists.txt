@@ -216,6 +216,10 @@ ENDIF(MLCPSIMPLEX_FOUND)
 
 LIBRARY_PROJECT_SETUP()
 
+# for dlopen or equivalent (used for plugins)
+SET(SiconosNumerics_LINK_LIBRARIES ${SiconosNumerics_LINK_LIBRARIES}
+ ${CMAKE_DL_LIBS})
+
 # F95 Cmake Bug. No more needed? 
 # The library tests
 

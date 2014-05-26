@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
     ## \brief Constructor
     #
     # \param  is a  (optional)
-_kappa = .4
+_kappa = .7
 _g = 9.81
 
-h = 1e-3
+h = 1e-7
 
 theta = 1.0
 gamma = 1.0
@@ -77,8 +77,8 @@ def vi_nabla_function(n, l, nabla_Fmcp):
     v_gamma = xk1 + gamma*h*rr1
     nabla_Fmcp[1, 0] = h*_g*invR2
     nabla_Fmcp[1, 1] = h*(_g*_kappa*l0**2)/invR2
-    nabla_Fmcp[0, 0] = -h*(_kappa*l1*v_gamma + gamma*h*_kappa*l0*l1*nabla_Fmcp[1, 0])
-    nabla_Fmcp[0, 1] = -h*(_kappa*l0*v_gamma + gamma*h*_kappa*l0*l1*nabla_Fmcp[1, 1])
+    nabla_Fmcp[0, 0] = -h*(_kappa*l1*v_gamma + (-1.0 + gamma*h*_kappa*l0*l1)*nabla_Fmcp[1, 0])
+    nabla_Fmcp[0, 1] = -h*(_kappa*l0*v_gamma + (-1.0 + gamma*h*_kappa*l0*l1)*nabla_Fmcp[1, 1])
     B[:] = nabla_Fmcp
     pass
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     xk[0] = 1.
     xk[1] = 10.
 
-    T = 10.0
+    T = 2.0
     t = 0.0
     vi = SN.VI(2, vi_function)
     vi.set_compute_nabla_F(vi_nabla_function)
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     sol[0, :] = xk
 
     k = 0
-    SN.setNumericsVerbose(3)
+    #SN.setNumericsVerbose(3)
 
     while t <= T:
         k += 1

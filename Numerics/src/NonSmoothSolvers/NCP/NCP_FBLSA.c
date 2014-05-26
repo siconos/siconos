@@ -124,14 +124,14 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
     ls_data.nonmonotone = options->iparam[FBLSA_NONMONOTONE_LS];
     ls_data.M = options->iparam[FBLSA_NONMONOTONE_LS_M];
     ls_data.m = 0;
-    ls_data.previous_theta = calloc(ls_data.M, sizeof(double));
+    ls_data.previous_thetas = (double*)calloc(ls_data.M, sizeof(double));
   }
   else
   {
     ls_data.nonmonotone = 0;
     ls_data.M = 0;
     ls_data.m = 0;
-    ls_data.previous_theta = NULL;
+    ls_data.previous_thetas = NULL;
   }
 
   // if error based on the norm of JacThetaF_merit, do something not too stupid
@@ -275,12 +275,13 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
         printf("newton_FBLSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);
 
       // Computations for the linear search
-      // preRHS = gamma * <JacThetaF_merit, d>
+      // preRHS = <JacThetaF_merit, d>
       // TODO: find a better name for this variable
       preRHS = cblas_ddot(n, JacThetaF_merit, incx, workV1, incy);
 
-      // we should not compute this if min descent search has failed
-      threshold = -rho*pow(cblas_dnrm2(n, workV1, incx), p);
+      // TODO we should not compute this if min descent search has failed
+      //threshold = -rho*pow(cblas_dnrm2(n, workV1, incx), p);
+      threshold = -rho*cblas_dnrm2(n, workV1, incx)*cblas_dnrm2(n, JacThetaF_merit, incx);
       if (preRHS > threshold)
       {
         if (verbose > 1)
@@ -358,9 +359,9 @@ newton_FBLSA_free:
     free(workV2);
     free(ipiv);
   }
-  if (ls_data.previous_theta)
+  if (ls_data.previous_thetas)
   {
-    free(ls_data.previous_theta);
+    free(ls_data.previous_thetas);
   }
 }
 

@@ -13,6 +13,31 @@
      return MCP;
    }
 
+  MixedComplementarityProblem2(PyObject* n1, PyObject* n2)
+  {
+     MixedComplementarityProblem2* MCP;
+     MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
+
+     MCP->compute_Fmcp = &call_py_compute_Fmcp;
+     MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
+     MCP->n1 = (int) PyInt_AsLong(n1);
+     MCP->n2 = (int) PyInt_AsLong(n2);
+     int size =  MCP->n1 +  MCP->n2;
+
+     if (size<1)
+     {
+       PyErr_SetString(PyExc_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
+       free(MCP);
+       return NULL;
+     }
+     else
+     {
+       MCP->nabla_Fmcp = (double *) calloc(size*size, sizeof(double));
+     }
+     return MCP;
+  }
+
+
   MixedComplementarityProblem2(PyObject* n1, PyObject* n2, PyObject* py_compute_class)
   {
      MixedComplementarityProblem2* MCP;
@@ -117,10 +142,49 @@
 
      return MCP;
    }
+
+  void set_compute_F_and_nabla_F_as_C_functions(PyObject* lib_name, PyObject* compute_F_name, PyObject* compute_nabla_F_name)
+  {
+%#if PY_MAJOR_VERSION < 3
+    if(PyString_Check(lib_name) && PyString_Check(compute_F_name) && PyString_Check(compute_nabla_F_name))
+%#else
+    if(PyUnicode_Check(lib_name) && PyUnicode_Check(compute_F_name) && PyUnicode_Check(compute_nabla_F_name))
+%#endif
+    {
+    void* p_compute_F;
+    void* p_compute_nabla_F;
+
+    // TODO: save this lib_handle somewhere and close it !
+    void* lib_handle = get_c_functions(lib_name, compute_F_name, compute_nabla_F_name, &p_compute_F, &p_compute_nabla_F);
+
+    $self->compute_Fmcp = (ptrFunctionMCP2)p_compute_F;
+    $self->compute_nabla_Fmcp = (ptrFunctionMCP2)p_compute_nabla_F;
+
+    }
+    else
+    {
+      PyErr_SetString(PyExc_TypeError, "All arguments should be strings");
+    }
+  }
+
+    PyObject* get_env_as_long(void)
+    {
+      return PyInt_FromLong((uintptr_t)&$self->env);
+    }
+
   ~MixedComplementarityProblem2()
   {
-    free($self->nabla_Fmcp);
-    free($self->env);
+    if ($self->nabla_Fmcp)
+    {
+      free($self->nabla_Fmcp);
+    }
+    if ($self->env)
+    {
+      if(((env_python*)$self->env)->id > 0)
+      {
+        free($self->env);
+      }
+    }
     free($self);
   }
 };

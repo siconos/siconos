@@ -26,6 +26,7 @@ typedef struct {
 #define ENV_IS_PYTHON_CLASS 1
 #define ENV_IS_PYTHON_FUNCTIONS 2
 #define ENV_IS_PYTHON_FUNCTIONS_WITH_PROJ 3
+#define ENV_IS_C_STRUCT -1
 
 static void call_py_compute_nabla_F(void *env, int n, double* z, double* nabla_F);
 static void call_py_compute_F(void *env, int n, double* z, double* F);

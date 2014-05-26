@@ -37,7 +37,7 @@ typedef struct _linesearch_data {
   int nonmonotone; /**< 0 if false, otherwise use os nonmonotone linesearch. The integer value gives the update rule for the merit value ``threshold'' */
   int M; /**< maximum number of previous values of the merit function stored*/
   int m; /**< number of previous values of the merit function stored*/
-  double* previous_theta; /**< set of previous values of the merit function */
+  double* previous_thetas; /**< set of previous values of the merit function */
 } linesearch_data;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

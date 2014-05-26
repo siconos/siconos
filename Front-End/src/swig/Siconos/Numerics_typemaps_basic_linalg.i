@@ -8,17 +8,7 @@
   if (!array 
       || !require_native(array) ) 
     SWIG_fail;
-  
-  npy_intp array_len[2] = {0,0};
 
-  array_len[0] = array_size(array,0);
-
-  if (array_numdims(array) > 1)
-    array_len[1] = array_size(array,1);
-
-  if(!require_size(array, array_len, array_numdims(array))) 
-    SWIG_fail;
-  
   $1 = (double *) array_data(array);
 
  }

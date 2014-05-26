@@ -125,15 +125,12 @@ static int convert_darray(PyObject *input, double *ptr) {
  }
 
 // info, error results
-%typemap(in, numinputs=0) int *info (int temp) {
-  $1 = &temp;
-}
-
 %typemap(in, numinputs=0) double *error (double temp) {
   $1 = &temp;
 }
 
 %typemap(argout) (int *info) {
+  Py_DECREF($result);
   $result = PyInt_FromLong(*$1);
  }
 
