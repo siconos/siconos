@@ -98,7 +98,7 @@ struct ContactPointVisitor : public SiconosVisitor
     const SimpleMatrix& jachqT = *rel.jachqT();
     double id = (size_t) &*rel.contactPoint();
     double mu = ask<ForMu>(*inter.nslaw());
-    SiconosVector cf(6);
+    SiconosVector cf(jachqT.size(1));
     prod(*inter.lambda(1), jachqT, cf, true);
     answer.setValue(0, mu);
     answer.setValue(1, posa[0]);

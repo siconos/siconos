@@ -34,10 +34,12 @@ public:
    * \param weightedShape the bullet
    * \param position the initial position (vector length: 3)
    * \param velocity the inital velocity  (vector length: 3)
+   * \param collision group (default 0)
    */
   BulletDS(SP::BulletWeightedShape weightedShape,
            SP::SiconosVector position,
-           SP::SiconosVector velocity);
+           SP::SiconosVector velocity,
+           int group=0);
 
 
   /** get the number of collision objects
@@ -132,4 +134,3 @@ struct UpdateCollisionObjects : public SiconosVisitor
   }
 };
 #endif
-

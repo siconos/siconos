@@ -144,7 +144,7 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
 
         p = q.rotate(offset[0])
 
-        r = Quaternion(offset[1]) * q
+        r = q * Quaternion(offset[1])
 
         transform.Identity()
         transform.Translate(q0 + p[0], q1 + p[1], q2 + p[2])
@@ -222,15 +222,7 @@ spos_data, dpos_data, cf_data, solv_data = load()
 #contact_field = vtk.vtkPointData()
 #c1 = vtk.vtkPolyData()
 
-#contact_data = vtk.vtkDataObject()
-contact_posa = vtk.vtkDataObjectToDataSetFilter()
-contact_posb = vtk.vtkDataObjectToDataSetFilter()
 
-add_compatiblity_methods(contact_posa)
-add_compatiblity_methods(contact_posb)
-
-contact_pos_force = vtk.vtkFieldDataToAttributeDataFilter()
-contact_pos_norm = vtk.vtkFieldDataToAttributeDataFilter()
 
 #contact_data.SetFieldData(contact_field)
 
@@ -239,6 +231,7 @@ contact_pos_norm = vtk.vtkFieldDataToAttributeDataFilter()
 #cf_provider = vtk.vtkProgrammableSource()
 keeper = []
 
+# contact forces provider
 class CFprov():
 
     def __init__(self, data):
@@ -257,43 +250,58 @@ class CFprov():
         else:
             self._time = 0
 
-        self._output = vtk.vtkPolyData()
-        self._contact_field = vtk.vtkPointData()
+        self.cpa_at_time = dict()
+        self.cpa = dict()
+
+        self.cpb_at_time = dict()
+        self.cpb = dict()
+
+        self.cf_at_time = dict()
+        self.cf = dict()
+
+        self.cn_at_time = dict()
+        self.cn = dict()
+
+        self._contact_field = dict()
+        self._output = dict()
+
+        for mu in self._mu_coefs:
+            self._contact_field[mu] = vtk.vtkPointData()
+            self._output[mu] = vtk.vtkPolyData()
+            self._output[mu].SetFieldData(self._contact_field[mu])
 
 
     def method(self):
-        global keeper
-
-        #        ind0 = bisect.bisect_left(self._data[:, 0], self._time)
-        self._contact_field = vtk.vtkPointData()
-        self._output.SetFieldData(self._contact_field)
 
         if self._data is not None:
+
             id_f = numpy.where(abs(self._data[:, 0] - self._time) < 1e-15)[0]
 
-            if len(id_f) == 0:
-                return
+            for mu in self._mu_coefs:
+                imu = numpy.where(self._data[id_f, 1] == mu)
 
-            self.cpa_at_time = self._data[id_f, 2:5].copy()
-            self.cpa = numpy_support.numpy_to_vtk(self.cpa_at_time)
-            self.cpa.SetName('contactPositionsA')
+                self.cpa_at_time[mu] = self._data[id_f[imu], 2:5].copy()
+                self.cpb_at_time[mu] = self._data[id_f[imu], 5:8].copy()
+                self.cn_at_time[mu] = - self._data[id_f[imu], 8:11].copy()
+                self.cf_at_time[mu] = self._data[id_f[imu], 11:14].copy()
 
-            self.cpb_at_time = self._data[id_f, 5:8].copy()
-            self.cpb = numpy_support.numpy_to_vtk(self.cpb_at_time)
-            self.cpb.SetName('contactPositionsB')
+                self.cpa[mu] = numpy_support.numpy_to_vtk(self.cpa_at_time[mu])
+                self.cpa[mu].SetName('contactPositionsA')
 
-            self.cn_at_time = - self._data[id_f, 8:11].copy()
-            self.cn = numpy_support.numpy_to_vtk(self.cn_at_time)
-            self.cn.SetName('contactNormals')
+                self.cpb[mu] = numpy_support.numpy_to_vtk(self.cpb_at_time[mu])
+                self.cpb[mu].SetName('contactPositionsB')
 
-            self.cf_at_time = self._data[id_f, 11:14].copy()
-            self.cf = numpy_support.numpy_to_vtk(self.cf_at_time)
-            self.cf.SetName('contactForces')
+                self.cn[mu] = numpy_support.numpy_to_vtk(self.cn_at_time[mu])
+                self.cn[mu].SetName('contactNormals')
 
-            self._contact_field.AddArray(self.cpa)
-            self._contact_field.AddArray(self.cpb)
-            self._contact_field.AddArray(self.cn)
-            self._contact_field.AddArray(self.cf)
+                self.cf[mu] = numpy_support.numpy_to_vtk(self.cf_at_time[mu])
+                self.cf[mu].SetName('contactForces')
+
+                self._contact_field[mu].AddArray(self.cpa[mu])
+                self._contact_field[mu].AddArray(self.cpb[mu])
+                self._contact_field[mu].AddArray(self.cn[mu])
+                self._contact_field[mu].AddArray(self.cf[mu])
+
 
         else:
             pass
@@ -302,29 +310,46 @@ class CFprov():
 
 cf_prov = CFprov(cf_data)
 
-contact_posa.SetDataSetTypeToPolyData()
-contact_posa.SetPointComponent(0, "contactPositionsA", 0)
-contact_posa.SetPointComponent(1, "contactPositionsA", 1)
-contact_posa.SetPointComponent(2, "contactPositionsA", 2)
 
-contact_posb.SetDataSetTypeToPolyData()
-contact_posb.SetPointComponent(0, "contactPositionsB", 0)
-contact_posb.SetPointComponent(1, "contactPositionsB", 1)
-contact_posb.SetPointComponent(2, "contactPositionsB", 2)
+contact_posa = dict()
+contact_posb = dict()
+contact_pos_force = dict()
+contact_pos_norm = dict()
 
-contact_pos_force.SetInputConnection(contact_posa.GetOutputPort())
-contact_pos_force.SetInputFieldToDataObjectField()
-contact_pos_force.SetOutputAttributeDataToPointData()
-contact_pos_force.SetVectorComponent(0, "contactForces", 0)
-contact_pos_force.SetVectorComponent(1, "contactForces", 1)
-contact_pos_force.SetVectorComponent(2, "contactForces", 2)
+for mu in cf_prov._mu_coefs:
 
-contact_pos_norm.SetInputConnection(contact_posa.GetOutputPort())
-contact_pos_norm.SetInputFieldToDataObjectField()
-contact_pos_norm.SetOutputAttributeDataToPointData()
-contact_pos_norm.SetVectorComponent(0, "contactNormals", 0)
-contact_pos_norm.SetVectorComponent(1, "contactNormals", 1)
-contact_pos_norm.SetVectorComponent(2, "contactNormals", 2)
+    contact_posa[mu] = vtk.vtkDataObjectToDataSetFilter()
+    contact_posb[mu] = vtk.vtkDataObjectToDataSetFilter()
+    
+    add_compatiblity_methods(contact_posa[mu])
+    add_compatiblity_methods(contact_posb[mu])
+    
+    contact_pos_force[mu] = vtk.vtkFieldDataToAttributeDataFilter()
+    contact_pos_norm[mu] = vtk.vtkFieldDataToAttributeDataFilter()
+    
+    contact_posa[mu].SetDataSetTypeToPolyData()
+    contact_posa[mu].SetPointComponent(0, "contactPositionsA", 0)
+    contact_posa[mu].SetPointComponent(1, "contactPositionsA", 1)
+    contact_posa[mu].SetPointComponent(2, "contactPositionsA", 2)
+    
+    contact_posb[mu].SetDataSetTypeToPolyData()
+    contact_posb[mu].SetPointComponent(0, "contactPositionsB", 0)
+    contact_posb[mu].SetPointComponent(1, "contactPositionsB", 1)
+    contact_posb[mu].SetPointComponent(2, "contactPositionsB", 2)
+
+    contact_pos_force[mu].SetInputConnection(contact_posa[mu].GetOutputPort())
+    contact_pos_force[mu].SetInputFieldToDataObjectField()
+    contact_pos_force[mu].SetOutputAttributeDataToPointData()
+    contact_pos_force[mu].SetVectorComponent(0, "contactForces", 0)
+    contact_pos_force[mu].SetVectorComponent(1, "contactForces", 1)
+    contact_pos_force[mu].SetVectorComponent(2, "contactForces", 2)
+
+    contact_pos_norm[mu].SetInputConnection(contact_posa[mu].GetOutputPort())
+    contact_pos_norm[mu].SetInputFieldToDataObjectField()
+    contact_pos_norm[mu].SetOutputAttributeDataToPointData()
+    contact_pos_norm[mu].SetVectorComponent(0, "contactNormals", 0)
+    contact_pos_norm[mu].SetVectorComponent(1, "contactNormals", 1)
+    contact_pos_norm[mu].SetVectorComponent(2, "contactNormals", 2)
 
 times = list(set(dpos_data[:, 0]))
 times.sort()
@@ -343,157 +368,181 @@ else:
 cf_prov._time = min(times[:])
 
 cf_prov.method()
-contact_posa.SetInputData(cf_prov._output)
-contact_posa.Update()
-contact_posb.SetInputData(cf_prov._output)
-contact_posb.Update()
 
-contact_pos_force.Update()
-contact_pos_norm.Update()
-
-arrow = vtk.vtkArrowSource()
-arrow.SetTipResolution(40)
-arrow.SetShaftResolution(40)
-
-cone = vtk.vtkConeSource()
-cone.SetResolution(40)
-
-if cf_prov._mu_coefs is not None:
-    cone.SetRadius(min(cf_prov._mu_coefs))  # one coef!!
-
-cylinder = vtk.vtkCylinderSource()
-cylinder.SetRadius(.01)
-cylinder.SetHeight(1)
-
-sphere = vtk.vtkSphereSource()
-
-
-# 1. scale = (scalar value of that particular data index);
-# 2. denominator = Range[1] - Range[0];
-# 3. scale = (scale < Range[0] ? Range[0] : (scale > Range[1] ? Range[1] : scale));
-# 4. scale = (scale - Range[0]) / denominator;
-# 5. scale *= scaleFactor;
-
-arrow_glyph = vtk.vtkGlyph3D()
-arrow_glyph.SetInputConnection(contact_pos_force.GetOutputPort())
-arrow_glyph.SetSourceConnection(arrow.GetOutputPort())
-arrow_glyph.ScalingOn()
-arrow_glyph.SetScaleModeToScaleByVector()
-arrow_glyph.SetRange(0, .01)
-arrow_glyph.ClampingOn()
-arrow_glyph._scale_fact = 5
-arrow_glyph.SetScaleFactor(arrow_glyph._scale_fact * scale_factor)
-arrow_glyph.SetVectorModeToUseVector()
-
-arrow_glyph.SetInputArrayToProcess(1, 0, 0, 0, 'contactForces')
-arrow_glyph.SetInputArrayToProcess(3, 0, 0, 0, 'contactForces')
-arrow_glyph.OrientOn()
-
-gmapper = vtk.vtkPolyDataMapper()
-gmapper.SetInputConnection(arrow_glyph.GetOutputPort())
-gmapper.SetScalarModeToUsePointFieldData()
-gmapper.SetColorModeToMapScalars()
-gmapper.ScalarVisibilityOn()
-gmapper.SelectColorArray('contactForces')
-#gmapper.SetScalarRange(contact_pos_force.GetOutput().GetPointData().GetArray('contactForces').GetRange())
-
-gactor = vtk.vtkActor()
-gactor.SetMapper(gmapper)
+cone = dict()
+cone_glyph = dict()
+cmapper = dict()
+cactor = dict()
+arrow = dict()
+cylinder = dict()
+sphere = dict()
+arrow_glyph = dict()
+gmapper = dict()
+gactor = dict()
+ctransform = dict()
+cylinder_glyph = dict()
+clmapper = dict()
+sphere_glypha = dict()
+sphere_glyphb = dict()
+smappera = dict()
+smapperb = dict()
+sactora = dict()
+sactorb = dict()
+clactor = dict()
 
 transform = vtk.vtkTransform()
 transform.Translate(-0.5, 0., 0.)
 
-cone_glyph = vtk.vtkGlyph3D()
-cone_glyph.SetSourceTransform(transform)
+for mu in cf_prov._mu_coefs:
+    contact_posa[mu].SetInputData(cf_prov._output[mu])
+    contact_posa[mu].Update()
+    contact_posb[mu].SetInputData(cf_prov._output[mu])
+    contact_posb[mu].Update()
 
-cone_glyph.SetInputConnection(contact_pos_norm.GetOutputPort())
-cone_glyph.SetSourceConnection(cone.GetOutputPort())
-#cone_glyph.ScalingOn()
-#cone_glyph.SetScaleModeToScaleByVector()
-#cone_glyph.SetRange(0, 100)
-#cone_glyph.ClampingOn()
-cone_glyph._scale_fact = 1
-cone_glyph.SetScaleFactor(cone_glyph._scale_fact * scale_factor)
-cone_glyph.SetVectorModeToUseVector()
+    contact_pos_force[mu].Update()
+    contact_pos_norm[mu].Update()
 
-cone_glyph.SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
-cone_glyph.OrientOn()
+    cone[mu] = vtk.vtkConeSource()
+    cone[mu].SetResolution(40)
 
-ctransform = vtk.vtkTransform()
-ctransform.Translate(-0.5, 0, 0)
-ctransform.RotateWXYZ(90, 0, 0, 1)
-cylinder_glyph = vtk.vtkGlyph3D()
-cylinder_glyph.SetSourceTransform(ctransform)
+    cone[mu].SetRadius(mu)  # one coef!!
 
-cylinder_glyph.SetInputConnection(contact_pos_norm.GetOutputPort())
-cylinder_glyph.SetSourceConnection(cylinder.GetOutputPort())
-cylinder_glyph.SetVectorModeToUseVector()
+    cone_glyph[mu] = vtk.vtkGlyph3D()
+    cone_glyph[mu].SetSourceTransform(transform)
 
-cylinder_glyph.SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
-cylinder_glyph.OrientOn()
-cylinder_glyph._scale_fact = 1
-cylinder_glyph.SetScaleFactor(cylinder_glyph._scale_fact * scale_factor)
+    cone_glyph[mu].SetInputConnection(contact_pos_norm[mu].GetOutputPort())
+    cone_glyph[mu].SetSourceConnection(cone[mu].GetOutputPort())
+    #cone_glyph.ScalingOn()
+    #cone_glyph.SetScaleModeToScaleByVector()
+    #cone_glyph.SetRange(0, 100)
+    #cone_glyph.ClampingOn()
+    cone_glyph[mu]._scale_fact = 1
+    cone_glyph[mu].SetScaleFactor(cone_glyph[mu]._scale_fact * scale_factor)
+    cone_glyph[mu].SetVectorModeToUseVector()
 
-cmapper = vtk.vtkPolyDataMapper()
-cmapper.SetInputConnection(cone_glyph.GetOutputPort())
+    cone_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
+    cone_glyph[mu].OrientOn()
 
-clmapper = vtk.vtkPolyDataMapper()
-clmapper.SetInputConnection(cylinder_glyph.GetOutputPort())
+    cmapper[mu] = vtk.vtkPolyDataMapper()
+    cmapper[mu].SetInputConnection(cone_glyph[mu].GetOutputPort())
+
+    cactor[mu] = vtk.vtkActor()
+    cactor[mu].GetProperty().SetOpacity(0.4)
+    cactor[mu].GetProperty().SetColor(0, 0, 1)
+    cactor[mu].SetMapper(cmapper[mu])
 
 
-sphere_glypha = vtk.vtkGlyph3D()
-sphere_glypha.SetInputConnection(contact_posa.GetOutputPort())
-sphere_glypha.SetSourceConnection(sphere.GetOutputPort())
-sphere_glypha.ScalingOn()
-#sphere_glypha.SetScaleModeToScaleByVector()
-#sphere_glypha.SetRange(-0.5, 2)
-#sphere_glypha.ClampingOn()
-sphere_glypha._scale_fact = .1
-sphere_glypha.SetScaleFactor(sphere_glypha._scale_fact * scale_factor)
-#sphere_glypha.SetVectorModeToUseVector()
+    arrow[mu] = vtk.vtkArrowSource()
+    arrow[mu].SetTipResolution(40)
+    arrow[mu].SetShaftResolution(40)
 
-sphere_glyphb = vtk.vtkGlyph3D()
-sphere_glyphb.SetInputConnection(contact_posb.GetOutputPort())
-sphere_glyphb.SetSourceConnection(sphere.GetOutputPort())
-sphere_glyphb.ScalingOn()
-#sphere_glyphb.SetScaleModeToScaleByVector()
-#sphere_glyphb.SetRange(-0.5, 2)
-#sphere_glyphb.ClampingOn()
-sphere_glyphb._scale_fact = .1
-sphere_glyphb.SetScaleFactor(sphere_glyphb._scale_fact * scale_factor)
-#sphere_glyphb.SetVectorModeToUseVector()
+    cylinder[mu] = vtk.vtkCylinderSource()
+    cylinder[mu].SetRadius(.01)
+    cylinder[mu].SetHeight(1)
 
-#sphere_glyphb.SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
-#sphere_glyph.OrientOn()
+    sphere[mu] = vtk.vtkSphereSource()
 
-smappera = vtk.vtkPolyDataMapper()
-smappera.SetInputConnection(sphere_glypha.GetOutputPort())
-smapperb = vtk.vtkPolyDataMapper()
-smapperb.SetInputConnection(sphere_glyphb.GetOutputPort())
+    # 1. scale = (scalar value of that particular data index);
+    # 2. denominator = Range[1] - Range[0];
+    # 3. scale = (scale < Range[0] ? Range[0] : (scale > Range[1] ? Range[1] : scale));
+    # 4. scale = (scale - Range[0]) / denominator;
+    # 5. scale *= scaleFactor;
 
-#cmapper.SetScalarModeToUsePointFieldData()
-#cmapper.SetColorModeToMapScalars()
-#cmapper.ScalarVisibilityOn()
-#cmapper.SelectColorArray('contactNormals')
-#gmapper.SetScalarRange(contact_pos_force.GetOutput().GetPointData().GetArray('contactForces').GetRange())
+    arrow_glyph[mu] = vtk.vtkGlyph3D()
+    arrow_glyph[mu].SetInputConnection(contact_pos_force[mu].GetOutputPort())
+    arrow_glyph[mu].SetSourceConnection(arrow[mu].GetOutputPort())
+    arrow_glyph[mu].ScalingOn()
+    arrow_glyph[mu].SetScaleModeToScaleByVector()
+    arrow_glyph[mu].SetRange(0, .01)
+    arrow_glyph[mu].ClampingOn()
+    arrow_glyph[mu]._scale_fact = 5
+    arrow_glyph[mu].SetScaleFactor(arrow_glyph[mu]._scale_fact * scale_factor)
+    arrow_glyph[mu].SetVectorModeToUseVector()
 
-cactor = vtk.vtkActor()
-cactor.GetProperty().SetOpacity(0.4)
-cactor.GetProperty().SetColor(0, 0, 1)
-cactor.SetMapper(cmapper)
+    arrow_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactForces')
+    arrow_glyph[mu].SetInputArrayToProcess(3, 0, 0, 0, 'contactForces')
+    arrow_glyph[mu].OrientOn()
 
-clactor = vtk.vtkActor()
-#cactor.GetProperty().SetOpacity(0.4)
-clactor.GetProperty().SetColor(1, 0, 0)
-clactor.SetMapper(clmapper)
+    gmapper[mu] = vtk.vtkPolyDataMapper()
+    gmapper[mu].SetInputConnection(arrow_glyph[mu].GetOutputPort())
+    gmapper[mu].SetScalarModeToUsePointFieldData()
+    gmapper[mu].SetColorModeToMapScalars()
+    gmapper[mu].ScalarVisibilityOn()
+    gmapper[mu].SelectColorArray('contactForces')
+    #gmapper.SetScalarRange(contact_pos_force.GetOutput().GetPointData().GetArray('contactForces').GetRange())
 
-sactora = vtk.vtkActor()
-sactora.GetProperty().SetColor(1, 0, 0)
-sactora.SetMapper(smappera)
+    gactor[mu] = vtk.vtkActor()
+    gactor[mu].SetMapper(gmapper[mu])
 
-sactorb = vtk.vtkActor()
-sactorb.GetProperty().SetColor(0, 1, 0)
-sactorb.SetMapper(smapperb)
+
+    ctransform[mu] = vtk.vtkTransform()
+    ctransform[mu].Translate(-0.5, 0, 0)
+    ctransform[mu].RotateWXYZ(90, 0, 0, 1)
+    cylinder_glyph[mu] = vtk.vtkGlyph3D()
+    cylinder_glyph[mu].SetSourceTransform(ctransform[mu])
+
+    cylinder_glyph[mu].SetInputConnection(contact_pos_norm[mu].GetOutputPort())
+    cylinder_glyph[mu].SetSourceConnection(cylinder[mu].GetOutputPort())
+    cylinder_glyph[mu].SetVectorModeToUseVector()
+
+    cylinder_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
+    cylinder_glyph[mu].OrientOn()
+    cylinder_glyph[mu]._scale_fact = 1
+    cylinder_glyph[mu].SetScaleFactor(cylinder_glyph[mu]._scale_fact * scale_factor)
+
+    clmapper[mu] = vtk.vtkPolyDataMapper()
+    clmapper[mu].SetInputConnection(cylinder_glyph[mu].GetOutputPort())
+
+
+    sphere_glypha[mu] = vtk.vtkGlyph3D()
+    sphere_glypha[mu].SetInputConnection(contact_posa[mu].GetOutputPort())
+    sphere_glypha[mu].SetSourceConnection(sphere[mu].GetOutputPort())
+    sphere_glypha[mu].ScalingOn()
+    #sphere_glypha[mu].SetScaleModeToScaleByVector()
+    #sphere_glypha[mu].SetRange(-0.5, 2)
+    #sphere_glypha[mu].ClampingOn()
+    sphere_glypha[mu]._scale_fact = .1
+    sphere_glypha[mu].SetScaleFactor(sphere_glypha[mu]._scale_fact * scale_factor)
+    #sphere_glypha[mu].SetVectorModeToUseVector()
+
+    sphere_glyphb[mu] = vtk.vtkGlyph3D()
+    sphere_glyphb[mu].SetInputConnection(contact_posb[mu].GetOutputPort())
+    sphere_glyphb[mu].SetSourceConnection(sphere[mu].GetOutputPort())
+    sphere_glyphb[mu].ScalingOn()
+    #sphere_glyphb[mu].SetScaleModeToScaleByVector()
+    #sphere_glyphb[mu].SetRange(-0.5, 2)
+    #sphere_glyphb[mu].ClampingOn()
+    sphere_glyphb[mu]._scale_fact = .1
+    sphere_glyphb[mu].SetScaleFactor(sphere_glyphb[mu]._scale_fact * scale_factor)
+    #sphere_glyphb[mu].SetVectorModeToUseVector()
+    
+    #sphere_glyphb[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
+    #sphere_glyph.OrientOn()
+    
+    smappera[mu] = vtk.vtkPolyDataMapper()
+    smappera[mu].SetInputConnection(sphere_glypha[mu].GetOutputPort())
+    smapperb[mu] = vtk.vtkPolyDataMapper()
+    smapperb[mu].SetInputConnection(sphere_glyphb[mu].GetOutputPort())
+    
+    #cmapper.SetScalarModeToUsePointFieldData()
+    #cmapper.SetColorModeToMapScalars()
+    #cmapper.ScalarVisibilityOn()
+    #cmapper.SelectColorArray('contactNormals')
+    #gmapper.SetScalarRange(contact_pos_force.GetOutput().GetPointData().GetArray('contactForces').GetRange())
+    
+    
+    clactor[mu] = vtk.vtkActor()
+    #cactor.GetProperty().SetOpacity(0.4)
+    clactor[mu].GetProperty().SetColor(1, 0, 0)
+    clactor[mu].SetMapper(clmapper[mu])
+    
+    sactora[mu] = vtk.vtkActor()
+    sactora[mu].GetProperty().SetColor(1, 0, 0)
+    sactora[mu].SetMapper(smappera[mu])
+    
+    sactorb[mu] = vtk.vtkActor()
+    sactorb[mu].GetProperty().SetColor(0, 1, 0)
+    sactorb[mu].SetMapper(smapperb[mu])
 
 #with open(pos_filename, 'r') as pos_file:
 #    for line in pos_file:
@@ -660,11 +709,15 @@ with h5py.File(io_filename, 'r') as io:
             offsets[instance].append((io['data']['input'][instance_name][contactor_instance_name].attrs['position'],
                                       io['data']['input'][instance_name][contactor_instance_name].attrs['orientation']))
 
-renderer.AddActor(gactor)
-renderer.AddActor(cactor)
-renderer.AddActor(clactor)
-renderer.AddActor(sactora)
-renderer.AddActor(sactorb)
+
+
+for mu in cf_prov._mu_coefs:
+    renderer.AddActor(gactor[mu])
+    renderer.AddActor(cactor[mu])
+
+    renderer.AddActor(clactor[mu])
+    renderer.AddActor(sactora[mu])
+    renderer.AddActor(sactorb[mu])
 
 import imp
 try:
@@ -780,11 +833,9 @@ class InputObserver():
         cf_prov._time = self._times[index]
         cf_prov.method()
 
-        # contact_posa.SetInput(cf_prov._output)
-        contact_posa.Update()
+#        contact_posa.Update()
 
-        # contact_posb.SetInput(cf_prov._output)
-        contact_posb.Update()
+#        contact_posb.Update()
 
         #contact_pos_force.Update()
         # arrow_glyph.Update()
@@ -808,6 +859,14 @@ class InputObserver():
         self._prec_plot_view.Update()
         self._iter_plot_view.GetRenderer().GetRenderWindow().Render()
         self._prec_plot_view.GetRenderer().GetRenderWindow().Render()
+
+    def object_pos(self, id_):
+        index = bisect.bisect_left(self._times, self._time)
+        index = max(0, index)
+        index = min(index, len(self._times)-1)
+
+        id_t = numpy.where(pos_data[:, 0] == self._times[index])
+        return (pos_data[id_t[0][id_], 2], pos_data[id_t[0][id_], 3], pos_data[id_t[0][id_], 4])
 
     def set_opacity(self):
         for instance, actor in zip(instances, actors):

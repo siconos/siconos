@@ -35,6 +35,10 @@
 #include "BulletDS.hpp"
 #include "BulletDS_impl.hpp"
 
+#include <RuntimeException.hpp>
+#include <boost/format.hpp>
+#include <boost/typeof/typeof.hpp>
+
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
@@ -329,17 +333,43 @@ void BulletSpaceFilter::buildInteractions(double time)
         {
           SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
 
-          assert(dsb->collisionObjects()->find(contactManifold->getBody0()) !=
-                 dsb->collisionObjects()->end());
+          assert(dsa->collisionObjects()->find(obA) != dsa->collisionObjects()->end());
+          assert(dsb->collisionObjects()->find(obB) != dsb->collisionObjects()->end());
 
-          nslaw = (*_nslaws)(boost::get<2>((*dsa->collisionObjects())[obA]),
-                             boost::get<2>((*dsb->collisionObjects())[obB]));
+          unsigned long int gid1 = boost::get<2>((*((*dsa->collisionObjects()).find(obA))).second);
+          unsigned long int gid2 = boost::get<2>((*((*dsb->collisionObjects()).find(obB))).second);
+
+          DEBUG_PRINTF("collision between group %ld and %ld\n", gid1, gid2);
+
+          nslaw = (*_nslaws)(gid1, gid2);
+
+          if (!nslaw)
+          {
+            RuntimeException::selfThrow(
+              (boost::format("Cannot find nslaw for collision between group %1% and %2%") %
+               gid1 % gid2).str());
+          }
 
         }
         else
         {
-          nslaw = (*_nslaws)(boost::get<2>((*dsa->collisionObjects())[obA]),
-                             (*_staticObjects->find(obB)).second.second);
+          assert(dsa->collisionObjects()->find(obA) != dsa->collisionObjects()->end());
+          assert(_staticObjects->find(obB) != _staticObjects->end());
+
+          unsigned long int gid1 = boost::get<2>((*((*dsa->collisionObjects()).find(obA))).second);
+          unsigned long int gid2 = (*_staticObjects->find(obB)).second.second;
+
+          DEBUG_PRINTF("collision between group %ld and %ld\n", gid1, gid2);
+
+          nslaw = (*_nslaws)(gid1, gid2);
+
+          if (!nslaw)
+          {
+            RuntimeException::selfThrow(
+              (boost::format("Cannot find nslaw for collision between group %1% and %2%") %
+               gid1 % gid2).str());
+          }
+
         }
 
         assert(nslaw);

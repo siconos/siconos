@@ -30,7 +30,8 @@
 
 BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
                    SP::SiconosVector position,
-                   SP::SiconosVector velocity) :
+                   SP::SiconosVector velocity,
+                   int group) :
   NewtonEulerDS(position, velocity, weightedShape->mass(),
                 weightedShape->inertiaMatrix()),
   _weightedShape(weightedShape),
@@ -58,11 +59,11 @@ BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
 
   collisionObject->setCollisionShape(&*(weightedShape->collisionShape()));
 
-  boost::array<double, 7> centerOfMass = { 0,0,0,1,0,0,0 };
+  boost::array<double, 7> centerOfMass = { 0,0,0,0,1,0,0 };
 
   (*_collisionObjects)[&*collisionObject] =
     boost::tuple<SP::btCollisionObject, OffSet , int>
-    (collisionObject,centerOfMass,0);
+    (collisionObject, centerOfMass, group);
 
   updateCollisionObjects();
 }
@@ -105,10 +106,8 @@ void BulletDS::updateCollisionObjects() const
                                                              q(1)+rboffset[1],
                                                              q(2)+rboffset[2]));
     collisionObject->getWorldTransform().getBasis().
-      setRotation(btQuaternion(offset[4], offset[5],
-                               offset[6], offset[3]) *
-                  btQuaternion(q(4), q(5),
-                               q(6), q(3)));
+      setRotation(rbase * btQuaternion(offset[4], offset[5],
+                                       offset[6], offset[3]));
 
     /* is this needed ? */
     collisionObject->setActivationState(ACTIVE_TAG);

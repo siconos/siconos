@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+#
+# Example of one object under gravity with one contactor and a ground
+#
+
+
 from Siconos.Mechanics.ContactDetection import Contactor
 from Siconos.Mechanics.ContactDetection.Bullet import IO
 
@@ -18,7 +23,7 @@ with IO.Hdf5(io_filename='cube.hdf5', mode='w') as io:
         (1.0, -1.0, 1.0)])
 
     # Alternative to the previous convex shape definition.
-    #  io.insertPrimitiveShape('Cube', 'Box', (.5, .5, .5))
+    #  io.insertPrimitiveShape('Cube', 'Box', (1, 1, 1))
 
     # Definition of the ground shape
     io.insertPrimitiveShape('Ground', 'Box', (30, 30, .5))
@@ -36,7 +41,7 @@ with IO.Hdf5(io_filename='cube.hdf5', mode='w') as io:
                     mass=1)
 
     # the ground object made with the ground shape. As the mass is
-    # not given, it is a static object only involved for contact
+    # not given, it is a static object only involved in contact
     # detection.
     io.insertObject('ground', [Contactor('Ground')],
                     position=[0, 0, 0])
