@@ -19,12 +19,13 @@
 
 //#include "SolverOptions.h"
 //#include "MixedComplementarityProblem.h"
-
 #include <assert.h>
 
 #include "MCP_Solvers.h"
 #include "MCP_cst.h"
+#include "MCP_FischerBurmeister.h"
 
+char SICONOS_MCP_FB_STR[] = "NewtonFB";
 char SICONOS_MCP_NEWTON_FBLSA_STR[] = "Newton FBLSA";
 char SICONOS_MCP_NEWTON_MINFBLSA_STR[] = "Newton minFBLSA";
 
@@ -59,4 +60,62 @@ int mcp_driver2(MixedComplementarityProblem2* problem, double *z , double *Fmcp,
   }
 
   return info;
+}
+
+int mcp_driver(MixedComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
+{
+  if (options == NULL)
+    numericsError("mcp_driver ", "null input for solver options.\n");
+
+  /* Set global options */
+  if (global_options)
+    setNumericsOptions(global_options);
+
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("mcp_driver", "null input for MixedComplementarityProblem and/or unknowns (z,w)");
+  /* Output info. : 0: ok -  >0: error (which depends on the chosen solver) */
+  int info = -1;
+
+  switch (options->solverId)
+  {
+  case SICONOS_MCP_FB: // Fischer-Burmeister/Newton
+    mcp_FischerBurmeister(problem, z, w, &info, options);
+    break;
+
+  default:
+    fprintf(stderr, "mcp_driver error: unknown solver id: %d\n", options->solverId);
+    exit(EXIT_FAILURE);
+
+  }
+
+  return info;
+}
+
+void mcp_driver_init(MixedComplementarityProblem* problem, SolverOptions* options)
+{
+  switch (options->solverId)
+  {
+  case SICONOS_MCP_FB :
+    mcp_FischerBurmeister_init(problem, options) ;
+    break ;
+  default :
+    fprintf(stderr, "mcp_driver_init error: unknown solver id: %d\n", options->solverId);
+    exit(EXIT_FAILURE);
+  }
+
+}
+
+void mcp_driver_reset(MixedComplementarityProblem* problem, SolverOptions* options)
+{
+  switch (options->solverId)
+  {
+  case SICONOS_MCP_FB :
+    mcp_FischerBurmeister_reset(problem, options) ;
+    break ;
+  default :
+    fprintf(stderr, "mcp_driver_init error: unknown solver id: %d\n", options->solverId);
+    exit(EXIT_FAILURE);
+  }
+
 }
