@@ -438,10 +438,13 @@ class Hdf5():
                 body = BulletDS(BulletWeightedShape(
                     self._shape.at_index(shape_id), mass),
                     position + orientation,
-                    velocity, contactors[0].group)
+                    velocity,
+                    contactors[0].position,
+                    contactors[0].orientation,
+                    contactors[0].group)
 
                 for contactor in contactors[1:]:
-                    shape_id = self._shapeid[contactors[0].name]
+                    shape_id = self._shapeid[contactor.name]
 
                     body.addCollisionShape(self._shape.at_index(shape_id),
                                            contactor.position,

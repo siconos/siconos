@@ -48,13 +48,12 @@ typedef bool (*ContactDestroyedCallback)(void* userPersistentData);
 extern ContactDestroyedCallback gContactDestroyedCallback;
 extern ContactProcessedCallback gContactProcessedCallback;
 
-std::vector<int> gOrphanedInteractions;
+std::vector<Interaction*> gOrphanedInteractions;
 
 bool contactClear(void* userPersistentData);
 bool contactClear(void* userPersistentData)
 {
-  //  DEBUG_PRINTF("gContactDestroyedCallback : push Interaction number %d, distance %g\n", static_cast<Interaction *>(userPersistentData)->number(),  static_cast<Interaction *>(userPersistentData)->y(0)->getValue(0));
-  gOrphanedInteractions.push_back(static_cast<Interaction *>(userPersistentData)->number());
+  gOrphanedInteractions.push_back(static_cast<Interaction *>(userPersistentData));
   return true;
 }
 
@@ -167,7 +166,7 @@ void BulletSpaceFilter::buildInteractions(double time)
   // 2. collect old contact points from Siconos graph
   std::map<btManifoldPoint*, bool> contactPoints;
 
-  std::map<int, bool> activeInteractions;
+  std::map<Interaction*, bool> activeInteractions;
 
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   InteractionsGraph::VIterator ui0, ui0end, v0next;
@@ -180,6 +179,8 @@ void BulletSpaceFilter::buildInteractions(double time)
     SP::btManifoldPoint cp = ask<ForContactPoint>(*(inter0.relation()));
     if(cp)
     {
+      DEBUG_PRINTF("Contact point in interaction : %p\n", &*cp);
+
       contactPoints[&*cp] = false;
     }
   }
@@ -206,181 +207,76 @@ void BulletSpaceFilter::buildInteractions(double time)
 
     unsigned int numContacts = contactManifold->getNumContacts();
 
-    if (obA->getUserPointer() && obA->getUserPointer() != obB->getUserPointer())
+    if ( (obA->getUserPointer() && obA->getUserPointer() != obB->getUserPointer()) ||
+         (obB->getUserPointer() && obA->getUserPointer() != obB->getUserPointer()) )
     {
 
-      btVector3 center;
-      btScalar radius;
-
-      obA->getCollisionShape()->getBoundingSphere(center, radius);
-
-      /* closed contact points elimination */
-      double contactThreshold = radius * _closeContactsThreshold;
-
-      unsigned int zone[4];
-      unsigned int maxZone = 0;
-      unsigned int bestContact[4];
-      double minDistance[4];
-      for (unsigned int j = 0; j < numContacts; ++j)
-      {
-        btManifoldPoint& cpointj = contactManifold->getContactPoint(j);
-        zone[j] = maxZone;
-        bestContact[zone[j]] = j;
-
-        btVector3 posaj = cpointj.getPositionWorldOnA();
-        btVector3 posbj = cpointj.getPositionWorldOnB();
-
-        for (unsigned int k = 0; k < j; ++k)
-        {
-
-          btManifoldPoint& cpointk = contactManifold->getContactPoint(k);
-
-          btVector3 posak = cpointk.getPositionWorldOnA();
-          btVector3 posbk = cpointk.getPositionWorldOnB();
-          double da = (posak - posaj).dot(posak - posaj);
-          double db = (posbk - posbj).dot(posbk - posbj);
-
-          DEBUG_PRINTF("j : %d, k : %d, da : %g,  db %g\n", j, k, da, db);
-
-          if (da < contactThreshold || db < contactThreshold)
-          {
-            zone[j] = zone[k];
-            bestContact[zone[j]] = bestContact[zone[k]];
-          }
-        }
-        if (zone[j] == maxZone) ++maxZone;
-      }
-
-      assert(maxZone <= 4);
-
-      DEBUG_PRINTF("maxZone : %d\n", maxZone);
-      for (unsigned int z = 0; z < maxZone; ++z)
-      {
-        DEBUG_PRINTF("z=%d, bestContact[z]=%d, getContactPoint(bestContact[z]).getDistance()=%g\n", z, bestContact[z], contactManifold->getContactPoint(bestContact[z]).getDistance());
-        minDistance[z] = contactManifold->getContactPoint(bestContact[z]).getDistance();
-      }
-
-      for (unsigned int j = 0; j < numContacts; ++j)
-      {
-        assert(zone[j] <= maxZone);
-
-        btManifoldPoint& cpointj = contactManifold->getContactPoint(j);
-        DEBUG_PRINTF("zone[j] : j = %d,  zone[j]=%d\n", j, zone[j]);
-        DEBUG_PRINTF("cpointj.getDistance() = %g\n", cpointj.getDistance());
-        DEBUG_PRINTF("cpointj.getDistance() > %g\n", minDistance[zone[j]]);
-        if (cpointj.getDistance() < minDistance[zone[j]])
-        {
-          DEBUG_PRINTF("bestContact[zone[j]] = j : zone[j]=%d, j=%d\n", zone[j], j);
-          bestContact[zone[j]] = j;
-          DEBUG_PRINTF(" minDistance[zone[j]] = cpointj.getDistance() = %g\n",  cpointj.getDistance());
-          minDistance[zone[j]] = cpointj.getDistance();
-        }
-      }
-
-#ifndef NDEBUG
-      for (unsigned int j = 0; j < numContacts; ++j)
-      {
-        assert(zone[j] < 4);
-        assert(bestContact[zone[j]] < 4);
-
-        btManifoldPoint& cpointj = contactManifold->getContactPoint(j);
-        btManifoldPoint& cpointbj = contactManifold->getContactPoint(bestContact[zone[j]]);
-        btVector3 posaj = cpointj.getPositionWorldOnA();
-        btVector3 posbj = cpointj.getPositionWorldOnB();
-
-        DEBUG_PRINTF("manifold %d, numContacts %d, best : %g,  contact %d : %g\n", i, numContacts, cpointbj.getDistance(), j, cpointj.getDistance());
-
-        assert(cpointbj.getDistance() <= cpointj.getDistance());
-
-        for (unsigned int k = 0; k < j; ++k)
-        {
-          btManifoldPoint& cpointk = contactManifold->getContactPoint(k);
-
-          btVector3 posak = cpointk.getPositionWorldOnA();
-          btVector3 posbk = cpointk.getPositionWorldOnB();
-
-          if (((posak - posaj).dot(posak - posaj) < contactThreshold) ||
-              (posbk - posbj).dot(posbk - posbj) < contactThreshold)
-          {
-            DEBUG_PRINTF("zone[j]==zone[k] ? j : %d, k : %d, zone[j : %d, zone[k] : %d\n", j, k, zone[j], zone[k]);
-            //  assert (zone[j] == zone[k]);
-          }
-        }
-      }
-#endif
-
-      for (unsigned int z = 0; z < maxZone; ++z)
+      for (unsigned int z = 0; z < numContacts; ++z)
       {
 
-        SP::btManifoldPoint cpoint(createSPtrbtManifoldPoint(contactManifold->getContactPoint(bestContact[z])));
-        DEBUG_PRINTF("manifold %d, contact %d, &contact %p, lifetime %d\n", i, bestContact[z], &*cpoint, cpoint->getLifeTime());
+        SP::btManifoldPoint cpoint(createSPtrbtManifoldPoint(contactManifold->getContactPoint(z)));
+        DEBUG_PRINTF("manifold %d, contact %d, &contact %p, lifetime %d\n", i, z, &*cpoint, cpoint->getLifeTime());
 
-        std::map<btManifoldPoint*, bool>::iterator itc;
-        itc = contactPoints.find(&*cpoint);
-
-        SP::DynamicalSystemsGraph DSG0 = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
         // should no be mixed with something else that use UserPointer!
-        assert(obA->getUserPointer());
+        SP::BulletDS dsa;
+        SP::BulletDS dsb;
+        unsigned long int gid1, gid2;
 
-        SP::BulletDS dsa(static_cast<BulletDS*>(obA->getUserPointer())->shared_ptr());
+        if(obA->getUserPointer())
+        {
+          dsa = static_cast<BulletDS*>(obA->getUserPointer())->shared_ptr();
 
-        assert(dsa->collisionObjects()->find(contactManifold->getBody0()) !=
-               dsa->collisionObjects()->end());
+          assert(dsa->collisionObjects()->find(contactManifold->getBody0()) !=
+                 dsa->collisionObjects()->end());
+          gid1 = boost::get<2>((*((*dsa->collisionObjects()).find(obA))).second);
+        }
+        else
+        {
+          gid1 = (*_staticObjects->find(obA)).second.second;
+        }
 
         SP::NonSmoothLaw nslaw;
         if (obB->getUserPointer())
         {
-          SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
+          dsb = static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr();
 
-          assert(dsa->collisionObjects()->find(obA) != dsa->collisionObjects()->end());
           assert(dsb->collisionObjects()->find(obB) != dsb->collisionObjects()->end());
 
-          unsigned long int gid1 = boost::get<2>((*((*dsa->collisionObjects()).find(obA))).second);
-          unsigned long int gid2 = boost::get<2>((*((*dsb->collisionObjects()).find(obB))).second);
-
-          DEBUG_PRINTF("collision between group %ld and %ld\n", gid1, gid2);
-
-          nslaw = (*_nslaws)(gid1, gid2);
-
-          if (!nslaw)
-          {
-            RuntimeException::selfThrow(
-              (boost::format("Cannot find nslaw for collision between group %1% and %2%") %
-               gid1 % gid2).str());
-          }
-
+          gid2 = boost::get<2>((*((*dsb->collisionObjects()).find(obB))).second);
         }
+
         else
         {
-          assert(dsa->collisionObjects()->find(obA) != dsa->collisionObjects()->end());
-          assert(_staticObjects->find(obB) != _staticObjects->end());
+          gid2 = (*_staticObjects->find(obB)).second.second;
+        }
 
-          unsigned long int gid1 = boost::get<2>((*((*dsa->collisionObjects()).find(obA))).second);
-          unsigned long int gid2 = (*_staticObjects->find(obB)).second.second;
 
-          DEBUG_PRINTF("collision between group %ld and %ld\n", gid1, gid2);
+        DEBUG_PRINTF("collision between group %ld and %ld\n", gid1, gid2);
 
-          nslaw = (*_nslaws)(gid1, gid2);
+        nslaw = (*_nslaws)(gid1, gid2);
 
-          if (!nslaw)
-          {
-            RuntimeException::selfThrow(
-              (boost::format("Cannot find nslaw for collision between group %1% and %2%") %
-               gid1 % gid2).str());
-          }
-
+        if (!nslaw)
+        {
+          RuntimeException::selfThrow(
+            (boost::format("Cannot find nslaw for collision between group %1% and %2%") %
+             gid1 % gid2).str());
         }
 
         assert(nslaw);
 
-        if (itc == contactPoints.end())
+        std::map<btManifoldPoint*, bool>::iterator itc;
+        itc = contactPoints.find(&*cpoint);
+
+        if (itc == contactPoints.end() || !cpoint->m_userPersistentData)
         {
+          /* new interaction */
+
           SP::Interaction inter;
           if (nslaw->size() == 3)
           {
             SP::BulletR rel(new BulletR(cpoint, createSPtrbtPersistentManifold(*contactManifold)));
-            inter.reset(new Interaction(3, nslaw, rel));
+            inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
           }
           else
           {
@@ -395,17 +291,21 @@ void BulletSpaceFilter::buildInteractions(double time)
           {
             SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
 
-            cpoint->m_userPersistentData = &*inter;
             if (dsa != dsb)
             {
-              DEBUG_PRINTF("LINK %p %p\n", obA, obB);
+              DEBUG_PRINTF("LINK obA:%p obB:%p inter:%p\n", obA, obB, &*inter);
+              assert(inter);
+
+              cpoint->m_userPersistentData = &*inter;
               link(inter, dsa, dsb);
             }
             /* else collision shapes belong to the same object do nothing */
           }
           else
           {
-            DEBUG_PRINTF("LINK %p\n", obA);
+            DEBUG_PRINTF("LINK obA:%p inter :%p\n", obA, &*inter);
+            assert(inter);
+
             cpoint->m_userPersistentData = &*inter;
             link(inter, dsa);
           }
@@ -413,21 +313,27 @@ void BulletSpaceFilter::buildInteractions(double time)
 
         if (cpoint->m_userPersistentData)
         {
-          activeInteractions[static_cast<Interaction *>(cpoint->m_userPersistentData)->number()] = true;
-          DEBUG_PRINTF("Interaction number %d = true\n", static_cast<Interaction *>(cpoint->m_userPersistentData)->number());
+          activeInteractions[static_cast<Interaction *>(cpoint->m_userPersistentData)] = true;
+          DEBUG_PRINTF("Interaction %p = true\n", static_cast<Interaction *>(cpoint->m_userPersistentData));
           DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
         }
+        else
+        {
+          assert(false);
+          DEBUG_PRINT("cpoint->m_userPersistentData is empty\n");
+        }
+
         contactPoints[&*cpoint] = true;
         DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
       }
     }
   }
 
-  for (std::vector<int>::iterator it = gOrphanedInteractions.begin();
+  for (std::vector<Interaction*>::iterator it = gOrphanedInteractions.begin();
        it != gOrphanedInteractions.end();
        ++it)
   {
-    DEBUG_PRINTF("setting contact point to false for orphaned interaction %d (was %d)\n", *it, activeInteractions[*it]);
+    DEBUG_PRINTF("setting contact point to false for orphaned interaction %p (was %d)\n", *it, activeInteractions[*it]);
     activeInteractions[*it] = false;
   }
   gOrphanedInteractions.clear();

@@ -13,6 +13,10 @@ import getopt
 from contextlib import contextmanager
 import tempfile
 import numpy as np
+
+from Siconos.Mechanics.ContactDetection.Bullet import btQuaternion
+from Siconos.Mechanics.ContactDetection.Bullet.BulletWrap import __mul__ as mul
+from Siconos.Mechanics.ContactDetection.Bullet.BulletWrap import quatRotate
 #
 # a context manager for a *named* temp file
 #
@@ -125,7 +129,7 @@ class Quaternion():
 
     def rotate(self, v):
         pv = Quaternion((0, v[0], v[1], v[2]))
-        rv = self.conjugate() * pv * self
+        rv = self * pv * self.conjugate()
         assert(rv[0] == 0)
         return [rv[1], rv[2], rv[3]]
 
@@ -133,7 +137,7 @@ class Quaternion():
         r = [0,0,0]
         a = self._data.GetRotationAngleAndAxis(r)
         return r, a
-        
+
 
 def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
 
@@ -149,8 +153,8 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
         transform.Identity()
         transform.Translate(q0 + p[0], q1 + p[1], q2 + p[2])
 
-        axis, angle = q.axisAngle()
-        
+        axis, angle = r.axisAngle()
+
 
 #        axis, angle = axis_angle((q3, q4, q5, q6))
 
@@ -320,18 +324,18 @@ for mu in cf_prov._mu_coefs:
 
     contact_posa[mu] = vtk.vtkDataObjectToDataSetFilter()
     contact_posb[mu] = vtk.vtkDataObjectToDataSetFilter()
-    
+
     add_compatiblity_methods(contact_posa[mu])
     add_compatiblity_methods(contact_posb[mu])
-    
+
     contact_pos_force[mu] = vtk.vtkFieldDataToAttributeDataFilter()
     contact_pos_norm[mu] = vtk.vtkFieldDataToAttributeDataFilter()
-    
+
     contact_posa[mu].SetDataSetTypeToPolyData()
     contact_posa[mu].SetPointComponent(0, "contactPositionsA", 0)
     contact_posa[mu].SetPointComponent(1, "contactPositionsA", 1)
     contact_posa[mu].SetPointComponent(2, "contactPositionsA", 2)
-    
+
     contact_posb[mu].SetDataSetTypeToPolyData()
     contact_posb[mu].SetPointComponent(0, "contactPositionsB", 0)
     contact_posb[mu].SetPointComponent(1, "contactPositionsB", 1)
@@ -515,31 +519,31 @@ for mu in cf_prov._mu_coefs:
     sphere_glyphb[mu]._scale_fact = .1
     sphere_glyphb[mu].SetScaleFactor(sphere_glyphb[mu]._scale_fact * scale_factor)
     #sphere_glyphb[mu].SetVectorModeToUseVector()
-    
+
     #sphere_glyphb[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
     #sphere_glyph.OrientOn()
-    
+
     smappera[mu] = vtk.vtkPolyDataMapper()
     smappera[mu].SetInputConnection(sphere_glypha[mu].GetOutputPort())
     smapperb[mu] = vtk.vtkPolyDataMapper()
     smapperb[mu].SetInputConnection(sphere_glyphb[mu].GetOutputPort())
-    
+
     #cmapper.SetScalarModeToUsePointFieldData()
     #cmapper.SetColorModeToMapScalars()
     #cmapper.ScalarVisibilityOn()
     #cmapper.SelectColorArray('contactNormals')
     #gmapper.SetScalarRange(contact_pos_force.GetOutput().GetPointData().GetArray('contactForces').GetRange())
-    
-    
+
+
     clactor[mu] = vtk.vtkActor()
     #cactor.GetProperty().SetOpacity(0.4)
     clactor[mu].GetProperty().SetColor(1, 0, 0)
     clactor[mu].SetMapper(clmapper[mu])
-    
+
     sactora[mu] = vtk.vtkActor()
     sactora[mu].GetProperty().SetColor(1, 0, 0)
     sactora[mu].SetMapper(smappera[mu])
-    
+
     sactorb[mu] = vtk.vtkActor()
     sactorb[mu].GetProperty().SetColor(0, 1, 0)
     sactorb[mu].SetMapper(smapperb[mu])
@@ -598,7 +602,7 @@ with h5py.File(io_filename, 'r') as io:
             points = vtk.vtkPoints()
             convex = vtk.vtkConvexPointSet()
             data = io['data']['ref'][shape_name][:]
-            convex.GetPointIds().SetNumberOfIds(data.shape[0])            
+            convex.GetPointIds().SetNumberOfIds(data.shape[0])
             for id_, vertice in enumerate(io['data']['ref'][shape_name][:]):
                 points.InsertNextPoint(vertice[0], vertice[1], vertice[2])
                 convex.GetPointIds().SetId(id_, id_)
@@ -608,7 +612,7 @@ with h5py.File(io_filename, 'r') as io:
             convex_grid.SetPoints(points)
 
             source = vtk.vtkProgrammableSource()
-            
+
             def sourceExec():
                 output = source.GetUnstructuredGridOutput()
                 output.Allocate(1, 1)
@@ -694,7 +698,7 @@ with h5py.File(io_filename, 'r') as io:
         for contactor_instance_name in io['data']['input'][instance_name]:
             contactor_name = io['data']['input'][instance_name][contactor_instance_name].attrs['name']
             contactors[instance].append(contactor_name)
-            
+
             actor = vtk.vtkActor()
             if io['data']['input'][instance_name].attrs['mass'] > 0:
                 actor.GetProperty().SetOpacity(0.7)
@@ -903,13 +907,13 @@ class InputObserver():
             else:
                 pos_data = dpos_data[:].copy()
             min_time = times[0]
-                
+
             max_time = times[len(times) - 1]
-                
+
             self._slider_repres.SetMinimumValue(min_time)
             self._slider_repres.SetMaximumValue(max_time)
             self.update()
-            
+
         if key == 'p':
             self._image_counter += 1
             image_maker.Update()

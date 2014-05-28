@@ -31,14 +31,21 @@ class BulletDS : public NewtonEulerDS, public std11::enable_shared_from_this<Bul
 public:
 
   /** constructor from a BulletWeightedShape
-   * \param weightedShape the bullet
+   * \param weightedShape the main bullet collision shape with an associated mass matrix
    * \param position the initial position (vector length: 3)
    * \param velocity the inital velocity  (vector length: 3)
-   * \param collision group (default 0)
+   * \param relative_position relative position of the main bullet
+   *        collision shape (default (0,0,0))
+   * \param relative_orientation relative orientation (given as a
+   *        quaternion) of the main buller collision shape (default
+   *        (0, 1, 0, 0))
+   * \param group the collision group (default 0)
    */
   BulletDS(SP::BulletWeightedShape weightedShape,
            SP::SiconosVector position,
            SP::SiconosVector velocity,
+           SP::SiconosVector relative_position = SP::SiconosVector(),
+           SP::SiconosVector relative_orientation = SP::SiconosVector(),
            int group=0);
 
 

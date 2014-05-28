@@ -6,7 +6,7 @@ class Contactor:
                  shape_name,
                  collision_group=0,
                  relative_position=[0, 0, 0],
-                 relative_orientation=[1, 0, 0, 0]):
+                 relative_orientation=[0, 1, 0, 0]):
 
         if len(relative_orientation) == 2:
             # axis + angle

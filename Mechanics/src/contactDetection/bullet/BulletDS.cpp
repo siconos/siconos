@@ -31,6 +31,8 @@
 BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
                    SP::SiconosVector position,
                    SP::SiconosVector velocity,
+                   SP::SiconosVector relative_position,
+                   SP::SiconosVector relative_orientation,
                    int group) :
   NewtonEulerDS(position, velocity, weightedShape->mass(),
                 weightedShape->inertiaMatrix()),
@@ -51,21 +53,21 @@ BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
 
   /* initialisation is done with the weighted shape as the only one
    * collision object */
-  SP::btCollisionObject collisionObject(new btCollisionObject());
+  if (! relative_position)
+  {
+    relative_position.reset(new SiconosVector(3));
+    relative_position->zero();
+  }
+  if (! relative_orientation)
+  {
+    relative_orientation.reset(new SiconosVector(4));
+    relative_orientation->zero();
+    (*relative_orientation)(1) = 1;
+  }
 
-  collisionObject->setUserPointer(this);
-  collisionObject->setCollisionFlags(collisionObject->getCollisionFlags()|
-                                     btCollisionObject::CF_KINEMATIC_OBJECT);
+  addCollisionShape(weightedShape->collisionShape(), relative_position,
+                      relative_orientation, group);
 
-  collisionObject->setCollisionShape(&*(weightedShape->collisionShape()));
-
-  boost::array<double, 7> centerOfMass = { 0,0,0,0,1,0,0 };
-
-  (*_collisionObjects)[&*collisionObject] =
-    boost::tuple<SP::btCollisionObject, OffSet , int>
-    (collisionObject, centerOfMass, group);
-
-  updateCollisionObjects();
 }
 
 unsigned int BulletDS::numberOfCollisionObjects() const
@@ -99,7 +101,9 @@ void BulletDS::updateCollisionObjects() const
                    pow(q(5), 2) +  pow(q(6), 2)) - 1.) < 1e-7);
 
     btQuaternion rbase = btQuaternion(q(4), q(5), q(6), q(3));
+
     btVector3 boffset = btVector3(offset[0], offset[1], offset[2]);
+
     btVector3 rboffset = quatRotate(rbase, boffset);
 
     collisionObject->getWorldTransform().setOrigin(btVector3(q(0)+rboffset[0],
