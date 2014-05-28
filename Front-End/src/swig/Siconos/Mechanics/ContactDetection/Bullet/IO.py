@@ -2,6 +2,9 @@
 
 from __future__ import print_function
 
+import os
+import sys
+
 import VtkShapes
 import shlex
 import numpy as np
@@ -341,11 +344,16 @@ class Hdf5():
          ow, ox, oy oz : components of an unit quaternion (float)
     """
 
-    def __init__(self, io_filename = 'io.hdf5', mode = 'w',
+    def __init__(self, io_filename = None, mode = 'w',
                  broadphase=None, osi=None, shape_filename=None,
                  input_filename='input.dat',
                  set_external_forces=apply_gravity):
-        self._io_filename = io_filename
+
+        if io_filename is None:
+            self._io_filename = '{0}.hdf5'.format(
+                os.path.splitext(os.path.basename(sys.argv[0]))[0])
+        else:
+            self._io_filename = io_filename
         self._mode = mode
         self._broadphase = broadphase
         self._osi = osi
@@ -671,7 +679,8 @@ class Hdf5():
                 obj.attrs['id'] = (self._number_of_dynamic_objects + 1)
                 self._number_of_dynamic_objects += 1
 
-    def insertNewtonImpactFrictionNSL(self, name, mu, e=0, gid1=0, gid2=0):
+    def insertNewtonImpactFrictionNSL(self, name, mu, e=0, collision_group1=0,
+                                      collision_group2=0):
         """
         Insert a nonsmooth law for contact between 2 groups.
         Only NewtonImpactFrictionNSL are supported.
@@ -686,8 +695,8 @@ class Hdf5():
             nslaw.attrs['type'] = 'NewtonImpactFrictionNSL'
             nslaw.attrs['mu'] = mu
             nslaw.attrs['e'] = e
-            nslaw.attrs['gid1'] = gid1
-            nslaw.attrs['gid2'] = gid2
+            nslaw.attrs['gid1'] = collision_group1
+            nslaw.attrs['gid2'] = collision_group2
 
             self.importNonSmoothLaw(name)
 
