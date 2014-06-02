@@ -266,12 +266,17 @@ texinfo_documents = [
 #texinfo_show_urls = 'footnote'
 
 
-
 def starting_with(prefixes):
     return ','.join([','.join([
         fun for fun in dir(__import__("Siconos.Numerics").Numerics)
         if fun.startswith(prefix)]) for prefix in prefixes])
 
+def under_directory(dirs):
+    return ','.join(
+        [','.join([
+            cls for cls in dir(__import__("Siconos.Kernel").Kernel)
+            if os.path.exists(os.path.join(d, '{0}.hpp'.format(cls)))])
+         for d in dirs])
 
 def source_read(app, docname, source):
     m = re.search(':eval:`(.*)`.*', source[0])

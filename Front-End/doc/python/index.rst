@@ -13,7 +13,9 @@ Contents:
 
    Introduction           
    modules/Numerics
-
+   modules/Kernel
+   modules/Mechanics
+   modules/IO
   
 
 Indices and tables

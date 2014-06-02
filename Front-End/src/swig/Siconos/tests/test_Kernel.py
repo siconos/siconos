@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+def test_autocast():
+    import Siconos.Kernel as K
+    dsA = K.LagrangianDS([0],[0],[[1]])
+    dsB = K.FirstOrderLinearDS([0],[[1]])
+    model = K.Model(0, 0)
+    model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsA)
+    model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsB)
+
+    assert(type(m.nonSmoothDynamicalSystem().dynamicalSystem(1)) == K.LagrangianDS)
+    assert(type(m.nonSmoothDynamicalSystem().dynamicalSystem(2)) == K.FirstOrderLinearDS)
+`
 
 def test_getVector():
     from Siconos.Kernel import getVector, SiconosVector
