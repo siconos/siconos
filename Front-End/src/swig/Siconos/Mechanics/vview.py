@@ -774,6 +774,31 @@ def make_scale_observer(glyphs):
 
     return scale_observer
 
+# callback maker for time scale manipulation
+def make_time_scale_observer(time_slider_repres, time_observer):
+
+    delta_time = max_time - min_time
+
+    def time_scale_observer(obj, event):
+        slider_repres = obj.GetRepresentation()
+        time_scale_at_pos = 1.-slider_repres.GetValue()
+
+        current_time = time_observer._time
+
+        shift = (current_time - min_time) / delta_time
+
+        xmin_time = min_time + time_scale_at_pos/2. * delta_time
+        xmax_time = max_time - time_scale_at_pos/2.* delta_time
+
+        xdelta_time = xmax_time - xmin_time
+        
+        new_mintime = max(min_time, current_time - xdelta_time)
+        new_maxtime = min(max_time, current_time + xdelta_time)
+
+        time_slider_repres.SetMinimumValue(new_mintime)
+        time_slider_repres.SetMaximumValue(new_maxtime)
+
+    return time_scale_observer
 
 # make a slider widget and its representation
 def make_slider(title, observer, interactor,
@@ -1115,10 +1140,17 @@ tview_prec.GetRenderer().Render()
 slwsc, slrepsc = make_slider('Scale',
                              make_scale_observer([cone_glyph, cylinder_glyph, sphere_glypha, sphere_glyphb, arrow_glyph]
                                                  ),
-                                                 interactor_renderer,
-                                                 scale_factor, scale_factor - scale_factor / 2,
-                                                 scale_factor + scale_factor / 2,
-                                                 0.01, 0.01, 0.01, 0.7)
+                             interactor_renderer,
+                             scale_factor, scale_factor - scale_factor / 2,
+                             scale_factor + scale_factor / 2,
+                             0.01, 0.01, 0.01, 0.7)
+
+xslwsc, xslrepsc = make_slider('Time scale',
+                               make_time_scale_observer(slider_repres, input_observer),
+                               interactor_renderer,
+                               scale_factor, scale_factor - scale_factor / 2,
+                               scale_factor + scale_factor / 2,
+                               0.1, 0.9, 0.3, 0.9)
 
 
 
