@@ -8,9 +8,9 @@ def test_autocast():
     model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsA)
     model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsB)
 
-    assert(type(m.nonSmoothDynamicalSystem().dynamicalSystem(1)) == K.LagrangianDS)
-    assert(type(m.nonSmoothDynamicalSystem().dynamicalSystem(2)) == K.FirstOrderLinearDS)
-`
+    assert(type(m.nonSmoothDynamicalSystem().dynamicalSystem(dsA.number())) == K.LagrangianDS)
+    assert(type(m.nonSmoothDynamicalSystem().dynamicalSystem(dsB.number())) == K.FirstOrderLinearDS)
+
 
 def test_getVector():
     from Siconos.Kernel import getVector, SiconosVector

@@ -5,8 +5,18 @@ Usage : example of the modelisation of a bouncing ball
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A ball bouncing on the ground may be defined as a linear lagrangian time
-invariant dynamical system with one degree of freedom. We first import the
-needed classes from `Siconos.Kernel` module:
+invariant dynamical system with one degree of freedom. 
+
+.. math::
+   M \ddot q = F_{ext} + p
+
+where :
+ - :math:`q` is the state vector, here of size 1 : the height of the center of the ball.
+ - :math:`M` is the time invariant mass matrix, here of size 1x1.
+ - :math:`F_{ext}` are the external forces, here the gravity.
+ - :math:`p` is the reaction force due to the nonsmooth interaction with the floor.
+
+We first import the needed classes from `Siconos.Kernel` module:
 
  - `LagrangianLinearTIDS`, for a linear lagrangian time invariant dynamical system object.
  - `LagrangianLinearTIR`, for a linear lagrangian time invariant relation object.
@@ -47,11 +57,8 @@ The gravity is applied to the ball as a constant external force :
   ball.setFExtPtr(weight)  # set the external force of the lagrangian dynamical system
 
 
-
-The ball-floor relation is defined as a time invariant and linear lagrangian
-relation :math:`y= Cq + e + D\lambda + Fz` 
-
-where :math:`C = {1}` [...]
+The ball is constrainted to lie above the floor  :math:`y = C * q` and :math:`C` is a one row * one column
+matrix :math:`C = \{1\}`
 
 .. testcode::
 
