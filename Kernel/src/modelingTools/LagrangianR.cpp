@@ -24,7 +24,6 @@
 #include "LagrangianDS.hpp"
 
 
-
 void LagrangianR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   // do nothing here, overload this if you need something done

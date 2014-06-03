@@ -206,65 +206,11 @@ public:
   */
   void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
-  virtual void computeJachlambda(double time, Interaction& inter)
-  {
-    ;
-  }
-  virtual void computeJachq(double time, Interaction& inter)
-  {
-    ;
-  }
-  virtual void computeJachqDot(double time, Interaction& inter)
-  {
-    ;
-  }
-  virtual void computeDotJachq(double time, Interaction& inter)
-  {
-    ;
-  }
-
-  /** to compute hDot using plug-in mechanism
-   * using plug-in mechanism with the data vector of the interaction
-   * should be used as less as possible to avoid side--effects
-   * prefer computehDot(double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
-   * \param time  current time
-   * \param inter interaction that owns the relation
-   */
-  virtual void computehDot(double time, Interaction& inter)
-  {
-    ;
-  }
-
-  virtual void computeJacglambda(double time, Interaction& inter)
-  {
-    ;
-  }
-  virtual void computeJacgq(double time, Interaction& inter)
-  {
-    ;
-  }
-  virtual void computeJacgqDot(double time, Interaction& inter)
-  {
-    ;
-  }
 
   /* compute all the H Jacobian */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp)
-  {
-    computeJachq(time, inter);
-    computeJachqDot(time, inter);
-    computeDotJachq(time, inter);
-    computeJachlambda(time, inter);
-    computehDot(time,inter);
-  }
-
+  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) = 0 ;
   /* compute all the G Jacobian */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
-  {
-    computeJacgq(time, inter);
-    computeJacgqDot(time, inter);
-    computeJacglambda(time, inter);
-  }
+  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0 ;
 
   /** to compute output
   *  \param double : current time

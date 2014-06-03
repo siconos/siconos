@@ -241,9 +241,7 @@ public:
   /* compute all the G Jacobian */
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
   {
-    computeJacgq(time, inter);
-    // computeJacgqDot(time, inter);
-    // computeJacglambda(time, inter);
+    ;
   }
 
 

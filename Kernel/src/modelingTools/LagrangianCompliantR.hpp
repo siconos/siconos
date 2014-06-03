@@ -116,6 +116,7 @@ public:
   const std::string getJachlambdaName() const;
   const std::string getJachqName() const;
 
+  
 
   /** to compute output
   *  \param time the current time
@@ -130,6 +131,17 @@ public:
   *  \param level "derivative" order of lambda used to compute input
   */
   void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  
+  /* compute all the H Jacobian */
+  void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+
+  /* compute all the G Jacobian */
+  void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  {
+    ;
+  }
+
+
 
   ACCEPT_STD_VISITORS();
 

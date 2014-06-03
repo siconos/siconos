@@ -150,3 +150,14 @@ void LagrangianCompliantR::computeInput(double time, Interaction& inter, Interac
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
   *DSlink[LagrangianR::z] = workZ;
 }
+
+
+void LagrangianCompliantR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+{
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  SiconosVector q = *DSlink[LagrangianR::q0];
+  SiconosVector z = *DSlink[LagrangianR::z];
+  SiconosVector& lambda = *inter.lambda(0);
+  computeJachq(time, q, lambda, z);
+  computeJachlambda(time, q, lambda, z);
+}

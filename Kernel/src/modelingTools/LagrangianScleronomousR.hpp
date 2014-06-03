@@ -188,12 +188,11 @@ public:
 
   /* compute all the H Jacobian */
   void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+
   /* compute all the G Jacobian */
   void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
   {
-    computeJacgq(time, inter);
-    // computeJacgqDot(time, inter);
-    // computeJacglambda(time, inter);
+    ;
   }
 
   /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism

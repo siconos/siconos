@@ -138,6 +138,23 @@ public:
   */
   void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
+ /* compute all the H Jacobian */
+  void computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+  {
+    ;
+  }
+
+
+  /* compute all the G Jacobian */
+  void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  {
+    ;
+  }
+
+
+
+
+
   // GETTERS/SETTERS
 
   // -- C --
