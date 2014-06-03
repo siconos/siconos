@@ -14,10 +14,14 @@ from Siconos.Mechanics.ContactDetection import Contactor
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
     BulletDS, BulletWeightedShape, \
-    btCollisionObject, btQuaternion, btTransform, btVector3
+    btCollisionObject, btQuaternion, btTransform, btVector3, quatRotate
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
     cast_BulletR
+
+from Siconos.Mechanics.ContactDetection.Bullet.BulletWrap import __mul__ as mul
+
+
 
 from Siconos.Kernel import cast_NewtonImpactFrictionNSL
 
@@ -417,20 +421,36 @@ class Hdf5():
         if self._broadphase is not None and 'input' in self._data:
             if mass == 0.:
                 # a static object
+                rbase = btQuaternion(orientation[1],
+                                     orientation[2],
+                                     orientation[3],
+                                     orientation[0])
+
                 for c in contactors:
+                    (w, x, y, z) = c.orientation
+                    c_orientation = btQuaternion(x, y, z, w)
+                    rc_orientation = mul(rbase, c_orientation)
+
+                    c_origin = btVector3(c.position[0],
+                                         c.position[1],
+                                         c.position[2])
+
+                    rc_origin = quatRotate(rbase, c_origin)
+
+                    rc_sorigin = btVector3(rc_origin.x() + position[0],
+                                           rc_origin.y() + position[1],
+                                           rc_origin.z() + position[2])
 
                     static_cobj = btCollisionObject()
                     static_cobj.setCollisionFlags(
                         btCollisionObject.CF_STATIC_OBJECT)
-                    c_origin = btVector3(c.position[0],
-                                         c.position[1],
-                                         c.position[2])
-                    self._static_origins.append(c_origin)
-                    (w, x, y, z) = c.orientation
-                    c_orientation = btQuaternion(x, y, z, w)
-                    self._static_orientations.append(c_orientation)
-                    transform = btTransform(c_orientation)
-                    transform.setOrigin(c_origin)
+
+                  
+                    self._static_origins.append(rc_sorigin)
+                   
+                    self._static_orientations.append(rc_orientation)
+                    transform = btTransform(rc_orientation)
+                    transform.setOrigin(rc_sorigin)
                     self._static_transforms.append(transform)
                     static_cobj.setWorldTransform(transform)
                     shape_id = self._shapeid[c.name]

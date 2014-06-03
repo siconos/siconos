@@ -770,7 +770,8 @@ def make_scale_observer(glyphs):
         slider_repres = obj.GetRepresentation()
         scale_at_pos = slider_repres.GetValue()
         for glyph in glyphs:
-            glyph.SetScaleFactor(scale_at_pos * glyph._scale_fact)
+            for k in glyph:
+                glyph[k].SetScaleFactor(scale_at_pos * glyph[k]._scale_fact)
 
     return scale_observer
 
