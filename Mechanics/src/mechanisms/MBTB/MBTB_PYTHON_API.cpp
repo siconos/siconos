@@ -553,12 +553,20 @@ void  MBTB_initSimu(double hTS, int withProj)
   myModel->initialize(sSimu);
 
   printf("====> COMPUTE H OF INTERATIONS: (just for display)\n");
+  SP::InteractionsGraph indexSet0 = myModel->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for(int numJ=0; numJ<sNbOfJoints; numJ++)
   {
     printf("-->compute h of %d \n",numJ);
-    sJointRelations[numJ]->_jointR->computeh(0.,*(sJointRelations[numJ]->_interaction));
+    SP::Interaction inter = sJointRelations[numJ]->_interaction;
+    InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
+    SiconosVector& y = *(inter->y(0));
+    VectorOfBlockVectors& DSlink = *(indexSet0->properties(ui)).DSlink;
+
+    sJointRelations[numJ]->_jointR->computeh(0., *DSlink[NewtonEulerR::q0], y);
   }
-   FILE *fp;
+  printf("====> COMPUTE H OF INTERATION END)\n");
+
+  FILE *fp;
   fp = fopen("simu.txt", "w");
   _MBTB_printHeader(fp);
   fclose(fp) ; 

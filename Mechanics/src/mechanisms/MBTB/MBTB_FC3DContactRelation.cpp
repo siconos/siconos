@@ -3,6 +3,10 @@
 #include "MBTB_DATA.hpp"
 #include "ace.h"
 
+
+#define DEBUG_MESSAGES
+#include "debug.h"
+
 #define OUTPUT_H_IN_FILE
 
 MBTB_FC3DContactRelation::~MBTB_FC3DContactRelation()
@@ -20,14 +24,14 @@ MBTB_FC3DContactRelation::MBTB_FC3DContactRelation()
   _pContact=NULL;
 }
 /*This function has to compute the distance between the objects*/
-void MBTB_FC3DContactRelation::computeh(double time, Interaction & inter)
+void MBTB_FC3DContactRelation::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
  //  DSIterator itDS=_pContact->interaction()->dynamicalSystemsBegin();
  //  SP::DynamicalSystem aux = *itDS;
  // if(sPrintDist)
  //  {
  //    printf("MBTB_FC3DContactRelation::computeh Start display for contact name %s\n",_pContact->_ContactName);
- //  } 
+ //  }
  //  if(sDS[_pContact->_indexBody1] != aux)
  //  {
  //    printf("MBTB_FC3DContactRelation::computeh wrong short of DS\n");
@@ -35,7 +39,14 @@ void MBTB_FC3DContactRelation::computeh(double time, Interaction & inter)
 
  //  }
 
-  SP::SiconosVector y = _pContact->interaction()->y(0);
+  DEBUG_PRINT("MBTB_FC3DContactRelation::computeh(double time, BlockVector& q0, SiconosVector& y )\n");
+  DEBUG_EXPR(_pContact->interaction()->y(0)->display(););
+  DEBUG_EXPR(y.display(););
+    //SP::SiconosVector y = _pContact->interaction()->y(0);
+
+
+
+
   //if (_pContact->_curTimeh + 1e-9 < time){
   ACE_times[ACE_TIMER_DIST].start();
   double X1,X2,Y1,Y2,Z1,Z2,n1x,n1y,n1z;
@@ -55,7 +66,7 @@ void MBTB_FC3DContactRelation::computeh(double time, Interaction & inter)
     else
       printf("    Normal vector computed from CAD taken from  Object 2 :  nx=%lf, ny=%lf, nz=%lf \n",n1x,n1y,n1z);
   }
-  
+
   //_Pc1->setValue(0,X1); _Pc1->setValue(1,Y1); _Pc1->setValue(2,Z1);
   if(_pContact->_OffsetP1)
   {
@@ -90,12 +101,18 @@ void MBTB_FC3DContactRelation::computeh(double time, Interaction & inter)
   _Nc->setValue(0,-n1x);
   _Nc->setValue(1,-n1y);
   _Nc->setValue(2,-n1z);
+
+  DEBUG_EXPR(_Nc->display(););
+  DEBUG_EXPR(_Pc1->display(););
+  DEBUG_EXPR(_Pc2->display(););
+
+
+
   ACE_times[ACE_TIMER_DIST].stop();
   _pContact->_dist-=_pContact->_Offset;
   _pContact->_curTimeh=time;
-  // printf("MBTB_FC3DContactRelation::computeh coordinate of contact points:\n");
-  // _Pc1->display();
-  // _Pc2->display();
+
+
   if(sPrintDist)
   {
     printf("MBTB_FC3DContactRelation compute h of %s: %14e \n",_pContact->_ContactName,_pContact->_dist);
@@ -114,7 +131,9 @@ void MBTB_FC3DContactRelation::computeh(double time, Interaction & inter)
   //   _pContact->_dist-=_pContact->sOffset;
   //   _pContact->_curTimeh=time;
   // }
-  y->setValue(0,_pContact->_dist);
+  y.setValue(0,_pContact->_dist);
+  DEBUG_EXPR(y.display(););
+
   //SP::NewtonEulerR ner =(boost::static_pointer_cast<NewtonEulerR>(interaction()->relation()));
   //ner->yProj()->setValue(0,_pContact->_dist);
   // _Pc1->setValue(0,0.5*(_pContact->_X1+_pContact->_X2));
@@ -126,6 +145,6 @@ void MBTB_FC3DContactRelation::computeh(double time, Interaction & inter)
   if(sPrintDist)
   {
     printf("MBTB_ContactRelation::computeh End display for contact name %s\n",_pContact->_ContactName);
-  } 
+  }
 
 }

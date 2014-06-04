@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file NewtonEulerR.hpp
+/*! \file NewtonEulerFrom3DLocalFrameR.hpp
 
  */
 #ifndef NEWTONEULERRELATIONFC3D_H

@@ -10,7 +10,7 @@
 
 
 #ifndef CADMBTBPYTHONAPI
-#define CDMBTBPYTHONAPI
+#define CADMBTBPYTHONAPI
 /*!
 * Load a step CAD file.
 *  \param:  const char * fileName, a CAD file.

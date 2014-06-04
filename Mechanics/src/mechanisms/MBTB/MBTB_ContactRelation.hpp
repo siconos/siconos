@@ -21,7 +21,7 @@ public:
    */
   MBTB_ContactRelation(MBTB_Contact * pC);
   //!This function has to compute the distance between the objects.
-  virtual void computeh(double time, Interaction &inter);
+  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
   //! Doing nothing.
   virtual ~MBTB_ContactRelation();
 

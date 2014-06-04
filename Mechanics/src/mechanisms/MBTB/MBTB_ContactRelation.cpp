@@ -4,13 +4,15 @@
 #include <boost/math/quaternion.hpp>
 #include "ace.h"
 
+#define DEBUG_MESSAGES
+#include "debug.h"
 
 MBTB_ContactRelation::~MBTB_ContactRelation()
 {
   ;
 }
 
-#define MBTB_PRINT_DIST
+
 
 MBTB_ContactRelation::MBTB_ContactRelation(): NewtonEulerFrom1DLocalFrameR()
 {
@@ -21,14 +23,21 @@ MBTB_ContactRelation::MBTB_ContactRelation(MBTB_Contact *pC): NewtonEulerFrom1DL
   _pContact=pC;
 }
 
-void MBTB_ContactRelation::computeh(double time, Interaction& inter)
+void MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
+
+
+  DEBUG_PRINT("MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector& y)\n");
+
+
   printf("sPrintDist=%d\t",sPrintDist);
   if(sPrintDist)
   {
     printf("MBTB_ContactRelation::computeh Start display for contact name %s\n",_pContact->_ContactName);
   } 
-   SP::SiconosVector y = _pContact->interaction()->y(0);
+
+
+
   //printf("contactName :%s\n",_ContactName);
   //if (_pContact->_curTimeh + 1e-9 < time){
   ACE_times[ACE_TIMER_DIST].start();
@@ -90,12 +99,13 @@ void MBTB_ContactRelation::computeh(double time, Interaction& inter)
   // _Nc->setValue(1,-ny);
   // _Nc->setValue(2,-nz);
   
-#ifdef MBTB_PRINT_DIST
-  std::cout << "MBTB_ContactRelation::computeh(double time) " <<std::endl; 
-  std::cout << "_Nc " <<std::endl; 
-  display();
-  _Nc->display();
-#endif
+
+  DEBUG_EXPR(display(););
+  DEBUG_EXPR(_Nc->display(););
+  DEBUG_EXPR(_Pc1->display(););
+  DEBUG_EXPR(_Pc2->display(););
+
+
   ACE_times[ACE_TIMER_DIST].stop();
   /** V.A. Is the following lin always true ? */
 
@@ -105,6 +115,8 @@ void MBTB_ContactRelation::computeh(double time, Interaction& inter)
     _pContact->_dist += _pContact->_Offset;
 
   _pContact->_curTimeh=time;
+
+
 
   //y->setValue(0,_pContact->_dist);
   if(sPrintDist)
@@ -120,7 +132,8 @@ void MBTB_ContactRelation::computeh(double time, Interaction& inter)
     printf("    Normal vector: nx=%lf, ny=%lf, nz=%lf \n",_Nc->getValue(0),_Nc->getValue(1),_Nc->getValue(2));
   }
   //}
-  y->setValue(0,_pContact->_dist);
+  y.setValue(0,_pContact->_dist);
+  DEBUG_EXPR(y.display(););
   if(sPrintDist)
   {
     printf("MBTB_ContactRelation::computeh End display for contact name %s\n",_pContact->_ContactName);
