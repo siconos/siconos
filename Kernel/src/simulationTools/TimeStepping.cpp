@@ -31,16 +31,16 @@
 #include "FrictionContact.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 #include "NonSmoothLaw.hpp"
-// #define DEBUG_STDOUT
-//#define DEBUG_MESSAGES 1
 #include "TypeName.hpp"
 #include "Relation.hpp"
 #include "BlockVector.hpp"
-#include <debug.h>
 #include "CxxStd.hpp"
 #include "NewtonEulerR.hpp"
 #include "FirstOrderR.hpp"
 
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES 
+#include <debug.h>
 
 using namespace RELATION;
 
@@ -568,7 +568,11 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
         if (hasNSProblems)
           saveYandLambdaInOldVariables();
       }
-      std::cout << "# steps: " << _newtonNbSteps << " " << _newtonResiduDSMax << " " << _newtonResiduYMax << " " <<_newtonResiduRMax << std::endl;
+      DEBUG_PRINTF("# _newtonNbSteps = %i\n",_newtonNbSteps );
+      DEBUG_PRINTF("# _newtonResiduDSMax = %12.8e\t",_newtonResiduDSMax );
+      DEBUG_PRINTF("# _newtonResiduYMax = %12.8e\t",_newtonResiduYMax );
+      DEBUG_PRINTF("# _newtonResiduRSMax = %12.8e\n",_newtonResiduRMax );
+      
     }
     if (!_isNewtonConverge)
     {
@@ -601,8 +605,6 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
   for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
   {
     residu = (*it)->computeResidu();
-
-    DEBUG_PRINTF("residu:%g\n", residu);
 
     if (residu > _newtonResiduDSMax) _newtonResiduDSMax = residu;
     if (residu > criterion)

@@ -308,20 +308,28 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(beam1, theta));
-    SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(beam2, theta));
-    SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(beam3, theta));
-
+    SP::MoreauJeanCombinedProjectionOSI OSI(new MoreauJeanCombinedProjectionOSI(theta));
+    OSI->insertDynamicalSystem(beam1);
+    OSI->insertDynamicalSystem(beam2);
+    OSI->insertDynamicalSystem(beam3);
+    
+    
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new MLCP());
+    SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
-    s->insertIntegrator(OSI2);
-    s->insertIntegrator(OSI3);
+ 
+
+    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
+    s->setProjectionMaxIteration(10);
+    s->setConstraintTolUnilateral(1e-08);
+
+
+
     //    s->setComputeResiduY(true);
     //  s->setUseRelativeConvergenceCriteron(false);
 
@@ -367,9 +375,10 @@ int main(int argc, char* argv[])
     for (k = 0; k < N; k++)
     {
       // solve ...
-      s->newtonSolve(1e-4, 50);
+      //s->newtonSolve(1e-4, 50);
 
-
+      s->computeOneStep();
+      s->nextStep();
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
@@ -445,12 +454,9 @@ int main(int argc, char* argv[])
     ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam2.dat", "ascii", beam2Plot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam3.dat", "ascii", beam3Plot, "noDim");
 
-    std::cout << "====> Comparison with reference file ..." << std::endl;
-
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("NE_3DS_3Knee_1Prism_MLCP.ref", "ascii", dataPlotRef);
-    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
       (dataPlot - dataPlotRef).display();

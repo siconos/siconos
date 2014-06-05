@@ -501,9 +501,9 @@ void  MBTB_initSimu(double hTS, int withProj)
   else if (withProj==2)
   {
     sSimu.reset(new MBTB_TimeSteppingCombinedProj(t,pOSI2,osnspb,osnspb_pos,2));
-    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(sDParams[4]);
-    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(sDParams[5]);   
-    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(sDParams[6]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setProjectionMaxIteration(sDParams[4]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTol(sDParams[5]);   
+    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTolUnilateral(sDParams[6]);
   }
   
   // --  OneStepIntegrators --

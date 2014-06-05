@@ -85,7 +85,7 @@ public:
 
   virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
 
-  void computeh(double time, SiconosVector& y);
+  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   virtual void computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot);
 

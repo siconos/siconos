@@ -24,6 +24,7 @@
 #include <NewtonEulerDS.hpp>
 #include <Interaction.hpp>
 #include <boost/math/quaternion.hpp>
+#include <BlockVector.hpp>
 
 /**axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/
 PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axis): NewtonEulerR()
@@ -166,17 +167,15 @@ void PrismaticJointR::computeJachq(double time, Interaction& inter, VectorOfBloc
 
 
 
-void PrismaticJointR::computeh(double time, Interaction& inter)
+void PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
-
-  SP::SiconosVector x2 = _d2->q();
-  double X2 = x2->getValue(0);
-  double Y2 = x2->getValue(1);
-  double Z2 = x2->getValue(2);
-  double q20 = x2->getValue(3);
-  double q21 = x2->getValue(4);
-  double q22 = x2->getValue(5);
-  double q23 = x2->getValue(6);
+  double X2 = q0.getValue(0);
+  double Y2 = q0.getValue(1);
+  double Z2 = q0.getValue(2);
+  double q20 = q0.getValue(3);
+  double q21 = q0.getValue(4);
+  double q22 = q0.getValue(5);
+  double q23 = q0.getValue(6);
   double X1 = 0;
   double Y1 = 0;
   double Z1 = 0;
@@ -186,16 +185,14 @@ void PrismaticJointR::computeh(double time, Interaction& inter)
   double q13 = 0;
   if(_d1)
   {
-    SP::SiconosVector x1 = _d1->q();
-    X1 = x1->getValue(0);
-    Y1 = x1->getValue(1);
-    Z1 = x1->getValue(2);
-    q10 = x1->getValue(3);
-    q11 = x1->getValue(4);
-    q12 = x1->getValue(5);
-    q13 = x1->getValue(6);
+    X1 = q0.getValue(7);
+    Y1 = q0.getValue(8);
+    Z1 = q0.getValue(9);
+    q10 = q0.getValue(10);
+    q11 = q0.getValue(11);
+    q12 = q0.getValue(12);
+    q13 = q0.getValue(13);
   }
-  SiconosVector& y = *inter.y(0);
   y.setValue(0, H1(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(1, H2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(2, H3(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));

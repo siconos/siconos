@@ -140,12 +140,12 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
         (_M)->computeSizeForProjection(inter);
 #ifdef MLCPPROJ_DEBUG
       std::cout << " " << std::endl;
-      std::cout <<  "Start to work on Interaction " << inter->getId() << "of vertex" << *vi <<  std::endl;
+      std::cout <<  "Start to work on Interaction " << inter->number() << "of vertex" << *vi <<  std::endl;
 #endif
       if (! indexSet->blockProj[*vi])
       {
 #ifdef MLCPPROJ_DEBUG
-        std::cout <<  "Allocation of blockProj of size " << nslawSize << " x " << nslawSize << " for interaction " << inter->getId() <<  std::endl;
+        std::cout <<  "Allocation of blockProj of size " << nslawSize << " x " << nslawSize << " for interaction " << inter->number() <<  std::endl;
 #endif
         indexSet->blockProj[*vi].reset(new SimpleMatrix(nslawSize, nslawSize));
       }
@@ -223,7 +223,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
             indexSet->upper_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
             initialized[indexSet->upper_blockProj[ed1]] = false;
 #ifdef MLCPPROJ_DEBUG
-            std::cout <<  "Allocation of upper_blockProj " <<  indexSet->upper_blockProj[ed1].get() << " of edge " << ed1 << " of size " << nslawSize1 << " x " << nslawSize2 << " for interaction " << inter1->getId() << " and interaction " <<  inter2->getId() <<  std::endl;
+            std::cout <<  "Allocation of upper_blockProj " <<  indexSet->upper_blockProj[ed1].get() << " of edge " << ed1 << " of size " << nslawSize1 << " x " << nslawSize2 << " for interaction " << inter1->number() << " and interaction " <<  inter2->number() <<  std::endl;
 #endif
 
             if (ed2 != ed1)
@@ -238,10 +238,10 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
           std::cout << "currentInteractionBlock->size(0)" << currentInteractionBlock->size(0) << std::endl;
           std::cout << "currentInteractionBlock->size(1)" << currentInteractionBlock->size(1) << std::endl;
 
-          std::cout << "inter1->display() " << inter1->getId() << std::endl;
+          std::cout << "inter1->display() " << inter1->number() << std::endl;
           //inter1->display();
 
-          std::cout << "inter2->display() " << inter2->getId() << std::endl;
+          std::cout << "inter2->display() " << inter2->number() << std::endl;
           //inter2->display();
 #endif
         }
@@ -251,7 +251,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
           {
 
 #ifdef MLCPPROJ_DEBUG
-            std::cout <<  "Allocation of lower_blockProj of size " << nslawSize1 << " x " << nslawSize2 << " for interaction " << inter1->getId() << " and interaction " <<  inter2->getId() <<  std::endl;
+            std::cout <<  "Allocation of lower_blockProj of size " << nslawSize1 << " x " << nslawSize2 << " for interaction " << inter1->number() << " and interaction " <<  inter2->number() <<  std::endl;
 #endif
             indexSet->lower_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
             initialized[indexSet->lower_blockProj[ed1]] = false;
@@ -269,10 +269,10 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
           std::cout << "currentInteractionBlock->size(1)" << currentInteractionBlock->size(1) << std::endl;
 
 
-          std::cout << "inter1->display() " << inter1->getId() << std::endl;
+          std::cout << "inter1->display() " << inter1->number() << std::endl;
           //inter1->display();
 
-          std::cout << "inter2->display() " << inter2->getId() << std::endl;
+          std::cout << "inter2->display() " << inter2->number() << std::endl;
           //inter2->display();
 #endif
 
@@ -530,7 +530,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
 #ifdef MLCPPROJ_DEBUG
   std::cout << "\nMLCPProjectOnConstraints::computeDiagonalInteractionBlock" <<std::endl;
-  std::cout << "levelMin()" << levelMin() << std::endl;
+  std::cout << "indexSetLevel()" << indexSetLevel() << std::endl;
   //   std::cout << "indexSet :"<< indexSet << std::endl;
   //   std::cout << "vd :"<< vd << std::endl;
   //  indexSet->display();
@@ -546,10 +546,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   //     std::cout<<"MLCPProjectOnConstraints::computeDiagonalInteractionBlock  "<<std::endl;
   //    currentInteractionBlock->display();
   std::cout << "sizeY " << sizeY  << std::endl;
-  std::cout <<  "blockProj " <<  indexSet->blockProj[vd].get() << " of edge " << vd << " of size " << currentInteractionBlock->size(0) << " x " << currentInteractionBlock->size(0) << " for interaction " << inter->getId() <<  std::endl;
-  // std::cout<<"inter1->display() "<< inter1->getId()<< std::endl;
+  std::cout <<  "blockProj " <<  indexSet->blockProj[vd].get() << " of edge " << vd << " of size " << currentInteractionBlock->size(0) << " x " << currentInteractionBlock->size(0) << " for interaction " << inter->number() <<  std::endl;
+  // std::cout<<"inter1->display() "<< inter1->number()<< std::endl;
   //inter1->display();
-  // std::cout<<"inter2->display() "<< inter2->getId()<< std::endl;
+  // std::cout<<"inter2->display() "<< inter2->number()<< std::endl;
   //inter2->display();
 
 #endif
@@ -817,10 +817,10 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
     //    currentInteractionBlock->display();
     std::cout << "sizeY1 " << sizeY1  << std::endl;
     std::cout << "sizeY2 " << sizeY2  << std::endl;
-    std::cout <<  "upper_blockProj " <<  indexSet->upper_blockProj[ed].get() << " of edge " << ed << " of size " << currentInteractionBlock->size(0) << " x " << currentInteractionBlock->size(0) << " for interaction " << inter1->getId() << " and interaction " <<  inter2->getId() <<  std::endl;
-    // std::cout<<"inter1->display() "<< inter1->getId()<< std::endl;
+    std::cout <<  "upper_blockProj " <<  indexSet->upper_blockProj[ed].get() << " of edge " << ed << " of size " << currentInteractionBlock->size(0) << " x " << currentInteractionBlock->size(0) << " for interaction " << inter1->number() << " and interaction " <<  inter2->number() <<  std::endl;
+    // std::cout<<"inter1->display() "<< inter1->number()<< std::endl;
     //inter1->display();
-    // std::cout<<"inter2->display() "<< inter2->getId()<< std::endl;
+    // std::cout<<"inter2->display() "<< inter2->number()<< std::endl;
     //inter2->display();
 
 #endif
@@ -1038,12 +1038,17 @@ void MLCPProjectOnConstraints::postComputeLagrangianR(SP::Interaction inter, uns
   printf("MLCPProjectOnConstraints::postComputeLagrangian lr->jachq \n");
   lr->jachq()->display();
   printf("MLCPProjectOnConstraints::postComputeLagrangianR q before update\n");
-  for (DSIterator it = inter->dynamicalSystemsBegin();
-       it != inter->dynamicalSystemsEnd();
-       ++it)
-  {
-    SP::LagrangianDS lds =  std11::static_pointer_cast<LagrangianDS>(*it);
-    lds->q()->display();
+
+  
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
+  InteractionsGraph::VDescriptor ui = indexSet->descriptor(inter);
+  InteractionsGraph::OEIterator oei, oeiend;
+    for(std11::tie(oei, oeiend) = indexSet->out_edges(ui);
+        oei != oeiend; ++oei)
+    {
+      
+      SP::LagrangianDS lds =  std11::static_pointer_cast<LagrangianDS>(indexSet->bundle(*oei));
+      lds->q()->display();
   }
 #endif
 
@@ -1071,11 +1076,11 @@ void MLCPProjectOnConstraints::postComputeLagrangianR(SP::Interaction inter, uns
   SP::SiconosMatrix J = lr->jachq();
   SP::SimpleMatrix aux(new SimpleMatrix(*J));
   aux->trans();
-  SP::SiconosVector tmp(new SiconosVector(*(lr->q())));
-  prod(*aux, *aBuff, *(tmp), false);
-  //prod(*aux,*lambda,*(lr->q()),false);
-  std:: std::cout << " tmp =  tmp + J^T * lambda" << std::endl;
-  tmp->display();
+  // SP::SiconosVector tmp(new SiconosVector(*(lr->q())));
+  // prod(*aux, *aBuff, *(tmp), false);
+  // //prod(*aux,*lambda,*(lr->q()),false);
+  // std:: std::cout << " tmp =  tmp + J^T * lambda" << std::endl;
+  // tmp->display();
 #endif
 
 
@@ -1132,7 +1137,10 @@ void MLCPProjectOnConstraints::postComputeLagrangianR(SP::Interaction inter, uns
   printf("MLCPProjectOnConstraints::postComputeLagrangianR _z\n");
   _z->display();
   printf("MLCPProjectOnConstraints::postComputeLagrangianR updated\n");
-  (lr->q())->display();
+  
+  VectorOfBlockVectors& DSlink = *(indexSet->properties(ui)).DSlink;
+//  (*DSlink[LagrangianR::q0]).display();
+//  (lr->q())->display();
 #endif
 
 

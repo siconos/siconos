@@ -24,9 +24,11 @@
 #include <NewtonEulerDS.hpp>
 #include <Interaction.hpp>
 #include <boost/math/quaternion.hpp>
+#include <BlockVector.hpp>
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
@@ -453,6 +455,7 @@ void KneeJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVect
 {
   _jachq->zero();
   SP::SiconosVector x1 = _d1->q();
+
   double X1 = x1->getValue(0);
   double Y1 = x1->getValue(1);
   double Z1 = x1->getValue(2);
@@ -713,17 +716,19 @@ double KneeJointR::Hz(double X1, double Y1, double Z1, double q10, double q11, d
   }
 }
 
-void KneeJointR::computeh(double time, SiconosVector& y)
+void KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
-
-  SP::SiconosVector x1 = _d1->q();
-  double X1 = x1->getValue(0);
-  double Y1 = x1->getValue(1);
-  double Z1 = x1->getValue(2);
-  double q10 = x1->getValue(3);
-  double q11 = x1->getValue(4);
-  double q12 = x1->getValue(5);
-  double q13 = x1->getValue(6);
+  DEBUG_PRINT("KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)\n");
+  // q0.display();
+  // SP::SiconosVector x1 = _d1->q();
+  // DEBUG_EXPR( _d1->q()->display(););
+  double X1 = q0.getValue(0);
+  double Y1 = q0.getValue(1);
+  double Z1 = q0.getValue(2);
+  double q10 = q0.getValue(3);
+  double q11 = q0.getValue(4);
+  double q12 = q0.getValue(5);
+  double q13 = q0.getValue(6);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
@@ -733,14 +738,15 @@ void KneeJointR::computeh(double time, SiconosVector& y)
   double q23 = 0;
   if(_d2)
   {
-    SP::SiconosVector x2 = _d2->q();
-    X2 = x2->getValue(0);
-    Y2 = x2->getValue(1);
-    Z2 = x2->getValue(2);
-    q20 = x2->getValue(3);
-    q21 = x2->getValue(4);
-    q22 = x2->getValue(5);
-    q23 = x2->getValue(6);
+    // SP::SiconosVector x2 = _d2->q();
+    // DEBUG_EXPR( _d2->q()->display(););
+    X2 = q0.getValue(7);
+    Y2 = q0.getValue(8);
+    Z2 = q0.getValue(9);
+    q20 = q0.getValue(10);
+    q21 = q0.getValue(11);
+    q22 = q0.getValue(12);
+    q23 = q0.getValue(13);
   }
   y.setValue(0, Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(1, Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));

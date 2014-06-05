@@ -44,7 +44,7 @@ contactTrans2=array.array('d',[
 
 #3D parameters
 ## It must be set to 1 to run in a 3D view.
-with3D=1
+with3D=0
 ## 3D viewer update frequency and output frequency.
 freqOutput=10
 freqUpdate=10
@@ -64,14 +64,14 @@ TSactivateYPosThreshold=1.e-7
 TSactivateYVelThreshold=100
 
 
-TSProjectionMaxIteration=10
-TSConstraintTol=1e-7
-TSConstraintTolUnilateral=1e-7
+TSProjectionMaxIteration=50
+TSConstraintTol=1e-8
+TSConstraintTolUnilateral=1e-8
 TSLevelOfProjection=0
 
 #solver parameters
 ## To activate the projection algorithm.
-withProj=0
+withProj=2
 ## Solver option
 withReduced=2
 

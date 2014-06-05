@@ -25,6 +25,8 @@
 #include <NewtonEulerDS.hpp>
 #include <boost/math/quaternion.hpp>
 
+#include <BlockVector.hpp>
+
 PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P, SP::SiconosVector A): KneeJointR(d1, d2, P)
 {
   // SP::SiconosVector q1 = d1->q0();
@@ -201,26 +203,25 @@ double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, doub
   return _A2x * aX + _A2y * aY + _A2z * aZ;
 }
 
-void PivotJointR::computeh(double time, Interaction& inter)
+void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
-  SiconosVector& y = *inter.y(0);
-  KneeJointR::computeh(time, y);
-  SP::SiconosVector x1 = _d1->q();
-  double q10 = x1->getValue(3);
-  double q11 = x1->getValue(4);
-  double q12 = x1->getValue(5);
-  double q13 = x1->getValue(6);
+
+  KneeJointR::computeh(time, q0,  y);
+
+  double q10 = q0.getValue(3);
+  double q11 = q0.getValue(4);
+  double q12 = q0.getValue(5);
+  double q13 = q0.getValue(6);
   double q20 = 1;
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
   if(_d2)
   {
-    SP::SiconosVector x2 = _d2->q();
-    q20 = x2->getValue(3);
-    q21 = x2->getValue(4);
-    q22 = x2->getValue(5);
-    q23 = x2->getValue(6);
+    q20 = q0.getValue(10);
+    q21 = q0.getValue(11);
+    q22 = q0.getValue(12);
+    q23 = q0.getValue(13);
   }
 
   y.setValue(3, AscalA1(q10, q11, q12, q13, q20, q21, q22, q23));

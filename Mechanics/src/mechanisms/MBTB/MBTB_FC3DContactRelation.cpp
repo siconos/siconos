@@ -4,7 +4,8 @@
 #include "ace.h"
 
 
-#define DEBUG_MESSAGES
+//#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
 #include "debug.h"
 
 #define OUTPUT_H_IN_FILE
