@@ -11,6 +11,7 @@ from Siconos.Mechanics.ContactDetection.Bullet import IO
 # Creation of the hdf5 file for input/output
 with IO.Hdf5(mode='w') as io:
 
+    # Definition of two boxes shape
     io.insertPrimitiveShape('BigBox', 'Box', (3, 5, 2))
 
     io.insertPrimitiveShape('LongBox', 'Box', (1, 1, 5))
@@ -30,7 +31,7 @@ with IO.Hdf5(mode='w') as io:
     io.insertNewtonImpactFrictionNSL('contact3', mu=0.1,
                                      collision_group1=0, collision_group2=0)
 
-    # A 'two boxes; object made with an two Contactors.
+    # A 'two boxes object made with two Contactors.
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.  
     io.insertObject('twoboxes', [Contactor('BigBox', 

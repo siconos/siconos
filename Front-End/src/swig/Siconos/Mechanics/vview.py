@@ -416,10 +416,7 @@ for mu in cf_prov._mu_coefs:
 
     cone_glyph[mu].SetInputConnection(contact_pos_norm[mu].GetOutputPort())
     cone_glyph[mu].SetSourceConnection(cone[mu].GetOutputPort())
-    #cone_glyph.ScalingOn()
-    #cone_glyph.SetScaleModeToScaleByVector()
-    #cone_glyph.SetRange(0, 100)
-    #cone_glyph.ClampingOn()
+
     cone_glyph[mu]._scale_fact = 1
     cone_glyph[mu].SetScaleFactor(cone_glyph[mu]._scale_fact * scale_factor)
     cone_glyph[mu].SetVectorModeToUseVector()

@@ -11,8 +11,9 @@ invariant dynamical system with one degree of freedom.
    M \ddot q = F_{ext} + p
 
 where :
- - :math:`q` is the state vector, here of size 1 : the height of the center of the ball.
- - :math:`M` is the time invariant mass matrix, here of size 1x1.
+ - :math:`q` is the state vector, here of size 1. The only coordinate
+   corresponds to the height of the center of the ball.
+ - :math:`M` is the time invariant mass matrix, here of size 1 * 1.
  - :math:`F_{ext}` are the external forces, here the gravity.
  - :math:`p` is the reaction force due to the nonsmooth interaction with the floor.
 
@@ -57,33 +58,44 @@ The gravity is applied to the ball as a constant external force :
   ball.setFExtPtr(weight)  # set the external force of the lagrangian dynamical system
 
 
-The ball is constrainted to lie above the floor  :math:`y = C * q` and :math:`C` is a one row * one column
-matrix :math:`C = \{1\}`
+The ball is constrained to lie above the floor. The relation between
+the state space and the constraint space is a linear mapping :math:`y
+= C * q` where :math:`y` denotes the constraint vector and :math:`q`
+denotes the state vector. :math:`C` is the one row * one column matrix:
+:math:`C = \{1\}`
+
+We build an object for this relation with the `LagrangianLinearTIR` class:
 
 .. testcode::
 
   C = [[1]]           
   relation = LagrangianLinearTIR(C)
 
-A nonsmooth law defined as a Newton impact law : 
+The "above floor" constraint is defined by the unilateral law :math:`y
+> 0` and a relation between velocities before and after impact. if
+:math:`t^{+}` denotes time before impact and :math:`t^{-}` denotes
+time after impact then if we add to the unilateral constraint a linear
+relation between the velocities :math:`\dot y(t^{+}) = e * \dot
+y(t^{-})`, we define a Newton impact nonsmooth law:
 
 .. testcode::
 
   e = 0.9
   nslaw = NewtonImpactNSL(e)
 
-
-
-We build an interaction object with the size of the input and the output, the nonsmooth law and the relation
+The relation and the nonsmooth law are tied together in an `Interaction`
+object:
 
 .. testcode::
 
-  # the first parameter is the size of the input and output
+  # the first parameter is here the dimension of the constraint space
   inter = Interaction(1,      
                       nslaw,    
                       relation) 
 
 
+We finally build a `Model` object to gather the dynamical sytems we
+have defined (here just the ball) and link the interactions to them.
 
 .. testcode::
 
