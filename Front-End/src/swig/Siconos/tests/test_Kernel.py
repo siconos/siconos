@@ -8,8 +8,8 @@ def test_autocast():
     model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsA)
     model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsB)
 
-    assert(type(m.nonSmoothDynamicalSystem().dynamicalSystem(dsA.number())) == K.LagrangianDS)
-    assert(type(m.nonSmoothDynamicalSystem().dynamicalSystem(dsB.number())) == K.FirstOrderLinearDS)
+    assert(type(model.nonSmoothDynamicalSystem().dynamicalSystem(dsA.number())) == K.LagrangianDS)
+    assert(type(model.nonSmoothDynamicalSystem().dynamicalSystem(dsB.number())) == K.FirstOrderLinearDS)
 
 
 def test_getVector():
@@ -26,12 +26,12 @@ def test_getVector():
     assert (getVector(v) != array([1,2,3])).any()
 
     assert (getVector(v) == array([1,2,4])).all()
-    
+
 
 def test_getMatrix():
     from Siconos.Kernel import getMatrix, SimpleMatrix
     from numpy import array
-    
+
     assert (getMatrix([[1,2,3]]) == array([[1,2,3]])).all()
 
     m = SimpleMatrix(1,3)
@@ -41,7 +41,7 @@ def test_getMatrix():
     m.setValue(0,1,2)
 
     m.setValue(0,2,3)
-    
+
     assert (getMatrix(m) == array([[1,2,3]])).all()
 
     assert (getMatrix(m) != array([[1,0,3]])).any()
@@ -57,9 +57,9 @@ def test_LagrangianDS_setMassPtr():
     lds = LDS()
 
     lds.setMassPtr([[1,2,3],[4,5,6]])
-    
+
     assert (lds.mass() == array([[1,2,3],[4,5,6]])).all()
-    
+
 
 def test_LagrangianScleronomousR_setJachqPtr():
     import Siconos.Kernel as K
@@ -67,7 +67,7 @@ def test_LagrangianScleronomousR_setJachqPtr():
 
     class Rel(K.LagrangianScleronomousR):
         pass
-    
+
     r = Rel()
     j = array([[1,2,3],[4,5,6]])
     r.setJachqPtr(j)
@@ -89,7 +89,7 @@ def test_LagrangianScleronomousR_setJachqPtr():
 
 
 def test_SolverOption():
-    
+
     from Siconos.Kernel import LCP
 
     lcp = LCP()
@@ -101,14 +101,14 @@ def test_SolverOption():
     assert lcp.numericsSolverOptions().iparam[0] != i0
 
     assert lcp.numericsSolverOptions().iparam[0] == i0+1
-    
+
     d0 = lcp.numericsSolverOptions().dparam[0]
 
     lcp.numericsSolverOptions().dparam[0] = 0.5 * d0
 
 
     assert lcp.numericsSolverOptions().dparam[0] !=  d0
-    
+
     assert lcp.numericsSolverOptions().dparam[0] ==  0.5 * d0
 
 

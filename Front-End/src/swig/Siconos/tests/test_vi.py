@@ -121,7 +121,7 @@ def test_vi_C_interface():
     try:
         from cffi import FFI
     except:
-        exit()
+        pass
 
     h = 1e-5
     T = 2.0
