@@ -230,7 +230,19 @@ if(NOT BLAS_FOUND)
     if(BLAS_LIBRARIES)
       set(WITH_BLAS "openblas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
       set(BLAS_HEADER cblas.h CACHE STRING "Blas header name")
-    endif(BLAS_LIBRARIES)
+      # calling FORTRAN complex function from C++ is not easy, see
+      # https://software.intel.com/sites/products/documentation/hpc/mkl/mkl_userguide_lnx/GUID-A0908E50-19D7-44C1-A068-44036B466BC7.htm
+      # http://www.netlib.org/blas/blast-forum/cinterface.pdf
+      # to ensure that std::complex<double> can be casted to double* and produces good results we should enfore std=c++11
+      # Right now openblas ships with a cblas.h header which uses double* as type for pointer to double complex, which makes ublas cry since it
+      # want to pass std::complex<double>*
+      if(BUILDNAME MATCHES ".*Kernel.*")
+        set(BLAS_INCLUDE_SUFFIXES AtlasLocal/atlas/)
+        set(INCLUDE_DIR_HINTS ${CMAKE_SOURCE_DIR}/src/utils/)
+      else(BUILDNAME MATCHES ".*Kernel.*")
+        set(BLAS_INCLUDE_SUFFIXES openblas)
+      endif(BUILDNAME MATCHES ".*Kernel.*")
+endif(BLAS_LIBRARIES)
   endif()
   
   ## Apple Framework ## 

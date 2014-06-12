@@ -31,6 +31,7 @@
 
 void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , double* s, unsigned int size_x, unsigned int* A, int *info , SolverOptions* options)
 {
+  assert(size_x > 0);
   /* matrix M of the avi */
   assert(problem);
   assert(problem->M);

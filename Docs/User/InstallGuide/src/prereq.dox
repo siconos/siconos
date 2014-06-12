@@ -17,6 +17,12 @@ yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp 
 yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig pytest
 \endverbatim
 
+<b> Fedora 16 or 17</b>:
+We recommand you to use openblas instead of atlas since it provides LAPACKE functions. Power users can still choose their favorite BLAS and LAPACK(E) vendor.
+\verbatim
+yum install cmake gcc gcc-gfortran boost-devel openblas openblas-devel gmp gmp-devel cppunit cppunit-devel python-matplotlib scipy python-numeric python-devel swig pytest
+\endverbatim
+
 <b> Ubuntu Precise</b>:
 \verbatim
 apt-get install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib make g++
