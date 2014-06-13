@@ -101,8 +101,6 @@ int main(int argc, char* argv[])
     double h = 0.01;                // time step
     int N = 1000;
     double L1 = 1.0;
-    double L2 = 1.0;
-    double L3 = 1.0;
     double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double g = 9.81; // Gravity
     double m = 1.;
@@ -121,6 +119,7 @@ int main(int argc, char* argv[])
 
 
     cout << "====> Model loading ..." << endl << endl;
+
     // -- Initial positions and velocities --
 
     //First DS
@@ -156,94 +155,11 @@ int main(int argc, char* argv[])
     (*weight)(2) = -m * g;
     beam1->setFExtPtr(weight);
 
-
-    //second DS
-    SP::SiconosVector q02(new SiconosVector(qDim));
-    SP::SiconosVector v02(new SiconosVector(nDim));
-    SP::SimpleMatrix I2(new SimpleMatrix(3, 3));
-    v02->zero();
-    I2->eye();
-    I2->setValue(0, 0, 0.1);
-    (*q02)(0) = L1 / sqrt(2.0) - 0.5 * L2 / sqrt(2.0);
-    (*q02)(1) = 0;
-    (*q02)(2) = -L1 / sqrt(2.0) - 0.5 * L2 / sqrt(2.0);
-
-    angle = -M_PI / 4;
-    V1.zero();
-    V1.setValue(0, 0);
-    V1.setValue(1, 1);
-    V1.setValue(2, 0);
-    q02->setValue(3, cos(angle / 2));
-    q02->setValue(4, V1.getValue(0)*sin(angle / 2));
-    q02->setValue(5, V1.getValue(1)*sin(angle / 2));
-    q02->setValue(6, V1.getValue(2)*sin(angle / 2));
-
-    SP::NewtonEulerDS beam2(new NewtonEulerDS(q02, v02, m, I2));
-    // -- Set external forces (weight) --
-    SP::SiconosVector weight2(new SiconosVector(nDof));
-    (*weight2)(2) = -m * g;
-    beam2->setFExtPtr(weight2);
-
-
-    SP::SiconosVector q03(new SiconosVector(qDim));
-    SP::SiconosVector v03(new SiconosVector(nDim));
-    SP::SimpleMatrix I3(new SimpleMatrix(3, 3));
-    v03->zero();
-    I3->eye();
-    I3->setValue(0, 0, 0.1);
-    q03->zero();
-    (*q03)(2) = -L1 * sqrt(2.0) - L1 / 2;
-
-    angle = M_PI / 2;
-    V1.zero();
-    V1.setValue(0, 0);
-    V1.setValue(1, 1);
-    V1.setValue(2, 0);
-    q03->setValue(3, cos(angle / 2));
-    q03->setValue(4, V1.getValue(0)*sin(angle / 2));
-    q03->setValue(5, V1.getValue(1)*sin(angle / 2));
-    q03->setValue(6, V1.getValue(2)*sin(angle / 2));
-
-    SP::NewtonEulerDS beam3(new NewtonEulerDS(q03, v03, m, I3));
-    // -- Set external forces (weight) --
-    SP::SiconosVector weight3(new SiconosVector(nDof));
-    (*weight3)(2) = -m * g;
-    beam3->setFExtPtr(weight3);
-
     // --------------------
     // --- Interactions ---
     // --------------------
-
-    // Interaction with the floor
-    double e = 0.9;
-    SP::SimpleMatrix H(new SimpleMatrix(1, qDim));
-    SP::SiconosVector eR(new SiconosVector(1));
-    eR->setValue(0, 2.3);
-    H->zero();
-    (*H)(0, 2) = 1.0;
-    SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
-    SP::NewtonEulerR relation0(new NewtonEulerR());
-    relation0->setJachq(H);
-    relation0->setE(eR);
-    cout << "main jacQH" << endl;
-    relation0->jachq()->display();
-
-
-    // Interactions
-
-
-    //
-    // SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::numberOfConstraints(), qDim));
-    // H1->zero();
-    // SP::SimpleMatrix H2(new SimpleMatrix(KneeJointR::numberOfConstraints(), 2 * qDim));
-    // SP::SimpleMatrix H3(new SimpleMatrix(KneeJointR::numberOfConstraints(), 2 * qDim));
-    // H2->zero();
-    // H3->zero();
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
-    SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
-    SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
 
-    //SP::NonSmoothLaw nslaw3(new EqualityConditionNSLKneeJointR::numberOfConstraints()());
     SP::SiconosVector P(new SiconosVector(3));
     P->zero();
     // Building the first knee joint for beam1
@@ -251,67 +167,24 @@ int main(int argc, char* argv[])
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
     SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
 
-
-
-    // Building the second knee joint for beam1 and beam2
-    // input  - the first concerned DS : beam1
-    // input  - the second concerned DS : beam2
-    //        - a point in the spatial frame (absolute frame) where the knee is defined P
-    P->zero();
-    P->setValue(0, L1 / 2);
-    SP::NewtonEulerR relation2(new KneeJointR(beam1, beam2, P));
-
-    // Building the third knee joint for beam2 and beam3
-    // input  - the first concerned DS : beam2
-    // input  - the second concerned DS : beam3
-    //        - a point in the spatial frame (absolute frame) where the knee is defined P
-    P->zero();
-    P->setValue(0, -L1 / 2);
-    SP::NewtonEulerR relation3(new KneeJointR(beam2, beam3, P));
-
-    // Building the prismatic joint for beam3
-    // input  - the first concerned DS : beam3
-    //        - an axis in the spatial frame (absolute frame)
-    // SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::numberOfConstraints(), qDim));
-    // H4->zero();
-    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::numberOfConstraints()));
-    SP::SiconosVector axe1(new SiconosVector(3));
-    axe1->zero();
-    axe1->setValue(2, 1);
-    SP::NewtonEulerR relation4(new PrismaticJointR(beam3, axe1));
-    // relation1->setJachq(H1); // Remark V.A. Why do we need to set the Jacobian outside
-    // relation2->setJachq(H2);
-    // relation3->setJachq(H3);
-    // relation4->setJachq(H4);
-
     SP::Interaction inter1(new Interaction(KneeJointR::numberOfConstraints(), nslaw1, relation1));
-    SP::Interaction inter2(new Interaction(KneeJointR::numberOfConstraints(), nslaw2, relation2));
-    SP::Interaction inter3(new Interaction(KneeJointR::numberOfConstraints(), nslaw3, relation3));
-    SP::Interaction inter4(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw4, relation4));
-    SP::Interaction interFloor(new Interaction(1, nslaw0, relation0));
+
     // -------------
     // --- Model ---
     // -------------
     SP::Model myModel(new Model(t0, T));
     // add the dynamical system in the non smooth dynamical system
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam2);
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam3);
     // link the interaction and the dynamical system
     myModel->nonSmoothDynamicalSystem()->link(inter1, beam1);
-    myModel->nonSmoothDynamicalSystem()->link(inter2, beam1, beam2);
-    myModel->nonSmoothDynamicalSystem()->link(inter3, beam2, beam3);
-    myModel->nonSmoothDynamicalSystem()->link(inter4, beam3);
-    myModel->nonSmoothDynamicalSystem()->link(interFloor, beam3);
     // ------------------
     // --- Simulation ---
     // ------------------
 
+
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanCombinedProjectionOSI OSI(new MoreauJeanCombinedProjectionOSI(theta));
     OSI->insertDynamicalSystem(beam1);
-    OSI->insertDynamicalSystem(beam2);
-    OSI->insertDynamicalSystem(beam3);
 
 
     // -- (2) Time discretisation --
@@ -320,20 +193,13 @@ int main(int argc, char* argv[])
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new MLCP());
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
-    //osnspb_pos->setNumericsVerboseMode(1);
+
     // -- (4) Simulation setup with (1) (2) (3)
 
 
     SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
     s->setProjectionMaxIteration(1000);
     s->setConstraintTolUnilateral(1e-08);
-    s->setConstraintTolUnilateral(1e-08);
-
-
-
-    //    s->setComputeResiduY(true);
-    //  s->setUseRelativeConvergenceCriteron(false);
-
 
 
     // =========================== End of model definition ===========================
@@ -351,12 +217,12 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 15 + 7;
     SimpleMatrix dataPlot(N, outputSize);
     SimpleMatrix beam1Plot(2,3*N);
-    SimpleMatrix beam2Plot(2,3*N);
-    SimpleMatrix beam3Plot(2,3*N);
 
     SP::SiconosVector q1 = beam1->q();
-    SP::SiconosVector q2 = beam2->q();
-    SP::SiconosVector q3 = beam3->q();
+    SP::SiconosVector y= inter1->y(0);
+    SP::SiconosVector ydot= inter1->y(1);
+
+
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -373,13 +239,12 @@ int main(int argc, char* argv[])
     fprintf(pFile, "double T[%d*%d]={", N + 1, outputSize);
     double beamTipTrajectories[6];
 
-    for (k = 0; k < N; k++)
+    for (k = 0; k < N-1; k++)
     {
       // solve ...
       //s->newtonSolve(1e-4, 50);
 
-      s->computeOneStep();
-
+      s->advanceToEvent();
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
 
@@ -390,22 +255,9 @@ int main(int argc, char* argv[])
       dataPlot(k, 5) = (*q1)(4);
       dataPlot(k, 6) = (*q1)(5);
       dataPlot(k, 7) = (*q1)(6);
+      dataPlot(k, 8) = y->norm2();
+      dataPlot(k, 9) = ydot->norm2();
 
-      dataPlot(k, 8) = (*q2)(0);
-      dataPlot(k, 9) = (*q2)(1);
-      dataPlot(k, 10) = (*q2)(2);
-      dataPlot(k, 11) = (*q2)(3);
-      dataPlot(k, 12) = (*q2)(4);
-      dataPlot(k, 13) = (*q2)(5);
-      dataPlot(k, 14) = (*q2)(6);
-
-      dataPlot(k, 15) = (*q3)(0);
-      dataPlot(k, 16) = (*q3)(1);
-      dataPlot(k, 17) = (*q3)(2);
-      dataPlot(k, 18) = (*q3)(3);
-      dataPlot(k, 19) = (*q3)(4);
-      dataPlot(k, 20) = (*q3)(5);
-      dataPlot(k, 21) = (*q3)(6);
 
       tipTrajectories(q1,beamTipTrajectories,L1);
       beam1Plot(0,3*k) = beamTipTrajectories[0];
@@ -415,23 +267,6 @@ int main(int argc, char* argv[])
       beam1Plot(1,3*k+1) = beamTipTrajectories[4];
       beam1Plot(1,3*k+2) = beamTipTrajectories[5];
 
-      tipTrajectories(q2,beamTipTrajectories,L2);
-      beam2Plot(0,3*k) = beamTipTrajectories[0];
-      beam2Plot(0,3*k+1) = beamTipTrajectories[1];
-      beam2Plot(0,3*k+2) = beamTipTrajectories[2];
-      beam2Plot(1,3*k) = beamTipTrajectories[3];
-      beam2Plot(1,3*k+1) = beamTipTrajectories[4];
-      beam2Plot(1,3*k+2) = beamTipTrajectories[5];
-
-      tipTrajectories(q3,beamTipTrajectories,L3);
-      beam3Plot(0,3*k) = beamTipTrajectories[0];
-      beam3Plot(0,3*k+1) = beamTipTrajectories[1];
-      beam3Plot(0,3*k+2) = beamTipTrajectories[2];
-      beam3Plot(1,3*k) = beamTipTrajectories[3];
-      beam3Plot(1,3*k+1) = beamTipTrajectories[4];
-      beam3Plot(1,3*k+2) = beamTipTrajectories[5];
-
-      //printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
 
       for (unsigned int jj = 0; jj < outputSize; jj++)
       {
@@ -440,7 +275,8 @@ int main(int argc, char* argv[])
         fprintf(pFile, "%f", dataPlot(k, jj));
       }
       fprintf(pFile, "\n");
-      s->nextStep();
+       s->nextStep();
+      //s->processEvents();
       ++show_progress;
     }
     fprintf(pFile, "};");
@@ -449,21 +285,18 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_MoreauJeanCombinedProjection.dat", "ascii", dataPlot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam2.dat", "ascii", beam2Plot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam3.dat", "ascii", beam3Plot, "noDim");
+    ioMatrix::write("NE_1DS_1Knee_MLCP_MoreauJeanCombinedProjection.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("NE_1DS_1Knee_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
 
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("NE_3DS_3Knee_1Prism_MLCP_MoreauJeanCombinedProjection.ref", "ascii", dataPlotRef);
+    ioMatrix::read("NE_1DS_1Knee_MLCP_MoreauJeanCombinedProjection.ref", "ascii", dataPlotRef);
     std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
 
 
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
+    if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
-      (dataPlot - dataPlotRef).display();
+      //(dataPlot - dataPlotRef).display();
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       return 1;
     }

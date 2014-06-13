@@ -27,8 +27,8 @@
 #include <BlockVector.hpp>
 
 
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
@@ -453,6 +453,7 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
 
 void KneeJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
 {
+  DEBUG_PRINT("KneeJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink) \n");
   _jachq->zero();
   SP::SiconosVector x1 = _d1->q();
 
@@ -719,7 +720,7 @@ double KneeJointR::Hz(double X1, double Y1, double Z1, double q10, double q11, d
 void KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
   DEBUG_PRINT("KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)\n");
-  // q0.display();
+  DEBUG_EXPR(q0.display());
   // SP::SiconosVector x1 = _d1->q();
   // DEBUG_EXPR( _d1->q()->display(););
   double X1 = q0.getValue(0);
@@ -729,6 +730,8 @@ void KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q11 = q0.getValue(4);
   double q12 = q0.getValue(5);
   double q13 = q0.getValue(6);
+  DEBUG_PRINTF("X1 = %12.8e,\t Y1 = %12.8e,\t Z1 = %12.8e,\n",X1,Y1,Z1);
+  DEBUG_PRINTF("q10 = %12.8e,\t q11 = %12.8e,\t q12 = %12.8e,\t q13 = %12.8e,\n",q10,q11,q12,q13);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
@@ -751,4 +754,5 @@ void KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   y.setValue(0, Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(1, Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(2, Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  DEBUG_EXPR(y.display());
 }

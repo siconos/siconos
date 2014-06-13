@@ -2,6 +2,7 @@
 resultfile ="NE_3DS_3Knee_1Prism_MLCP.dat"
 #resultfile ="NE_3DS_3Knee_1Prism_MLCP_D1MinusLinear.dat"
 
+resultfile ="NE_3DS_3Knee_1Prism_MLCP_MoreauJeanCombinedProjection.dat"
 set xrange [-0.1:3]
 set yrange [-3:0.1]
 #plot resultfile u 1:2

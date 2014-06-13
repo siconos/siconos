@@ -250,6 +250,11 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     else
     {
       DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
+      if (verbose)
+      {
+        printf("Solution of dgesv\n");
+        displayMat(sQ, sMl, 1, 0);
+      }
     }
     if (!LAinfo)
     {
@@ -420,6 +425,11 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
     else
     {
       DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
+      if (verbose)
+      {
+        printf("Solution of dgesv\n");
+        displayMat(sQ, sMl, 1, 0);
+      }
     }
     if (!LAinfo)
     {

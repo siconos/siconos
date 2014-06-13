@@ -18,8 +18,8 @@
  */
 #include <assert.h>
 
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 #include "Interaction.hpp"
@@ -709,6 +709,13 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
 
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
+  DEBUG_PRINT("Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) \n");
+  DEBUG_PRINTF("pos = %i\n", pos);
+
+  if (pos==6)
+    pos = pos + 1 ;
+
+
   //Type::Siconos dsType = Type::value(*ds);
   //if (dsType != Type::NewtonEulerDS)
   //  RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject- ds is not from NewtonEulerDS.");

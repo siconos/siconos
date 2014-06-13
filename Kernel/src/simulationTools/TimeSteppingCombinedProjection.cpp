@@ -35,12 +35,13 @@
 
 
 
-//#define TSPROJ_DEBUG
+//#define TSPROJ_DEBUG_LEVEL1
 //#define TSPROJ_WITHOUT_PROJECTION
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
+
 
 
 
@@ -266,10 +267,14 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     InteractionsGraph::VIterator ui, uiend;
     DEBUG_PRINTF( "====================== _nbIndexSetsIteration = %i \n ", _nbIndexSetsIteration );
 
-#ifdef TSPROJ_DEBUG
-
+#ifdef TSPROJ_DEBUG_LEVEL1
     SP::InteractionsGraph indexSet0 = topo->indexSet(0);
     std::cout << "indexSet0->size() " << indexSet0->size()   <<std::endl;
+    unsigned int level;
+    SP::Interaction inter;
+#endif
+
+#ifdef TSPROJ_DEBUG_LEVEL2
 
     if (topo->numberOfIndexSet() > _indexSetLevelForProjection)
     {
@@ -280,11 +285,11 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     }
 
 
-    unsigned int level;
-    SP::Interaction inter;
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       inter = indexSet0->bundle(*ui);
+
+      std::cout << "inter->number()" << inter->number()   << std::endl;
 
       inter->computeOutput(getTkp1(), indexSet0->properties(*ui), 0);
       inter->computeOutput(getTkp1(), indexSet0->properties(*ui), 1);
@@ -296,7 +301,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       assert(inter->lowerLevelForOutput() <= level);
       assert(inter->upperLevelForOutput() >= level);
 
-      std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      //std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
       std::cout << "inter->y(" << level << ")"   << std::endl;
       inter->y(level)->display();
 
@@ -306,7 +311,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       level = 1;
       assert(inter->lowerLevelForOutput() <= level);
       assert(inter->upperLevelForOutput() >= level);
-      std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      //std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
       std::cout << "inter->y(" << level << ")"   << std::endl;
       inter->y(level)->display();
       std::cout << "inter->y_k(" << level << ")"   << std::endl;
@@ -327,18 +332,19 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
     _cumulatedNewtonNbSteps += getNewtonNbSteps();
 
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
 
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
+    std::cout << "inter->number()" << inter->number()   << std::endl;
 
     level = 0;
 
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
 
-    std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+    //   std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
     std::cout << "inter->y(" << level << ")"   << std::endl;
     inter->y(level)->display();
     std::cout << "inter->y_k(" << level << ")"   << std::endl;
@@ -348,7 +354,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     level = 1;
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+    //std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
     std::cout << "inter->y(" << level << ")"   << std::endl;
     inter->y(level)->display();
     std::cout << "inter->y_k(" << level << ")"   << std::endl;
@@ -385,7 +391,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       updateIndexSet(2);
       computeCriteria(&runningProjection);
 
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
 
       SP::InteractionsGraph indexSet2 = topo->indexSet(2);
       SP::InteractionsGraph indexSet1 = topo->indexSet(1);
@@ -464,8 +470,8 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
       info = 0;
-#ifdef TSPROJ_DEBUG
-      std::cout << "TimeSteppingCombinedProjection compute OSNSP." <<std::endl ;
+#ifdef TSPROJ_DEBUG_LEVEL1
+      std::cout << "TimeSteppingCombinedProjection compute OSNSP POS." <<std::endl ;
 #endif
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
 
@@ -499,13 +505,9 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
           neds->normalizeq();
           neds->updateT();
-#ifdef TSPROJ_DEBUG
-          std::cout << " q=" << std::endl;
-          q->display();
-          std::cout << " p(0)=" << std::endl;
-          neds->p(0)->display();
-          std::cout << " p(1)=" << std::endl;
-          neds->p(1)->display();
+
+#ifdef TSPROJ_DEBUG_LEVEL1
+          neds->display();
 #endif
 
 
@@ -520,7 +522,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
             //*q = * qtmp +  *d->p(0);
             *q +=  *d->p(0);
           }
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
           std::cout << " q=" << std::endl;
           q->display();
           std::cout << " p(0)=" << std::endl;
@@ -543,7 +545,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
       //(std11::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
 
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
 
       // SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
       // std ::cout << "lambda(1) in IndexSet1" << std::endl;
@@ -553,7 +555,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       //   inter->lambda(1)->display();
       // }
       SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
-      std ::cout << "lamda(0) in indexSet2" << std::endl;
+      std ::cout << "lambda(0) in indexSet2" << std::endl;
       for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet2->bundle(*ui);
@@ -595,7 +597,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     {
       _isIndexSetsStable = true;
     }
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
 
     if (topo->numberOfIndexSet() > _indexSetLevelForProjection)
     {
@@ -645,16 +647,14 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 {
-
+  DEBUG_PRINT("TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)\n");
   // SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
   SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
 
   InteractionsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
-  double minViolationEquality = +1e24;
   double maxViolationUnilateral = -1e24;
-  //  double minViolationUnilateral = +1e24;
 
   *runningProjection = false;
 
@@ -679,7 +679,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 
 
 
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
       printf("  TimeSteppingCombinedProjection::computeCriteria  Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
 #endif
       if (!_doCombinedProjOnEquality)
@@ -690,7 +690,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
           if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
 
           *runningProjection = true;
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
           printf("TSProj newton criteria unilateral true %e.\n", criteria);
 #endif
         }
@@ -703,7 +703,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
         if (std::abs(criteria) >=  _constraintTolUnilateral)
         {
           *runningProjection = true;
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
           printf("TSProj newton criteria unilateral true %e.\n", criteria);
 #endif
         }
@@ -712,12 +712,16 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
     }
     else
     {
-      if (interac->y(0)->normInf()  > maxViolationEquality) maxViolationEquality = interac->y(0)->normInf() ;
-      if (interac->y(0)->normInf()  < minViolationEquality) minViolationEquality = interac->y(0)->normInf() ;
+      DEBUG_EXPR(interac->y(0)->display(););
+      if (interac->y(0)->normInf()  > maxViolationEquality)
+      {
+        DEBUG_EXPR(interac->y(0)->display(););
+        maxViolationEquality = interac->y(0)->normInf() ;
+      }
       if (interac->y(0)->normInf() > _constraintTol)
       {
         *runningProjection = true;
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
         printf("TSProj  newton criteria equality true %e.\n", interac->y(0)->normInf());
 #endif
       }
@@ -735,10 +739,9 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 
 
 
-#ifdef TSPROJ_DEBUG
+#ifdef TSPROJ_DEBUG_LEVEL1
   printf("TSProj newton min/max criteria projection\n");
   std::cout << "                 runningProjection  "  << *runningProjection << std::endl;
-  printf("              min criteria equality =  %e.\n", minViolationEquality);
   printf("              max criteria equality =  %e.\n", maxViolationEquality);
   printf("              max criteria unilateral =  %e.\n", maxViolationUnilateral);
   //  printf("              min criteria unilateral =  %e.\n",minViolationUnilateral);

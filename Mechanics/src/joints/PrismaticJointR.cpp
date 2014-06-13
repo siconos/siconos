@@ -26,6 +26,10 @@
 #include <boost/math/quaternion.hpp>
 #include <BlockVector.hpp>
 
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
+
 /**axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/
 PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axis): NewtonEulerR()
 {
@@ -129,6 +133,10 @@ void PrismaticJointR::computeV1V2FromAxis()
 
 void PrismaticJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
 {
+
+  DEBUG_PRINT("PrismaticJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink) \n");
+
+
   _jachq->zero();
   SP::SiconosVector x2 = _d2->q();
   double X2 = x2->getValue(0);
@@ -169,6 +177,7 @@ void PrismaticJointR::computeJachq(double time, Interaction& inter, VectorOfBloc
 
 void PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
+  DEBUG_PRINT("PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y) \n");
   double X2 = q0.getValue(0);
   double Y2 = q0.getValue(1);
   double Z2 = q0.getValue(2);
@@ -198,9 +207,13 @@ void PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   y.setValue(2, H3(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(3, H4(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(4, H5(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  double norm = 0;
-  for(int ii = 0; ii < 5; ii++)
-    norm += y.getValue(ii) * y.getValue(ii);
+
+  DEBUG_EXPR(y.display());
+  DEBUG_PRINTF(" y.normInf() = %12.8e \n", y.normInf());
+
+  // double norm = 0;
+  // for(int ii = 0; ii < 5; ii++)
+  //   norm += y.getValue(ii) * y.getValue(ii);
   //std::cout<<"Prismatic norm computeH: "<<norm<<std::endl;
 
 
