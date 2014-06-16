@@ -195,30 +195,31 @@ endif()
 
 AddSiconosProject(Numerics DEPENDS ${numerics_depends} CMAKE_ARGS ${ARGS})
 
-set(frontend_depends Numerics)
+set(Siconos_depends Numerics)
 
 if(WITH_KERNEL)
-  AddSiconosProject(Kernel DEPENDS Numerics CMAKE_ARGS ${ARGS})
-  list(APPEND frontend_depends Kernel)
+  AddSiconosProject(Kernel DEPENDS ${Siconos_depends} CMAKE_ARGS ${ARGS})
+  list(APPEND Siconos_depends Kernel)
 endif()
 
 if(WITH_MECHANICS)
-  AddSiconosProject(Mechanics DEPENDS Kernel CMAKE_ARGS ${ARGS})
-  list(APPEND frontend_depends Mechanics)
+  AddSiconosProject(Mechanics DEPENDS ${Siconos_depends} CMAKE_ARGS ${ARGS})
+  list(APPEND Siconos_depends Mechanics)
 endif()
 
 if(WITH_IO)
-  AddSiconosProject(IO DEPENDS Kernel CMAKE_ARGS ${ARGS})
-  list(APPEND frontend_depends IO)
+  AddSiconosProject(IO DEPENDS ${Siconos_depends} CMAKE_ARGS ${ARGS})
+  list(APPEND Siconos_depends IO)
 endif()
 
 if(WITH_FRONTEND)
-  AddSiconosProject(Front-End DEPENDS ${frontend_depends} CMAKE_ARGS ${ARGS})
+  AddSiconosProject(Front-End DEPENDS ${Siconos_depends} CMAKE_ARGS ${ARGS})
+  list(APPEND Siconos_depends Front-End)
 endif()
 
 if(WITH_EXAMPLES)
   AddSiconosProject(Examples 
-    DEPENDS ${frontend_depends} 
+    DEPENDS ${Siconos_depends} 
     CMAKE_ARGS ${ARGS}
     TEST_AFTER_INSTALL 1)
 endif()
