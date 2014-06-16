@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
       for (boost::tie(ui, uiend) = DSG0->vertices(); ui != uiend; ++ui)
       {
         SP::DynamicalSystem ds = DSG0->bundle(*ui);
-        SP::LagrangianDS lag_ds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
+        SP::LagrangianDS lag_ds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
         SP::SiconosVector q = lag_ds->q();
         SP::SiconosVector v = lag_ds->velocity();
         dataPlot(k, col_pos) = (*q)(0);
@@ -277,7 +277,7 @@ int main(int argc, char* argv[])
         for (boost::tie(ui, uiend) = DSG0->vertices(); ui != uiend; ++ui)
         {
           SP::DynamicalSystem ds = DSG0->bundle(*ui);
-          SP::LagrangianDS lag_ds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
+          SP::LagrangianDS lag_ds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
           SP::SiconosVector q = lag_ds->qMemory()->getSiconosVector(1);
           SP::SiconosVector v = lag_ds->velocityMemory()->getSiconosVector(1);
           dataPlot(k, col_pos) = (*q)(0);

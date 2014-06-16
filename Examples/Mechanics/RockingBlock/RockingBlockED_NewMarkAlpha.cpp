@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     //2. Integration solver for one step
     SP::OneStepIntegrator OSI(new NewMarkAlphaOSI(RockingBlock, _rho, IsHandleVelConstraint));
 
-    SP::NewMarkAlphaOSI _NewMarkAlpha = boost::static_pointer_cast<NewMarkAlphaOSI>(OSI);
+    SP::NewMarkAlphaOSI _NewMarkAlpha = std11::static_pointer_cast<NewMarkAlphaOSI>(OSI);
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem position(new LCP());
