@@ -38,7 +38,7 @@ extern "C"
       \param z vector
       \param w vector
       \param tolerance value for error computation
-      \param options
+      \param options solver options
       \param[in,out] error value
       \return 0 if ok
    */
@@ -52,9 +52,7 @@ extern "C"
       \param[in,out] error value
       \return 0 if ok
    */
-  int variationalInequality_compute_error_box(
-  VariationalInequality* problem,
-  double *z , double *w, double tolerance, double* error);
+  int variationalInequality_compute_error_box(VariationalInequality* problem, double* restrict x , double* restrict F, double tolerance, double* restrict error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -26,7 +26,7 @@
 #include "assert.h"
 
 /* Computation of  Fischer-Burmeister function, phi(z,F(z)) = sqrt(z*z + F(z)*F(z)) - z - F(z) */
-void phi_FB(int size, double* z, double* F, double* phiVector)
+void phi_FB(int size, double* restrict z, double* restrict F, double* restrict phiVector)
 {
   assert(z != NULL);
   assert(F != NULL);
@@ -127,7 +127,7 @@ void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double
   }
 }
 
-void Jac_F_FB(int n1, int n2, double* z, double* F, double* workV1, double* workV2, double* nabla_F, double* H)
+void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* restrict workV1, double* restrict workV2, double* restrict nabla_F, double* restrict H)
 {
   double normi;
   int n = n1 + n2;

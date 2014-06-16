@@ -86,27 +86,19 @@ int linearComplementarity_newton_FB_setDefaultSolverOptions(SolverOptions* optio
     printf("Set the Default SolverOptions for the NewtonFB Solver\n");
   }
 
-
-
   options->solverId = SICONOS_LCP_NEWTONFB;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
   options->iSize = 5;
   options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+
   options->iparam[0] = 1000;
-  options->dparam[0] = 1e-6;
-
-
+  options->dparam[0] = 1e-12;
 
   return 0;
 }

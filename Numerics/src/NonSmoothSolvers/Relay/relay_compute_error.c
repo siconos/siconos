@@ -22,22 +22,22 @@
 #include "RelayProblem.h"
 
 
-int projectiononbox(double *z , double *lb, double * ub, int n)
+void project_on_box(int n, double* restrict z, double* restrict lb, double* restrict ub)
 {
 
-  for (int i = 0 ; i < n ; i++)
+  for (int i = 0 ; i < n ; ++i)
   {
     if (z[i] < lb[i]) z[i] = lb[i];
     else if (z[i] > ub[i]) z[i] = ub[i];
   }
-  return 0;
 }
 
-int relay_compute_error(RelayProblem* problem, double *z , double *w, double tolerance, double * error)
+int relay_compute_error(RelayProblem* problem, double* restrict z , double* restrict w, double tolerance, double* restrict error)
 {
   /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numericsError("relay_compute_error", "null input for problem and/or z and/or w");
+  assert(problem);
+  assert(z);
+  assert(w);
 
   /* Computes w = Mz + q */
   int n = problem->size;
@@ -49,8 +49,8 @@ int relay_compute_error(RelayProblem* problem, double *z , double *w, double tol
   double rho = -1.0;
   cblas_daxpy(n, rho, w, 1, ztmp, 1);    //ztmp <- ztmp - rho w
 
-  projectiononbox(ztmp , problem->lb, problem->ub, n);
-  cblas_daxpy(n, -1, z, 1, ztmp, 1);    //ztmp <- ztmp -z
+  project_on_box(n, ztmp , problem->lb, problem->ub);
+  cblas_daxpy(n, -1.0, z, 1, ztmp, 1);    //ztmp <- ztmp -z
 
 
   *error = cblas_dnrm2(n , ztmp , 1);

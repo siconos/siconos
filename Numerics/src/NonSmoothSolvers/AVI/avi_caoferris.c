@@ -29,7 +29,7 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , double* s, unsigned int size_x, unsigned int* A, int *info , SolverOptions* options)
+void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* restrict u , double* restrict s, unsigned int size_x, unsigned int* restrict A, int *info , SolverOptions* options)
 {
   assert(size_x > 0);
   /* matrix M of the avi */
@@ -58,7 +58,7 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
   unsigned int* basis;
   unsigned int* u_indx;
   unsigned int* s_indx;
-  double** mat;
+  double* mat;
 
   /*output*/
 
@@ -66,13 +66,11 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
 
   /* Allocation */
   basis = (unsigned int *)malloc(dim * sizeof(unsigned int));
-  mat = (double **)malloc(dim * sizeof(double*));
+  mat = (double *)malloc(dim * dim2 * sizeof(double));
 
   u_indx = (unsigned int *)malloc(dim * sizeof(unsigned int));
   s_indx = (unsigned int *)malloc(dim * sizeof(unsigned int));
 
-  for (unsigned i = 0 ; i < dim; ++i)
-    mat[i] = (double *)malloc(dim2 * sizeof(double));
 
   /* construction of mat matrix such that
    * mat = [ q | Id | -d | -M ] with d_i = i in A ? 1 : 0
@@ -81,31 +79,31 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
   /* We need to init only the part corresponding to Id */
   for (unsigned int i = 0 ; i < dim; ++i)
     for (unsigned int j = 1 ; j <= dim; ++j)
-      mat[i][j] = 0.0;
+      mat[i + j*dim] = 0.0;
 
   /*  Copy M but mat[dim+2:, :] = -M */
   for (unsigned int i = 0 ; i < dim; ++i)
     for (unsigned int j = 0 ; j < dim; ++j)
-      mat[i][j + dim + 2] = -M[dim*j + i]; // Siconos is in column major
+      mat[i + dim*(j + dim + 2)] = -M[dim*j + i]; // Siconos is in column major
 
   assert(problem->q);
 
   for (unsigned int i = 0 ; i < dim; ++i)
   {
-    mat[i][0] = problem->q[i];
-    mat[i][i + 1] =  1.0;
+    mat[i] = problem->q[i];
+    mat[i + dim*(i + 1)] =  1.0;
   }
 
   /** Add covering vector */
   assert(problem->d != NULL);
-  for (unsigned int i = 0; i < size_x  ; ++i) mat[i][dim + 1] = problem->d[i];
-  for (unsigned int i = size_x; i < dim; ++i) mat[i][dim + 1] = 0.0;
+  for (unsigned int i = 0; i < size_x  ; ++i) mat[i + dim*(dim + 1)] = problem->d[i];
+  for (unsigned int i = size_x; i < dim; ++i) mat[i + dim*(dim + 1)] = 0.0;
 
 
   DEBUG_PRINT("total matrix\n");
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { for(unsigned int j = 0 ; j < dim2; ++j)
-      { DEBUG_PRINTF("% 2.2e ", mat[i][j]) }
+      { DEBUG_PRINTF("% 2.2e ", mat[i + j*dim]) }
       DEBUG_PRINT("\n")});
   /* End of construction of mat */
 
@@ -156,24 +154,24 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
   /* Pivot < mu , driver > */
 
   DEBUG_PRINTF("Pivoting %i and %i\n", block, drive);
-  pivot = mat[block][drive];
+  pivot = mat[block + drive*dim];
   pivot_inv = 1.0/pivot;
 
   /* Update column mat[block, :] */
-  mat[block][drive] = 1;
-  for (unsigned int i = 0        ; i < drive; ++i) mat[block][i] *= pivot_inv;
-  for (unsigned int i = drive + 1; i < dim2 ; ++i) mat[block][i] *= pivot_inv;
+  mat[block + drive*dim] = 1;
+  for (unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= pivot_inv;
+  for (unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= pivot_inv;
 
   /* Update other columns*/
   for (unsigned int i = 0; i < block; ++i)
   {
-    tmp = mat[i][drive];
-    for (unsigned int j = 0; j < dim2; ++j) mat[i][j] -= tmp*mat[block][j];
+    tmp = mat[i + drive*dim];
+    for (unsigned int j = 0; j < dim2; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
   }
   for (unsigned int i = block + 1; i < dim; ++i)
   {
-    tmp = mat[i][drive];
-    for (unsigned int j = 0; j < dim2; ++j) mat[i][j] -= tmp*mat[block][j];
+    tmp = mat[i + drive*dim];
+    for (unsigned int j = 0; j < dim2; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
   }
 
   /** one basic u is leaving and mu enters the basis */
@@ -188,7 +186,7 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
   DEBUG_PRINT("total matrix\n");
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { for(unsigned int j = 0 ; j < dim2; ++j)
-      { DEBUG_PRINTF("% 2.2e ", mat[i][j]) }
+      { DEBUG_PRINTF("% 2.2e ", mat[i + j*dim]) }
       DEBUG_PRINT("\n")});
 
   while (nb_iter < itermax && !has_sol)
@@ -215,10 +213,10 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
 
     for (unsigned int i = 0 ; i < dim ; ++i)
     {
-      zb = mat[i][drive];
+      zb = mat[i + drive*dim];
       if (zb > 0.0)
       {
-        z0 = mat[i][0] / zb;
+        z0 = mat[i] / zb;
         if (z0 > pivot) continue;
         if (z0 < pivot)
         {
@@ -230,7 +228,7 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
           for (unsigned int j = 1; j <= dim; ++j)
           {
             assert(block >=0 && "avi_caoferris: block <0");
-            dblock = mat[block][j] / pivot - mat[i][j] / zb;
+            dblock = mat[block + j*dim] / pivot - mat[i + j*dim] / zb;
             if (dblock < 0) break;
             else if (dblock > 0)
             {
@@ -248,24 +246,24 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
     /* Pivot < block , drive > */
     DEBUG_PRINTF("Pivoting %i and %i\n", block, drive);
 
-    pivot = mat[block][drive];
+    pivot = mat[block + drive*dim];
     pivot_inv = 1.0/pivot;
 
     /* Update column mat[block, :] */
-    mat[block][drive] = 1;
-    for (unsigned int i = 0        ; i < drive; ++i) mat[block][i] *= pivot_inv;
-    for (unsigned int i = drive + 1; i < dim2 ; ++i) mat[block][i] *= pivot_inv;
+    mat[block + drive*dim] = 1;
+    for (unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= pivot_inv;
+    for (unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= pivot_inv;
 
     /* Update other columns*/
     for (unsigned int i = 0; i < block; ++i)
     {
-      tmp = mat[i][drive];
-      for (unsigned int j = 0; j < dim2; ++j) mat[i][j] -= tmp*mat[block][j];
+      tmp = mat[i + drive*dim];
+      for (unsigned int j = 0; j < dim2; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
     }
     for (unsigned int i = block + 1; i < dim; ++i)
     {
-      tmp = mat[i][drive];
-      for (unsigned int j = 0; j < dim2; ++j) mat[i][j] -= tmp*mat[block][j];
+      tmp = mat[i + drive*dim];
+      for (unsigned int j = 0; j < dim2; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
     }
 
     /** one basic variable is leaving and driver enters the basis */
@@ -280,7 +278,7 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
   DEBUG_PRINT("total matrix\n");
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { for(unsigned int j = 0 ; j < dim2; ++j)
-      { DEBUG_PRINTF("% 2.2e ", mat[i][j]) }
+      { DEBUG_PRINTF("% 2.2e ", mat[i + j*dim]) }
       DEBUG_PRINT("\n")});
   } /* end while*/
 
@@ -292,7 +290,7 @@ void avi_caoferris_stage3(AffineVariationalInequalities* problem, double* u , do
   DEBUG_PRINT("total matrix\n");
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { for(unsigned int j = 0 ; j < dim2; ++j)
-      { DEBUG_PRINTF("% 2.2e ", mat[i][j]) }
+      { DEBUG_PRINTF("% 2.2e ", mat[i + j*dim]) }
       DEBUG_PRINT("\n")});
 
 exit_caoferris:
@@ -304,11 +302,11 @@ exit_caoferris:
     if (drive < dim + 1)
     {
       s[drive - 1] = 0.0;
-      u[drive - 1] = mat[i][0];
+      u[drive - 1] = mat[i];
     }
     else if (drive > dim + 1)
     {
-      s[drive - dim - 2] = mat[i][0];
+      s[drive - dim - 2] = mat[i];
       u[drive - dim - 2] = 0.0;
     }
   }
@@ -326,7 +324,6 @@ exit_caoferris:
   free(u_indx);
   free(s_indx);
 
-  for (unsigned int i = 0 ; i < dim ; ++i) free(mat[i]);
   free(mat);
 }
 

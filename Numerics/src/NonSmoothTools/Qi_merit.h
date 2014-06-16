@@ -19,6 +19,10 @@
 #ifndef QI_MERIT_H
 #define QI_MERIT_H
 
+#ifdef __cplusplus
+#define restrict __restrict
+#endif
+
 /*!\file Qi_merit.h
   \brief functions related to the Qi C-functions used as a merit function for box VI problems
 
@@ -41,7 +45,7 @@ extern "C"
    * \param[in] lb lower bounds, that is lb <= x
    * \param[in] ub upper bounds, that is ub >= x
    * */
-  void phi_Qi(int n, double* x, double* F, double* Fbox, double* lb, double* ub);
+  void phi_Qi(int n, double* restrict x, double* restrict F, double* restrict Fbox, double* restrict lb, double* restrict ub);
 
   /** Evaluates the Jacobian of the C function for a box-constrained VI
    * \param n size of the problem
@@ -54,7 +58,7 @@ extern "C"
    * \param[in] ub upper bounds, that is ub >= x
    * \param[out] H an element of the Jacobian
    * */
-  void Jac_F_Qi(int n, double* x, double* Fbox, double* workV1, double* workV2, double* nabla_Fbox, double* lb, double* ub, double* H);
+  void Jac_F_Qi(int n, double* restrict x, double* restrict Fbox, double* restrict workV1, double* restrict workV2, double* restrict nabla_Fbox, double* restrict lb, double* restrict ub, double* restrict H);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

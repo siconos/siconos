@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <float.h>
 
-void phi_Qi(int n, double* x, double* F, double* Fbox, double* lb, double* ub)
+void phi_Qi(int n, double* restrict x, double* restrict F, double* restrict Fbox, double* restrict lb, double* restrict ub)
 {
   assert(x);
   assert(Fbox);
@@ -74,7 +74,7 @@ void phi_Qi(int n, double* x, double* F, double* Fbox, double* lb, double* ub)
   }
 }
 
-void Jac_F_Qi(int n, double* x, double* F, double* workV1, double* workV2, double* nabla_F, double* lb, double* ub, double* H)
+void Jac_F_Qi(int n, double* restrict x, double* restrict F, double* restrict workV1, double* restrict workV2, double* restrict nabla_F, double* restrict lb, double* restrict ub, double* restrict H)
 {
   // function based on the formula given p. 873 in Facchinei--Pang (2003)
   // when the gradient fails to exists, we set a_i = 0 and b_i = 1, as in

@@ -27,7 +27,7 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 
-void relay_tolcp(RelayProblem* problem, LinearComplementarityProblem * lcp_problem)
+void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem * lcp_problem)
 {
   lcp_problem->size = 2 * problem->size ;
   lcp_problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
@@ -38,7 +38,7 @@ void relay_tolcp(RelayProblem* problem, LinearComplementarityProblem * lcp_probl
   lcp_problem->M->matrix1 = NULL;
   lcp_problem->M->matrix2 = NULL;
   lcp_problem->M->matrix3 = NULL;
-  lcp_problem->M->matrix0 = (double*)malloc(lcp_problem->size * lcp_problem->size * sizeof(double));;
+  lcp_problem->M->matrix0 = (double*)malloc(lcp_problem->size * lcp_problem->size * sizeof(double));
   lcp_problem->q = (double*)malloc(lcp_problem->size * sizeof(double));
 
   int i, j;

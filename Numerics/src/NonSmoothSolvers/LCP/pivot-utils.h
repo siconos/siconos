@@ -17,15 +17,39 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-int pivot_init_lemke(double** mat, unsigned int size_x);
+/** \file pivot-utils.h 
+ * \brief some functions used in one or more solver, mainly related to Lemke's
+ * algorithm
+ */
 
-int pivot_selection_lemke(double** mat, unsigned int dim, unsigned int drive);
+#ifndef PIVOT_UTILS_H
+#define PIVOT_UTILS_H
 
-void init_M_lemke(double** mat, double* M, unsigned int dim, unsigned int dim2, unsigned int size_x, double* q, double* d);
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
 
-void do_pivot_driftless(double** mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
 
-void do_pivot_driftless2(double** mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
+int pivot_init_lemke(double* mat, unsigned int size_x);
+
+int pivot_selection_lemke(double* mat, unsigned int dim, unsigned int drive);
+
+void init_M_lemke(double* restrict mat, double* restrict M, unsigned int dim, unsigned int dim2, unsigned int size_x, double* restrict q, double* restrict d);
+
+void do_pivot_driftless(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
+
+void do_pivot_driftless2(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
 
 /* Standard pivot <block, drive>  */
-void do_pivot(double** mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
+void do_pivot(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif
+
+#endif

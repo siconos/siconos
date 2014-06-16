@@ -95,6 +95,11 @@ The relay problem is reformulated as an AVI and solved with the solver proposed 
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -207,7 +212,7 @@ extern "C"
    *  1 = no convergence,\n
    * \author Olivier Huber
    */
-  void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void relay_avi_caoferris(RelayProblem* problem, double* restrict z, double* restrict w, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for
    * AVI_CAOFERRIS
@@ -256,7 +261,7 @@ extern "C"
      * \return status: 0 : convergence, 1: error > tolerance
      * \author Vincent Acary
      */
-  int relay_compute_error(RelayProblem* problem, double *z , double *w, double tolerance, double* error);
+  int relay_compute_error(RelayProblem* problem, double* restrict z , double* restrict w, double tolerance, double* restrict error);
 
 
   /** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector  \f$z\f$  \n
@@ -264,17 +269,16 @@ extern "C"
      * \param[in,out] ub a n-vector of doubles which contains the upper bounds
      * \param[in,out] lb a n-vector of doubles which contains the lower bounds
      * \param[in,out] n size of the a n-vector
-     * \return status: 0
      * \author Vincent Acary
      */
-  int projectiononbox(double *z , double *lb, double * ub, int n);
+  void project_on_box(int n, double* restrict z , double* restrict lb, double* restrict ub);
 
   /** This function transform a RelayProblem into a LinearComplementarityProblem
      * \param[in] problem A pointer to a Relay_problem to transform
      * \param[out] lcp_problem A pointer to a LinearComplementarity_problem resulting from the reformulation
      * \author Vincent Acary
      */
-  void relay_tolcp(RelayProblem* problem, LinearComplementarityProblem * lcp_problem);
+  void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem* lcp_problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

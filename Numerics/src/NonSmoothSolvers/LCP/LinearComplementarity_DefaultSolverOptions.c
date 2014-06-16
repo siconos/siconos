@@ -104,7 +104,7 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
   case SICONOS_LCP_NEWTONMINFB:
   {
     info =    linearComplementarity_newton_FB_setDefaultSolverOptions(options);
-    options->iparam[3] = SICONOS_LCP_NEWTONMINFB;
+    options->solverId = SICONOS_LCP_NEWTONMINFB;
     break;
   }
   case SICONOS_LCP_AVI_CAOFERRIS:

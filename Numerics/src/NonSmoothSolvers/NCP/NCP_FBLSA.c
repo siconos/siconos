@@ -280,8 +280,8 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
       preRHS = cblas_ddot(n, JacThetaF_merit, incx, workV1, incy);
 
       // TODO we should not compute this if min descent search has failed
-      //threshold = -rho*pow(cblas_dnrm2(n, workV1, incx), p);
-      threshold = -rho*cblas_dnrm2(n, workV1, incx)*cblas_dnrm2(n, JacThetaF_merit, incx);
+      threshold = -rho*pow(cblas_dnrm2(n, workV1, incx), p);
+      //threshold = -rho*cblas_dnrm2(n, workV1, incx)*cblas_dnrm2(n, JacThetaF_merit, incx);
       if (preRHS > threshold)
       {
         if (verbose > 1)

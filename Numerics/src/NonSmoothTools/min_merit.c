@@ -24,7 +24,7 @@
 #include <float.h>
 #include "assert.h"
 
-void F_min(int n1, int n2, double* z, double* F, double* Fmin)
+void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict Fmin)
 {
   assert(z != NULL);
   assert(F != NULL);
@@ -40,7 +40,7 @@ void F_min(int n1, int n2, double* z, double* F, double* Fmin)
   }
 }
 
-void Jac_F_min(int n1, int n2, double* z, double* F, double* nabla_F, double* H)
+void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict nabla_F, double* restrict H)
 {
 
   int n = n1 + n2;

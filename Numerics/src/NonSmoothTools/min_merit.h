@@ -31,6 +31,11 @@
   \f]
 */
 
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -43,7 +48,7 @@ extern "C"
    * \param[in] F value of F
    * \param[out] Fmin returned vector
    */
-  void F_min(int n1, int n2, double* z, double* F, double* Fmin);
+  void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict Fmin);
 
   /** Compute an element of Jac F_min
    * \param n1 number of equality constraints
@@ -53,7 +58,7 @@ extern "C"
    * \param[in] nabla_F value of nabla_F
    * \param[out] H returned vector
    */
-  void Jac_F_min(int n1, int n2, double* z, double* F, double* nabla_F, double* H);
+  void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict nabla_F, double* restrict H);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

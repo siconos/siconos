@@ -80,15 +80,15 @@
 
 #include "NumericsMatrix.h"
 
-/** Relay Problem elements
+/** \struct RelayProblem Relay Problem elements
  */
 typedef struct
 {
   int size;          /**< size dim of the problem */
   NumericsMatrix* M; /**< M matrix of the LCP */
   double * q;        /**< q vector */
-  double * lb;       /**< lb upper bound */
-  double * ub;       /**< ub lower bound */
+  double* lb;       /**< lb upper bound */
+  double* ub;       /**< ub lower bound */
 } RelayProblem;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -113,5 +113,3 @@ extern "C"
 #endif
 
 #endif
-
-

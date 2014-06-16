@@ -26,18 +26,19 @@
 #include "LCP_Solvers.h"
 #include "pivot-utils.h"
 
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-int pivot_selection_bard(double** mat, unsigned int dim)
+int pivot_selection_bard(double* mat, unsigned int dim)
 {
   int block = -1;
   double zb, z0, dblock;
 
   for (unsigned int i = 0; i < dim; ++i)
   {
-    zb = mat[i][0];
+    zb = mat[i];
     if (zb < 0.0)
     {
       if (block == -1)
@@ -49,7 +50,7 @@ int pivot_selection_bard(double** mat, unsigned int dim)
       {
         for (unsigned int j = 1; j <= dim; ++j)
         {
-          dblock = mat[i][j]/zb - mat[block][j]/z0;
+          dblock = mat[i + j*dim]/zb - mat[block + j*dim]/z0;
           if (dblock < 0.0)
           {
             break;
@@ -66,13 +67,13 @@ int pivot_selection_bard(double** mat, unsigned int dim)
   return block;
 }
 
-int pivot_selection_least_index(double** mat, unsigned int dim)
+int pivot_selection_least_index(double* mat, unsigned int dim)
 {
   int block = -1;
 
   for (unsigned int i = 0; i < dim; ++i)
   {
-    if (mat[i][0] < 0.0)
+    if (mat[i] < 0.0)
     {
       block = i;
       break;
@@ -81,7 +82,7 @@ int pivot_selection_least_index(double** mat, unsigned int dim)
   return block;
 }
 
-void init_M_bard(double** mat, double* M, unsigned int dim, double* q)
+void init_M_bard(double* restrict mat, double* restrict M, unsigned int dim, double* restrict q)
 {
   /* construction of mat matrix such that
    * mat = [ q | Id | -M ]
@@ -92,19 +93,19 @@ void init_M_bard(double** mat, double* M, unsigned int dim, double* q)
   {
     for (unsigned int j = 1; j <= dim; ++j)
     {
-      mat[i][j] = 0.0; /* We need to init only the part corresponding to Id */
-      mat[i][j + dim] = -M[dim*(j-1) + i]; /* Siconos is in column major */
+      mat[i + j*dim] = 0.0; /* We need to init only the part corresponding to Id */
+      mat[i+ dim*(j + dim)] = -M[dim*(j-1) + i]; /* Siconos is in column major */
     }
   }
 
   for (unsigned int i = 0; i < dim; ++i)
   {
-    mat[i][0] = q[i];
-    mat[i][i + 1] =  1.0;
+    mat[i] = q[i];
+    mat[i + dim*(i + 1)] =  1.0;
   }
 }
 
-void init_M_least_index(double** mat, double* M, unsigned int dim, double* q)
+void init_M_least_index(double* restrict mat, double* restrict M, unsigned int dim, double* restrict q)
 {
   /* construction of mat matrix such that
    * mat = [ q | M ]
@@ -113,13 +114,13 @@ void init_M_least_index(double** mat, double* M, unsigned int dim, double* q)
   /* We need to init only the part corresponding to Id */
   for (unsigned int i = 0 ; i < dim; ++i)
   {
-    mat[i][0] = q[i];
+    mat[i] = q[i];
     for (unsigned int j = 0 ; j < dim; ++j)
-      mat[i][j+1] = M[dim*j + i];
+      mat[i + dim*(j+1)] = M[dim*j + i];
   }
 }
 
-void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int *info , SolverOptions* options)
+void lcp_pivot(LinearComplementarityProblem* problem, double* restrict u , double* restrict s, int *info , SolverOptions* options)
 {
   /* matrix M of the LCP */
   assert(problem);
@@ -144,7 +145,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
   double pivot;
   double tmp;
   unsigned int* basis;
-  double** mat;
+  double* mat;
 
   /*output*/
 
@@ -152,7 +153,6 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
 
   /* Allocation */
   basis = (unsigned int *)malloc(dim * sizeof(unsigned int));
-  mat = (double **)malloc(dim * sizeof(double*));
 
   switch (pivot_selection_rule)
   {
@@ -167,8 +167,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
       dim2 = 2 * (dim + 1);
   }
 
-  for (unsigned int i = 0 ; i < dim; ++i)
-    mat[i] = (double *)malloc(dim2 * sizeof(double));
+  mat = (double *)malloc(dim * dim2 * sizeof(double*));
 
   assert(problem->q);
 
@@ -188,7 +187,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
   DEBUG_PRINT("total matrix\n");
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { for(unsigned int j = 0 ; j < dim2; ++j)
-      { DEBUG_PRINTF("% 2.2e ", mat[i][j]) }
+      { DEBUG_PRINTF("% 2.2e ", mat[i + j*dim]) }
       DEBUG_PRINT("\n")});
   /* End of construction of mat */
   for (unsigned int i = 0 ; i < dim  ; ++i) basis[i] = i + 1;
@@ -218,7 +217,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
   /* Pivot < mu , drive >  or < drive, drive > */
 
   DEBUG_PRINTF("Pivoting %i and %i\n", block, drive);
-  pivot = mat[block][drive];
+  pivot = mat[block + drive*dim];
 
   if (fabs(pivot) < DBL_EPSILON)
   {
@@ -266,7 +265,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
   DEBUG_PRINT("total matrix\n");
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { for(unsigned int j = 0 ; j < dim2; ++j)
-      { DEBUG_PRINTF("% 2.2e ", mat[i][j]) }
+      { DEBUG_PRINTF("% 2.2e ", mat[i + j*dim]) }
       DEBUG_PRINT("\n")});
 
   while (nb_iter < itermax && !has_sol)
@@ -319,7 +318,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
     /* Pivot < block , drive > */
     DEBUG_PRINTF("Pivoting %i and %i\n", block, drive);
 
-    pivot = mat[block][drive];
+    pivot = mat[block + drive*dim];
     if (fabs(pivot) < DBL_EPSILON)
     {
       *info = 3;
@@ -365,7 +364,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
     DEBUG_PRINT("total matrix\n");
     DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { for(unsigned int j = 0 ; j < dim2; ++j)
-      { DEBUG_PRINTF("% 2.2e ", mat[i][j]) }
+      { DEBUG_PRINTF("% 2.2e ", mat[i+ j*dim]) }
       DEBUG_PRINT("\n")});
   } /* end while*/
 
@@ -377,7 +376,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int
   DEBUG_PRINT("total matrix\n");
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { for(unsigned int j = 0 ; j < dim2; ++j)
-      { DEBUG_PRINTF("% 2.2e ", mat[i][j]) }
+      { DEBUG_PRINTF("% 2.2e ", mat[i + j*dim]) }
       DEBUG_PRINT("\n")});
 
 exit_lcp_pivot:
@@ -390,11 +389,11 @@ exit_lcp_pivot:
     if (drive < dim + 1)
     {
       u[drive - 1] = 0.0;
-      s[drive - 1] = mat[i][0];
+      s[drive - 1] = mat[i];
     }
     else if (drive > dim + 1)
     {
-      u[drive - dim - 2] = mat[i][0];
+      u[drive - dim - 2] = mat[i];
       s[drive - dim - 2] = 0.0;
     }
   }
@@ -426,7 +425,6 @@ exit_lcp_pivot:
 
   free(basis);
 
-  for (unsigned int i = 0 ; i < dim ; ++i) free(mat[i]);
   free(mat);
 }
 

@@ -49,13 +49,13 @@
  *  \section aviSolversList Available solvers
 
   The solvers and their parameters are described in \ref AVISolvers . \n
-  Use the generic function avi_driver() to call one the the specific solvers listed below:
+  Use the generic function AVI_driver() to call one the the specific solvers listed below:
 
-    - avi_caoferris(), direct solver for AVI based on pivoting method principle for degenerate problem.\n
+    - AVI_caoferris(), direct solver for AVI based on pivoting method principle for degenerate problem.\n
   Choice of pivot variable is performed via lexicographic ordering
   Ref: "The Linear Complementarity Problem" Cottle, Pang, Stone (1992)\n
 
-  (see also the functions/solvers list in AVI_Solvers.h and numbering in avi_cst.h)
+  (see also the functions/solvers list in AVI_Solvers.h and numbering in AVI_cst.h)
 
 */
 
@@ -63,7 +63,7 @@
 #include "polyhedron.h"
 
 /** \struct AffineVariationalInequalities AffineVariationalInequalities.h
- *  \brief Structure that contains and defines  \ref AVIProblem
+ *  \brief Structure that contains and defines  \ref AVI
  *
  *   Find \f$(z)\f$ such that:\n
  *   \f{equation*}{
@@ -74,9 +74,8 @@
  *   \f}
  *
  * where \f$ w, z, q\f$ are vectors of size \f$n\f$ and \f$ M \f$ is a \f$n\times n\f$ matrix.
- * See \ref AVIroblem for more details.
+ * See \ref AVI for more details.
  */
-
 typedef struct
 {
   unsigned int size; /**<  size of the problem */
@@ -90,36 +89,39 @@ typedef struct
 extern "C"
 {
 #endif
-  /** \fn void avi_display(AffineVariationalInequalities* problem)
+  /** \fn void AVI_display(AffineVariationalInequalities* problem)
    *  \brief function to display a AffineVariationalInequalities
    *  \param  problem pointer to a AffineVariationalInequalities to display
    */
-  void avi_display(AffineVariationalInequalities* problem);
+  void AVI_display(AffineVariationalInequalities* problem);
 
-  /** \fn int avi_printInFile(AffineVariationalInequalities*  problem, FILE* file)
+  /** \fn int AVI_printInFile(AffineVariationalInequalities*  problem, FILE* file)
    *  \brief function to write in a file a AffineVariationalInequalities
    *  \param problem pointer to a AffineVariationalInequalities to print
    *  \param file pointer to a FILE
+   *  \return 1 if successfull
    */
-  int avi_printInFile(AffineVariationalInequalities* problem, FILE* file);
+  int AVI_printInFile(AffineVariationalInequalities* problem, FILE* file);
 
-  /** \fn  int avi_newFromFile(AffineVariationalInequalities* problem, FILE* file)
+  /** \fn  int AVI_newFromFile(AffineVariationalInequalities* problem, FILE* file)
    *  \brief function to read and create a AffineVariationalInequalities
    *   from a file
    *  \param problem pointer to a AffineVariationalInequalities to create
    *  \param file pointer to a FILE
+   *  \return 1 if successfull
    */
-  int avi_newFromFile(AffineVariationalInequalities* problem, FILE* file);
+  int AVI_newFromFile(AffineVariationalInequalities* problem, FILE* file);
 
-  /** \fn  int avi_newFromFilename(AffineVariationalInequalities* problem, FILE* file)
+  /** \fn  int AVI_newFromFilename(AffineVariationalInequalities* problem, FILE* file)
    *  \brief function to read and create a AffineVariationalInequalities
    *   from a file
    *  \param problem pointer to a AffineVariationalInequalities to create
    *  \param filename that contains the AVI
+   *  \return 1 if successfull
    */
-  int avi_newFromFilename(AffineVariationalInequalities* problem, char* filename);
+  int AVI_newFromFilename(AffineVariationalInequalities* problem, char* filename);
 
-  /** \fn  void freeAffineVariationalInequalities(AffineVariationalInequalities* problem)
+  /** \fn  void freeAVI(AffineVariationalInequalities* problem)
    *  \brief function to delete a AffineVariationalInequalities
    *  \param problem  pointer to a AffineVariationalInequalities to delete
    */

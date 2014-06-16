@@ -51,6 +51,10 @@
 
 */
 
+#ifdef __cplusplus
+#define restrict __restrict
+#endif
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -62,7 +66,7 @@ extern "C"
       \param[in] F vector \f$ F(z) \f$
       \param[in,out]  phi vector \f$ \phi(z,F(z)) \f$
   */
-  void phi_FB(int size, double* z, double* F, double* phi);
+  void phi_FB(int size, double* restrict z, double* restrict F, double* restrict phi);
 
   /** Jacobian of the Fischer Burmeister function, \f$ \nabla_z \phi(z,F(z)) \f$
       \param[in] size of vector \f$ z \f$
@@ -82,7 +86,7 @@ extern "C"
       \param[in] F vector F(z)
       \param[in,out] phi \f$ \phi(z,F(z)) \f$.
   */
-  void phi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* phi);
+  void phi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* restrict F, double* restrict phi);
 
   /** Jacobian of the mixed Fischer Burmeister function, \f$ \nabla_z \phi(z,F(z)) \f$
       \param[in] sizeEq number of equality constraints.
@@ -105,7 +109,7 @@ extern "C"
       \param[in] nabla_F \f$ \nabla_z F(z) \f$
       \param[in,out] H element of Jac_F_merit
   */
-void Jac_F_FB(int n1, int n2, double* z, double* F, double* workV1, double* workV2, double* nabla_F, double* H);
+void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* restrict workV1, double* restrict workV2, double* restrict nabla_F, double* restrict H);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
