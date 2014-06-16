@@ -164,7 +164,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
   // To compute C = A + B
 
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
-    SiconosMatrixException::selfThrow("Matrix operator +: inconsistent sizes");
+    SiconosMatrixException::selfThrow("Matrix operator + : inconsistent sizes");
 
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
@@ -307,7 +307,7 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
   // To compute C = A - B
 
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
-    SiconosMatrixException::selfThrow("Matrix operator +: inconsistent sizes");
+    SiconosMatrixException::selfThrow("Matrix operator -  : inconsistent sizes");
 
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
