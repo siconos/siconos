@@ -27,6 +27,10 @@
 
 #define PI 3.14159265
 
+#ifdef _MSC_VER
+double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
+#endif
+
 double l1 = 0.5;//length of the first link
 double l2 = 0.5;//length of the second link
 double m1 = 1; //mass of the first link

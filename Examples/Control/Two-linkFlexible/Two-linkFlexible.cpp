@@ -30,6 +30,10 @@
 
 #define PI 3.14159265
 
+#ifdef _MSC_VER
+double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
+#endif
+
 using namespace std;
 
 
