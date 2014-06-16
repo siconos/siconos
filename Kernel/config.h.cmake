@@ -31,5 +31,8 @@
 #define BOOST_NUMERIC_BINDINGS_BLAS_MKL
 #endif
 
+// Say which version of C++ was used to compile the Kernel
+#define KERNEL_CXXVERSION @CXX_VERSION@
+
 #endif /*KERNELCONFIG_H*/
 

@@ -120,6 +120,10 @@ IF(CMAKE_CXX_COMPILER)
 
 ENDIF(CMAKE_CXX_COMPILER)
 
+INCLUDE(cxxVersion)
+detect_cxx_version(CXX_VERSION)
+
+
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(Boost REQUIRED)
 # FIND_PACKAGE( ... COMPONENTS <component>) does not mention <component> in failure message!
