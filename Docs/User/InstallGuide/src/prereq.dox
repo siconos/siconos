@@ -12,7 +12,7 @@ For a more details view of each library, see the Section \ref req_libs.
 yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig python-py
 \endverbatim
 
-<b> Fedora 16 or 17</b>:
+<b> Fedora 16, 17 or 18</b>:
 \verbatim
 yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig pytest
 \endverbatim

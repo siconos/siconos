@@ -36,6 +36,14 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "EventsManager.hpp"
 
+#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#include <functional>
+using namespace std::placeholders;
+#else
+#include <boost/bind.hpp>
+#include <boost/weak_ptr.hpp>
+#endif
+
 
 using namespace RELATION;
 
