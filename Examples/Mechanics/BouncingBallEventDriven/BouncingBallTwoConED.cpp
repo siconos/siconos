@@ -26,6 +26,7 @@
 */
 
 #include "SiconosKernel.hpp"
+#include <boost/numeric/ublas/matrix.hpp>
 
 using namespace std;
 
@@ -193,13 +194,13 @@ int main(int argc, char* argv[])
       // If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
       if (nonSmooth) // if the event is nonsmooth
       {
-        //dataPlot(k,0) = s->startingTime(); // get the time at nonsmooth event
-        //dataPlot(k,1) = (*ball->qMemory()->getSiconosVector(1))(0);
-        //dataPlot(k,2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
-        //k++;
+        dataPlot(k,0) = s->startingTime(); // get the time at nonsmooth event
+        dataPlot(k,1) = (*ball->qMemory()->getSiconosVector(1))(0);
+        dataPlot(k,2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
+        k++;
         nonSmooth = false;
         ++show_progress;
-        //dataPlot(k,4) = 1;
+        dataPlot(k,4) = 1;
         ++ll;
         //         cout << "========================================" << endl;
         //         cout << "Nonsmooth event" << endl;
@@ -232,7 +233,7 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << endl;
     cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
-    cout << "Number of nonsmooth events" << ll << endl;
+    cout << "Number of nonsmooth events = " << ll << endl;
     cout << "====> Output file writing ..." << endl << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("resultTwoConED.dat", "ascii", dataPlot, "noDim");
@@ -241,6 +242,8 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("BouncingBallTwoConED.ref", "ascii", dataPlotRef);
+
+    std:: cout << " Error ="<< (dataPlot - dataPlotRef).normInf() << std::endl;
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {

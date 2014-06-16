@@ -1,13 +1,14 @@
 set  term X11
 set term post
 set output "result.ps"
-!tail -n 100000 resultTwoConED.dat > resultTwoConED-gp.dat
-plot\
-"resultTwoConED-gp.dat" u 1:2 t "Ball position" w l,\
-"resultTwoConED-gp.dat" u 1:3 t "Ball Velocity" w l,\
-"resultTwoConED-gp.dat" u 1:8 t "Ball acceleration" w l,\
-"resultTwoConED-gp.dat" u 1:9 t "Reaction force" w l,\
-"resultTwoConED-gp.dat" u 1:4 t "Reaction impulse" w l
+resultfile = "resultTwoConED.dat"
+#resultfile = "BouncingBallTwoConED.ref"
+plot \
+resultfile u 1:2 every ::1 t "Ball position" w l,\
+resultfile u 1:3 every ::1 t "Ball Velocity" w l,\
+resultfile u 1:8 every ::1 t "Ball acceleration" w l,\
+resultfile u 1:9 every ::1 t "Reacti on force" w l,\
+resultfile u 1:4 every ::1 t "Reaction impulse" w l
 
 
 
