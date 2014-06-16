@@ -28,7 +28,7 @@
   translational clearance joints based on the non-smooth dynamics approach
   */
 #include "SiconosKernel.hpp"
-
+#include <boost/numeric/ublas/matrix.hpp>
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = slider->q();
     SP::SiconosVector v = slider->velocity();
-    
+
     SP::SiconosVector lambda1old = (inter1->lambdaMemory(1))->getSiconosVector(0);
     (*lambda1old)(0);
 
@@ -201,15 +201,15 @@ int main(int argc, char* argv[])
     dataPlot(k, 28) = (*inter2->lambda(2))(0) ; // lambda1_{k+1}^-
     dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda1_{k+1}^-
     dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda1_{k+1}^-
-    
-    
-    
+
+
+
     dataPlot(k, 31) = ( *((inter1->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1_k^+
     dataPlot(k, 32) = ( *((inter2->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda2_k^+
     dataPlot(k, 33) = ( *((inter3->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda3_k^+
     dataPlot(k, 34) = ( *((inter4->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda4_k^+
-    
-    
+
+
     dataPlot(k, 31) = ( *((inter1->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
     dataPlot(k, 32) = ( *((inter2->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
     dataPlot(k, 33) = ( *((inter3->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
@@ -278,15 +278,15 @@ int main(int argc, char* argv[])
       dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda1_{k+1}^-
 
 
-    
+
       dataPlot(k, 31) = ( *((inter1->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1_k^+
       dataPlot(k, 32) = ( *((inter2->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda2_k^+
       dataPlot(k, 33) = ( *((inter3->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda3_k^+
       dataPlot(k, 34) = ( *((inter4->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda4_k^+
 
-      // std::cout << "dataPlot(k, 27)" << dataPlot(k, 27)  << std::endl;      
+      // std::cout << "dataPlot(k, 27)" << dataPlot(k, 27)  << std::endl;
       // std::cout << "dataPlot(k, 31)" << dataPlot(k, 31)  << std::endl;
-      
+
 
 
       // std::cout <<" q->display()" <<  std::endl;
@@ -314,9 +314,15 @@ int main(int argc, char* argv[])
     dataPlotRef.zero();
     ioMatrix::read("SliderCrankD1MinusLinearOSI.ref", "ascii", dataPlotRef);
 
+    double error = (dataPlot - dataPlotRef).normInf();
+    std::cout << "Error = "<< error << std::endl;
+
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
+      (dataPlot - dataPlotRef).display();
+
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      std::cout << "Error = "<< error << std::endl;
       return 1;
     }
 
@@ -329,6 +335,6 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in SliderCrankD1MinusLinearOSI.cpp" << endl;
+    cout << "Exception caught in SliderCrankD1MinusLinear.cpp" << endl;
   }
 }

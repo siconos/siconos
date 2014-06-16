@@ -243,7 +243,9 @@ int main(int argc, char* argv[])
     cout << "error ="<<error << endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {
+      (dataPlot - dataPlotRef).display();
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      cout << "error ="<<error << endl;
       return 1;
     }
 

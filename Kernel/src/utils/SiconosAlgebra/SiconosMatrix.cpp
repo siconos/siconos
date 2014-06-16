@@ -44,6 +44,23 @@ const SP::Index SiconosMatrix::tabCol() const
   return SP::Index();
 }
 
+unsigned int SiconosMatrix::size(unsigned int index) const
+{
+  if (num == 1)
+  {
+    // The implementation is specific for dense matrix since the size can be changed
+    // though ioread function without affecting DimRow and DimCol.
+    if (index == 0) return (dense())->size1();
+    else return (dense())->size2();
+  }
+  else
+  {
+    if (index == 0) return dimRow;
+    else return dimCol;
+  }
+};
+
+
 //=====================
 // matrices comparison
 //=====================

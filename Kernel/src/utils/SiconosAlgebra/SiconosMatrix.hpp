@@ -139,11 +139,7 @@ public:
    *  \param : unsigned int, 0 for rows, 1 for columns
    *  \return an int
    */
-  inline unsigned int size(unsigned int index) const
-  {
-    if (index == 0) return dimRow;
-    else return dimCol;
-  };
+   unsigned int size(unsigned int index) const ;
 
   /** get the attribute num of current matrix
    * \return an unsigned int.

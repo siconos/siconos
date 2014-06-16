@@ -245,7 +245,9 @@ int main(int argc, char* argv[])
     std::cout << "Error = "<< error << std::endl;
     if (error > 1e-12)
     {
+      (dataPlot - dataPlotRef).display();
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      std::cout << "Error = "<< error << std::endl;
       return 1;
     }
 

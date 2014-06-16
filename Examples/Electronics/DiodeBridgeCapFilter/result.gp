@@ -58,7 +58,7 @@ set multiplot
 set size winratio,winheight
 
 set origin 0.0,winheight*3.0+heightoff
-set ylabel "V" 1
+set ylabel "V" 
 plot \
   "SMASHN0p25BE1us.dat" u ($1-toffset):2 t     "capacitor voltage , SMASH   BE 1us" w l,\
   "DiodeBridgeCapFilter.dat" u 1:2 t      "capacitor voltage , SICONOS BE 1us" w l
@@ -78,7 +78,7 @@ set format
 set xtics axis
 set xlabel "time in s"
 set origin 0.0,0.0+heightoff
-set ylabel "A" 1
+set ylabel "A" 
 plot\
   "SMASHN0p25BE1us.dat" u ($1-toffset):6 t     "diode F1 current , SMASH   BE 1us" w l,\
   "DiodeBridgeCapFilter.dat" u 1:7 t      "diode F1 current , SICONOS BE 1us" w l,\
