@@ -6,8 +6,34 @@
 #define SWIG_SHARED_PTR_NAMESPACE std11
 %include boost_shared_ptr.i
 
-#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+%import KernelConfig.h
+
+#if (KERNEL_CXXVERSION >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 #define STD11 std
+#undef __cplusplus
+#define __cplusplus KERNEL_CXXVERSION
+
+// from g++-v4/bits/shared_ptr.h
+// not sure if this is needed, but we can't use '#include <memory>'
+// since it is in a compiler path
+namespace STD11 {
+  template<typename _Tp>
+    class enable_shared_from_this
+    {
+    protected:
+      constexpr enable_shared_from_this();
+
+      ~enable_shared_from_this();
+
+    public:
+      shared_ptr<_Tp>
+      shared_from_this();
+
+      shared_ptr<const _Tp>
+      shared_from_this() const;
+
+    };
+}
 #else
 #define STD11 boost
 %import "boost/version.hpp"
@@ -25,6 +51,7 @@
 %import "boost/enable_shared_from_this.hpp"
 #endif
 #endif
+
 
 %rename("$ignore", regexmatch$name="^createSPtr.*") "";
 
