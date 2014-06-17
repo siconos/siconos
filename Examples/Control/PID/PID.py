@@ -26,9 +26,9 @@ from numpy.linalg import norm
 
 # variable declaration
 t0 = 0.0   # start time
-T = 100    # end time
-h = 0.05;  # time step
-xFinal = 0 # target position
+T = 100.0 # end time
+h = 0.05  # time step
+xFinal = 0.0 # target position
 theta = 0.5
 N = ceil((T-t0)/h + 10) # number of time steps
 outputSize = 5 # number of variable to store at each time step
@@ -56,18 +56,18 @@ s = TimeStepping(t, 0)
 s.insertIntegrator(OSI)
 
 # Actuator, Sensor & ControlManager
-control = ControlManager(process)
-sens = LinearSensor(tSensor, doubleIntegrator, C)
-control.addSensorPtr(sens)
-act = PID(tActuator, doubleIntegrator)
-act.addSensorPtr(sens)
-control.addActuatorPtr(act)
+control = ControlManager(s)
+sens = LinearSensor(doubleIntegrator, C)
+control.addSensorPtr(sens, tSensor)
+act = PID(sens)
+control.addActuatorPtr(act, tActuator)
 
 # Initialization
 process.initialize(s)
-control.initialize()
+control.initialize(process)
 act.setRef(xFinal)
 act.setKPtr(K)
+act.setDeltaT(h)
 # This is not working right now
 #eventsManager = s.eventsManager()
 
@@ -82,13 +82,14 @@ dataPlot[0, 4] = doubleIntegrator.b()[1]
 # Main loop
 k = 1
 while(s.hasNextEvent()):
-    s.computeOneStep()
-    dataPlot[k, 0] = s.nextTime()
-    dataPlot[k, 1] = doubleIntegrator.x()[0]
-    dataPlot[k, 2] = doubleIntegrator.x()[1]
-    dataPlot[k, 3] = doubleIntegrator.b()[0]
-    dataPlot[k, 4] = doubleIntegrator.b()[1]
-    k += 1
+    if (s.eventsManager().nextEvent() == 1):
+        s.computeOneStep()
+        dataPlot[k, 0] = s.nextTime()
+        dataPlot[k, 1] = doubleIntegrator.x()[0]
+        dataPlot[k, 2] = doubleIntegrator.x()[1]
+        dataPlot[k, 3] = doubleIntegrator.b()[0]
+        dataPlot[k, 4] = doubleIntegrator.b()[1]
+        k += 1
     s.nextStep()
 # Save to disk
 savetxt('output.txt', dataPlot)

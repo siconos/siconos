@@ -34,7 +34,7 @@ from ZhuravlevTwistingR import ZhuravlevTwistingR
 
 # variables
 t0 = 0.0   # start time
-T = 100.0     # end time
+T = 10.0     # end time
 h = 1.0e-3   # time step
 numInter = 2
 ninter = 2

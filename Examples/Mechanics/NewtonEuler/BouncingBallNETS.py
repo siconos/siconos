@@ -21,7 +21,7 @@
 
 from Siconos.Kernel import NewtonEulerDS, NewtonImpactNSL,\
      NewtonEulerR, NewtonEulerFrom1DLocalFrameR, Interaction, Model,\
-     Moreau, TimeDiscretisation, LCP, TimeStepping
+     MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
 
 from numpy import eye, empty, linalg, savetxt
 
@@ -35,13 +35,18 @@ class BouncingBallR(NewtonEulerFrom1DLocalFrameR):
         NewtonEulerFrom1DLocalFrameR.__init__(self)
         super(BouncingBallR, self).__init__()
 
-    def computeh(self, time, interaction):
+    def computeOutput(self, time, interaction, interProp, derivativeNumber):
 
-        q = inter.data(NewtonEulerR.q0)[0]
+        print(interProp.DSlink)
+        if derivativeNumber == 0:
+            self.computeh(interProp.DSlink[NewtonEulerR.q0], interaction.y(0))
+        else:
+            super(BouncingBallR, self).computeOutput(t, inter, interProp, derivativeNumber);
 
+    def computeh(self, q, y):
         height = q[0] - self._ballRadius
 
-        interaction.y(0)[0] = height
+        y[0] = height
 
         nnc = [1,0,0]
         self.setnc(nnc)
@@ -102,7 +107,7 @@ bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
 #
 
 # (1) OneStepIntegrators
-OSI = Moreau(theta)
+OSI = MoreauJeanOSI(theta)
 OSI.insertDynamicalSystem(ball)
 
 # (2) Time discretisation --

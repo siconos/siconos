@@ -17,7 +17,7 @@ yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp 
 yum install cmake gcc gcc-gfortran boost-devel atlas atlas-devel atlas-sse3 gmp gmp-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig pytest
 \endverbatim
 
-<b> Fedora 16 or 17</b>:
+<b> Fedora 20</b>:
 We recommand you to use openblas instead of atlas since it provides LAPACKE functions. Power users can still choose their favorite BLAS and LAPACK(E) vendor.
 \verbatim
 yum install cmake gcc gcc-gfortran boost-devel openblas openblas-devel gmp gmp-devel cppunit cppunit-devel python-matplotlib scipy python-numeric python-devel swig pytest
@@ -54,15 +54,15 @@ Here is a list of the minimal recommended version of the various
 external libraries used to compile Siconos. Note that it might work
 with older version but with those you should be safe.
 
-Compiler: gcc 4.5
+Compiler: gcc 4.5 or clang 3.2
 
 CMake: 2.8.5
 
-Boost 1.44
+Boost 1.49
 
 cppunit: 1.12
 
-Python: 2.7
+Python: 2.7 or 3.3
 
 Doxygen: 1.5.6
 

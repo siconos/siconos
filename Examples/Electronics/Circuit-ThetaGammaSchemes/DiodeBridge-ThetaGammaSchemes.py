@@ -64,7 +64,7 @@ if (withPlot):
 
 from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\
-                           Model, Moreau, TimeDiscretisation, LCP,  \
+                           Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
                            TimeStepping
 
 #
