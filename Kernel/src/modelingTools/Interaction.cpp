@@ -618,7 +618,6 @@ void Interaction::display() const
   else
     cout << "The interaction is not initialized" << endl;
   cout << "| number : " << _number << endl;
-  cout << "| relativeDegree : " << _relativeDegree << endl;
   cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << endl;
   cout << "| upperLevelForOutput : " << _upperLevelForOutput << endl;
   cout << "| lowerLevelForInput : " << _lowerLevelForInput << endl;

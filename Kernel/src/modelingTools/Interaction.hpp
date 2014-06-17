@@ -82,9 +82,6 @@ private:
   /** number specific to each Interaction */
   unsigned int _number;
 
-  /** relative degree of this interaction */
-  unsigned int _relativeDegree;
-
   /** Minimum required 'level' for output y
    *  y will be initialized from
    *  y[_lowerLevelForOutput] to y[_upperLevelForOutput]
@@ -254,24 +251,6 @@ public:
   {
     _number = newNumber;
   }
-
-
-  /** get the relative degree
-   * \return an unsigned int
-   */
-  inline unsigned int getRelativeDegree() const
-  {
-    return _relativeDegree;
-  };
-
-  /** set the relative degree
-   * \param an unsigned int
-   */
-  inline void setRelativeDegree(const unsigned int newVal)
-  {
-    _relativeDegree = newVal;
-  };
-
 
   /** set the lower level for output y
    * \param an unsigned int
