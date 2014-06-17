@@ -2836,6 +2836,9 @@ void SimpleMatrixTest::testProd() // y = A*x
   *res = prod(*tmp5, *w);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
   std::cout << "-->  test prod ended with success." <<std::endl;
+
+  delete sv2;
+  delete sv;
 }
 
 void SimpleMatrixTest::testProdBis()

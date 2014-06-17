@@ -97,5 +97,6 @@ void SiconosVisitorTest::t3()
 
   CPPUNIT_ASSERT(Type::name(*ds) == "LagrangianDS");
 
+  delete ds;
 }
 
