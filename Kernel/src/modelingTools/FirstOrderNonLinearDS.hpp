@@ -127,19 +127,6 @@ protected:
   /**  the previous r vectors */
   SP::SiconosMemory _rMemory;
 
-  /** Residu r*/
-  SP::SiconosVector _residur;
-
-  /** g_alpha*/
-  SP::SiconosVector _g_alpha;
-  //  SP::SiconosVector mXfree;
-
-  SP::SiconosVector _xp;
-  SP::SiconosVector _xq;
-
-
-
-
   /** Copy of M Matrix, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
   SP::SiconosMatrix _invM;
@@ -180,21 +167,6 @@ public:
    * \return a bool
    */
   bool checkDynamicalSystem();
-
-  inline SP::SiconosVector gAlpha() const
-  {
-    return _g_alpha;
-  }
-
-
-  /* Get _residur
-   * \return _residur
-   */
-  inline SP::SiconosVector residur() const
-  {
-    return _residur;
-  }
-
 
   // rMemory
 
@@ -370,12 +342,6 @@ public:
    */
   void computeM(double time);
 
-  /** function to compute \f$ M: (x,t)\f$ with x different from current saved state.
-   * \param time time instant used in the computations
-   * \param x2 a SiconosVector to store the resuting value
-   */
-  void computeM(double time, SP::SiconosVector x2);
-
   /** Default function to compute \f$ f: (x,t)\f$
    * \param time time instant used in the computations
    */
@@ -431,21 +397,6 @@ public:
    * \param level the level to reset
    */
   virtual void resetNonSmoothPart(unsigned int level);
-
-  /*
-   * get the Xp work vector.
-   */
-  inline SP::SiconosVector xp() const
-  {
-    return _xp;
-  };
-  /*
-   * get the Xq work vector.
-   */
-  inline SP::SiconosVector xq() const
-  {
-    return _xq;
-  };
 
   /** Get _pluginf
    * \return a SP::PluggedObject

@@ -74,17 +74,17 @@ public:
   /** === CONSTRUCTORS/DESTRUCTOR === */
 
   /** constructor from a set of data
-   *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param SiconosMatrix: A
+   *  \param x0 the initial state of this DynamicalSystem
+   *  \param A the A matrix
    */
-  FirstOrderLinearTIDS(SP::SiconosVector, SP::SiconosMatrix);
+  FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A);
 
   /** constructor from a set of data
-   *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param SiconosMatrix: A
-   *  \param SiconosVector: b
+   *  \param x0 the initial state of this DynamicalSystem
+   *  \param A the A matrix
+   *  \param b the b vector
    */
-  FirstOrderLinearTIDS(SP::SiconosVector, SP::SiconosMatrix, SP::SiconosVector);
+  FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A, SP::SiconosVector b);
 
   /** Copy constructor
    * \param FOLTIDS the FirstOrderLinearTIDS to copy
@@ -94,8 +94,8 @@ public:
   /** destructor */
   ~FirstOrderLinearTIDS() {};
 
-  /**
-   * return true if the Dynamical system is linear.
+  /** indicate that the DS is linear
+   * \return true if the Dynamical system is linear.
    */
   virtual bool isLinear()
   {
@@ -107,21 +107,21 @@ public:
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization.
    */
-  void initRhs(double) ;
+  void initRhs(double time);
 
   /** Default function to the right-hand side term
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time current time
+   *  \param isDSup flag to avoid recomputation of operators
    *
    */
-  void computeRhs(double, bool  = false);
+  void computeRhs(double time, bool isDSup = false);
 
   /** Default function to jacobian of the right-hand side term according to x
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time current time
+   *  \param isDSup flag to avoid recomputation of operators
    *
    */
-  void computeJacobianRhsx(double, bool  = false);
+  void computeJacobianRhsx(double time, bool isDSup = false);
 
   /** data display on screen
    */

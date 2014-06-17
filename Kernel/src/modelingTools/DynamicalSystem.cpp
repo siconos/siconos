@@ -72,8 +72,6 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   //    _jacxDotG.reset(new SimpleMatrix(*(ds.jacobianXDotG())));
   if (ds.z())
     _z.reset(new SiconosVector(*(ds.z())));
-  if (ds.g())
-    _g.reset(new SiconosVector(*(ds.g())));
 
   if (_pluging)
     _pluging.reset(new PluggedObject(*(ds.getPluginG())));
@@ -259,29 +257,6 @@ void DynamicalSystem::setzPtr(SP::SiconosVector newPtr)
 {
   _z = newPtr;
 }
-/*
-void DynamicalSystem::setG(const PVFInt& newValue)
-{
-  assert(newValue.size()==n&&"DynamicalSystem - setG: inconsistent dimensions with problem size for input vector g");
-
-  if( !g  )
-    g.reset(new PVFInt(newValue));
-  else
-    *g = newValue;
-}
-*/
-/*
-void DynamicalSystem::setJacobianG(unsigned int i, const PMFInt& newValue)
-{
-  assert(newValue.size(0)==n&&"DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
-  assert(newValue.size(1)==n&&"DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
-
-  if( !jacobianG [i] )
-    jacobianG[i].reset(new PMFInt(newValue));
-  else
-    *jacobianG[i] = newValue;
-}
-*/
 
 void DynamicalSystem::update(double time)
 {
@@ -326,11 +301,11 @@ void DynamicalSystem::setComputeJacobianDotXGFunction(const std::string& pluginP
 //   Plugin::setFunction(&pluginJacobianZGPtr, pluginPath,functionName);
 // }
 
-void DynamicalSystem::computeg(double time)
-{
-  if (_pluging->fPtr)
-    ((FPtr6)(_pluging->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_g)(0), _z->size(), &(*_z)(0));
-}
+//void DynamicalSystem::computeg(double time)
+//{
+//  if (_pluging->fPtr)
+//    ((FPtr6)(_pluging->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_g)(0), _z->size(), &(*_z)(0));
+//}
 
 //void DynamicalSystem::computeJacobianXG(double time){
 //  if (_pluginJacgx->fPtr)

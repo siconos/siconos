@@ -161,9 +161,6 @@ protected:
   /** initial state of the system */
   SP::SiconosVector _x0;
 
-  // /** ResiduFree  */
-  // SP::SiconosVector _workspace[freeresidu];
-
   /** the input vector due to the non-smooth law \f$ r \in R^{n}\f$
    * (multiplier, force, ...)
    * \remark V.A. 17/09/2011 :
@@ -190,7 +187,6 @@ protected:
   /** Arbitrary algebraic values vector, z, discret state of the
       system. */
   SP::SiconosVector _z;
-  SP::SiconosVector _g;
 
 
   /** DynamicalSystem plug-in to compute \f$ g(t,\dot x,x,z) \f$
@@ -368,16 +364,6 @@ public:
    */
   void setRPtr(SP::SiconosVector newPtr);
 
-  // --- Residu ---
-
-  /** get Residu,
-    *  \return pointer on a SiconosVector
-    */
-  // inline SP::SiconosVector workspace(DynamicalSystem::freeresidu) const
-  // {
-  //   return _workspace[freeresidu];
-  // }
-
   /** set the value of x0 to newValue
    *  \param newValue SiconosVector newValue
    */
@@ -504,64 +490,6 @@ public:
    */
   void setzPtr(SP::SiconosVector newPtr);
 
-  // --- g ---
-  /** get the value of g
-   *  \return plugged vector
-  inline const PVFInt getg() const { return *g; }
-   */
-
-  /** get g
-   *  \return pointer on a plugged vector
-   */
-  inline SP::SiconosVector g() const
-  {
-    return _g;
-  }
-
-  /** set the value of g to newValue
-   *  \param a plugged vector
-
-  void setG(const PVFInt&);
-  */
-
-  /** set g to pointer newPtr
-   *  \param newPtr a SP to plugged vector
-   */
-  inline void setGPtr(SP::SiconosVector newPtr)
-  {
-    _g = newPtr;
-  }
-
-  // -- Jacobian g --
-  /* get the value of jacobianG
-    \param index of the desired jacobian
-    *  \return a plugged-matrix
-
-  inline const PMFInt getJacobianG(unsigned int i) const { return *(jacobianG[i]); }
-  */
-
-  /* get jacobianG
-      \param index of the desired jacobian
-      *  \return pointer on a plugged-matrix
-      */
-  //  inline SP::SiconosMatrix jacobianXG() const { return _jacgx; }
-  //  inline SP::SiconosMatrix jacobianXDotG() const { return _jacxDotG; }
-  //  inline SP::SiconosMatrix jacobianZG() const { return jacobianZG; }
-
-  /* set the value of jacobianG to newValue
-      \param index of the desired jacobian
-      *  \param plugged-matrix newValue
-  void setJacobianG(unsigned int, const PMFInt&);
-      */
-
-  /* set jacobianG to pointer newPtr
-      \param index of the desired jacobian
-      *  \param a plugged matrix SP
-      */
-  //  inline void setJacobianXGPtr( SP::SiconosMatrix newPtr) {_jacgx = newPtr;}
-  //  inline void setJacobianXDotGPtr( SP::SiconosMatrix newPtr) {_jacxDotG = newPtr;}
-  //  inline void setJacobianZGPtr( SP::SiconosMatrix newPtr) {jacobianZG = newPtr;}
-
   // X memory
 
   /** get all the values of the state vector x stored in a SiconosMemory object
@@ -634,25 +562,18 @@ public:
   }
 
   /** to allocate memory for a new vector in tmp map
-   *  \param the id of the SiconosVector
-   *  \param an int to set the size
+   *  \param id the id of the SiconosVector
+   *  \param size an int to set the size
    */
   inline void allocateWorkVector(const WorkNames& id, int size)
   {
     _workspace[id].reset(new SiconosVector(size));
   }
 
-  // /** to get the free vector.
-  //  */
-  // inline SP::SiconosVector workspace(DynamicalSystem::free) const
-  // {
-  //   return _workFree;
-  // };
-
   //@}
 
-  /**
-   * return true if the Dynamical system is linear.
+  /** Determine whether this is a linear DS
+   * \return true if the Dynamical system is linear.
    */
   virtual bool isLinear()
   {
@@ -732,12 +653,10 @@ public:
    */
   virtual void setComputeJacobianDotXGFunction(FPtr6 newPtr) {};
   
-  /**  void setComputeJacobianZGFunction( FPtr6); */
-  
   /** Default function to compute g
    *  \param time double, the current time
    */
-  void computeg(double time);
+//  void computeg(double time);
 
   /**default function to update the plugins functions using a new time:
    * \param time  the current time

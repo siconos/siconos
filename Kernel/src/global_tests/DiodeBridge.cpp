@@ -47,6 +47,8 @@
 
 #include "SiconosKernel.hpp"
 
+static bool DiodeBridge();
+
 
 bool DiodeBridge()
 {

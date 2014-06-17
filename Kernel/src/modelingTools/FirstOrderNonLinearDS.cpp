@@ -46,10 +46,6 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   _x[1].reset(new SiconosVector(_n));
 
   //mG
-  _g_alpha.reset(new SiconosVector(_n));
-  _residur.reset(new SiconosVector(_n));
-  _xp.reset(new SiconosVector(getDim()));
-  _xq.reset(new SiconosVector(getDim()));
   _workspace[free].reset(new SiconosVector(getDim()));
   _fold.reset(new SiconosVector(getDim()));
   _f.reset(new SiconosVector(_n));
@@ -77,11 +73,6 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0, const std:
   _x[1].reset(new SiconosVector(_n));
   _f.reset(new SiconosVector(_n));
   _jacobianfx.reset(new SimpleMatrix(_n, _n));
-  //mG
-  _g_alpha.reset(new SiconosVector(_n));
-  _residur.reset(new SiconosVector(_n));
-  _xp.reset(new SiconosVector(getDim()));
-  _xq.reset(new SiconosVector(getDim()));
   _workspace[free].reset(new SiconosVector(getDim()));
   _r.reset(new SiconosVector(getDim()));
   _fold.reset(new SiconosVector(getDim()));
@@ -113,8 +104,6 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
     _pluginf.reset(new PluggedObject(*(FONLDS.getPluginF())));
   if (_pluginJacxf)
     _pluginJacxf.reset(new PluggedObject(*(FONLDS.getPluginJacxf())));
-  if (FONLDS.gAlpha())
-    _g_alpha.reset(new SiconosVector(*(FONLDS.gAlpha())));
   if (FONLDS.jacobianfx())
     _jacobianfx.reset(new SimpleMatrix(*(FONLDS.jacobianfx())));
 
@@ -127,12 +116,6 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
     _pluginM.reset(new PluggedObject(*(FONLDS.getPluginM())));
 
   // data - not always initialized
-  if (FONLDS.residur())
-    _residur.reset(new SiconosVector(*(FONLDS.residur())));
-  if (FONLDS.xp())
-    _xp.reset(new SiconosVector(*(FONLDS.xp())));
-  if (FONLDS.xq())
-    _xq.reset(new SiconosVector(*(FONLDS.xq())));
   if (FONLDS.invM())
     _invM.reset(new SimpleMatrix(*(FONLDS.invM())));
 }
@@ -302,17 +285,6 @@ void FirstOrderNonLinearDS::computeM(double time)
   {
     ((FNLDSPtrfct)_pluginM->fPtr)(time, _n, &((*(_x[0]))(0)), &(*_M)(0, 0), _z->size(), &(*_z)(0));
   }
-}
-
-void FirstOrderNonLinearDS::computeM(double time, SP::SiconosVector x2)
-{
-  // second argument is useless at the time - Used in derived classes
-  if (_pluginM->fPtr)
-  {
-    assert(x2->size() == _n && "FirstOrderNonLinearDS::computeM(t,x) x size does not fit with the system size.");
-    ((FNLDSPtrfct)_pluginM->fPtr)(time, _n, &((*x2)(0)), &(*_M)(0, 0), _z->size(), &(*_z)(0));
-  }
-  // else nothing!
 }
 
 void FirstOrderNonLinearDS::computef(double time)

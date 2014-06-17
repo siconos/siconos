@@ -22,15 +22,15 @@
 // --- Constructors ---
 
 // From a minimum set of data: A
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
-  FirstOrderLinearDS(newX0, newA)
+FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A):
+  FirstOrderLinearDS(x0, A)
 {
   checkDynamicalSystem();
 }
 
 // From a set of data: A and B
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
-  FirstOrderLinearDS(newX0, newA, newB)
+FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A, SP::SiconosVector b):
+  FirstOrderLinearDS(x0, A, b)
 {
   checkDynamicalSystem();
 }
@@ -56,7 +56,7 @@ void FirstOrderLinearTIDS::initRhs(double time)
   }
 }
 
-void FirstOrderLinearTIDS::computeRhs(double time, const bool)
+void FirstOrderLinearTIDS::computeRhs(double time, const bool isDSup)
 {
 
   *_x[1] = * _r; // Warning: r update is done in Interactions/Relations
@@ -72,7 +72,7 @@ void FirstOrderLinearTIDS::computeRhs(double time, const bool)
     _invM->PLUForwardBackwardInPlace(*_x[1]);
 }
 
-void FirstOrderLinearTIDS::computeJacobianRhsx(double time, const bool)
+void FirstOrderLinearTIDS::computeJacobianRhsx(double time, const bool isDSup)
 {
   // Nothing to be done: _jacxRhs is constant and computed during initialize. But this function is required to avoid call to base class function.
 }
