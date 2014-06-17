@@ -23,11 +23,7 @@
 #include "BlockMatrix.hpp"
 
 // Constructor with the type-number
-SiconosMatrix::SiconosMatrix(unsigned int newNum): dimRow(0), dimCol(0), num(newNum)
-{}
-
-// Constructor with the dimensions and the type-number
-SiconosMatrix::SiconosMatrix(unsigned int newNum, unsigned int row, unsigned int col): dimRow(row), dimCol(col), num(newNum)
+SiconosMatrix::SiconosMatrix(unsigned int newNum): num(newNum)
 {}
 
 const SP::Index SiconosMatrix::tabRow() const
@@ -43,22 +39,6 @@ const SP::Index SiconosMatrix::tabCol() const
   // fake to avoid error on warning.
   return SP::Index();
 }
-
-unsigned int SiconosMatrix::size(unsigned int index) const
-{
-  if (num == 1)
-  {
-    // The implementation is specific for dense matrix since the size can be changed
-    // though ioread function without affecting DimRow and DimCol.
-    if (index == 0) return (dense())->size1();
-    else return (dense())->size2();
-  }
-  else
-  {
-    if (index == 0) return dimRow;
-    else return dimCol;
-  }
-};
 
 
 //=====================

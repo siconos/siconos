@@ -114,9 +114,6 @@ void SimpleMatrix::trans()
   case 7:
     break;
   }
-  unsigned int tmp = dimRow;
-  dimRow = dimCol;
-  dimCol = tmp;
   resetLU();
 }
 
@@ -185,7 +182,7 @@ const SimpleMatrix pow(const SimpleMatrix& m, unsigned int power)
 {
   if (m.isBlock())
     SiconosMatrixException::selfThrow("Matrix, pow function: not yet implemented for BlockMatrix.");
-  if (!m.isSquare())
+  if ( m.size(0) != m.size(1))
     SiconosMatrixException::selfThrow("pow(SimpleMatrix), matrix is not square.");
 
   if (power > 0)

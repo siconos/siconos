@@ -55,9 +55,9 @@ void SimpleMatrix::PLUFactorizationInPlace()
   if (num == 1)
   {
     if (!ipiv)
-      ipiv.reset(new VInt(dimRow));
+      ipiv.reset(new VInt(size(0)));
     else
-      ipiv->resize(dimRow);
+      ipiv->resize(size(0));
     int info = lapack::getrf(*mat.Dense, *ipiv);
     if (info != 0)
     {
@@ -113,9 +113,9 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
     {
       // solve system:
       if (!ipiv)
-        ipiv.reset(new VInt(dimRow));
+        ipiv.reset(new VInt(size(0)));
       else
-        ipiv->resize(dimRow);
+        ipiv->resize(size(0));
       info = lapack::gesv(*mat.Dense, *ipiv, *(B.dense()));
       _isPLUFactorized = true;
 
@@ -180,9 +180,9 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
     {
       // solve system:
       if (!ipiv)
-        ipiv.reset(new VInt(dimRow));
+        ipiv.reset(new VInt(size(0)));
       else
-        ipiv->resize(dimRow);
+        ipiv->resize(size(0));
 
       info = lapack::gesv(*mat.Dense, *ipiv, tmpB);
       _isPLUFactorized = true;

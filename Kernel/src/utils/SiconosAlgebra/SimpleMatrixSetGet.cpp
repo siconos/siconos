@@ -35,7 +35,7 @@ using namespace Siconos;
 
 double SimpleMatrix::getValue(unsigned int row, unsigned int col) const
 {
-  if (row >= dimRow || col >= dimCol)
+  if (row >= size(0) || col >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix:getValue(index): Index out of range");
 
   if (num == 1)
@@ -62,7 +62,7 @@ double SimpleMatrix::getValue(unsigned int row, unsigned int col) const
 
 void SimpleMatrix::setValue(unsigned int row, unsigned int col, double value)
 {
-  if (row >= dimRow || col >= dimCol)
+  if (row >= size(0) || col >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix:setValue: Index out of range");
 
   if (num == 1)
@@ -104,20 +104,20 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
   if (&m == this)
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(pos,..., m): m = this.");
 
-  if (row_min >= dimRow)
+  if (row_min >= size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col): row is out of range");
 
-  if (col_min >= dimCol)
+  if (col_min >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col): col is out of range");
 
   unsigned int row_max, col_max;
   row_max = m.size(0) + row_min;
   col_max = m.size(1) + col_min;
 
-  if (row_max > dimRow)
+  if (row_max > size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col,m): m.row + row is out of range.");
 
-  if (col_max > dimCol)
+  if (col_max > size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col,m): m.col + col is out of range.");
 
   unsigned int numM = m.getNum();
@@ -537,10 +537,10 @@ void setBlock(SPC::SiconosMatrix  MIn, SP::SiconosMatrix MOut, const Index& dim,
 void SimpleMatrix::getRow(unsigned int r, SiconosVector &vOut) const
 {
   // Get row number r of current matrix and copy it into vOut.
-  if (r >= dimRow)
+  if (r >= size(0))
     SiconosMatrixException::selfThrow("getRow(row): row is out of range");
 
-  if (vOut.size() != dimCol)
+  if (vOut.size() != size(1))
     SiconosMatrixException::selfThrow("getRow(row,v): inconsistent sizes between this and v.");
 
   if (num == 7) // identity matrix
@@ -590,10 +590,10 @@ void SimpleMatrix::setRow(unsigned int r, const SiconosVector& vIn)
 {
   // Set row number r of current matrix with vIn.
   unsigned int numV = vIn.getNum();
-  if (r >= dimRow)
+  if (r >= size(0))
     SiconosMatrixException::selfThrow("setRow(row): row is out of range");
 
-  if (vIn.size() != dimCol)
+  if (vIn.size() != size(1))
     SiconosMatrixException::selfThrow("setRow(row,v): inconsistent sizes between this and v.");
 
   if (num == 6 || num == 7)
@@ -623,10 +623,10 @@ void SimpleMatrix::setRow(unsigned int r, const SiconosVector& vIn)
 void SimpleMatrix::getCol(unsigned int r, SiconosVector &vOut)const
 {
   // Get column number r of current matrix and copy it into vOut.
-  if (r >= dimCol)
+  if (r >= size(1))
     SiconosMatrixException::selfThrow("getCol(col): col is out of range");
 
-  if (vOut.size() != dimRow)
+  if (vOut.size() != size(0))
     SiconosMatrixException::selfThrow("getCol(col,v): inconsistent sizes between this and v.");
 
   if (num == 7) // identity matrix
@@ -678,10 +678,10 @@ void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
 {
   // Set column number r of current matrix with vIn.
   unsigned int numV = vIn.getNum();
-  if (r >= dimCol)
+  if (r >= size(1))
     SiconosMatrixException::selfThrow("setCol(col): col is out of range");
 
-  if (vIn.size() != dimRow)
+  if (vIn.size() != size(0))
     SiconosMatrixException::selfThrow("setCol(col,v): inconsistent sizes between this and v.");
 
   if (num == 6 || num == 7)
@@ -711,10 +711,10 @@ void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
 void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector vOut) const
 {
   // Get row number r of current matrix, starting from element at position pos, and copy it into vOut.
-  if (r >= dimRow)
+  if (r >= size(0))
     SiconosMatrixException::selfThrow("getSubRow(row,pos,v): row is out of range");
 
-  if (vOut->size() > dimCol - pos)
+  if (vOut->size() > size(1) - pos)
     SiconosMatrixException::selfThrow("getSubRow(row,pos,v): inconsistent sizes between this and v.");
 
   if (num == 7) // identity matrix
@@ -777,10 +777,10 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
 {
   // Set row number r, starting from element at position pos, of current matrix with vIn.
   unsigned int numV = vIn->getNum();
-  if (r >= dimRow)
+  if (r >= size(0))
     SiconosMatrixException::selfThrow("setSubRow(row): row is out of range");
 
-  if (vIn->size() > dimCol - pos)
+  if (vIn->size() > size(1) - pos)
     SiconosMatrixException::selfThrow("setSubRow(row,v): inconsistent sizes between this and v.");
 
   if (num == 6 || num == 7)
@@ -815,10 +815,10 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
 void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector vOut) const
 {
   // Get col number r of current matrix, starting from element at position pos, and copy it into vOut.
-  if (r >= dimCol)
+  if (r >= size(1))
     SiconosMatrixException::selfThrow("getSubCol(col,pos,v): col is out of range");
 
-  if (vOut->size() > dimRow - pos)
+  if (vOut->size() > size(0) - pos)
     SiconosMatrixException::selfThrow("getSubCol(col,pos,v): inconsistent sizes between this and v.");
 
   if (num == 7) // identity matrix
@@ -881,10 +881,10 @@ void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
 {
   // Set column number r, starting from element at position pos, of current matrix with vIn.
   unsigned int numV = vIn->getNum();
-  if (r >= dimCol)
+  if (r >= size(1))
     SiconosMatrixException::selfThrow("setSubCol(col): col is out of range");
 
-  if (vIn->size() > dimRow - pos)
+  if (vIn->size() > size(0) - pos)
     SiconosMatrixException::selfThrow("setSubCol(col,v): inconsistent sizes between this and v.");
 
   if (num == 6 || num == 7)

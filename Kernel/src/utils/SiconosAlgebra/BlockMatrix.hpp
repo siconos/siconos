@@ -61,6 +61,13 @@ private:
    */
   SP::Index _tabCol;
 
+  /** Number of rows (Warning: total number of scalar elements, not number of blocks) */
+  unsigned int dimRow;
+
+  /** Number of columns (Warning: total number of scalar elements, not number of blocks) */
+  unsigned int dimCol;
+
+
   /** default constructor
    */
   BlockMatrix() {};
@@ -222,6 +229,12 @@ public:
   /** set an identity matrix
    */
   void eye();
+
+  /** get the number of rows or columns of the matrix
+   *  \param : unsigned int, 0 for rows, 1 for columns
+   *  \return an int
+   */
+  unsigned int size(unsigned int index) const;
 
   /** resize the matrix with nbrow rows and nbcol columns, lower and upper are useful only for SparseMat.The existing elements of the Block matrix are preseved when specified.
    */

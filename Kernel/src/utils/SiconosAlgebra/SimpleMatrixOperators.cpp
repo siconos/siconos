@@ -37,7 +37,7 @@ using std::endl;
 
 double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
 {
-  if (row >= dimRow || col >= dimCol)
+  if (row >= size(0) || col >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix:operator(): Index out of range");
 
   if (num == 1)
@@ -64,7 +64,7 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
 
 double SimpleMatrix::operator()(unsigned int row, unsigned int col) const
 {
-  if (row >= dimRow || col >= dimCol)
+  if (row >= size(0) || col >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix:operator(): Index out of range");
 
   if (num == 1)
@@ -94,7 +94,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
 
   unsigned int numM = m.getNum();
 
-  if (dimRow != m.size(0) || dimCol != m.size(1))
+  if (size(0) != m.size(0) || size(1) != m.size(1))
   {
     resize(m.size(0), m.size(1));
   }
@@ -222,7 +222,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
 
   unsigned int numM = m.getNum();
 
-  if (dimRow != m.size(0) || dimCol != m.size(1))
+  if (size(0) != m.size(0) || size(1) != m.size(1))
     resize(m.size(0), m.size(1));
 
   //    SiconosMatrixException::selfThrow("SimpleMatrix::operator = failed. Inconsistent sizes.");
@@ -324,7 +324,7 @@ SimpleMatrix& SimpleMatrix::operator = (const DenseMat& m)
   if (num != 1)
     SiconosMatrixException::selfThrow("SimpleMatrix::operator = DenseMat : forbidden: the current matrix is not dense.");
 
-  if (dimRow != m.size1() || dimCol != m.size2())
+  if (size(0) != m.size1() || size(1) != m.size2())
     SiconosMatrixException::selfThrow("SimpleMatrix::operator = DenseMat failed. Inconsistent sizes.");
 
   noalias(*(mat.Dense)) = m;
@@ -370,7 +370,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
     return *this;
   }
 
-  if (dimRow != m.size(0) || dimCol != m.size(1))
+  if (size(0) != m.size(0) || size(1) != m.size(1))
     resize(m.size(0), m.size(1));
 
   //  SiconosMatrixException::selfThrow("SimpleMatrix op+= inconsistent sizes.");
@@ -524,7 +524,7 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
     resetLU();
     return *this;
   }
-  if (dimRow != m.size(0) || dimCol != m.size(1))
+  if (size(0) != m.size(0) || size(1) != m.size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix op-= inconsistent sizes.");
 
   if (numM == 0) // m is a BlockMatrix

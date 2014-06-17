@@ -397,6 +397,12 @@ public:
    */
   void eye();
 
+  /** get the number of rows or columns of the matrix
+   *  \param : unsigned int, 0 for rows, 1 for columns
+   *  \return an int
+   */
+  unsigned int size(unsigned int index) const;
+
   /** resize the matrix with nbrow rows and nbcol columns The existing elements of the matrix are preseved when specified.
    *  \exception SiconosMatrixException
    */

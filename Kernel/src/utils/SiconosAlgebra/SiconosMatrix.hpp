@@ -62,11 +62,6 @@ protected:
   ACCEPT_SERIALIZATION(SiconosMatrix);
 
 
-  /** Number of rows (Warning: total number of scalar elements, not number of blocks) */
-  unsigned int dimRow;
-
-  /** Number of columns (Warning: total number of scalar elements, not number of blocks) */
-  unsigned int dimCol;
 
   /** A number to specify the type of the matrix: (block or ublas-type)
    * 0-> BlockMatrix, 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat, 6->zeroMat, 7->IdentityMat
@@ -86,7 +81,7 @@ protected:
       \param unsigned int, number of rows
       \param unsigned int, number of columns
   */
-  SiconosMatrix(unsigned int, unsigned int, unsigned int);
+  //SiconosMatrix(unsigned int, unsigned int, unsigned int);
 
 public:
 
@@ -100,14 +95,6 @@ public:
     if (num == 0) return true ;
     else return false;
   }
-
-  /** determines if the matrix is square
-   *  \return a bool, true if dimRow == dimCol
-   */
-  inline bool isSquare() const
-  {
-    return (dimRow == dimCol);
-  };
 
   /** determines if the matrix has been inversed in place
    *  \return true if the matrix is inversed
@@ -139,7 +126,7 @@ public:
    *  \param : unsigned int, 0 for rows, 1 for columns
    *  \return an int
    */
-   unsigned int size(unsigned int index) const ;
+  virtual unsigned int size(unsigned int index) const = 0;
 
   /** get the attribute num of current matrix
    * \return an unsigned int.

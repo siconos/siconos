@@ -36,20 +36,20 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
   if (&m == this)
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(pos,..., m): m = this.");
 
-  if (row_min >= dimRow)
+  if (row_min >= size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col): row is out of range");
 
-  if (col_min >= dimCol)
+  if (col_min >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::addBloc(row,col)k: col is out of range");
 
   unsigned int row_max, col_max;
   row_max = m.size(0) + row_min;
   col_max = m.size(1) + col_min;
 
-  if (row_max > dimRow)
+  if (row_max > size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col,m): m.row + row is out of range.");
 
-  if (col_max > dimCol)
+  if (col_max > size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col,m): m.col + col is out of range.");
 
   unsigned int numM = m.getNum();
@@ -123,20 +123,20 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
   if (&m == this)
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(pos,..., m): m = this.");
 
-  if (row_min >= dimRow)
+  if (row_min >= size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col): row is out of range");
 
-  if (col_min >= dimCol)
+  if (col_min >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col): col is out of range");
 
   unsigned int row_max, col_max;
   row_max = m.size(0) + row_min;
   col_max = m.size(1) + col_min;
 
-  if (row_max > dimRow)
+  if (row_max > size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col,m): m.row + row is out of range.");
 
-  if (col_max > dimCol)
+  if (col_max > size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col,m): m.col + col is out of range.");
 
   unsigned int numM = m.getNum();

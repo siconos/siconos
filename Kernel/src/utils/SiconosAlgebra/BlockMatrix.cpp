@@ -35,7 +35,7 @@ using std::endl;
 //                CONSTRUCTORS
 // =================================================
 
-BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0)
+BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), dimRow(0), dimCol(0)
 {
   _tabRow.reset(new Index());
   _tabCol.reset(new Index());
@@ -92,7 +92,7 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0)
   }
 }
 
-BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0)
+BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), dimRow(0), dimCol(0)
 {
   unsigned int nbRows = m.getNumberOfBlocks(0);
   unsigned int nbCols = m.getNumberOfBlocks(1);
@@ -135,7 +135,7 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0)
 }
 
 BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int row, unsigned int col):
-  SiconosMatrix(0)
+  SiconosMatrix(0), dimRow(0), dimCol(0)
 {
   if (m.size() != (row * col))
     SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<SiconosMatrix*>, number of blocks inconsistent with provided dimensions.");
@@ -177,7 +177,7 @@ BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int 
 }
 
 BlockMatrix::BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMatrix C, SP::SiconosMatrix D):
-  SiconosMatrix(0)
+  SiconosMatrix(0), dimRow(0), dimCol(0)
 {
   if (A->size(0) != B->size(0) || C->size(0) != D->size(0) ||  A->size(1) != C->size(1) ||  B->size(1) != D->size(1))
     SiconosMatrixException::selfThrow("BlockMatrix constructor(A,B,C,D), inconsistent sizes between A, B, C or D SiconosMatrices.");
@@ -453,6 +453,13 @@ void BlockMatrix::eye()
     }
   }
 }
+
+unsigned int BlockMatrix::size(unsigned int index) const
+{
+  if (index == 0) return dimRow;
+  else return dimCol;
+};
+
 
 //=======================
 // set matrix dimensions

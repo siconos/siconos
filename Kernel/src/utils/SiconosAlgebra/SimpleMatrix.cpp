@@ -44,19 +44,19 @@ using std::endl;
 
 
 // Default (protected, used only for derived classes)
-SimpleMatrix::SimpleMatrix(int i): SiconosMatrix(1, 0, 0), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(int i): SiconosMatrix(1), _isPLUFactorized(false), _isPLUInversed(false)
 {
   mat.Dense = new DenseMat(ublas::zero_matrix<double>());
 }
 
-SimpleMatrix::SimpleMatrix(): SiconosMatrix(1, 0, 0), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(): SiconosMatrix(1), _isPLUFactorized(false), _isPLUInversed(false)
 {
   mat.Dense = new DenseMat(ublas::zero_matrix<double>());
 }
 
 // parameters: dimensions and type.
 SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, UBLAS_TYPE typ, unsigned int upper, unsigned int lower):
-  SiconosMatrix(1, row, col), _isPLUFactorized(false), _isPLUInversed(false)
+  SiconosMatrix(1), _isPLUFactorized(false), _isPLUInversed(false)
 {
   if (typ == DENSE)
   {
@@ -101,7 +101,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, UBLAS_TYPE typ, u
 
 // parameters: dimensions, input value and type
 SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue, UBLAS_TYPE typ, unsigned int upper, unsigned int lower):
-  SiconosMatrix(1, row, col), _isPLUFactorized(false), _isPLUInversed(false)
+  SiconosMatrix(1), _isPLUFactorized(false), _isPLUInversed(false)
 {
   // This constructor has sense only for dense matrices ...
   if (typ == DENSE)
@@ -156,7 +156,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 // }
 
 // Copy constructors
-SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum(), smat.size(0), smat.size(1)), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum()), _isPLUFactorized(false), _isPLUInversed(false)
 {
   if (num == 1)
   {
@@ -185,7 +185,7 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum(
     mat.Identity = new IdentityMat(smat.size(0), smat.size(1));
 }
 
-SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum(), m.size(0), m.size(1)), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum()), _isPLUFactorized(false), _isPLUInversed(false)
 {
   // num is set in SiconosMatrix constructor with m.getNum() ... must be changed if m is Block
   unsigned int numM = m.getNum();
@@ -194,7 +194,7 @@ SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum(), m.
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     num = 1;
     // get number of blocks in a row/col of m.
-    mat.Dense = new DenseMat(dimRow, dimCol);
+    mat.Dense = new DenseMat(m.size(0), m.size(1));
     ConstBlocksIterator1 it;
     ConstBlocksIterator2 it2;
     unsigned int posRow = 0;
@@ -236,37 +236,37 @@ SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum(), m.
     mat.Identity = new IdentityMat(m.size(0), m.size(1));
 }
 
-SimpleMatrix::SimpleMatrix(const DenseMat& m): SiconosMatrix(1, m.size1(), m.size2()), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const DenseMat& m): SiconosMatrix(1), _isPLUFactorized(false), _isPLUInversed(false)
 {
   mat.Dense = new DenseMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const TriangMat& m): SiconosMatrix(2, m.size1(), m.size2()), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const TriangMat& m): SiconosMatrix(2), _isPLUFactorized(false), _isPLUInversed(false)
 {
   mat.Triang = new TriangMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const SymMat& m): SiconosMatrix(3, m.size1(), m.size2()), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SymMat& m): SiconosMatrix(3), _isPLUFactorized(false), _isPLUInversed(false)
 {
   mat.Sym = new SymMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const SparseMat& m): SiconosMatrix(4, m.size1(), m.size2()), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SparseMat& m): SiconosMatrix(4), _isPLUFactorized(false), _isPLUInversed(false)
 {
   mat.Sparse = new SparseMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const BandedMat& m): SiconosMatrix(5, m.size1(), m.size2()), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const BandedMat& m): SiconosMatrix(5), _isPLUFactorized(false), _isPLUInversed(false)
 {
   mat.Banded = new BandedMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const ZeroMat& m): SiconosMatrix(6, m.size1(), m.size2()), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const ZeroMat& m): SiconosMatrix(6), _isPLUFactorized(false), _isPLUInversed(false)
 {
   mat.Zero = new ZeroMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const IdentityMat& m): SiconosMatrix(7, m.size1(), m.size2()), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const IdentityMat& m): SiconosMatrix(7), _isPLUFactorized(false), _isPLUInversed(false)
 {
   mat.Identity = new IdentityMat(m);
 }
@@ -282,9 +282,6 @@ SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii): SiconosMatrix(1
   {
     ioMatrix::read(file, "binary", *this);
   }
-  dimRow = (mat.Dense)->size1();
-  dimCol = (mat.Dense)->size2();
-
 }
 
 SimpleMatrix::~SimpleMatrix()
@@ -452,8 +449,8 @@ double* SimpleMatrix::getArray(unsigned int, unsigned int) const
 
 void SimpleMatrix::zero()
 {
-  unsigned int size1 = dimRow;
-  unsigned int size2 = dimCol;
+  unsigned int size1 = size(0);
+  unsigned int size2 = size(1);
   if (num == 1)
     *mat.Dense = ublas::zero_matrix<double>(size1, size2);
   else if (num == 2)
@@ -494,8 +491,8 @@ void SimpleMatrix::randomize_sym()
 
 void SimpleMatrix::eye()
 {
-  unsigned int size1 = dimRow;
-  unsigned int size2 = dimCol;
+  unsigned int size1 = size(0);
+  unsigned int size2 = size(1);
   if (num == 1)
     *mat.Dense = ublas::identity_matrix<double>(size1, size2);
 
@@ -515,6 +512,51 @@ void SimpleMatrix::eye()
     SiconosMatrixException::selfThrow("SimpleMatrix::eye(): you can not set to identity a matrix of type Zero!.");
   resetLU();
 }
+
+
+
+unsigned int SimpleMatrix::size(unsigned int index) const
+{
+  if (num == 1)
+  {
+    if (index == 0) return (*mat.Dense).size1();
+    else  return (*mat.Dense).size2();
+  }
+  else if (num == 2)
+  {
+   if (index == 0) return (*mat.Triang).size1();
+   else return (*mat.Triang).size2();
+  }
+  else if (num == 3)
+  {
+   if (index == 0) return (*mat.Sym).size1();
+   else  return (*mat.Sym).size2();
+  }
+  else if (num == 4)
+  {
+   if (index == 0) return (*mat.Sparse).size1();
+   else return (*mat.Sparse).size2();
+  }
+  else if (num == 5)
+  {
+  if (index == 0) return  (*mat.Banded).size1();
+  else  return  (*mat.Banded).size2();
+  }
+  else if (num == 6)
+  {
+  if (index == 0) return (*mat.Zero).size1();
+  else  return (*mat.Zero).size2();
+  }
+  else if (num == 7)
+  {
+   if (index == 0) return (*mat.Identity).size1();
+   else  return (*mat.Identity).size2();
+  }
+
+
+
+};
+
 
 //=======================
 // set matrix dimension
@@ -552,9 +594,7 @@ void SimpleMatrix::resize(unsigned int row, unsigned int col, unsigned int lower
     (*mat.Identity).resize(row, col, preserve);
   }
   resetLU();
-  dimRow = row;
-  dimCol = col;
-}
+ }
 
 
 //=====================
