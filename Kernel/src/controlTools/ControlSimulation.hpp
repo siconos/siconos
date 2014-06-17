@@ -29,7 +29,7 @@
 #include "ControlTypeDef.hpp"
 #include "SiconosControlFwd.hpp"
 
-class ControlSimulation : public std11::enable_shared_from_this<ControlSimulation>
+class ControlSimulation
 {
 private:
   /** serialization hooks */

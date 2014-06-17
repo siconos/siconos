@@ -79,7 +79,7 @@
    cm->addAndRecordActuator(myType,t)
    \endcode
 */
-class Actuator : public std11::enable_shared_from_this<Actuator>
+class Actuator
 {
 protected:
   /** serialization hooks

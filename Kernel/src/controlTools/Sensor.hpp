@@ -103,7 +103,7 @@
    See \ref SicControl for details on how to define its own Sensor.
 
  */
-class Sensor : public std11::enable_shared_from_this<Sensor>
+class Sensor
 {
 protected:
   /** serialization hooks

@@ -47,7 +47,7 @@
    its dynamics, inputs and a initial estimate of the state.
 */
 
-class Observer : public std11::enable_shared_from_this<Observer>
+class Observer
 {
 protected:
   /** serialization hooks
