@@ -167,7 +167,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* restrict u , doubl
       dim2 = 2 * (dim + 1);
   }
 
-  mat = (double *)malloc(dim * dim2 * sizeof(double*));
+  mat = (double *)malloc(dim * dim2 * sizeof(double));
 
   assert(problem->q);
 

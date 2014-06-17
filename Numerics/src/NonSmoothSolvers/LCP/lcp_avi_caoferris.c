@@ -46,7 +46,7 @@ void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double 
   for (unsigned int i = 0; i<n; ++i) A[i] = i+1;
 
   /* Call directly the 3rd stage */
-  avi_caoferris_stage3(&avi_pb, w, z, n, A, info, options);
+  *info = avi_caoferris_stage3(&avi_pb, w, z, n, A, options);
 
   /* free allocated stuff */
   free(A);

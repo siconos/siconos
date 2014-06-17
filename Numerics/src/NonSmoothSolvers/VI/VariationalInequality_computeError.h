@@ -27,6 +27,11 @@
 
 */
 
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

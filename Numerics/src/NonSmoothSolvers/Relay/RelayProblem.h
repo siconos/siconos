@@ -21,52 +21,35 @@
 
 
 #include <assert.h>
-/*! \page RelayProblem Primal or Dual Relay problems
+/*! \page RelayProblem Relay or box-constrained AVI problems
   \section relayIntro The problem
-  Two formulations are available, primal and dual problems.
+  Find \f$(z,w)\f$ such that:\n
 
-  Try \f$(z,w)\f$ such that:\n
-
-  <em>primal problem:</em>\n
-
-  \f$
-  \left\lbrace
-  \begin{array}{l}
-  w = M z + q \\
-  -w \in N_{[lb, ub]}(z)\\
-  \end{array}
-  \right.
-  \f$
-
-  or
-
-  <em>dual problem:</em>\n
   \f$
   \left\lbrace
   \begin{array}{l}
   w = M z + q\\
-  -z \in N_{[lb,ub]}(w)\\
-  \end{array}
+  -z \in \mathcal{N}_{K}(w)\\
+  \end{array},
   \right.
   \f$
 
-  here M is an (\f$ n \times n \f$)-matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+  where M is an (\f$ n \times n \f$)-matrix, q, z and w are n-dimensional vectors, K is the box
+  defined by \f$K=\{x\in\mathbb{R}^n \mid lb_i \leq x_i \leq ub_i, i = 1, ..., n \}\f$ and
+  \f$\mathcal{N}\f$ is the normal cone to K.
 
-  The solvers and their parameters are described in \ref RelaySolvers . \n
+  The solvers and their parameters are described in \ref RelaySolvers. \n
 
-  \section prSolversList Available solvers for primal case
+  \section relaySolversList Available solvers
 
-  Use the generic function pr_solver(), to call one the the specific solvers listed below:
+  - relay_avi_caoferris based on an algorithm by Cao and Ferris
+  - relay_path using the PATH solver
 
-  - pr_latin(), latin solver for primal relay problems.
-  - pr_nlgs(), non linear Gauss-Seidel solver for primal relay problems
+  Using an LCP reformulation (splitting z in positive and negative part), we have the following
+  available solvers:
 
-  \section prSolversList Available solvers for dual case
-
-  Use the generic function dr_solver(), to call one the the specific solvers listed below:
-
-  - dr_latin(), latin (LArge Time INcrement)solver for dual relay problems.
-  - dr_nlgs(), non linear Gauss-Seidel solver for dual relay problems
+  - relay_enum which solves the LCP using the enumerative method
+  - relay_lexicolemke which solves the LCP using Lemke's algorithm
 
   (see the functions/solvers list in Relay_Solvers.h)
 
@@ -80,13 +63,14 @@
 
 #include "NumericsMatrix.h"
 
-/** \struct RelayProblem Relay Problem elements
+/** \struct RelayProblem RelayProblem.h
+ * \brief Struct defining a Relay problem
  */
 typedef struct
 {
   int size;          /**< size dim of the problem */
-  NumericsMatrix* M; /**< M matrix of the LCP */
-  double * q;        /**< q vector */
+  NumericsMatrix* M; /**< M matrix of the Relay */
+  double* q;        /**< q vector */
   double* lb;       /**< lb upper bound */
   double* ub;       /**< ub lower bound */
 } RelayProblem;

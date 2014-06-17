@@ -24,6 +24,8 @@
 #include <float.h>
 #include "assert.h"
 
+#include "min_merit.h"
+
 void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict Fmin)
 {
   assert(z != NULL);

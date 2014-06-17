@@ -90,7 +90,7 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   double* s_vec = (double *)calloc(s, sizeof(double));
   /* Call directly the 3rd stage 
    * Here w is used as u and z as s in the AVI */
-  avi_caoferris_stage3(&avi_pb, u_vec, s_vec, n, A, info, options);
+  *info = avi_caoferris_stage3(&avi_pb, u_vec, s_vec, n, A, options);
 
   /* Update z  */
   /* XXX why no w ?  */
