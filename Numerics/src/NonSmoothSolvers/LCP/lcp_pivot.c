@@ -48,9 +48,9 @@ int pivot_selection_bard(double* mat, unsigned int dim)
       }
       else
       {
-        for (unsigned int j = 1; j <= dim; ++j)
+        for (unsigned int j = dim; j <= dim*dim; j += dim)
         {
-          dblock = mat[i + j*dim]/zb - mat[block + j*dim]/z0;
+          dblock = mat[i + j]/zb - mat[block + j]/z0;
           if (dblock < 0.0)
           {
             break;
@@ -91,17 +91,17 @@ void init_M_bard(double* restrict mat, double* restrict M, unsigned int dim, dou
   /*  Copy M but mat[dim+1:, :] = -M */
   for (unsigned int i = 0; i < dim; ++i)
   {
-    for (unsigned int j = 1; j <= dim; ++j)
+    for (unsigned int j = 0; j < dim*dim; j += dim)
     {
-      mat[i + j*dim] = 0.0; /* We need to init only the part corresponding to Id */
-      mat[i+ dim*(j + dim)] = -M[dim*(j-1) + i]; /* Siconos is in column major */
+      mat[i + j + dim] = 0.0; /* We need to init only the part corresponding to Id */
+      mat[i + j + dim*(1 + dim)] = -M[j + i]; /* Siconos is in column major */
     }
   }
 
-  for (unsigned int i = 0; i < dim; ++i)
+  for (unsigned int i = 0, j = dim; i < dim; ++i, j+= dim)
   {
     mat[i] = q[i];
-    mat[i + dim*(i + 1)] =  1.0;
+    mat[i + j] =  1.0;
   }
 }
 
@@ -115,8 +115,8 @@ void init_M_least_index(double* restrict mat, double* restrict M, unsigned int d
   for (unsigned int i = 0 ; i < dim; ++i)
   {
     mat[i] = q[i];
-    for (unsigned int j = 0 ; j < dim; ++j)
-      mat[i + dim*(j+1)] = M[dim*j + i];
+    for (unsigned int j = 0 ; j < dim*dim; j += dim)
+      mat[i + j + dim] = M[j + i];
   }
 }
 
@@ -125,7 +125,7 @@ void lcp_pivot(LinearComplementarityProblem* problem, double* restrict u , doubl
   /* matrix M of the LCP */
   assert(problem);
   assert(problem->M);
-  double * M = problem->M->matrix0;
+  double* M = problem->M->matrix0;
   assert(M);
   /* size of the LCP */
 
