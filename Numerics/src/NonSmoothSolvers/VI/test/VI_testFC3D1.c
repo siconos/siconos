@@ -66,6 +66,10 @@ int main(void)
   //vi.self = &vi;
   vi.F = &Ftest;
   vi.ProjectionOnX = &PXtest;
+  vi.normVI = 0.0;
+  vi.istheNormVIset = 0;
+  vi.set = NULL;
+  vi.nabla_F = NULL;
 
   NumericsOptions global_options;
   setDefaultNumericsOptions(&global_options);
@@ -91,8 +95,8 @@ int main(void)
   int n = problem->numberOfContacts * problem->dimension;
   vi.size=n;
 
-  double *x = (double*)malloc(n* sizeof(double));
-  double *w = (double*)malloc(n* sizeof(double));
+  double *x = (double*)calloc(n, sizeof(double));
+  double *w = (double*)calloc(n, sizeof(double));
 
   PXtest(&vi, x,w);
 
@@ -113,4 +117,6 @@ int main(void)
   free(problem);
   free(x);
   free(w);
+
+  return info;
 }
