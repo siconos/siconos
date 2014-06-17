@@ -287,6 +287,14 @@ IF(WITH_TESTING)
 
  BEGIN_TEST2(NonSmoothSolvers/LCP/test)
 
+  MACRO(SET_LCP_TEST_AS_FAILED DATASET_LCP_DIAG FAILING_ALGO)
+   FOREACH(_DS ${DATASET_LCP_DIAG})
+    FOREACH(_SOLVER ${FAILING_ALGO})
+     SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
+    ENDFOREACH()
+   ENDFOREACH()
+  ENDMACRO()
+
   SET(DATASET_LCP "lcp_mmc.dat;lcp_deudeu.dat;lcp_trivial.dat;lcp_ortiz.dat;lcp_enum_fails.dat")
   LIST(APPEND DATASET_LCP
    "lcp_exp_murty.dat;lcp_exp_murty2.dat;lcp_CPS_1.dat;lcp_CPS_2.dat;lcp_CPS_3.dat;lcp_CPS_4.dat;lcp_CPS_4bis.dat;lcp_CPS_5.dat")
@@ -316,61 +324,33 @@ IF(WITH_TESTING)
   SET(test-LCP_CPG-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
 
   # problem with Cholesky here
-  SET(DATASET_LCP_DIAG "exp_murty;exp_murty2")
-  SET(FAILING_ALGO "LATIN;LATIN_W")
-  FOREACH(_DS ${DATASET_LCP_DIAG})
-   FOREACH(_SOLVER ${FAILING_ALGO})
-    SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
-   ENDFOREACH()
-  ENDFOREACH()
-
+  SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2" "LATIN;LATIN_W")
   # QP reformulation does not always work when the matrix is not symmetric
   # Use NSQP
-  SET(DATASET_LCP_DIAG
-   "exp_murty;exp_murty;ortiz;enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis")
-  SET(FAILING_ALGO "QP")
-  FOREACH(_DS ${DATASET_LCP_DIAG})
-   FOREACH(_SOLVER ${FAILING_ALGO})
-    SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
-   ENDFOREACH()
-  ENDFOREACH()
+  SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2;ortiz;enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "QP")
 
-  SET(test-LCP_QP-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_QP-lcp_exp_murty2_PROPERTIES WILL_FAIL TRUE)
-
-  # NEWTONMIN has no linesearch -> problem in DGESV -> GAME OVER !
+  # NEWTONMIN has no backup descent dir -> problem in DGESV -> GAME OVER !
   SET(test-LCP_NEWTONMIN-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
   SET(test-LCP_NEWTONMIN-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
   SET(test-LCP_NEWTONMIN-lcp_CPS_5_PROPERTIES WILL_FAIL TRUE)
 
   # those test cannot be solved with an algorithm that requires non-zero
   # diagonal elements, that is PGS, BARD, MURTY, LATIN and LATIN_W
-  SET(DATASET_LCP_DIAG "enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis")
-  SET(FAILING_ALGO "PGS;BARD;MURTY;LATIN;LATIN_W")
-  FOREACH(_DS ${DATASET_LCP_DIAG})
-   FOREACH(_SOLVER ${FAILING_ALGO})
-    SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
-   ENDFOREACH()
-  ENDFOREACH()
-
+  SET_LCP_TEST_AS_FAILED("enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "PGS;BARD;MURTY;LATIN;LATIN_W")
   # suprinsingly this works ...
   SET(test-LCP_MURTY-lcp_enum_fails_PROPERTIES WILL_FAIL FALSE)
 
   # those test cannot be solved with Lemke-based solvers (CPS_3 is for Lemke-Howson)
-  # 
-  SET(DATASET_LCP_DIAG "CPS_3")
-  SET(FAILING_ALGO "LEMKE;AVI_CAOFERRIS;PIVOT")
-  FOREACH(_DS ${DATASET_LCP_DIAG})
-   FOREACH(_SOLVER ${FAILING_ALGO})
-    SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
-   ENDFOREACH()
-  ENDFOREACH()
+  SET_LCP_TEST_AS_FAILED("CPS_3" "LEMKE;AVI_CAOFERRIS;PIVOT")
+
+  # PSD matrices and those algo seems not to be a good mix
+  SET_LCP_TEST_AS_FAILED("CPS_2;CPS_3" "NSQP;RPGS")
 
   # lcp_mmc is of size 26, way too much for enum
   RM_TEST2(SICONOS_LCP_ENUM "lcp_mmc.dat")
   # this LCP was put here to show that enum does not work on every LCP, likely
-  # due to numerical problems
-  SET(test-LCP_ENUM-lcp_enum_fails_PROPERTIES WILL_FAIL TRUE)
+  # due to numerical problems, but works on some system ...
+  RM_TEST2(SICONOS_LCP_ENUM "lcp_enum_fails.dat")
 
   # special tests
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol.dat)
@@ -381,6 +361,10 @@ IF(WITH_TESTING)
   NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
 
   END_TEST(NonSmoothSolvers/LCP/test)
+
+
+
+
 
   BEGIN_TEST(NonSmoothSolvers/LinearSystem/test)
 
