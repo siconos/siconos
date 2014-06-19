@@ -1403,6 +1403,7 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
   unsigned int endOut = startOut + sizeB;
   unsigned int numIn = vIn.getNum();
   unsigned int numOut = vOut->getNum();
+  assert(vOut->size() >= endOut && "The output vector is too small");
   if (numIn == numOut)
   {
     if (numIn == 1) // vIn / vOut are Dense

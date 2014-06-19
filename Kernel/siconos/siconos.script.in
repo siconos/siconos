@@ -2,7 +2,7 @@
 
 # Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2010.
 # Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.	
+# of non smooth dynamical systems.
 # Siconos is a free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -336,8 +336,9 @@ if __name__ == '__main__':
                 # symbol by default -- xhub
                 if 'Darwin' in platform.uname():
                     linker_options.append('-undefined dynamic_lookup')
-                if msvc:
-                    linker_options.append('/FORCE')
+                # not sure that is work. Better let the build fail --xhub
+                #if msvc:
+                #    linker_options.append('/FORCE')
                 try:
                     cmake_boolean = { True: '1', False: '0' }
                     subprocess.check_call([
