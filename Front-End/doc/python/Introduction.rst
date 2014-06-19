@@ -29,7 +29,7 @@ Dense matrices and vectors
 Standard `python <https://www.python.org/>`_ sequences as well as
 `numpy <http://www.numpy.org/>`_ arrays and matrices may be used as
 input for matrices and vectors in the ``C`` and ``C++`` API. For
-example, with ``Numerics`` module a linear complementary problem :
+example, with ``Numerics`` module a linear complementarity problem :
 
 .. math::
    \begin{eqnarray*}
