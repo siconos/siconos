@@ -1,6 +1,8 @@
 Modelisation
 ------------
 
+.. _bouncingball-model:
+
 Usage : example of the modelisation of a bouncing ball
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
