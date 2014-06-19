@@ -410,7 +410,9 @@ IF(WITH_TESTING)
 
 
   BEGIN_TEST(NonSmoothSolvers/MLCP/test)
-  NEW_TEST(MLCPtest main_mlcp.cpp)
+  IF(HAVE_SYSTIMES_H)
+    NEW_TEST(MLCPtest main_mlcp.cpp)
+  ENDIF(HAVE_SYSTIMES_H)
   NEW_TEST(ReadWrite_MLCPtest MixedLinearComplementarity_ReadWrite_test.c)
   END_TEST()
 
