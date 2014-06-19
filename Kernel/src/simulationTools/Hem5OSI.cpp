@@ -33,8 +33,8 @@
 
 using namespace RELATION;
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 
@@ -103,7 +103,7 @@ extern "C" void Hem5OSI_solout_wrapper(integer* MODE,
 
 
 Hem5OSI::Hem5OSI(SP::DynamicalSystem ds):
-  OneStepIntegrator(OSI::HEM5OSI)
+  OneStepIntegrator(OSI::HEM5OSI), _idid(0)
 {
   // add ds in the set
   OSIDynamicalSystems->insert(ds);
