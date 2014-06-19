@@ -25,6 +25,7 @@ import platform
 import subprocess
 import getopt
 import tempfile
+import shlex
 
 numerics_prefix = os.getenv('NUMERICSPATH',
                             default='@SiconosNumerics_LIBRARY_DIRS_DIR@')
@@ -249,7 +250,7 @@ if __name__ == '__main__':
             linker_directories.append(a)
 
         if o == '-P':
-            exec_prefix.append(a)
+            exec_prefix += shlex.split(a)
 
         if o == '-O':
             compiler_options.append('-O{0}'.format(a))
