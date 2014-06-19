@@ -318,39 +318,22 @@ class Dat():
 
 class Hdf5():
     """a Hdf5 context manager reads at instantiation the positions and
-       orientations of collision objects from :
+       orientations of collision objects from hdf5 file
 
-       - a ref file (default ref.txt) with shape primitives or shape
-         url
-
-       - an input .dat file (default is input.dat)
-
-       input format is :
-       shaped_id object_group mass px py pz ow ox oy oz vx vy vx vo1 vo2 vo3
-
-       with
-         shape_id : line number in ref file (an integer)
-         object group : an integer ; negative means a static object
-         mass : mass of the object (a float)
-         px py pz : position (float)
-         ow ox oy oz : orientation (as an unit quaternion)
-         vx vy vx vo1 vo2 vo3 : velocity
-
-       It provides functions to output position and orientation during
-       simulation (output is done by default in pos.dat)
-
-       output format is : time object_id px py pz ow ox oy oz
+       It provides functions to output positions and orientations in
+       the same file during simulation (output is done by default in
+       pos.dat)
 
        with:
          time : float
          object_id : the object id (int)
          px, py, pz : components of the position (float)
          ow, ox, oy oz : components of an unit quaternion (float)
+
     """
 
     def __init__(self, io_filename = None, mode = 'w',
                  broadphase=None, osi=None, shape_filename=None,
-                 input_filename='input.dat',
                  set_external_forces=apply_gravity):
 
         if io_filename is None:
@@ -361,7 +344,6 @@ class Hdf5():
         self._mode = mode
         self._broadphase = broadphase
         self._osi = osi
-        self._input_filename = input_filename
         self._static_origins = []
         self._static_orientations = []
         self._static_transforms = []
@@ -445,9 +427,8 @@ class Hdf5():
                     static_cobj.setCollisionFlags(
                         btCollisionObject.CF_STATIC_OBJECT)
 
-                  
                     self._static_origins.append(rc_sorigin)
-                   
+
                     self._static_orientations.append(rc_orientation)
                     transform = btTransform(rc_orientation)
                     transform.setOrigin(rc_sorigin)
@@ -572,6 +553,7 @@ class Hdf5():
         self._dynamic_data[current_line:, :] = np.concatenate((times, tidd,
                                                                positions),
                                                                axis=1)
+
 
     def outputContactForces(self):
         """
