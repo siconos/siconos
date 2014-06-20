@@ -19,8 +19,11 @@
 #include "SiconosSharedLibrary.hpp"
 #include "SiconosSharedLibraryException.hpp"
 
-#include <map>
+#ifndef _WIN32
 #include <dlfcn.h>                      // for dlerror, dlclose, dlopen, etc
+#endif
+
+#include <map>
 #include <stddef.h>                     // for NULL
 #include <iostream>                     // for operator<<, basic_ostream, etc
 #include <utility>                      // for make_pair, pair

@@ -18,9 +18,13 @@
  *
  */
 
+// for M_PI
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include "SphereLDS.hpp"
 
-static double _2PI = 2 * M_PI;
+#define _2PI  2.0*M_PI
 
 void normalize(SP::SiconosVector q, unsigned int i);
 
