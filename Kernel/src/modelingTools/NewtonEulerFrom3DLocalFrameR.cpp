@@ -23,6 +23,8 @@
 #include <boost/math/quaternion.hpp>
 #include "Interaction.hpp"
 
+#include "op3x3.h"
+
 //#define NEFC3D_DEBUG
 /*
 See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'

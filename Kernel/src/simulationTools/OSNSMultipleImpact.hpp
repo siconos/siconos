@@ -24,7 +24,6 @@
 #define _OSNSMULTIPLEIMPACT_
 
 #include "LinearOSNS.hpp"
-#include<fstream>
 #include <string>
 
 using namespace RELATION;
@@ -108,8 +107,6 @@ private:
   double EnerAtPrimaCon;
   //! Step size for the iterative calculation
   double DeltaP;
-  //! ofstream objet to save the data during impact
-  std::ofstream OutputFile;
   //! Name of file into which the datat is writen
   std::string  NameFile;
   /** YesWriteData = true ==>save the data during impact

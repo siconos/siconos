@@ -45,6 +45,7 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include <debug.h>
+#include <fstream>
 #include "Model.hpp"
 
 

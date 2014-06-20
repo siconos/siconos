@@ -31,6 +31,8 @@
 #include "NonSmoothLaw.hpp"
 #include "Simulation.hpp"
 
+#include <NumericsOptions.h>
+
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -494,3 +496,7 @@ void OneStepNSProblem::printStat()
   std::cout << " Number of iterations done: " << _nbIter <<std::endl;
 }
 
+void OneStepNSProblem::setNumericsVerboseMode(bool vMode)
+{
+  _numerics_options->verboseMode = vMode;
+}

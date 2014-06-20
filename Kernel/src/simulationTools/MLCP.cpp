@@ -24,6 +24,8 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
+#include <MLCP_Solvers.h>
+
 using namespace RELATION;
 //#define MLCP_DEBUG
 

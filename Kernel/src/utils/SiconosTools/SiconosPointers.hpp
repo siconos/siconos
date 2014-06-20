@@ -60,12 +60,11 @@ More documentation on smart pointers and reference counting:
 
  */
 
-#include <SiconosNumerics.h>
-
 #include <boost/shared_array.hpp>
 
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 namespace std11 = std;
+#include <memory>
 #else
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>

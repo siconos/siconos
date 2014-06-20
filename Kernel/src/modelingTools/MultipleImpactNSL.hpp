@@ -3,7 +3,9 @@
 #define _MULTIPLEIMPACTNSL_
 //==================================================================================================================
 #include "NonSmoothLaw.hpp"
-#include <iostream>
+#include "SiconosPointers.hpp"          // for DEFINE_SPTR
+#include "SiconosSerialization.hpp"     // for ACCEPT_SERIALIZATION
+#include "SiconosVisitor.hpp"           // for ACCEPT_STD_VISITORS
 
 //==================================================================================================================
 class MultipleImpactNSL : public NonSmoothLaw

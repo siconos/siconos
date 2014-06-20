@@ -30,6 +30,7 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 
+#include <odepack.h>
 
 using namespace RELATION;
 

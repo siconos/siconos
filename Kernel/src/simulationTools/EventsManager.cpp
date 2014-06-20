@@ -18,14 +18,16 @@
 */
 #include "EventsManager.hpp"
 #include "EventFactory.hpp"
-#include "TimeDiscretisation.hpp"
 #include "TimeDiscretisationEvent.hpp"
+#include "TimeDiscretisationEventNoSaveInMemory.hpp"
 #include "Model.hpp"
 #include "Simulation.hpp"
 #include <cmath>
 #include <limits> // for ULONG_MAX
-#include "TimeDiscretisationEventNoSaveInMemory.hpp"
 #include "CxxStd.hpp"
+#include <gmp.h>
+#include <iostream>
+#include <set>
 
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 

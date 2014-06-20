@@ -27,6 +27,8 @@
 #include "Actuator.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
 
+#include <relay_cst.h>
+
 class CommonSMC : public Actuator
 {
 private:

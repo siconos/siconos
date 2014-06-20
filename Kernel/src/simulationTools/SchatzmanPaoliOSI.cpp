@@ -22,12 +22,9 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
-#include "FirstOrderLinearTIDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianLinearTIR.hpp"
-#include "FirstOrderLinearTIR.hpp"
-#include "FirstOrderLinearR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
@@ -1007,12 +1004,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
   SP::SiconosVector e;
   SP::BlockVector Xfree;
 
-  if (relationType == FirstOrder)
-  {
-    Xfree = DSlink[FirstOrderR::xfree];
-    deltax = DSlink[FirstOrderR::deltax];
-  }
-  else if (relationType == NewtonEuler)
+  if (relationType == NewtonEuler)
   {
     Xfree = DSlink[NewtonEulerR::xfree];
   }

@@ -23,6 +23,8 @@
 #include "Simulation.hpp"
 #include "RelayNSL.hpp"
 #include "OSNSMatrix.hpp"
+#include <Relay_Solvers.h>
+
 
 using namespace RELATION;
 

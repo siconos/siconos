@@ -39,6 +39,7 @@
 #define BOOST_ALL_NO_LIB
 #endif
 
+#include <vector>
 #include <limits>
 #include <boost/numeric/ublas/fwd.hpp>
 
@@ -48,9 +49,7 @@
 #include <boost/array.hpp>
 #endif
 
-#include<complex>
-#include "Tools.hpp"
-
+#include <complex>
 #include "SiconosPointers.hpp"
 
 #include "SiconosFwd.hpp"

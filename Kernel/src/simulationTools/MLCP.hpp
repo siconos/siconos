@@ -24,6 +24,8 @@
 #define MLCP_H
 
 #include "LinearOSNS.hpp"
+#include <mlcp_cst.h>
+
 #define MLCP_NB_BLOCKS 200
 /** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
  

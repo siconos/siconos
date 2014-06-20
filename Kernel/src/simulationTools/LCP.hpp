@@ -24,6 +24,9 @@
 #define LCP_H
 
 #include "LinearOSNS.hpp"
+
+#include <LinearComplementarityProblem.h>
+#include <lcp_cst.h>
 TYPEDEF_SPTR(LinearComplementarityProblem)
 
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)

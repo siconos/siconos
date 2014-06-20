@@ -112,9 +112,9 @@ private:
 
 public:
   /** constructor from a minimum set of data
-   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
    */
-  Hem5OSI(SP::DynamicalSystem);
+  Hem5OSI(SP::DynamicalSystem ds);
 
   /** destructor
    */

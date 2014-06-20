@@ -38,6 +38,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "OSNSMatrix.hpp"
 
+#include "Tools.hpp"
 
 using namespace RELATION;
 // #define LINEAROSNS_DEBUG

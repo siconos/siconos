@@ -7,6 +7,12 @@
 /* Forward declarations */
 
 // --- Numerics ---
+
+#include <MixedLinearComplementarityProblem.h>
+#include <NumericsOptions.h>
+#include <SolverOptions.h>
+#include <NumericsMatrix.h>
+
 TYPEDEF_SPTR(MixedLinearComplementarityProblem)
 TYPEDEF_SPTR(NumericsOptions)
 TYPEDEF_SPTR(SolverOptions)
@@ -75,6 +81,8 @@ DEFINE_SPTR(OSNSMatrix)
 DEFINE_SPTR(SiconosMemory)
 
 DEFINE_SPTR(NewtonEulerR)
+
+#include <f2c.h>
 
 TYPEDEF_SAPTR(integer)
 TYPEDEF_SPTR(integer)

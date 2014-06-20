@@ -24,6 +24,9 @@
 #define Relay_H
 
 #include "LinearOSNS.hpp"
+
+#include <relay_cst.h>
+#include <RelayProblem.h>
 TYPEDEF_SPTR(RelayProblem)
 
 /** Formalization and Resolution of a Linear Complementarity Problem (Relay)

@@ -21,6 +21,9 @@
 #include <cmath>
 #include "SphereLDSSphereLDSR.hpp"
 #include <BlockVector.hpp>
+
+#include <op3x3.h>
+
 SphereLDSSphereLDSR::SphereLDSSphereLDSR(double r, double rr) : LagrangianScleronomousR()
 {
   r1 = r;

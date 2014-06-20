@@ -23,10 +23,7 @@
 #ifndef SICONOSSHAREDLIBRARY_H
 #define SICONOSSHAREDLIBRARY_H
 
-#include <iostream>
-#ifndef _WIN32
-#include <dlfcn.h>
-#endif
+#include <string>
 
 #ifndef _WIN32
 #define _SYS_UNX

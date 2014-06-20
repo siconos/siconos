@@ -23,12 +23,10 @@
 #ifndef EventsManager_H
 #define EventsManager_H
 
-#include "SiconosConst.hpp"
-#include "Event.hpp"
+#include <vector>
+#include <limits>
+#include "SiconosFwd.hpp"
 #include "TimeDiscretisation.hpp"
-#include <gmp.h>
-#include <iostream>
-#include <set>
 
 const unsigned long int GAPLIMIT_DEFAULT = 100;
 

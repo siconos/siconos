@@ -19,6 +19,8 @@
 
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
+#include <cstdio>
+
 #include "NewtonEulerR.hpp"
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"

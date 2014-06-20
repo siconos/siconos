@@ -25,7 +25,8 @@
 #define LsodarOSI_H
 
 #include"OneStepIntegrator.hpp"
-#include"SiconosNumerics.h"
+#include "f2c.h"                        // for doublereal, integer
+
 #include<vector>
 const doublereal ATOL_DEFAULT = 100 * MACHINE_PREC;
 const doublereal RTOL_DEFAULT = 10 * MACHINE_PREC;

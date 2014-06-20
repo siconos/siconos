@@ -29,6 +29,8 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
+#include <mlcp_cst.h>
+
 using namespace RELATION;
 using namespace Siconos;
 //#define MLCPPROJ_DEBUG

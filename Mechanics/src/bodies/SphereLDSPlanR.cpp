@@ -22,6 +22,8 @@
 #include "SphereLDSPlanR.hpp"
 #include <BlockVector.hpp>
 
+#include <op3x3.h>
+
 SphereLDSPlanR::SphereLDSPlanR(double r, double A, double B, double C, double D)
   : LagrangianScleronomousR(), r(r), A(A), B(B), C(C), D(D)
 {

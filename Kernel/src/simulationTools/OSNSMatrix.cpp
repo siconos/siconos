@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include <assert.h>
-#include <map>
 #include "OSNSMatrix.hpp"
 #include "NonSmoothLaw.hpp"
 #include "Tools.hpp"

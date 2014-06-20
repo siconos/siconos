@@ -32,11 +32,6 @@ enum SICONOS_STORAGE_TYPE
   SICONOS_SPARSE = 1
 };
 
-/** Map of double; key = the related DS */
-#include <map>
-typedef std::map<SP::DynamicalSystem, unsigned  int> DS_int;
-TYPEDEF_SPTR(DS_int)
-
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
  *
@@ -113,14 +108,6 @@ protected:
 
   /** Storage type used for the present matrix */
   int storageType;
-
-  /** map that links each DynamicalSystem with an int that gives the
-   * position (in number of scalar elements, not DSBlocks) of the
-   * corresponding DSBlock matrix in the full matrix (M in
-   * GlobalFrictionalCase case) - Warning: it depends on the
-   * considered index set (ie on which constraints are "active")
-   */
-  SP::DS_int DSBlocksPositions;
 
   /** Numerics structure to be filled  */
   SP::NumericsMatrix numericsMat;
@@ -220,7 +207,8 @@ public:
   };
 
   /** fill the current class using an index set and a map of interactionBlocks
-      \param InteractionsGraph*, the index set of the active constraints
+      \param indexSet the index set of the active constraints
+      \param updateSize update the sizw of the Matrix (default true)
   */
   virtual void fill(SP::InteractionsGraph, bool updateSize = true);
 

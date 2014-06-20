@@ -23,7 +23,8 @@
 #define EventDriven_H
 
 #include "Simulation.hpp"
-#include "SiconosNumerics.h"
+#include "SiconosFwd.hpp"               // for OneStepIntegrator, etc
+#include "f2c.h"                        // for doublereal, integer
 const double DEFAULT_TOL_ED  = 1000 * DEFAULT_TOLERANCE;
 
 /** Simulation based on event driven method, ie events detection (see theoretical manual for more details).

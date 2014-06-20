@@ -33,7 +33,7 @@ namespace FirstOrderDS {
   enum WorkNames {residu, residuFree, xfree, xPartialNS, deltaxForRelation, xBuffer, sizeWorkV};
 }
 
-/**  General First Order Non Linear Dynamical Systems - \f$ M \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0\f$
+/**  General First Order Non Linear Dynamical Systems - \f$ M \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0 \f$
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -41,12 +41,11 @@ namespace FirstOrderDS {
  *
  * This class defines and computes a generic n-dimensional
  * dynamical system of the form :
- * \f[
- * M \dot x = f(x,t,z) + r, \quad
- * x(t_0) = x_0
- * \f]
+ * \f{equation}
+ * M \dot x = f(x,t,z) + r, \quad x(t_0) = x_0
+ * \f{equation}
  * where
- *    - \f[ x \in R^{n} \f] is the state.
+ *    - \f$ x \in R^{n} \f$ is the state.
  *    - \f$ M \in R^{n\times n} a "mass matrix"
  *    - \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
  *    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discrete state.

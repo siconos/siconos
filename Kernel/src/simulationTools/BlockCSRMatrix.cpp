@@ -26,6 +26,8 @@
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 
+#include "Tools.hpp"
+
 // Default constructor: empty matrix
 BlockCSRMatrix::BlockCSRMatrix():
   _nr(0), 

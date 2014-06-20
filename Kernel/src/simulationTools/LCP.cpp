@@ -22,6 +22,8 @@
 // #define DEBUG_MESSAGES 1
 #include "debug.h"
 
+#include <LCP_Solvers.h>
+
 using namespace RELATION;
 
 LCP::LCP(int numericsSolverId):

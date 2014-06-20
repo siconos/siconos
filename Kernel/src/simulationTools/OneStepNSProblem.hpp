@@ -253,12 +253,9 @@ public:
   };
 
   /** set Numerics verbose mode
-      \param a boolean = 1 for on, = 0 for off
+      \param vMode 1 for on, 0 for off
    */
-  inline void setNumericsVerboseMode(bool vMode)
-  {
-    _numerics_options->verboseMode = vMode;
-  };
+  void setNumericsVerboseMode(bool vMode);
 
   /** reset stat (nbIter and CPUtime)
    */

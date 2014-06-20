@@ -24,6 +24,9 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "OSNSMatrix.hpp"
 
+#include <FrictionContact2D_Solvers.h>
+#include <FrictionContact3D_Solvers.h>
+
 using namespace RELATION;
 
 
