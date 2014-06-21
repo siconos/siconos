@@ -262,6 +262,8 @@ int main()
   }
   aMLCP->reset();
   delete fout;
+  free(floatWorkingMem);
+  free(intWorkingMem);
   cout << "===== End of simulation. ==== " << endl;
   return 0;
 

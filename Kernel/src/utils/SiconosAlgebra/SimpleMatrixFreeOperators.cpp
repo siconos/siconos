@@ -306,23 +306,11 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
 {
   // To compute C = A - B
 
-  std::cout << "A.size(0)" << A.size(0) << std::endl;
-  std::cout << "A.size(1)" << A.size(1) << std::endl;
-  std::cout << "B.size(0)" << B.size(0) << std::endl;
-  std::cout << "B.size(1)" << B.size(1) << std::endl;
-
-
-
-
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
     SiconosMatrixException::selfThrow("Matrix operator -  : inconsistent sizes");
 
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
-
-
-  std::cout << "numA" << numA << std::endl;
-  std::cout << "numB" << numB << std::endl;
 
 
   // == B equal to null ==

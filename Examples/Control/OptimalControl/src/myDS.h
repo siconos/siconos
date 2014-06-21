@@ -93,7 +93,7 @@ public:
 
   /** destructor
    */
-  virtual ~MyDS() {};
+  virtual ~MyDS();
 
 
   /** Default function to compute \f$ f: (x,t)\f$

@@ -38,6 +38,13 @@ MyDS::MyDS(SP::SiconosVector x0): FirstOrderNonLinearDS(x0)
   K1->setValue(1, 1, +1.0);
 }
 
+MyDS::~MyDS()
+{
+  delete Q;
+  delete K1;
+}
+
+
 void MyDS::computef(double t)
 {
 

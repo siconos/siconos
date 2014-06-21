@@ -150,6 +150,10 @@ int main(int argc, char* argv[])
     controllerSimulation->insertNonSmoothProblem(controllerOSNSPB);
 
 
+    // coupling the simulation
+
+    SP::SiconosVector sampledControl(new SiconosVector(2));
+    processDS->setzPtr(sampledControl);
 
 
 
@@ -193,11 +197,6 @@ int main(int argc, char* argv[])
     dataPlotController(0, 8) = (*y)(1);
 
 
-    // coupling the simulation
-
-    SP::SiconosVector sampledControl(new SiconosVector(2));
-    sampledControl->zero();
-    processDS->setzPtr(sampledControl);
 
     // ==== Simulation loop =====
     cout << "====> Start computation ... " << endl << endl;

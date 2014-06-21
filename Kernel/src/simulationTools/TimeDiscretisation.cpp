@@ -104,7 +104,7 @@ TimeDiscretisation::~TimeDiscretisation()
 {
   if (!_tkV.empty())
     _tkV.clear();
-  
+
   mpf_clear(_hgmp);
   mpf_clear(_tkp1);
   mpf_clear(_tk);
