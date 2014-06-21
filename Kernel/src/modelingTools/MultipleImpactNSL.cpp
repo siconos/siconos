@@ -1,5 +1,6 @@
 // This is the implementation for the class <MultipleImpactNSL>
 #include "MultipleImpactNSL.hpp"
+#include <iostream>
 
 MultipleImpactNSL::MultipleImpactNSL(): NonSmoothLaw(1) {}
 // Constructor with parameters

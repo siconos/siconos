@@ -20,6 +20,7 @@
 #include "BlockMatrix.hpp"
 #include "debug.h"
 
+#include <iostream>
 
 // --- Constructor from a set of data - _Mass, K and C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0,

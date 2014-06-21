@@ -18,6 +18,7 @@
 */
 #include "FirstOrderLinearDS.hpp"
 //#include "Plugin.hpp"
+#include <iostream>
 
 typedef void (*computeAfct)(double, unsigned int, unsigned int, double*, unsigned int, double*);
 

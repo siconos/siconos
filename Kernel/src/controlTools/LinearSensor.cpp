@@ -34,7 +34,6 @@ LinearSensor::LinearSensor(SP::DynamicalSystem ds, SP::SimpleMatrix matC, SP::Si
 
 LinearSensor::~LinearSensor()
 {
-  std::cout << "LinearSensor destructor called" <<std::endl;
 }
 
 void LinearSensor::initialize(const Model& m)

@@ -20,6 +20,7 @@
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
 
+#include <iostream>
 
 
 // --- CONSTRUCTORS ---

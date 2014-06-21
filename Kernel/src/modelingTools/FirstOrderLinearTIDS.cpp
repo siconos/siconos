@@ -18,6 +18,7 @@
 */
 #include "FirstOrderLinearTIDS.hpp"
 
+#include <iostream>
 
 // --- Constructors ---
 

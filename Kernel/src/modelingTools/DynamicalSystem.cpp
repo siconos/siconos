@@ -18,6 +18,7 @@
  */
 #include "DynamicalSystem.hpp"
 
+#include <iostream>
 
 
 unsigned int DynamicalSystem::count = 0;

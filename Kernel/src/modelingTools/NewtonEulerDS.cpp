@@ -21,6 +21,7 @@
 #include "BlockMatrix.hpp"
 #include <boost/math/quaternion.hpp>
 
+#include <iostream>
 
 //#define DEBUG_MESSAGES
 #include <debug.h>
