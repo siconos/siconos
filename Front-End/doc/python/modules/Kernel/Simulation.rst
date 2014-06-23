@@ -93,7 +93,7 @@ The simulation can now be executed by a loop:
        # the current ball velocity is ball.velocity()
        # the current reaction force is ball.p(1)
 
-       s.nextStep()
+       simulation.nextStep()
 
 
 

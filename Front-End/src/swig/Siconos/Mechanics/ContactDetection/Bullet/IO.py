@@ -22,7 +22,6 @@ from Siconos.Mechanics.ContactDetection.Bullet import \
 from Siconos.Mechanics.ContactDetection.Bullet.BulletWrap import __mul__ as mul
 
 
-
 from Siconos.Kernel import cast_NewtonImpactFrictionNSL
 
 import Siconos.Kernel as Kernel
@@ -88,6 +87,7 @@ def data(h, name, nbcolumns):
     except KeyError:
         return h.create_dataset(name, (0, nbcolumns),
                                 maxshape=(None, nbcolumns))
+
 
 def add_line(dataset, line):
     dataset.resize(dataset.shape[0] + 1, 0)
@@ -358,6 +358,7 @@ class Hdf5():
         self._nslaws = None
         self._out = None
         self._data = None
+        self._joints = None
         self._io = MechanicsIO()
         self._set_external_forces = set_external_forces
         self._shape_filename = shape_filename
@@ -369,6 +370,7 @@ class Hdf5():
         self._out = h5py.File(self._io_filename, self._mode)
         self._data = group(self._out, 'data')
         self._ref = group(self._data, 'ref')
+        self._joints = group(self._data, 'joints')
         self._static_data = data(self._data, 'static', 9)
         self._dynamic_data = data(self._data, 'dynamic', 9)
         self._cf_data = data(self._data, 'cf', 15)
@@ -381,11 +383,35 @@ class Hdf5():
         else:
             self._shape = VtkShapes.Collection(self._shape_filename)
 
-        self.importScene()
         return self
 
     def __exit__(self, type_, value, traceback):
         self._out.close()
+
+
+    def shapes(self):
+        return self._ref
+
+    def static_data(self):
+        return self._static_data
+
+    def dynamic_data(self):
+        return self._dynamic_data
+
+    def contact_forces_data(self):
+        return self._cf_data
+
+    def solver_data(self):
+        return self._solv_data
+
+    def instances(self):
+        return self._input
+
+    def nonsmooth_laws(self):
+        return self._nslaws
+
+    def joints(self):
+        return self._joints
 
     def importNonSmoothLaw(self, name):
         if self._broadphase is not None:
@@ -398,7 +424,8 @@ class Hdf5():
                                     int(self._nslaws[name].attrs['gid1']),
                                     int(self._nslaws[name].attrs['gid2']))
 
-    def importObject(self, position, orientation, velocity, contactors, mass):
+    def importObject(self, name, position, orientation,
+                     velocity, contactors, mass):
 
         if self._broadphase is not None and 'input' in self._data:
             if mass == 0.:
@@ -469,6 +496,21 @@ class Hdf5():
                      insertDynamicalSystem(body)
                 self._osi.insertDynamicalSystem(body)
 
+    def importJoint(self, name):
+        if self._broadphase is not None:
+            topo = self._broadphase.model().nonSmoothDynamicalSystem().\
+                   Topology()
+            jointClass = getattr(Mechanics.Joints,
+                                 self.joints()[name].attrs['type'])
+
+            ds1_name = self.joints()[name].attrs['object1'].attrs['name']
+            ds2_name = self.joints()[name].attrs['object2'].attrs['name']
+            joint = jointClass(topo.getDynamicalSystem(ds1_name),
+                               topo.getDynamicalSystem(ds2_name),
+                               self.joints()[name].attrs['pivot_point'],
+                               self.joints()[name].attrs['axis'])
+
+
     def importScene(self):
         """
         Import into the broadphase object all the static and dynamic objects
@@ -497,12 +539,15 @@ class Hdf5():
                                         floatv(ctr.attrs['orientation']))
                               for name, ctr in obj.items()]
 
-                self.importObject(floatv(position), floatv(orientation),
+                self.importObject(name, floatv(position), floatv(orientation),
                                   floatv(velocity), contactors, float(mass))
 
         # import nslaws
         for name in self._nslaws:
             self.importNonSmoothLaw(name)
+
+        for name in self.joints():
+            self.importJoint(name)
 
     def outputStaticObjects(self):
         """
@@ -670,8 +715,8 @@ class Hdf5():
                 dat.attrs['position'] = contactor.position
                 dat.attrs['orientation'] = contactor.orientation
 
-            self.importObject(position, orientation, velocity, contactors,
-                              mass)
+            self.importObject(name, position, orientation, velocity,
+                              contactors, mass)
 
             if mass == 0:
                 obj.attrs['id'] = - (self._number_of_static_objects + 1)
@@ -702,6 +747,20 @@ class Hdf5():
 
             self.importNonSmoothLaw(name)
 
+
+    def insertJoint(self, name, object1, object2, pivot_point, axis,
+                    joint_class='PivotJointR'):
+        """
+        insert a pivot joint between two objects
+        """
+        if name not in self.joints():
+            joint = self.joints().create_dataset(name, (0,))
+            joint.attrs['object1'] = object1
+            joint.attrs['object2'] = object2
+            joint.attrs['type'] = joint_class
+            joint.attrs['pivot_point'] = pivot_point
+            joint.attrs['axis'] = axis
+
     def run(self,
             with_timer=False,
             t0=0,
@@ -717,7 +776,10 @@ class Hdf5():
 
         from Siconos.Kernel import \
             Model, MoreauJeanOSI, TimeDiscretisation,\
-            FrictionContact, NewtonImpactFrictionNSL, BlockCSRMatrix
+            GenericMechanical, FrictionContact, NewtonImpactFrictionNSL,\
+            BlockCSRMatrix
+
+        from Siconos.Numerics import SICONOS_FRICTION_3D_AlartCurnierNewton
 
         from Siconos.Mechanics.ContactDetection.Bullet import IO, \
             btConvexHullShape, btCollisionObject, \
@@ -733,12 +795,17 @@ class Hdf5():
         model = Model(t0, T)
 
         # (1) OneStepIntegrators
+        joints = list(self.joints())
+
         self._osi = MoreauJeanOSI(theta)
 
         # (2) Time discretisation --
         timedisc = TimeDiscretisation(t0, h)
 
-        osnspb = FrictionContact(3, solver)
+        if len(joints) > 0:
+            osnspb = GenericMechanical(SICONOS_FRICTION_3D_AlartCurnierNewton)
+        else:
+            osnspb = FrictionContact(3, solver)
 
         osnspb.numericsSolverOptions().iparam[0] = itermax
         osnspb.numericsSolverOptions().dparam[0] = tolerance
