@@ -343,6 +343,20 @@ SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber)
   return ds;
 }
 
+SP::DynamicalSystem Topology::getDynamicalSystem(std::string name)
+{
+  DynamicalSystemsGraph::VIterator vi, vdend;
+  for (std11::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
+  {
+    if (name == _DSG[0]->name.at(*vi))
+      return _DSG[0]->bundle(*vi);
+  }
+
+  RuntimeException::selfThrow("Topology::getDynamicalSystem() ds not found.");
+
+}
+
+
 unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
 {
    if (inumber >= _IG.size())
