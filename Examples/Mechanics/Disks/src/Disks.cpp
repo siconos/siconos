@@ -260,7 +260,9 @@ void Disks::init()
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.3, 2));
 
-    _playground.reset(new SpaceFilter(3, 6, _model, nslaw, _plans, _moving_plans));
+    _playground.reset(new SpaceFilter(3, 6, _model, _plans, _moving_plans));
+
+    _playground->insert(nslaw, 0, 0);
 
     _model->initialize(simulation_);
 

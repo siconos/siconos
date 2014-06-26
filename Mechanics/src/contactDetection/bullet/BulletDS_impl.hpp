@@ -1,6 +1,7 @@
 #ifndef BulletDS_impl_hpp
 #define BulletDS_impl_hpp
-#include <vector>
+
+#include <map>
 
 #include <boost/tuple/tuple.hpp>
 

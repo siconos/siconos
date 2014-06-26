@@ -87,6 +87,11 @@ struct ContactPointVisitor : public SiconosVisitor
   ContactPointVisitor(const Interaction& inter) :
     inter(inter) {};
 
+  /* equality condition */
+  void visit(const NewtonEulerR&)
+  {
+  }
+
 #ifdef HAVE_BULLET
   void visit(const BulletR& rel)
   {
@@ -194,7 +199,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model) const
       ContactPointVisitor visitor(inter);
       inter.relation()->accept(visitor);
       const SiconosVector& data = visitor.answer;
-      result->setRow(current_row, data);
+      if (data.size() == 14) result->setRow(current_row, data);
     }
   }
   return result;

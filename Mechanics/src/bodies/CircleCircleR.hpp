@@ -54,6 +54,7 @@ public:
       \param x2 x position of second disk
       \param y2 y position of second disk
       \param r2 radius of second disk
+      \return distance 
   */
   double distance(double x1, double y1, double r1,
                   double x2, double y2, double r2);

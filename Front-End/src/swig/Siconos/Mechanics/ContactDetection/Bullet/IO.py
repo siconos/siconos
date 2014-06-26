@@ -5,6 +5,8 @@ from __future__ import print_function
 import os
 import sys
 
+from math import cos, sin
+
 import VtkShapes
 import shlex
 import numpy as np
@@ -22,9 +24,11 @@ from Siconos.Mechanics.ContactDetection.Bullet import \
 from Siconos.Mechanics.ContactDetection.Bullet.BulletWrap import __mul__ as mul
 
 
-from Siconos.Kernel import cast_NewtonImpactFrictionNSL
+from Siconos.Kernel import cast_NewtonImpactFrictionNSL, EqualityConditionNSL, \
+    Interaction
 
 import Siconos.Kernel as Kernel
+import Siconos.Mechanics as Mechanics
 
 from Siconos.IO import MechanicsIO
 
@@ -493,23 +497,40 @@ class Hdf5():
                 # add the dynamical system to the non smooth
                 # dynamical system
                 self._broadphase.model().nonSmoothDynamicalSystem().\
-                     insertDynamicalSystem(body)
+                     insertDynamicalSystem(body, str(name))
                 self._osi.insertDynamicalSystem(body)
 
     def importJoint(self, name):
         if self._broadphase is not None:
             topo = self._broadphase.model().nonSmoothDynamicalSystem().\
-                   Topology()
-            jointClass = getattr(Mechanics.Joints,
+                   topology()
+            joint_class = getattr(Mechanics.Joints,
                                  self.joints()[name].attrs['type'])
 
-            ds1_name = self.joints()[name].attrs['object1'].attrs['name']
-            ds2_name = self.joints()[name].attrs['object2'].attrs['name']
-            joint = jointClass(topo.getDynamicalSystem(ds1_name),
-                               topo.getDynamicalSystem(ds2_name),
-                               self.joints()[name].attrs['pivot_point'],
-                               self.joints()[name].attrs['axis'])
+            joint_nslaw = EqualityConditionNSL(5)
 
+            ds1_name = self.joints()[name].attrs['object1']
+            ds1 = topo.getDynamicalSystem(ds1_name)
+
+            if 'object2' in self.joints()[name].attrs:
+                ds2_name = self.joints()[name].attrs['object2']
+                ds2 = topo.getDynamicalSystem(ds2_name)
+                joint = joint_class(ds1,
+                                    ds2,
+                                    self.joints()[name].attrs['pivot_point'],
+                                    self.joints()[name].attrs['axis'])
+                joint_inter = Interaction(5, joint_nslaw, joint)
+                self._broadphase.model().nonSmoothDynamicalSystem().\
+                    link(joint_inter, ds1, ds2)
+
+            else:
+                joint = joint_class(ds1,
+                                    self.joints()[name].attrs['pivot_point'],
+                                    self.joints()[name].attrs['axis'])
+
+                joint_inter = Interaction(5, joint_nslaw, joint)
+                self._broadphase.model().nonSmoothDynamicalSystem().\
+                    link(joint_inter, ds1)
 
     def importScene(self):
         """
@@ -528,6 +549,7 @@ class Hdf5():
 
         # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
+
             for (name, obj) in self._input.items():
                 mass = obj.attrs['mass']
                 position = obj.attrs['position']
@@ -537,17 +559,18 @@ class Hdf5():
                                         int(ctr.attrs['group']),
                                         floatv(ctr.attrs['position']),
                                         floatv(ctr.attrs['orientation']))
-                              for name, ctr in obj.items()]
+                              for _n_, ctr in obj.items()]
 
                 self.importObject(name, floatv(position), floatv(orientation),
                                   floatv(velocity), contactors, float(mass))
 
-        # import nslaws
-        for name in self._nslaws:
-            self.importNonSmoothLaw(name)
+            # import nslaws
+            for name in self._nslaws:
+                self.importNonSmoothLaw(name)
 
-        for name in self.joints():
-            self.importJoint(name)
+            for name in self.joints():
+                print ('import joint:', name)
+                self.importJoint(name)
 
     def outputStaticObjects(self):
         """
@@ -702,11 +725,26 @@ class Hdf5():
         The initial position is mandatory : [x, y z]
         if the mass is zero this a static object.
         """
+
+        if len(orientation) == 2:
+            # axis + angle
+            axis = orientation[0]
+            assert len(axis) == 3
+            angle = orientation[1]
+            assert type(angle) is float
+            n = sin(angle / 2) / np.linalg.norm(axis)
+
+            ori = [cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
+        else:
+            # a given quaternion
+            ori = orientation
+
+
         if name not in self._input:
             obj = group(self._input, name)
             obj.attrs['mass'] = mass
             obj.attrs['position'] = position
-            obj.attrs['orientation'] = orientation
+            obj.attrs['orientation'] = ori
             obj.attrs['velocity'] = velocity
             for num, contactor in enumerate(contactors):
                 dat = data(obj, '{0}-{1}'.format(contactor.name, num), 0)
@@ -714,9 +752,6 @@ class Hdf5():
                 dat.attrs['group'] = contactor.group
                 dat.attrs['position'] = contactor.position
                 dat.attrs['orientation'] = contactor.orientation
-
-            self.importObject(name, position, orientation, velocity,
-                              contactors, mass)
 
             if mass == 0:
                 obj.attrs['id'] = - (self._number_of_static_objects + 1)
@@ -745,10 +780,9 @@ class Hdf5():
             nslaw.attrs['gid1'] = collision_group1
             nslaw.attrs['gid2'] = collision_group2
 
-            self.importNonSmoothLaw(name)
 
-
-    def insertJoint(self, name, object1, object2, pivot_point, axis,
+    def insertJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
+                    axis=[0, 1, 0],
                     joint_class='PivotJointR'):
         """
         insert a pivot joint between two objects
@@ -756,7 +790,8 @@ class Hdf5():
         if name not in self.joints():
             joint = self.joints().create_dataset(name, (0,))
             joint.attrs['object1'] = object1
-            joint.attrs['object2'] = object2
+            if object2 is not None:
+                joint.attrs['object2'] = object2
             joint.attrs['type'] = joint_class
             joint.attrs['pivot_point'] = pivot_point
             joint.attrs['axis'] = axis
