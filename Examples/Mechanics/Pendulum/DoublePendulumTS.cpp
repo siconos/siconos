@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 6.0;                   // final computation time
+    double T = 5.0;                   // final computation time
     double h = 0.0005;                // time step
     double criterion = 0.05;
     unsigned int maxIter = 20000;
@@ -66,14 +66,22 @@ int main(int argc, char* argv[])
     // Initial position (angles in radian)
     SP::SiconosVector q0(new SiconosVector(nDof));
     SP::SiconosVector v0(new SiconosVector(nDof));
+
     q0->zero();
     v0->zero();
-    (*q0)(0) = 1.5;
-    (*q0)(1) = 1.5;
 
+    // (*q0)(0) = 1.5;
+    // (*q0)(1) = 1.5;
+
+    // for sympy plugins uncomment below (relative parametrization)
+    // (*q0)(0) = 0.1;
+    // (*q0)(1) = 0.1;
+    
+    (*q0)(0) = 0.1;
+    (*q0)(1) = 0.2;
+
+    /*REGULAR PLUGINS - uncomment to use*/
     SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumPlugin:mass"));
-
-    // external plug-in
     doublependulum->setComputeNNLFunction("DoublePendulumPlugin", "NNL");
     doublependulum->setComputeJacobianNNLqDotFunction("DoublePendulumPlugin", "jacobianVNNL");
     doublependulum->setComputeJacobianNNLqFunction("DoublePendulumPlugin", "jacobianNNLq");
@@ -81,11 +89,18 @@ int main(int argc, char* argv[])
     doublependulum->setComputeJacobianFIntqDotFunction("DoublePendulumPlugin", "jacobianVFInt");
     doublependulum->setComputeJacobianFIntqFunction("DoublePendulumPlugin", "jacobianFIntq");
 
+    /*SYMPY PLUGINS - uncomment to use*/
+    // SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumSymPyPlugin:mass"));    
+    // doublependulum->setComputeNNLFunction("DoublePendulumSymPyPlugin", "NNL");
+    // doublependulum->setComputeJacobianNNLqDotFunction("DoublePendulumSymPyPlugin", "jacobianVNNL");
+    // doublependulum->setComputeJacobianNNLqFunction("DoublePendulumSymPyPlugin", "jacobianNNLq");
+
     // -------------------
     // --- Interactions---
     // -------------------
 
     // -- relations --
+
     string G = "DoublePendulumPlugin:G0";
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("DoublePendulumPlugin:h0", G));
@@ -140,7 +155,7 @@ int main(int argc, char* argv[])
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
-    int N = ceil((T - t0) / h) + 1;
+    int N = ceil((T - t0) / h);
     cout << "Number of time step   " << N << endl;
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
