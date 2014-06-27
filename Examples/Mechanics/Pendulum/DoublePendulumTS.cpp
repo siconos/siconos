@@ -74,9 +74,11 @@ int main(int argc, char* argv[])
     // (*q0)(1) = 1.5;
 
     // for sympy plugins uncomment below (relative parametrization)
+    // Note, we have the relation :
+    // absolute[(*q0)(0)] + relative[(*q0)(1)] = absolute[(*q0)(1)]
     // (*q0)(0) = 0.1;
     // (*q0)(1) = 0.1;
-    
+
     (*q0)(0) = 0.1;
     (*q0)(1) = 0.2;
 
@@ -90,7 +92,7 @@ int main(int argc, char* argv[])
     doublependulum->setComputeJacobianFIntqFunction("DoublePendulumPlugin", "jacobianFIntq");
 
     /*SYMPY PLUGINS - uncomment to use*/
-    // SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumSymPyPlugin:mass"));    
+    // SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumSymPyPlugin:mass"));
     // doublependulum->setComputeNNLFunction("DoublePendulumSymPyPlugin", "NNL");
     // doublependulum->setComputeJacobianNNLqDotFunction("DoublePendulumSymPyPlugin", "jacobianVNNL");
     // doublependulum->setComputeJacobianNNLqFunction("DoublePendulumSymPyPlugin", "jacobianNNLq");
@@ -199,7 +201,11 @@ int main(int argc, char* argv[])
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*q)(1);
+      // sympy plugin with relative parametrization:
+      // dataPlot(k, 3) = (*q)(0) + (*q)(1);
       dataPlot(k, 4) = (*v)(1);
+      // sympy plugin with relative parametrization:
+      // dataPlot(k, 4) = (*v)(0) + (*v)(1);
       dataPlot(k, 5) =  l1 * sin((*q)(0));
       dataPlot(k, 6) = -l1 * cos((*q)(0));
       dataPlot(k, 7) =  l1 * sin((*q)(0)) + l2 * sin((*q)(1));
