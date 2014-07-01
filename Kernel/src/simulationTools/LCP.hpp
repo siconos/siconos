@@ -68,7 +68,7 @@ protected:
 public:
 
   /** Constructor with Numerics solver id (default = Lemke)
-      \param int id of numerics solver
+      \param numericsSolverId id of numerics solver
   */
   LCP(int numericsSolverId = SICONOS_LCP_LEMKE);
 
@@ -77,14 +77,15 @@ public:
   ~LCP();
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
-   *  \param double : current time
+   *  \param time : current time
    *  \return int, information about the solver convergence.
    */
-  int compute(double);
+  int compute(double time);
 
   /** initialize
+   * \param simulation the simulation
    */
-  void initialize(SP::Simulation sim);
+  void initialize(SP::Simulation simulation);
 
   /** print the data to the screen
    */

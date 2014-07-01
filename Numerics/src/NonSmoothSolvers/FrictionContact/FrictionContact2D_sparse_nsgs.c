@@ -192,7 +192,8 @@ void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, d
         /* Number of GS iterations */
         options[0].iparam[1] = iter;
         fprintf(stderr, "FrictionContact2D_nsgs error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
-        printf("FrictionContact2D_nsgs warning: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
+
+        *info = infoLocal;
         return;
       }
 

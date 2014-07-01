@@ -120,7 +120,7 @@ int FrictionContact::solve(SP::FrictionContactProblem problem)
   {
     problem = frictionContactProblem();
   }
-  
+
   return (*_frictionContact_driver)(&*problem,
                                     &*_z->getArray(),
                                     &*_w->getArray(),
@@ -143,9 +143,9 @@ int FrictionContact::compute(double time)
   {
     return info;
   }
-  
+
   updateMu();
-  
+
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)
@@ -158,7 +158,7 @@ int FrictionContact::compute(double time)
     info = solve();
     postCompute();
   }
-  
+
   return info;
 }
 
@@ -173,5 +173,3 @@ FrictionContact::~FrictionContact()
 {
   deleteSolverOptions(&*_numerics_solver_options);
 }
-
-

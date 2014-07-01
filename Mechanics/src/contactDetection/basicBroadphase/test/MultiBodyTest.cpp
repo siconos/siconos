@@ -88,8 +88,10 @@ TYPEDEF_SPTR(Disks)
 using namespace std;
 
 /* do nothing if solver does not converge */
-void localCheckSolverOuput(int, Simulation*)
-{}
+void localCheckSolverOuput(int info, Simulation*)
+{
+  if (info) exit(1);
+}
 
 double A(double t)
 {

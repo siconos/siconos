@@ -31,11 +31,11 @@ typedef int (*Driver)(FrictionContactProblem*, double*, double*, SolverOptions*,
 TYPEDEF_SPTR(FrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem
- 
+
    \author SICONOS Development Team - copyright INRIA
    \version 3.0.0.
    \date (Creation) Dec 15, 2005
- 
+
   This class is devoted to the formalization and the resolution of
   friction contact problems defined by :
   \f{eqnarray}
@@ -44,24 +44,24 @@ TYPEDEF_SPTR(FrictionContactProblem)
   velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
   \f}
   and a Coulomb friction law.
- 
+
   With:
      - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ the unknowns,
      - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
- 
+
   The dimension of the problem (2D or 3D) is given by the variable contactProblemDim and the proper
   Numerics driver will be called according to this value.
- 
+
   \b Construction: just set Numerics Solver id
 
   Main functions:
- 
+
   \b Usage:
   - compute(time) formalize, solve and post-process the problem.
-  
+
   pre- and post-pro are common to all LinearOSNS and defined in this class.
- 
- 
+
+
  */
 class FrictionContact : public LinearOSNS
 {
@@ -122,6 +122,7 @@ public:
   }
 
   /** get the value of the component number i of mu, the vector of the friction coefficients
+   *  \param i the component number (starting from 0)
    *  \return double value of mu
    */
   inline double getMu(unsigned int i) const
@@ -134,7 +135,7 @@ public:
   void updateMu();
 
   /** set the driver-function used to solve the problem
-      \param a function of prototype Driver
+      \param newFunction function of prototype Driver
   */
   inline void setNumericsDriver(Driver newFunction)
   {
@@ -144,11 +145,11 @@ public:
   // --- Others functions ---
 
   /** initialize the FrictionContact problem(compute topology ...)
-      \param the simulation, owner of this OSNSPB
+      \param simulation the simulation, owner of this OSNSPB
    */
-  void initialize(SP::Simulation);
+  void initialize(SP::Simulation simulation);
 
-  /** 
+  /**
    * \return the friction contact problem from Numerics
    */
   SP::FrictionContactProblem frictionContactProblem();
@@ -160,7 +161,7 @@ public:
   int solve(SP::FrictionContactProblem problem = SP::FrictionContactProblem());
 
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
-   *  \param double current time
+   *  \param time the current time
    *  \return int information about the solver convergence (0: ok, >0 problem, see Numerics documentation)
    */
   virtual int compute(double time);

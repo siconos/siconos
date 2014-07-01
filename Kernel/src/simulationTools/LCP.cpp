@@ -80,8 +80,6 @@ int LCP::compute(double time)
 
     }
 
-
-
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
 
