@@ -1,3 +1,9 @@
+OPTION(WITH_SERIALIZATION "Generates bindings with IO serialization for picklable objects" OFF)
+
+IF(WITH_SERIALIZATION)
+  SET(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS};-DWITH_SERIALIZATION")
+ENDIF()
+
 # cf http://stackoverflow.com/questions/435708/any-way-in-cmake-to-require-gcc-version-4
 # with cmake version >= 2.8.8 we can use CMAKE_C_COMPILER_VERSION and
 # CMAKE_CXX_COMPILER_VERSION
@@ -97,7 +103,7 @@ ENDIF(WITH_FCLIB)
 
 
 IF(SYSTEM_ARCHITECTURE)
-  SET(CMAKE_SWIG_FLAGS "-D__${SYSTEM_ARCHITECTURE}__")
+  SET(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS};-D__${SYSTEM_ARCHITECTURE}__")
 ENDIF()
 
 IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
