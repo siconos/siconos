@@ -786,6 +786,13 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
 
     image_maker = vtk.vtkWindowToImageFilter()
     image_maker.SetInput(renderer_window)
+
+    recorder = vtk.vtkOggTheoraWriter()
+    recorder.SetQuality(2)
+    recorder.SetRate(25)
+    recorder.SetFileName('xout.avi')
+    recorder.SetInputConnection(image_maker.GetOutputPort())
+
     writer = vtk.vtkPNGWriter()
     writer.SetInputConnection(image_maker.GetOutputPort())
 
@@ -803,6 +810,10 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
             self._renderer_window = renderer_window
             self._times = times
             self._image_counter = 0
+
+            self._recording = False
+
+           
 
         def update(self):
             index = bisect.bisect_left(self._times, self._time)
@@ -837,6 +848,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
             self._prec_plot_view.Update()
             self._iter_plot_view.GetRenderer().GetRenderWindow().Render()
             self._prec_plot_view.GetRenderer().GetRenderWindow().Render()
+
 
         def object_pos(self, id_):
             index = bisect.bisect_left(self._times, self._time)
@@ -921,6 +933,16 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                     print 'camera focal point', self._renderer.GetActiveCamera().GetFocalPoint()
                     print 'camera clipping plane', self._renderer.GetActiveCamera().GetClippingRange()
 
+            if key == 's':
+                if not self._recording:
+                    recorder.Start()
+                    self._recording = True
+
+            if key == 'e':
+                if self._recording:
+                    self._recording = False
+                    recorder.End()
+
 
             if key == 'C':
                     this_view.action(self)
@@ -948,6 +970,12 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                     self._time = self._times[self._prec_plot.GetSelection().GetValue(0)]
                     # -> recompute index ...
                     self.update()
+
+
+        def recorder_observer(self, obj, event):
+            if self._recording:
+                image_maker.Modified()
+                recorder.Write()
 
     slider_repres = vtk.vtkSliderRepresentation2D()
 
@@ -988,7 +1016,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
     slider_widget.AddObserver("InteractionEvent", input_observer.time)
 
     interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
-    interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
+
 
     # Create a vtkLight, and set the light parameters.
     light = vtk.vtkLight()
@@ -1061,7 +1089,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
     tview_prec.GetInteractor().AddObserver('RightButtonReleaseEvent',
                                            input_observer.prec_plot_observer)
 
-
+   
     #screen_size = renderer_window.GetScreenSize()
     renderer_window.SetSize(600, 600)
     tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
@@ -1097,4 +1125,8 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
 
     renderer_window.Render()
     interactor_renderer.Initialize()
+
+    timer_id = interactor_renderer.CreateRepeatingTimer(40)   # 25 fps
+    interactor_renderer.AddObserver('TimerEvent', input_observer.recorder_observer)
+
     interactor_renderer.Start()
