@@ -48,12 +48,18 @@ typedef bool (*ContactDestroyedCallback)(void* userPersistentData);
 extern ContactDestroyedCallback gContactDestroyedCallback;
 extern ContactProcessedCallback gContactProcessedCallback;
 
-std::vector<Interaction*> gOrphanedInteractions;
+
+std::map<Interaction*, bool> gOrphanedInteractions;
 
 bool contactClear(void* userPersistentData);
 bool contactClear(void* userPersistentData)
 {
-  gOrphanedInteractions.push_back(static_cast<Interaction *>(userPersistentData));
+  if (true)
+  {
+    DEBUG_PRINTF("contactClear : Interaction : %p\n",   static_cast<Interaction *>(userPersistentData));
+    gOrphanedInteractions[static_cast<Interaction *>(userPersistentData)] = true;
+  }
+
   return true;
 }
 
@@ -161,6 +167,7 @@ void BulletSpaceFilter::buildInteractions(double time)
   DEBUG_PRINT("-----start build interaction\n");
 
   // 1. perform bullet collision detection
+  gOrphanedInteractions.clear();
   _collisionWorld->performDiscreteCollisionDetection();
 
   // 2. collect old contact points from Siconos graph
@@ -175,16 +182,24 @@ void BulletSpaceFilter::buildInteractions(double time)
        ui0 != ui0end; ui0 = v0next)
   {
     ++v0next;  // trick to iterate on a dynamic bgl graph
-    Interaction& inter0 = *(indexSet0->bundle(*ui0));
-    SP::btManifoldPoint cp = ask<ForContactPoint>(*(inter0.relation()));
-    if(cp)
-    {
-      DEBUG_PRINTF("Contact point in interaction : %p\n", &*cp);
+    SP::Interaction inter0 = indexSet0->bundle(*ui0);
 
-      contactPoints[&*cp] = false;
+    if (gOrphanedInteractions.find(&*inter0) != gOrphanedInteractions.end())
+    {
+      model()->nonSmoothDynamicalSystem()->removeInteraction(inter0);
+    }
+
+    else
+    {
+      SP::btManifoldPoint cp = ask<ForContactPoint>(*(inter0->relation()));
+      if(cp)
+      {
+        DEBUG_PRINTF("Contact point in interaction : %p\n", &*cp);
+
+        contactPoints[&*cp] = false;
+      }
     }
   }
-
   unsigned int numManifolds =
     _collisionWorld->getDispatcher()->getNumManifolds();
 
@@ -268,6 +283,17 @@ void BulletSpaceFilter::buildInteractions(double time)
         std::map<btManifoldPoint*, bool>::iterator itc;
         itc = contactPoints.find(&*cpoint);
 
+        DEBUG_EXPR(if (itc == contactPoints.end())
+        {
+          DEBUG_PRINT("contact point not found\n");
+          for(std::map<btManifoldPoint*, bool>::iterator itd=contactPoints.begin();
+              itd != contactPoints.end(); ++itd)
+          {
+            DEBUG_PRINTF("-->%p != %p\n", &*cpoint, &*(*itd).first);
+          }
+        });
+
+
         if (itc == contactPoints.end() || !cpoint->m_userPersistentData)
         {
           /* new interaction */
@@ -328,15 +354,6 @@ void BulletSpaceFilter::buildInteractions(double time)
       }
     }
   }
-
-  for (std::vector<Interaction*>::iterator it = gOrphanedInteractions.begin();
-       it != gOrphanedInteractions.end();
-       ++it)
-  {
-    DEBUG_PRINTF("setting contact point to false for orphaned interaction %p (was %d)\n", *it, activeInteractions[*it]);
-    activeInteractions[*it] = false;
-  }
-  gOrphanedInteractions.clear();
 
   // 4. remove old contact points
   std11::tie(ui0, ui0end) = indexSet0->vertices();

@@ -243,6 +243,8 @@ void Topology::setControlProperty(SP::Interaction inter,
 
 void Topology::removeInteraction(SP::Interaction inter)
 {
+  DEBUG_PRINTF("removeInteraction : %p\n", &*inter);
+
   assert(_DSG[0]->edges_number() == _IG[0]->size());
   removeInteractionFromIndexSet(inter);
   assert(_DSG[0]->edges_number() == _IG[0]->size());
@@ -256,7 +258,8 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
 std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
 Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2)
 {
-  DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2)");
+  DEBUG_PRINTF("Topology::link : inter %p, ds1 %p, ds2 %p\n", &*inter, &*ds,
+               &*ds2);
   if (indexSet0()->is_vertex(inter))
   {
     removeInteractionFromIndexSet(inter);
@@ -354,6 +357,7 @@ SP::DynamicalSystem Topology::getDynamicalSystem(std::string name)
 
   RuntimeException::selfThrow("Topology::getDynamicalSystem() ds not found.");
 
+  return SP::DynamicalSystem();
 }
 
 
@@ -407,4 +411,3 @@ unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
 
   return return_value;
 }
-
