@@ -1,4 +1,4 @@
-# Siconos-Numerics, Copyright INRIA 2005-2010.
+# Siconos-Numerics, Copyright INRIA 2005-2014
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 # Siconos is a free software; you can redistribute it and/or modify
@@ -28,10 +28,12 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 --------------------------------------------------------------------------------
 Main Changes:
 
+	* add generic Newton-based with linesearch solvers for MCP and NCP
 	* rework LCP Solvers: fix some of them (FB and min merit functions) and add
 	new algorithm like Bard-type and Murty's rule.
 	* new AVI solver based on the work by Cao & Ferris. It is also used to
 	solve Relay problem
+	* new solver for box VI based on a merit function.
 
 --------------------------------------------------------------------------------
   v3.6.0

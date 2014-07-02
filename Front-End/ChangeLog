@@ -27,6 +27,7 @@ before it.
 	* numpy.i was updated
 	* New XML input feature: based on an XML description a Model can be
 	instantiated using python
+	* support C++11
 
 --------------------------------------------------------------------------------
   v3.6.0 - October 2013
