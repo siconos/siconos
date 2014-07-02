@@ -1376,17 +1376,6 @@ SiconosVector abs_wise(const SiconosVector& V){
   return Vabs;
 }
 //
-void getMax(const SiconosVector& V, double& maxvalue, unsigned int& idmax){
-  maxvalue = V.getValue(0);
-  idmax = 0;
-  for (unsigned int it = 1; it < V.size(); ++it){
-    if (V.getValue(it) > maxvalue){
-    maxvalue = V.getValue(it);
-    idmax = it;
-    };
-  };
-}
-//
 void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin){
   minvalue = V.getValue(0);
   idmin = 0;

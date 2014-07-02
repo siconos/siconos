@@ -314,12 +314,21 @@ int main(int argc, char* argv[])
     dataPlotRef.zero();
     ioMatrix::read("SliderCrankD1MinusLinearOSI.ref", "ascii", dataPlotRef);
 
-    double error = (dataPlot - dataPlotRef).normInf();
+    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
+    (dataPlot - dataPlotRef).normInfByColumn(err);
+    err->display();
+    double error = 0.0;
+    for (unsigned int i = 0; i < err->size(); ++i)
+    {
+      if (error < (*err)(i))
+        error = (*err)(i);
+    }
+
     std::cout << "Error = "<< error << std::endl;
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    if (error > 1e-12)
     {
-      (dataPlot - dataPlotRef).display();
+    //  (dataPlot - dataPlotRef).display();
 
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
       std::cout << "Error = "<< error << std::endl;

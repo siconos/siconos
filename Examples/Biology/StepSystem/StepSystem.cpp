@@ -188,8 +188,12 @@ int main(int argc, char *argv[])
     dataPlotRef.zero();
     ioMatrix::read("simu.1.6.ref", "ascii", dataPlotRef);
     cout<<"====> Comparison with reference file ..."<<endl;
+    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
+    (dataPlot - dataPlotRef).normInfByColumn(err);
+    err->display();
+
     std::cout << "Error w.r.t. reference file : " <<(dataPlot-dataPlotRef).normInf() << std::endl;
-    if ((dataPlot-dataPlotRef).normInf() > 1e-12)
+    if ((dataPlot-dataPlotRef).normInf() > 1e-11)
     {
       std::cout << "Warning. The result is rather different from the reference file."<< std::endl;
       return 1;

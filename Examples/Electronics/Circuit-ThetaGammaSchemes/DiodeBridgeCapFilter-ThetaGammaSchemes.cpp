@@ -239,9 +239,18 @@ int main(int argc, char* argv[])
     dataPlotRef.zero();
 
     ioMatrix::read("DiodeBridgeCapFilter.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf();
+    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
+    (dataPlot - dataPlotRef).normInfByColumn(err);
+    err->display();
+    double error = 0.0;
+    for (unsigned int i = 0; i < 3; ++i)
+    {
+      if (error < (*err)(i))
+        error = (*err)(i);
+    }
+
     cout << "error ="<<error << endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
+    if (error > 1e-12)
     {
       (dataPlot - dataPlotRef).display();
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;

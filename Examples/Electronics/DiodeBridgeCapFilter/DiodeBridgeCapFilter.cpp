@@ -241,7 +241,16 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("DiodeBridgeCapFilter.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
+    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
+    (dataPlot - dataPlotRef).normInfByColumn(err);
+    err->display();
+    double error = 0.0;
+    for (unsigned int i = 0; i < 3; ++i)
+    {
+      if (error < (*err)(i))
+        error = (*err)(i);
+    }
+
     std::cout << "Error = "<< error << std::endl;
     if (error > 1e-12)
     {
