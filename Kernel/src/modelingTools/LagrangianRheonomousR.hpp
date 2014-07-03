@@ -107,18 +107,6 @@ protected:
   /** plugged vector used to compute hDot */
   SP::SiconosVector _hDot;
 
-  /** LagrangianRheonomousR plug-in to compute h(q,t,z)
-  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-  * @param q : pointer to the first element of q
-  * @param time : current time
-  * @param sizeY : size of vector y (ie of the intercation)
-  * @param[in,out] y : pointer to the first element of y
-  * @param sizeZ : size of vector z
-  * @param[in,out] z : a vector of user-defined parameters
-  */
-  //  SP::PluggedObject _pluginjqh
-  //  FPtr4 hPtr;
-
   /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
   * @param q : pointer to the first element of q
@@ -129,24 +117,13 @@ protected:
   * @param[in,out] z : a vector of user-defined parameters
   */
   SP::PluggedObject _pluginhDot;
-  //  FPtr4 hDotPtr;
-
-  /** LagrangianRheonomousR plug-in to compute G0(q,t,z), gradient of h accoring to q
-  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-  * @param q : pointer to the first element of q
-  * @param time : current time
-  * @param sizeY : size of vector y (ie of the intercation)
-  * @param[in,out] G0 : pointer to the first element of G0
-  * @param sizeZ : size of vector z
-  * @param[in,out] z : a vector of user-defined parameters
-  */
-  //  FPtr4 computeJachqPtr;
-
-
-
 
   /** initialize G matrices or components specific to derived classes.
-  */
+   * \param inter : the Interaction
+   * \param DSlink : block vectors from dynamical systems
+   * \param workV : work vectors
+   * \param workM : work vectors
+   */
   void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** default constructor
@@ -200,41 +177,34 @@ public:
   */
 
   /** to set a specified function to compute function hDot
-  *  \param std::string : the complete path to the plugin
-  *  \param std::string : the name of the function to use in this plugin
+  *  \param pluginpath: the complete path to the plugin
+  *  \param name: the name of the function to use in this plugin
   */
-  void setComputehDotFunction(const std::string& , const std::string&);
+  void setComputehDotFunction(const std::string& pluginpath, const std::string& name);
   //  virtual void setComputehFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** to compute y = h(t,q,z) using plug-in mechanism
   * \param time current time
-  * \param inter interaction that owns the relation
-  * \param q the BlockVector of coordinates
-  * \param z the BlockVector of parameters
+  * \param q the vector of coordinates
+  * \param z the vector of parameters
+  * \param y the y vector
   */
   virtual void computeh(double time, SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
   /** to compute hDot using plug-in mechanism
    * \param time current time
-   * \param inter interaction that owns the relation
-   * \param q the BlockVector of coordinates
-   * \param z the BlockVector of parameters
+   * \param q the vector of coordinates
+   * \param z the vector of parameters
    */
   virtual void computehDot(double time, SiconosVector& q, SiconosVector& z);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
-  * \param: double, current time
-  * \param: unsigned int
+  * \param time: double, current time
+  * \param q: the coordinates vector
+  * \param z: the parameters vector
   */
   virtual void computeJachq(double time, SiconosVector& q, SiconosVector& z);
 
-  void computeJachqDot(double time, Interaction& inter)
-  {
-    /* \warning. This method should never be called, since we are only considering
-     * rheonomic constraint
-     */
-    assert(0) ;
-  }
 
   /* compute all the H Jacobian */
   void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
@@ -246,15 +216,19 @@ public:
 
 
   /** to compute output
-  *  \param double : current time
-  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+   * \param time : current time
+   * \param inter : the Interaction
+   * \param interProp : the Interaction properties
+  *  \param derivativeNumber : number of the derivative to compute, optional, default = 0.
   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
   /** to compute p
-  *  \param double : current time
-  *  \param unsigned int: "derivative" order of lambda used to compute input
-  */
+   * \param time : current time
+   * \param inter : the Interaction
+   * \param interProp : the Interactions properties
+   * \param level: "derivative" order of lambda used to compute input
+   */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   ACCEPT_STD_VISITORS();

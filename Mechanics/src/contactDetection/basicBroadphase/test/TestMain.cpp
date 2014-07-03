@@ -26,6 +26,7 @@ using namespace std;
 
 /* get a test pointer in the test suite */
 
+CppUnit::Test* GetTest(CppUnit::Test* tests, const std::string& name);
 CppUnit::Test* GetTest(CppUnit::Test* tests, const std::string& name)
 {
 
@@ -64,6 +65,7 @@ CppUnit::Test* GetTest(CppUnit::Test* tests, const std::string& name)
 };
 
 /* Dump a unit test as a cmake test */
+void CdashDumpTest(CppUnit::Test *test, char* myname);
 void CdashDumpTest(CppUnit::Test *test, char* myname)
 {
 
@@ -75,6 +77,7 @@ void CdashDumpTest(CppUnit::Test *test, char* myname)
 };
 
 /* Dump the test suite */
+int CdashDump(CppUnit::Test *tests, char* myname);
 int CdashDump(CppUnit::Test *tests, char* myname)
 {
 

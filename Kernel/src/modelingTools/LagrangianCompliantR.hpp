@@ -78,6 +78,10 @@ protected:
   LagrangianCompliantR() : LagrangianR(RELATION::CompliantR) {  };
 
   /** initialize G matrices or components specific to derived classes.
+   * \param inter : the Interaction
+   * \param DSlink : block vectors from dynamical systems
+   * \param workV : work vectors
+   * \param workM : work vectors
   */
   void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
   void zeroPlugin();
@@ -86,8 +90,8 @@ public:
 
   /** constructor from a set of data
   *  \param pluginh the name of the plugin to compute h
-  *  \param computeJacobianhq the name of the plugin to compute the gradient of h w.r.t q
-  *  \param computeJacobianhlambda the name of the plugin to compute the gradient of h w.r.t \f$\lambda\f$
+  *  \param pluginJacobianhq the name of the plugin to compute the gradient of h w.r.t q
+  *  \param pluginJacobianhlambda the name of the plugin to compute the gradient of h w.r.t \f$\lambda\f$
   */
   LagrangianCompliantR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginJacobianhlambda);
 
@@ -96,42 +100,50 @@ public:
   virtual ~LagrangianCompliantR() {};
 
   /** compute y = h(q,v,t) using plug-in mechanism
-  * \param time current time
-  * \param inter the Interaction
+  * \param time: the current time
+  * \param q: vector of coordinates
+  * \param lambda: vector for \f[ \lambda \f]
+  * \param z: parameter vector
+  * \param y: vector for y
   */
-  void computeh(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
+  virtual void computeh(double time, SiconosVector& q, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
 
   /** compute the jacobian of h w.r.t. q using plug-in mechanism
   * \param time current time
-  * \param inter the Interaction
+  * \param q: vector of coordinates
+  * \param lambda: vector for \f[ \lambda \f]
+  * \param z: parameter vector
   */
-  void computeJachq(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z);
+  virtual void computeJachq(double time, SiconosVector& q, SiconosVector& lambda, SiconosVector& z);
 
   /** compute the jacobian of h w.r.t. \f$\lambda\f$ using plug-in mechanism
-  * \param time current time
-  * \param inter the Interaction
+  * \param time:  current time
+  * \param q0: coordinates
+  * \param lambda: vector for \f[ \lambda \f]
+  * \param z: vector of parameters
   */
-  void computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z);
+  virtual void computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z);
 
   const std::string getJachlambdaName() const;
   const std::string getJachqName() const;
 
-  
-
   /** to compute output
-  *  \param time the current time
-  *  \param inter the Interaction owning y
-  *  \param level number of the derivative to compute, optional, default = 0.
+  *  \param time: the current time
+  *  \param inter: the Interaction owning y
+  *  \param interProp: Interaction properties
+  *  \param derivativeNumber: the number of the derivative to compute,
+  *  optional, default = 0.
   */
   void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
   /** to compute the input
-  *  \param time the current time
-  *  \param inter the Interaction owning lambda
-  *  \param level "derivative" order of lambda used to compute input
+  *  \param time: the current time
+  *  \param inter: the Interaction owning lambda
+  *  \param interProp: Interaction properties
+  *  \param level: "derivative" order of lambda used to compute input
   */
   void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-  
+
   /* compute all the H Jacobian */
   void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 

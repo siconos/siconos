@@ -162,29 +162,20 @@ public:
   * \param q the BlockVector of coordinates
   * \param z the BlockVector of parameters
   */
-  void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
+  virtual void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
   * \param time the current time
   * \param inter interaction that owns the relation
   */
-  void computeJachq(SiconosVector& q, SiconosVector& z);
+  virtual void computeJachq(SiconosVector& q, SiconosVector& z);
 
   /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
    * \param time double, current time
    * \param inter interaction that owns the relation
    */
   void computedotjacqhXqdot(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
-
-
-  void computeJachqDot(double time, Interaction& inter)
-  {
-    /* \warning. This method should never be called, since we are only considering
-     * scleronomic constraint
-     */
-    assert(0) ;
-  }
 
   /* compute all the H Jacobian */
   void computeJach(double time, Interaction& inter, InteractionProperties& interProp);

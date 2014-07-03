@@ -45,18 +45,21 @@ using namespace RELATION;
 SP::LsodarOSI global_object;
 
 // This first function must have the same signature as argument F (arg 1) in DLSODAR (see opkdmain.f in Numerics)
+extern "C" void LsodarOSI_f_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot);
 extern "C" void LsodarOSI_f_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
   return global_object->f(sizeOfX, time, x, xdot);
 }
 
 // Function to wrap g: same signature as argument G (arg 18) in DLSODAR (see opkdmain.f in Numerics)
+extern "C" void LsodarOSI_g_wrapper(integer* nEq, doublereal* time, doublereal* x, integer* ng, doublereal* gOut);
 extern "C" void LsodarOSI_g_wrapper(integer* nEq, doublereal* time, doublereal* x, integer* ng, doublereal* gOut)
 {
   return global_object->g(nEq, time, x, ng, gOut);
 }
 
 // Function to wrap jacobianf: same signature as argument JAC (arg 16) in DLSODAR (see opkdmain.f in Numerics)
+extern "C" void LsodarOSI_jacobianf_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd);
 extern "C" void LsodarOSI_jacobianf_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
   return global_object->jacobianfx(sizeOfX, time, x, ml, mu, jacob, nrowpd);

@@ -103,14 +103,17 @@ public:
   }
 
   /** get _intData[i]
+   * \param i: index number (starting from 0)
    *  \return an integer
    */
   inline integer intData(unsigned int i) const
   {
     return _intData[i];
   }
-  /** get _intData[i]
-   *  \return an integer
+
+  /** set _intData[i]
+   * \param i: index number (starting from 0)
+   * \param newValue : the new value
    */
   inline void setIntData(unsigned int i, int newValue)
   {
@@ -209,10 +212,10 @@ public:
   void updateData();
 
   /** fill xWork with a doublereal
-   *  \param integer*, size of x array
-   *  \param doublereal* x:array of double
+   *  \param size: size of x array
+   *  \param array: x array of double
    */
-  void fillXWork(integer*, doublereal*) ;
+  void fillXWork(integer* size, doublereal* array) ;
 
   /** compute rhs(t) for all dynamical systems in the set
    */
@@ -233,23 +236,18 @@ public:
   void initialize();
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param double: tinit, initial time
-   *  \param double: tend, end time
-   *  \param double: tout, real end time
-   *  \param int&: in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
+   *  \param tinit: initial time
+   *  \param tend: end time
+   *  \param tout: real end time
+   *  \param ioparam: in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
    */
-  void integrate(double&, double&, double&, int&);
+  void integrate(double& tinit, double& tend, double& tout, int& ioparam);
 
   /** update the state of the DynamicalSystems attached to this Integrator
    *  \param level level of interest for the dynamics
    */
   void updateState(const unsigned int level);
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepIntegrator* : the integrator which must be converted
-   * \return a pointer on the integrator if it is of the right type, NULL otherwise
-   */
-  //static LsodarOSI* convert (OneStepIntegrator* osi);
 
   void prepareNewtonIteration(double time)
   {
@@ -257,10 +255,10 @@ public:
   };
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex of the interaction graph
+   * \param vertex_descr descriptor vertex of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
+  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_descr, OneStepNSProblem* osnsp);
 
   /** print the data to the screen
    */

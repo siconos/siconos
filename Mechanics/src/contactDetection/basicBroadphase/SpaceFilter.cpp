@@ -981,19 +981,21 @@ void SpaceFilter::insert(SP::Hashed hashed)
 
 /* dynamical systems proximity detection */
 typedef std::pair<int, int> interPair;
-
+bool operator ==(interPair const& a, interPair const& b);
 bool operator ==(interPair const& a, interPair const& b)
 {
   return ((a.first == b.first) && (a.second == b.second));
 }
 
-
+bool operator ==(std::pair<double, double> const& a,
+                 std::pair<double, double> const& b);
 bool operator ==(std::pair<double, double> const& a,
                  std::pair<double, double> const& b)
 {
   return ((a.first == b.first) && (a.second == b.second));
 }
 
+bool operator ==(DiskPlanRDeclared const& a, DiskPlanRDeclared const& b);
 bool operator ==(DiskPlanRDeclared const& a, DiskPlanRDeclared const& b)
 {
   return ((a[0] == b[0] &&
