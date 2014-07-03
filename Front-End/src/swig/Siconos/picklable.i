@@ -17,9 +17,18 @@
 /* allow python serialization from SiconosIO serializers */
 %define %make_picklable(CLASS, COMPONENT)
 %extend CLASS {
-  std::string __getstate__()
+  std::string binary_export()
   {
-    return binary_export();
+    std::stringstream ss;
+    boost::archive::binary_oarchive ar(ss);
+    siconos_io_register_ ## COMPONENT(ar);
+    ar << ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
+    return ss.str();
+  }
+
+   std::string __getstate__()
+  {
+    return CLASS##_binary_export($self);
   }
 
   %pythoncode %{
@@ -45,15 +54,7 @@
     ar >> ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
   }
   
-  std::string binary_export()
-  {
-    std::stringstream ss;
-    boost::archive::binary_oarchive ar(ss);
-    siconos_io_register_ ## COMPONENT(ar);
-    ar << ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
-    return ss.str();
-  }
-  
+ 
   void binary_import(std::string const& from_str)
   {
     std::stringstream ss(from_str);

@@ -2,36 +2,40 @@
 
 from Siconos.Kernel import SiconosVector
 
-v1 = SiconosVector([1, 2, 3])
+v1 = SiconosVector([1.0, 2.0, 3.0])
 
 v2 = SiconosVector()
 
 def test_serialization1():
+    ''' test xml IO'''
 
     v2.xml_import(v1.xml_export())
 
-    assert(v2.getValue(0) == 1)
-    assert(v2.getValue(1) == 2)
-    assert(v2.getValue(2) == 3)
+    assert(v2.getValue(0) == 1.0)
+    assert(v2.getValue(1) == 2.0)
+    assert(v2.getValue(2) == 3.0)
 
-def test_serialization2():
+# question to Maurice: should we keep that or is it completely obsolete?
+#def test_serialization2():
+#    ''' test text IO'''
+#
+#    v2.text_import(v1.text_export())
+#
+#    assert(v2.getValue(0) == 1.0)
+#    assert(v2.getValue(1) == 2.0)
+#    assert(v2.getValue(2) == 3.0)
+#
 
-    v2.text_import(v1.text_export())
-
-    assert(v2.getValue(0) == 1)
-    assert(v2.getValue(1) == 2)
-    assert(v2.getValue(2) == 3)
-
-
-def test_serialization2():
+def test_serialization3():
+    ''' test binary IO'''
 
     v2.binary_import(v1.binary_export())
 
-    assert(v2.getValue(0) == 1)
-    assert(v2.getValue(1) == 2)
-    assert(v2.getValue(2) == 3)
+    assert(v2.getValue(0) == 1.0)
+    assert(v2.getValue(1) == 2.0)
+    assert(v2.getValue(2) == 3.0)
 
-def test_serialization3():
+def test_serialization4():
     from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL, \
         LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
 
