@@ -30,12 +30,12 @@ def tmpfile():
 
 def usage():
     """
-    Print usage.
-    """
+    {0} <hdf5 file>
+    """.format(sys.argv[0])
     print '{0}: Usage'.format(sys.argv[0])
     print """
     {0} [--help] [tmin=<float value>] [tmax=<float value>]
-        [--cf-scale=<float value>] [hdf5 file]
+        [--cf-scale=<float value>] <hdf5 file>
     """
 
 
@@ -80,17 +80,10 @@ for o, a in opts:
 
 if len(args) > 0:
     io_filename = args[0]
+
 else:
-    io_filename = 'io.hdf5'
-
-
-print min_time, max_time
-if len(args) == 1:
-    filename = args[0]
-elif len(args) > 1:
     usage()
     exit(1)
-
 
 def random_color():
     r = random.uniform(0.1, 0.9)
@@ -813,8 +806,6 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
 
             self._recording = False
 
-           
-
         def update(self):
             index = bisect.bisect_left(self._times, self._time)
             index = max(0, index)
@@ -1089,7 +1080,6 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
     tview_prec.GetInteractor().AddObserver('RightButtonReleaseEvent',
                                            input_observer.prec_plot_observer)
 
-   
     #screen_size = renderer_window.GetScreenSize()
     renderer_window.SetSize(600, 600)
     tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
