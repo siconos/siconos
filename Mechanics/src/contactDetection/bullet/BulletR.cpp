@@ -22,10 +22,13 @@
 
 #include "BulletR.hpp"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
 #include <bullet/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 #include <btBulletCollisionCommon.h>
+#pragma clang diagnostic pop
 
 #include <Interaction.hpp>
 

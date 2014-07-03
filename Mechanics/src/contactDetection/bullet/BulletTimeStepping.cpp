@@ -20,7 +20,11 @@
 #include "BulletTimeStepping.hpp"
 #include "BulletSiconosFwd.hpp"
 #include "BulletDS.hpp"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
 #include <btBulletCollisionCommon.h>
+#pragma clang diagnostic pop
 
 #ifndef DEBUG_BULLET_TIMESTEPPING
 #define DEBUG_MESSAGES 1
