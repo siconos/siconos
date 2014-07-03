@@ -606,6 +606,7 @@ bool LinearOSNS::preCompute(double time)
     _sizeOutput = _M->size();
 
     // Checks z and _w sizes and reset if necessary
+
     if (_z->size() != _sizeOutput)
     {
       _z->resize(_sizeOutput, false);
@@ -633,8 +634,18 @@ bool LinearOSNS::preCompute(double time)
         SPC::SiconosVector yOld = inter->yOld(inputOutputLevel());
         SPC::SiconosVector lambdaOld = inter->lambdaOld(inputOutputLevel());
 
-        setBlock(*yOld, _w, yOld->size(), 0, pos);
-        setBlock(*lambdaOld, _z, lambdaOld->size(), 0, pos);
+
+        if (_sizeOutput >= yOld->size() + pos)
+        {
+          setBlock(*yOld, _w, yOld->size(), 0, pos);
+          setBlock(*lambdaOld, _z, lambdaOld->size(), 0, pos);
+        }
+        else
+        {
+          std::cout << std::endl;
+          std::cout << "LinearOSNS::preCompute FIXME: Old variables are bigger than the LinearOSNS variables w and z !" << std::endl;
+        }
+
       }
     }
   }
