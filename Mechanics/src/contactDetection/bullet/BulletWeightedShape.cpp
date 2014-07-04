@@ -40,3 +40,13 @@ BulletWeightedShape::BulletWeightedShape(SP::btCollisionShape shape, const doubl
   (*_inertia)(2, 2) = localinertia[2];
 
 }
+
+
+void BulletWeightedShape::setInertia(double ix, double iy, double iz)
+{
+  _inertia->zero();
+
+  (*_inertia)(0, 0) = ix;
+  (*_inertia)(1, 1) = iy;
+  (*_inertia)(2, 2) = iz;
+}

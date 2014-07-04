@@ -32,21 +32,50 @@ private:
   SP::SimpleMatrix _inertia;
 
 public:
+  /* Constructor for an association of a bullet shape and an inertia
+   * \param shape the collision shape
+   * \param mass the mass
+   */
   BulletWeightedShape(SP::btCollisionShape shape, const double& mass);
 
+  /* Get the collision shape
+   * \return a btCollisionShape
+   */
   const SP::btCollisionShape& collisionShape() const
   {
     return _shape;
   };
 
+  /* Get the mass
+   * \return a double
+   */
   const double& mass() const
   {
     return _mass;
   };
 
-  SP::SimpleMatrix inertiaMatrix() const
+  /* Get the inertia matrix
+   * \return a SP::SimpleMatrix
+   */
+  SP::SimpleMatrix inertia() const
   {
     return _inertia;
   };
+
+  /* Modify the inertia matrix.
+     \param newInertia the new inertia matrix
+  */
+  void setInertia(SP::SimpleMatrix newInertia)
+  {
+    _inertia = newInertia;
+  }
+
+  /* Modify the inertia matrix.
+     \param ix x component
+     \param iy y component
+     \param iz z component
+  */
+  void setInertia(double ix, double iy, double iz);
+
 };
 #endif

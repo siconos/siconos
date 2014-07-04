@@ -38,7 +38,7 @@ BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
                    SP::SiconosVector relative_orientation,
                    int group) :
   NewtonEulerDS(position, velocity, weightedShape->mass(),
-                weightedShape->inertiaMatrix()),
+                weightedShape->inertia()),
   _weightedShape(weightedShape),
   _collisionObjects(new CollisionObjects())
 {
