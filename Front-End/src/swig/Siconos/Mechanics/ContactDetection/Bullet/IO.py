@@ -392,29 +392,55 @@ class Hdf5():
     def __exit__(self, type_, value, traceback):
         self._out.close()
 
+# hdf5 structure
 
     def shapes(self):
+        """
+        Shapes : parameterized primitives or user defined
+                 (convex set or meshes)
+        """
         return self._ref
 
     def static_data(self):
+        """
+        Coordinates and orientations of static objects.
+        """
         return self._static_data
 
     def dynamic_data(self):
+        """
+        Coordinates and orientations of dynamics objects.
+        """
         return self._dynamic_data
 
     def contact_forces_data(self):
+        """
+        Contact points informations.
+        """
         return self._cf_data
 
     def solver_data(self):
+        """
+        Solver output
+        """
         return self._solv_data
 
     def instances(self):
+        """
+        Scene objects.
+        """
         return self._input
 
     def nonsmooth_laws(self):
+        """
+        Non smooth laws between group of contactors.
+        """
         return self._nslaws
 
     def joints(self):
+        """
+        Joints between dynamic objects or between an object and the scenery.
+        """
         return self._joints
 
     def importNonSmoothLaw(self, name):
@@ -429,7 +455,7 @@ class Hdf5():
                                     int(self._nslaws[name].attrs['gid2']))
 
     def importObject(self, name, position, orientation,
-                     velocity, contactors, mass):
+                     velocity, contactors, mass, inertia):
 
         if self._broadphase is not None and 'input' in self._data:
             if mass == 0.:
@@ -475,6 +501,12 @@ class Hdf5():
             else:
                 # a moving object
                 shape_id = self._shapeid[contactors[0].name]
+                bws = BulletWeightedShape(
+                    self._shape.at_index(shape_id), mass)
+
+                if inertia is not None:
+                    bws.setInertia(inertia[0], inertia[1], inertia[2])
+
                 body = BulletDS(BulletWeightedShape(
                     self._shape.at_index(shape_id), mass),
                     position + orientation,
@@ -561,8 +593,14 @@ class Hdf5():
                                         floatv(ctr.attrs['orientation']))
                               for _n_, ctr in obj.items()]
 
+                if 'inertia' in obj.attrs:
+                    inertia = obj.attrs['inertia']
+                else:
+                    inertia = None
+
                 self.importObject(name, floatv(position), floatv(orientation),
-                                  floatv(velocity), contactors, float(mass))
+                                  floatv(velocity), contactors, float(mass), 
+                                  inertia)
 
             # import nslaws
             for name in self._nslaws:
@@ -718,7 +756,7 @@ class Hdf5():
                      position,
                      orientation=[1, 0, 0, 0],
                      velocity=[0, 0, 0, 0, 0, 0],
-                     mass=0):
+                     mass=0, inertia=None):
         """
         Insertion of an object.
         Contact detection is defined by a list of contactors.
@@ -739,13 +777,16 @@ class Hdf5():
             # a given quaternion
             ori = orientation
 
-
         if name not in self._input:
             obj = group(self._input, name)
             obj.attrs['mass'] = mass
             obj.attrs['position'] = position
             obj.attrs['orientation'] = ori
             obj.attrs['velocity'] = velocity
+
+            if inertia is not None:
+                obj.attrs['inertia'] = inertia
+
             for num, contactor in enumerate(contactors):
                 dat = data(obj, '{0}-{1}'.format(contactor.name, num), 0)
                 dat.attrs['name'] = contactor.name
@@ -803,11 +844,29 @@ class Hdf5():
             h=0.0005,
             multipointIterations=True,
             theta=0.50001,
+            NewtonMaxIter=20,
             set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
-            NewtonMaxIter=20,
             itermax=100000,
             tolerance=1e-8):
+        """
+        Run a simulation from inputs in hdf5 file.
+        parameters are:
+          with_timer : use a timer for log output (default False)
+          t0 : starting time
+          T  : end time
+          h  : timestep
+          multiPointIterations : use bullet "multipoint iterations"
+                                 (default True)
+          theta : parameter for Moreau-Jean OSI
+          NewtonMaxIter : maximum number of iterations for
+                          integrator Newton loop (default 20)
+          set_external_forces : method for external forces
+                                (default earth gravity)
+          solver : default Numerics.SICONOS_FRICTION_3D_NSGS
+          itermax : maximum number of iteration for solver
+          tolerance : friction contact solver tolerance
+        """
 
         from Siconos.Kernel import \
             Model, MoreauJeanOSI, TimeDiscretisation,\
