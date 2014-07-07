@@ -24,7 +24,7 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v3.7.0 
+  v3.7.0
 --------------------------------------------------------------------------------
 Main Changes:
 
@@ -34,6 +34,7 @@ Main Changes:
 	* new AVI solver based on the work by Cao & Ferris. It is also used to
 	solve Relay problem
 	* new solver for box VI based on a merit function.
+	* add a callback mechanism to gather solver informations.
 
 --------------------------------------------------------------------------------
   v3.6.0

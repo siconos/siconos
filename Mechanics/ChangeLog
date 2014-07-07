@@ -23,6 +23,16 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
+  v3.7.0
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* add the possibility of multiples contactors (bullet collision
+          objects) for one Newton Euleur dynamical system.
+	* add the possibility of multiples nslaws between collision groups.
+	* BulletDS : inertia matrix may be modified by the user.
+
+--------------------------------------------------------------------------------
   v3.6.0 - October 2013
 --------------------------------------------------------------------------------
 	* Mechanics is a new Siconos module which gather former classes

@@ -21,13 +21,14 @@ Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
 --------------------------------------------------------------------------------
-  v3.7.0 - 
+  v3.7.0 -
 --------------------------------------------------------------------------------
 	* The bindings can now be build with python3
 	* numpy.i was updated
 	* New XML input feature: based on an XML description a Model can be
 	instantiated using python
 	* support C++11
+	* Improvements of Mechanics/ContactDetection/Bullet/IO (cf Examples)
 
 --------------------------------------------------------------------------------
   v3.6.0 - October 2013
