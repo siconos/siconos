@@ -631,14 +631,14 @@ bool LinearOSNS::preCompute(double time)
         // or z
         unsigned int pos = _M->getPositionOfInteractionBlock(inter);
 
-        SPC::SiconosVector yOld = inter->yOld(inputOutputLevel());
-        SPC::SiconosVector lambdaOld = inter->lambdaOld(inputOutputLevel());
+        SiconosVector& yOutputOld = *inter->yOld(inputOutputLevel());
+        SiconosVector& lambdaOld = *inter->lambdaOld(inputOutputLevel());
 
 
-        if (_sizeOutput >= yOld->size() + pos)
+        if (_sizeOutput >= yOutputOld.size() + pos)
         {
-          setBlock(*yOld, _w, yOld->size(), 0, pos);
-          setBlock(*lambdaOld, _z, lambdaOld->size(), 0, pos);
+          setBlock(yOutputOld, _w, yOutputOld.size(), 0, pos);
+          setBlock(lambdaOld, _z, lambdaOld.size(), 0, pos);
         }
         else
         {
