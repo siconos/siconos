@@ -51,7 +51,7 @@ public:
     VectorOfBlockVectors& DSlink = *interProp.DSlink;
     if (derivativeNumber == 0)
     {
-      computeh(*DSlink[NewtonEulerR::q0], *inter.y(0));
+      computeh(t, *DSlink[NewtonEulerR::q0], *inter.y(0));
     }
     else
     {
@@ -59,7 +59,7 @@ public:
     }
 
   }
-  void computeh(BlockVector& q0, SiconosVector& y)
+  void computeh(double time, BlockVector& q0, SiconosVector& y)
   {
     double height = fabs(q0.getValue(0)) - _sBallRadius;
     // std::cout <<"my_NewtonEulerR:: computeh _jachq" << std:: endl;
