@@ -23,7 +23,7 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v3.7.0 
+  v3.7.0
 --------------------------------------------------------------------------------
 Main Changes:
 
@@ -32,6 +32,7 @@ Main Changes:
 	* First Order Relations are now stateless
 	* Fix newton-loop for First Order Systems + relations. The fully
 	non-linear case is now supported
+	* translation of siconos script in Python to improve portability.
 
 --------------------------------------------------------------------------------
   v3.6.0 October 2013
