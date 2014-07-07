@@ -299,6 +299,11 @@ typedef __mpz_struct mpz_t[1];
   %template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>,
                             std11::shared_ptr<DynamicalSystem> >;
 
+//BouncingBallNETS.py, attempt to reach DSlink as a vector...
+//swig failure.
+//%shared_ptr(VectorOfBlockVectors);
+//%template (vectorOfBlockVectors) std::vector<std11::shared_ptr<BlockVector> >;
+///
 //}
 
 
