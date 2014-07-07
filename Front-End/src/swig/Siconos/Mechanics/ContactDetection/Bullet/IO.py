@@ -72,11 +72,9 @@ def object_id(obj):
 
 
 def apply_gravity(body):
-    g = constants.g
+    g = constants.g * scale
     weight = [0, 0, - body.massValue() * g]
     body.setFExtPtr(weight)
-
-
 
 def group(h, name):
     try:
@@ -338,7 +336,7 @@ class Hdf5():
 
     def __init__(self, io_filename = None, mode = 'w',
                  broadphase=None, osi=None, shape_filename=None,
-                 set_external_forces=apply_gravity):
+                 set_external_forces=None, scale=None):
 
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
@@ -369,8 +367,15 @@ class Hdf5():
         self._number_of_shapes = 0
         self._number_of_dynamic_objects = 0
         self._number_of_static_objects = 0
+        self._scale = scale
 
     def __enter__(self):
+        if self._set_external_forces is None:
+            self._set_external_forces = self.apply_gravity
+            
+        if self._scale is None:
+            self._scale = 100  # 1000 : mm, 100 : cm, 1 : m
+
         self._out = h5py.File(self._io_filename, self._mode)
         self._data = group(self._out, 'data')
         self._ref = group(self._data, 'ref')
@@ -391,6 +396,12 @@ class Hdf5():
 
     def __exit__(self, type_, value, traceback):
         self._out.close()
+
+
+    def apply_gravity(self, body):
+        g = constants.g * self._scale
+        weight = [0, 0, - body.massValue() * g]
+        body.setFExtPtr(weight)
 
 # hdf5 structure
 
@@ -507,13 +518,12 @@ class Hdf5():
                 if inertia is not None:
                     bws.setInertia(inertia[0], inertia[1], inertia[2])
 
-                body = BulletDS(BulletWeightedShape(
-                    self._shape.at_index(shape_id), mass),
-                    position + orientation,
-                    velocity,
-                    contactors[0].position,
-                    contactors[0].orientation,
-                    contactors[0].group)
+                body = BulletDS(bws,
+                                position + orientation,
+                                velocity,
+                                contactors[0].position,
+                                contactors[0].orientation,
+                                contactors[0].group)
 
                 for contactor in contactors[1:]:
                     shape_id = self._shapeid[contactor.name]
@@ -607,7 +617,6 @@ class Hdf5():
                 self.importNonSmoothLaw(name)
 
             for name in self.joints():
-                print ('import joint:', name)
                 self.importJoint(name)
 
     def outputStaticObjects(self):
