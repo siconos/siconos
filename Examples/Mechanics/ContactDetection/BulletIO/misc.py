@@ -40,7 +40,7 @@ with IO.Hdf5(mode='w') as io:
                                  Contactor('LongBox', collision_group=1,
                                            relative_position=[0, 0, 0])],
                     position=[0, 0, 3],
-                    velocity=[100, 0, 0, 10, 10, 10],
+                    velocity=[10, 0, 0, 1, 1, 1],
                     mass=.1)
 
     # the ground object made with the ground shape. As the mass is
@@ -55,4 +55,8 @@ with IO.Hdf5(mode='w') as io:
 # with the vview command.
 with IO.Hdf5(mode='r+') as io:
 
+    # By default earth gravity is applied and the units are those
+    # of the International System of Units.
+    # Because of fixed collision margins used in the collision detection,
+    # sizes of small objects may need to be expressed in cm or mm.
     io.run()
