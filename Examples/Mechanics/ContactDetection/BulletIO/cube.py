@@ -36,8 +36,8 @@ with IO.Hdf5() as io:
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
     io.insertObject('cube', [Contactor('Cube')], position=[0, 0, 2],
-                    velocity=[10, 0, 0, 2, 2, 2],
-                    mass=1)
+                    velocity=[100, 0, 0, 20, 20, 20],
+                    mass=.1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
