@@ -88,7 +88,6 @@ public:
   void setTheta(unsigned int newTheta);
 
   /** Initialize the ControlSimulation, instantiate all objects
-   * \param x0 starting point
    */
   void initialize();
 
