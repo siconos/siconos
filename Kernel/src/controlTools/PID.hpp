@@ -86,7 +86,7 @@ public:
   void setKPtr(SP::SiconosVector newPtr);
 
   /** Set the value of _ref to newValue
-   * \param newValue
+   * \param newValue the new value
    */
   void inline setRef(double newValue)
   {

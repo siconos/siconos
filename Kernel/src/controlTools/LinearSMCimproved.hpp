@@ -61,7 +61,7 @@ protected:
 
   /** Predict the effect of the perturnation during the next timestep
    * \param xTk available state at the current time instant
-   * \param CBstart matrix \f$CB^{*}\f$
+   * \param CBstar matrix \f$CB^{*}\f$
    */
   void predictionPerturbation(const SiconosVector& xTk, SimpleMatrix& CBstar);
 
