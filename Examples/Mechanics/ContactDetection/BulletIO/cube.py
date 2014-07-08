@@ -36,7 +36,7 @@ with IO.Hdf5() as io:
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
     io.insertObject('cube', [Contactor('Cube')], position=[0, 0, 2],
-                    velocity=[10, 0, 0, 2, 2, 2],
+                    velocity=[10, 0, 0, 1, 1, 1],
                     mass=1)
 
     # the ground object made with the ground shape. As the mass is
@@ -51,4 +51,8 @@ with IO.Hdf5() as io:
 # with the vview command.
 with IO.Hdf5(mode='r+') as io:
 
+    # By default earth gravity is applied and the units are those
+    # of the International System of Units.
+    # Because of fixed collision margins used in the collision detection,
+    # sizes of small objects may need to be expressed in cm or mm.
     io.run()

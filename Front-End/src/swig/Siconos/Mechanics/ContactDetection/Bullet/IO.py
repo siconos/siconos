@@ -72,7 +72,7 @@ def object_id(obj):
 
 
 def apply_gravity(body):
-    g = constants.g * scale
+    g = constants.g
     weight = [0, 0, - body.massValue() * g]
     body.setFExtPtr(weight)
 
@@ -336,7 +336,7 @@ class Hdf5():
 
     def __init__(self, io_filename = None, mode = 'w',
                  broadphase=None, osi=None, shape_filename=None,
-                 set_external_forces=None, scale=None):
+                 set_external_forces=None, length_scale=None):
 
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
@@ -367,14 +367,14 @@ class Hdf5():
         self._number_of_shapes = 0
         self._number_of_dynamic_objects = 0
         self._number_of_static_objects = 0
-        self._scale = scale
+        self._length_scale = length_scale
 
     def __enter__(self):
         if self._set_external_forces is None:
             self._set_external_forces = self.apply_gravity
-            
-        if self._scale is None:
-            self._scale = 100  # 1000 : mm, 100 : cm, 1 : m
+
+        if self._length_scale is None:
+            self._length_scale = 1  # 1 => m, 1/100. => cm
 
         self._out = h5py.File(self._io_filename, self._mode)
         self._data = group(self._out, 'data')
@@ -399,7 +399,7 @@ class Hdf5():
 
 
     def apply_gravity(self, body):
-        g = constants.g * self._scale
+        g = constants.g / self._length_scale
         weight = [0, 0, - body.massValue() * g]
         body.setFExtPtr(weight)
 
@@ -609,7 +609,7 @@ class Hdf5():
                     inertia = None
 
                 self.importObject(name, floatv(position), floatv(orientation),
-                                  floatv(velocity), contactors, float(mass), 
+                                  floatv(velocity), contactors, float(mass),
                                   inertia)
 
             # import nslaws
@@ -848,6 +848,7 @@ class Hdf5():
 
     def run(self,
             with_timer=False,
+            lenth_scale=1,
             t0=0,
             T=10,
             h=0.0005,
@@ -862,12 +863,18 @@ class Hdf5():
         Run a simulation from inputs in hdf5 file.
         parameters are:
           with_timer : use a timer for log output (default False)
-          t0 : starting time
-          T  : end time
-          h  : timestep
+          length_scale : gravity is multiplied by this factor.
+                         1.     for meters (default).
+                         1./100 for centimeters.
+                         This parameter may be needed for small
+                         objects because of Bullet collision margin (0.04).
+
+          t0 : starting time (default 0)
+          T  : end time      (default 10)
+          h  : timestep      (default 0.0005)
           multiPointIterations : use bullet "multipoint iterations"
                                  (default True)
-          theta : parameter for Moreau-Jean OSI
+          theta : parameter for Moreau-Jean OSI (default 0.50001)
           NewtonMaxIter : maximum number of iterations for
                           integrator Newton loop (default 20)
           set_external_forces : method for external forces
@@ -875,6 +882,7 @@ class Hdf5():
           solver : default Numerics.SICONOS_FRICTION_3D_NSGS
           itermax : maximum number of iteration for solver
           tolerance : friction contact solver tolerance
+
         """
 
         from Siconos.Kernel import \

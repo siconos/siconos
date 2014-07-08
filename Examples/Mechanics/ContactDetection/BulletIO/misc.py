@@ -33,8 +33,8 @@ with IO.Hdf5(mode='w') as io:
 
     # A 'two boxes object made with two Contactors.
     # As a mass is given, it is a dynamic system involved in contact
-    # detection and in the simulation.  
-    io.insertObject('twoboxes', [Contactor('BigBox', 
+    # detection and in the simulation.
+    io.insertObject('twoboxes', [Contactor('BigBox',
                                            collision_group=0,
                                            relative_position=[0, 0, 0]),
                                  Contactor('LongBox', collision_group=1,
@@ -55,4 +55,8 @@ with IO.Hdf5(mode='w') as io:
 # with the vview command.
 with IO.Hdf5(mode='r+') as io:
 
+    # By default earth gravity is applied and the units are those
+    # of the International System of Units.
+    # Because of fixed collision margins used in the collision detection,
+    # sizes of small objects may need to be expressed in cm or mm.
     io.run()
