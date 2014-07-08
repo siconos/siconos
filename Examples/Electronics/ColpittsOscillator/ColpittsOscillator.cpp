@@ -221,6 +221,15 @@ int main(int argc, char* argv[])
     dataPlotRef.zero();
     ioMatrix::read("Colpitts.ref", "ascii", dataPlotRef);
     double errRef= (dataPlot - dataPlotRef).normInf();
+    if (errRef > 1e-12)
+    {
+      SimpleMatrix dataPlotRef2(dataPlot);
+      dataPlotRef2.zero();
+      ioMatrix::read("Colpitts-sol2.ref", "ascii", dataPlotRef2);
+      double errRef2 = (dataPlot - dataPlotRef2).normInf();
+      if (errRef2 < errRef) errRef = errRef2;
+    }
+
     std::cout <<
                 "Error with respect to  the reference file : "
               <<errRef << std::endl;
