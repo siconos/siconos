@@ -24,8 +24,9 @@ IF(SOURCE_IS_GIT_REPO MATCHES "^true\n")
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
  
   MESSAGE(STATUS "ABBREV_GIT_SHA1 :: ${SOURCE_ABBREV_GIT_SHA1}")
-
-  SET(BUILDNAME "${BUILDNAME}-${SOURCE_ABBREV_GIT_SHA1}")
+  
+  # buildname must stay static to have track possibility on CDash.
+  # SET(BUILDNAME "${BUILDNAME}-${SOURCE_ABBREV_GIT_SHA1}")
 
   # Jenkins always works in detached head mode, so we have to work a bit more to get the branch name
   EXECUTE_PROCESS(COMMAND
