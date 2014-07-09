@@ -344,7 +344,7 @@ MACRO(WRITE_NOTES)
   IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
     # a note file for the dashboard
     FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Testing/Notes)
-    FILE(WRITE ${CMAKE_BINARY_DIR}/Testing/Notes/Build "git sha1 : ${SOURCE_GIT_SHA1}\n")
+    FILE(WRITE ${CMAKE_BINARY_DIR}/Testing/Notes/Build "git sha1 : ${SOURCE_ABBREV_GIT_SHA1}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "cmake version : ${CMAKE_VERSION}\n")
     # the default buildname
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "System name : ${CMAKE_SYSTEM_NAME}\n")
