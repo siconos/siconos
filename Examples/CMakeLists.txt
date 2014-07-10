@@ -21,7 +21,7 @@ SET(NO_TEST_FILES QGL)
 
 # sharing a double between an executable and a library is hackisch
 IF(MSVC)
-  SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock SimplePendulum)
+  SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock Pendulum)
 ENDIF(MSVC)
 
 SICONOS_PROJECT(Examples)
