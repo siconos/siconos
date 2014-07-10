@@ -33,6 +33,7 @@ Main Changes:
 	* Fix newton-loop for First Order Systems + relations. The fully
 	non-linear case is now supported
 	* translation of siconos script in Python to improve portability.
+	* Removal of XML-related code
 
 --------------------------------------------------------------------------------
   v3.6.0 October 2013

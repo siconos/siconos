@@ -4,8 +4,20 @@ import Siconos.Kernel as SK
 import SiconosXMLParser
 import numpy as np
 import sys
+import os
 
 xsdfile = '${SiconosKernel_XML_SCHEMA}/SiconosModelSchema-V3.7.xsd'
+
+if not os.path.exists(xsdfile):
+    python_path = os.path.dirname(SK.__file__)
+    while not os.path.exists(os.path.join(python_path, 'share')) and tried_folder < 10:
+        python_path = os.path.join(python_path, os.path.pardir)
+
+    if tried_folder == 10:
+        sys.stderr.write('No XML Schema found, stopping!')
+        sys.exit(1)
+    xsdfile = os.path.join(python_path, 'share', 'siconos-kernel', 'SiconosModelSchema-V3.7.xsd')
+
 nsSiconos = {"xsd": "http://www.w3.org/2001/XMLSchema", "cArg": "X-Constructor_Arguments"}
 
 def _createVector(vec, dataType=np.float64):

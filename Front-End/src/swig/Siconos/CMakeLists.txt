@@ -261,6 +261,8 @@ CONFIGURE_FILE(path.i.in ${CMAKE_CURRENT_BINARY_DIR}/path.i)
 
 CONFIGURE_FILE(doxy2swig.py  ${CMAKE_CURRENT_BINARY_DIR}/doxy2swig.py COPYONLY)
 
+CONFIGURE_FILE(siconos_pythonpath.in ${CMAKE_CURRENT_BINARY_DIR}/siconos_pythonpath)
+
 INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/functions/__init__.py
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/functions)
 
@@ -269,6 +271,9 @@ INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/functions/functions.py
 
 INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/__init__.py 
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
+
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/siconos_pythonpath DESTINATION
+  share/siconos-front-end)
 
 MESSAGE(STATUS "swig modules: ${SWIG_MODULE_Numerics_REAL_NAME},  ${SWIG_MODULE_Kernel_REAL_NAME}")
 
@@ -296,9 +301,6 @@ INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/KernelTypes.i
 
 #INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/KernelRegistration.i DESTINATION include/Siconos/FrontEnd)
 #INSTALL(FILES ${CMAKE_BINARY_DIR}/src/swig/Siconos/Kernel-docstrings.i DESTINATION include/Siconos/FrontEnd)
-
-INSTALL(PROGRAMS ${CMAKE_BINARY_DIR}/src/swig/pysiconos
-  DESTINATION ${SiconosKernel_EXE_DIR})
 
 GET_FILENAME_COMPONENT(SiconosKernel_DIR ${SiconosKernel_EXE_DIR} PATH)
 SET(SiconosKernel_XML_SCHEMA "${SiconosKernel_DIR}/share/siconos-kernel")
