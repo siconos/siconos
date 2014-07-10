@@ -299,7 +299,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
     *void_ptr2 = get_function_address(handle_lib, name_str);
 
-    Py_DECREF(tmp_ascii);
+    Py_XDECREF(tmp_ascii);
 
     return handle_lib;
   }
