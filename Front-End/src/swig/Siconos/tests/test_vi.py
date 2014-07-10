@@ -162,7 +162,7 @@ def test_vi_C_interface():
         vi = SN.VI(2)
         D = ffi.dlopen(SN._Numerics.__file__)
         D.set_cstruct(vi.get_env_as_long(), ffi.cast('void*', data_struct))
-        vi.set_compute_F_and_nabla_F_as_C_functions('ZhuravlevIvanovVI.so', 'compute_F', 'compute_nabla_F')
+        vi.set_compute_F_and_nabla_F_as_C_functions('ZhuravlevIvanov.so', 'compute_F', 'compute_nabla_F')
 
         lambda_ = np.zeros((2,))
         xkp1 = np.zeros((2,))

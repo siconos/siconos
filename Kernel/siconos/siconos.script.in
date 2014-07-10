@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2010.
+# Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2014
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 # Siconos is a free software; you can redistribute it and/or modify
@@ -32,15 +32,22 @@ numerics_prefix = os.getenv('NUMERICSPATH',
 kernel_prefix = os.getenv('SICONOSPATH',
                           default='@CMAKE_INSTALL_PREFIX@')
 
+lib_dir = '@CMAKE_INSTALL_LIBDIR@'
+
 msvc = '@MSVC@' != ''
 exec_ = True
 comp = True
 myname = sys.argv[0]
 call_pwd = os.getcwd()
 
+def read_siconos_pythonpath(install_prefix):
+    ''' read the path where the Siconos Python module is installed '''
+    folder = os.path.join(install_prefix, 'share', 'siconos-front-end')
+    with open(os.path.join(folder, 'siconos_pythonpath')) as sfile:
+        return sfile.readline().rstrip()
 
-# a context manager for a workdir that may be temporary
 class WorkDir():
+    ''' a context manager for a workdir that may be temporary '''
     def __init__(self, directory, tmp=False):
         self.directory = directory
         self.tmp = tmp
@@ -85,11 +92,11 @@ def cartridge():
     sys.stdout.write(
 """
 |=============================================================================|
-|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2010.         |
+|          Siconos-Kernel version {0}.{1}.{2}, Copyright INRIA 2005-2014.         |
 |                                                                             |
 |                 Free software under GNU General Public License.             |
 |=============================================================================|
-""")
+""".format(@MAJOR_VERSION@, @MINOR_VERSION@, '@PATCH_VERSION@'.ljust(3)))
 
 
 def usage():
@@ -164,6 +171,14 @@ Options are:
     <source_directory> (Warning: absolute path!!)  to the executable.
 
  -v : to print 'make' commands as they are executed.
+
+ --generator <Generator Name>: set the generator for cmake (the default is
+     plateform dependent, but usually "Unix Makefiles" under *nix and MacOs).
+     This is mainly useful for Windows users.
+
+ --infer-prefix: change the prefix (path where Siconos is installed) to the
+     parent directory of this file. This is useful only when the Siconos install
+     was moved after install. Mainly useful for windows users.
  """.format(myname))
 
 
@@ -176,7 +191,8 @@ if __name__ == '__main__':
                                        ['build-dir=', 'clean-build', 'clean',
                                         'help', 'noexec', 'nocomp', 'src-dir=',
                                         'opt=', 'ldopt=', 'plugin-dir=',
-                                        'plugins-dir='])
+                                        'plugins-dir=', 'generator=',
+                                        'infer-prefix'])
     except (getopt.GetoptError, err):
         sys.stderr.write('{0} : {1}\n'.format(myname, str(err)))
         usage()
@@ -200,6 +216,8 @@ if __name__ == '__main__':
     make_targets = ['install']
     make_args = []
     source_is_python = False
+    extra_cmake_args = []
+    cmake_generator = None
 
     for o, a in opts:
 
@@ -271,6 +289,16 @@ if __name__ == '__main__':
             all_srcs = True
             sources_directories.append(a)
 
+        if o == '--generator':
+            cmake_generator = a
+
+        if o == '--infer-prefix':
+            current_dir = os.path.dirname(os.path.realpath(__file__))
+            prefix = os.path.abspath(os.path.join(current_dir, os.pardir))
+            kernel_prefix = prefix
+            numerics_prefix = prefix
+            definitions.append('SICONOS_NEW_PREFIX={0}'.format(prefix))
+
         if o == '-v':
             make_args.append('VERBOSE=1')
 
@@ -295,6 +323,7 @@ if __name__ == '__main__':
             if main_source_splitext[1] == '.py':
                 exe_full_path = main_source
                 exe_basename = os.path.basename(exe_full_path)
+                exe_dir = os.path.dirname(main_source)
                 source_is_python = True
             else:
                 exe_full_path = main_source_splitext[0]
@@ -328,11 +357,14 @@ if __name__ == '__main__':
             extra_defs = ['-D{0}'.format(d) for d in full_definitions]
             all_extra_defs = kwd_definitions
 
+            if cmake_generator is not None:
+                extra_cmake_args.append('-G' + cmake_generator)
+
             if source_is_python and \
                 plugins_directories == [] and \
                 plugin_directories == [] and \
-                not os.path.exists(os.path.join(call_pwd, 'plugins')) and \
-                not os.path.exists(os.path.join(call_pwd, 'plugin')):
+                not os.path.exists(os.path.join(exe_dir, 'plugins')) and \
+                not os.path.exists(os.path.join(exe_dir, 'plugin')):
                 comp = False
 
             if comp:
@@ -340,13 +372,15 @@ if __name__ == '__main__':
                 # symbol by default -- xhub
                 if 'Darwin' in platform.uname():
                     linker_options.append('-undefined dynamic_lookup')
-                # not sure that is work. Better let the build fail --xhub
-                #if msvc:
-                #    linker_options.append('/FORCE')
+                # Compiling on Windows is not an easy thing --xhub
+                if msvc and 'Windows' in platform.uname():
+                    cmake_cmd = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cmake-vc.bat')
+                else:
+                    cmake_cmd = 'cmake'
                 try:
                     cmake_boolean = { True: '1', False: '0' }
                     subprocess.check_call([
-                        'cmake', os.path.join(kernel_prefix,
+                        cmake_cmd, os.path.join(kernel_prefix,
                                               'share',
                                               'siconos-kernel'),
                         '-DCALL_PWD={0}'.format(call_pwd),
@@ -369,7 +403,7 @@ if __name__ == '__main__':
                         '-DALL_EXTRA_DEFINITIONS={0}'.format(
                             ';'.join(all_extra_defs)),
                         '-DCMAKE_INSTALL_PREFIX={0}'.format(kernel_prefix)] +
-                        extra_defs)
+                        extra_defs + extra_cmake_args)
                 except Exception as exception:
                     sys.stderr.write(
                         '{0}: {1} build configuration failed, {2}\n'.format(
@@ -393,19 +427,28 @@ if __name__ == '__main__':
         os.chdir(call_pwd)
         env = os.environ
         env['LD_LIBRARY_PATH'] = \
-            '{0}:{1}/lib:{2}/lib:{2}/share/siconos-kernel:.'.\
+            '{0}:{1}:.'.\
             format(os.getenv('LD_LIBRARY_PATH'),
-                   numerics_prefix,
-                   kernel_prefix)
+                   os.path.join(kernel_prefix, lib_dir))
+        env['Path'] = '{0};{1};.'.format(os.getenv('Path'),
+                                         os.path.join(kernel_prefix, lib_dir))
         if source_is_python:
             exec_prefix.append('python')
             final_exe = exe_full_path
+            if 'Windows' in platform.uname():
+                var_separator = ';'
+            else:
+                var_separator = ':'
+            siconos_pythonpath = read_siconos_pythonpath(kernel_prefix)
+            env['PYTHONPATH'] = '{0}{1}{2}'.format(os.path.join(kernel_prefix,
+                siconos_pythonpath), var_separator, os.getenv('PYTHONPATH'))
         else:
             final_exe = os.path.join('.', exe_basename)
         try:
             subprocess.check_call(exec_prefix +
                                   [final_exe] +
-                                  args[1:])
+                                  args[1:],
+                                  env=env)
         except Exception as exception:
             sys.stderr.write('{0}: {1} failed, {2}\n'.format(myname,
                                                            exe_full_path,

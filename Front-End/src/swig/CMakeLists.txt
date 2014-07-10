@@ -133,7 +133,6 @@ SET(SICONOS_NUMERICS_PATH "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
 CONFIGURE_FILE(setup.py.in setup.py)
 
 CONFIGURE_FILE(runtest.py.in ${CMAKE_BINARY_DIR}/src/swig/runtest.py)
-CONFIGURE_FILE(pysiconos.in ${CMAKE_BINARY_DIR}/src/swig/pysiconos)
 
 find_python_module(pytest REQUIRED)
 
