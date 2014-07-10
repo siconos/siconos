@@ -2,7 +2,7 @@
 
 import sys
 import os
-from subprocess import call
+from subprocess import check_call
 
 
 def returnWinePrefix():
@@ -11,13 +11,21 @@ def returnWinePrefix():
     else:
         return os.environ['HOME'] + "/.wine"
 
-call("${CMAKE_BINARY_DIR}/src/swig/pysiconos " + sys.argv[1] + " ${CMAKE_BINARY_DIR}/src/swig/Siconos/plugins/", shell=True)
+# 1. build plugins if needed
+check_call([os.path.join("${SiconosKernel_EXE_DIR}", "siconos"), 
+            sys.argv[1]])
 
-retcode = call("${EMULATOR}py.test${EXE_EXT} " + sys.argv[1], shell=True,
-               env={"PYTHONPATH": "${DRIVE_LETTER}${CMAKE_BINARY_DIR}/src/swig${VAR_SEPARATOR}${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/Siconos/functions",
-                    "PYTHONDONTWRITEBYTECODE": "1",
-                    "LD_LIBRARY_PATH": "${CMAKE_BINARY_DIR}/src/swig/Siconos/plugins/",
-                    "HOME": os.environ['HOME'],
-                    "WINEPREFIX": returnWinePrefix(),
-                    "Path": "${SICONOS_NUMERICS_PATH}"})
-exit(retcode)
+# 2. test command
+check_call(["${EMULATOR}py.test${EXE_EXT}", sys.argv[1]],
+           env={"PYTHONPATH": os.path.join(
+               "${DRIVE_LETTER}${CMAKE_BINARY_DIR}","src","swig") + \
+                "${VAR_SEPARATOR}" + \
+                os.path.join("${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}", 
+                             "Siconos", 
+                             "functions"),
+                "PYTHONDONTWRITEBYTECODE": "1",
+                "LD_LIBRARY_PATH": os.path.join("${CMAKE_BINARY_DIR}","src",
+                                                "swig","Siconos","plugins"),
+                "HOME": os.environ['HOME'],
+                "WINEPREFIX": returnWinePrefix(),
+                "Path": "${SICONOS_NUMERICS_PATH}"})
