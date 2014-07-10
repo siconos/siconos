@@ -293,12 +293,15 @@ if __name__ == '__main__':
         main_source_splitext = os.path.splitext(os.path.basename(main_source))
         if len(main_source_splitext)>1:
             if main_source_splitext[1] == '.py':
-                exe = os.path.basename(main_source)
+                exe_full_path = main_source
+                exe_basename = os.path.basename(exe_full_path)
                 source_is_python = True
             else:
-                exe = main_source_splitext[0]
+                exe_full_path = main_source_splitext[0]
+                exe_basename = os.path.basename(exe_full_path)
         else:
-            exe = main_source
+            exe_full_path = main_source
+            exe_basename = os.path.basename(exe_full_path)
 
         if 'install' in make_targets:
 
@@ -349,7 +352,7 @@ if __name__ == '__main__':
                         '-DCALL_PWD={0}'.format(call_pwd),
                         '-DMAIN_SOURCE={0}'.format(main_source),
                         '-DBUILD_MAIN={0}'.format(cmake_boolean[
-                            exe != os.path.basename(main_source)]),
+                            exe_basename != os.path.basename(main_source)]),
                         '-DPLUGINS_SOURCES={0}'.format(plugins_sources),
                         '-DPLUGINS_DIRECTORIES={0}'.format(
                             ';'.join(plugins_directories)),
@@ -370,7 +373,7 @@ if __name__ == '__main__':
                 except Exception as exception:
                     sys.stderr.write(
                         '{0}: {1} build configuration failed, {2}\n'.format(
-                            myname, exe, exception))
+                            myname, exe_full_path, exception))
                     exit(1)
 
         if comp:
@@ -381,7 +384,7 @@ if __name__ == '__main__':
                 subprocess.check_call(build_command)
             except Exception as exception:
                 sys.stderr.write('{0}: {1} build failed, {2}\n'.format(myname,
-                                                                     exe,
+                                                                     exe_full_path,
                                                                      exception))
                 exit(1)
 
@@ -396,12 +399,15 @@ if __name__ == '__main__':
                    kernel_prefix)
         if source_is_python:
             exec_prefix.append('python')
+            final_exe = exe_full_path
+        else:
+            final_exe = os.path.join('.', exe_basename)
         try:
             subprocess.check_call(exec_prefix +
-                                  [os.path.join('.', exe)] +
+                                  [final_exe] +
                                   args[1:])
         except Exception as exception:
             sys.stderr.write('{0}: {1} failed, {2}\n'.format(myname,
-                                                           exe,
+                                                           exe_full_path,
                                                            exception))
             exit(1)
