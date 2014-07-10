@@ -104,17 +104,17 @@ def usage():
 """
 The siconos command compiles, links and runs a Siconos program.
 
-Usage: {0} [options] [YourExample.cpp|location/YourExample.cpp] [Arguments]
+Usage: {0} [options] [YourExample.{cpp,py}|location/YourExample.{cpp,py}] [Arguments]
 
 
  --> To use other source files (*.c, *.cpp, *.f), put them in ./src or
      -see option src_dir below
 
- --> To create a library and link it with the siconos program, create
+ --> To create a library (to get a plugin for instance), create
     a ./plugin directory or use -plugin_dir option below.
 
- --> To create some libraries and link them with the siconos program,
-     create a ./plugins directory or use -plugins_dir option below.
+ --> To create some libraries, create a ./plugins directory
+     or use -plugins_dir option below.
 
 Options are:
 

@@ -217,7 +217,25 @@ IF(WITH_FCLIB)
 ENDIF()
 
 
-
+# Generate plugins for tests here since if we put it in runtest.py,
+# the siconos command is launched with the same directory multiple times
+# and we then meet our dear friend "race condition"
+IF(WITH_TESTING)
+  IF(CMAKE_TOOLCHAIN_FILE)
+    ADD_CUSTOM_COMMAND(TARGET ${SWIG_MODULE_Numerics_REAL_NAME}
+      POST_BUILD
+      COMMAND ${SiconosKernel_EXE_DIR}/siconos --noexec
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.py
+      -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+      COMMENT "Generating plugins for tests")
+  ELSE()
+    ADD_CUSTOM_COMMAND(TARGET ${SWIG_MODULE_Numerics_REAL_NAME}
+      POST_BUILD
+      COMMAND ${SiconosKernel_EXE_DIR}/siconos --noexec
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.py
+      COMMENT "Generating plugins for tests")
+  ENDIF()
+ENDIF()
 
 
 # get python dist-packages
@@ -230,13 +248,13 @@ ENDIF()
 
 IF(STD_PYTHON_DIST_PACKAGES)
   EXECUTE_PROCESS ( COMMAND 
-    python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+    ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
     OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 ELSE(STD_PYTHON_DIST_PACKAGES)
   IF(NOT PYTHON_DIST_PACKAGES)
     EXECUTE_PROCESS ( COMMAND 
-      python -c "from distutils.sysconfig import get_python_lib;print(get_python_lib(0,0,\"\"))"
+      ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib;print(get_python_lib(0,0,\"\"))"
       OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
       OUTPUT_STRIP_TRAILING_WHITESPACE)
   ENDIF(NOT PYTHON_DIST_PACKAGES)
