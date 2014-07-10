@@ -848,7 +848,7 @@ class Hdf5():
 
     def run(self,
             with_timer=False,
-            lenth_scale=1,
+            length_scale=1,
             t0=0,
             T=10,
             h=0.0005,
