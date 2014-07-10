@@ -21,7 +21,9 @@
 #define SICONOS_EXPORT extern "C" __declspec(dllexport) 
 #else 
 #define SICONOS_EXPORT extern "C" 
-#endif  
+#endif
+
+#define _USE_MATH_DEFINES
 #include <stdio.h>
 #include <math.h>
 

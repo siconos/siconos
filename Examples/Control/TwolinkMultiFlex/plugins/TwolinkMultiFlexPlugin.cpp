@@ -22,6 +22,8 @@
 #else 
 #define SICONOS_EXPORT extern "C" 
 #endif  
+
+#define _USE_MATH_DEFINES
 #include <stdio.h>
 #include <math.h>
 

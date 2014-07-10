@@ -26,6 +26,7 @@
 //
 // =============================================================================================
 
+#define _USE_MATH_DEFINES
 #include "SiconosKernel.hpp"
 #include <math.h>
 
