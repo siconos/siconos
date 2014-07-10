@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env ${PYTHON_EXECUTABLE}
 
 import sys
 import os
@@ -11,12 +11,15 @@ def returnWinePrefix():
     else:
         return os.environ['HOME'] + "/.wine"
 
-# 1. build plugins if needed
-check_call([os.path.join("${SiconosKernel_EXE_DIR}", "siconos"),
-            '--noexec', sys.argv[1]])
 
 # 2. test command
-check_call(["${EMULATOR}py.test${EXE_EXT}", "-v", sys.argv[1]],
+if "${EMULATOR}" == "":
+    args = []
+else:
+    args = ["${EMULATOR}"]
+
+args.extend(["py.test${EXE_EXT}", "-v", sys.argv[1]])
+check_call(args,
            env={"PYTHONPATH": os.path.join(
                "${DRIVE_LETTER}${CMAKE_BINARY_DIR}","src","swig") + \
                 "${VAR_SEPARATOR}" + \
