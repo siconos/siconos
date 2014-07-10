@@ -324,12 +324,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/diode_bridge.ref diode_bridge.r
 FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests/data DESTINATION
 	${CMAKE_BINARY_DIR}/src/swig/Siconos)
 
-IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
-  SET(DRIVE_LETTER "Z:")
-ELSE()
-  SET(DRIVE_LETTER)
-ENDIF()
-
 ADD_TEST(lcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_lcp.py)
 ADD_TEST(mlcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mlcp.py)
 ADD_TEST(mcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mcp.py)
