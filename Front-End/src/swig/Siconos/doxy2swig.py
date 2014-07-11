@@ -228,7 +228,10 @@ class Doxy2SWIG:
         else:
             self.add_text("""
 
-            .. math:: {0}
+            .. math::
+               :nowrap:
+
+               {0}
 
 """.format(data))
 

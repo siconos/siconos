@@ -10,7 +10,10 @@ A ball bouncing on the ground may be defined as a linear lagrangian time
 invariant dynamical system with one degree of freedom. 
 
 .. math::
-   M \ddot q = F_{ext} + p
+   :nowrap:
+   \begin{eqnarray*}
+      M \ddot q = F_{ext} + p
+   \end{eqnarray*}
 
 where :
  - :math:`q` is the state vector, here of size 1. The only coordinate
