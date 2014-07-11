@@ -25,8 +25,8 @@ div#navrow2 {
 
 .siconosheader {
     margin:0.0em;
-    padding:2.0em;
-    overflow: auto;
+    padding:0.0em;
+    overflow: hidden;
     border-bottom: 1px solid #f0e9eb;
 }
 .siconosfooter 
@@ -41,15 +41,21 @@ div#navrow2 {
 
 .siconostitle1 {
     font-size: 400%;
+    margin:0.0em;
+    padding:0.2em;
     background-color: white;
     color: #909090;
     float: none;
+    overflow: hidden;
 }
 .siconostitle2 {
+    margin:0.9em;
+    padding:0.0em;
     font-size: 150%;
     background-color: white;
     color: #909090;
     float: left;
+    overflow: hidden;
 }
 .left {
     float: left;
