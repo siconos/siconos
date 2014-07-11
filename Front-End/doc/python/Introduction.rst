@@ -32,6 +32,8 @@ input for matrices and vectors in the ``C`` and ``C++`` API. For
 example, with ``Numerics`` module a linear complementarity problem :
 
 .. math::
+   :nowrap:
+
    \begin{eqnarray*}
       \begin{cases}
         w=Mz+q \\
@@ -42,6 +44,7 @@ example, with ``Numerics`` module a linear complementarity problem :
 with 
 
 .. math::
+   :nowrap:
 
    \begin{eqnarray*}
         M = \begin{pmatrix}
@@ -53,7 +56,8 @@ with
 and
 
 .. math::
-   
+   :nowrap:
+
    \begin{eqnarray*}
         q = \begin{pmatrix}
         -5 \\

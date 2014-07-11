@@ -50,7 +50,7 @@ typedef void (*Fext)(double , double*, double*, double*);
  * reference (world frame) </li>
  * <li> \f$\Omega\f$ angular velocity vector expressed in the body-fixed frame (frame attached to the object) </li>
  * <li> \f$R\f$ rotation matrix form the inertial frame to the bosy-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, \textit{i.e} \f$ R\in SO^+(3)\f$  </li>
- * <li> \f$M=m\,I_{3\times 3}\f$ diagonal mass matrix with  \f$m \in \RR\f$ the scalar mass  </li>
+ * <li> \f$M=m\,I_{3\times 3}\f$ diagonal mass matrix with  \f$m \in \mathbb{R}\f$ the scalar mass  </li>
  * <li> \f$I\f$ constant inertia matrix </li>
  * <li> \f$F_{ext}\f$ and \f$ M_{ext}\f$ are the external applied forces and torques  </li>
  * </ul>
