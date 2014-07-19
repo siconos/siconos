@@ -160,8 +160,6 @@ def test_diodebridge1():
     #
     # comparison with the reference file
     #
-    from numpy import savetxt
-    savetxt('/tmp/diode_bridge.dat', dataPlot)
     ref = getMatrix(SimpleMatrix("diode_bridge.ref"))
 
     print(norm(dataPlot - ref))

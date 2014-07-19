@@ -61,7 +61,9 @@ void SiconosVisitorTest::t2()
 
   struct MyVisitor : public SiconosVisitor
   {
+#if !defined(_MSC_VER)
     using SiconosVisitor::visit;
+#endif
 
     void visit(const LagrangianDS& ds)
     {

@@ -3,13 +3,15 @@
 import sys
 import os
 from subprocess import check_call
-
+import subprocess
+import posixpath
+import platform
 
 def returnWinePrefix():
     if 'WINEPREFIX' in os.environ:
         return  os.environ['WINEPREFIX']
     else:
-        return os.environ['HOME'] + "/.wine"
+        return os.getenv('HOME', default='') + "/.wine"
 
 
 # 2. test command
@@ -18,16 +20,24 @@ if "${EMULATOR}" == "":
 else:
     args = ["${EMULATOR}"]
 
-args.extend(["py.test${EXE_EXT}", "-v", sys.argv[1]])
-check_call(args,
-           env={"PYTHONPATH": os.path.join(
-               "${DRIVE_LETTER}${CMAKE_BINARY_DIR}","src","swig") + \
-                "${VAR_SEPARATOR}" + \
-                os.path.join("${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}",
-                             "Siconos",
-                             "functions"),
-                "PYTHONDONTWRITEBYTECODE": "1",
-                "LD_LIBRARY_PATH": os.path.curdir,
-                "HOME": os.environ['HOME'],
-                "WINEPREFIX": returnWinePrefix(),
-                "Path": "${SICONOS_NUMERICS_PATH};" + os.getenv('Path', default='')})
+env = os.environ
+env["PYTHONPATH"] = posixpath.join("${DRIVE_LETTER}${CMAKE_BINARY_DIR}", "src",
+                    "swig") + "${VAR_SEPARATOR}" + posixpath.join(
+                    "${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}", "Siconos",
+                    "functions") + "${VAR_SEPARATOR}" + os.getenv('PYTHONPATH',
+                                                                  default='')
+env["PYTHONDONTWRITEBYTECODE"] = "1"
+env["LD_LIBRARY_PATH"] = os.path.curdir + ':' + os.getenv('LD_LIBRARY_PATH', default='')
+env["DYLD_LIBRARY_PATH"] = os.path.curdir + ':' + os.getenv('DYLD_LIBRARY_PATH', default='')
+env["WINEPREFIX"] = returnWinePrefix()
+env["PATH"] =  "${SICONOS_NUMERICS_PATH};" + os.getenv('PATH', default='')
+
+
+args.extend(["py.test", "-v", sys.argv[1]])
+
+if 'Windows' in platform.uname():
+    use_shell = True
+else:
+    use_shell = False
+
+check_call(args, env=env, shell=use_shell)

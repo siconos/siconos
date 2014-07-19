@@ -87,13 +87,14 @@ IF(DOXYGEN_FOUND)
       GET_FILENAME_COMPONENT(_FWE_XML ${_FXML} NAME_WE)
       ADD_CUSTOM_COMMAND(OUTPUT ${_FWE_XML}.i 
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/FrontEnd/xml/${_FWE_XML}.xml
-        COMMAND ./doxy2swig.py ${CMAKE_CURRENT_BINARY_DIR}/FrontEnd/xml/${_FWE_XML}.xml ${_FWE_XML}.i
+        COMMAND ${PYTHON_EXECUTABLE}
+        ARGS "./doxy2swig.py" ${CMAKE_CURRENT_BINARY_DIR}/FrontEnd/xml/${_FWE_XML}.xml ${_FWE_XML}.i
         COMMENT "docstrings generation for ${_FWE} (parsing ${_FWE_XML}.xml)")
       ADD_CUSTOM_TARGET(doc_${_FWE_XML}.i DEPENDS ${_FWE_XML}.i)
       LIST(APPEND NUMERICS_DOCSTRINGS_FILES ${_FWE_XML}.i)
     ENDFOREACH(_FXML ${${_FWE}_XMLS})
   ENDFOREACH(_F ${_HDRS})
-  
+
   SET(KERNEL_DOCSTRINGS_FILES)
   FOREACH(_F ${_HPPDRS})
     GET_FILENAME_COMPONENT(_XFWE ${_F} NAME_WE)
@@ -102,7 +103,8 @@ IF(DOXYGEN_FOUND)
       GET_FILENAME_COMPONENT(_FWE_XML ${_FXML} NAME_WE)
       ADD_CUSTOM_COMMAND(OUTPUT ${_FWE_XML}.i 
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/FrontEnd/xml/${_FWE_XML}.xml
-        COMMAND ./doxy2swig.py ${CMAKE_CURRENT_BINARY_DIR}/FrontEnd/xml/${_FWE_XML}.xml ${_FWE_XML}.i
+        COMMAND ${PYTHON_EXECUTABLE}
+        ARGS "./doxy2swig.py" ${CMAKE_CURRENT_BINARY_DIR}/FrontEnd/xml/${_FWE_XML}.xml ${_FWE_XML}.i
         COMMENT "docstrings generation for ${_FWE} (parsing ${_FWE_XML}.xml)")
       ADD_CUSTOM_TARGET(doc_${_FWE_XML}.i DEPENDS ${_FWE_XML}.i)
       LIST(APPEND KERNEL_DOCSTRINGS_FILES ${_FWE_XML}.i)
@@ -111,18 +113,20 @@ IF(DOXYGEN_FOUND)
 
   ADD_CUSTOM_COMMAND(OUTPUT Numerics-docstrings.i
     DEPENDS ${NUMERICS_DOCSTRINGS_FILES}
-    COMMAND cat ${NUMERICS_DOCSTRINGS_FILES} > Numerics-docstrings.i
+    COMMAND cat
+    ARGS ${NUMERICS_DOCSTRINGS_FILES} > Numerics-docstrings.i
     COMMENT "Numerics docstrings concatenation")
-  
+
   ADD_CUSTOM_COMMAND(OUTPUT Kernel-docstrings.i
     DEPENDS ${KERNEL_DOCSTRINGS_FILES}
-    COMMAND cat ${KERNEL_DOCSTRINGS_FILES} > Kernel-docstrings.i
+    COMMAND cat
+    ARGS ${KERNEL_DOCSTRINGS_FILES} > Kernel-docstrings.i
     COMMENT "Kernel docstrings concatenation")
-  
+
   ADD_CUSTOM_TARGET(numerics_docstrings DEPENDS Numerics-docstrings.i)
   ADD_CUSTOM_TARGET(kernel_docstrings DEPENDS Kernel-docstrings.i)
-  
-  
+
+
   #
   # dependencies for generated sources
   #
@@ -224,15 +228,17 @@ IF(WITH_TESTING)
   IF(CMAKE_TOOLCHAIN_FILE)
     ADD_CUSTOM_COMMAND(TARGET ${SWIG_MODULE_Numerics_REAL_NAME}
       POST_BUILD
-      COMMAND ${SiconosKernel_EXE_DIR}/siconos --noexec
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.py
+      COMMAND ${SiconosKernel_EXE_DIR}/siconos
+      ARGS --noexec --generator="${CMAKE_GENERATOR}"
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py
       -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
       COMMENT "Generating plugins for tests")
   ELSE()
     ADD_CUSTOM_COMMAND(TARGET ${SWIG_MODULE_Numerics_REAL_NAME}
       POST_BUILD
-      COMMAND ${SiconosKernel_EXE_DIR}/siconos --noexec
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.py
+      COMMAND ${SiconosKernel_EXE_DIR}/siconos
+      ARGS --noexec --generator="${CMAKE_GENERATOR}"
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py
       COMMENT "Generating plugins for tests")
   ENDIF()
 ENDIF()
@@ -342,21 +348,21 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/result.ref result.ref COPYONLY)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/diode_bridge.ref diode_bridge.ref COPYONLY)
 
 FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests/data DESTINATION
-	${CMAKE_BINARY_DIR}/src/swig/Siconos)
+  ${CMAKE_BINARY_DIR}/src/swig/Siconos)
 
-ADD_TEST(lcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_lcp.py)
-ADD_TEST(mlcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mlcp.py)
-ADD_TEST(mcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mcp.py)
-ADD_TEST(mcp2 ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mcp2.py)
-ADD_TEST(vi ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_vi.py)
-ADD_TEST(sparse ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_sparse.py)
-ADD_TEST(Kernel ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_Kernel.py)
-ADD_TEST(friction_contact ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
-ADD_TEST(bouncing_ball ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_bouncing_ball.py)
-ADD_TEST(diode_bridge ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diode_bridge.py)
-ADD_TEST(smc ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_smc.py)
-ADD_TEST(matrix_exp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
-ADD_TEST(xml ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
+ADD_TEST(lcp ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_lcp.py)
+ADD_TEST(mlcp ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mlcp.py)
+ADD_TEST(mcp ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mcp.py)
+ADD_TEST(mcp2 ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mcp2.py)
+ADD_TEST(vi ${PYTHON_EXECUTABLE}  ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_vi.py)
+ADD_TEST(sparse ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_sparse.py)
+ADD_TEST(Kernel ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_Kernel.py)
+ADD_TEST(friction_contact ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
+ADD_TEST(bouncing_ball ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_bouncing_ball.py)
+ADD_TEST(diode_bridge ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diode_bridge.py)
+ADD_TEST(smc ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_smc.py)
+ADD_TEST(matrix_exp ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
+ADD_TEST(xml ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
 
 IF(WITH_SERIALIZATION)
   ADD_TEST(serialization ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_serialization.py)

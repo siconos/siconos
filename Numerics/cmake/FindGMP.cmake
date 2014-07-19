@@ -49,7 +49,11 @@ endif()
 
 # Last try if nothing has been found before
 find_library(GMP_LIBRARY NAMES gmp)
-find_path(GMP_INCLUDE_DIR NAMES gmp.h)
+if(GMP_LIBRARY)
+  get_filename_component(GMP_LIBRARY_DIR "${GMP_LIBRARY}" PATH)
+  get_filename_component(GMP_LIBRARY_DIR_DIR "${GMP_LIBRARY_DIR}" PATH)
+endif()
+find_path(GMP_INCLUDE_DIR NAMES gmp.h HINTS ${GMP_LIBRARY_DIR_DIR}/include)
 
 # Set the required variables 
 set(GMP_PROCESS_INCLUDES GMP_INCLUDE_DIR)

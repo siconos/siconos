@@ -33,7 +33,7 @@ IF(SiconosIO_LIBRARY)
    FIND_PATH(SiconosIO_INCLUDE_DIRS SiconosRestart.hpp
     HINTS ${SiconosIO_LIBRARY_DIRS_DIR} ${SiconosIO_LIBRARY_DIRS_DIR_DIR} 
     ENV PATH
-    PATH_SUFFIXES Siconos/IO)
+    PATH_SUFFIXES include/Siconos/IO)
 
   IF(NOT SiconosIO_INCLUDE_DIRS)
     IF(SiconosIO_FIND_REQUIRED)

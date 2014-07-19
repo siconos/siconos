@@ -78,7 +78,7 @@ bool DiodeBridge()
     LS_A->setValue(0, 1, -1.0 / Cvalue);
     LS_A->setValue(1, 0, 1.0 / Lvalue);
 
-    SP::FirstOrderLinearDS LSDiodeBridge(new FirstOrderLinearDS(init_state, LS_A));
+    SP::DynamicalSystem LSDiodeBridge(new FirstOrderLinearDS(init_state, LS_A));
 
     // --- Interaction between linear system and non smooth system ---
     
@@ -121,7 +121,7 @@ bool DiodeBridge()
     double theta = 0.5;
 
     // One Step Integrator
-    SP::MoreauJeanOSI OSI_RLCD(new MoreauJeanOSI(LSDiodeBridge, theta));
+    SP::MoreauJeanOSI OSI_RLCD(new MoreauJeanOSI(LSDiodeBridge));
     StratDiodeBridge->insertIntegrator(OSI_RLCD);
 
     // One Step non smooth problem

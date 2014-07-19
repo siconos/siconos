@@ -26,6 +26,7 @@ import subprocess
 import getopt
 import tempfile
 import shlex
+import posixpath
 
 numerics_prefix = os.getenv('NUMERICSPATH',
                             default='@SiconosNumerics_LIBRARY_DIRS_DIR@')
@@ -176,9 +177,8 @@ Options are:
      plateform dependent, but usually "Unix Makefiles" under *nix and MacOs).
      This is mainly useful for Windows users.
 
- --infer-prefix: change the prefix (path where Siconos is installed) to the
-     parent directory of this file. This is useful only when the Siconos install
-     was moved after install. Mainly useful for windows users.
+ --no-infer-prefix: do not change the prefix (path where Siconos is installed) to the
+     parent directory of this file.
  """.format(myname))
 
 
@@ -192,11 +192,11 @@ if __name__ == '__main__':
                                         'help', 'noexec', 'nocomp', 'src-dir=',
                                         'opt=', 'ldopt=', 'plugin-dir=',
                                         'plugins-dir=', 'generator=',
-                                        'infer-prefix'])
+                                        'no-infer-prefix'])
     except (getopt.GetoptError, err):
         sys.stderr.write('{0} : {1}\n'.format(myname, str(err)))
         usage()
-        exit(2)
+        sys.exit(2)
 
     definitions = []
     linker_libraries = []
@@ -218,6 +218,7 @@ if __name__ == '__main__':
     source_is_python = False
     extra_cmake_args = []
     cmake_generator = None
+    infer_prefix = True
 
     for o, a in opts:
 
@@ -247,7 +248,7 @@ if __name__ == '__main__':
 
         if o == '-h' or o == '--help':
             usage()
-            exit(0)
+            sys.exit(0)
 
         if o == '--noexec':
             exec_ = False
@@ -292,12 +293,8 @@ if __name__ == '__main__':
         if o == '--generator':
             cmake_generator = a
 
-        if o == '--infer-prefix':
-            current_dir = os.path.dirname(os.path.realpath(__file__))
-            prefix = os.path.abspath(os.path.join(current_dir, os.pardir))
-            kernel_prefix = prefix
-            numerics_prefix = prefix
-            definitions.append('SICONOS_NEW_PREFIX={0}'.format(prefix))
+        if o == '--no-infer-prefix':
+            infer_prefix = False
 
         if o == '-v':
             make_args.append('VERBOSE=1')
@@ -305,12 +302,20 @@ if __name__ == '__main__':
     if len(args) == 0:
         sys.stderr.write('{0} : need a file\n'.format(myname))
         usage()
-        exit(1)
+        sys.exit(1)
 
     if not os.path.exists(args[0]):
         sys.stderr.write('{0} : cannot open {1}\n'.format(myname, args[0]))
         usage()
-        exit(1)
+        sys.exit(1)
+
+    #if not os.path.exists(os.path.join(kernel_prefix, 'share', 'siconos-kernel')) \
+    if infer_prefix:
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        prefix = os.path.abspath(os.path.join(current_dir, os.pardir))
+        kernel_prefix = prefix
+        numerics_prefix = prefix
+        definitions.append('NEW_SICONOS_PREFIX={0}'.format(prefix))
 
     siconos_build_dir = os.getenv('SICONOS_BUILD_DIR', default=build_directory)
 
@@ -332,6 +337,13 @@ if __name__ == '__main__':
             exe_full_path = main_source
             exe_basename = os.path.basename(exe_full_path)
 
+        env = os.environ
+        env['LD_LIBRARY_PATH'] = \
+            '{0}:{1}:.'.\
+            format(os.getenv('LD_LIBRARY_PATH'),
+                   os.path.join(kernel_prefix, lib_dir))
+        env['Path'] = '{0};{1}'.format(os.getenv('Path'),
+                                         os.path.join(kernel_prefix, lib_dir))
         if 'install' in make_targets:
 
             plugin_directories = \
@@ -357,7 +369,7 @@ if __name__ == '__main__':
             extra_defs = ['-D{0}'.format(d) for d in full_definitions]
             all_extra_defs = kwd_definitions
 
-            if cmake_generator is not None:
+            if cmake_generator is not None and 'Windows' in platform.uname():
                 extra_cmake_args.append('-G' + cmake_generator)
 
             if source_is_python and \
@@ -380,7 +392,7 @@ if __name__ == '__main__':
                 try:
                     cmake_boolean = { True: '1', False: '0' }
                     subprocess.check_call([
-                        cmake_cmd, os.path.join(kernel_prefix,
+                        cmake_cmd, posixpath.join(kernel_prefix,
                                               'share',
                                               'siconos-kernel'),
                         '-DCALL_PWD={0}'.format(call_pwd),
@@ -403,35 +415,30 @@ if __name__ == '__main__':
                         '-DALL_EXTRA_DEFINITIONS={0}'.format(
                             ';'.join(all_extra_defs)),
                         '-DCMAKE_INSTALL_PREFIX={0}'.format(kernel_prefix)] +
-                        extra_defs + extra_cmake_args)
+                        extra_defs + extra_cmake_args,
+                        stderr=subprocess.STDOUT,
+                        env=env)
                 except Exception as exception:
                     sys.stderr.write(
                         '{0}: {1} build configuration failed, {2}\n'.format(
                             myname, exe_full_path, exception))
-                    exit(1)
+                    sys.exit(1)
 
         if comp:
             try:
                 assert(len(make_targets) > 0)
-                build_command = ['cmake', '--build', '.',
+                build_command = [cmake_cmd, '--build', '.',
                                  '--target', make_targets[0], '--'] + make_args
                 subprocess.check_call(build_command)
             except Exception as exception:
-                sys.stderr.write('{0}: {1} build failed, {2}\n'.format(myname,
+                sys.stderr.write('{0}: {1} build failed, {2}'.format(myname,
                                                                      exe_full_path,
                                                                      exception))
-                exit(1)
+                sys.exit(1)
 
     # execution
     if exec_:
         os.chdir(call_pwd)
-        env = os.environ
-        env['LD_LIBRARY_PATH'] = \
-            '{0}:{1}:.'.\
-            format(os.getenv('LD_LIBRARY_PATH'),
-                   os.path.join(kernel_prefix, lib_dir))
-        env['Path'] = '{0};{1};.'.format(os.getenv('Path'),
-                                         os.path.join(kernel_prefix, lib_dir))
         if source_is_python:
             exec_prefix.append('python')
             final_exe = exe_full_path
@@ -453,4 +460,4 @@ if __name__ == '__main__':
             sys.stderr.write('{0}: {1} failed, {2}\n'.format(myname,
                                                            exe_full_path,
                                                            exception))
-            exit(1)
+            sys.exit(1)

@@ -1,0 +1,5 @@
+@echo off
+
+call $ENV{VCVARSALL_BAT} $ENV{VC_ARCH}
+
+cmake %*
