@@ -41,7 +41,7 @@ IF(SiconosKernel_LIBRARY)
   FIND_PATH(SiconosKernel_INCLUDE_DIRS SiconosKernel.hpp
     HINTS ${SiconosKernel_LIBRARY_DIRS_DIR} ${SiconosKernel_LIBRARY_DIRS_DIR_DIR} 
     ENV PATH
-    PATH_SUFFIXES Siconos/Kernel)
+    PATH_SUFFIXES include/Siconos/Kernel)
   
   IF(NOT SiconosKernel_INCLUDE_DIRS)
     IF(SiconosKernel_FIND_REQUIRED)

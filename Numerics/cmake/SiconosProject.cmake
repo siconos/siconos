@@ -169,7 +169,6 @@ MACRO(SICONOS_PROJECT
     OPTION(LINK_STATICALLY "Link external libraries statically (on if crosscompiling from linux to windows)" ON)
   ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
   IF(LINK_STATICALLY)
-    SET(BLA_STATIC TRUE) # For blas/lapack
     SET(Boost_USE_STATIC_LIBS TRUE)
     # For the compiler
     IF(NOT MSVC)
@@ -180,7 +179,6 @@ MACRO(SICONOS_PROJECT
         APPEND_CXX_FLAGS("-static -static-libgcc -static-libstdc++")
       ENDIF()
     ENDIF(NOT MSVC)
-    APPEND_Fortran_FLAGS("-static -static-libgcc -static-libgfortran") # XXX No test :( -- xhub
   ENDIF(LINK_STATICALLY)
 
   IF(CMAKE_SYSTEM_NAME MATCHES Windows)

@@ -29,6 +29,7 @@ int snprintf(char* str, size_t size, const char* format, ...)
   return count;
 }
 
+#if _MSC_VER < 1800
 double rint(double x)
 {
   //middle value point test
@@ -49,5 +50,6 @@ void csqrt(void * z)
   printf("csqrt is not supported with Visual Studio\n");
   exit(EXIT_FAILURE);
 }
+#endif
 
 #endif

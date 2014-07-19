@@ -109,10 +109,13 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
   cblas_daxpy(n , alpha , w , incx , H , incy);     /* / c'est faux*/
 
 
-  for (i = n; i < m; i++)
+  for (int ii = 0; ii < m - n; ++ii)
   {
-    if (w[i - n] > rho[i - n]*z[i - n]) H[i] = rho[i - n] * z[i - n];
-    else H[i] = w[i - n];
+    if (w[ii] > rho[ii]*z[ii])
+	{
+	  H[ii + n] = rho[ii]*z[ii];
+	}
+    else H[ii + n] = w[ii];
   }
 
 
@@ -183,10 +186,10 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
     alpha = -1.0;
     cblas_daxpy(n , alpha , w , incx , H , incy);                               /* / w-Mz-q --> H*/
 
-    for (i = n; i < m; i++)
+    for (i = 0; i < m - n; i++)
     {
-      if (w[i - n] > rho[i - n]*z[i - n]) H[i] = rho[i - n] * z[i - n];
-      else H[i] = w[i - n];
+      if (w[i] > rho[i]*z[i]) H[i+n] = rho[i] * z[i];
+      else H[i+n] = w[i];
     }
 
     /* **** Criterium convergence **** */

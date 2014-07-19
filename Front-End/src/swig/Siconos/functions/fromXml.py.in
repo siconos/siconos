@@ -8,10 +8,13 @@ import os
 
 xsdfile = '${SiconosKernel_XML_SCHEMA}/SiconosModelSchema-V3.7.xsd'
 
+
 if not os.path.exists(xsdfile):
+    tried_folder = 0
     python_path = os.path.dirname(SK.__file__)
     while not os.path.exists(os.path.join(python_path, 'share')) and tried_folder < 10:
         python_path = os.path.join(python_path, os.path.pardir)
+        tried_folder += 1
 
     if tried_folder == 10:
         sys.stderr.write('No XML Schema found, stopping!')

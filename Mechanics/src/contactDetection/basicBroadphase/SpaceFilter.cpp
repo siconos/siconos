@@ -945,14 +945,14 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
 void SpaceFilter::insert(SP::Disk ds, int i, int j, int k)
 {
 
-  SP::Hashed hashed(new Hashed(ds, i, j));
+  SP::Hashed hashed(new Hashed(std11::static_pointer_cast<DynamicalSystem>(ds), i, j));
   _hash_table->insert(hashed);
 }
 
 void SpaceFilter::insert(SP::Circle ds, int i, int j, int k)
 {
 
-  SP::Hashed hashed(new Hashed(ds, i, j));
+  SP::Hashed hashed(new Hashed(std11::static_pointer_cast<DynamicalSystem>(ds), i, j));
   _hash_table->insert(hashed);
 }
 
@@ -1050,7 +1050,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     double x1 = Q1->getValue(0);
     double y1 = Q1->getValue(1);
-    SP::Hashed hds1(new Hashed(ds1, (int) floor(x1 / parent->_cellsize),
+    SP::Hashed hds1(new Hashed(std11::static_pointer_cast<DynamicalSystem>(ds1),
+                             (int) floor(x1 / parent->_cellsize),
                                (int) floor(y1 / parent->_cellsize)));
 
     // find all other systems that are in the same cells

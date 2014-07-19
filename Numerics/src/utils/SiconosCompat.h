@@ -20,6 +20,9 @@
 #define _SICONOS_COMPAT
 
 #if defined(_MSC_VER)
+// for M_PI
+#define _USE_MATH_DEFINES
+#if _MSC_VER < 1800
 #include <float.h>
 #define isnan(x) _isnan(x)
 #define isinf(x) (!_finite(x) && !_isnan(x))
@@ -45,11 +48,9 @@ inline double fmin(double x, double y)
 }
 #define INFINITY (DBL_MAX+DBL_MAX)
 #define NAN (INFINITY-INFINITY)
-// for M_PI
-#define _USE_MATH_DEFINES
 #define copysign _copysign
 #define snprintf _snprintf
-
+#endif
 #endif
 
 #if defined(__SUNPRO_CC)

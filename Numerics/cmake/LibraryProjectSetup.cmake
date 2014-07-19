@@ -164,7 +164,7 @@ MACRO(LIBRARY_PROJECT_SETUP)
         ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME}_shared
           PRE_BUILD
           COMMAND ${CMAKE_NM} ARGS @${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${PROJECT_NAME}_shared.dir/objects1.rsp
-          | egrep ' "(D|T|B)" ' | cut -f 3 -d ' ' | sed  's,^_,,' | sed  '1iEXPORTS' > ${${PROJECT_NAME}_SHARED_LIB_WE}.def
+          | egrep " (D|T|B) " | cut -f 3 -d " " | sed  "1iEXPORTS" > ${${PROJECT_NAME}_SHARED_LIB_WE}.def
           ) # gruik gruik
       ENDIF(MSVC)
     ENDIF(BUILD_SHARED_LIBS)

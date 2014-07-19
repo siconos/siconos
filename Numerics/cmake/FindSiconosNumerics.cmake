@@ -35,7 +35,7 @@ IF(SiconosNumerics_LIBRARY)
   FIND_PATH(SiconosNumerics_INCLUDE_DIRS SiconosNumerics.h 
     HINTS ${SiconosNumerics_LIBRARY_DIRS_DIR} ${SiconosNumerics_LIBRARY_DIRS_DIR_DIR} 
     ENV PATH
-    PATH_SUFFIXES Siconos/Numerics)
+    PATH_SUFFIXES include/Siconos/Numerics)
   
   IF(NOT SiconosNumerics_INCLUDE_DIRS)
     IF(SiconosNumerics_FIND_REQUIRED)

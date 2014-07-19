@@ -214,13 +214,44 @@ IF(MLCPSIMPLEX_FOUND)
   SET(SiconosNumerics_LINKER_LANGUAGE CXX)
 ENDIF(MLCPSIMPLEX_FOUND)
 
-LIBRARY_PROJECT_SETUP()
-
 # for dlopen or equivalent (used for plugins)
 SET(SiconosNumerics_LINK_LIBRARIES ${SiconosNumerics_LINK_LIBRARIES}
  ${CMAKE_DL_LIBS})
 
-# F95 Cmake Bug. No more needed? 
+IF(MSVC AND "${CMAKE_Fortran_COMPILER}" MATCHES "gfortran")
+  SET(GCC_A "")
+  EXECUTE_PROCESS(COMMAND ${CMAKE_Fortran_COMPILER} -print-libgcc-file-name
+  OUTPUT_VARIABLE GCC_A)
+  STRING(REGEX REPLACE "\n.*$" "" GCC_A ${GCC_A})
+  GET_FILENAME_COMPONENT(GFORTRAN_DLL_A_DIR ${GCC_A} PATH)
+  MESSAGE(STATUS "libgfortran.dll.a dir :: ${GFORTRAN_DLL_A_DIR}")
+  STRING(REGEX REPLACE "\n.*$" "" GFORTRAN_DLL_A_DIR ${GFORTRAN_DLL_A_DIR})
+  find_library(LIBGFORTRAN_FOUND gfortran PATHS ${GFORTRAN_DLL_A_DIR} NO_DEFAULT_PATH)
+  SET(SiconosNumerics_LINK_LIBRARIES ${SiconosNumerics_LINK_LIBRARIES} ${LIBGFORTRAN_FOUND})
+  GET_FILENAME_COMPONENT(GFORTRAN_DIR ${CMAKE_Fortran_COMPILER} PATH)
+  SET(CMAKE_AR "${GFORTRAN_DIR}/ar")
+  APPEND_Fortran_FLAGS("-static -static-libgcc -static-libgfortran") # XXX No test :( -- xhub
+ENDIF()
+
+# for LAPACKE, see http://icl.cs.utk.edu/lapack-for-windows/lapack/
+IF(MSVC)
+  APPEND_C_FLAGS("/DHAVE_LAPACK_CONFIG_H")
+  APPEND_C_FLAGS("/DLAPACK_COMPLEX_STRUCTURE")
+  APPEND_C_FLAGS("/DADD_")
+  APPEND_CXX_FLAGS("/DHAVE_LAPACK_CONFIG_H")
+  APPEND_CXX_FLAGS("/DLAPACK_COMPLEX_STRUCTURE")
+  APPEND_CXX_FLAGS("/DADD_")
+ENDIF(MSVC)
+
+IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
+  STRING(REGEX REPLACE "\\\\" "/" ENV_PATH "$ENV{PATH}")
+  STRING(REGEX REPLACE "\;" "\\\;" ENV_PATH "${ENV_PATH}")
+ENDIF()
+
+
+LIBRARY_PROJECT_SETUP()
+
+
 # The library tests
 
 # wrapper are not needed

@@ -129,11 +129,11 @@ COMPILE_WITH(Boost REQUIRED)
 # FIND_PACKAGE( ... COMPONENTS <component>) does not mention <component> in failure message!
 # a workaround 
 
-FIND_PACKAGE(Boost COMPONENTS graph)
+#FIND_PACKAGE(Boost COMPONENTS graph)
 
-IF(NOT Boost_GRAPH_FOUND)
-  MESSAGE(STATUS "WARNING boost graph library not found.")
-ENDIF(NOT Boost_GRAPH_FOUND)
+#IF(NOT Boost_GRAPH_FOUND)
+#  MESSAGE(STATUS "WARNING boost graph library not found.")
+#ENDIF(NOT Boost_GRAPH_FOUND)
 
 compile_with(BLAS REQUIRED)
 compile_with(LAPACK REQUIRED)
@@ -166,6 +166,11 @@ SET(SiconosKernel_LINKER_LANGUAGE CXX)
 SET(SiconosKernel_LINK_LIBRARIES ${SiconosKernel_LINK_LIBRARIES}
  ${CMAKE_DL_LIBS})
 
+IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
+  STRING(REGEX REPLACE "\\\\" "/" ENV_PATH "$ENV{PATH}")
+  STRING(REGEX REPLACE "\;" "\\\;" ENV_PATH "${ENV_PATH}")
+ENDIF()
+
 LIBRARY_PROJECT_SETUP()
 
 # wrappers for tests are needed
@@ -179,7 +184,10 @@ ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
 IF(MSVC)
   SET(CMAKE_CXX_CREATE_SHARED_MODULE
 "<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
-  INSTALL(FILES ${CMAKE_SOURCE_DIR}/siconos/cmake-vc.bat DESTINATION bin)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/siconos/cmake-vc.bat.in
+    ${CMAKE_BINARY_DIR}/cmake-vc.bat)
+  INSTALL(FILES ${CMAKE_BINARY_DIR}/cmake-vc.bat DESTINATION bin)
+  INSTALL(FILES ${CMAKE_SOURCE_DIR}/siconos/siconos.bat DESTINATION bin)
 ENDIF(MSVC)
 #
 # tests with cppunit

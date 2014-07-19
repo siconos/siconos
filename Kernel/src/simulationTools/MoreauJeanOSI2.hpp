@@ -60,11 +60,6 @@ private:
   */
   ACCEPT_SERIALIZATION(MoreauJeanOSI2);
 
-
-  /** Default constructor
-   */
-  MoreauJeanOSI2() {};
-
 public:
 
   /** constructor from a minimum set of data: one DS and its theta

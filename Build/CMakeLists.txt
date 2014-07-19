@@ -127,10 +127,13 @@ macro(AddSiconosProject)
   foreach(elt ${project_CMAKE_ARGS})
     set(project_CMAKE_ARGS_sanitized ${elt}__00__${project_CMAKE_ARGS_sanitized})
   endforeach(elt)
+  STRING(REGEX REPLACE ":" "__22__" project_CMAKE_ARGS_sanitized "${project_CMAKE_ARGS_sanitized}")
 
   message(STATUS "Adding ${_project}")
   message(STATUS "Sources are in ${SOURCE_DIR}/${_project}")
   message(STATUS "Binaries are in ${CMAKE_BINARY_DIR}/${_project}")
+
+  SET(THE_GENERATOR "${CMAKE_GENERATOR}")
 
   # Note ONLY_DOCUMENTATION => without dashboard (need a cmake . -DON_DASHBOARD=0 before)
   if(ON_DASHBOARD)
@@ -140,6 +143,7 @@ macro(AddSiconosProject)
       BUILD_COMMAND ${CMAKE_CTEST_COMMAND} ${CTEST_OPTIONS}
       -DMODULE=${_project}
       -DMODE=${MODE}
+      -DCTEST_CMAKE_GENERATOR=${THE_GENERATOR}
       -DSOURCE_DIRECTORY=${SOURCE_DIR}
       -DBINARY_DIRECTORY=${CMAKE_BINARY_DIR}/${_project}
       -DEXTRA_CMAKE_ARGS=${project_CMAKE_ARGS_sanitized}
