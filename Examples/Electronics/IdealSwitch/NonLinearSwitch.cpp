@@ -104,7 +104,8 @@ int main()
 
   // -- (1) OneStepIntegrators --
   SP::OneStepIntegrator  aEulerMoreauOSI ;
-  aEulerMoreauOSI.reset(new EulerMoreauOSI(aDS, 0.5));
+  aEulerMoreauOSI.reset(new EulerMoreauOSI(0.5));
+  aEulerMoreauOSI->insertDynamicalSystem(aDS);
 
   // -- (2) Time discretisation --
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));

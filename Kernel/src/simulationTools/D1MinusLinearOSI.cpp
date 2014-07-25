@@ -72,6 +72,9 @@ struct D1MinusLinearOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 /// @endcond
 
+D1MinusLinearOSI::D1MinusLinearOSI() :
+  OneStepIntegrator(OSI::D1MINUSLINEAROSI) {}
+
 
 D1MinusLinearOSI::D1MinusLinearOSI(SP::DynamicalSystem newDS) :
   OneStepIntegrator(OSI::D1MINUSLINEAROSI)
@@ -1138,14 +1141,6 @@ bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsign
   return (y > 0.0);
 }
 
-
-
-
-
-void D1MinusLinearOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
-{
-  OSIDynamicalSystems->insert(ds);
-}
 
 #ifdef D1MINUSLINEAR_FULL
 

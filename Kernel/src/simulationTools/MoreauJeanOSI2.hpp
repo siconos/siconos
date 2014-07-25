@@ -62,11 +62,10 @@ private:
 
 public:
 
-  /** constructor from a minimum set of data: one DS and its theta
-   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param Theta value
+  /** constructor from a minimum set of data:  theta
+   *  \param theta value for the theta parameter
    */
-  MoreauJeanOSI2(SP::DynamicalSystem, double);
+  MoreauJeanOSI2(double theta = 0.5);
 
   ~MoreauJeanOSI2();
 

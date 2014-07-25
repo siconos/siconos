@@ -71,15 +71,17 @@ protected:
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
   bool _isThereImpactInTheTimeStep ;
-  /** Default constructor */
-  D1MinusLinearOSI() {};
 
 public:
+
+  /** basic constructor
+   */
+  D1MinusLinearOSI();
 
   /** constructor from one dynamical system
    *  \param newDS DynamicalSystem to be integrated
    */
-  D1MinusLinearOSI(SP::DynamicalSystem newDS);
+  DEPRECATED_OSI_API(D1MinusLinearOSI(SP::DynamicalSystem newDS));
 
   /** destructor */
   virtual ~D1MinusLinearOSI() {};
@@ -148,11 +150,6 @@ public:
   {
     RuntimeException::selfThrow("D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
   }
-
-  /** insert a dynamical system in this Integrator
-   *  \param ds pointer to DynamicalSystem
-   */
-  virtual void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** visitors hook */
   ACCEPT_STD_VISITORS();

@@ -151,7 +151,7 @@ public:
    *  \param theta value for the theta parameter (default = 0.5)
    *  \param gamma value for the gamma parameter (default = NaN and gamma is not used)
    */
-  MoreauJeanOSI(SP::DynamicalSystem ds, double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN());
+  DEPRECATED_OSI_API(MoreauJeanOSI(SP::DynamicalSystem ds, double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN()));
 
   /** constructor from theta value only
    *  \param theta value for the theta parameter (default = 0.5)
@@ -372,11 +372,6 @@ public:
   /** Displays the data of the MoreauJeanOSI's integrator
    */
   void display();
-
-  /** insert a dynamical system in this Integrator
-   *  \param ds the DynamicalSystem to integrate
-   */
-  void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** visitors hook
   */

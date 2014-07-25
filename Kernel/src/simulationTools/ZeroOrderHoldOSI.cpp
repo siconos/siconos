@@ -46,15 +46,12 @@ using namespace RELATION;
 //}
 
 // --- constructor from a minimum set of data ---
+ZeroOrderHoldOSI::ZeroOrderHoldOSI():
+  OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false) {}
+
+// --- constructor from a minimum set of data ---
 ZeroOrderHoldOSI::ZeroOrderHoldOSI(SP::DynamicalSystem ds):
   OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false)
-{
-  OSIDynamicalSystems->insert(ds);
-}
-
-
-// Note: OSIDynamicalSystems must disappear
-void ZeroOrderHoldOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   OSIDynamicalSystems->insert(ds);
 }

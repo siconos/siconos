@@ -32,7 +32,7 @@
 #include "SiconosSerialization.hpp"
 
 // As always, MSVC miss C99
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && _MSC_VER < 1800
 extern "C" double rint(double x);
 #endif
 

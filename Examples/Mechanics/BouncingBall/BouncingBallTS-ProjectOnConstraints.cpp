@@ -107,7 +107,8 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(ball, theta));
+    SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(theta));
+    OSI->insertDynamicalSystem(ball);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

@@ -29,7 +29,7 @@
 
 //using namespace RELATION;
 
-
+MoreauJeanCombinedProjectionOSI::MoreauJeanCombinedProjectionOSI(SP::DynamicalSystem ds, double theta) : MoreauJeanOSI(ds, theta) {}
 
 void MoreauJeanCombinedProjectionOSI::initialize()
 {

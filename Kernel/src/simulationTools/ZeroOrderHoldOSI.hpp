@@ -66,11 +66,6 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
  */
 class ZeroOrderHoldOSI : public OneStepIntegrator
 {
-private:
-  /** default constructor
-   */
-  ZeroOrderHoldOSI() {};
-
 protected:
   /** serialization hooks
   */
@@ -83,58 +78,16 @@ protected:
   /** Unused for now */
   bool _useGammaForRelation;
 
-  /** init Phi[ds], ZeroOrderHoldOSI matrix, at time t
-   *  \param t the time
-   *  \param ds a pointer to DynamicalSystem
-   */
-//  void initMatrixAd(double t, SP::DynamicalSystem ds);
-
-  /** init Ad[ds] and possibly Bd[ds] or Ld[ds] , ZeroOrderHoldOSI matrices, at time t
-   *  \param t the time
-   *  \param ds a pointer to DynamicalSystem
-   *  \param inter the control interaction
-   */
-//  void initMatrices(double t, SP::DynamicalSystem ds, const Interaction& inter);
-
-  /** Initialize the integrators
-   * \param ds the DynamicalSystem
-   * \param withInteraction true if we have an Interaction
-   */
-//  void initIntegrators(const DynamicalSystem& ds, const bool withInteraction);
-
-  /** compute Psi[ds], ZeroOrderHoldOSI matrix, at time t
-   *  \param ds the DynamicalSystem
-   *  \param rel the relation
-   */
-//  void computeBd(const DynamicalSystem& ds, const Relation& rel);
-
-  /** compute Psi[ds], ZeroOrderHoldOSI matrix, if the DS is TI
-   *  \param ds the DynamicalSystem
-   *  \param rel the relation
-   */
-//  void computeBdTI(const DynamicalSystem& ds, const Relation& rel);
-
-  /** compute Psi[ds], ZeroOrderHoldOSI matrix, if the DS is TI
-   *  \param ds the DynamicalSystem
-   */
-//  void computeLdTI(const DynamicalSystem& ds);
-
-  /** compute Phi[ds], ZeroOrderHoldOSI matrix, at time t
-   *  \param ds the DynamicalSystem
-   */
-//  void computeAd(const DynamicalSystem& ds);
-
-  /** compute AdInt[ds], ZeroOrderHoldOSI matrix, at time t
-   *  \param ds the DynamicalSystem
-   */
-//  void computeAdInt(const DynamicalSystem& ds);
-
 public:
+
+  /** basic constructor
+   */
+  ZeroOrderHoldOSI();
 
   /** constructor from a minimum set of data: one DS
    *  \param ds the DynamicalSystem linked to the OneStepIntegrator
    */
-  ZeroOrderHoldOSI(SP::DynamicalSystem ds);
+  DEPRECATED_OSI_API(ZeroOrderHoldOSI(SP::DynamicalSystem ds));
 
   /** destructor
   */
@@ -214,11 +167,6 @@ public:
   /** Displays the data of the ZeroOrderHoldOSI's integrator
   */
   void display();
-
-  /** insert a dynamical system in this Integrator
-   *  \param ds a SP::DynamicalSystem to insert
-   */
-  void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   void updateMatrices(SP::DynamicalSystem ds);
 

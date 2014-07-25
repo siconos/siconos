@@ -103,7 +103,8 @@ int main(int argc, char* argv[])
     double gamma = 0.500000000000;
 
     // -- (1) OneStepIntegrators --
-    SP::EulerMoreauOSI OSI_RLCD(new EulerMoreauOSI(LSCircuitRLCD, theta, gamma));
+    SP::EulerMoreauOSI OSI_RLCD(new EulerMoreauOSI(theta, gamma));
+    OSI_RLCD->insertDynamicalSystem(LSCircuitRLCD);
     OSI_RLCD->setUseGammaForRelation(true);
     // -- (2) Time discretisation --
     SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));

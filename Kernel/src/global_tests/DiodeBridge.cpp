@@ -109,7 +109,8 @@ bool DiodeBridge()
     // --- Model creation ---
     SP::Model DiodeBridge(new Model(t0, T, Modeltitle));
 
-    DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridge);
+    SP::MoreauJeanOSI OSI_RLCD(new MoreauJeanOSI());
+    DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridge, OSI_RLCD);
     DiodeBridge->nonSmoothDynamicalSystem()->link(InterDiodeBridge, LSDiodeBridge);
 
     // --- Simulation specification---
@@ -121,7 +122,6 @@ bool DiodeBridge()
     double theta = 0.5;
 
     // One Step Integrator
-    SP::MoreauJeanOSI OSI_RLCD(new MoreauJeanOSI(LSDiodeBridge));
     StratDiodeBridge->insertIntegrator(OSI_RLCD);
 
     // One Step non smooth problem

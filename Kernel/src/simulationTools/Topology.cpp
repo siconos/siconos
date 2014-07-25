@@ -22,6 +22,9 @@
 #include "Interaction.hpp"
 #include "EqualityConditionNSL.hpp"
 
+// to be removed, once the mess with allOSI and OSIDynamicalSystems has been cleaned -- xhub
+#include "OneStepIntegrator.hpp"
+
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 #include <functional>
 #else
@@ -219,6 +222,21 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds, const std::string& 
   _DSG[0]->properties(dsgv).workMatrices.reset(new VectorOfMatrices());
   ds->initWorkSpace(*_DSG[0]->properties(dsgv).workVectors, *_DSG[0]->properties(dsgv).workMatrices);
   _DSG[0]->name.insert(dsgv, name);
+}
+
+// In those two functions, we should store in the graph the information
+// that the ds is integrated by the OSI, instead of storing this info
+// in the OSI -- xhub
+void Topology::insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
+{
+  insertDynamicalSystem(ds);
+  OSI->insertDynamicalSystem(ds);
+}
+
+void Topology::insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI, const std::string& name)
+{
+  insertDynamicalSystem(ds, name);
+  OSI->insertDynamicalSystem(ds);
 }
 
 

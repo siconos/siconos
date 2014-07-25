@@ -95,8 +95,6 @@ private:
   /** temporary vector to save forces values */
   SP::BlockVector _forcesWork;
 
-  Hem5OSI() {};
-
   SP::SiconosVector _qtmp;
   SP::SiconosVector _vtmp;
   SP::SiconosVector _utmp;
@@ -111,10 +109,15 @@ private:
 
 
 public:
+
+  /** constructor from a minimum set of data
+   */
+  Hem5OSI();
+
   /** constructor from a minimum set of data
    *  \param ds the DynamicalSystem linked to the OneStepIntegrator
    */
-  Hem5OSI(SP::DynamicalSystem ds);
+  DEPRECATED_OSI_API(Hem5OSI(SP::DynamicalSystem ds));
 
   /** destructor
    */

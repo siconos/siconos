@@ -108,25 +108,25 @@ public:
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
    */
-  SchatzmanPaoliOSI(SP::DynamicalSystem, double);
+  DEPRECATED_OSI_API(SchatzmanPaoliOSI(SP::DynamicalSystem, double));
 
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
-  SchatzmanPaoliOSI(double);
+  SchatzmanPaoliOSI(double theta);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param Theta value
+   *  \param theta value
    *  \param gamma value
    */
-  SchatzmanPaoliOSI(SP::DynamicalSystem, double, double);
+  DEPRECATED_OSI_API(SchatzmanPaoliOSI(SP::DynamicalSystem, double, double));
 
   /** constructor from theta value only
    *  \param theta value for all these DS.
    *  \param gamma value for all these DS.
    */
-  SchatzmanPaoliOSI(double, double);
+  SchatzmanPaoliOSI(double theta, double gamma);
 
   /** destructor
    */
@@ -323,11 +323,6 @@ public:
   /** Displays the data of the SchatzmanPaoliOSI's integrator
    */
   void display();
-
-  /** insert a dynamical system in this Integrator
-   *  \param a SP::DynamicalSystem
-   */
-  void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** visitors hook
   */

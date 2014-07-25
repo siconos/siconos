@@ -155,7 +155,7 @@ public:
    *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param theta value of the parameter
    */
-  EulerMoreauOSI(SP::DynamicalSystem, double);
+  DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem, double));
 
   /** constructor from theta value only
    *  \param theta value for all DS.
@@ -167,7 +167,7 @@ public:
    *  \param Theta value
    *  \param gamma value
    */
-  EulerMoreauOSI(SP::DynamicalSystem, double, double);
+  DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem, double, double));
 
   /** constructor from theta value only
    *  \param theta value for all these DS.
@@ -385,11 +385,6 @@ public:
   /** Displays the data of the EulerMoreauOSI's integrator
    */
   void display();
-
-  /** insert a dynamical system in this Integrator
-   *  \param a SP::DynamicalSystem
-   */
-  void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** visitors hook
   */

@@ -72,13 +72,13 @@ void CommonSMC::initialize(const Model& m)
   _nsLawSMC.reset(new RelayNSL(sDim, -_alpha, _alpha));
 
   _interactionSMC.reset(new Interaction(sDim, _nsLawSMC, _relationSMC));
-  _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
+  _integratorSMC.reset(new ZeroOrderHoldOSI());
+  _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC, _integratorSMC);
   _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
   _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);
   // Set up the simulation
   _simulationSMC.reset(new TimeStepping(_td));
   _simulationSMC->setName("linear sliding mode controller simulation");
-  _integratorSMC.reset(new ZeroOrderHoldOSI(_DS_SMC));
   _simulationSMC->insertIntegrator(_integratorSMC);
   // OneStepNsProblem
   _OSNSPB_SMC.reset(new Relay(_numericsSolverId));

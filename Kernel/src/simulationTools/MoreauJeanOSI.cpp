@@ -73,13 +73,6 @@ MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   }
 }
 
-
-// Note: OSIDynamicalSystems must disappear
-void MoreauJeanOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
-{
-  OSIDynamicalSystems->insert(ds);
-}
-
 const SimpleMatrix MoreauJeanOSI::getW(SP::DynamicalSystem ds)
 {
   int dsN = ds->number();
