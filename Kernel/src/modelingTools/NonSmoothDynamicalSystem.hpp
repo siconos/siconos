@@ -147,6 +147,26 @@ public:
     _mIsLinear = ((ds)->isLinear() && _mIsLinear);
   };
 
+  /** add a dynamical system
+   * \param ds a pointer to the system to add
+   * \param OSI the integrator to use for this DS
+   */
+  inline void insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
+  {
+    _topology->insertDynamicalSystem(ds, OSI);
+    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+  };
+
+  /** add a dynamical system and add its name as a property
+   * \param ds the DynamicalSystem to add to the system
+   * \param OSI the integrator to use for this DS
+   * \param name the name of the DynamicalSystem
+   */
+  inline void insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI, const std::string& name)
+  {
+    _topology->insertDynamicalSystem(ds, OSI, name);
+    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+  };
 
   /** remove a dynamical system
    * \param ds the dynamical system to remove

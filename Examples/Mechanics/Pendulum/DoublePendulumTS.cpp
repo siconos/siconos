@@ -137,7 +137,8 @@ int main(int argc, char* argv[])
     //double theta=0.500001;
     double theta = 0.500001;
 
-    SP::MoreauJeanOSI OSI(new MoreauJeanOSI(doublependulum, theta));
+    SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
+    OSI->insertDynamicalSystem(doublependulum);
     s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --

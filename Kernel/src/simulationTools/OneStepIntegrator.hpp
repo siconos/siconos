@@ -29,6 +29,15 @@
 #include "DynamicalSystemsSet.hpp"
 #include "OneStepIntegratorTypes.hpp"
 
+#ifdef __GNUC__
+#define DEPRECATED_OSI_API(func) func __attribute__ ((deprecated ("This constructor of function is deprecrated and will be removed in the next major Siconos release! Use the insertDynamicalSystem method in NonSmoothDynamicalSystem !")))
+#elif defined(_MSC_VER)
+#define DEPRECATED_OSI_API(func) __declspec(deprecated("This constructor will be removed in the next major Siconos release and does not work with MSVC 2013 ! Use the insertDynamicalSystem method in NonSmoothDynamicalSystem !")) func
+#else
+#define DEPRECATED_OSI_API(func) func
+#endif
+
+
 /**  Generic object to manage DynamicalSystem(s) time-integration
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -37,7 +46,7 @@
  *
  * !!! This is a virtual class, interface for some specific integrators !!!
  *
- * At the time, available integrators are: MoreauJeanOSI and LsodarOSI
+ * At the time, available integrators are: MoreauJeanOSI, EulerMoreauOSI, LsodarOSI, Hem5OSI
  *
  */
 class OneStepIntegrator
@@ -146,9 +155,9 @@ public:
   };
 
 /** insert a dynamical system in this Integrator
- *  \param a SP::DynamicalSystem
+ *  \param ds a DynamicalSystem
  */
-  virtual void insertDynamicalSystem(SP::DynamicalSystem ds);
+  DEPRECATED_OSI_API(virtual void insertDynamicalSystem(SP::DynamicalSystem ds));
 
 /** get _sizeMem value
  *  \return an unsigned int

@@ -132,7 +132,8 @@ int main(int argc, char* argv[])
     //  s->setUseRelativeConvergenceCriteron(false);
 
     // -- OneStepIntegrators --
-    SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(beam1, theta));
+    SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
+    OSI1->insertDynamicalSystem(beam1);
     s->insertIntegrator(OSI1);
 
 

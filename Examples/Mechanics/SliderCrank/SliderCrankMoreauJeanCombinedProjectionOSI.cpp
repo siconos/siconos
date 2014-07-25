@@ -122,7 +122,8 @@ int main(int argc, char* argv[])
     // ----------------
     // --- Simulation ---
     // ----------------
-    SP::MoreauJeanCombinedProjectionOSI OSI(new MoreauJeanCombinedProjectionOSI(slider, 0.5));
+    SP::MoreauJeanCombinedProjectionOSI OSI(new MoreauJeanCombinedProjectionOSI(0.5));
+    OSI->insertDynamicalSystem(slider);
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
     SP::OneStepNSProblem impact(new FrictionContact(2, SICONOS_FRICTION_2D_ENUM));
     impact->numericsSolverOptions()->dparam[0] = 1e-08;

@@ -102,6 +102,14 @@ extern "C" void Hem5OSI_solout_wrapper(integer* MODE,
 }
 
 
+Hem5OSI::Hem5OSI():
+  OneStepIntegrator(OSI::HEM5OSI), _idid(0)
+{
+  _intData.resize(9);
+  for (int i = 0; i < 9; i++) _intData[i] = 0;
+  _sizeMem = 2;
+}
+
 Hem5OSI::Hem5OSI(SP::DynamicalSystem ds):
   OneStepIntegrator(OSI::HEM5OSI), _idid(0)
 {
@@ -111,6 +119,7 @@ Hem5OSI::Hem5OSI(SP::DynamicalSystem ds):
   for (int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
 }
+
 
 void Hem5OSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
 {

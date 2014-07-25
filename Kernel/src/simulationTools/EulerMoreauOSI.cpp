@@ -69,12 +69,6 @@ EulerMoreauOSI::EulerMoreauOSI(double newTheta, double newGamma):
   _useGamma = true;
 }
 
-
-// Note: OSIDynamicalSystems and thetaMap must disappear
-void EulerMoreauOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
-{
-  OSIDynamicalSystems->insert(ds);
-}
 const SimpleMatrix EulerMoreauOSI::getW(SP::DynamicalSystem ds)
 {
   int dsN = ds->number();

@@ -108,7 +108,8 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- OneStepIntegrator --
-    SP::OneStepIntegrator OSI(new MoreauJeanOSI(lds, theta));
+    SP::OneStepIntegrator OSI(new MoreauJeanOSI(theta));
+    OSI->insertDynamicalSystem(lds);
 
     // -- OneStepNsProblem --
     SP::OneStepNSProblem osnspb(new LCP(SICONOS_LCP_QP));

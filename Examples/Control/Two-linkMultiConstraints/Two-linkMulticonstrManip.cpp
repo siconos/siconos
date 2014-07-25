@@ -173,7 +173,8 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    SP::OneStepIntegrator OSI(new MoreauJeanOSI(arm, 0.500001));
+    SP::OneStepIntegrator OSI(new MoreauJeanOSI(0.500001));
+    OSI->insertDynamicalSystem(arm);
     s->insertIntegrator(OSI);
     ;
     // -- OneStepNsProblem --

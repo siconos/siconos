@@ -253,11 +253,8 @@ void Disks::init(std::string disks_input)
       FExt->setValue(1, -m * g);
       body->setFExtPtr(FExt);
 
-      // add the dynamical system to the one step integrator
-      osi->insertDynamicalSystem(body);
-
       // add the dynamical system in the non smooth dynamical system
-      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body, osi);
 
     }
 

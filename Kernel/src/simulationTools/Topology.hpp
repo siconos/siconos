@@ -149,6 +149,19 @@ public:
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds, const std::string& name);
 
+  /** add a dynamical system
+   * \param ds the DynamicalSystem to add
+   * \param OSI the integrator to use for this DS
+   */
+  void insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
+
+  /** add a dynamical system
+   * \param ds the DynamicalSystem to add
+   * \param OSI the integrator to use for this DS
+   * \param name the name of the DynamicalSystem
+   */
+  void insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI, const std::string& name);
+
   /** remove a dynamical system
    * \param ds the dynamical system to remove
    */

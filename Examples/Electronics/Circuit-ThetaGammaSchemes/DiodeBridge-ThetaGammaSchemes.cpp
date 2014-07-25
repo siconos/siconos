@@ -115,7 +115,8 @@ int main(int argc, char* argv[])
     double theta = 0.5;
     double gamma = 0.5;
 
-    SP::EulerMoreauOSI aOSI(new EulerMoreauOSI(LSDiodeBridge, theta, gamma));
+    SP::EulerMoreauOSI aOSI(new EulerMoreauOSI(theta, gamma));
+    aOSI->insertDynamicalSystem(LSDiodeBridge);
     aOSI->setUseGammaForRelation(true);
     // -- (2) Time discretisation --
     SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));

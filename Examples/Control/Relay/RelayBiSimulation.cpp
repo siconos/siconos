@@ -121,7 +121,8 @@ int main(int argc, char* argv[])
     SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
     // -- OneStepIntegrators --
     double theta = 0.5;
-    SP::EulerMoreauOSI processIntegrator(new EulerMoreauOSI(processDS, theta));
+    SP::EulerMoreauOSI processIntegrator(new EulerMoreauOSI(theta));
+    processIntegrator->insertDynamicalSystem(processDS);
     processSimulation->insertIntegrator(processIntegrator);
 
     // -------------
@@ -140,7 +141,8 @@ int main(int argc, char* argv[])
     SP::TimeStepping controllerSimulation(new TimeStepping(controllerTD));
     // -- OneStepIntegrators --
     double controllertheta = 0.5;
-    SP::EulerMoreauOSI controllerIntegrator(new EulerMoreauOSI(controllerDS, controllertheta));
+    SP::EulerMoreauOSI controllerIntegrator(new EulerMoreauOSI(controllertheta));
+    controllerIntegrator->insertDynamicalSystem(controllerDS);
     controllerSimulation->insertIntegrator(controllerIntegrator);
 
     // -- OneStepNsProblem --

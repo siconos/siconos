@@ -71,14 +71,14 @@ public:
    *  \param alpha_m double : value of alpha_m
    *  \param alpha_f double : value of alpha_f
    */
-  NewMarkAlphaOSI(SP::DynamicalSystem, double, double, double, double, bool);
+  DEPRECATED_OSI_API(NewMarkAlphaOSI(SP::DynamicalSystem, double, double, double, double, bool));
 
   /** constructor with one DS and the parameter rho_infty from which values of beta, gamma, alpha_m, alpha_f can be deduced
    * \param ds SP::DynamicalSystem
    * \param rho_infty double : value of rho_infty
    */
 
-  NewMarkAlphaOSI(SP::DynamicalSystem, double, bool);
+  DEPRECATED_OSI_API(NewMarkAlphaOSI(SP::DynamicalSystem, double, bool));
 
   /** constructor with only parameters beta, gamma, alpha_m, alpha_f
   * \param beta double
@@ -209,12 +209,6 @@ public:
    */
 
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
-
-  /** insert a dynamical system in this Integrator
-   *  \param a SP::DynamicalSystem
-   */
-  void insertDynamicalSystem(SP::DynamicalSystem ds);
-
 
   /** initialize WMap[ds] matrix
     *  \param a pointer to DynamicalSystem

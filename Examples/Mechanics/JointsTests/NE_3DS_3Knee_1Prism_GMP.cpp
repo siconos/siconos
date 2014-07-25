@@ -236,9 +236,12 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(beam1, theta));
-    SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(beam2, theta));
-    SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(beam3, theta));
+    SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
+    OSI1->insertDynamicalSystem(beam1);
+    SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(theta));
+    OSI2->insertDynamicalSystem(beam2);
+    SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(theta));
+    OSI3->insertDynamicalSystem(beam3);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

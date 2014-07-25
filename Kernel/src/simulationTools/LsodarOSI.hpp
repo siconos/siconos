@@ -88,7 +88,7 @@ public:
   /** constructor from a minimum set of data
    *  \param ds the DynamicalSystem to integrate
    */
-  LsodarOSI(SP::DynamicalSystem ds);
+  DEPRECATED_OSI_API(LsodarOSI(SP::DynamicalSystem ds));
 
   /** destructor
    */

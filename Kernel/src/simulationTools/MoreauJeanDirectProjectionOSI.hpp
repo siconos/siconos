@@ -79,7 +79,7 @@ public:
    *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param theta value of the parameter
    */
-  MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds, double theta);
+  DEPRECATED_OSI_API(MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds, double theta));
 
   /** constructor from theta value only
     *  \param theta value for all these DS.
@@ -90,7 +90,7 @@ public:
    *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param theta value of the parameter
    */
-  MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds, double theta, double gamma);
+  DEPRECATED_OSI_API(MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds, double theta, double gamma));
 
   /** destructor
    */

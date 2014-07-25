@@ -76,12 +76,6 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool _flag = false):
   _IsVelocityLevel = _flag;
 }
 
-
-void NewMarkAlphaOSI::insertDynamicalSystem(SP::DynamicalSystem ds)
-{
-  OSIDynamicalSystems->insert(ds);
-}
-
 const SimpleMatrix NewMarkAlphaOSI::getW(SP::DynamicalSystem ds)
 {
   int dsN = ds->number();

@@ -143,7 +143,8 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    SP::OneStepIntegrator vOSI(new MoreauJeanOSI(dynamicalSystem, theta));
+    SP::OneStepIntegrator vOSI(new MoreauJeanOSI(theta));
+    vOSI->insertDynamicalSystem(dynamicalSystem);
     s->insertIntegrator(vOSI);
 
 
