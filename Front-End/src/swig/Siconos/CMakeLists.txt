@@ -62,7 +62,7 @@ FILE(GLOB _HPPDRS
 
 SET(DOXYGEN_OUTPUT ${CMAKE_CURRENT_BINARY_DIR})
 
-IF(DOXYGEN_FOUND)
+IF(DOXYGEN_FOUND AND NOT NO_DOXY2SWIG)
   MESSAGE(STATUS "Found doxygen : configuring docstrings generation.")
   SET(XML_DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/xml_doxy.config")
 
@@ -153,6 +153,20 @@ IF(DOXYGEN_FOUND)
     numpy.i
     pyRegister.i
     Numerics-docstrings.i)
+ELSE()
+  ADD_CUSTOM_COMMAND(OUTPUT Numerics-docstrings.i
+    DEPENDS ${NUMERICS_DOCSTRINGS_FILES}
+    COMMAND echo "" > Numerics-docstrings.i
+    COMMENT "Numerics docstrings concatenation")
+
+  ADD_CUSTOM_COMMAND(OUTPUT Kernel-docstrings.i
+    DEPENDS ${KERNEL_DOCSTRINGS_FILES}
+    COMMAND echo "" > Kernel-docstrings.i
+    COMMENT "Kernel docstrings concatenation")
+
+  ADD_CUSTOM_TARGET(numerics_docstrings DEPENDS Numerics-docstrings.i)
+  ADD_CUSTOM_TARGET(kernel_docstrings DEPENDS Kernel-docstrings.i)
+
 ENDIF()
 
   # WARNING ${swig_generated_file_fullname} is overriden 

@@ -342,12 +342,12 @@ endif(BLAS_LIBRARIES)
     ## Use BLAS_DIR to set path for cmake search. 
     ## If pkg-config has been used, maybe it gives some hints about headers location ...
     message(STATUS pkg hints : ${INCLUDE_DIR_HINTS})
-    set(CMAKE_INCLUDE_PATH ${BLAS_INC_DIR} ${INCLUDE_DIR_HINTS})
-    set(CMAKE_PREFIX_PATH ${BLAS_DIR})
     ## Note Franck : it seems that find_path process does not work as expected on Macosx : it does not respect the search sequence described
     # in cmake doc (i.e. CMAKE_PREFIX, then HINTS, PATHS ... ) and always turn to find apple framework cblas if
     # NO_DEFAULT_PATH is not set. 
     if(APPLE) # First check in HINTS, no default, then global search.
+      set(CMAKE_INCLUDE_PATH ${INCLUDE_DIR_HINTS} ${BLAS_INC_DIR})
+      set(CMAKE_PREFIX_PATH ${BLAS_DIR})
       foreach(_file ${BLAS_HEADER})
 	unset(_dir CACHE)
 	find_path(_dir
@@ -368,6 +368,7 @@ endif(BLAS_LIBRARIES)
       find_path(BLAS_INCLUDE_DIRS 
 	NAMES ${BLAS_HEADER}
 	PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
+        HINTS ${INCLUDE_DIR_HINTS}  ${BLAS_INC_DIR}
 	)
     endif()
     if(BLAS_INCLUDE_DIRS)
