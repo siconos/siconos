@@ -32,6 +32,6 @@ ENDIF(NOT Boost_GRAPH_FOUND)
 
 #LINK_LIBRARIES(MBTB ${CMAKE_CURRENT_BINARY_DIR}/../CADMBTB/libCADMBTB.so ${CMAKE_CURRENT_BINARY_DIR}/../TIMERMBTB/libTIMERMBTB.so)
 
-LINK_LIBRARIES(MBTB TIMERMBTB CADMBTB SiconosMechanics ${SiconosKernel_LIBRARIES} ${SiconosNumerics_LIBRARIES})
+LINK_LIBRARIES(MBTB TIMERMBTB CADMBTB ${SiconosMechanics_LIBRARY} ${SiconosKernel_LIBRARIES} ${SiconosNumerics_LIBRARIES})
 
 add_library (MBTB SHARED MBTB_PYTHON_API.cpp MBTB_Body.cpp MBTB_internalTool.cpp MBTB_DATA.cpp MBTB_Contact.cpp MBTB_ContactRelation.cpp MBTB_FC3DContactRelation.cpp MBTB_TimeStepping.cpp MBTB_TimeSteppingProj.cpp MBTB_TimeSteppingCombinedProj.cpp MBTB_MoreauJeanOSI.cpp MBTB_JointR.cpp)
