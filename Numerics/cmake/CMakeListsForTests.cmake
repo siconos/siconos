@@ -119,7 +119,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     IF(CMAKE_SYSTEM_NAME MATCHES Windows)
       ADD_CUSTOM_COMMAND(TARGET ${_EXE}
         POST_BUILD
-        COMMAND env "PATH=\"@CMAKE_BINARY_DIR@/src;@SiconosNumerics_LIBRARY_DIRS@;@ENV_PATH@\"" ${EMULATOR} ARGS ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT}
+        COMMAND env "PATH=\"@CMAKE_BINARY_DIR@/src;@ENV_PATH@;@SiconosNumerics_LIBRARY_DIRS@\"" ${EMULATOR} ARGS ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT}
         --cdash-prepare ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT} > ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}.cmake
         COMMENT "Generating ${_EXE}.cmake")
     ELSE()
@@ -130,7 +130,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
         COMMENT "Generating ${_EXE}.cmake")
     ENDIF()
     
-  
+
     FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "# siconos test config file\n")
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "MACRO(ADD_CPPUNIT_TEST)\n")
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  ADD_TEST(\${ARGV})\n")

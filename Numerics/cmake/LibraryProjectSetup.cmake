@@ -161,11 +161,20 @@ MACRO(LIBRARY_PROJECT_SETUP)
         SET_TARGET_PROPERTIES(${PROJECT_NAME}_shared PROPERTIES
           ENABLE_EXPORT 1
           LINK_FLAGS /DEF:"${CMAKE_CURRENT_BINARY_DIR}/${${PROJECT_NAME}_SHARED_LIB_WE}.def")
+      IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
         ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME}_shared
           PRE_BUILD
           COMMAND ${CMAKE_NM} ARGS @${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${PROJECT_NAME}_shared.dir/objects1.rsp
-          | egrep " (D|T|B) " | cut -f 3 -d " " | sed  "1iEXPORTS" > ${${PROJECT_NAME}_SHARED_LIB_WE}.def
+          | egrep " '(D|T|B)' " | cut -f 3 -d " " | sed  's,^_,,' | sed "1iEXPORTS" > ${${PROJECT_NAME}_SHARED_LIB_WE}.def
           ) # gruik gruik
+      ELSE()
+       SET(EGREP_ARGS " (D|T|B) ")
+        ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME}_shared
+          PRE_BUILD
+          COMMAND ${CMAKE_NM} ARGS @${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${PROJECT_NAME}_shared.dir/objects1.rsp
+          | egrep " (D|T|B) " | cut -f 3 -d " " | sed "1iEXPORTS" > ${${PROJECT_NAME}_SHARED_LIB_WE}.def
+          ) # gruik gruik
+      ENDIF()
       ENDIF(MSVC)
     ENDIF(BUILD_SHARED_LIBS)
     
