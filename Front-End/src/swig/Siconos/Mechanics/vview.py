@@ -10,23 +10,8 @@ import numpy
 import random
 
 import getopt
-from contextlib import contextmanager
-import tempfile
 
 from Siconos.Mechanics.ContactDetection.Bullet import IO
-
-
-@contextmanager
-def tmpfile():
-    """
-    A context manager for a named temporay file
-    """
-    (_, tfilename) = tempfile.mkstemp()
-    fid = open(tfilename, 'w')
-    yield (fid, tfilename)
-    fid.close()
-    os.remove(tfilename)
-
 
 def usage():
     """
@@ -131,7 +116,7 @@ class Quaternion():
     def rotate(self, v):
         pv = Quaternion((0, v[0], v[1], v[2]))
         rv = self * pv * self.conjugate()
-        assert(rv[0] == 0)
+        #assert(rv[0] == 0)
         return [rv[1], rv[2], rv[3]]
 
     def axisAngle(self):
@@ -207,14 +192,14 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
         def __init__(self, data):
             self._data = None
             self._datap = numpy.array([[1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.]])
-            self._mu_coefs = None
+            self._mu_coefs = []
             if data is not None:
                 if len(data) > 0:
                     self._data = data
                     self._mu_coefs = set(self._data[:, 1])
             else:
                 self._data = None
-                self._mu_coefs = None
+                self._mu_coefs = []
 
             if self._data is not None:
                 self._time = min(self._data[:, 0])
@@ -252,24 +237,24 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
 
                     try:
                         imu = numpy.where(abs(self._data[id_f, 1] - mu) < 1e-15)[0]
-                   
+
                         self.cpa_at_time[mu] = self._data[id_f[imu], 2:5].copy()
                         self.cpb_at_time[mu] = self._data[id_f[imu], 5:8].copy()
                         self.cn_at_time[mu] = - self._data[id_f[imu], 8:11].copy()
                         self.cf_at_time[mu] = self._data[id_f[imu], 11:14].copy()
-                    
+
                         self.cpa[mu] = numpy_support.numpy_to_vtk(self.cpa_at_time[mu])
                         self.cpa[mu].SetName('contactPositionsA')
-                        
+
                         self.cpb[mu] = numpy_support.numpy_to_vtk(self.cpb_at_time[mu])
                         self.cpb[mu].SetName('contactPositionsB')
-                        
+
                         self.cn[mu] = numpy_support.numpy_to_vtk(self.cn_at_time[mu])
                         self.cn[mu].SetName('contactNormals')
-                        
+
                         self.cf[mu] = numpy_support.numpy_to_vtk(self.cf_at_time[mu])
                         self.cf[mu].SetName('contactForces')
-                        
+
                         self._contact_field[mu].AddArray(self.cpa[mu])
                         self._contact_field[mu].AddArray(self.cpb[mu])
                         self._contact_field[mu].AddArray(self.cn[mu])
@@ -279,7 +264,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
 
 
 
-          
+
 
 
             else:
@@ -528,16 +513,27 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
     mappers = dict()
     actors = []
 
+    vtk_reader = { 'vtp' : vtk.vtkXMLPolyDataReader,
+                   'stl' : vtk.vtkSTLReader }
+
     for shape_name in io.shapes():
 
-        if '.vtp' in shape_name:
-            with tmpfile() as tmpf:
-                tmpf.write(io.shapes()[shape_name][:])
-                reader = vtk.vtkXMLPolyDataReader()
-                reader.SetFileName(tmpf)
+        shape_type = io.shapes()[shape_name].attrs['type']
+
+        if shape_type in ['vtp', 'stl']:
+            with IO.tmpfile() as tmpf:
+                tmpf[0].write(str(io.shapes()[shape_name][:][0]))
+                tmpf[0].flush()
+                reader = vtk_reader[shape_type]()
+                reader.SetFileName(tmpf[1])
                 reader.Update()
                 readers[shape_name] = reader
-        elif 'primitive' not in io.shapes()[shape_name].attrs:
+                mapper = vtk.vtkDataSetMapper()
+                add_compatiblity_methods(mapper)
+                mapper.SetInputConnection(reader.GetOutputPort())
+                mappers[shape_name] = mapper
+
+        elif shape_type == 'convex':
             # a convex shape
             points = vtk.vtkPoints()
             convex = vtk.vtkConvexPointSet()
@@ -568,6 +564,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
             mappers[shape_name] = mapper
 
         else:
+            assert shape_type == 'primitive'
             primitive = io.shapes()[shape_name].attrs['primitive']
             attrs = io.shapes()[shape_name][:][0]
             if primitive == 'Sphere':

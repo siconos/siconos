@@ -12,6 +12,11 @@ import shlex
 import numpy as np
 import h5py
 
+import tempfile
+from contextlib import contextmanager
+
+import vtk
+
 from Siconos.Mechanics.ContactDetection import Contactor
 
 from Siconos.Mechanics.ContactDetection.Bullet import \
@@ -37,6 +42,17 @@ import Siconos.Numerics as Numerics
 from scipy import constants
 
 import time
+
+@contextmanager
+def tmpfile():
+    """
+    A context manager for a named temporay file
+    """
+    (_, tfilename) = tempfile.mkstemp()
+    fid = open(tfilename, 'w')
+    yield (fid, tfilename)
+    fid.close()
+    os.remove(tfilename)
 
 class Timer():
     def __init__(self):
@@ -97,7 +113,7 @@ def add_line(dataset, line):
 
 def str_of_file(filename):
     with open(filename, 'r') as f:
-        return f.read()
+        return str(f.read())
 
 class Dat():
     """a Dat context manager reads at instantiation the positions and
@@ -722,13 +738,33 @@ class Hdf5():
     def insertShapeFromFile(self, name, filename):
         """
         Insert a mesh shape from a file.
-        Accepted format : mesh encoded in VTK .vtp file
+        Accepted format : .stl or mesh encoded in VTK .vtp format
         """
         if name not in self._ref:
+
+            if os.path.splitext(filename)[-1][1:] == 'stl':
+                reader = vtk.vtkSTLReader()
+                reader.SetFileName(filename)
+                reader.Update()
+
+                with tmpfile() as tmpf:
+                    writer=vtk.vtkXMLPolyDataWriter()
+                    writer.SetInputData(reader.GetOutput())
+                    writer.SetFileName(tmpf[1])
+                    writer.Write()
+
+                    shape_data = str_of_file(tmpf[1])
+
+            else:
+                assert os.path.splitext(filename)[-1][1:] == 'vtp'
+                shape_data = str_of_file(filename)
+
+
             shape = self._ref.create_dataset(name, (1,),
                                              dtype=h5py.new_vlen(str))
-            shape[:] = str_of_file(filename)
+            shape[:] = shape_data
             shape.attrs['id'] = self._number_of_shapes
+            shape.attrs['type'] = 'vtp'
             self._shapeid[name] = shape.attrs['id']
             self._shape = VtkShapes.Collection(self._out)
             self._number_of_shapes += 1
@@ -743,6 +779,7 @@ class Hdf5():
                                              (apoints.shape[0],
                                               apoints.shape[1]))
             shape[:] = points[:]
+            shape.attrs['type'] = 'convex'
             shape.attrs['id'] = self._number_of_shapes
             self._shapeid[name] = shape.attrs['id']
             self._shape = VtkShapes.Collection(self._out)
@@ -755,6 +792,7 @@ class Hdf5():
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1, len(params)))
             shape.attrs['id'] = self._number_of_shapes
+            shape.attrs['type'] = 'primitive'
             shape.attrs['primitive'] = primitive
             shape[:] = params
             self._shapeid[name] = shape.attrs['id']
