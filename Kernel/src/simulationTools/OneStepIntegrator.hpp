@@ -29,10 +29,17 @@
 #include "DynamicalSystemsSet.hpp"
 #include "OneStepIntegratorTypes.hpp"
 
+// work around gccxml bug that does not accept an argument ot the deprecated attribute
+#ifndef __GCCXML__
+
 #ifdef __GNUC__
 #define DEPRECATED_OSI_API(func) func __attribute__ ((deprecated ("This constructor of function is deprecrated and will be removed in the next major Siconos release! Use the insertDynamicalSystem method in NonSmoothDynamicalSystem !")))
 #elif defined(_MSC_VER)
 #define DEPRECATED_OSI_API(func) __declspec(deprecated("This constructor will be removed in the next major Siconos release and does not work with MSVC 2013 ! Use the insertDynamicalSystem method in NonSmoothDynamicalSystem !")) func
+#else
+#define DEPRECATED_OSI_API(func) func
+#endif
+
 #else
 #define DEPRECATED_OSI_API(func) func
 #endif

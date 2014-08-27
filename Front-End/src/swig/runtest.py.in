@@ -29,13 +29,13 @@ env["PYTHONDONTWRITEBYTECODE"] = "1"
 env["LD_LIBRARY_PATH"] = os.path.curdir + ':' + os.getenv('LD_LIBRARY_PATH', default='')
 env["DYLD_LIBRARY_PATH"] = os.path.curdir + ':' + os.getenv('DYLD_LIBRARY_PATH', default='')
 env["WINEPREFIX"] = returnWinePrefix()
-env["PATH"] =  "${SICONOS_NUMERICS_PATH};" + "${ENV_PATH}"
 
 
 args.extend(["py.test", "-v", sys.argv[1]])
 
 if 'Windows' in platform.uname():
     use_shell = True
+    env["PATH"] =  r"${SICONOS_NUMERICS_PATH};" + r"${ENV_PATH_FOR_RUNTEST}"
 else:
     use_shell = False
 
