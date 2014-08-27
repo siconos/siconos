@@ -20,8 +20,7 @@
 #define VISOLVERS_H
 
 /*!\file VariationalInequality_Solvers.h
-  \brief Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
-
+  \brief Subroutines for the resolution of Variational Inequalites (VI) problems
 */
 
 /*! \page VISolvers VI problems Solvers
@@ -33,8 +32,6 @@ For each solver, the input argument are:
 - the unknowns (x,fx)
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a SolverOptions structure, which handles iparam and dparam
-
-
 */
 
 #include "VariationalInequality.h"
@@ -119,8 +116,16 @@ extern "C"
   int variationalInequality_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options);
 
 
+  /** VI Solver based on a merit function minimization with a line-search type
+   * algorithm 
+   * \param problem the variational inequality problem to solve
+   * \param[in,out] x, as input, the initial guess; as output the solution if
+   * the algorithm is successful
+   * \param[in,out] F value of the function
+   * \param info 0 if a solution is found
+   * \param options the solver options
+   */
   void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, double *x, double *F, int* info, SolverOptions* options);
-
 
   /**  set the default solver parameters and perform memory allocation for a VI
    * solver

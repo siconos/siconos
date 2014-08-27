@@ -17,7 +17,7 @@
  */
 
 /*!\file VariationalInequality.h
-  \brief Definition of a structure to handle with variational inequality problems.
+  \brief Definition of a structure to handle Variational Inequalities (VI).
 */
 
 /** \page viProblem Variational Inequality (VI)
@@ -26,35 +26,41 @@
  *  Given
  * <ul>
  *   <li> an integer \f$n\f$, the dimension of the ambient space,</li>
- *   <li> a mapping \f$ F:{\mathrm{I\!R}^n \rightarrow {\mathrm{I\!R}^n, \f$</li>
+ *   <li> a mapping \f$ F\colon \mathrm{I\!R}^n \rightarrow \mathrm{I\!R}^n\f$</li>
  *   <li> a set  \f$ {X} \in {{\mathrm{I\!R}}}^n\f$</li>
  * </ul>
- * the variational inequality problem  is to find a vector \f$z\in{{\mathrm{I\!R}}}^n \in X\f$,
- * \f{eqnarray*}{
- * F(z)(y-z) \geq 0,\quad \text{ for all } y \in X
+ * the variational inequality problem is to find a vector \f$z\in{{\mathrm{I\!R}}}^n \in X\f$,
+ * \f{equation*}{
+ * F(z)^T(y-z) \geq 0,\quad \text{ for all } y \in X
  * \f}
  * or equivalently,
- * \f{eqnarray*}{
- * - F(z) \in N_X(z)
+ * \f{equation*}{
+ * - F(z) \in \mathcal{N}_X(z)
  * \f}
- * where \f$N_X\f$ is the normal cone to \f$X\f$.
+ * where \f$\mathcal{N}_X\f$ is the normal cone to \f$X\f$ at \f$z\f$.
  *
  * Reference
  *
  * Facchinei, Francisco; Pang, Jong-Shi (2003), 
- * Finite Dimensional Variational Inequalities and Complementarity Problems, Vol. 1 & 2,
- * Springer Series in Operations Research, Berlin-Heidelberg-New York: Springer-Verlag,
+ * <i>Finite Dimensional Variational Inequalities and Complementarity Problems</i>, Vol. 1 & 2,
+ * Springer Series in Operations Research, Berlin-Heidelberg-New York: Springer-Verlag.
  *
  * The problem is stored and given to the solver in Siconos/Numerics thanks to
- *  a C structure VariationalProblem .
+ *  a C structure VariationalProblem.
  *
- *  \section viSolversList Available solvers for Variational Inequality (see VI_cst.h)
+ *  \section viSolversList Available solvers for Variational Inequality
  * Use the generic function variationalInequality_driver() to call one the the specific solvers listed below:
- *
  * <ul>
  *
- * <li> variationalInequality_ExtraGradient() :Extra gradient solver.
- *       SolverId : SICONOS_VI_EG =1000, </li>
+ * <li> variationalInequality_ExtraGradient() : Extra gradient solver.
+ *      SolverId: SICONOS_VI_EG = 1000. </li>
+ * <li> variationalInequality_FixedPointProjection() : Fixed-point solver.
+ *      SolverId: SICONOS_VI_EG = 1001. </li>
+ * <li> variationalInequality_HyperplaneProjection() : Hyperplane Projection
+ *      based Solver. SolverId: SICONOS_VI_HP_STR = 1002. </li>
+ * <li> variationalInequality_box_newton_QiLSA : Solver using the merit
+ * function proposed by Qi for box-constrained VI. SolverId:
+ * SICONOS_VI_BOX_QI_STR = 1003
  *
  * </ul>
  * (see the functions/solvers list in VariationalInequality_Solvers.h)
