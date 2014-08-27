@@ -25,6 +25,9 @@ endif(OCE_FOUND)
 if(OCE_FOUND)
   # Include files reside in ${OCE_INCLUDE_DIRS};
   include_directories(${OCE_INCLUDE_DIRS})
+
+  LIST(REMOVE_ITEM OCE_LIBRARIES DRAWEXE)
+
   LINK_LIBRARIES(CADMBTB ${OCE_LIBRARIES} TIMERMBTB)
   
   # We do not need library path, they will be automatically imported.
@@ -43,6 +46,9 @@ else(OCE_FOUND)
     message(STATUS "OpenCASCADE_LIBRARIES = " ${OpenCASCADE_LIBRARIES})
     message(STATUS "OpenCASCADE_LINK_DIRECTORY = " ${OpenCASCADE_LINK_DIRECTORY})
     include_directories(${OpenCASCADE_INCLUDE_DIR})
+
+    LIST(REMOVE_ITEM OpenCASCADE_LIBRARIES DRAWEXE)
+
     LINK_LIBRARIES(CADMBTB ${OpenCASCADE_LIBRARIES})
   ELSE(OpenCASCADE_FOUND)
     MESSAGE(STATUS "OpenCascade Libraries not found in standard paths.")
