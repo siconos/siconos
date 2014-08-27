@@ -235,12 +235,15 @@ public:
 
 
   /** constructor from a minimum set of data
-   *  \param SiconosVector : initial coordinates of this DynamicalSystem
-   *  \param SiconosVector : initial velocity of this DynamicalSystem
-   *  \param double : mass
-   *  \param SiconosMatrix : inertial matrix
+   *  \param position : initial coordinates of this DynamicalSystem
+   *  \param velocity: initial velocity of this DynamicalSystem
+   *  \param mass : the mass
+   *  \param inertia : the inertia matrix
    */
-  NewtonEulerDS(SP::SiconosVector, SP::SiconosVector, double  , SP::SiconosMatrix);
+  NewtonEulerDS(SP::SiconosVector position,
+                SP::SiconosVector velocity,
+                double mass ,
+                SP::SiconosMatrix inertia);
 
 
 
