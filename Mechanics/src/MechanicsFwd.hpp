@@ -23,4 +23,8 @@ DEFINE_SPTR(SphereLDSPlanR);
 DEFINE_SPTR(SphereLDSSphereLDSR);
 DEFINE_SPTR(FMatrix);
 DEFINE_SPTR(NSLawMatrix);
+DEFINE_SPTR(OccContactShape);
+DEFINE_SPTR(ContactShapes);
+DEFINE_SPTR(ContactPoint);
+DEFINE_SPTR(ContactPoints);
 #endif

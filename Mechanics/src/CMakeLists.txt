@@ -3,6 +3,7 @@
 #
 PROJECT(SiconosMechanics CXX)
 
+OPTION(WITH_OCC "compilation with OpenCascade Bindings. Default = OFF" OFF)
 OPTION(WITH_MECHANISMS "compilation with OpenCascade Bindings. Default = OFF" OFF)
 OPTION(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
 
@@ -19,6 +20,12 @@ SET(SiconosMechanics_DIRS
   bodies
   joints
   contactDetection/basicBroadphase)
+
+IF(WITH_OCC)
+  COMPILE_WITH(OCE)
+  LIST(REMOVE_ITEM SiconosMechanics_LINK_LIBRARIES DRAWEXE)
+  SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS} occ)
+ENDIF()
 
 IF(WITH_MECHANISMS)
   # SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
@@ -193,6 +200,12 @@ IF(WITH_TESTING)
   BEGIN_TEST(contactDetection/basicBroadphase/test)
   NEW_TEST(testMultiBody MultiBodyTest.cpp)
   END_TEST()
+
+  IF(WITH_OCC)
+    BEGIN_TEST(occ/test)
+    NEW_TEST(testOcc OccTest.cpp)
+    END_TEST()
+  ENDIF()
 
 ENDIF(WITH_TESTING)
 

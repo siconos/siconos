@@ -1,3 +1,5 @@
+OPTION(WITH_OCC "Generation of bindings for Mechanics/OpenCascade interface" OFF)
+
 MACRO(MECHANICS_ADD_MODULE _mod _dest)
   
   SET_SOURCE_FILES_PROPERTIES(${_mod}.i PROPERTIES CPLUSPLUS ON)
@@ -33,4 +35,10 @@ INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
 INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/vview.py
   DESTINATION bin RENAME vview)
 
+IF(WITH_OCC)
+  SUBDIRS(Occ)
+ENDIF()
+
 SUBDIRS(ContactDetection)
+
+
