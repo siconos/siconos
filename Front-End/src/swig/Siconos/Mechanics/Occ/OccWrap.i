@@ -47,7 +47,7 @@
 #define DEFINE_STANDARD_ALLOC
 %include <TopoDS_Shape.hxx>
 
-PY_FULL_REGISTER(OccShape);
+PY_FULL_REGISTER(OccContactShape);
 PY_FULL_REGISTER(OccBody);
 PY_FULL_REGISTER(OccR);
 
@@ -57,7 +57,7 @@ PY_FULL_REGISTER(OccR);
   #include <BRep_Builder.hxx>
   #include <sstream>
 
-  SP::OccShape OccShapeFromFreeCAD(PyObject * o)
+  SP::OccContactShape OccShapeFromFreeCAD(PyObject * o)
   {
 
   if (PyObject_HasAttrString(o, "exportBrepToString"))
@@ -69,7 +69,7 @@ PY_FULL_REGISTER(OccR);
     std::stringstream brep_stream;
     brep_stream << PyString_AsString(ostr);
 
-    SP::OccShape shape(new OccShape());
+    SP::OccContactShape shape(new OccContactShape());
     BRep_Builder brep_builder;
     BRepTools::Read(*shape, brep_stream, brep_builder);
 
@@ -77,7 +77,8 @@ PY_FULL_REGISTER(OccR);
   }
   else
   {
-    PyErr_SetString(PyExc_TypeError, "cannot import brep");
+    /* void pointer should return None on Python side */
+    return SP::OccContactShape();
   };
 
   }

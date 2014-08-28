@@ -33,23 +33,27 @@ public:
   //  Note: with c++11 =>
   //  using NewtonEulerDS::NewtonEulerDS;
 
-  //! Constructor from a minimum set of data
-  //  \param position : initial coordinates of this DynamicalSystem
-  //  \param velocity: initial velocity of this DynamicalSystem
-  //  \param mass : the mass
-  //  \param inertia : the inertia matrix
+  //! Constructor from a minimum set of data.
+  //  \param position : initial coordinates of this DynamicalSystem.
+  //  \param velocity: initial velocity of this DynamicalSystem.
+  //  \param mass : the mass.
+  //  \param inertia : the inertia matrix.
   //
   OccBody(SP::SiconosVector position,
           SP::SiconosVector velocity,
           double mass ,
           SP::SiconosMatrix inertia);
 
-  /** association of a contact shape
-   * \param shape : the contact shape
+  /** Association of a contact shape.
+   * \param shape : the contact shape.
    */
   void addContactShape(SP::OccContactShape shape);
 
-  /** get all the associated contact shapes
+  /** Update positions and orientations of contact shapes.
+   */
+  void updateContactShapes();
+
+  /** Get all the associated contact shapes.
    */
   const ContactShapes& contactShapes() const;
 

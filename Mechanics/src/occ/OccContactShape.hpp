@@ -28,7 +28,13 @@
 struct OccContactShape : public TopoDS_Shape
 {
 
+  /** Default constructor.
+   */
+  OccContactShape() : TopoDS_Shape() {};
 
+  /** Constructor from OpenCascade object
+      \param shape : FACE or EDGE shape
+   */
   OccContactShape(const TopoDS_Shape& shape)
     : TopoDS_Shape(shape)
   {};
@@ -74,6 +80,11 @@ struct OccContactShape : public TopoDS_Shape
   /**
    * @}
    */
+
+  /** contact group */
+  unsigned int contactGroup;
+
+
 };
 
 #endif
