@@ -71,7 +71,9 @@ int main(void)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
- 
+
   deleteSolverOptions(options);
   free(options);
+
+  return info;
 }
