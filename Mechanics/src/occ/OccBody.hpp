@@ -33,6 +33,12 @@ public:
   //  Note: with c++11 =>
   //  using NewtonEulerDS::NewtonEulerDS;
 
+
+  /* Default constructor.
+   */
+  OccBody() : NewtonEulerDS() {};
+
+
   //! Constructor from a minimum set of data.
   //  \param position : initial coordinates of this DynamicalSystem.
   //  \param velocity: initial velocity of this DynamicalSystem.
@@ -53,9 +59,10 @@ public:
    */
   void updateContactShapes();
 
-  /** Get all the associated contact shapes.
+  /** Get an associated contact shapes by its rank of association.
+      \param id : the number of the shape.
    */
-  const ContactShapes& contactShapes() const;
+  const OccContactShape& contactShape(unsigned int id) const;
 
   ACCEPT_STD_VISITORS();
 

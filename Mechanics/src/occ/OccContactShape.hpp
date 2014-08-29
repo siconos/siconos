@@ -23,21 +23,38 @@
 #define OccContactShape_hpp
 
 #include <string>
-#include "TopoDS_Shape.hxx"
+#include <SiconosFwd.hpp>
+#include <MechanicsFwd.hpp>
+DEFINE_SPTR(TopoDS_Shape);
 
-struct OccContactShape : public TopoDS_Shape
+struct OccContactShape
 {
 
   /** Default constructor.
    */
-  OccContactShape() : TopoDS_Shape() {};
+  OccContactShape() {};
 
-  /** Constructor from OpenCascade object
+  /** Constructor from OpenCascade object.
+      \param shape : FACE or EDGE shape
+   */
+  OccContactShape(TopoDS_Shape& shape)
+    : _shape(createSPtrTopoDS_Shape(shape))
+  {};
+
+  /** Constructor from const OpenCascade object : remove constness.
       \param shape : FACE or EDGE shape
    */
   OccContactShape(const TopoDS_Shape& shape)
-    : TopoDS_Shape(shape)
+    : _shape(createSPtrTopoDS_Shape(const_cast<TopoDS_Shape&>(shape)))
   {};
+
+  /** Return OpenCascade data with default initialization if needed.
+   */
+  TopoDS_Shape& data();
+
+  /** Return OpenCascade data.
+   */
+  TopoDS_Shape& data() const {return *_shape;};
 
   /** Known contacts.
    */
@@ -59,6 +76,12 @@ struct OccContactShape : public TopoDS_Shape
   /** Compute and store UV bounds of the shape.
    */
   void computeUVBounds();
+
+  /** Set shape position and orientation
+      \param q : NewtonEulerDS state
+  */
+  void move(const SiconosVector& q);
+
 
   /** Distance to another contact shape.
       \param sh2 : the other contact shape.
@@ -84,6 +107,7 @@ struct OccContactShape : public TopoDS_Shape
   /** contact group */
   unsigned int contactGroup;
 
+  SP::TopoDS_Shape _shape;
 
 };
 

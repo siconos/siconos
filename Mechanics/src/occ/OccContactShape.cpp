@@ -12,12 +12,15 @@
 #include <BRep_Tool.hxx>
 #include <GeomLProp_SLProps.hxx>
 #include <TopoDS.hxx>
+#include <TopLoc_Location.hxx>
 
+#include <gp_Vec.hxx>
+#include <gp_Quaternion.hxx>
 
 
 OccContactShape::ContactTypeValue OccContactShape::contactType() const
 {
-  switch (this->ShapeType())
+  switch (this->_shape->ShapeType())
   {
   case TopAbs_EDGE: { return OccContactShape::Edge; }
   case TopAbs_FACE: { return OccContactShape::Face; }
@@ -31,7 +34,7 @@ OccContactShape::ContactTypeValue OccContactShape::contactType() const
 void OccContactShape::computeUVBounds()
 {
   TopExp_Explorer Ex1;
-  TopoDS_Shape& aShape1= *this;
+  TopoDS_Shape& aShape1= this->data();
   if(this->contactType() == OccContactShape::Face)
   {
     Ex1.Init(aShape1, TopAbs_FACE);
@@ -190,8 +193,8 @@ void _myf_FaceEdge(double *x, double * fx, double * gx,const TopoDS_Face& face1,
 
 }
 
-void cadmbtb_distanceFaceFace(const OccContactShape& sh1,
-                              const OccContactShape& sh2,
+void cadmbtb_distanceFaceFace(const OccContactShape& csh1,
+                              const OccContactShape& csh2,
                               Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                               Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                               Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
@@ -199,14 +202,17 @@ void cadmbtb_distanceFaceFace(const OccContactShape& sh1,
                               Standard_Real& MinDist);
 
 // adapted from _CADMBTB_getMinDistanceFace*_using_n2qn1  (Olivier Bonnefon)
-void cadmbtb_distanceFaceFace(const OccContactShape& sh1,
-                              const OccContactShape& sh2,
+void cadmbtb_distanceFaceFace(const OccContactShape& csh1,
+                              const OccContactShape& csh2,
                               Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                               Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                               Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
                               bool normalFromFace1,
                               Standard_Real& MinDist)
 {
+
+  TopoDS_Shape& sh1 = csh1.data();
+  TopoDS_Shape& sh2 = csh2.data();
 
   double x[4];
   double f = 0;
@@ -234,31 +240,31 @@ void cadmbtb_distanceFaceFace(const OccContactShape& sh1,
 
       if(firstFace1)
       {
-        binf[0] = sh1.binf1[0];
-        binf[1] = sh1.binf1[1];
-        bsup[0] = sh1.bsup1[0];
-        bsup[1] = sh1.bsup1[1];
+        binf[0] = csh1.binf1[0];
+        binf[1] = csh1.binf1[1];
+        bsup[0] = csh1.bsup1[0];
+        bsup[1] = csh1.bsup1[1];
       }
       else
       {
-        binf[0] = sh1.binf2[0];
-        binf[1] = sh1.binf2[1];
-        bsup[0] = sh1.bsup2[0];
-        bsup[1] = sh1.bsup2[1];
+        binf[0] = csh1.binf2[0];
+        binf[1] = csh1.binf2[1];
+        bsup[0] = csh1.bsup2[0];
+        bsup[1] = csh1.bsup2[1];
       }
       if(firstFace2)
       {
-        binf[2] = sh2.binf1[0];
-        binf[3] = sh2.binf1[1];
-        bsup[2] = sh2.bsup1[0];
-        bsup[3] = sh2.bsup1[1];
+        binf[2] = csh2.binf1[0];
+        binf[3] = csh2.binf1[1];
+        bsup[2] = csh2.bsup1[0];
+        bsup[3] = csh2.bsup1[1];
       }
       else
       {
-        binf[2] = sh2.binf2[0];
-        binf[3] = sh2.binf2[1];
-        bsup[2] = sh2.bsup2[0];
-        bsup[3] = sh2.bsup2[1];
+        binf[2] = csh2.binf2[0];
+        binf[3] = csh2.binf2[1];
+        bsup[2] = csh2.bsup2[0];
+        bsup[3] = csh2.bsup2[1];
       }
 
       dxim[0]=1e-6*(bsup[0]-binf[0]);
@@ -361,13 +367,15 @@ void cadmbtb_distanceFaceEdge(
 
 /*idContact useful for the memory management of n2qn1.*/
 void cadmbtb_distanceFaceEdge(
-  const OccContactShape& sh1, const OccContactShape& sh2,
+  const OccContactShape& csh1, const OccContactShape& csh2,
   Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
   Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
   Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
   bool normalFromFace1,
   Standard_Real& MinDist)
 {
+  TopoDS_Shape& sh1 = csh1.data();
+  TopoDS_Shape& sh2 = csh2.data();
 
   TopExp_Explorer Ex1;
   Ex1.Init(sh1,TopAbs_FACE);
@@ -397,23 +405,23 @@ void cadmbtb_distanceFaceEdge(
 
     if(firstFace1)
     {
-      binf[0] = sh1.binf1[0];
-      binf[1] = sh1.binf1[1];
-      bsup[0] = sh1.bsup1[0];
-      bsup[1] = sh1.bsup1[1];
+      binf[0] = csh1.binf1[0];
+      binf[1] = csh1.binf1[1];
+      bsup[0] = csh1.bsup1[0];
+      bsup[1] = csh1.bsup1[1];
     }
     else
     {
-      binf[0] = sh1.binf2[0];
-      binf[1] = sh1.binf2[1];
-      bsup[0] = sh1.bsup2[0];
-      bsup[1] = sh1.bsup2[1];
+      binf[0] = csh1.binf2[0];
+      binf[1] = csh1.binf2[1];
+      bsup[0] = csh1.bsup2[0];
+      bsup[1] = csh1.bsup2[1];
     }
 
-    binf[2] = sh2.binf1[0];
-    binf[3] = sh2.binf1[1];
-    bsup[2] = sh2.bsup1[0];
-    bsup[3] = sh2.bsup1[1];
+    binf[2] = csh2.binf1[0];
+    binf[3] = csh2.binf1[1];
+    bsup[2] = csh2.bsup1[0];
+    bsup[3] = csh2.bsup1[1];
 
     /*Because of the case of cylinder, we chose to start from the midle point.*/
     x[0]=(binf[0]+bsup[0])*0.5;
@@ -533,7 +541,7 @@ std::string OccContactShape::exportBRepAsString() const
 {
   std::stringstream out;
 
-  BRepTools::Write(*this, out);
+  BRepTools::Write(this->data(), out);
 
   return out.str();
 }
@@ -545,6 +553,44 @@ void OccContactShape::importBRepFromString(const std::string& brepstr)
 
   in << brepstr;
 
-  BRepTools::Read(*this, in, brep_builder);
+  BRepTools::Read(this->data(), in, brep_builder);
+
+}
+
+#include <SiconosVector.hpp>
+
+TopoDS_Shape& OccContactShape::data()
+{
+  if(_shape)
+  {
+    return *_shape;
+  }
+  else
+  {
+    _shape.reset(new TopoDS_Shape());
+    return *_shape;
+  }
+}
+
+void OccContactShape::move(const SiconosVector& q)
+{
+
+  const gp_Vec& translat = gp_Vec(q(0), q(1), q(2));
+
+  const gp_Quaternion& rota = gp_Quaternion(q(4), q(5), q(6), q(3));
+
+  gp_Trsf transfo;
+
+  transfo.SetRotation(rota);
+  transfo.SetTranslationPart(translat);
+
+  this->data().Move(transfo);
+
+  // cf code from Olivier
+  // reset Location to avoid accumulation of TopLoc_Datum3D
+  const TopLoc_Location& aLoc = this->data().Location();
+  const gp_Trsf& T = aLoc.Transformation();
+  TopLoc_Location aLocWithoutList(T);
+  this->data().Location(aLocWithoutList);
 
 }

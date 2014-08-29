@@ -64,14 +64,14 @@ PY_FULL_REGISTER(OccR);
   {
     PyObject * ostr =
       PyObject_CallMethod(o,
-                          "exportBrepToString", NULL);
+                          const_cast<char *>("exportBrepToString"), NULL);
 
     std::stringstream brep_stream;
     brep_stream << PyString_AsString(ostr);
 
     SP::OccContactShape shape(new OccContactShape());
     BRep_Builder brep_builder;
-    BRepTools::Read(*shape, brep_stream, brep_builder);
+    BRepTools::Read(shape->data(), brep_stream, brep_builder);
 
     return shape;
   }

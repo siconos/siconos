@@ -20,11 +20,11 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
   double dist = std::numeric_limits<double>::infinity();
 
-  _contact1.shape.distance(_contact2.shape,
-                           X1,Y1,Z1,
-                           X2,Y2,Z2,
-                           n1x,n1y,n1z,
-                           _normalFromFace1, dist);
+  this->_contact1.shape.distance(_contact2.shape,
+                                 X1,Y1,Z1,
+                                 X2,Y2,Z2,
+                                 n1x,n1y,n1z,
+                                 _normalFromFace1, dist);
 
   //_Pc1->setValue(0,X1); _Pc1->setValue(1,Y1); _Pc1->setValue(2,Z1);
   if(_offsetp1)

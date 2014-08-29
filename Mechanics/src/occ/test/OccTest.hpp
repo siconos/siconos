@@ -33,6 +33,8 @@ private:
 
   CPPUNIT_TEST(t2);
 
+  CPPUNIT_TEST(t3);
+
   CPPUNIT_TEST_SUITE_END();
 
   // Members
@@ -40,6 +42,7 @@ private:
 
   void t2();
 
+  void t3();
 
 public:
   void setUp();
