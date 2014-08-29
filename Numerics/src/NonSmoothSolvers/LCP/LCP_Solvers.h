@@ -31,17 +31,17 @@
 This page gives an overview of the available solvers for LCP and their required parameters.
 
 For each solver, the input argument are:
-- a LinearComplementarityProblem
-- the unknowns (z,w)
+- a LinearComplementarityProblem structure
+- the unknowns z and w
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a SolverOptions structure, which handles iparam and dparam
 
-Remark: when filterOn parameter (from SolverOptions) is different from 0, lcp_compute_error() is called at the end of the
+Remark: when the filterOn parameter (from SolverOptions) is different from 0, lcp_compute_error() is called at the end of the
 process to check the validity of the solution. This function needs a tolerance value and returns an error. \n
 In that case, tolerance is dparam[0] and error output dparam[1]. Thus, in the following solvers, when dparam[0,1] are omitted, that
 means that they are not required inputs, and that if filter is on, some default values will be used.
 
-\section lcpLemke lexico Lemke
+\section lcpLemke lexicographic Lemke
 
 Direct solver for LCP based on pivoting method principle for degenerated problem.
 
@@ -56,20 +56,20 @@ quadratic programm formulation for solving a LCP with a symmetric matrix M.
 
 The QP we solve is
 
-  Minimize: \n
-  \f[
-    z^T M z + q^T x
-  \f]
+  Minimize:
+  \f{equation*}
+    z^T (M z + q)
+  \f}
 
-  subject to:\n
-  \f{eqnarray*}
+  subject to:
+  \f{equation*}
   Mz  + q  \geq  0
   \f}
 
   which is the classical reformulation that can be found
   in Cottle, Pang and Stone (2009).
 
-  If the symmetry condition is not fulfilled, use the 
+  If the symmetry condition is not fulfilled, use the NSQP Solver
 
 function: lcp_qp() \n
  parameters:
@@ -127,53 +127,65 @@ function: lcp_psor() \n
 - dparam[2] (in): relaxation parameter
 
 \section lcpNewtonMin  NewtonMin Solver
-a nonsmooth Newton method based on the min formulation  (or max formulation) of the LCP
+a nonsmooth Newton method based on the min formulation of the LCP
 
 function: lcp_newton_min() \n
  parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
+- iparam[2] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
+- iparam[3] (in): if > 0. use a non-monotone linear search
+- iparam[4] (in): if a non-monotone linear search is used, specify the number of merit values to remember
 - dparam[0] (in): tolerance
 - dparam[1] (out): resulting error
 
 \section lcpNewtonFB  NewtonFB Solver
-a nonsmooth Newton method based based on the Fischer-Burmeister convex function.
+a nonsmooth Newton method based based on the Fischer-Burmeister NCP function.
 It uses a variant of line search algorithm (VFBLSA in Facchinei-Pang 2003).
 
 function: lcp_newton_FB() \n
  parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
+- iparam[2] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
+- iparam[3] (in): if > 0. use a non-monotone linear search
+- iparam[4] (in): if a non-monotone linear search is used, specify the number of merit values to remember
 - dparam[0] (in): tolerance
 - dparam[1] (out): resulting error
 
-\section lcpNewtonminFB  Newton min + FB Solver \n
+\section lcpNewtonminFB  Newton min + FB Solver
 a nonsmooth Newton method based based on the minFBLSA algorithm : the descent direction is given
-by a min reformulation but the linesearch is done with Fischer-Burmeister.
+by a min reformulation but the linesearch is done with Fischer-Burmeister (and if needed the gradient direction).
 
 function: lcp_newton_minFB() \n
  parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
+- iparam[2] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
+- iparam[3] (in): if > 0. use a non-monotone linear search
+- iparam[4] (in): if a non-monotone linear search is used, specify the number of merit values to remember
 - dparam[0] (in): tolerance
 - dparam[1] (out): resulting error
 
 
 \section lcpPath Path (Ferris) Solver
+This solver uses the external PATH solver
 
  function: lcp_path() \n
  parameters:
 - dparam[0] (in): tolerance
 
 \section lcpEnum Enumeratif Solver
+A brute-force method to find the solution of the LCP
 
 function: lcp_enum() \n
  parameters:
+- iparam[0] (in): search for multiple solutions if 1
+- iparam[1] (out): key of the solution
+- iparam[1] (out): number of solutions
+- iparam[3] (in):  starting key values (seed)
+- iparam[4] (in):  use DGELS (1) or DGESV (0).
 - dparam[0] (in): tolerance
-- iparam[0] (in) : search for multiple solutions if 1
-- iparam[1] (out) : key of the solution
-- iparam[3] (in) :  starting key values (seed)
-- iparam[4] (in) :  use DGELS (1) or DGESV (0).
 
 \section lcpLatin Latin Solver
 LArge Time INcrements solver

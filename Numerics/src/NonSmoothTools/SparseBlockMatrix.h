@@ -25,7 +25,7 @@
 
 #include "SiconosCompat.h"
 
-#include <SparseMatrix.h>
+#include "SparseMatrix.h"
 
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to
