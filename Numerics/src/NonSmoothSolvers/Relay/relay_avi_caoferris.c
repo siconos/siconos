@@ -37,14 +37,9 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   AffineVariationalInequalities avi_pb;
   avi_pb.size = s;
   NumericsMatrix num_mat;
+  fillNumericsMatrix(&num_mat, NM_DENSE, s, s, calloc(s*s, sizeof(double)));
+
   avi_pb.M = &num_mat;
-  num_mat.size0 = s;
-  num_mat.size1 = s;
-  num_mat.storageType = 0;
-  num_mat.matrix1 = NULL;
-  num_mat.matrix2 = NULL;
-  num_mat.matrix3 = NULL;
-  num_mat.matrix0 = (double*)calloc(s*s, sizeof(double));
 
   avi_pb.q = (double *)malloc(s*sizeof(double));
   double* b_bar = (double *)malloc(s*sizeof(double));

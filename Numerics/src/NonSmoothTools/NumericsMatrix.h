@@ -251,6 +251,26 @@ extern "C"
                         double **Bout);
 
 
+  /** create a NumericsMatrix and possibly set the data
+   * \param storageType the type of storage
+   * \param size0 number of rows
+   * \param size1 number of columns
+   * \param data pointer to the matrix data. If NULL, all matrixX fields are
+   * set to NULL
+   * \return a pointer to a NumericsMatrix
+   */
+  NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1, void* data);
+
+  /** fill an existing NumericsMatrix struct
+   * \param[in,out] M the struct to fill
+   * \param storageType the type of storage
+   * \param size0 number of rows
+   * \param size1 number of columns
+   * \param data pointer to the matrix data. If NULL, all matrixX fields are
+   * set to NULL
+   */
+  void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1, void* data);
+
   /** new NumericsMatrix with sparse storage from minimal set of data
    * \param[in] size0 number of rows
    * \param[in] size1 number of columns

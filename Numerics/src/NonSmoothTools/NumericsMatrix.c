@@ -36,62 +36,59 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix
   int storage = A->storageType;
 
   /* double* storage */
-  if (storage == 0)
+  switch (storage)
   {
+    case NM_DENSE:
     cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1);
-  }
+    break;
   /* SparseBlock storage */
-  else if (storage == 1)
-  {
+    case NM_BLOCK:
     prodSBM(sizeX, sizeY, alpha, A->matrix1, x, beta, y);
-  }
+    break;
   /* coordinate */
-  else if (storage == 2)
-  {
+    case NM_TRIPLET:
     cs_aaxpy(alpha, A->matrix2, x, beta, y);
-  }
+    break;
 
-  else
-  {
+    default:
     fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage type for A.\n");
     exit(EXIT_FAILURE);
   }
+
 }
 
 void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const A, const NumericsMatrix* const B, double beta,  NumericsMatrix* C)
 {
 
-  int astorage = A->storageType;
-  int bstorage = B->storageType;
-  int cstorage = C->storageType;
   assert(A);
   assert(B);
   assert(C);
+  int astorage = A->storageType;
+  int bstorage = B->storageType;
+  int cstorage = C->storageType;
   assert(A->size1 == B->size0);
   assert(C->size0 == A->size0);
   assert(C->size1 == B->size1);
 
 
   /* double* storage */
-  if ((astorage == 0) & (bstorage == 0) & (cstorage == 0))
+  if ((astorage == NM_DENSE) && (bstorage == NM_DENSE) && (cstorage == NM_DENSE))
   {
     /*      cblas_dgemv(CblasColMajor,CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1); */
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, A->size1, alpha, A->matrix0, A->size0, B->matrix0, B->size0, beta, C->matrix0, C->size0);
   }
   /* SparseBlock storage */
-  else if ((astorage == 1) & (bstorage == 1) & (cstorage == 1))
+  else if ((astorage == NM_SPARSE_BLOCK) && (bstorage == NM_SPARSE_BLOCK) && (cstorage == NM_SPARSE_BLOCK))
   {
     prodSBMSBM(alpha, A->matrix1, B->matrix1, beta, C->matrix1);
-
-
   }
   else
   {
-
     fprintf(stderr, "Numerics, NumericsMatrix, product matrix - matrix prod(A,B,C) not yet implemented.\n");
     exit(EXIT_FAILURE);
   }
 }
+
 void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
 {
 
@@ -206,6 +203,13 @@ void freeNumericsMatrix(NumericsMatrix* m)
       cs_spfree(m->matrix3);
       m->matrix3 = NULL;
     }
+/* enable this when many part of the code have been fixed !
+    if (m->matrix4)
+    {
+      cs_spfree(m->matrix4);
+      m->matrix4 = NULL;
+    }
+    */
   }
 }
 
@@ -397,35 +401,37 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
     fprintf(stderr, "Numerics, NumericsMatrix newFromFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  CHECK_IO(fscanf(file, "%d", &(m->storageType)));
-  CHECK_IO(fscanf(file, "%d", &(m->size0)));
-  CHECK_IO(fscanf(file, "%d", &(m->size1)));
-  int storageType = m->storageType;
 
-  if (storageType == 0)
+  int storageType;
+  int size0;
+  int size1;
+  void* data;
+
+  CHECK_IO(fscanf(file, "%d", &storageType));
+  CHECK_IO(fscanf(file, "%d", &size0));
+  CHECK_IO(fscanf(file, "%d", &size1));
+
+  if (storageType == NM_DENSE)
   {
-    CHECK_IO(fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1)));
+    CHECK_IO(fscanf(file, "%d\t%d\n", &(size0), &(size1)));
 
-    m->matrix0 = (double *)malloc(m->size1 * m->size0 * sizeof(double));
+    data = malloc(size1 * size0 * sizeof(double));
+    double* data_d = (double*) data;
 
-    for (int i = 0; i < m->size1 * m->size0; i++)
+    for (int i = 0; i < size1 * size0; i++)
     {
-      CHECK_IO(fscanf(file, "%le", &(m->matrix0[i])));
-      if ((i + 1) % m->size1 == 0)
+      CHECK_IO(fscanf(file, "%le", &(data_d[i])));
+      if ((i + 1) % size1 == 0)
         IGNORE_IO(fscanf(file, "\n"));
     }
-    m->matrix1 = NULL;
-    m->matrix2 = NULL;
-    m->matrix3 = NULL;
   }
-  else if (storageType == 1)
+  else if (storageType == NM_SPARSE_BLOCK)
   {
-    m->matrix0 = NULL;
-    m->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-    m->matrix2 = NULL;
-    m->matrix3 = NULL;
-    newFromFileSBM(m->matrix1, file);
+    data = malloc(sizeof(SparseBlockStructuredMatrix));
+    newFromFileSBM((SparseBlockStructuredMatrix*)data, file);
   }
+
+  fillNumericsMatrix(m, storageType, size0, size1, data);
 }
 
 void readInFileName(NumericsMatrix* const m, const char *filename)
@@ -467,18 +473,56 @@ void getDiagonalBlock(NumericsMatrix* m, int numBlockRow, int numRow, int size, 
   }
 }
 
-NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1)
+NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1, void* data)
 {
   NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
 
-  M->storageType = 1;
-
-  M->size0 = size0;
-  M->size1 = size1;
-  M->matrix0 = NULL;
-  M->matrix1 = m1;
-  M->matrix2 = NULL;
-  M->matrix3 = NULL;
+  fillNumericsMatrix(M, size0, size1, data);
 
   return M;
+}
+
+
+void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1, void* data)
+{
+  M->storageType = storageType;
+  M->size0 = size0;
+  M->size1 = size1;
+
+  M->matrix0 = NULL;
+  M->matrix1 = NULL;
+  M->matrix2 = NULL;
+  M->matrix3 = NULL;
+  M->matrix4 = NULL;
+
+  if (data)
+  {
+    switch (storageType)
+    {
+      case NM_DENSE:
+        M->matrix0 = (double*) data;
+        break;
+      case NM_SPARSE_BLOCK:
+        M->matrix1 = (SparseBlockStructuredMatrix*) data;
+        break;
+      case NM_TRIPLET:
+        M->matrix2 = (SparseMatrix*) data;
+        break;
+      case NM_COMPR_COL:
+        M->matrix3 = (SparseMatrix*) data;
+        break;
+      case NM_COMPR_TRANS:
+        M->matrix4 = (SparseMatrix*) data;
+        break;
+
+      default:
+        printf("createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
+        exit(EXIT_FAILURE);
+    }
+  }
+}
+
+NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1)
+{
+  return createNumericsMatrix(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }

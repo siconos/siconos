@@ -68,7 +68,7 @@ extern "C"
   /** free memory of a Sparse Matrix
       \param M the matrix to be freed
    */
-  void freeSparse(const SparseMatrix* const M);
+  void freeSparse(const SparseMatrix* M);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
