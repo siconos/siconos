@@ -26,16 +26,20 @@
 
 To store matrix objects, Numerics functions use a structure named NumericsMatrix.\n
 This objects handles:
- - a number that identify the type of storage (0: double*, 1: sparse block)
+ - a number that identify the type of storage (0: double*, 1: sparse block, 2: sparse triplet, 3: sparse compressed columns, 4: sparse compressed transpose )
  - the dimensions of the matrix (rows: size0, columns: size1)
- - a list of pointers among which only one is non null and represents the matrix itself.
+ - a list of pointers among which only one is non NULL and represents the matrix itself.
 
-At the time, two different kind of storage are available: \n
+At the time, the following storage are available: \n
 - "classical" column-major storage in a double* (field named matrix0)
 - sparse block storage, in a structure of type SparseBlockStructuredMatrix (warning: only for square matrices!!) (field named matrix1)
+- triplet storage, to be used with cs_sparse  (field named matrix2)
+- compressed columns storage, to be used with cs_sparse  (field named matrix3)
+- compressed transposed storage  (field named matrix2)
 
-As an example, consider a matrix A = [aij] of size 8X8:\n
-\f$
+
+As an example, consider the following matrix A of size 8X8:\n
+\f{equation*}
   A=\left[\begin{array}{cccc|cc|cc}
            1 & 2 & 0 & 4   & 3 &-1   & 0 & 0\\
            2 & 1 & 0 & 0   & 4 & 1   & 0 & 0\\
@@ -48,20 +52,18 @@ As an example, consider a matrix A = [aij] of size 8X8:\n
            0 & 0 & 2 & 1   & 0 & 0   & 2 & 2\\
            0 & 0 & 2 & 2   & 0 & 0   & -1& 2\\
  \end{array}\right]
-\f$
+\f}
 
-Let us consider a NumericsMatrix named M used to save the matrix above.\n
+How can we store this matrix ?\n
 The first classical storage results in: \n
- - M.storageType = 0\n
+ - M.storageType = 0
  - M.size0 = 8, M.size1 = 8
  - M.matrix0 = [1 2 0 5 0 0 0 0 2 1 0 0 ...]\n
 matrix0 being a double* of size 64.
- - M.matrix1 = NULL
 
 For the second way of storage, SparseBlockStructuredMatrix we have:
- - M.storageType = 1\n
+ - M.storageType = 1
  - M.size0 = 8, M.size1 = 8
- - M.matrix0 = NULL
  - M.matrix1 a SparseBlockStructuredMatrix in which we save:
   - the number of non null blocks, 6 (matrix1->nbblocks) and the number of diagonal blocks, 3 (matrix1->size).
   - the vector matrix1->blocksize which collects the sum of diagonal blocks sizes until the present one, is equal to [4,6,8], \n
@@ -80,14 +82,11 @@ For the second way of storage, SparseBlockStructuredMatrix we have:
 - product of a sub-part of the matrix with a vector: subRowProd().\n
 
 
-\section NumericsMatrixBuild How to destroy NumericsMatrix?
+\section NumericsMatrixBuild How to create and destroy NumericsMatrix?
 
-In the platform, it's up to the Kernel functions to fill NumericsMatrix. Indeed they are only used in the OneStepNSProblem functions, as
-argument of the Numerics driver to solver. In that case NumericsMatrix contains only links to objects created in the OneStepNSProblem. Thus there is no
-need to allocate or destroy memory on Numerics' side. \n
-However, if required, a function freeNumericsMatrix() is available.
-
-
+NumericsMatrix of any kind can be created using either createNumericsMatrix(), which allocates memory or fillNumericsMatrix(), which just fills a structure.
+Those function accept a <i>data</i> parameter, which if non-NULL contains the matrix data.
+The function freeNumericsMatrix() is used to clean the fields properly.
 */
 
 
@@ -103,28 +102,21 @@ However, if required, a function freeNumericsMatrix() is available.
 
 /** Structure used to handle with matrix in Numerics (interface to double*, SparseBlockStructuredMatrix and so on) \n
     Warning: one and only one storage is allowed and thus only one of the pointers below can be different from NULL
-    \param storageType, int that identifies the type of storage (0: double*, 1:SparseBlockStructuredMatrix)
-    \param size0, number of rows
-    \param size1, number of columns
-    \param matrix0 dense storage
-    \param matrix1 sparse block storage
-    \param matrix2 triplet storage
-    \param matrix3 compressed column storage
     Related functions: prod(), subRowProd(), freeNumericsMatrix(), display()
 */
 typedef struct
 {
-  int storageType;
-  int size0;
-  int size1;
-  double* matrix0;
-  SparseBlockStructuredMatrix* matrix1;
-  SparseMatrix* matrix2; /* triplet */
-  SparseMatrix* matrix3; /* compressed col */
-  SparseMatrix* matrix4; /* compressed transpose */
+  int storageType; /**< the type of storage (0: dense (double*), 1: SparseBlockStructuredMatrix, 2: triplet, 3: compressed col, 4: compressed transpose) */
+  int size0; /**< number of rows */
+  int size1; /**< number of columns */
+  double* matrix0; /**< dense storage */
+  SparseBlockStructuredMatrix* matrix1; /**< sparse block storage */
+  SparseMatrix* matrix2; /**< triplet storage */
+  SparseMatrix* matrix3; /**< compressed column storage */
+  SparseMatrix* matrix4; /**< compressed transpose storage */
 } NumericsMatrix;
 
-
+enum NumericsMatrixType { NM_DENSE, NM_SPARSE_BLOCK, NM_TRIPLET, NM_COMPR_COL, NM_COMPR_TRANS };
 
 #include "stdio.h"
 
