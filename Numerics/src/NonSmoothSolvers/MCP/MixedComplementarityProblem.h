@@ -89,6 +89,7 @@ typedef struct MixedComplementarityProblem2_
                When called from C, it can reference a data struct containing variables needed for the computations.*/
 } MixedComplementarityProblem2;
 
+#include "NumericsConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

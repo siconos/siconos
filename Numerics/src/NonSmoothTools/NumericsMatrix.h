@@ -97,6 +97,7 @@ The function freeNumericsMatrix() is used to clean the fields properly.
   \author Franck Perignon
 */
 #include <stdio.h>
+#include "NumericsConfig.h"
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
 

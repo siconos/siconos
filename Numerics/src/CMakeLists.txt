@@ -38,24 +38,18 @@ SET(SiconosNumerics_DIRS
   utils
   utils/BlasLapackInterfaces
   NonSmoothTools
-  NonSmoothTools/test-utils
   NonSmoothSolvers
   NonSmoothSolvers/AVI
   NonSmoothSolvers/LCP
-  NonSmoothSolvers/LCP/test-utils
   NonSmoothSolvers/MLCP
   NonSmoothSolvers/LinearSystem
-  NonSmoothSolvers/LinearSystem/test-utils
   NonSmoothSolvers/InterfaceToPathFerris
   NonSmoothSolvers/QP
   NonSmoothSolvers/Relay
-  NonSmoothSolvers/Relay/test-utils
   NonSmoothSolvers/FrictionContact
-  NonSmoothSolvers/FrictionContact/test-utils
   NonSmoothSolvers/NCP
   NonSmoothSolvers/MCP
   NonSmoothSolvers/GenericMechanical
-  NonSmoothSolvers/GenericMechanical/test-utils
   NonSmoothSolvers/VI
 )
 #
@@ -745,10 +739,10 @@ ENDIF(MUMPS_FOUND)
   END_TEST()
 ENDIF(WITH_TESTING)
 
-IF(MSVC)
+IF(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
-ENDIF(MSVC)
+ ENDIF(BUILD_AS_CPP)
 
 IF(PRINT_ENV)
   INCLUDE(CMakeLog)

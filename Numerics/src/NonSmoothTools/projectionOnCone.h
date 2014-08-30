@@ -19,6 +19,9 @@
 
 #ifndef ProjectionOnCone_H
 #define ProjectionOnCone_H
+
+#include "NumericsConfig.h"
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

@@ -21,8 +21,15 @@
 #define SiconosBlas_H
 
 #include "NumericsConfig.h"
+
+#if defined(__cplusplus)
+#include <algorithm>
+using std::min;
+using std::max;
+#else
 #define min(a,b) ((a)>(b)?(b):(a))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
+#endif
 
 #if defined(__cplusplus) 
 extern "C"

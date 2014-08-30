@@ -19,6 +19,8 @@
 #ifndef QI_MERIT_H
 #define QI_MERIT_H
 
+#include "NumericsConfig.h"
+
 #ifdef __cplusplus
 #define restrict __restrict
 #endif

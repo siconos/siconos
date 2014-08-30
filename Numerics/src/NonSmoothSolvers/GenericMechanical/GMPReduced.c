@@ -399,23 +399,22 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
     //    printDenseMatrice("V",titi,Vreduced,nbRow,1);
   }
 #endif
-  if (*info)
-    goto END_GMP2;
-  GMPReducedSolToSol(pInProblem, reaction, velocity, Rreduced, Rreduced + Me_size, Vreduced + Me_size);
+  if (!*info)
+  {
+    GMPReducedSolToSol(pInProblem, reaction, velocity, Rreduced, Rreduced + Me_size, Vreduced + Me_size);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   //    printDenseMatrice("R2",titi,reaction,nbRow,1);
   //    printDenseMatrice("V2",titi,velocity,nbRow,1);
 #endif
-  double err;
-  int tolViolate = GenericMechanical_compute_error(pInProblem, reaction, velocity, options->dparam[0], options, &err);
-  if (tolViolate)
-  {
-    printf("GMPReduced2, warnning, reduced problem solved, but error of intial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
+    double err;
+    int tolViolate = GenericMechanical_compute_error(pInProblem, reaction, velocity, options->dparam[0], options, &err);
+    if (tolViolate)
+    {
+      printf("GMPReduced2, warnning, reduced problem solved, but error of intial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
+    }
   }
 
 
-END_GMP2:
-  ;
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   //    fclose(titi);
 #endif
@@ -551,29 +550,29 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
     printDenseMatrice("Vi", titi, Vreduced, Mi_size, 1);
   }
 #endif
-  if (*info)
-    goto END_GMP1;
-  /*Re computation*/
-  double * Re = (double*)malloc(Me_size * sizeof(double));
-  double * Rbuf = (double*)malloc(Me_size * sizeof(double));
-  memcpy(Rbuf, Qe, Me_size * sizeof(double));
-  cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Mi_size, 1.0, Me2, Me_size, Rreduced, 1, 1.0, Rbuf, 1);
-  cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Me_size, -1.0, pseduInvMe1, Me_size, Rbuf, 1, 0.0, Re, 1);
-#ifdef GMP_DEBUG_GMPREDUCED_SOLVE
-  fprintf(titi, "_Re=-Me1inv*(Me2*Ri+Qe);\n");
-  printDenseMatrice("Re", titi, Re, Me_size, 1);
-#endif
-  GMPReducedSolToSol(pInProblem, reaction, velocity, Re, Rreduced, Vreduced);
-  double err;
-  int tolViolate = GenericMechanical_compute_error(pInProblem, reaction, velocity, options->dparam[0], options, &err);
-  if (tolViolate)
+  if (!*info)
   {
-    printf("GMPReduced, warnning, reduced problem solved, but error of intial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
+    /*Re computation*/
+    double * Re = (double*)malloc(Me_size * sizeof(double));
+    double * Rbuf = (double*)malloc(Me_size * sizeof(double));
+    memcpy(Rbuf, Qe, Me_size * sizeof(double));
+    cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Mi_size, 1.0, Me2, Me_size, Rreduced, 1, 1.0, Rbuf, 1);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Me_size, -1.0, pseduInvMe1, Me_size, Rbuf, 1, 0.0, Re, 1);
+  #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
+    fprintf(titi, "_Re=-Me1inv*(Me2*Ri+Qe);\n");
+    printDenseMatrice("Re", titi, Re, Me_size, 1);
+  #endif
+    GMPReducedSolToSol(pInProblem, reaction, velocity, Re, Rreduced, Vreduced);
+    double err;
+    int tolViolate = GenericMechanical_compute_error(pInProblem, reaction, velocity, options->dparam[0], options, &err);
+    if (tolViolate)
+    {
+      printf("GMPReduced, warnning, reduced problem solved, but error of intial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
+    }
+    free(Re);
+    free(Rbuf);
   }
-  free(Re);
-  free(Rbuf);
-END_GMP1:
-  ;
+
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   fclose(titi);
 #endif
