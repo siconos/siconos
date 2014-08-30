@@ -19,6 +19,7 @@
 #ifndef NONSMOOTHNEWTONNEIGH_H
 #define NONSMOOTHNEWTONNEIGH_H
 
+#include "NumericsConfig.h"
 #include "NonSmoothNewton.h"
 
 /*!\file NonSmoothNewtonNeighbour.h

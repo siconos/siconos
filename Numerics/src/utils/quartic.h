@@ -19,6 +19,7 @@
 
 #ifndef QUARTIC_H
 #define QUARTIC_H
+
 /** CACM Algorithm 326
    Roots of low order polynomials
    Author: Terence R.F.Nonweiler
@@ -35,6 +36,8 @@ as roots of
 sum_{k=0:n} p[k] x^(n-k) =0
 Assume p[0]<>0 (overflows otherwise)
 **/
+
+#include "NumericsConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

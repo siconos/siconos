@@ -19,6 +19,7 @@
 #ifndef _NUMERICS_MISC_H_
 #define _NUMERICS_MISC_H_
 
+#include "NumericsConfig.h"
 #include <errno.h>
 
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)

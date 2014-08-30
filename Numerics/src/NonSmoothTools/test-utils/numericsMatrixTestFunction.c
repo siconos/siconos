@@ -25,9 +25,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+
+#include "NumericsConfig.h"
 #include "NumericsMatrix.h"
 #include "SiconosLapack.h"
-#include <math.h>
 #include "numericsMatrixTestFunction.h"
 
 int test_BuildNumericsMatrix(NumericsMatrix** MM)

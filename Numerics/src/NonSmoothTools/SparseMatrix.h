@@ -29,10 +29,19 @@
   \brief Structure definition and functions related to sparse matrix storage in Numerics
 */
 #include <stdio.h>
+
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
 #include "csparse.h"
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif
 
 /*  we use csparse from Timothy Davis
- 
+
     Timothy Davis,
     Direct Methods for Sparse Linear Systems,
     SIAM, 2006,

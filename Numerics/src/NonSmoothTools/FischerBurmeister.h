@@ -51,6 +51,8 @@
 
 */
 
+#include "NumericsConfig.h"
+
 #ifdef __cplusplus
 #define restrict __restrict
 #endif

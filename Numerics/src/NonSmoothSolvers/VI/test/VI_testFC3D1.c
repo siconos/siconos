@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
 #include "projectionOnCone.h"
 
 #include "SiconosBlas.h"

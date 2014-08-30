@@ -25,6 +25,8 @@
 #ifndef PIVOT_UTILS_H
 #define PIVOT_UTILS_H
 
+#include "NumericsConfig.h"
+
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict

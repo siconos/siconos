@@ -38,6 +38,8 @@ typedef struct Polyhedron
   double* Keq; /**< K vector in an (H,K) representation of a polytope Heq x = Keq */
 } Polyhedron;
 
+#include "NumericsConfig.h"
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

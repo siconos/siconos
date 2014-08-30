@@ -23,6 +23,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include "NumericsConfig.h"
 #include "SiconosCompat.h"
 
 #include "SparseMatrix.h"

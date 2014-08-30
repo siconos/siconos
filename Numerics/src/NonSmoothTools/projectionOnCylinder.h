@@ -19,6 +19,9 @@
 
 #ifndef ProjectionOnCylinder_H
 #define ProjectionOnCylinder_H
+
+#include "NumericsConfig.h"
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
