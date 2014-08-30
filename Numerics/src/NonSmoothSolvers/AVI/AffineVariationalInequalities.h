@@ -27,33 +27,31 @@
 
 /*! \page AVI Affine Variational Inequalities (AVI)
  * \section aviIntro The problem
- *  The Affine Variational Inequalities (AVI) is defined by
+ *  The Affine Variational Inequality (AVI) is defined by
  *
- *   Find \f$(z,w)\f$ such that:\n
- *   \f{equation*}{
- *   \begin{cases}
- *   M \ z + q = w \\
- *   0 \le w \perp z \ge 0 \\
- *   \end{cases}
- *   \f}
+ *   Given \f$q\in\mathbb{R}^n\f$, \f$M\in\mathbb{R}^{n\times n}\f$ and a set \f$K\in\mathbb{R}^n\f$,
+ *   find \f$z\in\mathbb{R}^n\f$ such that:
+ *   \f{equation*}{(Mz+q)^T(y -z) \geq 0,\quad \text{ for all } y \in K,\f}
+ *   or equivalently,
+ *   \f{equation*}{- Mz + q \in \mathcal{N}_K(z)\f}
+ *   where \f$\mathcal{N}_K\f$ is the normal cone to \f$K\f$ at \f$z\f$.
  *
- * where \f$ w, z, q\f$ are vectors of size \f$n\f$ and \f$ M \f$ is a \f$n\times n\f$ matrix.
+ * The AVI is a special case of a Variational Inequality (VI), where the
+ * function \f$F\f$ is affine. For VI solvers, see \subpage viProblem .
  *
- * The notation \f$x \perp y\f$ means that \f$x^Ty =0\f$. Inequalities involving vectors
- * are understood to hold component-wise.
+ * From more details on theory and analysis of AVI (and VI in general), we refer to
  *
- * From more details on theory and analysis of AVI, we refer to
- *
- * R.W. Cottle, J.S. Pang, and R.E. Stone. <i>The Linear Complementarity Problem.</i> Academic Press, Inc., Boston, MA, 1992.
+ * Facchinei, Francisco; Pang, Jong-Shi (2003),
+ * <i>Finite Dimensional Variational Inequalities and Complementarity Problems</i>, Vol. 1 & 2,
+ * Springer Series in Operations Research, Berlin-Heidelberg-New York: Springer-Verlag.
  *
  *  \section aviSolversList Available solvers
 
-  The solvers and their parameters are described in \ref AVISolvers . \n
+  The solvers and their parameters are described in \ref AVISolvers. \n
   Use the generic function AVI_driver() to call one the the specific solvers listed below:
 
-    - AVI_caoferris(), direct solver for AVI based on pivoting method principle for degenerate problem.\n
+    - avi_caoferris(), direct solver for AVI based on pivoting method principle for degenerate problem.\n
   Choice of pivot variable is performed via lexicographic ordering
-  Ref: "The Linear Complementarity Problem" Cottle, Pang, Stone (1992)\n
 
   (see also the functions/solvers list in AVI_Solvers.h and numbering in AVI_cst.h)
 
@@ -81,7 +79,7 @@ typedef struct
   unsigned int size; /**<  size of the problem */
   NumericsMatrix* M; /**< M matrix of the AVI (see the mathematical description)*/
   double* q; /**< vector of the AVI (see the mathematical description)*/
-  double* d; /** Covering vector (optional) */
+  double* d; /**< Covering vector (optional) */
   Polyhedron* poly; /** Polyhedra where the solution has to belong */
 } AffineVariationalInequalities;
 

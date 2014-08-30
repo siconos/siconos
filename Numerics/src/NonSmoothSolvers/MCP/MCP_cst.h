@@ -19,7 +19,7 @@
 
 #ifndef MCP_CST_H
 #define MCP_CST_H
-/*!\file mcp_cst.h
+/*!\file MCP_cst.h
   \brief Constants to define the list of available MCP solvers. See the solver list \ref mcpSolversList
 */
 /**\enum MCP_SOLVER

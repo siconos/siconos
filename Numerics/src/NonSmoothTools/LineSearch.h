@@ -48,6 +48,7 @@ extern "C"
   /** Armijo linesearch
    * \param n size of the problem
    * \param theta current value of the merit function
+   * \param preRHS pre-computed value for the acceptance test
    * \param ls_data necessary data for the linesearch algorithm
    */
   double linesearch_Armijo2(int n, double theta, double preRHS, linesearch_data* ls_data);

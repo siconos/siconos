@@ -119,7 +119,7 @@ extern "C"
   /** VI Solver based on a merit function minimization with a line-search type
    * algorithm 
    * \param problem the variational inequality problem to solve
-   * \param[in,out] x, as input, the initial guess; as output the solution if
+   * \param[in,out] x as input, the initial guess; as output the solution if
    * the algorithm is successful
    * \param[in,out] F value of the function
    * \param info 0 if a solution is found
