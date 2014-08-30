@@ -35,7 +35,7 @@ At the time, the following storage are available: \n
 - sparse block storage, in a structure of type SparseBlockStructuredMatrix (warning: only for square matrices!!) (field named matrix1)
 - triplet storage, to be used with cs_sparse  (field named matrix2)
 - compressed columns storage, to be used with cs_sparse  (field named matrix3)
-- compressed transposed storage  (field named matrix2)
+- compressed transposed storage  (field named matrix4)
 
 
 As an example, consider the following matrix A of size 8X8:\n

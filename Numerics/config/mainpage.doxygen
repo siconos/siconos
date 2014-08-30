@@ -3,23 +3,29 @@
 \section doxyNumericsIntro Introduction
 
 \b Numerics is a package of Siconos dedicated to low-level algorithms,
-written in C and Fortran, used to solve non-smooth problems. \n
+written in C and Fortran, used to solve variational inequalities, complementarity problems
+and non-smooth problems. \n
 
 It can be used as a stand-alone library thanks to its C API.
 
 \section doxyNumericsContents Contents
 \subsection nonsmoothsolvers Non-Smooth Solvers
 
-Numerics package proposes a set of non-smooth solvers dedicated to some specific formulations for a non-smooth problem.\n
+Numerics package proposes a set of non-smooth solvers dedicated to some specific formulations for a non-smooth problem.
+
+\subsubsection Non-Smooth Solvers list
 
 \subpage LCProblem \n\n
 \subpage MLCProblem \n\n
 \subpage NCProblem \n\n
+\subpage MCProblem \n\n
 \subpage fcProblem \n\n
 \subpage globalFcProblem \n\n
 \subpage RelayProblem \n\n
 \subpage QPSolvers\n\n
 \subpage viProblem\n\n
+
+\subsubsection numericsDriver Non-Smooth Solvers interface
 
 For each type of problem, a generic interface function (driver) is provided. \n
 
@@ -29,8 +35,7 @@ The main arguments of this driver are:
  - a structure of type SolverOptions, used to defined the solver type and its parameters (see \ref NumericsSolver). \n
  - a NumericsOptions structure, used to define global options (verbose mode ...)
 
-All the drivers interfaces are defined in the file NonSmoothDrivers.h .\n
-Each type of formulation is defined in a structure in the file XXXProblem.h .
+All the drivers interfaces are defined in the file NonSmoothDrivers.h and each type of formulation is defined in a structure in the file XXXProblem.h.
 
 
 Moreover, details on matrix storage in Numerics can be found in:
@@ -40,17 +45,14 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 
 \subsection netlib External Routines 
 
-Imports from <a href="http://www.netlib.org/">netlib</a> collection 
-<ul>
-<li>ODEPACK</li>
-</ul>
+Imports from <a href="http://www.netlib.org/">netlib</a> collection:
+- ODEPACK: LSODAR
+
+Other code:
+- Fortran code from <a href="http://www.unige.ch/~hairer/software.html">Ernst Hairer</a>: HEM5, RADAU, ...
 
 \subsection requirements Requirements
-<ul>
-<li>C and FORTRAN Compiler </li>
-<li>BLAS, LAPACK/ATLAS </li>
-</ul>
-
-
+- C and FORTRAN Compiler
+- BLAS, LAPACK implementation
 
 */

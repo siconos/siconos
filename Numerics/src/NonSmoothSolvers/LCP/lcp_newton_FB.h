@@ -55,7 +55,7 @@ extern "C"
   /** Compute F_FB : \f${F_FB}_i = \sqrt(z_i^2 + F_i^2) - (z_i + F_i)\f$
    * \param data_opaque a LinearComplementarityProblem but casted
    * \param[in] z non-basic variable
-   * \param[in] w basic variable
+   * \param[in] F basic variable
    * \param[out] F_FB value of the function
    */
   void lcp_FB(void* data_opaque, double* z, double* F, double* F_FB);

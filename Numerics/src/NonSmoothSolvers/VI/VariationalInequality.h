@@ -29,7 +29,7 @@
  *   <li> a mapping \f$ F\colon \mathrm{I\!R}^n \rightarrow \mathrm{I\!R}^n\f$</li>
  *   <li> a set  \f$ {X} \in {{\mathrm{I\!R}}}^n\f$</li>
  * </ul>
- * the variational inequality problem is to find a vector \f$z\in{{\mathrm{I\!R}}}^n \in X\f$,
+ * the variational inequality problem is to find a vector \f$z\in{{\mathrm{I\!R}}}^n\f$,
  * \f{equation*}{
  * F(z)^T(y-z) \geq 0,\quad \text{ for all } y \in X
  * \f}
@@ -50,21 +50,17 @@
  *
  *  \section viSolversList Available solvers for Variational Inequality
  * Use the generic function variationalInequality_driver() to call one the the specific solvers listed below:
- * <ul>
- *
- * <li> variationalInequality_ExtraGradient() : Extra gradient solver.
- *      SolverId: SICONOS_VI_EG = 1000. </li>
- * <li> variationalInequality_FixedPointProjection() : Fixed-point solver.
- *      SolverId: SICONOS_VI_EG = 1001. </li>
- * <li> variationalInequality_HyperplaneProjection() : Hyperplane Projection
- *      based Solver. SolverId: SICONOS_VI_HP_STR = 1002. </li>
- * <li> variationalInequality_box_newton_QiLSA : Solver using the merit
+ * - variationalInequality_ExtraGradient() : Extra gradient solver.
+ *      SolverId: SICONOS_VI_EG = 1000.
+ * - variationalInequality_FixedPointProjection() : Fixed-point solver.
+ *      SolverId: SICONOS_VI_EG = 1001.
+ * - variationalInequality_HyperplaneProjection() : Hyperplane Projection
+ *      based Solver. SolverId: SICONOS_VI_HP_STR = 1002.
+ * - variationalInequality_box_newton_QiLSA() : Solver using the merit
  * function proposed by Qi for box-constrained VI. SolverId:
  * SICONOS_VI_BOX_QI_STR = 1003
  *
- * </ul>
  * (see the functions/solvers list in VariationalInequality_Solvers.h)
- *
  *
  */
 

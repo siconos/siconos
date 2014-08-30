@@ -19,7 +19,7 @@
 
 #ifndef AVI_CST_H
 #define AVI_CST_H
-/*!\file avi_cst.h
+/*!\file AVI_cst.h
   \brief Constants to define the list of available AVI solvers. See the solver list \ref aviSolversList
 */
 /**\enum AVI_SOLVER
