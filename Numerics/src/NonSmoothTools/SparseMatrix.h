@@ -28,6 +28,8 @@
 /*!\file SparseMatrix.h
   \brief Structure definition and functions related to sparse matrix storage in Numerics
 */
+
+#include "NumericsConfig.h"
 #include <stdio.h>
 
 
