@@ -35,7 +35,6 @@
 #include "SparseBlockMatrix.h"
 #include "FrictionContact3D_Solvers.h"
 #include "Friction_cst.h"
-#include "frictionContact_test_function.h"
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_localAlartCurnier.h"
 #include "FrictionContact3D_compute_error.h"
@@ -186,7 +185,6 @@
 %include "lcp_cst.h"
 %include "SolverOptions.h"
 %include "NumericsOptions.h"
-%include "frictionContact_test_function.h"
 
 //Relay
 %include "relay_cst.h"

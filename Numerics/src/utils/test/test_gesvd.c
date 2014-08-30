@@ -6,6 +6,7 @@
 /* Parameters */
 #define M 6
 #define N 5
+#define MACRO_MIN(a,b) ((a)>(b) ? (b):(a))
 #define LDA M
 #define LDU M
 #define LDVT N
@@ -14,7 +15,7 @@
 int main() {
         /* Locals */
         int m = M, n = N, lda = LDA, ldu = LDU, ldvt = LDVT, info = 0;
-        double superb[min(M,N)-1];
+        double superb[MACRO_MIN(M,N)-1];
         double tol = 1e-2;
         /* Local arrays */
         double s[N], u[LDU*M], vt[LDVT*N];
