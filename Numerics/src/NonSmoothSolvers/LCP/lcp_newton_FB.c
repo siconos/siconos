@@ -80,7 +80,6 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
 int linearComplementarity_newton_FB_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the NewtonFB Solver\n");

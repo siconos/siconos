@@ -42,7 +42,7 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix
     cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1);
     break;
   /* SparseBlock storage */
-    case NM_BLOCK:
+    case NM_SPARSE_BLOCK:
     prodSBM(sizeX, sizeY, alpha, A->matrix1, x, beta, y);
     break;
   /* coordinate */
@@ -477,7 +477,7 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1, void
 {
   NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
 
-  fillNumericsMatrix(M, size0, size1, data);
+  fillNumericsMatrix(M, storageType, size0, size1, data);
 
   return M;
 }

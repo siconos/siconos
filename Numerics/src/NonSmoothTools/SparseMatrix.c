@@ -46,7 +46,7 @@ void printSparse(const SparseMatrix* const m)
 
 }
 
-void freeSparse(const SparseMatrix* M)
+void freeSparse(SparseMatrix* const M)
 {
 
   assert(M);
