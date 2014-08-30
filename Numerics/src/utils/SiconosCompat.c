@@ -31,10 +31,15 @@ float _logf(float x)
 {
   return logf(x);
 }
+
+#if _MSC_VER < 1800
 extern "C" long int lroundf(float x)
 {
   return (long int)floorl(x + .5);
 }
+#endif
+
+
 extern "C" double __cdecl __powidf2(double a, int b)
 {
   const int recip = b < 0;
