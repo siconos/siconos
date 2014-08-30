@@ -39,6 +39,8 @@ typedef struct box_constraints
   double* ub; /**< upper bounds */
 } box_constraints;
 
+#include "NumericsConfig.h"
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
