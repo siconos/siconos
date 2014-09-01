@@ -23,7 +23,7 @@
   \author Olivier Bonnefond
 */
 
-/*! \page FerrisPath Path (Ferris) Solver Interface
+/* \page FerrisPath Path (Ferris) Solver Interface
 
   The problem solved is:
 

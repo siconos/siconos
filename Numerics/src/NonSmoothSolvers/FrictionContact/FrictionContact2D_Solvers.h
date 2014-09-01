@@ -31,7 +31,7 @@ This page gives an overview of the available solvers for friction-contact (2D) p
 
 For each solver, the input argument are:
 - a FrictionContactProblem
-- the unknowns (reaction,velocity)2
+- the unknowns (reaction,velocity)
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a SolverOptions structure, which handles iparam and dparam
 

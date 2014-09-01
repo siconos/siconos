@@ -78,13 +78,11 @@
  *
  * \section pfc3DSolversList Available solvers for Friction Contact 3D
  * Use the generic function globalFrictionContact3D_driver() to call one the the specific solvers listed below:
- * <ul>
- *  <li> globalfrictionContact3D_nsgs() : non-smooth Gauss-Seidel solver </li>
- * </ul>
+ *   - globalFrictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
  * (see the functions/solvers list in GlobalFrictionContact3D_Solvers.h)
  *
  * \section pfc3DParam Required and optional parameters
- * GlobalFrictionContact3D problems needs some specific parameters, given to the GlobalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
+ * GlobalFrictionContact3D problems needs some specific parameters, given to the globalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
  *
  *
  */

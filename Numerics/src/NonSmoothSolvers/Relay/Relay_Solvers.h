@@ -35,31 +35,10 @@ For each solver, the input argument are:
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a SolverOptions structure, which handles iparam and dparam
 
-\section relayLatin Latin
-LArge Time INcrements solver
-
- function: dr_latin \n
- parameters:
-- iparam[0] (in): maximum number of iterations allowed
-- iparam[1] (out): number of iterations processed
-- dparam[0] (in): tolerance
-- dparam[1] (out): resulting error
-- dparam[2] (in): latin parameter
-
-\section relayNLGS Non-linear Gauss Seidel
-LArge Time INcrements solver
-
- function: dr_nlgs()\n
- parameters:
-- iparam[0] (in): maximum number of iterations allowed
-- iparam[1] (out): number of iterations processed
-- dparam[0] (in): tolerance
-- dparam[1] (out): resulting error
-
-\section relayENUM enumerative solver
+\section relayENUM Enumerative solver
 The relay problem is reformulated as a LCP and solved with the enumerative solver
 
- function: relay_enum\n
+ function: relay_enum()\n
    parameters:
   - dparam[0] (in): tolerance
   - iparam[0] (in) : search for multiple solutions if 1
@@ -70,13 +49,13 @@ The relay problem is reformulated as a LCP and solved with the enumerative solve
 \section relayPATH PATH solver
 The relay problem is reformulated as a LCP and solved with the PATH solver
 
- function: relay_path\n
+ function: relay_path()\n
 - dparam[0] (in): tolerance
 
 \section relayLEMKE Lemke solver
 The relay problem is reformulated as a LCP and solved with Lemke's method
 
- function: relay_lemke\n
+ function: relay_lexicolemke()\n
  parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
@@ -84,7 +63,7 @@ The relay problem is reformulated as a LCP and solved with Lemke's method
 \section relayAVI_CaoFerris CaoFerris solver
 The relay problem is reformulated as an AVI and solved with the solver proposed by Cao and Ferris
 
- function: relay_avi_caoferris\n
+ function: relay_avi_caoferris()\n
  parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
@@ -153,7 +132,6 @@ extern "C"
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
-     2 = Null diagonal term\n
      \author V. Acary
     */
   void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, NumericsOptions* global_options);

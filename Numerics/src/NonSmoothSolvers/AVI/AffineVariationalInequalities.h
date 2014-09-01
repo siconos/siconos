@@ -37,7 +37,7 @@
  *   where \f$\mathcal{N}_K\f$ is the normal cone to \f$K\f$ at \f$z\f$.
  *
  * The AVI is a special case of a Variational Inequality (VI), where the
- * function \f$F\f$ is affine. For VI solvers, see \subpage viProblem .
+ * function \f$F\f$ is affine. For VI solvers, see \ref viProblem .
  *
  * From more details on theory and analysis of AVI (and VI in general), we refer to
  *
