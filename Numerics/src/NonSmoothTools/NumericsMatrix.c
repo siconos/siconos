@@ -271,7 +271,7 @@ void display(const NumericsMatrix* const m)
   else if (storageType == 1)
     printSBM(m->matrix1);
 }
-void displayRawbyRaw(const NumericsMatrix* const m)
+void displayRowbyRow(const NumericsMatrix* const m)
 {
   if (! m)
   {

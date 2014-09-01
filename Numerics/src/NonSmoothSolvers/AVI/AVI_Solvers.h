@@ -32,14 +32,9 @@ This page gives an overview of the available solvers for AVI and their required 
 For each solver, the input argument are:
 - an AffineVariationalInequalities
 - the unknown z
-- the value of the function F(x)
+- the value of the function F(z)
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a SolverOptions struct, which contains iparam and dparam
-
-Remark: when filterOn parameter (from SolverOptions) is different from 0, lcp_compute_error() is called at the end of the
-process to check the validity of the solution. This function needs a tolerance value and returns an error. \n
-In that case, tolerance is dparam[0] and error output dparam[1]. Thus, in the following solvers, when dparam[0,1] are omitted, that
-means that they are not required inputs, and that if filter is on, some default values will be used.
 
 \section aviCaoFerris The Cao-Ferris algorithm
 

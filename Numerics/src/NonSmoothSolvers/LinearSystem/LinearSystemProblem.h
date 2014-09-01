@@ -25,7 +25,7 @@
   \author O. Bonnefon
 */
 
-/*! \page Linear problem System problems
+/* \page Linear System problems
 
   \f$
   \left\lbrace
@@ -47,15 +47,12 @@
 #include "NumericsMatrix.h"
 extern int SICONOS_LS_0;
 /** Linear Complementarity Problem elements
-    \param size dim of the problem
-    \param M matrix of the linear system
-    \param q vector
  */
 typedef struct
 {
-  int size;
-  NumericsMatrix* M;
-  double * q;
+  int size; /**< dim of the problem */
+  NumericsMatrix* M; /**< matrix of the linear system */
+  double * q; /**< vector */
 } LinearSystemProblem;
 
 

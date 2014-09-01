@@ -76,17 +76,30 @@ For the second way of storage, SparseBlockStructuredMatrix we have:
     ...\n
     matrix1->block[5] = [2,-1,2,2]
 
-\section NumericsMatrixTools Tools for NumericsMatrix
+\section NumericsMatrixTools Functions on NumericsMatrix
 
-- product with a vector: function prod()
-- product of a sub-part of the matrix with a vector: subRowProd().\n
-
-
-\section NumericsMatrixBuild How to create and destroy NumericsMatrix?
+\subsection NMAlloc Create and delete NumericsMatrix
 
 NumericsMatrix of any kind can be created using either createNumericsMatrix(), which allocates memory or fillNumericsMatrix(), which just fills a structure.
 Those function accept a <i>data</i> parameter, which if non-NULL contains the matrix data.
 The function freeNumericsMatrix() is used to clean the fields properly.
+
+\subsection NM_LA Linear Algebra
+
+The following linear algebra operation are supported:
+
+  - product matrix - vector: prodNumericsMatrix()
+  - product matrix - matrix: prodNumericsMatrixNumericsMatrix()
+  - partial product matrix - vector: subRowProd()
+
+\subsection NM_IO Input / Output
+
+  - display(): display a NumericsMatrix
+  - displayRowbyRow(): display a NumericsMatrix row by row
+  - printInFileName(), printInFile(): save to filesystem
+  - readInFileName(), readInFile(): fill a NumericsMatrix from a file
+  - newFromFile(): create new NumericsMatrix from a file
+
 */
 
 
@@ -179,7 +192,7 @@ extern "C"
       \param m the matrix to be displayed
       \param nRow the number of rows
       \param nCol the number of columns
-      \param lDim the leading dimesion of M
+      \param lDim the leading dimension of M
    */
   void displayMat(double * m, int nRow, int nCol, int lDim);
 
@@ -235,15 +248,15 @@ extern "C"
   /** Screen display raw by raw of the matrix content
       \param m the matrix to be displayed
   */
-  void displayRawbyRaw(const NumericsMatrix* const m);
+  void displayRowbyRow(const NumericsMatrix* const m);
 
   /** get the diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] m a NumericsMatrix
-   * \param[in] numBlockRow the number of the block Row. useful only in sparce case
+   * \param[in] numBlockRow the number of the block Row. Useful only in sparse case
    * \param[in] numRow the starting row. Useful only in dense case.
    * \param[in] size of the diag block.Useful only in dense case.
    * \param[out] Bout the target. In the dense case (*Bout) must be allocated by caller.
-   *   In case of sparce case **Bout contains the resulting block (from the SBM).
+   *   In case of sparse case **Bout contains the resulting block (from the SBM).
    */
   void getDiagonalBlock(NumericsMatrix* m,
                         int numBlockRow,

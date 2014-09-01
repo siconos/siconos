@@ -20,7 +20,9 @@
 #ifndef SparseMatrix_H
 #define SparseMatrix_H
 
-/*! \page SparseMatrixPage Matrix Storage in Numerics
+/*! \page SparseMatrixPage Sparse Matrix Storage in Numerics
+
+Documentation to be done
 
 */
 
