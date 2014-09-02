@@ -1,12 +1,15 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
+# Set minimum version for cmake
+cmake_minimum_required(VERSION 2.8.7)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+# MACOSX_RPATH required from cmake 3.0.
+# See http://www.kitware.com/blog/home/post/510
+cmake_policy(SET CMP0042 OLD)
 
-# CMP0011 policy before first include
-# others policies are set in SiconosProject
-IF(POLICY CMP0011)
-  CMAKE_POLICY(SET CMP0011 NEW)
-ENDIF(POLICY CMP0011)
+if(POLICY CMP0011)
+  cmake_policy(SET CMP0011 NEW)
+endif(POLICY CMP0011)
+
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 INCLUDE(SiconosProject)
 OPTION(WITH_DOCUMENTATION "Build doxygen documentation with 'make doc'" ON)

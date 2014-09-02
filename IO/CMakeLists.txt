@@ -1,7 +1,12 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
+# Set minimum version for cmake
+cmake_minimum_required(VERSION 2.8.7)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
-  
+# MACOSX_RPATH required from cmake 3.0.
+# See http://www.kitware.com/blog/home/post/510
+cmake_policy(SET CMP0042 OLD)
+
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
 ENABLE_LANGUAGE(CXX)
 
 INCLUDE(SiconosProject)

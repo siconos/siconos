@@ -1,6 +1,10 @@
-# cmake -DCMAKE_INSTALL_PREFIX=<your installation dir> <path>
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
-SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+# Set minimum version for cmake
+cmake_minimum_required(VERSION 2.8.7)
+
+# MACOSX_RPATH required from cmake 3.0.
+# See http://www.kitware.com/blog/home/post/510
+cmake_policy(SET CMP0042 OLD)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
   STRING(REGEX REPLACE "\\\;" ";" ENV_PATH "$ENV{PATH}")
