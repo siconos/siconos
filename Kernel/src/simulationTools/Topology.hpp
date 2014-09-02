@@ -143,29 +143,17 @@ public:
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds);
 
-  /** add a dynamical system
-   * \param ds the DynamicalSystem to add
+  /** set the name for this Dynamical System
+   * \param ds a pointer to the system
    * \param name the name of the DynamicalSystem
    */
-  void insertDynamicalSystem(SP::DynamicalSystem ds, const std::string& name);
+  void setName(SP::DynamicalSystem ds, const std::string& name);
 
-  /** add a dynamical system
+  /** set the OSI for this DynamicalSystem
    * \param ds the DynamicalSystem to add
    * \param OSI the integrator to use for this DS
    */
-  void insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
-
-  /** add a dynamical system
-   * \param ds the DynamicalSystem to add
-   * \param OSI the integrator to use for this DS
-   * \param name the name of the DynamicalSystem
-   */
-  void insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI, const std::string& name);
-
-  /** remove a dynamical system
-   * \param ds the dynamical system to remove
-   */
-  void removeDynamicalSystem(SP::DynamicalSystem ds);
+  void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
 
   /** link two dynamical systems to a relation
    * \param inter a SP::Interaction

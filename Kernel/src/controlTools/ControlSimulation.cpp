@@ -44,7 +44,8 @@ void ControlSimulation::initialize()
   // Simulation part
   _model.reset(new Model(_t0, _T));
   _processIntegrator.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_processDS, _processIntegrator);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_processDS);
+  _model->nonSmoothDynamicalSystem()->setOSI(_processDS, _processIntegrator);
   _processTD.reset(new TimeDiscretisation(_t0, _h));
   _processSimulation.reset(new TimeStepping(_processTD, 0));
   _processSimulation->setName("plant simulation");

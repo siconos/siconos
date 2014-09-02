@@ -40,7 +40,8 @@ void ZOHTest::init()
   _model.reset(new Model(_t0, _T));
   _sim.reset(new TimeStepping(_TD, 0));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _ZOH);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _ZOH);
   _sim->insertIntegrator(_ZOH);
   _model->initialize(_sim);
 }
@@ -157,7 +158,8 @@ void ZOHTest::testMatrixIntegration2()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _ZOH);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _ZOH);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
@@ -223,7 +225,8 @@ void ZOHTest::testMatrixIntegration3()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _ZOH);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _ZOH);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
@@ -295,7 +298,8 @@ void ZOHTest::testMatrixIntegration4()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _ZOH);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _ZOH);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
