@@ -73,7 +73,8 @@ void CommonSMC::initialize(const Model& m)
 
   _interactionSMC.reset(new Interaction(sDim, _nsLawSMC, _relationSMC));
   _integratorSMC.reset(new ZeroOrderHoldOSI());
-  _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC, _integratorSMC);
+  _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
+  _SMC->nonSmoothDynamicalSystem()->setOSI(_DS_SMC, _integratorSMC);
   _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
   _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);
   // Set up the simulation

@@ -215,30 +215,20 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   ds->initWorkSpace(*_DSG[0]->properties(dsgv).workVectors, *_DSG[0]->properties(dsgv).workMatrices);
 }
 
-void Topology::insertDynamicalSystem(SP::DynamicalSystem ds, const std::string& name)
+void Topology::setName(SP::DynamicalSystem ds, const std::string& name)
 {
-  DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->add_vertex(ds);
-  _DSG[0]->properties(dsgv).workVectors.reset(new VectorOfVectors());
-  _DSG[0]->properties(dsgv).workMatrices.reset(new VectorOfMatrices());
-  ds->initWorkSpace(*_DSG[0]->properties(dsgv).workVectors, *_DSG[0]->properties(dsgv).workMatrices);
+  DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->descriptor(ds);
   _DSG[0]->name.insert(dsgv, name);
 }
 
 // In those two functions, we should store in the graph the information
 // that the ds is integrated by the OSI, instead of storing this info
 // in the OSI -- xhub
-void Topology::insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
+void Topology::setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
 {
-  insertDynamicalSystem(ds);
+  // to be move on the graph
   OSI->insertDynamicalSystem(ds);
 }
-
-void Topology::insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI, const std::string& name)
-{
-  insertDynamicalSystem(ds, name);
-  OSI->insertDynamicalSystem(ds);
-}
-
 
 void Topology::setControlProperty(SP::Interaction inter,
   const bool isControlInteraction)
@@ -268,10 +258,6 @@ void Topology::removeInteraction(SP::Interaction inter)
   assert(_DSG[0]->edges_number() == _IG[0]->size());
 }
 
-void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
-{
-  RuntimeException::selfThrow("remove dynamical system not implemented");
-}
 
 std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
 Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSystem ds2)

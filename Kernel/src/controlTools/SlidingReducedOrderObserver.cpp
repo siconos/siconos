@@ -84,7 +84,8 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
   double T = m.finalT() + h;
   _model.reset(new Model(t0, T));
   _integrator.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _integrator);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _integrator);
 
   // Add the necessary properties
   DynamicalSystemsGraph& DSG0 = *_model->nonSmoothDynamicalSystem()->topology()->dSG(0);

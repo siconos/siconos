@@ -77,7 +77,8 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
   // integration stuff
   _model.reset(new Model(m.t0(), m.finalT()));
   _OSI.reset(new LsodarOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _OSI);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _OSI);
   _sim.reset(new EventDriven(_TD, 0));
   _sim->insertIntegrator(_OSI);
   _model->initialize(_sim);

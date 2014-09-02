@@ -137,43 +137,23 @@ public:
     _mIsLinear = ((ds)->isLinear() && _mIsLinear);
   };
 
-  /** add a dynamical system and add its name as a property
-   * \param ds the DynamicalSystem to add to the system
-   * \param name the name of the DynamicalSystem
-   */
-  inline void insertDynamicalSystem(SP::DynamicalSystem ds, const std::string& name)
-  {
-    _topology->insertDynamicalSystem(ds, name);
-    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
-  };
-
-  /** add a dynamical system
-   * \param ds a pointer to the system to add
+  /** set the one step integrator for this Dynamical System
+   * \param ds a pointer to the system
    * \param OSI the integrator to use for this DS
    */
-  inline void insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
+  inline void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
   {
-    _topology->insertDynamicalSystem(ds, OSI);
+    _topology->setOSI(ds, OSI);
     _mIsLinear = ((ds)->isLinear() && _mIsLinear);
   };
 
-  /** add a dynamical system and add its name as a property
-   * \param ds the DynamicalSystem to add to the system
-   * \param OSI the integrator to use for this DS
+  /** set the name for this Dynamical System
+   * \param ds a pointer to the system
    * \param name the name of the DynamicalSystem
    */
-  inline void insertDynamicalSystem(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI, const std::string& name)
+  inline void setName(SP::DynamicalSystem ds, const std::string& name)
   {
-    _topology->insertDynamicalSystem(ds, OSI, name);
-    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
-  };
-
-  /** remove a dynamical system
-   * \param ds the dynamical system to remove
-   */
-  inline void removeDynamicalSystem(SP::DynamicalSystem ds)
-  {
-    _topology->removeDynamicalSystem(ds);
+    _topology->setName(ds, name);
   };
 
   /** link an interaction to two dynamical systems
