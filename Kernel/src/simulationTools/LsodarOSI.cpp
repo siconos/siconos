@@ -38,6 +38,8 @@ using namespace RELATION;
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+int LsodarOSI::count_NST = 0;
+int LsodarOSI::count_NFE = 0;
 
 // ===== Out of class objects and functions =====
 
@@ -330,6 +332,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
   }
 
   _intData[4] = istate;
+
   // call LSODAR to integrate dynamical equation
   CNAME(dlsodar)(pointerToF,
                  &(_intData[0]),
@@ -379,7 +382,9 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
     //      std:: std::cout << "ok\n";
     assert(true);
   }
-
+  // Update counters
+  count_NST = iwork[10];
+  count_NFE = iwork[11];
   //  tinit = tinit_DR;
 }
 

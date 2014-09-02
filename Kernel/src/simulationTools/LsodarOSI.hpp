@@ -79,8 +79,11 @@ private:
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
 
-
 public:
+  /** Lsodar counter : Number of steps taken for the problem so far. */
+  static int count_NST;
+  /** Number of RHS evaluations for the problem so far. */
+  static int count_NFE;
 
   /** Default constructor */
   LsodarOSI();
@@ -263,6 +266,12 @@ public:
   /** print the data to the screen
    */
   void display();
+
+  /** Return current number of rhs call (for all lsodar-like OSIs!)*/
+  static int count_rhs_call() {return count_NFE;}
+
+  /** Return the number of lsodar steps already done (for all lsodar-like OSIs!)*/
+  static int count_steps() {return count_NST;}
 
   /** visitors hook
   */

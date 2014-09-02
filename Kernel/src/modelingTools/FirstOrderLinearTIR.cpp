@@ -54,8 +54,6 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D,
 
 void FirstOrderLinearTIR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
-
   DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");
   // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
@@ -81,7 +79,7 @@ void FirstOrderLinearTIR::initComponents(Interaction& inter, VectorOfBlockVector
 
 
   if (_F)
-    assert(((_F->size(0) != inter.getSizeOfY()) && (_F->size(1) != sizeZ)) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
+    assert(((_F->size(0) != inter.getSizeOfY()) && (_F->size(1) != DSlink[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
   if (_e)
     assert(_e->size() == inter.getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 }
