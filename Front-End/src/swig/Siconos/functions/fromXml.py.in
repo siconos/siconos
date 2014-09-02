@@ -365,7 +365,8 @@ def buildModelXML(xmlFile):
     for k, v in nsdsxml.DS_Definition.__dict__.items():
         for dsxml in v:
             newDS = _createDS(k, dsxml, constructorArgsDS[k], pluginsDS[k])
-            nsds.insertDynamicalSystem(newDS, dsxml.Name)
+            nsds.insertDynamicalSystem(newDS)
+            nsds.setName(newDS, dsxml.Name)
             allDS[dsxml.Name] = newDS
     if len(allDS) == 0:
         print('No DynamicalSystem found !')
