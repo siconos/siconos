@@ -14,31 +14,31 @@
 SICONOS is an Open Source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems :
 <ul>
 <li> Mechanical systems (Rigid body or solid) with Unilateral contact and Coulomb friction as we find in Non-smooth mechanics, Contact dynamics or Granular material.</li>
-<li>Switched Electrical Circuit such as electrical circuits with ideal and piecewise linear components Power converter, Rectifier ,Phase-locked loop (PLL) or Analog-to-digital converter</li>
-<li>Sliding mode control systems</li>
+<li>Switched Electrical Circuit such as electrical circuits with ideal and piecewise linear components: Power converter, Rectifier, Phase-locked loop (PLL) or Analog-to-digital converter.</li>
+<li>Sliding mode control systems.</li>
 </ul>
-Other applications are found in Systems and Control (hybrid systems, differential inclusions, optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), Biology (Gene regulatory network), Fluid Mechanics and Computer graphics, ....
+Other applications are found in Systems and Control (hybrid systems, differential inclusions, optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), Biology (Gene regulatory network), Fluid Mechanics, Computer graphics, ....
 
 
 The software is based on 3 main components :
 <ul>
-<li> <a href="../Numerics/index.html">Siconos/Numerics </a> (C API). Collection of low-level algorithms for solving basic Algebra ans optimization problem arising in the simulation of nonsmooth dynamical systems:
+<li> <a href="../Numerics/index.html">Siconos/Numerics </a> (C API). Collection of low-level algorithms for solving basic Algebra and optimization problem arising in the simulation of nonsmooth dynamical systems:
 <ul>	
-<li>Linear complementarity problem (LCP)</li>
-<li>Mixed linear complementarity problem (MLCP)</li>
-<li>Nonlinear complementarity problem (NCP)</li>
+<li>Linear complementarity problems (LCP)</li>
+<li>Mixed linear complementarity problems (MLCP)</li>
+<li>Nonlinear complementarity problems (NCP)</li>
 <li>Quadratic programming problems (QP)</li>
 <li>Friction-contact problems (2D or 3D) (Second-order cone programming (SOCP))</li>
 <li>Primal or Dual Relay problems</li>
 </ul>
 </li>
-<li> <a href="../Kernel/index.html">Siconos/Kernel</a>. API C++ that allows one to model and simulate the NonSmooth dynamical systems. it contains :
+<li> <a href="../Kernel/index.html">Siconos/Kernel</a>. API C++ used to model and simulate the NonSmooth dynamical systems. it contains :
 <ul>	
-<li>Dynamical systems classes : first order one, Lagrangian systems, Newton-Euler systems</li>
+<li>Dynamical systems classes : first order and Lagrangian systems, Newton-Euler systems</li>
 <li>Nonsmooth laws : complementarity, Relay, FrictionContact, impact</li>
 </ul>
 </li>
-<li>Siconos/Front-end (API Python) Mainly an auto-generated SWIG interface of the API C++ which a special support for data structure.</li>
+<li>Siconos/Front-end (API Python): an auto-generated SWIG interface of the API C++ with a special support for data structure.</li>
 </ul>
 
 
