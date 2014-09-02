@@ -23,8 +23,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include "MixedLinearComplementarityProblem.h"
 
+#include "MixedLinearComplementarityProblem.h"
+#include "misc.h"
 
 void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 {
@@ -250,16 +251,16 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
   }
   int i, j;
   int st1, st2;
-  fscanf(file, "%d\n", &st1);
+  CHECK_IO(fscanf(file, "%d\n", &st1));
   problem->isStorageType1 = st1;
-  fscanf(file, "%d\n", &st2);
+  CHECK_IO(fscanf(file, "%d\n", &st2));
   problem->isStorageType2 = st2;
 
   int n ;
-  fscanf(file, "%d\n", &n);
+  CHECK_IO(fscanf(file, "%d\n", &n));
   problem->n = n;
   int m;
-  fscanf(file, "%d\n", &m);
+  CHECK_IO(fscanf(file, "%d\n", &m));
   problem->m = m;
 
 
@@ -268,14 +269,14 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
   {
     int * blocksRows = (int *)malloc((n + m + 1) * sizeof(int));
     int nbBlocks = 0;
-    fscanf(file, "%d ", &(blocksRows[nbBlocks]));
+    CHECK_IO(fscanf(file, "%d ", &(blocksRows[nbBlocks])));
     while (blocksRows[nbBlocks] < (n + m))
     {
       nbBlocks++;
-      fscanf(file, "%d ", &(blocksRows[nbBlocks]));
+      CHECK_IO(fscanf(file, "%d ", &(blocksRows[nbBlocks])));
     }
     problem->blocksRows = (int *)malloc((nbBlocks + 1) * sizeof(int));
-    //fscanf(file,"\n");
+    //CHECK_IO(fscanf(file,"\n"));
     for (i = 0; i <= nbBlocks; i++)
     {
       problem->blocksRows[i] = blocksRows[i];
@@ -286,7 +287,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     //fprintf(file,"\n");
     for (i = 0; i < nbBlocks; i++)
     {
-      fscanf(file, "%d ", &(problem->blocksIsComp[i]));
+      CHECK_IO(fscanf(file, "%d ", &(problem->blocksIsComp[i])));
     }
 
     //fprintf(file,"\n");
@@ -296,7 +297,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
 
     for (i = 0; i < problem->M->size1; i++)
     {
-      fscanf(file, "%lf ", &(problem->q[i]));
+      CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
     }
     //fprintf(file,"\n");
     /* return 1; */
@@ -319,16 +320,16 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     {
       for (j = 0; j < problem->n; j++)
       {
-        fscanf(file, "%lf ", &(problem->A[i + j * n]));
+        CHECK_IO(fscanf(file, "%lf ", &(problem->A[i + j * n])));
       }
-      /* fscanf(file,"\n"); */
+      /* CHECK_IO(fscanf(file,"\n")); */
     }
 
     for (i = 0; i < problem->m; i++)
     {
       for (j = 0; j < problem->m; j++)
       {
-        fscanf(file, "%lf ", &(problem->B[i + j * m]));
+        CHECK_IO(fscanf(file, "%lf ", &(problem->B[i + j * m])));
       }
       /* fprintf(file,"\n"); */
     }
@@ -336,7 +337,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     {
       for (j = 0; j < problem->m; j++)
       {
-        fscanf(file, "%lf ", &(problem->C[i + j * n]));
+        CHECK_IO(fscanf(file, "%lf ", &(problem->C[i + j * n])));
       }
       /* fprintf(file,"\n"); */
     }
@@ -344,19 +345,19 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     {
       for (j = 0; j < problem->n; j++)
       {
-        fscanf(file, "%lf ", &(problem->D[i + j * m]));
+        CHECK_IO(fscanf(file, "%lf ", &(problem->D[i + j * m])));
       }
       /* fprintf(file,"\n"); */
     }
 
     for (i = 0; i < problem->n; i++)
     {
-      fscanf(file, "%lf ", &(problem->a[i]));
+      CHECK_IO(fscanf(file, "%lf ", &(problem->a[i])));
     }
     /* fprintf(file,"\n"); */
     for (i = 0; i < problem->m; i++)
     {
-      fscanf(file, "%lf ", &(problem->b[i]));
+      CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])));
     }
 
   }
@@ -373,9 +374,9 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
   double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
   double *a, *b;
-  fscanf(file , "%d" , &n);
-  fscanf(file , "%d" , &m);
-  fscanf(file , "%d" , &NbLines);
+  CHECK_IO(fscanf(file , "%d" , &n));
+  CHECK_IO(fscanf(file , "%d" , &m));
+  CHECK_IO(fscanf(file , "%d" , &NbLines));
 
   m2 = m * m;
 
@@ -433,7 +434,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < n ; ++j)
     {
-      fscanf(file, "%s", val);
+      CHECK_IO(fscanf(file, "%s", val));
       vecA[(NbLines - m)*j + i ] = atof(val);
       vecM[(NbLines)*j + i ] = atof(val);
     }
@@ -442,7 +443,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < m ; ++j)
     {
-      fscanf(file, "%s", val);
+      CHECK_IO(fscanf(file, "%s", val));
       vecB[ m * j + i ] = atof(val);
       /*  vecM[ n*(m+n)+(n+m)*j+n+i ] = atof(val);*/
       vecM[ n * (NbLines) + (NbLines)*j + (NbLines - m) + i ] = atof(val);
@@ -453,7 +454,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < m ; ++j)
     {
-      fscanf(file, "%s", val);
+      CHECK_IO(fscanf(file, "%s", val));
       vecC[(NbLines - m)*j + i ] = atof(val);
       vecM[(NbLines) * (n + j) + i ] = atof(val);
     }
@@ -462,7 +463,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   {
     for (j = 0 ; j < n ; ++j)
     {
-      fscanf(file, "%s", val);
+      CHECK_IO(fscanf(file, "%s", val));
       vecD[ m * j + i ] = atof(val);
       vecM[(NbLines)*j + i + (NbLines - m) ] = atof(val);
     }
@@ -470,13 +471,13 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
   for (i = 0 ; i < NbLines - m ; ++i)
   {
-    fscanf(file , "%s" , val);
+    CHECK_IO(fscanf(file , "%s" , val));
     a[i] = atof(val);
     vecQ[i] = atof(val);
   }
   for (i = 0 ; i < m ; ++i)
   {
-    fscanf(file , "%s" , val);
+    CHECK_IO(fscanf(file , "%s" , val));
     b[i] = atof(val);
     vecQ[i + NbLines - m] = atof(val);
   }

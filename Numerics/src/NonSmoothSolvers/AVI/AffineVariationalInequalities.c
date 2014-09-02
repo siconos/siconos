@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "AffineVariationalInequalities.h"
+#include "misc.h"
 
 
 void AVI_display(AffineVariationalInequalities* problem)
@@ -87,7 +88,7 @@ int AVI_newFromFile(AffineVariationalInequalities* problem, FILE* file)
   int n = 0;
   int i;
 
-  fscanf(file, "%d\n", &n);
+  CHECK_IO(fscanf(file, "%d\n", &n));
   problem->size = n;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
@@ -96,7 +97,7 @@ int AVI_newFromFile(AffineVariationalInequalities* problem, FILE* file)
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
-    fscanf(file, "%lf ", &(problem->q[i]));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
   return 1;
 }

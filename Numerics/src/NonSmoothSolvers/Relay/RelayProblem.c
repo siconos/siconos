@@ -23,8 +23,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include "RelayProblem.h"
 
+#include "RelayProblem.h"
+#include "misc.h"
 
 void Relay_display(RelayProblem* p)
 {
@@ -102,7 +103,7 @@ int relay_newFromFile(RelayProblem* problem, FILE* file)
   int n = 0;
   int i;
 
-  fscanf(file, "%d\n", &n);
+  CHECK_IO(fscanf(file, "%d\n", &n));
   problem->size = n;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
@@ -111,19 +112,19 @@ int relay_newFromFile(RelayProblem* problem, FILE* file)
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
-    fscanf(file, "%lf ", &(problem->q[i]));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
-  fscanf(file, "\n");
+  CHECK_IO(fscanf(file, "\n"));
   problem->lb = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
-    fscanf(file, "%lf ", &(problem->lb[i]));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->lb[i])));
   }
-  fscanf(file, "\n");
+  CHECK_IO(fscanf(file, "\n"));
   problem->ub = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
-    fscanf(file, "%lf ", &(problem->ub[i]));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->ub[i])));
   }
   return 1;
 }

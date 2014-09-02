@@ -405,7 +405,7 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
   int storageType;
   int size0;
   int size1;
-  void* data;
+  void* data = NULL;
 
   CHECK_IO(fscanf(file, "%d", &storageType));
   CHECK_IO(fscanf(file, "%d", &size0));
