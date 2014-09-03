@@ -29,20 +29,24 @@ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(OccTest);
 
-  CPPUNIT_TEST(t1);
+  CPPUNIT_TEST(exportBRepAsString);
 
-  CPPUNIT_TEST(t2);
+  CPPUNIT_TEST(computeUVBounds);
 
-  CPPUNIT_TEST(t3);
+  CPPUNIT_TEST(move);
+
+  CPPUNIT_TEST(distance);
 
   CPPUNIT_TEST_SUITE_END();
 
   // Members
-  void t1();
+  void exportBRepAsString();
 
-  void t2();
+  void computeUVBounds();
 
-  void t3();
+  void move();
+
+  void distance();
 
 public:
   void setUp();

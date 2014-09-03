@@ -29,4 +29,5 @@ DEFINE_SPTR(OccContactShape);
 DEFINE_SPTR(ContactShapes);
 DEFINE_SPTR(ContactPoint);
 DEFINE_SPTR(ContactPoints);
+DEFINE_SPTR(ContactShapeDistance);
 #endif

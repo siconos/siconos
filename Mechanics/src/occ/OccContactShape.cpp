@@ -1,4 +1,5 @@
 #include "OccContactShape.hpp"
+#include "ContactShapeDistance.hpp"
 
 #include <RuntimeException.hpp>
 
@@ -17,6 +18,7 @@
 #include <gp_Vec.hxx>
 #include <gp_Quaternion.hxx>
 
+#include <limits>
 
 OccContactShape::ContactTypeValue OccContactShape::contactType() const
 {
@@ -156,7 +158,7 @@ void _myf_FaceFace(double *x, double * fx, double * gx,const TopoDS_Face& face1,
   aVP2P1.SetY(aP1.Y()-aP2.Y());
   aVP2P1.SetZ(aP1.Z()-aP2.Z());
   *fx = aVP2P1.X()*aVP2P1.X()+aVP2P1.Y()*aVP2P1.Y()+aVP2P1.Z()*aVP2P1.Z();
-  //printf("myf %e %e %e %e --> %e\n",x[0],x[1],x[2],x[3],*fx);
+  printf("myf %e %e %e %e --> %e\n",x[0],x[1],x[2],x[3],*fx);
   gx[0]=2*aV1u.Dot(aVP2P1);
   gx[1]=2*aV1v.Dot(aVP2P1);
   gx[2]=-2*aV2u.Dot(aVP2P1);
@@ -489,45 +491,43 @@ void cadmbtb_distanceFaceEdge(
 
 
 
-
-
-void OccContactShape::distance(
-  const OccContactShape& sh2,
-  double& X1, double& Y1, double& Z1,
-  double& X2, double& Y2, double& Z2,
-  double& nX, double& nY, double& nZ,
-  bool normalFromFace1,double& MinDist) const
+ContactShapeDistance OccContactShape::distance(
+  const OccContactShape& sh2, bool normalFromFace1) const
 {
+
+  ContactShapeDistance dist;
+
+  dist.value = std::numeric_limits<double>::infinity();
 
   if(this->contactType() == OccContactShape::Face &&
      sh2.contactType() == OccContactShape::Edge)
   {
     cadmbtb_distanceFaceEdge(*this, sh2,
-                             X1,Y1,Z1,
-                             X2,Y2,Z2,
-                             nX,nY,nZ,
+                             dist.x1, dist.y1, dist.z1,
+                             dist.x2, dist.y2, dist.z2,
+                             dist.nx, dist.ny, dist.nz,
                              normalFromFace1,
-                             MinDist);
+                             dist.value);
   }
   else if(this->contactType() == OccContactShape::Edge &&
           sh2.contactType() == OccContactShape::Face)
   {
     cadmbtb_distanceFaceEdge(sh2, *this,
-                             X1,Y1,Z1,
-                             X2,Y2,Z2,
-                             nX,nY,nZ,
+                             dist.x1, dist.y1, dist.z1,
+                             dist.x2, dist.y2, dist.z2,
+                             dist.nx, dist.ny, dist.nz,
                              normalFromFace1,
-                             MinDist);
+                             dist.value);
   }
   else if(this->contactType() == OccContactShape::Face &&
           sh2.contactType() == OccContactShape::Face)
   {
     cadmbtb_distanceFaceFace(*this, sh2,
-                             X1,Y1,Z1,
-                             X2,Y2,Z2,
-                             nX,nY,nZ,
+                             dist.x1, dist.y1, dist.z1,
+                             dist.x2, dist.y2, dist.z2,
+                             dist.nx, dist.ny, dist.nz,
                              normalFromFace1,
-                             MinDist);
+                             dist.value);
   }
   else
   {
@@ -535,6 +535,8 @@ void OccContactShape::distance(
       "cadmbtb_distance : cannot compute distance for this geometries");
 
   }
+
+  return dist;
 }
 
 std::string OccContactShape::exportBRepAsString() const

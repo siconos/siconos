@@ -68,7 +68,7 @@ struct OccContactShape
    */
   std::string exportBRepAsString() const;
 
-  /** import the contact shape from a string.
+  /** Import the contact shape from a string.
    *  \param brepstr : the string containing the whole brep.
    */
   void importBRepFromString(const std::string& brepstr);
@@ -85,15 +85,12 @@ struct OccContactShape
 
   /** Distance to another contact shape.
       \param sh2 : the other contact shape.
+      \return the distance, contact points and normal in ContactShapeDistance
    */
-  void distance(
-    const OccContactShape& sh2,
-    double& X1, double& Y1, double& Z1,
-    double& X2, double& Y2, double& Z2,
-    double& nX, double& nY, double& nZ,
-    bool normalFromFace1,double& MinDist) const;
+  ContactShapeDistance distance(
+    const OccContactShape& sh2, bool normalFromFace1=false) const;
 
-  /** computed UV bounds
+  /** Computed UV bounds.
    * @{
    */
   double bsup1[2];
@@ -104,7 +101,7 @@ struct OccContactShape
    * @}
    */
 
-  /** contact group */
+  /** Contact group */
   unsigned int contactGroup;
 
   SP::TopoDS_Shape _shape;

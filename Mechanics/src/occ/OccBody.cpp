@@ -24,7 +24,7 @@ void OccBody::updateContactShapes()
   }
 }
 
-const OccContactShape& OccBody::contactShape(unsigned int id) const
+OccContactShape& OccBody::contactShape(unsigned int id) const
 {
   return *(*this->_contactShapes)[id];
 };

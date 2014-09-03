@@ -1,6 +1,7 @@
 #include "OccR.hpp"
 #include "OccR_impl.hpp"
 #include "OccContactShape.hpp"
+#include "ContactShapeDistance.hpp"
 
 #include <limits>
 
@@ -16,17 +17,23 @@ OccR::OccR(const ContactPoint& contact1,
 
 void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
-  double X1,X2,Y1,Y2,Z1,Z2,n1x,n1y,n1z;
 
-  double dist = std::numeric_limits<double>::infinity();
+  ContactShapeDistance dist =
+    this->_contact1.shape.distance(_contact2.shape,
+                                   _normalFromFace1);
 
-  this->_contact1.shape.distance(_contact2.shape,
-                                 X1,Y1,Z1,
-                                 X2,Y2,Z2,
-                                 n1x,n1y,n1z,
-                                 _normalFromFace1, dist);
+  double& X1 = dist.x1;
+  double& Y1 = dist.y1;
+  double& Z1 = dist.z1;
 
-  //_Pc1->setValue(0,X1); _Pc1->setValue(1,Y1); _Pc1->setValue(2,Z1);
+  double& X2 = dist.x2;
+  double& Y2 = dist.y2;
+  double& Z2 = dist.z2;
+
+  double& n1x = dist.nx;
+  double& n1y = dist.ny;
+  double& n1z = dist.nz;
+
   if(_offsetp1)
   {
     _Pc1->setValue(0,X1+_offset*n1x);
@@ -51,9 +58,8 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
   _Nc->setValue(1,-n1y);
   _Nc->setValue(2,-n1z);
 
+  dist.value -= _offset;
 
-  dist -= _offset;
-
-  y.setValue(0, dist);
+  y.setValue(0, dist.value);
 
 }

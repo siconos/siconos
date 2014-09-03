@@ -47,6 +47,7 @@
 #define DEFINE_STANDARD_ALLOC
 %include <TopoDS_Shape.hxx>
 
+PY_FULL_REGISTER(ContactShapeDistance);
 PY_FULL_REGISTER(OccContactShape);
 PY_FULL_REGISTER(OccBody);
 PY_FULL_REGISTER(OccR);

@@ -62,7 +62,7 @@ public:
   /** Get an associated contact shapes by its rank of association.
       \param id : the number of the shape.
    */
-  const OccContactShape& contactShape(unsigned int id) const;
+  OccContactShape& contactShape(unsigned int id) const;
 
   ACCEPT_STD_VISITORS();
 
