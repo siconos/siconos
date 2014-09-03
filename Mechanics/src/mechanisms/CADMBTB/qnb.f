@@ -45,7 +45,7 @@
       do i=1,n
       if (dxmin(i).le.0.d0) then
       if (.not.(modifx.or.plantage)) write (io,'()')
-      write (io,'(/a,1pd12.5,a,i4/)')
+      write (io,'(/a,1pd12.5,a,a,i4/)')
      &" >>> n2qn1: dxmin(i) = ",dxmin(i)," est negatif, ",
      &"i = ", i
       plantage = .true.
