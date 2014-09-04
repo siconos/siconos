@@ -1,4 +1,5 @@
 #!/bin/sh
+case $1 in -x) set -x; shift ;; esac
 
 #set -e
 #set -x
@@ -15,7 +16,7 @@ fi
 
 VERSION=$1
 
-BASE_DESTDIR=/tmp/siconos-source
+BASE_DESTDIR=/tmp/`whoami`/siconos-all-in-one-source
 
 DESTDIR=${BASE_DESTDIR}-${VERSION}
 if [ -e ${DESTDIR} ]; then

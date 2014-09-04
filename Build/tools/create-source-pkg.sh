@@ -1,7 +1,7 @@
 #!/bin/sh
-
+case $1 in -x) set -x; shift ;; esac
 #set -e
-#set -x
+
 
 # Usage :: cd /path/to/siconos; sh Build/tools/create-source-pkg.sh;
 # archives are created in DESTDIR = BASE_DESTDIR-VERSION
@@ -15,7 +15,7 @@ fi
 
 VERSION=$1
 
-BASE_DESTDIR=/tmp/siconos-source
+BASE_DESTDIR=/tmp/`whoami`/siconos-source
 
 MODULES="Numerics Kernel Mechanics IO Front-End Examples"
 
@@ -24,7 +24,7 @@ if [ -e ${DESTDIR} ]; then
 	rm -rf ${DESTDIR}
 fi
 
-git rev-parse --is-inside-work-tree >/dev/null 2>&1 || echo "Not in a git repo, exiting"; exit 1
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "Not in a git repo, exiting"; exit 1; }
 
 TOPLEVEL=$(git rev-parse --show-toplevel)
 
@@ -52,5 +52,6 @@ do
 	MODULE_DESTDIR_PARDIR=$(dirname ${MODULE_DESTDIR})
 	MODULE_DESTDIR_NAME=$(basename ${MODULE_DESTDIR})
 	cd ${MODULE_DESTDIR_PARDIR}
+        tar zcvf ${MODULE_DESTDIR_NAME}.tar.gz ${MODULE_DESTDIR_NAME}
 	zip -9 ${MODULE_DESTDIR_NAME}.zip -r ${MODULE_DESTDIR_NAME}
 done
