@@ -85,6 +85,7 @@ struct OccContactShape
 
   /** Distance to another contact shape.
       \param sh2 : the other contact shape.
+      \param normalFromFace1 : normal on first contact shape, default on second.
       \return the distance, contact points and normal in ContactShapeDistance
    */
   ContactShapeDistance distance(

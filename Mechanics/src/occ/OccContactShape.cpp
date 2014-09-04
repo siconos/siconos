@@ -20,6 +20,9 @@
 
 #include <limits>
 
+#define DEBUG_MESSAGES 1
+#include <debug.h>
+
 OccContactShape::ContactTypeValue OccContactShape::contactType() const
 {
   switch (this->_shape->ShapeType())
@@ -71,9 +74,6 @@ void OccContactShape::computeUVBounds()
   }
 }
 
-
-//#define DEBUG_USING_N2QN1
-//#define CADMBTB_PRINT_DIST
 gp_Pnt cadmbtb_FacePoint(const TopoDS_Face &face,Standard_Real u, Standard_Real v);
 gp_Pnt cadmbtb_FacePoint(const TopoDS_Face &face,Standard_Real u, Standard_Real v)
 {
@@ -158,7 +158,7 @@ void _myf_FaceFace(double *x, double * fx, double * gx,const TopoDS_Face& face1,
   aVP2P1.SetY(aP1.Y()-aP2.Y());
   aVP2P1.SetZ(aP1.Z()-aP2.Z());
   *fx = aVP2P1.X()*aVP2P1.X()+aVP2P1.Y()*aVP2P1.Y()+aVP2P1.Z()*aVP2P1.Z();
-  printf("myf %e %e %e %e --> %e\n",x[0],x[1],x[2],x[3],*fx);
+  DEBUG_PRINTF("myf %e %e %e %e --> %e\n",x[0],x[1],x[2],x[3],*fx);
   gx[0]=2*aV1u.Dot(aVP2P1);
   gx[1]=2*aV1v.Dot(aVP2P1);
   gx[2]=-2*aV2u.Dot(aVP2P1);
@@ -187,7 +187,7 @@ void _myf_FaceEdge(double *x, double * fx, double * gx,const TopoDS_Face& face1,
   aVP2P1.SetY(aP1.Y()-aP2.Y());
   aVP2P1.SetZ(aP1.Z()-aP2.Z());
   *fx = aVP2P1.X()*aVP2P1.X()+aVP2P1.Y()*aVP2P1.Y()+aVP2P1.Z()*aVP2P1.Z();
-  //printf("myf %e %e %e %e --> %e\n",x[0],x[1],x[2],x[3],*fx);
+  DEBUG_PRINTF("myf %e %e %e %e --> %e\n",x[0],x[1],x[2],x[3],*fx);
   gx[0]=2*aV1u.Dot(aVP2P1);
   gx[1]=2*aV1v.Dot(aVP2P1);
   gx[2]=-2*aV2u.Dot(aVP2P1);
@@ -305,10 +305,9 @@ void cadmbtb_distanceFaceFace(const OccContactShape& csh1,
 
       }
 
-#ifdef DEBUG_USING_N2QN1
-      printf("mode=%d and min value at u=%e,v=%e f=%e\n",mode,x[0],x[1],sqrt(f));
-      printf("_CADMBTB_getMinDistanceFaceFace_using_n2qn1 dist = %e\n",sqrt(f));
-#endif
+      DEBUG_PRINTF("mode=%d and min value at u=%e,v=%e f=%e\n",mode,x[0],x[1],sqrt(f));
+      DEBUG_PRINTF("_CADMBTB_getMinDistanceFaceFace_using_n2qn1 dist = %e\n",sqrt(f));
+
       double sqrt_f=sqrt(f);
       if(MinDist>sqrt_f)
       {
@@ -458,10 +457,8 @@ void cadmbtb_distanceFaceEdge(
 
     double sqrt_f=sqrt(f);
 
-#ifdef DEBUG_USING_N2QN1
-    printf("mode=%d and min value at u=%e,v=%e f=%e\n",mode,x[0],x[1],sqrt_f);
-    printf("cadmbtb_getMinDistanceFaceEdge_using_n2qn1 dist = %e\n",sqrt_f);
-#endif
+    DEBUG_PRINTF("mode=%d and min value at u=%e,v=%e f=%e\n",mode,x[0],x[1],sqrt_f);
+    DEBUG_PRINTF("cadmbtb_getMinDistanceFaceEdge_using_n2qn1 dist = %e\n",sqrt_f);
 
     if(MinDist>sqrt_f)
     {

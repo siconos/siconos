@@ -74,6 +74,8 @@ PY_FULL_REGISTER(OccR);
     BRep_Builder brep_builder;
     BRepTools::Read(shape->data(), brep_stream, brep_builder);
 
+    shape->computeUVBounds();
+
     return shape;
   }
   else

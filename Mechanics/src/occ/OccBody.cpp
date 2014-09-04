@@ -12,6 +12,7 @@ OccBody::OccBody(SP::SiconosVector position,
 
 void OccBody::addContactShape(SP::OccContactShape shape)
 {
+  shape->computeUVBounds();
   this->_contactShapes->push_back(shape);
 };
 
