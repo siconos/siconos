@@ -48,4 +48,5 @@ done
 DESTDIR_PARDIR=$(dirname ${DESTDIR})
 DESTDIR_NAME=$(basename ${DESTDIR})
 cd ${DESTDIR_PARDIR}
+tar zcvf ${DESTDIR_NAME}.tar.gz ${DESTDIR_NAME}
 zip -9 ${DESTDIR_NAME}.zip -r ${DESTDIR_NAME}
