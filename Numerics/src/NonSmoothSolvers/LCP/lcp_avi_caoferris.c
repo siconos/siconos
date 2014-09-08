@@ -27,10 +27,12 @@ Ferris solves the subsequent AVI.
 #include "avi_caoferris.h"
 #include "AVI_Solvers.h"
 #include "LCP_Solvers.h"
+#include <assert.h>
 
 void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   unsigned int n = problem->size;
+  assert(n > 0);
 
   /* Copy the data from LCP problem */
   AffineVariationalInequalities avi_pb;

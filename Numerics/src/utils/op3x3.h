@@ -22,7 +22,14 @@
 
 #include <math.h>
 #include <float.h>
+#include <stdlib.h>
+
 #include "SiconosCompat.h"
+
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
 
 #ifdef __GNUC__
 #define MAYBE_UNUSED __attribute__((unused))
@@ -160,7 +167,7 @@
 /** copy a 3x3 matrix or a vector[9]
  * \param[in] a  a[9]
  * \param[out] b  b[9]*/
-static inline void cpy3x3(double* a, double* b)
+static inline void cpy3x3(double* restrict a, double* restrict b)
 {
   OP3X3(*b++ = *a++);
 }
@@ -250,7 +257,7 @@ static inline void cpytr3x3(double* a, double* b)
  * \param[in] v v[3]
  * \param[out] r r[3]
  */
-static inline void mv3x3(double* a, double* v, double* r)
+static inline void mv3x3(double* restrict a, double* restrict v, double* restrict r)
 {
 
 #if defined(OP3X3_C_STORAGE)
@@ -295,7 +302,7 @@ static inline void mv3x3(double* a, double* v, double* r)
  * \param[in] v v[3]
  * \param[out] r r[3]
  */
-static inline void mvp3x3(double* a, double* v, double* r)
+static inline void mvp3x3(double* restrict a, double* restrict v, double* restrict r)
 {
 
 #if defined(OP3X3_C_STORAGE)
@@ -339,7 +346,7 @@ static inline void mvp3x3(double* a, double* v, double* r)
  * \param[in] b b[9]
  * \param[out] c c[9]
  */
-static inline void mm3x3(double* a, double* b, double* c)
+static inline void mm3x3(double* restrict a, double* restrict b, double* restrict c)
 {
 
   SET3X3(a);
@@ -365,7 +372,7 @@ static inline void mm3x3(double* a, double* b, double* c)
  * \param[in] b b[9]
  * \param[out] c c[9]
  */
-static inline void mmp3x3(double* a, double* b, double* c)
+static inline void mmp3x3(double* restrict a, double* restrict b, double* restrict c)
 {
 
   SET3X3(a);
@@ -391,7 +398,7 @@ static inline void mmp3x3(double* a, double* b, double* c)
  * \param[in] b b[9]
  * \param[out] c c[9]
  */
-static inline void mmm3x3(double* a, double* b, double* c)
+static inline void mmm3x3(double* restrict a, double* restrict b, double* restrict c)
 {
 
   SET3X3(a);
@@ -430,7 +437,7 @@ static inline double det3x3(double* a)
  * \param[out] x double x[3]
  * \param[in] b double b[3]
  */
-static inline void solv3x3(double* a, double* x, double* b)
+static inline void solv3x3(double* restrict a, double* restrict x, double* restrict b)
 {
 
   SET3X3(a);
@@ -467,7 +474,7 @@ static inline void solv3x3(double* a, double* x, double* b)
  * \param[in] a double a[9]
  * \param[in] b double b[9]
  */
-static inline int equal3x3(double* a, double* b)
+static inline int equal3x3(double* restrict a, double* restrict b)
 {
   return *a++ == *b++ &&
          *a++ == *b++ &&
@@ -484,7 +491,7 @@ static inline int equal3x3(double* a, double* b)
  * \param[in] a double a[3]
  * \param[in] b double b[3]
  */
-static inline int equal3(double* a, double* b)
+static inline int equal3(double* restrict a, double* restrict b)
 {
   return *a++ == *b++ &&
          *a++ == *b++ &&
@@ -496,7 +503,7 @@ static inline int equal3(double* a, double* b)
  * \param[in] b double b[3]
  * \return the scalar product
  */
-static inline double dot3(double* a, double* b)
+static inline double dot3(double* restrict a, double* restrict b)
 {
   double r;
   r = *a++ * * b++;
@@ -510,7 +517,7 @@ static inline double dot3(double* a, double* b)
  * \param[in] b double b[3]
  * \param[out] c double c[3]
  */
-static inline void cross3(double* a, double* b, double* c)
+static inline void cross3(double* restrict a, double* restrict b, double* restrict c)
 {
   double* a0 = a++;
   double* a1 = a++;
@@ -574,7 +581,7 @@ static inline double hypot9(double* a)
  * \param[in] a a[n,n] matrix
  * \param[out] b b[9] a 3x3 matrix */
 static inline void extract3x3(int n, int i0, int j0,
-                              double* a, double* b)
+                              double* restrict a, double* restrict b)
 {
 #if defined(OP3X3_C_STORAGE)
   int k0 = n * i0 + j0;
@@ -605,7 +612,7 @@ static inline void extract3x3(int n, int i0, int j0,
  * \param[in,out] a  a[n,n] matrix
  * \param[in] b b[9] a 3x3 matrix */
 static inline void insert3x3(int n, int i0, int j0,
-                             double* a, double* b)
+                             double* restrict a, double* restrict b)
 {
 
 #if defined(OP3X3_C_STORAGE)
@@ -631,13 +638,13 @@ static inline void insert3x3(int n, int i0, int j0,
 }
 
 /** print a matrix
- * \param mat double* a
+ * \param mat the matrix
  */
 void print3x3(double* mat);
 
 
 /** print a vector
- * \param[in] v double* v
+ * \param[in] v the vector
  */
 void print3(double* v);
 
@@ -713,5 +720,132 @@ static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az,
   (*A2z) = *Ax * *A1y - *Ay * *A1x;
 }
 
+
+/** solve Ax = b by partial pivoting Gaussian elimination. This function is 10
+ * to 20 times faster than calling LAPACK (tested with netlib and atlas).
+ * \param a column-major matrix (not modified)
+ * \param[in,out] b on input, the right-hand side; on output the solution x
+ * \return 0 if ok, otherwise the column where no pivot could be selected
+ */
+static inline int solve_3x3_gepp(double* restrict a, double* restrict b)
+{
+  double lp0, lp1, lp2, lm1, lm2, ln1, ln2;
+  double bl, bm, bn;
+  double factor1, factor2;
+  double sol0, sol1, sol2;
+  double alp0;
+  double a0 = a[0];
+  double a1 = a[1];
+  double a2 = a[2];
+  double aa0 = fabs(a0);
+  double aa1 = fabs(a1);
+  double aa2 = fabs(a2);
+  /* do partial search of pivot */
+  int pivot2, pivot1 = aa0 >= aa1 ? aa0 >= aa2 ? 0 : 20 : aa1 >= aa2 ? 10 : 20;
+  int info = 0;
+
+  /* We are going to put the system in the form
+   * | lp0 lp1 lp2 ; bl |
+   * |  0  lm1 lm2 ; bm |
+   * |  0  ln1 ln2 ; bn |
+   */
+  switch (pivot1)
+  {
+    case 0: /* first element is pivot, first line does not change */
+      factor1 = a1/a0;
+      factor2 = a2/a0;
+      lp0 = a0;
+      alp0 = fabs(a0);
+      lp1 = a[3];
+      lp2 = a[6];
+      lm1 = a[4] - factor1*lp1;
+      lm2 = a[7] - factor1*lp2;
+      ln1 = a[5] - factor2*lp1;
+      ln2 = a[8] - factor2*lp2;
+      bl = b[0];
+      bm = b[1] - factor1*bl;
+      bn = b[2] - factor2*bl;
+      break;
+    case 10: /* first element is pivot, first line does not change */
+      factor1 = a0/a1;
+      factor2 = a2/a1;
+      lp0 = a1;
+      alp0 = fabs(a1);
+      lp1 = a[4];
+      lp2 = a[7];
+      lm1 = a[3] - factor1*lp1;
+      lm2 = a[6] - factor1*lp2;
+      ln1 = a[5] - factor2*lp1;
+      ln2 = a[8] - factor2*lp2;
+      bl = b[1];
+      bm = b[0] - factor1*bl;
+      bn = b[2] - factor2*bl;
+      break;
+    case 20: /* first element is pivot, first line does not change */
+      factor1 = a0/a2;
+      factor2 = a1/a2;
+      lp0 = a2;
+      alp0 = fabs(a2);
+      lp1 = a[5];
+      lp2 = a[8];
+      lm1 = a[3] - factor1*lp1;
+      lm2 = a[6] - factor1*lp2;
+      ln1 = a[4] - factor2*lp1;
+      ln2 = a[7] - factor2*lp2;
+      bl = b[2];
+      bm = b[0] - factor1*bl;
+      bn = b[1] - factor2*bl;
+      break;
+    default:
+      exit(EXIT_FAILURE);
+  }
+
+  if (alp0 <= DBL_EPSILON)
+  {
+    info = 1;
+    return info;
+  }
+
+  double alm1 = fabs(lm1);
+  double aln1 = fabs(ln1);
+  pivot2 = alm1 >= aln1 ? 0 : 1;
+
+  /* We now solve the system 
+   * | lm1 lm2 ; bm |
+   * | ln1 ln2 ; bn |
+   */
+  switch (pivot2)
+  {
+    case 0:
+      if (alm1 < DBL_EPSILON)
+      {
+        info = 1;
+        return info;
+      }
+      factor1 = ln1/lm1;
+      sol2 = (bn - factor1*bm)/(ln2 - factor1*lm2);
+      sol1 = (bm - lm2*sol2)/lm1;
+      break;
+    case 1:
+      if (aln1 < DBL_EPSILON)
+      {
+        info = 1;
+        return info;
+      }
+      factor1 = lm1/ln1;
+      sol2 = (bm - factor1*bn)/(lm2 - factor1*ln2);
+      sol1 = (bn - ln2*sol2)/ln1;
+      break;
+    default:
+      exit(EXIT_FAILURE);
+  }
+  sol0 = (bl - sol1*lp1 - sol2*lp2)/lp0;
+
+  b[0] = sol0;
+  b[1] = sol1;
+  b[2] = sol2;
+
+  return info;
+}
 
 #endif
