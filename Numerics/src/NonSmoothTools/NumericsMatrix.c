@@ -379,9 +379,7 @@ void readInFile(NumericsMatrix* const m, FILE *file)
 
     for (int i = 0; i < m->size1 * m->size0; i++)
     {
-      CHECK_IO(fscanf(file, "%le", &(m->matrix0[i])));
-      if ((i + 1) % m->size1 == 0)
-        IGNORE_IO(fscanf(file, "\n"));
+      CHECK_IO(fscanf(file, "%le ", &(m->matrix0[i])));
     }
 
 
@@ -420,9 +418,7 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
 
     for (int i = 0; i < size1 * size0; i++)
     {
-      CHECK_IO(fscanf(file, "%le", &(data_d[i])));
-      if ((i + 1) % size1 == 0)
-        IGNORE_IO(fscanf(file, "\n"));
+      CHECK_IO(fscanf(file, "%le ", &(data_d[i])));
     }
   }
   else if (storageType == NM_SPARSE_BLOCK)

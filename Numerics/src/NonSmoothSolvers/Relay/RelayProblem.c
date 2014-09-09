@@ -114,13 +114,13 @@ int relay_newFromFile(RelayProblem* problem, FILE* file)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
-  CHECK_IO(fscanf(file, "\n"));
+
   problem->lb = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->lb[i])));
   }
-  CHECK_IO(fscanf(file, "\n"));
+
   problem->ub = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {

@@ -129,13 +129,11 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
     CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
-  IGNORE_IO(fscanf(file, "\n"));
   problem->mu = (double *) malloc(nc * sizeof(double));
   for (i = 0; i < nc; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
-  IGNORE_IO(fscanf(file, "\n")); 
   DEBUG_PRINT("End --  int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
 
   return 0;

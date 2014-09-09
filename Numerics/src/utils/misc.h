@@ -50,7 +50,7 @@ void printm(unsigned int nl, unsigned int nc, double *m);
     }                                                                   \
   } while (0)
 
-/** ignore
+/** ignore IO. Think carefully before using this ...
  */
 #define IGNORE_IO(EXPR)                                                 \
   do                                                                    \

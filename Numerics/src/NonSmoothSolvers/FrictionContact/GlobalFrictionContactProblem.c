@@ -77,13 +77,11 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
     CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])));
   }
 
-  IGNORE_IO(fscanf(file, "\n"));
   problem->mu = (double *) malloc(nc * sizeof(double));
   for (i = 0; i < nc; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
-  IGNORE_IO(fscanf(file, "\n"));
   return 0;
 }
 
