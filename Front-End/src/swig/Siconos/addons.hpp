@@ -17,6 +17,17 @@ std::vector<SP::DynamicalSystem> dynamicalSystems(SP::DynamicalSystemsGraph dsg)
   return r;
 };
 
+std::vector<SP::Interaction> interactions(SP::InteractionsGraph dsg)
+{
+  std::vector<SP::Interaction> r = std::vector<SP::Interaction>();
+  InteractionsGraph::VIterator vi, viend;
+  for (boost::tie(vi, viend) = dsg->vertices(); vi != viend; ++vi)
+  {
+    r.push_back(dsg->bundle(*vi));
+  };
+  return r;
+};
+
 std::vector<SP::DynamicalSystem> dynamicalSystemsVector()
 {
   return std::vector<SP::DynamicalSystem>();

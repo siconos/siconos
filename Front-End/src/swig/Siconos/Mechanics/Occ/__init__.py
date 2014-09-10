@@ -1,1 +1,1 @@
-from OccWrap import OccContactShape, OccBody, OccR, OccShapeFromFreeCAD, ContactShapeDistance
+from OccWrap import OccContactShape, OccBody, OccR, importContactShape

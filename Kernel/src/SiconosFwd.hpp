@@ -81,6 +81,8 @@ DEFINE_SPTR(OSNSMatrix)
 DEFINE_SPTR(SiconosMemory)
 
 DEFINE_SPTR(NewtonEulerR)
+DEFINE_SPTR(NewtonEulerFrom1DLocalFrameR)
+DEFINE_SPTR(NewtonEulerFrom3DLocalFrameR)
 
 #include <f2c.h>
 

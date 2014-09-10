@@ -27,8 +27,8 @@
 %include KernelTypes.i
 
 %import Kernel.i
-
 %include pyRegister.i
+
 
 %{
 #include <MechanicsFwd.hpp>
@@ -47,6 +47,9 @@
 #define DEFINE_STANDARD_ALLOC
 %include <TopoDS_Shape.hxx>
 
+// force the definition of SWIGTYPE_p_Interaction...
+typedef Interaction Interaction;
+
 PY_FULL_REGISTER(ContactShapeDistance);
 PY_FULL_REGISTER(OccContactShape);
 PY_FULL_REGISTER(OccBody);
@@ -58,7 +61,7 @@ PY_FULL_REGISTER(OccR);
   #include <BRep_Builder.hxx>
   #include <sstream>
 
-  SP::OccContactShape OccShapeFromFreeCAD(PyObject * o)
+  SP::OccContactShape importContactShape(PyObject * o)
   {
 
   if (PyObject_HasAttrString(o, "exportBrepToString"))

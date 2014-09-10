@@ -25,9 +25,6 @@
 
 #include "OccContactShape.hpp"
 #include <vector>
-#include <boost/array.hpp>
-#include <boost/tuple/tuple.hpp>
-
 
 struct ContactShapes : public std::vector<SP::OccContactShape>
 {

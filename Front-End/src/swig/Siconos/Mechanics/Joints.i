@@ -35,6 +35,8 @@
 %}
 %include <MechanicsFwd.hpp>
 
+// force the definition of SWIGTYPE_p_Interaction...
+typedef Interaction Interaction;
 
 PY_FULL_REGISTER(KneeJointR);
 PY_FULL_REGISTER(PivotJointR);

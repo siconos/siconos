@@ -25,7 +25,9 @@
 #define OccR_hpp
 
 #include "MechanicsFwd.hpp"
-#include "NewtonEulerFrom3DLocalFrameR.hpp"
+
+#include <SiconosFwd.hpp>
+#include <NewtonEulerFrom3DLocalFrameR.hpp>
 
 class OccR : public NewtonEulerFrom3DLocalFrameR
 {

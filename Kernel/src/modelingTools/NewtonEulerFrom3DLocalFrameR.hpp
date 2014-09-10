@@ -64,5 +64,4 @@ public:
 
   ACCEPT_STD_VISITORS();
 };
-TYPEDEF_SPTR(NewtonEulerFrom3DLocalFrameR)
 #endif // NEWTONEULERRELATIONFC3D_H

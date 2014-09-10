@@ -25,6 +25,8 @@
 #define OccBody_hpp
 
 #include "MechanicsFwd.hpp"
+
+#include <SiconosFwd.hpp>
 #include <NewtonEulerDS.hpp>
 
 class OccBody : public NewtonEulerDS
@@ -62,7 +64,7 @@ public:
   /** Get an associated contact shapes by its rank of association.
       \param id : the number of the shape.
    */
-  OccContactShape& contactShape(unsigned int id) const;
+  const OccContactShape& contactShape(unsigned int id) const;
 
   ACCEPT_STD_VISITORS();
 

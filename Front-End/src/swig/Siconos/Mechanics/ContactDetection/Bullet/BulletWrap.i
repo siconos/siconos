@@ -206,6 +206,9 @@ PY_REGISTER_BULLET_COLLISION_DETECTION(btUniformScalingShape);
 %shared_ptr(btGImpactMeshShape);
 %include "BulletCollision/Gimpact/btGImpactShape.h"
 
+// force the definition of SWIGTYPE_p_Interaction...
+typedef Interaction Interaction;
+
 %include "BulletSiconosFwd.hpp"
 PY_FULL_REGISTER(BulletR);
 PY_FULL_REGISTER(BulletDS);

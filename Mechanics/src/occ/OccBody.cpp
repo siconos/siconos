@@ -7,14 +7,15 @@ OccBody::OccBody(SP::SiconosVector position,
                  SP::SiconosMatrix inertia) :
   NewtonEulerDS(position, velocity, mass, inertia),
   _contactShapes(new ContactShapes())
-  {};
+{}
 
 
 void OccBody::addContactShape(SP::OccContactShape shape)
 {
-  shape->computeUVBounds();
   this->_contactShapes->push_back(shape);
-};
+
+  this->updateContactShapes();
+}
 
 void OccBody::updateContactShapes()
 {
@@ -25,7 +26,7 @@ void OccBody::updateContactShapes()
   }
 }
 
-OccContactShape& OccBody::contactShape(unsigned int id) const
+const OccContactShape& OccBody::contactShape(unsigned int id) const
 {
   return *(*this->_contactShapes)[id];
-};
+}

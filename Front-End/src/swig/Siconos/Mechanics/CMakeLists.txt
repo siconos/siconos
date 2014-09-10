@@ -1,5 +1,3 @@
-OPTION(WITH_OCC "Generation of bindings for Mechanics/OpenCascade interface" OFF)
-
 MACRO(MECHANICS_ADD_MODULE _mod _dest)
   
   SET_SOURCE_FILES_PROPERTIES(${_mod}.i PROPERTIES CPLUSPLUS ON)

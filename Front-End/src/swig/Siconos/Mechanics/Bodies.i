@@ -34,6 +34,9 @@
 %}
 %include <MechanicsFwd.hpp>
 
+// force the definition of SWIGTYPE_p_Interaction...
+typedef Interaction Interaction;
+
 PY_FULL_REGISTER(Disk);
 PY_FULL_REGISTER(Circle);
 PY_FULL_REGISTER(DiskDiskR);

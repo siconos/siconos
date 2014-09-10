@@ -486,8 +486,6 @@ void cadmbtb_distanceFaceEdge(
 
 }
 
-
-
 ContactShapeDistance OccContactShape::distance(
   const OccContactShape& sh2, bool normalFromFace1) const
 {

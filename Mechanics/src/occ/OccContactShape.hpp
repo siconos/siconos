@@ -22,9 +22,11 @@
 #ifndef OccContactShape_hpp
 #define OccContactShape_hpp
 
-#include <string>
+#include "MechanicsFwd.hpp"
+
 #include <SiconosFwd.hpp>
-#include <MechanicsFwd.hpp>
+#include <string>
+
 DEFINE_SPTR(TopoDS_Shape);
 
 struct OccContactShape
@@ -77,10 +79,10 @@ struct OccContactShape
    */
   void computeUVBounds();
 
-  /** Set shape position and orientation
+  /** Set shape position and orientation.
       \param q : NewtonEulerDS state
   */
-  void move(const SiconosVector& q);
+  virtual void move(const SiconosVector& q);
 
 
   /** Distance to another contact shape.
@@ -88,7 +90,7 @@ struct OccContactShape
       \param normalFromFace1 : normal on first contact shape, default on second.
       \return the distance, contact points and normal in ContactShapeDistance
    */
-  ContactShapeDistance distance(
+  virtual ContactShapeDistance distance(
     const OccContactShape& sh2, bool normalFromFace1=false) const;
 
   /** Computed UV bounds.
@@ -102,7 +104,7 @@ struct OccContactShape
    * @}
    */
 
-  /** Contact group */
+  /** Contact group. */
   unsigned int contactGroup;
 
   SP::TopoDS_Shape _shape;
