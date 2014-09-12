@@ -71,6 +71,16 @@ protected:
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
   bool _isThereImpactInTheTimeStep ;
+  unsigned int _typeOfD1MinusLinearOSI;
+
+  /** Switching variable for various versions of D1MinusLinear
+   */
+  enum ListOfTypeOfD1MinusLinearOSI {explicit_acceleration_level,
+                                     explicit_acceleration_level_full,
+                                     explicit_velocity_level,
+                                     halfexplicit_velocity_level,
+                                     numberOfTypeOfD1MinusLinearOSI };
+
 
 public:
 
@@ -97,13 +107,26 @@ public:
    */
   virtual double computeResidu();
 
+  /** return the maximum of all norms for the residus of DS for the type explicit_acceleration_level
+   *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
+   *  \return double
+   */
+  virtual double computeResidu_explicit_acceleration_level();
+
+  /** return the maximum of all norms for the residus of DS for the type explicit_acceleration_level_full
+   *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
+   *  \return double
+   */
+  virtual double computeResidu_explicit_acceleration_level_full();
+
+
   /** integrates the Dynamical System linked to this integrator without taking non-smooth effects into account
    *  \post{ds->velocity contains predicted velocity}
    */
   virtual void computeFreeState();
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex of the interaction graph
+   * \param vertex_inter of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
