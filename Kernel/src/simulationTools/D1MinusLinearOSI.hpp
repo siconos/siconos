@@ -111,13 +111,19 @@ public:
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
-  virtual double computeResidu_explicit_acceleration_level();
+  virtual double computeResiduExplicitAccelerationLevel();
 
   /** return the maximum of all norms for the residus of DS for the type explicit_acceleration_level_full
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
-  virtual double computeResidu_explicit_acceleration_level_full();
+  virtual double computeResiduExplicitAccelerationLevelFull();
+
+  /** return the maximum of all norms for the residus of DS for the type explicit_acceleration_level_full
+   *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
+   *  \return double
+   */
+  virtual double computeResiduHalfExplicitVelocityLevel();
 
 
   /** integrates the Dynamical System linked to this integrator without taking non-smooth effects into account
