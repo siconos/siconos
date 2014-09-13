@@ -75,8 +75,8 @@ protected:
 
   /** Switching variable for various versions of D1MinusLinear
    */
-  enum ListOfTypeOfD1MinusLinearOSI {explicit_acceleration_level,
-                                     explicit_acceleration_level_full,
+  enum ListOfTypeOfD1MinusLinearOSI {halfexplicit_acceleration_level,
+                                     halfexplicit_acceleration_level_full,
                                      explicit_velocity_level,
                                      halfexplicit_velocity_level,
                                      numberOfTypeOfD1MinusLinearOSI };
@@ -111,13 +111,13 @@ public:
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
-  virtual double computeResiduExplicitAccelerationLevel();
+  virtual double computeResiduHalfExplicitAccelerationLevel();
 
   /** return the maximum of all norms for the residus of DS for the type explicit_acceleration_level_full
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
-  virtual double computeResiduExplicitAccelerationLevelFull();
+  virtual double computeResiduHalfExplicitAccelerationLevelFull();
 
   /** return the maximum of all norms for the residus of DS for the type explicit_acceleration_level_full
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}

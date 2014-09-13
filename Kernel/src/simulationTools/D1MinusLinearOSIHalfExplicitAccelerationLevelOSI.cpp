@@ -40,7 +40,7 @@ using namespace RELATION;
 
 
 
-double D1MinusLinearOSI::computeResiduExplicitAccelerationLevel()
+double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 {
   double t = simulationLink->nextTime(); // end of the time step
   double told = simulationLink->startingTime(); // beginning of the time step

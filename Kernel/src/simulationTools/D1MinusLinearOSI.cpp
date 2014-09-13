@@ -73,11 +73,11 @@ struct D1MinusLinearOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 /// @endcond
 
 D1MinusLinearOSI::D1MinusLinearOSI() :
-  OneStepIntegrator(OSI::D1MINUSLINEAROSI), _typeOfD1MinusLinearOSI(explicit_acceleration_level) {}
+  OneStepIntegrator(OSI::D1MINUSLINEAROSI), _typeOfD1MinusLinearOSI(halfexplicit_acceleration_level) {}
 
 
 D1MinusLinearOSI::D1MinusLinearOSI(SP::DynamicalSystem newDS) :
-  OneStepIntegrator(OSI::D1MINUSLINEAROSI)
+  OneStepIntegrator(OSI::D1MINUSLINEAROSI), _typeOfD1MinusLinearOSI(halfexplicit_acceleration_level)
 {
   OSIDynamicalSystems->insert(newDS);
 }
@@ -111,10 +111,10 @@ double D1MinusLinearOSI::computeResidu()
   
   switch (_typeOfD1MinusLinearOSI)
   {
-  case explicit_acceleration_level:
-    return computeResiduExplicitAccelerationLevel();
-  case explicit_acceleration_level_full:
-    return computeResiduExplicitAccelerationLevelFull();
+  case halfexplicit_acceleration_level:
+    return computeResiduHalfExplicitAccelerationLevel();
+  case halfexplicit_acceleration_level_full:
+    return computeResiduHalfExplicitAccelerationLevelFull();
   case explicit_velocity_level:
     RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + explicit_velocity_level);
     break;
@@ -539,7 +539,7 @@ bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsign
 
 
 
-double D1MinusLinearOSI::computeResiduExplicitAccelerationLevelFull()
+double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevelFull()
 {
 RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu_explicit_acceleration_level has been removed due to obsolescence");
 return 0.0;
