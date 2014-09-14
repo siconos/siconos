@@ -120,7 +120,6 @@ bool DiodeBridge()
     TiDiscRLCD->display();
     SP::TimeStepping StratDiodeBridge(new TimeStepping(TiDiscRLCD));
 
-    double theta = 0.5;
 
     // One Step Integrator
     StratDiodeBridge->insertIntegrator(OSI_RLCD);

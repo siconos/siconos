@@ -31,41 +31,52 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 /// @cond
 using namespace RELATION;
 
+/* Some details on the implementation
+ *
+ * (lower-case) lambda that corresponds to the (non-impulsive) contact forces are computed
+ * at the acceleration level for the closed contact with vanishing relative velocity (indexSet2)
+ * The result, stored in lambda(2) and p(2) is computed by solving
+ *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ * at time told for lambda^+_{k} and time t for lambda^-_{k+1}
+ *
+ * The impact equation are solved at the velocity level as in MoreauJeanOSI using
+ * lambda(1) and p(1)   on the indexSet1
+ *
+ */
+
+
 
 
 double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 {
+  DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel(), starts\n");
+
   double t = simulationLink->nextTime(); // end of the time step
   double told = simulationLink->startingTime(); // beginning of the time step
   double h = simulationLink->timeStep(); // time step length
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
   SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
-  SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+  // SP::InteractionsGraph indexSet0 = topo->indexSet(0);
+  // SP::InteractionsGraph indexSet1 = topo->indexSet(1);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-
-  // Note FP : we must use graph rather than InteractionSet. I have update all the code
-  // in this file by replacing allInteractions calls with proper call to indexSet0.
-  // So it produces the same results as before my changes.
-  // Anyway, I think that in some place it will be better to call indexSet2 rather than indexSet0 as it was done in
-  // the original code?
 
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
   DEBUG_PRINTF("time step size %f\n", h);
 
+  /**************************************************************************************************************
+   *  Step 1-  solve a LCP at acceleration level for lambda^+_{k} for the last set indices
+   *   if index2 is empty we should skip this step
+   **************************************************************************************************************/
+
   DEBUG_PRINT("\nEVALUATE LEFT HAND SIDE\n");
-  /** Step 1-  solve a LCP at acceleration level for lambda^+_{k} for the last set indices
-   * if index2 is empty we skip this step
-   *
-   **/
 
   DEBUG_EXPR(std::cout<< "allOSNS->empty()   " << std::boolalpha << allOSNS->empty() << std::endl << std::endl);
   DEBUG_EXPR(std::cout<< "allOSNS->size()   "  << allOSNS->size() << std::endl << std::endl);
@@ -83,7 +94,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
-      workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
+      workFree = d->workspace(DynamicalSystem::free); /* POINTER CONSTRUCTOR : will contain
+                                                       * the acceleration without contact force */
       workFree->zero();
 
       // get left state from memory
@@ -245,9 +257,9 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     }
   }
 
-  /** Step 2 -  compute v_{k,1}
-   *
-   **/
+  /**************************************************************************************************************
+   *  Step 2 -  compute v_{k,1}
+   **************************************************************************************************************/
 
 
   DEBUG_PRINT("\n PREDICT RIGHT HAND SIDE\n");
@@ -355,7 +367,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
      * \begin{cases}
      * v_{k,0} = \mbox{\tt vold} \\
      * q_{k,0} = qold \\
-     * F_{k,+} = F(told,qol,vold) \\
+     * F_{k,+} = F(told,qold,vold) \\
      * Work_{freefree} =  M^{-1}_k (F^+_{k})  \mbox{stored in workFreeFree} \\
      * Work_{free} =  M^{-1}_k (P^+_{2,k}+F^+_{k})  \mbox{stored in workFree} \\
      * R_{free} = -h/2 * M^{-1}_k (P^+_{2,k}+F^+_{k})  \mbox{stored in ResiduFree} \\
@@ -555,18 +567,18 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
       InteractionsGraph::VIterator ui, uiend;
       SP::Interaction inter;
-      for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
-        inter = indexSet0->bundle(*ui);
-        inter->relation()->computeJach(t, *inter, indexSet0->properties(*ui));
+        inter = indexSet2->bundle(*ui);
+        inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
         if (inter->relation()->getType() == NewtonEuler)
         {
-          SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
-          SP::DynamicalSystem ds2 = indexSet0->properties(*ui).target;
+          SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
+          SP::DynamicalSystem ds2 = indexSet2->properties(*ui).target;
           SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
           ner->computeJachqT(*inter, ds1, ds2);
         }
-        inter->relation()->computeJacg(t, *inter, indexSet0->properties(*ui));
+        inter->relation()->computeJacg(t, *inter, indexSet2->properties(*ui));
       }
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
@@ -659,7 +671,9 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
   } // No impact
 
-  DEBUG_PRINT("D1MinusLinearOSI::computeResidu() ends\n");
+
+  DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel(), ends\n");
+
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
 }
 

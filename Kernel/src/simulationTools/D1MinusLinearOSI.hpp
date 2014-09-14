@@ -63,12 +63,37 @@
  * \end{cases}
  * \f]
  */
+
+
+
+
 class D1MinusLinearOSI : public OneStepIntegrator
 {
 protected:
 
   /** nslaw effects */
-  struct _NSLEffectOnFreeOutput;
+
+
+  struct _NSLEffectOnFreeOutput : public SiconosVisitor
+  {
+    
+    using SiconosVisitor::visit;
+    
+    OneStepNSProblem* _osnsp;
+    SP::Interaction _inter;
+    
+    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) : 
+      _osnsp(p), _inter(inter) {};
+    
+    void visit(const NewtonImpactNSL& nslaw);
+    void visit(const EqualityConditionNSL& nslaw)
+    {
+      ;
+    }
+  };
+  
+
+
   friend struct _NSLEffectOnFreeOutput;
   bool _isThereImpactInTheTimeStep ;
   unsigned int _typeOfD1MinusLinearOSI;
@@ -89,7 +114,6 @@ public:
   D1MinusLinearOSI();
 
   /** constructor from one dynamical system
-   *  \param newDS DynamicalSystem to be integrated
    */
   DEPRECATED_OSI_API(D1MinusLinearOSI(SP::DynamicalSystem newDS));
 
@@ -97,7 +121,7 @@ public:
   virtual ~D1MinusLinearOSI() {};
 
   /** initialization of the D1MinusLinearOSI integrator; for linear time
-  c   *  invariant systems, we compute time invariant operator
+   *  invariant systems, we compute time invariant operator
    */
   virtual void initialize();
 
@@ -137,6 +161,20 @@ public:
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
+  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
+   * \param vertex_inter of the interaction graph
+   * \param osnsp pointer to OneStepNSProblem
+   */
+  virtual void computeFreeOutputHalfExplicitAccelerationLevel(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
+
+  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
+   * \param vertex_inter of the interaction graph
+   * \param osnsp pointer to OneStepNSProblem
+   */
+  virtual void computeFreeOutputHalfExplicitVelocityLevel(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
+
+
+
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param ti initial time
    *  \param tf end time
@@ -157,12 +195,18 @@ public:
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
+   * \param inter the involved interaction
+   * \param i the index set level
+   * \return a boolean if it needs to be added or not
    */
   virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
-   */
+   * \param inter the involved interaction
+   * \param i the index set level
+   * \return a boolean if it needs to be removed or not
+  */
   virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
 
@@ -174,7 +218,9 @@ public:
     RuntimeException::selfThrow("D1MinusLinearOSI::display - not implemented!");
   }
 
-  /** preparations for Newton iteration */
+  /** preparations for Newton iteration 
+   *  \param time time 
+   */
   virtual void prepareNewtonIteration(double time)
   {
     RuntimeException::selfThrow("D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
@@ -183,5 +229,7 @@ public:
   /** visitors hook */
   ACCEPT_STD_VISITORS();
 };
+
+
 
 #endif // D1MINUSLINEAR_H

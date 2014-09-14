@@ -45,32 +45,20 @@
 /// @cond
 using namespace RELATION;
 
-struct D1MinusLinearOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
-{
-
-  using SiconosVisitor::visit;
-
-  OneStepNSProblem* _osnsp;
-  SP::Interaction _inter;
-
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) : _osnsp(p), _inter(inter) {};
-
-  void visit(const NewtonImpactNSL& nslaw)
-  {
-    double e = nslaw.e();
-    Index subCoord(4);
-    subCoord[0] = 0;
-    subCoord[1] = _inter->nonSmoothLaw()->size();
-    subCoord[2] = 0;
-    subCoord[3] = subCoord[1];
-    subscal(e, *(_inter->y_k(_osnsp->inputOutputLevel())), *(_inter->yForNSsolver()), subCoord, false);
-  }
-  void visit(const EqualityConditionNSL& nslaw)
-  {
-    ;
-  }
-};
 /// @endcond
+
+
+void D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactNSL& nslaw)
+{
+  double e = nslaw.e();
+  Index subCoord(4);
+  subCoord[0] = 0;
+  subCoord[1] = _inter->nonSmoothLaw()->size();
+  subCoord[2] = 0;
+  subCoord[3] = subCoord[1];
+  subscal(e, *(_inter->y_k(_osnsp->inputOutputLevel())), *(_inter->yForNSsolver()), subCoord, false);
+}
+
 
 D1MinusLinearOSI::D1MinusLinearOSI() :
   OneStepIntegrator(OSI::D1MINUSLINEAROSI), _typeOfD1MinusLinearOSI(halfexplicit_acceleration_level) {}
@@ -108,7 +96,6 @@ void D1MinusLinearOSI::initialize()
 double D1MinusLinearOSI::computeResidu()
 {
   DEBUG_PRINT("\n D1MinusLinearOSI::computeResidu(), start\n");
-  
   switch (_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:
@@ -122,6 +109,7 @@ double D1MinusLinearOSI::computeResidu()
     RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + halfexplicit_velocity_level);
     break;
   }
+  DEBUG_PRINT("D1MinusLinearOSI::computeResidu() ends\n");
   return 1;
 }
 
@@ -254,7 +242,30 @@ void D1MinusLinearOSI::updateState(const unsigned int level)
 
 }
 
+
+
 void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
+{
+  DEBUG_PRINT("\n D1MinusLinearOSI::computeFreeOutput(), start\n");
+  switch (_typeOfD1MinusLinearOSI)
+  {
+  case halfexplicit_acceleration_level:
+    return computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter,osnsp);
+  case halfexplicit_acceleration_level_full:
+    return computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter,osnsp);
+  case explicit_velocity_level:
+    RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + explicit_velocity_level);
+    break;
+  case halfexplicit_velocity_level:
+    RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + halfexplicit_velocity_level);
+    break;
+  }
+  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput() ends\n");
+}
+
+
+
+void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
 
   DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput starts\n");
