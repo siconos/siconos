@@ -5,7 +5,7 @@
 #
 
 from Siconos.Mechanics.ContactDetection import Contactor
-from Siconos.Mechanics.ContactDetection.Bullet import IO
+from Siconos.Mechanics import IO
 
 # Creation of the hdf5 file for input/output
 with IO.Hdf5() as io:

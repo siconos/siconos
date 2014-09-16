@@ -5,8 +5,4 @@ def getBase():
     sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 getBase()    
 from BulletWrap import *
-import IO
-try:
-    import VtkShapes
-except:
-    pass
+
