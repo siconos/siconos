@@ -33,6 +33,11 @@ try:
     from Siconos.Mechanics.ContactDetection.Bullet.BulletWrap import \
         __mul__ as mul
 
+    from ContactDetection.Bullet import btVector3, \
+        btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, \
+        btConeShape, btCapsuleShape, btCompoundShape, btTriangleIndexVertexArray, \
+        btGImpactMeshShape
+
 except:
     pass
 
@@ -185,11 +190,6 @@ class ShapeCollection():
     collect Bullet primitives or convex hull shapes from .vtp
     filenames given in a reference file
     """
-
-    from ContactDetection.Bullet import btVector3, \
-        btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, \
-        btConeShape, btCapsuleShape, btCompoundShape, btTriangleIndexVertexArray, \
-        btGImpactMeshShape
 
     def __init__(self, ref = 'ref.txt'):
         self._ref = ref
