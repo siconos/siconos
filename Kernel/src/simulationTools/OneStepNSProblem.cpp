@@ -72,7 +72,7 @@ OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
 
 bool OneStepNSProblem::hasInteractions() const
 {
-  return _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0)->size() > 0 ;
+  return _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel)->size() > 0 ;
 }
 
 void OneStepNSProblem::updateInteractionBlocks()

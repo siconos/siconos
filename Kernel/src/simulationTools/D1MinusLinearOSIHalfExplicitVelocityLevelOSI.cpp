@@ -31,8 +31,8 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 /// @cond
@@ -65,8 +65,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
   DEBUG_PRINT("\nEVALUATE LEFT HAND SIDE\n");
 
-  DEBUG_EXPR(std::cout<< "allOSNS->empty()   " << std::boolalpha << allOSNS->empty() << std::endl << std::endl);
-  DEBUG_EXPR(std::cout<< "allOSNS->size()   "  << allOSNS->size() << std::endl << std::endl);
+  // DEBUG_EXPR(std::cout<< "allOSNS->empty()   " << std::boolalpha << allOSNS->empty() << std::endl << std::endl);
+  // DEBUG_EXPR(std::cout<< "allOSNS->size()   "  << allOSNS->size() << std::endl << std::endl);
 
 // -- LEFT SIDE --
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -90,7 +90,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
       Mold = d->mass();
 
-      DEBUG_EXPR(workFree->display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
       DEBUG_EXPR(Mold->display());
@@ -101,7 +100,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       }
       workFreeFree = d->workspace(DynamicalSystem::free_tdg);
       workFreeFree->zero();
-      DEBUG_EXPR(workFreeFree->display());
 
       if (d->forces())
       {
@@ -194,8 +192,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         }
       }
       assert((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]);
-
-      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())) // it should be equivalent to indexSet2
+     
+      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())) /* it should be equivalent to indexSet2 */
       {
         DEBUG_PRINT("We compute lambda^+_{k} \n");
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
@@ -575,6 +573,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         }
       }
 
+       DEBUG_EXPR(std::cout<< " ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions()) " << std::boolalpha <<((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())  << std::endl << std::endl);
+      DEBUG_PRINTF("indexSet2->size =%i\n", indexSet2->size());
+
+
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions()))
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
@@ -694,22 +696,26 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
   // define Xfree for velocity and acceleration level
   if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
-    //Xfree = inter->dataX();
+    /* get the current velocity  of the aggregated ds */
     if (relationType == Lagrangian)
     {
       Xfree = DSlink[LagrangianR::q1];
+      DEBUG_PRINT("Xfree = DSlink[LagrangianR::q1];\n");
     }
     else if (relationType == NewtonEuler)
     {
       Xfree = DSlink[NewtonEulerR::velocity];
+      DEBUG_PRINT("Xfree = DSlink[NewtonEulerR::velocity];\n");
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
 
+    DEBUG_EXPR(Xfree->display());
+
   }
   else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
   {
-
+    /* get the free velocity  of the aggregated ds */
     if (relationType == Lagrangian)
     {
       Xfree = DSlink[LagrangianR::xfree];
@@ -720,9 +726,11 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
-    DEBUG_PRINT("Xfree = DSlink[LagrangianR::xfree];\n");
-    DEBUG_EXPR(Xfree->display());
+
     assert(Xfree);
+    DEBUG_PRINT("Xfree = DSlink[Lagrangian/NewtonEulerR::xfree];\n");
+    DEBUG_EXPR(Xfree->display());
+
   }
   else
     RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");

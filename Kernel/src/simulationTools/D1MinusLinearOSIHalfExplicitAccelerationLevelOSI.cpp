@@ -677,3 +677,200 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
 }
 
+
+void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
+{
+
+  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput starts\n");
+  SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
+  SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
+  SP::Interaction inter = indexSet->bundle(vertex_inter);
+  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  // get relation and non smooth law information
+  RELATION::TYPES relationType = inter->relation()->getType(); // relation
+  RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
+  unsigned int relativePosition = 0;
+  unsigned int sizeY = inter->nonSmoothLaw()->size(); // related NSL
+
+  Index coord(8);
+  coord[0] = relativePosition;
+  coord[1] = relativePosition + sizeY;
+  coord[2] = 0;
+  coord[3] = 0;
+  coord[4] = 0;
+  coord[5] = 0;
+  coord[6] = 0;
+  coord[7] = sizeY;
+  SP::SiconosMatrix C; // Jacobian of Relation with respect to degree of freedom
+  SP::BlockVector Xfree; // free degree of freedom
+  SiconosVector& yForNSsolver = *inter->yForNSsolver();
+
+  // define Xfree for velocity and acceleration level
+  if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+  {
+    //Xfree = inter->dataX();
+    /* get the current velocity  of the aggregated ds */
+    if (relationType == Lagrangian)
+    {
+      Xfree = DSlink[LagrangianR::q1];
+    }
+    else if (relationType == NewtonEuler)
+    {
+      Xfree = DSlink[NewtonEulerR::velocity];
+    }
+    else
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
+
+  }
+  else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
+  {
+    /* get the "free" acceleration of the aggregated ds */
+    if (relationType == Lagrangian)
+    {
+      Xfree = DSlink[LagrangianR::xfree];
+    }
+    else if (relationType == NewtonEuler)
+    {
+      Xfree = DSlink[NewtonEulerR::xfree];
+    }
+    else
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
+    DEBUG_PRINT("Xfree = DSlink[LagrangianR::xfree];\n");
+    DEBUG_EXPR(Xfree->display());
+    assert(Xfree);
+  }
+  else
+    RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
+
+  // calculate data of interaction
+  SP::Interaction mainInteraction = inter;
+  assert(mainInteraction);
+  assert(mainInteraction->relation());
+
+  // only Lagrangian Systems
+  if (relationType == Lagrangian)
+  {
+    // in yForNSsolver the linear part of velocity or acceleration relation will be saved
+    C = std11::static_pointer_cast<LagrangianR>(mainInteraction->relation())->C();
+
+    if (C)
+    {
+      assert(Xfree);
+
+      coord[3] = C->size(1);
+      coord[5] = C->size(1);
+      subprod(*C, *Xfree, yForNSsolver, coord, true);
+    }
+
+    // in yForNSsolver corrections have to be added
+    SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+    ID->eye();
+
+    Index xcoord(8);
+    xcoord[0] = 0;
+    xcoord[1] = sizeY;
+    xcoord[2] = 0;
+    xcoord[3] = sizeY;
+    xcoord[4] = 0;
+    xcoord[5] = sizeY;
+    xcoord[6] = 0;
+    xcoord[7] = sizeY;
+
+    if (relationSubType == RheonomousR) // explicit time dependence -> partial time derivative has to be added
+    {
+      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+      {
+        SiconosVector q = *DSlink[LagrangianR::q0];
+        SiconosVector z = *DSlink[LagrangianR::z];
+
+        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
+        *DSlink[LagrangianR::z] = z;
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false);
+      }
+      else
+        RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput is only implemented  at velocity level for LagrangianRheonomousR.");
+    }
+
+    if (relationSubType == ScleronomousR) // acceleration term involving Hessian matrix of Relation with respect to degree is added
+    {
+      DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput. acceleration term involving Hessian matrix of Relation\n");
+      DEBUG_EXPR(yForNSsolver.display(););
+
+      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
+      {
+        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), yForNSsolver, xcoord, false);
+      }
+      DEBUG_EXPR(yForNSsolver.display(););
+    }
+
+
+  }
+
+  else if (relationType == NewtonEuler)
+  {
+    SP::SiconosMatrix CT =  std11::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
+    DEBUG_EXPR(CT->display());
+    if (CT)
+    {
+      coord[3] = CT->size(1);
+      coord[5] = CT->size(1);
+      assert(Xfree);
+      // creates a POINTER link between workX[ds] (xfree) and the
+      // corresponding interactionBlock in each Interaction for each ds of the
+      // current Interaction.
+      // XXX Big quirks !!! -- xhub
+      subprod(*CT, *Xfree, yForNSsolver, coord, true);
+    }
+
+
+
+    if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
+    {
+      // in yForNSsolver corrections have to be added
+      SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+      ID->eye();
+
+      Index xcoord(8);
+      xcoord[0] = 0;
+      xcoord[1] = sizeY;
+      xcoord[2] = 0;
+      xcoord[3] = sizeY;
+      xcoord[4] = 0;
+      xcoord[5] = sizeY;
+      xcoord[6] = 0;
+      xcoord[7] = sizeY;
+
+      DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput.\n Adding the additional terms of the second order time derivative of constraints.\n");
+      DEBUG_EXPR(yForNSsolver.display(););
+
+      /** Compute additional terms of the second order time derivative of constraints
+       *
+       * \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
+       *
+       */
+      SP::DynamicalSystem ds1 = indexSet->properties(vertex_inter).source;
+      SP::DynamicalSystem ds2 = indexSet->properties(vertex_inter).target;
+
+      std11::static_pointer_cast<NewtonEulerR>(inter->relation())->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter, DSlink, ds1, ds2);
+
+      DEBUG_EXPR((std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms())->display());
+
+      subprod(*ID, *(std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms()), yForNSsolver, xcoord, false);
+      DEBUG_EXPR(yForNSsolver.display(););
+
+
+    }
+    DEBUG_EXPR(yForNSsolver.display(););
+    if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) // impact terms are added
+    {
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+    }
+  }
+
+  else
+    RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " + relationType);
+  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput ends\n");
+
+}

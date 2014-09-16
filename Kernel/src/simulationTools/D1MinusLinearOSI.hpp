@@ -72,31 +72,30 @@ class D1MinusLinearOSI : public OneStepIntegrator
 protected:
 
   /** nslaw effects */
-
-
   struct _NSLEffectOnFreeOutput : public SiconosVisitor
   {
-    
+
     using SiconosVisitor::visit;
-    
+
     OneStepNSProblem* _osnsp;
     SP::Interaction _inter;
-    
-    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) : 
+
+    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
       _osnsp(p), _inter(inter) {};
-    
+
     void visit(const NewtonImpactNSL& nslaw);
     void visit(const EqualityConditionNSL& nslaw)
     {
       ;
     }
   };
-  
-
 
   friend struct _NSLEffectOnFreeOutput;
   bool _isThereImpactInTheTimeStep ;
   unsigned int _typeOfD1MinusLinearOSI;
+
+
+public:
 
   /** Switching variable for various versions of D1MinusLinear
    */
@@ -106,12 +105,19 @@ protected:
                                      halfexplicit_velocity_level,
                                      numberOfTypeOfD1MinusLinearOSI };
 
-
-public:
-
   /** basic constructor
    */
   D1MinusLinearOSI();
+
+  /** Constructor with type of D1MinusLinear
+   * \param type unsigned int that specifies the type of D1MinusLinear
+   * D1MinusLinearOSI::halfexplicit_acceleration_level,
+   * D1MinusLinearOSI::halfexplicit_acceleration_level_full,
+   * D1MinusLinearOSI::explicit_velocity_level,
+   * D1MinusLinearOSI::halfexplicit_velocity_level,
+   * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
+   */
+  D1MinusLinearOSI(unsigned int type);
 
   /** constructor from one dynamical system
    */
@@ -119,6 +125,30 @@ public:
 
   /** destructor */
   virtual ~D1MinusLinearOSI() {};
+
+
+
+  /** Set the type of the D1MinusLinear
+   * \param type  the type to set
+   * D1MinusLinearOSI::halfexplicit_acceleration_level,
+   * D1MinusLinearOSI::halfexplicit_acceleration_level_full,
+   * D1MinusLinearOSI::explicit_velocity_level,
+   * D1MinusLinearOSI::halfexplicit_velocity_level,
+   * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
+   */
+  void setTypeOfD1MinusLinearOSI(unsigned int type);
+
+  /** get the type of the D1MinusLinear
+   * \return unsigne int type  the type to set
+   * D1MinusLinearOSI::halfexplicit_acceleration_level,
+   * D1MinusLinearOSI::halfexplicit_acceleration_level_full,
+   * D1MinusLinearOSI::explicit_velocity_level,
+   * D1MinusLinearOSI::halfexplicit_velocity_level,
+   * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
+   */
+  unsigned int setTypeOfD1MinusLinearOSI(){return _typeOfD1MinusLinearOSI;};
+
+
 
   /** initialization of the D1MinusLinearOSI integrator; for linear time
    *  invariant systems, we compute time invariant operator
@@ -218,8 +248,8 @@ public:
     RuntimeException::selfThrow("D1MinusLinearOSI::display - not implemented!");
   }
 
-  /** preparations for Newton iteration 
-   *  \param time time 
+  /** preparations for Newton iteration
+   *  \param time time
    */
   virtual void prepareNewtonIteration(double time)
   {
