@@ -1,1 +1,1 @@
-from OccWrap import OccContactShape, OccBody, OccR, importContactShape
+from OccWrap import OccContactShape, OccBody, OccR, importContactShape, OccTimeStepping, ContactShapeDistance, ContactPoint

@@ -50,10 +50,15 @@
 // force the definition of SWIGTYPE_p_Interaction...
 typedef Interaction Interaction;
 
+// due to undefined private copy constructors
+%feature("notabstract") OccTimeStepping;
+
 PY_FULL_REGISTER(ContactShapeDistance);
 PY_FULL_REGISTER(OccContactShape);
+PY_FULL_REGISTER(ContactPoint);
 PY_FULL_REGISTER(OccBody);
 PY_FULL_REGISTER(OccR);
+PY_FULL_REGISTER(OccTimeStepping);
 
 %inline
 %{

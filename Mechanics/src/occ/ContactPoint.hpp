@@ -16,20 +16,26 @@
  *
  * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
  */
-/** \file OccR_impl.hpp
+/** \file ContactPoint.hpp
     \brief Implementation details for OccR class.
  */
-#ifndef OccR_impl_hpp
-#define OccR_impl_hpp
+#ifndef ContactPoint_hpp
+#define ContactPoint_hpp
 
 #include "MechanicsFwd.hpp"
 
 
 struct ContactPoint
 {
-  const OccContactShape& shape;
+  ContactPoint(SP::OccContactShape shape) : _shape(shape) {};
+
+  SP::OccContactShape contactShape() const { return _shape; };
+
+  SP::OccContactShape _shape;
+
   double u;
   double v;
+
 };
 
 #endif

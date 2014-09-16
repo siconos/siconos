@@ -13,11 +13,11 @@ OccBody::OccBody(SP::SiconosVector position,
 void OccBody::addContactShape(SP::OccContactShape shape)
 {
   this->_contactShapes->push_back(shape);
-
+  shape->computeUVBounds();
   this->updateContactShapes();
 }
 
-void OccBody::updateContactShapes()
+void OccBody::updateContactShapes() const
 {
   for (ContactShapes::iterator csi = _contactShapes->begin();
        csi != _contactShapes->end(); ++ csi)

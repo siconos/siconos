@@ -86,12 +86,12 @@ struct OccContactShape
 
 
   /** Distance to another contact shape.
-      \param sh2 : the other contact shape.
+      \param psh2 : the other contact shape.
       \param normalFromFace1 : normal on first contact shape, default on second.
       \return the distance, contact points and normal in ContactShapeDistance
    */
-  virtual ContactShapeDistance distance(
-    const OccContactShape& sh2, bool normalFromFace1=false) const;
+  virtual SP::ContactShapeDistance distance(
+    SP::OccContactShape psh2, bool normalFromFace1=false) const;
 
   /** Computed UV bounds.
    * @{

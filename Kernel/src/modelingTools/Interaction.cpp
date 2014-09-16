@@ -199,6 +199,7 @@ void Interaction::initializeMemory(bool computeResidu)
     _y_k[i].reset(new SiconosVector(nslawSize));
     assert(_steps > 0);
     _yMemory[i].reset(new SiconosMemory(_steps, nslawSize));
+
     _y[i]->zero();
     _yOld[i]->zero();
     _y_k[i]->zero();

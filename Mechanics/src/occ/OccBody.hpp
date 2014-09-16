@@ -59,7 +59,7 @@ public:
 
   /** Update positions and orientations of contact shapes.
    */
-  void updateContactShapes();
+  void updateContactShapes() const;
 
   /** Get an associated contact shapes by its rank of association.
       \param id : the number of the shape.

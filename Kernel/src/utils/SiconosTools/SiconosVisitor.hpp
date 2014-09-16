@@ -94,27 +94,27 @@
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor)); \
     return Type::void_type;                                             \
   }                                                                     \
- 
+
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
   template<typename Archive> friend class SiconosSerializer;            \
   virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
   virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
- 
+
 #define ACCEPT_NONVIRTUAL_VISITORS()                                           \
   template<typename Archive> friend class SiconosSerializer;            \
   void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
   void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
- 
+
 #define ACCEPT_SP_VISITORS()                                            \
   virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
 
 #define ACCEPT_VISITORS()                       \
   ACCEPT_SP_VISITORS()                          \
   ACCEPT_STD_VISITORS()                         \
- 
+
 
 
 
@@ -161,7 +161,7 @@ enum Siconos
 #undef REGISTER
 #define REGISTER(X)                                                 \
   virtual Type::Siconos visit(const X&) const { return Type::X; };  \
- 
+
 #undef REGISTER_STRUCT
 #define REGISTER_STRUCT(X) REGISTER(X)
 
@@ -169,7 +169,7 @@ enum Siconos
 #undef REGISTER_BASE_EXTERN
 #define REGISTER_BASE(X,Y)                                         \
   virtual Type::Siconos visit(const X&) const { return Type::Y; }; \
- 
+
 #define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
 
 struct FindType

@@ -20,7 +20,7 @@
 
 #include <limits>
 
-#define DEBUG_MESSAGES 1
+//#define DEBUG_MESSAGES 1
 #include <debug.h>
 
 OccContactShape::ContactTypeValue OccContactShape::contactType() const
@@ -486,11 +486,14 @@ void cadmbtb_distanceFaceEdge(
 
 }
 
-ContactShapeDistance OccContactShape::distance(
-  const OccContactShape& sh2, bool normalFromFace1) const
+SP::ContactShapeDistance OccContactShape::distance(
+  SP::OccContactShape psh2, bool normalFromFace1) const
 {
 
-  ContactShapeDistance dist;
+  OccContactShape& sh2 = *psh2;
+
+  SP::ContactShapeDistance pdist(new ContactShapeDistance());
+  ContactShapeDistance& dist = *pdist;
 
   dist.value = std::numeric_limits<double>::infinity();
 
@@ -531,7 +534,7 @@ ContactShapeDistance OccContactShape::distance(
 
   }
 
-  return dist;
+  return pdist;
 }
 
 std::string OccContactShape::exportBRepAsString() const
@@ -572,9 +575,9 @@ TopoDS_Shape& OccContactShape::data()
 void OccContactShape::move(const SiconosVector& q)
 {
 
-  const gp_Vec& translat = gp_Vec(q(0), q(1), q(2));
+  const gp_Vec translat = gp_Vec(q(0), q(1), q(2));
 
-  const gp_Quaternion& rota = gp_Quaternion(q(4), q(5), q(6), q(3));
+  const gp_Quaternion rota = gp_Quaternion(q(4), q(5), q(6), q(3));
 
   gp_Trsf transfo;
 
@@ -582,12 +585,13 @@ void OccContactShape::move(const SiconosVector& q)
   transfo.SetTranslationPart(translat);
 
   this->data().Move(transfo);
+  this->data().Location(TopLoc_Location(transfo));
 
   // cf code from Olivier
   // reset Location to avoid accumulation of TopLoc_Datum3D
-  const TopLoc_Location& aLoc = this->data().Location();
-  const gp_Trsf& T = aLoc.Transformation();
-  TopLoc_Location aLocWithoutList(T);
-  this->data().Location(aLocWithoutList);
+//  const TopLoc_Location& aLoc = this->data().Location();
+//  const gp_Trsf& T = aLoc.Transformation();
+//  TopLoc_Location aLocWithoutList(T);
+//  this->data().Location(aLocWithoutList);
 
 }
