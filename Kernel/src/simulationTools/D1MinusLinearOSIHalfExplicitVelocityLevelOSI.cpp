@@ -192,7 +192,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         }
       }
       assert((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]);
-     
+
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())) /* it should be equivalent to indexSet2 */
       {
         DEBUG_PRINT("We compute lambda^+_{k} \n");
@@ -501,6 +501,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           if (d->forces())
           {
             d->computeForces(t, q, v);
+            DEBUG_EXPR(d->forces()->display());
             *workFree += *(d->forces());
           }
         }
@@ -572,11 +573,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           (*itOsns)->setHasBeenUpdated(false);
         }
       }
-
-       DEBUG_EXPR(std::cout<< " ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions()) " << std::boolalpha <<((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())  << std::endl << std::endl);
-      DEBUG_PRINTF("indexSet2->size =%i\n", indexSet2->size());
-
-
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions()))
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);

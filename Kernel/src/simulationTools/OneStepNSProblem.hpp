@@ -130,8 +130,11 @@ private:
    */
   OneStepNSProblem(const OneStepNSProblem&) {};
 
-  /** assignment (private => forbidden) */
-  OneStepNSProblem& operator=(const OneStepNSProblem&);
+  /** assignment (private => forbidden) 
+   * \param osnsp
+   * \return OneStepNSProblem&  osnsp
+   */
+  OneStepNSProblem& operator=(const OneStepNSProblem& osnsp);
 
 public:
   /**  constructor with a solver from Numerics
@@ -171,7 +174,7 @@ public:
   }
 
   /** set the value of sizeOutput
-   *  \param an unsigned int
+   *  \param newVal an unsigned int
    */
   inline void setSizeOutput(const unsigned int newVal)
   {
@@ -187,7 +190,7 @@ public:
   }
 
   /** set the Simulation of the OneStepNSProblem
-   *  \param a pointer to Simulation
+   *  \param newS a pointer to Simulation
    */
   inline void setSimulationPtr(SP::Simulation newS)
   {
@@ -203,7 +206,7 @@ public:
   }
 
   /** set the value of level min
-   *  \param an unsigned int
+   *  \param newVal an unsigned int
    */
   inline void setIndexSetLevel(unsigned int newVal)
   {
@@ -221,7 +224,7 @@ public:
   }
 
   /** set the value of Input/Output level
-   *  \param an unsigned int
+   *  \param newVal an unsigned int
    */
   inline void setInputOutputLevel(unsigned int newVal)
   {
@@ -237,7 +240,7 @@ public:
   }
 
   /** set the value of maxSize
-   *  \param an unsigned int
+   *  \param newVal an unsigned int
    */
   inline void setMaxSize(const unsigned int newVal)
   {
@@ -265,6 +268,7 @@ public:
   };
 
   /** Check if the OSNSPb has interactions.
+      \return bool = true if the  osnsp has interactions, i.e. indexSet(_indexSetLevel)->size >0 
    */
   bool hasInteractions() const;
 
@@ -278,6 +282,7 @@ public:
   }
 
   /** Display the set of blocks for  a given indexSet
+   * \param  indexSet  the concerned index set
    */
   virtual void displayBlocks(SP::InteractionsGraph indexSet);
 
@@ -287,24 +292,25 @@ public:
   virtual void updateInteractionBlocks();
 
   /** compute extra-diagonal interactionBlock-matrix
-   *  \param an edge descriptor
+   *  \param ed an edge descriptor
    */
-  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor&) = 0;
+  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor& ed ) = 0;
 
   /** compute diagonal Interaction block
-   * \param a vertex descriptor
+   * \param vd a vertex descriptor
    */
-  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&) = 0;
+  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd) = 0;
 
   /**
-   * return _hasBeenUpdated
+   * \return bool _hasBeenUpdated
    */
   bool hasBeenUpdated()
   {
     return _hasBeenUpdated;
   }
-  /**
-   * to set _hasBeenUpdated.
+
+  /** 
+   * \param v to set _hasBeenUpdated.
    */
   void setHasBeenUpdated(bool v)
   {
@@ -312,9 +318,9 @@ public:
   }
 
   /** initialize the problem(compute topology ...)
-      \param the simulation, owner of this OSNSPB
+      \param sim the simulation, owner of this OSNSPB
     */
-  virtual void initialize(SP::Simulation);
+  virtual void initialize(SP::Simulation sim);
 
   /** prepare data of the osns for solving
    *  \param time the current time
@@ -323,10 +329,10 @@ public:
   virtual bool preCompute(double time) = 0;
 
   /** To run the solver for ns problem
-   *  \param double : current time
-   *  \return int, information about the solver convergence.
+   *  \param time  current time
+   *  \return int information about the solver convergence.
    */
-  virtual int compute(double) = 0;
+  virtual int compute(double time) = 0;
 
   /** post treatment for output of the solver
    */

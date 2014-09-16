@@ -43,7 +43,7 @@ OneStepNSProblem::OneStepNSProblem():
   _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
 {
   _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL; 
+  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
   _numerics_solver_options->dWork = NULL;
   // Numerics general options
   _numerics_options.reset(new NumericsOptions());
@@ -416,10 +416,10 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
   SP::SimpleMatrix block;
   OSI::TYPES osiType; // type of the current one step integrator
   Type::Siconos dsType; // type of the current Dynamical System
-  
+
   osiType = Osi->getType();
   dsType = Type::value(*ds);
-  
+
   if (osiType == OSI::MOREAUJEANOSI
       || osiType == OSI::EULERMOREAUOSI
       || osiType == OSI::MOREAUDIRECTPROJECTIONOSI
@@ -447,7 +447,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
     //
     SP::OneStepNSProblems  allOSNS  = Osi->simulation()->oneStepNSProblems();
     // If LCP at acceleration level
-    if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this) 
+    if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this)
     {
       block = (std11::static_pointer_cast<LagrangianDS>(ds))->massLU();
     }
