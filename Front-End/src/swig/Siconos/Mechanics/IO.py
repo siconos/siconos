@@ -41,6 +41,14 @@ try:
 except:
     pass
 
+
+try:
+    from Siconos.Mechanics.Occ import \
+        OccContactShape, OccBody, OccContactFace, OccContactEdge, \
+        OccTimeStepping, OccSpaceFilter
+except:
+    pass
+
 from Siconos.Kernel import \
     cast_NewtonImpactFrictionNSL, EqualityConditionNSL, Interaction
 
@@ -58,13 +66,14 @@ import time
 @contextmanager
 def tmpfile():
     """
-    A context manager for a named temporay file
+    A context manager for a named temporary file.
     """
     (_, tfilename) = tempfile.mkstemp()
     fid = open(tfilename, 'w')
     yield (fid, tfilename)
     fid.close()
     os.remove(tfilename)
+
 
 class Timer():
     def __init__(self):
@@ -76,8 +85,10 @@ class Timer():
     def update(self):
         self._t0 = time.clock()
 
+
 def warn(msg):
     sys.stderr.write('{0}: {1}'.format(sys.argv[0], msg))
+
 
 def log(fun, with_timer=False):
     if with_timer:
@@ -94,6 +105,7 @@ def log(fun, with_timer=False):
             fun(*args)
         return silent
 
+
 def object_id(obj):
     """returns an unique object identifier"""
     return obj.__hash__()
@@ -103,6 +115,7 @@ def apply_gravity(body):
     g = constants.g
     weight = [0, 0, - body.massValue() * g]
     body.setFExtPtr(weight)
+
 
 def group(h, name):
     try:
@@ -122,6 +135,7 @@ def data(h, name, nbcolumns):
 def add_line(dataset, line):
     dataset.resize(dataset.shape[0] + 1, 0)
     dataset[dataset.shape[0]-1, :] = line
+
 
 def str_of_file(filename):
     with open(filename, 'r') as f:
@@ -187,48 +201,12 @@ def loadMesh(shape_filename):
 class ShapeCollection():
 
     """
-    collect Bullet primitives or convex hull shapes from .vtp
-    filenames given in a reference file
+    Instantiation of added contact shapes
     """
 
-    def __init__(self, ref = 'ref.txt'):
-        self._ref = ref
-        self._url = list()
-        self._attributes = list()
-        self._shape = dict()
-        self._tri = dict()
-
-        if isinstance(self._ref, str):
-            with open(self._ref, 'r') as ref_file:
-                for shape_url_line in ref_file:
-                    line_tokens = shlex.split(shape_url_line)
-                    shape_url = line_tokens[0]
-                    shape_attributes = [float(x) for x in (line_tokens[1:])]
-                    self._url.append(shape_url)
-                    self._attributes.append(shape_attributes)
-
-        # assume hdf5 file
-        else:
-            acc = []
-            for shape_name in self._ref['data']['ref']:
-                shape_attributes = self._ref['data']['ref'][shape_name][:]
-                shape_id = self._ref['data']['ref'][shape_name].attrs['id']
-                if 'url' in self._ref['data']['ref'][shape_name].attrs:
-                    shape_url = self._ref['data']['ref'][shape_name].\
-                        attrs['url']
-
-                elif 'filename' in self._ref['data']['ref'][shape_name].attrs:
-                    shape_url = self._ref['data']['ref'][shape_name].\
-                        attrs['filename']
-
-                else:
-                    shape_url = self._ref['data']['ref'][shape_name]
-
-                acc.append((shape_attributes, shape_url, shape_id))
-
-            sacc = sorted(acc, key=itemgetter(2))
-            self._url = [u for a, u, i in sacc]
-            self._attributes = [a for a, u, i in sacc]
+    def __init__(self, io):
+        self._io = io
+        self._shapes = dict()
 
         self._primitive = {'Cylinder': btCylinderShape,
                            'Sphere': btSphereShape,
@@ -237,52 +215,101 @@ class ShapeCollection():
                            'Compound': btCompoundShape,
                            'Capsule': btCapsuleShape}
 
-    def at_index(self, index):
+    def shape(self, shape_name):
+        return self._io.shapes()[shape_name]
 
-        if not index in self._shape:
+    def attributes(self, shape_name):
+        return self._io.shapes()[shape_name].attrs
+
+    def url(self, shape_name):
+        if 'url' in self.attributes(shape_name):
+            shape_url = self.shape(shape_name).\
+                        attrs['url']
+
+        elif 'filename' in self.attributes(shape_name):
+            shape_url = self.shape(shape_name).\
+                        attrs['filename']
+
+        else:
+            shape_url = self.shape(shape_name)
+
+        return shape_url
+
+
+    def get(self, shape_name):
+
+        if not shape_name in self._shapes:
 
             # load shape if it is an existing file
-            if not isinstance(self._url[index], str) and \
-                not 'primitive' in self._url[index].attrs:
+            if not isinstance(self.url(shape_name), str) and \
+               not 'primitive' in self.attributes(shape_name):
                 # assume a vtp file (xml) stored in a string buffer
-                if self._url[index].dtype == h5py.new_vlen(str):
-                    with tmpfile() as tmpf:
-                        data = self._url[index][:][0]
-                        tmpf[0].write(data)
-                        tmpf[0].flush()
-                        self._tri[index], self._shape[index] = loadMesh(
-                            tmpf[1])
+                if self.attributes(shape_name)['type'] == 'vtk':
+                    if self.shape(shape_name).dtype == h5py.new_vlen(str):
+                        with tmpfile() as tmpf:
+                            data = self.shape(shape_name)[:][0]
+                            tmpf[0].write(data)
+                            tmpf[0].flush()
+                            self._tri[index], self._shape[index] = loadMesh(
+                                tmpf[1])
+                    else:
+                        assert False
+                elif self.attributes(shape_name)['type'] == 'brep':
+                    if not 'contact' in self.attributes(shape_name):
+                        # the reference brep
+                        brep = OccContactShape()
+                        brep.importBRepFromString(self.shape(shape_name)[:][0])
+                        self._shapes[shape_name] = brep
+                        self._io._keep.append(self._shapes[shape_name])
+
+                    else:
+                        # a contact on a brep
+                        assert 'contact' in self.attributes(shape_name)
+                        assert 'index' in self.attributes(shape_name)
+                        assert 'brep' in self.attributes(shape_name)
+                        contact_index = self.attributes(shape_name)['index']
+                        print (self.attributes(shape_name)['brep'])
+                        ref_brep = self.get(self.attributes(shape_name)['brep'])
+                        if self.attributes(shape_name)['contact'] == 'Face':
+                            self._shapes[shape_name] = \
+                                        OccContactFace(ref_brep.data(),
+                                                       contact_index)
+                        elif self.attributes(shape_name)['contact'] == 'Edge':
+                            self._shapes[shape_name] = \
+                                        OccContactEdge(ref_brep.data(),
+                                                       contact_index)
+                        self._io._keep.append(self._shapes[shape_name])
                 else:
                     # a convex point set
                     convex = btConvexHullShape()
-                    for points in self._url[index]:
+                    for points in self.shape(shape_name):
                         convex.addPoint(btVector3(float(points[0]),
                                                   float(points[1]),
                                                   float(points[2])))
-                    self._shape[index] = convex
+                    self._shapes[shape_name] = convex
 
-            elif isinstance(self._url[index], str) and \
-                os.path.exists(self._url[index]):
-                self._tri[index], self._shape[index] = loadMesh(
-                    self._url[index])
+            elif isinstance(self.url(shape_name), str) and \
+                os.path.exists(self.url(shape_name)):
+                self._tri[shape_name], self._shapes[shape_name] = loadMesh(
+                    self.url(shape_name))
             else:
                 # it must be a primitive with attributes
-                if isinstance(self._url[index], str):
-                    name = self._url[index]
-                    attrs = [float(x) for x in self._attributes[index]]
+                if isinstance(self.url(shape_name), str):
+                    name = self.url(shape_name)
+                    attrs = [float(x) for x in self.shape(shape_name)[0]]
                 else:
-                    name = self._url[index].attrs['primitive']
-                    attrs = [float(x) for x in self._attributes[index][0]]
+                    name = self.attributes(shape_name)['primitive']
+                    attrs = [float(x) for x in self.shape(shape_name)[0]]
                 primitive = self._primitive[name]
 
                 if name in ['Box']:
-                    self._shape[index] = primitive(btVector3(attrs[0] / 2,
-                                                             attrs[1] / 2,
-                                                             attrs[2] / 2))
+                    self._shapes[shape_name] = primitive(btVector3(attrs[0] / 2,
+                                                                   attrs[1] / 2,
+                                                                   attrs[2] / 2))
                 elif name in ['Cylinder']:
-                    self._shape[index] = primitive(btVector3(attrs[0],
-                                                             attrs[1] / 2,
-                                                             attrs[0]))
+                    self._shapes[shape_name] = primitive(btVector3(attrs[0],
+                                                                   attrs[1] / 2,
+                                                                   attrs[0]))
                 # elif name in ['Compound']:
                 #     obj1 = attrs[0]
                 #     orig1 = attrs[1:4]
@@ -293,229 +320,9 @@ class ShapeCollection():
                 #     bcols = btCompoundShape()
                 #     bcols.addChildShape(...
                 else:
-                    self._shape[index] = primitive(*attrs)
+                    self._shapes[shape_name] = primitive(*attrs)
 
-        return self._shape[index]
-
-
-
-class Dat():
-    """a Dat context manager reads at instantiation the positions and
-       orientations of collision objects from :
-
-       - a ref file (default ref.txt) with shape primitives or shape
-         url
-
-       - an input .dat file (default is input.dat)
-
-       input format is :
-       shaped_id object_group mass px py pz ow ox oy oz vx vy vx vo1 vo2 vo3
-
-       with
-         shape_id : line number in ref file (an integer)
-         object group : an integer ; negative means a static object
-         mass : mass of the object (a float)
-         px py pz : position (float)
-         ow ox oy oz : orientation (as an unit quaternion)
-         vx vy vx vo1 vo2 vo3 : velocity
-
-       It provides functions to output position and orientation during
-       simulation (output is done by default in pos.dat)
-
-       output format is : time object_id px py pz ow ox oy oz
-
-       with:
-         time : float
-         object_id : the object id (int)
-         px, py, pz : components of the position (float)
-         ow, ox, oy oz : components of an unit quaternion (float)
-    """
-
-    def __init__(self, broadphase, osi, shape_filename='ref.txt',
-                 input_filename='input.dat',
-                 set_external_forces=apply_gravity):
-        self._broadphase = broadphase
-        self._osi = osi
-        self._input_filename = input_filename
-        self._static_origins = []
-        self._static_orientations = []
-        self._static_transforms = []
-        self._static_cobjs = []
-        self._shape = ShapeCollection(shape_filename)
-        self._static_pos_file = None
-        self._dynamic_pos_file = None
-        self._contact_forces_file = None
-        self._solver_traces_file = None
-        self._io = MechanicsIO()
-
-        # read data
-        with open(self._input_filename, 'r') as input_file:
-
-            with open('bindings.dat', 'w') as bind_file:
-
-                ids = -1
-                idd = 1
-                for line in input_file:
-                    sline = shlex.split(line)
-                    if len(sline) > 3:
-                        shape_id = int(sline[0])
-                        group_id = int(sline[1])
-                        mass = float(sline[2])
-                        q0, q1, q2, w, x, y, z, v0, v1, v2, v3, v4, v5 =\
-                          [ float(i) for i in sline[3:]]
-
-                        if group_id < 0:
-                            # a static object
-                            static_cobj = btCollisionObject()
-                            static_cobj.setCollisionFlags(
-                                btCollisionObject.CF_STATIC_OBJECT)
-                            origin = btVector3(q0, q1, q2)
-                            self._static_origins.append(origin)
-                            orientation = btQuaternion(x, y, z, w)
-                            self._static_orientations.append(orientation)
-                            transform = btTransform(orientation)
-                            transform.setOrigin(origin)
-                            self._static_transforms.append(transform)
-                            static_cobj.setWorldTransform(transform)
-                            static_cobj.setCollisionShape(
-                                self._shape.at_index(shape_id))
-                            self._static_cobjs.append(static_cobj)
-                            broadphase.addStaticObject(static_cobj, abs(group_id)-1)
-                            bind_file.write('{0} {1}\n'.format(ids, shape_id))
-                            ids -= 1
-
-                        else:
-                            # a moving object
-                            body = BulletDS(BulletWeightedShape(
-                                self._shape.at_index(shape_id), mass),
-                            [q0, q1, q2, w, x, y, z],
-                            [v0, v1, v2, v3, v4, v5])
-
-                              # set external forces
-                            set_external_forces(body)
-
-                            # add the dynamical system to the non smooth
-                            # dynamical system
-                            self._broadphase.model().nonSmoothDynamicalSystem().\
-                            insertDynamicalSystem(body)
-                            self._osi.insertDynamicalSystem(body)
-                            bind_file.write('{0} {1}\n'.format(idd, shape_id))
-                            idd += 1
-
-    def __enter__(self):
-        self._static_pos_file = open('spos.dat', 'w')
-        self._dynamic_pos_file = open('dpos.dat', 'w')
-        self._contact_forces_file = open('cf.dat', 'w')
-        self._solver_traces_file = open('solv.dat', 'w')
-        return self
-
-    def __exit__(self, type_, value, traceback):
-        self._contact_forces_file.close()
-        self._static_pos_file.close()
-        self._dynamic_pos_file.close()
-        self._solver_traces_file.close()
-
-
-    def outputStaticObjects(self):
-        """
-        Outputs positions and orientations of static objects
-        """
-        time = self._broadphase.model().simulation().nextTime()
-        idd = -1
-        for transform in self._static_transforms:
-            position = transform.getOrigin()
-            rotation = transform.getRotation()
-            self._static_pos_file.write(
-                '{0} {1} {2} {3} {4} {5} {6} {7} {8}\n'.
-                format(time,
-                       idd,
-                       position.x(),
-                       position.y(),
-                       position.z(),
-                       rotation.w(),
-                       rotation.x(),
-                       rotation.y(),
-                       rotation.z()))
-            idd -= 1
-
-    def outputDynamicObjects(self):
-        """
-        Outputs positions and orientations of dynamic objects
-        """
-        time = self._broadphase.model().simulation().nextTime()
-
-        positions = self._io.positions(self._broadphase.model())
-
-        times = np.empty((positions.shape[0], 1))
-        times.fill(time)
-
-        tidd = np.arange(1,
-                         positions.shape[0] + 1).reshape(positions.shape[0], 1)
-
-        np.savetxt(self._dynamic_pos_file,
-                   np.concatenate((times, tidd, positions),
-                                  axis=1))
-
-    def outputContactForces(self):
-        """
-        Outputs contact forces
-        """
-        if self._broadphase.model().nonSmoothDynamicalSystem().\
-                topology().indexSetsSize() > 1:
-            time = self._broadphase.model().simulation().nextTime()
-            for inter in self._broadphase.model().nonSmoothDynamicalSystem().\
-                topology().indexSet(1).interactions():
-                bullet_relation = cast_BulletR(inter.relation())
-                if bullet_relation is not None:
-                    nslaw = inter.nslaw()
-                    mu = cast_NewtonImpactFrictionNSL(nslaw).mu()
-                    nc = bullet_relation.nc()
-                    lambda_ = inter.lambda_(1)
-                    if(True):
-                        jachqt = bullet_relation.jachqT()
-                        cf = np.dot(jachqt.transpose(), lambda_)
-                        cp = bullet_relation.contactPoint()
-                        posa = cp.getPositionWorldOnA()
-                        posb = cp.getPositionWorldOnB()
-                        self._contact_forces_file.write(
-                        '{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}\n'.
-                        format(time,
-                               mu,
-                               posa.x(),
-                               posa.y(),
-                               posa.z(),
-                               posb.x(),
-                               posb.y(),
-                               posb.z(),
-                               nc[0], nc[1], nc[2],
-                               cf[0], cf[1], cf[2]))
-
-    def outputSolverInfos(self):
-        """
-        Outputs solver #iterations & precision reached
-        """
-
-        time = self._broadphase.model().simulation().nextTime()
-        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
-            numericsSolverOptions()
-
-        if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
-            iterations = so.iparam[3]
-            precision = so.dparam[2]
-            local_precision = so.dparam[3]
-        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
-            iterations = so.iparam[7]
-            precision = so.dparam[1]
-            local_precision = 0.
-        # maybe wrong for others
-        else:
-            iterations = so.iparam[1]
-            precision = so.dparam[1]
-            local_precision = so.dparam[2]
-
-        self._solver_traces_file.write('{0} {1} {2} {3}\n'.
-                                       format(time, iterations, precision,
-                                              local_precision))
+        return self._shapes[shape_name]
 
 
 class Hdf5():
@@ -568,6 +375,7 @@ class Hdf5():
         self._number_of_dynamic_objects = 0
         self._number_of_static_objects = 0
         self._length_scale = length_scale
+        self._keep = []
 
     def __enter__(self):
         if self._set_external_forces is None:
@@ -588,7 +396,7 @@ class Hdf5():
         self._nslaws = group(self._data, 'nslaws')
 
         if self._shape_filename is None:
-            self._shape = ShapeCollection(self._out)
+            self._shape = ShapeCollection(self)
         else:
             self._shape = ShapeCollection(self._shape_filename)
 
@@ -665,6 +473,40 @@ class Hdf5():
                                     int(self._nslaws[name].attrs['gid1']),
                                     int(self._nslaws[name].attrs['gid2']))
 
+    def importBRepObject(self, name, position, orientation,
+                         velocity, contactors, mass, given_inertia):
+
+        if given_inertia is not None:
+            inertia = given_inertia
+        else:
+            inertia = np.eye(3)
+
+        if mass == 0.:
+            # a static object
+            pass
+
+        else:
+            shape_id = self._shapeid[contactors[0].name]
+            body = OccBody(position + orientation, velocity, mass, inertia)
+            for contactor in contactors:
+
+                # /!\ shared pointer <-> python ref ...
+                shape_instantiated = self._shape.get(contactor.name)
+                self._keep.append(shape_instantiated)
+                body.addContactShape(shape_instantiated,
+                                     contactor.position,
+                                     contactor.orientation,
+                                     contactor.group)
+            self._set_external_forces(body)
+
+            # add the dynamical system to the non smooth
+            # dynamical system
+            nsds = self._broadphase.model().nonSmoothDynamicalSystem()
+            nsds.insertDynamicalSystem(body)
+            nsds.setOSI(body, self._osi)
+            nsds.setName(body, str(name))
+
+
     def importObject(self, name, position, orientation,
                      velocity, contactors, mass, inertia):
 
@@ -704,7 +546,7 @@ class Hdf5():
                     static_cobj.setWorldTransform(transform)
                     shape_id = self._shapeid[c.name]
                     static_cobj.setCollisionShape(
-                        self._shape.at_index(shape_id))
+                        self._shape.get(c.name))
                     self._static_cobjs.append(static_cobj)
                     self._broadphase.addStaticObject(static_cobj,
                                                      int(c.group))
@@ -713,7 +555,7 @@ class Hdf5():
                 # a moving object
                 shape_id = self._shapeid[contactors[0].name]
                 bws = BulletWeightedShape(
-                    self._shape.at_index(shape_id), mass)
+                    self._shape.get(contactors[0].name), mass)
 
                 if inertia is not None:
                     bws.setInertia(inertia[0], inertia[1], inertia[2])
@@ -728,7 +570,7 @@ class Hdf5():
                 for contactor in contactors[1:]:
                     shape_id = self._shapeid[contactor.name]
 
-                    body.addCollisionShape(self._shape.at_index(shape_id),
+                    body.addCollisionShape(self._shape.get(contactor.name),
                                            contactor.position,
                                            contactor.orientation,
                                            contactor.group)
@@ -785,8 +627,6 @@ class Hdf5():
             self._shapeid[shape_name] = self._ref[shape_name].attrs['id']
             self._number_of_shapes += 1
 
-        self._shape = ShapeCollection(self._out)
-
         def floatv(v):
             return [float(x) for x in v]
 
@@ -794,6 +634,7 @@ class Hdf5():
         if self._broadphase is not None and 'input' in self._data:
 
             for (name, obj) in self._input.items():
+                input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
                 position = obj.attrs['position']
                 orientation = obj.attrs['orientation']
@@ -802,16 +643,26 @@ class Hdf5():
                                         int(ctr.attrs['group']),
                                         floatv(ctr.attrs['position']),
                                         floatv(ctr.attrs['orientation']))
-                              for _n_, ctr in obj.items()]
+                              for ctr in input_ctrs]
 
                 if 'inertia' in obj.attrs:
                     inertia = obj.attrs['inertia']
                 else:
                     inertia = None
 
-                self.importObject(name, floatv(position), floatv(orientation),
-                                  floatv(velocity), contactors, float(mass),
-                                  inertia)
+                    
+                if True in ('type' in self.shapes()[ctr.attrs['name']].attrs
+                            and 'brep' in self.shapes()[ctr.attrs['name']].attrs['type']
+                            for ctr in input_ctrs):
+                    # Occ object
+                    self.importBRepObject(name, floatv(position), floatv(orientation),
+                                          floatv(velocity), contactors, float(mass),
+                                          inertia)
+                else:
+                    # Bullet object
+                    self.importObject(name, floatv(position), floatv(orientation),
+                                      floatv(velocity), contactors, float(mass),
+                                      inertia)
 
             # import nslaws
             for name in self._nslaws:
@@ -920,9 +771,9 @@ class Hdf5():
         self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
 
-    def insertShapeFromFile(self, name, filename):
+    def addShapeFromFile(self, name, filename):
         """
-        Insert a mesh shape from a file.
+        Add a mesh shape from a file.
         Accepted format : .stl or mesh encoded in VTK .vtp format
         """
         if name not in self._ref:
@@ -951,12 +802,40 @@ class Hdf5():
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'vtp'
             self._shapeid[name] = shape.attrs['id']
-            self._shape = ShapeCollection(self._out)
             self._number_of_shapes += 1
 
-    def insertConvexShape(self, name, points):
+    def addBRepFromString(self, name, shape_data):
         """
-        Insert a convex shape defined by points.
+        Add a brep contained in a string.
+        """
+        if name not in self._ref:
+            shape = self._ref.create_dataset(name, (1,),
+                                             dtype=h5py.new_vlen(str))
+            shape[:] = shape_data
+            shape.attrs['id'] = self._number_of_shapes
+            shape.attrs['type'] = 'brep'
+            self._shapeid[name] = shape.attrs['id']
+            self._number_of_shapes += 1
+
+    def addContactFromBRep(self, name, brepname, contact_type,
+                           index, collision_group=0):
+        """
+        Add contact reference from previously added brep.
+        """
+        if name not in self._ref:
+            shape = self._ref.create_dataset(name, (1,),
+                                             dtype=h5py.new_vlen(str))
+            shape.attrs['id'] = self._number_of_shapes
+            shape.attrs['type'] = 'brep'
+            shape.attrs['contact'] = contact_type
+            shape.attrs['brep'] = brepname
+            shape.attrs['index'] = index
+            self._shapeid[name] = shape.attrs['id']
+            self._number_of_shapes += 1
+
+    def addConvexShape(self, name, points):
+        """
+        Add a convex shape defined by points.
         """
         if name not in self._ref:
             apoints = np.array(points)
@@ -967,12 +846,11 @@ class Hdf5():
             shape.attrs['type'] = 'convex'
             shape.attrs['id'] = self._number_of_shapes
             self._shapeid[name] = shape.attrs['id']
-            self._shape = ShapeCollection(self._out)
             self._number_of_shapes += 1
 
-    def insertPrimitiveShape(self, name, primitive, params):
+    def addPrimitiveShape(self, name, primitive, params):
         """
-        Insert a primitive shape.
+        Add a primitive shape.
         """
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1, len(params)))
@@ -981,19 +859,18 @@ class Hdf5():
             shape.attrs['primitive'] = primitive
             shape[:] = params
             self._shapeid[name] = shape.attrs['id']
-            self._shape = ShapeCollection(self._out)
             self._number_of_shapes += 1
 
-    def insertObject(self, name, contactors,
-                     position,
-                     orientation=[1, 0, 0, 0],
-                     velocity=[0, 0, 0, 0, 0, 0],
-                     mass=0, inertia=None):
+    def addObject(self, name, contactors,
+                  position,
+                  orientation=[1, 0, 0, 0],
+                  velocity=[0, 0, 0, 0, 0, 0],
+                  mass=0, inertia=None):
         """
-        Insertion of an object.
+        Add an object.
         Contact detection is defined by a list of contactors.
-        The initial position is mandatory : [x, y z]
-        if the mass is zero this a static object.
+        The initial position is mandatory : [x, y z].
+        If the mass is zero this is a static object.
         """
 
         if len(orientation) == 2:
@@ -1034,10 +911,10 @@ class Hdf5():
                 obj.attrs['id'] = (self._number_of_dynamic_objects + 1)
                 self._number_of_dynamic_objects += 1
 
-    def insertNewtonImpactFrictionNSL(self, name, mu, e=0, collision_group1=0,
+    def addNewtonImpactFrictionNSL(self, name, mu, e=0, collision_group1=0,
                                       collision_group2=0):
         """
-        Insert a nonsmooth law for contact between 2 groups.
+        Add a nonsmooth law for contact between 2 groups.
         Only NewtonImpactFrictionNSL are supported.
         name is a user identifiant and must be unique,
         mu is the coefficient of friction,
@@ -1053,12 +930,11 @@ class Hdf5():
             nslaw.attrs['gid1'] = collision_group1
             nslaw.attrs['gid2'] = collision_group2
 
-
-    def insertJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
-                    axis=[0, 1, 0],
-                    joint_class='PivotJointR'):
+    def addJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
+                 axis=[0, 1, 0],
+                 joint_class='PivotJointR'):
         """
-        insert a pivot joint between two objects
+        add a pivot joint between two objects
         """
         if name not in self.joints():
             joint = self.joints().create_dataset(name, (0,))

@@ -4,6 +4,10 @@
 #include "SpaceFilter.hpp"
 
 class OccSpaceFilter : public SpaceFilter
+{
 
+  virtual void buildInteractions(double time) {};
+
+};
 
 #endif

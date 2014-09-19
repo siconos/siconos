@@ -4,6 +4,7 @@
 PROJECT(SiconosIO CXX)
 
 OPTION(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
+OPTION(WITH_OCC "compilation with Occ Bindings. Default = OFF" OFF)
 
 #
 # VERSION defined in top-level CMakeLists.txt
@@ -56,7 +57,7 @@ IF(WITH_BULLET)
   COMPILE_WITH(Bullet REQUIRED)
   IF(BULLET_FOUND)
     SET(HAVE_BULLET TRUE)
-    MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
+    MESSAGE( STATUS "Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
     SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS} contactDetection/bullet)
     IF(BULLET_USE_DOUBLE_PRECISION)
       APPEND_CXX_FLAGS("-DBT_USE_DOUBLE_PRECISION")
@@ -64,6 +65,11 @@ IF(WITH_BULLET)
   ENDIF(BULLET_FOUND)
 ENDIF(WITH_BULLET)
 
+#occ 
+IF(WITH_OCC)
+  SET(HAVE_OCC TRUE)
+  MESSAGE( STATUS "Compilation with Occ.")
+ENDIF()
 
 compile_with(BLAS REQUIRED)
 compile_with(LAPACK REQUIRED)

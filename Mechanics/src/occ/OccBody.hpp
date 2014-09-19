@@ -54,8 +54,14 @@ public:
 
   /** Association of a contact shape.
    * \param shape : the contact shape.
+   * \param position : relative position (x, y, z).
+   * \param orientation : relative orientation quaternion w, x, y, z
+   * \param group : contact group default 0
    */
-  void addContactShape(SP::OccContactShape shape);
+  void addContactShape(SP::OccContactShape shape,
+                       SP::SiconosVector position = SP::SiconosVector(),
+                       SP::SiconosVector orientation = SP::SiconosVector(),
+                       unsigned int group=0);
 
   /** Update positions and orientations of contact shapes.
    */

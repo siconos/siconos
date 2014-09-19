@@ -11,7 +11,7 @@ import random
 
 import getopt
 
-from Siconos.Mechanics.ContactDetection.Bullet import IO
+from Siconos.Mechanics import IO
 
 def usage():
     """

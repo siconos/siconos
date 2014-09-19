@@ -10,11 +10,14 @@ OccBody::OccBody(SP::SiconosVector position,
 {}
 
 
-void OccBody::addContactShape(SP::OccContactShape shape)
+void OccBody::addContactShape(SP::OccContactShape shape,
+                              SP::SiconosVector position,
+                              SP::SiconosVector orientation,
+                              unsigned int group)
 {
   this->_contactShapes->push_back(shape);
-  shape->computeUVBounds();
   this->updateContactShapes();
+  shape->computeUVBounds();
 }
 
 void OccBody::updateContactShapes() const

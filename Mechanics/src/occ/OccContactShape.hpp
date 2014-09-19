@@ -28,35 +28,43 @@
 #include <string>
 
 DEFINE_SPTR(TopoDS_Shape);
+DEFINE_SPTR(TopoDS_Edge);
+DEFINE_SPTR(TopoDS_Face);
 
 struct OccContactShape
 {
 
   /** Default constructor.
    */
-  OccContactShape() {};
+  OccContactShape();
 
   /** Constructor from OpenCascade object.
-      \param shape : FACE or EDGE shape
+      \param shape
    */
   OccContactShape(TopoDS_Shape& shape)
     : _shape(createSPtrTopoDS_Shape(shape))
   {};
 
   /** Constructor from const OpenCascade object : remove constness.
-      \param shape : FACE or EDGE shape
+      \param shape
    */
   OccContactShape(const TopoDS_Shape& shape)
     : _shape(createSPtrTopoDS_Shape(const_cast<TopoDS_Shape&>(shape)))
   {};
 
-  /** Return OpenCascade data with default initialization if needed.
+  /** Constructor from OccContactShape
+      \param shape : a SP::OccContactShape
    */
-  TopoDS_Shape& data();
+  OccContactShape(const OccContactShape& shape)
+    : _shape(shape.shape()) {};
+
+  /** Return shared pointer on data
+   */
+  SP::TopoDS_Shape shape() const { return _shape;};
 
   /** Return OpenCascade data.
    */
-  TopoDS_Shape& data() const {return *_shape;};
+  TopoDS_Shape& data() const { return *_shape;};
 
   /** Known contacts.
    */
@@ -66,9 +74,21 @@ struct OccContactShape
    */
   ContactTypeValue contactType() const;
 
+  virtual const TopoDS_Shape& contact() const;
+
+  /** Get a face from its index.
+      \param index : the index of the face.
+  */
+  const TopoDS_Face face(unsigned int index) const;
+
+  /** Get an edge from its index.
+      \param index : the index of the face.
+  */
+  const TopoDS_Edge edge(unsigned int index) const;
+
   /** Export the contact shape into a string.
    */
-  std::string exportBRepAsString() const;
+  std::string exportBRepToString() const;
 
   /** Import the contact shape from a string.
    *  \param brepstr : the string containing the whole brep.
@@ -77,7 +97,7 @@ struct OccContactShape
 
   /** Compute and store UV bounds of the shape.
    */
-  void computeUVBounds();
+  virtual void computeUVBounds();
 
   /** Set shape position and orientation.
       \param q : NewtonEulerDS state
@@ -91,7 +111,7 @@ struct OccContactShape
       \return the distance, contact points and normal in ContactShapeDistance
    */
   virtual SP::ContactShapeDistance distance(
-    SP::OccContactShape psh2, bool normalFromFace1=false) const;
+    SPC::OccContactShape psh2, bool normalFromFace1=false) const;
 
   /** Computed UV bounds.
    * @{

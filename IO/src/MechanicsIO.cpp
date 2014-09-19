@@ -17,6 +17,10 @@
 #include <btBulletCollisionCommon.h>
 #endif
 
+#ifdef HAVE_OCC
+#include <OccBody.hpp>
+#include <OccR.hpp>
+#endif
 
 #include "MechanicsIO.hpp"
 

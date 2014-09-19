@@ -169,14 +169,13 @@ public:
    */
   void insert(SP::Hashed);
 
-  /* insert a NonSmoothLaw between contactors i & contactors j
+  /* Insert a NonSmoothLaw between contactors i & contactors j.
    * \param nslaw the non smooth law
    * \param class1 contactor id
    * \param class2 contactor id
    */
   void insert(SP::NonSmoothLaw nslaw, long unsigned int class1,
               long unsigned int class2);
-
 
   /** get parameters
    */
@@ -190,25 +189,24 @@ public:
     return _cellsize;
   };
 
-  /** get the model
+  /** Get the model.
+      \return a Model object.
    */
   SP::Model model()
   {
     return _model;
   };
 
-
-  /** get non smooth laws
-      \return SP::NSLawMatrix
+  /** Get non smooth laws.
+      \return a non smooth laws matrix : SP::NSLawMatrix
    */
   SP::NSLawMatrix nslaws()
   {
     return _nslaws;
   };
 
-
-  /** get an interaction id
-      \return unsigned int
+  /** Get an interaction id.
+      \return an unsigned int
    * */
   unsigned int newInteractionId()
   {
@@ -220,33 +218,33 @@ public:
 //  std::pair<space_hash::iterator, space_hash::iterator> neighbours(SP::Hashed h);
 
 
-  /** just test the presence of neighbours
+  /** Just test the presence of neighbours.
+      \param h : hashed component of a body.
    */
   bool haveNeighbours(SP::Hashed h);
 
-  /** give the minimal distance
+  /** Give the minimal distance.
+      \param h : hashed component of a body.
    */
   double minDistance(SP::Hashed h);
 
 
-  /** insert a new interaction and link it to 1 or 2 ds.
-      \param inter the new interaction
-      \param ds1 a SP::DynamicalSystem
-      \param ds2 a SP::DynamicalSystem (optional)
+  /** Insert a new interaction and link it to 1 or 2 ds.
+      \param inter the new interaction.
+      \param ds1 a SP::DynamicalSystem.
+      \param ds2 a SP::DynamicalSystem (optional).
   */
-  void link(SP::Interaction inter, SP::DynamicalSystem,
-            SP::DynamicalSystem = SP::DynamicalSystem());
+  void link(SP::Interaction inter, SP::DynamicalSystem ds1,
+            SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
-  /** broadphase contact detection: add interactions in indexSet 0
-   *  \param the current time
+  /** Broadphase contact detection: add interactions in indexSet 0.
+   *  \param time: the current time.
    */
-  virtual void buildInteractions(double);
+  virtual void buildInteractions(double time);
 
-
-  /** destructor
+  /** Destructor.
    */
   virtual ~SpaceFilter() {};
-
 
   /** visitor hook
    */

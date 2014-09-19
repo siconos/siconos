@@ -2,6 +2,8 @@
 
 #include "MechanicsFwd.hpp"
 #include "OccContactShape.hpp"
+#include "OccContactFace.hpp"
+#include "OccContactEdge.hpp"
 #include "ContactShapeDistance.hpp"
 
 #include <TopoDS_Shape.hxx>
@@ -34,7 +36,7 @@ void OccTest::exportBRepAsString()
 
   OccContactShape sphere(mksphere.Shape());
 
-  std::string s1 = sphere.exportBRepAsString();
+  std::string s1 = sphere.exportBRepToString();
 
   std::stringstream out;
 
@@ -47,30 +49,23 @@ void OccTest::exportBRepAsString()
 void OccTest::computeUVBounds()
 {
 
+  TopExp_Explorer exp;
   BRepPrimAPI_MakeSphere mksphere(1.0);
 
-  TopExp_Explorer exp;
+  OccContactShape sphere_shape = OccContactShape(mksphere.Shape());
 
-  exp.Init(mksphere.Shape(), TopAbs_SHELL);
+  OccContactFace sphere_face(sphere_shape, 0);
 
-  TopoDS_Shell shell = TopoDS::Shell(exp.Current().Composed(mksphere.Shape().Orientation()));
+  sphere_face.computeUVBounds();
 
-  exp.Init(shell, TopAbs_FACE);
+  CPPUNIT_ASSERT(std::abs(sphere_face.bsup1[0] - 6.28319) < 1e-4);
+  CPPUNIT_ASSERT(std::abs(sphere_face.bsup1[1] - 1.5708) < 1e-4);
 
-  TopoDS_Face face = TopoDS::Face(exp.Current().Composed(shell.Orientation()));
+  CPPUNIT_ASSERT(std::abs(sphere_face.binf1[0] - 0.) < 1e-4);
+  CPPUNIT_ASSERT(std::abs(sphere_face.binf1[1] + 1.5708) < 1e-4);
 
-  OccContactShape sphere(face);
-
-  sphere.computeUVBounds();
-
-  CPPUNIT_ASSERT(std::abs(sphere.bsup1[0] - 6.28319) < 1e-4);
-  CPPUNIT_ASSERT(std::abs(sphere.bsup1[1] - 1.5708) < 1e-4);
-
-  CPPUNIT_ASSERT(std::abs(sphere.binf1[0] - 0.) < 1e-4);
-  CPPUNIT_ASSERT(std::abs(sphere.binf1[1] + 1.5708) < 1e-4);
-
-  std::cout << sphere.bsup1[0] << "," << sphere.bsup1[1] << std::endl;
-  std::cout << sphere.binf1[0] << "," << sphere.binf1[1] << std::endl;
+  std::cout << sphere_face.bsup1[0] << "," << sphere_face.bsup1[1] << std::endl;
+  std::cout << sphere_face.binf1[0] << "," << sphere_face.binf1[1] << std::endl;
 
 }
 
@@ -144,23 +139,11 @@ void OccTest::distance()
   BRepPrimAPI_MakeSphere mksphere1(1, pi);
   BRepPrimAPI_MakeSphere mksphere2(1, pi);
 
-  TopExp_Explorer exp1;
-  TopExp_Explorer exp2;
+  OccContactShape sphere1(mksphere1.Shape());
+  OccContactShape sphere2(mksphere2.Shape());
 
-  exp1.Init(mksphere1.Shape(), TopAbs_SHELL);
-  exp2.Init(mksphere2.Shape(), TopAbs_SHELL);
-
-  TopoDS_Shell shell1 = TopoDS::Shell(exp1.Current().Composed(mksphere1.Shape().Orientation()));
-  TopoDS_Shell shell2 = TopoDS::Shell(exp2.Current().Composed(mksphere2.Shape().Orientation()));
-
-  exp1.Init(shell1, TopAbs_FACE);
-  exp2.Init(shell2, TopAbs_FACE);
-
-  TopoDS_Face face1 = TopoDS::Face(exp1.Current().Composed(shell1.Orientation()));
-  TopoDS_Face face2 = TopoDS::Face(exp2.Current().Composed(shell2.Orientation()));
-
-  OccContactShape sphere1(face1);
-  OccContactShape sphere2(face2);
+  OccContactShape sphere1_contact(sphere1.face(0));
+  OccContactShape sphere2_contact(sphere2.face(0));
 
   SP::SiconosVector position1(new SiconosVector(7));
   SP::SiconosVector position2(new SiconosVector(7));
@@ -187,14 +170,9 @@ void OccTest::distance()
   SP::OccBody body1(new OccBody(position1, velocity, 1, inertia));
   SP::OccBody body2(new OccBody(position2, velocity, 1, inertia));
 
-  body1->addContactShape(createSPtrOccContactShape(sphere1));
-  body2->addContactShape(createSPtrOccContactShape(sphere2));
+  body1->addContactShape(createSPtrOccContactShape(sphere1_contact));
+  body2->addContactShape(createSPtrOccContactShape(sphere2_contact));
 
-  body1->updateContactShapes();
-  body2->updateContactShapes();
-
-  body1->contactShape(0).computeUVBounds();
-  body2->contactShape(0).computeUVBounds();
 
   std::cout << "umin1:" << body1->contactShape(0).binf1[0] << std::endl;
   std::cout << "umax1:" << body1->contactShape(0).bsup1[0] << std::endl;
@@ -219,8 +197,10 @@ void OccTest::distance()
   std::cout << translat2.X() << "," << translat2.Y() << "," << translat2.Z()
             << std::endl;
 
-  ContactShapeDistance dist =
-    body1->contactShape(0).distance(body2->contactShape(0));
+  SP::ContactShapeDistance pdist =
+    body1->contactShape(0).distance(createSPtrConstOccContactShape(body2->contactShape(0)));
+
+  ContactShapeDistance& dist = *pdist;
 
   std::cout << dist.value << std::endl;
 

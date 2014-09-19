@@ -23,6 +23,10 @@
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
+OccContactShape::OccContactShape() : _shape(new TopoDS_Shape())
+{
+}
+
 OccContactShape::ContactTypeValue OccContactShape::contactType() const
 {
   switch (this->_shape->ShapeType())
@@ -38,40 +42,9 @@ OccContactShape::ContactTypeValue OccContactShape::contactType() const
 
 void OccContactShape::computeUVBounds()
 {
-  TopExp_Explorer Ex1;
-  TopoDS_Shape& aShape1= this->data();
-  if(this->contactType() == OccContactShape::Face)
-  {
-    Ex1.Init(aShape1, TopAbs_FACE);
-    BRepTools::UVBounds(TopoDS::Face(Ex1.Current()),
-                        this->binf1[0],
-                        this->bsup1[0],
-                        this->binf1[1],
-                        this->bsup1[1]);
-    Ex1.Next();
-    if(Ex1.More())
-      BRepTools::UVBounds(TopoDS::Face(Ex1.Current()),
-                          this->binf2[0],
-                          this->bsup2[0],
-                          this->binf2[1],
-                          this->bsup2[1]);
-  }
-  else if(this->contactType() == OccContactShape::Edge)
-  {
-    Ex1.Init(aShape1,TopAbs_EDGE);
-    const TopoDS_Edge& edge = TopoDS::Edge(Ex1.Current());
-    BRepAdaptor_Curve SC(edge);
-    this->binf1[0]=SC.FirstParameter();
-    this->bsup1[0]=SC.LastParameter();
-    this->binf1[1]=0.;
-    this->bsup1[1]=0.;
-  }
-  else
-  {
-    RuntimeException::selfThrow(
-      "OccContactShape::computeUVBounds() : cannot compute UV bounds for this contact shape"
-      );
-  }
+  RuntimeException::selfThrow(
+    "OccContactShape::computeUVBounds() : cannot compute UV bounds for this contact shape"
+    );
 }
 
 gp_Pnt cadmbtb_FacePoint(const TopoDS_Face &face,Standard_Real u, Standard_Real v);
@@ -487,10 +460,10 @@ void cadmbtb_distanceFaceEdge(
 }
 
 SP::ContactShapeDistance OccContactShape::distance(
-  SP::OccContactShape psh2, bool normalFromFace1) const
+  SPC::OccContactShape psh2, bool normalFromFace1) const
 {
 
-  OccContactShape& sh2 = *psh2;
+  const OccContactShape& sh2 = *psh2;
 
   SP::ContactShapeDistance pdist(new ContactShapeDistance());
   ContactShapeDistance& dist = *pdist;
@@ -537,7 +510,7 @@ SP::ContactShapeDistance OccContactShape::distance(
   return pdist;
 }
 
-std::string OccContactShape::exportBRepAsString() const
+std::string OccContactShape::exportBRepToString() const
 {
   std::stringstream out;
 
@@ -559,18 +532,40 @@ void OccContactShape::importBRepFromString(const std::string& brepstr)
 
 #include <SiconosVector.hpp>
 
-TopoDS_Shape& OccContactShape::data()
+const TopoDS_Face OccContactShape::face(unsigned int index) const
 {
-  if(_shape)
+  TopExp_Explorer exp;
+  exp.Init(this->data(), TopAbs_FACE);
+  for (unsigned int i=0; i<index; ++i, exp.Next());
+  if (exp.More())
   {
-    return *_shape;
+    return TopoDS::Face(exp.Current().Composed(this->data().Orientation()));
   }
   else
   {
-    _shape.reset(new TopoDS_Shape());
-    return *_shape;
+    RuntimeException::selfThrow("OccContactShape::face failed");
   }
+
+  return *static_cast<TopoDS_Face *>(NULL);
 }
+
+const TopoDS_Edge OccContactShape::edge(unsigned int index) const
+{
+  TopExp_Explorer exp;
+  exp.Init(this->data(), TopAbs_EDGE);
+  for (unsigned int i=0; i<index; ++i, exp.Next());
+  if (exp.More())
+  {
+    return TopoDS::Edge(exp.Current().Composed(this->data().Orientation()));
+  }
+  else
+  {
+    RuntimeException::selfThrow("OccContactShape::edge failed");
+  }
+
+  return *static_cast<TopoDS_Edge *>(NULL);
+}
+
 
 void OccContactShape::move(const SiconosVector& q)
 {
@@ -594,4 +589,9 @@ void OccContactShape::move(const SiconosVector& q)
 //  TopLoc_Location aLocWithoutList(T);
 //  this->data().Location(aLocWithoutList);
 
+}
+
+const TopoDS_Shape& OccContactShape::contact() const
+{
+  return this->data();
 }

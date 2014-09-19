@@ -141,6 +141,9 @@ public:
 #ifdef HAVE_BULLET
     BULLET_CLASSES()
 #endif
+#ifdef HAVE_OCC
+    OCC_CLASSES()
+#endif
     T
  
 #undef REGISTER
@@ -158,6 +161,9 @@ public:
 #endif
 #ifdef HAVE_BULLET
     BULLET_CLASSES()
+#endif
+#ifdef HAVE_OCC
+    OCC_CLASSES()
 #endif
       ::Action Make;
   };
@@ -252,6 +258,12 @@ MECHANICS_CLASSES()
 #ifndef HAVE_BULLET
 
 BULLET_CLASSES()
+
+#endif
+
+#ifndef HAVE_OCC
+
+OCC_CLASSES()
 
 #endif
 
