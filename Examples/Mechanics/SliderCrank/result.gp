@@ -1,4 +1,5 @@
 resultfile = "result.dat"
+resultfile = "SliderCrankD1MinusLinearOSI.ref.ori"
 
 plot resultfile u 1:2 t "Crank revolutions" w l
 plot resultfile u 2:3 t "Rod angle" w l
@@ -13,7 +14,7 @@ plot resultfile u 2:8 t "Corner 1 y-position (normalized)" w l
 # plot resultfile u 2:12 t "Slider x-position (normalized)" w l
 # plot resultfile u 2:13 t "Slider y-position (normalized)" w l
 # plot resultfile u 3:6 t "Phase diagram rod" w l
-# plot resultfile u 12:13 t "Diagram slider position" w l
+ plot resultfile u 12:13 t "Diagram slider position" w l
 
-plot resultfile u 2:22 t "Corner 1 impulse" w l
+#plot resultfile u 2:22 t "Corner 1 impulse" w l
 

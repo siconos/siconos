@@ -42,8 +42,8 @@
 #include "NonSmoothLaw.hpp"
 #include "TypeName.hpp"
 // for Debug
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <debug.h>
 #include <fstream>
 #include "Model.hpp"
@@ -169,11 +169,11 @@ SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
 void Simulation::updateIndexSets()
 {
 
-  DEBUG_PRINT("Simulation::updateIndexSets() starts");
+  DEBUG_PRINT("Simulation::updateIndexSets() starts\n");
   // update I0 indices
   unsigned int nindexsets = model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize();
 
-  DEBUG_PRINTF("  nindexsets = %d", nindexsets   );
+  DEBUG_PRINTF("  nindexsets = %d\n", nindexsets   );
   if (nindexsets > 1)
   {
     for (unsigned int i = 1; i < nindexsets ; ++i)
@@ -183,7 +183,7 @@ void Simulation::updateIndexSets()
       model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_edges_indices();
     }
   }
-  DEBUG_PRINT("Simulation::updateIndexSets() ends");
+  DEBUG_PRINT("Simulation::updateIndexSets() ends\n");
 
 }
 

@@ -29,8 +29,8 @@
 #include "NewtonEulerR.hpp"
 #include "TypeName.hpp"
 #include "NonSmoothLaw.hpp"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -69,7 +69,7 @@ void TimeSteppingD1Minus::initOSNS()
   }
 }
 
-TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td), impactOccuredLastTimeStep(false)
+TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -99,158 +99,42 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
   SP::InteractionsGraph indexSet0 = topo->indexSet(0); // ALL Interactions : formula (8.30) of Acary2008
-  SP::InteractionsGraph indexSet1 = topo->indexSet(1); // ACTIVE Interactions for IMPACTS
-  SP::InteractionsGraph indexSet2 = topo->indexSet(2); // ACTIVE Interactions for CONTACTS
-  SP::InteractionsGraph indexSet3 = topo->indexSet(3); // ACTIVE Interactions for Impact computation
+  SP::InteractionsGraph indexSetCurrent = topo->indexSet(i); // ACTIVE Interactions for IMPACTS
   assert(indexSet0);
-  assert(indexSet1);
-  assert(indexSet2);
-  assert(indexSet3);
-
+  assert(indexSetCurrent);
   topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
 
 
   DEBUG_PRINTF("\nINDEXSETS BEFORE UPDATE for level i = %i\n", i);
   DEBUG_PRINTF(" indexSet0 size : %ld\n", indexSet0->size());
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
-  // DEBUG_EXPR(indexSet0->display());
-  // DEBUG_PRINT("\n");
-  // DEBUG_EXPR(indexSet1->display());
-  // DEBUG_PRINT("\n");
-  // DEBUG_EXPR(indexSet2->display());
 
   InteractionsGraph::VIterator uipend, uip;
   bool forecastImpact = false;
-  for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL verices in indexSet0
+  for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip)
+    /* loop over ALL vertices in indexSet0 */
   {
     SP::Interaction inter = indexSet0->bundle(*uip);
-    SP::OneStepIntegrator Osi = indexSet1->properties(*uip).osi;
-    if (i == 1)
+    SP::OneStepIntegrator Osi = indexSetCurrent->properties(*uip).osi;
+    if ((!indexSetCurrent->is_vertex(inter))
+        and (Osi->addInteractionInIndexSet(inter, i)))
     {
-      impactOccuredLastTimeStep = false;
-      DEBUG_PRINT("\nUPDATE INDEXSET 1\n");
-      if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
-        /* We activate Equality constraints only if there is an impact.
-         * we add them at the end */
+      indexSetCurrent->copy_vertex(inter, *indexSet0);
+      forecastImpact=true;
+      topo->setHasChanged(true);
+      if (i == 3)
       {
-        if (!indexSet1->is_vertex(inter))
-        {
-          if (Osi->addInteractionInIndexSet(inter, i))
-          {
-            indexSet1->copy_vertex(inter, *indexSet0);
-            forecastImpact=true;
-            topo->setHasChanged(true);
-          }
-        }
-        else
-        {
-          indexSet1->remove_vertex(inter);
-          topo->setHasChanged(true);
-          impactOccuredLastTimeStep = true;
-          inter->lambda(1)->zero(); // impulse is zero
-        }
+        forecastImpact = true;
       }
     }
-    else if (i == 2) 
+    else if ((indexSetCurrent->is_vertex(inter))
+             and !(Osi->addInteractionInIndexSet(inter, i)))
     {
-      DEBUG_PRINT("\nUPDATE INDEXSET 2\n");
-      if (indexSet2->is_vertex(inter))
+      indexSetCurrent->remove_vertex(inter);
+      topo->setHasChanged(true);
+      if (i< 3)
       {
-        if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
-          /* Equality constraints must always be activated at the acceleration level*/
-        {
-          if (Osi->removeInteractionInIndexSet(inter, i))
-          {
-            indexSet2->remove_vertex(inter);
-            topo->setHasChanged(true);
-            inter->lambda(2)->zero(); // force is zero
-          }
-        }
-      }
-      else
-      {
-        // bool activate = true;
-        if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
-          /* Equality constraints must always be  activated et the acceleration level*/
-        {
-          if (Osi->addInteractionInIndexSet(inter, i))
-          {
-            indexSet2->copy_vertex(inter, *indexSet0);
-            topo->setHasChanged(true);
-          }
-        }
-      }
-    }
-    else if (i == 3)
-    {
-      {
-        impactOccuredLastTimeStep = false;
-        DEBUG_PRINT("\nUPDATE INDEXSET 3\n");
-        if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
-          /* We activate Equality constraints only if there is an impact.
-           * we add them at the end */
-        {
-          if (!indexSet3->is_vertex(inter))
-          {
-            if (Osi->addInteractionInIndexSet(inter, i))
-            {
-              indexSet3->copy_vertex(inter, *indexSet0);
-              forecastImpact=true;
-              topo->setHasChanged(true);
-            }
-          }
-          else
-          {
-            indexSet3->remove_vertex(inter);
-            topo->setHasChanged(true);
-            impactOccuredLastTimeStep = true;
-          }
-        }
-      }
-    }
-    else
-      RuntimeException::selfThrow("TimeSteppingD1Minus::updateIndexSet, IndexSet[i > 2] does not exist.");
-  }
-
-  if (i==1)
-  {
-    if (forecastImpact) // we add equality constraints
-    {
-      for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL verices in indexSet0
-      {
-        SP::Interaction inter = indexSet0->bundle(*uip);
-        if (!indexSet1->is_vertex(inter))
-        {
-          if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL) /* We activate Equality constraintsonly if there is an impact.
-                                                                                    * we add them a */
-          {
-            indexSet1->copy_vertex(inter, *indexSet0);
-            topo->setHasChanged(true);
-          }
-        }
-      }
-    }
-    else
-    {
-      for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL verices in indexSet0
-      {
-        SP::Interaction inter = indexSet0->bundle(*uip);
-
-
-
-        if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL) /* We activate Equality constraintsonly if there is an impact.
-                                                                                  * we add them a */
-        {
-          if (indexSet1->is_vertex(inter))
-          {
-            indexSet1->remove_vertex(inter);
-            topo->setHasChanged(true);
-            impactOccuredLastTimeStep = true;
-            inter->lambda(1)->zero(); // impulse is zero
-          }
-
-        }
-
+        inter->lambda(i)->zero();
       }
     }
   }

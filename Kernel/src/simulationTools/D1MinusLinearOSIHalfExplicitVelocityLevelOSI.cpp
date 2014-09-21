@@ -38,9 +38,6 @@
 /// @cond
 using namespace RELATION;
 
-
-
-
 double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 {
   DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel(), starts\n");
@@ -58,10 +55,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
   DEBUG_PRINTF("startingTime %f\n", told);
   DEBUG_PRINTF("time step size %f\n", h);
 
-  /**************************************************************************************************************
+  /******************************************************************************************
    *  Step 1-  solve a LCP at acceleration level for lambda^+_{k} for the last set indices
    *   if index2 is empty we should skip this step
-   **************************************************************************************************************/
+   ******************************************************************************************/
 
   DEBUG_PRINT("\nEVALUATE LEFT HAND SIDE\n");
 

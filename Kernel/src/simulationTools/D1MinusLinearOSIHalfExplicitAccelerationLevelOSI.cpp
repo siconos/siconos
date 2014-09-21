@@ -38,22 +38,6 @@
 /// @cond
 using namespace RELATION;
 
-/* Some details on the implementation
- *
- * (lower-case) lambda that corresponds to the (non-impulsive) contact forces are computed
- * at the acceleration level for the closed contact with vanishing relative velocity (indexSet2)
- * The result, stored in lambda(2) and p(2) is computed by solving
- *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
- * at time told for lambda^+_{k} and time t for lambda^-_{k+1}
- *
- * The impact equation are solved at the velocity level as in MoreauJeanOSI using
- * lambda(1) and p(1)  on the indexSet1
- *
- */
-
-
-
-
 double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 {
   DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel(), starts\n");
@@ -383,7 +367,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   if (!allOSNS->empty())
   {
 
-    for (unsigned int level = simulationLink->levelMinForOutput(); 
+    for (unsigned int level = simulationLink->levelMinForOutput();
          level < simulationLink->levelMaxForOutput(); level++)
     {
       simulationLink->updateOutput(level);
@@ -392,7 +376,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
     SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
     SP::InteractionsGraph indexSet3 = topo->indexSet(3);
-   
+
     if (indexSet3->size() > 0)
     {
       _isThereImpactInTheTimeStep = true;
@@ -880,16 +864,25 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel(SP:
 
   if (i == 1)
   {
-    /* Active for impulses calculations? Contacts that are closed */
     DEBUG_PRINT(" level == 1\n");
+    if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
+    {
+      return true;
+    }
+    /* Active for impulses calculations? Contacts that are closed */
     double y = (*(inter->y(0)))(0); // current position
     DEBUG_PRINTF("y= %f\n", y);
     return (y <= DEFAULT_TOL_D1MINUS);
+
   }
   else if (i == 2)
   {
     DEBUG_PRINT(" level == 2\n");
-    /* Active for non-impulsive forces computation */
+    if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
+    {
+      return true;
+    }
+/* Active for non-impulsive forces computation */
     double y = (*(inter->y(0)))(0); // current position
     double yDot = (*(inter->y(1)))(0); // current position
     DEBUG_PRINTF("y= %f\n", y);
@@ -900,12 +893,15 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel(SP:
   }
   else if (i == 3)
   {
-    /*  Contacts which have been closing  in the last time step */
+    if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
+    {
+      return false;
+    }
+    /*  Contacts which have been closing in the last time step */
     DEBUG_PRINT(" level == 3\n");
     double y = (*(inter->y(0)))(0); // current position
     double yOld = (*(inter->yOld(0)))(0); // old position
     DEBUG_PRINTF("y= %f\n", y);  DEBUG_PRINTF("yOld= %f\n", yOld);
-    
     /* if Interaction has not been active in the previous calculation
        and now becomes active */
     return (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS);
@@ -919,24 +915,5 @@ bool D1MinusLinearOSI::removeInteractionInIndexSetHalfExplicitAccelerationLevel(
 {
   DEBUG_PRINT("D1MinusLinearOSI::removeInteractionInIndexSetHalfExplicitAccelerationLevel.\n");
 
-  if (i == 2)
-  {
-
-      double y = (*(inter->y(0)))(0); // current position
-      //double yOld = (*(inter->yOld(0)))(0); // old position
-      double yDot = (*(inter->y(1)))(0); // current position
-
-
-      DEBUG_PRINTF("y= %f\n", y);
-      DEBUG_PRINTF("yDot= %f\n", yDot);
-
-      DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) <<std::endl;);
-      DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) <<std::endl;);
-      /* if Interaction has been active in the previous calculation
-         and now becomes in-active */
-      return (y > DEFAULT_TOL_D1MINUS) || (yDot > DEFAULT_TOL_D1MINUS);
-  }
-  else
-    RuntimeException::selfThrow("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel, IndexSet[i > 2] does not exist.");
-  return false;
+  return !(addInteractionInIndexSetHalfExplicitAccelerationLevel(inter,i));
 }

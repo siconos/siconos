@@ -32,14 +32,20 @@
 #include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"
 
-/** D1MinusLinearOSI Time-Integrator for Dynamical Systems
+
+/** \class D1MinusLinearOSI D1MinusLinearOSI.hpp Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0.
+ *  \version 3.6.0 -- 3.7.x
  *  \date (Creation) September 01, 2011
  *
- *  see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
- *  on Discontinuous Galerkin Methods: Definition and Outlook
+ * Reference:
+ *
+ * Timestepping schemes for nonsmooth dynamics based on discontinuous Galerkin methods:
+ * Definition and outlook
+ * Thorsten Schindler; Vincent Acary
+ * Mathematics and Computers in Simulation,
+ * Elsevier, 2014, 95, pp. 180-199
  *
  *  A D1MinusLinearOSI instance is defined by the list of concerned dynamical systems.
  *
@@ -50,6 +56,44 @@
  *
  *  - updateState(): computes x(q,v), the complete dynamical systems
  *    states.
+ *
+
+ *
+ * \section sec_D1MinusLinear_implementation Some details on the implementation
+ *
+ * \subsection sec_D1MinusLinear_implementation_various Various implementations at various levels.
+ *
+ * To be completed
+ *
+ * The (lower-case) lambda vector that corresponds to the (non-impulsive) contact forces are computed
+ * for the closed contact with vanishing relative velocity (the number of the index set depends on the type of D1minulinear)
+ * The result, stored in lambda(2) and p(2) is computed by solving
+ *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ * at different specific time
+ *
+ * The impact equation are solved at the velocity level as in MoreauJeanOSI using
+ * lambda(1) and p(1). The number of the index set depends on the type of D1minulinear
+ *
+ *
+ * \subsection sec_D1MinusLinear_implementation_halfAcc  HalfExplicitAccelerationLevel
+ *
+ * The (lower-case) lambda \f$\lambda\f$ that corresponds to the (non-impulsive) contact
+ * forces are computed at the acceleration level for the closed contact with vanishing
+ * relative velocity (indexSet2)
+ *
+ * The problem, solved for  lambda(2) and p(2)   (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ * is solved at time told for \f$\lambda^+_{k}\f$ and time t for \f$\lambda^-_{k+1}\f$
+ *
+ * The problem, solved for  lambda(1) and p(1)   (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ * is solved at time t for \f$Lambda_{k+1}\f$.
+ *
+ * We use four index sets to compute the multipliers:
+ * <ul>
+ * <li> indexSet0 is the set of all constraints </li>
+ * <li> indexSet1 is the set of closed constraints (computed with \f$ q_{k,1} \f$) </li>
+ * <li> indexSet2 is the set of closed constraints and vanishing velocities (computed with \f$q_{k,1}\f$ and \f$v_{k,1}\f$  )  </li>
+ * <li> indexSet3 is the set of the constraints that have been closed within the time--step (computed with \f$q_{k,0}\f$ and \f$q_{k,1}\f$  )  </li>
+ * </ul>
  *
  * \f[
  * \begin{cases}
@@ -63,35 +107,7 @@
  * \end{cases}
  * \f]
  *
- *
- * \section Some details on the implementation
- *
- * \subsection Various implementations at various levels.
- *
- * To be written
- *
- * The (lower-case) lambda vector that corresponds to the (non-impulsive) contact forces are computed
- * for the closed contact with vanishing relative velocity (the number of the index set depends on the type of D1minulinear)
- * The result, stored in lambda(2) and p(2) is computed by solving
- *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
- * at different specific time
- *
- * The impact equation are solved at the velocity level as in MoreauJeanOSI using
- * lambda(1) and p(1). The number of the index set depends on the type of D1minulinear
- *
- *
- * \subsection  HalfExplcitAccelerationLevel
- *
- * (lower-case) lambda that corresponds to the (non-impulsive) contact forces are computed
- * at the acceleration level for the closed contact with vanishing relative velocity (indexSet2)
- * The problem, solved for  lambda(2) and p(2)
- *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
- * is solved at time told for lambda^+_{k} and time t for lambda^-_{k+1}
- *
- * The problem, solved for  lambda(1) and p(1)
- *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
- * is solved at time t for Lambda_{k+1}
- *
+ * \subsection sec_D1MinusLinear_implementation_halfVel  HalfExplicitVelocityLevel
  *
  *
  */
@@ -124,7 +140,7 @@ protected:
     }
   };
 
-  friend struct _NSLEffectOnFreeOutput;
+  //friend struct _NSLEffectOnFreeOutput;
   bool _isThereImpactInTheTimeStep ;
   unsigned int _typeOfD1MinusLinearOSI;
 
