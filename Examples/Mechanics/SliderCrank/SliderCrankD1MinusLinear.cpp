@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("result.dat", "ascii", dataPlot);
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
 
     // Comparison with a reference file
@@ -321,7 +321,7 @@ int main(int argc, char* argv[])
     double error = 0.0;
     for (unsigned int i = 0; i < err->size(); ++i)
     {
-      if (error < (*err)(i))
+      if (error < (*err)(i)) 
         error = (*err)(i);
     }
 

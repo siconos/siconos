@@ -31,8 +31,8 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 /// @cond
@@ -47,7 +47,7 @@ using namespace RELATION;
  * at time told for lambda^+_{k} and time t for lambda^-_{k+1}
  *
  * The impact equation are solved at the velocity level as in MoreauJeanOSI using
- * lambda(1) and p(1)   on the indexSet1
+ * lambda(1) and p(1)  on the indexSet1
  *
  */
 
@@ -63,8 +63,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   double h = simulationLink->timeStep(); // time step length
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
   SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-  // SP::InteractionsGraph indexSet0 = topo->indexSet(0);
-  // SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
   DEBUG_PRINTF("nextTime %f\n", t);
@@ -384,26 +383,25 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   if (!allOSNS->empty())
   {
 
-    for (unsigned int level = simulationLink->levelMinForOutput(); level < simulationLink->levelMaxForOutput(); level++)
+    for (unsigned int level = simulationLink->levelMinForOutput(); 
+         level < simulationLink->levelMaxForOutput(); level++)
     {
       simulationLink->updateOutput(level);
     }
     simulationLink->updateIndexSets();
 
     SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-    SP::InteractionsGraph indexSet0 = topo->indexSet(0);
-    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
-    SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-
-    if (indexSet1->size() > 0)
+    SP::InteractionsGraph indexSet3 = topo->indexSet(3);
+   
+    if (indexSet3->size() > 0)
     {
       _isThereImpactInTheTimeStep = true;
-      DEBUG_PRINT("There is an impact in the step. indexSet1->size() > 0. _isThereImpactInTheTimeStep = true;\n");
+      DEBUG_PRINT("There is an impact in the step. indexSet3->size() > 0. _isThereImpactInTheTimeStep = true;\n");
     }
     else
     {
       _isThereImpactInTheTimeStep = false;
-      DEBUG_PRINT("There is no  impact in the step. indexSet1->size() = 0. _isThereImpactInTheTimeStep = false;\n");
+      DEBUG_PRINT("There is no  impact in the step. indexSet3->size() = 0. _isThereImpactInTheTimeStep = false;\n");
     }
   }
 
@@ -412,7 +410,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   if (_isThereImpactInTheTimeStep)
   {
 
-    DEBUG_PRINT("There is an impact in the step. indexSet1->size() > 0.  _isThereImpactInTheTimeStep = true\n");
+    DEBUG_PRINT("There is an impact in the step. indexSet3->size() > 0.  _isThereImpactInTheTimeStep = true\n");
 
     for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     {
@@ -485,7 +483,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   }
   else
   {
-    DEBUG_PRINT("There is no  impact in the step. indexSet1->size() = 0. _isThereImpactInTheTimeStep = false;\n");
+    DEBUG_PRINT("There is no  impact in the step. indexSet3->size() = 0. _isThereImpactInTheTimeStep = false;\n");
     // -- RIGHT SIDE --
     // calculate acceleration without contact force
     for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -882,38 +880,38 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel(SP:
 
   if (i == 1)
   {
-    /* ACTIVE FOR IMPACT CALCULATIONS? Contacts which have been closing
-       in the last time step */
-    DEBUG_PRINT("\nUPDATE INDEXSET 1\n");
-
+    /* Active for impulses calculations? Contacts that are closed */
+    DEBUG_PRINT(" level == 1\n");
+    double y = (*(inter->y(0)))(0); // current position
+    DEBUG_PRINTF("y= %f\n", y);
+    return (y <= DEFAULT_TOL_D1MINUS);
+  }
+  else if (i == 2)
+  {
+    DEBUG_PRINT(" level == 2\n");
+    /* Active for non-impulsive forces computation */
+    double y = (*(inter->y(0)))(0); // current position
+    double yDot = (*(inter->y(1)))(0); // current position
+    DEBUG_PRINTF("y= %f\n", y);
+    DEBUG_PRINTF("yDot= %f\n", yDot);
+    DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) <<std::endl;);
+    DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) <<std::endl;);
+    return (y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS);
+  }
+  else if (i == 3)
+  {
+    /*  Contacts which have been closing  in the last time step */
+    DEBUG_PRINT(" level == 3\n");
     double y = (*(inter->y(0)))(0); // current position
     double yOld = (*(inter->yOld(0)))(0); // old position
-
-    DEBUG_PRINTF("y= %f\n", y);
-    DEBUG_PRINTF("yOld= %f\n", yOld);
-
+    DEBUG_PRINTF("y= %f\n", y);  DEBUG_PRINTF("yOld= %f\n", yOld);
+    
     /* if Interaction has not been active in the previous calculation
        and now becomes active */
     return (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS);
   }
-  else if (i == 2)
-  {
-
-      double y = (*(inter->y(0)))(0); // current position
-      //double yOld = (*(inter->yOld(0)))(0); // old position
-      double yDot = (*(inter->y(1)))(0); // current position
-
-
-      DEBUG_PRINTF("y= %f\n", y);
-      DEBUG_PRINTF("yDot= %f\n", yDot);
-
-      DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) <<std::endl;);
-      DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) <<std::endl;);
-
-      return (y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS);
-  }
   else
-    RuntimeException::selfThrow("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel, IndexSet[i > 2] does not exist.");
+    RuntimeException::selfThrow("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel, IndexSet[i > 3] does not exist.");
   return false;
 }
 

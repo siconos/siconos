@@ -42,8 +42,8 @@
 #include "NonSmoothLaw.hpp"
 #include "TypeName.hpp"
 // for Debug
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include <debug.h>
 #include <fstream>
 #include "Model.hpp"
@@ -169,9 +169,11 @@ SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
 void Simulation::updateIndexSets()
 {
 
+  DEBUG_PRINT("Simulation::updateIndexSets() starts");
   // update I0 indices
   unsigned int nindexsets = model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize();
 
+  DEBUG_PRINTF("  nindexsets = %d", nindexsets   );
   if (nindexsets > 1)
   {
     for (unsigned int i = 1; i < nindexsets ; ++i)
@@ -181,6 +183,8 @@ void Simulation::updateIndexSets()
       model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_edges_indices();
     }
   }
+  DEBUG_PRINT("Simulation::updateIndexSets() ends");
+
 }
 
 void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
@@ -967,7 +971,9 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
 void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)
 {
-  /** \warning. We test only for the first Dynamical of the interaction.
+  DEBUG_PRINT("Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)\n");
+  
+ /** \warning. We test only for the first Dynamical of the interaction.
    * we assume that the osi(s) are consistent for one interaction
    */
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
@@ -981,13 +987,11 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   std11::shared_ptr<SetupLevels> setupLevels;
   setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
   osi->accept(*(setupLevels.get()));
-  DEBUG_PRINTF("_numberOfIndexSets =%d\n", _numberOfIndexSets);
   if (!init) // We are not computing the levels at the initialization
   {
     SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
     unsigned int indxSize = topo->indexSetsSize();
     assert (_numberOfIndexSets >0);
-
     if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
     {
       topo->indexSetsResize(_numberOfIndexSets);
@@ -996,15 +1000,12 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
         topo->resetIndexSetPtr(i);
     }
   }
-  DEBUG_PRINTF("_levelMinForInput =%d\n", _levelMinForInput);
-  DEBUG_PRINTF("_levelMaxForInput =%d\n", _levelMaxForInput);
-  DEBUG_PRINTF("_levelMinForOutput =%d\n", _levelMinForInput);
-  DEBUG_PRINTF("_levelMaxForOutput =%d\n", _levelMaxForInput);
-
 }
 
 void Simulation::computeLevelsForInputAndOutput()
 {
+  DEBUG_PRINT("Simulation::computeLevelsForInputAndOutput()\n");
+
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
   InteractionsGraph::VIterator ui, uiend;
@@ -1015,14 +1016,14 @@ void Simulation::computeLevelsForInputAndOutput()
   }
 
   unsigned int indxSize = topo->indexSetsSize();
-  if ((indxSize == LEVELMAX) || (indxSize < _levelMaxForOutput + 1))
+  if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
   {
-    topo->indexSetsResize(_levelMaxForOutput + 1);
+    topo->indexSetsResize(_numberOfIndexSets );
     // Init if the size has changed
     for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
       topo->resetIndexSetPtr(i);
   }
-
+  DEBUG_PRINTF("_numberOfIndexSets =%d\n", _numberOfIndexSets);
   DEBUG_PRINTF("_levelMinForInput =%d\n", _levelMinForInput);
   DEBUG_PRINTF("_levelMaxForInput =%d\n", _levelMaxForInput);
   DEBUG_PRINTF("_levelMinForOutput =%d\n", _levelMinForInput);

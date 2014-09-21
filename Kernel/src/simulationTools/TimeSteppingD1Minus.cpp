@@ -29,8 +29,8 @@
 #include "NewtonEulerR.hpp"
 #include "TypeName.hpp"
 #include "NonSmoothLaw.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -101,17 +101,18 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   SP::InteractionsGraph indexSet0 = topo->indexSet(0); // ALL Interactions : formula (8.30) of Acary2008
   SP::InteractionsGraph indexSet1 = topo->indexSet(1); // ACTIVE Interactions for IMPACTS
   SP::InteractionsGraph indexSet2 = topo->indexSet(2); // ACTIVE Interactions for CONTACTS
+  SP::InteractionsGraph indexSet3 = topo->indexSet(3); // ACTIVE Interactions for Impact computation
   assert(indexSet0);
   assert(indexSet1);
   assert(indexSet2);
+  assert(indexSet3);
 
   topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
 
-  DEBUG_PRINTF("\nINDEXSETS BEFORE UPDATE for level = %i\n",i);
-  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
-  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
-  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
 
+  DEBUG_PRINTF("\nINDEXSETS BEFORE UPDATE for level i = %i\n", i);
+  DEBUG_PRINTF(" indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
   // DEBUG_EXPR(indexSet0->display());
   // DEBUG_PRINT("\n");
   // DEBUG_EXPR(indexSet1->display());
@@ -136,8 +137,6 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
         {
           if (Osi->addInteractionInIndexSet(inter, i))
           {
-            /* if Interaction has not been active in the previous calculation
-               and now becomes active */
             indexSet1->copy_vertex(inter, *indexSet0);
             forecastImpact=true;
             topo->setHasChanged(true);
@@ -152,10 +151,9 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
         }
       }
     }
-    else if (i == 2) // ACTIVE FOR CONTACT CALCULATIONS? Contacts which are closed but have not been closing in the last time step
+    else if (i == 2) 
     {
       DEBUG_PRINT("\nUPDATE INDEXSET 2\n");
-
       if (indexSet2->is_vertex(inter))
       {
         if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
@@ -175,21 +173,37 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
         if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
           /* Equality constraints must always be  activated et the acceleration level*/
         {
-          //     if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(inter) && !impactOccuredLastTimeStep)
-
-          //   if ((y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS))
-          //   {
-          //     activate=true;
-          //   }
-          //   else
-          //   {
-          //     activate =false;
-          //   }
-
           if (Osi->addInteractionInIndexSet(inter, i))
           {
             indexSet2->copy_vertex(inter, *indexSet0);
             topo->setHasChanged(true);
+          }
+        }
+      }
+    }
+    else if (i == 3)
+    {
+      {
+        impactOccuredLastTimeStep = false;
+        DEBUG_PRINT("\nUPDATE INDEXSET 3\n");
+        if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
+          /* We activate Equality constraints only if there is an impact.
+           * we add them at the end */
+        {
+          if (!indexSet3->is_vertex(inter))
+          {
+            if (Osi->addInteractionInIndexSet(inter, i))
+            {
+              indexSet3->copy_vertex(inter, *indexSet0);
+              forecastImpact=true;
+              topo->setHasChanged(true);
+            }
+          }
+          else
+          {
+            indexSet3->remove_vertex(inter);
+            topo->setHasChanged(true);
+            impactOccuredLastTimeStep = true;
           }
         }
       }
@@ -242,14 +256,8 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   }
 
   DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);
-  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
-  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
-  DEBUG_PRINTF("TimeSteppingD1MinusLinearOSI::updateIndexSet(unsigned int i). update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
-  // DEBUG_EXPR(indexSet0->display());
-  // DEBUG_PRINT("\n");
-  // DEBUG_EXPR(indexSet1->display());
-  // DEBUG_PRINT("\n");
-  // DEBUG_EXPR(indexSet2->display());
+  DEBUG_PRINTF(" indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
 }
 
 void TimeSteppingD1Minus::update(unsigned int levelInput)
