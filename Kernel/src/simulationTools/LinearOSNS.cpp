@@ -703,17 +703,21 @@ void LinearOSNS::postCompute()
 
 void LinearOSNS::display() const
 {
+  std::cout << "==========================" <<std::endl;
   std::cout << "_M  ";
   if (_M) _M->display();
   else std::cout << "-> NULL" <<std::endl;
-  std::cout <<std::endl << " q : " ;
+  std::cout <<std::endl << "q : " ;
   if (_q) _q->display();
   else std::cout << "-> NULL" <<std::endl;
-  std::cout << "w  ";
+  std::cout << std::endl;
+  std::cout << "w : ";
   if (_w) _w->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout <<std::endl << "z : " ;
   if (_z) _z->display();
   else std::cout << "-> NULL" <<std::endl;
+  std::cout << std::endl;
+  std::cout << "The linearOSNSP works on the index set of level  " << _indexSetLevel<< std::endl;
   std::cout << "==========================" <<std::endl;
 }

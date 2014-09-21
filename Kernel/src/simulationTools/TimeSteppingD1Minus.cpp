@@ -29,8 +29,8 @@
 #include "NewtonEulerR.hpp"
 #include "TypeName.hpp"
 #include "NonSmoothLaw.hpp"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -62,14 +62,6 @@ void TimeSteppingD1Minus::initOSNS()
     //update all index sets
     updateIndexSets();
 
-    // set evaluation levels (first is of velocity, second of acceleration type)
-    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
-    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->initialize(shared_from_this());
-
-    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
-    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(shared_from_this());
 
     // update output
     for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
@@ -131,26 +123,21 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL verices in indexSet0
   {
     SP::Interaction inter = indexSet0->bundle(*uip);
-
-    if (i == 1) // ACTIVE FOR IMPACT CALCULATIONS? Contacts which have been closing in the last time step
+    SP::OneStepIntegrator Osi = indexSet1->properties(*uip).osi;
+    if (i == 1)
     {
       impactOccuredLastTimeStep = false;
       DEBUG_PRINT("\nUPDATE INDEXSET 1\n");
-
-      double y = (*(inter->y(0)))(0); // current position
-      double yOld = (*(inter->yOld(0)))(0); // old position
-
-      DEBUG_PRINTF("y= %f\n", y);
-      DEBUG_PRINTF("yOld= %f\n", yOld);
-      if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL) /* We activate Equality constraints
-                                                                                * only if there is an impact.
-                                                                                * we add them at the end */
+      if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
+        /* We activate Equality constraints only if there is an impact.
+         * we add them at the end */
       {
         if (!indexSet1->is_vertex(inter))
         {
-          if (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS)
+          if (Osi->addInteractionInIndexSet(inter, i))
           {
-            // if Interaction has not been active in the previous calculation and xnow becomes active
+            /* if Interaction has not been active in the previous calculation
+               and now becomes active */
             indexSet1->copy_vertex(inter, *indexSet0);
             forecastImpact=true;
             topo->setHasChanged(true);
@@ -169,26 +156,13 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
     {
       DEBUG_PRINT("\nUPDATE INDEXSET 2\n");
 
-      double y = (*(inter->y(0)))(0); // current position
-      //double yOld = (*(inter->yOld(0)))(0); // old position
-      double yDot = (*(inter->y(1)))(0); // current position
-
-
-      DEBUG_PRINTF("y= %f\n", y);
-      DEBUG_PRINTF("yDot= %f\n", yDot);
-
-      DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) <<std::endl;);
-      DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) <<std::endl;);
-
       if (indexSet2->is_vertex(inter))
       {
-        if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL) /* Equality constraints must always be
-                                                                                  * activated et the acceleration level*/
+        if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
+          /* Equality constraints must always be activated at the acceleration level*/
         {
-          if ((y > DEFAULT_TOL_D1MINUS) || (yDot > DEFAULT_TOL_D1MINUS))
-
+          if (Osi->removeInteractionInIndexSet(inter, i))
           {
-            // if Interaction has been active in the previous calculation and now becomes in-active
             indexSet2->remove_vertex(inter);
             topo->setHasChanged(true);
             inter->lambda(2)->zero(); // force is zero
@@ -197,27 +171,26 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       }
       else
       {
-        bool activate = true;
-        if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL) /* Equality constraints must always be
-                                                                                  * activated et the acceleration level*/
+        // bool activate = true;
+        if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL)
+          /* Equality constraints must always be  activated et the acceleration level*/
         {
           //     if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(inter) && !impactOccuredLastTimeStep)
-          if ((y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS))
-          {
-            activate=true;
-          }
-          else
-          {
-            activate =false;
-          }
-        }
 
+          //   if ((y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS))
+          //   {
+          //     activate=true;
+          //   }
+          //   else
+          //   {
+          //     activate =false;
+          //   }
 
-        if (activate)
-        {
-          // if Interaction has is active but has not become active recently
-          indexSet2->copy_vertex(inter, *indexSet0);
-          topo->setHasChanged(true);
+          if (Osi->addInteractionInIndexSet(inter, i))
+          {
+            indexSet2->copy_vertex(inter, *indexSet0);
+            topo->setHasChanged(true);
+          }
         }
       }
     }

@@ -26,8 +26,6 @@
 
 #include "Simulation.hpp"
 
-const double DEFAULT_TOL_D1MINUS  = 1e-8;
-
 /** TimeSteppingD1Minus Timestepping Strategy
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -56,39 +54,34 @@ protected:
 public:
 
   /** constructor with the time-discretisation
-   *  \param pointer to a TimeDiscretisation
-   *  \param number of non smooth problem
+   *  \param td pointer to a TimeDiscretisation
+   *  \param nb number of non smooth problem
    */
-  TimeSteppingD1Minus(SP::TimeDiscretisation, int nb);
+  TimeSteppingD1Minus(SP::TimeDiscretisation td , int nb);
 
   /** destructor */
   ~TimeSteppingD1Minus();
 
   /** updateIndexSet using current y and lambda values of interactions
-   *  \param unsigned int: number of the set to be updated
+   *  \param i the  number of the set to be updated
    *  0 : ALL interactions (NEVER)
    *  1 : ACTIVE interactions for IMPACTS
    *  2 : ACTIVE interactions for CONTACTS
    */
-  virtual void updateIndexSet(unsigned int);
+  virtual void updateIndexSet(unsigned int i);
 
   using Simulation::update;
 
   /** update input, state and output of DynamicalSystems
-   *  \param level to be updated for input
+   *  \param levelInput to be updated for input
    */
-  virtual void update(unsigned int);
+  virtual void update(unsigned int levelInput);
 
   /** run the simulation, from t0 to T */
   virtual void run();
 
   /** step from current event to next event of EventsManager */
   virtual void advanceToEvent();
-
-  // /** compute r thanks to lambda[level] for all Interactions
-  //  *  \param unsigned int: lambda level
-  //  */
-  // virtual void updateInput(unsigned int);
 
   /** compute residu */
   void computeResidu();

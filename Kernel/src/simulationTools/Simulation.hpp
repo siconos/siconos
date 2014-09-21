@@ -118,6 +118,14 @@ protected:
    */
   unsigned int _levelMaxForInput;
 
+  /** _numberOfIndexSets is the number of index sets that we need for
+   * simulation. It corresponds for most of the simulation to
+   * _numberOfIndexSets = _levelMaxForOutput + 1
+   * Nevetheless, some simulation needs more sets of indices that the number
+   * of output that we considered.
+   */
+  unsigned int _numberOfIndexSets;
+
   /** tolerance value used to compute the index sets - Default: equal
       to machine double precision (from dlamch lapack routine).*/
   double _tolerance;

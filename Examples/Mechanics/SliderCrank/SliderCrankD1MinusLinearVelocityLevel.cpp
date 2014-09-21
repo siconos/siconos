@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
     time.restart();
 
 
-    while ((s->hasNextEvent()) && (k <= 2))
+    while ((s->hasNextEvent()) && (k <= 275))
 //    while ((s->hasNextEvent()))
     {
 

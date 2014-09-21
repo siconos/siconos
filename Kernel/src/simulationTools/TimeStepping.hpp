@@ -135,16 +135,10 @@ public:
   virtual void updateIndexSet(unsigned int i);
 
   // /** Used by the updateIndexSet function in order to deactivate SP::Interaction.
-  //  * \param SP::Interaction: SP::Interaction to be activated.
-  //  * \param unsigned int : number of the set to be updated.
-  //  * \return true iff SP::Interaction must be deactivated.
   //  */
   // virtual bool predictorDeactivate(SP::Interaction inter, unsigned int i);
 
   // /** Used by the updateIndexSet function in order to activate SP::Interaction.
-  //  * \param SP::Interaction: SP::Interaction to be deactivated.
-  //  * \param unsigned int : number of the set to be updated.
-  //  * \return true iff SP::Interaction must be activated.
   //  */
   // virtual bool predictorActivate(SP::Interaction inter, unsigned int i);
 
@@ -177,7 +171,7 @@ public:
   virtual void newtonSolve(double criterion, unsigned int maxStep);
 
   /** To known the number of steps performed by the Newton algorithm.
-   *
+   * \return  the number of steps performed by the Newton algorithm
    */
   unsigned int getNewtonNbSteps()
   {
@@ -195,6 +189,7 @@ public:
 
   /** check the convergence of Newton algorithm according to criterion
    * \param criterion convergence criterion
+   * \return bool = true if Newton method has converged
    */
   bool newtonCheckConvergence(double criterion);
 
@@ -230,7 +225,9 @@ public:
     _computeResiduY = v;
   };
 
-  /** To know if the output interaction residu must be computed. */
+  /** To know if the output interaction residu must be computed.
+   * \return bool _computeResiduY
+   */
   virtual bool computeResiduY()
   {
     return _computeResiduY;
@@ -245,7 +242,9 @@ public:
     _computeResiduR = v;
   };
 
-  /** To known if the input interaction residu must be computed. */
+  /** To known if the input interaction residu must be computed.
+   * \return bool _computeResiduR
+   */
   virtual bool computeResiduR()
   {
     return _computeResiduR;
@@ -303,20 +302,23 @@ public:
 
 
   /** accessor to _newtonResiduDSMax
-  */
+   * \return _newtonResiduDSMax
+   */
   double newtonResiduDSMax()
   {
     return _newtonResiduDSMax;
   };
 
   /** accessor to _newtonResiduYMax
-  */
+   * \return _newtonResiduYMax
+   */
   double newtonResiduYMax()
   {
     return _newtonResiduYMax;
   };
 
   /** accessor to _newtonResiduRMax
+   * \return _newtonResiduRMax
   */
   double newtonResiduRMax()
   {

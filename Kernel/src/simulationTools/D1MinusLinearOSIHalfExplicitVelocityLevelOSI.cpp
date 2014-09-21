@@ -51,8 +51,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
   SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
   // SP::InteractionsGraph indexSet0 = topo->indexSet(0);
-  // SP::InteractionsGraph indexSet1 = topo->indexSet(1);
-  SP::InteractionsGraph indexSet2 = topo->indexSet(2);
+   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+  //SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
@@ -166,22 +166,22 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
   if (!allOSNS->empty())
   {
-    if (indexSet2->size() >0)
+    if (indexSet1->size() >0)
     {
       InteractionsGraph::VIterator ui, uiend;
       SP::Interaction inter;
-      for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
       {
-        inter = indexSet2->bundle(*ui);
-        inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
+        inter = indexSet1->bundle(*ui);
+        inter->relation()->computeJach(t, *inter, indexSet1->properties(*ui));
         if (inter->relation()->getType() == NewtonEuler)
         {
-          SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
-          SP::DynamicalSystem ds2 = indexSet2->properties(*ui).target;
-          SP::NewtonEulerR ner = std11::static_pointer_cast<NewtonEulerR>(indexSet2->bundle(*ui)->relation());
+          SP::DynamicalSystem ds1 = indexSet1->properties(*ui).source;
+          SP::DynamicalSystem ds2 = indexSet1->properties(*ui).target;
+          SP::NewtonEulerR ner = std11::static_pointer_cast<NewtonEulerR>(indexSet1->bundle(*ui)->relation());
           ner->computeJachqT(*inter, ds1, ds2);
         }
-        inter->relation()->computeJacg(told, *inter, indexSet2->properties(*ui));
+        inter->relation()->computeJacg(told, *inter, indexSet1->properties(*ui));
       }
 
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -193,7 +193,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       }
       assert((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]);
 
-      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())) /* it should be equivalent to indexSet2 */
+      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())) /* it should be equivalent to indexSet1 */
       {
         DEBUG_PRINT("We compute lambda^+_{k} \n");
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
@@ -376,9 +376,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
     simulationLink->updateIndexSets();
 
     SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-    SP::InteractionsGraph indexSet0 = topo->indexSet(0);
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
-    SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
     if (indexSet1->size() > 0)
     {
@@ -553,18 +551,18 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
       InteractionsGraph::VIterator ui, uiend;
       SP::Interaction inter;
-      for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
       {
-        inter = indexSet2->bundle(*ui);
-        inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
+        inter = indexSet1->bundle(*ui);
+        inter->relation()->computeJach(t, *inter, indexSet1->properties(*ui));
         if (inter->relation()->getType() == NewtonEuler)
         {
-          SP::DynamicalSystem ds1 = indexSet2->properties(*ui).source;
-          SP::DynamicalSystem ds2 = indexSet2->properties(*ui).target;
+          SP::DynamicalSystem ds1 = indexSet1->properties(*ui).source;
+          SP::DynamicalSystem ds2 = indexSet1->properties(*ui).target;
           SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
           ner->computeJachqT(*inter, ds1, ds2);
         }
-        inter->relation()->computeJacg(t, *inter, indexSet2->properties(*ui));
+        inter->relation()->computeJacg(t, *inter, indexSet1->properties(*ui));
       }
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
@@ -665,7 +663,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
 
-  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput starts\n");
+  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel starts\n");
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
@@ -705,13 +703,13 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
-
+    DEBUG_PRINT("Xfree contains the current velocity of the aggregated ds];\n");
     DEBUG_EXPR(Xfree->display());
 
   }
   else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
   {
-    /* get the free velocity  of the aggregated ds */
+    /* get the free velocity of the aggregated ds */
     if (relationType == Lagrangian)
     {
       Xfree = DSlink[LagrangianR::xfree];
@@ -722,9 +720,9 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
-
     assert(Xfree);
     DEBUG_PRINT("Xfree = DSlink[Lagrangian/NewtonEulerR::xfree];\n");
+    DEBUG_PRINT("Xfree contains the free velocity of the aggregated ds];\n");
     DEBUG_EXPR(Xfree->display());
 
   }
@@ -860,6 +858,6 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
 
   else
     RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " + relationType);
-  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput ends\n");
+  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel ends\n");
 
 }

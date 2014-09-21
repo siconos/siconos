@@ -62,8 +62,42 @@
  * R_{free} = - \frac{h}{2}  M^{-1}_k (P^+_{2,k}+F^+_{k}) -  \frac{h}{2}  M^{-1}_{k+1} (P^-_{2,k+1}+F^-_{k+1}) \\[2mm]
  * \end{cases}
  * \f]
+ *
+ *
+ * \section Some details on the implementation
+ *
+ * \subsection Various implementations at various levels.
+ *
+ * To be written
+ *
+ * The (lower-case) lambda vector that corresponds to the (non-impulsive) contact forces are computed
+ * for the closed contact with vanishing relative velocity (the number of the index set depends on the type of D1minulinear)
+ * The result, stored in lambda(2) and p(2) is computed by solving
+ *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ * at different specific time
+ *
+ * The impact equation are solved at the velocity level as in MoreauJeanOSI using
+ * lambda(1) and p(1). The number of the index set depends on the type of D1minulinear
+ *
+ *
+ * \subsection  HalfExplcitAccelerationLevel
+ *
+ * (lower-case) lambda that corresponds to the (non-impulsive) contact forces are computed
+ * at the acceleration level for the closed contact with vanishing relative velocity (indexSet2)
+ * The problem, solved for  lambda(2) and p(2)
+ *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ * is solved at time told for lambda^+_{k} and time t for lambda^-_{k+1}
+ *
+ * The problem, solved for  lambda(1) and p(1)
+ *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ * is solved at time t for Lambda_{k+1}
+ *
+ *
+ *
  */
 
+
+const double DEFAULT_TOL_D1MINUS  = 1e-8;
 
 
 
@@ -126,8 +160,6 @@ public:
   /** destructor */
   virtual ~D1MinusLinearOSI() {};
 
-
-
   /** Set the type of the D1MinusLinear
    * \param type  the type to set
    * D1MinusLinearOSI::halfexplicit_acceleration_level,
@@ -139,16 +171,19 @@ public:
   void setTypeOfD1MinusLinearOSI(unsigned int type);
 
   /** get the type of the D1MinusLinear
-   * \return unsigne int type  the type to set
+   * \return unsigned int type  the type to set
    * D1MinusLinearOSI::halfexplicit_acceleration_level,
    * D1MinusLinearOSI::halfexplicit_acceleration_level_full,
    * D1MinusLinearOSI::explicit_velocity_level,
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */
-  unsigned int setTypeOfD1MinusLinearOSI(){return _typeOfD1MinusLinearOSI;};
+  unsigned int typeOfD1MinusLinearOSI(){return _typeOfD1MinusLinearOSI;};
 
-
+  /** get the number of index sets required for the simulation
+   * \return unsigned int
+   */
+  unsigned int numberOfIndexSets() const;
 
   /** initialization of the D1MinusLinearOSI integrator; for linear time
    *  invariant systems, we compute time invariant operator
@@ -238,6 +273,22 @@ public:
    * \return a boolean if it needs to be removed or not
   */
   virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+
+  /** Apply the rule to one Interaction to known if is it should be included
+   * in the IndexSet of level i
+   * \param inter the involved interaction
+   * \param i the index set level
+   * \return a boolean if it needs to be added or not
+   */
+  virtual bool addInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i);
+
+  /** Apply the rule to one Interaction to known if is it should be removed
+   * in the IndexSet of level i
+   * \param inter the involved interaction
+   * \param i the index set level
+   * \return a boolean if it needs to be removed or not
+  */
+  virtual bool removeInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i);
 
 
 

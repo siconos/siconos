@@ -42,8 +42,8 @@
 #include "NonSmoothLaw.hpp"
 #include "TypeName.hpp"
 // for Debug
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include <debug.h>
 #include <fstream>
 #include "Model.hpp"
@@ -226,13 +226,13 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
     }
   }
- 
+
   // This is the default
   _levelMinForInput = LEVELMAX;
   _levelMaxForInput = 0;
   _levelMinForOutput = LEVELMAX;
   _levelMaxForOutput = 0;
-  
+
   computeLevelsForInputAndOutput();
 
   // Loop over all DS in the graph, to reset NS part of each DS.
@@ -322,20 +322,20 @@ void Simulation::saveInMemory()
   OSIIterator it;
   for (it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->saveInMemory();
-  
+
   pushInteractionsInMemory();
 }
 
 void Simulation::pushInteractionsInMemory()
 {
   // Save OSNS state (Interactions) in Memory.
-  
+
   if (model()->nonSmoothDynamicalSystem()->topology()->indexSet0()->size() > 0)
   {
-    // Temp FP : saveInOldVar was called for each osns and each osns call 
-    // swapInOldVar for all interactions in the nsds. 
+    // Temp FP : saveInOldVar was called for each osns and each osns call
+    // swapInOldVar for all interactions in the nsds.
     // ==> let's do it only once, by the simu.
-    
+
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
@@ -509,6 +509,9 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+
+    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
+
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
@@ -547,6 +550,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
@@ -589,6 +593,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
@@ -637,6 +642,9 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
+
+
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
@@ -677,6 +685,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
 
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
@@ -686,7 +695,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
     _interaction->setSteps(2);
   };
-  void visit(const D1MinusLinearOSI&)
+  void visit(const D1MinusLinearOSI& d1OSI)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
     unsigned int upperLevelForOutput = 0;
@@ -719,6 +728,12 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+
+    /* Get the number of required index sets. */
+
+    unsigned int nbIndexSets =  d1OSI.numberOfIndexSets();
+
+    _parent->_numberOfIndexSets = std::max<int>(nbIndexSets, _parent->_numberOfIndexSets);
 
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
@@ -779,7 +794,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
+    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
@@ -839,7 +854,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
+    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
@@ -896,7 +911,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
+    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
@@ -937,6 +952,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
@@ -965,13 +981,16 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   std11::shared_ptr<SetupLevels> setupLevels;
   setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
   osi->accept(*(setupLevels.get()));
+  DEBUG_PRINTF("_numberOfIndexSets =%d\n", _numberOfIndexSets);
   if (!init) // We are not computing the levels at the initialization
   {
     SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
     unsigned int indxSize = topo->indexSetsSize();
-    if ((indxSize == LEVELMAX) || (indxSize < _levelMaxForOutput + 1))
+    assert (_numberOfIndexSets >0);
+
+    if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
     {
-      topo->indexSetsResize(_levelMaxForOutput + 1);
+      topo->indexSetsResize(_numberOfIndexSets);
       // Init if the size has changed
       for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
         topo->resetIndexSetPtr(i);
@@ -1015,5 +1034,3 @@ void Simulation::updateT(double T)
   _T = T;
   _eventsManager->updateT(T);
 }
-
-

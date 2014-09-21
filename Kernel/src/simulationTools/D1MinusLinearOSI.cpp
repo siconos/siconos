@@ -89,6 +89,22 @@ void D1MinusLinearOSI::setTypeOfD1MinusLinearOSI(unsigned int type)
   }
 }
 
+
+
+unsigned int D1MinusLinearOSI::numberOfIndexSets() const
+{
+  switch (_typeOfD1MinusLinearOSI)
+  {
+  case halfexplicit_acceleration_level:
+    return 4;
+  case halfexplicit_acceleration_level_full:
+    return 4;
+  case halfexplicit_velocity_level:
+    return 3;
+  }
+  RuntimeException::selfThrow("D1MinusLinearOSI::numberOfIndexSet - not implemented for D1minusLinear of type: " + _typeOfD1MinusLinearOSI);
+  return 0;
+}
 void D1MinusLinearOSI::initialize()
 {
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -102,10 +118,58 @@ void D1MinusLinearOSI::initialize()
     else if (dsType == Type::NewtonEulerDS)
     {
       //SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
-
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::initialize - not implemented for Dynamical system type: " + dsType);
+  }
+
+  DEBUG_PRINTF("D1MinusLinearOSI::initialize(). Type of OSI  %i ", _typeOfD1MinusLinearOSI );
+
+  SP::OneStepNSProblems allOSNSP  = simulationLink->oneStepNSProblems(); // all OSNSP
+
+  bool isOSNSPinitialized = false ;
+  switch (_typeOfD1MinusLinearOSI)
+  {
+  case halfexplicit_acceleration_level:
+  {
+    // set evaluation levels (first is of velocity, second of acceleration type)
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(simulationLink);
+
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(simulationLink);
+    isOSNSPinitialized = true ;
+  }
+  case halfexplicit_acceleration_level_full:
+  {
+    // set evaluation levels (first is of velocity, second of acceleration type)
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(simulationLink);
+
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(simulationLink);
+    isOSNSPinitialized = true ;
+  }
+  case halfexplicit_velocity_level:
+  {
+    // set evaluation levels (first is of velocity, second of acceleration type)
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(simulationLink);
+
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(1); /** !!! */
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(simulationLink);
+    isOSNSPinitialized = true ;
+  }
+  }
+  if (!isOSNSPinitialized)
+  {
+    RuntimeException::selfThrow("D1MinusLinearOSI::initialize() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI );
   }
 }
 
@@ -120,12 +184,10 @@ double D1MinusLinearOSI::computeResidu()
     return computeResiduHalfExplicitAccelerationLevel();
   case halfexplicit_acceleration_level_full:
     return computeResiduHalfExplicitAccelerationLevelFull();
-  case explicit_velocity_level:
-    RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + explicit_velocity_level);
-    break;
   case halfexplicit_velocity_level:
     return computeResiduHalfExplicitVelocityLevel();
   }
+  RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI );
   DEBUG_PRINT("D1MinusLinearOSI::computeResidu() ends\n");
   return 1;
 }
@@ -267,107 +329,132 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
   switch (_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:
-    return computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter,osnsp);
+    computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter,osnsp);
+    return;
   case halfexplicit_acceleration_level_full:
-    return computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter,osnsp);
-  case explicit_velocity_level:
-    RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + explicit_velocity_level);
-    break;
+    computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter,osnsp);
+    return;
   case halfexplicit_velocity_level:
-    RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + halfexplicit_velocity_level);
-    break;
+    computeFreeOutputHalfExplicitVelocityLevel(vertex_inter,osnsp);
+    return;
   }
+  RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
   DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput() ends\n");
 }
-
 
 
 
 bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSet.\n");
-  assert((i == 1) || (i==2));
-  // double h = simulationLink->timeStep();
-
-  double y = 0.0;
-  double yOld =0.0;
-  SP::Relation r = inter->relation();
-  RELATION::TYPES relationType = r->getType();
-  SP::LagrangianDS lds;
-  if (relationType == Lagrangian)
+  switch (_typeOfD1MinusLinearOSI)
   {
-
-    // compute yold
-    SP::BlockVector qoldB(new BlockVector());
-    SP::BlockVector voldB(new BlockVector());
-    SP::BlockVector zoldB(new BlockVector());
-    SP::BlockVector qB(new BlockVector());
-    SP::BlockVector vB(new BlockVector());
-    SP::BlockVector zB(new BlockVector());
-
-    for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
-    {
-      // check dynamical system type
-      assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
-              Type::value(**it) == Type::LagrangianDS));
-
-      // convert vDS systems into LagrangianDS and put them in vLDS
-      lds = std11::static_pointer_cast<LagrangianDS> (*it);
-
-      qoldB->insertPtr(lds->qMemory()->getSiconosVector(0));
-      voldB->insertPtr(lds->velocityMemory()->getSiconosVector(0));
-      /** \warning Warning the value of z of not stored. */
-      zoldB->insertPtr(lds->z());
-      qB->insertPtr(lds->q());
-      vB->insertPtr(lds->velocity());
-      zB->insertPtr(lds->z());
-    }
-    SiconosVector qold = *qoldB;
-    SiconosVector zold = *zoldB;
-    SiconosVector q = *qB;
-    SiconosVector z = *zB;
-
-    std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(qold, zold, *inter->y(0));
-    yOld = (inter->y(0))->getValue(0);
-    // Compute current y (we assume that q stores q_{k,1} and v stores v_{k,1})
-    // If not sure we have to store it into a new date in Interaction.
-    std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(q, z, *inter->y(0));
-    y = (inter->y(0))->getValue(0);
+  case halfexplicit_acceleration_level:
+    return addInteractionInIndexSetHalfExplicitAccelerationLevel(inter,i);
   }
-
-  DEBUG_PRINTF("D1MinusLinearOSI::addInteractionInIndexSet of level = %i yOld=%e, y=%e \n", i,  yOld, y);
-
-  assert(!isnan(y));
-
-  DEBUG_EXPR(
-    if ((yOld >0.0) && (y <= y))
-    DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSet contact are closing ((yOld >0.0) && (y <= y)).\n");
-  );
-  return ((yOld >0.0) && (y <= y));
+  RuntimeException::selfThrow("D1MinusLinearOSI::addInteractionInIndexSet() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
+  return 0;
 }
-
 
 bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  assert(i == 1);
-  double h = simulationLink->timeStep();
-  double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
-  double gamma = 1.0 / 2.0;
-  // if (_useGamma)
-  // {
-  //   gamma = _gamma;
-  // }
-  DEBUG_PRINTF("D1MinusLinearOSI::removeInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
-  y += gamma * h * yDot;
-  assert(!isnan(y));
-  DEBUG_EXPR(
-    if (y > 0)
-    DEBUG_PRINT("D1MinusLinearOSI::removeInteractionInIndexSet DEACTIVATE.\n");
-  );
-
-  return (y > 0.0);
+  DEBUG_PRINT("D1MinusLinearOSI::removeInteractionInIndexSet.\n");
+  switch (_typeOfD1MinusLinearOSI)
+  {
+  case halfexplicit_acceleration_level:
+    return removeInteractionInIndexSetHalfExplicitAccelerationLevel(inter,i);
+  }
+  RuntimeException::selfThrow("D1MinusLinearOSI::removeInteractionInIndexSet() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
+  return 0;
 }
+
+
+// bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+// {
+//   DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSet.\n");
+//   assert(0);
+//   assert((i == 1) || (i==2));
+//   // double h = simulationLink->timeStep();
+
+//   double y = 0.0;
+//   double yOld =0.0;
+//   SP::Relation r = inter->relation();
+//   RELATION::TYPES relationType = r->getType();
+//   SP::LagrangianDS lds;
+//   if (relationType == Lagrangian)
+//   {
+
+//     // compute yold
+//     SP::BlockVector qoldB(new BlockVector());
+//     SP::BlockVector voldB(new BlockVector());
+//     SP::BlockVector zoldB(new BlockVector());
+//     SP::BlockVector qB(new BlockVector());
+//     SP::BlockVector vB(new BlockVector());
+//     SP::BlockVector zB(new BlockVector());
+
+//     for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+//     {
+//       // check dynamical system type
+//       assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
+//               Type::value(**it) == Type::LagrangianDS));
+
+//       // convert vDS systems into LagrangianDS and put them in vLDS
+//       lds = std11::static_pointer_cast<LagrangianDS> (*it);
+
+//       qoldB->insertPtr(lds->qMemory()->getSiconosVector(0));
+//       voldB->insertPtr(lds->velocityMemory()->getSiconosVector(0));
+//       /** \warning Warning the value of z of not stored. */
+//       zoldB->insertPtr(lds->z());
+//       qB->insertPtr(lds->q());
+//       vB->insertPtr(lds->velocity());
+//       zB->insertPtr(lds->z());
+//     }
+//     SiconosVector qold = *qoldB;
+//     SiconosVector zold = *zoldB;
+//     SiconosVector q = *qB;
+//     SiconosVector z = *zB;
+
+//     std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(qold, zold, *inter->y(0));
+//     yOld = (inter->y(0))->getValue(0);
+//     // Compute current y (we assume that q stores q_{k,1} and v stores v_{k,1})
+//     // If not sure we have to store it into a new date in Interaction.
+//     std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(q, z, *inter->y(0));
+//     y = (inter->y(0))->getValue(0);
+//   }
+
+//   DEBUG_PRINTF("D1MinusLinearOSI::addInteractionInIndexSet of level = %i yOld=%e, y=%e \n", i,  yOld, y);
+
+//   assert(!isnan(y));
+
+//   DEBUG_EXPR(
+//     if ((yOld >0.0) && (y <= y))
+//     DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSet contact are closing ((yOld >0.0) && (y <= y)).\n");
+//   );
+//   return ((yOld >0.0) && (y <= y));
+// }
+
+
+// bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+// {
+//   assert(i == 1);
+//   double h = simulationLink->timeStep();
+//   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
+//   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
+//   double gamma = 1.0 / 2.0;
+//   // if (_useGamma)
+//   // {
+//   //   gamma = _gamma;
+//   // }
+//   DEBUG_PRINTF("D1MinusLinearOSI::removeInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+//   y += gamma * h * yDot;
+//   assert(!isnan(y));
+//   DEBUG_EXPR(
+//     if (y > 0)
+//     DEBUG_PRINT("D1MinusLinearOSI::removeInteractionInIndexSet DEACTIVATE.\n");
+//   );
+
+//   return (y > 0.0);
+// }
 
 
 

@@ -874,3 +874,71 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
   DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput ends\n");
 
 }
+
+
+bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i)
+{
+  DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel.\n");
+
+  if (i == 1)
+  {
+    /* ACTIVE FOR IMPACT CALCULATIONS? Contacts which have been closing
+       in the last time step */
+    DEBUG_PRINT("\nUPDATE INDEXSET 1\n");
+
+    double y = (*(inter->y(0)))(0); // current position
+    double yOld = (*(inter->yOld(0)))(0); // old position
+
+    DEBUG_PRINTF("y= %f\n", y);
+    DEBUG_PRINTF("yOld= %f\n", yOld);
+
+    /* if Interaction has not been active in the previous calculation
+       and now becomes active */
+    return (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS);
+  }
+  else if (i == 2)
+  {
+
+      double y = (*(inter->y(0)))(0); // current position
+      //double yOld = (*(inter->yOld(0)))(0); // old position
+      double yDot = (*(inter->y(1)))(0); // current position
+
+
+      DEBUG_PRINTF("y= %f\n", y);
+      DEBUG_PRINTF("yDot= %f\n", yDot);
+
+      DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) <<std::endl;);
+      DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) <<std::endl;);
+
+      return (y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS);
+  }
+  else
+    RuntimeException::selfThrow("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel, IndexSet[i > 2] does not exist.");
+  return false;
+}
+
+bool D1MinusLinearOSI::removeInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i)
+{
+  DEBUG_PRINT("D1MinusLinearOSI::removeInteractionInIndexSetHalfExplicitAccelerationLevel.\n");
+
+  if (i == 2)
+  {
+
+      double y = (*(inter->y(0)))(0); // current position
+      //double yOld = (*(inter->yOld(0)))(0); // old position
+      double yDot = (*(inter->y(1)))(0); // current position
+
+
+      DEBUG_PRINTF("y= %f\n", y);
+      DEBUG_PRINTF("yDot= %f\n", yDot);
+
+      DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) <<std::endl;);
+      DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) <<std::endl;);
+      /* if Interaction has been active in the previous calculation
+         and now becomes in-active */
+      return (y > DEFAULT_TOL_D1MINUS) || (yDot > DEFAULT_TOL_D1MINUS);
+  }
+  else
+    RuntimeException::selfThrow("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel, IndexSet[i > 2] does not exist.");
+  return false;
+}
