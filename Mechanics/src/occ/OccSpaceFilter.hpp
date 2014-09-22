@@ -5,6 +5,8 @@
 
 class OccSpaceFilter : public SpaceFilter
 {
+public:
+  OccSpaceFilter(SP::Model model) : SpaceFilter(model) {};
 
   virtual void buildInteractions(double time) {};
 

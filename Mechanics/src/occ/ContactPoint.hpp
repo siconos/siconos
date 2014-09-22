@@ -29,9 +29,9 @@ struct ContactPoint
 {
   ContactPoint(SP::OccContactShape shape) : _shape(shape) {};
 
-  SP::OccContactShape contactShape() const { return _shape; };
+  SPC::OccContactShape contactShape() const { return _shape; };
 
-  SP::OccContactShape _shape;
+  SPC::OccContactShape _shape;
 
   double u;
   double v;

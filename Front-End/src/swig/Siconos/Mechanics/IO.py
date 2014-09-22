@@ -272,11 +272,11 @@ class ShapeCollection():
                         ref_brep = self.get(self.attributes(shape_name)['brep'])
                         if self.attributes(shape_name)['contact'] == 'Face':
                             self._shapes[shape_name] = \
-                                        OccContactFace(ref_brep.data(),
+                                        OccContactFace(ref_brep,
                                                        contact_index)
                         elif self.attributes(shape_name)['contact'] == 'Edge':
                             self._shapes[shape_name] = \
-                                        OccContactEdge(ref_brep.data(),
+                                        OccContactEdge(ref_brep,
                                                        contact_index)
                         self._io._keep.append(self._shapes[shape_name])
                 else:
@@ -650,7 +650,7 @@ class Hdf5():
                 else:
                     inertia = None
 
-                    
+
                 if True in ('type' in self.shapes()[ctr.attrs['name']].attrs
                             and 'brep' in self.shapes()[ctr.attrs['name']].attrs['type']
                             for ctr in input_ctrs):
@@ -947,13 +947,15 @@ class Hdf5():
 
     def run(self,
             with_timer=False,
+            time_stepping=None,
+            space_filter=None,
             length_scale=1,
             t0=0,
             T=10,
             h=0.0005,
-            multipointIterations=True,
+            multipoints_iterations=True,
             theta=0.50001,
-            NewtonMaxIter=20,
+            Newton_max_iter=20,
             set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=100000,
@@ -974,7 +976,7 @@ class Hdf5():
           multiPointIterations : use bullet "multipoint iterations"
                                  (default True)
           theta : parameter for Moreau-Jean OSI (default 0.50001)
-          NewtonMaxIter : maximum number of iterations for
+          Newton_max_iter : maximum number of iterations for
                           integrator Newton loop (default 20)
           set_external_forces : method for external forces
                                 (default earth gravity)
@@ -999,6 +1001,12 @@ class Hdf5():
 
         if set_external_forces is not None:
             self._set_external_forces = set_external_forces
+
+        if time_stepping is None:
+            time_stepping = BulletTimeStepping
+
+        if space_filter is None:
+            space_filter = BulletSpaceFilter
 
         # Model
         #
@@ -1027,22 +1035,23 @@ class Hdf5():
         osnspb.setKeepLambdaAndYState(True)
 
         # (5) broadphase contact detection
-        self._broadphase = BulletSpaceFilter(model)
-        if not multipointIterations:
+        self._broadphase = space_filter(model)
+        if not multipoints_iterations:
             print("""
             ConvexConvexMultipointIterations and PlaneConvexMultipointIterations are unset
             """)
         else:
-            self._broadphase.collisionConfiguration().\
-                setConvexConvexMultipointIterations()
-            self._broadphase.collisionConfiguration().\
-                setPlaneConvexMultipointIterations()
+            if hasattr(self._broadphase, 'collisionConfiguration'):
+                self._broadphase.collisionConfiguration().\
+                    setConvexConvexMultipointIterations()
+                self._broadphase.collisionConfiguration().\
+                    setPlaneConvexMultipointIterations()
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
-        simulation = BulletTimeStepping(timedisc, self._broadphase)
+        simulation = time_stepping(timedisc)
         simulation.insertIntegrator(self._osi)
         simulation.insertNonSmoothProblem(osnspb)
-        simulation.setNewtonMaxIteration(NewtonMaxIter)
+        simulation.setNewtonMaxIteration(Newton_max_iter)
 
         k = 1
 

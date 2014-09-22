@@ -1,5 +1,6 @@
 
-#include <IOConfig.h>
+#include "IOConfig.h"
+#include "MechanicsIO.hpp"
 
 #define HAVE_SICONOS_MECHANICS
 #include <VisitorMaker.hpp>
@@ -7,7 +8,6 @@
 #include <SpaceFilter.hpp>
 #include <BlockVector.hpp>
 #include <Interaction.hpp>
-
 #include <Question.hpp>
 
 #ifdef HAVE_BULLET
@@ -20,9 +20,12 @@
 #ifdef HAVE_OCC
 #include <OccBody.hpp>
 #include <OccR.hpp>
+#include <OccContactShape.hpp>
+#include <OccContactEdge.hpp>
+#include <OccContactFace.hpp>
 #endif
 
-#include "MechanicsIO.hpp"
+
 
 #include <SiconosGraph.hpp>
 #include <LagrangianDS.hpp>

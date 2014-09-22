@@ -1,6 +1,8 @@
 #include "OccR.hpp"
 #include "ContactPoint.hpp"
 #include "OccContactShape.hpp"
+#include "OccContactFace.hpp"
+#include "OccContactEdge.hpp"
 #include "ContactShapeDistance.hpp"
 
 #include <limits>
@@ -18,9 +20,11 @@ OccR::OccR(const ContactPoint& contact1,
 void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
 
-  ContactShapeDistance& dist =
-    *this->_contact1.contactShape()->distance(_contact2.contactShape(),
-                                              _normalFromFace1);
+  OccContactShape::Geometer geometer(*this->_contact1.contactShape());
+
+  this->_contact2.contactShape()->accept(geometer);
+
+  ContactShapeDistance& dist = *geometer.answer;
 
   double& X1 = dist.x1;
   double& Y1 = dist.y1;

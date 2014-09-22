@@ -26,6 +26,8 @@ DEFINE_SPTR(NSLawMatrix);
 DEFINE_SPTR(OccR);
 DEFINE_SPTR(OccBody);
 DEFINE_SPTR(OccContactShape);
+DEFINE_SPTR(OccContactFace);
+DEFINE_SPTR(OccContactEdge);
 DEFINE_SPTR(ContactShapes);
 DEFINE_SPTR(ContactPoint);
 DEFINE_SPTR(ContactPoints);

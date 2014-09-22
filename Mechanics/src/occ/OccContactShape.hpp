@@ -26,10 +26,12 @@
 
 #include <SiconosFwd.hpp>
 #include <string>
+#include <SiconosVisitor.hpp>
 
 DEFINE_SPTR(TopoDS_Shape);
 DEFINE_SPTR(TopoDS_Edge);
 DEFINE_SPTR(TopoDS_Face);
+
 
 struct OccContactShape
 {
@@ -58,6 +60,10 @@ struct OccContactShape
   OccContactShape(const OccContactShape& shape)
     : _shape(shape.shape()) {};
 
+  /** Destructor.
+   */
+  virtual ~OccContactShape() {};
+
   /** Return shared pointer on data
    */
   SP::TopoDS_Shape shape() const { return _shape;};
@@ -74,17 +80,15 @@ struct OccContactShape
    */
   ContactTypeValue contactType() const;
 
-  virtual const TopoDS_Shape& contact() const;
-
   /** Get a face from its index.
       \param index : the index of the face.
   */
-  const TopoDS_Face face(unsigned int index) const;
+  SPC::TopoDS_Face face(unsigned int index) const;
 
   /** Get an edge from its index.
       \param index : the index of the face.
   */
-  const TopoDS_Edge edge(unsigned int index) const;
+  SPC::TopoDS_Edge edge(unsigned int index) const;
 
   /** Export the contact shape into a string.
    */
@@ -105,13 +109,29 @@ struct OccContactShape
   virtual void move(const SiconosVector& q);
 
 
-  /** Distance to another contact shape.
-      \param psh2 : the other contact shape.
+  /** Distance to a general contact shape.
+      \param sh2 : the contact shape.
       \param normalFromFace1 : normal on first contact shape, default on second.
       \return the distance, contact points and normal in ContactShapeDistance
    */
   virtual SP::ContactShapeDistance distance(
-    SPC::OccContactShape psh2, bool normalFromFace1=false) const;
+    const OccContactShape& sh2, bool normalFromFace1=false) const;
+
+  /** Distance to a contact face.
+      \param sh2 : the contact face.
+      \param normalFromFace1 : normal on first contact shape, default on second.
+      \return the distance, contact points and normal in ContactShapeDistance
+   */
+  virtual SP::ContactShapeDistance distance(
+    const OccContactFace& sh2, bool normalFromFace1=false) const;
+
+  /** Distance to a contact edge.
+      \param sh2 : the contact edge.
+      \param normalFromFace1 : normal on first contact shape, default on second.
+      \return the distance, contact points and normal in ContactShapeDistance
+   */
+  virtual SP::ContactShapeDistance distance(
+    const OccContactEdge& sh2, bool normalFromFace1=false) const;
 
   /** Computed UV bounds.
    * @{
@@ -128,6 +148,32 @@ struct OccContactShape
   unsigned int contactGroup;
 
   SP::TopoDS_Shape _shape;
+
+  struct Geometer : public SiconosVisitor
+  {
+    SP::ContactShapeDistance answer;
+    const OccContactShape& base;
+
+    Geometer(const OccContactShape& base) : base(base) {};
+
+    using SiconosVisitor::visit;
+
+    void visit(const OccContactFace& face)
+    {
+      answer = base.distance(face);
+    }
+
+    void visit(const OccContactEdge& edge)
+    {
+      answer = base.distance(edge);
+    }
+
+  };
+
+
+  /** visitors hook
+   */
+  VIRTUAL_ACCEPT_VISITORS(OccContactShape);
 
 };
 

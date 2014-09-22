@@ -26,13 +26,9 @@
 class BulletTimeStepping : public TimeStepping
 {
 
-  SP::BulletSpaceFilter _spaceFilter;
-
 public:
-  BulletTimeStepping(SP::TimeDiscretisation t, SP::BulletSpaceFilter sf) :
-    TimeStepping(t),
-    _spaceFilter(sf) {};
-
+  BulletTimeStepping(SP::TimeDiscretisation t) :
+    TimeStepping(t) {};
 
   void updateWorldFromDS();
 };

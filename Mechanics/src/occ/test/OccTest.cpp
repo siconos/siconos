@@ -142,8 +142,8 @@ void OccTest::distance()
   OccContactShape sphere1(mksphere1.Shape());
   OccContactShape sphere2(mksphere2.Shape());
 
-  OccContactShape sphere1_contact(sphere1.face(0));
-  OccContactShape sphere2_contact(sphere2.face(0));
+  OccContactFace sphere1_contact(sphere1, 0);
+  OccContactFace sphere2_contact(sphere2, 0);
 
   SP::SiconosVector position1(new SiconosVector(7));
   SP::SiconosVector position2(new SiconosVector(7));
@@ -198,7 +198,7 @@ void OccTest::distance()
             << std::endl;
 
   SP::ContactShapeDistance pdist =
-    body1->contactShape(0).distance(createSPtrConstOccContactShape(body2->contactShape(0)));
+    body1->contactShape(0).distance(body2->contactShape(0));
 
   ContactShapeDistance& dist = *pdist;
 

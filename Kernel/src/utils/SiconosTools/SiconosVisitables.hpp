@@ -88,6 +88,9 @@
 
 #define OCC_CLASSES()                             \
   REGISTER(OccR)                                  \
+  REGISTER(OccContactShape)                       \
+  REGISTER(OccContactFace)                        \
+  REGISTER(OccContactEdge)                        \
   REGISTER_BASE(OccBody, NewtonEulerDS)
 
 

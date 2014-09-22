@@ -27,6 +27,13 @@
 %include KernelTypes.i
 
 %import Kernel.i
+
+%{
+#include <ExternalBody.hpp>
+%}
+%import ../ContactDetection/Base.i
+
+
 %include pyRegister.i
 
 
@@ -53,6 +60,19 @@ typedef Interaction Interaction;
 // due to undefined private copy constructors
 %feature("notabstract") OccTimeStepping;
 
+%typecheck(SWIG_TYPECHECK_INTEGER) (const OccContactShape & reference_shape) ()
+%{
+  // director mess
+  int res;
+  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std11__shared_ptrT_OccContactShape_t, 0);
+  _v = SWIG_CheckState(res);
+  if(!_v)
+  {
+    res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_OccContactShape, 0);
+  }
+%}
+
+
 PY_FULL_REGISTER(ContactShapeDistance);
 PY_FULL_REGISTER(OccContactShape);
 PY_FULL_REGISTER(OccContactFace);
@@ -62,6 +82,7 @@ PY_FULL_REGISTER(OccBody);
 PY_FULL_REGISTER(OccR);
 PY_FULL_REGISTER(OccTimeStepping);
 PY_FULL_REGISTER(OccSpaceFilter);
+
 
 %inline
 %{
@@ -98,3 +119,4 @@ PY_FULL_REGISTER(OccSpaceFilter);
   }
 
 %}
+

@@ -152,6 +152,8 @@ public:
               SP::Model model,
               SP::SiconosMatrix plans);
 
+  SpaceFilter(SP::Model model) : _model(model) {};
+
   SpaceFilter();
 
   /** 2D/3D objects insertion
