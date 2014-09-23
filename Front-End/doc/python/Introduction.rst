@@ -32,38 +32,29 @@ input for matrices and vectors in the ``C`` and ``C++`` API. For
 example, with ``Numerics`` module a linear complementarity problem :
 
 .. math::
-   :nowrap:
 
-   \begin{eqnarray*}
       \begin{cases}
         w=Mz+q \\
         0 \leq w \perp z\geq 0
       \end{cases}
-    \end{eqnarray*}
 
 with 
 
 .. math::
-   :nowrap:
 
-   \begin{eqnarray*}
-        M = \begin{pmatrix}
-        2 & 1 \\
-        1 & 2 \\
-        \end{pmatrix}
-    \end{eqnarray*}
+   M = \begin{pmatrix}
+   2 & 1 \\
+   1 & 2 \\
+   \end{pmatrix}
 
 and
 
 .. math::
-   :nowrap:
-
-   \begin{eqnarray*}
-        q = \begin{pmatrix}
+   
+   q = \begin{pmatrix}
         -5 \\
         -6
-        \end{pmatrix}
-    \end{eqnarray*}
+   \end{pmatrix}
 
 may be declared like this:
 

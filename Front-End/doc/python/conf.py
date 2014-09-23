@@ -28,7 +28,7 @@ import re
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.coverage', 'sphinx.ext.mathjax']
 
 # DOXY_XML_DIR=/home/build/maurice/Release/Front-End/src/swig/Siconos/FrontEnd/xml make html
 #build_dir = os.getenv('DOXY_XML_DIR')
