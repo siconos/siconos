@@ -15,19 +15,19 @@ invariant dynamical system with one degree of freedom.
 
 
 where :
- - :math:`q` is the state vector, here of size 1. The only coordinate
+ - :math:`q` is the state vector. :math:`q \in \mathbb{R}^{1}`. The only coordinate
    corresponds to the height of the center of the ball.
- - :math:`M` is the time invariant mass matrix, here of size 1 * 1.
- - :math:`F_{ext}` are the external forces, here the gravity.
+ - :math:`M` is the time invariant mass matrix. :math:`M` is a 1 x 1 matrix.
+ - :math:`F_{ext}` contains the external forces. Here the gravity is applied.
  - :math:`p` is the reaction force due to the nonsmooth interaction with the floor.
 
 We first import the needed classes from `Siconos.Kernel` module:
 
- - `LagrangianLinearTIDS`, for a linear lagrangian time invariant dynamical system object.
- - `LagrangianLinearTIR`, for a linear lagrangian time invariant relation object.
- - `NewtonImpactNSL`, for a Newton Impact non smooth law object.
- - `Interaction`, to build an object that will tie the relation and the nonsmooth law.
- - `Model`, to build an object that will gather the whole definitions.
+ - `LagrangianLinearTIDS`, for a Linear Lagrangian Time Invariant Dynamical System object.
+ - `LagrangianLinearTIR`, for a Linear Lagrangian Time Invariant Relation object.
+ - `NewtonImpactNSL`, for a Newton Impact NonSmooth Law object.
+ - `Interaction`, to build an object that glues the relation and the nonsmooth law.
+ - `Model`, to build an object that gathers all the modeling and simulation objects.
 
 .. testcode::
 
@@ -39,9 +39,8 @@ To build a `LagrangianLinearTIDS` object, we have to give an initial
 position vector, an initial velocity vector and the constant mass
 matrix of the object.
 
-The position and velocity are both vectors of size 1 and the mass
-matrix is here defined as a one row * one column matrix :math:`\{ 1
-\}`:
+The position and velocity are both vectors of size 1. The mass
+matrix is defined as a 1 x 1 matrix.
 
 .. testcode::
   
@@ -52,20 +51,19 @@ matrix is here defined as a one row * one column matrix :math:`\{ 1
   
   ball = LagrangianLinearTIDS(position, velocity, M)
 
-
-The gravity is applied to the ball as a constant external force :
+The gravity is expressed in the coordinates choosen for the ball. It is then
+applied as a constant external force.
 
 .. testcode::
 
   g = 9.81  
-  weight = [- mass * g]    # a vector of size 1 (number of degrees of freedom)
-  ball.setFExtPtr(weight)  # set the external force of the lagrangian dynamical system
-
+  weight = [- mass * g]    # a vector of size 1
+  ball.setFExtPtr(weight)  # apply gravity
 
 The ball is constrained to lie above the floor. The relation between
 the state space and the constraint space is a linear mapping :math:`y
 = C * q` where :math:`y` denotes the constraint vector and :math:`q`
-denotes the state vector. :math:`C` is the one row * one column matrix:
+denotes the state vector. :math:`C` is a 1 x 1 matrix: 
 :math:`C = \{1\}`
 
 We build an object for this relation with the `LagrangianLinearTIR` class:
@@ -75,10 +73,10 @@ We build an object for this relation with the `LagrangianLinearTIR` class:
   C = [[1]]           
   relation = LagrangianLinearTIR(C)
 
-The "above floor" constraint is defined by the unilateral law :math:`y
-> 0` and a relation between velocities before and after impact. if
-:math:`t^{+}` denotes time before impact and :math:`t^{-}` denotes
-time after impact then if we add to the unilateral constraint a linear
+The "above floor" constraint is unilateral and defined by :math:`y
+> 0` and a relation between velocities before and after impact. Let
+:math:`t^{-}` denotes the time instant before impact and :math:`t^{+}` denotes
+time instant after impact. Then if we add to the unilateral constraint a linear
 relation between the velocities :math:`\dot y(t^{+}) = e * \dot
 y(t^{-})`, we define a Newton impact nonsmooth law:
 

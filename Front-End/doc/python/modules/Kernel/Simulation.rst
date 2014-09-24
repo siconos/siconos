@@ -45,7 +45,7 @@ Then, we attach the previously defined dynamical system to the integrator:
 
 .. testcode::
 
-   OSI.insertDynamicalSystem(ball)
+   bouncingBall.nonSmoothDynamicalSystem().setOSI(ball, OSI)
 
 And we attach this one step integrator to the simulation:
 
@@ -53,19 +53,16 @@ And we attach this one step integrator to the simulation:
 
    simulation.insertIntegrator(OSI)
    
-
-In the Moreau-Jean time-stepping scheme, the unilateral constraints,
-after being reformulated in terms of velocity, lead at each time step
-to nonsmooth optimization problems. In the case of a bouncing ball
-without friction (a constraint space with one dimension), the problem
-is a linear complementarity problem (LCP):
+In the Moreau-Jean time-stepping scheme, the unilateral constraints, after
+being reformulated at the velocity level, lead at each timestep to nonsmooth
+optimization problems. In our case, it is a linear complementarity problem
+(LCP):
 
 .. testcode::
 
    lcp = LCP()
 
-This one step nonsmooth problem object carry the default settings for
-the LCP solver, which may be modified. As the one step integrator
+The default solver for LCP is Lemke. As the one step integrator
 object, it needs to be attached to the simulation:
 
 .. testcode::
@@ -73,19 +70,27 @@ object, it needs to be attached to the simulation:
    simulation.insertNonSmoothProblem(lcp)
 
 
-At this stage, the simulation object does not know the relations we
-have defined for the dynamical systems. An initialization by the model
-needs to be done:
+At this stage, the simulation object does not know the interactions we have
+defined for the dynamical systems. An initialization phase remains to be done:
 
 .. testcode::
 
    bouncingBall.initialize(simulation)
 
-The simulation can now be executed by a loop:
+The simulation is now ready for execution.
+
+The simulation object provides methods in order to do the computation at each timestep:
+
+  - `simulation.hasNextEvent()` to check if some computation remains to be done.
+  - `simulation.computeOneStep()` to perform the computation a the current timestep.
+  - `simulation.nextStep()` to increment the current timestep.
+
+
+The following loop takes care of running the simulation:
 
 .. testcode::
 
-   while(simulation.hasNextEvent()):
+   while simulation.hasNextEvent():
        simulation.computeOneStep()
 
        # the current time is simulation.nextTime()
