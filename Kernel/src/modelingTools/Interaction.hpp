@@ -182,17 +182,26 @@ private:
 
 public:
 
-  /** default constructor */
+  /** Default constructor. */
   Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2)
   {};
 
-   /** constructor with no data
-   *  \param interactionSize size of the interaction, i.e. the size of the input and output
+   /** Constructor with interaction size, NonSmoothLaw and Relation.
+   *  \param interactionSize size of the interaction,
+             i.e. the size of the input and output
    *  \param NSL pointer to the NonSmoothLaw
    *  \param rel a pointer to the Relation
    *  \param number the number of this Interaction (default 0)
    */
   Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number = 0);
+
+  /** constructor with NonSmoothLaw and Relation.
+   *  \param NSL pointer to the NonSmoothLaw, the interaction size is
+   *         infered from the size of the NonSmoothLaw
+   *  \param rel a pointer to the Relation
+   *  \param number the number of this Interaction (default 0)
+   */
+  Interaction(SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number = 0);
 
   /** destructor
    */
@@ -244,54 +253,56 @@ public:
     return _number;
   }
 
-  /** set number
-  *  \param int number : the value to set number
+  /** Set number of the Interaction.
+  *  \param newNumber : int number : the value to set number.
   */
   inline void setNumber(const int newNumber)
   {
     _number = newNumber;
   }
 
-  /** set the lower level for output y
-   * \param an unsigned int
+  /** Set the lower level for output y.
+   * \param newVal : an unsigned int
    */
   inline void setLowerLevelForOutput(const unsigned int newVal)
   {
     _lowerLevelForOutput = newVal;
   };
 
-  /** set the upper level for output y
-   * \param an unsigned int
+  /** Set the upper level for output y.
+   * \param newVal : an unsigned int
    */
   inline void setUpperLevelForOutput(const unsigned int newVal)
   {
     _upperLevelForOutput = newVal;
   };
 
-  /** get the lower level for output y
+  /** Get the lower level for output y.
+      \return an unsigned int.
    */
   inline unsigned int lowerLevelForOutput()
   {
     return _lowerLevelForOutput;
   };
 
-  /** get the upper level for output y
+  /** Get the upper level for output y.
+      \return an unsigned int.
    */
   inline unsigned int  upperLevelForOutput()
   {
     return _upperLevelForOutput;
   };
 
-  /** set the lower level for input Lambda
-   * \param an unsigned int
+  /** Set the lower level for input Lambda.
+   * \param newVal : an unsigned int
    */
   inline void setLowerLevelForInput(const unsigned int newVal)
   {
     _lowerLevelForInput = newVal;
   };
 
-  /** set the upper level for input Lambda
-   * \param an unsigned int
+  /** Set the upper level for input Lambda.
+   * \param newVal : an unsigned int.
    */
   inline void setUpperLevelForInput(const unsigned int newVal)
   {
@@ -299,14 +310,16 @@ public:
   };
 
 
-  /** get the lower level for input Lambda
+  /** Get the lower level for input Lambda.
+      \return an unsigned int.
    */
   inline unsigned int lowerLevelForInput()
   {
     return _lowerLevelForInput ;
   };
 
-  /** get the upper level for input Lambda
+  /** Get the upper level for input Lambda.
+      \return an unsigned int.
    */
   inline unsigned int upperLevelForInput()
   {
@@ -314,16 +327,16 @@ public:
   };
 
 
-  /** get the dimension of the interaction (y and _lambda size)
-  *  \return an unsigned int
+  /** Get the dimension of the interaction (y and _lambda size).
+  *  \return an unsigned int.
   */
   inline unsigned int getSizeOfY() const
   {
     return _interactionSize;
   }
 
-  /** set the dimension of the Interaction
-  *  \param an unsigned int
+  /** Set the dimension of the Interaction.
+  *  \param newVal : an unsigned int.
   */
   inline void setInteractionSize(const unsigned int newVal)
   {
@@ -335,8 +348,8 @@ public:
   //  */
   // inline unsigned int numberOfRelations() const {return _numberOfRelations;}
 
-  /** get the sum of DS sizes, for DS involved in interaction
-   *  \return an unsigned int
+  /** Get the sum of DS sizes, for DS involved in interaction.
+   *  \return an unsigned int.
    */
   inline unsigned int getSizeOfDS() const
   {
@@ -346,12 +359,12 @@ public:
   /** Set the number of dynamical systems concerned by
       this interaction. Warning FP: this function is supposed
       to be called only during topology->link(inter, ds1, ds2) call.
-      \param bool : true if two ds, else false
+      \param val : true if two ds, else false
    */
   void setHas2Bodies(bool val) {_has2Bodies = val;}
 
   /** Check the number of dynamical systems concerned by
-      this interaction
+      this interaction.
       \return bool : true if two ds, else false
    */
   bool has2Bodies() const {return _has2Bodies;}
@@ -378,7 +391,8 @@ public:
 
   // -- y --
 
-  /** get y[i], derivative number i of output
+  /** Get y[i], derivative number i of output.
+   * \param i : the derivative number.
    *  \return BlockVector
    */
   inline const SiconosVector getCopyOfy(const unsigned int i) const

@@ -59,13 +59,13 @@ Vinit = 10.0     # initial voltage
 Modeltitle = "DiodeBridge"
 
 withPlot = True
-if (withPlot):
+if withPlot:
     from matplotlib.pyplot import subplot, title, plot, grid, show
 
 from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
-                           ComplementarityConditionNSL, Interaction,\
-                           Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
-                           TimeStepping
+    ComplementarityConditionNSL, Interaction,\
+    Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
+    TimeStepping
 
 #
 # dynamical system
@@ -98,7 +98,7 @@ LTIRDiodeBridge = FirstOrderLinearTIR(C, B)
 LTIRDiodeBridge.setDPtr(D)
 
 nslaw = ComplementarityConditionNSL(4)
-InterDiodeBridge = Interaction(4, nslaw, LTIRDiodeBridge, 1)
+InterDiodeBridge = Interaction(nslaw, LTIRDiodeBridge, 1)
 
 
 #

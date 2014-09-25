@@ -90,11 +90,8 @@ object:
 
 .. testcode::
 
-  # the first parameter is here the dimension of the constraint space
-  inter = Interaction(1,      
-                      nslaw,    
+  inter = Interaction(nslaw,    
                       relation) 
-
 
 We finally build a `Model` object to gather the dynamical sytems we
 have defined (here just the ball) and link the interactions to them.

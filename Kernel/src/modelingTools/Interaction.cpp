@@ -48,10 +48,21 @@ using namespace RELATION;
 // --- CONSTRUCTORS ---
 
 /* initialisation with empty set */
-Interaction::Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number):
-  _initialized(false), _number(number), _interactionSize(interactionSize), _sizeOfDS(0), _has2Bodies(false),
-  _y(2),  _nslaw(NSL), _relation(rel)
+Interaction::Interaction(unsigned int interactionSize,
+                         SP::NonSmoothLaw NSL,
+                         SP::Relation rel,
+                         unsigned int number) :
+  _initialized(false), _number(number), _interactionSize(interactionSize),
+  _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
 {}
+
+Interaction::Interaction(SP::NonSmoothLaw NSL,
+                         SP::Relation rel,
+                         unsigned int number) :
+  _initialized(false), _number(number), _interactionSize(NSL->size()),
+  _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
+{}
+
 
 void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
                              DynamicalSystem& ds1, VectorOfVectors& workV1,
