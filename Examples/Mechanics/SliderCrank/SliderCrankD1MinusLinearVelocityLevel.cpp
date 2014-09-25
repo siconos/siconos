@@ -56,10 +56,10 @@ int main(int argc, char* argv[])
     double e2 = 0.4;
     double e3 = 0.4;
     double e4 = 0.4;
-    e1 = 0.1;
-    e2 = 0.1;
-    e3 = 0.1;
-    e4 = 0.1;
+    // e1 = 0.1;
+    // e2 = 0.1;
+    // e3 = 0.1;
+    // e4 = 0.1;
     //double mu1 = 0.01;
     //double mu2 = 0.01;
     //double mu3 = 0.01;

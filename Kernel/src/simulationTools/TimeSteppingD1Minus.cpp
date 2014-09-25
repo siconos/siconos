@@ -29,8 +29,8 @@
 #include "NewtonEulerR.hpp"
 #include "TypeName.hpp"
 #include "NonSmoothLaw.hpp"
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -228,6 +228,11 @@ void TimeSteppingD1Minus::advanceToEvent()
 
   if (!_allNSProblems->empty())
     computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+
+  DEBUG_EXPR(
+    if (model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->size() >0)
+      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->display();
+    );
 
   // update on impulse level
   // * calculate global impulse (p_{k+1}^+)

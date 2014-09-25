@@ -56,7 +56,8 @@ void D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactNSL& nsla
   subCoord[1] = _inter->nonSmoothLaw()->size();
   subCoord[2] = 0;
   subCoord[3] = subCoord[1];
-  subscal(e, *(_inter->y_k(_osnsp->inputOutputLevel())), *(_inter->yForNSsolver()), subCoord, false);
+//  subscal(e, *(_inter->y_k(_osnsp->inputOutputLevel())), *(_inter->yForNSsolver()), subCoord, false);
+  subscal(e, *(_inter->yForNSsolver()), *(_inter->yForNSsolver()), subCoord, false);
 }
 
 
