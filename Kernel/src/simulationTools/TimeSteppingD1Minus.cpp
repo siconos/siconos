@@ -110,7 +110,6 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
 
   InteractionsGraph::VIterator uipend, uip;
-  bool forecastImpact = false;
   for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip)
     /* loop over ALL vertices in indexSet0 */
   {
@@ -120,19 +119,14 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
         and (Osi->addInteractionInIndexSet(inter, i)))
     {
       indexSetCurrent->copy_vertex(inter, *indexSet0);
-      forecastImpact=true;
       topo->setHasChanged(true);
-      if (i == 3)
-      {
-        forecastImpact = true;
-      }
     }
     else if ((indexSetCurrent->is_vertex(inter))
              and !(Osi->addInteractionInIndexSet(inter, i)))
     {
       indexSetCurrent->remove_vertex(inter);
       topo->setHasChanged(true);
-      if (i< 3)
+      if (i <= _levelMaxForInput)
       {
         inter->lambda(i)->zero();
       }

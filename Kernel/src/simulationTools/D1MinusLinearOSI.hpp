@@ -306,8 +306,21 @@ public:
   */
   virtual bool removeInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i);
 
+ /** Apply the rule to one Interaction to known if is it should be included
+   * in the IndexSet of level i
+   * \param inter the involved interaction
+   * \param i the index set level
+   * \return a boolean if it needs to be added or not
+   */
+  virtual bool addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Interaction inter, unsigned int i);
 
-
+  /** Apply the rule to one Interaction to known if is it should be removed
+   * in the IndexSet of level i
+   * \param inter the involved interaction
+   * \param i the index set level
+   * \return a boolean if it needs to be removed or not
+  */
+  virtual bool removeInteractionInIndexSetHalfExplicitVelocityLevel(SP::Interaction inter, unsigned int i);
 
   /** displays the data of the D1MinusLinearOSI's integrator */
   virtual void display()

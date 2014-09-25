@@ -31,8 +31,8 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 
@@ -351,6 +351,8 @@ bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
   {
   case halfexplicit_acceleration_level:
     return addInteractionInIndexSetHalfExplicitAccelerationLevel(inter,i);
+  case halfexplicit_velocity_level:
+    return addInteractionInIndexSetHalfExplicitVelocityLevel(inter,i);
   }
   RuntimeException::selfThrow("D1MinusLinearOSI::addInteractionInIndexSet() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
   return 0;
@@ -363,99 +365,12 @@ bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsign
   {
   case halfexplicit_acceleration_level:
     return removeInteractionInIndexSetHalfExplicitAccelerationLevel(inter,i);
+  case halfexplicit_velocity_level:
+    return removeInteractionInIndexSetHalfExplicitVelocityLevel(inter,i);
   }
   RuntimeException::selfThrow("D1MinusLinearOSI::removeInteractionInIndexSet() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
   return 0;
 }
-
-
-// bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
-// {
-//   DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSet.\n");
-//   assert(0);
-//   assert((i == 1) || (i==2));
-//   // double h = simulationLink->timeStep();
-
-//   double y = 0.0;
-//   double yOld =0.0;
-//   SP::Relation r = inter->relation();
-//   RELATION::TYPES relationType = r->getType();
-//   SP::LagrangianDS lds;
-//   if (relationType == Lagrangian)
-//   {
-
-//     // compute yold
-//     SP::BlockVector qoldB(new BlockVector());
-//     SP::BlockVector voldB(new BlockVector());
-//     SP::BlockVector zoldB(new BlockVector());
-//     SP::BlockVector qB(new BlockVector());
-//     SP::BlockVector vB(new BlockVector());
-//     SP::BlockVector zB(new BlockVector());
-
-//     for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
-//     {
-//       // check dynamical system type
-//       assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
-//               Type::value(**it) == Type::LagrangianDS));
-
-//       // convert vDS systems into LagrangianDS and put them in vLDS
-//       lds = std11::static_pointer_cast<LagrangianDS> (*it);
-
-//       qoldB->insertPtr(lds->qMemory()->getSiconosVector(0));
-//       voldB->insertPtr(lds->velocityMemory()->getSiconosVector(0));
-//       /** \warning Warning the value of z of not stored. */
-//       zoldB->insertPtr(lds->z());
-//       qB->insertPtr(lds->q());
-//       vB->insertPtr(lds->velocity());
-//       zB->insertPtr(lds->z());
-//     }
-//     SiconosVector qold = *qoldB;
-//     SiconosVector zold = *zoldB;
-//     SiconosVector q = *qB;
-//     SiconosVector z = *zB;
-
-//     std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(qold, zold, *inter->y(0));
-//     yOld = (inter->y(0))->getValue(0);
-//     // Compute current y (we assume that q stores q_{k,1} and v stores v_{k,1})
-//     // If not sure we have to store it into a new date in Interaction.
-//     std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(q, z, *inter->y(0));
-//     y = (inter->y(0))->getValue(0);
-//   }
-
-//   DEBUG_PRINTF("D1MinusLinearOSI::addInteractionInIndexSet of level = %i yOld=%e, y=%e \n", i,  yOld, y);
-
-//   assert(!isnan(y));
-
-//   DEBUG_EXPR(
-//     if ((yOld >0.0) && (y <= y))
-//     DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSet contact are closing ((yOld >0.0) && (y <= y)).\n");
-//   );
-//   return ((yOld >0.0) && (y <= y));
-// }
-
-
-// bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
-// {
-//   assert(i == 1);
-//   double h = simulationLink->timeStep();
-//   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-//   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
-//   double gamma = 1.0 / 2.0;
-//   // if (_useGamma)
-//   // {
-//   //   gamma = _gamma;
-//   // }
-//   DEBUG_PRINTF("D1MinusLinearOSI::removeInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
-//   y += gamma * h * yDot;
-//   assert(!isnan(y));
-//   DEBUG_EXPR(
-//     if (y > 0)
-//     DEBUG_PRINT("D1MinusLinearOSI::removeInteractionInIndexSet DEACTIVATE.\n");
-//   );
-
-//   return (y > 0.0);
-// }
-
 
 
 double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevelFull()

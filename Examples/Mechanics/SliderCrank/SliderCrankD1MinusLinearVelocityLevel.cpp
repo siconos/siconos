@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     // parameters according to Table 1
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0.0;         // initial computation time
-    double T = 0.2;       // final computation time
+    double T = 0.1;       // final computation time
     //T=0.00375;
     double h = 1e-5;       // time step : do not decrease, because of strong penetrations
 
@@ -231,8 +231,8 @@ int main(int argc, char* argv[])
     time.restart();
 
 
-    while ((s->hasNextEvent()) && (k <= 275))
-//    while ((s->hasNextEvent()))
+//    while ((s->hasNextEvent()) && (k <= 271))
+    while ((s->hasNextEvent()))
     {
 
       // std::cout <<"=====================================================" <<std::endl;
@@ -267,13 +267,13 @@ int main(int argc, char* argv[])
       dataPlot(k, 18) = (*inter2->y(1))(0) ; // dot g2
       dataPlot(k, 19) = (*inter3->y(1))(0) ; // dot g3
       dataPlot(k, 20) = (*inter4->y(1))(0) ; // dot g4
-      dataPlot(k, 21) = (*inter1->lambda(1))(0) ; // lambda1
-      dataPlot(k, 22) = (*inter2->lambda(1))(0) ; // lambda1
-      dataPlot(k, 23) = (*inter3->lambda(1))(0) ; // lambda3
-      dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
+      dataPlot(k, 21) = (*inter1->lambda(1))(0) ; // Lambda1 (impulse)
+      dataPlot(k, 22) = (*inter2->lambda(1))(0) ; // Lambda2
+      dataPlot(k, 23) = (*inter3->lambda(1))(0) ; // Lambda3
+      dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // Lambda4
       dataPlot(k, 25) = 0;
       dataPlot(k, 26) = 0;
-      dataPlot(k, 27) = (*inter1->lambda(2))(0) ; // lambda1_{k+1}^-
+      dataPlot(k, 27) = (*inter1->lambda(2))(0) ; // lambda1_{k+1}^- (nonimpulsive force)
       dataPlot(k, 28) = (*inter2->lambda(2))(0) ; // lambda1_{k+1}^-
       dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda1_{k+1}^-
       dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda1_{k+1}^-

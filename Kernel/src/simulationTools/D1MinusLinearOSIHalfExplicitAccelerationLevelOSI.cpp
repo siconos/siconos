@@ -109,7 +109,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       Mold->PLUForwardBackwardInPlace(*workFree); // contains left (right limit) acceleration without contact force
       d->addWorkVector(workFree,DynamicalSystem::free_tdg); // store the value in WorkFreeFree
     }
-
     else if(dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
@@ -362,7 +361,9 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   }
 
   DEBUG_PRINT("\n DECIDE STRATEGY\n");
-  /** Decide of the strategy impact or smooth multiplier */
+  /** Decide of the strategy impact or smooth multiplier.
+   *  Compute _isThereImpactInTheTimeStep
+   */
   _isThereImpactInTheTimeStep = false;
   if (!allOSNS->empty())
   {
@@ -390,7 +391,14 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   }
 
 
-  // We recompute the residu if _isThereImpactInTheTimeStep = true;
+  /* If _isThereImpactInTheTimeStep = true;
+   * we recompute residuFree by removing the contribution of the nonimpulsive contact forces.
+   * We add the contribution of the external forces at the end
+   * of the time--step
+   * If _isThereImpactInTheTimeStep = false;
+   * we recompute residuFree by adding   the contribution of the external forces at the end
+   * and the contribution of the nonimpulsive contact forces that are computed by solving the osnsp.
+   */
   if (_isThereImpactInTheTimeStep)
   {
 
@@ -416,7 +424,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         v->zero();
         SP::SiconosVector workFreeFree = d->workspace(DynamicalSystem::free_tdg);
         assert(workFreeFree);
-        *residuFree = 0.5 * h**workFreeFree;
+        *residuFree =  - 0.5 * h**workFreeFree;
         workFreeFree->zero();
 
         d->computeMass();
@@ -508,7 +516,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         M->PLUForwardBackwardInPlace(*workFree); // contains right (left limit) acceleration without contact force
         DEBUG_PRINT("workFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
         DEBUG_EXPR(workFree->display());
-      }
+       }
       else if (dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
@@ -757,6 +765,11 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
     xcoord[5] = sizeY;
     xcoord[6] = 0;
     xcoord[7] = sizeY;
+
+
+    /* <2014-09-22> :VA: The following code is dubious. We check first the type of relationSubtype and then
+     * the type of OSNSP that we want to solve. We should do the contrary !!!
+     */
 
     if (relationSubType == RheonomousR) // explicit time dependence -> partial time derivative has to be added
     {
