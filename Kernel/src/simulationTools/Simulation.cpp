@@ -56,7 +56,9 @@
 // --- id ---
 Simulation::Simulation(SP::TimeDiscretisation td):
   _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
-  _tolerance(DEFAULT_TOLERANCE), _printStat(false), _staticLevels(false)
+  _numberOfIndexSets(0),
+  _tolerance(DEFAULT_TOLERANCE), _printStat(false),
+  _staticLevels(false)
 {
   if (!td)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
