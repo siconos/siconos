@@ -31,8 +31,8 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 /// @cond
@@ -226,22 +226,18 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())) /* it should be equivalent to indexSet1 */
       {
         DEBUG_PRINT("We compute lambda^+_{k} \n");
-
-
-
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
         DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display());
-
-        // Note Franck : at the time this results in a call to swapInMem of all Interactions of the NSDS
-        // So let the simu do this.
-        //(*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
-        simulationLink->pushInteractionsInMemory();
-        simulationLink->updateInput(2);
       }
-
 
     }
   }
+
+  // Note Franck : at the time this results in a call to swapInMem of all Interactions of the NSDS
+  // So let the simu do this.
+  //(*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
+  simulationLink->pushInteractionsInMemory();
+  simulationLink->updateInput(2);
 
   /**************************************************************************************************************
    *  Step 2 -  compute v_{k,1}
@@ -265,27 +261,38 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       SP::SiconosVector workFree_tdg = d->workspace(DynamicalSystem::free_tdg);
 
 
-      // get left state from memory
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
       SP::SiconosVector v = d->velocity(); //contains velocity v_{k+1}^- and not free velocity
       v->zero();
 
-      SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
-      DEBUG_EXPR(d->p(2)->display());
+
+
+
+      SP::SiconosVector p2 = d->p(2);
+      SP::SiconosVector dummy(new SiconosVector(*p2)); // value = contact force
+      DEBUG_EXPR(p2->display());
+      /* we homogenize p(2) to a force for the user output   */
+      *p2 /= h;
+
 
       SP::SiconosMatrix Mold = d->mass();
+      DEBUG_EXPR(Mold->display(););
+
       Mold->PLUForwardBackwardInPlace(*dummy);
 
       DEBUG_EXPR(vFree->display());
+      DEBUG_EXPR(dummy->display());
+
+      *v = *vFree + *dummy;
+      DEBUG_EXPR(v->display());
+
+
+      // get left state from memory
+      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
-
-      *v = *vFree + h * *dummy;
-
-      DEBUG_EXPR(v->display());
 
       SP::SiconosVector q = d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
       *q = *qold;
@@ -295,7 +302,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
       SP::SiconosVector residuFree = (*it)->workspace(DynamicalSystem::freeresidu);
       residuFree->zero();
-      *residuFree -= 0.5 * h* (*workFree_tdg + *dummy);
+      *residuFree -= 0.5 * (h * *workFree_tdg) + 0.5* *dummy;
       DEBUG_EXPR(residuFree->display());
 
     }
@@ -314,8 +321,12 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
       v->zero();
 
-      SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
-      DEBUG_EXPR(d->p(2)->display());
+
+      SP::SiconosVector p2 = d->p(2);
+      SP::SiconosVector dummy(new SiconosVector(*p2)); // value = contact force
+      DEBUG_EXPR(p2->display());
+      /* we homogenize p(2) to a force for the user output   */
+      *p2 /= h;
 
       SP::SiconosMatrix Mold(new SimpleMatrix(*(d->mass())));  // we copy the mass matrix to avoid its factorization
       DEBUG_EXPR(Mold->display());
@@ -325,7 +336,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
 
-      *v = *vFree + h * *dummy;
+      *v = *vFree +  *dummy;
 
 
       DEBUG_EXPR(v->display());
@@ -353,7 +364,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
       SP::SiconosVector residuFree = (*it)->workspace(DynamicalSystem::freeresidu);
       residuFree->zero();
-      *residuFree -= 0.5 * h* (*workFree_tdg + *dummy);
+      *residuFree -= 0.5 * (h* *workFree_tdg) + 0.5 * *dummy;
       DEBUG_EXPR(residuFree->display());
 
 
@@ -596,6 +607,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       // }
       // simulationLink->updateIndexSets();
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
+      DEBUG_PRINTF("indexSet1->size() = %i\n",indexSet1->size()  );
       InteractionsGraph::VIterator ui, uiend;
       SP::Interaction inter;
       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
@@ -622,9 +634,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
         DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display(););
-        simulationLink->updateInput(2);
       }
     }
+
+    simulationLink->updateInput(2);
 
     for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     {
@@ -644,10 +657,14 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           SP::SiconosMatrix M = d->mass();
           DEBUG_EXPR(M->display());
           DEBUG_EXPR(d->p(2)->display());
-          SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
+          SP::SiconosVector p2 = d->p(2);
+          SP::SiconosVector dummy(new SiconosVector(*p2)); // value = contact force
+          DEBUG_EXPR(p2->display());
+          /* we homogenize p(2) to a force for the user output   */
+          *p2 *= 2.0/h;
 
           M->PLUForwardBackwardInPlace(*dummy);
-          *residuFree -= 0.5 * h**dummy;
+          *residuFree -=  *dummy;
 
         }
         DEBUG_EXPR(residuFree->display());
@@ -662,11 +679,13 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           // get right state from memory
           SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
           DEBUG_EXPR(M->display());
-          DEBUG_EXPR(d->p(2)->display());
-          SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
-
+          SP::SiconosVector p2 = d->p(2);
+          SP::SiconosVector dummy(new SiconosVector(*p2)); // value = contact force
+          DEBUG_EXPR(p2->display());
+          /* we homogenize p(2) to a force for the user output   */
+          *p2 *= 2.0/h;
           M->PLUForwardBackwardInPlace(*dummy);
-          *residuFree -= 0.5 * h**dummy;
+          *residuFree -=  *dummy;
 
         }
         DEBUG_EXPR(residuFree->display());
@@ -865,7 +884,7 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Int
     }
     /* Active for impulses calculations? Contacts that are closed */
     double y = (*(inter->y(0)))(0); // current position
-    DEBUG_PRINTF("y= %12.8e\n", y);
+    DEBUG_PRINTF("y= %18.14e\n", y);
     return (y <= DEFAULT_TOL_D1MINUS);
 
   }
@@ -879,7 +898,7 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Int
     DEBUG_PRINT(" level == 2\n");
     double y = (*(inter->y(0)))(0); // current position
     double yOld = (*(inter->yOld(0)))(0); // old position
-    DEBUG_PRINTF("y= %12.8e\n", y);  DEBUG_PRINTF("yOld= %12.8e\n", yOld);
+    DEBUG_PRINTF("y= %18.14e\n", y);  DEBUG_PRINTF("yOld= %18.14e\n", yOld);
     /* if Interaction has not been active in the previous calculation
        and now becomes active */
     return (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS);

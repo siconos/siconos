@@ -29,8 +29,8 @@
 #include "NewtonEulerR.hpp"
 #include "TypeName.hpp"
 #include "NonSmoothLaw.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -128,9 +128,26 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       topo->setHasChanged(true);
       if (i <= _levelMaxForInput)
       {
+        DEBUG_PRINTF("Reset to zero inter->lambda(%i)", i);
         inter->lambda(i)->zero();
       }
     }
+
+    if (!indexSetCurrent->is_vertex(inter))
+    {
+      DEBUG_PRINTF("The current interaction is not in the indexSet(%i)\n",(int)i);
+      DEBUG_EXPR(inter->lambda(i)->display());
+      inter->lambda(i)->zero();
+    }
+    else
+    {
+      DEBUG_PRINTF("The current interaction is in the indexSet(%i)\n",(int)i);
+      DEBUG_EXPR(inter->lambda(i)->display());
+    }
+
+
+
+
   }
 
   DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);

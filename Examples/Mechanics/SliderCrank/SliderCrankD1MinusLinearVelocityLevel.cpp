@@ -40,9 +40,9 @@ int main(int argc, char* argv[])
     // parameters according to Table 1
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0.0;         // initial computation time
-    double T = 0.1;       // final computation time
+    double T = 0.2;       // final computation time
     //T=0.00375;
-    double h = 1e-3;       // time step : do not decrease, because of strong penetrations
+    double h = 1e-5;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
     double l1 = 0.1530;
@@ -300,34 +300,34 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("result.dat", "ascii", dataPlot);
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
 
-    // // Comparison with a reference file
-    // SimpleMatrix dataPlotRef(dataPlot);
-    // dataPlotRef.zero();
-    // ioMatrix::read("SliderCrankD1MinusLinearOSI.ref", "ascii", dataPlotRef);
+    // Comparison with a reference file
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("SliderCrankD1MinusLinearOSIVelocityLevel.ref", "ascii", dataPlotRef);
 
-    // SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
-    // (dataPlot - dataPlotRef).normInfByColumn(err);
-    // err->display();
-    // double error = 0.0;
-    // for (unsigned int i = 0; i < err->size(); ++i)
-    // {
-    //   if (error < (*err)(i))
-    //     error = (*err)(i);
-    // }
+    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
+    (dataPlot - dataPlotRef).normInfByColumn(err);
+    err->display();
+    double error = 0.0;
+    for (unsigned int i = 0; i < err->size(); ++i)
+    {
+      if (error < (*err)(i))
+        error = (*err)(i);
+    }
 
-    // std::cout << "Error = "<< error << std::endl;
+    std::cout << "Error = "<< error << std::endl;
 
-    // if (error > 1e-12)
-    // {
-    // //  (dataPlot - dataPlotRef).display();
+    if (error > 1e-12)
+    {
+    //  (dataPlot - dataPlotRef).display();
 
-    //   std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-    //   std::cout << "Error = "<< error << std::endl;
-    //   return 1;
-    // }
+      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      std::cout << "Error = "<< error << std::endl;
+      return 1;
+    }
 
 
   }

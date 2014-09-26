@@ -186,7 +186,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     {
       // note : at most 4 edges
       DS2 = indexSet->bundle(*oei);
-      if (DS2 != DS1) 
+      if (DS2 != DS1)
       {
         assert(false);
         break;
@@ -204,7 +204,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
   // --- Compute diagonal block ---
   // Block to be set in OSNS Matrix, corresponding to
-  // the current interaction 
+  // the current interaction
   SP::SiconosMatrix currentInteractionBlock = indexSet->properties(vd).block;
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock;
 
@@ -316,7 +316,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       //*currentInteractionBlock *=h;
     }
     else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType);
-    // Set pos for next loop. 
+    // Set pos for next loop.
     pos = pos2;
   }
   DEBUG_PRINT("LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd) ends \n");
@@ -343,7 +343,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   SP::Interaction inter2 = indexSet->bundle(indexSet->target(ed));
   // Once again we assume that inter1 and inter2 have the same osi ...
   SP::OneStepIntegrator Osi = indexSet->properties(indexSet->source(ed)).osi;
-  
+
   // For the edge 'ds', we need to find relative position of this ds
   // in inter1 and inter2 relation matrices (--> pos1 and pos2 below)
   // - find if ds is source or target in inter_i
@@ -372,7 +372,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     tmpds  = indexSet->properties(vertex_inter).target;
     pos2 =  indexSet->properties(vertex_inter).target_pos;
   }
-  
+
   unsigned int index1 = indexSet->index(indexSet->source(ed));
   unsigned int index2 = indexSet->index(indexSet->target(ed));
   unsigned int nslawSize1 = inter1->nonSmoothLaw()->size();
@@ -588,7 +588,7 @@ bool LinearOSNS::preCompute(double time)
   // nothing to do
   if (indexSetLevel() == LEVELMAX)
     return false;
-  
+
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   assert(indexSet);
   if (indexSet->size() == 0)
@@ -658,7 +658,7 @@ bool LinearOSNS::preCompute(double time)
 
   // Computes q of LinearOSNS
   computeq(time);
-  
+
   return true;
 
 }
