@@ -67,7 +67,7 @@ public:
    */
   void updateContactShapes() const;
 
-  /** Get an associated contact shapes by its rank of association.
+  /** Get an associated contact shape by its rank of association.
       \param id : the number of the shape.
    */
   const OccContactShape& contactShape(unsigned int id) const;

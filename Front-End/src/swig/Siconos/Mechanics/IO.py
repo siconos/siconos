@@ -64,11 +64,11 @@ import time
 
 
 @contextmanager
-def tmpfile():
+def tmpfile(suffix='', prefix='siconos_io'):
     """
     A context manager for a named temporary file.
     """
-    (_, tfilename) = tempfile.mkstemp()
+    (_, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
     fid = open(tfilename, 'w')
     yield (fid, tfilename)
     fid.close()
@@ -771,7 +771,22 @@ class Hdf5():
         self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
 
-    def addShapeFromFile(self, name, filename):
+    def addMeshFromString(self, name, shape_data):
+        """
+        Add a mesh shape from a string.
+        Accepted format : mesh encoded in VTK .vtp format
+        """
+        if name not in self._ref:
+
+            shape = self._ref.create_dataset(name, (1,),
+                                             dtype=h5py.new_vlen(str))
+            shape[:] = shape_data
+            shape.attrs['id'] = self._number_of_shapes
+            shape.attrs['type'] = 'vtp'
+            self._shapeid[name] = shape.attrs['id']
+            self._number_of_shapes += 1        
+
+    def addMeshFromFile(self, name, filename):
         """
         Add a mesh shape from a file.
         Accepted format : .stl or mesh encoded in VTK .vtp format
@@ -796,13 +811,7 @@ class Hdf5():
                 shape_data = str_of_file(filename)
 
 
-            shape = self._ref.create_dataset(name, (1,),
-                                             dtype=h5py.new_vlen(str))
-            shape[:] = shape_data
-            shape.attrs['id'] = self._number_of_shapes
-            shape.attrs['type'] = 'vtp'
-            self._shapeid[name] = shape.attrs['id']
-            self._number_of_shapes += 1
+            self.addMeshShapeFromString(name, shape_data)
 
     def addBRepFromString(self, name, shape_data):
         """
@@ -818,7 +827,7 @@ class Hdf5():
             self._number_of_shapes += 1
 
     def addContactFromBRep(self, name, brepname, contact_type,
-                           index, collision_group=0):
+                           index, collision_group=0, associated_shape=None):
         """
         Add contact reference from previously added brep.
         """
@@ -830,6 +839,8 @@ class Hdf5():
             shape.attrs['contact'] = contact_type
             shape.attrs['brep'] = brepname
             shape.attrs['index'] = index
+            if associated_shape is not None:
+                shape.attrs['associated_shape'] = associated_shape
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
@@ -988,12 +999,11 @@ class Hdf5():
 
         from Siconos.Kernel import \
             Model, MoreauJeanOSI, TimeDiscretisation,\
-            GenericMechanical, FrictionContact, NewtonImpactFrictionNSL,\
-            BlockCSRMatrix
+            GenericMechanical, FrictionContact, NewtonImpactFrictionNSL
 
         from Siconos.Numerics import SICONOS_FRICTION_3D_AlartCurnierNewton
 
-        from Siconos.Mechanics.ContactDetection.Bullet import IO, \
+        from Siconos.Mechanics.ContactDetection.Bullet import \
             btConvexHullShape, btCollisionObject, \
             btBoxShape, btQuaternion, btTransform, btConeShape, \
             BulletSpaceFilter, cast_BulletR, \

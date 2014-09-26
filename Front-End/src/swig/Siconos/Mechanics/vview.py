@@ -531,7 +531,16 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 mapper = vtk.vtkDataSetMapper()
                 add_compatiblity_methods(mapper)
                 mapper.SetInputConnection(reader.GetOutputPort())
-                mappers[shape_name] = mapper
+                # delayed
+                mappers[shape_name] = lambda : mapper
+
+        elif shape_type in ['brep']:
+            # try to find an associated shape
+            if 'associated_shape' in io.shapes()[shape_name].attrs:
+                associated_shape = \
+                    io.shapes()[shape_name].\
+                    attrs['associated_shape']
+                mappers[shape_name] = lambda : mappers[associated_shape]() 
 
         elif shape_type == 'convex':
             # a convex shape
@@ -561,7 +570,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
             mapper = vtk.vtkDataSetMapper()
             add_compatiblity_methods(mapper)
             mapper.SetInputData(convex_grid)
-            mappers[shape_name] = mapper
+            mappers[shape_name] = lambda : mapper
 
         else:
             assert shape_type == 'primitive'
@@ -624,7 +633,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
             readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
             mapper.SetInputConnection(source.GetOutputPort())
-            mappers[shape_name] = mapper
+            mappers[shape_name] = lambda : mapper
 
 
     for instance_name in io.instances():
@@ -642,7 +651,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 actor.GetProperty().SetOpacity(0.7)
 
             actor.GetProperty().SetColor(random_color())
-            actor.SetMapper(mappers[contactor_name])
+            actor.SetMapper(mappers[contactor_name]())
             actors.append(actor)
             renderer.AddActor(actor)
             transform = vtk.vtkTransform()

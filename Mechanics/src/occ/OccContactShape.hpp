@@ -149,32 +149,34 @@ struct OccContactShape
 
   SP::TopoDS_Shape _shape;
 
-  struct Geometer : public SiconosVisitor
-  {
-    SP::ContactShapeDistance answer;
-    const OccContactShape& base;
-
-    Geometer(const OccContactShape& base) : base(base) {};
-
-    using SiconosVisitor::visit;
-
-    void visit(const OccContactFace& face)
-    {
-      answer = base.distance(face);
-    }
-
-    void visit(const OccContactEdge& edge)
-    {
-      answer = base.distance(edge);
-    }
-
-  };
-
 
   /** visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(OccContactShape);
 
 };
+
+struct Geometer : public SiconosVisitor
+{
+  const OccContactShape& base;
+  SP::ContactShapeDistance answer;
+
+  Geometer(const OccContactShape& base);
+
+  using SiconosVisitor::visit;
+
+  void visit(const OccContactFace& face)
+  {
+    answer = base.distance(face);
+  }
+
+  void visit(const OccContactEdge& edge)
+  {
+    answer = base.distance(edge);
+  }
+
+};
+
+
 
 #endif

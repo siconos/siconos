@@ -20,15 +20,15 @@ OccContactEdge::OccContactEdge(const OccContactShape& reference_shape,
 {
 };
 
-const TopoDS_Edge& OccContactEdge::contact() const
+const SPC::TopoDS_Edge OccContactEdge::contact() const
 {
-  return *this->_edge;
+  return this->edge(this->_index);
 }
 
 void OccContactEdge::computeUVBounds()
 {
   TopExp_Explorer Ex1;
-  Ex1.Init(this->contact(),TopAbs_EDGE);
+  Ex1.Init(*this->contact(),TopAbs_EDGE);
   const TopoDS_Edge& edge = TopoDS::Edge(Ex1.Current());
   BRepAdaptor_Curve SC(edge);
   this->binf1[0]=SC.FirstParameter();

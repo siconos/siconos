@@ -18,6 +18,8 @@
 #include <gp_Vec.hxx>
 #include <gp_Quaternion.hxx>
 
+#include <iostream>
+//#define DEBUG_MESSAGES 1
 #include <debug.h>
 
 gp_Pnt cadmbtb_FacePoint(const TopoDS_Face &face,Standard_Real u, Standard_Real v)
@@ -150,9 +152,12 @@ void cadmbtb_distanceFaceFace(const OccContactFace& csh1,
                               bool normalFromFace1,
                               Standard_Real& MinDist)
 {
-  const TopoDS_Face& face1 = csh1.contact();
-  const TopoDS_Face& face2 = csh2.contact();
+  // need the 2 sp pointers to keep memory
+  SPC::TopoDS_Face pface1 = csh1.contact();
+  SPC::TopoDS_Face pface2 = csh2.contact();
 
+  const TopoDS_Face& face1 = *pface1;
+  const TopoDS_Face& face2 = *pface2;
 
   double x[4];
   double f = 0;
@@ -270,8 +275,12 @@ void cadmbtb_distanceFaceEdge(
   Standard_Real& MinDist)
 {
 
-  const TopoDS_Face& face1 = csh1.contact();
-  const TopoDS_Edge& edge2 = csh2.contact();
+  // need the 2 sp pointers to keep memory
+  SPC::TopoDS_Face pface1 = csh1.contact();
+  SPC::TopoDS_Edge pedge2 = csh2.contact();
+
+  const TopoDS_Face& face1 = *pface1;
+  const TopoDS_Edge& edge2 = *pedge2;
 
   int n = 4;
   double x[4];

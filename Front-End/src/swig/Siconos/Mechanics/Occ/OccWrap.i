@@ -118,5 +118,14 @@ PY_FULL_REGISTER(OccSpaceFilter);
 
   }
 
+  /* fix: use generated dynamic casting instead! */
+  SP::OccBody cast_OccBody(SP::DynamicalSystem ds)
+  {
+    return std11::dynamic_pointer_cast<OccBody>(ds);
+  };
+
+
+
+
 %}
 

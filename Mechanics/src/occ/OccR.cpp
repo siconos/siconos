@@ -6,6 +6,7 @@
 #include "ContactShapeDistance.hpp"
 
 #include <limits>
+#include <iostream>
 
 OccR::OccR(const ContactPoint& contact1,
            const ContactPoint& contact2) :
@@ -20,7 +21,7 @@ OccR::OccR(const ContactPoint& contact1,
 void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
 
-  OccContactShape::Geometer geometer(*this->_contact1.contactShape());
+  Geometer geometer(*this->_contact1.contactShape());
 
   this->_contact2.contactShape()->accept(geometer);
 
@@ -65,5 +66,8 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
   dist.value -= _offset;
 
   y.setValue(0, dist.value);
+
+
+  std::cout << "dist:" << dist.value <<std::endl;
 
 }

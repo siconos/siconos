@@ -21,6 +21,15 @@ OccContactShape::OccContactShape() : _shape(new TopoDS_Shape())
 {
 }
 
+
+Geometer::Geometer(const OccContactShape& base) :
+  base(base),
+  answer(new ContactShapeDistance())
+{
+  answer->value = std::numeric_limits<double>::infinity();
+};
+
+
 OccContactShape::ContactTypeValue OccContactShape::contactType() const
 {
   switch (this->_shape->ShapeType())
@@ -45,7 +54,7 @@ void OccContactShape::computeUVBounds()
 SP::ContactShapeDistance OccContactShape::distance(
   const OccContactShape& sh2, bool normalFromFace1) const
 {
-  OccContactShape::Geometer geometer(*this);
+  Geometer geometer(*this);
   sh2.accept(geometer);
 
   return geometer.answer;

@@ -10,7 +10,7 @@ struct OccContactEdge : public OccContactShape
 
   OccContactEdge(const OccContactShape& reference_shape, unsigned int index);
 
-  virtual const TopoDS_Edge& contact() const;
+  virtual const SPC::TopoDS_Edge contact() const;
 
   virtual void computeUVBounds();
 

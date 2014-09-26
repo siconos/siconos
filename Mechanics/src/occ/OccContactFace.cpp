@@ -19,9 +19,9 @@ OccContactFace::OccContactFace(const OccContactShape& reference_shape,
 };
 
 
-const TopoDS_Face& OccContactFace::contact() const
+SPC::TopoDS_Face OccContactFace::contact() const
 {
-  return *this->_face;
+  return this->face(this->_index);
 }
 
 void OccContactFace::computeUVBounds()
