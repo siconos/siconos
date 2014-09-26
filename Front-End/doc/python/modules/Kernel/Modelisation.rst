@@ -3,8 +3,10 @@ Modelisation
 
 .. _bouncingball-model:
 
-Usage : example of the modelisation of a bouncing ball
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Usage :
+^^^^^^^
+example of the modelisation of a bouncing ball:
++++++++++++++++++++++++++++++++++++++++++++++++
 
 A ball bouncing on the ground may be defined as a linear lagrangian time
 invariant dynamical system with one degree of freedom. 
@@ -102,16 +104,92 @@ have defined (here just the ball) and link the interactions to them.
   # the second parameter is the end time
   bouncingBall = Model(0, 10)
 
-  # add the ball to the model's non smooth dynamical system
+  # add the ball to the model data
   bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
 
   # link the interaction and the dynamical system
   bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
 
 
+Example of the modelisation of a diode bridge:
+++++++++++++++++++++++++++++++++++++++++++++++
+
+This is an example of an electrical circuit involving:
+
+  - a linear dynamical system consisting of an LC oscillator (1 µF ,
+    10 mH)
+  - a non smooth system (a 1000 Ohm resistor supplied through a 4
+    diodes bridge) in parallel with the oscillator
+
+.. image:: ../../../../../Examples/figures/Electronics/DiodeBridge/SchemaDiodeBridge.png
+
+Expected behavior:
+
+The initial state (Vc = 10 V , IL = 0) of the oscillator provides
+an initial energy. The period is 2 Pi sqrt(LC) ~ 0,628 ms.
+
+The non smooth system is a full wave rectifier: each phase (positive
+and negative) of the oscillation allows current to flow through the
+resistor in a constant direction, resulting in an energy loss: the
+oscillation damps.
+
+State variables :
+  - the voltage across the capacitor (or inductor)
+  - the current through the inductor
+
+Since there is only one dynamical system, the interaction is defined
+by :
+
+ - complementarity laws between diodes current and voltage. Depending
+   on the diode position in the bridge, y stands for the reverse
+   voltage across the diode or for the diode current (see figure in
+   the template file)
+ - a linear time invariant relation between the state variables and y
+   and lambda (derived from Kirchhoff laws)
+
+The oscillator is a time-invariant linear dynamical system, and using
+the Kirchhoff current and voltage laws and branch constitutive
+equations, its dynamics is written as:
+
+.. math::
+   
+   \dot x = A.x + r
+   
+
+where :math:`x = \left[\begin{array}{c} \dot v_L\\ \dot i_L \end{array}\right]`, :math:`\lambda = \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right]`, :math:`A=\left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right]` and :math:`r= \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right].\lambda`
+
+
+We first import the needed classes for the construction of the model:
+
+.. testcode::
+
+   from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
+       ComplementarityConditionNSL, Interaction,\
+       Model
+
+We define the model parameters:
+
+.. testcode::
+
+   Lvalue = 1e-2    # inductance
+   Cvalue = 1e-6    # capacitance
+   Rvalue = 1e3     # resistance
+   Vinit = 10.0     # initial voltage
+
+
+The first order linear dynamical system is built:
+
+.. testcode::
+    
+   initstate = [Vinit, 0]
+
+   A = [[0,          -1.0/Cvalue],
+        [1.0/Lvalue, 0          ]]
+
+   LSDiodeBridge = FirstOrderLinearDS(init_state, A)
 
 Modelisation API
 ^^^^^^^^^^^^^^^^
 
-.. automodule:: Siconos.Kernel
-  :members: :eval:`under_directory(['../../../Kernel/src/modelingTools'])`
+#.. automodule:: Siconos.Kernel
+#  :members: :eval:`under_directory(['../../../Kernel/src/modelingTools'])`
