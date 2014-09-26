@@ -42,8 +42,8 @@
 
 using namespace RELATION;
 // #define LINEAROSNS_DEBUG
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 LinearOSNS::LinearOSNS(): OneStepNSProblem(), _MStorageType(0), _keepLambdaAndYState(true)
@@ -308,6 +308,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       work->trans();
       SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
       DEBUG_EXPR(centralInteractionBlock->display(););
+      DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isPLUFactorized() = "<< centralInteractionBlock->isPLUFactorized() << std::endl;);
       centralInteractionBlock->PLUForwardBackwardInPlace(*work);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);

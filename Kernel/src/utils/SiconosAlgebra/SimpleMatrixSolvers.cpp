@@ -54,11 +54,11 @@ void SimpleMatrix::PLUFactorizationInPlace()
   }
   if (num == 1)
   {
-    if (!ipiv)
-      ipiv.reset(new VInt(size(0)));
+    if (!_ipiv)
+      _ipiv.reset(new VInt(size(0)));
     else
-      ipiv->resize(size(0));
-    int info = lapack::getrf(*mat.Dense, *ipiv);
+      _ipiv->resize(size(0));
+    int info = lapack::getrf(*mat.Dense, *_ipiv);
     if (info != 0)
     {
       _isPLUFactorized = false;
@@ -90,7 +90,7 @@ void SimpleMatrix::PLUInverseInPlace()
     SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
 
 #if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
-  int info = lapack::getri(*mat.Dense, *ipiv);   // solve from factorization
+  int info = lapack::getri(*mat.Dense, *_ipiv);   // solve from factorization
 
   if (info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUInverseInPlace failed, the matrix is singular.");
@@ -112,11 +112,11 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
     if (!_isPLUFactorized) // call gesv => LU-factorize+solve
     {
       // solve system:
-      if (!ipiv)
-        ipiv.reset(new VInt(size(0)));
+      if (!_ipiv)
+        _ipiv.reset(new VInt(size(0)));
       else
-        ipiv->resize(size(0));
-      info = lapack::gesv(*mat.Dense, *ipiv, *(B.dense()));
+        _ipiv->resize(size(0));
+      info = lapack::gesv(*mat.Dense, *_ipiv, *(B.dense()));
       _isPLUFactorized = true;
 
       /*
@@ -131,7 +131,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
     }
     else // call getrs: only solve using previous lu-factorization
       if (B.getNum() == 1)
-        info = lapack::getrs(*mat.Dense, *ipiv, *(B.dense()));
+        info = lapack::getrs(*mat.Dense, *_ipiv, *(B.dense()));
       else
         SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices in RHS.");
   }
@@ -179,12 +179,12 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
     if (!_isPLUFactorized) // call gesv => LU-factorize+solve
     {
       // solve system:
-      if (!ipiv)
-        ipiv.reset(new VInt(size(0)));
+      if (!_ipiv)
+        _ipiv.reset(new VInt(size(0)));
       else
-        ipiv->resize(size(0));
+        _ipiv->resize(size(0));
 
-      info = lapack::gesv(*mat.Dense, *ipiv, tmpB);
+      info = lapack::gesv(*mat.Dense, *_ipiv, tmpB);
       _isPLUFactorized = true;
 
       /*
@@ -199,7 +199,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
       // B now contains solution:
     }
     else // call getrs: only solve using previous lu-factorization
-      info = lapack::getrs(*mat.Dense, *ipiv, tmpB);
+      info = lapack::getrs(*mat.Dense, *_ipiv, tmpB);
   }
   else
   {
@@ -222,7 +222,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 
 void SimpleMatrix::resetLU()
 {
-  if (ipiv) ipiv->clear();
+  if (_ipiv) _ipiv->clear();
   _isPLUFactorized = false;
   _isPLUInversed = false;
 }

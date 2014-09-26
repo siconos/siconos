@@ -30,7 +30,7 @@ const std::string transpose = "transpose";
 
 /** A STL vector of int */
 typedef std::vector<int> VInt;
-TYPEDEF_SPTR(VInt)
+
 
 /**  Matrix (embedded various types of Boost matrices of double)
  *
@@ -69,10 +69,10 @@ protected:
 
 
 private:
-  /** VInt ipiv;
+  /** VInt _ipiv;
    * The pivot indices obtained from DGETRF (PLUFactorizationInPlace)
    */
-  SP::VInt ipiv;
+  SP::VInt _ipiv;
 
   /** bool _isPLUFactorized;
    *  Boolean = true if the Matrix has been PLU Factorized in place.
@@ -274,6 +274,11 @@ public:
   inline bool isQRFactorized() const
   {
     return _isQRFactorized;
+  }
+
+  inline SP::VInt ipiv() const
+  {
+    return _ipiv;
   }
 
   /** get DenseMat matrix

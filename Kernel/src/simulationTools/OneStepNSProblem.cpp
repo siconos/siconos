@@ -33,8 +33,8 @@
 
 #include <NumericsOptions.h>
 
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 //#define OSNS_DEBUG
@@ -459,14 +459,22 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
   } // End Newmark OSI
   else if (osiType == OSI::D1MINUSLINEAROSI)
   {
-    DEBUG_PRINT("OneStepNSProblem::getOSIMatrix  for osiType   OSI::D1MINUSLINEAR");
+    DEBUG_PRINT("OneStepNSProblem::getOSIMatrix  for osiType   OSI::D1MINUSLINEAR\n");
     /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all OSNSP*/
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      (std11::static_pointer_cast<LagrangianDS>(ds))->computeMass();
-      (std11::static_pointer_cast<LagrangianDS>(ds))->mass()->resetLU();
-      DEBUG_EXPR(((std11::static_pointer_cast<LagrangianDS>(ds))->mass())->display(););
-      block.reset(new SimpleMatrix(*((std11::static_pointer_cast<LagrangianDS>(ds))->mass())));
+      // SP::SimpleMatrix Mold;
+      // Mold.reset(new SimpleMatrix(*(std11::static_pointer_cast<LagrangianDS>(ds))->mass()));
+      // DEBUG_EXPR(Mold->display(););
+      // DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isPLUFactorized() = "<< Mold->isPLUFactorized() << std::endl;);
+      //(std11::static_pointer_cast<LagrangianDS>(ds))->computeMass();
+      SP::SiconosMatrix Mass = ((std11::static_pointer_cast<LagrangianDS>(ds))->mass()) ;
+      DEBUG_EXPR(Mass->display(););
+      DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mass->isPLUFactorized() = "<< Mass->isPLUFactorized() << std::endl;);
+
+      //DEBUG_EXPR(std::cout << (*Mass-*Mold).normInf() << std::endl;);
+      /*Copy of the current mass matrix. */
+      block.reset(new SimpleMatrix(*Mass));
     }
     else if (dsType == Type::NewtonEulerDS)
     {

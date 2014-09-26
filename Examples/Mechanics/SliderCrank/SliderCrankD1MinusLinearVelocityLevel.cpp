@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     double t0 = 0.0;         // initial computation time
     double T = 0.1;       // final computation time
     //T=0.00375;
-    double h = 1e-5;       // time step : do not decrease, because of strong penetrations
+    double h = 1e-3;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
     double l1 = 0.1530;
@@ -202,13 +202,6 @@ int main(int argc, char* argv[])
     dataPlot(k, 28) = (*inter2->lambda(2))(0) ; // lambda1_{k+1}^-
     dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda1_{k+1}^-
     dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda1_{k+1}^-
-
-
-
-    dataPlot(k, 31) = ( *((inter1->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1_k^+
-    dataPlot(k, 32) = ( *((inter2->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda2_k^+
-    dataPlot(k, 33) = ( *((inter3->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda3_k^+
-    dataPlot(k, 34) = ( *((inter4->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda4_k^+
 
 
     dataPlot(k, 31) = ( *((inter1->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old

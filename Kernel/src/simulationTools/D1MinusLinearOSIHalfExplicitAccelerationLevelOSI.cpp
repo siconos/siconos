@@ -428,7 +428,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         workFreeFree->zero();
 
         d->computeMass();
-        M->resetLU();
+
         DEBUG_EXPR(M->display());
         if (d->forces())
         {
@@ -501,7 +501,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
           d->computeMass();
-          M->resetLU();
+
           DEBUG_EXPR(M->display());
           if (d->forces())
           {

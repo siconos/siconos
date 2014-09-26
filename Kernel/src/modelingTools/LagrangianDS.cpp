@@ -19,8 +19,8 @@
 #include "LagrangianDS.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 #include <iostream>
 
@@ -458,11 +458,14 @@ void LagrangianDS::setPPtr(SP::SiconosVector newPtr, unsigned int level)
 
 void LagrangianDS::computeMass()
 {
+  DEBUG_PRINT("LagrangianDS::computeMass()\n");
+  DEBUG_EXPR(_q[0]->display());
   if (_pluginMass->fPtr)
   {
     ((FPtrMass)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
     _mass->resetLU();
   }
+  DEBUG_EXPR(_mass->display());
 }
 
 void LagrangianDS::computeMass(SP::SiconosVector q2)

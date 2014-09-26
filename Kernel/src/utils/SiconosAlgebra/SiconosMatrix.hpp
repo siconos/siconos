@@ -40,6 +40,10 @@ union MATRIX_UBLAS_TYPE
   ZeroMat *Zero;      // num = 6
   IdentityMat *Identity; // num = 7
 };
+/** A STL vector of int */
+typedef std::vector<int> VInt;
+TYPEDEF_SPTR(VInt)
+
 
 /** Abstract class to provide interface for matrices handling
  *
@@ -121,6 +125,11 @@ public:
     return false;
   }
 
+  inline virtual SP::VInt ipiv() const
+  {
+    SP::VInt dummy;
+    return dummy;
+  }
 
   /** get the number of rows or columns of the matrix
    *  \param : unsigned int, 0 for rows, 1 for columns

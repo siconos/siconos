@@ -215,7 +215,7 @@ void D1MinusLinearOSI::computeFreeState()
       DEBUG_EXPR(vold->display());
 
       // get right information
-      SP::SiconosMatrix M = d->mass();
+      //SP::SiconosMatrix M = d->mass();
       SP::SiconosVector vfree = d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
       (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
       DEBUG_EXPR(d->workspace(DynamicalSystem::freeresidu)->display());

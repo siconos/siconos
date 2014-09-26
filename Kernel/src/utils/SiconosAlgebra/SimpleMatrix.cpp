@@ -185,10 +185,18 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum(
     mat.Identity = new IdentityMat(smat.size(0), smat.size(1));
 }
 
-SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum()), _isPLUFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum()), _isPLUFactorized(), _isPLUInversed(false)
 {
   // num is set in SiconosMatrix constructor with m.getNum() ... must be changed if m is Block
   unsigned int numM = m.getNum();
+
+
+  _isPLUFactorized= m.isPLUFactorized();
+  _isPLUInversed= m.isPLUInversed();
+
+  if (m.ipiv())
+    _ipiv.reset(new VInt(*(m.ipiv())));
+
   if (numM == 0) // ie if m is Block, this matrix is set to a dense.
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
@@ -475,7 +483,7 @@ void SimpleMatrix::randomize()
 {
   if (num == 1)
     Siconos::algebra::fill(*mat.Dense);
-  else 
+  else
     SiconosMatrixException::selfThrow("SimpleMatrix::randomize(): only implemented for dense matrices.");
   resetLU();
 }
@@ -484,7 +492,7 @@ void SimpleMatrix::randomize_sym()
 {
   if (num == 1)
     Siconos::algebra::fill_sym(*mat.Dense);
-  else 
+  else
     SiconosMatrixException::selfThrow("SimpleMatrix::randomize_sym(): only implemented for dense matrices.");
   resetLU();
 }
@@ -605,7 +613,7 @@ void SimpleMatrix::display() const
 {
   std::cout.setf(std::ios::scientific);
   std::cout.precision(6);
-  
+
   if (num == 1)
     Siconos::algebra::print_m(*mat.Dense);
     //std::cout << *mat.Dense << std::endl;
@@ -1005,5 +1013,3 @@ void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::Si
   private_addprod(a, A, startRow, 0, x, y);
 
 }
-
-
