@@ -150,6 +150,11 @@ typedef struct _SolverOptions
   struct _SolverOptions * internalSolvers; /**< internalSolvers pointer to sub-solvers*/
   NumericsOptions * numericsOptions;       /**< numericsOptions global options for numerics (verbose mode ...)*/
   Callback * callback;                     /**< callback a pointer to user Callback*/
+
+  void * solverParameters;                 /**< parameters specific to the solver */
+
+  void * solverData;                       /**< data specific to the solver, may contains allocated matrices, vectors, ipiv, ... */
+
 } SolverOptions;
 
 enum SICONOS_NUMERICS_PROBLEM_TYPE
