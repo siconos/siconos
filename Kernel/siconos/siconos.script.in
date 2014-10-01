@@ -41,13 +41,15 @@ comp = True
 myname = sys.argv[0]
 call_pwd = os.getcwd()
 
+
 def read_siconos_pythonpath(install_prefix):
     ''' read the path where the Siconos Python module is installed '''
     folder = os.path.join(install_prefix, 'share', 'siconos-front-end')
     with open(os.path.join(folder, 'siconos_pythonpath')) as sfile:
         return sfile.readline().rstrip()
 
-class WorkDir():
+
+class WorkDir(object):
     ''' a context manager for a workdir that may be temporary '''
     def __init__(self, directory, tmp=False):
         self.directory = directory
@@ -82,6 +84,7 @@ class WorkDir():
         if self.tmp:
             shutil.rmtree(self.directory)
 
+
 def silent_try(command, *_args):
     try:
         command(*_args)
@@ -90,8 +93,7 @@ def silent_try(command, *_args):
 
 
 def cartridge():
-    sys.stdout.write(
-"""
+    sys.stdout.write("""
 |=============================================================================|
 |          Siconos-Kernel version {0}.{1}.{2}, Copyright INRIA 2005-2014.         |
 |                                                                             |
@@ -101,8 +103,7 @@ def cartridge():
 
 
 def usage():
-    sys.stdout.write(
-"""
+    sys.stdout.write("""
 The siconos command compiles, links and runs a Siconos program.
 
 Usage: {0} [options] [YourExample.{{cpp,py}}|location/YourExample.{{cpp,py}}] [Arguments]
@@ -128,14 +129,14 @@ Options are:
 
  --clean-build : clean build directory.
 
- -c | -clean : to clean the current directory (deletes binary files,
+ -c | --clean : to clean the current directory (deletes binary files,
                etc.).
 
  -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.
 
  -g : to compile with debug informations.
 
- -h | -help : to print this help.
+ -h | --help : to print this help.
 
  -j<n>   : parrallel compilation with n jobs
 
@@ -193,7 +194,7 @@ if __name__ == '__main__':
                                         'opt=', 'ldopt=', 'plugin-dir=',
                                         'plugins-dir=', 'generator=',
                                         'no-infer-prefix'])
-    except (getopt.GetoptError, err):
+    except getopt.GetoptError as err:
         sys.stderr.write('{0} : {1}\n'.format(myname, str(err)))
         usage()
         sys.exit(2)
@@ -320,16 +321,16 @@ if __name__ == '__main__':
     siconos_build_dir = os.getenv('SICONOS_BUILD_DIR', default=build_directory)
 
     if msvc and 'Windows' in platform.uname():
-     cmake_cmd = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cmake-vc.bat')
+        cmake_cmd = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cmake-vc.bat')
     else:
-     cmake_cmd = 'cmake'
+        cmake_cmd = 'cmake'
 
     with WorkDir(directory=siconos_build_dir, tmp=tmp_build) as work_dir:
 
         assert(len(args) > 0)
         main_source = os.path.join(call_pwd, args[0])
         main_source_splitext = os.path.splitext(os.path.basename(main_source))
-        if len(main_source_splitext)>1:
+        if len(main_source_splitext) > 1:
             if main_source_splitext[1] == '.py':
                 exe_full_path = main_source
                 exe_basename = os.path.basename(exe_full_path)
@@ -348,7 +349,7 @@ if __name__ == '__main__':
             format(os.getenv('LD_LIBRARY_PATH'),
                    os.path.join(kernel_prefix, lib_dir))
         env['Path'] = '{0};{1}'.format(os.getenv('Path'),
-                                         os.path.join(kernel_prefix, lib_dir))
+                                       os.path.join(kernel_prefix, lib_dir))
         if 'install' in make_targets:
 
             plugin_directories = \
@@ -378,10 +379,10 @@ if __name__ == '__main__':
                 extra_cmake_args.append('-G' + cmake_generator)
 
             if source_is_python and \
-                plugins_directories == [] and \
-                plugin_directories == [] and \
-                not os.path.exists(os.path.join(exe_dir, 'plugins')) and \
-                not os.path.exists(os.path.join(exe_dir, 'plugin')):
+               plugins_directories == [] and \
+               plugin_directories == [] and \
+               not os.path.exists(os.path.join(exe_dir, 'plugins')) and \
+               not os.path.exists(os.path.join(exe_dir, 'plugin')):
                 comp = False
 
             if comp:
@@ -391,11 +392,10 @@ if __name__ == '__main__':
                     linker_options.append('-undefined dynamic_lookup')
                 # Compiling on Windows is not an easy thing --xhub
                 try:
-                    cmake_boolean = { True: '1', False: '0' }
+                    cmake_boolean = {True: '1', False: '0'}
                     subprocess.check_call([
                         cmake_cmd, posixpath.join(kernel_prefix,
-                                              'share',
-                                              'siconos-kernel'),
+                                                  'share', 'siconos-kernel'),
                         '-DCALL_PWD={0}'.format(call_pwd),
                         '-DMAIN_SOURCE={0}'.format(main_source),
                         '-DBUILD_MAIN={0}'.format(cmake_boolean[
@@ -459,6 +459,6 @@ if __name__ == '__main__':
                                   env=env)
         except Exception as exception:
             sys.stderr.write('{0}: {1} failed, {2}\n'.format(myname,
-                                                           exe_full_path,
-                                                           exception))
+                                                             exe_full_path,
+                                                             exception))
             sys.exit(1)
