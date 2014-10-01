@@ -293,29 +293,21 @@
 
 %extend SolverOptions
 {
-
   SolverOptions(FRICTION_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    switch(id)
-    {
-    case SICONOS_FRICTION_2D_NSGS:
-   
-    case SICONOS_FRICTION_2D_PGS:
-    case SICONOS_FRICTION_2D_CPG:
-    case SICONOS_FRICTION_2D_LATIN:
+
+    /* cf Friction_cst.h */
+    if(id >= 400 && id < 500)
     {
       frictionContact2D_setDefaultSolverOptions(SO, id);
-      break;
-    }      
-    // 3D
-    default:
+    }
+    else
     {
       frictionContact3D_setDefaultSolverOptions(SO, id);
     }
-    }
-    
+
     return SO;
   }
 
@@ -333,7 +325,7 @@
     linearComplementarity_setDefaultSolverOptions(lcp, SO, id);
     return SO;
   }
-  
+
   SolverOptions(MixedLinearComplementarityProblem* mlcp, MLCP_SOLVER id)
   {
     SolverOptions *SO;
