@@ -105,7 +105,7 @@ def usage():
 """
 The siconos command compiles, links and runs a Siconos program.
 
-Usage: {0} [options] [YourExample.{cpp,py}|location/YourExample.{cpp,py}] [Arguments]
+Usage: {0} [options] [YourExample.{{cpp,py}}|location/YourExample.{{cpp,py}}] [Arguments]
 
 
  --> To use other source files (*.c, *.cpp, *.f), put them in ./src or
@@ -319,6 +319,11 @@ if __name__ == '__main__':
 
     siconos_build_dir = os.getenv('SICONOS_BUILD_DIR', default=build_directory)
 
+    if msvc and 'Windows' in platform.uname():
+     cmake_cmd = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cmake-vc.bat')
+    else:
+     cmake_cmd = 'cmake'
+
     with WorkDir(directory=siconos_build_dir, tmp=tmp_build) as work_dir:
 
         assert(len(args) > 0)
@@ -385,10 +390,6 @@ if __name__ == '__main__':
                 if 'Darwin' in platform.uname():
                     linker_options.append('-undefined dynamic_lookup')
                 # Compiling on Windows is not an easy thing --xhub
-                if msvc and 'Windows' in platform.uname():
-                    cmake_cmd = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cmake-vc.bat')
-                else:
-                    cmake_cmd = 'cmake'
                 try:
                     cmake_boolean = { True: '1', False: '0' }
                     subprocess.check_call([
