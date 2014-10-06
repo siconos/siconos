@@ -40,12 +40,6 @@ using namespace RELATION;
 
 double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 {
-  DEBUG_PRINT("\n ******************************************************************\n");
-  DEBUG_PRINT(" ******************************************************************\n");
-  DEBUG_PRINT(" ******************************************************************\n");
-
-
-
   DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel(), starts\n");
 
   double t = simulationLink->nextTime(); // end of the time step
@@ -53,17 +47,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
   double h = simulationLink->timeStep(); // time step length
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
   SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-  // SP::InteractionsGraph indexSet0 = topo->indexSet(0);
-   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
-  //SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-
-  DEBUG_PRINTF("nextTime %f\n", t);
-  DEBUG_PRINTF("startingTime %f\n", told);
-  DEBUG_PRINTF("time step size %f\n", h);
+  SP::InteractionsGraph indexSet1 = topo->indexSet(1);
 
   /******************************************************************************************
-   *  Step 1-  solve a LCP at acceleration level for lambda^+_{k} for the last set indices
-   *   if index2 is empty we should skip this step
+   *  Step 1-  solve a LCP at velocity level for lambda^+_{k} for the last set indices
+   *   if index1 is empty we should skip this step
    ******************************************************************************************/
 
   DEBUG_PRINT("\nEVALUATE LEFT HAND SIDE\n");

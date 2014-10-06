@@ -31,8 +31,8 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 
@@ -108,6 +108,7 @@ unsigned int D1MinusLinearOSI::numberOfIndexSets() const
 }
 void D1MinusLinearOSI::initialize()
 {
+  DEBUG_PRINT("D1MinusLinearOSI::initialize() starts \n");
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     Type::Siconos dsType = Type::value(**it);
@@ -132,7 +133,6 @@ void D1MinusLinearOSI::initialize()
   switch (_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:
-  {
     // set evaluation levels (first is of velocity, second of acceleration type)
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
@@ -142,9 +142,9 @@ void D1MinusLinearOSI::initialize()
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(simulationLink);
     isOSNSPinitialized = true ;
-  }
+    DEBUG_EXPR((*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->display());
+    break;
   case halfexplicit_acceleration_level_full:
-  {
     // set evaluation levels (first is of velocity, second of acceleration type)
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
@@ -154,9 +154,8 @@ void D1MinusLinearOSI::initialize()
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(simulationLink);
     isOSNSPinitialized = true ;
-  }
+    break;
   case halfexplicit_velocity_level:
-  {
     // set evaluation levels (first is of velocity, second of acceleration type)
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
@@ -166,19 +165,31 @@ void D1MinusLinearOSI::initialize()
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(simulationLink);
     isOSNSPinitialized = true ;
-  }
+    break;
   }
   if (!isOSNSPinitialized)
   {
     RuntimeException::selfThrow("D1MinusLinearOSI::initialize() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI );
   }
+  DEBUG_PRINT("D1MinusLinearOSI::initialize() ends \n");
 }
 
 
 
 double D1MinusLinearOSI::computeResidu()
 {
+
+  DEBUG_PRINT("\n ******************************************************************\n");
+  DEBUG_PRINT(" ******************************************************************\n");
+  DEBUG_PRINT(" ******************************************************************\n");
+
   DEBUG_PRINT("\n D1MinusLinearOSI::computeResidu(), start\n");
+
+
+  DEBUG_PRINTF("nextTime %f\n", simulationLink->nextTime());
+  DEBUG_PRINTF("startingTime %f\n", simulationLink->startingTime());
+  DEBUG_PRINTF("time step size %f\n", simulationLink->timeStep());
+
   switch (_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:
@@ -268,29 +279,38 @@ void D1MinusLinearOSI::updateState(const unsigned int level)
   {
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
+
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
+    /* Lagrangian DS*/
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
-
-      // Lagrangian Systems
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
       SP::SiconosMatrix M = d->mass();
-      SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
+      SP::SiconosVector v = d->velocity();
 
+      DEBUG_PRINT("Position and velocity before update\n");
+      DEBUG_EXPR(d->q()->display());
+      DEBUG_EXPR(d->velocity()->display());
+
+      /* Add the contribution of the impulse if any */
       if (d->p(1))
       {
-        SP::SiconosVector dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
-        M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
-        *v += *dummy; // add free velocity
-        DEBUG_PRINT("\nRIGHT IMPULSE\n");
         DEBUG_EXPR(d->p(1)->display());
+        /* copy the value of the impulse */
+        SP::SiconosVector dummy(new SiconosVector(*(d->p(1))));
+        /* Compute the velocity jump due to the impulse */
+        M->PLUForwardBackwardInPlace(*dummy);
+        /* Add the velocity jump to the free velocity */
+        *v += *dummy;
       }
+
+      DEBUG_PRINT("Position and velocity after update\n");
       DEBUG_EXPR(d->q()->display());
       DEBUG_EXPR(d->velocity()->display());
     }
+    /*  NewtonEuler Systems */
     else if (dsType == Type::NewtonEulerDS)
     {
-      // NewtonEuler Systems
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
       SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
       SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity

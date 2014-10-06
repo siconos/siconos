@@ -211,12 +211,6 @@ int main(int argc, char* argv[])
     dataPlot(k, 34) = ( *((inter4->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda4_k^+
 
 
-    dataPlot(k, 31) = ( *((inter1->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
-    dataPlot(k, 32) = ( *((inter2->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
-    dataPlot(k, 33) = ( *((inter3->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
-    dataPlot(k, 34) = ( *((inter4->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
-
-
 
 
 
@@ -231,8 +225,8 @@ int main(int argc, char* argv[])
     time.restart();
 
 
-//    while ((s->hasNextEvent()) && (k <= 3000))
-    while ((s->hasNextEvent()))
+    while ((s->hasNextEvent()) && (k <= 350))
+//    while ((s->hasNextEvent()))
     {
 
       // std::cout <<"=====================================================" <<std::endl;
