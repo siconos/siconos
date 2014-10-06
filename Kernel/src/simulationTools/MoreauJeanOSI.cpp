@@ -186,6 +186,11 @@ void MoreauJeanOSI::initialize()
 
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
   }
+
+  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
+  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
+  //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(simulationLink);
 }
 void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
 {
@@ -209,8 +214,8 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
 
   double h = simulationLink->timeStep();
   Type::Siconos dsType = Type::value(*ds);
-  
-  
+
+
   if (dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
@@ -1010,7 +1015,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   SP::Interaction mainInteraction = inter;
   assert(mainInteraction);
   assert(mainInteraction->relation());
-  
+
   if (relationType == NewtonEuler)
   {
     SP::SiconosMatrix CT =  std11::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();

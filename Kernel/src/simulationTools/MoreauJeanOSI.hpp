@@ -360,7 +360,7 @@ public:
    *  \param tinit the initial time
    *  \param tend the end time
    *  \param tout the real end time
-   *  \param int: useless flag (for MoreauJeanOSI, used in LsodarOSI)
+   *  \param notUsed useless flag (for MoreauJeanOSI, used in LsodarOSI)
    */
   void integrate(double& tinit, double& tend, double& tout, int& notUsed);
 

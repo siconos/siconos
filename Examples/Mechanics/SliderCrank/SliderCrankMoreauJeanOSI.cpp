@@ -61,6 +61,7 @@ int main(int argc, char* argv[])
     eN2 = 0.1;
     eN3 = 0.1;
     eN4 = 0.1;
+#ifdef WITH_FRICTION
     double eT1 = 0.;
     double eT2 = 0.;
     double eT3 = 0.;
@@ -69,7 +70,7 @@ int main(int argc, char* argv[])
     double mu2 = 0.01;
     double mu3 = 0.01;
     double mu4 = 0.01;
-
+#endif
     // initial conditions
     SP::SiconosVector q0(new SiconosVector(nDof));
     SP::SiconosVector v0(new SiconosVector(nDof));
@@ -223,16 +224,16 @@ int main(int argc, char* argv[])
     time.restart();
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
 
-    while ((s->hasNextEvent()) && (k<= 3000))
-//    while ((s->hasNextEvent()))
+//    while ((s->hasNextEvent()) && (k<= 3000))
+    while ((s->hasNextEvent()))
     {
 
-      std::cout <<"=====================================================" <<std::endl;
-      std::cout <<"=====================================================" <<std::endl;
-      std::cout <<"=====================================================" <<std::endl;
-      std::cout <<"Iteration k = " << k <<std::endl;
-      std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
-      std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"Iteration k = " << k <<std::endl;
+      // std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
 
 
 
@@ -296,6 +297,19 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    cout << "====> Comparison with a reference file ..." << endl;
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("SliderCrankMoreauJeanOSI.ref", "ascii", dataPlotRef);
+    double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
+    std::cout << "Error = "<< error << std::endl;
+    if (error > 1e-12)
+    {
+      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      std::cout <<  "error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+      return 1;
+    }
+
   }
 
   catch (SiconosException e)
