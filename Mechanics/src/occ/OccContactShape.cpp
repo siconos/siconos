@@ -113,7 +113,7 @@ SPC::TopoDS_Face OccContactShape::face(unsigned int index) const
   if (exp.More())
   {
     // taking a ref fail!
-    *return_value = TopoDS::Face(exp.Current().Composed(this->data().Orientation()));
+    *return_value = TopoDS::Face(exp.Current());
   }
   else
   {
@@ -133,7 +133,7 @@ SPC::TopoDS_Edge OccContactShape::edge(unsigned int index) const
   if (exp.More())
   {
     // taking a ref fail!
-    *return_value = TopoDS::Edge(exp.Current().Composed(this->data().Orientation()));
+    *return_value = TopoDS::Edge(exp.Current());
   }
   else
   {
@@ -156,7 +156,7 @@ void OccContactShape::move(const SiconosVector& q)
   transfo.SetRotation(rota);
   transfo.SetTranslationPart(translat);
 
-  this->data().Move(transfo);
+  // this->data().Move(transfo);
   this->data().Location(TopLoc_Location(transfo));
 
   // cf code from Olivier

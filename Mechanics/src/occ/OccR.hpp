@@ -38,12 +38,17 @@ public:
    */
   OccR(const ContactPoint& contact1, const ContactPoint& contact2);
 
-  /** compute h.
+  /** Compute h.
    *  \param time : the time.
    *  \param q0 : the state vector.
    *  \param y : output vector.
    */
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+
+  /** Set offset.
+   * \param val : the new value.
+   */
+  void setOffset(double val) { _offset = val; };
 
 protected:
   const ContactPoint& _contact1;
