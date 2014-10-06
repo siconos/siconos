@@ -17,10 +17,10 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*!\file ImpactingBeam.cpp
+/*!\file ImpactingBar.cpp
   V. Acary
 
-  A Beam bouncing on the ground
+  A Bar bouncing on the ground
   Simulation with a Time-Stepping scheme.
 */
 
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     // ================= Creation of the model =======================
 
     // User-defined main parameters
-    unsigned int nDof = 100;// degrees of freedom for the beam
+    unsigned int nDof = 100;// degrees of freedom for the bar
     double t0 = 1e-8;                   // initial computation time
     double T = 0.0015;                  // final computation time
     double h = 2e-6;                // time step
@@ -46,9 +46,9 @@ int main(int argc, char* argv[])
     double epsilon = 0.5;//1e-1;
     double theta = 1/2.0 + epsilon;              // theta for MoreauJeanOSI integrator
     double E = 210e9; // young Modulus
-    double S = 0.000314; //  Beam Section 1 cm  for the diameter
+    double S = 0.000314; //  Bar Section 1 cm  for the diameter
 
-    double L = 1.0; // length of the  beam
+    double L = 1.0; // length of the  bar
     double rho = 7800.0 ; // specific mass
     double g = 9.81; // Gravity
     g=0.0;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 
     double l = L/nDof; // length of an element
 
-    cout << "beam length" << l <<  endl;
+    cout << "bar length" << l <<  endl;
 
     SP::SiconosMatrix SparseMass(new SimpleMatrix(nDof,nDof,Siconos::SPARSE,nDof));
     SP::SiconosMatrix SparseStiffness(new SimpleMatrix(nDof,nDof,Siconos::SPARSE,3*nDof));
@@ -103,17 +103,17 @@ int main(int argc, char* argv[])
     SP::SiconosVector v0(new SiconosVector(nDof,velocity_init));
 
     // -- The dynamical system --
-    SP::LagrangianLinearTIDS beam(new LagrangianLinearTIDS(q0,v0,SparseMass));
+    SP::LagrangianLinearTIDS bar(new LagrangianLinearTIDS(q0,v0,SparseMass));
 
     // -- Set stiffness matrix (weight) --
-    beam->setKPtr(SparseStiffness);
+    bar->setKPtr(SparseStiffness);
 
 
 
     // -- Set external forces (weight) --
     //SP::SiconosVector weight(new SiconosVector(nDof,-g*rho*S/l));
     SP::SiconosVector weight(new SiconosVector(nDof,0.0));
-    beam->setFExtPtr(weight);
+    bar->setFExtPtr(weight);
 
     // --------------------
     // --- Interactions ---
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     // -- nslaw --
     double e = 0.0;
 
-    // Interaction beam-floor
+    // Interaction bar-floor
     //
     SP::SimpleMatrix H(new SimpleMatrix(1,nDof));
     (*H)(0,0) = 1.0;
@@ -135,13 +135,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model impactingBeam(new Model(t0, T));
+    SP::Model impactingBar(new Model(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    impactingBeam->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam);
+    impactingBar->nonSmoothDynamicalSystem()->insertDynamicalSystem(bar);
 
     // link the interaction and the dynamical system
-    impactingBeam->nonSmoothDynamicalSystem()->link(inter,beam);
+    impactingBar->nonSmoothDynamicalSystem()->link(inter,bar);
 
 
     // ------------------
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     // -- (1) OneStepIntegrators --
 #ifdef TS_PROJ
     SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(theta));
-    OSI->insertDynamicalSystem(beam);
+    OSI->insertDynamicalSystem(bar);
     OSI->setDeactivateYPosThreshold(1e-05);
     OSI->setDeactivateYVelThreshold(0.0);
     OSI->setActivateYPosThreshold(1e-09);
@@ -159,10 +159,10 @@ int main(int argc, char* argv[])
 #else
 #ifdef TS_COMBINED
     SP::OneStepIntegrator OSI(new MoreauJeanCombinedProjectionOSI(theta));
-    OSI->insertDynamicalSystem(beam);
+    OSI->insertDynamicalSystem(bar);
 #else
     SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta,0.5));
-    OSI->insertDynamicalSystem(beam);
+    OSI->insertDynamicalSystem(bar);
 #endif
 #endif
     // -- (2) Time discretisation --
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout <<"====> Initialisation ..." <<endl<<endl;
-    impactingBeam->initialize(s);
+    impactingBar->initialize(s);
     int N = floor((T-t0)/h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -206,12 +206,12 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 11;
     SimpleMatrix dataPlot(N,outputSize);
 
-    SP::SiconosVector q = beam->q();
-    SP::SiconosVector v = beam->velocity();
-    SP::SiconosVector p = beam->p(1);
+    SP::SiconosVector q = bar->q();
+    SP::SiconosVector v = bar->velocity();
+    SP::SiconosVector p = bar->p(1);
     SP::SiconosVector lambda = inter->lambda(1);
 
-    dataPlot(0, 0) = impactingBeam->t0();
+    dataPlot(0, 0) = impactingBar->t0();
     dataPlot(0,1) = (*q)(0);
     dataPlot(0,2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
@@ -295,11 +295,11 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout<<"====> Output file writing ..."<<endl;
-    ioMatrix::write("ImpactingBeam.dat", "ascii", dataPlot,"noDim");
+    ioMatrix::write("ImpactingBar.dat", "ascii", dataPlot,"noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("ImpactingBeam.ref", "ascii", dataPlotRef);
+    ioMatrix::read("ImpactingBar.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
@@ -318,7 +318,7 @@ int main(int argc, char* argv[])
   }
   catch(...)
   {
-    cout << "Exception caught in ImpactingBeamTS.cpp" << endl;
+    cout << "Exception caught in ImpactingBarTS.cpp" << endl;
   }
 
 
