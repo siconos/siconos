@@ -5,7 +5,7 @@ Modelisation
 
 Usage :
 ^^^^^^^
-example of the modelisation of a bouncing ball:
+Example of the modelisation of a bouncing ball:
 +++++++++++++++++++++++++++++++++++++++++++++++
 
 A ball bouncing on the ground may be defined as a linear lagrangian time
@@ -156,7 +156,7 @@ equations, its dynamics is written as:
    \dot x = A.x + r
    
 
-where :math:`x = \left[\begin{array}{c} \dot v_L\\ \dot i_L \end{array}\right]`, :math:`\lambda = \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right]`, :math:`A=\left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right]` and :math:`r= \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right].\lambda`
+where :math:`x = \left[\begin{array}{c}  v_L\\ i_L \end{array}\right]`, :math:`\lambda = \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right]`, :math:`A=\left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right]` and :math:`r= \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right].\lambda`
 
 
 We first import the needed classes for the construction of the model:
@@ -176,8 +176,8 @@ We define the model parameters:
    Rvalue = 1e3     # resistance
    Vinit = 10.0     # initial voltage
 
-
-The first order linear dynamical system is built:
+A `FirstOrderLinearDS` object is built with the initial state and the linear
+operator :math:`A`:
 
 .. testcode::
     
@@ -186,10 +186,73 @@ The first order linear dynamical system is built:
    A = [[0,          -1.0/Cvalue],
         [1.0/Lvalue, 0          ]]
 
-   LSDiodeBridge = FirstOrderLinearDS(init_state, A)
+   LSDiodeBridge = FirstOrderLinearDS(initstate, A)
+
+
+The linear relations between voltage and current given by:
+
+:math:`y = Cx + D\lambda`, where :math:`y=\left[ \begin{array}{c} i_{DR1}\\ i_{DF2}\\ -v_{DF1}\\ -v_{DR2} \end{array} \right]`, :math:`C = \left[ \begin{array}{cc} 0 & 0\\ 0 & 0\\ -1 & 0\\ 1 & 0 \end{array} \right]` :math:`D = \left[ \begin{array}{cccc} \frac{1}{R} & \frac{1}{R} & -1 & 0\\ \frac{1}{R} & \frac{1}{R} & 0 & -1\\ 1 & 0 & 0 & 0\\ 0 & 1 & 0 & 0 \end{array} \right]` and :math:`\lambda =\left[ \begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array} \right]`
+
+Are provided with the help of a `FirstOrderLinearTIR` object:
+
+.. testcode::
+
+   C = [[0.,   0.],
+        [0,    0.],
+        [-1.,  0.],
+        [1.,   0.]]
+
+   D = [[1./Rvalue, 1./Rvalue, -1.,  0.],
+        [1./Rvalue, 1./Rvalue,  0., -1.],
+        [1.,        0.,         0.,  0.],
+        [0.,        1.,         0.,  0.]]
+
+   B = [[0.,        0., -1./Cvalue, 1./Cvalue],
+        [0.,        0.,  0.,        0.       ]]
+
+   LTIRDiodeBridge = FirstOrderLinearTIR(C, B)
+   LTIRDiodeBridge.setDPtr(D)
+
+The behavior of each diode of the bridge, supposed to be ideal,
+may be described with a complementarity condition between current and
+reverse voltage (variables (:math:`y`, :math:`\lambda`) ). Depending on the
+diode position in the bridge, y stands for the reverse voltage across
+the diode or for the diode current. Then, the complementarity
+conditions, results of the ideal diodes characteristics are given
+by:
+
+:math:`\begin{array}{l} 0 \leq -v_{DR1} \, \perp \, i_{DR1} \geq 0\\0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0\end{array} \ \ \ \ \ \ or \ \ \ \ \ \  0 \leq y \, \perp \, \lambda \geq 0`
+
+These conditions are defined with a `ComplementarityConditionNSL` object of size 4:
+
+.. testcode::
+   
+   nslaw = ComplementarityConditionNSL(4)
+
+Then the relation and the nonsmooth law are tied in an `Interaction` object:
+
+.. testcode::
+
+   InterDiodeBridge = Interaction(nslaw, LTIRDiodeBridge)
+
+Finally a `Model` object is built :
+
+.. testcode::
+
+   # the first parameter is the start time
+   # the second parameter is the end time
+   DiodeBridge = Model(0, 10)
+
+.. testcode::
+
+   # add the dynamical system to the model data
+   DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(LSDiodeBridge)
+
+   # link the interaction and the dynamical system
+   DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
 
 Modelisation API
 ^^^^^^^^^^^^^^^^
 
-#.. automodule:: Siconos.Kernel
-#  :members: :eval:`under_directory(['../../../Kernel/src/modelingTools'])`
+.. automodule:: Siconos.Kernel
+  :members: :eval:`under_directory(['../../../Kernel/src/modelingTools'])`
