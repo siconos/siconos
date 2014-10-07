@@ -6,8 +6,8 @@ set output "ImpactingBar-Energy.pdf"
 set auto
 plot\
 "ImpactingBar.dat" u 1:6 t "Potential energy" w l,\
-"ImpactingBeam.dat" u 1:7 t "Kinetic energy" w l,\
-"ImpactingBeam.dat" u 1:($7+$6) t "Total energy" w l
+"ImpactingBar.dat" u 1:7 t "Kinetic energy" w l,\
+"ImpactingBar.dat" u 1:($7+$6) t "Total energy" w l
 
 set output "ImpactingBar-qvr.pdf"
 
