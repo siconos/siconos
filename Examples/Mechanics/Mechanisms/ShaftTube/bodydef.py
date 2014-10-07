@@ -1,4 +1,4 @@
-# Example 3 - Shaft and tube assembly.
+# Example 3 - Shaft and tube assembly for contact detection.
 
 # REQUIRED number of bodies
 NBBODIES=1
