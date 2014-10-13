@@ -225,8 +225,8 @@ int main(int argc, char* argv[])
     time.restart();
 
 
-//    while ((s->hasNextEvent()) && (k <= 350))
-    while ((s->hasNextEvent()))
+    while ((s->hasNextEvent()) && (k <= 500))
+//    while ((s->hasNextEvent()))
     {
 
       // std::cout <<"=====================================================" <<std::endl;

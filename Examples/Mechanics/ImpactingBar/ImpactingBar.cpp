@@ -37,22 +37,8 @@ int main(int argc, char* argv[])
     // ================= Creation of the model =======================
 
     // User-defined main parameters
-    unsigned int nDof = 100;// degrees of freedom for the bar
-    double t0 = 1e-8;                   // initial computation time
-    double T = 0.0015;                  // final computation time
-    double h = 2e-6;                // time step
-    double position_init = 0.00005;      // initial position
-    double velocity_init =  -.1;      // initial velocity
-    double epsilon = 0.5;//1e-1;
-    double theta = 1/2.0 + epsilon;              // theta for MoreauJeanOSI integrator
-    double E = 210e9; // young Modulus
-    double S = 0.000314; //  Bar Section 1 cm  for the diameter
-
-    double L = 1.0; // length of the  bar
-    double rho = 7800.0 ; // specific mass
-    double g = 9.81; // Gravity
-    g=0.0;
-
+//#include "UserDefinedParameter.hpp"
+#include "UserDefinedParameter-ref.hpp"
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -93,6 +79,8 @@ int main(int argc, char* argv[])
 
     *SparseMass  *= rho*S*l;
     *SparseStiffness  *= E*S/l;
+
+
 
 //      SparseMass->display();
 //      SparseStiffness->display();
@@ -296,19 +284,21 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout<<"====> Output file writing ..."<<endl;
     ioMatrix::write("ImpactingBar.dat", "ascii", dataPlot,"noDim");
-    // Comparison with a reference file
+    cout << " Comparison with a reference file" << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("ImpactingBar.ref", "ascii", dataPlotRef);
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    double error = (dataPlot - dataPlotRef).normInf() ;
+cout << "Error = " << error << endl;
+    if (error > 1e-12)
     {
-      
+
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
       std::cout << "Error = "<< (dataPlot - dataPlotRef).normInf()<<std::endl;
       return 1;
     }
-    
+
 
   }
 

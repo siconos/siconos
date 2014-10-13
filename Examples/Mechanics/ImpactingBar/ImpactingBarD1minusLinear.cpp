@@ -25,8 +25,7 @@
 */
 
 #include "SiconosKernel.hpp"
-//#define TS_PROJ
-//#define TS_COMBINED
+#define TS_VELOCITY_LEVEL
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -37,22 +36,7 @@ int main(int argc, char* argv[])
     // ================= Creation of the model =======================
 
     // User-defined main parameters
-    unsigned int nDof = 200;// degrees of freedom for the bar
-    double t0 = 1e-8;                   // initial computation time
-    double T = 0.0015;                  // final computation time
-    //T = 0.01;
-    double h = 2e-7;                // time step
-    double position_init = 0.00005;      // initial position
-    double velocity_init =  -.1;      // initial velocity
-    double epsilon = 0.5;//1e-1;
-    double E = 210e9; // young Modulus
-    double S = 0.000314; //  Bar Section 1 cm  for the diameter
-
-    double L = 1.0; // length of the  bar
-    double rho = 7800.0 ; // specific mass
-    double g = 9.81; // Gravity
-    g=0.0;
-
+#include "UserDefinedParameter.hpp"
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -91,8 +75,17 @@ int main(int argc, char* argv[])
     SparseStiffness->setValue(nDof-1, nDof-2,-1.0);
     SparseStiffness->setValue(nDof-1,nDof-1,1.0);
 
+
+    SP::SiconosMatrix SparseDamping(new SimpleMatrix(*SparseStiffness));
+
+
+
     *SparseMass  *= rho*S*l;
     *SparseStiffness  *= E*S/l;
+    double xsi = 1000.0;
+    std::cout <<  xsi*S/l << std::endl;
+    *SparseDamping *= xsi*S/l;
+
 
 //      SparseMass->display();
 //      SparseStiffness->display();
@@ -104,14 +97,13 @@ int main(int argc, char* argv[])
 
 
 
-
-
     // -- The dynamical system --
     SP::SiconosMatrix SparseMassforDS(new SimpleMatrix(*SparseMass));
     SP::LagrangianLinearTIDS bar(new LagrangianLinearTIDS(q0,v0,SparseMassforDS));
 
     // -- Set stiffness matrix (weight) --
     bar->setKPtr(SparseStiffness);
+    bar->setCPtr(SparseDamping);
 
 
 
@@ -155,7 +147,11 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
 
+#ifdef TS_VELOCITY_LEVEL
+    SP::D1MinusLinearOSI OSI(new D1MinusLinearOSI(D1MinusLinearOSI::halfexplicit_velocity_level));
+#else
     SP::D1MinusLinearOSI OSI(new D1MinusLinearOSI());
+#endif
     OSI->insertDynamicalSystem(bar);
 
     // -- (2) Time discretisation --
@@ -187,23 +183,29 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 11;
+    unsigned int outputSize = 13;
     SimpleMatrix dataPlot(N,outputSize);
 
     SP::SiconosVector q = bar->q();
     SP::SiconosVector v = bar->velocity();
     SP::SiconosVector p = bar->p(1);
-    SP::SiconosVector lambda = inter->lambda(1);
+    SP::SiconosVector Lambda = inter->lambda(1);
+    SP::SiconosVector lambdaminus = inter->lambda(2);
+    SP::SiconosVector lambdaplus = ((inter->lambdaMemory(2))->getSiconosVector(0) );
+    SP::SiconosVector y = inter->y(0);
+    int k = 0;
+    dataPlot(k,0) = impactingBar->t0();
+    dataPlot(k,1) = (*q)(0);
+    dataPlot(k,2) = (*v)(0);
+    dataPlot(k,3) = (*p)(0);
+    dataPlot(k,4) = (*Lambda)(0);
+    dataPlot(k,11) = (*lambdaminus)(0); // lambda1_{k+1}^-
+    dataPlot(k,12) = (*lambdaplus)(0);;
 
-    dataPlot(0, 0) = impactingBar->t0();
-    dataPlot(0,1) = (*q)(0);
-    dataPlot(0,2) = (*v)(0);
-    dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*lambda)(0);
-    dataPlot(0,7) = (*q)(nDof-1);
-    dataPlot(0,8) = (*v)(nDof-1);
-    dataPlot(0,9) = (*q)((nDof)/2);
-    dataPlot(0,10) = (*v)((nDof)/2);
+    dataPlot(k,7) = (*q)(nDof-1);
+    dataPlot(k,8) = (*v)(nDof-1);
+    dataPlot(k,9) = (*q)((nDof)/2);
+    dataPlot(k,10) = (*v)((nDof)/2);
 
 
     SP::SiconosVector tmp(new SiconosVector(nDof));
@@ -213,8 +215,8 @@ int main(int argc, char* argv[])
     prod(*SparseMass, *v, *tmp, true);
     double kineticEnergy = inner_prod(*v,*tmp);
 
-    dataPlot(0, 5) = potentialEnergy;
-    dataPlot(0, 6) = kineticEnergy;
+    dataPlot(k, 5) = potentialEnergy;
+    dataPlot(k, 6) = kineticEnergy;
 
 //    std::cout <<"potentialEnergy ="<<potentialEnergy << std::endl;
 //     std::cout <<"kineticEnergy ="<<kineticEnergy << std::endl;
@@ -224,7 +226,7 @@ int main(int argc, char* argv[])
     // --- Time loop ---
     cout << "====> Start computation ... " <<endl<<endl;
     // ==== Simulation loop - Writing without explicit event handling =====
-    int k = 1;
+
     boost::progress_display show_progress(N);
 
     boost::timer time;
@@ -244,17 +246,19 @@ int main(int argc, char* argv[])
 //       v->display();
 
 // --- Get values to be plotted ---
-      dataPlot(k, 0) =  s->nextTime();
+      dataPlot(k,0) =s->nextTime();
       dataPlot(k,1) = (*q)(0);
       dataPlot(k,2) = (*v)(0);
-      dataPlot(k, 3) = (*p)(0)/h;
-      dataPlot(k, 4) = (*lambda)(0);
+      dataPlot(k,3) = (*p)(0);
+      dataPlot(k,4) = (*Lambda)(0);
+
+      dataPlot(k,11) = (*lambdaminus)(0); // lambda1_{k+1}^-
+      dataPlot(k,12) = (*lambdaplus)(0);;
+
       dataPlot(k,7) = (*q)(nDof-1);
       dataPlot(k,8) = (*v)(nDof-1);
       dataPlot(k,9) = (*q)((nDof)/2);
       dataPlot(k,10) = (*v)((nDof)/2);
-
-
 
       prod(*SparseStiffness, *q, *tmp, true);
       potentialEnergy = inner_prod(*q,   *tmp);
@@ -283,7 +287,7 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout<<"====> Output file writing ..."<<endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("ImpactingBar.dat", "ascii", dataPlot,"noDim");
+    ioMatrix::write("ImpactingBarD1MinusLinear.dat", "ascii", dataPlot,"noDim");
     // // Comparison with a reference file
     // SimpleMatrix dataPlotRef(dataPlot);
     // dataPlotRef.zero();
