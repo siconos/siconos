@@ -43,16 +43,29 @@ public:
    *  \param q0 : the state vector.
    *  \param y : output vector.
    */
-  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+  void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   /** Set offset.
    * \param val : the new value.
    */
   void setOffset(double val) { _offset = val; };
 
+  /** Get geometer.
+   * \return a SP::Geometer object.
+   */
+  SP::Geometer geometer() { return _geometer; }
+
+  /** Set geometer.
+   * \param geometer the new geometer
+   */
+  void setGeometer(SP::Geometer geometer) { _geometer = geometer; }
+
 protected:
   const ContactPoint& _contact1;
   const ContactPoint& _contact2;
+
+  SP::Geometer _geometer;
+
   bool _normalFromFace1;
   bool _offsetp1;
   double _offset;

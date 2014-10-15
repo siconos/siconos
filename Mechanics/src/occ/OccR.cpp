@@ -1,9 +1,8 @@
 #include "OccR.hpp"
 #include "ContactPoint.hpp"
 #include "OccContactShape.hpp"
-#include "OccContactFace.hpp"
-#include "OccContactEdge.hpp"
 #include "ContactShapeDistance.hpp"
+#include "Geometer.hpp"
 
 #include <limits>
 #include <iostream>
@@ -11,21 +10,22 @@
 OccR::OccR(const ContactPoint& contact1,
            const ContactPoint& contact2) :
   NewtonEulerFrom3DLocalFrameR(),
-  _contact1(contact1), _contact2(contact2),
+  _contact1(contact1), _contact2(contact2), _geometer(new Geometer()),
   _normalFromFace1(true),
   _offsetp1(false),
   _offset(0.002)
 {
 }
 
+
 void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
+  SPC::OccContactShape pcsh1 = this->_contact1.contactShape();
+  SPC::OccContactShape pcsh2 = this->_contact2.contactShape();
 
-  Geometer geometer(*this->_contact1.contactShape());
-
-  this->_contact2.contactShape()->accept(geometer);
-
-  ContactShapeDistance& dist = *geometer.answer;
+  SP::ContactShapeDistance pdist = _geometer->distance(std11::const_pointer_cast<OccContactShape>(pcsh1),
+                                                       std11::const_pointer_cast<OccContactShape>(pcsh2));
+  ContactShapeDistance& dist = *pdist;
 
   double& X1 = dist.x1;
   double& Y1 = dist.y1;
@@ -58,7 +58,7 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
     _Pc2->setValue(2, Z2-_offset*n1z);
   }
 
-  /*Because in CAD model, the normal is going outside of the body.*/
+  /* cf comments from O. Bonnefon */
   _Nc->setValue(0, -n1x);
   _Nc->setValue(1, -n1y);
   _Nc->setValue(2, -n1z);
@@ -67,6 +67,9 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
   y.setValue(0, dist.value);
 
-  std::cout << "dist:" << dist.value << std::endl;
+/*  std::cout << "dist.value:" << dist.value << std::endl;
+  std::cout << "dist.n:" << dist.nx << "," << dist.ny << "," << dist.nz << std::endl;
+  std::cout << "dist.p1:" << dist.x1 << "," << dist.y1 << "," << dist.z1 << std::endl;
+  std::cout << "dist.p2:" << dist.x2 << "," << dist.y2 << "," << dist.z2 << std::endl;*/
 
 }

@@ -3,6 +3,7 @@
 
 struct ContactShapeDistance
 {
+
   double value;
 
   double x1;

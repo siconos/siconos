@@ -1,6 +1,7 @@
 #include "OccContactShape.hpp"
 #include "ContactShapeDistance.hpp"
 #include "cadmbtb.hpp"
+#include "Geometer.hpp"
 
 #include <RuntimeException.hpp>
 
@@ -20,15 +21,6 @@
 OccContactShape::OccContactShape() : _shape(new TopoDS_Shape())
 {
 }
-
-
-Geometer::Geometer(const OccContactShape& base) :
-  base(base),
-  answer(new ContactShapeDistance())
-{
-  answer->value = std::numeric_limits<double>::infinity();
-};
-
 
 OccContactShape::ContactTypeValue OccContactShape::contactType() const
 {

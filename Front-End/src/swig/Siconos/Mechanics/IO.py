@@ -236,7 +236,7 @@ class ShapeCollection():
         return shape_url
 
 
-    def get(self, shape_name):
+    def get(self, shape_name, shape_class=None, face_class=None, edge_class=None):
 
         if not shape_name in self._shapes:
 
@@ -257,7 +257,11 @@ class ShapeCollection():
                 elif self.attributes(shape_name)['type'] == 'brep':
                     if not 'contact' in self.attributes(shape_name):
                         # the reference brep
-                        brep = OccContactShape()
+                        if shape_class is None:
+                            brep = OccContactShape()
+                        else:
+                            brep = shape_class()
+
                         brep.importBRepFromString(self.shape(shape_name)[:][0])
                         self._shapes[shape_name] = brep
                         self._io._keep.append(self._shapes[shape_name])
@@ -269,15 +273,26 @@ class ShapeCollection():
                         assert 'brep' in self.attributes(shape_name)
                         contact_index = self.attributes(shape_name)['index']
                         print (self.attributes(shape_name)['brep'])
-                        ref_brep = self.get(self.attributes(shape_name)['brep'])
+                        ref_brep = self.get(self.attributes(shape_name)['brep'], shape_class)
                         if self.attributes(shape_name)['contact'] == 'Face':
+                            if face_class is None:
+                                face_maker = OccContactFace
+                            else:
+                                face_maker = face_class
+
                             self._shapes[shape_name] = \
-                                        OccContactFace(ref_brep,
-                                                       contact_index)
+                                                       face_maker(ref_brep,
+                                                                  contact_index)
+
                         elif self.attributes(shape_name)['contact'] == 'Edge':
+                            if edge_class is None:
+                                edge_maker = OccContactEdge
+                            else:
+                                edge_maker = edge_class
                             self._shapes[shape_name] = \
-                                        OccContactEdge(ref_brep,
-                                                       contact_index)
+                                        edge_maker(ref_brep,
+                                                   contact_index)
+
                         self._io._keep.append(self._shapes[shape_name])
                 else:
                     # a convex point set
@@ -474,7 +489,11 @@ class Hdf5():
                                     int(self._nslaws[name].attrs['gid2']))
 
     def importBRepObject(self, name, position, orientation,
-                         velocity, contactors, mass, given_inertia):
+                         velocity, contactors, mass, given_inertia, body_class,
+                         shape_class, face_class, edge_class):
+
+        if body_class is None:
+            body_class = OccBody
 
         if given_inertia is not None:
             inertia = given_inertia
@@ -486,12 +505,12 @@ class Hdf5():
             pass
 
         else:
-            shape_id = self._shapeid[contactors[0].name]
-            body = OccBody(position + orientation, velocity, mass, inertia)
+            body = body_class(position + orientation, velocity, mass, inertia)
             for contactor in contactors:
 
                 # /!\ shared pointer <-> python ref ...
-                shape_instantiated = self._shape.get(contactor.name)
+                shape_instantiated = self._shape.get(contactor.name,
+                                                     shape_class, face_class, edge_class)
                 self._keep.append(shape_instantiated)
                 body.addContactShape(shape_instantiated,
                                      contactor.position,
@@ -508,7 +527,10 @@ class Hdf5():
 
 
     def importObject(self, name, position, orientation,
-                     velocity, contactors, mass, inertia):
+                     velocity, contactors, mass, inertia, body_class, shape_class):
+
+        if body_class is None:
+            body_class = BulletDS
 
         if self._broadphase is not None and 'input' in self._data:
             if mass == 0.:
@@ -544,7 +566,7 @@ class Hdf5():
                     transform.setOrigin(rc_sorigin)
                     self._static_transforms.append(transform)
                     static_cobj.setWorldTransform(transform)
-                    shape_id = self._shapeid[c.name]
+
                     static_cobj.setCollisionShape(
                         self._shape.get(c.name))
                     self._static_cobjs.append(static_cobj)
@@ -553,19 +575,19 @@ class Hdf5():
 
             else:
                 # a moving object
-                shape_id = self._shapeid[contactors[0].name]
+
                 bws = BulletWeightedShape(
                     self._shape.get(contactors[0].name), mass)
 
                 if inertia is not None:
                     bws.setInertia(inertia[0], inertia[1], inertia[2])
 
-                body = BulletDS(bws,
-                                position + orientation,
-                                velocity,
-                                contactors[0].position,
-                                contactors[0].orientation,
-                                contactors[0].group)
+                body = body_class(bws,
+                                  position + orientation,
+                                  velocity,
+                                  contactors[0].position,
+                                  contactors[0].orientation,
+                                  contactors[0].group)
 
                 for contactor in contactors[1:]:
                     shape_id = self._shapeid[contactor.name]
@@ -617,7 +639,7 @@ class Hdf5():
                 self._broadphase.model().nonSmoothDynamicalSystem().\
                     link(joint_inter, ds1)
 
-    def importScene(self):
+    def importScene(self, body_class, shape_class, face_class, edge_class):
         """
         Import into the broadphase object all the static and dynamic objects
         from hdf5 file
@@ -657,12 +679,12 @@ class Hdf5():
                     # Occ object
                     self.importBRepObject(name, floatv(position), floatv(orientation),
                                           floatv(velocity), contactors, float(mass),
-                                          inertia)
+                                          inertia, body_class, shape_class, face_class, edge_class)
                 else:
                     # Bullet object
                     self.importObject(name, floatv(position), floatv(orientation),
                                       floatv(velocity), contactors, float(mass),
-                                      inertia)
+                                      inertia, body_class, shape_class)
 
             # import nslaws
             for name in self._nslaws:
@@ -960,6 +982,10 @@ class Hdf5():
             with_timer=False,
             time_stepping=None,
             space_filter=None,
+            body_class=None,
+            shape_class=None,
+            face_class=None, 
+            edge_class=None,
             length_scale=1,
             t0=0,
             T=10,
@@ -1065,7 +1091,7 @@ class Hdf5():
 
         k = 1
 
-        self.importScene()
+        self.importScene(body_class, shape_class, face_class, edge_class)
 
         model.initialize(simulation)
 

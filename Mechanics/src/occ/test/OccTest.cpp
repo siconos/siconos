@@ -87,7 +87,8 @@ void OccTest::move()
 
   TopoDS_Face face = TopoDS::Face(exp.Current().Composed(shell.Orientation()));
 
-  OccContactShape sphere(face);
+  OccContactShape sphere(mksphere.Shape());
+  OccContactFace sphere_contact(sphere, 0);
 
   SP::SiconosVector position(new SiconosVector(7));
   SP::SiconosVector velocity(new SiconosVector(6));
@@ -108,9 +109,7 @@ void OccTest::move()
 
   SP::OccBody body(new OccBody(position, velocity, 1, inertia));
 
-  body->addContactShape(createSPtrOccContactShape(sphere));
-
-  body->updateContactShapes();
+  body->addContactShape(createSPtrOccContactShape(sphere_contact));
 
   gp_XYZ translat = body->contactShape(0).data().Location().Transformation().
     TranslationPart();

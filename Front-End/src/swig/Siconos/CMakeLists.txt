@@ -2,6 +2,9 @@ SET_SOURCE_FILES_PROPERTIES(Numerics.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(Kernel.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(IO.i PROPERTIES CPLUSPLUS ON)
 
+# -dirvtable      - Generate a pseudo virtual table for directors for faster dispatch \n\
+SET(SWIG_DEFS "${SWIG_DEFS};-dirvtable;-keyword")
+
 
 IF(WITH_FCLIB)
   SET(SWIG_DEFS "${SWIG_DEFS};-DWITH_FCLIB")

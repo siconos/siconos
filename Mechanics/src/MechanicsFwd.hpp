@@ -32,4 +32,5 @@ DEFINE_SPTR(ContactShapes);
 DEFINE_SPTR(ContactPoint);
 DEFINE_SPTR(ContactPoints);
 DEFINE_SPTR(ContactShapeDistance);
+DEFINE_SPTR(Geometer);
 #endif

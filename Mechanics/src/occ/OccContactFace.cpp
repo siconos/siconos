@@ -33,11 +33,16 @@ void OccContactFace::computeUVBounds()
                       this->bsup1[1]);
 }
 
+#include "OccBody.hpp"
+
 SP::ContactShapeDistance OccContactFace::distance(
   const OccContactFace& sh2, bool normalFromFace1) const
 {
 
-  SP::ContactShapeDistance pdist(new ContactShapeDistance());
+  SP::OccBody body(new OccBody());
+
+  SP::ContactShapeDistance pdist;
+  pdist.reset(new ContactShapeDistance());
   ContactShapeDistance& dist = *pdist;
 
   dist.value = std::numeric_limits<double>::infinity();

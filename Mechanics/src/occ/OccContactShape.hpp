@@ -25,8 +25,8 @@
 #include "MechanicsFwd.hpp"
 
 #include <SiconosFwd.hpp>
-#include <string>
 #include <SiconosVisitor.hpp>
+#include <string>
 
 DEFINE_SPTR(TopoDS_Shape);
 DEFINE_SPTR(TopoDS_Edge);
@@ -103,6 +103,17 @@ struct OccContactShape
    */
   virtual void computeUVBounds();
 
+
+  /** Set id.
+   *  \param id the new id
+  */
+  void setId(unsigned int id) { this->_id = id; }
+
+  /** Get id.
+   * \return an unsigned int
+   */
+  unsigned int id() { return this->_id; }
+
   /** Set shape position and orientation.
       \param q : NewtonEulerDS state
   */
@@ -149,34 +160,12 @@ struct OccContactShape
 
   SP::TopoDS_Shape _shape;
 
+  unsigned int _id;
 
   /** visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(OccContactShape);
 
 };
-
-struct Geometer : public SiconosVisitor
-{
-  const OccContactShape& base;
-  SP::ContactShapeDistance answer;
-
-  Geometer(const OccContactShape& base);
-
-  using SiconosVisitor::visit;
-
-  void visit(const OccContactFace& face)
-  {
-    answer = base.distance(face);
-  }
-
-  void visit(const OccContactEdge& edge)
-  {
-    answer = base.distance(edge);
-  }
-
-};
-
-
 
 #endif
