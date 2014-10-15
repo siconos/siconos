@@ -86,6 +86,8 @@ function: lcp_nsqp() \n
 
 \section lcpCPG CPG Solver
 Conjugated Projected Gradient solver for LCP based on quadratic minimization.
+Reference: "Conjugate gradient type algorithms for frictional multi-contact problems: applications to granular materials",
+M. Renouf, P. Alart. doi:10.1016/j.cma.2004.07.009
 
 function: lcp_cpg() \n
  parameters:
@@ -231,7 +233,8 @@ function: lcp_nsgs_SBM() \n
 #include "SolverOptions.h"
 #include "lcp_cst.h"
 #include "SiconosCompat.h"
-/* internal at the moment */
+
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -605,7 +608,6 @@ extern "C"
    * \param[out] info an integer which returns the termination value:\n
    * 0 : convergence\n
    * 1 : iter = itermax\n
-   * 2 : negative diagonal term\n
    * \param[in,out] options structure used to define the solver and its parameters.
    *
    *\author Olivier Huber
@@ -627,12 +629,27 @@ extern "C"
    * \param[out] info an integer which returns the termination value:\n
    * 0 : convergence\n
    * 1 : iter = itermax\n
-   * 2 : negative diagonal term\n
    * \param[in,out] options structure used to define the solver and its parameters.
    *
    *\author Olivier Huber
    */
   void lcp_pivot(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* restrict u , double* restrict s, int *info , SolverOptions* options, double* restrict cov_vec);
+
+  /** lcp_pathsearch is a direct solver for LCP based on the pathsearch algorithm\n
+   * \warning this solver is available for testing purposes only! consider
+   * using lcp_pivot() if you are looking for simular solvers
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   * 0 : convergence\n
+   * 1 : iter = itermax\n
+   * \param[in,out] options structure used to define the solver and its parameters.
+   *
+   *\author Olivier Huber
+   */
+  void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param options the pointer to the array of options to set

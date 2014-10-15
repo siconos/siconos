@@ -26,9 +26,9 @@
   A set of routines used in the min reformulation of a CP
 
   The min function is:
-  \f[
+  \f{equation*}
   \mathbf{F}_{\mathrm{min}}(z) = \min( z, F(z))
-  \f]
+  \f}
 */
 
 #ifdef __cplusplus

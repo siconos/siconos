@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2012.
+/* Siconos-Numerics, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -22,20 +22,18 @@
 #include <math.h>
 #include "NSSTools.h"
 
-void pos_part(double* x, double* sol, int n)
+void pos_part(unsigned n, double* restrict x, double* restrict x_plus)
 {
 
-  int     i;
-  for (i = 0 ; i < n ; i ++)
+  for (unsigned i = 0 ; i < n ; ++i)
   {
     if (x[i] > 0.0)
     {
-      sol[i] = x[i];
+      x_plus[i] = x[i];
     }
     else
     {
-      sol[i] =  0.0;
+      x_plus[i] =  0.0;
     }
   }
 }
-

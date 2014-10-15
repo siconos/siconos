@@ -117,7 +117,7 @@ void freeAVI(AffineVariationalInequalities* problem)
   freeNumericsMatrix(problem->M);
   free(problem->M);
   free(problem->q);
-  freePolyhedron(problem->poly);
+  free_polyhedron(problem->poly);
   if (problem->d)
     free(problem->d);
   free(problem);

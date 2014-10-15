@@ -109,7 +109,7 @@
      {
        $self->set = (void *)malloc(sizeof(box_constraints));
        box_constraints* box_c = (box_constraints*)$self->set;
-       box_c->id = VI_SET_IS_BOX;
+       box_c->id = SICONOS_SET_BOX;
        box_c->lb = (double*)malloc($self->size*sizeof(double));
        box_c->ub = (double*)malloc($self->size*sizeof(double));
 
@@ -168,7 +168,7 @@
       //black magic
       switch (((generic_set*)$self->set)->id)
       {
-        case VI_SET_IS_BOX:
+        case SICONOS_SET_BOX:
         {
           box_constraints* box_c = (box_constraints*)$self->set;
           free_box(box_c);

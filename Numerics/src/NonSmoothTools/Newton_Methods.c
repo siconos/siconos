@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2014.
+ /* Siconos-Numerics, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+#include "Newton_Methods.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,21 +26,16 @@
 #include <float.h>
 
 #include "SiconosLapack.h"
-#include "Newton_Methods.h"
-#include "LineSearch.h"
-
-#define FBLSA_DWORK_KEEP 2
-#define FBLSA_NONMONOTONE_LS 3
-#define FBLSA_NONMONOTONE_LS_M 4
-
+#include "ArmijoSearch.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, SolverOptions* options, functions_FBLSA* functions)
+
+void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverOptions* options, functions_LSA* functions)
 {
-  /* size of the CP */
+  /* size of the problem */
   assert(n>0);
 
   unsigned int iter;
@@ -76,12 +73,12 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
 //  for (unsigned int i = 0; i < n; i++) z[i] = 0.0;
 
   // if we keep the work space across calls
-  if (options->iparam[FBLSA_DWORK_KEEP] && (options->dWork == NULL))
+  if (options->iparam[SICONOS_IPARAM_PREALLOC] && (options->dWork == NULL))
   {
     options->dWork = (double *)malloc((3*n + 2*nn) * sizeof(double));
     options->iWork = (int *)malloc(n * sizeof(int));
   }
-  if (options->dWork != NULL)
+  if (options->dWork)
   {
     F_merit = options->dWork;
     workV1 = F_merit + n;
@@ -109,7 +106,7 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
     stats_iteration.id = NEWTON_STATS_ITERATION;
   }
 
-  linesearch_data ls_data;
+  search_data ls_data;
   ls_data.compute_F = functions->compute_F;
   ls_data.compute_F_merit = functions->compute_F_merit;
   ls_data.z = z;
@@ -117,21 +114,23 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
   ls_data.F = F;
   ls_data.F_merit = F_merit;
   ls_data.desc_dir = workV1;
+  /** \todo this value should be settable by the user with a default value*/
+  ls_data.alpha_min = 1e-12;
+  ls_data.alpha0 = 2.0;
   ls_data.data = data;
+  ls_data.set = NULL;
+  ls_data.sigma = sigma;
+  ls_data.searchtype = LINESEARCH;
 
-  if (options->iparam[FBLSA_NONMONOTONE_LS] > 0)
+  if (options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] > 0)
   {
-    ls_data.nonmonotone = options->iparam[FBLSA_NONMONOTONE_LS];
-    ls_data.M = options->iparam[FBLSA_NONMONOTONE_LS_M];
-    ls_data.m = 0;
-    ls_data.previous_thetas = (double*)calloc(ls_data.M, sizeof(double));
+    nm_ref_struct nm_ref_data;
+    fill_nm_data(&nm_ref_data, options->iparam);
+    ls_data.nm_ref_data = &nm_ref_data;
   }
   else
   {
-    ls_data.nonmonotone = 0;
-    ls_data.M = 0;
-    ls_data.m = 0;
-    ls_data.previous_thetas = NULL;
+    ls_data.nm_ref_data = NULL;
   }
 
   // if error based on the norm of JacThetaF_merit, do something not too stupid
@@ -167,14 +166,14 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
         DEBUG_PRINT("\n"));
 
 
-    // Construction of the directional derivatives of F_merit, JacThetaF_merit
+    // Construction of the directional derivative of F_merit: JacThetaF_merit
 
     // Construction of H and F_desc
     if (functions->compute_RHS_desc) // different merit function for the descent calc.(usually min)
     {
       functions->compute_H_desc(data, z, F, workV1, workV2, H);
       functions->compute_RHS_desc(data, z, F, F_merit);
-    }
+    } /* No computation of JacThetaFF_merit, this will come later */
     else
     {
       functions->compute_H(data, z, F, workV1, workV2, H);
@@ -244,11 +243,11 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
         options->dparam[1] = theta;
         *info = 2;
 
-        goto newton_FBLSA_free;
+        goto newton_LSA_free;
       }
     }
 
-    if (infoDGESV == 0)
+    if (infoDGESV == 0) /* direction search succeeded */
     {
       // workV1 contains the direction d
       cblas_dcopy(n, z, incx, workV2, incy);
@@ -262,7 +261,7 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
       theta_iter = cblas_dnrm2(n, F_merit, incx);
       theta_iter = 0.5 * theta_iter * theta_iter;
     }
-    else
+    else /* direction search failed, backup to gradient step*/
     {
       cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
       cblas_dscal(n, -1.0, workV1, incx);
@@ -272,9 +271,9 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
     if ((theta_iter > sigma * theta) || (infoDGESV > 0 && functions->compute_RHS_desc)) // Newton direction not good enough or min part failed
     {
       if (verbose > 1)
-        printf("newton_FBLSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);
+        printf("newton_LSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);
 
-      // Computations for the linear search
+      // Computations for the line search
       // preRHS = <JacThetaF_merit, d>
       // TODO: find a better name for this variable
       preRHS = cblas_ddot(n, JacThetaF_merit, incx, workV1, incy);
@@ -285,7 +284,7 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
       if (preRHS > threshold)
       {
         if (verbose > 1)
-          printf("newton_FBLSA :: direction not acceptable %g > %g\n", preRHS, threshold);
+          printf("newton_LSA :: direction not acceptable %g > %g\n", preRHS, threshold);
         cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
         preRHS = cblas_ddot(n, JacThetaF_merit, incx, workV1, incy);
@@ -348,9 +347,9 @@ void newton_FBLSA(unsigned int n, double *z, double *F, int *info, void* data, S
     else *info = 0;
   }
 
-newton_FBLSA_free:
+newton_LSA_free:
 
-  if (options->dWork == NULL)
+  if (!options->dWork)
   {
     free(H);
     free(JacThetaF_merit);
@@ -359,10 +358,15 @@ newton_FBLSA_free:
     free(workV2);
     free(ipiv);
   }
-  if (ls_data.previous_thetas)
+  if (ls_data.nm_ref_data)
   {
-    free(ls_data.previous_thetas);
+    free_nm_data((nm_ref_struct*)ls_data.nm_ref_data);
   }
 }
 
-
+void newton_lsa_default_SolverOption(SolverOptions* options)
+{
+  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
+  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
+  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-12;
+}

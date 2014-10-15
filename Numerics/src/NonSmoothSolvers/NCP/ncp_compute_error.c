@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2011.
+/* Siconos-Numerics, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -25,45 +25,14 @@
 #include "SiconosBlas.h"
 #include "NCP_Solvers.h"
 
-void NCP_compute_error(int n, double *w , double *z , int verbose,  double *err)
+#include "LCP_Solvers.h"
+
+int ncp_compute_error(int n, double* z, double * F, double tol, double* err)
 {
-#if 0
-  double error, normq;
-  double a1, b1;
-  int i, incx, incy;
-  int param = 1;
+  lcp_compute_error_only(n, z, F, err);
 
-  incx = 1;
-  incy = 1;
-  cblas_dcopy(n , q , incx , w , incy);
-
-  a1 = 1.;
-  b1 = 1.;
-
-
-  // following int param, we recompute the product w = M*z+q
-  // The test is then more severe if we compute w because it checks that the linear equation is satisfied
-
-  if (param == 1)
-  {
-    cblas_dgemv(CblasColMajor,CblasNoTrans , n , n , a1 , vec , n , z ,
-          incx , b1 , w , incy);
-  }
-
-
-
-  error = 0.;
-  for (i = 0 ; i < n ; i++)
-  {
-    error += fabs(z[i] + w[i]) - (z[i] + w[i]);
-  }
-
-  incx  = 1;
-  normq = cblas_dnrm2(n , q , incx);
-
-  *err = error / normq;
-
-  if (verbose > 0) printf("NCP_compute_error: Error evaluation = %g \n", *err);
-#endif
-  printf("NCP_compute_error: Not implemented !");
+  if (*err >= tol)
+    return 1;
+  else
+    return 0;
 }

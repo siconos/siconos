@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2012.
+/* Siconos-Numerics, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -24,6 +24,13 @@
   Header to collect basic tools, structures definition or any usefull things for NSSpack
 
 */
+
+#include "NumericsConfig.h"
+
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -59,11 +66,11 @@ extern "C"
   void minf(double* a, double* b, double* c);
 
   /** Positive part values of the components of a vector
-      \param[in] x the vector
-      \param[in,out] sol solution vector of positive part values of x components
       \param[in] n size of x
+      \param[in] x the vector
+      \param[out] x_plus solution vector of positive part values of x components
   */
-  void pos_part(double* x, double* sol, int n);
+  void pos_part(unsigned n, double* x, double* x_plus);
 
   /** Absolute values of the components of a vector
       \param[in] x the vector

@@ -23,25 +23,30 @@
 /*! \page NCProblem Nonlinear Complementarity Problems (NCP)
 
   \section ncpIntro The problem
-  Find \f$z \in \mathcal{R}^n\f$ such that:\n\n
-  \f$
-  0 \le z \perp F(z) \ge 0 \\
-  \f$
+  Find \f$z \in \mathcal{R}^n_+\f$ such that:
+  \f{equation*}{
+  0 \le z \perp F(z) \ge 0
+  \f}
 
   \section ncpSolvers Available solvers/formulations:
-   - Fischer-Burmeister (see NCP_FischerBurmeister.h)\n\n
+   - ncp_newton_FBLSA() with the FB merit function and a Newton with line-search
+   - ncp_newton_minFBLSA() with the min merit function (with the FB as backup) and a Newton with line-search
+   - ncp_pathsearch() solver using a path search
    - NCP_Path() Interface to Path (Ferris)
-
 */
 
 /*!\file NCP_Solvers.h
   \brief Functions related to NCP formulation and solvers.
-  \author Franck Perignon, last modification: 21/05/2008
+  \author Franck Perignon, Olivier Huber
 */
 
 #include "SparseBlockMatrix.h"
 #include "NCP_Path.h"
 #include "NCP_FixedP.h"
+
+#include "NumericsConfig.h"
+#include "SolverOptions.h"
+#include "NonlinearComplementarityProblem.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -49,21 +54,47 @@ extern "C"
 #endif
 
   /**
-   * This function checks the validity of the vector z as a solution \n
-   * of the NCP : \n
-   * \f$
-   *    0 \le z \perp w = F(z) \ge 0
-   * \f$
-   * \author Houari Khenous
-   \warning temporary function - To be reviewed
+   * This function compute the complementarity error of the NCP: \f$ 0 \leq z \perp F(z) \geq 0\f$.
+   * \param n size of the vectors
+   * \param[in] z solution
+   * \param[in] F value of the function at the solution
+   * \param[in] tol tolerance for the error
+   * \param[out] err value of the error
+   * \return 0 if the solution is good enough, 1 otherwise
+   * \author Olivier Huber
   */
-  void NCP_compute_error(int n, double *w, double *z, int verbose, double *err);
+  int ncp_compute_error(int n, double* z, double* F, double tol, double *err);
 
-  /** This function adapts the NCP_compute_error routine for M saved as a SparseBlockStructuredMatrix.
-   * TEMPORARY FUNCTION, used to compare pfc3D and FrictionContact3D functions.
-   * \author Franck Perignon
+  /** NCP Solver using the FB merit function and a Newton-based method with
+   * line-search
+   * \param problem the formalization of the NCP problem
+   * \param[in,out] z on input, initial guess; on output the solution
+   * \param F the value of the function at the solution
+   * \param info 0 if everything worked
+   * \param options struct used to specify the solver parameters
    */
-  void NCP_block_compute_error(int n, SparseBlockStructuredMatrix *M , double *q , double *z , int verbose, double *w, double *err);
+   void ncp_newton_FBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info, SolverOptions* options);
+
+   /** NCP Solver using the min merit function (+ the FB as backup) and a Newton-based method with
+   * line-search
+   * \param problem the formalization of the NCP problem
+   * \param[in,out] z on input, initial guess; on output the solution
+   * \param F the value of the function at the solution
+   * \param info 0 if everything worked
+   * \param options struct used to specify the solver parameters
+   */
+   void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info, SolverOptions* options);
+
+
+  /** NCP Solver using a path search algorithm, following the work of D. Ralph.
+   * M. Ferris, and many other collaborators of the latter.
+   * \param problem the formalization of the NCP problem
+   * \param[in,out] z on input, initial guess; on output the solution
+   * \param F the value of the function at the solution
+   * \param info 0 if everything worked
+   * \param options struct used to specify the solver parameters
+   */
+   void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

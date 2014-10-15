@@ -19,7 +19,7 @@
 #include "VariationalInequality_Solvers.h"
 #include "VariationalInequality_computeError.h"
 #include "Qi_merit.h"
-#include "box.h"
+#include "SiconosSets.h"
 #include "Newton_Methods.h"
 
 void VI_compute_F(void* data_opaque, double* x, double* F)
@@ -50,7 +50,7 @@ void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1
 
 void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, double *x, double *F, int* info, SolverOptions* options)
 {
-  functions_FBLSA functions_QiLSA;
+  functions_LSA functions_QiLSA;
   functions_QiLSA.compute_F = &VI_compute_F;
   functions_QiLSA.compute_F_merit = &VI_compute_F_box_Qi;
   functions_QiLSA.compute_H = &VI_compute_H_box_Qi;
@@ -58,5 +58,5 @@ void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, doub
   functions_QiLSA.compute_H_desc = NULL;
   functions_QiLSA.compute_RHS_desc = NULL;
 
-  newton_FBLSA(problem->size, x, F, info, (void *)problem, options, &functions_QiLSA);
+ newton_LSA(problem->size, x, F, info, (void *)problem, options, &functions_QiLSA);
 }

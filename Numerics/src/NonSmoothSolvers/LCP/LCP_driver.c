@@ -35,8 +35,8 @@ char *  SICONOS_LCP_LATIN_W_STR = "Latin_w";
 char *  SICONOS_LCP_QP_STR = "QP";
 char *  SICONOS_LCP_NSQP_STR = "NSQP";
 char *  SICONOS_LCP_NEWTONMIN_STR = "NewtonMin";
-char *  SICONOS_LCP_NEWTONFB_STR = "NewtonFB";
-char *  SICONOS_LCP_NEWTONMINFB_STR = "NewtonMinFB";
+char *  SICONOS_LCP_NEWTON_FBLSA_STR = "NewtonFB";
+char *  SICONOS_LCP_NEWTON_MINFBLSA_STR = "NewtonMinFB";
 char *  SICONOS_LCP_PSOR_STR = "PSOR";
 char *  SICONOS_LCP_RPGS_STR = "RPGS";
 char *  SICONOS_LCP_PATH_STR = "PATH";
@@ -45,6 +45,7 @@ char *  SICONOS_LCP_AVI_CAOFERRIS_STR = "AVI CaoFerris";
 char *  SICONOS_LCP_PIVOT_STR = "Pivot based method";
 char *  SICONOS_LCP_BARD_STR = "Bard-type pivoting method";
 char *  SICONOS_LCP_MURTY_STR = "Murty's least index pivoting method";
+char *  SICONOS_LCP_PATHSEARCH_STR = "For testing only: solver used in the Pathsearch algorithm";
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 
@@ -233,14 +234,14 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     /* IN: itermax, tolerance
        OUT: iter, error
     */
-  case SICONOS_LCP_NEWTONFB:
+  case SICONOS_LCP_NEWTON_FBLSA:
     lcp_newton_FB(problem, z , w , &info , options);
     break;
     /****** Newton min + Fischer-Burmeister ******/
     /* IN: itermax, tolerance
        OUT: iter, error
     */
-  case SICONOS_LCP_NEWTONMINFB:
+  case SICONOS_LCP_NEWTON_MINFBLSA:
     lcp_newton_minFB(problem, z , w , &info , options);
     break;
     /****** PSOR Solver ******/
@@ -289,6 +290,9 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     options->iparam[3] = SICONOS_LCP_PIVOT_LEAST_INDEX;
     lcp_pivot(problem, z , w , &info , options);
     break;
+  case SICONOS_LCP_PATHSEARCH:
+    lcp_pathsearch(problem, z , w , &info , options);
+    break;
   /*error */
   default:
   {
@@ -302,7 +306,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
   if (options->filterOn > 0)
   {
     int info_ = lcp_compute_error(problem, z, w, options->dparam[0], &(options->dparam[1]));
-    if (info <= 0) /* info was not setor the solver was happy */
+    if (info <= 0) /* info was not set or the solver was happy */
       info = info_;
   }
 

@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2012.
+/* Siconos-Numerics, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -24,11 +24,15 @@
 
 #include "mlcp_cst.h"
 #include "MCP_cst.h"
+#include "NCP_cst.h"
 #include "lcp_cst.h"
 #include "relay_cst.h"
 #include "Friction_cst.h"
 #include "VI_cst.h"
 #include "misc.h"
+
+#include "Newton_Methods.h"
+#include "PathSearch.h"
 
 //#define DEBUG_MESSAGES 1
 #include "debug.h"
@@ -338,7 +342,67 @@ void deleteSolverOptions(SolverOptions* op)
   }
 }
 
+void fill_SolverOptions(SolverOptions* options, int solverId, int iSize, int dSize, int iter_max, double tol)
+{
+  options->solverId = solverId;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = iSize;
+  options->dSize = dSize;
+  options->iparam = (int *)calloc(iSize, sizeof(int));
+  options->dparam = (double *)calloc(dSize, sizeof(double));
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->callback = NULL;
+  options->numericsOptions = NULL;
+  options->internalSolvers = NULL;
 
+  /* we set those value, even if they don't make sense. If this is the case,
+   * they should be +inf */
+  options->iparam[0] = iter_max;
+  options->dparam[0] = tol;
+
+}
+
+void set_SolverOptions(SolverOptions* options, int solverId)
+{
+ int iSize = 0;
+ int dSize = 0;
+ int iter_max = 0;
+ double tol = 0.0;
+
+ switch (solverId)
+ {
+  case SICONOS_NCP_NEWTON_FBLSA:
+  case SICONOS_NCP_NEWTON_MINFBLSA:
+  case SICONOS_MCP_NEWTON_FBLSA:
+  case SICONOS_MCP_NEWTON_MINFBLSA:
+  case SICONOS_LCP_NEWTON_FBLSA:
+  case SICONOS_LCP_NEWTON_MINFBLSA:
+   iSize = 5;
+   dSize = 3;
+   iter_max = 100;
+   tol = 1e-12;
+   fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+   newton_lsa_default_SolverOption(options);
+   break;
+
+  case SICONOS_NCP_PATHSEARCH:
+   iSize = 9;
+   dSize = 8;
+   iter_max = 100;
+   tol = 1e-12;
+   fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+   pathsearch_default_SolverOption(options);
+   break;
+
+  default:
+   printf("set_SolverOptions not supported for solver id %d named %s\n", solverId, idToName(solverId));
+   exit(EXIT_FAILURE);
+ }
+
+}
 
 char * idToName(int Id)
 {
@@ -395,10 +459,10 @@ char * idToName(int Id)
     return SICONOS_LCP_NSQP_STR;
   case    SICONOS_LCP_NEWTONMIN:
     return SICONOS_LCP_NEWTONMIN_STR ;
-  case    SICONOS_LCP_NEWTONFB :
-    return SICONOS_LCP_NEWTONFB_STR;
-  case    SICONOS_LCP_NEWTONMINFB :
-    return SICONOS_LCP_NEWTONMINFB_STR;
+  case    SICONOS_LCP_NEWTON_FBLSA :
+    return SICONOS_LCP_NEWTON_FBLSA_STR;
+  case    SICONOS_LCP_NEWTON_MINFBLSA :
+    return SICONOS_LCP_NEWTON_MINFBLSA_STR;
   case    SICONOS_LCP_PSOR :
     return SICONOS_LCP_PSOR_STR;
   case    SICONOS_LCP_RPGS :
@@ -415,6 +479,8 @@ char * idToName(int Id)
     return SICONOS_LCP_BARD_STR;
   case     SICONOS_LCP_MURTY :
     return SICONOS_LCP_MURTY_STR;
+  case     SICONOS_LCP_PATHSEARCH :
+    return SICONOS_LCP_PATHSEARCH_STR;
     /*RELAY*/
   case SICONOS_RELAY_PGS:
     return SICONOS_RELAY_PGS_STR;
@@ -565,10 +631,10 @@ int nameToId(char * pName)
     return SICONOS_LCP_NSQP;
   else if (strcmp(SICONOS_LCP_NEWTONMIN_STR, pName) == 0)
     return SICONOS_LCP_NEWTONMIN;
-  else if (strcmp(SICONOS_LCP_NEWTONFB_STR, pName) == 0)
-    return SICONOS_LCP_NEWTONFB;
-  else if (strcmp(SICONOS_LCP_NEWTONMINFB_STR, pName) == 0)
-    return SICONOS_LCP_NEWTONMINFB;
+  else if (strcmp(SICONOS_LCP_NEWTON_FBLSA_STR, pName) == 0)
+    return SICONOS_LCP_NEWTON_FBLSA;
+  else if (strcmp(SICONOS_LCP_NEWTON_MINFBLSA_STR, pName) == 0)
+    return SICONOS_LCP_NEWTON_MINFBLSA;
   else if (strcmp(SICONOS_LCP_PSOR_STR, pName) == 0)
     return SICONOS_LCP_PSOR;
   else if (strcmp(SICONOS_LCP_RPGS_STR, pName) == 0)
@@ -585,6 +651,8 @@ int nameToId(char * pName)
     return SICONOS_LCP_BARD;
   else if (strcmp(SICONOS_LCP_MURTY_STR, pName) == 0)
     return SICONOS_LCP_MURTY;
+  else if (strcmp(SICONOS_LCP_PATHSEARCH_STR, pName) == 0)
+    return SICONOS_LCP_PATHSEARCH;
   /*RELAY*/
   else if (strcmp(SICONOS_RELAY_PGS_STR, pName) == 0)
     return SICONOS_RELAY_PGS;

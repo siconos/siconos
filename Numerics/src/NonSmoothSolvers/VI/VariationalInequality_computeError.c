@@ -23,7 +23,7 @@
 #include "SolverOptions.h"
 #include "VariationalInequality_computeError.h"
 #include "SiconosLapack.h"
-#include "box.h"
+#include "SiconosSets.h"
 
 #include <math.h>
 #include <assert.h>

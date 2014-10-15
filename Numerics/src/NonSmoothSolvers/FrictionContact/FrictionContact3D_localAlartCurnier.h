@@ -27,12 +27,12 @@
   Subroutines used when the friction-contact 3D problem is written
   using Alart-Curnier formulation:
 
-  \f{eqnarray*}
-  F(reaction)=\left[\begin{array}{c}
+  \f{equation*}
+  F(reaction)= \begin{pmatrix}
   velocity - M.reaction - q  \\
   1/rn*[velocity_N - (velocity_N - rn*reaction_N)^+]
   1/rt*[velocity_T - proj(velocity_T - rt*reaction_T)]
-  \end{array}\right]
+  \end{pmatrix}
   \f}
 
   where M is an n by n matrix, q an n-dimensional vector, reaction an

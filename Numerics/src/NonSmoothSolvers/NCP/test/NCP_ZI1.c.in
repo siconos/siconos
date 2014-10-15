@@ -1,0 +1,196 @@
+/* Siconos-Numerics, Copyright INRIA 2005-2011.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <float.h>
+
+#include "NonSmoothDrivers.h"
+#include "MCP_cst.h"
+
+#include "SolverOptions.h"
+
+#define N 4
+
+typedef struct
+{
+  int id;
+  double* xk;
+  double h;
+  double theta;
+  double gamma;
+  double g;
+  double kappa;
+  unsigned int f_eval;
+  unsigned int nabla_eval;
+} data_ZI;
+
+void Fncp_ZI(void* env, int n, double* restrict z, double* restrict F)
+{
+  data_ZI* d = (data_ZI*) env;
+  double l0 = 2*z[0] - 1.0;
+  double l1 = 2*z[2] - 1.0;
+  double r1 = d->g*l0/(1.0 - d->kappa*l0*l1);
+  double v_gamma = (d->xk[1] + d->gamma*(d->h*r1));
+  double r0 = -d->kappa*l0*l1*(v_gamma);
+  double v_theta = d->xk[1] + d->theta*(d->h*r1);
+  F[0] = d->xk[0] + d->h*v_theta + d->h*r0 + z[1];
+  F[2] = d->xk[1] + d->h*r1 + z[3];
+  F[1] = 1.0 - z[0];
+  F[3] = 1.0 - z[2];
+  d->f_eval += 1;
+}
+
+void nabla_Fncp_ZI(void* env, int n, double* restrict z, double* restrict nabla_Fncp)
+{
+  data_ZI* d = (data_ZI*) env;
+  double l0 = 2.0*z[0] - 1.0;
+  double l1 = 2.0*z[2] - 1.0;
+  double invR = 1.0/(1.0 - d->kappa*l0*l1);
+  double invR2 = invR*invR;
+  double r1 = d->g*l0*invR;
+  double v_gamma = d->xk[1] + d->gamma*(d->h*r1);
+
+  nabla_Fncp[2] = 2.0*d->h*d->g*invR2;
+  nabla_Fncp[2 + 4] = 0.0;
+  nabla_Fncp[2 + 2*4] = 2.0*d->h*(d->g*d->kappa*l0*l0)*invR2;
+  nabla_Fncp[2 + 3*4] = 1.0;
+
+  nabla_Fncp[0] = -2.0*d->h*d->kappa*l1*(v_gamma) + d->h*(d->theta - d->gamma*d->kappa*l0*l1)*nabla_Fncp[2];
+  nabla_Fncp[0 + 1*4] = 1.0;
+  nabla_Fncp[0 + 2*4] = -2.0*d->h*d->kappa*l0*(v_gamma) + d->h*(d->theta - d->gamma*d->kappa*l0*l1)*nabla_Fncp[2 + 2*4];
+  nabla_Fncp[0 + 3*4] = 0.0;
+
+  nabla_Fncp[1] = -1.0;
+  nabla_Fncp[1 + 4] = 0.0;
+  nabla_Fncp[1 + 8] = 0.0;
+  nabla_Fncp[1 + 12] = 0.0;
+
+  nabla_Fncp[3] = 0.0;
+  nabla_Fncp[3 + 4] = 0.0;
+  nabla_Fncp[3 + 2*4] = -1.0;
+  nabla_Fncp[3 + 3*4] = 0.0;
+  d->nabla_eval += 1;
+}
+
+int main(void)
+{
+  int info = 0;
+
+  /* Set solver options */
+  SolverOptions options;
+
+  set_SolverOptions(&options, @NCP_SOLVER_ID@);
+
+  /* Create a NonlinearComplementarityProblem */
+  NonlinearComplementarityProblem* problem = (NonlinearComplementarityProblem *)malloc(sizeof(NonlinearComplementarityProblem));
+
+  problem->n = N;
+  problem->compute_F = &Fncp_ZI;
+  problem->compute_nabla_F = &nabla_Fncp_ZI;
+
+  double xk[] = {1., 10.0};
+  double t = 0.0;
+  double T = 10.0;
+
+  double z[N] = {0.};
+  double F[N] = {0.};
+  double nablaF[N*N] = {0.};
+
+  data_ZI sim_data;
+
+  sim_data.id = -1;
+  sim_data.xk = xk;
+  sim_data.h = 1e-3;
+  sim_data.theta = 1.0;
+  sim_data.gamma = 1.0;
+  sim_data.g = 9.81;
+  sim_data.kappa = .7;
+
+ options.dparam[0] = N*DBL_EPSILON;
+//  options.iparam[0] = 250;
+
+//  options.iparam[3] = 2;
+//  options.iparam[4] = 10;
+
+  problem->env = &sim_data;
+  problem->nabla_F = createNumericsMatrixFromData(NM_DENSE, N, N, nablaF);
+
+  unsigned k = 0;
+
+  while ((t <= T) && info == 0)
+  {
+    k++;
+    info = ncp_driver(problem, z, F, &options, NULL);
+    printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
+    if (info > 0)
+    {
+      printf("NCP_ZI1 info = %d\n", info);
+      /* do some magic shit to force the algo to fix a solution */
+      double x1 = F[0] - z[1];
+      double x2 = F[2] - z[3];
+      if ((x1 < -1e-7) && (fabs(z[1]) < 1e-10))
+      {
+        z[1] = -x1;
+        z[0] = 1.0;
+      }
+      if ((xk[1] < -1e-7) && (fabs(z[3]) < 1e-10))
+      {
+        z[3] = -x2;
+        z[2] = 1.0;
+      }
+      if (z[1] < -1e-7)
+      {
+        z[1] = 0.0;
+        z[0] = 0.0;
+      }
+      if (z[3] < -1e-7)
+      {
+        z[3] = 0.0;
+        z[2] = 0.0;
+      }
+      if ((z[1] > 1e-7) && (z[0] < 1.0 - 1e-7))
+      {
+        z[0] = 1.0;
+      }
+      if ((z[3] > 1e-7) && (z[2] < 1.0 - 1e-7))
+      {
+        z[2] = 1.0;
+      }
+
+      info = ncp_driver(problem, z, F, &options, NULL);
+
+      if (info > 0)
+      {
+        printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
+        printf("NCP_ZI1 with solver @NCP_SOLVER_ID@ failed completly\n");
+      }
+
+    }
+    xk[0] = F[0] - z[1];
+    xk[1] = F[2] - z[3];
+    t = k*sim_data.h;
+  }
+  deleteSolverOptions(&options);
+
+  free(problem->nabla_F);
+  free(problem);
+  return info;
+}

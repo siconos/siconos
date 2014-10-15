@@ -40,7 +40,7 @@
 #include "FrictionContact3D_compute_error.h"
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
-#include "box.h"
+#include "SiconosSets.h"
 #include "open_lib.h"
 
 #include <boost/preprocessor/stringize.hpp>

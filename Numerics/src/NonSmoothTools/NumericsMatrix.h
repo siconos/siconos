@@ -80,8 +80,8 @@ For the second way of storage, SparseBlockStructuredMatrix we have:
 
 \subsection NMAlloc Create and delete NumericsMatrix
 
-NumericsMatrix of any kind can be created using either createNumericsMatrix(), which allocates memory or fillNumericsMatrix(), which just fills a structure.
-Those function accept a <i>data</i> parameter, which if non-NULL contains the matrix data.
+NumericsMatrix of any kind can be created using either createNumericsMatrix(), which allocates memory or createNumericsMatrixFromData() or fillNumericsMatrix(), which just fills a structure.
+These last two functions accept a <i>data</i> parameter, which if non-NULL contains the matrix data.
 The function freeNumericsMatrix() is used to clean the fields properly.
 
 \subsection NM_LA Linear Algebra
@@ -183,7 +183,7 @@ extern "C"
   void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
 
   /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
-      memory has been allocate for the structure in Numerics.
+      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       \param m the matrix to be deleted.
    */
   void freeNumericsMatrix(NumericsMatrix* m);
@@ -265,6 +265,14 @@ extern "C"
                         double **Bout);
 
 
+  /** create a NumericsMatrix and allocate the memory according to the matrix type
+   * \param storageType the type of storage
+   * \param size0 number of rows
+   * \param size1 number of columns
+   * \return a pointer to a NumericsMatrix
+   */
+  NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1);
+
   /** create a NumericsMatrix and possibly set the data
    * \param storageType the type of storage
    * \param size0 number of rows
@@ -273,7 +281,7 @@ extern "C"
    * set to NULL
    * \return a pointer to a NumericsMatrix
    */
-  NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1, void* data);
+  NumericsMatrix* createNumericsMatrixFromData(int storageType, int size0, int size1, void* data);
 
   /** fill an existing NumericsMatrix struct
    * \param[in,out] M the struct to fill

@@ -57,15 +57,15 @@ void mcp_FB(void* data_opaque, double* z, double* F, double* F_FB)
 
 void mcp_newton_FBLSA(MixedComplementarityProblem2* problem, double *z, double* Fmcp, int *info , SolverOptions* options)
 {
-  functions_FBLSA functions_FBLSA_lcp;
-  functions_FBLSA_lcp.compute_F = &FB_compute_F_mcp;
-  functions_FBLSA_lcp.compute_F_merit = &mcp_FB;
-  functions_FBLSA_lcp.compute_H = &FB_compute_H_mcp;
-  functions_FBLSA_lcp.compute_error = &FB_compute_error_mcp;
-  functions_FBLSA_lcp.compute_H_desc = NULL;
-  functions_FBLSA_lcp.compute_RHS_desc = NULL;
+  functions_LSA functions_FBLSA_mcp;
+  functions_FBLSA_mcp.compute_F = &FB_compute_F_mcp;
+  functions_FBLSA_mcp.compute_F_merit = &mcp_FB;
+  functions_FBLSA_mcp.compute_H = &FB_compute_H_mcp;
+  functions_FBLSA_mcp.compute_error = &FB_compute_error_mcp;
+  functions_FBLSA_mcp.compute_H_desc = NULL;
+  functions_FBLSA_mcp.compute_RHS_desc = NULL;
 
-  newton_FBLSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_FBLSA_lcp);
+ newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_FBLSA_mcp);
 }
 
 int mixedComplementarity_newton_FBLSA_setDefaultSolverOptions(SolverOptions* options)

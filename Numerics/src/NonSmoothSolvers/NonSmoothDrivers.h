@@ -30,6 +30,7 @@
 
 #include "mlcp_cst.h"
 #include "MCP_cst.h"
+#include "NCP_cst.h"
 #include "lcp_cst.h"
 #include "relay_cst.h"
 #include "Friction_cst.h"
@@ -132,6 +133,16 @@ extern "C"
       \return info termination value  0 : successful, else error.\n
   */
   int mcp_driver2(MixedComplementarityProblem2* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
+
+  /** General interface to solver for NCP problems
+      \param[in] problem the NonlinearComplementarityProblem structure which handles the problem
+      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] F a n-vector of doubles which contains value of the function evaluated at the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and its(their) parameters
+      \param[in] global_options  general options for Numerics (verbose mode ...)
+      \return info termination value  0 : successful, else error
+  */
+  int ncp_driver(NCP_struct* problem, double *z , double *F, SolverOptions* options,  NumericsOptions* global_options);
 
   /** LMGC interface to solvers for friction-contact 3D problem
    *  \param[in,out] reaction global vector (nc*3)

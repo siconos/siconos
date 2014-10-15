@@ -71,7 +71,6 @@
 
 typedef void * (FVIPtr)(void*, double *, double *);
 typedef void (*ptrFunctionVI)(void *self, int n, double* x ,double* fx);
-enum VI_SET_TYPE { VI_SET_IS_BOX, VI_SET_IS_POLYHEDRON };
 
 
 /** \struct VariationalInequality

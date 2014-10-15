@@ -469,9 +469,37 @@ void getDiagonalBlock(NumericsMatrix* m, int numBlockRow, int numRow, int size, 
   }
 }
 
-NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1, void* data)
+NumericsMatrix* createNumericsMatrixFromData(int storageType, int size0, int size1, void* data)
 {
   NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+
+  fillNumericsMatrix(M, storageType, size0, size1, data);
+
+  return M;
+}
+
+NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
+{
+  NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+
+  void* data;
+
+  switch (storageType)
+  {
+    case NM_DENSE:
+      data = malloc(size0*size1*sizeof(double));
+      break;
+    case NM_SPARSE_BLOCK:
+      data = malloc(sizeof(SparseBlockStructuredMatrix));
+      break;
+    case NM_TRIPLET:
+    case NM_COMPR_COL:
+    case NM_COMPR_TRANS:
+      data = malloc(sizeof(SparseMatrix));
+    default:
+      printf("createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
+      exit(EXIT_FAILURE);
+  }
 
   fillNumericsMatrix(M, storageType, size0, size1, data);
 
@@ -512,7 +540,7 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
         break;
 
       default:
-        printf("createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
+        printf("fillNumericsMatrix :: storageType value %d not implemented yet !", storageType);
         exit(EXIT_FAILURE);
     }
   }
@@ -520,5 +548,5 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
 
 NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1)
 {
-  return createNumericsMatrix(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
+  return createNumericsMatrixFromData(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }

@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2013.
+/* Siconos-Numerics, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -17,21 +17,9 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "box.h"
-#include <stdlib.h>
-#include <assert.h>
-
-void free_box(box_constraints* b)
-{
-  assert(b);
-  if (b->lb)
-  {
-    free(b->lb);
-    b->lb = NULL;
-  }
-  if (b->ub)
-  {
-    free(b->ub);
-    b->ub = NULL;
-  }
-}
+// info values
+#define LCP_PIVOT_SUCCESS 0
+#define LCP_PIVOT_NUL 2
+#define LCP_PATHSEARCH_LEAVING_T 3
+#define LCP_PIVOT_RAY_TERMINATION 4
+#define LCP_PATHSEARCH_NON_ENTERING_T 5

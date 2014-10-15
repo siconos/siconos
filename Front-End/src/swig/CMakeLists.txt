@@ -26,13 +26,17 @@ ENDIF()
 IF(NOT WITH_PY3)
   # we still prefer python2 for now
   SET(PythonInterp_FIND_VERSION "2")
+  SET(PythonLibs_FIND_VERSION "2")
 ELSE(NOT WITH_PY3)
   SET(PythonInterp_FIND_VERSION "3")
+  SET(PythonLibs_FIND_VERSION "3")
 ENDIF(NOT WITH_PY3)
 
 FIND_PACKAGE(PythonInterp)
 
-SET(PythonLibs_FIND_VERSION ${PYTHON_VERSION_STRING})
+# should world for all recent cmake version
+# setting PythonInterp_FIND_VERSION to the version string is borken with cmake 3
+SET(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 
 FIND_PACKAGE(PythonLibs)
 

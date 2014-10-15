@@ -67,7 +67,7 @@ void lcp_FB(void* data_opaque, double* z, double* F, double* F_FB)
 
 void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
-  functions_FBLSA functions_FBLSA_lcp;
+  functions_LSA functions_FBLSA_lcp;
   functions_FBLSA_lcp.compute_F = &FB_compute_F_lcp;
   functions_FBLSA_lcp.compute_F_merit = &lcp_FB;
   functions_FBLSA_lcp.compute_H = &FB_compute_H_lcp;
@@ -75,7 +75,7 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
   functions_FBLSA_lcp.compute_H_desc = NULL;
   functions_FBLSA_lcp.compute_RHS_desc = NULL;
 
-  newton_FBLSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
+ newton_LSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
 }
 
 int linearComplementarity_newton_FB_setDefaultSolverOptions(SolverOptions* options)
@@ -85,7 +85,7 @@ int linearComplementarity_newton_FB_setDefaultSolverOptions(SolverOptions* optio
     printf("Set the Default SolverOptions for the NewtonFB Solver\n");
   }
 
-  options->solverId = SICONOS_LCP_NEWTONFB;
+  options->solverId = SICONOS_LCP_NEWTON_FBLSA;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

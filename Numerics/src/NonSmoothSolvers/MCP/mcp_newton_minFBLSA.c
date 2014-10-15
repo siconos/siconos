@@ -52,7 +52,7 @@ void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* workV1, 
 
 void mcp_newton_minFBLSA(MixedComplementarityProblem2* problem, double *z, double* Fmcp, int *info , SolverOptions* options)
 {
-  functions_FBLSA functions_minFBLSA_mcp;
+  functions_LSA functions_minFBLSA_mcp;
   functions_minFBLSA_mcp.compute_F = &FB_compute_F_mcp;
   functions_minFBLSA_mcp.compute_F_merit = &mcp_FB;
   functions_minFBLSA_mcp.compute_H = &FB_compute_H_mcp;
@@ -60,5 +60,5 @@ void mcp_newton_minFBLSA(MixedComplementarityProblem2* problem, double *z, doubl
   functions_minFBLSA_mcp.compute_RHS_desc = &mcp_min;
   functions_minFBLSA_mcp.compute_H_desc = &min_compute_H_mcp;
 
-  newton_FBLSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_minFBLSA_mcp);
+ newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_minFBLSA_mcp);
 }

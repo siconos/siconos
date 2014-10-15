@@ -20,6 +20,8 @@
 #ifndef MCP_NEWTON_FB
 #define MCP_NEWTON_FB
 
+#include "NumericsConfig.h"
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

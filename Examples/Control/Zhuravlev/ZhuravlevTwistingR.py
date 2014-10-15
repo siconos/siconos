@@ -3,7 +3,7 @@ try:
     import Siconos.Numerics as N
 
 except (ImportError):
-    print 'Could not import Siconos.* module'
+    print('Could not import Siconos.* module')
 
 import numpy as np
 

@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2011.
+/* Siconos-Numerics, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,33 +16,24 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+/*!\file PathSearch.h
+ * \brief Path search related functions and data
+ */
 
-#include "SparseBlockMatrix.h"
+#include "NumericsConfig.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "SiconosBlas.h"
-#include "NCP_Solvers.h"
-
-void NCP_block_compute_error(int n, SparseBlockStructuredMatrix *M , double *q , double *z , int verbose, double *w, double *err)
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
 {
-  double error = 0;
-  int incx = 1, incy = 1;
-  double normq = cblas_dnrm2(n , q , incx);
+#endif
 
-  /* w is initialized with q */
-  cblas_dcopy(n , q , incx , w , incy);
+  /** set some default value for the solver option when the path search
+   * algorithm is used
+   * \param options the structure to be modified
+   */
+  void pathsearch_default_SolverOption(SolverOptions* options);
 
-  /* Computes w += Mz */
-  prodSBM(n, n, 1.0, M, z, 1.0, w);
-
-  /* Computes error */
-  for (int i = 0 ; i < n ; i++)
-    error += fabs(z[i] + w[i]) - (z[i] + w[i]);
-
-  *err = error / normq;
-
-  if (verbose > 0) printf("Siconos/Numerics: NCP_compute_error: Error evaluation = %g \n", *err);
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
+#endif
+

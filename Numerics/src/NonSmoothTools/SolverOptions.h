@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2012.
+/* Siconos-Numerics, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -122,12 +122,12 @@ Structure used to store user callbacks inside solvers
 */
 typedef struct
 {
-  void *env; /**< general user environnement */
+  void *env; /**< general user environment */
   void (*collectStatsIteration)(void *env, int size, double*reaction,
                        double*velocity, double error, void* extra_data);/**< pointer on a function
 * Its signature is: user env, problem size, reaction,
 * velocity, error at end of solver iteration (when this makes sense) and an
-* extra data structur */
+* extra data structure */
 } Callback;
 
 
@@ -170,6 +170,43 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE
   SICONOS_NUMERICS_PROBLEM_AVI = 8
 };
 
+
+/** Some value for iparam index */
+#define SICONOS_IPARAM_MAX_ITER 0
+#define SICONOS_IPARAM_ITER_DONE 1
+#define SICONOS_IPARAM_PREALLOC 2
+
+/** for pivot based algorithm */
+#define SICONOS_IPARAM_PIVOT_RULE 3
+
+/** pathsearch specific data */
+#define SICONOS_IPARAM_PATHSEARCH_STACKSIZE 5
+
+/** line search based algo use this */
+#define SICONOS_IPARAM_LSA_NONMONOTONE_LS 3
+#define SICONOS_IPARAM_LSA_NONMONOTONE_LS_M 4
+
+/** non-monotone specific part */
+#define SICONOS_IPARAM_NMS_WATCHDOG_TYPE 6
+#define SICONOS_IPARAM_NMS_PROJECTED_GRADIENT_TYPE 7
+#define SICONOS_IPARAM_NMS_N_MAX 8
+
+/** Some values for dparam index */
+#define SICONOS_DPARAM_TOL 0
+#define SICONOS_DPARAM_RESIDU 1
+
+/** line-search */
+#define SICONOS_DPARAM_LSA_ALPHA_MIN 2
+
+/** non-monotone specific part */
+#define SICONOS_DPARAM_NMS_DELTA 2
+#define SICONOS_DPARAM_NMS_DELTA_VAR 3
+#define SICONOS_DPARAM_NMS_SIGMA 4
+#define SICONOS_DPARAM_NMS_ALPHA_MIN_WATCHDOG 5
+#define SICONOS_DPARAM_NMS_ALPHA_MIN_PGRAD 6
+#define SICONOS_DPARAM_NMS_MERIT_INCR 7
+
+
 extern char * SICONOS_NUMERICS_PROBLEM_LCP_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_MLCP_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_NCP_STR;
@@ -201,20 +238,54 @@ extern "C"
   */
   void printSolverOptions(SolverOptions* options);
 
-  /** delete the solver parameters :
-      delete iparam and dparam;
-      \param options the structure to be destroyed
-  */
+  /** free some SolverOptions fields;
+   *   \param options the structure to clean
+   */
   void deleteSolverOptions(SolverOptions * options);
 
+  /** fill a SolverOptions struct: set fields, allocate memory and set common
+   * values
+   * \param options struct to fill
+   * \param solverId identity of the solver
+   * \param iSize size of the iparam field (integer parameters)
+   * \param dSize size of the dparam field (double parameters)
+   * \param iter_max maximum number of iterations before the solver stops
+   * if this does not make sense or is unwanted, give inf as value
+   * \param tol tolerance for the solution.
+   * if this does not make sense or is unwanted, give inf as value
+   */
+  void fill_SolverOptions(SolverOptions* options, int solverId, int iSize, int dSize, int iter_max, double tol);
+
+  /** set parameters in SolverOption. This function should be used instead of
+   * rewrittent each time a new function for setting the parameters
+   * \param options the struct to set
+   * \param solverId the id of the solver
+   */
+  void set_SolverOptions(SolverOptions* options, int solverId);
+
   /* Free the working memory (options->iWork and options->dWork)
-     \param[in] options structure used to define the solver(s) and their parameters
-  */
+   *  \param[in] options structure used to define the solver(s) and their parameters
+   */
   void free_working_memory(SolverOptions* options);
 
+  /** return the id of a solver based on its name
+   * \param pName the name of the solver
+   * \return the id of the solver or 0 if it failed
+   */
   int nameToId(char * pName);
+
+  /** return the name of a solver given its id
+   * \param Id the id of the solver
+   * \return the name of the solver
+   */
   char * idToName(int Id);
+
+  /** return the name of a problem type (LCP, NCP, VI, ...) based on its id
+   * \param id the id of the problem
+   * \return the name of the problem
+   */
   char * idProblemToChar(int id);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

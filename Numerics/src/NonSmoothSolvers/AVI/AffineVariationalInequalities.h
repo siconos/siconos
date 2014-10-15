@@ -58,7 +58,7 @@
 */
 
 #include "NumericsMatrix.h"
-#include "polyhedron.h"
+#include "SiconosSets.h"
 
 /** \struct AffineVariationalInequalities AffineVariationalInequalities.h
  *  \brief Structure that contains and defines  \ref AVI
@@ -80,7 +80,7 @@ typedef struct
   NumericsMatrix* M; /**< M matrix of the AVI (see the mathematical description)*/
   double* q; /**< vector of the AVI (see the mathematical description)*/
   double* d; /**< Covering vector (optional) */
-  Polyhedron* poly; /** Polyhedra where the solution has to belong */
+  polyhedron* poly; /** Polyhedra where the solution has to belong */
 } AffineVariationalInequalities;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

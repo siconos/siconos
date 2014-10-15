@@ -96,7 +96,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   LIST(LENGTH ${_EXE}_DATA_LIST_${_CURRENT_TEST_DIRECTORY} count)
   MATH(EXPR count "${count}-1")
   FOREACH(i RANGE ${count})
-    IF(count EQUAL -1)
+    IF(count EQUAL -1) # there is no data file ...
       SET(_TEST_NAME ${_EXE})
       IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
         ADD_TEST(${_EXE} wine ${_EXE}${EXE_EXT})

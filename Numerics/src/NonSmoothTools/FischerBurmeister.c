@@ -39,7 +39,7 @@ void phi_FB(int size, double* restrict z, double* restrict F, double* restrict p
 }
 
 /* Compute the jacobian of the Fischer function */
-void jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* jacobianPhiMatrix)
+void jacobianPhi_FB(int size, double* restrict z, double* restrict F, double* restrict jacobianF, double* restrict jacobianPhiMatrix)
 {
   assert(z != NULL);
   assert(F != NULL);
@@ -73,7 +73,7 @@ void jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* j
 }
 
 /* Computation of the mixed Fischer-Burmeister function */
-void phi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* phiVector)
+void phi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* restrict F, double* restrict phiVector)
 {
   assert(z != NULL);
   assert(F != NULL);
@@ -92,7 +92,7 @@ void phi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* phiVec
 }
 
 /* Compute the jacobian of the mixed Fischer function */
-void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* jacobianF, double* jacobianPhiMatrix)
+void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* restrict F, double* restrict jacobianF, double* restrict jacobianPhiMatrix)
 {
   assert(z != NULL);
   assert(F != NULL);

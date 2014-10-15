@@ -87,11 +87,11 @@ int main(void)
   printSolverOptions(options);
   deleteSolverOptions(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NEWTONFB);
+  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NEWTON_FBLSA);
   printSolverOptions(options);
   deleteSolverOptions(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NEWTONMINFB);
+  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NEWTON_MINFBLSA);
   printSolverOptions(options);
   deleteSolverOptions(options);
 

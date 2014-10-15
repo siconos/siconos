@@ -1,4 +1,4 @@
- /* Siconos-Numerics, Copyright INRIA 2005-2014.
+ /* Siconos-Numerics, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -17,34 +17,47 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#ifndef Newton_Methods_H
-#define Newton_Methods_H
+#ifndef NEWTON_METHODS_H
+#define NEWTON_METHODS_H
+
+/*!\file Newton_Methods.h
+ * \brief Data structure and function for using Newton based solvers
+ *
+ * The reference used for the implementation is "Finite-Dimensional Variational
+ * Inequalities and Complementarity Problems" by Facchinei and Pang.
+ *
+ * More precisely, the function newton_LSA() is algorithm VFBLSA.
+ *
+ * \author Olivier Huber
+ */
 
 #include "SolverOptions.h"
+#include "NumericsConfig.h"
 
 typedef void (*compute_F_ptr) (void* data_opaque, double* z, double* w);
 typedef void (*compute_F_merit_ptr) (void* data_opaque, double* z, double* F, double* F_merit);
 
-/** \struct _functions_FBLSA Newton_Methods.h
- * Struct holding the necessary pointer to functions
+/** \struct functions_LSA Newton_Methods.h
+ * Struct holding the necessary pointers to functions needed by the
+ * newton_LSA() procedure.
  */
-typedef struct _functions_FBLSA {
+typedef struct {
   compute_F_ptr compute_F; /**< function to evaluate w = F(z) */
   compute_F_merit_ptr compute_F_merit; /**< function to evaluate F_merit(z) (e.g. F_FB, F_{min}, ...) */
   void (*compute_H)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H); /**< function to get an element H of T */
   void (*compute_error)(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err); /**< function to compute the error */
   void (*compute_RHS_desc)(void* data_opaque, double* z, double* w, double* F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min}, ...), optional */
   void (*compute_H_desc)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H_desc); /**< function to get an element H_desc of T_desc, optional */
-} functions_FBLSA;
+} functions_LSA;
 
 // id of the stat structure 
 #define NEWTON_STATS_ITERATION 1
 
-/** */
-typedef struct _newton_stats {
-  int id; /**< id of this structur */
+/** \struct newton_stats Newton_Methods.h */
+typedef struct {
+  int id; /**< id of this structure */
   double merit_value; /**< value of the merit function at the end of the iteration */
-  double alpha; /**< value of the LS */
+  double alpha; /**< value of the LS parameter */
   unsigned int status; /**< status of this newton iteration */
 } newton_stats;
 
@@ -57,16 +70,23 @@ extern "C"
 {
 #endif
 
-  /** NCP Solver based on FB with a line search
+  /** Newton algorithm for finding the zero of a function with a line search.
+   * Mainly used for equation-based reformulation of CP or VI.
    * \param n size of the problem
    * \param z variable
    * \param w value of F(z)
    * \param info solver-specific values
    * \param data opaque problem definition
    * \param options options for this solver
-   * \param functions struct of functions to compute F, H and the error
+   * \param functions struct of function pointers to compute F, H and the error
    */
-  void newton_FBLSA(unsigned int n, double *z, double *w, int *info, void* data, SolverOptions* options, functions_FBLSA* functions);
+  void newton_LSA(unsigned n, double *z, double *w, int *info, void* data, SolverOptions* options, functions_LSA* functions);
+
+  /** Set some default values in the SolverOption when the solver is based on
+   * newton_LSA()
+   * \param options the struct to modify
+   */
+  void newton_lsa_default_SolverOption(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
