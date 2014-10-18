@@ -48,6 +48,7 @@ typedef struct {
   void (*compute_error)(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err); /**< function to compute the error */
   void (*compute_RHS_desc)(void* data_opaque, double* z, double* w, double* F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min}, ...), optional */
   void (*compute_H_desc)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H_desc); /**< function to get an element H_desc of T_desc, optional */
+  void (*descent_direction)(void* data_opaque, double* z, double* w, double* descent_dir); /**< function to get the descent direction, used for instance in the Newton-Josephy method */
 } functions_LSA;
 
 // id of the stat structure 
@@ -87,6 +88,23 @@ extern "C"
    * \param options the struct to modify
    */
   void newton_lsa_default_SolverOption(SolverOptions* options);
+
+  /** Set the functions to compute F and F_merit and all the other pointers to
+   * NULL
+   * \param functions structure to fill
+   * \param compute_F function to compute F
+   * \param merit_function function to compute F_merit
+   */
+  static inline void init_lsa_functions(functions_LSA* functions, compute_F_ptr compute_F, compute_F_merit_ptr merit_function)
+  {
+    functions->compute_F = compute_F;
+    functions->compute_F_merit = merit_function;
+    functions->compute_H = NULL;
+    functions->compute_error = NULL;
+    functions->compute_RHS_desc = NULL;
+    functions->compute_H_desc = NULL;
+    functions->descent_direction = NULL;
+  }
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

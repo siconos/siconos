@@ -55,12 +55,9 @@ void FB_compute_error_ncp(void* data_opaque, double* z, double* w, double* Jac_F
 void ncp_newton_FBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info, SolverOptions* options)
 {
   functions_LSA functions_FBLSA_ncp;
-  functions_FBLSA_ncp.compute_F = &FB_compute_F_ncp;
-  functions_FBLSA_ncp.compute_F_merit = &ncp_FB;
+  init_lsa_functions(&functions_FBLSA_ncp, &FB_compute_F_ncp, &ncp_FB);
   functions_FBLSA_ncp.compute_H = &FB_compute_H_ncp;
   functions_FBLSA_ncp.compute_error = &FB_compute_error_ncp;
-  functions_FBLSA_ncp.compute_H_desc = NULL;
-  functions_FBLSA_ncp.compute_RHS_desc = NULL;
 
   newton_LSA(problem->n, z, F, info, (void *)problem, options, &functions_FBLSA_ncp);
 }

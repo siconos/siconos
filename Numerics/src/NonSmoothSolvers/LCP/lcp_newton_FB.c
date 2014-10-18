@@ -68,12 +68,9 @@ void lcp_FB(void* data_opaque, double* z, double* F, double* F_FB)
 void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   functions_LSA functions_FBLSA_lcp;
-  functions_FBLSA_lcp.compute_F = &FB_compute_F_lcp;
-  functions_FBLSA_lcp.compute_F_merit = &lcp_FB;
+  init_lsa_functions(&functions_FBLSA_lcp, &FB_compute_F_lcp, &lcp_FB);
   functions_FBLSA_lcp.compute_H = &FB_compute_H_lcp;
   functions_FBLSA_lcp.compute_error = &FB_compute_error_lcp;
-  functions_FBLSA_lcp.compute_H_desc = NULL;
-  functions_FBLSA_lcp.compute_RHS_desc = NULL;
 
  newton_LSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
 }

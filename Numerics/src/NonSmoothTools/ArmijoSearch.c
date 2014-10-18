@@ -28,6 +28,11 @@
 #include "ArmijoSearch.h"
 #include "SiconosSets.h"
 
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
+
 double search_Armijo_standalone(int n, double* theta, double preRHS, search_data* ls_data)
 {
   assert(ls_data->alpha0 > 0.0);
@@ -163,12 +168,13 @@ void get_non_monotone_ref(void* nm_ref_data, double* theta_ref)
   assert(nm_ref_data);
   assert(theta_ref);
   double local_theta_ref = 0.0;
+  nm_ref_struct* data_max;
+  nm_ref_struct* data_mean;
 
   switch (get_nonmonotone_type(nm_ref_data))
   {
     case NM_LS_MAX: // classical nonmonotone theta_ref = max theta_j
-      ;
-      nm_ref_struct* data_max = (nm_ref_struct*) nm_ref_data;
+      data_max = (nm_ref_struct*) nm_ref_data;
       assert(data_max->m > 0);
       for (int i = 0; i < data_max->m; ++i)
       {
@@ -181,8 +187,7 @@ void get_non_monotone_ref(void* nm_ref_data, double* theta_ref)
       break;
 
     case NM_LS_MEAN: // mean like value : theta_ref = max { theta, mean(theta) }
-      ;
-      nm_ref_struct* data_mean = (nm_ref_struct*)nm_ref_data;
+      data_mean = (nm_ref_struct*)nm_ref_data;
       assert(data_mean->m > 0);
       for (int i = 0; i < data_mean->m; ++i)
       {

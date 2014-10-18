@@ -53,8 +53,7 @@ void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* workV1, 
 void mcp_newton_minFBLSA(MixedComplementarityProblem2* problem, double *z, double* Fmcp, int *info , SolverOptions* options)
 {
   functions_LSA functions_minFBLSA_mcp;
-  functions_minFBLSA_mcp.compute_F = &FB_compute_F_mcp;
-  functions_minFBLSA_mcp.compute_F_merit = &mcp_FB;
+  init_lsa_functions(&functions_minFBLSA_mcp, &FB_compute_F_mcp, &mcp_FB);
   functions_minFBLSA_mcp.compute_H = &FB_compute_H_mcp;
   functions_minFBLSA_mcp.compute_error = &FB_compute_error_mcp;
   functions_minFBLSA_mcp.compute_RHS_desc = &mcp_min;

@@ -53,8 +53,7 @@ void min_compute_H_ncp(void* data_opaque, double* z, double* F, double* workV1, 
 void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info , SolverOptions* options)
 {
   functions_LSA functions_minFBLSA_ncp;
-  functions_minFBLSA_ncp.compute_F = &FB_compute_F_ncp;
-  functions_minFBLSA_ncp.compute_F_merit = &ncp_FB;
+  init_lsa_functions(&functions_minFBLSA_ncp, &FB_compute_F_ncp, &ncp_FB);
   functions_minFBLSA_ncp.compute_H = &FB_compute_H_ncp;
   functions_minFBLSA_ncp.compute_error = &FB_compute_error_ncp;
   functions_minFBLSA_ncp.compute_RHS_desc = &ncp_min;

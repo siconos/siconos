@@ -31,6 +31,11 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
+
 int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restrict z, double* restrict z_N, int force_watchdog_step, int force_d_step_merit_check, double check_ratio)
 {
   double theta_iter;
@@ -44,6 +49,9 @@ int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restri
   double* JacThetaF_merit = NMS_get_JacTheta_F_merit(data_NMS->workspace, n);
   double* workV1 = NMS_get_dir(data_NMS->workspace, n);
   double* workV2 = NMS_get_generic_workV(data_NMS->workspace, n);
+
+  double dotprod, ref_merit, preRHS;
+  double alpha_projected_gradient, alpha_watchdog;
 
   /* first see whether the path search was successful */
   if (force_watchdog_step) goto watchdog_step;
@@ -144,8 +152,8 @@ watchdog_step:
       cblas_dcopy(n, NMS_checkpoint_T(data_NMS, n), 1, workV1, 1);
       cblas_daxpy(n, -1.0, NMS_checkpoint_0(data_NMS, n), 1, workV1, 1);
 
-      double preRHS, dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
-      double ref_merit = data_NMS->ref_merit;
+      dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
+      ref_merit = data_NMS->ref_merit;
       if (dotprod < 0.0) /* check condition on <JacThetaF_merit, z_c(0) - z_c(T_k)>*/
       {
         preRHS = -data_NMS->sigma*dotprod; /* we expect a plus in the LS function */
@@ -158,7 +166,7 @@ watchdog_step:
       data_NMS->ls_data->z = NMS_checkpoint_0(data_NMS, n);
       data_NMS->ls_data->alpha0 = .95;
       data_NMS->ls_data->searchtype = LINESEARCH;
-      double alpha_watchdog = search_Armijo_standalone(n, &ref_merit, preRHS, data_NMS->ls_data);
+      alpha_watchdog = search_Armijo_standalone(n, &ref_merit, preRHS, data_NMS->ls_data);
       if (alpha_watchdog > data_NMS->alpha_min_watchdog)
       {
         /* successful line search */
@@ -196,7 +204,6 @@ projected_gradient_step:
 
   switch(data_NMS->projected_gradient_search_type)
   {
-    double alpha_projected_gradient;
     case LINESEARCH:
       /* workV1 is the same vector as the desc_dir used in the search */
       /* compute d = z_b(0) - JacThetaF_merit and project it onto the set*/
@@ -208,7 +215,7 @@ projected_gradient_step:
       /* compute d_B - z_b(0) */
       cblas_daxpy(n, -1.0, NMS_bestpoint(data_NMS, n), 1, workV1, 1);
       /* compute <JacThetaF_merit, d_B - z_b(0)> */
-      double preRHS, dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
+      dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
 
       /* check is reversed because we compute the <JacThetaF_merit, d_B - z_b(0)> */
       if (dotprod > 0.0) /* check condition on <JacThetaF_merit, z_b(0) - z_b(T_k)>*/

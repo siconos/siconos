@@ -127,12 +127,9 @@ void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabl
 void mlcp_newton_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   functions_LSA functions_FBLSA_mlcp;
-  functions_FBLSA_mlcp.compute_F = &FB_compute_F_mlcp;
-  functions_FBLSA_mlcp.compute_F_merit = &mlcp_mixed_FB;
+  init_lsa_functions(&functions_FBLSA_mlcp, &FB_compute_F_mlcp, &mlcp_FB);
   functions_FBLSA_mlcp.compute_H = &FB_compute_H_mlcp;
   functions_FBLSA_mlcp.compute_error = &FB_compute_error_mlcp;
-  functions_FBLSA_mlcp.compute_H_desc = NULL;
-  functions_FBLSA_mlcp.compute_RHS_desc = NULL;
 
  newton_LSA(problem->n + problem->m, z, w, info, (void *)problem, options, &functions_FBLSA_mlcp);
 }

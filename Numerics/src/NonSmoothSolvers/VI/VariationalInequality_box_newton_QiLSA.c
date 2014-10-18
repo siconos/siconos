@@ -51,12 +51,9 @@ void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1
 void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, double *x, double *F, int* info, SolverOptions* options)
 {
   functions_LSA functions_QiLSA;
-  functions_QiLSA.compute_F = &VI_compute_F;
-  functions_QiLSA.compute_F_merit = &VI_compute_F_box_Qi;
+  init_lsa_functions(&functions_QiLSA, &VI_compute_F, &VI_compute_F_box_Qi);
   functions_QiLSA.compute_H = &VI_compute_H_box_Qi;
   functions_QiLSA.compute_error = &VI_compute_error_box;
-  functions_QiLSA.compute_H_desc = NULL;
-  functions_QiLSA.compute_RHS_desc = NULL;
 
  newton_LSA(problem->size, x, F, info, (void *)problem, options, &functions_QiLSA);
 }

@@ -152,6 +152,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   while ((iter < itermax) && (err > tol))
   {
     ++iter;
+    int info_dir_search = 0;
 
     functions->compute_F(data, z, F);
 
@@ -165,39 +166,43 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         { DEBUG_PRINTF("% 2.2e ", F[i]) }
         DEBUG_PRINT("\n"));
 
-
-    // Construction of the directional derivative of F_merit: JacThetaF_merit
-
-    // Construction of H and F_desc
-    if (functions->compute_RHS_desc) // different merit function for the descent calc.(usually min)
+    if (functions->descent_direction)
     {
-      functions->compute_H_desc(data, z, F, workV1, workV2, H);
-      functions->compute_RHS_desc(data, z, F, F_merit);
-    } /* No computation of JacThetaFF_merit, this will come later */
+      functions->descent_direction(data, z, F, workV1);
+    }
     else
     {
-      functions->compute_H(data, z, F, workV1, workV2, H);
-      functions->compute_F_merit(data, z, F, F_merit);
-      cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, H, n, F_merit, incx, 0.0, JacThetaF_merit, incy);
+      // Construction of H and F_desc
+      if (functions->compute_RHS_desc) // different merit function for the descent calc.(usually min)
+      {
+        functions->compute_H_desc(data, z, F, workV1, workV2, H);
+        functions->compute_RHS_desc(data, z, F, F_merit);
+      } /* No computation of JacThetaFF_merit, this will come later */
+      else
+      {
+        functions->compute_H(data, z, F, workV1, workV2, H);
+        functions->compute_F_merit(data, z, F, F_merit);
+        cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, H, n, F_merit, incx, 0.0, JacThetaF_merit, incy);
+      }
+
+      DEBUG_PRINT("Directional derivative matrix H\n");
+      DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
+          { for(unsigned int j = 0 ; j < n; ++j)
+          { DEBUG_PRINTF("% 2.2e ", H[j * n + i]) }
+          DEBUG_PRINT("\n")});
+
+      DEBUG_PRINT("F_desc ");
+      DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
+          { DEBUG_PRINTF("% 2.2e ", F_merit[i]) }
+          DEBUG_PRINT("\n"));
+
+
+      // Find direction by solving H * d = -F_desc
+      cblas_dcopy(n, F_merit, incx, workV1, incy);
+      cblas_dscal(n, -1.0, workV1, incx);
+      DGESV(n, 1, H, n, ipiv, workV1, n, &info_dir_search);
+
     }
-
-    DEBUG_PRINT("Directional derivative matrix H\n");
-    DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-        { for(unsigned int j = 0 ; j < n; ++j)
-        { DEBUG_PRINTF("% 2.2e ", H[j * n + i]) }
-        DEBUG_PRINT("\n")});
-
-    DEBUG_PRINT("F_desc ");
-    DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-        { DEBUG_PRINTF("% 2.2e ", F_merit[i]) }
-        DEBUG_PRINT("\n"));
-
-
-    // Find direction by solving H * d = -F_desc
-    cblas_dcopy(n, F_merit, incx, workV1, incy);
-    cblas_dscal(n, -1.0, workV1, incx);
-    int infoDGESV = 0;
-    DGESV(n, 1, H, n, ipiv, workV1, n, &infoDGESV);
 
     DEBUG_PRINT("d_k ");
     DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
@@ -206,7 +211,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
     // Computation of JacThetaF_merit
     // JacThetaF_merit = H^T * F_merit
-    if (functions->compute_RHS_desc) // need to compute H and F_merit for the merit
+    if (functions->compute_RHS_desc || functions->descent_direction) // need to compute H and F_merit for the merit
     {
       // /!\ maide! workV1 cannot be used since it contains the descent
       // direction ...
@@ -223,15 +228,15 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
 
     // xhub :: we should be able to continue even if DGESV fails!
-    if (infoDGESV)
+    if (info_dir_search)
     {
       if (functions->compute_RHS_desc) // we are safe here
       {
         DEBUG_PRINT("functions->compute_RHS_desc : no min descent direction ! searching for FB descent direction\n");
         cblas_dcopy(n, F_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
-        infoDGESV = 0;
-        DGESV(n, 1, H, n, ipiv, workV1, n, &infoDGESV);
+        info_dir_search = 0;
+        DGESV(n, 1, H, n, ipiv, workV1, n, &info_dir_search);
       }
       else
       {
@@ -247,7 +252,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       }
     }
 
-    if (infoDGESV == 0) /* direction search succeeded */
+    if (info_dir_search == 0) /* direction search succeeded */
     {
       // workV1 contains the direction d
       cblas_dcopy(n, z, incx, workV2, incy);
@@ -268,7 +273,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     }
 
     tau = 1.0;
-    if ((theta_iter > sigma * theta) || (infoDGESV > 0 && functions->compute_RHS_desc)) // Newton direction not good enough or min part failed
+    if ((theta_iter > sigma * theta) || (info_dir_search > 0 && functions->compute_RHS_desc)) // Newton direction not good enough or min part failed
     {
       if (verbose > 1)
         printf("newton_LSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);

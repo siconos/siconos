@@ -105,8 +105,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
 
   /* for use in NMS; normally only those 3 functions are called */
   functions_LSA functions;
-  functions.compute_F = &FB_compute_F_ncp;
-  functions.compute_F_merit = &ncp_FB;
+  init_lsa_functions(&functions, &FB_compute_F_ncp, &ncp_FB);
   functions.compute_H = &FB_compute_H_ncp;
 
   positive_orthant pos_or = {SICONOS_SET_POSITIVE_ORTHANT};

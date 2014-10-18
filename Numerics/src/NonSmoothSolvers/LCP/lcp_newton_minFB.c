@@ -52,8 +52,7 @@ void min_compute_H_lcp(void* data_opaque, double* z, double* F, double* workV1, 
 void lcp_newton_minFB(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   functions_LSA functions_minFBLSA_lcp;
-  functions_minFBLSA_lcp.compute_F = &FB_compute_F_lcp;
-  functions_minFBLSA_lcp.compute_F_merit = &lcp_FB;
+  init_lsa_functions(&functions_minFBLSA_lcp, &FB_compute_F_lcp, &lcp_FB);
   functions_minFBLSA_lcp.compute_H = &FB_compute_H_lcp;
   functions_minFBLSA_lcp.compute_error = &FB_compute_error_lcp;
   functions_minFBLSA_lcp.compute_RHS_desc = &lcp_min;

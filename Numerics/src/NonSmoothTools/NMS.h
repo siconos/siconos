@@ -103,7 +103,7 @@ extern "C"
    * merit to increase by that much
    * \return 0 if succeeded, 1 if failed
    */
-  int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restrict z, double* restrict z_N, int force_watchdog_step, int force_d_step_merit_check, double check_ratio);
+  int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* z, double* z_N, int force_watchdog_step, int force_d_step_merit_check, double check_ratio);
 
   /** create (allocate) a NMS_data struct and do some allocation work
    * \param size size of the problem

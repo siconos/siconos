@@ -73,8 +73,8 @@ typedef void * (FVIPtr)(void*, double *, double *);
 typedef void (*ptrFunctionVI)(void *self, int n, double* x ,double* fx);
 
 
-/** \struct VariationalInequality
- *
+/** \struct VariationalInequality VariationalInequality.h
+ * 
  */
 typedef struct VariationalInequality_
 {
