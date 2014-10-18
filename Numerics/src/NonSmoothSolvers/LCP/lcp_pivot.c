@@ -238,7 +238,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
   double tmp;
   int* basis;
   int basis_init = 0; /* 0 is basis was not initialized, 1 otherwise*/
-  int t_indx = 0;
+  unsigned t_indx = 0;
   double* t_stack = NULL;
   double* mat;
 

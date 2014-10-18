@@ -44,7 +44,7 @@
 /** type for user defined function used to compute F and its jacobian.
  */
 typedef void (*ptrFunctionNCP)(void* env, int n, double* z, double* F);
-typedef void (*ptrFunctionJacNCP)(void* env, int n, double* z, NumericsMatrix* jacF);
+typedef void (*ptrFunctionJacNCP)(void* env, int n, double* z, double* jacF);
 
 /** \struct  NonlinearComplementarityProblem NonlinearComplementarityProblem.h
  * The structure that defines a Nonlinear Complementarity Problem (NCP) : Find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n})\f$ such that:\n

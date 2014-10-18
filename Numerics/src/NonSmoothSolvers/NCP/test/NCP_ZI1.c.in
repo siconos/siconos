@@ -29,6 +29,11 @@
 
 #define N 4
 
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
+
 typedef struct
 {
   int id;

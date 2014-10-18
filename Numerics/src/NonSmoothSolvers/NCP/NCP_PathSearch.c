@@ -144,6 +144,8 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
   LinearComplementarityProblem lcp_subproblem_check;
   int check_lcp_solution = 1; /* XXX add config for that */
 
+  double normal_norm2_newton_point;
+
   /* F is already computed here at z */
 
   while ((err > nn_tol) && (nbiter < itermax) && !nms_failed)
@@ -212,7 +214,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
           /* recompute the normal norm */
           problem->compute_F(problem->env, n, x_plus, r);
           cblas_daxpy(n, -1.0, x, 1, r, 1);
-          double normal_norm2_newton_point = cblas_ddot(n, r, 1, r, 1);
+          normal_norm2_newton_point = cblas_ddot(n, r, 1, r, 1);
           if (normal_norm2_newton_point > norm_r2)
           {
             printf("ncp_pathsearch :: lcp successfully solved, but the norm of the normal map increased! %e > %e\n", normal_norm2_newton_point, norm_r2);
@@ -244,7 +246,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
         /* recompute the normal norm */
         problem->compute_F(problem->env, n, x_plus, r);
         cblas_daxpy(n, -1.0, x, 1, r, 1);
-        double normal_norm2_newton_point = cblas_ddot(n, r, 1, r, 1);
+        normal_norm2_newton_point = cblas_ddot(n, r, 1, r, 1);
         if (normal_norm2_newton_point > norm_r2)
         {
           printf("ncp_pathsearch :: lcp successfully solved, but the norm of the normal map increased! %e > %e\n", normal_norm2_newton_point, norm_r2);

@@ -23,6 +23,11 @@
 #include <assert.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
+
 void project_on_set(int n, double* restrict x, void* restrict set)
 {
   assert(set);

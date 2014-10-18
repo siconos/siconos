@@ -335,7 +335,7 @@ NMS_data* create_NMS_data(unsigned size, int matrix_type, int* restrict iparam, 
   data->bestpoint = (double*)malloc(size*sizeof(double));
   data->workspace = (double*)malloc(5*size*sizeof(double));
   data->H = createNumericsMatrix(matrix_type, size, size);
-  data->ls_data = malloc(sizeof(search_data));
+  data->ls_data = (search_data *)malloc(sizeof(search_data));
 
   /* set to NULL stuff that we can't create here */
   data->set = NULL;
