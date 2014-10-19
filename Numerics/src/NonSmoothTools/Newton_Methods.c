@@ -122,9 +122,9 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   ls_data.sigma = sigma;
   ls_data.searchtype = LINESEARCH;
 
+  nm_ref_struct nm_ref_data;
   if (options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] > 0)
   {
-    nm_ref_struct nm_ref_data;
     fill_nm_data(&nm_ref_data, options->iparam);
     ls_data.nm_ref_data = &nm_ref_data;
   }
@@ -168,7 +168,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
     if (functions->descent_direction)
     {
-      functions->descent_direction(data, z, F, workV1);
+      functions->descent_direction(data, z, F, workV1, options);
     }
     else
     {

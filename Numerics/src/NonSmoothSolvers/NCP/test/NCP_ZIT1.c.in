@@ -104,7 +104,7 @@ int main(void)
   /* Set solver options */
   SolverOptions options;
 
-  set_SolverOptions(&options, @NCP_SOLVER_ID@);
+  set_SolverOptions(&options, @SOLVER_ID@);
 
   /* Create a NonlinearComplementarityProblem */
   NonlinearComplementarityProblem* problem = (NonlinearComplementarityProblem *)malloc(sizeof(NonlinearComplementarityProblem));
@@ -189,7 +189,7 @@ int main(void)
       if (info > 0)
       {
         printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
-        printf("NCP_ZI1 with solver @NCP_SOLVER_ID@ failed completly\n");
+        printf("NCP_ZI1 with solver @SOLVER_ID@ failed completly\n");
       }
 
     }

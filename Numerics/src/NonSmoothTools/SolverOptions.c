@@ -33,6 +33,7 @@
 
 #include "Newton_Methods.h"
 #include "PathSearch.h"
+#include "VariationalInequality_Solvers.h"
 
 //#define DEBUG_MESSAGES 1
 #include "debug.h"
@@ -395,23 +396,32 @@ void set_SolverOptions(SolverOptions* options, int solverId)
   case SICONOS_MCP_NEWTON_MINFBLSA:
   case SICONOS_LCP_NEWTON_FBLSA:
   case SICONOS_LCP_NEWTON_MINFBLSA:
-   iSize = 5;
-   dSize = 3;
-   iter_max = 100;
-   tol = 1e-12;
-   fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
-   newton_lsa_default_SolverOption(options);
-   break;
+  case SICONOS_VI_BOX_QI:
+    iSize = 5;
+    dSize = 3;
+    iter_max = 100;
+    tol = 1e-12;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    newton_lsa_default_SolverOption(options);
+    break;
 
   case SICONOS_NCP_PATHSEARCH:
-   iSize = 9;
-   dSize = 8;
-   iter_max = 100;
-   tol = 1e-12;
-   fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
-   pathsearch_default_SolverOption(options);
-   break;
+    iSize = 9;
+    dSize = 8;
+    iter_max = 100;
+    tol = 1e-12;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    pathsearch_default_SolverOption(options);
+    break;
 
+  case SICONOS_VI_BOX_AVI_LSA:
+    iSize = 5;
+    dSize = 3;
+    iter_max = 100;
+    tol = 1e-12;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    vi_box_AVI_extra_SolverOptions(options);
+    break;
   default:
    printf("set_SolverOptions not supported for solver id %d named %s\n", solverId, idToName(solverId));
    exit(EXIT_FAILURE);

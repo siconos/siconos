@@ -175,7 +175,7 @@ void get_non_monotone_ref(void* nm_ref_data, double* theta_ref)
   {
     case NM_LS_MAX: // classical nonmonotone theta_ref = max theta_j
       data_max = (nm_ref_struct*) nm_ref_data;
-      assert(data_max->m > 0);
+      local_theta_ref = *theta_ref;
       for (int i = 0; i < data_max->m; ++i)
       {
         if (data_max->previous_thetas[i] > local_theta_ref)
@@ -188,7 +188,6 @@ void get_non_monotone_ref(void* nm_ref_data, double* theta_ref)
 
     case NM_LS_MEAN: // mean like value : theta_ref = max { theta, mean(theta) }
       data_mean = (nm_ref_struct*)nm_ref_data;
-      assert(data_mean->m > 0);
       for (int i = 0; i < data_mean->m; ++i)
       {
         local_theta_ref += data_mean->previous_thetas[i];

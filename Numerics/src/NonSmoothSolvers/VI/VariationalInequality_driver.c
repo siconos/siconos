@@ -26,12 +26,13 @@
 #include "VariationalInequality_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "SiconosBlas.h"
+#include "SiconosSets.h"
 
 char *  SICONOS_VI_EG_STR = "VI_EG";
 char *  SICONOS_VI_FPP_STR = "VI_FPP";
 char *  SICONOS_VI_HP_STR = "VI_HP";
 char *  SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-function";
-char *  SICONOS_VI_BOX_AVI_STR = "Box VI solver based on solving a sequence of linear approximation";
+char *  SICONOS_VI_BOX_AVI_LSA_STR = "Box VI solver based on the Newton-Josephy method";
 
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
@@ -97,9 +98,12 @@ int variationalInequality_driver(VariationalInequality* problem,
   }
   case SICONOS_VI_BOX_QI:
   {
-    snPrintf(1, options, 
-             " ========================== Call solver based on merit function (Qi) for Box VI problem ==========================\n");
     variationalInequality_box_newton_QiLSA(problem, x, w, &info, options);
+    break;
+  }
+  case SICONOS_VI_BOX_AVI_LSA:
+  {
+    vi_box_AVI_LSA(problem, x, w, &info, options);
     break;
   }
   default:
@@ -118,7 +122,15 @@ int checkTrivialCase_vi(VariationalInequality* problem, double* x,
                         double* w, SolverOptions* options)
 {
   int n = problem->size;
-  problem->ProjectionOnX(problem,x,w);
+  if (problem->ProjectionOnX)
+  {
+    problem->ProjectionOnX(problem,x,w);
+  }
+  else
+  {
+    cblas_dcopy(problem->size, x, 1, w, 1);
+    project_on_set(problem->size, w, problem->set);
+  }
   cblas_daxpy(n, -1.0,x, 1, w , 1);
   double nnorm = cblas_dnrm2(n,w,1);
   if (nnorm < 1e-12)
