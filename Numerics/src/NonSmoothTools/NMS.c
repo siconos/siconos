@@ -376,7 +376,10 @@ void free_NMS_data(NMS_data* data)
 {
   assert(data);
   if (data->ref_merit_data)
+  {
+    free_nm_data(data->ref_merit_data);
     free(data->ref_merit_data);
+  }
 
   free(data->checkpoint);
   free(data->bestpoint);
@@ -384,6 +387,7 @@ void free_NMS_data(NMS_data* data)
   freeNumericsMatrix(data->H);
   free(data->H);
   free_siconos_set(data->set);
+  free(data->set);
   free(data->ls_data);
 
   if (data->path_data)

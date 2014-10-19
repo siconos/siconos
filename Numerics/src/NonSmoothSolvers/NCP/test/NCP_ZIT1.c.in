@@ -133,6 +133,7 @@ int main(void)
   sim_data.kappa = .8;
 
  options.dparam[0] = N*DBL_EPSILON;
+ options.iparam[SICONOS_IPARAM_PREALLOC] = 1;
 //  options.iparam[0] = 250;
 
 //  options.iparam[3] = 2;

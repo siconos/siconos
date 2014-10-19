@@ -311,6 +311,19 @@ void recursive_deleteSolverOptions(SolverOptions* op)
   }
 }
 
+void free_solverData(unsigned id, void* solverData)
+{
+  switch (id)
+  {
+    case SICONOS_NCP_PATHSEARCH:
+      assert(solverData);
+      free_solverData_PathSearch(solverData);
+      free(solverData);
+      break;
+    default:
+      ;
+  }
+}
 
 void deleteSolverOptions(SolverOptions* op)
 {
@@ -339,6 +352,7 @@ void deleteSolverOptions(SolverOptions* op)
       free(op->callback);
       op->callback = NULL;
     }
+    free_solverData(op->solverId, op->solverData);
   }
 }
 
@@ -357,7 +371,8 @@ void fill_SolverOptions(SolverOptions* options, int solverId, int iSize, int dSi
   options->callback = NULL;
   options->numericsOptions = NULL;
   options->internalSolvers = NULL;
-
+  options->solverData = NULL;
+  options->solverParameters = NULL;
   /* we set those value, even if they don't make sense. If this is the case,
    * they should be +inf */
   options->iparam[0] = iter_max;

@@ -26,8 +26,11 @@
  * \author Olivier Huber
  */
 
+#include "PathSearch.h"
+
 #include "SiconosBlas.h"
 #include "NumericsMatrix.h"
+
 
 #if defined(__cplusplus)
 #undef restrict

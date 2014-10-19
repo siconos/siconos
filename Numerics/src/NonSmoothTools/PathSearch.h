@@ -20,6 +20,21 @@
  * \brief Path search related functions and data
  */
 
+#ifndef PATHSEARCH_H
+#define PATHSEARCH_H
+
+#include "NMS.h"
+#include "Newton_Methods.h"
+
+/** struct ncp_pathsearch_data NCP_PathSearch.h
+ * solver specific data
+ */
+typedef struct
+{
+  NMS_data* data_NMS; /**< struct for the NMS scheme */
+  functions_LSA* lsa_functions; /**< functions for the search */
+} pathsearch_data;
+
 #include "NumericsConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -33,7 +48,14 @@ extern "C"
    */
   void pathsearch_default_SolverOption(SolverOptions* options);
 
+  /** free solverData specific for the path search
+   * \param solverData the struct to free
+   */
+  void free_solverData_PathSearch(void* solverData);
+
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
+#endif

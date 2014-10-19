@@ -73,6 +73,15 @@ extern "C"
 {
 #endif
 
+  /** set set id
+   * \param set the set which id should be set
+   * \param id the id of the set
+   */
+  static inline void set_set_id(void* set, unsigned id)
+  {
+    ((generic_set*)set)->id = id;
+  }
+
   /** project the point x on a set
    * \param n the size of x
    * \param x the point to project

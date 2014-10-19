@@ -84,10 +84,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
   }
 
 
-  if (!preAlloc || (preAlloc && !problem->nabla_F))
-  {
-    problem->nabla_F = createNumericsMatrix(NM_DENSE, n, n);
-  }
+  assert(problem->nabla_F);
   lcp_subproblem.M = problem->nabla_F;
 
 
@@ -100,35 +97,52 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
   double* x_plus = &options->dWork[2*n];
   double* r = &options->dWork[3*n];
 
-  /** \todo save this somewhere to avoid reallocating all the data -- xhub */
-  NMS_data* data_NMS = create_NMS_data(n, NM_DENSE, options->iparam, options->dparam);
+  NMS_data* data_NMS;
+  functions_LSA* functions;
 
-  /* for use in NMS; normally only those 3 functions are called */
-  functions_LSA functions;
-  init_lsa_functions(&functions, &FB_compute_F_ncp, &ncp_FB);
-  functions.compute_H = &FB_compute_H_ncp;
+  if (!preAlloc || (preAlloc && !options->solverData))
+  {
+    options->solverData = malloc(sizeof(pathsearch_data));
+    pathsearch_data* solverData = (pathsearch_data*) options->solverData;
 
-  positive_orthant pos_or = {SICONOS_SET_POSITIVE_ORTHANT};
-  data_NMS->set = &pos_or;
+    /* do all the allocation */
+    solverData->data_NMS = create_NMS_data(n, NM_DENSE, options->iparam, options->dparam);
+    solverData->lsa_functions = (functions_LSA*) malloc(sizeof(functions_LSA));
+    solverData->data_NMS->set = malloc(sizeof(positive_orthant));
 
-  /* fill ls_data */
-  data_NMS->ls_data->compute_F = functions.compute_F;
-  data_NMS->ls_data->compute_F_merit = functions.compute_F_merit;
-  data_NMS->ls_data->z = NULL; /* XXX to check -- xhub */
-  data_NMS->ls_data->zc = NMS_get_generic_workV(data_NMS->workspace, n);
-  data_NMS->ls_data->F = NMS_get_F(data_NMS->workspace, n);
-  data_NMS->ls_data->F_merit = NMS_get_F_merit(data_NMS->workspace, n);
-  data_NMS->ls_data->desc_dir = NMS_get_dir(data_NMS->workspace, n);
-  /** \todo this value should be settable by the user with a default value*/
-  data_NMS->ls_data->alpha_min = fmin(data_NMS->alpha_min_watchdog, data_NMS->alpha_min_pgrad);
-  data_NMS->ls_data->data = (void*)problem;
-  data_NMS->ls_data->set = &pos_or;
-  data_NMS->ls_data->sigma = options->dparam[SICONOS_DPARAM_NMS_SIGMA];
-  /* data_NMS->ls_data->searchtype is set in the NMS code */
+    data_NMS = solverData->data_NMS;
+    functions = solverData->lsa_functions;
+    /* for use in NMS;  only those 3 functions are called */
+    init_lsa_functions(functions, &FB_compute_F_ncp, &ncp_FB);
+    functions->compute_H = &FB_compute_H_ncp;
+
+    set_set_id(data_NMS->set, SICONOS_SET_POSITIVE_ORTHANT);
+
+    /* fill ls_data */
+    data_NMS->ls_data->compute_F = functions->compute_F;
+    data_NMS->ls_data->compute_F_merit = functions->compute_F_merit;
+    data_NMS->ls_data->z = NULL; /* XXX to check -- xhub */
+    data_NMS->ls_data->zc = NMS_get_generic_workV(data_NMS->workspace, n);
+    data_NMS->ls_data->F = NMS_get_F(data_NMS->workspace, n);
+    data_NMS->ls_data->F_merit = NMS_get_F_merit(data_NMS->workspace, n);
+    data_NMS->ls_data->desc_dir = NMS_get_dir(data_NMS->workspace, n);
+    /** \todo this value should be settable by the user with a default value*/
+    data_NMS->ls_data->alpha_min = fmin(data_NMS->alpha_min_watchdog, data_NMS->alpha_min_pgrad);
+    data_NMS->ls_data->data = (void*)problem;
+    data_NMS->ls_data->set = data_NMS->set;
+    data_NMS->ls_data->sigma = options->dparam[SICONOS_DPARAM_NMS_SIGMA];
+    /* data_NMS->ls_data->searchtype is set in the NMS code */
+  }
+  else
+  {
+    pathsearch_data* solverData = (pathsearch_data*) options->solverData;
+    data_NMS = solverData->data_NMS;
+    functions = solverData->lsa_functions;
+  }
 
   /* initial value for ref_merit */
   problem->compute_F(problem->env, n, z, F);
-  functions.compute_F_merit(problem, z, F, data_NMS->ls_data->F_merit);
+  functions->compute_F_merit(problem, z, F, data_NMS->ls_data->F_merit);
 
   data_NMS->ref_merit = .5 * cblas_ddot(n, data_NMS->ls_data->F_merit, 1, data_NMS->ls_data->F_merit, 1);
   data_NMS->merit_bestpoint = data_NMS->ref_merit;
@@ -327,12 +341,12 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
         exit(EXIT_FAILURE);
     }
 
-    nms_failed = NMS(data_NMS, problem, &functions, z, x_plus, force_watchdog_step, force_d_step_merit_check, check_ratio);
+    nms_failed = NMS(data_NMS, problem, functions, z, x_plus, force_watchdog_step, force_d_step_merit_check, check_ratio);
     /* at this point z has been updated */
 
     /* recompute the normal norm */
     problem->compute_F(problem->env, n, z, F);
-    functions.compute_F_merit(problem, z, F, data_NMS->ls_data->F_merit);
+    functions->compute_F_merit(problem, z, F, data_NMS->ls_data->F_merit);
 
     /* XXX is this correct ? */
     merit_norm = .5 * cblas_ddot(n, data_NMS->ls_data->F_merit, 1, data_NMS->ls_data->F_merit, 1);
@@ -359,22 +373,21 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
 
   DEBUG_PRINTF("ncp_pathsearch procedure finished :: info = %d; iter = %d; ncp_error = %e; merit_norm^2 = %e\n", *info, nbiter, err, merit_norm);
 
-  free_NMS_data(data_NMS);
+  if (!preAlloc)
+  {
+    freeNumericsMatrix(problem->nabla_F);
+    free(problem->nabla_F);
+    problem->nabla_F = NULL;
+    free(options->dWork);
+    options->dWork = NULL;
+    deleteSolverOptions(options->internalSolvers);
+    free(options->internalSolvers);
+    options->internalSolvers = NULL;
+    free_NMS_data(data_NMS);
+    free(functions);
+    free(options->solverData);
+    options->solverData = NULL;
+  }
 }
 
-void pathsearch_default_SolverOption(SolverOptions* options)
-{
-  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = NM_LS_MEAN;
-  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 10;
-  options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 5;
-  options->iparam[SICONOS_IPARAM_NMS_WATCHDOG_TYPE] = LINESEARCH;
-  options->iparam[SICONOS_IPARAM_NMS_PROJECTED_GRADIENT_TYPE] = ARCSEARCH;
-  options->iparam[SICONOS_IPARAM_NMS_N_MAX] = 10;
 
-  options->dparam[SICONOS_DPARAM_NMS_DELTA] = 20;
-  options->dparam[SICONOS_DPARAM_NMS_DELTA_VAR] = .8;
-  options->dparam[SICONOS_DPARAM_NMS_SIGMA] = .01;
-  options->dparam[SICONOS_DPARAM_NMS_ALPHA_MIN_WATCHDOG] = 1e-12;
-  options->dparam[SICONOS_DPARAM_NMS_ALPHA_MIN_PGRAD] = 1e-12;
-  options->dparam[SICONOS_DPARAM_NMS_MERIT_INCR] = 1.1; /* XXX 1.1 ?*/
-}
