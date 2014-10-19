@@ -183,11 +183,11 @@ watchdog_step:
     case ARCSEARCH:
       printf("watchdog_step: arc search not implemented yet !\n");
       exit(EXIT_FAILURE);
-      break;
+      //break;
     case BACKWARD_PATHSEARCH:
       printf("watchdog_step: path search not implemented yet !\n");
       exit(EXIT_FAILURE);
-      break;
+      //break;
     default:
       printf("watchdog_step: unknown search type : %d\n", data_NMS->watchdog_search_type);
       exit(EXIT_FAILURE);
@@ -247,7 +247,6 @@ projected_gradient_step:
         printf("NMS: projected gradient unsuccessful ! Don't know what to do ... \n");
         return 1;
       }
-      break;
     case ARCSEARCH:
       /* workV1 is the same vector as the desc_dir used in the search */
       /* desc_dir = -JacThetaF_merit */
@@ -274,7 +273,6 @@ projected_gradient_step:
         printf("NMS: projected gradient unsuccessful ! Don't know what to do ... \n");
         return 1;
       }
-      break;
     default:
       printf("projected gradient: unknown search type : %d\n", data_NMS->projected_gradient_search_type);
       exit(EXIT_FAILURE);

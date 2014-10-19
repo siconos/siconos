@@ -99,11 +99,9 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
     case LCP_PIVOT_NUL:
     case LCP_PATHSEARCH_LEAVING_T:
       printf("lcp_pathsearch :: kaboom, kaboom still more work needs to be done\n");
-      exit(EXIT_FAILURE);
       break;
     default:
       printf("lcp_pathsearch :: unknown code returned by the path search\n");
-      exit(EXIT_FAILURE);
   }
 
   /* recover solution */

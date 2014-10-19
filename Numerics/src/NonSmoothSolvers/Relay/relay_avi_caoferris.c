@@ -31,6 +31,7 @@ Ferris solves the subsequent AVI.
 void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   unsigned int n = problem->size;
+  assert(n > 0);
   unsigned int s = 2*n;
 
   /* Copy the data from Relay problem */
