@@ -23,7 +23,6 @@ def usage():
         [--cf-scale=<float value>] <hdf5 file>
     """
 
-
 def add_compatiblity_methods(obj):
     """
     Add missing methods in previous VTK versions.
@@ -531,8 +530,10 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 mapper = vtk.vtkDataSetMapper()
                 add_compatiblity_methods(mapper)
                 mapper.SetInputConnection(reader.GetOutputPort())
-                # delayed
-                mappers[shape_name] = lambda : mapper
+                # delayed (see the one in brep)
+                # note: "lambda : mapper" fails (dynamic scope)
+                # and (x for x in [mapper]) is ok.
+                mappers[shape_name] = (x for x in [mapper])
 
         elif shape_type in ['brep']:
             # try to find an associated shape
@@ -540,7 +541,8 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 associated_shape = \
                     io.shapes()[shape_name].\
                     attrs['associated_shape']
-                mappers[shape_name] = lambda : mappers[associated_shape]() 
+                # delayed
+                mappers[shape_name] = (x for x in [mappers[associated_shape]()])
 
         elif shape_type == 'convex':
             # a convex shape
@@ -570,7 +572,8 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
             mapper = vtk.vtkDataSetMapper()
             add_compatiblity_methods(mapper)
             mapper.SetInputData(convex_grid)
-            mappers[shape_name] = lambda : mapper
+            # delayed
+            mappers[shape_name] = (x for x in [mapper])
 
         else:
             assert shape_type == 'primitive'
@@ -633,7 +636,8 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
             readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
             mapper.SetInputConnection(source.GetOutputPort())
-            mappers[shape_name] = lambda : mapper
+            mappers[shape_name] = (x for x in [mapper])
+
 
 
     for instance_name in io.instances():
@@ -651,7 +655,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 actor.GetProperty().SetOpacity(0.7)
 
             actor.GetProperty().SetColor(random_color())
-            actor.SetMapper(mappers[contactor_name]())
+            actor.SetMapper(mappers[contactor_name].next())
             actors.append(actor)
             renderer.AddActor(actor)
             transform = vtk.vtkTransform()
