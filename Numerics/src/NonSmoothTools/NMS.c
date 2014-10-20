@@ -375,7 +375,9 @@ void free_NMS_data(NMS_data* data)
   assert(data);
   if (data->ref_merit_data)
   {
-    free_nm_data(data->ref_merit_data);
+    /* XXX fix this */
+    /** \todo sort the nm data thing */
+    free_nm_data((nm_ref_struct *)data->ref_merit_data);
     free(data->ref_merit_data);
   }
 
