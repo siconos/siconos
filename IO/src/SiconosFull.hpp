@@ -149,7 +149,7 @@ template <class Archive>
 void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
 {
   ar & boost::serialization::make_nvp("num", m.num);
-  ar & boost::serialization::make_nvp("ipiv", m.ipiv);
+  ar & boost::serialization::make_nvp("_ipiv", m._ipiv);
   ar & boost::serialization::make_nvp("_isPLUFactorized", m._isPLUFactorized);
   ar & boost::serialization::make_nvp("_isPLUInversed", m._isPLUInversed);
   switch (m.num)
