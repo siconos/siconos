@@ -151,9 +151,9 @@ typedef struct _SolverOptions
   NumericsOptions * numericsOptions;       /**< numericsOptions global options for numerics (verbose mode ...)*/
   Callback * callback;                     /**< callback a pointer to user Callback*/
 
-  void * solverParameters;                 /**< parameters specific to the solver */
+  void * solverParameters;                 /**< additional parameters specific to the solver */
 
-  void * solverData;                       /**< data specific to the solver, may contains allocated matrices, vectors, ipiv, ... */
+  void * solverData;                       /**< additional data specific to the solver */
 
 } SolverOptions;
 
