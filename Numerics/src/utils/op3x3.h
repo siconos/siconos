@@ -66,45 +66,10 @@
   } while(0)                                    \
  
 
-#if defined(OP3X3_C_STORAGE)
 /** SET3X3 : set pointers on a 3x3 matrix a (*a00 *a01 *a10 etc.)
  * warning the pointer a is modified (use a00 instead) and is ready
  * for a next SET3X3
  */
-#define SET3X3(V)                                          \
-  double* V##00 MAYBE_UNUSED = V++;                        \
-  double* V##01 MAYBE_UNUSED = V++;                        \
-  double* V##02 MAYBE_UNUSED = V++;                        \
-  double* V##10 MAYBE_UNUSED = V++;                        \
-  double* V##11 MAYBE_UNUSED = V++;                        \
-  double* V##12 MAYBE_UNUSED = V++;                        \
-  double* V##20 MAYBE_UNUSED = V++;                        \
-  double* V##21 MAYBE_UNUSED = V++;                        \
-  double* V##22 MAYBE_UNUSED = V++;
-#define SET3X3MAYBE(V)                                       \
-  double* V##00 MAYBE_UNUSED = 0;                            \
-  double* V##01 MAYBE_UNUSED = 0;                            \
-  double* V##02 MAYBE_UNUSED = 0;                            \
-  double* V##10 MAYBE_UNUSED = 0;                            \
-  double* V##11 MAYBE_UNUSED = 0;                            \
-  double* V##12 MAYBE_UNUSED = 0;                            \
-  double* V##20 MAYBE_UNUSED = 0;                            \
-  double* V##21 MAYBE_UNUSED = 0;                            \
-  double* V##22 MAYBE_UNUSED = 0;                            \
-  if (V)                                                     \
-  {                                             \
-    V##00 = V++;                                \
-    V##01 = V++;                                \
-    V##02 = V++;                                \
-    V##10 = V++;                                \
-    V##11 = V++;                                \
-    V##12 = V++;                                \
-    V##20 = V++;                                \
-    V##21 = V++;                                \
-    V##22 = V++;                                \
-  }
-
-#else // fortran storage
 #define SET3X3(V)                                                       \
   double* V##00 MAYBE_UNUSED = V++;                                     \
   double* V##10 MAYBE_UNUSED = V++;                                     \
@@ -137,7 +102,6 @@
     V##12 = V++;                                \
     V##22 = V++;                                \
   }
-#endif
 
 /** SET3 : set pointers on a vector3 v (*v0 *v1 *v2)
  * Warning: the pointer v is modified and is ready for a next SET3
@@ -260,18 +224,6 @@ static inline void cpytr3x3(double* a, double* b)
 static inline void mv3x3(double* restrict a, double* restrict v, double* restrict r)
 {
 
-#if defined(OP3X3_C_STORAGE)
-  double* pv;
-
-  pv = v;
-  *r++ = *a++ * *pv++ + *a++ * *pv++ + *a++ * *pv++;
-
-  pv = v;
-  *r++ = *a++ * *pv++ + *a++ * *pv++ + *a++ * *pv++;
-
-  pv = v;
-  *r++ = *a++ * *pv++ + *a++ * *pv++ + *a++ * *pv++;
-#else
   double* pr;
 
   pr = r;
@@ -291,9 +243,6 @@ static inline void mv3x3(double* restrict a, double* restrict v, double* restric
   *pr++ += *a++ * *v;
   *pr++ += *a++ * *v;
   *pr++ += *a++ * *v++;
-
-#endif
-
 }
 
 
@@ -305,18 +254,6 @@ static inline void mv3x3(double* restrict a, double* restrict v, double* restric
 static inline void mvp3x3(double* restrict a, double* restrict v, double* restrict r)
 {
 
-#if defined(OP3X3_C_STORAGE)
-  double* pv;
-
-  pv = v;
-  *r++ += *a++ * *pv++ + *a++ * *pv++ + *a++ * *pv++;
-
-  pv = v;
-  *r++ += *a++ * *pv++ + *a++ * *pv++ + *a++ * *pv++;
-
-  pv = v;
-  *r++ += *a++ * *pv++ + *a++ * *pv++ + *a++ * *pv++;
-#else
   double* pr;
 
   pr = r;
@@ -336,9 +273,6 @@ static inline void mvp3x3(double* restrict a, double* restrict v, double* restri
   *pr++ += *a++ * *v;
   *pr++ += *a++ * *v;
   *pr++ += *a++ * *v++;
-
-#endif
-
 }
 
 /** matrix matrix multiplication : c = a * b
@@ -583,11 +517,9 @@ static inline double hypot9(double* a)
 static inline void extract3x3(int n, int i0, int j0,
                               double* restrict a, double* restrict b)
 {
-#if defined(OP3X3_C_STORAGE)
-  int k0 = n * i0 + j0;
-#else
+
   int k0 = i0 + n * j0;
-#endif
+
   int nm3 = n - 3;
 
   a += k0;
@@ -615,11 +547,8 @@ static inline void insert3x3(int n, int i0, int j0,
                              double* restrict a, double* restrict b)
 {
 
-#if defined(OP3X3_C_STORAGE)
-  int k0 = n * i0 + j0;
-#else
   int k0 = i0 + n * j0;
-#endif
+
   int nm3 = n - 3;
 
   a += k0;
