@@ -39,19 +39,19 @@ give the value of the :math:`\theta` parameter:
 
 .. testcode::
 
-   OSI = MoreauJeanOSI(0.5)
+   osi = MoreauJeanOSI(0.5)
 
 Then, we attach the previously defined dynamical system to the integrator:
 
 .. testcode::
 
-   bouncingBall.nonSmoothDynamicalSystem().setOSI(ball, OSI)
+   bouncingBall.nonSmoothDynamicalSystem().setOSI(ball, osi)
 
 And we attach this one step integrator to the simulation:
 
 .. testcode::
 
-   simulation.insertIntegrator(OSI)
+   simulation.insertIntegrator(osi)
    
 In the Moreau-Jean time-stepping scheme, the unilateral constraints, after
 being reformulated at the velocity level, lead at each timestep to nonsmooth
@@ -100,6 +100,64 @@ The following loop takes care of running the simulation:
 
        simulation.nextStep()
 
+
+Example of the simulation of a diodes bridge:
++++++++++++++++++++++++++++++++++++++++++++++
+
+The diodes bridge model is given in the Modelisation section :
+:ref:`diodes-bridge-model`
+
+The needed classes are imported:
+
+.. testcode::
+
+   from Siconos.Kernel import \
+       TimeStepping, MoreauJeanOSI, TimeDiscretisation, LCP
+
+
+   td = TimeDiscretisation(0, 0.05)
+   simulation = TimeStepping(td)
+   osi = MoreauJeanOSI(0.5)
+
+.. testcode::
+
+   diodesBridge.nonSmoothDynamicalSystem().setOSI(osi)
+
+
+   lcp = LCP()
+
+
+.. testcode::
+
+   DiodesBridgeModel.initialize(ts)
+
+   k = 0
+   h = ts.timeStep()
+
+
+.. testcode::
+
+   x = LSDiodeBridge.x()
+   print "Initial state : ", x
+   y = InterDiodeBridge.y(0)
+   print "First y : ", y
+   lambda_ = InterDiodeBridge.lambda_(0)
+
+   
+.. testcode::
+
+   while simulation.hasNextEvent():
+       simulation.computeOneStep()
+
+       # inductor voltage is in x[0]
+       # inductor current is in x[1]
+       # diode R1 current is in y[0]
+       # diode R1 voltage is in lambda_[0]
+       # diode F2 voltage is in lambda_[1]
+       # diode F1 current is in lambda_[2]
+       # resistor current is y[0] + lambda_[2]
+
+       ts.nextStep()
 
 
 Simulation API

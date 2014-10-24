@@ -111,8 +111,10 @@ have defined (here just the ball) and link the interactions to them.
   bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
 
 
-Example of the modelisation of a diode bridge:
-++++++++++++++++++++++++++++++++++++++++++++++
+.. _diodes-bridge-model:
+
+Example of the modelisation of a diodes bridge:
++++++++++++++++++++++++++++++++++++++++++++++++
 
 This is an example of an electrical circuit involving:
 
@@ -186,7 +188,7 @@ operator :math:`A`:
    A = [[0,          -1.0/Cvalue],
         [1.0/Lvalue, 0          ]]
 
-   LSDiodeBridge = FirstOrderLinearDS(initstate, A)
+   diodesBridge = FirstOrderLinearDS(initstate, A)
 
 
 The linear relations between voltage and current given by:
@@ -210,8 +212,8 @@ Are provided with the help of a `FirstOrderLinearTIR` object:
    B = [[0.,        0., -1./Cvalue, 1./Cvalue],
         [0.,        0.,  0.,        0.       ]]
 
-   LTIRDiodeBridge = FirstOrderLinearTIR(C, B)
-   LTIRDiodeBridge.setDPtr(D)
+   relation = FirstOrderLinearTIR(C, B)
+   relation.setDPtr(D)
 
 The behavior of each diode of the bridge, supposed to be ideal,
 may be described with a complementarity condition between current and
@@ -233,7 +235,7 @@ Then the relation and the nonsmooth law are tied in an `Interaction` object:
 
 .. testcode::
 
-   InterDiodeBridge = Interaction(nslaw, LTIRDiodeBridge)
+   interaction = Interaction(nslaw, relation)
 
 Finally a `Model` object is built :
 
@@ -241,15 +243,15 @@ Finally a `Model` object is built :
 
    # the first parameter is the start time
    # the second parameter is the end time
-   DiodeBridge = Model(0, 10)
+   DiodesBridgeModel = Model(0, 10)
 
 .. testcode::
 
    # add the dynamical system to the model data
-   DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(LSDiodeBridge)
+   DiodesBridgeModel.nonSmoothDynamicalSystem().insertDynamicalSystem(diodesBridge)
 
    # link the interaction and the dynamical system
-   DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
+   DiodesBridgeModel.nonSmoothDynamicalSystem().link(interaction, diodesBridge)
 
 Modelisation API
 ^^^^^^^^^^^^^^^^
