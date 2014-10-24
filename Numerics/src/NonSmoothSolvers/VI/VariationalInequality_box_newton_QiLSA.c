@@ -48,12 +48,16 @@ void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1
   Jac_F_Qi(problem->size, x, F, workV1, workV2, problem->nabla_F, ((box_constraints*) problem->set)->lb, ((box_constraints*) problem->set)->ub, H);
 }
 
+void* vi_get_set(void* problem); /*XXX */
+
 void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, double *x, double *F, int* info, SolverOptions* options)
 {
   functions_LSA functions_QiLSA;
   init_lsa_functions(&functions_QiLSA, &VI_compute_F, &VI_compute_F_box_Qi);
   functions_QiLSA.compute_H = &VI_compute_H_box_Qi;
   functions_QiLSA.compute_error = &VI_compute_error_box;
+  functions_QiLSA.get_set_from_problem_data = &vi_get_set;
+  options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
 
  newton_LSA(problem->size, x, F, info, (void *)problem, options, &functions_QiLSA);
 }

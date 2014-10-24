@@ -45,6 +45,11 @@ void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* d
 //  for (unsigned int i = 0; i<n; ++i) x[i] = s_vec[A[i]-1] + problem->lb[i];
 }
 
+void * vi_get_set(void* problem)
+{
+  return ((VariationalInequality*) problem)->set;
+}
+
 void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* info, SolverOptions* options)
 {
 
@@ -67,6 +72,8 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   functions_AVI_LSA.compute_H = &VI_compute_H_box_Qi;
   functions_AVI_LSA.compute_error = &VI_compute_error_box;
   functions_AVI_LSA.descent_direction = &vi_compute_decent_dir_by_avi;
+  functions_AVI_LSA.get_set_from_problem_data = &vi_get_set;
+  options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
 
   newton_LSA(problem->size, z, F, info, (void *)problem, options, &functions_AVI_LSA);
 

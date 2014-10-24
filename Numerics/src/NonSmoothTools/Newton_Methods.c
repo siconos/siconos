@@ -122,6 +122,13 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   ls_data.sigma = sigma;
   ls_data.searchtype = LINESEARCH;
 
+  if (options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH])
+  {
+    assert(functions->get_set_from_problem_data);
+    ls_data.set = functions->get_set_from_problem_data(data);
+    ls_data.searchtype = ARCSEARCH;
+  }
+
   nm_ref_struct nm_ref_data;
   if (options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] > 0)
   {

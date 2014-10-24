@@ -370,6 +370,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
     }
     else if (block == PIVOT_PATHSEARCH_SUCCESS)
     {
+      assert(pivot_selection_rule == SICONOS_LCP_PIVOT_PATHSEARCH);
       DEBUG_PRINTF("lcp_pivot :: path search successful ! t_indx = %d\n", t_indx);
       bck_drive = t_indx; /* XXX correct ? */
       t_stack[nb_iter%stack_size] = 1.0;
@@ -520,6 +521,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
        * basic variable, but we are done here :) */
       else if (block == PIVOT_PATHSEARCH_SUCCESS)
       {
+        assert(pivot_selection_rule == SICONOS_LCP_PIVOT_PATHSEARCH);
         DEBUG_PRINTF("lcp_pivot :: path search successful ! t_indx = %d\n", t_indx);
         basis[t_indx] = drive;
         t_stack[nb_iter%stack_size] = 1.0;

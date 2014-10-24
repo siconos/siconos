@@ -185,6 +185,7 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE
 /** line search based algo use this */
 #define SICONOS_IPARAM_LSA_NONMONOTONE_LS 3
 #define SICONOS_IPARAM_LSA_NONMONOTONE_LS_M 4
+#define SICONOS_IPARAM_LSA_FORCE_ARCSEARCH 5
 
 /** non-monotone specific part */
 #define SICONOS_IPARAM_NMS_WATCHDOG_TYPE 6
