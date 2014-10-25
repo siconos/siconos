@@ -133,11 +133,11 @@ typedef struct
 
 /** Possible types of matrices for NumericsMatrix */
 enum NumericsMatrix_types {
-  NUMERICS_MATRIX_DENSE,                   /**< dense format */
-  NUMERICS_MATRIX_SPARSE_BLOCK,            /**< sparse block format */
-  NUMERICS_MATRIX_SPARSE_TRIPLET,          /**< triplet format */
-  NUMERICS_MATRIX_SPARSE_COMPRESSED_COL,   /**< compressed columns format */
-  NUMERICS_MATRIX_SPARSE_COMPRESSED_TRANS  /**< compressed transpose format */
+  NM_DENSE,        /**< dense format */
+  NM_SPARSE_BLOCK, /**< sparse block format */
+  NM_TRIPLET,      /**< triplet format */
+  NM_COMPR_COL,    /**< compressed columns format */
+  NM_COMPR_TRANS   /**< compressed transpose format */
 };
 
 #include "stdio.h"
