@@ -11,8 +11,8 @@ from cffi import FFI
 
 if __name__ == '__main__':
 
-    h = 1e-5
-    T = 20.0
+    h = 1e-3
+    T = 10.0
     t = 0.0
 
     theta = 1.0
@@ -117,22 +117,26 @@ if __name__ == '__main__':
     if withPlot:
         plt.figure()
         plt.plot(sol[:, 0], sol[:, 1], 'b-*')
+        plt.xlabel('s')
+        plt.ylabel('v')
         plt.figure()
-        plt.plot(sol[:, 0])
-        plt.plot(sol[:, 1])
+        plt.plot(sol[:, 0], label=r's')
+        plt.plot(sol[:, 1], label=r'v')
+        plt.legend(loc='best')
         plt.figure()
-        plt.plot(signs[:, 0])
-        plt.plot(signs[:, 1])
+        plt.plot(signs[:, 0], label=r'$\lambda_1$')
+        plt.plot(signs[:, 1], label=r'$\lambda_2$')
+        plt.legend(loc='best')
         plt.show()
 
         pos = np.abs(sol[:, 0])
         velocity = (1 - kappa*np.sign(sol[:, 0]*sol[:, 1]))*sol[:, 1]*np.sign(sol[:, 0])
 
-        plt.subplot(311)
+        plt.subplot(211)
         plt.title('position')
         plt.plot(pos)
         plt.grid()
-        plt.subplot(312)
+        plt.subplot(212)
         plt.title('velocity')
         plt.plot(velocity)
         plt.grid()

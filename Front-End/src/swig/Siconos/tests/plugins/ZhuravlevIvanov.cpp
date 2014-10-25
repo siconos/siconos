@@ -81,8 +81,8 @@ SICONOS_EXPORT void compute_nabla_F(void* env, int n, double* l, double* nabla_F
 SICONOS_EXPORT void compute_Fmcp(void* env, int n1, int n2, double* restrict z, double* restrict F)
 {
   data* d = (data*) env;
-  double l0 = 2*z[0] - 1.0;
-  double l1 = 2*z[2] - 1.0;
+  double l0 = 2.0*z[0] - 1.0;
+  double l1 = 2.0*z[2] - 1.0;
   double r1 = d->g*l0/(1.0 - d->kappa*l0*l1);
   double v_gamma = (d->xk[1] + d->gamma*(d->h*r1));
   double r0 = -d->kappa*l0*l1*(v_gamma);

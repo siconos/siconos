@@ -18,7 +18,7 @@ if __name__ == '__main__':
     z = np.zeros((4,))
     w = np.empty((4,))
 
-    kappa = 0.7
+    kappa = 0.9
     g = 9.81
     theta = 1.0
     gamma = 1.0
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     D = ffi.dlopen(SN._Numerics.__file__)
     D.set_cstruct(mcp.get_env_as_long(), ffi.cast('void*', data_struct))
-    mcp.set_compute_F_and_nabla_F_as_C_functions('ZhuravlevIvanovVI.so', 'compute_Fmcp', 'compute_nabla_Fmcp')
+    mcp.set_compute_F_and_nabla_F_as_C_functions('ZhuravlevIvanov.so', 'compute_Fmcp', 'compute_nabla_Fmcp')
 
 
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
 
     SO=SN.SolverOptions(mcp, SN.SICONOS_MCP_NEWTON_FBLSA)
-    SO.dparam[0] = 1e-24
+    SO.dparam[0] = 1.0e-24
     SO.iparam[0] = 150
     SO.iparam[3] = 2
     SO.iparam[4] = 10
@@ -127,22 +127,26 @@ if __name__ == '__main__':
     if withPlot:
         plt.figure()
         plt.plot(sol[:, 0], sol[:, 1], 'b-*')
+        plt.xlabel('s')
+        plt.ylabel('v')
         plt.figure()
-        plt.plot(sol[:, 0])
-        plt.plot(sol[:, 1])
+        plt.plot(sol[:, 0], label=r's')
+        plt.plot(sol[:, 1], label=r'v')
+        plt.legend(loc='best')
         plt.figure()
-        plt.plot(signs[:, 0])
-        plt.plot(signs[:, 1])
+        plt.plot(signs[:, 0], label=r'$\lambda_1$')
+        plt.plot(signs[:, 1], label=r'$\lambda_2$')
+        plt.legend(loc='best')
         plt.show()
 
         pos = np.abs(sol[:, 0])
         velocity = (1 - kappa*np.sign(sol[:, 0]*sol[:, 1]))*sol[:, 1]*np.sign(sol[:, 0])
 
-        plt.subplot(311)
+        plt.subplot(211)
         plt.title('position')
         plt.plot(pos)
         plt.grid()
-        plt.subplot(312)
+        plt.subplot(212)
         plt.title('velocity')
         plt.plot(velocity)
         plt.grid()
