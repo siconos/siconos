@@ -114,7 +114,8 @@ The following linear algebra operation are supported:
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
 
-/** Structure used to handle with matrix in Numerics (interface to double*, SparseBlockStructuredMatrix and so on) \n
+/** \struct NumericsMatrix NumericsMatrix.h
+ * Structure used to handle with matrix in Numerics (interface to double*, SparseBlockStructuredMatrix and so on) \n
     Warning: one and only one storage is allowed and thus only one of the pointers below can be different from NULL
     Related functions: prod(), subRowProd(), freeNumericsMatrix(), display()
 */
@@ -130,7 +131,14 @@ typedef struct
   SparseMatrix* matrix4; /**< compressed transpose storage */
 } NumericsMatrix;
 
-enum NumericsMatrixType { NM_DENSE, NM_SPARSE_BLOCK, NM_TRIPLET, NM_COMPR_COL, NM_COMPR_TRANS };
+/** Possible types of matrices for NumericsMatrix */
+enum NumericsMatrix_types {
+  NUMERICS_MATRIX_DENSE,                   /**< dense format */
+  NUMERICS_MATRIX_SPARSE_BLOCK,            /**< sparse block format */
+  NUMERICS_MATRIX_SPARSE_TRIPLET,          /**< triplet format */
+  NUMERICS_MATRIX_SPARSE_COMPRESSED_COL,   /**< compressed columns format */
+  NUMERICS_MATRIX_SPARSE_COMPRESSED_TRANS  /**< compressed transpose format */
+};
 
 #include "stdio.h"
 
