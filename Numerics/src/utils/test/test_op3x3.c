@@ -214,7 +214,7 @@ int main()
   print3(c);
 
 
-  sub3x3(iv, c);
+  sub3(iv, c);
   printf("v - a*x:\n");
   print3(c);
 
@@ -288,7 +288,7 @@ int main()
       print3(c);
       */
 
-      sub3x3(B + 3 * i, c);
+      sub3(B + 3 * i, c);
 
       /* printf("hypot3(c)=%g\n",hypot3(c));*/
 
@@ -336,7 +336,7 @@ int main()
       print3(c);
       */
 
-      sub3x3(B + 3 * i, c);
+      sub3(B + 3 * i, c);
 
 
       /*printf("hypot3(c)=%g\n",hypot3(c));*/

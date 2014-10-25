@@ -50,15 +50,8 @@ int relay_test_function(FILE * f, int  solverId)
   options->dparam[0] = tolerance;
 
 
-  double * z = (double *)malloc(problem->size * sizeof(double));
-  double * w = (double *)malloc(problem->size * sizeof(double));
-
-  for (i = 0; i <  problem->size ; i++)
-  {
-    z[i] = 0.0;
-    w[i] = 0.0;
-  }
-
+  double * z = (double *)calloc(problem->size, sizeof(double));
+  double * w = (double *)calloc(problem->size, sizeof(double));
 
   info = relay_driver(problem, z , w, options, &global_options);
 

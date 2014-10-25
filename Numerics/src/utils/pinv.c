@@ -34,7 +34,7 @@
 double pinv(double * A, int n, int m, double tolerance)
 {
   int dimS = min(n,m);
-  double * S =  (double*)malloc(dimS * sizeof(*S));
+  double * S =  (double*)malloc(dimS * sizeof(double));
   int LDU = n;
   double *U = (double*)malloc(LDU * n * sizeof(double));
   int LDVT = m;

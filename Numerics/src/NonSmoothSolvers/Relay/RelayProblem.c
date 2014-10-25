@@ -137,7 +137,6 @@ void freeRelay_problem(RelayProblem* problem)
   free(problem->lb);
   free(problem->ub);
   free(problem);
-  problem = NULL;
 }
 
 
