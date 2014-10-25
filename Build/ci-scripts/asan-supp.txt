@@ -1,0 +1,7 @@
+leak:SWIG_Python_addvarlink
+# http://stackoverflow.com/questions/1644766/cppunit-leakage
+leak:CppUnit::TestFactoryRegistry::makeTest
+leak:libcppunit
+# looks like there is some kind of false positive for this one
+# we should compile with -DGLIBCXX_FORCE_NEW
+leak:std::string::_Rep::_S_create
