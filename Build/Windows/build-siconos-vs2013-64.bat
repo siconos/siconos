@@ -6,13 +6,13 @@ set VC_ARCH=x86_amd64
 
 call %VCVARSALL_BAT% %VC_ARCH%
 
-REM set PATH=%PATH%;C:\Users\ci\OpenBLAS-64\lib
-set PATH=C:\Users\ci\siconos-external-lib\lib;%PATH%
-set PATH=C:\Users\ci\cppunit-1.13.2\lib;%PATH%
-set PATH=C:\Users\ci\all_libs;%PATH%
+REM set PATH=%PATH%;E:\OpenBLAS-64\lib
+set PATH=E:\siconos-external-lib\lib;%PATH%
+set PATH=E:\cppunit-1.13.2\lib;%PATH%
+set PATH=E:\all_libs;%PATH%
 
-set BOOST_INCLUDEDIR=C:/Users/ci/siconos-external-lib/include
-set INSTALL_PREFIX=C:/Users/ci/install-vs2013-amd64
+set BOOST_INCLUDEDIR=E:/siconos-external-lib/include
+set INSTALL_PREFIX=E:/install-vs2013-amd64
 set REL_TYPE="Release"
 
 
