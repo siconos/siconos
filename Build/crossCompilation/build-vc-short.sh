@@ -28,6 +28,7 @@ build_siconos() {
 	-DMODE=Continuous \
 	-DWITH_IO=0 \
 	-DWITH_MECHANICS=1 \
+	-DWITH_CONTROL=1 \
 	-DWITH_EXAMPLES=1  \
 	-DINSTALL_PREFIX="${INSTALL_PREFIX}" \
 	-DINSTALL_COMMAND="make;-ik;install" \

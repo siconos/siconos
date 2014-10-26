@@ -72,7 +72,7 @@ class WorkDir():
 devel = False
 user = getuser()
 
-mods = ['Docs', 'Numerics', 'Kernel', 'Front-End', 'IO', 'Mechanics', 'Examples']
+mods = ['Docs', 'Numerics', 'Kernel', 'Front-End', 'IO', 'Mechanics', 'Control', 'Examples']
 
 revision = 'HEAD'
 
@@ -154,12 +154,12 @@ with WorkDir(workdir_path) as workdir:
         assert(version is not None)
     else:
         version = ''
-    
+
     for mod in mods:
 
         builddir[mod] = mod
         srcdir[mod] = mod
- 
+
         # make documentation
         check_call(["cmake", srcdir[mod], "-DWITH_DOCUMENTATION=TRUE"],
                    cwd=builddir[mod])

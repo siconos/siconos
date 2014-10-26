@@ -14,6 +14,7 @@ cmake $WORKSPACE/Build \
     -DMODE=Continuous \
     -DWITH_IO=1 \
     -DWITH_MECHANICS=1 \
+    -DWITH_CONTROL=1 \
     -DWITH_EXAMPLES=1 \
     -DWITH_FRONTEND=1 \
     -DINSTALL_PREFIX=$WORKSPACE/install-dir \

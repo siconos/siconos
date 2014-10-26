@@ -17,7 +17,7 @@ VERSION=$1
 
 BASE_DESTDIR=/tmp/`whoami`/siconos-source
 
-MODULES="Numerics Kernel Mechanics IO Front-End Examples"
+MODULES="Numerics Kernel Mechanics Control IO Front-End Examples"
 
 DESTDIR=${BASE_DESTDIR}-${VERSION}
 if [ -e ${DESTDIR} ]; then
