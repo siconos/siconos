@@ -52,6 +52,8 @@ void  MLCP::reset()
     free(_numerics_problem.blocksIsComp);
   _numerics_problem.blocksIsComp = 0;
   mlcp_driver_reset(&_numerics_problem, &*_numerics_solver_options);
+  deleteSolverOptions(&*_numerics_solver_options);
+  _numerics_solver_options.reset();
 }
 
 void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
