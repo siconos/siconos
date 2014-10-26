@@ -1,0 +1,36 @@
+MACRO(CONTROL_ADD_MODULE _mod _dest)
+
+  SET_SOURCE_FILES_PROPERTIES(${_mod}.i PROPERTIES CPLUSPLUS ON)
+
+  SET_SOURCE_FILES_PROPERTIES(${_mod}.i PROPERTIES SWIG_FLAGS
+    "-dirprot;-I${CMAKE_SOURCE_DIR}/src/swig/Siconos;-I${CMAKE_BINARY_DIR}/src/swig/Siconos;-Wall;${SWIG_DEFS}")
+
+  SWIG_ADD_MODULE(${_mod} python ${_mod}.i)
+
+  SET(${_mod}_generated_file_fullname ${swig_generated_file_fullname})
+
+  MESSAGE(STATUS "${_mod} generated file ${${_mod}_generated_file_fullname}")
+
+  ADD_DEPENDENCIES(${SWIG_MODULE_${_mod}_REAL_NAME} ${SWIG_MODULE_Kernel_REAL_NAME})
+
+  SWIG_LINK_LIBRARIES(${_mod} ${PYTHON_LIBRARIES}
+    ${${PROJECT_NAME}_LINK_LIBRARIES})
+
+  INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${_mod}.py
+    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/Control/${_dest})
+
+  INSTALL(TARGETS ${SWIG_MODULE_${_mod}_REAL_NAME}
+    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/Control/${_dest})
+
+ENDMACRO(CONTROL_ADD_MODULE)
+
+CONTROL_ADD_MODULE(Controller .)
+CONTROL_ADD_MODULE(Observer .)
+CONTROL_ADD_MODULE(Sensor .)
+CONTROL_ADD_MODULE(Simulation .)
+
+FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py DESTINATION
+  ${CMAKE_BINARY_DIR}/src/swig/Siconos/Control/)
+
+INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
+  DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/Control)

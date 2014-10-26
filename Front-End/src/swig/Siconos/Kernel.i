@@ -234,13 +234,9 @@ namespace std
 %import "boost/config.hpp"
 %import "boost/graph/graph_utility.hpp"
 
-%include "ControlTypeDef.hpp"
-
 %include "Tools.hpp"
 
 %include "addons.hpp"
-
-%include "ControlTools.hpp"
 
 // fix : how to prevent swig to generate getter/setter for mpz_t ?
 // on some distrib %import gmp.h is not sufficient as gmp-<arch>.h may be used

@@ -40,22 +40,6 @@
   PY_REGISTER(FirstOrderLinearR);                                       \
   PY_REGISTER(FirstOrderLinearTIR);                                     \
   PY_REGISTER(Interaction);                                             \
-  PY_REGISTER_WITHOUT_DIRECTOR(Sensor)                                  \
-  PY_REGISTER_WITHOUT_DIRECTOR(Actuator)                                \
-  PY_REGISTER_WITHOUT_DIRECTOR(Observer)                                \
-  PY_REGISTER(ControlSensor)                                            \
-  PY_REGISTER(LinearSensor)                                             \
-  PY_REGISTER(PID)                                                      \
-  PY_REGISTER(CommonSMC)                                                \
-  PY_REGISTER(LinearSMC)                                                \
-  PY_REGISTER(ExplicitLinearSMC)                                        \
-  PY_REGISTER(LinearSMCOT2)                                             \
-  PY_REGISTER(LinearSMCimproved)                                        \
-  PY_REGISTER(LuenbergerObserver)                                       \
-  PY_REGISTER(SlidingReducedOrderObserver)                              \
-  PY_REGISTER(ControlManager)                                           \
-  PY_REGISTER(ControlSimulation)                                        \
-  PY_REGISTER(ControlFirstOrderLinearS)                                 \
   PY_REGISTER(TimeDiscretisation);                                      \
   PY_REGISTER(OneStepNSProblem);                                        \
   PY_REGISTER(OneStepIntegrator);                                       \

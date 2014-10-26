@@ -4,8 +4,8 @@
 # this test is taken almost verbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
     from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-        TimeStepping, ZeroOrderHoldOSI, ControlManager, LinearSensor, LinearSMCOT2, \
-        TD_EVENT
+        TimeStepping, ZeroOrderHoldOSI, TD_EVENT
+    from Siconos.Control import ControlManager, LinearSensor, LinearSMCOT2
     from numpy import eye, empty, zeros
     import numpy as np
     from math import ceil, sin
@@ -100,8 +100,9 @@ def test_smc1():
 #Same test, but with the simplified interface
 def test_smc2():
     from Siconos.Kernel import FirstOrderLinearDS, TimeDiscretisation, \
-        ControlFirstOrderLinearS, LinearSensor, ioMatrix_write, \
-        LinearSMCOT2, getMatrix, SimpleMatrix
+        ioMatrix_write, getMatrix, SimpleMatrix
+    from Siconos.Control import ControlManager, LinearSensor, LinearSMCOT2, \
+        ControlFirstOrderLinearS
     from numpy import eye, zeros
     import numpy as np
     from math import sin
