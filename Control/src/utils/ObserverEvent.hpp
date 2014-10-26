@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2012.
+/* Siconos-Kernel, Copyright INRIA 2005-2013.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,70 +16,72 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file ActuatorEvent.hpp
-  \brief Actuator Events
+/*! \file ObserverEvent.hpp
+  Observer Events
 */
-#ifndef ActuatorEvent_H
-#define ActuatorEvent_H
+#ifndef ObserverEvent_H
+#define ObserverEvent_H
 
 #include "Event.hpp"
 #include "SiconosControlFwd.hpp"
+#include "ControlTypeDef.hpp"
 
-/** Events when sensor data capture is done.
+/** Events when the observer updates the state estimate
  *
  * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 09, 2007
+ *  \version 3.6.0
+ *  \date (Creation) May 21, 2013
  *
  *
  */
-class ActuatorEvent : public Event
+class ObserverEvent : public Event
 {
 
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(ActuatorEvent);
+  ACCEPT_SERIALIZATION(ObserverEvent);
 
-  /** The actuator linked to the present event */
-  SP::Actuator _actuator;
+
+  /** The observer linked to the present event */
+  SP::Observer _observer;
 
   /** Default constructor */
-  ActuatorEvent(): Event(0.0, ACTUATOR_EVENT, true) {};
+  ObserverEvent(): Event(0.0, OBSERVER_EVENT, true) {};
 
 public:
 
   /** constructor with time value as a parameter
-   *  \param time the time of the Event
-   *  \param name the type of Event
+   *  \param time the starting time of the Event
+   *  \param name the type of the Event
    */
-  ActuatorEvent(double time, int name): Event(time, name, true) {};
+  ObserverEvent(double time, int name): Event(time, name, true) {};
 
   /** destructor
    */
-  ~ActuatorEvent() {};
+  ~ObserverEvent() {};
 
-  /** get the Actuator linked to this Event
-   *  \return a pointer to Actuator
+  /** get the Observer linked to this Event
+   *  \return a SP::Observer to the Observer
    */
-  inline SP::Actuator actuator() const
+  inline SP::Observer observer() const
   {
-    return _actuator;
+    return _observer;
   };
 
-  /** set the Actuator linked to this ActuatorEvent
-   *  \param newActuator the Actuator associated with this Event.
+  /** set the Observer linked to this Event
+   *  \param newObserver the SP::Observer
    */
-  void setActuatorPtr(SP::Actuator newActuator)
+  void setObserverPtr(SP::Observer newObserver)
   {
-    _actuator = newActuator;
+    _observer = newObserver;
   };
 
-  /** Call the actuate method of the Actuator
-   *  \param sim ignored argument.
+  /** Call the capture method of the linked Observer
+   *  \param sim a SP::Simulation (ignored).
    */
   void process(Simulation& sim);
 
 };
 
-#endif // ActuatorEvent_H
+#endif // ObserverEvent_H

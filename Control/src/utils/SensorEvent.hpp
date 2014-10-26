@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2013.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,37 +16,38 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file ObserverEvent.hpp
-  Observer Events
+/*! \file SensorEvent.hpp
+  Sensor Events
 */
-#ifndef ObserverEvent_H
-#define ObserverEvent_H
+#ifndef SensorEvent_H
+#define SensorEvent_H
 
 #include "Event.hpp"
 #include "SiconosControlFwd.hpp"
+#include "ControlTypeDef.hpp"
 
-/** Events when the observer updates the state estimate
+/** Events when sensor data capture is done.
  *
  * \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0
- *  \date (Creation) May 21, 2013
+ *  \version 3.0.0.
+ *  \date (Creation) February 01, 2007
  *
  *
  */
-class ObserverEvent : public Event
+class SensorEvent : public Event
 {
 
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(ObserverEvent);
+  ACCEPT_SERIALIZATION(SensorEvent);
 
 
-  /** The observer linked to the present event */
-  SP::Observer _observer;
+  /** The sensor linked to the present event */
+  SP::Sensor _sensor;
 
   /** Default constructor */
-  ObserverEvent(): Event(0.0, OBSERVER_EVENT, true) {};
+  SensorEvent(): Event(0.0, SENSOR_EVENT, true) {};
 
 public:
 
@@ -54,33 +55,33 @@ public:
    *  \param time the starting time of the Event
    *  \param name the type of the Event
    */
-  ObserverEvent(double time, int name): Event(time, name, true) {};
+  SensorEvent(double time, int name): Event(time, name, true) {};
 
   /** destructor
    */
-  ~ObserverEvent() {};
+  ~SensorEvent() {};
 
-  /** get the Observer linked to this Event
-   *  \return a SP::Observer to the Observer
+  /** get the Sensor linked to this Event
+   *  \return a pointer to the Sensor
    */
-  inline SP::Observer observer() const
+  inline SP::Sensor sensor() const
   {
-    return _observer;
+    return _sensor;
   };
 
-  /** set the Observer linked to this Event
-   *  \param newObserver the SP::Observer
+  /** set the Sensor linked to this Event
+   *  \param newSensor the SP::Sensor
    */
-  void setObserverPtr(SP::Observer newObserver)
+  void setSensorPtr(SP::Sensor newSensor)
   {
-    _observer = newObserver;
+    _sensor = newSensor;
   };
 
-  /** Call the capture method of the linked Observer
+  /** Call the capture method of the linked Sensor
    *  \param sim a SP::Simulation (ignored).
    */
   void process(Simulation& sim);
 
 };
 
-#endif // ObserverEvent_H
+#endif // SensorEvent_H

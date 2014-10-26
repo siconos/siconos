@@ -16,71 +16,71 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file SensorEvent.hpp
-  Sensor Events
+/*! \file ActuatorEvent.hpp
+  \brief Actuator Events
 */
-#ifndef SensorEvent_H
-#define SensorEvent_H
+#ifndef ActuatorEvent_H
+#define ActuatorEvent_H
 
 #include "Event.hpp"
 #include "SiconosControlFwd.hpp"
+#include "ControlTypeDef.hpp"
 
 /** Events when sensor data capture is done.
  *
  * \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
- *  \date (Creation) February 01, 2007
+ *  \date (Creation) February 09, 2007
  *
  *
  */
-class SensorEvent : public Event
+class ActuatorEvent : public Event
 {
 
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(SensorEvent);
+  ACCEPT_SERIALIZATION(ActuatorEvent);
 
-
-  /** The sensor linked to the present event */
-  SP::Sensor _sensor;
+  /** The actuator linked to the present event */
+  SP::Actuator _actuator;
 
   /** Default constructor */
-  SensorEvent(): Event(0.0, SENSOR_EVENT, true) {};
+  ActuatorEvent(): Event(0.0, ACTUATOR_EVENT, true) {};
 
 public:
 
   /** constructor with time value as a parameter
-   *  \param time the starting time of the Event
-   *  \param name the type of the Event
+   *  \param time the time of the Event
+   *  \param name the type of Event
    */
-  SensorEvent(double time, int name): Event(time, name, true) {};
+  ActuatorEvent(double time, int name): Event(time, name, true) {};
 
   /** destructor
    */
-  ~SensorEvent() {};
+  ~ActuatorEvent() {};
 
-  /** get the Sensor linked to this Event
-   *  \return a pointer to the Sensor
+  /** get the Actuator linked to this Event
+   *  \return a pointer to Actuator
    */
-  inline SP::Sensor sensor() const
+  inline SP::Actuator actuator() const
   {
-    return _sensor;
+    return _actuator;
   };
 
-  /** set the Sensor linked to this Event
-   *  \param newSensor the SP::Sensor
+  /** set the Actuator linked to this ActuatorEvent
+   *  \param newActuator the Actuator associated with this Event.
    */
-  void setSensorPtr(SP::Sensor newSensor)
+  void setActuatorPtr(SP::Actuator newActuator)
   {
-    _sensor = newSensor;
+    _actuator = newActuator;
   };
 
-  /** Call the capture method of the linked Sensor
-   *  \param sim a SP::Simulation (ignored).
+  /** Call the actuate method of the Actuator
+   *  \param sim ignored argument.
    */
   void process(Simulation& sim);
 
 };
 
-#endif // SensorEvent_H
+#endif // ActuatorEvent_H
