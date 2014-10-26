@@ -27,7 +27,6 @@
 #include <gmp.h>
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
-#include "ControlTypeDef.hpp"
 #include "SiconosPointers.hpp"
 #include "SiconosSerialization.hpp"
 

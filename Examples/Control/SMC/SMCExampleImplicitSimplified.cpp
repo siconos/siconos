@@ -26,6 +26,7 @@
   */
 
 #include "SiconosKernel.hpp"
+#include "SiconosControl.hpp"
 using namespace std;
 
 // main program

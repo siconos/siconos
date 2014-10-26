@@ -26,6 +26,7 @@
 */
 
 #include "SiconosKernel.hpp"
+#include "SiconosControl.hpp"
 #include "PID.hpp"
 #include "LinearSensor.hpp"
 

@@ -30,7 +30,6 @@ SET(SiconosKernel_DIRS
   plugin
   modelingTools
   simulationTools
-  controlTools
 )
 
 #
@@ -68,57 +67,7 @@ INSTALL(FILES ${BOOST_HDRS}
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/KernelConfig.h DESTINATION include/Siconos/Kernel)
 
-IF(CMAKE_CXX_COMPILER)
-
- IF(NOT CMAKE_COMPILER_IS_GNUCXX)
-  IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
-   # Disable warnings with intel compiler due (mainly) to visitors visit function overloading
-   IF(CXX_HAVE_DIAG_DISABLE_654)
-    APPEND_CXX_FLAGS("-diag-disable 654")
-   ENDIF(CXX_HAVE_DIAG_DISABLE_654)
-   # Error on intel compiler, see: http://software.intel.com/en-us/forums/showthread.php?t=65041
-   # This issue have been solved with ICC >= 12.1
-   if(NOT ICCOK)
-    if(CXX_HAVE_D__ALIGNED__IGNORED)
-     APPEND_CXX_FLAGS("-D__aligned__=ignored")
-    endif(CXX_HAVE_D__ALIGNED__IGNORED)
-   endif(NOT ICCOK)
-  endif(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
- endif(NOT CMAKE_COMPILER_IS_GNUCXX)
- # way too verbose with MSVC
- IF(CXX_HAVE_WALL AND NOT MSVC)
-  APPEND_CXX_FLAGS("-Wall")
- ENDIF(CXX_HAVE_WALL AND NOT MSVC)
- IF(CXX_HAVE_WEXTRA)
-  APPEND_CXX_FLAGS("-Wextra -Wno-unused-parameter")
- ENDIF(CXX_HAVE_WEXTRA)
- IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-   # stupid warning
-  APPEND_CXX_FLAGS("-Wno-string-plus-int")
- ENDIF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-
- IF(CXX_HAVE_WOVERLOADED_VIRTUAL)
-   APPEND_CXX_FLAGS("-Woverloaded-virtual")
- ENDIF(CXX_HAVE_WOVERLOADED_VIRTUAL)
-
- IF(CXX_HAVE_IMPL AND NOT MSVC)
-  APPEND_CXX_FLAGS("-Werror=implicit-function-declaration")
- ENDIF(CXX_HAVE_IMPL AND NOT MSVC)
-
- IF(CXX_HAVE_UNREACH AND NOT MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    APPEND_CXX_FLAGS("-Werror=unreachable-code")
- ENDIF(CXX_HAVE_UNREACH AND NOT MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-
- IF(CXX_HAVE_CONV AND NOT MSVC)
-   APPEND_CXX_FLAGS("-Werror=conversion -Wno-sign-conversion")
-   APPEND_CXX_FLAGS("-Wno-error=sign-conversion -Wno-error=shorten-64-to-32")
- ENDIF(CXX_HAVE_CONV AND NOT MSVC)
-
- IF(CXX_HAVE_MISS AND NOT MSVC)
-    APPEND_CXX_FLAGS("-Wmissing-declarations")
- ENDIF(CXX_HAVE_MISS AND NOT MSVC)
-
-ENDIF(CMAKE_CXX_COMPILER)
+INCLUDE(SiconosCompilerFlags)
 
 INCLUDE(cxxVersion)
 detect_cxx_version(CXX_VERSION)
@@ -311,6 +260,10 @@ INSTALL(FILES
   DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
 
 INSTALL(FILES 
+ ${CMAKE_SOURCE_DIR}/cmake/FindSiconosControl.cmake
+  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+
+INSTALL(FILES 
   ${CMAKE_SOURCE_DIR}/cmake/SiconosTools.cmake
   DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
 
@@ -341,8 +294,8 @@ MESSAGE(STATUS " Fortran Compiler : ${CMAKE_Fortran_COMPILER}")
 MESSAGE(STATUS " Compilation mode is : ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS " Code Sources are in : ${CMAKE_SOURCE_DIR}")
 MESSAGE(STATUS " The project will be installed in ${CMAKE_INSTALL_PREFIX}")
-MESSAGE(STATUS " The Numerics library used is : ${SiconosNumerics_LIBRARIES}")
-MESSAGE(STATUS " The Numerics headers are located in : ${SiconosNumerics_INCLUDE_DIRS}")
+MESSAGE(STATUS " The Kernel library used is : ${SiconosNumerics_LIBRARIES}")
+MESSAGE(STATUS " The Kernel headers are located in : ${SiconosNumerics_INCLUDE_DIRS}")
 message(STATUS " Blas is ${WITH_BLAS}. Libraries : ${BLAS_LIBRARIES}. Header : ${BLAS_INCLUDE_DIRS}/${BLAS_HEADER}.")
 message(STATUS " Lapack is ${WITH_LAPACK}. Libraries : ${LAPACK_LIBRARIES}. Header : ${LAPACK_INCLUDE_DIRS}/${LAPACK_HEADER}.")
 MESSAGE(STATUS " To get more information about dependencies, config or else, ")

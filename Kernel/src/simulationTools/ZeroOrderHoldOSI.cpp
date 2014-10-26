@@ -24,8 +24,6 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "FirstOrderLinearR.hpp"
-#include "NewtonEulerR.hpp"
-#include "LagrangianRheonomousR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "SubPluggedObject.hpp"
@@ -55,62 +53,6 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI(SP::DynamicalSystem ds):
 {
   OSIDynamicalSystems->insert(ds);
 }
-
-
-//void ZeroOrderHoldOSI::setPhi(const SiconosMatrix& newPhi, SP::DynamicalSystem ds)
-//{
-//  if (!ds)
-//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal, ds) - ds == NULL.");
-//
-//  // Check if ds is in the OSI
-//  if (!OSIDynamicalSystems->isIn(ds))
-//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal, ds) - ds does not belong to this Integrator ...");
-//
-//  unsigned int dsN = ds->number();
-//  // Check dimensions consistency
-//  unsigned int line = newPhi.size(0);
-//  unsigned int col  = newPhi.size(1);
-//
-//  if (line != col) // Check that newValue is square
-//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal,ds) - newVal is not square! ");
-//
-//  unsigned int sizePhi = ds->getDim(); // n for first order systems, ndof for lagrangian.
-//  if (line != sizePhi) // check consistency between newValue and dynamical system size
-//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
-//
-//  // Memory allocation for W, if required
-//  if (!_PhiMap[dsN]) // allocate a new W if required
-//  {
-//    _PhiMap[dsN].reset(new SimpleMatrix(newPhi));
-//  }
-//  else  // or fill-in an existing one if dimensions are consistent.
-//  {
-//    if (line == _PhiMap[dsN]->size(0) && col == _PhiMap[dsN]->size(1))
-//      *(_PhiMap[dsN]) = newPhi;
-//    else
-//      RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi: inconsistent dimensions with problem size for given input matrix W");
-//  }
-//}
-//
-//void ZeroOrderHoldOSI::setPhiPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
-//{
-//  unsigned int line = newPtr->size(0);
-//  unsigned int col  = newPtr->size(1);
-//  if (line != col) // Check that newPtr is square
-//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhiPtr(newVal, ds) - newVal is not square! ");
-//
-//  if (!ds)
-//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhiPtr(newVal, ds) - ds == NULL.");
-//
-//  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
-//  if (line != sizeW) // check consistency between newValue and dynamical system size
-//    RuntimeException::selfThrow("ZeroOrderHoldOSI::setPhi(newVal, ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
-//
-//  _PhiMap[ds->number()] = newPtr;                  // link with new pointer
-//}
-
-
-
 
 void ZeroOrderHoldOSI::initialize()
 {
