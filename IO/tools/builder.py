@@ -9,6 +9,13 @@
 # -I/usr/local/include/Siconos/Numerics \
 # --target=Mechanics
 
+# Control
+# ./builder.py -I/usr/local/include/Siconos/Kernel \
+# -I/usr/local/include/Siconos/Control \
+# -I/usr/local/include/Siconos/Numerics \
+# --target=Control
+
+
 # we use pygccxml from Roman Yakovenko.
 # http://sourceforge.net/projects/pygccxml/
 
@@ -78,6 +85,7 @@ input_headers['Mechanics'] = ["SpaceFilter.hpp", "SpaceFilter_impl.hpp",
                               "CircleCircleR.hpp", "CircularDS.hpp"
                               ]
 
+input_headers['Control'] = ['SiconosControl.hpp']
 
 all_headers = [h for h in itertools.chain(*(input_headers[target]
                                             for target in targets))]
