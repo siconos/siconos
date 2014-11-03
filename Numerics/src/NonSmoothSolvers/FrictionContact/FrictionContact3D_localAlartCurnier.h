@@ -52,6 +52,44 @@ extern "C"
 {
 #endif
 
+  /* Nonsmooth Newton solver based on the Alart--Curnier function for the
+   * local (reduced) frictional contact problem in the dense form
+   * \param problem the problem to solve in dense form
+   * \param reaction solution and initial guess for reaction
+   * \param velocity solution and initial guess for velocity
+   * \param info returned info
+   * \param options  the solver options
+   */
+  void frictionContact3D_localAlartCurnier(
+    FrictionContactProblem* problem,
+    double *reaction,
+    double *velocity,
+    int *info,
+    SolverOptions *options);
+
+  /* Nonsmooth Newton solver based on the Alart--Curnier function for the
+   * local (reduced) frictional contact problem in the sparse block form
+   * \param problem the problem to solve in sparse block form
+   * \param reaction solution and initial guess for reaction
+   * \param velocity solution and initial guess for velocity
+   * \param info returned info
+   * \param options  the solver options
+   */
+  void frictionContact3D_sparseLocalAlartCurnier(
+    FrictionContactProblem* problem,
+    double *reaction,
+    double *velocity,
+    int *info,
+    SolverOptions *options);
+
+  /* Init the nonsmooth Newton solver based on the Alart--Curnier function
+   * for the local (reduced) frictional contact problem in the sparse block form
+   * Mainly, initialize the sparse linear solver
+   * \param options  the solver options
+   */
+  void frictionContact3D_sparseLocalAlartCurnierInit(
+    SolverOptions *options);
+
   void frictionContact3D_AlartCurnierFunction(
     unsigned int problemSize,
     double *reaction3D,
@@ -69,25 +107,14 @@ extern "C"
     double *blocklist3x3_2,
     double *output_blockarray3x3);
 
-  void frictionContact3D_localAlartCurnier(
-    FrictionContactProblem* problem,
-    double *reaction,
-    double *velocity,
-    int *info,
-    SolverOptions *options);
-
+  /* Set the default solver options for the LOCALAC Solver
+   * \param options  the solver options
+   */
   int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
     SolverOptions* options);
 
-  void frictionContact3D_sparseLocalAlartCurnierInit(
-    SolverOptions *SO);
 
-  void frictionContact3D_sparseLocalAlartCurnier(
-    FrictionContactProblem* problem,
-    double *reaction,
-    double *velocity,
-    int *info,
-    SolverOptions *options);
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

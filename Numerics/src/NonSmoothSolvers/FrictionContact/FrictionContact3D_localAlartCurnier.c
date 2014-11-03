@@ -708,12 +708,12 @@ int globalLineSearchSparseGP(
 }
 
 void frictionContact3D_sparseLocalAlartCurnierInit(
-  SolverOptions *SO)
+  SolverOptions *options)
 {
   DMUMPS_STRUC_C* mumps_id = malloc(sizeof(DMUMPS_STRUC_C));
 
-  // SO with void pointers ?
-  SO->dparam[7] = (long) mumps_id;
+  // options with void pointers ?
+  options->dparam[7] = (long) mumps_id;
 
   // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
   mumps_id->job = JOB_INIT;
@@ -722,7 +722,7 @@ void frictionContact3D_sparseLocalAlartCurnierInit(
   mumps_id->comm_fortran = USE_COMM_WORLD;
   dmumps_c(mumps_id);
 
-  SO->iparam[8] = mumps_id->comm_fortran;
+  options->iparam[8] = mumps_id->comm_fortran;
 
   if (verbose > 1)
   {
@@ -998,7 +998,7 @@ void frictionContact3D_sparseLocalAlartCurnier(
 #else /*WITH_MUMPS*/
 
 void frictionContact3D_sparseLocalAlartCurnierInit(
-  SolverOptions *SO)
+  SolverOptions *options)
 {
   fprintf(stderr, "The sparse global Alart & Curnier solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
 }

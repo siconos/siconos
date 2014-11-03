@@ -163,7 +163,8 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
             " ========================== Call VI_FixedPointProjection (VI_FPP) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_VI_FixedPointProjection(problem, reaction , velocity , &info , options);
     break;
-  }  /* VI Extra Gradient algorithm */
+  }
+  /* VI Extra Gradient algorithm */
   case SICONOS_FRICTION_3D_VI_EG:
   {
     snPrintf(1, options,
