@@ -42,7 +42,7 @@ if(NOT BLAS_FOUND)
       return()
     endif()
   endif()
-  
+
   macro(check_blas_Libraries LIBRARIES _prefix _name _flags _list _thread)
     # This macro checks for the existence of the combination of libraries
     # given by _list.  If the combination is found, this macro checks (using the
@@ -242,7 +242,7 @@ if(NOT BLAS_FOUND)
       else(BUILDNAME MATCHES ".*Kernel.*")
         set(BLAS_INCLUDE_SUFFIXES openblas)
       endif(BUILDNAME MATCHES ".*Kernel.*")
-endif(BLAS_LIBRARIES)
+    endif(BLAS_LIBRARIES)
   endif()
   
   ## Apple Framework ## 
@@ -258,7 +258,8 @@ endif(BLAS_LIBRARIES)
       "")
     if (BLAS_LIBRARIES)
       set(WITH_BLAS "accelerate" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
-      set(BLAS_HEADER cblas.h Accelerate.h CACHE STRING "Blas header name(s)")
+      set(BLAS_HEADER Accelerate.h cblas.h CACHE STRING "Blas header name(s)")
+      set(BLAS_INCLUDE_SUFFIXES Headers Frameworks)
     endif (BLAS_LIBRARIES)
   endif()
   
@@ -347,20 +348,28 @@ endif(BLAS_LIBRARIES)
     # NO_DEFAULT_PATH is not set. 
     if(APPLE) # First check in HINTS, no default, then global search.
       set(CMAKE_INCLUDE_PATH ${INCLUDE_DIR_HINTS} ${BLAS_INC_DIR})
-      set(CMAKE_PREFIX_PATH ${BLAS_DIR})
+      set(CMAKE_PREFIX_PATH ${BLAS_LIBRARIES})
+      set(_headers)
       foreach(_file ${BLAS_HEADER})
 	unset(_dir CACHE)
 	find_path(_dir
 	  NAMES ${_file}
-	  HINTS ${BLAS_DIR} ${BLAS_INC_DIR}
+	  HINTS ${BLAS_LIBRARIES}
 	  PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
 	  NO_DEFAULT_PATH
 	  )
-	find_path(_dir 
+	find_path(_dir
 	  NAMES ${_file}
 	  PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
 	  )
-	list(APPEND BLAS_INCLUDE_DIRS ${_dir})
+	if(_dir)
+	  list(APPEND BLAS_INCLUDE_DIRS ${_dir})
+	  list(APPEND _headers ${_dir}/${_file})
+	 else()
+	   if(BLAS_FIND_REQUIRED)
+	     message(FATAL_ERROR "BLAS headers not found.")
+	   endif()
+	 endif()
       endforeach()
       unset(_dir CACHE)
       set(BLAS_INCLUDE_DIRS ${BLAS_INCLUDE_DIRS} CACHE STRING "Blas headers location." FORCE)
@@ -374,7 +383,6 @@ endif(BLAS_LIBRARIES)
     if(BLAS_INCLUDE_DIRS)
       set(BLAS_FOUND 1)
     endif()
-    
   endif()
 
   if(BLAS_FOUND) # NumericsConfig.h setup
@@ -404,7 +412,7 @@ endif(BLAS_LIBRARIES)
   endif (NOT BLAS_FOUND AND BLAS_FIND_REQUIRED)
   if(NOT BLAS_FIND_QUIETLY)
     if(BLAS_FOUND)
-      message(STATUS "Found a library with BLAS API (${WITH_BLAS}). Libraries : ${BLAS_LIBRARIES}. Header : ${BLAS_INCLUDE_DIRS}/${BLAS_HEADER}.")
+      message(STATUS "Found a library with BLAS API (${WITH_BLAS}). Libraries : ${BLAS_LIBRARIES}. Headers : ${BLAS_HEADER} in ${BLAS_INCLUDE_DIRS}.")
     else(BLAS_FOUND)
       message(STATUS "Cannot find a library with BLAS API. Maybe you can try again using BLAS_DIR option or set your environment variables properly.")
     endif(BLAS_FOUND)

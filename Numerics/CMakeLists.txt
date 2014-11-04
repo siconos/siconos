@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 2.8.7)
 
 # MACOSX_RPATH required from cmake 3.0.
 # See http://www.kitware.com/blog/home/post/510
-cmake_policy(SET CMP0042 OLD)
+if(POLICY CMP0042)
+  cmake_policy(SET CMP0042 OLD)
+endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 ENABLE_LANGUAGE(C)
@@ -47,8 +49,8 @@ message(STATUS " C Compiler : ${CMAKE_C_COMPILER}")
 message(STATUS " Fortran Compiler : ${CMAKE_Fortran_COMPILER}")
 message(STATUS " Compilation mode is : ${CMAKE_BUILD_TYPE}")
 message(STATUS " Code Sources are in : ${CMAKE_SOURCE_DIR}")
-message(STATUS " Blas is ${WITH_BLAS}. Libraries : ${BLAS_LIBRARIES}. Header : ${BLAS_INCLUDE_DIRS}/${BLAS_HEADER}.")
-message(STATUS " Lapack is ${WITH_LAPACK}. Libraries : ${LAPACK_LIBRARIES}. Header : ${LAPACK_INCLUDE_DIRS}/${LAPACK_HEADER}.")
+message(STATUS " Blas is ${WITH_BLAS}. Libraries : ${BLAS_LIBRARIES}. Headers : ${BLAS_HEADER} in ${BLAS_INCLUDE_DIRS}.")
+message(STATUS " Lapack is ${WITH_LAPACK}. Libraries : ${LAPACK_LIBRARIES}. Headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIRS}.")
 message(STATUS " The project will be installed in ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "To get more information about dependencies, config or else, ")
 message(STATUS "check CMakeCache.txt file or re-run cmake with -DPRINT_ENV=ON.")

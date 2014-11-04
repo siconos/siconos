@@ -267,6 +267,7 @@ if(NOT LAPACK_FOUND)
       if (LAPACK_LIBRARIES)
 	set(WITH_LAPACK "accelerate" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
 	set(CLAPACK_HEADER clapack.h)
+	set(LAPACK_INCLUDE_SUFFIXES Headers Frameworks)
       endif (LAPACK_LIBRARIES)
     endif()
     
@@ -382,7 +383,7 @@ if(NOT LAPACK_FOUND)
 	if(NOT LAPACK_INCLUDE_DIRS)
 	  find_path(LAPACK_INCLUDE_DIRS
 	    NAMES ${CLAPACK_HEADER}
-	    HINTS ${LAPACK_DIR} ${LAPACK_INC_DIR}
+	    HINTS ${LAPACK_LIBRARIES}
 	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
 	    NO_DEFAULT_PATH
 	    )
@@ -392,9 +393,13 @@ if(NOT LAPACK_FOUND)
 	    )
 	  if(LAPACK_INCLUDE_DIRS)
 	    set(HAS_CLAPACK 1 CACHE BOOL "clapack interface is available.")
+	  else()
+	    if(LAPACK_FIND_REQUIRED)
+	      message(FATAL_ERROR "Lapack headers not found.")
+	    endif()
 	  endif()
 	endif()
-	
+
       else() # The case which is supposed to always work
 	if(LAPACKE_HEADER)
 	  find_path(LAPACK_INCLUDE_DIRS 
