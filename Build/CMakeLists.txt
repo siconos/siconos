@@ -27,7 +27,7 @@ cmake_minimum_required(VERSION 2.8.7)
 
 # MACOSX_RPATH required from cmake 3.0.
 # See http://www.kitware.com/blog/home/post/510
-if(POLICY CMP0042 OLD)
+if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
 endif()
 include(${CMAKE_SOURCE_DIR}/../Numerics/cmake/OutOfSourcesBuild.cmake)
