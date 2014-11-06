@@ -3,7 +3,6 @@
 import sys
 import os
 from subprocess import check_call
-import subprocess
 import posixpath
 import platform
 
@@ -30,12 +29,15 @@ env["LD_LIBRARY_PATH"] = os.path.curdir + ':' + os.getenv('LD_LIBRARY_PATH', def
 env["DYLD_LIBRARY_PATH"] = os.path.curdir + ':' + os.getenv('DYLD_LIBRARY_PATH', default='')
 env["WINEPREFIX"] = returnWinePrefix()
 
+if "LOAD_ASAN_LIB" in env.keys():
+    env["LD_PRELOAD"] = env["LOAD_ASAN_LIB"] + ':' + os.getenv('LD_PRELOAD', default='')
+
 
 args.extend(["py.test", "-v", sys.argv[1]])
 
 if 'Windows' in platform.uname():
     use_shell = True
-    env["PATH"] =  r"${SICONOS_NUMERICS_PATH};" + r"${ENV_PATH_FOR_RUNTEST}"
+    env["PATH"] = r"${SICONOS_NUMERICS_PATH};" + r"${ENV_PATH_FOR_RUNTEST}"
 else:
     use_shell = False
 
