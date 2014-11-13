@@ -13,7 +13,7 @@
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
 
-
+#ifdef WITH_MUMPS
 #include <mpi.h>
 #include <dmumps_c.h>
 
@@ -476,3 +476,20 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   }
 
 }
+#else
+void frictionContactNonsmoothEqnInit(
+  SolverOptions *options)
+{
+  fprintf(stderr, "frictionContactNonsmoothEqnInit needs -DWITH_MUMPS at compilation time");
+}
+
+void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
+                                      double* reaction,
+                                      double* velocity,
+                                      int* info,
+                                      SolverOptions* options)
+{
+  fprintf(stderr, "frictionContactNonsmoothEqnSolve needs -DWITH_MUMPS at compilation time");
+}
+
+#endif
