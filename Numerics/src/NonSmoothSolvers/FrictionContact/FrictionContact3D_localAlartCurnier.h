@@ -102,8 +102,8 @@ extern "C"
 
   /** The Alart & Curnier function for several contacts.
       On each contact, the specified Alart Curnier function in iparam[9] is called.
-      \param computeACFun3x3 the block 3x3 Alart & Curnier function.
       \param problemSize the number of contacts.
+      \param computeACFun3x3 the block 3x3 Alart & Curnier function.
       \param reaction3D the reactions at each contact (size: 3 x problemSize)
       \param velocity3D the velocities at each contact (size: 3 x problemSize)
       \param mu the mu parameter (size : problemSize)
@@ -113,8 +113,8 @@ extern "C"
       \param output_blocklist3x3_2 the computed B param of gradient (size : 9 x problemSize)
   */
   void frictionContact3D_AlartCurnierFunction(
-    AlartCurnierFun3x3Ptr computeACFun3x3,
     unsigned int problemSize,
+    AlartCurnierFun3x3Ptr computeACFun3x3,
     double *reaction3D,
     double *velocity3D,
     double *mu,

@@ -229,13 +229,14 @@ unsigned int sizeOfPsi(
 }
 
 /* compute psi function */
-void ACPsi(AlartCurnierFun3x3Ptr computeACFun3x3,
-           GlobalFrictionContactProblem* problem,
-           double *globalVelocity,
-           double *reaction,
-           double *velocity,
-           double *rho,
-           double *psi)
+void ACPsi(
+  GlobalFrictionContactProblem* problem,
+  AlartCurnierFun3x3Ptr computeACFun3x3,
+  double *globalVelocity,
+  double *reaction,
+  double *velocity,
+  double *rho,
+  double *psi)
 {
 
   assert(problem->H->size1 == problem->dimension * problem->numberOfContacts);
@@ -267,8 +268,8 @@ void ACPsi(AlartCurnierFun3x3Ptr computeACFun3x3,
 
 
   /* compute AC function */
-  frictionContact3D_AlartCurnierFunction(computeACFun3x3,
-                                         localProblemSize,
+  frictionContact3D_AlartCurnierFunction(localProblemSize,
+                                         computeACFun3x3,
                                          reaction,
                                          velocity, problem->mu, rho,
                                          psi+globalProblemSize+
@@ -445,8 +446,8 @@ void init3x3DiagBlocks(int nc, double* P, SparseMatrix* R)
 /*
 */
 int _globalLineSearchSparseGP(
-  AlartCurnierFun3x3Ptr computeACFun3x3,
   GlobalFrictionContactProblem *problem,
+  AlartCurnierFun3x3Ptr computeACFun3x3,
   double *solution,
   double *direction,
   double *globalVelocity,
@@ -488,8 +489,8 @@ int _globalLineSearchSparseGP(
     cblas_daxpy(ACProblemSize, alpha[0], direction, 1, tmp, 1);
 
     ACPsi(
-      computeACFun3x3,
       problem,
+      computeACFun3x3,
       tmp,  /* v */
       tmp+problem->M->size0+problem->H->size1, /* P */
       tmp+problem->M->size0, /* U */
@@ -815,8 +816,8 @@ void globalFrictionContact3D_AlartCurnier(
   assert(B_.nz == problem->numberOfContacts * 9);
 
   frictionContact3D_AlartCurnierFunction(
-    computeACFun3x3,
     localProblemSize,
+    computeACFun3x3,
     reaction, velocity,
     problem->mu, rho,
     F, A, B);
@@ -861,11 +862,11 @@ void globalFrictionContact3D_AlartCurnier(
   {
 
     /* compute psi */
-    ACPsi(computeACFun3x3, problem, globalVelocity, reaction, velocity, rho, psi);
+    ACPsi(problem, computeACFun3x3, globalVelocity, reaction, velocity, rho, psi);
 
     /* compute A & B */
-    frictionContact3D_AlartCurnierFunction(computeACFun3x3,
-                                           localProblemSize,
+    frictionContact3D_AlartCurnierFunction(localProblemSize,
+                                           computeACFun3x3,
                                            reaction, velocity,
                                            problem->mu, rho,
                                            F, A, B);
@@ -941,8 +942,8 @@ void globalFrictionContact3D_AlartCurnier(
       solution[i+globalProblemSize+localProblemSize] = reaction[i];
     }
 
-    int info_ls = _globalLineSearchSparseGP(computeACFun3x3,
-                                            problem,
+    int info_ls = _globalLineSearchSparseGP(problem,
+                                            computeACFun3x3,
                                             solution,
                                             rhs,
                                             globalVelocity,

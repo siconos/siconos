@@ -33,8 +33,8 @@
 
 
 void frictionContact3D_AlartCurnierFunction(
-  AlartCurnierFun3x3Ptr computeACFun3x3,
   unsigned int problemSize,
+  AlartCurnierFun3x3Ptr computeACFun3x3,
   double *reaction,
   double *velocity,
   double *mu,
@@ -127,8 +127,8 @@ void computeAWpB(
 
 /* dense => merge with sparse one */
 int globalLineSearchGP(
-  AlartCurnierFun3x3Ptr computeACFun3x3,
   unsigned int problemSize,
+  AlartCurnierFun3x3Ptr computeACFun3x3,
   double *reaction,
   double *velocity,
   double *mu,
@@ -175,7 +175,7 @@ int globalLineSearchGP(
     cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1.,
           W, problemSize, tmp, 1, 1., velocity, 1);
 
-    frictionContact3D_AlartCurnierFunction(computeACFun3x3, problemSize, tmp,
+    frictionContact3D_AlartCurnierFunction(problemSize, computeACFun3x3, tmp,
         velocity, mu, rho, F,
         NULL, NULL);
 
@@ -346,8 +346,8 @@ void frictionContact3D_localAlartCurnier(
   {
 
     frictionContact3D_AlartCurnierFunction(
-      computeACFun3x3,
       problemSize,
+      computeACFun3x3,
       reaction, velocity,
       problem->mu, rho,
       F, A, B);
@@ -393,7 +393,7 @@ void frictionContact3D_localAlartCurnier(
 
     // line search
     double alpha = 1;
-    int info_ls = globalLineSearchGP(computeACFun3x3, problemSize, reaction, velocity, problem->mu, rho, F, A, B,
+    int info_ls = globalLineSearchGP(problemSize, computeACFun3x3, reaction, velocity, problem->mu, rho, F, A, B,
                                      problem->M->matrix0, problem->q, AWpB, tmp1, tmp2, &alpha, 100);
 
     if (!info_ls)
@@ -412,8 +412,8 @@ void frictionContact3D_localAlartCurnier(
     if (!(iter % erritermax))
     {
       frictionContact3D_AlartCurnierFunction(
-        computeACFun3x3,
         problemSize,
+        computeACFun3x3,
         reaction, velocity,
         problem->mu, rho,
         F, NULL, NULL);
@@ -548,8 +548,8 @@ void nonsmoothEqnAlartCurnierFun(void* arg,
 {
   AlartCurnierParams* acparams_p = (AlartCurnierParams *) arg;
 
-  frictionContact3D_AlartCurnierFunction(acparams_p->computeACFun3x3,
-                                         problemSize,
+  frictionContact3D_AlartCurnierFunction(problemSize,
+                                         acparams_p->computeACFun3x3,
                                          reaction,
                                          velocity,
                                          mu,
