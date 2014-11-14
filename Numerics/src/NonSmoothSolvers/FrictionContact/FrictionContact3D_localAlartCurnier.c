@@ -31,7 +31,9 @@
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
 
+
 void frictionContact3D_AlartCurnierFunction(
+  AlartCurnierFun3x3Ptr computeACFun3x3,
   unsigned int problemSize,
   double *reaction,
   double *velocity,
@@ -53,45 +55,7 @@ void frictionContact3D_AlartCurnierFunction(
   for (i = 0; i < problemSize; i += 3)
   {
 
-    computeAlartCurnierSTD
-    (reaction,
-     velocity,
-     *mu,
-     rho,
-     result, A, B);
-
-
-    // note: GENERATED_FUNCTION is different for a cube on plane & four
-    // contact points (mu=0.8). (but test with random values ok see
-    // AlartCurnierFunctions_test)
-#ifdef COMPARE_WITH_GENERATED_FUNCTION
-    double result_g[3];
-    double A_g[9];
-    double B_g[9];
-
-    frictionContact3D_AlartCurnierFunctionGenerated(reaction,
-        velocity,
-        *mu,
-        rho,
-        result_g, A_g, B_g);
-    if (result)
-    {
-      sub3(result, result_g);
-      assert(hypot3(result_g) < 1e-7);
-    }
-
-    if (A)
-    {
-      sub3x3(A, A_g);
-      assert(hypot9(A_g) < 1e-7);
-    }
-
-    if (B)
-    {
-      sub3x3(B, B_g);
-      assert(hypot9(B_g) < 1e-7);
-    }
-#endif
+    computeACFun3x3(reaction, velocity, *mu, rho, result, A, B);
 
     reaction += 3;
     velocity += 3;
@@ -161,7 +125,9 @@ void computeAWpB(
   }
 }
 
+/* dense => merge with sparse one */
 int globalLineSearchGP(
+  AlartCurnierFun3x3Ptr computeACFun3x3,
   unsigned int problemSize,
   double *reaction,
   double *velocity,
@@ -209,7 +175,7 @@ int globalLineSearchGP(
     cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1.,
           W, problemSize, tmp, 1, 1., velocity, 1);
 
-    frictionContact3D_AlartCurnierFunction(problemSize, tmp,
+    frictionContact3D_AlartCurnierFunction(computeACFun3x3, problemSize, tmp,
         velocity, mu, rho, F,
         NULL, NULL);
 
@@ -281,6 +247,32 @@ void frictionContact3D_localAlartCurnier(
   assert(problem->q);
   assert(problem->mu);
   assert(problem->M);
+
+  AlartCurnierFun3x3Ptr computeACFun3x3;
+
+  switch (options->iparam[10])
+  {
+  case 0:
+  {
+    computeACFun3x3 = &computeAlartCurnierSTD;
+    break;
+  }
+  case 1:
+  {
+    computeACFun3x3 = &computeAlartCurnierCKPS;
+    break;
+  };
+  case 2:
+  {
+    computeACFun3x3 = &frictionContact3D_AlartCurnierFunctionGenerated;
+    break;
+  }
+  case 3:
+  {
+    computeACFun3x3 = &frictionContact3D_localAlartCurnierCKPSFunctionGenerated;
+    break;
+  }
+  }
 
   if (!problem->M->matrix0)
   {
@@ -354,6 +346,7 @@ void frictionContact3D_localAlartCurnier(
   {
 
     frictionContact3D_AlartCurnierFunction(
+      computeACFun3x3,
       problemSize,
       reaction, velocity,
       problem->mu, rho,
@@ -400,7 +393,7 @@ void frictionContact3D_localAlartCurnier(
 
     // line search
     double alpha = 1;
-    int info_ls = globalLineSearchGP(problemSize, reaction, velocity, problem->mu, rho, F, A, B,
+    int info_ls = globalLineSearchGP(computeACFun3x3, problemSize, reaction, velocity, problem->mu, rho, F, A, B,
                                      problem->M->matrix0, problem->q, AWpB, tmp1, tmp2, &alpha, 100);
 
     if (!info_ls)
@@ -418,10 +411,12 @@ void frictionContact3D_localAlartCurnier(
 
     if (!(iter % erritermax))
     {
-      frictionContact3D_AlartCurnierFunction(problemSize,
-          reaction, velocity,
-          problem->mu, rho,
-          F, NULL, NULL);
+      frictionContact3D_AlartCurnierFunction(
+        computeACFun3x3,
+        problemSize,
+        reaction, velocity,
+        problem->mu, rho,
+        F, NULL, NULL);
 
 
 
@@ -499,13 +494,13 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 9;
-  options->dSize = 9;
+  options->iSize = 11;
+  options->dSize = 11;
   options->iparam = (int *) malloc(options->iSize * sizeof(int));
   options->dparam = (double *) malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
-  for (unsigned int i = 0; i < 9; i++)
+  for (unsigned int i = 0; i < 10; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
@@ -519,6 +514,7 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
   options->dparam[3] = 1;      /* default rho */
 
   options->iparam[8] = -1;     /* mpi com fortran */
+  options->iparam[10] = 0;     /* 0 STD AlartCurnier, 1 CKPS, 2 STD generated, 3 CKPS generated */
   options->internalSolvers = NULL;
 
   return 0;
@@ -534,6 +530,11 @@ void frictionContact3D_sparseLocalAlartCurnierInit(
   frictionContactNonsmoothEqnInit(options);
 }
 
+typedef struct
+{
+  AlartCurnierFun3x3Ptr computeACFun3x3;
+} AlartCurnierParams;
+
 
 void nonsmoothEqnAlartCurnierFun(void* arg,
                                  unsigned int problemSize,
@@ -545,7 +546,10 @@ void nonsmoothEqnAlartCurnierFun(void* arg,
                                  double* A,
                                  double* B)
 {
-  frictionContact3D_AlartCurnierFunction(problemSize,
+  AlartCurnierParams* acparams_p = (AlartCurnierParams *) arg;
+
+  frictionContact3D_AlartCurnierFunction(acparams_p->computeACFun3x3,
+                                         problemSize,
                                          reaction,
                                          velocity,
                                          mu,
@@ -554,6 +558,8 @@ void nonsmoothEqnAlartCurnierFun(void* arg,
                                          A,
                                          B);
 }
+
+
 
 
 void frictionContact3D_sparseLocalAlartCurnier(
@@ -583,10 +589,36 @@ void frictionContact3D_sparseLocalAlartCurnier(
 
   assert(!options->iparam[4]); // only host
 
+  AlartCurnierParams acparams;
+
+  switch (options->iparam[10])
+  {
+  case 0:
+  {
+    acparams.computeACFun3x3 = &computeAlartCurnierSTD;
+    break;
+  }
+  case 1:
+  {
+    acparams.computeACFun3x3 = &computeAlartCurnierCKPS;
+    break;
+  };
+  case 2:
+  {
+    acparams.computeACFun3x3 = &frictionContact3D_AlartCurnierFunctionGenerated;
+    break;
+  }
+  case 3:
+  {
+    acparams.computeACFun3x3 = &frictionContact3D_localAlartCurnierCKPSFunctionGenerated;
+    break;
+  }
+  }
 
   FrictionContactNonsmoothEqn equation;
 
   equation.problem = problem;
+  equation.data = (void *) &acparams;
   equation.function = &nonsmoothEqnAlartCurnierFun;
 
   frictionContactNonsmoothEqnSolve(&equation, reaction, velocity, info,

@@ -48,6 +48,7 @@
   \author Houari Khenous, Franck Perignon
 
  */
+#include "FrictionContactProblem.h"
 #include "SparseBlockMatrix.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
