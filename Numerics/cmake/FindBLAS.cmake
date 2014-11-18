@@ -20,6 +20,8 @@
 # If neither WITH_BLAS nor BLAS_DIR is set, all implementation are searched in this order : mkl, openblas, accelerate, veclib, atlas, generic. 
 # If available, pkg-config system is used to give hints to cmake search process.
 #
+
+
 if(NOT BLAS_FOUND)
   
   include(CheckFunctionExists)
@@ -381,7 +383,7 @@ if(NOT BLAS_FOUND)
 	)
     endif()
     if(BLAS_INCLUDE_DIRS)
-      set(BLAS_FOUND 1)
+      set(BLAS_FOUND 1 CACHE BOOL "Blas lib and headers have been found.")
     endif()
   endif()
 
