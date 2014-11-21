@@ -638,6 +638,10 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
             mapper.SetInputConnection(source.GetOutputPort())
             mappers[shape_name] = (x for x in [mapper])
 
+    fixed_mappers = dict()
+    for shape_name in io.shapes():
+        if shape_name not in fixed_mappers:
+            fixed_mappers[shape_name] = mappers[shape_name].next()
 
 
     for instance_name in io.instances():
@@ -655,7 +659,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 actor.GetProperty().SetOpacity(0.7)
 
             actor.GetProperty().SetColor(random_color())
-            actor.SetMapper(mappers[contactor_name].next())
+            actor.SetMapper(fixed_mappers[contactor_name])
             actors.append(actor)
             renderer.AddActor(actor)
             transform = vtk.vtkTransform()

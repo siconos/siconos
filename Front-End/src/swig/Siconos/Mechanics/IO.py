@@ -22,6 +22,8 @@ except:
 
 from Siconos.Mechanics.ContactDetection import Contactor
 
+from Siconos.Mechanics import Joints
+
 try:
     from Siconos.Mechanics.ContactDetection.Bullet import \
         BulletDS, BulletWeightedShape, \
@@ -611,7 +613,8 @@ class Hdf5():
         if self._broadphase is not None:
             topo = self._broadphase.model().nonSmoothDynamicalSystem().\
                    topology()
-            joint_class = getattr(Mechanics.Joints,
+
+            joint_class = getattr(Joints,
                                  self.joints()[name].attrs['type'])
 
             joint_nslaw = EqualityConditionNSL(5)
