@@ -107,43 +107,59 @@ Example of the simulation of a diodes bridge:
 The diodes bridge model is given in the Modelisation section :
 :ref:`diodes-bridge-model`
 
-The needed classes are imported:
+The same classes as for the simulation of the bouncing ball are
+imported:
 
 .. testcode::
 
    from Siconos.Kernel import \
        TimeStepping, MoreauJeanOSI, TimeDiscretisation, LCP
 
+And the time stepping simulation object built with a time discretisation
+object and the one-step integrator object are the same:
+
+.. testcode::
 
    td = TimeDiscretisation(0, 0.05)
    simulation = TimeStepping(td)
    osi = MoreauJeanOSI(0.5)
 
+The diodes bridge dynamical system built in the modelisation section is
+attached to the integrator which is attached to the simulation:
+
 .. testcode::
 
-   diodesBridge.nonSmoothDynamicalSystem().setOSI(osi)
+   diodesBridge.nonSmoothDynamicalSystem().setOSI(diodesBridge, osi)
+   simulation.insertIntegrator(osi)
 
+At each time step, the Moreau-Jean time stepping scheme needs a linear
+complementarity problem to be solved. The `LCP` object is attached to
+the simulation.
+
+.. testcode::
 
    lcp = LCP()
+   simulation.insertNonSmoothProblem(lcp)
 
-
-.. testcode::
-
-   DiodesBridgeModel.initialize(ts)
-
-   k = 0
-   h = ts.timeStep()
-
+The simulation is initialized with the modelisation part:
 
 .. testcode::
 
-   x = LSDiodeBridge.x()
-   print "Initial state : ", x
+   DiodesBridgeModel.initialize(simulation)
+
+
+It is now ready for execution.
+
+We may set some pointers on interesting values like this:
+
+.. testcode::
+
+   x = diodesBridge.x()
    y = InterDiodeBridge.y(0)
-   print "First y : ", y
    lambda_ = InterDiodeBridge.lambda_(0)
 
-   
+Then, the execution loop is similar to the one of the bouncing ball:
+
 .. testcode::
 
    while simulation.hasNextEvent():
@@ -157,7 +173,7 @@ The needed classes are imported:
        # diode F1 current is in lambda_[2]
        # resistor current is y[0] + lambda_[2]
 
-       ts.nextStep()
+       simulation.nextStep()
 
 
 Simulation API
