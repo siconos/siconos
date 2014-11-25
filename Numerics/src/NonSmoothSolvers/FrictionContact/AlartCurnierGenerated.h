@@ -39,7 +39,7 @@ void frictionContact3D_AlartCurnierABGenerated(
   double *result);
 
 
-void frictionContact3D_AlartCurnierCKPSFABGenerated(
+void frictionContact3D_AlartCurnierJeanMoreauFABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -52,7 +52,7 @@ void frictionContact3D_AlartCurnierCKPSFABGenerated(
   double rhot2,
   double *result);
 
-void frictionContact3D_AlartCurnierCKPSFGenerated(
+void frictionContact3D_AlartCurnierJeanMoreauFGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -65,7 +65,7 @@ void frictionContact3D_AlartCurnierCKPSFGenerated(
   double rhot2,
   double *result);
 
-void frictionContact3D_AlartCurnierCKPSABGenerated(
+void frictionContact3D_AlartCurnierJeanMoreauABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -87,7 +87,7 @@ void frictionContact3D_AlartCurnierFunctionGenerated(
   double *A,
   double *B);
 
-void frictionContact3D_localAlartCurnierCKPSFunctionGenerated(
+void frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,

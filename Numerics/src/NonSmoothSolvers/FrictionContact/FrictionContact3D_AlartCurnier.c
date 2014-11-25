@@ -32,18 +32,18 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
 //#define VERBOSE_DEBUG
 //#define AC_STD
 //#define AC_Generated
-#define AC_CKPS // Christensen & Pang
+#define AC_JeanMoreau // Christensen & Pang
 
 // Set the function for computing F and its gradient
 // \todo should nbe done in initialization
 #ifdef AC_STD
 computeNonsmoothFunction  Function = &(computeAlartCurnierSTD);
 #endif
-#ifdef AC_CKPS
-computeNonsmoothFunction  Function = &(computeAlartCurnierCKPS);
+#ifdef AC_JeanMoreau
+computeNonsmoothFunction  Function = &(computeAlartCurnierJeanMoreau);
 #endif
 
-// computeAlartCurnier[CKPS] == AC_Generated
+// computeAlartCurnier[JeanMoreau] == AC_Generated
 
 #ifdef AC_Generated
 computeNonsmoothFunction  Function = &(frictionContact3D_AlartCurnierFunctionGenerated);
@@ -919,7 +919,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
 
 
 /* Christensen & Pang version (Radius = mu* R[0])*/
-void computeAlartCurnierCKPS(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
+void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
 {
 
   double RVN, RVT, RVS;
@@ -1104,7 +1104,7 @@ void computerho(FrictionContactProblem* localproblem, double * rho)
 
 
 #ifndef NDEBUG
-void frictionContact3D_localAlartCurnierCKPSFunctionGenerated(
+void frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,
@@ -1177,8 +1177,8 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     frictionContact3D_AlartCurnierFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
 #endif
 
-#ifdef AC_CKPS
-    frictionContact3D_localAlartCurnierCKPSFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+#ifdef AC_JeanMoreau
+    frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
 #endif
 
     sub3(F, Fg);

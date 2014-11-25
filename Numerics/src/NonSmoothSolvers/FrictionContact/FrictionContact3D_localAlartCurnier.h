@@ -135,7 +135,7 @@ extern "C"
    * options.iparam[0] = 200 is the maximum number of iterations.
    * options.iparam[3] = 100000 is the nzmax parameter for sparse matrices.
    * options.iparam[10] = 0 : stands for STD Alart & Curnier function
-   *  (other values may be 1 for CKPS, 2 for STD generated, 3 for CKPS generated)
+   *  (other values may be 1 for JeanMoreau, 2 for STD generated, 3 for JeanMoreau generated)
    * options.dparam[0] = 1e-3 precision.
    * \param options  the solver options
    */

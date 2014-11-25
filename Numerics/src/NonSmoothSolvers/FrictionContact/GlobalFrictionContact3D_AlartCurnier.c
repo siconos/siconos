@@ -582,7 +582,7 @@ int globalFrictionContact3D_AlartCurnier_setDefaultSolverOptions(
 
   options->iparam[9] = 0;      /* > 0 memory is allocated */
 
-  options->iparam[10] = 0;     /* 0 STD AlartCurnier, 1 CKPS, 2 STD generated, 3 CKPS generated */
+  options->iparam[10] = 0;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
 
   options->dparam[0] = 1e-10;
 
@@ -734,7 +734,7 @@ void globalFrictionContact3D_AlartCurnier(
   }
   case 1:
   {
-    computeACFun3x3 = &computeAlartCurnierCKPS;
+    computeACFun3x3 = &computeAlartCurnierJeanMoreau;
     break;
   };
   case 2:
@@ -744,7 +744,7 @@ void globalFrictionContact3D_AlartCurnier(
   }
   case 3:
   {
-    computeACFun3x3 = &frictionContact3D_localAlartCurnierCKPSFunctionGenerated;
+    computeACFun3x3 = &frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated;
     break;
   }
   }

@@ -117,7 +117,7 @@ extern "C"
                               double mu, double rho[3],
                               double result[3], double A[9], double B[9]);
 
-  void computeAlartCurnierCKPS(double reaction[3], double velocity[3],
+  void computeAlartCurnierJeanMoreau(double reaction[3], double velocity[3],
                                double mu, double rho[3],
                                double result[3], double A[9], double B[9]);
 
