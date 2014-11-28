@@ -37,6 +37,7 @@
 #include "Friction_cst.h"
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_localAlartCurnier.h"
+#include "FrictionContact3D_localFischerBurmeister.h"
 #include "FrictionContact3D_compute_error.h"
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
@@ -760,6 +761,7 @@
 %include "Friction_cst.h"
 %include "FrictionContact3D_AlartCurnier.h"
 %include "FrictionContact3D_localAlartCurnier.h"
+%include "FrictionContact3D_localFischerBurmeister.h"
 %include "FrictionContact3D_compute_error.h"
 %include "fclib_interface.h"
 
