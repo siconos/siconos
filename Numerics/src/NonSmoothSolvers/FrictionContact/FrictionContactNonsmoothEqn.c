@@ -13,6 +13,107 @@
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
 
+/* dense => merge with sparse one */
+int globalLineSearchGP(
+  unsigned int problemSize,
+  FrictionContactNSFun3x3Ptr computeACFun3x3,
+  double *reaction,
+  double *velocity,
+  double *mu,
+  double *rho,
+  double *F,
+  double *A,
+  double *B,
+  double *W,
+  double *qfree,
+  double *AWpB,
+  double *direction,
+  double *tmp,
+  double alpha[1],
+  unsigned int maxiter_ls)
+{
+  double inf = 1e10;
+  double alphamin = 0.0;
+  double alphamax = inf;
+
+  double m1 = 0.01, m2 = 0.99;
+
+  // Computation of q(t) and q'(t) for t =0
+
+  double q0 = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
+
+  // useless (already computed)
+  computeAWpB(problemSize, A, W, B, AWpB);
+
+  //  tmp <- AWpB * direction
+  cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1., AWpB, problemSize, direction, 1, 0., tmp, 1);
+
+  double dqdt0 = cblas_ddot(problemSize, F, 1, tmp, 1);
+
+
+  for (unsigned int iter = 0; iter < maxiter_ls; ++iter)
+  {
+
+    // tmp <- alpha*direction+reaction
+    cblas_dcopy(problemSize, reaction, 1, tmp, 1);
+    cblas_daxpy(problemSize, alpha[0], direction, 1, tmp, 1);
+
+    // velocity <- W*tmp + qfree
+    cblas_dcopy(problemSize, qfree, 1, velocity, 1);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1.,
+          W, problemSize, tmp, 1, 1., velocity, 1);
+
+    frictionContact3D_FischerBurmeisterFunction(problemSize, computeACFun3x3, tmp,
+        velocity, mu, rho, F,
+        NULL, NULL);
+
+    double q  = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
+
+    assert(q >= 0);
+
+    double slope = (q - q0) / alpha[0];
+
+    int C1 = (slope >= m2 * dqdt0);
+    int C2 = (slope <= m1 * dqdt0);
+
+    if (C1 && C2)
+    {
+      if (verbose > 1)
+      {
+        printf("global line search success. Number of iteration = %i  alpha = %.10e, q = %.10e\n", iter, alpha[0], q);
+      }
+
+      return 0;
+
+    }
+    else if (!C1)
+    {
+      alphamin = alpha[0];
+    }
+    else
+    {
+      // not(C2)
+      alphamax = alpha[0];
+    }
+
+    if (alpha[0] < inf)
+    {
+      alpha[0] = 0.5 * (alphamin + alphamax);
+    }
+    else
+    {
+      alpha[0] = alphamin;
+    }
+
+  }
+  if (verbose > 0)
+  {
+    printf("global line search failed. max number of iteration reached  = %i  with alpha = %.10e \n", maxiter_ls, alpha[0]);
+  }
+
+  return -1;
+}
+
 #ifdef WITH_MUMPS
 #include <mpi.h>
 #include <dmumps_c.h>
@@ -22,6 +123,7 @@
 #define USE_COMM_WORLD -987654
 #define ICNTL(I) icntl[(I)-1]
 #define CNTL(I) cntl[(I)-1]
+
 
 void frictionContactNonsmoothEqnInit(
   SolverOptions *options)
@@ -61,6 +163,55 @@ void frictionContactNonsmoothEqnInit(
 
   //mumps_id->CNTL(3) = ...;
   //mumps_id->CNTL(5) = ...;
+}
+
+void computeAWpB(
+  unsigned int problemSize,
+  double *A,
+  double *W,
+  double *B,
+  double *result)
+{
+  assert(problemSize >= 3);
+
+  double Wij[9], Ai[9], Bi[9], tmp[9];
+
+  for (unsigned int ip3 = 0, ip9 = 0; ip3 < problemSize; ip3 += 3, ip9 += 9)
+  {
+    assert(ip9 < 3 * problemSize - 8);
+
+    extract3x3(3, ip9, 0, A, Ai);
+    extract3x3(3, ip9, 0, B, Bi);
+
+    for (unsigned int jp3 = 0; jp3 < problemSize; jp3 += 3)
+    {
+      assert(jp3 < problemSize - 2);
+      assert(ip3 < problemSize - 2);
+
+      extract3x3(problemSize, ip3, jp3, W, Wij);
+      mm3x3(Ai, Wij, tmp);
+      if (jp3 == ip3) add3x3(Bi, tmp);
+      insert3x3(problemSize, ip3, jp3, result, tmp);
+
+#ifdef VERBOSE_DEBUG_1
+      if (jp3 == ip3)
+      {
+        printf("Ai\n");
+        print3x3(Ai);
+
+        printf("Bi\n");
+        print3x3(Bi);
+
+        printf("Wij");
+        print3x3(Wij);
+
+        printf("result\n");
+        print3x3(tmp);
+      }
+#endif
+
+    }
+  }
 }
 
 

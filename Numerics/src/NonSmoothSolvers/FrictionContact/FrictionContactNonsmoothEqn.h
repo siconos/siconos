@@ -39,16 +39,26 @@
 /** The nonsmooth function signature.
 [...]
  */
-typedef void (*FrictionContactNonsmoothEqnFunPtr)(
-  void* data,
-  unsigned int problem_size,
-  double* reaction,
-  double* velocity,
-  double* mu,
-  double* rho,
-  double* F,
-  double* A,
-  double* B);
+typedef void (*FrictionContactNonsmoothEqnFunPtr)
+(void* data,
+ unsigned int problem_size,
+ double* reaction,
+ double* velocity,
+ double* mu,
+ double* rho,
+ double* F,
+ double* A,
+ double* B);
+
+/** The nonsmooth function signature for a 3x3 block.
+ */
+typedef void (*FrictionContactNSFun3x3Ptr)(double* reaction,
+                                           double* velocity,
+                                           double mu,
+                                           double* rho,
+                                           double* F,
+                                           double* A,
+                                           double* B);
 
 /** The nonsmooth equation structure.
 [...]
@@ -79,4 +89,32 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
                                       double* velocity,
                                       int* info,
                                       SolverOptions* options);
+
+
+
+void computeAWpB(
+    unsigned int problemSize,
+    double *blocklist3x3_1,
+    double *blockarray3x3,
+    double *blocklist3x3_2,
+    double *output_blockarray3x3);
+
+int globalLineSearchGP(
+  unsigned int problemSize,
+  FrictionContactNSFun3x3Ptr computeACFun3x3,
+  double *reaction,
+  double *velocity,
+  double *mu,
+  double *rho,
+  double *F,
+  double *A,
+  double *B,
+  double *W,
+  double *qfree,
+  double *AWpB,
+  double *direction,
+  double *tmp,
+  double alpha[1],
+  unsigned int maxiter_ls);
+
 #endif

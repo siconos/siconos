@@ -545,6 +545,8 @@ char * idToName(int Id)
     return SICONOS_FRICTION_3D_TFP_STR;
   case SICONOS_FRICTION_3D_LOCALAC:
     return SICONOS_FRICTION_3D_LOCALAC_STR;
+  case SICONOS_FRICTION_3D_LOCALFB:
+    return SICONOS_FRICTION_3D_LOCALFB_STR;
   case SICONOS_FRICTION_3D_DSFP:
     return SICONOS_FRICTION_3D_DSFP_STR;
   case SICONOS_FRICTION_3D_EG:
@@ -715,6 +717,8 @@ int nameToId(char * pName)
     return SICONOS_FRICTION_3D_TFP;
   else if (strcmp(SICONOS_FRICTION_3D_LOCALAC_STR, pName) == 0)
     return SICONOS_FRICTION_3D_LOCALAC;
+  else if (strcmp(SICONOS_FRICTION_3D_LOCALFB_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_LOCALFB;
   else if (strcmp(SICONOS_FRICTION_3D_DSFP_STR, pName) == 0)
     return SICONOS_FRICTION_3D_DSFP;
   else if (strcmp(SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR, pName) == 0)

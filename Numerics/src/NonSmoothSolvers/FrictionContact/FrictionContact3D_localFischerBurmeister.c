@@ -23,7 +23,7 @@
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContactProblem.h"
 #include "FrictionContact3D_compute_error.h"
-#include "AlartCurnierGenerated.h"
+#include "FischerBurmeisterGenerated.h"
 #include "FrictionContactNonsmoothEqn.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,9 +33,9 @@
 #include "SiconosLapack.h"
 
 
-void frictionContact3D_AlartCurnierFunction(
+void frictionContact3D_FischerBurmeisterFunction(
   unsigned int problemSize,
-  AlartCurnierFun3x3Ptr computeACFun3x3,
+  FischerBurmeisterFun3x3Ptr computeACFun3x3,
   double *reaction,
   double *velocity,
   double *mu,
@@ -76,7 +76,7 @@ void frictionContact3D_AlartCurnierFunction(
 
 }
 
-void frictionContact3D_localAlartCurnier(
+void frictionContact3D_localFischerBurmeister(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,
@@ -98,35 +98,22 @@ void frictionContact3D_localAlartCurnier(
   assert(problem->mu);
   assert(problem->M);
 
-  AlartCurnierFun3x3Ptr computeACFun3x3;
+  FischerBurmeisterFun3x3Ptr computeACFun3x3;
 
   switch (options->iparam[10])
   {
   case 0:
   {
-    computeACFun3x3 = &computeAlartCurnierSTD;
-    break;
-  }
-  case 1:
-  {
-    computeACFun3x3 = &computeAlartCurnierJeanMoreau;
-    break;
-  };
-  case 2:
-  {
-    computeACFun3x3 = &frictionContact3D_AlartCurnierFunctionGenerated;
-    break;
-  }
-  case 3:
-  {
-    computeACFun3x3 = &frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated;
+
+    computeACFun3x3 = &frictionContact3D_FischerBurmeisterFunctionGenerated;
     break;
   }
   }
 
+
   if (!problem->M->matrix0)
   {
-    frictionContact3D_sparseLocalAlartCurnier(
+    frictionContact3D_sparseLocalFischerBurmeister(
       problem,
       reaction,
       velocity,
@@ -195,7 +182,7 @@ void frictionContact3D_localAlartCurnier(
   while (iter++ < itermax)
   {
 
-    frictionContact3D_AlartCurnierFunction(
+    frictionContact3D_FischerBurmeisterFunction(
       problemSize,
       computeACFun3x3,
       reaction, velocity,
@@ -239,7 +226,7 @@ void frictionContact3D_localAlartCurnier(
 
     if (info2 > 0)
       /*if (verbose>0)*/
-      printf("LOCALAC: warning DGESV failed with U(%d,%d) == 0.\n", info2, info2);
+      printf("LOCALFB: warning DGESV failed with U(%d,%d) == 0.\n", info2, info2);
 
     // line search
     double alpha = 1;
@@ -261,7 +248,7 @@ void frictionContact3D_localAlartCurnier(
 
     if (!(iter % erritermax))
     {
-      frictionContact3D_AlartCurnierFunction(
+      frictionContact3D_FischerBurmeisterFunction(
         problemSize,
         computeACFun3x3,
         reaction, velocity,
@@ -281,7 +268,7 @@ void frictionContact3D_localAlartCurnier(
     }
 
     if (verbose > 0)
-      printf("LOCALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
+      printf("LOCALFB: iteration %d : error=%g\n", iter, options->dparam[1]);
 
     if (options->dparam[1] < tolerance)
     {
@@ -297,11 +284,11 @@ void frictionContact3D_localAlartCurnier(
   if (verbose > 0)
   {
     if (!info[0])
-      printf("LOCALAC: convergence after %d iterations, error : %g\n",
+      printf("LOCALFB: convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
     else
     {
-      printf("LOCALAC: no convergence after %d iterations, error : %g\n",
+      printf("LOCALFB: no convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
     }
   }
@@ -311,8 +298,8 @@ void frictionContact3D_localAlartCurnier(
   {
     static int file_counter = 0;
     char filename[64];
-    printf("LOCALAC: dumping problem\n");
-    sprintf(filename, "LOCALAC_failure%d.dat", file_counter++);
+    printf("LOCALFB: dumping problem\n");
+    sprintf(filename, "LOCALFB_failure%d.dat", file_counter++);
     FILE* file = fopen(filename, "w");
     frictionContact_printInFile(problem, file);
     fclose(file);
@@ -332,15 +319,15 @@ void frictionContact3D_localAlartCurnier(
 
 }
 
-int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
+int frictionContact3D_FischerBurmeister_setDefaultSolverOptions(
   SolverOptions* options)
 {
   if (verbose > 0)
   {
-    printf("Set the default solver options for the LOCALAC Solver\n");
+    printf("Set the default solver options for the LOCALFB Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_LOCALAC;
+  options->solverId = SICONOS_FRICTION_3D_LOCALFB;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
@@ -364,7 +351,7 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
   options->dparam[3] = 1;      /* default rho */
 
   options->iparam[8] = -1;     /* mpi com fortran */
-  options->iparam[10] = 0;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[10] = 0;
   options->internalSolvers = NULL;
 
   return 0;
@@ -373,7 +360,7 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
 
 #ifdef WITH_MUMPS
 
-void frictionContact3D_sparseLocalAlartCurnierInit(
+void frictionContact3D_sparseLocalFischerBurmeisterInit(
   SolverOptions *options)
 {
   frictionContactNonsmoothEqnInit(options);
@@ -381,11 +368,11 @@ void frictionContact3D_sparseLocalAlartCurnierInit(
 
 typedef struct
 {
-  AlartCurnierFun3x3Ptr computeACFun3x3;
-} AlartCurnierParams;
+  FischerBurmeisterFun3x3Ptr computeACFun3x3;
+} FischerBurmeisterParams;
 
 
-void nonsmoothEqnAlartCurnierFun(void* arg,
+void nonsmoothEqnFischerBurmeisterFun(void* arg,
                                  unsigned int problemSize,
                                  double* reaction,
                                  double* velocity,
@@ -395,9 +382,9 @@ void nonsmoothEqnAlartCurnierFun(void* arg,
                                  double* A,
                                  double* B)
 {
-  AlartCurnierParams* acparams_p = (AlartCurnierParams *) arg;
+  FischerBurmeisterParams* acparams_p = (FischerBurmeisterParams *) arg;
 
-  frictionContact3D_AlartCurnierFunction(problemSize,
+  frictionContact3D_FischerBurmeisterFunction(problemSize,
                                          acparams_p->computeACFun3x3,
                                          reaction,
                                          velocity,
@@ -411,7 +398,7 @@ void nonsmoothEqnAlartCurnierFun(void* arg,
 
 
 
-void frictionContact3D_sparseLocalAlartCurnier(
+void frictionContact3D_sparseLocalFischerBurmeister(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,
@@ -438,28 +425,13 @@ void frictionContact3D_sparseLocalAlartCurnier(
 
   assert(!options->iparam[4]); // only host
 
-  AlartCurnierParams acparams;
+  FischerBurmeisterParams acparams;
 
   switch (options->iparam[10])
   {
   case 0:
   {
-    acparams.computeACFun3x3 = &computeAlartCurnierSTD;
-    break;
-  }
-  case 1:
-  {
-    acparams.computeACFun3x3 = &computeAlartCurnierJeanMoreau;
-    break;
-  };
-  case 2:
-  {
-    acparams.computeACFun3x3 = &frictionContact3D_AlartCurnierFunctionGenerated;
-    break;
-  }
-  case 3:
-  {
-    acparams.computeACFun3x3 = &frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated;
+    acparams.computeACFun3x3 = &frictionContact3D_FischerBurmeisterFunctionGenerated;
     break;
   }
   }
@@ -468,7 +440,7 @@ void frictionContact3D_sparseLocalAlartCurnier(
 
   equation.problem = problem;
   equation.data = (void *) &acparams;
-  equation.function = &nonsmoothEqnAlartCurnierFun;
+  equation.function = &nonsmoothEqnFischerBurmeisterFun;
 
   frictionContactNonsmoothEqnSolve(&equation, reaction, velocity, info,
                                    options);
@@ -477,19 +449,19 @@ void frictionContact3D_sparseLocalAlartCurnier(
 
 #else /*WITH_MUMPS*/
 
-void frictionContact3D_sparseLocalAlartCurnierInit(
+void frictionContact3D_sparseLocalFischerBurmeisterInit(
   SolverOptions *options)
 {
-  fprintf(stderr, "The sparse global Alart & Curnier solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
+  fprintf(stderr, "The sparse global Fischer & Burmeister solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
 }
 
-void frictionContact3D_sparseLocalAlartCurnier(
+void frictionContact3D_sparseLocalFischerBurmeister(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,
   int *info,
   SolverOptions *options)
 {
-  fprintf(stderr, "The sparse global Alart & Curnier solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
+  fprintf(stderr, "The sparse global Fischer & Burmeister solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
 }
 #endif

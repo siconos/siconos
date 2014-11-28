@@ -94,6 +94,11 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
     info =    frictionContact3D_AlartCurnier_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_LOCALFB:
+  {
+    info =    frictionContact3D_FischerBurmeister_setDefaultSolverOptions(options);
+    break;
+  }
   case SICONOS_FRICTION_3D_QUARTIC:
   {
     info =    frictionContact3D_unitary_enumerative_setDefaultSolverOptions(options);

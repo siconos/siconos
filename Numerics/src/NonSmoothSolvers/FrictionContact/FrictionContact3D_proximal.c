@@ -110,6 +110,18 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
       }
       iter_iparam =1;
     }
+    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALFB)
+    {
+      if (problem->M->matrix0)
+      {
+        internalsolver = &frictionContact3D_localFischerBurmeister;
+      }
+      else
+      {
+        internalsolver = &frictionContact3D_sparseLocalFischerBurmeister;
+      }
+      iter_iparam =1;
+    }
   }
   else
   {
