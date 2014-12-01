@@ -12,6 +12,55 @@
 #include <assert.h>
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
+#include "FrictionContactNonsmoothEqn.h"
+void computeAWpB(
+  unsigned int problemSize,
+  double *A,
+  double *W,
+  double *B,
+  double *result)
+{
+  assert(problemSize >= 3);
+
+  double Wij[9], Ai[9], Bi[9], tmp[9];
+
+  for (unsigned int ip3 = 0, ip9 = 0; ip3 < problemSize; ip3 += 3, ip9 += 9)
+  {
+    assert(ip9 < 3 * problemSize - 8);
+
+    extract3x3(3, ip9, 0, A, Ai);
+    extract3x3(3, ip9, 0, B, Bi);
+
+    for (unsigned int jp3 = 0; jp3 < problemSize; jp3 += 3)
+    {
+      assert(jp3 < problemSize - 2);
+      assert(ip3 < problemSize - 2);
+
+      extract3x3(problemSize, ip3, jp3, W, Wij);
+      mm3x3(Ai, Wij, tmp);
+      if (jp3 == ip3) add3x3(Bi, tmp);
+      insert3x3(problemSize, ip3, jp3, result, tmp);
+
+#ifdef VERBOSE_DEBUG_1
+      if (jp3 == ip3)
+      {
+        printf("Ai\n");
+        print3x3(Ai);
+
+        printf("Bi\n");
+        print3x3(Bi);
+
+        printf("Wij");
+        print3x3(Wij);
+
+        printf("result\n");
+        print3x3(tmp);
+      }
+#endif
+
+    }
+  }
+}
 
 /* dense => merge with sparse one */
 int globalLineSearchGP(
@@ -163,55 +212,6 @@ void frictionContactNonsmoothEqnInit(
 
   //mumps_id->CNTL(3) = ...;
   //mumps_id->CNTL(5) = ...;
-}
-
-void computeAWpB(
-  unsigned int problemSize,
-  double *A,
-  double *W,
-  double *B,
-  double *result)
-{
-  assert(problemSize >= 3);
-
-  double Wij[9], Ai[9], Bi[9], tmp[9];
-
-  for (unsigned int ip3 = 0, ip9 = 0; ip3 < problemSize; ip3 += 3, ip9 += 9)
-  {
-    assert(ip9 < 3 * problemSize - 8);
-
-    extract3x3(3, ip9, 0, A, Ai);
-    extract3x3(3, ip9, 0, B, Bi);
-
-    for (unsigned int jp3 = 0; jp3 < problemSize; jp3 += 3)
-    {
-      assert(jp3 < problemSize - 2);
-      assert(ip3 < problemSize - 2);
-
-      extract3x3(problemSize, ip3, jp3, W, Wij);
-      mm3x3(Ai, Wij, tmp);
-      if (jp3 == ip3) add3x3(Bi, tmp);
-      insert3x3(problemSize, ip3, jp3, result, tmp);
-
-#ifdef VERBOSE_DEBUG_1
-      if (jp3 == ip3)
-      {
-        printf("Ai\n");
-        print3x3(Ai);
-
-        printf("Bi\n");
-        print3x3(Bi);
-
-        printf("Wij");
-        print3x3(Wij);
-
-        printf("result\n");
-        print3x3(tmp);
-      }
-#endif
-
-    }
-  }
 }
 
 

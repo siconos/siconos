@@ -116,13 +116,6 @@ extern "C"
     double *output_blocklist3x3_1,
     double *output_blocklist3x3_2);
 
-  void computeAWpB(
-    unsigned int problemSize,
-    double *blocklist3x3_1,
-    double *blockarray3x3,
-    double *blocklist3x3_2,
-    double *output_blockarray3x3);
-
   /* Set the default solver options for the LOCALAC Solver
    * Some default values:
    * options.iparam[0] = 200 is the maximum number of iterations.

@@ -53,7 +53,7 @@ void frictionContact3D_FischerBurmeisterFABGenerated(
   double x35=mu*x3;
   double x36=2*x35;
   double x37=x30*x6;
-  double x38=(1.0L/2.0L)*x10*(x36 + 2*x37);
+  double x38=0.5*x10*(x36 + 2*x37);
   double x39=x25*(x34 + x38);
   double x40=x22*(x32 + x39);
   double x41=x28*(x32 - x39);
@@ -61,7 +61,7 @@ void frictionContact3D_FischerBurmeisterFABGenerated(
   double x43=ut2*x5 + x3*x42;
   double x44=x10*x33;
   double x45=x30*x7;
-  double x46=(1.0L/2.0L)*x13*(x36 + 2*x45);
+  double x46=0.5*x13*(x36 + 2*x45);
   double x47=x25*(x44 + x46);
   double x48=x22*(x43 + x47);
   double x49=x28*(x43 - x47);
@@ -262,7 +262,7 @@ void frictionContact3D_FischerBurmeisterABGenerated(
   double x34=x12*x33;
   double x35=2*x9;
   double x36=x2*x29;
-  double x37=(1.0L/2.0L)*x10*(x35 + 2*x36);
+  double x37=0.5*x10*(x35 + 2*x36);
   double x38=x23*(x34 + x37);
   double x39=x18*(x32 + x38);
   double x40=x27*(x32 - x38);
@@ -270,7 +270,7 @@ void frictionContact3D_FischerBurmeisterABGenerated(
   double x42=ut2*x0 + x41*x6;
   double x43=x10*x33;
   double x44=x29*x4;
-  double x45=(1.0L/2.0L)*x12*(x35 + 2*x44);
+  double x45=0.5*x12*(x35 + 2*x44);
   double x46=x23*(x43 + x45);
   double x47=x18*(x42 + x46);
   double x48=x27*(x42 - x46);
