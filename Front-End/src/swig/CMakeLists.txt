@@ -23,10 +23,42 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   ENDIF()
 ENDIF()
 
-find_package(PythonFull REQUIRED)
-include(FindPythonModule)
+if(APPLE)
+  find_package(PythonFull REQUIRED)
+  include(FindPythonModule)
+  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIR})
+else() # the previous instructions do not work on ubuntu 14.4 (and others)
+       # the following instructions do not work on Yosemite.
+ IF(NOT WITH_PY3)
+   # we still prefer python2 for now
+   SET(PythonInterp_FIND_VERSION "2")
+   SET(PythonLibs_FIND_VERSION "2")
+ELSE(NOT WITH_PY3)
+  SET(PythonInterp_FIND_VERSION "3")
+  SET(PythonLibs_FIND_VERSION "3")
+ENDIF(NOT WITH_PY3)
+ 
+FIND_PACKAGE(PythonInterp)
 
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIR})
+# should world for all recent cmake version
+# setting PythonInterp_FIND_VERSION to the version string is borken with cmake 3
+SET(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+
+FIND_PACKAGE(PythonLibs)
+
+MESSAGE("Python libs version : ${PYTHONLIBS_VERSION_STRING}")
+
+MESSAGE("PYTHON EXECUTABLE : ${PYTHON_EXECUTABLE}")
+MESSAGE("Python_ADDITIONAL_VERSIONS : ${Python_ADDITIONAL_VERSIONS}")
+MESSAGE("Python_FRAMEWORKS : ${Python_FRAMEWORKS}")
+
+MESSAGE("PYTHON INCLUDE DIR : ${PYTHON_INCLUDE_DIR}")
+MESSAGE("PYTHON LIBRARIES : ${PYTHON_LIBRARIES}")
+
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+endif()
+
+
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
