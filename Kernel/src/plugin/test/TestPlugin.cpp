@@ -61,10 +61,10 @@ extern "C" DLLEXPORT void computeFExt(double time, unsigned int sizeOfq, double 
     fExt[i] = i * time;
 }
 
-extern "C" DLLEXPORT void computeNNL(unsigned int sizeOfq, double *q, double *velocity, double *NNL, unsigned int sizeOfZ, double *z)
+extern "C" DLLEXPORT void computeFGyr(unsigned int sizeOfq, double *q, double *velocity, double *FGyr, unsigned int sizeOfZ, double *z)
 {
   for (unsigned int i = 0; i < sizeOfq; ++i)
-    NNL[i] = i * q[i];
+    FGyr[i] = i * q[i];
 }
 
 extern "C" DLLEXPORT void computeJacobianFIntq(double time, unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
@@ -79,13 +79,13 @@ extern "C" DLLEXPORT void computeJacobianFintVelocity(double time, unsigned int 
     jacob[i] = i * q[0];
 }
 
-extern "C" DLLEXPORT void computeJacobianNNLq(unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+extern "C" DLLEXPORT void computeJacobianFGyrq(unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-extern "C" DLLEXPORT void computeJacobianNNLVelocity(unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+extern "C" DLLEXPORT void computeJacobianFGyrVelocity(unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];

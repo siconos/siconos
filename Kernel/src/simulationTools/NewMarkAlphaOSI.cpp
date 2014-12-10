@@ -209,7 +209,7 @@ double NewMarkAlphaOSI::computeResidu()
         d->computeMass();
         F = d->forces();
         if (F)
-          // Compute F = F_ext - F_int - F_NNL
+          // Compute F = F_ext - F_int - F_Gyr
           d->computeForces(t);
       }
       // For LagrangianLinearTIDS

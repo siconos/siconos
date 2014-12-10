@@ -51,9 +51,9 @@
 				<FInt vectorPlugin="TestPlugin:computeFInt"/>
 				<JacobianQFInt matrixPlugin="TestPlugin:computeJacobianQFInt"/>
 				<JacobianVelocityFInt matrixPlugin="TestPlugin:computeJacobianVelocityFInt"/>
-				<NNL vectorPlugin="TestPlugin:computeNNL"/>
-				<JacobianQNNL matrixPlugin="TestPlugin:computeJacobianQNNL"/>
-				<JacobianVelocityNNL matrixPlugin="TestPlugin:computeJacobianVelocityNNL"/>
+				<FGyr vectorPlugin="TestPlugin:computeFGyr"/>
+				<JacobianQFGyr matrixPlugin="TestPlugin:computeJacobianQFGyr"/>
+				<JacobianVelocityFGyr matrixPlugin="TestPlugin:computeJacobianVelocityFGyr"/>
 			</LagrangianDS>
 			<LagrangianDS number='4'>
 				<StepsInMemory>1</StepsInMemory>				
@@ -80,19 +80,19 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</JacobianVelocityFInt>			
-				<NNL vectorSize='3'>
+				<FGyr vectorSize='3'>
 					4 8 12
-				</NNL>
-				<JacobianQNNL matrixRowSize='3' matrixColSize='3'>	
+				</FGyr>
+				<JacobianQFGyr matrixRowSize='3' matrixColSize='3'>	
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
-				</JacobianQNNL>			
-				<JacobianVelocityNNL matrixRowSize='3' matrixColSize='3'>	
+				</JacobianQFGyr>			
+				<JacobianVelocityFGyr matrixRowSize='3' matrixColSize='3'>	
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
-				</JacobianVelocityNNL>			
+				</JacobianVelocityFGyr>			
 			</LagrangianDS>
 		</DS_Definition>
 	</NSDS>

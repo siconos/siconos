@@ -68,11 +68,11 @@ void LagrangianDSTest::testBuildLagrangianDS4()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4Q : ", isPl["fExt"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4R : ", isPl["fInt"], false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4S : ", isPl["NNL"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4S : ", isPl["fGyr"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianFIntq"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianFIntVelocity"], false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianNNLq"], false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianNNLVelocity"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianFGyrq"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianFGyrVelocity"], false);
   std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
 
@@ -94,11 +94,11 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5M : ", isPl["mass"], true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5Q : ", isPl["fExt"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5R : ", isPl["fInt"], false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5S : ", isPl["NNL"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5S : ", isPl["fGyr"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianFIntq"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianFIntVelocity"], false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianNNLq"], false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianNNLVelocity"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianFGyrq"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianFGyrVelocity"], false);
   std::cout << "--> Constructor 5 test ended with success." <<std::endl;
 }
 
@@ -121,7 +121,7 @@ void LagrangianDSTest::testcomputeDS()
   SP::SiconosVector vf = ds->rhs();
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->vector(0)) == *velocity0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(M, *(vf->vector(1))) == (copy->getFExt() - copy->getFInt() - copy->getNNL()) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(M, *(vf->vector(1))) == (copy->getFExt() - copy->getFInt() - copy->getFGyr()) , true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->block(1, 0))) == (copy->getJacobianFL(0)) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->block(1, 1))) == (copy->getJacobianFL(1)) , true);
