@@ -12,9 +12,9 @@ int main(int argc, char* argv[])
     // == User-defined parameters ==
     unsigned int ndof = 2;  // number of degrees of freedom of your system
     double t0 = 0.0;
-    double T = 10;        // Total simulation times
-    double h = 1.0e-2;      // Time step
-    double Vinit = 10.0;
+    double T = 2.0;        // Total simulation times
+    double h = 1.0e-3;      // Time step
+    double Vinit = 3.0;
 
 
     // ================= Creation of the model =======================
@@ -47,6 +47,9 @@ int main(int argc, char* argv[])
     SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));
     //    process->setComputebFunction("ObserverLCSPlugin","uProcess");
 
+
+    double c =25.0;
+
     // --------------------
     // --- Interactions ---
     // --------------------
@@ -57,8 +60,8 @@ int main(int argc, char* argv[])
     // r = Blambda
     SP::SimpleMatrix B(new SimpleMatrix(ndof, ninter));
     (*B)(0, 0) = 1.0;
-    (*B)(1, 0) = 2.0;
-    (*B)(0, 1) = -2.0;
+    (*B)(1, 0) = 1.0+c;
+    (*B)(0, 1) = -(1.0+c);
     (*B)(1, 1) = 1.0;
     *B = 2.0 * (*B);
     SP::SimpleMatrix C(new SimpleMatrix(ninter, ndof));

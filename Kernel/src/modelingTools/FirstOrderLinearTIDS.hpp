@@ -34,7 +34,7 @@
  *
  *  This class represents first order linear systems of the form:
  * \f[
- * \dot x = Ax(t) + b + r,
+ * \dot x(t) = A x(t) + b + r,
  *  x(t_0)=x_0
  * \f]
  * where
