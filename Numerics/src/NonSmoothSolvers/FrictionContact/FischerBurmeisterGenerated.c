@@ -9,6 +9,15 @@
 #define Rand(x) ((double) rand()/ (double) RAND_MAX)
 #define CHECK(x) x = (isfinite(x) ? x : 0)
 
+// temporary bug fix for overloaded pow. Sympy generates code with long double
+// and it is not clear for all compiler which cast should be applied.
+// The real fix is to prevent sympy from adding the type specifier
+#ifdef __cplusplus
+#define pow(x, y) std::pow(static_cast<double>(x), static_cast<double>(y))
+#else
+#define pow(x,y) pow((double)x, (double)y)
+#endif
+
 void frictionContact3D_FischerBurmeisterFABGenerated(
   double rn,
   double rt1,
