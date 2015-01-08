@@ -4,8 +4,8 @@
 %shared_ptr(TYPE)
 %enddef
 
-# generate this list with grep REGISTER *.i | sed -n 's/.*(\(.*\)).*/DEFINE_TYPEMAPS(\1);/p'
-# and remove the last item
+// generate this list with grep REGISTER *.i | sed -n 's/.*(\(.*\)).*/DEFINE_TYPEMAPS(\1);/p'
+// and remove the last item
 
 DEFINE_TYPEMAPS(Actuator);
 DEFINE_TYPEMAPS(PID);
