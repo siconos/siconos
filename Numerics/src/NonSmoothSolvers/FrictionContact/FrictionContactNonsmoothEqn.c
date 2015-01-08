@@ -179,7 +179,7 @@ void frictionContactNonsmoothEqnInit(
 {
 
 
-  DMUMPS_STRUC_C* mumps_id = malloc(sizeof(DMUMPS_STRUC_C));
+  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)malloc(sizeof(DMUMPS_STRUC_C));
 
   // options with void pointers ?
   options->dparam[7] = (long) mumps_id;

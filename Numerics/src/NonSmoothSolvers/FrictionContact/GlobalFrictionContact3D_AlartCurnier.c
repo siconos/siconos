@@ -596,7 +596,7 @@ void globalFrictionContact3D_sparseGlobalAlartCurnierInit(
   SolverOptions *SO)
 {
 #ifdef WITH_MUMPS
-  DMUMPS_STRUC_C* mumps_id = malloc(sizeof(DMUMPS_STRUC_C));
+  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)malloc(sizeof(DMUMPS_STRUC_C));
 
   // SO with void pointers ?
   SO->dparam[7] = (long) mumps_id;

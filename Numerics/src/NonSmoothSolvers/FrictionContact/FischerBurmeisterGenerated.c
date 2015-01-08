@@ -7,7 +7,13 @@
 #define Max fmax
 #define Heaviside(x) (.5*Sign(x) + .5)
 #define Rand(x) ((double) rand()/ (double) RAND_MAX)
+
+#ifdef __cplusplus
+#include <cmath>
+#define CHECK(x) x = (std::isfinite(x) ? x : 0)
+#else
 #define CHECK(x) x = (isfinite(x) ? x : 0)
+#endif
 
 // temporary bug fix for overloaded pow. Sympy generates code with long double
 // and it is not clear for all compiler which cast should be applied.
@@ -17,6 +23,8 @@
 #else
 #define pow(x,y) pow((double)x, (double)y)
 #endif
+
+#pragma GCC diagnostic ignored "-Wconversion"
 
 void frictionContact3D_FischerBurmeisterFABGenerated(
   double rn,
