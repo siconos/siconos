@@ -84,18 +84,18 @@ int main(int argc, char* argv[])
 
     /*REGULAR PLUGINS - uncomment to use*/
     SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumPlugin:mass"));
-    doublependulum->setComputeNNLFunction("DoublePendulumPlugin", "NNL");
-    doublependulum->setComputeJacobianNNLqDotFunction("DoublePendulumPlugin", "jacobianVNNL");
-    doublependulum->setComputeJacobianNNLqFunction("DoublePendulumPlugin", "jacobianNNLq");
+    doublependulum->setComputeFGyrFunction("DoublePendulumPlugin", "FGyr");
+    doublependulum->setComputeJacobianFGyrqDotFunction("DoublePendulumPlugin", "jacobianVFGyr");
+    doublependulum->setComputeJacobianFGyrqFunction("DoublePendulumPlugin", "jacobianFGyrq");
     doublependulum->setComputeFIntFunction("DoublePendulumPlugin", "FInt");
     doublependulum->setComputeJacobianFIntqDotFunction("DoublePendulumPlugin", "jacobianVFInt");
     doublependulum->setComputeJacobianFIntqFunction("DoublePendulumPlugin", "jacobianFIntq");
 
     /*SYMPY PLUGINS - uncomment to use*/
     // SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumSymPyPlugin:mass"));
-    // doublependulum->setComputeNNLFunction("DoublePendulumSymPyPlugin", "NNL");
-    // doublependulum->setComputeJacobianNNLqDotFunction("DoublePendulumSymPyPlugin", "jacobianVNNL");
-    // doublependulum->setComputeJacobianNNLqFunction("DoublePendulumSymPyPlugin", "jacobianNNLq");
+    // doublependulum->setComputeFGyrFunction("DoublePendulumSymPyPlugin", "FGyr");
+    // doublependulum->setComputeJacobianFGyrqDotFunction("DoublePendulumSymPyPlugin", "jacobianVFGyr");
+    // doublependulum->setComputeJacobianFGyrqFunction("DoublePendulumSymPyPlugin", "jacobianFGyrq");
 
     // -------------------
     // --- Interactions---

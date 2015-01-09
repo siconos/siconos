@@ -69,9 +69,9 @@ int main(int argc, char* argv[])
 
     // external plug-in
     arm->setComputeMassFunction("RobotPlugin", "mass");
-    arm->setComputeNNLFunction("RobotPlugin", "NNL");
-    arm->setComputeJacobianNNLqDotFunction("RobotPlugin", "jacobianVNNL");
-    arm->setComputeJacobianNNLqFunction("RobotPlugin", "jacobianNNLq");
+    arm->setComputeFGyrFunction("RobotPlugin", "FGyr");
+    arm->setComputeJacobianFGyrqDotFunction("RobotPlugin", "jacobianVFGyr");
+    arm->setComputeJacobianFGyrqFunction("RobotPlugin", "jacobianFGyrq");
 
     // -------------------
     // --- Interactions---

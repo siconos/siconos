@@ -37,15 +37,15 @@ SICONOS_EXPORT void mass(unsigned int sizeOfq, const double *q, double *mass, un
   mass[8] = l;
 }
 
-SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FGyr(unsigned int sizeOfq, const double *q, const double *velocity, double *FGyr, unsigned int sizeZ, double* z)
 {
   // nonlinear inertia terms (negative in h according to LagrangianDS)
-  NNL[0] = -m2*l*velocity[2]*velocity[2]*sin(q[2]);
-  NNL[1] = 0.0;
-  NNL[2] = 0.0;
+  FGyr[0] = -m2*l*velocity[2]*velocity[2]*sin(q[2]);
+  FGyr[1] = 0.0;
+  FGyr[2] = 0.0;
 }
 
-SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianFGyrq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   // Jacobian of nonlinear inertia terms with respect to q (columnwise)
   jacob[0] = 0.0;
@@ -61,7 +61,7 @@ SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const do
   jacob[8] = 0.0;
 }
 
-SICONOS_EXPORT void jacobianNNLqDot(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianFGyrqDot(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   // Jacobian of nonlinear inertia terms with respect to velocity (columnwise)
   jacob[0] =  0.;

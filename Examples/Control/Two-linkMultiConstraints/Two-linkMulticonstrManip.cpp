@@ -100,9 +100,9 @@ int main(int argc, char* argv[])
 
     // external plug-in
     arm->setComputeMassFunction("Two-linkMultiPlugin", "mass");
-    arm->setComputeNNLFunction("Two-linkMultiPlugin", "NNL");
-    arm->setComputeJacobianNNLqDotFunction("Two-linkMultiPlugin", "jacobianVNNL");
-    arm->setComputeJacobianNNLqFunction("Two-linkMultiPlugin", "jacobianNNLq");
+    arm->setComputeFGyrFunction("Two-linkMultiPlugin", "FGyr");
+    arm->setComputeJacobianFGyrqDotFunction("Two-linkMultiPlugin", "jacobianVFGyr");
+    arm->setComputeJacobianFGyrqFunction("Two-linkMultiPlugin", "jacobianFGyrq");
     arm->setComputeFIntFunction("Two-linkMultiPlugin", "U");
     arm->setComputeJacobianFIntqDotFunction("Two-linkMultiPlugin", "jacobFintV");
     arm->setComputeJacobianFIntqFunction("Two-linkMultiPlugin", "jacobFintQ");

@@ -39,13 +39,13 @@ SICONOS_EXPORT void mass(unsigned int sizeOfq, const double *q, double *mass, un
   mass[3] = m2 * l2;
 }
 
-SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FGyr(unsigned int sizeOfq, const double *q, const double *velocity, double *FGyr, unsigned int sizeZ, double* z)
 {
-  NNL[0] =  m2 * l2 * velocity[1] * velocity[1] * sin(q[0] - q[1]) ;
-  NNL[1] = -m2 * l1 * velocity[0] * velocity[0] * sin(q[0] - q[1]);
+  FGyr[0] =  m2 * l2 * velocity[1] * velocity[1] * sin(q[0] - q[1]) ;
+  FGyr[1] = -m2 * l1 * velocity[0] * velocity[0] * sin(q[0] - q[1]);
 }
 
-SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianFGyrq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] =  m2 * l2 * velocity[1] * velocity[0] * cos(q[0] - q[1]);
   jacob[1] =  -m2 * l1 * velocity[0] * velocity[0] * cos(q[0] - q[1]);
@@ -53,7 +53,7 @@ SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const do
   jacob[3] =  m2 * l1 * velocity[0] * velocity[0] * cos(q[0] - q[1]);
 }
 
-SICONOS_EXPORT void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianVFGyr(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] =  0.0;
   jacob[1] = -2.0 * m2 * l1 * velocity[0] * sin(q[0] - q[1]);

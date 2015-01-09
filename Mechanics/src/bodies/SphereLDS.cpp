@@ -67,12 +67,12 @@ void SphereLDS::computeMass()
 
 }
 
-void SphereLDS::computeNNL()
+void SphereLDS::computeFGyr()
 {
-  SphereLDS::computeNNL(q(), velocity());
+  SphereLDS::computeFGyr(q(), velocity());
 }
 
-void SphereLDS::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
+void SphereLDS::computeFGyr(SP::SiconosVector q, SP::SiconosVector v)
 {
 
   assert(q->size() == 6);
@@ -90,27 +90,27 @@ void SphereLDS::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
 
   double sintheta   = sin(theta);
 
-  (*_NNL)(0) = (*_NNL)(1) = (*_NNL)(2) = 0;
+  (*_fGyr)(0) = (*_fGyr)(1) = (*_fGyr)(2) = 0;
 
-  (*_NNL)(3) = I * psidot * phidot * sintheta;
-  (*_NNL)(4) = -I * psidot * thetadot * sintheta;
-  (*_NNL)(5) = -I * phidot * thetadot * sintheta;
+  (*_fGyr)(3) = I * psidot * phidot * sintheta;
+  (*_fGyr)(4) = -I * psidot * thetadot * sintheta;
+  (*_fGyr)(5) = -I * phidot * thetadot * sintheta;
 }
 
 
 
-void SphereLDS::computeJacobianNNLq()
+void SphereLDS::computeJacobianFGyrq()
 {
 
-  SphereLDS::computeJacobianNNLq(q(), velocity());
+  SphereLDS::computeJacobianFGyrq(q(), velocity());
 }
-void SphereLDS::computeJacobianNNLqDot()
+void SphereLDS::computeJacobianFGyrqDot()
 {
 
-  SphereLDS::computeJacobianNNLqDot(q(), velocity());
+  SphereLDS::computeJacobianFGyrqDot(q(), velocity());
 }
 
-void SphereLDS::computeJacobianNNLq(SP::SiconosVector q, SP::SiconosVector v)
+void SphereLDS::computeJacobianFGyrq(SP::SiconosVector q, SP::SiconosVector v)
 {
   double theta    = q->getValue(3);
 
@@ -120,15 +120,15 @@ void SphereLDS::computeJacobianNNLq(SP::SiconosVector q, SP::SiconosVector v)
 
   double costheta = cos(theta);
 
-  _jacobianNNLq->zero();
+  _jacobianFGyrq->zero();
 
-  (*_jacobianNNLq)(3, 3) = -I * psidot * phidot * costheta;
-  (*_jacobianNNLq)(4, 3) = I * psidot * thetadot * costheta;
-  (*_jacobianNNLq)(5, 3) = I * psidot * thetadot * costheta;
+  (*_jacobianFGyrq)(3, 3) = -I * psidot * phidot * costheta;
+  (*_jacobianFGyrq)(4, 3) = I * psidot * thetadot * costheta;
+  (*_jacobianFGyrq)(5, 3) = I * psidot * thetadot * costheta;
 
 
 }
-void SphereLDS::computeJacobianNNLqDot(SP::SiconosVector q, SP::SiconosVector v)
+void SphereLDS::computeJacobianFGyrqDot(SP::SiconosVector q, SP::SiconosVector v)
 {
   double theta    = q->getValue(3);
 
@@ -138,20 +138,20 @@ void SphereLDS::computeJacobianNNLqDot(SP::SiconosVector q, SP::SiconosVector v)
 
   double sintheta   = sin(theta);
 
-  _jacobianNNLqDot->zero();
+  _jacobianFGyrqDot->zero();
 
 
-  (*_jacobianNNLqDot)(3, 3) = 0;
-  (*_jacobianNNLqDot)(3, 4) = I * psidot * sintheta;
-  (*_jacobianNNLqDot)(3, 5) = I * phidot * sintheta;
+  (*_jacobianFGyrqDot)(3, 3) = 0;
+  (*_jacobianFGyrqDot)(3, 4) = I * psidot * sintheta;
+  (*_jacobianFGyrqDot)(3, 5) = I * phidot * sintheta;
 
-  (*_jacobianNNLqDot)(4, 3) = -I * psidot * sintheta;
-  (*_jacobianNNLqDot)(4, 4) = 0;
-  (*_jacobianNNLqDot)(4, 5) = -I * thetadot * sintheta;
+  (*_jacobianFGyrqDot)(4, 3) = -I * psidot * sintheta;
+  (*_jacobianFGyrqDot)(4, 4) = 0;
+  (*_jacobianFGyrqDot)(4, 5) = -I * thetadot * sintheta;
 
-  (*_jacobianNNLqDot)(5, 3) =  -I * phidot * sintheta;
-  (*_jacobianNNLqDot)(5, 4) =  -I * thetadot * sintheta;
-  (*_jacobianNNLqDot)(5, 5) = 0;
+  (*_jacobianFGyrqDot)(5, 3) =  -I * phidot * sintheta;
+  (*_jacobianFGyrqDot)(5, 4) =  -I * thetadot * sintheta;
+  (*_jacobianFGyrqDot)(5, 5) = 0;
 
 }
 
@@ -178,13 +178,13 @@ SphereLDS::SphereLDS(double r, double m,
 
   computeMass();
 
-  _jacobianNNLq.reset(new SimpleMatrix(_ndof, _ndof));
-  _jacobianNNLqDot.reset(new SimpleMatrix(_ndof, _ndof));
+  _jacobianFGyrq.reset(new SimpleMatrix(_ndof, _ndof));
+  _jacobianFGyrqDot.reset(new SimpleMatrix(_ndof, _ndof));
 
-  _NNL.reset(new SiconosVector(_ndof));
-  _NNL->zero();
+  _fGyr.reset(new SiconosVector(_ndof));
+  _fGyr->zero();
 
-  computeNNL();
+  computeFGyr();
 
 
 }

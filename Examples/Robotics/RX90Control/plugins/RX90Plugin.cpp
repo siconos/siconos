@@ -358,7 +358,7 @@ SICONOS_EXPORT void mass(unsigned int sizeOfq, const double *q, double *mass, un
   Inertia(mass, q_local);
 }
 
-SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FGyr(unsigned int sizeOfq, const double *q, const double *velocity, double *FGyr, unsigned int sizeZ, double* z)
 {
   double q_local[sizeOfq];
   double v_local[sizeOfq];
@@ -367,15 +367,15 @@ SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *vel
     q_local[i] = q[i];
     v_local[i] = velocity[i];
   }
-  NLEffects(NNL, q_local, v_local);
+  NLEffects(FGyr, q_local, v_local);
 }
 
-SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacobq, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobianFGyrq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacobq, unsigned int sizeOfZ, double* z)
 {
   //dummy function
 }
 
-SICONOS_EXPORT void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacobv, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobianVFGyr(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacobv, unsigned int sizeOfZ, double* z)
 {
   //dummy function
 }

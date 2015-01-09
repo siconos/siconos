@@ -49,9 +49,9 @@ int main(int argc, char* argv[])
 
     // external plug-in
     bip->setComputeMassFunction("RobotPlugin", "mass");
-    bip->setComputeNNLFunction("RobotPlugin", "NNL");
-    bip->setComputeJacobianNNLFunction(0, "RobotPlugin", "jacobianNNLq");
-    bip->setComputeJacobianNNLFunction(1, "RobotPlugin", "jacobianVNNL");
+    bip->setComputeFGyrFunction("RobotPlugin", "FGyr");
+    bip->setComputeJacobianFGyrFunction(0, "RobotPlugin", "jacobianFGyrq");
+    bip->setComputeJacobianFGyrFunction(1, "RobotPlugin", "jacobianVFGyr");
 
     // -------------------
     // --- Interactions---

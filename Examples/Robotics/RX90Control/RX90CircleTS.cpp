@@ -78,9 +78,9 @@ int main(int argc, char* argv[])
 
     // external plug-in
     //    arm->setComputeMassFunction("RX90Plugin","mass");
-    arm->setComputeNNLFunction("RX90Plugin", "NNL");
-    arm->setComputeJacobianNNLqFunction("RX90Plugin", "jacobianVNNL");
-    arm->setComputeJacobianNNLqDotFunction("RX90Plugin", "jacobianNNLq");
+    arm->setComputeFGyrFunction("RX90Plugin", "FGyr");
+    arm->setComputeJacobianFGyrqFunction("RX90Plugin", "jacobianVFGyr");
+    arm->setComputeJacobianFGyrqDotFunction("RX90Plugin", "jacobianFGyrq");
     arm->setComputeFIntFunction("RX90Plugin", "U");
     arm->setComputeJacobianFIntqFunction("RX90Plugin", "jacobFintV");
     arm->setComputeJacobianFIntqDotFunction("RX90Plugin", "jacobFintQ");

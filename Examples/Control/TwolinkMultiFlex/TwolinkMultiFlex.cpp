@@ -107,9 +107,9 @@ int main(int argc, char* argv[])
 
     // external plug-in
     arm->setComputeMassFunction("TwolinkMultiFlexPlugin", "mass");
-    arm->setComputeNNLFunction("TwolinkMultiFlexPlugin", "NNL");
-    arm->setComputeJacobianNNLqDotFunction("TwolinkMultiFlexPlugin", "jacobianVNNL");
-    arm->setComputeJacobianNNLqFunction("TwolinkMultiFlexPlugin", "jacobianNNLq");
+    arm->setComputeFGyrFunction("TwolinkMultiFlexPlugin", "FGyr");
+    arm->setComputeJacobianFGyrqDotFunction("TwolinkMultiFlexPlugin", "jacobianVFGyr");
+    arm->setComputeJacobianFGyrqFunction("TwolinkMultiFlexPlugin", "jacobianFGyrq");
     arm->setComputeFIntFunction("TwolinkMultiFlexPlugin", "U");
     arm->setComputeJacobianFIntqDotFunction("TwolinkMultiFlexPlugin", "jacobFintV");
     arm->setComputeJacobianFIntqFunction("TwolinkMultiFlexPlugin", "jacobFintQ");

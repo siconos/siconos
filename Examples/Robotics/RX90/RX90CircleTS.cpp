@@ -72,11 +72,11 @@ int main(int argc, char* argv[])
     SP::LagrangianDS arm(new LagrangianDS(q0, v0, "RX90Plugin:mass"));
 
     // external plug-in
-    arm->setComputeNNLFunction("RX90Plugin", "NNL");
-    //arm->setComputeJacobianNNLFunction(1,"RX90Plugin","jacobianVNNL");
-    arm->setComputeJacobianNNLqDotFunction("RX90Plugin", "jacobianVNNL");
-    //arm->setComputeJacobianNNLFunction(0,"RX90Plugin","jacobianNNLq");
-    arm->setComputeJacobianNNLqFunction("RX90Plugin", "jacobianNNLq");
+    arm->setComputeFGyrFunction("RX90Plugin", "FGyr");
+    //arm->setComputeJacobianFGyrFunction(1,"RX90Plugin","jacobianVFGyr");
+    arm->setComputeJacobianFGyrqDotFunction("RX90Plugin", "jacobianVFGyr");
+    //arm->setComputeJacobianFGyrFunction(0,"RX90Plugin","jacobianFGyrq");
+    arm->setComputeJacobianFGyrqFunction("RX90Plugin", "jacobianFGyrq");
     arm->setComputeFIntFunction("RX90Plugin", "U");
     //arm->setComputeJacobianFIntFunction(1,"RX90Plugin","jacobFintV");
     arm->setComputeJacobianFIntqDotFunction("RX90Plugin", "jacobFintV");

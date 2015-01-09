@@ -59,9 +59,9 @@ int main(int argc, char* argv[])
     cout << "====> Model loading ..." << endl << endl;
 
     SP::LagrangianDS pendulum(new LagrangianDS(q0, v0, "PendulumPlugin:mass"));
-    pendulum->setComputeNNLFunction("PendulumPlugin", "NNL");
-    pendulum->setComputeJacobianNNLqFunction("PendulumPlugin", "jacobianNNLq");
-    pendulum->setComputeJacobianNNLqDotFunction("PendulumPlugin", "jacobianNNLqDot");
+    pendulum->setComputeFGyrFunction("PendulumPlugin", "FGyr");
+    pendulum->setComputeJacobianFGyrqFunction("PendulumPlugin", "jacobianFGyrq");
+    pendulum->setComputeJacobianFGyrqDotFunction("PendulumPlugin", "jacobianFGyrqDot");
     pendulum->setComputeFIntFunction("PendulumPlugin", "FInt");
     pendulum->setComputeJacobianFIntqFunction("PendulumPlugin", "jacobianFIntq");
     pendulum->setComputeJacobianFIntqDotFunction("PendulumPlugin", "jacobianFIntqDot");

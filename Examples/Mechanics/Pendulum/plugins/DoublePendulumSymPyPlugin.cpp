@@ -49,24 +49,24 @@ SICONOS_EXPORT void mass(unsigned int sizeOfq, const double *q, double *mass, un
 
 }
 
-SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FGyr(unsigned int sizeOfq, const double *q, const double *velocity, double *FGyr, unsigned int sizeZ, double* z)
 {
 
   int n = sizeOfq;
  
-  // NNL set to zero
+  // FGyr set to zero
   for (int i = 0; i < n; i++)
   {
 
-    NNL[i] = 0.0;	
+    FGyr[i] = 0.0;	
 
   }
 
-  NNLEffects(NNL, q, velocity);
+  FGyrEffects(FGyr, q, velocity);
 
 }
 
-SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianFGyrq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
 
   int n = sizeOfq;
@@ -81,11 +81,11 @@ SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const do
 
   }
 
-  JacobianQNNL(jacob, q, velocity);
+  JacobianQFGyr(jacob, q, velocity);
 
 }
 
-SICONOS_EXPORT void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void jacobianVFGyr(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
 
   int n = sizeOfq;
@@ -100,7 +100,7 @@ SICONOS_EXPORT void jacobianVNNL(unsigned int sizeOfq, const double *q, const  d
 
   }
 
-  JacobianVNNL(jacob, q, velocity);
+  JacobianVFGyr(jacob, q, velocity);
 
 }
 

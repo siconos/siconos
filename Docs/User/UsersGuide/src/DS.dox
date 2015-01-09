@@ -187,9 +187,9 @@ with:
 - q: state of the system - Vector of size nDof.
 - \f$ \dot q \f$ the derivative of the state according to time.
 - \f{eqnarray*}
- f_L(t,\dot q , q , z) =  F_{Ext}(t,z) - NNL(\dot q, q,z) - F_{Int}(t,\dot q , q , z) 
+ f_L(t,\dot q , q , z) =  F_{Ext}(t,z) - fGyr(\dot q, q,z) - F_{Int}(t,\dot q , q , z) 
 \f}
-- \f$NNL(\dot q, q,z)\f$:  non linear terms, time-independent - Vector of size nDof.
+- \f$fGyr(\dot q, q,z)\f$:  non linear terms, time-independent - Vector of size nDof.
 - \f$F_{Int}(t,\dot q , q , z)\f$: time-dependent linear terms - Vector of size nDof.
 - \f$F_{Ext}(t,z)\f$: external forces, time-dependent BUT do not depend on state - Vector of size nDof.
 - p: input due to non-smooth behavior - Vector of size nDof.
@@ -200,12 +200,12 @@ Some gradients are also required:
 
 - jacobianFInt[0] = \f$\nabla_q F_{Int}(t,q,\dot q,z)\f$ - nDofX nDof matrix.
 - jacobianFInt[1] = \f$\nabla_{\dot q} F_{Int}(t,q,\dot q,z)\f$ - nDof X nDof matrix.
-- jacobianNNL[0] = \f$\nabla_q NNL(\dot q, q, z)\f$ - nDof X nDof matrix.
-- jacobianNNL[1] = \f$\nabla_{\dot q}NNL(\dot q, q, z)\f$ - nDof X nDof matrix.
+- jacobianfGyr[0] = \f$\nabla_q fGyr(\dot q, q, z)\f$ - nDof X nDof matrix.
+- jacobianfGyr[1] = \f$\nabla_{\dot q}fGyr(\dot q, q, z)\f$ - nDof X nDof matrix.
 
 We consider that the Mass matrix is invertible and that its gradient is null.
 
-There are plug-in functions in this class for \f$ F_{int}, F_{Ext}, M, NNL\f$ and the four Jacobian matrices. 
+There are plug-in functions in this class for \f$ F_{int}, F_{Ext}, M, fGyr\f$ and the four Jacobian matrices. 
 
 Other variables are those of DynamicalSystem class, but some of them are not defined and thus not usable: \n
 - g and its gradients
@@ -245,7 +245,7 @@ With:
 
 Other variables are those of DynamicalSystem and LagrangianDS classes, but some of them are not defined and thus not usable: \n
 - g and its gradients
-- fL, fInt, NNL and their gradients.
+- fL, fInt, fGyr and their gradients.
 
 And we have:
 
@@ -271,7 +271,7 @@ See \ref doc_usingPlugin for details on how to use a plug-in in Siconos. \n
 - DynamicalSystem: \f$ g(t,\dot x,x,z), \ \ \nabla_x g(t,\dot x,x,z), \ \ \nabla_{\dot x} g(t,\dot x,x,z) \f$
 - FirstOrderNonLinearDS: \f$ f(t,x,z), \ \ \nabla_x f(t,x,z) \f$
 - FirstOrderLinearDS: A(t,z), b(t,z)
-- LagrangianDS: \f$ M(q,z), \ \ NNL(\dot q,q,z), \ \ F_{Int}(t,\dot q,q ,z), \ \ F_{Ext}(t,z), \ \ \nabla_q F_{Int}(t,\dot q,q,z), \ \ \nabla_{\dot q}F_{Int}(t,\dot q, q, z), \ \ \nabla_q NNL(\dot q, q, z), \ \ \nabla_{\dot q}NNL(\dot q, q, z) \f$.
+- LagrangianDS: \f$ M(q,z), \ \ fGyr(\dot q,q,z), \ \ F_{Int}(t,\dot q,q ,z), \ \ F_{Ext}(t,z), \ \ \nabla_q F_{Int}(t,\dot q,q,z), \ \ \nabla_{\dot q}F_{Int}(t,\dot q, q, z), \ \ \nabla_q fGyr(\dot q, q, z), \ \ \nabla_{\dot q}fGyr(\dot q, q, z) \f$.
 - LagrangianLinearTIDS:\f$  F_{Ext}(t,z) \f$
 
 */

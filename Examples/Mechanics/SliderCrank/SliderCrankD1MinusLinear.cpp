@@ -87,9 +87,9 @@ int main(int argc, char* argv[])
     cout << "====> Model loading ..." << endl << endl;
 
     SP::LagrangianDS slider(new LagrangianDS(q0, v0, "SliderCrankPlugin:mass"));
-    slider->setComputeNNLFunction("SliderCrankPlugin", "NNL");
-    slider->setComputeJacobianNNLqFunction("SliderCrankPlugin", "jacobianNNLq");
-    slider->setComputeJacobianNNLqDotFunction("SliderCrankPlugin", "jacobianNNLqDot");
+    slider->setComputeFGyrFunction("SliderCrankPlugin", "FGyr");
+    slider->setComputeJacobianFGyrqFunction("SliderCrankPlugin", "jacobianFGyrq");
+    slider->setComputeJacobianFGyrqDotFunction("SliderCrankPlugin", "jacobianFGyrqDot");
     slider->setComputeFIntFunction("SliderCrankPlugin", "FInt");
     slider->setComputeJacobianFIntqFunction("SliderCrankPlugin", "jacobianFIntq");
     slider->setComputeJacobianFIntqDotFunction("SliderCrankPlugin", "jacobianFIntqDot");

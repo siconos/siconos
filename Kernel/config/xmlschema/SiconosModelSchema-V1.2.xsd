@@ -338,11 +338,11 @@
 						<xsd:element name="Mass" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="FInt" type="vector" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="FExt" type="vector" minOccurs="0" maxOccurs="1"/>
-						<xsd:element name="NNL" type="vector" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="FGyr" type="vector" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="JacobianQFInt" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="JacobianVelocityFInt" type="matrix" minOccurs="0" maxOccurs="1"/>
-						<xsd:element name="JacobianQNNL" type="matrix" minOccurs="0" maxOccurs="1"/>
-						<xsd:element name="JacobianVelocityNNL" type="matrix" minOccurs="0" maxOccurs="1"/>
+						<xsd:element name="JacobianQFGyr" type="matrix" minOccurs="0" maxOccurs="1"/>
+						<xsd:element name="JacobianVelocityFGyr" type="matrix" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
 				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>

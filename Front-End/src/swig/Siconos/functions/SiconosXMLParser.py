@@ -3441,18 +3441,18 @@ class FirstOrderLinearTIDSType(GeneratedsSuper):
 class LagrangianDSType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, Name=None, q0=None, Velocity0=None, Mass=None, FInt=None, FExt=None, NNL=None, JacobianQFInt=None, JacobianVelocityFInt=None, JacobianQNNL=None, JacobianVelocityNNL=None):
+    def __init__(self, Name=None, q0=None, Velocity0=None, Mass=None, FInt=None, FExt=None, FGyr=None, JacobianQFInt=None, JacobianVelocityFInt=None, JacobianQFGyr=None, JacobianVelocityFGyr=None):
         self.Name = _cast(None, Name)
         self.q0 = q0
         self.Velocity0 = Velocity0
         self.Mass = Mass
         self.FInt = FInt
         self.FExt = FExt
-        self.NNL = NNL
+        self.FGyr = FGyr
         self.JacobianQFInt = JacobianQFInt
         self.JacobianVelocityFInt = JacobianVelocityFInt
-        self.JacobianQNNL = JacobianQNNL
-        self.JacobianVelocityNNL = JacobianVelocityNNL
+        self.JacobianQFGyr = JacobianQFGyr
+        self.JacobianVelocityFGyr = JacobianVelocityFGyr
     def factory(*args_, **kwargs_):
         if LagrangianDSType.subclass:
             return LagrangianDSType.subclass(*args_, **kwargs_)
@@ -3469,16 +3469,16 @@ class LagrangianDSType(GeneratedsSuper):
     def set_FInt(self, FInt): self.FInt = FInt
     def get_FExt(self): return self.FExt
     def set_FExt(self, FExt): self.FExt = FExt
-    def get_NNL(self): return self.NNL
-    def set_NNL(self, NNL): self.NNL = NNL
+    def get_FGyr(self): return self.FGyr
+    def set_FGyr(self, FGyr): self.FGyr = FGyr
     def get_JacobianQFInt(self): return self.JacobianQFInt
     def set_JacobianQFInt(self, JacobianQFInt): self.JacobianQFInt = JacobianQFInt
     def get_JacobianVelocityFInt(self): return self.JacobianVelocityFInt
     def set_JacobianVelocityFInt(self, JacobianVelocityFInt): self.JacobianVelocityFInt = JacobianVelocityFInt
-    def get_JacobianQNNL(self): return self.JacobianQNNL
-    def set_JacobianQNNL(self, JacobianQNNL): self.JacobianQNNL = JacobianQNNL
-    def get_JacobianVelocityNNL(self): return self.JacobianVelocityNNL
-    def set_JacobianVelocityNNL(self, JacobianVelocityNNL): self.JacobianVelocityNNL = JacobianVelocityNNL
+    def get_JacobianQFGyr(self): return self.JacobianQFGyr
+    def set_JacobianQFGyr(self, JacobianQFGyr): self.JacobianQFGyr = JacobianQFGyr
+    def get_JacobianVelocityFGyr(self): return self.JacobianVelocityFGyr
+    def set_JacobianVelocityFGyr(self, JacobianVelocityFGyr): self.JacobianVelocityFGyr = JacobianVelocityFGyr
     def get_Name(self): return self.Name
     def set_Name(self, Name): self.Name = Name
     def hasContent_(self):
@@ -3488,11 +3488,11 @@ class LagrangianDSType(GeneratedsSuper):
             self.Mass is not None or
             self.FInt is not None or
             self.FExt is not None or
-            self.NNL is not None or
+            self.FGyr is not None or
             self.JacobianQFInt is not None or
             self.JacobianVelocityFInt is not None or
-            self.JacobianQNNL is not None or
-            self.JacobianVelocityNNL is not None
+            self.JacobianQFGyr is not None or
+            self.JacobianVelocityFGyr is not None
         ):
             return True
         else:
@@ -3532,16 +3532,16 @@ class LagrangianDSType(GeneratedsSuper):
             self.FInt.export(outfile, level, namespace_, name_='FInt', pretty_print=pretty_print)
         if self.FExt is not None:
             self.FExt.export(outfile, level, namespace_, name_='FExt', pretty_print=pretty_print)
-        if self.NNL is not None:
-            self.NNL.export(outfile, level, namespace_, name_='NNL', pretty_print=pretty_print)
+        if self.FGyr is not None:
+            self.FGyr.export(outfile, level, namespace_, name_='FGyr', pretty_print=pretty_print)
         if self.JacobianQFInt is not None:
             self.JacobianQFInt.export(outfile, level, namespace_, name_='JacobianQFInt', pretty_print=pretty_print)
         if self.JacobianVelocityFInt is not None:
             self.JacobianVelocityFInt.export(outfile, level, namespace_, name_='JacobianVelocityFInt', pretty_print=pretty_print)
-        if self.JacobianQNNL is not None:
-            self.JacobianQNNL.export(outfile, level, namespace_, name_='JacobianQNNL', pretty_print=pretty_print)
-        if self.JacobianVelocityNNL is not None:
-            self.JacobianVelocityNNL.export(outfile, level, namespace_, name_='JacobianVelocityNNL', pretty_print=pretty_print)
+        if self.JacobianQFGyr is not None:
+            self.JacobianQFGyr.export(outfile, level, namespace_, name_='JacobianQFGyr', pretty_print=pretty_print)
+        if self.JacobianVelocityFGyr is not None:
+            self.JacobianVelocityFGyr.export(outfile, level, namespace_, name_='JacobianVelocityFGyr', pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='LagrangianDSType'):
         level += 1
         already_processed = set()
@@ -3584,10 +3584,10 @@ class LagrangianDSType(GeneratedsSuper):
             self.FExt.exportLiteral(outfile, level, name_='FExt')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.NNL is not None:
+        if self.FGyr is not None:
             showIndent(outfile, level)
-            outfile.write('NNL=model_.vector(\n')
-            self.NNL.exportLiteral(outfile, level, name_='NNL')
+            outfile.write('FGyr=model_.vector(\n')
+            self.FGyr.exportLiteral(outfile, level, name_='FGyr')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.JacobianQFInt is not None:
@@ -3602,16 +3602,16 @@ class LagrangianDSType(GeneratedsSuper):
             self.JacobianVelocityFInt.exportLiteral(outfile, level, name_='JacobianVelocityFInt')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.JacobianQNNL is not None:
+        if self.JacobianQFGyr is not None:
             showIndent(outfile, level)
-            outfile.write('JacobianQNNL=model_.matrix(\n')
-            self.JacobianQNNL.exportLiteral(outfile, level, name_='JacobianQNNL')
+            outfile.write('JacobianQFGyr=model_.matrix(\n')
+            self.JacobianQFGyr.exportLiteral(outfile, level, name_='JacobianQFGyr')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.JacobianVelocityNNL is not None:
+        if self.JacobianVelocityFGyr is not None:
             showIndent(outfile, level)
-            outfile.write('JacobianVelocityNNL=model_.matrix(\n')
-            self.JacobianVelocityNNL.exportLiteral(outfile, level, name_='JacobianVelocityNNL')
+            outfile.write('JacobianVelocityFGyr=model_.matrix(\n')
+            self.JacobianVelocityFGyr.exportLiteral(outfile, level, name_='JacobianVelocityFGyr')
             showIndent(outfile, level)
             outfile.write('),\n')
     def build(self, node):
@@ -3647,10 +3647,10 @@ class LagrangianDSType(GeneratedsSuper):
             obj_ = vector.factory()
             obj_.build(child_)
             self.FExt = obj_
-        elif nodeName_ == 'NNL':
+        elif nodeName_ == 'FGyr':
             obj_ = vector.factory()
             obj_.build(child_)
-            self.NNL = obj_
+            self.FGyr = obj_
         elif nodeName_ == 'JacobianQFInt':
             obj_ = matrix.factory()
             obj_.build(child_)
@@ -3659,14 +3659,14 @@ class LagrangianDSType(GeneratedsSuper):
             obj_ = matrix.factory()
             obj_.build(child_)
             self.JacobianVelocityFInt = obj_
-        elif nodeName_ == 'JacobianQNNL':
+        elif nodeName_ == 'JacobianQFGyr':
             obj_ = matrix.factory()
             obj_.build(child_)
-            self.JacobianQNNL = obj_
-        elif nodeName_ == 'JacobianVelocityNNL':
+            self.JacobianQFGyr = obj_
+        elif nodeName_ == 'JacobianVelocityFGyr':
             obj_ = matrix.factory()
             obj_.build(child_)
-            self.JacobianVelocityNNL = obj_
+            self.JacobianVelocityFGyr = obj_
 # end class LagrangianDSType
 
 
@@ -6648,7 +6648,7 @@ GDSClassesMapping = {
     'NewtonImpactNSL': NewtonImpactNSLType,
     'iparam': vector,
     'LsodarOSI': LsodarOSIType,
-    'NNL': vector,
+    'FGyr': vector,
     'Interaction': InteractionType,
     'LagrangianRheonomousR': LagrangianRheonomousRType,
     'LagrangianLinearTIDS': LagrangianLinearTIDSType,
@@ -6702,7 +6702,7 @@ GDSClassesMapping = {
     'OneStepNSProblems_List': OneStepNSProblems_ListType,
     'LagrangianDS': LagrangianDSType,
     'Relay': RelayType,
-    'JacobianQNNL': matrix,
+    'JacobianQFGyr': matrix,
     'b': vector,
     'e': vector,
     'LCP': LCPType,
@@ -6717,7 +6717,7 @@ GDSClassesMapping = {
     'FirstOrderR': FirstOrderRType,
     'B': matrix,
     'JacobianVelocityFInt': matrix,
-    'JacobianVelocityNNL': matrix,
+    'JacobianVelocityFGyr': matrix,
 }
 
 

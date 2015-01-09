@@ -1,5 +1,5 @@
 #include <math.h>
-void JacobianQNNL(double* Jac, const double* Q, const double* QP)
+void JacobianQFGyr(double* Jac, const double* Q, const double* QP)
 {
 
 double Q1 = Q[0];

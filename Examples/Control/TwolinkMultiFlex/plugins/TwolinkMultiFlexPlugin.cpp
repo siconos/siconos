@@ -71,15 +71,15 @@ SICONOS_EXPORT void mass(unsigned int sizeOfq, const double *q, double *mass, un
   mass[15]  = J2;
 }
 
-SICONOS_EXPORT void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void FGyr(unsigned int sizeOfq, const double *q, const double *velocity, double *FGyr, unsigned int sizeZ, double* z)
 {
-  NNL[0] = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
-  NNL[1] = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
-  NNL[2] = K1 * (q[2] - q[0]);
-  NNL[3] = K2 * (q[3] - q[1]);
+  FGyr[0] = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
+  FGyr[1] = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
+  FGyr[2] = K1 * (q[2] - q[0]);
+  FGyr[3] = K2 * (q[3] - q[1]);
 }
 
-SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobianFGyrq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   jacob[0] = -g * (l1 * sin(q[0]) * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) / 2) + K1;
   jacob[1] = -g * m2 * l2 * sin(q[0] + q[1]) / 2;
@@ -99,7 +99,7 @@ SICONOS_EXPORT void jacobianNNLq(unsigned int sizeOfq, const double *q, const do
   jacob[15] = K2;
 }
 
-SICONOS_EXPORT void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void jacobianVFGyr(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   jacob[0] = -m2 * l1 * l2 * sin(q[1]) * velocity[1];
   jacob[1] = m2 * l1 * l2 * sin(q[1]) * velocity[0];
@@ -128,15 +128,15 @@ SICONOS_EXPORT void U(double time, unsigned int sizeOfq, const double *q, const 
   double detm = m11 * m22 - m12 * m12;
   double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(q[1]) * velocity[1];
 
-  double NNL0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
-  double NNL1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
+  double FGyr0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
+  double FGyr1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
 
   // acceleration in q[0],q[1] coordinates
-  double dv0 = -(m22 * NNL0 - m12 * NNL1) / detm;
-  double dv1 = -(m11 * NNL1 - m12 * NNL0) / detm;
+  double dv0 = -(m22 * FGyr0 - m12 * FGyr1) / detm;
+  double dv1 = -(m11 * FGyr1 - m12 * FGyr0) / detm;
 
-  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm);
-  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * FGyr0 - m12 * FGyr1) * ddetm) / (detm * detm);
+  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * FGyr1 - m12 * FGyr0) * ddetm) / (detm * detm);
 
   // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
@@ -345,15 +345,15 @@ SICONOS_EXPORT void U1(double time, unsigned int sizeOfq, const double *q, const
   double detm = m11 * m22 - m12 * m12;
   double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(q[1]) * velocity[1];
 
-  double NNL0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
-  double NNL1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
+  double FGyr0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
+  double FGyr1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
 
   // acceleration in q[0],q[1] coordinates
-  double dv0 = -(m22 * NNL0 - m12 * NNL1) / detm;
-  double dv1 = -(m11 * NNL1 - m12 * NNL0) / detm;
+  double dv0 = -(m22 * FGyr0 - m12 * FGyr1) / detm;
+  double dv1 = -(m11 * FGyr1 - m12 * FGyr0) / detm;
 
-  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm);
-  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * FGyr0 - m12 * FGyr1) * ddetm) / (detm * detm);
+  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * FGyr1 - m12 * FGyr0) * ddetm) / (detm * detm);
 
   // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
@@ -617,15 +617,15 @@ SICONOS_EXPORT void U2(double time, unsigned int sizeOfq, const double *q, const
   double detm = m11 * m22 - m12 * m12;
   double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(q[1]) * velocity[1];
 
-  double NNL0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
-  double NNL1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
+  double FGyr0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
+  double FGyr1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
 
   // acceleration in q[0],q[1] coordinates
-  double dv0 = -(m22 * NNL0 - m12 * NNL1) / detm;
-  double dv1 = -(m11 * NNL1 - m12 * NNL0) / detm;
+  double dv0 = -(m22 * FGyr0 - m12 * FGyr1) / detm;
+  double dv1 = -(m11 * FGyr1 - m12 * FGyr0) / detm;
 
-  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm);
-  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * FGyr0 - m12 * FGyr1) * ddetm) / (detm * detm);
+  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * FGyr1 - m12 * FGyr0) * ddetm) / (detm * detm);
 
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
   double y = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
@@ -811,15 +811,15 @@ SICONOS_EXPORT void U3(double time, unsigned int sizeOfq, const double *q, const
   double detm = m11 * m22 - m12 * m12;
   double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(q[1]) * velocity[1];
 
-  double NNL0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
-  double NNL1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
+  double FGyr0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
+  double FGyr1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
 
   // acceleration in q[0],q[1] coordinates
-  double dv0 = -(m22 * NNL0 - m12 * NNL1) / detm;
-  double dv1 = -(m11 * NNL1 - m12 * NNL0) / detm;
+  double dv0 = -(m22 * FGyr0 - m12 * FGyr1) / detm;
+  double dv1 = -(m11 * FGyr1 - m12 * FGyr0) / detm;
 
-  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm);
-  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * FGyr0 - m12 * FGyr1) * ddetm) / (detm * detm);
+  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * FGyr1 - m12 * FGyr0) * ddetm) / (detm * detm);
 
   // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
@@ -1051,15 +1051,15 @@ SICONOS_EXPORT void U4(double time, unsigned int sizeOfq, const double *q, const
   double detm = m11 * m22 - m12 * m12;
   double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(q[1]) * velocity[1];
 
-  double NNL0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
-  double NNL1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
+  double FGyr0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
+  double FGyr1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
 
   // acceleration in q[0],q[1] coordinates
-  double dv0 = -(m22 * NNL0 - m12 * NNL1) / detm;
-  double dv1 = -(m11 * NNL1 - m12 * NNL0) / detm;
+  double dv0 = -(m22 * FGyr0 - m12 * FGyr1) / detm;
+  double dv1 = -(m11 * FGyr1 - m12 * FGyr0) / detm;
 
-  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm);
-  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * FGyr0 - m12 * FGyr1) * ddetm) / (detm * detm);
+  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * FGyr1 - m12 * FGyr0) * ddetm) / (detm * detm);
 
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
   double y = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
@@ -1249,15 +1249,15 @@ SICONOS_EXPORT void U5(double time, unsigned int sizeOfq, const double *q, const
   double detm = m11 * m22 - m12 * m12;
   double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(q[1]) * velocity[1];
 
-  double NNL0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
-  double NNL1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
+  double FGyr0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
+  double FGyr1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
 
   // acceleration in q[0],q[1] coordinates
-  double dv0 = -(m22 * NNL0 - m12 * NNL1) / detm;
-  double dv1 = -(m11 * NNL1 - m12 * NNL0) / detm;
+  double dv0 = -(m22 * FGyr0 - m12 * FGyr1) / detm;
+  double dv1 = -(m11 * FGyr1 - m12 * FGyr0) / detm;
 
-  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm);
-  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * FGyr0 - m12 * FGyr1) * ddetm) / (detm * detm);
+  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * FGyr1 - m12 * FGyr0) * ddetm) / (detm * detm);
 
   // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
@@ -1476,15 +1476,15 @@ SICONOS_EXPORT void U6(double time, unsigned int sizeOfq, const double *q, const
   double detm = m11 * m22 - m12 * m12;
   double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(q[1]) * velocity[1];
 
-  double NNL0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
-  double NNL1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
+  double FGyr0 = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2) + K1 * (q[0] - q[2]);
+  double FGyr1 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[0] + q[1]) / 2 + K2 * (q[1] - q[3]);
 
   // acceleration in q[0],q[1] coordinates
-  double dv0 = -(m22 * NNL0 - m12 * NNL1) / detm;
-  double dv1 = -(m11 * NNL1 - m12 * NNL0) / detm;
+  double dv0 = -(m22 * FGyr0 - m12 * FGyr1) / detm;
+  double dv1 = -(m11 * FGyr1 - m12 * FGyr0) / detm;
 
-  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm);
-  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * NNL1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+  double ddv0 = -((m22 * (-m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) - m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) - g * (l1 * sin(q[0]) * velocity[0] * (m2 + m1 / 2) + m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2) + K1 * (velocity[0] - velocity[2])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 / 2 - m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3]))) * detm - (m22 * FGyr0 - m12 * FGyr1) * ddetm) / (detm * detm);
+  double ddv1 = -((m11 * (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] * velocity[1] / 2 + m2 * l1 * l2 * sin(q[1]) * velocity[0] * dv0 + K2 * (velocity[1] - velocity[3])) + m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr0 / 2 - m2 * l1 * l2 * sin(q[1]) * velocity[1] * FGyr1 + m12 * (m2 * l1 * l2 * cos(q[1]) * velocity[1] * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + m2 * l1 * l2 * sin(q[1]) * (dv0 * velocity[1] + dv1 * velocity[0] + dv1 * velocity[1]) + g * m2 * l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]) / 2 - K1 * (velocity[0] - velocity[2]))) * detm - (m11 * FGyr1 - m12 * FGyr0) * ddetm) / (detm * detm);
 
   // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);

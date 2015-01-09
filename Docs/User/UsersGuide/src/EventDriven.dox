@@ -196,9 +196,9 @@ This results in the computation of \f$ y, \dot y \f$ at this new point and to an
 
 According to \ref doc_lagds, in Siconos, the Dynamics of Lagrangian systems is written as:
 \f{eqnarray*}
- M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) &=& F_{Ext}(t) + p \\
+ M(q) \ddot q + fGyr(\dot q, q) + F_{Int}(\dot q , q , t) &=& F_{Ext}(t) + p \\
 \f}
-Next,\f$ NNL \f$ term will be forget and considered as included in \f$ F_{Int} \f$. \n
+Next,\f$ fGyr \f$ term will be forget and considered as included in \f$ F_{Int} \f$. \n
 And Lagrangian relations are (see \ref docRelationLag): 
 \f{eqnarray*}	
 y &=& h(Q) \\

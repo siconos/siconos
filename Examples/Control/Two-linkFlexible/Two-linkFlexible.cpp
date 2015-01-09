@@ -102,9 +102,9 @@ int main(int argc, char* argv[])
 
     // external plug-in
     arm->setComputeMassFunction("Two-linkFlexiblePlugin", "mass");
-    arm->setComputeNNLFunction("Two-linkFlexiblePlugin", "NNL");
-    arm->setComputeJacobianNNLqDotFunction("Two-linkFlexiblePlugin", "jacobianVNNL");
-    arm->setComputeJacobianNNLqFunction("Two-linkFlexiblePlugin", "jacobianNNLq");
+    arm->setComputeFGyrFunction("Two-linkFlexiblePlugin", "FGyr");
+    arm->setComputeJacobianFGyrqDotFunction("Two-linkFlexiblePlugin", "jacobianVFGyr");
+    arm->setComputeJacobianFGyrqFunction("Two-linkFlexiblePlugin", "jacobianFGyrq");
     arm->setComputeFIntFunction("Two-linkFlexiblePlugin", "U");
     arm->setComputeJacobianFIntqDotFunction("Two-linkFlexiblePlugin", "jacobFintV");
     arm->setComputeJacobianFIntqFunction("Two-linkFlexiblePlugin", "jacobFintQ");
@@ -349,9 +349,9 @@ int main(int argc, char* argv[])
 
 //     // external plug-in
 //     arm->setComputeMassFunction("Two-linkFlexiblePlugin","mass");
-//     arm->setComputeNNLFunction("Two-linkFlexiblePlugin","NNL");
-//     arm->setComputeJacobianNNLFunction(1,"Two-linkFlexiblePlugin","jacobianVNNL");
-//     arm->setComputeJacobianNNLFunction(0,"Two-linkFlexiblePlugin","jacobianNNLq");
+//     arm->setComputeFGyrFunction("Two-linkFlexiblePlugin","FGyr");
+//     arm->setComputeJacobianFGyrFunction(1,"Two-linkFlexiblePlugin","jacobianVFGyr");
+//     arm->setComputeJacobianFGyrFunction(0,"Two-linkFlexiblePlugin","jacobianFGyrq");
 //     arm->setComputeFExtFunction("Two-linkFlexiblePlugin","U");
 //     arm->setzPtr(z);
 

@@ -150,7 +150,7 @@ We note that \f$q_{d}=q^{*}_{d}\f$ on \f$(t_{f}^{k},t_{d}^{k})\f$.
 From the input of the physical data, we construct all of the terms which defined a Lagrangian NSDS. In our special case:
 
 - \f$M\f$ is given in the previous sections,
-- \f$NNL=C(q,\dot{q})\dot{q}+G(q)\f$,
+- \f$fGyr=C(q,\dot{q})\dot{q}+G(q)\f$,
 - \f$F_{int}\f$ is identically zero,
 - \f$F_{ext}\f$ is used to introduce the control law \f$U\f$.
 

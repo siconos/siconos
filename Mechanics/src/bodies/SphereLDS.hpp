@@ -74,15 +74,15 @@ public:
     RuntimeException::selfThrow("SphereLDS::computeMass(vector) - not implemented");
   }
 
-  void computeNNL(SP::SiconosVector, SP::SiconosVector);
+  void computeFGyr(SP::SiconosVector, SP::SiconosVector);
 
-  void computeNNL();
+  void computeFGyr();
 
-  void computeJacobianNNLq();
-  void computeJacobianNNLqDot();
+  void computeJacobianFGyrq();
+  void computeJacobianFGyrqDot();
 
-  void computeJacobianNNLq(SP::SiconosVector, SP::SiconosVector);
-  void computeJacobianNNLqDot(SP::SiconosVector, SP::SiconosVector);
+  void computeJacobianFGyrq(SP::SiconosVector, SP::SiconosVector);
+  void computeJacobianFGyrqDot(SP::SiconosVector, SP::SiconosVector);
 
 
   /** visitors hook
