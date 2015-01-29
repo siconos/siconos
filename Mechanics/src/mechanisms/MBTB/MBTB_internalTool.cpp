@@ -513,7 +513,7 @@ void _MBTB_printStep(FILE *fp)
     unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();    
     if (sizeY==1)
     {
-      fprintf(fp,"%e\t",
+      fprintf(fp,"%e\t0.\t0.\t",
               sContacts[numC]->interaction()->y(0)->getValue(0));   
     }
     else
@@ -529,7 +529,7 @@ void _MBTB_printStep(FILE *fp)
     unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();
     if (sizeY==1)
     {
-      fprintf(fp,"%e\t",
+      fprintf(fp,"%e\t0.\t0.\t",
             sContacts[numC]->interaction()->y(1)->getValue(0));
     }
     else
@@ -540,16 +540,7 @@ void _MBTB_printStep(FILE *fp)
             sContacts[numC]->interaction()->y(1)->getValue(2));
     }
   }
- 
 
-  for(int numC=0; numC<sNbOfContacts; numC++)
-  {
-    fprintf(fp,"%e\t",sContacts[numC]->interaction()->y(0)->getValue(0));
-  }
-  for(int numC=0; numC<sNbOfContacts; numC++)
-  { 
-      fprintf(fp,"%e\t\t",sContacts[numC]->interaction()->y(1)->getValue(0));
-  }
  fprintf(fp,"\n");
 }
 void _MBTB_printHeader(FILE *fp)
@@ -560,56 +551,77 @@ void _MBTB_printHeader(FILE *fp)
   cmp++;
   for(int numDS =0; numDS<sNbOfBodies; numDS++)
   {
-    fprintf(fp,"position%d_%d_ds_%d\t",cmp,cmp+7-1,numDS);
+    for(unsigned int icmp=cmp; icmp<=cmp+7-1; ++icmp)
+    {
+      fprintf(fp,"position%d_ds_%d\t",icmp,numDS);
+    }
     cmp+=7;
-    fprintf(fp,"velocity%d_%d_ds_%d\t",cmp,cmp+6-1,numDS);
+    for(unsigned int icmp=cmp; icmp<=cmp+6-1; ++icmp)
+    {
+      fprintf(fp,"velocity%d_ds_%d\t",icmp,numDS);
+    }
     cmp+=6;
     fprintf(fp,"EC%d_ds_%d\t",cmp,numDS);
     cmp++;
   }
   for(int numJ=0; numJ<sNbOfJoints; numJ++)
   {
-    fprintf(fp,"jointF%d_%d_%d\t",cmp,cmp+6-1,numJ);
+    for(unsigned int icmp=cmp; icmp<=cmp+6-1; ++icmp)
+    {
+      fprintf(fp,"jointF%d_%d\t",icmp,numJ);
+    }
     cmp+=6;
     if(sJointRelations[numJ]->_G0C1)
     {
-      fprintf(fp,"jointEquiF%d_%d_%d\t",cmp,cmp+6,numJ);
+      for(unsigned int icmp=cmp; icmp<=cmp+6-1; ++icmp)
+      {
+        fprintf(fp,"jointEquiF%d_%d\t",icmp,numJ);
+      }
       cmp+=6;
     }
   }
   for(int numC=0; numC<sNbOfContacts; numC++)
   {
-    fprintf(fp,"ContactForce_%s_%d_%d,%d\t",sContacts[numC]->contactName(),cmp,cmp+6-1,numC);
+    for(unsigned int icmp=cmp; icmp<=cmp+6-1; ++icmp)
+    {
+      fprintf(fp,"ContactForce_%s_%d,%d\t",sContacts[numC]->contactName(),icmp,numC);
+    }
     cmp+=6;
-    
   }
   /*  for(int numC=0; numC<sNbOfContacts; numC++)
   {
     fprintf(fp,"MomentsOfContactForce_%s_%d_%d\t",sContacts[numC]->contactName(),cmp,cmp+6-1,numC);
     cmp+=6;
-    
     }*/
   for(int numC=0; numC<sNbOfContacts; numC++)
   {
     fprintf(fp,"ContactState_%s_%d\t",sContacts[numC]->contactName(),cmp);
     cmp++;
-   
   }
   for(int numC=0; numC<sNbOfContacts; numC++)
   {
-    fprintf(fp,"ContactPoint_%s%d_%d\t",sContacts[numC]->contactName(),cmp,cmp+2);
+    for(unsigned int icmp=cmp; icmp<=cmp+2; ++icmp)
+    {
+      fprintf(fp,"ContactPoint_%s_%d\t",sContacts[numC]->contactName(),icmp);
+    }
     cmp+=3;
-   
   }
  for(int numC=0; numC<sNbOfContacts; numC++)
   {
-    fprintf(fp,"ContactGap_%s_%d\t",sContacts[numC]->contactName(),cmp);
-    cmp++;
+    for(unsigned int icmp=cmp; icmp<=cmp+2; ++icmp)
+    {
+      fprintf(fp,"ContactGap_%s_%d\t",sContacts[numC]->contactName(),icmp);
+    }
+    cmp+=3;
   }
+
  for(int numC=0; numC<sNbOfContacts; numC++)
   {
-    fprintf(fp,"ContactVitess_%s_%d\t",sContacts[numC]->contactName(),cmp);
-    cmp++;
+    for(unsigned int icmp=cmp; icmp<=cmp+2; ++icmp)
+    {
+      fprintf(fp,"ContactVitess_%s_%d\t",sContacts[numC]->contactName(),icmp);
+    }
+    cmp+=3;
   }
   fprintf(fp,"\n");
   _MBTB_printStep(fp);
