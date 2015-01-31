@@ -17,10 +17,9 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file
-
-Typedef for simulation-related objects
-*/
+/*! \file SimulationTypeDef.hpp
+ * \brief Typedef for simulation-related objects
+ */
 
 #ifndef SimulationTypedef_H
 #define SimulationTypedef_H
@@ -29,10 +28,8 @@ Typedef for simulation-related objects
 #include <map>
 #include <set>
 
-#include "SiconosGraph.hpp"
 #include "SiconosPointers.hpp"
 
-#include "SiconosProperties.hpp"
 #include "Interaction.hpp"
 
 /** double precision machine */
@@ -129,94 +126,6 @@ struct GraphProperties
   ACCEPT_SERIALIZATION(GraphProperties);
 };
 
-TYPEDEF_SPTR(GraphProperties)
-
-
-/** the graph structure :
- *
- * InteractionsGraph = L(DynamicalSystemsGraph)
- *
- * where L is the line graph
- * transformation */
-typedef SiconosGraph < std11::shared_ptr<DynamicalSystem>, std11::shared_ptr<Interaction>,
-        SystemProperties, InteractionProperties,
-        GraphProperties > _DynamicalSystemsGraph;
-
-
-typedef SiconosGraph < std11::shared_ptr<Interaction>, std11::shared_ptr<DynamicalSystem>,
-        InteractionProperties, SystemProperties,
-        GraphProperties > _InteractionsGraph;
-
-struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
-{
-  /** optional properties : memory is allocated only on first access */
-  INSTALL_GRAPH_PROPERTIES(DynamicalSystems,
-                           ((Vertex, SP::MatrixIntegrator, Ad)) // for ZOH Integration
-                           ((Vertex, SP::MatrixIntegrator, AdInt)) // for ZOH Integration
-                           ((Vertex, SP::MatrixIntegrator, Ld)) // For Observer (ZOH Integration)
-                           ((Vertex, SP::MatrixIntegrator, Bd)) // For Controlled System (ZOH Integration)
-                           ((Vertex, SP::SiconosMatrix, B)) // For Controlled System
-                           ((Vertex, SP::SiconosMatrix, L)) // For Observer
-                           ((Vertex, SP::PluggedObject, pluginB)) // For Controlled System
-                           ((Vertex, SP::PluggedObject, pluginL)) // For Observer
-                           ((Vertex, SP::SiconosVector, e)) // For Observer (ZOH Integration)
-                           ((Vertex, SP::SiconosVector, u)) // For Controlled System (ZOH Integration)
-                           ((Vertex, std::string, name)) // a name for a dynamical system
-                           ((Vertex, unsigned int, groupId))); // For group manipulations (example assign
-                                                               // a material id for contact law
-                                                               // determination
-  // always needed -> SystemProperties
-
-  /** serialization hooks */
-  ACCEPT_SERIALIZATION(DynamicalSystemsGraph);
-
-  // to be installed with INSTALL_GRAPH_PROPERTIES
-  void eraseProperties(_DynamicalSystemsGraph::VDescriptor vd)
-  {
-    Ad._store->erase(vd);
-    AdInt._store->erase(vd);
-    Ld._store->erase(vd);
-    Bd._store->erase(vd);
-    B._store->erase(vd);
-    L._store->erase(vd);
-    pluginB._store->erase(vd);
-    pluginL._store->erase(vd);
-    e._store->erase(vd);
-    u._store->erase(vd);
-    name._store->erase(vd);
-    groupId._store->erase(vd);
-  }
-};
-
-struct InteractionsGraph : public _InteractionsGraph
-{
-  /** optional properties : memory is allocated only on first access */
-  INSTALL_GRAPH_PROPERTIES(Interactions,
-                           ((Vertex, SP::SimpleMatrix, blockProj))        // ProjectOnConstraint
-                           ((Edge, SP::SimpleMatrix, upper_blockProj))    // idem
-                           ((Edge, SP::SimpleMatrix, lower_blockProj))  // idem
-                           ((Vertex, std::string, name)));
-
-  // to be installed with INSTALL_GRAPH_PROPERTIES
-  void eraseProperties(_InteractionsGraph::VDescriptor vd)
-  {
-    blockProj._store->erase(vd);
-    name._store->erase(vd);
-  }
-
-  // to be installed with INSTALL_GRAPH_PROPERTIES
-  void eraseProperties(_InteractionsGraph::EDescriptor ed)
-  {
-    upper_blockProj._store->erase(ed);
-    lower_blockProj._store->erase(ed);
-  }
-
-  /** serialization hooks */
-  ACCEPT_SERIALIZATION(InteractionsGraph);
-};
-
-TYPEDEF_SPTR(DynamicalSystemsGraph)
-TYPEDEF_SPTR(InteractionsGraph)
 
 
 
@@ -240,7 +149,6 @@ typedef DSOSIMap::const_iterator DSOSIConstIterator;
 
 // ================== Objects to handle OSNS ==================
 
-#include "OneStepNSProblem.hpp"
 /** Map of OSNS */
 //typedef std::map<std::string, SP::OneStepNSProblem > OneStepNSProblems;
 typedef std::vector<SP::OneStepNSProblem> OneStepNSProblems;

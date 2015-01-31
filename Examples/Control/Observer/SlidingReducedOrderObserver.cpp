@@ -17,14 +17,6 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*!\file PID.cpp
-  \brief \ref EMPID - C++ input file -
-  O. Huber.
-
-  Simple PID example.
-  The controlled plant is a double integrator
-*/
-
 #include "SiconosKernel.hpp"
 #include "SiconosControl.hpp"
 #include "PID.hpp"
@@ -141,7 +133,7 @@ int main(int argc, char* argv[])
   control->initialize(*process);
 #ifdef WITH_CONTROL
   act->setRef(xFinal);
-  act->setK(*K);
+  act->setK(K);
 #endif
   SP::EventsManager eventsManager = processSimulation->eventsManager();
   unsigned int N = ceil((T - t0) / h + 10); // Number of time steps

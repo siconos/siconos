@@ -25,55 +25,56 @@
 #include "NewtonEulerR.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#include "OneStepNSProblem.hpp"
 
 using namespace RELATION;
 //#define DEBUG_NEWMARK
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool _flag = false) :
+NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool flag = false) :
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
   OSIDynamicalSystems->insert(newDS);
-  beta = new_beta;
-  gamma = new_gamma;
-  alpha_m = new_alpha_m;
-  alpha_f = new_alpha_f;
+  _beta = new_beta;
+  _gamma = new_gamma;
+  _alpha_m = new_alpha_m;
+  _alpha_f = new_alpha_f;
   _orderDenseOutput = 5;
-  _IsVelocityLevel = _flag;
+  _IsVelocityLevel = flag;
 }
 
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double _rho_infty, bool _flag = false) :
+NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double _rho_infty, bool flag = false) :
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
   OSIDynamicalSystems->insert(newDS);
-  alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
-  alpha_f = _rho_infty / (_rho_infty + 1);
-  gamma = 0.5 + alpha_f - alpha_m;
-  beta = 0.25 * std::pow((gamma + 0.5), 2);
+  _alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
+  _alpha_f = _rho_infty / (_rho_infty + 1);
+  _gamma = 0.5 + _alpha_f - _alpha_m;
+  _beta = 0.25 * std::pow((_gamma + 0.5), 2);
   _orderDenseOutput = 5.0;
-  _IsVelocityLevel = _flag;
+  _IsVelocityLevel = flag;
 }
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool _flag = false):
+NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
-  beta = new_beta;
-  gamma = new_gamma;
-  alpha_m = new_alpha_m;
-  alpha_f = new_alpha_f;
+  _beta = new_beta;
+  _gamma = new_gamma;
+  _alpha_m = new_alpha_m;
+  _alpha_f = new_alpha_f;
   _orderDenseOutput = 5.0;
-  _IsVelocityLevel = _flag;
+  _IsVelocityLevel = flag;
 }
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool _flag = false):
+NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
-  alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
-  alpha_f = _rho_infty / (_rho_infty + 1);
-  gamma = 0.5 + alpha_f - alpha_m;
-  beta = 0.25 * std::pow((gamma + 0.5), 2);
+  _alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
+  _alpha_f = _rho_infty / (_rho_infty + 1);
+  _gamma = 0.5 + _alpha_f - _alpha_m;
+  _beta = 0.25 * std::pow((_gamma + 0.5), 2);
   _orderDenseOutput = 5.0;
-  _IsVelocityLevel = _flag;
+  _IsVelocityLevel = flag;
 }
 
 const SimpleMatrix NewMarkAlphaOSI::getW(SP::DynamicalSystem ds)
@@ -112,8 +113,8 @@ void NewMarkAlphaOSI::initW(SP::DynamicalSystem ds)
 
 void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds)
 {
-  double beta_prime = (1 - alpha_m) / ((1 - alpha_f) * beta);
-  double gamma_prime = gamma / beta;
+  double beta_prime = (1 - _alpha_m) / ((1 - _alpha_f) * _beta);
+  double gamma_prime = _gamma / _beta;
   double h = simulationLink->nextTime() - simulationLink->startingTime(); // step size
   if (h < 100 * MACHINE_PREC)
     RuntimeException::selfThrow("In NewMarkAlphaOSI::initW(t,ds), time integration is too small");
@@ -385,7 +386,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
         else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
         {
           double h = simulationLink->nextTime() - simulationLink->startingTime();
-          double gamma_prime = gamma / beta;
+          double gamma_prime = _gamma / _beta;
           inter->computeOutput(t, indexSet->properties(vertex_inter), 1); // Update output of level 1
           yForNSsolver = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
         }
@@ -483,11 +484,11 @@ void NewMarkAlphaOSI::prediction()
       _a->display();
 #endif
       //
-      *_q = *_q + (*_dotq) * h + (*_a) * (h*h * (0.5 - beta)); // q_{n+1} = q_n + (h^2)*(0.5 - beta)*a_n
-      *_dotq = *_dotq + (*_a) * (h * (1 - gamma));              // dotq_{n+1} = dotq_n + h*(1 - gamma)*a_n
-      *_a = (alpha_f / (1 - alpha_m)) * (*_ddotq) - (alpha_m / (1 - alpha_m)) * (*_a); // a_{n+1} = (alpha_f*ddotq_n - alpha_m*a_n)/(1 - alpha_m)
-      *_q = *_q + (h*h * beta) * (*_a);
-      *_dotq = *_dotq + (h * gamma) * (*_a);
+      *_q = *_q + (*_dotq) * h + (*_a) * (h*h * (0.5 - _beta)); // q_{n+1} = q_n + (h^2)*(0.5 - beta)*a_n
+      *_dotq = *_dotq + (*_a) * (h * (1 - _gamma));              // dotq_{n+1} = dotq_n + h*(1 - gamma)*a_n
+      *_a = (_alpha_f / (1 - _alpha_m)) * (*_ddotq) - (_alpha_m / (1 - _alpha_m)) * (*_a); // a_{n+1} = (alpha_f*ddotq_n - alpha_m*a_n)/(1 - alpha_m)
+      *_q = *_q + (h*h * _beta) * (*_a);
+      *_dotq = *_dotq + (h * _gamma) * (*_a);
       _ddotq->zero();
       // Display message for debug
 #ifdef DEBUG_NEWMARK
@@ -514,8 +515,8 @@ void NewMarkAlphaOSI::prediction()
 void NewMarkAlphaOSI::correction()
 {
   double h = simulationLink->nextTime() - simulationLink->startingTime();
-  double beta_prime = (1 - alpha_m) / ((1 - alpha_f) * beta);
-  double gamma_prime = gamma / beta;
+  double beta_prime = (1 - _alpha_m) / ((1 - _alpha_f) * _beta);
+  double gamma_prime = _gamma / _beta;
   //Make sure that the input of the concerned Dynamical Systems is updated after solving LCP
   ConstDSIterator itDS;
   Type::Siconos dsType ;    // Type of the current DS
@@ -538,7 +539,7 @@ void NewMarkAlphaOSI::correction()
       *(d->velocity()) += (gamma_prime / h) * (*delta_q); // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q
       *(d->acceleration()) += beta_prime / (h*h) * (*delta_q); // ddotq_{n+1,k+1} = ddotq_{n+1,k} + (beta_prime/h^2)*delta_q
       //a_{n+1,k+1} = a_{n+1,k} + ((1-alpha_f)/(1-alpha_m))*(beta_prime/h^2)*delta_q
-      *(d->workspace(DynamicalSystem::acce_like)) += ((1 - alpha_f) / (1 - alpha_m)) * ((beta_prime / (h*h)) * (*delta_q));
+      *(d->workspace(DynamicalSystem::acce_like)) += ((1 - _alpha_f) / (1 - _alpha_m)) * ((beta_prime / (h*h)) * (*delta_q));
       //
 #ifdef DEBUG_NEWMARK
       std::cout.precision(15);
@@ -562,7 +563,7 @@ void NewMarkAlphaOSI::correction()
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void NewMarkAlphaOSI::integrate(double& t_ini, double& t_end, double& t_out, int& _flag)
+void NewMarkAlphaOSI::integrate(double& t_ini, double& t_end, double& t_out, int& flag)
 {
   RuntimeException::selfThrow("In NewMarkAlphaOSI::integrate, this method does nothing in the NewMarkAlpha OneStepIntegrator!!!");
 }

@@ -30,6 +30,7 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonEulerR.hpp"
+#include "OneStepNSProblem.hpp"
 
 using namespace RELATION;
 

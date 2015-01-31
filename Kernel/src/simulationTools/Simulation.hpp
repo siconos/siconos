@@ -87,10 +87,6 @@ protected:
   /** Map to link all DynamicalSystems and their OneStepIntegrator*/
   DSOSIMap _osiMap;
 
-  /** index sets vector (indexSets[0] is the set where y[0]=0,
-      indexSets[1] where y[0] = 0 and y[1]=0 and so on */
-  //std::vector<InteractionsGraph> indexSets;
-
   /** the non smooth problems (each problem is identified thanks to
       its id) */
   SP::OneStepNSProblems _allNSProblems;
@@ -259,14 +255,6 @@ public:
   {
     return _eventsManager;
   };
-
-  /** set the EventsManager
-   *  \param newEM a pointer to EventsManager
-   */
-  inline void setEventsManager(SP::EventsManager newEM)
-  {
-    _eventsManager = newEM;
-  }
 
   /** get "current time" (ie starting point for current integration,
       time of currentEvent of eventsManager.)

@@ -89,7 +89,7 @@ ENDIF(MSVC)
 IF(WITH_TESTING)
 
   # the main test driver
-  #  SET(TEST_MAIN model/test/TestMain.cpp)
+  SET(TEST_MAIN tests/TestMain.cpp)
 
   # For Windows
   SET(PATH_FOR_PLUGIN
@@ -98,12 +98,11 @@ IF(WITH_TESTING)
   SET(SICONOS_LIB_PATH "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
 
   # Simulation tests
-  #  BEGIN_TEST(simulationTools/test)
+  BEGIN_TEST(tests)
 
-  #  NEW_TEST(testSimulationTools ZOHTest.cpp)
+  NEW_TEST(tests PIDTest.cpp SMCTest.cpp)
 
-
-  #  END_TEST()
+  END_TEST()
 
 ENDIF(WITH_TESTING)
 

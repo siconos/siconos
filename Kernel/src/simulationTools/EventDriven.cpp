@@ -102,10 +102,9 @@ void EventDriven::updateIndexSet(unsigned int i)
 
   // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-  assert(indexSet0);
+  assert(_indexSet0);
   assert(indexSet1);
   assert(indexSet2);
 
@@ -114,11 +113,11 @@ void EventDriven::updateIndexSet(unsigned int i)
   // DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
 
   InteractionsGraph::VIterator uibegin, uipend, uip;
-  std11::tie(uibegin, uipend) = indexSet0->vertices();
+  std11::tie(uibegin, uipend) = _indexSet0->vertices();
   // loop over all vertices of the indexSet[i-1]
   for (uip = uibegin; uip != uipend; ++uip)
   {
-    SP::Interaction inter = indexSet0->bundle(*uip);
+    SP::Interaction inter = _indexSet0->bundle(*uip);
     if (i == 1) // IndexSet[1]
     {
       // if indexSet[1]=>getYRef(0): output y
@@ -136,7 +135,7 @@ void EventDriven::updateIndexSet(unsigned int i)
         if (fabs(y) <= TOL_ED)
         {
           // vertex and edges insertions
-          indexSet1->copy_vertex(inter, *indexSet0);
+          indexSet1->copy_vertex(inter, *_indexSet0);
         }
       }
       else // if the Interaction was already in the set
@@ -158,7 +157,7 @@ void EventDriven::updateIndexSet(unsigned int i)
           if (fabs(y) <= TOL_ED)
           {
             // vertex and edges insertions
-            indexSet2->copy_vertex(inter, *indexSet0);
+            indexSet2->copy_vertex(inter, *_indexSet0);
           }
         }
         else // if the Interaction was already in the set
@@ -233,8 +232,6 @@ void EventDriven::initOSNS()
   // Note that interactions set may be empty.
   InteractionsGraph::VIterator ui, uiend;
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-
-  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
 
   // === update all index sets ===
   updateIndexSets();
@@ -336,22 +333,24 @@ void EventDriven::initOSIRhs()
 void EventDriven::initialize(SP::Model m, bool withOSI)
 {
   // Initialization for Simulation
+  _indexSet0 = m->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  _DSG0 = m->nonSmoothDynamicalSystem()->topology()->dSG(0);
+
   Simulation::initialize(m, withOSI);
   // Initialization for all OneStepIntegrators
   initOSIs();
   initOSIRhs();
 }
 
-void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
+void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
   // computeF is supposed to fill xdot in, using the definition of the
   // dynamical systems belonging to the osi
 
   // Check osi type: only lsodar is allowed.
-  if (osi->getType() != OSI::LSODAROSI)
-    RuntimeException::selfThrow("EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
+  assert((osi.getType() != OSI::LSODAROSI) && "EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi.getType());
 
-  LsodarOSI& lsodar = static_cast<LsodarOSI&>(*osi);
+  LsodarOSI& lsodar = static_cast<LsodarOSI&>(osi);
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   lsodar.fillXWork(sizeOfX, x);
 
@@ -359,17 +358,16 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   model()->setCurrentTime(t);
   // Update Jacobian matrices at all interactions
   InteractionsGraph::VIterator ui, uiend;
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet0->bundle(*ui);
-    inter->relation()->computeJach(t, *inter, indexSet0->properties(*ui));
-    if (inter->relation()->getType() == NewtonEuler)
+    Interaction& inter = *_indexSet0->bundle(*ui);
+    inter.relation()->computeJach(t, inter, _indexSet0->properties(*ui));
+    if (inter.relation()->getType() == NewtonEuler)
     {
-      SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
-      SP::DynamicalSystem ds2 = indexSet0->properties(*ui).target;
-      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
-      ner->computeJachqT(*inter, ds1, ds2);
+      SP::DynamicalSystem ds1 = _indexSet0->properties(*ui).source;
+      SP::DynamicalSystem ds2 = _indexSet0->properties(*ui).target;
+      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter.relation()));
+      ner->computeJachqT(inter, ds1, ds2);
     }
   }
 
@@ -387,45 +385,43 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   }
 
   // update the DS of the OSI.
-  lsodar.computeRhs(t);
+  lsodar.computeRhs(t, *_DSG0);
   //  for the DS state, ie the ones computed by lsodar (x above)
   // Update Index sets? No !!
 
   // Get the required value, ie xdot for output.
   DSIterator it;
-  unsigned int i = 0;
   unsigned pos = 0;
   for (it = lsodar.dynamicalSystemsBegin(); it != lsodar.dynamicalSystemsEnd(); ++it)
   {
-    if (Type::value(**it) == Type::LagrangianDS ||
-        Type::value(**it) == Type::LagrangianLinearTIDS)
+    DynamicalSystem& ds = **it;
+    Type::Siconos dsType = Type::value(ds);
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(*it);
+      LagrangianDS& LDS = static_cast<LagrangianDS&>(ds);
       SiconosVector& qDotTmp = *LDS.velocity();
       SiconosVector& qDotDotTmp = *LDS.acceleration();
-      for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
-        xdot[i++] = qDotTmp(j);
-      for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
-        xdot[i++] = qDotDotTmp(j);
+      pos += qDotTmp.copyData(&xdot[pos]);
+      pos += qDotDotTmp.copyData(&xdot[pos]);
     }
     else
     {
-      SiconosVector& xtmp2 = *(*it)->rhs(); // Pointer link !
+      SiconosVector& xtmp2 = ds.getRhs(); // Pointer link !
       pos += xtmp2.copyData(&xdot[pos]);
     }
   }
 }
 
-void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
+void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
                                     integer *sizeOfX,
                                     doublereal *time,
                                     doublereal *x,
                                     doublereal *jacob)
 {
-  if (osi->getType() != OSI::LSODAROSI)
-    RuntimeException::selfThrow("EventDriven::computeJacobianfx(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
+  assert((osi.getType() != OSI::LSODAROSI) &&
+    "EventDriven::computeJacobianfx(osi, ...), not yet implemented for a one step integrator of type " + osi.getType());
 
-  SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(osi);
+  LsodarOSI& lsodar = static_cast<LsodarOSI&>(osi);
 
   // Remark A: according to DLSODAR doc, each call to jacobian is
   // preceded by a call to f with the same arguments NEQ, T, and Y.
@@ -440,42 +436,43 @@ void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
   // current ds
   double t = *time;
   model()->setCurrentTime(t);
-  lsodar->computeJacobianRhs(t);
+  lsodar.computeJacobianRhs(t, *_DSG0);
 
   // Save jacobianX values from dynamical system into current jacob
   // (in-out parameter)
 
-  DSIterator it;
   unsigned int i = 0;
-  for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
+  unsigned pos = 0;
+  for (DSIterator it = lsodar.dynamicalSystemsBegin(); it != lsodar.dynamicalSystemsEnd(); ++it)
   {
-    if (Type::value(**it) == Type::LagrangianDS ||
-        Type::value(**it) == Type::LagrangianLinearTIDS)
+    DynamicalSystem& ds = **it;
+    Type::Siconos dsType = Type::value(ds);
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(*it);
+      LagrangianDS& lds = static_cast<LagrangianDS&>(ds);
       BlockMatrix& jacotmp = *lds.jacobianRhsx();
-      for (unsigned int j = 0; j < (*it)->getN(); ++j)
+      for (unsigned int j = 0; j < lds.getN(); ++j)
       {
-        for (unsigned int k = 0; k < (*it)->getDim(); ++k)
+        for (unsigned int k = 0; k < lds.getDim(); ++k)
           jacob[i++] = jacotmp(k, j);
       }
     }
+    else if(dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS
+        || dsType == Type::FirstOrderLinearTIDS)
+    {
+      SimpleMatrix& jacotmp = static_cast<SimpleMatrix&>(ds.getJacobianRhsx()); // Pointer link !
+      pos += jacotmp.copyData(&jacob[pos]);
+    }
     else
     {
-      SiconosMatrix& jacotmp = *(*it)->jacobianRhsx(); // Pointer link !
-      for (unsigned int j = 0; j < (*it)->getN(); ++j)
-      {
-        for (unsigned int k = 0; k < (*it)->getDim(); ++k)
-          jacob[i++] = jacotmp(k, j);
-      }
+      RuntimeException::selfThrow("EventDriven::computeJacobianfx, type of DynamicalSystem not yet supported.");
     }
   }
 }
 
 unsigned int EventDriven::computeSizeOfg()
 {
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-  return (indexSet0->size());
+  return (_indexSet0->size());
 }
 
 
@@ -489,7 +486,6 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   assert(model()->nonSmoothDynamicalSystem()->topology());
   InteractionsGraph::VIterator ui, uiend;
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   unsigned int nsLawSize, k = 0 ;
   SP::SiconosVector y, ydot, yddot, lambda;
@@ -516,9 +512,9 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   updateOutput(1);
   updateOutput(2);
   //
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet0->bundle(*ui);
+    SP::Interaction inter = _indexSet0->bundle(*ui);
     nsLawSize = inter->nonSmoothLaw()->size();
     y = inter->y(0);   // output y at this Interaction
     ydot = inter->y(1); // output of level 1 at this Interaction
@@ -619,14 +615,12 @@ void EventDriven::advanceToEvent()
   double _minConstraint = 0.0;
 
   // Initialize lambdas of all interactions.
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
-                                    topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend, vnext;
-  std11::tie(ui, uiend) = indexSet0->vertices();
+  std11::tie(ui, uiend) = _indexSet0->vertices();
   for (vnext = ui; ui != uiend; ui = vnext)
   {
     ++vnext;
-    indexSet0->bundle(*ui)->resetAllLambda();
+    _indexSet0->bundle(*ui)->resetAllLambda();
   }
 
   if (osiType == OSI::NEWMARKALPHAOSI)
@@ -883,13 +877,12 @@ void EventDriven::predictionNewtonIteration()
   }
   // Prediction of the output and lambda for all Interactions before Newton iteration
   double t = nextTime(); // time at the end of the step
-  InteractionsGraph& indexSet0 = *model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   // Loop over all interactions
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
-    Interaction& inter = *indexSet0.bundle(*ui);
-    inter.computeOutput(t, indexSet0.properties(*ui), 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
+    Interaction& inter = *_indexSet0->bundle(*ui);
+    inter.computeOutput(t, _indexSet0->properties(*ui), 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
     inter.lambda(2)->zero(); // reset lambda[2] to zero
   }
 }
@@ -960,7 +953,7 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-double EventDriven::detectEvents(bool _IsUpdateIstate)
+double EventDriven::detectEvents(bool updateIstate)
 {
   double _minResiduOutput = 0.0; // maximum of g_i with i running over all activated or deactivated contacts
   // Loop over all interactions to detect whether some constraints are activated or deactivated
@@ -970,15 +963,14 @@ double EventDriven::detectEvents(bool _IsUpdateIstate)
   InteractionsGraph::VIterator ui, uiend;
   SP::SiconosVector y, ydot, lambda;
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   //
 #ifdef DEBUG_MESSAGES
   cout << "======== In EventDriven::detectEvents =========" <<endl;
 #endif
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet0->bundle(*ui);
+    SP::Interaction inter = _indexSet0->bundle(*ui);
     double nsLawSize = inter->nonSmoothLaw()->size();
     if (nsLawSize != 1)
     {
@@ -1039,7 +1031,7 @@ double EventDriven::detectEvents(bool _IsUpdateIstate)
     //
   }
   //
-  if (_IsUpdateIstate)
+  if (updateIstate)
   {
     if ((!_IsContactClosed) && (!_IsContactOpened))
     {

@@ -85,14 +85,16 @@ protected:
    */
   SP::PluggedObject _pluging;
 
-  /** Plug-in to compute \f$ \nabla_\lambda g(lambda,t,z)\f$
-   */
-  SP::PluggedObject _pluginJacLg;
-  /** Plug-in to compute f.$
-   */
+  /** Plug-in to compute \f$ \nabla_\lambda g\f$ */
+  SP::PluggedObject _pluginJacglambda;
+
+  /** Plug-in to compute \f$ \nabla_x g\f$ */
+  SP::PluggedObject _pluginJacgx;
+
+  /** Plug-in to compute f*/
   SP::PluggedObject _pluginf;
-  /** Plug-in to compute e.$
-   */
+
+  /** Plug-in to compute e*/
   SP::PluggedObject _plugine;
   /** To initialize all the plugin functions with NULL.
    */
@@ -105,10 +107,10 @@ protected:
   RELATION::SUBTYPES _subType;
 
   /** basic constructor
-   *  \param : std::string that gives the type of the relation
-   *  \param : std::string that gives the subtype of the relation
+   *  \param type type of the relation
+   *  \param subtype subtype of the relation
    */
-  Relation(RELATION::TYPES, RELATION::SUBTYPES);
+  Relation(RELATION::TYPES type, RELATION::SUBTYPES subtype);
 
 private:
 
@@ -209,7 +211,13 @@ public:
    */
   virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
 
-  /** To set a plug-in function to compute the jacobian according to x of the input
+  /** To set a plug-in function to compute the jacobian of \f$g\f$ w.r.t. x
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
+   */
+  virtual void setComputeJacgxFunction(const std::string& pluginPath, const std::string& functionName);
+
+  /** To set a plug-in function to compute the jacobian of \f$g\f$ w.r.t. \f$\lambda\f$.
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the function name to use in this plugin
    */
@@ -288,7 +296,7 @@ public:
    */
   bool isgPlugged() const;
 
-  /** Check if _pluginJacLg is correctly set
+  /** Check if _pluginJacglambda is correctly set
       \return a bool
   */
   bool isJacLgPlugged() const;
@@ -335,12 +343,12 @@ public:
     return _pluging;
   };
 
-  /** Get _pluginJacLg
+  /** Get _pluginJacglambda
       \return a shared pointer to the plugin
   */
   inline SP::PluggedObject getPluginJacLg() const
   {
-    return _pluginJacLg;
+    return _pluginJacglambda;
   };
 
   /** Get _pluginf

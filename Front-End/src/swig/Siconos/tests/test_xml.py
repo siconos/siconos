@@ -15,6 +15,7 @@ from fromXml import buildModelXML
 import Siconos.Kernel as SK
 import numpy as np
 
+
 def test_xml1():
     ''' the BouncingBall '''
 
@@ -22,7 +23,7 @@ def test_xml1():
     # --- Get the simulation ---
     s = bouncingBall.simulation()
 
-    dsN = bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
+    dsN = SK.dynamicalSystems(bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
     ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
 
     N = 2000  # Number of time steps
@@ -46,7 +47,7 @@ def test_xml1():
     while s.hasNextEvent():
         s.computeOneStep()
         # --- Get values to be plotted ---
-        dataPlot[k, 0] =  s.nextTime()
+        dataPlot[k, 0] = s.nextTime()
         dataPlot[k, 1] = q[0]
         dataPlot[k, 2] = v[0]
         dataPlot[k, 3] = p[0]
@@ -63,6 +64,7 @@ def test_xml1():
     if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-12:
         print(dataPlot - dataPlotRef)
         print("ERROR: The result is rather different from the reference file.")
+
 
 def test_xml2():
     ''' BallInBowl '''
@@ -81,12 +83,12 @@ def test_xml2():
     # . saved in a matrix dataPlot
     dataPlot = np.zeros((N + 1, 6))
 
-    print( "Prepare data for plotting ... ")
+    print("Prepare data for plotting ... ")
     # For the initial time step:
     # time
-    dataPlot[k, 0] =  bouncingBall.t0()
+    dataPlot[k, 0] = bouncingBall.t0()
     # state q for the first dynamical system (ball)
-    dsN = bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
+    dsN = SK.dynamicalSystems(bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
     ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
 
     q = ball.q()
@@ -100,15 +102,15 @@ def test_xml2():
     dataPlot[k, 5] = p[0]
 
     # --- Compute elapsed time ---
-    print( "Computation ... ")
+    print("Computation ... ")
     # --- Time loop  ---
     while s.hasNextEvent():
         # solve ...
         s.computeOneStep()
 
         # --- Get values to be plotted ---
-        #time
-        dataPlot[k, 0] = s.nextTime();
+        # time
+        dataPlot[k, 0] = s.nextTime()
         # Ball: state q
         dataPlot[k, 1] = q[0]
         # Ball: velocity
@@ -125,11 +127,11 @@ def test_xml2():
         k += 1
 
     # Number of time iterations
-    print( "Number of iterations done: ")
+    print("Number of iterations done: ")
 
     # dataPlot (ascii) output
-    #ioMatrix::write(dataPlot,"noDim")
-    np.savetxt("result.dat",  dataPlot)
+    # ioMatrix::write(dataPlot,"noDim")
+    np.savetxt("result.dat", dataPlot)
 
 
 def test_xml3():
@@ -148,14 +150,14 @@ def test_xml3():
     # . saved in a matrix dataPlot
     dataPlot = np.zeros((N + 1, 5))
 
-    print( "Prepare data for plotting ... ")
+    print("Prepare data for plotting ... ")
     # For the initial time step:
     # time
     dataPlot[k, 0] = t0
     # state q for the first dynamical system (ball)
-    dsN = oscillator.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
+    dsN = SK.dynamicalSystems(oscillator.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
     oscillo = oscillator.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
-    inter = oscillator.nonSmoothDynamicalSystem().topology().dSG(0).interactions()[0]
+    inter = SK.interactions(oscillator.nonSmoothDynamicalSystem().topology().indexSet(0))[0]
 
     dataPlot[k, 1] = oscillo.q()[0]
     # velocity for the oscillo
@@ -164,7 +166,7 @@ def test_xml3():
     dataPlot[k, 4] = inter.lambda_(1)[1]
 
     # --- Compute elapsed time ---
-    print( "Computation ... ")
+    print("Computation ... ")
     # --- Time loop  ---
     while k < N:
         # get current time step
@@ -173,7 +175,7 @@ def test_xml3():
         # solve ...
         s.computeOneStep()
         # --- Get values to be plotted ---
-        #time
+        # time
         dataPlot[k, 0] = s.nextTime()
         # Oscillo: state q
         dataPlot[k, 1] = oscillo.q()[0]
@@ -186,16 +188,17 @@ def test_xml3():
         s.nextStep()
 
     # Number of time iterations
-    print( "Number of iterations done: {:}".format(k))
+    print("Number of iterations done: {:}".format(k))
 
     # dataPlot (ascii) output
     np.savetxt("result.dat",  dataPlot)
+
 
 @xfail
 def test_xml4():
     ''' CamFollower '''
     # --- buildModelXML loading from xml file ---
-    CamFollower =  buildModelXML("./data/CamFollower_TIDS.xml")
+    CamFollower = buildModelXML("./data/CamFollower_TIDS.xml")
 
     # --- Get and initialize the simulation ---
     S = CamFollower.simulation()
@@ -209,7 +212,7 @@ def test_xml4():
     # . saved in a matrix dataPlot
     dataPlot = np.zeros((N + 1, 8))
 
-    print( "Prepare data for plotting ... ")
+    print("Prepare data for plotting ... ")
     # For the initial time step:
     # time
     dataPlot[k, 0] = t0
@@ -238,7 +241,7 @@ def test_xml4():
     # Acceleration of the Cam
     dataPlot[k, 7] = CamPosition + Follower.q()[0]
 
-    print( "Computation ... ")
+    print("Computation ... ")
     # --- Time loop  ---
 
     while k < N:
@@ -265,25 +268,26 @@ def test_xml4():
         S.nextStep()
 
     # Number of time iterations
-    print( "Number of iterations done: {:}".format(k))
+    print("Number of iterations done: {:}".format(k))
 
     # dataPlot (ascii) output
-    np.savetxt("result.dat",  dataPlot)
+    np.savetxt("result.dat", dataPlot)
+
 
 def test_xml5():
     ''' Bouncing Ball ED '''
     # --- buildModelXML loading from xml file ---
-    bouncingBall =  buildModelXML("./data/BBallED.xml")
+    bouncingBall = buildModelXML("./data/BBallED.xml")
 
     # --- Get and initialize the simulation ---
     s = bouncingBall.simulation()
-    dsN = bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
+    dsN = SK.dynamicalSystems(bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
     ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
 
     # --- Get the values to be plotted ---
     # . saved in a matrix dataPlot
 
-    N = 12368 # Number of saved points: depends on the number of events ...
+    N = 12368  # Number of saved points: depends on the number of events ...
     outputSize = 5
     dataPlot = np.zeros((N + 1, outputSize))
 
@@ -298,7 +302,7 @@ def test_xml5():
     dataPlot[0, 3] = p[0]
     dataPlot[0, 4] = f[0]
 
-    print( "====> Start computation ... ")
+    print("====> Start computation ... ")
     # --- Time loop  ---
     eventsManager = s.eventsManager()
     numberOfEvent = 0
@@ -334,7 +338,7 @@ def test_xml5():
     dataPlotRef = SK.getMatrix(SK.SimpleMatrix("./data/BouncingBallEDXml.ref"))
 
     if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-11:
-        print( "Warning. The results is rather different from the reference file.")
+        print("Warning. The results is rather different from the reference file.")
         print(np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf))
         exit(1)
 
@@ -351,16 +355,16 @@ def test_xml6():
     t0 = oscillator.t0()
     T = oscillator.finalT()
     h = s.timeStep()
-    N = np.ceil((T - t0) / h) # Number of time steps
+    N = np.ceil((T - t0) / h)  # Number of time steps
 
     # --- Get the values to be plotted ---
     # . saved in a matrix dataPlot
     dataPlot = np.zeros((N, 3))
 
-    print( "Prepare data for plotting ... ")
+    print("Prepare data for plotting ... ")
     # For the initi)al time step:
     # XXX fix this crap
-    dsN = oscillator.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
+    dsN = SK.dynamicalSystems(oscillator.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
     oscillo = oscillator.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
     q = oscillo.q()
     v = oscillo.velocity()
@@ -371,7 +375,7 @@ def test_xml6():
     # velocity for the oscillo
     dataPlot[0, 2] = v[0]
 
-    print( "Computation ... ")
+    print("Computation ... ")
     # --- Time loop  ---
     # while (s.hasNextEvent()
     # {
@@ -387,9 +391,7 @@ def test_xml6():
     #   }
 
     # Number of time iterations
-    print( "Number of iterations done: {:}".format(k))
+    print("Number of iterations done: {:}".format(k))
 
     # dataPlot (ascii) output
     np.savetxt("result.dat", dataPlot)
-
-

@@ -45,6 +45,12 @@ public:
    */
   ExplicitLinearSMC(SP::ControlSensor sensor);
 
+  /** Constructor.with all data
+   * \param sensor the ControlSensor feeding the Actuator
+   * \param B the B matrix
+   */
+  ExplicitLinearSMC(SP::ControlSensor sensor, SP::SimpleMatrix B);
+
   /** destructor
   */
   virtual ~ExplicitLinearSMC();

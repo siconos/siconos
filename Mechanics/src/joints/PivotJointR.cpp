@@ -27,6 +27,8 @@
 
 #include <BlockVector.hpp>
 
+#include <iostream>
+
 #include <op3x3.h>
 
 PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P, SP::SiconosVector A): KneeJointR(d1, d2, P)

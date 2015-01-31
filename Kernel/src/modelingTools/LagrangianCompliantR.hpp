@@ -100,27 +100,27 @@ public:
   virtual ~LagrangianCompliantR() {};
 
   /** compute y = h(q,v,t) using plug-in mechanism
-  * \param time: the current time
-  * \param q: vector of coordinates
-  * \param lambda: vector for \f[ \lambda \f]
-  * \param z: parameter vector
-  * \param y: vector for y
+  * \param time the current time
+  * \param q vector of coordinates
+  * \param lambda vector for \f[ \lambda \f]
+  * \param z parameter vector
+  * \param y vector for y
   */
   virtual void computeh(double time, SiconosVector& q, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
 
   /** compute the jacobian of h w.r.t. q using plug-in mechanism
   * \param time current time
-  * \param q: vector of coordinates
-  * \param lambda: vector for \f[ \lambda \f]
-  * \param z: parameter vector
+  * \param q vector of coordinates
+  * \param lambda vector for \f[ \lambda \f]
+  * \param z parameter vector
   */
   virtual void computeJachq(double time, SiconosVector& q, SiconosVector& lambda, SiconosVector& z);
 
   /** compute the jacobian of h w.r.t. \f$\lambda\f$ using plug-in mechanism
-  * \param time:  current time
-  * \param q0: coordinates
-  * \param lambda: vector for \f[ \lambda \f]
-  * \param z: vector of parameters
+  * \param time  current time
+  * \param q0 coordinates
+  * \param lambda vector for \f[ \lambda \f]
+  * \param z vector of parameters
   */
   virtual void computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z);
 
@@ -128,19 +128,19 @@ public:
   const std::string getJachqName() const;
 
   /** to compute output
-  *  \param time: the current time
-  *  \param inter: the Interaction owning y
-  *  \param interProp: Interaction properties
-  *  \param derivativeNumber: the number of the derivative to compute,
+  *  \param time the current time
+  *  \param inter the Interaction owning y
+  *  \param interProp Interaction properties
+  *  \param derivativeNumber the number of the derivative to compute,
   *  optional, default = 0.
   */
   void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
   /** to compute the input
-  *  \param time: the current time
-  *  \param inter: the Interaction owning lambda
-  *  \param interProp: Interaction properties
-  *  \param level: "derivative" order of lambda used to compute input
+  *  \param time the current time
+  *  \param inter the Interaction owning lambda
+  *  \param interProp Interaction properties
+  *  \param level "derivative" order of lambda used to compute input
   */
   void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 

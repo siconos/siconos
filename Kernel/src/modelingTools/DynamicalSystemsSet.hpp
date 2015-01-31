@@ -23,7 +23,6 @@ Set of SP::DynamicalSystem
 #define DynamicalSystemsSet_H
 
 #include "DynamicalSystem.hpp"
-#include "SiconosSet.hpp"
 
 #include <boost/shared_ptr.hpp>
 

@@ -147,10 +147,9 @@ public:
   BlockCSRMatrix(unsigned int);
 
   /** Constructor from index set
-      \param SP::Interaction, the index set of the active
-      constraints
+      \param indexSet the index set of the active constraints
   */
-  BlockCSRMatrix(SP::InteractionsGraph);
+  BlockCSRMatrix(SP::InteractionsGraph indexSet);
 
   /** destructor
    */

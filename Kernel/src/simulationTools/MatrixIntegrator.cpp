@@ -108,7 +108,7 @@ void MatrixIntegrator::integrate()
     else
       x(i) = 1;
     //Reset LsodarOSI
-    _sim->setIstate(3);
+    _sim->setIstate(1);
     _sim->advanceToEvent();
     _mat->setCol(i, x);
   }

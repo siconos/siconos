@@ -39,7 +39,7 @@ extern "C" void CNAME(f1)(integer *sizeOfX, doublereal *time, doublereal *x, dou
 
 }
 
-extern "C"void CNAME(jac1)(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd)
+extern "C" void CNAME(jac1)(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd)
 {
   /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
    * output parameter : jacob (pointer to JacobianX matrix)

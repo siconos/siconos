@@ -22,9 +22,9 @@
 #include "BlockVector.hpp"
 #include "SimulationTypeDef.hpp"
 
+#include <iostream>
+
 using namespace RELATION;
-
-
 
 FirstOrderLinearR::FirstOrderLinearR():
   FirstOrderR(LinearR)
@@ -40,7 +40,7 @@ FirstOrderLinearR::FirstOrderLinearR(const std::string& Cname, const std::string
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the user-defined function.
   _pluginJachx->setComputeFunction(Cname);
-  _pluginJacLg->setComputeFunction(Bname);
+  _pluginJacglambda->setComputeFunction(Bname);
 }
 
 // Constructor from a complete set of data (plugin)
@@ -48,7 +48,7 @@ FirstOrderLinearR::FirstOrderLinearR(const std::string& Cname, const std::string
 {
   _pluginJachx->setComputeFunction(Cname);
   _pluginJachlambda->setComputeFunction(Dname);
-  _pluginJacLg->setComputeFunction(Bname);
+  _pluginJacglambda->setComputeFunction(Bname);
   _pluginf->setComputeFunction(Fname);
   _plugine->setComputeFunction(Ename);
 }
@@ -91,7 +91,7 @@ void FirstOrderLinearR::initComponents(Interaction& inter, VectorOfBlockVectors&
     workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeX));
   if (!_D && _pluginJachlambda->fPtr)
     workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-  if (!_B && _pluginJacLg->fPtr)
+  if (!_B && _pluginJacglambda->fPtr)
     workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeX, sizeY));
   if (!_F && _pluginf->fPtr)
   {
@@ -181,9 +181,9 @@ void FirstOrderLinearR::computee(double time, SiconosVector& z, SiconosVector& e
 
 void FirstOrderLinearR::computeB(double time, SiconosVector& z, SimpleMatrix& B)
 {
-  if (_pluginJacLg->fPtr)
+  if (_pluginJacglambda->fPtr)
   {
-    ((FOMatPtr1) _pluginJacLg->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), z.size(), &(z)(0));
+    ((FOMatPtr1) _pluginJacglambda->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), z.size(), &(z)(0));
   }
 }
 

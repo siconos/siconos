@@ -27,6 +27,7 @@
 #include "FirstOrderType1R.hpp"
 #include "NonSmoothLaw.hpp"
 #include "CxxStd.hpp"
+#include "OneStepNSProblem.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -36,36 +37,36 @@
 using namespace RELATION;
 
 // --- constructor from a minimum set of data ---
-EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem newDS, double newTheta) :
+EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem ds, double theta) :
   OneStepIntegrator(OSI::EULERMOREAUOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
-  OSIDynamicalSystems->insert(newDS);
-  _theta = newTheta;
+  OSIDynamicalSystems->insert(ds);
+  _theta = theta;
 }
 
 // --- constructor with theta parameter value  ---
-EulerMoreauOSI::EulerMoreauOSI(double newTheta):
+EulerMoreauOSI::EulerMoreauOSI(double theta):
   OneStepIntegrator(OSI::EULERMOREAUOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
-  _theta = newTheta;
+  _theta = theta;
 }
 
 // --- constructor from a minimum set of data ---
-EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
+EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem ds, double theta, double gamma) :
   OneStepIntegrator(OSI::EULERMOREAUOSI), _useGammaForRelation(false)
 {
-  OSIDynamicalSystems->insert(newDS);
-  _theta = newTheta;
-  _gamma = newGamma;
+  OSIDynamicalSystems->insert(ds);
+  _theta = theta;
+  _gamma = gamma;
   _useGamma = true;
 }
 
 // --- constructor from a set of data ---
-EulerMoreauOSI::EulerMoreauOSI(double newTheta, double newGamma):
+EulerMoreauOSI::EulerMoreauOSI(double theta, double gamma):
   OneStepIntegrator(OSI::EULERMOREAUOSI), _useGammaForRelation(false)
 {
-  _theta = newTheta;
-  _gamma = newGamma;
+  _theta = theta;
+  _gamma = gamma;
   _useGamma = true;
 }
 
@@ -601,10 +602,6 @@ void EulerMoreauOSI::computeFreeState()
 
       // At this point xfree = (ResiduFree - h(1-gamma)*rold)
       // -> Solve WX = xfree and set xfree = X
-      // -- Update W --
-      if (dsType != Type::FirstOrderLinearTIDS)
-        computeW(t, d, dsgVD);
-
       W.PLUForwardBackwardInPlace(xfree);
 
       // at this point, xfree = W^{-1} (ResiduFree - h(1-gamma)*rold)
@@ -826,7 +823,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
       yForNSsolver += *H_alpha;
     }
   }
-  else
+  else // First Order Linear Relation
   {
     C = mainInteraction->relation()->C();
     if (!C) C = workM[FirstOrderR::mat_C];
@@ -852,8 +849,8 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
     if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
     {
-      // In the first order linear case it may be required to add e + FZ to q.
-      // q = HXfree + e + FZ
+      // In the first order linear case it may be required to add e + FZ to y.
+      // y = CXfree + e + FZ
       SP::SiconosVector e;
       if (relationSubType == LinearTIR)
       {

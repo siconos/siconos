@@ -29,8 +29,11 @@
 #include "Simulation.hpp"
 #include "EventsManager.hpp"
 
-PID::PID(SP::ControlSensor sensor): Actuator(PID_, sensor), _ref(0), _curDeltaT(0)
+#include <iostream>
+
+PID::PID(SP::ControlSensor sensor, SP::SimpleMatrix B): Actuator(PID_, sensor), _ref(0), _curDeltaT(0)
 {
+  _B = B;
 }
 
 PID::~PID()
@@ -39,24 +42,22 @@ PID::~PID()
 
 void PID::initialize(const Model& m)
 {
-  _B.reset(new SimpleMatrix(2, 1, 0)); // XXX
-  (*_B)(1, 0) = 1;
+  _u.reset(new SiconosVector(1, 0));
   Actuator::initialize(m);
 
   _curDeltaT = m.simulation()->eventsManager()->timeDiscretisation()->currentTimeStep(0);
 
   // initialize _err
   _err.reset(new boost::circular_buffer<double> (3));
-  for (unsigned int i = 0; i < 3; i++)
+  for (unsigned int i = 0; i < 3; ++i)
     (*_err).push_front(0.0);
 }
 
 void PID::actuate()
 {
-  // We have to distinguish two cases : linear or nonlinear
-  // TODO support the nonlinear case
-
-  // Get DeltaT
+  /** \todo We have to distinguish two cases : linear or nonlinear
+   *  support the nonlinear case
+   */
 
   // Compute the new error
 
@@ -67,36 +68,16 @@ void PID::actuate()
               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2];
 }
 
-void PID::setK(const SiconosVector& newValue)
+void PID::setK(SP::SiconosVector K)
 {
   // check dimensions ...
-  if (newValue.size() != 3)
+  if (K->size() != 3)
   {
     RuntimeException::selfThrow("PID::setK - the size of K should be 3");
   }
   else
   {
-    if (_K)
-    {
-      *_K = newValue;
-    }
-    else
-    {
-      _K.reset(new SiconosVector(newValue));
-    }
-  }
-}
-
-void PID::setKPtr(SP::SiconosVector newPtr)
-{
-  // check dimensions ...
-  if (newPtr->size() != 3)
-  {
-    RuntimeException::selfThrow("PID::setKPtr - the size of K should be 3");
-  }
-  else
-  {
-    _K = newPtr;
+    _K = K;
   }
 }
 

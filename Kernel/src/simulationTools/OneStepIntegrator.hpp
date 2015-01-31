@@ -28,6 +28,7 @@
 #include "SimulationTypeDef.hpp"
 #include "DynamicalSystemsSet.hpp"
 #include "OneStepIntegratorTypes.hpp"
+#include "SimulationGraphs.hpp"
 
 // work around gccxml bug that does not accept an argument ot the deprecated attribute
 #ifndef __GCCXML__
@@ -76,9 +77,6 @@ protected:
 /** A link to the simulation that owns this OSI */
   SP::Simulation simulationLink;
 
-/** Work map to save state-related data for the dynamical systems of the osi - DSVector: map<DS * , SP::SiconosVector> */
-//  DSVectors workX;
-
 /** basic constructor with Id
  *  \param integrator type/name
  */
@@ -87,6 +85,9 @@ protected:
 /** default constructor
  */
   OneStepIntegrator() {};
+
+  /** struct to add terms in the integration. Useful for Control */
+  SP::ExtraAdditionalTerms _extraAdditionalTerms;
 
 private:
 
@@ -226,12 +227,12 @@ public:
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param double: tinit, initial time
-   *  \param double: tend, end time
-   *  \param double: tout, real end time
-   *  \param int: flag used in LsodarOSI.
+   *  \param tinit initial time
+   *  \param tend end time
+   *  \param tout real end time
+   *  \param idid flag used in EventDriven schemes
    */
-  virtual void integrate(double&, double&, double&, int&) = 0;
+  virtual void integrate(double& tinit, double& tend, double& tout, int& idid) = 0;
 
   /** set to zero all the r vectors of the DynamicalSystems of the present OSI
    */
@@ -272,6 +273,23 @@ public:
     RuntimeException::selfThrow("OneStepIntegrator::removeInteractionInIndexSet - Should not be called at this level");
     return 0;
   };
+
+  /** get the ExtraAdditionalTerms.
+   * \return the ExtraAdditionalTerms
+   */
+  inline SP::ExtraAdditionalTerms extraAdditionalTerms()
+  {
+    return _extraAdditionalTerms;
+  }
+
+  /** set the ExtraAdditionalTerms to add smooth terms for the integration process.
+   * Useful when a control loop is added to a DynamicalSystem.
+   * \param eat the ExtraAdditionalTerms to use
+   */
+  inline void setExtraAdditionalTerms(SP::ExtraAdditionalTerms eat)
+  {
+    _extraAdditionalTerms = eat;
+  }
 
   /** visitors hook
    */

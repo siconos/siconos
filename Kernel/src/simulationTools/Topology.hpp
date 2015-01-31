@@ -25,7 +25,7 @@
 
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
-
+#include "SimulationGraphs.hpp"
 
 /**  This class describes the topology of the non-smooth dynamical
  *  system. It holds all the "potential" Interactions".
@@ -149,13 +149,19 @@ public:
    */
   void setName(SP::DynamicalSystem ds, const std::string& name);
 
+  /** set the name for an Interaction
+   * \param inter a pointer to the Interaction
+   * \param name the name of the Interaction
+   */
+  void setName(SP::Interaction inter, const std::string& name);
+
   /** set the OSI for this DynamicalSystem
-   * \param ds the DynamicalSystem to add
+   * \param ds the DynamicalSystem
    * \param OSI the integrator to use for this DS
    */
   void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
 
-  /** link two dynamical systems to a relation
+   /** link two dynamical systems to a relation
    * \param inter a SP::Interaction
    * \param ds a SP::DynamicalSystem
    * \param ds2 a SP::DynamicalSystem (optional)

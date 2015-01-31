@@ -21,5 +21,6 @@ DEFINE_TYPEMAPS(Sensor);
 DEFINE_TYPEMAPS(ControlSensor);
 DEFINE_TYPEMAPS(LinearSensor);
 DEFINE_TYPEMAPS(ControlSimulation);
-DEFINE_TYPEMAPS(ControlFirstOrderLinearS);
+DEFINE_TYPEMAPS(ControlLsodarSimulation);
+DEFINE_TYPEMAPS(ControlZOHSimulation);
 DEFINE_TYPEMAPS(ControlManager);

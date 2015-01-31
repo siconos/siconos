@@ -28,7 +28,7 @@
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-
+#include "OneStepNSProblem.hpp"
 
 using namespace RELATION;
 

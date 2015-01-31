@@ -42,20 +42,32 @@ protected:
   /** index for saving data */
   unsigned int _indx;
 
-  /** the vector defining the surface (\f$ s = Cx \f$) */
+  /** name of the plugin to add a term to the sliding variable; useful when doing trajectory tracking */
+  std::string _plugineName;
+
+  /** name of the plugin to compute \f$y = h(x, ...)\f$ for the nonlinear case*/
+  std::string _pluginhName;
+
+  /** name of the plugin to compute \f$\nabla_x h\f$ for the nonlinear case*/
+  std::string _pluginJachxName;
+
+  /** name of the plugin to compute \f$\nabla_\lambda h\f$ for the nonlinear case*/
+  std::string _pluginJachlambdaName;
+
+  /** name of the plugin to compute \f$\nabla_\lambda g\f$ for the nonlinear case*/
+  std::string _pluginJacglambdaName;
+
+  /** the vector defining the linear contribution of the state to the sliding variable  (\f$ \sigma = Cx \f$) */
   SP::SimpleMatrix _Csurface;
 
-  /** matrix describing the influence of \f$lambda\f$ on s */
+  /** matrix describing the influence of \f$lambda\f$ on \f$\sigma\f$ */
   SP::SimpleMatrix _D;
 
   /** scalar multiplying Sign; \f$ u^s = - \alpha Sign \f$ */
   double _alpha;
 
   /** the Relation for the Controller */
-  SP::Relation _relationSMC;
-
-  /** the NonSmoothLaw for the controller */
-  SP::NonSmoothLaw _sign;
+  SP::FirstOrderR _relationSMC;
 
   /** Interaction for the control */
   SP::Interaction _interactionSMC;
@@ -71,16 +83,22 @@ protected:
 
   /** the Model for the controller */
   SP::Model _SMC;
+
   /** the DynamicalSystem for the controller */
-  SP::FirstOrderLinearDS _DS_SMC;
+  SP::FirstOrderNonLinearDS _DS_SMC; // XXX replace this by FirstOrderDS
+
   /** the TimeDiscretisation for the controller */
   SP::TimeDiscretisation _td;
+
   /** Simulation for the controller */
   SP::TimeStepping _simulationSMC;
+
   /** Integrator for the controller */
   SP::OneStepIntegrator _integratorSMC;
+
   /** Theta for the controller */
   double _thetaSMC;
+
   /** OneStepNsProblem for the controller */
   SP::Relay _OSNSPB_SMC;
 
@@ -123,7 +141,7 @@ public:
    * \param B the B matrix
    * \param D the saturation matrix
    */
-  CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D):
+  CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std11::shared_ptr<SimpleMatrix>()):
     Actuator(type, sensor), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE),
     _precision(1e-8), _thetaSMC(0.5), _noUeq(false)
   {
@@ -140,25 +158,24 @@ public:
    */
   virtual void initialize(const Model& m);
 
-  /** Set the value of _Csurface to newValue
-   * \param newValue the new value for _Csurface
-   */
-  void setCsurface(const SimpleMatrix& newValue);
 
-  /** Set _Csurface to pointer newPtr
-   * \param newPtr a SP::SimpleMatrix containing the new value for _Csurface
-   */
-  void setCsurfacePtr(SP::SimpleMatrix newPtr);
+  void sete(const std::string& plugin);
+  void seth(const std::string& plugin);
+  void setJachx(const std::string& plugin);
+  void setJachlambda(const std::string& plugin);
+  void setg(const std::string& plugin);
+  void setJacgx(const std::string& plugin);
+  void setJacglambda(const std::string& plugin);
 
-  /** Set the value of _D to newValue
-   * \param newValue the new value for _D
+  /** Set Csurface
+   * \param Csurface a SP::SimpleMatrix containing the new value for _Csurface
    */
-  void setSaturationMatrix(const SimpleMatrix& newValue);
+  void setCsurface(SP::SimpleMatrix Csurface);
 
   /** Set _D to pointer newPtr
-   * \param newPtr a SP::SimpleMatrix containing the new value for _D
+   * \param newSat a SP::SimpleMatrix containing the new value for _D
    */
-  void setSaturationMatrixPtr(SP::SimpleMatrix newPtr);
+  void setSaturationMatrix(SP::SimpleMatrix newSat);
 
   /** Set _alpha
    * \param alpha the new value for _alpha
@@ -237,6 +254,22 @@ public:
   *  \param td the TimeDiscretisation for this Sensor
   */
   virtual void setTimeDiscretisation(const TimeDiscretisation& td);
+
+  /** Set the DynamicalSystem used to compute the control law.
+   * This is useful when we have a Nonlinear problem and we need to compute
+   * the control law with an approximate model, or when the dynamics are
+   * quite different.
+   * \param ds the DynamicalSystem to be used in the Controller
+   */
+  void setDS(SP::FirstOrderNonLinearDS ds) // XXX replace this by FirstOrderDS
+  {
+    _DS_SMC = ds;
+  };
+
+  /** get the Model used in the SMC
+   * \return the Model used in the SMC
+   */
+  virtual SP::Model getInternalModel() const { return _SMC; };
 
 };
 #endif

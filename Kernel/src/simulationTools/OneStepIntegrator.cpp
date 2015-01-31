@@ -22,6 +22,7 @@
 #include "Model.hpp"
 #include "DynamicalSystem.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#include "ExtraAdditionalTerms.hpp"
 
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 #include <functional>
@@ -45,7 +46,13 @@ void OneStepIntegrator::insertDynamicalSystem(SP::DynamicalSystem ds)
 }
 
 void OneStepIntegrator::initialize()
-{}
+{
+  if (_extraAdditionalTerms)
+  {
+    Model& m = *simulationLink->model();
+    _extraAdditionalTerms->init(*m.nonSmoothDynamicalSystem()->topology()->dSG(0), m);
+  }
+}
 
 void OneStepIntegrator::saveInMemory()
 {

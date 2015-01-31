@@ -98,28 +98,27 @@ public:
     /** default function to compute h
   *  \param double : current time
   */
-  virtual void computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y) = 0;
+  virtual void computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y, SiconosVector& z);
 
   /** default function to compute g
   *  \param double : current time
   */
-  virtual void computeg(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& r) = 0;
+  virtual void computeg(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& r, SiconosVector& z);
 
   /** default function to compute jacobianH
-  *  \param double : current time
-  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+  *  \param time current time
+  *  \param inter Interaction holding this Relation
   */
-  void computeJachz(double time, Interaction& inter);
-  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
-  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
+  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C, SiconosVector& z);
+  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D, SiconosVector& z);
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
   /** default function to compute jacobianG according to lambda
   *  \param double : current time
   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
   */
-  virtual void computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& B);
-  virtual void computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& K);
+  virtual void computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& B, SiconosVector& z);
+  virtual void computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& K, SiconosVector& z);
 
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);

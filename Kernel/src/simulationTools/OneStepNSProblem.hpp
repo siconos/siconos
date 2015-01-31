@@ -25,6 +25,7 @@
 
 #include "SiconosFwd.hpp"
 #include "SimulationTypeDef.hpp"
+#include "SimulationGraphs.hpp"
 
 /** Non Smooth Problem Formalization and Simulation
 

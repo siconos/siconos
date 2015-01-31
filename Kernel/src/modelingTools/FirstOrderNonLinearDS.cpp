@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+
 #include "FirstOrderNonLinearDS.hpp"
-//#include "Plugin.hpp"
 #include "PluginTypes.hpp"
 
 // #define DEBUG_MESSAGES
@@ -50,6 +50,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   _workspace[free].reset(new SiconosVector(getDim()));
   _fold.reset(new SiconosVector(getDim()));
   _f.reset(new SiconosVector(_n));
+  _b.reset(new SiconosVector(getDim()));
   _jacobianfx.reset(new SimpleMatrix(_n, _n));
   // == r ==
 
@@ -73,6 +74,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0, const std:
   _x[0].reset(new SiconosVector(*_x0));
   _x[1].reset(new SiconosVector(_n));
   _f.reset(new SiconosVector(_n));
+  _b.reset(new SiconosVector(getDim()));
   _jacobianfx.reset(new SimpleMatrix(_n, _n));
   _workspace[free].reset(new SiconosVector(getDim()));
   _r.reset(new SiconosVector(getDim()));
@@ -101,9 +103,9 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
   _rMemory.reset(new SiconosMemory(*(FONLDS.rMemory())));
 
   // Not always initialized
-  if (_pluginf)
+  if (FONLDS.getPluginF())
     _pluginf.reset(new PluggedObject(*(FONLDS.getPluginF())));
-  if (_pluginJacxf)
+  if (FONLDS.getPluginJacxf())
     _pluginJacxf.reset(new PluggedObject(*(FONLDS.getPluginJacxf())));
   if (FONLDS.jacobianfx())
     _jacobianfx.reset(new SimpleMatrix(*(FONLDS.jacobianfx())));
@@ -113,7 +115,10 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
   if (FONLDS.f())
     _f.reset(new SiconosVector(*(FONLDS.f())));
 
-  if (_pluginM)
+  if (FONLDS.b())
+    _b.reset(new SiconosVector(*(FONLDS.b())));
+
+  if (FONLDS.getPluginM())
     _pluginM.reset(new PluggedObject(*(FONLDS.getPluginM())));
 
   // data - not always initialized
@@ -179,12 +184,13 @@ void FirstOrderNonLinearDS::initRhs(double time)
 
     // else no allocation, jacobian is equal to 0.
   }
-//  computeJacobianRhsx(time);
 }
 
 void FirstOrderNonLinearDS::updatePlugins(double time)
 {
-  computeM(time);
+  if (_M)
+    computeM(time);
+
   computef(time);
   computeJacobianfx(time);
 }
@@ -259,6 +265,7 @@ void FirstOrderNonLinearDS::setComputeMFunction(FPtr1 fct)
 {
   _pluginM->setComputeFunction((void *)fct);
 }
+
 void FirstOrderNonLinearDS::setComputeFFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginf->setComputeFunction(pluginPath, functionName);
@@ -291,7 +298,7 @@ void FirstOrderNonLinearDS::computeM(double time)
 void FirstOrderNonLinearDS::computef(double time)
 {
   if (_pluginf->fPtr)
-    ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, &((*(_x[0]))(0)) , &(*_f)(0), _z->size(), &(*_z)(0));
+    ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, _x[0]->getArray(), _f->getArray(), _z->size(), &(*_z)(0));
 }
 
 void FirstOrderNonLinearDS::computef(double time, SiconosVector& x2)
@@ -308,11 +315,11 @@ void FirstOrderNonLinearDS::computeJacobianfx(double time, bool isDSUp)
     ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, &((*(_x[0]))(0)), &(*_jacobianfx)(0, 0), _z->size(), &(*_z)(0));
 }
 
-void FirstOrderNonLinearDS::computeJacobianfx(double time, SP::SiconosVector x2)
+void FirstOrderNonLinearDS::computeJacobianfx(double time, const SiconosVector& x2)
 {
   // second argument is useless at the time - Used in derived classes
   if (_pluginJacxf->fPtr)
-    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, &((*x2)(0)), &(*_jacobianfx)(0, 0), _z->size(), &(*_z)(0));
+    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, x2.getArray(), &(*_jacobianfx)(0, 0), _z->size(), _z->getArray());
 }
 
 void FirstOrderNonLinearDS::computeRhs(double time, bool isDSUp)
@@ -344,8 +351,7 @@ void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool isDSUp)
 
   // compute jacobian of rhs according to x, = M-1(jacobianfx + jacobianX(T.u))
   // At the time, second term is set to zero.
-  if (!_pluginJacxf->fPtr)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianRhsx: there is no plugin to compute the jacobian of f");
+  assert(!_pluginJacxf->fPtr && "FirstOrderNonLinearDS::computeJacobianRhsx: there is no plugin to compute the jacobian of f");
 
   computeJacobianfx(time);
   // solve M*jacobianXRhS = jacobianfx

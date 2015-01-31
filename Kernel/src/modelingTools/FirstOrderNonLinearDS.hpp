@@ -18,7 +18,7 @@
  */
 
 /*! \file FirstOrderNonLinearDS.hpp
-  First Order Non Linear Dynamical Systems
+  \brief First Order Non Linear Dynamical Systems
 */
 
 #ifndef FIRSTORDERNONLINEARDS_H
@@ -94,6 +94,9 @@ protected:
 
   /** value of f(x,t,z) */
   SP::SiconosVector _f;
+
+  /** strength vector */
+  SP::SiconosVector _b;
 
   /** to store f(x_k,t_k,z_k)*/
   SP::SiconosVector _fold;
@@ -258,6 +261,22 @@ public:
     _jacobianfx = newPtr;
   }
 
+  /** get b
+   *  \return a SP::SiconosVector
+   */
+  inline SP::SiconosVector b() const
+  {
+    return _b;
+  }
+
+  /** set b
+   *  \param b a SiconosVector
+   */
+  inline void setb(SP::SiconosVector b)
+  {
+    _b = b;
+  }
+
   /** Initialization function for the rhs and its jacobian.
    *  \param time the time of initialization
    */
@@ -365,7 +384,7 @@ public:
    *  \param time instant used in the computations
    *  \param x2 a SiconosVector to store the resuting value
    */
-  virtual void computeJacobianfx(double time, SP::SiconosVector x2);
+  virtual void computeJacobianfx(double time, const SiconosVector& x2);
 
   /** Default function to the right-hand side term
    *  \param time time instant used in the computations

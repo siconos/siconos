@@ -108,21 +108,21 @@ protected:
   SP::SiconosVector _hDot;
 
   /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
-  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-  * @param q : pointer to the first element of q
-  * @param time : current time
-  * @param sizeY : size of vector hDot (ie of the intercation)
+  * @param sizeDS sum of the sizes of all the DynamicalSystems involved in the interaction
+  * @param q pointer to the first element of q
+  * @param time current time
+  * @param sizeY size of vector hDot (ie of the intercation)
   * @param[in,out] pointer to the first element of hDot
-  * @param sizeZ : size of vector z
-  * @param[in,out] z : a vector of user-defined parameters
+  * @param sizeZ size of vector z
+  * @param[in,out] z a vector of user-defined parameters
   */
   SP::PluggedObject _pluginhDot;
 
   /** initialize G matrices or components specific to derived classes.
-   * \param inter : the Interaction
-   * \param DSlink : block vectors from dynamical systems
-   * \param workV : work vectors
-   * \param workM : work vectors
+   * \param inter the Interaction
+   * \param DSlink block vectors from dynamical systems
+   * \param workV work vectors
+   * \param workM work vectors
    */
   void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
@@ -177,11 +177,10 @@ public:
   */
 
   /** to set a specified function to compute function hDot
-  *  \param pluginpath: the complete path to the plugin
-  *  \param name: the name of the function to use in this plugin
+  *  \param pluginpath the complete path to the plugin
+  *  \param name the name of the function to use in this plugin
   */
   void setComputehDotFunction(const std::string& pluginpath, const std::string& name);
-  //  virtual void setComputehFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** to compute y = h(t,q,z) using plug-in mechanism
   * \param time current time
@@ -199,9 +198,9 @@ public:
   virtual void computehDot(double time, SiconosVector& q, SiconosVector& z);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
-  * \param time: double, current time
-  * \param q: the coordinates vector
-  * \param z: the parameters vector
+  * \param time double, current time
+  * \param q the coordinates vector
+  * \param z the parameters vector
   */
   virtual void computeJachq(double time, SiconosVector& q, SiconosVector& z);
 
@@ -216,18 +215,18 @@ public:
 
 
   /** to compute output
-   * \param time : current time
-   * \param inter : the Interaction
-   * \param interProp : the Interaction properties
-  *  \param derivativeNumber : number of the derivative to compute, optional, default = 0.
+   * \param time current time
+   * \param inter the Interaction
+   * \param interProp the Interaction properties
+  *  \param derivativeNumber number of the derivative to compute, optional, default = 0.
   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
   /** to compute p
-   * \param time : current time
-   * \param inter : the Interaction
-   * \param interProp : the Interactions properties
-   * \param level: "derivative" order of lambda used to compute input
+   * \param time current time
+   * \param inter the Interaction
+   * \param interProp the Interactions properties
+   * \param level "derivative" order of lambda used to compute input
    */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 

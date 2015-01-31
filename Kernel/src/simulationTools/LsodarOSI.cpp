@@ -29,6 +29,9 @@
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include "FirstOrderNonLinearDS.hpp"
+#include "ExtraAdditionalTerms.hpp"
+#include "OneStepNSProblem.hpp"
 
 #include <odepack.h>
 
@@ -173,23 +176,37 @@ void LsodarOSI::fillXWork(integer* sizeOfX, doublereal* x)
   (*_xWork) = x;
 }
 
-void LsodarOSI::computeRhs(double t)
+void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
 {
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-    (*it)->computeRhs(t);
+  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  {
+    SP::DynamicalSystem& ds = *it;
+    ds->computeRhs(t);
+    if (_extraAdditionalTerms)
+    {
+      DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
+      _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, t, ds->getRhs());
+    }
+  }
 }
 
-void LsodarOSI::computeJacobianRhs(double t)
+void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
 {
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-    (*it)->computeJacobianRhsx(t);
+  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  {
+    SP::DynamicalSystem& ds = *it;
+    ds->computeJacobianRhsx(t);
+    if (_extraAdditionalTerms)
+    {
+      DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
+      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t, ds->getJacobianRhsx());
+    }
+  }
 }
 
 void LsodarOSI::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
-  std11::static_pointer_cast<EventDriven>(simulationLink)->computef(shared_from_this(), sizeOfX, time, x, xdot);
+  std11::static_pointer_cast<EventDriven>(simulationLink)->computef(*this, sizeOfX, time, x, xdot);
 }
 
 void LsodarOSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
@@ -199,7 +216,7 @@ void LsodarOSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, d
 
 void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
-  std11::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
+  std11::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(*this, sizeOfX, time, x, jacob);
 }
 
 void LsodarOSI::initialize()

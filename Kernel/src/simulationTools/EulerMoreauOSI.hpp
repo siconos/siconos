@@ -152,28 +152,28 @@ protected:
 
 public:
   /** constructor from a minimum set of data: one DS and its theta
-   *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
    *  \param theta value of the parameter
    */
-  DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem, double));
+  DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem ds, double theta));
 
   /** constructor from theta value only
    *  \param theta value for all DS.
    */
-  EulerMoreauOSI(double);
+  EulerMoreauOSI(double theta);
 
   /** constructor from a minimum set of data: one DS and its theta
-   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param Theta value
+   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
+   *  \param theta value
    *  \param gamma value
    */
-  DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem, double, double));
+  DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem ds, double theta, double gamma));
 
   /** constructor from theta value only
    *  \param theta value for all these DS.
    *  \param gamma value for all these DS.
    */
-  EulerMoreauOSI(double, double);
+  EulerMoreauOSI(double theta, double gamma);
 
   /** destructor
    */
@@ -202,7 +202,7 @@ public:
   void setW(const SiconosMatrix&, SP::DynamicalSystem);
 
   /** set W[ds] to pointer newPtr
-   * \param SP::SiconosMatrix  newPtr
+   * \param newPtr
    * \param a pointer to DynamicalSystem
    */
   void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem);
@@ -370,12 +370,12 @@ public:
 
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param double: tinit, initial time
-   *  \param double: tend, end time
-   *  \param double: tout, real end time
-   *  \param int: useless flag (for EulerMoreauOSI, used in LsodarOSI)
+   *  \param tinit initial time
+   *  \param tend end time
+   *  \param tout real end time
+   *  \param useless flag (for EulerMoreauOSI, used in LsodarOSI)
    */
-  void integrate(double&, double&, double&, int&);
+  void integrate(double& tinit, double& tend, double& tout, int&);
 
   /** updates the state of the Dynamical Systems
    *  \param level the level of interest for the dynamics: not used at the time

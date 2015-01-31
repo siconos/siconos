@@ -181,6 +181,11 @@ public:
     _DS = ds;
   }
 
+  /** get the Model used in the Observer
+   * \return The Model used in the Observer
+   */
+  virtual SP::Model getInternalModel() const { return _model; };
+
 };
 
 #endif

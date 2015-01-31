@@ -47,6 +47,8 @@ DEFINE_SPTR(OneStepIntegrator)
 
 DEFINE_SPTR(Relation)
 
+DEFINE_SPTR(FirstOrderR)
+
 DEFINE_SPTR(Simulation)
 DEFINE_SPTR(EventDriven)
 DEFINE_SPTR(TimeStepping)
@@ -69,6 +71,7 @@ DEFINE_SPTR(DynamicalSystemsSet)
 DEFINE_SPTR(MatrixIntegrator)
 DEFINE_SPTR(PluggedObject)
 DEFINE_SPTR(SubPluggedObject)
+DEFINE_SPTR_STRUCT(ExtraAdditionalTerms)
 
 DEFINE_SPTR(SiconosMatrix)
 DEFINE_SPTR(SimpleMatrix)
@@ -84,14 +87,19 @@ DEFINE_SPTR(NewtonEulerR)
 DEFINE_SPTR(NewtonEulerFrom1DLocalFrameR)
 DEFINE_SPTR(NewtonEulerFrom3DLocalFrameR)
 
+// Graph thing
+DEFINE_SPTR_STRUCT(InteractionProperties)
+DEFINE_SPTR_STRUCT(GraphProperties)
+DEFINE_SPTR_STRUCT(DynamicalSystemsGraph)
+DEFINE_SPTR_STRUCT(InteractionsGraph)
+
+
+// Fortran
 #include <f2c.h>
 
 TYPEDEF_SAPTR(integer)
 TYPEDEF_SPTR(integer)
 TYPEDEF_SAPTR(doublereal)
 TYPEDEF_SPTR(doublereal)
-
-// Custom - struct
-struct InteractionProperties;
 
 #endif

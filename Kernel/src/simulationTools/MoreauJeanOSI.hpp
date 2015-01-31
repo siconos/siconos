@@ -186,7 +186,7 @@ public:
   void setW(const SiconosMatrix&, SP::DynamicalSystem);
 
   /** set W[ds] to pointer newPtr
-   * \param SP::SiconosMatrix  newPtr
+   * \param newPtr
    * \param a pointer to DynamicalSystem
    */
   void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem);

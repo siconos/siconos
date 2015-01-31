@@ -26,6 +26,7 @@
 #include "Topology.hpp"
 #include "EventsManager.hpp"
 #include "SiconosGraph.hpp" // For setOfGraph
+#include "SimulationTypeDef.hpp"
 
 #include "TypeName.hpp"
 
@@ -114,4 +115,3 @@ void Model::setT(double newValue)
   _T = newValue;
   _strat->updateT(newValue);
 }
-

@@ -36,7 +36,8 @@ extern "C" double rint(double x);
 #endif
 
 // tick default value
-const double DEFAULT_TICK = 1e-16;
+// it has to be greater than DBL_EPSILON ...
+const double DEFAULT_TICK = 1e-15;
 
 /** Abstract class that represents generic time events.
  *
@@ -136,11 +137,7 @@ public:
   /** set tick value
    *  \param newTick the new tick value
    */
-  inline void setTick(double newTick)
-  {
-    std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
-    _tick = newTick;
-  };
+  void setTick(double newTick);
 
   /** get the time of the present event (mpz_t format)
    *  \return a mpz_t

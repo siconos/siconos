@@ -45,7 +45,7 @@ public:
   RuntimeException();
 
   /** constructor with a report
-   * \param std::string report : exception description
+   * \param report exception description
    */
   RuntimeException(const std::string& report);
 
@@ -59,7 +59,7 @@ public:
   static void selfThrow() NO_RETURN;
 
   /** static function which throw a RuntimeException with a report
-   * \param std::string report : exception description
+   * \param report exception description
    *
    */
   static void selfThrow(const std::string& report) NO_RETURN;

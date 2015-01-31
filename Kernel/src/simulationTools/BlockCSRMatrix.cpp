@@ -25,6 +25,7 @@
 
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
+#include "SimulationGraphs.hpp"
 
 #include "Tools.hpp"
 

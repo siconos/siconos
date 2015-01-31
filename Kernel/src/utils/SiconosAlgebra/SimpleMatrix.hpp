@@ -97,7 +97,7 @@ private:
        \param a pointer to a SiconosVector, x
        \param a DenseVect, res.
   */
-  friend void private_addprod(SPC::SiconosMatrix, unsigned int, unsigned int, SPC::SiconosVector, SP::SiconosVector);
+  friend void private_addprod(const SiconosMatrix&, unsigned int, unsigned int, const SiconosVector&, SiconosVector&);
 
   /**  computes res = a*subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
        If x is a block vector, it call the present function for all blocks.
@@ -108,7 +108,6 @@ private:
        \param a pointer to a SiconosVector, x
        \param a DenseVect, res.
   */
-  friend void private_addprod(double, SPC::SiconosMatrix, unsigned int, unsigned int, SPC::SiconosVector, SP::SiconosVector);
 
   /**  computes res = subA*x +res, subA being a submatrix of trans(A) (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
        If x is a block vector, it call the present function for all blocks.
@@ -128,12 +127,13 @@ private:
        \param a pointer to a SiconosVector, y
        \param init, a bool
   */
-  friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::SiconosVector, bool);
-  friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::BlockVector , SP::SiconosVector, bool);
+  friend void private_prod(const SiconosMatrix& A, unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init);
+  friend void private_prod(const SiconosMatrix& A, unsigned int, BlockVector&, const SiconosVector&, bool);
   friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::BlockVector, bool);
   friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::BlockVector , SP::BlockVector, bool);
 
 
+  friend void private_addprod(double, SPC::SiconosMatrix, unsigned int, unsigned int, SPC::SiconosVector, SP::SiconosVector);
 
 
   /**  computes y = a*subA*x (init =true) or += a*subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
@@ -167,85 +167,74 @@ public:
   SimpleMatrix(int i);
 
   /** constructor with the type and the dimension of the Boost matrix
-   *  \param unsigned int, number of rows.
-   *  \param unsigned int, number of columns.
-   *  \param Siconos::UBLAS_TYPE
-   *  \param unsigned int, if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal
-   *  \param unsigned int, if Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   *  \param row number of rows.
+   *  \param col number of columns.
+   *  \param typ the type of matrix
+   *  \param upper if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal
+   *  \param lower if Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
    */
-  SimpleMatrix(unsigned int, unsigned int, Siconos::UBLAS_TYPE = Siconos::DENSE, unsigned int = 1, unsigned int = 1);
+  SimpleMatrix(unsigned int row, unsigned int col, Siconos::UBLAS_TYPE typ = Siconos::DENSE, unsigned int upper = 1, unsigned int lower = 1);
 
   /** constructor with the the dimensions of the Boost matrix, a default value and the type.
-   *  \param unsigned int, number of rows.
-   *  \param unsigned int, number of columns.
+   *  \param row number of rows.
+   *  \param col number of columns.
    *  \param double a, so that *this = [a a a ...]
-   *  \param Siconos::UBLAS_TYPE
-   *  \param unsigned int, if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal
-   *  \param unsigned int, if Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   *  \param typ the type of matrix
+   *  \param upper if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal
+   *  \param lower if Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
    */
-  SimpleMatrix(unsigned int, unsigned int, double, Siconos::UBLAS_TYPE = Siconos::DENSE, unsigned int = 1, unsigned int = 1);
-
-  /** constructor with a vector of the values, the dimensiosn and the type of the boost matrix.
-   *  The integers upper and lower are useful only for BandedMat
-   *  \param a std::vector<double>
-   *  \param unsigned int, number of rows
-   *  \param unsigned int, number of columns
-   *  \param a Siconos::UBLAS_TYPE
-   *  \param unsigned int, if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal
-   *  \param unsigned int, if Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
-   */
-  //  SimpleMatrix (const std::vector<double>& ,unsigned int, unsigned int = 0, Siconos::UBLAS_TYPE = Siconos::DENSE, unsigned int = 0, unsigned int = 0);
+  SimpleMatrix(unsigned int row, unsigned int col, double inputValue, Siconos::UBLAS_TYPE typ = Siconos::DENSE, unsigned int upper = 1, unsigned int lower = 1);
 
   /** copy constructor
-   *  \param SimpleMatrix
+   *  \param smat the matrix to copy
    */
-  SimpleMatrix(const SimpleMatrix&);
+  SimpleMatrix(const SimpleMatrix& smat);
 
   /** copy constructor
-   *  \param SiconosMatrix
+   *  \param m the matrix to copy
    */
-  SimpleMatrix(const SiconosMatrix&);
+  SimpleMatrix(const SiconosMatrix& m);
 
   /** constructor with a DenseMat matrix (see SiconosMatrix.h for details)
-   *  \param a DenseMat
+   *  \param m a DenseMat
    */
-  SimpleMatrix(const DenseMat&);
+  SimpleMatrix(const DenseMat& m);
 
   /** constructor with a TriangMat matrix (see SiconosMatrix.h for details)
-   *  \param a TriangMat
+   *  \param m a TriangMat
    */
-  SimpleMatrix(const TriangMat&);
+  SimpleMatrix(const TriangMat& m);
 
   /** constructor with a SymMat matrix (see SiconosMatrix.h for details)
-   *  \param a SymMat
+   *  \param m a SymMat
    */
-  SimpleMatrix(const SymMat&);
+  SimpleMatrix(const SymMat& m);
 
   /** constructor with a BandedMat matrix (see SiconosMatrix.h for details)
-   *  \param a BandedMat
+   *  \param m a BandedMat
    */
-  SimpleMatrix(const BandedMat&);
+  SimpleMatrix(const BandedMat& m);
 
   /** constructor with a SparseMat matrix (see SiconosMatrix.h for details)
-   *  \param a SparseMat
+   *  \param m a SparseMat
    */
-  SimpleMatrix(const SparseMat&);
+  SimpleMatrix(const SparseMat& m);
 
   /** constructor with a ZeroMat matrix (see SiconosMatrix.h for details)
-   *  \param a ZeroMat
+   *  \param m a ZeroMat
    */
-  SimpleMatrix(const ZeroMat&);
+  SimpleMatrix(const ZeroMat& m);
 
   /** constructor with a IdentityMat matrix (see SiconosMatrix.h for details)
-   *  \param a IdentityMat
+   *  \param m a IdentityMat
    */
-  SimpleMatrix(const IdentityMat&);
+  SimpleMatrix(const IdentityMat& m);
 
   /** constructor with an input file
-   *  \param a std::string which contain the file path
-   *  \param a boolean to indicate if the file is in ascii
+   *  \param file the input file path
+   *  \param ascii a boolean to indicate if the file is in ascii
    */
-  SimpleMatrix(const std::string&, bool = true);
+  SimpleMatrix(const std::string& file, bool ascii = true);
 
   /** destructor
    */
@@ -402,9 +391,16 @@ public:
    */
   void eye();
 
+  /** copy the matrix data to the array given in parameter'
+   * Works only for dense matrices !
+   * \param data array where the matrix is copied
+   * \return the size of the matrix
+   */
+  unsigned copyData(double* data) const;
+
   /** get the number of rows or columns of the matrix
-   *  \param : unsigned int, 0 for rows, 1 for columns
-   *  \return an int
+   *  \param index 0 for rows, 1 for columns
+   *  \return the size
    */
   unsigned int size(unsigned int index) const;
 
@@ -529,14 +525,14 @@ public:
   /** set column number index of current matrix, starting from element at position pos, with vIn
    *  \param index index of required column
    *  \param pos index of the first required element in the column
-   *  \param vIn a SP::SiconosVector
+   *  \param vIn a vector
    */
   void setSubCol(unsigned int index, unsigned int pos, SP::SiconosVector vIn);
 
   /** set row number index of current matrix, starting from element at position pos, with vIn
    *  \param index index of required row
    *  \param pos index of the first required element in the row
-   *  \param vIn a SP::SiconosVector
+   *  \param vIn a vector
    */
   void setSubRow(unsigned int index, unsigned int pos, SP::SiconosVector vIn);
 
@@ -559,34 +555,34 @@ public:
   void trans();
 
   /** transpose a matrix: x->trans(m) is x = transpose of m.
-   *  \param mat a SiconosMatrix: the matrix to be transposed.
+   *  \param mat the matrix to be transposed.
    */
   void trans(const SiconosMatrix& mat);
 
   /** assignment
-   *  \param SiconosMatrix : the matrix to be copied
+   *  \param m the matrix to be copied
    */
-  SimpleMatrix& operator = (const SiconosMatrix&);
+  SimpleMatrix& operator = (const SiconosMatrix& m);
 
   /** assignment
-   *  \param SimpleMatrix : the matrix to be copied
+   *  \param m the matrix to be copied
    */
-  SimpleMatrix& operator = (const SimpleMatrix&);
+  SimpleMatrix& operator = (const SimpleMatrix& m);
 
   /** assignment to a DenseMat
    *  \param the matrix to be copied
    */
-  SimpleMatrix& operator = (const DenseMat&);
+  SimpleMatrix& operator = (const DenseMat& m);
 
   /** operator +=
-   *  \param SiconosMatrix : a matrix to add
+   *  \param m a matrix to add
    */
-  SimpleMatrix& operator +=(const SiconosMatrix&);
+  SimpleMatrix& operator +=(const SiconosMatrix& m);
 
   /** operator -=
-   *  \param SiconosMatrix : a matrix to subtract
+   *  \param m a matrix to subtract
    */
-  SimpleMatrix& operator -=(const SiconosMatrix&);
+  SimpleMatrix& operator -=(const SiconosMatrix& m);
 
   /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
@@ -601,25 +597,25 @@ public:
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
-   *  \param[in,out] B tas input: the RHS matrix B - as output: the matrix X
+   *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
   void PLUForwardBackwardInPlace(SiconosMatrix& B);
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
-   *  \param[in,out] B as input: the RHS vector b - as output: the vector x
+   *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
   void PLUForwardBackwardInPlace(SiconosVector& B);
 
   /** solves a system of linear equations A * X = B  (A=this)
       with a general N-by-N matrix A using the Least squares method
-   *  \param[in,out] B as input: the RHS vector b - as output: the vector x
+   *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
   void SolveByLeastSquares(SiconosMatrix& B);
 
   /** solves a system of linear equations A * X = B  (A=this)
        with a general N-by-N matrix A using the Least squares method
-    *  \param[in,out] B as input: the RHS vector b - as output: the vector x
+   *  \param[in,out] B on input the RHS matrix b; on output the result x
     */
   void SolveByLeastSquares(SiconosVector& B);
 
@@ -673,7 +669,7 @@ public:
 
   friend const SiconosVector prod(const SiconosMatrix&, const SiconosVector&);
 
-  friend void prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool);
+  friend void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init);
 
   friend void prod(const SiconosMatrix&, const BlockVector&, SiconosVector&, bool);
 

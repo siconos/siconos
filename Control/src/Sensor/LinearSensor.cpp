@@ -42,6 +42,11 @@ void LinearSensor::initialize(const Model& m)
   ControlSensor::initialize(m);
 
   // consistency checks
+  if (!_matC)
+  {
+    RuntimeException::selfThrow("LinearSensor::initialize - no C matrix was given");
+  }
+
   unsigned int colC = _matC->size(1);
   unsigned int rowC = _matC->size(0);
   // What happen here if we have more than one DS ?

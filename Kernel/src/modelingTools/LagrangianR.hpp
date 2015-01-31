@@ -159,36 +159,13 @@ public:
     return _jachlambda;
   }
 
-  /** set the value of Jach[index] to newValue (copy)
-  *  \param SiconosMatrix newValue
-  *  \param unsigned int: index position in Jach vector
-
-  template <class U> void setJach(const U& newValue, unsigned int index = 0)
-  {
-  assert(index>=Jach.size()&&"LagrangianR:: setJach(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
-
-  if(Jach[index]) Jach[index]->resize(newValue.size(0), newValue.size(1));
-  setObject<PluggedMatrix,SP_PluggedMatrix,U>(Jach[index],newValue);
-  }
-  */
   /** set Jach[index] to pointer newPtr (pointer link)
-  *  \param SP::SiconosMatrix  newPtr
-  *  \param unsigned int: index position in Jach vector
+  *  \param newPtr the new matrix
   */
   inline void setJachqPtr(SP::SimpleMatrix newPtr)
   {
     _jachq = newPtr ;
   }
-
-  /** To get the name of Jach[i] plugin
-  *  \return a std::string
-  const std::string getJachName(unsigned int i) const {return Jach[i]->getPluginName();}
-  */
-
-  /** true if Jach[i] is plugged
-  *  \return a bool
-  const bool isJachPlugged(unsigned int i) const {return Jach[i]->isPlugged();}
-  */
 
   /** Gets the number of computed jacobians for h
   \return an unsigned int.
@@ -202,6 +179,8 @@ public:
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction using this relation
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   * \param workV the work vectors
    * \param workM work matrices
   */
   void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
@@ -213,14 +192,14 @@ public:
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0 ;
 
   /** to compute output
-  *  \param double : current time
-  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+  *  \param time current time
+  *  \param derivativeNumber number of the derivative to compute, optional, default = 0.
   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
 
   /** to compute p
-  *  \param double : current time
-  *  \param unsigned int: "derivative" order of lambda used to compute input
+  *  \param time current time
+  *  \param level "derivative" order of lambda used to compute input
   */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
 

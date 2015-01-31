@@ -40,6 +40,11 @@
 #include <boost/config.hpp>
 #include <boost/version.hpp>
 
+#if (__cplusplus >= 201103L) && !defined(USE_MAP_FOR_HASH)
+#include <unordered_map>
+#else
+#include <map>
+#endif
 
 /* gccxml 0.9 complains about ambiguous usage of size_t or std::size_t
  * in some boost headers, so we specify which one we want. It seems
@@ -184,7 +189,12 @@ public:
   //  typedef typename
   //  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
-  typedef typename std::map<V, VDescriptor> VMap;
+#if (__cplusplus >= 201103L) && !defined(USE_MAP_FOR_HASH)
+  typedef std::unordered_map<V, VDescriptor> VMap;
+#else
+  typedef std::map<V, VDescriptor> VMap;
+#endif
+
 
   int _stamp;
   VMap vertex_descriptor;
@@ -687,7 +697,12 @@ public:
 
       if (vdx == vd2) endl = true;
 
+#if (__cplusplus >= 201103L) && !defined(USE_MAP_FOR_HASH)
+      std::unordered_map<E, EDescriptor> Edone;
+#else
       std::map<E, EDescriptor> Edone;
+#endif
+
 
       OEIterator ied, iedend;
       for (std11::tie(ied, iedend) = out_edges(vdx);

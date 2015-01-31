@@ -17,21 +17,24 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "ControlManager.hpp"
 #include "EventsManager.hpp"
 #include "Simulation.hpp"
+#include "Simulation.hpp"
+#include "TimeDiscretisation.hpp"
+#include "Model.hpp"
+#include "OneStepIntegrator.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+
+#include "ControlManager.hpp"
 #include "Sensor.hpp"
 #include "SensorFactory.hpp"
 #include "ActuatorFactory.hpp"
 #include "Observer.hpp"
 #include "ObserverFactory.hpp"
-#include "Simulation.hpp"
-#include "TimeDiscretisation.hpp"
-
 #include "SensorEvent.hpp"
 #include "ActuatorEvent.hpp"
 #include "ObserverEvent.hpp"
-
+#include "ExtraAdditionalTerms.hpp"
 
 ControlManager::ControlManager(SP::Simulation sim): _sim(sim)
 {
@@ -59,12 +62,24 @@ void ControlManager::initialize(const Model& m)
     (*itA)->initialize(m);
   }
 
-  // Initialize all the Actuators and insert their events into the
+  // Initialize all the Observer and insert their events into the
   // EventsManager of the Simulation.
   for (ObserversIterator itO = _allObservers.begin();
        itO != _allObservers.end(); ++itO)
   {
     (*itO)->initialize(m);
+  }
+
+  // init the control terms, if any
+  OSISet& allOSI = *m.simulation()->oneStepIntegrators();
+  DynamicalSystemsGraph& DSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
+  for (OSIIterator itosi = allOSI.begin(); itosi != allOSI.end(); ++itosi)
+  {
+    if ((*itosi)->extraAdditionalTerms())
+    {
+      // would be nice to check is those are for Control
+      (*itosi)->extraAdditionalTerms()->init(DSG0, m);
+    }
   }
 }
 
@@ -87,6 +102,8 @@ SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t
 
 SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor)
 {
+  if (!sensor)
+    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
   SP::Actuator act = (* (_allActuators.insert(regActuator.instantiate(type, sensor))).first);
   linkActuatorSimulation(act, td); 
@@ -95,6 +112,8 @@ SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation td, SP
 
 SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor)
 {
+  if (!sensor)
+    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
   SP::Actuator act = *(_allActuators.insert(regActuator.instantiate(type, sensor))).first;
   linkActuatorSimulation(act, td);
@@ -104,6 +123,8 @@ SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisati
 
 SP::Observer ControlManager::addObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
+  if (!sensor)
+    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
   ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
   SP::Observer obs = (* (_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first);
   linkObserverSimulation(obs, td);
@@ -121,12 +142,16 @@ SP::Observer ControlManager::addAndRecordObserver(int type, SP::TimeDiscretisati
 
 void ControlManager::addSensorPtr(SP::Sensor s, SP::TimeDiscretisation td)
 {
+  if (!s)
+    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
   _allSensors.insert(s);
   linkSensorSimulation(s, td);
 }
 
 void ControlManager::addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td)
 {
+  if (!s)
+    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
   _allSensors.insert(s);
   linkSensorSimulation(s, td);
   s->initialize(*_sim->model());
@@ -134,12 +159,16 @@ void ControlManager::addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation 
 
 void ControlManager::addActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td)
 {
+  if (!act)
+    RuntimeException::selfThrow("ControlManager::addActuator - actuator is not valid !");
   _allActuators.insert(act);
   linkActuatorSimulation(act, td);
 }
 
 void ControlManager::addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td)
 {
+  if (!act)
+    RuntimeException::selfThrow("ControlManager::addActuator - actuator is not valid !");
   _allActuators.insert(act);
   linkActuatorSimulation(act, td);
   act->initialize(*_sim->model());
@@ -147,12 +176,16 @@ void ControlManager::addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretis
 
 void ControlManager::addObserverPtr(SP::Observer obs, SP::TimeDiscretisation td)
 {
+  if (!obs)
+    RuntimeException::selfThrow("ControlManager::addActuator - observer is not valid !");
   _allObservers.insert(obs);
   linkObserverSimulation(obs, td);
 }
 
 void ControlManager::addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td)
 {
+  if (!obs)
+    RuntimeException::selfThrow("ControlManager::addActuator - observer is not valid !");
   _allObservers.insert(obs);
   linkObserverSimulation(obs, td);
   obs->initialize(*_sim->model());

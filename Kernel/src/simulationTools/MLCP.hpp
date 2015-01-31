@@ -81,9 +81,8 @@ protected:
 public:
 
   /** constructor from data
-  *  \param id of Numerics solver
-  *  (optional, default = NULL => read .opt file in Numerics)
-  *  \param std::string: id of the problem (default = "unamed")
+  *  \param numericsSolverId id of Numerics solver
+  *  (optional, SICONOS_MLCP_ENUM the enumerative solver)
   */
   MLCP(int numericsSolverId = SICONOS_MLCP_ENUM);
 
@@ -136,12 +135,13 @@ public:
   virtual bool preCompute(double time);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
-  *  \param double : current time
+  *  \param time current time
   *  \return int, information about the solver convergence.
   */
-  int compute(double);
+  int compute(double time);
 
   /** initialize
+   * \param sim the Simulation
    */
   void initialize(SP::Simulation sim);
 

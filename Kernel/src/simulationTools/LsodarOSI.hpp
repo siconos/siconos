@@ -106,7 +106,7 @@ public:
   }
 
   /** get _intData[i]
-   * \param i: index number (starting from 0)
+   * \param i index number (starting from 0)
    *  \return an integer
    */
   inline integer intData(unsigned int i) const
@@ -115,8 +115,8 @@ public:
   }
 
   /** set _intData[i]
-   * \param i: index number (starting from 0)
-   * \param newValue : the new value
+   * \param i index number (starting from 0)
+   * \param newValue the new value
    */
   inline void setIntData(unsigned int i, int newValue)
   {
@@ -171,8 +171,17 @@ public:
     return jroot;
   }
 
-  /** set Jt value, Jacobian type indicator (see the documentation of the lsodar subroutine)
-   *  \param newJT new value for the jt parameter
+  /** set Jt value, Jacobian type indicator. Excerpts from the lsodar documentation.
+   *    1 means a user-supplied full (neq by neq) jacobian.
+   *    2 means an internally generated (difference quotient) full
+   *      jacobian (using neq extra calls to f per df/dy value).
+   *    4 means a user-supplied banded jacobian.
+   *    5 means an internally generated banded jacobian (using
+   *      ml+mu+1 extra calls to f per df/dy evaluation).
+   *  if jt = 1 or 4, the user must supply a subroutine jac
+   *  (the name is arbitrary) as described above under jac.
+   *  if jt = 2 or 5, a dummy argument can be used.
+   *  \param newJT new value for the jt parameter.
    */
   inline void setJT(integer newJT)
   {
@@ -215,18 +224,22 @@ public:
   void updateData();
 
   /** fill xWork with a doublereal
-   *  \param size: size of x array
-   *  \param array: x array of double
+   *  \param size size of x array
+   *  \param array x array of double
    */
-  void fillXWork(integer* size, doublereal* array) ;
+  void fillXWork(integer* size, doublereal* array);
 
   /** compute rhs(t) for all dynamical systems in the set
+   * \param t current time of simulation
+   * \param DSG0 the graph of DynamicalSystem
    */
-  void computeRhs(double) ;
+  void computeRhs(double t, DynamicalSystemsGraph& DSG0);
 
   /** compute jacobian of the rhs at time t for all dynamical systems in the set
+   * \param t current time of simulation
+   * \param DSG0 the graph of DynamicalSystem
    */
-  void computeJacobianRhs(double) ;
+  void computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0);
 
   void f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot);
 
@@ -239,10 +252,10 @@ public:
   void initialize();
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param tinit: initial time
-   *  \param tend: end time
-   *  \param tout: real end time
-   *  \param ioparam: in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
+   *  \param tinit initial time
+   *  \param tend end time
+   *  \param tout real end time
+   *  \param ioparam in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
    */
   void integrate(double& tinit, double& tend, double& tout, int& ioparam);
 

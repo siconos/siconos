@@ -28,6 +28,9 @@
 #include "SiconosAlgebraTypeDef.hpp"
 #include "ControlTypeDef.hpp"
 #include "SiconosControlFwd.hpp"
+#include "SiconosFwd.hpp"
+
+#include <string>
 
 class ControlSimulation
 {
@@ -43,40 +46,59 @@ protected:
    * \param t0 the starting time \f$t_0\f$
    * \param T the end time T
    * \param h the simulation time step
-   * \param x0 the initial state
    * */
-  ControlSimulation(double t0, double T, double h, SP::SiconosVector x0);
+  ControlSimulation(double t0, double T, double h);
 
   /** Starting time */
   double _t0;
+
   /** End time */
   double _T;
+
   /** Simulation step */
   double _h;
+
   /** Theta for MoreauJeanOSI */
   double _theta;
+
   /** Time spent computing */
   double _elapsedTime;
+
   /** rough estimation of the number of points to save */
-  unsigned int _N;
+  unsigned _N;
+
   /** Dimension of the state space */
-  unsigned int _nDim;
-  /** Starting point */
-  SP::SiconosVector _x0;
+  unsigned _nDim;
+
+  /** Save only the data in the main Simulation*/
+  bool _saveOnlyMainSimulation;
+
   /** Matrix for saving result */
   SP::SimpleMatrix _dataM;
-  /** DynamicalSystem */
-  SP::DynamicalSystem _processDS;
+
+  /** Legend for the columns in the matrix _dataM*/
+  std::string _dataLegend;
+
   /** Model */
   SP::Model _model;
-  /** TimeDiscretisation */
+
+  /** TimeDiscretisation for the simulation*/
   SP::TimeDiscretisation _processTD;
-  /** TimeStepping */
-  SP::TimeStepping _processSimulation;
-  /** MoreauJeanOSI */
+
+  /** The Simulation */
+  SP::Simulation _processSimulation;
+
+  /** The integrator */
   SP::OneStepIntegrator _processIntegrator;
+
   /** the ControlManager */
   SP::ControlManager _CM;
+
+  /** DynamicalSystemsGraph (for convenience)*/
+  SP::DynamicalSystemsGraph _DSG0;
+
+  /** InteractionsGraph (for convenience)*/
+  SP::InteractionsGraph _IG0;
 
 public:
 
@@ -91,36 +113,47 @@ public:
    */
   void initialize();
 
-  /** Add a Sensor
-   * \param newSensor the SP::Sensor to be added
-   * \param td the TimeDiscretisation associated with the Sensor
+  /** Add a DynamicalSystem
+   * \param ds the DynamicalSystem to integrate
+   * \param name of the ds (optional)
    */
-  void addSensorPtr(SP::Sensor newSensor, SP::TimeDiscretisation td);
+  void addDynamicalSystem(SP::DynamicalSystem ds, const std::string& name = "");
+
+  /** Add a Sensor
+   * \param sensor the sensor to be added
+   * \param h sampling period (or timestep) for the Sensor
+   */
+  void addSensor(SP::Sensor sensor, const double h);
 
   /** Add an Actuator
-   * \param newActuator the SP::Actuator to be added
-   * \param td the TimeDiscretisation associated with the Actuator
+   * \param actuator the controller to be added
+   * \param h sampling period (or timestep) for the Sensor
    */
-  void addActuatorPtr(SP::Actuator newActuator, SP::TimeDiscretisation td);
+  void addActuator(SP::Actuator actuator, const double h);
 
-  /** Return the DynamicalSystem
-   * \return the SP::DynamicalSystem
+  /** store the simulation data in a row of the matrix
+   * \param indx the current row index
    */
-  inline SP::DynamicalSystem processDS() const
-  {
-    return _processDS;
-  };
+  void storeData(unsigned indx);
 
   /** Return the Simulation
-   * \return the process Simulation (a SP::TimeStepping)
+   * \return the simulation for the main simulation
   */
-  inline SP::TimeStepping simulation() const
+  inline SP::Simulation simulation() const
   {
     return _processSimulation;
   };
 
+  /** Return the OneStepIntegrator
+   * \return the Integrator
+  */
+  inline SP::OneStepIntegrator integrator() const
+  {
+    return _processIntegrator;
+  };
+
   /** Return the Model
-   * \return the SP::Model
+   * \return the Model 
   */
   inline SP::Model model() const
   {
@@ -135,6 +168,14 @@ public:
     return _dataM;
   }
 
+  /** get the legend for the matrix
+   * \return legend as string of space seperated values
+   */
+  inline std::string dataLegend() const
+  {
+    return _dataLegend;
+  }
+
   /** Return the elapsed time computing
    * \return the elapsed time computing
    */
@@ -144,23 +185,23 @@ public:
   }
 
   /** Return the ControlManager
-   * \return a SP::ControlManager
+   * \return the ControlManager
    */
   inline SP::ControlManager CM() const
   {
     return _CM;
   };
 
-  /** Change the FirstOrderLinearDS
-   * \param ds the new SP::DynamicalSystem
+  /** Set the value of _saveOnlyMainSimulation
+   * \param v a boolean
    */
-  inline void setProcessDS(SP::DynamicalSystem ds)
+  inline void setSaveOnlyMainSimulation(bool v)
   {
-    _processDS = ds;
-  };
+    _saveOnlyMainSimulation = v;
+  }
 
   /** Run the simulation */
-  virtual void run();
+  virtual void run() = 0;
 };
 
 #endif // CONTROLDYNAMICALSYSTEM_H

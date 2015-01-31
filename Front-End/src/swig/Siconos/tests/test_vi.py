@@ -175,7 +175,7 @@ def test_vi_C_interface():
         N = int(T/h + 10)
         print(N)
         SO.dparam[0] = 1e-24
-        SO.iparam[0] = 40
+        SO.iparam[0] = 100
         SO.iparam[2] = 1
         SO.iparam[3] = 0
         SO.iparam[4] = 5
@@ -191,7 +191,6 @@ def test_vi_C_interface():
             k += 1
             info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
             #print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
-            #info = SN.mcp_newton_FBLSA(mcp, z, w, SO)
             if info > 0:
                 print(lambda_)
     #            vi_function(2, signs[k-1, :], xkp1)
@@ -204,7 +203,6 @@ def test_vi_C_interface():
                     print('ok lambda')
                     print(lambda_)
                 info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
-    #            info = SN.mcp_newton_minFBLSA(mcp, z, w, SO)
                 print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
                 if info >0:
                     print('VI solver failed ! info = {:}'.format(info))

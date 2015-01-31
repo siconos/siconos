@@ -26,6 +26,7 @@
 #include <boost/math/quaternion.hpp>
 #include <BlockVector.hpp>
 
+#include <iostream>
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES

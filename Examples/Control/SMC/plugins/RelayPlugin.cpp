@@ -9,13 +9,11 @@
 
 extern "C" double computeDefault(double time)
 {
-  double u;
-  u = sin(50 * time);
-  return u;
+  return sin(50 * time);
 }
 
 SICONOS_EXPORT void computeB(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double* z)
 {
-  b[0] = computeDefault(time) + z[0];
-  b[1] = -1.0 * computeDefault(time) + z[1];
+  b[0] = computeDefault(time);
+  b[1] = -1.0 * computeDefault(time);
 }

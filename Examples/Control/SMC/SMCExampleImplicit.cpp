@@ -25,15 +25,11 @@
 
 #include "SiconosKernel.hpp"
 #include "SiconosControl.hpp"
-//#include <fenv.h>
 using namespace std;
 
 // main program
 int main(int argc, char* argv[])
 {
-
-  //feenableexcept(FE_INEXACT);
-
   // User-defined parameters
   unsigned int ndof = 2;          // Number of degrees of freedom of your system
   double t0 = 0.0;                // Starting time
@@ -62,57 +58,40 @@ int main(int argc, char* argv[])
   // Note: r = Blambda, B defines in relation below.
 
   // Matrix declaration
-  // For the DynamycalSystem
   SP::SiconosMatrix A(new SimpleMatrix(ndof, ndof, 0));
   SP::SiconosVector x0(new SiconosVector(ndof));
   (*x0)(0) = Xinit;
   (*x0)(1) = -Xinit;
-  // For the Sensor
   SP::SimpleMatrix sensorC(new SimpleMatrix(2, 2));
   sensorC->eye();
-  // For the Actuator
-  SP::SimpleMatrix Csurface(new SimpleMatrix(2, 2));
-  Csurface->eye();
-  SP::SimpleMatrix Brel(new SimpleMatrix(2, 2));
-  Brel->eye();
-  *(Brel) *= 2;
-  SP::SimpleMatrix Drel(new SimpleMatrix(2, 2, 0));
+  SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
+  SP::SimpleMatrix Csurface(new SimpleMatrix(1, 2, 0));
+  (*Csurface)(0, 1) = 1;
+  SP::SimpleMatrix Brel(new SimpleMatrix(2, 1, 0));
+  (*Brel)(1, 0) = 2;
+
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
   processDS->setComputebFunction("RelayPlugin", "computeB");
-
   // -------------
   // --- Model process ---
   // -------------
-  SP::Model process(new Model(t0, T));
-  process->nonSmoothDynamicalSystem()->insertDynamicalSystem(processDS);
+  SP::ControlSimulation sim(new ControlZOHSimulation(t0, T, h));
+  sim->setSaveOnlyMainSimulation(true);
+  sim->addDynamicalSystem(processDS);
 
   // ------------------
   // --- Simulation ---
   // ------------------
-  // TimeDiscretisation
-  SP::TimeDiscretisation processTD(new TimeDiscretisation(t0, h));
-  SP::TimeDiscretisation tSensor(new TimeDiscretisation(t0, hControl));
-  SP::TimeDiscretisation tActuator(new TimeDiscretisation(t0, hControl));
-  // == Creation of the Simulation ==
-  SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
-  processSimulation->setName("plant simulation");
-  // -- OneStepIntegrators --
-  SP::ZeroOrderHoldOSI processIntegrator(new ZeroOrderHoldOSI(processDS));
-  processSimulation->insertIntegrator(processIntegrator);
-
   // Control stuff
-  SP::ControlManager control(new ControlManager(processSimulation));
   // use a controlSensor
   SP::LinearSensor sens(new LinearSensor(processDS, sensorC));
-  control->addSensorPtr(sens, tSensor);
+  sim->addSensor(sens, hControl);
   // add the sliding mode controller
-  LinearSMC& act = *std11::static_pointer_cast<LinearSMC>(control->addActuator
-                   (LINEAR_SMC, tActuator, sens));
-  act.setCsurfacePtr(Csurface);
-  act.setBPtr(Brel);
-  act.setDPtr(Drel);
-
+  SP::LinearSMC act(new LinearSMC(sens));
+  act->setCsurface(Csurface);
+  act->setB(Brel);
+  sim->addActuator(act, hControl);
   // =========================== End of model definition ===========================
 
   // ================================= Computation =================================
@@ -121,48 +100,14 @@ int main(int argc, char* argv[])
 
   cout << "====> Simulation initialisation ..." << endl << endl;
   // initialise the process and the ControlManager
-  process->initialize(processSimulation);
-  control->initialize(*process);
-
-  // --- Get the values to be plotted ---
-  unsigned int outputSize = 3; // number of required data
-  unsigned int N = ceil((T - t0) / h) + 10; // Number of time steps
-
-  SiconosVector& xProc = *processDS->x();
-  // Save data in a matrix dataPlot
-  SimpleMatrix dataPlot(N, outputSize);
-  dataPlot(0, 0) = process->t0(); // Initial time of the model
-  dataPlot(0, 1) = xProc(0);
-  dataPlot(0, 2) = xProc(1);
-
-  EventsManager& eventsManager = *processSimulation->eventsManager();
+  sim->initialize();
 
   // ==== Simulation loop =====
   cout << "====> Start computation ... " << endl << endl;
-  int k = 0; // Current step
-  // Simulation loop
-  boost::progress_display show_progress(N);
-  boost::timer time;
-  time.restart();
-  while (processSimulation->hasNextEvent())
-  {
-    Event& nextEvent = *eventsManager.nextEvent();
-    if (nextEvent.getType() == TD_EVENT)
-    {
-      processSimulation->computeOneStep();
-      k++;
-      dataPlot(k, 0) = processSimulation->nextTime();
-      dataPlot(k, 1) = xProc(0);
-      dataPlot(k, 2) = xProc(1);
-      ++show_progress;
-    }
-    processSimulation->nextStep();
-  }
-  cout << endl << "Computation Time " << time.elapsed()  << endl;
-
+  sim->run();
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
-  dataPlot.resize(k, outputSize);
+  SimpleMatrix& dataPlot = *sim->data();
   ioMatrix::write("SMCExampleImplicit.dat", "ascii", dataPlot, "noDim");
 
   // Comparison with a reference file
@@ -170,10 +115,11 @@ int main(int argc, char* argv[])
   dataPlotRef.zero();
   ioMatrix::read("SMCExampleImplicit.ref", "ascii", dataPlotRef);
   std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
+
   if ((dataPlot - dataPlotRef).normInf() > 1e-12)
   {
     std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
     return 1;
   }
+
 }

@@ -278,12 +278,12 @@ public:
   void initialize();
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param double: tinit, initial time
-   *  \param double: tend, end time
-   *  \param double: tout, real end time
-   *  \param int&: in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
+   *  \param tinit initial time
+   *  \param tend end time
+   *  \param tout real end time
+   *  \param idid in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
    */
-  void integrate(double&, double&, double&, int&);
+  void integrate(double& tinit, double& tend, double& tout, int& idid);
 
   /** update the state of the DynamicalSystems attached to this Integrator
    *  \param level level of interest for the dynamics

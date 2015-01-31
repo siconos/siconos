@@ -30,6 +30,11 @@ ExplicitLinearSMC::ExplicitLinearSMC(SP::ControlSensor sensor): CommonSMC(EXPLIC
 {
 }
 
+ExplicitLinearSMC::ExplicitLinearSMC(SP::ControlSensor sensor, SP::SimpleMatrix B): CommonSMC(EXPLICIT_LINEAR_SMC, sensor, B)
+{
+}
+
+
 ExplicitLinearSMC::~ExplicitLinearSMC()
 {
   _sigma.reset();

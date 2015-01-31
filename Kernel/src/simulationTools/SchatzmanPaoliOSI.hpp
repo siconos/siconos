@@ -308,12 +308,12 @@ public:
   void prepareNewtonIteration(double time);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param double: tinit, initial time
-   *  \param double: tend, end time
-   *  \param double: tout, real end time
-   *  \param int: useless flag (for SchatzmanPaoliOSI, used in LsodarOSI)
+   *  \param tinit initial time
+   *  \param tend end time
+   *  \param tout real end time
+   *  \param idid useless flag (for SchatzmanPaoliOSI, used in LsodarOSI)
    */
-  void integrate(double&, double&, double&, int&);
+  void integrate(double& tinit, double& tend, double& tout, int& idid);
 
   /** updates the state of the Dynamical Systems
    *  \param level level of interest for the dynamics: not used at the time

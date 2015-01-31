@@ -20,11 +20,12 @@
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
 
+#include <iostream>
 
 // Default constructor
-Relation::Relation(RELATION::TYPES newType,
-                   RELATION::SUBTYPES newSub):
-  _relationType(newType), _subType(newSub)
+Relation::Relation(RELATION::TYPES type,
+                   RELATION::SUBTYPES subtype):
+  _relationType(type), _subType(subtype)
 {
   zeroPlugin();
 }
@@ -36,7 +37,8 @@ void Relation::zeroPlugin()
   _pluginJachz.reset(new PluggedObject());
   _pluginJachlambda.reset(new PluggedObject());
   _pluging.reset(new PluggedObject());
-  _pluginJacLg.reset(new PluggedObject());
+  _pluginJacgx.reset(new PluggedObject());
+  _pluginJacglambda.reset(new PluggedObject());
   _pluginf.reset(new PluggedObject());
   _plugine.reset(new PluggedObject());
 }
@@ -104,7 +106,7 @@ bool Relation::isgPlugged() const
 
 bool Relation::isJacLgPlugged() const
 {
-  return _pluginJacLg->isPlugged();
+  return _pluginJacglambda->isPlugged();
 }
 
 bool Relation::isfPlugged() const
@@ -143,9 +145,14 @@ void Relation::setComputeEFunction(const std::string& pluginPath, const std::str
   _plugine->setComputeFunction(pluginPath, functionName);
 }
 
+void Relation::setComputeJacgxFunction(const std::string& pluginPath, const std::string& functionName)
+{
+  _pluginJacgx->setComputeFunction(pluginPath, functionName);
+}
+
 void Relation::setComputeJacglambdaFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  _pluginJacLg->setComputeFunction(pluginPath, functionName);
+  _pluginJacglambda->setComputeFunction(pluginPath, functionName);
 }
 
 void Relation::setComputehFunction(const std::string& pluginPath, const std::string& functionName)

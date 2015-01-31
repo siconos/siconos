@@ -26,7 +26,6 @@
 #include "DynamicalSystemsSet.hpp"
 #include "Topology.hpp"
 
-
 /** the Non Smooth Dynamical System consists of DynamicalDystem
  *  and Interaction regrouped together in a Topology object,
  *  in the form of a graph of DynamicalDystem as nodes and Interaction as edges
@@ -214,22 +213,7 @@ public:
   /** set symmetry in the blocks computation
    * \param val a bool
    */
-  void setSymmetric(bool val)
-  {
-    topology()->setSymmetric(val);
-  }
-
-  /** use this function to add a control input to the DynamicalSystem ds. Internaly it adds
-   * an optional property to the DynamicalSystem
-   * \param ds the DynamicalSystem
-   * \param B the B matrix */
-  void setControlInput(SP::DynamicalSystem ds, SP::SiconosMatrix B);
-
-  /** use this function to flag this DynamicalSystem as an Observer. Internaly it adds
-   * an optional property to the DynamicalSystem
-   *  \param ds the DynamicalSystem
-   *  \param L the observer gain matrix */
-  void setObserverInput(SP::DynamicalSystem ds, SP::SiconosMatrix L);
+  void setSymmetric(bool val);
 };
 
 #endif

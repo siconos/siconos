@@ -69,44 +69,29 @@ int main(int argc, char* argv[])
   (*Csurface)(0, 1) = 1;
   SP::SimpleMatrix Brel(new SimpleMatrix(2, 1, 0));
   (*Brel)(1, 0) = 2;
-  SP::SimpleMatrix Drel(new SimpleMatrix(1, 1, 0));
-  SP::SiconosVector z(new SiconosVector(ndof));
 
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
   processDS->setComputebFunction("RelayPlugin", "computeB");
-  processDS->setzPtr(z);
   // -------------
   // --- Model process ---
   // -------------
-  SP::Model process(new Model(t0, T));
-  process->nonSmoothDynamicalSystem()->insertDynamicalSystem(processDS);
+  SP::ControlSimulation sim(new ControlZOHSimulation(t0, T, h));
+  sim->setSaveOnlyMainSimulation(true);
+  sim->addDynamicalSystem(processDS);
 
   // ------------------
   // --- Simulation ---
   // ------------------
-  // TimeDiscretisation
-  SP::TimeDiscretisation processTD(new TimeDiscretisation(t0, h));
-  SP::TimeDiscretisation tSensor(new TimeDiscretisation(t0, hControl));
-  SP::TimeDiscretisation tActuator(new TimeDiscretisation(t0, hControl));
-  // == Creation of the Simulation ==
-  SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
-  processSimulation->setName("plant simulation");
-  // -- OneStepIntegrators --
-  SP::ZeroOrderHoldOSI processIntegrator(new ZeroOrderHoldOSI(processDS));
-  processSimulation->insertIntegrator(processIntegrator);
-
   // Control stuff
-  SP::ControlManager control(new ControlManager(processSimulation));
   // use a controlSensor
   SP::LinearSensor sens(new LinearSensor(processDS, sensorC));
-  control->addSensorPtr(sens, tSensor);
+  sim->addSensor(sens, hControl);
   // add the sliding mode controller
-  SP::ExplicitLinearSMC act = std11::static_pointer_cast<ExplicitLinearSMC>
-                                (control->addActuator(EXPLICIT_LINEAR_SMC, tActuator, sens));
-  act->setCsurfacePtr(Csurface);
-  act->setBPtr(Brel);
-  act->setSaturationMatrixPtr(Drel);
+  SP::ExplicitLinearSMC act(new ExplicitLinearSMC(sens));
+  act->setCsurface(Csurface);
+  act->setB(Brel);
+  sim->addActuator(act, hControl);
   // =========================== End of model definition ===========================
 
   // ================================= Computation =================================
@@ -115,49 +100,14 @@ int main(int argc, char* argv[])
 
   cout << "====> Simulation initialisation ..." << endl << endl;
   // initialise the process and the ControlManager
-  process->initialize(processSimulation);
-  control->initialize(*process);
-
-  // --- Get the values to be plotted ---
-  unsigned int outputSize = 3; // number of required data
-  unsigned int N = ceil((T - t0) / h) + 10; // Number of time steps
-
-  SP::SiconosVector xProc = processDS->x();
-  // Save data in a matrix dataPlot
-  SimpleMatrix dataPlot(N, outputSize);
-  dataPlot(0, 0) = process->t0(); // Initial time of the model
-  dataPlot(0, 1) = (*xProc)(0);
-  dataPlot(0, 2) = (*xProc)(1);
-
-  EventsManager& eventsManager = *processSimulation->eventsManager();
+  sim->initialize();
 
   // ==== Simulation loop =====
   cout << "====> Start computation ... " << endl << endl;
-  int k = 0; // Current step
-  // Simulation loop
-  boost::progress_display show_progress(N);
-  boost::timer time;
-  time.restart();
-  while (processSimulation->hasNextEvent())
-  {
-    Event& nextEvent = *eventsManager.nextEvent();
-    if (nextEvent.getType() == TD_EVENT)
-    {
-      processSimulation->computeOneStep();
-      k++;
-      dataPlot(k, 0) = processSimulation->nextTime();
-      dataPlot(k, 1) = (*xProc)(0);
-      dataPlot(k, 2) = (*xProc)(1);
-      ++show_progress;
-    }
-    processSimulation->nextStep();
-    std::cout << processSimulation->getTk() << " " << processSimulation->getTkp1() << " " << processSimulation->getTkp2() << std::endl;
-  }
-  cout << endl << "Computation Time " << time.elapsed()  << endl;
-
+  sim->run();
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
-  dataPlot.resize(k, outputSize);
+  SimpleMatrix& dataPlot = *sim->data();
   ioMatrix::write("SMCExampleExplicit.dat", "ascii", dataPlot, "noDim");
 
   // Comparison with a reference file

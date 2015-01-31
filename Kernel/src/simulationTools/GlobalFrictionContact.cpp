@@ -204,21 +204,22 @@ void GlobalFrictionContact::computeq(double time)
   }
 }
 
-void GlobalFrictionContact::computeqBlockDS(SP::DynamicalSystem DS, unsigned int pos)
+void GlobalFrictionContact::computeqBlockDS(SP::DynamicalSystem ds, unsigned int pos)
 {
-  SP::OneStepIntegrator  Osi = simulation->integratorOfDS(DS);
+  SP::OneStepIntegrator  Osi = simulation->integratorOfDS(ds);
   std::string osiType = Osi->getType();
   unsigned int sizeDS;
   if (osiType == MOREAU2)
   {
-    sizeDS = (DS)->getDim();
-    setBlock(Osi->getWorkX(DS), q, sizeDS, 0, pos);
+    sizeDS = (ds)->getDim();
+    setBlock(Osi->getWorkX(ds), q, sizeDS, 0, pos);
   }
   else
   {
     RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osiType);
   }
 }
+
 void GlobalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter, unsigned int pos)
 {
   // Get relation and non smooth law types

@@ -144,7 +144,7 @@ void LinearSMCimproved::actuate()
   CBstar->PLUForwardBackwardInPlace(*_ueq);
 
   *(_DS_SMC->x()) = *xTk;
-  prod(*_B, *_ueq, *(_DS_SMC->b()));
+  prod(*_B, *_ueq, *(std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->b()));
   _simulationSMC->computeOneStep();
   _simulationSMC->nextStep();
 

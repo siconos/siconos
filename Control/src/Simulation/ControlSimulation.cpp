@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2012.
+/* Siconos-Kernel, Copyright INRIA 2005-2015
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,22 +16,74 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+
 #include "TimeDiscretisation.hpp"
 #include "ModelingTools.hpp"
 #include "SimulationTools.hpp"
+
 #include "ControlManager.hpp"
 #include "Sensor.hpp"
 #include "Actuator.hpp"
+#include "Observer.hpp"
 #include "ControlSimulation.hpp"
 #include <boost/progress.hpp>
 #include <boost/timer.hpp>
 #include "Model.hpp"
 
+#include "ControlSimulation_impl.hpp"
 
-
-ControlSimulation::ControlSimulation(double t0, double T, double h, SP::SiconosVector x0):
-  _t0(t0), _T(T), _h(h), _theta(0.5), _elapsedTime(0.0), _N(0), _nDim(x0->size()), _x0(x0)
+ControlSimulation::ControlSimulation(double t0, double T, double h):
+  _t0(t0), _T(T), _h(h), _theta(0.5), _elapsedTime(0.0), _N(0), _saveOnlyMainSimulation(false)
 {
+  _model.reset(new Model(_t0, _T));
+  _processTD.reset(new TimeDiscretisation(_t0, _h));
+
+}
+
+void ControlSimulation::initialize()
+{
+  std::pair<unsigned, std::string> res;
+  _dataLegend = "time";
+
+  // Simulation part
+  _model->initialize(_processSimulation);
+  // Control part
+  _CM->initialize(*_model);
+
+  // Output
+  _N = ceil((_T - _t0) / _h) + 10; // Number of time steps
+  DynamicalSystemsGraph& DSG0 = *_model->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  InteractionsGraph& IG0 = *_model->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  res = getNumberOfStates(DSG0, IG0);
+  _nDim = res.first;
+  _dataLegend += res.second;
+  if (!_saveOnlyMainSimulation)
+  {
+    // iter over controller and observer
+    const Actuators& allActuators = _CM->getActuators();
+    for (ActuatorsIterator it = allActuators.begin(); it != allActuators.end(); ++it)
+    {
+      if ((*it)->getInternalModel())
+      {
+        Topology& topo = *(*it)->getInternalModel()->nonSmoothDynamicalSystem()->topology();
+        res = getNumberOfStates(*topo.dSG(0), *topo.indexSet0());
+        _nDim += res.first;
+        _dataLegend += res.second;
+      }
+    }
+    const Observers& allObservers = _CM->getObservers();
+    for (ObserversIterator it = allObservers.begin(); it != allObservers.end(); ++it)
+    {
+      if ((*it)->getInternalModel())
+      {
+        Topology& topo = *(*it)->getInternalModel()->nonSmoothDynamicalSystem()->topology();
+        res = getNumberOfStates(*topo.dSG(0), *topo.indexSet0());
+        _nDim += res.first;
+        _dataLegend += res.second;
+      }
+    }
+  }
+  _dataM.reset(new SimpleMatrix(_N, _nDim + 1)); // we save the system state 
 }
 
 void ControlSimulation::setTheta(unsigned int newTheta)
@@ -39,71 +91,55 @@ void ControlSimulation::setTheta(unsigned int newTheta)
   _theta = newTheta;
 }
 
-void ControlSimulation::initialize()
+void ControlSimulation::addDynamicalSystem(SP::DynamicalSystem ds, const std::string& name)
 {
-  // Simulation part
-  _model.reset(new Model(_t0, _T));
-  _processIntegrator.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_processDS);
-  _model->nonSmoothDynamicalSystem()->setOSI(_processDS, _processIntegrator);
-  _processTD.reset(new TimeDiscretisation(_t0, _h));
-  _processSimulation.reset(new TimeStepping(_processTD, 0));
-  _processSimulation->setName("plant simulation");
-  _processSimulation->insertIntegrator(_processIntegrator);
-  _model->initialize(_processSimulation);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
+  _model->nonSmoothDynamicalSystem()->setOSI(ds, _processIntegrator);
 
-  // Control part
-  _CM.reset(new ControlManager(_processSimulation));
-
-  // Output
-  _N = ceil((_T - _t0) / _h) + 10; // Number of time steps
-  _dataM.reset(new SimpleMatrix(_N, _nDim + 1)); // we save the system state 
-}
-
-
-void ControlSimulation::addSensorPtr(SP::Sensor newSensor, SP::TimeDiscretisation td)
-{
-  _CM->addSensorPtr(newSensor, td);
-}
-
-void ControlSimulation::addActuatorPtr(SP::Actuator newActuator, SP::TimeDiscretisation td)
-{
-  _CM->addActuatorPtr(newActuator, td);
-}
-
-void ControlSimulation::run()
-{
-  SP::SiconosVector xProc = _processDS->x();
-  (*_dataM)(0, 0) = _t0;
-  for (unsigned int i = 0; i < _nDim; i++)
+  if (!name.empty())
   {
-    (*_dataM)(0, i + 1) = (*xProc)(i);
+    _model->nonSmoothDynamicalSystem()->setName(ds, name);
   }
+}
 
-  SP::EventsManager eventsManager = _processSimulation->eventsManager();
-  unsigned int k = 0;
-  boost::progress_display show_progress(_N);
-  boost::timer time;
-  time.restart();
-  SP::Event nextEvent;
+void ControlSimulation::addSensor(SP::Sensor sensor, const double h)
+{
+  SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
+  _CM->addSensorPtr(sensor, td);
+}
 
-  while (_processSimulation->hasNextEvent())
+void ControlSimulation::addActuator(SP::Actuator actuator, const double h)
+{
+  SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
+  _CM->addActuatorPtr(actuator, td);
+}
+
+void ControlSimulation::storeData(unsigned indx)
+{
+  unsigned startingColumn = 1;
+  startingColumn = storeAllStates(indx, startingColumn, *_DSG0, *_IG0, *_dataM);
+  if (!_saveOnlyMainSimulation)
   {
-    nextEvent = eventsManager->nextEvent();
-    if (nextEvent->getType() == TD_EVENT)
+    // iter over controller and observer
+    const Actuators& allActuators = _CM->getActuators();
+    for (ActuatorsIterator it = allActuators.begin(); it != allActuators.end(); ++it)
     {
-      _processSimulation->computeOneStep();
-      k++;
-      (*_dataM)(k, 0) = _processSimulation->nextTime();
-      for (unsigned int i = 0; i < _nDim; i++)
+      if ((*it)->getInternalModel())
       {
-        (*_dataM)(k, i + 1) = (*xProc)(i);
+        Topology& topo = *(*it)->getInternalModel()->nonSmoothDynamicalSystem()->topology();
+        startingColumn = storeAllStates(indx, startingColumn, *topo.dSG(0), *topo.indexSet0(), *_dataM);
       }
-      ++show_progress;
     }
-    _processSimulation->nextStep();
+    const Observers& allObservers = _CM->getObservers();
+    for (ObserversIterator it = allObservers.begin(); it != allObservers.end(); ++it)
+    {
+      if ((*it)->getInternalModel())
+      {
+        Topology& topo = *(*it)->getInternalModel()->nonSmoothDynamicalSystem()->topology();
+        startingColumn = storeAllStates(indx, startingColumn, *topo.dSG(0), *topo.indexSet0(), *_dataM);
+      }
+    }
   }
-
-  _elapsedTime = time.elapsed();
-  _dataM->resize(k, _nDim + 1);
 }
+
+

@@ -66,7 +66,7 @@ control.addActuatorPtr(act, tActuator)
 process.initialize(s)
 control.initialize(process)
 act.setRef(xFinal)
-act.setKPtr(K)
+act.setK(K)
 act.setDeltaT(h)
 # This is not working right now
 #eventsManager = s.eventsManager()

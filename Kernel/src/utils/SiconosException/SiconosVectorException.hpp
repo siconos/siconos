@@ -47,7 +47,7 @@ public:
   SiconosVectorException();
 
   /** constructor with a report
-   * \param std::string report : exception description
+   * \param report exception description
    */
   SiconosVectorException(const std::string& report);
 
@@ -60,7 +60,7 @@ public:
   static void selfThrow() NO_RETURN;
 
   /** static function which throw a SiconosVectorException with a report
-   * \param std::string report : exception description
+   * \param report exception description
    * \exception SiconosVectorException
    */
   static void selfThrow(const std::string& report) NO_RETURN;

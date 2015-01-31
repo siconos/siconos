@@ -27,7 +27,6 @@
 #include<string>
 #include <sstream>
 #include <vector>
-#include <map>
 #include <deque>
 
 /** Type used for inside-class allocation checking */

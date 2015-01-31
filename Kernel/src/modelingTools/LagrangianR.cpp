@@ -23,6 +23,7 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
+#include <iostream>
 
 void LagrangianR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {

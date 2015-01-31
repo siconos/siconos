@@ -32,20 +32,21 @@
 /** A set of Sensors */
 typedef std::set<SP::Sensor> Sensors;
 
-/** An iterator through a set of Sensors */
-typedef Sensors::iterator SensorsIterator;
-
 /** A set of Actuators */
 typedef std::set<SP::Actuator> Actuators;
-
-/** An iterator through a set of Actuators */
-typedef Actuators::iterator ActuatorsIterator;
 
 /** A set of Observers */
 typedef std::set<SP::Observer> Observers;
 
+/** An iterator through a set of Sensors */
+typedef Sensors::iterator SensorsIterator;
+
+/** An iterator through a set of Actuators */
+typedef Actuators::iterator ActuatorsIterator;
+
 /** An iterator through a set of Observers */
 typedef Observers::iterator ObserversIterator;
+
 
 /** ControlManager Class: tools to provide control in a Simulation (Sensors, Actuators, Observers)
 
@@ -87,7 +88,7 @@ protected:
   /** A list of Observers */
   Observers _allObservers;
 
-  /** The model linked to this ControlManager */
+  /** The simulation linked to this ControlManager */
   SP::Simulation _sim;
 
   /** default constructor

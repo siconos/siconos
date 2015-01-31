@@ -53,5 +53,6 @@
 #include "MatrixIntegrator.hpp"
 
 // sugar
-#include "ControlFirstOrderLinearS.hpp"
+#include "ControlZOHSimulation.hpp"
+#include "ControlLsodarSimulation.hpp"
 

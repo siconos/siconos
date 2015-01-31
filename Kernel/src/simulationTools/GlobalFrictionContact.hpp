@@ -108,9 +108,9 @@ protected:
 public:
 
   /** constructor from data
-   *  \param int dim (2D or 3D) of the friction-contact problem
-   *  \param std::string numericsSolvername
-   *  \param std::string id of the problem (optional)
+   *  \param dimPb dimension (2D or 3D) of the friction-contact problem
+   *  \param numericsSolverId type of the solver to be used
+   *  \param newId id of the problem (optional)
    */
   GlobalFrictionContact(int dimPb,
                         const int numericsSolverId =
@@ -171,7 +171,7 @@ public:
   void setLocalVelocity(const SiconosVector&);
 
   /** set localVelocity to pointer newPtr
-   *  \param SP::SiconosVector  newPtr
+   *  \param newPtr the new vector
    */
   inline void setLocalVelocityPtr(SP::SiconosVector newPtr)
   {
@@ -202,7 +202,7 @@ public:
   void setLocalReaction(const SiconosVector&);
 
   /** set localReaction to pointer newPtr
-   *  \param SP::SiconosVector  newPtr
+   *  \param newPtr the new vector
    */
   inline void setLocalReactionPtr(SP::SiconosVector newPtr)
   {
@@ -234,7 +234,7 @@ public:
   void setTildeLocalVelocity(const SiconosVector&);
 
   /** set tildeLocalVelocity to pointer newPtr
-   *  \param SP::SiconosVector  newPtr
+   *  \param newPtr the new vector
    */
   inline void setTildeLocalVelocityPtr(SP::SiconosVector newPtr)
   {
@@ -257,7 +257,7 @@ public:
   void setH(const OSNSMatrix &) {}
 
   /** set H to pointer newPtr
-   *  \param  SP::OSNSMatrix newPtr
+   *  \param newPtr the new OSNSMatrix
    */
   inline void setHPtr(SP::OSNSMatrix newPtr)
   {
@@ -326,24 +326,24 @@ public:
   void computeInteractionDSBlock(SP::Interaction, SP::DynamicalSystem);
 
   /** To compute a part of the "q" vector of the OSNS
-      \param SP::Interaction, the Interaction which corresponds to the considered block
-       \param unsigned int, the position of the first element of yOut to be set
+      \param ds the Interaction which corresponds to the considered block
+       \param pos the position of the first element of yOut to be set
   */
-  void computeqBlockDS(SP::DynamicalSystem, unsigned int);
+  void computeqBlockDS(SP::DynamicalSystem ds, unsigned int pos);
 
   /** compute vector q
-   *  \param double : current time
+   *  \param time current time
    */
   void computeq(double time);
 
   /** To compute a part of the "tildeLovalVelocity" vector of the OSNS
-      \param SP::Interaction, the Interaction which corresponds to the considered block
-       \param unsigned int, the position of the first element of yOut to be set
+      \param inter the Interaction which corresponds to the considered block
+       \param pos the position of the first element of yOut to be set
   */
-  void computeTildeLocalVelocityBlock(SP::Interaction, unsigned int);
+  void computeTildeLocalVelocityBlock(SP::Interaction inter, unsigned int pos);
 
   /** compute vector tildeLocalVelocity
-   *  \param double : current time
+   *  \param time current time
    */
   void computeTildeLocalVelocity(double time);
 

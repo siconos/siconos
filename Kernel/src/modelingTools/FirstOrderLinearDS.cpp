@@ -36,7 +36,6 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::strin
 
   _f.reset(new SiconosVector(getDim()));
   _A.reset(new SimpleMatrix(getDim(), getDim()));
-  _b.reset(new SiconosVector(getDim()));
 
   checkDynamicalSystem();
 }
@@ -86,9 +85,6 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstOrderNonLinearDS(FOLDS)
 {
   _A.reset(new SimpleMatrix(*(FOLDS.A())));
-
-  if (_b)
-    _b.reset(new SiconosVector(*(FOLDS.b())));
 
   if (Type::value(FOLDS) == Type::FirstOrderLinearDS)
   {

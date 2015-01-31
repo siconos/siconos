@@ -64,15 +64,15 @@ def test_smc1():
 
     control.addSensorPtr(sens, tSensor)
     act = LinearSMCOT2(sens)
-    act.setCsurfacePtr(Csurface)
-    act.setBPtr(Brel)
+    act.setCsurface(Csurface)
+    act.setB(Brel)
     control.addActuatorPtr(act, tActuator)
 
     # Initialization.
     process.initialize(processSimulation)
     control.initialize(process)
     # This is not working right now
-    #eventsManager = s.eventsManager()
+    # eventsManager = s.eventsManager()
 
     # Matrix for data storage
     dataPlot = empty((3*(N+1), outputSize))
@@ -97,12 +97,10 @@ def test_smc1():
     dataPlot.resize(k, outputSize)
 
 
-#Same test, but with the simplified interface
+# Same test, but with the simplified interface
 def test_smc2():
-    from Siconos.Kernel import FirstOrderLinearDS, TimeDiscretisation, \
-        ioMatrix_write, getMatrix, SimpleMatrix
-    from Siconos.Control import ControlManager, LinearSensor, LinearSMCOT2, \
-        ControlFirstOrderLinearS
+    from Siconos.Kernel import FirstOrderLinearDS, getMatrix, SimpleMatrix
+    from Siconos.Control import LinearSensor, LinearSMCOT2, ControlZOHSimulation
     from numpy import eye, zeros
     import numpy as np
     from math import sin
@@ -140,31 +138,25 @@ def test_smc2():
     processDS = MyFOLDS(x0, A)
     # XXX b is not automatically created ...
     processDS.setb([0, 0])
-    controlProcess = ControlFirstOrderLinearS(t0, T, h, x0, A)
-    controlProcess.setProcessDS(processDS)
-    controlProcess.initialize()
+    sim = ControlZOHSimulation(t0, T, h)
+    sim.addDynamicalSystem(processDS)
     # time discretisation
-    tSensor = TimeDiscretisation(t0, hControl)
-    tActuator = TimeDiscretisation(t0, hControl)
     # Actuator, Sensor & ControlManager
-    control = controlProcess.CM()
     sens = LinearSensor(processDS, sensorC, sensorD)
-    control.addSensorPtr(sens, tSensor)
+    sim.addSensor(sens, hControl)
     act = LinearSMCOT2(sens)
-    act.setCsurfacePtr(Csurface)
-    act.setBPtr(Brel)
-    control.addActuatorPtr(act, tActuator)
-
-    # Initialization
-    control.initialize(controlProcess.model())
+    act.setCsurface(Csurface)
+    act.setB(Brel)
+    sim.addActuator(act, hControl)
 
     # Run the simulation
-    controlProcess.run()
+    sim.initialize()
+    sim.run()
     # get the results
-    tmpData = controlProcess.data()
+    tmpData = sim.data()
     dataPlot = tmpData
     # compare with the reference
-    ref = getMatrix(SimpleMatrix("smc_2.ref"))
+    ref = np.loadtxt("smc_2.ref.gz", skiprows=1)
     np.savetxt("smc_2.dat", dataPlot)
     print("%e" % norm(dataPlot - ref))
     if (norm(dataPlot - ref) > 5e-12):

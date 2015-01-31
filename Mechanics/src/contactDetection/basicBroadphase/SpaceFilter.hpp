@@ -221,12 +221,12 @@ public:
 
 
   /** Just test the presence of neighbours.
-      \param h : hashed component of a body.
+      \param h hashed component of a body.
    */
   bool haveNeighbours(SP::Hashed h);
 
   /** Give the minimal distance.
-      \param h : hashed component of a body.
+      \param h hashed component of a body.
    */
   double minDistance(SP::Hashed h);
 
@@ -240,7 +240,7 @@ public:
             SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
   /** Broadphase contact detection: add interactions in indexSet 0.
-   *  \param time: the current time.
+   *  \param time the current time.
    */
   virtual void buildInteractions(double time);
 

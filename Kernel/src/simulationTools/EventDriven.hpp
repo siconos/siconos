@@ -53,13 +53,13 @@ private:
   void initOSNS();
 
   /** Initialize OneStepIntergrators */
-
   void initOSIs();
 
   /** Initialize the Rhs of the OSI */
   void initOSIRhs();
+
 protected:
-  /** an epsilon to define the contraint g for Urs in IndexSet[1]
+  /** an epsilon to define the contraint g for Interaction in IndexSet[1]
    */
   static double TOL_ED;
 
@@ -82,25 +82,28 @@ protected:
   double _newtonTolerance;
 
   /** Maximum number of iterations to localize events */
-
   unsigned int _localizeEventMaxIter;
 
   /**  number of OneStepNSProblems considered in the simulation */
   unsigned int _numberOfOneStepNSproblems;
+
+  /** store the indexSet0 for performance reason (Lsodar)*/
+  SP::InteractionsGraph _indexSet0;
+
+  /** store the graph of DynamicalSystems for performance reason (Lsodar)*/
+  SP::DynamicalSystemsGraph _DSG0;
+
 public:
-
-
-
   /** defaut constructor
-   *  \param a SP::timeDiscretisation
+   *  \param td time discretisation
    */
   EventDriven(SP::TimeDiscretisation td);
 
   /** constructor with data
-   *  \param a SP::timeDiscretisation
-   *  \param an int (number of NSProblem)
+   *  \param td time discretisation
+   *  \param nb number of NSProblem
    */
-  EventDriven(SP::TimeDiscretisation, int);
+  EventDriven(SP::TimeDiscretisation td, int nb);
 
   /** defaut constructor (needed for serialization)
   */
@@ -110,8 +113,11 @@ public:
   */
   ~EventDriven() {};
 
-  /** Overload Simulation::initialize */
-  void initialize(SP::Model, bool = true);
+  /** Overload Simulation::initialize
+   * \param m the Model
+   * \param withOSI
+   */
+  void initialize(SP::Model m, bool withOSI = true);
 
   /* Getters and setters */
   /** Set value to _istate */
@@ -150,7 +156,7 @@ public:
   }
 
   /** Set value to the maximum number of iterations
-   *\param unsigned int : maximum number of step
+   *\param maxStep maximum number of step
    */
   void setNewtonMaxIteration(unsigned int maxStep)
   {
@@ -158,11 +164,11 @@ public:
   };
 
   /** To set maximum number of iterations to localize events
-   *\param unsigned int : maximum number of iterations
+   *\param maxIter maximum number of iterations
    */
-  void setLocalizeEventsMaxIteration(unsigned int _maxNum)
+  void setLocalizeEventsMaxIteration(unsigned int maxIter)
   {
-    _localizeEventMaxIter = _maxNum;
+    _localizeEventMaxIter = maxIter;
   }
 
   /** get the maximum number of Newton iteration
@@ -213,32 +219,32 @@ public:
   void insertIntegrator(SP::OneStepIntegrator);
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
-   *  \param unsigned int: the number of the set to be updated
+   *  \param i the number of the set to be updated
    */
 
-  void updateIndexSet(unsigned int);
+  void updateIndexSet(unsigned int i);
 
   /** update indexSets[1] and [2] (using current y and lambda values of Interactions) with conditions on y[2] AND lambda[2].
   */
   void updateIndexSetsWithDoubleCondition();
 
   /** compute right-hand side of xdot = f(x,t), for the integrator osi.
-   *  \param pointer to OneStepIntegrator.
-   *  \param integer*, size of vector x
-   *  \param doublereal*, time
-   *  \param doublereal*, x:array of double
-   *  \param doublereal*, derivative of x (in-out parameter)
+   *  \param osi the integrator (Lsodar)
+   *  \param sizeOfX size of vector x
+   *  \param time current time given by the integrator
+   *  \param x state vector
+   *  \param xdot derivative of x
    */
-  void computef(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, doublereal*);
+  void computef(OneStepIntegrator& osi, integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot);
 
   /** compute jacobian of the right-hand side
-   *  \param pointer to OneStepIntegrator.
-   *  \param integer*, size of vector x
-   *  \param doublereal*, time
-   *  \param doublereal*, x:array of double
-   *  \param doublereal*, jacobian of f according to x (in-out parameter)
+   *  \param osi the integrator (Lsodar)
+   *  \param sizeOfX size of vector x
+   *  \param time current time given by the integrator
+   *  \param x state vector
+   *  \param jacob jacobian of f according to x
    */
-  void computeJacobianfx(SP::OneStepIntegrator, integer*, doublereal*, doublereal*,  doublereal*);
+  void computeJacobianfx(OneStepIntegrator& osi, integer* sizeOfX, doublereal* time, doublereal* x,  doublereal* jacob);
 
   /** compute the size of constraint function g(x,t,...) for osi */
   virtual unsigned int computeSizeOfg();
@@ -303,16 +309,16 @@ public:
   void correctionNewtonIteration();
 
   /** Newton iteration to get the state of all Dynamical Systems at the end of step
-   *\param double: tolerance to check convergence
-   *\param unsigned int: maximum number of steps
+   *\param criterion tolerance to check convergence
+   *\param maxStep maximum number of steps
    */
-  void newtonSolve(double, unsigned int);
+  void newtonSolve(double criterion, unsigned int maxStep);
 
   /** Detect whether or not events occur during each integration step
-   *\param bool: true if we need to update the flag _istate, false otherwise
+   *\param updateIstate true if we need to update the flag _istate, false otherwise
    *\return double, maximum of absolute values of constraint fonctions over all activated ot deactivated contacts
    */
-  double detectEvents(bool _IsUpdateIstate = true);
+  double detectEvents(bool updateIstate = true);
 
   /** Localize time of the first event */
   void LocalizeFirstEvent();

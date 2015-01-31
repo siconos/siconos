@@ -42,10 +42,10 @@ public:
 
 
   //! Constructor from a minimum set of data.
-  //  \param position : initial coordinates of this DynamicalSystem.
-  //  \param velocity: initial velocity of this DynamicalSystem.
-  //  \param mass : the mass.
-  //  \param inertia : the inertia matrix.
+  //  \param position initial coordinates of this DynamicalSystem.
+  //  \param velocity initial velocity of this DynamicalSystem.
+  //  \param mass the mass.
+  //  \param inertia the inertia matrix.
   //
   OccBody(SP::SiconosVector position,
           SP::SiconosVector velocity,
@@ -53,10 +53,10 @@ public:
           SP::SiconosMatrix inertia);
 
   /** Association of a contact shape.
-   * \param shape : the contact shape.
-   * \param position : relative position (x, y, z).
-   * \param orientation : relative orientation quaternion w, x, y, z
-   * \param group : contact group default 0
+   * \param shape the contact shape.
+   * \param position relative position (x, y, z).
+   * \param orientation relative orientation quaternion w, x, y, z
+   * \param group contact group default 0
    */
   void addContactShape(SP::OccContactShape shape,
                        SP::SiconosVector position = SP::SiconosVector(),
@@ -68,7 +68,7 @@ public:
   void updateContactShapes() const;
 
   /** Get an associated contact shape by its rank of association.
-   *  \param id : the number of the shape.
+   *  \param id the number of the shape.
    */
   const OccContactShape& contactShape(unsigned int id) const;
 

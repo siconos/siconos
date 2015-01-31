@@ -88,7 +88,7 @@ public:
   }
 
   /** set Q to pointer newPtr
-   *  \param SP::SiconosMatrix  newPtr
+   *  \param newPtr the new matrix
    */
   inline void setQPtr(SP::SiconosMatrix newPtr)
   {
@@ -132,10 +132,10 @@ public:
   // --- OTHER FUNCTIONS ---
 
   /** To run the solver for ns problem
-   *   \param double : current time
+   *   \param time current time
    *  \return int, information about the solver convergence.
    */
-  int compute(double);
+  int compute(double time);
 
   /** print the data to the screen
    */

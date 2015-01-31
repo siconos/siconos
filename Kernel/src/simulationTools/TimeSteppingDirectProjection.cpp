@@ -28,6 +28,7 @@
 #include "NewtonEulerR.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#include "OneStepNSProblem.hpp"
 
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 

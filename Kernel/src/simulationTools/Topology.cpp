@@ -221,6 +221,12 @@ void Topology::setName(SP::DynamicalSystem ds, const std::string& name)
   _DSG[0]->name.insert(dsgv, name);
 }
 
+void Topology::setName(SP::Interaction inter, const std::string& name)
+{
+  InteractionsGraph::VDescriptor igv = _IG[0]->descriptor(inter);
+  _IG[0]->name.insert(igv, name);
+}
+
 // In those two functions, we should store in the graph the information
 // that the ds is integrated by the OSI, instead of storing this info
 // in the OSI -- xhub

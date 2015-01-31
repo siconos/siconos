@@ -68,10 +68,6 @@ private:
   /** information concerning the Model */
   std::string _title, _author, _description, _date;
 
-  /** Copy constructor => private, no copy nor pass-by value for Model
-   */
-  //  Model(const Model&){};
-
   /** assignment operator => forbidden
       \return Model&
    */
@@ -252,7 +248,6 @@ public:
       \return void
    */
   void display() const ;
-
 };
 
 #endif // MODEL_H

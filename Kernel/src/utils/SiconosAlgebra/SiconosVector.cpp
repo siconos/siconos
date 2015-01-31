@@ -643,7 +643,7 @@ SiconosVector& SiconosVector::operator = (const double* d)
 
 unsigned SiconosVector::copyData(double* data) const
 {
-  assert(!_dense && "SiconosVector::operator = double* : forbidden: the current vector is not dense.");
+  assert(!_dense && "SiconosVector::copyData : forbidden: the current vector is not dense.");
 
   unsigned size = vect.Dense->size();
   siconosBindings::detail::copy(vect.Dense->size(), getArray(), 1, data, 1);

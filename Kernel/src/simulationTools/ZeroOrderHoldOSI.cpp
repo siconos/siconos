@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2012.
+/* Siconos-Kernel, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+
 #include "ZeroOrderHoldOSI.hpp"
 #include "EventDriven.hpp"
 #include "Model.hpp"
-#include "LsodarOSI.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
@@ -29,7 +29,9 @@
 #include "SubPluggedObject.hpp"
 #include "FirstOrderType2R.hpp"
 #include "MatrixIntegrator.hpp"
+#include "ExtraAdditionalTerms.hpp"
 #include "CxxStd.hpp"
+#include "OneStepNSProblem.hpp"
 
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -57,12 +59,13 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI(SP::DynamicalSystem ds):
 void ZeroOrderHoldOSI::initialize()
 {
   OneStepIntegrator::initialize();
-  // Get initial time
   ConstDSIterator itDS;
   DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   InteractionsGraph& IG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   DynamicalSystemsGraph::OEIterator oei, oeiend;
   Type::Siconos dsType;
+
+  Model& model = *simulationLink->model();
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
     dsType = Type::value(**itDS);
@@ -73,7 +76,7 @@ void ZeroOrderHoldOSI::initialize()
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*itDS);
     if (!DSG0.Ad.hasKey(dsgVD))
     {
-      DSG0.Ad[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model()));
+      DSG0.Ad[dsgVD].reset(new MatrixIntegrator(**itDS, model));
       if (DSG0.Ad.at(dsgVD)->isConst())
         DSG0.Ad.at(dsgVD)->integrate();
     }
@@ -84,30 +87,14 @@ void ZeroOrderHoldOSI::initialize()
     {
       SP::SiconosMatrix E(new SimpleMatrix((*itDS)->getN(), (*itDS)->getN(), 0));
       E->eye();
-      DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(**itDS, *simulationLink->model(), E)));
+      DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(**itDS, model, E)));
       if (DSG0.AdInt.at(dsgVD)->isConst())
         DSG0.AdInt.at(dsgVD)->integrate();
     }
-   if (DSG0.B.hasKey(dsgVD))
-   {
-     DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.B[dsgVD]));
-     if (DSG0.Bd.at(dsgVD)->isConst())
-       DSG0.Bd.at(dsgVD)->integrate();
-   }
-   if (DSG0.L.hasKey(dsgVD))
-   {
-     DSG0.Ld[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.L[dsgVD]));
-     if (DSG0.Ld.at(dsgVD)->isConst())
-       DSG0.Ld.at(dsgVD)->integrate();
-   }
-   if (DSG0.pluginB.hasKey(dsgVD))
-     DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.pluginB[dsgVD], DSG0.u[dsgVD]->size()));
-   if (DSG0.pluginL.hasKey(dsgVD))
-     DSG0.Ld[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), DSG0.pluginL[dsgVD], DSG0.e[dsgVD]->size()));
 
     // Now we search for an Interaction dedicated to control
     for (std11::tie(avi, aviend) = DSG0.adjacent_vertices(dsgVD);
-         avi != aviend; ++avi)
+        avi != aviend; ++avi)
     {
       DynamicalSystemsGraph::EDescriptor ed1, ed2;
       std11::tie(ed1, ed2) = DSG0.edges(dsgVD, *avi);
@@ -125,13 +112,13 @@ void ZeroOrderHoldOSI::initialize()
           indxIter++;
           if (!relR.isJacLgPlugged())
           {
-            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), relR.B()));
+            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, model, relR.B()));
             if (DSG0.Bd.at(dsgVD)->isConst())
               DSG0.Bd.at(dsgVD)->integrate();
           }
           else
           {
-            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, *simulationLink->model(), relR.getPluging(), inter.getSizeOfY()));
+            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, model, relR.getPluging(), inter.getSizeOfY()));
           }
         }
         else
@@ -194,6 +181,9 @@ void ZeroOrderHoldOSI::computeFreeState()
   // "Free" means without taking non-smooth effects into account.
 
   // Operators computed at told have index i, and (i+1) at t.
+  double t = simulationLink->nextTime(); // End of the time step
+  double told = simulationLink->startingTime(); // Beginning of the time step
+  double h = t - told; // time step length
 
   DSIterator it; // Iterator through the set of DS.
 
@@ -215,10 +205,6 @@ void ZeroOrderHoldOSI::computeFreeState()
         DSG0.Ad.at(dsgVD)->integrate();
       if (d.b() && !DSG0.AdInt.at(dsgVD)->isConst())
         DSG0.AdInt.at(dsgVD)->integrate();
-      if (DSG0.Bd.hasKey(dsgVD) && !DSG0.Bd.at(dsgVD)->isConst())
-        DSG0.Bd.at(dsgVD)->integrate();
-      if (DSG0.Ld.hasKey(dsgVD) && !DSG0.Ld.at(dsgVD)->isConst())
-        DSG0.Ld.at(dsgVD)->integrate();
 
       SiconosVector& xfree = *workVectors[FirstOrderDS::xfree];
       prod(DSG0.Ad.at(dsgVD)->mat(), *d.x(), xfree); // xfree = Ad*xold
@@ -227,31 +213,10 @@ void ZeroOrderHoldOSI::computeFreeState()
         assert(DSG0.AdInt.hasKey(dsgVD));
         prod(DSG0.AdInt.at(dsgVD)->mat(), *d.b(), xfree, false); // xfree += AdInt*b
       }
-      // check whether we have a system with a control input
-      if (DSG0.u.hasKey(dsgVD))
-      {
-        if (!DSG0.Bd.hasKey(dsgVD))
-        {
-          assert(DSG0.B.hasKey(dsgVD));
-          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(d, *simulationLink->model(), DSG0.B.at(dsgVD)));
-          if (DSG0.Bd.at(dsgVD)->isConst())
-            DSG0.Bd.at(dsgVD)->integrate();
-        }
-        prod(DSG0.Bd.at(dsgVD)->mat(), *DSG0.u.at(dsgVD), xfree, false); // xfree += Bd*u
-      }
-      // check whether the DynamicalSystem is an Observer
-      if (DSG0.e.hasKey(dsgVD))
-      {
-        if (!DSG0.Ld.hasKey(dsgVD))
-        {
-          assert(DSG0.L.hasKey(dsgVD));
-          DSG0.Ld[dsgVD].reset(new MatrixIntegrator(d, *simulationLink->model(), DSG0.L.at(dsgVD)));
-          if (DSG0.Ld.at(dsgVD)->isConst())
-            DSG0.Ld.at(dsgVD)->integrate();
-        }
-        prod(DSG0.Ld.at(dsgVD)->mat(), *DSG0.e.at(dsgVD), xfree, false); // xfree += -Ld*e
-      }
 
+      // add extra term, possible control terms
+      if (_extraAdditionalTerms)
+        _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, h, xfree);
     }
     else
       RuntimeException::selfThrow("ZeroOrderHoldOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
@@ -465,7 +430,6 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
   {
     DynamicalSystem& ds = **it;
     Type::Siconos dsType = Type::value(ds);
-    SP::Interaction interC;
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*it);
     VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
     // 1 - First Order Linear Systems
@@ -478,15 +442,16 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
       x = *workVectors[FirstOrderDS::xfree]; // x = xfree = Phi*xold (+ Bd*u ) (+  Ld*e)
       if (level != LEVELMAX)
       {
-       // we have to find the control interaction
-       for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
-       {
-         if (DSG0.properties(*oei).forControl)
-         {
-           interC = DSG0.bundle(*oei);
-           break;
-         }
-       }
+        SP::Interaction interC;
+        // we have to find the control interaction
+        for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
+        {
+          if (DSG0.properties(*oei).forControl)
+          {
+            interC = DSG0.bundle(*oei);
+            break;
+          }
+        }
         if (interC)
         {
           MatrixIntegrator& Bd = *DSG0.Bd[dsgVD];

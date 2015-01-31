@@ -53,7 +53,7 @@ public:
    * \param D the D matrix in the FirstOrderLinearR
    * \param type do not set this yourself ! this is used in derived classes
    */
-  LinearSMC(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D, unsigned int type = LINEAR_SMC);
+  LinearSMC(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std11::shared_ptr<SimpleMatrix>(), unsigned int type = LINEAR_SMC);
 
   /** destructor
    */
@@ -64,12 +64,6 @@ public:
    * TODO
    */
   virtual void actuate();
-
-
-  /** Set the D matrix
-   * \param D the new D matrix
-  */
-  void setD(const SimpleMatrix & D);
 
   /** Set the D matrix
   * \param D the new D matrix

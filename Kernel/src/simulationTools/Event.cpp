@@ -20,6 +20,7 @@
 #include "TimeDiscretisation.hpp"
 #include "RuntimeException.hpp"
 #include <cmath>
+#include <iostream>
 
 
 double Event::_tick = DEFAULT_TICK;
@@ -61,6 +62,13 @@ void Event::setTimeDiscretisation(SP::TimeDiscretisation td)
     mpf_clear(tmp);
   }
 }
+
+void Event::setTick(double newTick)
+{
+  std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
+  _tick = newTick;
+}
+
 
 void Event::display() const
 {

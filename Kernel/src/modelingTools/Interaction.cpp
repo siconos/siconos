@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include <assert.h>
+#include <iostream>
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES

@@ -29,6 +29,7 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "CxxStd.hpp"
 
+#include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
 //#define DEBUG_STDOUT

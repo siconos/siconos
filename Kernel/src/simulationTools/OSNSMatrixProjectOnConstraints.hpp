@@ -110,7 +110,7 @@ public:
   OSNSMatrixProjectOnConstraints(unsigned int, unsigned int, int);
 
   /** compute the size of the vector to project for a given Interaction.
-  *  \param SP::Interaction inter the corresponding interaction
+  *  \param inter the corresponding interaction
   */
   unsigned int computeSizeForProjection(SP::Interaction inter);
 

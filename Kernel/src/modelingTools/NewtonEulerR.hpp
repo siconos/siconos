@@ -171,8 +171,7 @@ public:
   }
 
   /** set Jach[index] to pointer newPtr (pointer link)
-  *  \param SP::SiconosMatrix  newPtr
-  *  \param unsigned int: index position in Jach vector
+  *  \param newPtr the new matrix
   */
   void setJachqPtr(SP::SimpleMatrix newPtr);
 
@@ -190,28 +189,42 @@ public:
   SP::SiconosVector _secondOrderTimeDerivativeTerms;
 
   /** initialize the relation (check sizes, memory allocation ...)
-  \param SP to Interaction: the interaction that owns this relation
+   * \param inter the interaction using this relation
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   * \param workV the work vectors
+   * \param workM work matrices
   */
   void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
-  * \param: double, current time
+  * \param time current time
+  * \param q0 the position
+  * \param y the output
   */
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   /** default function to compute jacobianH
-  *  \param double : current time
-  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+   * \param time current time
+   * \param inter the interaction using this relation
+   */
 
-  void computeJachx(double);*/
   virtual void computeJachlambda(double time, Interaction& inter)
   {
     ;
   }
+  /** compute the jacobian of h w.r.t. q 
+   * \param time current time
+   * \param inter the interaction using this relation
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
   virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
   {
     ;
   }
+  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$ 
+   * \param time current time
+   * \param inter the interaction using this relation
+   */
   virtual void computeJachqDot(double time, Interaction& inter)
   {
     /* \warning. This method should never be called, since we are only considering
@@ -222,14 +235,26 @@ public:
   virtual void computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot);
 
 
+  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$ 
+   * \param time current time
+   * \param inter the interaction using this relation
+   */
   virtual void computeJacglambda(double time, Interaction& inter)
   {
     ;
   }
+  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$ 
+   * \param time current time
+   * \param inter the interaction using this relation
+   */
   virtual void computeJacgq(double time, Interaction& inter)
   {
     ;
   }
+  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$ 
+   * \param time current time
+   * \param inter the interaction using this relation
+   */
   virtual void computeJacgqDot(double time, Interaction& inter)
   {
     ;
@@ -237,17 +262,24 @@ public:
 
   /* default implementation consists in multiplying jachq and T
      \param inter interaction that owns the relation
-     \param dynamical system linked to this interaction (source)
-     \param second ds linked to this interaction (target). If there is 
+     \param ds1 dynamical system linked to this interaction (source)
+     \param ds2 second ds linked to this interaction (target). If there is 
      only one ds in the inter, call this function with ..., ds, ds)
-     
   */
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
-  /* compute all the H Jacobian */
+  /** compute all the jacobian of h 
+   * \param time current time
+   * \param inter the interaction using this relation
+   * \param interProp Interaction properties
+   */
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
-  /* compute all the G Jacobian */
+  /** compute all the jacobian of g 
+   * \param time current time
+   * \param inter the interaction using this relation
+   * \param interProp Interaction properties
+   */
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
   {
     computeJacgq(time, inter);
@@ -256,27 +288,29 @@ public:
   }
 
   /** To compute the terms of the second order time derivative of y
-      
       \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
-      
-      \param time double, current time
+      \param time  current time
       \param inter interaction that owns the relation
-      \param dynamical system linked to this interaction (source)
-      \param second ds linked to this interaction (target). If there is 
+      \param ds1 dynamical system linked to this interaction (source)
+      \param ds2 second ds linked to this interaction (target). If there is 
       only one ds in the inter, call this function with ..., ds, ds)
    */
   void computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, VectorOfBlockVectors& DSlink, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   /** to compute output
-  *  \param double : current time
-  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-  */
+   * \param time current time
+   * \param inter the interaction using this relation
+   * \param interProp Interaction properties
+   * \param derivativeNumber number of the derivative to compute, optional, default = 0.
+   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
-  /** to compute p
-  *  \param double : current time
-  *  \param unsigned int: "derivative" order of lambda used to compute input
-  */
+  /** to compute the input
+   * \param time current time
+   * \param inter the interaction using this relation
+   * \param interProp Interaction properties
+   * \param level number of the derivative to compute, optional, default = 0.
+   */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   /**
@@ -312,13 +346,6 @@ public:
   {
     return _contactForce;
   };
-
-  /** return a block vector containing ths dynamical system's dof.*/
-  //  SP::BlockVector getq(){return data[q0];}
-
-  //  SP::BlockVector q(){return data[q0];}
-
-  //  SP::BlockVector getDeltaq(){return data[deltaq];}
 
   ACCEPT_STD_VISITORS();
 

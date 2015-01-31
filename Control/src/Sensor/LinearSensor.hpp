@@ -114,5 +114,5 @@ public:
     _matD = D;
   };
 };
-TYPEDEF_SPTR(LinearSensor)
+
 #endif

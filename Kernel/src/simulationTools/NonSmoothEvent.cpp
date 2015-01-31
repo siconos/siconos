@@ -19,11 +19,7 @@
 #include "NonSmoothEvent.hpp"
 #include "EventFactory.hpp"
 #include "EventDriven.hpp"
-#include "OneStepIntegrator.hpp"
-#include "LagrangianDS.hpp"
-#include "Model.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
-
+#include "SimulationGraphs.hpp"
 
 using namespace EventFactory;
 
@@ -49,14 +45,8 @@ void NonSmoothEvent::process(Simulation& simulation)
     // Compute y[0], y[1] and update index sets. => already done
     // during advance to event ...
 
-    //       simulation->updateOutput(0, 1);
-
-    //       simulation->updateIndexSets();
-
     // Get the required index sets ...
     SP::InteractionsGraph indexSet0 = simulation.indexSet(0);
-    SP::DynamicalSystemsGraph dsG = simulation.model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
-    DynamicalSystemsGraph::VIterator vi, viend;
 
     // Update all the index sets ...
     eventDriven.updateIndexSets();
@@ -87,32 +77,9 @@ void NonSmoothEvent::process(Simulation& simulation)
       eventDriven.updateIndexSets();
     }
 
-    /*
-    // Display the variable after processing NSEvent
-    std::cout<< "-------After processing NS events---------" <<std::endl;
-    for (std11::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
-      {
-        SP::Interaction inter = indexSet0->bundle(*ui);
-        std::cout << "Velocity at this Interaction: " << (*inter->y(1))(0) <<std::endl;
-      }
-
-    for (std11::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
-      {
-        SP::DynamicalSystem ds = dsG->bundle(*vi);
-        SP::LagrangianDS Lag_ds = std11::static_pointer_cast<LagrangianDS>(ds);
-        std::cout << "Velocity of DS: " << (*Lag_ds->velocity())(0) <<std::endl;
-      }
-    //
-    */
     //---> solve acceleration LCP if IndexSet[2] is not empty
     if (indexSet2->size() > 0)
     {
-      // // Update the state of the DS
-      // OSIIterator itOSI; for(itOSI = simulation->oneStepIntegrators()->begin();
-      //                        itOSI!= simulation->oneStepIntegrators()->end() ;
-      //                        ++itOSI)
-      //                           (*itOSI)->updateState(2);
-
       // solve LCP-acceleration
       eventDriven.computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_ACC); // solveLCPAcceleration();
       // update input of level 2, acceleration and output of level 2

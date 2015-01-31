@@ -25,7 +25,7 @@
 #include "NonSmoothLaw.hpp"
 #include "OSNSMatrix.hpp"
 #include "BlockCSRMatrix.hpp"
-
+#include "SimulationGraphs.hpp"
 using namespace RELATION;
 using namespace Siconos;
 //#define OSNSMPROJ_DEBUG

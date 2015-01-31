@@ -21,6 +21,7 @@
 #include "NonSmoothLaw.hpp"
 #include "Tools.hpp"
 #include "BlockCSRMatrix.hpp"
+#include "SimulationGraphs.hpp"
 //#define OSNSM_DEBUG
 
 

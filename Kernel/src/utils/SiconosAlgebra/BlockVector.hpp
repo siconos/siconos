@@ -67,10 +67,10 @@ public:
   BlockVector(const BlockVector&);
 
   /** contructor with a 2 SiconosVectors
-   *  \param SP::SiconosVector v1
-   *  \param SP::SiconosVector v2
+   *  \param v1 first vector
+   *  \param v2 second vector
    */
-  BlockVector(SP::SiconosVector, SP::SiconosVector);
+  BlockVector(SP::SiconosVector v1, SP::SiconosVector v2);
 
   BlockVector(unsigned int numberOfBlocks, unsigned int dim);
 
@@ -105,7 +105,7 @@ public:
   };
 
   /** const iterator equal to vect.begin
-      \param a VectorOfVectors::iterator
+      \return a VectorOfVectors::iterator
   */
   inline VectorOfVectors::const_iterator begin() const
   {
@@ -113,7 +113,7 @@ public:
   };
 
   /** const iterator equal to vect.end
-      \param a VectorOfVectors::iterator
+      \return a VectorOfVectors::iterator
   */
   inline VectorOfVectors::const_iterator end() const
   {
@@ -139,7 +139,6 @@ public:
 
 
   /** sets all the values of the vector to 0.0
-   *  \param unsigned int: position of the required vector (useless for SiconosVector, default = 0)
    */
   void zero();
 
@@ -177,7 +176,7 @@ public:
   double operator()(unsigned int) const;
 
   /** return i-eme SiconosVector of vect
-   * \param unsigned int: block number
+   * \param pos block number
    * \return a pointer to a SiconosVector
    */
   inline SP::SiconosVector vector(unsigned int pos)
@@ -186,7 +185,7 @@ public:
   };
 
   /** return i-eme SiconosVector of vect
-   * \param unsigned int: block number
+   * \param pos block number
    * \return a pointer to a SiconosVector
    */
   inline SPC::SiconosVector vector(unsigned int pos) const
@@ -195,28 +194,28 @@ public:
   };
 
   /** set i-eme SiconosVector of vect (copy)
-   * \param unsigned int: block number
-   * \param a SiconosVector
+   * \param pos block number
+   * \param v a SiconosVector
    */
-  void setVector(unsigned int, const SiconosVector&);
+  void setVector(unsigned int pos, const SiconosVector& v);
 
   /** set i-eme SiconosVector of vect (pointer link)
-   * \param unsigned int: block number
-   * \param a pointer to a SiconosVector
+   * \param pos block number
+   * \param v a SiconosVector
    */
-  void setVectorPtr(unsigned int, SP::SiconosVector);
+  void setVectorPtr(unsigned int pos, SP::SiconosVector v);
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
-   *  \param an unsigned integer i
+   *  \param pos block number
    *  \return a SP::SiconosVector
    */
-  SP::SiconosVector operator [](unsigned int) ;
+  SP::SiconosVector operator [](unsigned int pos) ;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
-   *  \param an unsigned integer i
+   *  \param pos block number
    *  \return a SP::SiconosVector
    */
-  SPC::SiconosVector operator [](unsigned int) const;
+  SPC::SiconosVector operator [](unsigned int pos) const;
 
   /** get the index tab
    * \return a standard vector of int
@@ -273,9 +272,9 @@ public:
   unsigned int getNumVectorAtPos(unsigned int) const;
 
   /** operator =
-  *  \param SiconosVector : the vector to be copied
+  *  \param vIn the vector to be copied
   */
-  BlockVector& operator =(const BlockVector&);
+  BlockVector& operator =(const BlockVector& vIn);
 
   /** Equality operator with raw double* data on the right-hand side
    *  \param data data to put in the BlockVector
@@ -286,7 +285,7 @@ public:
   BlockVector& operator +=(const BlockVector&);
 
   /* * operator =
-   * \param SiconosVector : the vector to be copied
+  *  \param vIn the vector to be copied
    */
   BlockVector& operator =(const SiconosVector& vIn);
 
@@ -300,9 +299,9 @@ public:
   void insert(const SiconosVector&) ;
 
   /** Insert a pointer to a subvector in this vector: no reallocation nor copy.
-   *  \param a pointer to SP::SiconosVector
+   *  \param v a SiconosVector
    */
-  void insertPtr(SP::SiconosVector) ;
+  void insertPtr(SP::SiconosVector v);
 
   bool isComparableTo(const BlockVector& v1, const BlockVector& v2);
 

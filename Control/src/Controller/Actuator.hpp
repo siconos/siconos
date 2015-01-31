@@ -25,7 +25,6 @@
 #define Actuator_H
 
 #include <string>
-#include "RuntimeException.hpp"
 #include "SiconosPointers.hpp"
 
 #include "SiconosFwd.hpp"
@@ -98,6 +97,12 @@ protected:
   /** B Matrix */
   SP::SimpleMatrix _B;
 
+  /** name of the plugin for g (nonlinear affine in control system)*/
+  std::string _plugingName;
+
+  /** name of the plugin to compute \f$\nabla_x g\f$ for the nonlinear case*/
+  std::string _pluginJacgxName;
+
   /** ControlSensor feeding the Controller */
   SP::ControlSensor _sensor;
 
@@ -152,17 +157,25 @@ public:
    */
   inline const SiconosVector& u() const { return *_u; };
 
-  /** Set the B matrix
-   * \param B the new B matrix
-  */
-  void setB(const SimpleMatrix& B);
+  /** Set the control size
+   * \param size dimension of the control input u
+   */
+  void setSizeu(unsigned size);
 
   /** Set the B matrix
    * \param B the new B matrix
    */
-  inline void setBPtr(SP::SimpleMatrix B)
+  inline void setB(SP::SimpleMatrix B)
   {
     _B = B;
+  };
+
+  /** Set the name of the plugin for computing g
+   * \param g the name of the plugin to compute g
+   */
+  inline void setg(const std::string& g)
+  {
+    _plugingName = g;
   };
 
   /** add a Sensor in the actuator.
@@ -177,7 +190,7 @@ public:
   virtual void setTimeDiscretisation(const TimeDiscretisation& td) {};
 
   /** initialize actuator data.
-   * \param m a SP::Model
+   * \param m the Model
    */
   virtual void initialize(const Model& m);
 
@@ -189,5 +202,10 @@ public:
    */
   virtual void display() const;
 
+  /** get the Model used in the Controller, if there is one
+   * \return "NULL" shared_ptr if there is no internal simulation, otherwise
+   * it return the Model hoding the simulation
+   */
+  virtual SP::Model getInternalModel() const;
 };
 #endif

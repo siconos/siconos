@@ -75,29 +75,29 @@ private:
 public:
 
   /** copy constructor
-   *  \param SiconosMatrix
+   *  \param m a SiconosMatrix
    */
-  BlockMatrix(const SiconosMatrix&);
+  BlockMatrix(const SiconosMatrix& m);
 
   /** copy constructor
-   *  \param BlockMatrix
+   *  \param m a BlockMatrix
    */
-  BlockMatrix(const BlockMatrix&);
+  BlockMatrix(const BlockMatrix& m);
 
   /** constructor with a list of pointer to SiconosMatrix (!links with pointer, no copy!)
-   *  \param vector<SiconosMatrix*>
-   *  \param unsigned int: number of blocks in a row
-   *  \param unsigned int: number of col in a row
+   *  \param m a vector of SiconosMatrix
+   *  \param row number of blocks in a row
+   *  \param col number of col in a row
    */
-  BlockMatrix(const std::vector<SP::SiconosMatrix>&, unsigned int, unsigned int);
+  BlockMatrix(const std::vector<SP::SiconosMatrix>& m, unsigned int row, unsigned int col);
 
   /** contructor with a list of 4 pointer to SiconosMatrix (!links with pointer, no copy!)
-   *  \param SP::SiconosMatrix  m1, block (0,0)
-   *  \param SP::SiconosMatrix  m2, block (0,1)
-   *  \param SP::SiconosMatrix  m3, block (1,0)
-   *  \param SP::SiconosMatrix  m4, block (1,1)
+   *  \param A block (0,0)
+   *  \param B block (0,1)
+   *  \param C block (1,0)
+   *  \param D block (1,1)
    */
-  BlockMatrix(SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix);
+  BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMatrix C, SP::SiconosMatrix D);
 
   /** destructor
    */
@@ -231,7 +231,7 @@ public:
   void eye();
 
   /** get the number of rows or columns of the matrix
-   *  \param : unsigned int, 0 for rows, 1 for columns
+   *  \param index 0 for rows, 1 for columns
    *  \return an int
    */
   unsigned int size(unsigned int index) const;
@@ -284,9 +284,9 @@ public:
   void trans();
 
   /** transpose a matrix: x->trans(m) is x = transpose of m.
-   *  \param a SiconosMatrix: the matrix to be transposed.
+   *  \param m the matrix to be transposed.
    */
-  void trans(const SiconosMatrix&);
+  void trans(const SiconosMatrix& m);
 
   /** get the vector tabRow
    *  \return a vector of int
@@ -332,27 +332,29 @@ public:
    */
   SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const;
 
-  /** get row index of current matrix and save it unsigned into vOut
-   *  \param unsigned int: index of required line
-   *  \param ref to SiconosVector: in-out parameter
+  /** get row index of current matrix and save it in  v
+   *  \param r index of required line
+   *  \param[out] v a vector
    */
-  void  getRow(unsigned int, SiconosVector&) const;
+  void  getRow(unsigned int r, SiconosVector& v) const;
 
   /** set line row of the current matrix with vector v
-   *  \param an unsigned int and a SiconosVector
+   *  \param r index of required line
+   *  \param v a vector
    */
-  void  setRow(unsigned int, const SiconosVector&);
+  void  setRow(unsigned int r, const SiconosVector& v);
 
   /** get column index of current matrix and save it into vOut
-   *  \param unsigned int: index of required column
-   *  \param ref to SiconosVector: in-out parameter
+   *  \param c index of required column
+   *  \param[out] v a vector
    */
-  void  getCol(unsigned int, SiconosVector&) const;
+  void  getCol(unsigned int c, SiconosVector& v) const;
 
-  /** set column col of the current matrix with vector v
-   *  \param an unsigned int and a SiconosVector
+  /** set column col of the current matrix with vector
+   *  \param c index of required column
+   *  \param v a vector
    */
-  void  setCol(unsigned int, const SiconosVector&);
+  void  setCol(unsigned int c, const SiconosVector& v);
 
   /** add a part of the input matrix (starting from (i,j) pos) to the current matrix
    *  \param an unsigned int i (in-out)
@@ -369,29 +371,29 @@ public:
   void subSimple(unsigned int&, unsigned int&, const SiconosMatrix&);
 
   /** assignment
-   *  \param SiconosMatrix : the matrix to be copied
+   *  \param m the matrix to be copied
    */
-  BlockMatrix& operator = (const SiconosMatrix&);
+  BlockMatrix& operator = (const SiconosMatrix& m);
 
   /** assignment
-   *  \param BlockMatrix : the matrix to be copied
+   *  \param m the matrix to be copied
    */
-  BlockMatrix& operator = (const BlockMatrix&);
+  BlockMatrix& operator = (const BlockMatrix& m);
 
   /** assignment
-   *  \param  DenseMat: the matrix to be copied
+   *  \param m the matrix to be copied
    */
-  BlockMatrix& operator = (const DenseMat&);
+  BlockMatrix& operator = (const DenseMat& m);
 
   /**operator +=
-   *  \param SiconosMatrix : a matrix to add
+   *  \param m the matrix to add
    */
-  BlockMatrix& operator +=(const SiconosMatrix&);
+  BlockMatrix& operator +=(const SiconosMatrix& m);
 
   /**operator -=
-   *  \param SiconosMatrix : a matrix to subtract
+   *  \param m the matrix to subtract
    */
-  BlockMatrix& operator -=(const SiconosMatrix&);
+  BlockMatrix& operator -=(const SiconosMatrix& m);
 
   /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
@@ -405,13 +407,13 @@ public:
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
-   *  \param input: the RHS matrix b - output: the result x
+   *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosMatrix &B);
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
-   *  \param input: the RHS matrix b - output: the result x
+   *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosVector &B);
 

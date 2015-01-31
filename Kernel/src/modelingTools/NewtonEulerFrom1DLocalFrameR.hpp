@@ -110,7 +110,7 @@ public:
   }
 
   /** set the coordinates of first contact point
-  * \param SP::SiconosVector new coordinates
+  * \param npc new coordinates
   */
   void setpc1(SP::SiconosVector npc)
   {
@@ -118,7 +118,7 @@ public:
   };
 
   /** set the coordinates of second contact point
-  * \param SP::SiconosVector new coordinates
+  * \param npc new coordinates
   */
   void setpc2(SP::SiconosVector npc)
   {
@@ -126,7 +126,7 @@ public:
   };
 
   /** set the coordinates of inside normal vector at the contact point
-  * \param SP::SiconosVector new coordinates
+  * \param nnc new coordinates
   */
   void setnc(SP::SiconosVector nnc)
   {

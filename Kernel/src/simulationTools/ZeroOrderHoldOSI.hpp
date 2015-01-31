@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file
-  ZeroOrderHoldOSI Time-Integrator for Dynamical Systems
+/*!\file ZeroOrderHoldOSI.hpp
+  Time-Integrator for linear dynamical systems using the Zero-Order Hold (ZOH) method
   */
 
 #ifndef ZEROORDERHOLD_H
@@ -32,8 +32,6 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
 /**  ZeroOrderHoldOSI Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
  *
  * See User's guide, \ref docSimuZeroOrderHoldOSITS for details.
  *
@@ -42,26 +40,11 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
 
  * A ZeroOrderHoldOSI instance is defined by the value of theta and the list of
  * concerned dynamical systems.  Each DynamicalSystem is associated to
- * a SiconosMatrix, named "W"
  *
- * W matrices are initialized and computed in initW and
- * computeW. Depending on the DS type, they may depend on time and DS
- * state (x).
+ * - computeFreeState(): computes xfree of dynamical systems
+ *   state without taking the non-smooth part into account
  *
- * For first order systems, the implementation uses _r for storing the
- * the input due to the nonsmooth law. This ZeroOrderHoldOSI scheme assumes that the
- * relative degree is zero or one and one level for _r is sufficient
- *
- * For Lagrangian systems, the implementation uses _p[1] for storing the
- * discrete impulse.
- *
- * Main functions:
- *
- * - computeFreeState(): computes xfree (or vfree), dynamical systems
- *   state without taking non-smooth part into account \n
- *
- * - updateState(): computes x (q,v), the complete dynamical systems
- *    states.
+ * - updateState(): update the state x of the dynamical systems
  *
  */
 class ZeroOrderHoldOSI : public OneStepIntegrator
@@ -176,5 +159,4 @@ public:
 
 };
 
-//TYPEDEF_SPTR(ZeroOrderHoldOSI)
 #endif // ZEROORDERHOLD_H

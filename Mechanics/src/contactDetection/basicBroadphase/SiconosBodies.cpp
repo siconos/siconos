@@ -25,6 +25,8 @@
 #include <Model.hpp>
 #include "SpaceFilter.hpp"
 
+#include <iostream>
+
 void SiconosBodies::compute()
 {
   try

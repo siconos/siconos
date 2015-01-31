@@ -117,9 +117,9 @@ void computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix&
   *  \param time current time (not used)
   *  \param x the state used to evaluate the jacobian
   *  \param z the extra input used to evaluate the jacobian
-  *  \param D the matrix used to store the jacobian
+  *  \param F the matrix used to store the jacobian
   */
-void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& D);
+void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& F);
 
   /** default function to compute jacobianG according to lambda
   *  \param time current time (not used)

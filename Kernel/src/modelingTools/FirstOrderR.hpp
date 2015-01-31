@@ -183,6 +183,4 @@ public:
 
 
 };
-TYPEDEF_SPTR(FirstOrderR)
-
 #endif

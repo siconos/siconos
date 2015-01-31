@@ -18,7 +18,7 @@
 */
 
 /*! \file PID.hpp
-  \brief General interface to define an actuator
+  \brief Proportional-Integral-Derivative Controller
 */
 
 #ifndef PID_H
@@ -53,8 +53,9 @@ public:
 
   /** Constructor.
    * \param sensor the ControlSensor feeding the Actuator
+   * \param B the B matrix
    */
-  PID(SP::ControlSensor sensor);
+  PID(SP::ControlSensor sensor, SP::SimpleMatrix B = std11::shared_ptr<SimpleMatrix>());
 
   /** destructor
    */
@@ -75,22 +76,17 @@ public:
    */
   void actuate();
 
-  /** Set the value of _K to newValue
-   * * \param newValue SiconosVector \f$ [K_P, K_I, K_D] \f$
+  /** Set K
+   * \param K SP::SiconosVector \f$ [K_P, K_I, K_D] \f$
    */
-  void setK(const SiconosVector& newValue);
+  void setK(SP::SiconosVector K);
 
-  /** Set _K to pointer newPtr
-   * \param newPtr SP::SiconosVector \f$ [K_P, K_I, K_D] \f$
+  /** Set the value of _ref to reference
+   * \param reference the new value
    */
-  void setKPtr(SP::SiconosVector newPtr);
-
-  /** Set the value of _ref to newValue
-   * \param newValue the new value
-   */
-  void inline setRef(double newValue)
+  void inline setRef(double reference)
   {
-    _ref = newValue;
+    _ref = reference;
   }
 
   /** Get the timestep from the TimeDiscretisation associated with this PID controller

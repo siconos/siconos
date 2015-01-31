@@ -208,7 +208,9 @@ public:
     _q = newQ;
   }
 
-  /** get the type of storage for M */
+  /** get the type of storage for M
+   * \return the type of storage
+   */
   inline int getMStorageType() const
   {
     return _MStorageType;

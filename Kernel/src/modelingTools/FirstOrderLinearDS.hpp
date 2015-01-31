@@ -81,9 +81,6 @@ protected:
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
   SP::SiconosMatrix _A;
 
-  /** strength vector */
-  SP::SiconosVector _b;
-
   /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
   * @param time : current time
   * @param sizeOfA : size of square-matrix A
@@ -208,22 +205,6 @@ public:
    **/
   void setA(const SiconosMatrix& newA);
 
-  /** get b
-   *  \return a SP::SiconosVector
-   */
-  inline SP::SiconosVector b() const
-  {
-    return _b;
-  }
-
-  /** set b
-   *  \param b a SiconosVector
-   */
-  inline void setb(SP::SiconosVector b)
-  {
-    _b = b;
-  }
-
   // --- plugins related functions
 
   /** set a specified function to compute the matrix A => same action as setComputeJacobianfxFunction
@@ -312,7 +293,7 @@ public:
     _pluginA = newPluginA;
   };
 
-  /** Set _pluginB
+  /** Set _pluginb
    * \param newPluginB the new plugin
    */
   inline void setPluginB(SP::PluggedObject newPluginB)

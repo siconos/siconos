@@ -93,11 +93,11 @@ protected:
   ACCEPT_SERIALIZATION(LagrangianScleronomousR);
 
   /** LagrangianScleronomousR plug-in to compute G0(q,z), gradient of h according to q
-  * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
-  * @param q : pointer to the first element of q
-  * @param sizeY : size of vector y (ie of the intercation)
+  * @param sizeQ size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
+  * @param q  pointer to the first element of q
+  * @param sizeY  size of vector y (ie of the intercation)
   * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
-  * @param sizeZ : size of vector z
+  * @param sizeZ size of vector z
   * @param[in,out] z: pointer to z vector(s) from DS.
   */
   /** Plugin object for the time--derivative of Jacobian i.e.
@@ -194,14 +194,16 @@ public:
   /** to compute output
   * \param time the current time
   * \param inter interaction that owns the relation
-  * \param unsigned int: number of the derivative to compute, optional, default = 0.
+  * \param interProp the InteractionProperties of this Interaction
+  * \param derivativeNumber number of the derivative to compute, optional, default = 0.
   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
 
   /** to compute p
   * \param time the current time
   * \param inter interaction that owns the relation
-  * \param unsigned int: "derivative" order of lambda used to compute input
+  * \param interProp the InteractionProperties of this Interaction
+  * \param level "derivative" order of lambda used to compute input
   */
   void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 

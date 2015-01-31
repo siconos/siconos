@@ -4,6 +4,7 @@
 %include ControlBase.i
 
 PY_FULL_REGISTER(ControlSimulation);
-PY_FULL_REGISTER(ControlFirstOrderLinearS);
+PY_FULL_REGISTER(ControlLsodarSimulation);
+PY_FULL_REGISTER(ControlZOHSimulation);
 PY_FULL_REGISTER(ControlManager);
 

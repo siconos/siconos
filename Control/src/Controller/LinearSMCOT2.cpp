@@ -40,6 +40,16 @@ LinearSMCOT2::~LinearSMCOT2()
 
 void LinearSMCOT2::initialize(const Model& m)
 {
+  if (!_Csurface)
+  {
+    RuntimeException::selfThrow("CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing the Actuator");
+  }
+  else
+  {
+    if (_Csurface && !_u)
+      _u.reset(new SiconosVector(_Csurface->size(0), 0));
+  }
+
   Actuator::initialize(m);
 
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
@@ -118,13 +128,12 @@ void LinearSMCOT2::actuate()
   // Update it
   *_XPhi = *_X;
 
-  // We change the values of the state each time, so we need to change istate to 3
-  // The first time, istate has to be 1 for initialization purposes
+  // We change the values of the state each time, so we need to change istate to 1
   // See LsodarOSI.cpp for the meaning of istate
   if (_indx > 0)
   {
-    _simulPhi->setIstate(3);
-    _simulPred->setIstate(3);
+    _simulPhi->setIstate(1);
+    _simulPred->setIstate(1);
   }
   // Compute _XPhi = \Phi*X
   _simulPhi->advanceToEvent();

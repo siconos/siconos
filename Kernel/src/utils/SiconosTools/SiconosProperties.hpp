@@ -50,6 +50,9 @@ namespace std11 = std;
 namespace std11 = boost;
 #endif
 
+#include <map>
+
+
 #include <boost/mpl/eval_if.hpp>
 #include <boost/static_assert.hpp>
 #include <vector>
@@ -249,6 +252,7 @@ public:
 
   // serialization issue with key_type as simple pointer (void *)
   std11::shared_ptr< std::map<key_type, T> > _store;
+
   int _stamp;
 
 
@@ -256,8 +260,7 @@ public:
       \param g a SiconosGraph
   */
 
-  Properties(G& g)
-    : _g(g), _store(new std::map<key_type, T>()), _stamp(-1)
+  Properties(G& g) : _g(g), _store(new std::map<key_type, T>()), _stamp(-1)
   {}
 
 
@@ -274,7 +277,7 @@ public:
   /** data access from a SiconosGraph vertex descriptor or edge
       descriptor
       \warning this operator creates an empty element if the key
-      is not in the map. Dot not use it to test if a key os present
+      is not in the map. Dot not use it to test if a key is present
       or not in the map ...
       \param v a SiconosGraph::VDescriptor or
       SiconosGraph::EDescriptor according to IndexMap type
@@ -349,6 +352,37 @@ public:
     friend class boost::serialization::access;
   */
 };
+
+/** vertex property structure with shared_pre
+    \param T the property data type
+    \param G the graph type
+ */
+template<typename T, typename G>
+class VertexSPProperties : public VertexProperties<std11::shared_ptr<T>, G>
+{
+public:
+  VertexSPProperties(G& g) : VertexProperties<std11::shared_ptr<T>, G>(g)
+  {};
+
+
+  typedef typename boost::property_traits<typename G::VIndexAccess>::key_type  key_type;
+  typedef void serializable;
+
+  /** data access from a SiconosGraph vertex descriptor or edge
+      descriptor
+      \warning this operator creates an empty element if the key
+      is not in the map. Dot not use it to test if a key os present
+      or not in the map ...
+      \param v a SiconosGraph::VDescriptor or
+      SiconosGraph::EDescriptor according to IndexMap type
+      \return the element in the vector
+    */
+  inline T& getRef(const key_type& v)
+  {
+    return *((*this->_store)[v]).get();
+  };
+};
+
 
 /** edge property structure:
     \param T the property data type

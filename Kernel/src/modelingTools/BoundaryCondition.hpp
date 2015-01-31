@@ -91,8 +91,8 @@ public:
   };
 
   /** allow to set a specified function to compute prescribedVelocity
-   *  \param std::string : the complete path to the plugin
-   *  \param std::string : the name of the function to use in this plugin
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the name of the function to use in this plugin
    */
   void setComputePrescribedVelocityFunction(const std::string&  pluginPath, const std::string& functionName)
   {

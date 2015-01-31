@@ -133,7 +133,7 @@ public:
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the function name to use in this plugin
    */
-  void setComputebFunction(const std::string& pluginPath, const std::string& functionName)
+  void setComputeBFunction(const std::string& pluginPath, const std::string& functionName)
   {
     setComputeJacglambdaFunction(pluginPath,  functionName);
   }

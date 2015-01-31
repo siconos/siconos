@@ -185,10 +185,10 @@ protected:
   // pointers to functions member to compute plug-in functions
 
   /** NewtonEulerDS plug-in to compute internal forces \f$F_{int}(t,q,\dot q)\f$ - id = "fInt"
-   * @param time : current time
-   * @param sizeOfq : size of vector q
-   * @param q : pointer to the first element of q
-   * @param velocity : pointer to the first element of velocity
+   * @param time current time
+   * @param sizeOfq size of vector q
+   * @param q pointer to the first element of q
+   * @param velocity pointer to the first element of velocity
    * @param[in,out] fInt : pointer to the first element of fInt
    * @param  size of vector z
    * @param[in,out] z : a vector of user-defined parameters
@@ -206,10 +206,10 @@ protected:
 
 
   /** NewtonEulerDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianFIntq"
-   * @param time : current time
-   * @param sizeOfq : size of vector q
-   * @param q : pointer to the first element of q
-   * @param velocity : pointer to the first element of velocity
+   * @param time current time
+   * @param sizeOfq size of vector q
+   * @param q pointer to the first element of q
+   * @param velocity pointer to the first element of velocity
    * @param[in,out] jacob : pointer to the first element of the jacobian
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
@@ -217,10 +217,10 @@ protected:
   FPtr6 computeJacobianFIntqPtr;
 
   /** NewtonEulerDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianFIntqDot"
-   * @param time : current time
-   * @param sizeOfq : size of vector q
-   * @param q : pointer to the first element of q
-   * @param velocity : pointer to the first element of velocity
+   * @param time current time
+   * @param sizeOfq size of vector q
+   * @param q pointer to the first element of q
+   * @param velocity pointer to the first element of velocity
    * @param[in,out] jacob : pointer to the first element of the jacobian
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
@@ -235,10 +235,10 @@ public:
 
 
   /** constructor from a minimum set of data
-   *  \param position : initial coordinates of this DynamicalSystem
-   *  \param velocity: initial velocity of this DynamicalSystem
-   *  \param mass : the mass
-   *  \param inertia : the inertia matrix
+   *  \param position initial coordinates of this DynamicalSystem
+   *  \param velocity initial velocity of this DynamicalSystem
+   *  \param mass the mass
+   *  \param inertia the inertia matrix
    */
   NewtonEulerDS(SP::SiconosVector position,
                 SP::SiconosVector velocity,
@@ -261,14 +261,14 @@ public:
   void initForces();
 
   /** Initialization function for the rhs and its jacobian.
-   *  \param time : the time of initialization
+   *  \param time the time of initialization
    */
   void initRhs(double time) ;
 
   /** dynamical system initialization function except for _p:
    *  mainly set memory and compute plug-in for initial state values.
-   *  \param time: the time of initialization, default value = 0
-   *  \param size: the size of the memory, default size = 1.
+   *  \param time the time of initialization, default value = 0
+   *  \param size the size of the memory, default size = 1.
    */
   void initialize(double time = 0, unsigned int size = 1) ;
 
@@ -520,11 +520,11 @@ public:
   virtual void computeForces(double);
 
   /** function to compute fL with some specific values for q and velocity (ie not those of the current state).
-   *  \param double time : the current time
-   *  \param SP::SiconosVector: pointers on q
-   *  \param SP::SiconosVector: pointers on velocity
+   *  \param time the current time
+   *  \param q2 positions where the forces has to be computed
+   *  \param v2 velocities where the forces has to be computed
    */
-  virtual void computeForces(double , SP::SiconosVector, SP::SiconosVector);
+  virtual void computeForces(double time, SP::SiconosVector, SP::SiconosVector v2);
 
   /** Default function to compute the jacobian following q of fL
    *  \param double, the current time

@@ -378,10 +378,8 @@ public:
 
   /** get the value of \f$ x \f$, the state of the DynamicalSystem
    * \return SiconosVector
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  
-  inline const SiconosVector getx() const
+  inline const SiconosVector& getx() const
   {
     return *(_x[0]);
   }
@@ -410,7 +408,7 @@ public:
    *  \return SiconosVector
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  inline const SiconosVector getRhs() const
+  inline SiconosVector& getRhs() const
   {
     return *(_x[1]);
   }
@@ -438,7 +436,7 @@ public:
   /** get the value of the gradient according to \f$ x \f$ of the right-hand side
    *  \return SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianRhsx() const
+  inline SiconosMatrix& getJacobianRhsx() const
   {
     return *_jacxRhs;
   }
@@ -465,9 +463,8 @@ public:
 
   /** get the value of \f$ z \f$, the vector of algebraic parameters.
    * \return a SiconosVector
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  inline const SiconosVector getz() const
+  inline const SiconosVector& getz() const
   {
     return *_z;
   }

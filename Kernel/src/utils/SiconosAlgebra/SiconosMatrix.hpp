@@ -132,7 +132,7 @@ public:
   }
 
   /** get the number of rows or columns of the matrix
-   *  \param : unsigned int, 0 for rows, 1 for columns
+   *  \param index 0 for rows, 1 for columns
    *  \return an int
    */
   virtual unsigned int size(unsigned int index) const = 0;
@@ -346,63 +346,67 @@ public:
   virtual SPC::SiconosMatrix block(unsigned int = 0, unsigned int = 0) const = 0;
 
   /** get row index of current matrix and save it into vOut
-   *  \param unsigned int: index of required line
-   *  \param ref to SiconosVector: in-out parameter
+   *  \param index row we want to get
+   *  \param[out] vOut SiconosVector that will contain the desired row
    */
-  virtual void getRow(unsigned int, SiconosVector&) const = 0;
+  virtual void getRow(unsigned int index, SiconosVector& vOut) const = 0;
 
   /** get column index of current matrix and save it into vOut
-   *  \param unsigned int: index of required column
-   *  \param ref to SiconosVector: in-out parameter
+   *  \param index column we want to get
+   *  \param[out] vOut SiconosVector that will contain the desired column
    */
-  virtual void getCol(unsigned int, SiconosVector&) const = 0;
+  virtual void getCol(unsigned int index, SiconosVector& vOut) const = 0;
 
   /** set line row of the current matrix with vector v
-   *  \param an unsigned int and a SiconosVector
+   *  \param index row we want to set
+   *  \param vIn SiconosVector containing the new row
    */
-  virtual void setRow(unsigned int, const SiconosVector&) = 0;
+  virtual void setRow(unsigned int index, const SiconosVector& vIn) = 0;
 
   /** set column col of the current matrix with vector v
-   *  \param an unsigned int and a SiconosVector
+   *  \param index column we want to set
+   *  \param vIn a SiconosVector containing the new column
    */
-  virtual void setCol(unsigned int, const SiconosVector&) = 0;
+  virtual void setCol(unsigned int index, const SiconosVector& vIn) = 0;
 
   /** transpose in place: x->trans() is x = transpose of x.
    */
   virtual void trans() = 0;
 
   /** transpose a matrix: x->trans(m) is x = transpose of m.
-   *  \param a SiconosMatrix: the matrix to be transposed.
+   *  \param m the matrix to be transposed.
    */
-  virtual void trans(const SiconosMatrix&) = 0;
+  virtual void trans(const SiconosMatrix& m) = 0;
 
   /** operator =
-   *  \param SiconosMatrix : the matrix to be copied
+   *  \param m the matrix to be copied
    */
-  virtual SiconosMatrix& operator  = (const SiconosMatrix&) = 0;
+  virtual SiconosMatrix& operator  = (const SiconosMatrix& m) = 0;
 
   /** operator = to a DenseMat
-   *  \param the ublas-matrix to be copied
+   *  \param m the DenseMat to be copied
    */
-  virtual SiconosMatrix& operator  = (const DenseMat&) = 0;
+  virtual SiconosMatrix& operator  = (const DenseMat& m) = 0;
 
   /** operator +=
-   *  \param SiconosMatrix : a matrix to add
+   *  \param m a matrix to add
    */
-  virtual SiconosMatrix& operator +=(const SiconosMatrix&) = 0;
+  virtual SiconosMatrix& operator +=(const SiconosMatrix& m) = 0;
 
   /** operator -=
-   *  \param SiconosMatrix : a matrix to subtract
+   *  \param m a matrix to subtract
    */
-  virtual SiconosMatrix& operator -=(const SiconosMatrix&) = 0;
+  virtual SiconosMatrix& operator -=(const SiconosMatrix& m) = 0;
 
   /** multiply the current matrix with a scalar
-   *  \param template, double, int ...
+   *  \param m the matrix to operate on
+   *  \param s the scalar
    */
   friend SiconosMatrix& operator *=(SiconosMatrix& m, const double& s);
 
   /** divide the current matrix with a scalar
-   *  \param template, double, int ...
+   *  \param m the matrix to operate on
+   *  \param s the scalar
    */
   friend SiconosMatrix& operator /=(SiconosMatrix& m, const double& s);
 
@@ -418,13 +422,13 @@ public:
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
-   *  \param input: the RHS matrix b - output: the result x
+   *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
   virtual void  PLUForwardBackwardInPlace(SiconosMatrix &B) = 0;
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
-   *  \param input: the RHS matrix b - output: the result x
+   *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
   virtual void   PLUForwardBackwardInPlace(SiconosVector &B) = 0;
 
@@ -439,10 +443,10 @@ public:
   /** Compares two (block) matrices: true if they have the same number of blocks and if
       blocks which are facing each other have the same size;
       always true if one of the two is a SimpleMatrix.
-      \param a SiconosMatrix
-      \param a SiconosMatrix
+      \param m1 a SiconosMatrix
+      \param m2 a SiconosMatrix
   */
-  friend bool isComparableTo(const SiconosMatrix&, const SiconosMatrix&);
+  friend bool isComparableTo(const SiconosMatrix& m1, const SiconosMatrix& m2);
 
   /** Visitors hook
    */

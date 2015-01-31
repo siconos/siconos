@@ -31,6 +31,8 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
+#include "OneStepNSProblem.hpp"
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"

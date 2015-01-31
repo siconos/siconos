@@ -17,6 +17,7 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
+#include "RuntimeException.hpp"
 #include "Actuator.hpp"
 #include "ActuatorEvent.hpp"
 #include "ControlSensor.hpp"
@@ -51,27 +52,47 @@ void Actuator::initialize(const Model& m)
     RuntimeException::selfThrow("Actuator::initialize - No Sensor given to the Actuator");
   }
 
-  // Init the control variable
-  if (!_B)
-    RuntimeException::selfThrow("Actuator::initialize - the matrix _B is not initialized");
-  _u.reset(new SiconosVector(_B->size(1), 0));
-  // Add the necessary properties
+  // Init the control variable and add the necessary properties
   DynamicalSystemsGraph& DSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_sensor->getDS());
-  DSG0.B[dsgVD] = _B;
-  DSG0.u[dsgVD] = _u;
+  if (_B)
+  {
+    DSG0.B[dsgVD] = _B;
+  }
+  else if (!_plugingName.empty())
+  {
+    DSG0.pluginU[dsgVD].reset(new PluggedObject(_plugingName));
+    if (!_pluginJacgxName.empty())
+    {
+      DSG0.pluginJacgx[dsgVD].reset(new PluggedObject(_plugingName));
+    }
+    if (!_u)
+    {
+      RuntimeException::selfThrow("Actuator::initialize - u should have already been initialized");
+    }
+  }
+  else
+  {
+    RuntimeException::selfThrow("Actuator::initialize - niether the matrix B or the plugin g are not initialized");
+  }
 
+  DSG0.u[dsgVD] = _u;
 }
 
-void Actuator::setB(const SimpleMatrix& B)
+void Actuator::setSizeu(unsigned size)
 {
-  _B.reset(new SimpleMatrix(B));
+  _u.reset(new SiconosVector(size, 0));
+}
+
+SP::Model Actuator::getInternalModel() const
+{
+  return std11::shared_ptr<Model>();
 }
 
 void Actuator::display() const
 {
   std::cout << "=====> Actuator of type " << _type << ", named " << _id << std::endl;;
-  std::cout << "The associated Sensors is: " << std::endl;
+  std::cout << "The associated Sensor is: " << std::endl;
   if (_sensor)
     _sensor->display();
   std::cout << "======" <<std::endl;

@@ -23,6 +23,8 @@
 #include "BlockVector.hpp"
 #include "SimulationTypeDef.hpp"
 
+#include <iostream>
+
 using namespace RELATION;
 
 // Minimum data (C as pointer) constructor

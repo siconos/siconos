@@ -34,6 +34,9 @@
 
 using namespace Siconos;
 
+#include <boost/numeric/bindings/blas.hpp>
+namespace siconosBindings = boost::numeric::bindings::blas;
+
 
 // =================================================
 //                CONSTRUCTORS
@@ -650,7 +653,7 @@ void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool i
   VectorOfVectors::const_iterator it;
   for (it = x.begin(); it != x.end(); ++it)
   {
-    private_addprod(createSPtrConstSiconosMatrix(A), startRow, startCol, *it, createSPtrSiconosVector(y));
+    private_addprod(A, startRow, startCol, **it, y);
     startCol += (*it)->size();
   }
 }
@@ -665,7 +668,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool i
   //       // private_prod takes into account the fact that x and y[i] may be block vectors.
   for (it = y.begin(); it != y.end(); ++it)
   {
-    private_prod(createSPtrConstSiconosMatrix(A), startRow, createSPtrConstSiconosVector(x), *it, init);
+    private_prod(A, startRow, x, **it, init);
     startRow += (*it)->size();
   }
 
@@ -741,75 +744,73 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool i
   }
 }
 
-void private_addprod(SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SPC::SiconosVector x, SP::SiconosVector y)
+void private_addprod(const SiconosMatrix& A, unsigned startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& y)
 {
-  assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  if (A->isBlock())
-    SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(A.isBlock() && "private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
 
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
   // Then computation of y = subA*x + y.
-  unsigned int numA = A->getNum();
-  unsigned int numY = y->getNum();
-  unsigned int numX = x->getNum();
-  unsigned int sizeX = x->size();
-  unsigned int sizeY = y->size();
+  unsigned int numA = A.getNum();
+  unsigned int numY = y.getNum();
+  unsigned int numX = x.getNum();
+  unsigned int sizeX = x.size();
+  unsigned int sizeY = y.size();
 
-  if (numX != numY)
-    SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
+  assert(numX != numY && "private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
 
   if (numY == 1 && numX == 1)
   {
 
-    assert(y->dense() != x->dense());
+    assert(y.dense() != x.dense());
 
     if (numA == 1)
-      noalias(*y->dense()) += prod(ublas::subrange(*A->dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+      noalias(*y.dense()) += prod(ublas::subrange(*A.dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
     else if (numA == 2)
-      noalias(*y->dense()) += prod(ublas::subrange(*A->triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+      noalias(*y.dense()) += prod(ublas::subrange(*A.triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
     else if (numA == 3)
-      noalias(*y->dense()) += prod(ublas::subrange(*A->sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+      noalias(*y.dense()) += prod(ublas::subrange(*A.sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
     else if (numA == 4)
-      noalias(*y->dense()) += prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+      noalias(*y.dense()) += prod(ublas::subrange(*A.sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
     else //if(numA==5)
-      noalias(*y->dense()) += prod(ublas::subrange(*A->banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+      noalias(*y.dense()) += prod(ublas::subrange(*A.banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
   }
   else // x and y sparse
   {
     if (numA == 4)
-      *y->sparse() += prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
+      *y.sparse() += prod(ublas::subrange(*A.sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.sparse());
     else
       SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");
   }
 }
 
-void private_addprod(SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SPC::BlockVector x, SP::SiconosVector y)
+void private_addprod(const SiconosMatrix& A, unsigned int startRow, unsigned int startCol, const BlockVector& x, SiconosVector& y)
 {
-  assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
-  if (A->isBlock())
+  if (A.isBlock())
     SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
 
   VectorOfVectors::const_iterator it;
   unsigned int startColBis = startCol;
-  for (it = x->begin(); it != x->end(); ++it)
+  for (it = x.begin(); it != x.end(); ++it)
   {
-    private_addprod(A, startRow, startColBis, (*it), y);
+    private_addprod(A, startRow, startColBis, **it, y);
     startColBis += (*it)->size();
   }
 
 }
 
 // x block, y siconos
-void private_prod(SPC::SiconosMatrix A, unsigned int startRow, SPC::BlockVector x, SP::SiconosVector y, bool init)
+void private_prod(const SiconosMatrix& A, unsigned int startRow, const BlockVector& x, SiconosVector& y, bool init)
 {
-  assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
 
   if (init) // y = subA * x , else y += subA * x
-    y->zero();
+    y.zero();
   private_addprod(A, startRow, 0, x, y);
 }
 
@@ -822,20 +823,20 @@ void private_prod(SPC::SiconosMatrix A, const unsigned int startRow, SPC::BlockV
   VectorOfVectors::const_iterator it;
   for (it = y->begin(); it != y->end(); ++it)
   {
-    private_prod(A, row, x, *it, init);
+    private_prod(*A, row, *x, **it, init);
     row += (*it)->size();
   }
 }
 
 // x block, y siconos
-void private_prod(SPC::SiconosMatrix A, unsigned int startRow, SPC::SiconosVector x, SP::SiconosVector y, bool init)
+void private_prod(const SiconosMatrix& A, unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init)
 {
-  assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
 
   if (init) // y = subA * x , else y += subA * x
-    y->zero();
+    y.zero();
   private_addprod(A, startRow, 0, x, y);
 }
 
@@ -848,7 +849,7 @@ void private_prod(SPC::SiconosMatrix A, const unsigned int startRow, SPC::Sicono
   VectorOfVectors::const_iterator it;
   for (it = y->begin(); it != y->end(); ++it)
   {
-    private_prod(A, row, x, *it, init);
+    private_prod(*A, row, *x, **it, init);
     row += (*it)->size();
   }
 }
@@ -1012,4 +1013,13 @@ void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::Si
     y->zero();
   private_addprod(a, A, startRow, 0, x, y);
 
+}
+
+unsigned SimpleMatrix::copyData(double* data) const
+{
+  assert((_num != 1) && "SiconosMatrix::copyData : forbidden: the current matrix is not dense.");
+
+  unsigned size = mat.Dense->size1() * mat.Dense->size2();
+  siconosBindings::detail::copy(size, getArray(), 1, data, 1);
+  return size;
 }

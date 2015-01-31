@@ -44,7 +44,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(NewMarkAlphaOSI);
   /** Parameters of the numerical scheme:  beta, gamma, alpha_m, alpha_f */
-  double beta, gamma, alpha_m, alpha_f;
+  double _beta, _gamma, _alpha_m, _alpha_f;
 
   /** Stl map that associates a W matrix to each DynamicalSystem of the OSI */
   MapOfDSMatrices WMap;
@@ -85,9 +85,10 @@ public:
   * \param gamma double
   * \param alpha_m double
   * \param alpha_f double
+  * \param flag true of working at veolcity level
   */
 
-  NewMarkAlphaOSI(double, double, double, double, bool);
+  NewMarkAlphaOSI(double beta, double gamma, double alpha_m, double alpha_f, bool flag);
 
   /** constructor with only the parameter rho_infty
   * \param rho_infty double
@@ -103,12 +104,12 @@ public:
   // --- GETTERS/SETTERS ---
 
   /** set value to the parameter beta
-   * \param double : value of beta
+   * \param beta value of beta
    */
 
-  inline void setBeta(double value_beta)
+  inline void setBeta(double beta)
   {
-    beta = value_beta;
+    _beta = beta;
   };
 
   /** set value to the parameter gamma
@@ -117,7 +118,7 @@ public:
 
   inline void setGamma(double value_gamma)
   {
-    gamma = value_gamma;
+    _gamma = value_gamma;
   };
 
   /** set value to the parameter alpha_m
@@ -126,7 +127,7 @@ public:
 
   inline void setAlpha_m(double value_alpha_m)
   {
-    alpha_m = value_alpha_m;
+    _alpha_m = value_alpha_m;
   };
 
   /** set value to the parameter alpha_f
@@ -135,7 +136,7 @@ public:
 
   inline void setAlpha_f(double value_alpha_f)
   {
-    alpha_f = value_alpha_f;
+    _alpha_f = value_alpha_f;
   };
 
   /** set values to the parameters beta, gamma, alpha_f, alpha_m from the value of rho_infty
@@ -144,38 +145,38 @@ public:
 
   inline void setParametersFromRho_infty(double _rho_infty)
   {
-    alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
-    alpha_f = _rho_infty / (_rho_infty + 1);
-    gamma = 0.5 + alpha_f - alpha_m;
-    beta = 0.25 * std::pow((gamma + 0.5), 2);
+    _alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
+    _alpha_f = _rho_infty / (_rho_infty + 1);
+    _gamma = 0.5 + _alpha_f - _alpha_m;
+    _beta = 0.25 * std::pow((_gamma + 0.5), 2);
   };
 
   /** get value of beta */
 
   inline double getBeta()
   {
-    return beta;
+    return _beta;
   };
 
   /** get value of gamma*/
 
   inline double getGamma()
   {
-    return gamma;
+    return _gamma;
   };
 
   /** get value of alpha_m*/
 
   inline double getAlpha_m()
   {
-    return alpha_m;
+    return _alpha_m;
   };
 
   /** get value of alpha_f */
 
   inline double getAlpha_f()
   {
-    return alpha_f;
+    return _alpha_f;
   };
   /** get the order of the polynomial for dense output */
   inline unsigned int getOrderDenseOutput()
@@ -186,9 +187,9 @@ public:
   /** set the flag _IsVelocityLevel
    * \param bool
    */
-  inline void setFlagVelocityLevel(bool _flag)
+  inline void setFlagVelocityLevel(bool flag)
   {
-    _IsVelocityLevel = _flag;
+    _IsVelocityLevel = flag;
   }
 
   /** get the flag _IsVelocityLevel

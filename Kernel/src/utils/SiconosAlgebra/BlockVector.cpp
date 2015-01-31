@@ -228,23 +228,23 @@ double BlockVector::operator()(unsigned int pos) const
 //============================================
 
 
-void BlockVector::setVector(unsigned int pos, const SiconosVector& newV)
+void BlockVector::setVector(unsigned int pos, const SiconosVector& v)
 {
   if (! vect[pos])
     SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] == NULL pointer.");
 
-  if (newV.size() != (vect[pos])->size())
+  if (v.size() != (vect[pos])->size())
     SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] and v have unconsistent sizes.");
 
-  *vect[pos] = newV ;
+  *vect[pos] = v ;
 }
 
-void BlockVector::setVectorPtr(unsigned int pos, SP::SiconosVector newV)
+void BlockVector::setVectorPtr(unsigned int pos, SP::SiconosVector v)
 {
-  if (newV->size() != (vect[pos])->size())
+  if (v->size() != (vect[pos])->size())
     SiconosVectorException::selfThrow("BlockVector::setVectorPtr(pos,v), this[pos] and v have unconsistent sizes.");
 
-  vect[pos] = newV;
+  vect[pos] = v;
 }
 
 SP::SiconosVector BlockVector::operator [](unsigned int pos)

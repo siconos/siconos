@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2012.
+/* Siconos-Kernel, Copyright INRIA 2005-2014
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -15,24 +15,23 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
+
+/*!\file ControlLsodarSimulation.hpp
+ * \brief Simulation with Control using Lsodar
  */
 
-#include "FirstOrderLinearDS.hpp"
+#ifndef ControlLsodarSimulation_hpp
+#define ControlLsodarSimulation_hpp
 
-#include "ControlFirstOrderLinearS.hpp"
+#include "ControlSimulation.hpp"
 
-#include "SiconosVector.hpp"
+class ControlLsodarSimulation : public ControlSimulation {
 
+public:
+  ControlLsodarSimulation(double t0, double T, double h);
 
+  virtual void run();
 
-ControlFirstOrderLinearS::ControlFirstOrderLinearS(double t0, double T, double h,
-    SP::SiconosVector x0, SP::SiconosMatrix A):
-  ControlSimulation(t0, T, h, x0), _A(A)
-{
-  _processDS.reset(new FirstOrderLinearDS(_x0, _A));
-}
-
-void ControlFirstOrderLinearS::initialize()
-{
-  ControlSimulation::initialize();
-}
+};
+#endif

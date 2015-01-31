@@ -144,6 +144,10 @@ struct nullDeleter
   class X; \
   TYPEDEF_SPTR(X)
 
+#define DEFINE_SPTR_STRUCT(X) \
+  struct X; \
+  TYPEDEF_SPTR(X)
+
 #define DEFINE_SAPTR(X) \
   class X; \
   TYPEDEF_SAPTR(X)

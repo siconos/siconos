@@ -19,7 +19,7 @@
 
 /* !\file SMCExampleImplicitOT2.cpp
   \brief Two independent systems of dimension one controlled to slide
-  on \f$x = 0\f$. An implicit scheme is used with a disturbance prediction
+  on \f$x = 0\f$. The scheme from Su, Drakunov and Özgüner (2000) is used
   O. Huber
   */
 
@@ -64,45 +64,34 @@ int main(int argc, char* argv[])
   (*x0)(1) = -Xinit;
   SP::SimpleMatrix sensorC(new SimpleMatrix(2, 2));
   sensorC->eye();
+  SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
   SP::SimpleMatrix Csurface(new SimpleMatrix(1, 2, 0));
   (*Csurface)(0, 1) = 1;
-  SP::SimpleMatrix B(new SimpleMatrix(2, 1, 0));
-  (*B)(1, 0) = 1;
+  SP::SimpleMatrix Brel(new SimpleMatrix(2, 1, 0));
+  (*Brel)(1, 0) = 2;
+
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
   processDS->setComputebFunction("RelayPlugin", "computeB");
-
   // -------------
   // --- Model process ---
   // -------------
-  SP::Model process(new Model(t0, T));
-  process->nonSmoothDynamicalSystem()->insertDynamicalSystem(processDS);
+  SP::ControlSimulation sim(new ControlZOHSimulation(t0, T, h));
+  sim->setSaveOnlyMainSimulation(true);
+  sim->addDynamicalSystem(processDS);
 
   // ------------------
   // --- Simulation ---
   // ------------------
-  // TimeDiscretisation
-  SP::TimeDiscretisation processTD(new TimeDiscretisation(t0, h));
-  SP::TimeDiscretisation tSensor(new TimeDiscretisation(t0, hControl));
-  SP::TimeDiscretisation tActuator(new TimeDiscretisation(t0, hControl));
-  // == Creation of the Simulation ==
-  SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
-  processSimulation->setName("plant simulation");
-  // -- OneStepIntegrators --
-  SP::ZeroOrderHoldOSI processIntegrator(new ZeroOrderHoldOSI(processDS));
-  processSimulation->insertIntegrator(processIntegrator);
-
   // Control stuff
-  SP::ControlManager control(new ControlManager(processSimulation));
   // use a controlSensor
   SP::LinearSensor sens(new LinearSensor(processDS, sensorC));
-  control->addSensorPtr(sens, tSensor);
+  sim->addSensor(sens, hControl);
   // add the sliding mode controller
-  SP::LinearSMCOT2 act = std11::static_pointer_cast<LinearSMCOT2>
-                         (control->addActuator(LINEAR_SMC_OT2, tActuator, sens));
-  act->setCsurfacePtr(Csurface);
-  act->setBPtr(B);
-
+  SP::LinearSMCOT2 act(new LinearSMCOT2(sens));
+  act->setCsurface(Csurface);
+  act->setB(Brel);
+  sim->addActuator(act, hControl);
   // =========================== End of model definition ===========================
 
   // ================================= Computation =================================
@@ -111,52 +100,14 @@ int main(int argc, char* argv[])
 
   cout << "====> Simulation initialisation ..." << endl << endl;
   // initialise the process and the ControlManager
-  process->initialize(processSimulation);
-  control->initialize(*process);
-
-  // --- Get the values to be plotted ---
-  unsigned int outputSize = 4; // number of required data
-  unsigned int N = ceil((T - t0) / h) + 10; // Number of time steps
-
-  SP::SiconosVector xProc = processDS->x();
-  const SiconosVector& uProc = act->u();
-  // Save data in a matrix dataPlot
-  SimpleMatrix dataPlot(N, outputSize);
-  dataPlot(0, 0) = process->t0(); // Initial time of the model
-  dataPlot(0, 1) = (*xProc)(0);
-  dataPlot(0, 2) = (*xProc)(1);
-  dataPlot(0, 3) = (uProc)(0);
-
-  SP::EventsManager eventsManager = processSimulation->eventsManager();
+  sim->initialize();
 
   // ==== Simulation loop =====
   cout << "====> Start computation ... " << endl << endl;
-  int k = 0; // Current step
-  // Simulation loop
-  boost::progress_display show_progress(N);
-  boost::timer time;
-  time.restart();
-  SP::Event nextEvent;
-  while (processSimulation->hasNextEvent())
-  {
-    nextEvent = eventsManager->nextEvent();
-    if (nextEvent->getType() == TD_EVENT)
-    {
-      processSimulation->computeOneStep();
-      k++;
-      dataPlot(k, 0) = processSimulation->nextTime();
-      dataPlot(k, 1) = (*xProc)(0);
-      dataPlot(k, 2) = (*xProc)(1);
-      dataPlot(k, 3) = (uProc)(0);
-      ++show_progress;
-    }
-    processSimulation->nextStep();
-  }
-  cout << endl << "Computation Time " << time.elapsed()  << endl;
-
+  sim->run();
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
-  dataPlot.resize(k, outputSize);
+  SimpleMatrix& dataPlot = *sim->data();
   ioMatrix::write("SMCExampleImplicitOT2.dat", "ascii", dataPlot, "noDim");
 
   // Comparison with a reference file
