@@ -277,6 +277,11 @@ public:
   */
   BlockVector& operator =(const BlockVector&);
 
+  /** Equality operator with raw double* data on the right-hand side
+   *  \param data data to put in the BlockVector
+   */
+  BlockVector& operator = (const double* data);
+
   BlockVector& operator -=(const BlockVector&);
   BlockVector& operator +=(const BlockVector&);
 

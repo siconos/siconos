@@ -73,17 +73,17 @@ public:
   /***************************** CONSTRUCTORS ****************************/
 
   /** constructor with the type and the dimension of the Boost vector
-   *  \param an unsigned int, dimension
-   *  \param an_UBLAS_TYPE
+   *  \param row the size of the vector
+   *  \param type the type of vector
    */
-  SiconosVector(unsigned int , Siconos::UBLAS_TYPE = Siconos::DENSE);
+  SiconosVector(unsigned row, Siconos::UBLAS_TYPE type = Siconos::DENSE);
 
   /** constructor with the dimension of the Boost vector, a default value and the type.
-   *  \param an unsigned int, dimension
-   *  \param double a, so that *this = [a a a ...]
-   *  \param an Siconos::UBLAS_TYPE (default = dense)
+   *  \param row the size of the vector
+   *  \param val value for initiliazing the vector
+   *  \param type the type of vector
    */
-  SiconosVector(unsigned int , double, Siconos::UBLAS_TYPE = Siconos::DENSE);
+  SiconosVector(unsigned row, double val, Siconos::UBLAS_TYPE type = Siconos::DENSE);
 
   /** constructor with  a std::vector of the values and the type of the boost vector.
    *  \param a std::vector<double>
@@ -169,16 +169,9 @@ public:
   SparseVect* sparse(unsigned int = 0) const;
 
   /** return the array of double values of the vector
-   *  \param unsigned int: vector position (only for block vector)
-   *  \return double* : the pointer on the array
+   *  \return a pointer to the array
    */
-  double* getArray(unsigned int = 0) const;
-
-  /* get block starting at "pos" (first argument) and of size block.size() and write it in v (second arg)
-   *  \param pos an int, position of the first element of the required block
-   *  \param v a SiconosVector *, in-out parameter.
-   */
-  //  void getBlock(unsigned int, SP::SiconosVector) const;
+  double* getArray() const;
 
   /** sets all the values of the vector to 0.0
    */
@@ -314,6 +307,12 @@ public:
    */
   void subBlock(unsigned int, const SiconosVector&);
 
+  /** copy the data to double* (dense only)
+   * \param data the memory where to copy the data
+   * \return the number of element written (size of the vector)
+   */
+  unsigned copyData(double* data) const;
+
   /** operator =
    *  \param SiconosVector : the vector to be copied
    */
@@ -330,9 +329,14 @@ public:
   SiconosVector& operator = (const DenseVect&);
 
   /** operator =
-   *  \param a DenseVect : the vector to be copied
+   *  \param sp the vector to be copied
    */
-  SiconosVector& operator = (const SparseVect&);
+  SiconosVector& operator = (const SparseVect& sp);
+
+  /** operator =
+   *  \param d data to put the in vector
+   */
+  SiconosVector& operator = (const double* d);
 
   /** operator +=
    *  \param SiconosVector : a vector to add

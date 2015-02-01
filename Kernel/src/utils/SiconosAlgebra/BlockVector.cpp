@@ -292,6 +292,21 @@ BlockVector& BlockVector::operator = (const BlockVector& vIn)
   }
 }
 
+BlockVector& BlockVector::operator = (const double* data)
+{
+  VectorOfVectors::iterator it1;
+  unsigned indxPos = 0;
+
+  for (it1 = vect.begin(); it1 != vect.end(); ++it1)
+  {
+    SiconosVector& v = **it1;
+    v = &data[indxPos];
+    indxPos += v.size();
+  }
+  return *this;
+}
+
+
 BlockVector& BlockVector::operator -= (const BlockVector& vIn)
 {
   if (isComparableTo(*this, vIn)) // if vIn and this are "block-consistent"

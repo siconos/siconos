@@ -104,14 +104,14 @@ SiconosVector::SiconosVector()
 }
 
 // parameters: dimension and type.
-SiconosVector::SiconosVector(unsigned int row, Siconos::UBLAS_TYPE typ)
+SiconosVector::SiconosVector(unsigned row, Siconos::UBLAS_TYPE type)
 {
-  if (typ == Siconos::SPARSE)
+  if (type == Siconos::SPARSE)
   {
     _dense = false;
     vect.Sparse = new SparseVect(ublas::zero_vector<double>(row));
   }
-  else if (typ == Siconos::DENSE)
+  else if (type == Siconos::DENSE)
   {
     _dense = true;
     vect.Dense = new DenseVect(ublas::zero_vector<double>(row));
@@ -123,15 +123,15 @@ SiconosVector::SiconosVector(unsigned int row, Siconos::UBLAS_TYPE typ)
 }
 
 // parameters: dimension, default value for all components and type.
-SiconosVector::SiconosVector(unsigned int row, double val, Siconos::UBLAS_TYPE typ)
+SiconosVector::SiconosVector(unsigned row, double val, Siconos::UBLAS_TYPE type)
 {
-  if (typ == Siconos::SPARSE)
+  if (type == Siconos::SPARSE)
   {
     _dense = false;
     vect.Sparse = new SparseVect(row);
     fill(val);
   }
-  else if (typ == Siconos::DENSE)
+  else if (type == Siconos::DENSE)
   {
     _dense = true;
     vect.Dense = new DenseVect(ublas::scalar_vector<double>(row, val));
@@ -284,12 +284,9 @@ SparseVect* SiconosVector::sparse(unsigned int)const
   return vect.Sparse;
 }
 
-double* SiconosVector::getArray(unsigned int) const
+double* SiconosVector::getArray() const
 {
-  if (!_dense)
-    SiconosVectorException::selfThrow("SiconosVector::getArray() : not yet implemented for sparse vector.");
-
-  assert(vect.Dense);
+  assert(vect.Dense && "SiconosVector::getArray() : not yet implemented for sparse vector.");
 
   return &(((*vect.Dense).data())[0]);
 }
@@ -414,8 +411,7 @@ const std::string SiconosVector::toString() const
 
 double SiconosVector::getValue(unsigned int row) const
 {
-  if (row >= size())
-    SiconosVectorException::selfThrow("SiconosVector::getValue(index) : Index out of range");
+  assert(row >= size() && "SiconosVector::getValue(index) : Index out of range");
 
   if (_dense)
     return (*vect.Dense)(row);
@@ -435,8 +431,7 @@ void SiconosVector::setValue(unsigned int row, double value)
 
 double& SiconosVector::operator()(unsigned int row)
 {
-  if (row >= size())
-    SiconosVectorException::selfThrow("SiconosVector::operator ( index ): Index out of range");
+  assert(row >= size() && "SiconosVector::operator ( index ): Index out of range");
 
   if (_dense)
     return (*vect.Dense)(row);
@@ -464,18 +459,16 @@ void SiconosVector::setBlock(unsigned int index, const SiconosVector& vIn)
   // Set current vector elements, starting from position "index", to the values of vector vIn
 
   // Exceptions ...
-  if (&vIn == this)
-    SiconosVectorException::selfThrow("SiconosVector::this->setBlock(pos,vIn): vIn = this.");
+  assert(&vIn == this && 
+      "SiconosVector::this->setBlock(pos,vIn): vIn = this.");
 
-  if (index > size())
-    SiconosVectorException::selfThrow("SiconosVector::setBlock : invalid ranges");
+  assert(index > size() && "SiconosVector::setBlock : invalid ranges");
 
   unsigned int end = vIn.size() + index;
-  if (end > size())
-    SiconosVectorException::selfThrow("SiconosVector::setBlock : invalid ranges");
+  assert(end > size() && "SiconosVector::setBlock : invalid ranges");
 
   unsigned int numVin = vIn.getNum();
-  if (numVin != getNum()) SiconosVectorException::selfThrow("SiconosVector::setBlock: inconsistent types.");
+  assert (numVin != getNum() && "SiconosVector::setBlock: inconsistent types.");
 
   if (_dense)
     noalias(ublas::subrange(*vect.Dense, index, end)) = *vIn.dense();
@@ -490,19 +483,15 @@ void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned in
   unsigned int sizeIn = size();
   unsigned int sizeOut = vOut.size();
 
-  if (startIn >= sizeIn)
-    SiconosVectorException::selfThrow("vector toBlock(v1,v2,...): start position in input vector is out of range.");
+  assert(startIn >= sizeIn && "vector toBlock(v1,v2,...): start position in input vector is out of range.");
 
-  if (startOut >= sizeOut)
-    SiconosVectorException::selfThrow("vector toBlock(v1,v2,...): start position in output vector is out of range.");
+  assert(startOut >= sizeOut && "vector toBlock(v1,v2,...): start position in output vector is out of range.");
 
   unsigned int endIn = startIn + sizeB;
   unsigned int endOut = startOut + sizeB;
 
-  if (endIn > sizeIn)
-    SiconosVectorException::selfThrow("vector toBlock(v1,v2,...): end position in input vector is out of range.");
-  if (endOut > sizeOut)
-    SiconosVectorException::selfThrow("vector toBlock(v1,v2,...): end position in output vector is out of range.");
+  assert(endIn > sizeIn && "vector toBlock(v1,v2,...): end position in input vector is out of range.");
+  assert(endOut > sizeOut && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
 
   unsigned int numIn = getNum();
   unsigned int numOut = vOut.getNum();
@@ -573,11 +562,9 @@ SiconosVector& SiconosVector::operator = (const SiconosVector& vIn)
 {
   if (&vIn == this) return *this; // auto-assignment.
 
-  if (size() != vIn.size())
-    SiconosVectorException::selfThrow("SiconosVector::operator = failed: inconsistent sizes.");
+  assert(size() != vIn.size() && "SiconosVector::operator = failed: inconsistent sizes.");
 
   unsigned int vInNum = vIn.getNum();
-
   {
     switch (getNum())
     {
@@ -645,6 +632,24 @@ SiconosVector& SiconosVector::operator = (const SparseVect& sp)
 
   return *this;
 }
+
+SiconosVector& SiconosVector::operator = (const double* d)
+{
+  assert(!_dense && "SiconosVector::operator = double* : forbidden: the current vector is not dense.");
+
+  siconosBindings::detail::copy(vect.Dense->size(), d, 1, getArray(), 1);
+  return *this;
+}
+
+unsigned SiconosVector::copyData(double* data) const
+{
+  assert(!_dense && "SiconosVector::operator = double* : forbidden: the current vector is not dense.");
+
+  unsigned size = vect.Dense->size();
+  siconosBindings::detail::copy(vect.Dense->size(), getArray(), 1, data, 1);
+  return size;
+}
+
 
 //=================================
 // Op. and assignment (+=, -= ... )
