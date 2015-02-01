@@ -169,9 +169,8 @@ void LsodarOSI::updateData()
 
 void LsodarOSI::fillXWork(integer* sizeOfX, doublereal* x)
 {
-  unsigned int sizeX = (unsigned int)(*sizeOfX);
-  for (unsigned int i = 0; i < sizeX ; ++i)
-    (*_xWork)(i) = x[i];
+  assert((unsigned int)(*sizeOfX) == _xWork->size() && "LsodarOSI::fillXWork xWork and sizeOfX have different sizes");
+  (*_xWork) = x;
 }
 
 void LsodarOSI::computeRhs(double t)
@@ -336,7 +335,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
   // call LSODAR to integrate dynamical equation
   CNAME(dlsodar)(pointerToF,
                  &(_intData[0]),
-                 &(*_xtmp)(0),
+                 _xtmp->getArray(),
                  &tinit_DR,
                  &tend_DR,
                  &(_intData[2]),

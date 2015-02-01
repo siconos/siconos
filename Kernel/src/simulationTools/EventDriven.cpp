@@ -394,6 +394,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   // Get the required value, ie xdot for output.
   DSIterator it;
   unsigned int i = 0;
+  unsigned pos = 0;
   for (it = lsodar.dynamicalSystemsBegin(); it != lsodar.dynamicalSystemsEnd(); ++it)
   {
     if (Type::value(**it) == Type::LagrangianDS ||
@@ -410,8 +411,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     else
     {
       SiconosVector& xtmp2 = *(*it)->rhs(); // Pointer link !
-      for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
-        xdot[i++] = xtmp2(j);
+      pos += xtmp2.copyData(&xdot[pos]);
     }
   }
 }
