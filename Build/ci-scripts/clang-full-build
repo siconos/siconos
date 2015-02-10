@@ -3,7 +3,7 @@
 WORK_DIR=$1
 
 rm -rf $WORK_DIR/build-dir
-rm -rf WORK_DIR/install-dir
+rm -rf $WORK_DIR/install-dir
 
 mkdir -p $WORK_DIR/build-dir
 
