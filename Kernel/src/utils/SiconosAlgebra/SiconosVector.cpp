@@ -411,7 +411,7 @@ const std::string SiconosVector::toString() const
 
 double SiconosVector::getValue(unsigned int row) const
 {
-  assert(row >= size() && "SiconosVector::getValue(index) : Index out of range");
+  assert(row < size() && "SiconosVector::getValue(index) : Index out of range");
 
   if (_dense)
     return (*vect.Dense)(row);
@@ -421,8 +421,7 @@ double SiconosVector::getValue(unsigned int row) const
 
 void SiconosVector::setValue(unsigned int row, double value)
 {
-  if (row >= size())
-    SiconosVectorException::selfThrow("SiconosVector::setValue(index, value) : Index out of range");
+  assert(row < size() && "SiconosVector::setValue(index, value) : Index out of range");
   if (_dense)
     (*vect.Dense)(row) = value ;
   else
@@ -431,7 +430,7 @@ void SiconosVector::setValue(unsigned int row, double value)
 
 double& SiconosVector::operator()(unsigned int row)
 {
-  assert(row >= size() && "SiconosVector::operator ( index ): Index out of range");
+  assert(row < size() && "SiconosVector::operator ( index ): Index out of range");
 
   if (_dense)
     return (*vect.Dense)(row);
@@ -441,8 +440,7 @@ double& SiconosVector::operator()(unsigned int row)
 
 double SiconosVector::operator()(unsigned int row) const
 {
-  if (row >= size())
-    SiconosVectorException::selfThrow("SiconosVector::operator ( index ): Index out of range");
+  assert(row < size() && "SiconosVector::operator ( index ): Index out of range");
 
   if (_dense)
     return (*vect.Dense)(row);
@@ -459,16 +457,15 @@ void SiconosVector::setBlock(unsigned int index, const SiconosVector& vIn)
   // Set current vector elements, starting from position "index", to the values of vector vIn
 
   // Exceptions ...
-  assert(&vIn == this && 
-      "SiconosVector::this->setBlock(pos,vIn): vIn = this.");
+  assert(&vIn != this && "SiconosVector::this->setBlock(pos,vIn): vIn = this.");
 
-  assert(index > size() && "SiconosVector::setBlock : invalid ranges");
+  assert(index < size() && "SiconosVector::setBlock : invalid ranges");
 
   unsigned int end = vIn.size() + index;
-  assert(end > size() && "SiconosVector::setBlock : invalid ranges");
+  assert(end <= size() && "SiconosVector::setBlock : invalid ranges");
 
   unsigned int numVin = vIn.getNum();
-  assert (numVin != getNum() && "SiconosVector::setBlock: inconsistent types.");
+  assert (numVin == getNum() && "SiconosVector::setBlock: inconsistent types.");
 
   if (_dense)
     noalias(ublas::subrange(*vect.Dense, index, end)) = *vIn.dense();
@@ -483,15 +480,15 @@ void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned in
   unsigned int sizeIn = size();
   unsigned int sizeOut = vOut.size();
 
-  assert(startIn >= sizeIn && "vector toBlock(v1,v2,...): start position in input vector is out of range.");
+  assert(startIn < sizeIn && "vector toBlock(v1,v2,...): start position in input vector is out of range.");
 
-  assert(startOut >= sizeOut && "vector toBlock(v1,v2,...): start position in output vector is out of range.");
+  assert(startOut < sizeOut && "vector toBlock(v1,v2,...): start position in output vector is out of range.");
 
   unsigned int endIn = startIn + sizeB;
   unsigned int endOut = startOut + sizeB;
 
-  assert(endIn > sizeIn && "vector toBlock(v1,v2,...): end position in input vector is out of range.");
-  assert(endOut > sizeOut && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
+  assert(endIn <= sizeIn && "vector toBlock(v1,v2,...): end position in input vector is out of range.");
+  assert(endOut <= sizeOut && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
 
   unsigned int numIn = getNum();
   unsigned int numOut = vOut.getNum();
@@ -562,7 +559,7 @@ SiconosVector& SiconosVector::operator = (const SiconosVector& vIn)
 {
   if (&vIn == this) return *this; // auto-assignment.
 
-  assert(size() != vIn.size() && "SiconosVector::operator = failed: inconsistent sizes.");
+  assert(size() == vIn.size() && "SiconosVector::operator = failed: inconsistent sizes.");
 
   unsigned int vInNum = vIn.getNum();
   {
@@ -635,7 +632,7 @@ SiconosVector& SiconosVector::operator = (const SparseVect& sp)
 
 SiconosVector& SiconosVector::operator = (const double* d)
 {
-  assert(!_dense && "SiconosVector::operator = double* : forbidden: the current vector is not dense.");
+  assert(_dense && "SiconosVector::operator = double* : forbidden: the current vector is not dense.");
 
   siconosBindings::detail::copy(vect.Dense->size(), d, 1, getArray(), 1);
   return *this;
@@ -643,7 +640,7 @@ SiconosVector& SiconosVector::operator = (const double* d)
 
 unsigned SiconosVector::copyData(double* data) const
 {
-  assert(!_dense && "SiconosVector::copyData : forbidden: the current vector is not dense.");
+  assert(_dense && "SiconosVector::copyData : forbidden: the current vector is not dense.");
 
   unsigned size = vect.Dense->size();
   siconosBindings::detail::copy(vect.Dense->size(), getArray(), 1, data, 1);

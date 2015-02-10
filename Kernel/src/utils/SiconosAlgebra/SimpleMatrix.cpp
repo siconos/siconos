@@ -747,7 +747,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool i
 void private_addprod(const SiconosMatrix& A, unsigned startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& y)
 {
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  assert(A.isBlock() && "private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
+  assert(!A.isBlock() && "private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
 
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
@@ -758,7 +758,7 @@ void private_addprod(const SiconosMatrix& A, unsigned startRow, unsigned int sta
   unsigned int sizeX = x.size();
   unsigned int sizeY = y.size();
 
-  assert(numX != numY && "private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
+  assert(numX == numY && "private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
 
   if (numY == 1 && numX == 1)
   {
@@ -789,8 +789,7 @@ void private_addprod(const SiconosMatrix& A, unsigned int startRow, unsigned int
 {
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
-  if (A.isBlock())
-    SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
+  assert(!A.isBlock() && "private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
 
   VectorOfVectors::const_iterator it;
   unsigned int startColBis = startCol;
@@ -1017,7 +1016,7 @@ void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::Si
 
 unsigned SimpleMatrix::copyData(double* data) const
 {
-  assert((num != 1) && "SiconosMatrix::copyData : forbidden: the current matrix is not dense.");
+  assert((num == 1) && "SiconosMatrix::copyData : forbidden: the current matrix is not dense.");
 
   unsigned size = mat.Dense->size1() * mat.Dense->size2();
   siconosBindings::detail::copy(size, getArray(), 1, data, 1);

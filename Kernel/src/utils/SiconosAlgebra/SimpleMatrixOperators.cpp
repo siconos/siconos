@@ -37,7 +37,7 @@ using std::endl;
 
 double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
 {
-  assert((row >= size(0) || col >= size(1)) && "SimpleMatrix:operator(): Index out of range");
+  assert((row < size(0) && col < size(1)) && "SimpleMatrix:operator(): Index out of range");
 
   if (num == 1)
     return (*mat.Dense)(row, col);
@@ -63,7 +63,7 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
 
 double SimpleMatrix::operator()(unsigned int row, unsigned int col) const
 {
-  assert((row >= size(0) || col >= size(1)) && "SimpleMatrix:operator(): Index out of range");
+  assert((row < size(0) && col < size(1)) && "SimpleMatrix:operator(): Index out of range");
 
   if (num == 1)
     return (*mat.Dense)(row, col);
