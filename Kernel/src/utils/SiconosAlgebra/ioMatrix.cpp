@@ -44,6 +44,11 @@ bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m
   if (!infile.good())
     SiconosMatrixException::selfThrow("ioMatrix::read error : Fail to open \"" + fileName + "\"");
 
+  if (infile.peek() == std::ifstream::traits_type::eof())
+  {
+    SiconosMatrixException::selfThrow("ioMatrix::read : the given file is empty!");
+  }
+
   if (m.isBlock())
     SiconosMatrixException::selfThrow("ioMatrix::read not yet implemented for block matrix.");
 

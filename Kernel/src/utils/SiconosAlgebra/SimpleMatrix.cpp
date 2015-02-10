@@ -1017,7 +1017,7 @@ void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::Si
 
 unsigned SimpleMatrix::copyData(double* data) const
 {
-  assert((_num != 1) && "SiconosMatrix::copyData : forbidden: the current matrix is not dense.");
+  assert((num != 1) && "SiconosMatrix::copyData : forbidden: the current matrix is not dense.");
 
   unsigned size = mat.Dense->size1() * mat.Dense->size2();
   siconosBindings::detail::copy(size, getArray(), 1, data, 1);

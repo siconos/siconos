@@ -92,6 +92,10 @@ void ZeroOrderHoldOSI::initialize()
         DSG0.AdInt.at(dsgVD)->integrate();
     }
 
+    // init extra term, usually to add control terms
+    if (_extraAdditionalTerms)
+      _extraAdditionalTerms->init(DSG0, model);
+
     // Now we search for an Interaction dedicated to control
     for (std11::tie(avi, aviend) = DSG0.adjacent_vertices(dsgVD);
         avi != aviend; ++avi)

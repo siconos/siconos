@@ -114,6 +114,12 @@ void ControlSimulation::addActuator(SP::Actuator actuator, const double h)
   _CM->addActuatorPtr(actuator, td);
 }
 
+void ControlSimulation::addObserver(SP::Observer observer, const double h)
+{
+  SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
+  _CM->addObserverPtr(observer, td);
+}
+
 void ControlSimulation::storeData(unsigned indx)
 {
   unsigned startingColumn = 1;

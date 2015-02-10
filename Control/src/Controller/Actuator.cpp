@@ -73,7 +73,7 @@ void Actuator::initialize(const Model& m)
   }
   else
   {
-    RuntimeException::selfThrow("Actuator::initialize - niether the matrix B or the plugin g are not initialized");
+    RuntimeException::selfThrow("Actuator::initialize - neither the matrix B or the plugin g are not initialized");
   }
 
   DSG0.u[dsgVD] = _u;

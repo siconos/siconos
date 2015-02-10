@@ -40,6 +40,11 @@ namespace ioVector
     infile.flags(flags);
     if (!infile.good())
       SiconosVectorException::selfThrow("ioVector::read error : Fail to open \"" + fileName + "\"");
+    if (infile.peek() == std::ifstream::traits_type::eof())
+    {
+      SiconosVectorException::selfThrow("ioVector::read : the given file is empty!");
+    }
+
     infile.precision(prec);
 
     if(mode == BINARY_IN)

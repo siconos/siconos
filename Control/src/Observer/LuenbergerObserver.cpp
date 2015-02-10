@@ -24,6 +24,8 @@
 #include "LuenbergerObserver.hpp"
 #include "ControlSensor.hpp"
 #include "ObserverFactory.hpp"
+#include "ControlZOHAdditionalTerms.hpp"
+
 
 void LuenbergerObserver::initialize(const Model& m)
 {
@@ -84,6 +86,8 @@ void LuenbergerObserver::initialize(const Model& m)
   double T = m.finalT() + h;
   _model.reset(new Model(t0, T));
   _integrator.reset(new ZeroOrderHoldOSI());
+  std11::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
+      std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
   _model->nonSmoothDynamicalSystem()->setOSI(_DS, _integrator);
 

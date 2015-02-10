@@ -40,6 +40,7 @@
 ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
   ControlSimulation(t0, T, h)
 {
+  Event::setTick(1e-15);
   _processIntegrator.reset(new LsodarOSI());
   _processSimulation.reset(new EventDriven(_processTD, 0));
   _processSimulation->setName("plant simulation");

@@ -57,7 +57,7 @@ void FirstOrderNonLinearR::initComponents(Interaction& inter, VectorOfBlockVecto
 
 }
 
-void FirstOrderNonLinearR::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y, SiconosVector& z)
+void FirstOrderNonLinearR::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y)
 {
   if (_pluginh)
   {
@@ -69,7 +69,7 @@ void FirstOrderNonLinearR::computeh(double time, SiconosVector& x, SiconosVector
   }
 }
 
-void FirstOrderNonLinearR::computeg(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& r, SiconosVector& z)
+void FirstOrderNonLinearR::computeg(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& r)
 {
   if (_pluging)
   {
@@ -81,7 +81,7 @@ void FirstOrderNonLinearR::computeg(double time, SiconosVector& x, SiconosVector
   }
 }
 
-void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C, SiconosVector& z)
+void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& C)
 {
   if (_pluginJachx)
   {
@@ -91,7 +91,7 @@ void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVe
     RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachx, you need to derive this function in order to use it");
 }
 
-void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D, SiconosVector& z)
+void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& D)
 {
   if (_pluginJachlambda)
   {
@@ -101,7 +101,7 @@ void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, Sico
     RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachlambda, you need to either provide a matrix D or derive this function in order to use it");
 }
 
-void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& B, SiconosVector& z)
+void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
 {
   if (_pluginJacglambda)
   {
@@ -111,7 +111,7 @@ void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, Sico
     RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacglambda, you need to either provide a matrix B or derive this function in order to use it");
 }
 
-void FirstOrderNonLinearR::computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& K, SiconosVector& z)
+void FirstOrderNonLinearR::computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& K)
 {
   if (_pluginJacgx)
   {
@@ -180,7 +180,7 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, Intera
   SiconosVector& z = *workV[FirstOrderR::vec_z];
   z = *DSlink[FirstOrderR::z];
 
-  computeh(time, x, *inter.lambda(level), *inter.Halpha(), z);
+  computeh(time, x, *inter.lambda(level), z, *inter.Halpha());
 
   *DSlink[FirstOrderR::z] = z;
 }
@@ -227,7 +227,7 @@ void FirstOrderNonLinearR::computeInput(double time, Interaction& inter, Interac
   x = *DSlink[FirstOrderR::x];
   SiconosVector& z = *workV[FirstOrderR::vec_z];
   z = *DSlink[FirstOrderR::z];
-  computeg(time, x, *inter.lambda(level), g_alpha, z);
+  computeg(time, x, *inter.lambda(level), z, g_alpha);
   *DSlink[FirstOrderR::z] = z;
 }
 
@@ -268,12 +268,12 @@ void FirstOrderNonLinearR::computeJach(double time, Interaction& inter, Interact
 
   if (!_C)
   {
-    computeJachx(time, x, lambda, *workM[FirstOrderR::mat_C], z);
+    computeJachx(time, x, lambda, z, *workM[FirstOrderR::mat_C]);
   }
 
   if (!_D)
   {
-    computeJachlambda(time, x, lambda, *workM[FirstOrderR::mat_D], z);
+    computeJachlambda(time, x, lambda, z, *workM[FirstOrderR::mat_D]);
   }
   *DSlink[FirstOrderR::z] = z;
 }
@@ -290,11 +290,11 @@ void FirstOrderNonLinearR::computeJacg(double time, Interaction& inter, Interact
   SiconosVector& lambda = *inter.lambda(0);
   if (!_B)
   {
-    computeJacglambda(time, x, lambda, *workM[FirstOrderR::mat_B], z);
+    computeJacglambda(time, x, lambda, z, *workM[FirstOrderR::mat_B]);
   }
   if (!_K)
   {
-    computeJacgx(time, x, lambda, *workM[FirstOrderR::mat_K], z);
+    computeJacgx(time, x, lambda, z, *workM[FirstOrderR::mat_K]);
   }
   *DSlink[FirstOrderR::z] = z;
 }

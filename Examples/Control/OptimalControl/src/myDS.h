@@ -118,7 +118,7 @@ public:
    *  \param double time : current time
    *  \param SP::SiconosVector
    */
-  virtual void computeJacobianfx(double, SP::SiconosVector);
+  virtual void computeJacobianfx(double, const SiconosVector& v);
 
   /** Default function to the right-hand side term
    *  \param double time : current time

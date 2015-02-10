@@ -27,7 +27,7 @@ double adjointInput::source(double t)
 }
 
 /*y = h(X,lambda)*/
-void adjointInput::computeh(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
+void adjointInput::computeh(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y)
 {
 
 #ifdef SICONOS_DEBUG
@@ -52,7 +52,7 @@ void adjointInput::computeh(double t, SiconosVector& x, SiconosVector& lambda, S
 
 
 
-void adjointInput::computeg(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& r)
+void adjointInput::computeg(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& r)
 {
 #ifdef SICONOS_DEBUG
   std::cout << "************      computeG at: " << t << std::endl;
@@ -82,7 +82,7 @@ void adjointInput::computeg(double t, SiconosVector& x, SiconosVector& lambda, S
  *  \param double : current time
  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
  */
-void adjointInput::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
+void adjointInput::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& C)
 {
 
 #ifdef SICONOS_DEBUG
@@ -115,7 +115,7 @@ void adjointInput::computeJachx(double t, SiconosVector& x, SiconosVector& lambd
 
 
 }
-void adjointInput::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
+void adjointInput::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& D)
 {
 #ifdef SICONOS_DEBUG
   std::cout << "computeJachlambda " << " at " << " " << t << std::endl;
@@ -136,7 +136,7 @@ void adjointInput::computeJachlambda(double t, SiconosVector& x, SiconosVector& 
  *  \param double : current time
  *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
  */
-void adjointInput::computeJacgx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& K)
+void adjointInput::computeJacgx(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& K)
 {
 
 #ifdef SICONOS_DEBUG
@@ -172,7 +172,7 @@ void adjointInput::computeJacgx(double t, SiconosVector& x, SiconosVector& lambd
 
 
 }
-void adjointInput::computeJacglambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& B)
+void adjointInput::computeJacglambda(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
 {
 
   double *g = B.getArray();

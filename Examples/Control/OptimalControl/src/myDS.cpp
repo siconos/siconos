@@ -107,7 +107,7 @@ void MyDS::computeJacobianfx(double t, bool  b)
 
 }
 
-void MyDS::computeJacobianfx(double t, SP::SiconosVector v) {}
+void MyDS::computeJacobianfx(double t, const SiconosVector& v) {}
 
 void MyDS::alpha(double t, SP::SiconosVector _xvalue, SP::SiconosVector _alpha)
 {

@@ -37,7 +37,7 @@ extern "C" double rint(double x);
 
 // tick default value
 // it has to be greater than DBL_EPSILON ...
-const double DEFAULT_TICK = 1e-15;
+const double DEFAULT_TICK = 1e-16;
 
 /** Abstract class that represents generic time events.
  *
@@ -137,7 +137,7 @@ public:
   /** set tick value
    *  \param newTick the new tick value
    */
-  void setTick(double newTick);
+  static void setTick(double newTick);
 
   /** get the time of the present event (mpz_t format)
    *  \return a mpz_t
