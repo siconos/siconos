@@ -29,11 +29,17 @@
 
 struct ExtraAdditionalTerms {
 
+private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(ExtraAdditionalTerms);
+
+public:
   /** initialize elements in the graph for the computations
    * \param DSG0 the graph of DynamicalSystems
    * \param model the current Model
    */
-  virtual void init(DynamicalSystemsGraph& DSG0, const Model& model) {};
+  virtual void init(DynamicalSystemsGraph& DSG0, const Model& model) = 0;
 
   /** add smooth term to xfree (like the control input, the error correction for an observer)
    * \param DSG0 the graph of DynamicalSystems

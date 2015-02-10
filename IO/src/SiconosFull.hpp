@@ -268,6 +268,18 @@ void siconos_property_io(Archive& ar, P& p)
     siconos_property_io(ar, p);                                         \
   }                                                                     \
   template<class Archive>                                               \
+  void siconos_io(Archive& ar, Siconos::VertexSPProperties<CLASS, _DynamicalSystemsGraph>& p, unsigned int version) \
+  {                                                                     \
+    SERIALIZE(p, (_g)(_stamp), ar);                                     \
+    siconos_property_io(ar, p);                                         \
+  }                                                                     \
+  template<class Archive>                                               \
+  void siconos_io(Archive& ar, Siconos::VertexSPProperties<CLASS, _InteractionsGraph>& p, unsigned int version) \
+  {                                                                     \
+    SERIALIZE(p, (_g)(_stamp), ar);                                     \
+    siconos_property_io(ar, p);                                         \
+  }                                                                     \
+  template<class Archive>                                               \
   void siconos_io(Archive& ar, Siconos::EdgeProperties<CLASS, _DynamicalSystemsGraph>& p, unsigned int version) \
   {                                                                     \
     SERIALIZE(p, (_g)(_stamp), ar);                                     \
