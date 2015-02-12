@@ -24,6 +24,8 @@
 #ifndef SpaceFilter_impl_hpp
 #define SpaceFilter_impl_hpp
 
+#include <map>
+
 #include <SpaceFilter.hpp>
 #include "DiskMovingPlanR.hpp"
 #include <boost/numeric/ublas/symmetric.hpp>
