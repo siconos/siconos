@@ -2,8 +2,8 @@
 // You have to PY_REGISTER base classe before derivated classes
 #undef PY_REGISTER
 #define KERNEL_REGISTRATION()                                           \
-  PY_REGISTER_WITHOUT_DIRECTOR_REF_ONLY(SiconosMatrix);                          \
-  PY_REGISTER_SIMPLEMATRIX(SimpleMatrix);                           \
+  PY_REGISTER_WITHOUT_DIRECTOR_REF_ONLY(SiconosMatrix);                 \
+  PY_REGISTER_SIMPLEMATRIX(SimpleMatrix);                               \
   PY_REGISTER_WITHOUT_DIRECTOR_REF(SiconosVector);                      \
   PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                            \
   PY_REGISTER(SiconosMemory)                                            \
@@ -15,6 +15,7 @@
   PY_REGISTER(EqualityConditionNSL);                                    \
   PY_REGISTER(MultipleImpactNSL);                                       \
   PY_REGISTER(RelayNSL);                                                \
+  PY_REGISTER(NormalConeNSL);                                           \
   PY_REGISTER(DynamicalSystem);                                         \
   PY_REGISTER(NonSmoothDynamicalSystem);                                \
   PY_REGISTER(Topology);                                                \
@@ -46,6 +47,7 @@
   PY_REGISTER(LinearOSNS);                                              \
   PY_REGISTER(LsodarOSI);                                               \
   PY_REGISTER(LCP);                                                     \
+  PY_REGISTER(AVI);                                                     \
   PY_REGISTER(QP);                                                      \
   PY_REGISTER(Relay);                                                   \
   PY_REGISTER(MLCP);                                                    \

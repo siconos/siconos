@@ -69,6 +69,7 @@
  %rename (MLCP) MixedLinearComplementarityProblem;
  %rename (MCP) MixedComplementarityProblem;
  %rename (VI) VariationalInequality;
+ %rename (AVI) AffineVariationalInequalities;
 
  %ignore lcp_compute_error_only;
 
@@ -189,6 +190,7 @@
 
 //Relay
 %include "relay_cst.h"
+%include Numerics_AVI.i
 
 
 // redefine typemap on q for MLCP
@@ -363,6 +365,14 @@
     return SO;
   }
 
+  SolverOptions(AffineVariationalInequalities* vi, AVI_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    SO->solverId=id;
+    avi_setDefaultSolverOptions(vi, SO, id);
+    return SO;
+  }
   // SolverOptions(FRICTION_SOLVER id)
   // {
   //   return BOOST_PP_CAT(FE_SWIG_INTERNAL_MEMBER,SolverOptions_makeSolverOptions)(NULL, NULL, id);
