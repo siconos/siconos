@@ -47,31 +47,13 @@ Direct solver for AVI based on pivoting method principle for (degenerated) probl
 - iparam[1] (out): number of iterations processed
 */
 
-#include "NumericsOptions.h"
 #include "AffineVariationalInequalities.h"
 #include "SolverOptions.h"
-#include "AVI_cst.h"
-#include "SiconosCompat.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-
-  /** \fn   int linearComplementarity_driver(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
-   *
-   General interface to solvers for Linear Complementarity Problems
-    \param[in] problem the AffineVariationalInequalities structure which handles the problem (M,q)
-    \param[in,out] sol a n-vector of doubles which contains the solution of the problem.
-    \param[in,out] value a n-vector of doubles which contains the solution of the problem.
-    \param[in,out] options structure used to define the solver(s) and their parameters
-    \param[in]  global_options the global options of Numerics
-    \return info termination value
-    - 0 : successful\n
-    - >0 : otherwise see each solver for more information about the log info
-    \author Olivier Huber
-  */
-  int avi_driver(AffineVariationalInequalities* problem, double *sol, double *value, SolverOptions* options,  NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for an AVI resolution
       \param[in] problem the AffineVariationalInequalities struct which handles the AVI
@@ -86,17 +68,14 @@ extern "C"
    * Choice of pivot variable is performed via lexicographic ordering \n
    *  Ref: "A Pivotal Method for Affine Variational Inequalities" Menglin Cao et Michael Ferris (1996)\n
    * \param[in] problem structure that represents the AVI (M, q, K)
-   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   * 0 : convergence\n
-   * 1 : iter = itermax\n
-   * 2 : negative diagonal term\n
+   * \param[in,out] z on call contains the initial solution and on return holds the solution of the problem.
+   * \param[in,out] w defined as Mz + q
    * \param[in,out] options structure used to define the solver and its parameters.
    *
+   * \return info about the convergence: 0 ok; 1 ...
    *\author Olivier Huber
    */
-//  void avi_caoferris(AffineVariationalInequalities* problem, double *sol, double *value, int *info, SolverOptions* options);
+  int avi_caoferris(AffineVariationalInequalities* problem, double *z, double* w, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param options the pointer to the array of options to set

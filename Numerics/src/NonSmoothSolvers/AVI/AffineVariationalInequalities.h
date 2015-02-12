@@ -22,7 +22,7 @@
 /*!\file AffineVariationalInequalities.h
  * \brief Definitions for AVI
  *
- * \authors Olivier Huber
+ * \author Olivier Huber
 */
 
 /*! \page AVI Affine Variational Inequalities (AVI)
@@ -33,7 +33,7 @@
  *   find \f$z\in\mathbb{R}^n\f$ such that:
  *   \f{equation*}{(Mz+q)^T(y -z) \geq 0,\quad \text{ for all } y \in K,\f}
  *   or equivalently,
- *   \f{equation*}{- Mz + q \in \mathcal{N}_K(z)\f}
+ *   \f{equation*}{-(Mz + q) \in \mathcal{N}_K(z)\f}
  *   where \f$\mathcal{N}_K\f$ is the normal cone to \f$K\f$ at \f$z\f$.
  *
  * The AVI is a special case of a Variational Inequality (VI), where the
@@ -61,18 +61,12 @@
 #include "SiconosSets.h"
 
 /** \struct AffineVariationalInequalities AffineVariationalInequalities.h
- *  \brief Structure that contains and defines  \ref AVI
+ *  \brief Structure that contains and defines an \ref AVI
  *
- *   Find \f$(z)\f$ such that:\n
+ *   The problem is the following: given a matrix \f$M\f$ and \f$q\f$, find \f$z\f$ such that:
  *   \f{equation*}{
- *   \begin{cases}
- *   M \ z + q = w \\
- *   0 \le w \perp z \ge 0 \\
- *   \end{cases}
+ *   \langle x - z, q + Mz \rangle \geq 0\quad \text{for all }x\in K.
  *   \f}
- *
- * where \f$ w, z, q\f$ are vectors of size \f$n\f$ and \f$ M \f$ is a \f$n\times n\f$ matrix.
- * See \ref AVI for more details.
  */
 typedef struct
 {

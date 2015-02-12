@@ -34,25 +34,19 @@ void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double 
   unsigned int n = problem->size;
   assert(n > 0);
 
-  /* Copy the data from LCP problem */
-  AffineVariationalInequalities avi_pb;
-  avi_pb.size = n;
-  avi_pb.M = problem->M;
-  avi_pb.q = problem->q;
-  avi_pb.d = (double *)malloc(n*sizeof(double));
-  for (unsigned int i = 0; i<n; ++i) avi_pb.d[i] = -1;
-  avi_pb.poly = NULL;
+  double* d_vec = (double *)malloc(n*sizeof(double));
+  for (unsigned i = 0; i < n; ++i) d_vec[i] = -1.0;
 
   /* Set of active constraint is trivial */
-  unsigned int * A = (unsigned int *)malloc(n*sizeof(unsigned int));
-  for (unsigned int i = 0; i<n; ++i) A[i] = i+1;
+  unsigned* A = (unsigned*)malloc(n*sizeof(unsigned));
+  for (unsigned i = 0; i < n; ++i) A[i] = i + 1;
 
   /* Call directly the 3rd stage */
-  *info = avi_caoferris_stage3(&avi_pb, w, z, n, A, options);
+  *info = avi_caoferris_stage3(problem, w, z, d_vec, n, A, options);
 
   /* free allocated stuff */
   free(A);
-  free(avi_pb.d);
+  free(d_vec);
 }
 
 int linearComplementarity_avi_caoferris_setDefaultSolverOptions(SolverOptions* options)

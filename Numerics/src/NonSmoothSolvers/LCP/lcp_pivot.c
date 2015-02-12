@@ -172,7 +172,7 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
   /* Compute LU factorisation of basis */
   DGETRF(n, n, mat_basic, n, ipiv, &info);
 
-  assert(info <= 0 && "crash_pivot_basis :: pivot form DGETRF > 0, this should not append !\n");
+  assert(info <= 0 && "crash_pivot_basis :: info from DGETRF > 0, this should not append !\n");
   if (info < 0)
   {
     printf("crash_pivot_basis :: the crash basis is singular, cannot inverse the matrix.\n\

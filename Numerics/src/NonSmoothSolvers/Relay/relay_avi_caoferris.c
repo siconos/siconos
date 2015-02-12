@@ -27,6 +27,12 @@ Ferris solves the subsequent AVI.
 #include "Relay_Solvers.h"
 #include "avi_caoferris.h"
 #include "relay_cst.h"
+#include "LinearComplementarityProblem.h"
+
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+#include "debug.h"
+
 
 void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -35,14 +41,14 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   unsigned int s = 2*n;
 
   /* Copy the data from Relay problem */
-  AffineVariationalInequalities avi_pb;
-  avi_pb.size = s;
+  LinearComplementarityProblem lcplike_pb;
+  lcplike_pb.size = s;
   NumericsMatrix num_mat;
   fillNumericsMatrix(&num_mat, NM_DENSE, s, s, calloc(s*s, sizeof(double)));
 
-  avi_pb.M = &num_mat;
+  lcplike_pb.M = &num_mat;
 
-  avi_pb.q = (double *)malloc(s*sizeof(double));
+  lcplike_pb.q = (double *)malloc(s*sizeof(double));
   double* b_bar = (double *)malloc(s*sizeof(double));
 
   /* We can always choose the extreme point such that the matrix of active
@@ -58,46 +64,46 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   for (unsigned int i = 0; i < n; ++i)
   {
     tmp = 0.0;
-    avi_pb.M->matrix0[i*(s+1)] = 1.0;
-    avi_pb.M->matrix0[(i + n)*(s+1)] = -1.0;
-    avi_pb.q[i] = problem->q[i];
-    avi_pb.q[i+n] = - problem->lb[i] + problem->ub[i];
-    for (unsigned int j = 0; j < n; ++j)
+    lcplike_pb.M->matrix0[i*(s+1)] = 1.0;
+    lcplike_pb.M->matrix0[(i + n)*(s+1)] = -1.0;
+    lcplike_pb.q[i] = problem->q[i];
+    lcplike_pb.q[i+n] = - problem->lb[i] + problem->ub[i];
+    for (unsigned j = 0; j < n; ++j)
     {
-      avi_pb.M->matrix0[i + (j+n)*s] = problem->M->matrix0[i + j*n];
+      lcplike_pb.M->matrix0[i + (j+n)*s] = problem->M->matrix0[i + j*n];
       tmp += problem->M->matrix0[i + j*n]*problem->lb[j];
     }
     /* \bar{a} =  -\tilde{a} + Ay_e */
-    avi_pb.q[i] += tmp;
+    lcplike_pb.q[i] += tmp;
   }
-  avi_pb.d = (double *)malloc(s*sizeof(double));
-  for (unsigned int i = 0; i<n; ++i)
+  double* d_vec = (double *)malloc(s*sizeof(double));
+  for (unsigned i = 0; i<n; ++i)
   {
-    avi_pb.d[i] = -1;
-    avi_pb.d[i+n] = 0;
+    d_vec[i] = -1.0;
+    d_vec[i+n] = 0;
   }
-  avi_pb.poly = NULL;
 
   /* Set of active constraint is trivial */
-  unsigned int * A = (unsigned int *)malloc(n*sizeof(unsigned int));
-  for (unsigned int i = 0; i<n; ++i) A[i] = i+1;
+  unsigned* A = (unsigned*)malloc(n*sizeof(unsigned));
+  for (unsigned i = 0; i < n; ++i) A[i] = i + 1;
 
   double* u_vec = (double *)calloc(s, sizeof(double));
   double* s_vec = (double *)calloc(s, sizeof(double));
   /* Call directly the 3rd stage 
    * Here w is used as u and z as s in the AVI */
-  *info = avi_caoferris_stage3(&avi_pb, u_vec, s_vec, n, A, options);
+  *info = avi_caoferris_stage3(&lcplike_pb, u_vec, s_vec, d_vec, n, A, options);
 
   /* Update z  */
   /* XXX why no w ?  */
-  for (unsigned int i = 0; i<n; ++i) z[i] = s_vec[A[i]-1] + problem->lb[i];
+  DEBUG_PRINT_VEC_INT(A, n);
+  for (unsigned i = 0; i<n; ++i) z[i] = s_vec[A[i]-1] + problem->lb[i];
   /* free allocated stuff */
   free(u_vec);
   free(s_vec);
   free(A);
-  free(avi_pb.d);
-  freeNumericsMatrix(avi_pb.M);
-  free(avi_pb.q);
+  free(d_vec);
+  freeNumericsMatrix(lcplike_pb.M);
+  free(lcplike_pb.q);
   free(b_bar);
 }
 

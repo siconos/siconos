@@ -34,6 +34,7 @@ char*  SICONOS_RELAY_NLGS_STR = "RELAY_NLGS";
 char*  SICONOS_RELAY_LEMKE_STR = "RELAY_LEMKE";
 char*  SICONOS_RELAY_LATIN_STR = "RELAY_LATIN";
 char*  SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
+char*  SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR = "test version of the solver by Cao & Ferris; DO NOT USE!";
 
 int relay_driver(RelayProblem* problem, double *z , double *w,
                  SolverOptions* options, NumericsOptions* global_options)
@@ -116,6 +117,11 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   case SICONOS_RELAY_AVI_CAOFERRIS:
   {
     relay_avi_caoferris(problem, z , w , &info , options);
+    break;
+  }
+  case SICONOS_RELAY_AVI_CAOFERRIS_TEST:
+  {
+    relay_avi_caoferris_test(problem, z , w , &info , options);
     break;
   }
   /*error */

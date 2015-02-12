@@ -57,6 +57,11 @@ int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options,
     info =    relay_avi_caoferris_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_RELAY_AVI_CAOFERRIS_TEST:
+  {
+    info =    relay_avi_caoferris_test_setDefaultSolverOptions(options);
+    break;
+  }
 /* XXX: to implement ?
    case SICONOS_RELAY_LATIN:
   {

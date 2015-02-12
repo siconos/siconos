@@ -11,7 +11,7 @@
 #cmakedefine DUMP_PROBLEM
 #cmakedefine WITH_FCLIB
 #cmakedefine BUILD_AS_CPP
-
+#cmakedefine WITH_LPSOLVE
 
 // Is cblas available? 
 #cmakedefine HAS_CBLAS

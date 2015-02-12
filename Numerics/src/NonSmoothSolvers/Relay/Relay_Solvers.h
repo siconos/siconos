@@ -198,6 +198,26 @@ extern "C"
    */
   int relay_avi_caoferris_setDefaultSolverOptions(SolverOptions* options);
 
+  /** Solve a Relay problem using the AVI framework and the solver by Cao and Ferris.
+   * \warning This is only a test version. It does not take into account the
+   * specificities of the problem like relay_avi_caoferris() does. Please do
+   * not use this solver unless you have a pretty good reason.
+   * \param[in] problem structure that represents the Relay (M, q, ...)
+   * \param[in,out] z vector which on call is the initial point and on exit is the solution of the problem.
+   * \param[in,out] w vector for computations
+   * \param options struct used to define the solver(s) and its (their) parameters
+   * \param[out] info an integer which returns the termination value:\n
+   *  0 = convergence,\n
+   *  1 = no convergence,\n
+   * \author Olivier Huber
+   */
+  void relay_avi_caoferris_test(RelayProblem* problem, double* restrict z, double* restrict w, int *info, SolverOptions* options);
+
+  /** set the default solver parameters and perform memory allocation for AVI_CAOFERRIS
+   * \param options struct used to define the solver(s) and its (their) parameters
+   */
+  int relay_avi_caoferris_test_setDefaultSolverOptions(SolverOptions* options);
+
   /** dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.

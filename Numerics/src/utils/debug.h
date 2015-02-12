@@ -48,4 +48,28 @@
 #define DEBUG_EXPR_WE(E)
 #endif
 
+#define DEBUG_PRINT_MAT(M, nrows, ncols) \
+DEBUG_PRINT(#M " matrix\n"); \
+DEBUG_EXPR_WE(for (unsigned i = 0; i < nrows; ++i) \
+  { for(unsigned j = 0 ; j < ncols; ++j) \
+  { DEBUG_PRINTF("% 2.2e ", M[i + j*nrows]) } \
+   DEBUG_PRINT("\n")});
+
+#define DEBUG_PRINT_VEC_STR(MSG, V, size) \
+DEBUG_PRINT(MSG " vector\n"); \
+DEBUG_EXPR_WE(for (unsigned i = 0; i < size; ++i) \
+  { DEBUG_PRINTF("% 2.2e ", V[i]) }\
+   DEBUG_PRINT("\n"));
+
+#define DEBUG_PRINT_VEC(V, size) DEBUG_PRINT_VEC_STR(#V, V, size)
+
+#define DEBUG_PRINT_VEC_INT_STR(MSG, V, size) \
+DEBUG_PRINT(MSG " vector\n"); \
+DEBUG_EXPR_WE(for (unsigned i = 0; i < size; ++i) \
+  { DEBUG_PRINTF("%d ", V[i]) }\
+   DEBUG_PRINT("\n"));
+
+#define DEBUG_PRINT_VEC_INT(V, size) DEBUG_PRINT_VEC_INT_STR(#V, V, size)
+
+
 #endif

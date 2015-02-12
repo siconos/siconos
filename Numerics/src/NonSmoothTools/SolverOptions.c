@@ -28,6 +28,7 @@
 #include "lcp_cst.h"
 #include "relay_cst.h"
 #include "Friction_cst.h"
+#include "AVI_cst.h"
 #include "VI_cst.h"
 #include "misc.h"
 
@@ -521,6 +522,8 @@ char * idToName(int Id)
     return SICONOS_RELAY_LATIN_STR;
   case SICONOS_RELAY_AVI_CAOFERRIS:
     return SICONOS_RELAY_AVI_CAOFERRIS_STR;
+  case SICONOS_RELAY_AVI_CAOFERRIS_TEST:
+    return SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR;
     /*FRICTION_2D*/
   case SICONOS_FRICTION_2D_NSGS:
     return SICONOS_FRICTION_2D_NSGS_STR;
@@ -601,6 +604,8 @@ char * idToName(int Id)
     // MCP
   case SICONOS_MCP_FB:
     return SICONOS_MCP_FB_STR;
+  case SICONOS_AVI_CAOFERRIS:
+    return SICONOS_AVI_CAOFERRIS_STR;
     /*DEFAULT*/
   default:
     return SICONOS_NONAME_STR;
@@ -693,6 +698,8 @@ int nameToId(char * pName)
     return SICONOS_RELAY_NLGS;
   else if (strcmp(SICONOS_RELAY_AVI_CAOFERRIS_STR, pName) == 0)
     return SICONOS_RELAY_AVI_CAOFERRIS;
+  else if (strcmp(SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR, pName) == 0)
+    return SICONOS_RELAY_AVI_CAOFERRIS_TEST;
   /*FRICTION_2D*/
   else if (strcmp(SICONOS_FRICTION_2D_NSGS_STR, pName) == 0)
     return SICONOS_FRICTION_2D_NSGS;
@@ -768,6 +775,8 @@ int nameToId(char * pName)
     return SICONOS_FRICTION_3D_GLOBAL_NSGS;
   else if (strcmp(SICONOS_MCP_FB_STR, pName) == 0)
     return SICONOS_MCP_FB;
+  else if (strcmp(SICONOS_AVI_CAOFERRIS_STR, pName) == 0)
+    return SICONOS_AVI_CAOFERRIS;
 
   return 0;
 

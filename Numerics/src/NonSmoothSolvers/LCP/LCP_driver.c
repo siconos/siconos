@@ -316,16 +316,15 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
 int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
 {
-  if (options == NULL)
-    numericsError("lcp_driver", "null input for solver options");
+  assert(options && "lcp_driver : null input for solver options");
 
   /* Set global options */
   if (global_options)
     setNumericsOptions(global_options);
 
   /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numericsError("lcp_driver", "null input for LinearComplementarityProblem and/or unknowns (z,w)");
+  assert(problem && z && w &&
+      "lcp_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -333,11 +332,7 @@ int linearComplementarity_driver(LinearComplementarityProblem* problem, double *
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
 
-  /*   linearComplementarity_display(problem); */
-
   int storageType = problem->M->storageType;
-
-
 
   /* Sparse Block Storage */
   if (storageType == 1)
@@ -350,4 +345,3 @@ int linearComplementarity_driver(LinearComplementarityProblem* problem, double *
   }
   return info;
 }
-

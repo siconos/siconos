@@ -40,6 +40,7 @@
 #include "VariationalInequality_Solvers.h"
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
+#include "AVI_Solvers.h"
 #include "MLCP_Solvers.h"
 #include "NCP_Solvers.h"
 #include "MCP_Solvers.h"
@@ -113,6 +114,19 @@ extern "C"
    *  \return result (0 if successful otherwise 1).
    */
   int variationalInequality_driver(VariationalInequality* problem, double *x , double *w, SolverOptions* options, NumericsOptions* global_options);
+
+  /** General interface to solvers for Affine Variational Inequalities (AVI)
+    \param[in] problem the AffineVariationalInequalities structure which handles the problem (M,q)
+    \param[in,out] sol a n-vector of doubles which contains the solution of the problem.
+    \param[in,out] value a n-vector of doubles which contains the solution of the problem.
+    \param[in,out] options structure used to define the solver(s) and their parameters
+    \param[in]  global_options the global options of Numerics
+    \return info termination value
+    - 0 : successful\n
+    - >0 : otherwise see each solver for more information about the log info
+    \author Olivier Huber
+  */
+  int avi_driver(AffineVariationalInequalities* problem, double *sol, double *value, SolverOptions* options,  NumericsOptions* global_options);
 
   /** General interface to solver for MCP problems
       \param[in] problem the MixedComplementarityProblem structure which handles the problem

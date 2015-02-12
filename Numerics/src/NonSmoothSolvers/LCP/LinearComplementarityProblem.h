@@ -96,8 +96,8 @@ typedef struct
 {
 
   int size; /**<  size of the problem */
-  NumericsMatrix* M ;/**< M matrix of the LCP (see the mathematical description)*/
-  double * q;/**< vector of the LCP (see the mathematical description)*/
+  NumericsMatrix* M; /**< M matrix of the LCP (see the mathematical description)*/
+  double * q; /**< vector of the LCP (see the mathematical description)*/
 } LinearComplementarityProblem;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
