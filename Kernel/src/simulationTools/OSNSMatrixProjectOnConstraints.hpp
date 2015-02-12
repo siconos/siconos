@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file OSNSMatrix.hpp
-  Specific storage for matrices used in OneStepNSProblem
+/*! \file OSNSMatrixProjectOnConstraints.hpp
+  Specific storage for matrices used in OneStepNSProblem with a projection scheme
 */
 
 #ifndef OSNSMPROJECTONCONSTRAINT_H
@@ -99,7 +99,7 @@ protected:
    */
   OSNSMatrixProjectOnConstraints() {};
 
-  virtual void updateSizeAndPositions(unsigned int&, SP::InteractionsGraph);
+  virtual void updateSizeAndPositions(unsigned int& dim, SP::InteractionsGraph indexSet);
 public:
 
 
@@ -121,11 +121,12 @@ public:
 
 
   /** fill the current class using an index set and a map of interactionBlocks
-      \param InteractionsGraph*, the index set of the active constraints
+      \param indexSet the index set of the active constraints
+      \param update if true update the size and position
   */
-  virtual void fill(SP::InteractionsGraph, bool updateSize = true);
+  virtual void fill(SP::InteractionsGraph indexSet, bool update = true);
 
-  virtual unsigned int getPositionOfInteractionBlock(SP::Interaction) const;
+  virtual unsigned int getPositionOfInteractionBlock(Interaction& inter) const;
 };
 
 DEFINE_SPTR(OSNSMatrixProjectOnConstraints)

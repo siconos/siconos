@@ -132,7 +132,7 @@ OSNSMatrix::~OSNSMatrix()
 {
 }
 
-unsigned int OSNSMatrix::getPositionOfInteractionBlock(SP::Interaction inter) const
+unsigned int OSNSMatrix::getPositionOfInteractionBlock(Interaction& inter) const
 {
   // Note FP: I think the return value below is not the right one :
   // this position does not depend on the interaction but on
@@ -140,7 +140,7 @@ unsigned int OSNSMatrix::getPositionOfInteractionBlock(SP::Interaction inter) co
   // One Interaction may have different absolute positions if it is present
   // in several OSNS. ==> add this pos as a property on vertex in Interactions Graph
   // 
-  return inter->absolutePosition();
+  return inter.absolutePosition();
 }
 
 // Fill the matrix

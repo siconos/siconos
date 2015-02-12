@@ -187,9 +187,9 @@ void ZOHTest::testMatrixIntegration2()
     dataPlot(k, 4) = lambda(1);
     _sim->nextStep();
   }
+  dataPlot.resize(k, 5);
   dataPlot.display();
   std::cout <<std::endl <<std::endl;
-  dataPlot.resize(k, 5);
   ioMatrix::write("testMatrixIntegration2.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);
@@ -260,9 +260,9 @@ void ZOHTest::testMatrixIntegration3()
     dataPlot(k, 6) = lambda(1);
     _sim->nextStep();
   }
+  dataPlot.resize(k, 7);
   dataPlot.display();
   std::cout <<std::endl <<std::endl;
-  dataPlot.resize(k, 7);
   ioMatrix::write("testMatrixIntegration3.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);
@@ -333,9 +333,9 @@ void ZOHTest::testMatrixIntegration4()
     dataPlot(k, 6) = lambda(1);
     _sim->nextStep();
   }
+  dataPlot.resize(k, 7);
   dataPlot.display();
   std::cout <<std::endl <<std::endl;
-  dataPlot.resize(k, 7);
   ioMatrix::write("testMatrixIntegration4.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);

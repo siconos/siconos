@@ -34,6 +34,7 @@ DEFINE_SPTR(QP)
 DEFINE_SPTR(LinearOSNS)
 DEFINE_SPTR(FrictionContact)
 DEFINE_SPTR(LCP)
+DEFINE_SPTR(AVI)
 DEFINE_SPTR(MLCP)
 DEFINE_SPTR(MLCPProjectOnConstraints)
 DEFINE_SPTR(Relay)
@@ -56,6 +57,7 @@ DEFINE_SPTR(EventsManager)
 
 DEFINE_SPTR(RelayNSL)
 DEFINE_SPTR(MixedComplementarityConditionNSL)
+DEFINE_SPTR(NormalConeNSL)
 
 DEFINE_SPTR(TimeDiscretisation)
 

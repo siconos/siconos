@@ -18,6 +18,7 @@
 */
 
 #include "NonSmoothLaw.hpp"
+#include "RuntimeException.hpp"
 
 
 // Constructors
@@ -29,5 +30,11 @@ NonSmoothLaw::NonSmoothLaw(unsigned int size): _size(size), _sizeProjectOnConstr
 
 NonSmoothLaw::~NonSmoothLaw()
 {}
+
+bool NonSmoothLaw::isVerified() const
+{
+  RuntimeException::selfThrow("NonSmoothLaw::isVerified, not yet implemented!");
+  return false;
+}
 
 

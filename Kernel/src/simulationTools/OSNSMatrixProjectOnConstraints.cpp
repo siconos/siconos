@@ -190,9 +190,9 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
   if (update)
     convert();
 }
-unsigned int OSNSMatrixProjectOnConstraints::getPositionOfInteractionBlock(SP::Interaction inter) const
+unsigned int OSNSMatrixProjectOnConstraints::getPositionOfInteractionBlock(Interaction& inter) const
 {
-  return inter->absolutePositionProj();
+  return inter.absolutePositionProj();
 }
 
 unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)

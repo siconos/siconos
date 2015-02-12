@@ -14,6 +14,7 @@
   REGISTER(EqualityConditionNSL)                       \
   REGISTER(ComplementarityConditionNSL)                \
   REGISTER(RelayNSL)                                   \
+  REGISTER(NormalConeNSL)                              \
   REGISTER(NewtonImpactNSL)                            \
   REGISTER(MultipleImpactNSL)                          \
   REGISTER(NewtonImpactFrictionNSL)                    \

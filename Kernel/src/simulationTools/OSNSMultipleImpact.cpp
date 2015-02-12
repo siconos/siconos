@@ -312,7 +312,7 @@ void OSNSMultipleImpact::BuildParaContact()
     SP::MultipleImpactNSL Mulnslaw = std11::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
     assert(Mulnslaw && "In OSNSMultipleImpact::BuildStiffResCofVec, non-smooth law used must be MultipleImpactNSL!!!");
     // Get the relative position of inter-interactionBlock in the vector VelContact
-    unsigned int pos = _M->getPositionOfInteractionBlock(inter);
+    unsigned int pos = _M->getPositionOfInteractionBlock(*inter);
     (*ResContact)(pos) = Mulnslaw->ResCof();
     (*Kcontact)(pos) = Mulnslaw->Stiff();
     (*ElasCoefContact)(pos) = Mulnslaw->ElasCof();
@@ -441,7 +441,7 @@ void OSNSMultipleImpact::InitializeInput()
     SP::Interaction inter = indexSet->bundle(*ui);
     //SP::SiconosVector Vc0 = inter->y(1); // Relative velocity at beginning of impact
     SP::SiconosVector Vc0 = inter->yOld(1); // Relative velocity at beginning of impact
-    unsigned int pos_inter = _M->getPositionOfInteractionBlock(inter);
+    unsigned int pos_inter = _M->getPositionOfInteractionBlock(*inter);
     setBlock(*Vc0, VelContact, Vc0->size(), 0, pos_inter);
     SP::SiconosVector ener0(new SiconosVector(Vc0->size()));
     ener0->zero(); // We suppose that the initial potential energy before impact is equal to zero at any contact
@@ -811,12 +811,12 @@ void OSNSMultipleImpact::UpdateDuringImpact()
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet->bundle(*ui);
+    Interaction& inter = *indexSet->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector VelContact/TolImpulseContact
     pos = _M->getPositionOfInteractionBlock(inter);
     // Get Y and Lambda for the current Interaction
-    y = inter->y(inputOutputLevel());
-    lambda = inter->lambda(inputOutputLevel());
+    y = inter.y(inputOutputLevel());
+    lambda = inter.lambda(inputOutputLevel());
     // Copy VelContact/TolImpulseContact, starting from index pos into y/lambda
     // save into y !!
     setBlock(*VelContact, y, y->size(), pos, 0);
@@ -844,29 +844,29 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
   unsigned int col_pos = 1;
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction ur = indexSet0->bundle(*ui); // UR
-    SP::SiconosVector ydot = ur->y(1);
-    SP::SiconosVector P_ur(new SiconosVector(ur->getSizeOfY()));
-    SP::SiconosVector F_ur(new SiconosVector(ur->getSizeOfY()));
-    SP::SiconosVector E_ur(new SiconosVector(1));
-    if (indexSet1->is_vertex(ur)) // if UR belongs to the IndexSet[1]
+    SP::Interaction inter = indexSet0->bundle(*ui);
+    SP::SiconosVector ydot = inter->y(1);
+    SP::SiconosVector P_inter(new SiconosVector(inter->getSizeOfY()));
+    SP::SiconosVector F_inter(new SiconosVector(inter->getSizeOfY()));
+    SP::SiconosVector E_inter(new SiconosVector(1));
+    if (indexSet1->is_vertex(inter)) // if Interaction belongs to the IndexSet[1]
     {
-      pos = _M->getPositionOfInteractionBlock(ur);
-      setBlock(*TolImpulseContact, P_ur, P_ur->size(), pos, 0);
-      setBlock(*ForceContact, F_ur, F_ur->size(), pos, 0);
-      setBlock(*EnerContact, E_ur, E_ur->size(), pos, 0);
+      pos = _M->getPositionOfInteractionBlock(*inter);
+      setBlock(*TolImpulseContact, P_inter, P_inter->size(), pos, 0);
+      setBlock(*ForceContact, F_inter, F_inter->size(), pos, 0);
+      setBlock(*EnerContact, E_inter, E_inter->size(), pos, 0);
     }
     else
     {
-      P_ur->zero();   // no impulse at this UR
-      F_ur->zero();   // no force at this UR
-      E_ur->zero();   // no potential at this UR
+      P_inter->zero();   // no impulse at this Interaction
+      F_inter->zero();   // no force at this Interaction
+      E_inter->zero();   // no potential at this Interaction
     };
-    // Write the force at the UR
-    WriteVectorIntoMatrix(*F_ur, _ithPoint, col_pos);
-    //WriteVectorIntoMatrix(*P_ur, _ithPoint, col_pos);
-    //WriteVectorIntoMatrix(*E_ur, _ithPoint, col_pos);
-    col_pos = col_pos + F_ur->size();
+    // Write the force at the Interaction
+    WriteVectorIntoMatrix(*F_inter, _ithPoint, col_pos);
+    //WriteVectorIntoMatrix(*P_inter, _ithPoint, col_pos);
+    //WriteVectorIntoMatrix(*E_inter, _ithPoint, col_pos);
+    col_pos = col_pos + F_inter->size();
   } // Save the data related to DS
   SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
@@ -1000,12 +1000,12 @@ void OSNSMultipleImpact::PostComputeImpact()
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet->bundle(*ui);
+    Interaction& inter = *indexSet->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector VelContact/TolImpulseContact
     pos = _M->getPositionOfInteractionBlock(inter);
     // Get Y and Lambda for the current Interaction
-    y = inter->y(inputOutputLevel());
-    lambda = inter->lambda(inputOutputLevel());
+    y = inter.y(inputOutputLevel());
+    lambda = inter.lambda(inputOutputLevel());
     // Copy VelContact/TolImpulseContact, starting from index pos into y/lambda
     // save into y !!
     setBlock(*VelContact, y, y->size(), pos, 0);// Warning: yEquivalent is

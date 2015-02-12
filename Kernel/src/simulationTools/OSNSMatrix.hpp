@@ -119,11 +119,11 @@ protected:
       (storageType = 1) */
   SP::BlockCSRMatrix M2;
 
-  /** For each Interaction in the graph, compute its absolute position.      Interaction
-      \param InteractionsGraph* the index set of
-      the active constraints
+  /** For each Interaction in the graph, compute its absolute position
+   * \param[out] dim the dimension of the problem (or size of the matrix), computed as the sum of the nslaw of all the Interaction in indexSet
+     \param indexSet the index set of the active constraints
   */
-  virtual void updateSizeAndPositions(unsigned int&, SP::InteractionsGraph);
+  virtual void updateSizeAndPositions(unsigned int& dim, SP::InteractionsGraph indexSet);
 
 private:
   /** Private copy constructor => no copy nor pass by value */
@@ -183,16 +183,18 @@ public:
     return storageType;
   };
 
-  /** set which type of storage will be used for current matrix */
+  /** set which type of storage will be used for current matrix
+   * \param i the type of storage
+   */
   inline void setStorageType(int i)
   {
     storageType = i;
   };
 
   /** get the absolute position of the interaction 
-      \param Interaction from which position is required
+      \param inter the Interaction from which position is required
   */
-  virtual unsigned int getPositionOfInteractionBlock(SP::Interaction) const;
+  virtual unsigned int getPositionOfInteractionBlock(Interaction& inter) const;
 
   /** get the numerics-readable structure */
   inline SP::NumericsMatrix getNumericsMatrix()
@@ -208,9 +210,9 @@ public:
 
   /** fill the current class using an index set and a map of interactionBlocks
       \param indexSet the index set of the active constraints
-      \param updateSize update the sizw of the Matrix (default true)
+      \param update if true update the size of the Matrix (default true)
   */
-  virtual void fill(SP::InteractionsGraph, bool updateSize = true);
+  virtual void fill(SP::InteractionsGraph indexSet, bool update = true);
 
   /** fill the numerics structure numericsMatSparse using MBlockCSR */
   void convert();

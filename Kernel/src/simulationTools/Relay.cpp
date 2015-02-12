@@ -25,6 +25,7 @@
 #include "OSNSMatrix.hpp"
 #include <Relay_Solvers.h>
 
+#include <limits>
 
 using namespace RELATION;
 
@@ -56,27 +57,20 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
   void visit(const RelayNSL& nslaw)
   {
 
-    // std::cout << "Relay::_BoundsNSLEffect visit"  <<std::endl;
-    for (unsigned int i = 0; i <  _inter->nonSmoothLaw()->size(); i++)
+    for (unsigned i = 0; i <  _inter->nonSmoothLaw()->size(); ++i)
     {
-      (*(_parent->lb()))(_pos + i) =
-        nslaw.lb();
-      (*(_parent->ub()))(_pos + i) =
-        nslaw.ub();
+      (*(_parent->lb()))(_pos + i) = nslaw.lb();
+      (*(_parent->ub()))(_pos + i) = nslaw.ub();
     }
   }
 
   void visit(const ComplementarityConditionNSL& nslaw)
   {
-    for (unsigned int i = 0; i <  _inter->nonSmoothLaw()->size(); i++)
+    for (unsigned i = 0; i <  _inter->nonSmoothLaw()->size(); ++i)
     {
       (*(_parent->lb()))(_pos + i) = 0.0;
-      (*(_parent->ub()))(_pos + i) = 1e+24;
+      (*(_parent->ub()))(_pos + i) = std::numeric_limits<double>::infinity();
     }
-
-
-    // \warning Introduce the infinte double symbol rather 1e+24
-
   }
 
 };
@@ -114,10 +108,9 @@ int Relay::compute(double time)
   if (!cont)
     return info;
 
-
   // fill _lb and _ub wiht the value of the NonSmooth Law
 
-  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
+  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
   //cout << " _sizeOutput =" <<_sizeOutput <<std::endl;
   if (_lb->size() != _sizeOutput)
@@ -132,13 +125,13 @@ int Relay::compute(double time)
   }
 
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet->bundle(*ui);
+    SP::Interaction inter = indexSet.bundle(*ui);
 
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
-    unsigned int pos = _M->getPositionOfInteractionBlock(inter);
+    unsigned int pos = _M->getPositionOfInteractionBlock(*inter);
     SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, inter, pos));
     inter->nonSmoothLaw()->accept(*NSLEffect);
   }
@@ -175,7 +168,6 @@ int Relay::compute(double time)
 
     // --- Recovering of the desired variables from Relay output ---
     postCompute();
-
   }
 
   return info;

@@ -25,7 +25,6 @@
 #define NSLAW_H
 
 #include "SiconosConst.hpp"
-#include "RuntimeException.hpp"
 
 #include "SiconosPointers.hpp"
 
@@ -43,13 +42,14 @@
  * A nonsmooth law characterize the (nonsmooth) relationship between 2 variables,
  * usually designated by \f$y\f$ and \f$\lambda\f$. \f$y\f$ is most of time seen as the
  * "input" from DynamicalSystems and is given by a Relation linked to this nonsmoothlaw.
- * \f$\lambda\f$ is then the "output" and through the same Relation feed back to one or more
+ * \f$\lambda\f$ is then the "output" and through the same Relation is fed back to one or more
  * DynamicalSystem.
  *
  * classical examples of nonsmooth law include:
- * - RelayNSL: \f$y \in -\mathcal{N}_{[-1,1]}(\lambda)\quad \Longleftrightarrow \lambda \in -\mbox{sgn} (y)\f$
+ * - RelayNSL: \f$-y \in \mathcal{N}_{[-1,1]}(\lambda)\quad \Longleftrightarrow\quad -\lambda \in \mbox{sgn} (y)\f$
+ * - NormalConeNSL: given a polytope $K$, \f$-\lambda \in \partial \sigma_{-K}(y)\quad\Longleftrightarrow\quad y\in\mathcal{N}_{-K}(-\lambda)\f$
  * - ComplementarityConditionNSL: \f$0\leq y \perp \lambda \geq 0\f$
- * - NewtonImpactNSL and NewtonImpactFrictionNSL for impact, with possible friction
+ * - NewtonImpactNSL and NewtonImpactFrictionNSL for impact, without or with friction
  * - MultipleImpactNSL for a multiple impact law
  * - MixedComplementarityConditionNSL
  *
@@ -93,11 +93,7 @@ public:
   /** check if the NS law is verified
   *  \return a boolean value which determines if the NS Law is verified
   */
-  virtual bool isVerified() const
-  {
-    RuntimeException::selfThrow("NonSmoothLaw::isVerified, not yet implemented!");
-    return false;
-  }
+  virtual bool isVerified() const;
 
   /** to get the size
   *  \return the size of the NS law

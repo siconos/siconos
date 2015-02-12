@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file SiconosKernel.hpp
+/*! \file SimulationTools.hpp
 Include files related to simulationTools
 Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */
@@ -26,22 +26,26 @@ Note that not all files from the current location are listed below, since some o
 #include "EventDriven.hpp"
 #include "EventsManager.hpp"
 #include "EventFactory.hpp"
-#include "FrictionContact.hpp"
-//#include "GlobalFrictionContact.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "TimeSteppingD1Minus.hpp"
 #include "TimeSteppingDirectProjection.hpp"
 #include "TimeSteppingCombinedProjection.hpp"
+
 #include "Equality.hpp"
 #include "LCP.hpp"
 #include "OSNSMultipleImpact.hpp"
 #include "MLCP.hpp"
 #include "MLCPProjectOnConstraints.hpp"
+#include "AVI.hpp"
 //#include "MLCP2.hpp"
 #include "GenericMechanical.hpp"
 //#include "mlcpDefaultSolver.hpp"
 #include "QP.hpp"
+#include "Relay.hpp"
+#include "FrictionContact.hpp"
+//#include "GlobalFrictionContact.hpp"
+
 #include "LsodarOSI.hpp"
 #include "Hem5OSI.hpp"
 #include "MoreauJeanOSI.hpp"
@@ -53,7 +57,7 @@ Note that not all files from the current location are listed below, since some o
 #include "D1MinusLinearOSI.hpp"
 #include "SchatzmanPaoliOSI.hpp"
 #include "ZeroOrderHoldOSI.hpp"
-#include "Relay.hpp"
+
 #include "NonSmoothEvent.hpp"
 #include "TimeDiscretisationEvent.hpp"
 #include "BlockCSRMatrix.hpp"

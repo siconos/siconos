@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file
+/*! \file NewtonImpactFrictionNSL.hpp
   Newton-Impact Non-Smooth Law
 */
 

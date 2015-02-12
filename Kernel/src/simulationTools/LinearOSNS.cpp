@@ -554,7 +554,7 @@ void LinearOSNS::computeq(double time)
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet->bundle(*ui);
+    Interaction& inter = *indexSet->bundle(*ui);
 
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
@@ -627,13 +627,13 @@ bool LinearOSNS::preCompute(double time)
       InteractionsGraph::VIterator ui, uiend;
       for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
-        SP::Interaction inter = indexSet->bundle(*ui);
+        Interaction& inter = *indexSet->bundle(*ui);
         // Get the relative position of inter-interactionBlock in the vector w
         // or z
         unsigned int pos = _M->getPositionOfInteractionBlock(inter);
 
-        SiconosVector& yOutputOld = *inter->yOld(inputOutputLevel());
-        SiconosVector& lambdaOld = *inter->lambdaOld(inputOutputLevel());
+        SiconosVector& yOutputOld = *inter.yOld(inputOutputLevel());
+        SiconosVector& lambdaOld = *inter.lambdaOld(inputOutputLevel());
 
 
         if (_sizeOutput >= yOutputOld.size() + pos)
@@ -684,20 +684,20 @@ void LinearOSNS::postCompute()
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet->bundle(*ui);
+    Interaction& inter = *indexSet->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector w
     // or z
     pos = _M->getPositionOfInteractionBlock(inter);
 
     // Get Y and Lambda for the current Interaction
-    y = inter->y(inputOutputLevel());
-    lambda = inter->lambda(inputOutputLevel());
+    y = inter.y(inputOutputLevel());
+    lambda = inter.lambda(inputOutputLevel());
     // Copy _w/_z values, starting from index pos into y/lambda.
 
     //setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
     // saved in y !!
     setBlock(*_z, lambda, lambda->size(), pos, 0);
-    DEBUG_EXPR(    lambda->display(););
+    DEBUG_EXPR(lambda->display(););
   }
 
 }

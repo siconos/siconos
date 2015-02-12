@@ -37,7 +37,6 @@ TYPEDEF_SPTR(MuStorage)
 
     Base class for linear non-smooth problems, usually in the form:
 
-
     \f[
     w =  q + M z
     \f]

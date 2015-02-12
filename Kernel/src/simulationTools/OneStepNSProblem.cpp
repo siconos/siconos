@@ -148,7 +148,7 @@ void OneStepNSProblem::updateInteractionBlocks()
 
       assert(*ei == ed1 || *ei == ed2);
 
-      /* the first edge as the lower index */
+      /* the first edge has the lower index */
       assert(indexSet->index(ed1) <= indexSet->index(ed2));
 
       // Memory allocation if needed

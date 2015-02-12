@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 /*! \file RelayNSL.hpp
-
+    \brief formalization of the Relay nonsmooth law
 */
 #ifndef RELAYNSLAW_H
 #define RELAYNSLAW_H

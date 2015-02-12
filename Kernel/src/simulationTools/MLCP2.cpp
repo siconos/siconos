@@ -186,15 +186,14 @@ void MLCP2::computeq(double time)
   unsigned int pos = 0;
   InteractionsGraph::VIterator ui, uiend;
   std::string simulationType = simulation->getType();
-  SP::Interaction inter;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    inter = indexSet->bundle(*ui);
+    Interaction& inter = *indexSet->bundle(*ui);
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = M->getPositionOfInteractionBlock(inter);
     //update e(ti+1)
-    SP::SiconosVector  e = std11::static_pointer_cast<FirstOrderLinearR>(inter->relation())->e();
-    q->addBlock(pos, *e);
+    SiconosVector&  e = *static_pointer_cast<FirstOrderLinearR>(inter.relation())->e();
+    q->addBlock(pos, e);
   }
   // for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   // {

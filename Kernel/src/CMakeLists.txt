@@ -204,7 +204,7 @@ IF(WITH_TESTING)
   # Simulation tests
   BEGIN_TEST(simulationTools/test)
 
-  NEW_TEST(testSimulationTools ZOHTest.cpp)
+  NEW_TEST(testSimulationTools ZOHTest.cpp OSNSPTest.cpp)
 
 
   END_TEST()

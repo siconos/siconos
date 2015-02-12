@@ -311,7 +311,7 @@ void GlobalFrictionContact::computeTildeLocalVelocity(double time)
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet->bundle(*ui);
-    pos = H->getPositionOfInteractionBlock(inter);
+    pos = H->getPositionOfInteractionBlock(*inter);
     computeTildeLocalVelocityBlock(inter, pos);
   }
 

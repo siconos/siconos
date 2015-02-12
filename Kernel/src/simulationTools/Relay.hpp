@@ -83,24 +83,23 @@ public:
   /** constructor from data
    *  \param numericsSolverId id of numerics solver
    */
-  Relay(int numericsSolverId = SICONOS_RELAY_LEMKE);
+  Relay(int numericsSolverId = SICONOS_RELAY_AVI_CAOFERRIS);
 
   /** destructor
    */
   ~Relay();
+
   // --- lb ---
   /** get the value of lb, the   lower bounds of the Relay system
-   *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an
-   *  lvalue => return SiconosVector
+   *  \return the vector of lower bounds
    */
-  inline const SiconosVector getLb() const
+  inline const SiconosVector& getLb() const
   {
     return *_lb;
   }
 
   /** get lb, the lower bounds of the Relay system
-   *  \return pointer on a SiconosVector
+   *  \return the vector of lower bounds
    */
   inline SP::SiconosVector lb() const
   {
@@ -118,17 +117,15 @@ public:
 
   // --- ub ---
   /** get the value of ub, the  upper bounds of the Relay system
-   *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an
-   *  lvalue => return SiconosVector
+   *  \return the vector of upper bounds
    */
-  inline const SiconosVector getUb() const
+  inline const SiconosVector& getUb() const
   {
     return *_ub;
   }
 
   /** get lb, the lower bounds of the Relay system
-   *  \return pointer on a SiconosVector
+   *  \return the vector of upper bounds
    */
   inline SP::SiconosVector ub() const
   {
