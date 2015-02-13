@@ -31,9 +31,7 @@ extern "C"
 {
 #endif
 
-#ifdef WITH_LPSOLVE
   void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis);
-#endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
