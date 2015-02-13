@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 
 #ifdef __cplusplus
 #undef restrict
@@ -57,7 +58,7 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
     rowno[i] = i+1;
     set_mat(lp, i+1, size+i+1, -1.0);
     //assert(K[nrows-1-i] >= 0.0);
-    set_mat(lp, 0, size+1+i, abs(K[nrows-1-i]) + 0.0001*(rand()%100));
+    set_mat(lp, 0, size+1+i, fabs(K[nrows-1-i]) + 0.0001*(rand()%100));
     set_constr_type(lp, i+1, EQ);
   }
 //    set_constr_type(lp, nrows+1, GE);
