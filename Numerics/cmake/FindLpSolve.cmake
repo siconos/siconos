@@ -1,6 +1,15 @@
 #Please note that we are using lpsolve 5.5
 FIND_PATH(LpSolve_INCLUDE_DIR lpsolve/lp_lib.h)
-FIND_LIBRARY(LpSolve_LIBRARY lpsolve55)
+
+# debian nonsense: see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=503314
+if(EXISTS "/etc/debian_version")
+  FIND_LIBRARY(LpSolve_LIBRARY lpsolve55 PATH_SUFFIXES "lp_solve")
+  IF(LpSolve_LIBRARY AND "${LpSolve_LIBRARY}" MATCHES ".a$" AND NOT I_WANT_STATIC_LPSOLVE)
+    SET(LpSolve_LIBRARY FALSE)
+  ENDIF()
+ELSE()
+  FIND_LIBRARY(LpSolve_LIBRARY lpsolve55)
+ENDIF()
 
 IF (NOT LpSolve_INCLUDE_DIR)
   MESSAGE("Cannot find LPSOLVE headers!")
