@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     SP::Relay osnspb(new Relay());
 
 
-    osnspb->numericsSolverOptions()->solverId = SICONOS_RELAY_LEMKE;
+    osnspb->setSolverId(SICONOS_RELAY_LEMKE);
     osnspb->numericsSolverOptions()->dparam[0] = 1e-08;
 
 
@@ -192,7 +192,6 @@ int main(int argc, char* argv[])
     while (step < N - 1)
     {
       step++;
-      cout << "step --> " << step << endl;
 
       //  osnspb->setNumericsVerboseMode(1);
 

@@ -173,6 +173,13 @@ int Relay::compute(double time)
   return info;
 }
 
+void Relay::setSolverId(int solverId)
+{
+  // clear previous Solveroptions
+  deleteSolverOptions(_numerics_solver_options.get());
+  relay_setDefaultSolverOptions(NULL, _numerics_solver_options.get(), solverId);
+}
+
 void Relay::display() const
 {
   std::cout << "======= Relay of size " << _sizeOutput << " with: " <<std::endl;

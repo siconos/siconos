@@ -120,6 +120,14 @@ void AVI::display() const
   LinearOSNS::display();
 }
 
+void AVI::setSolverId(int solverId)
+{
+  // clear previous Solveroptions
+  deleteSolverOptions(_numerics_solver_options.get());
+  avi_setDefaultSolverOptions(NULL, _numerics_solver_options.get(), solverId);
+}
+
+
 AVI::~AVI()
 {
   deleteSolverOptions(&*_numerics_solver_options);

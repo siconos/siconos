@@ -140,7 +140,9 @@ public:
     _ub = newUb;
   }
 
-  void initialize(SP::Simulation sim) ;
+  void initialize(SP::Simulation sim);
+
+  virtual void setSolverId(int solverId);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param time current time

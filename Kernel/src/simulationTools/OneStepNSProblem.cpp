@@ -504,6 +504,11 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
   return block;
 }
 
+void OneStepNSProblem::setSolverId(int solverId)
+{
+  RuntimeException::selfThrow("OneStepNSProblem::setSolverId - this virtual method should be implemented in all derived classes!");
+}
+
 void OneStepNSProblem::printStat()
 {
   std::cout << " Number of iterations done: " << _nbIter <<std::endl;

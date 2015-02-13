@@ -49,6 +49,7 @@
    For Linear problems, the following formulations exists: 
    - Linear Complementarity (LCP)
    - Mixed Linear Complementarity (MLCP)
+   - Affine Variational Inequalities (AVI)
    - FrictionContact
    - Relay
    - Equality
@@ -338,6 +339,11 @@ public:
   /** post treatment for output of the solver
    */
   virtual void postCompute() = 0;
+
+  /** change the solver type. This requires a reset of the Solveroption struct
+   * \param solverId the new solver
+   */
+  virtual void setSolverId(int solverId);
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
       (Ex: for MoreauJeanOSI, W)
