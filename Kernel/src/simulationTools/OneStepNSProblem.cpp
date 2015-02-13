@@ -23,6 +23,7 @@
 #include "Topology.hpp"
 #include "Simulation.hpp"
 #include "Model.hpp"
+#include "EulerMoreauOSI.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "LagrangianDS.hpp"
@@ -426,7 +427,6 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
   dsType = Type::value(*ds);
 
   if (osiType == OSI::MOREAUJEANOSI
-      || osiType == OSI::EULERMOREAUOSI
       || osiType == OSI::MOREAUDIRECTPROJECTIONOSI
       || osiType == OSI::SCHATZMANPAOLIOSI)
   {
@@ -434,6 +434,10 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
       block = (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
     else
       block = (std11::static_pointer_cast<NewtonEulerDS> (ds))->luW(); // get its W matrix ( pointer link!)
+  }
+  else if (osiType == OSI::EULERMOREAUOSI)
+  {
+    block = (std11::static_pointer_cast<EulerMoreauOSI>(Osi))->W(ds); // get its W matrix ( pointer link!)
   }
   else if (osiType == OSI::LSODAROSI) // Warning: LagrangianDS only at the time !!!
   {

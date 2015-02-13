@@ -121,7 +121,7 @@ def replace_by_typedef(some_type):
     return str(some_type)
 
 # main loop
-config = parser.config_t(include_paths=include_paths)
+config = parser.config_t(include_paths=include_paths, ignore_gccxml_output=True)
 
 decls = parser.parse(all_headers, config,  compilation_mode=COMPILATION_MODE.ALL_AT_ONCE)
 global_ns = declarations.get_global_namespace(decls)

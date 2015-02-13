@@ -62,3 +62,4 @@ Note that not all files from the current location are listed below, since some o
 #include "TimeDiscretisationEvent.hpp"
 #include "BlockCSRMatrix.hpp"
 #include "MatrixIntegrator.hpp"
+#include "ExtraAdditionalTerms.hpp"

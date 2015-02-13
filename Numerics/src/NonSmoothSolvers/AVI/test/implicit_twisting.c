@@ -136,6 +136,7 @@ int main(void)
 
   printf("final x: %2.6e %2.6e\n", sigma[0], sigma[1]);
 
+  deleteSolverOptions(&options);
   return info;
 
 expose_failure:

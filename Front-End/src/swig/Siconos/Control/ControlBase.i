@@ -3,6 +3,15 @@
 
 %include start.i
 
+#undef WITH_IO
+#undef WITH_SERIALIZATION
+
+#ifdef WITH_IO
+%{
+#include <SiconosFull.hpp>
+%}
+#endif
+
 %include picklable.i
 
 %include path.i
