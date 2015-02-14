@@ -100,7 +100,7 @@ protected:
   double _thetaSMC;
 
   /** OneStepNsProblem for the controller */
-  SP::Relay _OSNSPB_SMC;
+  SP::LinearOSNS _OSNSPB_SMC;
 
   /** SP::EventsManager of the SMC Simulation */
   SP::EventsManager _eventsManager;
@@ -132,7 +132,7 @@ public:
    * \param sensor the ControlSensor feeding the Actuator
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor): Actuator(type, sensor),
-    _indx(0), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8),
+    _indx(0), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS), _precision(1e-8),
     _thetaSMC(0.5), _noUeq(false) {}
 
   /** Constructor with a TimeDiscretisation, a Model and two matrices
@@ -142,7 +142,7 @@ public:
    * \param D the saturation matrix
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std11::shared_ptr<SimpleMatrix>()):
-    Actuator(type, sensor), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_LEMKE),
+    Actuator(type, sensor), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS),
     _precision(1e-8), _thetaSMC(0.5), _noUeq(false)
   {
     _B = B;
@@ -206,11 +206,11 @@ public:
     _precision = newPrecision;
   };
 
-  /** Get the Relay problem associated with the controller. This is useful to
-   * gain access to the data given to the Relay solver in Numerics
-   * \return a reference to the Relay problem
+  /** Get the OneStepNSProblem problem associated with the controller. This is useful to
+   * gain access to the data given to the solver in Numerics
+   * \return a reference to the LinearOSNS problem
    */
-  inline const Relay& relay()
+  inline const LinearOSNS& relay()
   {
     return * _OSNSPB_SMC;
   };

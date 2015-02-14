@@ -138,7 +138,9 @@ void CommonSMC::initialize(const Model& m)
       std11::static_pointer_cast<FirstOrderLinearTIR>(_relationSMC)->setDPtr(_D);
   }
 
-  _nsLawSMC.reset(new RelayNSL(sDim, -_alpha, _alpha));
+  // _nsLawSMC and the OSNSP can be defined in derived classes, like twisting
+  if (!_nsLawSMC)  _nsLawSMC.reset(new RelayNSL(sDim, -_alpha, _alpha));
+  if (!_OSNSPB_SMC) _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
 
   _interactionSMC.reset(new Interaction(sDim, _nsLawSMC, _relationSMC));
 
@@ -160,7 +162,6 @@ void CommonSMC::initialize(const Model& m)
   _simulationSMC->setName("linear sliding mode controller simulation");
   _simulationSMC->insertIntegrator(_integratorSMC);
   // OneStepNsProblem
-  _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
   _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
   //    std::cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] <<std::endl;
   _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);

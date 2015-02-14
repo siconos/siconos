@@ -40,6 +40,7 @@
 #include "ExplicitLinearSMC.hpp"
 #include "LinearSMCOT2.hpp"
 #include "LinearSMCimproved.hpp"
+#include "Twisting.hpp"
 
 // Observer - generic
 #include "Observer.hpp"

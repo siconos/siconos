@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2012.
+/* Siconos-Kernel, Copyright INRIA 2005-2015
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -17,9 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file
-
-  Typedef for control-related objects
+/*! \file ControlTypeDef.hpp
+  \brief Typedef for control-related objects
   */
 
 #ifndef ControlTypeDef_H
@@ -31,6 +30,7 @@
 #define EXPLICIT_LINEAR_SMC        103
 #define LINEAR_SMC_OT2             104
 #define LINEAR_SMC_IMPROVED        105
+#define TWISTING                   106
 
 
 /** Sensor types */

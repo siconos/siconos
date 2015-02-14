@@ -42,15 +42,20 @@ private:
   CPPUNIT_TEST(test_iSMC_Lsodar);
   CPPUNIT_TEST(test_eSMC_ZOH);
   CPPUNIT_TEST(test_eSMC_Lsodar);
+  CPPUNIT_TEST(test_itw_ZOH);
+  CPPUNIT_TEST(test_itw_Lsodar);
 
   CPPUNIT_TEST_SUITE_END();
 
   void init();
   void init2();
+  void initTwisting();
   void test_iSMC_ZOH();
   void test_iSMC_Lsodar();
   void test_eSMC_ZOH();
   void test_eSMC_Lsodar();
+  void test_itw_ZOH();
+  void test_itw_Lsodar();
   // Members
 
   unsigned int _n;
@@ -58,6 +63,7 @@ private:
   double _t0;
   double _T;
   double _tol;
+  double _beta;
   double _xFinal;
   SP::FirstOrderLinearTIDS _DS;
   SP::SiconosMatrix _A;
@@ -70,11 +76,12 @@ private:
   SP::LinearSensor _sensor;
   SP::LinearSMC _iSMC;
   SP::ExplicitLinearSMC _eSMC;
+  SP::Twisting _itw;
 
 
 public:
 
-  SMCTest(): _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7e-11) {}
+  SMCTest(): _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7e-11), _beta(0.1) {}
   void setUp();
   void tearDown();
 

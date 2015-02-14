@@ -21,6 +21,7 @@ DEFINE_SPTR(LinearSMC)
 DEFINE_SPTR(LinearSMCOT2)
 DEFINE_SPTR(LinearSMCimproved)
 DEFINE_SPTR(PID)
+DEFINE_SPTR(Twisting)
 
 DEFINE_SPTR(Observer)
 DEFINE_SPTR(LuenbergerObserver)

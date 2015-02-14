@@ -17,13 +17,16 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SMCTest.hpp"
+
+#include <ioMatrix.hpp>
+#include <FirstOrderLinearTIDS.hpp>
+
 #include "ControlZOHSimulation.hpp"
 #include "ControlLsodarSimulation.hpp"
-#include <FirstOrderLinearTIDS.hpp>
 #include "LinearSensor.hpp"
 #include "LinearSMC.hpp"
 #include "ExplicitLinearSMC.hpp"
-#include "ioMatrix.hpp"
+#include "Twisting.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -69,6 +72,16 @@ void SMCTest::init2()
   _sensor.reset(new LinearSensor(_DS, _C));
   _eSMC.reset(new ExplicitLinearSMC(_sensor, _B));
   _eSMC->setCsurface(_Csurface);
+}
+
+void SMCTest::initTwisting()
+{
+  _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
+  _sensor.reset(new LinearSensor(_DS, _C));
+  _itw.reset(new Twisting(_sensor, 300., _beta, _h));
+  SP::SimpleMatrix eye(new SimpleMatrix(2 , 2));
+  eye->eye();
+  _itw->setCsurface(eye);
 }
 
 
@@ -153,4 +166,74 @@ void SMCTest::test_eSMC_Lsodar()
   ioMatrix::read("eSMC.ref", "ascii", dataRef);
   std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_iSMC_Lsodar : ", (data - dataRef).normInf() < _tol, true);
+}
+
+void SMCTest::test_itw_ZOH()
+{
+  initTwisting();
+  SP::ControlZOHSimulation simZOH(new ControlZOHSimulation(_t0, _T, _h));
+  simZOH->setSaveOnlyMainSimulation(true);
+  simZOH->addDynamicalSystem(_DS);
+  simZOH->addSensor(_sensor, _h);
+  simZOH->addActuator(_itw, _h);
+  simZOH->initialize();
+  simZOH->run();
+  SimpleMatrix& data = *simZOH->data();
+  ioMatrix::write("itw_ZOH.dat", "ascii", data, "noDim");
+  // Reference Matrix
+  SimpleMatrix dataRef(data);
+  dataRef.zero();
+  ioMatrix::read("itw.ref", "ascii", dataRef);
+  // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
+  SiconosVector lambda1 = SiconosVector(data.size(0));
+  SiconosVector lambda2 = SiconosVector(data.size(0));
+  data.getCol(3, lambda1);
+  data.getCol(4, lambda2);
+  axpy(_beta, lambda2, lambda1);
+  SiconosVector lambda1Ref = SiconosVector(data.size(0));
+  SiconosVector lambda2Ref = SiconosVector(data.size(0));
+  dataRef.getCol(3, lambda1Ref);
+  dataRef.getCol(4, lambda2Ref);
+  axpy(_beta, lambda2Ref, lambda1Ref);
+  data.setCol(3, lambda1);
+  dataRef.setCol(3, lambda1Ref);
+  data.resize(data.size(0), 4);
+  dataRef.resize(data.size(0), 4);
+  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", (data - dataRef).normInf() < _tol, true);
+}
+
+void SMCTest::test_itw_Lsodar()
+{
+  initTwisting();
+  SP::ControlLsodarSimulation simLsodar(new ControlLsodarSimulation(_t0, _T, _h));
+  simLsodar->setSaveOnlyMainSimulation(true);
+  simLsodar->addDynamicalSystem(_DS);
+  simLsodar->addSensor(_sensor, _h);
+  simLsodar->addActuator(_itw, _h);
+  simLsodar->initialize();
+  simLsodar->run();
+  SimpleMatrix& data = *simLsodar->data();
+  ioMatrix::write("itw_Lsodar.dat", "ascii", data, "noDim");
+  // Reference Matrix
+  SimpleMatrix dataRef(data);
+  dataRef.zero();
+  ioMatrix::read("itw.ref", "ascii", dataRef);
+  // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
+  SiconosVector lambda1 = SiconosVector(data.size(0));
+  SiconosVector lambda2 = SiconosVector(data.size(0));
+  data.getCol(3, lambda1);
+  data.getCol(4, lambda2);
+  axpy(_beta, lambda2, lambda1);
+  SiconosVector lambda1Ref = SiconosVector(data.size(0));
+  SiconosVector lambda2Ref = SiconosVector(data.size(0));
+  dataRef.getCol(3, lambda1Ref);
+  dataRef.getCol(4, lambda2Ref);
+  axpy(_beta, lambda2Ref, lambda1Ref);
+  data.setCol(3, lambda1);
+  dataRef.setCol(3, lambda1Ref);
+  data.resize(data.size(0), 4);
+  dataRef.resize(data.size(0), 4);
+  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", (data - dataRef).normInf() < _tol, true);
 }

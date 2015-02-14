@@ -80,10 +80,14 @@
 */
 class Actuator
 {
-protected:
+
+private:
+
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Actuator);
+
+protected:
 
   /** type of the Actuator */
   unsigned int _type;
