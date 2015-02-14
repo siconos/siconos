@@ -81,6 +81,7 @@ IF(MSVC)
   # On other Module this variable is set through FindBinutils since we ask for
   # a Fortran compiler --xhub
   find_program(CMAKE_NM NAMES ${_CMAKE_TOOLCHAIN_PREFIX}nm HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
+  include(Platform/Windows-GNU) # for proper prefixes and suffixes
 ENDIF(MSVC)
 
 LIBRARY_PROJECT_SETUP()
@@ -104,7 +105,7 @@ IF(WITH_TESTING)
   # Simulation tests
   BEGIN_TEST(tests)
 
-  NEW_TEST(tests PIDTest.cpp SMCTest.cpp)
+  NEW_TEST(tests PIDTest.cpp SMCTest.cpp ObserverTest.cpp)
 
   END_TEST()
 
