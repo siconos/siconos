@@ -22,13 +22,25 @@
 
 #include "BulletR.hpp"
 
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunreachable-code"
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
+
 #include <bullet/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 #include <btBulletCollisionCommon.h>
+
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic pop
+#endif
 
 #include <Interaction.hpp>
 

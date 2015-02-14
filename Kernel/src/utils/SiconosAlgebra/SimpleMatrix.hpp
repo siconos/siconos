@@ -405,9 +405,13 @@ public:
   unsigned int size(unsigned int index) const;
 
   /** resize the matrix with nbrow rows and nbcol columns The existing elements of the matrix are preseved when specified.
-   *  \exception SiconosMatrixException
+   *  \param row the new number of rows
+   *  \param col the mew number of columns
+   *  \param lower (only for Banded)
+   *  \param upper (only for Banded)
+   *  \[aram preserve preserve existing elements
    */
-  void resize(unsigned int, unsigned int, unsigned int = 0, unsigned int = 0, bool = true);
+  void resize(unsigned int row, unsigned int col, unsigned int lower = 0, unsigned int upper = 0, bool preserve = true);
 
   /** compute the infinite norm of the matrix
    *  \return a double

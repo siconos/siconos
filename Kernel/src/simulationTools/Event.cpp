@@ -24,6 +24,7 @@
 
 
 double Event::_tick = DEFAULT_TICK;
+bool Event::_eventCreated = false;
 
 Event::Event(double time, int newType, bool reschedule):
   _type(newType), _dTime(time), _k(0), _reschedule(reschedule)
@@ -31,6 +32,7 @@ Event::Event(double time, int newType, bool reschedule):
   // Initialize and set timeOfEvent.
   mpz_init_set_d(_timeOfEvent, rint(time / _tick));
   mpz_init_set_d(_tickIncrement, 0);
+  _eventCreated = true;
 }
 
 Event::~Event()
@@ -65,7 +67,10 @@ void Event::setTimeDiscretisation(SP::TimeDiscretisation td)
 
 void Event::setTick(double newTick)
 {
-  std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
+  if (_eventCreated)
+  {
+    std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
+  }
   _tick = newTick;
 }
 

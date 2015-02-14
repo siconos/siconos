@@ -89,6 +89,9 @@ protected:
    */
   static double _tick;
 
+  /** has one Event object been instanciated. Use to detect in setTick potentially dangerous cases*/
+  static bool _eventCreated;
+
   /** index for the current Event*/
   unsigned int _k;
 

@@ -21,10 +21,25 @@
 #include "BulletSiconosFwd.hpp"
 #include "BulletDS.hpp"
 
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunreachable-code"
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
+
+
+// looks like bullet have overloaded virtual functions ...
+
 #include <btBulletCollisionCommon.h>
+
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic pop
+#endif
 
 #ifndef DEBUG_BULLET_TIMESTEPPING
 #define DEBUG_MESSAGES 1
