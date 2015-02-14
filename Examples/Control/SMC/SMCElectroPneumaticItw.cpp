@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
   sensorC->eye();
   SP::LinearSensor sensor(new LinearSensor(plant, sensorC));
   // add the sliding mode controller
-  SP::LinearSMC twisting(new LinearSMC(sensor));
+  SP::Twisting twisting(new Twisting(sensor, hControl));
 
   twisting->seth("electro_pneumatic_nantes:computeh");
   twisting->setg("electro_pneumatic_nantes:computeg");
@@ -93,8 +93,6 @@ int main(int argc, char* argv[])
   twisting->setJacgx("electro_pneumatic_nantes:computeJacgx");
   twisting->setJacglambda("electro_pneumatic_nantes:computeJacglambda");
 
-  twisting->noUeq(true);
-  twisting->setSizeu(2);
   simLsodar->addSensor(sensor, hControl);
   simLsodar->addActuator(twisting, hControl);
 
@@ -111,7 +109,7 @@ int main(int argc, char* argv[])
 //  (std11::static_pointer_cast<LsodarOSI>(simLsodar->integrator()))->setMaxOrder(0, 5);
   simLsodar->run();
   SimpleMatrix& data = *simLsodar->data();
-  ioMatrix::write("SMCElectroPneumatic.dat", "ascii", data, "noDim");
+  ioMatrix::write("ElectroPneumaticItw.dat", "ascii", data, "noDim");
   std::cout << std::endl << simLsodar->dataLegend() << std::endl;
 
 #if 0

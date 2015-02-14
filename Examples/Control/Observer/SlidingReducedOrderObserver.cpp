@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
   // use a controlSensor
   SP::SimpleMatrix C(new SimpleMatrix(1, 2, 0));
-  (*C)(0, 0) = 1;
+  (*C)(0, 0) = 1.0;
   SP::LinearSensor sens(new LinearSensor(doubleIntegrator, C));
   sim->addSensor(sens, hControl);
 

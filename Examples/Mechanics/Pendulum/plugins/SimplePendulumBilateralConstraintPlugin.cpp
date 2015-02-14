@@ -26,20 +26,23 @@
 #include <math.h>
 using namespace std;
 
+#undef restrict
+#define restrict __restrict
+
 extern "C" double L;
 
-SICONOS_EXPORT void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void h0(unsigned int sizeOfq,  double* restrict  q, unsigned int sizeOfY, double* restrict  y, unsigned int sizeZ, double* restrict  z)
 {
   y[0] = pow(L, 2) - (pow(q[0], 2) + pow(q[1], 2));
 }
 
-SICONOS_EXPORT void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
+SICONOS_EXPORT void G0(unsigned int sizeOfq,  double* restrict  q, unsigned int sizeOfY, double* restrict  G, unsigned int sizeZ, double* restrict  z)
 {
   G[0] = -2.0 * q[0];
   G[1] = -2.0 * q[1];
 }
 
-SICONOS_EXPORT void G0dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S, unsigned int sizeOfZ, double* z)
+SICONOS_EXPORT void G0dot(unsigned int sizeOfq,  double* restrict  q, unsigned int sizeOfqdot,  double* restrict  qdot, double* restrict  S, unsigned int sizeOfZ, double* restrict  z)
 {
   S[0] = -2.0 * qdot[0];
   S[1] = -2.0 * qdot[1];
