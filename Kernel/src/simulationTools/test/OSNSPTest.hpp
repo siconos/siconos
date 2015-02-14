@@ -32,6 +32,8 @@
 #include "AVI.hpp"
 #include "EulerMoreauOSI.hpp"
 
+#include <NumericsConfig.h>
+
 class OSNSPTest : public CppUnit::TestFixture
 {
 
@@ -46,7 +48,9 @@ private:
 
   // tests to be done ...
 
+#ifdef HAS_EXTREME_POINT_ALGO
   CPPUNIT_TEST(testAVI);
+#endif
 
   CPPUNIT_TEST_SUITE_END();
 

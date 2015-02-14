@@ -12,6 +12,7 @@
 #cmakedefine WITH_FCLIB
 #cmakedefine BUILD_AS_CPP
 #cmakedefine WITH_LPSOLVE
+#cmakedefine HAS_EXTREME_POINT_ALGO
 
 // Is cblas available? 
 #cmakedefine HAS_CBLAS
