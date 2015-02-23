@@ -327,10 +327,6 @@ void TimeStepping::initOSNS()
       /* Default choices for the index set  (indexSet(_levelMinForInput))
        * and input/output y[_levelMinForInput], lambda[_levelMinForInput] that is considered in osns */
 
-      // MB: moved into OneSteNSProblem->initialize(...)
-      // (*itOsns)->setInputOutputLevel(_levelMinForInput);
-      // (*itOsns)->setIndexSetLevel(_levelMinForInput);
-
       (*itOsns)->initialize(shared_from_this());
     }
   }

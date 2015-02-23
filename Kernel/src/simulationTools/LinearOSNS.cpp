@@ -108,7 +108,7 @@ void LinearOSNS::initOSNSMatrix()
       _M.reset(new OSNSMatrix(maxSize(), _MStorageType));
     else // if(_MStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
-      if (indexSetLevel() != LEVELMAX)
+      if (indexSetLevel() != LEVELMAX && simulation()->model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
       {
         _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _MStorageType));
       }

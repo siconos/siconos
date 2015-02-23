@@ -398,10 +398,6 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 
   _simulation = sim;
 
-  // MB: from TimeStepping::initOSNS (cf Mechanics tests t1, t2)
-  setInputOutputLevel(sim->levelMinForInput());
-  setIndexSetLevel(sim->levelMinForInput());
-
   // === Adds this in the simulation set of OneStepNSProblem === First
   // checks the id if required.  An id is required if there is more
   // than one OneStepNSProblem in the simulation
