@@ -1,14 +1,14 @@
 try:
     import Siconos.Kernel as SK
-    import Siconos.Numerics as N
 
 except (ImportError):
     print('Could not import Siconos.* module')
 
 import numpy as np
 
+
 class ZhuravlevTwistingR(SK.FirstOrderNonLinearR):
-    ## \brief Constructor
+    # \brief Constructor
     #
     # \param  is a  (optional)
     def __init__(self, C, B):
@@ -18,35 +18,34 @@ class ZhuravlevTwistingR(SK.FirstOrderNonLinearR):
         self.setCPtr(C)
         return
 
-
-    def computeh(self,time, x, l, y):
-        #print 'call computeh'
-        #print('x=',x)
-        #print(y)
+    def computeh(self, time, x, l, z, y):
+        # print 'call computeh'
+        # print('x=',x)
+        # print(y)
         y[:] = self.C().dot(x)
-        #print('computeh done')
+        # print('computeh done')
         pass
 
-    def computeg(self,time, x, l, R):
-        #print 'call computeg'
-        #print(l)
-        #print(R)
+    def computeg(self, time, x, l, z, R):
+        # print 'call computeg'
+        # print(l)
+        # print(R)
         R[0] = -self._kappa*l[0]*l[1]*x[1]
         R[1] = (self._mu1*l[0]+l[1])/(1-self._kappa*l[0]*l[1])
         print(R)
-        #print('computeg done')
+        # print('computeg done')
         pass
 
-    def computeJachx(self,time, x, l, C):
-        #print('call computeJachx')
-        #print('x=',x)
-        #print(l)
-        #print(C)
+    def computeJachx(self, time, x, l, z, C):
+        # print('call computeJachx')
+        # print('x=',x)
+        # print(l)
+        # print(C)
         C[:] = np.eye(2)
         pass
 
-    def computeJacglambda(self,time, x, l, B):
-        #print('call computeJacglambda')
+    def computeJacglambda(self, time, x, l, z, B):
+        # print('call computeJacglambda')
         print(x)
         B[0, 0] = -self._kappa*l[1]*x[1]
         B[0, 1] = -self._kappa*l[0]*x[1]
@@ -56,19 +55,17 @@ class ZhuravlevTwistingR(SK.FirstOrderNonLinearR):
         print(np.linalg.cond(B))
         pass
 
-    def computeJacgx(self,time, x, l, K):
-        #print('call computeJacgx')
+    def computeJacgx(self, time, x, l, z, K):
+        # print('call computeJacgx')
 
         K[:]=np.zeros(2)
         K[0, 1] = -self._kappa*l[0]*l[1]
 
-        #print(K)
+        # print(K)
         pass
 
-    def computeJachlambda(self, time, x, l, D):
-        #print('call computeJachlambda')
-        #print(D)
+    def computeJachlambda(self, time, x, l, z, D):
+        # print('call computeJachlambda')
+        # print(D)
         D[:]=np.zeros(2)
         pass
-
-

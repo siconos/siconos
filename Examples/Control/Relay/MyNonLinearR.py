@@ -1,14 +1,14 @@
 try:
     import Siconos.Kernel as SK
-    import Siconos.Numerics as N
 
 except (ImportError):
     print 'Could not import Siconos.* module'
 
 import numpy
 
+
 class MyNonLinearR(SK.FirstOrderNonLinearR):
-    ## \brief Constructor
+    # \brief Constructor
     #
     # \param  is a  (optional)
     def __init__(self, C, B):
@@ -18,7 +18,7 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
         return
 
 
-    def computeh(self,time, x, l, y):
+    def computeh(self, time, x, l, z, y):
         print 'call computeh'
         print(x)
         print(y)
@@ -27,7 +27,7 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
         print('computeh done')
         pass
 
-    def computeg(self,time, x, l, R):
+    def computeg(self, time, x, l, z, R):
         print 'call computeg'
         print(l)
         print(R)
@@ -37,7 +37,7 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
         print('computeg done')
         pass
 
-    def computeJachx(self,time, x, l, C):
+    def computeJachx(self, time, x, l, z, C):
         #self.setJachxPtr(C) not exiting ??
         #numpy.copyto(self._C,self.jachx() ) version 1.7
         print('call computeJachx')
@@ -48,7 +48,7 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
         #print 'self.jachx()', self.jachx()
         pass
 
-    def computeJacglambda(self,time, x, l, B):
+    def computeJacglambda(self, time, x, l, z, B):
         print('call computeJacglambda')
         print(B)
         B[:] = self.B()
@@ -57,7 +57,7 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
         #self.setJachglambdaPtr(self._B) not callable in that form ?
         pass
 
-    def computeJacgx(self,time, x, l, K):
+    def computeJacgx(self, time, x, l, z, K):
         print('call computeJacgx')
         print(K)
         K[:] = numpy.zeros(2)[:]
@@ -66,7 +66,7 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
         #self.setJachglambdaPtr(self._B) not callable in that form ?
         pass
 
-    def computeJachlambda(self, time, x, l, D):
+    def computeJachlambda(self, time, x, l, z, D):
         print('call computeJachlambda')
         print(D)
         D[:] = numpy.zeros(2)[:]
@@ -74,7 +74,3 @@ class MyNonLinearR(SK.FirstOrderNonLinearR):
         #print 'self.jacglambda() = ', self.jacglambda()
         #self.setJachglambdaPtr(self._B) not callable in that form ?
         pass
-
-
-
-
