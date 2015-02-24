@@ -22,10 +22,19 @@
 #if defined(_MSC_VER)
 // for M_PI
 #define _USE_MATH_DEFINES
+
 #if _MSC_VER < 1800
 #include <float.h>
 #define isnan(x) _isnan(x)
 #define isinf(x) (!_finite(x) && !_isnan(x))
+
+/* This is really bad --xhub */
+#ifdef __cplusplus
+namespace std {
+  int isfinite(double x) { return _finite(x); }
+}
+#endif
+
 inline double fmax(double x, double y)
 {
   if (isnan(y)) return x;
@@ -50,8 +59,9 @@ inline double fmin(double x, double y)
 #define NAN (INFINITY-INFINITY)
 #define copysign _copysign
 #define snprintf _snprintf
-#endif
-#endif
+#endif /* _MSC_VER < 1800 */
+
+#endif /* defined(_MSC_VER) */
 
 #if defined(__SUNPRO_CC)
 #define INFINITY (DBL_MAX+DBL_MAX)

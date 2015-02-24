@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
   ioMatrix::write("ElectroPneumaticItw.dat", "ascii", data, "noDim");
   std::cout << std::endl << simLsodar->dataLegend() << std::endl;
 
-#if 0
+/*
   // Comparison with a reference file
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
@@ -126,6 +126,6 @@ int main(int argc, char* argv[])
   }
 #else
   return 0;
-#endif
+*/
   return 0;
 }

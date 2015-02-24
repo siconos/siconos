@@ -40,7 +40,6 @@
 ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
   ControlSimulation(t0, T, h)
 {
-  Event::setTick(1e-15);
   _processIntegrator.reset(new LsodarOSI());
   _processSimulation.reset(new EventDriven(_processTD, 0));
   _processSimulation->setName("plant simulation");
@@ -57,10 +56,7 @@ ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
 
 void ControlLsodarSimulation::run()
 {
-  (*_dataM)(0, 0) = _t0;
-  storeData(0);
-
-  SP::EventsManager eventsManager = _processSimulation->eventsManager();
+  EventsManager& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
   boost::progress_display show_progress(_N);
   boost::timer time;
@@ -69,21 +65,32 @@ void ControlLsodarSimulation::run()
 
   while (sim.hasNextEvent())
   {
-    Event& nextEvent = *eventsManager->nextEvent();
-    if (nextEvent.getType() == TD_EVENT)
+    if (eventsManager.needsIntegration())
+    {
+      sim.advanceToEvent();
+    }
+    sim.processEvents();
+    Event& currentEvent = *eventsManager.currentEvent();
+    Event& nextEvent = *eventsManager.nextEvent();
+    if (currentEvent.getType() == ACTUATOR_EVENT)
     {
       // this is necessary since we changed the control input, hence the RHS
       sim.setIstate(1);
-      sim.advanceToEvent();
-      ++k;
-      (*_dataM)(k, 0) = sim.nextTime();
+    }
+    if (nextEvent.getType() == TD_EVENT) // We store only on TD_EVENT, this should be settable
+    {
+      (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);
-
+      ++k;
       ++show_progress;
     }
-    sim.processEvents();
   }
 
+  /* saves last status */
+  (*_dataM)(k, 0) = sim.startingTime();
+  storeData(k);
+  ++k;
+
   _elapsedTime = time.elapsed();
-  _dataM->resize(k+1, _nDim + 1);
+  _dataM->resize(k, _nDim + 1);
 }

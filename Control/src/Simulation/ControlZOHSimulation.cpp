@@ -52,10 +52,7 @@ ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
 
 void ControlZOHSimulation::run()
 {
-  (*_dataM)(0, 0) = _t0;
-  storeData(0);
-
-  SP::EventsManager eventsManager = _processSimulation->eventsManager();
+  EventsManager& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
   boost::progress_display show_progress(_N);
   boost::timer time;
@@ -64,18 +61,28 @@ void ControlZOHSimulation::run()
 
   while (sim.hasNextEvent())
   {
-    Event& nextEvent = *eventsManager->nextEvent();
+    Event& nextEvent = *eventsManager.nextEvent();
     if (nextEvent.getType() == TD_EVENT)
     {
       sim.computeOneStep();
-      ++k;
-      (*_dataM)(k, 0) = sim.nextTime();
+    }
+
+    sim.nextStep();
+
+    if (eventsManager.nextEvent()->getType() == TD_EVENT)  // We store only on TD_EVENT
+    {
+      (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);
+      ++k;
       ++show_progress;
     }
-    sim.nextStep();
   }
 
+  /* saves last status */
+  (*_dataM)(k, 0) = sim.startingTime();
+  storeData(k);
+  ++k;
+
   _elapsedTime = time.elapsed();
-  _dataM->resize(k+1, _nDim + 1);
+  _dataM->resize(k, _nDim + 1);
 }

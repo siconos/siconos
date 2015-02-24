@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-205
+/* Siconos-Kernel, Copyright INRIA 2005-2015
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify

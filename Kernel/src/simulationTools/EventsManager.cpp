@@ -119,6 +119,12 @@ double EventsManager::nextTime() const
   return _events[1]->getDoubleTimeOfEvent();
 }
 
+bool EventsManager::needsIntegration() const
+{
+  if (_events.size() <= 1)
+    RuntimeException::selfThrow("EventsManager nextTime, next event is NULL");
+  return (mpz_cmp(*_events[0]->getTimeOfEvent(), *_events[1]->getTimeOfEvent()) < 0);
+}
 
 // Creates (if required) and update the non smooth event of the set
 // Useful during simulation when a new event is detected.
@@ -227,24 +233,42 @@ void EventsManager::update(Simulation& sim)
 
 unsigned int EventsManager::insertEv(SP::Event e)
 {
-  const mpz_t *t1 = e->getTimeOfEvent();
+  mpz_t *t1 = const_cast<mpz_t*>(e->getTimeOfEvent());
   const unsigned int eType = e->getType();
   bool inserted = false;
   unsigned int pos = 0;
+  mpz_t delta_time;
+  mpz_init(delta_time); // initialize delta_time
+  mpz_t abs_delta_time;
+  mpz_init(abs_delta_time); // initialize delta_time
   // Find a place for the event in the vector
   for (EventsContainer::iterator it = _events.begin();
-       it != _events.end(); ++it)
+      it != _events.end(); ++it)
   {
     Event& ev = **it;
-    const mpz_t *t2 = ev.getTimeOfEvent();
-    int res = mpz_cmp(*t1, *t2);
-    if (res == 0)
-      res = eType - ev.getType();
-    if (res < 0)
+    mpz_sub(delta_time, *ev.getTimeOfEvent(), *t1); // delta = t_existing_event - t_event_to _insert
+    int res = mpz_cmp_ui(delta_time, _GapLimit2Events);
+    if (res > 0) // insert
     {
       _events.insert(it, e);
       inserted = true;
       break;
+    }
+    else
+    {
+      mpz_abs(abs_delta_time, delta_time);
+      if (mpz_cmp_ui(abs_delta_time, _GapLimit2Events) <= 0) // the two are too close
+      {
+        // reschedule the TD event only if its time instant is less than T
+        mpz_set(*t1, *ev.getTimeOfEvent());
+        res = eType - ev.getType();
+        if (res < 0)
+        {
+          _events.insert(it, e);
+          inserted = true;
+          break;
+        }
+      }
     }
     pos++;
   }
@@ -253,6 +277,8 @@ unsigned int EventsManager::insertEv(SP::Event e)
     _events.push_back(e);
 
   return pos;
+  mpz_clear(delta_time);
+  mpz_clear(abs_delta_time);
 }
 
 void EventsManager::display() const

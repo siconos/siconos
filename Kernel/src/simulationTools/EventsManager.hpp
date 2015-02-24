@@ -196,6 +196,12 @@ public:
    */
   double nextTime() const ;
 
+  /** is an integration step required ? The current event and the next one may have
+   * the same time instant in which case no integration as to be performed
+   * \return true if the simulation needs to be integrate, no otherwise
+   */
+  bool needsIntegration() const;
+
   /** display EventsManager data
    */
   void display() const ;

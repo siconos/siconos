@@ -26,6 +26,8 @@
 #include "pivot-utils.h"
 #include "lcp_pivot.h"
 
+#include "SiconosCompat.h"
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
