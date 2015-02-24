@@ -69,7 +69,7 @@ void ControlZOHSimulation::run()
 
     sim.nextStep();
 
-    if (eventsManager.nextEvent()->getType() == TD_EVENT)  // We store only on TD_EVENT
+    if (sim.hasNextEvent() && eventsManager.nextEvent()->getType() == TD_EVENT)  // We store only on TD_EVENT
     {
       (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);

@@ -40,7 +40,7 @@ static inline void JacglambdaSetter(FirstOrderR& rel, SP::SimpleMatrix B, std::s
     rel.setComputeJacglambdaFunction(SSLH::getPluginName(pluginName), SSLH::getPluginFunctionName(pluginName));
   }
   else
-    RuntimeException::selfThrow("LinearSMC no B or pluginJacglambda given");
+    RuntimeException::selfThrow("FirstOrderRHelpers::JacglambdaSetter no B or pluginJacglambda given");
 }
 
 static inline void JachxSetter(FirstOrderR& rel, SP::SimpleMatrix C, std::string& pluginName)
@@ -55,7 +55,7 @@ static inline void JachxSetter(FirstOrderR& rel, SP::SimpleMatrix C, std::string
   }
   else
   {
-    RuntimeException::selfThrow("LinearSMC no C or pluginJachx given");
+    RuntimeException::selfThrow("FirstOrderRHelpers::JachxSetter no C or pluginJachx given");
   }
 }
 
@@ -68,6 +68,10 @@ static inline void JachlambdaSetter(FirstOrderR& rel, SP::SimpleMatrix D, std::s
   else if (!pluginName.empty())
   {
     rel.setComputeJachlambdaFunction(SSLH::getPluginName(pluginName), SSLH::getPluginFunctionName(pluginName));
+  }
+  else
+  {
+    RuntimeException::selfThrow("FirstOrderRHelpers::JachlambdaSetter no D or pluginJachlambda given");
   }
 }
 }

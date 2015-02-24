@@ -71,13 +71,12 @@ void ControlLsodarSimulation::run()
     }
     sim.processEvents();
     Event& currentEvent = *eventsManager.currentEvent();
-    Event& nextEvent = *eventsManager.nextEvent();
     if (currentEvent.getType() == ACTUATOR_EVENT)
     {
       // this is necessary since we changed the control input, hence the RHS
       sim.setIstate(1);
     }
-    if (nextEvent.getType() == TD_EVENT) // We store only on TD_EVENT, this should be settable
+    if (sim.hasNextEvent() && eventsManager.nextEvent()->getType() == TD_EVENT) // We store only on TD_EVENT, this should be settable
     {
       (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);
