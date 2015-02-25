@@ -21,6 +21,7 @@
 #include <string.h>
 #include <math.h>
 #include "Relay_Solvers.h"
+#include "relay_cst.h"
 
 #ifdef HAVE_PATHFERRIS
 #include "InterfaceToPathFerris/SimpleLCP.h"
@@ -58,7 +59,7 @@ void relay_path(RelayProblem* problem, double *z, double *w, int *info , SolverO
   double * m_ij = (double *)calloc(nnz + 1, sizeof(double));
   double * lb = (double *)calloc(n + 1, sizeof(double));
   double * ub = (double *)calloc(n + 1, sizeof(double));
-  double err, val;
+  double err=1e24, val;
 
 
   FortranToPathSparse(n, M, 1.0e-18, m_i, m_j, m_ij);

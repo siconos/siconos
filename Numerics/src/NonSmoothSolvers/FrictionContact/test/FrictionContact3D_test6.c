@@ -33,23 +33,23 @@ int main(void)
 
 
 
-  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
+  /* printf("Test on ./data/Example1_Fc3D_SBM.dat\n"); */
 
-  FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
-  options->dparam[0] = 1e-16;
-  options->internalSolvers->solverId = SICONOS_FRICTION_3D_NCPGlockerFBPATH;
-  options->internalSolvers->iparam[0] = 0;
-  options->internalSolvers->dparam[0] = 0.0;
+  /* FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r"); */
+  /* SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions)); */
+  /* info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS); */
+  /* options->dparam[0] = 1e-16; */
+  /* options->internalSolvers->solverId = SICONOS_FRICTION_3D_NCPGlockerFBPATH; */
+  /* options->internalSolvers->iparam[0] = 0; */
+  /* options->internalSolvers->dparam[0] = 0.0; */
 
-  options->internalSolvers->dparam[3] = 0.1;
+  /* options->internalSolvers->dparam[3] = 0.1; */
 
-  info = frictionContact_test_function(finput, options);
+  /* info = frictionContact_test_function(finput, options); */
 
-  deleteSolverOptions(options);
-  free(options);
-  fclose(finput);
-  printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");
-  return info;
+  /* deleteSolverOptions(options); */
+  /* free(options); */
+  /* fclose(finput); */
+  /* printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n"); */
+  /* return info; */
 }
