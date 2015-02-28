@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2011.
+/* Siconos-Numerics, Copyright INRIA 2005-2015
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -38,6 +38,14 @@ extern "C" long int lroundf(float x)
   return (long int)floorl(x + .5);
 }
 #endif
+
+/* This is really bad --xhub */
+#ifdef __cplusplus
+namespace std {
+  int isfinite(double x) { return _finite(x); }
+}
+#endif
+
 
 
 extern "C" double __cdecl __powidf2(double a, int b)

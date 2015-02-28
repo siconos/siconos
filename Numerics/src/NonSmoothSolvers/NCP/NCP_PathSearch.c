@@ -36,6 +36,8 @@
 
 #include "NCP_PathSearch.h"
 
+#include "SiconosCompat.h"
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"

@@ -32,9 +32,11 @@ else() # the previous instructions do not work on ubuntu 14.4 (and others)
  IF(NOT WITH_PY3)
    # we still prefer python2 for now
    SET(PythonInterp_FIND_VERSION "2")
+   SET(PythonInterp_FIND_VERSION_MAJOR "2")
    SET(PythonLibs_FIND_VERSION "2")
 ELSE(NOT WITH_PY3)
   SET(PythonInterp_FIND_VERSION "3")
+  SET(PythonInterp_FIND_VERSION_MAJOR "3")
   SET(PythonLibs_FIND_VERSION "3")
 ENDIF(NOT WITH_PY3)
  
@@ -95,9 +97,6 @@ ENDIF(SiconosIO_FOUND)
 COMPILE_WITH(Boost REQUIRED)
 
 COMPILE_WITH(GMP REQUIRED)
-
-COMPILE_WITH(BLAS REQUIRED)
-COMPILE_WITH(LAPACK REQUIRED)
 
 # contact detection
 IF(WITH_BULLET)

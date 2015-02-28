@@ -1,0 +1,8 @@
+#!/bin/sh
+
+pkg install -y cmake cblas openblas lapacke gcc gmp doxygen boost-libs gmake cppunit py27-numpy py27-scipy py27-lxml py27-pytest swig30
+
+# quick because lapacke packaging is broken
+if [ ! -f /usr/local/include/lapacke_mangling.h ]; then
+  curl http://www.netlib.org/lapack/lapacke_mangling.h -o /usr/local/include/lapacke_mangling.h
+fi

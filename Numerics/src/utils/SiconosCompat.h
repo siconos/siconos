@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2011.
+/* Siconos-Numerics, Copyright INRIA 2005-2015
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 /* This is really bad --xhub */
 #ifdef __cplusplus
 namespace std {
-  int isfinite(double x) { return _finite(x); }
+  int isfinite(double x);
 }
 #endif
 
