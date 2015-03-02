@@ -377,6 +377,7 @@ class Hdf5():
         self._shape = None
         self._shapeid = dict()
         self._static_data = None
+        self._velocities_data = None
         self._dynamic_data = None
         self._cf_data = None
         self._solv_data = None
@@ -406,6 +407,7 @@ class Hdf5():
         self._ref = group(self._data, 'ref')
         self._joints = group(self._data, 'joints')
         self._static_data = data(self._data, 'static', 9)
+        self._velocities_data = data(self._data, 'velocities', 8)
         self._dynamic_data = data(self._data, 'dynamic', 9)
         self._cf_data = data(self._data, 'cf', 15)
         self._solv_data = data(self._data, 'solv', 4)
@@ -745,6 +747,33 @@ class Hdf5():
         self._dynamic_data[current_line:, :] = np.concatenate((times, tidd,
                                                                positions),
                                                                axis=1)
+
+
+    def outputVelocities(self):
+        """
+        Output velocities of dynamic objects
+        """
+
+        current_line = self._dynamic_data.shape[0]
+
+        time = self._broadphase.model().simulation().nextTime()
+
+        velocities = self._io.velocities(self._broadphase.model())
+
+        self._velocities_data.resize(current_line + velocities.shape[0], 0)
+
+        times = np.empty((velocities.shape[0], 1))
+        times.fill(time)
+
+        tidd = np.arange(1,
+                         velocities.shape[0] + 1).reshape(
+                         velocities.shape[0],
+                         1)
+
+        self._velocities_data[current_line:, :] = np.concatenate((times, tidd,
+                                                                  velocities),
+                                                                  axis=1)
+
 
 
     def outputContactForces(self):
@@ -1111,6 +1140,8 @@ class Hdf5():
             log(simulation.computeOneStep, with_timer)()
 
             log(self.outputDynamicObjects, with_timer)()
+
+            log(self.outputVelocities, with_timer)()
 
             log(self.outputContactForces, with_timer)()
 
