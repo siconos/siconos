@@ -339,15 +339,17 @@ void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGra
   }
   else RuntimeException::selfThrow("EulerMoreauOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
 
-  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-  DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
-  InteractionsGraph& indexSet = *topo.indexSet(0);
-  DynamicalSystemsGraph::OEIterator oei, oeiend;
-  InteractionsGraph::VDescriptor ivd;
-  SP::SimpleMatrix K;
-  SP::Interaction inter;
-  for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
+//  if (_useGamma)
   {
+    Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+    DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
+    InteractionsGraph& indexSet = *topo.indexSet(0);
+    DynamicalSystemsGraph::OEIterator oei, oeiend;
+    InteractionsGraph::VDescriptor ivd;
+    SP::SimpleMatrix K;
+    SP::Interaction inter;
+    for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
+    {
       inter = DSG0.bundle(*oei);
       ivd = indexSet.descriptor(inter);
       FirstOrderR& rel = static_cast<FirstOrderR&>(*inter->relation());
@@ -358,6 +360,7 @@ void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGra
         scal(-h * _gamma, *K, W, false);
       }
     }
+  }
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
 }

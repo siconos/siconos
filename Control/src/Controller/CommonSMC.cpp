@@ -120,10 +120,13 @@ void CommonSMC::initialize(const Model& m)
     _relationSMC->setComputehFunction(SSLH::getPluginName(_pluginhName), SSLH::getPluginFunctionName(_pluginhName));
     _relationSMC->setComputegFunction(SSLH::getPluginName(_plugingName), SSLH::getPluginFunctionName(_plugingName));
 
-    _simulationSMC->setComputeResiduY(true);
-    _simulationSMC->setComputeResiduR(true);
-    _simulationSMC->setUseRelativeConvergenceCriteron(false);
+    if (_computeResidus)
+    {
+      _simulationSMC->setComputeResiduY(true);
+      _simulationSMC->setComputeResiduR(true);
+      _simulationSMC->setUseRelativeConvergenceCriteron(false);
     }
+  }
   else
   {
     if (!_plugineName.empty())

@@ -279,11 +279,11 @@ public:
   };
 
   /** set the boolean to indicate that we use gamma
-   *  \param a bool
+   *  \param b true if gamma has to be used, false otherwise
    */
-  inline void setUseGamma(bool newUseGamma)
+  inline void setUseGamma(bool b)
   {
-    _useGamma = newUseGamma;
+    _useGamma = b;
   };
 
   /** get bool gammaForRelation for the relation

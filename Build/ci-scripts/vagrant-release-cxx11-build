@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 WORK_DIR=$1
 

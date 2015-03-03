@@ -54,10 +54,13 @@ void LinearSMC::actuate()
   }
 
   *(_DS_SMC->x()) = _sensor->y();
+  *(_DS_SMC->xMemory()->getSiconosVector(0)) = _sensor->y();
 
   Type::Siconos dsType = Type::value(*_DS_SMC);
   if (dsType == Type::FirstOrderNonLinearDS)
   {
+    _DS_SMC->computef(_simulationSMC->startingTime());
+    _DS_SMC->swapInMemory();
 //    _DS_SMC->computef(_simulationSMC->startingTime());
 //    *_DS_SMC->fold() = *_DS_SMC->f();
   }

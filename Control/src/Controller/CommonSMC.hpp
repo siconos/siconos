@@ -104,6 +104,7 @@ protected:
 
   /** SP::EventsManager of the SMC Simulation */
   SP::EventsManager _eventsManager;
+
   /** SP::NonSmoothLaw for computing the control law */
   SP::NonSmoothLaw _nsLawSMC;
 
@@ -119,6 +120,9 @@ protected:
   /** Do not use the state-continuous equivaluent control \f$u^{eq}\f$ */
   bool _noUeq;
 
+  /** If true perform the computation of the residus in the Newton loop if needed */
+  bool _computeResidus;
+
   /** Compute the equivalent part of the control \f$u^{eq}\f$.
    * The method used here is to discretize the continuous-time
    * formula using a theta method
@@ -133,7 +137,7 @@ public:
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor): Actuator(type, sensor),
     _indx(0), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS), _precision(1e-8),
-    _thetaSMC(0.5), _noUeq(false) {}
+    _thetaSMC(0.5), _noUeq(false), _computeResidus(true) {}
 
   /** Constructor with a TimeDiscretisation, a Model and two matrices
    * \param type the type of the SMC Actuator
@@ -143,7 +147,7 @@ public:
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std11::shared_ptr<SimpleMatrix>()):
     Actuator(type, sensor), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS),
-    _precision(1e-8), _thetaSMC(0.5), _noUeq(false)
+    _precision(1e-8), _thetaSMC(0.5), _noUeq(false), _computeResidus(true)
   {
     _B = B;
   }
@@ -249,6 +253,15 @@ public:
     _noUeq = b;
   };
 
+  /** Disable (or enable) the computation of the residus on the Newton loop.
+   * This has an incidence only if the Relation is nonlinear
+   * \param b disable the computation of the residus
+   */
+  inline void setComputeResidus(bool b)
+  {
+    _computeResidus = b;
+  };
+
   /** This is derived in child classes if they need to copy the TimeDiscretisation
    * associated with this Sensor
   *  \param td the TimeDiscretisation for this Sensor
@@ -270,6 +283,11 @@ public:
    * \return the Model used in the SMC
    */
   virtual SP::Model getInternalModel() const { return _SMC; };
+
+  /** get the Integrator used in the SMC
+   * \return the Integrator used in the SMC
+   */
+  OneStepIntegrator& getInternalOSI() const { return *_integratorSMC; };
 
 };
 #endif

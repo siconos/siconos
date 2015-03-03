@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 //  (std11::static_pointer_cast<LsodarOSI>(simLsodar->integrator()))->setMaxOrder(0, 5);
   simLsodar->run();
   SimpleMatrix& data = *simLsodar->data();
-  ioMatrix::write("ElectroPneumaticItw.dat", "ascii", data, "noDim");
+  ioMatrix::write("SMCElectroPneumaticItw.dat", "ascii", data, "noDim");
   std::cout << std::endl << simLsodar->dataLegend() << std::endl;
 
 /*
