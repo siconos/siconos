@@ -230,13 +230,15 @@ if(NOT LAPACK_FOUND)
     ## MKL : already done thanks to blas
     
     ## OpenBLAS ##
+    # this can come in 3 flavors: no LAPACK, fortran LAPACK, LAPACKE
+    # the problem with the second option is that we have no headers ...
+    # the last case occurs for instance on Fedora (up to 21 at time of writing)
     if((NOT LAPACK_LIBRARIES)
 	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "openblas")))
       message(STATUS "Try to find lapack in openblas ...")
-      
       check_lapack_libraries(
 	LAPACK_LIBRARIES
-	LAPACK
+	LAPACKE
 	cheev
 	""
 	"openblas"
@@ -246,7 +248,6 @@ if(NOT LAPACK_FOUND)
 	set(WITH_LAPACK "openblas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
 	set(LAPACKE_HEADER lapacke.h)
 	set(LAPACK_INCLUDE_SUFFIXES openblas/lapacke)
-	set(CLAPACK_HEADER clapack.h)
       else()
 	set(WITH_LAPACK "" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
       endif(LAPACK_LIBRARIES)
@@ -400,7 +401,7 @@ if(NOT LAPACK_FOUND)
 	  endif()
 	endif()
 
-      else() # The case which is supposed to always work
+      else(APPLE) # The case which is supposed to always work
 	if(LAPACKE_HEADER)
 	  find_path(LAPACK_INCLUDE_DIRS 
 	    NAMES ${LAPACKE_HEADER}
@@ -457,9 +458,8 @@ if(NOT LAPACK_FOUND)
       set(HAS_OpenBLAS_LAPACK 1 CACHE BOOL "Blas/Lapack come from OpenBlas ")
       set(LAPACK_SUFFIX)
       if(HAS_LAPACKE)
-	set(LAPACK_PREFIX "LAPACKE_")
+        set(LAPACK_PREFIX "LAPACKE_")
       else()
-	set(LAPACK_PREFIX "clapack_")
       endif()
     else()
       set(HAS_GenericCLAPACK 1 CACHE BOOL "Lapack is available from an unknown version.")

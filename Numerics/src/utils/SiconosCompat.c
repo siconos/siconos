@@ -23,6 +23,10 @@
 
 #ifdef _MSC_VER
 
+// before MSVC 2013
+#if _MSC_VER < 1800
+#include <float.h>
+
 float _sqrtf(float x)
 {
   return sqrtf(x);
@@ -32,19 +36,25 @@ float _logf(float x)
   return logf(x);
 }
 
-#if _MSC_VER < 1800
 extern "C" long int lroundf(float x)
 {
   return (long int)floorl(x + .5);
 }
-#endif
 
-/* This is really bad --xhub */
+// Classify floating point number - usually defined in math.h
+extern "C" int __fpclassify(double x)
+{
+  return _fpclass(x);
+}/* This is really bad --xhub */
+
 #ifdef __cplusplus
 namespace std {
   int isfinite(double x) { return _finite(x); }
 }
+
 #endif
+
+#endif /* _MSC_VER < 1800 */
 
 
 
@@ -64,16 +74,4 @@ extern "C" double __cdecl __powidf2(double a, int b)
   return recip ? 1 / r : r;
 }
 
-#endif
-
-#ifdef _MSC_VER
-
-#include <float.h>
-
-// Classify floating point number - usually defined in math.h
-extern "C" int __fpclassify(double x)
-{
-  return _fpclass(x);
-}
-
-#endif
+#endif /* _MSC_VER */
