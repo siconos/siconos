@@ -57,6 +57,7 @@ void ControlZOHSimulation::run()
   boost::progress_display show_progress(_N);
   boost::timer time;
   time.restart();
+
   TimeStepping& sim = static_cast<TimeStepping&>(*_processSimulation);
 
   while (sim.hasNextEvent())
@@ -74,7 +75,10 @@ void ControlZOHSimulation::run()
       (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);
       ++k;
-      ++show_progress;
+      if (!_silent)
+      {
+        ++show_progress;
+      }
     }
   }
 

@@ -33,7 +33,7 @@
 #include "ControlSimulation_impl.hpp"
 
 ControlSimulation::ControlSimulation(double t0, double T, double h):
-  _t0(t0), _T(T), _h(h), _theta(0.5), _elapsedTime(0.0), _N(0), _saveOnlyMainSimulation(false)
+  _t0(t0), _T(T), _h(h), _theta(0.5), _elapsedTime(0.0), _N(0), _saveOnlyMainSimulation(false), _silent(false)
 {
   _model.reset(new Model(_t0, _T));
   _processTD.reset(new TimeDiscretisation(_t0, _h));

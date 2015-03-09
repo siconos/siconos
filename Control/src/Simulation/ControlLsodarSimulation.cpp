@@ -81,7 +81,10 @@ void ControlLsodarSimulation::run()
       (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);
       ++k;
-      ++show_progress;
+      if (!_silent)
+      {
+       ++show_progress;
+      }
     }
   }
 

@@ -88,6 +88,7 @@ void ExplicitLinearSMC::actuate()
     }
   }
 
+  *_lambda = *_us;
   *_u = *_us;
   *_u += *_ueq;
 }

@@ -73,6 +73,9 @@ protected:
   /** Save only the data in the main Simulation*/
   bool _saveOnlyMainSimulation;
 
+  /** If true, do not show progress of the simulation */
+  bool _silent;
+
   /** Matrix for saving result */
   SP::SimpleMatrix _dataM;
 
@@ -204,7 +207,11 @@ public:
   inline void setSaveOnlyMainSimulation(bool v)
   {
     _saveOnlyMainSimulation = v;
-  }
+  };
+
+  /** Set the simulation to be silent, e.g. do not show any progress bar
+   * \param s is true is silent, else display progress bar */
+  void silent(bool s = true) { _silent = s; };
 
   /** Run the simulation */
   virtual void run() = 0;
