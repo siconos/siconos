@@ -184,8 +184,9 @@ void CADMBTB_moveModelFromModel(unsigned int idModel1, int unsigned idModel2)
   assert(sNumberOfObj>idModel1&&"CADMBTB_moveModelFromModel idModel1 out of range");
   assert(sNumberOfObj>idModel2&&"CADMBTB_moveModelFromModel idModel2 out of range");
   sTopoDS[idModel1].Move(sTrsfTopoDS[idModel2]);
-  /*Move is suffisient, but the following code merge the list contains in the TopLoc in an unique item.
-    That's necessary because of performance.*/
+  /* Move is sufficient, but the following code merge
+     the list contains in the TopLoc in an unique item.
+     That's necessary because of performance. */
   const TopLoc_Location& aLoc = sTopoDS[idModel1].Location();
   const gp_Trsf& T = aLoc.Transformation();
   TopLoc_Location aLocWithoutList(T);
@@ -199,7 +200,18 @@ void CADMBTB_moveGraphicalModelFromModel(unsigned int idGraphicModel, unsigned i
     return;
   assert(sNumberOfObj>idGraphicModel &&"CADMBTB_moveGraphicModelFromModel idGraphicModel out of range");
   assert(sNumberOfObj>idModel &&"CADMBTB_moveGraphicModelFromModel idModel out of range");
-  //spAISToposDS[idGraphicModel]->SetTransformation(&(sGeomTrsf[idModel]),false,false);
+  // First tentative :
+  // spAISToposDS[idGraphicModel]->SetTransformation(&(sGeomTrsf[idModel]),true,false);
+
+  //Second tentative
+  //Handle_AIS_Shape aAS = Handle(AIS_Shape)::DownCast(spAISToposDS[idGraphicModel]);
+  //aAS->SetTransformation(&(sGeomTrsf[idModel]),true,false);
+
+  //Third attempt
+
+  const TopLoc_Location& aLoc = sTopoDS[idModel].Location();
+  pAIS_InteractiveContext->SetLocation(spAISToposDS[idGraphicModel], aLoc);
+
   //spAISToposDS1->SetTransformation(&(sGeomTrsf1),false,false);
 }
 
