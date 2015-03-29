@@ -1,26 +1,30 @@
-SET_SOURCE_FILES_PROPERTIES(Numerics.i PROPERTIES CPLUSPLUS ON)
-SET_SOURCE_FILES_PROPERTIES(Kernel.i PROPERTIES CPLUSPLUS ON)
-SET_SOURCE_FILES_PROPERTIES(IO.i PROPERTIES CPLUSPLUS ON)
 
-# -dirvtable      - Generate a pseudo virtual table for directors for faster dispatch \n\
-SET(SWIG_DEFS "${SWIG_DEFS};-dirvtable;-keyword")
+# get python dist-packages
+# warning python may not know cmake_install_prefix
+# installation in standard python dist package with:
+# -DSTD_PYTHON_DIST_PACKAGES=TRUE 
+#
+# installation in specific place:
+# -DPYTHON_DIST_PACKAGES=/my/specific/place
+
+IF(STD_PYTHON_DIST_PACKAGES)
+  EXECUTE_PROCESS ( COMMAND 
+    ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+    OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+ELSE(STD_PYTHON_DIST_PACKAGES)
+  IF(NOT PYTHON_DIST_PACKAGES)
+    EXECUTE_PROCESS ( COMMAND 
+      ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib;print(get_python_lib(0,0,\"\"))"
+      OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  ENDIF(NOT PYTHON_DIST_PACKAGES)
+ENDIF(STD_PYTHON_DIST_PACKAGES)
+
+MESSAGE(STATUS "PYTHON_DIST_PACKAGES : ${PYTHON_DIST_PACKAGES}")
 
 
-IF(WITH_FCLIB)
-  SET(SWIG_DEFS "${SWIG_DEFS};-DWITH_FCLIB")
-  SET_SOURCE_FILES_PROPERTIES(FCLib.i PROPERTIES CPLUSPLUS ON)
-ENDIF()
-
-IF(HAVE_SICONOS_IO)
-  SET(SWIG_DEFS "${SWIG_DEFS};-DWITH_IO")
-ENDIF()
-
-SET_SOURCE_FILES_PROPERTIES(
-  Numerics.i 
-  Kernel.i 
-  IO.i
-  FCLib.i
-  PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_SOURCE_DIR}/src/swig/Siconos;-Wall;${SWIG_DEFS}")
+INCLUDE(SiconosSwigHelper)
 
 # cf LIBRARY_PROJECT_SETUP, but we do not use it here.
 
@@ -33,7 +37,7 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 # the RPATH to be used when installing
 ASSERT(CMAKE_INSTALL_LIBDIR)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_LIBDIR}")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 
 # don't add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
@@ -126,36 +130,13 @@ IF(DOXYGEN_FOUND AND NOT NO_DOXY2SWIG)
     ARGS ${KERNEL_DOCSTRINGS_FILES} > Kernel-docstrings.i
     COMMENT "Kernel docstrings concatenation")
 
+  #
+  # dependencies for generated sources
+  #
   ADD_CUSTOM_TARGET(numerics_docstrings DEPENDS Numerics-docstrings.i)
   ADD_CUSTOM_TARGET(kernel_docstrings DEPENDS Kernel-docstrings.i)
 
 
-  #
-  # dependencies for generated sources
-  #
-  SET(SWIG_MODULE_Kernel_EXTRA_DEPS
-    KernelTypes.i
-    KernelRegistration.i
-    solverOptions.i
-    FrictionContactProblem.i
-    handleException.i
-    start.i
-    end.i
-    numpy.i
-    pyRegister.i
-    graph.i
-    Kernel-docstrings.i)
-  
-  SET(SWIG_MODULE_Numerics_EXTRA_DEPS
-    KernelTypes.i
-    KernelRegistration.i
-    solverOptions.i
-    FrictionContactProblem.i
-    start.i
-    end.i
-    numpy.i
-    pyRegister.i
-    Numerics-docstrings.i)
 ELSE()
   ADD_CUSTOM_COMMAND(OUTPUT Numerics-docstrings.i
     DEPENDS ${NUMERICS_DOCSTRINGS_FILES}
@@ -172,48 +153,67 @@ ELSE()
 
 ENDIF()
 
-  # WARNING ${swig_generated_file_fullname} is overriden 
-# save it in a specific var if needed
-SWIG_ADD_MODULE(Numerics python Numerics.i)
-SET(Numerics_generated_file_fullname ${swig_generated_file_fullname})
-MESSAGE(STATUS "Numerics generated files ${swig_generated_file_fullname}")
 
-SWIG_ADD_MODULE(Kernel python Kernel.i)
-SET(Kernel_generated_file_fullname ${swig_generated_file_fullname})
-MESSAGE(STATUS "Kernel generated files ${swig_generated_file_fullname}")
+###############################################################################################
+# swig module declaration
 
-IF(HAVE_SICONOS_IO)
-  SWIG_ADD_MODULE(IO python IO.i)
-  SET(IO_generated_file_fullname ${swig_generated_file_fullname})
-  MESSAGE(STATUS "IO generated files ${swig_generated_file_fullname}")
-  ADD_DEPENDENCIES(${SWIG_MODULE_IO_REAL_NAME} ${SWIG_MODULE_Kernel_REAL_NAME})
-ENDIF()
+# -dirvtable      - Generate a pseudo virtual table for directors for faster dispatch
+SET(SWIG_DEFS "${SWIG_DEFS};-dirvtable;")
 
 IF(WITH_FCLIB)
-  SWIG_ADD_MODULE(FCLib python FCLib.i)
-  SET(FCLib_generated_file_fullname ${swig_generated_file_fullname})
-  MESSAGE(STATUS "FCLib generated files ${swig_generated_file_fullname}")
+  SET(SWIG_DEFS "${SWIG_DEFS};-DWITH_FCLIB")
+ENDIF()
+
+IF(HAVE_SICONOS_IO)
+  SET(SWIG_DEFS "${SWIG_DEFS};-DWITH_IO")
+ENDIF()
+
+SET(SWIG_MODULE_Numerics_EXTRA_DEPS
+    ../KernelTypes.i
+    ../solverOptions.i
+    ../start.i
+    ../end.i
+    ../numpy.i
+    ../pyRegister.i)
+SET(SWIG_MODULE_Kernel_EXTRA_DEPS
+    ../KernelTypes.i
+    KernelRegistration.i
+    ../solverOptions.i
+    ../handleException.i
+    ../start.i
+    ../end.i
+    ../numpy.i
+    ../pyRegister.i
+    ../graph.i)
+
+
+
+ADD_SUBDIRECTORY(Numerics)
+
+ADD_SUBDIRECTORY(Kernel)
+
+IF(WITH_FCLIB)
+  ADD_SUBDIRECTORY(FCLib)
+ENDIF()
+
+IF(HAVE_SICONOS_IO)
+  ADD_SUBDIRECTORY(IO)
 ENDIF()
 
 IF(HAVE_SICONOS_MECHANICS)
-  SUBDIRS(Mechanics)
+  ADD_SUBDIRECTORY(Mechanics)
 ENDIF()
 
 IF(HAVE_SICONOS_CONTROL)
-  SUBDIRS(Control)
+  ADD_SUBDIRECTORY(Control)
 ENDIF(HAVE_SICONOS_CONTROL)
-
-
-
 
 #
 # dependencies for libraries compilation
 #
-ADD_DEPENDENCIES(${SWIG_MODULE_Kernel_REAL_NAME} ${SWIG_MODULE_Numerics_REAL_NAME})
-
 IF(DOXYGEN_FOUND)
-  ADD_DEPENDENCIES(${SWIG_MODULE_Numerics_REAL_NAME} numerics_docstrings)
-  ADD_DEPENDENCIES(${SWIG_MODULE_Kernel_REAL_NAME} kernel_docstrings)
+  ADD_DEPENDENCIES(${SWIG_MODULE_Numerics_DEPNAME} numerics_docstrings)
+  ADD_DEPENDENCIES(${SWIG_MODULE_Kernel_DEPNAME} kernel_docstrings)
 ENDIF()
 
 #
@@ -223,81 +223,27 @@ ENDIF()
 MESSAGE(STATUS "Link directories : ${${PROJECT_NAME}_LINK_DIRECTORIES}")
 MESSAGE(STATUS "Link libraries : ${${PROJECT_NAME}_LINK_LIBRARIES}")
 
-SWIG_LINK_LIBRARIES(Numerics ${PYTHON_LIBRARIES} 
-  ${${PROJECT_NAME}_LINK_LIBRARIES}
-  ${FORTRAN_LIBRARIES})
-
-SWIG_LINK_LIBRARIES(Kernel ${PYTHON_LIBRARIES} 
-  ${${PROJECT_NAME}_LINK_LIBRARIES})
-
-IF(HAVE_SICONOS_IO)
-  SWIG_LINK_LIBRARIES(IO ${PYTHON_LIBRARIES} 
-    ${${PROJECT_NAME}_LINK_LIBRARIES})
-ENDIF()
-
-IF(WITH_FCLIB)
-  SWIG_LINK_LIBRARIES(FCLib ${PYTHON_LIBRARIES} 
-    ${${PROJECT_NAME}_LINK_LIBRARIES})
-ENDIF()
-
-
 # Generate plugins for tests here since if we put it in runtest.py,
 # the siconos command is launched with the same directory multiple times
 # and we then meet our dear friend "race condition"
 IF(WITH_TESTING)
   IF(CMAKE_TOOLCHAIN_FILE)
-    ADD_CUSTOM_COMMAND(TARGET ${SWIG_MODULE_Numerics_REAL_NAME}
-      POST_BUILD
+    ADD_CUSTOM_TARGET(siconos_plugins
       COMMAND ${SiconosKernel_EXE_DIR}/siconos
-      ARGS --noexec --generator="${CMAKE_GENERATOR}"
+      --noexec --generator="${CMAKE_GENERATOR}"
       ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py
       -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
       COMMENT "Generating plugins for tests")
   ELSE()
-    ADD_CUSTOM_COMMAND(TARGET ${SWIG_MODULE_Numerics_REAL_NAME}
-      POST_BUILD
+    ADD_CUSTOM_TARGET(siconos_plugins
       COMMAND ${SiconosKernel_EXE_DIR}/siconos
-      ARGS --noexec --generator="${CMAKE_GENERATOR}"
+      --noexec --generator="${CMAKE_GENERATOR}"
       ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py
       COMMENT "Generating plugins for tests")
   ENDIF()
+  ADD_DEPENDENCIES(${SWIG_MODULE_Numerics_DEPNAME} siconos_plugins)
 ENDIF()
 
-
-# get python dist-packages
-# warning python may not know cmake_install_prefix
-# installation in standard python dist package with:
-# -DSTD_PYTHON_DIST_PACKAGES=TRUE 
-#
-# installation in specific place:
-# -DPYTHON_DIST_PACKAGES=/my/specific/place
-
-IF(STD_PYTHON_DIST_PACKAGES)
-  EXECUTE_PROCESS ( COMMAND 
-    ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
-    OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-ELSE(STD_PYTHON_DIST_PACKAGES)
-  IF(NOT PYTHON_DIST_PACKAGES)
-    EXECUTE_PROCESS ( COMMAND 
-      ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib;print(get_python_lib(0,0,\"\"))"
-      OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-  ENDIF(NOT PYTHON_DIST_PACKAGES)
-ENDIF(STD_PYTHON_DIST_PACKAGES)
-
-MESSAGE(STATUS "PYTHON_DIST_PACKAGES : ${PYTHON_DIST_PACKAGES}")
-
-INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Numerics.py 
-  DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
-
-INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Kernel.py 
-  DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
-
-IF(HAVE_SICONOS_IO)
-  INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/IO.py 
-    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
-ENDIF()
 
 CONFIGURE_FILE(__init__.py.in ${CMAKE_CURRENT_BINARY_DIR}/__init__.py)
 
@@ -319,29 +265,7 @@ INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/siconos_pythonpath DESTINATION
   share/siconos-front-end)
 
-MESSAGE(STATUS "swig modules: ${SWIG_MODULE_Numerics_REAL_NAME},  ${SWIG_MODULE_Kernel_REAL_NAME}")
-
-INSTALL(TARGETS ${SWIG_MODULE_Numerics_REAL_NAME} ${SWIG_MODULE_Kernel_REAL_NAME}
-  DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
-
-IF(HAVE_SICONOS_IO)
-  INSTALL(TARGETS ${SWIG_MODULE_IO_REAL_NAME}
-    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
-ENDIF()
-
-IF(WITH_FCLIB)
-  INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/FCLib.py 
-    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
-  INSTALL(TARGETS ${SWIG_MODULE_FCLib_REAL_NAME}
-    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
-ENDIF()
-
-
-INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/KernelTypes.i
-	      ${CMAKE_CURRENT_SOURCE_DIR}/Kernel.i
-              ${CMAKE_CURRENT_SOURCE_DIR}/IO.i
-	      ${CMAKE_CURRENT_SOURCE_DIR}/addons.hpp
-  DESTINATION share/siconos-front-end/swig)
+MESSAGE(STATUS "swig modules: ${SWIG_MODULE_Numerics_DEPNAME}, ${SWIG_MODULE_Kernel_DEPNAME}")
 
 #INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/KernelRegistration.i DESTINATION include/Siconos/FrontEnd)
 #INSTALL(FILES ${CMAKE_BINARY_DIR}/src/swig/Siconos/Kernel-docstrings.i DESTINATION include/Siconos/FrontEnd)
@@ -350,7 +274,7 @@ GET_FILENAME_COMPONENT(SiconosKernel_DIR ${SiconosKernel_EXE_DIR} PATH)
 SET(SiconosKernel_XML_SCHEMA "${SiconosKernel_DIR}/share/siconos-kernel")
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/functions/fromXml.py.in
-	${CMAKE_BINARY_DIR}/src/swig/fromXml.py)
+  ${CMAKE_BINARY_DIR}/src/swig/fromXml.py)
 
 INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/functions/SiconosXMLParser.py
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/functions)

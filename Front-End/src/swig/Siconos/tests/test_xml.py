@@ -57,7 +57,7 @@ def test_xml1():
     print("End of computation - Number of iterations done: {:}".format(k))
     print("====> Output file writing ...")
     dataPlot.resize(k, outputSize)
-    np.savetxt("result.dat", dataPlot)
+    np.savetxt("BBallTS.dat", dataPlot)
 
     # Comparison with a reference file
     dataPlotRef = SK.getMatrix(SK.SimpleMatrix('./data/BBallTSXML.ref'))
@@ -131,7 +131,7 @@ def test_xml2():
 
     # dataPlot (ascii) output
     # ioMatrix::write(dataPlot,"noDim")
-    np.savetxt("result.dat", dataPlot)
+    np.savetxt("BallInBowl.dat", dataPlot)
 
 
 def test_xml3():
@@ -191,7 +191,7 @@ def test_xml3():
     print("Number of iterations done: {:}".format(k))
 
     # dataPlot (ascii) output
-    np.savetxt("result.dat",  dataPlot)
+    np.savetxt("DryFriction.dat",  dataPlot)
 
 
 @xfail
@@ -271,7 +271,7 @@ def test_xml4():
     print("Number of iterations done: {:}".format(k))
 
     # dataPlot (ascii) output
-    np.savetxt("result.dat", dataPlot)
+    np.savetxt("CamFollower.dat", dataPlot)
 
 
 def test_xml5():
@@ -333,7 +333,7 @@ def test_xml5():
 
     # --- Output files ---
     dataPlot.resize(k, outputSize)
-    np.savetxt("result.dat",  dataPlot)
+    np.savetxt("BBallED.dat",  dataPlot)
     # Comparison with a reference file
     dataPlotRef = SK.getMatrix(SK.SimpleMatrix("./data/BouncingBallEDXml.ref"))
 
@@ -394,4 +394,4 @@ def test_xml6():
     print("Number of iterations done: {:}".format(k))
 
     # dataPlot (ascii) output
-    np.savetxt("result.dat", dataPlot)
+    np.savetxt("BeadPlan.dat", dataPlot)

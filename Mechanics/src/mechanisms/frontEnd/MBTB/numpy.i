@@ -3,7 +3,7 @@
 
 %{
 #ifndef SWIG_FILE_WITH_INIT
-#  define NO_IMPORT_ARRAY
+#define NO_IMPORT_ARRAY
 #endif
 #include "stdio.h"
 #include <numpy/arrayobject.h>
@@ -107,40 +107,71 @@
     if (PyDict_Check(    py_obj)) return "dict"        ;
     if (PyList_Check(    py_obj)) return "list"        ;
     if (PyTuple_Check(   py_obj)) return "tuple"       ;
+%#if PY_MAJOR_VERSION < 3
     if (PyFile_Check(    py_obj)) return "file"        ;
     if (PyModule_Check(  py_obj)) return "module"      ;
     if (PyInstance_Check(py_obj)) return "instance"    ;
+%#endif
 
     return "unkown type";
   }
 
   /* Given a NumPy typecode, return a string describing the type.
    */
-  const char* typecode_string(int typecode) {
-    static const char* type_names[25] = {"bool", "byte", "unsigned byte",
-                                   "short", "unsigned short", "int",
-                                   "unsigned int", "long", "unsigned long",
-                                   "long long", "unsigned long long",
-                                   "float", "double", "long double",
-                                   "complex float", "complex double",
-                                   "complex long double", "object",
-                                   "string", "unicode", "void", "ntypes",
-                                   "notype", "char", "unknown"};
+  const char* typecode_string(int typecode)
+  {
+    static const char* type_names[25] = {"bool",
+                                         "byte",
+                                         "unsigned byte",
+                                         "short",
+                                         "unsigned short",
+                                         "int",
+                                         "unsigned int",
+                                         "long",
+                                         "unsigned long",
+                                         "long long",
+                                         "unsigned long long",
+                                         "float",
+                                         "double",
+                                         "long double",
+                                         "complex float",
+                                         "complex double",
+                                         "complex long double",
+                                         "object",
+                                         "string",
+                                         "unicode",
+                                         "void",
+                                         "ntypes",
+                                         "notype",
+                                         "char",
+                                         "unknown"};
     return typecode < 24 ? type_names[typecode] : type_names[24];
   }
 
-  /* Make sure input has correct numpy type.  Allow character and byte
-   * to match.  Also allow int and long to match.  This is deprecated.
-   * You should use PyArray_EquivTypenums() instead.
+  /* Make sure input has correct numpy type.  This now just calls
+     PyArray_EquivTypenums().
    */
-  int type_match(int actual_type, int desired_type) {
+  int type_match(int actual_type,
+                 int desired_type)
+  {
     return PyArray_EquivTypenums(actual_type, desired_type);
   }
+
+%#ifdef SWIGPY_USE_CAPSULE
+  void free_cap(PyObject * cap)
+  {
+    void* array = (void*) PyCapsule_GetPointer(cap,SWIGPY_CAPSULE_NAME);
+    if (array != NULL) free(array);
+  }
+%#endif
+
+
 }
 
 /**********************************************************************/
 
-%fragment("NumPy_Object_to_Array", "header",
+%fragment("NumPy_Object_to_Array",
+          "header",
           fragment="NumPy_Backward_Compatibility",
           fragment="NumPy_Macros",
           fragment="NumPy_Utilities")
@@ -149,7 +180,8 @@
    * legal.  If not, set the python error string appropriately and
    * return NULL.
    */
-  PyArrayObject* obj_to_array_no_conversion(PyObject* input, int typecode)
+  PyArrayObject* obj_to_array_no_conversion(PyObject* input,
+                                            int        typecode)
   {
     PyArrayObject* ary = NULL;
     if (is_array(input) && (typecode == NPY_NOTYPE ||
@@ -168,11 +200,12 @@
     }
     else
     {
-      const char * desired_type = typecode_string(typecode);
-      const char * actual_type  = pytype_string(input);
+      const char* desired_type = typecode_string(typecode);
+      const char* actual_type  = pytype_string(input);
       PyErr_Format(PyExc_TypeError,
                    "Array of type '%s' required.  A '%s' was given",
-                   desired_type, actual_type);
+                   desired_type,
+                   actual_type);
       ary = NULL;
     }
     return ary;
@@ -183,11 +216,12 @@
    * correct type.  On failure, the python error string will be set and
    * the routine returns NULL.
    */
-  PyArrayObject* obj_to_array_allow_conversion(PyObject* input, int typecode,
-                                               int* is_new_object)
+  PyArrayObject* obj_to_array_allow_conversion(PyObject* input,
+                                               int       typecode,
+                                               int*      is_new_object)
   {
     PyArrayObject* ary = NULL;
-    PyObject* py_obj;
+    PyObject*      py_obj;
     if (is_array(input) && (typecode == NPY_NOTYPE ||
                             PyArray_EquivTypenums(array_type(input),typecode)))
     {
@@ -209,8 +243,10 @@
    * not contiguous, create a new PyArrayObject using the original data,
    * flag it as a new object and return the pointer.
    */
-  PyArrayObject* make_contiguous(PyArrayObject* ary, int* is_new_object,
-                                 int min_dims, int max_dims)
+  PyArrayObject* make_contiguous(PyArrayObject* ary,
+                                 int*           is_new_object,
+                                 int            min_dims,
+                                 int            max_dims)
   {
     PyArrayObject* result;
     if (array_is_contiguous(ary))
@@ -221,9 +257,9 @@
     else
     {
       result = (PyArrayObject*) PyArray_ContiguousFromObject((PyObject*)ary,
-                                                             array_type(ary),
-                                                             min_dims,
-                                                             max_dims);
+                                                              array_type(ary),
+                                                              min_dims,
+                                                              max_dims);
       *is_new_object = 1;
     }
     return result;

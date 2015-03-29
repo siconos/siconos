@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-print '##################################################################'
-print '############## Siconos/Mechanics mechanisms module ###############'
-print '##################################################################'
+print('##################################################################')
+print('############## Siconos/Mechanics mechanisms module ###############')
+print('##################################################################')
 
 
 import numpy
@@ -12,10 +12,10 @@ import sys
 
 
 install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
-print "install_path :", install_path
+print("install_path :", install_path)
 
 build_path= "@CMAKE_BINARY_DIR@" +"/src/mechanisms/"
-print "build_path : ", build_path 
+print("build_path : ", build_path) 
 
 SiconosMechanisms_BUILD=build_path
 #SiconosMechanisms_DIR=os.environ.get("SiconosMechanisms_DIR")
@@ -29,17 +29,17 @@ import cadmbtb
 my_PI=3.14159265
 
 # would be better in install_path/share ...
-execfile(install_path+"/mbtbDefaultOptions.py")
-print "siconos-mechanisms.py: ", install_path+"/mbtbDefaultOptions.py loaded"
+exec(compile(open(install_path+"/mbtbDefaultOptions.py").read(), install_path+"/mbtbDefaultOptions.py", 'exec'))
+print("siconos-mechanisms.py: ", install_path+"/mbtbDefaultOptions.py loaded")
  
 try:
-   execfile("mbtbLocalOptions.py")
-   print "siconos-mechanisms.py: mbtbLocalOptions.py loaded"
+   exec(compile(open("mbtbLocalOptions.py").read(), "mbtbLocalOptions.py", 'exec'))
+   print("siconos-mechanisms.py: mbtbLocalOptions.py loaded")
 except :
-   print "siconos-mechanisms.py, info: mbtbLocalOptions.py not defined"
+   print("siconos-mechanisms.py, info: mbtbLocalOptions.py not defined")
 
-execfile("bodydef.py")
-print "run.py: bodydef.py loaded"
+exec(compile(open("bodydef.py").read(), "bodydef.py", 'exec'))
+print("run.py: bodydef.py loaded")
 
 if with3D:
     from OCC.BRepPrimAPI import *
@@ -78,7 +78,7 @@ for idBody in range(NBBODIES):
    cadmbtb.CADMBTB_setShapeDParam(0,idBody,bodyTrans[idBody]) # visu
 
 #build dynamical systems
-print "User plugin : ", plugin
+print("User plugin : ", plugin)
 
 for idBody in range(NBBODIES):
     mbtb.MBTB_BodyLoadCADFile(idBody,afile[idBody],bodyDraw[idBody])
@@ -95,7 +95,7 @@ try:
    for idJoint in range(NBJOINTS):
       mbtb.MBTB_setJointPoints(idJoint,jointPoints[2*idJoint],jointPoints[2*idJoint+1])
 except NameError:
-   print "run.py, info: joint points not defined."
+   print("run.py, info: joint points not defined.")
 
 for idArtefact in range(NBARTEFACTS):
    cadmbtb.CADMBTB_loadArtefactCADFile(Artefactfile[idArtefact],ArtefactTrans[idArtefact])

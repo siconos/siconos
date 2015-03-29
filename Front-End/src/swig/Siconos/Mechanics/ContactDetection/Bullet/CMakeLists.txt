@@ -3,9 +3,5 @@ IF(HAVE_BULLET)
   IF(BULLET_USE_DOUBLE_PRECISION)
     SET(SWIG_DEFS "${SWIG_DEFS};-DBT_USE_DOUBLE_PRECISION")
   ENDIF()
-  MECHANICS_ADD_MODULE(BulletWrap ContactDetection/Bullet)
+  SICONOS_SWIG_SUBMODULE(Machanics "BulletWrap;" ContactDetection/Bullet)
 ENDIF()
-
-INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
-  DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/Mechanics/ContactDetection/Bullet)
-

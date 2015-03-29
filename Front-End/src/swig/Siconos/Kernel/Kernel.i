@@ -89,8 +89,6 @@
 // cannot compile wrapper
 %ignore statOut;
 
-// mandatory !
-%rename (lambda_) lambda;
 
  // common declarations with upper modules : Mechanics, IO, ...
 %include handleException.i
@@ -166,7 +164,6 @@ namespace std
 
 %include NumericsOptions.h
 %include solverOptions.i
-%include FrictionContactProblem.i
 
 // access NumericsMatrix cf Numerics.i
 %typemap(out) (std11::shared_ptr<NumericsMatrix>) {
@@ -311,11 +308,6 @@ typedef __mpz_struct mpz_t[1];
 
 %ignore Question<unsigned int>;
 %template (quint) Question<unsigned int>;
-
-// suppress warning
-%ignore  STD11::enable_shared_from_this< Hashed >;
-%template (sharedHashed) STD11::enable_shared_from_this< Hashed >;
-
 
 
 %ignore OSNSMatrix::updateSizeAndPositions;

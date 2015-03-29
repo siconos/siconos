@@ -25,7 +25,7 @@
 %{
 #include <SiconosKernel.hpp>
 %}
-%import Kernel.i
+%import Kernel/Kernel.i
 
 %include pyRegister.i
 

@@ -62,3 +62,6 @@
               data, 0, NPY_ARRAY_FARRAY, NULL)
 
 %}
+
+// mandatory !
+%rename (lambda_) lambda;

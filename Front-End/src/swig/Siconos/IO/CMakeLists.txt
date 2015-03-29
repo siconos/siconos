@@ -1,0 +1,4 @@
+SICONOS_SWIG_MODULE(IO "IO;")
+
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/IO.i
+  DESTINATION share/siconos-front-end/swig)

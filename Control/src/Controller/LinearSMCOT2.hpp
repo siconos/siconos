@@ -63,7 +63,6 @@ private:
   /** Coefficient*/
   double _coeff;
 
-protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(LinearSMCOT2);

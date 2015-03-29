@@ -29,7 +29,7 @@ if(APPLE)
   INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIR})
 else() # the previous instructions do not work on ubuntu 14.4 (and others)
        # the following instructions do not work on Yosemite.
- IF(NOT WITH_PY3)
+IF(NOT WITH_PY3)
    # we still prefer python2 for now
    SET(PythonInterp_FIND_VERSION "2")
    SET(PythonInterp_FIND_VERSION_MAJOR "2")
@@ -39,7 +39,7 @@ ELSE(NOT WITH_PY3)
   SET(PythonInterp_FIND_VERSION_MAJOR "3")
   SET(PythonLibs_FIND_VERSION "3")
 ENDIF(NOT WITH_PY3)
- 
+
 FIND_PACKAGE(PythonInterp)
 
 # should world for all recent cmake version

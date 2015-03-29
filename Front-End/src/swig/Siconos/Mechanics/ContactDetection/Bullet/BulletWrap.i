@@ -33,7 +33,7 @@
 #include <ExternalBody.hpp>
 %}
 
-%import Kernel.i
+%import Kernel/Kernel.i
 
 %import ../Base.i
 

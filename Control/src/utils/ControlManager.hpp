@@ -74,11 +74,12 @@ typedef Observers::iterator ObserversIterator;
 
 class ControlManager
 {
-protected:
+private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(ControlManager);
 
+protected:
   /** A list of Sensors */
   Sensors _allSensors;
 
@@ -94,12 +95,6 @@ protected:
   /** default constructor
    */
   ControlManager(): _sim(SP::Simulation()) {};
-
-  /** copy constructor
-   * Private => no copy nor pass-by value allowed.
-   * \param cm the ControlManager
-   */
-  ControlManager(const ControlManager& cm): _sim(SP::Simulation()) {};
 
   /** Create associated Event and give the opportunity to get the TimeDiscretisation
    * \param s a Sensor

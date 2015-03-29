@@ -12,22 +12,22 @@
 %}
 #endif
 
-%include picklable.i
-
 %include path.i
+
+%include picklable.i
 
 %include handleException.i
 
 %include sharedPointers.i
 
+%include stl.i
+
 %include KernelTypes.i
 
 %{
-#include <SiconosKernel.hpp>
+  #include <SiconosKernel.hpp>
 %}
-%import Kernel.i
-
-%include pyRegister.i
+%import Kernel/Kernel.i
 
 %{
 #include <SiconosControlFwd.hpp>
@@ -38,3 +38,13 @@
 typedef Interaction Interaction;
 
 %include ControlTypemaps.i
+
+%fragment("NumPy_Fragments");
+
+// this does not work, why why why ???
+//%include ../KernelRegistration.i
+//%include pySharedPtr.i
+//KERNEL_REGISTRATION();
+
+%include pyRegister.i
+

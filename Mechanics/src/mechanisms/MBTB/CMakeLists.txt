@@ -13,14 +13,6 @@ FIND_PACKAGE(SiconosKernel REQUIRED)
  
 
 INCLUDE_DIRECTORIES(../../joints)
-COMPILE_WITH(BLAS REQUIRED)
-
-COMPILE_WITH(LAPACK REQUIRED COMPLETE)
-
-
-
-
-##FIND_PACKAGE(ATLAS REQUIRED)
 
 INCLUDE(UseDoxygen OPTIONAL)
 
@@ -30,15 +22,27 @@ COMPILE_WITH(Boost REQUIRED)
 # FIND_PACKAGE( ... COMPONENTS <component>) does not mention <component> in failure message!
 # a workaround 
 
-FIND_PACKAGE(Boost COMPONENTS graph)
+# do not skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 
-IF(NOT Boost_GRAPH_FOUND)
-  MESSAGE(STATUS "WARNING boost graph library not found.")
-ENDIF(NOT Boost_GRAPH_FOUND)
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
 
+# the RPATH to be used when installing
+ASSERT(CMAKE_INSTALL_LIBDIR)
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+
+# don't add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 #LINK_LIBRARIES(MBTB ${CMAKE_CURRENT_BINARY_DIR}/../CADMBTB/libCADMBTB.so ${CMAKE_CURRENT_BINARY_DIR}/../TIMERMBTB/libTIMERMBTB.so)
 
 LINK_LIBRARIES(MBTB TIMERMBTB CADMBTB ${SiconosMechanics_LIBRARY} ${SiconosKernel_LIBRARIES} ${SiconosNumerics_LIBRARIES})
 
 add_library (MBTB SHARED MBTB_PYTHON_API.cpp MBTB_Body.cpp MBTB_internalTool.cpp MBTB_DATA.cpp MBTB_Contact.cpp MBTB_ContactRelation.cpp MBTB_FC3DContactRelation.cpp MBTB_TimeStepping.cpp MBTB_TimeSteppingProj.cpp MBTB_TimeSteppingCombinedProj.cpp MBTB_MoreauJeanOSI.cpp MBTB_JointR.cpp)
+
+INSTALL(TARGETS MBTB RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

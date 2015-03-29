@@ -27,7 +27,7 @@
 #include <boost/typeof/typeof.hpp>
 %}
 
-%import Kernel.i
+%import Kernel/Kernel.i
 
 %include pyRegister.i
 
@@ -38,6 +38,10 @@
 #include <MechanicsFwd.hpp>
 %}
 %include <MechanicsFwd.hpp>
+
+// suppress warning
+%ignore  STD11::enable_shared_from_this< Hashed >;
+%template (sharedHashed) STD11::enable_shared_from_this< Hashed >;
 
 PY_FULL_REGISTER(SpaceFilter);
 PY_FULL_REGISTER(SiconosBodies);

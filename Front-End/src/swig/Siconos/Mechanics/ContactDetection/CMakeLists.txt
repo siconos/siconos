@@ -1,4 +1,4 @@
-MECHANICS_ADD_MODULE(Base ContactDetection)
+SICONOS_SWIG_SUBMODULE(Mechanics Base ContactDetection)
 
 IF(HAVE_BULLET)
   SUBDIRS(Bullet)
@@ -7,5 +7,3 @@ ENDIF()
 INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/Tools.py
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/Mechanics/ContactDetection)
 
-INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
-  DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/Mechanics/ContactDetection)

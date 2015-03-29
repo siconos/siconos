@@ -25,7 +25,7 @@
 %include sharedPointers.i
 %include KernelTypes.i
 
-%import Kernel.i
+%import Kernel/Kernel.i
 
 %{
 #include <ExternalBody.hpp>

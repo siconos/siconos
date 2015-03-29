@@ -242,7 +242,7 @@ public:
    */
   NewtonEulerDS(SP::SiconosVector position,
                 SP::SiconosVector velocity,
-                double mass ,
+                double mass,
                 SP::SiconosMatrix inertia);
 
 
