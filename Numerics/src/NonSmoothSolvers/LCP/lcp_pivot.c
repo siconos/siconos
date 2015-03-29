@@ -237,7 +237,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
   double pivot;
   double tmp;
   int* basis;
-  int basis_init = 0; /* 0 is basis was not initialized, 1 otherwise*/
+  int basis_init = 0; /* 0 if basis was not initialized, 1 otherwise*/
   unsigned t_indx = 0;
   double* t_stack = NULL;
   double* mat;
@@ -657,9 +657,12 @@ exit_lcp_pivot:
     }
     else
     {
-      assert(bck_drive >= 0);
-      u[bck_drive] = 0.0;
-      s[bck_drive] = 0.0;
+      if (nb_iter < itermax)
+      {
+        assert(bck_drive >= 0);
+        u[bck_drive] = 0.0;
+        s[bck_drive] = 0.0;
+      }
     }
 
   }

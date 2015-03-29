@@ -423,6 +423,17 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
     vi_box_AVI_extra_SolverOptions(options);
     break;
+
+  case SICONOS_LCP_PIVOT:
+  case SICONOS_LCP_PATHSEARCH:
+    iSize = 6;
+    dSize = 3;
+    iter_max = 10000;
+    tol = 0.;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    options->iparam[SICONOS_IPARAM_PIVOT_RULE] = SICONOS_LCP_PIVOT_LEMKE;
+    break;
+
   default:
    printf("set_SolverOptions not supported for solver id %d named %s\n", solverId, idToName(solverId));
    exit(EXIT_FAILURE);
