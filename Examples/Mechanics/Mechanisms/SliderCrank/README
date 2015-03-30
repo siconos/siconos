@@ -1,6 +1,4 @@
-# 1. compilation of the plugin
-siconos 1.py
+# the simulation may be executed with this command:
 
-# 2. simulation
-LD_LIBRARY_PATH=. siconos-mechanisms.py bodydef.py 
+siconos -Psiconos-mechanisms.py .
 
