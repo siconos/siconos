@@ -160,7 +160,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   cblas_dgemv(CblasColMajor, CblasTrans, n, n, 1.0, basepointer, n, d_vec, 1, 0.0, lcplike_pb.q, 1);
   DEBUG_PRINT_VEC_STR("B_A_T^{-1} M B_A^{-1} K_A =: q[0:n]", lcplike_pb.q, n);
 
-  /* q[0:n] = 2 B_A_T^{-1} A B_A^{-1}b_A  B_A_T{-1} q_{AVI} */
+  /* q[0:n] = 2 B_A_T^{-1} A B_A^{-1}b_A  + B_A_T{-1} q_{AVI} */
   /*  XXX about the + or -: we do not follow the convention of Cao & Ferris */
   cblas_daxpy(n, 1.0, a_bar, 1, lcplike_pb.q, 1);
   DEBUG_PRINT("final q\n");
@@ -254,7 +254,7 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
   unsigned int nb_iter = 0;
   unsigned int leaving;
   unsigned int itermax = options->iparam[0];
-
+  unsigned aux_indx = 0;
 
   double z0, zb, dblock;
   double pivot, pivot_inv;
@@ -355,6 +355,9 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
     has_sol = 1;
     goto exit_caoferris;
   }
+  /* save the position of the auxiliary variable */
+  assert(drive >= 0);
+  aux_indx = drive;
 
   /* Pivot < mu , driver > */
 
@@ -413,39 +416,9 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
 
     DEBUG_PRINTF("driving variable %i \n", drive_number);
     assert(drive_number < dim2);
-    /* Start research of argmin lexico for minimum ratio test */
 
-    pivot = 1e20;
-    block = -1;
+    block = pivot_selection_lemke(mat, dim, drive, aux_indx);
 
-    for (unsigned int i = 0 ; i < dim ; ++i)
-    {
-      zb = mat[i + drive*dim];
-      if (zb > 0.0)
-      {
-        z0 = mat[i] / zb;
-        if (z0 > pivot) continue;
-        if (z0 < pivot)
-        {
-          pivot = z0;
-          block = i;
-        }
-        else
-        {
-          for (unsigned int j = dim; j <= dim*dim; j += dim)
-          {
-            assert(block >=0 && "avi_caoferris: block <0");
-            dblock = mat[block + j] / pivot - mat[i + j] / zb;
-            if (dblock < 0) break;
-            else if (dblock > 0)
-            {
-              block = i;
-              break;
-            }
-          }
-        }
-      }
-    }
     if (block == -1) break;
 
     if (basis[block] == dim + 1) has_sol = 1;

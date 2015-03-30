@@ -72,7 +72,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
   }
   
   double z0, zb, dblock;
-  double pivot, tovip;
+  double pivot, tovip, ratio;
   double tmp;
   int *basis;
   double** A;
@@ -204,7 +204,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
     DEBUG_PRINTF("driving variable %i \n", drive);
 
     /* Start research of argmin lexico for minimum ratio test */
-    pivot = 1e20;
+    ratio = 1e20;
     block = -1;
 
     for (ic = 0 ; ic < dim ; ++ic)
@@ -213,10 +213,10 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
       if (zb > 0.0)
       {
         z0 = A[ic][0] / zb;
-        if (z0 > pivot) continue;
-        if (z0 < pivot)
+        if (z0 > ratio) continue;
+        if (z0 < ratio)
         {
-          pivot = z0;
+          ratio = z0;
           block = ic;
         }
         else
@@ -224,7 +224,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
           for (jc = 1 ; jc < dim + 1 ; ++jc)
           {
             assert(block >=0 && "lcp_lexicolemke: block <0");
-            dblock = A[block][jc] / pivot - A[ic][jc] / zb;
+            dblock = A[block][jc] / A[block][drive] - A[ic][jc] / zb;
             if (dblock < 0.0) break;
             else if (dblock > 0.0)
             {

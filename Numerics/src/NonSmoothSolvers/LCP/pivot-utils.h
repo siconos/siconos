@@ -60,9 +60,10 @@ extern "C"
  * covering vector of the entering variable
  * \param dim dimension of the problem
  * \param drive the driving or entering variable
+ * \param aux_index index of auxillary variable in the current basis
  * \return the leaving (or blocking) variable
  */
-  int pivot_selection_lemke(double* mat, unsigned int dim, unsigned int drive);
+  int pivot_selection_lemke(double* mat, unsigned dim, unsigned drive, unsigned aux_index);
 
 /** find the leaving variable in a path search procedure. The code is almost
  * the same as in pivot_selection_lemke, except that we also check if it is
@@ -74,7 +75,7 @@ extern "C"
  * \param t_indx the index of the t variable in the basis
  * \return the leaving (or blocking) variable
  */
-  int pivot_selection_pathsearch(double* mat, unsigned int dim, unsigned int drive, unsigned int t_indx);
+  int pivot_selection_pathsearch(double* mat, unsigned dim, unsigned drive, unsigned t_indx);
 
 /** Initialize the matrix for Lemke's algorithm as [ q | Id | -d | -M ] with
  * d_i = 1 if i < size_x if the argument d is NULL. Otherwise take d from the

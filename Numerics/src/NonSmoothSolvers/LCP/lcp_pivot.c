@@ -30,8 +30,10 @@
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
+//#define DEBUG_NO_MATRIX
 #include "debug.h"
 
+//#define WARN_ONLY_SMALL_PIVOT
 #include "lcp_pivot.h"
 
 int pivot_selection_bard(double* mat, unsigned int dim)
@@ -224,21 +226,22 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
       for(unsigned i = 0; i < dim; ++i) {printf("%e ", problem->q[i]);} printf("\n");
       if (cov_vec) { DEBUG_PRINT("covering vector: ") for(unsigned i = 0; i < dim; ++i) {printf("%e ", cov_vec[i]);}printf("\n");});
 
-  unsigned int drive = dim+1;
+  unsigned drive = dim+1;
   int bck_drive = -1;
   int block = -1;
-  unsigned int has_sol = 0;
-  unsigned int nb_iter = 0;
-  unsigned int leaving = 0;
-  unsigned int itermax = options->iparam[0];
-  unsigned int preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
-  unsigned int pivot_selection_rule = options->iparam[SICONOS_IPARAM_PIVOT_RULE];
+  unsigned has_sol = 0;
+  unsigned nb_iter = 0;
+  unsigned leaving = 0;
+  unsigned itermax = options->iparam[0];
+  unsigned preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
+  unsigned pivot_selection_rule = options->iparam[SICONOS_IPARAM_PIVOT_RULE];
 
   double pivot;
   double tmp;
   int* basis;
   int basis_init = 0; /* 0 if basis was not initialized, 1 otherwise*/
   unsigned t_indx = 0;
+  unsigned aux_indx = 0;
   double* t_stack = NULL;
   double* mat;
 
@@ -388,6 +391,11 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
       goto exit_lcp_pivot;
     }
   }
+
+  /* save the position of the auxiliary variable */
+  assert(drive >= 0);
+  aux_indx = drive;
+
   /* Pivot < mu , drive >  or < drive, drive > */
 
   DEBUG_PRINTF("Pivoting %i and %i\n", block, drive);
@@ -395,10 +403,12 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
 
   if (fabs(pivot) < DBL_EPSILON)
   {
-    *info = LCP_PIVOT_NUL;
     if (verbose > 0)
-      printf("the pivot is nul, the algorithm cannot be used !\n");
+      printf("the pivot is quasi-nul %e, the algorithm cannot be used !\n", pivot);
+#ifndef WARN_ONLY_SMALL_PIVOT
+    *info = LCP_PIVOT_NUL;
     goto exit_lcp_pivot;
+#endif
   }
 
   /* update matrix */
@@ -492,7 +502,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
         {
           drive = leaving - (dim + 1);
         }
-        block = pivot_selection_lemke(mat, dim, drive);
+        block = pivot_selection_lemke(mat, dim, drive, aux_indx);
     }
 
     DEBUG_PRINTF("Blocking variable: %d\tDriving variable: %d\n", block, drive);
@@ -558,10 +568,12 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
     pivot = mat[block + drive*dim];
     if (fabs(pivot) < DBL_EPSILON)
     {
-      *info = LCP_PIVOT_NUL;
       if (verbose > 0)
-        printf("the pivot is nul, the algorithm cannot be used !\n");
+        printf("the pivot is quasi-nul %e, danger !\nq[block] = %e; z = %e\n", pivot, mat[block], mat[block]/pivot);
+#ifndef WARN_ONLY_SMALL_PIVOT
+      *info = LCP_PIVOT_NUL;
       goto exit_lcp_pivot;
+#endif
     }
 
     /* update matrix */

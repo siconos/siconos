@@ -51,8 +51,8 @@ int pivot_init_lemke(double* mat, unsigned int dim)
       for (unsigned int j = 1; j <= dim; ++j)
       {
         dblock = mat[block + j*dim] - mat[i + j*dim];
-        if (dblock < 0) break;
-        else if (dblock > 0)
+        if (dblock < 0.) break;
+        else if (dblock > 0.)
         {
           block = i;
           break;
@@ -115,34 +115,44 @@ int pivot_init_pathsearch(unsigned dim, double* mat, unsigned* t_indx)
   return block;
 }
 
-int pivot_selection_lemke(double* mat, unsigned int dim, unsigned int drive)
+int pivot_selection_lemke(double* mat, unsigned dim, unsigned drive, unsigned aux_indx)
 {
   int block = -1;
-  double zb, z0, dblock;
-  double pivot = 0.0;
-  for (unsigned int i = 0 ; i < dim ; ++i)
+  double candidate_pivot, candidate_ratio, dblock;
+  double ratio = INFINITY;
+  for (unsigned i = 0 ; i < dim ; ++i)
   {
-    zb = mat[i + drive*dim];
-    if (zb > DBL_EPSILON)
+    candidate_pivot = mat[i + drive*dim];
+    if (candidate_pivot > 0.)
     {
-      z0 = mat[i] / zb;
-      if ((block >= 0) && (z0 > pivot)) continue;
-      else if ((block == -1) || (z0 < pivot))
+      candidate_ratio = mat[i] / candidate_pivot;
+      if (candidate_ratio > ratio) continue;
+      else if (candidate_ratio < ratio)
       {
-        pivot = z0;
+        ratio = candidate_ratio;
         block = i;
       }
       else
       {
-        for (unsigned int j = 1; j <= dim; ++j)
+        if (block == aux_indx || i == aux_indx)
         {
-          assert(block >= 0 && "pivot_selection_lemke: block < 0");
-          dblock = mat[block + j*dim] / pivot - mat[i + j*dim] / zb;
-          if (dblock < 0) break;
-          else if (dblock > 0)
+          /* We want the auxilliary variable to exit before any othe.
+           * see CPS p. 279 and example 4.4.16 */
+          block = aux_indx;
+        }
+        else
+        {
+          double current_pivot = mat[block + drive*dim];
+          for (unsigned j = 1; j <= dim; ++j)
           {
-            block = i;
-            break;
+            assert(block >= 0 && "ratio_selection_lemke: block < 0");
+            dblock = mat[block + j*dim] / current_pivot - mat[i + j*dim] / candidate_pivot;
+            if (dblock < 0.) break;
+            else if (dblock > 0.)
+            {
+              block = i;
+              break;
+            }
           }
         }
       }
@@ -151,18 +161,18 @@ int pivot_selection_lemke(double* mat, unsigned int dim, unsigned int drive)
   return block;
 }
 
-int pivot_selection_pathsearch(double* mat, unsigned int dim, unsigned int drive, unsigned int t_indx)
+int pivot_selection_pathsearch(double* mat, unsigned dim, unsigned drive, unsigned t_indx)
 {
-  int block = pivot_selection_lemke(mat, dim, drive);
-  double zb = mat[t_indx + drive*dim];
-  if (zb <= -DBL_EPSILON)
+  int block = pivot_selection_lemke(mat, dim, drive, t_indx);
+  double pivot_t = mat[t_indx + drive*dim];
+  if (pivot_t <= -DBL_EPSILON)
   {
     /* try to set t to 1 */
-    double z0 = (mat[t_indx] - 1.0)/zb;
+    double ratio_t = (mat[t_indx] - 1.0)/pivot_t;
     if (block >= 0)
     {
-      double pivot_lemke = mat[block]/mat[block + drive*dim];
-      if (z0 <= pivot_lemke)
+      double ratio_lemke = mat[block]/mat[block + drive*dim];
+      if (ratio_t <= ratio_lemke)
       {
         block = PIVOT_PATHSEARCH_SUCCESS;
       }
@@ -207,11 +217,15 @@ void init_M_lemke(double* restrict mat, double* restrict M, unsigned int dim, un
 
 void do_pivot_driftless(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive)
 {
-  double tmp;
+  if (mat[block + drive*dim] < DBL_EPSILON)
+  {
+    printf("do_pivot_driftless :: pivot value too small %e\n", mat[block + drive*dim]);
+  }
   double pivot_inv = 1.0/mat[block + drive*dim];
+  unsigned ncols = dim*dim2;
 
   /* Update column mat[block, :] */
-  mat[block + drive*dim] = 1.0; /* nm_rs = 1 */
+  mat[block + drive*dim] = 1.; /* nm_rs = 1 */
   /* nm_rj = m_rj/m_rs */
   for (unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= pivot_inv;
   for (unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= pivot_inv;
@@ -219,15 +233,15 @@ void do_pivot_driftless(double* mat, unsigned int dim, unsigned int dim2, unsign
   /* Update other columns*/
   for (unsigned int i = 0; i < block; ++i)
   {
-    tmp = mat[i + drive*dim];
+    double tmp = mat[i + drive*dim];
     /* nm_ij = m_ij + (m_ir/m_rs)m_rj = m_ij - m_is*nm_rj */
-    for (unsigned int j = 0; j < dim2; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
+    for (unsigned int j = 0; j < ncols; j+=dim) mat[i + j] -= tmp*mat[block + j];
   }
   for (unsigned int i = block + 1; i < dim; ++i)
   {
-    tmp = mat[i + drive*dim];
+    double tmp = mat[i + drive*dim];
     /* nm_ij = m_ij + (m_ir/m_rs)m_rj = m_ij - m_is*nm_rj */
-    for (unsigned int j = 0; j < dim2; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
+    for (unsigned int j = 0; j < ncols; j+=dim) mat[i + j] -= tmp*mat[block + j];
   }
 }
 
