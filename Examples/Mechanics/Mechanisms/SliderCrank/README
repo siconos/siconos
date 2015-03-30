@@ -1,0 +1,6 @@
+# 1. compilation of the plugin
+siconos 1.py
+
+# 2. simulation
+LD_LIBRARY_PATH=. siconos-mechanisms.py bodydef.py 
+

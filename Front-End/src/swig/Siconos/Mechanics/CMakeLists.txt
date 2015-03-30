@@ -14,4 +14,6 @@ ENDIF()
 
 SUBDIRS(ContactDetection)
 
-
+IF(WITH_MECHANISMS)
+  SUBDIRS(Mechanisms)
+ENDIF()

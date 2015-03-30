@@ -82,7 +82,7 @@ afile=numpy.array(['./CAD/body1.step',
 if apple :
     plugin=SiconosMechanisms_BUILD+'/plugin/SliderCrank/libSliderCrankPlugin.dylib'
 else :
-    plugin=SiconosMechanisms_BUILD+'/plugin/SliderCrank/libSliderCrankPlugin'    
+    plugin="plugin.so"
 
 ## REQUIRED the external forces.
 fctf=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS',''])

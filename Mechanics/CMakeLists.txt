@@ -8,18 +8,21 @@ if(POLICY CMP0042)
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-INCLUDE(SiconosProject)
+option(WITH_OCC "compilation with OpenCascade Bindings. Default = OFF" OFF)
+option(WITH_MECHANISMS "compilation with OpenCascade Bindings. Default = OFF" OFF)
+option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
 
-ENABLE_LANGUAGE(C)
-ENABLE_LANGUAGE(CXX)
-ENABLE_LANGUAGE(Fortran) # see lapack macros
+include(SiconosProject)
 
-SET(PACKAGE_DESCRIPTION_SUMMARY
+enable_language(C)
+enable_language(CXX)
+enable_language(Fortran) # see lapack macros
+
+set(PACKAGE_DESCRIPTION_SUMMARY
   "Siconos/Mechanics is dedicated to the modeling and the simulation of nonsmooth mechanical systems")
 
-SET(PACKAGE_DESCRIPTION
+set(PACKAGE_DESCRIPTION
   "The present package, Siconos/Mechanics, is dedicated to the modeling and
 the simulation of Non Smooth Mechanical Systems")
 
-SICONOS_PROJECT(Mechanics)
-
+siconos_project(Mechanics)

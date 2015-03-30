@@ -7,6 +7,10 @@ if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
 endif()
 
+if(POLICY CMP0022)
+  cmake_policy(SET CMP0022 NEW)
+endif()
+
 FIND_PACKAGE(Boost COMPONENTS graph)
 
 FIND_PACKAGE(SiconosMechanics REQUIRED)
@@ -15,7 +19,8 @@ IF(NOT Boost_GRAPH_FOUND)
   MESSAGE(STATUS "WARNING boost graph library not found.")
 ENDIF(NOT Boost_GRAPH_FOUND)
 
-
+FILE(GLOB _HDRS TIMERMBTB/*.hpp CADMBTB/*.hpp MBTB/*.hpp)
+INSTALL(FILES ${_HDRS} DESTINATION ${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/Mechanisms)
 
 add_subdirectory(TIMERMBTB)
 add_subdirectory(CADMBTB)

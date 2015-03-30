@@ -759,7 +759,4 @@ IF(PRINT_VAR)
   MESSAGE(STATUS)
 ENDIF(PRINT_VAR)
 
-# print all features
-FEATURE_SUMMARY(WHAT ALL)
-
-WRITE_NOTES()
+close_project()

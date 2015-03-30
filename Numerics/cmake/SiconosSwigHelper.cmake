@@ -2,7 +2,7 @@ SET(SiconosNumerics_DEPS FALSE)
 SET(SiconosKernel_DEPS "Numerics")
 SET(SiconosMechanics_DEPS "Kernel")
 SET(SiconosControl_DEPS "Kernel")
-SET(SiconosIO_DEPS "IO")
+SET(SiconosIO_DEPS "Kernel")
 SET(SiconosFCLib_DEPS "Numerics")
 
 MACRO(SICONOS_SWIG_MODULE _module _parts)

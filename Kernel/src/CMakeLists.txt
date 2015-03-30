@@ -281,27 +281,6 @@ IF(PRINT_VAR)
   MESSAGE(STATUS)
 ENDIF(PRINT_VAR)
 
-# print all features
-FEATURE_SUMMARY(WHAT ALL)
-
-# To have a full print of variables, use -DPRINT_ENV=ON
-MESSAGE(STATUS "\n============================================ Summary ============================================")
-MESSAGE(STATUS "${PROJECT_NAME} version ${VERSION} is now ready for compilation and installation.")
-MESSAGE(STATUS "To proceed run 'make' and 'make install' and optionaly 'make test'.")
-MESSAGE(STATUS " C++ Compiler : ${CMAKE_CXX_COMPILER}")
-MESSAGE(STATUS " C Compiler : ${CMAKE_C_COMPILER}")
-MESSAGE(STATUS " Fortran Compiler : ${CMAKE_Fortran_COMPILER}")
-MESSAGE(STATUS " Compilation mode is : ${CMAKE_BUILD_TYPE}")
-MESSAGE(STATUS " Code Sources are in : ${CMAKE_SOURCE_DIR}")
-MESSAGE(STATUS " The project will be installed in ${CMAKE_INSTALL_PREFIX}")
-MESSAGE(STATUS " The Kernel library used is : ${SiconosNumerics_LIBRARIES}")
-MESSAGE(STATUS " The Kernel headers are located in : ${SiconosNumerics_INCLUDE_DIRS}")
-message(STATUS " Blas is ${WITH_BLAS}. Libraries : ${BLAS_LIBRARIES}. Header : ${BLAS_INCLUDE_DIRS}/${BLAS_HEADER}.")
-message(STATUS " Lapack is ${WITH_LAPACK}. Libraries : ${LAPACK_LIBRARIES}. Header : ${LAPACK_INCLUDE_DIRS}/${LAPACK_HEADER}.")
-MESSAGE(STATUS " To get more information about dependencies, config or else, ")
-MESSAGE(STATUS "check CMakeCache.txt file or re-run cmake with -DPRINT_ENV=ON.")
-MESSAGE(STATUS "=================================================================================================\n")
-
-WRITE_NOTES()
+CLOSE_PROJECT()
 
 

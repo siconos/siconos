@@ -1,0 +1,10 @@
+This directory contains some tests about the multiBodies tool box.
+Each example directory contains a bodydef.py describing the multibody.
+It assumes that environment variable SALADYN_BUILD and SALADYN_DIR are defined.
+SALADYN_BUILD is the directory containing the directory MBTB used for the compilation.
+SALADYN_DIR is the main directory of saladyn.
+To run an example:
+->Go to the directory of the example.
+->Copy the file SALADYN_DIR/trunk/Multibody/Tests/E1/env.sh, and make necessary adaptations.
+->source env.sh
+->python ../run.py

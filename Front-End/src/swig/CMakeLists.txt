@@ -1,6 +1,7 @@
 OPTION(WITH_SERIALIZATION "Generates bindings with IO serialization for picklable objects" OFF)
 OPTION(WITH_OCC "Generation of bindings for Mechanics/OpenCascade interface" OFF)
 OPTION(WITH_FCLIB "Generation of bindings for fclib interface" OFF)
+OPTION(WITH_MECHANISMS "Generation of bindings for Saladyn Mechanisms toolbox" OFF)
 
 IF(WITH_SERIALIZATION)
   SET(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS};-DWITH_SERIALIZATION")

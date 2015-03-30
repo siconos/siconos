@@ -328,16 +328,6 @@ MACRO(SICONOS_PROJECT
 
 ENDMACRO(SICONOS_PROJECT)
 
-MACRO(CLOSE_PROJECT)
-  # NumericsConfig.h/KernelConfig.h generation
-  IF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/${PROJECT_SHORT_NAME}Config.h)
-  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-  
-  FEATURE_SUMMARY(WHAT ALL)
-
-ENDMACRO(CLOSE_PROJECT)
-
 MACRO(WRITE_NOTES)
   IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
     # a note file for the dashboard
@@ -358,3 +348,37 @@ MACRO(WRITE_NOTES)
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "all libraries : ${${PROJECT_NAME}_LINK_LIBRARIES}\n")
   ENDIF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
 ENDMACRO(WRITE_NOTES)
+
+
+MACRO(CLOSE_PROJECT)
+
+  # NumericsConfig.h/KernelConfig.h generation
+  IF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/${PROJECT_SHORT_NAME}Config.h)
+  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+  
+  FEATURE_SUMMARY(WHAT ALL)
+
+  # ============= Summary =============
+  # To have a full print of variables, use -DPRINT_ENV=ON
+  message(STATUS "\n============================================ Summary ============================================")
+  message(STATUS "${PROJECT_NAME} version ${VERSION} is now ready for compilation and installation.")
+  message(STATUS "To proceed run 'make' and 'make install' and optionaly 'make test'.")
+  message(STATUS "C++ Compiler : ${CMAKE_CXX_COMPILER}")
+  message(STATUS "C Compiler : ${CMAKE_C_COMPILER}")
+  message(STATUS "Fortran Compiler : ${CMAKE_Fortran_COMPILER}")
+  message(STATUS "Compilation mode is : ${CMAKE_BUILD_TYPE}")
+  message(STATUS "Code Sources are in : ${CMAKE_SOURCE_DIR}")
+  message(STATUS "Blas is ${WITH_BLAS}. Libraries : ${BLAS_LIBRARIES}. Headers : ${BLAS_HEADER} in ${BLAS_INCLUDE_DIRS}.")
+  message(STATUS "Lapack is ${WITH_LAPACK}. Libraries : ${LAPACK_LIBRARIES}. Headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIRS}.")
+  message(STATUS "All linking libraries are : ${${PROJECT_NAME}_LINK_LIBRARIES}.")
+  message(STATUS "The project will be installed in ${CMAKE_INSTALL_PREFIX}")
+  
+  message(STATUS "To get more information about dependencies, config or else, ")
+  message(STATUS "check CMakeCache.txt file or re-run cmake with -DPRINT_ENV=ON.")
+  message(STATUS "=================================================================================================\n")
+
+  WRITE_NOTES()
+
+ENDMACRO(CLOSE_PROJECT)
+

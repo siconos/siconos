@@ -15,6 +15,8 @@
 
 %include KernelTypes.i
 
+%import ../Kernel/Kernel.i
+
 %include "SiconosRestart.hpp"
 
 #ifdef HAVE_SICONOS_MECHANICS
