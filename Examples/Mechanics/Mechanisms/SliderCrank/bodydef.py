@@ -78,11 +78,11 @@ afile=numpy.array(['./CAD/body1.step',
                    './CAD/body2.step',
                    './CAD/Slider.step'])
 
-## REQUIRED the library for the pluged forces.
+## REQUIRED the library for the plugged forces.
 if apple :
-    plugin=SiconosMechanisms_BUILD+'/plugin/SliderCrank/libSliderCrankPlugin.dylib'
+    plugin="SliderCrankPlugin.dylib"
 else :
-    plugin="plugin.so"
+    plugin="SliderCrankPlugin.so"
 
 ## REQUIRED the external forces.
 fctf=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS',''])
