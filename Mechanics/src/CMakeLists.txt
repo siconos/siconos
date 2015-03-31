@@ -86,8 +86,9 @@ IF(WITH_MECHANISMS)
   SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
   
   message(STATUS "Searching for OCE ....")
-  find_package(OCE COMPONENTS ${OCE_TOOLKITS})
-  
+  compile_with(OCE COMPONENTS ${OCE_TOOLKITS})
+  LIST(REMOVE_ITEM ${PROJECT_NAME}_LINK_LIBRARIES DRAWEXE)  
+
   if(OCE_FOUND)
     message(STATUS "Found OCE version ${OCE_VERSION}")
     if(NOT OCE_ALL_FOUND)
@@ -98,11 +99,8 @@ IF(WITH_MECHANISMS)
   
   if(OCE_FOUND)
     # Include files reside in ${OCE_INCLUDE_DIRS};
-    include_directories(${OCE_INCLUDE_DIRS})
+#    include_directories(${OCE_INCLUDE_DIRS})
 
-    LIST(REMOVE_ITEM OCE_LIBRARIES DRAWEXE)
-    
-    LINK_LIBRARIES(CADMBTB ${OCE_LIBRARIES})
     # We do not need library path, they will be automatically imported.
   else(OCE_FOUND)
     # OCE not found; either it is not found and user
@@ -110,8 +108,6 @@ IF(WITH_MECHANISMS)
     # OCEConfig.cmake, or OCE is not installed and we
     # try to find OpenCascade files.
     message(STATUS "OCE not found.  Try to find OpenCascade files.")
-    
-    
 
     FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
     COMPILE_WITH(OpenCASCADE)
@@ -127,13 +123,15 @@ IF(WITH_MECHANISMS)
     
   endif(OCE_FOUND)
 
-
-#  add_subdirectory(mechanisms)
+  #  add_subdirectory(mechanisms)
   SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS}
      mechanisms/CADMBTB
      mechanisms/MBTB
      mechanisms/TIMERMBTB
      mechanisms/frontEnd)
+
+  INSTALL(FILES mechanisms/frontEnd/mbtbDefaultOptions.py DESTINATION bin)
+  INSTALL(FILES mechanisms/frontEnd/siconos-mechanisms.py DESTINATION bin)
 
 ENDIF(WITH_MECHANISMS)
 
