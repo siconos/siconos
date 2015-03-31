@@ -27,9 +27,9 @@ afile=numpy.array(['./CAD/tube.stp'])
 
 ## REQUIRED the library for the pluged forces.
 if apple :
-    plugin=SiconosMechanisms_BUILD+'/plugin/Tube/libTubePlugin.dylib'
+    plugin='TubePlugin.dylib'
 else :
-    plugin=SiconosMechanisms_BUILD+'/plugin/Tube/libTubePlugin'    
+    plugin='TubePlugin'    
 
 ## REQUIRED the external forces.
 fctf=numpy.array(['externalForceG'])
@@ -66,7 +66,7 @@ contactOffset=array.array('d',[
        ])
 ## defining if the offset is applied to the first surface. Useful to place the contact point.
 contactOffsetP1=array.array('I',[
-        0.0,0.0,0.0
+        0,0,0
         ])
 ## defining if the normal is computed from the first surface.
 contactNormalFromFace1=array.array('I',[
