@@ -10,7 +10,6 @@ import array
 import os
 import sys
 
-
 install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
 print("install_path :", install_path)
 
@@ -23,8 +22,8 @@ SiconosMechanisms_BUILD=build_path
 sys.path.append(SiconosMechanisms_BUILD+'/frontEnd/MBTB')
 sys.path.append(SiconosMechanisms_BUILD+'/frontEnd/CADMBTB')
 
-import mbtb
-import cadmbtb
+from Siconos.Mechanics.Mechanisms import mbtb
+from Siconos.Mechanics.Mechanisms import cadmbtb
 
 my_PI=3.14159265
 
@@ -137,6 +136,7 @@ if with3D:
                          # ord('Q'): self._display.SetModeQuickHLR,
                          # ord('E'): self._display.SetModeExactHLR,
                          # ord('F'): self._display.FitAll(
+
 ais_boxshp=None
 
 def STEP(event=None):

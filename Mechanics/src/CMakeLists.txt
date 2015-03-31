@@ -9,7 +9,7 @@ PROJECT(SiconosMechanics CXX)
 SET(SiconosMechanics_VERSION "${VERSION}")
 
 #
-# Project directories 
+# Project directories
 #
 SET(SiconosMechanics_DIRS
   .
@@ -84,10 +84,10 @@ ENDIF()
 
 IF(WITH_MECHANISMS)
   SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
-  
+
   message(STATUS "Searching for OCE ....")
   compile_with(OCE COMPONENTS ${OCE_TOOLKITS})
-  LIST(REMOVE_ITEM ${PROJECT_NAME}_LINK_LIBRARIES DRAWEXE)  
+  LIST(REMOVE_ITEM ${PROJECT_NAME}_LINK_LIBRARIES DRAWEXE)
 
   if(OCE_FOUND)
     message(STATUS "Found OCE version ${OCE_VERSION}")
@@ -96,7 +96,7 @@ IF(WITH_MECHANISMS)
       message(WARNING "Ignoring OCE installation due to missing toolkit(s): ${OCE_MISSING_TOOLKITS}")
     endif(NOT OCE_ALL_FOUND)
   endif(OCE_FOUND)
-  
+
   if(OCE_FOUND)
     # Include files reside in ${OCE_INCLUDE_DIRS};
 #    include_directories(${OCE_INCLUDE_DIRS})
@@ -111,8 +111,8 @@ IF(WITH_MECHANISMS)
 
     FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
     COMPILE_WITH(OpenCASCADE)
-    
-    IF(OpenCASCADE_FOUND) 
+
+    IF(OpenCASCADE_FOUND)
       message(STATUS "OpenCASCADE_INCLUDE_DIR = " ${OpenCASCADE_INCLUDE_DIR})
       message(STATUS "OpenCASCADE_LIBRARIES = " ${OpenCASCADE_LIBRARIES})
       message(STATUS "OpenCASCADE_LINK_DIRECTORY = " ${OpenCASCADE_LINK_DIRECTORY})
@@ -120,7 +120,7 @@ IF(WITH_MECHANISMS)
     ELSE(OpenCASCADE_FOUND)
       MESSAGE(STATUS "OpenCascade Libraries not found in standard paths.")
     ENDIF(OpenCASCADE_FOUND)
-    
+
   endif(OCE_FOUND)
 
   #  add_subdirectory(mechanisms)
@@ -130,8 +130,14 @@ IF(WITH_MECHANISMS)
      mechanisms/TIMERMBTB
      mechanisms/frontEnd)
 
-  INSTALL(FILES mechanisms/frontEnd/mbtbDefaultOptions.py DESTINATION bin)
-  INSTALL(FILES mechanisms/frontEnd/siconos-mechanisms.py DESTINATION bin)
+  CONFIGURE_FILE(mechanisms/frontEnd/mbtbDefaultOptions.py ${CMAKE_BINARY_DIR})
+  CONFIGURE_FILE(mechanisms/frontEnd/siconos-mechanisms.py ${CMAKE_BINARY_DIR})
+
+  INSTALL(
+    FILES ${CMAKE_BINARY_DIR}/mbtbDefaultOptions.py ${CMAKE_BINARY_DIR}/siconos-mechanisms.py
+    DESTINATION bin
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+
 
 ENDIF(WITH_MECHANISMS)
 

@@ -575,6 +575,10 @@ void  MBTB_initSimu(double hTS, int withProj)
   setNumericsOptions(&global_options);
 
 }
+SP::Model MBTB_getModel()
+{
+  return myModel;
+}
 void MBTB_doProj(unsigned int v)
 {
   (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setDoProj(v);
