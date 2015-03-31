@@ -1,5 +1,4 @@
 
-
 /*! \addtogroup CADMBTB_API
  * \brief This module provides an API on the 3D modeler dedicated to the Multi Bodies simulation.
  *
@@ -9,6 +8,9 @@
  */
 #ifndef CADMBTBAPI
 #define CADMBTBAPI
+#include "TopoDS.hxx"
+
+
 //! It updates the graphic.
 /*!
   It assume that  CADMBTB_setGraphicContext has been called, else it does nothing.
@@ -172,6 +174,10 @@ void CADMBTB_buildOrientedLineArtefactLine1(unsigned int id,  double* X1, double
 
 void CADMBTB_buildCylinderArtefactLine(unsigned int id,  double* X1, double* Y1, double* Z1,
                                        double* X2, double* Y2, double* Z2, double *radius);
+
+
+TopoDS_Shape CADMBTB_TopoDS(unsigned int num);
+
 /*! @} */
 
 #endif

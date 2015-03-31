@@ -134,17 +134,17 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName, 
  \param [in] int withProj, iff 0 the projection in done.
 */
 void  MBTB_initSimu(double hTS, int withProj);
+//! Get Siconos model.
+/*!
+  The model may be used outside MBTB in Siconos Front-End.
+*/
+SP::Model MBTB_getModel();
+
 //! It runs the simulation.
 /*!
   It consists in running nbSteps simulation steps.
   \param [in] int nbSteps, the number of run step.
  */
-SP::Model MBTB_getModel();
-//! Get Siconos model.
-/*!
-  The model may be used outside MBTB in Siconos Front-End
-*/
-
 void MBTB_run(int nbSteps);
 //! It does one step.
 /*!

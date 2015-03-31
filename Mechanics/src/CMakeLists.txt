@@ -130,15 +130,6 @@ IF(WITH_MECHANISMS)
      mechanisms/TIMERMBTB
      mechanisms/frontEnd)
 
-  CONFIGURE_FILE(mechanisms/frontEnd/mbtbDefaultOptions.py ${CMAKE_BINARY_DIR})
-  CONFIGURE_FILE(mechanisms/frontEnd/siconos-mechanisms.py ${CMAKE_BINARY_DIR})
-
-  INSTALL(
-    FILES ${CMAKE_BINARY_DIR}/mbtbDefaultOptions.py ${CMAKE_BINARY_DIR}/siconos-mechanisms.py
-    DESTINATION bin
-    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
-
-
 ENDIF(WITH_MECHANISMS)
 
 LIBRARY_PROJECT_SETUP()

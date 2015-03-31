@@ -124,13 +124,13 @@ typedef Interaction Interaction;
 %feature("nodirector") ContactShapeDistance;
 PY_FULL_REGISTER(ContactShapeDistance);
 
-//%feature("nodirector") OccContactShape;
+%feature("nodirector") OccContactShape;
 PY_FULL_REGISTER(OccContactShape);
 
-//%feature("nodirector") OccContactFace;
+%feature("nodirector") OccContactFace;
 PY_FULL_REGISTER(OccContactFace);
 
-//%feature("nodirector") OccContactEdge;
+%feature("nodirector") OccContactEdge;
 PY_FULL_REGISTER(OccContactEdge);
 
 %feature("nodirector") Geometer::visit;

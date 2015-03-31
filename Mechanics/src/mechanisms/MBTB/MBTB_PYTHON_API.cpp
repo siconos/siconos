@@ -12,6 +12,7 @@
 #include "MBTB_TimeStepping.hpp"
 #include "MBTB_TimeSteppingProj.hpp"
 #include "MBTB_TimeSteppingCombinedProj.hpp"
+#include <BRepTools.hxx>
 
 //#define MBTB_MOREAU_YES
 
@@ -579,6 +580,7 @@ SP::Model MBTB_getModel()
 {
   return myModel;
 }
+
 void MBTB_doProj(unsigned int v)
 {
   (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setDoProj(v);

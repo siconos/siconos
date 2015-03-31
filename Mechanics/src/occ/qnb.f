@@ -1,1 +1,0 @@
-../mechanisms/CADMBTB/qnb.f

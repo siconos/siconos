@@ -84,8 +84,8 @@ extern "C"
               int *io,int* mode, int* iter, int * nsim, double* binf, double* bsup, int* iz, double* rz, int * reverse);
 }
 
-void _myf_FaceFace(double *x, double * fx, double * gx,const TopoDS_Face& face1,const TopoDS_Face& face2);
-void _myf_FaceFace(double *x, double * fx, double * gx,const TopoDS_Face& face1,const TopoDS_Face& face2)
+void cadmbtb_myf_FaceFace(double *x, double * fx, double * gx,const TopoDS_Face& face1,const TopoDS_Face& face2);
+void cadmbtb_myf_FaceFace(double *x, double * fx, double * gx,const TopoDS_Face& face1,const TopoDS_Face& face2)
 {
   gp_Pnt aP1;
   gp_Pnt aP2;
@@ -112,8 +112,8 @@ void _myf_FaceFace(double *x, double * fx, double * gx,const TopoDS_Face& face1,
 
 }
 
-void _myf_FaceEdge(double *x, double * fx, double * gx,const TopoDS_Face& face1,const TopoDS_Edge& edge2);
-void _myf_FaceEdge(double *x, double * fx, double * gx,const TopoDS_Face& face1,const TopoDS_Edge& edge2)
+void cadmbtb_myf_FaceEdge(double *x, double * fx, double * gx,const TopoDS_Face& face1,const TopoDS_Edge& edge2);
+void cadmbtb_myf_FaceEdge(double *x, double * fx, double * gx,const TopoDS_Face& face1,const TopoDS_Edge& edge2)
 {
 
   gp_Pnt aP1;
@@ -190,7 +190,7 @@ void cadmbtb_distanceFaceFace(const OccContactFace& csh1,
   x[2]=(binf[2]+bsup[2])*0.5;
   x[3]=(binf[3]+bsup[3])*0.5;
 
-  _myf_FaceFace(x,&f,g,face1,face2);
+  cadmbtb_myf_FaceFace(x,&f,g,face1,face2);
 
   df1=f;
 
@@ -210,7 +210,7 @@ void cadmbtb_distanceFaceFace(const OccContactFace& csh1,
 
   while(mode > 7)
   {
-    _myf_FaceFace(x,&f,g,face1,face2);
+    cadmbtb_myf_FaceFace(x,&f,g,face1,face2);
 
     n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
 
@@ -309,7 +309,7 @@ void cadmbtb_distanceFaceEdge(
   x[1]=(binf[1]+bsup[1])*0.5;
   x[2]=(binf[2]+bsup[2])*0.5;
   // x[3]=(binf[3]+bsup[3])*0.5;
-  _myf_FaceEdge(x,&f,g,face1,edge2);
+  cadmbtb_myf_FaceEdge(x,&f,g,face1,edge2);
 
   df1=f;
   /*n=3 because of Face, edge.*/
@@ -329,14 +329,14 @@ void cadmbtb_distanceFaceEdge(
 
   while(mode > 7)
   {
-    _myf_FaceEdge(x,&f,g,face1,edge2);
+    cadmbtb_myf_FaceEdge(x,&f,g,face1,edge2);
 
     n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
 
   }
 
   double sqrt_f=sqrt(f);
-  
+
   DEBUG_PRINTF("mode=%d and min value at u=%e,v=%e f=%e\n",mode,x[0],x[1],sqrt_f);
   DEBUG_PRINTF("cadmbtb_getMinDistanceFaceEdge_using_n2qn1 dist = %e\n",sqrt_f);
 

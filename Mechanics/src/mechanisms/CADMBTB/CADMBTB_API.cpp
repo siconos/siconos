@@ -5,7 +5,6 @@
 #include "STEPControl_Reader.hxx"
 #include "AIS_InteractiveContext.hxx"
 #include "TopExp_Explorer.hxx"
-#include "TopoDS.hxx"
 #include "BRepTools.hxx"
 #include "BRepBuilderAPI_MakeEdge.hxx"
 #include "BRepBuilderAPI_MakeVertex.hxx"
@@ -740,4 +739,10 @@ void CADMBTB_loadArtefactCADFile(const char * fileName,double trans)
       }
     }
   }
+}
+
+
+TopoDS_Shape CADMBTB_TopoDS(unsigned int numDS)
+{
+  return sTopoDS[numDS];
 }
