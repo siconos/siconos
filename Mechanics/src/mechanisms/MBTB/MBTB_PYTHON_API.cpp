@@ -576,7 +576,7 @@ void  MBTB_initSimu(double hTS, int withProj)
   setNumericsOptions(&global_options);
 
 }
-SP::Model MBTB_getModel()
+SP::Model MBTB_model()
 {
   return myModel;
 }

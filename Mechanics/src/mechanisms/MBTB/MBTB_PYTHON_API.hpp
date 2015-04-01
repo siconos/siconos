@@ -138,7 +138,7 @@ void  MBTB_initSimu(double hTS, int withProj);
 /*!
   The model may be used outside MBTB in Siconos Front-End.
 */
-SP::Model MBTB_getModel();
+SP::Model MBTB_model();
 
 //! It runs the simulation.
 /*!

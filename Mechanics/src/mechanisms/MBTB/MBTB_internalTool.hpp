@@ -4,9 +4,11 @@
    * It consists in updating the CADMBTB from the simulation step. <br>
    * It also manages the output data.
    *  @{
-   */#ifndef INTERNALTOOLMBTB
+   */
+#ifndef INTERNALTOOLMBTB
 #define INTERNALTOOLMBTB
 #include <stdio.h>
+#include <string>
 #define PRINT_FORCE_CONTACTS
 #define MBTB_PRINT_DIST
 //! It updates the contacts CAD model from the body.
@@ -27,6 +29,11 @@ void _MBTB_updateContactFromDS(int numDS);
 /*!
 
  */
+FILE* _MBTB_open(std::string filename, std::string args);
+
+void _MBTB_close(FILE *);
+
+
 void _MBTB_printHeader(FILE *fp);
 //!It prints the current state in the output file.
 /*!

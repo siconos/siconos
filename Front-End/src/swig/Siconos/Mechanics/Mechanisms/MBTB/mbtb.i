@@ -9,7 +9,12 @@
 
 %{
 #include <SiconosKernel.hpp>
+#include <MBTB_DATA.hpp>
+#include <MBTB_internalTool.hpp>
 #include <MBTB_PYTHON_API.hpp>
+#include <ace.h>
+
+  unsigned int sUseGravity = 0;
 %}
 
 %include handleException.i
@@ -18,5 +23,9 @@
 
 %import Kernel/Kernel.i
 
+%include <MBTB_DATA.hpp>
+%include <MBTB_internalTool.hpp>
 %include <MBTB_PYTHON_API.hpp>
+%include <ace.h>
+
  //%include "MBTB_Body.hpp"

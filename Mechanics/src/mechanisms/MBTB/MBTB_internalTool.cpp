@@ -392,11 +392,23 @@ void _MBTB_displayStep()
        printf("vitess  for contact %i\t =\t ",numC);
       printf("%e\n",
 	     sContacts[numC]->interaction()->y(1)->getValue(0));
-      
+
     }
   }
   // printf("\n");
 }
+FILE* _MBTB_open(std::string filename, std::string args)
+{
+  FILE* fp = fopen(filename.c_str(), args.c_str());
+  return fp;
+}
+
+void _MBTB_close(FILE* fp)
+{
+  fclose(fp);
+}
+
+
 void _MBTB_printStep(FILE *fp)
 {
   //fprintf(fp,"_MBTB_printStep ");
