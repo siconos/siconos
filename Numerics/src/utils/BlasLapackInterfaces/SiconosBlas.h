@@ -51,6 +51,7 @@ extern "C"
 #endif
 
 
+#include "NumericsMatrixLA.h"
 
 #endif // SiconosBlas_H
 

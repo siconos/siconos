@@ -46,6 +46,7 @@ char *  SICONOS_LCP_PIVOT_STR = "Pivot based method";
 char *  SICONOS_LCP_BARD_STR = "Bard-type pivoting method";
 char *  SICONOS_LCP_MURTY_STR = "Murty's least index pivoting method";
 char *  SICONOS_LCP_PATHSEARCH_STR = "For testing only: solver used in the Pathsearch algorithm";
+char *  SICONOS_LCP_PIVOT_LUMOD_STR = "Pivot based method with BLU updates using LUMOD";
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 
@@ -56,7 +57,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
     numericsError("lcp_driver_SparseBlockMatrix", "forbidden type of storage for the matrix M of the LCP");
 
   /*
-    The options for the global "block" solver are defined in options[0].\n
+    The options for the global "block" solver are defined in options->\n
     options[i], for 0<i<numberOfSolvers-1 correspond to local solvers.
    */
 
@@ -81,8 +82,8 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
       w[j] = q[j];
     }
     info = 0;
-    options[0].iparam[1] = 0;   /* Number of iterations done */
-    options[0].dparam[1] = 0.0; /* Error */
+    options->iparam[1] = 0;   /* Number of iterations done */
+    options->dparam[1] = 0.0; /* Error */
     if (verbose > 0)
       printf("LCP_driver_SparseBlockMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
     return info;
@@ -93,24 +94,24 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
   *************************************************/
 
   /* Solver name */
-  //  char * name = options[0].solverName;
+  //  char * name = options->solverName;
   if (verbose == 1)
-    printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", idToName(options[0].solverId));
+    printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", idToName(options->solverId));
 
   /****** Gauss Seidel block solver ******/
-  if ((options[0].solverId) == SICONOS_LCP_NSGS_SBM)
+  if ((options->solverId) == SICONOS_LCP_NSGS_SBM)
     lcp_nsgs_SBM(problem, z , w , &info , options);
   else
   {
-    fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", idToName(options[0].solverId));
+    fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", idToName(options->solverId));
     exit(EXIT_FAILURE);
   }
 
   /*************************************************
    *  3 - Computes w = Mz + q and checks validity
    *************************************************/
-  if (options[0].filterOn > 0)
-    info = lcp_compute_error(problem, z, w, options[0].dparam[0], &(options[0].dparam[1]));
+  if (options->filterOn > 0)
+    info = lcp_compute_error(problem, z, w, options->dparam[0], &(options->dparam[1]));
 
   return info;
 
@@ -292,6 +293,9 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     break;
   case SICONOS_LCP_PATHSEARCH:
     lcp_pathsearch(problem, z , w , &info , options);
+    break;
+  case SICONOS_LCP_PIVOT_LUMOD:
+    lcp_pivot_lumod(problem, z , w , &info , options);
     break;
   /*error */
   default:

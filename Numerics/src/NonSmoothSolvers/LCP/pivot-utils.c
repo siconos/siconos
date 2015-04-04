@@ -23,13 +23,16 @@
 #include <string.h>
 #include <float.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "pivot-utils.h"
 #include "lcp_pivot.h"
 
+#include "lumod_wrapper.h"
 #include "SiconosCompat.h"
+#include "SiconosBlas.h"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 int pivot_init_lemke(double* mat, unsigned int dim)
@@ -161,6 +164,54 @@ int pivot_selection_lemke(double* mat, unsigned dim, unsigned drive, unsigned au
   return block;
 }
 
+/* This version is with   */
+int pivot_selection_lemke2(unsigned n, double* restrict col_drive, double* restrict q_tilde, double* restrict lexico_mat, unsigned drive, unsigned aux_indx)
+{
+  int block = -1;
+  double candidate_pivot, current_pivot, candidate_ratio, dblock;
+  double ratio = INFINITY;
+  for (unsigned i = 0 ; i < n ; ++i)
+  {
+    candidate_pivot = col_drive[i];
+    if (candidate_pivot > DBL_EPSILON)
+    {
+      candidate_ratio = q_tilde[i] / candidate_pivot;
+      if (candidate_ratio > ratio) continue;
+      else if (candidate_ratio < ratio)
+      {
+        ratio = candidate_ratio;
+        block = i;
+        current_pivot = col_drive[block];
+      }
+      else
+      {
+        if (block == aux_indx || i == aux_indx)
+        {
+          /* We want the auxilliary variable to exit before any othe.
+           * see CPS p. 279 and example 4.4.16 */
+          block = aux_indx;
+        }
+        else
+        {
+          for (unsigned j = 0; j < n; ++j)
+          {
+            assert(block >= 0 && "ratio_selection_lemke: block < 0");
+            dblock = lexico_mat[block*n + j] / current_pivot - lexico_mat[i*n + j] / candidate_pivot;
+            if (dblock < 0.) break;
+            else if (dblock > 0.)
+            {
+              block = i;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  return block;
+}
+
+
 int pivot_selection_pathsearch(double* mat, unsigned dim, unsigned drive, unsigned t_indx)
 {
   int block = pivot_selection_lemke(mat, dim, drive, t_indx);
@@ -217,9 +268,9 @@ void init_M_lemke(double* restrict mat, double* restrict M, unsigned int dim, un
 
 void do_pivot_driftless(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive)
 {
-  if (mat[block + drive*dim] < DBL_EPSILON)
+  if (fabs(mat[block + drive*dim]) < DBL_EPSILON)
   {
-    printf("do_pivot_driftless :: pivot value too small %e\n", mat[block + drive*dim]);
+    printf("do_pivot_driftless :: pivot value too small %e; q[block] = %e; theta = %e\n", mat[block + drive*dim], mat[block], mat[block]/mat[block + drive*dim]);
   }
   double pivot_inv = 1.0/mat[block + drive*dim];
   unsigned ncols = dim*dim2;
@@ -251,7 +302,7 @@ void do_pivot_driftless2(double* mat, unsigned int dim, unsigned int dim2, unsig
   double pivot_inv = 1.0/mat[block + drive*dim];
 
   /* Update column mat[block, :] */
-  mat[block + drive*dim] = 1.0; /* nm_rs = 1 */
+  mat[block + drive*dim] = pivot_inv; /* nm_rs = 1 */
   /*  nm_rj = m_rj/m_rs */
   for (unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= pivot_inv;
   for (unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= pivot_inv;
@@ -300,6 +351,106 @@ void do_pivot(double* mat, unsigned int dim, unsigned int dim2, unsigned int blo
     for (unsigned int j = 0        ; j < drive; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
     for (unsigned int j = drive + 1; j < dim2 ; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
     mat[i + drive*dim] *= pivot_inv;
+  }
+}
+
+void do_pivot_lumod(SN_lumod_dense_data* restrict lumod_data, NumericsMatrix* restrict M, double* restrict q_tilde, double* restrict lexico_mat, double* restrict col_drive, double* restrict col_tilde, unsigned* basis, unsigned block, unsigned drive)
+{
+  unsigned n = lumod_data->n;
+
+  /* Get */
+  unsigned leaving_var_indx = basis[block]-1;
+  unsigned entering_var_indx = drive-1;
+  /* this variable is p+1 in QianLi */
+  unsigned pos_leaving_var_in_factorized_basis = lumod_data->factorized_basis[leaving_var_indx];
+  /* Determine the type of pivot operation */
+  unsigned leaving_type = pos_leaving_var_in_factorized_basis > 0 ? 1 : 0;
+  unsigned entering_type = lumod_data->factorized_basis[entering_var_indx] > 0 ? 2 : 0;
+
+  switch (leaving_type + entering_type)
+  {
+    case 0:
+      /* Both variables are not in the factorized basis
+       * -> change the column corresponding to the leaving variable */
+      SN_lumod_replace_col(lumod_data, -lumod_data->row_col_indx[leaving_var_indx], col_tilde);
+      lumod_data->row_col_indx[entering_var_indx] = lumod_data->row_col_indx[leaving_var_indx];
+      lumod_data->row_col_indx[leaving_var_indx] = 0;
+      break;
+    case 1:
+      /* Leaving variable is in the factorized basis, entering not
+       * -> add one row and col */
+      /* Save the index of the column associated with the entering variable that
+       * was not in the basis */
+        lumod_data->row_col_indx[entering_var_indx] = -lumod_data->k; /* col index is negative */
+        lumod_data->row_col_indx[leaving_var_indx] = lumod_data->k;
+        SN_lumod_add_row_col(lumod_data, pos_leaving_var_in_factorized_basis-1, col_tilde);
+      break;
+    case 2:
+      {
+      /*  Leaving variable is not in the factorized basis, entering is.
+       *  -> remove one row and one col */
+        DEBUG_PRINT_VEC_INT_STR("old index", lumod_data->row_col_indx, 2*n+1);
+      int index_row = lumod_data->row_col_indx[entering_var_indx];
+      int index_col = lumod_data->row_col_indx[leaving_var_indx];
+      assert(index_row >= 0);
+      assert(index_col <= 0);
+      SN_lumod_delete_row_col(lumod_data, index_row, -index_col);
+      /*  update the index, since a row ans col was deleted */
+      unsigned changed_row = SN_lumod_find_arg_var(lumod_data->row_col_indx, lumod_data->k, n);
+      unsigned changed_col = SN_lumod_find_arg_var(lumod_data->row_col_indx, -lumod_data->k, n);
+      DEBUG_PRINTF("Changing row for variable %d and col for variable %d\n", changed_row, changed_col);
+      lumod_data->row_col_indx[changed_row] = index_row;
+      lumod_data->row_col_indx[changed_col] = index_col;
+      lumod_data->row_col_indx[entering_var_indx] = 0;
+      lumod_data->row_col_indx[leaving_var_indx] = 0;
+      DEBUG_PRINT_VEC_INT_STR("new index", lumod_data->row_col_indx, 2*n+1);
+/*       if ((index_row <= lumod_data->k) || (index_col >= -lumod_data->k))
+      {
+        for (unsigned i = 0; i < 2*n + 1; ++i)
+        {
+          if (lumod_data->row_col_indx[i] > index_row)
+          {
+            --(lumod_data->row_col_indx[i]);
+          }
+          else if(lumod_data->row_col_indx[i] < index_col)
+          {
+            ++(lumod_data->row_col_indx[i]);
+          }
+        }
+      }*/
+        DEBUG_PRINT_VEC_INT(lumod_data->row_col_indx, 2*n+1);
+      }
+      break;
+    case 3:
+      /* Both variables are in the factorized basis 
+       * -> replace the row corresponding to the entering variable by the
+       *  leaving one*/
+      SN_lumod_replace_row(lumod_data, lumod_data->row_col_indx[entering_var_indx], pos_leaving_var_in_factorized_basis-1);
+      lumod_data->row_col_indx[leaving_var_indx] = lumod_data->row_col_indx[entering_var_indx];
+      lumod_data->row_col_indx[entering_var_indx] = 0;
+      break;
+    default:
+      printf("do_pivot_lumod :: unkown update type occuring\n");
+      exit(EXIT_FAILURE);
+  }
+
+  /* Update q_tilde */
+  double theta = q_tilde[block]/col_drive[block];
+  DEBUG_PRINTF("theta = %e\n", theta);
+  DEBUG_PRINT_VEC(col_drive, n);
+  cblas_daxpy(n, -theta, col_drive, 1, q_tilde, 1);
+  q_tilde[block] = theta;
+
+  /* Update the lexico_mat
+   * XXX check if this is correct. The value of the pivot may be wrong --xhub */
+  double pivot = col_drive[block];
+  unsigned block_row_indx = block*n;
+
+  cblas_dscal(n, 1./pivot, &lexico_mat[block_row_indx], 1);
+  for (unsigned i = 0; i < n*n; i += n)
+  {
+    if (i == block_row_indx) continue;
+    cblas_daxpy(n, -col_drive[i]/pivot, &lexico_mat[block_row_indx], 1, &lexico_mat[i], 1);
   }
 }
 

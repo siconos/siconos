@@ -34,6 +34,7 @@ void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearCo
   case SICONOS_LCP_CPG:
   case SICONOS_LCP_LEMKE:
   case SICONOS_LCP_PIVOT:
+  case SICONOS_LCP_PIVOT_LUMOD:
   case SICONOS_LCP_BARD:
   case SICONOS_LCP_MURTY:
   case SICONOS_LCP_PATHSEARCH:

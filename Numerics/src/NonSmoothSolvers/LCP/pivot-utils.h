@@ -26,6 +26,7 @@
 #define PIVOT_UTILS_H
 
 #include "NumericsConfig.h"
+#include "lumod_wrapper.h"
 
 #ifdef __cplusplus
 #undef restrict
@@ -64,6 +65,7 @@ extern "C"
  * \return the leaving (or blocking) variable
  */
   int pivot_selection_lemke(double* mat, unsigned dim, unsigned drive, unsigned aux_index);
+  int pivot_selection_lemke2(unsigned n, double* col_drive, double* q_tilde, double* lexico_mat, unsigned drive, unsigned aux_indx);
 
 /** find the leaving variable in a path search procedure. The code is almost
  * the same as in pivot_selection_lemke, except that we also check if it is
@@ -88,7 +90,7 @@ extern "C"
  * \param q vector from the LCP formulation
  * \param d covering vector for the auxiliary variable, possibly NULL
  */
-void init_M_lemke(double* restrict mat, double* restrict M, unsigned int dim, unsigned int size_x, double* restrict q, double* restrict d);
+void init_M_lemke(double* mat, double* M, unsigned int dim, unsigned int size_x, double* q, double* d);
 
 /** Do the pivot <block, drive>, driftless version
  * \param mat the matrix to update
@@ -116,6 +118,19 @@ void do_pivot_driftless2(double* mat, unsigned int dim, unsigned int dim2, unsig
  * \param drive the driving or entering variable
  */
   void do_pivot(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
+
+/** Do the pivot <block, drive> with block-LU updates
+ * \param lumod_data lumod data
+ * \param M the LCP matrix
+ * \param q_tilde the modified q vector: it is the current of the variables currently in the basis
+ * \param lexico_mat matrix for the lexicographic ordering
+ * \param col_drive column of the driving variable
+ * \param col_tilde Solution to H x = col
+ * \param basis current basis
+ * \param block the blocking or leaving variable
+ * \param drive the driving or entering variable
+ */
+  void do_pivot_lumod(SN_lumod_dense_data* lumod_data, NumericsMatrix* M, double* q_tilde, double* lexico_mat, double* col_drive, double* col_tilde, unsigned* basis, unsigned block, unsigned drive);
 
   /** print a diagnostic of the info value
    * \param info the value given by the algorithm

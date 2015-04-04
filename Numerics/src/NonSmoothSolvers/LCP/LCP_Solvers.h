@@ -635,6 +635,8 @@ extern "C"
    */
   void lcp_pivot(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
   void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* u , double* s, int *info , SolverOptions* options, double* cov_vec);
+  void lcp_pivot_lumod(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, double* u , double* s, int *info , SolverOptions* options, double* cov_vec);
 
   /** lcp_pathsearch is a direct solver for LCP based on the pathsearch algorithm\n
    * \warning this solver is available for testing purposes only! consider

@@ -28,12 +28,11 @@
 
 #include "SiconosLapack.h"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-//#define DEBUG_NO_MATRIX
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#define DEBUG_NO_MATRIX
 #include "debug.h"
 
-//#define WARN_ONLY_SMALL_PIVOT
 #include "lcp_pivot.h"
 
 int pivot_selection_bard(double* mat, unsigned int dim)
@@ -393,8 +392,8 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
   }
 
   /* save the position of the auxiliary variable */
-  assert(drive >= 0);
-  aux_indx = drive;
+  assert(block >= 0);
+  aux_indx = block;
 
   /* Pivot < mu , drive >  or < drive, drive > */
 
@@ -403,12 +402,15 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
 
   if (fabs(pivot) < DBL_EPSILON)
   {
-    if (verbose > 0)
-      printf("the pivot is quasi-nul %e, the algorithm cannot be used !\n", pivot);
-#ifndef WARN_ONLY_SMALL_PIVOT
-    *info = LCP_PIVOT_NUL;
-    goto exit_lcp_pivot;
-#endif
+    switch (pivot_selection_rule)
+    {
+      case SICONOS_LCP_PIVOT_BARD:
+      case SICONOS_LCP_PIVOT_LEAST_INDEX:
+        if (verbose > 0)
+          printf("the pivot is quasi-nul %e, the algorithm cannot be used !\n", pivot);
+        *info = LCP_PIVOT_NUL;
+        goto exit_lcp_pivot;
+    }
   }
 
   /* update matrix */
@@ -568,12 +570,16 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
     pivot = mat[block + drive*dim];
     if (fabs(pivot) < DBL_EPSILON)
     {
-      if (verbose > 0)
-        printf("the pivot is quasi-nul %e, danger !\nq[block] = %e; z = %e\n", pivot, mat[block], mat[block]/pivot);
-#ifndef WARN_ONLY_SMALL_PIVOT
-      *info = LCP_PIVOT_NUL;
-      goto exit_lcp_pivot;
-#endif
+      switch (pivot_selection_rule)
+      {
+        case SICONOS_LCP_PIVOT_BARD:
+        case SICONOS_LCP_PIVOT_LEAST_INDEX:
+          if (verbose > 0)
+            printf("the pivot is quasi-nul %e, the algorithm cannot be used !\n", pivot);
+          *info = LCP_PIVOT_NUL;
+          goto exit_lcp_pivot;
+          break;
+      }
     }
 
     /* update matrix */
