@@ -9,6 +9,7 @@
 # <PROJECT_NAME>_Unstable_SRCS : built only if -DUNSTABLE=ON
 # <PROJECT_NAME>_VERSION : version of the library
 # <PROJECT_NAME>_HDRS : installation headers  (if none all headers)
+# <PROJECT_NAME>_HDRS_EXCLUDE_DIR : exclude headers from this dir from installation
 # <PROJECT_NAME>_INSTALL_INCLUDE_DIR : where to install headers
 # <PROJECT_NAME>_INSTALL_LIB_DIR     : where to install the build libraries
 # <PROJECT_NAME>_SOURCE_FILE_EXTENSIONS may contains the wanted sources extensions (default: all extensions)
@@ -87,12 +88,14 @@ MACRO(LIBRARY_PROJECT_SETUP)
   # headers
   #
   IF(NOT ${PROJECT_NAME}_HDRS)
-    FOREACH(_DIR ${_ALL_DIRS})
-      FILE(GLOB _HDRS  ${_DIR}/*.h ${_DIR}/*.hpp)
-      IF(_HDRS)
-        LIST(APPEND ${PROJECT_NAME}_HDRS ${_HDRS})
-      ENDIF(_HDRS)
-    ENDFOREACH(_DIR ${_ALL_DIRS})
+   FOREACH(_DIR ${_ALL_DIRS})
+    IF(NOT ";${${PROJECT_NAME}_HDRS_EXCLUDE_DIR};" MATCHES ";${_DIR};")
+     FILE(GLOB _HDRS  ${_DIR}/*.h ${_DIR}/*.hpp)
+     IF(_HDRS)
+      LIST(APPEND ${PROJECT_NAME}_HDRS ${_HDRS})
+     ENDIF(_HDRS)
+    ENDIF(NOT ";${${PROJECT_NAME}_HDRS_EXCLUDE_DIR};" MATCHES ";${_DIR};")
+   ENDFOREACH(_DIR ${_ALL_DIRS})
   ENDIF(NOT ${PROJECT_NAME}_HDRS)
 
   #
