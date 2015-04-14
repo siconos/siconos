@@ -321,9 +321,11 @@ void printvec( int n, REAL *x, int modulo );
 void printmatSQ( int size, int n, REAL *X, int modulo );
 void printmatUT( int size, int n, REAL *U, int modulo );
 
+#ifdef STRANGE_FUNCTIONS
 #if defined _MSC_VER
 int fileCount( char *filemask );
 MYBOOL fileSearchPath( char *envvar, char *searchfile, char *foundpath );
+#endif
 #endif
 
 #ifdef __cplusplus

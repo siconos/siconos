@@ -3,6 +3,12 @@
 #ifndef NM_LA_H
 #define NM_LA_H
 
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
+
+
 static inline double* NMD_row_rmajor(double* restrict mat, unsigned ncols, unsigned rindx)
 { 
   return &mat[rindx*ncols];

@@ -46,7 +46,7 @@ void strtoup(char *s)
 {
   if(s != NULL)
   while (*s) {
-    *s = toupper(*s);
+    *s = (char)toupper(*s);
     s++;
   }
 }
@@ -54,7 +54,7 @@ void strtolo(char *s)
 {
   if(s != NULL)
   while (*s) {
-    *s = tolower(*s);
+    *s = (char)tolower(*s);
     s++;
   }
 }
@@ -62,7 +62,7 @@ void strcpyup(char *t, char *s)
 {
   if((s != NULL) && (t != NULL)) {
     while (*s) {
-      *t = toupper(*s);
+      *t = (char)toupper(*s);
       t++;
       s++;
     }
@@ -73,7 +73,7 @@ void strcpylo(char *t, char *s)
 {
   if((s != NULL) && (t != NULL)) {
     while (*s) {
-      *t = tolower(*s);
+      *t = (char)tolower(*s);
       t++;
       s++;
     }
@@ -781,6 +781,7 @@ void printmatSQ( int size, int n, REAL *X, int modulo)
    }
 }
 
+#ifdef STRANGE_FUNCTIONS
 /* Miscellaneous file functions */
 #if defined _MSC_VER
 /* Check MS versions before 7 */
@@ -818,4 +819,5 @@ MYBOOL fileSearchPath( char *envvar, char *searchfile, char *foundpath )
      return( TRUE );
    }
 }
+#endif
 #endif

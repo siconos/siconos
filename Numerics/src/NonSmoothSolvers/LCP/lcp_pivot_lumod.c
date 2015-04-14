@@ -517,7 +517,7 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, doub
 //          *info = 0;
 //          has_sol = 1;
 //        }
-        break;
+//        break;
       case SICONOS_LCP_PIVOT_LEMKE:
       default:
         /** one basic variable is leaving and the driving one enters the basis */

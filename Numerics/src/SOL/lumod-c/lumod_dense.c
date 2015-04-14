@@ -10,6 +10,11 @@
 /* TODO kill this */
 #define ADDR_OFFSET 1
 
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
+
 /* Modification for siconos, Olivier Huber:
  * - add restrict keyword to pointer to ensure aliasing
  * - replace BLAS Fortran API with CBLAS

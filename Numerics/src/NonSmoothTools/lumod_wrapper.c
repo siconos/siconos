@@ -82,7 +82,7 @@ SN_lumod_dense_data* SN_lumod_dense_allocate(unsigned n, unsigned maxmod)
   unsigned size_Uk = n*maxmod;
   unsigned size_Yk = n*maxmod;
   unsigned size_L_C = maxmod*maxmod;
-  unsigned size_U_C = ceil(maxmod*(maxmod + 1)/2);
+  unsigned size_U_C = (unsigned)ceil(maxmod*(maxmod + 1)/2);
   unsigned size_y = maxmod;
   unsigned size_z = maxmod;
   unsigned size_w = maxmod;

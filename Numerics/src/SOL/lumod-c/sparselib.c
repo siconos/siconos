@@ -154,7 +154,8 @@ void moveVector(sparseVector *sparse, int destPos, int sourcePos, int itemCount)
     MEMMOVE(&sparse->value[destPos], &sparse->value[sourcePos], itemCount);
     MEMMOVE(&sparse->index[destPos], &sparse->index[sourcePos], itemCount);
   }
-  else {
+  /* XXX WTF is this ?  */
+/*   else {
     int    *idxPtr1, *idxPtr2;
     double *valPtr1, *valPtr2;
 
@@ -164,7 +165,7 @@ void moveVector(sparseVector *sparse, int destPos, int sourcePos, int itemCount)
       *idxPtr1 = *idxPtr2;
       *valPtr1 = *valPtr2;
     }
-  }
+  } */
 #else
   for(i = 1; i<=itemCount; i++) {
     sparse->value[destPos] = sparse->value[sourcePos];
@@ -413,6 +414,7 @@ void swapItems(sparseVector *sparse, int firstIndex, int secondIndex)
     secondIndex = i;
   }
 
+/* XXX WTF
   if(FALSE) {
     i = 1;
     ki = 0;
@@ -421,7 +423,7 @@ void swapItems(sparseVector *sparse, int firstIndex, int secondIndex)
     kj = 0;
     while(j <= sparse->count && (kj = sparse->index[j])<secondIndex) j++;
   }
-  else {
+  else*/ {
     i = findIndex(firstIndex, sparse->index, sparse->count, BLAS_BASE);
     if(i < 0)
       i = -i;
@@ -622,7 +624,7 @@ REAL dotVector(sparseVector *sparse, REAL *dense, int indexStart, int indexEnd)
       if(i < 0) {
         i = -i;
         if(i > n) 
-          return(sum);
+          return (REAL)sum;
       }
     }
     else
@@ -655,7 +657,7 @@ REAL dotVector(sparseVector *sparse, REAL *dense, int indexStart, int indexEnd)
 #endif    
   }
 
-  return(sum);
+  return (REAL)sum;
 }
 
 

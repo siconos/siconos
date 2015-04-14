@@ -463,6 +463,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
 
   for (i = 0 ; i < dim ; ++i) free(A[i]);
   free(A);
+  free(candidate_pivots_indx);
 }
 
 

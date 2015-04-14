@@ -578,7 +578,6 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
             printf("the pivot is quasi-nul %e, the algorithm cannot be used !\n", pivot);
           *info = LCP_PIVOT_NUL;
           goto exit_lcp_pivot;
-          break;
       }
     }
 
