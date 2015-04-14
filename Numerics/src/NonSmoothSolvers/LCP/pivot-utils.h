@@ -60,12 +60,13 @@ extern "C"
  * \param mat the matrix; we only use the columns of basic variable and the
  * covering vector of the entering variable
  * \param dim dimension of the problem
- * \param drive the driving or entering variable
  * \param aux_index index of auxillary variable in the current basis
+ * \param lexico_tol the tolerance on the lexicographic comparison
  * \return the leaving (or blocking) variable
  */
   int pivot_selection_lemke(double* mat, unsigned dim, unsigned drive, unsigned aux_index);
-  int pivot_selection_lemke2(unsigned n, double* col_drive, double* q_tilde, double* lexico_mat, unsigned drive, unsigned aux_indx);
+  int pivot_selection_lemke2(unsigned n, double* col_drive, double* q_tilde, double* lexico_mat, unsigned aux_indx, double lexico_tol);
+int pivot_selection_lemke3(unsigned n, double* restrict col_drive, double* restrict q_tilde, double* restrict lexico_col, unsigned* restrict basis, unsigned* restrict candidate_indx, SN_lumod_dense_data* restrict lumod_data, unsigned aux_indx, double lexico_tol);
 
 /** find the leaving variable in a path search procedure. The code is almost
  * the same as in pivot_selection_lemke, except that we also check if it is

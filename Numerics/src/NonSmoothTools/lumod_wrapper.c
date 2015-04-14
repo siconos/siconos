@@ -16,7 +16,8 @@
 
 
 #define TOL_BLU 1e-30
-//#define DEEP_DEBUG_Ck
+#define BASIS_OFFSET 1
+#define DEEP_DEBUG_Ck
 #include <fenv.h>
 
 /* TODO :
@@ -227,17 +228,20 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
   assert(Mlcp);
 
   /* Reset the factorized_basis */
-  memset(factorized_basis, 0, (2*n+1)*sizeof(double));
+  memset(factorized_basis, 0, (2*n+1)*sizeof(unsigned));
+  memset(lumod_data->row_col_indx, 0, (2*n+1)*sizeof(int));
   DEBUG_PRINT("Variables in factorized basis\n")
 
   for (unsigned i = 0, j = 0; i < n; ++i, j += n)
   {
-    unsigned var = basis[i]-1;
+    unsigned var = basis[i] - BASIS_OFFSET;
     DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], n), basis_to_number(basis[i], n))
-    factorized_basis[var] = i+1;
+    factorized_basis[var] = i + BASIS_OFFSET;
     if (var > n) /* z var */
     {
-      unsigned z_indx = var - n -1;
+      unsigned z_indx = var - n - 1;
+      assert( var - n - 1 >= 0);
+      assert(var - n - 1 < n);
       cblas_dcopy(n, &Mlcp[z_indx*n], 1, &H[j], 1);
     }
     else if (var < n)
@@ -339,7 +343,7 @@ void SN_lumod_replace_col(SN_lumod_dense_data* restrict lumod_data,  unsigned in
   assert(k > 0);
   assert(index_col < k);
 
-  /* Update a column of Yk (row major) */
+  /* Update a column of Yk */
   DEBUG_PRINT_MAT_STR("Yk before replacement", lumod_data->Yk, n, k);
   cblas_dcopy(n, col, 1, &lumod_data->Yk[index_col*n], 1);
   DEBUG_PRINT_MAT_STR("Yk after replacement", lumod_data->Yk, n, k);
@@ -366,8 +370,11 @@ void SN_lumod_replace_row(SN_lumod_dense_data* restrict lumod_data,  unsigned in
   unsigned maxmod = lumod_data->maxmod;
   assert(k > 0);
   assert(index_row < k);
+  assert(leaving_indx_in_H>=0);
+  assert(leaving_indx_in_H < n);
 
   /* Update a column of Uk  */
+  DEBUG_PRINTF("SN_lumod_replace_row :: replacing row %d in Uk", index_row);
   DEBUG_PRINT_MAT_STR("Uk before replacement", lumod_data->Uk, n, k);
   memset(&lumod_data->Uk[index_row*n], 0, n*sizeof(double));
   lumod_data->Uk[index_row*n + leaving_indx_in_H] = 1.;
