@@ -308,6 +308,8 @@ IF(WITH_TESTING)
 
   # lcp_mmc is of size 26, way too much for enum
   RM_TEST2(SICONOS_LCP_ENUM "lcp_mmc.dat")
+  # ditto for lcp_tobenna (size 40)
+  RM_TEST2(SICONOS_LCP_ENUM "lcp_tobenna.dat")
   # this LCP was put here to show that enum does not work on every LCP, likely
   # due to numerical problems, but works on some system ...
   RM_TEST2(SICONOS_LCP_ENUM "lcp_enum_fails.dat")
@@ -317,6 +319,10 @@ IF(WITH_TESTING)
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol_perturbed.dat)
   SET(test-LCP_ENUM-lcp_Pang_isolated_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_inf_sol_perturbed.dat)
+
+  NEW_LCP_TEST(SICONOS_LCP_LEMKE lcp_tobenna.dat)
+  NEW_LCP_TEST(SICONOS_LCP_PIVOT lcp_tobenna.dat)
+  NEW_LCP_TEST(SICONOS_LCP_PIVOT_LUMOD lcp_tobenna.dat)
 
   NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
 
