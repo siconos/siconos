@@ -22,12 +22,32 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include "LCP_Solvers.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
+
+//#define MAX_PIVOT
+//#define INV_PIVOT
+
 #include "debug.h"
 
+#define BASIS_OFFSET 1
+
+inline static char* basis_to_name(unsigned nb, unsigned n)
+{
+  if (nb < n + BASIS_OFFSET) return "w";
+  else if (nb > n + BASIS_OFFSET) return "z"; 
+  else return "e";
+}
+
+inline static unsigned basis_to_number(unsigned nb, unsigned n)
+{
+  if (nb < n + BASIS_OFFSET) return nb + 1 - BASIS_OFFSET;
+  else if (nb > n + BASIS_OFFSET) return nb - n - BASIS_OFFSET;
+  else return 0;
+}
 
 void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , double *wlem , int *info , SolverOptions* options)
 {
@@ -48,10 +68,10 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
   i=0;
   int n = problem->size;
   double *q = problem->q;
-  
+
   while ((i < (n - 1)) && (q[i] >= 0.)) 
     i++;
-  
+
   if ((i == (n - 1)) && (q[n - 1] >= 0.))
   {
 
@@ -70,8 +90,8 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
       printf("lcp_lexicolemke: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
     return ;
   }
-  
-  double z0, zb, dblock;
+
+  double z0, zb, delta_lexico;
   double pivot, tovip, ratio;
   double tmp;
   int *basis;
@@ -83,6 +103,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
 
   /* Allocation */
 
+  unsigned* candidate_pivots_indx = (unsigned*)malloc(dim * sizeof(unsigned));
   basis = (int *)malloc(dim * sizeof(int));
   A = (double **)malloc(dim * sizeof(double*));
 
@@ -98,10 +119,26 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
     for (jc = 1 ; jc <= dim; ++jc)
       A[ic][jc] = 0.0;
 
+  double max_elt_M = 0.;
   for (ic = 0 ; ic < dim; ++ic)
     for (jc = 0 ; jc < dim; ++jc)
+    {
       A[ic][jc + dim + 2] = -M[dim * jc + ic];
+      if (fabs(M[dim * jc + ic]) > max_elt_M) max_elt_M = fabs(M[dim * jc + ic]);
+    }
 
+  double lexico_tol_diff;
+  double lexico_tol_elt;
+  if (options->iparam[2] == 0)
+  {
+    lexico_tol_diff = max_elt_M*DBL_EPSILON;
+    lexico_tol_elt = max_elt_M*DBL_EPSILON;
+  }
+  else
+  {
+    lexico_tol_diff = options->dparam[2];
+    lexico_tol_elt = options->dparam[3];
+  }
   assert(problem->q);
 
   for (ic = 0 ; ic < dim; ++ic) A[ic][0] = problem->q[ic];
@@ -141,12 +178,12 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
     {
       for (jc = 0 ; jc < dim ; ++jc)
       {
-        dblock = A[block][1 + jc] - A[ic][1 + jc];
-        if (dblock < 0)
+        delta_lexico = A[block][1 + jc] - A[ic][1 + jc];
+        if (delta_lexico < 0.)
         {
           break;
         }
-        else if (dblock > 0)
+        else if (delta_lexico > 0)
         {
           block = ic;
           break;
@@ -163,7 +200,11 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
 
   /* Pivot < block , drive > */
 
-  A[block][drive] = 1;
+#ifdef INV_PIVOT
+  A[block][drive] = tovip;
+#else
+  A[block][drive] = 1.;
+#endif
   for (ic = 0       ; ic < drive ; ++ic) A[block][ic] = A[block][ic] * tovip;
   for (ic = drive + 1 ; ic < dim2  ; ++ic) A[block][ic] = A[block][ic] * tovip;
 
@@ -192,6 +233,14 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
       { for(unsigned int j = 0 ; j < dim2; ++j)
       { DEBUG_PRINTF("%1.2e ", A[i][j]) }
       DEBUG_PRINT("\n")});
+  DEBUG_PRINT("lexico_mat\n");
+  DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
+      { DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.1e " ANSI_COLOR_RESET, A[i][drive]);
+      for(unsigned int j = 1 ; j <= dim; ++j) {
+      if (fabs(A[i][j]) > 2.2e-16) {DEBUG_PRINTF(ANSI_COLOR_YELLOW " % 2.f " ANSI_COLOR_RESET, A[i][j])}
+      else if (A[i][j] == 0.) { DEBUG_PRINT(ANSI_COLOR_BLUE " . " ANSI_COLOR_RESET) }
+      else { DEBUG_PRINT(ANSI_COLOR_RED " X " ANSI_COLOR_RESET) } }
+      DEBUG_PRINT("\n")});
 
   while (ITER < itermax && !Ifound)
   {
@@ -201,12 +250,14 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
     if (nobasis < dim + 1)      drive = nobasis + (dim + 1);
     else if (nobasis > dim + 1) drive = nobasis - (dim + 1);
 
-    DEBUG_PRINTF("driving variable %i \n", drive);
+    DEBUG_EXPR_WE( DEBUG_PRINT("basis= "); for (unsigned i = 0; i < dim; ++i) { DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], dim), basis_to_number(basis[i], dim)); } DEBUG_PRINT("\n"));
 
     /* Start research of argmin lexico for minimum ratio test */
     ratio = 1e20;
     block = -1;
 
+    unsigned nb_candidate = 0;
+    DEBUG_EXPR_WE(unsigned max_pivot_helped = 0;)
     for (ic = 0 ; ic < dim ; ++ic)
     {
       zb = A[ic][drive];
@@ -218,23 +269,102 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
         {
           ratio = z0;
           block = ic;
+          nb_candidate = 0;
+          DEBUG_EXPR_WE(max_pivot_helped = 0;)
         }
         else
         {
-          for (jc = 1 ; jc < dim + 1 ; ++jc)
+          candidate_pivots_indx[nb_candidate++] = ic;
+        }
+      }
+    }
+
+    if (nb_candidate > 0)
+    {
+      DEBUG_PRINTF("pivot_selection_lemke :: lexicomin %d candidates, ratio = %e, drive = %d\n", nb_candidate, ratio, drive);
+      for (unsigned k = 0; k < nb_candidate; ++k)
+      {
+        unsigned var = candidate_pivots_indx[k];
+        double candidate_pivot = A[var][drive];
+        for (jc = 1 ; jc < dim + 1 ; ++jc)
+        {
+          assert(block >=0 && "lcp_lexicolemke: block <0");
+          //                dblock = (A[block][jc] / A[block][drive]) - (A[var][jc] / candidate_pivot);
+          if (fabs(A[block][jc]) < lexico_tol_elt) // XXX TOL
           {
-            assert(block >=0 && "lcp_lexicolemke: block <0");
-            dblock = A[block][jc] / A[block][drive] - A[ic][jc] / zb;
-            if (dblock < 0.0) break;
-            else if (dblock > 0.0)
+            if (A[var][jc] < -lexico_tol_elt)
             {
-              block = ic;
+              /*  delta_lexico > 0 (since pivot are always >0., => new lexicomin  */
+              block = var;
+              DEBUG_EXPR_WE(max_pivot_helped = 0;)
               break;
             }
+            else if (A[var][jc] > lexico_tol_elt)
+              /* delta_lexico < 0 => lexicomin does not change */
+            {
+              DEBUG_EXPR_WE(max_pivot_helped = 0;)
+              break;
+            }
+            else /* delta_lexico not conclusive => equality */
+            {
+              continue;
+            }
+          }
+          else if (fabs(A[var][jc]) < lexico_tol_elt)
+          {
+            if (A[block][jc] > lexico_tol_elt)
+            {
+              /*  delta_lexico > 0 (since pivot are always >0., => new lexicomin  */
+              block = var;
+              DEBUG_EXPR_WE(max_pivot_helped = 0;)
+              break;
+            }
+            else if (A[block][jc] < -lexico_tol_elt)
+              /* delta_lexico < 0 => lexicomin does not change */
+            {
+              DEBUG_EXPR_WE(max_pivot_helped = 0;)
+              break;
+            }
+            else /* delta_lexico not conclusive => equality */
+            {
+              continue;
+            }
+          }
+          else /* really compute delta_lexico */
+          {
+            delta_lexico = (A[block][jc] * candidate_pivot) - (A[var][jc] * A[block][drive]);
+            DEBUG_EXPR_WE(if ((delta_lexico != 0.) && (fabs(delta_lexico) < 1e-10) && (fabs(delta_lexico) > lexico_tol_diff)) { printf("pivot_selection_lemke :: very small difference in lexicomin: %2.2e\n", delta_lexico);
+                unsigned block_number = basis_to_number(basis[block], dim); unsigned var_number =  basis_to_number(basis[var], dim);
+                char* block_name = basis_to_name(basis[block], dim); char* var_name = basis_to_name(basis[var], dim);
+                printf("lexicomin: A[%s%d][jc] / A[%s%d][drive] = %e / %e vs A[%s%d][jc] / A[%s%d][drive] = %e / %e\n", block_name, block_number, block_name, block_number, A[block][jc], A[block][drive], var_name, var_number, var_name, var_number, A[var][jc], A[var][drive]);});
+            if (delta_lexico < -lexico_tol_diff) break;
+            else if (delta_lexico > lexico_tol_diff)
+            {
+              DEBUG_PRINTF("pivot_selection_lemke :: lexicomin change var block changes %s%d from %s%d, delta_lexico = %2.2e, new pivot = %e\n", basis_to_name(basis[var], dim), basis_to_number(basis[var], dim), basis_to_name(basis[block], dim), basis_to_number(basis[block], dim), delta_lexico, A[var][drive]);
+              block = var;
+              DEBUG_EXPR_WE(max_pivot_helped = 0;)
+              break;
+            }
+#ifdef MAX_PIVOT
+            else if (delta_lexico != 0.)
+            {
+              if ((A[block][drive] < 1e-10) && (candidate_pivot > A[block][drive]))
+              {
+                DEBUG_PRINTF("pivot_selection_lemke :: lexicomin small difference %2.2e, taking largest pivot %e > %e (var %s%d vs %s%d)\n", delta_lexico, candidate_pivot, A[block][drive], basis_to_name(basis[var], dim), basis_to_number(basis[var], dim), basis_to_name(basis[block], dim), basis_to_number(basis[block], dim));
+                block = var;
+                DEBUG_EXPR_WE(max_pivot_helped = 1;)
+                break;
+              }
+
+            }
+#endif
           }
         }
       }
     }
+
+
+    DEBUG_EXPR_WE(if (max_pivot_helped) {DEBUG_PRINT("pivot_selection_lemke :: lexicomin MAX PIVOT HELPED!\n");});
     if (block == -1)
     {
       Ifound = 1;
@@ -244,13 +374,18 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
       break;
     }
 
+    DEBUG_PRINTF("leaving variable %s%d entering variable %s%d\n", basis_to_name(basis[block], dim), basis_to_number(basis[block], dim), basis_to_name(drive, dim), basis_to_number(drive, dim));
     if (basis[block] == dim + 1) Ifound = 1;
 
     /* Pivot < block , drive > */
 
     pivot = A[block][drive];
     tovip = 1.0 / pivot;
-    A[block][drive] = 1;
+#ifdef INV_PIVOT
+    A[block][drive] = tovip;
+#else
+    A[block][drive] = 1.;
+#endif
 
     for (ic = 0       ; ic < drive ; ++ic) A[block][ic] = A[block][ic] * tovip;
     for (ic = drive + 1 ; ic < dim2  ; ++ic) A[block][ic] = A[block][ic] * tovip;
@@ -281,6 +416,15 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
       { for(unsigned int j = 0 ; j < dim2; ++j)
       { DEBUG_PRINTF("%1.2e ", A[i][j]) }
       DEBUG_PRINT("\n")});
+    DEBUG_PRINT("lexico_mat\n");
+    DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
+        { DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.1e " ANSI_COLOR_RESET, A[i][drive]);
+        for(unsigned int j = 1 ; j <= dim; ++j) {
+        if (fabs(A[i][j]) > 2.2e-16) {DEBUG_PRINTF(ANSI_COLOR_YELLOW " % 2.f " ANSI_COLOR_RESET, A[i][j])}
+        else if (A[i][j] == 0.) { DEBUG_PRINT(ANSI_COLOR_BLUE " . " ANSI_COLOR_RESET) }
+        else { DEBUG_PRINT(ANSI_COLOR_RED " X " ANSI_COLOR_RESET) } }
+        DEBUG_PRINT("\n")});
+
 
   } /* end while*/
 

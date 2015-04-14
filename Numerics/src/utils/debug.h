@@ -40,20 +40,25 @@
 #define DEBUG_WHERESTR  "%s"
 #define DEBUG_WHEREARG  ""
 #endif
+
 #ifdef DEBUG_STDOUT
 #define DEBUG_INTERNAL_PRINTF(...)       printf(ANSI_COLOR_RED); printf(__VA_ARGS__); printf(ANSI_COLOR_RESET);
 #else
 #define DEBUG_INTERNAL_PRINTF(...)       fprintf(stderr, ANSI_COLOR_RED); fprintf(stderr, __VA_ARGS__); fprintf(stderr, ANSI_COLOR_RESET);
 #endif
+
 #define DEBUG_PRINTF(_fmt, ...)  DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)
 #define DEBUG_PRINT(M)  DEBUG_PRINTF("%s",M)
 #define DEBUG_EXPR(E) DEBUG_PRINTF("%s: ", #E) do { E ; } while(0)
 #define DEBUG_EXPR_WE(E) do { E ; } while(0)
+#define DEBUG_GLOBAL_VAR_DECL(D) D
+
 #else
 #define DEBUG_PRINTF(_fmt, ...)
 #define DEBUG_PRINT(M)
 #define DEBUG_EXPR(E)
 #define DEBUG_EXPR_WE(E)
+#define DEBUG_GLOBAL_VAR_DECL(D)
 #endif
 
 #define DEBUG_PRINT_MAT_STR(NAME, M, nrows, ncols) \
@@ -64,6 +69,17 @@ DEBUG_EXPR_WE(for (unsigned i = 0; i < nrows; ++i) \
    DEBUG_PRINT("\n")});
 
 #define DEBUG_PRINT_MAT(M, nrows, ncols) DEBUG_PRINT_MAT_STR(#M, M, nrows, ncols)
+
+#define DEBUG_PRINT_MAT_SMALL_STR(NAME, M, nrows, ncols, ...) \
+DEBUG_PRINT(#NAME " matrix\n"); \
+DEBUG_EXPR_WE(double* _arr_[] = {__VA_ARGS__}; for (unsigned i = 0; i < nrows; ++i) \
+  { for (unsigned k = 0; k < sizeof(_arr_)/sizeof(double*); ++k) {DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.0e " ANSI_COLOR_RESET, _arr_[k][i])} \
+    for(unsigned j = 0 ; j < ncols; ++j) \
+  { if (fabs(M[i + j*nrows]) > 2.2e-16) {DEBUG_PRINTF(ANSI_COLOR_YELLOW " % 2.f " ANSI_COLOR_RESET, M[i + j*nrows])} \
+    else { DEBUG_PRINT(ANSI_COLOR_BLUE " . " ANSI_COLOR_RESET) } } \
+   DEBUG_PRINT("\n")});
+
+#define DEBUG_PRINT_SMALL_MAT(M, nrows, ncols) DEBUG_PRINT_MAT_SMALL_STR(#M, M, nrows, ncols)
 
 #define DEBUG_PRINT_MAT_ROW_MAJOR_STR(NAME, M, nrows, ncols) \
 DEBUG_PRINT(#NAME " matrix\n"); \
@@ -82,6 +98,25 @@ DEBUG_EXPR_WE(for (unsigned i = 0; i < nrows; ++i) \
    DEBUG_PRINT("\n")});
 
 #define DEBUG_PRINT_MAT_ROW_MAJOR_NCOLS(M, nrows, ncols, ncols_to_display) DEBUG_PRINT_MAT_ROW_MAJOR_NCOLS_STR(#M, M, nrows, ncols, ncols_to_display)
+
+#define DEBUG_PRINT_MAT_ROW_MAJOR_NCOLS_SMALL_STR(NAME, M, nrows, ncols, ncols_to_display) \
+DEBUG_PRINT(#NAME " matrix\n"); \
+DEBUG_EXPR_WE(for (unsigned i = 0; i < nrows; ++i) \
+  { for(unsigned j = 0 ; j < ncols_to_display; ++j) \
+  { if (fabs(M[i*ncols + j]) > 2.2e-16) {DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.0e " ANSI_COLOR_RESET, M[i*ncols + j])} \
+    else { DEBUG_PRINT(ANSI_COLOR_BLUE " 0     " ANSI_COLOR_RESET) } } \
+   DEBUG_PRINT("\n")});
+
+#define DEBUG_PRINT_MAT_ROW_MAJOR_NCOLS_SMALL2_STR(NAME, M, nrows, ncols, ncols_to_display, ...) \
+DEBUG_PRINT(#NAME " matrix\n"); \
+DEBUG_EXPR_WE( double* _arr_[] = {__VA_ARGS__}; for (unsigned i = 0; i < nrows; ++i) \
+  { for (unsigned k = 0; k < sizeof(_arr_)/sizeof(double*); ++k) {DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.0e "ANSI_COLOR_RESET, _arr_[k][i])} \
+    for(unsigned j = 0 ; j < ncols_to_display; ++j) \
+  { if (fabs(M[i*ncols + j]) > 2.2e-16) {DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.0e " ANSI_COLOR_RESET, M[i*ncols + j])} \
+    else { DEBUG_PRINT(ANSI_COLOR_BLUE " 0 " ANSI_COLOR_RESET) } } \
+   DEBUG_PRINT("\n")});
+
+#define DEBUG_PRINT_MAT_ROW_MAJOR_SMALL_NCOLS(M, nrows, ncols, ncols_to_display) DEBUG_PRINT_MAT_ROW_MAJOR_SMALL_NCOLS_STR(#M, M, nrows, ncols, ncols_to_display)
 
 #define DEBUG_PRINT_VEC_STR(MSG, V, size) \
 DEBUG_PRINT(MSG " vector\n"); \
