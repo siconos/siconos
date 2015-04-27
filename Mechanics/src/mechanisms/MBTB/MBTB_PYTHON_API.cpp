@@ -153,9 +153,9 @@ void _MBTB_BodyBuildComputeInitPosition(unsigned int numDS,   double mass,
                           q4);
   _MBTB_updateContactFromDS(numDS);
   /*3) compute the q0 of Siconos, that is the coordinate of G at the initial position*/
-  unsigned int qDim=7;
-  unsigned int nDof = 3;
-  unsigned int nDim = 6;
+  //unsigned int qDim=7;
+  //unsigned int nDof = 3;
+  //unsigned int nDim = 6;
   //SP::SiconosVector q10(new SiconosVector(qDim));
   //SP::SiconosVector v10(new SiconosVector(nDim));
   q10->zero();
@@ -223,7 +223,7 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
 {
   assert(sNbOfBodies > numDS &&"MBTB_BodyBuild numDS out of range.");
   unsigned int qDim=7;
-  unsigned int nDof = 3;
+  //unsigned int nDof = 3;
   unsigned int nDim = 6;
 
   SP::SiconosVector q10(new SiconosVector(qDim));
@@ -384,20 +384,20 @@ void MBTB_setSolverDOption(int i,double value)
 void  MBTB_initSimu(double hTS, int withProj)
 {
 
-  for(int numDS =0; numDS<sNbOfBodies; numDS++)
+  for(unsigned int numDS =0; numDS<sNbOfBodies; numDS++)
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(sDS[numDS]);
-  for(int numJ=0; numJ<sNbOfJoints; numJ++)
+  for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
   {
     if (sJointType[numJ]==PIVOT_0)
-	  myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
-						    sDS[sJointIndexDS[2*numJ]]);
+      myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
+                                                sDS[sJointIndexDS[2*numJ]]);
     if (sJointType[numJ]==PIVOT_1)
       myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
-						sDS[sJointIndexDS[2*numJ]],
-						sDS[sJointIndexDS[2*numJ+1]]);
+                                                sDS[sJointIndexDS[2*numJ]],
+                                                sDS[sJointIndexDS[2*numJ+1]]);
   }
   
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
 
     if(sContacts[numC]->_indexBody2!=-1)
@@ -514,7 +514,7 @@ void  MBTB_initSimu(double hTS, int withProj)
    *  Is it jutified ?
    */
 
-  for(int numDS =1; numDS<sNbOfBodies; numDS++)
+  for(unsigned int numDS =1; numDS<sNbOfBodies; numDS++)
   {
 #ifdef MBTB_MOREAU_YES
     if (withProj==0 or withProj==1)
@@ -555,7 +555,7 @@ void  MBTB_initSimu(double hTS, int withProj)
 
   printf("====> COMPUTE H OF INTERATIONS: (just for display)\n");
   SP::InteractionsGraph indexSet0 = myModel->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  for(int numJ=0; numJ<sNbOfJoints; numJ++)
+  for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
   {
     printf("-->compute h of %d \n",numJ);
     SP::Interaction inter = sJointRelations[numJ]->_interaction;
@@ -684,7 +684,7 @@ void MBTB_setJointPoints(unsigned int numJ, SP::SiconosVector G0C1,SP::SiconosVe
 void MBTB_ContactSetDParam(unsigned int paramId,unsigned int contactId,unsigned int idShape,double v)
 {
   assert(sNbOfContacts > contactId &&"MBTB_ContactLoadCADFile contactId out of range.");
-  unsigned int IdInCAD=sNbOfBodies+2*contactId;
+  // unsigned int IdInCAD=sNbOfBodies+2*contactId;
   switch(paramId)
   {
   case 1:

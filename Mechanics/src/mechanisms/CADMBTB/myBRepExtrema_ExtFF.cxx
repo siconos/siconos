@@ -136,8 +136,11 @@ classifier.Perform(F1, Puv, Tol1);/*Call UVBounds*/
       Puv.SetCoord(U1, U2);
       classifier.Perform(F2, Puv, Tol2);
       state2 = classifier.State();
-      if(true || (state1 == TopAbs_ON || state1 == TopAbs_IN) &&
-	 (state2 == TopAbs_ON || state2 == TopAbs_IN)) {
+//      if(true || (state1 == TopAbs_ON || state1 == TopAbs_IN) &&
+      if
+        (state2 == TopAbs_ON || state2 == TopAbs_IN)
+        //    )
+    {
 	mynbext++;
 	mydist.Append(myExtrem.Value(i));
 	myPointsOnS1.Append(P1);
