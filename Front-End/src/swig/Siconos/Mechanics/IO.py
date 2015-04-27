@@ -66,12 +66,15 @@ import time
 
 
 @contextmanager
-def tmpfile(suffix='', prefix='siconos_io'):
+def tmpfile(suffix='', prefix='siconos_io', contents=None):
     """
     A context manager for a named temporary file.
     """
     (_, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
     fid = open(tfilename, 'w')
+    if contents is not None:
+        fid.write(contents)
+        fid.flush()
     yield (fid, tfilename)
     fid.close()
     os.remove(tfilename)
@@ -838,7 +841,7 @@ class Hdf5():
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'vtp'
             self._shapeid[name] = shape.attrs['id']
-            self._number_of_shapes += 1        
+            self._number_of_shapes += 1
 
     def addMeshFromFile(self, name, filename):
         """
@@ -880,10 +883,28 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
+    def addShapeDataFromFile(self, name, filename):
+        """
+        Add shape data from a file.
+        """
+        if name not in self._ref:
+            shape = self._ref.create_dataset(name, (1,),
+                                             dtype=h5py.new_vlen(str))
+            shape[:] = str_of_file(filename)
+            shape.attrs['id'] = self._number_of_shapes
+            try:
+                shape.attrs['type'] = os.path.splitext(filename)[1][1:]
+            except:
+                shape.attrs['type'] = 'unknown'
+
+            self._shapeid[name] = shape.attrs['id']
+            self._number_of_shapes += 1
+
+
     def addContactFromBRep(self, name, brepname, contact_type,
                            index, collision_group=0, associated_shape=None):
         """
-        Add contact reference from previously added brep.
+        Add contact reference from a previously added brep.
         """
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1,),
@@ -900,7 +921,7 @@ class Hdf5():
 
     def addConvexShape(self, name, points):
         """
-        Add a convex shape defined by points.
+        Add a convex shape defined by a list of points.
         """
         if name not in self._ref:
             apoints = np.array(points)
@@ -926,13 +947,13 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addObject(self, name, contactors,
+    def addObject(self, name, shapes,
                   position,
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, inertia=None):
         """
-        Add an object.
+        Add an object with associated shapes.
         Contact detection is defined by a list of contactors.
         The initial position is mandatory : [x, y z].
         If the mass is zero this is a static object.
@@ -944,7 +965,7 @@ class Hdf5():
             assert len(axis) == 3
             angle = orientation[1]
             assert type(angle) is float
-            n = sin(angle / 2) / np.linalg.norm(axis)
+            n = sin(angle / 2.) / np.linalg.norm(axis)
 
             ori = [cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
         else:
@@ -952,6 +973,7 @@ class Hdf5():
             ori = orientation
 
         if name not in self._input:
+
             obj = group(self._input, name)
             obj.attrs['mass'] = mass
             obj.attrs['position'] = position
@@ -961,12 +983,16 @@ class Hdf5():
             if inertia is not None:
                 obj.attrs['inertia'] = inertia
 
-            for num, contactor in enumerate(contactors):
-                dat = data(obj, '{0}-{1}'.format(contactor.name, num), 0)
-                dat.attrs['name'] = contactor.name
-                dat.attrs['group'] = contactor.group
-                dat.attrs['position'] = contactor.position
-                dat.attrs['orientation'] = contactor.orientation
+            for num, shape in enumerate(shapes):
+                dat = data(obj, '{0}-{1}'.format(shape.name, num), 0)
+                dat.attrs['name'] = shape.name
+                if hasattr(shape, 'group'):
+                    dat.attrs['group'] = shape.group
+                if hasattr(shape, 'parameters') and \
+                    shape.parameters is not None:
+                    dat.attrs['parameters'] = shape.parameters
+                dat.attrs['position'] = shape.position
+                dat.attrs['orientation'] = shape.orientation
 
             if mass == 0:
                 obj.attrs['id'] = - (self._number_of_static_objects + 1)
@@ -1016,7 +1042,7 @@ class Hdf5():
             space_filter=None,
             body_class=None,
             shape_class=None,
-            face_class=None, 
+            face_class=None,
             edge_class=None,
             length_scale=1,
             t0=0,

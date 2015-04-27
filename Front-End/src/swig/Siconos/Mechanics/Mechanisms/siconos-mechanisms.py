@@ -18,7 +18,7 @@ from Siconos.Mechanics.Mechanisms import cadmbtb
 # a (pseudo) Contactor class is needed for the object-shape association.
 from Siconos.Mechanics.ContactDetection import SpaceFilter
 from Siconos.Mechanics import IO
-from Siconos.Mechanics.ContactDetection import Contactor
+from Siconos.Mechanics.ContactDetection import Avatar, Contactor
 
 install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
 print("install_path :", install_path)
@@ -154,6 +154,7 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
             mbtb._MBTB_STEP()
             mbtb._MBTB_displayStep()
             io.outputDynamicObjects()
+            io.outputVelocities()
             io.outputContactForces()
             io.outputSolverInfos()
             if mbtb.cvar.sTimerCmp % mbtb.cvar.sFreqOutput == 0:
@@ -165,6 +166,7 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
     def STEP(event=None):
         mbtb.MBTB_step()
         io.outputDynamicObjects()
+        io.outputVelocities()
         io.outputContactForces()
         io.outputSolverInfos()
 
@@ -174,6 +176,7 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
         while ii < 1000:
             mbtb.MBTB_step()
             io.outputDynamicObjects()
+            io.outputVelocities()
             io.outputContactForces()
             io.outputSolverInfos()
             cadmbtb.CADMBTB_DumpGraphic()
@@ -283,19 +286,13 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
     def VIEW_TOP(event=None):
         display.View_Top()
 
-
-
     for idBody in range(NBBODIES):
-        brep_name = 'brep{0}'.format(idBody)
-        pseudo_contact_name = 'cbrep{0}'.format(idBody)
+        shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
 
-        io.addBRepFromString(brep_name, cadmbtb.CADMBTB_TopoDSAsString(idBody))
-        io.addContactFromBRep(pseudo_contact_name, brep_name, 'Face', 0)
-        io.addObject('obj{0}'.format(idBody), [Contactor(pseudo_contact_name)],
+        io.addShapeDataFromFile(shape_name, afile[idBody])
+        io.addObject('obj-{0}'.format(shape_name), [Avatar(shape_name)],
                      mass=1,
-                     position=[0, 0, 0],
-                     velocity=[0, 0, 0, 0, 0, 0],
-                     orientation = ([0,0,1], pi/2))
+                     position=[0, 0, 0])
 
     if with3D and __name__ == '__main__':
         cadmbtb.CADMBTB_setIParam(0,dumpGraphic)

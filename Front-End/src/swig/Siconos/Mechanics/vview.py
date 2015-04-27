@@ -151,6 +151,53 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
 set_positionv = numpy.vectorize(set_position)
 
 
+def simple_vtp_mesh_str(brep_string):
+
+    FREECADPATH = '/usr/lib/freecad/lib' # path to your FreeCAD.so or FreeCAD.dll file
+    sys.path.append(FREECADPATH)
+    import FreeCAD
+    import Part
+    import Mesh
+
+    bshape = Part.Shape()
+
+    bshape.importBrepFromString(brep_string)
+
+    shape = bshape.Faces[0]
+    result = None
+
+    if hasattr(shape,'CenterOfMass'):
+        base = shape.CenterOfMass
+    else:
+        base = FreeCAD.Base.Vector(0.,0.,0.)
+
+    rawdata = shape.tessellate(.001)
+    faces = []
+    for triangle in rawdata[1]:
+        face = []
+        for i in range(3):
+            vindex = triangle[i]
+            face.append(rawdata[0][vindex] - base)
+            faces.append(face)
+    m = Mesh.Mesh(faces)
+    print m
+
+    with IO.tmpfile(suffix='.stl') as tmpf:
+        m.write(tmpf[1])
+        tmpf[0].flush()
+        print IO.str_of_file(tmpf[1])
+        reader = vtk.vtkSTLReader()
+        reader.SetFileName(tmpf[1])
+        reader.Update()
+        writer = vtk.vtkXMLPolyDataWriter()
+        with IO.tmpfile(suffix='.vtp') as tmp_vtpf:
+            writer.SetFileName(tmp_vtpf[1])
+            writer.SetInputData(reader.GetOutput())
+            writer.Write()
+            result = IO.str_of_file(tmp_vtpf[1])
+            return result
+
+
 def usage():
     print """{0}
     """.format(sys.argv[0])
@@ -543,6 +590,19 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                     attrs['associated_shape']
                 # delayed
                 mappers[shape_name] = (x for x in [mappers[associated_shape]()])
+            else:
+                mesh_str = simple_vtp_mesh_str(str(io.shapes()[shape_name][:]))
+                with IO.tmpfile() as tmpf:
+                    tmpf[0].write(mesh_str)
+                    tmpf[0].flush()
+                    reader = vtk_reader['vtp']()
+                    reader.SetFileName(tmpf[1])
+                    reader.Update()
+                    readers[shape_name] = reader
+                    mapper = vtk.vtkDataSetMapper()
+                    add_compatiblity_methods(mapper)
+                    mapper.SetInputConnection(reader.GetOutputPort())
+                    mappers[shape_name] = (x for x in [mapper])
 
         elif shape_type == 'convex':
             # a convex shape

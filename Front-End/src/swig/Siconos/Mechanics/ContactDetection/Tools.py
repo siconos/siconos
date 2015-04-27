@@ -1,10 +1,12 @@
 from math import cos, sin
 from numpy.linalg import norm
 
-class Contactor:
+class Shape(object):
+    """
+    A shape is associated to some body with relatives position and orientation.
+    """
     def __init__(self,
                  shape_name,
-                 collision_group=0,
                  relative_position=[0, 0, 0],
                  relative_orientation=[0, 1, 0, 0]):
 
@@ -23,7 +25,42 @@ class Contactor:
             ori = relative_orientation
 
         self.name = shape_name
-        self.group = collision_group
         self.position = relative_position
         self.orientation = ori
 
+
+class Avatar(Shape):
+    """
+    An Avatar shape is a shape associated to a body for visualisation
+    purpose only.
+    """
+
+    def __init__(self,
+                 shape_name,
+                 parameters=None,
+                 relative_position=[0, 0, 0],
+                 relative_orientation=[0, 1, 0, 0]):
+
+        self.parameters = parameters
+        super(Avatar, self).__init__(shape_name,
+                                     relative_position,
+                                     relative_orientation)
+
+
+class Contactor(Shape):
+    """
+    A Contactor shape belongs to a group and is associated to a body.
+    Contact laws must then be defined between groups.
+    """
+
+    def __init__(self,
+                 shape_name,
+                 collision_group=0,
+                 relative_position=[0, 0, 0],
+                 relative_orientation=[0, 1, 0, 0]):
+
+        self.group = collision_group
+
+        super(Contactor, self).__init__(shape_name,
+                                        relative_position,
+                                        relative_orientation)
