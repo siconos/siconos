@@ -286,15 +286,65 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
     def VIEW_TOP(event=None):
         display.View_Top()
 
+    assoc_shapes = dict()
+    offset = dict()
     for idBody in range(NBBODIES):
         shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
 
-        offset = [-v for v in initCenterMass[idBody]]
+        offset[idBody] = [-v for v in initCenterMass[idBody]]
 
         io.addShapeDataFromFile(shape_name, afile[idBody])
-        io.addObject('obj-{0}'.format(shape_name), [Avatar(shape_name, relative_position=offset)],
+
+        assoc_shapes[idBody] = [Avatar(shape_name,
+                                      relative_position=offset[idBody])]
+#        io.addObject('obj-{0}'.format(shape_name),
+#                     [Avatar(shape_name, relative_position=offset)],
+#                     mass=1,
+#                     position=[0, 0, 0])
+
+    for idContact in range(NBCONTACTS):
+        shape_name1 = os.path.basename(os.path.splitext(afileContact1[idContact])[0])
+        shape_name2 = os.path.basename(os.path.splitext(afileContact2[idContact])[0])
+
+        io.addShapeDataFromFile(shape_name1, afileContact1[idContact])
+        io.addShapeDataFromFile(shape_name2, afileContact2[idContact])
+
+        print contactBody1[idContact], contactBody2[idContact]
+
+        assoc_shapes[contactBody1[idContact]] += [Contactor(shape_name1,
+                                                           relative_position=offset[contactBody1[idContact]])]
+
+        if contactBody2[idContact] >= 0:
+            assoc_shapes[contactBody2[idContact]] += [Contactor(shape_name2,
+                                                                relative_position=offset[contactBody2[idContact]])]
+
+
+    for idArtefact in range(NBARTEFACTS):
+        shape_name = os.path.basename(os.path.splitext(Artefactfile[idArtefact])[0])
+
+        io.addShapeDataFromFile(shape_name, Artefactfile[idArtefact])
+
+
+    for idBody in range(NBBODIES):
+        shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
+
+        io.addObject('obj-{0}'.format(shape_name),
+                     assoc_shapes[idBody],
                      mass=1,
                      position=[0, 0, 0])
+
+
+    for idArtefact in range(NBARTEFACTS):
+
+        shape_name = os.path.basename(os.path.splitext(Artefactfile[idArtefact])[0])
+
+        io.addObject('artefact-{0}'.format(shape_name),
+                     [Avatar(shape_name)], 
+                     mass=0,
+                     position=[0, 0, 0])
+
+
+    io.outputStaticObjects()
 
     if with3D and __name__ == '__main__':
         cadmbtb.CADMBTB_setIParam(0,dumpGraphic)

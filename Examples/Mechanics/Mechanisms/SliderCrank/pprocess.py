@@ -12,6 +12,9 @@ from OCC.Display.SimpleGui import get_backend
 from OCC.STEPControl import STEPControl_Reader
 from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
+import OCC.Graphic3d as Graphic3d
+from OCC.Quantity import Quantity_NOC_DARKVIOLET, Quantity_NOC_BLUE1, Quantity_NOC_GREEN, Quantity_NOC_RED, Quantity_NOC_ORANGE, Quantity_NOC_SALMON, Quantity_NOC_YELLOW
+
 import vtk
 from vtk.util import numpy_support
 
@@ -249,6 +252,7 @@ def make_slider(minv, maxv, vstep):
             self.createControls("Controls")
 
             self.valueSpinBox.valueChanged.connect(self.horizontalSliders.setValue)
+            self.horizontalSliders.slider.valueChanged.connect(self.valueSpinBox.setValue)
 
             layout = QtGui.QHBoxLayout()
             layout.addWidget(self.controlsGroup)
@@ -264,9 +268,9 @@ def make_slider(minv, maxv, vstep):
         def createControls(self, title):
             self.controlsGroup = QtGui.QGroupBox(title)
 
-            minimumLabel = QtGui.QLabel("Minimum value:")
-            maximumLabel = QtGui.QLabel("Maximum value:")
-            valueLabel = QtGui.QLabel("Current value:")
+            minimumLabel = QtGui.QLabel("Minimum step:")
+            maximumLabel = QtGui.QLabel("Maximum step:")
+            valueLabel = QtGui.QLabel("Current step:")
 
             self.minimumSpinBox = QtGui.QSpinBox()
             self.minimumSpinBox.setRange(-100, 100)
@@ -301,16 +305,20 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
     display, start_display, add_menu, add_function_to_menu, app, win = init_display(backend_str='qt-pyqt4')
 
     dpos_data = io.dynamic_data()[:]
-    nbobjs = len(io.instances())
-
-    print dpos_data.shape
+    nbobjs = len(filter(lambda x: io.instances()[x].attrs['id'] >= 0, io.instances()))
 
     nbsteps = dpos_data.shape[0] / nbobjs
 
     assert nbsteps * nbobjs == dpos_data.shape[0]
 
+    current_color = 0
     @memoize
     def make_shape(shape_name):
+        global current_color
+
+        # cf CADMBTB_API, but cannot get the same color order
+        colors = list(reversed([Quantity_NOC_DARKVIOLET, Quantity_NOC_BLUE1, Quantity_NOC_GREEN, Quantity_NOC_RED, Quantity_NOC_ORANGE, Quantity_NOC_SALMON, Quantity_NOC_YELLOW]))
+
         with IO.tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
 
             step_reader = STEPControl_Reader()
@@ -325,8 +333,15 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
                 ok = step_reader.TransferRoot(1)
                 nbs = step_reader.NbShapes()
 
-                return [display.DisplayShape(step_reader.Shape(i), update=True)
-                        for i in range(1, nbs+1)]
+                l=[]
+                for i in range(1, nbs+1):
+                    ais_shape = display.DisplayShape(step_reader.Shape(i), update=True, transparency=.55)
+                    ais_shape.GetObject().SetColor(colors[current_color % 6])
+                    current_color += 1
+                    ais_shape.GetObject().SetMaterial(Graphic3d.Graphic3d_NOM_PLASTIC)
+                    l.append(ais_shape)
+
+                return l
 
 
     obj_by_id = dict()
@@ -334,7 +349,6 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
         obj_by_id[io.instances()[instance].attrs['id']] = instance
 
     def get_offset(instance_name, shape_name):
-        print instance_name, shape_name
         return (io.instances()[instance_name][shape_name].attrs['position'],
                 io.instances()[instance_name][shape_name].attrs['orientation'])
 
@@ -392,6 +406,8 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
     dw = QtGui.QDockWidget()
     win.addDockWidget(QtCore.Qt.DockWidgetArea(QtCore.Qt.TopDockWidgetArea), dw)
     dw.setWidget(sl)
-#    sl.show()
+
+    for instance in io.instances():
+        avatars(instance)
 
     start_display()
