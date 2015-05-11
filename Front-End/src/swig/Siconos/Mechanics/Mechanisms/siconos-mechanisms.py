@@ -289,8 +289,10 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
     for idBody in range(NBBODIES):
         shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
 
+        offset = [-v for v in initCenterMass[idBody]]
+
         io.addShapeDataFromFile(shape_name, afile[idBody])
-        io.addObject('obj-{0}'.format(shape_name), [Avatar(shape_name)],
+        io.addObject('obj-{0}'.format(shape_name), [Avatar(shape_name, relative_position=offset)],
                      mass=1,
                      position=[0, 0, 0])
 
