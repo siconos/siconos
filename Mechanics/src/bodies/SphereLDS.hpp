@@ -26,6 +26,7 @@
 #ifndef SphereLDS_h
 #define SphereLDS_h
 
+#include "MechanicsFwd.hpp"
 #include "LagrangianDS.hpp"
 
 class SphereLDS : public LagrangianDS, public std11::enable_shared_from_this<SphereLDS>
@@ -87,8 +88,7 @@ public:
 
   /** visitors hook
    */
-  ACCEPT_SP_VISITORS();
-  ACCEPT_STD_VISITORS();
+  ACCEPT_BASE_VISITORS(LagrangianDS);
 
 };
 #endif /* SphereLDS_h */

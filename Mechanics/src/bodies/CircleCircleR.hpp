@@ -25,6 +25,7 @@
 #ifndef CircleCircleR_h
 #define CircleCircleR_h
 
+#include "MechanicsFwd.hpp"
 #include "CircularR.hpp"
 
 /** \class CircleCircleR

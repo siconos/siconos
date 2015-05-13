@@ -26,6 +26,7 @@
 #ifndef SphereNEDS_h
 #define SphereNEDS_h
 
+#include <MechanicsFwd.hpp>
 #include "NewtonEulerDS.hpp"
 
 
@@ -70,8 +71,7 @@ public:
 
   /** visitors hook
    */
-  ACCEPT_SP_VISITORS();
-  ACCEPT_STD_VISITORS();
+  ACCEPT_BASE_VISITORS(NewtonEulerDS);
 
 };
 #endif /* SphereNEDS_h */

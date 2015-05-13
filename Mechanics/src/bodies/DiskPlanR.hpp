@@ -25,6 +25,7 @@
 #ifndef DiskPlanR_h
 #define DiskPlanR_h
 
+#include "MechanicsFwd.hpp"
 #include "LagrangianScleronomousR.hpp"
 
 /** \class DiskPlanR

@@ -28,6 +28,7 @@
 #ifndef CircularDS_h
 #define CircularDS_h
 
+#include "MechanicsFwd.hpp"
 #include "LagrangianDS.hpp"
 
 class CircularDS : public LagrangianDS

@@ -261,7 +261,7 @@ def make_slider(minv, maxv, vstep):
 
             self.minimumSpinBox.setValue(minv)
             self.maximumSpinBox.setValue(maxv)
-            self.valueSpinBox.setValue(5)
+            self.valueSpinBox.setValue(minv)
 
             self.setWindowTitle("Step")
 
@@ -273,15 +273,15 @@ def make_slider(minv, maxv, vstep):
             valueLabel = QtGui.QLabel("Current step:")
 
             self.minimumSpinBox = QtGui.QSpinBox()
-            self.minimumSpinBox.setRange(-100, 100)
+            self.minimumSpinBox.setRange(minv, maxv)
             self.minimumSpinBox.setSingleStep(1)
 
             self.maximumSpinBox = QtGui.QSpinBox()
-            self.maximumSpinBox.setRange(-100, 100)
+            self.maximumSpinBox.setRange(minv, maxv)
             self.maximumSpinBox.setSingleStep(1)
 
             self.valueSpinBox = QtGui.QSpinBox()
-            self.valueSpinBox.setRange(-100, 100)
+            self.valueSpinBox.setRange(minv, maxv)
             self.valueSpinBox.setSingleStep(1)
 
             self.minimumSpinBox.valueChanged.connect(self.horizontalSliders.setMinimum)

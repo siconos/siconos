@@ -26,6 +26,7 @@
 #ifndef Circle_H
 #define Circle_H
 
+#include "MechanicsFwd.hpp"
 #include "CircularDS.hpp"
 
 class Circle : public CircularDS, public std11::enable_shared_from_this<Circle>
@@ -59,7 +60,7 @@ public:
   ~Circle();
 
   /** visitors hook */
-  ACCEPT_SP_VISITORS();
+  ACCEPT_BASE_SP_VISITORS(LagrangianDS);
 
 };
 #endif /* Circle_H */

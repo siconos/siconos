@@ -20,6 +20,7 @@
 #ifndef BulletTimeSteppingDirectProjection_hpp
 #define BulletTimeSteppingDirectProjection_hpp
 
+#include "MechanicsFwd.hpp"
 #include "TimeSteppingDirectProjection.hpp"
 #include "BulletSpaceFilter.hpp"
 

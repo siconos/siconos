@@ -12,13 +12,19 @@
 #include <SiconosFull.hpp>
 %}
 #endif
+
+%include sharedPointers.i
+
+%{
+#include <MechanicsFwd.hpp>
+%}
+%include <MechanicsFwd.hpp>
+
 %include picklable.i
 
 %include path.i
 
 %include handleException.i
-
-%include sharedPointers.i
 
 %include KernelTypes.i
 
@@ -29,10 +35,7 @@
 
 %include pyRegister.i
 
-%{
-#include <MechanicsFwd.hpp>
-%}
-%include <MechanicsFwd.hpp>
+
 
 // force the definition of SWIGTYPE_p_Interaction...
 typedef Interaction Interaction;

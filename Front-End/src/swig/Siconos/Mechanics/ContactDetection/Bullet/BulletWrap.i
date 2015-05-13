@@ -7,6 +7,13 @@
 #undef WITH_IO
 #undef WITH_SERIALIZATION
 
+%include sharedPointers.i
+
+%{
+#include <MechanicsFwd.hpp>
+%}
+%include <MechanicsFwd.hpp>
+
 #ifdef WITH_IO
 %{
 #include <SiconosFull.hpp>
@@ -18,8 +25,6 @@
 
 %include handleException.i
 
-%include sharedPointers.i
-
 %include stl.i
 
 %include KernelTypes.i
@@ -27,7 +32,6 @@
 %{
 #include <SiconosKernel.hpp>
 #include <boost/typeof/typeof.hpp>
-#include <MechanicsFwd.hpp>
 
 // need this one
 #include <ExternalBody.hpp>

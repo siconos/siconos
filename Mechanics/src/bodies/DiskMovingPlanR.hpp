@@ -28,6 +28,7 @@
 #ifndef DiskMovingPlanR_h
 #define DiskMovingPlanR_h
 
+#include "MechanicsFwd.hpp"
 #include "LagrangianRheonomousR.hpp"
 
 typedef double(*FTime)(double);

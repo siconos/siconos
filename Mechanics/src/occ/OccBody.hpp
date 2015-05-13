@@ -72,7 +72,7 @@ public:
    */
   const OccContactShape& contactShape(unsigned int id) const;
 
-  ACCEPT_STD_VISITORS();
+  ACCEPT_BASE_STD_VISITORS(NewtonEulerDS);
 
 protected:
   SP::ContactShapes _contactShapes;

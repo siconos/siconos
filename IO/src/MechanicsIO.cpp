@@ -1,33 +1,69 @@
 
 #include "IOConfig.h"
+
 #include "MechanicsIO.hpp"
 
-#define HAVE_SICONOS_MECHANICS
-#include <VisitorMaker.hpp>
+#define DUMMY(X, Y) struct X : public Y {}
 
-#include <SpaceFilter.hpp>
-#include <BlockVector.hpp>
-#include <Interaction.hpp>
-#include <Question.hpp>
+#undef BULLET_CLASSES
+#undef OCC_CLASSES
+#undef MECHANISMS_CLASSES
+
+#define XBULLET_CLASSES() \
+  REGISTER(BulletDS)     \
+  REGISTER(BulletR) \
+  REGISTER(BulletSpaceFilter)
 
 #ifdef HAVE_BULLET
 #include <BulletDS.hpp>
 #include <BulletR.hpp>
 #include <BulletSpaceFilter.hpp>
-#include <btBulletCollisionCommon.h>
+#else
+DUMMY(BulletDS, NewtonEulerDS);
+DUMMY(BulletR, NewtonEulerFrom3DLocalFrameR);
+DUMMY(BulletSpaceFilter, SpaceFilter);
 #endif
 
+#define OCC_CLASSES() \
+  REGISTER(OccBody) \
+  REGISTER(OccR)
 #ifdef HAVE_OCC
 #include <OccBody.hpp>
 #include <OccR.hpp>
-#include <OccContactShape.hpp>
-#include <OccContactEdge.hpp>
-#include <OccContactFace.hpp>
+#else
+DUMMY(OccBody, NewtonEulerDS);
+DUMMY(OccR, NewtonEulerFrom3DLocalFrameR);
 #endif
 
+#define MECHANISMS_CLASSES() \
+  REGISTER(MBTB_FC3DContactRelation) \
+  REGISTER(MBTB_ContactRelation)
+#ifdef HAVE_MECHANISMS
+#include <MBTB_FC3DContactRelation.hpp>
+#include <MBTB_ContactRelation.hpp>
+#else
+DUMMY(MBTB_FC3DContactRelation, NewtonEulerFrom3DLocalFrameR);
+DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
+#endif
 
+#define VISITOR_CLASSES() \
+  REGISTER(DynamicalSystem) \
+  REGISTER(LagrangianDS) \
+  REGISTER(NewtonEulerDS) \
+  REGISTER(LagrangianR) \
+  REGISTER(NewtonEulerR) \
+  REGISTER(NewtonEulerFrom1DLocalFrameR) \
+  REGISTER(NewtonEulerFrom3DLocalFrameR) \
+  REGISTER(PivotJointR) \
+  REGISTER(KneeJointR) \
+  REGISTER(PrismaticJointR) \
+  OCC_CLASSES()             \
+  XBULLET_CLASSES()          \
+  MECHANISMS_CLASSES()
 
-#include <SiconosGraph.hpp>
+#include <BlockVector.hpp>
+#include <Question.hpp>
+
 #include <LagrangianDS.hpp>
 #include <NewtonEulerDS.hpp>
 
@@ -51,11 +87,16 @@
 #include "SphereNEDSPlanR.hpp"
 #include "ExternalBody.hpp"
 
+#include <PivotJointR.hpp>
+#include <KneeJointR.hpp>
+#include <PrismaticJointR.hpp>
+
+#include <VisitorMaker.hpp>
 
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
-using namespace Alternative;
+using namespace Experimental;
 
 struct GetPosition : public SiconosVisitor
 {
@@ -84,50 +125,73 @@ struct GetVelocity : public SiconosVisitor
 struct ForMu : public Question<double>
 {
   ANSWER(NewtonImpactFrictionNSL, mu());
+  ANSWER_V(NewtonImpactNSL, 0.);
+};
+
+/* template partial specilization is not possible inside struct, so we
+ * need an helper function */
+template<typename T>
+void contactPointProcess(SiconosVector& answer,
+                         const Interaction& inter,
+                         const T& rel)
+{
+  answer.resize(14);
+  const SiconosVector& posa = *rel.pc1();
+  const SiconosVector& posb = *rel.pc2();
+  const SiconosVector& nc = *rel.nc();
+  const SimpleMatrix& jachqT = *rel.jachqT();
+  double id = inter.number();
+  double mu = ask<ForMu>(*inter.nslaw());
+  SiconosVector cf(jachqT.size(1));
+  prod(*inter.lambda(1), jachqT, cf, true);
+  answer.setValue(0, mu);
+  answer.setValue(1, posa(0));
+  answer.setValue(2, posa(1));
+  answer.setValue(3, posa(2));
+  answer.setValue(4, posb(0));
+  answer.setValue(5, posb(1));
+  answer.setValue(6, posb(2));
+  answer.setValue(7, nc(0));
+  answer.setValue(8, nc(1));
+  answer.setValue(9, nc(2));
+  answer.setValue(10, cf(0));
+  answer.setValue(11, cf(1));
+  answer.setValue(12, cf(2));
+  answer.setValue(13, id);
+};
+
+template<>
+void contactPointProcess<PivotJointR>(SiconosVector& answer,
+                                      const Interaction& inter,
+                                      const PivotJointR& rel)
+{
+};
+
+template<>
+void contactPointProcess<KneeJointR>(SiconosVector& answer,
+                                     const Interaction& inter,
+                                     const KneeJointR& rel)
+{
+};
+
+template<>
+void contactPointProcess<PrismaticJointR>(SiconosVector& answer,
+                                          const Interaction& inter,
+                                          const PrismaticJointR& rel)
+{
 };
 
 struct ContactPointVisitor : public SiconosVisitor
 {
-  const Interaction& inter;
+  SP::Interaction inter;
   SiconosVector answer;
 
-  ContactPointVisitor(const Interaction& inter) :
-    inter(inter) {};
-
-  /* equality condition */
-  void visit(const NewtonEulerR&)
+  template<typename T>
+  void operator()(const T& rel)
   {
+    contactPointProcess<T>(answer, *inter, rel);
   }
 
-#ifdef HAVE_BULLET
-  void visit(const BulletR& rel)
-  {
-    answer.resize(14);
-    btManifoldPoint& cp = *rel.contactPoint();
-    const btVector3& posa = cp.getPositionWorldOnA();
-    const btVector3& posb = cp.getPositionWorldOnB();
-    const SiconosVector& nc = *rel.nc();
-    const SimpleMatrix& jachqT = *rel.jachqT();
-    double id = (size_t) &*rel.contactPoint();
-    double mu = ask<ForMu>(*inter.nslaw());
-    SiconosVector cf(jachqT.size(1));
-    prod(*inter.lambda(1), jachqT, cf, true);
-    answer.setValue(0, mu);
-    answer.setValue(1, posa[0]);
-    answer.setValue(2, posa[1]);
-    answer.setValue(3, posa[2]);
-    answer.setValue(4, posb[0]);
-    answer.setValue(5, posb[1]);
-    answer.setValue(6, posb[2]);
-    answer.setValue(7, nc(0));
-    answer.setValue(8, nc(1));
-    answer.setValue(9, nc(2));
-    answer.setValue(10, cf(0));
-    answer.setValue(11, cf(1));
-    answer.setValue(12, cf(2));
-    answer.setValue(13, id);
-  }
-#endif
 };
 
 template<typename T, typename G>
@@ -202,10 +266,17 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model) const
     {
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
-      const Interaction& inter = *graph.bundle(*vi);
-      ContactPointVisitor visitor(inter);
-      inter.relation()->accept(visitor);
-      const SiconosVector& data = visitor.answer;
+      typedef Visitor < Classes <
+                          NewtonEulerFrom1DLocalFrameR,
+                          NewtonEulerFrom3DLocalFrameR,
+                          PrismaticJointR,
+                          KneeJointR,
+                          PivotJointR>,
+                        ContactPointVisitor>::Make ContactPointInspector;
+      ContactPointInspector inspector;
+      inspector.inter = graph.bundle(*vi);
+      graph.bundle(*vi)->relation()->accept(inspector);
+      const SiconosVector& data = inspector.answer;
       if (data.size() == 14) result->setRow(current_row, data);
     }
   }

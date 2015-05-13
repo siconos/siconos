@@ -7,6 +7,13 @@
 #undef WITH_IO
 #undef WITH_SERIALIZATION
 
+%include sharedPointers.i
+
+%{
+#include <MechanicsFwd.hpp>
+%}
+%include <MechanicsFwd.hpp>
+
 #ifdef WITH_IO
 %{
 #include <SiconosFull.hpp>
@@ -22,7 +29,6 @@
 %}
 
 %include handleException.i
-%include sharedPointers.i
 %include KernelTypes.i
 
 %import Kernel/Kernel.i
@@ -33,11 +39,6 @@
 %import ../ContactDetection/Base.i
 
 %include pyRegister.i
-
-%{
-#include <MechanicsFwd.hpp>
-%}
-%include <MechanicsFwd.hpp>
 
 // do not wrap visitor visit : this leads to a huge amount of wrapper
 // code generation and this fails at compile time on shared_ptr freearg

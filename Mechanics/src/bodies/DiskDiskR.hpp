@@ -23,7 +23,8 @@
 #ifndef DiskDiskR_h
 #define DiskDiskR_h
 
-
+#include "MechanicsFwd.hpp"
+#include <SiconosVisitor.hpp>
 #include "CircularR.hpp"
 
 

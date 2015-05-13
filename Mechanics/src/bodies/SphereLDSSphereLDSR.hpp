@@ -25,6 +25,7 @@
 #ifndef SphereLDSSphereLDSR_h
 #define SphereLDSSphereLDSR_h
 
+#include "MechanicsFwd.hpp"
 #include "LagrangianScleronomousR.hpp"
 
 class SphereLDSSphereLDSR : public LagrangianScleronomousR, public std11::enable_shared_from_this<SphereLDSSphereLDSR>

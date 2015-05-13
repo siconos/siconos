@@ -95,7 +95,7 @@ public:
 
   /** visitor hook
    */
-  ACCEPT_STD_VISITORS();
+  ACCEPT_BASE_STD_VISITORS(NewtonEulerDS);
 
   /** return the shared pointer associated
    * \return std11::shared_ptr<BulletDS>

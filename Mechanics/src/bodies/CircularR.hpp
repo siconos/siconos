@@ -23,6 +23,7 @@
 #ifndef CircularR_h
 #define CircularR_h
 
+#include "MechanicsFwd.hpp"
 #include "Interaction.hpp"
 #include "LagrangianScleronomousR.hpp"
 

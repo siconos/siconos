@@ -23,10 +23,12 @@
 #ifndef Disk_H
 #define Disk_H
 
+#include "MechanicsFwd.hpp"
 #include "CircularDS.hpp"
 /** \class Disk
  *  \brief Definition of a 2D disk - Inherits from LagrangianDS
  */
+
 
 class Disk : public CircularDS, public std11::enable_shared_from_this<Disk>
 {
@@ -59,8 +61,7 @@ public:
 
   /** visitors hook
    */
-  ACCEPT_SP_VISITORS();
-  ACCEPT_STD_VISITORS();
+  ACCEPT_BASE_VISITORS(LagrangianDS);
 
 };
 #endif /* Disk_H */

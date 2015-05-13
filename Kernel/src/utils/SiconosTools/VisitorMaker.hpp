@@ -35,7 +35,7 @@
 
 struct GetVelocity : public SiconosVisitor
 {
-  
+
   SP::SiconosVector result;
 
   template<typename T>
@@ -46,12 +46,12 @@ struct GetVelocity : public SiconosVisitor
 };
 
 
-Visitor < Classes < LagrangianDS, NewtonEulerDS >, 
+Visitor < Classes < LagrangianDS, NewtonEulerDS >,
           GetVelocity >::Make getVelocity;
 
 SP::SiconosVector q(new SiconosVector(3));
 SP::SiconosVector v(new SiconosVector(3));
-  
+
   (*q)(0) = 0.;
   (*q)(1) = 1.;
   (*q)(2) = 1.;
@@ -68,15 +68,15 @@ ds->accept(getVelocity)->display();
 */
 
 
-namespace Alternative{
+namespace Experimental{
 
 template<typename T, typename Action>
 struct Call : public Action
 {
   typedef Call<T, Action> type;
-  
+
   using SiconosVisitor::visit;
-  
+
   virtual void visit(const T& x)
   {
     (*this)(x);
@@ -103,18 +103,18 @@ template<typename T, typename Pred>
 class VisitMaker
 {
 private:
-  typedef typename 
+  typedef typename
   boost::mpl::fold<
-  typename Pred::Action::Base, 
+  typename Pred::Action::Base,
   boost::mpl::false_,
-  boost::mpl::if_<boost::is_base_of<boost::mpl::_2, T>, 
-                  boost::mpl::true_, 
+  boost::mpl::if_<boost::is_base_of<boost::mpl::_2, T>,
+                  boost::mpl::true_,
                   boost::mpl::_1> >::type Condition;
 
 public:
   typedef typename
-  boost::mpl::eval_if<Condition, 
-                      Call<T, typename Pred::Action>, 
+  boost::mpl::eval_if<Condition,
+                      Call<T, typename Pred::Action>,
                       NoCall<T, typename Pred::Action> >::type Action;
 
 };
@@ -125,7 +125,7 @@ public:
 #undef REGISTER_BASE
 #undef REGISTER_BASE_EXTERN
 
-#define REGISTER(X) VisitMaker<X, 
+#define REGISTER(X) VisitMaker<X,
 #define REGISTER_STRUCT(X)
 #define REGISTER_BASE(X, Y) REGISTER(X)
 #define REGISTER_BASE_EXTERN(X, Y)
@@ -133,38 +133,20 @@ public:
   template<typename T>
   struct GlobalVisitor
   {
-    typedef typename 
-    KERNEL_CLASSES()
-#ifdef HAVE_SICONOS_MECHANICS
-    MECHANICS_CLASSES()
-#endif
-#ifdef HAVE_BULLET
-    BULLET_CLASSES()
-#endif
-#ifdef HAVE_OCC
-    OCC_CLASSES()
-#endif
+    typedef typename
+    VISITOR_CLASSES()
     T
- 
+
 #undef REGISTER
 #undef REGISTER_STRUCT
 #undef REGISTER_BASE
 #undef REGISTER_BASE_EXTERN
 
 #define REGISTER(X) >
-#define REGISTER_STRUCT(X) 
+#define REGISTER_STRUCT(X)
 #define REGISTER_BASE(X, Y) REGISTER(X)
 #define REGISTER_BASE_EXTERN(X, Y)
-    KERNEL_CLASSES()
-#ifdef HAVE_SICONOS_MECHANICS
-    MECHANICS_CLASSES()
-#endif
-#ifdef HAVE_BULLET
-    BULLET_CLASSES()
-#endif
-#ifdef HAVE_OCC
-    OCC_CLASSES()
-#endif
+    VISITOR_CLASSES()
       ::Action Make;
   };
 
@@ -172,29 +154,60 @@ public:
 /* hide mpl::vector */
 struct empty{};
 
-template<typename T1 = empty, typename T2 = empty, typename T3 = empty, 
-         typename T4 = empty>
+template<typename T1 = empty, typename T2 = empty, typename T3 = empty,
+         typename T4 = empty, typename T5 = empty, typename T6 = empty,
+         typename T7 = empty, typename T8 = empty, typename T9 = empty>
 struct Classes
 {
-  typedef typename boost::mpl::vector<T1, T2, T3, T4> Base;
+  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7, T8, T9> Base;
 };
 
 template<typename T1>
-struct Classes<T1, empty, empty, empty>
+struct Classes<T1, empty, empty, empty, empty, empty, empty, empty, empty>
 {
   typedef typename boost::mpl::vector<T1> Base;
 };
 
 template<typename T1, typename T2>
-struct Classes<T1, T2, empty, empty>
+struct Classes<T1, T2, empty, empty, empty, empty, empty, empty, empty>
 {
   typedef typename boost::mpl::vector<T1, T2> Base;
 };
 
 template<typename T1, typename T2, typename T3>
-struct Classes<T1, T2, T3, empty>
+struct Classes<T1, T2, T3, empty, empty, empty, empty, empty, empty>
 {
   typedef typename boost::mpl::vector<T1, T2, T3> Base;
+  };
+
+template<typename T1, typename T2, typename T3, typename T4>
+struct Classes<T1, T2, T3, T4, empty, empty, empty, empty, empty>
+{
+  typedef typename boost::mpl::vector<T1, T2, T3, T4> Base;
+};
+
+template<typename T1, typename T2, typename T3, typename T4, typename T5>
+struct Classes<T1, T2, T3, T4, T5, empty, empty, empty, empty>
+{
+  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5> Base;
+};
+
+template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
+struct Classes<T1, T2, T3, T4, T5, T6, empty, empty, empty>
+{
+  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6> Base;
+};
+
+template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
+struct Classes<T1, T2, T3, T4, T5, T6, T7, empty, empty>
+{
+  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7> Base;
+};
+
+template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+struct Classes<T1, T2, T3, T4, T5, T6, T7, T8, empty>
+{
+  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7, T8> Base;
 };
 
 /* build final visitor */
@@ -206,7 +219,7 @@ struct Filter
     typedef _T Action;
   };
 
-  typedef typename 
+  typedef typename
   boost::mpl::fold<
     typename C::Base,
     _T,
@@ -218,7 +231,7 @@ template<typename C, typename T>
 struct Visitor
 {
   typedef typename Filter<C, T>::Make LocalFilter;
-  
+
   typedef typename GlobalVisitor<LocalFilter>::Make Make;
 
 };
@@ -226,51 +239,5 @@ struct Visitor
 
 }
 
-/* dummy definitions for some types */
-
-/* note one cannot really define is_complete<T>, cf 
- http://stackoverflow.com/questions/8449036/is-it-possible-to-deduce-whether-type-is-incomplete-without-compilation-failure?lq=1
-*/
-
-
-#undef REGISTER
-#undef REGISTER_STRUCT
-#undef REGISTER_BASE
-#undef REGISTER_BASE_EXTERN
-
-#define REGISTER(X)                             \
-  struct X                                      \
-  {                                             \
-    ACCEPT_STD_VISITORS();                      \
-  };                                            \
-
-#define REGISTER_STRUCT(X) REGISTER(X)
-#define REGISTER_BASE(X, Y) REGISTER(X)
-#define REGISTER_BASE_EXTERN(X, Y) REGISTER(X)
-
-
-#ifndef HAVE_SICONOS_MECHANICS
-
-MECHANICS_CLASSES()
-
-#endif
-
-#ifndef HAVE_BULLET
-
-BULLET_CLASSES()
-
-#endif
-
-#ifndef HAVE_OCC
-
-OCC_CLASSES()
-
-#endif
-
-#ifndef HAVE_LMGC
-
-LMGC_CLASSES()
-
-#endif
 
 #endif

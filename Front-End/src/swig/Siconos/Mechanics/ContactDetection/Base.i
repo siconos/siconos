@@ -3,6 +3,13 @@
 
 %include start.i
 
+%include sharedPointers.i
+
+%{
+#include <MechanicsFwd.hpp>
+%}
+%include <MechanicsFwd.hpp>
+
 #undef WITH_IO
 #undef WITH_SERIALIZATION
 
@@ -17,8 +24,6 @@
 
 %include handleException.i
 
-%include sharedPointers.i
-
 %include stl.i
 
 %include KernelTypes.i
@@ -32,12 +37,6 @@
 %include pyRegister.i
 
 %fragment("NumPy_Fragments");
-
-
-%{
-#include <MechanicsFwd.hpp>
-%}
-%include <MechanicsFwd.hpp>
 
 // suppress warning
 %ignore  STD11::enable_shared_from_this< Hashed >;

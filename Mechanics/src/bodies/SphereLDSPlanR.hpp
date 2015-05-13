@@ -25,6 +25,7 @@
 #ifndef SphereLDSPlanR_h
 #define SphereLDSPlanR_h
 
+#include "MechanicsFwd.hpp"
 #include "CircularR.hpp"
 
 class SphereLDSPlanR : public LagrangianScleronomousR, public std11::enable_shared_from_this<SphereLDSPlanR>

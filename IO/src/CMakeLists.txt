@@ -5,6 +5,7 @@ PROJECT(SiconosIO CXX)
 
 OPTION(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
 OPTION(WITH_OCC "compilation with Occ Bindings. Default = OFF" OFF)
+OPTION(WITH_MECHANISMS "compilation with Siconos/Mechanisms Bindings. Default = OFF" OFF)
 
 #
 # VERSION defined in top-level CMakeLists.txt
@@ -74,6 +75,11 @@ ENDIF(WITH_BULLET)
 #occ 
 IF(WITH_OCC)
   SET(HAVE_OCC TRUE)
+  MESSAGE( STATUS "Compilation with Occ.")
+ENDIF()
+
+IF(WITH_MECHANISMS)
+  SET(HAVE_MECHANISMS TRUE)
   MESSAGE( STATUS "Compilation with Occ.")
 ENDIF()
 

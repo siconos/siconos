@@ -82,12 +82,12 @@
   virtual void accept(SiconosVisitor&) const                            \
   {                                                                     \
     RuntimeException::selfThrow                                         \
-      ( "accept: no visitor defined");                     \
+      ( "accept: no visitor defined");                                  \
   };                                                                    \
   virtual void acceptSerializer(SiconosVisitor&)                        \
   {                                                                     \
     RuntimeException::selfThrow                                         \
-      ( "acceptSerializer: no serializer defined");                                           \
+      ( "acceptSerializer: no serializer defined");                     \
   };                                                                    \
   virtual inline Type::Siconos acceptType(FindType& ft) const           \
   { RuntimeException::selfThrow                                         \
@@ -102,9 +102,9 @@
   virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
-#define ACCEPT_NONVIRTUAL_VISITORS()                                           \
+#define ACCEPT_NONVIRTUAL_VISITORS()                                    \
   template<typename Archive> friend class SiconosSerializer;            \
-  void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  void accept(SiconosVisitor& tourist) const { tourist.visit(*this); }  \
   void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
@@ -115,9 +115,30 @@
   ACCEPT_SP_VISITORS()                          \
   ACCEPT_STD_VISITORS()                         \
 
+/** hooks to be inserted in class definition */
+#define ACCEPT_BASE_STD_VISITORS(BASE)                                  \
+  template<typename Archive> friend class SiconosSerializer;            \
+  virtual void acceptBase(SiconosVisitor& tourist) const { tourist.visit(*static_cast<const BASE *>(this)); } \
+  virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  virtual void acceptSerializerBase(SiconosVisitor& serializer) { serializer.visit(*static_cast<const BASE *>(this)); } \
+  virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
+  virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*static_cast<const BASE *>(this)); } \
 
+#define ACCEPT_BASE_NONVIRTUAL_VISITORS(BASE)                           \
+  template<typename Archive> friend class SiconosSerializer;            \
+  void acceptBase(SiconosVisitor& tourist) const { tourist.visit(*static_cast<const BASE *>(this)); } \
+  void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  void acceptSerializerBase(SiconosVisitor& serializer) { serializer.visit(*static_cast<const BASE *>(this)); } \
+  void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
+  inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*static_cast<const BASE *>(this)); } \
 
+#define ACCEPT_BASE_SP_VISITORS(BASE)                                   \
+  virtual void acceptSPBase(SP::SiconosVisitor tourist) { tourist->visit(std11::static_pointer_cast<BASE>(shared_from_this())); }\
+  virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
 
+#define ACCEPT_BASE_VISITORS(BASE)                           \
+  ACCEPT_BASE_SP_VISITORS(BASE)                              \
+  ACCEPT_BASE_STD_VISITORS(BASE)                             \
 
 /* objects that may be visited (1) */
 #undef REGISTER

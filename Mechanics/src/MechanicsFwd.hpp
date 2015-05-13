@@ -2,35 +2,50 @@
 #ifndef MechanicsFwd_hpp
 #define MechanicsFwd_hpp
 #include <SiconosPointers.hpp>
-DEFINE_SPTR(LagrangianBody);
-DEFINE_SPTR(NewtonEulerBody);
-DEFINE_SPTR(SpaceFilter);
-DEFINE_SPTR(SiconosBodies);
-DEFINE_SPTR(ExternalBody);
-DEFINE_SPTR(Disk);
-DEFINE_SPTR(Circle);
-DEFINE_SPTR(SphereNEDS);
-DEFINE_SPTR(SphereLDS);
-DEFINE_SPTR(CircleCircleR);
-DEFINE_SPTR(DiskDiskR);
-DEFINE_SPTR(DiskPlanR);
-DEFINE_SPTR(DiskMovingPlanR);
-DEFINE_SPTR(CircularDS);
-DEFINE_SPTR(CircularR);
-DEFINE_SPTR(SphereNEDSPlanR);
-DEFINE_SPTR(SphereNEDSSphereNEDSR);
-DEFINE_SPTR(SphereLDSPlanR);
-DEFINE_SPTR(SphereLDSSphereLDSR);
-DEFINE_SPTR(FMatrix);
-DEFINE_SPTR(NSLawMatrix);
-DEFINE_SPTR(OccR);
-DEFINE_SPTR(OccBody);
-DEFINE_SPTR(OccContactShape);
-DEFINE_SPTR(OccContactFace);
-DEFINE_SPTR(OccContactEdge);
-DEFINE_SPTR(ContactShapes);
-DEFINE_SPTR(ContactPoint);
-DEFINE_SPTR(ContactPoints);
-DEFINE_SPTR(ContactShapeDistance);
-DEFINE_SPTR(Geometer);
+
+#define MECHANICS_CLASSES()\
+  REGISTER(SpaceFilter)                         \
+  REGISTER(SiconosBodies)                       \
+  REGISTER(ExternalBody)                        \
+  REGISTER(Disk)                                \
+  REGISTER(Circle)                              \
+  REGISTER(SphereNEDS)                          \
+  REGISTER(SphereLDS)                           \
+  REGISTER(CircleCircleR)                       \
+  REGISTER(DiskDiskR)                           \
+  REGISTER(DiskPlanR)                           \
+  REGISTER(DiskMovingPlanR)                     \
+  REGISTER(CircularDS)                          \
+  REGISTER(CircularR)                           \
+  REGISTER(SphereNEDSPlanR)                     \
+  REGISTER(SphereNEDSSphereNEDSR)               \
+  REGISTER(SphereLDSPlanR)                      \
+  REGISTER(SphereLDSSphereLDSR)                 \
+  REGISTER(FMatrix)                             \
+  REGISTER(NSLawMatrix)                         \
+  REGISTER(OccR)                                \
+  REGISTER(OccBody)                             \
+  REGISTER(OccContactShape)                     \
+  REGISTER(OccContactFace)                      \
+  REGISTER(OccContactEdge)                      \
+  REGISTER(ContactShapes)                       \
+  REGISTER(ContactPoint)                        \
+  REGISTER(ContactPoints)                       \
+  REGISTER(ContactShapeDistance)                \
+  REGISTER(Geometer)
+
+#include <SiconosVisitables.hpp>
+
+#undef SICONOS_VISITABLES
+#define SICONOS_VISITABLES() \
+  KERNEL_CLASSES() \
+  MECHANICS_CLASSES()
+
+#undef REGISTER
+#undef REGISTER_BASE
+#define REGISTER(X) DEFINE_SPTR(X);
+#define REGISTER_BASE(X, Y) DEFINE_SPTR(X);
+MECHANICS_CLASSES();
+#undef REGISTER
+
 #endif

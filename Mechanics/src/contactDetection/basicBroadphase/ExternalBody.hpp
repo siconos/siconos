@@ -37,7 +37,7 @@ public:
 
   virtual void selfFindInteractions(SP::SpaceFilter) = 0;
 
-  ACCEPT_STD_VISITORS();
+  ACCEPT_BASE_VISITORS(LagrangianDS);
 };
 
 
