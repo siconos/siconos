@@ -1,7 +1,8 @@
 #ifndef MBTB_CONTACTRELATION
 #define MBTB_CONTACTRELATION
-#include "SiconosKernel.hpp"
 
+#include "MechanicsFwd.hpp"
+#include <SiconosKernel.hpp>
 #include "MBTB_Contact.hpp"
 //! It is a relation dedicated for the simple unilateral (ie: without  Coulomb friction).
 /*!
@@ -25,8 +26,9 @@ public:
   //! Doing nothing.
   virtual ~MBTB_ContactRelation();
 
+  ACCEPT_STD_VISITORS();
+
 };
-TYPEDEF_SPTR(MBTB_ContactRelation);
 
 
 #endif

@@ -47,19 +47,22 @@ DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
 #endif
 
 #define VISITOR_CLASSES() \
-  REGISTER(DynamicalSystem) \
-  REGISTER(LagrangianDS) \
-  REGISTER(NewtonEulerDS) \
-  REGISTER(LagrangianR) \
-  REGISTER(NewtonEulerR) \
-  REGISTER(NewtonEulerFrom1DLocalFrameR) \
-  REGISTER(NewtonEulerFrom3DLocalFrameR) \
-  REGISTER(PivotJointR) \
-  REGISTER(KneeJointR) \
-  REGISTER(PrismaticJointR) \
-  OCC_CLASSES()             \
-  XBULLET_CLASSES()          \
-  MECHANISMS_CLASSES()
+  REGISTER(DynamicalSystem)                     \
+  REGISTER(LagrangianDS)                        \
+  REGISTER(NewtonEulerDS)                       \
+  REGISTER(LagrangianR)                         \
+  REGISTER(NewtonEulerFrom1DLocalFrameR)        \
+  REGISTER(NewtonEulerFrom3DLocalFrameR)        \
+  REGISTER(PivotJointR)                         \
+  REGISTER(KneeJointR)                          \
+  REGISTER(PrismaticJointR)                     \
+  OCC_CLASSES()                                 \
+  XBULLET_CLASSES()                             \
+  MECHANISMS_CLASSES()                          \
+  REGISTER(NewtonEulerR)
+
+#undef SICONOS_VISITABLES
+#define SICONOS_VISITABLES() VISITOR_CLASSES()
 
 #include <BlockVector.hpp>
 #include <Question.hpp>
@@ -135,6 +138,7 @@ void contactPointProcess(SiconosVector& answer,
                          const Interaction& inter,
                          const T& rel)
 {
+
   answer.resize(14);
   const SiconosVector& posa = *rel.pc1();
   const SiconosVector& posb = *rel.pc2();
@@ -145,6 +149,12 @@ void contactPointProcess(SiconosVector& answer,
   SiconosVector cf(jachqT.size(1));
   prod(*inter.lambda(1), jachqT, cf, true);
   answer.setValue(0, mu);
+
+  DEBUG_PRINTF("posa(0)=%g\n", posa(0));
+  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
+  DEBUG_PRINTF("posa(2)=%g\n", posa(2));
+
+
   answer.setValue(1, posa(0));
   answer.setValue(2, posa(1));
   answer.setValue(3, posa(2));

@@ -2,7 +2,9 @@
 #ifndef MBTB_FC3DCONTACTRELATION
 #define MBTB_FC3DCONTACTRELATION
 
-#include "SiconosKernel.hpp"
+#include "MechanicsFwd.hpp"
+
+#include <SiconosKernel.hpp>
 #include "MBTB_Contact.hpp"
 
 //! It is a relation dedicated for the unilateral constraint with Coulomb friction.
@@ -27,7 +29,9 @@ public :
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
   //! Doing nothing.
   virtual ~MBTB_FC3DContactRelation();
+
+  ACCEPT_STD_VISITORS();
+
 };
-TYPEDEF_SPTR(MBTB_FC3DContactRelation);
 
 #endif

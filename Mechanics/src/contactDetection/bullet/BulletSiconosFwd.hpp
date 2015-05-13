@@ -42,29 +42,15 @@ DEFINE_SPTR(btPersistentManifold);
 
 DEFINE_SPTR(btBroadphaseInterface);
 
-DEFINE_SPTR(BulletDS);
+//DEFINE_SPTR(BulletDS);
 DEFINE_SPTR(BulletWeightedShape);
-DEFINE_SPTR(BulletR);
-DEFINE_SPTR(BulletFrom1DLocalFrameR);
-DEFINE_SPTR(BulletSpaceFilter);
-DEFINE_SPTR(BulletTimeStepping);
+//DEFINE_SPTR(BulletR);
+//DEFINE_SPTR(BulletFrom1DLocalFrameR);
+//DEFINE_SPTR(BulletSpaceFilter);
+//DEFINE_SPTR(BulletTimeStepping);
 DEFINE_SPTR(CollisionObjects);
 DEFINE_SPTR(StaticObjects);
 
-#define BULLET_CLASSES() \
-  REGISTER(BulletDS)                            \
-  REGISTER(BulletR)                             \
-  REGISTER(BulletFrom1DLocalFrameR)             \
-  REGISTER(BulletSpaceFilter)                   \
-  REGISTER(BulletTimeStepping)                  \
-
 #include "MechanicsFwd.hpp"
-
-#undef SICONOS_VISITABLES
-#define SICONOS_VISITABLES() \
-  KERNEL_CLASSES() \
-  MECHANICS_CLASSES() \
-  BULLET_CLASSES()
-
 
 #endif
