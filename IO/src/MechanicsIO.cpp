@@ -58,6 +58,8 @@ DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
   REGISTER(LagrangianDS)                        \
   REGISTER(NewtonEulerDS)                       \
   REGISTER(LagrangianR)                         \
+  REGISTER(Disk)                                \
+  REGISTER(Circle)                              \
   REGISTER(NewtonEulerFrom1DLocalFrameR)        \
   REGISTER(NewtonEulerFrom3DLocalFrameR)        \
   REGISTER(PivotJointR)                         \

@@ -5,6 +5,10 @@
 #include <boost/numeric/bindings/ublas/vector_sparse.hpp>
 #include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
 
+#ifdef HAVE_SICONOS_MECHANICS
+#include "MechanicsIO.hpp"
+#endif
+
 #define DEBUG_MESSAGES 1
 #include "../SiconosFull.hpp"
 
@@ -267,7 +271,7 @@ void KernelTest::t5()
 
   // -- (1) OneStepIntegrators --
   SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
-  bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+  bouncingBall->nonSmoothDynamicalSystem()->setOSI(ball, OSI);
 
   // -- (2) Time discretisation --
   SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -408,10 +412,6 @@ void KernelTest::t6()
 }
 
 #ifdef HAVE_SICONOS_MECHANICS
-#include "MechanicsIO.hpp"
-
-#undef ACCEPT_BASE_VISITORS
-#define ACCEPT_BASE_VISITORS(X)
 #include <Disk.hpp>
 
 void KernelTest::t7()

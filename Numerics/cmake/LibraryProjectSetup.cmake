@@ -295,6 +295,9 @@ MACRO(LIBRARY_PROJECT_SETUP)
       CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/filedoxy.config.in 
         ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.config)
 
+      # for doxygen warnings
+      FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/xml)
+
       ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.warnings
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.config
         COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.warnings
