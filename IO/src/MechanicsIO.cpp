@@ -19,6 +19,9 @@
 #include <BulletR.hpp>
 #include <BulletSpaceFilter.hpp>
 #else
+#include <NewtonEulerDS.hpp>
+#include <NewtonEulerFrom3DLocalFrameR.hpp>
+#include <SpaceFilter.hpp>
 DUMMY(BulletDS, NewtonEulerDS);
 DUMMY(BulletR, NewtonEulerFrom3DLocalFrameR);
 DUMMY(BulletSpaceFilter, SpaceFilter);
@@ -31,6 +34,8 @@ DUMMY(BulletSpaceFilter, SpaceFilter);
 #include <OccBody.hpp>
 #include <OccR.hpp>
 #else
+#include <NewtonEulerDS.hpp>
+#include <NewtonEulerFrom3DLocalFrameR.hpp>
 DUMMY(OccBody, NewtonEulerDS);
 DUMMY(OccR, NewtonEulerFrom3DLocalFrameR);
 #endif
@@ -42,6 +47,8 @@ DUMMY(OccR, NewtonEulerFrom3DLocalFrameR);
 #include <MBTB_FC3DContactRelation.hpp>
 #include <MBTB_ContactRelation.hpp>
 #else
+#include <NewtonEulerFrom3DLocalFrameR.hpp>
+#include <NewtonEulerFrom1DLocalFrameR.hpp>
 DUMMY(MBTB_FC3DContactRelation, NewtonEulerFrom3DLocalFrameR);
 DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
 #endif

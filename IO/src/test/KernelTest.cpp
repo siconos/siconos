@@ -410,6 +410,10 @@ void KernelTest::t6()
 #ifdef HAVE_SICONOS_MECHANICS
 #include "MechanicsIO.hpp"
 
+#undef ACCEPT_BASE_VISITORS
+#define ACCEPT_BASE_VISITORS(X)
+#include <Disk.hpp>
+
 void KernelTest::t7()
 {
 

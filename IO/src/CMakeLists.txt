@@ -3,9 +3,11 @@
 #
 PROJECT(SiconosIO CXX)
 
-OPTION(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
-OPTION(WITH_OCC "compilation with Occ Bindings. Default = OFF" OFF)
-OPTION(WITH_MECHANISMS "compilation with Siconos/Mechanisms Bindings. Default = OFF" OFF)
+OPTION(WITH_BULLET "Compilation with Bullet Bindings. Default = OFF" OFF)
+OPTION(WITH_OCC "Compilation with Occ Bindings. Default = OFF" OFF)
+OPTION(WITH_MECHANISMS "Compilation with Siconos/Mechanisms Bindings. Default = OFF" OFF)
+OPTION(WITH_SERIALIZATION "Compilation of serialization functions. Default = ON" ON)
+OPTION(WITH_GENERATION "Generation of serialization functions with gccxml. Default = ON" ON)
 
 #
 # VERSION defined in top-level CMakeLists.txt
@@ -13,31 +15,22 @@ OPTION(WITH_MECHANISMS "compilation with Siconos/Mechanisms Bindings. Default = 
 SET(SiconosIO_VERSION "${VERSION}")
 
 #
-# Project directories 
-#
-SET(SiconosIO_DIRS
-  .)
-
-#
 # Installation layout
 #
 SET(SiconosIO_INSTALL_INCLUDE_DIR include/Siconos/IO)
 
-
-
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/IOConfig.h DESTINATION include/Siconos/IO)
 
-# Generated
-INSTALL(FILES ${CMAKE_BINARY_DIR}/src/SiconosFullGenerated.hpp DESTINATION include/Siconos/IO)
-
-# boost patch
-INSTALL(FILES 
-  ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_collections_load_imp.hpp
-  ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_collections_save_imp.hpp
-  ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_map.hpp
-  ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_set.hpp
-  DESTINATION include/Siconos/IO/boost/serialization)
+IF(WITH_SERIALIZATION)
+  # boost patch
+  INSTALL(FILES 
+    ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_collections_load_imp.hpp
+    ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_collections_save_imp.hpp
+    ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_map.hpp
+    ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_set.hpp
+    DESTINATION include/Siconos/IO/boost/serialization)
+ENDIF()
 
 IF(WITH_TESTING)
   COMPILE_WITH(CppUnit REQUIRED)
@@ -55,7 +48,6 @@ COMPILE_WITH(SiconosControl)
 IF(SiconosControl_FOUND)
   SET(HAVE_SICONOS_CONTROL TRUE)
 ENDIF(SiconosControl_FOUND)
-
 
 COMPILE_WITH(GMP REQUIRED)
 
@@ -111,8 +103,6 @@ SET(SiconosIO_LINK_LIBRARIES  "${SiconosIO_LINK_LIBRARIES};${Boost_LIBRARIES}")
 
 COMPILE_WITH(Boost REQUIRED)
 
-
-
 # remove debug & optimized inside LINK_LIBRARIES...
 FOREACH(_L ${SiconosIO_LINK_LIBRARIES})
   IF(NOT ${_L} STREQUAL "debug")
@@ -125,39 +115,64 @@ SET(SiconosIO_LINK_LIBRARIES ${_LL})
 
 SET(SiconosIO_LINKER_LANGUAGE CXX)
 
-# header generation
-SET(GENERATED_TARGETS --targets=Kernel)
-SET(GENERATED_HEADERS SiconosFullGenerated.hpp)
-SET(GENERATED_DEPENDENCIES ${SiconosKernel_INCLUDE_DIRS}/SiconosKernel.hpp)
-SET(GENERATED_INCLUDES -I${SiconosNumerics_INCLUDE_DIRS}
-  -I${SiconosKernel_INCLUDE_DIRS})
-IF(SiconosMechanics_FOUND)
-  SET(GENERATED_TARGETS "${GENERATED_TARGETS},Mechanics")
-  SET(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES}
-    ${SiconosMechanics_INCLUDE_DIRS}/SpaceFilter.hpp)
-  SET(GENERATED_INCLUDES ${GENERATED_INCLUDES} -I${SiconosMechanics_INCLUDE_DIRS})
-ENDIF()
-IF(SiconosControl_FOUND)
-  SET(GENERATED_TARGETS "${GENERATED_TARGETS},Control")
-  SET(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES}
-    ${SiconosControl_INCLUDE_DIRS}/SiconosControl.hpp)
-  SET(GENERATED_INCLUDES ${GENERATED_INCLUDES} -I${SiconosControl_INCLUDE_DIRS})
-ENDIF(SiconosControl_FOUND)
+IF(WITH_SERIALIZATION)
+  IF(WITH_GENERATION)
 
+    FILE(REMOVE SiconosFullGenerated.hpp)
 
-ADD_CUSTOM_COMMAND(
-  OUTPUT ${GENERATED_HEADERS}
-  DEPENDS ${GENERATED_DEPENDENCIES}
-  COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py ${GENERATED_TARGETS}
-  ${GENERATED_INCLUDES})
+    # header generation
+    SET(GENERATED_TARGETS --targets=Kernel)
+    SET(GENERATED_HEADERS SiconosFullGenerated.hpp)
+    SET(GENERATED_DEPENDENCIES ${SiconosKernel_INCLUDE_DIRS}/SiconosKernel.hpp)
+    SET(GENERATED_INCLUDES -I${SiconosNumerics_INCLUDE_DIRS}
+      -I${SiconosKernel_INCLUDE_DIRS})
+    
+    SET(GENERATED_COMMAND COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py ${GENERATED_TARGETS} ${GENERATED_INCLUDES})
+
+    IF(SiconosMechanics_FOUND)
+
+      SET(GENERATED_TARGETS --targets=Mechanics)
+      SET(GENERATED_INCLUDES ${GENERATED_INCLUDES} -I${SiconosMechanics_INCLUDE_DIRS})
+      SET(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES}
+        ${SiconosMechanics_INCLUDE_DIRS}/SpaceFilter.hpp)
+      SET(GENERATED_COMMAND ${GENERATED_COMMAND} COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py ${GENERATED_TARGETS} ${GENERATED_INCLUDES})
+
+    ENDIF()
+
+    IF(SiconosControl_FOUND)
+      SET(GENERATED_TARGETS --targets=Control)
+      SET(GENERATED_INCLUDES ${GENERATED_INCLUDES} -I${SiconosControl_INCLUDE_DIRS})
+      SET(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES}
+        ${SiconosControl_INCLUDE_DIRS}/SiconosControl.hpp)
+      SET(GENERATED_COMMAND ${GENERATED_COMMAND} COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py ${GENERATED_TARGETS} ${GENERATED_INCLUDES})
+
+    ENDIF()
+
+      ADD_CUSTOM_COMMAND(
+        OUTPUT ${GENERATED_HEADERS}
+        DEPENDS ${GENERATED_DEPENDENCIES}
+        ${GENERATED_COMMAND})
+
+    # install the generated header
+    INSTALL(FILES ${CMAKE_BINARY_DIR}/src/SiconosFullGenerated.hpp DESTINATION include/Siconos/IO)
+  ELSE()
+    # install the distributed header
+    INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp DESTINATION include/Siconos/IO)
+  ENDIF()
+
+  # add dependencies for header generation
+  ADD_CUSTOM_TARGET(SerializersGeneration ALL
+    DEPENDS 
+    SiconosFullGenerated.hpp)
+
+  SET(SiconosIO_SRCS SiconosRestart.cpp MechanicsIO.cpp)
+ELSE()
+  # do not compile serializers
+  SET(SiconosIO_SRCS MechanicsIO.cpp)
+ENDIF()  
 
 # set library target
 LIBRARY_PROJECT_SETUP()
-
-# add dependencies for header generation
-ADD_CUSTOM_TARGET(SerializersGeneration ALL
-  DEPENDS 
-  SiconosFullGenerated.hpp)
 
 IF(BUILD_SHARED_LIBS)
   ADD_DEPENDENCIES(SiconosIO_shared SerializersGeneration)
@@ -184,9 +199,12 @@ IF(WITH_TESTING)
 
   BEGIN_TEST(test)
 
-  SET(TEST_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR})
+  SET(TEST_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/src)
 
-  NEW_TEST(ioTests BasicTest.cpp KernelTest.cpp)
+  IF(WITH_SERIALIZATION)
+    NEW_TEST(ioTests BasicTest.cpp KernelTest.cpp)
+  ENDIF()
+
   END_TEST(test)
 
 ENDIF(WITH_TESTING)

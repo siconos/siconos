@@ -72,21 +72,21 @@ input_headers = dict()
 
 input_headers['Kernel'] = ["SiconosKernel.hpp"]
 
-input_headers['Mechanics'] = []
-#input_headers['Mechanics'] = ["MechanicsFwd.hpp", "SpaceFilter.hpp", "SpaceFilter_impl.hpp",
-#                              "ExternalBody.hpp",
-#                              "Disk.hpp", "Circle.hpp", "DiskDiskR.hpp",
-#                              "DiskMovingPlanR.hpp",
-#                              "DiskPlanR.hpp", "SphereLDS.hpp",
-#                              "SphereLDSPlanR.hpp",
-#                              "SphereLDSSphereLDSR.hpp", "SphereNEDS.hpp",
-#                              "SphereNEDSPlanR.hpp",
-#                              "SphereNEDSSphereNEDSR.hpp",
-#                              "SiconosBodies.hpp",
-#                              "CircleCircleR.hpp", "CircularDS.hpp"
-#                              ]
+input_headers['Mechanics'] = ["MechanicsFwd.hpp", "SpaceFilter.hpp", "SpaceFilter_impl.hpp",
+                             "ExternalBody.hpp",
+                             "Disk.hpp", "Circle.hpp", "DiskDiskR.hpp",
+                             "DiskMovingPlanR.hpp",
+                             "DiskPlanR.hpp", "SphereLDS.hpp",
+                             "SphereLDSPlanR.hpp",
+                             "SphereLDSSphereLDSR.hpp", "SphereNEDS.hpp",
+                             "SphereNEDSPlanR.hpp",
+                             "SphereNEDSSphereNEDSR.hpp",
+                             "SiconosBodies.hpp",
+                             "CircleCircleR.hpp", "CircularDS.hpp"
+                             ]
 
-input_headers['Control'] = ['SiconosControl.hpp']
+# fix missing forwards for Control
+input_headers['Control'] = ['FirstOrderNonLinearDS.hpp', 'FirstOrderLinearDS.hpp', 'SiconosControl.hpp']
 
 all_headers = [h for h in itertools.chain(*(input_headers[target]
                                             for target in targets))]
@@ -140,7 +140,7 @@ typedef = dict()
 for t in global_ns.typedefs():
     typedef[str(t._type)] = name(t)
 
-with open(generated_file(), 'w') as dest_file:
+with open(generated_file(), 'a') as dest_file:
 
     dest_file.write('// generated with the command : {0}\n'
                     .format(' '.join(sys.argv)))
