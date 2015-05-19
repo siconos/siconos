@@ -9,7 +9,13 @@ from OCC.TopLoc import TopLoc_Location
 
 from OCC.Display.SimpleGui import get_backend
 
-from OCC.STEPControl import STEPControl_Reader
+from OCC.STEPControl import STEPControl_Reader, STEPControl_Writer, STEPControl_AsIs
+from OCC.Interface import Interface_Static_SetCVal
+
+from OCC.BRep import BRep_Builder
+from OCC.BRepBuilderAPI import BRepBuilderAPI_Transform
+from OCC.TopoDS import TopoDS_Compound
+
 from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
 import OCC.Graphic3d as Graphic3d
@@ -161,8 +167,8 @@ def init_display(backend_str=None, size=(1024, 768)):
                 except KeyError:
                     raise ValueError('the menu item %s does not exist' % menu_name)
         # following couple of lines is a twek to enable ipython --gui='qt'
-        app = QtGui.QApplication.instance()  # checks if QApplication already exists 
-        if not app:  # create QApplication if it doesnt exist 
+        app = QtGui.QApplication.instance()  # checks if QApplication already exists
+        if not app:  # create QApplication if it doesnt exist
             app = QtGui.QApplication(sys.argv)
         win = MainWindow()
         win.show()
@@ -226,16 +232,16 @@ def make_slider(minv, maxv, vstep):
 
             slidersLayout = QtGui.QBoxLayout(direction)
             slidersLayout.addWidget(self.slider)
-            self.setLayout(slidersLayout)    
+            self.setLayout(slidersLayout)
 
         def setValue(self, value):
             vstep(value)
-            self.slider.setValue(value)    
+            self.slider.setValue(value)
 
-        def setMinimum(self, value):    
+        def setMinimum(self, value):
             self.slider.setMinimum(value)
 
-        def setMaximum(self, value):    
+        def setMaximum(self, value):
             self.slider.setMaximum(value)
 
 
@@ -363,11 +369,26 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
         # flatten
         return [item for sublist in l for item in sublist]
 
+    @memoize
+    def write_step(stshape):
+        # initialize the STEP exporter
+        step_writer = STEPControl_Writer()
+        Interface_Static_SetCVal("write.step.schema", "AP203")
+
+        step_str, shape = stshape
+
+        step_writer.Transfer(shape, STEPControl_AsIs)
+        status = step_writer.Write('siconos-mechanisms-{0}.stp'.format(step_str))
+
     def vstep(step_str):
 
         step = int(step_str)
 
         positions = dpos_data[nbobjs*step:nbobjs*step+nbobjs, 2:]
+
+        builder = BRep_Builder()
+        comp = TopoDS_Compound()
+        builder.MakeCompound(comp)
 
         for _id in range(positions.shape[0]):
 
@@ -378,7 +399,7 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
             q = Quaternion((q3, q4, q5, q6))
 
             for shape_name, avatar in zip(io.instances()[obj], avatars(obj)):
-                offset = get_offset(obj, shape_name) 
+                offset = get_offset(obj, shape_name)
                 p = q.rotate(offset[0])
                 r = q*Quaternion(offset[1])
 
@@ -395,7 +416,14 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
 
                 display.Context.SetLocation(avatar, loc)
 
+                moved_shape = BRepBuilderAPI_Transform(avatar.GetObject().Shape(), tr, True).Shape()
+
+                builder.Add(comp, moved_shape)
+
             display.Context.UpdateCurrentViewer()
+
+            write_step((step_str, comp))
+
 
 #    add_menu('run')
 #    add_function_to_menu('run', run)
