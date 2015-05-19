@@ -373,7 +373,9 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
     def write_step(stshape):
         # initialize the STEP exporter
         step_writer = STEPControl_Writer()
-        Interface_Static_SetCVal("write.step.schema", "AP203")
+
+        # missing person => load failure
+        #Interface_Static_SetCVal("write.step.schema", "AP203")
 
         step_str, shape = stshape
 
@@ -422,7 +424,7 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
 
             display.Context.UpdateCurrentViewer()
 
-            write_step((step_str, comp))
+        write_step((step_str, comp))
 
 
 #    add_menu('run')
