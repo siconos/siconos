@@ -151,51 +151,50 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
 set_positionv = numpy.vectorize(set_position)
 
 
-def simple_vtp_mesh_str(brep_string):
+def step_reader(step_string):
 
-    FREECADPATH = '/usr/lib/freecad/lib' # path to your FreeCAD.so or FreeCAD.dll file
-    sys.path.append(FREECADPATH)
-    import FreeCAD
-    import Part
-    import Mesh
+    from OCC.StlAPI import StlAPI_Writer
+    from OCC.STEPControl import STEPControl_Reader
+    from OCC.BRep import BRep_Builder
+    from OCC.TopoDS import TopoDS_Compound
+    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
-    bshape = Part.Shape()
+    builder = BRep_Builder()
+    comp = TopoDS_Compound()
+    builder.MakeCompound(comp)
 
-    bshape.importBrepFromString(brep_string)
+    stl_writer = StlAPI_Writer()
+    stl_writer.SetASCIIMode(True)
 
-    shape = bshape.Faces[0]
-    result = None
+    with IO.tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
+        step_reader = STEPControl_Reader()
 
-    if hasattr(shape,'CenterOfMass'):
-        base = shape.CenterOfMass
-    else:
-        base = FreeCAD.Base.Vector(0.,0.,0.)
+        status = step_reader.ReadFile(tmpfile[1])
 
-    rawdata = shape.tessellate(.001)
-    faces = []
-    for triangle in rawdata[1]:
-        face = []
-        for i in range(3):
-            vindex = triangle[i]
-            face.append(rawdata[0][vindex] - base)
-            faces.append(face)
-    m = Mesh.Mesh(faces)
-    print m
+        if status == IFSelect_RetDone:  # check status
+            failsonly = False
+            step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
+            step_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
 
-    with IO.tmpfile(suffix='.stl') as tmpf:
-        m.write(tmpf[1])
-        tmpf[0].flush()
-        print IO.str_of_file(tmpf[1])
-        reader = vtk.vtkSTLReader()
-        reader.SetFileName(tmpf[1])
-        reader.Update()
-        writer = vtk.vtkXMLPolyDataWriter()
-        with IO.tmpfile(suffix='.vtp') as tmp_vtpf:
-            writer.SetFileName(tmp_vtpf[1])
-            writer.SetInputData(reader.GetOutput())
-            writer.Write()
-            result = IO.str_of_file(tmp_vtpf[1])
-            return result
+            ok = step_reader.TransferRoot(1)
+            nbs = step_reader.NbShapes()
+
+            l=[]
+            for i in range(1, nbs+1):
+                shape = step_reader.Shape(i)
+
+                builder.Add(comp, shape)
+
+            with IO.tmpfile(suffix='.stl') as tmpf:
+                    stl_writer.Write(comp, tmpf[1])
+                    tmpf[0].flush()
+
+
+                    reader = vtk.vtkSTLReader()
+                    reader.SetFileName(tmpf[1])
+                    reader.Update()
+
+                    return reader
 
 
 def usage():
@@ -574,15 +573,22 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 reader.SetFileName(tmpf[1])
                 reader.Update()
                 readers[shape_name] = reader
+
+                # a try for smooth rendering but it does not work here
+                normals = vtk.vtkPolyDataNormals()
+                normals.SetInputConnection(reader.GetOutputPort())
+                normals.SetFeatureAngle(60.0)
+
                 mapper = vtk.vtkDataSetMapper()
                 add_compatiblity_methods(mapper)
-                mapper.SetInputConnection(reader.GetOutputPort())
-                # delayed (see the one in brep)
+                mapper.SetInputConnection(normals.GetOutputPort())
+                mapper.ScalarVisibilityOff()
+               # delayed (see the one in brep)
                 # note: "lambda : mapper" fails (dynamic scope)
                 # and (x for x in [mapper]) is ok.
                 mappers[shape_name] = (x for x in [mapper])
 
-        elif shape_type in ['brep']:
+        elif shape_type in ['stp', 'step']:
             # try to find an associated shape
             if 'associated_shape' in io.shapes()[shape_name].attrs:
                 associated_shape = \
@@ -591,18 +597,13 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 # delayed
                 mappers[shape_name] = (x for x in [mappers[associated_shape]()])
             else:
-                mesh_str = simple_vtp_mesh_str(str(io.shapes()[shape_name][:]))
-                with IO.tmpfile() as tmpf:
-                    tmpf[0].write(mesh_str)
-                    tmpf[0].flush()
-                    reader = vtk_reader['vtp']()
-                    reader.SetFileName(tmpf[1])
-                    reader.Update()
-                    readers[shape_name] = reader
-                    mapper = vtk.vtkDataSetMapper()
-                    add_compatiblity_methods(mapper)
-                    mapper.SetInputConnection(reader.GetOutputPort())
-                    mappers[shape_name] = (x for x in [mapper])
+                reader = step_reader(str(io.shapes()[shape_name][:]))
+
+                readers[shape_name] = reader
+                mapper = vtk.vtkDataSetMapper()
+                add_compatiblity_methods(mapper)
+                mapper.SetInputConnection(reader.GetOutputPort())
+                mappers[shape_name] = (x for x in [mapper])
 
         elif shape_type == 'convex':
             # a convex shape
