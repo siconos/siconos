@@ -588,6 +588,18 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 # and (x for x in [mapper]) is ok.
                 mappers[shape_name] = (x for x in [mapper])
 
+        elif shape_type in ['brep']:
+            # try to find an associated shape
+            if 'associated_shape' in io.shapes()[shape_name].attrs:
+                associated_shape = \
+                    io.shapes()[shape_name].\
+                    attrs['associated_shape']
+                # delayed
+                mappers[shape_name] = (x for x in [mappers[associated_shape]()])
+            else:
+                # fix
+                assert(0) 
+
         elif shape_type in ['stp', 'step']:
             # try to find an associated shape
             if 'associated_shape' in io.shapes()[shape_name].attrs:
