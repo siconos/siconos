@@ -20,16 +20,11 @@
 #define SiconosVisitorTest_h
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "../SiconosVisitor.hpp"
 
 class SiconosVisitorTest : public CppUnit::TestFixture
 {
 
 private:
-  /** serialization hooks
-  */
-  ACCEPT_SERIALIZATION(SiconosVisitorTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(SiconosVisitorTest);
@@ -41,12 +36,15 @@ private:
 
   CPPUNIT_TEST(t3);
 
+  CPPUNIT_TEST(t4);
+
   CPPUNIT_TEST_SUITE_END();
 
   // Members
   void t1();
   void t2();
   void t3();
+  void t4();
 
 public:
   void setUp();

@@ -17,7 +17,20 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosVisitorTest.hpp"
+class ObjectA;
+class ObjectB;
+
+#include "../SiconosVisitables.hpp"
+#undef SICONOS_VISITABLES
+#define SICONOS_VISITABLES()                    \
+  KERNEL_CLASSES()                              \
+  REGISTER(ObjectA)                             \
+  REGISTER(ObjectB)
+
 #include "TypeName.hpp"
+#include "../SiconosVisitor.hpp"
+
+
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(SiconosVisitorTest);
@@ -102,3 +115,72 @@ void SiconosVisitorTest::t3()
   delete ds;
 }
 
+struct Object {
+
+  VIRTUAL_ACCEPT_VISITORS();
+
+};
+
+struct ObjectA : public Object
+{
+  int id;
+  int dummya;
+
+  ACCEPT_STD_VISITORS();
+};
+
+struct ObjectB : public Object
+{
+  int id;
+  int dummyb;
+
+  ACCEPT_STD_VISITORS();
+};
+
+#define VISITOR_CLASSES()\
+  REGISTER(ObjectA)\
+  REGISTER(ObjectB)
+
+#include "VisitorMaker.hpp"
+using namespace Experimental;
+
+struct GetId : public SiconosVisitor
+{
+
+  int result;
+
+  template<typename T>
+  void operator()(const T& obj)
+  {
+    result = obj.id;
+  }
+};
+
+
+void SiconosVisitorTest::t4()
+{
+  Object *o;
+
+  ObjectA ooa;
+  ObjectB oob;
+
+  ooa.id = 0;
+  oob.id = 1;
+
+
+  Visitor < Classes < ObjectA, ObjectB >,
+            GetId >::Make visitor;
+
+  o = & ooa;
+
+  o->accept(visitor);
+
+  CPPUNIT_ASSERT(visitor.result == 0);
+
+  o = & oob;
+
+  o->accept(visitor);
+
+  CPPUNIT_ASSERT(visitor.result == 1);
+
+};
