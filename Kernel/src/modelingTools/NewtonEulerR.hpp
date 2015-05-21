@@ -104,7 +104,7 @@ protected:
   SP::SiconosMatrix _jachqT;
 
   /** basic constructor
-  \param the sub-type of the relation
+  \param lagType the sub-type of the relation
   */
   NewtonEulerR(RELATION::SUBTYPES lagType): Relation(RELATION::NewtonEuler, lagType) {}
 
@@ -291,6 +291,7 @@ public:
       \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
       \param time  current time
       \param inter interaction that owns the relation
+      \param DSlink the container of the link to DynamicalSystem attributes
       \param ds1 dynamical system linked to this interaction (source)
       \param ds2 second ds linked to this interaction (target). If there is 
       only one ds in the inter, call this function with ..., ds, ds)
@@ -316,7 +317,7 @@ public:
   /**
   * return a SP on the C matrix.
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
-  *
+  * \return SP::SimpleMatrix
   */
   virtual inline SP::SimpleMatrix C() const
   {
@@ -325,6 +326,7 @@ public:
   /**
   * return a SP on the D matrix.
   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
+  * \return SP::SiconosMatrix
   */
   virtual inline SP::SiconosMatrix D() const
   {
@@ -333,6 +335,7 @@ public:
   /**
   * return a SP on the B matrix.
   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
+  * \return SP::SiconosMatrix
   */
   virtual inline SP::SiconosMatrix B() const
   {
@@ -341,6 +344,7 @@ public:
   /** A buffer containing the forces due to this.
   It is an output unused for the computation.
   Fix : is it usefull ?
+  \return SP::SiconosVector
   */
   inline SP::SiconosVector contactForce() const
   {

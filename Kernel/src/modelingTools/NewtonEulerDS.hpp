@@ -49,7 +49,7 @@ typedef void (*Fext)(double , double*, double*, double*);
  * <li> \f$x_G,v_G\f$ position and velocity of the center of mass expressed in a inertial frame of
  * reference (world frame) </li>
  * <li> \f$\Omega\f$ angular velocity vector expressed in the body-fixed frame (frame attached to the object) </li>
- * <li> \f$R\f$ rotation matrix form the inertial frame to the bosy-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, \textit{i.e} \f$ R\in SO^+(3)\f$  </li>
+ * <li> \f$R\f$ rotation matrix form the inertial frame to the bosy-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, i.e \f$ R\in SO^+(3)\f$  </li>
  * <li> \f$M=m\,I_{3\times 3}\f$ diagonal mass matrix with  \f$m \in \mathbb{R}\f$ the scalar mass  </li>
  * <li> \f$I\f$ constant inertia matrix </li>
  * <li> \f$F_{ext}\f$ and \f$ M_{ext}\f$ are the external applied forces and torques  </li>
@@ -367,7 +367,7 @@ public:
   // -- p --
 
   /** get p
-   *  \param unsigned int, required level for p, default = 2
+   *  \param level unsigned int, required level for p, default = 2
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector p(unsigned int level = 2) const
@@ -510,30 +510,31 @@ public:
 
   /** Default function to compute jacobian of the right-hand side term according to x
    *  \param time current time
-   *  \param isDSup flag to avoid recomputation of operators
+   *  \param isDup flag to avoid recomputation of operators
    */
   virtual void computeJacobianRhsx(double time, bool isDup = false);
 
   /** Default function to compute fL
-   *  \param double, the current time
+   *  \param time the current time
    */
-  virtual void computeForces(double);
+  virtual void computeForces(double time);
 
   /** function to compute fL with some specific values for q and velocity (ie not those of the current state).
    *  \param time the current time
    *  \param q2 positions where the forces has to be computed
    *  \param v2 velocities where the forces has to be computed
    */
-  virtual void computeForces(double time, SP::SiconosVector, SP::SiconosVector v2);
+  virtual void computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2);
 
   /** Default function to compute the jacobian following q of fL
-   *  \param double, the current time
+   *  \param time the current time
    */
-  virtual void computeJacobianvFL(double);
+  virtual void computeJacobianvFL(double time);
+
   /** Default function to compute the jacobian following qDot of fL
-   *  \param double, the current time
+   *  \param time the current time
    */
-  virtual void computeJacobianqDotForces(double);
+  virtual void computeJacobianqDotForces(double time);
 
   // --- miscellaneous ---
 
@@ -542,11 +543,9 @@ public:
   void display() const;
 
   /** initialize the SiconosMemory objects with a positive size.
-   *  \param int levelMin for allocation of _p
-   *  \param int levelMax for allocation of _p
-   *  \param the size of the SiconosMemory. must be >= 0
+   * \param steps the size of the SiconosMemory (i)
    */
-  void initMemory(unsigned int);
+  void initMemory(unsigned int steps);
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,
@@ -602,7 +601,9 @@ public:
   {
     return _dotq;
   }
-  /** get the matrix converting the object coordinates in the absolute coordinates.*/
+  /** get the matrix converting the object coordinates in the absolute coordinates.
+      \return SP::SimpleMatrix
+   */
   SP::SimpleMatrix MObjToAbs()
   {
     return _MObjToAbs;
