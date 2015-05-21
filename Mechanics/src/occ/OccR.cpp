@@ -20,11 +20,10 @@ OccR::OccR(const ContactPoint& contact1,
 
 void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
-  SPC::OccContactShape pcsh1 = this->_contact1.contactShape();
-  SPC::OccContactShape pcsh2 = this->_contact2.contactShape();
+  const OccContactShape& pcsh1 = *this->_contact1.contactShape();
+  const OccContactShape& pcsh2 = *this->_contact2.contactShape();
 
-  SP::ContactShapeDistance pdist = _geometer->distance(std11::const_pointer_cast<OccContactShape>(pcsh1),
-                                                       std11::const_pointer_cast<OccContactShape>(pcsh2));
+  SP::ContactShapeDistance pdist = _geometer->distance(pcsh1, pcsh2);
   ContactShapeDistance& dist = *pdist;
 
   double& X1 = dist.x1;

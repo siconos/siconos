@@ -25,10 +25,10 @@ struct Geometer : public SiconosVisitor
   }
 
 
-  virtual SP::ContactShapeDistance distance(SP::OccContactShape psh1,
-                                            SP::OccContactShape psh2)
+  virtual SP::ContactShapeDistance distance(const OccContactShape& psh1,
+                                            const OccContactShape& psh2)
   {
-    return psh1->distance(*psh2);
+    return psh1.distance(psh2);
   }
 };
 

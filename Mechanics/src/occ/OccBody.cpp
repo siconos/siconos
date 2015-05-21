@@ -20,7 +20,7 @@ void OccBody::addContactShape(SP::OccContactShape shape,
   shape->computeUVBounds();
 }
 
-void OccBody::updateContactShapes() const
+void OccBody::updateContactShapes()
 {
   for (ContactShapes::iterator csi = _contactShapes->begin();
        csi != _contactShapes->end(); ++ csi)

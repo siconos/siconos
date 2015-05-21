@@ -1,17 +1,39 @@
-#include "OccTimeStepping.hpp"
+class OccBody;
 
+#include <SiconosVisitables.hpp>
+#undef SICONOS_VISITABLES
+
+#define SICONOS_VISITABLES()                    \
+  KERNEL_CLASSES()                              \
+  REGISTER(OccBody)
+
+
+
+#include "OccTimeStepping.hpp"
 #include "OccBody.hpp"
 
 #include <Model.hpp>
 #include <NonSmoothDynamicalSystem.hpp>
 
+#include <SiconosVisitor.hpp>
+
+#define VISITOR_CLASSES()                       \
+  REGISTER(OccBody)
+
+#include <VisitorMaker.hpp>
+
+
+
+using namespace Experimental;
+
 struct UpdateContactShapes : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
-  void visit(const OccBody& ods)
+  template<typename T>
+  void operator() (const T& ds)
   {
-    ods.updateContactShapes();
+    const_cast<T&>(ds).updateContactShapes();
   }
 };
 
@@ -22,7 +44,7 @@ void OccTimeStepping::updateWorldFromDS()
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   std11::tie(dsi, dsiend) = dsg.vertices();
 
-  static UpdateContactShapes up;
+  Visitor< Classes < OccBody >, UpdateContactShapes >::Make up;
 
   for (; dsi != dsiend; ++dsi)
   {
