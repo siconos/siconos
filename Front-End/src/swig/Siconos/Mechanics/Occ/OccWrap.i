@@ -51,9 +51,55 @@
 %{
 #include <TopoDS_Shape.hxx>
 %}
+%typecheck(SWIG_TYPECHECK_INTEGER) (TopoDS_Shape & shape) ()
+%{
+  int res;
+  res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_std11__shared_ptrT_TopoDS_Shape_t, 0);
+  _v = SWIG_CheckState(res);
+  if(!_v)
+  {
+    res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_TopoDS_Shape, 0);
+  }
+  _v = SWIG_CheckState(res);
+%}
+
+%typemap(in) (TopoDS_Shape & shape) (void * argp1, int res)
+%{
+  {
+    int newmem = 0;
+    res = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_TopoDS_Shape,  0 , &newmem);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "new_OccContactShape" "', argument " "1"" of type '" "TopoDS_Shape const &""'"); 
+    }
+  }
+%}
 
 %shared_ptr(TopoDS_Shape)
 %include <TopoDS_Shape.hxx>
+TYPEDEF_SPTR(TopoDS_Shape)
+
+
+
+%extend TopoDS_Shape {
+%pythoncode {
+	def __getstate__(self):
+		from OCC.BRepTools import BRepTools_ShapeSet
+		ss = BRepTools_ShapeSet()
+		ss.Add(self)
+		str_shape = ss.WriteToString()
+		indx = ss.Locations().Index(self.Location())
+		return str_shape, indx
+	def __setstate__(self, state):
+		from OCC.BRepTools import BRepTools_ShapeSet
+		topods_str, indx = state
+		ss = BRepTools_ShapeSet()
+		ss.ReadFromString(topods_str)
+		the_shape = ss.Shape(ss.NbShapes())
+		location = ss.Locations().Location(indx)
+		the_shape.Location(location)
+		self.this = the_shape.this
+	}
+};
 
 %{
 #include <TopoDS_Face.hxx>
