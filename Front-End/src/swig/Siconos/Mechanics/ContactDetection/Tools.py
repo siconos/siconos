@@ -3,11 +3,11 @@ from numpy.linalg import norm
 
 class Shape(object):
     """
-    A shape is associated to some body with relatives position and orientation.
+    A shape is associated to some body with relatives translation and orientation.
     """
     def __init__(self,
                  shape_name,
-                 relative_position=[0, 0, 0],
+                 relative_translation=[0, 0, 0],
                  relative_orientation=[0, 1, 0, 0]):
 
         if len(relative_orientation) == 2:
@@ -25,7 +25,7 @@ class Shape(object):
             ori = relative_orientation
 
         self.name = shape_name
-        self.position = relative_position
+        self.translation = relative_translation
         self.orientation = ori
 
 
@@ -38,12 +38,12 @@ class Avatar(Shape):
     def __init__(self,
                  shape_name,
                  parameters=None,
-                 relative_position=[0, 0, 0],
+                 relative_translation=[0, 0, 0],
                  relative_orientation=[0, 1, 0, 0]):
 
         self.parameters = parameters
         super(Avatar, self).__init__(shape_name,
-                                     relative_position,
+                                     relative_translation,
                                      relative_orientation)
 
 
@@ -56,11 +56,11 @@ class Contactor(Shape):
     def __init__(self,
                  shape_name,
                  collision_group=0,
-                 relative_position=[0, 0, 0],
+                 relative_translation=[0, 0, 0],
                  relative_orientation=[0, 1, 0, 0]):
 
         self.group = collision_group
 
         super(Contactor, self).__init__(shape_name,
-                                        relative_position,
+                                        relative_translation,
                                         relative_orientation)

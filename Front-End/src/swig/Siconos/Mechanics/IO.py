@@ -47,7 +47,7 @@ except:
 try:
     from Siconos.Mechanics.Occ import \
         OccContactShape, OccBody, OccContactFace, OccContactEdge, \
-        OccTimeStepping, OccSpaceFilter
+        OccTimeStepping, OccSpaceFilter, OccWrap
 except:
     pass
 
@@ -75,7 +75,24 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None):
     if contents is not None:
         fid.write(contents)
         fid.flush()
-    yield (fid, tfilename)
+
+    class TmpFile:
+        def __init__(self, fid, name):
+            self.fid = fid
+            self.name = name
+
+        def __getitem__(self, n):
+            if n==0:
+                return self.fid
+            elif n==1:
+                return self.name
+            else:
+                raise IndexError
+
+
+    r = TmpFile(fid, tfilename)
+
+    yield r
     fid.close()
     os.remove(tfilename)
 
@@ -202,7 +219,6 @@ def loadMesh(shape_filename):
 
     return keep, shape
 
-
 class ShapeCollection():
 
     """
@@ -259,15 +275,66 @@ class ShapeCollection():
                                 tmpf[1])
                     else:
                         assert False
-                elif self.attributes(shape_name)['type'] == 'brep':
+                elif self.attributes(shape_name)['type'] in['step']:
+                    from OCC.STEPControl import STEPControl_Reader
+                    from OCC.BRep import BRep_Builder
+                    from OCC.TopoDS import TopoDS_Compound
+                    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
+
+                    builder = BRep_Builder()
+                    comp = TopoDS_Compound()
+                    builder.MakeCompound(comp)
+
+                    step_name = self.attributes(shape_name)['step']
+
+                    with tmpfile(contents=self.shape(step_name)[:][0]) as tmpf:
+                        step_reader = STEPControl_Reader()
+
+                        status = step_reader.ReadFile(tmpf[1])
+
+                        if status == IFSelect_RetDone:  # check status
+                            failsonly = False
+                            step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
+                            step_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
+
+                            ok = step_reader.TransferRoot(1)
+                            nbs = step_reader.NbShapes()
+
+                            l=[]
+
+                            for i in range(1, nbs+1):
+                                shape = step_reader.Shape(i)
+                                builder.Add(comp, shape)
+
+                            self._shapes[shape_name] = comp
+                            self._io._keep.append(self._shapes[shape_name])
+
+
+                elif self.attributes(shape_name)['type'] in['brep']:
                     if not 'contact' in self.attributes(shape_name):
+
                         # the reference brep
                         if shape_class is None:
-                            brep = OccContactShape()
+                            brep_class = OccContactShape
                         else:
-                            brep = shape_class()
+                            brep_class = shape_class
 
-                        brep.importBRepFromString(self.shape(shape_name)[:][0])
+                        if 'occ_indx' in self.attributes(shape_name):
+
+                            from OCC.BRepTools import BRepTools_ShapeSet
+                            shape_set = BRepTools_ShapeSet()
+                            shape_set.ReadFromString(self.shape(shape_name)[:][0])
+                            the_shape = shape_set.Shape(shape_set.NbShapes())
+                            location = shape_set.Locations().Location(self.attributes(shape_name)['occ_indx'])
+                            the_shape.Location(location)
+                            brep = brep_class()
+                            brep.setData(the_shape)
+
+                        else:
+                            # raw brep
+                            brep = brep_class()
+                            brep.importBRepFromString(self.shape(shape_name)[:][0])
+
                         self._shapes[shape_name] = brep
                         self._io._keep.append(self._shapes[shape_name])
 
@@ -277,8 +344,9 @@ class ShapeCollection():
                         assert 'index' in self.attributes(shape_name)
                         assert 'brep' in self.attributes(shape_name)
                         contact_index = self.attributes(shape_name)['index']
-                        print (self.attributes(shape_name)['brep'])
+
                         ref_brep = self.get(self.attributes(shape_name)['brep'], shape_class)
+
                         if self.attributes(shape_name)['contact'] == 'Face':
                             if face_class is None:
                                 face_maker = OccContactFace
@@ -346,17 +414,17 @@ class ShapeCollection():
 
 
 class Hdf5():
-    """a Hdf5 context manager reads at instantiation the positions and
+    """a Hdf5 context manager reads at instantiation the translations and
        orientations of collision objects from hdf5 file
 
-       It provides functions to output positions and orientations in
+       It provides functions to output translations and orientations in
        the same file during simulation (output is done by default in
        pos.dat)
 
        with:
          time : float
          object_id : the object id (int)
-         px, py, pz : components of the position (float)
+         px, py, pz : components of the translation (float)
          ow, ox, oy oz : components of an unit quaternion (float)
 
     """
@@ -495,7 +563,7 @@ class Hdf5():
                                     int(self._nslaws[name].attrs['gid1']),
                                     int(self._nslaws[name].attrs['gid2']))
 
-    def importBRepObject(self, name, position, orientation,
+    def importBRepObject(self, name, translation, orientation,
                          velocity, contactors, mass, given_inertia, body_class,
                          shape_class, face_class, edge_class):
 
@@ -512,15 +580,16 @@ class Hdf5():
             pass
 
         else:
-            body = body_class(position + orientation, velocity, mass, inertia)
+            body = body_class(translation + orientation, velocity, mass, inertia)
             for contactor in contactors:
 
                 # /!\ shared pointer <-> python ref ...
                 shape_instantiated = self._shape.get(contactor.name,
                                                      shape_class, face_class, edge_class)
                 self._keep.append(shape_instantiated)
+
                 body.addContactShape(shape_instantiated,
-                                     contactor.position,
+                                     contactor.translation,
                                      contactor.orientation,
                                      contactor.group)
             self._set_external_forces(body)
@@ -533,7 +602,7 @@ class Hdf5():
             nsds.setName(body, str(name))
 
 
-    def importObject(self, name, position, orientation,
+    def importObject(self, name, translation, orientation,
                      velocity, contactors, mass, inertia, body_class, shape_class):
 
         if body_class is None:
@@ -552,15 +621,15 @@ class Hdf5():
                     c_orientation = btQuaternion(x, y, z, w)
                     rc_orientation = mul(rbase, c_orientation)
 
-                    c_origin = btVector3(c.position[0],
-                                         c.position[1],
-                                         c.position[2])
+                    c_origin = btVector3(c.translation[0],
+                                         c.translation[1],
+                                         c.translation[2])
 
                     rc_origin = quatRotate(rbase, c_origin)
 
-                    rc_sorigin = btVector3(rc_origin.x() + position[0],
-                                           rc_origin.y() + position[1],
-                                           rc_origin.z() + position[2])
+                    rc_sorigin = btVector3(rc_origin.x() + translation[0],
+                                           rc_origin.y() + translation[1],
+                                           rc_origin.z() + translation[2])
 
                     static_cobj = btCollisionObject()
                     static_cobj.setCollisionFlags(
@@ -590,9 +659,9 @@ class Hdf5():
                     bws.setInertia(inertia[0], inertia[1], inertia[2])
 
                 body = body_class(bws,
-                                  position + orientation,
+                                  translation + orientation,
                                   velocity,
-                                  contactors[0].position,
+                                  contactors[0].translation,
                                   contactors[0].orientation,
                                   contactors[0].group)
 
@@ -600,7 +669,7 @@ class Hdf5():
                     shape_id = self._shapeid[contactor.name]
 
                     body.addCollisionShape(self._shape.get(contactor.name),
-                                           contactor.position,
+                                           contactor.translation,
                                            contactor.orientation,
                                            contactor.group)
 
@@ -666,12 +735,12 @@ class Hdf5():
             for (name, obj) in self._input.items():
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
-                position = obj.attrs['position']
+                translation = obj.attrs['translation']
                 orientation = obj.attrs['orientation']
                 velocity = obj.attrs['velocity']
                 contactors = [Contactor(ctr.attrs['name'],
                                         int(ctr.attrs['group']),
-                                        floatv(ctr.attrs['position']),
+                                        floatv(ctr.attrs['translation']),
                                         floatv(ctr.attrs['orientation']))
                               for ctr in input_ctrs]
 
@@ -682,15 +751,15 @@ class Hdf5():
 
 
                 if True in ('type' in self.shapes()[ctr.attrs['name']].attrs
-                            and 'brep' in self.shapes()[ctr.attrs['name']].attrs['type']
+                            and self.shapes()[ctr.attrs['name']].attrs['type'] in ['brep', 'step']
                             for ctr in input_ctrs):
                     # Occ object
-                    self.importBRepObject(name, floatv(position), floatv(orientation),
+                    self.importBRepObject(name, floatv(translation), floatv(orientation),
                                           floatv(velocity), contactors, float(mass),
                                           inertia, body_class, shape_class, face_class, edge_class)
                 else:
                     # Bullet object
-                    self.importObject(name, floatv(position), floatv(orientation),
+                    self.importObject(name, floatv(translation), floatv(orientation),
                                       floatv(velocity), contactors, float(mass),
                                       inertia, body_class, shape_class)
 
@@ -703,7 +772,7 @@ class Hdf5():
 
     def outputStaticObjects(self):
         """
-        Outputs positions and orientations of static objects
+        Outputs translations and orientations of static objects
         """
         time = self._broadphase.model().simulation().nextTime()
         idd = -1
@@ -711,14 +780,14 @@ class Hdf5():
         self._static_data.resize(len(self._static_transforms), 0)
 
         for transform in self._static_transforms:
-            position = transform.getOrigin()
+            translation = transform.getOrigin()
             rotation = transform.getRotation()
             self._static_data[p, :] = \
                 [time,
                  idd,
-                 position.x(),
-                 position.y(),
-                 position.z(),
+                 translation.x(),
+                 translation.y(),
+                 translation.z(),
                  rotation.w(),
                  rotation.x(),
                  rotation.y(),
@@ -728,7 +797,7 @@ class Hdf5():
 
     def outputDynamicObjects(self):
         """
-        Outputs positions and orientations of dynamic objects
+        Outputs translations and orientations of dynamic objects
         """
 
         current_line = self._dynamic_data.shape[0]
@@ -744,8 +813,7 @@ class Hdf5():
 
         tidd = np.arange(1,
                          positions.shape[0] + 1).reshape(
-                             positions.shape[0],
-                             1)
+                         positions.shape[0], 1)
 
         self._dynamic_data[current_line:, :] = np.concatenate((times, tidd,
                                                                positions),
@@ -877,11 +945,49 @@ class Hdf5():
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1,),
                                              dtype=h5py.new_vlen(str))
-            shape[:] = shape_data
+            if type(shape_data) == str:
+                # raw str
+                shape[:] = shape_data
+            else:
+                # __getstate__ as with pythonocc
+                shape[:] = shape_data[0]
+                shape.attrs['occ_indx'] = shape_data[1]
+                
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'brep'
+
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
+
+    def addOccShape(self, name, occ_shape):
+        """
+        Add an OpenCascade TopoDS_Shape
+        """
+
+        if name not in self._ref:
+
+            from OCC.STEPControl import STEPControl_Writer, STEPControl_AsIs
+
+            # step format is used for the storage.
+            step_writer = STEPControl_Writer()
+            step_writer.Transfer(occ_shape, STEPControl_AsIs)
+
+            shape_data = None
+
+            with tmpfile() as tmpf:
+
+                status = step_writer.Write(tmpf[1])
+
+                tmpf[0].flush()
+                shape_data = str_of_file(tmpf[1])
+
+                shape = self._ref.create_dataset(name, (1,),
+                                                 dtype=h5py.new_vlen(str))
+                shape[:] = shape_data
+                shape.attrs['id'] = self._number_of_shapes
+                shape.attrs['type'] = 'step'
+                self._shapeid[name] = shape.attrs['id']
+                self._number_of_shapes += 1
 
     def addShapeDataFromFile(self, name, filename):
         """
@@ -919,6 +1025,24 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
+    def addContactFromOccShape(self, name, occ_shape_name, contact_type,
+                               index, collision_group=0, associated_shape=None):
+        """
+        Add contact reference from a previously added brep.
+        """
+        if name not in self._ref:
+            shape = self._ref.create_dataset(name, (1,),
+                                             dtype=h5py.new_vlen(str))
+            shape.attrs['id'] = self._number_of_shapes
+            shape.attrs['type'] = 'step'
+            shape.attrs['contact'] = contact_type
+            shape.attrs['step'] = occ_shape_name
+            shape.attrs['index'] = index
+            if associated_shape is not None:
+                shape.attrs['associated_shape'] = associated_shape
+            self._shapeid[name] = shape.attrs['id']
+            self._number_of_shapes += 1
+
     def addConvexShape(self, name, points):
         """
         Add a convex shape defined by a list of points.
@@ -948,14 +1072,14 @@ class Hdf5():
             self._number_of_shapes += 1
 
     def addObject(self, name, shapes,
-                  position,
+                  translation,
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, inertia=None):
         """
         Add an object with associated shapes.
         Contact detection is defined by a list of contactors.
-        The initial position is mandatory : [x, y z].
+        The initial translation is mandatory : [x, y z].
         If the mass is zero this is a static object.
         """
 
@@ -976,7 +1100,7 @@ class Hdf5():
 
             obj = group(self._input, name)
             obj.attrs['mass'] = mass
-            obj.attrs['position'] = position
+            obj.attrs['translation'] = translation
             obj.attrs['orientation'] = ori
             obj.attrs['velocity'] = velocity
 
@@ -991,7 +1115,7 @@ class Hdf5():
                 if hasattr(shape, 'parameters') and \
                     shape.parameters is not None:
                     dat.attrs['parameters'] = shape.parameters
-                dat.attrs['position'] = shape.position
+                dat.attrs['translation'] = shape.translation
                 dat.attrs['orientation'] = shape.orientation
 
             if mass == 0:

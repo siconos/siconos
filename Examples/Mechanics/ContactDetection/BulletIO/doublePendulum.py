@@ -60,29 +60,29 @@ with IO.Hdf5() as io:
     # first branch + first mass the center of gravity is at the center of the
     # Mass1
     io.addObject('arm1', [Contactor('Mass1'),
-                             Contactor('Arm1',
-                                       relative_position=[0, r1+l1/2., 0])],
-                    position=[0, 0, r2 + gap + r2 + l2 + r1 + hgap],
+                          Contactor('Arm1',
+                                    relative_translation=[0, r1+l1/2., 0])],
+                    translation=[0, 0, r2 + gap + r2 + l2 + r1 + hgap],
                     orientation=((1, 0, 0), pi/2),
                     mass=m1)
 
     # second branch + second mass
     io.addObject('arm2', [Contactor('Mass2'),
-                             Contactor('Arm2',
-                                       relative_position=[0, r2+l2/2., 0])],
-                    position=[0, 0, r2 + gap],
+                          Contactor('Arm2',
+                                    relative_translation=[0, r2+l2/2., 0])],
+                    translation=[0, 0, r2 + gap],
                     orientation=((1, 0, 0), pi/2),
                     velocity=[0, 20, 0, 0, 0, 0],
                     mass=m2)
 
     io.addJoint('joint1', 'arm1', 'arm2', [0, -r1, 0],
-                   [1, 0, 0],
-                   'PivotJointR')
+                [1, 0, 0],
+                'PivotJointR')
 
     io.addJoint('joint2', 'arm1',
-                   pivot_point=[0, 0, r2 + gap + r2 + l2 + r1 + hgap + l1],
-                   axis=[1, 0, 0],
-                   joint_class='PivotJointR')
+                pivot_point=[0, 0, r2 + gap + r2 + l2 + r1 + hgap + l1],
+                axis=[1, 0, 0],
+                joint_class='PivotJointR')
 
     # a brick wall
     H = 3   # heigh
@@ -91,23 +91,23 @@ with IO.Hdf5() as io:
         for n in range(0, L):
             io.addObject('brick{0}'.format(k+n*H),
                             [Contactor('Brick')],
-                            position=[n*bx-L*bx/2. + (k % 2) * bx/2.,
-                                      -5,
-                                      k*bz + bz/2.], mass=2)
+                            translation=[n*bx-L*bx/2. + (k % 2) * bx/2.,
+                                         -5,
+                                         k*bz + bz/2.], mass=2)
 
     k = H-1
     for n in range(1, L):
         io.addObject('brick{0}'.format(k+n*H),
                         [Contactor('Brick')],
-                        position=[n*bx-L*bx/2. + (k % 2) * bx/2.,
-                                  -5,
-                                  k*bz + bz/2.], mass=2)
+                        translation=[n*bx-L*bx/2. + (k % 2) * bx/2.,
+                                     -5,
+                                     k*bz + bz/2.], mass=2)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.addObject('ground', [Contactor('Ground')],
-                    position=[0, 0, -.25])
+                 translation=[0, 0, -.25])
 
 
 # Run the simulation from the inputs previously defined and add

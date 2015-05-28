@@ -21,33 +21,33 @@ with IO.Hdf5(mode='w') as io:
 
     # Definition of a non smooth law between groups 0 and 1
     io.addNewtonImpactFrictionNSL('contact1', mu=0.1,
-                                     collision_group1=0, collision_group2=1)
+                                  collision_group1=0, collision_group2=1)
 
     # Definition of a non smooth law between groups 1 and 1
     io.addNewtonImpactFrictionNSL('contact2', mu=0.7,
-                                     collision_group1=1, collision_group2=1)
+                                  collision_group1=1, collision_group2=1)
 
     # Definition of a non smooth law between groups 0 and 0
     io.addNewtonImpactFrictionNSL('contact3', mu=0.1,
-                                     collision_group1=0, collision_group2=0)
+                                  collision_group1=0, collision_group2=0)
 
     # A 'two boxes object made with two Contactors.
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.
     io.addObject('twoboxes', [Contactor('BigBox',
-                                           collision_group=0,
-                                           relative_position=[0, 0, 0]),
+                                        collision_group=0,
+                                        relative_translation=[0, 0, 0]),
                                  Contactor('LongBox', collision_group=1,
-                                           relative_position=[0, 0, 0])],
-                    position=[0, 0, 3],
-                    velocity=[10, 0, 0, 1, 1, 1],
-                    mass=1)
+                                           relative_translation=[0, 0, 0])],
+                 translation=[0, 0, 3],
+                 velocity=[10, 0, 0, 1, 1, 1],
+                 mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved for contact
     # detection.
     io.addObject('ground', [Contactor('Ground', collision_group=1)],
-                    position=[0, 0, 0])
+                 translation=[0, 0, 0])
 
 
 # Run the simulation from the inputs previously defined and add

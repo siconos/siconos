@@ -35,15 +35,15 @@ with IO.Hdf5() as io:
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
-    io.addObject('cube', [Contactor('Cube')], position=[0, 0, 2],
-                    velocity=[10, 0, 0, 1, 1, 1],
-                    mass=1)
+    io.addObject('cube', [Contactor('Cube')], translation=[0, 0, 2],
+                 velocity=[10, 0, 0, 1, 1, 1],
+                 mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.addObject('ground', [Contactor('Ground')],
-                    position=[0, 0, 0])
+                 translation=[0, 0, 0])
 
 
 # Run the simulation from the inputs previously defined and add

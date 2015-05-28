@@ -55,7 +55,7 @@ struct OccContactShape
   {};
 
   /** Constructor from OccContactShape
-      \param shape : a SP::OccContactShape
+      \param shape : an OccContactShape
    */
   OccContactShape(const OccContactShape& shape)
     : _shape(shape.shape()) {};
@@ -64,13 +64,27 @@ struct OccContactShape
    */
   virtual ~OccContactShape() {};
 
-  /** Return shared pointer on data
+  /** Return shared pointer on OpenCascade data
    */
-  SP::TopoDS_Shape shape() const { return _shape;};
+  SP::TopoDS_Shape shape() const { return this->_shape;};
 
-  /** Return OpenCascade data.
+  /** Return reference on OpenCascade data.
    */
-  TopoDS_Shape& data() const { return *_shape;};
+  TopoDS_Shape& data() const { return *this->_shape;};
+
+  /** Set OpenCascade data from a shared pointer.
+   */
+  void setShape(SP::TopoDS_Shape shape)
+  {
+    this->_shape = shape;
+  }
+
+  /** Set OpenCascade data.
+   */
+  void setData(TopoDS_Shape& data)
+  {
+    this->_shape = createSPtrTopoDS_Shape(data);
+  }
 
   /** Known contacts.
    */

@@ -197,6 +197,33 @@ def step_reader(step_string):
                     return reader
 
 
+def brep_reader(brep_string, indx):
+
+    from OCC.StlAPI import StlAPI_Writer
+
+    from OCC.BRepTools import BRepTools_ShapeSet
+    shape_set = BRepTools_ShapeSet()
+    shape_set.ReadFromString(brep_string)
+    shape = shape_set.Shape(shape_set.NbShapes())
+    location = shape_set.Locations().Location(indx)
+    shape.Location(location)
+
+    stl_writer = StlAPI_Writer()
+
+    with IO.tmpfile(suffix='.stl') as tmpf:
+        stl_writer.Write(shape, tmpf[1])
+        tmpf[0].flush()
+
+        reader = vtk.vtkSTLReader()
+        reader.SetFileName(tmpf[1])
+        reader.Update()
+
+        return reader
+        
+        
+
+
+
 def usage():
     print """{0}
     """.format(sys.argv[0])
@@ -597,8 +624,15 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                 # delayed
                 mappers[shape_name] = (x for x in [mappers[associated_shape]()])
             else:
-                # fix
-                assert(0) 
+                brep = io.shapes()[shape_name].attrs['brep']
+                print io.shapes()[brep][:]
+
+                reader = brep_reader(str(io.shapes()[brep][:][0]), io.shapes()[brep].attrs['occ_indx'])
+                readers[shape_name] = reader
+                mapper = vtk.vtkDataSetMapper()
+                add_compatiblity_methods(mapper)
+                mapper.SetInputConnection(reader.GetOutputPort())
+                mappers[shape_name] = (x for x in [mapper])
 
         elif shape_type in ['stp', 'step']:
             # try to find an associated shape
@@ -738,7 +772,7 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
             transform = vtk.vtkTransform()
             actor.SetUserTransform(transform)
             transforms[instance].append(transform)
-            offsets[instance].append((io.instances()[instance_name][contactor_instance_name].attrs['position'],
+            offsets[instance].append((io.instances()[instance_name][contactor_instance_name].attrs['translation'],
                                       io.instances()[instance_name][contactor_instance_name].attrs['orientation']))
 
 
