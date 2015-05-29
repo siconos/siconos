@@ -1,6 +1,6 @@
-/** \page EMObserverPassivityBased ObserverPassivityBased
+/** \page PassivityBasedObserver PassivityBasedObserver
 
-\authors A. Tanwani, B. Brogliato, C. Prieur
+\authors: A. Tanwani, B. Brogliato, C. Prieur
 
 \b Keywords: LagrangianLinearTIDS, LagrangianScleronomousR, FirstOrderLinearDS, TimeStepping, LCP
 
@@ -8,20 +8,20 @@
 
 \b Code: 
 
-\date May 2015.
+\date: May 2015.
 
-\section EMObserverPassivityBased1 Observers for Lagrangian Systems with Unilateral Constraints
+\section PassivityBasedObserver1 Observers for Lagrangian Systems with Unilateral Constraints
 
 This page is dedicated to simulation results obtained by implementing
 a certain class of observers for Lagrangian systems with unilateral
 constraints. The state estimators used for this purpose are based on
 the results developed in the following paper:
 
--# A. Tanwani, B. Brogliato, and C. Prieur. Observer Design for
+- A. Tanwani, B. Brogliato, and C. Prieur. Observer Design for
 Unilaterally Constrained Lagrangian Systems: A Passivity-Based
 Approach. Submitted for publication. 
 
--# A. Tanwani, B. Brogliato, and C. Prieur. Passivity-based observer
+- A. Tanwani, B. Brogliato, and C. Prieur. Passivity-based observer
 design for a class of Lagrangian systems with perfect unilateral
 constraints. Proceedings of 52nd IEEE Conf. on Decision and Control,
 Florence, Italy, 2013.
