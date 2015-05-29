@@ -85,6 +85,11 @@ The examples are organised as follows:
 
 \image html Control/ObserverLCS/ObserverLCS.png 
 </td>
+
+<td align="center">
+\subpage EMObserverPassivityBased
+
+</td>
 </tr>
 </table>
 
