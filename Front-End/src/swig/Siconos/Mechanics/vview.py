@@ -622,12 +622,16 @@ with IO.Hdf5(io_filename=io_filename, mode='r') as io:
                     io.shapes()[shape_name].\
                     attrs['associated_shape']
                 # delayed
-                mappers[shape_name] = (x for x in [mappers[associated_shape]()])
+                mappers[shape_name] = (x for x in
+                                       [mappers[associated_shape]()])
             else:
-                brep = io.shapes()[shape_name].attrs['brep']
-                print io.shapes()[brep][:]
+                if 'brep' in io.shapes()[shape_name].attrs:
+                    brep = io.shapes()[shape_name].attrs['brep']
+                else:
+                    brep = shape_name
 
-                reader = brep_reader(str(io.shapes()[brep][:][0]), io.shapes()[brep].attrs['occ_indx'])
+                reader = brep_reader(str(io.shapes()[brep][:][0]), 
+                                     io.shapes()[brep].attrs['occ_indx'])
                 readers[shape_name] = reader
                 mapper = vtk.vtkDataSetMapper()
                 add_compatiblity_methods(mapper)

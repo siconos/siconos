@@ -40,7 +40,12 @@ try:
         btConeShape, btCapsuleShape, btCompoundShape, btTriangleIndexVertexArray, \
         btGImpactMeshShape
 
+    bullet_is_here = True
+
 except:
+
+    bullet_is_here = False
+
     pass
 
 
@@ -229,13 +234,17 @@ class ShapeCollection():
         self._io = io
         self._shapes = dict()
 
-        self._primitive = {'Cylinder': btCylinderShape,
-                           'Sphere': btSphereShape,
-                           'Box': btBoxShape,
-                           'Cone': btConeShape,
-                           'Compound': btCompoundShape,
-                           'Capsule': btCapsuleShape}
-
+        if bullet_is_here:
+        
+            self._primitive = {'Cylinder': btCylinderShape,
+                               'Sphere': btSphereShape,
+                               'Box': btBoxShape,
+                               'Cone': btConeShape,
+                               'Compound': btCompoundShape,
+                               'Capsule': btCapsuleShape}
+        else:
+            self._primitive = dict()
+            
     def shape(self, shape_name):
         return self._io.shapes()[shape_name]
 

@@ -60,22 +60,55 @@ SpaceFilter::SpaceFilter(unsigned int bboxfactor,
               SP::Model model,
               SP::SiconosMatrix plans,
               SP::FMatrix moving_plans) :
-    _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
-    _model(model), _nslaws(new NSLawMatrix()), _plans(plans), _moving_plans(moving_plans), _osnsinit(false), _hash_table(new space_hash()),
-    diskdisk_relations(new DiskDiskRDeclaredPool()), diskplan_relations(new DiskPlanRDeclaredPool()), circlecircle_relations(new CircleCircleRDeclaredPool())
-  {};
+    _bboxfactor(bboxfactor),
+    _cellsize(cellsize),
+    _interID(0),
+    _model(model),
+    _nslaws(new NSLawMatrix()),
+    _plans(plans),
+    _moving_plans(moving_plans),
+    _osnsinit(false),
+    _hash_table(new space_hash()),
+    diskdisk_relations(new DiskDiskRDeclaredPool()),
+    diskplan_relations(new DiskPlanRDeclaredPool()),
+  circlecircle_relations(new CircleCircleRDeclaredPool())
+{};
 
 SpaceFilter::SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
               SP::Model model,
               SP::SiconosMatrix plans) :
-    _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
-    _model(model), _nslaws(new NSLawMatrix()), _plans(plans), _osnsinit(false), _hash_table(new space_hash()),
-    diskdisk_relations(new DiskDiskRDeclaredPool()), diskplan_relations(new DiskPlanRDeclaredPool()), circlecircle_relations(new CircleCircleRDeclaredPool())
-  {};
+    _bboxfactor(bboxfactor),
+    _cellsize(cellsize),
+    _interID(0),
+    _model(model),
+    _nslaws(new NSLawMatrix()),
+    _plans(plans),
+    _osnsinit(false),
+    _hash_table(new space_hash()),
+    diskdisk_relations(new DiskDiskRDeclaredPool()),
+    diskplan_relations(new DiskPlanRDeclaredPool()),
+    circlecircle_relations(new CircleCircleRDeclaredPool())
+{};
 
-SpaceFilter::SpaceFilter() : _hash_table(new space_hash()),
-    diskdisk_relations(new DiskDiskRDeclaredPool()), diskplan_relations(new DiskPlanRDeclaredPool()), circlecircle_relations(new CircleCircleRDeclaredPool()) {};
+SpaceFilter::SpaceFilter(SP::Model model) :
+  _model(model),
+  _nslaws(new NSLawMatrix()),
+  _osnsinit(false),
+  _hash_table(new space_hash()),
+  diskdisk_relations(new DiskDiskRDeclaredPool()),
+  diskplan_relations(new DiskPlanRDeclaredPool()),
+  circlecircle_relations(new CircleCircleRDeclaredPool())
+{};
+
+SpaceFilter::SpaceFilter() :
+  _osnsinit(false),
+  _hash_table(new space_hash()),
+  diskdisk_relations(new DiskDiskRDeclaredPool()),
+  diskplan_relations(new DiskPlanRDeclaredPool()),
+  circlecircle_relations(new CircleCircleRDeclaredPool())
+{};
+
 
 /* the hashing is done with a visitor */
 struct SpaceFilter::_BodyHash : public SiconosVisitor

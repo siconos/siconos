@@ -152,7 +152,7 @@ public:
               SP::Model model,
               SP::SiconosMatrix plans);
 
-  SpaceFilter(SP::Model model) : _model(model) {};
+  SpaceFilter(SP::Model model);
 
   SpaceFilter();
 

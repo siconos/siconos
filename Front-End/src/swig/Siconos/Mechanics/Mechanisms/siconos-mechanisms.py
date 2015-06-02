@@ -20,10 +20,10 @@ from Siconos.Mechanics.ContactDetection import SpaceFilter
 from Siconos.Mechanics import IO
 from Siconos.Mechanics.ContactDetection import Avatar, Contactor
 
-install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
+install_path= "/usr/local"+"/bin"
 print("install_path :", install_path)
 
-build_path= "@CMAKE_BINARY_DIR@" +"/src/mechanisms/"
+build_path= "/home/build/maurice/Release/Front-End" +"/src/mechanisms/"
 print("build_path : ", build_path)
 
 SiconosMechanisms_BUILD=build_path
@@ -296,11 +296,11 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
         io.addShapeDataFromFile(shape_name, afile[idBody])
 
         assoc_shapes[idBody] = [Avatar(shape_name,
-                                      relative_position=offset[idBody])]
+                                      relative_translation=offset[idBody])]
 #        io.addObject('obj-{0}'.format(shape_name),
-#                     [Avatar(shape_name, relative_position=offset)],
+#                     [Avatar(shape_name, relative_translation=offset)],
 #                     mass=1,
-#                     position=[0, 0, 0])
+#                     translation=[0, 0, 0])
 
     for idContact in range(NBCONTACTS):
         shape_name1 = os.path.basename(os.path.splitext(afileContact1[idContact])[0])
@@ -312,11 +312,11 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
         print contactBody1[idContact], contactBody2[idContact]
 
         assoc_shapes[contactBody1[idContact]] += [Contactor(shape_name1,
-                                                           relative_position=offset[contactBody1[idContact]])]
+                                                           relative_translation=offset[contactBody1[idContact]])]
 
         if contactBody2[idContact] >= 0:
             assoc_shapes[contactBody2[idContact]] += [Contactor(shape_name2,
-                                                                relative_position=offset[contactBody2[idContact]])]
+                                                                relative_translation=offset[contactBody2[idContact]])]
 
 
     for idArtefact in range(NBARTEFACTS):
@@ -331,7 +331,7 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
         io.addObject('obj-{0}'.format(shape_name),
                      assoc_shapes[idBody],
                      mass=1,
-                     position=[0, 0, 0])
+                     translation=[0, 0, 0])
 
 
     for idArtefact in range(NBARTEFACTS):
@@ -341,7 +341,7 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
         io.addObject('artefact-{0}'.format(shape_name),
                      [Avatar(shape_name)], 
                      mass=0,
-                     position=[0, 0, 0])
+                     translation=[0, 0, 0])
 
 
     io.outputStaticObjects()
