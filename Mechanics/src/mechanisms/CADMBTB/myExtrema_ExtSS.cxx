@@ -89,7 +89,7 @@ void myExtrema_ExtSS::Perform(const Adaptor3d_Surface&   S1,
   myPOnS2.Clear();
   myvalue.Clear();
   Standard_Integer i;
-  GeomAbs_SurfaceType myS1type  = S1.GetType();
+  //GeomAbs_SurfaceType myS1type  = S1.GetType();
   Standard_Integer NbU = 10, NbV = 10;
   
  

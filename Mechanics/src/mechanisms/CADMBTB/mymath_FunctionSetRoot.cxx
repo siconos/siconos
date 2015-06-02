@@ -323,7 +323,7 @@ static void SearchDirection(const math_Matrix& DF,
 
 {
   Standard_Integer Ninc = DF.ColNumber(), Neq = DF.RowNumber();
-  Standard_Real Eps = 1.e-32;
+  //Standard_Real Eps = 1.e-32;
   if (!ChangeDirection) {
     if (Ninc == Neq) {
       for (Standard_Integer i = FF.Lower(); i <= FF.Upper(); i++) {

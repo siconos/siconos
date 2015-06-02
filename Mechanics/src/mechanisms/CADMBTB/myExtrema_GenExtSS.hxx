@@ -153,12 +153,12 @@ Handle_TColgp_HArray2OfPnt mypoints2;
 Standard_Real mytol1;
 Standard_Real mytol2;
 myExtrema_FuncExtSS myF;
-Adaptor3d_SurfacePtr myS1;
+//Adaptor3d_SurfacePtr myS1;
 Adaptor3d_SurfacePtr myS2;
-  Standard_Real myGuessU1;
-  Standard_Real myGuessV1;
-  Standard_Real myGuessU2;
-  Standard_Real myGuessV2;
+//  Standard_Real myGuessU1;
+//  Standard_Real myGuessV1;
+//  Standard_Real myGuessU2;
+//  Standard_Real myGuessV2;
 };
 
 

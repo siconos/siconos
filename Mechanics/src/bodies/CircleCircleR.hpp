@@ -63,14 +63,14 @@ public:
   using LagrangianScleronomousR::computeh;
 
   /** computeh implementation, see LagrangianScleronomousR
-      \param time
-      \param inter
+      \param q
+      \param z
   */
   void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
   /** computeh implementation, see LagrangianScleronomousR
-      \param time
-      \param inter
+      \param q
+      \param z
   */
   void computeJachq(SiconosVector& q, SiconosVector& z);
 

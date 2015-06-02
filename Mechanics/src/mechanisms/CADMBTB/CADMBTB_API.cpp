@@ -102,7 +102,7 @@ void CADMBTB_init(unsigned int NumberOfObj,unsigned int NumberOfContacts)
 
 void CADMBTB_initContact(unsigned int idContact)
 {
-  assert(idContact<sNumberOfContacts && "CADMBTB_initContact contactId out of range");
+  assert((int)idContact<sNumberOfContacts && "CADMBTB_initContact contactId out of range");
   unsigned int idFace1=sNumberOfObj+(2*idContact-2*sNumberOfContacts);
   unsigned int idFace2=sNumberOfObj+(2*idContact+1-2*sNumberOfContacts);
   if(sTopoDSType[idFace1] == CADMBTB_TYPE_EDGE)
@@ -132,18 +132,18 @@ void CADMBTB_initContact(unsigned int idContact)
 
   double * x = pInSauceD;
   pInSauceD +=n;
-  double  f =0;
-  double * g =pInSauceD;
+  //double  f =0;
+  //double * g =pInSauceD;
   pInSauceD+=n;
   double * dxim = pInSauceD;
   pInSauceD+=n;
-  double  df1 =0;
+  //double  df1 =0;
   double  epsabs=0;
   double *binf= pInSauceD;
   pInSauceD+=n;
   double *bsup= pInSauceD;
   pInSauceD+=n;
-  double * rz = pInSauceD;
+  //double * rz = pInSauceD;
 
   /*dxim*/
 
@@ -267,7 +267,8 @@ void CADMBTB_loadCADFile(unsigned int id, const char * fileName)
     aReader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity);
     for(Standard_Integer n = 1; n <= nbr; n++)
     {
-      bool ok = aReader.TransferRoot(n);
+      bool ok;
+      ok = aReader.TransferRoot(n);
       int nbs = aReader.NbShapes();
       printf("importSTEP Solid, nb shapes: %d",nbs);
       if(nbs > 0)
@@ -404,7 +405,7 @@ void CADMBTB_getMinDistance
 {
   assert(id1 < sNumberOfObj && "CADMBTB_getMinDistance id1 out of range");
   assert(id2 < sNumberOfObj && "CADMBTB_getMinDistance id2 out of range");
-  assert(idContact<sNumberOfContacts && "CADMBTB_getMinDistance idContact out of range");
+  assert((int)idContact<sNumberOfContacts && "CADMBTB_getMinDistance idContact out of range");
   MinDist = 1.e9;
   if(sTopoDSType[id2] == CADMBTB_TYPE_EDGE || sTopoDSType[id1] == CADMBTB_TYPE_EDGE)
   {
@@ -693,7 +694,7 @@ void CADMBTB_setNbOfArtefacts(unsigned int nb)
 }
 void CADMBTB_setContactAISdParam(unsigned int IdParam,unsigned int idContact,unsigned int idShape,double & v)
 {
-  assert(idContact<sNumberOfContacts && "CADMBTB_setContactAISdParam contactId out of range");
+  assert((int)idContact<sNumberOfContacts && "CADMBTB_setContactAISdParam contactId out of range");
 
   unsigned int idShape1=sNumberOfObj+(2*idContact-2*sNumberOfContacts)+idShape;
 
@@ -723,7 +724,8 @@ void CADMBTB_loadArtefactCADFile(const char * fileName,double trans)
     aReader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity);
     for(Standard_Integer n = 1; n <= nbr; n++)
     {
-      bool ok = aReader.TransferRoot(n);
+      bool ok;
+      ok = aReader.TransferRoot(n);
       int nbs = aReader.NbShapes();
       printf("importSTEP Solid, nb shapes: %d",nbs);
       if(nbs > 0)

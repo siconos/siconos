@@ -173,7 +173,7 @@ void _CADMBTB_getMinDistanceFaceFace_using_n2qn1(unsigned int idContact, unsigne
   unsigned int idFace21=sNumberOfObj+(2*idContact+1-2*sNumberOfContacts);
   assert(idFace11==idFace1);
   assert(idFace21==idFace2);
-  AIS_Shape * sAISArtefacts[3];
+  //AIS_Shape * sAISArtefacts[3];
   int n = 4;
   int sizeD=
     /*x*/n+
@@ -606,7 +606,7 @@ void _CADMBTB_getMinDistanceFaceEdge_using_n2qn1(
   }
   if (sCADPrintDist)
   {
-     printf(" min value at u=%e,v=%e f=%e\n",x[0],x[1]);
+     printf(" min value at u=%e,v=%e \n",x[0],x[1]);
     printf("   _CADMBTB_getMinDistanceFaceEdge_using_n2qn1:  Minimal distance computed from CAD and n2qn1 : %lf \n",MinDist);
     if (reverted)
       printf("    Normal vector computed from CAD (reverted) :  nx=%lf, ny=%lf, nz=%lf \n",nX,nY,nZ);

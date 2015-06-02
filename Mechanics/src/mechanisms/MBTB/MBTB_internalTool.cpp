@@ -9,7 +9,7 @@
 
 void _MBTB_updateContactFromDS()
 {
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
 #ifdef PRINT_FORCE_CONTACTS
     printf("....> contact force of %s :",sContacts[numC]->contactName());
@@ -36,9 +36,9 @@ void _MBTB_updateContactFromDS()
 
 void _MBTB_updateContactFromDS(int numDS)
 {
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for( int numC=0; numC < (int)sNbOfContacts; numC++)
   {
-    if(sContacts[numC]->_indexBody1 == numDS)
+    if((int)(sContacts[numC]->_indexBody1) == numDS)
     {
       CADMBTB_moveModelFromModel(sContacts[numC]->_indexCAD1,numDS);
       CADMBTB_moveGraphicalModelFromModel(sContacts[numC]->_indexCAD1,numDS);
@@ -56,19 +56,21 @@ void _MBTB_DRAW_STEP()
   /*delete previous*/
   if(sDrawMode)
   {
-    for(int nC=0; nC<3*sNbOfContacts; nC++)
+    for(unsigned int nC=0; nC<3*sNbOfContacts; nC++)
     {
        CADMBTB_buildLineArtefactLine(nC,0,0,0,0,0,0);
     }
 
   }
   if(sDrawMode & MBTB_FACE_NORMAL1)
-     {for(int nC=0; nC<sNbOfContacts; nC++) 
-	 {double x1,x2,y1,y2,z1,z2,nx,ny,nz,MinDist;
-	   int index1=sContacts[nC]->_indexBody1;
-	   int index2=sContacts[nC]->_indexBody2;
-           int normalFromFace1; 
-           
+  {
+    for(unsigned int nC=0; nC<sNbOfContacts; nC++)
+    {
+      double x1,x2,y1,y2,z1,z2;//,nx,ny,nz,MinDist;
+      //int index1=sContacts[nC]->_indexBody1;
+      //int index2=sContacts[nC]->_indexBody2;
+      //int normalFromFace1;
+
       x2=sContacts[nC]->relation()->pc2()->getValue(0);
       y2=sContacts[nC]->relation()->pc2()->getValue(1);
       z2=sContacts[nC]->relation()->pc2()->getValue(2);
@@ -76,19 +78,19 @@ void _MBTB_DRAW_STEP()
       y1=y2+1.1*sArtefactLength*sContacts[nC]->relation()->nc()->getValue(1);
       z1=z2+1.1*sArtefactLength*sContacts[nC]->relation()->nc()->getValue(2);
       /*  CADMBTB_getMinDistance(nC,index1,index2,
-                                                x1,y1,z1,
-                                                x2,y2,z2,
-                                                nx,ny,nz,
-                                                normalFromFace1,
-                                                MinDist);
-						printf ("second point of contact : x2=%lf ,y2=%lf,z2=%lf\n",x2,y2,z2);*/
+          x1,y1,z1,
+          x2,y2,z2,
+          nx,ny,nz,
+          normalFromFace1,
+          MinDist);
+          printf ("second point of contact : x2=%lf ,y2=%lf,z2=%lf\n",x2,y2,z2);*/
       //  CADMBTB_buildOrientedLineArtefactLine(nC+sNbOfContacts,&x2,&y2,&z2,&x1,&y1,&z1);
-         }
-     }
-      
+    }
+  }
+
   if(sDrawMode & MBTB_ARTEFACT_P1P2)
   {
-    for(int nC=0; nC<sNbOfContacts; nC++)
+    for(unsigned int nC=0; nC<sNbOfContacts; nC++)
     {
       double x1,x2,y1,y2,z1,z2;
       x1=sContacts[nC]->relation()->pc1()->getValue(0);
@@ -99,14 +101,14 @@ void _MBTB_DRAW_STEP()
       z2=sContacts[nC]->relation()->pc2()->getValue(2);
       // printf ("second point of contact : x2=%lf ,y2=%lf,z2=%lf\n",x2,y2,z2);
       CADMBTB_buildLineArtefactLine(nC,&x1,&y1,&z1,&x2,&y2,&z2);
-     
+
     }
   }
-  
+
 
   if(sDrawMode & MBTB_ARTEFACT_NORMAL)
   {
-    for(int nC=0; nC<sNbOfContacts; nC++)
+    for(unsigned int nC=0; nC<sNbOfContacts; nC++)
     {
       double x1,x2,y1,y2,z1,z2;
       x1=sContacts[nC]->relation()->pc1()->getValue(0);
@@ -116,7 +118,7 @@ void _MBTB_DRAW_STEP()
       y2=y1+1.1*sArtefactLength*sContacts[nC]->relation()->nc()->getValue(1);
       z2=z1+1.1*sArtefactLength*sContacts[nC]->relation()->nc()->getValue(2);
       CADMBTB_buildOrientedLineArtefactLine(nC+sNbOfContacts,&x1,&y1,&z1,&x2,&y2,&z2);
-     
+
     }
   }
 
@@ -144,7 +146,7 @@ void _MBTB_DRAW_STEP()
         nbUR++;
         SP::Interaction inter1 = indexSet1->bundle(*ui1);
         SP::Relation R=inter1->relation();
-        for(int nC=0; nC<sNbOfContacts; nC++)
+        for(unsigned int nC=0; nC<sNbOfContacts; nC++)
         {
           if(sContacts[nC]->relation() == R)
           {
@@ -167,7 +169,7 @@ void _MBTB_DRAW_STEP()
     {
       SP::Interaction inter1 = indexSet1->bundle(*ui1);
       SP::Relation R=inter1->relation();
-      for(int nC=0; nC<sNbOfContacts; nC++)
+      for(unsigned int nC=0; nC<sNbOfContacts; nC++)
       {
         if(sContacts[nC]->relation() == R)
         {
@@ -251,7 +253,7 @@ void _MBTB_displayStep()
         printf("\t");
       }
       printf("\n");
-      printf("Kinetic Energy of body %i\n", numDS);      
+      printf("Kinetic Energy of body %i\n", numDS);
       /*Ec of the DS*/
       //   printf("MBTB Ec computattiom masse matrix:\n");
       //    (sDS[numDS]->M())->display();
@@ -275,7 +277,7 @@ void _MBTB_displayStep()
     {
       printf("Joint number %i\n", numJ);
       printf("interactionjointR->display  %i\n", numJ);
-      sJointRelations[numJ]->_interaction->display();     
+      sJointRelations[numJ]->_interaction->display();
       printf("\n");printf("Forces in Joint  %i\n", numJ);
       for(int ii=0; ii<3; ii++)
       {
@@ -317,13 +319,13 @@ void _MBTB_displayStep()
         printf("N/A\t");
       }
      printf("\n");
-     
+
     }
   }
   // Contacts display output
   if (sDisplayStepContacts)
   {
-    printf("STEP Number = %d\t",sTimerCmp);  
+    printf("STEP Number = %d\t",sTimerCmp);
     for(int numC=0; numC<sNbOfContacts; numC++)
     {
       printf("Contact number %i\n", numC);
@@ -333,7 +335,7 @@ void _MBTB_displayStep()
         printf("%e",sContacts[numC]->relation()->contactForce()->getValue(ii));
         printf("\t");
       }
-      
+
 
       SiconosVector vaux(3),res(3);
       for(int ii=3; ii<6; ii++)
@@ -350,9 +352,9 @@ void _MBTB_displayStep()
         printf("%e",res.getValue(ii));
         printf("\t");
       }
-    
+
       printf("\n");
-      
+
       SP::InteractionsGraph indexSet1=myModel->nonSmoothDynamicalSystem()->topology()->indexSet(1);
       InteractionsGraph::VIterator ui1, ui1end, v1next;
       boost::tie(ui1,ui1end) = indexSet1->vertices();
@@ -368,10 +370,10 @@ void _MBTB_displayStep()
           find =1;
         }
       }
-      
+
       printf("Contact status %d\n",find);
       printf("Coordinates of first contact point for contact %i",numC);
-      
+
       printf("%e\t%e\t%e\t",
              sContacts[numC]->relation()->pc1()->getValue(0),
              sContacts[numC]->relation()->pc1()->getValue(1),
@@ -522,11 +524,11 @@ void _MBTB_printStep(FILE *fp)
   }
   for(int numC=0; numC<sNbOfContacts; numC++)
   {
-    unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();    
+    unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();
     if (sizeY==1)
     {
       fprintf(fp,"%e\t0.\t0.\t",
-              sContacts[numC]->interaction()->y(0)->getValue(0));   
+              sContacts[numC]->interaction()->y(0)->getValue(0));
     }
     else
     {
