@@ -1,185 +1,26 @@
 #view Param
-bodyDraw=array.array('I',[1,1,1,1,1,1,1,1,1,1,1,1,1,1])
-bodyTrans=array.array('d',[
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5,
-        2.5])
+mbtb.MBTB_MAX_BODIES_NUMBER 
+mbtb.MBTB_MAX_CONTACTS_NUMBER
+mbtb.MBTB_MAX_JOINTS_NUMBER
 
-initVel=numpy.array([(0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0),
-                     (0,0,0,0,0,0)])
-
+bodyDraw=array.array('I',[1 for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+bodyTrans=array.array('d',[2.5 for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+initVel=numpy.array([(0,0,0,0,0,0) for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+               
 #view parameters
 ContactArtefactLength=10.0
 ArtefactThershold=1e-7
 NominalForce=0
-contactDraw1=array.array('I',[
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1])
-contactDraw2=array.array('I',[
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1])
+contactDraw1=array.array('I',[ 1 for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
+contactDraw2=array.array('I',[ 1 for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
 
-contactTrans1=array.array('d',[
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7])
-contactTrans2=array.array('d',[
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7,
-        2.7])
+contactTrans1=array.array('d',[2.7  for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
+contactTrans2=array.array('d',[2.7  for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
 
 NBARTEFACTS=0
+contactNormalFromFace1=array.array('I',[ 1 for i  in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
+contactOffsetP1=array.array('I',[1 for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
 
-contactNormalFromFace1=array.array('I',[
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,])
-contactOffsetP1=array.array('I',[
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,])
 
 #3D parameters
 with3D=1
