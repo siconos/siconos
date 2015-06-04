@@ -357,6 +357,11 @@ int frictionContact3D_unitary_enumerative_solve_sliding(FrictionContactProblem* 
   double cosphi = NAN;
   double sinphi = NAN;
   FC3D_unitary_enum_factorize2x2(M11, M22, M12, &D1, &D2, V);
+
+#ifdef FC3D_UE_DEBUG
+  double D_Dir[2];
+#endif
+
   if (!FC3D_UE_TEST_NULL(e))
   {
     d = fabs(*Q0) / NormD;
@@ -367,17 +372,22 @@ int frictionContact3D_unitary_enumerative_solve_sliding(FrictionContactProblem* 
     if (!FC3D_UE_TEST_NULL(*M02))
     {
       OD[1] = -(((-*M01) * (*M01) * (*Q0)) / NormD2 + *Q0) / (*M02);
-//      D_Dir[0] = 1;
-      //    D_Dir[1] = -(*M01) / (*M02);
+
+#ifdef FC3D_UE_DEBUG
+      D_Dir[0] = 1;
+      D_Dir[1] = -(*M01) / (*M02);
+#endif
     }
     else
     {
       OD[1] = 0;
-      //D_Dir[0] = 0;
-      /* if (*M01 > 0) */
-      /*   //D_Dir[1] = 1; */
-      /* else */
-      /*   //D_Dir[1] = -1; */
+#ifdef FC3D_UE_DEBUG
+      D_Dir[0] = 0;
+      if (*M01 > 0)
+        D_Dir[1] = 1;
+      else
+        D_Dir[1] = -1;
+#endif
     }
     OD2[0] = (*V00) * OD[0] + (*V01) * OD[1];
     OD2[1] = (*V10) * OD[0] + (*V11) * OD[1];
