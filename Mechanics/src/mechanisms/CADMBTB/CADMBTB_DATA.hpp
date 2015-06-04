@@ -18,7 +18,7 @@
 #include "V3d_View.hxx"
 
 //! Maximal number of objects managed by the CADMBTB mudule.
-#define NB_OBJ 100
+#define NB_OBJ 200
 
 //! The debug mode.
 #define DEBUG_CONTACT

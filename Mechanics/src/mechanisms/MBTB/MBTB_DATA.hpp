@@ -12,11 +12,11 @@
 //!Must be 1. It is the update frequency setting the transformation of the graphical object.
 #define FREQ_UPDATE_GRAPHIC 1
 //! The maximal number of bodies.
-#define MBTB_MAX_BODIES_NUMBER 30
+#define MBTB_MAX_BODIES_NUMBER 100
 //! The maximal number of joints.
-#define MBTB_MAX_JOINTS_NUMBER 30
+#define MBTB_MAX_JOINTS_NUMBER 100
 //! The maximal number of contacts.
-#define MBTB_MAX_CONTACTS_NUMBER 30
+#define MBTB_MAX_CONTACTS_NUMBER 100
 //!The dynamical bodies.
 extern SP::MBTB_Body sDS[];
 //!The joint relations.
