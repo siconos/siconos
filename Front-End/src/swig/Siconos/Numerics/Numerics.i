@@ -767,6 +767,7 @@
 %include FrictionContactProblem.i
 
 %include "FrictionContact3D_Solvers.h"
+%include "FrictionContact3D_unitary_enumerative.h"
 %include "FrictionContact2D_Solvers.h"
 %include "Friction_cst.h"
 %include "FrictionContact3D_AlartCurnier.h"
