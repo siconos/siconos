@@ -179,6 +179,15 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     frictionContact3D_unitary_enumerative_initialize(localproblem);
     break;
   }
+  case SICONOS_FRICTION_3D_QUARTIC_NU:
+  {
+    *solve = &frictionContact3D_unitary_enumerative_solve;
+    *update = &frictionContact3D_nsgs_update;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_unitary_enumerative_free;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
+    frictionContact3D_unitary_enumerative_initialize(localproblem);
+    break;
+  }
   default:
   {
     fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown internal solver : %s.\n", idToName(localsolver_options->solverId));
