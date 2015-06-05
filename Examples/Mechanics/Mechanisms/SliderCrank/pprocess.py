@@ -355,7 +355,7 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
         obj_by_id[io.instances()[instance].attrs['id']] = instance
 
     def get_offset(instance_name, shape_name):
-        return (io.instances()[instance_name][shape_name].attrs['position'],
+        return (io.instances()[instance_name][shape_name].attrs['translation'],
                 io.instances()[instance_name][shape_name].attrs['orientation'])
 
     def shape_names(obj):
