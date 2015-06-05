@@ -65,6 +65,12 @@ void printm(unsigned int nl, unsigned int nc, double *m);
 #define NO_RETURN
 #endif
 
+#ifdef __GNUC__
+#define MAYBE_UNUSED __attribute__((unused))
+#else
+#define MAYBE_UNUSED
+#endif
+
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 }
 #endif

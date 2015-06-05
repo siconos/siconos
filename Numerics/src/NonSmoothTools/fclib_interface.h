@@ -27,6 +27,10 @@ extern "C"
 #endif
 
 #ifdef WITH_FCLIB
+
+  FrictionContactProblem* from_fclib_local(const struct fclib_local *fclib_problem);
+
+
   FrictionContactProblem* frictionContact_fclib_read(const char *path);
 
   int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description,

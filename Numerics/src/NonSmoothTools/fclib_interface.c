@@ -25,18 +25,8 @@
 #ifdef WITH_FCLIB
 #include <fclib.h>
 
-FrictionContactProblem* frictionContact_fclib_read(const char *path)
+FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem)
 {
-
-  struct fclib_local   *fclib_problem;
-
-  fclib_problem = fclib_read_local(path);
-
-  if (fclib_problem == NULL)
-  {
-    return NULL;
-  }
-
   FrictionContactProblem* problem;
 
   problem = malloc(sizeof(FrictionContactProblem));
@@ -64,6 +54,22 @@ FrictionContactProblem* frictionContact_fclib_read(const char *path)
 
   return problem;
 
+}
+
+
+FrictionContactProblem* frictionContact_fclib_read(const char *path)
+{
+
+  struct fclib_local   *fclib_problem;
+
+  fclib_problem = fclib_read_local(path);
+
+  if (!fclib_problem)
+  {
+    return NULL;
+  }
+
+  return from_fclib_local(fclib_problem);
 }
 
 int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description, char * mathInfo,
@@ -117,7 +123,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   else if (problem ->M->storageType == 1) /* Sparse block storage */
   {
     spmat = malloc(sizeof(SparseMatrix));
-    int res = SBMtoSparseInitMemory(problem ->M->matrix1, spmat);
+    int MAYBE_UNUSED res = SBMtoSparseInitMemory(problem ->M->matrix1, spmat);
     res = SBMtoSparse(problem->M->matrix1, spmat);
     fclib_problem->W->nzmax = spmat->nzmax;
     fclib_problem->W->x = spmat->x;

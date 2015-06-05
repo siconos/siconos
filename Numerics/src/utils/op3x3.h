@@ -24,6 +24,7 @@
 #include <float.h>
 #include <stdlib.h>
 
+#include "misc.h"
 #include "SiconosCompat.h"
 
 #ifdef __cplusplus
@@ -31,11 +32,6 @@
 #define restrict __restrict
 #endif
 
-#ifdef __GNUC__
-#define MAYBE_UNUSED __attribute__((unused))
-#else
-#define MAYBE_UNUSED
-#endif
 
 /** OP3X3(EXPR) do EXPR 9 times
  * \param EXPR a C expression that should contains self incrementing
