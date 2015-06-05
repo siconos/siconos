@@ -1,24 +1,10 @@
 from IO import *
 
-_imported_modules = [IO]
+__all__ = filter(lambda s:
+                 any(b not in s for b in
+                     ['_swigregister', 'nullDeleter', 'weakref']),
+                 filter(lambda s:
+                        s[0] != '_' and
+                        s not in ['Kernel', 'SHARED_PTR_DISOWN', 'os', 'sys'],
+                        dir(IO)))
 
-_bad_items = ['Kernel', 'SHARED_PTR_DISOWN', 'os', 'sys']
-_bad_expr = ['_swigregister', 'nullDeleter', 'weakref']
-
-__all__ = []
-
-for mod in _imported_modules:
-    _list_items = dir(mod)
-
-    for _it in _list_items:
-        _not_add = 0
-        if _it in _bad_items or _it[0] == '_':
-            break
-
-        for _bad in _bad_expr:
-            if _bad in _it:
-                _not_add = 1
-                break
-
-        if _not_add == 0:
-            __all__.append(_it)

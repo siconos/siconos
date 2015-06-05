@@ -1,7 +1,8 @@
 
 // List of solvers generated with
-// git grep '^ *SICONOS_[A-Z_]* = [0-9]' | sed 's/.*\(SICONOS_[A-Z_]*\).*/SICONOS_SOLVER_MACRO(\1); \\/' | \ 
-// grep -v NUMERICS_PROBLEM > NonSmoothSolvers/SiconosNumerics_Solvers.h
+//   git grep '^ *SICONOS_[A-Z_]* = [0-9]' | sed 's/.*\(SICONOS_[A-Z_]*\).*/SICONOS_SOLVER_MACRO(\1); \\/' |
+//   grep -v NUMERICS_PROBLEM > NonSmoothSolvers/SiconosNumerics_Solvers.h
+
 
 #undef SICONOS_SOLVER_MACRO
 #define SICONOS_REGISTER_SOLVERS() \
@@ -60,4 +61,4 @@ SICONOS_SOLVER_MACRO(SICONOS_VI_EG); \
 SICONOS_SOLVER_MACRO(SICONOS_VI_FPP); \
 SICONOS_SOLVER_MACRO(SICONOS_VI_HP); \
 SICONOS_SOLVER_MACRO(SICONOS_VI_BOX_QI); \
-SICONOS_SOLVER_MACRO(SICONOS_VI_BOX_AVI_LSA); \
+SICONOS_SOLVER_MACRO(SICONOS_VI_BOX_AVI_LSA);

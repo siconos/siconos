@@ -1,7 +1,7 @@
 // -*- C++ -*-
 // Siconos-Front-End , Copyright INRIA 2005-2012.
 // Siconos is a program dedicated to modeling, simulation and control
-// of non smooth dynamical systems.	
+// of non smooth dynamical systems.
 // Siconos is a free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -15,12 +15,12 @@
 // along with Siconos; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-// Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr 
-//	
+// Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+//
 
 %module FCLib
 
-%include start.i 
+%include start.i
 %fragment("NumPy_Fragments");
 %{
 extern "C"
@@ -35,7 +35,7 @@ extern "C"
   $1 = (double *) array_data(array);
  }
 
-%apply (double *v) { (double *u) } 
+%apply (double *v) { (double *u) }
 %apply (double *v) { (double *r) }
 %apply (double *v) { (double *l) }
 
@@ -67,8 +67,9 @@ extern "C"
   }
 %}
 
-%typemap(in) (int number_of_guesses,  fclib_solution *guesses) (struct fclib_solution* temp) { 
-  
+%typemap(in) (int number_of_guesses,  fclib_solution *guesses) (struct fclib_solution* temp) {
+
+  temp = NULL;
   temp = (fclib_solution *) malloc(sizeof(fclib_solution)*PyObject_Length($input));
   if (!convert_fcsol_array($input,temp)) {
     SWIG_fail;
@@ -77,8 +78,4 @@ extern "C"
   $2 = &temp[0];
  }
 
-
 %include fclib.h
-
-
-
