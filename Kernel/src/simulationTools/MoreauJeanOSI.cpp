@@ -33,9 +33,9 @@
 #include "BlockVector.hpp"
 
 
-#define DEBUG_STDOUT
-#define DEBUG_NOCOLOR
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_NOCOLOR
+//#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
@@ -370,7 +370,7 @@ void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
-
+  DEBUG_PRINT("MoreauJeanOSI::computeW starts\n");
   // When this function is called, WMap[ds] is supposed to exist and not to be null
   // Memory allocation has been done during initW.
 
@@ -428,6 +428,7 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
     {
       d->computeJacobianqForces(t);
       SP::SiconosMatrix T = d->T();
+      DEBUG_EXPR(T->display(););
       SimpleMatrix * buffer = new SimpleMatrix(*(d->mass()));
       prod(*K, *T, *buffer, true);
       scal(-h * h * _theta * _theta, *buffer, *(d->luW()), false);
@@ -435,7 +436,7 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
     }
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
-
+  DEBUG_PRINT("MoreauJeanOSI::computeW ends\n");
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
 }
@@ -1396,7 +1397,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       // dotq->setValue(4, (q->getValue(4) - qold->getValue(4)) / h);
       // dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);
       // dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
-      //d->updateT();
+      d->updateT();
     }
     else RuntimeException::selfThrow("MoreauJeanOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
   }

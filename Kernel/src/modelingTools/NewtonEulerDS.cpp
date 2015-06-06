@@ -394,7 +394,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     }
     if (_fInt)
     {
-      // computeFInt(time, q, v);
+      computeFInt(time, q, v);
       // std::cout << "_fInt : "<< std::endl;
       //_fInt->display();
       _forces->setValue(0, _forces->getValue(0) - _fInt->getValue(0));
@@ -599,6 +599,8 @@ void NewtonEulerDS::updateT()
 
 void NewtonEulerDS::updateT(SP::SiconosVector q)
 {
+
+  //  std::cout <<"\n NewtonEulerDS::updateT(SP::SiconosVector q)\n  " <<std::endl;
   double q0 = q->getValue(3) / 2.0;
   double q1 = q->getValue(4) / 2.0;
   double q2 = q->getValue(5) / 2.0;

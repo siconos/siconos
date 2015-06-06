@@ -131,12 +131,13 @@ int main(int argc, char* argv[])
     I1->eye();
     I1->setValue(0, 0, 0.1);
     // Initial position of the center of gravity CG1
-    (*q10)(0) = 0.5 * L1 / sqrt(2.0);
+    (*q10)(0) = 1.0;0.5 * L1 / sqrt(2.0);
     (*q10)(1) = 0;
-    (*q10)(2) = -0.5 * L1 / sqrt(2.0);
+    (*q10)(2) = -1.0;-0.5 * L1 / sqrt(2.0);
     // Initial orientation (a quaternion that gives the rotation w.r.t the spatial frame)
     // angle of the rotation Pi/4
     double angle = M_PI / 4;
+    angle =0.0;
     SiconosVector V1(3);
     V1.zero();
     // vector of the rotation (Y-axis)
@@ -376,10 +377,10 @@ int main(int argc, char* argv[])
     fprintf(pFile, "double T[%d*%d]={", N + 1, outputSize);
     double beamTipTrajectories[6];
 
-    for (k = 0; k < 1; k++)
+    for (k = 0; k < N; k++)
     {
       // solve ...
-      s->newtonSolve(1e-10, 20);
+      s->newtonSolve(1e-10, 4);
 
 
 
