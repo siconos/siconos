@@ -1384,7 +1384,6 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       coeff = h * (1 - _theta);
       scal(coeff, *dotqold, *q, false); // q += h(1-theta)*vold
       *q += *qold;
-
       DEBUG_PRINT("new q before normalizing\n");
       DEBUG_EXPR(q->display());
 

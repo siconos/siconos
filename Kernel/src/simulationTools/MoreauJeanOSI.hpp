@@ -166,30 +166,30 @@ public:
   // --- GETTERS/SETTERS ---
 
   /** get the value of W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get W[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getW(SP::DynamicalSystem = SP::DynamicalSystem());
+  const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get W[0] in that case
    * \return pointer to a SiconosMatrix
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
-   * \param SiconosMatrix newValue
-   * \param a pointer to DynamicalSystem,
+   * \param newValue SiconosMatrix
+   * \param ds a pointer to DynamicalSystem,
    */
-  void setW(const SiconosMatrix&, SP::DynamicalSystem);
+  void setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds);
 
   /** set W[ds] to pointer newPtr
    * \param newPtr
-   * \param a pointer to DynamicalSystem
+   * \param ds a pointer to DynamicalSystem
    */
-  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem);
+  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
 
   // -- WBoundaryConditions --
 
@@ -206,10 +206,10 @@ public:
    * NULL. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem = SP::DynamicalSystem());
+  const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
@@ -226,7 +226,7 @@ public:
   };
 
   /** set the value of theta
-   *  \param a double
+   *  \param newTheta a double
    */
   inline void setTheta(double newTheta)
   {
@@ -244,7 +244,7 @@ public:
   };
 
   /** set the value of gamma
-   *  \param a double
+   *  \param newGamma a double
    */
   inline void setGamma(double newGamma)
   {
@@ -262,8 +262,8 @@ public:
     return _useGamma;
   };
 
-  /** set the boolean to indicate that we use gamma
-   *  \param a bool
+  /** set the Boolean to indicate that we use gamma
+   *  \param newUseGamma  a  Boolean variable
    */
   inline void setUseGamma(bool newUseGamma)
   {
@@ -271,16 +271,15 @@ public:
   };
 
   /** get bool gammaForRelation for the relation
-   *  \return a
+   *  \return a Boolean
    */
   inline bool useGammaForRelation()
   {
     return _useGammaForRelation;
   };
 
-
   /** set the boolean to indicate that we use gamma for the relation
-   *  \param a bool
+   *  \param newUseGammaForRelation a Boolean
    */
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
   {
@@ -298,27 +297,26 @@ public:
   virtual void initialize();
 
   /** init WMap[ds] MoreauJeanOSI matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param time
+   *  \param ds a pointer to DynamicalSystem
    */
-  void initW(double, SP::DynamicalSystem);
+  void initW(double time, SP::DynamicalSystem ds );
 
   /** compute WMap[ds] MoreauJeanOSI matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param time (double)
+   *  \param ds a pointer to DynamicalSystem
    */
-  void computeW(double, SP::DynamicalSystem);
+  void computeW(double time , SP::DynamicalSystem ds);
 
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param ds a pointer to DynamicalSystem
    */
-  void computeWBoundaryConditions(SP::DynamicalSystem);
+  void computeWBoundaryConditions(SP::DynamicalSystem ds);
 
   /** init WBoundaryConditionsMap[ds] MoreauJeanOSI
-   *  \param a pointer to DynamicalSystem
+   *  \param ds a pointer to DynamicalSystem
    */
-  void initWBoundaryConditions(SP::DynamicalSystem);
+  void initWBoundaryConditions(SP::DynamicalSystem ds);
 
   /** return the maximum of all norms for the "MoreauJeanOSI-discretized" residus of DS
       \return a double
@@ -331,7 +329,7 @@ public:
   virtual void computeFreeState();
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex of the interaction graph
+   * \param vertex_inter vertex of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
@@ -340,6 +338,7 @@ public:
    * in the IndexSet of level i
    * \param inter the Interaction to test
    * \param i level of the IndexSet
+   * \return Boolean
    */
   virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
@@ -347,11 +346,13 @@ public:
    * in the IndexSet of level i
    * \param inter the Interaction to test
    * \param i level of the IndexSet
+   * \return Boolean
    */
   virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
 
-  /**
+  /** method to prepare the fist Newton iteration
+   *   \param time
    */
   void prepareNewtonIteration(double time);
 
@@ -364,7 +365,7 @@ public:
    */
   void integrate(double& tinit, double& tend, double& tout, int& notUsed);
 
-  /** updates the state of the Dynamical Systems
+  /** update the state of the dynamical systems
    *  \param level the level of interest for the dynamics: not used at the time
    */
   virtual void updateState(const unsigned int level);

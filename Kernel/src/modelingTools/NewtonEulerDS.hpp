@@ -224,6 +224,7 @@ protected:
    */
   SP::PluggedObject _pluginJacqMInt;
 
+
   /** NewtonEulerDS plug-in to compute \f$\nabla_{\dot q}M_{Int}(\dot q, q, t)\f$, id = "jacobianMIntv"
    * @param time : current time
    * @param sizeOfq : size of vector q
