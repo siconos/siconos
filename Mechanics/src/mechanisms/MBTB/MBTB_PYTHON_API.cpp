@@ -217,9 +217,12 @@ void _MBTB_BodyBuildComputeInitPosition(unsigned int numDS,   double mass,
 }
 /*Build the MBTB_body and set to the initial postion.*/
 void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mass,
-                    SP::SiconosVector initPos, SP::SiconosVector modelCenterMass,SP::SimpleMatrix inertialMatrix,
-                    const std::string& pluginFLib,  const std::string& pluginFFct,
-                    const std::string& pluginMLib,  const std::string& pluginMFct)
+                    SP::SiconosVector initPos, SP::SiconosVector modelCenterMass,
+                    SP::SimpleMatrix inertialMatrix,
+                    const std::string& pluginFextLib,  const std::string& pluginFextFct,
+                    const std::string& pluginMextLib,  const std::string& pluginMextFct,
+                    const std::string& pluginFintLib,  const std::string& pluginFintFct,
+                    const std::string& pluginMintLib,  const std::string& pluginMintFct)
 {
   assert(sNbOfBodies > numDS &&"MBTB_BodyBuild numDS out of range.");
   unsigned int qDim=7;
@@ -233,14 +236,24 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
   p =new MBTB_Body(q10,v10,mass,inertialMatrix,modelCenterMass,
                    BodyName, BodyName);
 
-  if(pluginFFct.length()>1)
+  if(pluginFextFct.length()>1)
   {
-    p->setComputeFExtFunction(pluginFLib,pluginFFct);
+    p->setComputeFExtFunction(pluginFextLib,pluginFextFct);
   }
-  if(pluginMFct.length()>1)
+  if(pluginMextFct.length()>1)
   {
-    p->setComputeMExtFunction(pluginMLib,pluginMFct);
+    p->setComputeMExtFunction(pluginMextLib,pluginMextFct);
   }
+  if(pluginFintFct.length()>1)
+  {
+    p->setComputeFIntFunction(pluginFintLib,pluginFintFct);
+  }
+  if(pluginMintFct.length()>1)
+  {
+    p->setComputeMIntFunction(pluginMintLib,pluginMintFct);
+  }
+
+
   sDS[numDS].reset(p);
   sAllDS.insert(sDS[numDS]);
   // std::cout << "MBTB_BodyBuild()" <<std::endl;

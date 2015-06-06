@@ -99,7 +99,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   (*_q) = (*_q0);
   _dotq.reset(new SiconosVector(_qDim));
   _massMatrix.reset(new SimpleMatrix(_n, _n));
-  _jacobianvFL.reset(new SimpleMatrix(_n, _n));
+  _jacobianFGyrv.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
   _massMatrix->zero();
   _massMatrix->setValue(0, 0, _mass);
@@ -134,11 +134,14 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, 
 
 void NewtonEulerDS::zeroPlugin()
 {
-  computeJacobianFIntqPtr = NULL;
-  computeJacobianFIntqDotPtr = NULL;
   _pluginFExt.reset(new PluggedObject());
   _pluginMExt.reset(new PluggedObject());
-  //  computeFIntPtr=NULL;
+  _pluginFInt.reset(new PluggedObject());
+  _pluginMInt.reset(new PluggedObject());
+  _pluginJacqFInt.reset(new PluggedObject());
+  _pluginJacvFInt.reset(new PluggedObject());
+  _pluginJacqMInt.reset(new PluggedObject());
+  _pluginJacvMInt.reset(new PluggedObject());
 }
 
 // Destructor
@@ -160,7 +163,7 @@ bool NewtonEulerDS::checkDynamicalSystem()
 
 
   // fInt
-  //   if( ( _fInt && computeFIntPtr) && ( ! _jacobianFIntq || ! _jacobianFIntqDot ) )
+  //   if( ( _fInt && computeFIntPtr) && ( ! _jacobianFIntq || ! _jacobianFIntv ) )
   //     // ie if fInt is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
   //     {
   //       RuntimeException::selfThrow("NewtonEulerDS::checkDynamicalSystem - You defined fInt but not its Jacobian (according to q and velocity).");
@@ -197,11 +200,10 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 
 void NewtonEulerDS::initForces()
 {
-
   _forces.reset(new SiconosVector(_n));
-
-  _jacobianvFL.reset(new SimpleMatrix(_n, _qDim));
-  _jacobianqDotForces.reset(new SimpleMatrix(_n, _qDim));
+  _jacobianFGyrv.reset(new SimpleMatrix(_n, _n));
+  _jacobianvForces.reset(new SimpleMatrix(_n, _n));
+  _jacobianqForces.reset(new SimpleMatrix(_n, _qDim));
 }
 
 void NewtonEulerDS::initRhs(double time)
@@ -237,19 +239,27 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
     _mExt.reset(new SiconosVector(3, 0));
   }
 
-  //   if ( computeFIntPtr && ! _fInt)
-  //     _fInt.reset(new SiconosVector(_n));
-  //   if (computeJacobianFIntqPtr && !_jacobianFIntq)
-  //     _jacobianFIntq.reset(new SimpleMatrix(_n,_n));
-  //   if (computeJacobianFIntqDotPtr && !_jacobianFIntqDot)
-  //     _jacobianFIntqDot.reset(new SimpleMatrix(_n,_n));
+  if (_pluginFInt->fPtr && !_fInt)
+    _fInt.reset(new SiconosVector(3, 0));
 
+  if (_pluginJacqFInt->fPtr && !_jacobianFIntq)
+    _jacobianFIntq.reset(new SimpleMatrix(3, _qDim));
 
-  //
+  if (_pluginJacvFInt->fPtr && !_jacobianFIntv)
+    _jacobianFIntv.reset(new SimpleMatrix(3, _n));
+
+  if (_pluginMInt->fPtr && !_mInt)
+    _mInt.reset(new SiconosVector(3, 0));
+  if (_pluginJacqMInt->fPtr && !_jacobianMIntq)
+    _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
+  if (_pluginJacvFInt->fPtr && !_jacobianFIntv)
+    _jacobianMIntv.reset(new SimpleMatrix(3, _n));
+
   // Memory allocation for fL and its jacobians.
 
   // Set links to variables of top-class DynamicalSystem.
-  // Warning: this results only in pointers links. No more memory allocation for vectors or matrices.
+  // Warning: this results only in pointers links.
+  // No more memory allocation for vectors or matrices.
   connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
   checkDynamicalSystem();
 
@@ -260,19 +270,87 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
 }
 
-
-
 void NewtonEulerDS::computeFExt(double time)
 {
   if (_pluginFExt->fPtr)
-    ((Fext)_pluginFExt->fPtr)(time, &(*_q)(0), &(*_fExt)(0),  &(*_q0)(0));
+    ((FExt_NE)_pluginFExt->fPtr)(time, &(*_fExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
 }
 
 void NewtonEulerDS::computeMExt(double time)
 {
   if (_pluginMExt->fPtr)
-    ((Fext)_pluginMExt->fPtr)(time, &(*_q)(0), &(*_mExt)(0),  &(*_q0)(0));
+    ((FExt_NE)_pluginFExt->fPtr)(time, &(*_mExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
 }
+
+
+void NewtonEulerDS::computeFInt(double time)
+{
+  computeFInt(time, _q, _v);
+}
+
+void NewtonEulerDS::computeMInt(double time)
+{
+  computeMInt(time, _q, _v);
+}
+
+
+
+void NewtonEulerDS::computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v)
+{
+  if (_pluginFInt->fPtr)
+    ((FInt_NE)_pluginFInt->fPtr)(time, &(*q)(0), &(*v)(0), &(*_fInt)(0), _qDim,  &(*_q0)(0));// parameter z are assumed to be equal to q0
+}
+
+void NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v)
+{
+  if (_pluginMInt->fPtr)
+    ((FInt_NE)_pluginMInt->fPtr)(time, &(*q)(0), &(*v)(0), &(*_mInt)(0), _qDim,  &(*_q0)(0));// parameter z are assumed to be equal to q0
+}
+
+void NewtonEulerDS::computeJacobianFIntq(double time)
+{
+  computeJacobianFIntq(time, _q, _v);
+}
+void NewtonEulerDS::computeJacobianFIntv(double time)
+{
+  computeJacobianFIntv(time, _q, _v);
+}
+
+void NewtonEulerDS::computeJacobianFIntq(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
+{
+  if (_pluginJacqFInt->fPtr)
+    ((FInt_NE)_pluginJacqFInt->fPtr)(time, &(*q2)(0), &(*velocity2)(0), &(*_jacobianFIntq)(0, 0), _z->size(), &(*_z)(0));
+}
+void NewtonEulerDS::computeJacobianFIntv(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
+{
+  if (_pluginJacvFInt->fPtr)
+    ((FInt_NE)_pluginJacvFInt->fPtr)(time, &(*q2)(0), &(*velocity2)(0), &(*_jacobianFIntv)(0, 0), _z->size(), &(*_z)(0));
+}
+
+
+
+
+void NewtonEulerDS::computeJacobianMIntq(double time)
+{
+  computeJacobianMIntq(time, _q, _v);
+}
+void NewtonEulerDS::computeJacobianMIntv(double time)
+{
+  computeJacobianMIntv(time, _q, _v);
+}
+
+void NewtonEulerDS::computeJacobianMIntq(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
+{
+  if (_pluginJacqMInt->fPtr)
+    ((FInt_NE)_pluginJacqMInt->fPtr)(time, &(*q2)(0), &(*velocity2)(0), &(*_jacobianMIntq)(0, 0), _z->size(), &(*_z)(0));
+}
+void NewtonEulerDS::computeJacobianMIntv(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
+{
+  if (_pluginJacvMInt->fPtr)
+    ((FInt_NE)_pluginJacvMInt->fPtr)(time, &(*q2)(0), &(*velocity2)(0), &(*_jacobianMIntv)(0, 0), _z->size(), &(*_z)(0));
+}
+
+
 
 void NewtonEulerDS::computeRhs(double time, bool isDSup)
 {
@@ -286,8 +364,6 @@ void NewtonEulerDS::computeRhs(double time, bool isDSup)
     //*_q += *_forces;
   }
 
-
-
 }
 
 void NewtonEulerDS::computeJacobianRhsx(double time, bool isDSup)
@@ -296,6 +372,11 @@ void NewtonEulerDS::computeJacobianRhsx(double time, bool isDSup)
 }
 
 void NewtonEulerDS::computeForces(double time)
+{
+  computeForces(time, _q, _v);
+}
+
+void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector v)
 {
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
   if (_forces)
@@ -316,19 +397,41 @@ void NewtonEulerDS::computeForces(double time)
       *_mExt = aux;
       _forces->setBlock(3, *_mExt);
     }
-    /*computation of \Omega vectortiel I \Omega*/
+    if (_fInt)
+    {
+      computeFInt(time, q, v);
+      std::cout << "_fInt : "<< std::endl;
+      _fInt->display();
+      _forces->setValue(0, _forces->getValue(0) - _fInt->getValue(0));
+      _forces->setValue(1, _forces->getValue(1) - _fInt->getValue(1));
+      _forces->setValue(2, _forces->getValue(2) - _fInt->getValue(2));
+
+    }
+    if (_mInt)
+    {
+      computeMInt(time, q , v);
+      SiconosVector aux(3);
+      updateMObjToAbs();
+      prod(*_mInt, *_MObjToAbs, aux);
+      *_mInt = aux;
+      _forces->setValue(3, _forces->getValue(3) - _mInt->getValue(0));
+      _forces->setValue(4, _forces->getValue(4) - _mInt->getValue(1));
+      _forces->setValue(5, _forces->getValue(5) - _mInt->getValue(2));
+    }
+
+    /*computation of \Omega times I \Omega*/
     if (_I)
     {
-      // printf("NewtonEulerDS::computeFL _I:\n");
+      // printf("NewtonEulerDS::computeFGyrv _I:\n");
       // _I->display();
-      // _v->display();
+      // v->display();
 
       SiconosVector bufOmega(3);
       SiconosVector bufIOmega(3);
       SiconosVector buf(3);
-      bufOmega.setValue(0, _v->getValue(3));
-      bufOmega.setValue(1, _v->getValue(4));
-      bufOmega.setValue(2, _v->getValue(5));
+      bufOmega.setValue(0, v->getValue(3));
+      bufOmega.setValue(1, v->getValue(4));
+      bufOmega.setValue(2, v->getValue(5));
       prod(*_I, bufOmega, bufIOmega, true);
       cross_product(bufOmega, bufIOmega, buf);
       _forces->setValue(3, _forces->getValue(3) - buf.getValue(0));
@@ -338,51 +441,79 @@ void NewtonEulerDS::computeForces(double time)
   }
   // else nothing.
 }
-void NewtonEulerDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2)
+
+void NewtonEulerDS::computeJacobianqForces(double time)
 {
-  if (_forces)
+  if (_jacobianqForces)
   {
-    _forces->zero();
-    // 1 - Computes the required functions
-    if (_fExt)
+    computeJacobianFIntq(time);
+    computeJacobianMIntq(time);
+
+    std::cout << "_jacobianFIntq : "<< std::endl;
+    if (_jacobianFIntq)
+      _jacobianFIntq->display();
+    // if (_jacobianMIntq)
+    //   _jacobianMIntq->display();
+
+    _jacobianqForces->zero();
+    if (_jacobianFIntq)
+      _jacobianqForces->setBlock(0,0,*_jacobianFIntq);
+    if (_jacobianMIntq)
+      _jacobianqForces->setBlock(3,0,*_jacobianMIntq);
+
+    // std::cout << "_jacobianqForces : "<< std::endl;
+    // _jacobianqForces->display();
+
+  }
+  //else nothing.
+}
+void NewtonEulerDS::computeJacobianvForces(double time)
+{
+  if (_jacobianvForces)
+  {
+    computeJacobianFIntv(time);
+    computeJacobianMIntv(time);
+    // std::cout << "_jacobianFIntv : "<< std::endl;
+    // if (_jacobianFIntv)
+    // _jacobianFIntv->display();
+    // if (_jacobianMIntv)
+    // _jacobianMIntv->display();
+
+    computeJacobianFGyrv(time);
+
+
+    // not true!
+    // if( jacobianFL[i].use_count() == 1 )
     {
-      //      computeFExt(time);
-      _forces->setBlock(0, *_fExt);
-    }
-    if (_mExt)
-    {
-      //      computeMExt(time);
-      SiconosVector aux(3);
-      updateMObjToAbs();
-      prod(*_mExt, *_MObjToAbs, aux);
-      *_mExt = aux;
-      _forces->setBlock(3, *_mExt);
-    }
-    /*computation of \Omega vectortiel I \Omega*/
-    if (_I)
-    {
-      SiconosVector bufOmega(3);
-      SiconosVector bufIOmega(3);
-      SiconosVector buf(3);
-      bufOmega.setValue(0, v2->getValue(3));
-      bufOmega.setValue(1, v2->getValue(4));
-      bufOmega.setValue(2, v2->getValue(5));
-      prod(*_I, bufOmega, bufIOmega, true);
-      cross_product(bufOmega, bufIOmega, buf);
-      _forces->setValue(3, _forces->getValue(3) - buf.getValue(0));
-      _forces->setValue(4, _forces->getValue(4) - buf.getValue(1));
-      _forces->setValue(5, _forces->getValue(5) - buf.getValue(2));
+      //if not that means that jacobianFL[i] is already (pointer-)connected with
+      // either jacobianFInt or jacobianFGyr
+      _jacobianvForces->zero();
+      if (_jacobianFIntv)
+        _jacobianvForces->setBlock(0,0,*_jacobianFIntv);
+        //*_jacobianvForces -= *_jacobianFIntv;
+      if (_jacobianMIntv)
+        _jacobianvForces->setBlock(3,0,*_jacobianMIntv);
+        // *_jacobianvForces -= *_jacobianMIntv;
+      // std::cout << "_jacobianvForces : "<< std::endl;
+      // _jacobianvForces->display();
+      // if (_jacobianFGyrv)
+      //   *_jacobianvForces -= *_jacobianFGyrv;
+      if (_jacobianFGyrv)
+        *_jacobianvForces -= *_jacobianFGyrv;
+      // std::cout << "_jacobianvForces : "<< std::endl;
+      // _jacobianvForces->display();
+
     }
   }
+  //else nothing.
 }
 
-
-void NewtonEulerDS::computeJacobianvFL(double time)
+void NewtonEulerDS::computeJacobianFGyrv(double time)
 {
-  if (_jacobianvFL)
+  if (_jacobianFGyrv)
   {
     //Omega /\ I \Omega:
-    _jacobianvFL->zero();
+    _jacobianFGyrv->zero();
     SiconosVector omega(3);
     omega.setValue(0, _v->getValue(3));
     omega.setValue(1, _v->getValue(4));
@@ -403,32 +534,12 @@ void NewtonEulerDS::computeJacobianvFL(double time)
       cross_product(omega, Iei, omega_Iei);
       cross_product(ei, Iomega, ei_Iomega);
       for (int j = 0; j < 3; j++)
-        _jacobianvFL->setValue(3 + i, 3 + j, ei_Iomega.getValue(j) + omega_Iei.getValue(j));
+        _jacobianFGyrv->setValue(3 + i, 3 + j, ei_Iomega.getValue(j) + omega_Iei.getValue(j));
     }
   }
   //else nothing.
 }
-void NewtonEulerDS::computeJacobianqDotForces(double time)
-{
-  if (_jacobianqDotForces)
-  {
-    //      computeJacobianFIntqDot(time);
 
-    // not true!
-    // if( jacobianFL[i].use_count() == 1 )
-    {
-      //if not that means that jacobianFL[i] is already (pointer-)connected with
-      // either jacobianFInt
-      _jacobianqDotForces->zero();
-      //    if( _jacobianFIntqDot )
-      //      *_jacobianqDotForces-=*_jacobianFIntqDot;
-    }
-  }
-  //else nothing.
-}
-// void NewtonEulerDS::computeJacobianZFL( double time){
-//    RuntimeException::selfThrow("NewtonEulerDS::computeJacobianZFL - not implemented");
-// }
 
 void NewtonEulerDS::display() const
 {
@@ -605,4 +716,43 @@ void NewtonEulerDS::updateMObjToAbs()
   _MObjToAbs->setValue(2, 1, quatBuff.R_component_3());
   _MObjToAbs->setValue(2, 2, quatBuff.R_component_4());
 
+}
+
+void NewtonEulerDS::setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
+{
+  //    Plugin::setFunction(&computeJacobianFIntqPtr, pluginPath,functionName);
+  _pluginJacqFInt->setComputeFunction(pluginPath, functionName);
+}
+void NewtonEulerDS::setComputeJacobianFIntvFunction(const std::string&  pluginPath, const std::string&  functionName)
+{
+  //    Plugin::setFunction(&computeJacobianFIntvPtr, pluginPath,functionName);
+  _pluginJacvFInt->setComputeFunction(pluginPath, functionName);
+}
+void NewtonEulerDS::setComputeJacobianFIntqFunction(FInt_NE fct)
+{
+  _pluginJacqFInt->setComputeFunction((void *)fct);
+}
+void NewtonEulerDS::setComputeJacobianFIntvFunction(FInt_NE fct)
+{
+  _pluginJacvFInt->setComputeFunction((void *)fct);
+}
+
+
+void NewtonEulerDS::setComputeJacobianMIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
+{
+  //    Plugin::setFunction(&computeJacobianFIntqPtr, pluginPath,functionName);
+  _pluginJacqMInt->setComputeFunction(pluginPath, functionName);
+}
+void NewtonEulerDS::setComputeJacobianMIntvFunction(const std::string&  pluginPath, const std::string&  functionName)
+{
+  //    Plugin::setFunction(&computeJacobianFIntvPtr, pluginPath,functionName);
+  _pluginJacvMInt->setComputeFunction(pluginPath, functionName);
+}
+void NewtonEulerDS::setComputeJacobianMIntqFunction(FInt_NE fct)
+{
+  _pluginJacqMInt->setComputeFunction((void *)fct);
+}
+void NewtonEulerDS::setComputeJacobianMIntvFunction(FInt_NE fct)
+{
+  _pluginJacvMInt->setComputeFunction((void *)fct);
 }

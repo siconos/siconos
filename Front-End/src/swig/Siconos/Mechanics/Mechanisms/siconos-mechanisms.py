@@ -90,7 +90,10 @@ for idBody in range(NBBODIES):
     mbtb.MBTB_BodyLoadCADFile(idBody,afile[idBody],bodyDraw[idBody])
     mbtb.MBTB_BodyBuild(idBody, body[idBody], m[idBody],
                         initPos[idBody], initCenterMass[idBody],
-                        inertialMatrix[idBody],plugin, fctf[idBody],plugin,fctm[idBody])
+                        inertialMatrix[idBody],
+                        plugin, fctfext[idBody],plugin,fctmext[idBody],
+                        plugin, fctfint[idBody],plugin,fctmint[idBody])
+
     mbtb.MBTB_BodySetVelocity(idBody,initVel[idBody])
 
 #build joint

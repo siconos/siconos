@@ -85,9 +85,14 @@ else :
     plugin="SliderCrankPlugin.so"
 
 ## REQUIRED the external forces.
-fctf=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS',''])
+fctfext=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS',''])
 ## REQUIRED the external momentums.
-fctm=numpy.array(['','','',''])
+fctmext=numpy.array(['','','',''])
+
+## REQUIRED the internal forces.
+fctfint=numpy.array(['','','',''])
+## REQUIRED the internal momentums.
+fctmint=numpy.array(['','','',''])
 
 #JOINTS DESCRIPTION
 ## REQUIRED the number of joints

@@ -28,10 +28,15 @@
 #include "BlockVector.hpp"
 #include "SimulationTypeDef.hpp"
 
+
 //#define NER_DEBUG
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include <debug.h>
+
+
+#include <iostream>
+
 
 void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
@@ -207,7 +212,7 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionPro
   /*\warning : implemented for the bouncing ball !!!!*/
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  DEBUG_PRINT("NewtonEulerR::computeOutput");
+  DEBUG_PRINT("NewtonEulerR::computeOutput ");
   DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber);
 
   SiconosVector& y = *inter.y(derivativeNumber);
@@ -253,7 +258,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProp
   /*\warning : implemented for the bouncing ball !!!!*/
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
-  DEBUG_PRINT("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) starts\n")
+  DEBUG_PRINT("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) starts \n")
   DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level);
   DEBUG_EXPR(printf("interaction %p\n",&inter););
   DEBUG_EXPR(inter.display(););
@@ -273,11 +278,13 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProp
       _contactForce->display();
     }
 #endif
-
+    std::cout << "_jachqT" << std::endl;
+    _jachqT->display();
     /*data is a pointer of memory associated to a dynamical system*/
     /** false because it consists in doing a sum*/
     prod(lambda, *_jachqT, *DSlink[NewtonEulerR::p0 + level], false);
-
+    std::cout << "data[p0+level]" << DSlink[NewtonEulerR::p0 + level] <<  std::endl;
+    DSlink[NewtonEulerR::p0 + level]->display();
 #ifdef NER_DEBUG
     {
       std::cout << "_jachqT" << std::endl;

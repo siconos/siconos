@@ -51,9 +51,12 @@ void MBTB_BodyLoadCADFile(unsigned int numDS,const std::string& CADFile,unsigned
   \param [in] const std::string& plunginFct, the name of the pluged fonction.
  */
 void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,double mass,
-                    SP::SiconosVector initPos, SP::SiconosVector initCenterMass,SP::SimpleMatrix inertialMatrix,
-                    const std::string& pluginFLib,  const std::string& plunginFFct,
-                    const std::string& pluginMLib,  const std::string& plunginMFct);
+                    SP::SiconosVector initPos, SP::SiconosVector initCenterMass,
+                    SP::SimpleMatrix inertialMatrix,
+                    const std::string& pluginFextLib,  const std::string& pluginFextFct,
+                    const std::string& pluginMextLib,  const std::string& pluginMextFct,
+                    const std::string& pluginFintLib,  const std::string& pluginFintFct,
+                    const std::string& pluginMintLib,  const std::string& pluginMintFct);
 //! To build a joint.
 /*!
  * It builds the joint in the simulator.

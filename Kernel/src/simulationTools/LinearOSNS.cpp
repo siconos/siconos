@@ -236,6 +236,8 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
     inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock, workMInter);
     DEBUG_EXPR(leftInteractionBlock->display(););
+    std::cout << "leftInteractionBlock->display();" << std::endl;
+    leftInteractionBlock->display();
     // Computing depends on relation type -> move this in Interaction method?
     if (relationType == FirstOrder)
     {
@@ -643,8 +645,8 @@ bool LinearOSNS::preCompute(double time)
         }
         else
         {
-          std::cout << std::endl;
-          std::cout << "LinearOSNS::preCompute FIXME: Old variables are bigger than the LinearOSNS variables w and z !" << std::endl;
+          //std::cout << std::endl;
+          //std::cout << "LinearOSNS::preCompute FIXME: Old variables are bigger than the LinearOSNS variables w and z !" << std::endl;
         }
 
       }

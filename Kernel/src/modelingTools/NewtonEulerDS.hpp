@@ -26,8 +26,8 @@
 #include "DynamicalSystem.hpp"
 
 /** Pointer to function for plug-in. */
-typedef void (*FPtr5)(unsigned int, double*, double*, double*, unsigned int, double*);
-typedef void (*Fext)(double , double*, double*, double*);
+typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int size_z,  double* z);
+typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
 
 
 /** \class NewtonEulerDS
@@ -38,9 +38,9 @@ typedef void (*Fext)(double , double*, double*, double*);
  * \f{equation}
  * \label{eq:NewtonEuler}
  * \left\{\begin{array}{rcl}
- *   M \dot v &=& F_{ext}(q, v, \Omega, R), \\
- *   I \dot \Omega + \Omega \wedge I\Omega &=&  M_{ext}(q,v, \Omega, R), \\
- *   \dot q &=& T(q) v, \\
+ *   M \dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \\
+ *   I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&  M_{ext}(t), \\
+ *   \dot q &=& T(q) [ v, \Omega] \\
  *   \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
  * \end{array}\right.
  * \f}
@@ -122,7 +122,6 @@ protected:
    */
   double _mass;
 
-
   /** used for concatenate _I and _mass.I_3 */
   SP::SimpleMatrix _massMatrix;
 
@@ -144,8 +143,35 @@ protected:
   /** "Reaction" due to the non smooth law - The index corresponds to the dynamic levels. */
   std::vector<SP::SiconosVector> _p;
 
+  /** external forces of the system */
+  SP::SiconosVector _fExt;
+
+  /** internal forces of the system */
+  SP::SiconosVector _fInt;
+
   /** external moment of the forces */
   SP::SiconosVector _mExt;
+
+  /** internal moment of the forces */
+  SP::SiconosVector _mInt;
+
+  /** jacobian_q FInt*/
+  SP::SimpleMatrix _jacobianFIntq;
+
+  /** jacobian_{v} FInt*/
+  SP::SimpleMatrix _jacobianFIntv;
+
+  /** jacobian_q MInt*/
+  SP::SimpleMatrix _jacobianMIntq;
+
+  /** jacobian_{v} MInt*/
+  SP::SimpleMatrix _jacobianMIntv;
+
+  /** jacobian_v FGyr*/
+  SP::SimpleMatrix _jacobianFGyrv;
+
+
+
 
   /** Plugin to compute strength of external forces */
   SP::PluggedObject _pluginFExt;
@@ -153,25 +179,79 @@ protected:
   /** Plugin to compute moments of external forces */
   SP::PluggedObject _pluginMExt;
 
-  /** The following code is commented because the jacobian of _mExt and _fExt
+  /** Plugin to compute strength of internal forces */
+  SP::PluggedObject _pluginFInt;
+
+  /** Plugin to compute moments of internal forces */
+  SP::PluggedObject _pluginMInt;
+
+  /** The following code is commented because the jacobian of _mInt and _fInt
    *  are not yet used by the numerical scheme.
    *  Will be needed by a fully implicit scheme for instance.
    */
   /** jacobian_q */
-  //  SP::SiconosMatrix _jacobianqmExt;
+  //  SP::SimpleMatrix _jacobianqmInt;
   /** jacobian_{qDot} */
-  //  SP::SiconosMatrix _jacobianqDotmExt;
+  //  SP::SimpleMatrix _jacobianqDotmInt;
 
-  /** external strength of the system */
-  SP::SiconosVector _fExt;
+  /** NewtonEulerDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianFIntq"
+   * @param time : current time
+   * @param sizeOfq : size of vector q
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] jacob : pointer to the first element of the jacobian
+   * @param  size of vector z
+   * @param[in,out] z  : a vector of user-defined parameters
+   */
+  SP::PluggedObject _pluginJacqFInt;
+
+  /** NewtonEulerDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianFIntv"
+   * @param time : current time
+   * @param sizeOfq : size of vector q
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] jacob : pointer to the first element of the jacobian
+   * @param  size of vector z
+   * @param[in,out] z  : a vector of user-defined parameters
+   */
+  SP::PluggedObject _pluginJacvFInt;
+
+  /** NewtonEulerDS plug-in to compute \f$\nabla_qM_{Int}(\dot q, q, t)\f$, id = "jacobianMIntq"
+   * @param time : current time
+   * @param sizeOfq : size of vector q
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] jacob : pointer to the first element of the jacobian
+   * @param  size of vector z
+   * @param[in,out] z  : a vector of user-defined parameters
+   */
+  SP::PluggedObject _pluginJacqMInt;
+
+  /** NewtonEulerDS plug-in to compute \f$\nabla_{\dot q}M_{Int}(\dot q, q, t)\f$, id = "jacobianMIntv"
+   * @param time : current time
+   * @param sizeOfq : size of vector q
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] jacob : pointer to the first element of the jacobian
+   * @param  size of vector z
+   * @param[in,out] z  : a vector of user-defined parameters
+   */
+  SP::PluggedObject _pluginJacvMInt;
+
+
 
   /** forces(q[0],q[1],t)= fExt - fInt */
   SP::SiconosVector _forces;
 
   /** jacobian_q FL*/
   SP::SimpleMatrix _jacobianvFL;
-  /** jacobian_{qDot} FL*/
-  SP::SimpleMatrix _jacobianqDotForces;
+
+  /** jacobian_q forces*/
+  SP::SimpleMatrix _jacobianqForces;
+
+  /** jacobian_{qv} forces*/
+  SP::SimpleMatrix _jacobianvForces;
+
 
   /** set links with DS members
    */
@@ -180,52 +260,6 @@ protected:
   /** Default constructor
    */
   NewtonEulerDS();
-
-
-  // pointers to functions member to compute plug-in functions
-
-  /** NewtonEulerDS plug-in to compute internal forces \f$F_{int}(t,q,\dot q)\f$ - id = "fInt"
-   * @param time current time
-   * @param sizeOfq size of vector q
-   * @param q pointer to the first element of q
-   * @param velocity pointer to the first element of velocity
-   * @param[in,out] fInt : pointer to the first element of fInt
-   * @param  size of vector z
-   * @param[in,out] z : a vector of user-defined parameters
-   */
-  FPtr6 computeFIntPtr;
-
-  /** NewtonEulerDS plug-in to compute external forces \f$F_{Ext}(t)\f$, id = "fExt"
-   * @param[in] time : current time
-   * @param[in] q : current dof
-   * @param[in,out] fExt : pointer to the first element of fExt
-   * @param[in,out] z : a vector of user-defined parameters
-   */
-  //  void (*computeFExtPtr)(double, double *, double*, double* );
-  //  void (*computeMExtPtr)(double, double *, double*, double* );
-
-
-  /** NewtonEulerDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianFIntq"
-   * @param time current time
-   * @param sizeOfq size of vector q
-   * @param q pointer to the first element of q
-   * @param velocity pointer to the first element of velocity
-   * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param  size of vector z
-   * @param[in,out] z  : a vector of user-defined parameters
-   */
-  FPtr6 computeJacobianFIntqPtr;
-
-  /** NewtonEulerDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianFIntqDot"
-   * @param time current time
-   * @param sizeOfq size of vector q
-   * @param q pointer to the first element of q
-   * @param velocity pointer to the first element of velocity
-   * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param  size of vector z
-   * @param[in,out] z  : a vector of user-defined parameters
-   */
-  FPtr6 computeJacobianFIntqDotPtr;
 
   void zeroPlugin();
 
@@ -389,7 +423,6 @@ public:
 
 
   // -- Fext --
-
   /** get fExt
    *  \return pointer on a plugged vector
    */
@@ -419,7 +452,7 @@ public:
 
   // -- forces --
 
-  /** get the value of fL
+  /** get the value of forces
    *  \return SiconosVector
    */
   inline const SiconosVector getForces() const
@@ -435,22 +468,24 @@ public:
     return _forces;
   }
 
-  // -- Jacobian fL --
+  // -- Jacobian Forces w.r.t q --
 
 
-  /** get JacobianFL
+  /** get JacobianqForces
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SimpleMatrix jacobianvFL() const
+  inline SP::SimpleMatrix jacobianqForces() const
   {
-    return _jacobianvFL;
+    return _jacobianqForces;
   }
-  /** get JacobianFL
+
+
+  /** get JacobianvForces
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SimpleMatrix jacobianqDotForces() const
+  inline SP::SimpleMatrix jacobianvForces() const
   {
-    return _jacobianqDotForces;
+    return _jacobianvForces;
   }
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 
@@ -478,7 +513,7 @@ public:
   /** set a specified function to compute _fExt
    *  \param fct a pointer on the plugin function
    */
-  void setComputeFExtFunction(Fext fct)
+  void setComputeFExtFunction(FExt_NE fct)
   {
     _pluginFExt->setComputeFunction((void*)fct);
   }
@@ -486,12 +521,90 @@ public:
   /** set a specified function to compute _mExt
    *  \param fct a pointer on the plugin function
    */
-  void setComputeMExtFunction(Fext fct)
+  void setComputeMExtFunction(FExt_NE fct)
   {
     _pluginMExt->setComputeFunction((void*)fct);
   }
 
-  /** default function to compute the external strengths
+  /** allow to set a specified function to compute _fInt
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the name of the function to use in this plugin
+   */
+  void setComputeFIntFunction(const std::string&  pluginPath, const std::string& functionName)
+  {
+    _pluginFInt->setComputeFunction(pluginPath, functionName);
+  }
+  /** allow to set a specified function to compute _mInt
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the name of the function to use in this plugin
+   */
+  void setComputeMIntFunction(const std::string&  pluginPath, const std::string& functionName)
+  {
+    _pluginMInt->setComputeFunction(pluginPath, functionName);
+  }
+
+  /** set a specified function to compute _fInt
+   *  \param fct a pointer on the plugin function
+   */
+  void setComputeFIntFunction(FInt_NE fct)
+  {
+    _pluginFInt->setComputeFunction((void*)fct);
+  }
+
+  /** set a specified function to compute _mInt
+   *  \param fct a pointer on the plugin function
+   */
+  void setComputeMExtFunction(FInt_NE fct)
+  {
+    _pluginMInt->setComputeFunction((void*)fct);
+  }
+
+  /** allow to set a specified function to compute the jacobian w.r.t q of the internal forces
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
+   */
+  void setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName);
+
+  /** allow to set a specified function to compute the jacobian following v of the internal forces w.r.t.
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
+   */
+  void setComputeJacobianFIntvFunction(const std::string&  pluginPath, const std::string&  functionName);
+
+  /** set a specified function to compute jacobian following q of the FInt
+   *  \param fct a pointer on the plugin function
+   */
+  void setComputeJacobianFIntqFunction(FInt_NE fct);
+
+  /** set a specified function to compute jacobian following v of the FInt
+   *  \param fct a pointer on the plugin function
+   */
+  void setComputeJacobianFIntvFunction(FInt_NE fct);
+
+  /** allow to set a specified function to compute the jacobian w.r.t q of the internal forces
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
+   */
+  void setComputeJacobianMIntqFunction(const std::string&  pluginPath, const std::string&  functionName);
+  /** allow to set a specified function to compute the jacobian following v of the internal forces w.r.t.
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
+   */
+  void setComputeJacobianMIntvFunction(const std::string&  pluginPath, const std::string&  functionName);
+
+  /** set a specified function to compute jacobian following q of the FInt
+   *  \param fct a pointer on the plugin function
+   */
+  void setComputeJacobianMIntqFunction(FInt_NE fct);
+
+  /** set a specified function to compute jacobian following v of the FInt
+   *  \param fct a pointer on the plugin function
+   */
+  void setComputeJacobianMIntvFunction(FInt_NE fct);
+
+
+
+  /** default function to compute the external forces
    *  \param time the current time
    */
   virtual void computeFExt(double time);
@@ -501,11 +614,35 @@ public:
    */
   virtual void computeMExt(double time);
 
+  /** default function to compute the internal forces
+   *  \param time the current time
+   */
+  virtual void computeFInt(double time);
+
+  /** default function to compute the internal moments
+   * \param time the current time
+   */
+  virtual void computeMInt(double time);
+
+  /** default function to compute the internal forces
+   * \param time the current time
+   * \param q
+   * \param v
+   */
+  virtual void computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v);
+
+  /** default function to compute the internal moments
+   * \param time the current time
+   * \param q
+   * \param v
+   */
+  virtual void computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v);
 
   /** Default function to compute the right-hand side term
    *  \param time current time
    *  \param isDSup flag to avoid recomputation of operators
    */
+
   virtual void computeRhs(double time, bool isDSup = false);
 
   /** Default function to compute jacobian of the right-hand side term according to x
@@ -514,27 +651,95 @@ public:
    */
   virtual void computeJacobianRhsx(double time, bool isDup = false);
 
-  /** Default function to compute fL
-   *  \param time the current time
+  /** Default function to compute forces
+   *  \param time double, the current time
    */
   virtual void computeForces(double time);
 
-  /** function to compute fL with some specific values for q and velocity (ie not those of the current state).
-   *  \param time the current time
-   *  \param q2 positions where the forces has to be computed
-   *  \param v2 velocities where the forces has to be computed
+  /** function to compute forces with some specific values for q and velocity (ie not those of the current state).
+   *  \param time double : the current time
+   *  \param q SP::SiconosVector: pointers on q
+   *  \param velocity SP::SiconosVector: pointers on velocity
    */
-  virtual void computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2);
+  virtual void computeForces(double time,
+                             SP::SiconosVector q,
+                             SP::SiconosVector velocity);
 
-  /** Default function to compute the jacobian following q of fL
-   *  \param time the current time
+  /** Default function to compute the jacobian w.r.t. q of forces
+   *  \param time double, the current time
    */
-  virtual void computeJacobianvFL(double time);
+  virtual void computeJacobianqForces(double time);
 
-  /** Default function to compute the jacobian following qDot of fL
+  /** Default function to compute the jacobian w.r.t. v of forces
+   *  \param time double, the current time
+   */
+  virtual void computeJacobianvForces(double time);
+
+  /** Default function to compute the jacobian following q of fGyr
    *  \param time the current time
    */
-  virtual void computeJacobianqDotForces(double time);
+  virtual void computeJacobianFGyrv(double time);
+
+  // /** Default function to compute the jacobian following v of fGyr
+  //  *  \param time the current time
+  //  */
+  // virtual void computeJacobianvForces(double time);
+
+    /** To compute the jacobian w.r.t q of the internal forces
+   *  \param time double : the current time
+   */
+  virtual void computeJacobianFIntq(double time);
+  /** To compute the jacobian w.r.t v of the internal forces
+   *  \param time double : the current time
+   */
+  virtual void computeJacobianFIntv(double time);
+
+  /** To compute the jacobian w.r.t q of the internal forces
+   *  \param time double : the current time,
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
+   */
+  virtual void computeJacobianFIntq(double time,
+                                    SP::SiconosVector position,
+                                    SP::SiconosVector velocity);
+
+  /** To compute the jacobian w.r.t. v of the internal forces
+   *  \param time double: the current time
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
+   */
+  virtual void computeJacobianFIntv(double time,
+                                       SP::SiconosVector position,
+                                       SP::SiconosVector velocity);
+    /** To compute the jacobian w.r.t q of the internal forces
+   *  \param time double : the current time
+   */
+  virtual void computeJacobianMIntq(double time);
+  /** To compute the jacobian w.r.t v of the internal forces
+   *  \param time double : the current time
+   */
+  virtual void computeJacobianMIntv(double time);
+
+  /** To compute the jacobian w.r.t q of the internal forces
+   *  \param time double : the current time,
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
+   */
+  virtual void computeJacobianMIntq(double time,
+                                    SP::SiconosVector position,
+                                    SP::SiconosVector velocity);
+
+  /** To compute the jacobian w.r.t. v of the internal forces
+   *  \param time double: the current time
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
+   */
+  virtual void computeJacobianMIntv(double time,
+                                       SP::SiconosVector position,
+                                       SP::SiconosVector velocity);
+
+
+
 
   // --- miscellaneous ---
 
@@ -589,7 +794,7 @@ public:
     assert(_Tdot);
     return _Tdot;
   }
-  inline SP::SiconosMemory fLMemory()
+  inline SP::SiconosMemory forcesMemory()
   {
     return _forcesMemory;
   }

@@ -46,8 +46,8 @@ using namespace std::placeholders;
 #include <boost/weak_ptr.hpp>
 #endif
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES 
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include <debug.h>
 
 using namespace RELATION;
@@ -578,7 +578,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       DEBUG_PRINTF("# _newtonNbSteps = %i\n",_newtonNbSteps );
       DEBUG_PRINTF("# _newtonResiduDSMax = %12.8e\t",_newtonResiduDSMax );
       DEBUG_PRINTF("# _newtonResiduYMax = %12.8e\t",_newtonResiduYMax );
-      DEBUG_PRINTF("# _newtonResiduRSMax = %12.8e\n",_newtonResiduRMax );
+      DEBUG_PRINTF("# _newtonResiduRMax = %12.8e\n",_newtonResiduRMax );
 
     }
     if (!_isNewtonConverge)

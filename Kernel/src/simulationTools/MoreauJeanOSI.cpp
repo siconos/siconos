@@ -412,16 +412,54 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
   else if (dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-    d->computeJacobianvFL(t);
-    double thetaFL = _theta;
-    *(d->luW()) = *(d->jacobianvFL());
-    scal(h * thetaFL, *(d->jacobianvFL()), *(d->luW()), true);
-    *(d->luW()) += *(d->mass());
+    *(d->luW()) = *(d->mass());
 
-    //cout<<"MoreauJeanOSI::computeW luW before LUFact\n";
-    //d->luW()->display();
+    SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
+    SP::SiconosMatrix C = d->jacobianvForces(); // jacobian according to velocity
 
-    d->luW()->PLUFactorizationInPlace();
+    // if (C)
+    // {
+    //   d->computeJacobianvForces(t);
+    //   scal(-h * _theta, *C, *(d->luW()), false); // W -= h*_theta*C
+    // }
+    // std::cout<< "trifouille"<<std::endl;
+    // d->luW()->display();
+    if (K)
+    {
+      d->computeJacobianqForces(t);
+
+      SP::SiconosMatrix T = d->T();
+      std::cout<<"MoreauJeanOSI::T\n";
+      T->display();
+
+      SimpleMatrix * buffer = new SimpleMatrix(*(d->mass()));
+      prod(*K, *T, *buffer, true);
+      scal(-h * h * _theta * _theta, *buffer, *(d->luW()), false);
+                                //*W -= h*h*_theta*_theta**K;
+    }
+    // std::cout<< "trifouille"<<std::endl;
+    // d->luW()->display();
+    // double thetaFL = _theta;
+    // std::cout<< "trifouille"<<std::endl;
+    // d->luW()->display();
+    // d->jacobianvFL()->display();
+    // //*(d->luW()) = *(d->jacobianvFL());
+    // std::cout<< "trifouille 1"<<std::endl;
+    // (d->luW()) ->display();
+
+
+    // scal(h * thetaFL, *(d->jacobianvFL()), *(d->luW()), true);
+    // std::cout<< "trifouille 2"<<std::endl;
+    // (d->luW()) ->display();
+
+    // *(d->luW()) += *(d->mass());
+    // std::cout<< "trifouille 3"<<std::endl;
+    // (d->luW()) ->display();
+
+    std::cout<<"MoreauJeanOSI::computeW luW before LUFact\n";
+    d->luW()->display();
+
+    //d->luW()->PLUFactorizationInPlace();
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
 
@@ -554,6 +592,7 @@ double MoreauJeanOSI::computeResidu()
 
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
+                                                            // We use DynamicalSystem::free as tmp buffer
       //       std::cout << "MoreauJeanOSI::ComputeResidu LagrangianDS residu :"  << std::endl;
       //      d->workspace(DynamicalSystem::free)->display();
       normResidu = d->workspace(DynamicalSystem::free)->norm2();
@@ -695,6 +734,7 @@ double MoreauJeanOSI::computeResidu()
       (* d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
+                                                            // We use DynamicalSystem::free as tmp buffer
 
       //      std::cout << "MoreauJeanOSI::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       //      d->workspace(DynamicalSystem::free)->display();
@@ -711,40 +751,56 @@ double MoreauJeanOSI::computeResidu()
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      // residu = M(q*)(v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*forces(ti,vi,qi) - pi+1
+      // residu = M (v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*forces(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
 
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
+      // Get the state  (previous time step) from memory vector
+      // -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
 
+
+      // Get the current state vector
       SP::SiconosVector q = d->q();
-
-
-      SP::SiconosMatrix massMatrix = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
+
+      // Get the (constant mass matrix)
+      SP::SiconosMatrix massMatrix = d->mass();
       prod(*massMatrix, (*v - *vold), *residuFree); // residuFree = M(v - vold)
+
       if (d->forces())  // if fL exists
       {
-        // computes forces(ti,vi,qi)
-        SP::SiconosVector fLold = d->fLMemory()->getSiconosVector(0);
-        double _thetaFL = 0.5;
-        double coef = -h * (1 - _thetaFL);
+
+        // Old cheaper version
+        // get forces(ti,vi,qi) from memory
+        //SP::SiconosVector fold = d->forcesMemory()->getSiconosVector(0);
+        //double coef = -h * (1 - _theta);
         // residuFree += coef * fL_i
-        scal(coef, *fLold, *residuFree, false);
-        d->computeForces(t);
-        //        printf("cpmputeFreeState d->FL():\n");
-        //  d->forces()->display();
-        coef = -h * _thetaFL;
+        //scal(coef, *fold, *residuFree, false);
+
+        d->computeForces(told,qold,vold);
+        double coef = -h * (1 - _theta);
+        scal(coef, *d->forces(), *residuFree, false);
+
+
+
+        // computes forces(ti,v,q)
+        d->computeForces(t,q,v);
+        coef = -h * _theta;
         scal(coef, *d->forces(), *residuFree, false);
       }
       *(d->workspace(DynamicalSystem::free)) = *residuFree;
-      //cout<<"MoreauJeanOSI::computeResidu :\n";
-      // residuFree->display();
       if (d->p(1))
-        *(d->workspace(DynamicalSystem::free)) -= *d->p(1);
+        *(d->workspace(DynamicalSystem::free)) -= *d->p(1);// We use DynamicalSystem::free as tmp buffer
+
+
+      DEBUG_PRINT("MoreauJeanOSI::computeResidu :\n");
+      DEBUG_EXPR(residuFree->display(););
+      DEBUG_EXPR(if (d->p(1)) d->p(1)->display(););
+      DEBUG_EXPR((d->workspace(DynamicalSystem::free))->display(););
+
       normResidu = d->workspace(DynamicalSystem::free)->norm2();
     }
     else
@@ -810,7 +866,7 @@ void MoreauJeanOSI::computeFreeState()
       (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
 
       // -- Update W --
-      // Note: during computeW, mass and jacobians of fL will be computed/
+      // Note: during computeW, mass and jacobians of forces will be computed/
       computeW(t, d);
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
 
@@ -871,9 +927,9 @@ void MoreauJeanOSI::computeFreeState()
       // with
       // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
-      // -- Convert the DS into a Lagrangian one.
+      // -- Convert the DS into a NewtonEuler one.
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      computeW(t, d);
+
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
@@ -887,7 +943,8 @@ void MoreauJeanOSI::computeFreeState()
       //*(d->vPredictor())=*(d->workspace(DynamicalSystem::freeresidu));
 
       // -- Update W --
-      // Note: during computeW, mass and jacobians of fL will be computed/
+      // Note: during computeW, mass and jacobians of forces will be computed/
+      computeW(t, d);
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
 
       // -- vfree =  v - W^{-1} ResiduFree --
@@ -1020,7 +1077,8 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   if (relationType == NewtonEuler)
   {
     SP::SiconosMatrix CT =  std11::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
-
+    std::cout << "CT = "<< std::endl;
+    CT->display();
     if (CT)
     {
       coord[3] = CT->size(1);
@@ -1291,8 +1349,8 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->velocity();
-      DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
-      DEBUG_EXPR(d->display());
+      //DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
+      //DEBUG_EXPR(d->display());
       DEBUG_PRINT("MoreauJeanOSI::updateState() prev v\n")
       DEBUG_EXPR(v->display());
 
@@ -1309,7 +1367,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
         d->luW()->PLUForwardBackwardInPlace(*v);
 
         DEBUG_EXPR(d->p(level)->display());
-        DEBUG_PRINT("MoreauJeanOSI::updatestate hWB lambda\n");
+        DEBUG_PRINT("MoreauJeanOSI::updatestate W CT lambda\n");
         DEBUG_EXPR(v->display());
         *v +=  * ds->workspace(DynamicalSystem::free);
       }
@@ -1320,6 +1378,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       DEBUG_EXPR(ds->workspace(DynamicalSystem::free)->display());
       DEBUG_PRINT("MoreauJeanOSI::updatestate new v\n");
       DEBUG_EXPR(v->display());
+
 
       //compute q
       //first step consists in computing  \dot q.
@@ -1344,19 +1403,20 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       coeff = h * (1 - _theta);
       scal(coeff, *dotqold, *q, false); // q += h(1-theta)*vold
       *q += *qold;
+
       DEBUG_PRINT("new q before normalizing\n");
       DEBUG_EXPR(q->display());
 
       //q[3:6] must be normalized
-      d->normalizeq();
+      //d->normalizeq();
       /* \warning VA 02/06/2013.
        * What is the reason of doing the following computation ?
        */
-      dotq->setValue(3, (q->getValue(3) - qold->getValue(3)) / h);
-      dotq->setValue(4, (q->getValue(4) - qold->getValue(4)) / h);
-      dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);
-      dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
-      d->updateT();
+      // dotq->setValue(3, (q->getValue(3) - qold->getValue(3)) / h);
+      // dotq->setValue(4, (q->getValue(4) - qold->getValue(4)) / h);
+      // dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);
+      // dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
+      //d->updateT();
     }
     else RuntimeException::selfThrow("MoreauJeanOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
   }
