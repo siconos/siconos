@@ -278,13 +278,9 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProp
       _contactForce->display();
     }
 #endif
-    std::cout << "_jachqT" << std::endl;
-    _jachqT->display();
     /*data is a pointer of memory associated to a dynamical system*/
     /** false because it consists in doing a sum*/
     prod(lambda, *_jachqT, *DSlink[NewtonEulerR::p0 + level], false);
-    std::cout << "data[p0+level]" << DSlink[NewtonEulerR::p0 + level] <<  std::endl;
-    DSlink[NewtonEulerR::p0 + level]->display();
 #ifdef NER_DEBUG
     {
       std::cout << "_jachqT" << std::endl;

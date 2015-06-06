@@ -42,9 +42,17 @@
 #endif
 
 #ifdef DEBUG_STDOUT
-#define DEBUG_INTERNAL_PRINTF(...)       printf(ANSI_COLOR_RED); printf(__VA_ARGS__); printf(ANSI_COLOR_RESET);
+#ifdef DEBUG_NOCOLOR
+#define DEBUG_INTERNAL_PRINTF(...)      printf(__VA_ARGS__);
+#else
+#define DEBUG_INTERNAL_PRINTF(...)      printf(ANSI_COLOR_RED); printf(__VA_ARGS__); printf(ANSI_COLOR_RESET);
+#endif
+#else
+#ifdef DEBUG_NOCOLOR
+#define DEBUG_INTERNAL_PRINTF(...)       fprintf(stderr, __VA_ARGS__);
 #else
 #define DEBUG_INTERNAL_PRINTF(...)       fprintf(stderr, ANSI_COLOR_RED); fprintf(stderr, __VA_ARGS__); fprintf(stderr, ANSI_COLOR_RESET);
+#endif
 #endif
 
 #define DEBUG_PRINTF(_fmt, ...)  DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)

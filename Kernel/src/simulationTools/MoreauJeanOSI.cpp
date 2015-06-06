@@ -32,8 +32,10 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+
+#define DEBUG_STDOUT
+#define DEBUG_NOCOLOR
+#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
@@ -417,49 +419,20 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     SP::SiconosMatrix C = d->jacobianvForces(); // jacobian according to velocity
 
-    // if (C)
-    // {
-    //   d->computeJacobianvForces(t);
-    //   scal(-h * _theta, *C, *(d->luW()), false); // W -= h*_theta*C
-    // }
-    // std::cout<< "trifouille"<<std::endl;
-    // d->luW()->display();
+    if (C)
+    {
+      d->computeJacobianvForces(t);
+      scal(-h * _theta, *C, *(d->luW()), false); // W -= h*_theta*C
+    }
     if (K)
     {
       d->computeJacobianqForces(t);
-
       SP::SiconosMatrix T = d->T();
-      std::cout<<"MoreauJeanOSI::T\n";
-      T->display();
-
       SimpleMatrix * buffer = new SimpleMatrix(*(d->mass()));
       prod(*K, *T, *buffer, true);
       scal(-h * h * _theta * _theta, *buffer, *(d->luW()), false);
                                 //*W -= h*h*_theta*_theta**K;
     }
-    // std::cout<< "trifouille"<<std::endl;
-    // d->luW()->display();
-    // double thetaFL = _theta;
-    // std::cout<< "trifouille"<<std::endl;
-    // d->luW()->display();
-    // d->jacobianvFL()->display();
-    // //*(d->luW()) = *(d->jacobianvFL());
-    // std::cout<< "trifouille 1"<<std::endl;
-    // (d->luW()) ->display();
-
-
-    // scal(h * thetaFL, *(d->jacobianvFL()), *(d->luW()), true);
-    // std::cout<< "trifouille 2"<<std::endl;
-    // (d->luW()) ->display();
-
-    // *(d->luW()) += *(d->mass());
-    // std::cout<< "trifouille 3"<<std::endl;
-    // (d->luW()) ->display();
-
-    std::cout<<"MoreauJeanOSI::computeW luW before LUFact\n";
-    d->luW()->display();
-
-    //d->luW()->PLUFactorizationInPlace();
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
 
@@ -768,10 +741,13 @@ double MoreauJeanOSI::computeResidu()
 
       // Get the (constant mass matrix)
       SP::SiconosMatrix massMatrix = d->mass();
-      prod(*massMatrix, (*v - *vold), *residuFree); // residuFree = M(v - vold)
+      prod(*massMatrix, (*v - *vold), *residuFree, true); // residuFree = M(v - vold)
+      DEBUG_EXPR(residuFree->display(););
 
       if (d->forces())  // if fL exists
       {
+        DEBUG_PRINTF("MoreauJeanOSI:: _theta = %e\n",_theta);
+        DEBUG_PRINTF("MoreauJeanOSI:: h = %e\n",h );
 
         // Old cheaper version
         // get forces(ti,vi,qi) from memory
@@ -781,15 +757,20 @@ double MoreauJeanOSI::computeResidu()
         //scal(coef, *fold, *residuFree, false);
 
         d->computeForces(told,qold,vold);
-        double coef = -h * (1 - _theta);
+        double coef = -h * (1.0 - _theta);
         scal(coef, *d->forces(), *residuFree, false);
-
-
+        DEBUG_PRINT("MoreauJeanOSI:: old forces :\n");
+        DEBUG_EXPR(d->forces()->display(););
+        DEBUG_EXPR(residuFree->display(););
 
         // computes forces(ti,v,q)
         d->computeForces(t,q,v);
         coef = -h * _theta;
         scal(coef, *d->forces(), *residuFree, false);
+        DEBUG_PRINT("MoreauJeanOSI:: new forces :\n");
+        DEBUG_EXPR(d->forces()->display(););
+        DEBUG_EXPR(residuFree->display(););
+
       }
       *(d->workspace(DynamicalSystem::free)) = *residuFree;
       if (d->p(1))
@@ -925,7 +906,8 @@ void MoreauJeanOSI::computeFreeState()
 
       // vFree = v_k,i+1 - W^{-1} ResiduFree
       // with
-      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
+      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1)
+      //                                        - h*(1-theta)*forces(ti,vi,qi)
 
       // -- Convert the DS into a NewtonEuler one.
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
@@ -1077,8 +1059,6 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   if (relationType == NewtonEuler)
   {
     SP::SiconosMatrix CT =  std11::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
-    std::cout << "CT = "<< std::endl;
-    CT->display();
     if (CT)
     {
       coord[3] = CT->size(1);
@@ -1349,8 +1329,8 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->velocity();
-      //DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
-      //DEBUG_EXPR(d->display());
+      DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
+      DEBUG_EXPR(d->display());
       DEBUG_PRINT("MoreauJeanOSI::updateState() prev v\n")
       DEBUG_EXPR(v->display());
 

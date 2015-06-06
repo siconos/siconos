@@ -17,7 +17,7 @@ extern "C" void externalMomentum(double t,double *m, unsigned int size_z, double
 }
 
 extern "C" void fInt_beam1(double t, double *q, double *v, double *f, unsigned int size_z, double *z){
-  f[0]=-1e4*q[0];
+  f[0]=1e4*q[0];
   f[1]=0.0;
   f[2]=0.0;-1e4*q[2];
 
@@ -28,7 +28,7 @@ extern "C" void jacobianFIntq_beam1(double t, double *q, double *v, double *jac,
     for (int j=0; j<7; j++)
       jac[i+j*3]=0.0;
   }
-  jac[0+0*3]=-1e4;
+  jac[0+0*3]=1e4;
   //jac[2+2*3]=-1e4;
 }
 

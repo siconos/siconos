@@ -293,8 +293,6 @@ void NewtonEulerDS::computeMInt(double time)
   computeMInt(time, _q, _v);
 }
 
-
-
 void NewtonEulerDS::computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v)
 {
   if (_pluginFInt->fPtr)
@@ -326,9 +324,6 @@ void NewtonEulerDS::computeJacobianFIntv(double time, SP::SiconosVector q2, SP::
   if (_pluginJacvFInt->fPtr)
     ((FInt_NE)_pluginJacvFInt->fPtr)(time, &(*q2)(0), &(*velocity2)(0), &(*_jacobianFIntv)(0, 0), _z->size(), &(*_z)(0));
 }
-
-
-
 
 void NewtonEulerDS::computeJacobianMIntq(double time)
 {
@@ -399,9 +394,9 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     }
     if (_fInt)
     {
-      computeFInt(time, q, v);
-      std::cout << "_fInt : "<< std::endl;
-      _fInt->display();
+      // computeFInt(time, q, v);
+      // std::cout << "_fInt : "<< std::endl;
+      //_fInt->display();
       _forces->setValue(0, _forces->getValue(0) - _fInt->getValue(0));
       _forces->setValue(1, _forces->getValue(1) - _fInt->getValue(1));
       _forces->setValue(2, _forces->getValue(2) - _fInt->getValue(2));
@@ -425,7 +420,6 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       // printf("NewtonEulerDS::computeFGyrv _I:\n");
       // _I->display();
       // v->display();
-
       SiconosVector bufOmega(3);
       SiconosVector bufIOmega(3);
       SiconosVector buf(3);
@@ -438,6 +432,9 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       _forces->setValue(4, _forces->getValue(4) - buf.getValue(1));
       _forces->setValue(5, _forces->getValue(5) - buf.getValue(2));
     }
+    // std::cout << "_forces : "<< std::endl;
+    // _forces->display();
+
   }
   // else nothing.
 }
@@ -446,64 +443,45 @@ void NewtonEulerDS::computeJacobianqForces(double time)
 {
   if (_jacobianqForces)
   {
-    computeJacobianFIntq(time);
-    computeJacobianMIntq(time);
-
-    std::cout << "_jacobianFIntq : "<< std::endl;
-    if (_jacobianFIntq)
-      _jacobianFIntq->display();
-    // if (_jacobianMIntq)
-    //   _jacobianMIntq->display();
-
     _jacobianqForces->zero();
     if (_jacobianFIntq)
-      _jacobianqForces->setBlock(0,0,*_jacobianFIntq);
+    {
+      computeJacobianFIntq(time);
+      _jacobianqForces->setBlock(0,0,-1.0 * *_jacobianFIntq);
+    }
     if (_jacobianMIntq)
-      _jacobianqForces->setBlock(3,0,*_jacobianMIntq);
-
+    {
+      computeJacobianMIntq(time);
+      _jacobianqForces->setBlock(3,0,-1.0* *_jacobianMIntq);
+    }
     // std::cout << "_jacobianqForces : "<< std::endl;
     // _jacobianqForces->display();
-
   }
   //else nothing.
 }
+
 void NewtonEulerDS::computeJacobianvForces(double time)
 {
   if (_jacobianvForces)
   {
-    computeJacobianFIntv(time);
-    computeJacobianMIntv(time);
-    // std::cout << "_jacobianFIntv : "<< std::endl;
-    // if (_jacobianFIntv)
-    // _jacobianFIntv->display();
-    // if (_jacobianMIntv)
-    // _jacobianMIntv->display();
-
-    computeJacobianFGyrv(time);
-
-
-    // not true!
-    // if( jacobianFL[i].use_count() == 1 )
+    _jacobianvForces->zero();
+    if (_jacobianFIntv)
     {
-      //if not that means that jacobianFL[i] is already (pointer-)connected with
-      // either jacobianFInt or jacobianFGyr
-      _jacobianvForces->zero();
-      if (_jacobianFIntv)
-        _jacobianvForces->setBlock(0,0,*_jacobianFIntv);
-        //*_jacobianvForces -= *_jacobianFIntv;
-      if (_jacobianMIntv)
-        _jacobianvForces->setBlock(3,0,*_jacobianMIntv);
-        // *_jacobianvForces -= *_jacobianMIntv;
-      // std::cout << "_jacobianvForces : "<< std::endl;
-      // _jacobianvForces->display();
-      // if (_jacobianFGyrv)
-      //   *_jacobianvForces -= *_jacobianFGyrv;
-      if (_jacobianFGyrv)
-        *_jacobianvForces -= *_jacobianFGyrv;
-      // std::cout << "_jacobianvForces : "<< std::endl;
-      // _jacobianvForces->display();
-
+      computeJacobianFIntv(time);
+      _jacobianvForces->setBlock(0,0,-1.0 * *_jacobianFIntv);
     }
+    if (_jacobianMIntv)
+    {
+      computeJacobianMIntv(time);
+      _jacobianvForces->setBlock(3,0,-1.0 * *_jacobianMIntv);
+    }
+    if (_jacobianFGyrv)
+    {
+      computeJacobianFGyrv(time);
+      *_jacobianvForces -= *_jacobianFGyrv;
+    }
+    // std::cout << "_jacobianvForces : "<< std::endl;
+    // _jacobianvForces->display();
   }
   //else nothing.
 }

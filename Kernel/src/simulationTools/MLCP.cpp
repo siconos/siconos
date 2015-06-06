@@ -27,7 +27,7 @@
 #include <MLCP_Solvers.h>
 
 using namespace RELATION;
-#define MLCP_DEBUG
+//#define MLCP_DEBUG
 
 // Constructor from a set of data
 MLCP::MLCP(int numericsSolverId):

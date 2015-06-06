@@ -170,9 +170,6 @@ protected:
   /** jacobian_v FGyr*/
   SP::SimpleMatrix _jacobianFGyrv;
 
-
-
-
   /** Plugin to compute strength of external forces */
   SP::PluggedObject _pluginFExt;
 
@@ -238,18 +235,13 @@ protected:
    */
   SP::PluggedObject _pluginJacvMInt;
 
-
-
-  /** forces(q[0],q[1],t)= fExt - fInt */
+  /** forces(q,v,t)= fExt - fInt - fGyr */
   SP::SiconosVector _forces;
-
-  /** jacobian_q FL*/
-  SP::SimpleMatrix _jacobianvFL;
 
   /** jacobian_q forces*/
   SP::SimpleMatrix _jacobianqForces;
 
-  /** jacobian_{qv} forces*/
+  /** jacobian_{v} forces*/
   SP::SimpleMatrix _jacobianvForces;
 
 
