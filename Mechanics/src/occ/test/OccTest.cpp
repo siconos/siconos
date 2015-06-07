@@ -124,10 +124,10 @@ void OccTest::move()
   gp_Quaternion rotat = body->contactShape(0).data().Location().Transformation().
     GetRotation();
 
-  CPPUNIT_ASSERT(abs(rotat.X() - 0.44543540318737401) < 1e-9);
-  CPPUNIT_ASSERT(abs(rotat.Y() - 0.53452248382484879) < 1e-9);
-  CPPUNIT_ASSERT(abs(rotat.Z() - 0.62360956446232352) < 1e-9);
-  CPPUNIT_ASSERT(abs(rotat.W() - 0.35634832254989918) < 1e-9);
+  CPPUNIT_ASSERT(std::abs(rotat.X() - 0.44543540318737401) < 1e-9);
+  CPPUNIT_ASSERT(std::abs(rotat.Y() - 0.53452248382484879) < 1e-9);
+  CPPUNIT_ASSERT(std::abs(rotat.Z() - 0.62360956446232352) < 1e-9);
+  CPPUNIT_ASSERT(std::abs(rotat.W() - 0.35634832254989918) < 1e-9);
 
 }
 
@@ -209,6 +209,6 @@ void OccTest::distance()
 
   std::cout << dist.nx << "," << dist.ny << "," << dist.nz << std::endl;
 
-  CPPUNIT_ASSERT(abs(dist.value - 1.0) < 1e-9);
+  CPPUNIT_ASSERT(std::abs(dist.value - 1.0) < 1e-9);
 
 }
