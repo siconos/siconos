@@ -59,6 +59,11 @@ void OneStepIntegrator::saveInMemory()
   std::for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::swapInMemory, _1));
 }
 
+void OneStepIntegrator::computeInitialNewtonState()
+{
+  // Default behavior :  do nothing and used the current state as starting state of the Newton iteration
+}
+
 double OneStepIntegrator::computeResidu()
 {
   RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + integratorType);

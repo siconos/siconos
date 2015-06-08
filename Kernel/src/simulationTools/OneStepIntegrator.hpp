@@ -78,9 +78,9 @@ protected:
   SP::Simulation simulationLink;
 
 /** basic constructor with Id
- *  \param integrator type/name
+ *  \param type integrator type/name
  */
-  OneStepIntegrator(const OSI::TYPES&);
+  OneStepIntegrator(const OSI::TYPES& type);
 
 /** default constructor
  */
@@ -95,8 +95,10 @@ private:
 /** copy constructor, private, no copy nor pass-by value allowed */
   OneStepIntegrator(const OneStepIntegrator&);
 
-/** assignment (private => forbidden) */
-  OneStepIntegrator& operator=(const OneStepIntegrator&);
+/** assignment (private => forbidden)
+ * \param  OSI
+ */
+  OneStepIntegrator& operator=(const OneStepIntegrator& OSI);
 
 public:
 
@@ -115,7 +117,7 @@ public:
   }
 
 /** set the type of the OneStepIntegrator
- *  \return std::string : the type of the OneStepIntegrator
+ *  \param newType std::string : the type of the OneStepIntegrator
  */
   inline void setType(const OSI::TYPES& newType)
   {
@@ -163,7 +165,6 @@ public:
   };
 
 /** insert a dynamical system in this Integrator
- *  \param ds a DynamicalSystem
  */
   DEPRECATED_OSI_API(virtual void insertDynamicalSystem(SP::DynamicalSystem ds));
 
@@ -202,13 +203,16 @@ public:
   // --- OTHERS ... ---
 
   /** initialise the integrator
-      \param the simulation that owns this OSI
-  */
+   */
   virtual void initialize() = 0;
 
   /** Save Dynamical Systems data into memory.
    */
   void saveInMemory();
+
+  /** compute the initial state of the Newton loop.
+   */
+  virtual void computeInitialNewtonState();
 
   /** return the maximum of all norms for the discretized residus of DS
       \return a double
@@ -221,7 +225,7 @@ public:
   virtual void computeFreeState();
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex of the interaction graph
+   * \param vertex_inter of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
@@ -239,6 +243,7 @@ public:
   void resetNonSmoothPart();
 
   /** set to zero all the r vectors of the DynamicalSystems of the present OSI for a given level
+   * \param level
    */
   void resetNonSmoothPart(unsigned int level);
 
@@ -257,6 +262,9 @@ public:
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
+   * \param inter
+   * \param i
+   * \return bool
    */
   virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   {
@@ -267,6 +275,9 @@ public:
 
   /** Apply the rule to one Interaction to know if is it should be removed
    * from the IndexSet of level i
+   * \param inter
+   * \param i
+   * \return bool
    */
   virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   {

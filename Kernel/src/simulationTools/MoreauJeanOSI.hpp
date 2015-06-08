@@ -318,6 +318,12 @@ public:
    */
   void initWBoundaryConditions(SP::DynamicalSystem ds);
 
+
+  /** compute the initial state of the Newton loop.
+   */
+  void computeInitialNewtonState();
+
+
   /** return the maximum of all norms for the "MoreauJeanOSI-discretized" residus of DS
       \return a double
    */
@@ -364,6 +370,11 @@ public:
    *  \param notUsed useless flag (for MoreauJeanOSI, used in LsodarOSI)
    */
   void integrate(double& tinit, double& tend, double& tout, int& notUsed);
+
+  /** update the state of the dynamical systems
+      \param ds the dynamical to update
+   */
+  virtual void updatePosition(SP::DynamicalSystem ds);
 
   /** update the state of the dynamical systems
    *  \param level the level of interest for the dynamics: not used at the time

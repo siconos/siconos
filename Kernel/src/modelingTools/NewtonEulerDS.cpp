@@ -409,6 +409,8 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       updateMObjToAbs();
       prod(*_mInt, *_MObjToAbs, aux);
       *_mInt = aux;
+      std::cout << "NewtonEulerDS::computeForces: _mint: " <<std::endl;
+      _mInt->display();
       _forces->setValue(3, _forces->getValue(3) - _mInt->getValue(0));
       _forces->setValue(4, _forces->getValue(4) - _mInt->getValue(1));
       _forces->setValue(5, _forces->getValue(5) - _mInt->getValue(2));

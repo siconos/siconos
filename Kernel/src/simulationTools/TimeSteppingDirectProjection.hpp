@@ -26,7 +26,7 @@
 
 
 
-/** \class TimeSteppingProjectOn constraints
+/** \class TimeSteppingDirectProjection
  *  \brief Time-Stepping scheme with a direct projection onto the constraint 
  *  thanks to the GGL augmentation of the system
  *
@@ -92,17 +92,18 @@ protected:
 public:
 
   /** Constructor with the time-discretisation.
-  *  \param a pointer to a timeDiscretisation (linked to the model
-  *  that owns this simulation)
-     \param a one step integrator
-     \param a one step non smooth problem for the velocity formulation
-     \param a one step non smooth problem for the position formulation
+   *  \param td a pointer to a timeDiscretisation (linked to the model
+   *     that owns this simulation)
+   *  \param osi a one step integrator
+   *  \param osnspb_velo a one step non smooth problem for the velocity formulation
+   *  \param osnspb_pos a one step non smooth problem for the position formulation
+   *  \param _level
   */
   TimeSteppingDirectProjection(SP::TimeDiscretisation td,
-                                   SP::OneStepIntegrator osi,
-                                   SP::OneStepNSProblem osnspb_velo,
-                                   SP::OneStepNSProblem osnspb_pos,
-                                   unsigned int _level = 1);
+                               SP::OneStepIntegrator osi,
+                               SP::OneStepNSProblem osnspb_velo,
+                               SP::OneStepNSProblem osnspb_pos,
+                               unsigned int _level = 1);
 
   virtual void initOSNS();
 
@@ -114,13 +115,13 @@ public:
 
 
 
-
   virtual void updateWorldFromDS()
   {
     ;
   }
 
   /** get the Number of iteration of projection
+      \return _nbProjectionIteration
    */
   inline unsigned int nbProjectionIteration()
   {

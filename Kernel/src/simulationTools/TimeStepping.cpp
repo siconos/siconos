@@ -376,13 +376,18 @@ void TimeStepping::computeOneStep()
 }
 
 
-void TimeStepping::computeInitialResidu()
+void TimeStepping::initializeNewtonLoop()
 {
-  //  std::cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
   assert(!isnan(tkp1));
 
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+
+  for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
+  {
+    (*it)->computeInitialNewtonState();
+    (*it)->computeResidu();
+  }
 
   if (indexSet0->size()>0)
   {
@@ -390,8 +395,6 @@ void TimeStepping::computeInitialResidu()
     assert(_levelMaxForOutput >= _levelMinForOutput);
     //    assert(_levelMinForInput >=0);
     assert(_levelMaxForInput >= _levelMinForInput);
-
-
     updateOutput(_levelMinForOutput);
     updateInput(_levelMaxForInput);
   }
@@ -516,7 +519,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   InteractionsGraph& indexSet0 = *model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
 
-  computeInitialResidu();
+  initializeNewtonLoop();
+
   if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
       || isLinear)
   {

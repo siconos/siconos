@@ -178,11 +178,11 @@ public:
     return _newtonNbSteps;
   }
 
-  /** compute initial residu
-   * It computes the initial residu to start the newton algorithm.
-   *
+  /** initialize the Newton
+   * It computes the initial residu and set the, if needed to Newton variable
+   * to start the newton algorithm.
    */
-  void computeInitialResidu();
+  void initializeNewtonLoop();
 
 
   void prepareNewtonIteration();
