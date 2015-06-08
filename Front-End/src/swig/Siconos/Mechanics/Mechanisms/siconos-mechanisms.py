@@ -36,16 +36,16 @@ my_PI=3.14159265
 # would be better in install_path/share ...
 # would be better in install_path/share ...
 exec(compile(open(install_path+"/mbtbDefaultOptions.py").read(), install_path+"/mbtbDefaultOptions.py", 'exec'))
-print("siconos-mechanisms.py: ", install_path+"/mbtbDefaultOptions.py loaded")
+print("siconos-mechanisms.py, info:", install_path+"/mbtbDefaultOptions.py loaded")
 
 try:
     exec(compile(open("mbtbLocalOptions.py").read(), "mbtbLocalOptions.py", 'exec'))
-    print("siconos-mechanisms.py: mbtbLocalOptions.py loaded")
+    print("siconos-mechanisms.py, info: mbtbLocalOptions.py loaded")
 except :
     print("siconos-mechanisms.py, info: mbtbLocalOptions.py not defined")
 
 exec(compile(open("bodydef.py").read(), "bodydef.py", 'exec'))
-print("run.py: bodydef.py loaded")
+print("siconos-mechanisms.py, info: bodydef.py loaded")
 
 if with3D:
     from OCC.BRepPrimAPI import *
@@ -64,7 +64,7 @@ mbtb.MBTB_init(NBBODIES,NBJOINTS,NBCONTACTS)
 
 if NBCONTACTS>0:
     mbtb.MBTB_ContactSetDParam(2,0,0,ContactArtefactLength)
-    mbtb.MBTB_ContactSetDParam(3,0,0,ArtefactThershold)
+    mbtb.MBTB_ContactSetDParam(3,0,0,ArtefactThreshold)
     mbtb.MBTB_ContactSetDParam(4,0,0,NominalForce)
 
 for idContact in range(NBCONTACTS):
@@ -92,7 +92,9 @@ for idBody in range(NBBODIES):
                         initPos[idBody], initCenterMass[idBody],
                         inertialMatrix[idBody],
                         plugin, fctfext[idBody],plugin,fctmext[idBody],
-                        plugin, fctfint[idBody],plugin,fctmint[idBody])
+                        plugin, fctfint[idBody],plugin,fctmint[idBody],
+                        plugin, fctfintjacq[idBody],plugin,fctmintjacq[idBody],
+                        plugin, fctfintjacv[idBody],plugin,fctmintjacv[idBody])
 
     mbtb.MBTB_BodySetVelocity(idBody,initVel[idBody])
 

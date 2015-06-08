@@ -1,35 +1,51 @@
-#view Param
+# Default values for bodies and contact parameters. Should be change in bodydef.py if needed.
 mbtb.MBTB_MAX_BODIES_NUMBER 
 mbtb.MBTB_MAX_CONTACTS_NUMBER
 mbtb.MBTB_MAX_JOINTS_NUMBER
 
+initVel=numpy.array([(0,0,0,0,0,0) for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctfext=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctmext=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctfint=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctmint=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctfintjacq=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctmintjacq=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctfintjacv=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctmintjacv=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+
+NBARTEFACTS=0
+
+
+contactNormalFromFace1=array.array('I',[ 1 for i  in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
+contactOffsetP1=array.array('I',[1 for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
+
+
+
+# View and rendering parameters
+with3D=1                   # rendering window
+
+ContactArtefactLength=10.0 #
+ArtefactThreshold=1e-7     #
+NominalForce=0             #
+
 bodyDraw=array.array('I',[1 for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
 bodyTrans=array.array('d',[2.5 for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-initVel=numpy.array([(0,0,0,0,0,0) for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-               
-#view parameters
-ContactArtefactLength=10.0
-ArtefactThershold=1e-7
-NominalForce=0
+
 contactDraw1=array.array('I',[ 1 for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
 contactDraw2=array.array('I',[ 1 for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
 
 contactTrans1=array.array('d',[2.7  for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
 contactTrans2=array.array('d',[2.7  for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
 
-NBARTEFACTS=0
-contactNormalFromFace1=array.array('I',[ 1 for i  in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
-contactOffsetP1=array.array('I',[1 for i in range(mbtb.MBTB_MAX_CONTACTS_NUMBER)])
 
+freqUpdate=1    # frequency update of the view windows
+freqOutput=1    # frequency update of data output
+dumpGraphic=0   # if 1 dump graphic file
 
-#3D parameters
-with3D=1
-freqUpdate=1
-freqOutput=1
-dumpGraphic=0
-drawMode=mbtb.MBTB_ARTEFACT_REACTION+mbtb.MBTB_ARTEFACT_NORMAL+mbtb.MBTB_ARTEFACT_P1P2
-#drawMode=mbtb.MBTB_ARTEFACT_P1P2
-#Simulation parameters
+drawMode=mbtb.MBTB_ARTEFACT_REACTION+mbtb.MBTB_ARTEFACT_NORMAL+mbtb.MBTB_ARTEFACT_P1P2 #drawMode=mbtb.MBTB_ARTEFACT_P1P2
+
+#Default simulation parameters
+
 stepSize=1e-4
 stepNumber=60000
 TSdeactivateYPosThreshold=1e-4

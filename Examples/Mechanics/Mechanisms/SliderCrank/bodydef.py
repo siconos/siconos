@@ -87,22 +87,22 @@ else :
 ## REQUIRED the external forces.
 fctfext=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS',''])
 ## REQUIRED the external momentums.
-fctmext=numpy.array(['','','',''])
+#fctmext=numpy.array(['','','',''])
 
 ## REQUIRED the internal forces.
 fctfint=numpy.array(['internalForcesB1','','',''])
 ## REQUIRED the internal momentums.
-fctmint=numpy.array(['','','',''])
+#fctmint=numpy.array(['','','',''])
 
 ## REQUIRED the internal forces.
 fctfintjacq=numpy.array(['internalForcesB1_Jacq','','',''])
 ## REQUIRED the internal momentums.
-fctmintjacq=numpy.array(['','','',''])
+#fctmintjacq=numpy.array(['','','',''])
 
 ## REQUIRED the internal forces.
-fctfintjacv=numpy.array(['','','',''])
+#fctfintjacv=numpy.array(['','','',''])
 ## REQUIRED the internal momentums.
-fctmintjacv=numpy.array(['','','',''])
+#fctmintjacv=numpy.array(['','','',''])
 
 
 #JOINTS DESCRIPTION

@@ -49,7 +49,7 @@ void MBTB_init(unsigned int NumOfBodies, unsigned int NumOfJoints, unsigned int 
 void MBTB_updateDSFromSiconos()
 {
   //ACE_times[ACE_TIMER_UPDATE_POS].start();
-  for(int numDS=0; numDS<sNbOfBodies; numDS++)
+  for(unsigned int numDS=0; numDS<sNbOfBodies; numDS++)
   {
     SP::SiconosVector q = sDS[numDS]->q();
     //printf("step %d siconos %s ->q:\n",mTimerCmp,sPieceName[numDS]);
@@ -240,6 +240,7 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
   p =new MBTB_Body(q10,v10,mass,inertialMatrix,modelCenterMass,
                    BodyName, BodyName);
 
+  // set external forces plugin
   if(pluginFextFct.length()>1)
   {
     p->setComputeFExtFunction(pluginFextLib,pluginFextFct);
@@ -248,23 +249,35 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
   {
     p->setComputeMExtFunction(pluginMextLib,pluginMextFct);
   }
-  if(pluginFintJacqFct.length()>1)
+
+  // set internal forces plugin
+  if(pluginFintFct.length()>1)
   {
-    p->setComputeJacobianFIntqFunction(pluginFintJacqLib,pluginFintJacqFct);
-  }
-  if(pluginMintJacqFct.length()>1)
-  {
-    p->setComputeJacobianMIntqFunction(pluginMintJacqLib,pluginMintJacqFct);
-  }
-  if(pluginFintJacvFct.length()>1)
-  {
-    p->setComputeJacobianFIntvFunction(pluginFintJacvLib,pluginFintJacvFct);
-  }
-  if(pluginMintJacvFct.length()>1)
-  {
-    p->setComputeJacobianMIntvFunction(pluginMintJacvLib,pluginMintJacvFct);
+    p->setComputeFIntFunction(pluginFintLib,pluginFintFct);
+    if(pluginFintJacqFct.length()>1)
+    {
+      p->setComputeJacobianFIntqFunction(pluginFintJacqLib,pluginFintJacqFct);
+    }
+    if(pluginFintJacvFct.length()>1)
+    {
+      p->setComputeJacobianFIntvFunction(pluginFintJacvLib,pluginFintJacvFct);
+    }
   }
 
+  if(pluginMintFct.length()>1)
+  {
+    p->setComputeMIntFunction(pluginMintLib,pluginMintFct);
+
+    if(pluginMintJacqFct.length()>1)
+    {
+      p->setComputeJacobianMIntqFunction(pluginMintJacqLib,pluginMintJacqFct);
+    }
+
+    if(pluginMintJacvFct.length()>1)
+    {
+      p->setComputeJacobianMIntvFunction(pluginMintJacvLib,pluginMintJacvFct);
+    }
+  }
 
 
 

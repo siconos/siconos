@@ -32,14 +32,16 @@ extern "C" void externalForcesB1(double t, double *f, unsigned int size_z,double
   f[0]=0;
   f[1]=0;
   f[2]=-9.81*0.038;
-
+  // printf("externalForcesB1 :\n");
+  // printf("f[0] = %e\t f[1] = %e\t, f[2]=%e\n",f[0],f[1],f[2]);
 }
 
 extern "C" void internalForcesB1(double t, double *q, double *v, double *f, unsigned int size_z,double *z){
   f[0]=0;
   f[1]=0;
   f[2]=1e4*q[2];
-
+  // printf("internalForcesB1 :\n");
+  // printf("f[0] = %e\t f[1] = %e\t, f[2]=%e\n",f[0],f[1],f[2]);
 }
 extern "C" void internalForcesB1_Jacq(double t, double *q, double *v, double *jac, unsigned int size_z,double *z){
   for (int i =0; i < 3; i++)
@@ -48,6 +50,8 @@ extern "C" void internalForcesB1_Jacq(double t, double *q, double *v, double *ja
       jac[i+j*3]=0.0;
   }
   jac[2+2*3]=1e4;
+  // printf("internalForcesB1_Jacq :\n");
+  // printf("jac[2+2*3] = %e\n", jac[2+2*3]);
 }
 extern "C" void externalForcesB2(double t,double *f, unsigned  int size_z,double *z){
   f[0]=0;
