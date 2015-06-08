@@ -222,7 +222,11 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
                     const std::string& pluginFextLib,  const std::string& pluginFextFct,
                     const std::string& pluginMextLib,  const std::string& pluginMextFct,
                     const std::string& pluginFintLib,  const std::string& pluginFintFct,
-                    const std::string& pluginMintLib,  const std::string& pluginMintFct)
+                    const std::string& pluginMintLib,  const std::string& pluginMintFct,
+                    const std::string& pluginFintJacqLib,  const std::string& pluginFintJacqFct,
+                    const std::string& pluginMintJacqLib,  const std::string& pluginMintJacqFct,
+                    const std::string& pluginFintJacvLib,  const std::string& pluginFintJacvFct,
+                    const std::string& pluginMintJacvLib,  const std::string& pluginMintJacvFct)
 {
   assert(sNbOfBodies > numDS &&"MBTB_BodyBuild numDS out of range.");
   unsigned int qDim=7;
@@ -244,14 +248,24 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
   {
     p->setComputeMExtFunction(pluginMextLib,pluginMextFct);
   }
-  if(pluginFintFct.length()>1)
+  if(pluginFintJacqFct.length()>1)
   {
-    p->setComputeFIntFunction(pluginFintLib,pluginFintFct);
+    p->setComputeJacobianFIntqFunction(pluginFintJacqLib,pluginFintJacqFct);
   }
-  if(pluginMintFct.length()>1)
+  if(pluginMintJacqFct.length()>1)
   {
-    p->setComputeMIntFunction(pluginMintLib,pluginMintFct);
+    p->setComputeJacobianMIntqFunction(pluginMintJacqLib,pluginMintJacqFct);
   }
+  if(pluginFintJacvFct.length()>1)
+  {
+    p->setComputeJacobianFIntvFunction(pluginFintJacvLib,pluginFintJacvFct);
+  }
+  if(pluginMintJacvFct.length()>1)
+  {
+    p->setComputeJacobianMIntvFunction(pluginMintJacvLib,pluginMintJacvFct);
+  }
+
+
 
 
   sDS[numDS].reset(p);

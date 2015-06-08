@@ -90,9 +90,20 @@ fctfext=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS','']
 fctmext=numpy.array(['','','',''])
 
 ## REQUIRED the internal forces.
-fctfint=numpy.array(['','','',''])
+fctfint=numpy.array(['internalForcesB1','','',''])
 ## REQUIRED the internal momentums.
 fctmint=numpy.array(['','','',''])
+
+## REQUIRED the internal forces.
+fctfintjacq=numpy.array(['internalForcesB1_Jacq','','',''])
+## REQUIRED the internal momentums.
+fctmintjacq=numpy.array(['','','',''])
+
+## REQUIRED the internal forces.
+fctfintjacv=numpy.array(['','','',''])
+## REQUIRED the internal momentums.
+fctmintjacv=numpy.array(['','','',''])
+
 
 #JOINTS DESCRIPTION
 ## REQUIRED the number of joints
