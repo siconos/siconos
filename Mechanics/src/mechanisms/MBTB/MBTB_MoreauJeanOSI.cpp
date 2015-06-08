@@ -65,7 +65,7 @@ bool MBTB_MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigne
   
   assert(i==1);
   double y = (inter->y(i-1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity 
+  //double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
  
   DEBUG_PRINTF("MBTB_MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
 
@@ -84,7 +84,7 @@ bool MBTB_MoreauJeanOSI::removeInteractionInIndexSet(SP::Interaction inter, unsi
 
 {
   assert(i==1);
-  double h = simulationLink->timeStep();
+//  double h = simulationLink->timeStep();
   double y = (inter->y(i-1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity 
 

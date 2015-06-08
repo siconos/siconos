@@ -16,39 +16,32 @@
 
  */
 void _MBTB_updateContactFromDS();
-//! It updates the contacts CAD model from the body.
-/*!
-  \param [in] int numDS, update the cad model of contact related to the ds of id numDS.
+
+/** It updates the contacts CAD model from the body.
+ * \param [in] numDS int,  update the cad model of contact related to the ds of id numDS.
  */
 void _MBTB_updateContactFromDS(int numDS);
-//!It prints the header of the output file.
-/*!
 
- */
-//!
-/*!
-
- */
 FILE* _MBTB_open(std::string filename, std::string args);
 
 void _MBTB_close(FILE *);
 
-
+/**!It prints the header of the output file.
+ * \param fp output file
+ */
 void _MBTB_printHeader(FILE *fp);
-//!It prints the current state in the output file.
-/*!
 
+
+/**It prints the current state in the output file.
+ * \param fp output file
  */
 void _MBTB_printStep(FILE *fp);
 
-//!It displays the current state on std output.
-/*!
-
+/** It displays the current state on std output.
  */
 void _MBTB_displayStep();
-//!It performs a step.
-/*!
-  It performs a step including the siconos call and the graphical update.
+
+/** It performs a step including the siconos call and the graphical update.
  */
 void _MBTB_STEP();
 

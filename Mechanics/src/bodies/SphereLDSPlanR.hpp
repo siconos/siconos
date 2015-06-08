@@ -46,13 +46,13 @@ private:
 public:
 
   /** Constructor
-
-  \param disk radius
+  \param r disk radius
   \param A
   \param B
   \param C
+  \param D
   */
-  SphereLDSPlanR(double, double, double, double, double);
+  SphereLDSPlanR(double r, double A, double B, double C, double D);
 
   double distance(double, double, double, double);
 

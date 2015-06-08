@@ -5,8 +5,6 @@
 #include "ace.h"
 
 
-
-
 void _MBTB_updateContactFromDS()
 {
   for(unsigned int numC=0; numC<sNbOfContacts; numC++)
@@ -243,18 +241,18 @@ void _MBTB_displayStep()
   if (sDisplayStepBodies)
   {
     printf("STEP Number = %d\t",sTimerCmp);
-    for(int numDS =0; numDS<sNbOfBodies; numDS++)
+    for(unsigned int numDS =0; numDS<sNbOfBodies; numDS++)
     {
       printf("Body number %i\n", numDS);
       printf("Position of body %i\n", numDS);
-      for(int ii=0; ii<sDS[numDS]->q()->size(); ii++)
+      for(unsigned int ii=0; ii<sDS[numDS]->q()->size(); ii++)
       {
         printf("%e",sDS[numDS]->q()->getValue(ii));
         printf("\t");
       }
       printf("\n");
       printf("Velocity of body %i\n", numDS);
-      for(int ii=0; ii<sDS[numDS]->velocity()->size(); ii++)
+      for(unsigned int ii=0; ii<sDS[numDS]->velocity()->size(); ii++)
       {
         printf("%e",sDS[numDS]->velocity()->getValue(ii));
         printf("\t");
@@ -280,7 +278,7 @@ void _MBTB_displayStep()
   if (sDisplayStepJoints)
   {
     printf("STEP Number = %d\t",sTimerCmp);
-    for(int numJ=0; numJ<sNbOfJoints; numJ++)
+    for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
     {
       printf("Joint number %i\n", numJ);
       printf("interactionjointR->display  %i\n", numJ);
@@ -333,7 +331,7 @@ void _MBTB_displayStep()
   if (sDisplayStepContacts)
   {
     printf("STEP Number = %d\t",sTimerCmp);
-    for(int numC=0; numC<sNbOfContacts; numC++)
+    for(unsigned int numC=0; numC<sNbOfContacts; numC++)
     {
       printf("Contact number %i\n", numC);
       printf("Contact forces in contact  %i\n", numC);
@@ -422,14 +420,14 @@ void _MBTB_printStep(FILE *fp)
 {
   //fprintf(fp,"_MBTB_printStep ");
   fprintf(fp,"%d\t",sTimerCmp);
-  for(int numDS =0; numDS<sNbOfBodies; numDS++)
+  for(unsigned int numDS =0; numDS<sNbOfBodies; numDS++)
   {
-    for(int ii=0; ii<sDS[numDS]->q()->size(); ii++)
+    for(unsigned int ii=0; ii<sDS[numDS]->q()->size(); ii++)
     {
       fprintf(fp,"%e",sDS[numDS]->q()->getValue(ii));
       fprintf(fp,"\t");
     }
-    for(int ii=0; ii<sDS[numDS]->velocity()->size(); ii++)
+    for(unsigned int ii=0; ii<sDS[numDS]->velocity()->size(); ii++)
     {
       fprintf(fp,"%e",sDS[numDS]->velocity()->getValue(ii));
       fprintf(fp,"\t");
@@ -446,15 +444,15 @@ void _MBTB_printStep(FILE *fp)
     fprintf(fp,"%e\t",ec*0.5);
     //    printf("ec=%e",ec*0.5);
   }
-  for(int numJ=0; numJ<sNbOfJoints; numJ++)
+  for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
   {
-    for(int ii=0; ii<3; ii++)
+    for(unsigned int ii=0; ii<3; ii++)
     {
       fprintf(fp,"%e",sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
       fprintf(fp,"\t");
     }
     SiconosVector vaux(3),res(3);
-    for(int ii=3; ii<6; ii++)
+    for(unsigned int ii=3; ii<6; ii++)
     {
       vaux.setValue(ii-3,sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
     }
@@ -479,15 +477,15 @@ void _MBTB_printStep(FILE *fp)
     }
 
   }
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
-    for(int ii=0; ii<3; ii++)
+    for(unsigned int ii=0; ii<3; ii++)
     {
       fprintf(fp,"%e",sContacts[numC]->relation()->contactForce()->getValue(ii));
       fprintf(fp,"\t");
     }
     SiconosVector vaux(3),res(3);
-    for(int ii=3; ii<6; ii++)
+    for(unsigned int ii=3; ii<6; ii++)
     {
       vaux.setValue(ii-3,sContacts[numC]->relation()->contactForce()->getValue(ii));
     }
@@ -500,7 +498,7 @@ void _MBTB_printStep(FILE *fp)
       fprintf(fp,"\t");
     }
   }
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
 
     SP::InteractionsGraph indexSet1=myModel->nonSmoothDynamicalSystem()->topology()->indexSet(1);
@@ -521,7 +519,7 @@ void _MBTB_printStep(FILE *fp)
     fprintf(fp,"%d\t",find);
 
   }
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     fprintf(fp,"%e\t%e\t%e\t",
             sContacts[numC]->relation()->pc1()->getValue(0),
@@ -529,7 +527,7 @@ void _MBTB_printStep(FILE *fp)
             sContacts[numC]->relation()->pc1()->getValue(2));
 
   }
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();
     if (sizeY==1)
@@ -545,7 +543,7 @@ void _MBTB_printStep(FILE *fp)
             sContacts[numC]->interaction()->y(0)->getValue(2));
     }
   }
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();
     if (sizeY==1)
@@ -566,11 +564,11 @@ void _MBTB_printStep(FILE *fp)
 }
 void _MBTB_printHeader(FILE *fp)
 {
-  int cmp=1;
+  unsigned int cmp=1;
   //fprintf(fp,"_MBTB_printStep\t");
   fprintf(fp,"stepNum1\t");
   cmp++;
-  for(int numDS =0; numDS<sNbOfBodies; numDS++)
+  for(unsigned int numDS =0; numDS<sNbOfBodies; numDS++)
   {
     for(unsigned int icmp=cmp; icmp<=cmp+7-1; ++icmp)
     {
@@ -585,7 +583,7 @@ void _MBTB_printHeader(FILE *fp)
     fprintf(fp,"EC%d_ds_%d\t",cmp,numDS);
     cmp++;
   }
-  for(int numJ=0; numJ<sNbOfJoints; numJ++)
+  for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
   {
     for(unsigned int icmp=cmp; icmp<=cmp+6-1; ++icmp)
     {
@@ -601,7 +599,7 @@ void _MBTB_printHeader(FILE *fp)
       cmp+=6;
     }
   }
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     for(unsigned int icmp=cmp; icmp<=cmp+6-1; ++icmp)
     {
@@ -614,12 +612,12 @@ void _MBTB_printHeader(FILE *fp)
     fprintf(fp,"MomentsOfContactForce_%s_%d_%d\t",sContacts[numC]->contactName(),cmp,cmp+6-1,numC);
     cmp+=6;
     }*/
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     fprintf(fp,"ContactState_%s_%d\t",sContacts[numC]->contactName(),cmp);
     cmp++;
   }
-  for(int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     for(unsigned int icmp=cmp; icmp<=cmp+2; ++icmp)
     {
@@ -627,7 +625,7 @@ void _MBTB_printHeader(FILE *fp)
     }
     cmp+=3;
   }
- for(int numC=0; numC<sNbOfContacts; numC++)
+ for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     for(unsigned int icmp=cmp; icmp<=cmp+2; ++icmp)
     {
@@ -636,7 +634,7 @@ void _MBTB_printHeader(FILE *fp)
     cmp+=3;
   }
 
- for(int numC=0; numC<sNbOfContacts; numC++)
+ for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     for(unsigned int icmp=cmp; icmp<=cmp+2; ++icmp)
     {

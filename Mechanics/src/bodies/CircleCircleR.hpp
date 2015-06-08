@@ -65,6 +65,7 @@ public:
   /** computeh implementation, see LagrangianScleronomousR
       \param q
       \param z
+      \param y
   */
   void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
