@@ -20,10 +20,10 @@ from Siconos.Mechanics.ContactDetection import SpaceFilter
 from Siconos.Mechanics import IO
 from Siconos.Mechanics.ContactDetection import Avatar, Contactor
 
-install_path= "/usr/local"+"/bin"
+install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
 print("install_path :", install_path)
 
-build_path= "/home/build/maurice/Release/Front-End" +"/src/mechanisms/"
+build_path= "@CMAKE_BINARY_DIR@" +"/src/mechanisms/"
 print("build_path : ", build_path)
 
 SiconosMechanisms_BUILD=build_path
