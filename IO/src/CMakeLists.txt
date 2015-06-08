@@ -42,6 +42,7 @@ COMPILE_WITH(SiconosKernel REQUIRED)
 COMPILE_WITH(SiconosMechanics)
 IF(SiconosMechanics_FOUND)
   SET(HAVE_SICONOS_MECHANICS TRUE)
+  INSTALL(FILES ${CMAKE_BINARY_DIR}/src/MechanicsIO.hpp DESTINATION include/Siconos/IO)
 ENDIF(SiconosMechanics_FOUND)
 
 COMPILE_WITH(SiconosControl)
