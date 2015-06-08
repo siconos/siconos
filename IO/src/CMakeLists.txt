@@ -51,6 +51,10 @@ IF(SiconosControl_FOUND)
   SET(HAVE_SICONOS_CONTROL TRUE)
 ENDIF(SiconosControl_FOUND)
 
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/Register.hpp DESTINATION include/Siconos/IO)
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/SiconosRestart.hpp DESTINATION include/Siconos/IO)
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/SiconosFull.hpp DESTINATION include/Siconos/IO)
+
 COMPILE_WITH(GMP REQUIRED)
 
 # contact detection
