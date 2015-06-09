@@ -320,7 +320,7 @@ int main(int argc, char* argv[])
 
     std::cout << "Error = "<< error << std::endl;
 
-    if (error > 1e-12)
+    if (error > 1e-10)
     {
     //  (dataPlot - dataPlotRef).display();
 
