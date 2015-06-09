@@ -498,7 +498,8 @@ void  MBTB_initSimu(double hTS, int withProj)
   SP::MoreauJeanCombinedProjectionOSI pOSI2;
   if (withProj==0 or withProj==1)
   {
-    pOSI1.reset(new MBTB_MoreauJeanOSI(sDS[0],sDParams[0]));
+    pOSI1.reset(new MBTB_MoreauJeanOSI(sDParams[0]));
+    pOS11->insertDynamicalSystem(sDS[0]);
     pOSI1->_deactivateYPosThreshold= sDParams[2];
     pOSI1->_deactivateYVelThreshold= sDParams[3];
     pOSI1->_activateYPosThreshold= sDParams[4];
@@ -510,11 +511,13 @@ void  MBTB_initSimu(double hTS, int withProj)
   SP::MoreauJeanCombinedProjectionOSI pOSI2;
   if (withProj==0)
   {
-    pOSI0.reset(new MoreauJeanOSI(sDS[0],sDParams[0]));
+    pOSI0.reset(new MoreauJeanOSI(sDParams[0]));
+    pOSI0->insertDynamicalSystem(sDS[0]);
   }
   else if(withProj==1)
   {
-    pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDS[0],sDParams[0]));
+    pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDParams[0]));
+    pOSI1->insertDynamicalSystem(sDS[0]);
     pOSI1->setDeactivateYPosThreshold(sDParams[2]);
     pOSI1->setDeactivateYVelThreshold(sDParams[3]);
     pOSI1->setActivateYPosThreshold(sDParams[4]);
@@ -523,7 +526,8 @@ void  MBTB_initSimu(double hTS, int withProj)
 #endif
   else if  (withProj==2)
   {
-    pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDS[0],sDParams[0]));
+    pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDParams[0]));
+    pOSI2->insertDynamicalSystem(sDS[0]);
   }
 
 
@@ -551,7 +555,8 @@ void  MBTB_initSimu(double hTS, int withProj)
 
   /** \warning VA 3/12/2011
    *  I do not understand why pOSI is multiply reset to another pointer
-   *  Is it jutified ?
+   *  Is it justified ?
+   *  9/06/2015 :  VA commented the use of multiple OSI
    */
 
   for(unsigned int numDS =1; numDS<sNbOfBodies; numDS++)
@@ -559,33 +564,37 @@ void  MBTB_initSimu(double hTS, int withProj)
 #ifdef MBTB_MOREAU_YES
     if (withProj==0 or withProj==1)
      {
-       pOSI1.reset(new MBTB_MoreauJeanOSI(sDS[numDS],sDParams[0]));
-       pOSI1->_deactivateYPosThreshold= sDParams[2];
-       pOSI1->_deactivateYVelThreshold= sDParams[3];
-       pOSI1->_activateYPosThreshold= sDParams[4];
-       pOSI1->_activateYVelThreshold= sDParams[5];
-       sSimu->insertIntegrator(pOSI1);
+       //pOSI1.reset(new MBTB_MoreauJeanOSI(sDParams[0]));
+       pOSI1->insertDynamicalSystem(sDS[numDS]);
+       // pOSI1->_deactivateYPosThreshold= sDParams[2];
+       // pOSI1->_deactivateYVelThreshold= sDParams[3];
+       // pOSI1->_activateYPosThreshold= sDParams[4];
+       // pOSI1->_activateYVelThreshold= sDParams[5];
+       // sSimu->insertIntegrator(pOSI1);
      }
 #else
     if (withProj==0)
     {
-      pOSI0.reset(new MoreauJeanOSI(sDS[numDS],sDParams[0]));
-      sSimu->insertIntegrator(pOSI0);
+      //pOSI0.reset(new MoreauJeanOSI(sDParams[0]));
+      pOSI0->insertDynamicalSystem(sDS[numDS]);
+      // sSimu->insertIntegrator(pOSI0);
     }
     else if (withProj==1)
     {
-      pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDS[numDS],sDParams[0]));
-      pOSI1->setDeactivateYPosThreshold(sDParams[2]);
-      pOSI1->setDeactivateYVelThreshold(sDParams[3]);
-      pOSI1->setActivateYPosThreshold(sDParams[4]);
-      pOSI1->setActivateYVelThreshold(sDParams[5]);
-      sSimu->insertIntegrator(pOSI1);
+      //pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDParams[0]));
+      pOSI1->insertDynamicalSystem(sDS[numDS]);
+      // pOSI1->setDeactivateYPosThreshold(sDParams[2]);
+      // pOSI1->setDeactivateYVelThreshold(sDParams[3]);
+      // pOSI1->setActivateYPosThreshold(sDParams[4]);
+      // pOSI1->setActivateYVelThreshold(sDParams[5]);
+      // sSimu->insertIntegrator(pOSI1);
     }
 #endif
     else if  (withProj==2)
     {
-      pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDS[numDS],sDParams[0]));
-      sSimu->insertIntegrator(pOSI2);
+      //pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDParams[0]));
+      pOSI2->insertDynamicalSystem(sDS[numDS]);
+      // sSimu->insertIntegrator(pOSI2);
     }
   }
 

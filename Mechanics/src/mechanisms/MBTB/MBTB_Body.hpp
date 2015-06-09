@@ -16,25 +16,36 @@ protected:
   const std::string& _cadFileName;
   MBTB_Body();
 public:
-  /**
-     builder
-     \param [in] SP::SiconosVector q0, initial position of the center of mass.
-     \param [in] SP::SiconosVector v0, initial velocity.
-     \param [in]  double& mass,the mass.
-     \param [in]  SP::SimpleMatrix I,matrix in R^{3,3}
-     \param [in]  SP::SiconosVector centerOfMass,coordinate of the mass center in the just loaded model
-     \param [in] const std::string& BodyName, a string for the body name.
-     \param [in] const std::string& CADFile, the cad file.
-     \param [in] const std::string& pluginLib, the path to the plugin library.
-     \param [in] const std::string& plunginFct, the name of the pluged fonction
+  /** Basic constructor without plugin builder
+     \param [in] q0 SP::SiconosVector initial position of the center of mass.
+     \param [in] v0 SP::SiconosVector initial velocity.
+     \param [in] mass double& ,the mass.
+     \param [in] I SP::SimpleMatrix matrix in R^{3,3}
+     \param [in] centerOfMass SP::SiconosVector coordinate of the mass center in the just loaded model
+     \param [in] BodyName const std::string& , a string for the body name.
+     \param [in] CADFile const std::string& , the cad file.
+     \param [in] pluginLib const std::string& , the path to the plugin library.
+     \param [in] pluginFct const std::string& , the name of the pluged fonction
    */
   MBTB_Body(SP::SiconosVector q0, SP::SiconosVector v0,
             double& mass,SP::SimpleMatrix I,SP::SiconosVector centerOfMass,
             const std::string& BodyName,  const std::string& CADFile,
-            const std::string& pluginLib,  const std::string& plunginFct);
+            const std::string& pluginLib,  const std::string& pluginFct);
+
+
+  /** Constructor without plugin builder
+     \param [in] q0 SP::SiconosVector initial position of the center of mass.
+     \param [in] v0 SP::SiconosVector initial velocity.
+     \param [in] mass double& ,the mass.
+     \param [in] I SP::SimpleMatrix matrix in R^{3,3}
+     \param [in] centerOfMass SP::SiconosVector coordinate of the mass center in the just loaded model
+     \param [in] BodyName const std::string& , a string for the body name.
+     \param [in] CADFile const std::string& , the cad file.
+    */
   MBTB_Body(SP::SiconosVector q0, SP::SiconosVector v0,
             double& mass,SP::SimpleMatrix I,SP::SiconosVector centerOfMass,
             const std::string& BodyName,  const std::string& CADFile);
+
   virtual ~MBTB_Body();
   inline SP::SiconosVector centerOfMass() const
   {
