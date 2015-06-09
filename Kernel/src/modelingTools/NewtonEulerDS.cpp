@@ -123,7 +123,8 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _T->setValue(0, 0, 1.0);
   _T->setValue(1, 1, 1.0);
   _T->setValue(2, 2, 1.0);
-  updateT();
+  computeT();
+  updateMObjToAbs();
   initForces();
 }
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double  mass, SP::SiconosMatrix inertialMatrix):
@@ -387,8 +388,8 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     {
       computeMExt(time);
       SiconosVector aux(3);
-      updateMObjToAbs();
-      prod(*_mExt, *_MObjToAbs, aux);
+      //updateMObjToAbs();
+      prod( *_mExt, *_MObjToAbs, aux); // aux =  transpose(_MObjToAbs) * _mext
       *_mExt = aux;
       _forces->setBlock(3, *_mExt);
     }
@@ -406,11 +407,13 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     {
       computeMInt(time, q , v);
       SiconosVector aux(3);
-      updateMObjToAbs();
-      prod(*_mInt, *_MObjToAbs, aux);
+      //updateMObjToAbs();
+      prod(*_mInt, *_MObjToAbs, aux);// aux =  transpose(_MObjToAbs) * _mInt
       *_mInt = aux;
-      std::cout << "NewtonEulerDS::computeForces: _mint: " <<std::endl;
-      _mInt->display();
+      // std::cout << "_MObjToAbs " <<std::endl;
+      // _MObjToAbs->display();
+      //std::cout << "NewtonEulerDS::computeForces: _mint: " <<std::endl;
+      //_mInt->display();
       _forces->setValue(3, _forces->getValue(3) - _mInt->getValue(0));
       _forces->setValue(4, _forces->getValue(4) - _mInt->getValue(1));
       _forces->setValue(5, _forces->getValue(5) - _mInt->getValue(2));
@@ -454,7 +457,13 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     if (_jacobianMIntq)
     {
       computeJacobianMIntq(time);
-      _jacobianqForces->setBlock(3,0,-1.0* *_jacobianMIntq);
+      SimpleMatrix *aux = new SimpleMatrix(3,_qDim);
+      SimpleMatrix *RT  = new SimpleMatrix(3,3);
+      //updateMObjToAbs();
+      RT->trans(*_MObjToAbs);
+      prod(*RT, *_jacobianMIntq, *aux);
+      _jacobianqForces->setBlock(3,0, -1.0* *aux);
+      //_jacobianqForces->setBlock(3,0,-1.0* *_jacobianMIntq);
     }
     // std::cout << "_jacobianqForces : "<< std::endl;
     // _jacobianqForces->display();
@@ -593,16 +602,16 @@ void NewtonEulerDS::resetNonSmoothPart(unsigned int level)
 }
 
 
-void NewtonEulerDS::updateT()
+void NewtonEulerDS::computeT()
 {
-  updateT(_q);
+  computeT(_q);
 }
 
 
-void NewtonEulerDS::updateT(SP::SiconosVector q)
+void NewtonEulerDS::computeT(SP::SiconosVector q)
 {
 
-  //  std::cout <<"\n NewtonEulerDS::updateT(SP::SiconosVector q)\n  " <<std::endl;
+  //  std::cout <<"\n NewtonEulerDS::computeT(SP::SiconosVector q)\n  " <<std::endl;
   double q0 = q->getValue(3) / 2.0;
   double q1 = q->getValue(4) / 2.0;
   double q2 = q->getValue(5) / 2.0;
@@ -622,12 +631,12 @@ void NewtonEulerDS::updateT(SP::SiconosVector q)
 
 }
 
-void NewtonEulerDS::updateTdot()
+void NewtonEulerDS::computeTdot()
 {
-  updateTdot(_dotq);
+  computeTdot(_dotq);
 }
 
-void NewtonEulerDS::updateTdot(SP::SiconosVector dotq)
+void NewtonEulerDS::computeTdot(SP::SiconosVector dotq)
 {
 
   if (!_Tdot)

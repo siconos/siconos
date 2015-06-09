@@ -261,7 +261,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 		      q->display(););
 	
         neds->normalizeq();
-        neds->updateT();
+        neds->computeT();
       }
       else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {

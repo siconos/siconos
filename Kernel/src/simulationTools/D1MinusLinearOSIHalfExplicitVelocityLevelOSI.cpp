@@ -347,7 +347,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       DEBUG_EXPR(q->display());
       //q[3:6] must be normalized
       d->normalizeq();
-      d->updateT();
+      d->computeT();
       DEBUG_PRINT("new q after normalizing\n");
       DEBUG_EXPR(q->display());
 

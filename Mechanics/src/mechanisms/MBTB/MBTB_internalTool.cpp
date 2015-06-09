@@ -208,7 +208,7 @@ void _MBTB_STEP()
   MBTB_updateDSFromSiconos();
   _MBTB_updateContactFromDS();
   ACE_times[ACE_TIMER_SICONOS].start();
-  sSimu->setNewtonTolerance(1e-6);
+  sSimu->setNewtonTolerance(1e-10);
   sSimu->setNewtonMaxIteration(15);
   sSimu->advanceToEvent();
 

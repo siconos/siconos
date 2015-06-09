@@ -429,6 +429,7 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
       d->computeJacobianqForces(t);
       SP::SiconosMatrix T = d->T();
       DEBUG_EXPR(T->display(););
+      DEBUG_EXPR(K->display(););
       SimpleMatrix * buffer = new SimpleMatrix(*(d->mass()));
       prod(*K, *T, *buffer, true);
       scal(-h * h * _theta * _theta, *buffer, *(d->luW()), false);
@@ -450,7 +451,15 @@ void MoreauJeanOSI::computeInitialNewtonState()
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
-    updatePosition(*it);
+    SP::DynamicalSystem ds = *it;
+    updatePosition(ds);
+
+    if (Type::value(*ds) == Type::NewtonEulerDS){
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      d->computeT(qold);
+      d->updateMObjToAbs();
+    }
   }
   DEBUG_PRINT("MoreauJeanOSI::computeInitialNewtonState() ends\n");
 }
@@ -1304,7 +1313,8 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     // dotq->setValue(4, (q->getValue(4) - qold->getValue(4)) / h);
     // dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);
     // dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
-    d->updateT();
+
+    // d->computeT(); // We prefer only T() every step for Newton convergence reasons.
 
   }
 }

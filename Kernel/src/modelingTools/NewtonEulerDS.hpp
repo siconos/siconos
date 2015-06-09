@@ -761,11 +761,11 @@ public:
   void resetNonSmoothPart(unsigned int level);
 
 
-  virtual void updateT();
-  virtual void updateT(SP::SiconosVector q);
+  virtual void computeT();
+  virtual void computeT(SP::SiconosVector q);
 
-  virtual void updateTdot();
-  virtual void updateTdot(SP::SiconosVector dotq);
+  virtual void computeTdot();
+  virtual void computeTdot(SP::SiconosVector dotq);
 
 
   virtual void normalizeq();

@@ -174,7 +174,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
     setBlock(_jachq, auxBloc, dimIndex, startIndex);
 
     NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (ds);
-    d.updateTdot();
+    d.computeTdot();
     SiconosMatrix& Tdot = *d.Tdot();
 
     DEBUG_EXPR(d.display());
