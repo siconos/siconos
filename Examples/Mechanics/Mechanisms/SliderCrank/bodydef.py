@@ -90,14 +90,14 @@ fctfext=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS','']
 #fctmext=numpy.array(['','','',''])
 
 ## REQUIRED the internal forces.
-fctfint=numpy.array(['internalForcesB1','','',''])
+#fctfint=numpy.array(['internalForcesB1','','',''])
 ## REQUIRED the internal momentums.
-fctmint=numpy.array(['internalMomentsB1','','',''])
+#fctmint=numpy.array(['internalMomentsB1','','',''])
 
 ## REQUIRED the internal forces.
-fctfintjacq=numpy.array(['internalForcesB1_Jacq','','',''])
+#fctfintjacq=numpy.array(['internalForcesB1_Jacq','','',''])
 ## REQUIRED the internal momentums.
-fctmintjacq=numpy.array(['internalMomentsB1_Jacq','','',''])
+#fctmintjacq=numpy.array(['internalMomentsB1_Jacq','','',''])
 
 ## REQUIRED the internal forces.
 #fctfintjacv=numpy.array(['','','',''])

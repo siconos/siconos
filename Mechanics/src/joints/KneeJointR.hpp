@@ -95,7 +95,7 @@ protected:
                      double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
 
-  /** \warning, the following function should also depend on q */
+  /* \warning, the following function should also depend on q */
   virtual void DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
                         double Xdot2, double Ydot2, double Zdot2, double qdot20, double qdot21, double qdot22, double qdot23);
   virtual void DotJd1(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13);

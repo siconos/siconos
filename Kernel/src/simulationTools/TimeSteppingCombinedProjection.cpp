@@ -502,9 +502,8 @@ void TimeSteppingCombinedProjection::advanceToEvent()
             //*q = * qtmp +  *neds->p(0);
             *q +=  *neds->p(0);
           }
-
           neds->normalizeq();
-          neds->computeT();
+          //neds->computeT();
 
 #ifdef TSPROJ_DEBUG_LEVEL1
           neds->display();

@@ -43,10 +43,10 @@ public:
 
   /** Constructor
 
-  \param disk1 radius
-  \param disk2 radius
+  \param r1 disk1 radius
+  \param r2 disk2 radius
   */
-  SphereLDSSphereLDSR(double, double);
+  SphereLDSSphereLDSR(double r1, double r2);
 
   double distance(double, double, double, double, double, double, double, double);
 

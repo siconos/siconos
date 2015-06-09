@@ -119,12 +119,13 @@ public:
 
 
   /** Constructor with the time-discretisation.
-  *  \param a pointer to a timeDiscretisation (linked to the model
-  *  that owns this simulation)
-     \param a one step integrator
-     \param a one step non smooth problem for the velocity formulation
-     \param a one step non smooth problem for the position formulation
-  */
+   *  \param td a pointer to a timeDiscretisation (linked to the model
+   *  that owns this simulation)
+   *  \param osi a one step integrator
+   * \param osnspb_velo a one step non smooth problem for the velocity formulation
+   *  \param osnspb_pos a one step non smooth problem for the position formulation
+   *  \param _level
+   */
   TimeSteppingCombinedProjection(SP::TimeDiscretisation td,
                                  SP::OneStepIntegrator osi,
                                  SP::OneStepNSProblem osnspb_velo,

@@ -23,6 +23,14 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
+  v3.8.0
+--------------------------------------------------------------------------------
+Main Changes:
+	* NewtonEulerDS Add internal forces and associated jacobians to improve
+	the convergence of the Newton loop. Remove adhoc update of T and MObjToAbs
+	* MoreauJeanOSI Add a correct treatment of NewtonEuler DS with the Newton
+	Loop
+--------------------------------------------------------------------------------
   v3.7.0
 --------------------------------------------------------------------------------
 Main Changes:

@@ -1305,7 +1305,8 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     DEBUG_EXPR(q->display());
 
     //q[3:6] must be normalized
-    //d->normalizeq();
+    d->normalizeq();
+
     /* \warning VA 02/06/2013.
      * What is the reason of doing the following computation ?
      */
@@ -1314,7 +1315,7 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     // dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);
     // dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
 
-    // d->computeT(); // We prefer only T() every step for Newton convergence reasons.
+    // d->computeT(); // We prefer only compute T() every step for Newton convergence reasons.
 
   }
 }
