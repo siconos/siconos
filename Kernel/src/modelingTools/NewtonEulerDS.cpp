@@ -124,7 +124,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _T->setValue(1, 1, 1.0);
   _T->setValue(2, 2, 1.0);
   computeT();
-  updateMObjToAbs();
+  computeMObjToAbs();
   initForces();
 }
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double  mass, SP::SiconosMatrix inertialMatrix):
@@ -388,7 +388,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     {
       computeMExt(time);
       SiconosVector aux(3);
-      //updateMObjToAbs();
+      //computeMObjToAbs();
       prod( *_mExt, *_MObjToAbs, aux); // aux =  transpose(_MObjToAbs) * _mext
       *_mExt = aux;
       _forces->setBlock(3, *_mExt);
@@ -407,7 +407,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     {
       computeMInt(time, q , v);
       SiconosVector aux(3);
-      //updateMObjToAbs();
+      //computeMObjToAbs();
       prod(*_mInt, *_MObjToAbs, aux);// aux =  transpose(_MObjToAbs) * _mInt
       *_mInt = aux;
       // std::cout << "_MObjToAbs " <<std::endl;
@@ -459,7 +459,7 @@ void NewtonEulerDS::computeJacobianqForces(double time)
       computeJacobianMIntq(time);
       SimpleMatrix *aux = new SimpleMatrix(3,_qDim);
       SimpleMatrix *RT  = new SimpleMatrix(3,3);
-      //updateMObjToAbs();
+      //computeMObjToAbs();
       RT->trans(*_MObjToAbs);
       prod(*RT, *_jacobianMIntq, *aux);
       _jacobianqForces->setBlock(3,0, -1.0* *aux);
@@ -677,7 +677,7 @@ void NewtonEulerDS::normalizeq()
   _q->setValue(5, _q->getValue(5) * normq);
   _q->setValue(6, _q->getValue(6) * normq);
 }
-void NewtonEulerDS::updateMObjToAbs()
+void NewtonEulerDS::computeMObjToAbs()
 {
   double q0 = _q->getValue(3);
   double q1 = _q->getValue(4);

@@ -807,7 +807,7 @@ public:
     return _MObjToAbs;
   }
   /*update the _MObjToAbs from the current quaternion.*/
-  void updateMObjToAbs();
+  void computeMObjToAbs();
 
   ACCEPT_STD_VISITORS();
 

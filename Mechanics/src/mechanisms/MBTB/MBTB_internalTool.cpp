@@ -348,7 +348,7 @@ void _MBTB_displayStep()
         vaux.setValue(ii-3,sContacts[numC]->relation()->contactForce()->getValue(ii));
       }
       /*convert momentum in abs frame*/
-      sDS[sContacts[numC]->_indexBody1]->updateMObjToAbs();
+      //sDS[sContacts[numC]->_indexBody1]->computeMObjToAbs();
       prod(*(sDS[sContacts[numC]->_indexBody1]->MObjToAbs()),vaux,res);
       printf("\n");
       printf("Moments of contact forces in contact  %i in absolute frame \n", numC);
@@ -490,7 +490,7 @@ void _MBTB_printStep(FILE *fp)
       vaux.setValue(ii-3,sContacts[numC]->relation()->contactForce()->getValue(ii));
     }
     /*convert momentum in abs frame*/
-    sDS[sContacts[numC]->_indexBody1]->updateMObjToAbs();
+    //sDS[sContacts[numC]->_indexBody1]->computeMObjToAbs();
     prod(*(sDS[sContacts[numC]->_indexBody1]->MObjToAbs()),vaux,res);
     for(int ii=0; ii<3; ii++)
     {

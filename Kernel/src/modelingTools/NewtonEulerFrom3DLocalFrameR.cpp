@@ -94,7 +94,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
-  d1->updateMObjToAbs();
+//  d1->computeMObjToAbs();
   SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
 
@@ -209,7 +209,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   (*_NPG2)(2, 2) = 0;
 
 
-  d1->updateMObjToAbs();
+//  d1->computeMObjToAbs();
   SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
 
@@ -225,7 +225,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
-  d2->updateMObjToAbs();
+//  d2->computeMObjToAbs();
   SimpleMatrix& Mobj2_abs = *d2->MObjToAbs();
 
   prod(*_NPG2, Mobj2_abs, *_AUX1, true);

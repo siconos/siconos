@@ -458,7 +458,7 @@ void MoreauJeanOSI::computeInitialNewtonState()
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       d->computeT(qold);
-      d->updateMObjToAbs();
+      d->computeMObjToAbs();
     }
   }
   DEBUG_PRINT("MoreauJeanOSI::computeInitialNewtonState() ends\n");

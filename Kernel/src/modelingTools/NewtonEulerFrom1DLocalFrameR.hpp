@@ -76,7 +76,7 @@ public:
 
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
   *  seems parametrize the projection algorithm
-  *  the projection is done on the surface $y=0$ or on $y \geq 0$
+  *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
   */
   bool _isOnContact;
 
