@@ -44,7 +44,7 @@ contactTrans2=array.array('d',[
 
 #3D parameters
 ## It must be set to 1 to run in a 3D view.
-with3D=1
+with3D=0
 ## 3D viewer update frequency and output frequency.
 freqOutput=10
 freqUpdate=10
@@ -57,6 +57,9 @@ apple=0
 stepSize=1e-4
 ## Simulation parameters number of steps. Useful if with3D=0.
 stepNumber=2000
+
+TSTheta=0.5
+TSGamma=0.5
 
 TSdeactivateYPosThreshold=1e-5
 TSdeactivateYVelThreshold=0.0

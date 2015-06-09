@@ -34,11 +34,11 @@ void MBTB_init(unsigned int NumOfBodies, unsigned int NumOfJoints, unsigned int 
   //sDS = (SP::MBTB_Body *) malloc(sNbOfBody*sizeof(SP::MBTB_Body));
   //sPieceDraw = (bool*) malloc(sNbOfBody*sizeof(bool));
   CADMBTB_init(sNbOfBodies + 2*NumOfContacts,NumOfContacts);
-  CADMBTB_setNbOfArtefacts(4*NumOfContacts); /** P1P2, NORMAL, REACTION */ 
+  CADMBTB_setNbOfArtefacts(4*NumOfContacts); /** P1P2, NORMAL, REACTION */
 
   myt0=0;
   myTf=10;
-  
+
   // -------------
   // --- Model ---
   // -------------
@@ -288,9 +288,9 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
   // myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(sDS[numDS]);
 }
 
-void MBTB_JointBuild(unsigned int numJ,const std::string& JointName, 
+void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
                      unsigned int jointType,
-                     unsigned int indexDS1, unsigned int indexDS2, 
+                     unsigned int indexDS1, unsigned int indexDS2,
                      SP::SiconosVector jointPosition)
 {
   assert(sNbOfJoints > numJ &&"MBTB_JointBuild numJ >=sNbOfJoints.");
@@ -358,9 +358,9 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   }
   sJointRelations[numJ]->_jointR->setJachq(lH);
 //  sInterJoints[numJ].reset(new Interaction(JointName, sAllDSByInter[numJ],
-//                                           numJ, lNbEq , lNSL, 
+//                                           numJ, lNbEq , lNSL,
 //                                           sJointRelations[numJ]->_jointR));
-  sInterJoints[numJ].reset(new Interaction(lNbEq , lNSL, 
+  sInterJoints[numJ].reset(new Interaction(lNbEq , lNSL,
                                            sJointRelations[numJ]->_jointR));
   sJointRelations[numJ]->_interaction = sInterJoints[numJ];
   // myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
@@ -368,7 +368,7 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   // if(sJointType[numJ]==PIVOT_1)
   //   myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
   //                                             sDS[indexDS2]);
-  
+
 
 }
 
@@ -377,7 +377,7 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
                        unsigned int withFriction, double mu, double en, double et)
 {
   assert(sNbOfContacts > numContact &&"MBTB_ContactBuild contactId out of range.");
-  sContacts[numContact]=new MBTB_Contact(numContact,ContactName, 
+  sContacts[numContact]=new MBTB_Contact(numContact,ContactName,
                                          indexBody1, indexBody2,
                                          sNbOfBodies+2*numContact,
                                          sNbOfBodies+2*numContact+1,
@@ -401,11 +401,11 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
   }
 
   sContacts[numContact]->setInteraction(sInterContacts[numContact]);
-  
+
   // myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numContact],
   //                                           sDS[sContacts[numContact]->_indexBody1]);
   // std::cout << "MBTB_ContactBuild() insert "<< sContacts[numContact]->_indexBody1 <<std::endl;
-  
+
   // sDS[sContacts[numContact]->_indexBody1]->display();
   // if(sContacts[numContact]->_indexBody2!=-1)
   //   myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numContact],
@@ -436,7 +436,7 @@ void  MBTB_initSimu(double hTS, int withProj)
                                                 sDS[sJointIndexDS[2*numJ]],
                                                 sDS[sJointIndexDS[2*numJ+1]]);
   }
-  
+
   for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
 
@@ -446,9 +446,9 @@ void  MBTB_initSimu(double hTS, int withProj)
 						sDS[sContacts[numC]->_indexBody1],
                                                 sDS[sContacts[numC]->_indexBody2]);
       // sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody2]  );
-      
+
     }
-    else 
+    else
       {
 	myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
 						  sDS[sContacts[numC]->_indexBody1]);
@@ -463,7 +463,7 @@ void  MBTB_initSimu(double hTS, int withProj)
 	//    sInterContacts[numC]->dynamicalSystem(0)->display();
       }
   }
-  
+
 
 
   // -- (2) Time discretisation --
@@ -494,15 +494,15 @@ void  MBTB_initSimu(double hTS, int withProj)
 
   // -- (4) Simulation setup with (1) (2) (3)
 #ifdef MBTB_MOREAU_YES
-  SP::MBTB_MoreauJeanOSI pOSI1; 
+  SP::MBTB_MoreauJeanOSI pOSI1;
   SP::MoreauJeanCombinedProjectionOSI pOSI2;
   if (withProj==0 or withProj==1)
   {
-    pOSI1.reset(new MBTB_MoreauJeanOSI(sDS[0],0.5));
-    pOSI1->_deactivateYPosThreshold= sDParams[0];
-    pOSI1->_deactivateYVelThreshold= sDParams[1];
-    pOSI1->_activateYPosThreshold= sDParams[2];
-    pOSI1->_activateYVelThreshold= sDParams[3];  
+    pOSI1.reset(new MBTB_MoreauJeanOSI(sDS[0],sDParams[0]));
+    pOSI1->_deactivateYPosThreshold= sDParams[2];
+    pOSI1->_deactivateYVelThreshold= sDParams[3];
+    pOSI1->_activateYPosThreshold= sDParams[4];
+    pOSI1->_activateYVelThreshold= sDParams[5];
   }
 #else
   SP::MoreauJeanOSI pOSI0;
@@ -510,43 +510,43 @@ void  MBTB_initSimu(double hTS, int withProj)
   SP::MoreauJeanCombinedProjectionOSI pOSI2;
   if (withProj==0)
   {
-    pOSI0.reset(new MoreauJeanOSI(sDS[0],0.5));
+    pOSI0.reset(new MoreauJeanOSI(sDS[0],sDParams[0]));
   }
   else if(withProj==1)
   {
-    pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDS[0],0.5));
-    pOSI1->setDeactivateYPosThreshold(sDParams[0]);
-    pOSI1->setDeactivateYVelThreshold(sDParams[1]);
-    pOSI1->setActivateYPosThreshold(sDParams[2]);
-    pOSI1->setActivateYVelThreshold(sDParams[3]);  
+    pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDS[0],sDParams[0]));
+    pOSI1->setDeactivateYPosThreshold(sDParams[2]);
+    pOSI1->setDeactivateYVelThreshold(sDParams[3]);
+    pOSI1->setActivateYPosThreshold(sDParams[4]);
+    pOSI1->setActivateYVelThreshold(sDParams[5]);
   }
 #endif
   else if  (withProj==2)
   {
-    pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDS[0],0.5));
+    pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDS[0],sDParams[0]));
   }
-    
-    
-  if(withProj==0)  
+
+
+  if(withProj==0)
   {
     sSimu.reset(new MBTB_TimeStepping(t,pOSI0,osnspb));
-    SP::MBTB_TimeStepping spSimu = (boost::static_pointer_cast<MBTB_TimeStepping>(sSimu)); 
+    SP::MBTB_TimeStepping spSimu = (boost::static_pointer_cast<MBTB_TimeStepping>(sSimu));
   }
   else if (withProj==1)
   {
-    sSimu.reset(new MBTB_TimeSteppingProj(t,pOSI1,osnspb,osnspb_pos,sDParams[7]));
-    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(sDParams[4]);
-    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(sDParams[5]);   
-    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(sDParams[6]);
+    sSimu.reset(new MBTB_TimeSteppingProj(t,pOSI1,osnspb,osnspb_pos,sDParams[9]));
+    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(sDParams[6]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(sDParams[7]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(sDParams[8]);
   }
   else if (withProj==2)
   {
     sSimu.reset(new MBTB_TimeSteppingCombinedProj(t,pOSI2,osnspb,osnspb_pos,2));
-    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setProjectionMaxIteration(sDParams[4]);
-    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTol(sDParams[5]);   
-    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTolUnilateral(sDParams[6]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setProjectionMaxIteration(sDParams[6]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTol(sDParams[7]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTolUnilateral(sDParams[8]);
   }
-  
+
   // --  OneStepIntegrators --
 
   /** \warning VA 3/12/2011
@@ -559,32 +559,32 @@ void  MBTB_initSimu(double hTS, int withProj)
 #ifdef MBTB_MOREAU_YES
     if (withProj==0 or withProj==1)
      {
-       pOSI1.reset(new MBTB_MoreauJeanOSI(sDS[numDS],0.5)); 
-       pOSI1->_deactivateYPosThreshold= sDParams[0];
-       pOSI1->_deactivateYVelThreshold= sDParams[1];
-       pOSI1->_activateYPosThreshold= sDParams[2];
-       pOSI1->_activateYVelThreshold= sDParams[3];  
+       pOSI1.reset(new MBTB_MoreauJeanOSI(sDS[numDS],sDParams[0]));
+       pOSI1->_deactivateYPosThreshold= sDParams[2];
+       pOSI1->_deactivateYVelThreshold= sDParams[3];
+       pOSI1->_activateYPosThreshold= sDParams[4];
+       pOSI1->_activateYVelThreshold= sDParams[5];
        sSimu->insertIntegrator(pOSI1);
      }
 #else
     if (withProj==0)
     {
-      pOSI0.reset(new MoreauJeanOSI(sDS[numDS],0.5)); 
+      pOSI0.reset(new MoreauJeanOSI(sDS[numDS],sDParams[0]));
       sSimu->insertIntegrator(pOSI0);
     }
     else if (withProj==1)
     {
-      pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDS[numDS],0.5)); 
-      pOSI1->setDeactivateYPosThreshold(sDParams[0]);
-      pOSI1->setDeactivateYVelThreshold(sDParams[1]);
-      pOSI1->setActivateYPosThreshold(sDParams[2]);
-      pOSI1->setActivateYVelThreshold(sDParams[3]);  
+      pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDS[numDS],sDParams[0]));
+      pOSI1->setDeactivateYPosThreshold(sDParams[2]);
+      pOSI1->setDeactivateYVelThreshold(sDParams[3]);
+      pOSI1->setActivateYPosThreshold(sDParams[4]);
+      pOSI1->setActivateYVelThreshold(sDParams[5]);
       sSimu->insertIntegrator(pOSI1);
     }
 #endif
     else if  (withProj==2)
     {
-      pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDS[numDS],0.5));
+      pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDS[numDS],sDParams[0]));
       sSimu->insertIntegrator(pOSI2);
     }
   }
@@ -610,7 +610,7 @@ void  MBTB_initSimu(double hTS, int withProj)
   FILE *fp;
   fp = fopen("simu.txt", "w");
   _MBTB_printHeader(fp);
-  fclose(fp) ; 
+  fclose(fp) ;
   NumericsOptions global_options;
   global_options.verboseMode=0;
   setNumericsOptions(&global_options);
@@ -797,4 +797,3 @@ void MBTB_displayStep_contacts(unsigned int v)
 {
   sDisplayStepContacts=v;
 }
-

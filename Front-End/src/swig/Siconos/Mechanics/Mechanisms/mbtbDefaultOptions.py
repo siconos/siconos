@@ -48,6 +48,10 @@ drawMode=mbtb.MBTB_ARTEFACT_REACTION+mbtb.MBTB_ARTEFACT_NORMAL+mbtb.MBTB_ARTEFAC
 
 stepSize=1e-4
 stepNumber=60000
+
+TSTheta=0.5
+TSGamma=0.5
+
 TSdeactivateYPosThreshold=1e-4
 TSdeactivateYVelThreshold=0.0
 TSactivateYPosThreshold=0.0
