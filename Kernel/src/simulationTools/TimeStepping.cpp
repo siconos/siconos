@@ -47,6 +47,7 @@ using namespace std::placeholders;
 #endif
 
 //#define DEBUG_STDOUT
+//#define DEBUG_NOCOLOR
 //#define DEBUG_MESSAGES
 #include <debug.h>
 
@@ -63,8 +64,8 @@ static CheckSolverFPtr checkSolverOutput = NULL;
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
                            SP::OneStepNSProblem osnspb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false), 
-    _computeResiduR(false), 
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false),
+    _computeResiduR(false),
     _isNewtonConverge(false)
 {
 
@@ -75,8 +76,8 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
 }
 
 TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false), 
-    _computeResiduR(false), 
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false),
+    _computeResiduR(false),
     _isNewtonConverge(false)
 {
   (*_allNSProblems).resize(nb);
@@ -437,7 +438,7 @@ void TimeStepping::run()
 void TimeStepping::advanceToEvent()
 {
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
-  
+
   // Initialize lambdas of all interactions.
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
                                     topology()->indexSet(0);
@@ -479,7 +480,7 @@ void   TimeStepping::prepareNewtonIteration()
     }
     inter->relation()->computeJacg(getTkp1(), *inter, interProp);
 
-    // Note FP : prepar call below is only useful for FirstOrderType2R. 
+    // Note FP : prepar call below is only useful for FirstOrderType2R.
     // We should check if we really need this ...
     inter->relation()->prepareNewtonIteration(*inter, interProp);
   }
@@ -496,10 +497,10 @@ void   TimeStepping::prepareNewtonIteration()
 
 void TimeStepping::saveYandLambdaInOldVariables()
 {
-    // Temp FP : saveInOldVar was called for each osns and each osns call 
-    // swapInOldVar for all interactions in the nsds. 
+    // Temp FP : saveInOldVar was called for each osns and each osns call
+    // swapInOldVar for all interactions in the nsds.
     // ==> let's do it only once, by the simu.
-    
+
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
@@ -587,7 +588,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     }
     if (!_isNewtonConverge)
     {
-      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
+      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep <<
+        ") reached at accuracy = "<< _newtonResiduDSMax  <<"." <<std::endl ;
       if (info)
         std::cout << "TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
     }
@@ -634,7 +636,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     _newtonResiduYMax = 0.0;
     residu = 0.0;
     SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
-    
+
     InteractionsGraph::VIterator ui, uiend;
     SP::Interaction inter;
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)

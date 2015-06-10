@@ -52,6 +52,9 @@ stepNumber=60000
 TSTheta=0.5
 TSGamma=0.5
 
+TSNewtonTolerance=1e-10
+TSNewtonMaxIteration=15
+
 TSdeactivateYPosThreshold=1e-4
 TSdeactivateYVelThreshold=0.0
 TSactivateYPosThreshold=0.0

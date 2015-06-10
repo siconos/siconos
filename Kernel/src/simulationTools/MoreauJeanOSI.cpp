@@ -452,14 +452,21 @@ void MoreauJeanOSI::computeInitialNewtonState()
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     SP::DynamicalSystem ds = *it;
-    updatePosition(ds);
-
     if (Type::value(*ds) == Type::NewtonEulerDS){
+      // The goal is to update T() and MObjToAbs() one time at the beginning of the Newton Loop
+      // We want to be explicit on this function since we do not compute their Jacobians.
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      //SP::SiconosVector q = d->q();
       d->computeT(qold);
-      d->computeMObjToAbs();
+      d->computeMObjToAbs(qold);
     }
+    
+    // The goal is to converge in one iteration of the system is almost linear
+    // we start the Newton loop q = q0+hv0
+    updatePosition(ds);
+
+
   }
   DEBUG_PRINT("MoreauJeanOSI::computeInitialNewtonState() ends\n");
 }
@@ -468,7 +475,7 @@ void MoreauJeanOSI::computeInitialNewtonState()
 
 double MoreauJeanOSI::computeResidu()
 {
-  DEBUG_PRINT("MoreauJeanOSI::computeResidu(), start\n");
+  DEBUG_PRINT("\nMoreauJeanOSI::computeResidu(), start\n");
   // This function is used to compute the residu for each "MoreauJeanOSI-discretized" dynamical system.
   // It then computes the norm of each of them and finally return the maximum
   // value for those norms.
@@ -502,7 +509,7 @@ double MoreauJeanOSI::computeResidu()
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
     SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu);
-
+    DEBUG_PRINT("New DS ----------\n")
     // 3 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
     {
@@ -815,6 +822,7 @@ double MoreauJeanOSI::computeResidu()
       DEBUG_EXPR((d->workspace(DynamicalSystem::free))->display(););
 
       normResidu = d->workspace(DynamicalSystem::free)->norm2();
+      DEBUG_PRINTF("normResidu= %e\n", normResidu);
     }
     else
       RuntimeException::selfThrow("MoreauJeanOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
@@ -827,7 +835,7 @@ double MoreauJeanOSI::computeResidu()
 
 void MoreauJeanOSI::computeFreeState()
 {
-  DEBUG_PRINT("MoreauJeanOSI::computeFreeState() starts\n");
+  DEBUG_PRINT("\nMoreauJeanOSI::computeFreeState() starts\n");
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
@@ -1251,7 +1259,7 @@ void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& no
 }
 void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
 {
-  DEBUG_PRINT("MoreauJeanOSI::updateState(SP::DynamicalSystem ds)\n");
+  DEBUG_PRINT("\nMoreauJeanOSI::updateState(SP::DynamicalSystem ds)\n");
 
   double h = simulationLink->timeStep();
 

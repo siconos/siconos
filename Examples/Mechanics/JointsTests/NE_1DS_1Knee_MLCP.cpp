@@ -127,8 +127,11 @@ int main(int argc, char* argv[])
     SP::SiconosVector v10(new SiconosVector(nDim));
     SP::SimpleMatrix I1(new SimpleMatrix(3, 3));
     v10->zero();
+    (*v10)(0)=1000;
     I1->eye();
     I1->setValue(0, 0, 0.1);
+    I1->setValue(0, 1, 0.1);
+    I1->setValue(1, 0, 0.1);
     // Initial position of the center of gravity CG1
     (*q10)(0) = 0.5 * L1 / sqrt(2.0);
     (*q10)(1) = 0;

@@ -398,6 +398,7 @@ void NewtonEulerDS::computeFGyr(SP::SiconosVector v)
     bufOmega.setValue(2, v->getValue(5));
     prod(*_I, bufOmega, bufIOmega, true);
     cross_product(bufOmega, bufIOmega, *_fGyr);
+    // _fGyr->display();
   }
 }
 
@@ -450,6 +451,8 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     }
 
     computeFGyr(v);
+    // std::cout << "_fGyr " <<std::endl;
+    // _fGyr->display();
     _forces->setValue(3, _forces->getValue(3) - _fGyr->getValue(0));
     _forces->setValue(4, _forces->getValue(4) - _fGyr->getValue(1));
     _forces->setValue(5, _forces->getValue(5) - _fGyr->getValue(2));
@@ -506,7 +509,7 @@ void NewtonEulerDS::computeJacobianvForces(double time)
     if (_jacobianFGyrv)
     {
       computeJacobianFGyrv(time);
-      *_jacobianvForces -= *_jacobianFGyrv;
+      *_jacobianvForces += *_jacobianFGyrv;
     }
     // std::cout << "_jacobianvForces : "<< std::endl;
     // _jacobianvForces->display();
@@ -542,6 +545,7 @@ void NewtonEulerDS::computeJacobianFGyrv(double time)
       for (int j = 0; j < 3; j++)
         _jacobianFGyrv->setValue(3 + i, 3 + j, ei_Iomega.getValue(j) + omega_Iei.getValue(j));
     }
+    // Check if Jacobian is valid
   }
   //else nothing.
 }

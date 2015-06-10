@@ -114,14 +114,18 @@ for idArtefact in range(NBARTEFACTS):
 
 mbtb.MBTB_SetDParam(0,TSTheta)
 mbtb.MBTB_SetDParam(1,TSGamma)
-mbtb.MBTB_SetDParam(2,TSdeactivateYPosThreshold)
-mbtb.MBTB_SetDParam(3,TSdeactivateYVelThreshold)
-mbtb.MBTB_SetDParam(4,TSactivateYPosThreshold)
-mbtb.MBTB_SetDParam(5,TSactivateYVelThreshold)
-mbtb.MBTB_SetDParam(6,TSProjectionMaxIteration)
-mbtb.MBTB_SetDParam(7,TSConstraintTol)
-mbtb.MBTB_SetDParam(8,TSConstraintTolUnilateral)
-mbtb.MBTB_SetDParam(9,TSLevelOfProjection)
+
+mbtb.MBTB_SetDParam(2,TSNewtonTolerance)
+mbtb.MBTB_SetDParam(3,TSNewtonMaxIteration)
+
+mbtb.MBTB_SetDParam(4,TSdeactivateYPosThreshold)
+mbtb.MBTB_SetDParam(5,TSdeactivateYVelThreshold)
+mbtb.MBTB_SetDParam(6,TSactivateYPosThreshold)
+mbtb.MBTB_SetDParam(7,TSactivateYVelThreshold)
+mbtb.MBTB_SetDParam(8,TSProjectionMaxIteration)
+mbtb.MBTB_SetDParam(9,TSConstraintTol)
+mbtb.MBTB_SetDParam(10,TSConstraintTolUnilateral)
+mbtb.MBTB_SetDParam(11,TSLevelOfProjection)
 
 mbtb.MBTB_initSimu(stepSize,withProj)
 mbtb.MBTB_setGraphicFreq(freqUpdate)

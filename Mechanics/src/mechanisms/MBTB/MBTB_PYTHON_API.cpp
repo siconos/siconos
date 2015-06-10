@@ -500,10 +500,10 @@ void  MBTB_initSimu(double hTS, int withProj)
   {
     pOSI1.reset(new MBTB_MoreauJeanOSI(sDParams[0]));
     pOS11->insertDynamicalSystem(sDS[0]);
-    pOSI1->_deactivateYPosThreshold= sDParams[2];
-    pOSI1->_deactivateYVelThreshold= sDParams[3];
-    pOSI1->_activateYPosThreshold= sDParams[4];
-    pOSI1->_activateYVelThreshold= sDParams[5];
+    pOSI1->_deactivateYPosThreshold= sDParams[4];
+    pOSI1->_deactivateYVelThreshold= sDParams[5];
+    pOSI1->_activateYPosThreshold= sDParams[6];
+    pOSI1->_activateYVelThreshold= sDParams[7];
   }
 #else
   SP::MoreauJeanOSI pOSI0;
@@ -518,10 +518,10 @@ void  MBTB_initSimu(double hTS, int withProj)
   {
     pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDParams[0]));
     pOSI1->insertDynamicalSystem(sDS[0]);
-    pOSI1->setDeactivateYPosThreshold(sDParams[2]);
-    pOSI1->setDeactivateYVelThreshold(sDParams[3]);
-    pOSI1->setActivateYPosThreshold(sDParams[4]);
-    pOSI1->setActivateYVelThreshold(sDParams[5]);
+    pOSI1->setDeactivateYPosThreshold(sDParams[4]);
+    pOSI1->setDeactivateYVelThreshold(sDParams[5]);
+    pOSI1->setActivateYPosThreshold(sDParams[6]);
+    pOSI1->setActivateYVelThreshold(sDParams[7]);
   }
 #endif
   else if  (withProj==2)
@@ -538,17 +538,17 @@ void  MBTB_initSimu(double hTS, int withProj)
   }
   else if (withProj==1)
   {
-    sSimu.reset(new MBTB_TimeSteppingProj(t,pOSI1,osnspb,osnspb_pos,sDParams[9]));
-    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(sDParams[6]);
-    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(sDParams[7]);
-    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(sDParams[8]);
+    sSimu.reset(new MBTB_TimeSteppingProj(t,pOSI1,osnspb,osnspb_pos,sDParams[11]));
+    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(sDParams[9]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
   }
   else if (withProj==2)
   {
     sSimu.reset(new MBTB_TimeSteppingCombinedProj(t,pOSI2,osnspb,osnspb_pos,2));
-    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setProjectionMaxIteration(sDParams[6]);
-    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTol(sDParams[7]);
-    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTolUnilateral(sDParams[8]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTol(sDParams[9]);
+    (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
   }
 
   // --  OneStepIntegrators --
@@ -566,10 +566,10 @@ void  MBTB_initSimu(double hTS, int withProj)
      {
        //pOSI1.reset(new MBTB_MoreauJeanOSI(sDParams[0]));
        pOSI1->insertDynamicalSystem(sDS[numDS]);
-       // pOSI1->_deactivateYPosThreshold= sDParams[2];
-       // pOSI1->_deactivateYVelThreshold= sDParams[3];
-       // pOSI1->_activateYPosThreshold= sDParams[4];
-       // pOSI1->_activateYVelThreshold= sDParams[5];
+       // pOSI1->_deactivateYPosThreshold= sDParams[4];
+       // pOSI1->_deactivateYVelThreshold= sDParams[5];
+       // pOSI1->_activateYPosThreshold= sDParams[6];
+       // pOSI1->_activateYVelThreshold= sDParams[7];
        // sSimu->insertIntegrator(pOSI1);
      }
 #else
@@ -583,10 +583,10 @@ void  MBTB_initSimu(double hTS, int withProj)
     {
       //pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDParams[0]));
       pOSI1->insertDynamicalSystem(sDS[numDS]);
-      // pOSI1->setDeactivateYPosThreshold(sDParams[2]);
-      // pOSI1->setDeactivateYVelThreshold(sDParams[3]);
-      // pOSI1->setActivateYPosThreshold(sDParams[4]);
-      // pOSI1->setActivateYVelThreshold(sDParams[5]);
+      // pOSI1->setDeactivateYPosThreshold(sDParams[4]);
+      // pOSI1->setDeactivateYVelThreshold(sDParams[5]);
+      // pOSI1->setActivateYPosThreshold(sDParams[6];
+      // pOSI1->setActivateYVelThreshold(sDParams[7]);
       // sSimu->insertIntegrator(pOSI1);
     }
 #endif
