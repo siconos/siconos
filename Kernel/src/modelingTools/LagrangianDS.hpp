@@ -209,8 +209,12 @@ protected:
 
   /** jacobian_q forces*/
   SP::SiconosMatrix _jacobianqForces;
+
   /** jacobian_{qDot} forces*/
   SP::SiconosMatrix _jacobianqDotForces;
+
+  /** memory of previous forces of the system */
+  SP::SiconosMemory _forcesMemory;
 
   /** Boundary condition applied to a dynamical system*/
   SP::BoundaryCondition _boundaryConditions;
@@ -707,7 +711,13 @@ public:
   {
     return _forces;
   }
-
+  /** get forces
+   *  \return pointer on a SiconosMemory
+   */
+  inline SP::SiconosMemory forcesMemory()
+  {
+    return _forcesMemory;
+  }
   // -- Jacobian forces --
 
 

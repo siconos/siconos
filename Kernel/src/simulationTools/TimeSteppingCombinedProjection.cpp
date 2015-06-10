@@ -560,7 +560,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         SP::Interaction inter = indexSet2->bundle(*ui);
         inter->lambda(0)->display();
       }
-      
+
 
 
 #endif
@@ -573,7 +573,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     } // end while ((runningProjection && _nbProjectionIteration < _projectionMaxIteration) && _doCombinedProj)
 
     DEBUG_PRINTF( "TimeSteppingCombinedProjection::Projection end : Number of iterations= %i\n", _nbProjectionIteration);
-      
+
     _nbCumulatedProjectionIteration += _nbProjectionIteration ;
     if (_nbProjectionIteration == _projectionMaxIteration)
     {
@@ -586,6 +586,27 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
     DEBUG_PRINT( "TimeSteppingCombinedProjection::newtonSolve end projection:\n");
+
+    // We update forces to start the Newton Loop the next tiem step with a correct value in swap
+    for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+      {
+        SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
+        Type::Siconos dsType = Type::value(*ds);
+        if (dsType == Type::NewtonEulerDS)
+        {
+          SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+          double time = nextTime();
+          neds->computeForces(time);
+        }
+        else if (dsType == Type::LagrangianDS)
+        {
+          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+          double time = nextTime();
+          d->computeForces(time);
+        }
+        else
+          RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+      }
 
 
     if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)

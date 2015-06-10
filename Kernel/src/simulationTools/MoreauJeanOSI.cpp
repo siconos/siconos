@@ -532,25 +532,33 @@ double MoreauJeanOSI::computeResidu()
 
       prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
 
-
-      if (d->forces())  // if fL exists
+      if (d->forces())
       {
-        // computes forces(ti,vi,qi)
-        d->computeForces(told, qold, vold);
+        // Cheaper version: get forces(ti,vi,qi) from memory
+        SP::SiconosVector fold = d->forcesMemory()->getSiconosVector(0);
         double coef = -h * (1 - _theta);
-        // residuFree += coef * fL_i
-        scal(coef, *d->forces(), *residuFree, false);
+        scal(coef, *fold, *residuFree, false);
+
+        // Expensive computes forces(ti,vi,qi)
+        // d->computeForces(told, qold, vold);
+        // double coef = -h * (1 - _theta);
+        // // residuFree += coef * fL_i
+        // scal(coef, *d->forces(), *residuFree, false);
 
         // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
-        //d->computeForces(t);
-        // or  forces(ti+1, v_k,i+1, q(v_k,i+1))
-        //or
-        SP::SiconosVector qbasedonv(new SiconosVector(*qold));
-        *qbasedonv +=  h * ((1 - _theta)* *vold + _theta * *v);
-        d->computeForces(t, qbasedonv, v);
+        d->computeForces(t,q,v);
         coef = -h * _theta;
-        // residuFree += coef * fL_k,i+1
         scal(coef, *d->forces(), *residuFree, false);
+
+        // or  forces(ti+1, v_k,i+\theta, q(v_k,i+\theta))
+        //SP::SiconosVector qbasedonv(new SiconosVector(*qold));
+        //*qbasedonv +=  h * ((1 - _theta)* *vold + _theta * *v);
+        //d->computeForces(t, qbasedonv, v);
+        //coef = -h * _theta;
+        // residuFree += coef * fL_k,i+1
+        //scal(coef, *d->forces(), *residuFree, false);
+
+
       }
 
       if (d->boundaryConditions())
@@ -773,16 +781,16 @@ double MoreauJeanOSI::computeResidu()
         DEBUG_PRINTF("MoreauJeanOSI:: _theta = %e\n",_theta);
         DEBUG_PRINTF("MoreauJeanOSI:: h = %e\n",h );
 
-        // Old cheaper version
-        // get forces(ti,vi,qi) from memory
-        //SP::SiconosVector fold = d->forcesMemory()->getSiconosVector(0);
-        //double coef = -h * (1 - _theta);
-        // residuFree += coef * fL_i
-        //scal(coef, *fold, *residuFree, false);
+        // Cheaper version: get forces(ti,vi,qi) from memory
+        SP::SiconosVector fold = d->forcesMemory()->getSiconosVector(0);
+        double coef = -h * (1 - _theta);
+        scal(coef, *fold, *residuFree, false);
 
-        d->computeForces(told,qold,vold);
-        double coef = -h * (1.0 - _theta);
-        scal(coef, *d->forces(), *residuFree, false);
+        // Expensive version to check ...
+        //d->computeForces(told,qold,vold);
+        //double coef = -h * (1.0 - _theta);
+        //scal(coef, *d->forces(), *residuFree, false);
+
         DEBUG_PRINT("MoreauJeanOSI:: old forces :\n");
         DEBUG_EXPR(d->forces()->display(););
         DEBUG_EXPR(residuFree->display(););
@@ -1315,7 +1323,7 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     // dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);
     // dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
 
-    // d->computeT(); // We prefer only compute T() every step for Newton convergence reasons.
+    // d->computeT(); //  VA 09/06/2015. We prefer only compute T() every time--step for Newton convergence reasons.
 
   }
 }

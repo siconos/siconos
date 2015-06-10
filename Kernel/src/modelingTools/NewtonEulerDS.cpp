@@ -264,10 +264,11 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
   connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
   checkDynamicalSystem();
 
+  initRhs(time);
+
   // Initialize memory vectors
   initMemory(sizeOfMemory);
 
-  initRhs(time);
 
 }
 
@@ -579,13 +580,11 @@ void NewtonEulerDS::initMemory(unsigned int steps)
 
 void NewtonEulerDS::swapInMemory()
 {
-
   //  _xMemory->swap(_x[0]);
   _qMemory->swap(*_q);
   _vMemory->swap(*_v);
   _dotqMemory->swap(*_dotq);
   _forcesMemory->swap(*_forces);
-
 }
 
 void NewtonEulerDS::resetAllNonSmoothPart()

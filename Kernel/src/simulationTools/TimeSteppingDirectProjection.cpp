@@ -326,6 +326,34 @@ void TimeSteppingDirectProjection::advanceToEvent()
     //  (*it)->relation()->computeh(getTkp1());
     //}
   }// end while(runningProjection && _nbProjectionIteration < _projectionMaxIteration)
+
+    // We update forces to start the Newton Loop the next tiem step with a correct value in swap
+    for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+      {
+        SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
+        Type::Siconos dsType = Type::value(*ds);
+        if (dsType == Type::NewtonEulerDS)
+        {
+          SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+          double time = nextTime();
+          neds->computeForces(time);
+        }
+        else if (dsType == Type::LagrangianDS)
+        {
+          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+          double time = nextTime();
+          d->computeForces(time);
+        }
+        else
+          RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+      }
+
+
+
+
+
+
+
   if (_nbProjectionIteration == _projectionMaxIteration)
   {
     std::cout << "TimeSteppingDirectProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;

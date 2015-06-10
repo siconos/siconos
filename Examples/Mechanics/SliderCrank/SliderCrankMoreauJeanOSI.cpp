@@ -307,6 +307,9 @@ int main(int argc, char* argv[])
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
       std::cout <<  "error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+      SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
+      (dataPlot - dataPlotRef).normInfByColumn(err);
+      err->display();
       return 1;
     }
 
