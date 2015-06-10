@@ -1,5 +1,5 @@
 // User-defined main parameters
-unsigned int nDof = 1000;// degrees of freedom for the beam
+unsigned int nDof = 10;// degrees of freedom for the beam
 double t0 = 1e-8;                   // initial computation time
 double T = 0.0015;                  // final computation time
 double h = 1e-7;                // time step
