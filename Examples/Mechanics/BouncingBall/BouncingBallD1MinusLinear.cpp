@@ -187,16 +187,19 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result_tdg.dat", "ascii", dataPlot, "noDim");
+    cout << "====> Comparison with a reference file ..." << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("result_tdg.ref", "ascii", dataPlotRef);
-
-    if((dataPlot-dataPlotRef).normInf() > 1e-8)
+    double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
+    std::cout << "Error = "<< error << std::endl;
+    if (error > 1e-12)
     {
-      std::cout<< "(dataPlot-dataPlotRef).normInf()"<< (dataPlot-dataPlotRef).normInf() <<std::endl;
-      std::cout << "Warning. The results are rather different from the reference file." << std::endl;
+      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      std::cout <<  "error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
       return 1;
     }
+
   }
 
   catch (SiconosException e)
