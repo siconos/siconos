@@ -167,6 +167,9 @@ protected:
   /** jacobian_{v} MInt*/
   SP::SimpleMatrix _jacobianMIntv;
 
+  /** internal forces of the system */
+  SP::SiconosVector _fGyr;
+
   /** jacobian_v FGyr*/
   SP::SimpleMatrix _jacobianFGyrv;
 
@@ -668,6 +671,13 @@ public:
    */
   virtual void computeJacobianvForces(double time);
 
+
+  /** function to compute gyroscopic forces with some specific values for q and velocity (ie not those of the current state).
+   *  \param velocity SP::SiconosVector: pointers on  velocity vector
+   */
+  virtual void computeFGyr(SP::SiconosVector velocity);
+
+  
   /** Default function to compute the jacobian following q of fGyr
    *  \param time the current time
    */
@@ -808,6 +818,11 @@ public:
   }
   /*update the _MObjToAbs from the current quaternion.*/
   void computeMObjToAbs();
+
+  /* update the _MObjToAbs from a given quaternion.
+   * \param q
+   */
+  void computeMObjToAbs(SP::SiconosVector q);
 
   ACCEPT_STD_VISITORS();
 

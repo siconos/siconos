@@ -202,9 +202,9 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 void NewtonEulerDS::initForces()
 {
   _forces.reset(new SiconosVector(_n));
+  _fGyr.reset(new SiconosVector(3,0.0));
   _jacobianFGyrv.reset(new SimpleMatrix(_n, _n));
   _jacobianvForces.reset(new SimpleMatrix(_n, _n));
-  _jacobianqForces.reset(new SimpleMatrix(_n, _qDim));
 }
 
 void NewtonEulerDS::initRhs(double time)
@@ -244,15 +244,23 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
     _fInt.reset(new SiconosVector(3, 0));
 
   if (_pluginJacqFInt->fPtr && !_jacobianFIntq)
+  {
     _jacobianFIntq.reset(new SimpleMatrix(3, _qDim));
-
+    if (!_jacobianqForces)
+      _jacobianqForces.reset(new SimpleMatrix(_n, _qDim));
+  }
   if (_pluginJacvFInt->fPtr && !_jacobianFIntv)
     _jacobianFIntv.reset(new SimpleMatrix(3, _n));
-
   if (_pluginMInt->fPtr && !_mInt)
+  {
     _mInt.reset(new SiconosVector(3, 0));
+  }
   if (_pluginJacqMInt->fPtr && !_jacobianMIntq)
+  {
+    if (!_jacobianqForces)
+      _jacobianqForces.reset(new SimpleMatrix(_n, _qDim));
     _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
+  }
   if (_pluginJacvFInt->fPtr && !_jacobianFIntv)
     _jacobianMIntv.reset(new SimpleMatrix(3, _n));
 
@@ -373,6 +381,27 @@ void NewtonEulerDS::computeForces(double time)
   computeForces(time, _q, _v);
 }
 
+
+void NewtonEulerDS::computeFGyr(SP::SiconosVector v)
+{
+  /*computation of \Omega times I \Omega*/
+
+  if (_I)
+  {
+    // printf("NewtonEulerDS::computeFGyrv _I:\n");
+    // _I->display();
+    // v->display();
+    SiconosVector bufOmega(3);
+    SiconosVector bufIOmega(3);
+    bufOmega.setValue(0, v->getValue(3));
+    bufOmega.setValue(1, v->getValue(4));
+    bufOmega.setValue(2, v->getValue(5));
+    prod(*_I, bufOmega, bufIOmega, true);
+    cross_product(bufOmega, bufIOmega, *_fGyr);
+  }
+}
+
+
 void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector v)
 {
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
@@ -420,24 +449,11 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       _forces->setValue(5, _forces->getValue(5) - _mInt->getValue(2));
     }
 
-    /*computation of \Omega times I \Omega*/
-    if (_I)
-    {
-      // printf("NewtonEulerDS::computeFGyrv _I:\n");
-      // _I->display();
-      // v->display();
-      SiconosVector bufOmega(3);
-      SiconosVector bufIOmega(3);
-      SiconosVector buf(3);
-      bufOmega.setValue(0, v->getValue(3));
-      bufOmega.setValue(1, v->getValue(4));
-      bufOmega.setValue(2, v->getValue(5));
-      prod(*_I, bufOmega, bufIOmega, true);
-      cross_product(bufOmega, bufIOmega, buf);
-      _forces->setValue(3, _forces->getValue(3) - buf.getValue(0));
-      _forces->setValue(4, _forces->getValue(4) - buf.getValue(1));
-      _forces->setValue(5, _forces->getValue(5) - buf.getValue(2));
-    }
+    computeFGyr(v);
+    _forces->setValue(3, _forces->getValue(3) - _fGyr->getValue(0));
+    _forces->setValue(4, _forces->getValue(4) - _fGyr->getValue(1));
+    _forces->setValue(5, _forces->getValue(5) - _fGyr->getValue(2));
+    
     // std::cout << "_forces : "<< std::endl;
     // _forces->display();
 
@@ -678,10 +694,15 @@ void NewtonEulerDS::normalizeq()
 }
 void NewtonEulerDS::computeMObjToAbs()
 {
-  double q0 = _q->getValue(3);
-  double q1 = _q->getValue(4);
-  double q2 = _q->getValue(5);
-  double q3 = _q->getValue(6);
+  computeMObjToAbs(_q);
+}
+
+void NewtonEulerDS::computeMObjToAbs(SP::SiconosVector q)
+{
+  double q0 = q->getValue(3);
+  double q1 = q->getValue(4);
+  double q2 = q->getValue(5);
+  double q3 = q->getValue(6);
 
   ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
   ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
@@ -705,7 +726,6 @@ void NewtonEulerDS::computeMObjToAbs()
   _MObjToAbs->setValue(2, 0, quatBuff.R_component_2());
   _MObjToAbs->setValue(2, 1, quatBuff.R_component_3());
   _MObjToAbs->setValue(2, 2, quatBuff.R_component_4());
-
 }
 
 void NewtonEulerDS::setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
