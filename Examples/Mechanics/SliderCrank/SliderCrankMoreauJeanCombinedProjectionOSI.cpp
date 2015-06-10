@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0;         // initial computation time
     double T = 0.2;       // final computation time
-    double h = 1e-6;       // time step : do not decrease, because of strong penetrations
+    double h = 1e-4;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
     double l1 = 0.1530;
@@ -258,7 +258,10 @@ int main(int argc, char* argv[])
     if (error > 1e-12)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-      std::cout <<  "error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+      std::cout <<  "Absolute error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+      SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
+      (dataPlot - dataPlotRef).normInfByColumn(err);
+      err->display();
       return 1;
     }
 

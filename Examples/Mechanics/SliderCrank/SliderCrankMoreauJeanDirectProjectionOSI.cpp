@@ -280,7 +280,14 @@ int main(int argc, char* argv[])
     if (error > 1e-12)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-      std::cout <<  "error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+
+      std::cout <<  "Absolute error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+      std::cout <<  "Norm inf of the ref file  = " << (dataPlotRef).normInf() << std::endl;
+      std::cout <<  "Norm inf of the result file  = " << (dataPlot).normInf() << std::endl;
+
+      SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
+      (dataPlot - dataPlotRef).normInfByColumn(err);
+      err->display();
       return 1;
     }
 
