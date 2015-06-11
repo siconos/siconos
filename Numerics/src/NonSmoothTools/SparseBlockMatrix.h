@@ -352,7 +352,7 @@ extern "C"
       \param[in,out] outSBM pointer on an empty SparseBlockStructuredMatrix
       \return 0 in ok
   */
-  int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* outSBM);
+  int sparseToSBM(int blocksize, const NumericsSparseMatrix* const sparseMat, SparseBlockStructuredMatrix* outSBM);
 
   /** Copy a SBM into a Dense Matrix
   \param[in] A the SparseBlockStructuredMatrix matrix
@@ -365,14 +365,14 @@ extern "C"
   \param[in] outSparseMat pointer on the filled sparse Matrix
   \return 0 if ok
   */
-  int SBMtoSparse(const SparseBlockStructuredMatrix* const A, SparseMatrix *outSparseMat);
+  int SBMtoSparse(const SparseBlockStructuredMatrix* const A, NumericsSparseMatrix *outSparseMat);
 
   /** initMemory of a Sparse (CSR) Matrix form a SBM matrix
   \param[in] A the SparseBlockStructuredMatrix matrix
   \param[in] sparseMat pointer on the initialized sparse Matrix
   \return 0 if ok
   */
-  int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, SparseMatrix *sparseMat);
+  int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, NumericsSparseMatrix *sparseMat);
 
   /**Copy a block row of the SBM into a Dense Matrix
   \param[in] A the SparseBlockStructuredMatrix matrix to be inversed.

@@ -1,3 +1,10 @@
+#ifndef AlartCurnierGenerated_h
+#define AlartCurnierGenerated_h
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
+
 void frictionContact3D_AlartCurnierFABGenerated(
   double rn,
   double rt1,
@@ -95,3 +102,8 @@ void frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated(
   double *f,
   double *A,
   double *B);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif
+#endif

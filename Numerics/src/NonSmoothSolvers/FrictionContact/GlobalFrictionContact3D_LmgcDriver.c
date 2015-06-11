@@ -48,8 +48,8 @@ int globalFrictionContact_fclib_write(
   assert(problem->M->matrix2);
   assert(problem->H->matrix2);
 
-  SparseMatrix* _M = problem->M->matrix2;
-  SparseMatrix* _H = problem->H->matrix2;
+  NumericsSparseMatrix* _M = problem->M->matrix2;
+  NumericsSparseMatrix* _H = problem->H->matrix2;
 
   M.m = _M->m;
   M.n = _M->n;
@@ -120,7 +120,7 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   GlobalFrictionContactProblem problem;
   NumericsMatrix M, H;
 
-  SparseMatrix _M, _H;
+  NumericsSparseMatrix _M, _H;
 
   unsigned int * _colM = alloc_memory_int(nzM, colM);
   unsigned int * _rowM = alloc_memory_int(nzM, rowM);

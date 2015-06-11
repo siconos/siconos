@@ -19,10 +19,10 @@ typedef struct sparse_matrix_iterator
   int first;
   int second;
   double third;
-  const SparseMatrix* mat;
+  const NumericsSparseMatrix* mat;
 } sparse_matrix_iterator;
 
-static sparse_matrix_iterator sparseMatrixBegin(const SparseMatrix* const sparseMat);
+static sparse_matrix_iterator sparseMatrixBegin(const NumericsSparseMatrix* const sparseMat);
 static int sparseMatrixNext(sparse_matrix_iterator* it);
 
 
@@ -1455,7 +1455,7 @@ void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat)
   }
 }
 
-int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, SparseMatrix *sparseMat)
+int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, NumericsSparseMatrix *sparseMat)
 {
   assert(A);
   assert(A->blocksize0);
@@ -1505,7 +1505,7 @@ int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, SparseMatr
   return 0;
 }
 
-sparse_matrix_iterator sparseMatrixBegin(const SparseMatrix* const sparseMat)
+sparse_matrix_iterator sparseMatrixBegin(const NumericsSparseMatrix* const sparseMat)
 {
   if (sparseMat->nz >= 0)
   {
@@ -1767,7 +1767,7 @@ void freeSBMFromSBCM(SparseBlockStructuredMatrix* M)
   M = NULL;
 }
 
-int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* A)
+int sparseToSBM(int blocksize, const NumericsSparseMatrix* const sparseMat, SparseBlockStructuredMatrix* A)
 {
   assert(sparseMat);
   assert(sparseMat->p);
@@ -1990,7 +1990,7 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
 }
 
-int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, SparseMatrix *sparseMat)
+int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, NumericsSparseMatrix *sparseMat)
 {
   assert(A);
   assert(A->blocksize0);

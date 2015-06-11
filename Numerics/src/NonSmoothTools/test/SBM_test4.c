@@ -28,7 +28,7 @@
 #include "NumericsMatrix.h"
 #include <math.h>
 #include "numericsMatrixTestFunction.h"
-#include "SparseMatrix.h"
+#include "NumericsSparseMatrix.h"
 
 
 int main(void)
@@ -41,7 +41,7 @@ int main(void)
   printSBM(&M);
   fclose(file);
   /*alloc enough memory */
-  SparseMatrix sparseMat;
+  NumericsSparseMatrix sparseMat;
   res = SBMtoSparseInitMemory(&M, &sparseMat);
   if (res)
   {
