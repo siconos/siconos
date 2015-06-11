@@ -231,11 +231,11 @@ int main(int argc, char* argv[])
       dataPlot(k, 26) = (*inter2->lambda(0))(0) ; // lambda2
       dataPlot(k, 27) = (*inter3->lambda(0))(0) ; // lambda3
       dataPlot(k, 28) = (*inter4->lambda(0))(0) ; // lambda4
-      dataPlot(k, 29) = s->getNewtonNbSteps();
+      dataPlot(k, 29) = s->getNewtonNbIterations();
       dataPlot(k, 30) = s->nbProjectionIteration();
       dataPlot(k, 31) = s->maxViolationUnilateral();
       dataPlot(k, 32) = s->nbIndexSetsIteration();
-      dataPlot(k, 33) = s->cumulatedNewtonNbSteps();
+      dataPlot(k, 33) = s->cumulatedNewtonNbIterations();
       dataPlot(k, 34) = s->nbCumulatedProjectionIteration();
       s->processEvents();
       ++show_progress;

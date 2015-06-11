@@ -258,7 +258,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
   _nbIndexSetsIteration = 0 ;
-  _cumulatedNewtonNbSteps = 0 ;
+  _cumulatedNewtonNbIterations = 0 ;
   _nbCumulatedProjectionIteration = 0;
 
   while (!_isIndexSetsStable)
@@ -330,7 +330,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     /** First step, Solve the standard velocity formulation.*/
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
-    _cumulatedNewtonNbSteps += getNewtonNbSteps();
+    _cumulatedNewtonNbIterations += getNewtonNbIterations();
 
 #ifdef TSPROJ_DEBUG_LEVEL1
 

@@ -63,7 +63,7 @@ protected:
   unsigned int _newtonMaxIteration;
 
   /** Number of steps perfomed is the Newton Loop */
-  unsigned int _newtonNbSteps;
+  unsigned int _newtonNbIterations;
 
   /** unsigned int  _newtonOptions
    *  option in the Newon iteration
@@ -173,9 +173,9 @@ public:
   /** To known the number of steps performed by the Newton algorithm.
    * \return  the number of steps performed by the Newton algorithm
    */
-  unsigned int getNewtonNbSteps()
+  unsigned int getNewtonNbIterations()
   {
-    return _newtonNbSteps;
+    return _newtonNbIterations;
   }
 
   /** initialize the Newton

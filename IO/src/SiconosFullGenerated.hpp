@@ -737,7 +737,7 @@ SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL,(NonSmoothLaw),
   (_ElasCof))
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingCombinedProjection,(TimeStepping),
   (_indexSetLevelForProjection)
-  (_cumulatedNewtonNbSteps)
+  (_cumulatedNewtonNbIterations)
   (_nbProjectionIteration)
   (_nbCumulatedProjectionIteration)
   (_nbIndexSetsIteration)

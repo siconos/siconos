@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 7) = (*inter1->y(0))(0) ; // g1
       dataPlot(k, 8) = (*inter2->y(0))(0) ; // g2
       dataPlot(k, 9) = (*inter3->y(0))(0) ; // g3
-      dataPlot(k, 10) = s->getNewtonNbSteps();
+      dataPlot(k, 10) = s->getNewtonNbIterations();
       dataPlot(k, 11) = indexSet1->size();
 
       if (indexSet1->size() > 5)

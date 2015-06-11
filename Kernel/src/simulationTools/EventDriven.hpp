@@ -70,7 +70,7 @@ protected:
   unsigned int _newtonMaxIteration;
 
   /** Number of steps perfomed is the Newton Loop */
-  unsigned int _newtonNbSteps;
+  unsigned int _newtonNbIterations;
 
   /** Maximum Residual for the Dynamical system */
   double _newtonResiduDSMax;
@@ -150,9 +150,9 @@ public:
   };
 
   /** To known the number of steps performed by the Newton algorithm */
-  unsigned int getNewtonNbSteps()
+  unsigned int getNewtonNbIterations()
   {
-    return _newtonNbSteps;
+    return _newtonNbIterations;
   }
 
   /** Set value to the maximum number of iterations

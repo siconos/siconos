@@ -108,7 +108,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
   
 
-  DEBUG_EXPR_WE(std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbSteps() << "\n";
+  DEBUG_EXPR_WE(std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbIterations() << "\n";
 		std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
 		std::cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
 		std::cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
@@ -554,7 +554,7 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
 void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int maxStep)
 {
   bool isNewtonConverge = false;
-  _newtonNbSteps = 0; // number of Newton iterations
+  _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
   //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
@@ -564,7 +564,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
   if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
       || isLinear)
   {
-    _newtonNbSteps++;
+    _newtonNbIterations++;
     prepareNewtonIteration();
     computeFreeState();
     // updateOutput(0);
@@ -586,9 +586,9 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
 
   else if (_newtonOptions == SICONOS_TS_NONLINEAR)
   {
-    while ((!isNewtonConverge) && (_newtonNbSteps < maxStep) && (!info))
+    while ((!isNewtonConverge) && (_newtonNbIterations < maxStep) && (!info))
     {
-      _newtonNbSteps++;
+      _newtonNbIterations++;
       prepareNewtonIteration();
       computeFreeState();
       // updateOutput(0);
@@ -628,7 +628,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     else if (info)
       std::cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." <<std::endl ;
     //    else
-    //      std::cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
+    //      std::cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbIterations<<"maxStep="<<maxStep<<endl;
   }
   else
     RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);

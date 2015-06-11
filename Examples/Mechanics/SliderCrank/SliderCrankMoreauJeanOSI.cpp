@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 22) = (*inter2->lambda(1))(0) ; // lambda1
       dataPlot(k, 23) = (*inter3->lambda(1))(0) ; // lambda3
       dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
-      dataPlot(k, 25) = s->getNewtonNbSteps();
+      dataPlot(k, 25) = s->getNewtonNbIterations();
       dataPlot(k, 26) = indexSet1->size();
 
       if (indexSet1->size() > 5)

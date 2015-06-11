@@ -46,7 +46,7 @@ protected:
   unsigned int _indexSetLevelForProjection;
 
   /** Cumulated Number of steps perfomed is the Newton Loop */
-  unsigned int _cumulatedNewtonNbSteps;
+  unsigned int _cumulatedNewtonNbIterations;
 
   /** Number of iteration of projection
   */
@@ -169,9 +169,9 @@ public:
 
   /** get the  Cumulated Number of steps perfomed is the Newton Loop
    */
-  inline unsigned int cumulatedNewtonNbSteps()
+  inline unsigned int cumulatedNewtonNbIterations()
   {
-    return _cumulatedNewtonNbSteps;
+    return _cumulatedNewtonNbIterations;
   }
 
   /** get the Number of iteration for stabilizating indexsets

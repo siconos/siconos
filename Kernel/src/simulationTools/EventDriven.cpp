@@ -49,7 +49,7 @@ EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1),
   (*_allNSProblems).resize(_numberOfOneStepNSproblems);
   _newtonTolerance = DEFAULT_TOL_ED;
   _newtonMaxIteration = 50;
-  _newtonNbSteps = 0;
+  _newtonNbIterations = 0;
   _newtonResiduDSMax = 0.0;
   _newtonResiduYMax = 0.0;
   _localizeEventMaxIter = 100;
@@ -61,7 +61,7 @@ EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _is
   _numberOfOneStepNSproblems = 0;
   _newtonTolerance = DEFAULT_TOL_ED;
   _newtonMaxIteration = 50;
-  _newtonNbSteps = 0;
+  _newtonNbIterations = 0;
   _newtonResiduDSMax = 0.0;
   _newtonResiduYMax = 0.0;
   _localizeEventMaxIter = 100;
@@ -911,21 +911,21 @@ void EventDriven::correctionNewtonIteration()
 void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
 {
   _isNewtonConverge = false;
-  _newtonNbSteps = 0; // number of Newton iterations
+  _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
   _istate = 1; // beginning of time integration
   // Prediction
   predictionNewtonIteration();
   while (1 != 0)
   {
-    _newtonNbSteps++;
+    _newtonNbIterations++;
     // Prepare for iteration
     prepareNewtonIteration();
     // Check convergence
     _isNewtonConverge = newtonCheckConvergence(_newtonTolerance);
     //
 #ifdef DEBUG_MESSAGES
-    cout << "Iteration: " << _newtonNbSteps <<endl;
+    cout << "Iteration: " << _newtonNbIterations <<endl;
     cout << "Convergence: " << _isNewtonConverge <<endl;
 #endif
     //
@@ -933,7 +933,7 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
     {
       break;
     }
-    if (_newtonNbSteps >  maxStep)
+    if (_newtonNbIterations >  maxStep)
     {
       cout << "Warning!!!In EventDriven::newtonSolve: Number of iterations is greater than the maximum value " << maxStep <<endl;
     }

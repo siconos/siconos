@@ -514,7 +514,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
   DEBUG_PRINT("TimeStepping::newtonSolve()\n");
   _isNewtonConverge = false;
-  _newtonNbSteps = 0; // number of Newton iterations
+  _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
   InteractionsGraph& indexSet0 = *model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
@@ -525,8 +525,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
       || isLinear)
   {
-    _newtonNbSteps++;
-    DEBUG_PRINTF("TimeStepping::newtonSolve(). _newtonNbSteps = %i\n", _newtonNbSteps);
+    _newtonNbIterations++;
+    DEBUG_PRINTF("TimeStepping::newtonSolve(). _newtonNbIterations = %i\n", _newtonNbIterations);
     prepareNewtonIteration();
     computeFreeState();
     if (hasNSProblems)
@@ -546,10 +546,10 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
   else if (_newtonOptions == SICONOS_TS_NONLINEAR)
   {
-    //  while((!_isNewtonConverge)&&(_newtonNbSteps < maxStep)&&(!info))
-    while ((!_isNewtonConverge) && (_newtonNbSteps < maxStep))
+    //  while((!_isNewtonConverge)&&(_newtonNbIterations < maxStep)&&(!info))
+    while ((!_isNewtonConverge) && (_newtonNbIterations < maxStep))
     {
-      _newtonNbSteps++;
+      _newtonNbIterations++;
       prepareNewtonIteration();
       computeFreeState();
       if (info)
@@ -580,7 +580,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
         if (hasNSProblems)
           saveYandLambdaInOldVariables();
       }
-      DEBUG_PRINTF("# _newtonNbSteps = %i\n",_newtonNbSteps );
+      DEBUG_PRINTF("# _newtonNbIterations = %i\n",_newtonNbIterations );
       DEBUG_PRINTF("# _newtonResiduDSMax = %12.8e\t",_newtonResiduDSMax );
       DEBUG_PRINTF("# _newtonResiduYMax = %12.8e\t",_newtonResiduYMax );
       DEBUG_PRINTF("# _newtonResiduRMax = %12.8e\n",_newtonResiduRMax );
