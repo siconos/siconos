@@ -27,18 +27,18 @@
 /** type of function used to post-treat output info from solver. */
 typedef void (*CheckSolverFPtr)(int, Simulation*);
 
-/** \class TimeStepping 
+/** \class TimeStepping
     \brief Event-capturing Time-Stepping simulation
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
- * This class implements the basic algorithm for Event-capturing Time-Stepping 
+ * This class implements the basic algorithm for Event-capturing Time-Stepping
  * simulations.
  *
  * References :
  *
- * V. Acary and B. Brogliato. Numerical Methods for Nonsmooth Dynamical Systems: 
+ * V. Acary and B. Brogliato. Numerical Methods for Nonsmooth Dynamical Systems:
  * Applications in Mechanics and Electronics, volume 35 of Lecture Notes in
  * Applied and Computational Mechanics. Springer Verlag, 2008.
  *
@@ -62,8 +62,11 @@ protected:
   /** Default maximum number of Newton iteration*/
   unsigned int _newtonMaxIteration;
 
-  /** Number of steps perfomed is the Newton Loop */
+  /** Number of steps perfomed in the Newton Loop */
   unsigned int _newtonNbIterations;
+
+  /** Cumulative number of steps perfomed in the Newton Loops */
+  unsigned int _newtonCumulativeNbIterations;
 
   /** unsigned int  _newtonOptions
    *  option in the Newon iteration
@@ -97,11 +100,11 @@ protected:
 
   /** Default Constructor
    */
-  TimeStepping() : 
-    _computeResiduY(false), 
-    _computeResiduR(false), 
+  TimeStepping() :
+    _computeResiduY(false),
+    _computeResiduR(false),
     _isNewtonConverge(false) {};
-  
+
 public:
 
   /** initialisation specific to TimeStepping for OneStepNSProblem.
@@ -109,7 +112,7 @@ public:
   virtual void initOSNS();
 
   /** Constructor with the time-discretisation.
-   *  \param td pointer to a timeDiscretisation used in the integration 
+   *  \param td pointer to a timeDiscretisation used in the integration
    *  (linked to the model that owns this simulation)
    *  \param osi one step integrator (default none)
    *  \param osnspb one step non smooth problem (default none)
@@ -119,7 +122,7 @@ public:
                SP::OneStepNSProblem osnspb = SP::OneStepNSProblem());
 
   /** Constructor with the time-discretisation.
-   *  \param td pointer to a timeDiscretisation used in the integration 
+   *  \param td pointer to a timeDiscretisation used in the integration
    *  (linked to the model that owns this simulation)
    *  \param nb number of non smooth problem
    */
@@ -176,6 +179,14 @@ public:
   unsigned int getNewtonNbIterations()
   {
     return _newtonNbIterations;
+  }
+
+  /** To known the number of steps performed by the Newton algorithm.
+   * \return  the cumulative number of steps performed by the Newton algorithm
+   */
+  unsigned int getNewtonCumulativeNbIterations()
+  {
+    return _newtonCumulativeNbIterations;
   }
 
   /** initialize the Newton

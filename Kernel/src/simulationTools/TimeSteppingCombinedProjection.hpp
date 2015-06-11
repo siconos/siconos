@@ -167,7 +167,7 @@ public:
     return _nbCumulatedProjectionIteration;
   }
 
-  /** get the  Cumulated Number of steps perfomed is the Newton Loop
+  /** get the  Cumulated Number of steps perfomed in the Newton Loop
    */
   inline unsigned int cumulatedNewtonNbIterations()
   {

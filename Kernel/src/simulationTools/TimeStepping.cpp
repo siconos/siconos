@@ -64,8 +64,10 @@ static CheckSolverFPtr checkSolverOutput = NULL;
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
                            SP::OneStepNSProblem osnspb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false),
-    _computeResiduR(false),
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50),_newtonCumulativeNbIterations(0),
+    _newtonOptions(SICONOS_TS_NONLINEAR),
+    _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0),
+    _computeResiduY(false),_computeResiduR(false),
     _isNewtonConverge(false)
 {
 
@@ -76,7 +78,9 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
 }
 
 TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false),
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonCumulativeNbIterations(0),
+    _newtonOptions(SICONOS_TS_NONLINEAR),
+    _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false),
     _computeResiduR(false),
     _isNewtonConverge(false)
 {
@@ -586,6 +590,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       DEBUG_PRINTF("# _newtonResiduRMax = %12.8e\n",_newtonResiduRMax );
 
     }
+    _newtonCumulativeNbIterations += _newtonNbIterations;
     if (!_isNewtonConverge)
     {
       std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep <<
