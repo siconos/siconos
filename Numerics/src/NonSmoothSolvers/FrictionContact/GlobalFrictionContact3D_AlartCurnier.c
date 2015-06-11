@@ -67,7 +67,7 @@
   } while (0)
 
 /* from sparse to dense */
-double* cs_dense(NumericsSparseMatrix *A)
+double* cs_dense(CSparseMatrix *A)
 {
   int m = A->m;
   int n = A->n;
@@ -106,7 +106,7 @@ double* cs_dense(NumericsSparseMatrix *A)
 }
 
 /* add an entry to triplet matrix only if value is not (nearly) null */
-int cs_zentry(NumericsSparseMatrix *T, int i, int j, double x)
+int cs_zentry(CSparseMatrix *T, int i, int j, double x)
 {
   if(fabs(x) >= DBL_EPSILON)
   {
@@ -141,7 +141,7 @@ int cs_aaxpy(const double alpha, const cs *A, const double *x,
 }
 
 /* NumericsMatrix : create compress column storage from triplet storage */
-NumericsSparseMatrix* NM_csc(NumericsMatrix *A)
+CSparseMatrix* NM_csc(NumericsMatrix *A)
 {
   if(!A->matrix3)
   {
@@ -153,7 +153,7 @@ NumericsSparseMatrix* NM_csc(NumericsMatrix *A)
 
 /* NumericsMatrix : create transposed compress column storage from
  * compress column storage */
-NumericsSparseMatrix* NM_trans(NumericsMatrix* A)
+CSparseMatrix* NM_trans(NumericsMatrix* A)
 {
   if(!A->matrix4)
   {
@@ -222,8 +222,8 @@ void NM_setup(NumericsMatrix* A)
 
 /* size of whole problem */
 unsigned int sizeOfPsi(
-  NumericsSparseMatrix* M,
-  NumericsSparseMatrix* H)
+  CSparseMatrix* M,
+  CSparseMatrix* H)
 {
   return M->n + H->n + H->m;
 }
@@ -284,11 +284,11 @@ void ACPsi(
 
 /* init memory for jacobian */
 int initACPsiJacobian(
-  NumericsSparseMatrix* M,
-  NumericsSparseMatrix* H,
-  NumericsSparseMatrix *A,
-  NumericsSparseMatrix *B,
-  NumericsSparseMatrix *J)
+  CSparseMatrix* M,
+  CSparseMatrix* H,
+  CSparseMatrix *A,
+  CSparseMatrix *B,
+  CSparseMatrix *J)
 {
   /* only triplet matrix */
   assert(M->nz>=0);
@@ -353,11 +353,11 @@ int initACPsiJacobian(
 
 /* update J with new A and B */
 void updateACPsiJacobian(
-  NumericsSparseMatrix* M,
-  NumericsSparseMatrix* H,
-  NumericsSparseMatrix *A,
-  NumericsSparseMatrix *B,
-  NumericsSparseMatrix *J,
+  CSparseMatrix* M,
+  CSparseMatrix* H,
+  CSparseMatrix *A,
+  CSparseMatrix *B,
+  CSparseMatrix *J,
   int Astart)
 {
   /* only triplet matrix */
@@ -421,7 +421,7 @@ void updateACPsiJacobian(
 }
 
 /* 3D lists blocks => sparse matrix */
-void init3x3DiagBlocks(int nc, double* P, NumericsSparseMatrix* R)
+void init3x3DiagBlocks(int nc, double* P, CSparseMatrix* R)
 {
 
   R->m = 3 * nc;
@@ -457,7 +457,7 @@ int _globalLineSearchSparseGP(
   double *rho,
   double *F,
   double *psi,
-  NumericsSparseMatrix *J,
+  CSparseMatrix *J,
   double *tmp,
   double alpha[1],
   unsigned int maxiter_ls)
@@ -793,9 +793,9 @@ void globalFrictionContact3D_AlartCurnier(
   int * pA = iB + 3 * localProblemSize;
   int * pB = pA + 3 * localProblemSize;
 
-  NumericsSparseMatrix A_;
-  NumericsSparseMatrix B_;
-  NumericsSparseMatrix *J;
+  CSparseMatrix A_;
+  CSparseMatrix B_;
+  CSparseMatrix *J;
 
   A_.p = pA;
   B_.p = pB;
@@ -880,7 +880,7 @@ void globalFrictionContact3D_AlartCurnier(
     cblas_dscal(ACProblemSize, -1., rhs, 1);
 
     /* get compress column storage for linear ops */
-    NumericsSparseMatrix* Jcsc = cs_triplet(J);
+    CSparseMatrix* Jcsc = cs_triplet(J);
 
     /* Solve: J X = -psi */
 

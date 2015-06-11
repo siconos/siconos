@@ -6,11 +6,11 @@
 
 //#define VERBOSE_DEBUG
 
-void printSparse(const NumericsSparseMatrix* const m)
+void printSparse(const CSparseMatrix* const m)
 {
   if (! m)
   {
-    fprintf(stderr, "Numerics, NumericsSparseMatrix display failed, NULL input.\n");
+    fprintf(stderr, "Numerics, CSparseMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   assert(m->p);
@@ -46,7 +46,7 @@ void printSparse(const NumericsSparseMatrix* const m)
 
 }
 
-void freeSparse(NumericsSparseMatrix* const M)
+void freeSparse(CSparseMatrix* const M)
 {
 
   assert(M);

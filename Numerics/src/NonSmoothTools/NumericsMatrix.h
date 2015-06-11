@@ -126,9 +126,9 @@ typedef struct
   int size1; /**< number of columns */
   double* matrix0; /**< dense storage */
   SparseBlockStructuredMatrix* matrix1; /**< sparse block storage */
-  NumericsSparseMatrix* matrix2; /**< triplet storage */
-  NumericsSparseMatrix* matrix3; /**< compressed column storage */
-  NumericsSparseMatrix* matrix4; /**< compressed transpose storage */
+  CSparseMatrix* matrix2; /**< triplet storage */
+  CSparseMatrix* matrix3; /**< compressed column storage */
+  CSparseMatrix* matrix4; /**< compressed transpose storage */
 } NumericsMatrix;
 
 /** Possible types of matrices for NumericsMatrix */

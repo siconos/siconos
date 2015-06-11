@@ -67,7 +67,7 @@ int nz ;      : # of entries in triplet matrix;
 } */
 
 
-#define NumericsSparseMatrix struct cs_sparse
+#define CSparseMatrix struct cs_sparse
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -76,12 +76,12 @@ extern "C"
   /** Screen display of the matrix content
       \param M the matrix to be displayed
    */
-  void printSparse(const NumericsSparseMatrix* const M);
+  void printSparse(const CSparseMatrix* const M);
 
   /** free memory of a Sparse Matrix
       \param M the matrix to be freed
    */
-  void freeSparse(NumericsSparseMatrix* const M);
+  void freeSparse(CSparseMatrix* const M);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

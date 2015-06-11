@@ -41,7 +41,7 @@ int main(void)
   printSBM(&M);
   fclose(file);
   /*alloc enough memory */
-  NumericsSparseMatrix sparseMat;
+  CSparseMatrix sparseMat;
   res = SBMtoSparseInitMemory(&M, &sparseMat);
   if (res)
   {

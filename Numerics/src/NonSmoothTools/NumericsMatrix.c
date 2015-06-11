@@ -495,7 +495,7 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
     case NM_TRIPLET:
     case NM_COMPR_COL:
     case NM_COMPR_TRANS:
-      data = malloc(sizeof(NumericsSparseMatrix));
+      data = malloc(sizeof(CSparseMatrix));
     default:
       printf("createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
       exit(EXIT_FAILURE);
@@ -530,13 +530,13 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
         M->matrix1 = (SparseBlockStructuredMatrix*) data;
         break;
       case NM_TRIPLET:
-        M->matrix2 = (NumericsSparseMatrix*) data;
+        M->matrix2 = (CSparseMatrix*) data;
         break;
       case NM_COMPR_COL:
-        M->matrix3 = (NumericsSparseMatrix*) data;
+        M->matrix3 = (CSparseMatrix*) data;
         break;
       case NM_COMPR_TRANS:
-        M->matrix4 = (NumericsSparseMatrix*) data;
+        M->matrix4 = (CSparseMatrix*) data;
         break;
 
       default:
