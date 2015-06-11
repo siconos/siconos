@@ -604,6 +604,9 @@ void TimeSteppingCombinedProjection::advanceToEvent()
           double time = nextTime();
           d->computeForces(time);
         }
+        else if (dsType == Type::LagrangianLinearTIDS)
+        {
+        }
         else
           RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
       }
