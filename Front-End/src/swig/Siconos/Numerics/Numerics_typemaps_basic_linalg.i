@@ -5,8 +5,8 @@
 
   array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
 
-  if (!array 
-      || !require_native(array) ) 
+  if (!array
+      || !require_native(array) )
     SWIG_fail;
 
   $1 = (double *) array_data(array);
@@ -40,30 +40,30 @@
       SWIG_fail;
 
     if (*p_problem_size1 % 3 != 0) SWIG_fail;
-    
+
     if (*p_problem_size1 / 3 == 0) SWIG_fail;
-    
+
     number_of_contacts1 = *p_problem_size1 / 3;
-    
+
   }
 
   assert (*p_problem_size1);
-  
+
 
   if (array_numdims(array) > 1)
   {
     array_len[0] = *p_problem_size1 * 3;
     array_len[1] = 1;
-  } 
-  else 
+  }
+  else
   {
     array_len[0] = *p_problem_size1 * 3;
   }
-    
-  if (!array 
+
+  if (!array
       || !require_native(array) || !require_contiguous(array)
       || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
-  
+
   $1 = (double *) array_data(array);
 
  }
@@ -95,15 +95,15 @@
     else
       SWIG_fail;
 
-    
+
     if (*p_problem_size1 % 3 != 0) SWIG_fail;
-    
+
     if (*p_problem_size1 / 3 == 0) SWIG_fail;
-    
+
     number_of_contacts1 = *p_problem_size1 / 3;
-    
-  }    
-  
+
+  }
+
   assert (*p_problem_size1);
 
   if (array_numdims(array) > 1)
@@ -111,15 +111,15 @@
     array_len[0] = *p_problem_size1;
     array_len[1] = *p_problem_size1;
   }
-  else 
+  else
   {
     array_len[0] = *p_problem_size1 * *p_problem_size1;
   }
 
-  if (!array 
+  if (!array
       || !require_native(array) || !require_fortran(array)
       || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
-  
+
   $1 = (double *) array_data(array);
 
  }
@@ -146,17 +146,17 @@
     else if (array_numdims(array) > 1)
     {
       *p_problem_size1 = fmax(array_size(array,0), array_size(array,1));
-    } 
-    
+    }
+
     if (*p_problem_size1 % 3 != 0) SWIG_fail;
-    
+
     if (*p_problem_size1 / 3 == 0) SWIG_fail;
-    
-    
+
+
     number_of_contacts1 = *p_problem_size1 / 3;
-    
+
   }
-  
+
   assert (*p_problem_size1);
 
   if (array_numdims(array) == 1)
@@ -169,10 +169,10 @@
     array_len[1] = 1;
   }
 
-  if (!array 
+  if (!array
       || !require_native(array) || !require_contiguous(array)
       || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
-  
+
   $1 = (double *) array_data(array);
 
  }
@@ -194,18 +194,18 @@
 }
 
 // 2 : check must be done after in
-%typemap(check) (double *output_blocklist3) 
+%typemap(check) (double *output_blocklist3)
 {
   if (*p_problem_size1)
   {
-    
+
     npy_intp dims[2] = { *p_problem_size1, 1};
-    
+
     array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     if (!array$argnum) SWIG_fail;
     $1 = ($1_ltype) array_data(array$argnum);
   }
-  
+
 }
 
 // 3 : return arg
@@ -215,7 +215,7 @@
   {
      $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
   }
-  
+
 }
 
 // 3x3 matrices
@@ -236,13 +236,13 @@
 }
 
 // 2 : check must be done after in
-%typemap(check) (double *output_blocklist3x3) 
+%typemap(check) (double *output_blocklist3x3)
 {
   if (*p_problem_size1)
   {
-    
+
     npy_intp dims[2] = { *p_problem_size1 * 3, 1 };
-    
+
     array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     // block list : require_fortran useless?
     if (!array$argnum) SWIG_fail;
@@ -250,22 +250,22 @@
     if (!array || !require_fortran(array)) SWIG_fail;
     $1 = ($1_ltype) array_data(array);
   }
-  
+
 }
 
-%typemap(check) (double *output_blockarray3x3) 
+%typemap(check) (double *output_blockarray3x3)
 {
   if (*p_problem_size1)
   {
-    
+
     npy_intp dims[2] = { *p_problem_size1, *p_problem_size1};
-    
+
     array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     PyArrayObject *array = (PyArrayObject*) array$argnum;
     if (!array || !require_fortran(array)) SWIG_fail;
     $1 = ($1_ltype) array_data(array);
   }
-  
+
 }
 
 // 3 : return arg
@@ -275,7 +275,7 @@
   {
     $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
   }
-  
+
 }
 
 %typemap(argout) (double *output_blockarray3x3)
@@ -298,13 +298,13 @@
     array_len[1] = 1;
 
     array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-    
+
     if (!array
         || !require_native(array) || !require_contiguous(array) || !require_fortran(array)
         || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
-    
+
     $1 = (double *) array_data(array);
-    
+
   }
  }
 
@@ -314,15 +314,25 @@
     { Py_DECREF(array$argnum); }
 }
 
+%typemap(in, numinputs=0) (double *output3) 
+{
+}
+
+%typemap(argout) (double *output3)
+{
+  $result = SWIG_Python_AppendOutput($result, PyFloat_FromDouble($1[0]));
+  $result = SWIG_Python_AppendOutput($result, PyFloat_FromDouble($1[1]));
+  $result = SWIG_Python_AppendOutput($result, PyFloat_FromDouble($1[2]));
+}
 
 // other names that must be transformed this way
-%apply (double *z) { (double *w) }; 
+%apply (double *z) { (double *w) };
 
-%apply (double *z) { (double *x) }; 
+%apply (double *z) { (double *x) };
 
-%apply (double *z) { (double *F) }; 
+%apply (double *z) { (double *F) };
 
-%apply (double *z) { (double *Fmcp) }; 
+%apply (double *z) { (double *Fmcp) };
 
 %apply (double *z) { (double *zlem) };
 
@@ -363,5 +373,3 @@
 %apply (double *output_blocklist3x3) { (double *output_blocklist3x3_1) };
 
 %apply (double *output_blocklist3x3) { (double *output_blocklist3x3_2) };
-
-

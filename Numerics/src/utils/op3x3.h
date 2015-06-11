@@ -60,7 +60,6 @@
     EXPR;                                       \
     EXPR;                                       \
   } while(0)                                    \
- 
 
 /** SET3X3 : set pointers on a 3x3 matrix a (*a00 *a01 *a10 etc.)
  * warning the pointer a is modified (use a00 instead) and is ready
