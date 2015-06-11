@@ -28,7 +28,7 @@
 #include "NumericsMatrix.h"
 #include <math.h>
 #include "numericsMatrixTestFunction.h"
-#include "NumericsSparseMatrix.h"
+#include "SparseMatrix.h"
 
 
 int main(void)
