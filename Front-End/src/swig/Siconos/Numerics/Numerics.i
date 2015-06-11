@@ -1,7 +1,7 @@
 // -*- C++ -*-
 // Siconos-Front-End , Copyright INRIA 2005-2012.
 // Siconos is a program dedicated to modeling, simulation and control
-// of non smooth dynamical systems.	
+// of non smooth dynamical systems.
 // Siconos is a free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -15,7 +15,7 @@
 // along with Siconos; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-// Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr 
+// Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 //
 
 // Siconos.i - SWIG interface for Siconos
@@ -38,6 +38,8 @@
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_localAlartCurnier.h"
 #include "FrictionContact3D_localFischerBurmeister.h"
+#include "AlartCurnierGenerated.h"
+#include "FischerBurmeisterGenerated.h"
 #include "FrictionContact3D_compute_error.h"
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
@@ -225,9 +227,9 @@
     (const char * filename)
   {
     FILE * finput = fopen(filename, "r");
-    if (finput) 
+    if (finput)
     {
-      FrictionContactProblem* problem = 
+      FrictionContactProblem* problem =
         (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
       if (frictionContact_newFromFile(problem,finput))
       {
@@ -245,14 +247,14 @@
     }
     fclose(finput);
   }
-  
+
   MixedLinearComplementarityProblem* mixedLinearComplementarityProblemFromFile
     (const char * filename)
   {
     FILE * finput = fopen(filename, "r");
-    if (finput) 
+    if (finput)
     {
-      MixedLinearComplementarityProblem* problem = 
+      MixedLinearComplementarityProblem* problem =
         (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
       if (mixedLinearComplementarity_newFromFile(problem,finput))
       {
@@ -274,7 +276,7 @@
 
 %include Numerics_for_python_callback.i
 
-// MCP 
+// MCP
 %include "MixedComplementarityProblem.h"
 %include "MCP_Solvers.h"
 %include "MCP_cst.h"
@@ -383,8 +385,8 @@
   //   return BOOST_PP_CAT(FE_SWIG_INTERNAL_MEMBER,SolverOptions_makeSolverOptions)(NULL, fcp, id);
   // }
 
-  ~SolverOptions() 
-    { 
+  ~SolverOptions()
+    {
       deleteSolverOptions($self);
       free($self);
     }
@@ -400,7 +402,7 @@
       int is_new_object2=0;
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       assert(array);
-      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2); 
+      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
       assert(vector);
       LinearComplementarityProblem *LC;
       // return pointer : free by std swig destructor
@@ -431,7 +433,7 @@
       return LC;
 
     }
-  
+
 
   ~LinearComplementarityProblem()
   {
@@ -462,9 +464,9 @@
       int is_new_object2=0;
 
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
-      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2); 
-      
-      
+      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
+
+
       MixedLinearComplementarityProblem *MLCP;
       // return pointer : free by std swig destructor
       MLCP = (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
@@ -479,7 +481,7 @@
                      "A non square matrix (%ld,%ld) has been given",
                      array_size(array,0), array_size(array,1));
       }
-      
+
       M->matrix0 = (double *) malloc(M->size0*M->size1*sizeof(double));
       memcpy(M->matrix0,array_data(array),M->size0*M->size1*sizeof(double));
 
@@ -487,16 +489,16 @@
       MLCP->m = M->size0 - MLCP->n;
       MLCP->blocksRows = (int *) malloc(3*sizeof(int));
       MLCP->blocksIsComp = (int *) malloc(2*sizeof(int));
-       
-      
+
+
       MLCP->blocksRows[0]=0;
       MLCP->blocksRows[1]=MLCP->n;
       MLCP->blocksRows[2]=MLCP->n+MLCP->m;
       MLCP->blocksIsComp[0]=0;
       MLCP->blocksIsComp[1]=1;
-      
- 
-      MLCP->isStorageType1 = 1;     
+
+
+      MLCP->isStorageType1 = 1;
       MLCP->isStorageType2 = 0;
       MLCP->M = M;
       MLCP->A = NULL;
@@ -510,7 +512,7 @@
       {
         //printf("size of q = %i\n",  array_size(vector,0));
         //printf("size of M = %i\n",  array_size(array,0));
-        
+
         PyErr_Format(PyExc_ValueError,
                      "Matrix and vector of incompatible lengths (%ld != %ld) ",
                      array_size(array,0), array_size(vector,0) );
@@ -532,26 +534,26 @@
       return MLCP;
 
     }
-  
- 
+
+
 
   ~MixedLinearComplementarityProblem()
   {
     freeMixedLinearComplementarityProblem($self);
   }
-  
+
   // MixedLinearComplementarityProblem * newFromFilename(PyObject * o1)
   // {
   //   int result;
   //   MixedLinearComplementarityProblem *MLCP;
   //   // return pointer : free by std swig destructor
   //   MLCP = (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
-    
+
   //   char *arg1 = (char *) 0 ;
   //   int res1 ;
   //   char *buf1 = 0 ;
   //   int alloc1 = 0 ;
-    
+
   //   res1 = SWIG_AsCharPtrAndSize(o1, &buf1, NULL, &alloc1);
   //   // if (!SWIG_IsOK(res1)) {
   //   //   SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MixedLinearComplementarity_newFromFilename" "', argument " "1"" of type '" "char *""'");
@@ -567,9 +569,9 @@
   //       // SWIG_exception(SWIG_ValueError, e.what());
   //     }
   //   }
-    
+
   //   return MLCP;
-    
+
   // }
 
 };
@@ -584,7 +586,7 @@
 %extend MixedComplementarityProblem
 {
 
- 
+
 
   MixedComplementarityProblem()
    {
@@ -602,24 +604,24 @@
     set_my_callback_Fmcp(o);
     $self->computeFmcp = (my_call_to_callback_Fmcp);
   }
-  
+
   void set_computeNablaFmcp(PyObject *o)
   {
 
     set_my_callback_NablaFmcp(o);
     $self->computeNablaFmcp = (my_call_to_callback_NablaFmcp);
   }
-  
+
   void test_call_to_callback()
   {
     printf("I am in test_call_to_callback()\n");
-    
+
     int size =   $self->sizeEqualities +  $self->sizeInequalities;
 
     double * z = (double *)malloc(size*sizeof(double));
     double * F = (double *)malloc(size*sizeof(double));
     double * nablaF = (double *)malloc(size*size*sizeof(double));
-    
+
     for (int i=0; i < size; i++) z[i]=i;
     printf("Input \n");
     for (int i=0; i < size; i++) printf("z[%i] = %lf\t", i, z[i]);
@@ -630,20 +632,20 @@
       $self->computeNablaFmcp(size,z,nablaF);
     }
     printf("Output \n");
-    for (int i=0; i < size; i++) printf("F[%i] =  %lf\t", i, F[i]); 
+    for (int i=0; i < size; i++) printf("F[%i] =  %lf\t", i, F[i]);
     printf("\n");
     for (int i=0; i < size*size; i++) printf("nablaF[%i] =  %lf\t", i, nablaF[i]);
-    
+
     printf("\n");
     free(z);
     free(F);
     free(nablaF);
-    
-    
+
+
 
     printf("I leave test_call_to_callback()\n");
   }
- 
+
 
 
   MixedComplementarityProblem(PyObject *sizeEq, PyObject *sizeIneq, PyObject *o1, PyObject *o2)
@@ -654,7 +656,7 @@
      MCP->sizeEqualities = (int) PyInt_AsLong(sizeEq);
      MCP->sizeInequalities = (int) PyInt_AsLong(sizeIneq);
      int size =  MCP->sizeEqualities +  MCP->sizeInequalities;
-     
+
      if (size<1)
      {
        PyErr_SetString(PyExc_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
@@ -668,8 +670,8 @@
        MCP->Fmcp = (double *) malloc(size*sizeof(double));
        MCP->nablaFmcp = (double *) malloc(size*size*sizeof(double));
      }
-     
-     if (PyCallable_Check(o1)) 
+
+     if (PyCallable_Check(o1))
      {
        set_my_callback_Fmcp(o1);
        MCP->computeFmcp = (my_call_to_callback_Fmcp);
@@ -685,7 +687,7 @@
        return NULL;
      }
 
-     
+
      if (PyCallable_Check(o2))
      {
        set_my_callback_NablaFmcp(o2);
@@ -763,8 +765,18 @@
 
 %ignore frictionContactProblem_new; // signature issue with mu param
 
-
 %include FrictionContactProblem.i
+
+%include "typemaps.i"
+
+%apply double *OUTPUT { double *error };
+%apply double *OUTPUT { double *result };
+
+// Callback (see SolverOptions.i) needed here
+%typemap(in, numinputs=0) (FischerBurmeisterFun3x3Ptr computeACFun3x3) () {
+  // Callback (see SolverOptions.i) needed here
+  $1 = &frictionContact3D_FischerBurmeisterFunctionGenerated;
+ }
 
 %include "FrictionContact3D_Solvers.h"
 %include "FrictionContact3D_unitary_enumerative.h"
@@ -773,15 +785,20 @@
 %include "FrictionContact3D_AlartCurnier.h"
 %include "FrictionContact3D_localAlartCurnier.h"
 %include "FrictionContact3D_localFischerBurmeister.h"
+%include "AlartCurnierGenerated.h"
+%include "FischerBurmeisterGenerated.h"
 %include "FrictionContact3D_compute_error.h"
 %include "fclib_interface.h"
+
+
+
 
 %extend FrictionContactProblem
 {
   FrictionContactProblem()
   {
     FrictionContactProblem * FCP = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-    
+
     return FCP;
   }
 
@@ -813,7 +830,7 @@
     FrictionContactProblem * FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
     FC->dimension = PyInt_AsLong(dim);
     FC->numberOfContacts = PyInt_AsLong(numberOfContacts);
-    
+
     {
       void * _M;
       int res = SWIG_ConvertPtr(M, &_M,SWIGTYPE_p_NumericsMatrix, 0 |  0 );
@@ -834,7 +851,7 @@
     }
 
     return FC;
-    
+
   }
 
   NumericsMatrix* rawM()
@@ -847,11 +864,11 @@
 
       int is_new_object1=0;
       int is_new_object2=0;
-      int is_new_object3=0; 
+      int is_new_object3=0;
 
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
-      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3); 
+      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3);
       FrictionContactProblem *FC;
       // return pointer : free by std swig destructor
       FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
@@ -869,14 +886,14 @@
       memcpy(FC->q,array_data(vector),M->size0*sizeof(double));
       FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
       memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
-   
+
 
       // python mem management
       if(is_new_object1 && array)
       {
         Py_DECREF(array);
       }
-  
+
       if(is_new_object2 && vector)
       {
         Py_DECREF(vector);
@@ -906,11 +923,11 @@
 
       int is_new_object1=0;
       int is_new_object2=0;
-      int is_new_object3=0; 
+      int is_new_object3=0;
 
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
-      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3); 
+      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3);
       GlobalFrictionContactProblem *FC;
       // return pointer : free by std swig destructor
       FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
@@ -928,14 +945,14 @@
       memcpy(FC->q,array_data(vector),M->size0*sizeof(double));
       FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
       memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
-   
+
 
       // python mem management
       if(is_new_object1 && array)
       {
         Py_DECREF(array);
       }
-  
+
       if(is_new_object2 && vector)
       {
         Py_DECREF(vector);
@@ -971,14 +988,14 @@
 %include "SparseBlockMatrix.h"
 %include "NumericsMatrix.h"
 
-// some extensions but numpy arrays should be used instead 
+// some extensions but numpy arrays should be used instead
 %extend NumericsMatrix
 {
 
   NumericsMatrix(int nrows, int ncols, double *data)
     {
       NumericsMatrix *M;
-      
+
       // return pointer : free by std swig destructor
       M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
       M->storageType = 0;
@@ -1042,8 +1059,8 @@
     return PyUnicode_FromString(result.str().c_str());
     %#endif
   }
-  
-}; 
+
+};
 
 
 #define GET_ATTR(OBJ,ATTR)                                              \
@@ -1082,14 +1099,14 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
     try
     {
 
-      M = (cs_sparse *) malloc(sizeof(cs_sparse));      
-      
+      M = (cs_sparse *) malloc(sizeof(cs_sparse));
+
       GET_ATTR(obj,shape);
       GET_ATTR(obj,nnz);
       GET_ATTR(obj,data);
       GET_ATTR(obj,indices);
       GET_ATTR(obj,indptr);
-      
+
       int dim0, dim1, nzmax;
 
       GET_INTS(shape,0,dim0);
@@ -1100,14 +1117,14 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
       array_data = obj_to_array_allow_conversion(data, NPY_DOUBLE, &is_new_object1);
       array_indices = obj_to_array_allow_conversion(indices, NPY_INT32, &is_new_object2);
       array_indptr = obj_to_array_allow_conversion(indptr, NPY_INT32, &is_new_object3);
-      
+
       M->m = dim0;
       M->n = dim1;
 
       M->nzmax = nzmax;
 
       M->nz = -2; // csr only for the moment
-      
+
       M->p = (int *) malloc((M->m+1) * sizeof(int));
       M->i = (int *) malloc(M->nzmax * sizeof(int));
       M->x = (double *) malloc(M->nzmax * sizeof(double));
@@ -1121,7 +1138,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
       {
         M->i[i] = ((int *) array_data(array_indices)) [i];
       }
-     
+
       memcpy(M->x, (double *) array_data(array_data), M->nzmax * sizeof(double));
 
       Py_DECREF(shape);
@@ -1144,7 +1161,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
       {
         Py_DECREF(array_indices);
       }
-      
+
 
       return M;
     }
@@ -1160,17 +1177,17 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
       {
         Py_DECREF(array_data);
       }
-      
+
       if (array_indptr && is_new_object2)
       {
         Py_DECREF(array_indptr);
       }
-      
+
       if (array_indices && is_new_object3)
       {
         Py_DECREF(array_indices);
       }
-      
+
       assert(!M->p);
       assert(!M->i);
       assert(!M->x);
@@ -1186,11 +1203,6 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
   }
 }
 
-
-%{
-
- 
-%}
 
 #ifdef WITH_IO
 %include picklable.i

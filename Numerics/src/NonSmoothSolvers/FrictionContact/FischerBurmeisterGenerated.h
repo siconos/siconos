@@ -1,3 +1,10 @@
+#ifndef FischerBurmeisterGenerated_h
+#define FischerBurmeisterGenerated_h
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
+
 void frictionContact3D_FischerBurmeisterFABGenerated(
   double rn,
   double rt1,
@@ -46,3 +53,8 @@ void frictionContact3D_FischerBurmeisterFunctionGenerated(
   double *f,
   double *A,
   double *B);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif
+#endif

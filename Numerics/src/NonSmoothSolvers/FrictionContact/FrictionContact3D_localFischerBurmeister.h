@@ -127,6 +127,12 @@ extern "C"
     SolverOptions* options);
 
 
+  int frictionContact3D_FischerBurmeister_compute_error(
+    FrictionContactProblem* problem,
+    double *z , double *w, double tolerance,
+    SolverOptions * options, double * error);
+
+
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

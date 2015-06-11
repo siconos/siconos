@@ -25,6 +25,7 @@
 #include "FrictionContact3D_compute_error.h"
 #include "FischerBurmeisterGenerated.h"
 #include "FrictionContactNonsmoothEqn.h"
+#include "FrictionContact3D_localFischerBurmeister.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -256,9 +257,8 @@ void frictionContact3D_localFischerBurmeister(
         F, NULL, NULL);
 
 
-
-      FrictionContact3D_compute_error(problem, reaction, velocity,
-                                      tolerance, options, &(options->dparam[1]));
+      frictionContact3D_FischerBurmeister_compute_error(problem, reaction, velocity,
+                                                        tolerance, options, &(options->dparam[1]));
 
 
       assert((cblas_dnrm2(problemSize, F, 1)
@@ -317,6 +317,64 @@ void frictionContact3D_localFischerBurmeister(
   }
 
 
+}
+
+int frictionContact3D_FischerBurmeister_compute_error(
+    FrictionContactProblem* problem,
+    double *z , double *w, double tolerance,
+    SolverOptions * options, double * error)
+{
+
+  double *A = NULL;
+  double *B = NULL;
+
+  unsigned int problemSize = 3 * problem->numberOfContacts;
+
+  double *rho = malloc(problemSize*sizeof(double));
+  double *F = (double *) malloc(problemSize*sizeof(double));
+
+  FischerBurmeisterFun3x3Ptr computeACFun3x3;
+
+  switch (options->iparam[10])
+  {
+  case 0:
+  {
+
+    computeACFun3x3 = &frictionContact3D_FischerBurmeisterFunctionGenerated;
+    break;
+  }
+  }
+
+  frictionContact3D_FischerBurmeisterFunction(
+    problemSize,
+    computeACFun3x3,
+    z, w,
+    problem->mu, rho,
+    F, A, B);
+
+  *error=0.;
+  for(unsigned int i=0; i<problemSize;
+      i+=3)
+  {
+    *error += sqrt(F[i]*F[i] + F[i+1]*F[i+1] + F[i+2]*F[i+2]);
+  }
+
+  *error /= (problem->numberOfContacts + 1);
+
+  free(F);
+  free(rho);
+
+  if (*error > tolerance)
+  {
+    if (verbose > 1)
+      printf(" Numerics - FrictionContact3D_compute_error: error = %g > tolerance = %g.\n",
+             *error, tolerance);
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
 }
 
 int frictionContact3D_FischerBurmeister_setDefaultSolverOptions(

@@ -573,6 +573,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
 
       FrictionContact3D_compute_error(problem, reaction, velocity,
+//      frictionContact3D_FischerBurmeister_compute_error(problem, reaction, velocity,
                                       tolerance, options, &(options->dparam[1]));
 
 
