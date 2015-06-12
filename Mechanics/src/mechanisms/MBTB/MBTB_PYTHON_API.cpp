@@ -249,18 +249,34 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
   {
     p->setComputeMExtFunction(pluginMextLib,pluginMextFct);
   }
-
   // set internal forces plugin
   if(pluginFintFct.length()>1)
   {
     p->setComputeFIntFunction(pluginFintLib,pluginFintFct);
+
     if(pluginFintJacqFct.length()>1)
     {
-      p->setComputeJacobianFIntqFunction(pluginFintJacqLib,pluginFintJacqFct);
+      if (pluginFintJacqFct == "FiniteDifference")
+      {
+        std::cout <<"setComputeJacobianFIntqByFD(true)" <<std::endl;
+        p->setComputeJacobianFIntqByFD(true);
+      }
+      else
+      {
+        p->setComputeJacobianFIntqFunction(pluginFintJacqLib,pluginFintJacqFct);
+      }
     }
     if(pluginFintJacvFct.length()>1)
     {
-      p->setComputeJacobianFIntvFunction(pluginFintJacvLib,pluginFintJacvFct);
+      if (pluginFintJacvFct == "FiniteDifference")
+      {
+        std::cout <<"setComputeJacobianFIntvByFD(true)" <<std::endl;
+        p->setComputeJacobianFIntvByFD(true);
+      }
+      else
+      {
+        p->setComputeJacobianFIntvFunction(pluginFintJacvLib,pluginFintJacvFct);
+      }
     }
   }
 
@@ -270,14 +286,30 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
 
     if(pluginMintJacqFct.length()>1)
     {
-      p->setComputeJacobianMIntqFunction(pluginMintJacqLib,pluginMintJacqFct);
+      if (pluginMintJacqFct == "FiniteDifference")
+      {
+        std::cout <<"setComputeJacobianMIntqByFD(true)" <<std::endl;
+        p->setComputeJacobianMIntqByFD(true);
+      }
+      else
+      {
+        p->setComputeJacobianMIntqFunction(pluginMintJacqLib,pluginMintJacqFct);
+      }
     }
-
     if(pluginMintJacvFct.length()>1)
     {
-      p->setComputeJacobianMIntvFunction(pluginMintJacvLib,pluginMintJacvFct);
+      if (pluginMintJacvFct == "FiniteDifference")
+      {
+        std::cout <<"setComputeJacobianMIntvByFD(true)" <<std::endl;
+        p->setComputeJacobianMIntvByFD(true);
+      }
+      else
+      {
+        p->setComputeJacobianMIntvFunction(pluginMintJacvLib,pluginMintJacvFct);
+      }
     }
   }
+
 
 
 

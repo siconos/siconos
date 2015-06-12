@@ -433,7 +433,7 @@ void NewtonEulerDS::computeJacobianMIntq(double time, SP::SiconosVector q, SP::S
     ((FInt_NE)_pluginJacqMInt->fPtr)(time, &(*q)(0), &(*velocity)(0), &(*_jacobianMIntq)(0, 0), _qDim,  &(*_q0)(0));
   else if (_computeJacobianMIntqByFD)
     computeJacobianMIntqByFD(time, q, velocity);
-  DEBUG_EXPR(_jacobianMIntq->display();)
+  DEBUG_EXPR(_jacobianMIntq->display());
   DEBUG_PRINT("NewtonEulerDS::computeJacobianMIntq(...) ends");
 
 }

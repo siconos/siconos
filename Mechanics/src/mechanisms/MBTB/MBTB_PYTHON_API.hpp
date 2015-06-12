@@ -297,11 +297,12 @@ void MBTB_print_dist(unsigned int v);
 
 
 
-//! MBTB_BodySetDParam not yet used
-/*!
-
+/** MBTB_BodySetDParam not yet used
+ * \param paramId
+ * \param bodyId
+ * \param v
  */
-void MBTB_BodySetDParam(unsigned int paramId,unsigned int bodyId,double v);
+void MBTB_BodySetDParam(unsigned int paramId,unsigned int bodyId ,double v);
 
 //! MBTB_SetDParam
 /*!
