@@ -173,6 +173,21 @@ protected:
   /** jacobian_v FGyr*/
   SP::SimpleMatrix _jacobianFGyrv;
 
+  /** If true, we compute the missing Jacobian by forward finite difference */
+  bool _computeJacobianFIntqByFD;
+
+  /** If true, we compute the missing Jacobian by forward finite difference */
+  bool _computeJacobianFIntvByFD;
+
+  /** If true, we compute the missing Jacobian by forward finite difference */
+  bool _computeJacobianMIntqByFD;
+
+  /** If true, we compute the missing Jacobian by forward finite difference */
+  bool _computeJacobianMIntvByFD;
+
+  /** value of the step in finite difference */
+  double _epsilonFD;
+
   /** Plugin to compute strength of external forces */
   SP::PluggedObject _pluginFExt;
 
@@ -427,7 +442,6 @@ public:
     return _fExt;
   }
 
-
   /** set fExt to pointer newPtr
    *  \param   newPtr a SP to a Simple vector
    */
@@ -485,9 +499,28 @@ public:
   }
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 
+
+  inline void setComputeJacobianFIntqByFD(bool value)
+  {
+    _computeJacobianFIntqByFD=value;
+  }
+  inline void setComputeJacobianFIntvByFD(bool value)
+  {
+    _computeJacobianFIntvByFD=value;
+  }
+  inline void setComputeJacobianMIntqByFD(bool value)
+  {
+    _computeJacobianMIntqByFD=value;
+  }
+  inline void setComputeJacobianMIntvByFD(bool value)
+  {
+    _computeJacobianMIntvByFD=value;
+  }
+
+
+
+
   // --- PLUGINS RELATED FUNCTIONS ---
-
-
 
   /** allow to set a specified function to compute _fExt
    *  \param pluginPath the complete path to the plugin
@@ -598,8 +631,6 @@ public:
    */
   void setComputeJacobianMIntvFunction(FInt_NE fct);
 
-
-
   /** default function to compute the external forces
    *  \param time the current time
    */
@@ -613,26 +644,42 @@ public:
   /** default function to compute the internal forces
    *  \param time the current time
    */
-  virtual void computeFInt(double time);
+  void computeFInt(double time);
 
   /** default function to compute the internal moments
    * \param time the current time
    */
-  virtual void computeMInt(double time);
+  void computeMInt(double time);
 
   /** default function to compute the internal forces
    * \param time the current time
    * \param q
    * \param v
    */
-  virtual void computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v);
+  void computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v);
 
   /** default function to compute the internal moments
    * \param time the current time
    * \param q
    * \param v
    */
-  virtual void computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v);
+  void computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v);
+
+  /** default function to compute the internal forces
+   * \param time the current time
+   * \param q
+   * \param v
+   * \param fInt the computed internal force vector
+   */
+  virtual void computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector fInt);
+
+  /** default function to compute the internal moments
+   * \param time the current time
+   * \param q
+   * \param v
+   * \param mInt the computed internal moment vector
+   */
+  virtual void computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector mInt);
 
   /** Default function to compute the right-hand side term
    *  \param time current time
@@ -677,7 +724,7 @@ public:
    */
   virtual void computeFGyr(SP::SiconosVector velocity);
 
-  
+
   /** Default function to compute the jacobian following q of fGyr
    *  \param time the current time
    */
@@ -688,23 +735,34 @@ public:
   //  */
   // virtual void computeJacobianvForces(double time);
 
-    /** To compute the jacobian w.r.t q of the internal forces
+  /** To compute the jacobian w.r.t q of the internal forces
    *  \param time double : the current time
    */
-  virtual void computeJacobianFIntq(double time);
+  void computeJacobianFIntq(double time);
+
   /** To compute the jacobian w.r.t v of the internal forces
    *  \param time double : the current time
    */
-  virtual void computeJacobianFIntv(double time);
+  void computeJacobianFIntv(double time);
 
   /** To compute the jacobian w.r.t q of the internal forces
-   *  \param time double : the current time,
+   * \param time double
    * \param position SP::SiconosVector
    * \param velocity SP::SiconosVector
    */
   virtual void computeJacobianFIntq(double time,
                                     SP::SiconosVector position,
                                     SP::SiconosVector velocity);
+  /** To compute the jacobian w.r.t q of the internal forces
+   * by forward finite difference
+   * \param time double
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
+   */
+  void computeJacobianFIntqByFD(double time,
+                                SP::SiconosVector position,
+                                SP::SiconosVector velocity);
+
 
   /** To compute the jacobian w.r.t. v of the internal forces
    *  \param time double: the current time
@@ -714,10 +772,23 @@ public:
   virtual void computeJacobianFIntv(double time,
                                        SP::SiconosVector position,
                                        SP::SiconosVector velocity);
-    /** To compute the jacobian w.r.t q of the internal forces
+
+  /** To compute the jacobian w.r.t v of the internal forces
+   * by forward finite difference
+   * \param time double
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
+   */
+  void computeJacobianFIntvByFD(double time,
+                                SP::SiconosVector position,
+                                SP::SiconosVector velocity);
+
+
+  /** To compute the jacobian w.r.t q of the internal forces
    *  \param time double : the current time
    */
   virtual void computeJacobianMIntq(double time);
+
   /** To compute the jacobian w.r.t v of the internal forces
    *  \param time double : the current time
    */
@@ -732,6 +803,19 @@ public:
                                     SP::SiconosVector position,
                                     SP::SiconosVector velocity);
 
+  /** To compute the jacobian w.r.t q of the internal moments
+   * by forward finite difference
+   * \param time double
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
+   */
+  void computeJacobianMIntqByFD(double time,
+                                SP::SiconosVector position,
+                                SP::SiconosVector velocity);
+
+
+
+
   /** To compute the jacobian w.r.t. v of the internal forces
    *  \param time double: the current time
    * \param position SP::SiconosVector
@@ -741,6 +825,15 @@ public:
                                        SP::SiconosVector position,
                                        SP::SiconosVector velocity);
 
+  /** To compute the jacobian w.r.t v of the internal moments
+   * by forward finite difference
+   * \param time double
+   * \param position SP::SiconosVector
+   * \param velocity SP::SiconosVector
+   */
+  void computeJacobianMIntvByFD(double time,
+                                SP::SiconosVector position,
+                                SP::SiconosVector velocity);
 
 
 

@@ -155,12 +155,14 @@ int main(int argc, char* argv[])
     SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(2) = -m * g;
     beam1->setFExtPtr(weight);
-    // beam1->setComputeFIntFunction("SimplePlugin", "fInt_beam1");
-    // beam1->setComputeJacobianFIntqFunction("SimplePlugin", "jacobianFIntq_beam1");
-    // beam1->setComputeJacobianFIntvFunction("SimplePlugin", "jacobianFIntv_beam1");
+    beam1->setComputeFIntFunction("SimplePlugin", "fInt_beam1");
+    beam1->setComputeJacobianFIntqFunction("SimplePlugin", "jacobianFIntq_beam1");
+    //beam1->setComputeJacobianFIntqByFD(true);
+    beam1->setComputeJacobianFIntvFunction("SimplePlugin", "jacobianFIntv_beam1");
 
     beam1->setComputeMIntFunction("SimplePlugin", "mInt_beam1");
     beam1->setComputeJacobianMIntqFunction("SimplePlugin", "jacobianMIntq_beam1");
+    //beam1->setComputeJacobianMIntqByFD(true);
     beam1->setComputeJacobianMIntvFunction("SimplePlugin", "jacobianMIntv_beam1");
 
     //second DS

@@ -17,9 +17,12 @@ extern "C" void externalMoment(double t,double *m, unsigned int size_z, double *
 }
 
 extern "C" void fInt_beam1(double t, double *q, double *v, double *f, unsigned int size_z, double *z){
+  // printf("fInt_beam1\n");
+  // printf("q[0] = %e\t q[1] = %e\t, q[2]=%e\n",q[0],q[1],q[2]);
   f[0]=1e4*q[0];
   f[1]=0.0;
   f[2]=1e4*q[2];
+  // printf("f[0] = %e\t f[1] = %e\t, f[2]=%e\n",f[0],f[1],f[2]);
 
 }
 extern "C" void jacobianFIntq_beam1(double t, double *q, double *v, double *jac, unsigned int size_z, double *z){

@@ -102,9 +102,9 @@ protected:
   bool _isIndexSetsStable;
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
-   *  \param unsigned int: the number of the set to be updated
+   *  \param level unsigned int: the level of the set to be updated
    */
-  void updateIndexSet(unsigned int);
+  void updateIndexSet(unsigned int level);
 
 
   struct _SimulationEffectOnOSNSP;

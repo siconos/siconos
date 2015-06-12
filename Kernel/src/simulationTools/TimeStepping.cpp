@@ -584,7 +584,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
         if (hasNSProblems)
           saveYandLambdaInOldVariables();
       }
-      DEBUG_PRINTF("# _newtonNbIterations = %i\n",_newtonNbIterations );
+      DEBUG_PRINTF("# _newtonNbIterations = %i, _newtonCumulativeNbIterations= %i\n",_newtonNbIterations,_newtonCumulativeNbIterations );
+
       DEBUG_PRINTF("# _newtonResiduDSMax = %12.8e\t",_newtonResiduDSMax );
       DEBUG_PRINTF("# _newtonResiduYMax = %12.8e\t",_newtonResiduYMax );
       DEBUG_PRINTF("# _newtonResiduRMax = %12.8e\n",_newtonResiduRMax );
