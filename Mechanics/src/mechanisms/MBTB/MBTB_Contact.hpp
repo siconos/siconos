@@ -50,7 +50,9 @@ public:
    */
   MBTB_Contact(unsigned int id,const std::string& contactName, unsigned int indexBody1, int indexBody2,unsigned int indexCAD1,unsigned int indexCAD2,int withFriction);
 
-  //! To get the relation.
+  /** To get the relation. 
+   * \return SP::NewtonEulerFrom1DLocalFrameR the SP on the relation
+   */
   inline SP::NewtonEulerFrom1DLocalFrameR relation()
   {
     return _Relation;
@@ -94,7 +96,9 @@ public:
   //! To know if P1 is trnaslated of _Offset*N or P2.
   unsigned int _OffsetP1;
 
-  //! To get the name of the contact.
+  /** To get the name of the contact.
+   * \return char * contactName
+   */
   inline char * contactName()
   {
     return _ContactName;

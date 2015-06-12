@@ -9,7 +9,14 @@
 class MBTB_TimeSteppingProj : public TimeSteppingDirectProjection
 {
 public:
-  //! builder.
+  /** Constructor with the time-discretisation.
+   *  \param td pointer to a timeDiscretisation used in the integration
+   *          (linked to the model that owns this simulation)
+   *  \param osi one step integrator (default none)
+   *  \param osnspb_velo one step non smooth problem (default none)
+   *  \param osnspb_pos one step non smooth problem (default none)
+   *  \param level
+   */
   MBTB_TimeSteppingProj(SP::TimeDiscretisation td,
                         SP::OneStepIntegrator osi,
                         SP::OneStepNSProblem osnspb_velo,

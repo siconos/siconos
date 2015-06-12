@@ -20,13 +20,18 @@ protected:
   MBTB_Contact * _pContact;
   MBTB_FC3DContactRelation();
 public :
-  //! Builder
-  /*
-    \param [in] a pointer to the MBTB_Contact. Must be allocated/free by the caller.
+  /** Constructor
+   * \param _pContact [in] a pointer to the MBTB_Contact. Must be allocated/free by the caller.
    */
   MBTB_FC3DContactRelation(MBTB_Contact * _pContact);
-  //!This function has to compute the distance between the objects.
+  
+  /** This function has to compute the distance between the objects.
+   * \param time the given  time
+   * \param q0 the position
+   * \param y the output
+   */
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+  
   //! Doing nothing.
   virtual ~MBTB_FC3DContactRelation();
 
