@@ -60,48 +60,48 @@ namespace ioVector
   const openmode ASCII_OUT = std::ios::out; //|std::ios::scientific;
 
 /** Read a SiconosVector from a file
-    \param[in] fileName the file containing the vector
-    \param[in,out] m the SiconosVector to be filled
-    \param[in] ios_base::openmode, mode for reading (like  ios::in|ios:binary ...)
-    default = ascii
-    \param[in] precision value for float output. Default = 15.
-    \param[in] flags for reading
-    \param[in] inputType (see outputType in write function)
-    \return bool true if read ok, else false ...
+ *  \param[in] fileName the file containing the vector
+ *  \param[in,out] m the SiconosVector to be filled
+ *  \param[in] mode ios_base::openmode, mode for reading (like  ios::in|ios:binary ...)
+ *       default = ascii
+ *  \param[in] precision value for float output. Default = 15.
+ *  \param[in] inputType (see outputType in write function)
+ *  \param[in] flags for reading
+ *  \return bool true if read ok, else false ...
  */
   bool read(const std::string& fileName, 
             SiconosVector& m, 
-            const openmode& = ASCII_IN,
-            int =15,
+            const openmode&  mode = ASCII_IN,
+            int precision =15,
             const std::string& inputType = "python",
             const std::ios::fmtflags& flags = std::cin.flags());
   
 /** Write a SiconosVector to a file
-    \param[in] output file name
-    \param[in] ios_base::openmode, mode for writing (like  ios::out|ios:binary ...)
+    \param[in] fileName output file name
+    \param[in] mode ios_base::openmode, mode for writing (like  ios::out|ios:binary ...)
     default = ascii
     \param[in] flags
     \param[in,out] m the SiconosVector to be written
     \param[in] precision value for float output. Default = 15.
-    \param[in] std::string type of output:
-    Type of Output for write function:
-    - "boost": boost way: \n
-    [row] (a0, a1,..)
-    - "python"(default): \n
-    row \n
-    a0 a1 a2 ... \n
-    - "noDim": \n
-    a0 a1 a2 ... \n
-    Reading input format is the one corresponding to "python".
+    \param[in] outputType std::string type of output:
+        Type of Output for write function:
+        - "boost": boost way: \n
+        [row] (a0, a1,..)
+        - "python"(default): \n
+        row \n
+        a0 a1 a2 ... \n
+        - "noDim": \n
+        a0 a1 a2 ... \n
+        Reading input format is the one corresponding to "python".
     \param[in] flags
     \return bool true if read ok, else false ...
 */
   bool write(const std::string& fileName,
              const SiconosVector& m, 
-             const openmode& = ASCII_OUT,
-             int prec=15, 
+             const openmode& mode= ASCII_OUT,
+             int precision =15, 
              const std::string& outputType = "python",
-             const std::ios_base::fmtflags& = std::cout.flags());
+             const std::ios_base::fmtflags & flags  = std::cout.flags());
   
 }
 #endif

@@ -137,7 +137,7 @@ template<typename MATRIX> MATRIX expm_pad(const MATRIX &H, const unsigned int p 
  	else
 		U.assign( I + 2.0 * prod(H2, P));
 // Squaring 
-	for(int i = 0; i < s; ++i)
+	for(size_type i = 0; i < s; ++i)
 	{
 		U = (prod(U,U));
 	}

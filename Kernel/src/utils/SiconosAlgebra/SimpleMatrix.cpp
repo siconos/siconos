@@ -563,7 +563,7 @@ unsigned int SimpleMatrix::size(unsigned int index) const
    if (index == 0) return (*mat.Identity).size1();
    else  return (*mat.Identity).size2();
   }
-
+  else return 0;
 
 
 };

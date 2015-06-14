@@ -109,7 +109,11 @@ protected:
   NewtonEulerR(RELATION::SUBTYPES lagType): Relation(RELATION::NewtonEuler, lagType) {}
 
   /** initialize components specific to derived classes.
-  */
+   * \param inter  Interaction associated with the Relation
+   * \param DSlink 
+   * \param workV
+   * \param workM 
+   */
   virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 public:

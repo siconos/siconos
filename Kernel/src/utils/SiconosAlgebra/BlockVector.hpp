@@ -62,9 +62,9 @@ public:
   BlockVector();
 
   /** copy contructor
-   *  \param BlockVector& v
+   *  \param v BlockVector& 
    */
-  BlockVector(const BlockVector&);
+  BlockVector(const BlockVector& v);
 
   /** contructor with a 2 SiconosVectors
    *  \param v1 first vector
@@ -145,35 +145,35 @@ public:
   /** set all values of the vector component to value.
    * \param a double
    */
-  void fill(double);
+  void fill(double a);
 
   /** display data on standard output
    */
   void display(void) const;
 
   /** return the element vector[i]
-   *  \param an unsigned int i
+   *  \param i an unsigned int
    *  \return a double
    */
-  double getValue(unsigned int) const;
+  double getValue(unsigned int i) const;
 
   /** set the element vector[i]
-   *  \param an unsigned int i
-   *  \param the value
+   *  \param i an unsigned int
+   *  \param value
    */
-  void setValue(unsigned int, double);
+  void setValue(unsigned int i, double value);
 
   /** get the element at position i (warning: absolute position.)
-   *  \param an unsigned integer i
+   *  \param i an unsigned integer
    *  \return a reference to a double
    */
-  double& operator()(unsigned int) ;
+  double& operator()(unsigned int i) ;
 
   /** get the element at position i (warning: absolute position.)
-   *  \param an unsigned integer i
+   *  \param  i an unsigned integer
    *  \return a double
    */
-  double operator()(unsigned int) const;
+  double operator()(unsigned int i) const;
 
   /** return i-eme SiconosVector of vect
    * \param pos block number
@@ -266,26 +266,29 @@ public:
   }
 
   /** get the number of the vector that handles element at position "pos"
-      \param unsigned int, position of the element
-      \return unsigned int number of the searched vector
-  */
-  unsigned int getNumVectorAtPos(unsigned int) const;
+   *  \param pos unsigned int, position of the element
+   *  \return unsigned int number of the searched vector
+   */
+  unsigned int getNumVectorAtPos(unsigned int pos) const;
 
   /** operator =
   *  \param vIn the vector to be copied
+  * \return  BlockVector&
   */
   BlockVector& operator =(const BlockVector& vIn);
 
   /** Equality operator with raw double* data on the right-hand side
    *  \param data data to put in the BlockVector
+   * \return  BlockVector&
    */
   BlockVector& operator = (const double* data);
 
   BlockVector& operator -=(const BlockVector&);
   BlockVector& operator +=(const BlockVector&);
 
-  /* * operator =
-  *  \param vIn the vector to be copied
+  /** operator =
+   *  \param vIn the vector to be copied
+   * \return  BlockVector&
    */
   BlockVector& operator =(const SiconosVector& vIn);
 
@@ -294,9 +297,9 @@ public:
   BlockVector& operator /= (double s);
 
   /** Insert a subvector in this vector: allocation and copy
-  *  \param SiconosVector& v : the vector to be inserted
+  *  \param v SiconosVector& v : the vector to be inserted
   */
-  void insert(const SiconosVector&) ;
+  void insert(const SiconosVector& v) ;
 
   /** Insert a pointer to a subvector in this vector: no reallocation nor copy.
    *  \param v a SiconosVector

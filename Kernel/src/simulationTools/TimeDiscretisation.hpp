@@ -101,6 +101,7 @@ private:
 
   /** Assignment Operator (private => forbidden)
    * \param td unused
+   * \return TimeDiscretisation&
    */
   TimeDiscretisation& operator =(const TimeDiscretisation& td);
 

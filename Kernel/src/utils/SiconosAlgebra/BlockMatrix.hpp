@@ -104,115 +104,115 @@ public:
   ~BlockMatrix(void);
 
   /** get the number of block (i=0, row, i=1 col)
-   *  \param unsigned int(i=0, row, i=1 col)
+   *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int
    */
-  unsigned int getNumberOfBlocks(unsigned int) const;
+  unsigned int getNumberOfBlocks(unsigned int i) const;
 
   /** get DenseMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a DenseMat
    */
-  const DenseMat getDense(unsigned int = 0, unsigned int = 0) const;
+  const DenseMat getDense(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get TriangMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a TriangMat
    */
-  const TriangMat getTriang(unsigned int = 0, unsigned int = 0) const;
+  const TriangMat getTriang(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get SymMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SymMat
    */
-  const SymMat getSym(unsigned int = 0, unsigned int = 0)const;
+  const SymMat getSym(unsigned int row = 0, unsigned int col = 0)const;
 
   /** get BandedMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a BandedMat
    */
-  const BandedMat getBanded(unsigned int = 0, unsigned int = 0)const;
+  const BandedMat getBanded(unsigned int row = 0, unsigned int col = 0)const;
 
   /** get SparseMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SparseMat
    */
-  const SparseMat getSparse(unsigned int = 0, unsigned int = 0)const;
+  const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0)const;
 
   /** get ZeroMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat
    */
-  const ZeroMat getZero(unsigned int = 0, unsigned int = 0) const;
+  const ZeroMat getZero(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get  getIdentity matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return an IdentityMat
    */
-  const IdentityMat getIdentity(unsigned int = 0, unsigned int = 0) const;
+  const IdentityMat getIdentity(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get a pointer on DenseMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a DenseMat*
    */
-  DenseMat* dense(unsigned int = 0, unsigned int = 0)const;
+  DenseMat* dense(unsigned int row = 0, unsigned int col = 0)const;
 
   /** get a pointer on TriangMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a TriangMat*
    */
-  TriangMat* triang(unsigned int = 0, unsigned int = 0)const;
+  TriangMat* triang(unsigned int row = 0, unsigned int col = 0)const;
 
   /** get a pointer on SymMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col `an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SymMat*
    */
-  SymMat* sym(unsigned int = 0, unsigned int = 0)const;
+  SymMat* sym(unsigned int row = 0, unsigned int col = 0)const;
 
   /** get a pointer on BandedMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a BandedMat*
    */
-  BandedMat* banded(unsigned int = 0, unsigned int = 0)const;
+  BandedMat* banded(unsigned int row = 0, unsigned int col = 0)const;
 
   /** get a pointer on SparseMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SparseMat*
    */
-  SparseMat* sparse(unsigned int = 0, unsigned int = 0)const;
+  SparseMat* sparse(unsigned int row = 0, unsigned int col = 0)const;
 
   /** get a pointer on ZeroMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  ZeroMat* zero(unsigned int = 0, unsigned int = 0) const;
+  ZeroMat* zero(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get a pointer on Identity matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return an IdentityMat*
    */
-  IdentityMat* identity(unsigned int = 0, unsigned int = 0) const;
+  IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const;
 
   /** return the adress of the array of double values of the matrix
-   *  \param: row position for the required block ->useless for SimpleMatrix
-   *  \param: col position for the required block ->useless for SimpleMatrix
+   *  \param row position for the required block ->useless for SimpleMatrix
+   *  \param col position for the required block ->useless for SimpleMatrix
    *  \return double* : the pointer on the double array
    */
-  double* getArray(unsigned int = 0, unsigned int = 0) const;
+  double* getArray(unsigned int row = 0, unsigned int col = 0) const;
 
   /** sets all the values of the matrix to 0.0
    */
@@ -237,8 +237,14 @@ public:
   unsigned int size(unsigned int index) const;
 
   /** resize the matrix with nbrow rows and nbcol columns, lower and upper are useful only for SparseMat.The existing elements of the Block matrix are preseved when specified.
+   * \param nbrow
+   * \param nbcol
+   * \param lower
+   * \param upper
+   * \param b
    */
-  void resize(unsigned int, unsigned int, unsigned int lower = 0, unsigned int upper = 0, bool = true);
+  void resize(unsigned int nbrow, unsigned int nbcol, unsigned int lower = 0,
+              unsigned int upper = 0, bool b = true);
 
   /** compute the infinite norm of the Block matrix
    *  \return a double
@@ -250,34 +256,34 @@ public:
   void display() const;
 
   /** get or set the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
+   *  \param i an unsigned int 
+   *  \param j an unsigned int 
    *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
-  double& operator()(unsigned int, unsigned int);
+  double& operator()(unsigned int i, unsigned int j);
 
   /** get or set the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
+   *  \param i an unsigned int 
+   *  \param j an unsigned int
    *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
-  double operator()(unsigned int, unsigned int) const;
+  double operator()(unsigned int i, unsigned int j) const;
 
   /** return the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
+   *  \param i an unsigned int 
+   *  \param j an unsigned int 
    *  \return a double
    */
-  double getValue(unsigned int, unsigned int) const;
+  double getValue(unsigned int i, unsigned int j) const;
 
   /** set the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
-   *  \param the value
+   *  \param i an unsigned int i
+   *  \param j an unsigned int j
+   *  \param value
    */
-  void setValue(unsigned int, unsigned int, double);
+  void setValue(unsigned int i, unsigned int j, double value);
 
   /** transpose in place: x->trans() is x = transpose of x.
    */
@@ -321,14 +327,16 @@ public:
   };
 
   /** get block at position row-col
-   *  \param unsigned int row
-   *  \param unsigned int col
+   *  \param row unsigned int
+   *  \param col unsigned int
+   *  \return SP::SiconosMatrix the requested block
    */
   SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0);
 
   /** get block at position row-col
-   *  \param unsigned int row
-   *  \param unsigned int col
+   *  \param row unsigned int
+   *  \param col unsigned int
+   *  \return SP::SiconosMatrix the requested block
    */
   SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const;
 
@@ -357,41 +365,46 @@ public:
   void  setCol(unsigned int c, const SiconosVector& v);
 
   /** add a part of the input matrix (starting from (i,j) pos) to the current matrix
-   *  \param an unsigned int i (in-out)
-   *  \param an unsigned int j (in-out)
-   *  \param a SiconosMatrix (in-out)
+   *  \param i an unsigned int i (in-out)
+   *  \param j an unsigned int j (in-out)
+   *  \param m a SiconosMatrix (in-out)
    */
-  void addSimple(unsigned int&, unsigned int&, const SiconosMatrix&);
+  void addSimple(unsigned int& i, unsigned int& j, const SiconosMatrix& m);
 
   /** subtract a part of the input matrix (starting from (i,j) pos) to the current matrix
-   *  \param an unsigned int i (in-out)
-   *  \param an unsigned int j (in-out)
-   *  \param a SiconosMatrix (in-out)
+   *  \param i an unsigned int i (in-out)
+   *  \param j an unsigned int j (in-out)
+   *  \param m a SiconosMatrix (in-out)
    */
-  void subSimple(unsigned int&, unsigned int&, const SiconosMatrix&);
+  void subSimple(unsigned int& i, unsigned int& j, const SiconosMatrix& m);
 
   /** assignment
-   *  \param m the matrix to be copied
+   * \param m the matrix to be copied
+   * \return  BlockMatrix&
    */
   BlockMatrix& operator = (const SiconosMatrix& m);
 
   /** assignment
    *  \param m the matrix to be copied
+   * \return  BlockMatrix&
    */
   BlockMatrix& operator = (const BlockMatrix& m);
 
   /** assignment
    *  \param m the matrix to be copied
+   * \return  BlockMatrix&
    */
   BlockMatrix& operator = (const DenseMat& m);
 
-  /**operator +=
+  /** operator +=
    *  \param m the matrix to add
+   * \return  BlockMatrix&
    */
   BlockMatrix& operator +=(const SiconosMatrix& m);
 
   /**operator -=
    *  \param m the matrix to subtract
+   * \return  BlockMatrix&
    */
   BlockMatrix& operator -=(const SiconosMatrix& m);
 

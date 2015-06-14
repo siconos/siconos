@@ -308,7 +308,7 @@ void SiconosVector::zero()
 
 }
 
-void SiconosVector::setVector(unsigned int, const SiconosVector& newV)
+void SiconosVector::setVector(unsigned int , const SiconosVector& newV)
 {
   if (newV.size() != size())
     SiconosVectorException::selfThrow("SiconosVector::setVector(num,v), unconsistent sizes.");
@@ -1389,7 +1389,8 @@ void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin){
   };
 }
 */
-void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
+void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB,
+              unsigned int startIn, unsigned int startOut)
 {
   unsigned int endOut = startOut + sizeB;
   unsigned int numIn = vIn.getNum();

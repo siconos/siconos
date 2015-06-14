@@ -37,7 +37,7 @@ namespace Siconos {
     \param Exp : result = exp(A)
     \param computeAndAdd : if true, result = result + exp(A)
 **/
-      void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool = false);
+      void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd = false);
     
     } // namespace tools
   } // namespace algebra

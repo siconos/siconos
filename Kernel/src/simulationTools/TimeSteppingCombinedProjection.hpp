@@ -155,12 +155,14 @@ public:
     ;
   }
   /** get the Number of iteration of projection
+   * \return unsigned int nbProjectionIteration
    */
   inline unsigned int nbProjectionIteration()
   {
     return _nbProjectionIteration;
   }
   /** get the Number of cumulated iteration of projection
+   * \return unsigned int
    */
   inline unsigned int nbCumulatedProjectionIteration()
   {
@@ -168,6 +170,7 @@ public:
   }
 
   /** get the  Cumulated Number of steps perfomed in the Newton Loop
+   * \return unsigned int
    */
   inline unsigned int cumulatedNewtonNbIterations()
   {
@@ -175,6 +178,7 @@ public:
   }
 
   /** get the Number of iteration for stabilizating indexsets
+   * \return unsigned int
    */
   inline unsigned int nbIndexSetsIteration()
   {

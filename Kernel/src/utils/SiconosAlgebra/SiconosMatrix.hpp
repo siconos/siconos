@@ -76,15 +76,10 @@ protected:
   SiconosMatrix() {};
 
   /** basic constructor
-      \param unsigned int, type-number of the vector
-  */
-  SiconosMatrix(unsigned int);
+   *   \param type unsigned int type-number of the vector
+   */
+  SiconosMatrix(unsigned int type);
 
-  /** basic constructor
-      \param unsigned int, type-number of the vector
-      \param unsigned int, number of rows
-      \param unsigned int, number of columns
-  */
   //SiconosMatrix(unsigned int, unsigned int, unsigned int);
 
 public:
@@ -146,10 +141,10 @@ public:
   };
 
   /** get the number of block (i=0, row, i=1 col)
-   *  \param unsigned int(i=0, row, i=1 col)
+   *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int. 1 as default for SimpleMatrix.
    */
-  inline virtual unsigned int getNumberOfBlocks(unsigned int) const
+  inline virtual unsigned int getNumberOfBlocks(unsigned int i) const
   {
     return 1;
   };
@@ -165,109 +160,110 @@ public:
   virtual const SP::Index tabCol() const ;
 
   /** get DenseMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int position of the block (column) - Useless for SimpleMatrix
    *  \return a DenseMat
    */
-  virtual const DenseMat getDense(unsigned int = 0, unsigned int = 0) const =  0;
+  virtual const DenseMat getDense(unsigned int row = 0, unsigned int col = 0) const =  0;
 
   /** get TriangMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a TriangMat
    */
-  virtual const TriangMat getTriang(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const TriangMat getTriang(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get SymMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SymMat
    */
-  virtual const SymMat getSym(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const SymMat getSym(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get BandedMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a BandedMat
    */
-  virtual const BandedMat getBanded(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const BandedMat getBanded(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get SparseMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SparseMat
    */
-  virtual const SparseMat getSparse(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get ZeroMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat
    */
-  virtual const ZeroMat getZero(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const ZeroMat getZero(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get  getIdentity matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return an IdentityMat
    */
-  virtual const IdentityMat getIdentity(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const IdentityMat getIdentity(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on DenseMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a DenseMat*
    */
-  virtual  DenseMat* dense(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual  DenseMat* dense(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on TriangMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a TriangMat*
    */
-  virtual TriangMat* triang(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual TriangMat* triang(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on SymMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SymMat*
    */
-  virtual SymMat* sym(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SymMat* sym(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on BandedMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a BandedMat*
    */
-  virtual BandedMat* banded(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual BandedMat* banded(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on SparseMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SparseMat*
    */
-  virtual SparseMat* sparse(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SparseMat* sparse(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on ZeroMat matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  virtual ZeroMat* zero(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual ZeroMat* zero(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on Identity matrix
-   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return an IdentityMat*
    */
-  virtual IdentityMat* identity(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const = 0;
 
-  /** return the adress of the array of double values of the matrix ( for block(i,j) if this is a block matrix)
-   *  \param: row position for the required block
-   *  \param: col position for the required block
+  /** return the adress of the array of double values of the matrix 
+   *   ( for block(i,j) if this is a block matrix)
+   *  \param row position for the required block
+   *  \param col position for the required block
    *  \return double* : the pointer on the double array
    */
-  virtual double* getArray(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual double* getArray(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** sets all the values of the matrix to 0.0
    */
@@ -278,7 +274,7 @@ public:
   virtual void randomize() = 0;
 
   /** Initialize a symmetric matrix with random values
-   */
+   */ 
   virtual void randomize_sym()= 0;
 
   /** set an identity matrix
@@ -286,11 +282,14 @@ public:
   virtual void eye() = 0;
 
   /** resize the matrix with nbrow rows and nbcol columns, upper and lower are only useful for BandedMatrix .
-   *   The existing elements of the matrix are preseved when specified.
-   *  \param 2 unsigned int: number of rows and columns
-   *  \param 2 unsigned int: for banded matrices
+   *  The existing elements of the matrix are preseved when specified.
+   * \param nbrow
+   * \param nbcol
+   * \param lower,upper for banded matrices
+   * \param preserve
    */
-  virtual void resize(unsigned int, unsigned int, unsigned int = 0, unsigned int = 0, bool = true) = 0;
+  virtual void resize(unsigned int nbrow, unsigned int nbcol,
+                      unsigned int lower = 0, unsigned int upper = 0, bool preserve = true) = 0;
 
   /** compute the infinite norm of the matrix
    *  \return a double
@@ -306,44 +305,46 @@ public:
   // for a BlockMatrix w that contains 2 SiconosMatrix of size 3
   // w(1, 4) corresponds to the element (1,1) of the second matrix.
   /** get or set the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
+   *  \param i an unsigned int i
+   *  \param j an unsigned int j
    *  \return the element matrix[i,j]
    */
-  virtual double& operator()(unsigned int , unsigned int) = 0;
+  virtual double& operator()(unsigned int i, unsigned int j) = 0;
 
   /** get or set the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
+   *  \param i an unsigned int i
+   *  \param j an unsigned int j
    *  \return the element matrix[i,j]
    */
-  virtual double operator()(unsigned int , unsigned int) const = 0;
+  virtual double operator()(unsigned int i, unsigned int j) const = 0;
 
   /** return the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
+   *  \param i an unsigned int i
+   *  \param j an unsigned int j
    *  \return a double
    */
-  virtual double getValue(unsigned int, unsigned int) const = 0;
+  virtual double getValue(unsigned int i, unsigned int j) const = 0;
 
   /** set the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
-   *  \param the value
+   *  \param i an unsigned int i
+   *  \param j an unsigned int j
+   *  \param value
    */
-  virtual void setValue(unsigned int, unsigned int, double) = 0;
+  virtual void setValue(unsigned int i, unsigned int j, double value) = 0;
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
-   *  \param unsigned int row
-   *  \param unsigned int col
+   *  \param row unsigned int row
+   *  \param col unsigned int col
+   * \return SP::SiconosMatrix
    */
-  virtual SP::SiconosMatrix block(unsigned int = 0, unsigned int = 0) = 0;
+  virtual SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) = 0;
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
-   *  \param unsigned int row
-   *  \param unsigned int col
+   *  \param row unsigned int row
+   *  \param col unsigned int col
+   * \return SPC::SiconosMatrix
    */
-  virtual SPC::SiconosMatrix block(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get row index of current matrix and save it into vOut
    *  \param index row we want to get
@@ -380,33 +381,39 @@ public:
 
   /** operator =
    *  \param m the matrix to be copied
+   * \return SiconosMatrix&
    */
   virtual SiconosMatrix& operator  = (const SiconosMatrix& m) = 0;
 
   /** operator = to a DenseMat
    *  \param m the DenseMat to be copied
+   * \return SiconosMatrix&
    */
   virtual SiconosMatrix& operator  = (const DenseMat& m) = 0;
 
   /** operator +=
    *  \param m a matrix to add
+   * \return SiconosMatrix&
    */
   virtual SiconosMatrix& operator +=(const SiconosMatrix& m) = 0;
 
   /** operator -=
    *  \param m a matrix to subtract
+   * \return SiconosMatrix&
    */
   virtual SiconosMatrix& operator -=(const SiconosMatrix& m) = 0;
 
   /** multiply the current matrix with a scalar
    *  \param m the matrix to operate on
    *  \param s the scalar
+   * \return SiconosMatrix&
    */
   friend SiconosMatrix& operator *=(SiconosMatrix& m, const double& s);
 
   /** divide the current matrix with a scalar
    *  \param m the matrix to operate on
    *  \param s the scalar
+   * \return SiconosMatrix&
    */
   friend SiconosMatrix& operator /=(SiconosMatrix& m, const double& s);
 

@@ -30,28 +30,28 @@ namespace Siconos {
   namespace eigenproblems {
 
 /** Compute eigenvalues and eigenvectors of a real symmetric matrix A
-    See examples of use in test/EigenProblemsTest.cpp.
-    \param[in,out] eigenval : eigenvalues of the matrix
-    \param[in,out] eigenvec : input matrix A, replace with eigenvectors (columns) in output.
-    \param[in] withVect : true if eigenvectors are to be computed (default = true).
-    eigenvector. 
-    \return int : return value from lapack routine. 0 if successful.
-**/
+ *   See examples of use in test/EigenProblemsTest.cpp.
+ *   \param[in,out] eigenval : eigenvalues of the matrix
+ *   \param[in,out] eigenvec : input matrix A, replace with eigenvectors (columns) in output.
+ *   \param[in] withVect : true if eigenvectors are to be computed (default = true).
+ *   eigenvector. 
+ *   \return int : return value from lapack routine. 0 if successful.
+ */
     int syev(SiconosVector& eigenval, SiconosMatrix& eigenvec, bool withVect = true);
 
 /** Compute eigenvalues and eigenvectors of a nonsymmetrix complex matrix 
-    See examples of use in test/EigenProblemsTest.cpp.
-    \param[in,out] SiconosMatrix : input matrix.
-    \param[in,out] complex_vector : eigenvalues of the matrix
-    \param[in,out] complex_matrix : matrix of the left eigenvectors
-    \param[in, out]  complex_matrix : matrix of the right eigenvectors
-    \param[in] withLeft : true if left eigenvectors are to be computed (default = false).
-    \param[in] withRight : true ifright  eigenvectors are to be computed (default = true).
-    \param[in] withVect : true if eigenvectors are to be computed (default).
-
-    \return int : return value from lapack routine. 0 if succesful.
-**/
-    int geev(SiconosMatrix& input_mat, complex_vector& eigenval, complex_matrix& left_eigenvec, complex_matrix& right_eigenvec, bool withLeft = false, bool withRight = true);
+ *   See examples of use in test/EigenProblemsTest.cpp.
+ *   \param[in,out] input_mat SiconosMatrix : input matrix.
+ *   \param[in,out] eigenval complex_vector : eigenvalues of the matrix
+ *   \param[in,out] left_eigenvec complex_matrix : matrix of the left eigenvectors
+ *   \param[in, out] right_eigenvec  complex_matrix : matrix of the right eigenvectors
+ *   \param[in] withLeft : true if left eigenvectors are to be computed (default = false).
+ *   \param[in] withRight : true if right  eigenvectors are to be computed (default = true).
+ *    \return int : return value from lapack routine. 0 if succesful.
+ */
+    int geev(SiconosMatrix& input_mat, complex_vector& eigenval,
+             complex_matrix& left_eigenvec, complex_matrix& right_eigenvec,
+             bool withLeft = false, bool withRight = true);
 
   } // namespace eigenproblems
 } // namespace Siconos
