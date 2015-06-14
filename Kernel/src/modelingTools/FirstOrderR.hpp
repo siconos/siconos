@@ -85,7 +85,7 @@ protected:
   ACCEPT_SERIALIZATION(FirstOrderR);
 
   /** basic constructor
-  *  \param the type of the relation
+  *  \param newType the type of the relation
   */
   FirstOrderR(RELATION::SUBTYPES newType): Relation(RELATION::FirstOrder, newType) {}
 
@@ -105,8 +105,11 @@ public:
   virtual ~FirstOrderR() {};
 
   /** initialize the relation (check sizes, memory allocation ...)
-  \param SP to Interaction: the interaction that owns this relation
-  */
+   * \param inter the interaction that owns this relation
+   * \param DSlink
+   * \param workV
+   * \param workM
+   */
   virtual void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** set C to pointer newC
@@ -118,7 +121,7 @@ public:
   }
 
   /** set B to pointer newB
-  *  \param newPtr the B matrix
+  *  \param newB the B matrix
   */
   inline void setBPtr(SP::SimpleMatrix newB)
   {

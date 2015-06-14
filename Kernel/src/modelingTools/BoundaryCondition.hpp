@@ -47,7 +47,7 @@ public:
 
   /** \fn BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices);
    *  \brief Basic constructor
-   *  \param the indices of the velocity subjected to prescribed velocities
+   *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    */
 
   BoundaryCondition(SP::UnsignedIntVector newVelocityIndices);
@@ -55,8 +55,8 @@ public:
   /** \fn BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices,
    *                 SP::SiconosVector newVelocityValues);
    *  \brief Constructor with constant prescribed values
-   *  \param the indices of the velocity subjected to prescribed velocities
-   *  \param the values of the prescribed velocities
+   *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
+   *  \param newVelocityValues the values of the prescribed velocities
    */
   BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices,
                     SP::SiconosVector newVelocityValues);
@@ -101,7 +101,7 @@ public:
   }
 
   /** default function to compute the precribed velocities
-   *  \param double time : the current time
+   *  \param  time : the current time
    */
   virtual void computePrescribedVelocity(double time);
 

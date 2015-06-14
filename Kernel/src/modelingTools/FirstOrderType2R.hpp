@@ -60,13 +60,15 @@ protected:
 //  SP::SimpleMatrix _jacgx;
 
 public:
-
+  
+  /** Basic contructor */
   FirstOrderType2R();
+  
   /** data constructor
-  *  \param pluginh name of the plugin to compute h
-  *  \param pluging name of the plugin to compute g
-  */
-  FirstOrderType2R(const std::string& pluginh, const std::string& pluhing);
+   *  \param pluginh name of the plugin to compute h
+   *  \param pluging name of the plugin to compute g
+   */
+  FirstOrderType2R(const std::string& pluginh, const std::string& pluging);
 
   /** data constructor
   *  \param pluginh name of the plugin to compute h
@@ -92,14 +94,14 @@ public:
   /** default function to compute y = h(x, lambda, t)
   * \param time the current time
   * \param x the state vector
-  * \param lambdaXXX
+  * \param lambda XXX
   * \param y the "output" vector
   */
   virtual void computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y);
 
   /** default function to compute g
   * \param time the current time
-  * \param lambdaXXX
+  * \param lambda XXX
   * \param r the nonsmooth "input" vector
   */
   virtual void computeg(double time, SiconosVector& lambda, SiconosVector& r);
@@ -107,25 +109,19 @@ public:
   /** default function to compute \f$\nabla_x h\f$
   *  \param time current time (not used)
   *  \param x the state used to evaluate the jacobian
-  *  \param z the extra input used to evaluate the jacobian
+  *  \param lambda
   *  \param C the matrix used to store the jacobian
   */
   virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
 //  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C);
 
-  /** default function to compute \f$\nabla_z h\f$
-  *  \param time current time (not used)
-  *  \param x the state used to evaluate the jacobian
-  *  \param z the extra input used to evaluate the jacobian
-  *  \param D the matrix used to store the jacobian
-  */
+
 //  virtual void computeJachz(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 //  virtual void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& D);
 
   /** default function to compute jacobianG according to lambda
   *  \param time current time (not used)
   *  \param lambda the nonsmooth input used to evaluate the jacobian
-  *  \param z the extra input used to evaluate the jacobian
   *  \param B the matrix used to store the jacobian
   */
   virtual void computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B);
@@ -134,9 +130,7 @@ public:
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
+  *  \param interProp
   *  \param level not used
   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
@@ -144,9 +138,7 @@ public:
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
+  *  \param interProp
   *  \param level not used
   */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);

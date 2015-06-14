@@ -47,7 +47,7 @@ public:
   /** constructor with a report
    * \param report exception description
    */
-  SiconosException(const std::string&);
+  SiconosException(const std::string& report);
 
   /** destructor
   */

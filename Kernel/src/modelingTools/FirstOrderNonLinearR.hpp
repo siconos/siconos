@@ -87,7 +87,6 @@ protected:
 public:
 
   /** basic constructor
-  *  \param the type of the relation
   */
   FirstOrderNonLinearR(): FirstOrderR(RELATION::NonLinearR) {}
 
@@ -95,47 +94,65 @@ public:
   */
   virtual ~FirstOrderNonLinearR() {};
 
-    /** default function to compute h
-  *  \param double : current time
-  */
+  /** default function to compute h
+   * \param time : current time
+   * \param x
+   * \param lambda
+   * \param z
+   * \param y
+   */
   virtual void computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
 
   /** default function to compute g
-  *  \param double : current time
+   * \param time : current time
+   * \param x
+   * \param lambda
+   * \param z
+   * \param r
   */
   virtual void computeg(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& r);
 
   /** default function to compute jacobianH
-  *  \param time current time
-  *  \param inter Interaction holding this Relation
-  */
+   * \param time : current time
+   * \param x
+   * \param lambda
+   * \param z
+   * \param C
+   */
   virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& C);
   virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& D);
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
   /** default function to compute jacobianG according to lambda
-  *  \param double : current time
-  *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+  * \param time current time
+  * \param x
+  * \param lambda
+  * \param z
+  * \param B
   */
   virtual void computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
+  /** default function to compute jacobianG according to x
+   * \param time  double : current time
+   * \param x
+   * \param lambda
+   * \param z
+   * \param K
+   */
   virtual void computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& K);
 
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-
   virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
 
   /** return true if the relation requires the computation of residu
-      \return true if residu are required, false otherwise
+   * \return true if residu are required, false otherwise
    */
   virtual bool requireResidu()
   {
     return true;
   }
-
-
+ 
 };
 TYPEDEF_SPTR(FirstOrderNonLinearR)
 

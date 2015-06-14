@@ -526,7 +526,8 @@ public:
   }
 
   /** get a temporary saved vector, ref by id
-   *  \return a SP::SiconosVector
+   * \param id  WorkNames
+   * \return a SP::SiconosVector
    */
   inline SP::SiconosVector workspace(const WorkNames& id) const
   {

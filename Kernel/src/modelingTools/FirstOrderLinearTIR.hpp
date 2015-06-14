@@ -49,8 +49,12 @@ protected:
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
-  */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+   * \param DSlink
+   * \param workV
+   * \param workM
+   */
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+                              VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   SP::SiconosVector _e;
 
@@ -67,84 +71,88 @@ public:
   FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B);
 
   /** create the Relation from a set of data
-  *  \param C the C matrix
-  *  \param D the D matrix
-  *  \param F the F matrix
-  *  \param e the e matrix
-  *  \param B the B matrix
-  */
+   *  \param C the C matrix
+   *  \param D the D matrix
+   *  \param F the F matrix
+   *  \param e the e matrix
+   *  \param B the B matrix
+   */
   FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e, SP::SimpleMatrix B);
 
   /** destructor
-  */
+   */
   virtual ~FirstOrderLinearTIR() {};
 
   // GETTERS/SETTERS
 
   /** default function to compute h
-  *  \param time current time
-  *  \param xXXX
-  *  \param zXXX
-  *  \param y value of h
-  */
+   *  \param x
+   *  \param lambda
+   *  \param z
+   *  \param y value of h
+   */
   void computeh(BlockVector& x, SiconosVector& lambda, BlockVector& z, SiconosVector& y);
 
   /** default function to compute g
-  *  \param lambdaXXX
-  *  \param r non-smooth input
-  */
+   *  \param lambda
+   *  \param r non-smooth input
+   */
   void computeg(SiconosVector& lambda, BlockVector& r);
 
   /** default function to compute y
-  *  \param time current time
-  *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
-  *  \param level not used
-  */
+   *  \param time current time
+   *  \param inter Interaction using this Relation
+   *  \param interProp
+   *  \param level not used
+   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   /** default function to compute r
-  *  \param time current time
-  *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workM
-  *  \param level not used
-  */
+   *  \param time current time
+   *  \param inter Interaction using this Relation
+   *  \param interProp
+   *  \param level not used
+   */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   /** print the data to the screen
-  */
+   */
   void display() const;
 
   /** compute the jacobian of h: nothing to be done here
+   *  \param time current time
+   *  \param inter Interaction using this Relation
+   *  \param interProp
    */
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) {};
 
   /** compute the jacobian of g: nothing to be done here
+   *  \param time current time
+   *  \param inter Interaction using this Relation
+   *  \param interProp
    */
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) {};
+ 
 
   /** set e
-  *  \param  newe the new value of e
-  */
+   *  \param  newe the new value of e
+   */
   inline void setePtr(SP::SiconosVector newe)
   {
     _e = newe;
   }
 
   /** get e
-  *  \return e matrix
-  */
+   *  \return e matrix
+   */
   inline SP::SiconosVector e() const
   {
     return _e;
   }
 
   /**
-  * return true if the relation is linear.
-  */
+   * \return true if the relation is linear.
+   */
   virtual bool isLinear()
   {
     return true;

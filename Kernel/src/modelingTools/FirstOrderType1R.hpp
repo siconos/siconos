@@ -132,26 +132,22 @@ void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, Sim
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
+  *  \param interProp
   *  \param level not used
   */
-virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
+  *  \param interProp
   *  \param level not used
   */
-virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
-    virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
-    virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
 
   /** return true if the relation requires the computation of residu
       \return true if residu are required, false otherwise

@@ -45,7 +45,11 @@ typedef std::map<int, object_creator> MapFactory;
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
-/** Template function to return a new object of type SubType*/
+/** Template function to return a new object of type SubType
+ * \param name
+ * \param x0
+ * \return SP::DynamicalSystem
+ */
 template<class SubType> SP::DynamicalSystem factory(int name, const SiconosVector& x0)
 {
   SP::DynamicalSystem res(new SubType(name, x0));
@@ -78,20 +82,23 @@ private :
 
 public :
 
-  /** Access function to the Registry */
+  /** Access function to the Registry
+   * \return static Registry&
+   */
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param an int, the name of the object added
-   * \param an object creator
+   * \param i an int, the name of the object added
+   * \param obj an object creator
    */
-  void add(int, object_creator);
+  void add(int i, object_creator obj);
 
   /** Function to instantiate a new DynamicalSystem
-   * \param an int, the name of the object added (type name!)
-   * \param the initial condition (SP)
+   * \param i an int, the name of the object added (type name!)
+   * \param x0 the initial condition (SP)
+   * \return  SP::DynamicalSystem
    */
-  SP::DynamicalSystem instantiate(int, const SiconosVector&);
+  SP::DynamicalSystem instantiate(int i, const SiconosVector& x0);
 } ;
 
 /** Registration Class for sensors.
@@ -108,10 +115,10 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param an int, the name of the object to be registered
-   * \param an object creator
+   * \param i an int, the name of the object to be registered
+   * \param obj an object creator
    */
-  Registration(int, object_creator) ;
+  Registration(int i, object_creator obj) ;
 } ;
 
 #define AUTO_REGISTER_DS(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);

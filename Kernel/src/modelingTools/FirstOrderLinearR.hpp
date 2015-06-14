@@ -175,21 +175,21 @@ public:
 
   /** default function to compute h
   *  \param time current time
-  *  \param inter Interaction using this Relation
   *  \param workV
   *  \param workM
-  *  \param xXXX
-  *  \param zXXX
+  *  \param x XXX
+  *  \param z XXX
+  *  \param lambda
   *  \param y value of h
   */
-  void computeh(double time, VectorOfVectors& workV, VectorOfSMatrices& workM, BlockVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
+  void computeh(double time, VectorOfVectors& workV, VectorOfSMatrices& workM,
+                BlockVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
 
   /** default function to compute g
   *  \param time current time
-  *  \param inter Interaction using this Relation
   *  \param workM
-  *  \param lambdaXXX
-  *  \param zXXX
+  *  \param lambda XXX
+  *  \param z XXX
   *  \param r non-smooth input
   */
   void computeg(double time, VectorOfSMatrices& workM, SiconosVector& lambda, SiconosVector& z, BlockVector& r);
@@ -197,9 +197,7 @@ public:
   /** default function to compute y
   *  \param time current time
   *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
+  *  \param interProp
   *  \param level not used
   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
@@ -207,8 +205,7 @@ public:
   /** default function to compute r
   *  \param time current time
   *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workM
+  *  \param interProp
   *  \param level not used
   */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);

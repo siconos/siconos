@@ -67,7 +67,9 @@ private:
   /** default constructor, private. */
   SiconosMemory() {};
 
-  /** Assignment, private */
+  /** Assignment, private 
+   * \return SiconosMemory&
+   */
   const SiconosMemory& operator=(const SiconosMemory&);
 
 public:
@@ -79,17 +81,17 @@ public:
   SiconosMemory(const unsigned int size, const unsigned int vectorSize);
 
   /** constructor with deque parameter.
-   * \param MemoryContainer, the deque of siconosVector which must be stored
+   * \param deque MemoryContainer, the deque of siconosVector which must be stored
    * _size is set to the size of the deque given in parameters
    */
-  SiconosMemory(const MemoryContainer&);
+  SiconosMemory(const MemoryContainer& deque);
 
   /** constructor with size and deque parameter.
-   * \param int : the size of the memory
-   * \param  MemoryContainer, the deque of siconosVector which must be stored
+   * \param size int , the size of the memory
+   * \param deque MemoryContainer, the deque of siconosVector which must be stored
    * this constructor is useful if the deque given in parameters has a size lower than the normal size of the memory
    */
-  SiconosMemory(const unsigned int, const MemoryContainer&);
+  SiconosMemory(const unsigned int size, const MemoryContainer& deque);
 
   /** Copy constructor
    * \param Mem a SiconosMemory
@@ -102,10 +104,10 @@ public:
   /*************************************************************************/
 
   /** fill the memory with a vector of siconosVector
-   * \param MemoryContainer
-   * _size is set to the size of the deque given in parameters
+   * \param v MemoryContainer
+   *       _size is set to the size of the deque given in parameters
    */
-  void setVectorMemory(const MemoryContainer&);
+  void setVectorMemory(const MemoryContainer& v );
 
   /** To get SiconosVector number i of the memory
    * \param int i: the position in the memory of the wanted SiconosVector
@@ -122,7 +124,7 @@ public:
   };
 
   /** set the max size of the SiconosMemory
-   * \param int : the max size for this SiconosMemory
+   * \param max the max size for this SiconosMemory
    */
   inline void setSiconosMemorySize(const unsigned int max)
   {

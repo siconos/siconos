@@ -44,7 +44,7 @@ public:
 
   /**
    * constructor
-   * \param repot the exception description
+   * \param report the exception description
    */
   SiconosMemoryException(const std::string& report);
 
