@@ -117,13 +117,18 @@ protected:
   SP::PluggedObject _pluginJachq;
 
   /** basic constructor
-  \param the sub-type of the relation
-  */
+   * \param lagType the sub-type of the relation
+   */
   LagrangianR(RELATION::SUBTYPES lagType): Relation(RELATION::Lagrangian, lagType) {}
 
   /** initialize components specific to derived classes.
-  */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+   * \param inter the interaction using this relation
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   * \param workV work vectors
+   * \param workM work matrices
+   */
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+                              VectorOfVectors& workV, VectorOfSMatrices& workM);
   virtual void zeroPlugin();
 
 public:
@@ -167,11 +172,6 @@ public:
     _jachq = newPtr ;
   }
 
-  /** Gets the number of computed jacobians for h
-  \return an unsigned int.
-  inline unsigned int numberOfJacobiansForH() const { return Jach.size();}
-  */
-
   inline SP::SimpleMatrix C() const
   {
     return _jachq;
@@ -180,27 +180,38 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction using this relation
    * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV the work vectors
+   * \param workV work vectors
    * \param workM work matrices
   */
   void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
-
-  /* compute all the H Jacobian */
+  /* compute all the H Jacobian 
+   * \param time
+   * \param inter
+   * \param interProp
+   */
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) = 0 ;
-  /* compute all the G Jacobian */
+  /* compute all the G Jacobian
+   * \param time
+   * \param inter
+   * \param interProp
+   */
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0 ;
 
   /** to compute output
-  *  \param time current time
-  *  \param derivativeNumber number of the derivative to compute, optional, default = 0.
-  */
+   * \param time current time
+   * \param inter
+   * \param interProp
+   *  \param derivativeNumber number of the derivative to compute, optional, default = 0.
+   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
 
   /** to compute p
-  *  \param time current time
-  *  \param level "derivative" order of lambda used to compute input
-  */
+   *  \param time current time
+   * \param inter
+   * \param interProp
+   *  \param level "derivative" order of lambda used to compute input
+   */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
 
   /** main relation members display

@@ -81,7 +81,7 @@ public:
   };
 
   /** setter of e
-  *  \param a double to set e
+  *  \param newVal a double to set e
   */
   inline void setE(double newVal)
   {

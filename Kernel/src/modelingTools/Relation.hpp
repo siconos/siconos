@@ -224,18 +224,24 @@ public:
   virtual void setComputeJacglambdaFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** initialize the relation (check sizes, memory allocation ...)
-      \param inter the interaction using this relation
-  */
+   * \param inter the interaction using this relation
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   * \param workV work vectors
+   * \param workM work matrices
+   */
   virtual void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
+  
   /** compute all the H Jacobian
-      \param time the current time
-      \param inter the interaction using this relation
-  */
+   * \param time the current time
+   * \param inter the interaction using this relation
+   * \param interProp
+   */
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) = 0;
 
   /* compute all the G Jacobian
-   *  \param time the current time
-   *  \param inter the interaction using this relation
+   * \param time the current time
+   * \param inter the interaction using this relation
+   * \param interProp
    */
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0;
 
@@ -243,6 +249,7 @@ public:
   /** default function to compute y
    *  \param time the current time
    *  \param inter the interaction using this relation
+   *  \param interProp
    *  \param derivativeNumber number of the derivative to compute (optional, default = 0)
    */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
@@ -250,6 +257,7 @@ public:
   /** default function to compute r
    *  \param time the current time
    *  \param inter the interaction using this relation
+   *  \param interProp
    *  \param level the input "derivative" order of lambda used to compute input
    */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
@@ -367,7 +375,8 @@ public:
     return _plugine;
   };
   /** visitors hook
-      \param inter : interaction 
+   *  \param inter  interaction 
+   *  \param interProp
    */
   virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
   {

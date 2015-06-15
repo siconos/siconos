@@ -151,61 +151,74 @@ public:
   */
   virtual ~LagrangianScleronomousR() {};
 
-  /**return the product of  the time--derivative of Jacobian with the velocity qdot */
+  /** \return the product of  the time--derivative of Jacobian with the velocity qdot */
   inline SP::SiconosVector dotjacqhXqdot()
   {
     return _dotjacqhXqdot;
   };
 
   /** to compute y = h(q,z) using plug-in mechanism
-  * \param inter interaction that owns the relation
-  * \param q the BlockVector of coordinates
-  * \param z the BlockVector of parameters
-  */
+   * \param q the BlockVector of coordinates
+   * \param z the BlockVector of parameters
+   * \param y the output
+   */
   virtual void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
-
-  /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
-  * \param time the current time
-  * \param inter interaction that owns the relation
-  */
+  /** to compute the jacobian of h using plug-in mechanism.
+   * Index shows which jacobian is computed
+   * \param q the BlockVector of coordinates
+   * \param z the BlockVector of parameters
+   */
   virtual void computeJachq(SiconosVector& q, SiconosVector& z);
 
   /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
    * \param time double, current time
    * \param inter interaction that owns the relation
+   * \param DSlink
    */
   void computedotjacqhXqdot(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
 
-  /* compute all the H Jacobian */
+  /* compute all the H Jacobian
+   * \param time double, current time
+   * \param inter interaction that owns the relation
+   * \param interProp
+   */
   void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
-  /* compute all the G Jacobian */
+  /* compute all the G Jacobian
+   * \param time double, current time
+   * \param inter interaction that owns the relation
+   * \param interProp
+   */
   void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
   {
     ;
   }
 
   /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism
-  * \param time the current time
-  */
+   * \param q the BlockVector of coordinates
+   * \param z the BlockVector of parameters
+   * \param qDot q the BlockVector of derivative of coordinates
+   */
   virtual void computeDotJachq(SiconosVector& q, SiconosVector& z, SiconosVector& qDot);
 
   /** to compute output
-  * \param time the current time
-  * \param inter interaction that owns the relation
-  * \param interProp the InteractionProperties of this Interaction
-  * \param derivativeNumber number of the derivative to compute, optional, default = 0.
-  */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
+   * \param time the current time
+   * \param inter interaction that owns the relation
+   * \param interProp the InteractionProperties of this Interaction
+   * \param derivativeNumber number of the derivative to compute, optional, default = 0.
+   */
+  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp,
+                             unsigned int derivativeNumber = 0);
 
   /** to compute p
-  * \param time the current time
-  * \param inter interaction that owns the relation
-  * \param interProp the InteractionProperties of this Interaction
-  * \param level "derivative" order of lambda used to compute input
-  */
-  void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+   * \param time the current time
+   * \param inter interaction that owns the relation
+   * \param interProp the InteractionProperties of this Interaction
+   * \param level "derivative" order of lambda used to compute input
+   */
+  void computeInput(double time, Interaction& inter, InteractionProperties& interProp,
+                    unsigned int level = 0);
 
   const std::string getJachqName() const;
 

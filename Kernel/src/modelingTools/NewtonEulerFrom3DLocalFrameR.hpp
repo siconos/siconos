@@ -50,8 +50,13 @@ private:
 
 protected:
   /** initialize components specific to derived classes.
-  */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+   * \param inter the interaction using this relation
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   * \param workV work vectors
+   * \param workM work matrices
+   */
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+                              VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 public:
   NewtonEulerFrom3DLocalFrameR(): NewtonEulerFrom1DLocalFrameR() {}
@@ -59,7 +64,11 @@ public:
   /** destructor
   */
   virtual ~NewtonEulerFrom3DLocalFrameR() {};
-  /*default implementation consists in multiplying jachq and T*/
+  /* Default implementation consists in multiplying jachq and T
+   * \param inter
+   * \param ds1
+   * \param ds2
+   */
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
 
   ACCEPT_STD_VISITORS();

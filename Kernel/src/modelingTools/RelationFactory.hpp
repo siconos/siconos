@@ -42,7 +42,10 @@ typedef std::map<int, object_creator> MapFactory;
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
-/** Template function to return a new object of type SubType*/
+/** Template function to return a new object of type SubType
+ * \param name an int, the name of the object added
+ * \return SP::Relation
+ */
 template<class SubType> SP::Relation factory(int name)
 {
   SP::Relation res(new SubType(name));
@@ -70,22 +73,25 @@ private :
 
 public :
 
-  /** Access function to the Registry */
+  /** Access function to the Registry 
+   * \return Registry&
+   */
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param an int, the name of the object added
-   * \param an object creator
+   * \param name an int, the name of the object added
+   * \param obj an object creator
    */
-  void add(int, object_creator);
+  void add(int name, object_creator obj);
 
   /** Function to instantiate a new Relation
-   * \param an int, the name of the object added (type name!)
+   * \param name an int, the name of the object added (type name!)
+   * \return  SP::Relation
    */
-  SP::Relation instantiate(int);
+  SP::Relation instantiate(int name);
 } ;
 
-/** Registration Class for sensors.
+/** Registration Class for relations.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -100,10 +106,10 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param an int, the name of the object to be registered
-   * \param an object creator
+   * \param name an int, the name of the object to be registered
+   * \param obj an object creator
    */
-  Registration(int, object_creator) ;
+  Registration(int name, object_creator obj) ;
 } ;
 
 #define AUTO_REGISTER_RELATION(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);

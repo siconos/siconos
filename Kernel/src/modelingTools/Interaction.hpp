@@ -177,6 +177,7 @@ private:
   // === PRIVATE FUNCTIONS ===
 
   /** copy constructor => private, no copy nor pass-by-value.
+   * \param inter to copy
    */
   Interaction(const Interaction& inter);
 
@@ -401,7 +402,8 @@ public:
   }
 
   /** get y[i], derivative number i of output
-   *  \return BlockVector
+   * \param i derivative number i of output
+   * \return BlockVector
    */
   inline const SiconosVector getCopyOfyOld(const unsigned int i) const
   {
@@ -410,8 +412,8 @@ public:
 
 
   /** get vector of output derivatives
-  *  \return a VectorOfVectors
-  */
+   *  \return a VectorOfVectors
+   */
   inline const VectorOfVectors y() const
   {
     return _y;
@@ -419,8 +421,9 @@ public:
 
 
   /** get y[i], derivative number i of output
-  *  \return pointer on a SiconosVector
-  */
+   * \param i derivative number i of output
+   *  \return pointer on a SiconosVector
+   */
   inline SP::SiconosVector y(const unsigned int i) const
   {
     return _y[i];
@@ -428,25 +431,27 @@ public:
 
   /** set the output vector y to newVector with copy of the y[i] (ie
       memory allocation)
-  *  \param VectorOfVectors
+  *  \param v VectorOfVectors
   */
-  void setY(const VectorOfVectors&);
+  void setY(const VectorOfVectors& v);
 
   /** set the output vector y to newVector with direct pointer
   *  equality for the y[i]
-  * \param VectorOfVectors
+  * \param v VectorOfVectors
   */
-  void setYPtr(const VectorOfVectors&);
+  void setYPtr(const VectorOfVectors& v);
 
   /** set y[i] to newValue
-  *  \param a SiconosVector and an unsigned int
-  */
-  void setY(const unsigned int , const SiconosVector&);
+   * \param i derivative number i of output
+   * \param v a SiconosVector and an unsigned int
+   */
+  void setY(const unsigned int i, const SiconosVector& v);
 
   /** set y[i] to pointer newPtr
-  *  \param a SP::SiconosVector  and an unsigned int
-  */
-  void setYPtr(const unsigned int , SP::SiconosVector newPtr);
+   * \param i derivative number i of output
+   * \param v a SP::SiconosVector  and an unsigned int
+   */
+  void setYPtr(const unsigned int i, SP::SiconosVector v);
 
   // -- yOld --
 
@@ -459,22 +464,25 @@ public:
   }
 
   /** get yOld[i], derivative number i of output
-  *  \return BlockVector
-  */
+   * \param i derivative number i of output
+   * \return BlockVector
+   */
   inline const SiconosVector getYOld(const unsigned int i) const
   {
     return *(_yOld[i]);
   }
 
   /** get yOld[i], derivative number i of output
-  *  \return pointer on a SiconosVector
-  */
+   * \param i derivative number i of output
+   * \return pointer on a SiconosVector
+   */
   inline SP::SiconosVector yOld(const unsigned int i) const
   {
     return _yOld[i];
   }
-  /*get y_k[i]
-    \return pointer on a SiconosVector
+  /* get y_k[i]
+   * \param i derivative number i of output
+   * \return pointer on a SiconosVector
    */
   inline SP::SiconosVector y_k(const unsigned int i) const
   {
@@ -482,29 +490,31 @@ public:
   }
 
   /** set the output vector yOld to newVector
-  *  \param VectorOfVectors
-  */
-  void setYOld(const VectorOfVectors&);
+   * \param  v VectorOfVectors
+   */
+  void setYOld(const VectorOfVectors& v);
 
   /** set vector yOld to newVector with direct pointer equality for
-  *  the yOld[i]
-  * \param VectorOfVectors
-  */
-  void setYOldPtr(const VectorOfVectors&);
+   *  the yOld[i]
+   * \param  v VectorOfVectors
+   */
+  void setYOldPtr(const VectorOfVectors& v);
 
   /** set yOld[i] to newValue
-  *  \param a SiconosVector and an unsigned int
-  */
-  void setYOld(const unsigned int , const SiconosVector&);
+   * \param i derivative number i of output
+   * \param v a SiconosVector and an unsigned int
+   */
+  void setYOld(const unsigned int i, const SiconosVector& v);
 
   /** set yOld[i] to pointer newPtr
-  *  \param a SP::SiconosVector  and an unsigned int
-  */
-  void setYOldPtr(const unsigned int , SP::SiconosVector newPtr);
+   * \param i derivative number i of output
+   * \param v a SP::SiconosVector  and an unsigned int
+   */
+  void setYOldPtr(const unsigned int i, SP::SiconosVector v);
 
 
   /** set yOld[i] to pointer newPtr
-   *  \param a SP::SiconosVector  and an unsigned int
+   * \param newval  a SP::SiconosVector  and an unsigned int
    */
   void setSteps(unsigned int newval)
   {
@@ -513,7 +523,8 @@ public:
 
 
   /** get all the values of the state vector y stored in memory
-   *  \return a memory
+   * \param level
+   * \return a memory
    */
   inline SP::SiconosMemory yMemory(unsigned int level) const
   {
@@ -521,30 +532,28 @@ public:
   }
 
   /** get all the values of the multiplier lambda stored in memory
-   *  \return a memory
+   * \param level
+   * \return a memory
    */
   inline SP::SiconosMemory lambdaMemory(unsigned int level) const
   {
     return _lambdaMemory[level];
   }
 
-
-
-
-
   // -- _lambda --
 
   /** get vector of input derivatives
-  *  \return a VectorOfVectors
-  */
+   *  \return a VectorOfVectors
+   */
   inline const VectorOfVectors getLambda() const
   {
     return _lambda;
   }
 
   /** get _lambda[i], derivative number i of input
-  *  \return SiconosVector
-  */
+   * \param i derivative number i of output
+   * \return SiconosVector
+   */
   inline const SiconosVector getLambda(const unsigned int i) const
   {
     assert(_lambda[i]);
@@ -552,8 +561,9 @@ public:
   }
 
   /** get _lambda[i], derivative number i of input
-  *  \return pointer on a SiconosVector
-  */
+   * \param i derivative number i of output
+   * \return pointer on a SiconosVector
+   */
   inline SP::SiconosVector lambda(const unsigned int i) const
   {
     assert(_lambda[i]);
@@ -561,24 +571,26 @@ public:
   }
 
   /** set the input vector _lambda to newVector
-  *  \param VectorOfVectors
-  */
-  void setLambda(const VectorOfVectors&);
+   *  \param v VectorOfVectors
+   */
+  void setLambda(const VectorOfVectors& v);
 
   /** set vector _lambda to newVector with direct pointer equality for the _lambda[i]
-  *  \param VectorOfVectors
-  */
-  void setLambdaPtr(const VectorOfVectors&);
+   *  \param v VectorOfVectors
+   */
+  void setLambdaPtr(const VectorOfVectors& v);
 
   /** set _lambda[i] to newValue
-  *  \param a SiconosVector and an unsigned int
-  */
-  void setLambda(const unsigned int , const SiconosVector&);
+   * \param i derivative number i of output
+   *  \param newValue a SiconosVector 
+   */
+  void setLambda(const unsigned int i, const SiconosVector& newValue);
 
   /** set _lambda[i] to pointer newPtr
-  *  \param a SP::SiconosVector  and an unsigned int
-  */
-  void setLambdaPtr(const unsigned int , SP::SiconosVector newPtr);
+   * \param i derivative number i of output
+   * \param newPtr a SP::SiconosVector
+   */
+  void setLambdaPtr(const unsigned int i, SP::SiconosVector newPtr);
 
   // -- _lambdaOld --
 
@@ -591,40 +603,44 @@ public:
   }
 
   /** get _lambdaOld[i], derivative number i of input
-  *  \return SiconosVector
-  */
+   * \param i derivative number i of output
+   *  \return SiconosVector
+   */
   inline const SiconosVector getLambdaOld(const unsigned int i) const
   {
     return *(_lambdaOld[i]);
   }
 
   /** get _lambdaOld[i], derivative number i of input
-  *  \return pointer on a SiconosVector
-  */
+   * \param i derivative number i of output
+   *  \return pointer on a SiconosVector
+   */
   inline SP::SiconosVector lambdaOld(const unsigned int i) const
   {
     return _lambdaOld[i];
   }
 
   /** set the input vector _lambdaOld to newVector
-  *  \param VectorOfVectors
-  */
-  void setLambdaOld(const VectorOfVectors&);
+   * \param v VectorOfVectors
+   */
+  void setLambdaOld(const VectorOfVectors& v);
 
-  /** set vector _lambdaOld to newVector with direct pointer equality for the _lambdaOld[i]
-  *  \param VectorOfVectors
+  /** set vector _lambdaOld to newVector with direct pointer equality for the _lambdaOld
+  *  \param v VectorOfVectors
   */
-  void setLambdaOldPtr(const VectorOfVectors&);
+  void setLambdaOldPtr(const VectorOfVectors& v);
 
   /** set _lambdaOld[i] to newValue
-  *  \param a SiconosVector and an unsigned int
-  */
-  void setLambdaOld(const unsigned int , const SiconosVector&);
+   * \param i derivative number i of output
+   * \param v a SiconosVector
+   */
+  void setLambdaOld(const unsigned int i, const SiconosVector& v );
 
   /** set _lambdaOld[i] to pointer newPtr
-  *  \param a SP::SiconosVector  and an unsigned int
-  */
-  void setLambdaOldPtr(const unsigned int , SP::SiconosVector newPtr);
+   * \param i derivative number i of output
+   * \param newPtr a SP::SiconosVector
+   */
+  void setLambdaOldPtr(const unsigned int i, SP::SiconosVector newPtr);
 
   /** get the Relation of this Interaction
    *  \return a pointer on this Relation
@@ -635,8 +651,8 @@ public:
   }
 
   /** get the NonSmoothLaw of this Interaction
-  *  \return a pointer on this NonSmoothLaw
-  */
+   *  \return a pointer on this NonSmoothLaw
+   */
   inline SP::NonSmoothLaw nonSmoothLaw() const
   {
     return _nslaw;
@@ -657,14 +673,13 @@ public:
   // --- OTHER FUNCTIONS ---
 
   /** set interaction 'ds-dimension', i.e. sum of all sizes of the dynamical systems linked
-      by the current interaction. This must be done by topology during call to link(inter, ds, ...).
-      \param int sum of ds sizes
-      \param int sum of sizes of z components of the ds.
+   *  by the current interaction. This must be done by topology during call to link(inter, ds, ...).
+   * \param s1 int sum of ds sizes
+   * \param s2 int sum of sizes of z components of the ds.
   */
   inline void setDSSizes(unsigned int s1, unsigned int s2)
   {
     _sizeOfDS = s1;
-
   }
 
   /**   put values of y into yOld, the same for _lambda
@@ -681,6 +696,7 @@ public:
 
   /** Computes output y; depends on the relation type.
    *  \param time current time
+   *  \param interProp
    *  \param derivativeNumber number of the derivative to compute,
    *  optional, default = 0.
    */
@@ -689,6 +705,7 @@ public:
   /** Compute input r of all Dynamical Systems involved in the present
    *   Interaction.
    *  \param time current time
+   *  \param interProp
    *  \param level order of _lambda used to compute input.
    */
   void computeInput(double time, InteractionProperties& interProp, unsigned int level = 0);
@@ -703,41 +720,49 @@ public:
 
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to one ds.
-   *  \param int, relative position of the beginning of the required block in relation matrix.
-   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   *  \param pos int, relative position of the beginning of the required block in relation matrix.
+   *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   *  \param workM
    */
   void getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
 
   /** gets the matrix used in interactionBlock computation. Used only for the formulation projecting on the constraints.
    *         We get only the part corresponding to ds.
-   *  \param int, relative position of the beginning of the required block in relation matrix.
-   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   *  \param pos int, relative position of the beginning of the required block in relation matrix.
+   *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getLeftInteractionBlockForDSProjectOnConstraints(unsigned int, SP::SiconosMatrix InteractionBlock) const;
+  void getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const;
 
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
-   *  \param int, relative position of the beginning of the required block in relation matrix.
-   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   *  \param pos int, relative position of the beginning of the required block in relation matrix.
+   *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   *  \param workM
    */
   void getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
 
   /** gets extra interactionBlock corresponding to the present Interaction (see the
    *  top of this files for extra interactionBlock meaning)
    * \param[in,out] InteractionBlock SP::SiconosMatrix
+   * \param workM
    */
   void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
 
   void computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
 
+
+  /**  get the single value used to build indexSets Warning: the
+   * relativePosition depends on NsLawSize and/or type.  This means
+   * that at the time, for the interactionBlock of y that corresponds to
+   * the present relation, the first scalar value is used.  For
+   * example, for friction, normal part is in first position, followed
+   * by the tangential parts.
+   * \param i derivative number i of output
+   * \return double
+   */
   inline double getYRef(unsigned int i) const
   {
-    // get the single value used to build indexSets Warning: the
-    // relativePosition depends on NsLawSize and/or type.  This means
-    // that at the time, for the interactionBlock of y that corresponds to
-    // the present relation, the first scalar value is used.  For
-    // example, for friction, normal part is in first position, followed
-    // by the tangential parts.
+
     return (*_y[i])(0);
   }
 
@@ -759,16 +784,15 @@ public:
     return _h_alpha;
   }
 
-  /*
-   *  Compute the residuY.
-   *
-   *
+  /*  Compute the residuY.
+   * \param time
    */
   void computeResiduY(double time);
 
   /* Compute the residuR.
+   * \param time
    * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param the work vectors of the DynamicalSystem
+   * \param workV the work vectors of the DynamicalSystem
    */
   void computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV) ;
 
@@ -784,6 +808,7 @@ public:
    * \param DSlink the container of the link to DynamicalSystem attributes
    */
   void initDSData(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink);
+  
   /** Instantiate the link with the DynamicalSystem, FirstOrderDS variant
    * \param DSlink the container of the link to DynamicalSystem attributes
    */

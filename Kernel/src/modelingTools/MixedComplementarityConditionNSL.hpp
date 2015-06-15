@@ -53,9 +53,9 @@ private:
 
 public:
   /** basic constructor
-  *  \param: size of the non smooth law
-  *  \param: size of the equality relation
-  */
+   *  \param newSize size of the non smooth law
+   *  \param equalitySize size of the equality relation
+   */
   MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize);
 
   /** Destructor */

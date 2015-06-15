@@ -56,7 +56,7 @@ template<class SubType> SP::DynamicalSystem factory(int name, const SiconosVecto
   return res;
 }
 
-/** Registry Class for sensors.
+/** Registry Class for DynamicalSystem.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.

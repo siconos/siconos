@@ -60,12 +60,12 @@ public:
   NewtonImpactFrictionNSL(unsigned int size);
 
   /** constructor with the value of the NewtonImpactFrictionNSL attributes
-   *  \param double : normal e coefficient
-   *  \param double : tangent e coefficient
-   *  \param double : friction coefficient
-   *  \param unsigned int: size of the ns law
+   *  \param en double : normal e coefficient
+   *  \param et double : tangent e coefficient
+   *  \param mu double : friction coefficient
+   *  \param size unsigned int: size of the ns law
    */
-  NewtonImpactFrictionNSL(double, double, double, unsigned int);
+  NewtonImpactFrictionNSL(double en, double et, double mu, unsigned int size);
 
   /** Destructor */
   ~NewtonImpactFrictionNSL();
@@ -86,7 +86,7 @@ public:
   };
 
   /** setter of en
-   *  \param a double to set en
+   *  \param newVal a double to set en
    */
   inline void setEn(double newVal)
   {
@@ -102,7 +102,7 @@ public:
   };
 
   /** setter of et
-   *  \param a double to set et
+   * \param newVal a double to set et
    */
   inline void setEt(double newVal)
   {
@@ -110,7 +110,7 @@ public:
   };
 
   /** getter of mu
-   *  \return the value of mu
+   * \return the value of mu
    */
   inline double mu() const
   {
@@ -118,7 +118,7 @@ public:
   };
 
   /** setter of mu
-   *  \param a double to set mu
+   * \param newVal a double to set mu
    */
   inline void setMu(double newVal)
   {

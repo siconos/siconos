@@ -184,14 +184,8 @@ public:
     return _C;
   }
 
-  /** set the value of C to newValue
-   *  \param SiconosMatrix newValue
-
-  void setC(const SiconosMatrix&);
-  */
-
   /** set C to pointer newPtr
-   *  \param newPtr pointer to the new damping matrix
+   * \param newPtr pointer to the new damping matrix
    */
   void setCPtr(SP::SiconosMatrix newPtr) ;
 
