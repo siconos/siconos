@@ -104,14 +104,16 @@ public:
 
 
   /** Constructor with dimRow and DimColumn of the matrix
-      \param n and m sizes of the rectangle matrix
-      \param stor storage type (0:dense, 1:sparse interactionBlock)
-  */
-  OSNSMatrixProjectOnConstraints(unsigned int, unsigned int, int);
+   * \param n row size of the rectangle matrix
+   * \param m column size of the rectangle matrix
+   * \param stor storage type (0:dense, 1:sparse interactionBlock)
+   */
+  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, int stor);
 
   /** compute the size of the vector to project for a given Interaction.
-  *  \param inter the corresponding interaction
-  */
+   * \param inter the corresponding interaction
+   * \return  unsigned int
+   */
   unsigned int computeSizeForProjection(SP::Interaction inter);
 
 

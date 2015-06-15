@@ -104,10 +104,6 @@ protected:
 
 public:
 
-  /** constructor from a minimum set of data: one DS and its theta
-   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param Theta value
-   */
   DEPRECATED_OSI_API(SchatzmanPaoliOSI(SP::DynamicalSystem, double));
 
   /** constructor from theta value only
@@ -115,11 +111,6 @@ public:
    */
   SchatzmanPaoliOSI(double theta);
 
-  /** constructor from a minimum set of data: one DS and its theta
-   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param theta value
-   *  \param gamma value
-   */
   DEPRECATED_OSI_API(SchatzmanPaoliOSI(SP::DynamicalSystem, double, double));
 
   /** constructor from theta value only
@@ -135,30 +126,30 @@ public:
   // --- GETTERS/SETTERS ---
 
   /** get the value of W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get W[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getW(SP::DynamicalSystem = SP::DynamicalSystem());
+  const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get W[0] in that case
    * \return pointer to a SiconosMatrix
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
-   * \param SiconosMatrix newValue
-   * \param a pointer to DynamicalSystem,
+   * \param newValue SiconosMatrix 
+   * \param ds  a pointer to DynamicalSystem,
    */
-  void setW(const SiconosMatrix&, SP::DynamicalSystem);
+  void setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds);
 
   /** set W[ds] to pointer newPtr
-   * \param SP::SiconosMatrix  newPtr
-   * \param a pointer to DynamicalSystem
+   * \param newPtr SP::SiconosMatrix  
+   * \param ds a pointer to DynamicalSystem
    */
-  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem);
+  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
 
   // -- WBoundaryConditions --
 
@@ -171,14 +162,14 @@ public:
   };
 
   /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem = SP::DynamicalSystem());
+  const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
@@ -195,7 +186,7 @@ public:
   };
 
   /** set the value of theta
-   *  \param a double
+   *  \param newTheta a double
    */
   inline void setTheta(double newTheta)
   {
@@ -213,7 +204,7 @@ public:
   };
 
   /** set the value of gamma
-   *  \param a double
+   *  \param newGamma a double
    */
   inline void setGamma(double newGamma)
   {
@@ -232,7 +223,7 @@ public:
   };
 
   /** set the boolean to indicate that we use gamma
-   *  \param a bool
+   *  \param newUseGamma a bool
    */
   inline void setUseGamma(bool newUseGamma)
   {
@@ -249,7 +240,7 @@ public:
 
 
   /** set the boolean to indicate that we use gamma for the relation
-   *  \param a bool
+   *  \param newUseGammaForRelation a bool
    */
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
   {
@@ -267,30 +258,29 @@ public:
   void initialize();
 
   /** init WMap[ds] SchatzmanPaoliOSI matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param time (double)
+   *  \param ds a pointer to DynamicalSystem
    */
-  void initW(double, SP::DynamicalSystem);
+  void initW(double time, SP::DynamicalSystem ds);
 
   /** compute WMap[ds] SchatzmanPaoliOSI matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param time the time (double)
+   *  \param ds a pointer to DynamicalSystem
    */
-  void computeW(double, SP::DynamicalSystem);
+  void computeW(double time, SP::DynamicalSystem ds);
 
   /** compute WBoundaryConditionsMap[ds] SchatzmanPaoliOSI matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param ds a pointer to DynamicalSystem
    */
-  void computeWBoundaryConditions(SP::DynamicalSystem);
+  void computeWBoundaryConditions(SP::DynamicalSystem ds);
 
   /** init WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
-   *  \param a pointer to DynamicalSystem
+   *  \param ds a pointer to DynamicalSystem
    */
-  void initWBoundaryConditions(SP::DynamicalSystem);
+  void initWBoundaryConditions(SP::DynamicalSystem ds);
 
   /** return the maximum of all norms for the "SchatzmanPaoliOSI-discretized" residus of DS
-      \return a double
+   *  \return a double
    */
   double computeResidu();
 
@@ -300,7 +290,7 @@ public:
   virtual void computeFreeState();
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex of the interaction graph
+   * \param vertex_inter of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);

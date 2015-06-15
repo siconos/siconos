@@ -243,6 +243,7 @@ public:
   void fill(double a);
 
   /** put data of the vector into a std::string
+   * \return std::string
    */
   const std::string toString() const;
 

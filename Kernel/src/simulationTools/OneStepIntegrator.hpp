@@ -97,6 +97,7 @@ private:
 
 /** assignment (private => forbidden)
  * \param  OSI
+ * \return OneStepIntegrator&
  */
   OneStepIntegrator& operator=(const OneStepIntegrator& OSI);
 
@@ -164,8 +165,7 @@ public:
     return OSIDynamicalSystems->end();
   };
 
-/** insert a dynamical system in this Integrator
- */
+
   DEPRECATED_OSI_API(virtual void insertDynamicalSystem(SP::DynamicalSystem ds));
 
 /** get _sizeMem value

@@ -80,7 +80,7 @@ public:
   }
 
   /** set the value of Q to newValue
-   *  \param SiconosMatrix newValue
+   *  \param newValue SiconosMatrix 
    */
   inline void setQ(const SiconosMatrix& newValue)
   {
@@ -114,7 +114,7 @@ public:
   }
 
   /** set the value of p to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue SiconosVector 
    */
   inline void setP(const SiconosVector& newValue)
   {
@@ -122,7 +122,7 @@ public:
   }
 
   /** set p to pointer newPtr
-   *  \param SiconosVector * newPtr
+   *  \param newPtr SiconosVector * 
    */
   inline void setPPtr(SP::SiconosVector newPtr)
   {

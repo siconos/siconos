@@ -37,7 +37,6 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
  *
  * ZeroOrderHoldOSI class is used to define some time-integrators methods for a
  * list of dynamical systems.
-
  * A ZeroOrderHoldOSI instance is defined by the value of theta and the list of
  * concerned dynamical systems.  Each DynamicalSystem is associated to
  *
@@ -67,9 +66,7 @@ public:
    */
   ZeroOrderHoldOSI();
 
-  /** constructor from a minimum set of data: one DS
-   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
-   */
+  
   DEPRECATED_OSI_API(ZeroOrderHoldOSI(SP::DynamicalSystem ds));
 
   /** destructor

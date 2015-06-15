@@ -129,7 +129,9 @@ private:
   /** Private copy constructor => no copy nor pass by value */
   OSNSMatrix(const OSNSMatrix&);
 
-  /** Private assignment -> forbidden */
+  /** Private assignment -> forbidden
+   * \return  OSNSMatrix&
+   */
   OSNSMatrix& operator=(const OSNSMatrix&);
 
 public:
@@ -139,45 +141,52 @@ public:
   OSNSMatrix();
 
   /** Constructor with dimRow. of the matrix
-      \param n size of the square matrix
-      \param stor storage type (0:dense, 1:sparse interactionBlock)
-  */
-  OSNSMatrix(unsigned int, int);
+   *   \param n size of the square matrix
+   *   \param stor storage type (0:dense, 1:sparse interactionBlock)
+   */
+  OSNSMatrix(unsigned int n, int stor);
 
   /** Constructor with dimRow and DimColumn of the matrix
-      \param n and m sizes of the rectangle matrix
-      \param stor storage type (0:dense, 1:sparse interactionBlock)
-  */
-  OSNSMatrix(unsigned int, unsigned int, int);
+   * \param n row sizes of the rectangle matrix
+   * \param m column size of the rectangle matrix
+   * \param stor storage type (0:dense, 1:sparse interactionBlock)
+   */
+  OSNSMatrix(unsigned int n, unsigned int m, int stor);
 
   /** Constructor from index set and map
-      \param InteractionsGraph* the index set of the active constraints
-      \param storage type
-  */
-  OSNSMatrix(SP::InteractionsGraph, int);
+   * \param indexSet InteractionsGraph* the index set of the active constraints
+   * \param stor storage type
+   */
+  OSNSMatrix(SP::InteractionsGraph indexSet, int stor);
 
   /** Constructor with copy of a SiconosMatrix => storageType = 0
-      \param MSource matrix to be copied
-  */
-  OSNSMatrix(const SiconosMatrix&);
+   * \param MSource matrix to be copied
+   */
+  OSNSMatrix(const SiconosMatrix& MSource);
 
   /** destructor
    */
   virtual ~OSNSMatrix();
 
-  /** get dimension of the square matrix */
+  /** get dimension of the square matrix 
+   * \return unsigned int
+   */  
   inline unsigned int size() const
   {
     return dimRow;
   };
 
-  /** get dimension of the square matrix */
+  /** get dimension of the square matrix 
+   * \return unsigned int
+   */
   inline unsigned int sizeColumn() const
   {
     return dimColumn;
   };
 
-  /** get the type of storage for current matrix  */
+  /** get the type of storage for current matrix 
+   * \return unsigned int
+   */
   inline int getStorageType() const
   {
     return storageType;
@@ -192,26 +201,31 @@ public:
   };
 
   /** get the absolute position of the interaction 
-      \param inter the Interaction from which position is required
-  */
+   * \param inter the Interaction from which position is required
+   * \return unsigned int
+   */
   virtual unsigned int getPositionOfInteractionBlock(Interaction& inter) const;
 
-  /** get the numerics-readable structure */
+  /** get the numerics-readable structure
+   * \return SP::NumericsMatrix
+   */
   inline SP::NumericsMatrix getNumericsMatrix()
   {
     return numericsMat;
   };
 
-  /** get the matrix used for default storage */
+  /** get the matrix used for default storage
+   * \return SP::NumericsMatrix 
+   */
   inline SP::SiconosMatrix defaultMatrix()
   {
     return M1;
   };
 
   /** fill the current class using an index set and a map of interactionBlocks
-      \param indexSet the index set of the active constraints
-      \param update if true update the size of the Matrix (default true)
-  */
+   * \param indexSet the index set of the active constraints
+   * \param update if true update the size of the Matrix (default true)
+   */
   virtual void fill(SP::InteractionsGraph indexSet, bool update = true);
 
   /** fill the numerics structure numericsMatSparse using MBlockCSR */

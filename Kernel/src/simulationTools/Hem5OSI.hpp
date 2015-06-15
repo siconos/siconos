@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  *
  */
-/*! \file Hem5OSI.cpp
+/** \file Hem5OSI.hpp
  * Hem5OSI solver (from E. Hairer software lists)
  */
 #ifndef Hem5OSI_H
@@ -114,9 +114,6 @@ public:
    */
   Hem5OSI();
 
-  /** constructor from a minimum set of data
-   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
-   */
   DEPRECATED_OSI_API(Hem5OSI(SP::DynamicalSystem ds));
 
   /** destructor
@@ -132,21 +129,23 @@ public:
   }
 
   /** get _intData[i]
-   *  \return an integer
+   * \param i index
+   * \return an integer
    */
   inline integer intData(unsigned int i) const
   {
     return _intData[i];
   }
-  /** get _intData[i]
-   *  \return an integer
+  /** set _intData[i]
+   * \param i index
+   * \param newValue
    */
   inline void setIntData(unsigned int i, int newValue)
   {
     _intData[i] = newValue;
   }
 
-  /** get relative tolerance parameter for lsodar
+  /** get relative tolerance parameter for Hem5
    *  \return a doublereal*
    */
   inline const SA::doublereal getRtol() const
@@ -154,7 +153,7 @@ public:
     return rtol;
   }
 
-  /** get absolute tolerance parameter for lsodar
+  /** get absolute tolerance parameter for Hem5
    *  \return a doublereal*
    */
   inline const SA::doublereal getAtol() const
@@ -186,29 +185,29 @@ public:
     return iwork;
   }
 
-  /** set itol, rtol and atol (tolerance parameters for lsodar)
-   *  \param integer (itol value)
-   *  \param doublereal * (rtol)
-   *  \param doublereal * (atol)
+  /** set itol, rtol and atol (tolerance parameters for Hem5)
+   *  \param itol integer (itol value)
+   *  \param rtol doublereal * (rtol)
+   *  \param atol doublereal * (atol)
    */
-  void setTol(integer, SA::doublereal, SA::doublereal);
+  void setTol(integer itol, SA::doublereal rtol, SA::doublereal atol);
 
-  /** set itol, rtol and atol (scalar tolerance parameters for lsodar)
-   *  \param integer (itol value)
-   *  \param double (rtol)
-   *  \param double (atol)
+  /** set itol, rtol and atol (scalar tolerance parameters for Hem5)
+   *  \param itol integer (itol value)
+   *  \param rtol double (rtol)
+   *  \param atol double (atol)
    */
-  void setTol(integer, doublereal, doublereal);
+  void setTol(integer itol, doublereal rtol, doublereal atol);
 
   /** set the maximul number of steps for one call of Hem5OSI
-   *\param an integer
+   *\param nstepmax an integer
    */
-  void setMaxNstep(integer);
+  void setMaxNstep(integer nstepmax);
 
   /** set the minimum and maximum step sizes
-   *\param double (maximul step size)
+   * \param maxstepsize double (maximul step size)
    */
-  void setMaxStepSize(doublereal);
+  void setMaxStepSize(doublereal maxstepsize);
 
   /** update _intData
    */
@@ -219,16 +218,16 @@ public:
   void updateData();
 
   /** fill qWork with a doublereal
-   *  \param integer*, size of x array
-   *  \param doublereal* x:array of double
+   *  \param sizex integer*, size of x array
+   *  \param x doublereal* x:array of double
    */
-  void fillqWork(integer*, doublereal*) ;
+  void fillqWork(integer* sizex, doublereal* x) ;
 
   /** fill vWork with a doublereal
-   *  \param integer*, size of x array
-   *  \param doublereal* x:array of double
+   *  \param sizex integer*, size of x array
+   *  \param x doublereal* x:array of double
    */
-  void fillvWork(integer*, doublereal*) ;
+  void fillvWork(integer* sizex, doublereal* x) ;
 
   /** compute rhs(t) for all dynamical systems in the set
    */
@@ -296,7 +295,7 @@ public:
   };
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex of the interaction graph
+   * \param vertex_inter of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);

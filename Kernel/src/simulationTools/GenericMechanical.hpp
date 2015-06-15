@@ -59,7 +59,7 @@ protected:
 public:
 
   /** Basic constructor, from numerics solver id.
-   *  \param int type of FC3D solver
+   *  \param FC3D_Solver_Id int type of FC3D solver
    */
   GenericMechanical(int FC3D_Solver_Id = SICONOS_FRICTION_3D_QUARTIC);
 
@@ -73,25 +73,25 @@ public:
   // --- Others functions ---
 
   /** initialize the GenericMechanical problem(compute topology ...)
-      \param the simulation, owner of this OSNSPB
+   *   \param sim the simulation, owner of this OSNSPB
    */
-  void initialize(SP::Simulation);
+  void initialize(SP::Simulation sim);
 
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
-   *  \param double current time
+   *  \param time double current time
    *  \return int information about the solver convergence (0: ok, >0 problem, see Numerics documentation)
    */
   int compute(double time);
 
   /** compute extra-diagonal interactionBlock-matrix
-    *  \param an edge descriptor
+    *  \param ed an edge descriptor
     */
-  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor&);
+  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor& ed);
 
   /** compute diagonal Interaction block
-   * \param a vertex descriptor
+   * \param vd  a vertex descriptor
    */
-  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&);
+  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
 
   /** print the data to the screen */
   void display() const;

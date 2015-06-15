@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file MLCP.hpp
-\brief Linear Complementarity Problem formulation and solving
-*/
+/*! \file OSNSMultipleImpact.hpp
+ * \brief Linear Complementarity Problem formulation and solving
+ */
 
 #ifndef _OSNSMULTIPLEIMPACT_
 #define _OSNSMULTIPLEIMPACT_
@@ -138,119 +138,221 @@ public:
   //!Default constructor
   OSNSMultipleImpact();
   /** Constructor from data (step size is required here)
-      \param  the type of the compliance law
-      \param step size estimated
-  */
-  OSNSMultipleImpact(std::string, double);
+   *  \param type  the type of the compliance law
+   *  \param step step size estimated
+   */
+  OSNSMultipleImpact(std::string type, double step);
+
   //!Destructor
   ~OSNSMultipleImpact();
-  //!To get the type of the compliance law at contact
+  /* To get the type of the compliance law at contact
+   * \return std::string
+   */
   inline std::string getTypeCompLaw() const
   {
     return TypeCompLaw;
   };
-  //!To set the type of the compliance law
+
+  /** To set the type of the compliance law
+   * \param newTypeLaw
+   */
   void setTypeCompLaw(std::string newTypeLaw);
-  //! To set the tolerance to define zero
+
+  /** To set the tolerance to define zero
+   * \param  newTolZero
+   */
   void setTolImpact(double newTolZero);
-  //! To get the tolerance to define zero
+
+  /** To get the tolerance to define zero
+   * \return double
+   */
   inline double getTolImpact()
   {
     return TOL_IMPACT;
   };
-  //! To set the flag to save the data during impact or not
+
+  /** To set the flag to save the data during impact or not
+   * \param var
+   */
   void SetYesSaveData(bool var);
-  //! To set the name for the output file
+
+  /** To set the name for the output file
+   * \param file_name
+   */
   void SetNameOutput(std::string file_name);
-  //! To get step size
+
+  /** To get step size
+   * \return double
+   */
   inline double GetStepSize()
   {
     return DeltaP;
   };
-  //! To get the duration of multiple impacts process
+
+  /* To get the duration of multiple impacts process
+   * \return double
+   */
   inline double DurationImpact()
   {
     return Time_variable;
   };
-  //! To set the variable NstepSave
+
+  /** To set the variable NstepSave
+   * \param var
+   */
   void SetNstepSave(unsigned int var);
-  //! To set the maximal number of steps allowed for each computation
+
+  /** To set the maximal number of steps allowed for each computation
+   * \param var
+   */
   void SetNstepMax(unsigned int var);
-  //! Set number of points to be saved during impact
-  void SetSizeDataSave(unsigned int);
-  //! Set tolerence to define whether or not a velocity is zero
-  void SetTolVel(double);
-  //! Set tolerence to define whether or not a potential energy is zero
-  void SetTolEner(double);
-  //! Set epsilon _ZeroVel_EndIm
-  void SetZeroVelEndImp(double);
-  //! Set epsilon _ZeroEner_EndIm
-  void SetZeroEnerEndImp(double);
-  //! Set the step number to start the data save and step number to stop save
-  void SetStepMinMaxSave(unsigned int, unsigned int);
-  //! To compare a double number with zero
-  bool isZero(double);
-  //! To compare a velocity grandeur with zero
-  bool isVelNegative(double);
-  //! To compare an energy grandeur with zero
-  bool isEnerZero(double);
-  //! To select the pramary contact
+
+  /** Set number of points to be saved during impact
+   * \param var
+   */
+  void SetSizeDataSave(unsigned int var);
+
+  /** Set tolerence to define whether or not a velocity is zero
+   * \param var
+   */
+  void SetTolVel(double var);
+
+  /** Set tolerence to define whether or not a potential energy is zero
+   * \param var
+   */
+  void SetTolEner(double var);
+
+  /** Set epsilon _ZeroVel_EndIm
+   * \param var
+   */
+  void SetZeroVelEndImp(double var);
+
+  /** Set epsilon _ZeroEner_EndIm
+   * \param var
+   */
+  void SetZeroEnerEndImp(double var);
+
+  /** Set the step number to start the data save and step number to stop save
+   * \param min
+   * \param max
+   */
+  void SetStepMinMaxSave(unsigned int min,  unsigned int max);
+
+  /** To compare a double number with zero
+   * \param var
+   * \return bool   
+   */
+  bool isZero(double var);
+
+  /** To compare a velocity value with zero
+   * \param var 
+   * \return bool   
+   */
+  bool isVelNegative(double var);
+
+  /** To compare an energy value with zero
+   * \param var
+   * \return bool   
+   */
+  bool isEnerZero(double var);
+
+  /** To select the pramary contact
+   */
   void SelectPrimaContact();
-  //! Calculate the vector of distributing rule
+
+  /** Calculate the vector of distributing rule */
   void ComputeDistriVector();
-  //! Compute the normal imulse at contacts
+
+  /** Compute the normal imulse at contacts */
   void ComputeImpulseContact();
-  //! Compute the relative velocity at contacts
+
+  /** Compute the relative velocity at contacts */
   void ComputeVelContact();
-  //! Compute the potential energy at contacts during each computation step
+
+  /** Compute the potential energy at contacts during each computation step */
   void ComputeEnerContact();
-  //! Compute the velocity of the bodies during impact
+
+  /** Compute the velocity of the bodies during impact */
   void UpdateDuringImpact();
-  //! Run the iterative procedure to solve the multiple impact problem
+
+  /** Run the iterative procedure to solve the multiple impact problem */
   void ComputeImpact();
-  //! Post-compute for multiple impacts
+
+  /** Post-compute for multiple impacts */
   void PostComputeImpact();
-  //! Check if the multiple impacts process is terminated or not
+
+  /** Check if the multiple impacts process is terminated or not 
+   * \return bool
+   */
   bool IsMulImpactTerminate();
-  //! To allocate the memory
+
+  /** To allocate the memory */
   void AllocateMemory();
-  //! To build the vector of stiffnesses and restitution coefficient at contacts
+
+  /** To build the vector of stiffnesses and restitution coefficient at contacts */
   void BuildParaContact();
-  //! To get the velocity of bodies, relative velocity and potential energy at the beginning of impact
+
+  /** To get the velocity of bodies, relative velocity and potential energy at the beginning of impact */
   void InitializeInput();
-  //! To check the state of contacts during impact
+
+  /** To check the state of contacts during impact */
   void CheckStateContact();
-  //! Pre-compute for multiple impacs
+
+  /** Pre-compute for multiple impacs */
   void PreComputeImpact();
+
   /** To get the primary contact according to the relative velocity
       In this case, the primary contact correspond to the contact at which the relative velocity
       is minimum (the relative velocity for two approching bodies is negative so the magnitude of
       the relative velocity at the primary contact is maximum)
   */
   void PrimConVelocity();
+
   /** To get the primary contact according to the potential energy. In this case, the primary
       contact corresponds to the one at which the potential energy is maximum
   */
   void PrimConEnergy();
+
   /** To decide if the primary contact is selected according to the relative velocity or to the
-      potential energy. The first case happens when there is no potential energy at any contact
-  */
+   *   potential energy. The first case happens when there is no potential energy at any contact
+   * \return bool
+   */
   bool IsEnermaxZero();
-  //! Verify if the minimum relative velocity at contacts is negative or not
+
+  /** Verify if the minimum relative velocity at contacts is negative or not 
+   * \return bool
+   */
   bool IsVcminNegative();
-  //! compute the unknown post-impact relative velocity and post-impact impulse
-  int compute(double);
-  //!initialize
-  void initialize(SP::Simulation);
-  //! print the data to the screen
+
+  /** compute the unknown post-impact relative velocity and post-impact impulse
+   * \param time
+   * \return int
+   */
+  int compute(double time);
+
+  /**initialize
+   * \param sim
+   */
+  void initialize(SP::Simulation sim);
+
+  /** print the data to the screen */
   void display() const;
-  //! To write a SiconosVector into a matrix
-  //! row and columns positions starting to write
-  void WriteVectorIntoMatrix(const SiconosVector, const unsigned int, const unsigned int);
-  //! Save data for each step
-  //! parameter: ith pointer to be save
-  void SaveDataOneStep(unsigned int);
-  //! Estimate size of data matrix
+
+  /** To write a SiconosVector into a matrix
+   * \param v
+   * \param row position starting to write
+   * \param col position starting to write
+   */
+
+  void WriteVectorIntoMatrix(const SiconosVector v, const unsigned int row, const unsigned int col);
+
+  /** Save data for each step
+   * \param i pointer to be save */
+  void SaveDataOneStep(unsigned int i);
+
+  /** Estimate size of data matrix
+   * \return unsigned int
+   */
   unsigned int EstimateNdataCols();
 
   ACCEPT_STD_VISITORS();

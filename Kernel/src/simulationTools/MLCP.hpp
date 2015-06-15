@@ -92,8 +92,8 @@ public:
 
   /** compute equalities/inequalities sizes and set corresponding values in
       numerics problem
-      \param inter Interaction used to get a non-smooth law and the constraints sizes.
-      \param inter another interaction, not used indeed (?)
+      \param inter1 Interaction used to get a non-smooth law and the constraints sizes.
+      \param inter2 another interaction, not used indeed (?)
   */
   virtual void computeOptions(SP::Interaction inter1, SP::Interaction inter2);
 
@@ -123,15 +123,19 @@ public:
   virtual void reset();
 
   /** compute extra-diagonal interactionBlock-matrix
-   *  \param an edge descriptor
+   *  \param ed an edge descriptor
    */
-  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor&);
+  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor& ed);
 
   /** compute diagonal Interaction block
-   * \param a vertex descriptor
+   * \param vd a vertex descriptor
    */
-  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&);
+  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
 
+  /** Pre compute 
+   * \param time current time
+   * \return bool
+   */
   virtual bool preCompute(double time);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )

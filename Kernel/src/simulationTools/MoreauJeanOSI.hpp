@@ -146,11 +146,6 @@ protected:
 
 public:
 
-  /** constructor from a minimum set of data: one DS and its theta
-   *  \param ds the DynamicalSystem integrated by this integrator
-   *  \param theta value for the theta parameter (default = 0.5)
-   *  \param gamma value for the gamma parameter (default = NaN and gamma is not used)
-   */
   DEPRECATED_OSI_API(MoreauJeanOSI(SP::DynamicalSystem ds, double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN()));
 
   /** constructor from theta value only

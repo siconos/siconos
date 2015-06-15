@@ -88,9 +88,6 @@ public:
   /** Default constructor */
   LsodarOSI();
 
-  /** constructor from a minimum set of data
-   *  \param ds the DynamicalSystem to integrate
-   */
   DEPRECATED_OSI_API(LsodarOSI(SP::DynamicalSystem ds));
 
   /** destructor
@@ -280,10 +277,14 @@ public:
    */
   void display();
 
-  /** Return current number of rhs call (for all lsodar-like OSIs!)*/
+  /** Return current number of rhs call (for all lsodar-like OSIs!)
+   * \return int
+   */
   static int count_rhs_call() {return count_NFE;}
 
-  /** Return the number of lsodar steps already done (for all lsodar-like OSIs!)*/
+  /** Return the number of lsodar steps already done (for all lsodar-like OSIs!)
+   * \return int
+   */
   static int count_steps() {return count_NST;}
 
   /** visitors hook

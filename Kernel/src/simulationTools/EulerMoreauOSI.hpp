@@ -27,7 +27,8 @@
 
 const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
 
-/** \class EulerMoreauOSI Time-Integrator for Dynamical Systems
+/** \class EulerMoreauOSI 
+ * Time-Integrator for Dynamical Systems
  *  \brief One Step time Integrator for First Order Dynamical Systems.
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.7.0.
@@ -45,17 +46,20 @@ const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
  * for instance
  *
  *
- * Consistency of a time-stepping method for a class of piecewise linear networks\br
+ * Consistency of a time-stepping method for a class of piecewise linear networks
+ *
  * M.K. Camlibel, W.P.M.H. Heemels, and J.M. Schumacher
  * IEEE Transactions on Circuits and Systems I, 2002, 49(3):349--357
  *
- * Numerical methods for nonsmooth dynamical systems: applications in mechanics and electronics\br
+ * Numerical methods for nonsmooth dynamical systems: applications in mechanics and electronics
+ *
  * V Acary, B Brogliato Springer Verlag 2008
  *
  * Convergence of time-stepping schemes for passive and extended linear complementarity systems
  * L. Han, A. Tiwari, M.K. Camlibel, and J.-S. Pang SIAM Journal on Numerical Analysis 2009, 47(5):3768-3796
  *
- * On preserving dissipativity properties of linear complementarity dynamical systems with the &theta-method\br
+ * On preserving dissipativity properties of linear complementarity dynamical systems with the &theta-method
+ *
  * Greenhalgh Scott, Acary Vincent, Brogliato Bernard Numer. Math., , 2013.
  *
  * Main time--integration schemes are based on the following \f$\theta-\gamma\f$ scheme
@@ -151,10 +155,7 @@ protected:
   EulerMoreauOSI() {};
 
 public:
-  /** constructor from a minimum set of data: one DS and its theta
-   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
-   *  \param theta value of the parameter
-   */
+  
   DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem ds, double theta));
 
   /** constructor from theta value only
@@ -162,11 +163,6 @@ public:
    */
   EulerMoreauOSI(double theta);
 
-  /** constructor from a minimum set of data: one DS and its theta
-   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
-   *  \param theta value
-   *  \param gamma value
-   */
   DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem ds, double theta, double gamma));
 
   /** constructor from theta value only
@@ -182,30 +178,30 @@ public:
   // --- GETTERS/SETTERS ---
 
   /** get the value of W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get W[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getW(SP::DynamicalSystem = SP::DynamicalSystem());
+  const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
-   * NULL. get W[0] in that case
+   * \param ds a pointer to DynamicalSystem, optional,
+   *      default = NULL  get W[0] in that case
    * \return pointer to a SiconosMatrix
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
-   * \param SiconosMatrix newValue
-   * \param a pointer to DynamicalSystem,
+   * \param newValue SiconosMatrix 
+   * \param ds a pointer to DynamicalSystem,
    */
-  void setW(const SiconosMatrix&, SP::DynamicalSystem);
+  void setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds);
 
   /** set W[ds] to pointer newPtr
    * \param newPtr
-   * \param a pointer to DynamicalSystem
+   * \param ds a pointer to DynamicalSystem
    */
-  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem);
+  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
 
   // -- WBoundaryConditions --
 
@@ -218,14 +214,14 @@ public:
   };
 
   /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem = SP::DynamicalSystem());
+  const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
+   * \param ds a pointer to DynamicalSystem, optional, default =
    * NULL. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
@@ -242,7 +238,7 @@ public:
   };
 
   /** set the value of theta
-   *  \param a double
+   *  \param newTheta a double
    */
   inline void setTheta(double newTheta)
   {
@@ -260,7 +256,7 @@ public:
   };
 
   /** set the value of gamma
-   *  \param a double
+   *  \param newGamma a double
    */
   inline void setGamma(double newGamma)
   {
@@ -296,7 +292,7 @@ public:
 
 
   /** set the boolean to indicate that we use gamma for the relation
-   *  \param a bool
+   *  \param newUseGammaForRelation a bool
    */
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
   {
@@ -314,52 +310,46 @@ public:
   virtual void initialize();
 
   /** init WMap[ds] EulerMoreauOSI matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param time the time (double)
+   *  \param ds a pointer to DynamicalSystem
    */
-  void initW(double, SP::DynamicalSystem);
+  void initW(double time, SP::DynamicalSystem ds);
 
   /** compute WMap[ds] EulerMoreauOSI matrix at time t
    *  \param time the current time
    *  \param ds the DynamicalSystem
+   *  \param dsgVD a DynamicalSystemsGraph::VDescriptor&
    */
   void computeW(double time, DynamicalSystem& ds, DynamicalSystemsGraph::VDescriptor& dsgVD);
 
   /** compute WBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param ds a pointer to DynamicalSystem
    */
-  void computeWBoundaryConditions(SP::DynamicalSystem);
+  void computeWBoundaryConditions(SP::DynamicalSystem ds);
 
   /** init WBoundaryConditionsMap[ds] EulerMoreauOSI
-   *  \param a pointer to DynamicalSystem
+   *  \param ds a pointer to DynamicalSystem
    */
-  void initWBoundaryConditions(SP::DynamicalSystem);
+  void initWBoundaryConditions(SP::DynamicalSystem ds);
 
   /** Computes the residuFree and residu of all the DynamicalSystems
-      \return the maximum of the 2-norm over all the residu
+   *  \return the maximum of the 2-norm over all the residu
    */
   double computeResidu();
-
+  
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input r
    */
   virtual void computeFreeState();
-
+  
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex of the interaction graph
+   * \param vertex_inter of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
-  /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
-   */
   //virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
-  /** Apply the rule to one Interaction to known if is it should be removed
-   * in the IndexSet of level i
-   */
   //virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
 
@@ -375,7 +365,7 @@ public:
    *  \param tout real end time
    *  \param useless flag (for EulerMoreauOSI, used in LsodarOSI)
    */
-  void integrate(double& tinit, double& tend, double& tout, int&);
+  void integrate(double& tinit, double& tend, double& tout, int& useless);
 
   /** updates the state of the Dynamical Systems
    *  \param level the level of interest for the dynamics: not used at the time

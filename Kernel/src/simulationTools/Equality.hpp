@@ -59,8 +59,8 @@ private:
 public:
 
   /** constructor
-      \param int id of numerics solver
-  */
+   *  \param numericsSolverId int id of numerics solver
+   */
   Equality(int numericsSolverId = 0): LinearOSNS(numericsSolverId) {};
   
   /** destructor
@@ -68,14 +68,15 @@ public:
   ~Equality() {};
 
   /** initialize
+   * \param sim the simulation
    */
   void initialize(SP::Simulation sim);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
-   *  \param double : current time
-   *  \return int, information about the solver convergence.
+   *  \param time double : current time
+   *  \return int information about the solver convergence.
    */
-  int compute(double);
+  int compute(double time);
 
   /** Build or reinit M and the NumericsProblem*/
   virtual void updateM();

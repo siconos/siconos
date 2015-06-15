@@ -132,7 +132,9 @@ private:
   /** Private copy constructor => no copy nor pass by value */
   BlockCSRMatrix(const BlockCSRMatrix&);
 
-  /** Private assignment -> forbidden */
+  /** Private assignment -> forbidden 
+   * \return  BlockCSRMatrix&
+   */
   BlockCSRMatrix& operator=(const BlockCSRMatrix&);
 
 public:
@@ -144,7 +146,7 @@ public:
   /** Constructor with dimension (number of blocks)
       \param n number of blocks in a row/column (only square matrices allowed)
   */
-  BlockCSRMatrix(unsigned int);
+  BlockCSRMatrix(unsigned int n);
 
   /** Constructor from index set
       \param indexSet the index set of the active constraints
@@ -155,29 +157,38 @@ public:
    */
   ~BlockCSRMatrix();
 
-  /** get size (in block-components) */
+  /** get size (in block-components) 
+   * \return unsigned int NumberOfBlocksInARow
+   */
   inline unsigned int getNumberOfBlocksInARow() const
   {
     return _nr;
   };
 
-  /** get total number of non-null blocks */
+  /** get total number of non-null blocks
+   * \return unsigned int
+   */
   unsigned int getNbNonNullBlocks() const;
 
-  /** get the numerics-readable structure */
+  /** get the numerics-readable structure
+   * \return SP::SparseBlockStructuredMatrix
+   */
   inline SP::SparseBlockStructuredMatrix getNumericsMatSparse()
   {
     return _sparseBlockStructuredMatrix;
   };
 
-  /** get the ublas sparse mat*/
+  /** get the ublas sparse mat
+   * \return SP::CompressedRowMat
+   */
   inline SP::CompressedRowMat getMSparse()
   {
     return _blockCSR;
   };
 
   /** get the dimension of the square-diagonal block number num
-      \param num block position
+   * \param i block position
+   * \return unsigned int
   */
   unsigned int getSizeOfDiagonalBlock(int i) const
   {
@@ -186,8 +197,9 @@ public:
   };
 
   /** get the index of blocks position (i=0 -> rows, i=1 -> columns)
-      \param unsigned int, 0 for rows, 1 for columns
-  */
+   * \param i unsigned int, 0 for rows, 1 for columns
+   * \return SP::IndexInt
+   */
   inline SP::IndexInt getPositionsIndex(bool i)
   {
     if (i) return rowPos;
@@ -195,38 +207,39 @@ public:
   };
 
   /** fill the current class using an index set
-      \param indexSet set of the active constraints
-  */
-  void fill(SP::InteractionsGraph);
+   *  \param indexSet set of the active constraints
+   */
+  void fill(SP::InteractionsGraph indexSet);
 
 
   /** fill the matrix with the Mass matrix 
-  \warning only for NewtonEulerDS
-  \param indexSet of the active constraints
-  */
-  void fillM(SP::InteractionsGraph);
+   * \warning only for NewtonEulerDS
+   * \param indexSet of the active constraints
+   */
+  void fillM(SP::InteractionsGraph indexSet);
 
   /** fill the matrix with the H matrix 
-  \warning only for NewtonEulerFrom3DLocalFrameR
-  \param indexSet of the active constraints
-  */
-  void fillH(SP::InteractionsGraph);
-
-  /** fill the current class using an index set and a map of DSblocks
-       \param DynamicalSystemsSet*, the set of DynamicalSystem
-       \param MapOfDSMatrices, the list of matrices linked to a
-       DynamicalSystem
+   * \warning only for NewtonEulerFrom3DLocalFrameR
+   * \param indexSet of the active constraints
    */
-  void fill(SP::DynamicalSystemsSet, MapOfDSMatrices&);
+  void fillH(SP::InteractionsGraph indexSet);
 
   /** fill the current class using an index set and a map of DSblocks
-       \param DynamicalSystemsSet*, the set of DynamicalSystem
-       \param InteractionsGraph*, the index set of the active
+   *    \param DSSet DynamicalSystemsSet*, the set of DynamicalSystem
+   *    \param DSblocks MapOfDSMatrices, the list of matrices linked to a
+   *   DynamicalSystem
+   */
+  void fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSblocks);
+
+  /** fill the current class using an index set and a map of DSblocks
+       \param indexSet DynamicalSystemsSet*, the set of DynamicalSystem
+       \param DSSet InteractionsGraph*, the index set of the active
        constraints
-       \param MapOfInteractionMapOfDSMatrices, the list of matrices linked
+       \param interactionDSBlocks MapOfInteractionMapOfDSMatrices, the list of matrices linked
        to a DynamicalSystem
    */
-  void fill(SP::InteractionsGraph, SP::DynamicalSystemsSet, MapOfInteractionMapOfDSMatrices&);
+  void fill(SP::InteractionsGraph indexSet, SP::DynamicalSystemsSet DSSet,
+            MapOfInteractionMapOfDSMatrices& interactionDSBlocks);
 
   /** fill the numerics structure _sparseBlockStructuredMatrix using _blockCSR */
   void convert();

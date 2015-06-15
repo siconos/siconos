@@ -69,10 +69,6 @@ public:
    */
   explicit MoreauJeanCombinedProjectionOSI(double theta) : MoreauJeanOSI(theta) {}  ;
 
-  /** constructor from a minimum set of data: one DS and its theta
-   *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param theta value of the parameter
-   */
   DEPRECATED_OSI_API(MoreauJeanCombinedProjectionOSI(SP::DynamicalSystem ds, double theta));
 
   /** destructor
@@ -93,11 +89,17 @@ public:
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
+   * \param inter concerned interaction 
+   * \param i level
+   * \return bool
    */
   virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
+   * \param inter concerned interaction 
+   * \param i level
+   * \return bool
    */
   virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 

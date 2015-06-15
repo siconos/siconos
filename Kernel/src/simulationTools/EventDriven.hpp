@@ -106,7 +106,7 @@ public:
   EventDriven(SP::TimeDiscretisation td, int nb);
 
   /** defaut constructor (needed for serialization)
-  */
+   */
   EventDriven() : _isNewtonConverge(false) {};
 
   /** destructor
@@ -120,16 +120,23 @@ public:
   void initialize(SP::Model m, bool withOSI = true);
 
   /* Getters and setters */
-  /** Set value to _istate */
+
+  
+  /** Set value to _istate 
+   * \param newValue
+   */
   inline void setIstate(int newValue)
   {
     _istate = newValue;
   }
-  /** Get value of _istate */
+  /** Get value of _istate
+   * \return _istate a double
+   */
   inline double istate()
   {
     return _istate;
   }
+  
   /** Set value to TOL_ED
    * \param var the new tolerance
    */
@@ -137,26 +144,32 @@ public:
   {
     TOL_ED = var;
   }
-  /** Get value of _epsilon */
+  /** Get value of _epsilon
+   * \return double
+   */
   inline double toleranceED()
   {
     return TOL_ED;
   }
 
-  /** To know if Newton Iteratio is convergent*/
+  /** To know if Newton Iteratio is convergent
+   * \return _isNewtonConverge
+   */
   bool isNewtonConverge()
   {
     return _isNewtonConverge;
   };
 
-  /** To known the number of steps performed by the Newton algorithm */
+  /** To known the number of steps performed by the Newton algorithm 
+   * \return _newtonNbIterations
+   */
   unsigned int getNewtonNbIterations()
   {
     return _newtonNbIterations;
   }
 
   /** Set value to the maximum number of iterations
-   *\param maxStep maximum number of step
+   * \param maxStep maximum number of step
    */
   void setNewtonMaxIteration(unsigned int maxStep)
   {
@@ -187,13 +200,17 @@ public:
     return _localizeEventMaxIter;
   }
 
-  /** accessor to _newtonResiduDSMax */
+  /** accessor to _newtonResiduDSMax
+   * \return double _newtonResiduDSMax
+   */
   double newtonResiduDSMax()
   {
     return _newtonResiduDSMax;
   };
 
-  /** accessor to _newtonResiduYMax */
+  /** accessor to _newtonResiduYMax 
+   * \return double _newtonResiduYMax
+   */
   double newtonResiduYMax()
   {
     return _newtonResiduYMax;
@@ -246,18 +263,22 @@ public:
    */
   void computeJacobianfx(OneStepIntegrator& osi, integer* sizeOfX, doublereal* time, doublereal* x,  doublereal* jacob);
 
-  /** compute the size of constraint function g(x,t,...) for osi */
+  /** compute the size of constraint function g(x,t,...) for osi 
+   * \return unsigned int 
+   */
   virtual unsigned int computeSizeOfg();
 
   /** compute constraint function g(x,t,...) for osi.
-   *  \param pointer to OneStepIntegrator.
-   *  \param integer*, size of vector x
-   *  \param doublereal*, time
-   *  \param doublereal*, x:array of double
-   *  \param integer*, size of vector g (ie number of constraints)
-   *  \param doublereal*, g (in-out parameter)
+   *  \param osi pointer to OneStepIntegrator.
+   *  \param sizeX integer*, size of vector x
+   *  \param time doublereal*, time
+   *  \param x doublereal*, x:array of double
+   *  \param sizeG integer*, size of vector g (ie number of constraints)
+   *  \param g doublereal*, g (in-out parameter)
    */
-  virtual void computeg(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, integer*, doublereal*);
+  virtual void computeg(SP::OneStepIntegrator osi, integer* sizeX,
+                        doublereal* time, doublereal* x,
+                        integer* sizeG, doublereal* g);
 
   /** update input for impact case (ie compute p[1])
   */
@@ -270,9 +291,9 @@ public:
   using Simulation::update;
 
   /** update input, output and indexSets.
-   *  \param lambda order used to compute input
+   *  \param level of lambda  used to compute input
    */
-  void update(unsigned int);
+  void update(unsigned int level);
 
   /** Initialize EventDriven **/
 

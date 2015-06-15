@@ -64,19 +64,7 @@ protected:
 
 public:
 
-  /** constructor with one DS and parameters beta, gamma, alpha_m, alpha_f
-   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
-   *  \param beta value of beta
-   *  \param gamma double : value of gamma
-   *  \param alpha_m double : value of alpha_m
-   *  \param alpha_f double : value of alpha_f
-   */
   DEPRECATED_OSI_API(NewMarkAlphaOSI(SP::DynamicalSystem, double, double, double, double, bool));
-
-  /** constructor with one DS and the parameter rho_infty from which values of beta, gamma, alpha_m, alpha_f can be deduced
-   * \param ds SP::DynamicalSystem
-   * \param rho_infty double : value of rho_infty
-   */
 
   DEPRECATED_OSI_API(NewMarkAlphaOSI(SP::DynamicalSystem, double, bool));
 
@@ -85,16 +73,15 @@ public:
   * \param gamma double
   * \param alpha_m double
   * \param alpha_f double
-  * \param flag true of working at veolcity level
+  * \param flag true of working at velocity level
   */
-
   NewMarkAlphaOSI(double beta, double gamma, double alpha_m, double alpha_f, bool flag);
 
   /** constructor with only the parameter rho_infty
-  * \param rho_infty double
-  */
-
-  NewMarkAlphaOSI(double, bool);
+   * \param rho_infty double
+   * \param flag true of working at velocity level
+   */
+  NewMarkAlphaOSI(double rho_infty, bool flag);
 
   /** destructor
    */
@@ -106,23 +93,21 @@ public:
   /** set value to the parameter beta
    * \param beta value of beta
    */
-
   inline void setBeta(double beta)
   {
     _beta = beta;
   };
 
   /** set value to the parameter gamma
-   * \param double : value of gamma
+   * \param value_gamma double : value of gamma
    */
-
   inline void setGamma(double value_gamma)
   {
     _gamma = value_gamma;
   };
 
   /** set value to the parameter alpha_m
-   * \param double : value of alpha_m
+   * \param value_alpha_m double : value of alpha_m
    */
 
   inline void setAlpha_m(double value_alpha_m)
@@ -131,7 +116,7 @@ public:
   };
 
   /** set value to the parameter alpha_f
-   * \param double : value of alpha_f
+   * \param value_alpha_f double : value of alpha_f
    */
 
   inline void setAlpha_f(double value_alpha_f)
@@ -140,52 +125,59 @@ public:
   };
 
   /** set values to the parameters beta, gamma, alpha_f, alpha_m from the value of rho_infty
-   * \param double : value of rho_infty
+   * \param rho_infty double : value of rho_infty
    */
 
-  inline void setParametersFromRho_infty(double _rho_infty)
+  inline void setParametersFromRho_infty(double rho_infty)
   {
-    _alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
-    _alpha_f = _rho_infty / (_rho_infty + 1);
+    _alpha_m = (2 * rho_infty - 1) / (rho_infty + 1);
+    _alpha_f = rho_infty / (rho_infty + 1);
     _gamma = 0.5 + _alpha_f - _alpha_m;
     _beta = 0.25 * std::pow((_gamma + 0.5), 2);
   };
 
-  /** get value of beta */
-
+  /** get value of beta
+   * \return double
+   */
   inline double getBeta()
   {
     return _beta;
   };
 
-  /** get value of gamma*/
-
+  /** get value of gamma
+   * \return double
+   */
   inline double getGamma()
   {
     return _gamma;
   };
 
-  /** get value of alpha_m*/
-
+  /** get value of alpha_m
+   * \return double
+   */
   inline double getAlpha_m()
   {
     return _alpha_m;
   };
 
-  /** get value of alpha_f */
+  /** get value of alpha_f
+   * \return double
+   */
 
   inline double getAlpha_f()
   {
     return _alpha_f;
   };
-  /** get the order of the polynomial for dense output */
+  /** get the order of the polynomial for dense output
+   * \return unsigned int
+   */
   inline unsigned int getOrderDenseOutput()
   {
     return _orderDenseOutput;
   }
 
   /** set the flag _IsVelocityLevel
-   * \param bool
+   * \param flag bool
    */
   inline void setFlagVelocityLevel(bool flag)
   {
@@ -201,25 +193,26 @@ public:
   }
 
   /** get matrix W
-   *\param SP::DynamicalSystem DynamicalSystem concerned
+   * \param ds SP::DynamicalSystem DynamicalSystem concerned
+   * \return  SimpleMatrix
    */
   const SimpleMatrix getW(SP::DynamicalSystem ds);
 
   /** get pointer to the maxtrix W
-   *\param SP::DynamicalSystem DynamicalSystem concerned
+   * \param ds SP::DynamicalSystem DynamicalSystem concerned
+   * \return  SP::SimpleMatrix
    */
-
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
   /** initialize WMap[ds] matrix
-    *  \param a pointer to DynamicalSystem
+    *  \param ds a pointer to DynamicalSystem
     */
-  void initW(SP::DynamicalSystem);
+  void initW(SP::DynamicalSystem ds );
 
   /** compute WMap[ds] matrix
-   *  \param a pointer to DynamicalSystem
+   *  \param ds a pointer to DynamicalSystem
    */
-  void computeW(SP::DynamicalSystem);
+  void computeW(SP::DynamicalSystem ds);
 
   /** compute the residual of dynamical equation
    *\return double: maximum residu over all DSs
@@ -230,16 +223,19 @@ public:
   void computeFreeState();
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex of the interaction graph
+   * \param vertex_inter of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
+  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter,
+                                 OneStepNSProblem* osnsp);
   
   /** initialize */
   void initialize();
 
-  /** prepare for Newton Iteration */
-  void prepareNewtonIteration(double);
+  /** prepare for Newton Iteration 
+   * \param time
+   */
+  void prepareNewtonIteration(double time);
 
   /** predict first values for the Newton iteration */
   void prediction();
@@ -249,12 +245,12 @@ public:
   void correction();
 
   /** integrate the system, between tinit and tend with possible stop at tout
-   *  \param double: tinit, initial time
-   *  \param double: tend, end time
-   *  \param double: tout, real end time
-   *  \param int: a flag, useless for NewMarkAlphaOSI
+   *  \param tinit double: tinit, initial time
+   *  \param tend double: tend, end time
+   *  \param tout double: tout, real end time
+   *  \param flag useless for NewMarkAlphaOSI
    */
-  void integrate(double&, double&, double&, int&);
+  void integrate(double& tinit, double& tend, double& tout, int& flag);
 
   /** updates the state of the Dynamical Systems
    *  \param level the level of interest for the dynamics: not used at the time
@@ -262,17 +258,17 @@ public:
   void updateState(const unsigned int level);
 
   /** Compute coefficients of the polynomial of the dense output for a given DS
-   *  \param SP::DynamicalSystem, ds concerned
+   *  \param ds SP::DynamicalSystem, ds concerned
    */
-  void computeCoefsDenseOutput(SP::DynamicalSystem);
+  void computeCoefsDenseOutput(SP::DynamicalSystem ds);
 
   /** prepare for Event localization*/
   void prepareEventLocalization();
 
   /** Generate dense output for all Dynamical Systems belonging to OSI
-   * \param double time at which we want to generate the dense output
+   * \param time at which we want to generate the dense output
    */
-  void DenseOutputallDSs(double);
+  void DenseOutputallDSs(double time);
 
   /** Displays the data of the NewMarkAlpha's integrator
    */
