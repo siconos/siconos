@@ -33,8 +33,8 @@ enum MCP_SOLVER
 };
 
 
-extern char SICONOS_MCP_FB_STR[];
-extern char SICONOS_MCP_NEWTON_FBLSA_STR[];
-extern char SICONOS_MCP_NEWTON_MINFBLSA_STR[];
+extern char *SICONOS_MCP_FB_STR;
+extern char *SICONOS_MCP_NEWTON_FBLSA_STR;
+extern char *SICONOS_MCP_NEWTON_MINFBLSA_STR;
 
 #endif

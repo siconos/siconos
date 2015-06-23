@@ -296,11 +296,11 @@
   }
 }
 
-%extend SolverOptions
+%extend _SolverOptions
 {
-  SolverOptions(FRICTION_SOLVER id)
+  _SolverOptions(FRICTION_SOLVER id)
   {
-    SolverOptions *SO;
+    _SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
 
     /* cf Friction_cst.h */
@@ -316,14 +316,14 @@
     return SO;
   }
 
-  SolverOptions()
+  _SolverOptions()
     {
       SolverOptions *SO;
       SO = (SolverOptions *) malloc(sizeof(SolverOptions));
       return SO;
     }
 
-  SolverOptions(LinearComplementarityProblem* lcp, LCP_SOLVER id)
+  _SolverOptions(LinearComplementarityProblem* lcp, LCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -331,7 +331,7 @@
     return SO;
   }
 
-  SolverOptions(MixedLinearComplementarityProblem* mlcp, MLCP_SOLVER id)
+  _SolverOptions(MixedLinearComplementarityProblem* mlcp, MLCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -340,7 +340,7 @@
     return SO;
   }
 
-  SolverOptions(MixedComplementarityProblem* mlcp, MCP_SOLVER id)
+  _SolverOptions(MixedComplementarityProblem* mlcp, MCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -349,7 +349,7 @@
     return SO;
   }
 
-  SolverOptions(MixedComplementarityProblem2* mcp, MCP_SOLVER id)
+  _SolverOptions(MixedComplementarityProblem2* mcp, MCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -358,7 +358,7 @@
     return SO;
   }
 
-  SolverOptions(VariationalInequality* vi, VI_SOLVER id)
+  _SolverOptions(VariationalInequality* vi, VI_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -367,7 +367,7 @@
     return SO;
   }
 
-  SolverOptions(AffineVariationalInequalities* vi, AVI_SOLVER id)
+  _SolverOptions(AffineVariationalInequalities* vi, AVI_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -385,7 +385,7 @@
   //   return BOOST_PP_CAT(FE_SWIG_INTERNAL_MEMBER,SolverOptions_makeSolverOptions)(NULL, fcp, id);
   // }
 
-  ~SolverOptions()
+  ~_SolverOptions()
     {
       deleteSolverOptions($self);
       free($self);
@@ -776,6 +776,11 @@
 %typemap(in, numinputs=0) (FischerBurmeisterFun3x3Ptr computeACFun3x3) () {
   // Callback (see SolverOptions.i) needed here
   $1 = &frictionContact3D_FischerBurmeisterFunctionGenerated;
+ }
+
+%typemap(in, numinputs=0) (AlartCurnierFun3x3Ptr computeACFun3x3) () {
+  // Callback (see SolverOptions.i) needed here
+  $1 = &frictionContact3D_AlartCurnierFunctionGenerated;
  }
 
 %include "FrictionContact3D_Solvers.h"
