@@ -7,6 +7,7 @@ before_script:
   - sudo apt-get update -q
   - sudo apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-py make g++ git gccxml python-pygccxml python-lxml swig2.0
   - ./Build/ci-scripts/gcc-release-build $TRAVIS_BUILD_DIR
+  - cd $TRAVIS_BUILD_DIR/build-dir
 
 script:
   - time make -ik
