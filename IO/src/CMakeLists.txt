@@ -124,7 +124,7 @@ SET(SiconosIO_LINKER_LANGUAGE CXX)
 IF(WITH_SERIALIZATION)
   IF(WITH_GENERATION)
 
-    FILE(REMOVE SiconosFullGenerated.hpp)
+    FILE(REMOVE ${CMAKE_BINARY_DIR}/src/SiconosFullGenerated.hpp)
 
     # header generation
     SET(GENERATED_TARGETS --targets=Kernel)
