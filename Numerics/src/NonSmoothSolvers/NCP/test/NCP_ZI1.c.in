@@ -185,8 +185,9 @@ int main(void)
 
       if (info > 0)
       {
-        printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
+        printf("step %d, iter = %d, error = %le, info = %d\n", k, options.iparam[1], options.dparam[1], info);
         printf("NCP_ZI1 with solver @SOLVER_ID@ failed completly\n");
+        printf("NCP_ZI1 failure at xk[0] =  %.*e; xk[1] =  %.*e; xk[2] =  %.*e; xk[3] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1],  DECIMAL_DIG, xk[2],  DECIMAL_DIG, xk[3]);
       }
 
     }

@@ -26,17 +26,17 @@
 #ifdef HAVE_PATHFERRIS
 
 #include "SimpleLCP.h"
-#include "include/MCP_Interface.h"
+#include "InterfaceToPathFerris/include/MCP_Interface.h"
 
-#include "include/Path.h"
-#include "include/PathOptions.h"
+#include "InterfaceToPathFerris/include/Path.h"
+#include "InterfaceToPathFerris/include/PathOptions.h"
 
-#include "include/Error.h"
-#include "include/Macros.h"
-#include "include/Memory.h"
-#include "include/Output.h"
-#include "include/Options.h"
-#include "include/Output_Interface.h"
+#include "InterfaceToPathFerris/include/Error.h"
+#include "InterfaceToPathFerris/include/Macros.h"
+#include "InterfaceToPathFerris/include/Memory.h"
+#include "InterfaceToPathFerris/include/Output.h"
+#include "InterfaceToPathFerris/include/Options.h"
+#include "InterfaceToPathFerris/include/Output_Interface.h"
 typedef struct
 {
   int variables;
@@ -466,7 +466,9 @@ void SimpleLCP(int variables,
   install_interface(m);
 
   Options_Read(o, "path.opt");
+  Options_SetDouble(o, "con_tol", 1e-10);
   Options_Display(o);
+
 
   info.generate_output = Output_Log | Output_Status | Output_Listing;
   info.use_start = True;
@@ -492,7 +494,7 @@ void SimpleLCP(int variables,
 }
 #else
 
-#include "include/Types.h"
+#include "InterfaceToPathFerris/include/Types.h"
 
 void SimpleLCP(int variables,
                int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,

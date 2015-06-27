@@ -26,6 +26,7 @@
 char SICONOS_NCP_NEWTON_FBLSA_STR[] = "NCP Newton FBLSA";
 char SICONOS_NCP_NEWTON_MINFBLSA_STR[] = "NCP Newton minFBLSA";
 char SICONOS_NCP_PATHSEARCH_STR[] = "NCP Path search";
+char SICONOS_NCP_PATH_STR[] = "NCP PATH";
 
 int ncp_driver(NCP_struct* problem, double *z , double *F, SolverOptions* options,  NumericsOptions* global_options)
 {
@@ -51,6 +52,9 @@ int ncp_driver(NCP_struct* problem, double *z , double *F, SolverOptions* option
     break;
   case SICONOS_NCP_PATHSEARCH: // pathsearch method
     ncp_pathsearch(problem, z, F, &info, options);
+    break;
+  case SICONOS_NCP_PATH: // PATH method
+    ncp_path(problem, z, F, &info, options);
     break;
   default:
     fprintf(stderr, "ncp_driver error: unknown solver id: %d\n", options->solverId);

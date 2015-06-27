@@ -31,7 +31,8 @@ enum VI_SOLVER
   SICONOS_VI_FPP = 1001,
   SICONOS_VI_HP = 1002,
   SICONOS_VI_BOX_QI = 1020,
-  SICONOS_VI_BOX_AVI_LSA = 1021
+  SICONOS_VI_BOX_AVI_LSA = 1021,
+  SICONOS_VI_BOX_PATH = 1022
 };
 
 extern char *  SICONOS_VI_EG_STR ;
@@ -39,5 +40,6 @@ extern char *  SICONOS_VI_FPP_STR ;
 extern char *  SICONOS_VI_HP_STR ;
 extern char *  SICONOS_VI_BOX_QI_STR ;
 extern char *  SICONOS_VI_BOX_AVI_LSA_STR ;
+extern char *  SICONOS_VI_BOX_PATH_STR ;
 
 #endif

@@ -23,7 +23,7 @@
 #include "LCP_Solvers.h"
 
 #ifdef HAVE_PATHFERRIS
-#include "InterfaceToPathFerris/SimpleLCP.h"
+#include "SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 
 void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)

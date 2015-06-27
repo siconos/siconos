@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "NCP_Path.h"
 #include "NCP_FixedP.h"
 #include "NonSmoothNewton.h"
 #include "FrictionContact3D_Solvers.h"

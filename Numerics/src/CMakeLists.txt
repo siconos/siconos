@@ -38,13 +38,14 @@ SET(SiconosNumerics_DIRS
   SOL/lumod-c
   utils
   utils/BlasLapackInterfaces
+  utils/InterfaceToPathFerris/include
+  utils/InterfaceToPathFerris/interface
   NonSmoothTools
   NonSmoothSolvers
   NonSmoothSolvers/AVI
   NonSmoothSolvers/LCP
   NonSmoothSolvers/MLCP
   NonSmoothSolvers/LinearSystem
-  NonSmoothSolvers/InterfaceToPathFerris
   NonSmoothSolvers/QP
   NonSmoothSolvers/Relay
   NonSmoothSolvers/FrictionContact
@@ -303,7 +304,7 @@ IF(WITH_TESTING)
   # those test cannot be solved with Lemke-based solvers (CPS_3 is for Lemke-Howson)
   SET_LCP_TEST_AS_FAILED("CPS_3" "LEMKE;AVI_CAOFERRIS;PIVOT;PIVOT_LUMOD;PATHSEARCH")
 
-  # PSD matrices and those algo seems not to be a good mix
+  # PSD matrices and those algo does not seem to be a good idea
   SET_LCP_TEST_AS_FAILED("CPS_2;CPS_3" "NSQP;RPGS")
 
   # lcp_mmc is of size 26, way too much for enum
@@ -323,6 +324,13 @@ IF(WITH_TESTING)
   NEW_LCP_TEST(SICONOS_LCP_LEMKE lcp_tobenna.dat)
   NEW_LCP_TEST(SICONOS_LCP_PIVOT lcp_tobenna.dat)
   NEW_LCP_TEST(SICONOS_LCP_PIVOT_LUMOD lcp_tobenna.dat)
+
+  IF(PATHFERRIS_FOUND)
+   NEW_LCP_TEST(SICONOS_LCP_PATH lcp_tobenna.dat)
+  ENDIF(PATHFERRIS_FOUND)
+  IF(HAVE_GAMS_C_API)
+   NEW_LCP_TEST(SICONOS_LCP_GAMS lcp_tobenna.dat)
+  ENDIF(HAVE_GAMS_C_API)
 
   NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
 
@@ -389,6 +397,9 @@ IF(WITH_TESTING)
 
   BEGIN_TEST(NonSmoothSolvers/NCP/test)
   SET(SICONOS_NCP_SOLVERS "NEWTON_FBLSA;NEWTON_MINFBLSA;PATHSEARCH")
+  IF(PATHFERRIS_FOUND)
+    LIST(APPEND SICONOS_NCP_SOLVERS "PATH")
+  ENDIF(PATHFERRIS_FOUND)
   SET(SICONOS_NCP_TEST_PROBLEMS "NCP_ZI1;NCP_ZIT1")
   FOREACH(_PB ${SICONOS_NCP_TEST_PROBLEMS})
    FOREACH(_SOLVER ${SICONOS_NCP_SOLVERS})
@@ -736,6 +747,10 @@ ENDIF(MUMPS_FOUND)
   NEW_TEST(VI_testFC3D3 VI_testFC3D3.c)
 
   SET(SICONOS_VI_SOLVERS "BOX_QI;BOX_AVI_LSA")
+  IF(PATHFERRIS_FOUND)
+    LIST(APPEND SICONOS_VI_SOLVERS "BOX_PATH")
+  ENDIF(PATHFERRIS_FOUND)
+
   SET(SICONOS_VI_TEST_PROBLEMS "VI_ZI1;VI_ZIT1")
   FOREACH(_PB ${SICONOS_VI_TEST_PROBLEMS})
    FOREACH(_SOLVER ${SICONOS_VI_SOLVERS})

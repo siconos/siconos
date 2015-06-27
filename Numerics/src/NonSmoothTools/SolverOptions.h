@@ -218,6 +218,9 @@ extern char * SICONOS_NUMERICS_PROBLEM_FC3D_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_VI_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_AVI_STR;
 
+
+#include "SolverOptions_helpers.h"
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

@@ -141,6 +141,16 @@ extern "C"
    */
   void vi_box_AVI_extra_SolverOptions(SolverOptions* options);
 
+  /** Solver for box constrainted VI using PATH.
+   * \param problem the variational inequality problem to solve
+   * \param[in,out] z as input, the initial guess; as output the solution if
+   * the algorithm is successful
+   * \param[in,out] F value of the function
+   * \param info 0 if a solution is found
+   * \param options the solver options
+   */
+  void vi_box_path(VariationalInequality* problem, double *z, double* F, int *info , SolverOptions* options);
+
   /**  set the default solver parameters and perform memory allocation for a VI
    * solver
    * \param options the SolverOptions to set

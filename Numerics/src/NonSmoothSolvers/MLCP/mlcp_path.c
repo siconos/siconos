@@ -24,7 +24,7 @@
 #include <math.h>
 
 #ifdef HAVE_PATHFERRIS
-#include "InterfaceToPathFerris/SimpleLCP.h"
+#include "InterfaceToPathFerris/interface/SimpleLCP.h"
 #endif
 /*
 Warning: this function requires MLCP with M and q, not (A,B,C,D).

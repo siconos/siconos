@@ -24,7 +24,7 @@
 #include "relay_cst.h"
 
 #ifdef HAVE_PATHFERRIS
-#include "InterfaceToPathFerris/SimpleLCP.h"
+#include "InterfaceToPathFerris/interface/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 
 void relay_path(RelayProblem* problem, double *z, double *w, int *info , SolverOptions* options)
@@ -136,7 +136,7 @@ int relay_path_setDefaultSolverOptions(SolverOptions* options)
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
-  options->dparam[0] = 1e-6;
+  options->dparam[0] = 1e-8;
   options->dparam[1] = 1.0;
 #endif /*HAVE_PATHFERRIS*/
   return 0;

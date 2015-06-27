@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "NCP_Path.h"
 #include "NonSmoothNewton.h"
 #include "FrictionContact3D_Solvers.h"
 #include "SiconosBlas.h"
@@ -26,21 +25,20 @@
 #include <stdio.h>
 #include "Friction_cst.h"
 
+#include "PathAlgebra.h"
+#include "NonlinearComplementarityProblem.h"
+
+#include "NCP_Solvers.h"
+
 /* Pointer to function used to update the solver, to formalize the local problem for example. */
 typedef void (*UpdateSolverPtr)(int, double*);
 
 
-static FuncEvalPtr F = NULL;
-static JacEvalPtr jacobianF = NULL;
-static UpdateSolverPtr updateSolver = NULL;
-static PostSolverPtr postSolver = NULL;
-static FreeSolverPtr freeSolver = NULL;
 /* size of a block */
-static int Fsize;
 
 /** writes \f$ F(z) \f$ using Glocker formulation
  */
-int F_GlockerPath(int sizeF, double* reaction, double* FVector)
+void F_GlockerPath(void* env, int sizeF, double* reaction, double* FVector)
 {
   /* Glocker formulation */
   int up2Date = 0;
@@ -53,12 +51,11 @@ int F_GlockerPath(int sizeF, double* reaction, double* FVector)
   /* TMP COPY: review memory management for FGlocker ...*/
   cblas_dcopy(sizeF , FGlocker , 1, FVector , 1);
   FGlocker = NULL;
-  return 1;
 }
 
 /** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister function.
  */
-int jacobianF_GlockerPath(int sizeF, int nnz, double* reaction, int* col_start, int* col_len, int* row, double* jacobianFMatrix)
+void jacobianF_GlockerPath(void* env, int sizeF, double* reaction, double* jacobianFMatrix)
 {
   int up2Date = 0;
   /* Glocker formulation */
@@ -69,12 +66,8 @@ int jacobianF_GlockerPath(int sizeF, int nnz, double* reaction, int* col_start, 
    the present file.
   */
 
-  /* Write jacobianFGlocker in a Path-Sparse format */
-  convertToPathSparse(sizeF, sizeF, jacobianFGlocker, col_start, col_len, row, jacobianFMatrix);
-
   FGlocker = NULL;
   jacobianFGlocker = NULL;
-  return 1;
 }
 
 
@@ -88,13 +81,7 @@ void frictionContact3D_Path_initialize(FrictionContactProblem* problem, Friction
   /* Glocker formulation */
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBPATH)
   {
-    Fsize = 5;
     NCPGlocker_initialize(problem, localproblem);
-    F = &F_GlockerPath;
-    jacobianF = &jacobianF_GlockerPath;
-    /*    updateSolver = &NCPGlocker_update; */
-    postSolver = &NCPGlocker_post;
-    freeSolver = &NCPGlocker_free;
   }
   else
   {
@@ -105,14 +92,18 @@ void frictionContact3D_Path_initialize(FrictionContactProblem* problem, Friction
 
 int frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
 {
-  int * iparam = options->iparam;
-  double * dparam = options->dparam;
 
+  NonlinearComplementarityProblem NCP_struct = {
+    5,
+    &F_GlockerPath,
+    &jacobianF_GlockerPath,
+    NULL,
+    NULL
+  };
 
-  /*   (*updateSolver)(contact, reaction); */
-
-  double * reactionBlock = reaction;
-  int info = NCP_Path(Fsize, reactionBlock, F, jacobianF, iparam, dparam);
+  double Fvec[5];
+  int info;
+  ncp_path(&NCP_struct, reaction, Fvec, &info, options);
   if (info > 0)
   {
     fprintf(stderr, "Numerics, FrictionContact3D_Path failed");
@@ -124,11 +115,7 @@ int frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double*
 
 void frictionContact3D_Path_free()
 {
-  F = NULL;
-  jacobianF = NULL;
-  updateSolver = NULL;
-  postSolver = NULL;
-  (*freeSolver)();
+  NCPGlocker_free();
 }
 
 void frictionContact3D_Path_computeError(int n, double* velocity, double* reaction, double * error)

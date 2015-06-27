@@ -41,7 +41,6 @@
 */
 
 #include "SparseBlockMatrix.h"
-#include "NCP_Path.h"
 #include "NCP_FixedP.h"
 
 #include "NumericsConfig.h"
@@ -95,6 +94,15 @@ extern "C"
    * \param options struct used to specify the solver parameters
    */
    void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , SolverOptions* options);
+
+  /** NCP Solver using the PATH solver
+   * \param problem the formalization of the NCP problem
+   * \param[in,out] z on input, initial guess; on output the solution
+   * \param F the value of the function at the solution
+   * \param info 0 if everything worked
+   * \param options struct used to specify the solver parameters
+   */
+   void ncp_path(NCP_struct* problem, double* z, double* F, int *info , SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

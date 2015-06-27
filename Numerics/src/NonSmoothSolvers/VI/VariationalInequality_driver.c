@@ -106,6 +106,11 @@ int variationalInequality_driver(VariationalInequality* problem,
     vi_box_AVI_LSA(problem, x, w, &info, options);
     break;
   }
+  case SICONOS_VI_BOX_PATH:
+  {
+    vi_box_path(problem, x, w, &info, options);
+    break;
+  }
   default:
   {
     fprintf(stderr, "Numerics, variationalInequality_driver failed. Unknown solver.\n");

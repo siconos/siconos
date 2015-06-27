@@ -143,4 +143,6 @@ DEBUG_EXPR_WE(for (unsigned i = 0; i < size; ++i) \
 #define DEBUG_PRINT_VEC_INT(V, size) DEBUG_PRINT_VEC_INT_STR(#V, V, size)
 
 
+#define DEBUG_OR_VERBOSE(X) if (verbose > 0) { X; } else { DEBUG_EXPR_WE(X); }
+
 #endif

@@ -49,7 +49,7 @@
 #ifndef SIMPLELCP_H
 #define SIMPLELCP_H
 
-#include "include/Types.h"
+#include "InterfaceToPathFerris/include/Types.h"
 /*because libpath46.so*/
 const unsigned short int *__ctype_b;
 const __int32_t *__ctype_tolower ;
