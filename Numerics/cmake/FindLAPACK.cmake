@@ -276,12 +276,17 @@ if(NOT LAPACK_FOUND)
     if((NOT LAPACK_LIBRARIES)
 	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "lapacke")))
       message(STATUS "Try to find a generic lapacke ...")
+      if(LAPACKE_NAME)
+	message(STATUS "Using user-provided name ${LAPACKE_NAME}")
+      else(LAPACKE_NAME)
+	set(LAPACKE_NAME "lapacke")
+      endif(LAPACKE_NAME)
       check_lapack_libraries(
 	LAPACK_LIBRARIES
 	LAPACKE
 	cheev
 	""
-	"lapacke;lapack"
+	"${LAPACKE_NAME};lapack"
 	"${BLAS_LIBRARIES}"
 	"")
       if (LAPACK_LIBRARIES)

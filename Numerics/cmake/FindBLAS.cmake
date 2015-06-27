@@ -220,14 +220,19 @@ if(NOT BLAS_FOUND)
   
   ## OpenBLAS ##
   if((NOT BLAS_LIBRARIES)
-      AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "openblas")))
+    AND ((NOT WITH_BLAS) OR (WITH_BLAS MATCHES "openblas")))
+    if(WITH_BLAS MATCHES "openblas")
+      set(OPENBLAS_LIB_NAME ${WITH_BLAS})
+    else()
+      set(OPENBLAS_LIB_NAME "openblas")
+    endif()
     message(STATUS "Try to find blas in openblas ...")
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "openblas"
+      "${OPENBLAS_LIB_NAME}"
       "")
     if(BLAS_LIBRARIES)
       set(WITH_BLAS "openblas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
