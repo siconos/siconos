@@ -218,6 +218,7 @@ int lcp_test_function(FILE * f, int solverId)
   }
   fillParamWithRespectToSolver(options, solverId, problem);
 
+#ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)
   {
     options->solverParameters = malloc(sizeof(SN_GAMSparams));
@@ -225,6 +226,7 @@ int lcp_test_function(FILE * f, int solverId)
     GP->model_dir = GAMS_MODELS_SOURCE_DIR;
     GP->gams_dir = GAMS_DIR;
   }
+#endif
 
   options->isSet = 1;
   options->filterOn = 1;
@@ -295,6 +297,8 @@ int lcp_test_function_SBM(FILE * f, int solverId)
   options->internalSolvers->solverId = solverId;
 
   fillParamWithRespectToSolver_SBM(options->internalSolvers, solverId, problem);
+
+#ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)
   {
     options->internalSolvers->solverParameters = malloc(sizeof(SN_GAMSparams));
@@ -302,7 +306,7 @@ int lcp_test_function_SBM(FILE * f, int solverId)
     GP->model_dir = GAMS_MODELS_SOURCE_DIR;
     GP->gams_dir = GAMS_DIR;
   }
-
+#endif
 
 
 
@@ -328,12 +332,13 @@ int lcp_test_function_SBM(FILE * f, int solverId)
   free(w);
   // info = linearComplementarity_deleteDefaultSolverOptions(&options,solvername);
 
+#ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)
   {
     free(options->solverParameters);
     options->solverParameters = NULL;
   }
-
+#endif
 
   deleteSolverOptions(options);
   free(options);
