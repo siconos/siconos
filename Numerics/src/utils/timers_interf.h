@@ -33,8 +33,8 @@
 
 #define HAVE_FFTW_CYCLE_H
 
-#ifndef _BSD_SOURCE
-#define _BSD_SOURCE
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
 #endif
 
 #ifdef WITH_TIMERS
