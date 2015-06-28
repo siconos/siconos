@@ -135,6 +135,11 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
     options->solverId = SICONOS_LCP_PATHSEARCH;
     break;
   }
+  case SICONOS_LCP_GAMS:
+  {
+    set_SolverOptions(options, SICONOS_LCP_GAMS);
+    info = 0;
+  }
   default:
   {
     numericsError("linearComplementarity_setDefaultSolverOptions", "Unknown Solver");

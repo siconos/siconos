@@ -653,6 +653,19 @@ extern "C"
    */
   void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
+  /** lcp_gams uses the solver provided by GAMS \n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   * 0 : convergence\n
+   * 1 : iter = itermax\n
+   * \param[in,out] options structure used to define the solver and its parameters.
+   *
+   *\author Olivier Huber
+   */
+  void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param options the pointer to the array of options to set
   */

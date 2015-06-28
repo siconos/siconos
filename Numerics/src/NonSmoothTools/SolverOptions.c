@@ -437,6 +437,16 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     options->iparam[SICONOS_IPARAM_PIVOT_RULE] = SICONOS_LCP_PIVOT_LEMKE;
     break;
 
+  case SICONOS_LCP_GAMS:
+  {
+    /* TODO do something about GAMS dir */
+    iSize = 2;
+    dSize = 2;
+    iter_max = 10000;
+    tol = 1e-12;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    break;
+  }
 
   case SICONOS_NCP_PATH:
   case SICONOS_VI_BOX_PATH:

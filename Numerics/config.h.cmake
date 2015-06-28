@@ -35,4 +35,11 @@
 #cmakedefine HAS_LAPACK_DGESVD
 #cmakedefine HAS_LAPACK_DTRTRS
 #cmakedefine HAS_LAPACK_DGELS
+
+// Gams stuff
+#cmakedefine GAMS_MODELS_SOURCE_DIR "@GAMS_MODELS_SOURCE_DIR@"
+#cmakedefine GAMS_MODELS_SHARE_DIR "@GAMS_MODELS_SHARE_DIR@"
+#cmakedefine GAMS_DIR "@GAMS_DIR@"
+#cmakedefine HAVE_GAMS_C_API
+
 #endif

@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "lcp_test_function.h"
+#include "GAMSlink.h"
 
 
 void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearComplementarityProblem* problem)
@@ -39,6 +40,7 @@ void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearCo
   case SICONOS_LCP_MURTY:
   case SICONOS_LCP_PATHSEARCH:
   case SICONOS_LCP_AVI_CAOFERRIS:
+  case SICONOS_LCP_GAMS:
   case SICONOS_LCP_NEWTONMIN:
   case SICONOS_LCP_NEWTON_FBLSA:
   case SICONOS_LCP_NEWTON_MINFBLSA:
@@ -216,6 +218,14 @@ int lcp_test_function(FILE * f, int solverId)
   }
   fillParamWithRespectToSolver(options, solverId, problem);
 
+  if (solverId == SICONOS_LCP_GAMS)
+  {
+    options->solverParameters = malloc(sizeof(SN_GAMSparams));
+    SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
+    GP->model_dir = GAMS_MODELS_SOURCE_DIR;
+    GP->gams_dir = GAMS_DIR;
+  }
+
   options->isSet = 1;
   options->filterOn = 1;
   double * z = (double *)calloc(problem->size, sizeof(double));
@@ -242,6 +252,11 @@ int lcp_test_function(FILE * f, int solverId)
   free(options->iparam);
   free(options->dparam);
 
+  if (solverId == SICONOS_LCP_GAMS)
+  {
+    free(options->solverParameters);
+    options->solverParameters = NULL;
+  }
 
   if (options->dWork != NULL) free(options->dWork);
   if (options->iWork != NULL) free(options->iWork);
@@ -280,18 +295,19 @@ int lcp_test_function_SBM(FILE * f, int solverId)
   options->internalSolvers->solverId = solverId;
 
   fillParamWithRespectToSolver_SBM(options->internalSolvers, solverId, problem);
-
-
-
-  double * z = (double *)malloc(problem->size * sizeof(double));
-  double * w = (double *)malloc(problem->size * sizeof(double));
-
-  for (i = 0; i < problem->size; i++)
+  if (solverId == SICONOS_LCP_GAMS)
   {
-    z[i] = 0.0;
-    w[i] = 0.0;
+    options->internalSolvers->solverParameters = malloc(sizeof(SN_GAMSparams));
+    SN_GAMSparams* GP = (SN_GAMSparams*)options->internalSolvers->solverParameters;
+    GP->model_dir = GAMS_MODELS_SOURCE_DIR;
+    GP->gams_dir = GAMS_DIR;
   }
 
+
+
+
+  double * z = (double *)calloc(problem->size, sizeof(double));
+  double * w = (double *)calloc(problem->size, sizeof(double));
 
   info = linearComplementarity_driver(problem, z , w, options, &global_options);
 
@@ -311,6 +327,12 @@ int lcp_test_function_SBM(FILE * f, int solverId)
   free(z);
   free(w);
   // info = linearComplementarity_deleteDefaultSolverOptions(&options,solvername);
+
+  if (solverId == SICONOS_LCP_GAMS)
+  {
+    free(options->solverParameters);
+    options->solverParameters = NULL;
+  }
 
 
   deleteSolverOptions(options);
