@@ -1,6 +1,7 @@
 
-/* random is POSIX but not C99...*/
-#define _DEFAULT_SOURCE
+/* random is POSIX but not C99...
+ * we don't define _BSD_SOURCE but rather _XOPEN_SOURCE */
+#define _XOPEN_SOURCE 700
 
 #include <stdlib.h>
 #include <stdio.h>

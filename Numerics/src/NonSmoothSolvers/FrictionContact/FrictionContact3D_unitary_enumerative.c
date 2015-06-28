@@ -17,21 +17,20 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+#define _XOPEN_SOURCE 700
 
-#define _DEFAULT_SOURCE
 
-
-#include "FrictionContact3D_Solvers.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
+
+#include "FrictionContact3D_Solvers.h"
 #include "Friction_cst.h"
 #include "op3x3.h"
 #include "FrictionContact3D_unitary_enumerative.h"
 //#define FC3D_UE_DEBUG
 
-#include <stdio.h>
-#include <math.h>
 #include "quartic.h"
 #include "projectionOnCone.h"
 #include "FrictionContact3D_compute_error.h"
