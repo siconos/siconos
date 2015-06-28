@@ -82,6 +82,8 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
+
+  problem->env = NULL;
   return 0;
 }
 
@@ -95,7 +97,7 @@ void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
   free(problem->mu);
   free(problem->q);
   free(problem->b);
+  if (problem->env) assert(0 && "freeGlobalFrictionContactProblem :: problem->env != NULL, don't know what to do");
   free(problem);
-  problem = NULL;
 
 }

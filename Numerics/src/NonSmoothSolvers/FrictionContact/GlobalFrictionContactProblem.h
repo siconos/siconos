@@ -132,6 +132,8 @@ typedef struct
   /** mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
   double* mu;
+  /** opaque environment, solver specific */
+  void* env; 
 } GlobalFrictionContactProblem;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
