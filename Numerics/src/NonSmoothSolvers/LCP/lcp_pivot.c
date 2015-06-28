@@ -556,6 +556,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
       else
       {
         DEBUG_PRINT("t variable leaving !\n");
+        DEBUG_PRINTF("t value : %le\n", mat[t_indx]);
         *info = LCP_PATHSEARCH_LEAVING_T;
         bck_drive = drive < dim + 1 ? drive - 1 : drive - dim - 2;
         options->dparam[2] = mat[t_indx];

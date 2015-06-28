@@ -66,19 +66,21 @@ extern "C"
   void setNumericsOptions(NumericsOptions* opt);
 
   /* message output and exit with error
-     \param name of the function where error occurs
-     \param output message
+     \param functionName name of the function where error occurs
+     \param message output message
   */
   void numericsError(char* functionName, char* message) NO_RETURN;
 
   /* message output without exit
-     \param name of the function where warning occurs
-     \param output message
+     \param functionName name of the function where warning occurs
+     \param message output message
   */
   void numericsWarning(char* functionName, char* message);
 
 
-  /* set default values for NumericsOptions */
+  /* set default values for NumericsOptions
+   * \param opt a NumericsOptions structure
+   */
   void setDefaultNumericsOptions(NumericsOptions* opt);
 
 #ifdef __cplusplus
