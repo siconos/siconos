@@ -25,36 +25,6 @@
 //#define OSNSM_DEBUG
 
 
-void OSNSMatrix::updateSizeAndPositions(unsigned dim,
-                                        SP::InteractionsGraph indexSet)
-{
-  // === Description ===
-
-  // For an interactionBlock (diagonal or extra diagonal) corresponding to
-  // an Interaction, we need to know the position of its first
-  // element in the full-matrix M. This position depends on the
-  // previous interactionBlocks sizes.
-  //
-  // Note FP: at the time positions are saved in the Interaction
-  // but this is wrong (I think) since it prevents the inter
-  // to be present in several different osns.
-  //
-
-  // Computes real size of the current matrix = sum of the dim. of all
-  // Interactionin indexSet
-  dim = 0;
-  InteractionsGraph::VIterator vd, vdend;
-  for (std11::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
-  {
-    assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
-
-    indexSet->bundle(*vd)->setAbsolutePosition(dim); 
-    dim += (indexSet->bundle(*vd)->nonSmoothLaw()->size());
-
-    assert(indexSet->bundle(*vd)->absolutePosition() < dim);
-  }
-}
-
 // Default constructor: empty matrix, default storage
 // No allocation for _M1 or _M2
 OSNSMatrix::OSNSMatrix():
@@ -132,6 +102,38 @@ OSNSMatrix::~OSNSMatrix()
 {
 }
 
+unsigned OSNSMatrix::updateSizeAndPositions(SP::InteractionsGraph indexSet)
+{
+  // === Description ===
+
+  // For an interactionBlock (diagonal or extra diagonal) corresponding to
+  // an Interaction, we need to know the position of its first
+  // element in the full-matrix M. This position depends on the
+  // previous interactionBlocks sizes.
+  //
+  // Note FP: at the time positions are saved in the Interaction
+  // but this is wrong (I think) since it prevents the inter
+  // to be present in several different osns.
+  //
+
+  // Computes real size of the current matrix = sum of the dim. of all
+  // Interactionin indexSet
+  unsigned dim = 0;
+  InteractionsGraph::VIterator vd, vdend;
+  for (std11::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
+  {
+    assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
+
+    indexSet->bundle(*vd)->setAbsolutePosition(dim); 
+    dim += (indexSet->bundle(*vd)->nonSmoothLaw()->size());
+
+    assert(indexSet->bundle(*vd)->absolutePosition() < dim);
+  }
+
+  return dim;
+}
+
+
 unsigned int OSNSMatrix::getPositionOfInteractionBlock(Interaction& inter) const
 {
   // Note FP: I think the return value below is not the right one :
@@ -152,7 +154,7 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
   if (update)
   {
     // Computes _dimRow and interactionBlocksPositions according to indexSet
-    updateSizeAndPositions(_dimColumn, indexSet);
+    _dimColumn = updateSizeAndPositions(indexSet);
     _dimRow = _dimColumn;
   }
 

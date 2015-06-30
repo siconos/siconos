@@ -43,8 +43,7 @@ OSNSMatrixProjectOnConstraints::~OSNSMatrixProjectOnConstraints()
 {
 }
 
-void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned dim,
-    SP::InteractionsGraph indexSet)
+unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(SP::InteractionsGraph indexSet)
 {
   // === Description ===
 
@@ -59,7 +58,7 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned dim,
 
   // Computes real size of the current matrix = sum of the dim. of all
   // Interactionin indexSet
-  dim = 0;
+  unsigned dim = 0;
   InteractionsGraph::VIterator vd, vdend;
 #ifdef OSNSMPROJ_DEBUG
   std::cout << "indexSet :" << indexSet << std::endl;
@@ -85,6 +84,8 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned dim,
     dim += nslawSize;
     assert(indexSet->bundle(*vd)->absolutePositionProj() < dim);
   }
+
+  return dim;
 }
 
 void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool update)
@@ -94,7 +95,7 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
   if (update)
   {
     // Computes _dimRow and interactionBlocksPositions according to indexSet
-    updateSizeAndPositions(_dimColumn, indexSet);
+    _dimColumn = updateSizeAndPositions(indexSet);
     _dimRow = _dimColumn;
   }
 

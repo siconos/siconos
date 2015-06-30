@@ -99,7 +99,7 @@ protected:
    */
   OSNSMatrixProjectOnConstraints() {};
 
-  virtual void updateSizeAndPositions(unsigned dim, SP::InteractionsGraph indexSet);
+  virtual unsigned updateSizeAndPositions(SP::InteractionsGraph indexSet);
 public:
 
 

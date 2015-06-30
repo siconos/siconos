@@ -120,10 +120,10 @@ protected:
   SP::BlockCSRMatrix _M2;
 
   /** For each Interaction in the graph, compute its absolute position
-   * \param[out] dim the dimension of the problem (or size of the matrix), computed as the sum of the nslaw of all the Interaction in indexSet
      \param indexSet the index set of the active constraints
+   * \return the dimension of the problem (or size of the matrix), computed as the sum of the nslaw of all the Interaction in indexSet
   */
-  virtual void updateSizeAndPositions(unsigned dim, SP::InteractionsGraph indexSet);
+  virtual unsigned updateSizeAndPositions(SP::InteractionsGraph indexSet);
 
 private:
   /** Private copy constructor => no copy nor pass by value */
