@@ -36,8 +36,8 @@ double*, ublas::basic_row_major<unsigned int>, 0, ublas::unbounded_array<std::si
 TYPEDEF_SPTR(CompressedRowMat)
 TYPEDEF_SPTR(SparseBlockStructuredMatrix)
 
-/** Definition of a compressed sparse row matrix of SiconosMatrix*,
- * used in OneStepNSProblem to store matrix M.
+/** Definition of a compressed sparse row matrix of SiconosMatrix,
+ * used in OneStepNSProblem to store the M matrix.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.

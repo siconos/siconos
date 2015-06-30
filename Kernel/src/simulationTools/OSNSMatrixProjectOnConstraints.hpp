@@ -75,12 +75,12 @@
  *
  * Note: at the time the available storage types are:
  *
- *  - full matrix in a SiconosMatrix (storageType = 0). In this case,
+ *  - full matrix in a SiconosMatrix (_storageType = 0). In this case,
  *  for each call to fill(), the SiconosMatrix M is resized
  *  according  to the sizes of the Interaction present in indexSet and then
  *  all the required interactionBlocks mij are COPIED into M.
  *
- *  - Sparse Block Storage (storageType = 1): corresponds to
+ *  - Sparse Block Storage (_storageType = 1): corresponds to
  *  SparseBlockStructuredMatrix structure of Numerics. Only non-null
  *  interactionBlocks are saved in the matrix M and there is no copy of
  *  sub-interactionBlocks, only links thanks to pointers.
@@ -99,7 +99,7 @@ protected:
    */
   OSNSMatrixProjectOnConstraints() {};
 
-  virtual void updateSizeAndPositions(unsigned int& dim, SP::InteractionsGraph indexSet);
+  virtual void updateSizeAndPositions(unsigned dim, SP::InteractionsGraph indexSet);
 public:
 
 

@@ -81,12 +81,12 @@ enum SICONOS_STORAGE_TYPE
  *
  * Note: at the time the available storage types are:
  *
- *  - full matrix in a SiconosMatrix (storageType = 0). In this case,
+ *  - full matrix in a SiconosMatrix (_storageType = 0). In this case,
  *  for each call to fill(), the SiconosMatrix M is resized
  *  according  to the sizes of the Interaction present in indexSet and then
  *  all the required interactionBlocks mij are COPIED into M.
  *
- *  - Sparse Block Storage (storageType = 1): corresponds to
+ *  - Sparse Block Storage (_storageType = 1): corresponds to
  *  SparseBlockStructuredMatrix structure of Numerics. Only non-null
  *  interactionBlocks are saved in the matrix M and there is no copy of
  *  sub-interactionBlocks, only links thanks to pointers.
@@ -101,29 +101,29 @@ protected:
 
 
   /** number of rows */
-  unsigned int dimRow;
+  unsigned int _dimRow;
 
   /** number of columns */
-  unsigned int dimColumn;
+  unsigned int _dimColumn;
 
   /** Storage type used for the present matrix */
-  int storageType;
+  int _storageType;
 
   /** Numerics structure to be filled  */
-  SP::NumericsMatrix numericsMat;
+  SP::NumericsMatrix _numericsMat;
 
-  /** Matrix used for default storage type (storageType = 0) */
-  SP::SiconosMatrix M1;
+  /** Matrix used for default storage type (_storageType = 0) */
+  SP::SiconosMatrix _M1;
 
   /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix
-      (storageType = 1) */
-  SP::BlockCSRMatrix M2;
+      (_storageType = 1) */
+  SP::BlockCSRMatrix _M2;
 
   /** For each Interaction in the graph, compute its absolute position
    * \param[out] dim the dimension of the problem (or size of the matrix), computed as the sum of the nslaw of all the Interaction in indexSet
      \param indexSet the index set of the active constraints
   */
-  virtual void updateSizeAndPositions(unsigned int& dim, SP::InteractionsGraph indexSet);
+  virtual void updateSizeAndPositions(unsigned dim, SP::InteractionsGraph indexSet);
 
 private:
   /** Private copy constructor => no copy nor pass by value */
@@ -140,13 +140,13 @@ public:
    */
   OSNSMatrix();
 
-  /** Constructor with dimRow. of the matrix
+  /** Constructor with _dimRow. of the matrix
    *   \param n size of the square matrix
    *   \param stor storage type (0:dense, 1:sparse interactionBlock)
    */
   OSNSMatrix(unsigned int n, int stor);
 
-  /** Constructor with dimRow and DimColumn of the matrix
+  /** Constructor with _dimRow and DimColumn of the matrix
    * \param n row sizes of the rectangle matrix
    * \param m column size of the rectangle matrix
    * \param stor storage type (0:dense, 1:sparse interactionBlock)
@@ -159,7 +159,7 @@ public:
    */
   OSNSMatrix(SP::InteractionsGraph indexSet, int stor);
 
-  /** Constructor with copy of a SiconosMatrix => storageType = 0
+  /** Constructor with copy of a SiconosMatrix => _storageType = 0
    * \param MSource matrix to be copied
    */
   OSNSMatrix(const SiconosMatrix& MSource);
@@ -173,7 +173,7 @@ public:
    */  
   inline unsigned int size() const
   {
-    return dimRow;
+    return _dimRow;
   };
 
   /** get dimension of the square matrix 
@@ -181,7 +181,7 @@ public:
    */
   inline unsigned int sizeColumn() const
   {
-    return dimColumn;
+    return _dimColumn;
   };
 
   /** get the type of storage for current matrix 
@@ -189,7 +189,7 @@ public:
    */
   inline int getStorageType() const
   {
-    return storageType;
+    return _storageType;
   };
 
   /** set which type of storage will be used for current matrix
@@ -197,7 +197,7 @@ public:
    */
   inline void setStorageType(int i)
   {
-    storageType = i;
+    _storageType = i;
   };
 
   /** get the absolute position of the interaction 
@@ -211,7 +211,7 @@ public:
    */
   inline SP::NumericsMatrix getNumericsMatrix()
   {
-    return numericsMat;
+    return _numericsMat;
   };
 
   /** get the matrix used for default storage
@@ -219,7 +219,7 @@ public:
    */
   inline SP::SiconosMatrix defaultMatrix()
   {
-    return M1;
+    return _M1;
   };
 
   /** fill the current class using an index set and a map of interactionBlocks
@@ -228,7 +228,7 @@ public:
    */
   virtual void fill(SP::InteractionsGraph indexSet, bool update = true);
 
-  /** fill the numerics structure numericsMatSparse using MBlockCSR */
+  /** fill the numerics structure _numericsMatSparse using MBlockCSR */
   void convert();
 
   /** display the current matrix

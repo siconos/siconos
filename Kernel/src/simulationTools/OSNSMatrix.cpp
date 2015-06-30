@@ -25,7 +25,7 @@
 //#define OSNSM_DEBUG
 
 
-void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
+void OSNSMatrix::updateSizeAndPositions(unsigned dim,
                                         SP::InteractionsGraph indexSet)
 {
   // === Description ===
@@ -56,74 +56,74 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
 }
 
 // Default constructor: empty matrix, default storage
-// No allocation for M1 or M2
+// No allocation for _M1 or _M2
 OSNSMatrix::OSNSMatrix():
-  dimRow(0),  dimColumn(0), storageType(0)
+  _dimRow(0),  _dimColumn(0), _storageType(0)
 {
-  numericsMat.reset(new NumericsMatrix);
+  _numericsMat.reset(new NumericsMatrix);
 }
 
 // Constructor with dimensions (one input: square matrix only)
 OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
-  dimRow(n),  dimColumn(n), storageType(stor)
+  _dimRow(n),  _dimColumn(n), _storageType(stor)
 {
   // Note:
 
-  // for storageType = 0 (dense) n represents the real dimRowension of
-  // the matrix and for sparse storage (storageType == 1) the number
+  // for _storageType = 0 (dense) n represents the real _dimRowension of
+  // the matrix and for sparse storage (_storageType == 1) the number
   // of interactionBlocks in a row or column.
 
-  if (storageType == 0)
+  if (_storageType == 0)
   {
     // A zero matrix M of size nXn is built.  interactionBlocksPositions
     // remains empty (=NULL) since we have no information concerning
     // the Interaction.
-    M1.reset(new SimpleMatrix(n, n));
+    _M1.reset(new SimpleMatrix(n, n));
   }
-  else // if(storageType == 1)
+  else // if(_storageType == 1)
   {
-    M2.reset(new BlockCSRMatrix(n));
+    _M2.reset(new BlockCSRMatrix(n));
   }
-  numericsMat.reset(new NumericsMatrix);
+  _numericsMat.reset(new NumericsMatrix);
 }
 
 OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
-  dimRow(n),  dimColumn(m), storageType(stor)
+  _dimRow(n),  _dimColumn(m), _storageType(stor)
 {
   // Note:
 
-  // for storageType = 0 (dense) n represents the real dimension of
-  // the matrix and for sparse storage (storageType == 1) the number
+  // for _storageType = 0 (dense) n represents the real dimension of
+  // the matrix and for sparse storage (_storageType == 1) the number
   // of interactionBlocks in a row or column.
 
-  if (storageType == 0)
+  if (_storageType == 0)
   {
     // A zero matrix M of size nXn is built.  interactionBlocksPositions
     // remains empty (=NULL) since we have no information concerning
     // the Interaction.
-    M1.reset(new SimpleMatrix(n, m));
+    _M1.reset(new SimpleMatrix(n, m));
   }
-  else // if(storageType == 1)
-    M2.reset(new BlockCSRMatrix(n));
+  else // if(_storageType == 1)
+    _M2.reset(new BlockCSRMatrix(n));
 
-  numericsMat.reset(new NumericsMatrix);
+  _numericsMat.reset(new NumericsMatrix);
 }
 
 // Basic constructor
 OSNSMatrix::OSNSMatrix(SP::InteractionsGraph indexSet, int stor):
-  dimRow(0), dimColumn(0), storageType(stor)
+  _dimRow(0), _dimColumn(0), _storageType(stor)
 {
-  numericsMat.reset(new NumericsMatrix);
+  _numericsMat.reset(new NumericsMatrix);
   fill(indexSet);
 }
 
 
 // construct by copy of SiconosMatrix
 OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
-  dimRow(MSource.size(0)), dimColumn(MSource.size(1)), storageType(0)
+  _dimRow(MSource.size(0)), _dimColumn(MSource.size(1)), _storageType(0)
 {
-  numericsMat.reset(new NumericsMatrix);
-  M1.reset(new SimpleMatrix(MSource));
+  _numericsMat.reset(new NumericsMatrix);
+  _M1.reset(new SimpleMatrix(MSource));
 }
 
 
@@ -151,25 +151,25 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
 
   if (update)
   {
-    // Computes dimRow and interactionBlocksPositions according to indexSet
-    updateSizeAndPositions(dimColumn, indexSet);
-    dimRow = dimColumn;
+    // Computes _dimRow and interactionBlocksPositions according to indexSet
+    updateSizeAndPositions(_dimColumn, indexSet);
+    _dimRow = _dimColumn;
   }
 
-  if (storageType == 0)
+  if (_storageType == 0)
   {
 
     // === Memory allocation, if required ===
     // Mem. is allocate only if !M or if its size has changed.
     if (update)
     {
-      if (! M1)
-        M1.reset(new SimpleMatrix(dimRow, dimColumn));
+      if (! _M1)
+        _M1.reset(new SimpleMatrix(_dimRow, _dimColumn));
       else
       {
-        if (M1->size(0) != dimRow || M1->size(1) != dimColumn)
-          M1->resize(dimRow, dimColumn);
-        M1->zero();
+        if (_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
+          _M1->resize(_dimRow, _dimColumn);
+        _M1->zero();
       }
     }
 
@@ -189,10 +189,10 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
       SP::Interaction inter = indexSet->bundle(*vi);
       pos = inter->absolutePosition();
 
-      std11::static_pointer_cast<SimpleMatrix>(M1)
+      std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(pos, pos, *indexSet->properties(*vi).block);
 #ifdef OSNSMPROJ_DEBUG
-      printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
+      printf("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
       printf("OSNSMatrix block: %i %i\n", indexSet->properties(*vi).block->size(0), indexSet->properties(*vi).block->size(1));
 #endif
     }
@@ -214,33 +214,33 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
       col = inter2->absolutePosition();
 
 
-      assert(pos < dimRow);
-      assert(col < dimColumn);
+      assert(pos < _dimRow);
+      assert(col < _dimColumn);
 
 #ifdef OSNSM_DEBUG
-      printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
+      printf("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
       printf("OSNSMatrix upper: %i %i\n", indexSet->properties(*ei).upper_block->size(0), indexSet->properties(*ei).upper_block->size(1));
       printf("OSNSMatrix lower: %i %i\n", indexSet->properties(*ei).lower_block->size(0), indexSet->properties(*ei).lower_block->size(1));
 #endif
 
       assert(indexSet->properties(*ei).lower_block);
       assert(indexSet->properties(*ei).upper_block);
-      std11::static_pointer_cast<SimpleMatrix>(M1)
+      std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *indexSet->properties(*ei).upper_block);
 
-      std11::static_pointer_cast<SimpleMatrix>(M1)
+      std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *indexSet->properties(*ei).lower_block);
     }
 
   }
-  else // if storageType == 1
+  else // if _storageType == 1
   {
-    if (! M2)
-      M2.reset(new BlockCSRMatrix(indexSet));
+    if (! _M2)
+      _M2.reset(new BlockCSRMatrix(indexSet));
     else
-      M2->fill(indexSet);
+      _M2->fill(indexSet);
   }
   if (update)
     convert();
@@ -250,38 +250,38 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
 // convert current matrix to NumericsMatrix structure
 void OSNSMatrix::convert()
 {
-  numericsMat->storageType = storageType;
-  numericsMat->size0 = dimRow;
-  numericsMat->size1 = dimColumn;
-  if (storageType == 0)
+  _numericsMat->storageType = _storageType;
+  _numericsMat->size0 = _dimRow;
+  _numericsMat->size1 = _dimColumn;
+  if (_storageType == 0)
   {
-    numericsMat->matrix0 = M1->getArray(); // Pointer link
-    // numericsMat->matrix1 = NULL; matrix1 is not set to NULL: we
+    _numericsMat->matrix0 = _M1->getArray(); // Pointer link
+    // _numericsMat->matrix1 = NULL; matrix1 is not set to NULL: we
     // keep previous allocation. May be usefull if we switch between
     // different storages during simu
   }
   else
   {
-    M2->convert();
-    numericsMat->matrix1 = &*M2->getNumericsMatSparse();
+    _M2->convert();
+    _numericsMat->matrix1 = &*_M2->getNumericsMatSparse();
   }
 }
 
 // Display data
 void OSNSMatrix::display() const
 {
-  if (storageType == 0)
+  if (_storageType == 0)
   {
     std::cout << "----- OSNS Matrix using default storage type for Numerics structure (SiconosMatrix -> double*)" <<std::endl;
-    if (! M1)
+    if (! _M1)
       std::cout << " matrix = NULL pointer" <<std::endl;
-    else M1->display();
+    else _M1->display();
   }
   else
   {
     std::cout << "----- OSNS Matrix using Sparse InteractionBlock storage type for Numerics (SparseBlockStructuredMatrix)" <<std::endl;
-    if (! M2)
+    if (! _M2)
       std::cout << " matrix = NULL pointer" <<std::endl;
-    else M2->display();
+    else _M2->display();
   }
 }

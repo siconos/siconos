@@ -43,7 +43,7 @@ OSNSMatrixProjectOnConstraints::~OSNSMatrixProjectOnConstraints()
 {
 }
 
-void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
+void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned dim,
     SP::InteractionsGraph indexSet)
 {
   // === Description ===
@@ -93,25 +93,25 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
 
   if (update)
   {
-    // Computes dimRow and interactionBlocksPositions according to indexSet
-    updateSizeAndPositions(dimColumn, indexSet);
-    dimRow = dimColumn;
+    // Computes _dimRow and interactionBlocksPositions according to indexSet
+    updateSizeAndPositions(_dimColumn, indexSet);
+    _dimRow = _dimColumn;
   }
 
-  if (storageType == 0)
+  if (_storageType == 0)
   {
 
     // === Memory allocation, if required ===
     // Mem. is allocate only if !M or if its size has changed.
     if (update)
     {
-      if (! M1)
-        M1.reset(new SimpleMatrix(dimRow, dimColumn));
+      if (! _M1)
+        _M1.reset(new SimpleMatrix(_dimRow, _dimColumn));
       else
       {
-        if (M1->size(0) != dimRow || M1->size(1) != dimColumn)
-          M1->resize(dimRow, dimColumn);
-        M1->zero();
+        if (_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
+          _M1->resize(_dimRow, _dimColumn);
+        _M1->zero();
       }
     }
 
@@ -135,10 +135,10 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
       SP::Interaction inter = indexSet->bundle(*vi);
       pos = inter->absolutePositionProj();
       assert(indexSet->blockProj[*vi]);
-      std11::static_pointer_cast<SimpleMatrix>(M1)
+      std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(pos, pos, *(indexSet->blockProj[*vi]));
 #ifdef OSNSMPROJ_DEBUG
-      printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
+      printf("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
       printf("OSNSMatrix block: %i %i\n", indexSet->blockProj[*vi]->size(0), indexSet->blockProj[*vi]->size(1));
 #endif
     }
@@ -161,31 +161,31 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
       col =  inter2->absolutePositionProj();//(*interactionBlocksPositions)[inter2];
 
 
-      assert(pos < dimRow);
-      assert(col < dimColumn);
+      assert(pos < _dimRow);
+      assert(col < _dimColumn);
 
 #ifdef OSNSMPROJ_DEBUG
-      printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
+      printf("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
       printf("OSNSMatrix upper: %i %i\n", (indexSet->upper_blockProj[*ei])->size(0), (indexSet->upper_blockProj[*ei])->size(1));
       printf("OSNSMatrix lower: %i %i\n", (indexSet->lower_blockProj[*ei])->size(0), (indexSet->upper_blockProj[*ei])->size(1));
 #endif
 
-      std11::static_pointer_cast<SimpleMatrix>(M1)
+      std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *(indexSet->upper_blockProj[*ei]));
 
-      std11::static_pointer_cast<SimpleMatrix>(M1)
+      std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *(indexSet->lower_blockProj[*ei]));
     }
 
   }
-  else // if storageType == 1
+  else // if _storageType == 1
   {
-    if (! M2)
-      M2.reset(new BlockCSRMatrix(indexSet));
+    if (! _M2)
+      _M2.reset(new BlockCSRMatrix(indexSet));
     else
-      M2->fill(indexSet);
+      _M2->fill(indexSet);
   }
   if (update)
     convert();
