@@ -55,9 +55,6 @@ ENDIF(WITH_BULLET)
 
 INCLUDE(SiconosCompilerFlags)
 
-compile_with(BLAS REQUIRED)
-compile_with(LAPACK REQUIRED)
-
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(SiconosKernel REQUIRED)
 
