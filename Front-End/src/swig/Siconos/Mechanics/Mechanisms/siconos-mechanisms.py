@@ -4,7 +4,6 @@ print('##################################################################')
 print('############## Siconos/Mechanics mechanisms module ###############')
 print('##################################################################')
 
-
 import numpy
 import array
 import os
@@ -47,6 +46,18 @@ except :
 exec(compile(open("bodydef.py").read(), "bodydef.py", 'exec'))
 print("siconos-mechanisms.py, info: bodydef.py loaded")
 
+try:
+    print(" run id: ", run_id )
+    os.mkdir(run_id)
+    os.chdir(run_id)
+    os.symlink(os.path.join('..','CAD'), 'CAD')
+    os.symlink(os.path.join('..','plugins'), 'plugins')
+    with_run_id = True
+
+except:
+    with_run_id = False
+
+
 if with3D:
     from OCC.BRepPrimAPI import *
     from OCC.gp import *
@@ -84,6 +95,9 @@ for idBody in range(NBBODIES):
     cadmbtb.CADMBTB_setShapeDParam(0,idBody,bodyTrans[idBody]) # visu
 
 #build dynamical systems
+if with_run_id:
+    plugin = os.path.join('..', plugin)
+
 print("User plugin : ", plugin)
 
 for idBody in range(NBBODIES):
@@ -151,6 +165,20 @@ if with3D:
                          # ord('E'): self._display.SetModeExactHLR,
                          # ord('F'): self._display.FitAll(
 ais_boxshp=None
+
+def remove_run_id_dir():
+
+    if with_run_id:
+        os.rename('simu.txt', os.path.join('..', 'simu-{0}.txt'.format(run_id)))
+        os.rename('siconos-mechanisms.hdf5', os.path.join('..', 'siconos-mechanisms-{0}.hdf5'.format(run_id)))
+        os.remove('CAD')
+        os.remove('plugins')
+        os.chdir('..')
+        os.removedirs(run_id)
+
+
+import atexit
+atexit.register(remove_run_id_dir)
 
 # Hdf5 IO setup
 with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
@@ -402,3 +430,5 @@ with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
         start_display()
     else:
         _run(stepNumber)
+
+
