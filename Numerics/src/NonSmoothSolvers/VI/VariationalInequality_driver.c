@@ -33,6 +33,7 @@ char *  SICONOS_VI_FPP_STR = "VI_FPP";
 char *  SICONOS_VI_HP_STR = "VI_HP";
 char *  SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-function";
 char *  SICONOS_VI_BOX_AVI_LSA_STR = "Box VI solver based on the Newton-Josephy method";
+char *  SICONOS_VI_BOX_PATH_STR = "Box VI solver based on PATH solver";
 
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
