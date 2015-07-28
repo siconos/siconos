@@ -24,6 +24,9 @@
 #ifndef SICONOSRESTART_HPP
 #define SICONOSRESTART_HPP
 
+#include <SiconosFwd.hpp>
+#include <string>
+
 namespace Siconos
 {
 

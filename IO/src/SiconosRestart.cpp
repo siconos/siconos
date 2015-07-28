@@ -38,10 +38,6 @@
 namespace Siconos
 {
 
-/** save Siconos model into a file
- *  \param model
- *  \param filename with extension : .xml, .bin
- */
   void save(SP::Model model, std::string filename)
   {
     boost::filesystem::path tempf =
@@ -101,7 +97,8 @@ namespace Siconos
   }
 }
 #else
-
+#include "SiconosRestart.hpp"
+#include <RuntimeException.hpp>
 namespace Siconos
 {
 

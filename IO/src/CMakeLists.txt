@@ -121,6 +121,8 @@ SET(SiconosIO_LINK_LIBRARIES ${_LL})
 
 SET(SiconosIO_LINKER_LANGUAGE CXX)
 
+SET(GENERATED_HEADER ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
+
 IF(WITH_SERIALIZATION)
   IF(WITH_GENERATION)
 
@@ -129,8 +131,6 @@ IF(WITH_SERIALIZATION)
     # header generation
     SET(GENERATED_TARGETS --targets=Kernel)
 
-    # overwrite the distributed one
-    SET(GENERATED_HEADER ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
     SET(GENERATED_DEPENDENCIES ${SiconosKernel_INCLUDE_DIRS}/SiconosKernel.hpp)
     SET(GENERATED_INCLUDES -I${SiconosNumerics_INCLUDE_DIRS}
       -I${SiconosKernel_INCLUDE_DIRS})
@@ -160,18 +160,17 @@ IF(WITH_SERIALIZATION)
 
   ENDIF()
 
-  # install the generated or distributed header
-  INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp DESTINATION include/Siconos/IO)
-
-  # add dependencies for header generation
-  ADD_CUSTOM_TARGET(SerializersGeneration ALL
-    DEPENDS ${GENERATED_HEADER})
-
-  SET(SiconosIO_SRCS SiconosRestart.cpp MechanicsIO.cpp)
-ELSE()
-  # do not compile serializers
-  SET(SiconosIO_SRCS MechanicsIO.cpp)
 ENDIF()  
+
+# install the generated or distributed header
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp DESTINATION include/Siconos/IO)
+
+# add dependencies for header generation
+ADD_CUSTOM_TARGET(SerializersGeneration ALL
+  DEPENDS ${GENERATED_HEADER})
+
+SET(SiconosIO_SRCS SiconosRestart.cpp MechanicsIO.cpp)
+
 
 # set library target
 LIBRARY_PROJECT_SETUP()
