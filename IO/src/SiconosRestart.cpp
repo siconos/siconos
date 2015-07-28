@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+#include "IOConfig.h"
+#ifdef WITH_SERIALIZATION
 #include "SiconosFull.hpp"
 #include "SiconosRestart.hpp"
 
@@ -98,3 +100,19 @@ namespace Siconos
     return model;
   }
 }
+#else
+
+namespace Siconos
+{
+
+  void save(SP::Model model, std::string filename)
+  {
+    RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
+  }
+
+  SP::Model load(std::string filename)
+  {
+    RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
+  }
+}
+#endif

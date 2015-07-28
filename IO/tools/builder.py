@@ -20,6 +20,7 @@
 # http://sourceforge.net/projects/pygccxml/
 
 import sys
+import os
 import getopt
 import re
 import itertools
@@ -31,26 +32,23 @@ myname = sys.argv[0]
 include_paths = []
 siconos_namespace = '::'
 
-
-def generated_file():
-    return '../src/SiconosFullGenerated.hpp'
-
-
 def usage():
     print('{0} [--namespace=<namespace>] -I<path> [-I<path> ...] \
                [--targets=<Mod1>[,Mod2[,...]]] \
+               [--output=<filename>] \
                header'.format(myname))
 
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'I:', ['help', 'namespace=',
-                                                    'targets='])
+                                                    'targets=', 'output='])
 except getopt.GetoptError as err:
     print(str(err))
     usage()
     sys.exit(2)
 
 targets = []
+generated_file = None
 
 for opt, arg in opts:
     if opt == '--targets':
@@ -62,7 +60,15 @@ for opt, arg in opts:
     if opt == '--help':
         usage()
         sys.exit(0)
+    if opt == '--output':
+        generated_file = arg
 
+if generated_file is None:
+    usage()
+    print('{0} --ouput option is mandatory.'.format(myname))
+    sys.exit(1)
+
+generated_header = os.path.splitext(os.path.basename(generated_file))[0]
 
 if len(args) != 0:
     usage()
@@ -140,12 +146,14 @@ typedef = dict()
 for t in global_ns.typedefs():
     typedef[str(t._type)] = name(t)
 
-with open(generated_file(), 'a') as dest_file:
+with open(generated_file, 'a') as dest_file:
 
     dest_file.write('// generated with the command : {0}\n'
                     .format(' '.join(sys.argv)))
-    dest_file.write('#ifndef SiconosFullGenerated_hpp\n')
-    dest_file.write('#define SiconosFullGenerated_hpp\n')
+    dest_file.write('#ifndef {0}_hpp\n'.format(generated_header))
+    dest_file.write('#define {0}_hpp\n'.format(generated_header))
+    dest_file.write('#include <IOConfig.h>\n'.format(generated_header))
+    dest_file.write('#ifdef WITH_SERIALIZATION\n'.format(generated_header))
 
     for header in all_headers:
         dest_file.write('#include "{0}"\n'.format(header))
@@ -223,4 +231,5 @@ with open(generated_file(), 'a') as dest_file:
                             .join(
                                 '  ar.register_type(static_cast<{0}*>(NULL));'
                                 .format(x) for x in with_base)))
-    dest_file.write('#endif')
+    dest_file.write('#endif\n')
+    dest_file.write('#endif\n')

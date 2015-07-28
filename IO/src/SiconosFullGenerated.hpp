@@ -1,6 +1,8 @@
-// generated with the command : /home/maurice/S/IO/tools/builder.py --targets=Mechanics,Kernel,Control -I/usr/local/include/Siconos/Numerics -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Mechanics -I/usr/local/include/Siconos/Control
+// generated with the command : /home/maurice/S/IO/tools/builder.py --targets=Mechanics,Kernel,Control -I/usr/local/include/Siconos/Numerics -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Mechanics -I/usr/local/include/Siconos/Control --output=/home/maurice/S/IO/src/SiconosFullGenerated.hpp
 #ifndef SiconosFullGenerated_hpp
 #define SiconosFullGenerated_hpp
+#include <IOConfig.h>
+#ifdef WITH_SERIALIZATION
 #include "MechanicsFwd.hpp"
 #include "SpaceFilter.hpp"
 #include "SpaceFilter_impl.hpp"
@@ -150,11 +152,11 @@ SICONOS_IO_REGISTER_WITH_BASES(NewMarkAlphaOSI,(OneStepIntegrator),
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
 SICONOS_IO_REGISTER(OSNSMatrix,
-  (dimRow)
-  (dimColumn)
-  (storageType)
-  (M1)
-  (M2))
+  (_dimRow)
+  (_dimColumn)
+  (_storageType)
+  (_M1)
+  (_M2))
 SICONOS_IO_REGISTER(TimeDiscretisation,
   (_h)
   (_tkV)
@@ -182,15 +184,32 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_T)
   (_Tdot)
   (_p)
+  (_fExt)
+  (_fInt)
   (_mExt)
+  (_mInt)
+  (_jacobianFIntq)
+  (_jacobianFIntv)
+  (_jacobianMIntq)
+  (_jacobianMIntv)
+  (_fGyr)
+  (_jacobianFGyrv)
+  (_computeJacobianFIntqByFD)
+  (_computeJacobianFIntvByFD)
+  (_computeJacobianMIntqByFD)
+  (_computeJacobianMIntvByFD)
+  (_epsilonFD)
   (_pluginFExt)
   (_pluginMExt)
-  (_fExt)
+  (_pluginFInt)
+  (_pluginMInt)
+  (_pluginJacqFInt)
+  (_pluginJacvFInt)
+  (_pluginJacqMInt)
+  (_pluginJacvMInt)
   (_forces)
-  (_jacobianvFL)
-  (_jacobianqDotForces))
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType1R,(FirstOrderR),
-)
+  (_jacobianqForces)
+  (_jacobianvForces))
 SICONOS_IO_REGISTER(BlockCSRMatrix,
   (_nr)
   (_nc)
@@ -305,6 +324,8 @@ SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_q)
   (_MStorageType)
   (_keepLambdaAndYState))
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType1R,(FirstOrderR),
+)
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R,(FirstOrderR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSPlanR,(NewtonEulerFrom3DLocalFrameR),
@@ -625,7 +646,7 @@ SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
   (TOL_ED)
   (_isNewtonConverge)
   (_newtonMaxIteration)
-  (_newtonNbSteps)
+  (_newtonNbIterations)
   (_newtonResiduDSMax)
   (_newtonResiduYMax)
   (_newtonTolerance)
@@ -637,7 +658,8 @@ SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
 SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonTolerance)
   (_newtonMaxIteration)
-  (_newtonNbSteps)
+  (_newtonNbIterations)
+  (_newtonCumulativeNbIterations)
   (_newtonOptions)
   (_newtonResiduDSMax)
   (_newtonResiduYMax)
@@ -848,6 +870,7 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
   (_forces)
   (_jacobianqForces)
   (_jacobianqDotForces)
+  (_forcesMemory)
   (_boundaryConditions)
   (_reactionToBoundaryConditions)
   (_pluginMass)
@@ -884,7 +907,6 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<OSNSMatrix*>(NULL));
   ar.register_type(static_cast<TimeDiscretisation*>(NULL));
   ar.register_type(static_cast<NewtonEulerDS*>(NULL));
-  ar.register_type(static_cast<FirstOrderType1R*>(NULL));
   ar.register_type(static_cast<BlockCSRMatrix*>(NULL));
   ar.register_type(static_cast<LagrangianLinearTIR*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom3DLocalFrameR*>(NULL));
@@ -902,6 +924,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<CircleCircleR*>(NULL));
   ar.register_type(static_cast<Relay*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearDS*>(NULL));
+  ar.register_type(static_cast<FirstOrderType1R*>(NULL));
   ar.register_type(static_cast<FirstOrderType2R*>(NULL));
   ar.register_type(static_cast<SphereNEDSPlanR*>(NULL));
   ar.register_type(static_cast<LagrangianCompliantR*>(NULL));
@@ -968,4 +991,5 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
 }
+#endif
 #endif

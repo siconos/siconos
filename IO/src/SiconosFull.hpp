@@ -19,7 +19,8 @@
 
 #ifndef SiconosFull_hpp
 #define SiconosFull_hpp
-
+#include "IOConfig.h"
+#ifdef WITH_SERIALIZATION
 #include "Register.hpp"
 
 #define NVP(X) BOOST_SERIALIZATION_NVP(X)
@@ -377,4 +378,5 @@ void siconos_io_register_Kernel(Archive& ar)
 
 }
 
+#endif
 #endif

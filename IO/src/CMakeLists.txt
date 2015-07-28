@@ -124,17 +124,18 @@ SET(SiconosIO_LINKER_LANGUAGE CXX)
 IF(WITH_SERIALIZATION)
   IF(WITH_GENERATION)
 
-    FILE(REMOVE ${CMAKE_BINARY_DIR}/src/SiconosFullGenerated.hpp)
+    FILE(REMOVE ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
 
     # header generation
     SET(GENERATED_TARGETS --targets=Kernel)
-    SET(GENERATED_HEADERS SiconosFullGenerated.hpp)
+
+    # overwrite the distributed one
+    SET(GENERATED_HEADER ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
     SET(GENERATED_DEPENDENCIES ${SiconosKernel_INCLUDE_DIRS}/SiconosKernel.hpp)
     SET(GENERATED_INCLUDES -I${SiconosNumerics_INCLUDE_DIRS}
       -I${SiconosKernel_INCLUDE_DIRS})
     
     IF(SiconosMechanics_FOUND)
-
       SET(GENERATED_TARGETS --targets=Mechanics,Kernel)
       SET(GENERATED_INCLUDES ${GENERATED_INCLUDES} -I${SiconosMechanics_INCLUDE_DIRS})
       SET(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES}
@@ -148,24 +149,23 @@ IF(WITH_SERIALIZATION)
         ${SiconosControl_INCLUDE_DIRS}/SiconosControl.hpp)
     ENDIF()
 
-    SET(GENERATED_COMMAND COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py ${GENERATED_TARGETS} ${GENERATED_INCLUDES})
+    SET(GENERATED_COMMAND COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py ${GENERATED_TARGETS} ${GENERATED_INCLUDES} --output=${GENERATED_HEADER})
 
     ADD_CUSTOM_COMMAND(
-      OUTPUT ${GENERATED_HEADERS}
+      OUTPUT ${GENERATED_HEADER}
       DEPENDS ${GENERATED_DEPENDENCIES}
       ${GENERATED_COMMAND})
 
-    # install the generated header
-    INSTALL(FILES ${CMAKE_BINARY_DIR}/src/SiconosFullGenerated.hpp DESTINATION include/Siconos/IO)
   ELSE()
-    # install the distributed header
-    INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp DESTINATION include/Siconos/IO)
+
   ENDIF()
+
+  # install the generated or distributed header
+  INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp DESTINATION include/Siconos/IO)
 
   # add dependencies for header generation
   ADD_CUSTOM_TARGET(SerializersGeneration ALL
-    DEPENDS 
-    SiconosFullGenerated.hpp)
+    DEPENDS ${GENERATED_HEADER})
 
   SET(SiconosIO_SRCS SiconosRestart.cpp MechanicsIO.cpp)
 ELSE()

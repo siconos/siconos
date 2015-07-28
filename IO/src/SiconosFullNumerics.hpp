@@ -20,6 +20,8 @@
 #ifndef SiconosFullNumerics_hpp
 #define SiconosFullNumerics_hpp
 
+#include "IOConfig.h"
+#ifdef WITH_SERIALIZATION
 #include "Register.hpp"
 
 
@@ -184,5 +186,5 @@ void siconos_io_register_Numerics(Archive& ar)
   ar.register_type(static_cast<FrictionContactProblem*>(NULL));
 
 }
-
+#endif
 #endif
