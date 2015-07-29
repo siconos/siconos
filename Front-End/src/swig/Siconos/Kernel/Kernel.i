@@ -26,8 +26,7 @@
 // generated docstrings from doxygen xml output
 %include Kernel-docstrings.i
 
-
-
+%include picklable.i
 
 %{
 #include <SiconosKernel.hpp>
@@ -39,8 +38,6 @@
 #include <boost/mpl/eval_if.hpp>
 #include <boost/typeof/typeof.hpp>
 %}
-
-%include picklable.i
 
 // ignores
 %ignore nullDeleter;

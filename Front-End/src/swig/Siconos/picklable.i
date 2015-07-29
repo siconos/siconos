@@ -4,6 +4,8 @@
 
 #ifdef WITH_SERIALIZATION
 %{
+#include <SiconosFull.hpp>
+
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
