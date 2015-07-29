@@ -149,7 +149,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   }
   else if (problem ->M->storageType == 1)
   {
-    freeSparse(spmat);
+    cs_spfree(spmat);
   }
   free(fclib_problem->W);
   free(fclib_problem->info);

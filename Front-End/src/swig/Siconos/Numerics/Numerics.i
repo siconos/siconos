@@ -1204,7 +1204,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
 
   ~cs_sparse()
   {
-    freeSparse($self);
+    cs_spfree($self);
   }
 }
 

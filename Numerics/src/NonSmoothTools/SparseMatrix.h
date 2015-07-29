@@ -102,16 +102,6 @@ extern "C"
                const double beta, double *y);
 
 
-  /** Screen display of the matrix content
-      \param M the matrix to be displayed
-   */
-  void printSparse(const CSparseMatrix* const M);
-
-  /** Free memory of a Sparse Matrix
-      \param M the matrix to be freed
-   */
-  void freeSparse(CSparseMatrix* const M);
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

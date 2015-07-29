@@ -382,7 +382,7 @@
   }
   if(M$argnum)
   {
-    freeSparse(M$argnum);
+    cs_spfree(M$argnum);
   }
 }
 

@@ -550,3 +550,80 @@ NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructu
 {
   return createNumericsMatrixFromData(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }
+
+CSparseMatrix* NM_csc(NumericsMatrix *A)
+{
+  if(!A->matrix3)
+  {
+    assert(A->matrix2);
+    A->matrix3 = cs_triplet(A->matrix2); /* triplet -> csc */
+  }
+  return A->matrix3;
+}
+
+CSparseMatrix* NM_trans(NumericsMatrix* A)
+{
+  if(!A->matrix4)
+  {
+    A->matrix4 = cs_transpose(NM_csc(A), 1); /* value = 1 -> allocation */
+  }
+  return A->matrix4;
+}
+
+/* Numerics Matrix wrapper  for y += alpha A x + y */
+void NM_aaxpy(const double alpha, NumericsMatrix* A, const double *x,
+              double *y)
+{
+  CHECK(cs_aaxpy(alpha, NM_csc(A), x, 1, y));
+}
+
+/* Numerics Matrix wrapper for y += alpha transpose(A) x + y */
+void NM_aatxpy(const double alpha, NumericsMatrix* A, const double *x,
+               double *y)
+{
+  CHECK(cs_aaxpy(alpha, NM_trans(A), x, 1, y));
+}
+
+/* NumericsMatrix : initialize csc storage from sparse block storage */
+void NM_setup(NumericsMatrix* A)
+{
+  if(!A->matrix2)
+  {
+    assert(A->matrix1);
+    A->matrix2 = cs_spalloc(0,0,1,1,1);
+
+    /* iteration on row, cr : current row */
+    for(unsigned int cr = 0; cr < A->matrix1->filled1-1; ++cr)
+    {
+      for(size_t bn = A->matrix1->index1_data[cr];
+          bn < A->matrix1->index1_data[cr + 1]; ++bn)
+      {
+        /* cc : current column */
+        size_t cc = A->matrix1->index2_data[bn];
+        unsigned int inbr = A->matrix1->blocksize0[cr];
+        unsigned int roffset = 0;
+        unsigned int coffset = 0;
+        if(cr != 0)
+        {
+          roffset = A->matrix1->blocksize0[cr - 1];
+          inbr -= roffset;
+        }
+        unsigned int inbc = A->matrix1->blocksize1[cc];
+        if(cc != 0)
+        {
+          coffset = A->matrix1->blocksize1[cc - 1];
+          inbc -= coffset;
+        }
+        for(unsigned j = 0; j < inbc; ++j)
+        {
+          for(unsigned i = 0; i < inbr; ++i)
+          {
+            CHECK(cs_zentry(A->matrix2, i + roffset, j + coffset,
+                            A->matrix1->block[bn][i + j*inbr]));
+          }
+        }
+      }
+    }
+  }
+}
+

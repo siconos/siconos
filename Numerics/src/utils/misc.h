@@ -31,6 +31,17 @@ extern "C"
  */
 void printm(unsigned int nl, unsigned int nc, double *m);
 
+/* Check return code of a function. */
+#define CHECK(EXPR)                                                     \
+  do                                                                    \
+  {                                                                     \
+    if (!EXPR)                                                          \
+    {                                                                   \
+      fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d ",   \
+               #EXPR, __FILE__, __LINE__);                              \
+    }                                                                   \
+  } while (0)
+
 /** check IO
  */
 #define CHECK_IO(EXPR)                                                  \

@@ -309,6 +309,44 @@ extern "C"
    */
   NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1);
 
+  /** Create triplet storage from sparse block storage.
+   * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
+   * \return the triplet sparse Matrix created in A.
+   */
+  void NM_setup(NumericsMatrix* A);
+
+  /** Create compress column storage of a NumericsMatrix from triplet storage.
+   * \param[in,out] A a NumericsMatrix with triplet storage initialized
+   * \return the compressed column CSparseMatrix created in A.
+   */
+  CSparseMatrix* NM_csc(NumericsMatrix *A);
+
+  /** Create transposed compress column storage from compress column storage.
+   * \param[in,out] A a NumericsMatrix with compress column storage.
+   * \return the transposed compressed column matrix created in A.
+   */
+  CSparseMatrix* NM_trans(NumericsMatrix* A);
+
+  /** Matrix vector multiplication : y += alpha A x + y
+   * \param[in] alpha matrix coefficient
+   * \param[in] A a NumericsMatrix
+   * \param[in] x pointer on a dense vector of size A->size1
+   * \param[in, out] y pointer on a dense vector of size A->size1
+   */
+  void NM_aaxpy(const double alpha, NumericsMatrix* A, const double *x,
+                double *y);
+
+
+  /** Transposed matrix multiplication : y += alpha transpose(A) x + y 
+   * \param[in] alpha matrix coefficient
+   * \param[in] A a NumericsMatrix
+   * \param[in] x pointer on a dense vector of size A->size1
+   * \param[in, out] y pointer on a dense vector of size A->size1
+   */
+  void NM_aatxpy(const double alpha, NumericsMatrix* A, const double *x,
+                 double *y);
+
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
