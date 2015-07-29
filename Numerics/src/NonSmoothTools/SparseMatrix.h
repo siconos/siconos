@@ -73,12 +73,41 @@ int nz ;      : # of entries in triplet matrix;
 extern "C"
 {
 #endif
+  /** Add an entry to a triplet matrix only if the absolute value is
+   * greater than DBL_EPSILON.
+   * \param T the CSparseMatrix
+   * \param i row index
+   * \param j column index
+   * \param x the value
+   * \return integer value : 1 if the absolute value is less than
+   * DBL_EPSILON, otherwise the return value of cs_entry.
+   */
+  int cs_zentry(CSparseMatrix *T, int i, int j, double x);
+
+  /** Create dense matrix from a CSparseMatrix.
+   * \param A the CSparseMatrix
+   * \return a pointer on A->m * A->n allocated storage
+   */
+  double* cs_dense(CSparseMatrix *A);
+
+  /** Matrix vector multiplication : y = alpha*A*x+beta*y
+   * \param[in] alpha matrix coefficient
+   * \param[in] A the CSparseMatrix
+   * \param[in] x pointer on a dense vector of size A->n
+   * \param[in] beta vector coefficient
+   * \param[in, out] y pointer on a dense vector of size A->n
+   * \return 0 if A x or y is NULL else 1
+   */
+  int cs_aaxpy(const double alpha, const cs *A, const double *x,
+               const double beta, double *y);
+
+
   /** Screen display of the matrix content
       \param M the matrix to be displayed
    */
   void printSparse(const CSparseMatrix* const M);
 
-  /** free memory of a Sparse Matrix
+  /** Free memory of a Sparse Matrix
       \param M the matrix to be freed
    */
   void freeSparse(CSparseMatrix* const M);
