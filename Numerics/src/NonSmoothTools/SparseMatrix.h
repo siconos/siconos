@@ -101,6 +101,13 @@ extern "C"
   int cs_aaxpy(const double alpha, const cs *A, const double *x,
                const double beta, double *y);
 
+  /** Free space allocated for a SparseMatrix. note : cs_spfree also
+   *  free the cs_struct this fails when the struct is allocated on
+   *  the stack.
+   * \param A a CSparseMatrix
+   * \return NULL on success
+  */
+  CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

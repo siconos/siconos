@@ -81,3 +81,11 @@ int cs_aaxpy(const double alpha, const cs *A, const double *x,
   return (1) ;
 }
 
+CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A)
+{
+  if(!A) return (NULL) ;	/* do nothing if A already NULL */
+  cs_free(A->p) ;
+  cs_free(A->i) ;
+  cs_free(A->x) ;
+  return NULL;
+}

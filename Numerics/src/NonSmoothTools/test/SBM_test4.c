@@ -55,8 +55,8 @@ int main(void)
     printf("========= Failed SBM tests 4 for SBM  ========= \n");
     return 1;
   }
-  cs_print(&sparseMat, 0);
-  cs_spfree(&sparseMat);
+  cs_print(&sparseMat, 1);
+  cs_spfree_on_stack(&sparseMat);
 
   int n = M.blocksize0[M.blocknumber0 - 1];
   int m = M.blocksize1[M.blocknumber1 - 1];
