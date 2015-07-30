@@ -61,9 +61,6 @@ const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ DE
 const unsigned int M_MAXSIZEFORDISPLAY = 10;
 const std::string DEFAULT_FORMAT = "ascii";
 
-/** value used to compare matrices. Matrices A and B are equal when (A-B).normInf()<tolerance. */
-const double tolerance = std::numeric_limits<double>::epsilon();
-
 /** Siconos::UBLAS_TYPE is an enumerated type of Siconos::DENSE, TRIANGULAR, SYMMETRIC,
     SPARSE, BANDED. It is used to describe the type of matrix or
     vector we want to construct.

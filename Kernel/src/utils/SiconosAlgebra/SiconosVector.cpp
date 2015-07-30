@@ -772,7 +772,7 @@ SiconosVector& SiconosVector::operator -= (const BlockVector& vIn)
 
 bool operator == (const SiconosVector &m, const SiconosVector &x)
 {
-  return ((m - x).norm2() < tolerance);
+  return ((m - x).norm2() < std::numeric_limits<double>::epsilon());
 }
 
 //==================

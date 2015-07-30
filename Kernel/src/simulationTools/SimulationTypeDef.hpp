@@ -34,7 +34,7 @@
 
 /** double precision machine */
 /*  eq dlmach('e'),  DBL_EPSILON,  fabs(a-b) <  */
-const double MACHINE_PREC = std::numeric_limits<double>::epsilon();
+#define MACHINE_PREC std::numeric_limits<double>::epsilon()
 
 
 
@@ -162,7 +162,7 @@ typedef OneStepNSProblems::const_iterator ConstOSNSIterator;
 // ================== Misc ==================
 
 /** default tolerance value, used to update index sets */
-const double DEFAULT_TOLERANCE = 10 * MACHINE_PREC;
+#define DEFAULT_TOLERANCE 10 * MACHINE_PREC
 
 enum SICONOS_OSNSP
 {

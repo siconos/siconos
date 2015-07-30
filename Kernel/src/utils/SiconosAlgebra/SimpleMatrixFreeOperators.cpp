@@ -458,13 +458,13 @@ bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
   //    return false;
   // Warning : two block matrices may be "equal" but have blocks of different sizes.
   double norm = (m - x).normInf();
-  return (norm < tolerance);
+  return (norm < std::numeric_limits<double>::epsilon());
 }
 
 bool operator != (const SiconosMatrix &m, const SiconosMatrix &x)
 {
   double norm = (m - x).normInf();
-  return (norm > tolerance);
+  return (norm > std::numeric_limits<double>::epsilon());
 }
 
 
