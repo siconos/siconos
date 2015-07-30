@@ -330,7 +330,7 @@ int frictionContact3D_FischerBurmeister_compute_error(
 
   unsigned int problemSize = 3 * problem->numberOfContacts;
 
-  double *rho = malloc(problemSize*sizeof(double));
+  double *rho = (double*) malloc(problemSize*sizeof(double));
   double *F = (double *) malloc(problemSize*sizeof(double));
 
   FischerBurmeisterFun3x3Ptr computeACFun3x3;
