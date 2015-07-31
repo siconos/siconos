@@ -32,7 +32,7 @@ extern "C"
 void printm(unsigned int nl, unsigned int nc, double *m);
 
 /* Check return code of a function. */
-#define CHECK(EXPR)                                                     \
+#define CHECK_RETURN(EXPR)                                              \
   do                                                                    \
   {                                                                     \
     if (!EXPR)                                                          \

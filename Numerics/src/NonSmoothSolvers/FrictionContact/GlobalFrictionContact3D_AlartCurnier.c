@@ -145,7 +145,7 @@ int initACPsiJacobian(
   for(unsigned int e = 0; e < M->nz; ++e)
   {
     DEBUG_PRINTF("e=%d, M->i[e]=%d, M->p[e]=%d, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]);
-    CHECK(cs_zentry(J, M->i[e], M->p[e], - M->x[e]));
+    CHECK_RETURN(cs_zentry(J, M->i[e], M->p[e], - M->x[e]));
   }
 
   /* H */
@@ -154,19 +154,19 @@ int initACPsiJacobian(
   {
     DEBUG_PRINTF("e=%d, H->i[e]=%d, H->p[e] + M->n + A->n=%d, H->x[e]=%g\n", 
                  e, H->i[e], H->p[e] + M->n + A->n , H->x[e]);
-    CHECK(cs_zentry(J, H->i[e], H->p[e] + M->n + A->n, H->x[e]));
+    CHECK_RETURN(cs_zentry(J, H->i[e], H->p[e] + M->n + A->n, H->x[e]));
   }
 
   /* Ht */
   for(unsigned int e = 0; e < H->nz; ++e)
   {
-    CHECK(cs_zentry(J, H->p[e] + M->m, H->i[e], H->x[e]));
+    CHECK_RETURN(cs_zentry(J, H->p[e] + M->m, H->i[e], H->x[e]));
   }
 
   /* -I */
   for(unsigned int e = 0; e < A->m; ++e)
   {
-    CHECK(cs_zentry(J, e + M->m, e + M->n, -1.));
+    CHECK_RETURN(cs_zentry(J, e + M->m, e + M->n, -1.));
   }
 
   /* keep A start indice for update */
@@ -175,13 +175,13 @@ int initACPsiJacobian(
   /* A */
   for(unsigned int e = 0; e < A->nz; ++e)
   {
-    CHECK(cs_zentry(J, A->i[e] + M->m + H->n, A->p[e] + M->n, A->x[e]));
+    CHECK_RETURN(cs_zentry(J, A->i[e] + M->m + H->n, A->p[e] + M->n, A->x[e]));
   }
 
   /* B */
   for(unsigned int e = 0; e < B->nz; ++e)
   {
-    CHECK(cs_zentry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n, B->x[e]));
+    CHECK_RETURN(cs_zentry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n, B->x[e]));
   }
 
   return Astart;
@@ -219,7 +219,7 @@ void updateACPsiJacobian(
 
   if(((Astart + A->nz + B->nz) > J->nzmax))
   {
-    CHECK(cs_sprealloc(J, Astart + A->nz + B->nz));
+    CHECK_RETURN(cs_sprealloc(J, Astart + A->nz + B->nz));
   }
 
   /* A */
@@ -580,7 +580,7 @@ void globalFrictionContact3D_AlartCurnier(
   }
   case 3:
   {
-    computeACFun3x3 = &frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated;
+    computeACFun3x3 = &frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated;
     break;
   }
   }
@@ -760,7 +760,7 @@ void globalFrictionContact3D_AlartCurnier(
     }
 #else
     /* use csparse LU factorization */
-    CHECK(cs_lusol(Jcsc, rhs, 1, DBL_EPSILON));
+    CHECK_RETURN(cs_lusol(Jcsc, rhs, 1, DBL_EPSILON));
 
 #endif
 

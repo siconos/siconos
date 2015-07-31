@@ -574,14 +574,14 @@ CSparseMatrix* NM_trans(NumericsMatrix* A)
 void NM_aaxpy(const double alpha, NumericsMatrix* A, const double *x,
               double *y)
 {
-  CHECK(cs_aaxpy(alpha, NM_csc(A), x, 1, y));
+  CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, 1, y));
 }
 
 /* Numerics Matrix wrapper for y += alpha transpose(A) x + y */
 void NM_aatxpy(const double alpha, NumericsMatrix* A, const double *x,
                double *y)
 {
-  CHECK(cs_aaxpy(alpha, NM_trans(A), x, 1, y));
+  CHECK_RETURN(cs_aaxpy(alpha, NM_trans(A), x, 1, y));
 }
 
 /* NumericsMatrix : initialize csc storage from sparse block storage */
@@ -618,8 +618,8 @@ void NM_setup(NumericsMatrix* A)
         {
           for(unsigned i = 0; i < inbr; ++i)
           {
-            CHECK(cs_zentry(A->matrix2, i + roffset, j + coffset,
-                            A->matrix1->block[bn][i + j*inbr]));
+            CHECK_RETURN(cs_zentry(A->matrix2, i + roffset, j + coffset,
+                                   A->matrix1->block[bn][i + j*inbr]));
           }
         }
       }
