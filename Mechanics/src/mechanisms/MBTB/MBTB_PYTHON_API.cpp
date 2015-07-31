@@ -36,8 +36,8 @@ void MBTB_init(unsigned int NumOfBodies, unsigned int NumOfJoints, unsigned int 
   CADMBTB_init(sNbOfBodies + 2*NumOfContacts,NumOfContacts);
   CADMBTB_setNbOfArtefacts(4*NumOfContacts); /** P1P2, NORMAL, REACTION */
 
-  myt0=0;
-  myTf=10;
+  myt0 = 0;
+  myTf = std::numeric_limits<double>::max();
 
   // -------------
   // --- Model ---
