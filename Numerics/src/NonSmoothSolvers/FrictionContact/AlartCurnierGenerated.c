@@ -1,284 +1,54 @@
-#include <assert.h>
 #include <math.h>
-#include "op3x3.h"
-#include "AlartCurnierGenerated.h"
-#define sign(x) copysign(1.,x)
+#include <assert.h>
+#include <op3x3.h>
+#include <stdlib.h>
+
+//#define DEBUG_MESSAGES 1
+//#include <stdio.h>
+#include <debug.h>
+#include "FischerBurmeisterGenerated.h"
+
+#define RESULT_CHECK(X)
+#define VALUE_CHECK(X)
+
+#define ZERO 1e-13
+#define NOT_ZERO(x) fabs(x) > 0
+#define IS_NOT_ZERO(x) fabs(x) > 0
+#define IS_POSITIVE(x) 1
+
+#define Sign(x) ((x>0) - (x<0))
+#define Max fmax
+#define Heaviside(x) (.5*Sign(x) + .5)
+#define Rand(x) ((double) rand()/ (double) RAND_MAX)
+
+#define random1 .5
+#define random2 .5
+
+#ifdef __cplusplus
+#include <cmath>
+#define CHECK(x)
+#define XCHECK(x) assert(isfinite(x))
+#else
+#define CHECK(x)
+#define XCHECK(x) assert(isfinite(x))
+#endif
+
+// temporary bug fix for overloaded pow. Sympy generates code with long double
+// and it is not clear for all compiler which cast should be applied.
+// The real fix is to prevent sympy from adding the type specifier
+#ifdef __cplusplus
+#define pow(x, y) std::pow(static_cast<double>(x), static_cast<double>(y))
+#else
+#define pow(x,y) pow((double)x, (double)y)
+#endif
+
+#pragma GCC diagnostic ignored "-Wconversion"
+
+// hack, should be prevented in sage/sympy/maple or in code generation
+#define sqrt(x) (x < 0 ? 0 : sqrt(x))
 
 // this file consists of generated code
 //#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-
-void frictionContact3D_AlartCurnierJeanMoreauFABGenerated(
-  double rn,
-  double rt1,
-  double rt2,
-  double un,
-  double ut1,
-  double ut2,
-  double mu,
-  double rhon,
-  double rhot1,
-  double rhot2,
-  double *result)
-{
-  double x0=-rhon*un + rn;
-  int    x1=x0 <= 0;
-  int    x2=x0 > 0;
-  double x3=rhot1*ut1;
-  double x4=rt1 - x3;
-  double x5=x4*x4;
-  double x6=rhot2*ut2;
-  double x7=rt2 - x6;
-  double x8=x7*x7;
-  double x9=x5 + x8;
-  double x10=sqrt(x9);
-  int    x11=rn <= 0;
-  int    x12=rn > 0;
-  double x13;
-  double x14;
-  int x15 = 0;
-  double x16=1./(x10);
-  double x17;
-  int x18 = 0;
-  double x19=sqrt(1./(x9*x9*x9));
-  double x20;
-  double x21=x4*x7;
-  double x22;
-  double x23;
-  double x24=-rt1 + x3;
-  double x25;
-  double x26=-rt2 + x6;
-  double x27;
-  if (x11)
-  {
-    x13=0;
-    x23=0;
-  };
-  if (x12)
-  {
-    x13=rn;
-    x23=mu*x16;
-  };
-  if (x11 || x12)
-  {
-    x14=mu*x13;
-    x15=x10 <= x14;
-    x17=x14*x16;
-    x18=x10 > x14;
-    x20=mu*rhot1*x13*x19;
-    x22=mu*rhot2*x13*x19;
-    x25=mu*x13*x19*x4;
-    x27=mu*x13*x19*x7;
-  };
-  if (x1)
-  {
-    result[0]=rn;
-    result[3]=0;
-    result[12]=1;
-  };
-  if (x2)
-  {
-    result[0]=rn - x0;
-    result[3]=rhon;
-    result[12]=0;
-  };
-  if ((x11 || x12) && (x15))
-  {
-    result[1]=rt1 - x4;
-    result[7]=rhot1;
-    result[10]=0;
-    result[13]=0;
-    result[16]=0;
-    result[19]=0;
-    result[2]=rt2 - x7;
-    result[8]=0;
-    result[11]=rhot2;
-    result[14]=0;
-    result[17]=0;
-    result[20]=0;
-  };
-  if ((x11 || x12) && (x18))
-  {
-    result[1]=rt1 - x17*x4;
-    result[7]=rhot1*x17 - x20*x5;
-    result[10]=-x21*x22;
-    result[13]=-x23*x4;
-    result[16]=-x17 - x24*x25 + 1;
-    result[19]=-x25*x26;
-    result[2]=rt2 - x17*x7;
-    result[8]=-x20*x21;
-    result[11]=rhot2*x17 - x22*x8;
-    result[14]=-x23*x7;
-    result[17]=-x24*x27;
-    result[20]=-x17 - x26*x27 + 1;
-  };
-  result[6]=0;
-  result[9]=0;
-  result[15]=0;
-  result[18]=0;
-  result[4]=0;
-  result[5]=0;
-}
-void frictionContact3D_AlartCurnierJeanMoreauFGenerated(
-  double rn,
-  double rt1,
-  double rt2,
-  double un,
-  double ut1,
-  double ut2,
-  double mu,
-  double rhon,
-  double rhot1,
-  double rhot2,
-  double *result)
-{
-  double x0=-rhon*un + rn;
-  double x1=-rhot1*ut1 + rt1;
-  double x2=-rhot2*ut2 + rt2;
-  double x3=sqrt(pow(x1, 2) + pow(x2, 2));
-  double x4;
-  double x5;
-  int x6 = 0;
-  double x7;
-  int x8 = 0;
-  if (rn <= 0)
-  {
-    x4=0;
-  };
-  if (rn > 0)
-  {
-    x4=rn;
-  };
-  if (rn <= 0 || rn > 0)
-  {
-    x5=mu*x4;
-    x6=x3 <= x5;
-    x7=mu*x4/x3;
-    x8=x3 > x5;
-  };
-  if (x0 <= 0)
-  {
-    result[0]=rn;
-  };
-  if (x0 > 0)
-  {
-    result[0]=rn - x0;
-  };
-  if ((rn <= 0 || rn > 0) && (x6))
-  {
-    result[1]=rt1 - x1;
-    result[2]=rt2 - x2;
-  };
-  if ((rn <= 0 || rn > 0) && (x8))
-  {
-    result[1]=rt1 - x1*x7;
-    result[2]=rt2 - x2*x7;
-  };
-}
-void frictionContact3D_AlartCurnierJeanMoreauABGenerated(
-  double rn,
-  double rt1,
-  double rt2,
-  double un,
-  double ut1,
-  double ut2,
-  double mu,
-  double rhon,
-  double rhot1,
-  double rhot2,
-  double *result)
-{
-  double x0=-rhon*un + rn;
-  int    x1=x0 <= 0;
-  int    x2=x0 > 0;
-  double x3=rhot1*ut1;
-  double x4=rt1 - x3;
-  double x5=x4*x4;
-  double x6=rhot2*ut2;
-  double x7=rt2 - x6;
-  double x8=x7*x7;
-  double x9=x5 + x8;
-  double x10=sqrt(x9);
-  int    x11=rn <= 0;
-  int    x12=rn > 0;
-  double x13;
-  double x14;
-  int x15 = 0;
-  double x16=1./(x10);
-  double x17;
-  double x18=sqrt(1./(x9*x9*x9));
-  double x19;
-  int x20 = 0;
-  double x21=x4*x7;
-  double x22;
-  double x23;
-  double x24=-rt1 + x3;
-  double x25;
-  double x26=-rt2 + x6;
-  double x27;
-  if (x11)
-  {
-    x13=0;
-    x23=0;
-  };
-  if (x12)
-  {
-    x13=rn;
-    x23=mu*x16;
-  };
-  if (x11 || x12)
-  {
-    x14=mu*x13;
-    x15=x10 <= x14;
-    x17=x14*x16;
-    x19=mu*rhot1*x13*x18;
-    x20=x10 > x14;
-    x22=mu*rhot2*x13*x18;
-    x25=mu*x13*x18*x4;
-    x27=mu*x13*x18*x7;
-  };
-  if (x1)
-  {
-    result[0]=0;
-    result[9]=1;
-  };
-  if (x2)
-  {
-    result[0]=rhon;
-    result[9]=0;
-  };
-  if ((x11 || x12) && (x15))
-  {
-    result[4]=rhot1;
-    result[7]=0;
-    result[10]=0;
-    result[13]=0;
-    result[16]=0;
-    result[5]=0;
-    result[8]=rhot2;
-    result[11]=0;
-    result[14]=0;
-    result[17]=0;
-  };
-  if ((x11 || x12) && (x20))
-  {
-    result[4]=rhot1*x17 - x19*x5;
-    result[7]=-x21*x22;
-    result[10]=-x23*x4;
-    result[13]=-x17 - x24*x25 + 1;
-    result[16]=-x25*x26;
-    result[5]=-x19*x21;
-    result[8]=rhot2*x17 - x22*x8;
-    result[11]=-x23*x7;
-    result[14]=-x24*x27;
-    result[17]=-x17 - x26*x27 + 1;
-  };
-  result[3]=0;
-  result[6]=0;
-  result[12]=0;
-  result[15]=0;
-  result[1]=0;
-  result[2]=0;
-}
 
 void frictionContact3D_AlartCurnierFABGenerated(
   double rn,
@@ -293,101 +63,442 @@ void frictionContact3D_AlartCurnierFABGenerated(
   double rhot2,
   double *result)
 {
-  double x0=-rhon*un + rn;
-  int    x1=x0 <= 0;
-  int    x2=x0 > 0;
-  double x3;
-  double x4;
-  double x5;
-  double x6=rhot1*ut1;
-  double x7=rt1 - x6;
-  double x8=x7*x7;
-  double x9=rhot2*ut2;
-  double x10=rt2 - x9;
-  double x11=x10*x10;
-  double x12=x11 + x8;
-  double x13=sqrt(x12);
-  double x14;
-  int x15 = 0;
-  double x16=1./(x13);
-  double x17;
-  int x18 = 0;
-  double x19;
-  double x20=sqrt(1./(x12*x12*x12));
-  double x21;
-  double x22=x10*x7;
-  double x23;
-  double x24;
-  double x25=-rt1 + x6;
-  double x26;
-  double x27=-rt2 + x9;
-  double x28;
-  if (x1)
-  {
-    x3=0;
-    x4=0;
-    x5=0;
-  };
-  if (x2)
-  {
-    x3=x0;
-    x4=-rhon;
-    x5=1;
-  };
-  if (x1 || x2)
-  {
-    x14=mu*x3;
-    x15=x13 <= x14;
-    x17=x14*x16;
-    x18=x13 > x14;
-    x19=mu*x16*x4;
-    x21=mu*rhot1*x20*x3;
-    x23=mu*rhot2*x20*x3;
-    x24=mu*x16*x5;
-    x26=mu*x20*x3*x7;
-    x28=mu*x10*x20*x3;
-    result[0]=rn - x3;
-    result[3]=-x4;
-    result[12]=-x5 + 1;
-  };
-  if ((x1 || x2) && (x15))
-  {
-    result[1]=rt1 - x7;
-    result[4]=0;
-    result[7]=rhot1;
-    result[10]=0;
-    result[13]=0;
-    result[16]=0;
-    result[19]=0;
-    result[2]=rt2 - x10;
-    result[5]=0;
-    result[8]=0;
-    result[11]=rhot2;
-    result[14]=0;
-    result[17]=0;
-    result[20]=0;
-  };
-  if ((x1 || x2) && (x18))
-  {
-    result[1]=rt1 - x17*x7;
-    result[4]=-x19*x7;
-    result[7]=rhot1*x17 - x21*x8;
-    result[10]=-x22*x23;
-    result[13]=-x24*x7;
-    result[16]=-x17 - x25*x26 + 1;
-    result[19]=-x26*x27;
-    result[2]=rt2 - x10*x17;
-    result[5]=-x10*x19;
-    result[8]=-x21*x22;
-    result[11]=rhot2*x17 - x11*x23;
-    result[14]=-x10*x24;
-    result[17]=-x25*x28;
-    result[20]=-x17 - x27*x28 + 1;
-  };
-  result[6]=0;
-  result[9]=0;
-  result[15]=0;
-  result[18]=0;
+    double x1;
+    double x2;
+    int x3;
+    x1=rhon*un;
+    x2=rn - x1;
+    x3=x2 <= 0;
+    int x4;
+    x4=x2 > 0;
+    double x5;
+    double x6;
+    double x7;
+    double x8;
+    double x9;
+    double x10;
+    int x11;
+    double x12;
+    int x13;
+    int x14;
+    x5=rhot1*ut1;
+    x6=-rt1 + x5;
+    x7=rhot2*ut2;
+    x8=-rt2 + x7;
+    x9=x6*x6 + x8*x8;
+    x10=(assert(IS_POSITIVE(x9)), sqrt(x9));
+    x11=x10 <= 0;
+    x12=mu*x2;
+    x13=x10 <= x12;
+    x14=x11 && x3 || x13 && x4;
+    int x15;
+    int x16;
+    int x17;
+    int x18;
+    x15=x10 > 0;
+    x16=x10 > x12;
+    x17=x15 && x3 || x16 && x4;
+    x18=x17 && x3;
+    int x22;
+    double x19;
+    double x20;
+    double x21;
+    x22=x17 && x4;
+    int x23;
+    x23=(x13 || x3) && (x11 || x13 || x3) && (x11 || x3 || x4) && (x13 || x16 || x3) && (x13 || x3 || x4) && (x11 || x13 || x16 || x3) && (x11 || x13 || x3 || x4) && (x13 || x15 || x16 || x3) && (x13 || x15 || x3 || x4);
+    /* Assignment result[0, 0]=Piecewise((rn, x3), (x1, x4)) */
+    if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 0]=rn */
+        result[0] = rn;
+    }
+    else if (x4)
+    {
+        DEBUG_PRINT("Case (x4) is True.\n");
+
+        /* Assignment result[0, 0]=x1 */
+        result[0] = x1;
+    }
+
+    /* Assignment result[1, 0]=Piecewise((x5, x14), (rt1, x18), (rt1 - x19*x21, x22)) */
+    if (x14)
+    {
+        DEBUG_PRINT("Case (x14) is True.\n");
+
+        /* Assignment result[1, 0]=x5 */
+        result[1] = x5;
+    }
+    else if (x18)
+    {
+        DEBUG_PRINT("Case (x18) is True.\n");
+
+        /* Assignment result[1, 0]=rt1 */
+        result[1] = rt1;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x19=rt1 - x5;
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x12*x20;
+
+        /* Assignment result[1, 0]=rt1 - x19*x21 */
+        result[1] = rt1 - x19*x21;
+    }
+
+    /* Assignment result[2, 0]=Piecewise((x7, x14), (rt2, x18), (rt2 - x21*x31, x22)) */
+    double x31;if (x14)
+    {
+        DEBUG_PRINT("Case (x14) is True.\n");
+
+        /* Assignment result[2, 0]=x7 */
+        result[2] = x7;
+    }
+    else if (x18)
+    {
+        DEBUG_PRINT("Case (x18) is True.\n");
+
+        /* Assignment result[2, 0]=rt2 */
+        result[2] = rt2;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x12*x20;
+        x31=rt2 - x7;
+
+        /* Assignment result[2, 0]=rt2 - x21*x31 */
+        result[2] = rt2 - x21*x31;
+    }
+
+    /* Assignment result[0, 1]=Piecewise((0, x3), (rhon, x4)) */
+    if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 1]=0 */
+        result[3] = 0;
+    }
+    else if (x4)
+    {
+        DEBUG_PRINT("Case (x4) is True.\n");
+
+        /* Assignment result[0, 1]=rhon */
+        result[3] = rhon;
+    }
+
+    /* Assignment result[1, 1]=Piecewise((0, x23), (rhon*x25, x22)) */
+    double x24;
+    double x25;if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[1, 1]=0 */
+        result[4] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x19=rt1 - x5;
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x24=mu*x20;
+        x25=x19*x24;
+
+        /* Assignment result[1, 1]=rhon*x25 */
+        result[4] = rhon*x25;
+    }
+
+    /* Assignment result[2, 1]=Piecewise((0, x23), (rhon*x32, x22)) */
+    double x32;if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[2, 1]=0 */
+        result[5] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x24=mu*x20;
+        x31=rt2 - x7;
+        x32=x24*x31;
+
+        /* Assignment result[2, 1]=rhon*x32 */
+        result[5] = rhon*x32;
+    }
+
+    /* Assignment result[0, 2]=0 */
+    result[6] = 0;
+
+    /* Assignment result[1, 2]=Piecewise((rhot1, x14), (0, x18), (rhot1*x21 + rhot1*x28, x22)) */
+    double x26;
+    double x27;
+    double x28;if (x14)
+    {
+        DEBUG_PRINT("Case (x14) is True.\n");
+
+        /* Assignment result[1, 2]=rhot1 */
+        result[7] = rhot1;
+    }
+    else if (x18)
+    {
+        DEBUG_PRINT("Case (x18) is True.\n");
+
+        /* Assignment result[1, 2]=0 */
+        result[7] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x19=rt1 - x5;
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x12*x20;
+        x26=pow(x9, -3.0/2.0);
+        x27=mu*x19*x2*x26;
+        x28=x27*x6;
+
+        /* Assignment result[1, 2]=rhot1*x21 + rhot1*x28 */
+        result[7] = rhot1*x21 + rhot1*x28;
+    }
+
+    /* Assignment result[2, 2]=Piecewise((0, x23), (rhot1*x34, x22)) */
+    double x33;
+    double x34;if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[2, 2]=0 */
+        result[8] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x26=pow(x9, -3.0/2.0);
+        x31=rt2 - x7;
+        x33=mu*x2*x26*x31;
+        x34=x33*x6;
+
+        /* Assignment result[2, 2]=rhot1*x34 */
+        result[8] = rhot1*x34;
+    }
+
+    /* Assignment result[0, 3]=0 */
+    result[9] = 0;
+
+    /* Assignment result[1, 3]=Piecewise((0, x23), (rhot2*x29, x22)) */
+    double x29;if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[1, 3]=0 */
+        result[10] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x19=rt1 - x5;
+        x26=pow(x9, -3.0/2.0);
+        x27=mu*x19*x2*x26;
+        x29=x27*x8;
+
+        /* Assignment result[1, 3]=rhot2*x29 */
+        result[10] = rhot2*x29;
+    }
+
+    /* Assignment result[2, 3]=Piecewise((rhot2, x14), (0, x18), (rhot2*x21 + rhot2*x35, x22)) */
+    double x35;if (x14)
+    {
+        DEBUG_PRINT("Case (x14) is True.\n");
+
+        /* Assignment result[2, 3]=rhot2 */
+        result[11] = rhot2;
+    }
+    else if (x18)
+    {
+        DEBUG_PRINT("Case (x18) is True.\n");
+
+        /* Assignment result[2, 3]=0 */
+        result[11] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x12*x20;
+        x26=pow(x9, -3.0/2.0);
+        x31=rt2 - x7;
+        x33=mu*x2*x26*x31;
+        x35=x33*x8;
+
+        /* Assignment result[2, 3]=rhot2*x21 + rhot2*x35 */
+        result[11] = rhot2*x21 + rhot2*x35;
+    }
+
+    /* Assignment result[0, 4]=Piecewise((1, x3), (0, x4)) */
+    if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 4]=1 */
+        result[12] = 1;
+    }
+    else if (x4)
+    {
+        DEBUG_PRINT("Case (x4) is True.\n");
+
+        /* Assignment result[0, 4]=0 */
+        result[12] = 0;
+    }
+
+    /* Assignment result[1, 4]=Piecewise((0, x23), (-x25, x22)) */
+    if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[1, 4]=0 */
+        result[13] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x19=rt1 - x5;
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x24=mu*x20;
+        x25=x19*x24;
+
+        /* Assignment result[1, 4]=-x25 */
+        result[13] = -x25;
+    }
+
+    /* Assignment result[2, 4]=Piecewise((0, x23), (-x32, x22)) */
+    if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[2, 4]=0 */
+        result[14] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x24=mu*x20;
+        x31=rt2 - x7;
+        x32=x24*x31;
+
+        /* Assignment result[2, 4]=-x32 */
+        result[14] = -x32;
+    }
+
+    /* Assignment result[0, 5]=0 */
+    result[15] = 0;
+
+    /* Assignment result[1, 5]=Piecewise((0, x14), (1, x18), (-x28 + x30, x22)) */
+    double x30;if (x14)
+    {
+        DEBUG_PRINT("Case (x14) is True.\n");
+
+        /* Assignment result[1, 5]=0 */
+        result[16] = 0;
+    }
+    else if (x18)
+    {
+        DEBUG_PRINT("Case (x18) is True.\n");
+
+        /* Assignment result[1, 5]=1 */
+        result[16] = 1;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x19=rt1 - x5;
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x12*x20;
+        x26=pow(x9, -3.0/2.0);
+        x27=mu*x19*x2*x26;
+        x28=x27*x6;
+        x30=-x21 + 1;
+
+        /* Assignment result[1, 5]=-x28 + x30 */
+        result[16] = -x28 + x30;
+    }
+
+    /* Assignment result[2, 5]=Piecewise((0, x23), (-x34, x22)) */
+    if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[2, 5]=0 */
+        result[17] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x26=pow(x9, -3.0/2.0);
+        x31=rt2 - x7;
+        x33=mu*x2*x26*x31;
+        x34=x33*x6;
+
+        /* Assignment result[2, 5]=-x34 */
+        result[17] = -x34;
+    }
+
+    /* Assignment result[0, 6]=0 */
+    result[18] = 0;
+
+    /* Assignment result[1, 6]=Piecewise((0, x23), (-x29, x22)) */
+    if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[1, 6]=0 */
+        result[19] = 0;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x19=rt1 - x5;
+        x26=pow(x9, -3.0/2.0);
+        x27=mu*x19*x2*x26;
+        x29=x27*x8;
+
+        /* Assignment result[1, 6]=-x29 */
+        result[19] = -x29;
+    }
+
+    /* Assignment result[2, 6]=Piecewise((0, x14), (1, x18), (x30 - x35, x22)) */
+    if (x14)
+    {
+        DEBUG_PRINT("Case (x14) is True.\n");
+
+        /* Assignment result[2, 6]=0 */
+        result[20] = 0;
+    }
+    else if (x18)
+    {
+        DEBUG_PRINT("Case (x18) is True.\n");
+
+        /* Assignment result[2, 6]=1 */
+        result[20] = 1;
+    }
+    else if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x12*x20;
+        x26=pow(x9, -3.0/2.0);
+        x30=-x21 + 1;
+        x31=rt2 - x7;
+        x33=mu*x2*x26*x31;
+        x35=x33*x8;
+
+        /* Assignment result[2, 6]=x30 - x35 */
+        result[20] = x30 - x35;
+    }
 }
 void frictionContact3D_AlartCurnierFGenerated(
   double rn,
@@ -402,41 +513,94 @@ void frictionContact3D_AlartCurnierFGenerated(
   double rhot2,
   double *result)
 {
-  double x0=-rhon*un + rn;
-  double x1;
-  double x2=-rhot1*ut1 + rt1;
-  double x3=-rhot2*ut2 + rt2;
-  double x4=sqrt(pow(x2, 2) + pow(x3, 2));
-  double x5;
-  int x6 = 0;
-  double x7;
-  int x8 = 0;
-  if (x0 <= 0)
-  {
-    x1=0;
-  };
-  if (x0 > 0)
-  {
-    x1=x0;
-  };
-  if (x0 <= 0 || x0 > 0)
-  {
-    x5=mu*x1;
-    x6=x4 <= x5;
-    x7=mu*x1/x4;
-    x8=x4 > x5;
-    result[0]=rn - x1;
-  };
-  if ((x0 <= 0 || x0 > 0) && (x6))
-  {
-    result[1]=rt1 - x2;
-    result[2]=rt2 - x3;
-  };
-  if ((x0 <= 0 || x0 > 0) && (x8))
-  {
-    result[1]=rt1 - x2*x7;
-    result[2]=rt2 - x3*x7;
-  };
+    double x1;
+    double x2;
+    int x3;
+    x1=rhon*un;
+    x2=rn - x1;
+    x3=x2 <= 0;
+    int x4;
+    x4=x2 > 0;
+    double x5;
+    double x6;
+    double x7;
+    double x8;
+    int x9;
+    x5=rhot1*ut1;
+    x6=rhot2*ut2;
+    x7=(assert(IS_POSITIVE((-rt1 + x5)*(-rt1 + x5) + (-rt2 + x6)*(-rt2 + x6))), sqrt((-rt1 + x5)*(-rt1 + x5) + (-rt2 + x6)*(-rt2 + x6)));
+    x8=mu*x2;
+    x9=x3 && x7 <= 0 || x4 && x7 <= x8;
+    int x10;
+    int x11;
+    x10=x3 && x7 > 0 || x4 && x7 > x8;
+    x11=x10 && x3;
+    int x13;
+    double x12;
+    x13=x10 && x4;
+    /* Assignment result[0, 0]=Piecewise((rn, x3), (x1, x4)) */
+    if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 0]=rn */
+        result[0] = rn;
+    }
+    else if (x4)
+    {
+        DEBUG_PRINT("Case (x4) is True.\n");
+
+        /* Assignment result[0, 0]=x1 */
+        result[0] = x1;
+    }
+
+    /* Assignment result[1, 0]=Piecewise((x5, x9), (rt1, x11), (rt1 - x12*(rt1 - x5), x13)) */
+    if (x9)
+    {
+        DEBUG_PRINT("Case (x9) is True.\n");
+
+        /* Assignment result[1, 0]=x5 */
+        result[1] = x5;
+    }
+    else if (x11)
+    {
+        DEBUG_PRINT("Case (x11) is True.\n");
+
+        /* Assignment result[1, 0]=rt1 */
+        result[1] = rt1;
+    }
+    else if (x13)
+    {
+        DEBUG_PRINT("Case (x13) is True.\n");
+        x12=(assert(IS_NOT_ZERO(x7)), mu*x2/x7);
+
+        /* Assignment result[1, 0]=rt1 - x12*(rt1 - x5) */
+        result[1] = rt1 - x12*(rt1 - x5);
+    }
+
+    /* Assignment result[2, 0]=Piecewise((x6, x9), (rt2, x11), (rt2 - x12*(rt2 - x6), x13)) */
+    if (x9)
+    {
+        DEBUG_PRINT("Case (x9) is True.\n");
+
+        /* Assignment result[2, 0]=x6 */
+        result[2] = x6;
+    }
+    else if (x11)
+    {
+        DEBUG_PRINT("Case (x11) is True.\n");
+
+        /* Assignment result[2, 0]=rt2 */
+        result[2] = rt2;
+    }
+    else if (x13)
+    {
+        DEBUG_PRINT("Case (x13) is True.\n");
+        x12=(assert(IS_NOT_ZERO(x7)), mu*x2/x7);
+
+        /* Assignment result[2, 0]=rt2 - x12*(rt2 - x6) */
+        result[2] = rt2 - x12*(rt2 - x6);
+    }
 }
 void frictionContact3D_AlartCurnierABGenerated(
   double rn,
@@ -451,98 +615,375 @@ void frictionContact3D_AlartCurnierABGenerated(
   double rhot2,
   double *result)
 {
-  double x0=-rhon*un + rn;
-  int    x1=x0 <= 0;
-  int    x2=x0 > 0;
-  double x3;
-  double x4;
-  double x5=rhot1*ut1;
-  double x6=rt1 - x5;
-  double x7=x6*x6;
-  double x8=rhot2*ut2;
-  double x9=rt2 - x8;
-  double x10=x9*x9;
-  double x11=x10 + x7;
-  double x12=sqrt(x11);
-  double x13;
-  double x14;
-  int x15 = 0;
-  double x16=1./(x12);
-  double x17;
-  int x18 = 0;
-  double x19;
-  double x20=sqrt(1./(x11*x11*x11));
-  double x21;
-  double x22=x6*x9;
-  double x23;
-  double x24;
-  double x25=-rt1 + x5;
-  double x26;
-  double x27=-rt2 + x8;
-  double x28;
-  if (x1)
-  {
-    x3=0;
-    x4=0;
-    x13=0;
-  };
-  if (x2)
-  {
-    x3=-rhon;
-    x4=1;
-    x13=x0;
-  };
-  if (x1 || x2)
-  {
-    x14=mu*x13;
-    x15=x12 <= x14;
-    x17=mu*x16*x3;
-    x18=x12 > x14;
-    x19=x14*x16;
-    x21=mu*rhot1*x13*x20;
-    x23=mu*rhot2*x13*x20;
-    x24=mu*x16*x4;
-    x26=mu*x13*x20*x6;
-    x28=mu*x13*x20*x9;
-    result[0]=-x3;
-    result[9]=-x4 + 1;
-  };
-  if ((x1 || x2) && (x15))
-  {
-    result[1]=0;
-    result[4]=rhot1;
-    result[7]=0;
-    result[10]=0;
-    result[13]=0;
-    result[16]=0;
-    result[2]=0;
-    result[5]=0;
-    result[8]=rhot2;
-    result[11]=0;
-    result[14]=0;
-    result[17]=0;
-  };
-  if ((x1 || x2) && (x18))
-  {
-    result[1]=-x17*x6;
-    result[4]=rhot1*x19 - x21*x7;
-    result[7]=-x22*x23;
-    result[10]=-x24*x6;
-    result[13]=-x19 - x25*x26 + 1;
-    result[16]=-x26*x27;
-    result[2]=-x17*x9;
-    result[5]=-x21*x22;
-    result[8]=rhot2*x19 - x10*x23;
-    result[11]=-x24*x9;
-    result[14]=-x25*x28;
-    result[17]=-x19 - x27*x28 + 1;
-  };
-  result[3]=0;
-  result[6]=0;
-  result[12]=0;
-  result[15]=0;
-}
+    double x1;
+    int x2;
+    x1=-rhon*un + rn;
+    x2=x1 <= 0;
+    int x3;
+    x3=x1 > 0;
+    double x4;
+    double x5;
+    double x6;
+    double x7;
+    double x8;
+    double x9;
+    double x10;
+    int x11;
+    int x12;
+    int x13;
+    int x14;
+    int x15;
+    x4=rhot1*ut1;
+    x5=-rt1 + x4;
+    x6=rhot2*ut2;
+    x7=-rt2 + x6;
+    x8=x5*x5 + x7*x7;
+    x9=(assert(IS_POSITIVE(x8)), sqrt(x8));
+    x10=mu*x1;
+    x11=x9 <= x10;
+    x12=x9 <= 0;
+    x13=x9 > x10;
+    x14=x9 > 0;
+    x15=(x11 || x2) && (x11 || x12 || x2) && (x11 || x13 || x2) && (x11 || x2 || x3) && (x12 || x2 || x3) && (x11 || x12 || x13 || x2) && (x11 || x12 || x2 || x3) && (x11 || x13 || x14 || x2) && (x11 || x14 || x2 || x3);
+    int x20;
+    int x21;
+    double x16;
+    double x17;
+    double x18;
+    double x19;
+    x20=x13 && x3 || x14 && x2;
+    x21=x20 && x3;
+    int x22;
+    x22=x11 && x3 || x12 && x2;
+    int x23;
+    x23=x2 && x20;
+    /* Assignment result[0, 0]=Piecewise((0, x2), (rhon, x3)) */
+    if (x2)
+    {
+        DEBUG_PRINT("Case (x2) is True.\n");
 
+        /* Assignment result[0, 0]=0 */
+        result[0] = 0;
+    }
+    else if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 0]=rhon */
+        result[0] = rhon;
+    }
+
+    /* Assignment result[1, 0]=Piecewise((0, x15), (rhon*x19, x21)) */
+    if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[1, 0]=0 */
+        result[1] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x16=rt1 - x4;
+        x17=1.0/(assert(IS_NOT_ZERO(x9)), x9);
+        x18=mu*x17;
+        x19=x16*x18;
+
+        /* Assignment result[1, 0]=rhon*x19 */
+        result[1] = rhon*x19;
+    }
+
+    /* Assignment result[2, 0]=Piecewise((0, x15), (rhon*x31, x21)) */
+    double x30;
+    double x31;if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[2, 0]=0 */
+        result[2] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x17=1.0/(assert(IS_NOT_ZERO(x9)), x9);
+        x18=mu*x17;
+        x30=rt2 - x6;
+        x31=x18*x30;
+
+        /* Assignment result[2, 0]=rhon*x31 */
+        result[2] = rhon*x31;
+    }
+
+    /* Assignment result[0, 1]=0 */
+    result[3] = 0;
+
+    /* Assignment result[1, 1]=Piecewise((rhot1, x22), (0, x23), (rhot1*x24 + rhot1*x27, x21)) */
+    double x24;
+    double x25;
+    double x26;
+    double x27;if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+
+        /* Assignment result[1, 1]=rhot1 */
+        result[4] = rhot1;
+    }
+    else if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[1, 1]=0 */
+        result[4] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x16=rt1 - x4;
+        x17=1.0/(assert(IS_NOT_ZERO(x9)), x9);
+        x24=x10*x17;
+        x25=pow(x8, -3.0/2.0);
+        x26=mu*x1*x16*x25;
+        x27=x26*x5;
+
+        /* Assignment result[1, 1]=rhot1*x24 + rhot1*x27 */
+        result[4] = rhot1*x24 + rhot1*x27;
+    }
+
+    /* Assignment result[2, 1]=Piecewise((0, x15), (rhot1*x33, x21)) */
+    double x32;
+    double x33;if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[2, 1]=0 */
+        result[5] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x25=pow(x8, -3.0/2.0);
+        x30=rt2 - x6;
+        x32=mu*x1*x25*x30;
+        x33=x32*x5;
+
+        /* Assignment result[2, 1]=rhot1*x33 */
+        result[5] = rhot1*x33;
+    }
+
+    /* Assignment result[0, 2]=0 */
+    result[6] = 0;
+
+    /* Assignment result[1, 2]=Piecewise((0, x15), (rhot2*x28, x21)) */
+    double x28;if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[1, 2]=0 */
+        result[7] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x16=rt1 - x4;
+        x25=pow(x8, -3.0/2.0);
+        x26=mu*x1*x16*x25;
+        x28=x26*x7;
+
+        /* Assignment result[1, 2]=rhot2*x28 */
+        result[7] = rhot2*x28;
+    }
+
+    /* Assignment result[2, 2]=Piecewise((rhot2, x22), (0, x23), (rhot2*x24 + rhot2*x34, x21)) */
+    double x34;if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+
+        /* Assignment result[2, 2]=rhot2 */
+        result[8] = rhot2;
+    }
+    else if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[2, 2]=0 */
+        result[8] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x17=1.0/(assert(IS_NOT_ZERO(x9)), x9);
+        x24=x10*x17;
+        x25=pow(x8, -3.0/2.0);
+        x30=rt2 - x6;
+        x32=mu*x1*x25*x30;
+        x34=x32*x7;
+
+        /* Assignment result[2, 2]=rhot2*x24 + rhot2*x34 */
+        result[8] = rhot2*x24 + rhot2*x34;
+    }
+
+    /* Assignment result[0, 3]=Piecewise((1, x2), (0, x3)) */
+    if (x2)
+    {
+        DEBUG_PRINT("Case (x2) is True.\n");
+
+        /* Assignment result[0, 3]=1 */
+        result[9] = 1;
+    }
+    else if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 3]=0 */
+        result[9] = 0;
+    }
+
+    /* Assignment result[1, 3]=Piecewise((0, x15), (-x19, x21)) */
+    if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[1, 3]=0 */
+        result[10] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x16=rt1 - x4;
+        x17=1.0/(assert(IS_NOT_ZERO(x9)), x9);
+        x18=mu*x17;
+        x19=x16*x18;
+
+        /* Assignment result[1, 3]=-x19 */
+        result[10] = -x19;
+    }
+
+    /* Assignment result[2, 3]=Piecewise((0, x15), (-x31, x21)) */
+    if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[2, 3]=0 */
+        result[11] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x17=1.0/(assert(IS_NOT_ZERO(x9)), x9);
+        x18=mu*x17;
+        x30=rt2 - x6;
+        x31=x18*x30;
+
+        /* Assignment result[2, 3]=-x31 */
+        result[11] = -x31;
+    }
+
+    /* Assignment result[0, 4]=0 */
+    result[12] = 0;
+
+    /* Assignment result[1, 4]=Piecewise((0, x22), (1, x23), (-x27 + x29, x21)) */
+    double x29;if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+
+        /* Assignment result[1, 4]=0 */
+        result[13] = 0;
+    }
+    else if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[1, 4]=1 */
+        result[13] = 1;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x16=rt1 - x4;
+        x17=1.0/(assert(IS_NOT_ZERO(x9)), x9);
+        x24=x10*x17;
+        x25=pow(x8, -3.0/2.0);
+        x26=mu*x1*x16*x25;
+        x27=x26*x5;
+        x29=-x24 + 1;
+
+        /* Assignment result[1, 4]=-x27 + x29 */
+        result[13] = -x27 + x29;
+    }
+
+    /* Assignment result[2, 4]=Piecewise((0, x15), (-x33, x21)) */
+    if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[2, 4]=0 */
+        result[14] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x25=pow(x8, -3.0/2.0);
+        x30=rt2 - x6;
+        x32=mu*x1*x25*x30;
+        x33=x32*x5;
+
+        /* Assignment result[2, 4]=-x33 */
+        result[14] = -x33;
+    }
+
+    /* Assignment result[0, 5]=0 */
+    result[15] = 0;
+
+    /* Assignment result[1, 5]=Piecewise((0, x15), (-x28, x21)) */
+    if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[1, 5]=0 */
+        result[16] = 0;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x16=rt1 - x4;
+        x25=pow(x8, -3.0/2.0);
+        x26=mu*x1*x16*x25;
+        x28=x26*x7;
+
+        /* Assignment result[1, 5]=-x28 */
+        result[16] = -x28;
+    }
+
+    /* Assignment result[2, 5]=Piecewise((0, x22), (1, x23), (x29 - x34, x21)) */
+    if (x22)
+    {
+        DEBUG_PRINT("Case (x22) is True.\n");
+
+        /* Assignment result[2, 5]=0 */
+        result[17] = 0;
+    }
+    else if (x23)
+    {
+        DEBUG_PRINT("Case (x23) is True.\n");
+
+        /* Assignment result[2, 5]=1 */
+        result[17] = 1;
+    }
+    else if (x21)
+    {
+        DEBUG_PRINT("Case (x21) is True.\n");
+        x17=1.0/(assert(IS_NOT_ZERO(x9)), x9);
+        x24=x10*x17;
+        x25=pow(x8, -3.0/2.0);
+        x29=-x24 + 1;
+        x30=rt2 - x6;
+        x32=mu*x1*x25*x30;
+        x34=x32*x7;
+
+        /* Assignment result[2, 5]=x29 - x34 */
+        result[17] = x29 - x34;
+    }
+}
 
 void frictionContact3D_AlartCurnierFunctionGenerated(
   double *reaction,
@@ -553,7 +994,7 @@ void frictionContact3D_AlartCurnierFunctionGenerated(
   double *A,
   double *B)
 {
-  double result[21]; //3 + 2 * 9
+  double result[21];
 
   assert(reaction);
   assert(velocity);
@@ -605,7 +1046,876 @@ void frictionContact3D_AlartCurnierFunctionGenerated(
   }
 }
 
-void frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated(
+void frictionContact3D_AlartCurnierJeanMoreauFABGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+    double x1;
+    double x2;
+    int x3;
+    x1=rhon*un;
+    x2=rn - x1;
+    x3=x2 <= 0;
+    int x4;
+    x4=x2 > 0;
+    double x5;
+    int x6;
+    double x7;
+    double x8;
+    double x9;
+    double x10;
+    double x11;
+    int x12;
+    int x13;
+    double x14;
+    int x15;
+    int x16;
+    x5=rhot1*ut1;
+    x6=rn <= 0;
+    x7=-rt1 + x5;
+    x8=rhot2*ut2;
+    x9=-rt2 + x8;
+    x10=x7*x7 + x9*x9;
+    x11=(assert(IS_POSITIVE(x10)), sqrt(x10));
+    x12=x11 <= 0;
+    x13=rn > 0;
+    x14=mu*rn;
+    x15=x11 <= x14;
+    x16=x12 && x6 || x13 && x15;
+    int x17;
+    int x18;
+    int x19;
+    int x20;
+    x17=x11 > 0;
+    x18=x11 > x14;
+    x19=x13 && x18 || x17 && x6;
+    x20=x19 && x6;
+    int x24;
+    double x21;
+    double x22;
+    double x23;
+    x24=x13 && x19;
+    int x28;
+    x28=(x15 || x6) && (x12 || x13 || x6) && (x12 || x15 || x6) && (x13 || x15 || x6) && (x15 || x18 || x6) && (x12 || x13 || x15 || x6) && (x12 || x15 || x18 || x6) && (x13 || x15 || x17 || x6) && (x15 || x17 || x18 || x6);
+    /* Assignment result[0, 0]=Piecewise((rn, x3), (x1, x4)) */
+    if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 0]=rn */
+        result[0] = rn;
+    }
+    else if (x4)
+    {
+        DEBUG_PRINT("Case (x4) is True.\n");
+
+        /* Assignment result[0, 0]=x1 */
+        result[0] = x1;
+    }
+
+    /* Assignment result[1, 0]=Piecewise((x5, x16), (rt1, x20), (rt1 - x21*x23, x24)) */
+    if (x16)
+    {
+        DEBUG_PRINT("Case (x16) is True.\n");
+
+        /* Assignment result[1, 0]=x5 */
+        result[1] = x5;
+    }
+    else if (x20)
+    {
+        DEBUG_PRINT("Case (x20) is True.\n");
+
+        /* Assignment result[1, 0]=rt1 */
+        result[1] = rt1;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x21=rt1 - x5;
+        x22=1.0/(assert(IS_NOT_ZERO(x11)), x11);
+        x23=x14*x22;
+
+        /* Assignment result[1, 0]=rt1 - x21*x23 */
+        result[1] = rt1 - x21*x23;
+    }
+
+    /* Assignment result[2, 0]=Piecewise((x8, x16), (rt2, x20), (rt2 - x23*x32, x24)) */
+    double x32;if (x16)
+    {
+        DEBUG_PRINT("Case (x16) is True.\n");
+
+        /* Assignment result[2, 0]=x8 */
+        result[2] = x8;
+    }
+    else if (x20)
+    {
+        DEBUG_PRINT("Case (x20) is True.\n");
+
+        /* Assignment result[2, 0]=rt2 */
+        result[2] = rt2;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x22=1.0/(assert(IS_NOT_ZERO(x11)), x11);
+        x23=x14*x22;
+        x32=rt2 - x8;
+
+        /* Assignment result[2, 0]=rt2 - x23*x32 */
+        result[2] = rt2 - x23*x32;
+    }
+
+    /* Assignment result[0, 1]=Piecewise((0, x3), (rhon, x4)) */
+    if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 1]=0 */
+        result[3] = 0;
+    }
+    else if (x4)
+    {
+        DEBUG_PRINT("Case (x4) is True.\n");
+
+        /* Assignment result[0, 1]=rhon */
+        result[3] = rhon;
+    }
+
+    /* Assignment result[1, 1]=0 */
+    result[4] = 0;
+
+    /* Assignment result[2, 1]=0 */
+    result[5] = 0;
+
+    /* Assignment result[0, 2]=0 */
+    result[6] = 0;
+
+    /* Assignment result[1, 2]=Piecewise((rhot1, x16), (0, x20), (rhot1*x23 + rhot1*x27, x24)) */
+    double x25;
+    double x26;
+    double x27;if (x16)
+    {
+        DEBUG_PRINT("Case (x16) is True.\n");
+
+        /* Assignment result[1, 2]=rhot1 */
+        result[7] = rhot1;
+    }
+    else if (x20)
+    {
+        DEBUG_PRINT("Case (x20) is True.\n");
+
+        /* Assignment result[1, 2]=0 */
+        result[7] = 0;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x21=rt1 - x5;
+        x22=1.0/(assert(IS_NOT_ZERO(x11)), x11);
+        x23=x14*x22;
+        x25=pow(x10, -3.0/2.0);
+        x26=mu*rn*x21*x25;
+        x27=x26*x7;
+
+        /* Assignment result[1, 2]=rhot1*x23 + rhot1*x27 */
+        result[7] = rhot1*x23 + rhot1*x27;
+    }
+
+    /* Assignment result[2, 2]=Piecewise((0, x28), (rhot1*x34, x24)) */
+    double x33;
+    double x34;if (x28)
+    {
+        DEBUG_PRINT("Case (x28) is True.\n");
+
+        /* Assignment result[2, 2]=0 */
+        result[8] = 0;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x25=pow(x10, -3.0/2.0);
+        x32=rt2 - x8;
+        x33=mu*rn*x25*x32;
+        x34=x33*x7;
+
+        /* Assignment result[2, 2]=rhot1*x34 */
+        result[8] = rhot1*x34;
+    }
+
+    /* Assignment result[0, 3]=0 */
+    result[9] = 0;
+
+    /* Assignment result[1, 3]=Piecewise((0, x28), (rhot2*x29, x24)) */
+    double x29;if (x28)
+    {
+        DEBUG_PRINT("Case (x28) is True.\n");
+
+        /* Assignment result[1, 3]=0 */
+        result[10] = 0;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x21=rt1 - x5;
+        x25=pow(x10, -3.0/2.0);
+        x26=mu*rn*x21*x25;
+        x29=x26*x9;
+
+        /* Assignment result[1, 3]=rhot2*x29 */
+        result[10] = rhot2*x29;
+    }
+
+    /* Assignment result[2, 3]=Piecewise((rhot2, x16), (0, x20), (rhot2*x23 + rhot2*x35, x24)) */
+    double x35;if (x16)
+    {
+        DEBUG_PRINT("Case (x16) is True.\n");
+
+        /* Assignment result[2, 3]=rhot2 */
+        result[11] = rhot2;
+    }
+    else if (x20)
+    {
+        DEBUG_PRINT("Case (x20) is True.\n");
+
+        /* Assignment result[2, 3]=0 */
+        result[11] = 0;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x22=1.0/(assert(IS_NOT_ZERO(x11)), x11);
+        x23=x14*x22;
+        x25=pow(x10, -3.0/2.0);
+        x32=rt2 - x8;
+        x33=mu*rn*x25*x32;
+        x35=x33*x9;
+
+        /* Assignment result[2, 3]=rhot2*x23 + rhot2*x35 */
+        result[11] = rhot2*x23 + rhot2*x35;
+    }
+
+    /* Assignment result[0, 4]=Piecewise((1, x3), (0, x4)) */
+    if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 4]=1 */
+        result[12] = 1;
+    }
+    else if (x4)
+    {
+        DEBUG_PRINT("Case (x4) is True.\n");
+
+        /* Assignment result[0, 4]=0 */
+        result[12] = 0;
+    }
+
+    /* Assignment result[1, 4]=Piecewise((0, x28), (-x21*x30, x24)) */
+    double x30;if (x28)
+    {
+        DEBUG_PRINT("Case (x28) is True.\n");
+
+        /* Assignment result[1, 4]=0 */
+        result[13] = 0;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x21=rt1 - x5;
+        x22=1.0/(assert(IS_NOT_ZERO(x11)), x11);
+        x30=mu*x22;
+
+        /* Assignment result[1, 4]=-x21*x30 */
+        result[13] = -x21*x30;
+    }
+
+    /* Assignment result[2, 4]=Piecewise((0, x28), (-x30*x32, x24)) */
+    if (x28)
+    {
+        DEBUG_PRINT("Case (x28) is True.\n");
+
+        /* Assignment result[2, 4]=0 */
+        result[14] = 0;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x22=1.0/(assert(IS_NOT_ZERO(x11)), x11);
+        x30=mu*x22;
+        x32=rt2 - x8;
+
+        /* Assignment result[2, 4]=-x30*x32 */
+        result[14] = -x30*x32;
+    }
+
+    /* Assignment result[0, 5]=0 */
+    result[15] = 0;
+
+    /* Assignment result[1, 5]=Piecewise((0, x16), (1, x20), (-x27 + x31, x24)) */
+    double x31;if (x16)
+    {
+        DEBUG_PRINT("Case (x16) is True.\n");
+
+        /* Assignment result[1, 5]=0 */
+        result[16] = 0;
+    }
+    else if (x20)
+    {
+        DEBUG_PRINT("Case (x20) is True.\n");
+
+        /* Assignment result[1, 5]=1 */
+        result[16] = 1;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x21=rt1 - x5;
+        x22=1.0/(assert(IS_NOT_ZERO(x11)), x11);
+        x23=x14*x22;
+        x25=pow(x10, -3.0/2.0);
+        x26=mu*rn*x21*x25;
+        x27=x26*x7;
+        x31=-x23 + 1;
+
+        /* Assignment result[1, 5]=-x27 + x31 */
+        result[16] = -x27 + x31;
+    }
+
+    /* Assignment result[2, 5]=Piecewise((0, x28), (-x34, x24)) */
+    if (x28)
+    {
+        DEBUG_PRINT("Case (x28) is True.\n");
+
+        /* Assignment result[2, 5]=0 */
+        result[17] = 0;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x25=pow(x10, -3.0/2.0);
+        x32=rt2 - x8;
+        x33=mu*rn*x25*x32;
+        x34=x33*x7;
+
+        /* Assignment result[2, 5]=-x34 */
+        result[17] = -x34;
+    }
+
+    /* Assignment result[0, 6]=0 */
+    result[18] = 0;
+
+    /* Assignment result[1, 6]=Piecewise((0, x28), (-x29, x24)) */
+    if (x28)
+    {
+        DEBUG_PRINT("Case (x28) is True.\n");
+
+        /* Assignment result[1, 6]=0 */
+        result[19] = 0;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x21=rt1 - x5;
+        x25=pow(x10, -3.0/2.0);
+        x26=mu*rn*x21*x25;
+        x29=x26*x9;
+
+        /* Assignment result[1, 6]=-x29 */
+        result[19] = -x29;
+    }
+
+    /* Assignment result[2, 6]=Piecewise((0, x16), (1, x20), (x31 - x35, x24)) */
+    if (x16)
+    {
+        DEBUG_PRINT("Case (x16) is True.\n");
+
+        /* Assignment result[2, 6]=0 */
+        result[20] = 0;
+    }
+    else if (x20)
+    {
+        DEBUG_PRINT("Case (x20) is True.\n");
+
+        /* Assignment result[2, 6]=1 */
+        result[20] = 1;
+    }
+    else if (x24)
+    {
+        DEBUG_PRINT("Case (x24) is True.\n");
+        x22=1.0/(assert(IS_NOT_ZERO(x11)), x11);
+        x23=x14*x22;
+        x25=pow(x10, -3.0/2.0);
+        x31=-x23 + 1;
+        x32=rt2 - x8;
+        x33=mu*rn*x25*x32;
+        x35=x33*x9;
+
+        /* Assignment result[2, 6]=x31 - x35 */
+        result[20] = x31 - x35;
+    }
+}
+void frictionContact3D_AlartCurnierJeanMoreauFGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+    double x1;
+    double x2;
+    x1=rhon*un;
+    x2=rn - x1;
+    double x3;
+    int x4;
+    double x5;
+    double x6;
+    int x7;
+    double x8;
+    int x9;
+    x3=rhot1*ut1;
+    x4=rn <= 0;
+    x5=rhot2*ut2;
+    x6=(assert(IS_POSITIVE((-rt1 + x3)*(-rt1 + x3) + (-rt2 + x5)*(-rt2 + x5))), sqrt((-rt1 + x3)*(-rt1 + x3) + (-rt2 + x5)*(-rt2 + x5)));
+    x7=rn > 0;
+    x8=mu*rn;
+    x9=x4 && x6 <= 0 || x7 && x6 <= x8;
+    int x10;
+    int x11;
+    x10=x4 && x6 > 0 || x7 && x6 > x8;
+    x11=x10 && x4;
+    int x13;
+    double x12;
+    x13=x10 && x7;
+    /* Assignment result[0, 0]=Piecewise((rn, x2 <= 0), (x1, x2 > 0)) */
+    if (x2 <= 0)
+    {
+        DEBUG_PRINT("Case (x2 <= 0) is True.\n");
+
+        /* Assignment result[0, 0]=rn */
+        result[0] = rn;
+    }
+    else if (x2 > 0)
+    {
+        DEBUG_PRINT("Case (x2 > 0) is True.\n");
+
+        /* Assignment result[0, 0]=x1 */
+        result[0] = x1;
+    }
+
+    /* Assignment result[1, 0]=Piecewise((x3, x9), (rt1, x11), (rt1 - x12*(rt1 - x3), x13)) */
+    if (x9)
+    {
+        DEBUG_PRINT("Case (x9) is True.\n");
+
+        /* Assignment result[1, 0]=x3 */
+        result[1] = x3;
+    }
+    else if (x11)
+    {
+        DEBUG_PRINT("Case (x11) is True.\n");
+
+        /* Assignment result[1, 0]=rt1 */
+        result[1] = rt1;
+    }
+    else if (x13)
+    {
+        DEBUG_PRINT("Case (x13) is True.\n");
+        x12=(assert(IS_NOT_ZERO(x6)), mu*rn/x6);
+
+        /* Assignment result[1, 0]=rt1 - x12*(rt1 - x3) */
+        result[1] = rt1 - x12*(rt1 - x3);
+    }
+
+    /* Assignment result[2, 0]=Piecewise((x5, x9), (rt2, x11), (rt2 - x12*(rt2 - x5), x13)) */
+    if (x9)
+    {
+        DEBUG_PRINT("Case (x9) is True.\n");
+
+        /* Assignment result[2, 0]=x5 */
+        result[2] = x5;
+    }
+    else if (x11)
+    {
+        DEBUG_PRINT("Case (x11) is True.\n");
+
+        /* Assignment result[2, 0]=rt2 */
+        result[2] = rt2;
+    }
+    else if (x13)
+    {
+        DEBUG_PRINT("Case (x13) is True.\n");
+        x12=(assert(IS_NOT_ZERO(x6)), mu*rn/x6);
+
+        /* Assignment result[2, 0]=rt2 - x12*(rt2 - x5) */
+        result[2] = rt2 - x12*(rt2 - x5);
+    }
+}
+void frictionContact3D_AlartCurnierJeanMoreauABGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+    double x1;
+    int x2;
+    x1=-rhon*un + rn;
+    x2=x1 <= 0;
+    int x3;
+    x3=x1 > 0;
+    int x4;
+    double x5;
+    double x6;
+    double x7;
+    double x8;
+    double x9;
+    double x10;
+    int x11;
+    int x12;
+    double x13;
+    int x14;
+    int x15;
+    x4=rn <= 0;
+    x5=rhot1*ut1;
+    x6=-rt1 + x5;
+    x7=rhot2*ut2;
+    x8=-rt2 + x7;
+    x9=x6*x6 + x8*x8;
+    x10=(assert(IS_POSITIVE(x9)), sqrt(x9));
+    x11=x10 <= 0;
+    x12=rn > 0;
+    x13=mu*rn;
+    x14=x10 <= x13;
+    x15=x11 && x4 || x12 && x14;
+    int x16;
+    int x17;
+    int x18;
+    int x19;
+    x16=x10 > 0;
+    x17=x10 > x13;
+    x18=x12 && x17 || x16 && x4;
+    x19=x18 && x4;
+    int x26;
+    double x20;
+    double x21;
+    double x22;
+    double x23;
+    double x24;
+    double x25;
+    x26=x12 && x18;
+    int x27;
+    x27=(x14 || x4) && (x11 || x12 || x4) && (x11 || x14 || x4) && (x12 || x14 || x4) && (x14 || x17 || x4) && (x11 || x12 || x14 || x4) && (x11 || x14 || x17 || x4) && (x12 || x14 || x16 || x4) && (x14 || x16 || x17 || x4);
+    /* Assignment result[0, 0]=Piecewise((0, x2), (rhon, x3)) */
+    if (x2)
+    {
+        DEBUG_PRINT("Case (x2) is True.\n");
+
+        /* Assignment result[0, 0]=0 */
+        result[0] = 0;
+    }
+    else if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 0]=rhon */
+        result[0] = rhon;
+    }
+
+    /* Assignment result[1, 0]=0 */
+    result[1] = 0;
+
+    /* Assignment result[2, 0]=0 */
+    result[2] = 0;
+
+    /* Assignment result[0, 1]=0 */
+    result[3] = 0;
+
+    /* Assignment result[1, 1]=Piecewise((rhot1, x15), (0, x19), (rhot1*x21 + rhot1*x25, x26)) */
+    if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[1, 1]=rhot1 */
+        result[4] = rhot1;
+    }
+    else if (x19)
+    {
+        DEBUG_PRINT("Case (x19) is True.\n");
+
+        /* Assignment result[1, 1]=0 */
+        result[4] = 0;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x13*x20;
+        x22=rt1 - x5;
+        x23=pow(x9, -3.0/2.0);
+        x24=mu*rn*x22*x23;
+        x25=x24*x6;
+
+        /* Assignment result[1, 1]=rhot1*x21 + rhot1*x25 */
+        result[4] = rhot1*x21 + rhot1*x25;
+    }
+
+    /* Assignment result[2, 1]=Piecewise((0, x27), (rhot1*x33, x26)) */
+    double x31;
+    double x32;
+    double x33;if (x27)
+    {
+        DEBUG_PRINT("Case (x27) is True.\n");
+
+        /* Assignment result[2, 1]=0 */
+        result[5] = 0;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x23=pow(x9, -3.0/2.0);
+        x31=rt2 - x7;
+        x32=mu*rn*x23*x31;
+        x33=x32*x6;
+
+        /* Assignment result[2, 1]=rhot1*x33 */
+        result[5] = rhot1*x33;
+    }
+
+    /* Assignment result[0, 2]=0 */
+    result[6] = 0;
+
+    /* Assignment result[1, 2]=Piecewise((0, x27), (rhot2*x28, x26)) */
+    double x28;if (x27)
+    {
+        DEBUG_PRINT("Case (x27) is True.\n");
+
+        /* Assignment result[1, 2]=0 */
+        result[7] = 0;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x22=rt1 - x5;
+        x23=pow(x9, -3.0/2.0);
+        x24=mu*rn*x22*x23;
+        x28=x24*x8;
+
+        /* Assignment result[1, 2]=rhot2*x28 */
+        result[7] = rhot2*x28;
+    }
+
+    /* Assignment result[2, 2]=Piecewise((rhot2, x15), (0, x19), (rhot2*x21 + rhot2*x34, x26)) */
+    double x34;if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[2, 2]=rhot2 */
+        result[8] = rhot2;
+    }
+    else if (x19)
+    {
+        DEBUG_PRINT("Case (x19) is True.\n");
+
+        /* Assignment result[2, 2]=0 */
+        result[8] = 0;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x13*x20;
+        x23=pow(x9, -3.0/2.0);
+        x31=rt2 - x7;
+        x32=mu*rn*x23*x31;
+        x34=x32*x8;
+
+        /* Assignment result[2, 2]=rhot2*x21 + rhot2*x34 */
+        result[8] = rhot2*x21 + rhot2*x34;
+    }
+
+    /* Assignment result[0, 3]=Piecewise((1, x2), (0, x3)) */
+    if (x2)
+    {
+        DEBUG_PRINT("Case (x2) is True.\n");
+
+        /* Assignment result[0, 3]=1 */
+        result[9] = 1;
+    }
+    else if (x3)
+    {
+        DEBUG_PRINT("Case (x3) is True.\n");
+
+        /* Assignment result[0, 3]=0 */
+        result[9] = 0;
+    }
+
+    /* Assignment result[1, 3]=Piecewise((0, x27), (-x22*x29, x26)) */
+    double x29;if (x27)
+    {
+        DEBUG_PRINT("Case (x27) is True.\n");
+
+        /* Assignment result[1, 3]=0 */
+        result[10] = 0;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x22=rt1 - x5;
+        x29=mu*x20;
+
+        /* Assignment result[1, 3]=-x22*x29 */
+        result[10] = -x22*x29;
+    }
+
+    /* Assignment result[2, 3]=Piecewise((0, x27), (-x29*x31, x26)) */
+    if (x27)
+    {
+        DEBUG_PRINT("Case (x27) is True.\n");
+
+        /* Assignment result[2, 3]=0 */
+        result[11] = 0;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x29=mu*x20;
+        x31=rt2 - x7;
+
+        /* Assignment result[2, 3]=-x29*x31 */
+        result[11] = -x29*x31;
+    }
+
+    /* Assignment result[0, 4]=0 */
+    result[12] = 0;
+
+    /* Assignment result[1, 4]=Piecewise((0, x15), (1, x19), (-x25 + x30, x26)) */
+    double x30;if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[1, 4]=0 */
+        result[13] = 0;
+    }
+    else if (x19)
+    {
+        DEBUG_PRINT("Case (x19) is True.\n");
+
+        /* Assignment result[1, 4]=1 */
+        result[13] = 1;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x13*x20;
+        x22=rt1 - x5;
+        x23=pow(x9, -3.0/2.0);
+        x24=mu*rn*x22*x23;
+        x25=x24*x6;
+        x30=-x21 + 1;
+
+        /* Assignment result[1, 4]=-x25 + x30 */
+        result[13] = -x25 + x30;
+    }
+
+    /* Assignment result[2, 4]=Piecewise((0, x27), (-x33, x26)) */
+    if (x27)
+    {
+        DEBUG_PRINT("Case (x27) is True.\n");
+
+        /* Assignment result[2, 4]=0 */
+        result[14] = 0;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x23=pow(x9, -3.0/2.0);
+        x31=rt2 - x7;
+        x32=mu*rn*x23*x31;
+        x33=x32*x6;
+
+        /* Assignment result[2, 4]=-x33 */
+        result[14] = -x33;
+    }
+
+    /* Assignment result[0, 5]=0 */
+    result[15] = 0;
+
+    /* Assignment result[1, 5]=Piecewise((0, x27), (-x28, x26)) */
+    if (x27)
+    {
+        DEBUG_PRINT("Case (x27) is True.\n");
+
+        /* Assignment result[1, 5]=0 */
+        result[16] = 0;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x22=rt1 - x5;
+        x23=pow(x9, -3.0/2.0);
+        x24=mu*rn*x22*x23;
+        x28=x24*x8;
+
+        /* Assignment result[1, 5]=-x28 */
+        result[16] = -x28;
+    }
+
+    /* Assignment result[2, 5]=Piecewise((0, x15), (1, x19), (x30 - x34, x26)) */
+    if (x15)
+    {
+        DEBUG_PRINT("Case (x15) is True.\n");
+
+        /* Assignment result[2, 5]=0 */
+        result[17] = 0;
+    }
+    else if (x19)
+    {
+        DEBUG_PRINT("Case (x19) is True.\n");
+
+        /* Assignment result[2, 5]=1 */
+        result[17] = 1;
+    }
+    else if (x26)
+    {
+        DEBUG_PRINT("Case (x26) is True.\n");
+        x20=1.0/(assert(IS_NOT_ZERO(x10)), x10);
+        x21=x13*x20;
+        x23=pow(x9, -3.0/2.0);
+        x30=-x21 + 1;
+        x31=rt2 - x7;
+        x32=mu*rn*x23*x31;
+        x34=x32*x8;
+
+        /* Assignment result[2, 5]=x30 - x34 */
+        result[17] = x30 - x34;
+    }
+}
+
+void frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,
@@ -614,7 +1924,7 @@ void frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated(
   double *A,
   double *B)
 {
-  double result[21]; //3 + 2 * 9
+  double result[21];
 
   assert(reaction);
   assert(velocity);

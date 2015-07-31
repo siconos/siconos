@@ -1104,7 +1104,7 @@ void computerho(FrictionContactProblem* localproblem, double * rho)
 
 
 #ifndef NDEBUG
-void frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated(
+void frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,
@@ -1178,7 +1178,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 #endif
 
 #ifdef AC_JeanMoreau
-    frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+    frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
 #endif
 
     sub3(F, Fg);

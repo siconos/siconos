@@ -94,7 +94,7 @@ void frictionContact3D_AlartCurnierFunctionGenerated(
   double *A,
   double *B);
 
-void frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated(
+void frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,

@@ -119,7 +119,7 @@ void frictionContact3D_localAlartCurnier(
   }
   case 3:
   {
-    computeACFun3x3 = &frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated;
+    computeACFun3x3 = &frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated;
     break;
   }
   }
@@ -364,7 +364,7 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
   options->dparam[3] = 1;      /* default rho */
 
   options->iparam[8] = -1;     /* mpi com fortran */
-  options->iparam[10] = 0;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[10] = 2;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
   options->internalSolvers = NULL;
 
   return 0;
@@ -459,7 +459,7 @@ void frictionContact3D_sparseLocalAlartCurnier(
   }
   case 3:
   {
-    acparams.computeACFun3x3 = &frictionContact3D_localAlartCurnierJeanMoreauFunctionGenerated;
+    acparams.computeACFun3x3 = &frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated;
     break;
   }
   }
