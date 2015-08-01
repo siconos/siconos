@@ -160,6 +160,8 @@ MACRO(LIBRARY_PROJECT_SETUP)
         LINKER_LANGUAGE ${${PROJECT_NAME}_LINKER_LANGUAGE}
         )
       IF(MSVC)
+	    find_program(CMAKE_NM NAMES ${_CMAKE_TOOLCHAIN_PREFIX}nm HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
+		include(Platform/Windows-GNU) # for proper prefixes and suffixes
         GET_FILENAME_COMPONENT(${PROJECT_NAME}_SHARED_LIB_WE lib${PROJECT_NAME} NAME_WE)
         SET_TARGET_PROPERTIES(${PROJECT_NAME}_shared PROPERTIES
           ENABLE_EXPORT 1
@@ -174,7 +176,7 @@ MACRO(LIBRARY_PROJECT_SETUP)
           ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME}_shared
             PRE_BUILD
             COMMAND ${CMAKE_NM} ARGS @${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${PROJECT_NAME}_shared.dir/objects1.rsp
-            | egrep " (D|T|B) " | cut -f 3 -d " " | sed "1iEXPORTS" > ${${PROJECT_NAME}_SHARED_LIB_WE}.def
+            | bash ${CMAKE_SOURCE_DIR}/cmake/export_filter.sh > ${${PROJECT_NAME}_SHARED_LIB_WE}.def
             ) # gruik gruik
         ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
       ENDIF(MSVC)

@@ -33,10 +33,11 @@ IF(SiconosKernel_LIBRARY)
   
   #  set(SiconosKernel_EXE_DIR ${SiconosKernel_LIBRARY_DIRS_DIR}/bin CACHE STRING "Path to siconos executable")
 
-  FIND_PATH(SiconosKernel_EXE_DIR siconos
+  FIND_PATH(SiconosKernel_EXE_DIR bin/siconos
     HINTS ${SiconosKernel_LIBRARY_DIRS_DIR} ${SiconosKernel_LIBRARY_DIRS_DIR_DIR} 
-    ENV PATH
-    PATH_SUFFIXES bin)
+    ENV PATH)
+
+  SET(SiconosKernel_EXE_DIR "${SiconosKernel_EXE_DIR}/bin")
 
   FIND_PATH(SiconosKernel_INCLUDE_DIRS SiconosKernel.hpp
     HINTS ${SiconosKernel_LIBRARY_DIRS_DIR} ${SiconosKernel_LIBRARY_DIRS_DIR_DIR} 

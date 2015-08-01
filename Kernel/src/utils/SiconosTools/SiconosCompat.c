@@ -5,6 +5,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#if _MSC_VER < 1900
+
 int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 {
   int count = -1;
@@ -28,6 +30,8 @@ int snprintf(char* str, size_t size, const char* format, ...)
 
   return count;
 }
+#endif // _MSC_VER < 1900
+
 
 #if _MSC_VER < 1800
 double rint(double x)
@@ -50,6 +54,6 @@ void csqrt(void * z)
   printf("csqrt is not supported with Visual Studio\n");
   exit(EXIT_FAILURE);
 }
-#endif
+#endif // _MSC_VER < 1800
 
 #endif

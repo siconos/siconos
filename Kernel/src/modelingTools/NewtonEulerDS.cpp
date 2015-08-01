@@ -251,26 +251,26 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
   if (_pluginFInt->fPtr && !_fInt)
     _fInt.reset(new SiconosVector(3, 0));
 
-  if ((_pluginJacqFInt->fPtr  or _computeJacobianFIntqByFD) && !_jacobianFIntq)
+  if ((_pluginJacqFInt->fPtr  || _computeJacobianFIntqByFD) && !_jacobianFIntq)
   {
     _jacobianFIntq.reset(new SimpleMatrix(3, _qDim));
     if (!_jacobianqForces)
       _jacobianqForces.reset(new SimpleMatrix(_n, _qDim));
   }
 
-  if ((_pluginJacvFInt->fPtr or _computeJacobianFIntvByFD) && !_jacobianFIntv)
+  if ((_pluginJacvFInt->fPtr || _computeJacobianFIntvByFD) && !_jacobianFIntv)
     _jacobianFIntv.reset(new SimpleMatrix(3, _n));
 
   if (_pluginMInt->fPtr && !_mInt)
     _mInt.reset(new SiconosVector(3, 0));
 
-  if ((_pluginJacqMInt->fPtr or _computeJacobianMIntqByFD) && !_jacobianMIntq)
+  if ((_pluginJacqMInt->fPtr || _computeJacobianMIntqByFD) && !_jacobianMIntq)
   {
     if (!_jacobianqForces)
       _jacobianqForces.reset(new SimpleMatrix(_n, _qDim));
     _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
   }
-  if ((_pluginJacvFInt->fPtr or _computeJacobianMIntvByFD) && !_jacobianFIntv)
+  if ((_pluginJacvFInt->fPtr || _computeJacobianMIntvByFD) && !_jacobianFIntv)
     _jacobianMIntv.reset(new SimpleMatrix(3, _n));
 
 
