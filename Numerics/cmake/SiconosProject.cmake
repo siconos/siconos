@@ -131,6 +131,8 @@ MACRO(SICONOS_PROJECT
   CHECK_FUNCTION_EXISTS(gettimeofday HAVE_SYSTIMES_H)
   IF(MSVC)
     SET(BUILD_AS_CPP TRUE)
+    ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
+    ADD_DEFINITIONS("-DEHsc") # this shoule be define by CMake, see Windows-MSVC.cmake
   ENDIF(MSVC)
 
   # Link external lib statically. This comes handy when we want to distribute
