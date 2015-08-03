@@ -19,6 +19,8 @@ SET(SiconosIO_VERSION "${VERSION}")
 #
 SET(SiconosIO_INSTALL_INCLUDE_DIR include/Siconos/IO)
 
+INCLUDE(SiconosCompilerFlags)
+
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/IOConfig.h DESTINATION include/Siconos/IO)
 

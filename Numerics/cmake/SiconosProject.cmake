@@ -29,10 +29,11 @@ MACRO(SICONOS_PROJECT
   OPTION(WITH_CPACK "Configuration for cpack. Default = on." ON)
   OPTION(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings." ON) # ON for developpers, OFF for distributed version
   OPTION(FUCK_DOXYGEN "At your convenience." OFF) 
+  OPTION(DEV_MODE "Developer mode." ON)
 
-  IF(FUCK_DOXYGEN)
+  IF(FUCK_DOXYGEN OR NOT DEV_MODE)
     SET(WITH_DOXYGEN_WARNINGS OFF)
-  ENDIF(FUCK_DOXYGEN)
+  ENDIF(FUCK_DOXYGEN OR NOT DEV_MODE)
 
   # get system architecture 
   # https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake
@@ -100,36 +101,6 @@ MACRO(SICONOS_PROJECT
   INCLUDE(CheckIncludeFile)
   INCLUDE(CheckStructHasMember)
 
-  # Compilers environment
-  IF(CMAKE_C_COMPILER)
-    INCLUDE(CheckCCompilerFlag)
-    CHECK_C_COMPILER_FLAG("-std=c99" C_HAVE_C99)
-    CHECK_C_COMPILER_FLAG("-xc99" C_HAVE_XC99)
-    CHECK_C_COMPILER_FLAG("-Wall" C_HAVE_WALL)
-    CHECK_C_COMPILER_FLAG("-lm" C_HAVE_LINKER_M)
-    CHECK_C_COMPILER_FLAG("-static -static-libgcc" C_HAVE_STATIC_LINK)
-    CHECK_C_COMPILER_FLAG("-Werror=implicit-function-declaration" C_HAVE_IMPL)
-    CHECK_C_COMPILER_FLAG("-Werror=unreachable-code" C_HAVE_UNREACH)
-    CHECK_C_COMPILER_FLAG("-Werror=conversion -Wno-sign-conversion
-      -Wno-error=sign-conversion -Wno-error=shorten-64-to-32" C_HAVE_CONV)
-    CHECK_C_COMPILER_FLAG("-Wmissing-prototypes" C_HAVE_MISS)
-  ENDIF(CMAKE_C_COMPILER)
-
-  IF(CMAKE_CXX_COMPILER)
-    INCLUDE(TestCXXAcceptsFlag)
-    CHECK_CXX_ACCEPTS_FLAG("-static -static-libgcc -static-libstdc++" CXX_HAVE_STATIC_LINK)
-    CHECK_CXX_ACCEPTS_FLAG("-Woverloaded-virtual" CXX_HAVE_WOVERLOADED_VIRTUAL)
-    CHECK_CXX_ACCEPTS_FLAG("-diag-disable 654" CXX_HAVE_DIAG_DISABLE_654)
-    CHECK_CXX_ACCEPTS_FLAG("-D__aligned__=ignored" CXX_HAVE_D__ALIGNED__IGNORED)
-    CHECK_CXX_ACCEPTS_FLAG("-Wall" CXX_HAVE_WALL)
-    CHECK_CXX_ACCEPTS_FLAG("-Wextra -Wno-unused-parameter" CXX_HAVE_WEXTRA)
-    CHECK_CXX_ACCEPTS_FLAG("-Werror=implicit-function-declaration" CXX_HAVE_IMPL)
-    CHECK_CXX_ACCEPTS_FLAG("-Werror=unreachable-code" CXX_HAVE_UNREACH)
-    CHECK_CXX_ACCEPTS_FLAG("-Werror=conversion -Wno-sign-conversion
-      -Wno-error=sign-conversion -Wno-error=shorten-64-to-32" C_HAVE_CONV)
-    CHECK_CXX_ACCEPTS_FLAG("-Wmissing-declarations" CXX_HAVE_MISS)
-  ENDIF(CMAKE_CXX_COMPILER)
-
   # Get c compiler version (cf FindBoost.cmake version 2.8.7)
   IF(CMAKE_C_COMPILER)
     EXEC_PROGRAM(${CMAKE_C_COMPILER}
@@ -184,7 +155,7 @@ MACRO(SICONOS_PROJECT
   IF(CMAKE_SYSTEM_NAME MATCHES Windows)
     if (NOT MINGW)
       SET(CMAKE_FIND_LIBRARY_PREFIXES "lib" "" ${CMAKE_FIND_LIBRARY_PREFIXES})
-      SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ${CMAKE_FIND_LIBRARY_SUFFIXES})
+      SET(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} ".dll.a" ".a")
     endif()
     SET(EXE_EXT ".exe")
   ELSE()

@@ -1,35 +1,97 @@
 # apply misc flags
 
+INCLUDE(cxxVersion)
+INCLUDE(cVersion)
+
+macro(ADD_CXX_OPTIONS OPT)
+
+ CHECK_CXX_ACCEPTS_FLAG("${OPT}" CXX_HAVE_"${OPT}")
+
+ set(_compilers ${ARGN})
+ IF(_compilers)
+  SET(ADD_OPTION FALSE)
+  FOREACH(_compiler ${_compilers})
+   IF (${CMAKE_CXX_COMPILER_ID} MATCHES ${_compiler})
+    SET(ADD_OPTION TRUE)
+   ENDIF()
+  ENDFOREACH()
+ ELSE(_compilers)
+  SET(ADD_OPTION TRUE)
+ ENDIF(_compilers)
+
+ IF(ADD_OPTION AND CXX_HAVE_"${OPT}")
+  APPEND_CXX_FLAGS("${OPT}")
+ ENDIF(ADD_OPTION AND CXX_HAVE_"${OPT}")
+
+endmacro(ADD_CXX_OPTIONS)
+
+macro(ADD_C_OPTIONS OPT)
+
+ STRING(REGEX REPLACE " " "" OPT_SANE "${OPT}")
+ CHECK_C_COMPILER_FLAG("${OPT}" C_HAVE_${OPT_SANE})
+
+ set(_compilers ${ARGN})
+ IF(_compilers)
+  SET(ADD_OPTION FALSE)
+  FOREACH(_compiler ${_compilers})
+   IF (${CMAKE_C_COMPILER_ID} MATCHES ${_compiler})
+    MESSAGE(STATUS "Adding option for compiler ${_compiler}")
+    SET(ADD_OPTION TRUE)
+   ENDIF()
+  ENDFOREACH()
+ ELSE(_compilers)
+  SET(ADD_OPTION TRUE)
+ ENDIF(_compilers)
+
+ IF(ADD_OPTION AND C_HAVE_${OPT_SANE})
+  APPEND_C_FLAGS("${OPT}")
+ ENDIF(ADD_OPTION AND C_HAVE_${OPT_SANE})
+
+endmacro(ADD_C_OPTIONS)
+
+
 IF(CMAKE_C_COMPILER)
+ INCLUDE(CheckCCompilerFlag)
+ detect_c_version(C_VERSION)
 
- IF(C_HAVE_C99 AND NOT MSVC)
-  APPEND_C_FLAGS("-std=c99")
- ELSEIF(C_HAVE_C99 AND NOT MSVC)
-  IF(C_HAVE_XC99 AND NOT MSVC)
-   APPEND_C_FLAGS("-xc99")
-  ENDIF(C_HAVE_XC99 AND NOT MSVC)
- ENDIF(C_HAVE_C99 AND NOT MSVC)
+ IF(C_VERSION STRLESS "201112L")
+  SET(C_STD_VERSION "c99")
+ ELSE(C_VERSION STRLESS "201112L")
+  # default C standart is c11 or newer
+  SET(C_STD_VERSION "c11")
+ ENDIF(C_VERSION STRLESS "201112L")
 
- IF(C_HAVE_WALL)
-  APPEND_C_FLAGS("-Wall")
- ENDIF(C_HAVE_WALL)
+ IF(NOT MSVC)
+  ADD_C_OPTIONS("-std=${C_STD_VERSION}")
+  ADD_C_OPTIONS("-x${C_STD_VERSION}")
+ ENDIF(NOT MSVC)
 
- IF(C_HAVE_WEXTRA)
-  APPEND_C_FLAGS("-Wextra -Wno-unused-parameter")
- ENDIF(C_HAVE_WEXTRA)
+ # ADD_C_OPTIONS("-static -static-libgcc" "GNU;Clang")
+ # way too verbose with MSVC
+ IF(NOT MSVC)
+  ADD_C_OPTIONS("-Wall")
+ ENDIF(NOT MSVC)
+ ADD_C_OPTIONS("-Werror=overloaded-virtual")
+ ADD_C_OPTIONS("-Wextra -Wno-unused-parameter")
+ ADD_C_OPTIONS("-Werror=implicit-function-declaration")
+ ADD_C_OPTIONS("-Werror=conversion -Wno-sign-conversion -Wno-error=sign-conversion -Wno-error=shorten-64-to-32")
+ ADD_C_OPTIONS("-Werror=switch-bool")
+ ADD_C_OPTIONS("-Werror=logical-not-parentheses")
+ ADD_C_OPTIONS("-Werror=sizeof-array-argument")
+ ADD_C_OPTIONS("-Werror=bool-compare")
+ ADD_C_OPTIONS("-Werror=array-bounds")
 
- IF(C_HAVE_IMPL)
-  APPEND_C_FLAGS("-Werror=implicit-function-declaration")
- ENDIF(C_HAVE_IMPL)
+ # C specific
+ ADD_C_OPTIONS("-Werror=missing-prototypes")
 
- IF(C_HAVE_UNREACH AND NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  APPEND_C_FLAGS("-Werror=unreachable-code")
- ENDIF(C_HAVE_UNREACH AND NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+ # Compiler Specific
+ ADD_C_OPTIONS("-diag-disable 654" "Intel")
+ IF(NOT ICCOK)
+  ADD_C_OPTIONS("-D__aligned__=ignored" "Intel")
+ ENDIF(NOT ICCOK)
 
- IF(C_HAVE_CONV)
-  APPEND_C_FLAGS("-Werror=conversion -Wno-sign-conversion")
-  APPEND_C_FLAGS("-Wno-error=sign-conversion -Wno-error=shorten-64-to-32")
- ENDIF(C_HAVE_CONV)
+ ADD_C_OPTIONS("-Wno-string-plus-int" "Clang")
+ ADD_C_OPTIONS("-Werror=unreachable-code" "Clang")
 
  # too many errors right now ...
  #IF(C_HAVE_MISS)
@@ -39,55 +101,39 @@ IF(CMAKE_C_COMPILER)
 ENDIF(CMAKE_C_COMPILER)
 
 IF(CMAKE_CXX_COMPILER)
-
- IF(NOT CMAKE_COMPILER_IS_GNUCXX)
-  IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
-   # Disable warnings with intel compiler due (mainly) to visitors visit function overloading
-   IF(CXX_HAVE_DIAG_DISABLE_654)
-    APPEND_CXX_FLAGS("-diag-disable 654")
-   ENDIF(CXX_HAVE_DIAG_DISABLE_654)
-   # Error on intel compiler, see: http://software.intel.com/en-us/forums/showthread.php?t=65041
-   # This issue have been solved with ICC >= 12.1
-   if(NOT ICCOK)
-    if(CXX_HAVE_D__ALIGNED__IGNORED)
-     APPEND_CXX_FLAGS("-D__aligned__=ignored")
-    endif(CXX_HAVE_D__ALIGNED__IGNORED)
-   endif(NOT ICCOK)
-  endif(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
- endif(NOT CMAKE_COMPILER_IS_GNUCXX)
+ detect_cxx_version(CXX_VERSION)
+ INCLUDE(TestCXXAcceptsFlag)
+ # ADD_CXX_OPTIONS("-static -static-libgcc -static-libstdc++" "GNU;Clang")
  # way too verbose with MSVC
- IF(CXX_HAVE_WALL AND NOT MSVC)
-  APPEND_CXX_FLAGS("-Wall")
- ENDIF(CXX_HAVE_WALL AND NOT MSVC)
- IF(CXX_HAVE_WEXTRA)
-  APPEND_CXX_FLAGS("-Wextra -Wno-unused-parameter")
- ENDIF(CXX_HAVE_WEXTRA)
- IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-   # stupid warning
-  APPEND_CXX_FLAGS("-Wno-string-plus-int")
- ENDIF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+ IF(NOT MSVC)
+  ADD_CXX_OPTIONS("-Wall")
+ ENDIF(NOT MSVC)
+ ADD_CXX_OPTIONS("-Werror=overloaded-virtual")
+ ADD_CXX_OPTIONS("-Wextra -Wno-unused-parameter")
+ ADD_CXX_OPTIONS("-Werror=implicit-function-declaration")
+ ADD_CXX_OPTIONS("-Werror=conversion -Wno-sign-conversion -Wno-error=sign-conversion -Wno-error=shorten-64-to-32" C_HAVE_CONV)
+ ADD_CXX_OPTIONS("-Werror=missing-declarations")
+ ADD_CXX_OPTIONS("-Werror=switch-bool")
+ ADD_CXX_OPTIONS("-Werror=logical-not-parentheses")
+ ADD_CXX_OPTIONS("-Werror=sizeof-array-argument")
+ ADD_CXX_OPTIONS("-Werror=bool-compare")
+ ADD_CXX_OPTIONS("-Werror=array-bounds")
 
- IF(CXX_HAVE_WOVERLOADED_VIRTUAL)
-   APPEND_CXX_FLAGS("-Woverloaded-virtual")
- ENDIF(CXX_HAVE_WOVERLOADED_VIRTUAL)
+ ADD_CXX_OPTIONS("-Wodr")
 
- IF(CXX_HAVE_IMPL AND NOT MSVC)
-  APPEND_CXX_FLAGS("-Werror=implicit-function-declaration")
- ENDIF(CXX_HAVE_IMPL AND NOT MSVC)
+ IF(NOT CXX_VERSION STRLESS "201102L" AND DEV_MODE)
+  ADD_CXX_OPTIONS("-Wsuggest-final-types")
+  ADD_CXX_OPTIONS("-Wsuggest-final-methods")
+  ADD_CXX_OPTIONS("-Wzero-as-null-pointer-constant")
+ ENDIF()
 
- IF(CXX_HAVE_UNREACH AND NOT MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    APPEND_CXX_FLAGS("-Werror=unreachable-code")
- ENDIF(CXX_HAVE_UNREACH AND NOT MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+ # Compiler Specific
+ ADD_CXX_OPTIONS("-diag-disable 654" "Intel")
+ IF(NOT ICCOK)
+  ADD_CXX_OPTIONS("-D__aligned__=ignored" "Intel")
+ ENDIF(NOT ICCOK)
 
- IF(CXX_HAVE_CONV AND NOT MSVC)
-   APPEND_CXX_FLAGS("-Werror=conversion -Wno-sign-conversion")
-   APPEND_CXX_FLAGS("-Wno-error=sign-conversion -Wno-error=shorten-64-to-32")
- ENDIF(CXX_HAVE_CONV AND NOT MSVC)
-
- IF(CXX_HAVE_MISS AND NOT MSVC)
-    APPEND_CXX_FLAGS("-Wmissing-declarations")
- ENDIF(CXX_HAVE_MISS AND NOT MSVC)
+ ADD_CXX_OPTIONS("-Wno-string-plus-int" "Clang")
+ ADD_CXX_OPTIONS("-Werror=unreachable-code" "Clang")
 
 ENDIF(CMAKE_CXX_COMPILER)
-
-

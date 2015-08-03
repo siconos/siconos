@@ -41,10 +41,6 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/ControlConfig.h DESTINATION include/Siconos/Co
 
 INCLUDE(SiconosCompilerFlags)
 
-INCLUDE(cxxVersion)
-detect_cxx_version(CXX_VERSION)
-
-
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(SiconosKernel REQUIRED)
 COMPILE_WITH(Boost REQUIRED)
