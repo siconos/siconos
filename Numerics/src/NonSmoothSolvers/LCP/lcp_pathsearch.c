@@ -30,7 +30,7 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-void ncp_pathsearch_compute_x_from_z(unsigned n, double* restrict z, double* restrict F, double* restrict x);
+#include "NCP_PathSearch.h"
 
 /* This function is here to test the pivotal code of the path search */
 void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)

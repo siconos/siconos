@@ -507,6 +507,7 @@ void QS_delete(UNIONTYPE QSORTrec a[], int ipos, int epos)
   for(; epos > ipos; epos--)
     a[epos] = a[epos-1];
 }
+int QS_sort(UNIONTYPE QSORTrec a[], int l, int r, findCompare_func findCompare);
 int QS_sort(UNIONTYPE QSORTrec a[], int l, int r, findCompare_func findCompare)
 {
   register int i, j, nmove = 0;
@@ -540,6 +541,7 @@ int QS_sort(UNIONTYPE QSORTrec a[], int l, int r, findCompare_func findCompare)
   }
   return( nmove );
 }
+int QS_finish(UNIONTYPE QSORTrec a[], int lo0, int hi0, findCompare_func findCompare);
 int QS_finish(UNIONTYPE QSORTrec a[], int lo0, int hi0, findCompare_func findCompare)
 {
   int      i, j, nmove = 0;

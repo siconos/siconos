@@ -37,6 +37,9 @@
 
 #define FC3D_UE_TEST_NULL(EXPR)  (fabs(EXPR)<1e-15)
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
+
 static void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c1, double *x, double *y);
 
 

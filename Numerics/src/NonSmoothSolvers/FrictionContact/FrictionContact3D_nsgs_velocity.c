@@ -27,6 +27,8 @@
 #include "pinv.h"
 #include "Friction_cst.h"
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 void initializeLocalSolver_nsgs_velocity(SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions* localsolver_options)
 {
 

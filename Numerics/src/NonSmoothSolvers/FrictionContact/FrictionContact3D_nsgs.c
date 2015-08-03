@@ -30,6 +30,8 @@
 #include <assert.h>
 #include <time.h>
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error)
 {
   int n = 3 * problem->numberOfContacts;

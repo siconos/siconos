@@ -65,7 +65,7 @@ public:
    */
   inline bool isPlugged() const
   {
-    return (fPtr != 0);
+    return (fPtr != NULL);
   };
 
   /** destructor

@@ -18,6 +18,7 @@
 */
 #include "MultiBodyTest.hpp"
 
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
 
 #ifndef Disks_h
 #define Disks_h

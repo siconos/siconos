@@ -20,6 +20,8 @@
 
 /* /!\ work in progress */
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 #include "NumericsConfig.h"
 
 #include "GlobalFrictionContact3D_AlartCurnier.h"

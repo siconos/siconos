@@ -23,9 +23,10 @@
 
 #define PATHFERRIS_LOG_IN_FILE
 
+#include "SimpleLCP.h"
+
 #ifdef HAVE_PATHFERRIS
 
-#include "SimpleLCP.h"
 #include "InterfaceToPathFerris/include/MCP_Interface.h"
 
 #include "InterfaceToPathFerris/include/Path.h"

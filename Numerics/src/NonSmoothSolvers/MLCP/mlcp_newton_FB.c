@@ -29,6 +29,8 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w);
 static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H);
 static void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err);

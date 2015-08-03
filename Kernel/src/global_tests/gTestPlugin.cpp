@@ -19,6 +19,8 @@
 #include <cstdio>
 #include <cmath>
 
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+
 // BOUNCING BALL
 
 #if defined(_MSC_VER)

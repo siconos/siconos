@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 // All the boost bindings required includes ...
 #include <boost/numeric/bindings/lapack.hpp>
 //#include <boost/numeric/bindings/noop.hpp>

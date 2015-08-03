@@ -32,6 +32,7 @@
 #include "NewtonEulerR.hpp"
 #include "OneStepNSProblem.hpp"
 
+
 using namespace RELATION;
 
 //#define DEBUG_STDOUT
@@ -45,7 +46,9 @@ using namespace RELATION;
 SP::Hem5OSI hem5_global_object;
 
 // This first function must have the same signature as argument FPROB  in HEM5
-extern "C" void Hem5OSI_fprob_wrapper(integer* IFCN,
+extern "C" fprobfunction Hem5OSI_fprob_wrapper;
+
+void Hem5OSI_fprob_wrapper(integer* IFCN,
                                    integer* NQ,
                                    integer* NV,
                                    integer* NU,
@@ -77,7 +80,8 @@ extern "C" void Hem5OSI_fprob_wrapper(integer* IFCN,
 }
 
 // This first function must have the same signature as argument SOLOUT in HEM5
-extern "C" void Hem5OSI_solout_wrapper(integer* MODE,
+extern "C" soloutfunction Hem5OSI_solout_wrapper;
+void Hem5OSI_solout_wrapper(integer* MODE,
                                     integer* NSTEP,
                                     integer* NQ,
                                     integer* NV,

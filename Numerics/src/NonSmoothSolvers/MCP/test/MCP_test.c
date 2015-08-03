@@ -24,11 +24,13 @@
 
 
 
+void testF(int size, double *z, double * F);
 void testF(int size, double *z, double * F)
 {
   printf("call to MCP function F(z) ...\n");
 }
 
+void testNablaF(int size, double *z, double *F);
 void testNablaF(int size, double *z, double *F)
 {
   printf("call to MCP function nablaF(z) ...\n");

@@ -22,6 +22,7 @@
 #include <assert.h>
 #include "MixedLinearComplementarityProblem.h"
 
+int write_newformat(char *filename);
 int write_newformat(char *filename)
 {
   printf("\n Start of test \n");

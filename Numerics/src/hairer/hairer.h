@@ -19,7 +19,7 @@
 
 #include "SiconosFortran.h"
 
-typedef void (*fprobpointer)(integer* IFCN,
+typedef void fprobfunction (integer* IFCN,
                              integer* NQ,
                              integer* NV,
                              integer* NU,
@@ -34,7 +34,9 @@ typedef void (*fprobpointer)(integer* IFCN,
                              doublereal* GQQ, doublereal* GT, doublereal * FL,
                              doublereal* QDOT, doublereal* UDOT, doublereal * AM);
 
-typedef void (*soloutpointer)(integer* MODE,
+typedef fprobfunction* fprobpointer;
+
+typedef void soloutfunction(integer* MODE,
                               integer* NSTEP,
                               integer* NQ,
                               integer* NV,
@@ -45,6 +47,8 @@ typedef void (*soloutpointer)(integer* MODE,
                               fprobpointer FPROB,
                               doublereal* q, doublereal* v, doublereal* u,
                               doublereal *DOWK, integer* IDOWK);
+
+typedef soloutfunction* soloutpointer;
 
 #ifdef __cplusplus
 extern "C" {

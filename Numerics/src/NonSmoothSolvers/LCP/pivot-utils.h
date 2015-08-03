@@ -138,6 +138,12 @@ void do_pivot_driftless2(double* mat, unsigned int dim, unsigned int dim2, unsig
    */
   void lcp_pivot_diagnose_info(int info);
 
+  int pivot_selection_bard(double* mat, unsigned int dim);
+  int pivot_selection_least_index(double* mat, unsigned int dim);
+  void init_M_bard(double* restrict mat, double* restrict M, unsigned int dim, double* restrict q);
+  void init_M_least_index(double* restrict mat, double* restrict M, unsigned int dim, double* restrict q);
+  int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, double* restrict M, double* restrict q, int* restrict basis, double* restrict cov_vec);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

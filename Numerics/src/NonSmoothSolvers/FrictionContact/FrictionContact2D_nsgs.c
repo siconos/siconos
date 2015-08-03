@@ -24,6 +24,7 @@
 #include "SiconosBlas.h"
 #include "FrictionContact2D_Solvers.h"
 
+void shuffle(int size, int * randnum);
 void shuffle(int size, int * randnum) //size is the given range
 {
   int i;

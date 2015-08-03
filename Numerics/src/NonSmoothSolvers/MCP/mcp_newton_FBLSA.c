@@ -26,6 +26,8 @@
 #include "Newton_Methods.h"
 #include "FischerBurmeister.h"
 
+#include "mcp_newton_FBLSA.h"
+
 void FB_compute_F_mcp(void* data_opaque, double* z, double* Fmcp)
 {
   // Computation of the new value F(z)

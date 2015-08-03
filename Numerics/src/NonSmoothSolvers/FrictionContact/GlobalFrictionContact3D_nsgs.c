@@ -32,6 +32,8 @@ extern int *Global_ipiv;
 extern int  Global_MisInverse;
 extern int  Global_MisLU;
 
+void GlobalfrictionContact3D_projection_free(GlobalFrictionContactProblem* problem);
+
 void GlobalfrictionContact3D_projection_free(GlobalFrictionContactProblem* problem)
 {
   assert(problem->M);
@@ -41,6 +43,7 @@ void GlobalfrictionContact3D_projection_free(GlobalFrictionContactProblem* probl
   }
 }
 
+void initializeGlobalLocalSolver(int n, SolverGlobalPtr* solve, FreeSolverGlobalPtr* freeSolver, ComputeErrorGlobalPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam);
 
 void initializeGlobalLocalSolver(int n, SolverGlobalPtr* solve, FreeSolverGlobalPtr* freeSolver, ComputeErrorGlobalPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
 {

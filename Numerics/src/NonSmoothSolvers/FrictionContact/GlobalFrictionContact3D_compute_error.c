@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+#include "GlobalFrictionContact3D_compute_error.h"
 
 #include "NumericsOptions.h" // for global options
 #include "GlobalFrictionContactProblem.h"

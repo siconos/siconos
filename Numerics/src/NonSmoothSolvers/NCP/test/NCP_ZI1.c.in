@@ -47,6 +47,7 @@ typedef struct
   unsigned int nabla_eval;
 } data_ZI;
 
+void Fncp_ZI(void* env, int n, double* restrict z, double* restrict F);
 void Fncp_ZI(void* env, int n, double* restrict z, double* restrict F)
 {
   data_ZI* d = (data_ZI*) env;
@@ -63,6 +64,7 @@ void Fncp_ZI(void* env, int n, double* restrict z, double* restrict F)
   d->f_eval += 1;
 }
 
+void nabla_Fncp_ZI(void* env, int n, double* restrict z, double* restrict nabla_Fncp);
 void nabla_Fncp_ZI(void* env, int n, double* restrict z, double* restrict nabla_Fncp)
 {
   data_ZI* d = (data_ZI*) env;
@@ -187,7 +189,7 @@ int main(void)
       {
         printf("step %d, iter = %d, error = %le, info = %d\n", k, options.iparam[1], options.dparam[1], info);
         printf("NCP_ZI1 with solver @SOLVER_ID@ failed completly\n");
-        printf("NCP_ZI1 failure at xk[0] =  %.*e; xk[1] =  %.*e; xk[2] =  %.*e; xk[3] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1],  DECIMAL_DIG, xk[2],  DECIMAL_DIG, xk[3]);
+        printf("NCP_ZI1 failure at xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
       }
 
     }

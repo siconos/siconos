@@ -25,6 +25,8 @@ extern "C"
 #endif
   int ls_test_function(FILE * f, int solverid);
   int ls_test_function_SBM(FILE * f, int solverid);
+  void _LSfillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearSystemProblem* problem);
+  void _LSfillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, LinearSystemProblem* problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

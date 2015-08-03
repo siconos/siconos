@@ -123,32 +123,6 @@ void MLCP::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&
   LinearOSNS::computeDiagonalInteractionBlock(vd);
 }
 
-void displayNM(const NumericsMatrix* const m)
-{
-  if (!m)
-  {
-    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
-  int storageType = m->storageType;
-  if (storageType == 0)
-  {
-    printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
-    printf("[");
-    for (int i = 0; i < m->size1 * m->size0; i++)
-    {
-      printf("%f ", m->matrix0[i]);
-      if ((i + 1) % m->size1 == 0)
-        printf("\n");
-    }
-    printf("]");
-    printf("\n (warning: column-major) \n");
-  }
-  else if (storageType == 1)
-    fprintf(stderr, "storageType NumericsdisplayNM.\n");
-
-}
-
 bool MLCP::preCompute(double time)
 {
   bool res = LinearOSNS::preCompute(time);

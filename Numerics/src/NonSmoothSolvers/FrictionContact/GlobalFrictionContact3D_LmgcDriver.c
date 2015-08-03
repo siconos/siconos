@@ -77,6 +77,7 @@ int globalFrictionContact_fclib_write(
 static int fccounter = 0;
 #endif
 
+double * alloc_memory_double(unsigned int size, double *p);
 double * alloc_memory_double(unsigned int size, double *p)
 {
   double * r = (double *) malloc (size * sizeof(double));
@@ -84,6 +85,7 @@ double * alloc_memory_double(unsigned int size, double *p)
   return r;
 }
 
+unsigned int * alloc_memory_int(unsigned int size, unsigned int *p);
 unsigned int * alloc_memory_int(unsigned int size, unsigned int *p)
 {
   unsigned int * r = (unsigned int *) malloc (size * sizeof(int));

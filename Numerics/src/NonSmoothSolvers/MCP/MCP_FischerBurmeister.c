@@ -28,6 +28,8 @@
 #include "MCP_Solvers.h"
 #include "MCP_FischerBurmeister.h"
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 /* Static object which contains the MCP problem description.
 Ugly but required to deal with function pointer connection
 in  FischerFunc_MCP and its jacobian.

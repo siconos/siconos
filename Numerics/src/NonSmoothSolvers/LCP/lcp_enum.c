@@ -16,6 +16,9 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

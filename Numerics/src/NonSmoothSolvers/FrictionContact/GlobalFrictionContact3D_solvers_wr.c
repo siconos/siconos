@@ -37,6 +37,8 @@ extern int *Global_ipiv;
 extern int  Global_MisInverse;
 extern int  Global_MisLU;
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 /* Global Variable for the reformulation of the problem */
 
 int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, FrictionContactProblem* localproblem)

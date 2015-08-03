@@ -25,6 +25,8 @@
 #include "MCP_cst.h"
 #include "MCP_FischerBurmeister.h"
 
+#include "NonSmoothDrivers.h"
+
 char *SICONOS_MCP_FB_STR = "NewtonFB";
 char *SICONOS_MCP_NEWTON_FBLSA_STR = "Newton FBLSA";
 char *SICONOS_MCP_NEWTON_MINFBLSA_STR = "Newton minFBLSA";

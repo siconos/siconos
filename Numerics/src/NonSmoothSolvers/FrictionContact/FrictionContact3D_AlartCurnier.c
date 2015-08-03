@@ -27,6 +27,8 @@
 #include "SiconosBlas.h"
 #include "SiconosBlas.h"
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 typedef void (*computeNonsmoothFunction)(double *, double * , double , double * , double *, double *, double *);
 
 //#define VERBOSE_DEBUG

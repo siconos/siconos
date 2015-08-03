@@ -19,6 +19,9 @@
 
 
 #include "NumericsOptions.h" // for global options
+
+#include "FrictionContact2D_compute_error.h"
+
 #include "FrictionContactProblem.h"
 #include "SiconosBlas.h"
 #include <math.h>

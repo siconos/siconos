@@ -611,6 +611,7 @@ exit_lcp_pivot:
 }
 
 
+/*
 int linearComplementarity_pivot_lumod_setDefaultSolverOptions(SolverOptions* options)
 {
   if (verbose > 0)
@@ -621,3 +622,4 @@ int linearComplementarity_pivot_lumod_setDefaultSolverOptions(SolverOptions* opt
   set_SolverOptions(options, SICONOS_LCP_PIVOT_LUMOD);
   return 0;
 }
+*/

@@ -4,6 +4,7 @@
 #include "NonlinearComplementarityProblem.h"
 #include "SolverOptions.h"
 
+#include "NCP_Solvers.h"
 
 #ifdef HAVE_PATHFERRIS
 

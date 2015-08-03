@@ -20,6 +20,7 @@
 #include "SolverOptions.h"
 #include <assert.h>
 
+#include "NonSmoothDrivers.h"
 #include "NCP_Solvers.h"
 #include "NCP_cst.h"
 

@@ -45,7 +45,7 @@ int Equality::compute(double time)
     _numerics_problem.q = q()->getArray();
     _numerics_problem.size = _sizeOutput;
     //      displayLS(&_numerics_problem);
-    info = LinearSystem_driver(&_numerics_problem, _z->getArray() , _w->getArray() , 0);
+    info = LinearSystem_driver(&_numerics_problem, _z->getArray() , _w->getArray() , NULL);
 
     // --- Recovering of the desired variables from EQUALITY output ---
     postCompute();

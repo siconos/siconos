@@ -24,6 +24,8 @@
 #include "FischerBurmeister.h"
 #include "SiconosBlas.h"
 
+#include "NCP_Solvers.h"
+
 
 void ncp_FB(void* data_opaque, double* z, double* F, double* F_FB)
 {
@@ -62,7 +64,9 @@ void ncp_newton_FBLSA(NonlinearComplementarityProblem* problem, double *z, doubl
   newton_LSA(problem->n, z, F, info, (void *)problem, options, &functions_FBLSA_ncp);
 }
 
+/*
 void ncp_newton_FBLSA_setDefaultSolverOptions(SolverOptions* options)
 {
   fill_SolverOptions(options, SICONOS_NCP_NEWTON_FBLSA, 5, 5, 100, 1e-16);
 }
+*/

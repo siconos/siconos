@@ -33,6 +33,7 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+void mcp_min(void* data_opaque, double* z, double* F, double* Fmin);
 void mcp_min(void* data_opaque, double* z, double* F, double* Fmin)
 {
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
@@ -40,6 +41,7 @@ void mcp_min(void* data_opaque, double* z, double* F, double* Fmin)
   F_min(data->n1, data->n2, z, F, Fmin);
 }
 
+void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, double* H);
 void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, double* H)
 {
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;

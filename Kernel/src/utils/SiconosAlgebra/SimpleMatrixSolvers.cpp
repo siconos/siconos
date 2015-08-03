@@ -18,6 +18,9 @@
  */
 
 #include "KernelConfig.h"
+
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
@@ -283,6 +286,7 @@ void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
 
 }
 
+/*
 void polePlacement(const SiconosMatrix& A, const SiconosVector& B, SiconosVector& P, bool transpose)
 {
   unsigned int n = A.size(0);
@@ -295,4 +299,4 @@ void polePlacement(const SiconosMatrix& A, const SiconosVector& B, SiconosVector
   lapack::orghr(n, 1, n, Q, tau);
   noalias(BB) = prod(Q, *B.dense());
 }
-
+*/

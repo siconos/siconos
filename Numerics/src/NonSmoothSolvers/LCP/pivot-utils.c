@@ -30,6 +30,7 @@
 #include "lumod_wrapper.h"
 #include "SiconosCompat.h"
 #include "SiconosBlas.h"
+#include "SiconosLapack.h"
 
 #define DEBUG_STDOUT
 #define DEBUG_MESSAGES
@@ -60,6 +61,9 @@ inline static unsigned basis_to_number(unsigned nb, unsigned n)
 
 DEBUG_GLOBAL_VAR_DECL(extern unsigned * basis_global;)
 DEBUG_GLOBAL_VAR_DECL(static unsigned max_pivot_helped;)
+
+int lexicosort_lumod(unsigned* vars, unsigned n, unsigned nb_candidates, SN_lumod_dense_data* restrict lumod_data, unsigned* restrict basis, double* restrict lexico_col, double* restrict driving_col, double lexico_tol);
+
 
 int lexicosort_lumod(unsigned* vars, unsigned n, unsigned nb_candidates, SN_lumod_dense_data* restrict lumod_data, unsigned* restrict basis, double* restrict lexico_col, double* restrict driving_col, double lexico_tol)
 {
@@ -509,6 +513,58 @@ int pivot_selection_pathsearch(double* mat, unsigned dim, unsigned drive, unsign
   return block;
 }
 
+int pivot_selection_bard(double* mat, unsigned int dim)
+{
+  int block = -1;
+  double zb, z0, dblock;
+
+  for (unsigned int i = 0; i < dim; ++i)
+  {
+    zb = mat[i];
+    if (zb < 0.0)
+    {
+      if (block == -1)
+      {
+        z0    = zb;
+        block = i;
+      }
+      else
+      {
+        for (unsigned int j = dim; j <= dim*dim; j += dim)
+        {
+          dblock = mat[i + j]/zb - mat[block + j]/z0;
+          if (dblock < 0.0)
+          {
+            break;
+          }
+          else if (dblock > 0.0)
+          {
+            block = i;
+            break;
+          }
+        }
+      }
+    }
+  }
+  return block;
+}
+
+int pivot_selection_least_index(double* mat, unsigned int dim)
+{
+  int block = -1;
+
+  for (unsigned int i = 0; i < dim; ++i)
+  {
+    if (mat[i] < 0.0)
+    {
+      block = i;
+      break;
+    }
+  }
+  return block;
+}
+
+
 void init_M_lemke(double* restrict mat, double* restrict M, unsigned int dim, unsigned int size_x, double* restrict q, double* restrict d)
 {
   /* construction of mat matrix such that
@@ -537,6 +593,122 @@ void init_M_lemke(double* restrict mat, double* restrict M, unsigned int dim, un
     for (unsigned int i = 0; i < size_x  ; ++i) mat[i + dim*(dim + 1)] = -1.0;
   for (unsigned int i = size_x; i < dim; ++i) mat[i + dim*(dim + 1)] = 0.0;
 }
+
+void init_M_bard(double* restrict mat, double* restrict M, unsigned int dim, double* restrict q)
+{
+  /* construction of mat matrix such that
+   * mat = [ q | Id | -M ]
+   */
+
+  /*  Copy M but mat[dim+1:, :] = -M */
+  for (unsigned int i = 0; i < dim; ++i)
+  {
+    for (unsigned int j = 0; j < dim*dim; j += dim)
+    {
+      mat[i + j + dim*(1 + dim)] = -M[j + i]; /* Siconos is in column major */
+    }
+  }
+
+  memset(&mat[dim], 0, sizeof(double) * dim * dim);
+
+  for (unsigned int i = 0, j = dim; i < dim; ++i, j+= dim)
+  {
+    mat[i] = q[i];
+    mat[i + j] =  1.0;
+  }
+}
+
+void init_M_least_index(double* restrict mat, double* restrict M, unsigned int dim, double* restrict q)
+{
+  /* construction of mat matrix such that
+   * mat = [ q | M ]
+   */
+
+  /* We need to init only the part corresponding to Id */
+  for (unsigned int i = 0 ; i < dim; ++i)
+  {
+    mat[i] = q[i];
+    for (unsigned int j = 0 ; j < dim*dim; j += dim)
+      mat[i + j + dim] = M[j + i];
+  }
+}
+
+int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, double* restrict M, double* restrict q, int* restrict basis, double* restrict cov_vec)
+{
+  /* crash the basis and form the matrix for Lemke's algorithm
+   * mat = [ q | Id | -d | -M ]
+   * TODO: implement a version with no memory allocation
+   * TODO: think if it is necessary to compute the new covering vector if
+   * cov_vec == NULL
+   */
+
+  /* q vector */
+  double* q_bar = mat;
+  cblas_dcopy(n, q, 1, q_bar, 1);
+
+  /* covering vector for the auxiliary variable */
+  double* d = &mat[(n+1)*n];
+  if (cov_vec)  cblas_dcopy(n, cov_vec, 1, d, 1);
+  else for (unsigned int i = 0; i < n; ++i) d[i] = 1.0;
+
+  /* take care of M */
+  double* mat_basic = &mat[n];
+  double* mat_nonbasic = &mat[(n+2)*n];
+  for (unsigned int i = 0; i < n; ++i)
+  {
+    if (u[i] > DBL_EPSILON) // M_bas[:, i] = M[:, i]
+    {
+      basis[i] = i + 2 + n;
+      cblas_dcopy(n, &M[i*n], 1, &mat_basic[i*n], 1);
+      memset(&mat_nonbasic[i*n], 0, sizeof(double) * n);
+      mat_nonbasic[i*n + i] = -1.0;
+    }
+    else /* s[i] > 0.0 and if both s and u are nonbasic, we insert a column from the identity matrix
+          * this choice could ne different
+          * M_bas[:, i] = -I[:, i] */
+    {
+      basis[i] = i + 1;
+      cblas_dcopy(n, &M[i*n], 1, &mat_nonbasic[i*n], 1);
+      memset(&mat_basic[i*n], 0, sizeof(double) * n);
+      mat_basic[i*n + i] = -1.0;
+    }
+  }
+
+  /* data for LAPACKE */
+  int *ipiv = (int*)malloc((n+1)*sizeof(int));
+  int info = 0;
+
+  /* Compute LU factorisation of basis */
+  DGETRF(n, n, mat_basic, n, ipiv, &info);
+
+  assert(info <= 0 && "crash_pivot_basis :: info from DGETRF > 0, this should not append !\n");
+  if (info < 0)
+  {
+    printf("crash_pivot_basis :: the crash basis is singular, cannot inverse the matrix.\n\
+            The (first) diagonal element of U to be 0.0 is %d\n\
+            A remedy remains to be implemented !\n", info);
+    return info;
+  }
+
+  /* Compute new values Mbar = (M_bas)^{-1} M_nonbas ; q_bar = (M_bas)^{-1} q ;
+   * d_bar = (M_bas)^{-1} d */
+  DGETRS(LA_NOTRANS, n, n, mat_basic, n, ipiv, mat_nonbasic, n, &info);
+  DGETRS(LA_NOTRANS, n, 1, mat_basic, n, ipiv, q_bar, n, &info);
+  DGETRS(LA_NOTRANS, n, 1, mat_basic, n, ipiv, d, n, &info);
+
+  /* take the opposite of d and M, see matrix definition */
+  cblas_dscal(n, -1.0, q_bar, 1);
+//  cblas_dscal(n, -1.0, d, 1);
+//  cblas_dscal(n*n, -1.0, mat_nonbasic, 1);
+
+  /* set the identity part in the matrix (for the lexicographic ordering) */
+  memset(mat_basic, 0, sizeof(double) * n * n);
+  for (unsigned int i = 0; i < n; ++i) mat[i + n*(i + 1)] =  1.0;
+
+  free(ipiv);
+  return info;
+}
+
 
 void do_pivot_driftless(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive)
 {

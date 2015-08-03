@@ -290,6 +290,11 @@ extern "C"
    */
   char * idProblemToChar(int id);
 
+  /** free the solverData structure
+   * \param id the solver id
+   * \param solverData the structure to free
+   */
+  void free_solverData(unsigned id, void* solverData);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

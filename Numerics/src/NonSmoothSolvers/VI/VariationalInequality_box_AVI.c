@@ -24,6 +24,7 @@
 #include "Newton_Methods.h"
 #include "VI_Newton.h"
 
+void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* descent_dir, SolverOptions* options);
 void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* descent_dir, SolverOptions* options)
 {
   VariationalInequality* vi_pb = (VariationalInequality*) problem;
@@ -45,6 +46,7 @@ void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* d
 //  for (unsigned int i = 0; i<n; ++i) x[i] = s_vec[A[i]-1] + problem->lb[i];
 }
 
+void * vi_get_set(void* problem);
 void * vi_get_set(void* problem)
 {
   return ((VariationalInequality*) problem)->set;

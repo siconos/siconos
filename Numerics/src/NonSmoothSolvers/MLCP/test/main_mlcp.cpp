@@ -45,6 +45,8 @@
  *
  */
 
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+
 #include "NumericsConfig.h"
 
 #include <stdio.h>

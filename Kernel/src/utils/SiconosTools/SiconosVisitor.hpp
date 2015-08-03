@@ -181,7 +181,7 @@ enum Siconos
 /* the type visitor */
 #undef REGISTER
 #define REGISTER(X)                                                 \
-  virtual Type::Siconos visit(const X&) const { return Type::X; };  \
+  Type::Siconos visit(const X&) const { return Type::X; };  \
 
 #undef REGISTER_STRUCT
 #define REGISTER_STRUCT(X) REGISTER(X)
@@ -189,7 +189,7 @@ enum Siconos
 #undef REGISTER_BASE
 #undef REGISTER_BASE_EXTERN
 #define REGISTER_BASE(X,Y)                                         \
-  virtual Type::Siconos visit(const X&) const { return Type::Y; }; \
+  Type::Siconos visit(const X&) const { return Type::Y; }; \
 
 #define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
 

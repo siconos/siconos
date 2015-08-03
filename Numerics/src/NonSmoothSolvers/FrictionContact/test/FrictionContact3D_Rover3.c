@@ -22,7 +22,7 @@
 #include "frictionContact_test_function.h"
 
 
-int test_rover(char  * filename)
+static inline test_rover(char  * filename)
 {
   int info = 0 ;
 

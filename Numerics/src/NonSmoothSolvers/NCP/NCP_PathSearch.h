@@ -30,7 +30,7 @@
 
 #include "SiconosBlas.h"
 #include "NumericsMatrix.h"
-
+#include "NonlinearComplementarityProblem.h"
 
 #if defined(__cplusplus)
 #undef restrict
@@ -48,7 +48,7 @@ extern "C"
    * \param F value of the NCP function
    * \param[out] x current newton iterate
    * */
-  void ncp_pathsearch_compute_x_from_z(unsigned n, double* restrict z, double* restrict F,double* restrict x)
+  static inline void ncp_pathsearch_compute_x_from_z(unsigned n, double* restrict z, double* restrict F,double* restrict x)
   {
     /* init value of x */
     /* see Linear Algebra Enhancements to the PATH Solver by Li, Ferris and Munson */

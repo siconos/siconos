@@ -3,6 +3,8 @@
 #include "VariationalInequality.h"
 #include "SolverOptions.h"
 
+#include "VariationalInequality_Solvers.h"
+
 #ifdef HAVE_PATHFERRIS
 
 #include <limits.h>

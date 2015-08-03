@@ -27,6 +27,8 @@
 #include "Newton_Methods.h"
 #include "FischerBurmeister.h"
 
+#include "lcp_newton_FB.h"
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"

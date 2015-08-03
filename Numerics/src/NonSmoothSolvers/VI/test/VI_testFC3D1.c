@@ -6,6 +6,8 @@
 
 #include "SiconosBlas.h"
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 typedef struct {
   VariationalInequality * vi;
   FrictionContactProblem * fc3d;

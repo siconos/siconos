@@ -23,19 +23,19 @@
 
 PluggedObject::PluggedObject(): _pluginName("unplugged")
 {
-  fPtr = 0;
+  fPtr = NULL;
 }
 
 PluggedObject::PluggedObject(const std::string& name): _pluginName(name)
 {
-  fPtr = 0;
+  fPtr = NULL;
   setComputeFunction();
 }
 
 PluggedObject::PluggedObject(const PluggedObject & PO):  _pluginName(PO.getPluginName())
 {
   // we don't copy the fPtr since we need to increment the number of times we opened the plugin file in the openedPlugins multimap
-  fPtr = 0;
+  fPtr = NULL;
   if ((_pluginName.compare("unplugged") != 0) && (_pluginName.compare("Unknown") != 0))
     setComputeFunction();
 }

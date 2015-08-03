@@ -25,6 +25,7 @@
 static double M[4] = {2.0, 1.0, 1.0, 2.0};
 static double q[4] = { -5.0, -6.0};
 
+void testF(int size, double *z, double * F);
 void testF(int size, double *z, double * F)
 {
   /* printf("call to MCP function F(z) ...\n");   */
@@ -49,6 +50,7 @@ void testF(int size, double *z, double * F)
   /* printf("End call to MCP function F(z) ...\n");   */
 }
 
+void testNablaF(int size, double *z, double *nablaF);
 void testNablaF(int size, double *z, double *nablaF)
 {
   /* printf("call to MCP function nablaF(z) ...\n"); */

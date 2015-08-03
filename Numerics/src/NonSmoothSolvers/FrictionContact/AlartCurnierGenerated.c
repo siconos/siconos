@@ -8,6 +8,8 @@
 #include <debug.h>
 #include "FischerBurmeisterGenerated.h"
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 #define RESULT_CHECK(X)
 #define VALUE_CHECK(X)
 

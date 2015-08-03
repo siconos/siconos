@@ -28,9 +28,9 @@
 
 using namespace RELATION;
 
-const double DEFAULT_TOL_IMPACT = MACHINE_PREC;
-const double DEFAULT_TOL_VEL = MACHINE_PREC;
-const double DEFAULT_TOL_ENER = MACHINE_PREC;
+#define DEFAULT_TOL_IMPACT MACHINE_PREC
+#define DEFAULT_TOL_VEL MACHINE_PREC
+#define DEFAULT_TOL_ENER MACHINE_PREC
 
 /** Formalization and Resolution of a Multiple Impact Non-Smooth problem.
 

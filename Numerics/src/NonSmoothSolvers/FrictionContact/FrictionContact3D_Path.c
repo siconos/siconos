@@ -30,6 +30,8 @@
 
 #include "NCP_Solvers.h"
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 /* Pointer to function used to update the solver, to formalize the local problem for example. */
 typedef void (*UpdateSolverPtr)(int, double*);
 

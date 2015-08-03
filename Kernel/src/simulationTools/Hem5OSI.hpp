@@ -24,10 +24,12 @@
 #define Hem5OSI_H
 
 #include"OneStepIntegrator.hpp"
-#include"SiconosNumerics.h"
 #include<vector>
-const doublereal HEM5_ATOL_DEFAULT = 100 * MACHINE_PREC;
-const doublereal HEM5_RTOL_DEFAULT = 10 * MACHINE_PREC;
+
+#include <hairer.h>
+
+#define HEM5_ATOL_DEFAULT 100 * MACHINE_PREC;
+#define HEM5_RTOL_DEFAULT 10 * MACHINE_PREC;
 
 /** Hem5OSI solver (odepack)
  *
@@ -239,32 +241,9 @@ public:
 
   unsigned int numberOfConstraints();
 
-  void fprob(integer* IFCN,
-             integer* NQ,
-             integer* NV,
-             integer* NU,
-             integer* NL,
-             integer* LDG, integer* LDF, integer* LDA,
-             integer* NBLK, integer* NMRC,
-             integer* NPGP, integer* NPFL,
-             integer* INDGR, integer* INDGC, integer * INDFLR, integer * INDFLC,
-             doublereal* time,
-             doublereal* q, doublereal* v, doublereal* u,  doublereal* xl,
-             doublereal* G, doublereal* GQ, doublereal * F,
-             doublereal* GQQ, doublereal* GT, doublereal * FL,
-             doublereal* QDOT, doublereal* UDOT, doublereal * AM);
+  fprobfunction fprob;
 
-  void solout(integer* MODE,
-              integer* NSTEP,
-              integer* NQ,
-              integer* NV,
-              integer* NU,
-              integer* NL,
-              integer* LDG, integer* LDF, integer* LDA,
-              integer* LRDO, integer* LIDO,
-              fprobpointer FPROB,
-              doublereal* q, doublereal* v, doublereal* u,
-              doublereal *DOWK, integer* IDOWK);
+  soloutfunction solout;
 
   void f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot);
 

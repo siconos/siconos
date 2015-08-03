@@ -3,6 +3,8 @@
 #include "NonSmoothDrivers.h"
 #include "stdlib.h"
 
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
 void Ftest(void * viIn, int n, double *x, double *F)
 {
   int i;

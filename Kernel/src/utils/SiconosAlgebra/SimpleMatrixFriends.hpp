@@ -87,7 +87,7 @@ const SimpleMatrix operator +(const SiconosMatrix& A, const SiconosMatrix& B);
  * \return a SP::SimpleMatrix
  */
 SP::SimpleMatrix operator +(const SP::SimpleMatrix A, const SP::SimpleMatrix B);
-//  SimpleMatrix operator +(const SimpleMatrix&,const SimpleMatrix&);
+SimpleMatrix operator +(const SimpleMatrix& A, const SimpleMatrix& B);
 
 /** Addition of two matrices C = A+B
  *  \param A a SiconosMatrix
@@ -285,6 +285,8 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool = true);
 void private_addprod(const SiconosMatrix& , unsigned int, unsigned int, const SiconosVector&, SiconosVector&);
 void private_addprod(double, SPC::SiconosMatrix, unsigned int, unsigned int, SPC::SiconosVector, SP::SiconosVector);
 void private_addprod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, unsigned int, SP::SiconosVector);
+void private_addprod(const SiconosMatrix& , unsigned int, unsigned int, const BlockVector&, SiconosVector&);
+void private_addprod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, unsigned int, SP::SiconosVector);
 void private_prod(const SiconosMatrix& A, unsigned int, const SiconosVector&, SiconosVector&, bool);
 void private_prod(const SiconosMatrix& A, unsigned int, const BlockVector& , SiconosVector&, bool);
 void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::BlockVector, bool);

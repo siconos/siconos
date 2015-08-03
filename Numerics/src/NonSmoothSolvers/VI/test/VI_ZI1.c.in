@@ -48,6 +48,7 @@ typedef struct
   unsigned int nabla_eval;
 } data_ZI;
 
+void F_ZI(void* env, int n, double* restrict l, double* restrict F);
 void F_ZI(void* env, int n, double* restrict l, double* restrict F)
 {
   data_ZI* d = (data_ZI*) env;
@@ -69,6 +70,7 @@ void F_ZI(void* env, int n, double* restrict l, double* restrict F)
 
 }
 
+void nabla_F_ZI(void* env, int n, double* restrict l, double* restrict nabla_F);
 void nabla_F_ZI(void* env, int n, double* restrict l, double* restrict nabla_F)
 {
   data_ZI* d = (data_ZI*) env;

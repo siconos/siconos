@@ -30,6 +30,7 @@
 #include <string.h>
 #include <math.h>
 
+#include "FrictionContact2D_Solvers.h"
 
 void FrictionContact2D_projf(int etat[], int *nn, double y[], double fric[], double projf1[])
 {

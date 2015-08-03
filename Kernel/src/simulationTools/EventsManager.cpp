@@ -276,9 +276,9 @@ unsigned int EventsManager::insertEv(SP::Event e)
   if (!inserted)
     _events.push_back(e);
 
-  return pos;
   mpz_clear(delta_time);
   mpz_clear(abs_delta_time);
+  return pos;
 }
 
 void EventsManager::display() const

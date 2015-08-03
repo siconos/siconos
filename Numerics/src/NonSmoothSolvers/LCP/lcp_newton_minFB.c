@@ -33,11 +33,13 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+void lcp_min(void* data_opaque, double* z, double* F, double* Fmin);
 void lcp_min(void* data_opaque, double* z, double* F, double* Fmin)
 {
   F_min(0, ((LinearComplementarityProblem *)data_opaque)->size, z, F, Fmin);
 }
 
+void min_compute_H_lcp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, double* H);
 void min_compute_H_lcp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, double* H)
 {
   LinearComplementarityProblem* data = (LinearComplementarityProblem *)data_opaque;
