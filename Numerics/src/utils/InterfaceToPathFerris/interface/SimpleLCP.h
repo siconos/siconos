@@ -52,7 +52,7 @@
 #include "InterfaceToPathFerris/include/Types.h"
 /*because libpath46.so*/
 
-#include <stdlib.h>
+#include <stdint.h>
 
 const unsigned short int *__ctype_b;
 const int32_t *__ctype_tolower ;
