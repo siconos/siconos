@@ -24,6 +24,8 @@
 #ifndef OPEN_LIB_H
 #define OPEN_LIB_H
 
+#include "NumericsConfig.h"
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

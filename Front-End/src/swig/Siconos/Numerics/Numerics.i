@@ -44,7 +44,6 @@
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
 #include "SiconosSets.h"
-#include "open_lib.h"
 
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/preprocessor/cat.hpp>

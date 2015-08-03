@@ -1,6 +1,8 @@
 
 %{
 
+#include <open_lib.h>
+
 static PyObject *my_callback_NablaFmcp = NULL;
 
 static PyObject * set_my_callback_NablaFmcp(PyObject *o)
