@@ -247,21 +247,13 @@ INSTALL(FILES
   ${CMAKE_SOURCE_DIR}/cmake/FindQGLViewer.cmake
   DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
 
-INSTALL(FILES 
-  ${CMAKE_SOURCE_DIR}/cmake/FindSiconosNumerics.cmake
-  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+SET(MODULES "Generic;Numerics;Kernel;Mechanics;Control;IO")
 
-INSTALL(FILES 
-  ${CMAKE_SOURCE_DIR}/cmake/FindSiconosIO.cmake
-  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
-
-INSTALL(FILES 
-  ${CMAKE_SOURCE_DIR}/cmake/FindSiconosMechanics.cmake
-  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
-
-INSTALL(FILES 
- ${CMAKE_SOURCE_DIR}/cmake/FindSiconosControl.cmake
-  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+FOREACH(_M ${MODULES})
+ INSTALL(FILES 
+  ${CMAKE_SOURCE_DIR}/cmake/FindSiconos${_M}.cmake
+   DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+ENDFOREACH()
 
 INSTALL(FILES 
   ${CMAKE_SOURCE_DIR}/cmake/SiconosTools.cmake
