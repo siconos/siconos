@@ -25,7 +25,9 @@ MACRO(FIND_SICONOS_COMPONENT _project _header_file)
   FIND_PACKAGE_HANDLE_STANDARD_ARGS(Siconos${_project} 
     REQUIRED_VARS Siconos${_project}_LIBRARY)
 
-  SET(Siconos${_project}_FOUND ${SICONOSNUMERICS_FOUND})
+  # We should use the second version of FIND_PACKAGE_HANDLE_STANDARD_ARGS ... -- xhub
+  string(TOUPPER ${_project} _PROJECT)
+  SET(Siconos${_project}_FOUND ${SICONOS${_PROJECT}_FOUND})
 
   IF(Siconos${_project}_LIBRARY)
     SET(Siconos${_project}_LIBRARIES ${Siconos${_project}_LIBRARY})

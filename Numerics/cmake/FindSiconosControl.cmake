@@ -1,2 +1,2 @@
 INCLUDE(FindSiconosGeneric)
-FIND_SICONOS_COMPONENT(Control ControlManager.hpp)
+FIND_SICONOS_COMPONENT(Control SiconosControl.hpp)
