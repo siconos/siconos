@@ -72,11 +72,11 @@ FILE_VERSION_FILTER    =
 #---------------------------------------------------------------------------
 # configuration options related to warning and progress messages
 #---------------------------------------------------------------------------
-QUIET                  = NO
-WARNINGS               = YES
-WARN_IF_UNDOCUMENTED   = YES
-WARN_IF_DOC_ERROR      = YES
-WARN_NO_PARAMDOC       = YES
+QUIET                  = @DOXY_QUIET@
+WARNINGS               = @DOXY_WARNINGS@
+WARN_IF_UNDOCUMENTED   = @DOXY_WARNINGS@
+WARN_IF_DOC_ERROR      = @DOXY_WARNINGS@
+WARN_NO_PARAMDOC       = @DOXY_WARNINGS@
 WARN_FORMAT            = "$file:$line: $text"
 WARN_LOGFILE           = 
 #---------------------------------------------------------------------------
@@ -85,6 +85,7 @@ WARN_LOGFILE           =
 INPUT                  = @SiconosNumerics_INCLUDE_DIRS@ \
                          @SiconosKernel_INCLUDE_DIRS@ \
                          @SiconosMechanics_INCLUDE_DIRS@ \
+                         @SiconosControl_INCLUDE_DIRS@ \
                          @SiconosIO_INCLUDE_DIRS@
 FILE_PATTERNS          = *.h \
                          *.hpp
