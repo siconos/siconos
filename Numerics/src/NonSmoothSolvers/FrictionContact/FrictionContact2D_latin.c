@@ -39,9 +39,10 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
   int info77 = 0;
   int i, j, kk, iter1, ino, ddl, nrhs;
   int info2 = 0;
-  int n = 2 * nc, idim, nbno;
+  int n = 2 * nc;
+  size_t idim, nbno;
   int incx = 1, incy = 1;
-  int taille, taillet, taillen, itt;
+  size_t taille, taillet, taillen, itt;
   int *ddln;
   int *ddlt, *vectnt;
   assert(n>0);

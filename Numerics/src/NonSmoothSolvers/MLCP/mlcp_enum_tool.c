@@ -54,7 +54,7 @@ int nextEnum(int * W2V)
   affectW2V(W2V);
   sCurrentEnum++;
   sCmpEnum++;
-  if (verbose && sCmpEnum > sProgress * sNbCase)
+  if (verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
   {
     sProgress += 0.001;
     printf(" progress %f %d \n", sProgress, (int) sCurrentEnum);

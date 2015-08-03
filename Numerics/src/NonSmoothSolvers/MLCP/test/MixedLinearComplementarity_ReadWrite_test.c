@@ -28,8 +28,8 @@ int write_newformat(char *filename)
   printf("\n Start of test \n");
   printf("Test on %s\n", filename);
   int info = 0;
-  int sizeoffilename = strlen(filename);
-  printf("sizeoffilename %d\n",  sizeoffilename);
+  size_t sizeoffilename = strlen(filename);
+  printf("sizeoffilename %z\n",  sizeoffilename);
   char  extension[4] = "ext";
   strncpy(extension, &filename[sizeoffilename - 3], 3);
   printf("extension %s\n",  extension);

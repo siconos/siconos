@@ -82,7 +82,7 @@ static inline double elapsed_clock_gettime(struct timespec* t1, struct timespec*
   long tdelta;
   tdelta = t2->tv_nsec - t1->tv_nsec;
   if (tdelta < 0) tdelta += 1000000000;
-  return tdelta * 1e-9;
+  return ((double)tdelta) * 1e-9;
 }
 
 #define DECL_TIMER_CLOCK_GETTIME(T)                                     \

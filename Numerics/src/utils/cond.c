@@ -37,7 +37,7 @@ double cond(double * A, int n, int m)
   char JOBVT = 'N';
   int LDVT = 1;
   double *VT = NULL;
-  int size = n * m * sizeof(double);
+  size_t size = n * m * sizeof(double);
   double *Atmp = (double *)malloc(size);
   memcpy(Atmp, A, size);
 

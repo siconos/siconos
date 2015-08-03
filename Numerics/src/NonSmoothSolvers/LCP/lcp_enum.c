@@ -126,7 +126,7 @@ int lcp_nextEnum()
   affectWZ();
   sCurrentEnum++;
   sCmpEnum++;
-  if (verbose && sCmpEnum > sProgress * sNbCase)
+  if (verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
   {
     sProgress += 0.001;
     printf("lcp_enum progress %f %d \n", sProgress, (int) sCurrentEnum);
