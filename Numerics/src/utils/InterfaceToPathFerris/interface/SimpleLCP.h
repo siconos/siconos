@@ -55,7 +55,7 @@
 #include <stdlib.h>
 
 const unsigned short int *__ctype_b;
-const __int32_t *__ctype_tolower ;
+const int32_t *__ctype_tolower ;
 
 /**
 
