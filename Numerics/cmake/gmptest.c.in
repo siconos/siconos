@@ -33,7 +33,7 @@ int main(void)
 
   genericMechanicalProblem_setDefaultSolverOptions(options,@TEST_SOLVER@);
   double testTolerance = @TEST_TOLERANCE@;
-  if (testTolerance)
+  if (testTolerance > 0.)
   {
     options->dparam[0]=@TEST_TOLERANCE@;
     options->iparam[0]=@TEST_MAXITER@;
