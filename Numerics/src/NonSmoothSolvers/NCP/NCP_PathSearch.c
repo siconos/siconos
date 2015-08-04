@@ -36,6 +36,8 @@
 
 #include "NCP_PathSearch.h"
 
+#include "ncp_newton_FBLSA.h"
+
 #include "SiconosCompat.h"
 
 //#define DEBUG_STDOUT

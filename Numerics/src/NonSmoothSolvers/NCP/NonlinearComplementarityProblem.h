@@ -66,27 +66,4 @@ typedef struct
 
 typedef NonlinearComplementarityProblem NCP_struct;
 
-#include "NumericsConfig.h"
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
-#endif
-
-  /** compute the value of the Fischer-Burmeister function with an NCP
-   * \param data_opaque the strcture formalizing the NCP problem
-   * \param z current iterate
-   * \param F current value of the nonlinear function
-   * \param[out] F_FB value of the FB function
-   */
-  void ncp_FB(void* data_opaque, double* z, double* F, double* F_FB);
-void FB_compute_F_ncp(void* data_opaque, double* z, double* Fmcp);
-void FB_compute_H_ncp(void* data_opaque, double* z, double* Fmcp, double* workV1, double* workV2, double* H);
-void FB_compute_error_ncp(void* data_opaque, double* z, double* w, double* Jac_F_merit, double tol, double* err);
-
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-}
-#endif
-
 #endif

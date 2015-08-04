@@ -26,6 +26,7 @@
 
 #include "NCP_Solvers.h"
 
+#include "ncp_newton_FBLSA.h"
 
 void ncp_FB(void* data_opaque, double* z, double* F, double* F_FB)
 {
@@ -51,7 +52,7 @@ void FB_compute_H_ncp(void* data_opaque, double* z, double* F, double* workV1, d
 void FB_compute_error_ncp(void* data_opaque, double* z, double* w, double* Jac_F_merit, double tol, double* err)
 {
   NonlinearComplementarityProblem* data = (NonlinearComplementarityProblem *)data_opaque;
-  err[0] = cblas_dnrm2(data->n, Jac_F_merit, 1);
+  *err = cblas_dnrm2(data->n, Jac_F_merit, 1);
 }
 
 void ncp_newton_FBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info, SolverOptions* options)
