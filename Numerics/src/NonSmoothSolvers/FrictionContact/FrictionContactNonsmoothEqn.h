@@ -76,8 +76,8 @@ typedef struct
  */
 void frictionContactNonsmoothEqnInit(SolverOptions* options);
 
-/** Solve the equation. The only implemented method is
-    nonsmooth Newton method with a Goldstein Price line search.
+/** Solve the equation. The only implemented method is a
+    nonsmooth Newton method with a Goldstein Price or a FBLSA line search.
     \param equation the nonsmooth equation.
     \param reaction the reaction guess as input and the solution as output.
     \param velocity the velocity guess as input and the solution as output.

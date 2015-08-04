@@ -77,6 +77,8 @@ void frictionContact3D_FischerBurmeisterFunction(
 
 }
 
+
+
 void frictionContact3D_localFischerBurmeister(
   FrictionContactProblem* problem,
   double *reaction,
@@ -232,7 +234,7 @@ void frictionContact3D_localFischerBurmeister(
     // line search
     double alpha = 1;
     int info_ls = globalLineSearchGP(problemSize, computeACFun3x3, reaction, velocity, problem->mu, rho, F, A, B,
-                                     problem->M->matrix0, problem->q, AWpB, tmp1, tmp2, &alpha, 100);
+                                     problem->M->matrix0, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
 
     if (!info_ls)
       cblas_daxpy(problemSize, alpha, tmp1, 1, reaction, 1);
@@ -389,13 +391,13 @@ int frictionContact3D_FischerBurmeister_setDefaultSolverOptions(
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 11;
-  options->dSize = 11;
+  options->iSize = 14;
+  options->dSize = 14;
   options->iparam = (int *) malloc(options->iSize * sizeof(int));
   options->dparam = (double *) malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
-  for (unsigned int i = 0; i < 10; i++)
+  for (unsigned int i = 0; i < 14; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
@@ -410,6 +412,9 @@ int frictionContact3D_FischerBurmeister_setDefaultSolverOptions(
 
   options->iparam[8] = -1;     /* mpi com fortran */
   options->iparam[10] = 0;
+  options->iparam[11] = 0;     /* 0 GoldsteinPrice line search, 1 FBLSA */
+  options->iparam[12] = 100;   /* max iter line search */
+
   options->internalSolvers = NULL;
 
   return 0;

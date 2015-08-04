@@ -37,7 +37,7 @@ void printm(unsigned int nl, unsigned int nc, double *m);
   {                                                                     \
     if (!EXPR)                                                          \
     {                                                                   \
-      fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d ",   \
+      fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d\n",   \
                #EXPR, __FILE__, __LINE__);                              \
     }                                                                   \
   } while (0)
@@ -52,11 +52,11 @@ void printm(unsigned int nl, unsigned int nc, double *m);
       if (errno != 0)                                                   \
       {                                                                 \
         perror(#EXPR);                                                 \
-        fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d ", #EXPR, __FILE__, __LINE__); \
+        fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d\n", #EXPR, __FILE__, __LINE__); \
       }                                                                 \
       else                                                              \
       {                                                                 \
-        fprintf (stderr, "Siconos Numerics unknown error for %s, %s:%d ", #EXPR, __FILE__, __LINE__); \
+        fprintf (stderr, "Siconos Numerics unknown error for %s, %s:%d\n", #EXPR, __FILE__, __LINE__); \
       }                                                                 \
     }                                                                   \
   } while (0)

@@ -45,7 +45,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 
 // hack, should be prevented in sage/sympy/maple or in code generation
-#define sqrt(x) (x < 0 ? 0 : sqrt(x))
+#define sqrt(x) ((x < 0) && ( -x < 1000* DBL_EPSILON) ? 0 : (assert(x>=0),sqrt(x)))
 
 void frictionContact3D_FischerBurmeisterFABGenerated(
   double rn,
@@ -5316,6 +5316,626 @@ void frictionContact3D_FischerBurmeisterABGenerated(
     }
 }
 
+void frictionContact3D_FischerBurmeisterFMeritGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+
+    /* Assignment result=0.5*(mu*rn - x10 - x11 + x3)**2 + 0.5*(mu*ut1 + rt1 + x10*x16 - x11*x16)**2 + 0.5*(mu*ut2 + rt2 + x10*x17 - x11*x17)**2 */
+    double x1;
+    double x2;
+    double x3;
+    double x4;
+    double x5;
+    double x6;
+    double x7;
+    double x8;
+    double x9;
+    double x10;
+    double x11;
+    double x12;
+    int x13;
+    double x14;
+    int x15;
+    double x16;
+    double x17;x1=ut1*ut1;
+    x2=ut2*ut2;
+    x3=mu*(assert(IS_POSITIVE(x1 + x2)), sqrt(x1 + x2)) + un;
+    x4=mu*mu;
+    x5=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x3*x3;
+    x6=mu*rn*rt1 + mu*ut1*x3;
+    x7=mu*rn*rt2 + mu*ut2*x3;
+    x8=(assert(IS_POSITIVE(x6*x6 + x7*x7)), sqrt(x6*x6 + x7*x7));
+    x9=2*x8;
+    x10=0.5*(assert(IS_POSITIVE(x5 - x9)), sqrt(x5 - x9));
+    x11=0.5*(assert(IS_POSITIVE(x5 + x9)), sqrt(x5 + x9));
+    x12=1.0/(assert(IS_NOT_ZERO(x8)), x8);
+    x13=x8 > 0;
+    x14=(assert(IS_POSITIVE(random1*random1 + random2*random2)), pow(random1*random1 + random2*random2, -1.0/2.0));
+    x15=x8 <= 0;
+    x16=((x13) ? (x12*x6): (random1*x14));
+    x17=((x13) ? (x12*x7): (random2*x14));
+    result[0] = 0.5*(mu*rn - x10 - x11 + x3)*(mu*rn - x10 - x11 + x3) + 0.5*(mu*ut1 + rt1 + x10*x16 - x11*x16)*(mu*ut1 + rt1 + x10*x16 - x11*x16) + 0.5*(mu*ut2 + rt2 + x10*x17 - x11*x17)*(mu*ut2 + rt2 + x10*x17 - x11*x17);
+}
+void frictionContact3D_FischerBurmeisterGradFMeritGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+    double x1;
+    double x2;
+    double x3;
+    double x5;
+    double x7;
+    double x8;
+    double x9;
+    double x10;
+    double x11;
+    double x12;
+    int x45;
+    double x4;
+    double x6;
+    double x13;
+    double x14;
+    double x15;
+    double x16;
+    double x17;
+    double x18;
+    double x19;
+    double x20;
+    double x21;
+    double x22;
+    double x23;
+    double x24;
+    double x25;
+    double x26;
+    double x27;
+    double x28;
+    double x29;
+    double x30;
+    double x31;
+    double x32;
+    double x33;
+    double x34;
+    double x35;
+    double x36;
+    double x37;
+    double x38;
+    double x39;
+    double x40;
+    double x41;
+    double x42;
+    double x43;
+    double x44;
+    x1=ut1*ut1;
+    x2=ut2*ut2;
+    x3=(assert(IS_POSITIVE(x1 + x2)), sqrt(x1 + x2));
+    x5=mu*x3 + un;
+    x7=mu*rn*rt1 + mu*ut1*x5;
+    x8=x7*x7;
+    x9=mu*rn*rt2 + mu*ut2*x5;
+    x10=x9*x9;
+    x11=x10 + x8;
+    x12=(assert(IS_POSITIVE(x11)), sqrt(x11));
+    x45=x12 > 0;
+    int x53;
+    double x46;
+    double x47;
+    double x48;
+    double x49;
+    double x50;
+    double x51;
+    double x52;
+    x53=x12 <= 0;
+    if (x45)
+    {
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x18=rn*x4;
+        x19=mu*rt1;
+        x20=x19*x7;
+        x21=mu*rt2;
+        x22=x21*x9;
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x24=x23*(x20 + x22);
+        x25=x17*(x18 + x24);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x28=x18 - x24;
+        x29=x16*(2*mu - x25 - x27*x28);
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x32=0.25*x14*x23*x7 - 0.25*x15*x23*x7 + x30 + x31;
+        x33=pow(x11, -3.0/2.0);
+        x34=x33*(-x20 - x22);
+        x35=x19*x23 + x34*x7;
+        x36=1.0*x15;
+        x37=x23*x26*x7;
+        x38=x23*x7;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x41=0.25*x14*x23*x9 - 0.25*x15*x23*x9 + x39 + x40;
+        x42=x21*x23 + x34*x9;
+        x43=x23*x26*x9;
+        x44=x23*x9;
+    }
+    else if (x53)
+    {
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x18=rn*x4;
+        x19=mu*rt1;
+        x20=x19*x7;
+        x21=mu*rt2;
+        x22=x21*x9;
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x24=x23*(x20 + x22);
+        x25=x17*(x18 + x24);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x28=x18 - x24;
+        x29=x16*(2*mu - x25 - x27*x28);
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x46=(assert(IS_POSITIVE(random1*random1 + random2*random2)), pow(random1*random1 + random2*random2, -1.0/2.0));
+        x47=0.25*random1*x14*x46 - 0.25*random1*x15*x46 + x30 + x31;
+        x48=random1*x26*x46;
+        x49=random1*x46;
+        x50=0.25*random2*x14*x46 - 0.25*random2*x15*x46 + x39 + x40;
+        x51=random2*x26*x46;
+        x52=random2*x46;
+    }
+    /* Assignment result[0, 0]=Piecewise((x29 + x32*(x14*x35 - x25*x38 + x28*x37 - x35*x36) + x41*(x14*x42 - x25*x44 + x28*x43 - x36*x42), x45), (x29 + x47*(-x25*x49 + x28*x48) + x50*(-x25*x52 + x28*x51), x53)) */
+
+    if (x45)
+    {
+        DEBUG_PRINT("Case (x45) is True.\n");
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x18=rn*x4;
+        x19=mu*rt1;
+        x20=x19*x7;
+        x21=mu*rt2;
+        x22=x21*x9;
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x24=x23*(x20 + x22);
+        x25=x17*(x18 + x24);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x28=x18 - x24;
+        x29=x16*(2*mu - x25 - x27*x28);
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x32=0.25*x14*x23*x7 - 0.25*x15*x23*x7 + x30 + x31;
+        x33=pow(x11, -3.0/2.0);
+        x34=x33*(-x20 - x22);
+        x35=x19*x23 + x34*x7;
+        x36=1.0*x15;
+        x37=x23*x26*x7;
+        x38=x23*x7;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x41=0.25*x14*x23*x9 - 0.25*x15*x23*x9 + x39 + x40;
+        x42=x21*x23 + x34*x9;
+        x43=x23*x26*x9;
+        x44=x23*x9;
+
+        /* Assignment result[0, 0]=x29 + x32*(x14*x35 - x25*x38 + x28*x37 - x35*x36) + x41*(x14*x42 - x25*x44 + x28*x43 - x36*x42) */
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x18=rn*x4;
+        x19=mu*rt1;
+        x20=x19*x7;
+        x21=mu*rt2;
+        x22=x21*x9;
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x24=x23*(x20 + x22);
+        x25=x17*(x18 + x24);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x28=x18 - x24;
+        x29=x16*(2*mu - x25 - x27*x28);
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x32=0.25*x14*x23*x7 - 0.25*x15*x23*x7 + x30 + x31;
+        x33=pow(x11, -3.0/2.0);
+        x34=x33*(-x20 - x22);
+        x35=x19*x23 + x34*x7;
+        x36=1.0*x15;
+        x37=x23*x26*x7;
+        x38=x23*x7;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x41=0.25*x14*x23*x9 - 0.25*x15*x23*x9 + x39 + x40;
+        x42=x21*x23 + x34*x9;
+        x43=x23*x26*x9;
+        x44=x23*x9;
+        result[0] = x29 + x32*(x14*x35 - x25*x38 + x28*x37 - x35*x36) + x41*(x14*x42 - x25*x44 + x28*x43 - x36*x42);
+    }
+    else if (x53)
+    {
+        DEBUG_PRINT("Case (x53) is True.\n");
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x18=rn*x4;
+        x19=mu*rt1;
+        x20=x19*x7;
+        x21=mu*rt2;
+        x22=x21*x9;
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x24=x23*(x20 + x22);
+        x25=x17*(x18 + x24);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x28=x18 - x24;
+        x29=x16*(2*mu - x25 - x27*x28);
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x46=(assert(IS_POSITIVE(random1*random1 + random2*random2)), pow(random1*random1 + random2*random2, -1.0/2.0));
+        x47=0.25*random1*x14*x46 - 0.25*random1*x15*x46 + x30 + x31;
+        x48=random1*x26*x46;
+        x49=random1*x46;
+        x50=0.25*random2*x14*x46 - 0.25*random2*x15*x46 + x39 + x40;
+        x51=random2*x26*x46;
+        x52=random2*x46;
+
+        /* Assignment result[0, 0]=x29 + x47*(-x25*x49 + x28*x48) + x50*(-x25*x52 + x28*x51) */
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x18=rn*x4;
+        x19=mu*rt1;
+        x20=x19*x7;
+        x21=mu*rt2;
+        x22=x21*x9;
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x24=x23*(x20 + x22);
+        x25=x17*(x18 + x24);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x28=x18 - x24;
+        x29=x16*(2*mu - x25 - x27*x28);
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x46=(assert(IS_POSITIVE(random1*random1 + random2*random2)), pow(random1*random1 + random2*random2, -1.0/2.0));
+        x47=0.25*random1*x14*x46 - 0.25*random1*x15*x46 + x30 + x31;
+        x48=random1*x26*x46;
+        x49=random1*x46;
+        x50=0.25*random2*x14*x46 - 0.25*random2*x15*x46 + x39 + x40;
+        x51=random2*x26*x46;
+        x52=random2*x46;
+        result[0] = x29 + x47*(-x25*x49 + x28*x48) + x50*(-x25*x52 + x28*x51);
+    }
+
+    /* Assignment result[0, 1]=Piecewise((x32*(x14*x62 - x36*x62 + x37*x57 - x38*x56 + 2) + x41*(x43*x57 - x44*x56 + x60) + x58, x45), (x47*(x48*x57 - x49*x56 + 2) + x50*(x51*x57 - x52*x56) + x58, x53)) */
+    double x54;
+    double x55;
+    double x56;
+    double x57;
+    double x58;
+    double x59;
+    double x60;
+    double x61;
+    double x62;
+    if (x45)
+    {
+        DEBUG_PRINT("Case (x45) is True.\n");
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x32=0.25*x14*x23*x7 - 0.25*x15*x23*x7 + x30 + x31;
+        x33=pow(x11, -3.0/2.0);
+        x36=1.0*x15;
+        x37=x23*x26*x7;
+        x38=x23*x7;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x41=0.25*x14*x23*x9 - 0.25*x15*x23*x9 + x39 + x40;
+        x43=x23*x26*x9;
+        x44=x23*x9;
+        x54=mu*rn*x23;
+        x55=x54*x7;
+        x56=x17*(rt1 + x55);
+        x57=rt1 - x55;
+        x58=x16*(-x27*x57 - x56);
+        x59=mu*rn*x33*x7*x9;
+        x60=-x14*x59 + x36*x59;
+        x61=mu*rn*x33;
+        x62=x54 - x61*x8;
+
+        /* Assignment result[0, 1]=x32*(x14*x62 - x36*x62 + x37*x57 - x38*x56 + 2) + x41*(x43*x57 - x44*x56 + x60) + x58 */
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x32=0.25*x14*x23*x7 - 0.25*x15*x23*x7 + x30 + x31;
+        x33=pow(x11, -3.0/2.0);
+        x36=1.0*x15;
+        x37=x23*x26*x7;
+        x38=x23*x7;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x41=0.25*x14*x23*x9 - 0.25*x15*x23*x9 + x39 + x40;
+        x43=x23*x26*x9;
+        x44=x23*x9;
+        x54=mu*rn*x23;
+        x55=x54*x7;
+        x56=x17*(rt1 + x55);
+        x57=rt1 - x55;
+        x58=x16*(-x27*x57 - x56);
+        x59=mu*rn*x33*x7*x9;
+        x60=-x14*x59 + x36*x59;
+        x61=mu*rn*x33;
+        x62=x54 - x61*x8;
+        result[1] = x32*(x14*x62 - x36*x62 + x37*x57 - x38*x56 + 2) + x41*(x43*x57 - x44*x56 + x60) + x58;
+    }
+    else if (x53)
+    {
+        DEBUG_PRINT("Case (x53) is True.\n");
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x46=(assert(IS_POSITIVE(random1*random1 + random2*random2)), pow(random1*random1 + random2*random2, -1.0/2.0));
+        x47=0.25*random1*x14*x46 - 0.25*random1*x15*x46 + x30 + x31;
+        x48=random1*x26*x46;
+        x49=random1*x46;
+        x50=0.25*random2*x14*x46 - 0.25*random2*x15*x46 + x39 + x40;
+        x51=random2*x26*x46;
+        x52=random2*x46;
+        x54=mu*rn*x23;
+        x55=x54*x7;
+        x56=x17*(rt1 + x55);
+        x57=rt1 - x55;
+        x58=x16*(-x27*x57 - x56);
+
+        /* Assignment result[0, 1]=x47*(x48*x57 - x49*x56 + 2) + x50*(x51*x57 - x52*x56) + x58 */
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x46=(assert(IS_POSITIVE(random1*random1 + random2*random2)), pow(random1*random1 + random2*random2, -1.0/2.0));
+        x47=0.25*random1*x14*x46 - 0.25*random1*x15*x46 + x30 + x31;
+        x48=random1*x26*x46;
+        x49=random1*x46;
+        x50=0.25*random2*x14*x46 - 0.25*random2*x15*x46 + x39 + x40;
+        x51=random2*x26*x46;
+        x52=random2*x46;
+        x54=mu*rn*x23;
+        x55=x54*x7;
+        x56=x17*(rt1 + x55);
+        x57=rt1 - x55;
+        x58=x16*(-x27*x57 - x56);
+        result[1] = x47*(x48*x57 - x49*x56 + 2) + x50*(x51*x57 - x52*x56) + x58;
+    }
+
+    /* Assignment result[0, 2]=Piecewise((x32*(x37*x65 - x38*x64 + x60) + x41*(x14*x67 - x36*x67 + x43*x65 - x44*x64 + 2) + x66, x45), (x47*(x48*x65 - x49*x64) + x50*(x51*x65 - x52*x64 + 2) + x66, x53)) */
+    double x63;
+    double x64;
+    double x65;
+    double x66;
+    double x67;
+    if (x45)
+    {
+        DEBUG_PRINT("Case (x45) is True.\n");
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x32=0.25*x14*x23*x7 - 0.25*x15*x23*x7 + x30 + x31;
+        x33=pow(x11, -3.0/2.0);
+        x36=1.0*x15;
+        x37=x23*x26*x7;
+        x38=x23*x7;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x41=0.25*x14*x23*x9 - 0.25*x15*x23*x9 + x39 + x40;
+        x43=x23*x26*x9;
+        x44=x23*x9;
+        x54=mu*rn*x23;
+        x59=mu*rn*x33*x7*x9;
+        x60=-x14*x59 + x36*x59;
+        x61=mu*rn*x33;
+        x63=x54*x9;
+        x64=x17*(rt2 + x63);
+        x65=rt2 - x63;
+        x66=x16*(-x27*x65 - x64);
+        x67=-x10*x61 + x54;
+
+        /* Assignment result[0, 2]=x32*(x37*x65 - x38*x64 + x60) + x41*(x14*x67 - x36*x67 + x43*x65 - x44*x64 + 2) + x66 */
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x32=0.25*x14*x23*x7 - 0.25*x15*x23*x7 + x30 + x31;
+        x33=pow(x11, -3.0/2.0);
+        x36=1.0*x15;
+        x37=x23*x26*x7;
+        x38=x23*x7;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x41=0.25*x14*x23*x9 - 0.25*x15*x23*x9 + x39 + x40;
+        x43=x23*x26*x9;
+        x44=x23*x9;
+        x54=mu*rn*x23;
+        x59=mu*rn*x33*x7*x9;
+        x60=-x14*x59 + x36*x59;
+        x61=mu*rn*x33;
+        x63=x54*x9;
+        x64=x17*(rt2 + x63);
+        x65=rt2 - x63;
+        x66=x16*(-x27*x65 - x64);
+        x67=-x10*x61 + x54;
+        result[2] = x32*(x37*x65 - x38*x64 + x60) + x41*(x14*x67 - x36*x67 + x43*x65 - x44*x64 + 2) + x66;
+    }
+    else if (x53)
+    {
+        DEBUG_PRINT("Case (x53) is True.\n");
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x46=(assert(IS_POSITIVE(random1*random1 + random2*random2)), pow(random1*random1 + random2*random2, -1.0/2.0));
+        x47=0.25*random1*x14*x46 - 0.25*random1*x15*x46 + x30 + x31;
+        x48=random1*x26*x46;
+        x49=random1*x46;
+        x50=0.25*random2*x14*x46 - 0.25*random2*x15*x46 + x39 + x40;
+        x51=random2*x26*x46;
+        x52=random2*x46;
+        x54=mu*rn*x23;
+        x63=x54*x9;
+        x64=x17*(rt2 + x63);
+        x65=rt2 - x63;
+        x66=x16*(-x27*x65 - x64);
+
+        /* Assignment result[0, 2]=x47*(x48*x65 - x49*x64) + x50*(x51*x65 - x52*x64 + 2) + x66 */
+        x4=mu*mu;
+        x6=rn*rn*x4 + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
+        x13=2*x12;
+        x14=(assert(IS_POSITIVE(-x13 + x6)), sqrt(-x13 + x6));
+        x15=(assert(IS_POSITIVE(x13 + x6)), sqrt(x13 + x6));
+        x16=0.5*mu*rn + 0.5*mu*x3 + 0.5*un - 0.25*x14 - 0.25*x15;
+        x17=(assert(IS_NOT_ZERO(x15)), 1.0/x15);
+        x23=1.0/(assert(IS_NOT_ZERO(x12)), x12);
+        x26=1.0/(assert(IS_NOT_ZERO(x14)), x14);
+        x27=1.0*x26;
+        x30=0.5*rt1;
+        x31=0.5*mu*ut1;
+        x39=0.5*rt2;
+        x40=0.5*mu*ut2;
+        x46=(assert(IS_POSITIVE(random1*random1 + random2*random2)), pow(random1*random1 + random2*random2, -1.0/2.0));
+        x47=0.25*random1*x14*x46 - 0.25*random1*x15*x46 + x30 + x31;
+        x48=random1*x26*x46;
+        x49=random1*x46;
+        x50=0.25*random2*x14*x46 - 0.25*random2*x15*x46 + x39 + x40;
+        x51=random2*x26*x46;
+        x52=random2*x46;
+        x54=mu*rn*x23;
+        x63=x54*x9;
+        x64=x17*(rt2 + x63);
+        x65=rt2 - x63;
+        x66=x16*(-x27*x65 - x64);
+        result[2] = x47*(x48*x65 - x49*x64) + x50*(x51*x65 - x52*x64 + 2) + x66;
+    }
+}
+
+
+
 void frictionContact3D_FischerBurmeisterFunctionGenerated(
   double *reaction,
   double *velocity,
@@ -5375,4 +5995,30 @@ void frictionContact3D_FischerBurmeisterFunctionGenerated(
       cpy3x3(result + 9, B);
     }
   }
+}
+
+void frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated(
+  double *reaction,
+  double *velocity,
+  double mu,
+  double *rho,
+  double *gf)
+{
+  double result[3];
+
+  assert(reaction);
+  assert(velocity);
+  assert(rho);
+
+  SET3(reaction);
+  SET3(velocity);
+  SET3(rho);
+
+  frictionContact3D_FischerBurmeisterGradFMeritGenerated(
+    *reaction0, *reaction1, *reaction2,
+    *velocity0, *velocity1, *velocity2,
+    mu,
+    *rho0, *rho1, *rho2,
+    result);
+  cpy3(result, gf);
 }

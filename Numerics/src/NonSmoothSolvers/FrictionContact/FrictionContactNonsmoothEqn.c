@@ -1,5 +1,7 @@
 #include "FrictionContactNonsmoothEqn.h"
 
+#define DEBUG_MESSAGES 1
+#include "debug.h"
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
 #include "FrictionContact3D_Solvers.h"
@@ -40,23 +42,6 @@ void computeAWpB(
       mm3x3(Ai, Wij, tmp);
       if (jp3 == ip3) add3x3(Bi, tmp);
       insert3x3(problemSize, ip3, jp3, result, tmp);
-
-#ifdef VERBOSE_DEBUG_1
-      if (jp3 == ip3)
-      {
-        printf("Ai\n");
-        print3x3(Ai);
-
-        printf("Bi\n");
-        print3x3(Bi);
-
-        printf("Wij");
-        print3x3(Wij);
-
-        printf("result\n");
-        print3x3(tmp);
-      }
-#endif
 
     }
   }
@@ -310,7 +295,7 @@ int globalLineSearchSparseGP(
   double alpha[1],
   unsigned int maxiter_ls)
 {
-  double inf = 1e10;
+  double inf = DBL_MAX;
   double alphamin = 0.0;
   double alphamax = inf;
 
@@ -388,6 +373,157 @@ int globalLineSearchSparseGP(
   return -1;
 }
 
+void frictionContact3D_FischerBurmeisterFunctionGenerated(
+  double *reaction,
+  double *velocity,
+  double mu,
+  double *rho,
+  double *f,
+  double *A,
+  double *B);
+
+
+void frictionContact3D_FischerBurmeisterGradFMeritGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result);
+
+void frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated(
+  double *reaction,
+  double *velocity,
+  double mu,
+  double *rho,
+  double *gf);
+
+
+/* cf Fachicchinei & Pang, Finite-Dimensional Variational Inequalities
+ * and Complementarity Problems, Volume II, p 805. */
+int frictionContactSparseFBLSA(
+  FrictionContactNonsmoothEqn* equation,
+  unsigned int problemSize,
+  double *reaction,
+  double *velocity,
+  double *mu,
+  double *rho,
+  double *F,
+  double *A,
+  double *B,
+  SparseBlockStructuredMatrix *W,
+  double *qfree,
+  SparseBlockStructuredMatrix *blockAWpB,
+  double *direction,
+  double *tmp,
+  double alpha[1],
+  unsigned int maxiter_ls)
+{
+  double fblsa_rho = 1.;
+  double gamma = 1.;
+  double scal = 1.;
+
+  cblas_dcopy(problemSize, direction, 1, tmp, 1);
+
+  // compute fb
+  frictionContact3D_FischerBurmeisterFunction(problemSize,
+                                              (FischerBurmeisterFun3x3Ptr) frictionContact3D_FischerBurmeisterFunctionGenerated,
+                                              tmp,
+                                              velocity,
+                                              mu,
+                                              rho,
+                                              F,
+                                              NULL,
+                                              NULL);
+
+  double thetafb0 = 0.5 * cblas_dnrm2(problemSize, F, 1);
+
+  // compute gradient of fb merit function (ugly)
+  frictionContact3D_FischerBurmeisterFunction(problemSize,
+                                              (FischerBurmeisterFun3x3Ptr) frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated,
+                                              tmp,
+                                              velocity,
+                                              mu,
+                                              rho,
+                                              F,
+                                              NULL,
+                                              NULL);
+
+  double gradmeritfb_dir = cblas_ddot(problemSize, F, 1, tmp, 1);
+  double norm_r = cblas_dnrm2(problemSize, tmp, 1);
+
+  if (gradmeritfb_dir > (-fblsa_rho * norm_r))
+  {
+    if (verbose > 0)
+    {
+      printf("fc3d FBLSA: condition 9.1.6 unsatisfied, gradmeritfb_dir=%g, norm_r=%g, setting d^k to - grad merit(fb) \n", gradmeritfb_dir, norm_r);
+    }
+    cblas_dcopy(problemSize, F, 1, tmp, 1);
+    cblas_dscal(problemSize, -1, tmp, 1);
+  }
+
+  for (unsigned int iter = 0; iter < maxiter_ls; ++iter)
+  {
+
+    scal /= 2.;
+
+    // tmp <- 2^(-ik)*direction+reaction
+    cblas_dcopy(problemSize, reaction, 1, tmp, 1);
+    cblas_daxpy(problemSize, scal, direction, 1, tmp, 1);
+
+    // velocity <- W*tmp + qfree
+    cblas_dcopy(problemSize, qfree, 1, velocity, 1);
+    prodSBM(problemSize, problemSize, 1., W, tmp, 1., velocity);
+
+    // compute fb
+    frictionContact3D_FischerBurmeisterFunction(problemSize,
+                                                (FischerBurmeisterFun3x3Ptr) frictionContact3D_FischerBurmeisterFunctionGenerated,
+                                                tmp,
+                                                velocity,
+                                                mu,
+                                                rho,
+                                                F,
+                                                NULL,
+                                                NULL);
+
+    double thetafb  = 0.5 * cblas_dnrm2(problemSize, F, 1);
+
+    // compute grad merit fb (ugly)
+    frictionContact3D_FischerBurmeisterFunction(problemSize,
+                                                (FischerBurmeisterFun3x3Ptr) frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated,
+                                                tmp,
+                                                velocity,
+                                                mu,
+                                                rho,
+                                                F,
+                                                NULL,
+                                                NULL);
+
+
+    if (thetafb < thetafb0 + gamma * scal * cblas_ddot(problemSize, F, 1, tmp, 1))
+    {
+      if (verbose > 0)
+      {
+        printf("fc3d FBLSA success. iteration  = %i, thetafb=%g, thetafb0=%g, gradmeritf,reaction=%g\n", iter, thetafb, thetafb0, gamma*scal*cblas_ddot(problemSize, F, 1, tmp, 1));
+      }
+      return 0;
+    }
+
+  }
+
+  if (verbose > 0)
+  {
+    printf("fc3d FBLSA failed. max number of iteration reached  = %i\n", maxiter_ls);
+  }
+
+  return -1;
+}
+
 
 void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
                                       double* reaction,
@@ -430,11 +566,11 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
   if (mumps_com==-1)
   {
-    int ierr, myid;
+    int myid;
     int argc = 0;
     char **argv;
-    ierr = MPI_Init(&argc, &argv);
-    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    CHECK_RETURN(MPI_Init(&argc, &argv));
+    CHECK_RETURN(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
     frictionContact3D_sparseLocalAlartCurnierInit(options);
     mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
   }
@@ -494,7 +630,6 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
   info[0] = 1;
 
-
   // blockAWpB init
   copySBM(problem->M->matrix1, blockAWpB, 1);
 
@@ -547,20 +682,33 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
     // line search
     double alpha = 1;
-    int info_ls = globalLineSearchSparseGP(equation, problemSize, reaction, velocity, problem->mu, rho, F, A, B,
-                                           problem->M->matrix1, problem->q, blockAWpB, tmp1, tmp2, &alpha, 100);
+    int info_ls = 0;
+
+    switch (options->iparam[11])
+    {
+    case 0:
+      /* Goldstein Price */
+      info_ls = globalLineSearchSparseGP(equation, problemSize, reaction, velocity, problem->mu, rho, F, A, B,
+                                         problem->M->matrix1, problem->q, blockAWpB, tmp1, tmp2, &alpha, options->iparam[12]);
+      break;
+    case 1:
+      /* FBLSA */
+      info_ls = frictionContactSparseFBLSA(equation, problemSize, reaction, velocity, problem->mu, rho, F, A, B,
+                                           problem->M->matrix1, problem->q, blockAWpB, tmp1, tmp2, &alpha, options->iparam[12]);
+
+    }
 
     if (!info_ls)
-      cblas_daxpy(problemSize, alpha, tmp1, 1, reaction, 1);
+      // tmp2 should contains the reaction iterate of the line search
+      //  for GP this should be the same as cblas_daxpy(problemSize, alpha, tmp1, 1, reaction, 1);
+      cblas_dcopy(problemSize, tmp2, 1, reaction, 1);
     else
-      cblas_daxpy(problemSize, 1, tmp1, 1., reaction, 1);
+      cblas_daxpy(problemSize, 1., tmp1, 1., reaction, 1);
 
 
     // velocity <- M*reaction + qfree
     cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
     prodSBM(problemSize, problemSize, 1., problem->M->matrix1, reaction, 1., velocity);
-
-
 
     options->dparam[1] = INFINITY;
 
