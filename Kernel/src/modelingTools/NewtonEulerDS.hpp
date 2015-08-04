@@ -24,6 +24,7 @@
 #define NEWTONEULERNLDS_H
 
 #include "DynamicalSystem.hpp"
+#include "BoundaryCondition.hpp"
 
 /** Pointer to function for plug-in. */
 typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int size_z,  double* z);
@@ -262,6 +263,13 @@ protected:
 
   /** jacobian_{v} forces*/
   SP::SimpleMatrix _jacobianvForces;
+
+  /** Boundary condition applied to a dynamical system*/
+  SP::BoundaryCondition _boundaryConditions;
+
+  /** Reaction to an applied  boundary condition */
+  SP::SiconosVector _reactionToBoundaryConditions;
+
 
 
   /** set links with DS members
@@ -902,6 +910,40 @@ public:
   {
     return _dotq;
   }
+
+  /** set Boundary Conditions
+   *  \param newbd BoundaryConditions
+   */
+  inline void setBoundaryConditions(SP::BoundaryCondition newbd)
+  {
+    _boundaryConditions = newbd;
+  };
+
+  /** get Boundary Conditions
+   *  \return SP::BoundaryCondition pointer on a BoundaryConditions
+   */
+  inline SP::BoundaryCondition boundaryConditions()
+  {
+    return _boundaryConditions;
+  };
+
+  /** set Reaction to Boundary Conditions
+   *  \param newrbd BoundaryConditions pointer
+   */
+  inline void setReactionToBoundaryConditions(SP::SiconosVector newrbd)
+  {
+    _reactionToBoundaryConditions = newrbd;
+  };
+
+  /** get Reaction to  Boundary Conditions
+   *  \return pointer on a BoundaryConditions
+   */
+  inline SP::SiconosVector reactionToBoundaryConditions()
+  {
+    return _reactionToBoundaryConditions;
+  };
+
+
   /** get the matrix converting the object coordinates in the absolute coordinates.
       \return SP::SimpleMatrix
    */

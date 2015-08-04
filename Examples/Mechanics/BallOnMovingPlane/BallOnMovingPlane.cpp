@@ -91,9 +91,9 @@ int main(int argc, char* argv[])
     SP::IndexInt bdindex(new IndexInt(1));
     (*bdindex)[0] = 0;
 
-    //    SP::SiconosVector bdPrescribedVelocity(new SiconosVector(1));
-    //    bdPrescribedVelocity->setValue(0,0.5);
-    //    SP::BoundaryCondition bd (new BoundaryCondition(&bdindex,bdPrescribedVelocity));
+    // SP::SiconosVector bdPrescribedVelocity(new SiconosVector(1));
+    // bdPrescribedVelocity->setValue(0,0.5);
+    // SP::BoundaryCondition bd (new BoundaryCondition(bdindex,bdPrescribedVelocity));
 
 
     SP::BoundaryCondition bd(new BoundaryCondition(bdindex));
