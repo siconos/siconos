@@ -169,9 +169,11 @@ int main(void)
 
 
 
-  free(W);
-  free(Wpinv);
   free(Wpinvtest);
+  freeNumericsMatrix(Wnum);
+  freeNumericsMatrix(WnumpInv);
+  free(Wnum);
+  free(WnumpInv);
 
   printf("-----------------------------------\n");
   printf("test with nearly 10*identity matrix\n");

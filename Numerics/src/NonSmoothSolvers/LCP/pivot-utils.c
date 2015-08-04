@@ -743,6 +743,9 @@ void do_pivot_driftless(double* mat, unsigned int dim, unsigned int dim2, unsign
     for (unsigned int j = 0; j < ncols; j+=dim) mat[i + j] -= tmp*mat[block + j];
   }
   DEBUG_PRINT_MAT_SMALL_STR("lexico_mat", (&mat[dim]), dim, dim, driving_col);
+#ifdef DEBUG_MESSAGES
+  free(driving_col);
+#endif
 }
 
 void do_pivot_driftless2(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive)

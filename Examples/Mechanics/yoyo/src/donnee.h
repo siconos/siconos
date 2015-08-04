@@ -23,6 +23,7 @@
 #endif
 #include <math.h>
 
+#include <assert.h>
 
 double puissance(double a, int n)
 {
@@ -80,26 +81,10 @@ double Som[G] = {L / 2, L / 4, L, L, L / 2};
 
 
 
-double*   tetaset(double Som[])
+double thetaset(double Som[], size_t i)
 {
 
-  double* p = new double[G] ;
-  for (int i = 0; i < G; i++)     p[i] = (1 - ue) * (Som[i]) / r;
-  return p ;
+  assert(i < G);
+  return (1 - ue) * (Som[i]) / r ;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

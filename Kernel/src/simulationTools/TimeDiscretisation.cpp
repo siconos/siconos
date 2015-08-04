@@ -60,7 +60,6 @@ TimeDiscretisation::TimeDiscretisation(double t0, const std::string& str): _t0(t
   mpf_init(_hgmp);
   mpf_init(_tkp1);
   mpf_init(_tk);
-  mpf_init(_t0gmp);
   mpf_set_str(_hgmp, str.c_str(), 10);
   _h = 0.0;
   mpf_init_set_d(_t0gmp, t0);
@@ -131,7 +130,7 @@ double TimeDiscretisation::currentTimeStep(const unsigned int k)
 {
   if(_tkV.empty())
   {
-    if (_h > 0)
+    if (_h > 0.)
       return _h;
     else
     {
@@ -150,7 +149,7 @@ double TimeDiscretisation::getTk(const unsigned int indx)
 {
   if(_tkV.empty())
   {
-    if (_h > 0)
+    if (_h > 0.)
       return _t0 + _h*indx;
     else
     {
