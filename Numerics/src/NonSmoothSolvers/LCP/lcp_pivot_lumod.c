@@ -608,6 +608,9 @@ exit_lcp_pivot:
     free(mat);
     SM_lumod_dense_free(lumod_data);
   }
+
+  /*  XXX Clean that --xhub */
+  free(candidate_indx);
 }
 
 
