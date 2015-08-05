@@ -50,7 +50,7 @@ set ylabel "A"
 set ylabel "N s "
 plot \
 resultfile u 1:4 t "contact impulse" w l,\
-resultfile u 1:12 t "reaction impulse on plane" w l
+resultfile u 1:19 t "reaction impulse on plane" w l
 
 
 set nomultiplot

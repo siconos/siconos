@@ -1582,7 +1582,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
           /* \warning the computation of reactionToBoundaryConditions take into
              account the contact impulse but not the external and internal forces.
              A complete computation of the residu should be better */
-          //d->reactionToBoundaryConditions()->setValue(bc, value) ;
+          d->reactionToBoundaryConditions()->setValue(bc, value) ;
           bc++;
         }
       }

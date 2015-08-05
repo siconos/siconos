@@ -36,6 +36,7 @@
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
 #include "LagrangianLinearTIDS.hpp"
+#include "NewtonEulerDS.hpp"
 #include "OSNSMatrix.hpp"
 
 #include "Tools.hpp"
@@ -279,29 +280,34 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
              relationType == NewtonEuler)
     {
 
+      SP::BoundaryCondition bc;
       Type::Siconos dsType = Type::value(*ds);
-
       if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-
-        if (d->boundaryConditions())
-        {
-          for (std::vector<unsigned int>::iterator itindex =
-                 d->boundaryConditions()->velocityIndices()->begin() ;
-               itindex != d->boundaryConditions()->velocityIndices()->end();
-               ++itindex)
-          {
-            // (nslawSize,sizeDS));
-            SP::SiconosVector coltmp(new SiconosVector(nslawSize));
-            coltmp->zero();
-            leftInteractionBlock->setCol(*itindex, *coltmp);
-          }
-        }
-        DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n")
-        DEBUG_EXPR(leftInteractionBlock->display(););
-
+        if (d->boundaryConditions()) bc = d->boundaryConditions();
       }
+      else if (dsType == Type::NewtonEulerDS)
+      {
+        SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+        if (d->boundaryConditions()) bc = d->boundaryConditions();
+      }
+      if (bc)
+      {
+        for (std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
+             itindex != bc->velocityIndices()->end();
+             ++itindex)
+        {
+          // (nslawSize,sizeDS));
+          SP::SiconosVector coltmp(new SiconosVector(nslawSize));
+          coltmp->zero();
+          leftInteractionBlock->setCol(*itindex, *coltmp);
+        }
+      }
+      DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n");
+      DEBUG_EXPR(leftInteractionBlock->display(););
+
+
       // (inter1 == inter2)
       DEBUG_EXPR(leftInteractionBlock->display(););
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
@@ -453,24 +459,45 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
            relationType2 == NewtonEuler)
   {
 
-    Type::Siconos dsType = Type::value(*ds);
+    //Type::Siconos dsType = Type::value(*ds);
 
+
+    // if (d->boundaryConditions())
+    // {
+    //   for (std::vector<unsigned int>::iterator itindex =
+    //          d->boundaryConditions()->velocityIndices()->begin() ;
+    //        itindex != d->boundaryConditions()->velocityIndices()->end();
+    //        ++itindex)
+    //   {
+    //     // (nslawSize1,sizeDS));
+    //     SP::SiconosVector coltmp(new SiconosVector(nslawSize1));
+    //     coltmp->zero();
+    //     leftInteractionBlock->setCol(*itindex, *coltmp);
+    //   }
+    // }
+
+    SP::BoundaryCondition bc;
+    Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-
-      if (d->boundaryConditions())
+      if (d->boundaryConditions()) bc = d->boundaryConditions();
+    }
+    else if (dsType == Type::NewtonEulerDS)
+    {
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+      if (d->boundaryConditions()) bc = d->boundaryConditions();
+    }
+    if (bc)
+    {
+      for (std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
+           itindex != bc->velocityIndices()->end();
+           ++itindex)
       {
-        for (std::vector<unsigned int>::iterator itindex =
-               d->boundaryConditions()->velocityIndices()->begin() ;
-             itindex != d->boundaryConditions()->velocityIndices()->end();
-             ++itindex)
-        {
-          // (nslawSize1,sizeDS));
-          SP::SiconosVector coltmp(new SiconosVector(nslawSize1));
-          coltmp->zero();
-          leftInteractionBlock->setCol(*itindex, *coltmp);
-        }
+        // (nslawSize,sizeDS));
+        SP::SiconosVector coltmp(new SiconosVector(nslawSize1));
+        coltmp->zero();
+        leftInteractionBlock->setCol(*itindex, *coltmp);
       }
     }
 

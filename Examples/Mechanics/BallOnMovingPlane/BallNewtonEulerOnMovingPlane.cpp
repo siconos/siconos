@@ -62,11 +62,9 @@ public:
   void computeh(double time, BlockVector& q0, SiconosVector& y)
   {
 
-    std::cout <<"my_NewtonEulerR:: computeh" << std:: endl;
-    std::cout <<"q0.size() = " << q0.size() << std:: endl;
+    //std::cout <<"my_NewtonEulerR:: computeh" << std:: endl;
+    //std::cout <<"q0.size() = " << q0.size() << std:: endl;
     double height = q0.getValue(0) - _sBallRadius - q0.getValue(7);
-    // std::cout <<"my_NewtonEulerR:: computeh _jachq" << std:: endl;
-    // _jachq->display();
 
     y.setValue(0, height);
     _Nc->setValue(0, 1);
@@ -80,10 +78,10 @@ public:
     _Pc2->setValue(1,q0.getValue(8));
     _Pc2->setValue(2,q0.getValue(9));
     //printf("my_NewtonEulerR N, Pc\n");
-    _Nc->display();
-    _Pc1->display();
-    _Pc2->display();
-    std::cout <<"my_NewtonEulerR:: computeh ends" << std:: endl;
+    //_Nc->display();
+    //_Pc1->display();
+    //_Pc2->display();
+    //std::cout <<"my_NewtonEulerR:: computeh ends" << std:: endl;
   }
   //ACCEPT_VISITORS();
 };
@@ -115,7 +113,7 @@ int main(int argc, char* argv[])
     double theta = 0.5;              // theta for MoreauJeanOSI integrator
     double m = 1; // Ball mass
     double g = 9.81; // Gravity
-    double radius = 0.1;
+    double radius = 0.0;
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -163,15 +161,15 @@ int main(int argc, char* argv[])
     SP::IndexInt bdindex(new IndexInt(1));
     (*bdindex)[0] = 0;
 
-    SP::SiconosVector bdPrescribedVelocity(new SiconosVector(1));
-    bdPrescribedVelocity->setValue(0,0.5);
-    SP::BoundaryCondition bd (new BoundaryCondition(bdindex,bdPrescribedVelocity));
+    // SP::SiconosVector bdPrescribedVelocity(new SiconosVector(1));
+    // bdPrescribedVelocity->setValue(0,0.5);
+    // SP::BoundaryCondition bd (new BoundaryCondition(bdindex,bdPrescribedVelocity));
 
 
-    // SP::BoundaryCondition bd(new BoundaryCondition(bdindex));
-    // bd->setComputePrescribedVelocityFunction("BallOnMovingPlanePlugin", "prescribedvelocity");
+    SP::BoundaryCondition bd(new BoundaryCondition(bdindex));
+    bd->setComputePrescribedVelocityFunction("BallOnMovingPlanePlugin", "prescribedvelocity");
 
-    //movingplane->setBoundaryConditions(bd);
+    movingplane->setBoundaryConditions(bd);
 
 
 
@@ -263,7 +261,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 18;
+    unsigned int outputSize = 19;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = ball->q();
@@ -273,17 +271,17 @@ int main(int argc, char* argv[])
     SP::SiconosVector vplane = movingplane->velocity();
     SP::SiconosVector pplane = movingplane->p(1);
 
-    // SP::SiconosVector lambda = inter->lambda(1);
-    // SP::SiconosVector y = inter->y(0);
+    SP::SiconosVector lambda = inter->lambda(1);
+    SP::SiconosVector y = inter->y(0);
 
-    //SP::SiconosVector reaction = movingplane->reactionToBoundaryConditions();
+    SP::SiconosVector reaction = movingplane->reactionToBoundaryConditions();
 
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
-    // dataPlot(0, 4) = (*lambda)(0);
+    dataPlot(0, 4) = (*lambda)(0);
     dataPlot(0, 5) = acos((*q)(3));
     dataPlot(0, 6) = relation0->contactForce()->norm2();
 
@@ -300,7 +298,7 @@ int main(int argc, char* argv[])
 
     dataPlot(0, 16) = (*qplane)(2);
     dataPlot(0, 17) = (*vplane)(2);
-
+    dataPlot(0, 18) = (*reaction)(0);
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -311,7 +309,7 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
     dataPlot(k, 6) = relation0->contactForce()->norm2();
-    while (s->hasNextEvent() && k <5)
+    while (s->hasNextEvent() && k <5000000)
     {
       //      s->computeOneStep();
       s->advanceToEvent();
@@ -336,6 +334,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 16) = (*qplane)(0);
       dataPlot(k, 17) = (*vplane)(0);
 
+      dataPlot(k, 18) = (*reaction)(0);
 
 
       s->nextStep();
