@@ -859,10 +859,10 @@ double MoreauJeanOSI::computeResidu()
 
           double DeltaPrescribedVelocity =
             d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - vold->getValue(columnindex);
+            - v->getValue(columnindex);
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
-          *residuFree += *columntmp * (DeltaPrescribedVelocity);
+          *residuFree -= *columntmp * (DeltaPrescribedVelocity);
 
           residuFree->setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
 
@@ -874,6 +874,28 @@ double MoreauJeanOSI::computeResidu()
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1);// We use DynamicalSystem::free as tmp buffer
 
+
+      if (d->boundaryConditions())
+      {
+        unsigned int columnindex = 0;
+        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
+        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+
+        for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+             itindex != d->boundaryConditions()->velocityIndices()->end();
+             ++itindex)
+        {
+          double DeltaPrescribedVelocity =
+            d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
+            - v->getValue(columnindex);
+
+          WBoundaryConditions->getCol(columnindex, *columntmp);
+
+          d->workspace(DynamicalSystem::free)->setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
+
+          columnindex ++;
+        }
+      }
 
       DEBUG_PRINT("MoreauJeanOSI::computeResidu :\n");
       DEBUG_EXPR(residuFree->display(););

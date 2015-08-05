@@ -282,6 +282,12 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
   initRhs(time);
 
+
+  if (_boundaryConditions)
+  {
+    _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
+  }
+
   // Initialize memory vectors
   initMemory(sizeOfMemory);
 
