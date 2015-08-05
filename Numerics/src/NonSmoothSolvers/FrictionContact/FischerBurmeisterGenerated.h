@@ -54,6 +54,39 @@ void frictionContact3D_FischerBurmeisterFunctionGenerated(
   double *A,
   double *B);
 
+void frictionContact3D_FischerBurmeisterFMeritGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result);
+
+void frictionContact3D_FischerBurmeisterGradFMeritGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result);
+
+void frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated(
+  double *reaction,
+  double *velocity,
+  double mu,
+  double *rho,
+  double *gf);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

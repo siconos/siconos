@@ -437,7 +437,7 @@ void globalFrictionContact3D_sparseGlobalAlartCurnierInit(
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)malloc(sizeof(DMUMPS_STRUC_C));
 
   // SO with void pointers ?
-  SO->dparam[7] = (long) mumps_id;
+  SO->dparam[7] = (double) (long long) mumps_id;
 
   // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
   mumps_id->job = JOB_INIT;

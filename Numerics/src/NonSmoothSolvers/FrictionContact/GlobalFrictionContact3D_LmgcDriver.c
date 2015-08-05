@@ -22,6 +22,12 @@ int globalFrictionContact_fclib_write(
   char * title,
   char * description,
   char * mathInfo,
+  const char *path);
+int globalFrictionContact_fclib_write(
+  GlobalFrictionContactProblem* problem,
+  char * title,
+  char * description,
+  char * mathInfo,
   const char *path)
 {
   int rinfo = 0;

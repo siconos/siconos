@@ -23,7 +23,7 @@
 
 
 #ifdef WITH_FCLIB
-#include <fclib.h>
+#include "fclib_interface.h"
 
 FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem)
 {

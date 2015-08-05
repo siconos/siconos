@@ -21,13 +21,16 @@
 
 #include "NumericsConfig.h"
 
+#if defined(WITH_FCLIB)
+#include <fclib.h>
+#endif
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-#ifdef WITH_FCLIB
-
+#if defined(WITH_FCLIB)
   FrictionContactProblem* from_fclib_local(const struct fclib_local *fclib_problem);
 
 
