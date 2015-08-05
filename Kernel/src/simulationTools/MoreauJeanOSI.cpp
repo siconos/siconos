@@ -35,9 +35,9 @@
 #include "BlockVector.hpp"
 
 
-#define DEBUG_STDOUT
-#define DEBUG_NOCOLOR
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_NOCOLOR
+//#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
@@ -227,9 +227,10 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
 
   if (dsType == Type::LagrangianDS)
   {
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+    WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
     // Compute the W matrix
     computeW(t,ds);
-    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
     // WBoundaryConditions initialization
     if (d->boundaryConditions())
       initWBoundaryConditions(d);
@@ -238,22 +239,20 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
   else if (dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
+    WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
-    WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
     SP::SiconosMatrix W = WMap[dsN];
 
     if (C)
       scal(h * _theta, *C, *W, false); // W += h*_theta *C
-
     if (K)
       scal(h * h * _theta * _theta, *K, *W, false); // W = h*h*_theta*_theta*K
 
     // WBoundaryConditions initialization
     if (d->boundaryConditions())
       initWBoundaryConditions(d);
-
-
   }
 
   // === ===
@@ -382,8 +381,10 @@ void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
       W->setCol(*itindex, *columntmp);
       W->setRow(*itindex, *columntmp);
 
+
       columnindex ++;
     }
+    DEBUG_EXPR(W->display());
   }
   else
     RuntimeException::selfThrow("MoreauJeanOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type : " +  Type::name(*ds));
@@ -459,7 +460,7 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
       scal(-h * h * _theta * _theta, *buffer, *(d->luW()), false);
                                 //*W -= h*h*_theta*_theta**K;
     }
-    DEBUG_EXPR(d->luW()->display(););
+    //DEBUG_EXPR(d->luW()->display(););
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(*ds));
   DEBUG_PRINT("MoreauJeanOSI::computeW ends\n");
@@ -533,12 +534,11 @@ double MoreauJeanOSI::computeResidu()
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
     SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu);
-    DEBUG_PRINT("New DS ----------\n")
     // 3 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
     {
-      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), dsType == Type::LagrangianDS");
-      // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi) - pi+1
+      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), dsType == Type::LagrangianDS\n");
+      // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t_i+1,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi) - p_i+1
 
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
@@ -554,8 +554,12 @@ double MoreauJeanOSI::computeResidu()
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
       //residuFree->zero();
       DEBUG_EXPR(residuFree->display());
+
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
+      DEBUG_EXPR(q->display());
+      DEBUG_EXPR(v->display());
+
       DEBUG_EXPR(M->display());
 
 
@@ -594,7 +598,6 @@ double MoreauJeanOSI::computeResidu()
 
       if (d->boundaryConditions())
       {
-
         d->boundaryConditions()->computePrescribedVelocity(t);
 
         unsigned int columnindex = 0;
@@ -605,38 +608,59 @@ double MoreauJeanOSI::computeResidu()
              itindex != d->boundaryConditions()->velocityIndices()->end();
              ++itindex)
         {
-
           double DeltaPrescribedVelocity =
             d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - vold->getValue(columnindex);
+            - v->getValue(columnindex);
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
           *residuFree -= *columntmp * (DeltaPrescribedVelocity);
 
-          residuFree->setValue(*itindex, columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
+          residuFree->setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
 
           columnindex ++;
-
         }
       }
 
       *(d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
-      //       std::cout << "MoreauJeanOSI::ComputeResidu LagrangianDS residufree :"  << std::endl;
-      //      residuFree->display();
 
-      DEBUG_EXPR(d->workspace(DynamicalSystem::free)->display());
+      //       std::cout << "MoreauJeanOSI::ComputeResidu LagrangianDS residufree :"  << std::endl;
+      DEBUG_EXPR(residuFree->display());
 
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
                                                             // We use DynamicalSystem::free as tmp buffer
-      //       std::cout << "MoreauJeanOSI::ComputeResidu LagrangianDS residu :"  << std::endl;
-      //      d->workspace(DynamicalSystem::free)->display();
+
+      if (d->boundaryConditions())
+      {
+        unsigned int columnindex = 0;
+        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
+        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+
+        for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+             itindex != d->boundaryConditions()->velocityIndices()->end();
+             ++itindex)
+        {
+          double DeltaPrescribedVelocity =
+            d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
+            - v->getValue(columnindex);
+
+          WBoundaryConditions->getCol(columnindex, *columntmp);
+
+          d->workspace(DynamicalSystem::free)->setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
+
+          columnindex ++;
+        }
+      }
+
+
+      DEBUG_EXPR(d->workspace(DynamicalSystem::free)->display());
       normResidu = d->workspace(DynamicalSystem::free)->norm2();
+      DEBUG_PRINTF("normResidu= %e\n", normResidu);
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
     {
-      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), dsType == Type::LagrangianLinearTIDS");
+      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), dsType == Type::LagrangianLinearTIDS\n");
       // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
       // This formulae is only valid for the first computation of the residual for v = v_i
       // otherwise the complete formulae must be applied, that is
@@ -651,18 +675,11 @@ double MoreauJeanOSI::computeResidu()
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
-      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), qold :");
-#ifdef DEBUG_MESSAGES
-      qold->display();
-#endif
-      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), vold :");
-#ifdef DEBUG_MESSAGES
-      vold->display();
-#endif
-      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), q :");
-#ifdef DEBUG_MESSAGES
-      d->q()->display();
-#endif
+
+      DEBUG_EXPR(qold->display(););
+      DEBUG_EXPR(vold->display(););
+      DEBUG_EXPR(d->q()->display(););
+      DEBUG_EXPR(d->velocity()->display(););
 
       // --- ResiduFree computation Equation (1) ---
       residuFree->zero();
@@ -760,13 +777,6 @@ double MoreauJeanOSI::computeResidu()
         }
       }
 
-
-      //        std::cout << "MoreauJeanOSI::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
-      //       residuFree->display();
-
-      //        std::cout << "MoreauJeanOSI::ComputeResidu LagrangianLinearTIDS realresiduFree :"  << std::endl;
-      //       realresiduFree->display();
-
       (* d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
@@ -775,18 +785,15 @@ double MoreauJeanOSI::computeResidu()
       //      std::cout << "MoreauJeanOSI::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       //      d->workspace(DynamicalSystem::free)->display();
 
-      //      *realresiduFree-= *d->p(1);
-      //       std::cout << "MoreauJeanOSI::ComputeResidu LagrangianLinearTIDS realresidu :"  << std::endl;
-      //      realresiduFree->display();
-
 
       //     normResidu = d->workspace(DynamicalSystem::free)->norm2();
       normResidu = 0.0; // we assume that v = vfree + W^(-1) p
       //     normResidu = realresiduFree->norm2();
-
+      //DEBUG_PRINTF("normResidu (really computed) = %e\n", d->workspace(DynamicalSystem::free)->norm2() );
     }
     else if (dsType == Type::NewtonEulerDS)
     {
+      DEBUG_PRINT("MoreauJeanOSI::computeResidu(), dsType == Type::NewtonEulerDS\n");
       // residu = M (v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*forces(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
@@ -913,6 +920,7 @@ void MoreauJeanOSI::computeFreeState()
     // 3 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
     {
+      DEBUG_PRINT("MoreauJeanOSI::computeFreeState(), dsType == Type::LagrangianDS\n");
       // IN to be updated at current time: W, M, q, v, fL
       // IN at told: qi,vi, fLi
 
@@ -929,8 +937,11 @@ void MoreauJeanOSI::computeFreeState()
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
+      DEBUG_EXPR(vold->display());
+      DEBUG_EXPR(v->display());
+
 
       // --- ResiduFree computation ---
       // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
@@ -942,7 +953,6 @@ void MoreauJeanOSI::computeFreeState()
       // -- Update W --
       // Note: during computeW, mass and jacobians of forces will be computed/
       computeW(t, d);
-      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
 
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
@@ -951,11 +961,13 @@ void MoreauJeanOSI::computeFreeState()
       // -> compute real vfree
       *vfree *= -1.0;
       *vfree += *v;
+      DEBUG_EXPR(vfree->display());
 
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
     {
+      DEBUG_PRINT("MoreauJeanOSI::computeFreeState(), dsType == Type::LagrangianLinearTIDS\n");
       // IN to be updated at current time: Fext
       // IN at told: qi,vi, fext
       // IN constants: K,C
@@ -970,13 +982,10 @@ void MoreauJeanOSI::computeFreeState()
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
 
       // --- ResiduFree computation ---
-
       // vFree pointer is used to compute and save ResiduFree in this first step.
-
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);//workX[d];
@@ -985,6 +994,9 @@ void MoreauJeanOSI::computeFreeState()
       W->PLUForwardBackwardInPlace(*vfree);
       *vfree *= -1.0;
       *vfree += *vold;
+
+      DEBUG_EXPR(vfree->display());
+
 
     }
     else if (dsType == Type::NewtonEulerDS)
@@ -1411,6 +1423,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
     // 3 - Lagrangian Systems
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
+      DEBUG_PRINT("MoreauJeanOSI::updateState(const unsigned int level), dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS \n");
       // get dynamical system
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
@@ -1419,6 +1432,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->relativeConvergenceCriterionHeld();
 
       // level == LEVELMAX => p(level) does not even exists (segfault)
+      // \warning VA 04/08/2015. Why must we check that  d->p(level)->size() > 0 ?
       if (level != LEVELMAX && d->p(level) && d->p(level)->size() > 0)
       {
 
@@ -1439,6 +1453,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       {
         *v =  * ds->workspace(DynamicalSystem::free);
       }
+      DEBUG_EXPR(v->display());
 
 
 
@@ -1454,7 +1469,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
           _WBoundaryConditionsMap[ds->number()]->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = - inner_prod(*columntmp, *v);
-          if (level != LEVELMAX && d->p(level))
+          if (level != LEVELMAX && d->p(level)&& d->p(level)->size() > 0)
           {
             value += (d->p(level))->getValue(*itindex);
           }
@@ -1484,6 +1499,8 @@ void MoreauJeanOSI::updateState(const unsigned int level)
     }
     else if (dsType == Type::NewtonEulerDS)
     {
+      DEBUG_PRINT("MoreauJeanOSI::updateState(const unsigned int level), dsType == Type::NewtonEulerDS \n");
+
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->velocity();
@@ -1523,6 +1540,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       DEBUG_EXPR(ds->workspace(DynamicalSystem::free)->display());
       DEBUG_PRINT("MoreauJeanOSI::updatestate new v\n");
       DEBUG_EXPR(v->display());
+
       if (d->boundaryConditions())
       {
         int bc = 0;
@@ -1535,7 +1553,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
           _WBoundaryConditionsMap[ds->number()]->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = - inner_prod(*columntmp, *v);
-          if (level != LEVELMAX && d->p(level))
+          if (level != LEVELMAX && d->p(level) && d->p(level)->size() > 0)
           {
             value += (d->p(level))->getValue(*itindex);
           }

@@ -46,9 +46,9 @@ using namespace std::placeholders;
 #include <boost/weak_ptr.hpp>
 #endif
 
-//#define DEBUG_STDOUT
-//#define DEBUG_NOCOLOR
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
 #include <debug.h>
 
 using namespace RELATION;
@@ -383,6 +383,7 @@ void TimeStepping::computeOneStep()
 
 void TimeStepping::initializeNewtonLoop()
 {
+  DEBUG_PRINT("TimeStepping::initializeNewtonLoop() starts\n");
   double tkp1 = getTkp1();
   assert(!isnan(tkp1));
 
@@ -421,6 +422,7 @@ void TimeStepping::initializeNewtonLoop()
       indexSet0->bundle(*ui)->computeResiduY(tkp1);
     }
   }
+  DEBUG_PRINT("TimeStepping::initializeNewtonLoop() ends\n");
 }
 
 void TimeStepping::run()
