@@ -45,7 +45,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 
 // hack, should be prevented in sage/sympy/maple or in code generation
-#define sqrt(x) ((x < 0) && ( -x < 1000* DBL_EPSILON) ? 0 : (assert(x>=0),sqrt(x)))
+#define sqrt(x) ((x < 0) && ( x > -1000* DBL_EPSILON) ? 0 : (assert(x>=0),sqrt(x)))
 
 void frictionContact3D_FischerBurmeisterFABGenerated(
   double rn,
