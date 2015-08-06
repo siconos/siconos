@@ -15,6 +15,12 @@
 #include <BRepTools.hxx>
 
 //#define MBTB_MOREAU_YES
+// #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
+#include "debug.h"
+
+
 
 #ifdef MBTB_MOREAU_YES
 #include "MBTB_MoreauJeanOSI.hpp"
@@ -226,7 +232,9 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
                     const std::string& pluginFintJacqLib,  const std::string& pluginFintJacqFct,
                     const std::string& pluginMintJacqLib,  const std::string& pluginMintJacqFct,
                     const std::string& pluginFintJacvLib,  const std::string& pluginFintJacvFct,
-                    const std::string& pluginMintJacvLib,  const std::string& pluginMintJacvFct)
+                    const std::string& pluginMintJacvLib,  const std::string& pluginMintJacvFct,
+                    const std::string& pluginBoundaryConditionLib,  const std::string& pluginBoundaryConditionFct,
+                    SP::IndexInt boundaryConditionIndex)
 {
   assert(sNbOfBodies > numDS &&"MBTB_BodyBuild numDS out of range.");
   unsigned int qDim=7;
@@ -309,8 +317,31 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
       }
     }
   }
+  // set boundary condition
+  if (pluginBoundaryConditionFct.length() >1)
+  {
+    //SP::IndexInt bdindex(new IndexInt(1));
+    //(*bdindex)[0] = 4;
+    DEBUG_PRINT("################################################################\n");
 
+    DEBUG_PRINT("###\n");
 
+    DEBUG_PRINT("###\n");
+
+    DEBUG_PRINT("###\n");
+
+    DEBUG_PRINTF("Set boundary Condition for body numDs = %i\n", numDS);
+    DEBUG_EXPR(
+      for (std::vector<unsigned int>::iterator  itindex = boundaryConditionIndex->begin() ;
+           itindex != boundaryConditionIndex->end();
+           ++itindex)
+      {std::cout << *itindex <<std::endl;};
+          );
+
+    SP::BoundaryCondition bd(new BoundaryCondition(boundaryConditionIndex));
+    bd->setComputePrescribedVelocityFunction(pluginBoundaryConditionLib, pluginBoundaryConditionFct);
+    p->setBoundaryConditions(bd);
+  }
 
 
   sDS[numDS].reset(p);

@@ -95,3 +95,15 @@ extern "C" void externalForceG(double t,double *f, unsigned  int size_z, double 
   f[2]=-9.81;
 }
 
+extern "C" void prescribedvelocityB1(double time, unsigned int sizeofprescribedvelocity, double *pv)
+{
+  /* the plugin implements v(t) = C + A cos(omega *t) */
+
+  double C = -150.0 ;
+  double omega = M_PI / 2.0;
+  double A = 10.0;
+
+  //pv[0] =  A * cos(omega * time*100.0);
+  pv[0] =  C;
+  //printf("prescribed velocity = %e\n", pv[0]);
+}

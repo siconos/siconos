@@ -97,7 +97,7 @@ public:
   void setComputePrescribedVelocityFunction(const std::string&  pluginPath, const std::string& functionName)
   {
     _pluginPrescribedVelocity->setComputeFunction(pluginPath, functionName);
-    if (!_prescribedVelocity) _prescribedVelocity.reset(new SiconosVector(_velocityIndices->size()));
+    if (!_prescribedVelocity) _prescribedVelocity.reset(new SiconosVector((unsigned int)_velocityIndices->size()));
   }
 
   /** default function to compute the precribed velocities

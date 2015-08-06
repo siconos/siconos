@@ -63,6 +63,9 @@ void MBTB_BodyLoadCADFile(unsigned int numDS,const std::string& CADFile,unsigned
   \param [in] pluginFintJacvFct const std::string& , the name of the pluged fonction.
   \param [in] pluginMintJacvLib const std::string& , the path to the plugin library.
   \param [in] pluginMintJacvFct const std::string& , the name of the pluged fonction.
+  \param [in] pluginBoundaryConditionLib const std::string& , the path to the plugin library.
+  \param [in] pluginBoundaryConditionFct const std::string& , the name of the pluged fonction.
+  \param [in] boundaryConditionIndex SP::IndexInt, the indices of the velocities prescribed by the boundary condition
  */
 void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,double mass,
                     SP::SiconosVector initPos, SP::SiconosVector initCenterMass,
@@ -74,7 +77,9 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,double mass,
                     const std::string& pluginFintJacqLib,  const std::string& pluginFintJacqFct,
                     const std::string& pluginMintJacqLib,  const std::string& pluginMintJacqFct,
                     const std::string& pluginFintJacvLib,  const std::string& pluginFintJacvFct,
-                    const std::string& pluginMintJacvLib,  const std::string& pluginMintJacvFct);
+                    const std::string& pluginMintJacvLib,  const std::string& pluginMintJacvFct,
+                    const std::string& pluginBoundaryConditionLib,  const std::string& pluginBoundaryConditionFct,
+                    SP::IndexInt boundaryConditionIndex);
 //! To build a joint.
 /*!
  * It builds the joint in the simulator.

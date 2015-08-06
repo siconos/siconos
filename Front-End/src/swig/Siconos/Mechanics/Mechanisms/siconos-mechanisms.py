@@ -108,7 +108,8 @@ for idBody in range(NBBODIES):
                         plugin, fctfext[idBody],plugin,fctmext[idBody],
                         plugin, fctfint[idBody],plugin,fctmint[idBody],
                         plugin, fctfintjacq[idBody],plugin,fctmintjacq[idBody],
-                        plugin, fctfintjacv[idBody],plugin,fctmintjacv[idBody])
+                        plugin, fctfintjacv[idBody],plugin,fctmintjacv[idBody],
+                        plugin, boundaryCondition[idBody],boundaryConditionIndex[idBody])
 
     mbtb.MBTB_BodySetVelocity(idBody,initVel[idBody])
 

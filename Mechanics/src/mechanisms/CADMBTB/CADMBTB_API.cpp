@@ -217,14 +217,14 @@ void CADMBTB_moveGraphicalModelFromModel(unsigned int idGraphicModel, unsigned i
 void CADMBTB_moveObjectFromQ(unsigned int id,double& x,double& y, double& z, double& q1,double& q2,double& q3,double& q4)
 {
   assert(sNumberOfObj>id &&"CADMBTB_moveGraphicModelFromModel id out of range");
-  ::boost::math::quaternion<float>    quattrf(q1,q2,q3,q4);
+  ::boost::math::quaternion<double>    quattrf(q1,q2,q3,q4);
 
   //gp_Trsf aTrsf;
 
 
-  ::boost::math::quaternion<float> quatZ(0,0,0,1);
-  ::boost::math::quaternion<float> quatX(0,1,0,0);
-  ::boost::math::quaternion<float> quatBuff(0,0,0,0);
+  ::boost::math::quaternion<double> quatZ(0,0,0,1);
+  ::boost::math::quaternion<double> quatX(0,1,0,0);
+  ::boost::math::quaternion<double> quatBuff(0,0,0,0);
   quatBuff=quattrf*quatZ/quattrf;
   //    std::cout<<"Z axis"<<quatBuff<<"\n";
   gp_Dir axeZ(quatBuff.R_component_2() ,quatBuff.R_component_3() ,quatBuff.R_component_4());

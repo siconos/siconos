@@ -212,12 +212,12 @@ void _MBTB_STEP()
   sSimu->setNewtonMaxIteration(sDParams[3]);
   sSimu->advanceToEvent();
 
-  // double * dd =   sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam;
-  // int * ii =   sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam;
+  double * dd =   sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam;
+  int * ii =   sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam;
 
-  // std::cout<< " reached accuracy ="<< dd[2] << " < " << dd [0] <<  std::endl;
-  // std::cout<< " nb iterations ="<< ii[3] << " < " << ii [0] <<  std::endl;
-  // std::cout<< " Number of Newton iterations = " << sSimu->getNewtonNbIterations() <<std::endl;
+  std::cout<< " reached accuracy ="<< dd[2] << " < " << dd [0] <<  std::endl;
+  std::cout<< " nb iterations ="<< ii[3] << " < " << ii [0] <<  std::endl;
+  std::cout<< " Number of Newton iterations = " << sSimu->getNewtonNbIterations() <<std::endl;
 
   //sSimu->oneStepNSProblem(0)->display();
   ACE_times[ACE_TIMER_SICONOS].stop();

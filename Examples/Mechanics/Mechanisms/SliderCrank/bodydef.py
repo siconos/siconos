@@ -85,24 +85,31 @@ else :
     plugin="SliderCrankPlugin.so"
 
 ## REQUIRED the external forces.
-fctfext=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS',''])
+fctfext=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS'])
 ## REQUIRED the external momentums.
-#fctmext=numpy.array(['','','',''])
+#fctmext=numpy.array(['','',''])
 
 ## REQUIRED the internal forces.
-#fctfint=numpy.array(['internalForcesB1','','',''])
+#fctfint=numpy.array(['internalForcesB1','',''])
 ## REQUIRED the internal momentums.
-#fctmint=numpy.array(['internalMomentsB1','','',''])
+#fctmint=numpy.array(['internalMomentsB1','',''])
 
 ## REQUIRED the internal forces.
-#fctfintjacq=numpy.array(['internalForcesB1_Jacq','','',''])
+#fctfintjacq=numpy.array(['internalForcesB1_Jacq','',''])
 ## REQUIRED the internal momentums.
-#fctmintjacq=numpy.array(['internalMomentsB1_Jacq','','',''])
+#fctmintjacq=numpy.array(['internalMomentsB1_Jacq','',''])
 
 ## REQUIRED the internal forces.
-#fctfintjacv=numpy.array(['','','',''])
+#fctfintjacv=numpy.array(['','',''])
 ## REQUIRED the internal momentums.
-#fctmintjacv=numpy.array(['','','',''])
+#fctmintjacv=numpy.array(['','',''])
+
+## REQUIRED Boundary condition
+# we impose a boundary condition for the foirst body given by the plugin
+boundaryCondition=numpy.array(['prescribedvelocityB1','',''])
+# we prescribe the 4th component of the velocity of the first body
+# i.e we prescribe a angular velocity around the y-axis.
+boundaryConditionIndex=numpy.array([numpy.array([4]), numpy.array([]),numpy.array([])]) # we impose the velocity
 
 
 #JOINTS DESCRIPTION

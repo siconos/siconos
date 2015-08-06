@@ -13,6 +13,9 @@ fctmintjacq=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
 fctfintjacv=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
 fctmintjacv=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
 
+boundaryCondition=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+boundaryConditionIndex=numpy.array([numpy.array([],dtype=int) for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+
 NBARTEFACTS=0
 
 
