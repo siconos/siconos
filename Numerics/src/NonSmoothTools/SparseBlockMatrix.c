@@ -10,6 +10,14 @@
 
 //#define VERBOSE_DEBUG
 
+/* Clang 3.6 seems to be at odd with the C99 and C11 std on the conversion from
+ * double to _Bool, cf paragraph "6.3.1.2 Boolean type" in the latest C99 or C11 draft  */
+#ifdef __clang__
+#if (__clang_major__ == 3 && __clang_minor__ == 6)
+#pragma clang diagnostic ignored "-Wfloat-conversion"
+#endif
+#endif
+
 /* a basic iterator scheme for different kind of sparse
  * matrices (csc, csr, triplet) */
 typedef struct sparse_matrix_iterator
