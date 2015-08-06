@@ -105,12 +105,15 @@ void frictionContact3D_localFischerBurmeister(
 
   switch (options->iparam[10])
   {
-  case 0:
-  {
+    case 0:
+      {
 
-    computeACFun3x3 = &frictionContact3D_FischerBurmeisterFunctionGenerated;
-    break;
-  }
+        computeACFun3x3 = &frictionContact3D_FischerBurmeisterFunctionGenerated;
+        break;
+      }
+    default:
+      printf("frictionContact3D_localFischerBurmeister :: unsupported options to compute function. value = %d\n", options->iparam[10]);
+      exit(EXIT_FAILURE);
   }
 
 

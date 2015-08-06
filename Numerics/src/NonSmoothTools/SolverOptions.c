@@ -41,6 +41,7 @@
 //#define DEBUG_MESSAGES 1
 #include "debug.h"
 
+#define MAX_ENV_SIZE 200
 
 char * SICONOS_NUMERICS_PROBLEM_LCP_STR = "LCP";
 char * SICONOS_NUMERICS_PROBLEM_MLCP_STR = "MLCP";
@@ -119,10 +120,11 @@ void readSolverOptions(int driverType, SolverOptions* options)
 
   FILE * ficin;
   /* Name of the default parameters file */
-  char name[64];
+  char name[MAX_ENV_SIZE];
+  char nameSuffix[] = "/include/Siconos/Numerics/";
 
-  strcpy(name, getenv("SICONOSPATH"));
-  strcat(name, "/include/Siconos/Numerics/");
+  strncpy(name, getenv("SICONOSPATH"), MAX_ENV_SIZE - sizeof(nameSuffix));
+  strcat(name, nameSuffix);
 
   char buffer[64];
   char bufferName[64];
@@ -217,7 +219,7 @@ void recursive_printSolverOptions(SolverOptions* options, int level)
     {
       printf("%sdouble parameters \t\t\t\t options->dparam\n", marge);
       printf("%ssize of the double parameters\t\t\t options->dSize = %i\n", marge, options->dSize);
-      for (int i = 0; i < options->iSize; ++i)
+      for (int i = 0; i < options->dSize; ++i)
         printf("%s\t\t\t\t\t\t options->dparam[%i] = %.6le\n", marge, i, options->dparam[i]);
     }
   }

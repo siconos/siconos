@@ -37,8 +37,8 @@
 int main(void)
 {
   double x[2];
-  unsigned short xsubi1[3];
-  unsigned short xsubi2[3];
+  unsigned short xsubi1[] = {0., 0., 0.};
+  unsigned short xsubi2[] = {0., 0., 0.};
   x[0] = 50*erand48(xsubi1);
   x[1] = 50*erand48(xsubi2);
   /* column major */

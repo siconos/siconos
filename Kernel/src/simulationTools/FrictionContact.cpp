@@ -38,11 +38,19 @@ FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
   _numerics_problem.reset(new FrictionContactProblem);
 
   if (dimPb == 2)
+  {
     frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
+    _frictionContact_driver = &frictionContact2D_driver;
+  }
   else if (dimPb == 3)
+  {
     frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
+    _frictionContact_driver = &frictionContact3D_driver;
+  }
   else
     RuntimeException::selfThrow("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
+
+  _mu.reset(new MuStorage());
 }
 
 void FrictionContact::initialize(SP::Simulation sim)
@@ -56,10 +64,6 @@ void FrictionContact::initialize(SP::Simulation sim)
   LinearOSNS::initialize(sim);
 
   // Connect to the right function according to dim. of the problem
-  if (_contactProblemDim == 2)
-    _frictionContact_driver = &frictionContact2D_driver;
-  else // if(_contactProblemDim == 3)
-    _frictionContact_driver = &frictionContact3D_driver;
 
   // get topology
   SP::Topology topology =
@@ -71,7 +75,6 @@ void FrictionContact::initialize(SP::Simulation sim)
   // Fill vector of friction coefficients
   int sizeMu = simulation()->model()->nonSmoothDynamicalSystem()
                ->topology()->indexSet(0)->size();
-  _mu.reset(new MuStorage());
   _mu->reserve(sizeMu);
 
   // If the topology is TimeInvariant ie if M structure does not

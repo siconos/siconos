@@ -82,7 +82,8 @@ SN_lumod_dense_data* SN_lumod_dense_allocate(unsigned n, unsigned maxmod)
   unsigned size_Uk = n*maxmod;
   unsigned size_Yk = n*maxmod;
   unsigned size_L_C = maxmod*maxmod;
-  unsigned size_U_C = (unsigned)ceil(maxmod*(maxmod + 1)/2);
+  /* the original formula is ceil(maxmod*(maxmod + 1)/2) */
+  unsigned size_U_C = maxmod*(maxmod + 1)/2 + 1;
   unsigned size_y = maxmod;
   unsigned size_z = maxmod;
   unsigned size_w = maxmod;
@@ -240,7 +241,7 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
     if (var > n) /* z var */
     {
       unsigned z_indx = var - n - 1;
-      assert( var - n - 1 >= 0);
+      assert(var >=  n + 1 );
       assert(var - n - 1 < n);
       cblas_dcopy(n, &Mlcp[z_indx*n], 1, &H[j], 1);
     }
@@ -370,7 +371,6 @@ void SN_lumod_replace_row(SN_lumod_dense_data* restrict lumod_data,  unsigned in
   unsigned maxmod = lumod_data->maxmod;
   assert(k > 0);
   assert(index_row < k);
-  assert(leaving_indx_in_H>=0);
   assert(leaving_indx_in_H < n);
 
   /* Update a column of Uk  */

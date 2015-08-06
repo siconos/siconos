@@ -87,7 +87,10 @@ bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction i
     //    return (lambda > 0);
     return true;
   }
-  return(0);
+  else
+  {
+    return false;
+  }
 }
 
 

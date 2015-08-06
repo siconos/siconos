@@ -81,8 +81,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   int ls_itermax = 10;
   double tau=0.6, L= 0.9, Lmin =0.3, taumin=0.7;
   double a1=0.0, a2=0.0;
-  double * x_k =0;
-  double * w_k =0;
+  double * x_k = NULL;
+  double * w_k = NULL;
 
   if (isVariable)
   {
@@ -319,14 +319,18 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
-    free(x_k);
-    free(w_k);
   }
 
 
   if (verbose > 0)
   {
     printf("----------------------------------- VI - Fixed Point Projection (FPP) - #Iteration %i Final Error = %14.7e\n", iter, error);
+  }
+
+  if (isVariable)
+  {
+    free(x_k);
+    free(w_k);
   }
 
   dparam[0] = tolerance;

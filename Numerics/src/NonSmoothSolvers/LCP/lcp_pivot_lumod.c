@@ -350,7 +350,7 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, doub
       {
         drive = leaving - (dim + BASIS_OFFSET);
         memset(driving_col, 0, sizeof(double) * dim);
-        assert(drive - BASIS_OFFSET >= 0);
+        assert(drive >= BASIS_OFFSET);
         driving_col[drive - BASIS_OFFSET] = -1.;
       }
       solve_info = SN_lumod_dense_solve(lumod_data, driving_col, get_col_tilde(mat, dim));

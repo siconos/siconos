@@ -106,6 +106,7 @@ void SimpleMatrix::trans()
     break;
   case 4:
     *mat.Sparse = ublas::trans(*mat.Sparse);
+    break;
   case 5:
     *mat.Banded = ublas::trans(*mat.Banded);
     break;

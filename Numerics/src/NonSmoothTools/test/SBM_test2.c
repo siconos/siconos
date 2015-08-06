@@ -45,16 +45,18 @@ int main(void)
   }
 
   SBMfree(&M, NUMERICS_SBM_FREE_BLOCK);
+
+  SparseBlockStructuredMatrix M2;
   file = fopen("data/SBM2.dat", "r");
-  newFromFileSBM(&M, file);
+  newFromFileSBM(&M2, file);
   fclose(file);
-  res = test_RowPermutationSBM(&M);
+  res = test_RowPermutationSBM(&M2);
   if (res)
   {
     printf("========= Failed SBM tests 2 for SBM  ========= \n");
     return 1;
   }
-  SBMfree(&M, NUMERICS_SBM_FREE_BLOCK);
+  SBMfree(&M2, NUMERICS_SBM_FREE_BLOCK);
   printf("\n========= Succed SBM tests 2 for SBM  ========= \n");
   return 0;
 

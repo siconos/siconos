@@ -74,6 +74,8 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6),
   _luW.reset(new SimpleMatrix(_n, _n));
   _massMatrix->zero();
   _T.reset(new SimpleMatrix(_qDim, _n));
+
+  _mass = 0.;
 }
 
 void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix)
@@ -270,7 +272,7 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
       _jacobianqForces.reset(new SimpleMatrix(_n, _qDim));
     _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
   }
-  if ((_pluginJacvFInt->fPtr || _computeJacobianMIntvByFD) && !_jacobianFIntv)
+  if ((_pluginJacvMInt->fPtr || _computeJacobianMIntvByFD) && !_jacobianMIntv)
     _jacobianMIntv.reset(new SimpleMatrix(3, _n));
 
 

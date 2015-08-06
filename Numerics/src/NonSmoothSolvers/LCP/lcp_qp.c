@@ -79,20 +79,14 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
     p[i] = problem->q[i] ;
 
   /* / Creation of the data matrix of the linear constraints, A and  the constant data of the linear constraints b*/
-  A = (double *)malloc(mmax * nmax * sizeof(double));
-  for (j = 0; j < m; j++)
-  {
-    for (i = 0; i < n; i++) A[j * mmax + i] = 0.0;
-  }
+  A = (double *)calloc(mmax * nmax, sizeof(double));
 
-  b = (double *)malloc(mmax * sizeof(double));
-  for (i = 0; i < m; i++) b[i] = 0.0 ;
+  b = (double *)calloc(mmax, sizeof(double));
 
   /* Creation of the the lower and upper bounds for the variables.*/
   xu = (double *)malloc(n * sizeof(double));
   for (i = 0; i < n; i++) xu[i] = 1e32 ;
-  xl = (double *)malloc(n * sizeof(double));
-  for (i = 0; i < n; i++) xl[i] = 0.0 ;
+  xl = (double *)calloc(n, sizeof(double));
 
   /*  on return, lambda contains the lagrange multipliers.*/
   lambda = (double *)malloc(mnn * sizeof(double));

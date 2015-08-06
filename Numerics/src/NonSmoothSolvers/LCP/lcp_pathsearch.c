@@ -96,6 +96,7 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
       break;
     case LCP_PATHSEARCH_NON_ENTERING_T:
       DEBUG_PRINT("lcp_pathsearch :: the variable t could not enter !\n");
+      break;
     case LCP_PIVOT_NUL:
     case LCP_PATHSEARCH_LEAVING_T:
       printf("lcp_pathsearch :: kaboom, kaboom still more work needs to be done\n");

@@ -77,13 +77,6 @@ protected:
 
   virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
-  SP::SimpleMatrix _C;
-  SP::SimpleMatrix _D;
-  SP::SimpleMatrix _F;
-
-  SP::SimpleMatrix _B;
-  SP::SimpleMatrix _K;
-
 public:
 
   /** basic constructor

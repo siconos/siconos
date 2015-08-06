@@ -39,6 +39,8 @@ using namespace RELATION;
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+ // initial step size guess (typical value 1e-3)
+#define INITIAL_GUESS_TS 1.e-3
 
 // ===== Out of class objects and functions =====
 
@@ -113,6 +115,7 @@ Hem5OSI::Hem5OSI():
   _intData.resize(9);
   for (int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
+  _timeStep = INITIAL_GUESS_TS;
 }
 
 Hem5OSI::Hem5OSI(SP::DynamicalSystem ds):
@@ -123,6 +126,7 @@ Hem5OSI::Hem5OSI(SP::DynamicalSystem ds):
   _intData.resize(9);
   for (int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
+  _timeStep = INITIAL_GUESS_TS;
 }
 
 
@@ -524,7 +528,6 @@ void Hem5OSI::initialize()
   // }
 
 
-  _timeStep = 1.e-3; // initial step size guess (typical value 1e-3)
 
 }
 void Hem5OSI::solout(integer* MODE,

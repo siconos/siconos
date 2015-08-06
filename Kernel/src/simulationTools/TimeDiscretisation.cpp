@@ -19,9 +19,12 @@
 #include "TimeDiscretisation.hpp"
 #include "RuntimeException.hpp"
 #include "Tools.hpp"
-#include <cmath>
 
-TimeDiscretisation::TimeDiscretisation()
+#include <cmath>
+#include <limits>
+
+
+TimeDiscretisation::TimeDiscretisation(): _h(0.), _t0(std::numeric_limits<double>::quiet_NaN())
 {
   mpf_init(_hgmp);
   mpf_init(_tkp1); 
@@ -55,13 +58,12 @@ TimeDiscretisation::TimeDiscretisation(double t0, double h):
 }
 
 // INPUTS: t0 and h
-TimeDiscretisation::TimeDiscretisation(double t0, const std::string& str): _t0(t0)
+TimeDiscretisation::TimeDiscretisation(double t0, const std::string& str): _h(0.0), _t0(t0)
 {
   mpf_init(_hgmp);
   mpf_init(_tkp1);
   mpf_init(_tk);
   mpf_set_str(_hgmp, str.c_str(), 10);
-  _h = 0.0;
   mpf_init_set_d(_t0gmp, t0);
 }
 
@@ -87,11 +89,15 @@ TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
   if (td.hGmp())
   {
     mpf_init_set(_hgmp, *td.currentTimeStep());
+    _h = 0.;
+  }
+  else if (td.hConst())
+  {
+    _h = td._h;
   }
   else
   {
-    if (td.hConst())
-      _h = td._h;
+    _h = 0.;
   }
   _t0 = td.getT0();
   _tkV = td.getTkVector();

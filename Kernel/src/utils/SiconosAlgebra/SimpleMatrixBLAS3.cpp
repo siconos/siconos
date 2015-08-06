@@ -827,8 +827,6 @@ void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, dou
 
 void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 {
-  std::cout<< "compute gemm .JKJKJK.." << std::endl;
-
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
   unsigned int numC = C.getNum();
@@ -850,6 +848,7 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
     siconosBindings::blas::gemm(a, *A.dense(), *B.dense(), b, *tmpC);
     std::cout << *tmpC << std::endl;
     noalias(*C.dense()) = *tmpC;
+    delete tmpC;
   }
   else
     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for these kinds of matrices.");

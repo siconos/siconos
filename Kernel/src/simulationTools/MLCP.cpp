@@ -41,6 +41,14 @@ MLCP::MLCP(int numericsSolverId):
   _numerics_problem.blocksRows[0] = 0;
   _curBlock = 0;
 
+  _numerics_problem.A = 0;
+  _numerics_problem.B = 0;
+  _numerics_problem.C = 0;
+  _numerics_problem.D = 0;
+  _numerics_problem.a = 0;
+  _numerics_problem.b = 0;
+  _numerics_problem.isStorageType1 = 1;
+  _numerics_problem.isStorageType2 = 0;
 }
 
 void  MLCP::reset()
@@ -207,14 +215,6 @@ void MLCP::initialize(SP::Simulation sim)
   LinearOSNS::initialize(sim);
 
   _numerics_problem.M = &*_M->getNumericsMatrix();
-  _numerics_problem.A = 0;
-  _numerics_problem.B = 0;
-  _numerics_problem.C = 0;
-  _numerics_problem.D = 0;
-  _numerics_problem.a = 0;
-  _numerics_problem.b = 0;
-  _numerics_problem.isStorageType1 = 1;
-  _numerics_problem.isStorageType2 = 0;
 }
 void  MLCP::updateInteractionBlocks()
 {

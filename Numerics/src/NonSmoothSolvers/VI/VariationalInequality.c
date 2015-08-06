@@ -26,7 +26,7 @@ void variationalInequality_display(VariationalInequality* problem)
 {
 
   assert(problem);
- 
+
 }
 
 int variationalInequality_printInFile(VariationalInequality*  problem, FILE* file)
@@ -36,7 +36,7 @@ int variationalInequality_printInFile(VariationalInequality*  problem, FILE* fil
     fprintf(stderr, "Numerics, VariationalInequality printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  
+
   return 0;
 }
 
@@ -48,8 +48,7 @@ int variationalInequality_newFromFile(VariationalInequality* problem, FILE* file
 
 void freeVariationalInequalityProblem(VariationalInequality* problem)
 {
-  problem = NULL;
-
+  assert(problem);
 }
 
 /* VariationalInequality* variationalInequalityProblem_new( int dim, void (* F)(void *vi, double *,double *)  ) */

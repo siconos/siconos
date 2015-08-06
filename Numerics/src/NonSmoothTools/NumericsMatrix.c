@@ -401,8 +401,8 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
   }
 
   int storageType;
-  int size0;
-  int size1;
+  size_t size0;
+  size_t size1;
   void* data = NULL;
 
   CHECK_IO(fscanf(file, "%d", &storageType));
@@ -411,8 +411,10 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
 
   if (storageType == NM_DENSE)
   {
-    CHECK_IO(fscanf(file, "%d\t%d\n", &(size0), &(size1)));
+    CHECK_IO(fscanf(file, "%z\t%z\n", &(size0), &(size1)));
 
+    assert(size0 < (size_t)sqrt(SIZE_MAX/sizeof(double)));
+    assert(size1 < (size_t)sqrt(SIZE_MAX/sizeof(double)));
     data = malloc(size1 * size0 * sizeof(double));
     double* data_d = (double*) data;
 
@@ -494,6 +496,7 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
       break;
     case NM_TRIPLET:
       data = malloc(sizeof(CSparseMatrix));
+      break;
     default:
       printf("createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
       exit(EXIT_FAILURE);

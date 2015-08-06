@@ -242,6 +242,10 @@ SiconosVector::SiconosVector(const SiconosVector& v1, const SiconosVector& v2)
     _dense = false;
     vect.Sparse = new SparseVect(size1 + v2.size());
   }
+  else
+  {
+    SiconosVectorException::selfThrow("SiconosVector::SiconosVector :: mixed dense and sparse vector detected");
+  }
   setBlock(0, v1);
   setBlock(size1, v2);
 }

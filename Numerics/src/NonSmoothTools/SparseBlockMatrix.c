@@ -1438,7 +1438,7 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
 
     }
   }
-  if ((!infoDGETRF) || (!infoDGETRF)) info = 0;
+  if ((!infoDGETRF) || (!infoDGETRI)) info = 0;
 
   return info;
 

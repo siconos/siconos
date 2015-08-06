@@ -63,6 +63,9 @@ bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m
   infile >> s1;
   infile >> s2;
 
+  assert(s1 > 0);
+  assert(s2 > 0);
+
   if (s1 != p.size1() || s2 != p.size2())
     p.resize(s1, s2);
 
