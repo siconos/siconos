@@ -105,7 +105,7 @@ void ZOHTest::testMatrixIntegration1()
   _x0->zero();
   (*_x0)(0) = 1;
   init();
-  SimpleMatrix dataPlot(ceil((_T - _t0) / _h) + 10, 3);
+  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 3);
   SiconosVector& xProc = *_DS->x();
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
@@ -167,7 +167,7 @@ void ZOHTest::testMatrixIntegration2()
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
   _model->initialize(_sim);
-  SimpleMatrix dataPlot(ceil((_T - _t0) / _h) + 10, 5);
+  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);
   unsigned int k = 0;
@@ -234,7 +234,7 @@ void ZOHTest::testMatrixIntegration3()
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
   _model->initialize(_sim);
-  SimpleMatrix dataPlot(ceil((_T - _t0) / _h) + 10, 7);
+  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);
   SiconosVector sampledControl(_n);
@@ -307,7 +307,7 @@ void ZOHTest::testMatrixIntegration4()
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
   _model->initialize(_sim);
-  SimpleMatrix dataPlot(ceil((_T - _t0) / _h) + 10, 7);
+  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);
   SiconosVector sampledControl(_n);

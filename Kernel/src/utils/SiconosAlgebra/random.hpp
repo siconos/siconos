@@ -22,7 +22,7 @@ namespace Siconos {
     }
 
     template <>
-    float random_value<float>() {return float(std::rand()) / float(RAND_MAX) - 0.5;}
+    float random_value<float>() {return float(std::rand()) / float(RAND_MAX) - 0.5f;}
 
     template <>
     double random_value<double>() {return double(std::rand()) / double(RAND_MAX) - 0.5;}

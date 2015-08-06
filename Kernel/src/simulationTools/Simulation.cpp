@@ -200,7 +200,7 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 void Simulation::initialize(SP::Model m, bool withOSI)
 {
   // === Connection with the model ===
-  assert(m || !"Simulation::initialize(model) - model = NULL.");
+  assert(m && "Simulation::initialize(model) - model = NULL.");
   _model = std11::weak_ptr<Model>(m);
 
   _T = m->finalT();
