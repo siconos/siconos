@@ -1,3 +1,5 @@
+/* Factorisation with Newton_Methods.c is needed */
+
 #include "FrictionContactNonsmoothEqn.h"
 
 #define DEBUG_MESSAGES 1
@@ -471,8 +473,10 @@ int frictionContactSparseFBLSA(
   // - F contains FB or grad FB merit
   // - tmp contains direction, scal*direction, reaction+scal*direction
 
-  double fblsa_rho = 1.;
-  double gamma = 1.;
+  // cf Newton_Methods.c, L59
+  double p = 2.1;
+  double fblsa_rho = 1e-8;
+  double gamma = 1e-4;
   double scal = 1.;
 
   // F <- compute fb
@@ -498,22 +502,24 @@ int frictionContactSparseFBLSA(
                                               F,
                                               NULL,
                                               NULL);
-  // tmp <- direction
-  cblas_dcopy(problemSize, direction, 1, tmp, 1);
-  double norm_r = cblas_dnrm2(problemSize, tmp, 1);
-  double gradmeritfb_dir = cblas_ddot(problemSize, F, 1, tmp, 1);
+  double norm_dir_exp_p = pow(cblas_dnrm2(problemSize, direction, 1), p);
+  double gradmeritfb_dir = cblas_ddot(problemSize, F, 1, direction, 1);
 
-  if (!isnan(gradmeritfb_dir) && !isinf(gradmeritfb_dir) && gradmeritfb_dir > (-fblsa_rho * norm_r))
+  if (!isnan(gradmeritfb_dir) && !isinf(gradmeritfb_dir) && gradmeritfb_dir > (-fblsa_rho * norm_dir_exp_p))
   {
     if (verbose > 0)
     {
-      printf("fc3d FBLSA: condition 9.1.6 unsatisfied, gradmeritfb_dir=%g, norm_r=%g\n", gradmeritfb_dir, norm_r);
+      printf("fc3d FBLSA: condition 9.1.6 unsatisfied, gradmeritfb_dir=%g, norm_r=%g\n", gradmeritfb_dir, norm_dir_exp_p);
     }
 
     // FIX: failure...
-//    printf("fc3d FBLSA: set d^k to - grad merit(fb)\n");
-//    cblas_dcopy(problemSize, F, 1, direction, 1);
-//    cblas_dscal(problemSize, -1, direction, 1);
+    if (verbose > 0)
+    {
+      printf("fc3d FBLSA: set d^k to - grad merit(fb)\n");
+    }
+
+    cblas_dcopy(problemSize, F, 1, direction, 1);
+    cblas_dscal(problemSize, -1, direction, 1);
   }
 
   for (unsigned int iter = 0; iter < maxiter_ls; ++iter)
@@ -702,6 +708,11 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
                        rho,
                        F, A, B);
 
+    if (verbose>0)
+    {
+      printf("fc3d_eSolve: ||F||=%g\n", cblas_dnrm2(problemSize, F, 1));
+    }
+
     // AW + B
     computeSparseAWpB(problemSize, A, problem->M->matrix1, B, blockAWpB, nzmax, nz, irn, jcn, AWpB);
 
@@ -740,8 +751,15 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     double alpha = 1;
     int info_ls = 0;
 
+    cblas_dcopy(problemSize, tmp1, 1, tmp3, 1);
+
     switch (options->iparam[11])
     {
+    case -1:
+      /* without line search */
+      info_ls = 1;
+      break;
+
     case 0:
       /* Goldstein Price */
       info_ls = globalLineSearchSparseGP(equation, problemSize, reaction, velocity, problem->mu, rho, F, A, B,
@@ -751,10 +769,8 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
       /* FBLSA */
       info_ls = frictionContactSparseFBLSA(equation, problemSize, reaction, velocity, problem->mu, rho, F, A, B,
                                            problem->M->matrix1, problem->q, blockAWpB, tmp1, tmp2, &alpha, options->iparam[12]);
-
+      break;
     }
-
-    cblas_dcopy(problemSize, tmp1, 1, tmp3, 1);
 
     if (!info_ls)
       // tmp2 should contains the reaction iterate of the line search
@@ -772,27 +788,30 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
     if (!(iter % erritermax))
     {
-      equation->function(equation->data, problemSize,
-                         reaction, velocity, equation->problem->mu, rho,
-                         F, NULL, NULL);
-
-
 
       FrictionContact3D_compute_error(problem, reaction, velocity,
 //      frictionContact3D_FischerBurmeister_compute_error(problem, reaction, velocity,
                                       tolerance, options, &(options->dparam[1]));
 
+      DEBUG_EXPR_WE(equation->function(equation->data, problemSize,
+                                       reaction, velocity, equation->problem->mu, rho,
+                                       F, NULL, NULL));
 
-      assert((cblas_dnrm2(problemSize, F, 1)
-              / (1 + cblas_dnrm2(problemSize, problem->q, 1)))
-             <= (10 * options->dparam[1] + 1e-15));
 
+      DEBUG_EXPR_WE(assert((cblas_dnrm2(problemSize, F, 1)
+                            / (1 + cblas_dnrm2(problemSize, problem->q, 1)))
+                           <= (10 * options->dparam[1] + 1e-15)));
 
     }
 
     if (verbose > 0)
-      printf("fc3d_esolve: iteration %d : error=%g\n", iter, options->dparam[1]);
+    {
+      equation->function(equation->data, problemSize,
+                         reaction, velocity, equation->problem->mu, rho,
+                         F, NULL, NULL);
 
+      printf("fc3d_esolve: iteration %d : error=%g, ||F||=%g\n", iter, options->dparam[1],cblas_dnrm2(problemSize, F, 1));
+    }
 
     if (options->callback)
     {

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-
+#include "debug.h"
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
 #include "FrictionContact3D_Solvers.h"
@@ -261,12 +261,6 @@ void frictionContact3D_localAlartCurnier(
 
     if (!(iter % erritermax))
     {
-      frictionContact3D_AlartCurnierFunction(
-        problemSize,
-        computeACFun3x3,
-        reaction, velocity,
-        problem->mu, rho,
-        F, NULL, NULL);
 
 
 
@@ -274,15 +268,31 @@ void frictionContact3D_localAlartCurnier(
                                       tolerance, options, &(options->dparam[1]));
 
 
-      assert((cblas_dnrm2(problemSize, F, 1)
-              / (1 + cblas_dnrm2(problemSize, problem->q, 1)))
-             <= (10 * options->dparam[1] + 1e-15));
+      DEBUG_EXPR_WE(
+        frictionContact3D_AlartCurnierFunction(
+          problemSize,
+          computeACFun3x3,
+          reaction, velocity,
+          problem->mu, rho,
+          F, NULL, NULL));
+
+      DEBUG_EXPR_WE(
+        assert((cblas_dnrm2(problemSize, F, 1)
+                / (1 + cblas_dnrm2(problemSize, problem->q, 1)))
+               <= (10 * options->dparam[1] + 1e-15)));
 
     }
 
     if (verbose > 0)
-      printf("LOCALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
-
+    {
+      frictionContact3D_AlartCurnierFunction(
+          problemSize,
+          computeACFun3x3,
+          reaction, velocity,
+          problem->mu, rho,
+          F, NULL, NULL);
+      printf("LOCALAC: iteration %d : error=%g, ||AC||=%g\n", iter, options->dparam[1], cblas_dnrm2(problemSize, F, 1));
+    }
     if (options->dparam[1] < tolerance)
     {
       info[0] = 0;
