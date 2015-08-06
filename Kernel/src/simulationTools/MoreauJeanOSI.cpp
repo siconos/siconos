@@ -610,7 +610,7 @@ double MoreauJeanOSI::computeResidu()
         {
           double DeltaPrescribedVelocity =
             d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - v->getValue(columnindex);
+            - v->getValue(*itindex);
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
           *residuFree -= *columntmp * (DeltaPrescribedVelocity);
@@ -642,7 +642,7 @@ double MoreauJeanOSI::computeResidu()
         {
           double DeltaPrescribedVelocity =
             d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - v->getValue(columnindex);
+            - v->getValue(*itindex);
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
 
@@ -765,7 +765,7 @@ double MoreauJeanOSI::computeResidu()
 
           double DeltaPrescribedVelocity =
             d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - vold->getValue(columnindex);
+            - vold->getValue(*itindex);
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
           *residuFree += *columntmp * (DeltaPrescribedVelocity);
@@ -857,12 +857,17 @@ double MoreauJeanOSI::computeResidu()
              ++itindex)
         {
 
+          DEBUG_PRINTF("columnindex = %i\n",columnindex);
+          DEBUG_PRINTF("*itindex = %i\n",*itindex);
           double DeltaPrescribedVelocity =
             d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - v->getValue(columnindex);
+            - v->getValue(*itindex);
+
+          DEBUG_EXPR(d->boundaryConditions()->prescribedVelocity()->display());
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
           *residuFree -= *columntmp * (DeltaPrescribedVelocity);
+
 
           residuFree->setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
 
@@ -887,7 +892,7 @@ double MoreauJeanOSI::computeResidu()
         {
           double DeltaPrescribedVelocity =
             d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - v->getValue(columnindex);
+            - v->getValue(*itindex);
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
 
