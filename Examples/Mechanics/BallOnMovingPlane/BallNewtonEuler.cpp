@@ -17,13 +17,15 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*!\file BallNewtonEulerOnMovingPlane.cpp
-  \brief
-  A Ball bouncing on the moving ground.
+/*!\file BouncingBallNETS.cpp
+  \brief \ref EMBouncingBall - C++ input file, Time-Stepping version -
+  V. Acary, O. Bonnefon.
+
+  A Ball bouncing on the ground.
   Direct description of the model.
   Simulation with a Time-Stepping scheme.
 */
-
+//#include "SphereNEDSPlanR.hpp"
 #include "SiconosKernel.hpp"
 
 //#define WITH_PROJ
@@ -60,9 +62,11 @@ public:
   void computeh(double time, BlockVector& q0, SiconosVector& y)
   {
 
-    //std::cout <<"my_NewtonEulerR:: computeh" << std:: endl;
-    //std::cout <<"q0.size() = " << q0.size() << std:: endl;
+    std::cout <<"my_NewtonEulerR:: computeh" << std:: endl;
+    std::cout <<"q0.size() = " << q0.size() << std:: endl;
     double height = q0.getValue(0) - _sBallRadius - q0.getValue(7);
+    // std::cout <<"my_NewtonEulerR:: computeh _jachq" << std:: endl;
+    // _jachq->display();
 
     y.setValue(0, height);
     _Nc->setValue(0, 1);
@@ -76,10 +80,10 @@ public:
     _Pc2->setValue(1,q0.getValue(8));
     _Pc2->setValue(2,q0.getValue(9));
     //printf("my_NewtonEulerR N, Pc\n");
-    //_Nc->display();
-    //_Pc1->display();
-    //_Pc2->display();
-    //std::cout <<"my_NewtonEulerR:: computeh ends" << std:: endl;
+    _Nc->display();
+    _Pc1->display();
+    _Pc2->display();
+    std::cout <<"my_NewtonEulerR:: computeh ends" << std:: endl;
   }
   //ACCEPT_VISITORS();
 };
@@ -103,15 +107,15 @@ int main(int argc, char* argv[])
     unsigned int nDim = 6;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
     double T = 10.0;                  // final computation time
-    double h = 0.005;                // time step
+    double h = 0.001;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
-    double velocity_init = 2.0;      // initial velocity for lowest bead.
+    double velocity_init = 0.0;      // initial velocity for lowest bead.
     double omega_initx = 0.0;
     double omega_initz = 0.0;// initial velocity for lowest bead.
-    double theta = 0.5;              // theta for MoreauJeanOSI integrator
+    double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double m = 1; // Ball mass
-    double g = 9.81; // Gravity
-    double radius = 0.0;
+    double g = 10.0; // Gravity
+    double radius = 0.1;
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -141,23 +145,11 @@ int main(int argc, char* argv[])
     (*weight)(0) = -m * g;
     ball->setFExtPtr(weight);
 
-    // -- Moving Plane --
-
-
-    // -- Initial positions and velocities --
-    SP::SiconosVector q02(new SiconosVector(qDim));
-    SP::SiconosVector v02(new SiconosVector(nDim));
-    v02->zero();
-    q02->zero();
-    (*q02)(3) = 1.0;
-    // -- The dynamical system --
-    SP::NewtonEulerDS movingplane(new NewtonEulerDS(q02, v02, m, I ));
-
-    // // -- Set external forces (weight) --
-    movingplane->setFExtPtr(weight);
-
-    SP::IndexInt bdindex(new IndexInt(1));
+    SP::IndexInt bdindex(new IndexInt(3));
     (*bdindex)[0] = 0;
+    (*bdindex)[1] = 3;
+    (*bdindex)[2] = 5;
+
 
     // SP::SiconosVector bdPrescribedVelocity(new SiconosVector(1));
     // bdPrescribedVelocity->setValue(0,0.5);
@@ -165,12 +157,11 @@ int main(int argc, char* argv[])
 
 
     SP::BoundaryCondition bd(new BoundaryCondition(bdindex));
-    bd->setComputePrescribedVelocityFunction("BallOnMovingPlanePlugin", "prescribedvelocity");
-
-    movingplane->setBoundaryConditions(bd);
+    bd->setComputePrescribedVelocityFunction("BallOnMovingPlanePlugin", "prescribedvelocity3");
 
 
 
+    ball->setBoundaryConditions(bd);
 
     // --------------------
     // --- Interactions ---
@@ -209,11 +200,7 @@ int main(int argc, char* argv[])
     SP::Model bouncingBall(new Model(t0, T));
     // add the dynamical system in the non smooth dynamical system
     bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(movingplane);
 
-    // link the interaction and the dynamical system
-    //r
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball, movingplane);
 
     // ------------------
     // --- Simulation ---
@@ -226,7 +213,6 @@ int main(int argc, char* argv[])
     SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
 #endif
     OSI->insertDynamicalSystem(ball);
-    OSI->insertDynamicalSystem(movingplane);
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
@@ -259,29 +245,26 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 19;
+    unsigned int outputSize = 20;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);
-    SP::SiconosVector qplane = movingplane->q();
-    SP::SiconosVector vplane = movingplane->velocity();
-    SP::SiconosVector pplane = movingplane->p(1);
 
-    SP::SiconosVector lambda = inter->lambda(1);
-    SP::SiconosVector y = inter->y(0);
+    // SP::SiconosVector lambda = inter->lambda(1);
+    // SP::SiconosVector y = inter->y(0);
 
-    SP::SiconosVector reaction = movingplane->reactionToBoundaryConditions();
+    SP::SiconosVector reaction = ball->reactionToBoundaryConditions();
 
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*lambda)(0);
+    dataPlot(0, 4) = (*reaction)(0);
     dataPlot(0, 5) = acos((*q)(3));
-    dataPlot(0, 6) = relation0->contactForce()->norm2();
+    //dataPlot(0, 6) = relation0->contactForce()->norm2();
 
     dataPlot(0, 7) = (*q)(0);
     dataPlot(0, 8) = (*q)(1);
@@ -291,12 +274,14 @@ int main(int argc, char* argv[])
     dataPlot(0, 12) = (*q)(5);
     dataPlot(0, 13) = (*q)(6);
 
-    dataPlot(0, 14) = (*v)(1);
-    dataPlot(0, 15) = (*v)(2);
+    dataPlot(0, 14) = (*v)(0);
+    dataPlot(0, 15) = (*v)(1);
+    dataPlot(0, 16) = (*v)(2);
+    dataPlot(0, 17) = (*v)(3);
+    dataPlot(0, 18) = (*v)(4);
+    dataPlot(0, 19) = (*v)(5);
 
-    dataPlot(0, 16) = (*qplane)(2);
-    dataPlot(0, 17) = (*vplane)(2);
-    dataPlot(0, 18) = (*reaction)(0);
+
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -306,8 +291,8 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
-    dataPlot(k, 6) = relation0->contactForce()->norm2();
-    while (s->hasNextEvent() && k <5000000)
+    //dataPlot(k, 6) = relation0->contactForce()->norm2();
+    while (s->hasNextEvent() )
     {
       //      s->computeOneStep();
       s->advanceToEvent();
@@ -316,9 +301,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
-      // dataPlot(k, 4) = (*lambda)(0);
+
+      dataPlot(k, 4) = (*reaction)(0);
       dataPlot(k, 5) = acos((*q)(3));
-      dataPlot(k, 6) = relation0->contactForce()->norm2();
+      // dataPlot(k, 6) = relation0->contactForce()->norm2();
       dataPlot(k, 7) = (*q)(0);
       dataPlot(k, 8) = (*q)(1);
       dataPlot(k, 9) = (*q)(2);
@@ -326,13 +312,14 @@ int main(int argc, char* argv[])
       dataPlot(k, 11) = (*q)(4);
       dataPlot(k, 12) = (*q)(5);
       dataPlot(k, 13) = (*q)(6);
-      dataPlot(k, 14) = (*v)(1);
-      dataPlot(k, 15) = (*v)(2);
 
-      dataPlot(k, 16) = (*qplane)(0);
-      dataPlot(k, 17) = (*vplane)(0);
+      dataPlot(k, 14) = (*v)(0);
+      dataPlot(k, 15) = (*v)(1);
+      dataPlot(k, 16) = (*v)(2);
+      dataPlot(k, 17) = (*v)(3);
+      dataPlot(k, 18) = (*v)(4);
+      dataPlot(k, 19) = (*v)(5);
 
-      dataPlot(k, 18) = (*reaction)(0);
 
 
       s->nextStep();
@@ -345,7 +332,7 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("BallNewtonEulerOnMovingPlane.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("BallNewtonEuler.dat", "ascii", dataPlot, "noDim");
 
     // Comparison with a reference file
     cout << "====> Comparison with a reference file ..." << endl;

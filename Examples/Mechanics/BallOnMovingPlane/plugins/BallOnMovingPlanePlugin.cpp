@@ -39,3 +39,15 @@ SICONOS_EXPORT void prescribedvelocity(double time, unsigned int sizeofprescribe
 
   pv[0] =  C +  A * cos(omega * time);
 }
+SICONOS_EXPORT void prescribedvelocity3(double time, unsigned int sizeofprescribedvelocity, double *pv)
+{
+  /* the plugin implements v(t) = C + A cos(omega *t) */
+
+  double C = 2.0 ;
+  double omega = M_PI / 2.0;
+  double A = 1.0;
+
+  pv[0] =  C +  A * cos(omega * time);
+  pv[1] =  C +  A * cos(omega * time);
+  pv[2] =  C +  A * cos(omega * time);
+}

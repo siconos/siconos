@@ -28,7 +28,59 @@
 #include "SiconosKernel.hpp"
 #include "KneeJointR.hpp"
 #include "PrismaticJointR.hpp"
+#include <boost/math/quaternion.hpp>
 using namespace std;
+
+/* Given a position of a point in the Inertial Frame and the configuration vector q of a solid
+ * returns a position in the spatial frame.
+ */
+void fromInertialToSpatialFrame(double *positionInInertialFrame, double *positionInSpatialFrame, SP::SiconosVector  q  )
+{
+double q0 = q->getValue(3);
+double q1 = q->getValue(4);
+double q2 = q->getValue(5);
+double q3 = q->getValue(6);
+
+::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+::boost::math::quaternion<double>    quatpos(0, positionInInertialFrame[0], positionInInertialFrame[1], positionInInertialFrame[2]);
+::boost::math::quaternion<double>    quatBuff;
+
+//perform the rotation
+quatBuff = quatQ * quatpos * quatcQ;
+
+positionInSpatialFrame[0] = quatBuff.R_component_2()+q->getValue(0);
+positionInSpatialFrame[1] = quatBuff.R_component_3()+q->getValue(1);
+positionInSpatialFrame[2] = quatBuff.R_component_4()+q->getValue(2);
+
+}
+void tipTrajectories(SP::SiconosVector  q, double * traj, double length)
+{
+  double positionInInertialFrame[3];
+  double positionInSpatialFrame[3];
+  // Output the position of the tip of beam1
+  positionInInertialFrame[0]=length/2;
+  positionInInertialFrame[1]=0.0;
+  positionInInertialFrame[2]=0.0;
+
+  fromInertialToSpatialFrame(positionInInertialFrame, positionInSpatialFrame, q  );
+  traj[0] = positionInSpatialFrame[0];
+  traj[1] = positionInSpatialFrame[1];
+  traj[2] = positionInSpatialFrame[2];
+
+
+  // std::cout <<  "positionInSpatialFrame[0]" <<  positionInSpatialFrame[0]<<std::endl;
+  // std::cout <<  "positionInSpatialFrame[1]" <<  positionInSpatialFrame[1]<<std::endl;
+  // std::cout <<  "positionInSpatialFrame[2]" <<  positionInSpatialFrame[2]<<std::endl;
+
+  positionInInertialFrame[0]=-length/2;
+  fromInertialToSpatialFrame(positionInInertialFrame, positionInSpatialFrame, q  );
+  traj[3]= positionInSpatialFrame[0];
+  traj[4] = positionInSpatialFrame[1];
+  traj[5] = positionInSpatialFrame[2];
+}
+
+
 
 int main(int argc, char* argv[])
 {
@@ -48,7 +100,7 @@ int main(int argc, char* argv[])
     int N = 1000;
     double L1 = 1.0;
     double L2 = 1.0;
-    //double L3 = 1.0;
+    double L3 = 1.0;
     double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double g = 9.81; // Gravity
     double m = 1.;
@@ -97,7 +149,6 @@ int main(int argc, char* argv[])
     SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(2) = -m * g;
     beam1->setFExtPtr(weight);
-
 
     //second DS
     SP::SiconosVector q02(new SiconosVector(qDim));
@@ -169,8 +220,10 @@ int main(int argc, char* argv[])
     cout << "main jacQH" << endl;
     relation0->jachq()->display();
 
+    // --------------------
+    // --- Interactions ---
+    // --------------------
 
-    // Interactions
     //
     SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::numberOfConstraints(), qDim));
     H1->zero();
@@ -270,10 +323,15 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 15 + 7;
+    unsigned int outputSize = 15 + 7 + 6;
     SimpleMatrix dataPlot(N, outputSize);
+    SimpleMatrix beam1Plot(2,3*N);
+    SimpleMatrix beam2Plot(2,3*N);
+    SimpleMatrix beam3Plot(2,3*N);
+
 
     SP::SiconosVector q1 = beam1->q();
+    SP::SiconosVector v1 = beam1->velocity();
     SP::SiconosVector q2 = beam2->q();
     SP::SiconosVector q3 = beam3->q();
 
@@ -292,6 +350,10 @@ int main(int argc, char* argv[])
     Index dimIndex(2);
     Index startIndex(4);
     fprintf(pFile, "double T[%d*%d]={", N + 1, outputSize);
+    double beamTipTrajectories[6];
+
+
+    //N=100;
     for (k = 0; k < N; k++)
     {
       // solve ...
@@ -322,6 +384,38 @@ int main(int argc, char* argv[])
       dataPlot(k, 19) = (*q3)(4);
       dataPlot(k, 20) = (*q3)(5);
       dataPlot(k, 21) = (*q3)(6);
+
+      dataPlot(k, 22) = (*v1)(0);
+      dataPlot(k, 23) = (*v1)(1);
+      dataPlot(k, 24) = (*v1)(2);
+      dataPlot(k, 25) = (*v1)(3);
+      dataPlot(k, 26) = (*v1)(4);
+      dataPlot(k, 27) = (*v1)(5);
+
+      tipTrajectories(q1,beamTipTrajectories,L1);
+      beam1Plot(0,3*k) = beamTipTrajectories[0];
+      beam1Plot(0,3*k+1) = beamTipTrajectories[1];
+      beam1Plot(0,3*k+2) = beamTipTrajectories[2];
+      beam1Plot(1,3*k) = beamTipTrajectories[3];
+      beam1Plot(1,3*k+1) = beamTipTrajectories[4];
+      beam1Plot(1,3*k+2) = beamTipTrajectories[5];
+
+      tipTrajectories(q2,beamTipTrajectories,L2);
+      beam2Plot(0,3*k) = beamTipTrajectories[0];
+      beam2Plot(0,3*k+1) = beamTipTrajectories[1];
+      beam2Plot(0,3*k+2) = beamTipTrajectories[2];
+      beam2Plot(1,3*k) = beamTipTrajectories[3];
+      beam2Plot(1,3*k+1) = beamTipTrajectories[4];
+      beam2Plot(1,3*k+2) = beamTipTrajectories[5];
+
+      tipTrajectories(q3,beamTipTrajectories,L3);
+      beam3Plot(0,3*k) = beamTipTrajectories[0];
+      beam3Plot(0,3*k+1) = beamTipTrajectories[1];
+      beam3Plot(0,3*k+2) = beamTipTrajectories[2];
+      beam3Plot(1,3*k) = beamTipTrajectories[3];
+      beam3Plot(1,3*k+1) = beamTipTrajectories[4];
+      beam3Plot(1,3*k+2) = beamTipTrajectories[5];
+
 //      printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
 
       for (unsigned int jj = 0; jj < outputSize; jj++)
@@ -338,9 +432,14 @@ int main(int argc, char* argv[])
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
+    dataPlot.resize(k, outputSize);
+
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("NE_3DS_3Knee_1Prism_GMP.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_beam1.dat", "ascii", beam1Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_beam2.dat", "ascii", beam2Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_beam3.dat", "ascii", beam3Plot, "noDim");
 
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
