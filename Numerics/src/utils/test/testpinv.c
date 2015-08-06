@@ -50,7 +50,7 @@ int main(void)
   Wnum-> size1 = m;
   Wnum->matrix1 = NULL;
   Wnum->matrix2 = NULL;
-  Wnum->matrix3 = NULL;
+  Wnum->internalData = NULL;
   Wnum->matrix0 = W;
 
   FILE * file1 = fopen("dataW.dat", "w");
@@ -63,7 +63,7 @@ int main(void)
   WnumpInv-> size1 = m;
   WnumpInv->matrix1 = NULL;
   WnumpInv->matrix2 = NULL;
-  WnumpInv->matrix3 = NULL;
+  WnumpInv->internalData = NULL;
   WnumpInv->matrix0 = Wpinv;
 
   double tol = 1e-24;

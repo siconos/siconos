@@ -22,14 +22,14 @@
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
 
-
+int write_test_fclib(char * filename);
 int write_test_fclib(char * filename)
 {
   printf("\n Start of test \n");
   printf("Test on %s\n", filename);
   int info = 0;
-  int sizeoffilename = strlen(filename);
-  printf("sizeoffilename %d\n",  sizeoffilename);
+  size_t sizeoffilename = strlen(filename);
+  printf("sizeoffilename %ld\n",  sizeoffilename);
   char  extension[4];
   strncpy(extension, &filename[sizeoffilename - 4], 4);
   char * basename;

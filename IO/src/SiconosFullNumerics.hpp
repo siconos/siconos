@@ -156,7 +156,7 @@ void siconos_io(Archive&ar, NumericsMatrix& v, unsigned int version)
       v.matrix0 = (double *) malloc(v.size0 * v.size1 * sizeof(double));
       v.matrix1 = NULL;
       v.matrix2 = NULL;
-      v.matrix3 = NULL;
+      v.internalData = NULL;
     }
     SERIALIZE_C_ARRAY(v.size0 * v.size1, v, matrix0, ar);
   }
@@ -168,7 +168,7 @@ void siconos_io(Archive&ar, NumericsMatrix& v, unsigned int version)
         v.matrix0 = NULL;
         v.matrix1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
         v.matrix2 = NULL;
-        v.matrix3 = NULL;
+        v.internalData = NULL;
       }
       SERIALIZE(v, (matrix1), ar);
     }

@@ -64,9 +64,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     M1->matrix0[i] = m0[i];
   M1->matrix1 = NULL;
   M1->matrix2 = NULL;
-  M1->matrix3 = NULL;
-
-
+  M1->internalData = NULL;
 
   int nn = 4;
   /* Double * storage (column-major) */
@@ -83,7 +81,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     M3->matrix0[i] = m00[i];
   M3->matrix1 = NULL;
   M3->matrix2 = NULL;
-  M3->matrix3 = NULL;
+  M3->internalData = NULL;
 
   /* Build a NumericsMatrix with sparse-block storage */
   M2->storageType = 1;
@@ -91,7 +89,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   M2->size1 = n;
   M2->matrix0 = NULL;
   M2->matrix2 = NULL;
-  M2->matrix3 = NULL;
+  M2->internalData = NULL;
 
   SparseBlockStructuredMatrix * SBM = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   M2->matrix1 = SBM;
@@ -176,7 +174,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   M4->size1 = 4;
   M4->matrix0 = NULL;
   M4->matrix2 = NULL;
-  M4->matrix3 = NULL;
+  M4->internalData = NULL;
 
   M4->matrix1 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   SparseBlockStructuredMatrix * SBM2 = M4->matrix1;
@@ -385,7 +383,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C.matrix0 = (double *)malloc(C.size0 * C.size1 * sizeof(double));
   C.matrix1 = NULL;
   C.matrix2 = NULL;
-  C.matrix3 = NULL;
+  C.internalData = NULL;
   prodNumericsMatrixNumericsMatrix(alpha, M1, M1, beta,  &C);
 
   double * Cref = (double *)malloc(C.size0 * C.size1 * sizeof(double));
@@ -436,7 +434,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C2.matrix0 = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
   C2.matrix1 = NULL;
   C2.matrix2 = NULL;
-  C2.matrix3 = NULL;
+  C2.internalData = NULL;
   prodNumericsMatrixNumericsMatrix(alpha, M1, M3, beta,  &C2);
 
   double * C2ref = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
@@ -482,7 +480,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   SparseBlockStructuredMatrix * SBM3 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   C3.matrix1 = SBM3;
   C3.matrix2 = NULL;
-  C3.matrix3 = NULL;
+  C3.internalData = NULL;
   beta = 1.0;
   i = 1;
   // while (i > 0)
@@ -533,7 +531,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   SparseBlockStructuredMatrix * SBM4 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   C4.matrix1 = SBM4;
   C4.matrix2 = NULL;
-  C4.matrix3 = NULL;
+  C4.internalData = NULL;
 
   allocateMemoryForProdSBMSBM(M2->matrix1, M4->matrix1, SBM4);
   /* printSBM(SBM4); */

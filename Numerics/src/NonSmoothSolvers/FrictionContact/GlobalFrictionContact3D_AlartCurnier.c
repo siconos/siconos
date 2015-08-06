@@ -81,8 +81,8 @@ void ACPsi(
 
   unsigned int localProblemSize = problem->H->size1;
 
-  unsigned int ACProblemSize = sizeOfPsi(problem->M->matrix2,
-                                         problem->H->matrix2);
+  unsigned int ACProblemSize = sizeOfPsi(NM_triplet(problem->M),
+                                         NM_triplet(problem->H));
 
   unsigned int globalProblemSize = problem->M->size0;
 
@@ -92,8 +92,8 @@ void ACPsi(
      ... */
   cblas_dscal(ACProblemSize, 0., psi, 1);
   cblas_dcopy(globalProblemSize, problem->q, 1, psi, 1);
-  NM_aaxpy(1., problem->H, reaction, psi);
-  NM_aaxpy(-1., problem->M, globalVelocity, psi);
+  NM_gemv(1., problem->H, reaction, 1, psi);
+  NM_gemv(-1., problem->M, globalVelocity, 1, psi);
 
 
   /* psi + globalProblemSize <-
@@ -101,7 +101,7 @@ void ACPsi(
    ... */
   cblas_daxpy(localProblemSize, -1., velocity, 1, psi + globalProblemSize, 1);
   cblas_daxpy(localProblemSize, 1, problem->b, 1, psi + globalProblemSize, 1);
-  NM_aatxpy(1., problem->H, globalVelocity, psi + globalProblemSize);
+  NM_tgemv(1., problem->H, globalVelocity, 1, psi + globalProblemSize);
 
 
 
@@ -144,7 +144,7 @@ int initACPsiJacobian(
   assert(A->nz == B->nz);
 
   /* - M */
-  for(unsigned int e = 0; e < M->nz; ++e)
+  for(int e = 0; e < M->nz; ++e)
   {
     DEBUG_PRINTF("e=%d, M->i[e]=%d, M->p[e]=%d, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]);
     CHECK_RETURN(cs_zentry(J, M->i[e], M->p[e], - M->x[e]));
@@ -152,7 +152,7 @@ int initACPsiJacobian(
 
   /* H */
   assert(M->n == H->m);
-  for(unsigned int e = 0; e < H->nz; ++e)
+  for(int e = 0; e < H->nz; ++e)
   {
     DEBUG_PRINTF("e=%d, H->i[e]=%d, H->p[e] + M->n + A->n=%d, H->x[e]=%g\n", 
                  e, H->i[e], H->p[e] + M->n + A->n , H->x[e]);
@@ -160,13 +160,13 @@ int initACPsiJacobian(
   }
 
   /* Ht */
-  for(unsigned int e = 0; e < H->nz; ++e)
+  for(int e = 0; e < H->nz; ++e)
   {
     CHECK_RETURN(cs_zentry(J, H->p[e] + M->m, H->i[e], H->x[e]));
   }
 
   /* -I */
-  for(unsigned int e = 0; e < A->m; ++e)
+  for(int e = 0; e < A->m; ++e)
   {
     CHECK_RETURN(cs_zentry(J, e + M->m, e + M->n, -1.));
   }
@@ -175,13 +175,13 @@ int initACPsiJacobian(
   int Astart = J->nz;
 
   /* A */
-  for(unsigned int e = 0; e < A->nz; ++e)
+  for(int e = 0; e < A->nz; ++e)
   {
     CHECK_RETURN(cs_zentry(J, A->i[e] + M->m + H->n, A->p[e] + M->n, A->x[e]));
   }
 
   /* B */
-  for(unsigned int e = 0; e < B->nz; ++e)
+  for(int e = 0; e < B->nz; ++e)
   {
     CHECK_RETURN(cs_zentry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n, B->x[e]));
   }
@@ -227,7 +227,7 @@ void updateACPsiJacobian(
   /* A */
   J->nz = Astart;
 
-  for(unsigned int e = 0; e < A->nz; ++e)
+  for(int e = 0; e < A->nz; ++e)
   {
     if(fabs(A->x[e]) >= DBL_EPSILON)
     {
@@ -243,7 +243,7 @@ void updateACPsiJacobian(
   }
 
   /* B */
-  for(unsigned int e = 0; e < B->nz; ++e)
+  for(int e = 0; e < B->nz; ++e)
   {
     if(fabs(B->x[e]) > DBL_EPSILON)
     {
@@ -268,11 +268,11 @@ void init3x3DiagBlocks(int nc, double* P, CSparseMatrix* R)
   R->nz = 9*nc;
   R->nzmax = R->nz;
 
-  for(unsigned int ib = 0; ib < nc; ++ib)
+  for(int ib = 0; ib < nc; ++ib)
   {
-    for(unsigned int j = 0; j < 3; ++j)
+    for(int j = 0; j < 3; ++j)
     {
-      for(unsigned int i = 0; i < 3; ++i)
+      for(int i = 0; i < 3; ++i)
       {
         R->i[9*ib+i+3*j] = ib * 3 + i;
         R->p[9*ib+i+3*j] = ib * 3 + j;
@@ -306,8 +306,8 @@ int _globalLineSearchSparseGP(
 
   double m1 = 0.01, m2 = 0.99;
 
-  unsigned int ACProblemSize = sizeOfPsi(problem->M->matrix2,
-                                         problem->H->matrix2);
+  unsigned int ACProblemSize = sizeOfPsi(NM_triplet(problem->M),
+                                         NM_triplet(problem->H));
 
   // Computation of q(t) and q'(t) for t =0
 
@@ -545,13 +545,13 @@ void globalFrictionContact3D_AlartCurnier(
   assert(tolerance > 0);
 
   /* sparse triplet storage */
-  NM_setup(problem->M);
-  NM_setup(problem->H);
+  NM_triplet(problem->M);
+  NM_triplet(problem->H);
 
-  unsigned int ACProblemSize = sizeOfPsi(problem->M->matrix2,
-                                         problem->H->matrix2);
+  unsigned int ACProblemSize = sizeOfPsi(NM_triplet(problem->M),
+                                         NM_triplet(problem->H));
 
-  unsigned int globalProblemSize = problem->M->matrix2->m;
+  unsigned int globalProblemSize = NM_triplet(problem->M)->m;
 
   unsigned int localProblemSize = problem->H->size1;
 
@@ -561,7 +561,7 @@ void globalFrictionContact3D_AlartCurnier(
                                                    * Htrans*globalVelocity */
 
 
-  AlartCurnierFun3x3Ptr computeACFun3x3;
+  AlartCurnierFun3x3Ptr computeACFun3x3 = NULL;
 
   switch (options->iparam[10])
   {
@@ -643,9 +643,9 @@ void globalFrictionContact3D_AlartCurnier(
   init3x3DiagBlocks(problem->numberOfContacts, A, &A_);
   init3x3DiagBlocks(problem->numberOfContacts, B, &B_);
 
-  J = cs_spalloc(problem->M->matrix2->n + A_.m + B_.m,
-                 problem->M->matrix2->n + A_.m + B_.m,
-                 problem->M->matrix2->nzmax + 2*problem->H->matrix2->nzmax +
+  J = cs_spalloc(NM_triplet(problem->M)->n + A_.m + B_.m,
+                 NM_triplet(problem->M)->n + A_.m + B_.m,
+                 NM_triplet(problem->M)->nzmax + 2*NM_triplet(problem->H)->nzmax +
                  2*A_.n + A_.nzmax + B_.nzmax, 1, 1);
 
   assert(A_.n == problem->H->size1);
@@ -660,8 +660,8 @@ void globalFrictionContact3D_AlartCurnier(
     problem->mu, rho,
     F, A, B);
 
-  int Astart = initACPsiJacobian(problem->M->matrix2,
-                                 problem->H->matrix2,
+  int Astart = initACPsiJacobian(NM_triplet(problem->M),
+                                 NM_triplet(problem->H),
                                  &A_, &B_, J);
 
   assert(Astart > 0);
@@ -694,7 +694,7 @@ void globalFrictionContact3D_AlartCurnier(
   /* update local velocity from global velocity */
   /* an assertion ? */
   cblas_dcopy(localProblemSize, problem->b, 1, velocity, 1);
-  NM_aatxpy(1., problem->H, globalVelocity, velocity);
+  NM_tgemv(1., problem->H, globalVelocity, 1, velocity);
 
   while(iter++ < itermax)
   {
@@ -709,8 +709,8 @@ void globalFrictionContact3D_AlartCurnier(
                                            problem->mu, rho,
                                            F, A, B);
     /* update J */
-    updateACPsiJacobian(problem->M->matrix2,
-                        problem->H->matrix2,
+    updateACPsiJacobian(NM_triplet(problem->M),
+                        NM_triplet(problem->H),
                         &A_, &B_, J, Astart);
 
     /* rhs = -psi */
@@ -728,7 +728,7 @@ void globalFrictionContact3D_AlartCurnier(
 
     /* set fortran indices in place so we do not have to bother with
      * yet another heap allocation */
-    for(unsigned int e = 0 ; e < J->nz ; ++e)
+    for(int e = 0 ; e < J->nz ; ++e)
     {
       J->i[e]++;
       J->p[e]++;
@@ -737,7 +737,7 @@ void globalFrictionContact3D_AlartCurnier(
     dmumps_c(mumps_id);
 
     /* come back to C indices */
-    for(unsigned int e = 0 ; e < J->nz ; ++e)
+    for(int e = 0 ; e < J->nz ; ++e)
     {
       J->i[e]--;
       J->p[e]--;

@@ -97,7 +97,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     Wnum->matrix0 = (double*)malloc(m * m * sizeof(double));
     Wnum->matrix1 = NULL;
     Wnum->matrix2 = NULL;
-    Wnum->matrix3 = NULL;
+    Wnum->internalData = NULL;
     // Compute W <-  H^T M^1 H
 
 
@@ -228,7 +228,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     WnumInverse-> size1 = m;
     WnumInverse->matrix1 = NULL;
     WnumInverse->matrix2 = NULL;
-    WnumInverse->matrix3 = NULL;
+    WnumInverse->internalData = NULL;
     WnumInverse->matrix0 = (double*)malloc(m * m * sizeof(double));
     double * WInverse = WnumInverse->matrix0;
     SBMtoDense(W, WnumInverse->matrix0);
@@ -272,7 +272,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     WnumInversetmp-> size1 = m;
     WnumInversetmp->matrix1 = NULL;
     WnumInversetmp->matrix2 = NULL;
-    WnumInversetmp->matrix3 = NULL;
+    WnumInversetmp->internalData = NULL;
     WnumInversetmp->matrix0 = WInversetmp ;
 
     FILE * file3 = fopen("dataWPseudoInverse.dat", "w");
@@ -460,7 +460,7 @@ void  globalFrictionContact3D_globalAlartCurnier_wr(GlobalFrictionContactProblem
     free(localproblem->M->matrix1);
     localproblem->M->matrix1 = NULL;
     localproblem->M->matrix2 = NULL;
-    localproblem->M->matrix3 = NULL;
+    localproblem->M->internalData = NULL;
     localproblem->M->storageType = 0;
   }
 
@@ -520,7 +520,7 @@ void  globalFrictionContact3D_nsgs_velocity_wr(GlobalFrictionContactProblem* pro
     localproblem->M->storageType = 0;
     localproblem->M->matrix1 = NULL;
     localproblem->M->matrix2 = NULL;
-    localproblem->M->matrix3 = NULL;
+    localproblem->M->internalData = NULL;
   }
 
   frictionContact3D_nsgs_velocity(localproblem, reaction , velocity , info , options->internalSolvers);

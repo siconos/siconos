@@ -80,12 +80,7 @@ int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem,
   else if (M->storageType == 2)
   {
     cblas_dcopy(n, qtmp, 1, globalVelocitytmp, 1);
-    /* => need to store LU ! */
-    if (!M->matrix3 )
-    {
-      M->matrix3 = cs_triplet(M->matrix2);
-    }
-    cs_lusol(M->matrix3, globalVelocitytmp, 1, DBL_EPSILON);
+    cs_lusol(NM_triplet(M), globalVelocitytmp, 1, DBL_EPSILON);
   }
 
 

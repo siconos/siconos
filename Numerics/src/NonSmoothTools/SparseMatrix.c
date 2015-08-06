@@ -89,3 +89,57 @@ CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A)
   cs_free(A->x) ;
   return NULL;
 }
+
+NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p)
+{
+  if (p->iparam)
+  {
+    assert(p->iparamSize>0);
+    free(p->iparam);
+    p->iparam = NULL;
+  }
+  if (p->dparam)
+  {
+    assert(p->dparamSize>0);
+    free(p->dparam);
+    p->dparam = NULL;
+  }
+  if (p->iWork)
+  {
+    assert(p->iWorkSize>0);
+    free(p->iWork);
+    p->iWork = NULL;
+  }
+  if (p->dWork)
+  {
+    assert(p->dWorkSize>0);
+    free(p->dWork);
+    p->dWork = NULL;
+  }
+}
+
+NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)
+{
+  if (A->solverParams)
+  {
+    freeNumericsSparseLinearSolverParams(A->solverParams);
+    A->solverParams = NULL;
+  }
+  if (A->triplet)
+  {
+    cs_spfree(A->triplet);
+    A->triplet = NULL;
+  }
+  if (A->csc)
+  {
+    cs_spfree(A->csc);
+    A->csc = NULL;
+  }
+  if (A->trans_csc)
+  {
+    cs_spfree(A->trans_csc);
+    A->trans_csc = NULL;
+  }
+
+  return NULL;
+}

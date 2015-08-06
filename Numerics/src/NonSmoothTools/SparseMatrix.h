@@ -73,6 +73,35 @@ int nz ;      : # of entries in triplet matrix;
 extern "C"
 {
 #endif
+
+  typedef enum { NS_CS_LUSOL, NS_MUMPS } NumericsSparseLinearSolver;
+
+  typedef struct
+  {
+    NumericsSparseLinearSolver solver;
+
+    int* iparam;
+    double iparamSize;
+    double* dparam;
+    double dparamSize;
+
+    int* iWork; /**< integer work vector array (internal) */
+    int iWorkSize; /**< size of integer work vector array */
+    double* dWork;
+    int dWorkSize;
+  } NumericsSparseLinearSolverParams;
+
+  typedef struct
+  {
+    NumericsSparseLinearSolver solver;
+    NumericsSparseLinearSolverParams* solverParams;
+
+    CSparseMatrix* triplet;
+    CSparseMatrix* csc;
+    CSparseMatrix* trans_csc;
+  } NumericsSparseMatrix;
+
+
   /** Add an entry to a triplet matrix only if the absolute value is
    * greater than DBL_EPSILON.
    * \param T the CSparseMatrix
@@ -108,6 +137,19 @@ extern "C"
    * \return NULL on success
   */
   CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A);
+
+  /** Free alocated space for NumericsSparseLinearSolverParams.
+   * \param p a NumericsSparseLinearSolverParams
+   * \return NULL on sucess
+   */
+  NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p);
+
+  /** Free allocated space for a NumericsSparseMatrix.
+   * \param A a NumericsSparseMatrix
+   * \return NULL on sucess
+   */
+  NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A);
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

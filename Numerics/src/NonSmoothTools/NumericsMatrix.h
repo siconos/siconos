@@ -109,38 +109,50 @@ The following linear algebra operation are supported:
   \brief Structure definition and functions related to matrix storage in Numerics
   \author Franck Perignon
 */
-#include <stdio.h>
 #include "NumericsConfig.h"
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
 
+typedef struct
+{
+  int iWorkSize;
+  int *iWork;
+} NumericsMatrixInternalData;
+
 /** \struct NumericsMatrix NumericsMatrix.h
- * Structure used to handle with matrix in Numerics (interface to double*, SparseBlockStructuredMatrix and so on) \n
-    Warning: one and only one storage is allowed and thus only one of the pointers below can be different from NULL
-    Related functions: prod(), subRowProd(), freeNumericsMatrix(), display()
+ * Structure used to handle with matrix in Numerics (interface to
+ * double*, SparseBlockStructuredMatrix and so on).\n
+
+ * The structure may carry different representations of the same
+ * matrix. The storageType indicates the default storage in order to
+ * choose between different operations. NM_* functions allows for some
+ * linear algebra operations on dense SparseBlock and sparse storage.
 */
 typedef struct
 {
-  int storageType; /**< the type of storage (0: dense (double*), 1: SparseBlockStructuredMatrix, 2: triplet, 3: compressed col, 4: compressed transpose) */
+  int storageType; /**< the type of storage:
+                      0: dense (double*),
+                      1: SparseBlockStructuredMatrix,
+                      2: triplet */
   int size0; /**< number of rows */
   int size1; /**< number of columns */
   double* matrix0; /**< dense storage */
   SparseBlockStructuredMatrix* matrix1; /**< sparse block storage */
-  CSparseMatrix* matrix2; /**< triplet storage */
-  CSparseMatrix* matrix3; /**< compressed column storage */
-  CSparseMatrix* matrix4; /**< compressed transpose storage */
+  NumericsSparseMatrix* matrix2; /**< triplet storage */
+
+  NumericsMatrixInternalData* internalData;
+
 } NumericsMatrix;
 
-/** Possible types of matrices for NumericsMatrix */
+/** Possible types of matrices for NumericsMatrix. In case of sparse
+    matrix, the compressed column comes after triplet setup and is a
+    secondary storage for linear algebra operations. */
+
 enum NumericsMatrix_types {
   NM_DENSE,        /**< dense format */
   NM_SPARSE_BLOCK, /**< sparse block format */
   NM_TRIPLET,      /**< triplet format */
-  NM_COMPR_COL,    /**< compressed columns format */
-  NM_COMPR_TRANS   /**< compressed transpose format */
 };
-
-#include "stdio.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -155,7 +167,7 @@ extern "C"
       \param[in] beta coefficient
       \param[in,out] y the resulting vector
   */
-  void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y);
+  void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, const double* const x, double beta, double* y);
 
   /** Matrix - Matrix product C = alpha*A*B + beta*B
       \param[in] alpha coefficient
@@ -309,42 +321,65 @@ extern "C"
    */
   NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1);
 
-  /** Create triplet storage from sparse block storage.
+  /** Creation, if needed, of triplet storage from sparse block storage.
    * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
    * \return the triplet sparse Matrix created in A.
    */
-  void NM_setup(NumericsMatrix* A);
+  CSparseMatrix* NM_triplet(NumericsMatrix* A);
 
-  /** Create compress column storage of a NumericsMatrix from triplet storage.
+  /** Creation, if needed, of compress column storage of a
+   * NumericsMatrix from triplet storage.
    * \param[in,out] A a NumericsMatrix with triplet storage initialized
    * \return the compressed column CSparseMatrix created in A.
    */
   CSparseMatrix* NM_csc(NumericsMatrix *A);
 
-  /** Create transposed compress column storage from compress column storage.
+  /** Creation, if needed, of the transposed compress column storage
+   * from compress column storage.
    * \param[in,out] A a NumericsMatrix with compress column storage.
    * \return the transposed compressed column matrix created in A.
    */
-  CSparseMatrix* NM_trans(NumericsMatrix* A);
+  CSparseMatrix* NM_csc_trans(NumericsMatrix* A);
 
   /** Matrix vector multiplication : y += alpha A x + y
-   * \param[in] alpha matrix coefficient
+   * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix
    * \param[in] x pointer on a dense vector of size A->size1
-   * \param[in, out] y pointer on a dense vector of size A->size1
+   * \param[in] beta scalar
+   * \param[in,out] y pointer on a dense vector of size A->size1
    */
-  void NM_aaxpy(const double alpha, NumericsMatrix* A, const double *x,
+  void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
+               const double beta,
+               double *y);
+
+
+  /** Transposed matrix multiplication : y += alpha transpose(A) x + y
+   * \param[in] alpha scalar
+   * \param[in] A a NumericsMatrix
+   * \param[in] x pointer on a dense vector of size A->size1
+   * \param[in] beta scalar
+   * \param[in,out] y pointer on a dense vector of size A->size1
+   */
+  void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
+                const double beta,
                 double *y);
 
 
-  /** Transposed matrix multiplication : y += alpha transpose(A) x + y 
-   * \param[in] alpha matrix coefficient
-   * \param[in] A a NumericsMatrix
-   * \param[in] x pointer on a dense vector of size A->size1
-   * \param[in, out] y pointer on a dense vector of size A->size1
+  /** Integer work vector initialization, if needed.
+   * \param[in,out] A pointer on a NumericsMatrix.
+   * \param[in] size the size of needed space.
+   * \return pointer on A->iWork allocated space of size A->size0.
    */
-  void NM_aatxpy(const double alpha, NumericsMatrix* A, const double *x,
-                 double *y);
+  int* NM_iWork(NumericsMatrix *A, int size);
+
+
+  /** Direct computation of the solution of a real system of linear
+   * equations: A x = b.
+   * \param[in,out] A a NumericsMatrix. On a dense factorisation
+   * A.iWork is initialized.
+   * \param[in,out] b pointer on a dense vector of size A->size1
+   */
+  void NM_gesv(NumericsMatrix* A, double *b);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

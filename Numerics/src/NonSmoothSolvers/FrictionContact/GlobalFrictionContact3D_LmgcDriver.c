@@ -54,8 +54,8 @@ int globalFrictionContact_fclib_write(
   assert(problem->M->matrix2);
   assert(problem->H->matrix2);
 
-  CSparseMatrix* _M = problem->M->matrix2;
-  CSparseMatrix* _H = problem->H->matrix2;
+  CSparseMatrix* _M = problem->M->matrix2->triplet;
+  CSparseMatrix* _H = problem->H->matrix2->triplet;
 
   M.m = _M->m;
   M.n = _M->n;
@@ -140,8 +140,7 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   M.matrix0 = NULL;
   M.matrix1 = NULL;
   M.matrix2 = NULL;
-  M.matrix3 = NULL;
-  M.matrix4 = NULL;
+  M.internalData = NULL;
 
   M.storageType = 2; /* csc */
   M.size0 = n;
@@ -159,8 +158,7 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   H.matrix0 = NULL;
   H.matrix1 = NULL;
   H.matrix2 = NULL;
-  H.matrix3 = NULL;
-  H.matrix4 = NULL;
+  H.internalData = NULL;
 
   H.storageType = 2;
   H.size0 = M.size0;
@@ -175,16 +173,16 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   _H.i = (int *) _rowH;
   _H.x = Hdata;
 
-  M.matrix2 = &_M;
-  H.matrix2 = &_H;
+  M.matrix2->triplet = &_M;
+  H.matrix2->triplet = &_H;
 
-  for (unsigned int i=0; i< _M.nz; ++i)
+  for (int i=0; i< _M.nz; ++i)
   {
     _M.p[i] --;
     _M.i[i] --;
   }
 
-  for (unsigned int i=0; i< _H.nz; ++i)
+  for (int i=0; i< _H.nz; ++i)
   {
     _H.p[i] --;
 
@@ -215,10 +213,10 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   assert(isize <= numerics_solver_options.iSize);
   assert(dsize <= numerics_solver_options.dSize);
 
-  for (unsigned int i=0; i<isize; ++i)
+  for (int i=0; i<isize; ++i)
     numerics_solver_options.iparam[i] = iparam[i];
 
-  for (unsigned int i=0; i<dsize; ++i)
+  for (int i=0; i<dsize; ++i)
     numerics_solver_options.dparam[i] = dparam[i];
 
   int rinfo = globalFrictionContact3D_driver(&problem,
@@ -269,29 +267,9 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
 
   }
 
-  if (M.matrix3)
-  {
-    cs_free(M.matrix3);
-    M.matrix3 = NULL;
-  }
 
-  if (M.matrix4)
-  {
-    cs_free(M.matrix4);
-    M.matrix4 = NULL;
-  }
-
-  if (H.matrix3)
-  {
-    cs_free(H.matrix3);
-    H.matrix3 = NULL;
-  }
-
-  if (H.matrix4)
-  {
-    cs_free(H.matrix4);
-    H.matrix4 = NULL;
-  }
+  freeNumericsMatrix(&M);
+  freeNumericsMatrix(&H);
 
   free(_colM);
   free(_colH);

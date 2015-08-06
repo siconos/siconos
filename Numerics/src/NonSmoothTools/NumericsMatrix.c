@@ -19,12 +19,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <float.h>
 #include "NumericsMatrix.h"
 #include "SiconosLapack.h"
 #include "misc.h"
 #include "GlobalFrictionContact3D_AlartCurnier.h"
 
-void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y)
+void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, const double* const x, double beta, double* y)
 {
 
   assert(A);
@@ -39,15 +40,15 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix
   switch (storage)
   {
     case NM_DENSE:
-    cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1);
+      cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1);
     break;
   /* SparseBlock storage */
     case NM_SPARSE_BLOCK:
-    prodSBM(sizeX, sizeY, alpha, A->matrix1, x, beta, y);
+      prodSBM(sizeX, sizeY, alpha, A->matrix1, x, beta, y);
     break;
   /* coordinate */
     case NM_TRIPLET:
-    cs_aaxpy(alpha, A->matrix2, x, beta, y);
+      cs_aaxpy(alpha, NM_triplet(A), x, beta, y);
     break;
 
     default:
@@ -188,28 +189,27 @@ void freeNumericsMatrix(NumericsMatrix* m)
       free(m->matrix0);
     m->matrix0 = NULL;
   }
-  else 
+  else
   {
     freeSBM(m->matrix1);
     free(m->matrix1);
     m->matrix1 = NULL;
     if (m->matrix2)
     {
-      cs_spfree(m->matrix2);
+      freeNumericsSparseMatrix(m->matrix2);
+      free(m->matrix2);
       m->matrix2 = NULL;
     }
-    if (m->matrix3)
+    if (m->internalData)
     {
-      cs_spfree(m->matrix3);
-      m->matrix3 = NULL;
+      if (m->internalData->iWork)
+      {
+        assert (m->internalData->iWorkSize > 0);
+        free(m->internalData->iWork);
+      }
+      free(m->internalData);
+      m->internalData = NULL;
     }
-/* enable this when many part of the code have been fixed !
-    if (m->matrix4)
-    {
-      cs_spfree(m->matrix4);
-      m->matrix4 = NULL;
-    }
-    */
   }
 }
 
@@ -493,8 +493,6 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
       data = malloc(sizeof(SparseBlockStructuredMatrix));
       break;
     case NM_TRIPLET:
-    case NM_COMPR_COL:
-    case NM_COMPR_TRANS:
       data = malloc(sizeof(CSparseMatrix));
     default:
       printf("createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
@@ -516,8 +514,7 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
   M->matrix0 = NULL;
   M->matrix1 = NULL;
   M->matrix2 = NULL;
-  M->matrix3 = NULL;
-  M->matrix4 = NULL;
+  M->internalData = NULL;
 
   if (data)
   {
@@ -530,13 +527,7 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
         M->matrix1 = (SparseBlockStructuredMatrix*) data;
         break;
       case NM_TRIPLET:
-        M->matrix2 = (CSparseMatrix*) data;
-        break;
-      case NM_COMPR_COL:
-        M->matrix3 = (CSparseMatrix*) data;
-        break;
-      case NM_COMPR_TRANS:
-        M->matrix4 = (CSparseMatrix*) data;
+        M->matrix2 = (NumericsSparseMatrix*) data;
         break;
 
       default:
@@ -551,46 +542,17 @@ NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructu
   return createNumericsMatrixFromData(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }
 
-CSparseMatrix* NM_csc(NumericsMatrix *A)
-{
-  if(!A->matrix3)
-  {
-    assert(A->matrix2);
-    A->matrix3 = cs_triplet(A->matrix2); /* triplet -> csc */
-  }
-  return A->matrix3;
-}
-
-CSparseMatrix* NM_trans(NumericsMatrix* A)
-{
-  if(!A->matrix4)
-  {
-    A->matrix4 = cs_transpose(NM_csc(A), 1); /* value = 1 -> allocation */
-  }
-  return A->matrix4;
-}
-
-/* Numerics Matrix wrapper  for y += alpha A x + y */
-void NM_aaxpy(const double alpha, NumericsMatrix* A, const double *x,
-              double *y)
-{
-  CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, 1, y));
-}
-
-/* Numerics Matrix wrapper for y += alpha transpose(A) x + y */
-void NM_aatxpy(const double alpha, NumericsMatrix* A, const double *x,
-               double *y)
-{
-  CHECK_RETURN(cs_aaxpy(alpha, NM_trans(A), x, 1, y));
-}
-
 /* NumericsMatrix : initialize csc storage from sparse block storage */
-void NM_setup(NumericsMatrix* A)
+CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
   if(!A->matrix2)
   {
+    A->matrix2 = (NumericsSparseMatrix*) malloc(sizeof(NumericsSparseMatrix));
+  }
+  if(!A->matrix2->triplet)
+  {
     assert(A->matrix1);
-    A->matrix2 = cs_spalloc(0,0,1,1,1);
+    A->matrix2->triplet = cs_spalloc(0,0,1,1,1);
 
     /* iteration on row, cr : current row */
     for(unsigned int cr = 0; cr < A->matrix1->filled1-1; ++cr)
@@ -618,12 +580,136 @@ void NM_setup(NumericsMatrix* A)
         {
           for(unsigned i = 0; i < inbr; ++i)
           {
-            CHECK_RETURN(cs_zentry(A->matrix2, i + roffset, j + coffset,
+            CHECK_RETURN(cs_zentry(A->matrix2->triplet, i + roffset, j + coffset,
                                    A->matrix1->block[bn][i + j*inbr]));
           }
         }
       }
     }
   }
+  return A->matrix2->triplet;
 }
 
+CSparseMatrix* NM_csc(NumericsMatrix *A)
+{
+
+  assert(A->matrix2);
+
+  if(!A->matrix2->csc)
+  {
+    assert(A->matrix2);
+    A->matrix2->csc = cs_triplet(A->matrix2->triplet); /* triplet -> csc */
+  }
+  return A->matrix2->csc;
+}
+
+CSparseMatrix* NM_csc_trans(NumericsMatrix* A)
+{
+
+  assert(A->matrix2);
+
+  if(!A->matrix2->trans_csc)
+  {
+    A->matrix2->trans_csc = cs_transpose(NM_csc(A), 1); /* value = 1 -> allocation */
+  }
+  return A->matrix2->trans_csc;
+}
+
+/* Numerics Matrix wrapper  for y += alpha A x + y */
+void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
+             const double beta, double *y)
+{
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+    cblas_dgemv(CblasColMajor, CblasNoTrans, A->size0, A->size1,
+                alpha, A->matrix0, A->size0, x, 1, beta, y, 1);
+    break;
+  case NM_SPARSE_BLOCK:
+    prodSBM(A->size1, A->size0, alpha, A->matrix1, x, beta, y);
+    break;
+
+  default:
+    assert(A->storageType == NM_TRIPLET);
+    CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, beta, y));
+    break;
+  }
+}
+
+/* Numerics Matrix wrapper  for y += alpha trans(A) x + y */
+void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
+              const double beta, double *y)
+{
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    cblas_dgemv(CblasColMajor, CblasTrans, A->size0, A->size1,
+                alpha, A->matrix0, A->size0, x, 1, beta, y, 1);
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  case NM_TRIPLET:
+  {
+    CHECK_RETURN(cs_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
+    break;
+  }
+  }
+}
+
+int* NM_iWork(NumericsMatrix* A, int size)
+{
+  if (!A->internalData)
+  {
+    A->internalData = (NumericsMatrixInternalData *)
+      malloc(sizeof(NumericsMatrixInternalData));
+  }
+
+  if (!A->internalData->iWork)
+  {
+    assert(A->internalData->iWorkSize == 0);
+    A->internalData->iWork = (int *) malloc(size * sizeof(int));
+    A->internalData->iWorkSize = size;
+  }
+  else
+  {
+    if (size > A->internalData->iWorkSize)
+    {
+      A->internalData->iWork = (int *) realloc(A->internalData->iWork, size * sizeof(int));
+      A->internalData->iWorkSize = size;
+    }
+  }
+
+  assert(A->internalData->iWork);
+  assert(A->internalData->iWorkSize >= size);
+
+  return A->internalData->iWork;
+}
+
+void NM_gesv(NumericsMatrix* A, double *b)
+{
+  assert(A->size0 == A->size1);
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    assert(A->matrix0);
+    int info;
+    DGESV(A->size0, 1, A->matrix0, A->size0, NM_iWork(A, A->size0), b,
+          A->size0, &info);
+    CHECK_RETURN(info);
+    break;
+  }
+
+  case NM_SPARSE_BLOCK:
+  case NM_TRIPLET:
+  {
+    cs_lusol(NM_triplet(A), b, 1, DBL_EPSILON);
+    break;
+  }
+
+  default:
+    assert (0);
+  }
+}
