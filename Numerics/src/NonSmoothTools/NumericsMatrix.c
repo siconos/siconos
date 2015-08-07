@@ -20,6 +20,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <float.h>
+#include <math.h>
+#include <stdint.h>
+
 #include "NumericsMatrix.h"
 #include "SiconosLapack.h"
 #include "misc.h"
@@ -406,19 +409,19 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
   void* data = NULL;
 
   CHECK_IO(fscanf(file, "%d", &storageType));
-  CHECK_IO(fscanf(file, "%d", &size0));
-  CHECK_IO(fscanf(file, "%d", &size1));
+  CHECK_IO(fscanf(file, "%d", (int*)&size0));
+  CHECK_IO(fscanf(file, "%d", (int*)&size1));
 
   if (storageType == NM_DENSE)
   {
-    CHECK_IO(fscanf(file, "%z\t%z\n", &(size0), &(size1)));
+    CHECK_IO(fscanf(file, "%d\t%d\n", (int*)&size0, (int*)&size1));
 
-    assert(size0 < (size_t)sqrt(SIZE_MAX/sizeof(double)));
-    assert(size1 < (size_t)sqrt(SIZE_MAX/sizeof(double)));
+    assert(size0 < (size_t)sqrt((double)SIZE_MAX/sizeof(double)));
+    assert(size1 < (size_t)sqrt((double)SIZE_MAX/sizeof(double)));
     data = malloc(size1 * size0 * sizeof(double));
     double* data_d = (double*) data;
 
-    for (int i = 0; i < size1 * size0; i++)
+    for (size_t i = 0; i < size1 * size0; ++i)
     {
       CHECK_IO(fscanf(file, "%le ", &(data_d[i])));
     }
@@ -429,7 +432,7 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
     newFromFileSBM((SparseBlockStructuredMatrix*)data, file);
   }
 
-  fillNumericsMatrix(m, storageType, size0, size1, data);
+  fillNumericsMatrix(m, storageType, (int)size0, (int)size1, data);
 }
 
 void readInFileName(NumericsMatrix* const m, const char *filename)
@@ -635,7 +638,6 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
   default:
     assert(A->storageType == NM_TRIPLET);
     CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, beta, y));
-    break;
   }
 }
 
@@ -645,18 +647,22 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
 {
   switch (A->storageType)
   {
-  case NM_DENSE:
-  {
-    cblas_dgemv(CblasColMajor, CblasTrans, A->size0, A->size1,
-                alpha, A->matrix0, A->size0, x, 1, beta, y, 1);
-    break;
-  }
-  case NM_SPARSE_BLOCK:
-  case NM_TRIPLET:
-  {
-    CHECK_RETURN(cs_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
-    break;
-  }
+    case NM_DENSE:
+      {
+        cblas_dgemv(CblasColMajor, CblasTrans, A->size0, A->size1,
+            alpha, A->matrix0, A->size0, x, 1, beta, y, 1);
+        break;
+      }
+    case NM_SPARSE_BLOCK:
+    case NM_TRIPLET:
+      {
+        CHECK_RETURN(cs_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
+        break;
+      }
+    default:
+      {
+        assert(0 && "NM_tgemv unknown storageType");
+      }
   }
 }
 
@@ -713,6 +719,6 @@ void NM_gesv(NumericsMatrix* A, double *b)
   }
 
   default:
-    assert (0);
+    assert (0 && "NM_gesv unknown storageType");
   }
 }

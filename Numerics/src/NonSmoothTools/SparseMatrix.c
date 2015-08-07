@@ -94,13 +94,13 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
 {
   if (p->iparam)
   {
-    assert(p->iparamSize>0);
+    assert(p->iSize>0);
     free(p->iparam);
     p->iparam = NULL;
   }
   if (p->dparam)
   {
-    assert(p->dparamSize>0);
+    assert(p->dSize>0);
     free(p->dparam);
     p->dparam = NULL;
   }

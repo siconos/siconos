@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
+
 #include "commonlib.h"
 #include "sparselib.h"
 

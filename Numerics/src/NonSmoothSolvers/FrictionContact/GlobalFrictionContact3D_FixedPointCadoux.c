@@ -20,6 +20,9 @@
 
 #include "GlobalFrictionContact3D_Gams.h"
 #include "GlobalFrictionContactProblem.h"
+
+#include "GlobalFrictionContact3D_Solvers.h"
+
 #include "SolverOptions.h"
 
 

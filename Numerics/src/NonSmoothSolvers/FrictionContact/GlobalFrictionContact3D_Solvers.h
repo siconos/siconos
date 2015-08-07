@@ -176,6 +176,7 @@ extern "C"
   void  globalFrictionContact3D_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
 
   int globalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options);
+
   /** Non-Smooth Gauss Seidel solver  for friction-contact 3D problem
         \param problem the friction-contact 3D problem to solve
         \param velocity global vector (n), in-out parameter
@@ -193,6 +194,21 @@ extern "C"
         \todo Use a global projection perhaps
     */
   void globalFrictionContact3D_nsgs(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, SolverOptions* options);
+
+   /** Solver based on the fixed-point iteration proposed by Cadoux for friction-contact 3D problem
+        \param problem the friction-contact 3D problem to solve
+        \param velocity global vector (n), in-out parameter
+        \param reaction global vector (n), in-out parameters
+        \param globalVelocity global vector (m), in-out parameters
+        \param info return 0 if the solution is found
+        \param options the solver options :
+        iparam[0] : Maximum iteration number
+        iparam[4] ; local strategy
+        dparam[0] : tolerance
+        dparam[2] : localtolerance
+        dparam[1] : (out) error
+    */
+  void globalFrictionContact3D_FixedPointCadoux(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, SolverOptions* options);
 
 
 
