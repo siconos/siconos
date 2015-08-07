@@ -81,9 +81,9 @@ extern "C"
     NumericsSparseLinearSolver solver;
 
     int* iparam;
-    double iparamSize;
+    double iSize;
     double* dparam;
-    double dparamSize;
+    double dSize;
 
     int* iWork; /**< integer work vector array (internal) */
     int iWorkSize; /**< size of integer work vector array */

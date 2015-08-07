@@ -434,16 +434,24 @@ typedef struct
   FischerBurmeisterFun3x3Ptr computeACFun3x3;
 } FischerBurmeisterParams;
 
-
 void nonsmoothEqnFischerBurmeisterFun(void* arg,
-                                 unsigned int problemSize,
-                                 double* reaction,
-                                 double* velocity,
-                                 double* mu,
-                                 double* rho,
-                                 double* result,
-                                 double* A,
-                                 double* B)
+                                      unsigned int problemSize,
+                                      double* reaction,
+                                      double* velocity,
+                                      double* mu,
+                                      double* rho,
+                                      double* result,
+                                      double* A,
+                                      double* B);
+void nonsmoothEqnFischerBurmeisterFun(void* arg,
+                                      unsigned int problemSize,
+                                      double* reaction,
+                                      double* velocity,
+                                      double* mu,
+                                      double* rho,
+                                      double* result,
+                                      double* A,
+                                      double* B)
 {
   FischerBurmeisterParams* acparams_p = (FischerBurmeisterParams *) arg;
 

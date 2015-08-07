@@ -138,19 +138,22 @@ void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
 
 
 
-#define ANSWER(T,CODE) \
+#define ANSWER(T,CODE)                          \
+  using SiconosVisitor::visit;                  \
   void visit(const T& ds)                       \
   {                                             \
     answer = ds . CODE;                         \
   }
 
-#define ANSWER_V(T,CODE) \
+#define ANSWER_V(T,CODE)                        \
+  using SiconosVisitor::visit;                  \
   void visit(const T& ds)                       \
   {                                             \
     answer = CODE;                              \
   }
 
-#define ANSWER_F(T,CODE) \
+#define ANSWER_F(T,CODE)                        \
+  using SiconosVisitor::visit;                  \
   void visit(const T& ds)                       \
   {                                             \
     answer = CODE(ds);                          \

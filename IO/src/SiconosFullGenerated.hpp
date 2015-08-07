@@ -209,7 +209,9 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_pluginJacvMInt)
   (_forces)
   (_jacobianqForces)
-  (_jacobianvForces))
+  (_jacobianvForces)
+  (_boundaryConditions)
+  (_reactionToBoundaryConditions))
 SICONOS_IO_REGISTER(BlockCSRMatrix,
   (_nr)
   (_nc)

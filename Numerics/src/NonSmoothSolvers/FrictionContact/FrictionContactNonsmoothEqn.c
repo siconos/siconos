@@ -630,8 +630,9 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     int myid;
     int argc = 0;
     char **argv;
-    CHECK_RETURN(MPI_Init(&argc, &argv));
-    CHECK_RETURN(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
+    int error_code;
+    CHECK_MPI(MPI_Init(&argc, &argv));
+    CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
     frictionContact3D_sparseLocalAlartCurnierInit(options);
     mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
   }

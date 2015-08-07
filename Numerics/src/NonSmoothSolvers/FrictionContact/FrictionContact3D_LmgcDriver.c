@@ -51,35 +51,35 @@ int frictionContact3D_LmgcDriver(double *reaction,
     fprintf(file, "int nc = %i ;\n ", nc);
     fprintf(file, "int nb = %i ;\n ", nb);
     fprintf(file, "double mu[%i] ={\n", nc);
-    for (int i = 0; i < nc - 1 ; i++)
+    for (unsigned int i = 0; i < nc - 1 ; i++)
     {
       fprintf(file, "%32.24e, \t", mu[i]);
     }
     fprintf(file, "%32.24e };\n", mu[nc - 1]);
     fprintf(file, "int row[%i] ={\n", nb);
-    for (int i = 0; i < nb - 1 ; i++)
+    for (unsigned int i = 0; i < nb - 1 ; i++)
     {
       fprintf(file, "%i,\t", row[i]);
     }
 
     fprintf(file, " %i};\n", row[nb - 1]);
     fprintf(file, "int column[%i] ={\n", nb);
-    for (int i = 0; i < nb - 1 ; i++)
+    for (unsigned int i = 0; i < nb - 1 ; i++)
     {
       fprintf(file, "%i,\t", column[i]);
     }
     fprintf(file, " %i};\n", column[nb - 1]);
     fprintf(file, "double q[%i] ={\n", 3 * nc);
-    for (int i = 0; i < 3 * nc - 1 ; i++)
+    for (unsigned int i = 0; i < 3 * nc - 1 ; i++)
     {
       fprintf(file, "%32.24e,\t", q[i]);
     }
     fprintf(file, " %32.24e};\n", q[3 * nc - 1]);
 
     fprintf(file, "double W[%i] ={\n", 3 * 3 * nb);
-    for (int i = 0; i < nb - 1 ; i++)
+    for (unsigned int i = 0; i < nb - 1 ; i++)
     {
-      for (int j = 0; j < 3 * 3 ; j++)
+      for (unsigned int j = 0; j < 3 * 3 ; j++)
       {
         fprintf(file, "%32.24e, \t", W[i * 9 + j]);
       }

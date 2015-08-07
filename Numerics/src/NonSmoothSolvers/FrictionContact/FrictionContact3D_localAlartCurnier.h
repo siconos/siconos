@@ -136,16 +136,6 @@ extern "C"
     SolverOptions* options);
 
 
-  void nonsmoothEqnAlartCurnierFun(void* arg,
-                                   unsigned int problemSize,
-                                   double* reaction,
-                                   double* velocity,
-                                   double* mu,
-                                   double* rho,
-                                   double* result,
-                                   double* A,
-                                   double* B);
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

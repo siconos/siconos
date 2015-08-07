@@ -1213,7 +1213,6 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
 
 %make_picklable(Callback, Numerics);
 %make_picklable(_SolverOptions, Numerics);
-%make_picklable(SolverOptions, Numerics);
 %make_picklable(FrictionContactProblem, Numerics);
 %make_picklable(NumericsMatrix, Numerics);
 %make_picklable(SparseBlockStructuredMatrix, Numerics);

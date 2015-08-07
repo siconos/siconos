@@ -6,6 +6,7 @@
 #cmakedefine HAVE_MLCPSIMPLEX
 #cmakedefine HAVE_TIME_H
 #cmakedefine HAVE_SYSTIMES_H
+#cmakedefine HAVE_MPI
 #cmakedefine WITH_MUMPS
 #cmakedefine WITH_TIMERS
 #cmakedefine DUMP_PROBLEM

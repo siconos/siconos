@@ -292,7 +292,7 @@ void uint_swap (unsigned int *a, unsigned int *b)
 }
 
 /* shuffle an unsigned array */
-void uint_shuffle (unsigned int *a, int n) {
+void uint_shuffle (unsigned int *a, unsigned int n) {
   for (unsigned int i = 0; i < n - 1; i++)
   {
     uint_swap  (&a[i], &a[i + rand()%(n - i)]);
@@ -306,7 +306,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   int* iparam = options->iparam;
   double* dparam = options->dparam;
   /* Number of contacts */
-  int nc = problem->numberOfContacts;
+  unsigned int nc = problem->numberOfContacts;
   /* Maximum number of iterations */
   int itermax = iparam[0];
   /* Tolerance */

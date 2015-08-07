@@ -31,16 +31,16 @@ double* cs_dense(CSparseMatrix *A)
   int nzmax = A->nzmax;
   int nz = A->nz;
   double *r = (double*) malloc(A->m * A->n * sizeof(double));
-  for(unsigned int i = 0; i<m*n; ++i)
+  for(int i = 0; i<m*n; ++i)
   {
     r[i] = 0.;
   }
   if(nz < 0)
   {
-    for(unsigned int j = 0 ; j < n ; j++)
+    for(int j = 0 ; j < n ; j++)
     {
       printf("    col %d : locations %d to %d\n", j, Ap [j], Ap [j+1]-1);
-      for(unsigned int p = Ap [j] ; p < Ap [j+1] ; p++)
+      for(int p = Ap [j] ; p < Ap [j+1] ; p++)
       {
         printf("      %d : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
         r[Ai[p] + j*m] = Ax ? Ax [p] : 1;
@@ -50,7 +50,7 @@ double* cs_dense(CSparseMatrix *A)
   else
   {
     printf("triplet: %d-by-%d, nzmax: %d nnz: %d\n", m, n, nzmax, nz) ;
-    for(unsigned int p = 0 ; p < nz ; p++)
+    for(int p = 0 ; p < nz ; p++)
     {
       printf("    %d %d : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
       r[Ai[p] + Ap[p] * m] = Ax ? Ax[p] : 1;
@@ -116,6 +116,8 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
     free(p->dWork);
     p->dWork = NULL;
   }
+
+  return NULL;
 }
 
 NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)

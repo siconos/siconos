@@ -68,14 +68,14 @@ ds->accept(getVelocity)->display();
 */
 
 
-namespace Experimental{
+namespace Experimental {
 
 template<typename T, typename Action>
 struct Call : public Action
 {
   typedef Call<T, Action> type;
 
-  using SiconosVisitor::visit;
+  using Action::visit;
 
   virtual void visit(const T& x)
   {
@@ -88,14 +88,11 @@ struct NoCall : public Action
 {
   typedef NoCall type;
 
-  using SiconosVisitor::visit;
+  using Action::visit;
 
   virtual void visit(const T& x)
   {
   }
-
-
-
 };
 
 
@@ -236,8 +233,6 @@ struct Visitor
 
 };
 
-
 }
-
 
 #endif
