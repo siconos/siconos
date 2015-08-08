@@ -38,6 +38,19 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   /* size of the problem */
   assert(n>0);
 
+  /* Checking the consistency of the functions_LSA struct */
+
+  assert(functions->compute_F && "functions_LSA lacks compute_F");
+  assert(functions->compute_F_merit && "functions_LSA lacks compute_F_merit");
+  assert(functions->compute_error && "functions_LSA lacks compute_error");
+  assert(((functions->compute_descent_direction) || \
+        (functions->compute_RHS_desc && functions->compute_H_desc) || \
+        functions->compute_H) && "functions_LSA lacks a way to compute a descente direction");
+  assert(((!functions->compute_RHS_desc || !functions->compute_descent_direction) || \
+        (functions->compute_JacTheta_merit || functions->compute_H)) && \
+      "functions_LSA lacks a way to compute JacTheta_merit");
+
+
   unsigned int iter;
   unsigned int nn = n*n;
 
@@ -124,7 +137,8 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   if (options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH])
   {
-    assert(functions->get_set_from_problem_data);
+    assert(functions->get_set_from_problem_data && \
+        "newton_LSA :: arc search selected but no et_set_from_problem_data provided!");
     ls_data.set = functions->get_set_from_problem_data(data);
     ls_data.searchtype = ARCSEARCH;
   }
@@ -142,7 +156,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   // if error based on the norm of JacThetaF_merit, do something not too stupid
   // here
-  JacThetaF_merit[0] = 1e20;
+  JacThetaF_merit[0] = DBL_MAX;
 
   iter = 0;
 
@@ -173,9 +187,12 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         { DEBUG_PRINTF("% 2.2e ", F[i]) }
         DEBUG_PRINT("\n"));
 
-    if (functions->descent_direction)
+    /**************************************************************************
+     * START COMPUTATION DESCENTE DIRECTION
+     */
+    if (functions->compute_descent_direction)
     {
-      functions->descent_direction(data, z, F, workV1, options);
+      functions->compute_descent_direction(data, z, F, workV1, options);
     }
     else
     {
@@ -210,21 +227,35 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       DGESV(n, 1, H, n, ipiv, workV1, n, &info_dir_search);
 
     }
+    /**************************************************************************
+     * END COMPUTATION DESCENTE DIRECTION
+     */
 
     DEBUG_PRINT("d_k ");
     DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
         { DEBUG_PRINTF("% 2.10e ", workV1[i]) }
         DEBUG_PRINT("\n"));
 
+    /**************************************************************************
+     * START COMPUTATION JacTheta F_merit
+     */
     // Computation of JacThetaF_merit
     // JacThetaF_merit = H^T * F_merit
-    if (functions->compute_RHS_desc || functions->descent_direction) // need to compute H and F_merit for the merit
+    if (functions->compute_RHS_desc || functions->compute_descent_direction) // need to compute H and F_merit for the merit
     {
       // /!\ maide! workV1 cannot be used since it contains the descent
       // direction ...
-      functions->compute_H(data, z, F, F_merit, workV2, H);
-      functions->compute_F_merit(data, z, F, F_merit);
-      cblas_dgemv(CblasColMajor, CblasTrans, n, n, 1.0, H, n, F_merit, incx, 0.0, JacThetaF_merit, incy);
+
+      if (functions->compute_JacTheta_merit)
+      {
+        functions->compute_JacTheta_merit(data, z, F, F_merit, workV2, JacThetaF_merit, options);
+      }
+      else
+      {
+        functions->compute_H(data, z, F, F_merit, workV2, H);
+        functions->compute_F_merit(data, z, F, F_merit);
+        cblas_dgemv(CblasColMajor, CblasTrans, n, n, 1.0, H, n, F_merit, incx, 0.0, JacThetaF_merit, incy);
+      }
     }
 
 

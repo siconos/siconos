@@ -48,8 +48,9 @@ typedef struct {
   void (*compute_error)(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err); /**< function to compute the error */
   void (*compute_RHS_desc)(void* data_opaque, double* z, double* w, double* F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min}, ...), optional */
   void (*compute_H_desc)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H_desc); /**< function to get an element H_desc of T_desc, optional */
-  void (*descent_direction)(void* data_opaque, double* z, double* w, double* descent_dir, SolverOptions* options); /**< function to get the descent direction, used for instance in the Newton-Josephy method */
-  void* (*get_set_from_problem_data)(void* problem);
+  void (*compute_descent_direction)(void* data_opaque, double* z, double* w, double* descent_dir, SolverOptions* options); /**< function to get the descent direction, used for instance in the Newton-Josephy method */
+  void (*compute_JacTheta_merit)(void* data_opaque, double* z, double* w, double* F_merit, double* workV, double* JacThetaF_merit, SolverOptions* options); /**< function to get the descent direction, used for instance in the Newton-Josephy method */
+  void* (*get_set_from_problem_data)(void* problem); /**< Function returning the set description from the  */
 } functions_LSA;
 
 // id of the stat structure 
@@ -104,7 +105,8 @@ extern "C"
     functions->compute_error = NULL;
     functions->compute_RHS_desc = NULL;
     functions->compute_H_desc = NULL;
-    functions->descent_direction = NULL;
+    functions->compute_descent_direction = NULL;
+    functions->compute_JacTheta_merit = NULL;
     functions->get_set_from_problem_data = NULL;
   }
 

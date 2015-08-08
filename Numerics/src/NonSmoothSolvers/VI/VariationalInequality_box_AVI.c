@@ -73,7 +73,7 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   init_lsa_functions(&functions_AVI_LSA, &VI_compute_F, &VI_compute_F_box_Qi);
   functions_AVI_LSA.compute_H = &VI_compute_H_box_Qi;
   functions_AVI_LSA.compute_error = &VI_compute_error_box;
-  functions_AVI_LSA.descent_direction = &vi_compute_decent_dir_by_avi;
+  functions_AVI_LSA.compute_descent_direction = &vi_compute_decent_dir_by_avi;
   functions_AVI_LSA.get_set_from_problem_data = &vi_get_set;
   options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
 
