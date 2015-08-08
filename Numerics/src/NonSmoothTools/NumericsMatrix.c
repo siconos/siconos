@@ -409,15 +409,13 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
   void* data = NULL;
 
   CHECK_IO(fscanf(file, "%d", &storageType));
-  CHECK_IO(fscanf(file, "%d", (int*)&size0));
-  CHECK_IO(fscanf(file, "%d", (int*)&size1));
+  CHECK_IO(fscanf(file, "%zu",&size0));
+  CHECK_IO(fscanf(file, "%zu", &size1));
 
   if (storageType == NM_DENSE)
   {
-    CHECK_IO(fscanf(file, "%d\t%d\n", (int*)&size0, (int*)&size1));
+    CHECK_IO(fscanf(file, "%zu\t%zu\n", &size0, &size1));
 
-    assert(size0 < (size_t)sqrt((double)SIZE_MAX/sizeof(double)));
-    assert(size1 < (size_t)sqrt((double)SIZE_MAX/sizeof(double)));
     data = malloc(size1 * size0 * sizeof(double));
     double* data_d = (double*) data;
 
@@ -553,7 +551,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
   if(!A->matrix2)
   {
-    A->matrix2 = (NumericsSparseMatrix*) malloc(sizeof(NumericsSparseMatrix));
+    A->matrix2 = createNumericsSparseMatrix();
   }
   if(!A->matrix2->triplet)
   {

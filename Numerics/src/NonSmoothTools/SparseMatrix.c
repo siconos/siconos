@@ -142,6 +142,15 @@ NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)
     cs_spfree(A->trans_csc);
     A->trans_csc = NULL;
   }
-
   return NULL;
+}
+
+NumericsSparseMatrix* createNumericsSparseMatrix(void)
+{
+  NumericsSparseMatrix* A = (NumericsSparseMatrix*) malloc(sizeof(NumericsSparseMatrix));
+  A->solverParams = NULL;
+  A->triplet = NULL;
+  A->csc = NULL;
+  A->trans_csc = NULL;
+  return A;
 }

@@ -5,7 +5,8 @@ INCLUDE(cVersion)
 
 macro(ADD_CXX_OPTIONS OPT)
 
- CHECK_CXX_ACCEPTS_FLAG("${OPT}" CXX_HAVE_"${OPT}")
+ STRING(REGEX REPLACE " " "" OPT_SANE "${OPT}")
+ CHECK_CXX_ACCEPTS_FLAG("${OPT} ${_EXTRA_WARNING_FLAGS}" CXX_HAVE_${OPT_SANE})
 
  set(_compilers ${ARGN})
  IF(_compilers)
@@ -19,16 +20,16 @@ macro(ADD_CXX_OPTIONS OPT)
   SET(ADD_OPTION TRUE)
  ENDIF(_compilers)
 
- IF(ADD_OPTION AND CXX_HAVE_"${OPT}")
+ IF(ADD_OPTION AND CXX_HAVE_${OPT_SANE})
   APPEND_CXX_FLAGS("${OPT}")
- ENDIF(ADD_OPTION AND CXX_HAVE_"${OPT}")
+ ENDIF(ADD_OPTION AND CXX_HAVE_${OPT_SANE})
 
 endmacro(ADD_CXX_OPTIONS)
 
 macro(ADD_C_OPTIONS OPT)
 
  STRING(REGEX REPLACE " " "" OPT_SANE "${OPT}")
- CHECK_C_COMPILER_FLAG("${OPT}" C_HAVE_${OPT_SANE})
+ CHECK_C_COMPILER_FLAG("${OPT} ${_EXTRA_WARNING_FLAGS}" C_HAVE_${OPT_SANE})
 
  set(_compilers ${ARGN})
  IF(_compilers)
@@ -52,6 +53,13 @@ endmacro(ADD_C_OPTIONS)
 
 IF(CMAKE_C_COMPILER)
  INCLUDE(CheckCCompilerFlag)
+
+ IF(${CMAKE_C_COMPILER_ID} MATCHES "Clang")
+  SET(_EXTRA_WARNING_FLAGS "-Werror=unknown-warning-option")
+ ELSE()
+  SET(_EXTRA_WARNING_FLAGS "")
+ ENDIF()
+
  detect_c_version(C_VERSION)
 
  IF(C_VERSION STRLESS "201112L")
@@ -81,6 +89,8 @@ IF(CMAKE_C_COMPILER)
  ADD_C_OPTIONS("-Werror=sizeof-array-argument")
  ADD_C_OPTIONS("-Werror=bool-compare")
  ADD_C_OPTIONS("-Werror=array-bounds")
+ ADD_C_OPTIONS("-Werror=format-invalid-specifier")
+ ADD_C_OPTIONS("-Werror=type-limits")
 
  # C specific
  ADD_C_OPTIONS("-Werror=missing-prototypes")
@@ -104,6 +114,13 @@ ENDIF(CMAKE_C_COMPILER)
 IF(CMAKE_CXX_COMPILER)
  detect_cxx_version(CXX_VERSION)
  INCLUDE(TestCXXAcceptsFlag)
+
+ IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+  SET(_EXTRA_WARNING_FLAGS "-Werror=unknown-warning-option")
+ ELSE()
+  SET(_EXTRA_WARNING_FLAGS "")
+ ENDIF()
+
  # ADD_CXX_OPTIONS("-static -static-libgcc -static-libstdc++" "GNU;Clang")
  # way too verbose with MSVC
  IF(NOT MSVC)
@@ -113,13 +130,16 @@ IF(CMAKE_CXX_COMPILER)
  ADD_CXX_OPTIONS("-Wextra -Wno-unused-parameter")
  ADD_CXX_OPTIONS("-Werror=implicit-function-declaration")
  # should be supported only by Clang. The last statement is important, otherwise nothing compiles ...
- ADD_CXX_OPTIONS("-Werror=conversion -Wno-sign-conversion -Wno-error=sign-conversion -Wno-error=shorten-64-to-32")
+ ADD_CXX_OPTIONS("-Werror=conversion -Wno-sign-conversion -Wno-error=sign-conversion Wno-shorten-64-to-32 -Wno-error=shorten-64-to-32")
+ # ADD_C_OPTIONS("-Wno-error=shorten-64-to-32") # for clang
  ADD_CXX_OPTIONS("-Werror=missing-declarations")
  ADD_CXX_OPTIONS("-Werror=switch-bool")
  ADD_CXX_OPTIONS("-Werror=logical-not-parentheses")
  ADD_CXX_OPTIONS("-Werror=sizeof-array-argument")
  ADD_CXX_OPTIONS("-Werror=bool-compare")
  ADD_CXX_OPTIONS("-Werror=array-bounds")
+ ADD_CXX_OPTIONS("-Werror=format-invalid-specifier")
+ ADD_CXX_OPTIONS("-Werror=type-limits")
 
  ADD_CXX_OPTIONS("-Wodr")
 

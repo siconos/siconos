@@ -96,7 +96,7 @@ void OSNSPTest::testAVI()
   SP::AVI osnspb(new AVI());
   _sim->insertNonSmoothProblem(osnspb);
   _model->initialize(_sim);
-  SimpleMatrix dataPlot(ceil((_T - _t0) / _h) + 10, 5);
+  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);
   unsigned int k = 0;

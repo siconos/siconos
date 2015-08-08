@@ -51,7 +51,7 @@ void ControlSimulation::initialize()
   _CM->initialize(*_model);
 
   // Output
-  _N = ceil((_T - _t0) / _h) + 10; // Number of time steps
+  _N = (unsigned)ceil((_T - _t0) / _h) + 10; // Number of time steps
   DynamicalSystemsGraph& DSG0 = *_model->nonSmoothDynamicalSystem()->topology()->dSG(0);
   InteractionsGraph& IG0 = *_model->nonSmoothDynamicalSystem()->topology()->indexSet0();
   res = getNumberOfStates(DSG0, IG0);

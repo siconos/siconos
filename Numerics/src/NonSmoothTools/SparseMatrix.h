@@ -93,7 +93,6 @@ extern "C"
 
   typedef struct
   {
-    NumericsSparseLinearSolver solver;
     NumericsSparseLinearSolverParams* solverParams;
 
     CSparseMatrix* triplet;
@@ -137,6 +136,11 @@ extern "C"
    * \return NULL on success
   */
   CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A);
+
+  /** Create a NumericsSparseMatrix (malloc + set fields to NULL)
+   * \return a NumericsSparseMatrix
+   */
+  NumericsSparseMatrix* createNumericsSparseMatrix(void);
 
   /** Free alocated space for NumericsSparseLinearSolverParams.
    * \param p a NumericsSparseLinearSolverParams

@@ -51,7 +51,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
 
   lcplike_pb.M = &num_mat;
 
-  lcplike_pb.q = (double *)malloc(nrows*sizeof(double));
+  lcplike_pb.q = (double *)calloc(nrows, sizeof(double));
   double* a_bar = (double *)malloc(nrows*sizeof(double));
 
   double* B_A_T = (double*)malloc(n*n*sizeof(double));
@@ -74,13 +74,13 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   unsigned indx_B_I_T = 0;
   for (unsigned i = 1; i <= nrows; ++i)
   {
-    assert(abs(basis[i]) > nrows); /* we don't want slack variable here */
+    assert((unsigned)abs(basis[i]) > nrows); /* we don't want slack variable here */
     int indx = abs(basis[i]) - nrows - 1 - n;
     if (indx >= 0)
     {
       /* this is an inactive constraint */
       assert(indx_B_I_T < n_I);
-      assert(indx < nrows); 
+      assert((unsigned)indx < nrows); 
       cblas_dcopy(n, &H[indx], nrows, &B_I_T[indx_B_I_T*n], 1); /* form B_I_T */
       active_constraints[indx] = 0; /* desactivate the constraint */
       lcplike_pb.q[n+indx_B_I_T] = -K[indx]; /* partial construction of q[n:nrows] as -K_I  */
@@ -356,7 +356,6 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
     goto exit_caoferris;
   }
   /* save the position of the auxiliary variable */
-  assert(drive >= 0);
   aux_indx = drive;
 
   /* Pivot < mu , driver > */

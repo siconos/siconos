@@ -140,11 +140,9 @@ TYPEDEF_SPTR(_InteractionsGraph);
                           InteractionProperties, SystemProperties,
                           GraphProperties >);
 
-TYPEDEF_SPTR(DynamicalSystemsGraph);
 %feature("director") DynamicalSystemsGraph;
 %shared_ptr(DynamicalSystemsGraph);
 
-TYPEDEF_SPTR(InteractionsGraph);
 %feature("director") InteractionsGraph;
 %shared_ptr(InteractionsGraph);
 

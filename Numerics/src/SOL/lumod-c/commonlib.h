@@ -128,7 +128,7 @@ static char NumChars[14]  = {"0123456789-+."};
 #ifndef CALLOC
 #define CALLOC(ptr, nr)\
   if(!calloc((size_t)(nr), sizeof(*ptr)) && nr) {\
-    printf("calloc of %z bytes failed on line %d of file %s\n",\
+    printf("calloc of %zu bytes failed on line %u of file %s\n",\
            (size_t) nr * sizeof(*ptr), __LINE__, __FILE__);\
     assert(0 && "calloc failed");\
   }
@@ -137,7 +137,7 @@ static char NumChars[14]  = {"0123456789-+."};
 #ifndef MALLOC
 #define MALLOC(ptr, nr)\
   if(!(malloc((size_t)((size_t) (nr) * sizeof(*ptr)))) && nr) {\
-    printf("malloc of %z bytes failed on line %d of file %s\n",\
+    printf("malloc of %zu bytes failed on line %u of file %s\n",\
            (size_t) nr * sizeof(*ptr), __LINE__, __FILE__);\
     assert(0 && "malloc failed");\
   }
@@ -146,7 +146,7 @@ static char NumChars[14]  = {"0123456789-+."};
 #ifndef REALLOC
 #define REALLOC(ptr, nr)\
   if(!(realloc(ptr, (size_t)((size_t) (nr) * sizeof(*ptr)))) && nr) {\
-    printf("realloc of %z bytes failed on line %d of file %s\n",\
+    printf("realloc of %zu bytes failed on line %u of file %s\n",\
            (size_t) nr * sizeof(*ptr), __LINE__, __FILE__);\
     assert(0 && "realloc failed");\
   }
