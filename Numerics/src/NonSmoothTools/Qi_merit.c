@@ -74,8 +74,15 @@ void phi_Qi(int n, double* restrict x, double* restrict F, double* restrict Fbox
   }
 }
 
-void Jac_F_Qi(int n, double* restrict x, double* restrict F, double* restrict workV1, double* restrict workV2, double* restrict nabla_F, double* restrict lb, double* restrict ub, double* restrict H)
+void Jac_F_Qi(int n, double* restrict x, double* restrict F, double* restrict workV1, double* restrict workV2, NumericsMatrix* restrict nabla_F, double* restrict lb, double* restrict ub, NumericsMatrix* restrict H)
 {
+
+  NM_assert(NM_DENSE, nabla_F);
+  NM_assert(NM_DENSE, H);
+
+  double* H_dense = H->matrix0;
+  double* nabla_F_dense = nabla_F->matrix0;
+
   // function based on the formula given p. 873 in Facchinei--Pang (2003)
   // when the gradient fails to exists, we set a_i = 0 and b_i = 1, as in
   // L. Qi (1999) doi:10.1287/moor.24.2.440
@@ -99,9 +106,9 @@ void Jac_F_Qi(int n, double* restrict x, double* restrict F, double* restrict wo
     { // a = 0.0, b = 1.0 ; other choices are possible
       for (int j = 0; j < n; ++j)
       {
-        H[j * n + i] = bb*nabla_F[j * n + i];
+        H_dense[j * n + i] = bb*nabla_F_dense[j * n + i];
       }
-      H[i * n + i] = aa;
+      H_dense[i * n + i] = aa;
     }
     else // now the rest.... Easy things first
     {
@@ -138,9 +145,9 @@ void Jac_F_Qi(int n, double* restrict x, double* restrict F, double* restrict wo
       // now fill H
       for (int j = 0; j < n; ++j)
       {
-        H[j * n + i] = b*nabla_F[j * n + i];
+        H_dense[j * n + i] = b*nabla_F_dense[j * n + i];
       }
-      H[i * n + i] += a;
+      H_dense[i * n + i] += a;
     }
   }
 }

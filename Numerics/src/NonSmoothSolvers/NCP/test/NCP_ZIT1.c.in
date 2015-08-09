@@ -48,8 +48,7 @@ typedef struct
   unsigned int nabla_eval;
 } data_ZIT;
 
-void compute_Fncp_ZIT(void* env, int n, double* restrict z, double* restrict F);
-void compute_Fncp_ZIT(void* env, int n, double* restrict z, double* restrict F)
+static void compute_Fncp_ZIT(void* env, int n, double* restrict z, double* restrict F)
 {
   data_ZIT* d = (data_ZIT*) env;
   double l0 = 2*z[0] - 1.0;
@@ -65,9 +64,10 @@ void compute_Fncp_ZIT(void* env, int n, double* restrict z, double* restrict F)
   d->f_eval += 1;
 }
 
-void compute_nabla_Fncp_ZIT(void* env, int n, double* restrict z, double* restrict nabla_Fncp);
-void compute_nabla_Fncp_ZIT(void* env, int n, double* restrict z, double* restrict nabla_Fncp)
+static void compute_nabla_Fncp_ZIT(void* env, int n, double* restrict z, NumericsMatrix* restrict nabla_Fncp)
 {
+  double* restrict nabla_Fncp_dense = nabla_Fncp->matrix0;
+
   data_ZIT* d = (data_ZIT*) env;
   double l0 = 2.0*z[0] - 1.0;
   double l1 = 2.0*z[2] - 1.0;
@@ -76,25 +76,25 @@ void compute_nabla_Fncp_ZIT(void* env, int n, double* restrict z, double* restri
   double r1 = (d->mu1*l0 + l1)*invR;
   double v_gamma = d->xk[1] + d->gamma*(d->h*r1);
 
-  nabla_Fncp[2] = 2.0*d->h*(d->mu1+d->kappa*l1*l1)*invR2;
-  nabla_Fncp[2 + 4] = 0.0;
-  nabla_Fncp[2 + 2*4] = 2.0*d->h*(1.0 + d->kappa*l0*l0)*invR2;
-  nabla_Fncp[2 + 3*4] = 1.0;
+  nabla_Fncp_dense[2] = 2.0*d->h*(d->mu1+d->kappa*l1*l1)*invR2;
+  nabla_Fncp_dense[2 + 4] = 0.0;
+  nabla_Fncp_dense[2 + 2*4] = 2.0*d->h*(1.0 + d->kappa*l0*l0)*invR2;
+  nabla_Fncp_dense[2 + 3*4] = 1.0;
 
-  nabla_Fncp[0] = -2.0*d->h*d->kappa*l1*(v_gamma) + d->h*(d->theta - d->gamma*d->kappa*l0*l1)*nabla_Fncp[2];
-  nabla_Fncp[0 + 1*4] = 1.0;
-  nabla_Fncp[0 + 2*4] = -2.0*d->h*d->kappa*l0*(v_gamma) + d->h*(d->theta - d->gamma*d->kappa*l0*l1)*nabla_Fncp[2 + 2*4];
-  nabla_Fncp[0 + 3*4] = 0.0;
+  nabla_Fncp_dense[0] = -2.0*d->h*d->kappa*l1*(v_gamma) + d->h*(d->theta - d->gamma*d->kappa*l0*l1)*nabla_Fncp_dense[2];
+  nabla_Fncp_dense[0 + 1*4] = 1.0;
+  nabla_Fncp_dense[0 + 2*4] = -2.0*d->h*d->kappa*l0*(v_gamma) + d->h*(d->theta - d->gamma*d->kappa*l0*l1)*nabla_Fncp_dense[2 + 2*4];
+  nabla_Fncp_dense[0 + 3*4] = 0.0;
 
-  nabla_Fncp[1] = -1.0;
-  nabla_Fncp[1 + 4] = 0.0;
-  nabla_Fncp[1 + 8] = 0.0;
-  nabla_Fncp[1 + 12] = 0.0;
+  nabla_Fncp_dense[1] = -1.0;
+  nabla_Fncp_dense[1 + 4] = 0.0;
+  nabla_Fncp_dense[1 + 8] = 0.0;
+  nabla_Fncp_dense[1 + 12] = 0.0;
 
-  nabla_Fncp[3] = 0.0;
-  nabla_Fncp[3 + 4] = 0.0;
-  nabla_Fncp[3 + 2*4] = -1.0;
-  nabla_Fncp[3 + 3*4] = 0.0;
+  nabla_Fncp_dense[3] = 0.0;
+  nabla_Fncp_dense[3 + 4] = 0.0;
+  nabla_Fncp_dense[3 + 2*4] = -1.0;
+  nabla_Fncp_dense[3 + 3*4] = 0.0;
   d->nabla_eval += 1;
 }
 

@@ -52,6 +52,7 @@
 */
 
 #include "NumericsConfig.h"
+#include "NumericsMatrix.h"
 
 #ifdef __cplusplus
 #define restrict __restrict
@@ -111,7 +112,7 @@ extern "C"
       \param[in] nabla_F \f$ \nabla_z F(z) \f$
       \param[in,out] H element of Jac_F_merit
   */
-void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* restrict workV1, double* restrict workV2, double* restrict nabla_F, double* restrict H);
+void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* restrict workV1, double* restrict workV2, NumericsMatrix* restrict nabla_F, NumericsMatrix* restrict H);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

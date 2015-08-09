@@ -179,7 +179,8 @@ int SN_lumod_dense_solve(SN_lumod_dense_data* restrict lumod_data, double* restr
 
     DEBUG_EXPR_WE(double* Ctmp = (double*)calloc(k*k, sizeof(double));
         cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, k, k, n, 1.0, lumod_data->Uk, n, lumod_data->Yk, n, 0., Ctmp, k);
-        DEBUG_PRINT_MAT_STR("Ck", Ctmp, k, k));
+        DEBUG_PRINT_MAT_STR("Ck", Ctmp, k, k);
+        free(Ctmp););
     /* Step 2. */
     /* Step 2.a Compute Uk^T x1  */
     /** this is just a permutation, could replace accordingly*/

@@ -40,13 +40,13 @@ void FB_compute_F_ncp(void* data_opaque, double* z, double* F)
   data->compute_F(data->env, data->n, z, F);
 }
 
-void FB_compute_H_ncp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, double* H)
+void FB_compute_H_ncp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, NumericsMatrix* H)
 {
   NonlinearComplementarityProblem* data = (NonlinearComplementarityProblem *)data_opaque;
 
-  data->compute_nabla_F(data->env, data->n, z, data->nabla_F->matrix0);
+  data->compute_nabla_F(data->env, data->n, z, data->nabla_F);
 
-  Jac_F_FB(0, data->n, z, F, workV1, workV2, data->nabla_F->matrix0, H);
+  Jac_F_FB(0, data->n, z, F, workV1, workV2, data->nabla_F, H);
 }
 
 void FB_compute_error_ncp(void* data_opaque, double* z, double* w, double* Jac_F_merit, double tol, double* err)
@@ -62,6 +62,7 @@ void ncp_newton_FBLSA(NonlinearComplementarityProblem* problem, double *z, doubl
   functions_FBLSA_ncp.compute_H = &FB_compute_H_ncp;
   functions_FBLSA_ncp.compute_error = &FB_compute_error_ncp;
 
+  set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->n, z, F, info, (void *)problem, options, &functions_FBLSA_ncp);
 }
 

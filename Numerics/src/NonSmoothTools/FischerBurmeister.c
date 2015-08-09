@@ -127,8 +127,14 @@ void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* 
   }
 }
 
-void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* restrict workV1, double* restrict workV2, double* restrict nabla_F, double* restrict H)
+void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* restrict workV1, double* restrict workV2, NumericsMatrix* restrict nabla_F, NumericsMatrix* restrict H)
 {
+  NM_assert(NM_DENSE, nabla_F);
+  NM_assert(NM_DENSE, H);
+
+  double* nabla_F_dense = nabla_F->matrix0;
+  double* H_dense = H->matrix0;
+
   double normi;
   int n = n1 + n2;
 
@@ -136,7 +142,7 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
   {
     //printf("Jac_F_FB: the mixed case needs review and testing -- xhub\n");
     /* H is initialized with nabla_F */
-    cblas_dcopy((n2+n1) * (n2+n1), nabla_F, 1, H, 1);
+    cblas_dcopy((n2+n1) * (n2+n1), nabla_F_dense, 1, H_dense, 1);
   }
   // constructing the set beta
   // Introduce a tolerance ? -- xhub
@@ -154,7 +160,7 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
   // workV1 = "z" in Facchinei--Pang (2003) p. 808
   // "z_i" = 1 if z_i = w_i = 0.0
   // nabla_F^T.workV1 --> workV2
-  cblas_dgemv(CblasColMajor,CblasTrans, n2 , n2 , 1.0 , nabla_F , n2 , &workV1[n1], 1, 0.0 , &workV2[n1], 1);
+  cblas_dgemv(CblasColMajor,CblasTrans, n2 , n2 , 1.0 , nabla_F_dense , n2 , &workV1[n1], 1, 0.0 , &workV2[n1], 1);
   for (int i = n1; i < n; ++i)
   {
     if (workV1[i] != 0.0) // i in beta
@@ -162,9 +168,9 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
       normi = sqrt(workV1[i] * workV1[i] + workV2[i] * workV2[i]);
       for (int j = 0; j < n; j++)
       {
-        H[j * n + i] = (workV2[i] / normi - 1.0) * nabla_F[j * n + i];
+        H_dense[j * n + i] = (workV2[i] / normi - 1.0) * nabla_F_dense[j * n + i];
       }
-      H[i * n + i] += (workV1[i] / normi - 1.0);
+      H_dense[i * n + i] += (workV1[i] / normi - 1.0);
 
     }
     else // i not in beta
@@ -172,9 +178,9 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
       normi = sqrt(z[i] * z[i] + F[i] * F[i]);
       for (int j = 0; j < n; j++)
       {
-        H[j * n + i] = (F[i] / normi - 1.0) * nabla_F[j * n + i];
+        H_dense[j * n + i] = (F[i] / normi - 1.0) * nabla_F_dense[j * n + i];
       }
-      H[i * n + i] += (z[i] / normi - 1.0);
+      H_dense[i * n + i] += (z[i] / normi - 1.0);
     }
   }
 }

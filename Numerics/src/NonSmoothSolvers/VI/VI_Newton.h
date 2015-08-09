@@ -24,6 +24,7 @@
  */
 
 #include "NumericsConfig.h"
+#include "NumericsMatrix.h"
 
 #if defined(__cplusplus)
 #undef restrict
@@ -38,7 +39,7 @@ extern "C"
   void VI_compute_F(void* data_opaque, double* x, double* F);
   void VI_compute_error_box(void* data_opaque, double* x, double* F, double* Jac_F_merit, double tol, double* err);
   void VI_compute_F_box_Qi(void* data_opaque, double* x, double* F, double* Fbox);
-  void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1, double* workV2, double* H);
+  void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1, double* workV2, NumericsMatrix* H);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

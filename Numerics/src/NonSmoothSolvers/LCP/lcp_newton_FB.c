@@ -46,15 +46,13 @@ void FB_compute_F_lcp(void* data_opaque, double* z, double* w)
   cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, data->M->matrix0, n, z, 1, 1.0, w, 1);
 }
 
-void FB_compute_H_lcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H)
+void FB_compute_H_lcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, NumericsMatrix* H)
 {
   LinearComplementarityProblem* data = (LinearComplementarityProblem *)data_opaque;
   unsigned int n = data->size;
   assert(data->M);
-  assert(data->M->matrix0);
-  double* M = data->M->matrix0;
 
-  Jac_F_FB(0, n, z, w, workV1, workV2, M, H);
+  Jac_F_FB(0, n, z, w, workV1, workV2, data->M, H);
 }
 
 void FB_compute_error_lcp(void* data_opaque, double* z, double* w, double* notused, double tol, double* err)
@@ -74,30 +72,6 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
   functions_FBLSA_lcp.compute_H = &FB_compute_H_lcp;
   functions_FBLSA_lcp.compute_error = &FB_compute_error_lcp;
 
- newton_LSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
+  set_lsa_params_data(options, problem->M);
+  newton_LSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
 }
-
-int linearComplementarity_newton_FB_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NewtonFB Solver\n");
-  }
-
-  options->solverId = SICONOS_LCP_NEWTON_FBLSA;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
-
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-12;
-
-  return 0;
-}
-

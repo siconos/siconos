@@ -32,8 +32,8 @@
 #include "SiconosBlas.h"
 #include "SiconosLapack.h"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 #define TOL_LEXICO DBL_EPSILON*10000

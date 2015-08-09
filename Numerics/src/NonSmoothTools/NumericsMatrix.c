@@ -203,16 +203,17 @@ void freeNumericsMatrix(NumericsMatrix* m)
       free(m->matrix2);
       m->matrix2 = NULL;
     }
-    if (m->internalData)
+  }
+  if (m->internalData)
+  {
+    if (m->internalData->iWork)
     {
-      if (m->internalData->iWork)
-      {
-        assert (m->internalData->iWorkSize > 0);
-        free(m->internalData->iWork);
-      }
-      free(m->internalData);
-      m->internalData = NULL;
+      assert (m->internalData->iWorkSize > 0);
+      free(m->internalData->iWork);
+      m->internalData->iWork = NULL;
     }
+    free(m->internalData);
+    m->internalData = NULL;
   }
 }
 
@@ -481,6 +482,37 @@ NumericsMatrix* createNumericsMatrixFromData(int storageType, int size0, int siz
   return M;
 }
 
+NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat)
+{
+  NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+
+  void* data;
+  int size0 = mat->size0;
+  int size1 = mat->size1;
+
+  M->storageType = mat->storageType;
+  switch (mat->storageType)
+  {
+    case NM_DENSE:
+      data = malloc(size0*size1*sizeof(double));
+      break;
+    case NM_SPARSE_BLOCK:
+      data = malloc(sizeof(SparseBlockStructuredMatrix));
+      break;
+    case NM_TRIPLET:
+      data = malloc(sizeof(CSparseMatrix));
+      break;
+    default:
+      printf("createNumericsMatrix :: storageType value %d not implemented yet !", mat->storageType);
+      exit(EXIT_FAILURE);
+  }
+
+  fillNumericsMatrix(M, mat->storageType, size0, size1, data);
+
+  return M;
+}
+
+
 NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
 {
   NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
@@ -619,7 +651,7 @@ CSparseMatrix* NM_csc_trans(NumericsMatrix* A)
   return A->matrix2->trans_csc;
 }
 
-/* Numerics Matrix wrapper  for y += alpha A x + y */
+/* Numerics Matrix wrapper  for y <- alpha A x + beta y */
 void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
              const double beta, double *y)
 {
@@ -639,7 +671,7 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
   }
 }
 
-/* Numerics Matrix wrapper  for y += alpha trans(A) x + y */
+/* Numerics Matrix wrapper  for y <- alpha trans(A) x + beta y */
 void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
               const double beta, double *y)
 {
@@ -668,8 +700,7 @@ int* NM_iWork(NumericsMatrix* A, int size)
 {
   if (!A->internalData)
   {
-    A->internalData = (NumericsMatrixInternalData *)
-      malloc(sizeof(NumericsMatrixInternalData));
+    NM_alloc_internalData(A);
   }
 
   if (!A->internalData->iWork)
@@ -693,30 +724,36 @@ int* NM_iWork(NumericsMatrix* A, int size)
   return A->internalData->iWork;
 }
 
-void NM_gesv(NumericsMatrix* A, double *b)
+int NM_gesv(NumericsMatrix* A, double *b)
 {
   assert(A->size0 == A->size1);
+
+  int info;
 
   switch (A->storageType)
   {
   case NM_DENSE:
   {
     assert(A->matrix0);
-    int info;
     DGESV(A->size0, 1, A->matrix0, A->size0, NM_iWork(A, A->size0), b,
           A->size0, &info);
-    CHECK_RETURN(info);
     break;
   }
 
   case NM_SPARSE_BLOCK:
   case NM_TRIPLET:
   {
-    cs_lusol(NM_triplet(A), b, 1, DBL_EPSILON);
+    info = cs_lusol(NM_triplet(A), b, 1, DBL_EPSILON);
     break;
   }
 
   default:
     assert (0 && "NM_gesv unknown storageType");
   }
+
+  /* some time we cannot find a solution to a linear system, and its fine, for
+   * instance with the minFBLSA. Therefore, we should not check here for
+   * problems, but the calling function has to check the return code.*/
+//  CHECK_RETURN(info);
+  return info;
 }

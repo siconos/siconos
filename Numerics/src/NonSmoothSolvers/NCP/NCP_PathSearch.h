@@ -74,7 +74,7 @@ extern "C"
   static inline void ncp_pathsearch_update_lcp_data(NCP_struct* problem, LinearComplementarityProblem* lcp_subproblem, unsigned n, double* restrict x_plus, double* restrict x, double* restrict r)
   {
     /* compute M = nabla F(x_plus) */
-    problem->compute_nabla_F(problem->env, n, x_plus, problem->nabla_F->matrix0);
+    problem->compute_nabla_F(problem->env, n, x_plus, problem->nabla_F);
 
     /* r = F_+(x) = F(x_+) + x - x_+ */
     /* the real q = q - r = x_+ - x - M x_plus */

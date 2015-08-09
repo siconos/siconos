@@ -73,7 +73,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
   if (!preAlloc || (preAlloc && !options->internalSolvers))
   {
     options->internalSolvers = (SolverOptions *) malloc(sizeof(SolverOptions));
-    linearComplementarity_pivot_setDefaultSolverOptions(options->internalSolvers);
+    set_SolverOptions(options->internalSolvers, SICONOS_LCP_PIVOT);
     options->numberOfInternalSolvers = 1;
 
     SolverOptions * lcp_options = options->internalSolvers;

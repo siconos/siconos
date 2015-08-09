@@ -42,12 +42,16 @@
   - mcp_FB(), nonsmooth Newton method based on Fisher-Burmeister function.
 */
 
+#include "NumericsConfig.h"
+#include "NumericsMatrix.h"
+
 /** type for user defined function used to compute Fmcp and its jacobian.
     TODO : set properly the list of arguments for this function, when
     things will be clearer ...
  */
 typedef void (*ptrFunctionMCP)(int size , double* z, double * F);
 typedef void (*ptrFunctionMCP2)(void* env, int n1, int n2, double* z, double * F);
+typedef void (*ptrFunctionMCP_nabla)(void* env, int n1, int n2, double* z, NumericsMatrix * F);
 
 /** \struct  MixedComplementarityProblem MixedComplementarityProblem.h
  * The structure that defines a Mixed Complementarity problem (MCP) : Find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:\n
@@ -82,14 +86,12 @@ typedef struct MixedComplementarityProblem2_
   int n1; /**< number of equalities constraints */
   int n2; /**< size of complementary variables */
   ptrFunctionMCP2 compute_Fmcp; /**< pointer to the function used to compute \f$F_{mcp}(z) = (G(z), H(z))\f$ */
-  ptrFunctionMCP2 compute_nabla_Fmcp; /**< pointer to the function used to compute \f$\nabla_z F_{mcp}\f$ */
-  double* nabla_Fmcp; /**< storage for \f$\nabla_z F_{mcp}\f$*/
+  ptrFunctionMCP_nabla compute_nabla_Fmcp; /**< pointer to the function used to compute \f$\nabla_z F_{mcp}\f$ */
+  NumericsMatrix* nabla_Fmcp; /**< storage for \f$\nabla_z F_{mcp}\f$*/
   void* env; /**< environment for the compute_Fmcp and compute_nabla_Fmcp function.
                When called from Python, it contains an object with compute_Fmcp and compute_nabla_Fmcp as methods.
                When called from C, it can reference a data struct containing variables needed for the computations.*/
 } MixedComplementarityProblem2;
-
-#include "NumericsConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

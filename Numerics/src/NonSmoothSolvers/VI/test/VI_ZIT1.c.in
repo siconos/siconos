@@ -49,8 +49,7 @@ typedef struct
   unsigned int nabla_eval;
 } data_ZIT;
 
-void F_ZIT(void* env, int n, double* restrict l, double* restrict F);
-void F_ZIT(void* env, int n, double* restrict l, double* restrict F)
+static void F_ZIT(void* env, int n, double* restrict l, double* restrict F)
 {
   data_ZIT* d = (data_ZIT*) env;
 
@@ -71,9 +70,9 @@ void F_ZIT(void* env, int n, double* restrict l, double* restrict F)
 
 }
 
-void nabla_F_ZIT(void* env, int n, double* restrict l, double* restrict nabla_F);
-void nabla_F_ZIT(void* env, int n, double* restrict l, double* restrict nabla_F)
+static void nabla_F_ZIT(void* env, int n, double* restrict l, NumericsMatrix* restrict nabla_F)
 {
+  double* restrict nabla_F_dense = nabla_F->matrix0;
   data_ZIT* d = (data_ZIT*) env;
 
   double l0 = l[0];
@@ -85,12 +84,12 @@ void nabla_F_ZIT(void* env, int n, double* restrict l, double* restrict nabla_F)
 
   double v_gamma = xk1 + d->gamma*d->h*rr1;
 
-  nabla_F[1] = d->h*(d->mu1+d->kappa*l1*l1)*invR2;
-  nabla_F[1 + 2] = d->h*(1.0 + d->kappa*l0*l0)/invR2;
-//  nabla_F[0] = d->h*(-d->kappa*l1*v_gamma + d->gamma*d->h*(1.0-d->kappa*l0*l1)*nabla_F[1]);
-//  nabla_F[0 + 2] = d->h*(-d->kappa*l0*v_gamma + d->gamma*d->h*(1.0-d->kappa*l0*l1)*nabla_F[1 + 2]);
-  nabla_F[0] = d->h*(-d->kappa*l1*v_gamma + d->gamma*d->h*(1.0-d->kappa*l0*l1)*nabla_F[1]);
-  nabla_F[0 + 2] = d->h*(-d->kappa*l0*v_gamma + d->gamma*d->h*(1.0-d->kappa*l0*l1)*nabla_F[1 + 2]);
+  nabla_F_dense[1] = d->h*(d->mu1+d->kappa*l1*l1)*invR2;
+  nabla_F_dense[1 + 2] = d->h*(1.0 + d->kappa*l0*l0)/invR2;
+//  nabla_F_dense[0] = d->h*(-d->kappa*l1*v_gamma + d->gamma*d->h*(1.0-d->kappa*l0*l1)*nabla_F_dense[1]);
+//  nabla_F_dense[0 + 2] = d->h*(-d->kappa*l0*v_gamma + d->gamma*d->h*(1.0-d->kappa*l0*l1)*nabla_F_dense[1 + 2]);
+  nabla_F_dense[0] = d->h*(-d->kappa*l1*v_gamma + d->gamma*d->h*(1.0-d->kappa*l0*l1)*nabla_F_dense[1]);
+  nabla_F_dense[0 + 2] = d->h*(-d->kappa*l0*v_gamma + d->gamma*d->h*(1.0-d->kappa*l0*l1)*nabla_F_dense[1 + 2]);
   d->nabla_eval += 1;
 }
 
@@ -137,8 +136,7 @@ int main(void)
 //  options.iparam[4] = 10;
 
   problem->env = &sim_data;
-//  problem->nabla_F = createNumericsMatrixFromData(NM_DENSE, N, N, nablaF);
-  problem->nabla_F = nablaF;
+  problem->nabla_F = createNumericsMatrixFromData(NM_DENSE, N, N, nablaF);
 
   box_constraints box;
   double lb[] = {-1.0, -1.0};

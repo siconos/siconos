@@ -24,14 +24,21 @@
 #include "Newton_Methods.h"
 #include "VI_Newton.h"
 
-void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* descent_dir, SolverOptions* options);
-void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* descent_dir, SolverOptions* options)
+typedef struct {
+  NumericsMatrix* mat;
+  RelayProblem* relay_pb;
+} vi_box_AVI_LSA_data;
+
+static void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* descent_dir, SolverOptions* options)
 {
   VariationalInequality* vi_pb = (VariationalInequality*) problem;
   int n = vi_pb->size;
   vi_pb->F(vi_pb->env, n, z, F);
-  RelayProblem* relay_pb = (RelayProblem*) options->solverData;
-  vi_pb->compute_nabla_F(vi_pb->env, n, z, relay_pb->M->matrix0);
+  RelayProblem* relay_pb = ((vi_box_AVI_LSA_data*)options->solverData)->relay_pb;
+
+  NM_assert(NM_DENSE, relay_pb->M);
+
+  vi_pb->compute_nabla_F(vi_pb->env, n, z, relay_pb->M);
 
   cblas_dcopy(n, F, 1, relay_pb->q, 1);
   prodNumericsMatrix(n, n, -1.0, relay_pb->M, z, 1.0, relay_pb->q);
@@ -67,7 +74,13 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   box_constraints* box = (box_constraints*) problem->set;
   relay_pb.lb = box->lb;
   relay_pb.ub = box->ub;
-  options->solverData = &relay_pb;
+  if (!options->solverData)
+  {
+    vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)malloc(sizeof(vi_box_AVI_LSA_data));
+    sData->mat = (NumericsMatrix*)duplicateNumericsMatrix(problem->nabla_F);
+    sData->relay_pb = &relay_pb;
+    options->solverData = sData;
+  }
 
   functions_LSA functions_AVI_LSA;
   init_lsa_functions(&functions_AVI_LSA, &VI_compute_F, &VI_compute_F_box_Qi);
@@ -77,6 +90,7 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   functions_AVI_LSA.get_set_from_problem_data = &vi_get_set;
   options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
 
+  set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->size, z, F, info, (void *)problem, options, &functions_AVI_LSA);
 
 

@@ -33,19 +33,16 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-void mcp_min(void* data_opaque, double* z, double* F, double* Fmin);
-void mcp_min(void* data_opaque, double* z, double* F, double* Fmin)
+static void mcp_min(void* data_opaque, double* z, double* F, double* Fmin)
 {
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
 
   F_min(data->n1, data->n2, z, F, Fmin);
 }
 
-void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, double* H);
-void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, double* H)
+static void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, NumericsMatrix* H)
 {
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
-  assert(data->nabla_Fmcp);
 
   data->compute_nabla_Fmcp(data->env, data->n1, data->n2, z, data->nabla_Fmcp);
 
@@ -61,5 +58,6 @@ void mcp_newton_minFBLSA(MixedComplementarityProblem2* problem, double *z, doubl
   functions_minFBLSA_mcp.compute_RHS_desc = &mcp_min;
   functions_minFBLSA_mcp.compute_H_desc = &min_compute_H_mcp;
 
- newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_minFBLSA_mcp);
+  set_lsa_params_data(options, problem->nabla_Fmcp);
+  newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_minFBLSA_mcp);
 }

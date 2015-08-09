@@ -22,93 +22,6 @@
 #include "lcp_test_function.h"
 #include "GAMSlink.h"
 
-
-void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearComplementarityProblem* problem)
-{
-  int maxIter = 1001;
-  double tolerance = 1e-8;
-  double lighttolerance = 1e-5;
-
-  switch (solverId)
-  {
-  case SICONOS_LCP_PGS:
-  case SICONOS_LCP_CPG:
-  case SICONOS_LCP_LEMKE:
-  case SICONOS_LCP_PIVOT:
-  case SICONOS_LCP_PIVOT_LUMOD:
-  case SICONOS_LCP_BARD:
-  case SICONOS_LCP_MURTY:
-  case SICONOS_LCP_PATHSEARCH:
-  case SICONOS_LCP_AVI_CAOFERRIS:
-  case SICONOS_LCP_GAMS:
-  case SICONOS_LCP_NEWTONMIN:
-  case SICONOS_LCP_NEWTON_FBLSA:
-  case SICONOS_LCP_NEWTON_MINFBLSA:
-  {
-    options->iSize = 2;
-    options->dSize = 2;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-    break;
-  }
-
-
-  case SICONOS_LCP_RPGS:
-  {
-    options->iSize = 2;
-    options->dSize = 3;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-    options->dparam[2] = 1.0;
-    break;
-  }
-  case SICONOS_LCP_LATIN:
-  {
-    options->iSize = 2;
-    options->dSize = 3;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = lighttolerance;
-    options->dparam[2] = 0.3;
-    break;
-  }
-  case SICONOS_LCP_LATIN_W:
-  {
-    options->iSize = 2;
-    options->dSize = 4;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = lighttolerance;
-    options->dparam[2] = 0.3;
-    options->dparam[3] = 1.0;
-    break;
-  }
-  case SICONOS_LCP_PATH:
-  case SICONOS_LCP_QP:
-  case SICONOS_LCP_NSQP:
-  {
-    options->iSize = 0;
-    options->dSize = 2;
-    options->dparam[0] = tolerance;
-    break;
-  }
-  case SICONOS_LCP_ENUM:
-  {
-    options->iSize = 5;
-    options->dSize = 2;
-    options->dparam[0] = tolerance;
-    /*use dgels:*/
-    options->iparam[4] = 0;
-    options->dWork = (double*) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
-    options->iWork = (int*) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
-    break;
-  }
-  default:
-    ;
-  }
-
-
-}
-
-
 void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, LinearComplementarityProblem* problem)
 {
   int maxIter = 1001;
@@ -200,40 +113,23 @@ int lcp_test_function(FILE * f, int solverId)
   NumericsOptions global_options;
   setDefaultNumericsOptions(&global_options);
   global_options.verboseMode = 1;
-  SolverOptions * options ;
-  options = (SolverOptions *) malloc(sizeof(*options));
-  options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
-  options->numberOfInternalSolvers = 0;
-  options->solverId = solverId;
-  printf("solverName ==> %s\n", idToName(solverId));
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  for (i = 0; i < 10; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  fillParamWithRespectToSolver(options, solverId, problem);
+  SolverOptions options;
+  set_SolverOptions(&options, solverId);
 
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)
   {
-    options->solverParameters = malloc(sizeof(SN_GAMSparams));
-    SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
+    options.solverParameters = malloc(sizeof(SN_GAMSparams));
+    SN_GAMSparams* GP = (SN_GAMSparams*)options.solverParameters;
     GP->model_dir = GAMS_MODELS_SOURCE_DIR;
     GP->gams_dir = GAMS_DIR;
   }
 #endif
 
-  options->isSet = 1;
-  options->filterOn = 1;
   double * z = (double *)calloc(problem->size, sizeof(double));
   double * w = (double *)calloc(problem->size, sizeof(double));
 
-  info = linearComplementarity_driver(problem, z , w, options, &global_options);
+  info = linearComplementarity_driver(problem, z , w, &options, &global_options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -242,28 +138,22 @@ int lcp_test_function(FILE * f, int solverId)
 
   if (!info)
   {
-    printf("test succeeded err = %e \n", options->dparam[1]);
+    printf("test succeeded err = %e \n", options.dparam[1]);
   }
   else
   {
-    printf("test unsucceeded err =%e  \n", options->dparam[1]);
+    printf("test unsucceeded err =%e  \n", options.dparam[1]);
   }
   free(z);
   free(w);
 
-  free(options->iparam);
-  free(options->dparam);
+  deleteSolverOptions(&options);
 
   if (solverId == SICONOS_LCP_GAMS)
   {
-    free(options->solverParameters);
-    options->solverParameters = NULL;
+    free(options.solverParameters);
+    options.solverParameters = NULL;
   }
-
-  if (options->dWork != NULL) free(options->dWork);
-  if (options->iWork != NULL) free(options->iWork);
-
-  free(options);
 
   freeLinearComplementarityProblem(problem);
   printf("End of test.\n");

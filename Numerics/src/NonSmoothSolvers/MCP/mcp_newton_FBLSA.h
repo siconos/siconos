@@ -21,6 +21,7 @@
 #define MCP_NEWTON_FB
 
 #include "NumericsConfig.h"
+#include "NumericsMatrix.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -42,7 +43,7 @@ extern "C"
    * \param workV2 work vector
    * \param[out] H an element of JacF_FB
    */
-  void FB_compute_H_mcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H);
+  void FB_compute_H_mcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, NumericsMatrix* H);
 
   /** Compute the error for termination, here mcp_compute_error
    * \param data_opaque a LinearComplementarityProblem but casted

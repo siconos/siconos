@@ -31,11 +31,7 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w);
-static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H);
-static void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err);
-
-void FB_compute_F_mlcp(void* data_opaque, double* z, double* w)
+static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w)
 {
   // Computation of the new value w = F(z) = Mz + q
   // q --> w
@@ -74,7 +70,7 @@ void FB_compute_F_mlcp(void* data_opaque, double* z, double* w)
   }
  }
 
-void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H)
+static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, NumericsMatrix* H)
 {
   printf("MLCP FB_compute_H_mlcp not implemented yet");
   exit(1);
@@ -133,7 +129,8 @@ void mlcp_newton_FB(MixedLinearComplementarityProblem* problem, double *z, doubl
   functions_FBLSA_mlcp.compute_H = &FB_compute_H_mlcp;
   functions_FBLSA_mlcp.compute_error = &FB_compute_error_mlcp;
 
- newton_LSA(problem->n + problem->m, z, w, info, (void *)problem, options, &functions_FBLSA_mlcp);
+  set_lsa_params_data(options, problem->M);
+  newton_LSA(problem->n + problem->m, z, w, info, (void *)problem, options, &functions_FBLSA_mlcp);
 }
 
 

@@ -35,7 +35,7 @@ void FB_compute_F_mcp(void* data_opaque, double* z, double* Fmcp)
   data->compute_Fmcp(data->env, data->n1, data->n2, z, Fmcp);
 }
 
-void FB_compute_H_mcp(void* data_opaque, double* z, double* Fmcp, double* workV1, double* workV2, double* H)
+void FB_compute_H_mcp(void* data_opaque, double* z, double* Fmcp, double* workV1, double* workV2, NumericsMatrix* H)
 {
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
 
@@ -64,7 +64,8 @@ void mcp_newton_FBLSA(MixedComplementarityProblem2* problem, double *z, double* 
   functions_FBLSA_mcp.compute_H = &FB_compute_H_mcp;
   functions_FBLSA_mcp.compute_error = &FB_compute_error_mcp;
 
- newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_FBLSA_mcp);
+  set_lsa_params_data(options, problem->nabla_Fmcp);
+  newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_FBLSA_mcp);
 }
 
 int mixedComplementarity_newton_FBLSA_setDefaultSolverOptions(SolverOptions* options)

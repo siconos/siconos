@@ -91,7 +91,7 @@ IF(CMAKE_C_COMPILER)
  ADD_C_OPTIONS("-Werror=array-bounds")
  ADD_C_OPTIONS("-Werror=format-invalid-specifier")
  ADD_C_OPTIONS("-Werror=type-limits")
-
+ ADD_C_OPTIONS("-Werror=incompatible-pointer-types")
  # C specific
  ADD_C_OPTIONS("-Werror=missing-prototypes")
 

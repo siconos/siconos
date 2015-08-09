@@ -25,7 +25,6 @@
 extern "C"
 {
 #endif
-  void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearComplementarityProblem* problem);
   void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, LinearComplementarityProblem* problem);
   int lcp_test_function(FILE * f, int solverid);
   int lcp_test_function_SBM(FILE * f, int solverid);

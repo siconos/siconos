@@ -42,14 +42,17 @@ void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restr
   }
 }
 
-void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict nabla_F, double* restrict H)
+void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F, NumericsMatrix* restrict nabla_F, NumericsMatrix* restrict H)
 {
+
+  double* nabla_F_dense = nabla_F->matrix0;
+  double* H_dense = H->matrix0;
 
   int n = n1 + n2;
   if (n1 > 0)
   {
     //printf("Jac_F_min: mixed case has to validated -- xhub\n");
-    cblas_dcopy(n*n, nabla_F, 1, H, 1);
+    cblas_dcopy(n*n, nabla_F_dense, 1, H_dense, 1);
   }
   // Facchinei--Pang p. 660 and 661
   // i \in alpha if F_i > z_i
@@ -65,16 +68,16 @@ void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F, double* r
     {
       for (int j = 0; j < n; ++j)
       {
-        H[j * n + i] = 0.0;
+        H_dense[j * n + i] = 0.0;
       }
-      H[i * n + i] = 1.0;
+      H_dense[i * n + i] = 1.0;
 
     }
     else // i in gamma
     {
       for (int j = 0; j < n; ++j)
       {
-        H[j * n + i] = nabla_F[j * n + i];
+        H_dense[j * n + i] = nabla_F_dense[j * n + i];
       }
     }
   }

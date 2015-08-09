@@ -181,6 +181,10 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
 {
   *info = 1;
   double tol ;
+  if (options->dWork == NULL)
+  {
+    lcp_enum_init(problem, options, 1);
+  }
   double * workingFloat = options->dWork;
   int * workingInt = options->iWork;
   int lin;
@@ -208,7 +212,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   }
 
   if (verbose)
-    printf("lcp_enum begin, size %d tol %lf\n", sSize, tol);
+    printf("lcp_enum begin, size %d tol %e\n", sSize, tol);
 
   sM = workingFloat;
   sQ = sM + sSize * sSize;

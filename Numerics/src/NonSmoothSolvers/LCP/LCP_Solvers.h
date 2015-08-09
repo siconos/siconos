@@ -527,10 +527,6 @@ extern "C"
    */
 
   void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-      \param options the pointer to the array of options to set
-  */
-  int linearComplementarity_newton_FB_setDefaultSolverOptions(SolverOptions* options);
 
   /** lcp_newton_minFB use a nonsmooth newton method based on both a min and Fischer-Bursmeister reformulation
    * References: Facchinei--Pang (2003)
@@ -561,6 +557,7 @@ extern "C"
    \author Olivier Bonnefon
   */
   void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param options the pointer to the array of options to set
   */
@@ -665,11 +662,6 @@ extern "C"
    *\author Olivier Huber
    */
   void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-      \param options the pointer to the array of options to set
-  */
-  int linearComplementarity_pivot_setDefaultSolverOptions(SolverOptions* options);
 
   /** generic interface used to call any LCP solver applied on a Sparse-Block structured matrix M, with a Gauss-Seidel process
    * to solve the global problem (formulation/solving of local problems for each row of blocks)

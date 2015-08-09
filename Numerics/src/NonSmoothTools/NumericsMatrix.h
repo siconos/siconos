@@ -109,6 +109,9 @@ The following linear algebra operation are supported:
   \brief Structure definition and functions related to matrix storage in Numerics
   \author Franck Perignon
 */
+#include <stdlib.h>
+#include <assert.h>
+
 #include "NumericsConfig.h"
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
@@ -285,6 +288,12 @@ extern "C"
                         double **Bout);
 
 
+  /** create a NumericsMatrix similar to the another one. The structure is the same
+   * \param mat the model matrix
+   * \return a pointer to a NumericsMatrix
+   */
+  NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat);
+
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows
@@ -378,10 +387,47 @@ extern "C"
    * \param[in,out] A a NumericsMatrix. On a dense factorisation
    * A.iWork is initialized.
    * \param[in,out] b pointer on a dense vector of size A->size1
+   * \return 0 if successful, else the error is specific to the backend solver
+   * used
    */
-  void NM_gesv(NumericsMatrix* A, double *b);
+  int NM_gesv(NumericsMatrix* A, double *b);
 
 
+  /** assert that a NumericsMatrix has the right structure given its type
+   * \param type expected type 
+   * \param M the matrix to check
+   */
+  static inline void NM_assert(const int type, NumericsMatrix* M)
+  {
+#ifndef NDEBUG
+    assert(M && "NM_assert :: the matrix is NULL");
+    assert(M->storageType == type && "NM_assert :: the matrix has the wrong type");
+    switch(type)
+    {
+      case NM_DENSE:
+        assert(M->matrix0);
+        break;
+      case NM_SPARSE_BLOCK:
+        assert(M->matrix1);
+        break;
+      case NM_TRIPLET:
+        assert(M->matrix2);
+        break;
+      default:
+        assert(0 && "NM_assert :: unknown storageType");
+    }
+#endif
+  }
+
+  /** Allocate the internalData structure (but not its content!)
+   * \param M the matrix to modify
+   */
+  static inline void NM_alloc_internalData(NumericsMatrix* M)
+  {
+    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
+    M->internalData->iWorkSize = 0;
+    M->internalData->iWork = NULL;
+  }
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

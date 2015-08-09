@@ -31,6 +31,9 @@
   \f}
 */
 
+#include "NumericsConfig.h"
+#include "NumericsMatrix.h"
+
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
@@ -58,7 +61,7 @@ extern "C"
    * \param[in] nabla_F value of nabla_F
    * \param[out] H returned vector
    */
-  void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict nabla_F, double* restrict H);
+  void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F, NumericsMatrix* nabla_F, NumericsMatrix* H);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -31,9 +31,9 @@
 
 #include "SiconosLapack.h"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
-#define DEBUG_NO_MATRIX
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+//#define DEBUG_NO_MATRIX
 #include "debug.h"
 
 #define NO_LEXICO_MAT

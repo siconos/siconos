@@ -70,7 +70,8 @@
 #include "NumericsMatrix.h"
 
 typedef void * (FVIPtr)(void*, double *, double *);
-typedef void (*ptrFunctionVI)(void *self, int n, double* x ,double* fx);
+typedef void (*ptrFunctionVI)(void *self, int n, double* x, double* fx);
+typedef void (*ptrFunctionVI_nabla)(void *self, int n, double* x, NumericsMatrix* nabla_F);
 
 
 /** \struct VariationalInequality VariationalInequality.h
@@ -81,14 +82,14 @@ typedef struct VariationalInequality_
   int size; /**< size of the VI \f$ n \f$ */
   void *env; /**< pointer onto env object (which is self is the simplest case)*/
   ptrFunctionVI F; /**< Function of the VI */
-  ptrFunctionVI compute_nabla_F; /**< Function to compute the jacobian of F */
+  ptrFunctionVI_nabla compute_nabla_F; /**< Function to compute the jacobian of F */
   void (*ProjectionOnX)(void *self, double *x, double * PX); /**< Projection on X of the VI */
   double normVI; /**< Norm of the VI problem to compute relative solution */
   int istheNormVIset; /**< Boolean to know if the norm is set 
    * If not (istheNormVIset=0) it will be computed in the first call of variationalInequality_computeError
    * By default, set istheNormVIset =0 */
   void* set; /**< opaque struct that represent the set K (possibly empty) */
-  double* nabla_F; /**< storage for \f$\nabla_x F\f$*/
+  NumericsMatrix* nabla_F; /**< storage for \f$\nabla_x F\f$*/
 } VariationalInequality;
 
 

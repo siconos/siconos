@@ -33,23 +33,20 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-void ncp_min(void* data_opaque, double* z, double* F, double* Fmin);
-void ncp_min(void* data_opaque, double* z, double* F, double* Fmin)
+static void ncp_min(void* data_opaque, double* z, double* F, double* Fmin)
 {
   NonlinearComplementarityProblem* data = (NonlinearComplementarityProblem *)data_opaque;
 
   F_min(0, data->n, z, F, Fmin);
 }
 
-void min_compute_H_ncp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, double* H);
-void min_compute_H_ncp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, double* H)
+static void min_compute_H_ncp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, NumericsMatrix* H)
 {
   NonlinearComplementarityProblem* data = (NonlinearComplementarityProblem *)data_opaque;
-  assert(data->nabla_F);
 
-  data->compute_nabla_F(data->env, data->n, z, data->nabla_F->matrix0);
+  data->compute_nabla_F(data->env, data->n, z, data->nabla_F);
 
-  Jac_F_min(0, data->n, z, F, data->nabla_F->matrix0, H);
+  Jac_F_min(0, data->n, z, F, data->nabla_F, H);
 }
 
 void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info , SolverOptions* options)
@@ -61,5 +58,6 @@ void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double *z, do
   functions_minFBLSA_ncp.compute_RHS_desc = &ncp_min;
   functions_minFBLSA_ncp.compute_H_desc = &min_compute_H_ncp;
 
- newton_LSA(problem->n, z, F, info, (void *)problem, options, &functions_minFBLSA_ncp);
+  set_lsa_params_data(options, problem->nabla_F);
+  newton_LSA(problem->n, z, F, info, (void *)problem, options, &functions_minFBLSA_ncp);
 }

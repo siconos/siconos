@@ -41,7 +41,7 @@ void VI_compute_F_box_Qi(void* data_opaque, double* x, double* F, double* Fbox)
   phi_Qi(problem->size, x, F, Fbox, ((box_constraints*) problem->set)->lb, ((box_constraints*) problem->set)->ub);
 }
 
-void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1, double* workV2, double* H)
+void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1, double* workV2, NumericsMatrix* H)
 {
   VariationalInequality* problem = (VariationalInequality*) data_opaque;
   problem->compute_nabla_F(problem->env, problem->size, x, problem->nabla_F);
@@ -60,5 +60,6 @@ void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, doub
   functions_QiLSA.get_set_from_problem_data = &vi_get_set;
   options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
 
- newton_LSA(problem->size, x, F, info, (void *)problem, options, &functions_QiLSA);
+  set_lsa_params_data(options, problem->nabla_F);
+  newton_LSA(problem->size, x, F, info, (void *)problem, options, &functions_QiLSA);
 }

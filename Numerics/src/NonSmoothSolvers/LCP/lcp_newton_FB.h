@@ -40,7 +40,7 @@ extern "C"
    * \param workV2 work vector
    * \param[out] H an element of JacF_FB
    */
-  void FB_compute_H_lcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H);
+  void FB_compute_H_lcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, NumericsMatrix* H);
 
   /** Compute the error for termination, here lcp_compute_error
    * \param data_opaque a LinearComplementarityProblem but casted

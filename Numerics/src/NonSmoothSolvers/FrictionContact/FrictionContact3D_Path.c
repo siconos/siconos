@@ -57,7 +57,7 @@ void F_GlockerPath(void* env, int sizeF, double* reaction, double* FVector)
 
 /** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister function.
  */
-void jacobianF_GlockerPath(void* env, int sizeF, double* reaction, double* jacobianFMatrix)
+void jacobianF_GlockerPath(void* env, int sizeF, double* reaction, NumericsMatrix* jacobianFMatrix)
 {
   int up2Date = 0;
   /* Glocker formulation */

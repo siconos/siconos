@@ -317,14 +317,21 @@ void recursive_deleteSolverOptions(SolverOptions* op)
   }
 }
 
-void free_solverData(unsigned id, void* solverData)
+void free_solver_specific_data(SolverOptions* options)
 {
+  int id = options->solverId;
+  if (newton_LSA_check_solverId(id))
+  {
+    assert(options->solverData);
+    assert(options->solverParameters);
+    newton_LSA_free_solverOptions(options);
+  }
   switch (id)
   {
     case SICONOS_NCP_PATHSEARCH:
-      assert(solverData);
-      free_solverData_PathSearch(solverData);
-      free(solverData);
+      assert(options->solverData);
+      free_solverData_PathSearch(options->solverData);
+      free(options->solverData);
       break;
     default:
       ;
@@ -358,7 +365,7 @@ void deleteSolverOptions(SolverOptions* op)
       free(op->callback);
       op->callback = NULL;
     }
-    free_solverData(op->solverId, op->solverData);
+    free_solver_specific_data(op);
   }
 }
 
@@ -395,6 +402,63 @@ void set_SolverOptions(SolverOptions* options, int solverId)
 
  switch (solverId)
  {
+  case SICONOS_LCP_PGS:
+  case SICONOS_LCP_CPG:
+  case SICONOS_LCP_NEWTONMIN:
+  case SICONOS_LCP_PATH:
+  case SICONOS_LCP_QP:
+  case SICONOS_LCP_NSQP:
+  {
+    iSize = 2;
+    dSize = 2;
+    iter_max = 1000;
+    tol = 1e-8;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    break;
+  }
+  case SICONOS_LCP_RPGS:
+  {
+    iSize = 2;
+    dSize = 3;
+    iter_max = 1000;
+    tol = 1e-8;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    options->dparam[2] = 1.0;
+    break;
+  }
+  case SICONOS_LCP_LATIN:
+  {
+    iSize = 2;
+    dSize = 3;
+    iter_max = 1000;
+    tol = 1e-8;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    options->dparam[2] = 0.3;
+    break;
+  }
+  case SICONOS_LCP_LATIN_W:
+  {
+    iSize = 2;
+    dSize = 4;
+    iter_max = 1000;
+    tol = 1e-8;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    options->dparam[2] = 0.3;
+    options->dparam[3] = 1.0;
+    break;
+  }
+  case SICONOS_LCP_ENUM:
+  {
+    iSize = 5;
+    dSize = 2;
+    iter_max = 0; /* this indicate the number of solutions ...  */
+    tol = 1e-8;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    /*use dgels:*/
+    options->iparam[4] = 0;
+    break;
+  }
+
   case SICONOS_NCP_NEWTON_FBLSA:
   case SICONOS_NCP_NEWTON_MINFBLSA:
   case SICONOS_MCP_NEWTON_FBLSA:
@@ -404,7 +468,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
   case SICONOS_VI_BOX_QI:
     iSize = 6;
     dSize = 3;
-    iter_max = 100;
+    iter_max = 1000;
     tol = 1e-12;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
     newton_lsa_default_SolverOption(options);
@@ -428,13 +492,17 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     vi_box_AVI_extra_SolverOptions(options);
     break;
 
+  case SICONOS_LCP_LEMKE:
+  case SICONOS_LCP_AVI_CAOFERRIS:
+  case SICONOS_LCP_BARD:
+  case SICONOS_LCP_MURTY:
   case SICONOS_LCP_PIVOT:
   case SICONOS_LCP_PIVOT_LUMOD:
   case SICONOS_LCP_PATHSEARCH:
     iSize = 6;
     dSize = 3;
     iter_max = 10000;
-    tol = 0.;
+    tol = 100*DBL_EPSILON;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
     options->iparam[SICONOS_IPARAM_PIVOT_RULE] = SICONOS_LCP_PIVOT_LEMKE;
     break;
@@ -484,15 +552,4 @@ int nameToId(char * pName)
 SICONOS_REGISTER_SOLVERS()
   return 0;
 
-}
-
-/* Free working vectors memory */
-void free_working_memory(SolverOptions* options)
-{
-  if (options->iWork)
-    free(options->iWork);
-  if (options->dWork)
-    free(options->dWork);
-  options->iWork = NULL;
-  options->dWork = NULL;
 }

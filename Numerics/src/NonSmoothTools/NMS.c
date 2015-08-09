@@ -68,7 +68,7 @@ int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restri
     {
       /* see if the nonmonotone criterion is fulfilled */
       /* F should be up-to-date, H and F_merit have to be recomputed */
-      functions->compute_H(data, z, F, workV1, workV2, H);
+      functions->compute_H(data, z, F, workV1, workV2, Htmp);
       functions->compute_F_merit(data, z, F, F_merit);
       cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, H, n, F_merit, 1, 0.0, JacThetaF_merit, 1);
 
@@ -109,7 +109,7 @@ int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restri
   {
 m_step:
     /* compute the gradient JacThetaF_merit */
-    functions->compute_H(data, z, F, workV1, workV2, H);
+    functions->compute_H(data, z, F, workV1, workV2, Htmp);
     functions->compute_F_merit(data, z, F, F_merit);
     cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, H, n, F_merit, 1, 0.0, JacThetaF_merit, 1);
     /* compute d = z - z_N */
@@ -145,7 +145,7 @@ watchdog_step:
     case LINESEARCH:
       /* compute the gradient JacThetaF_merit at the checkpoint z_c(0)*/
       functions->compute_F(data, NMS_checkpoint_0(data_NMS, n), F);
-      functions->compute_H(data, NMS_checkpoint_0(data_NMS, n), F, workV1, workV2, H);
+      functions->compute_H(data, NMS_checkpoint_0(data_NMS, n), F, workV1, workV2, Htmp);
       functions->compute_F_merit(data, NMS_checkpoint_0(data_NMS, n), F, F_merit);
       cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, H, n, F_merit, 1, 0.0, JacThetaF_merit, 1);
       /* compute d = z_c(T_k) - z_c(0) */
@@ -198,7 +198,7 @@ projected_gradient_step:
 
   /* compute the gradient JacThetaF_merit at the bestpoint z_b(0)*/
   functions->compute_F(data, NMS_bestpoint(data_NMS, n), F);
-  functions->compute_H(data, NMS_bestpoint(data_NMS, n), F, workV1, workV2, H);
+  functions->compute_H(data, NMS_bestpoint(data_NMS, n), F, workV1, workV2, Htmp);
   functions->compute_F_merit(data, NMS_bestpoint(data_NMS, n), F, F_merit);
   cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, H, n, F_merit, 1, 0.0, JacThetaF_merit, 1);
 

@@ -33,6 +33,9 @@
 
 #include "SolverOptions.h"
 #include "NumericsConfig.h"
+#include "NumericsMatrix.h"
+
+#include <stdbool.h>
 
 typedef void (*compute_F_ptr) (void* data_opaque, double* z, double* w);
 typedef void (*compute_F_merit_ptr) (void* data_opaque, double* z, double* F, double* F_merit);
@@ -44,10 +47,10 @@ typedef void (*compute_F_merit_ptr) (void* data_opaque, double* z, double* F, do
 typedef struct {
   compute_F_ptr compute_F; /**< function to evaluate w = F(z) */
   compute_F_merit_ptr compute_F_merit; /**< function to evaluate F_merit(z) (e.g. F_FB, F_{min}, ...) */
-  void (*compute_H)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H); /**< function to get an element H of T */
+  void (*compute_H)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, NumericsMatrix* H); /**< function to get an element H of T */
   void (*compute_error)(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err); /**< function to compute the error */
   void (*compute_RHS_desc)(void* data_opaque, double* z, double* w, double* F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min}, ...), optional */
-  void (*compute_H_desc)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, double* H_desc); /**< function to get an element H_desc of T_desc, optional */
+  void (*compute_H_desc)(void* data_opaque, double* z, double* w, double* workV1, double* workV2, NumericsMatrix* H_desc); /**< function to get an element H_desc of T_desc, optional */
   void (*compute_descent_direction)(void* data_opaque, double* z, double* w, double* descent_dir, SolverOptions* options); /**< function to get the descent direction, used for instance in the Newton-Josephy method */
   void (*compute_JacTheta_merit)(void* data_opaque, double* z, double* w, double* F_merit, double* workV, double* JacThetaF_merit, SolverOptions* options); /**< function to get the descent direction, used for instance in the Newton-Josephy method */
   void* (*get_set_from_problem_data)(void* problem); /**< Function returning the set description from the  */
@@ -63,6 +66,19 @@ typedef struct {
   double alpha; /**< value of the LS parameter */
   unsigned int status; /**< status of this newton iteration */
 } newton_stats;
+
+/** \sutrct newton_LSA_data Newton_Methods.h*/
+typedef struct {
+  double p; /**<  p value for the acceptance test of the direction solution of the linear system */
+  double sigma; /**< ratio for the decrease in norm of the C-function (\f$gamma'\$ in VFBLSA)*/
+  double gamma; /**< constant for the line search*/
+  double rho; /**< coefficient for the direction check*/
+} newton_LSA_param;
+
+/** \sutrct newton_LSA_data Newton_Methods.h*/
+typedef struct {
+  NumericsMatrix* H; /**< matrix */
+} newton_LSA_data;
 
 // status of the newton step
 #define NEWTON_STATS_NEWTON_STEP 1
@@ -109,6 +125,23 @@ extern "C"
     functions->compute_JacTheta_merit = NULL;
     functions->get_set_from_problem_data = NULL;
   }
+
+  /** Set the parameters and data for newton_LSA
+   * \param options the solver option
+   * \param mat the */
+ void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat);
+
+ /** Check whether the solver uses the Newton_LSA framework or not
+  * \param options the SolverOptions
+  * \return true if the solver is using newton_LSA, false otherwise
+  */
+ bool newton_LSA_check_solverId(int solverId);
+
+ /** clear the solver-specific data
+  * \param options the SolverOption structure
+  */
+ void newton_LSA_free_solverOptions(SolverOptions* options);
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

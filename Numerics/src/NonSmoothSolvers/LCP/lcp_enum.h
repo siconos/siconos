@@ -19,7 +19,19 @@
 #ifndef LCP_ENUM_H
 #define LCP_ENUM_H
 
-int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* options);
-int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options);
+#include "NumericsConfig.h"
+#include "LinearComplementarityProblem.h"
+#include "SolverOptions.h"
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
+  int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* options);
+  int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif
 
 #endif //LCP_ENUM_H

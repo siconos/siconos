@@ -96,49 +96,23 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
     info =    linearComplementarity_newton_min_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_LCP_NEWTON_FBLSA:
-  {
-    info =    linearComplementarity_newton_FB_setDefaultSolverOptions(options);
-    break;
-  }
-  case SICONOS_LCP_NEWTON_MINFBLSA:
-  {
-    info =    linearComplementarity_newton_FB_setDefaultSolverOptions(options);
-    options->solverId = SICONOS_LCP_NEWTON_MINFBLSA;
-    break;
-  }
   case SICONOS_LCP_AVI_CAOFERRIS:
   {
     info =    linearComplementarity_avi_caoferris_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_LCP_PIVOT:
-  {
-    info =    linearComplementarity_pivot_setDefaultSolverOptions(options);
-    break;
-  }
   case SICONOS_LCP_BARD:
-  {
-    info =    linearComplementarity_pivot_setDefaultSolverOptions(options);
-    options->iparam[3] = SICONOS_LCP_PIVOT_BARD;
-    break;
-  }
   case SICONOS_LCP_MURTY:
-  {
-    info =    linearComplementarity_pivot_setDefaultSolverOptions(options);
-    options->iparam[3] = SICONOS_LCP_PIVOT_LEAST_INDEX;
-    break;
-  }
   case SICONOS_LCP_PATHSEARCH:
-  {
-    info =    linearComplementarity_pivot_setDefaultSolverOptions(options);
-    options->solverId = SICONOS_LCP_PATHSEARCH;
-    break;
-  }
+  case SICONOS_LCP_NEWTON_MINFBLSA:
+  case SICONOS_LCP_NEWTON_FBLSA:
   case SICONOS_LCP_GAMS:
+  case SICONOS_LCP_PIVOT:
+  case SICONOS_LCP_PIVOT_LUMOD:
   {
-    set_SolverOptions(options, SICONOS_LCP_GAMS);
+    set_SolverOptions(options, solverId);
     info = 0;
+    break;
   }
   default:
   {

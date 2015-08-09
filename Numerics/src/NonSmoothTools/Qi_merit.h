@@ -20,6 +20,7 @@
 #define QI_MERIT_H
 
 #include "NumericsConfig.h"
+#include "NumericsMatrix.h"
 
 #ifdef __cplusplus
 #define restrict __restrict
@@ -55,12 +56,12 @@ extern "C"
    * \param[out] Fbox value of the function
    * \param workV1 work vector
    * \param workV2 work vector
-   * \param[in] nabla_Fbox gradient of the C-function
+   * \param[in] nabla_F gradient of the C-function
    * \param[in] lb lower bounds, that is lb <= x
    * \param[in] ub upper bounds, that is ub >= x
    * \param[out] H an element of the Jacobian
    * */
-  void Jac_F_Qi(int n, double* restrict x, double* restrict Fbox, double* restrict workV1, double* restrict workV2, double* restrict nabla_Fbox, double* restrict lb, double* restrict ub, double* restrict H);
+  void Jac_F_Qi(int n, double* restrict x, double* restrict Fbox, double* restrict workV1, double* restrict workV2, NumericsMatrix* restrict nabla_F, double* restrict lb, double* restrict ub, NumericsMatrix* restrict H);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
