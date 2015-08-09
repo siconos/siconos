@@ -199,7 +199,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
   };
 
-  static void call_py_compute_nabla_Fmcp(void *env, int n1, int n2, double* z, double* nabla_Fmcp)
+  static void call_py_compute_nabla_Fmcp(void *env, int n1, int n2, double* z, NumericsMatrix* nabla_Fmcp)
   {
     npy_intp dim[1];
     dim[0] = n1 + n2;
@@ -209,7 +209,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     dim2[1] = n1 + n2;
 
     PyObject* py_z = FPyArray_SimpleNewFromData(1, dim, NPY_DOUBLE, z);
-    PyObject* py_nabla_Fmcp = FPyArray_SimpleNewFromData(2, dim2, NPY_DOUBLE, nabla_Fmcp);
+    assert(nabla_Fmcp->matrix0 && "only dense matrix is supported");
+    PyObject* py_nabla_Fmcp = FPyArray_SimpleNewFromData(2, dim2, NPY_DOUBLE, nabla_Fmcp->matrix0);
 
     PyObject* py_n1 = PyInt_FromLong(n1);
     PyObject* py_n2 = PyInt_FromLong(n2);
@@ -240,7 +241,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     Py_DECREF(py_n);
   };
 
-  static void call_py_compute_nabla_F(void *env, int n, double* z, double* nabla_F)
+  static void call_py_compute_nabla_F(void *env, int n, double* z, NumericsMatrix* nabla_F)
   {
     npy_intp dim[1];
     dim[0] = n;
@@ -251,7 +252,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
 
     PyObject* py_z = FPyArray_SimpleNewFromData(1, dim, NPY_DOUBLE, z);
-    PyObject* py_nabla_F = FPyArray_SimpleNewFromData(2, dim2, NPY_DOUBLE, nabla_F);
+    assert(nabla_F->matrix0 && "only dense matrix is supported");
+    PyObject* py_nabla_F = FPyArray_SimpleNewFromData(2, dim2, NPY_DOUBLE, nabla_F->matrix0);
 
     PyObject* py_n = PyInt_FromLong(n);
 

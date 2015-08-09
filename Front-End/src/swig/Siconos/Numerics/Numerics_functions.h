@@ -28,10 +28,10 @@ typedef struct {
 #define ENV_IS_PYTHON_FUNCTIONS_WITH_PROJ 3
 #define ENV_IS_C_STRUCT -1
 
-static void call_py_compute_nabla_F(void *env, int n, double* z, double* nabla_F);
+static void call_py_compute_nabla_F(void *env, int n, double* z, NumericsMatrix* nabla_F);
 static void call_py_compute_F(void *env, int n, double* z, double* F);
 
-static void call_py_compute_nabla_Fmcp(void *env, int n1, int n2, double* z, double* nabla_Fmcp);
+static void call_py_compute_nabla_Fmcp(void *env, int n1, int n2, double* z, NumericsMatrix* nabla_Fmcp);
 static void call_py_compute_Fmcp(void *env, int n1, int n2, double* z, double* Fmcp);
 
 #define PYTHON_NAME_CALL_TYPE_2 PyString_FromString

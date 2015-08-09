@@ -32,7 +32,8 @@
      }
      else
      {
-       MCP->nabla_Fmcp = (double *) calloc(size*size, sizeof(double));
+     //TODO implement different types of matrices
+       MCP->nabla_Fmcp = createNumericsMatrix(NM_DENSE, size, size);
      }
      return MCP;
   }
@@ -57,7 +58,7 @@
      }
      else
      {
-       MCP->nabla_Fmcp = (double *) calloc(size*size, sizeof(double));
+       MCP->nabla_Fmcp = createNumericsMatrix(NM_DENSE, size, size);
      }
 
      PyObject* method_compute_Fmcp = PyObject_GetAttrString(py_compute_class, "compute_Fmcp");
@@ -76,6 +77,7 @@
        Py_XDECREF(method_compute_Fmcp);
        Py_XDECREF(method_compute_nabla_Fmcp);
        PyErr_SetString(PyExc_TypeError, "argument 2 must be have a method compute_Fmcp and a method compute_nabla_Fmcp");
+       freeNumericsMatrix(MCP->nabla_Fmcp);
        free(MCP->nabla_Fmcp);
        free(MCP);
        PyErr_PrintEx(0);
@@ -104,7 +106,7 @@
      }
      else
      {
-       MCP->nabla_Fmcp = (double *) malloc(size*size*sizeof(double));
+       MCP->nabla_Fmcp = createNumericsMatrix(NM_DENSE, size, size);
      }
 
      MCP->env = (void*) malloc(sizeof(functions_env_python));
@@ -118,6 +120,7 @@
      else
      {
        PyErr_SetString(PyExc_TypeError, "argument 3 must be callable");
+       freeNumericsMatrix(MCP->nabla_Fmcp);
        free(MCP->nabla_Fmcp);
        free(MCP->env);
        free(MCP);
@@ -133,6 +136,7 @@
      else
      {
        PyErr_SetString(PyExc_TypeError, "argument 4 must be callable");
+       freeNumericsMatrix(MCP->nabla_Fmcp);
        free(MCP->nabla_Fmcp);
        free(MCP->env);
        free(MCP);
@@ -158,7 +162,7 @@
     void* lib_handle = get_c_functions(lib_name, compute_F_name, compute_nabla_F_name, &p_compute_F, &p_compute_nabla_F);
 
     $self->compute_Fmcp = (ptrFunctionMCP2)p_compute_F;
-    $self->compute_nabla_Fmcp = (ptrFunctionMCP2)p_compute_nabla_F;
+    $self->compute_nabla_Fmcp = (ptrFunctionMCP_nabla)p_compute_nabla_F;
 
     }
     else
@@ -176,6 +180,7 @@
   {
     if ($self->nabla_Fmcp)
     {
+      freeNumericsMatrix($self->nabla_Fmcp);
       free($self->nabla_Fmcp);
     }
     if ($self->env)
