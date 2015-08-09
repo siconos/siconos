@@ -402,13 +402,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
 
 
-  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
-
-
-  NumericsMatrix * M = problem->M;
-
-  M->storageType = 0;
-  M->matrix0 = vecM;
+  problem->M = createNumericsMatrixFromData(NM_DENSE, NbLines, n + m, vecM);
 
   problem->isStorageType1 = 1; // Both problems seems to be stored
   problem->isStorageType2 = 1; // Both problems seems to be stored
@@ -424,9 +418,6 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   problem->blocksRows[2] = n + m;
   problem->n = n;
   problem->m = m;
-
-  M->size0 = NbLines;
-  M->size1 = n + m;
 
 
 
