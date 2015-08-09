@@ -520,9 +520,12 @@ void globalFrictionContact3D_AlartCurnier(
     /* we suppose mpi init has not been done */
     int ierr MAYBE_UNUSED;
     int myid;
+    /* c99 mandates that argv[argc] = NULL --xhub */
+    /* Also where are we calling MPI_Finalize ?  */
     int argc = 0;
-    char **argv;
-    ierr = MPI_Init(NULL, NULL);
+    char * argv0 = NULL;
+    char ** argv = &argv0;
+    ierr = MPI_Init(&argc, &argv);
     ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
     globalFrictionContact3D_sparseGlobalAlartCurnierInit(options);
     mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];

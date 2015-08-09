@@ -629,9 +629,12 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   {
     int myid;
     int error_code;
-    /* with openmpi 1.8, the argument better be NULL, otherwise segfault --xhub */
+    /* c99 mandates that argv[argc] = NULL --xhub */
     /* Also where are we calling MPI_Finalize ?  */
-    CHECK_MPI(MPI_Init(NULL, NULL));
+    int argc = 0;
+    char * argv0 = NULL;
+    char ** argv = &argv0;
+    CHECK_MPI(MPI_Init(&argc, &argv));
     CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
     frictionContact3D_sparseLocalAlartCurnierInit(options);
     mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
