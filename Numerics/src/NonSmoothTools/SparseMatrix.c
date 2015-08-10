@@ -90,6 +90,30 @@ CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A)
   return NULL;
 }
 
+NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
+{
+  NumericsSparseLinearSolverParams* p = (NumericsSparseLinearSolverParams*)
+    malloc(sizeof(NumericsSparseLinearSolverParams));
+
+  p->iparam = NULL;
+  p->dparam = NULL;
+  p->iWork = NULL;
+  p->dWork = NULL;
+
+#ifdef HAVE_MPI
+  p->mpi_com = MPI_COMM_NULL;
+#endif
+
+  p->solver_data = NULL;
+
+  p->iSize = 0;
+  p->dSize = 0;
+  p->iWorkSize = 0;
+  p->dWorkSize = 0;
+
+  return p;
+}
+
 NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p)
 {
   if (p->iparam)
@@ -116,16 +140,37 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
     free(p->dWork);
     p->dWork = NULL;
   }
+  if (p->solver_data)
+  {
+    free(p->solver_data);
+    p->solver_data = NULL;
+  }
 
   return NULL;
 }
 
+NumericsSparseMatrix* newNumericsSparseMatrix(void)
+{
+  NumericsSparseMatrix* p = (NumericsSparseMatrix*)
+    malloc(sizeof(NumericsSparseMatrix));
+
+  p->linearSolver = NS_CS_LUSOL;
+
+  p->linearSolverParams = newNumericsSparseLinearSolverParams();
+
+  p->triplet = NULL;
+  p->csc = NULL;
+  p->trans_csc = NULL;
+
+  return p;
+}
+
 NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)
 {
-  if (A->solverParams)
+  if (A->linearSolverParams)
   {
-    freeNumericsSparseLinearSolverParams(A->solverParams);
-    A->solverParams = NULL;
+    freeNumericsSparseLinearSolverParams(A->linearSolverParams);
+    A->linearSolverParams = NULL;
   }
   if (A->triplet)
   {
@@ -145,12 +190,3 @@ NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)
   return NULL;
 }
 
-NumericsSparseMatrix* createNumericsSparseMatrix(void)
-{
-  NumericsSparseMatrix* A = (NumericsSparseMatrix*) malloc(sizeof(NumericsSparseMatrix));
-  A->solverParams = NULL;
-  A->triplet = NULL;
-  A->csc = NULL;
-  A->trans_csc = NULL;
-  return A;
-}

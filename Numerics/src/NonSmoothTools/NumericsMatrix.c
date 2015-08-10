@@ -578,14 +578,29 @@ NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructu
   return createNumericsMatrixFromData(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }
 
-/* NumericsMatrix : initialize csc storage from sparse block storage */
-CSparseMatrix* NM_triplet(NumericsMatrix* A)
+NumericsSparseMatrix* NM_sparse(NumericsMatrix* A)
 {
   if(!A->matrix2)
   {
-    A->matrix2 = createNumericsSparseMatrix();
+    A->matrix2 = newNumericsSparseMatrix();
   }
-  if(!A->matrix2->triplet)
+  return A->matrix2;
+}
+
+NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A)
+{
+  if(!NM_sparse(A)->linearSolverParams)
+  {
+    NM_sparse(A)->linearSolverParams = newNumericsSparseLinearSolverParams();
+  }
+  return NM_sparse(A)->linearSolverParams;
+}
+
+
+/* NumericsMatrix : initialize csc storage from sparse block storage */
+CSparseMatrix* NM_triplet(NumericsMatrix* A)
+{
+  if(!NM_sparse(A)->triplet)
   {
     assert(A->matrix1);
     A->matrix2->triplet = cs_spalloc(0,0,1,1,1);
@@ -628,24 +643,19 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
 
 CSparseMatrix* NM_csc(NumericsMatrix *A)
 {
-
-  assert(A->matrix2);
-
-  if(!A->matrix2->csc)
+  if(!NM_sparse(A)->csc)
   {
     assert(A->matrix2);
-    A->matrix2->csc = cs_triplet(A->matrix2->triplet); /* triplet -> csc */
+    A->matrix2->csc = cs_triplet(NM_triplet(A)); /* triplet -> csc */
   }
   return A->matrix2->csc;
 }
 
 CSparseMatrix* NM_csc_trans(NumericsMatrix* A)
 {
-
-  assert(A->matrix2);
-
-  if(!A->matrix2->trans_csc)
+  if(!NM_sparse(A)->trans_csc)
   {
+    assert(A->matrix2);
     A->matrix2->trans_csc = cs_transpose(NM_csc(A), 1); /* value = 1 -> allocation */
   }
   return A->matrix2->trans_csc;
@@ -696,21 +706,32 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
   }
 }
 
-int* NM_iWork(NumericsMatrix* A, int size)
+NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
 {
   if (!A->internalData)
   {
     NM_alloc_internalData(A);
   }
+  A->internalData->iWork = NULL;
+  A->internalData->iWorkSize = 0;
 
-  if (!A->internalData->iWork)
+  return A->internalData;
+}
+
+int* NM_iWork(NumericsMatrix* A, int size)
+{
+  if (!NM_internalData(A)->iWork)
   {
+    assert(A->internalData);
+
     assert(A->internalData->iWorkSize == 0);
     A->internalData->iWork = (int *) malloc(size * sizeof(int));
     A->internalData->iWorkSize = size;
   }
   else
   {
+    assert(A->internalData);
+
     if (size > A->internalData->iWorkSize)
     {
       A->internalData->iWork = (int *) realloc(A->internalData->iWork, size * sizeof(int));
@@ -724,11 +745,126 @@ int* NM_iWork(NumericsMatrix* A, int size)
   return A->internalData->iWork;
 }
 
+#ifdef WITH_MUMPS
+
+MPI_Comm NM_MPI_com(NumericsMatrix* A)
+{
+  if (NM_linearSolverParams(A)->mpi_com == MPI_COMM_NULL)
+  {
+    int myid;
+    int argc = 0;
+    char **argv;
+    CHECK_MPI(MPI_Init(&argc, &argv));
+    CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
+    NM_linearSolverParams(A)->mpi_com = MPI_COMM_WORLD;
+  }
+  return NM_linearSolverParams(A)->mpi_com;
+}
+
+
+int* NM_MUMPS_irn(NumericsMatrix* A)
+{
+  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
+
+  if(!params->iWork)
+  {
+    CSparseMatrix* triplet = NM_triplet(A);
+    int nz = triplet->nz;
+
+    params->iWork = (int *) malloc(2 * nz * sizeof(int));
+    params->iWorkSize = 2 * nz;
+
+    int *p_mumps_irn = params->iWork;
+    int *p_A_irn = triplet->i;
+
+    for (int i=0; i<nz ; ++i, *p_mumps_irn++ = *p_A_irn++ + 1);
+  }
+  return params->iWork;
+}
+
+int* NM_MUMPS_jcn(NumericsMatrix* A)
+{
+  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
+
+  CSparseMatrix* triplet = NM_triplet(A);
+  int nz = triplet->nz;
+
+  if(!params->iWork)
+  {
+    params->iWork = (int *) malloc(2 * nz * sizeof(int));
+    params->iWorkSize = 2 * nz;
+
+    int *p_mumps_jcn = params->iWork + nz;
+    int *p_A_jcn = triplet->p;
+
+    for (int i=0; i<nz ; ++i, *p_mumps_jcn++ = *p_A_jcn++ + 1);
+  }
+  return params->iWork + nz;
+}
+
+
+DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
+{
+  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
+
+  if (!params->solver_data)
+  {
+    params->solver_data = malloc(sizeof(DMUMPS_STRUC_C));
+
+    DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
+
+    // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
+    mumps_id->job = JOB_INIT;
+    mumps_id->par = 1;
+    mumps_id->sym = 0;
+
+    if (NM_MPI_com(A) == MPI_COMM_WORLD)
+    {
+      mumps_id->comm_fortran = USE_COMM_WORLD;
+    }
+    else
+    {
+      mumps_id->comm_fortran = MPI_Comm_c2f(NM_MPI_com(A));
+    }
+
+    dmumps_c(mumps_id);
+
+    if (verbose > 1)
+    {
+      mumps_id->ICNTL(4) = 0;
+      mumps_id->ICNTL(10) = 1;
+      mumps_id->ICNTL(11) = 1;
+    }
+    else
+    {
+      mumps_id->ICNTL(1) = -1;
+      mumps_id->ICNTL(2) = -1;
+      mumps_id->ICNTL(3) = -1;
+    }
+
+    mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
+    // ok for a cube on a plane & four contact points
+    // computeAlartCurnierSTD != generated in this case...
+
+    //mumps_id->CNTL(3) = ...;
+    //mumps_id->CNTL(5) = ...;
+
+    mumps_id->n = NM_triplet(A)->n;
+    mumps_id->nz = NM_triplet(A)->nz;
+    mumps_id->irn = NM_MUMPS_irn(A);
+    mumps_id->jcn = NM_MUMPS_jcn(A);
+    mumps_id->a = NM_triplet(A)->x;
+
+  }
+  return (DMUMPS_STRUC_C*) params->solver_data;
+}
+#endif
+
 int NM_gesv(NumericsMatrix* A, double *b)
 {
   assert(A->size0 == A->size1);
 
-  int info;
+  int info = 1;
 
   switch (A->storageType)
   {
@@ -740,10 +876,48 @@ int NM_gesv(NumericsMatrix* A, double *b)
     break;
   }
 
-  case NM_SPARSE_BLOCK:
+  case NM_SPARSE_BLOCK: /* sparse block -> triplet */
   case NM_TRIPLET:
   {
-    info = cs_lusol(NM_triplet(A), b, 1, DBL_EPSILON);
+    switch (NM_sparse(A)->linearSolver)
+    {
+    case NS_CS_LUSOL:
+      info = cs_lusol(NM_triplet(A), b, 1, DBL_EPSILON);
+      break;
+
+#ifdef WITH_MUMPS
+    case NS_MUMPS:
+    {
+      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+      mumps_id->rhs = b;
+      mumps_id->job = 6;
+
+      dmumps_c(mumps_id);
+
+      info = mumps_id->info[0];
+
+      if (mumps_id->info[0] > 0)
+      {
+        if (verbose > 0)
+        {
+          printf("NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", mumps_id->info[0], mumps_id->info[1]);
+        }
+      }
+      if (verbose > 0)
+      {
+        printf("MUMPS : condition number %g\n", mumps_id->rinfog[9]);
+        printf("MUMPS : component wise scaled residual %g\n", mumps_id->rinfog[6]);
+        printf("MUMPS : \n");
+      }
+      break;
+    }
+#endif
+    default:
+    {
+      fprintf(stderr, "NM_gesv: unknown sparse linearsolver : %d\n", NM_sparse(A)->linearSolver);
+      exit(EXIT_FAILURE);
+    }
+    }
     break;
   }
 

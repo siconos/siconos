@@ -32,8 +32,11 @@ Documentation to be done
 */
 
 #include "NumericsConfig.h"
-#include <stdio.h>
 
+#include <stdio.h> /* for csparse */
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -85,6 +88,11 @@ extern "C"
     double* dparam;
     double dSize;
 
+#ifdef HAVE_MPI
+    MPI_Comm mpi_com;
+#endif
+    void* solver_data;
+
     int* iWork; /**< integer work vector array (internal) */
     int iWorkSize; /**< size of integer work vector array */
     double* dWork;
@@ -93,7 +101,8 @@ extern "C"
 
   typedef struct
   {
-    NumericsSparseLinearSolverParams* solverParams;
+    NumericsSparseLinearSolver linearSolver;
+    NumericsSparseLinearSolverParams* linearSolverParams;
 
     CSparseMatrix* triplet;
     CSparseMatrix* csc;
@@ -137,12 +146,17 @@ extern "C"
   */
   CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A);
 
-  /** Create a NumericsSparseMatrix (malloc + set fields to NULL)
-   * \return a NumericsSparseMatrix
+  /** New and empty NumericsSparseLinearSolverParams.
+   * \return a pointer on the allocated space.
    */
-  NumericsSparseMatrix* createNumericsSparseMatrix(void);
+  NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void);
 
-  /** Free alocated space for NumericsSparseLinearSolverParams.
+  /** New and empty NumericsSparseMatrix with correctly initialized fields.
+   * \return a pointer on the allocated space.
+   */
+  NumericsSparseMatrix* newNumericsSparseMatrix(void);
+
+  /** Free allocated space for NumericsSparseLinearSolverParams.
    * \param p a NumericsSparseLinearSolverParams
    * \return NULL on sucess
    */

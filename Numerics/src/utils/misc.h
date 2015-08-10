@@ -73,7 +73,7 @@ void printm(unsigned int nl, unsigned int nc, double *m);
 #define CHECK_MPI(EXPR)                                                 \
   do                                                                    \
   {                                                                     \
-    error_code = EXPR;                                                  \
+    int error_code = EXPR;                                                  \
     MPI_Errhandler_set(MPI_COMM_WORLD, MPI_ERRORS_RETURN);              \
     if (error_code != MPI_SUCCESS) {                                    \
       char error_string[1024];                                          \

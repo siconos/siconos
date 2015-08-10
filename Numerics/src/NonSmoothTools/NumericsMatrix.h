@@ -116,6 +116,17 @@ The following linear algebra operation are supported:
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
 
+#ifdef WITH_MUMPS
+#include <mpi.h>
+#include <dmumps_c.h>
+
+#define JOB_INIT -1
+#define JOB_END -2
+#define USE_COMM_WORLD -987654
+#define ICNTL(I) icntl[(I)-1]
+#define CNTL(I) cntl[(I)-1]
+#endif
+
 typedef struct
 {
   int iWorkSize;
@@ -330,6 +341,12 @@ extern "C"
    */
   NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1);
 
+  /** Creation, if needed, of sparse matrix storage.
+   * \param[in,out] A a NumericsMatrix
+   * \return a pointer on the sparse matrix storage
+   */
+  NumericsSparseMatrix* NM_sparse(NumericsMatrix* A);
+
   /** Creation, if needed, of triplet storage from sparse block storage.
    * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
    * \return the triplet sparse Matrix created in A.
@@ -338,14 +355,14 @@ extern "C"
 
   /** Creation, if needed, of compress column storage of a
    * NumericsMatrix from triplet storage.
-   * \param[in,out] A a NumericsMatrix with triplet storage initialized
+   * \param[in,out] A a NumericsMatrix with sparse block storage initialized
    * \return the compressed column CSparseMatrix created in A.
    */
   CSparseMatrix* NM_csc(NumericsMatrix *A);
 
   /** Creation, if needed, of the transposed compress column storage
    * from compress column storage.
-   * \param[in,out] A a NumericsMatrix with compress column storage.
+   * \param[in,out] A a NumericsMatrix with spare block storage.
    * \return the transposed compressed column matrix created in A.
    */
   CSparseMatrix* NM_csc_trans(NumericsMatrix* A);
@@ -361,7 +378,6 @@ extern "C"
                const double beta,
                double *y);
 
-
   /** Transposed matrix multiplication : y += alpha transpose(A) x + y
    * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix
@@ -372,7 +388,6 @@ extern "C"
   void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
                 const double beta,
                 double *y);
-
 
   /** Integer work vector initialization, if needed.
    * \param[in,out] A pointer on a NumericsMatrix.
@@ -392,6 +407,18 @@ extern "C"
    */
   int NM_gesv(NumericsMatrix* A, double *b);
 
+  NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A);
+
+#ifdef WITH_MUMPS
+  MPI_Comm NM_MPI_com(NumericsMatrix* A);
+
+  NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A);
+
+  int* NM_MUMPS_irn(NumericsMatrix* A);
+  int* NM_MUMPS_jcn(NumericsMatrix* A);
+
+  DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A);
+#endif
 
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type 
