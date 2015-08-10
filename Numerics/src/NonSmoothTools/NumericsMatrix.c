@@ -597,7 +597,7 @@ NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A)
 }
 
 
-/* NumericsMatrix : initialize csc storage from sparse block storage */
+/* NumericsMatrix : initialize triplet storage from sparse block storage */
 CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
   if(!NM_sparse(A)->triplet)
@@ -757,6 +757,7 @@ MPI_Comm NM_MPI_com(NumericsMatrix* A)
     CHECK_MPI(MPI_Init(&argc, &argv));
     CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
     NM_linearSolverParams(A)->mpi_com = MPI_COMM_WORLD;
+    NM_linearSolverParams(A)->mpi_com_init = 1;
   }
   return NM_linearSolverParams(A)->mpi_com;
 }

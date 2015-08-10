@@ -101,6 +101,7 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   p->dWork = NULL;
 
 #ifdef HAVE_MPI
+  p->mpi_com_init = 0;
   p->mpi_com = MPI_COMM_NULL;
 #endif
 
@@ -145,6 +146,18 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
     free(p->solver_data);
     p->solver_data = NULL;
   }
+
+#ifdef HAVE_MPI
+  if (p->mpi_com)
+  {
+    /* MPI_Finalize called only if initialization has been done for
+     * this matrix */
+    if (p->mpi_com_init)
+    {
+      MPI_Finalize();
+    }
+  }
+#endif
 
   return NULL;
 }

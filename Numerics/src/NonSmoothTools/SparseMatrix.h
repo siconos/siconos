@@ -89,6 +89,7 @@ extern "C"
     double dSize;
 
 #ifdef HAVE_MPI
+    int mpi_com_init;
     MPI_Comm mpi_com;
 #endif
     void* solver_data;
