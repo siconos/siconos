@@ -234,17 +234,22 @@
       {
       fprintf(stderr, "frictionContactProblemFromFile: cannot load %s\n",filename);
       free(problem);
+      fclose(finput);
       return 0;
       }
       else
+      {
+        fclose(finput);
         return problem;
+      }
     }
     else
     {
+      fclose(finput);
       fprintf(stderr, "frictionContactProblemFromFile: cannot open %s\n",filename);
       return 0;
     }
-    fclose(finput);
+    
   }
 
   MixedLinearComplementarityProblem* mixedLinearComplementarityProblemFromFile
@@ -259,17 +264,21 @@
       {
       fprintf(stderr, "mixedLinearComplementarityProblemFromFile: cannot load %s\n",filename);
       free(problem);
+      fclose(finput);
       return 0;
       }
       else
+      {
+        fclose(finput);
         return problem;
+      }
     }
     else
     {
+      fclose(finput);
       fprintf(stderr, "mixedLinearComplementarityProblemFromFile: cannot open %s\n",filename);
       return 0;
     }
-    fclose(finput);
   }
 %}
 
