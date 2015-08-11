@@ -267,11 +267,6 @@ extern "C"
    */
   void set_SolverOptions(SolverOptions* options, int solverId);
 
-  /* Free the working memory (options->iWork and options->dWork)
-   *  \param[in] options structure used to define the solver(s) and their parameters
-   */
-  void free_working_memory(SolverOptions* options);
-
   /** return the id of a solver based on its name
    * \param pName the name of the solver
    * \return the id of the solver or 0 if it failed

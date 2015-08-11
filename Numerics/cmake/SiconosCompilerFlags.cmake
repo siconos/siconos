@@ -135,7 +135,7 @@ IF(CMAKE_CXX_COMPILER)
  ADD_CXX_OPTIONS("-Werror=conversion -Wno-sign-conversion -Wno-error=sign-conversion Wno-shorten-64-to-32 -Wno-error=shorten-64-to-32")
  # ADD_C_OPTIONS("-Wno-error=shorten-64-to-32") # for clang
 
- IF(NOT WITH_MECHANISMS)
+ IF((NOT WITH_MECHANISMS) AND (NOT SWIG_PROJECT))
    ADD_CXX_OPTIONS("-Werror=missing-declarations")
  ENDIF()
  ADD_CXX_OPTIONS("-Werror=switch-bool")
@@ -151,7 +151,10 @@ IF(CMAKE_CXX_COMPILER)
  IF(NOT CXX_VERSION STRLESS "201102L" AND DEV_MODE)
   ADD_CXX_OPTIONS("-Wsuggest-final-types")
   ADD_CXX_OPTIONS("-Wsuggest-final-methods")
-  ADD_CXX_OPTIONS("-Wzero-as-null-pointer-constant")
+
+  IF(NOT SWIG_PROJECT)
+    ADD_CXX_OPTIONS("-Wzero-as-null-pointer-constant")
+  ENDIF()
  ENDIF()
 
  # Compiler Specific
