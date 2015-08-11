@@ -59,6 +59,17 @@ INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/SiconosFull.hpp DESTINATION include/Sicono
 
 COMPILE_WITH(GMP REQUIRED)
 
+IF(WITH_MUMPS)
+  COMPILE_WITH(MPI REQUIRED)
+  IF(MPI_FOUND)
+    SET(HAVE_MPI TRUE)
+    # Fedora allow parallel install of MPI and vanilla version of MUMPS.
+    # This shouldn't hurt in any case ...
+    GET_FILENAME_COMPONENT(MUMPS_LIBRARY_DIRECTORY "${MPI_LIBRARY}" PATH)
+   ENDIF()
+  COMPILE_WITH(MUMPS REQUIRED)
+ENDIF(WITH_MUMPS)
+
 # contact detection
 IF(WITH_BULLET)
   COMPILE_WITH(Bullet REQUIRED)

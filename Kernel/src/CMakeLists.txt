@@ -85,6 +85,17 @@ compile_with(LAPACK REQUIRED)
 
 COMPILE_WITH(GMP REQUIRED)
 
+IF(WITH_MUMPS)
+  COMPILE_WITH(MPI REQUIRED)
+  IF(MPI_FOUND)
+    SET(HAVE_MPI TRUE)
+    # Fedora allow parallel install of MPI and vanilla version of MUMPS.
+    # This shouldn't hurt in any case ...
+    GET_FILENAME_COMPONENT(MUMPS_LIBRARY_DIRECTORY "${MPI_LIBRARY}" PATH)
+   ENDIF()
+  COMPILE_WITH(MUMPS REQUIRED)
+ENDIF(WITH_MUMPS)
+
 IF(WITH_TESTING)
   # We don't use COMPILE_WITH since we don't want to link cppunit with the
   # kernel library
