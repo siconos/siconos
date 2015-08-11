@@ -25,7 +25,6 @@
   This example shows how some precribed boundary conditions can be imposed.
   Simulation with a Time-Stepping scheme.
 */
-
 #include "SiconosKernel.hpp"
 
 using namespace std;
