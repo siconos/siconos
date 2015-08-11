@@ -80,13 +80,6 @@ int mixedComplementarity_setDefaultSolverOptions(MixedComplementarityProblem* pr
     info =    mixedComplementarity_FB_setDefaultSolverOptions(problem, pOptions);
     break;
   }
-  case SICONOS_MCP_NEWTON_FBLSA:
-  case SICONOS_MCP_NEWTON_MINFBLSA:
-  {
-    info = mixedComplementarity_newton_FBLSA_setDefaultSolverOptions(pOptions);
-    break;
-  }
-
   default:
   {
     numericsError("mixedLinearComplementarity_setDefaultSolverOptions", "Unknown Solver");

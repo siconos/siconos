@@ -1,12 +1,12 @@
-# Copyright (C) 2005, 2014 by INRIA
 #!/usr/bin/env python
+# Copyright (C) 2005, 2014 by INRIA
 
 from numpy import *
 
 # import Siconos.Numerics * fails with py.test!
 import Siconos.Numerics as SN
 
-def mcp_function(n1, n2, z, F) :
+def mcp_function(n1, n2, z, F):
     M = array([[2., 1.],
                [1., 2.]])
 
@@ -14,7 +14,7 @@ def mcp_function(n1, n2, z, F) :
     F[:] = dot(M,z) + q
     pass
 
-def mcp_Nablafunction (n1, n2, z, nabla_F) :
+def mcp_Nablafunction (n1, n2, z, nabla_F):
     M = array([[2., 1.],
                [1., 2.]])
     nabla_F[:] = M

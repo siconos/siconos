@@ -510,6 +510,5 @@ void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* pr
     free(problem->b);
   }
   free(problem);
-  problem = NULL;
 }
 #endif

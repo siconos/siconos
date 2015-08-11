@@ -109,11 +109,6 @@ extern "C"
   */
   int mixedComplementarity_FB_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pSolver);
 
-  /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity2
-      \param options options structure to be set
-  */
-  int mixedComplementarity_newton_FBLSA_setDefaultSolverOptions(SolverOptions* options);
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

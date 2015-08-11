@@ -69,7 +69,7 @@
  %rename (LCP) LinearComplementarityProblem;
  %rename (MLCP) MixedLinearComplementarityProblem;
  %rename (MCP) MixedComplementarityProblem;
- %rename (VI) VariationalInequality;
+ %rename (VI) VariationalInequality_;
  %rename (AVI) AffineVariationalInequalities;
 
  %ignore lcp_compute_error_only;
@@ -335,7 +335,7 @@
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    linearComplementarity_setDefaultSolverOptions(lcp, SO, id);
+    set_SolverOptions(SO, id);
     return SO;
   }
 
@@ -361,8 +361,7 @@
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    SO->solverId=id;
-    mixedComplementarity_setDefaultSolverOptions((MixedComplementarityProblem*)mcp, SO);
+    set_SolverOptions(SO, id);
     return SO;
   }
 
@@ -370,8 +369,7 @@
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    SO->solverId=id;
-    variationalInequality_setDefaultSolverOptions(SO, id);
+    set_SolverOptions(SO, id);
     return SO;
   }
 
@@ -415,17 +413,14 @@
       LinearComplementarityProblem *LC;
       // return pointer : free by std swig destructor
       LC = (LinearComplementarityProblem *) malloc(sizeof(LinearComplementarityProblem));
-      NumericsMatrix *M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
+      size_t size0 = array_size(array,0);
+      size_t size1 = array_size(array,1);
+      LC->M = createNumericsMatrix(NM_DENSE, size0, size1);
 
-      M->storageType = 0;
-      M->size0 = array_size(array,0);
-      M->size1 = array_size(array,1);
-      M->matrix0 = (double *) malloc(M->size0*M->size1*sizeof(double));
-      memcpy(M->matrix0,array_data(array),M->size0*M->size1*sizeof(double));
-      LC->size = M->size0;
-      LC->M = M;
-      LC->q = (double *) malloc(M->size0*sizeof(double));
-      memcpy(LC->q,array_data(vector),M->size0*sizeof(double));
+      memcpy(LC->M->matrix0,array_data(array),size0*size1*sizeof(double));
+      LC->size = size0;
+      LC->q = (double *) malloc(size0*sizeof(double));
+      memcpy(LC->q,array_data(vector),size0*sizeof(double));
 
       // python mem management
       if(is_new_object1 && array)
@@ -474,15 +469,6 @@
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
 
-
-      MixedLinearComplementarityProblem *MLCP;
-      // return pointer : free by std swig destructor
-      MLCP = (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
-      NumericsMatrix *M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
-
-      M->storageType = 0;
-      M->size0 = array_size(array,0);
-      M->size1 = array_size(array,1);
       if ( array_size(array,0) !=  array_size(array,1))
       {
         PyErr_Format(PyExc_ValueError,
@@ -490,11 +476,17 @@
                      array_size(array,0), array_size(array,1));
       }
 
-      M->matrix0 = (double *) malloc(M->size0*M->size1*sizeof(double));
-      memcpy(M->matrix0,array_data(array),M->size0*M->size1*sizeof(double));
+
+      MixedLinearComplementarityProblem *MLCP;
+      // return pointer : free by std swig destructor
+      MLCP = (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
+
+      MLCP->M = createNumericsMatrix(NM_DENSE, array_size(array,0), array_size(array,1));
+
+      memcpy(MLCP->M->matrix0,array_data(array),MLCP->M->size0*MLCP->M->size1*sizeof(double));
 
       MLCP->n = (int) PyInt_AsLong(dim);
-      MLCP->m = M->size0 - MLCP->n;
+      MLCP->m = MLCP->M->size0 - MLCP->n;
       MLCP->blocksRows = (int *) malloc(3*sizeof(int));
       MLCP->blocksIsComp = (int *) malloc(2*sizeof(int));
 
@@ -508,7 +500,6 @@
 
       MLCP->isStorageType1 = 1;
       MLCP->isStorageType2 = 0;
-      MLCP->M = M;
       MLCP->A = NULL;
       MLCP->B = NULL;
       MLCP->C = NULL;
@@ -525,8 +516,8 @@
                      "Matrix and vector of incompatible lengths (%ld != %ld) ",
                      array_size(array,0), array_size(vector,0) );
       }
-      MLCP->q = (double *) malloc(M->size0*sizeof(double));
-      memcpy(MLCP->q,array_data(vector),M->size0*sizeof(double));
+      MLCP->q = (double *) malloc(MLCP->M->size0*sizeof(double));
+      memcpy(MLCP->q,array_data(vector),MLCP->M->size0*sizeof(double));
 
       // python mem management
       if(is_new_object1 && array)
@@ -885,18 +876,16 @@
       FrictionContactProblem *FC;
       // return pointer : free by std swig destructor
       FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-      NumericsMatrix *M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
+      size_t size0 = array_size(array,0);
+      size_t size1 = array_size(array,1);
 
-      M->storageType = 0;
-      M->size0 = array_size(array,0);
-      M->size1 = array_size(array,1);
-      M->matrix0 = (double *) malloc(M->size0*M->size1*sizeof(double));
-      memcpy(M->matrix0,array_data(array),M->size0*M->size1*sizeof(double));
+      FC->M = createNumericsMatrix(NM_DENSE, size0, size1);
+
+      memcpy(FC->M->matrix0,array_data(array),size0*size1*sizeof(double));
       FC->dimension = (int) PyInt_AsLong(dim);
-      FC->numberOfContacts = M->size0 / FC->dimension;
-      FC->M = M;
-      FC->q = (double *) malloc(M->size0*sizeof(double));
-      memcpy(FC->q,array_data(vector),M->size0*sizeof(double));
+      FC->numberOfContacts = size0 / FC->dimension;
+      FC->q = (double *) malloc(size0*sizeof(double));
+      memcpy(FC->q,array_data(vector),size0*sizeof(double));
       FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
       memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
 
@@ -944,18 +933,15 @@
       GlobalFrictionContactProblem *FC;
       // return pointer : free by std swig destructor
       FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
-      NumericsMatrix *M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
+      size_t size0 = array_size(array,0);
+      size_t size1 = array_size(array,1);
+      FC->M = createNumericsMatrix(NM_DENSE, size0, size1);
 
-      M->storageType = 0;
-      M->size0 = array_size(array,0);
-      M->size1 = array_size(array,1);
-      M->matrix0 = (double *) malloc(M->size0*M->size1*sizeof(double));
-      memcpy(M->matrix0,array_data(array),M->size0*M->size1*sizeof(double));
+      memcpy(FC->M->matrix0,array_data(array),size0*size1*sizeof(double));
       FC->dimension = (int) PyInt_AsLong(dim);
-      FC->numberOfContacts = M->size0 / FC->dimension;
-      FC->M = M;
-      FC->q = (double *) malloc(M->size0*sizeof(double));
-      memcpy(FC->q,array_data(vector),M->size0*sizeof(double));
+      FC->numberOfContacts = size0 / FC->dimension;
+      FC->q = (double *) malloc(size0*sizeof(double));
+      memcpy(FC->q,array_data(vector),size0*sizeof(double));
       FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
       memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
 

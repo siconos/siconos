@@ -39,6 +39,7 @@ void FB_compute_H_mcp(void* data_opaque, double* z, double* Fmcp, double* workV1
 {
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
 
+  assert(data->nabla_Fmcp);
   data->compute_nabla_Fmcp(data->env, data->n1, data->n2, z, data->nabla_Fmcp);
 
   Jac_F_FB(data->n1, data->n2, z, Fmcp, workV1, workV2, data->nabla_Fmcp, H);
@@ -67,28 +68,3 @@ void mcp_newton_FBLSA(MixedComplementarityProblem2* problem, double *z, double* 
   set_lsa_params_data(options, problem->nabla_Fmcp);
   newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_FBLSA_mcp);
 }
-
-int mixedComplementarity_newton_FBLSA_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Newton based FBLSA MCP Solver\n");
-  }
-
-  options->solverId = SICONOS_MCP_NEWTON_FBLSA;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
-
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-10;
-
-  return 0;
-}
-
