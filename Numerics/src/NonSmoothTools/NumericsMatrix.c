@@ -712,8 +712,6 @@ NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
   {
     NM_alloc_internalData(A);
   }
-  A->internalData->iWork = NULL;
-  A->internalData->iWorkSize = 0;
 
   return A->internalData;
 }
@@ -753,7 +751,10 @@ MPI_Comm NM_MPI_com(NumericsMatrix* A)
   {
     int myid;
     int argc = 0;
-    char **argv;
+    /* C99 requires that argv[argc] == NULL. With openmpi 1.8, we get a
+     * segfault if this is not true */
+    char *argv0 = NULL;
+    char **argv = &argv0;
     CHECK_MPI(MPI_Init(&argc, &argv));
     CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
     NM_linearSolverParams(A)->mpi_com = MPI_COMM_WORLD;
