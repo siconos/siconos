@@ -389,14 +389,6 @@ extern "C"
                 const double beta,
                 double *y);
 
-  /** Integer work vector initialization, if needed.
-   * \param[in,out] A pointer on a NumericsMatrix.
-   * \param[in] size the size of needed space.
-   * \return pointer on A->iWork allocated space of size A->size0.
-   */
-  int* NM_iWork(NumericsMatrix *A, int size);
-
-
   /** Direct computation of the solution of a real system of linear
    * equations: A x = b.
    * \param[in,out] A a NumericsMatrix. On a dense factorisation
@@ -407,12 +399,27 @@ extern "C"
    */
   int NM_gesv(NumericsMatrix* A, double *b);
 
+  /** Get linear solver parameters with initialization if needed.
+   * \param[in,out] A a NumericsMatrix.
+   * \return a pointer on parameters.
+   */
   NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A);
+
+  /** Get Matrix internal data with initialization if needed.
+   * \param[in,out] A a NumericsMatrix.
+   * \return a pointer on internal data.
+   */
+  NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A);
+
+  /** Integer work vector initialization, if needed.
+   * \param[in,out] A pointer on a NumericsMatrix.
+   * \param[in] size the size of needed space.
+   * \return pointer on A->iWork allocated space of size A->size0.
+   */
+  int* NM_iWork(NumericsMatrix *A, int size);
 
 #ifdef WITH_MUMPS
   MPI_Comm NM_MPI_com(NumericsMatrix* A);
-
-  NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A);
 
   int* NM_MUMPS_irn(NumericsMatrix* A);
   int* NM_MUMPS_jcn(NumericsMatrix* A);
