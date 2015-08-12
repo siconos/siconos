@@ -120,8 +120,10 @@ int main(int argc, char* argv[])
     // -- relations --
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
-    SP::Relation relation(new LagrangianScleronomousR("Two-linkFlexiblePlugin:h0", "Two-linkFlexiblePlugin:G0"));
-    SP::Interaction inter(new Interaction(2, nslaw, relation));
+    SP::Relation relation1(new LagrangianScleronomousR("Two-linkFlexiblePlugin:h01", "Two-linkFlexiblePlugin:G01"));
+    SP::Interaction inter1(new Interaction(1, nslaw, relation1));
+    SP::Relation relation2(new LagrangianScleronomousR("Two-linkFlexiblePlugin:h02", "Two-linkFlexiblePlugin:G02"));
+    SP::Interaction inter2(new Interaction(1, nslaw, relation2));
     //  Relation * relation0 = new LagrangianScleronomousR("Two-linkFlexiblePlugin:h3","Two-linkFlexiblePlugin:G3");
     //  Interaction * inter0 = new Interaction("wall-arm", allDS,1,2, nslaw, relation0);
   
@@ -135,7 +137,8 @@ int main(int argc, char* argv[])
     Manipulator->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
 
     // link the interaction and the dynamical system
-    Manipulator->nonSmoothDynamicalSystem()->link(inter, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter1, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter2, arm);
 
     // ----------------
     // --- Simulation ---
@@ -191,10 +194,10 @@ int main(int argc, char* argv[])
     dataPlot(k, 0) =  Manipulator->t0();
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*q)(1);
-    dataPlot(k, 3) = (*inter->y(0))(1);
+    dataPlot(k, 3) = (*inter2->y(0))(0);
     dataPlot(k, 4) = (*v)(0);
     dataPlot(k, 5) = (*v)(1);
-    dataPlot(k, 6) = (*inter->y(0))(0) - 2;
+    dataPlot(k, 6) = (*inter1->y(0))(0) - 2;
     dataPlot(k, 7) = nimpact; //(*inter->y(1))(1);
     dataPlot(k, 8) = (*z)(6);
     dataPlot(k, 9) = (*z)(4); //L
@@ -203,7 +206,10 @@ int main(int argc, char* argv[])
     dataPlot(k, 12) = (*z)(14);
     dataPlot(k, 13) = (*z)(15);
 
+    boost::progress_display show_progress(N);
 
+    boost::timer time;
+    time.restart();
 
     while (k < N)
     {
@@ -222,10 +228,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*q)(1);
-      dataPlot(k, 3) = (*inter->y(0))(1);
+      dataPlot(k, 3) = (*inter2->y(0))(0);
       dataPlot(k, 4) = (*v)(0);
       dataPlot(k, 5) = (*v)(1);
-      dataPlot(k, 6) = (*inter->y(0))(0) - 2;
+      dataPlot(k, 6) = (*inter1->y(0))(0) - 2;
       dataPlot(k, 7) = nimpact; //(*inter->y(1))(1);
       dataPlot(k, 8) = (*z)(6);
       if (test == 3) dataPlot(k, 9) = (*z)(4) / h;
@@ -237,7 +243,7 @@ int main(int argc, char* argv[])
 
       s->newtonSolve(criterion, maxIter);
       dataPlot(k, 11) = (*p)(1);
-      (*z)(4) = (inter->getLambda(1))(1);
+      (*z)(4) = (inter2->getLambda(1))(0);
       s->nextStep();
 
       //    controller during impacts accumulation phase before the first impact
@@ -288,6 +294,7 @@ int main(int argc, char* argv[])
         test = 0;
         (*z)(13) = 0;
       }
+      ++show_progress;
     }
     cout << endl << "End of computation - Number of iterations done: " << k << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
