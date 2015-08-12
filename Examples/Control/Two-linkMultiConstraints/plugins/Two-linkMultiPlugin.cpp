@@ -812,6 +812,33 @@ SICONOS_EXPORT void G0(unsigned int sizeOfq, const double* q, unsigned int sizeO
   G[2] = 0;
   G[3] = l2 * cos(q[0] + q[1]);
 }
+
+
+SICONOS_EXPORT void h01(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeOfZ, double* z)
+{
+  y[0] = 2 + l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
+}
+
+SICONOS_EXPORT void G01(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeOfZ, double* z)
+{
+  // Curious entry for the Jacobian
+  G[0] = 0;
+  G[1] = 0;
+}
+
+
+SICONOS_EXPORT void h02(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeOfZ, double* z)
+{
+  y[0] = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
+}
+
+SICONOS_EXPORT void G02(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeOfZ, double* z)
+{
+  G[0] = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
+  G[1] = l2 * cos(q[0] + q[1]);
+}
+
+
 SICONOS_EXPORT void h3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeOfZ, double* z)
 {
   y[0] = 0.7 - l1 * cos(q[0]) - l2 * cos(q[0] + q[1]);
@@ -825,4 +852,29 @@ SICONOS_EXPORT void G3(unsigned int sizeOfq, const double* q, unsigned int sizeO
   G[1] = 0;
   G[2] = l2 * sin(q[0] + q[1]);
   G[3] = 0;
+}
+
+
+SICONOS_EXPORT void h31(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeOfZ, double* z)
+{
+  y[0] = 0.7 - l1 * cos(q[0]) - l2 * cos(q[0] + q[1]);
+}
+
+SICONOS_EXPORT void G31(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeOfZ, double* z)
+{
+  G[0] = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
+  G[1] = l2 * sin(q[0] + q[1]);
+}
+
+
+SICONOS_EXPORT void h32(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeOfZ, double* z)
+{
+  y[0] = 2 + l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
+
+}
+
+SICONOS_EXPORT void G32(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeOfZ, double* z)
+{
+  G[0] = 0;
+  G[1] = 0;
 }

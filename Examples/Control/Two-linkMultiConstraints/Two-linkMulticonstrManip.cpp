@@ -47,8 +47,8 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 60;                   // final computation time
-    double h = 1e-4;                // time step
+    double T = 30;                   // final computation time
+    double h = 1e-3;                // time step
     double criterion = 1e-8;
     unsigned int maxIter = 200000;
     double e = 0.7;                  // nslaw
@@ -118,36 +118,55 @@ int main(int argc, char* argv[])
     // -- relations --
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
-    SP::Relation relation(new LagrangianScleronomousR("Two-linkMultiPlugin:h0", "Two-linkMultiPlugin:G0"));
-    SP::Interaction inter(new Interaction(2, nslaw, relation));
-    SP::Relation relation0(new LagrangianScleronomousR("Two-linkMultiPlugin:h3", "Two-linkMultiPlugin:G3"));
-    SP::Interaction inter0(new Interaction(2, nslaw, relation0));
+    //SP::Relation relation(new LagrangianScleronomousR("Two-linkMultiPlugin:h0", "Two-linkMultiPlugin:G0"));
+    //SP::Interaction inter(new Interaction(2, nslaw, relation));
+    SP::Relation relation01(new LagrangianScleronomousR("Two-linkMultiPlugin:h01", "Two-linkMultiPlugin:G01"));
+    SP::Interaction inter01(new Interaction(1, nslaw, relation01));
+    SP::Relation relation02(new LagrangianScleronomousR("Two-linkMultiPlugin:h02", "Two-linkMultiPlugin:G02"));
+    SP::Interaction inter02(new Interaction(1, nslaw, relation02));
+    
+    SP::Relation relation31(new LagrangianScleronomousR("Two-linkMultiPlugin:h31", "Two-linkMultiPlugin:G31"));
+    SP::Interaction inter31(new Interaction(1, nslaw, relation31));
+    SP::Relation relation32(new LagrangianScleronomousR("Two-linkMultiPlugin:h32", "Two-linkMultiPlugin:G32"));
+    SP::Interaction inter32(new Interaction(1, nslaw, relation32));
 
-    SimpleMatrix H1(2, 2);
-    SiconosVector b1(2);
-    H1.zero();
-    H1(0, 0) = -1;
-    H1(1, 0) = 1;
-
-    b1(0) = PI;
-    b1(1) = 0;
+    SP::SimpleMatrix H10(new SimpleMatrix(1, 2));
+    SP::SiconosVector b10(new SiconosVector(1));
+    H10->zero();
+    (*H10)(0, 0) = -1;
+    (*b10)(0) = PI;
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
-    SP::Relation relation1(new LagrangianLinearTIR(H1, b1));
-    SP::Interaction inter1(new Interaction(2, nslaw2, relation1));
+    SP::Relation relation10(new LagrangianLinearTIR(H10, b10));
+    SP::Interaction inter10(new Interaction(1, nslaw2, relation10));
 
-    SimpleMatrix H2(2, 2);
-    SiconosVector b2(2);
-    H2.zero();
-    H2(0, 1) = -1;
-    H2(1, 1) = 1;
+    SP::SimpleMatrix H11(new SimpleMatrix(1, 2));
+    SP::SiconosVector b11(new SiconosVector(1));
+    H11->zero();
+    (*H11)(0, 0) = 1;
+    (*b11)(0) = 0;
 
-    b2(0) = 0.0001;
-    b2(1) = PI - 0.0001;
+    SP::Relation relation11(new LagrangianLinearTIR(H11, b11));
+    SP::Interaction inter11(new Interaction(1, nslaw2, relation11));
+
+    SP::SimpleMatrix H20(new SimpleMatrix(1, 2));
+    SP::SiconosVector b20(new SiconosVector(1));
+    H20->zero();
+    (*H20)(0, 1) = -1;
+    (*b20)(0) = 0.0001;
+
+    SP::Relation relation20(new LagrangianLinearTIR(H20, b20));
+    SP::Interaction inter20(new Interaction(1, nslaw2, relation20));
+
+    SP::SimpleMatrix H21(new SimpleMatrix(1, 2));
+    SP::SiconosVector b21(new SiconosVector(1));
+    H21->zero();
+    (*H21)(0, 1) = 1;
+    (*b21)(0) = PI - 0.0001;
 
 
-    SP::Relation relation2(new LagrangianLinearTIR(H2, b2));
-    SP::Interaction inter2(new Interaction( 2, nslaw2, relation2));
+    SP::Relation relation21(new LagrangianLinearTIR(H21, b21));
+    SP::Interaction inter21(new Interaction(1, nslaw2, relation21));
 
     // -------------
     // --- Model ---
@@ -158,10 +177,14 @@ int main(int argc, char* argv[])
     Manipulator->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
 
     // link the interaction and the dynamical system
-    Manipulator->nonSmoothDynamicalSystem()->link(inter, arm);
-    Manipulator->nonSmoothDynamicalSystem()->link(inter0, arm);
-    Manipulator->nonSmoothDynamicalSystem()->link(inter1, arm);
-    Manipulator->nonSmoothDynamicalSystem()->link(inter2, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter01, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter02, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter31, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter32, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter10, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter20, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter11, arm);
+    Manipulator->nonSmoothDynamicalSystem()->link(inter21, arm);
 
     // ----------------
     // --- Simulation ---
@@ -212,10 +235,10 @@ int main(int argc, char* argv[])
     dataPlot(k, 0) =  Manipulator->t0();
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*q)(1);
-    dataPlot(k, 3) = (*inter->y(0))(1);
+    dataPlot(k, 3) = (*inter02->y(0))(0);
     dataPlot(k, 4) = (*v)(0);
     dataPlot(k, 5) = (*v)(1);
-    dataPlot(k, 6) = (*inter->y(0))(0) - 2;
+    dataPlot(k, 6) = (*inter01->y(0))(0) - 2;
     dataPlot(k, 7) = nimpact; //(*inter->y(1))(1);
     dataPlot(k, 8) = (*z)(6);
     dataPlot(k, 9) = (*z)(4); //L
@@ -225,7 +248,10 @@ int main(int argc, char* argv[])
     dataPlot(k, 13) = (*z)(22);
     dataPlot(k, 14) = (*z)(23);
 
+    boost::progress_display show_progress(N);
 
+    boost::timer time;
+    time.restart();
     while (k < N)
     {
       (*z)(0) = (*q)(0);
@@ -243,10 +269,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*q)(1);
-      dataPlot(k, 3) = (*inter->y(0))(1);
+      dataPlot(k, 3) = (*inter02->y(0))(0);
       dataPlot(k, 4) = (*v)(0);
       dataPlot(k, 5) = (*v)(1);
-      dataPlot(k, 6) = (*inter->y(0))(0) - 2;
+      dataPlot(k, 6) = (*inter01->y(0))(0) - 2;
       dataPlot(k, 7) = nimpact; //(*inter->y(1))(1);
       dataPlot(k, 8) = (*z)(6);
       if (test == 3) dataPlot(k, 9) = (*z)(4) / h;
@@ -259,8 +285,8 @@ int main(int argc, char* argv[])
 
       s->newtonSolve(criterion, maxIter);
       dataPlot(k, 12) = (*p)(1);
-      (*z)(4) = (inter->getLambda(1))(1);
-      (*z)(24) = (inter0->getLambda(1))(0);
+      (*z)(4) = (inter02->getLambda(1))(0);
+      (*z)(24) = (inter31->getLambda(1))(0);
       s->nextStep();
 
       //    controller during impacts accumulation phase before the first impact
@@ -284,7 +310,7 @@ int main(int argc, char* argv[])
         nimpact = nimpact + 1;
 
       // controller during constraint-motion phase.
-      if ((dataPlot(k, 12) > 0) && (test == 2) && (dataPlot(k, 7) - dataPlot(k - 1, 7) == 1) && (fabs((*inter->y(1))(1)) < 1e-6))
+      if ((dataPlot(k, 12) > 0) && (test == 2) && (dataPlot(k, 7) - dataPlot(k - 1, 7) == 1) && (fabs((*inter02->y(0))(0)) < 1e-6))
       {
         // L= dataPlot(k,0)-(*z)(8);
         (*z)(8) = dataPlot(k, 0);
@@ -325,6 +351,7 @@ int main(int argc, char* argv[])
         test = 0;
         (*z)(13) = 0;
       }
+      ++show_progress;
     }
     cout << endl << "End of computation - Number of iterations done: " << k << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
