@@ -341,7 +341,7 @@ int main(int argc, char* argv[])
 #ifdef WITH_PROJ
     ioMatrix::read("resultNETS-WITHPROJ.ref", "ascii", dataPlotRef);
 #else
-    ioMatrix::read("BallNewtonEulerOnMovingPlane.ref", "ascii", dataPlotRef);
+    ioMatrix::read("BallNewtonEuler.ref", "ascii", dataPlotRef);
 #endif
     std::cout << "Error w.r.t reference file = " << (dataPlot - dataPlotRef).normInf() << std::endl;
 
