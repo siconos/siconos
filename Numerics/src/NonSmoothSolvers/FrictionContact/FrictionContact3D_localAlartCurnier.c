@@ -110,6 +110,9 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
   options->iparam[10] = 2;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
   options->iparam[11] = 0;     /* 0 GoldsteinPrice line search, 1 FBLSA */
   options->iparam[12] = 100;   /* max iter line search */
+
+  options->iparam[13] = 0;     /* Linear solver used at each Newton iteration. 0: cs_lusol, 1 mumps */
+
   options->internalSolvers = NULL;
 
   return 0;

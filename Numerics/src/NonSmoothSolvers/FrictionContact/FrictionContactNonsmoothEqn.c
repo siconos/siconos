@@ -512,9 +512,12 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
   if (!options->dWork)
   {
-    buffer = malloc((11 * problemSize +          // F(1), tmp1(1), tmp2(1), tmp3(1),
-                                                 // A(3), B(3), rho (1)
-                     2*nzmax) * sizeof(double));   // AWpB + backup
+    buffer = malloc((11 * problemSize) * sizeof(double)); // F(1),
+                                                          // tmp1(1),
+                                                          // tmp2(1),
+                                                          // tmp3(1),
+                                                          // A(3),
+                                                          // B(3), rho
   }
   else
   {
@@ -537,6 +540,20 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   {
     AWpB = createNumericsMatrix(NM_SPARSE_BLOCK, problemSize, problemSize);
     copySBM(problem->M->matrix1, AWpB->matrix1, 1);
+    switch(options->iparam[13])
+    {
+    case 0:
+      NM_linearSolverParams(AWpB)->solver = NS_CS_LUSOL;
+      break;
+    case 1:
+      NM_linearSolverParams(AWpB)->solver = NS_MUMPS;
+      break;
+    default:
+    {
+      fprintf(stderr, "fc3d esolve: unknown linear solver.\n");
+      return;
+    }
+    }
   }
 
   // compute rho here
@@ -568,10 +585,9 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     cblas_dscal(problemSize, -1., tmp1, 1);
 
     /* Solve: AWpB X = -F */
-    NM_linearSolverParams(AWpB)->solver = NS_MUMPS;
-
     int lsi = NM_gesv(AWpB, tmp1);
 
+    /* NM_copy needed here */
     computeAWpB(Ax, problem->M, Bx, AWpB);
 
     if (lsi)

@@ -171,6 +171,8 @@ int frictionContact3D_FischerBurmeister_setDefaultSolverOptions(
   options->iparam[11] = 0;     /* 0 GoldsteinPrice line search, 1 FBLSA */
   options->iparam[12] = 100;   /* max iter line search */
 
+  options->iparam[13] = 0;     /* Linear solver used at each Newton iteration. 0: cs_lusol, 1 mumps */
+
   options->internalSolvers = NULL;
 
   return 0;
