@@ -620,8 +620,8 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     if (_jacobianMIntq)
     {
       computeJacobianMIntq(time);
-      SimpleMatrix *aux = new SimpleMatrix(3,_qDim);
-      SimpleMatrix *RT  = new SimpleMatrix(3,3);
+      SP::SimpleMatrix aux (new SimpleMatrix(3,_qDim));
+      SP::SimpleMatrix RT (new SimpleMatrix(3,3));
       //computeMObjToAbs();
       RT->trans(*_MObjToAbs);
       prod(*RT, *_jacobianMIntq, *aux);

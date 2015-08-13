@@ -455,10 +455,10 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
       SP::SiconosMatrix T = d->T();
       DEBUG_EXPR(T->display(););
       DEBUG_EXPR(K->display(););
-      SimpleMatrix * buffer = new SimpleMatrix(*(d->mass()));
+      SP::SimpleMatrix  buffer (new SimpleMatrix(*(d->mass())));
       prod(*K, *T, *buffer, true);
       scal(-h * h * _theta * _theta, *buffer, *(d->luW()), false);
-                                //*W -= h*h*_theta*_theta**K;
+      //*W -= h*h*_theta*_theta**K;
     }
     //DEBUG_EXPR(d->luW()->display(););
   }
