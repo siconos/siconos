@@ -302,9 +302,8 @@ void frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated(
 
 /* cf Fachicchinei & Pang, Finite-Dimensional Variational Inequalities
  * and Complementarity Problems, Volume II, p 805. */
-int frictionContactSparseFBLSA(
+int frictionContactFBLSA(
   FrictionContactNonsmoothEqn* equation,
-  unsigned int problemSize,
   double *reaction,
   double *velocity,
   double *mu,
@@ -312,16 +311,15 @@ int frictionContactSparseFBLSA(
   double *F,
   double *A,
   double *B,
-  SparseBlockStructuredMatrix *W,
+  NumericsMatrix *W,
   double *qfree,
-  SparseBlockStructuredMatrix *blockAWpB,
+  NumericsMatrix *blockAWpB,
   double *direction,
   double *tmp,
   double alpha[1],
   unsigned int maxiter_ls);
-int frictionContactSparseFBLSA(
+int frictionContactFBLSA(
   FrictionContactNonsmoothEqn* equation,
-  unsigned int problemSize,
   double *reaction,
   double *velocity,
   double *mu,
@@ -329,14 +327,16 @@ int frictionContactSparseFBLSA(
   double *F,
   double *A,
   double *B,
-  SparseBlockStructuredMatrix *W,
+  NumericsMatrix *W,
   double *qfree,
-  SparseBlockStructuredMatrix *blockAWpB,
+  NumericsMatrix *blockAWpB,
   double *direction,
   double *tmp,
   double alpha[1],
   unsigned int maxiter_ls)
 {
+  unsigned problemSize = W->size0;
+
   // notes :
   // - F contains FB or grad FB merit
   // - tmp contains direction, scal*direction, reaction+scal*direction
@@ -401,7 +401,7 @@ int frictionContactSparseFBLSA(
 
     // velocity <- W*tmp + qfree
     cblas_dcopy(problemSize, qfree, 1, velocity, 1);
-    prodSBM(problemSize, problemSize, 1., W, tmp, 1., velocity);
+    NM_gemv(1., W, tmp, 1., velocity);
 
     // compute fb
     frictionContact3D_FischerBurmeisterFunction(problemSize,
@@ -431,7 +431,9 @@ int frictionContactSparseFBLSA(
     cblas_dscal(problemSize, 0., tmp, 1);
     cblas_daxpy(problemSize, scal, direction, 1, tmp, 1);
     double grad_meritf_reaction = cblas_ddot(problemSize, F, 1, tmp, 1);
-    if (!isinf(grad_meritf_reaction) && !isnan(grad_meritf_reaction) && thetafb < thetafb0 + gamma * scal * grad_meritf_reaction)
+
+    if (!isinf(grad_meritf_reaction) && !isnan(grad_meritf_reaction) &&
+        thetafb < thetafb0 + gamma * scal * grad_meritf_reaction)
     {
       if (verbose > 0)
       {
@@ -442,7 +444,6 @@ int frictionContactSparseFBLSA(
 
       return 0;
     }
-
   }
 
   if (verbose > 0)
@@ -531,29 +532,41 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   double *Bx = Ax + _3problemSize;
   double *rho = Bx + _3problemSize;
 
-  NumericsMatrix* AWpB;
-  if (problem->M->storageType == NM_DENSE)
+  NumericsMatrix *AWpB, *AWpB_backup;
+  if (!options->dWork)
   {
-    AWpB = createNumericsMatrix(NM_DENSE, problemSize, problemSize);
+    AWpB = createNumericsMatrix(problem->M->storageType,
+                                problem->M->size0, problem->M->size1);
+
+    AWpB_backup = createNumericsMatrix(problem->M->storageType,
+                                       problem->M->size0, problem->M->size1);
   }
-  else if (problem->M->storageType == NM_SPARSE_BLOCK)
+  else
   {
-    AWpB = createNumericsMatrix(NM_SPARSE_BLOCK, problemSize, problemSize);
-    copySBM(problem->M->matrix1, AWpB->matrix1, 1);
-    switch(options->iparam[13])
-    {
-    case 0:
-      NM_linearSolverParams(AWpB)->solver = NS_CS_LUSOL;
-      break;
-    case 1:
-      NM_linearSolverParams(AWpB)->solver = NS_MUMPS;
-      break;
-    default:
-    {
-      fprintf(stderr, "fc3d esolve: unknown linear solver.\n");
-      return;
-    }
-    }
+    AWpB = (NumericsMatrix*) (rho + problemSize);
+    AWpB_backup = (NumericsMatrix*) (AWpB + sizeof(NumericsMatrix*));
+  }
+
+  /* just for allocations */
+  NM_copy(problem->M, AWpB);
+
+  switch(options->iparam[13])
+  {
+  case 0:
+  {
+    NM_linearSolverParams(AWpB)->solver = NS_CS_LUSOL;
+    break;
+  }
+  case 1:
+  {
+    NM_linearSolverParams(AWpB)->solver = NS_MUMPS;
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "fc3d esolve: unknown linear solver.\n");
+    return;
+  }
   }
 
   // compute rho here
@@ -585,10 +598,12 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     cblas_dscal(problemSize, -1., tmp1, 1);
 
     /* Solve: AWpB X = -F */
+
+    NM_copy(AWpB, AWpB_backup);
     int lsi = NM_gesv(AWpB, tmp1);
 
     /* NM_copy needed here */
-    computeAWpB(Ax, problem->M, Bx, AWpB);
+    NM_copy(AWpB_backup, AWpB);
 
     if (lsi)
     {
@@ -610,13 +625,12 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
     case 0:
       /* Goldstein Price */
-      info_ls = globalLineSearchGP(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx,                                   problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
+      info_ls = globalLineSearchGP(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx, problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
       break;
     case 1:
       /* FBLSA */
-      /* broken */
-//      info_ls = frictionContactSparseFBLSA(equation, problemSize, reaction, velocity, problem->mu, rho, F, Ax, Bx,
-//                                           problem->M->matrix1, problem->q, blockAWpB, tmp1, tmp2, &alpha, options->iparam[12]);
+      info_ls = frictionContactFBLSA(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx,
+                                     problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
       break;
     }
 
@@ -712,4 +726,8 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   }
 
   freeNumericsMatrix(AWpB);
+  freeNumericsMatrix(AWpB_backup);
+
+  free(AWpB);
+  free(AWpB_backup);
 }

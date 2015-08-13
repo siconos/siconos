@@ -581,6 +581,303 @@ NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructu
   return createNumericsMatrixFromData(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }
 
+
+void NM_clearDense(NumericsMatrix* A)
+{
+  if (A->matrix0)
+  {
+    free(A->matrix0);
+    A->matrix0 = NULL;
+  }
+}
+
+void NM_clearSparseBlock(NumericsMatrix* A)
+{
+  if (A->matrix1)
+  {
+    freeSBM(A->matrix1);
+    free(A->matrix1);
+    A->matrix1 = NULL;
+  }
+}
+
+void NM_clearSparse(NumericsMatrix* A)
+{
+  if (A->matrix2)
+  {
+    freeNumericsSparseMatrix(A->matrix2);
+    free(A->matrix2);
+    A->matrix2 = NULL;
+  }
+}
+
+void NM_clearTriplet(NumericsMatrix* A)
+{
+  if (A->matrix2)
+  {
+    if (A->matrix2->triplet)
+    {
+      cs_spfree(A->matrix2->triplet);
+      A->matrix2->triplet = NULL;
+    }
+  }
+}
+
+void NM_clearCSC(NumericsMatrix* A)
+{
+  if (A->matrix2)
+  {
+    if (A->matrix2->csc)
+    {
+      cs_spfree(A->matrix2->csc);
+      A->matrix2->csc = NULL;
+    }
+  }
+}
+
+void NM_clearCSCTranspose(NumericsMatrix* A)
+{
+  if (A->matrix2)
+  {
+    if (A->matrix2->trans_csc)
+    {
+      cs_spfree(A->matrix2->trans_csc);
+      A->matrix2->trans_csc = NULL;
+    }
+  }
+}
+
+void NM_clearSparseStorage(NumericsMatrix *A)
+{
+  NM_clearTriplet(A);
+  NM_clearCSC(A);
+  NM_clearCSCTranspose(A);
+}
+
+void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
+{
+  int sizeA = A->size0 * A->size1;
+  int sizeB = A->size0 * A->size1;
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    if (B->matrix0)
+    {
+      if (sizeB < sizeA)
+      {
+        B->matrix0 = (double*) realloc(B->matrix0, sizeA * sizeof(double));
+      }
+    }
+    else
+    {
+      B->matrix0 = (double*) malloc(sizeA * sizeof(double));
+    }
+    cblas_dcopy(sizeA, A->matrix0, 1, B->matrix0, 1);
+    B->size0 = A->size0;
+    B->size1 = A->size1;
+
+    /* invalidations */
+    NM_clearSparseBlock(B);
+    NM_clearSparseStorage(B);
+
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    SparseBlockStructuredMatrix* A_ = A->matrix1;
+    SparseBlockStructuredMatrix* B_ = B->matrix1;
+
+    if (B_)
+    {
+      if (B_->nbblocks < A_->nbblocks)
+      {
+        for (unsigned i=0; i<B_->nbblocks; ++i)
+        {
+          free(B_->block [i]);
+          B_->block [i] = NULL;
+        }
+        B_->block = (double **) realloc(B_->block, A_->nbblocks * sizeof(double *));
+      }
+      B_->nbblocks = A_->nbblocks;
+
+      if (B_->blocknumber0 < A_->blocknumber0)
+      {
+        B_->blocksize0 = (unsigned int*) realloc(B_->blocksize0, A_->blocknumber0 * sizeof(unsigned int));
+      }
+      B_->blocknumber0 = A_->blocknumber0;
+
+      if (B_->blocknumber1 < A_->blocknumber1)
+      {
+        B_->blocksize1 = (unsigned int*) realloc(B_->blocksize1, A_->blocknumber1 * sizeof(unsigned int));
+      }
+      B_->blocknumber1 = A_->blocknumber1;
+
+      if (B_->filled1 < A_->filled1)
+      {
+        B_->index1_data = (size_t*) realloc(B_->index1_data, A_->filled1 * sizeof(size_t));
+      }
+      B_->filled1 = A_->filled1;
+
+      if (B_->filled2 < A_->filled2)
+      {
+        B_->index2_data = (size_t*) realloc(B_->index2_data, A_->filled2 * sizeof(size_t));
+      }
+      B_->filled2 = A_->filled2;
+    }
+    else
+    {
+      B->matrix1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+      B_ = B->matrix1;
+
+      B_->block = (double **) malloc(A_->nbblocks * sizeof(double));
+      B_->nbblocks = A_->nbblocks;
+
+      B_->blocksize0 = (unsigned int*) malloc(A_->blocknumber0 * sizeof(unsigned int));
+      B_->blocknumber0 = A_->blocknumber0;
+
+      B_->blocksize1 = (unsigned int*) malloc(A_->blocknumber1 * sizeof(unsigned int));
+      B_->blocknumber1 = A_->blocknumber1;
+
+      B_->index1_data = (size_t*) malloc(A_->filled1 * sizeof(size_t));
+      B_->filled1 = A_->filled1;
+
+      B_->index2_data = (size_t*) malloc(A_->filled2 * sizeof(size_t));
+      B_->filled2 = A_->filled2;
+    }
+
+    memcpy(B_->blocksize0, A_->blocksize0, A_->blocknumber0 * sizeof(unsigned int));
+    memcpy(B_->blocksize1, A_->blocksize1, A_->blocknumber1 * sizeof(unsigned int));
+    memcpy(B_->index1_data, A_->index1_data, A_->filled1 * sizeof(size_t));
+    memcpy(B_->index2_data, A_->index2_data, A_->filled2 * sizeof(size_t));
+
+    /* cf copySBM */
+    unsigned int currentRowNumber ;
+    size_t colNumber;
+    unsigned int nbRows, nbColumns;
+    for (currentRowNumber = 0 ; currentRowNumber < A_->filled1 - 1; ++currentRowNumber)
+    {
+      for (size_t blockNum = A_->index1_data[currentRowNumber];
+           blockNum < A_->index1_data[currentRowNumber + 1]; ++blockNum)
+      {
+        assert(blockNum < A_->filled2);
+        colNumber = A_->index2_data[blockNum];
+        /* Get dim. of the current block */
+        nbRows = A_->blocksize0[currentRowNumber];
+        if (currentRowNumber != 0)
+          nbRows -= A_->blocksize0[currentRowNumber - 1];
+        nbColumns = A_->blocksize1[colNumber];
+
+        if (colNumber != 0)
+          nbColumns -= A_->blocksize1[colNumber - 1];
+
+        B_->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
+
+        for (unsigned int i = 0; i < nbRows * nbColumns; i++)
+        {
+          B_->block[blockNum] [i] = A_->block[blockNum] [i] ;
+        }
+      }
+    }
+    B->size0 = A->size0;
+    B->size1 = A->size1;
+
+    /* invalidations */
+    NM_clearDense(B);
+    NM_clearSparseStorage(B);
+
+    break;
+  }
+  case NM_CSC:
+  {
+    CSparseMatrix* A_;
+    CSparseMatrix* B_;
+
+    if (A->matrix2->triplet)
+    {
+      A_ = A->matrix2->triplet;
+
+      if (!B->matrix2->triplet)
+      {
+        B->matrix2->triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
+      }
+
+      B_ = B->matrix2->triplet;
+    }
+    else
+    {
+      assert (A->matrix2->csc);
+
+      A_ = A->matrix2->csc;
+
+      if (!B->matrix2->csc)
+      {
+        B->matrix2->csc = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 0);
+      }
+
+      B_ = B->matrix2->csc;
+    }
+
+    assert (A_);
+    assert (B_);
+
+    if (B_ ->nzmax < A_ ->nzmax)
+    {
+      B_->x = (double *) realloc(B_->x, A_->nzmax * sizeof(double));
+      B_->i = (int *) realloc(B_->i, A_->nzmax * sizeof(int));
+    }
+    if (A_->nz >= 0)
+    {
+      /* triplet */
+      A_->p = (int *) realloc(B_->p, A_->nzmax * sizeof(int));
+    }
+    else
+    {
+      if (B_->n < A_->n)
+      {
+        /* csc */
+        A_-> p = (int *) realloc(B_->p, (A_->n + 1) * sizeof(int));
+      }
+    }
+
+    B_->nzmax = A_->nzmax;
+    B_->nz = A_->nz;
+    B_->m = A_->m;
+    B_->n = A_->n;
+
+    memcpy(B_->x, A_->x, A_->nzmax * sizeof(double));
+    memcpy(B_->i, A_->i, A_->nzmax * sizeof(int));
+
+    if (A_->nz >= 0)
+    {
+      memcpy(B_->p, A_->p, A_->nzmax * sizeof(int));
+    }
+    else
+    {
+      memcpy(B_->p, A_->p, (A_->n + 1) * sizeof(int));
+    }
+
+
+    /* invalidations */
+    NM_clearDense(B);
+    NM_clearSparseBlock(B);
+
+    if (B_->nz >= 0)
+    {
+      NM_clearCSC(B);
+      NM_clearCSCTranspose(B);
+    }
+    else
+    {
+      NM_clearTriplet(B);
+    }
+
+    break;
+  }
+  }
+}
+
 NumericsSparseMatrix* NM_sparse(NumericsMatrix* A)
 {
   if(!A->matrix2)
@@ -613,17 +910,8 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
 
     /* Invalidation of previously constructed csc storage. */
     /* If we want to avoid this -> rewrite cs_triplet with reallocation. */
-    if (A->matrix2->csc)
-    {
-      cs_spfree(A->matrix2->csc);
-      A->matrix2->csc = NULL;
-    }
-
-    if (A->matrix2->trans_csc)
-    {
-      cs_spfree(A->matrix2->trans_csc);
-      A->matrix2->trans_csc = NULL;
-    }
+    NM_clearCSC(A);
+    NM_clearCSCTranspose(A);
 
     if (A->matrix1)
     {
@@ -678,6 +966,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
       exit(EXIT_FAILURE);
     }
   }
+
   return A->matrix2->triplet;
 }
 
@@ -688,6 +977,8 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
     assert(A->matrix2);
     A->matrix2->csc = cs_triplet(NM_triplet(A)); /* triplet -> csc
                                                   * with allocation */
+
+    NM_clearCSCTranspose(A);
   }
   return A->matrix2->csc;
 }
@@ -711,16 +1002,25 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
   switch (A->storageType)
   {
   case NM_DENSE:
+  {
     cblas_dgemv(CblasColMajor, CblasNoTrans, A->size0, A->size1,
                 alpha, A->matrix0, A->size0, x, 1, beta, y, 1);
-    break;
+
+     break;
+  }
+
   case NM_SPARSE_BLOCK:
+  {
     prodSBM(A->size1, A->size0, alpha, A->matrix1, x, beta, y);
-    break;
+
+     break;
+  }
 
   default:
+  {
     assert(A->storageType == NM_CSC);
     CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, beta, y));
+  }
   }
 }
 
@@ -755,15 +1055,30 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
   switch(A->storageType)
   {
   case NM_DENSE:
+  {
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, B->size1, alpha, A->matrix0, A->size0, B->matrix0, B->size0, beta, C->matrix0, A->size0);
+
+    NM_clearSparseBlock(C);
+    NM_clearSparseStorage(C);
+
+    break;
+  }
   case NM_SPARSE_BLOCK:
   {
     prodNumericsMatrixNumericsMatrix(alpha, A, B, beta, C);
+
+    NM_clearDense(C);
+    NM_clearSparseStorage(C);
     break;
   }
   case NM_CSC:
   {
     CSparseMatrix* result = cs_add(cs_multiply(NM_csc(A), NM_csc(B)),
                                    NM_csc(C), alpha, beta);
+
+    NM_clearDense(C);
+    NM_clearSparseBlock(C);
+    NM_clearSparseStorage(C);
 
     NM_sparse(C)->csc = result;
     C->size0 = C->matrix2->csc->m;

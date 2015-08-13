@@ -341,6 +341,52 @@ extern "C"
    */
   NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1);
 
+
+  /** Clear dense storage, if it is existent.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearDense(NumericsMatrix* A);
+
+  /** Clear sparse block storage, if it is existent.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearSparseBlock(NumericsMatrix* A);
+
+  /** Clear sparse data, if it is existent.
+      The linear solver parameters are also cleared.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearSparse(NumericsMatrix* A);
+
+  /** Clear triplet storage, if it is existent.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearTriplet(NumericsMatrix* A);
+
+  /** Clear compressed column storage, if it is existent.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearCSC(NumericsMatrix* A);
+
+  /** Clear transposed compressed column storage, if it is existent.
+    * \param[in,out] A a Numericsmatrix
+    */
+  void NM_clearCSCTranspose(NumericsMatrix* A);
+
+  /** Clear triplet, csc, csc transposed storage, if they are existent.
+    * Linear solver parameters are preserved.
+    * \param[in,out] A a Numericsmatrix
+    */
+  void NM_clearSparseStorage(NumericsMatrix *A);
+
+  /** Copy a NumericsMatrix inside another NumericsMatrix.
+   *  Reallocation are performed if arrays size of B are greater than
+   *  arrays size of A.
+   * \param[in] A a NumericsMatrix
+   * \param[in,out] B a NumericsMatrix
+   */
+  void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B);
+
   /** Creation, if needed, of sparse matrix storage.
    * \param[in,out] A a NumericsMatrix
    * \return a pointer on the sparse matrix storage
