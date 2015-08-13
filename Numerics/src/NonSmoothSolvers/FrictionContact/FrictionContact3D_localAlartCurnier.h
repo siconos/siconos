@@ -77,29 +77,6 @@ extern "C"
     int *info,
     SolverOptions *options);
 
-  /** Nonsmooth Newton solver based on the Alart--Curnier function for the
-   * local (reduced) frictional contact problem in the sparse block form
-   * \param problem the problem to solve in sparse block form
-   * \param reaction solution and initial guess for reaction
-   * \param velocity solution and initial guess for velocity
-   * \param info returned info
-   * \param options  the solver options
-   */
-  void frictionContact3D_sparseLocalAlartCurnier(
-    FrictionContactProblem* problem,
-    double *reaction,
-    double *velocity,
-    int *info,
-    SolverOptions *options);
-
-  /** Init the nonsmooth Newton solver based on the Alart--Curnier function
-   * for the local (reduced) frictional contact problem in the sparse block form
-   * Mainly, initialize the sparse linear solver
-   * \param options  the solver options
-   */
-  void frictionContact3D_sparseLocalAlartCurnierInit(
-    SolverOptions *options);
-
   /** The Alart & Curnier function for several contacts.
       On each contact, the specified Alart Curnier function in iparam[9] is called.
       \param problemSize the number of contacts.

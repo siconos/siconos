@@ -95,6 +95,8 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   NumericsSparseLinearSolverParams* p = (NumericsSparseLinearSolverParams*)
     malloc(sizeof(NumericsSparseLinearSolverParams));
 
+  p->solver = NS_CS_LUSOL;
+
   p->iparam = NULL;
   p->dparam = NULL;
   p->iWork = NULL;
@@ -166,8 +168,6 @@ NumericsSparseMatrix* newNumericsSparseMatrix(void)
 {
   NumericsSparseMatrix* p = (NumericsSparseMatrix*)
     malloc(sizeof(NumericsSparseMatrix));
-
-  p->linearSolver = NS_CS_LUSOL;
 
   p->linearSolverParams = newNumericsSparseLinearSolverParams();
 

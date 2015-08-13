@@ -57,7 +57,7 @@ extern "C"
 
   /** Nonsmooth Newton solver based on the Fischer--Burmeister function for the
    * local (reduced) frictional contact problem in the dense form
-   * \param problem the problem to solve in dense form
+   * \param problem the problem to solve in dense or sparse block form
    * \param reaction solution and initial guess for reaction
    * \param velocity solution and initial guess for velocity
    * \param info returned info
@@ -70,28 +70,6 @@ extern "C"
     int *info,
     SolverOptions *options);
 
-  /** Nonsmooth Newton solver based on the Fischer--Burmeister function for the
-   * local (reduced) frictional contact problem in the sparse block form
-   * \param problem the problem to solve in sparse block form
-   * \param reaction solution and initial guess for reaction
-   * \param velocity solution and initial guess for velocity
-   * \param info returned info
-   * \param options  the solver options
-   */
-  void frictionContact3D_sparseLocalFischerBurmeister(
-    FrictionContactProblem* problem,
-    double *reaction,
-    double *velocity,
-    int *info,
-    SolverOptions *options);
-
-  /** Init the nonsmooth Newton solver based on the Fischer--Burmeister function
-   * for the local (reduced) frictional contact problem in the sparse block form
-   * Mainly, initialize the sparse linear solver
-   * \param options  the solver options
-   */
-  void frictionContact3D_sparseLocalFischerBurmeisterInit(
-    SolverOptions *options);
 
   /** The Fischer & Burmeister function for several contacts.
       On each contact, the specified Fischer Burmeister function in iparam[9] is called.

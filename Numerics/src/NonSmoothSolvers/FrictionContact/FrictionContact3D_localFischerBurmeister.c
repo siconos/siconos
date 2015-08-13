@@ -33,7 +33,6 @@
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
 
-
 void frictionContact3D_FischerBurmeisterFunction(
   unsigned int problemSize,
   FischerBurmeisterFun3x3Ptr computeACFun3x3,
@@ -77,252 +76,6 @@ void frictionContact3D_FischerBurmeisterFunction(
 
 }
 
-
-
-void frictionContact3D_localFischerBurmeister(
-  FrictionContactProblem* problem,
-  double *reaction,
-  double *velocity,
-  int *info,
-  SolverOptions *options)
-{
-  assert(problem);
-  assert(reaction);
-  assert(velocity);
-  assert(info);
-  assert(options);
-
-  assert(problem->dimension == 3);
-
-  assert(options->iparam);
-  assert(options->dparam);
-
-  assert(problem->q);
-  assert(problem->mu);
-  assert(problem->M);
-
-  FischerBurmeisterFun3x3Ptr computeACFun3x3;
-
-  switch (options->iparam[10])
-  {
-    case 0:
-      {
-
-        computeACFun3x3 = &frictionContact3D_FischerBurmeisterFunctionGenerated;
-        break;
-      }
-    default:
-      printf("frictionContact3D_localFischerBurmeister :: unsupported options to compute function. value = %d\n", options->iparam[10]);
-      exit(EXIT_FAILURE);
-  }
-
-
-  if (!problem->M->matrix0)
-  {
-    frictionContact3D_sparseLocalFischerBurmeister(
-      problem,
-      reaction,
-      velocity,
-      info,
-      options);
-    return;
-  }
-
-  assert(problem->M->matrix0);
-
-  unsigned int problemSize = 3 * problem->numberOfContacts;
-
-  unsigned int iter = 0;
-  unsigned int itermax = options->iparam[0];
-  unsigned int erritermax = options->iparam[7];
-
-  assert(itermax > 0);
-
-  double tolerance = options->dparam[0];
-  assert(tolerance > 0);
-
-  unsigned int problemSize2 = problemSize * problemSize;
-  unsigned int _3problemSize = 3 * problemSize;
-
-  void *buffer;
-
-  if (!options->dWork)
-  {
-#ifndef NDEBUG
-    buffer = malloc((14 * problemSize +
-                     2 * problemSize2) * sizeof(double) +
-                    problemSize * sizeof(int));
-#else
-    buffer = malloc((14 * problemSize +
-                     problemSize2) * sizeof(double) +
-                    problemSize * sizeof(int));
-#endif
-  }
-  else
-    buffer = options->dWork;
-
-  double *F = (double *) buffer; //malloc(problemSize*sizeof(double));
-  double *tmp1 = (double *) F + problemSize; //malloc(problemSize*sizeof(double));
-  double *tmp2 = (double *) tmp1 + problemSize; //malloc(problemSize*sizeof(double));
-  double *A = tmp2 + problemSize; //malloc(3*problemSize*sizeof(double));
-  double *B = A + _3problemSize; //malloc(3*problemSize*sizeof(double));
-  double *rho = B + _3problemSize; //malloc(problemSize*sizeof(double));
-  double *AWpB = rho + problemSize;// malloc(problemSize*problemSize*sizeof(double));
-  int *ipiv = (int *)(AWpB + problemSize2);  // malloc(problemSize*sizeof(int));
-#ifndef NDEBUG
-  double *AWpB_ = (double *) ipiv + problemSize;
-#endif
-
-  for (unsigned int i = 0; i < problemSize; ++i) rho[i] = 1.;
-
-  info[0] = 1;
-
-  // velocity <- M*reaction + qfree
-
-
-  cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
-  cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1.,
-        problem->M->matrix0, problemSize, reaction, 1, 1., velocity, 1);
-
-
-  while (iter++ < itermax)
-  {
-
-    frictionContact3D_FischerBurmeisterFunction(
-      problemSize,
-      computeACFun3x3,
-      reaction, velocity,
-      problem->mu, rho,
-      F, A, B);
-
-    // AW + B
-    computeAWpB(problemSize, A, problem->M->matrix0, B, AWpB);
-
-    int info2 = 0;
-
-    cblas_dcopy(problemSize, F, 1, tmp1, 1);
-    cblas_dscal(problemSize, -1., tmp1, 1);
-
-    if (options->iparam[2])
-    {
-      DGELS(LA_NOTRANS,problemSize, problemSize, 1, AWpB, problemSize,
-            tmp1, problemSize, &info2);
-    }
-    else
-    {
-
-#ifndef NDEBUG
-      cblas_dcopy(problemSize * problemSize, AWpB, 1, AWpB_, 1);
-#endif
-
-      // tmp1 <- sol (AWpB * tmp1 = -F)
-      DGESV(problemSize, 1, AWpB, problemSize, ipiv,
-            tmp1, problemSize, &info2);
-
-#ifndef NDEBUG
-      cblas_dcopy(problemSize, F, 1, tmp2, 1);
-      cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1., AWpB_,
-            problemSize, tmp1, 1, 1., tmp2, 1);
-      assert(cblas_ddot(problemSize, tmp2, 1, tmp2, 1) < 1e-10);
-#endif
-
-    }
-
-    assert(info2 >= 0);
-
-    if (info2 > 0)
-      /*if (verbose>0)*/
-      printf("LOCALFB: warning DGESV failed with U(%d,%d) == 0.\n", info2, info2);
-
-    // line search
-    double alpha = 1;
-    int info_ls = globalLineSearchGP(problemSize, computeACFun3x3, reaction, velocity, problem->mu, rho, F, A, B,
-                                     problem->M->matrix0, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
-
-    if (!info_ls)
-      cblas_daxpy(problemSize, alpha, tmp1, 1, reaction, 1);
-    else
-      cblas_daxpy(problemSize, 1, tmp1, 1., reaction, 1);
-
-
-    // velocity <- M*reaction + qfree
-    cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
-    cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1.,
-          problem->M->matrix0, problemSize, reaction, 1, 1., velocity, 1);
-
-    options->dparam[1] = INFINITY;
-
-    if (!(iter % erritermax))
-    {
-      frictionContact3D_FischerBurmeisterFunction(
-        problemSize,
-        computeACFun3x3,
-        reaction, velocity,
-        problem->mu, rho,
-        F, NULL, NULL);
-
-
-      frictionContact3D_FischerBurmeister_compute_error(problem, reaction, velocity,
-                                                        tolerance, options, &(options->dparam[1]));
-
-
-      assert((cblas_dnrm2(problemSize, F, 1)
-              / (1 + cblas_dnrm2(problemSize, problem->q, 1)))
-             <= (10 * options->dparam[1] + 1e-15));
-
-    }
-
-    if (verbose > 0)
-      printf("LOCALFB: iteration %d : error=%g\n", iter, options->dparam[1]);
-
-    if (options->dparam[1] < tolerance)
-    {
-      info[0] = 0;
-      break;
-    }
-
-
-  }
-
-
-
-  if (verbose > 0)
-  {
-    if (!info[0])
-      printf("LOCALFB: convergence after %d iterations, error : %g\n",
-             iter, options->dparam[1]);
-    else
-    {
-      printf("LOCALFB: no convergence after %d iterations, error : %g\n",
-             iter, options->dparam[1]);
-    }
-  }
-
-#ifdef DUMP_PROBLEM
-  if (info[0])
-  {
-    static int file_counter = 0;
-    char filename[64];
-    printf("LOCALFB: dumping problem\n");
-    sprintf(filename, "LOCALFB_failure%d.dat", file_counter++);
-    FILE* file = fopen(filename, "w");
-    frictionContact_printInFile(problem, file);
-    fclose(file);
-  }
-#endif
-
-  if (!options->dWork)
-  {
-    assert(buffer);
-    free(buffer);
-  }
-  else
-  {
-    assert(buffer == options->dWork);
-  }
-
-
-}
 
 int frictionContact3D_FischerBurmeister_compute_error(
     FrictionContactProblem* problem,
@@ -424,14 +177,6 @@ int frictionContact3D_FischerBurmeister_setDefaultSolverOptions(
 }
 
 
-#ifdef WITH_MUMPS
-
-void frictionContact3D_sparseLocalFischerBurmeisterInit(
-  SolverOptions *options)
-{
-  frictionContactNonsmoothEqnInit(options);
-}
-
 typedef struct
 {
   FischerBurmeisterFun3x3Ptr computeACFun3x3;
@@ -472,7 +217,7 @@ void nonsmoothEqnFischerBurmeisterFun(void* arg,
 
 
 
-void frictionContact3D_sparseLocalFischerBurmeister(
+void frictionContact3D_localFischerBurmeister(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,
@@ -494,8 +239,7 @@ void frictionContact3D_sparseLocalFischerBurmeister(
   assert(problem->mu);
   assert(problem->M);
 
-  assert(!problem->M->matrix0);
-  assert(problem->M->matrix1);
+  assert(problem->M->matrix0 || problem->M->matrix1);
 
   assert(!options->iparam[4]); // only host
 
@@ -521,21 +265,3 @@ void frictionContact3D_sparseLocalFischerBurmeister(
 
 }
 
-#else /*WITH_MUMPS*/
-
-void frictionContact3D_sparseLocalFischerBurmeisterInit(
-  SolverOptions *options)
-{
-  fprintf(stderr, "The sparse global Fischer & Burmeister solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
-}
-
-void frictionContact3D_sparseLocalFischerBurmeister(
-  FrictionContactProblem* problem,
-  double *reaction,
-  double *velocity,
-  int *info,
-  SolverOptions *options)
-{
-  fprintf(stderr, "The sparse global Fischer & Burmeister solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
-}
-#endif

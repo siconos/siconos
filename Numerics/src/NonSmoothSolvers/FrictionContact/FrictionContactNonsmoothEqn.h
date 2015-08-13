@@ -92,29 +92,5 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
 
 
-void computeAWpB(
-    unsigned int problemSize,
-    double *blocklist3x3_1,
-    double *blockarray3x3,
-    double *blocklist3x3_2,
-    double *output_blockarray3x3);
-
-int globalLineSearchGP(
-  unsigned int problemSize,
-  FrictionContactNSFun3x3Ptr computeACFun3x3,
-  double *reaction,
-  double *velocity,
-  double *mu,
-  double *rho,
-  double *F,
-  double *A,
-  double *B,
-  double *W,
-  double *qfree,
-  double *AWpB,
-  double *direction,
-  double *tmp,
-  double alpha[1],
-  unsigned int maxiter_ls);
 
 #endif

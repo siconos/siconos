@@ -26,16 +26,18 @@
 
 To store matrix objects, Numerics functions use a structure named NumericsMatrix.\n
 This objects handles:
- - a number that identify the type of storage (0: double*, 1: sparse block, 2: sparse triplet, 3: sparse compressed columns, 4: sparse compressed transpose )
+ - a number that identify the type of storage (0: double*
+ 1: sparse block, 2: sparse compressed columns)
  - the dimensions of the matrix (rows: size0, columns: size1)
- - a list of pointers among which only one is non NULL and represents the matrix itself.
+ - a list of pointers among which only one is non NULL and represents
+   the matrix itself.
 
 At the time, the following storage are available: \n
 - "classical" column-major storage in a double* (field named matrix0)
-- sparse block storage, in a structure of type SparseBlockStructuredMatrix (warning: only for square matrices!!) (field named matrix1)
-- triplet storage, to be used with cs_sparse  (field named matrix2)
-- compressed columns storage, to be used with cs_sparse  (field named matrix3)
-- compressed transposed storage  (field named matrix4)
+- sparse block storage, in a structure of type
+  SparseBlockStructuredMatrix (warning: only for square matrices!!)
+  (field named matrix1)
+- compressed columns storage, to be used with cs_sparse  (field named matrix2)
 
 
 As an example, consider the following matrix A of size 8X8:\n
@@ -147,25 +149,23 @@ typedef struct
   int storageType; /**< the type of storage:
                       0: dense (double*),
                       1: SparseBlockStructuredMatrix,
-                      2: triplet */
+                      2: compressed sparse column (csc) */
   int size0; /**< number of rows */
   int size1; /**< number of columns */
   double* matrix0; /**< dense storage */
   SparseBlockStructuredMatrix* matrix1; /**< sparse block storage */
-  NumericsSparseMatrix* matrix2; /**< triplet storage */
+  NumericsSparseMatrix* matrix2; /**< csc storage */
 
   NumericsMatrixInternalData* internalData;
 
 } NumericsMatrix;
 
-/** Possible types of matrices for NumericsMatrix. In case of sparse
-    matrix, the compressed column comes after triplet setup and is a
-    secondary storage for linear algebra operations. */
+/** Possible types of matrices for NumericsMatrix */
 
 enum NumericsMatrix_types {
   NM_DENSE,        /**< dense format */
   NM_SPARSE_BLOCK, /**< sparse block format */
-  NM_TRIPLET,      /**< triplet format */
+  NM_CSC,          /**< compressed column format */
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -367,7 +367,7 @@ extern "C"
    */
   CSparseMatrix* NM_csc_trans(NumericsMatrix* A);
 
-  /** Matrix vector multiplication : y += alpha A x + y
+  /** Matrix vector multiplication : y = alpha A x + beta y
    * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix
    * \param[in] x pointer on a dense vector of size A->size1
@@ -377,6 +377,16 @@ extern "C"
   void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
                const double beta,
                double *y);
+
+  /** Matrix matrix multiplication : C = alpha A B + beta C
+   * \param[in] alpha scalar
+   * \param[in] A a NumericsMatrix
+   * \param[in] B a NumericsMatrix
+   * \param[in] beta scalar
+   * \param[in,out] C a NumericsMatrix
+   */
+  void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
+               const double beta, NumericsMatrix *C);
 
   /** Transposed matrix multiplication : y += alpha transpose(A) x + y
    * \param[in] alpha scalar
@@ -419,6 +429,10 @@ extern "C"
   int* NM_iWork(NumericsMatrix *A, int size);
 
 #ifdef WITH_MUMPS
+  /** Get the MPI communicator. Call MPI_Init if needed.
+   * \param[in,out] A a NumericsMatrix.
+   * \return the MPI communicator.
+   */
   MPI_Comm NM_MPI_com(NumericsMatrix* A);
 
   int* NM_MUMPS_irn(NumericsMatrix* A);
@@ -426,6 +440,14 @@ extern "C"
 
   DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A);
 #endif
+
+
+
+
+
+
+
+
 
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type 
@@ -444,7 +466,7 @@ extern "C"
       case NM_SPARSE_BLOCK:
         assert(M->matrix1);
         break;
-      case NM_TRIPLET:
+      case NM_CSC:
         assert(M->matrix2);
         break;
       default:

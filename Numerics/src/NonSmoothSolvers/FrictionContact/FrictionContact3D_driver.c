@@ -192,7 +192,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     }
     else
     {
-      frictionContact3D_sparseLocalAlartCurnier(problem, reaction , velocity , &info , options);
+      frictionContact3D_localAlartCurnier(problem, reaction , velocity , &info , options);
     }
     break;
   }
@@ -201,14 +201,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   {
     snPrintf(1, options, 
             " ========================== Call Fischer Burmeister solver for Friction-Contact 3D problem ==========================\n");
-    if (problem->M->matrix0)
-    {
-      frictionContact3D_localFischerBurmeister(problem, reaction , velocity , &info , options);
-    }
-    else
-    {
-      frictionContact3D_sparseLocalFischerBurmeister(problem, reaction , velocity , &info , options);
-    }
+    frictionContact3D_localFischerBurmeister(problem, reaction , velocity , &info , options);
     break;
   }
   case SICONOS_FRICTION_3D_QUARTIC_NU:

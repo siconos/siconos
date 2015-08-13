@@ -102,7 +102,6 @@ extern "C"
 
   typedef struct
   {
-    NumericsSparseLinearSolver linearSolver;
     NumericsSparseLinearSolverParams* linearSolverParams;
 
     CSparseMatrix* triplet;
