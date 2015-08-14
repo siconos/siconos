@@ -195,6 +195,15 @@ ENDIF()
 
 LIBRARY_PROJECT_SETUP()
 
+# We need to save part of the config to enable/disable some tests or code in
+# other modules
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/NumericsCmakeConfig.cmake.in
+ ${CMAKE_BINARY_DIR}/NumericsCmakeConfig.cmake @ONLY)
+
+# the destination is a hack, we need a cleaner way of doing this ... -- xhub
+INSTALL(FILES
+ ${CMAKE_BINARY_DIR}/NumericsCmakeConfig.cmake
+ DESTINATION share/siconos-kernel/cmake)
 
 # The library tests
 
@@ -374,7 +383,11 @@ IF(WITH_TESTING)
   BEGIN_TEST2(NonSmoothSolvers/Relay/test)
 
   SET(DATA_SET "relay1.dat;relay_2x2.dat;relay_4x4.dat;relay_simple2.dat;step_1x1.dat;step_2x2.dat;step_4x4.dat")
-  SET(SICONOS_RELAY_SOLVERS "ENUM;LEMKE;PGS;AVI_CAOFERRIS;AVI_CAOFERRIS_TEST")
+  SET(SICONOS_RELAY_SOLVERS "ENUM;LEMKE;PGS;AVI_CAOFERRIS")
+  IF(HAS_ONE_LP_SOLVER)
+   LIST(APPEND SICONOS_RELAY_SOLVERS "AVI_CAOFERRIS_TEST")
+  ENDIF()
+
   IF(PATHFERRIS_FOUND)
    LIST(APPEND SICONOS_RELAY_SOLVERS "PATH")
   ENDIF()

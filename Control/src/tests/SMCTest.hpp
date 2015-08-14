@@ -20,9 +20,11 @@
 #define __SMCTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <SiconosFwd.hpp>
+#include "SiconosFwd.hpp"
 #include "SiconosControlFwd.hpp"
 #include <FirstOrderLinearTIDS.hpp>
+
+#include <NumericsConfig.h>
 
 class SMCTest : public CppUnit::TestFixture
 {
@@ -42,8 +44,10 @@ private:
   CPPUNIT_TEST(test_iSMC_Lsodar);
   CPPUNIT_TEST(test_eSMC_ZOH);
   CPPUNIT_TEST(test_eSMC_Lsodar);
+#ifdef HAS_EXTREME_POINT_ALGO
   CPPUNIT_TEST(test_itw_ZOH);
   CPPUNIT_TEST(test_itw_Lsodar);
+#endif
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -54,8 +58,11 @@ private:
   void test_iSMC_Lsodar();
   void test_eSMC_ZOH();
   void test_eSMC_Lsodar();
+
+#ifdef HAS_EXTREME_POINT_ALGO
   void test_itw_ZOH();
   void test_itw_Lsodar();
+#endif
   // Members
 
   unsigned int _n;
@@ -76,7 +83,9 @@ private:
   SP::LinearSensor _sensor;
   SP::LinearSMC _iSMC;
   SP::ExplicitLinearSMC _eSMC;
+#ifdef HAS_EXTREME_POINT_ALGO
   SP::Twisting _itw;
+#endif
 
 
 public:

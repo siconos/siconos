@@ -36,11 +36,19 @@ IF(MSVC)
   SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock Pendulum)
 ENDIF(MSVC)
 
-SICONOS_PROJECT(Examples)
-
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(SiconosKernel REQUIRED)
 COMPILE_WITH(SiconosMechanics)
+
+INCLUDE(NumericsCmakeConfig)
+
+IF(NOT HAS_ONE_LP_SOLVER)
+  SET(NO_TEST_FILES ${NO_TEST_FILES} SMCElectroPneumaticItw Twisting)
+ENDIF(NOT HAS_ONE_LP_SOLVER)
+
+SICONOS_PROJECT(Examples)
+
+
 
 MACRO(ADD_EXAMPLE_DIRECTORY _N)
   MESSAGE("Adding example directory ${_N}")

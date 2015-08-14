@@ -1,0 +1,4 @@
+# -*- cmake -*-
+
+SET(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
+

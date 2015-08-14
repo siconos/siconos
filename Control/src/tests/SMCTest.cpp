@@ -74,6 +74,7 @@ void SMCTest::init2()
   _eSMC->setCsurface(_Csurface);
 }
 
+#ifdef HAS_EXTREME_POINT_ALGO
 void SMCTest::initTwisting()
 {
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
@@ -83,7 +84,7 @@ void SMCTest::initTwisting()
   eye->eye();
   _itw->setCsurface(eye);
 }
-
+#endif
 
 void SMCTest::tearDown()
 {}
@@ -168,6 +169,7 @@ void SMCTest::test_eSMC_Lsodar()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_iSMC_Lsodar : ", (data - dataRef).normInf() < _tol, true);
 }
 
+#ifdef HAS_EXTREME_POINT_ALGO
 void SMCTest::test_itw_ZOH()
 {
   initTwisting();
@@ -237,3 +239,4 @@ void SMCTest::test_itw_Lsodar()
   std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", (data - dataRef).normInf() < _tol, true);
 }
+#endif
