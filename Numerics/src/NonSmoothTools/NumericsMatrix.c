@@ -50,7 +50,7 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, c
       prodSBM(sizeX, sizeY, alpha, A->matrix1, x, beta, y);
     break;
   /* coordinate */
-    case NM_CSC:
+    case NM_SPARSE:
       cs_aaxpy(alpha, NM_csc(A), x, beta, y);
     break;
 
@@ -189,8 +189,10 @@ void freeNumericsMatrix(NumericsMatrix* m)
   if (m->storageType == 0)
   {
     if (m->matrix0)
+    {
       free(m->matrix0);
-    m->matrix0 = NULL;
+      m->matrix0 = NULL;
+    }
   }
   else
   {
@@ -502,7 +504,7 @@ NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat)
     case NM_SPARSE_BLOCK:
       data = malloc(sizeof(SparseBlockStructuredMatrix));
       break;
-    case NM_CSC:
+    case NM_SPARSE:
       data = malloc(sizeof(CSparseMatrix));
       break;
     default:
@@ -515,10 +517,23 @@ NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat)
   return M;
 }
 
+NumericsMatrix* newNumericsMatrix(void)
+{
+  NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+  M->storageType = -1;
+  M->size0 = 0;
+  M->size1 = 0;
+  M->matrix0 = NULL;
+  M->matrix1 = NULL;
+  M->matrix2 = NULL;
+  M->internalData = NULL;
+
+  return M;
+}
 
 NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
 {
-  NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+  NumericsMatrix* M = newNumericsMatrix();
 
   void* data;
 
@@ -528,10 +543,10 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
       data = malloc(size0*size1*sizeof(double));
       break;
     case NM_SPARSE_BLOCK:
-      data = malloc(sizeof(SparseBlockStructuredMatrix));
+      data = newSBM();
       break;
-    case NM_CSC:
-      data = malloc(sizeof(CSparseMatrix));
+    case NM_SPARSE:
+      data = newNumericsSparseMatrix();
       break;
     default:
       printf("createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
@@ -546,14 +561,12 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
 
 void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1, void* data)
 {
+
+  freeNumericsMatrix(M);
+
   M->storageType = storageType;
   M->size0 = size0;
   M->size1 = size1;
-
-  M->matrix0 = NULL;
-  M->matrix1 = NULL;
-  M->matrix2 = NULL;
-  M->internalData = NULL;
 
   if (data)
   {
@@ -565,7 +578,7 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
       case NM_SPARSE_BLOCK:
         M->matrix1 = (SparseBlockStructuredMatrix*) data;
         break;
-      case NM_CSC:
+      case NM_SPARSE:
         M->matrix2 = (NumericsSparseMatrix*) data;
         break;
 
@@ -728,7 +741,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     }
     else
     {
-      B->matrix1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+      B->matrix1 = newSBM();
       B_ = B->matrix1;
 
       B_->block = (double **) malloc(A_->nbblocks * sizeof(double));
@@ -789,7 +802,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
 
     break;
   }
-  case NM_CSC:
+  case NM_SPARSE:
   {
     CSparseMatrix* A_;
     CSparseMatrix* B_;
@@ -905,7 +918,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
     A->matrix2->triplet = cs_spalloc(0,0,1,1,1);
   }
 
-  if (!(A->storageType == NM_CSC))
+  if (!(A->storageType == NM_SPARSE))
   {
 
     /* Invalidation of previously constructed csc storage. */
@@ -1018,7 +1031,7 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
 
   default:
   {
-    assert(A->storageType == NM_CSC);
+    assert(A->storageType == NM_SPARSE);
     CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, beta, y));
   }
   }
@@ -1037,7 +1050,7 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
         break;
       }
     case NM_SPARSE_BLOCK:
-    case NM_CSC:
+    case NM_SPARSE:
       {
         CHECK_RETURN(cs_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
         break;
@@ -1071,7 +1084,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     NM_clearSparseStorage(C);
     break;
   }
-  case NM_CSC:
+  case NM_SPARSE:
   {
     CSparseMatrix* result = cs_add(cs_multiply(NM_csc(A), NM_csc(B)),
                                    NM_csc(C), alpha, beta);
@@ -1299,7 +1312,7 @@ int NM_gesv(NumericsMatrix* A, double *b)
   }
 
   case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
-  case NM_CSC:
+  case NM_SPARSE:
   {
     switch (NM_linearSolverParams(A)->solver)
     {

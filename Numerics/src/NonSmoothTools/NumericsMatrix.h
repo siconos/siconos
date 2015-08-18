@@ -165,7 +165,7 @@ typedef struct
 enum NumericsMatrix_types {
   NM_DENSE,        /**< dense format */
   NM_SPARSE_BLOCK, /**< sparse block format */
-  NM_CSC,          /**< compressed column format */
+  NM_SPARSE,          /**< compressed column format */
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -305,6 +305,13 @@ extern "C"
    */
   NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat);
 
+
+  /** Creation of an empty NumericsMatrix.
+   * \return a pointer to allocated space
+   */
+  NumericsMatrix* newNumericsMatrix(void);
+
+
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows
@@ -380,7 +387,7 @@ extern "C"
   void NM_clearSparseStorage(NumericsMatrix *A);
 
   /** Copy a NumericsMatrix inside another NumericsMatrix.
-   *  Reallocation are performed if arrays size of B are greater than
+   *  Reallocations are performed if arrays size of B are greater than
    *  arrays size of A.
    * \param[in] A a NumericsMatrix
    * \param[in,out] B a NumericsMatrix
@@ -512,7 +519,7 @@ extern "C"
       case NM_SPARSE_BLOCK:
         assert(M->matrix1);
         break;
-      case NM_CSC:
+      case NM_SPARSE:
         assert(M->matrix2);
         break;
       default:

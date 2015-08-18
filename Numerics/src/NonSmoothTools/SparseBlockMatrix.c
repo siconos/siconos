@@ -18,6 +18,27 @@
 #endif
 #endif
 
+
+SparseBlockStructuredMatrix* newSBM(void)
+{
+  SparseBlockStructuredMatrix* sbm = (SparseBlockStructuredMatrix*)
+    malloc(sizeof(SparseBlockStructuredMatrix));
+
+  sbm->nbblocks = 0;
+  sbm->block = NULL;
+  sbm->blocknumber0 = 0;
+  sbm->blocknumber1 = 0;
+  sbm->blocksize0 = NULL;
+  sbm->blocksize1 = NULL;
+  sbm->filled1 = 0;
+  sbm->filled2 = 0;
+  sbm->index1_data = NULL;
+  sbm->index2_data = NULL;
+
+  return sbm;
+}
+
+
 /* a basic iterator scheme for different kind of sparse
  * matrices (csc, csr, triplet) */
 typedef struct sparse_matrix_iterator
@@ -645,10 +666,12 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
     {
       blmat->blocksize1 = NULL ;
     }
+    blmat->blocksize0 = NULL;
   }
   if (blmat->blocksize1)
   {
     free(blmat->blocksize1);
+    blmat->blocksize0 = NULL;
   }
 
   for (unsigned int i = 0 ; i < blmat->nbblocks ; i++)
@@ -658,14 +681,31 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
       free(blmat->block[i]);
     }
   }
+
   if (blmat->block)
+  {
     free(blmat->block);
+    blmat->block = NULL;
+  }
 
 
   if (blmat->index1_data)
+  {
     free(blmat->index1_data);
+    blmat->index1_data = NULL;
+  }
+
   if (blmat->index2_data)
+  {
     free(blmat->index2_data);
+    blmat->index2_data = NULL;
+  }
+
+  blmat->filled1 = 0;
+  blmat->filled2 = 0;
+  blmat->blocknumber0 = 0;
+  blmat->blocknumber1 = 0;
+  blmat->nbblocks = 0;
 }
 
 void printSBM(const SparseBlockStructuredMatrix* const m)

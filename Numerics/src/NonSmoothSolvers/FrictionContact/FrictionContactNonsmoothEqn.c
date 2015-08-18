@@ -725,9 +725,12 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     assert(buffer == options->dWork);
   }
 
-  freeNumericsMatrix(AWpB);
-  freeNumericsMatrix(AWpB_backup);
+  if (!options->dWork)
+  {
+    freeNumericsMatrix(AWpB);
+    freeNumericsMatrix(AWpB_backup);
 
-  free(AWpB);
-  free(AWpB_backup);
+    free(AWpB);
+    free(AWpB_backup);
+  }
 }

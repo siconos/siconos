@@ -175,6 +175,11 @@ extern "C"
 {
 #endif
 
+  /** Creation of an empty Sparse Block Matrix.
+   * \return a pointer on allocated and initialized space
+   */
+  SparseBlockStructuredMatrix* newSBM(void);
+
   /** SparseMatrix - vector product y = alpha*A*x + beta*y
       \param[in] sizeX dim of the vectors x
       \param[in] sizeY dim of the vectors y
