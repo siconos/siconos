@@ -432,7 +432,7 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
   }
   else if (storageType == NM_SPARSE_BLOCK)
   {
-    data = malloc(sizeof(SparseBlockStructuredMatrix));
+    data = newSBM();
     newFromFileSBM((SparseBlockStructuredMatrix*)data, file);
   }
 
@@ -562,11 +562,14 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
 void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1, void* data)
 {
 
-  freeNumericsMatrix(M);
-
   M->storageType = storageType;
   M->size0 = size0;
   M->size1 = size1;
+
+  M->matrix0 = NULL;
+  M->matrix1 = NULL;
+  M->matrix2 = NULL;
+  M->internalData = NULL;
 
   if (data)
   {

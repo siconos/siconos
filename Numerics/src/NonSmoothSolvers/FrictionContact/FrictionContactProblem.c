@@ -117,7 +117,7 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   DEBUG_PRINTF("problem->dimension = %i \n",problem->dimension );
   CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
-  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+  problem->M = newNumericsMatrix();
 
   /* fix: problem->M->storageType unitialized ! */
 
