@@ -44,7 +44,7 @@ int main(void)
     printf("\n");
   }
 
-  NumericsMatrix *Wnum = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *Wnum = newNumericsMatrix();
   Wnum->storageType = 0;
   Wnum-> size0 = n;
   Wnum-> size1 = m;
@@ -57,7 +57,7 @@ int main(void)
   printInFileForScilab(Wnum, file1);
   fclose(file1);
 
-  NumericsMatrix *WnumpInv = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *WnumpInv = newNumericsMatrix();
   WnumpInv->storageType = 0;
   WnumpInv-> size0 = n;
   WnumpInv-> size1 = m;

@@ -30,7 +30,7 @@
 void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem * lcp_problem)
 {
   lcp_problem->size = 2 * problem->size ;
-  lcp_problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+  lcp_problem->M = newNumericsMatrix();
   fillNumericsMatrix(lcp_problem->M, NM_DENSE, lcp_problem->size, lcp_problem->size, malloc(lcp_problem->size * lcp_problem->size * sizeof(double)));
   lcp_problem->q = (double*)malloc(lcp_problem->size * sizeof(double));
 

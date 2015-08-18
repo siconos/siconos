@@ -40,8 +40,8 @@ int main(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NMM[i] = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
-    Mread[i] = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+    NMM[i] = newNumericsMatrix();
+    Mread[i] = newNumericsMatrix();
   }
 
 

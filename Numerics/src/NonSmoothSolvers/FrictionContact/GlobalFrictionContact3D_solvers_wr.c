@@ -89,7 +89,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     assert(!infoDGETRS);
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
-    localproblem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+    localproblem->M = newNumericsMatrix();
     NumericsMatrix *Wnum = localproblem->M;
     Wnum->storageType = 0;
     Wnum-> size0 = m;
@@ -202,7 +202,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     printf("Display Htrans\n");
     printSBM(Htrans);
 #endif
-    localproblem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));;
+    localproblem->M = newNumericsMatrix();
     NumericsMatrix *Wnum = localproblem->M;
     Wnum->storageType = 1;
     Wnum-> size0 = m;
@@ -222,7 +222,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 #endif
 
 #ifdef TEST_COND
-    NumericsMatrix *WnumInverse = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+    NumericsMatrix *WnumInverse = newNumericsMatrix();
     WnumInverse->storageType = 0;
     WnumInverse-> size0 = m;
     WnumInverse-> size1 = m;
@@ -266,7 +266,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
     double tol = 1e-24;
     pinv(WInversetmp, m, m, tol);
-    NumericsMatrix *WnumInversetmp = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+    NumericsMatrix *WnumInversetmp = newNumericsMatrix();
     WnumInversetmp->storageType = 0;
     WnumInversetmp-> size0 = m;
     WnumInversetmp-> size1 = m;

@@ -105,7 +105,7 @@ int relay_newFromFile(RelayProblem* problem, FILE* file)
 
   CHECK_IO(fscanf(file, "%d\n", &n));
   problem->size = n;
-  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+  problem->M = newNumericsMatrix();
 
   newFromFile(problem->M, file);
 

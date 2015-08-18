@@ -151,14 +151,14 @@ int main(int argc, char* argv[])
   NumericsProblem.q = q;
   NumericsProblem.b = b;
 
-  NumericsProblem.M = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsProblem.M = newNumericsMatrix();
   NumericsMatrix *MM =  NumericsProblem.M;
   MM->storageType = 1;
   MM->size0 = Ndof;
   MM->size1 = Ndof;
 
 
-  MM->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+  MM->matrix1 = newSBM();
   MM->matrix0 = NULL;
   SparseBlockStructuredMatrix *MBlockMatrix = MM->matrix1;
   MBlockMatrix->nbblocks = 4;
@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
   MBlockMatrix->index2_data =  index2_data;
 
 
-  NumericsProblem.H = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsProblem.H = newSBM();
   NumericsMatrix *HH =  NumericsProblem.H;
   HH->storageType = 1;
   HH->size0 = Ndof;

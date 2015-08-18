@@ -118,7 +118,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
   {
     newProblem->problem = (void *) malloc(sizeof(LinearComplementarityProblem));
     LinearComplementarityProblem * pLCP = (LinearComplementarityProblem*)newProblem->problem;
-    pLCP->M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+    pLCP->M = newNumericsMatrix();
     pLCP->q = (double*) malloc(size * sizeof(double));
     newProblem->q = pLCP->q;
     pLCP->M->storageType = 0; /*local prb is dense*/
@@ -133,7 +133,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     newProblem->problem = (void *) malloc(sizeof(LinearSystemProblem));
     LinearSystemProblem* pLS = (LinearSystemProblem*) newProblem->problem;
     pLS->size = size;
-    pLS->M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+    pLS->M = newNumericsMatrix();
     pLS->q = (double*) malloc(size * sizeof(double));
     newProblem->q = pLS->q;
     pLS->M->storageType = 0; /*local prb is dense*/
@@ -146,7 +146,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     newProblem->problem = (void *) malloc(sizeof(FrictionContactProblem));
     FrictionContactProblem* pFC3D = (FrictionContactProblem*) newProblem->problem;
     pFC3D->mu = (double*) malloc(sizeof(double));
-    pFC3D->M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+    pFC3D->M = newNumericsMatrix();
     pFC3D->M->storageType = 0; /*Local prb is dense*/
     pFC3D->M->size0 = size;
     pFC3D->M->size1 = size;
@@ -216,7 +216,7 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
 
   //fscanf(file,"%d\n",&nsubProb);
 
-  pGMP->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+  pGMP->M = newNumericsMatrix();
   newFromFile(pGMP->M, file);
   SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
 

@@ -291,7 +291,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     }
 
     //fprintf(file,"\n");
-    problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+    problem->M = newNumericsMatrix();
     newFromFile(problem->M, file);
     problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
 

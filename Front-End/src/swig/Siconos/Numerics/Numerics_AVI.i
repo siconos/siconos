@@ -34,7 +34,7 @@
       assert(array);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(vec, NPY_DOUBLE, &is_new_object2); 
       assert(vector);
-      NumericsMatrix *M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
+      NumericsMatrix *M = newNumericsMatrix();
       fillNumericsMatrix(M, NM_DENSE, array_size(array, 0), array_size(array, 1), array_data(array));
 
       avi->size = M->size0;

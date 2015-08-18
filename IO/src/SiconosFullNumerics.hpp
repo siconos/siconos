@@ -65,7 +65,7 @@ void siconos_io(Archive& ar, LinearComplementarityProblem& v, unsigned int versi
   if(Archive::is_loading::value)
   {
     v.q = (double *) malloc(v.size * sizeof(double));
-    v.M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
+    v.M = newNumericsMatrix();
   }
   SERIALIZE(v, (M), ar);
   SERIALIZE_C_ARRAY(v.size, v, q, ar);
@@ -81,7 +81,7 @@ void siconos_io(Archive& ar, FrictionContactProblem& p, const unsigned int file_
   {
     p.q = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
     p.mu = (double *) malloc(p.numberOfContacts * sizeof(double));
-    p.M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
+    p.M = newNumericsMatrix();
   }
 
   SERIALIZE(p, (M), ar);

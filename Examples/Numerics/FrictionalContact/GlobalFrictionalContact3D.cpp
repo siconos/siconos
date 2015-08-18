@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
   numericsProblem.b = b;
 
 
-  numericsProblem.M = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  numericsProblem.M = newNumericsMatrix();
   NumericsMatrix *MM = numericsProblem.M ;
   MM->storageType = 0;
   MM->matrix0 = M;
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
   MM->size1 = n;
 
 
-  numericsProblem.H  = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  numericsProblem.H  = newNumericsMatrix();
   NumericsMatrix *HH = numericsProblem.H;
   HH->storageType = 0;
   HH->matrix0 = H;

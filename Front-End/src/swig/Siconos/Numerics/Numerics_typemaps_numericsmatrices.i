@@ -5,7 +5,7 @@
  int is_new_object=0,
 
  // free in typemap(freearg)
- NumericsMatrix *nummat = (NumericsMatrix *) malloc(sizeof(NumericsMatrix)))
+ NumericsMatrix *nummat = newNumericsMatrix())
 {
   array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 

@@ -35,7 +35,7 @@ int FrictionContact2D_tolcp(FrictionContactProblem* problem, LinearComplementari
   }
   int nc = problem->numberOfContacts;
   lcp_problem->size = 3 * nc ;
-  lcp_problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+  lcp_problem->M = newNumericsMatrix();
   lcp_problem->M->size0 = 3 * nc ;
   lcp_problem->M->size1 = 3 * nc ;
 

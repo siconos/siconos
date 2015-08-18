@@ -480,7 +480,7 @@ void getDiagonalBlock(NumericsMatrix* m, int numBlockRow, int numRow, int size, 
 
 NumericsMatrix* createNumericsMatrixFromData(int storageType, int size0, int size1, void* data)
 {
-  NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+  NumericsMatrix* M = newNumericsMatrix();
 
   fillNumericsMatrix(M, storageType, size0, size1, data);
 
@@ -489,7 +489,7 @@ NumericsMatrix* createNumericsMatrixFromData(int storageType, int size0, int siz
 
 NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat)
 {
-  NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+  NumericsMatrix* M = newNumericsMatrix();
 
   void* data;
   int size0 = mat->size0;

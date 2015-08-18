@@ -37,14 +37,14 @@ FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem
 
   problem->numberOfContacts = fclib_problem->W->m / fclib_problem->spacedim; /* cf fclib spec */
 
-  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+  problem->M = newNumericsMatrix();
 
   problem->M->storageType = 1; /* sparse */
   problem->M->size0 = fclib_problem->W->m;
   problem->M->size1 = fclib_problem->W->n;
 
   problem->M->matrix0 = NULL;
-  problem->M->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+  problem->M->matrix1 = newSBM();
 
   problem->M->matrix1->block = NULL;
   problem->M->matrix1->index1_data = NULL;

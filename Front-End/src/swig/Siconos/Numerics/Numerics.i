@@ -996,7 +996,7 @@
       NumericsMatrix *M;
 
       // return pointer : free by std swig destructor
-      M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
+      M = newNumericsMatrix();
       M->storageType = 0;
       M->size0 = nrows;
       M->size1 = ncols;

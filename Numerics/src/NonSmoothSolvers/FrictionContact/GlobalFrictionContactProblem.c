@@ -62,10 +62,10 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   problem->dimension = d;
   CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
-  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+  problem->M = newNumericsMatrix();
 
   newFromFile(problem->M, file);
-  problem->H = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+  problem->H = newNumericsMatrix();
   newFromFile(problem->H, file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
