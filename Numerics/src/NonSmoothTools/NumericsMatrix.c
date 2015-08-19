@@ -702,6 +702,8 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   }
   case NM_SPARSE_BLOCK:
   {
+    int need_blocks = 0;
+
     SparseBlockStructuredMatrix* A_ = A->matrix1;
     SparseBlockStructuredMatrix* B_ = B->matrix1;
 
@@ -709,6 +711,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     {
       if (B_->nbblocks < A_->nbblocks)
       {
+        need_blocks = 1;
         for (unsigned i=0; i<B_->nbblocks; ++i)
         {
           free(B_->block [i]);
@@ -788,7 +791,10 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
         if (colNumber != 0)
           nbColumns -= A_->blocksize1[colNumber - 1];
 
-        B_->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
+        if (need_blocks)
+        {
+          B_->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
+        }
 
         for (unsigned int i = 0; i < nbRows * nbColumns; i++)
         {
@@ -916,12 +922,7 @@ NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A)
 /* NumericsMatrix : initialize triplet storage from sparse block storage */
 CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
-  if(!NM_sparse(A)->triplet)
-  {
-    A->matrix2->triplet = cs_spalloc(0,0,1,1,1);
-  }
-
-  if (!(A->storageType == NM_SPARSE))
+  if (A->storageType == NM_SPARSE_BLOCK || A->storageType == NM_DENSE)
   {
 
     /* Invalidation of previously constructed csc storage. */
@@ -982,6 +983,8 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
       exit(EXIT_FAILURE);
     }
   }
+
+  assert (A->matrix2->triplet);
 
   return A->matrix2->triplet;
 }
@@ -1182,7 +1185,7 @@ int* NM_MUMPS_irn(NumericsMatrix* A)
   }
   else
   {
-    CSparseMatrix* csc = NM_csc(A);
+    CSparseMatrix* csc = NM_sparse(A)->csc;
     int nzmax = csc->nzmax ;
 
     int* iWork = NM_iWork(A, 2*nzmax + 1);
@@ -1272,7 +1275,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 
   }
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
-  mumps_id->n = NM_csc(A)->n;
+  mumps_id->n = NM_triplet(A)->n;
   mumps_id->irn = NM_MUMPS_irn(A);
   mumps_id->jcn = NM_MUMPS_jcn(A);
 
@@ -1281,13 +1284,13 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
   {
     nz = NM_sparse(A)->triplet->nz;
     mumps_id->nz = nz;
-    mumps_id->a = NM_triplet(A)->x;
+    mumps_id->a = NM_sparse(A)->triplet->x;
   }
   else
   {
     nz = NM_linearSolverParams(A)->iWork[2 * NM_csc(A)->nzmax];
     mumps_id->nz = nz;
-    mumps_id->a = NM_csc(A)->x;
+    mumps_id->a = NM_sparse(A)->csc->x;
   }
 
 
@@ -1326,11 +1329,20 @@ int NM_gesv(NumericsMatrix* A, double *b)
 #ifdef WITH_MUMPS
     case NS_MUMPS:
     {
+      /* the mumps instance is initialized (call with job=-1) */
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
       mumps_id->rhs = b;
       mumps_id->job = 6;
 
+      /* compute the solution */
       dmumps_c(mumps_id);
+
+      /* clean the mumps instance */
+      mumps_id->job = -2;
+      dmumps_c(mumps_id);
+      free(NM_linearSolverParams(A)->solver_data);
+      NM_linearSolverParams(A)->solver_data = NULL;
 
       info = mumps_id->info[0];
 
@@ -1341,7 +1353,7 @@ int NM_gesv(NumericsMatrix* A, double *b)
           printf("NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", mumps_id->info[0], mumps_id->info[1]);
         }
       }
-      if (verbose > 0)
+      if (verbose > 1)
       {
         printf("MUMPS : condition number %g\n", mumps_id->rinfog[9]);
         printf("MUMPS : component wise scaled residual %g\n", mumps_id->rinfog[6]);
