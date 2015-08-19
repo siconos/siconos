@@ -1760,12 +1760,8 @@ SparseBlockStructuredMatrix* SBCMToSBM(SparseBlockCoordinateMatrix* MC)
   M->blocksize0 = MC->blocksize0;
   M->blocksize1 = MC->blocksize1;
 
-  M->index1_data = (size_t *) malloc(sizeof(size_t) * (M->blocknumber0 + 1));
+  M->index1_data = (size_t *) calloc(M->blocknumber0 + 1, sizeof(size_t));
   M->index2_data = (size_t *) malloc(sizeof(size_t) * M->nbblocks);
-  for (unsigned int i = 0; i < M->blocknumber0; ++i)
-  {
-    M->index1_data[i] = 0;
-  }
   M->filled1 = 2;
   for (unsigned int i = 0; i < M->nbblocks; ++i)
   {
