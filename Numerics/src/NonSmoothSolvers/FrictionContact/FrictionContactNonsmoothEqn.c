@@ -192,7 +192,10 @@ int globalLineSearchGP(
 
   if (isnan(q0) || isinf(q0))
   {
-    fprintf(stderr, "global line search failed. q0 is not a finite number.\n");
+    if (verbose > 0)
+    {
+      fprintf(stderr, "global line search failed. q0 is not a finite number.\n");
+    }
     return -1;
   }
 
@@ -598,7 +601,6 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     cblas_dscal(problemSize, -1., tmp1, 1);
 
     /* Solve: AWpB X = -F */
-
     NM_copy(AWpB, AWpB_backup);
     int lsi = NM_gesv(AWpB, tmp1);
 
@@ -607,9 +609,22 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
     if (lsi)
     {
-      fprintf(stderr, "fc3d esolve: warning! linear solver failed with code = %d\n", lsi);
+      if (verbose > 0)
+      {
+        fprintf(stderr, "fc3d esolve: warning! linear solver failed with code = %d\n", lsi);
+      }
     }
 
+    if (verbose > 0)
+    {
+      cblas_dcopy(problemSize, F, 1, tmp3, 1);
+      NM_gemv(1., AWpB, tmp1, 1., tmp3);
+
+      fprintf(stderr, "fc3d esolve: linear equation residual = %g\n",
+              cblas_dnrm2(problemSize, tmp3, 1));
+      /* for the component wise scaled residual: cf mumps &
+       * http://www.netlib.org/lapack/lug/node81.html */
+    }
     // line search
     double alpha = 1;
     int info_ls = 0;
