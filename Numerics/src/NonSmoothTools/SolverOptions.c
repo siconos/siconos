@@ -354,7 +354,7 @@ void deleteSolverOptions(SolverOptions* op)
       free(op->dparam);
     op->dparam = NULL;
     if (op->iWork != NULL)
-    free(op->iWork);
+      free(op->iWork);
     op->iWork = NULL;
     if (op->dWork != NULL)
       free(op->dWork);

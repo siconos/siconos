@@ -563,6 +563,25 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   case 1:
   {
     NM_linearSolverParams(AWpB)->solver = NS_MUMPS;
+
+#ifdef HAVE_MPI
+
+    assert (options->solverData);
+
+    if ((MPI_Comm) options->solverData == MPI_COMM_NULL)
+    {
+      options->solverData = NM_MPI_com(AWpB);
+    }
+    else
+    {
+      NM_linearSolverParams(AWpB)->mpi_com = (MPI_Comm) options->solverData;
+      NM_linearSolverParams(AWpB)->mpi_com_init = 0;
+    }
+
+#else
+    numericsError("MUMPS solver needs a MPI installation.\n")
+#endif
+
     break;
   }
   default:

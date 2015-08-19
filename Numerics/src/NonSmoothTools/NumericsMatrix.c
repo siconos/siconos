@@ -922,68 +922,72 @@ NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A)
 /* NumericsMatrix : initialize triplet storage from sparse block storage */
 CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
-  if (A->storageType == NM_SPARSE_BLOCK || A->storageType == NM_DENSE)
+  if (!NM_sparse(A)->triplet)
   {
-
-    /* Invalidation of previously constructed csc storage. */
-    /* If we want to avoid this -> rewrite cs_triplet with reallocation. */
-    NM_clearCSC(A);
-    NM_clearCSCTranspose(A);
-
-    if (A->matrix1)
+    if (A->storageType == NM_SPARSE_BLOCK || A->storageType == NM_DENSE)
     {
-      A->matrix2->triplet = cs_spalloc(0,0,1,1,1);
 
-      /* iteration on row, cr : current row */
-      for(unsigned int cr = 0; cr < A->matrix1->filled1-1; ++cr)
+      /* Invalidation of previously constructed csc storage. */
+      /* If we want to avoid this -> rewrite cs_triplet with reallocation. */
+      NM_clearCSC(A);
+      NM_clearCSCTranspose(A);
+
+      if (A->matrix1)
       {
-        for(size_t bn = A->matrix1->index1_data[cr];
-            bn < A->matrix1->index1_data[cr + 1]; ++bn)
+        assert (A->matrix2->triplet == NULL);
+
+        A->matrix2->triplet = cs_spalloc(0,0,1,1,1);
+
+        /* iteration on row, cr : current row */
+        for(unsigned int cr = 0; cr < A->matrix1->filled1-1; ++cr)
         {
-          /* cc : current column */
-          size_t cc = A->matrix1->index2_data[bn];
-          unsigned int inbr = A->matrix1->blocksize0[cr];
-          unsigned int roffset = 0;
-          unsigned int coffset = 0;
-          if(cr != 0)
+          for(size_t bn = A->matrix1->index1_data[cr];
+              bn < A->matrix1->index1_data[cr + 1]; ++bn)
           {
-            roffset = A->matrix1->blocksize0[cr - 1];
-            inbr -= roffset;
-          }
-          unsigned int inbc = A->matrix1->blocksize1[cc];
-          if(cc != 0)
-          {
-            coffset = A->matrix1->blocksize1[cc - 1];
-            inbc -= coffset;
-          }
-          for(unsigned j = 0; j < inbc; ++j)
-          {
-            for(unsigned i = 0; i < inbr; ++i)
+            /* cc : current column */
+            size_t cc = A->matrix1->index2_data[bn];
+            unsigned int inbr = A->matrix1->blocksize0[cr];
+            unsigned int roffset = 0;
+            unsigned int coffset = 0;
+            if(cr != 0)
             {
-              CHECK_RETURN(cs_zentry(A->matrix2->triplet, i + roffset, j + coffset,
-                                     A->matrix1->block[bn][i + j*inbr]));
+              roffset = A->matrix1->blocksize0[cr - 1];
+              inbr -= roffset;
+            }
+            unsigned int inbc = A->matrix1->blocksize1[cc];
+            if(cc != 0)
+            {
+              coffset = A->matrix1->blocksize1[cc - 1];
+              inbc -= coffset;
+            }
+            for(unsigned j = 0; j < inbc; ++j)
+            {
+              for(unsigned i = 0; i < inbr; ++i)
+              {
+                CHECK_RETURN(cs_zentry(A->matrix2->triplet, i + roffset, j + coffset,
+                                       A->matrix1->block[bn][i + j*inbr]));
+              }
             }
           }
         }
       }
-    }
-    else if (A->matrix0)
-    {
-      for (int i = 0; i<A->size0; ++i)
+      else if (A->matrix0)
       {
-        for (int j = 0; j<A->size1; ++j)
+        for (int i = 0; i<A->size0; ++i)
         {
-          CHECK_RETURN(cs_zentry(A->matrix2->triplet, i, j, A->matrix0[i + A->size0*j]));
+          for (int j = 0; j<A->size1; ++j)
+          {
+            CHECK_RETURN(cs_zentry(A->matrix2->triplet, i, j, A->matrix0[i + A->size0*j]));
+          }
         }
       }
-    }
-    else
-    {
-      fprintf(stderr, "NM_triplet: sparse matrix cannot be constructed.\n");
-      exit(EXIT_FAILURE);
+      else
+      {
+        fprintf(stderr, "NM_triplet: sparse matrix cannot be constructed.\n");
+        exit(EXIT_FAILURE);
+      }
     }
   }
-
   assert (A->matrix2->triplet);
 
   return A->matrix2->triplet;
@@ -1147,9 +1151,10 @@ int* NM_iWork(NumericsMatrix* A, int size)
 
 #ifdef WITH_MUMPS
 
+
 MPI_Comm NM_MPI_com(NumericsMatrix* A)
 {
-  if (NM_linearSolverParams(A)->mpi_com == MPI_COMM_NULL)
+  if (!A || (A && NM_linearSolverParams(A)->mpi_com == MPI_COMM_NULL))
   {
     int myid;
     int argc = 0;
@@ -1159,10 +1164,22 @@ MPI_Comm NM_MPI_com(NumericsMatrix* A)
     char **argv = &argv0;
     CHECK_MPI(MPI_Init(&argc, &argv));
     CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
-    NM_linearSolverParams(A)->mpi_com = MPI_COMM_WORLD;
-    NM_linearSolverParams(A)->mpi_com_init = 1;
+
+    if (A)
+    {
+      NM_linearSolverParams(A)->mpi_com = MPI_COMM_WORLD;
+      NM_linearSolverParams(A)->mpi_com_init = 1;
+    }
   }
-  return NM_linearSolverParams(A)->mpi_com;
+
+  if(A)
+  {
+    return NM_linearSolverParams(A)->mpi_com;
+  }
+  else
+  {
+    return MPI_COMM_WORLD;
+  }
 }
 
 int* NM_MUMPS_irn(NumericsMatrix* A)

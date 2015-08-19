@@ -175,6 +175,10 @@ int frictionContact3D_FischerBurmeister_setDefaultSolverOptions(
 
   options->internalSolvers = NULL;
 
+#ifdef HAVE_MPI
+  options->solverData = MPI_COMM_NULL;
+#endif
+
   return 0;
 }
 
