@@ -30,7 +30,7 @@
 
 /* Notes:
  - check Olivier Newton_method (only dense)
- - only sparse storage.
+ x only sparse storage. (fixed now)
  - void parameter *data is unused for the moment.
  - problem_size, mu and rho should be moved outside parameters (inside *data)
 */
@@ -70,14 +70,10 @@ typedef struct
   FrictionContactNonsmoothEqnFunPtr function;
 } FrictionContactNonsmoothEqn;
 
-/** The needed steps before solver usage.
-   Note: at the moment this is for MPI initialization.
-   \param options the SolverOptions.
- */
-void frictionContactNonsmoothEqnInit(SolverOptions* options);
-
-/** Solve the equation. The only implemented method is a
-    nonsmooth Newton method with a Goldstein Price or a FBLSA line search.
+/** Solve the equation. The only implemented method is a nonsmooth
+    Newton method with a Goldstein Price or a FBLSA line search.
+    Linear solver choice and line search are specified in
+    SolverOptions parameter.
     \param equation the nonsmooth equation.
     \param reaction the reaction guess as input and the solution as output.
     \param velocity the velocity guess as input and the solution as output.
