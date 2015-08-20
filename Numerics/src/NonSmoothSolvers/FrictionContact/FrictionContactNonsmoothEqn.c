@@ -579,7 +579,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     }
 
 #else
-    numericsError("frictionContactNonsmoothEqnSolve", "MUMPS solver needs a MPI installation.\n")
+    numericsError("frictionContactNonsmoothEqnSolve", "MUMPS solver needs a MPI installation.\n");
 #endif
 
     break;

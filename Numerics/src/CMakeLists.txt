@@ -543,58 +543,49 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest50 FrictionContact3D_test50.c)
   
 
-  IF(WITH_MUMPS) # uses sparse Alart & Curnier
-    # 3D PROX 
-    NEW_TEST(FC3Dtest60 FrictionContact3D_test60.c)
+  NEW_TEST(FC3Dtest60 FrictionContact3D_test60.c)
 
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Example1_Fc3D_SBM.dat)
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Example1_Fc3D_SBM.dat)
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC OneObject-i100000-499.hdf5.dat)
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB OneObject-i100000-499.hdf5.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Example1_Fc3D_SBM.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Example1_Fc3D_SBM.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC OneObject-i100000-499.hdf5.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB OneObject-i100000-499.hdf5.dat)
+  
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i100-1090.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i100-1090.dat)
+  
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i101-404.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i101-404.dat)
 
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i100-1090.dat)
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i100-1090.dat)
-
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i101-404.dat)
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i101-404.dat)
-
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i103-990.dat)
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i103-990.dat)
-
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i122-1617.dat)
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i122-1617.dat)
-
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i100-889.dat)
-    NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i100-889.dat)
-
-  ENDIF(WITH_MUMPS)
-
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i103-990.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i103-990.dat)
+  
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i122-1617.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i122-1617.dat)
+  
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Capsules-i100-889.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Capsules-i100-889.dat)
+  
   NEW_TEST(FC3Dtest70 FrictionContact3D_test70.c) # DSFP
   NEW_TEST(FC3Dtest71 FrictionContact3D_test71.c) # DSFP
   NEW_TEST(FC3Dtest72 FrictionContact3D_test72.c)	
   NEW_TEST(FC3Dtest73 FrictionContact3D_test73.c)
   NEW_TEST(FC3Dtest74 FrictionContact3D_test74.c)
-
-  IF(WITH_MUMPS) # uses sparse Alart & Curnier
-    NEW_TEST(FC3Dtest80 FrictionContact3D_test80.c) # Proximal
-    NEW_TEST(FC3Dtest81 FrictionContact3D_test81.c) # Proximal
-    NEW_TEST(FC3Dtest83 FrictionContact3D_test83.c) # Proximal
-  ENDIF(WITH_MUMPS)
-
+  
+  NEW_TEST(FC3Dtest80 FrictionContact3D_test80.c) # Proximal
+  NEW_TEST(FC3Dtest81 FrictionContact3D_test81.c) # Proximal
+  NEW_TEST(FC3Dtest83 FrictionContact3D_test83.c) # Proximal
 
  # NEW_TEST(FC3Dtest82 FrictionContact3D_test82.c) # Proximal
 
  # NEW_TEST(FC3Dtest90 FrictionContact3D_test90.c) # TFP
 
-
-
   NEW_TEST(FC3DNewFromFortranData FrictionContact3D_newFromFortranData.c)
   NEW_TEST(FC3DLmgcDriver1 FrictionContact3D_LmgcDriver_test1.c)
   NEW_TEST(FC3DLmgcDriver2 FrictionContact3D_LmgcDriver_test2.c)
   NEW_TEST(FC3DLmgcDriver3 FrictionContact3D_LmgcDriver_test3.c)
-IF(MUMPS_FOUND)
+
   NEW_TEST(FC3DLmgcDriver4 FrictionContact3D_LmgcDriver_test4.c)
-ENDIF(MUMPS_FOUND)
+
   NEW_TEST(FC3DLmgcDriver5 FrictionContact3D_LmgcDriver_test5.c)
 
   NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)

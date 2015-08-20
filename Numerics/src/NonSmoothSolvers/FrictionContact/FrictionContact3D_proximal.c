@@ -107,27 +107,31 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
       internalsolver = &frictionContact3D_localAlartCurnier;
 
 #ifdef HAVE_MPI
-      if (internalsolver_options->solverData == MPI_COMM_NULL) /* default */
+      if (internalsolver_options->iparam[13] == 1)   /* MUMPS */
       {
-        internalsolver_options->solverData = NM_MPI_com(NULL);
-        mpi_init = 1;
+        if (internalsolver_options->solverData == MPI_COMM_NULL) /* default */
+        {
+          internalsolver_options->solverData = NM_MPI_com(NULL);
+          mpi_init = 1;
+        }
       }
 #endif
-
       iter_iparam =1;
     }
     else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALFB)
     {
-      internalsolver = &frictionContact3D_localFischerBurmeister;
+      if (internalsolver_options->iparam[13] == 1)   /* MUMPS */
+      {
+        internalsolver = &frictionContact3D_localFischerBurmeister;
 
 #ifdef HAVE_MPI
-      if (internalsolver_options->solverData == MPI_COMM_NULL) /* default */
-      {
-        internalsolver_options->solverData = NM_MPI_com(NULL);
-        mpi_init = 1;
-      }
+        if (internalsolver_options->solverData == MPI_COMM_NULL) /* default */
+        {
+          internalsolver_options->solverData = NM_MPI_com(NULL);
+          mpi_init = 1;
+        }
 #endif
-
+      }
       iter_iparam =1;
     }
   }
