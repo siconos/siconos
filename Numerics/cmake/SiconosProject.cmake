@@ -12,7 +12,7 @@ INCLUDE(SiconosTools)
 
 MACRO(SICONOS_PROJECT 
     _PROJECT_NAME)
-  
+
   # Build options
   # Static and shared libs : defaults
   OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
@@ -30,6 +30,7 @@ MACRO(SICONOS_PROJECT
   OPTION(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings." ON) # ON for developpers, OFF for distributed version
   OPTION(FUCK_DOXYGEN "At your convenience." OFF) 
   OPTION(DEV_MODE "Developer mode." ON)
+  OPTION(WITH_DOCKER "Enable docker targets. Default = off." OFF)
 
   IF(FUCK_DOXYGEN OR NOT DEV_MODE)
     SET(WITH_DOXYGEN_WARNINGS OFF)
@@ -67,9 +68,6 @@ MACRO(SICONOS_PROJECT
   # http://public.kitware.com/Bug/view.php?id=11964
   INCLUDE(GNUInstallDirs)
   ASSERT(CMAKE_INSTALL_LIBDIR)
-
-  # PACKAGE PROJECT SETUP
-  PROJECT(${PROJECT_PACKAGE_NAME})
 
   SET(VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")  
   
@@ -130,6 +128,7 @@ MACRO(SICONOS_PROJECT
   ENDIF(CMAKE_SYSTEM_NAME MATCHES Windows)
   CHECK_FUNCTION_EXISTS(gettimeofday HAVE_SYSTIMES_H)
   IF(MSVC)
+    ENABLE_LANGUAGE(CXX)
     SET(BUILD_AS_CPP TRUE)
     ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
     ADD_DEFINITIONS("-DEHsc") # this shoule be define by CMake, see Windows-MSVC.cmake
@@ -298,6 +297,14 @@ MACRO(SICONOS_PROJECT
     INCLUDE(CPack)
 
   ENDIF(WITH_CPACK)
+
+  FIND_PROGRAM(HAVE_DOCKER docker)
+
+  IF(WITH_DOCKER)
+    IF(HAVE_DOCKER)
+      INCLUDE(Docker)
+    ENDIF()
+  ENDIF()
 
 ENDMACRO(SICONOS_PROJECT)
 

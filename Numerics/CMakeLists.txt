@@ -8,9 +8,7 @@ if(POLICY CMP0042)
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-enable_language(C)
-enable_language(CXX)
-enable_language(Fortran)
+option(WITH_CXX "Enable CXX compiler for Numerics. Default=OFF" OFF)
 
 include(SiconosProject)
 
@@ -25,6 +23,12 @@ well-identified problems.")
 
 if(FAT_BINARY)
   set(CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
+endif()
+
+if(WITH_CXX)
+  project(SiconosNumerics C CXX Fortran)
+else()
+  project(SiconosNumerics C Fortran)
 endif()
 
 siconos_project(Numerics)

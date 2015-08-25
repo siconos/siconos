@@ -1,6 +1,8 @@
 # apply misc flags
 
-INCLUDE(cxxVersion)
+IF(WITH_CXX)
+  INCLUDE(cxxVersion)
+ENDIF()
 INCLUDE(cVersion)
 
 macro(ADD_CXX_OPTIONS OPT)
@@ -111,59 +113,66 @@ IF(CMAKE_C_COMPILER)
 
 ENDIF(CMAKE_C_COMPILER)
 
-IF(CMAKE_CXX_COMPILER)
- detect_cxx_version(CXX_VERSION)
- INCLUDE(TestCXXAcceptsFlag)
 
- IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-  SET(_EXTRA_WARNING_FLAGS "-Werror=unknown-warning-option")
- ELSE()
-  SET(_EXTRA_WARNING_FLAGS "")
- ENDIF()
+IF(WITH_CXX)
+ 
+  if (NOT CMAKE_CXX_COMPILER)
+    message(ABORT "no cxx compiler")
+  endif()
+  
+  detect_cxx_version(CXX_VERSION)
 
- # ADD_CXX_OPTIONS("-static -static-libgcc -static-libstdc++" "GNU;Clang")
- # way too verbose with MSVC
- IF(NOT MSVC)
-  ADD_CXX_OPTIONS("-Wall")
- ENDIF(NOT MSVC)
- IF(NOT WITH_OCC)
-   ADD_CXX_OPTIONS("-Werror=overloaded-virtual")
- ENDIF()
- ADD_CXX_OPTIONS("-Wextra -Wno-unused-parameter")
- ADD_CXX_OPTIONS("-Werror=implicit-function-declaration")
- # should be supported only by Clang. The last statement is important, otherwise nothing compiles ...
- ADD_CXX_OPTIONS("-Werror=conversion -Wno-sign-conversion -Wno-error=sign-conversion Wno-shorten-64-to-32 -Wno-error=shorten-64-to-32")
- # ADD_C_OPTIONS("-Wno-error=shorten-64-to-32") # for clang
-
- IF((NOT WITH_MECHANISMS) AND (NOT SWIG_PROJECT))
-   ADD_CXX_OPTIONS("-Werror=missing-declarations")
- ENDIF()
- ADD_CXX_OPTIONS("-Werror=switch-bool")
- ADD_CXX_OPTIONS("-Werror=logical-not-parentheses")
- ADD_CXX_OPTIONS("-Werror=sizeof-array-argument")
- ADD_CXX_OPTIONS("-Werror=bool-compare")
- ADD_CXX_OPTIONS("-Werror=array-bounds")
- ADD_CXX_OPTIONS("-Werror=format-invalid-specifier")
- ADD_CXX_OPTIONS("-Werror=type-limits")
-
- ADD_CXX_OPTIONS("-Wodr")
-
- IF(NOT CXX_VERSION STRLESS "201102L" AND DEV_MODE)
-  ADD_CXX_OPTIONS("-Wsuggest-final-types")
-  ADD_CXX_OPTIONS("-Wsuggest-final-methods")
-
-  IF(NOT SWIG_PROJECT)
-    ADD_CXX_OPTIONS("-Wzero-as-null-pointer-constant")
+  INCLUDE(TestCXXAcceptsFlag)
+  
+  IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+    SET(_EXTRA_WARNING_FLAGS "-Werror=unknown-warning-option")
+  ELSE()
+    SET(_EXTRA_WARNING_FLAGS "")
   ENDIF()
- ENDIF()
 
- # Compiler Specific
- ADD_CXX_OPTIONS("-diag-disable 654" "Intel")
- IF(NOT ICCOK)
-  ADD_CXX_OPTIONS("-D__aligned__=ignored" "Intel")
- ENDIF(NOT ICCOK)
-
- ADD_CXX_OPTIONS("-Wno-string-plus-int" "Clang")
- ADD_CXX_OPTIONS("-Werror=unreachable-code" "Clang")
-
-ENDIF(CMAKE_CXX_COMPILER)
+  # ADD_CXX_OPTIONS("-static -static-libgcc -static-libstdc++" "GNU;Clang")
+  # way too verbose with MSVC
+  IF(NOT MSVC)
+    ADD_CXX_OPTIONS("-Wall")
+  ENDIF(NOT MSVC)
+  IF(NOT WITH_OCC)
+    ADD_CXX_OPTIONS("-Werror=overloaded-virtual")
+  ENDIF()
+  ADD_CXX_OPTIONS("-Wextra -Wno-unused-parameter")
+  ADD_CXX_OPTIONS("-Werror=implicit-function-declaration")
+  # should be supported only by Clang. The last statement is important, otherwise nothing compiles ...
+  ADD_CXX_OPTIONS("-Werror=conversion -Wno-sign-conversion -Wno-error=sign-conversion Wno-shorten-64-to-32 -Wno-error=shorten-64-to-32")
+  # ADD_C_OPTIONS("-Wno-error=shorten-64-to-32") # for clang
+  
+  IF((NOT WITH_MECHANISMS) AND (NOT SWIG_PROJECT))
+    ADD_CXX_OPTIONS("-Werror=missing-declarations")
+  ENDIF()
+  ADD_CXX_OPTIONS("-Werror=switch-bool")
+  ADD_CXX_OPTIONS("-Werror=logical-not-parentheses")
+  ADD_CXX_OPTIONS("-Werror=sizeof-array-argument")
+  ADD_CXX_OPTIONS("-Werror=bool-compare")
+  ADD_CXX_OPTIONS("-Werror=array-bounds")
+  ADD_CXX_OPTIONS("-Werror=format-invalid-specifier")
+  ADD_CXX_OPTIONS("-Werror=type-limits")
+  
+  ADD_CXX_OPTIONS("-Wodr")
+  
+  IF(NOT CXX_VERSION STRLESS "201102L" AND DEV_MODE)
+    ADD_CXX_OPTIONS("-Wsuggest-final-types")
+    ADD_CXX_OPTIONS("-Wsuggest-final-methods")
+    
+    IF(NOT SWIG_PROJECT)
+      ADD_CXX_OPTIONS("-Wzero-as-null-pointer-constant")
+    ENDIF()
+  ENDIF()
+  
+  # Compiler Specific
+  ADD_CXX_OPTIONS("-diag-disable 654" "Intel")
+  IF(NOT ICCOK)
+    ADD_CXX_OPTIONS("-D__aligned__=ignored" "Intel")
+  ENDIF(NOT ICCOK)
+  
+  ADD_CXX_OPTIONS("-Wno-string-plus-int" "Clang")
+  ADD_CXX_OPTIONS("-Werror=unreachable-code" "Clang")
+  
+ENDIF(WITH_CXX)

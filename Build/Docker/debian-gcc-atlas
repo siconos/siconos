@@ -1,0 +1,14 @@
+# -*- dockerfile -*-
+ 
+FROM debian
+
+RUN apt-get -y update && apt-get -y install \
+     cmake \
+     make \
+     gcc \
+     gfortran \
+     doxygen \
+     libblas-dev \
+     liblapack-dev \
+     libatlas-base-dev \
+     libatlas-dev

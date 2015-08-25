@@ -1,7 +1,6 @@
 #
 # Here comes Numerics
 #
-PROJECT(SiconosNumerics C CXX Fortran)
 
 include(FortranCInterface)
 # Set module files directory (i.e. where .mod will be created)
@@ -221,7 +220,9 @@ IF(WITH_TESTING)
   NEW_TEST(odepacktest7 DLSODIS-test.f)
   NEW_TEST(odepacktest8 DLSODKR-test.f)
   NEW_TEST(odepacktest9 DLSOIBT-test.f)
-  NEW_TEST(odepacktest10 test-funcC-inC.cpp funC.cpp)
+  if(WITH_CXX)
+    NEW_TEST(odepacktest10 test-funcC-inC.cpp funC.cpp)
+  endif()
   END_TEST()
 
   BEGIN_TEST(hairer/test)
@@ -422,7 +423,9 @@ IF(WITH_TESTING)
 
   BEGIN_TEST(NonSmoothSolvers/MLCP/test)
   IF(HAVE_SYSTIMES_H)
-    NEW_TEST(MLCPtest main_mlcp.cpp)
+    if(WITH_CXX)
+      NEW_TEST(MLCPtest main_mlcp.cpp)
+    endif()
   ENDIF(HAVE_SYSTIMES_H)
   NEW_TEST(ReadWrite_MLCPtest MixedLinearComplementarity_ReadWrite_test.c)
   END_TEST()

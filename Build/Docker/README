@@ -1,0 +1,10 @@
+Specification for docker images
+
+/!\ only Numerics at the moment
+
+cmake -DWITH_DOCKER=1 -DDOCKER_IMAGE=debian-gcc-atlas -DDOCKER_CMAKE_FLAGS=... -DDOCKER_MAKE_FLAGS=...
+
+make docker-image
+make docker-cmake
+make docker-make
+make docker-make-test

@@ -1,0 +1,6 @@
+# -*- dockerfile -*-
+ 
+FROM siconos/debian-gcc-atlas
+
+RUN apt-get -y update && apt-get -y install \
+    libmumps-dev
