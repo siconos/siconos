@@ -32,6 +32,8 @@
 #include "SiconosBlas.h"
 #include "SiconosLapack.h"
 
+#include "sanitizer.h"
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -644,11 +646,11 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
 
   /* q vector */
   double* q_bar = mat;
-  cblas_dcopy(n, q, 1, q_bar, 1);
+  cblas_dcopy_msan(n, q, 1, q_bar, 1);
 
   /* covering vector for the auxiliary variable */
   double* d = &mat[(n+1)*n];
-  if (cov_vec)  cblas_dcopy(n, cov_vec, 1, d, 1);
+  if (cov_vec) cblas_dcopy_msan(n, cov_vec, 1, d, 1);
   else for (unsigned int i = 0; i < n; ++i) d[i] = 1.0;
 
   /* take care of M */
@@ -659,7 +661,7 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
     if (u[i] > DBL_EPSILON) // M_bas[:, i] = M[:, i]
     {
       basis[i] = i + 2 + n;
-      cblas_dcopy(n, &M[i*n], 1, &mat_basic[i*n], 1);
+      cblas_dcopy_msan(n, &M[i*n], 1, &mat_basic[i*n], 1);
       memset(&mat_nonbasic[i*n], 0, sizeof(double) * n);
       mat_nonbasic[i*n + i] = -1.0;
     }
@@ -668,7 +670,7 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
           * M_bas[:, i] = -I[:, i] */
     {
       basis[i] = i + 1;
-      cblas_dcopy(n, &M[i*n], 1, &mat_nonbasic[i*n], 1);
+      cblas_dcopy_msan(n, &M[i*n], 1, &mat_nonbasic[i*n], 1);
       memset(&mat_basic[i*n], 0, sizeof(double) * n);
       mat_basic[i*n + i] = -1.0;
     }

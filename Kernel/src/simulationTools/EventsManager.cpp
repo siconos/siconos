@@ -150,7 +150,7 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
   unsigned int pos;
   pos = insertEv(_eNonSmooth);
   // looking for a TD event close to the NS one.
-  mpz_t delta_time;
+  mpz_t delta_time = {};
   mpz_init(delta_time); // initialize delta_time
   for (unsigned int j = 1; j < _events.size(); j++)
   {

@@ -24,6 +24,8 @@
 #include "LCP_Solvers.h"
 #include "QP_Solvers.h"
 
+#include "sanitizer.h"
+
 void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* size of the LCP */
@@ -90,6 +92,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
 
   /*  on return, lambda contains the lagrange multipliers.*/
   lambda = (double *)malloc(mnn * sizeof(double));
+  MSAN_INIT_VAR(lambda, mnn);
 
   /* /   integer indicating the desired output unit number,*/
   iout = 6;

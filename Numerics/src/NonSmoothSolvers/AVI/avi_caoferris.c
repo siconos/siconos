@@ -30,6 +30,8 @@
 
 #include "SiconosLapack.h"
 
+#include "sanitizer.h"
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -131,7 +133,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   DEBUG_PRINT_MAT(copyA, n, n);
 
   /* do some precomputation for \bar{q}: B_A_T^{-1}q_{AVI} */
-  cblas_dcopy(n, problem->q, 1, a_bar, 1);
+  cblas_dcopy_msan(n, problem->q, 1, a_bar, 1);
   DGETRS(LA_NOTRANS, n, 1, B_A_T, n, ipiv, a_bar, n, &infoLAPACK);
   assert(infoLAPACK == 0  && "avi_caoferris :: info from DGETRS for solving B_A_T X = a_bar is not zero!\n");
   DEBUG_PRINT_VEC_STR("B_A_T{-1}q_{AVI}", a_bar, n);

@@ -23,6 +23,8 @@
 
 #include "Relay_Solvers.h"
 
+#include "sanitizer.h"
+
 void project_on_box(int n, double* restrict z, double* restrict lb, double* restrict ub)
 {
 
@@ -45,7 +47,7 @@ int relay_compute_error(RelayProblem* problem, double* restrict z , double* rest
   cblas_dcopy(n , problem->q , 1 , w , 1);  // w <-q
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
   double * ztmp = (double*)malloc(n * sizeof(double));
-  cblas_dcopy(n , z , 1 , ztmp, 1);  // ztmp <-z
+  cblas_dcopy_msan(n , z , 1 , ztmp, 1);  // ztmp <-z
 
   double rho = -1.0;
   cblas_daxpy(n, rho, w, 1, ztmp, 1);    //ztmp <- ztmp - rho w
