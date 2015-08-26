@@ -1,0 +1,24 @@
+# -*- dockerfile -*-
+ 
+FROM fedora
+
+RUN dnf install -y \
+     cmake \
+     make \
+     clang \
+     gcc-gfortran \
+     gcc-c++ \
+     doxygen \
+     openblas-devel \
+     lapack-devel \
+     boost-devel \
+     gmp-devel \
+     cppunit \
+     cppunit-devel \
+     scipy \
+     python-devel \
+     python-lxml \
+     pytest
+
+ENV CC /usr/bin/clang
+ENV CXX /usr/bin/clang++

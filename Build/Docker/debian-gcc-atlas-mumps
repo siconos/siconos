@@ -3,4 +3,8 @@
 FROM siconos/debian-gcc-atlas
 
 RUN apt-get -y update && apt-get -y install \
+    libopenmpi-dev \
+    openssh-client \
+    libscalapack-mpi-dev \
+    libmetis-dev \
     libmumps-dev
