@@ -99,18 +99,28 @@ extern "C"
   */
   int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
-
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
       \param options the solver options :
-      iparam[0] : Maximum iteration number
-      iparam[1] : error computation. 0 : Complete error computation with velocity computation 1: Light error computation with incremental values on reaction verification of absolute error at the end 2: only light error computation (velocity not computed)
-      The internal (local) solver must set by the SolverOptions options[1]
-  */
+      [in] iparam[0] : Maximum iteration number
+      [in] iparam[1] : error computation method :
+          0 : Complete error computation with velocity computation
+          1: Light error computation with incremental values on reaction verification of absolute error at the end
+          2: only light error computation (velocity not computed)
+      [out]iparam[7] = iter number of performed iterations
+      [in] iparam[8] : method uses overrelaxation
+      [in] iparam[9] : shuffle the contact indices in the loop
 
+      [in]  dparam[0]  user tolerance on the loop
+      [in]  dparam[8]  the relaxation parameter omega
+      [out] dparam[1]  reached error
+
+      The internal (local) solver must set by the SolverOptions options[1]
+
+  */
   void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   void frictionContact3D_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact);
