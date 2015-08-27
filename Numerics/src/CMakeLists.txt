@@ -44,6 +44,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/AVI
   NonSmoothSolvers/LCP
   NonSmoothSolvers/MLCP
+  NonSmoothSolvers/SOCP
   NonSmoothSolvers/LinearSystem
   NonSmoothSolvers/QP
   NonSmoothSolvers/Relay
