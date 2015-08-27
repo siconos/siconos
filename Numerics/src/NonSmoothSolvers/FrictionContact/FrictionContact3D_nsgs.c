@@ -356,7 +356,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-  int contact; /* Number of the current row of blocks in M */
+  unsigned int contact; /* Number of the current row of blocks in M */
 
   unsigned int *scontacts = NULL;
 
@@ -377,10 +377,10 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
   if (iparam[1] == 1 || iparam[1] == 2)
   {
-
+    double reactionold[3];
     while ((iter < itermax) && (hasNotConverged > 0))
     {
-      double reactionold[3];
+
       ++iter;
       /* Loop through the contact points */
       //cblas_dcopy( n , q , incx , velocity , incy );
@@ -438,45 +438,191 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   }
   else
   {
-    while ((iter < itermax) && (hasNotConverged > 0))
+
+    if (iparam[9])
     {
-      ++iter;
-      /* Loop through the contact points */
-      //cblas_dcopy( n , q , incx , velocity , incy );
-      for (unsigned int i= 0 ; i < nc ; ++i)
+      int withRelaxation=iparam[8];
+      if (withRelaxation)
       {
-        if (iparam[9])
+        double reactionold[3];
+
+        double omega = dparam[8];
+        while ((iter < itermax) && (hasNotConverged > 0))
         {
-          contact = scontacts[i];
-        }
-        else
-        {
-          contact = i;
+          ++iter;
+          /* Loop through the contact points */
+          //cblas_dcopy( n , q , incx , velocity , incy );
+          for (unsigned int i= 0 ; i < nc ; ++i)
+          {
+
+            contact = scontacts[i];
+
+            reactionold[0] = reaction[3 * contact];
+            reactionold[1] = reaction[3 * contact + 1];
+            reactionold[2] = reaction[3 * contact + 2];
+
+            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
+            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+            localsolver_options->iparam[4] = contact;
+            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+
+            reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
+            reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
+            reaction[3 * contact+2] = omega*reaction[3 * contact+2]+(1.0-omega)*reactionold[2];
+          }
+
+          /* **** Criterium convergence **** */
+          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+
+          if (verbose > 0)
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+
+          if (error < tolerance) hasNotConverged = 0;
+          *info = hasNotConverged;
+
+          if (options->callback)
+          {
+            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
+                                                     reaction, velocity,
+                                                     error, NULL);
+          }
         }
 
-        if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-        (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-        localsolver_options->iparam[4] = contact;
-        (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+      }
+      else
+      {
+        while ((iter < itermax) && (hasNotConverged > 0))
+        {
+          ++iter;
+          /* Loop through the contact points */
+          //cblas_dcopy( n , q , incx , velocity , incy );
+          for (unsigned int i= 0 ; i < nc ; ++i)
+          {
+
+            contact = scontacts[i];
+
+
+            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
+            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+            localsolver_options->iparam[4] = contact;
+            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+
+          }
+
+          /* **** Criterium convergence **** */
+          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+
+          if (verbose > 0)
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+
+          if (error < tolerance) hasNotConverged = 0;
+          *info = hasNotConverged;
+
+          if (options->callback)
+          {
+            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
+                                                     reaction, velocity,
+                                                     error, NULL);
+          }
+        }
+
       }
 
-      /* **** Criterium convergence **** */
-      (*computeError)(problem, reaction , velocity, tolerance, options, &error);
-
-      if (verbose > 0)
-        printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
-
-      if (error < tolerance) hasNotConverged = 0;
-      *info = hasNotConverged;
-
-      if (options->callback)
-      {
-        options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                                        reaction, velocity,
-                                        error, NULL);
-      }
 
     }
+    else
+    {
+      int withRelaxation=iparam[8];
+      if(withRelaxation)
+      {
+        double reactionold[3];
+        double omega = dparam[8];
+        while ((iter < itermax) && (hasNotConverged > 0))
+        {
+          ++iter;
+          /* Loop through the contact points */
+          //cblas_dcopy( n , q , incx , velocity , incy );
+          for (contact= 0 ; contact < nc ; ++contact)
+          {
+            if (withRelaxation)
+            {
+              reactionold[0] = reaction[3 * contact];
+              reactionold[1] = reaction[3 * contact + 1];
+              reactionold[2] = reaction[3 * contact + 2];
+            }
+
+            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
+            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+            localsolver_options->iparam[4] = contact;
+            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+            if(withRelaxation)
+            {
+              reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
+              reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
+              reaction[3 * contact+2] = omega*reaction[3 * contact+2]+(1.0-omega)*reactionold[2];
+            }
+          }
+
+          /* **** Criterium convergence **** */
+          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+
+          if (verbose > 0)
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+
+          if (error < tolerance) hasNotConverged = 0;
+          *info = hasNotConverged;
+
+          if (options->callback)
+          {
+            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
+                                                     reaction, velocity,
+                                                     error, NULL);
+          }
+        }
+
+      }
+      else
+      {
+        while ((iter < itermax) && (hasNotConverged > 0))
+        {
+          ++iter;
+          /* Loop through the contact points */
+          //cblas_dcopy( n , q , incx , velocity , incy );
+          for (contact= 0 ; contact < nc ; ++contact)
+          {
+
+
+            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
+            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+            localsolver_options->iparam[4] = contact;
+            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+
+          }
+
+          /* **** Criterium convergence **** */
+          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+
+          if (verbose > 0)
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+
+          if (error < tolerance) hasNotConverged = 0;
+          *info = hasNotConverged;
+
+          if (options->callback)
+          {
+            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
+                                                     reaction, velocity,
+                                                     error, NULL);
+          }
+        }
+
+      }
+    }
+
+
+
+
+
   }
   dparam[0] = tolerance;
   dparam[1] = error;

@@ -617,6 +617,9 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest200 FrictionContact3D_test200.c)
   NEW_TEST(FC3Dtest210 FrictionContact3D_test210.c)
 
+  NEW_TEST(FC3Dtest300 FrictionContact3D_test300.c)
+
+
   # Global Alart Curnier + Rover ok.
   NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALAC Example1_Fc3D.dat)
   NEW_FC_TEST(SICONOS_FRICTION_3D_LOCALFB Example1_Fc3D.dat)
