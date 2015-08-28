@@ -27,8 +27,8 @@ enum SOCLCP_SOLVER
   /* SICONOS_SOCLCP_AlartCurnierNewton = 550, */
   /* SICONOS_SOCLCP_NCPGlockerFBNewton = 551, */
   /* SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization = 552, */
-  SICONOS_SOCLCP_ProjectionOnCone = 1153
-                                    /* SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration = 554, */
+  SICONOS_SOCLCP_ProjectionOnCone = 1153,
+  SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration = 1154
                                     /* SICONOS_SOCLCP_projectionOnConeWithRegularization = 555, */
                                     /* SICONOS_SOCLCP_NCPGlockerFBPATH = 556, */
                                     /* SICONOS_SOCLCP_projectionOnCylinder = 557, */

@@ -31,6 +31,11 @@
 #include <assert.h>
 #include <time.h>
 
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+
+#include "debug.h"
+
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 /* void fake_compute_error_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, double tolerance, SolverOptions  *options,  double* error) */
@@ -100,15 +105,15 @@ void soclcp_initializeLocalSolver_nsgs(Solver_soclcp_Ptr* solve, Update_soclcp_P
   /*   soclcp_projection_initialize(problem, localproblem); */
   /*   break; */
   /* } */
-  /* case SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration: */
-  /* { */
-  /*   *solve = &soclcp_projectionOnConeWithLocalIteration_solve; */
-  /*   *update = &soclcp_projection_update; */
-  /*   *freeSolver = (FreeSolverNSGS_soclcp_Ptr)&soclcp_projectionOnConeWithLocalIteration_free; */
-  /*   *computeError = (ComputeError_soclcp_Ptr)&soclcp_compute_error; */
-  /*   soclcp_projectionOnConeWithLocalIteration_initialize(problem, localproblem,localsolver_options ); */
-  /*   break; */
-  /* } */
+  case SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration:
+  {
+    *solve = &soclcp_projectionOnConeWithLocalIteration_solve;
+    *update = &soclcp_nsgs_update;
+    *freeSolver = (FreeSolverNSGS_soclcp_Ptr)&soclcp_projectionOnConeWithLocalIteration_free;
+    *computeError = (ComputeError_soclcp_Ptr)&soclcp_compute_error;
+    soclcp_projectionOnConeWithLocalIteration_initialize(problem, localproblem,localsolver_options );
+    break;
+  }
   /* case SICONOS_SOCLCP_projectionOnConeWithRegularization: */
   /* { */
   /*   *solve = &soclcp_projectionOnCone_solve; */
@@ -214,7 +219,7 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
 
   int normal = problem->coneIndex[cone];
 
-  int dim = problem->coneIndex[cone+1]-problem->coneIndex[cone+1];
+  int dim = problem->coneIndex[cone+1]-problem->coneIndex[cone];
 
 
   /* r current block set to zero, to exclude current contact block */
@@ -247,13 +252,14 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
     /* qLocal += rowMB * r
     with rowMB the row of blocks of MGlobal which corresponds to the current contact
     */
+    DEBUG_PRINTF("dim= %i\n", dim);
     rowProdNoDiagSBM(n, dim, cone, problem->M->matrix1, r, qLocal, 0);
   }
   for(int i = 0; i < dim; i++)
   {
     r[normal + i]=  rsave[i];
   }
-
+  free(rsave);
 }
 
 void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, int cone)

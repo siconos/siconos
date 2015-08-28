@@ -33,11 +33,15 @@ int soclcp_test_function(FILE * f, SolverOptions * options)
   info = secondOrderConeLinearComplementarityProblem_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
+
   info = secondOrderConeLinearComplementarityProblem_printInFile(problem, foutput);
+
+  secondOrderConeLinearComplementarityProblem_display(problem);
 
   NumericsOptions global_options;
   setDefaultNumericsOptions(&global_options);
   global_options.verboseMode = 1; // turn verbose mode to off by default
+
 
   int n = problem->n;
 

@@ -42,7 +42,7 @@ void soclcp_unitary_compute_and_add_error(double *z , double *w, double mu, doub
   double worktmp[3];
   /* Compute the modified local velocity */
   normUT = hypot(w[1], w[2]); // i.e sqrt(w[ic3p1]*w[ic3p1]+w[ic3p2]*w[ic3p2]);
-  worktmp[0] = z[0] - rho * (w[0] + mu * normUT);
+  worktmp[0] = z[0] - rho * w[0];
   worktmp[1] = z[1] - rho * w[1] ;
   worktmp[2] = z[2] - rho * w[2] ;
   projectionOnCone(worktmp, mu);

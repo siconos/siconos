@@ -22,43 +22,25 @@
 #include "soclcp_test_function.h"
 
 
-#include "../FrictionContact/test-utils/frictionContact_test_function.h"
-
-
 
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
-  FILE * finput  =  fopen("../../FrictionContact/test/data/Capsules-i122-1617.dat", "r");
+  printf("Test on ./data/Capsules-i122-1617.dat \n");
 
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
+  FILE * finput  =  fopen("./data/Capsules-i122-1617.dat", "r");
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
+  info = soclcp_setDefaultSolverOptions(options, SICONOS_SOCLCP_NSGS);
+  options->dparam[0] = 1e-08;
+  options->iparam[0] = 20000;
+  options->internalSolvers->solverId = SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration;
+  options->internalSolvers->dparam[0]=1e-16;
+  options->internalSolvers->iparam[0]=100;
+  info = soclcp_test_function(finput, options);
 
-  info = frictionContact_newFromFile(problem, finput);
-
-
-  unsigned int * coneIndex = (unsigned int *) malloc((problem->numberOfContacts+1)*sizeof(unsigned int));
-
-  for(int i = 0; i < problem->numberOfContacts+1; i++)
-  {
-    coneIndex[i]=i*3;
-  }
-  int n = coneIndex[problem->numberOfContacts];
-  SecondOrderConeLinearComplementarityProblem* soclcp =  secondOrderConeLinearComplementarityProblem_new
-      (n, problem->numberOfContacts, problem->M, problem->q, coneIndex, problem->mu);
-
-  secondOrderConeLinearComplementarityProblem_display(soclcp);
-
-  FILE * foutput  =  fopen("./data/Capsules-i122-1617.dat", "w");
-  info = secondOrderConeLinearComplementarityProblem_printInFile(soclcp, foutput);
-
-
-
-
-
-
-
+  deleteSolverOptions(options);
+  free(options);
   fclose(finput);
-  printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("\nEnd of test on ./data/Capsules-i122-1617.dat \n");
   return info;
 }

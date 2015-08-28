@@ -266,7 +266,7 @@ void soclcp_projectionOnConeWithLocalIteration_free(SecondOrderConeLinearComplem
   localsolver_options->dWork=NULL;
 }
 
-int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions* options)
+int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* r, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -275,7 +275,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   double * MLocal = localproblem->M->matrix0;
   double * qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
-  int nLocal = 3;
+  int nLocal = localproblem->n;;
 
 
   /*   /\* Builds local problem for the current cone *\/ */
@@ -298,14 +298,15 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   /* printf ("saved rho = %14.7e\n",rho ); */
   /* printf ("options->iparam[4] = %i\n",options->iparam[4] ); */
 
-
-
   int incx = 1, incy = 1;
 
 
+  double * v = (double*)malloc(nLocal*sizeof(double));
+  double * v_k = (double*)malloc(nLocal*sizeof(double));
+  double * r_k = (double*)malloc(nLocal*sizeof(double));
 
-  double velocity[3],velocity_k[3],reaction_k[3];
-  double normUT;
+
+
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
   int localiter = 0;
@@ -335,45 +336,42 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
     /* Store the error */
     localerror_k = localerror;
 
-    /* store the reaction at the beginning of the iteration */
-    cblas_dcopy(nLocal , reaction , 1 , reaction_k, 1);
-
-
+    /* store r at the beginning of the iteration */
+    cblas_dcopy(nLocal , r , 1 , r_k, 1);
 
     /* velocity_k <- q  */
-    cblas_dcopy(nLocal , qLocal , 1 , velocity_k, 1);
+    cblas_dcopy(nLocal , qLocal , 1 , v_k, 1);
 
     /* velocity_k <- q + M * reaction  */
-    cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocity_k, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, r, incx, 1.0, v_k, incy);
 
 
     ls_iter = 0 ;
     success =0;
 
-    normUT = sqrt(velocity_k[1] * velocity_k[1] + velocity_k[2] * velocity_k[2]);
     while(!success && (ls_iter < ls_itermax))
     {
 
       rho_k = rho * pow(tau,ls_iter);
-      reaction[0] = reaction_k[0] -  rho_k * (velocity_k[0] + mu_i * normUT);
-      reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
-      reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
+      r[0] = r_k[0] -  rho_k * v_k[0];
+      r[1] = r_k[1] - rho_k * v_k[1];
+      r[2] = r_k[2] - rho_k * v_k[2];
 
-      projectionOnCone(&reaction[0], mu_i);
+      projectionOnSecondOrderCone(&r[0], mu_i,nLocal);
 
-      /* velocity <- q  */
-      cblas_dcopy(nLocal , qLocal , 1 , velocity, 1);
+      /* v <- q  */
+      cblas_dcopy(nLocal , qLocal , 1 , v, 1);
 
-      /* velocity <- q + M * reaction  */
-      cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocity, incy);
+      /* v <- q + M * r  */
+      cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, r, incx, 1.0, v, incy);
 
-      a1 = sqrt((velocity_k[0] - velocity[0]) * (velocity_k[0] - velocity[0]) +
-                (velocity_k[1] - velocity[1]) * (velocity_k[1] - velocity[1]) +
-                (velocity_k[2] - velocity[2]) * (velocity_k[2] - velocity[2]));
+      a1 = sqrt((v_k[0] - v[0]) * (v_k[0] - v[0]) +
+                (v_k[1] - v[1]) * (v_k[1] - v[1]) +
+                (v_k[2] - v[2]) * (v_k[2] - v[2]));
 
-      a2 = sqrt((reaction_k[0] - reaction[0]) * (reaction_k[0] - reaction[0]) +
-                (reaction_k[1] - reaction[1]) * (reaction_k[1] - reaction[1]) +
-                (reaction_k[2] - reaction[2]) * (reaction_k[2] - reaction[2]));
+      a2 = sqrt((r_k[0] - r[0]) * (r_k[0] - r[0]) +
+                (r_k[1] - r[1]) * (r_k[1] - r[1]) +
+                (r_k[2] - r[2]) * (r_k[2] - r[2]));
 
 
 
@@ -390,11 +388,11 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
       ls_iter++;
     }
 
-    /* printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror); */
+    /* printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);  */
 
     /* compute local error */
     localerror =0.0;
-    soclcp_unitary_compute_and_add_error(reaction , velocity, mu_i, &localerror);
+    soclcp_unitary_compute_and_add_error(r , v, mu_i, &localerror);
 
 
     /*Update rho*/
@@ -451,37 +449,31 @@ int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* l
   /*  /\* Builds local problem for the current cone *\/ */
   /*   soclcp_projection_update(cone, reaction); */
 
-
-
   double * MLocal = localproblem->M->matrix0;
   double * qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
-  int nLocal = 3;
+  int nLocal = localproblem->n;
 
   /* this part is critical for the success of the projection */
-  /*double an = 1./(MLocal[0]);*/
-  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
-  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] + MLocal[1*nLocal+2]; */
-  /*   double beta = alpha*alpha - 4*det; */
-  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
-
   //double an = 1./(MLocal[0]+mu_i);
   double an = 1. / (MLocal[0]);
 
 
   int incx = 1, incy = 1;
-  double worktmp[3];
-  double normUT;
+  double * worktmp = (double*)malloc(nLocal*sizeof(double));
+
   cblas_dcopy(nLocal , qLocal, incx , worktmp , incy);
 
-  cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, worktmp, incy);
-  normUT = sqrt(worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
-  reaction[0] -= an * (worktmp[0] + mu_i * normUT);
-  reaction[1] -= an * worktmp[1];
-  reaction[2] -= an * worktmp[2];
+  cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, reaction, incx, 1.0, worktmp, incy);
 
+  for (int i =0; i < nLocal ; i++)
+  {
+    reaction[i] -= an * worktmp[i];
+  }
 
-  projectionOnCone(reaction, mu_i);
+  free(worktmp);
+
+  projectionOnSecondOrderCone(reaction, mu_i, nLocal);
   return 0;
 
 }

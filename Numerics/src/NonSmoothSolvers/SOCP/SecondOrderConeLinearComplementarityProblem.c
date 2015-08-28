@@ -130,8 +130,12 @@ int secondOrderConeLinearComplementarityProblem_printInFilename(SecondOrderConeL
 int secondOrderConeLinearComplementarityProblem_newFromFile(SecondOrderConeLinearComplementarityProblem* problem, FILE* file)
 {
   DEBUG_PRINT("Start -- int secondOrderConeLinearComplementarityProblem_newFromFile(SecondOrderConeLinearComplementarityProblem* problem, FILE* file)\n");
+  int n = 0;
   int nc = 0;
   int i;
+
+  CHECK_IO(fscanf(file, "%d\n", &n));
+  problem->n = n;
   CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->nc = nc;
   problem->M = newNumericsMatrix();
