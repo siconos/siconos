@@ -823,6 +823,7 @@ IF(WITH_TESTING)
 
   BEGIN_TEST(NonSmoothSolvers/SOCP/test)
     NEW_TEST(SOCLCP_test1 soclcp_test1.c)
+    NEW_TEST(SOCLCP_test2 soclcp_test2.c)
     NEW_TEST(SOCLCP_fc3d_to_soclcp  fc3d_to_soclcp.c)
   END_TEST(NonSmoothSolvers/SOCP/test)
 

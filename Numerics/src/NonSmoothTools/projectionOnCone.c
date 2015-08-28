@@ -42,3 +42,17 @@ void projectionOnCone(double* r, double  mu)
     return;
   }
 }
+
+void projectionOnSecondOrderCone(double* r, double  mu, int size)
+{
+  if (size ==3)
+  {
+    projectionOnCone(r, mu);
+  }
+  else
+  {
+    fprintf(stderr, "Numerics, projectionOnSecondOrderCone f not yet implementes for size != 3 \n");
+    exit(EXIT_FAILURE);
+  }
+
+}
