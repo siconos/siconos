@@ -35,14 +35,14 @@ void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearCo
   int i, n ;
 
   n=0;
-  for (i =0; i < problem->nc; ++i)
+  for(i =0; i < problem->nc; ++i)
   {
-    n += problem->coneDimensions[i];
+    n += problem->coneIndex[i];
   }
   printf("SecondOrderConeLinearComplementarityProblem Display :\n-------------\n");
   printf("nc:%d \n", problem->nc);
 
-  if (problem->M)
+  if(problem->M)
   {
     printf("M matrix:\n");
     display(problem->M);
@@ -50,25 +50,25 @@ void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearCo
   else
     printf("No M matrix:\n");
 
-  if (problem->q)
+  if(problem->q)
   {
     printf("q vector:\n");
-    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
+    for(i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
   }
   else
     printf("No q vector:\n");
 
-  if (problem->coneDimensions)
+  if(problem->coneIndex)
   {
-    printf("coneDimensions vector:\n");
-    for (i = 0; i < problem->nc; i++) printf("coneDimensions[ %i ] = %i\n", i, problem->coneDimensions[i]);
+    printf("coneIndex vector:\n");
+    for(i = 0; i < problem->nc+1; i++) printf("coneIndex[ %i ] = %i\n", i, problem->coneIndex[i]);
   }
   else
     printf("No mu vector:\n");
-  if (problem->mu)
+  if(problem->mu)
   {
     printf("mu vector:\n");
-    for (i = 0; i < problem->nc; i++) printf("mu[ %i ] = %12.8e\n", i, problem->mu[i]);
+    for(i = 0; i < problem->nc; i++) printf("mu[ %i ] = %12.8e\n", i, problem->mu[i]);
   }
   else
     printf("No mu vector:\n");
@@ -81,26 +81,29 @@ void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearCo
 
 int secondOrderConeLinearComplementarityProblem_printInFile(SecondOrderConeLinearComplementarityProblem*  problem, FILE* file)
 {
-  if (! problem)
+  if(! problem)
   {
     fprintf(stderr, "Numerics, SecondOrderConeLinearComplementarityProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   int i;
+  int n = problem->n;
+  fprintf(file, "%d\n", n);
   int nc = problem->nc;
   fprintf(file, "%d\n", nc);
   printInFile(problem->M, file);
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
   fprintf(file, "\n");
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc+1; i++)
   {
-    fprintf(file, "%i ", problem->coneDimensions[i]);
+    fprintf(file, "%i ", problem->coneIndex[i]);
   }
+  fprintf(file, "\n");
 
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     fprintf(file, "%32.24e ", problem->mu[i]);
   }
@@ -113,7 +116,7 @@ int secondOrderConeLinearComplementarityProblem_printInFilename(SecondOrderConeL
   int info = 0;
   FILE * file = fopen(filename, "w");
 
-  if (!file)
+  if(!file)
   {
     return errno;
   }
@@ -138,18 +141,18 @@ int secondOrderConeLinearComplementarityProblem_newFromFile(SecondOrderConeLinea
   newFromFile(problem->M, file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
-  problem->coneDimensions = (int *) malloc(nc * sizeof(int));
-  for (i = 0; i < nc; i++)
+  problem->coneIndex = (unsigned int *) malloc((nc+1) * sizeof(unsigned int));
+  for(i = 0; i < nc+1; i++)
   {
-    CHECK_IO(fscanf(file, "%d ", &(problem->coneDimensions[i])));
+    CHECK_IO(fscanf(file, "%d ", &(problem->coneIndex[i])));
   }
 
   problem->mu = (double *) malloc(nc * sizeof(double));
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
@@ -163,7 +166,7 @@ int secondOrderConeLinearComplementarityProblem_newFromFilename(SecondOrderConeL
   int info = 0;
   FILE * file = fopen(filename, "r");
 
-  if (!file)
+  if(!file)
   {
     return errno;
   }
@@ -181,20 +184,21 @@ void freeSecondOrderConeLinearComplementarityProblem(SecondOrderConeLinearComple
   free(problem->M);
   free(problem->mu);
   free(problem->q);
-  free(problem->coneDimensions);
+  free(problem->coneIndex);
   free(problem);
   problem = NULL;
 
 }
 
-SecondOrderConeLinearComplementarityProblem* secondOrderConeLinearComplementarityProblem_new( int nc, NumericsMatrix* M, double* q, int *coneDimensions, double* mu)
+SecondOrderConeLinearComplementarityProblem* secondOrderConeLinearComplementarityProblem_new(int n,  int nc, NumericsMatrix* M, double* q, unsigned int *coneIndex, double* mu)
 {
   SecondOrderConeLinearComplementarityProblem* soclcp = (SecondOrderConeLinearComplementarityProblem*) malloc(sizeof(SecondOrderConeLinearComplementarityProblem));
 
+  soclcp->n = n;
   soclcp->nc = nc;
   soclcp->M = M;
   soclcp->q = q;
-  soclcp->coneDimensions = coneDimensions;
+  soclcp->coneIndex = coneIndex;
   soclcp->mu = mu;
 
   return soclcp;

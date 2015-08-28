@@ -743,6 +743,11 @@ IF(WITH_TESTING)
 
 
   END_TEST()
+
+
+
+
+
   
   BEGIN_TEST(NonSmoothSolvers/GenericMechanical/test)
   NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP0.dat)
@@ -814,6 +819,17 @@ IF(WITH_TESTING)
   ENDIF(HAS_ONE_LP_SOLVER)
 
   END_TEST(NonSmoothSolvers/AVI/test)
+
+
+  BEGIN_TEST(NonSmoothSolvers/SOCP/test)
+    NEW_TEST(SOCLCP_test1 soclcp_test1.c)
+    NEW_TEST(SOCLCP_fc3d_to_soclcp  fc3d_to_soclcp.c)
+  END_TEST(NonSmoothSolvers/SOCP/test)
+
+
+
+
+
 ENDIF(WITH_TESTING)
 
 

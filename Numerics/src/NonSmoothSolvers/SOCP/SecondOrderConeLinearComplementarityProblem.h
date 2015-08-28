@@ -91,6 +91,9 @@
  */
 typedef struct
 {
+  /** the problem dimenction. must equal to\f$ \sum_{i}^{n_c} d_i \f$   */
+  int n;
+
   /** the number of cones \f$ n_c \f$ in the Cartesian product */
   int nc;
   /** M \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
@@ -98,9 +101,9 @@ typedef struct
   NumericsMatrix* M;
   /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
-  /** coneDimensions \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of dimension of the cones
-      (\f$ n_c =\f$ numberOfContacts) */
-  int* coneDimensions;
+  /** coneIndex \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of indices of the cones
+      (\f$ n_c =\f$ nc) */
+  unsigned int* coneIndex;
   /** mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of coefficients
       (\f$ n_c =\f$ nc) */
   double* mu;
@@ -112,56 +115,57 @@ extern "C"
 
 {
 #endif
-  /** display a SecondOrderConeLinearComplementarityProblem
-   * \param problem the problem to display
-   */
-  void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearComplementarityProblem*  problem);
+/** display a SecondOrderConeLinearComplementarityProblem
+ * \param problem the problem to display
+ */
+void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearComplementarityProblem*  problem);
 
-  /** print a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format)
-   * \param problem the problem to print out
-   * \param file the dest file
-   * \return 0 if successfull
-   */
-  int secondOrderConeLinearComplementarityProblem_printInFile(SecondOrderConeLinearComplementarityProblem*  problem, FILE* file);
+/** print a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format)
+ * \param problem the problem to print out
+ * \param file the dest file
+ * \return 0 if successfull
+ */
+int secondOrderConeLinearComplementarityProblem_printInFile(SecondOrderConeLinearComplementarityProblem*  problem, FILE* file);
 
-  /** print a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from its filename
-   * \param problem the problem to print out
-   * \param filename the dest file
-   * \return 0 if successfull
-   */
-  int secondOrderConeLinearComplementarityProblem_printInFilename(SecondOrderConeLinearComplementarityProblem*  problem, char * filename);
+/** print a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from its filename
+ * \param problem the problem to print out
+ * \param filename the dest file
+ * \return 0 if successfull
+ */
+int secondOrderConeLinearComplementarityProblem_printInFilename(SecondOrderConeLinearComplementarityProblem*  problem, char * filename);
 
-  /** read a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format)
-   * \param problem the problem to read
-   * \param file the target file
-   * \return 0 if successfull
-   */
-  int secondOrderConeLinearComplementarityProblem_newFromFile(SecondOrderConeLinearComplementarityProblem*  problem, FILE* file);
+/** read a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format)
+ * \param problem the problem to read
+ * \param file the target file
+ * \return 0 if successfull
+ */
+int secondOrderConeLinearComplementarityProblem_newFromFile(SecondOrderConeLinearComplementarityProblem*  problem, FILE* file);
 
-  /** read a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from its filename
-   * \param problem the problem to read
-   * \param filename the name of the target file
-   * \return 0 if successfull
-   */
-  int secondOrderConeLinearComplementarityProblem_newFromFilename(SecondOrderConeLinearComplementarityProblem*  problem, char * filename);
+/** read a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from its filename
+ * \param problem the problem to read
+ * \param filename the name of the target file
+ * \return 0 if successfull
+ */
+int secondOrderConeLinearComplementarityProblem_newFromFilename(SecondOrderConeLinearComplementarityProblem*  problem, char * filename);
 
-  /** free a SecondOrderConeLinearComplementarityProblem
-   * \param problem the problem to free
-   */
-  void freeSecondOrderConeLinearComplementarityProblem(SecondOrderConeLinearComplementarityProblem* problem);
+/** free a SecondOrderConeLinearComplementarityProblem
+ * \param problem the problem to free
+ */
+void freeSecondOrderConeLinearComplementarityProblem(SecondOrderConeLinearComplementarityProblem* problem);
 
 
-  /** new SecondOrderConeLinearComplementarityProblem from minimal set of data
-   * \param[in] nc the number of contact
-   * \param[in] M the NumericsMatrix
-   * \param[in] q the q vector
-   * \param[in] coneDimensions the q vector
-   * \param[in] mu the mu vector
-   * \return a pointer to a SecondOrderConeLinearComplementarityProblem structure
-   */
-  SecondOrderConeLinearComplementarityProblem* secondOrderConeLinearComplementarityProblem_new( int nc,
-                                                                          NumericsMatrix* M, double* q,
-                                                                          int *coneDimensions, double* mu);
+/** new SecondOrderConeLinearComplementarityProblem from minimal set of data
+ * \param[in] n the size of the problem
+ * \param[in] nc the number of contact
+ * \param[in] M the NumericsMatrix
+ * \param[in] q the q vector
+ * \param[in] coneIndex
+ * \param[in] mu the mu vector
+ * \return a pointer to a SecondOrderConeLinearComplementarityProblem structure
+ */
+SecondOrderConeLinearComplementarityProblem* secondOrderConeLinearComplementarityProblem_new
+(int n, int nc, NumericsMatrix* M, double* q,
+ unsigned int *coneIndex, double* mu);
 
 
 
