@@ -736,6 +736,8 @@
     SWIG_fail;
  }
 
+// for b in GlobalFrictionContact
+%apply (double* q) { (double* b) };
 
 %typemap(out) (double* mu) {
   npy_intp dims[2];
@@ -919,6 +921,44 @@
 
 %extend GlobalFrictionContactProblem
 {
+
+  GlobalFrictionContactProblem()
+    {
+
+      GlobalFrictionContactProblem *FC;
+      // return pointer : free by std swig destructor
+      FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
+
+      FC->M = NULL;
+      FC->H = NULL;
+      FC->q = NULL;
+      FC->b = NULL;
+      FC->mu = NULL;
+      FC->env = NULL;
+      FC->numberOfContacts = 0;
+      FC->dimension = 0;
+
+      return FC;
+    }
+
+  GlobalFrictionContactProblem(PyObject *dim)
+    {
+
+      GlobalFrictionContactProblem *FC;
+      // return pointer : free by std swig destructor
+      FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
+
+      FC->M = NULL;
+      FC->H = NULL;
+      FC->q = NULL;
+      FC->b = NULL;
+      FC->mu = NULL;
+      FC->env = NULL;
+      FC->numberOfContacts = NULL;
+      FC->dimension = (int) PyInt_AsLong(dim);
+
+      return FC;
+    }
 
   GlobalFrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
     {

@@ -92,13 +92,38 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
 void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
 {
 
-  freeNumericsMatrix(problem->M);
-  freeNumericsMatrix(problem->H);
-  free(problem->M);
-  free(problem->H);
-  free(problem->mu);
-  free(problem->q);
-  free(problem->b);
+  if (problem->M)
+  {
+    freeNumericsMatrix(problem->M);
+    free(problem->M);
+    problem->M = NULL;
+  }
+
+  if (problem->H)
+  {
+    freeNumericsMatrix(problem->H);
+    free(problem->H);
+    problem->H = NULL;
+  }
+
+  if (problem->mu)
+  {
+    free(problem->mu);
+    problem->mu = NULL;
+  }
+
+  if (problem->q)
+  {
+    free(problem->q);
+    problem->q = NULL;
+  }
+
+  if (problem->b)
+  {
+    free(problem->b);
+    problem->b = NULL;
+  }
+
   if (problem->env) assert(0 && "freeGlobalFrictionContactProblem :: problem->env != NULL, don't know what to do");
   free(problem);
 

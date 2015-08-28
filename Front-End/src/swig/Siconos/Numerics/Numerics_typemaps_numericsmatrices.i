@@ -12,7 +12,7 @@
   if (!array || !require_dimensions(array,2) ||
       !require_native(array) || !require_fortran(array)) SWIG_fail;
 
-  nummat->storageType = 0;
+  nummat->storageType = NM_DENSE;
   nummat->size0 =  array_size(array,0);
   nummat->size1 =  array_size(array,1);
 
@@ -33,24 +33,32 @@
 }
 
 %typemap(out) (NumericsMatrix* M) {
-  npy_intp dims[2];
-  dims[0] = $1->size0;
-  dims[1] = $1->size1;
-  if ($1->matrix0)
+  if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1->matrix0);
-    PyArrayObject *array = (PyArrayObject*) obj;
-    if (!array || !require_fortran(array)) SWIG_fail;
-    $result = obj;
+    npy_intp dims[2];
+    dims[0] = $1->size0;
+    dims[1] = $1->size1;
+    if ($1->matrix0)
+    {
+      PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1->matrix0);
+      PyArrayObject *array = (PyArrayObject*) obj;
+      if (!array || !require_fortran(array)) SWIG_fail;
+      $result = obj;
+    }
+    else if($1->matrix1)
+    {
+      // matrix is sparse : return opaque pointer
+      $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), SWIGTYPE_p_SparseBlockStructuredMatrix, 0);
+    }
+    else
+      SWIG_fail;
+   }
+   else
+   {
+     Py_INCREF(Py_None);
+     $result = Py_None;
+   }
   }
-  else if($1->matrix1)
-  {
-    // matrix is sparse : return opaque pointer
-    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), SWIGTYPE_p_SparseBlockStructuredMatrix, 0);
-  }
-  else
-    SWIG_fail;
- }
 
 %typemap(out) (double* q) {
   npy_intp dims[2];
@@ -65,11 +73,15 @@
     $result = obj;
   }
   else
-    SWIG_fail;
+   {
+     Py_INCREF(Py_None);
+     $result = Py_None;
+   }
  }
 
 %apply (NumericsMatrix *A) { (NumericsMatrix *m) };
 %apply (NumericsMatrix *A) { (NumericsMatrix *M) };
+%apply (NumericsMatrix *M) { (NumericsMatrix *H) };
 
 // SBM handling
 
@@ -226,60 +238,76 @@
 
   cs_sparse *M=$1;
 
-  /* get sys.modules dict */
-  PyObject* sys_mod_dict = PyImport_GetModuleDict();
-  
-  /* get the csr module object */
-  PyObject* csr_mod = PyMapping_GetItemString(sys_mod_dict, (char *)"scipy.sparse.csr");
-  
-  npy_intp this_M_x_dims[1];
-  this_M_x_dims[0] = M->nzmax;
-
-  npy_intp this_M_i_dims[1];
-  this_M_i_dims[0] = M->nzmax;
-
-  npy_intp this_M_p_dims[1];
-  this_M_p_dims[0] = M->m+1;
-
-  PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x);
-  if(!out_data) SWIG_fail;
-
-  PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims,NPY_INT,M->i);
-  if(!out_indices) SWIG_fail;
-
-  PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims,NPY_INT,M->p);
-  if(!out_indptr) SWIG_fail;
-
-  PyObject* out_shape = PyTuple_Pack(2,PyInt_FromLong(M->n),PyInt_FromLong(M->m));
-  if(!out_shape) SWIG_fail;
-
-  PyObject* out_nnz = PyInt_FromLong(M->nzmax);
-  if(!out_nnz) SWIG_fail;
-
-  /* call the class inside the csr module */
-  %#if PY_MAJOR_VERSION < 3
-  PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyString_FromString((char *)"csr_matrix"), out_shape, NULL);
-  %#else
-  PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyUnicode_FromString((char *)"csr_matrix"), out_shape, NULL);
-  %#endif
-
-  if(out_csr)
+  if (!M)
   {
-    PyObject_SetAttrString(out_csr,"data",out_data);
-    PyObject_SetAttrString(out_csr,"indices",out_indices);
-    PyObject_SetAttrString(out_csr,"indptr",out_indptr);
-
-#ifndef NDEBUG
-    PyObject *auto_nnz = PyObject_GetAttrString(out_csr,"nnz");
-    assert(PyInt_AsLong(auto_nnz) == M->nzmax);
-    Py_XDECREF(auto_nnz);
-#endif
-
-    $result = SWIG_Python_AppendOutput($result,out_csr);
+    Py_INCREF(Py_None);
+    $result = Py_None;
   }
   else
   {
-    SWIG_fail;
+    /* get sys.modules dict */
+    PyObject* sys_mod_dict = PyImport_GetModuleDict();
+
+    /* get the csr module object */
+    PyObject* csr_mod = PyMapping_GetItemString(sys_mod_dict, (char *)"scipy.sparse.csr");
+
+    if (!csr_mod)
+    {
+      PyErr_SetString(PyExc_RuntimeError, "Did you import scipy.sparse.csr?");
+      SWIG_fail;
+    }
+
+    npy_intp this_M_x_dims[1];
+    this_M_x_dims[0] = M->nzmax;
+
+    npy_intp this_M_i_dims[1];
+    this_M_i_dims[0] = M->nzmax;
+
+    npy_intp this_M_p_dims[1];
+    this_M_p_dims[0] = M->m+1;
+
+    PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x);
+    if(!out_data) SWIG_fail;
+
+    PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims,NPY_INT,M->i);
+    if(!out_indices) SWIG_fail;
+
+    PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims,NPY_INT,M->p);
+    if(!out_indptr) SWIG_fail;
+
+    /* Warning ! m is the number of rows, n the number of columns ! --xhub */
+    PyObject* out_shape = PyTuple_Pack(2,PyInt_FromLong(M->m),PyInt_FromLong(M->n));
+    if(!out_shape) SWIG_fail;
+
+    PyObject* out_nnz = PyInt_FromLong(M->nzmax);
+    if(!out_nnz) SWIG_fail;
+
+    /* call the class inside the csr module */
+    %#if PY_MAJOR_VERSION < 3
+    PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyString_FromString((char *)"csr_matrix"), out_shape, NULL);
+    %#else
+    PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyUnicode_FromString((char *)"csr_matrix"), out_shape, NULL);
+    %#endif
+
+    if(out_csr)
+    {
+      PyObject_SetAttrString(out_csr,"data",out_data);
+      PyObject_SetAttrString(out_csr,"indices",out_indices);
+      PyObject_SetAttrString(out_csr,"indptr",out_indptr);
+
+#ifndef NDEBUG
+      PyObject *auto_nnz = PyObject_GetAttrString(out_csr,"nnz");
+      assert(PyInt_AsLong(auto_nnz) == M->nzmax);
+      Py_XDECREF(auto_nnz);
+#endif
+
+      $result = SWIG_Python_AppendOutput($result,out_csr);
+    }
+    else
+    {
+      PyErr_SetString(PyExc_RuntimeError, "Could not create csr matrix");
+      SWIG_fail;
+    }
   }
 
 }

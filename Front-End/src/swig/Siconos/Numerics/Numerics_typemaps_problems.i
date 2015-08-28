@@ -51,7 +51,7 @@
   (npy_intp problem_size, npy_intp problem_dimension, npy_intp number_of_contacts) 
 {
   void *fcp;
-  int res = SWIG_ConvertPtr($input, &fcp,SWIGTYPE_p_FrictionContactProblem, 0 |  0 );
+  int res = SWIG_ConvertPtr($input, &fcp,SWIGTYPE_p_GlobalFrictionContactProblem, 0 |  0 );
   if (!SWIG_IsOK(res)) SWIG_fail;
 
   problem_dimension=((GlobalFrictionContactProblem *) fcp)->dimension;

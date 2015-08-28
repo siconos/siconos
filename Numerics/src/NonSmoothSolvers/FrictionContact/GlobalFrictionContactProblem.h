@@ -95,7 +95,7 @@
 #include "NumericsMatrix.h"
 
 /** \struct GlobalFrictionContactProblem GlobalFrictionContactProblem.h
- * The structure that defines a Friction-Contact (3D or 2D)problem \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
+ * The structure that defines a Friction-Contact (3D or 2D ) problem \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
  * \f{eqnarray*}{
  * \begin{cases}
  *  M v =  q +  H r \\
