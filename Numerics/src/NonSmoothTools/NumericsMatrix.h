@@ -264,8 +264,9 @@ extern "C"
   /** Create from file a NumericsMatrix with  memory allocation
      \param M the matrix to be read
      \param file the corresponding  file
+     \return 0 if ok
   */
-  void newFromFile(NumericsMatrix* const M, FILE *file);
+  int  newFromFile(NumericsMatrix* const M, FILE *file);
 
   /** PrintInFileForScilab  of the matrix content
    \param M the matrix to be printed

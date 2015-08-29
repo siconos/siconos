@@ -186,6 +186,7 @@ void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMat
 
 void freeNumericsMatrix(NumericsMatrix* m)
 {
+  assert(m && "freeNumericsMatrix, m == NULL");
   if (m->storageType == 0)
   {
     if (m->matrix0)
@@ -401,7 +402,7 @@ void readInFile(NumericsMatrix* const m, FILE *file)
 }
 
 
-void newFromFile(NumericsMatrix* const m, FILE *file)
+int newFromFile(NumericsMatrix* const m, FILE *file)
 {
   if (! m)
   {
@@ -412,22 +413,23 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
   int storageType;
   size_t size0;
   size_t size1;
+  int info = 0;
   void* data = NULL;
 
-  CHECK_IO(fscanf(file, "%d", &storageType));
-  CHECK_IO(fscanf(file, "%zu",&size0));
-  CHECK_IO(fscanf(file, "%zu", &size1));
+  CHECK_IO(fscanf(file, "%d", &storageType), &info);
+  CHECK_IO(fscanf(file, "%zu", &size0), &info);
+  CHECK_IO(fscanf(file, "%zu", &size1), &info);
 
   if (storageType == NM_DENSE)
   {
-    CHECK_IO(fscanf(file, "%zu\t%zu\n", &size0, &size1));
+    CHECK_IO(fscanf(file, "%zu\t%zu\n", &size0, &size1), &info);
 
     data = malloc(size1 * size0 * sizeof(double));
     double* data_d = (double*) data;
 
     for (size_t i = 0; i < size1 * size0; ++i)
     {
-      CHECK_IO(fscanf(file, "%le ", &(data_d[i])));
+      CHECK_IO(fscanf(file, "%le ", &(data_d[i])), &info);
     }
   }
   else if (storageType == NM_SPARSE_BLOCK)
@@ -437,6 +439,8 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
   }
 
   fillNumericsMatrix(m, storageType, (int)size0, (int)size1, data);
+
+  return info;
 }
 
 void readInFileName(NumericsMatrix* const m, const char *filename)

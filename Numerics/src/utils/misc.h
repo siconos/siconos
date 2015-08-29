@@ -44,19 +44,22 @@ void printm(unsigned int nl, unsigned int nc, double *m);
 
 /** check IO
  */
-#define CHECK_IO(EXPR)                                                  \
+#define CHECK_IO(EXPR, ...)                                             \
   do                                                                    \
   {                                                                     \
     if (!EXPR)                                                          \
     {                                                                   \
+      int * _arr_[] = {__VA_ARGS__};                                    \
       if (errno != 0)                                                   \
       {                                                                 \
-        perror(#EXPR);                                                 \
+        perror(#EXPR);                                                  \
         fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d\n", #EXPR, __FILE__, __LINE__); \
+        if (sizeof(_arr_)) { *_arr_[0] = errno; }                       \
       }                                                                 \
       else                                                              \
       {                                                                 \
         fprintf (stderr, "Siconos Numerics unknown error for %s, %s:%d\n", #EXPR, __FILE__, __LINE__); \
+        if (sizeof(_arr_)) { *_arr_[0] = 1; }                           \
       }                                                                 \
     }                                                                   \
   } while (0)

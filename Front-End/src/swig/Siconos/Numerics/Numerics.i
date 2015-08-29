@@ -245,7 +245,6 @@
     }
     else
     {
-      fclose(finput);
       fprintf(stderr, "frictionContactProblemFromFile: cannot open %s\n",filename);
       return 0;
     }
@@ -804,6 +803,9 @@
   FrictionContactProblem()
   {
     FrictionContactProblem * FCP = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    FCP->M = NULL;
+    FCP->q = NULL;
+    FCP->mu = NULL;
 
     return FCP;
   }

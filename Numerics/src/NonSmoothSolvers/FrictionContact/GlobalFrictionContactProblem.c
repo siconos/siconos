@@ -18,6 +18,7 @@
 */
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "GlobalFrictionContactProblem.h"
 #include "misc.h"
@@ -57,36 +58,40 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FI
 int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FILE* file)
 {
   int nc = 0, d = 0;
-  int i;
-  CHECK_IO(fscanf(file, "%d\n", &d));
+  int info = 0;
+  CHECK_IO(fscanf(file, "%d\n", &d), &info);
   problem->dimension = d;
-  CHECK_IO(fscanf(file, "%d\n", &nc));
+  CHECK_IO(fscanf(file, "%d\n", &nc), &info);
   problem->numberOfContacts = nc;
   problem->M = newNumericsMatrix();
 
-  newFromFile(problem->M, file);
+  info = newFromFile(problem->M, file);
+  if (!info) goto fail;
+
   problem->H = newNumericsMatrix();
-  newFromFile(problem->H, file);
+  info = newFromFile(problem->H, file);
+  if (!info) goto fail;
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  for (int i = 0; i < problem->M->size1; ++i)
   {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])), &info);
   }
   problem->b = (double *) malloc(problem->H->size1 * sizeof(double));
-  for (i = 0; i < problem->H->size1; i++)
+  for (int i = 0; i < problem->H->size1; ++i)
   {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])), &info);
   }
 
   problem->mu = (double *) malloc(nc * sizeof(double));
-  for (i = 0; i < nc; i++)
+  for (int i = 0; i < nc; ++i)
   {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])), &info);
   }
 
+fail:
   problem->env = NULL;
-  return 0;
+  return info;
 }
 
 void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
