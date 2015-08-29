@@ -34,11 +34,8 @@ void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearCo
 
   int i, n ;
 
-  n=0;
-  for(i =0; i < problem->nc; ++i)
-  {
-    n += problem->coneIndex[i];
-  }
+  n=problem->n;
+
   printf("SecondOrderConeLinearComplementarityProblem Display :\n-------------\n");
   printf("nc:%d \n", problem->nc);
 
