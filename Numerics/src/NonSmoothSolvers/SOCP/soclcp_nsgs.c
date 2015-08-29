@@ -343,14 +343,14 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   ComputeError_soclcp_Ptr computeError = NULL;
 
   unsigned int cone ;
-  bool isConeDimensionsEqual=true;
+  int isConeDimensionsEqual=1;
   /* Connect local solver and local problem*/
   unsigned int dim = problem->coneIndex[1]-problem->coneIndex[0];
   for(cone = 1; cone < nc; cone++)
   {
     if(problem->coneIndex[cone+1]-problem->coneIndex[cone] != dim)
     {
-      isConeDimensionsEqual=false;
+      isConeDimensionsEqual=0;
       break;
     }
   }
