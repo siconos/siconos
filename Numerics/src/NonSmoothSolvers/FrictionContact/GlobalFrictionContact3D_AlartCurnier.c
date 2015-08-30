@@ -398,17 +398,12 @@ int globalFrictionContact3D_AlartCurnier_setDefaultSolverOptions(
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 11;
+  options->iSize = 14;
   options->dSize = 11;
-  options->iparam = (int *) malloc(options->iSize * sizeof(int));
-  options->dparam = (double *) malloc(options->dSize * sizeof(double));
+  options->iparam = (int *) calloc(options->iSize, sizeof(int));
+  options->dparam = (double *) calloc(options->dSize,  sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
-  for(unsigned int i = 0; i < 10; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
   options->iparam[0] = 200;    /* input :  itermax */
   options->iparam[1] = 1;      /* output : #iter */
   options->iparam[2] = 0;      /* unused */

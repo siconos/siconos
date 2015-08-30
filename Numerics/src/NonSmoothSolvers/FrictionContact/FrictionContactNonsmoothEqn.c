@@ -539,10 +539,10 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   if (!options->dWork)
   {
     AWpB = createNumericsMatrix(problem->M->storageType,
-                                problem->M->size0, problem->M->size1);
+        problem->M->size0, problem->M->size1);
 
     AWpB_backup = createNumericsMatrix(problem->M->storageType,
-                                       problem->M->size0, problem->M->size1);
+        problem->M->size0, problem->M->size1);
   }
   else
   {
@@ -553,42 +553,44 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   /* just for allocations */
   NM_copy(problem->M, AWpB);
 
-  switch(options->iparam[13])
+  if (problem->M->storageType != NM_DENSE)
   {
-  case 0:
-  {
-    NM_linearSolverParams(AWpB)->solver = NS_CS_LUSOL;
-    break;
-  }
-  case 1:
-  {
-    NM_linearSolverParams(AWpB)->solver = NS_MUMPS;
+    switch(options->iparam[13])
+    {
+      case 0:
+        {
+          NM_linearSolverParams(AWpB)->solver = NS_CS_LUSOL;
+          break;
+        }
+      case 1:
+        {
+          NM_linearSolverParams(AWpB)->solver = NS_MUMPS;
 
 #ifdef HAVE_MPI
 
-    assert (options->solverData);
+          assert (options->solverData);
 
-    if ((MPI_Comm) options->solverData == MPI_COMM_NULL)
-    {
-      options->solverData = NM_MPI_com(AWpB);
-    }
-    else
-    {
-      NM_linearSolverParams(AWpB)->mpi_com = (MPI_Comm) options->solverData;
-      NM_linearSolverParams(AWpB)->mpi_com_init = 0;
-    }
+          if ((MPI_Comm) options->solverData == MPI_COMM_NULL)
+          {
+            options->solverData = NM_MPI_com(AWpB);
+          }
+          else
+          {
+            NM_linearSolverParams(AWpB)->mpi_com = (MPI_Comm) options->solverData;
+            NM_linearSolverParams(AWpB)->mpi_com_init = 0;
+          }
 
 #else
-    numericsError("frictionContactNonsmoothEqnSolve", "MUMPS solver needs a MPI installation.\n");
+          numericsError("frictionContactNonsmoothEqnSolve", "MUMPS solver needs a MPI installation.\n");
 #endif
-
-    break;
-  }
-  default:
-  {
-    fprintf(stderr, "fc3d esolve: unknown linear solver.\n");
-    return;
-  }
+          break;
+        }
+      default:
+        {
+          fprintf(stderr, "fc3d esolve: unknown linear solver.\n");
+          return;
+        }
+    }
   }
 
   // compute rho here
@@ -666,6 +668,12 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
       info_ls = frictionContactFBLSA(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx,
                                      problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
       break;
+    default:
+      {
+        fprintf(stderr, "fc3d esolve: unknown line search option.\n");
+        return;
+      }
+
     }
 
     if (!info_ls)
@@ -706,7 +714,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
                          reaction, velocity, equation->problem->mu, rho,
                          F, NULL, NULL);
 
-      printf("fc3d_esolve: iteration %d : error=%g, ||F||=%g\n", iter, options->dparam[1],cblas_dnrm2(problemSize, F, 1));
+      printf("fc3d_esolve: iteration %d : residual=%g, ||F||=%g\n", iter, options->dparam[1],cblas_dnrm2(problemSize, F, 1));
     }
 
     if (options->callback)
@@ -719,7 +727,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     {
        if (verbose > 0)
        {
-         printf("fc3d_esolve: iteration %d : computed error is not a number, stop.\n", iter);
+         printf("fc3d_esolve: iteration %d : computed residual is not a number, stop.\n", iter);
        }
        info[0] = 2;
        break;
@@ -737,11 +745,11 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   if (verbose > 0)
   {
     if (!info[0])
-      printf("fc3d_esolve: convergence after %d iterations, error : %g\n",
+      printf("fc3d_esolve: convergence after %d iterations, residual : %g\n",
              iter, options->dparam[1]);
     else
     {
-      printf("fc3d_esolve: no convergence after %d iterations, error : %g\n",
+      printf("fc3d_esolve: no convergence after %d iterations, residual : %g\n",
              iter, options->dparam[1]);
     }
   }

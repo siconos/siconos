@@ -66,11 +66,11 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   problem->M = newNumericsMatrix();
 
   info = newFromFile(problem->M, file);
-  if (!info) goto fail;
+  if (info) goto fail;
 
   problem->H = newNumericsMatrix();
   info = newFromFile(problem->H, file);
-  if (!info) goto fail;
+  if (info) goto fail;
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (int i = 0; i < problem->M->size1; ++i)
