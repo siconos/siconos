@@ -87,12 +87,27 @@ COMPILE_WITH(Pthread)
 COMPILE_WITH(Cplex)
 
 IF(GAMS_DIR)
+
  SET(GAMS_C_API_FIND_REQUIRED TRUE)
   COMPILE_WITH(GamsCApi)
-  LIST(APPEND SiconosNumerics_DIRS ${GAMS_DIR}/${GAMS_C_API_DIR})
+  #  LIST(APPEND SiconosNumerics_DIRS ${GAMS_DIR}/${GAMS_C_API_DIR})
+  IF(NOT SiconosNumerics_ADD_SRCS)
+   SET(SiconosNumerics_ADD_SRCS)
+  ENDIF(NOT SiconosNumerics_ADD_SRCS)
+  LIST(APPEND SiconosNumerics_ADD_SRCS ${GAMS_C_API_FILES})
+  INCLUDE_DIRECTORIES(${GAMS_C_API_INCLUDE_DIRS})
   INCLUDE_DIRECTORIES("${GAMS_DIR}/testlib_ml") # XXX Hack -- xhub
   SET(GAMS_MODELS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/share/gams")
   SET(GAMS_MODELS_SHARE_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_PACKAGE_NAME}")
+
+  INCLUDE(CheckCCompilerFlag)
+  CHECK_C_COMPILER_FLAG("-Werror=conversion" C_HAVE_WERR_CONV)
+  IF(C_HAVE_WERR_CONV)
+
+   SET_SOURCE_FILES_PROPERTIES(${GAMS_C_API_FILES} PROPERTIES COMPILE_FLAGS
+    "-Wno-error=conversion")
+  ENDIF()
+
 ENDIF(GAMS_DIR)
 
 COMPILE_WITH(LpSolve)
@@ -194,6 +209,7 @@ ENDIF()
 
 
 LIBRARY_PROJECT_SETUP()
+
 
 # We need to save part of the config to enable/disable some tests or code in
 # other modules

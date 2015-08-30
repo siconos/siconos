@@ -27,6 +27,7 @@ typedef struct {
 #include "gamsxcc.h"
 #include "idxcc.h"
 #include "optcc.h"
+#include "gevmcc.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -79,11 +80,37 @@ static inline void SN_Gams_set_dirs(const SN_GAMSparams* solverParameters, const
   }
 }
 
+static inline int getGamsSolverOpt(const optHandle_t Optr, const char *sysdir, const char *solverDefName)
+{
+  assert(Optr);
+  assert(sysdir);
+  assert(solverDefName);
+
+  char deffile[GMS_SSSIZE];
+  char msg[GMS_SSSIZE];
+  strncpy(deffile, sysdir, sizeof(deffile));
+  strncat(deffile, "/opt", sizeof(deffile));
+  strncat(deffile, solverDefName, sizeof(deffile));
+  strncat(deffile, ".def", sizeof(deffile));
+
+  if (optReadDefinition(Optr,deffile)) {
+    int itype;
+    for (int i=1; i<=optMessageCount(Optr); ++i) {
+      optGetMessage(Optr, i, msg, &itype);
+      printf("%s\n", msg);
+    }
+    return 1;
+  }
+  return 0;
+}
+
 static inline int CallGams(const gamsxHandle_t Gptr, const optHandle_t Optr, const char *sysdir, const char *model)
 {
-  char msg[GMS_SSSIZE], deffile[GMS_SSSIZE];
+  char msg[GMS_SSSIZE];
+  char deffile[GMS_SSSIZE];
 
   assert(Gptr); assert(Optr);
+
   strncpy(deffile, sysdir, sizeof(deffile));
   strncat(deffile, "/optgams.def", sizeof(deffile));
 
@@ -95,10 +122,12 @@ static inline int CallGams(const gamsxHandle_t Gptr, const optHandle_t Optr, con
     }
     return 1;
   }
-
-  optSetStrStr(Optr,"sysdir", sysdir);
-  optSetStrStr(Optr,"input", model);
-  optSetIntStr(Optr,"logoption", 2);
+  optSetStrStr(Optr, "sysdir", sysdir);
+  optSetStrStr(Optr, "input", model);
+  optSetIntStr(Optr, "logoption", 2);
+  optSetIntStr(Optr, "keep", 1);
+  optSetIntStr(Optr, "optfile", 1);
+//  optSetDblStr(Optr,"OptCA", 1e-12);
 
   if (gamsxRunExecDLL(Gptr, Optr, sysdir, 1, msg)) {
     printf ("Could not execute RunExecDLL: %s", msg);
@@ -141,7 +170,7 @@ static inline int NV_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
   return 0;
 }
 
-static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, const NumericsMatrix* M)
+static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMatrix* M)
 {
   char msg[GMS_SSSIZE];
 
@@ -151,7 +180,16 @@ static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
   if (idxDataWriteStart(Xptr, name, descr, 2, dims, msg, GMS_SSSIZE) == 0)
     idxerrorR(idxGetLastError(Xptr), "idxDataWriteStart");
 
-  idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
+  if (M->storageType == 0)
+  {
+    idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
+  }
+  else
+  {
+    CSparseMatrix* cs = NM_csc(M);
+    idxDataWriteSparseColMajor(Xptr, cs->p, cs->i, cs->x);
+  }
+
 
   if (0==idxDataWriteDone(Xptr))
     idxerrorR(idxGetLastError(Xptr), "idxDataWriteDone");
@@ -168,7 +206,7 @@ static inline int GDX_to_NV(idxHandle_t Xptr, const char* name, double* vector, 
   if (idxDataReadStart(Xptr, name, &nbdims, dims, &nbelts, msg, GMS_SSSIZE) == 0)
     idxerrorR(idxGetLastError(Xptr), "idxDataReadStart");
 
-  if (nbdims != 1 || dims[0] != size)
+  if (nbdims != 1 || dims[0] != (int)size)
   {
     printf("GDX_to_NV :: inconsistency between expected size and actual one, variable %s\n", name);
     printf("expected dimension: %d; actual one: %d\n", 1, nbdims);

@@ -39,8 +39,10 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
   gamsxHandle_t Gptr = NULL;
   idxHandle_t Xptr = NULL;
   optHandle_t Optr = NULL;
+  optHandle_t solverOptPtr = NULL;
+  gevHandle_t Envptr = NULL;
 
-  int status;
+  int status = 0;
   char sysdir[GMS_SSSIZE], model[GMS_SSSIZE], msg[GMS_SSSIZE];
   const char defModel[] = SPACE_CONC(GAMS_MODELS_SHARE_DIR, "/lcp.gms");
   const char defGAMSdir[] = GAMS_DIR;
@@ -58,10 +60,24 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
     return;
   }
 
+  if (! optCreateD (&solverOptPtr, sysdir, msg, sizeof(msg))) {
+    printf("Could not create opt object: %s\n", msg);
+    return;
+  }
+
   if (! optCreateD (&Optr, sysdir, msg, sizeof(msg))) {
     printf("Could not create opt object: %s\n", msg);
     return;
   }
+
+  if (! gevCreateD (&Envptr, sysdir, msg, sizeof(msg))) {
+    printf("Could not create env object: %s\n", msg);
+    return;
+  }
+
+  getGamsSolverOpt(solverOptPtr, sysdir, "path");
+  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+  optWriteParameterFile(solverOptPtr, "./path.opt");
 
   idxOpenWrite(Xptr, "lcp.gdx", "Siconos/Numerics NM_to_GDX", &status);
   if (status)
@@ -79,6 +95,7 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   if (idxClose(Xptr))
     idxerror(idxGetLastError(Xptr), "idxClose");
+
 
   if ((status=CallGams(Gptr, Optr, sysdir, model))) {
     printf("Call to GAMS failed\n");

@@ -10,7 +10,7 @@
 # PathFerris_LIBRARY_DIRECTORY before FIND_PACKAGE(PathFerris)
 INCLUDE(FindPackageHandleStandardArgs)
 
-SET(FILES_TO_CHECK "idxcc.c;optcc.c;gamsxcc.c")
+SET(FILES_TO_CHECK "idxcc.c;optcc.c;gamsxcc.c;gevmcc.c")
 
 SET(GAMS_C_API_DIR "apifiles/C/api")
 
