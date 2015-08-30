@@ -36,7 +36,7 @@ int soclcp_test_function(FILE * f, SolverOptions * options)
 
   info = secondOrderConeLinearComplementarityProblem_printInFile(problem, foutput);
 
-  secondOrderConeLinearComplementarityProblem_display(problem);
+  /* secondOrderConeLinearComplementarityProblem_display(problem); */
 
   NumericsOptions global_options;
   setDefaultNumericsOptions(&global_options);

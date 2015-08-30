@@ -29,23 +29,6 @@
 #include <math.h>
 #include <float.h>
 
-/* Static variables */
-
-/* The global problem of size n sum_nc coneDimensions, nc being the number of cones, is locally saved in MGlobal and qGlobal */
-/* mu corresponds to the vector of coefficients */
-/* note that either MGlobal or MBGlobal is used, depending on the chosen storage */
-/* static int n=0; */
-/* static const NumericsMatrix* MGlobal = NULL; */
-/* static const double* qGlobal = NULL; */
-/* static const double* mu = NULL; */
-
-/* Local problem operators */
-/* static const int nLocal = 3; */
-/* static double* MLocal; */
-/* static int isMAllocatedIn = 0; /\* True if a malloc is done for MLocal, else false *\/ */
-/* static double qLocal[3]; */
-/* static double mu_i = 0.0; */
-
 #define VERBOSE_DEBUG
 
 void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem * problem,
@@ -73,7 +56,6 @@ void soclcp_projectionWithDiagonalization_update(int cone, SecondOrderConeLinear
 
   NumericsMatrix * MGlobal = problem->M;
   double * MLocal =  localproblem->M->matrix0;
-
 
   double *qLocal = localproblem->q;
   double * qGlobal = problem->q;
@@ -249,15 +231,27 @@ int soclcp_projectionWithDiagonalization_solve(SecondOrderConeLinearComplementar
   return 0;
 }
 
-void soclcp_projectionOnConeWithLocalIteration_initialize(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, SolverOptions* localsolver_options)
+void soclcp_projectionOnConeWithLocalIteration_initialize(SecondOrderConeLinearComplementarityProblem * problem,
+                                                          SecondOrderConeLinearComplementarityProblem * localproblem,
+                                                          SolverOptions* localsolver_options)
 {
   int nc = problem->nc;
+  unsigned int dim_max=0;
+  for (int i =0; i <nc; i++)
+  {
+    dim_max=max(dim_max,problem->coneIndex[i+1]-problem->coneIndex[i]);
+  }
   /* printf("soclcp_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
-  localsolver_options->dWork = (double *)malloc(nc * sizeof(double));
+  localsolver_options->dWork = (double *)malloc((nc+3*dim_max) * sizeof(double));
   for(int i = 0; i < nc; i++)
   {
     localsolver_options->dWork[i]=1.0;
   }
+  localsolver_options->iWork = (int *)malloc(sizeof(int));
+  localsolver_options->iWork[0]=nc;
+  
+
+  
 }
 
 void soclcp_projectionOnConeWithLocalIteration_free(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, SolverOptions* localsolver_options)
@@ -300,12 +294,10 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
 
   int incx = 1, incy = 1;
 
-
-  double * v = (double*)malloc(nLocal*sizeof(double));
-  double * v_k = (double*)malloc(nLocal*sizeof(double));
-  double * r_k = (double*)malloc(nLocal*sizeof(double));
-
-
+  int nc = options->iWork[0];
+  double * v = options->dWork + nc;
+  double * v_k = options->dWork + nc + nLocal;
+  double * r_k = options->dWork + nc + nLocal+ nLocal;
 
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
@@ -329,9 +321,9 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   {
     localiter ++;
 
-    /*    printf ("reaction[0] = %14.7e\n",reaction[0]); */
-    /*    printf ("reaction[1] = %14.7e\n",reaction[1]); */
-    /*    printf ("reaction[2] = %14.7e\n",reaction[2]); */
+    /*    printf ("r[0] = %14.7e\n",r[0]); */
+    /*    printf ("r[1] = %14.7e\n",r[1]); */
+    /*    printf ("r[2] = %14.7e\n",r[2]); */
 
     /* Store the error */
     localerror_k = localerror;
@@ -380,20 +372,20 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
       /* printf("rho_k = %12.8e\t", rho_k); */
       /* printf("a1 = %12.8e\t", a1); */
       /* printf("a2 = %12.8e\t", a2); */
-      /* printf("norm reaction = %12.8e\t",sqrt(( reaction[0]) * (reaction[0]) + */
-      /*           ( reaction[1]) *  reaction[1]) + */
-      /*           ( reaction[2]) * ( reaction[2])); */
+      /* printf("norm r = %12.8e\t",sqrt(( r[0]) * (r[0]) + */
+      /*           ( r[1]) *  r[1]) + */
+      /*           ( r[2]) * ( r[2])); */
       /* printf("success = %i\n", success); */
 
       ls_iter++;
     }
 
-    /* printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);  */
 
     /* compute local error */
     localerror =0.0;
-    soclcp_unitary_compute_and_add_error(r , v, mu_i, &localerror);
+    soclcp_unitary_compute_and_add_error(r , v, nLocal, mu_i, &localerror);
 
+    /* printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);  */
 
     /*Update rho*/
     if((rho_k*a1 < Lmin * a2) && (localerror < localerror_k))

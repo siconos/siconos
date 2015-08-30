@@ -38,44 +38,32 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-/* void fake_compute_error_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, double tolerance, SolverOptions  *options,  double* error) */
-/* { */
-/*   int n = 3 * problem->numberOfContacts; */
-/*   *error = 0.; */
-/*   int i, m; */
-/*   m = 5 * n / 3; */
-/*   double err = INFINITY; */
-/*   for (i = 0 ; i < m ; ++i) */
-/*   { */
-/*     *error += Compute_NCP_error1(i, err); */
-/*   } */
-/* } */
-void soclcp_nsgs_update(int contact, SecondOrderConeLinearComplementarityProblem* problem, SecondOrderConeLinearComplementarityProblem* localproblem, double * r, SolverOptions* options)
+void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* problem, SecondOrderConeLinearComplementarityProblem* localproblem, double * r, SolverOptions* options)
 {
-  /* Build a local problem for a specific contact
+  /* Build a local problem for a specific cone
      r corresponds to the global vector (size n) of the global problem.
   */
   /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  /* Build a local problem for a specific contact
+  /* Build a local problem for a specific cone
    r corresponds to the global vector (size n) of the global problem.
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  soclcp_nsgs_fillMLocal(problem, localproblem, contact);
+  soclcp_nsgs_fillMLocal(problem, localproblem, cone);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.rBlock,
-     excluding the block corresponding to the current contact. ****/
-  soclcp_nsgs_computeqLocal(problem, localproblem, r, contact);
+     excluding the block corresponding to the current cone. ****/
+  soclcp_nsgs_computeqLocal(problem, localproblem, r, cone);
 
   /* coefficient for current block*/
-  localproblem->mu[0] = problem->mu[contact];
+  localproblem->mu[0] = problem->mu[cone];
 
   /* index for current block*/
   localproblem->coneIndex[0] = 0;
 
 
   /* coefficient for current block*/
-  localproblem->n = problem->coneIndex[contact+1] - problem->coneIndex[contact];
+  localproblem->n = problem->coneIndex[cone+1] - problem->coneIndex[cone];
 
 
 }
@@ -222,7 +210,7 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
   int dim = problem->coneIndex[cone+1]-problem->coneIndex[cone];
 
 
-  /* r current block set to zero, to exclude current contact block */
+  /* r current block set to zero, to exclude current cone block */
   int i;
   double * rsave = (double *) malloc(dim*sizeof(double));
   for(i = 0; i < dim; i++)
@@ -250,7 +238,7 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
   else if(problem->M->storageType == 1)
   {
     /* qLocal += rowMB * r
-    with rowMB the row of blocks of MGlobal which corresponds to the current contact
+    with rowMB the row of blocks of MGlobal which corresponds to the current cone
     */
     DEBUG_PRINTF("dim= %i\n", dim);
     rowProdNoDiagSBM(n, dim, cone, problem->M->matrix1, r, qLocal, 0);
@@ -273,23 +261,14 @@ void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem * proble
   if(storageType == 0)
     // Dense storage
   {
-
     int normal = problem->coneIndex[cone];
-
     int dim = problem->coneIndex[cone+1]-problem->coneIndex[cone+1];
-
     int inc = n * normal;
-
     double * MM = MGlobal->matrix0;
     double * MLocal =  localproblem->M->matrix0;
-
-
-
-
     /* The part of MM which corresponds to the current block is copied into MLocal */
     for(int j =0; j< dim; j++)
     {
-
       for(int i = 0; i < dim; i++)  MLocal[i+j*dim] = MM[inc + normal+i];
       inc += n;
     }
@@ -298,7 +277,6 @@ void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem * proble
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, cone);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
-
   }
   else
     numericsError("soclcp_projection -", "unknown storage type for matrix M");
@@ -318,7 +296,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
-  /* Number of contacts */
+  /* Number of cones */
   unsigned int nc = problem->nc;
   /* Maximum number of iterations */
   int itermax = iparam[0];
@@ -375,7 +353,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
     }
     else
     {
-      localproblem->M = createNumericsMatrix(NM_DENSE, 3, 3);
+      localproblem->M = createNumericsMatrix(NM_DENSE, dim, dim);
     }
   }
   else
@@ -392,18 +370,17 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-  unsigned int contact; /* Number of the current row of blocks in M */
 
-  unsigned int *scontacts = NULL;
+  unsigned int *scones = NULL;
 
   if(iparam[9])  /* shuffle */
   {
-    scontacts = (unsigned int *) malloc(nc * sizeof(unsigned int));
+    scones = (unsigned int *) malloc(nc * sizeof(unsigned int));
     for(unsigned int i = 0; i<nc ; ++i)
     {
-      scontacts[i] = i;
+      scones[i] = i;
     }
-    uint_shuffle(scontacts, nc);
+    uint_shuffle(scones, nc);
   }
 
 
@@ -413,48 +390,42 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
   if(iparam[1] == 1 || iparam[1] == 2)
   {
-    double rold[3];
+    int n =problem->n;
+    double * rold = (double*)malloc(n*sizeof(double)); // save memory if isConeDimensionsEqual
     while((iter < itermax) && (hasNotConverged > 0))
     {
-
       ++iter;
-      /* Loop through the contact points */
+      /* Loop through the cone  */
       //cblas_dcopy( n , q , incx , v , incy );
       error = 0.0;
-
+      for (int i =0; i < n; i++) rold[i] = r[i];
       for(unsigned int i= 0 ; i < nc ; ++i)
       {
         if(iparam[9])
         {
-          contact = scontacts[i];
+          cone = scones[i];
         }
         else
         {
-          contact = i;
+          cone = i;
         }
 
+        if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+        (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
+        
+        localsolver_options->iparam[4] = cone;
 
-        rold[0] = r[3 * contact];
-        rold[1] = r[3 * contact + 1];
-        rold[2] = r[3 * contact + 2];
-        if(verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-        (*update_localproblem)(contact, problem, localproblem, r, localsolver_options);
-
-
-        localsolver_options->iparam[4] = contact;
-        (*local_solver)(localproblem, &(r[3 * contact]) , localsolver_options);
-
-        error += pow(r[3 * contact] - rold[0], 2) +
-                 pow(r[3 * contact + 1] - rold[1], 2) +
-                 pow(r[3 * contact + 2] - rold[2], 2);
-
+        (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]) , localsolver_options);
       }
-
+      for (int i=0;i < n; i++)
+      {
+        error += pow(r[i] - rold[i], 2);
+      }
 
       /* **** Criterium convergence **** */
       error = sqrt(error);
       if(verbose > 0)
-        printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+        printf("----------------------------------- SOCLCP - NSGS - Iteration %i Error = %14.7e\n", iter, error);
       if(error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
@@ -467,10 +438,11 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       {
         if(absolute_error > error)
         {
-          printf("----------------------------------- FC3D - NSGS - Warning absolute Error = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
+          printf("----------------------------------- SOCLCP - NSGS - Warning absolute Error = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
         }
       }
     }
+    free(rold);
   }
   else
   {
@@ -480,68 +452,68 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       int withRelaxation=iparam[8];
       if(withRelaxation)
       {
-        double rold[3];
-
+        int n = problem->n;
+        double * rold = (double*)malloc(n*sizeof(double)); // save memory if isConeDimensionsEqual
         double omega = dparam[8];
+        unsigned int dim;
         while((iter < itermax) && (hasNotConverged > 0))
         {
           ++iter;
-          /* Loop through the contact points */
+          for (int i =0; i < n; i++) rold[i] = r[i];
+          /* Loop through the cone points */
           //cblas_dcopy( n , q , incx , v , incy );
           for(unsigned int i= 0 ; i < nc ; ++i)
           {
+            cone = scones[i];
 
-            contact = scontacts[i];
+            if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+            (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
+            localsolver_options->iparam[4] = cone;
+            (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
 
-            rold[0] = r[3 * contact];
-            rold[1] = r[3 * contact + 1];
-            rold[2] = r[3 * contact + 2];
-
-            if(verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, r, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(r[3 * contact]), localsolver_options);
-
-            r[3 * contact] = omega*r[3 * contact]+(1.0-omega)*rold[0];
-            r[3 * contact+1] = omega*r[3 * contact+1]+(1.0-omega)*rold[1];
-            r[3 * contact+2] = omega*r[3 * contact+2]+(1.0-omega)*rold[2];
+            dim = problem->coneIndex[cone+1]-problem->coneIndex[cone];
+            for (unsigned int i =0; i <dim; ++i)
+            {
+              r[problem->coneIndex[cone]+i] = omega*r[problem->coneIndex[cone]+i]
+                +(1.0-omega)*rold[problem->coneIndex[cone]+i];
+            }
           }
 
           /* **** Criterium convergence **** */
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+            printf("----------------------------------- SOCLCP - NSGS - Iteration %i Error = %14.7e\n", iter, error);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
 
           if(options->callback)
           {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                r, v,
-                error, NULL);
+            options->callback->collectStatsIteration(options->callback->env, problem->n,
+                                                     r, v,
+                                                     error, NULL);
           }
         }
-
+        free(rold);
       }
       else
       {
         while((iter < itermax) && (hasNotConverged > 0))
         {
           ++iter;
-          /* Loop through the contact points */
+          /* Loop through the cone  */
           //cblas_dcopy( n , q , incx , v , incy );
           for(unsigned int i= 0 ; i < nc ; ++i)
           {
+            
+            cone = scones[i];
 
-            contact = scontacts[i];
 
-
-            if(verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, r, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(r[3 * contact]), localsolver_options);
+            if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+            (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
+            localsolver_options->iparam[4] = cone;
+            (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
 
           }
 
@@ -549,16 +521,16 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+            printf("----------------------------------- SOCLP - NSGS - Iteration %i Error = %14.7e\n", iter, error);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
 
           if(options->callback)
           {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                r, v,
-                error, NULL);
+            options->callback->collectStatsIteration(options->callback->env, problem->n,
+                                                     r, v,
+                                                     error, NULL);
           }
         }
 
@@ -571,48 +543,46 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       int withRelaxation=iparam[8];
       if(withRelaxation)
       {
-        double rold[3];
+        int n = problem->n;
+        double * rold = (double*)malloc(n*sizeof(double)); // save memory if isConeDimensionsEqual
         double omega = dparam[8];
         while((iter < itermax) && (hasNotConverged > 0))
         {
           ++iter;
-          /* Loop through the contact points */
-          //cblas_dcopy( n , q , incx , v , incy );
-          for(contact= 0 ; contact < nc ; ++contact)
-          {
-            if(withRelaxation)
-            {
-              rold[0] = r[3 * contact];
-              rold[1] = r[3 * contact + 1];
-              rold[2] = r[3 * contact + 2];
-            }
+          for (int i =0; i < n; i++) rold[i] = r[i];
 
-            if(verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, r, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(r[3 * contact]), localsolver_options);
-            if(withRelaxation)
+          /* Loop through the cones  */
+          //cblas_dcopy( n , q , incx , v , incy );
+          for(cone= 0 ; cone< nc ; ++cone)
+          {
+
+            if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+            (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
+            localsolver_options->iparam[4] = cone;
+            (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
+
+            dim = problem->coneIndex[cone+1]-problem->coneIndex[cone];
+            for (unsigned int i =0; i <dim; ++i)
             {
-              r[3 * contact] = omega*r[3 * contact]+(1.0-omega)*rold[0];
-              r[3 * contact+1] = omega*r[3 * contact+1]+(1.0-omega)*rold[1];
-              r[3 * contact+2] = omega*r[3 * contact+2]+(1.0-omega)*rold[2];
-            }
+              r[problem->coneIndex[cone]+i] = omega*r[problem->coneIndex[cone]+i]
+                +(1.0-omega)*rold[problem->coneIndex[cone]+i];
+            } 
           }
 
           /* **** Criterium convergence **** */
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+            printf("----------------------------------- SOCLCP - NSGS - Iteration %i Error = %14.7e\n", iter, error);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
 
           if(options->callback)
           {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                r, v,
-                error, NULL);
+            options->callback->collectStatsIteration(options->callback->env, problem->n,
+                                                     r, v,
+                                                     error, NULL);
           }
         }
 
@@ -622,16 +592,15 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
         while((iter < itermax) && (hasNotConverged > 0))
         {
           ++iter;
-          /* Loop through the contact points */
+          /* Loop through the cones  */
           //cblas_dcopy( n , q , incx , v , incy );
-          for(contact= 0 ; contact < nc ; ++contact)
+          for(cone= 0 ; cone < nc ; ++cone)
           {
 
-
-            if(verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, r, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(r[3 * contact]), localsolver_options);
+            if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+            (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
+            localsolver_options->iparam[4] = cone;
+            (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
 
           }
 
@@ -639,14 +608,14 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+            printf("----------------------------------- SOCLCP - NSGS - Iteration %i Error = %14.7e\n", iter, error);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
 
           if(options->callback)
           {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
+            options->callback->collectStatsIteration(options->callback->env, problem->n,
                 r, v,
                 error, NULL);
           }
@@ -673,9 +642,9 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   localproblem->M->matrix0 = NULL;
   freeSecondOrderConeLinearComplementarityProblem(localproblem);
 
-  if(scontacts)  /* shuffle */
+  if(scones)  /* shuffle */
   {
-    free(scontacts);
+    free(scones);
   }
 
 }

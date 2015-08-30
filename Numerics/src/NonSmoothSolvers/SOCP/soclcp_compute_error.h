@@ -46,10 +46,11 @@ int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem* problem, d
 /** Error computation for one SOCLCP problem
     \param z vector
     \param w vector
+    \param dim dimension of the cone
     \param mu coeficient of friction
     \param[in,out] error value
  */
-void soclcp_unitary_compute_and_add_error(double z[3] , double w[3], double mu, double * error);
+  void soclcp_unitary_compute_and_add_error(double z[3] , double w[3], unsigned int dim, double mu, double * error);
 
 /** Error computation for SOCLCP problem
     \param problem the structure which defines the SOCLCP
@@ -60,20 +61,9 @@ void soclcp_unitary_compute_and_add_error(double z[3] , double w[3], double mu, 
     \param[in,out] error value
     \return 0 if ok
  */
-int soclcp_compute_error_velocity(SecondOrderConeLinearComplementarityProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
 
-
-/** Error computation for SOCLCP problem with Tresca Friction
-    \param problem the structure which defines the SOCLCP
-    \param z vector
-    \param w vector
-    \param tolerance value for error computation
-    \param options
-    \param[in,out] error value
-    \return 0 if ok
- */
-int soclcp_Tresca_compute_error(SecondOrderConeLinearComplementarityProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
