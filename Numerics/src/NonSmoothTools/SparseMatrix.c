@@ -161,6 +161,7 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
   }
 #endif
 
+  free(p);
   return NULL;
 }
 

@@ -527,10 +527,7 @@ NumericsMatrix* newNumericsMatrix(void)
   M->storageType = -1;
   M->size0 = 0;
   M->size1 = 0;
-  M->matrix0 = NULL;
-  M->matrix1 = NULL;
-  M->matrix2 = NULL;
-  M->internalData = NULL;
+  NM_null(M);
 
   return M;
 }
@@ -570,10 +567,7 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
   M->size0 = size0;
   M->size1 = size1;
 
-  M->matrix0 = NULL;
-  M->matrix1 = NULL;
-  M->matrix2 = NULL;
-  M->internalData = NULL;
+  NM_null(M);
 
   if (data)
   {

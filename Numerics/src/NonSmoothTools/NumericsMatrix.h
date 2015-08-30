@@ -482,6 +482,17 @@ extern "C"
    */
   int* NM_iWork(NumericsMatrix *A, int size);
 
+  /** set NumericsMatrix fiels to NULL
+   * \param A a matrix
+   */
+  static inline void NM_null(NumericsMatrix* A)
+  {
+    A->matrix0 = NULL;
+    A->matrix1 = NULL;
+    A->matrix2 = NULL;
+    A->internalData = NULL;
+  }
+
 #ifdef WITH_MUMPS
   /** Get the MPI communicator. Call MPI_Init if needed.
    * \param[in,out] A a NumericsMatrix.
