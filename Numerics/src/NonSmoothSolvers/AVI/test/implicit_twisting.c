@@ -28,6 +28,7 @@
 #include <float.h>
 
 #include "AVI_Solvers.h"
+#include "AVI_cst.h"
 #include "SiconosSets.h"
 
 #define TS 10e-3
@@ -70,7 +71,7 @@ int main(void)
   };
 
   SolverOptions options;
-  avi_caoferris_setDefaultSolverOptions(&options);
+  set_SolverOptions(&options, SICONOS_AVI_CAOFERRIS);
 
   _Bool c1, c2, c3, c4;
   unsigned N = 0;

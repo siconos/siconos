@@ -403,7 +403,7 @@ int globalFrictionContact3D_AlartCurnier_setDefaultSolverOptions(
   options->iparam = (int *) calloc(options->iSize, sizeof(int));
   options->dparam = (double *) calloc(options->dSize,  sizeof(double));
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
+  null_SolverOptions(options);
   options->iparam[0] = 200;    /* input :  itermax */
   options->iparam[1] = 1;      /* output : #iter */
   options->iparam[2] = 0;      /* unused */

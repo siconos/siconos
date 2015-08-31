@@ -320,7 +320,7 @@ int frictionContact2D_cpg_setDefaultSolverOptions(SolverOptions *options)
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
+  null_SolverOptions(options);
   for (i = 0; i < 5; i++)
   {
     options->iparam[i] = 0;

@@ -55,15 +55,6 @@ extern "C"
 {
 #endif
 
-  /** set the default solver parameters and perform memory allocation for an AVI resolution
-      \param[in] problem the AffineVariationalInequalities struct which handles the AVI
-      \param options the pointer to the array of options to set
-      \param solverId the solver to invoke
-      \return info termination value
-  */
-  int avi_setDefaultSolverOptions(AffineVariationalInequalities* problem, SolverOptions* options, int solverId);
-
-
   /** avi_caoferris is a direct solver for AVI based on pivoting method principle for degenerate problem \n
    * Choice of pivot variable is performed via lexicographic ordering \n
    *  Ref: "A Pivotal Method for Affine Variational Inequalities" Menglin Cao et Michael Ferris (1996)\n
@@ -76,11 +67,6 @@ extern "C"
    *\author Olivier Huber
    */
   int avi_caoferris(AffineVariationalInequalities* problem, double *z, double* w, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-      \param options the pointer to the array of options to set
-  */
-  int avi_caoferris_setDefaultSolverOptions(SolverOptions* options);
 
   /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n
    * of the AVI : \n

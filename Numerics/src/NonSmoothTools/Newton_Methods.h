@@ -67,15 +67,15 @@ typedef struct {
   unsigned int status; /**< status of this newton iteration */
 } newton_stats;
 
-/** \sutrct newton_LSA_data Newton_Methods.h*/
+/** \struct newton_LSA_data Newton_Methods.h*/
 typedef struct {
   double p; /**<  p value for the acceptance test of the direction solution of the linear system */
-  double sigma; /**< ratio for the decrease in norm of the C-function (\f$gamma'\$ in VFBLSA)*/
+  double sigma; /**< ratio for the decrease in norm of the C-function (\f$gamma'\f$ in VFBLSA)*/
   double gamma; /**< constant for the line search*/
   double rho; /**< coefficient for the direction check*/
 } newton_LSA_param;
 
-/** \sutrct newton_LSA_data Newton_Methods.h*/
+/** \struct newton_LSA_data Newton_Methods.h*/
 typedef struct {
   NumericsMatrix* H; /**< matrix */
 } newton_LSA_data;
@@ -132,7 +132,6 @@ extern "C"
  void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat);
 
  /** Check whether the solver uses the Newton_LSA framework or not
-  * \param options the SolverOptions
   * \return true if the solver is using newton_LSA, false otherwise
   */
  bool newton_LSA_check_solverId(int solverId);

@@ -511,31 +511,3 @@ exit_caoferris:
 
   return info;
 }
-
-
-int avi_caoferris_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Cao-Ferris Solver\n");
-  }
-
-  options->solverId = SICONOS_AVI_CAOFERRIS;
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  options->iWork = NULL;
-  options->callback = NULL;
-  options->numericsOptions = NULL;
-  options->dparam[0] = 1e-6;
-  options->iparam[0] = 10000;
-
-
-  return 0;
-}

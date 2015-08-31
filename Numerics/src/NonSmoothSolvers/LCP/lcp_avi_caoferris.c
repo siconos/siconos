@@ -48,9 +48,3 @@ void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double 
   free(A);
   free(d_vec);
 }
-
-int linearComplementarity_avi_caoferris_setDefaultSolverOptions(SolverOptions* options)
-{
-  return avi_caoferris_setDefaultSolverOptions(options);
-}
-

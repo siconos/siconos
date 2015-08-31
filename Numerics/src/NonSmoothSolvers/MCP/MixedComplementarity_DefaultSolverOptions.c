@@ -37,18 +37,10 @@ void  mixedComplementarity_default_setDefaultSolverOptions(MixedComplementarityP
   pOptions->filterOn = 0;
   pOptions->dWork = 0;
   pOptions->iWork = 0;
-  pOptions->iparam = (int*)malloc(10 * sizeof(int));
-  pOptions->dparam = (double*)malloc(10 * sizeof(double));
+  pOptions->iparam = (int*)calloc(10, sizeof(int));
+  pOptions->dparam = (double*)calloc(10, sizeof(double));
   pOptions->numberOfInternalSolvers = 0;
-  pOptions->internalSolvers = NULL;
-  pOptions->numericsOptions = NULL;
-  pOptions->callback = NULL;
-
-  for (int i = 0; i < 10; i++)
-  {
-    pOptions-> iparam[i] = 0;
-    pOptions->dparam[i] = 0.0;
-  }
+  null_SolverOptions(pOptions);
 
 
   /*default tolerance of it*/

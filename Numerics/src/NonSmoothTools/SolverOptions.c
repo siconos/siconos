@@ -379,6 +379,17 @@ void deleteSolverOptions(SolverOptions* op)
   }
 }
 
+void null_SolverOptions(SolverOptions* options)
+{
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->callback = NULL;
+  options->numericsOptions = NULL;
+  options->internalSolvers = NULL;
+  options->solverData = NULL;
+  options->solverParameters = NULL;
+}
+
 void fill_SolverOptions(SolverOptions* options, int solverId, int iSize, int dSize, int iter_max, double tol)
 {
   options->solverId = solverId;
@@ -389,13 +400,7 @@ void fill_SolverOptions(SolverOptions* options, int solverId, int iSize, int dSi
   options->dSize = dSize;
   options->iparam = (int *)calloc(iSize, sizeof(int));
   options->dparam = (double *)calloc(dSize, sizeof(double));
-  options->dWork = NULL;
-  options->iWork = NULL;
-  options->callback = NULL;
-  options->numericsOptions = NULL;
-  options->internalSolvers = NULL;
-  options->solverData = NULL;
-  options->solverParameters = NULL;
+  null_SolverOptions(options);
   /* we set those value, even if they don't make sense. If this is the case,
    * they should be +inf */
   options->iparam[0] = iter_max;
@@ -502,8 +507,18 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     vi_box_AVI_extra_SolverOptions(options);
     break;
 
-  case SICONOS_LCP_LEMKE:
+  case SICONOS_AVI_CAOFERRIS:
   case SICONOS_LCP_AVI_CAOFERRIS:
+  case SICONOS_RELAY_AVI_CAOFERRIS:
+  case SICONOS_RELAY_AVI_CAOFERRIS_TEST:
+    iSize = 6;
+    dSize = 3;
+    iter_max = 10000;
+    tol = 1e-12;
+    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    break;
+
+  case SICONOS_LCP_LEMKE:
   case SICONOS_LCP_BARD:
   case SICONOS_LCP_MURTY:
   case SICONOS_LCP_PIVOT:

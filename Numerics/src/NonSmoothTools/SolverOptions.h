@@ -247,6 +247,11 @@ extern "C"
    */
   void deleteSolverOptions(SolverOptions * options);
 
+  /* Set all pointer fields to NULL, except iparam and dparam
+   * \param options the struct to initialize
+   */
+  void null_SolverOptions(SolverOptions* options);
+
   /** fill a SolverOptions struct: set fields, allocate memory and set common
    * values
    * \param options struct to fill

@@ -611,11 +611,6 @@ extern "C"
    */
   void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-      \param options the pointer to the array of options to set
-  */
-  int linearComplementarity_avi_caoferris_setDefaultSolverOptions(SolverOptions* options);
-
   /** lcp_pivot is a direct solver for LCP based on a pivoting method\n
    * It can currently use Bard, Murty's least-index or Lemke rule for choosing
    * the pivot. The default one is Lemke and it cam be changed by setting

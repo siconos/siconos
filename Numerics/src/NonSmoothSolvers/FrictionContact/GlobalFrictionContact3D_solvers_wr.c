@@ -429,7 +429,7 @@ int globalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* optio
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
+  null_SolverOptions(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -492,7 +492,7 @@ int globalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(Solver
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
+  null_SolverOptions(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   globalFrictionContact3D_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -550,7 +550,7 @@ int globalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptio
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
+  null_SolverOptions(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   frictionContact3D_nsgs_velocity_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -591,7 +591,7 @@ int globalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* o
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
+  null_SolverOptions(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   frictionContact3D_proximal_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -630,7 +630,7 @@ int globalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOpti
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
+  null_SolverOptions(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -670,7 +670,7 @@ int globalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptio
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  options->iWork = NULL;   options->callback = NULL; options->numericsOptions = NULL;
+  null_SolverOptions(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options->internalSolvers);
   return 0;

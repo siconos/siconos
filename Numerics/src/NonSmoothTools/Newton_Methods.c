@@ -452,6 +452,7 @@ void newton_LSA_free_solverOptions(SolverOptions* options)
 {
   assert(options->solverParameters);
   free(options->solverParameters);
+  options->solverParameters = NULL;
 
   assert(options->solverData);
   newton_LSA_data* sd = (newton_LSA_data*) options->solverData;
@@ -459,4 +460,6 @@ void newton_LSA_free_solverOptions(SolverOptions* options)
   freeNumericsMatrix(sd->H);
   free(sd->H);
   free(sd);
+  options->solverData = NULL;
+
 }
