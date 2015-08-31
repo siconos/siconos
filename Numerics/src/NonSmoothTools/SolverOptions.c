@@ -523,6 +523,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
   case SICONOS_FRICTION_3D_GLOBAL_GAMS_PATH:
   case SICONOS_FRICTION_3D_GLOBAL_GAMS_PATHVI:
   {
+#ifdef HAVE_GAMS_C_API
     iSize = 2;
     dSize = 2;
     iter_max = 10000;
@@ -535,6 +536,10 @@ void set_SolverOptions(SolverOptions* options, int solverId)
       GP->model_dir = GAMS_MODELS_SHARE_DIR;
       GP->gams_dir = GAMS_DIR;
     }
+#else
+    printf("set_SolverOptions :: GAMS was not enabled, exiting!\n");
+    exit(EXIT_FAILURE);
+#endif
     break;
   }
 
