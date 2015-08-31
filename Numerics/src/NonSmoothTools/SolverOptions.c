@@ -536,11 +536,11 @@ void set_SolverOptions(SolverOptions* options, int solverId)
       GP->model_dir = GAMS_MODELS_SHARE_DIR;
       GP->gams_dir = GAMS_DIR;
     }
+    break;
 #else
     printf("set_SolverOptions :: GAMS was not enabled, exiting!\n");
     exit(EXIT_FAILURE);
 #endif
-    break;
   }
 
   case SICONOS_NCP_PATH:
