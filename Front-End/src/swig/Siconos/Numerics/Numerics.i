@@ -377,7 +377,7 @@
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
     SO->solverId=id;
-    avi_setDefaultSolverOptions(vi, SO, id);
+    set_SolverOptions(SO, id);
     return SO;
   }
   // SolverOptions(FRICTION_SOLVER id)
@@ -956,7 +956,7 @@
       FC->b = NULL;
       FC->mu = NULL;
       FC->env = NULL;
-      FC->numberOfContacts = NULL;
+      FC->numberOfContacts = 0;
       FC->dimension = (int) PyInt_AsLong(dim);
 
       return FC;

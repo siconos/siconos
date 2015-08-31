@@ -34,7 +34,7 @@ AVI::AVI(int numericsSolverId): LinearOSNS(numericsSolverId)
 {
   _numerics_problem.reset(new AffineVariationalInequalities);
   _numerics_problem->poly = new polyhedron;
-  avi_setDefaultSolverOptions(NULL, _numerics_solver_options.get(), numericsSolverId);
+  set_SolverOptions(_numerics_solver_options.get(), numericsSolverId);
 }
 
 void AVI::initialize(SP::Simulation sim)
@@ -124,7 +124,7 @@ void AVI::setSolverId(int solverId)
 {
   // clear previous Solveroptions
   deleteSolverOptions(_numerics_solver_options.get());
-  avi_setDefaultSolverOptions(NULL, _numerics_solver_options.get(), solverId);
+  set_SolverOptions(_numerics_solver_options.get(), solverId);
 }
 
 
