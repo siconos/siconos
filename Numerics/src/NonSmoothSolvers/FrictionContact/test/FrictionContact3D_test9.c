@@ -19,30 +19,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "soclcp_test_function.h"
+#include "frictionContact_test_function.h"
 
 
 
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/Capsules-i122-1617.dat \n");
+  printf("Test on ./data/Capsules-i122-1617.dat.dat\n");
 
   FILE * finput  =  fopen("./data/Capsules-i122-1617.dat", "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = soclcp_setDefaultSolverOptions(options, SICONOS_SOCLCP_NSGS);
-  options->dparam[0] = 1e-06;
-  options->iparam[0] = 2000000;
-  //options->iparam[8] = 1;
-  //options->dparam[8] = 1.0;
-  options->internalSolvers->solverId = SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration;
-  options->internalSolvers->dparam[0]=1e-16;
-  options->internalSolvers->iparam[0]=100;
-  info = soclcp_test_function(finput, options);
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
+  options->dparam[0] = 1e-07;
+  options->iparam[0] = 1000000;
+  options->dparam[8] = 1.0;
+  options->iparam[8] = 1;
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration;
+  options->internalSolvers->iparam[0] = 20;
+  options->internalSolvers->dparam[0] = 1e-16;
+
+  info = frictionContact_test_function(finput, options);
 
   deleteSolverOptions(options);
   free(options);
   fclose(finput);
-  printf("\nEnd of test on ./data/Capsules-i122-1617.dat \n");
+  printf("\nEnd of test on ./data/Capsules-i122-1617.dat\n");
   return info;
 }

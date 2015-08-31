@@ -49,8 +49,10 @@ int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem* problem, d
     \param dim dimension of the cone
     \param mu coeficient of friction
     \param[in,out] error value
+    \param worktmp 
  */
-  void soclcp_unitary_compute_and_add_error(double z[3] , double w[3], unsigned int dim, double mu, double * error);
+  void soclcp_unitary_compute_and_add_error(double z[3] , double w[3], unsigned int dim, double mu, double * error,
+    double * worktmp);
 
 /** Error computation for SOCLCP problem
     \param problem the structure which defines the SOCLCP

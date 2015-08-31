@@ -24,30 +24,29 @@ enum SOCLCP_SOLVER
   /* SICONOS_SOCLCP_LOCALFB = 513, */
 
   /** SOCLCP for one cone (used mainly inside NSGS solvers) */
+  SICONOS_SOCLCP_ProjectionOnCone = 1150,
+  SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration = 1151,
+  SICONOS_SOCLCP_projectionOnConeWithRegularization = 1152
   /* SICONOS_SOCLCP_AlartCurnierNewton = 550, */
   /* SICONOS_SOCLCP_NCPGlockerFBNewton = 551, */
-  /* SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization = 552, */
-  SICONOS_SOCLCP_ProjectionOnCone = 1153,
-  SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration = 1154
-                                    /* SICONOS_SOCLCP_projectionOnConeWithRegularization = 555, */
-                                    /* SICONOS_SOCLCP_NCPGlockerFBPATH = 556, */
-                                    /* SICONOS_SOCLCP_projectionOnCylinder = 557, */
-                                    /* SICONOS_SOCLCP_ProjectionOnCone_velocity = 558, */
-                                    /* SICONOS_SOCLCP_PGoC = 559, */
-                                    /* SICONOS_SOCLCP_DeSaxceFixedPoint = 560, */
-                                    /* SICONOS_SOCLCP_DampedAlartCurnierNewton = 561, */
-                                    /* SICONOS_SOCLCP_QUARTIC = 562, */
-                                    /* SICONOS_SOCLCP_QUARTIC_NU = 563, */
+  /* SICONOS_SOCLCP_NCPGlockerFBPATH = 556, */
+  /* SICONOS_SOCLCP_projectionOnCylinder = 557, */
+  /* SICONOS_SOCLCP_ProjectionOnCone_velocity = 558, */
+  /* SICONOS_SOCLCP_PGoC = 559, */
+  /* SICONOS_SOCLCP_DeSaxceFixedPoint = 560, */
+  /* SICONOS_SOCLCP_DampedAlartCurnierNewton = 561, */
+  /* SICONOS_SOCLCP_QUARTIC = 562, */
+  /* SICONOS_SOCLCP_QUARTIC_NU = 563, */
 
-                                    /** SOCLCP local solvers on global formulation */
-                                    /* SICONOS_SOCLCP_GLOBAL_NSGS_WR = 600, */
-                                    /* SICONOS_SOCLCP_GLOBAL_NSGSV_WR = 601, */
-                                    /* SICONOS_SOCLCP_GLOBAL_PROX_WR = 602, */
-                                    /* SICONOS_SOCLCP_GLOBAL_DSFP_WR = 603, */
-                                    /* SICONOS_SOCLCP_GLOBAL_TFP_WR = 604, */
-                                    /* SICONOS_SOCLCP_GLOBAL_NSGS = 605, */
-                                    /* SICONOS_SOCLCP_GLOBAL_LOCALAC_WR = 606, */
-                                    /* SICONOS_SOCLCP_GLOBAL_AC = 607 */
+  /** SOCLCP local solvers on global formulation */
+  /* SICONOS_SOCLCP_GLOBAL_NSGS_WR = 600, */
+  /* SICONOS_SOCLCP_GLOBAL_NSGSV_WR = 601, */
+  /* SICONOS_SOCLCP_GLOBAL_PROX_WR = 602, */
+  /* SICONOS_SOCLCP_GLOBAL_DSFP_WR = 603, */
+  /* SICONOS_SOCLCP_GLOBAL_TFP_WR = 604, */
+  /* SICONOS_SOCLCP_GLOBAL_NSGS = 605, */
+  /* SICONOS_SOCLCP_GLOBAL_LOCALAC_WR = 606, */
+  /* SICONOS_SOCLCP_GLOBAL_AC = 607 */
 
 };
 

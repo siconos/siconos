@@ -15,52 +15,34 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
-#include <math.h>
-#include "projectionOnCylinder.h"
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
+#include "soclcp_test_function.h"
 
-void projectionOnCylinder(double* r, double  R)
+
+
+int main(void)
 {
+  int info = 0 ;
+  printf("Test on ./data/Capsules-i122-1617.dat \n");
 
-  double normTsquare = r[1] * r[1] + r[2] * r[2];
+  FILE * finput  =  fopen("./data/Capsules-i122-1617.dat", "r");
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
+  info = soclcp_setDefaultSolverOptions(options, SICONOS_SOCLCP_NSGS);
+  options->dparam[0] = 1e-06;
+  options->iparam[0] = 2000000;
+  options->iparam[8] = 1;
+  options->dparam[8] = 1.3;
+  options->internalSolvers->solverId = SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration;
+  options->internalSolvers->dparam[0]=1e-16;
+  options->internalSolvers->iparam[0]=100;
+  info = soclcp_test_function(finput, options);
 
-  if (r[0] >= 0)
-  {
-    if (normTsquare <= R * R)
-    {
-      return ;
-    }
-    else
-    {
-      normTsquare = sqrt(normTsquare);
-      r[1] = R * r[1] / normTsquare;
-      r[2] = R * r[2] / normTsquare;
-      return;
-    }
-  }
-  else
-  {
-    r[0] = 0.0;
-    if (0 < normTsquare)
-    {
-
-      normTsquare = sqrt(normTsquare);
-      r[1] = R * r[1] / normTsquare;
-      r[2] = R * r[2] / normTsquare;
-      /*    r[1]=0.0; */
-      /*    r[2]=0.0; */
-      return;
-    }
-    else
-    {
-      r[1] = 0.0;
-      r[2] = 0.0;
-      return;
-    }
-
-  }
-}
-void projectionOnGeneralCylinder(double* r, double  R, int dim)
-{
-
+  deleteSolverOptions(options);
+  free(options);
+  fclose(finput);
+  printf("\nEnd of test on ./data/Capsules-i122-1617.dat \n");
+  return info;
 }

@@ -53,7 +53,7 @@ void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* p
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.rBlock,
      excluding the block corresponding to the current cone. ****/
-  soclcp_nsgs_computeqLocal(problem, localproblem, r, cone);
+  soclcp_nsgs_computeqLocal(problem, localproblem, r, cone, options);
 
   /* coefficient for current block*/
   localproblem->mu[0] = problem->mu[cone];
@@ -81,18 +81,9 @@ void soclcp_initializeLocalSolver_nsgs(Solver_soclcp_Ptr* solve, Update_soclcp_P
     *update = &soclcp_nsgs_update;
     *freeSolver = (FreeSolverNSGS_soclcp_Ptr)&soclcp_projection_free;
     *computeError = (ComputeError_soclcp_Ptr)&soclcp_compute_error;
-    soclcp_projection_initialize(problem, localproblem);
+    soclcp_projection_initialize(problem, localproblem, localsolver_options);
     break;
   }
-  /* case SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization: */
-  /* { */
-  /*   *solve = &soclcp_projectionWithDiagonalization_solve; */
-  /*   *update = &soclcp_projectionWithDiagonalization_update; */
-  /*   *freeSolver = (FreeSolverNSGS_soclcp_Ptr)&soclcp_projection_free; */
-  /*   *computeError = (ComputeError_soclcp_Ptr)&soclcp_compute_error; */
-  /*   soclcp_projection_initialize(problem, localproblem); */
-  /*   break; */
-  /* } */
   case SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration:
   {
     *solve = &soclcp_projectionOnConeWithLocalIteration_solve;
@@ -102,15 +93,15 @@ void soclcp_initializeLocalSolver_nsgs(Solver_soclcp_Ptr* solve, Update_soclcp_P
     soclcp_projectionOnConeWithLocalIteration_initialize(problem, localproblem,localsolver_options );
     break;
   }
-  /* case SICONOS_SOCLCP_projectionOnConeWithRegularization: */
-  /* { */
-  /*   *solve = &soclcp_projectionOnCone_solve; */
-  /*   *update = &soclcp_projection_update_with_regularization; */
-  /*   *freeSolver = (FreeSolverNSGS_soclcp_Ptr)&soclcp_projection_with_regularization_free; */
-  /*   *computeError = (ComputeError_soclcp_Ptr)&soclcp_compute_error; */
-  /*   soclcp_projection_initialize_with_regularization(problem, localproblem); */
-  /*   break; */
-  /* } */
+  case SICONOS_SOCLCP_projectionOnConeWithRegularization:
+  {
+    *solve = &soclcp_projectionOnCone_solve;
+    *update = &soclcp_projection_update_with_regularization;
+    *freeSolver = (FreeSolverNSGS_soclcp_Ptr)&soclcp_projection_with_regularization_free;
+    *computeError = (ComputeError_soclcp_Ptr)&soclcp_compute_error;
+    soclcp_projection_initialize_with_regularization(problem, localproblem);
+    break;
+  }
   /* /\* Newton solver (Alart-Curnier) *\/ */
   /* case SICONOS_SOCLCP_AlartCurnierNewton: */
   /* { */
@@ -198,7 +189,7 @@ void soclcp_initializeLocalSolver_nsgs(Solver_soclcp_Ptr* solve, Update_soclcp_P
   }
   }
 }
-void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, double *r, int cone)
+void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, double *r, int cone, SolverOptions * options)
 {
 
   double *qLocal = localproblem->q;
@@ -212,7 +203,7 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
 
   /* r current block set to zero, to exclude current cone block */
   int i;
-  double * rsave = (double *) malloc(dim*sizeof(double));
+  double * rsave = options->dWork;
   for(i = 0; i < dim; i++)
   {
     rsave[i] = r[normal + i];
@@ -247,7 +238,6 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
   {
     r[normal + i]=  rsave[i];
   }
-  free(rsave);
 }
 
 void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, int cone)
@@ -323,15 +313,17 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   unsigned int cone ;
   int isConeDimensionsEqual=1;
   /* Connect local solver and local problem*/
-  unsigned int dim = problem->coneIndex[1]-problem->coneIndex[0];
+  unsigned int dim_max = problem->coneIndex[1]-problem->coneIndex[0];
   for(cone = 1; cone < nc; cone++)
   {
-    if(problem->coneIndex[cone+1]-problem->coneIndex[cone] != dim)
+    if (dim_max !=problem->coneIndex[cone+1]-problem->coneIndex[cone])
     {
       isConeDimensionsEqual=0;
-      break;
+      dim_max = max(dim_max,problem->coneIndex[cone+1]-problem->coneIndex[cone]);
     }
-  }
+   
+  } 
+
   SecondOrderConeLinearComplementarityProblem* localproblem;
 
 
@@ -339,21 +331,21 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   {
     localproblem = (SecondOrderConeLinearComplementarityProblem*)malloc(sizeof(SecondOrderConeLinearComplementarityProblem));
     localproblem->nc = 1;
-    localproblem->n = dim;
-    localproblem->q = (double*)malloc(dim * sizeof(double));
+    localproblem->n = dim_max;
+    localproblem->q = (double*)malloc(dim_max * sizeof(double));
     localproblem->mu = (double*)malloc(sizeof(double));
     localproblem->coneIndex = (unsigned int*)malloc(2*sizeof(unsigned int));
     localproblem->coneIndex[0]=0;
-    localproblem->coneIndex[1]=dim;
+    localproblem->coneIndex[1]=dim_max;
 
     if(problem->M->storageType == 0)
     {
-      localproblem->M = createNumericsMatrixFromData(NM_DENSE, dim, dim,
-                        malloc(dim*dim* sizeof(double)));
+      localproblem->M = createNumericsMatrixFromData(NM_DENSE, dim_max, dim_max,
+                        malloc(dim_max*dim_max* sizeof(double)));
     }
     else
     {
-      localproblem->M = createNumericsMatrix(NM_DENSE, dim, dim);
+      localproblem->M = createNumericsMatrix(NM_DENSE, dim_max, dim_max);
     }
   }
   else
@@ -384,10 +376,8 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   }
 
 
-
-
   /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
-
+  
   if(iparam[1] == 1 || iparam[1] == 2)
   {
     int n =problem->n;
@@ -544,6 +534,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       if(withRelaxation)
       {
         int n = problem->n;
+        unsigned int dim;
         double * rold = (double*)malloc(n*sizeof(double)); // save memory if isConeDimensionsEqual
         double omega = dparam[8];
         while((iter < itermax) && (hasNotConverged > 0))

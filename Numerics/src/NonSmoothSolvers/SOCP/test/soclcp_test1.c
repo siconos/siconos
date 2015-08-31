@@ -33,8 +33,6 @@ int main(void)
   info = soclcp_setDefaultSolverOptions(options, SICONOS_SOCLCP_NSGS);
   options->dparam[0] = 1e-16;
   options->internalSolvers->solverId = SICONOS_SOCLCP_ProjectionOnCone;
-  options->internalSolvers->iparam[0] = 0;
-  options->internalSolvers->dparam[0] = 0.0;
 
   info = soclcp_test_function(finput, options);
 

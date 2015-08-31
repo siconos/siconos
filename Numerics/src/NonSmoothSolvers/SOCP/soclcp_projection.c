@@ -32,75 +32,54 @@
 #define VERBOSE_DEBUG
 
 void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem * problem,
-                                  SecondOrderConeLinearComplementarityProblem * localproblem)
+                                  SecondOrderConeLinearComplementarityProblem * localproblem,
+                                  SolverOptions* localsolver_options)
 {
-
+  int nc = problem->nc;
+  unsigned int dim_max=0;
+  for (int i =0; i <nc; i++)
+  {
+    dim_max=max(dim_max,problem->coneIndex[i+1]-problem->coneIndex[i]);
+  }
+  /* printf("soclcp_projectionOnCone_initialize. Allocation of dwork\n"); */
+  localsolver_options->dWork = (double *)malloc(dim_max * sizeof(double));
 }
 
-void soclcp_projectionWithDiagonalization_update(int cone, SecondOrderConeLinearComplementarityProblem* problem, SecondOrderConeLinearComplementarityProblem* localproblem,  double* reaction, SolverOptions* options)
+int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions * options)
 {
-  /* Build a local problem for a specific cone
-     reaction corresponds to the global vector (size n) of the global problem.
-  */
+  /*  /\* Builds local problem for the current cone *\/ */
+  /*   soclcp_projection_update(cone, reaction); */ 
+  double * MLocal = localproblem->M->matrix0;
+  double * qLocal = localproblem->q;
+  double mu_i = localproblem->mu[0];
+  int nLocal = localproblem->n;
 
-  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  /* Build a local problem for a specific cone
-   reaction corresponds to the global vector (size n) of the global problem.
-  */
+  /* this part is critical for the success of the projection */
+  //double an = 1./(MLocal[0]+mu_i);
+  double an = 1. / (MLocal[0]);
 
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  soclcp_nsgs_fillMLocal(problem, localproblem, cone);
+  int incx = 1, incy = 1;
+  double * worktmp = options->dWork;
 
-  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-     excluding the block corresponding to the current cone. ****/
+  cblas_dcopy(nLocal , qLocal, incx , worktmp , incy);
+  
+  cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, reaction, incx, 1.0, worktmp, incy);
 
-  NumericsMatrix * MGlobal = problem->M;
-  double * MLocal =  localproblem->M->matrix0;
-
-  double *qLocal = localproblem->q;
-  double * qGlobal = problem->q;
-  int n =  problem->n;
-
-
-  int in = 3 * cone, it = in + 1, is = it + 1;
-  /* reaction current block set to zero, to exclude current cone block */
-  /*   double rin= reaction[in] ; double rit= reaction[it] ; double ris= reaction[is] ;  */
-  /* qLocal computation*/
-  qLocal[0] = qGlobal[in];
-  qLocal[1] = qGlobal[it];
-  qLocal[2] = qGlobal[is];
-
-  if(MGlobal->storageType == 0)
+  for (int i =0; i < nLocal ; i++)
   {
-    double * MM = MGlobal->matrix0;
-    int incx = n, incy = 1;
-    qLocal[0] += cblas_ddot(n , &MM[in] , incx , reaction , incy);
-    qLocal[1] += cblas_ddot(n , &MM[it] , incx , reaction , incy);
-    qLocal[2] += cblas_ddot(n , &MM[is] , incx , reaction , incy);
-    // Substract diagonal term
-    qLocal[0] -= MM[in + n * in] * reaction[in];
-    qLocal[1] -= MM[it + n * it] * reaction[it];
-    qLocal[2] -= MM[is + n * is] * reaction[is];
+    reaction[i] -= an * worktmp[i];
   }
-  else if(MGlobal->storageType == 1)
-  {
-    /* qLocal += rowMB * reaction
-       with rowMB the row of blocks of MGlobal which corresponds to the current cone
-    */
-    subRowProdSBM(n, 3, cone, MGlobal->matrix1, reaction, qLocal, 0);
-    // Substract diagonal term
-    qLocal[0] -= MLocal[0] * reaction[in];
-    qLocal[1] -= MLocal[4] * reaction[it];
-    qLocal[2] -= MLocal[8] * reaction[is];
-
-  }
-  /*   reaction[in] = rin; reaction[it] = rit; reaction[is] = ris; */
-
-  /* coefficient for current block*/
-  localproblem->mu[0] = problem->mu[cone];
+  projectionOnSecondOrderCone(reaction, mu_i, nLocal);
+  return 0;
 }
 
 
+
+void soclcp_projection_free(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, SolverOptions* localsolver_options)
+{
+  free(localsolver_options->dWork);
+  localsolver_options->dWork=NULL;
+}
 void soclcp_projection_initialize_with_regularization(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem)
 {
   if(!localproblem->M->matrix0)
@@ -161,7 +140,7 @@ void soclcp_projection_update_with_regularization(int cone, SecondOrderConeLinea
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current cone. ****/
-  soclcp_nsgs_computeqLocal(problem, localproblem, reaction, cone);
+  soclcp_nsgs_computeqLocal(problem, localproblem, reaction, cone, options);
 
   double rho = options->dparam[3];
   for(int i = 0 ; i < 3 ; i++) localproblem->M->matrix0[i + 3 * i] += rho ;
@@ -180,57 +159,6 @@ void soclcp_projection_update_with_regularization(int cone, SecondOrderConeLinea
 
 }
 
-int soclcp_projectionWithDiagonalization_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions * options)
-{
-
-
-
-  /* Current block position */
-
-  /* Builds local problem for the current cone */
-  /*  soclcp_projection_update(cone, reaction); */
-  /*  soclcp_projectionWithDiagonalization_update(cone, reaction);  */
-
-
-  double * MLocal = localproblem->M->matrix0;
-  double * qLocal = localproblem->q;
-  double mu_i = localproblem->mu[0];
-  int nLocal = 3;
-
-  double mrn, num, mu2 = mu_i * mu_i;
-
-
-  /* projection */
-  if(qLocal[0] > 0.)
-  {
-    reaction[0] = 0.;
-    reaction[1] = 0.;
-    reaction[2] = 0.;
-  }
-  else
-  {
-    if(MLocal[0] < DBL_EPSILON || MLocal[nLocal + 1] < DBL_EPSILON || MLocal[2 * nLocal + 2] < DBL_EPSILON)
-    {
-      fprintf(stderr, "soclcp_projection error: null term on MLocal diagonal.\n");
-      exit(EXIT_FAILURE);
-    }
-
-    reaction[0] = -qLocal[0] / MLocal[0];
-    reaction[1] = -qLocal[1] / MLocal[nLocal + 1];
-    reaction[2] = -qLocal[2] / MLocal[2 * nLocal + 2];
-
-    mrn = reaction[1] * reaction[1] + reaction[2] * reaction[2];
-
-    if(mrn > mu2 * reaction[0]*reaction[0])
-    {
-      num = mu_i * reaction[0] / sqrt(mrn);
-      reaction[1] = reaction[1] * num;
-      reaction[2] = reaction[2] * num;
-    }
-  }
-  return 0;
-}
-
 void soclcp_projectionOnConeWithLocalIteration_initialize(SecondOrderConeLinearComplementarityProblem * problem,
                                                           SecondOrderConeLinearComplementarityProblem * localproblem,
                                                           SolverOptions* localsolver_options)
@@ -242,22 +170,22 @@ void soclcp_projectionOnConeWithLocalIteration_initialize(SecondOrderConeLinearC
     dim_max=max(dim_max,problem->coneIndex[i+1]-problem->coneIndex[i]);
   }
   /* printf("soclcp_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
-  localsolver_options->dWork = (double *)malloc((nc+3*dim_max) * sizeof(double));
-  for(int i = 0; i < nc; i++)
+  localsolver_options->dWork = (double *)malloc((3*dim_max+nc) * sizeof(double));
+  localsolver_options->iWork = (int *)malloc(sizeof(int));
+  localsolver_options->iWork[0]=3*dim_max;
+  for(unsigned int i = 3*dim_max; i < nc+3*dim_max; i++)
   {
     localsolver_options->dWork[i]=1.0;
   }
-  localsolver_options->iWork = (int *)malloc(sizeof(int));
-  localsolver_options->iWork[0]=nc;
-  
-
-  
+    
 }
 
 void soclcp_projectionOnConeWithLocalIteration_free(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, SolverOptions* localsolver_options)
 {
   free(localsolver_options->dWork);
   localsolver_options->dWork=NULL;
+  free(localsolver_options->iWork);
+  localsolver_options->iWork=NULL;
 }
 
 int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* r, SolverOptions* options)
@@ -288,16 +216,15 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   /* double as = 1.0 / (MLocal[8] + mu_i); */
   /* at = an; */
   /* as = an; */
-  double rho=   options->dWork[options->iparam[4]] , rho_k;
+  double rho=   options->dWork[options->iparam[4]+options->iWork[0]] , rho_k;
   /* printf ("saved rho = %14.7e\n",rho ); */
   /* printf ("options->iparam[4] = %i\n",options->iparam[4] ); */
 
   int incx = 1, incy = 1;
 
-  int nc = options->iWork[0];
-  double * v = options->dWork + nc;
-  double * v_k = options->dWork + nc + nLocal;
-  double * r_k = options->dWork + nc + nLocal+ nLocal;
+  double * v = options->dWork;
+  double * v_k = options->dWork + nLocal;
+  double * r_k = options->dWork + nLocal+ nLocal;
 
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
@@ -345,7 +272,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
     {
 
       rho_k = rho * pow(tau,ls_iter);
-      r[0] = r_k[0] -  rho_k * v_k[0];
+      r[0] = r_k[0] - rho_k * v_k[0];
       r[1] = r_k[1] - rho_k * v_k[1];
       r[2] = r_k[2] - rho_k * v_k[2];
 
@@ -383,7 +310,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
 
     /* compute local error */
     localerror =0.0;
-    soclcp_unitary_compute_and_add_error(r , v, nLocal, mu_i, &localerror);
+    soclcp_unitary_compute_and_add_error(r , v, nLocal, mu_i, &localerror, r_k);
 
     /* printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);  */
 
@@ -398,7 +325,6 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
     if(verbose > 1)
     {
       printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
-
     }
 
     options->dWork[options->iparam[4]] =rho;
@@ -410,33 +336,16 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   return 0;
 
 }
-void soclcp_projectionOnCylinder_update(int cone, SecondOrderConeLinearComplementarityProblem* problem, SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions* options)
+
+
+void soclcp_projection_with_regularization_free(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, SolverOptions* localsolver_options)
 {
-  /* Build a local problem for a specific cone
-     reaction corresponds to the global vector (size n) of the global problem.
-  */
-
-  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  /* Build a local problem for a specific cone
-   reaction corresponds to the global vector (size n) of the global problem.
-  */
-
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  soclcp_nsgs_fillMLocal(problem, localproblem, cone);
-
-  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-     excluding the block corresponding to the current cone. ****/
-  soclcp_nsgs_computeqLocal(problem, localproblem, reaction, cone);
-
-  /* coefficient for current block*/
-  localproblem->mu[0] = (options->dWork[cone]);
-
+  free(localproblem->M->matrix0);
+  localproblem->M->matrix0 = NULL;
 }
 
-
-int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions * options)
+int soclcp_projectionOnCylinder_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions * options)
 {
-
 
   /*  /\* Builds local problem for the current cone *\/ */
   /*   soclcp_projection_update(cone, reaction); */
@@ -465,63 +374,14 @@ int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* l
 
   free(worktmp);
 
-  projectionOnSecondOrderCone(reaction, mu_i, nLocal);
+  projectionOnGeneralCylinder(reaction, mu_i, nLocal);
   return 0;
 
 }
 
 
 
-void soclcp_projection_free(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, SolverOptions* localsolver_options)
-{
-}
 
-void soclcp_projection_with_regularization_free(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, SolverOptions* localsolver_options)
-{
-  free(localproblem->M->matrix0);
-  localproblem->M->matrix0 = NULL;
-}
-
-
-
-
-
-int soclcp_projectionOnCylinder_solve(SecondOrderConeLinearComplementarityProblem *localproblem , double* reaction, SolverOptions* options)
-{
-  /* int and double parameters */
-  /*   int* iparam = options->iparam; */
-  /*   double* dparam = options->dparam; */
-  double * MLocal = localproblem->M->matrix0;
-  double * qLocal = localproblem->q;
-  int nLocal = 3;
-
-
-  /* Builds local problem for the current cone */
-  /*   soclcp_projection_update(cone, reaction); */
-
-
-  /*double an = 1./(MLocal[0]);*/
-  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
-  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] + MLocal[1*nLocal+2]; */
-  /*   double beta = alpha*alpha - 4*det; */
-  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
-
-  double an = 1. / (MLocal[0]);
-
-  int incx = 1, incy = 1;
-  double worktmp[3];
-
-  double R  = localproblem->mu[0];
-  cblas_dcopy(nLocal , qLocal, incx , worktmp , incy);
-  cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, worktmp, incy);
-  reaction[0]   -= an * worktmp[0];
-  reaction[1] -= an * worktmp[1];
-  reaction[2] -= an * worktmp[2];
-
-  projectionOnCylinder(reaction, R);
-  return 0;
-
-}
 int soclcp_projection_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;

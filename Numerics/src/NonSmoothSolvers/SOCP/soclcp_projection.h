@@ -47,9 +47,11 @@ extern "C"
 /** Initialize SOCLCP projection
  * \param problem :  the global problem to solve
  * \param localproblem :  the local problem to initialize
+ * \param options 
  */
 void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem * problem,
-                                  SecondOrderConeLinearComplementarityProblem * localproblem);
+                                  SecondOrderConeLinearComplementarityProblem * localproblem,
+                                  SolverOptions * options);
 
 /** Initialize SOCLCP projection with regularization
  * \param problem :  the global problem to solve
@@ -77,24 +79,6 @@ void soclcp_projection_update(int number,  SecondOrderConeLinearComplementarityP
  */
 void soclcp_projection_update_with_regularization(int number,  SecondOrderConeLinearComplementarityProblem* problem, SecondOrderConeLinearComplementarityProblem* localproblem, double* r, SolverOptions* options);
 
-/** solve SOCLCP problem with projection assuming that M is diagonal
- * \param localproblem :  the local problem to initialize
- * \param r
- * \param options
- * \return 0 if successfull
- */
-int soclcp_projectionWithDiagonalization_solve(SecondOrderConeLinearComplementarityProblem * localproblem, double* r, SolverOptions * options);
-
-/** Update SOCLCP projection solver: formalize local problem for one contact.
- * \param number (position in global matrix) of the considered contact
- * \param problem :  the global problem to solve
- * \param localproblem :  the local problem to initialize
- * \param r (only the block corresponding to the current contact will be modified,
- * the rest is used to formalize the local problem)
- * \param options
- */
-void soclcp_projectionWithDiagonalization_update(int number,  SecondOrderConeLinearComplementarityProblem* problem, SecondOrderConeLinearComplementarityProblem* localproblem, double* r, SolverOptions* options);
-
 /** solve SOCLCP problem with projection on the Cone
  * \param localproblem :  the local problem to initialize
  * \param r
@@ -102,17 +86,6 @@ void soclcp_projectionWithDiagonalization_update(int number,  SecondOrderConeLin
  * \return 0 if successfull
  */
 int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem * localproblem, double* r, SolverOptions *options);
-
-/** Update SOCLCP projection solver: formalize local problem for one contact.
- * \param number (position in global matrix) of the considered contact
- * \param problem :  the global problem to solve
- * \param localproblem :  the local problem to initialize
- * \param r (only the block corresponding to the current contact will be modified,
- * the rest is used to formalize the local problem)
- * \param options
-*/
-void soclcp_projectionOnCylinder_update(int number,  SecondOrderConeLinearComplementarityProblem* problem, SecondOrderConeLinearComplementarityProblem* localproblem, double* r, SolverOptions* options);
-
 
 /** solve SOCLCP problem with projection on the Cone with local
  *   iteration up to convergence of the local problem

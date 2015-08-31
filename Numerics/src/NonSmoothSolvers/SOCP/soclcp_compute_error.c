@@ -33,23 +33,32 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
-void soclcp_unitary_compute_and_add_error(double *z , double *w, unsigned int dim, double mu, double * error)
+void soclcp_unitary_compute_and_add_error(double *z , double *w, unsigned int dim, double mu, double * error,
+                                          double * worktmp)
 {
 
   double rho = 1.0;
-
-  double *worktmp = (double *)malloc(dim*sizeof(double));
   for (unsigned int i =0; i < dim; ++i)
   {
     worktmp[i] = z[i] - rho * w[i];
   }
+  /* printf("mu = %f\n", mu); */
+  /* for (int i=0; i < dim; i++ ) */
+  /* { */
+  /*   printf("-- worktmp[%i]=%e\t\t\t",i,(worktmp)[i]); */
+  /*   printf("z[%i]=%e\n",i,(z)[i]); */
+  /* } */
   projectionOnSecondOrderCone(worktmp, mu, dim);
+  /* for (int i=0; i < dim; i++ ) */
+  /* { */
+  /*   printf("-- worktmp[%i]=%e\t\t\n",i,(worktmp)[i]); */
+  /* } */
+
   for (unsigned int i =0; i < dim; ++i)
   {
     worktmp[i] = z[i] -  worktmp[i];
     *error +=  worktmp[i] * worktmp[i];
   }
-  free(worktmp);
 }
 int soclcp_compute_error(
   SecondOrderConeLinearComplementarityProblem* problem,
@@ -71,24 +80,44 @@ int soclcp_compute_error(
   // Compute the current velocity
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
-
+  /* for (int i=0; i < n ; i++ ) */
+  /* { */
+  /*   printf("w[%i]=%e\t\t\t",i,w[i]); */
+  /*   printf("z[%i]=%e\n",i,z[i]); */
+  /* } */
+  /* printf("\n"); */
+  
   *error = 0.;
 
-
   int ic;
+  int dim;
+  unsigned int dim_max;
+  for (int i =0; i <nc; i++)
+  {
+    dim_max=max(dim_max,problem->coneIndex[i+1]-problem->coneIndex[i]);
+  }
+  double *worktmp = (double *)malloc(dim_max*sizeof(double));
 
   for(ic = 0 ; ic < nc ; ic++)
   {
-    
-    soclcp_unitary_compute_and_add_error(z + problem->coneIndex[ic], w + problem->coneIndex[ic],
-                                         problem->coneIndex[ic+1]- problem->coneIndex[ic], mu[ic], error);
+    dim = problem->coneIndex[ic+1]- problem->coneIndex[ic];
+    soclcp_unitary_compute_and_add_error(z + problem->coneIndex[ic],
+                                         w + problem->coneIndex[ic],
+                                         dim , mu[ic], error, worktmp);
+    /* for (int i=0; i < dim; i++ ) */
+    /* { */
+    /*   printf("-- w[%i]=%e\t\t\t",i,(w + problem->coneIndex[ic])[i]); */
+    /*   printf("z[%i]=%e\n",i,(z + problem->coneIndex[ic])[i]); */
+    /* } */
   }
+  free(worktmp);
   *error = sqrt(*error);
 
   /* Computes error */
   double normq = cblas_dnrm2(n , problem->q , incx);
   DEBUG_PRINTF("normq = %12.8e\n", normq);
   *error = *error / (normq + 1.0);
+  
   if(*error > tolerance)
   {
     if(verbose > 1)
