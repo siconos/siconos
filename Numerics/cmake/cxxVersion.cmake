@@ -7,11 +7,11 @@
 
 set(cxx_detect_code "
 #if __cplusplus >= 201103L
-#error CXX_VERSION 201103L
+#error CXXVERSION 201103L
 #elif __cplusplus >= 199711L
-#error CXX_VERSION 199711L
+#error CXXVERSION 199711L
 #else
-#error CXX_VERSION 000000L
+#error CXXVERSION 000000L
 #endif
 ")
 
@@ -32,10 +32,10 @@ function(detect_cxx_version output_var)
         )
 
         # Parse the architecture name from the compiler output
-        string(REGEX MATCH "CXX_VERSION ([a-zA-Z0-9_]+)" CXXVERSION "${CXXVERSION}")
+        string(REGEX MATCH "CXXVERSION ([a-zA-Z0-9_]+)" CXXVERSION "${CXXVERSION}")
 
         # Get rid of the value marker leaving just the architecture name
-        string(REPLACE "CXX_VERSION " "" CXXVERSION "${CXXVERSION}")
+        string(REPLACE "CXXVERSION " "" CXXVERSION "${CXXVERSION}")
 
-        set(${output_var} "${CXXVERSION}" PARENT_SCOPE)
+        set(${output_var} "${CXXVERSION}" CACHE STRING "C++ standart used to compile the process" FORCE)
 endfunction()

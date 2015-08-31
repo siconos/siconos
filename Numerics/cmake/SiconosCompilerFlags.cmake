@@ -1,6 +1,6 @@
 # apply misc flags
 
-IF(WITH_CXX)
+IF(CMAKE_CXX_COMPILER_WORKS)
   INCLUDE(cxxVersion)
 ENDIF()
 INCLUDE(cVersion)
@@ -114,13 +114,13 @@ IF(CMAKE_C_COMPILER)
 ENDIF(CMAKE_C_COMPILER)
 
 
-IF(WITH_CXX)
+IF(CMAKE_CXX_COMPILER_WORKS)
  
   if (NOT CMAKE_CXX_COMPILER)
     message(ABORT "no cxx compiler")
   endif()
   
-  detect_cxx_version(CXX_VERSION)
+  detect_cxx_version(CXXVERSION)
 
   INCLUDE(TestCXXAcceptsFlag)
   
@@ -157,7 +157,7 @@ IF(WITH_CXX)
   
   ADD_CXX_OPTIONS("-Wodr")
   
-  IF(NOT CXX_VERSION STRLESS "201102L" AND DEV_MODE)
+  IF(NOT CXXVERSION STRLESS "201102L" AND DEV_MODE)
     ADD_CXX_OPTIONS("-Wsuggest-final-types")
     ADD_CXX_OPTIONS("-Wsuggest-final-methods")
     
@@ -175,4 +175,4 @@ IF(WITH_CXX)
   ADD_CXX_OPTIONS("-Wno-string-plus-int" "Clang")
   ADD_CXX_OPTIONS("-Werror=unreachable-code" "Clang")
   
-ENDIF(WITH_CXX)
+ENDIF(CMAKE_CXX_COMPILER_WORKS)

@@ -32,7 +32,7 @@
 #endif
 
 // Say which version of C++ was used to compile the Kernel
-#define KERNEL_CXXVERSION @CXX_VERSION@
+#define KERNEL_CXXVERSION @CXXVERSION@
 
 #endif /*KERNELCONFIG_H*/
 

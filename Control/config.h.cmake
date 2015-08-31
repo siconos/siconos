@@ -3,7 +3,7 @@
 #define WITH_CMAKE
 
 // Say which version of C++ was used to compile the Kernel
-#define CONTROL_CXXVERSION @CXX_VERSION@
+#define CONTROL_CXXVERSION @CXXVERSION@
 
 #endif /*CONTROLCONFIG_H*/
 
