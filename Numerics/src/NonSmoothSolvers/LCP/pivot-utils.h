@@ -61,12 +61,36 @@ extern "C"
  * covering vector of the entering variable
  * \param dim dimension of the problem
  * \param aux_index index of auxillary variable in the current basis
- * \param lexico_tol the tolerance on the lexicographic comparison
  * \return the leaving (or blocking) variable
  */
   int pivot_selection_lemke(double* mat, unsigned dim, unsigned drive, unsigned aux_index);
+
+  /** find the leaving variable for Lemke's algorithm
+ * \param n dimension of the problem
+ * pivots)
+ * \param col_drive column of the driving variable (contains all the possible
+ * pivots)
+ * \param q_tilde solution of the linear system
+ * \param lexico_mat matrix for the lexico ordering
+ * \param aux_indx index of auxillary variable in the current basis
+ * \param lexico_tol the tolerance on the lexicographic comparison
+ * \return the leaving (or blocking) variable
+ */
   int pivot_selection_lemke2(unsigned n, double* col_drive, double* q_tilde, double* lexico_mat, unsigned aux_indx, double lexico_tol);
-int pivot_selection_lemke3(unsigned n, double* restrict col_drive, double* restrict q_tilde, double* restrict lexico_col, unsigned* restrict basis, unsigned* restrict candidate_indx, SN_lumod_dense_data* restrict lumod_data, unsigned aux_indx, double lexico_tol);
+
+  /** find the leaving variable for Lemke's algorithm
+ * \param n dimension of the problem
+ * \param col_drive column of the driving variable (contains all the possible
+ * pivots)
+ * \param q_tilde solution of the linear system
+ * \param lexico_col column for the lexico ordering
+ * \param basis current basis
+ * \param lumod_data data for the BLU update
+ * \param aux_indx index of auxillary variable in the current basis
+ * \param lexico_tol the tolerance on the lexicographic comparison
+ * \return the leaving (or blocking) variable
+ */
+int pivot_selection_lemke3(unsigned n, double* col_drive, double* q_tilde, double* lexico_col, unsigned* basis, unsigned* candidate_indx, SN_lumod_dense_data* lumod_data, unsigned aux_indx, double lexico_tol);
 
 /** find the leaving variable in a path search procedure. The code is almost
  * the same as in pivot_selection_lemke, except that we also check if it is
