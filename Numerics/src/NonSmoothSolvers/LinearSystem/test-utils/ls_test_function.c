@@ -96,7 +96,7 @@ int ls_test_function(FILE * f, int solverId)
   }
   else
   {
-    printf("test unsucceeded err =%e  \n", options->dparam[1]);
+    printf("test unsuccessful err =%e  \n", options->dparam[1]);
   }
   free(z);
   free(w);

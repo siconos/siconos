@@ -98,7 +98,9 @@ IF(GAMS_DIR)
   INCLUDE_DIRECTORIES(${GAMS_C_API_INCLUDE_DIRS})
   INCLUDE_DIRECTORIES("${GAMS_DIR}/testlib_ml") # XXX Hack -- xhub
   SET(GAMS_MODELS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/share/gams")
-  SET(GAMS_MODELS_SHARE_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_PACKAGE_NAME}")
+  SET(GAMS_MODELS_SHARE_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_PACKAGE_NAME}/gams")
+  INSTALL(DIRECTORY ${GAMS_MODELS_SOURCE_DIR}
+   DESTINATION share/${PROJECT_PACKAGE_NAME})
 
   INCLUDE(CheckCCompilerFlag)
   CHECK_C_COMPILER_FLAG("-Werror=conversion" C_HAVE_WERR_CONV)
@@ -756,9 +758,17 @@ IF(WITH_TESTING)
   IF(WITH_FCLIB)
   NEW_TEST(FCLIB_test1 FrictionContact3D_writefclib_local_test.c)
   ENDIF(WITH_FCLIB)
+  SET(FC3D_DATA_SET
+   "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;Example1_Fc3D.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;NESpheres_10_1.dat;NESpheres_30_1.dat;OneObject-i100000-499.hdf5.dat;Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;Rover4396.dat;Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;KaplasTower-i1061-4.hdf5.dat;Confeti-ex13-Fc3D-SBM.dat;BoxesStack1-i100000-32.hdf5.dat;FrictionContactProblem00237.dat;FrictionContactProblem00727.dat")
 
+  IF(HAVE_GAMS_C_API)
+    FOREACH(_DAT ${FC3D_DATA_SET})
+     NEW_FC_TEST(SICONOS_FRICTION_3D_GAMS_PATH ${_DAT})
+     NEW_FC_TEST(SICONOS_FRICTION_3D_GAMS_PATHVI ${_DAT})
+    ENDFOREACH(_DAT ${FC3D_DATA_SET})
+  ENDIF(HAVE_GAMS_C_API)
 
-  END_TEST()
+   END_TEST()
 
 
 

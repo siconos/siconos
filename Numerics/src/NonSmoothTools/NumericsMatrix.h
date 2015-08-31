@@ -388,12 +388,20 @@ extern "C"
   void NM_clearSparseStorage(NumericsMatrix *A);
 
   /** Copy a NumericsMatrix inside another NumericsMatrix.
-   *  Reallocations are performed if arrays size of B are greater than
-   *  arrays size of A.
+   *  Reallocations are performed if B cannot hold a copy of A
    * \param[in] A a NumericsMatrix
    * \param[in,out] B a NumericsMatrix
    */
   void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B);
+
+  /** Copy a NumericsMatrix to s sparse one.
+   *  Allocation or reallocation are performed on B
+   *  \warning It is assumed that B has been properly initialized: its storageType must
+   *  be set to NM_SPARSE.
+   * \param[in] A a NumericsMatrix
+   * \param[in,out] B a NumericsMatrix
+   */
+  void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
 
   /** Creation, if needed, of sparse matrix storage.
    * \param[in,out] A a NumericsMatrix

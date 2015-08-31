@@ -69,7 +69,7 @@ int soclcp_test_function(FILE * f, SolverOptions * options)
   }
   else
   {
-    printf("test unsucceeded\n");
+    printf("test unsuccessful\n");
   }
   free(r);
   free(v);

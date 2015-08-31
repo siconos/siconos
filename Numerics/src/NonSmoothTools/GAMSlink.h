@@ -80,7 +80,7 @@ static inline void SN_Gams_set_dirs(const SN_GAMSparams* solverParameters, const
   }
 }
 
-static inline int getGamsSolverOpt(const optHandle_t Optr, const char *sysdir, const char *solverDefName)
+static inline int getGamsSolverOpt(const optHandle_t Optr, const char* sysdir, const char* solverDefName)
 {
   assert(Optr);
   assert(sysdir);
@@ -103,14 +103,10 @@ static inline int getGamsSolverOpt(const optHandle_t Optr, const char *sysdir, c
   }
   return 0;
 }
-
-static inline int CallGams(const gamsxHandle_t Gptr, const optHandle_t Optr, const char *sysdir, const char *model)
+static inline int getGamsOpt(const optHandle_t Optr, const char *sysdir)
 {
   char msg[GMS_SSSIZE];
   char deffile[GMS_SSSIZE];
-
-  assert(Gptr); assert(Optr);
-
   strncpy(deffile, sysdir, sizeof(deffile));
   strncat(deffile, "/optgams.def", sizeof(deffile));
 
@@ -123,6 +119,16 @@ static inline int CallGams(const gamsxHandle_t Gptr, const optHandle_t Optr, con
     return 1;
   }
   optSetStrStr(Optr, "sysdir", sysdir);
+
+  return 0;
+}
+
+static inline int CallGams(const gamsxHandle_t Gptr, const optHandle_t Optr, const char *sysdir, const char *model)
+{
+  char msg[GMS_SSSIZE];
+
+  assert(Gptr); assert(Optr);
+
   optSetStrStr(Optr, "input", model);
   optSetIntStr(Optr, "logoption", 2);
   optSetIntStr(Optr, "keep", 1);
@@ -182,11 +188,15 @@ static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
 
   if (M->storageType == 0)
   {
+    assert(M->matrix0);
     idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
   }
   else
   {
     CSparseMatrix* cs = NM_csc(M);
+    assert(cs->p);
+    assert(cs->i);
+    assert(cs->x);
     idxDataWriteSparseColMajor(Xptr, cs->p, cs->i, cs->x);
   }
 

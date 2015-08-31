@@ -668,10 +668,70 @@ void NM_clearSparseStorage(NumericsMatrix *A)
   NM_clearCSCTranspose(A);
 }
 
+static inline void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
+{
+  assert(A->matrix0);
+  assert(B->matrix2->triplet);
+  for (int i = 0; i < A->size0; ++i)
+  {
+    for (int j = 0; j < A->size1; ++j)
+    {
+      CHECK_RETURN(cs_zentry(B->matrix2->triplet, i, j, A->matrix0[i + A->size0*j]));
+    }
+  }
+}
+
+void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
+{
+  assert(A);
+  assert(B);
+  B->size0 = A->size0;
+  B->size1 = A->size1;
+
+  assert(B->storageType == NM_SPARSE);
+  if (!B->matrix2)
+  {
+    B->matrix2 = newNumericsSparseMatrix();
+  }
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    B->matrix2->triplet = cs_spalloc(0,0,1,1,1);
+    NM_dense_to_sparse(A, B);
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    // XXX this is suboptimal since the matrix A might have already been converted
+    // to csc or triplet --xhub
+    B->matrix1 = A->matrix1;
+    B->storageType = NM_SPARSE_BLOCK;
+    NM_triplet(B);
+    B->matrix1 = NULL;
+    B->storageType = NM_SPARSE;
+    break;
+  }
+  case NM_SPARSE:
+  {
+    NM_copy(A, B);
+    break;
+  }
+  default:
+  {
+    printf("NM_copy_to_sparse :: Unsupported storage type %d, exiting!\n", A->storageType);
+    exit(EXIT_FAILURE);
+  }
+  }
+}
+
 void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
 {
   int sizeA = A->size0 * A->size1;
-  int sizeB = A->size0 * A->size1;
+  int sizeB = B->size0 * B->size1;
+  B->size0 = A->size0;
+  B->size1 = A->size1;
 
   switch (A->storageType)
   {
@@ -689,8 +749,6 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       B->matrix0 = (double*) malloc(sizeA * sizeof(double));
     }
     cblas_dcopy(sizeA, A->matrix0, 1, B->matrix0, 1);
-    B->size0 = A->size0;
-    B->size1 = A->size1;
 
     /* invalidations */
     NM_clearSparseBlock(B);
@@ -800,8 +858,6 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
         }
       }
     }
-    B->size0 = A->size0;
-    B->size1 = A->size1;
 
     /* invalidations */
     NM_clearDense(B);
@@ -813,6 +869,11 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   {
     CSparseMatrix* A_;
     CSparseMatrix* B_;
+
+    if (!B->matrix2)
+    {
+      B->matrix2 = newNumericsSparseMatrix();
+    }
 
     if (A->matrix2->triplet)
     {
@@ -847,17 +908,22 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       B_->x = (double *) realloc(B_->x, A_->nzmax * sizeof(double));
       B_->i = (int *) realloc(B_->i, A_->nzmax * sizeof(int));
     }
+    else if (!(B_->x))
+    {
+      B_->x = (double *) malloc(A_->nzmax * sizeof(double));
+    }
+
     if (A_->nz >= 0)
     {
       /* triplet */
-      A_->p = (int *) realloc(B_->p, A_->nzmax * sizeof(int));
+      B_->p = (int *) realloc(B_->p, A_->nzmax * sizeof(int));
     }
     else
     {
       if (B_->n < A_->n)
       {
         /* csc */
-        A_-> p = (int *) realloc(B_->p, (A_->n + 1) * sizeof(int));
+        B_-> p = (int *) realloc(B_->p, (A_->n + 1) * sizeof(int));
       }
     }
 
@@ -930,11 +996,10 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
       NM_clearCSC(A);
       NM_clearCSCTranspose(A);
 
+      A->matrix2->triplet = cs_spalloc(0,0,1,1,1);
+
       if (A->matrix1)
       {
-        assert (A->matrix2->triplet == NULL);
-
-        A->matrix2->triplet = cs_spalloc(0,0,1,1,1);
 
         /* iteration on row, cr : current row */
         for(unsigned int cr = 0; cr < A->matrix1->filled1-1; ++cr)
@@ -971,13 +1036,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
       }
       else if (A->matrix0)
       {
-        for (int i = 0; i<A->size0; ++i)
-        {
-          for (int j = 0; j<A->size1; ++j)
-          {
-            CHECK_RETURN(cs_zentry(A->matrix2->triplet, i, j, A->matrix0[i + A->size0*j]));
-          }
-        }
+        NM_dense_to_sparse(A, A);
       }
       else
       {
@@ -992,6 +1051,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
 }
 
 CSparseMatrix* NM_csc(NumericsMatrix *A)
+
 {
   if(!NM_sparse(A)->csc)
   {
@@ -999,6 +1059,7 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
     A->matrix2->csc = cs_triplet(NM_triplet(A)); /* triplet -> csc
                                                   * with allocation */
 
+    assert(A->matrix2->csc);
     NM_clearCSCTranspose(A);
   }
   return A->matrix2->csc;

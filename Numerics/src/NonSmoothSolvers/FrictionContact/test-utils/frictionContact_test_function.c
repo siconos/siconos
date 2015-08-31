@@ -41,13 +41,8 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   int dim = problem->dimension;
   //int dim = problem->numberOfContacts;
   
-  double *reaction = (double*)malloc(dim * NC * sizeof(double));
-  double *velocity = (double*)malloc(dim * NC * sizeof(double));
-  for (k = 0 ; k < dim * NC; k++)
-  {
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
-  }
+  double *reaction = (double*)calloc(dim * NC, sizeof(double));
+  double *velocity = (double*)calloc(dim * NC, sizeof(double));
 
   if (dim == 2)
   {
@@ -74,11 +69,11 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 
   if (!info)
   {
-    printf("test succeeded\n");
+    printf("test successful, residual = %g\n", options->dparam[1]);
   }
   else
   {
-    printf("test unsucceeded\n");
+    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
   }
   free(reaction);
   free(velocity);

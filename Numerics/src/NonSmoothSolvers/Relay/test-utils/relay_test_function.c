@@ -66,7 +66,7 @@ int relay_test_function(FILE * f, int  solverId)
   }
   else
   {
-    printf("test unsucceeded\n");
+    printf("test unsuccessful\n");
   }
   free(z);
   free(w);

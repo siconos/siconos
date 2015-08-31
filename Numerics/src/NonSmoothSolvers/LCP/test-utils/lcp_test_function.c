@@ -119,10 +119,8 @@ int lcp_test_function(FILE * f, int solverId)
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)
   {
-    options.solverParameters = malloc(sizeof(SN_GAMSparams));
     SN_GAMSparams* GP = (SN_GAMSparams*)options.solverParameters;
     GP->model_dir = GAMS_MODELS_SOURCE_DIR;
-    GP->gams_dir = GAMS_DIR;
   }
 #endif
 
@@ -142,7 +140,7 @@ int lcp_test_function(FILE * f, int solverId)
   }
   else
   {
-    printf("test unsucceeded err =%e  \n", options.dparam[1]);
+    printf("test unsuccessful err =%e  \n", options.dparam[1]);
   }
   free(z);
   free(w);
@@ -191,10 +189,8 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)
   {
-    options->internalSolvers->solverParameters = malloc(sizeof(SN_GAMSparams));
     SN_GAMSparams* GP = (SN_GAMSparams*)options->internalSolvers->solverParameters;
     GP->model_dir = GAMS_MODELS_SOURCE_DIR;
-    GP->gams_dir = GAMS_DIR;
   }
 #endif
 
@@ -216,19 +212,11 @@ int lcp_test_function_SBM(FILE * f, int solverId)
   }
   else
   {
-    printf("test unsucceeded err =%e \n", options->dparam[1]);
+    printf("test unsuccessful err =%e \n", options->dparam[1]);
   }
   free(z);
   free(w);
   // info = linearComplementarity_deleteDefaultSolverOptions(&options,solvername);
-
-#ifdef HAVE_GAMS_C_API
-  if (solverId == SICONOS_LCP_GAMS)
-  {
-    free(options->solverParameters);
-    options->solverParameters = NULL;
-  }
-#endif
 
   deleteSolverOptions(options);
   free(options);

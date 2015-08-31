@@ -21,11 +21,13 @@
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 
+#include "GAMSlink.h"
+
 int main(void)
 {
   int info =0 ;
 
-  char filename[50] = "./data/@TEST_DATA@";
+  char filename[] = "./data/@TEST_DATA@";
   printf("Test on %s\n",filename);
 
   FILE * finput  =  fopen(filename,"r");
@@ -45,7 +47,16 @@ int main(void)
     options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
     options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
   }
-  
+
+#ifdef HAVE_GAMS_C_API
+  if (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATH || @TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATHVI)
+  {
+    assert(options->solverParameters);
+    SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
+    GP->model_dir = GAMS_MODELS_SOURCE_DIR;
+  }
+#endif
+
   info = frictionContact_test_function(finput,options);
   deleteSolverOptions(options);
   free(options);

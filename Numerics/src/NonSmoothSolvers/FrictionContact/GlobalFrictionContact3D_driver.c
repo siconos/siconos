@@ -37,6 +37,8 @@ char *SICONOS_FRICTION_3D_GLOBAL_DSFP_WR_STR = "F3DP_DSFP_WR";
 char *SICONOS_FRICTION_3D_GLOBAL_TFP_WR_STR = "F3DP_TFP_WR";
 char *SICONOS_FRICTION_3D_GLOBAL_NSGS_STR = "F3DP_NSGS";
 char *SICONOS_FRICTION_3D_GLOBAL_AC_STR = "F3DP_AC";
+char * SICONOS_FRICTION_3D_GLOBAL_GAMS_PATH_STR = "F3D_GAMS_PATH";
+char * SICONOS_FRICTION_3D_GLOBAL_GAMS_PATHVI_STR = "F3D_GAMS_PATHVI";
 
 
 int globalFrictionContact3D_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options, NumericsOptions* global_options)
@@ -148,6 +150,18 @@ int globalFrictionContact3D_driver(GlobalFrictionContactProblem* problem, double
                                          globalVelocity, &info , options);
     break;
 
+  }
+  case SICONOS_FRICTION_3D_GLOBAL_GAMS_PATH:
+  {
+    printf(" ========================== Call PATH solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
+    globalFrictionContact3D_AVI_gams_path(problem, reaction , velocity, &info, options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_GLOBAL_GAMS_PATHVI:
+  {
+    printf(" ========================== Call PATHVI solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
+    globalFrictionContact3D_AVI_gams_pathvi(problem, reaction , velocity, &info, options);
+    break;
   }
   default:
   {

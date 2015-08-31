@@ -51,6 +51,8 @@ char * SICONOS_FRICTION_3D_VI_EG_STR = "F3D_VI_ExtraGradient";
 char * SICONOS_FRICTION_3D_VI_FPP_STR = "F3D_VI_FixedPointProjection";
 char * SICONOS_FRICTION_3D_HP_STR = "F3D_HyperplaneProjection";
 char * SICONOS_FRICTION_3D_PROX_STR = "F3D_PROX";
+char * SICONOS_FRICTION_3D_GAMS_PATH_STR = "F3D_GAMS_PATH";
+char * SICONOS_FRICTION_3D_GAMS_PATHVI_STR = "F3D_GAMS_PATHVI";
 char * SICONOS_FRICTION_3D_QUARTIC_STR = "F3D_QUARTIC";
 char * SICONOS_FRICTION_3D_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
 
@@ -216,8 +218,22 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
   {
     snPrintf(1, options, 
-            " ========================== Call Quartic solver for Friction-Contact 3D problem ==========================\n");
+            " ========================== Call Newton-based solver for Friction-Contact 3D problem ==========================\n");
     info = frictionContact3D_Newton_solve(problem, reaction , options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_GAMS_PATH:
+  {
+    snPrintf(1, options, 
+            " ========================== Call PATH solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_AVI_gams_path(problem, reaction , velocity, &info, options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_GAMS_PATHVI:
+  {
+    snPrintf(1, options, 
+            " ========================== Call PATHVI solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_AVI_gams_pathvi(problem, reaction , velocity, &info, options);
     break;
   }
   default:

@@ -210,6 +210,24 @@ extern "C"
     */
   void globalFrictionContact3D_FixedPointCadoux(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, SolverOptions* options);
 
+  /** solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
+      \param problem the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options
+  */
+  void globalFrictionContact3D_AVI_gams_path(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+  /** solver using PATHVI (via GAMS) for friction-contact 3D problem based on an AVI reformulation
+      \param problem the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options
+  */
+  void globalFrictionContact3D_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

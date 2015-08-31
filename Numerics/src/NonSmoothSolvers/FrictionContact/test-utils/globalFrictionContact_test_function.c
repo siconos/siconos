@@ -83,7 +83,7 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   }
   else
   {
-    printf("test unsucceeded\n");
+    printf("test unsuccessful\n");
   }
   free(reaction);
   free(velocity);

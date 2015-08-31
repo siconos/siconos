@@ -36,6 +36,8 @@
 #include "PathSearch.h"
 #include "VariationalInequality_Solvers.h"
 
+#include "GAMSlink.h"
+
 #include "SiconosNumerics_Solvers.h"
 
 //#define DEBUG_MESSAGES 1
@@ -332,8 +334,16 @@ void free_solver_specific_data(SolverOptions* options)
       assert(options->solverData);
       free_solverData_PathSearch(options->solverData);
       free(options->solverData);
+      options->solverData = NULL;
       break;
     default:
+      {
+       if (options->solverParameters)
+       {
+        free(options->solverParameters);
+        options->solverParameters = NULL;
+       }
+      }
       ;
   }
 }
@@ -451,7 +461,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
   {
     iSize = 5;
     dSize = 2;
-    iter_max = 0; /* this indicate the number of solutions ...  */
+    iter_max = 0; /* this indicates the number of solutions ...  */
     tol = 1e-8;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
     /*use dgels:*/
@@ -508,13 +518,23 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     break;
 
   case SICONOS_LCP_GAMS:
+  case SICONOS_FRICTION_3D_GAMS_PATH:
+  case SICONOS_FRICTION_3D_GAMS_PATHVI:
+  case SICONOS_FRICTION_3D_GLOBAL_GAMS_PATH:
+  case SICONOS_FRICTION_3D_GLOBAL_GAMS_PATHVI:
   {
-    /* TODO do something about GAMS dir */
     iSize = 2;
     dSize = 2;
     iter_max = 10000;
     tol = 1e-12;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    if (!options->solverParameters)
+    {
+      options->solverParameters = malloc(sizeof(SN_GAMSparams));
+      SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
+      GP->model_dir = GAMS_MODELS_SHARE_DIR;
+      GP->gams_dir = GAMS_DIR;
+    }
     break;
   }
 

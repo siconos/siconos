@@ -35,6 +35,7 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
   options->internalSolvers = NULL;
   options->numericsOptions = NULL;
   options->callback = NULL;
+  options->solverParameters = NULL;
 
   int info = -1;
   switch (solverId)
@@ -112,7 +113,7 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
   }
   default:
   {
-    numericsError("frictionContact3D_setDefaultSolverOptions", "Unknown Solver");
+    set_SolverOptions(options, solverId);
 
   }
   }
