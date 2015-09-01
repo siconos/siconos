@@ -60,6 +60,7 @@ extern "C"
  * \param mat the matrix; we only use the columns of basic variable and the
  * covering vector of the entering variable
  * \param dim dimension of the problem
+ * \param drive the driving variable
  * \param aux_index index of auxillary variable in the current basis
  * \return the leaving (or blocking) variable
  */
@@ -85,6 +86,7 @@ extern "C"
  * \param q_tilde solution of the linear system
  * \param lexico_col column for the lexico ordering
  * \param basis current basis
+ * \param candidate_indx array for storing the possible candidate indexes
  * \param lumod_data data for the BLU update
  * \param aux_indx index of auxillary variable in the current basis
  * \param lexico_tol the tolerance on the lexicographic comparison

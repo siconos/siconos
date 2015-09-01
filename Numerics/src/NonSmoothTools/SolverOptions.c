@@ -542,7 +542,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     iSize = 2;
     dSize = 2;
     iter_max = 10000;
-    tol = 1e-12;
+    tol = 1e-9;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
     if (!options->solverParameters)
     {
