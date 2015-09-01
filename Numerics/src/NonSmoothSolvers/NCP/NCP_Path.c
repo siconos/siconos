@@ -24,8 +24,8 @@
 
 #include "Path_interface.h"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 CB_FUNC(void) ncp_PATH_problem_size(void* restrict id, int* restrict n, int* restrict nnz)
