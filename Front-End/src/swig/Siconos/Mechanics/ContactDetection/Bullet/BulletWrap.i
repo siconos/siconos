@@ -71,7 +71,20 @@
 %define PY_REGISTER_BULLET_COLLISION_DETECTION(X)
 %inline
 %{
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
 #include <BulletCollision/CollisionShapes/X.h>
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic pop
+#endif
 %}
 %shared_ptr(X);
 %include "BulletCollision/CollisionShapes/X.h";
