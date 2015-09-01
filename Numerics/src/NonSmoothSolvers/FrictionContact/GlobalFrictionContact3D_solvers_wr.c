@@ -31,6 +31,9 @@
 #include "cond.h"
 #include "pinv.h"
 #include <string.h>
+
+#include "sanitizer.h"
+
 //#define TEST_COND
 //#define OUTPUT_DEBUG
 extern int *Global_ipiv;

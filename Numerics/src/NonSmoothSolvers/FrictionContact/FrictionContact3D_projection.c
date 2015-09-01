@@ -29,7 +29,7 @@
 #include <math.h>
 #include <float.h>
 
-#include "sanitzer.h"
+#include "sanitizer.h"
 
 /* Static variables */
 

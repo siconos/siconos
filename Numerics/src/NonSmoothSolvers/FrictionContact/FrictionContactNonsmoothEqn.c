@@ -17,6 +17,7 @@
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
 #include "FrictionContactNonsmoothEqn.h"
+#include "sanitizer.h"
 
 void computeDenseAWpB(
   double *A,
