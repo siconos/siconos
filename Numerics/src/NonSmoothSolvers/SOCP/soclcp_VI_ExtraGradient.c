@@ -26,7 +26,7 @@
 #include "SecondOrderConeLinearComplementarityProblem_as_VI.h"
 #include "VariationalInequality_Solvers.h"
 #include "SOCLCP_Solvers.h"
-#include "SOCLCP_compute_error.h"
+#include "soclcp_compute_error.h"
 
 #include "SolverOptions.h"
 
