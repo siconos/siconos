@@ -618,7 +618,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     // AW + B
     computeAWpB(Ax, problem->M, Bx, AWpB);
 
-    cblas_dcopy(problemSize, F, 1, tmp1, 1);
+    cblas_dcopy_msan(problemSize, F, 1, tmp1, 1);
     cblas_dscal(problemSize, -1., tmp1, 1);
 
     /* Solve: AWpB X = -F */
@@ -638,7 +638,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
     if (verbose > 0)
     {
-      cblas_dcopy(problemSize, F, 1, tmp3, 1);
+      cblas_dcopy_msan(problemSize, F, 1, tmp3, 1);
       NM_gemv(1., AWpB, tmp1, 1., tmp3);
 
       fprintf(stderr, "fc3d esolve: linear equation residual = %g\n",
@@ -650,7 +650,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     double alpha = 1;
     int info_ls = 0;
 
-    cblas_dcopy(problemSize, tmp1, 1, tmp3, 1);
+    cblas_dcopy_msan(problemSize, tmp1, 1, tmp3, 1);
 
     switch (options->iparam[11])
     {

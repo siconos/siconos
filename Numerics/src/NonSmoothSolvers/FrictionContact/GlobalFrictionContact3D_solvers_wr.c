@@ -78,7 +78,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     double *Htmp = (double*)malloc(nm * sizeof(double));
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
-    cblas_dcopy(nm,  H->matrix0 , 1, Htmp, 1);
+    cblas_dcopy_msan(nm,  H->matrix0 , 1, Htmp, 1);
     //Compute Htmp   <- M^-1 Htmp
     Global_MisLU = 0; /*  Assume that M is not already LU */
     DGETRF(n, n, M->matrix0, n, Global_ipiv, &infoDGETRF);
@@ -115,10 +115,10 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
     //Copy localq <- b
     localproblem->q = (double*)malloc(m * sizeof(double));
-    cblas_dcopy(m, problem->b , 1, localproblem->q, 1);
+    cblas_dcopy_msan(m, problem->b , 1, localproblem->q, 1);
 
     double* qtmp = (double*)malloc(n * sizeof(double));
-    cblas_dcopy(n,  problem->q, 1, qtmp, 1);
+    cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
 
     // compute H^T M^(-1) q + b
 
@@ -287,7 +287,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
     localproblem->q = (double*)malloc(m * sizeof(double));
     //Copy q<- b
-    cblas_dcopy(m, problem->b  , 1, localproblem->q, 1);
+    cblas_dcopy_msan(m, problem->b  , 1, localproblem->q, 1);
     // compute H^T M^-1 q+ b
     double* qtmp = (double*)malloc(n * sizeof(double));
     for (int i = 0; i < n; i++) qtmp[i] = 0.0;
@@ -351,7 +351,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     double alpha = 1.0;
     double beta = 1.0;
 
-    cblas_dcopy(n,  problem->q , 1, qtmp, 1);
+    cblas_dcopy_msan(n,  problem->q , 1, qtmp, 1);
     prodSBM(m, n, alpha, problem->H->matrix1, reaction, beta, qtmp);
     /* Compute global velocity = M^(-1) qtmp*/
 

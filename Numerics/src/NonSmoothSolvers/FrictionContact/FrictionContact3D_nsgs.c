@@ -337,14 +337,14 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   localproblem->mu = (double*)malloc(sizeof(double));
 
 
-  if (problem->M->storageType == 0)
+  if (problem->M->storageType == NM_DENSE)
   {
     localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3,
                                            malloc(9 * sizeof(double)));
   }
   else
   {
-    localproblem->M = createNumericsMatrix(NM_DENSE, 3, 3);
+    localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3, NULL);
   }
 
 

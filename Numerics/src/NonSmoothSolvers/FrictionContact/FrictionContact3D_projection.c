@@ -29,6 +29,8 @@
 #include <math.h>
 #include <float.h>
 
+#include "sanitzer.h"
+
 /* Static variables */
 
 /* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in MGlobal and qGlobal */
@@ -494,7 +496,7 @@ int frictionContact3D_projectionOnCone_solve(FrictionContactProblem* localproble
   int incx = 1, incy = 1;
   double worktmp[3];
   double normUT;
-  cblas_dcopy(nLocal , qLocal, incx , worktmp , incy);
+  cblas_dcopy_msan(nLocal , qLocal, incx , worktmp , incy);
 
   cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, worktmp, incy);
   normUT = sqrt(worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
