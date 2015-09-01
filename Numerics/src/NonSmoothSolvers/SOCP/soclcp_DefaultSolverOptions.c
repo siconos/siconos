@@ -45,7 +45,7 @@ int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId)
   /*   info =    soclcp_nsgs_velocity_setDefaultSolverOptions(options); */
   /*   break; */
   /* } */
-  /* case SICONOS_SOCLCP_PROX: */
+  /* case SICONOS_SOCLCP_
   /* { */
   /*   info =    soclcp_proximal_setDefaultSolverOptions(options); */
   /*   break; */
@@ -70,16 +70,16 @@ int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId)
   /*   info =    soclcp_ExtraGradient_setDefaultSolverOptions(options); */
   /*   break; */
   /* } */
-  /* case SICONOS_SOCLCP_VI_FPP: */
-  /* { */
-  /*   info =    soclcp_VI_FixedPointProjection_setDefaultSolverOptions(options); */
-  /*   break; */
-  /* } */
-  /* case SICONOS_SOCLCP_VI_EG: */
-  /* { */
-  /*   info =    soclcp_VI_ExtraGradient_setDefaultSolverOptions(options); */
-  /*   break; */
-  /* } */
+  case SICONOS_SOCLCP_VI_FPP:
+  {
+    info =    soclcp_VI_FixedPointProjection_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_SOCLCP_VI_EG:
+  {
+    info =    soclcp_VI_ExtraGradient_setDefaultSolverOptions(options);
+    break;
+  }
   /* case SICONOS_SOCLCP_HP: */
   /* { */
   /*   info =    soclcp_HyperplaneProjection_setDefaultSolverOptions(options); */

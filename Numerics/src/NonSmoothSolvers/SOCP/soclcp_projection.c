@@ -47,7 +47,7 @@ void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem * 
 
 int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions * options)
 {
-  /*  /\* Builds local problem for the current cone *\/ */
+  /*  /\* Build local problem for the current cone *\/ */
   /*   soclcp_projection_update(cone, reaction); */ 
   double * MLocal = localproblem->M->matrix0;
   double * qLocal = localproblem->q;
@@ -200,7 +200,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   int nLocal = localproblem->n;;
 
 
-  /*   /\* Builds local problem for the current cone *\/ */
+  /*   /\* Build local problem for the current cone *\/ */
   /*   soclcp_projection_update(localproblem, reaction); */
 
 
@@ -347,7 +347,7 @@ void soclcp_projection_with_regularization_free(SecondOrderConeLinearComplementa
 int soclcp_projectionOnCylinder_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions * options)
 {
 
-  /*  /\* Builds local problem for the current cone *\/ */
+  /*  /\* Build local problem for the current cone *\/ */
   /*   soclcp_projection_update(cone, reaction); */
 
   double * MLocal = localproblem->M->matrix0;

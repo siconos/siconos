@@ -129,47 +129,21 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   /*   soclcp_TrescaFixedPoint(problem, r , v , &info , options); */
   /*   break; */
   /* } */
-  /* /\* De Saxce Fixed point algorithm *\/ */
-  /* case SICONOS_SOCLCP_DSFP: */
-  /* { */
-  /*   snPrintf(1, options,  */
-  /*            " ========================== Call DeSaxce Fixed Point (DSFP) solver for Second Order Cone LCP problem ==========================\n"); */
-  /*   soclcp_DeSaxceFixedPoint(problem, r , v , &info , options); */
-  /*   break; */
-  /* } */
-  /* /\* Fixed point projection algorithm *\/ */
-  /* case SICONOS_SOCLCP_FPP: */
-  /* { */
-  /*   snPrintf(1, options,  */
-  /*            " ========================== Call Fixed Point Projection (FPP) solver for Second Order Cone LCP problem ==========================\n"); */
-  /*   soclcp_fixedPointProjection(problem, r , v , &info , options); */
-  /*   break; */
-  /* } */
-
-  /* /\* Extra Gradient algorithm *\/ */
-  /* case SICONOS_SOCLCP_EG: */
-  /* { */
-  /*   snPrintf(1, options,  */
-  /*            " ========================== Call ExtraGradient (EG) solver for Second Order Cone LCP problem ==========================\n"); */
-  /*   soclcp_ExtraGradient(problem, r , v , &info , options); */
-  /*   break; */
-  /* } */
-  /* /\* VI Fixed Point Projection algorithm *\/ */
-  /* case SICONOS_SOCLCP_VI_FPP: */
-  /* { */
-  /*   snPrintf(1, options, */
-  /*            " ========================== Call VI_FixedPointProjection (VI_FPP) solver for Second Order Cone LCP problem ==========================\n"); */
-  /*   soclcp_VI_FixedPointProjection(problem, r , v , &info , options); */
-  /*   break; */
-  /* } */
-  /* /\* VI Extra Gradient algorithm *\/ */
-  /* case SICONOS_SOCLCP_VI_EG: */
-  /* { */
-  /*   snPrintf(1, options, */
-  /*            " ========================== Call VI_ExtraGradient (VI_EG) solver for Second Order Cone LCP problem ==========================\n"); */
-  /*   soclcp_VI_ExtraGradient(problem, r , v , &info , options); */
-  /*   break; */
-  /* } */
+  case SICONOS_SOCLCP_VI_FPP:
+  {
+    snPrintf(1, options,
+             " ========================== Call VI_FixedPointProjection (VI_FPP) solver for Second Order Cone LCP problem ==========================\n");
+    soclcp_VI_FixedPointProjection(problem, r , v , &info , options);
+    break;
+  }
+  /* VI Extra Gradient algorithm */
+  case SICONOS_SOCLCP_VI_EG:
+  {
+    snPrintf(1, options,
+             " ========================== Call VI_ExtraGradient (VI_EG) solver for Second Order Cone LCP problem ==========================\n");
+    soclcp_VI_ExtraGradient(problem, r , v , &info , options);
+    break;
+  }
   /* /\* Hyperplane Projection algorithm *\/ */
   /* case SICONOS_SOCLCP_HP: */
   /* { */

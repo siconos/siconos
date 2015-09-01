@@ -202,90 +202,28 @@ int soclcp_nsgs_setDefaultSolverOptions(SolverOptions* options);
 /* *\/ */
 /* void soclcp_ProjectedGradientOnCylinder(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
 
-/* /\** set the default solver parameters and perform memory allocation for NSGS */
-/*     \param options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* options); */
+void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options);
 
-/* /\**Fixed Point solver for SOCLCP problem based on the De Saxce Formulation */
-/*     \param problem : the SOCLCP problem to solve */
-/*     \param v global vector (n), in-out parameter */
-/*     \param r global vector (n), in-out parameters */
-/*     \param info return 0 if the solution is found */
-/*     \param options the solver options : */
-/*     iparam[0] : Maximum iteration number */
-/*     dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed. */
-/* *\/ */
-/* void soclcp_DeSaxceFixedPoint(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
+/** set the default solver parameters and perform memory allocation for DSFP
+  \param options the pointer to the array of options to set
+*/
+int soclcp_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
 
-/* /\** set the default solver parameters and perform memory allocation for DSFP */
-/*   \param options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options); */
+/**Extra Gradient solver (VI_EG) for SOCLCP problem based on a VI reformulation
+    \param problem the SOCLCP problem to solve
+    \param v global vector (n), in-out parameter
+    \param r global vector (n), in-out parameters
+    \param info return 0 if the solution is found
+    \param options the solver options :
+    iparam[0] : Maximum iteration number
+    dparam[3] : rho >0
+*/
+void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options);
 
-/* /\**Fixed Point Projection solver for SOCLCP problem based on the De Saxce Formulation */
-/*     \param problem : the SOCLCP problem to solve */
-/*     \param v global vector (n), in-out parameter */
-/*     \param r global vector (n), in-out parameters */
-/*     \param info return 0 if the solution is found */
-/*     \param options the solver options : */
-/*     iparam[0] : Maximum iteration number */
-/*     dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed. */
-/* *\/ */
-/* void soclcp_fixedPointProjection(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
-
-/* /\** set the default solver parameters and perform memory allocation for DSFP */
-/*   \param options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_fixedPointProjection_setDefaultSolverOptions(SolverOptions* options); */
-
-/* /\**Fixed Point solver for SOCLCP problem based on the VI reformulation */
-/*     \param problem : the SOCLCP problem to solve */
-/*     \param v global vector (n), in-out parameter */
-/*     \param r global vector (n), in-out parameters */
-/*     \param info return 0 if the solution is found */
-/*     \param options the solver options : */
-/*     iparam[0] : Maximum iteration number */
-/*     dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed. */
-/* *\/ */
-/* void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
-
-/* /\** set the default solver parameters and perform memory allocation for DSFP */
-/*   \param options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options); */
-
-/* /\**Extra Gradient solver for SOCLCP problem based on the De Saxce Formulation */
-/*     \param problem the SOCLCP problem to solve */
-/*     \param v global vector (n), in-out parameter */
-/*     \param r global vector (n), in-out parameters */
-/*     \param info return 0 if the solution is found */
-/*     \param options the solver options : */
-/*     iparam[0] : Maximum iteration number */
-/*     dparam[3] : rho >0 */
-/* *\/ */
-/* void soclcp_ExtraGradient(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
-
-/* /\** set the default solver parameters and perform memory allocation for EG */
-/*   \param options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_ExtraGradient_setDefaultSolverOptions(SolverOptions* options); */
-
-/* /\**Extra Gradient solver (VI_EG) for SOCLCP problem based on a VI reformulation */
-/*     \param problem the SOCLCP problem to solve */
-/*     \param v global vector (n), in-out parameter */
-/*     \param r global vector (n), in-out parameters */
-/*     \param info return 0 if the solution is found */
-/*     \param options the solver options : */
-/*     iparam[0] : Maximum iteration number */
-/*     dparam[3] : rho >0 */
-/* *\/ */
-/* void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
-
-/* /\** set the default solver parameters and perform memory allocation for VI_EG */
-/*   \param options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options); */
+/** set the default solver parameters and perform memory allocation for VI_EG
+  \param options the pointer to the array of options to set
+*/
+ int soclcp_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
 
 /* /\** Hyperplane Projection solver for SOCLCP problem based on the De Saxce Formulation */
 /*     \param problem the SOCLCP problem to solve */
