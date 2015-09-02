@@ -32,7 +32,7 @@ int main(void)
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = soclcp_setDefaultSolverOptions(options, SICONOS_SOCLCP_NSGS);
   options->dparam[0] = 1e-16;
-  options->internalSolvers->solverId = SICONOS_SOCLCP_ProjectionOnCone
+  options->internalSolvers->solverId = SICONOS_SOCLCP_ProjectionOnCone;
 
   info = soclcp_test_function(finput, options);
 
