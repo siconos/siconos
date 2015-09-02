@@ -66,9 +66,10 @@ void frictionContact3D_nsgs_update(int contact, FrictionContactProblem* problem,
 
 
 }
-void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * localsolver_options)
+void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
+                                FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+                                SolverOptions * options, SolverOptions * localsolver_options)
 {
-
 
   /** Connect to local solver */
   switch (localsolver_options->solverId)
@@ -167,9 +168,19 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
   {
     *solve = &frictionContact3D_projectionOnCylinder_solve;
     *update = &frictionContact3D_projectionOnCylinder_update;
-    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_projection_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_projectionOnCylinder_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_Tresca_compute_error;
-    frictionContact3D_projection_initialize(problem, localproblem);
+    frictionContact3D_projectionOnCylinder_initialize(problem, localproblem, options );
+    break;
+  }
+    /*iparam[4] > 10 are reserved for Tresca resolution */
+  case SICONOS_FRICTION_3D_projectionOnCylinderWithLocalIteration:
+  {
+    *solve = &frictionContact3D_projectionOnCylinderWithLocalIteration_solve;
+    *update = &frictionContact3D_projectionOnCylinder_update;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_projectionOnCylinderWithLocalIteration_free;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_Tresca_compute_error;
+    frictionContact3D_projectionOnCylinderWithLocalIteration_initialize(problem, localproblem, options, localsolver_options );
     break;
   }
   case SICONOS_FRICTION_3D_QUARTIC:
@@ -350,7 +361,8 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
   initializeLocalSolver_nsgs(&local_solver, &update_localproblem,
                              (FreeSolverNSGSPtr *)&freeSolver, &computeError,
-                             problem , localproblem, localsolver_options);
+                             problem , localproblem,
+                             options, localsolver_options);
 
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
@@ -418,7 +430,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
       /* **** Criterium convergence **** */
       error = sqrt(error);
       if (verbose > 0)
-        printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+        printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
@@ -475,7 +487,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
           if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
 
           if (error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -513,7 +525,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
           if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
 
           if (error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -567,7 +579,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
           if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
 
           if (error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -588,6 +600,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
           ++iter;
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
+
           for (contact= 0 ; contact < nc ; ++contact)
           {
 
@@ -603,8 +616,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
           if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
-
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
           if (error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
 

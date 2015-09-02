@@ -32,7 +32,7 @@ int main(void)
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PROX);
-  options->dparam[0] = 1e-8; //
+  options->dparam[0] = 1e-6; //
   options->dparam[3] = 1e4; //
   options->iparam[0] = 100000; //
   options->iparam[1] = 1; //

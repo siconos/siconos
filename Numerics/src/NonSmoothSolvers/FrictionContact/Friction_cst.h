@@ -31,6 +31,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_LOCALFB = 513,
   SICONOS_FRICTION_3D_GAMS_PATH = 514,
   SICONOS_FRICTION_3D_GAMS_PATHVI = 515,
+  SICONOS_FRICTION_3D_ACLMFP = 516,
 
   /** 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
   SICONOS_FRICTION_3D_AlartCurnierNewton = 550,
@@ -47,6 +48,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_DampedAlartCurnierNewton = 561,
   SICONOS_FRICTION_3D_QUARTIC = 562,
   SICONOS_FRICTION_3D_QUARTIC_NU = 563,
+  SICONOS_FRICTION_3D_projectionOnCylinderWithLocalIteration = 564,
 
   /** 3D Frictional contact local solvers on global formulation */
   SICONOS_FRICTION_3D_GLOBAL_NSGS_WR = 600,

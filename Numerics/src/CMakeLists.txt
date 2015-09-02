@@ -561,6 +561,7 @@ IF(WITH_TESTING)
 
   NEW_TEST(FC3Dtest36 FrictionContact3D_test36.c) #TFP with NSGS and projection on cylinder
 
+  #SET(FC3Dtest37_PROPERTIES WILL_FAIL TRUE)
   #NEW_TEST(FC3Dtest37 FrictionContact3D_test37.c) #TFP with ProjectedGradientOnCylinder is not working ...
 
   #NEW_TEST(FC3Dtest38 FrictionContact3D_test38.c) # HP is not converging
@@ -611,9 +612,9 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest81 FrictionContact3D_test81.c) # Proximal
   NEW_TEST(FC3Dtest83 FrictionContact3D_test83.c) # Proximal
 
- # NEW_TEST(FC3Dtest82 FrictionContact3D_test82.c) # Proximal
-
- # NEW_TEST(FC3Dtest90 FrictionContact3D_test90.c) # TFP
+  NEW_TEST(FC3Dtest82 FrictionContact3D_test82.c) # Proximal
+  SET(FC3Dtest90_PROPERTIES WILL_FAIL TRUE)
+  NEW_TEST(FC3Dtest90 FrictionContact3D_test90.c) # TFP with cycling
 
   NEW_TEST(FC3DNewFromFortranData FrictionContact3D_newFromFortranData.c)
   NEW_TEST(FC3DLmgcDriver1 FrictionContact3D_LmgcDriver_test1.c)
@@ -630,6 +631,8 @@ IF(WITH_TESTING)
   SET(FC3Dtest120_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest120 FrictionContact3D_test120.c) # TFP
   NEW_TEST(FC3Dtest121 FrictionContact3D_test121.c) # DSFP
+
+  NEW_TEST(FC3Dtest122 FrictionContact3D_test122.c) # ACLMFP
 
 
   NEW_TEST(FC3Dtest130 FrictionContact3D_test130.c)

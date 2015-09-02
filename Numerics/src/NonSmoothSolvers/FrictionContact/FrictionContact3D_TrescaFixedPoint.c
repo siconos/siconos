@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <math.h>
 #define max(a,b) (a>=b?a:b)
-//#define VERBOSE_DEBUG
+#define VERBOSE_DEBUG
 #include "Friction_cst.h"
 void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -75,7 +75,7 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
     if (verbose == 1)
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     internalsolver = &frictionContact3D_nsgs;
-    internalsolver_options->internalSolvers->dWork = options->dWork;
+    //internalsolver_options->internalSolvers->dWork = options->dWork;
   }
   else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_PGoC)
   {
@@ -91,7 +91,7 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
 
 
 
-
+  int cumul_internal=0;
 
   while ((iter < itermax) && (hasNotConverged > 0))
   {
@@ -102,13 +102,11 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
     /* Compute the value of the initial value friction threshold*/
     for (int ic = 0 ; ic < nc ; ic++) mu[ic] = fmax(0.0, problem->mu[ic] *  reaction [ic * 3]);
 
-#ifdef VERBOSE_DEBUG
-    for (int ic = 0 ; ic < nc ; ic++) printf("problem->mu[%i] = %le\n", ic, problem->mu[ic]);
-    for (int ic = 0 ; ic < nc ; ic++) printf("mu[%i] = %le \n", ic, mu[ic]);
-#endif
-    //internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]);
+    internalsolver_options->dparam[0] = max(error/1000.0, options->dparam[0]/problem->numberOfContacts);
 
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
+
+    cumul_internal += internalsolver_options->iparam[7];
 
     /* **** Criterium convergence **** */
 
@@ -126,8 +124,10 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  if (verbose > 0)
+  if (verbose > 0){
     printf("----------------------------------- FC3D - TFP - # Iteration %i Final Error = %14.7e\n", iter, error);
+    printf("----------------------------------- FC3D - TFP - #              Internal iteration = %i\n", cumul_internal);
+  }
   free(options->dWork);
   options->dWork = NULL;
   internalsolver_options->dWork = NULL;
@@ -168,16 +168,17 @@ int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* op
   }
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
 
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
+  options->internalSolvers->iparam[0]=1000;
+
   SolverOptions * subsubsolver = options->internalSolvers->internalSolvers;
 
+  subsubsolver->iparam[0] = 50;
+  subsubsolver->dparam[0] = 1e-14;
 
-  subsubsolver->iparam[0] = 0;
-  subsubsolver->dparam[0] = 0.0;
-
-  subsubsolver->solverId = SICONOS_FRICTION_3D_projectionOnCylinder;
+  subsubsolver->solverId = SICONOS_FRICTION_3D_projectionOnCylinderWithLocalIteration;
 
   return 0;
 }

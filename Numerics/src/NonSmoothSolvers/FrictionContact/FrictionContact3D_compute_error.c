@@ -152,8 +152,27 @@ int FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, do
     return 0;
 }
 
+void FrictionContact3D_Tresca_unitary_compute_and_add_error(double *z , double *w, double R, double * error)
+{
+  double rho = 1.0;
+  double worktmp[3];
+  /* Compute the modified local velocity */
+  worktmp[0] = z[0] - rho * w[0];
+  worktmp[1] = z[1] - rho * w[1] ;
+  worktmp[2] = z[2] - rho * w[2] ;
+  projectionOnCylinder(worktmp, R);
+  worktmp[0] = z[0] -  worktmp[0];
+  worktmp[1] = z[1] -  worktmp[1];
+  worktmp[2] = z[2] -  worktmp[2];
+  *error +=  worktmp[0] * worktmp[0]
+    + worktmp[1] * worktmp[1]
+    + worktmp[2] * worktmp[2];
 
-int FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, double *z, double * w, double tolerance, SolverOptions * options, double* error)
+}
+int FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem,
+                                           double *z, double * w,
+                                           double tolerance, SolverOptions * options,
+                                           double* error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
@@ -163,28 +182,18 @@ int FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, doub
   int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;
   int n = nc * 3;
-  double worktmp[3];
   double R;
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
   *error = 0.;
-  double rho = 1.0;
-  for (int ic = 0 ; ic < nc ; ic++)
-  {
-    /* Compute the modified local velocity */
-    //normUT = sqrt(w[ic * 3 + 1] * w[ic * 3 + 1] + w[ic * 3 + 2] * w[ic * 3 + 2]);
-    worktmp[0] = z[ic * 3] - rho * (w[ic * 3]);
-    worktmp[1] = z[ic * 3 + 1] - rho * w[ic * 3 + 1] ;
-    worktmp[2] = z[ic * 3 + 2] - rho * w[ic * 3 + 2] ;
+  int ic, ic3;
 
+  for (ic = 0, ic3 = 0 ; ic < nc ; ic++, ic3 += 3)
+  {
     R = (options->dWork[ic]);
-    projectionOnCylinder(worktmp, R);
-    worktmp[0] = z[ic * 3] -  worktmp[0];
-    worktmp[1] = z[ic * 3 + 1] -  worktmp[1];
-    worktmp[2] = z[ic * 3 + 2] -  worktmp[2];
-    *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+    FrictionContact3D_Tresca_unitary_compute_and_add_error(z+ic3 , w+ic3, R, error);
   }
   *error = sqrt(*error);
 
@@ -193,7 +202,7 @@ int FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, doub
   *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
-    /*      if (verbose > 0) printf(" Numerics - FrictionContact3D_Tresca_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
+    /* if (verbose > 0) printf(" Numerics - FrictionContact3D_Tresca_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);  */
     return 1;
   }
   else

@@ -61,11 +61,32 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
     info = 1;
   }
   printf("\n");
-  for (k = 0 ; k < dim * NC; k++)
+
+  int print_size =10;
+
+  if  (dim * NC >= print_size)
   {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    printf("First values (%i)\n", print_size);
+    for (k = 0 ; k < print_size; k++)
+    {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    }
+    printf(" ..... \n");
   }
-  printf("\n");
+  else
+  {
+    for (k = 0 ; k < dim * NC; k++)
+    {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    }
+    printf("\n");
+  }
+
+  /* for (k = 0 ; k < dim * NC; k++) */
+  /* { */
+  /*   printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]); */
+  /* } */
+  /* printf("\n"); */
 
   if (!info)
   {

@@ -187,6 +187,24 @@ extern "C"
    */
   int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
+  /** Fixed point solver for friction-contact 3D problem based on the ACLM
+  problem with fixed friction threshold
+    \param problem the friction-contact 3D problem to solve
+    \param velocity global vector (n), in-out parameter
+    \param reaction global vector (n), in-out parameters
+    \param info return 0 if the solution is found
+    \param options the solver options :
+    iparam[0] : Maximum iteration number
+    The internal (local) solver must set by the SolverOptions options[1] : possible internal solvers is NSGS.
+  */
+  void frictionContact3D_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+
+  /** set the default solver parameters and perform memory allocation for ACLM
+   *  \param options the pointer to the array of options to set
+   */
+  int frictionContact3D_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options);
+
   /** Projected Gradient on Cylinder solver for  Friction-contact 3D problem
    * \param problem the friction-contact 3D problem to solve
    *  \param velocity global vector (n), in-out parameter

@@ -138,7 +138,20 @@ extern "C"
    * \return 0 if successfull
    */
   int frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
+  void frictionContact3D_projectionOnCylinder_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* options);
+  void frictionContact3D_projectionOnCylinder_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options );
   
+  /** solve friction-contact 3D problem with projection on the (Tresca Cylinder)
+   * \param localproblem :  the local problem to initialize
+   * \param reaction
+   * \param options
+   * \return 0 if successfull
+   */
+  int frictionContact3D_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
+
+  void frictionContact3D_projectionOnCylinderWithLocalIteration_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* options, SolverOptions* localsolver_options);
+
+  void frictionContact3D_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options );
   /** free memory for friction contact 3D projection solver
    * \param problem :  the  problem to free
    * \param localproblem :  the  problem to free

@@ -60,6 +60,11 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
     info =    frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_ACLMFP:
+  {
+    info =    frictionContact3D_ACLMFixedPoint_setDefaultSolverOptions(options);
+    break;
+  }
   case SICONOS_FRICTION_3D_DSFP:
   {
     info =    frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options);

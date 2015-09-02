@@ -32,7 +32,8 @@ int main(void)
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_TFP);
-  options->iparam[0] = 20;
+  options->iparam[0] = 2000;
+  options->dparam[0] = 10e-8;
 
   info = frictionContact_test_function(finput, options);
 

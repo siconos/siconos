@@ -62,6 +62,13 @@ extern "C"
    */
   int FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
+  /** Error computation for one friction-contact 3D problem
+      \param z vector
+      \param w vector
+      \param R radius of the cylinder
+      \param[in,out] error value
+   */
+  void FrictionContact3D_Tresca_unitary_compute_and_add_error(double z[3] , double w[3], double R, double * error);
 
 
   /** Error computation for friction-contact 3D problem with Tresca Friction
