@@ -40,7 +40,7 @@
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityProblem*, double*, double*, int *, SolverOptions *);
 
-void frictionContact3D_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
+void frictionContact3D_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -49,9 +49,6 @@ void frictionContact3D_ACLMFixedPoint(FrictionContactProblem* problem, double *r
   /* Number of contacts */
   int nc = problem->numberOfContacts;
 
-
-  /* Maximum number of iterations */
-  int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
 
@@ -59,7 +56,7 @@ void frictionContact3D_ACLMFixedPoint(FrictionContactProblem* problem, double *r
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("frictionContact3D_ACLMFixedpoint", "The ACLM Fixed Point method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numericsError("frictionContact3D_SOCLCP", "The SOCLCP for FrictionContactProblem needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
   SolverOptions * internalsolver_options = options->internalSolvers;
@@ -72,9 +69,7 @@ void frictionContact3D_ACLMFixedPoint(FrictionContactProblem* problem, double *r
 
 
   /*****  Fixed Point Iterations *****/
-  int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
-  int hasNotConverged = 1;
 
   soclcp_InternalSolverPtr internalsolver;
 
@@ -104,63 +99,34 @@ void frictionContact3D_ACLMFixedPoint(FrictionContactProblem* problem, double *r
   }
   else
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_ACLMFixedPoint failed. Unknown internal solver.\n");
+    fprintf(stderr, "Numerics, FrictionContact3D_SOCLCP failed. Unknown internal solver.\n");
     exit(EXIT_FAILURE);
   }
+  internalsolver_options->dparam[0]=options->dparam[0];
+  internalsolver_options->iparam[0]=options->iparam[0];
+  
+  (*internalsolver)(soclcp, reaction , velocity , info , internalsolver_options);
 
-  double normUT;
-  int cumul_iter =0;
-  while ((iter < itermax) && (hasNotConverged > 0))
+  error = internalsolver_options->dparam[1];
+
+
+  double real_error=0.0;
+  
+  FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &real_error);
+
+  if (options->callback)
   {
-    ++iter;
-    // internal solver for the regularized problem
-
-    /* Compute the value of the initial value of q */
-    for (int ic = 0 ; ic < nc ; ic++)
-    {
-      normUT = sqrt(velocity[ic*3+1] * velocity[ic*3+1] + velocity[ic*3+2] * velocity[ic*3+2]);
-      soclcp->q[3*ic] = problem->q[3*ic] + problem->mu[ic]*normUT;
-    }
-    secondOrderConeLinearComplementarityProblem_printInFilename(soclcp,"output.dat");
-    // DEBUG_EXPR(for (int ic = 0 ; ic < nc ; ic++) printf("problem->q[%i] = %le\n", 3*ic, problem->q[3*ic]);
-    //  for (int ic = 0 ; ic < nc ; ic++) printf("q[%i] = %le\n", 3*ic, soclcp->q[3*ic]); );
-    if (iparam[1] == 0 )
-    {
-      internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]/problem->numberOfContacts);
-    }
-    else if (iparam[1] ==1)
-    {
-      internalsolver_options->dparam[0] = options->dparam[0]/2.0;
-    }
-    else
-    {
-      fprintf(stderr, "Numerics, frictionContact3D_ACLMFixedPoint failed. Unknown startegy for driving tolerence of internal.\n");
-      exit(EXIT_FAILURE);
-    }
-
-    (*internalsolver)(soclcp, reaction , velocity , info , internalsolver_options);
-    cumul_iter +=  internalsolver_options->iparam[7];
-    /* **** Criterium convergence **** */
-
-    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
-
-    if (options->callback)
-    {
-      options->callback->collectStatsIteration(options->callback->env, nc * 3,
-                                      reaction, velocity, error, NULL);
-    }
-
-    if (verbose > 0)
-      printf("------------------------ FC3D - ACLMFP - Iteration %i Error = %14.7e\n", iter, error);
-
-    if (error < tolerance) hasNotConverged = 0;
-    *info = hasNotConverged;
+    options->callback->collectStatsIteration(options->callback->env, nc * 3,
+                                             reaction, velocity, error, NULL);
   }
-  if (verbose > 0)
+  
+  if (verbose > -1)
   {
-    printf("----------------------------------- FC3D - ACLMFP - # Iteration %i Final Error = %14.7e\n", iter, error);
-    printf("----------------------------------- FC3D - ACLMFP - #              internal iteration = %i\n", cumul_iter);
+    printf("----------------------------------- FC3D - SOCLCP - # Iteration %i Final Error = %14.7e\n", internalsolver_options->iparam[7], error);
+    printf("----------------------------------- FC3D - SOCLCP - #              error of the real problem = %14.7e\n", real_error );
+    printf("----------------------------------- FC3D - SOCLCP - #              gap with the real problem = %14.7e\n", fabs(real_error-error) );
   }
+
   free(soclcp->q);
   free(soclcp->coneIndex);
   free(soclcp);
@@ -168,23 +134,25 @@ void frictionContact3D_ACLMFixedPoint(FrictionContactProblem* problem, double *r
 
   if (internalsolver_options->internalSolvers != NULL)
     internalsolver_options->internalSolvers->dWork = NULL;
+  
   dparam[0] = tolerance;
   dparam[1] = error;
-  iparam[7] = iter;
+  dparam[2] = fabs(real_error-error);
+  iparam[7] = internalsolver_options->iparam[7];
 
 }
 
 
 
-int frictionContact3D_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
+int frictionContact3D_SOCLCP_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default SolverOptions for the ACLMFP Solver\n");
+    printf("Set the Default SolverOptions for the SOCLCP Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_ACLMFP;
+  options->solverId = SICONOS_FRICTION_3D_SOCLCP;
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
@@ -200,7 +168,6 @@ int frictionContact3D_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* opti
     options->dparam[i] = 0.0;
   }
   options->iparam[0] = 1000;
-  options->iparam[1] = 0;
   options->dparam[0] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
 

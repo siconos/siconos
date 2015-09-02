@@ -625,15 +625,19 @@ IF(WITH_TESTING)
 
   NEW_TEST(FC3DLmgcDriver5 FrictionContact3D_LmgcDriver_test5.c)
 
-  NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
-  NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)
+  NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)# TFP
+  NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)# TFP
 
-  SET(FC3Dtest120_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest120 FrictionContact3D_test120.c) # TFP
   NEW_TEST(FC3Dtest121 FrictionContact3D_test121.c) # DSFP
 
   NEW_TEST(FC3Dtest122 FrictionContact3D_test122.c) # ACLMFP
+  NEW_TEST(FC3Dtest123 FrictionContact3D_test123.c) # SOCLCP
+  NEW_TEST(FC3Dtest124 FrictionContact3D_test124.c) # NSGS
 
+  NEW_TEST(FC3Dtest125 FrictionContact3D_test125.c) # TFP with other strategy for internal solver
+  NEW_TEST(FC3Dtest126 FrictionContact3D_test126.c) # ACLMFPwith other strategy for internal solver
+ 
 
   NEW_TEST(FC3Dtest130 FrictionContact3D_test130.c)
 

@@ -189,17 +189,15 @@ void soclcp_initializeLocalSolver_nsgs(Solver_soclcp_Ptr* solve, Update_soclcp_P
   }
   }
 }
-void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, double *r, int cone, SolverOptions * options)
+void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * problem,
+                               SecondOrderConeLinearComplementarityProblem * localproblem,
+                               double *r, int cone, SolverOptions * options)
 {
 
   double *qLocal = localproblem->q;
-
   int n = problem->n;
-
   int normal = problem->coneIndex[cone];
-
   int dim = problem->coneIndex[cone+1]-problem->coneIndex[cone];
-
 
   /* r current block set to zero, to exclude current cone block */
   int i;
@@ -211,16 +209,15 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
   }
 
   /* qLocal computation*/
-
   for(i = 0; i < dim; i++)
   {
     qLocal[i] = problem->q[normal +i];
   }
+  
   if(problem->M->storageType == 0)
   {
     double * MM = problem->M->matrix0;
     int incx = n, incy = 1;
-
     for(i = 0; i < dim; i++)
     {
       qLocal[i] += cblas_ddot(n , &MM[normal+i] , incx , r , incy);
@@ -240,7 +237,8 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
   }
 }
 
-void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, int cone)
+void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem * problem,
+                            SecondOrderConeLinearComplementarityProblem * localproblem, int cone)
 {
 
   NumericsMatrix * MGlobal = problem->M;
@@ -271,7 +269,6 @@ void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem * proble
   else
     numericsError("soclcp_projection -", "unknown storage type for matrix M");
 }
-
 
 /* swap two indices */
 void uint_swap(unsigned int *a, unsigned int *b);
@@ -325,7 +322,6 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   } 
 
   SecondOrderConeLinearComplementarityProblem* localproblem;
-
 
   if(isConeDimensionsEqual)
   {

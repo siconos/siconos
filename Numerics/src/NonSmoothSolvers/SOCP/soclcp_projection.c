@@ -217,8 +217,8 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   /* at = an; */
   /* as = an; */
   double rho=   options->dWork[options->iparam[4]+options->iWork[0]] , rho_k;
-  /* printf ("saved rho = %14.7e\n",rho ); */
-  /* printf ("options->iparam[4] = %i\n",options->iparam[4] ); */
+  /* printf ("saved rho = %14.7e\n",rho );  */
+  /* printf ("options->iparam[4] = %i\n",options->iparam[4] );  */
 
   int incx = 1, incy = 1;
 
@@ -276,7 +276,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
       r[1] = r_k[1] - rho_k * v_k[1];
       r[2] = r_k[2] - rho_k * v_k[2];
 
-      projectionOnSecondOrderCone(&r[0], mu_i,nLocal);
+      projectionOnSecondOrderCone(&r[0], mu_i, nLocal);
 
       /* v <- q  */
       cblas_dcopy(nLocal , qLocal , 1 , v, 1);
@@ -327,7 +327,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
       printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
     }
 
-    options->dWork[options->iparam[4]] =rho;
+    options->dWork[options->iparam[4]+options->iWork[0]] =rho;
 
   }
 
@@ -408,8 +408,7 @@ int soclcp_projection_setDefaultSolverOptions(SolverOptions* options)
     options->dparam[i] = 0.0;
   }
 
-  options->iparam[0] = 10;
-  options->iparam[1] = 10;
+  options->iparam[0] = 100;
   options->dparam[0] = 1e-16;
   return 0;
 }

@@ -101,9 +101,19 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
 
     /* Compute the value of the initial value friction threshold*/
     for (int ic = 0 ; ic < nc ; ic++) mu[ic] = fmax(0.0, problem->mu[ic] *  reaction [ic * 3]);
-
-    internalsolver_options->dparam[0] = max(error/1000.0, options->dparam[0]/problem->numberOfContacts);
-
+    if (iparam[1] == 0 )
+    {
+      internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]/problem->numberOfContacts);
+    }
+    else if (iparam[1] ==1)
+    {
+      internalsolver_options->dparam[0] = options->dparam[0]/2.0;
+    }
+    else
+    {
+      fprintf(stderr, "Numerics, frictionContact3D_TrescaFixedPoint failed. Unknown startegy for driving tolerence of internal.\n");
+    exit(EXIT_FAILURE);
+    }
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
     cumul_internal += internalsolver_options->iparam[7];

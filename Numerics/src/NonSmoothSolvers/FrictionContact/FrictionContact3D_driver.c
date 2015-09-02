@@ -56,6 +56,7 @@ char * SICONOS_FRICTION_3D_GAMS_PATHVI_STR = "F3D_GAMS_PATHVI";
 char * SICONOS_FRICTION_3D_QUARTIC_STR = "F3D_QUARTIC";
 char * SICONOS_FRICTION_3D_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
 char *  SICONOS_FRICTION_3D_ACLMFP_STR = "F3D_ACLMFP";
+char *  SICONOS_FRICTION_3D_SOCLCP_STR = "F3D_SOCLCP";
 
 
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
@@ -142,6 +143,14 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     snPrintf(1, options,
              " ========================== Call ACLM (Acary Cadoux Lemarechal Malick Fixed Point) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_ACLMFixedPoint(problem, reaction , velocity , &info , options);
+    break;
+  }
+  /* SOCLCP Fixed point algorithm */
+  case SICONOS_FRICTION_3D_SOCLCP:
+  {
+    snPrintf(1, options,
+             " ========================== Call SOCLCP solver for Friction-Contact 3D problem (Associated one) ==========================\n");
+    frictionContact3D_SOCLCP(problem, reaction , velocity , &info , options);
     break;
   }
   /* De Saxce Fixed point algorithm */

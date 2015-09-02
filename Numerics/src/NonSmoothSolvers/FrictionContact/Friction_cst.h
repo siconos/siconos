@@ -32,6 +32,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_GAMS_PATH = 514,
   SICONOS_FRICTION_3D_GAMS_PATHVI = 515,
   SICONOS_FRICTION_3D_ACLMFP = 516,
+  SICONOS_FRICTION_3D_SOCLCP = 517,
 
   /** 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
   SICONOS_FRICTION_3D_AlartCurnierNewton = 550,

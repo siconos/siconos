@@ -57,7 +57,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
 
   unsigned int iter;
-  unsigned int nn = n*n;
+
 
   int incx, incy;
   double theta, preRHS, tau, threshold;
