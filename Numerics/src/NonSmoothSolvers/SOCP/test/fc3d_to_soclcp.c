@@ -47,7 +47,7 @@ int main(void)
   SecondOrderConeLinearComplementarityProblem* soclcp =  secondOrderConeLinearComplementarityProblem_new
       (n, problem->numberOfContacts, problem->M, problem->q, coneIndex, problem->mu);
 
-  secondOrderConeLinearComplementarityProblem_display(soclcp);
+//  secondOrderConeLinearComplementarityProblem_display(soclcp);
 
   FILE * foutput  =  fopen("./data/Capsules-i122-1617.dat", "w");
   info = secondOrderConeLinearComplementarityProblem_printInFile(soclcp, foutput);

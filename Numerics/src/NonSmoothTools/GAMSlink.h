@@ -28,6 +28,7 @@ typedef struct {
 #include "idxcc.h"
 #include "optcc.h"
 #include "gevmcc.h"
+#include "gmomcc.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -130,7 +131,7 @@ static inline int CallGams(const gamsxHandle_t Gptr, const optHandle_t Optr, con
   assert(Gptr); assert(Optr);
 
   optSetStrStr(Optr, "input", model);
-  optSetIntStr(Optr, "logoption", 2);
+  optSetIntStr(Optr, "logoption", 4);
   optSetIntStr(Optr, "keep", 1);
   optSetIntStr(Optr, "optfile", 1);
 //  optSetDblStr(Optr,"OptCA", 1e-12);

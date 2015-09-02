@@ -1,3 +1,6 @@
+
+set j /1 * 2/;
+
 sets i, p;
 parameter W(i,i), E(i,i), Wt(i, i), q(i), qt(i), Ak(p,i);
 
@@ -14,7 +17,7 @@ alias(i,l);
 variables r(l), y(l);
 equations  F_r(l), F_y(l), cons_r(p), cons_y(p);
 
-parameter reaction(l), velocity(l);
+parameter reaction(l), velocity(l), infos(j);
 
 F_r(l)..
   sum(i, W(l,i)*r(i)) + sum(i, E(l, i)*y(i)) + q(l) =n= 0;
@@ -40,4 +43,10 @@ velocity(i) = r.m(i);
 
 * display r.l, y.l
 
-execute_unloadIdx 'fc3d_avi-condensed_sol.gdx', reaction, velocity;
+infos('1') = vi.modelstat;
+infos('2') = vi.solvestat;
+
+display vi.modelstat;
+display vi.solvestat;
+
+execute_unloadIdx 'fc3d_avi-condensed_sol.gdx', reaction, velocity, infos;

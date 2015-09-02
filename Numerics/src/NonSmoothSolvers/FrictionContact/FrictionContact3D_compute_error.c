@@ -33,7 +33,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
-void FrictionContact3D_unitary_compute_and_add_error(double *z , double *w, double mu, double * error)
+void FrictionContact3D_unitary_compute_and_add_error(double* restrict r , double* restrict u, double mu, double* restrict error)
 {
 
   double normUT;
@@ -41,14 +41,14 @@ void FrictionContact3D_unitary_compute_and_add_error(double *z , double *w, doub
 
   double worktmp[3];
   /* Compute the modified local velocity */
-  normUT = hypot(w[1], w[2]); // i.e sqrt(w[ic3p1]*w[ic3p1]+w[ic3p2]*w[ic3p2]);
-  worktmp[0] = z[0] - rho * (w[0] + mu * normUT);
-  worktmp[1] = z[1] - rho * w[1] ;
-  worktmp[2] = z[2] - rho * w[2] ;
+  normUT = hypot(u[1], u[2]); // i.e sqrt(u[ic3p1]*u[ic3p1]+u[ic3p2]*u[ic3p2]);
+  worktmp[0] = r[0] - rho * (u[0] + mu * normUT);
+  worktmp[1] = r[1] - rho * u[1] ;
+  worktmp[2] = r[2] - rho * u[2] ;
   projectionOnCone(worktmp, mu);
-  worktmp[0] = z[0] -  worktmp[0];
-  worktmp[1] = z[1] -  worktmp[1];
-  worktmp[2] = z[2] -  worktmp[2];
+  worktmp[0] = r[0] -  worktmp[0];
+  worktmp[1] = r[1] -  worktmp[1];
+  worktmp[2] = r[2] -  worktmp[2];
   *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 
 }

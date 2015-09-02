@@ -326,6 +326,10 @@
 }
 
 // other names that must be transformed this way
+%apply (double *z) { (double *r) };
+
+%apply (double *z) { (double *u) };
+
 %apply (double *z) { (double *w) };
 
 %apply (double *z) { (double *x) };

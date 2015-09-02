@@ -262,24 +262,46 @@ void display(const NumericsMatrix* const m)
     fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  int storageType = m->storageType;
-  if (storageType == 0)
+  switch (m->storageType)
+  {
+  case NM_DENSE:
   {
     printf("\n ========== Numerics Matrix\n");
     displayMat(m->matrix0, m->size0, m->size1, m->size0);
-    /* printf("["); */
-    /* for (int i = 0; i<m->size0; i++) */
-    /* {     */
-    /*   printf("["); */
-    /*   for (int j = 0; j<m->size1; j++) */
-    /*   { */
-    /*     printf("%lf ",m->matrix0[i+j*m->size0]); */
-    /*   } */
-    /*   printf("]\n"); */
-    /* }   */
+    break;
   }
-  else if (storageType == 1)
+  case NM_SPARSE_BLOCK:
+  {
+    assert(m->matrix1);
     printSBM(m->matrix1);
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(m->matrix2);
+    if (m->matrix2->triplet)
+    {
+      cs_print(m->matrix2->triplet, 0);
+    }
+    else if (m->matrix2->csc)
+    {
+      cs_print(m->matrix2->csc, 0);
+    }
+    else if (m->matrix2->trans_csc)
+    {
+      cs_print(m->matrix2->trans_csc, 0);
+    }
+    else
+    {
+      fprintf(stderr, "display for sparse matrix: no matrix found!\n");
+    }
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "display for NumericsMatrix: matrix type %d not supported!\n", m->storageType);
+  }
+  }
 }
 void displayRowbyRow(const NumericsMatrix* const m)
 {
