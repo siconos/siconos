@@ -650,7 +650,6 @@ int frictionContact3D_projectionOnCylinderWithLocalIteration_solve(FrictionConta
 
   double * MLocal = localproblem->M->matrix0;
   double * qLocal = localproblem->q;
-  double mu_i = localproblem->mu[0];
   int nLocal = 3;
 
   /*   /\* Builds local problem for the current contact *\/ */
