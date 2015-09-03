@@ -70,6 +70,7 @@ int cs_aaxpy(const double alpha, const cs *A, const double *x,
   Ap = A->p ;
   Ai = A->i ;
   Ax = A->x ;
+  assert(fabs(beta-1.) < 100*DBL_EPSILON && "cs_aaxpy is broken for beta != 1, if you don't see why, ask Olivier");
   for(j = 0 ; j < n ; j++)
   {
     for(p = Ap [j] ; p < Ap [j+1] ; p++)
