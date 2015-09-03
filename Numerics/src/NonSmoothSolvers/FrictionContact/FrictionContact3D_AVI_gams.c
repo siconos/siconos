@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <float.h>
 
 #include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
@@ -48,6 +49,71 @@
 
 #define ETERMINATE 4242
 
+//#define SMALL_APPROX
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+
+static int cp(const char *to, const char *from)
+{
+    int fd_to, fd_from;
+    char buf[4096];
+    ssize_t nread;
+    int saved_errno;
+
+    fd_from = open(from, O_RDONLY);
+    if (fd_from < 0)
+        return -1;
+
+    fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0666);
+    if (fd_to < 0)
+        goto out_error;
+
+    while (nread = read(fd_from, buf, sizeof buf), nread > 0)
+    {
+        char *out_ptr = buf;
+        ssize_t nwritten;
+
+        do {
+            nwritten = write(fd_to, out_ptr, nread);
+
+            if (nwritten >= 0)
+            {
+                nread -= nwritten;
+                out_ptr += nwritten;
+            }
+            else if (errno != EINTR)
+            {
+                goto out_error;
+            }
+        } while (nread > 0);
+    }
+
+    if (nread == 0)
+    {
+        if (close(fd_to) < 0)
+        {
+            fd_to = -1;
+            goto out_error;
+        }
+        close(fd_from);
+
+        /* Success! */
+        return 0;
+    }
+
+  out_error:
+    saved_errno = errno;
+
+    close(fd_from);
+    if (fd_to >= 0)
+        close(fd_to);
+
+    errno = saved_errno;
+    return -1;
+}
+
 static inline double rad2deg(double rad) { return rad*180/M_PI; }
 
 
@@ -63,7 +129,7 @@ static int SN_rm_normal_part(int i, int j, double val, void* env)
   }
 }
 
-static int FC3D_gams_inner_loop_condensed(idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, double* restrict reaction, double* restrict velocity, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
+static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, double* restrict reaction, double* restrict velocity, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
 {
 
   char msg[GMS_SSSIZE];
@@ -87,6 +153,13 @@ static int FC3D_gams_inner_loop_condensed(idxHandle_t Xptr, gamsxHandle_t Gptr, 
     printf("Could not create gmo object: %s\n", msg);
     return 1;
   }
+
+  char gdxFileName[GMS_SSSIZE];
+  char iterStr[4];
+  sprintf(iterStr, "%d", iter);
+  strncpy(gdxFileName, "fc3d_avi-condensed", sizeof(gdxFileName));
+  strncat(gdxFileName, iterStr, sizeof(iterStr));
+  strncat(gdxFileName, ".gdx", sizeof(gdxFileName));
 
   idxOpenWrite(Xptr, "fc3d_avi-condensed.gdx", "Siconos/Numerics NM_to_GDX", &status);
   if (status)
@@ -139,6 +212,8 @@ static int FC3D_gams_inner_loop_condensed(idxHandle_t Xptr, gamsxHandle_t Gptr, 
 
   if (idxClose(Xptr))
     idxerrorR(idxGetLastError(Xptr), "idxClose");
+
+   cp(gdxFileName, "fc3d_avi-condensed.gdx");
 
   if ((status=CallGams(Gptr, Optr, sysdir, model))) {
     printf("Call to GAMS failed\n");
@@ -282,9 +357,10 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   }
   else // only for path
   {
-    optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+//    optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
 
   }
+  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
   optWriteParameterFile(solverOptPtr, msg);
 
   optSetIntStr(Optr, "Keep", 0);
@@ -321,10 +397,13 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
 
   double current_nb_approx = NB_APPROX;
 
-  while (!done)
+  unsigned iter = 0;
+  unsigned maxiter = 20;
+  while (!done && (iter < maxiter))
   {
+    iter++;
     total_residual = 0.;
-    int solverStat = FC3D_gams_inner_loop_condensed(Xptr, Gptr, Optr, gmoPtr, sysdir, model, reaction, velocity, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
+    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, reaction, velocity, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
     DEBUG_PRINT_VEC(reaction, size);
     DEBUG_PRINT_VEC(velocity, size);
 
@@ -385,6 +464,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
      * Compute the error on each contact point + 
      ************************************************/
     unsigned offset_row = 0;
+    double* xtmp = (double*)calloc(size, sizeof(double));
     for (unsigned i3 = 0, i = 0; i3 < size; ++i, i3 += 3)
     {
       double res = 0.;
@@ -395,7 +475,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
       double mu = problem->mu[i];
       FrictionContact3D_unitary_compute_and_add_error(ri, ui, mu, &res);
       total_residual += res;
-      unsigned p = NB_APPROX;
+      unsigned p = 10;
       /* TODO we may want to revisit this, since err < TOL2 should be enough to
        * really reduce the number of constraints ...*/
       /* Well we do not want to mess with the sliding case ( both r and u on
@@ -431,7 +511,11 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
           if (fabs(delta_angle+2*M_PI) > M_PI/2)
           {
             printf("Contact %d, something bad happened, angle value is %g (rad) or %g (deg)\n", i, delta_angle, rad2deg(delta_angle));
-            printf("r = [%g; %g; %g]\tu = [%g; %g; %g]\tres = %g\n", ri[0], ri[1], ri[2], ui[0], ui[1], ui[2], res);
+            printf("r = [%g; %g; %g]\tu = [%g; %g; %g]\tres = %g\n", ri[0], ri[1], ri[2], ui[0], ui[1], ui[2], sqrt(res));
+            if (((ri[1]*ri[1] + ri[2]*ri[2]) < mu*mu * ri[0]*ri[0]))
+            {
+              printf("r is the in the interior of the cone ... |r_r| = %g < %g = r_n*mu\n", sqrt((ri[1]*ri[1] + ri[2]*ri[2])), sqrt(mu*mu * ri[0]*ri[0]));
+            }
             goto bad_angle;
           }
           else
@@ -464,16 +548,73 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
         /* Add the last constraint  */
         /* XXX we already have computed those ...  --xhub */
         double middle_point[] = {(cos(minus_r_angle) + cos(angle))/2., (sin(minus_r_angle) + sin(angle))/2.};
-        cs_entry(Ak_triplet, p + offset_row, i3, mu*hypot(middle_point[0], middle_point[1]));
-        cs_entry(Ak_triplet, p + offset_row, i3 + 1, middle_point[0]);
-        cs_entry(Ak_triplet, p + offset_row, i3 + 2, middle_point[1]);
-        DEBUG_PRINTF("contact %d, row entry %d, last_entry: angle = %g, norm = %g; coeff = %g, %g, %g\n", i, p + offset_row, rad2deg(atan2(middle_point[1], middle_point[0])), hypot(middle_point[0], middle_point[1]), mu*hypot(middle_point[0], middle_point[1]), middle_point[0], middle_point[1]);
 
+#ifdef SMALL_APPROX
+        cs_entry(Ak_triplet, p + offset_row, i3, -mu*(hypot(middle_point[0], middle_point[1])));
+        cs_entry(Ak_triplet, p + offset_row, i3 + 1, -cos((minus_r_angle+angle)/2));
+        cs_entry(Ak_triplet, p + offset_row, i3 + 2, -sin((minus_r_angle+angle)/2));
         /* Update the row index */
-        offset_row += p;
+        offset_row += p + 1;
+#else
+
+        cs_entry(Ak_triplet, p + offset_row, i3, 0.);
+        cs_entry(Ak_triplet, p + offset_row+1, i3, 0.);
+        if (delta_angle > 0) /* We need to rotate - pi/2 the original angle */
+        {
+          cs_entry(Ak_triplet, p + offset_row, i3 + 1, cos(minus_r_angle-M_PI/2)); /* XXX there are formulas for this ... */
+          cs_entry(Ak_triplet, p + offset_row, i3 + 2, sin(minus_r_angle-M_PI/2));
+          cs_entry(Ak_triplet, p + offset_row+1, i3 + 1, cos(angle + M_PI/2));
+          cs_entry(Ak_triplet, p + offset_row+1, i3 + 2, sin(angle + M_PI/2));
+        }
+        else /* We need to rotate of pi/2 */
+        {
+          cs_entry(Ak_triplet, p + offset_row, i3 + 1, cos(minus_r_angle + M_PI/2));
+          cs_entry(Ak_triplet, p + offset_row, i3 + 2, sin(minus_r_angle + M_PI/2));
+          cs_entry(Ak_triplet, p + offset_row+1, i3 + 1, cos(angle - M_PI/2));
+          cs_entry(Ak_triplet, p + offset_row+1, i3 + 2, sin(angle - M_PI/2));
+        }
+
+        offset_row += p + 2;
+#endif
+        DEBUG_PRINTF("contact %d, row entry %d, last_entry: angle = %g, norm = %g; coeff = %g, %g, %g\n", i, p + offset_row, rad2deg(atan2(middle_point[1], middle_point[0])), hypot(middle_point[0], middle_point[1]), -mu*hypot(middle_point[0], middle_point[1]), -middle_point[0], -middle_point[1]);
+        double xx[] = {1, -middle_point[0]/((1+hypot(middle_point[0], middle_point[1]))/2), -middle_point[1]/((hypot(middle_point[0], middle_point[1]) + 1)/2)};
+        xtmp[i3] = 1./mu; xtmp[i3+1] = xx[1]; xtmp[i3+2] = xx[2];
+/*         Akmat.size0 = offset_row + p + 1;
+        DEBUG_PRINTF("contact %d, checking feasibility, Ak size = (%d,%d)\n", i, Akmat.size0, Akmat.size1);
+        double* xtmp2 = (double*)calloc(Akmat.size0, sizeof(double));
+        double* pts = (double*)calloc(size, sizeof(double));
+        xtmp[i3] = 1./mu;
+        xtmp[i3+1] = xx[1];
+        xtmp[i3+2] = xx[2];
+        DEBUG_PRINT_VEC(xtmp, size);
+        cs_gaxpy(NM_csc(&Akmat), xtmp, xtmp2);
+        NM_clearCSC(&Akmat);
+        DEBUG_PRINT_VEC(xtmp2, Akmat.size0);
+        pts[i3] = mu;
+        pts[i3+1] = 0;
+        pts[i3+2] = 0;
+        DEBUG_PRINT_VEC(pts, size);
+        memset(xtmp2, 0, size*sizeof(double));
+        cs_gaxpy(NM_csc(&Akmat), pts, xtmp2);
+        DEBUG_PRINT_VEC(xtmp2, Akmat.size0);
+        NM_clearCSC(&Akmat);
+        pts[i3] = 1./mu;
+        pts[i3+1] = -xx[1];
+        pts[i3+2] = -xx[2];
+        printf("%g\n", hypot(middle_point[0], middle_point[1]));
+        DEBUG_PRINT_VEC(pts, size);
+        memset(xtmp2, 0, size*sizeof(double));
+        cs_gaxpy(NM_csc(&Akmat), pts, xtmp2);
+        DEBUG_PRINT_VEC(xtmp2, Akmat.size0);
+        NM_clearCSC(&Akmat);
+        display(&Akmat);
+        DEBUG_PRINTF("contact %d, checking feasibility\n", i);
+        free(xtmp2);
+        free(pts);*/
+
 
       }
-      else // r = 0
+      else // r = 0, or r in int(cone) but other interactions moved u
 bad_angle:
       {
         double angle = 2*M_PI/(NB_APPROX + 1);
@@ -482,15 +623,25 @@ bad_angle:
         for (unsigned k = 0; k < NB_APPROX; ++k)
         {
           cs_entry(Ak_triplet, k + offset_row, i3, mu);
-          cs_entry(Ak_triplet, k + offset_row, i3 + 1, cos(i*angle));
-          cs_entry(Ak_triplet, k + offset_row, i3 + 2, sin(i*angle));
+          cs_entry(Ak_triplet, k + offset_row, i3 + 1, cos(k*angle));
+          cs_entry(Ak_triplet, k + offset_row, i3 + 2, sin(k*angle));
         }
         offset_row += NB_APPROX;
       }
 
       /* Update the dimension of Ak */
-      Akmat.size0 = offset_row+1;
+      Akmat.size0 = offset_row;
     }
+    double* xtmp2 = (double*)calloc(Akmat.size0, sizeof(double));
+    DEBUG_PRINT_VEC(xtmp, size);
+    cs_gaxpy(NM_csc(&Akmat), xtmp, xtmp2);
+    DEBUG_PRINT_VEC(xtmp2, Akmat.size0);
+    for (unsigned ii = 0; ii < Akmat.size0; ++ii)
+    {
+      if (xtmp2[ii] < -DBL_EPSILON) printf("constraint violation at row %d, value %g\n", ii, xtmp2[ii]);
+    }
+    free(xtmp);
+    free(xtmp2);
     total_residual = sqrt(total_residual);
     DEBUG_PRINTF("FrictionContact3D_AVI_gams :: residual = %g\n", total_residual);
 //    done = (total_residual < options->dparam[0]);
@@ -498,18 +649,18 @@ bad_angle:
     if (total_residual > 10*old_residual)
     {
       printf("FrictionContact3D_AVI_gams :: failure, new residual %g is bigger than old one %g\n", total_residual, old_residual);
-      goto TERMINATE;
+//      goto TERMINATE;
     }
     else
     {
       old_residual = total_residual;
       if (total_residual< .9*old_residual)
       {
-        current_nb_approx = NB_APPROX;
+//        current_nb_approx = NB_APPROX;
       }
       else
       {
-        current_nb_approx += 5;
+//        current_nb_approx += 5;
       }
     }
   }

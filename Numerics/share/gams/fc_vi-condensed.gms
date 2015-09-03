@@ -1,16 +1,20 @@
+$if not set filename $set filename 'fc3d_avi-condensed.gdx'
+
 
 set j /1 * 2/;
 
 sets i, p;
 parameter W(i,i), E(i,i), Wt(i, i), q(i), qt(i), Ak(p,i);
 
-$gdxin 'fc3d_avi-condensed.gdx'
+$gdxin '%filename%';
 
 $loadIdx W E Wt Ak q qt
 
 $gdxin
 
 display Ak, W, E, Wt, q, qt;
+
+display i, p;
 
 alias(i,l);
 
