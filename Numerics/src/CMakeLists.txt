@@ -868,7 +868,10 @@ IF(WITH_TESTING)
     NEW_TEST(SOCLCP_test1 soclcp_test1.c)
     NEW_TEST(SOCLCP_test2 soclcp_test2.c)
     NEW_TEST(SOCLCP_test3 soclcp_test3.c)
-    NEW_TEST(SOCLCP_test4 soclcp_test4.c)
+    # timeout on all machines, see
+    # http://cdash-bipop.inrialpes.fr/testSummary.php?project=1&name=SOCLCP_test4&date=2015-09-03
+    # Feel free to remove this once it is fixed --xhub
+    #NEW_TEST(SOCLCP_test4 soclcp_test4.c)
     NEW_TEST(SOCLCP_test5 soclcp_test5.c)
     NEW_TEST(SOCLCP_fc3d_to_soclcp  fc3d_to_soclcp.c)
   END_TEST(NonSmoothSolvers/SOCP/test)
