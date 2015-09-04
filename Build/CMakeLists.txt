@@ -18,7 +18,7 @@
 
 # CTest options : -DCTEST_OPTIONS='-j2'
 
-# install prefix : -DINSTALL_PREFIX='/tmp'
+# install prefix : -DCMAKE_INSTALL_PREFIX='/tmp'
 
 # SOURCE_DIRECTORY : -DSOURCE_DIRECTORY=/some/where
 
@@ -98,9 +98,9 @@ else()
     set(CTEST_OPTIONS "${CTEST_OPTIONS} --debug")
   endif()
   
-  if(INSTALL_PREFIX)
-    set(_project_CMAKE_ARGS ${project_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX})
-    list(APPEND ARGS -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX})
+  if(CMAKE_INSTALL_PREFIX)
+    set(_project_CMAKE_ARGS ${project_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX})
+    list(APPEND ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX})
   endif()
   
   if(NOT DEV_MODE)
@@ -191,7 +191,7 @@ else()
         BINARY_DIR ${CMAKE_BINARY_DIR}/${_project}
         DEPENDS ${project_DEPENDS}
         SOURCE_DIR ${SOURCE_DIR}/${_project}
-        INSTALL_DIR ${INSTALL_PREFIX}
+        INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
         INSTALL_COMMAND ${INSTALL_COMMAND}
         TEST_BEFORE_INSTALL ${project_TEST_BEFORE_INSTALL}
         TEST_AFTER_INSTALL ${project_TEST_AFTER_INSTALL})
@@ -212,7 +212,7 @@ else()
         SOURCE_DIR ${SOURCE_DIR}/${_project}
         BINARY_DIR ${CMAKE_BINARY_DIR}/${_project}
         CMAKE_ARGS ${project_CMAKE_ARGS}
-        INSTALL_DIR ${INSTALL_PREFIX}
+        INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
         INSTALL_COMMAND ${_install_command}
         TEST_BEFORE_INSTALL ${WITH_TESTING})
     endif()

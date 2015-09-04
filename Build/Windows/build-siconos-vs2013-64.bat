@@ -12,11 +12,11 @@ set PATH=E:\cppunit-1.13.2\lib;%PATH%
 set PATH=E:\all_libs;%PATH%
 
 set BOOST_INCLUDEDIR=E:/siconos-external-lib/include
-set INSTALL_PREFIX=E:/install-vs2013-amd64
+set CMAKE_INSTALL_PREFIX=E:/install-vs2013-amd64
 set REL_TYPE="Release"
 
 
-set PATH=%INSTALL_PREFIX%;%PATH%
+set PATH=%CMAKE_INSTALL_PREFIX%;%PATH%
 
 call cmake %* -DON_DASHBOARD=1 ^
 -G"NMake Makefiles" ^
@@ -26,7 +26,7 @@ call cmake %* -DON_DASHBOARD=1 ^
 -DWITH_MECHANICS=1 ^
 -DWITH_CONTROL=1 ^
 -DWITH_EXAMPLES=1 ^
--DINSTALL_PREFIX="%INSTALL_PREFIX%" ^
+-DCMAKE_INSTALL_PREFIX="%CMAKE_INSTALL_PREFIX%" ^
 -DINSTALL_COMMAND="nmake;/I;install" ^
 -DFROM_REPO=0 ^
 -DCTEST_OPTIONS="-j2;-V" ^

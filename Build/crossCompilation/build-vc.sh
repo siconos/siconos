@@ -2,7 +2,7 @@
 
 
 MXE_PREFIX="$HOME"
-INSTALL_PREFIX="$HOME/siconos-windows-VC/install"
+CMAKE_INSTALL_PREFIX="$HOME/siconos-windows-VC/install"
 SICONOS_SOURCES="$HOME/workspace/crosscompilation"
 BUILD_DIR="$HOME/siconos-windows-VC/build"
 LIBS_PREFIX="$HOME/libs"
@@ -19,7 +19,7 @@ build_component() {
 	cmake -DBUILD_STATIC_LIBS=ON \
 		-DCMAKE_TOOLCHAIN_FILE=${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
-		-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
+		-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} \
 		${SICONOS_SOURCES}/$1
 }
 
@@ -33,7 +33,7 @@ make_component() {
 
 build_siconos() {
 	rm -rf ${BUILD_DIR}/*
-	rm -rf ${INSTALL_PREFIX}/*
+	rm -rf ${CMAKE_INSTALL_PREFIX}/*
   build_Numerics_VS
 	build_Kernel_VS
   build_FE_VS
@@ -74,8 +74,8 @@ build_Kernel_VS() {
 	        -DBLAS_INCLUDE_DIRS=$HOME/mxe/usr/i686-pc-mingw32/include-VC \
 		-DBLAS_LIBRARIES="$HOME/mxe/usr/i686-pc-mingw32/lib/libblas.a;${WINEPREFIX}/drive_c/MinGW/lib/gcc/mingw32/${GCC_VER}/libgfortran.dll.a;$HOME/mxe/usr/i686-pc-mingw32/lib/libcblas.a" \
 		-DCMAKE_INSTALL_PREFIX=$HOME/siconos-windows-VC/install \
-		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll.a" \
-		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
+		-DSiconosNumerics_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosNumerics.dll.a" \
+		-DSiconosNumerics_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Numerics/" \
 		-DGMP_LIBRARY=$HOME/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
 		-DGMP_LIBRARIES=$HOME/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
 		-DGMP_INCLUDE_DIRS=$HOME/mxe/usr/i686-pc-mingw32/include-VC \
@@ -107,10 +107,10 @@ build_FE_VS() {
 		-DLAPACK_LIBRARIES="$HOME/mxe/usr/i686-pc-mingw32/lib/liblapack.a;$HOME/mxe/usr/i686-pc-mingw32/lib/liblapacke.a" \
 		-DBLAS_LIBRARIES="$HOME/mxe/usr/i686-pc-mingw32/lib/libblas.a;${WINEPREFIX}/drive_c/MinGW/lib/gcc/mingw32/${GCC_VER}/libgfortran.dll.a;$HOME/mxe/usr/i686-pc-mingw32/lib/libcblas.a" \
 		-DCMAKE_INSTALL_PREFIX=$HOME/siconos-windows-VC/install \
-		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll.a" \
-		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
-		-DSiconosKernel_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
-		-DSiconosKernel_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosKernel.dll.a" \
+		-DSiconosNumerics_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosNumerics.dll.a" \
+		-DSiconosNumerics_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Numerics/" \
+		-DSiconosKernel_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Kernel/" \
+		-DSiconosKernel_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosKernel.dll.a" \
 		-DSWIG_DIR="/usr/share/swig/2.0.9/" \
 		-DPYTHON_LIBRARIES="${LIBS_PREFIX}/python/python27.lib" \
 		-DPYTHON_LIBRARY="${LIBS_PREFIX}/python/python27.lib" \

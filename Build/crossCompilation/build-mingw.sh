@@ -1,7 +1,7 @@
 #!/bin/sh
 
 MXE_PREFIX="/scratch/Olivier/mingw32/"
-INSTALL_PREFIX="/scratch/Olivier/siconos-windows/install"
+CMAKE_INSTALL_PREFIX="/scratch/Olivier/siconos-windows/install"
 SICONOS_SOURCES="$HOME/siconos"
 BUILD_DIR="/scratch/Olivier/siconos-windows/build"
 
@@ -13,7 +13,7 @@ build_component() {
 	cmake -DBUILD_STATIC_LIBS=ON \
 		-DCMAKE_TOOLCHAIN_FILE=${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
-		-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
+		-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} \
 		${SICONOS_SOURCES}/$1
 }
 
@@ -27,7 +27,7 @@ make_component() {
 
 build_siconos() {
 	rm -rf ${BUILD_DIR}/*
-	rm -rf ${INSTALL_PREFIX}/*
+	rm -rf ${CMAKE_INSTALL_PREFIX}/*
 	mkdir -p "${BUILD_DIR}/Numerics"
 	cd "${BUILD_DIR}/Numerics"
 
@@ -39,7 +39,7 @@ build_siconos() {
 	CFLAGS='-U__STRICT_ANSI__' cmake \
 		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
-		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
+		-DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}" \
 		"${SICONOS_SOURCES}/Numerics"
 	make_component
 	make -i install
@@ -49,10 +49,10 @@ build_siconos() {
 	cmake \
 		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
-		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
-		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
-		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
-		-DCMAKE_PREFIX_PATH="${INSTALL_PREFIX}" \
+		-DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}" \
+		-DSiconosNumerics_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Numerics/" \
+		-DSiconosNumerics_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
+		-DCMAKE_PREFIX_PATH="${CMAKE_INSTALL_PREFIX}" \
 		"${SICONOS_SOURCES}/Kernel"
 	make_component
 	make -i install
@@ -62,11 +62,11 @@ build_siconos() {
 	cmake \
 		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
-		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
-		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
-		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
-		-DSiconosKernel_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
-		-DSiconosKernel_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
+		-DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}" \
+		-DSiconosNumerics_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Numerics/" \
+		-DSiconosNumerics_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
+		-DSiconosKernel_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Kernel/" \
+		-DSiconosKernel_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
 		"${SICONOS_SOURCES}/Mechanics"
 	make_component
 	make -i install
@@ -76,11 +76,11 @@ build_siconos() {
 	cmake \
 		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
-		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
-		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
-		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
-		-DSiconosKernel_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
-		-DSiconosKernel_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
+		-DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}" \
+		-DSiconosNumerics_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Numerics/" \
+		-DSiconosNumerics_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
+		-DSiconosKernel_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Kernel/" \
+		-DSiconosKernel_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
 		-DSWIG_DIR="/usr/share/swig/2.0.9/" \
 		-DPYTHON_LIBRARY="${MXE_PREFIX}/python/python27.dll" \
 		-DPYTHON_INCLUDE_DIR="${MXE_PREFIX}/python/" \
@@ -94,12 +94,12 @@ build_siconos() {
 	cmake \
 		-DCMAKE_TOOLCHAIN_FILE="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake" \
 		-DCROSSCOMPILING_LINUX_TO_WINDOWS=1 \
-		-DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
-		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
-		-DSiconosNumerics_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
-		-DSiconosKernel_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
-		-DSiconosKernel_LIBRARY="${INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
-		-DSiconosKernel_EXE_DIR="${INSTALL_PREFIX}/bin" \
+		-DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}" \
+		-DSiconosNumerics_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Numerics/" \
+		-DSiconosNumerics_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosNumerics.dll" \
+		-DSiconosKernel_INCLUDE_DIRS="${CMAKE_INSTALL_PREFIX}/include/Siconos/Kernel/" \
+		-DSiconosKernel_LIBRARY="${CMAKE_INSTALL_PREFIX}/lib/libSiconosKernel.dll" \
+		-DSiconosKernel_EXE_DIR="${CMAKE_INSTALL_PREFIX}/bin" \
 		"${SICONOS_SOURCES}/Examples"
 	make_component
 	make -i install
