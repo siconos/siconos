@@ -2,6 +2,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
+include(SiconosTools)
+get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
+
 INCLUDE(SiconosProject)
 
 ENABLE_LANGUAGE(CXX)

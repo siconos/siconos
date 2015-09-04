@@ -8,6 +8,9 @@ if(POLICY CMP0042)
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
+include(SiconosTools)
+get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
+
 IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
   STRING(REGEX REPLACE "\\\;" ";" ENV_PATH "$ENV{PATH}")
   STRING(REGEX REPLACE "\\\\" "/" ENV_PATH "${ENV_PATH}")

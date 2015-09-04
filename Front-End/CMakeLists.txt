@@ -8,6 +8,9 @@ if(POLICY CMP0042)
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
+include(SiconosTools)
+get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
+
 ENABLE_LANGUAGE(C)
 ENABLE_LANGUAGE(CXX)
 

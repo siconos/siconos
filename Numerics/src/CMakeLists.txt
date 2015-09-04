@@ -78,6 +78,13 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/FCMangle.h DESTINATION include/Siconos/Numeric
 
 compile_with(BLAS REQUIRED)
 compile_with(LAPACK REQUIRED)
+if(NOT BLAS_INCLUDE_DIRS)
+  message(FATAL_ERROR "cannot find blas include directories")
+endif()
+if(NOT LAPACK_INCLUDE_DIRS)
+  message(FATAL_ERROR "cannot find lapack include directories")
+endif()
+
 
 include_directories(utils/test)
 

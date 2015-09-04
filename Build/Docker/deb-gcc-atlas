@@ -1,6 +1,8 @@
 # -*- dockerfile -*-
+
+# A minimal build system for Numerics with gcc & atlas
  
-FROM debian
+FROM @DOCKER_DISTRIB@
 
 RUN apt-get -y update && apt-get -y install \
      cmake \

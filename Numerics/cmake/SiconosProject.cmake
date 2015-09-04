@@ -13,41 +13,50 @@ INCLUDE(SiconosTools)
 MACRO(SICONOS_PROJECT 
     _PROJECT_NAME)
 
-  # Build options
-  # Static and shared libs : defaults
-  OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
-  OPTION(BUILD_STATIC_LIBS "Building of static libraries" OFF)
-  OPTION(WITH_TESTS_COVERAGE "Code coverage setup" OFF)
-  OPTION(WITH_GIT "Consider sources are under GIT" OFF)
-  OPTION(WITH_DEFAULT_BUILD_TYPE "Use a default build type (Release)" ON)
-  OPTION(WITH_DOCUMENTATION "Build doxygen documentation with 'make doc'" OFF)
-  OPTION(WITH_TESTING "Enable 'make test' target" ON)
-  OPTION(WITH_TIMERS "Enable timers" OFF)
-  OPTION(WITH_MUMPS "Compilation with MUMPS solver" OFF)
-  OPTION(WITH_FCLIB "link with fclib when this mode is enable. Default = off." OFF)
-  OPTION(WITH_SYSTEM_INFO "Print some CMake variables. Default = off." OFF)
-  OPTION(WITH_CPACK "Configuration for cpack. Default = on." ON)
-  OPTION(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings." ON) # ON for developpers, OFF for distributed version
-  OPTION(FUCK_DOXYGEN "At your convenience." OFF) 
-  OPTION(DEV_MODE "Developer mode." ON)
-  OPTION(WITH_DOCKER "Enable docker targets. Default = off." OFF)
-
-  FIND_PROGRAM(HAVE_DOCKER docker)
+  OPTION(WITH_DOCKER "Build inside a docker container." OFF)
   
   IF(WITH_DOCKER)
+    FIND_PROGRAM(HAVE_DOCKER docker)
     IF(HAVE_DOCKER)
+
       SET(DOCKER_IMAGE_DIR ${CMAKE_SOURCE_DIR}/../Build/Docker)
       SET(DOCKER_REPOSITORY siconos)
-      SET(DOCKER_SHARED_DIRECTORIES ${CMAKE_SOURCE_DIR}/../Numerics/cmake;${CMAKE_SOURCE_DIR}/../Examples/Control/PID;${CMAKE_SOURCE_DIR}/../Kernel/src/model/test)
-      SET(DOCKER_HOST_INSTALL_PREFIX /tmp/$ENV{USER}/siconos/docker)
-      FILE(MAKE_DIRECTORY ${DOCKER_HOST_INSTALL_PREFIX})
+      SET(DOCKER_CMAKE_FLAGS ${CMAKE_ARGS_FROM_CACHE};-DWITH_DOCKER=0)
+      SET(DOCKER_SHARED_DIRECTORIES ${CMAKE_SOURCE_DIR}/../Numerics/cmake;${CMAKE_SOURCE_DIR}/../Examples/Control/PID;${CMAKE_SOURCE_DIR}/../Kernel/src/model/test;${DOCKER_SHARED_DIRECTORIES})
       INCLUDE(Docker)
+
+      ADD_DOCKER_TARGETS(
+        DOCKER_IMAGE ${DOCKER_IMAGE}
+        DOCKER_TEMPLATE ${DOCKER_TEMPLATE}
+        DOCKER_IMAGE_DIR ${DOCKER_IMAGE_DIR}
+        DOCKER_REPOSITORY ${DOCKER_REPOSITORY}
+        DOCKER_CMAKE_FLAGS ${DOCKER_CMAKE_FLAGS}
+        DOCKER_SHARED_DIRECTORIES ${DOCKER_SHARED_DIRECTORIES})
+
+      PROJECT(${_PROJECT_NAME} NONE)
+    ELSE()
+      MESSAGE(FATAL_ERROR "Cannot find docker.")
     ENDIF()
   ELSE()
-
-    IF(FUCK_DOXYGEN OR NOT DEV_MODE)
+    # Build options
+    # Static and shared libs : defaults
+    OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
+    OPTION(BUILD_STATIC_LIBS "Building of static libraries" OFF)
+    OPTION(WITH_TESTS_COVERAGE "Code coverage setup" OFF)
+    OPTION(WITH_GIT "Consider sources are under GIT" OFF)
+    OPTION(WITH_DEFAULT_BUILD_TYPE "Use a default build type (Release)" ON)
+    OPTION(WITH_DOCUMENTATION "Build doxygen documentation with 'make doc'" OFF)
+    OPTION(WITH_TESTING "Enable 'make test' target" ON)
+    OPTION(WITH_TIMERS "Enable timers" OFF)
+    OPTION(WITH_MUMPS "Compilation with MUMPS solver" OFF)
+    OPTION(WITH_FCLIB "link with fclib when this mode is enable. Default = off." OFF)
+    OPTION(WITH_SYSTEM_INFO "Print some CMake variables. Default = off." OFF)
+    OPTION(WITH_CPACK "Configuration for cpack. Default = on." ON)
+    OPTION(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings." ON) # ON for developpers, OFF for distributed version
+    OPTION(DEV_MODE "Developer mode." ON)
+    IF(NOT DEV_MODE)
       SET(WITH_DOXYGEN_WARNINGS OFF)
-    ENDIF(FUCK_DOXYGEN OR NOT DEV_MODE)
+    ENDIF(NOT DEV_MODE)
     
     # get system architecture 
     # https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake

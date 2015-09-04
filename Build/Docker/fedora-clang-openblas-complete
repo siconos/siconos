@@ -18,7 +18,8 @@ RUN dnf install -y \
      scipy \
      python-devel \
      python-lxml \
-     pytest
+     pytest \
+     swig
 
-ENV CC /usr/bin/clang
-ENV CXX /usr/bin/clang++
+ENV CC /usr/bin/gcc
+ENV CXX /usr/bin/c++

@@ -1,8 +1,6 @@
 Specification for docker images
 
-/!\ only Numerics at the moment
-
-cmake -DWITH_DOCKER=1 -DDOCKER_IMAGE=debian-gcc-atlas -DDOCKER_CMAKE_FLAGS=... -DDOCKER_MAKE_FLAGS=...
+cmake -DWITH_DOCKER=1 -DDOCKER_TEMPLATE=deb-gcc-atlas -DDOCKER_DISTRIB=ubuntu:14.04 -DDOCKER_CMAKE_FLAGS=... -DDOCKER_MAKE_FLAGS=...
 
 make docker-image
 make docker-cmake

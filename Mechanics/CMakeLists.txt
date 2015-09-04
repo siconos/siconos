@@ -8,6 +8,9 @@ if(POLICY CMP0042)
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
+include(SiconosTools)
+get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
+
 option(WITH_OCC "compilation with OpenCascade Bindings. Default = OFF" OFF)
 option(WITH_MECHANISMS "compilation with OpenCascade Bindings. Default = OFF" OFF)
 option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)

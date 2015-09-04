@@ -12,6 +12,9 @@ endif(POLICY CMP0011)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
+include(SiconosTools)
+get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
+
 INCLUDE(SiconosProject)
 OPTION(WITH_DOCUMENTATION "Build doxygen documentation with 'make doc'" ON)
 

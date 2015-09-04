@@ -6,7 +6,10 @@ cmake_minimum_required(VERSION 2.8.7)
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
 endif()
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(SiconosTools)
+get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
 
 option(WITH_CXX "Enable CXX compiler for Numerics. Default=OFF" OFF)
 
@@ -32,3 +35,6 @@ else()
 endif()
 
 siconos_project(Numerics)
+
+
+
