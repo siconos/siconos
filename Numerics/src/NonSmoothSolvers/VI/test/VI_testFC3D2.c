@@ -64,6 +64,7 @@ void PXtest(void *viIn, double *x, double *PX)
 int main(void)
 {
   VariationalInequality vi;
+  variationalInequality_clear(&vi);
   //vi.env = &vi;
   vi.F = &Ftest;
   vi.ProjectionOnX = &PXtest;

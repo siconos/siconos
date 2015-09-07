@@ -49,9 +49,9 @@ typedef struct
   unsigned int nabla_eval;
 } data_ZIT;
 
-static void F_ZIT(void* env, int n, double* restrict l, double* restrict F)
+static void F_ZIT(void* problem, int n, double* restrict l, double* restrict F)
 {
-  data_ZIT* d = (data_ZIT*) env;
+  data_ZIT* d = (data_ZIT*) VI_get_env(problem);
 
   double xk0 = d->xk[0];
   double xk1 = d->xk[1];
@@ -70,10 +70,10 @@ static void F_ZIT(void* env, int n, double* restrict l, double* restrict F)
 
 }
 
-static void nabla_F_ZIT(void* env, int n, double* restrict l, NumericsMatrix* restrict nabla_F)
+static void nabla_F_ZIT(void* problem, int n, double* restrict l, NumericsMatrix* restrict nabla_F)
 {
   double* restrict nabla_F_dense = nabla_F->matrix0;
-  data_ZIT* d = (data_ZIT*) env;
+  data_ZIT* d = (data_ZIT*) VI_get_env(problem);
 
   double l0 = l[0];
   double l1 = l[1];
@@ -103,15 +103,14 @@ int main(void)
   set_SolverOptions(&options, @SOLVER_ID@);
 
   /* Create a VariationalInequality */
-  VariationalInequality* problem = (VariationalInequality *)malloc(sizeof(VariationalInequality));
 
-  problem->size = N;
+  VariationalInequality* problem = variationalInequality_new(N);
   problem->F = &F_ZIT;
   problem->compute_nabla_F = &nabla_F_ZIT;
 
   double xk[] = {1., 10.0};
   double t = 0.0;
-  double T = 10.0;
+  double T = 1.0;
 
   double z[N] = {0.};
   double F[N] = {0.};
@@ -152,10 +151,10 @@ int main(void)
   {
     k++;
     info = variationalInequality_driver(problem, z, F, &options, NULL);
-    printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
+    //printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
     if (info > 0)
     {
-      printf("NCP_ZI1 info = %d\n", info);
+      printf("VI_ZIT1 info = %d\n", info);
       /* do some magic shit to force the algo to fix a solution */
       z[0] = copysign(1.0, -xk[0]);
       z[1] = copysign(1.0, -xk[1]);
@@ -174,6 +173,7 @@ int main(void)
     xk[1] = F[1];
     t = k*sim_data.h;
   }
+  printf("VI_ZIT2 final values xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
   deleteSolverOptions(&options);
 
   free(problem);

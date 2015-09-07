@@ -1,5 +1,6 @@
 
 
+#include "SiconosNumerics.h"
 
 #ifdef __cplusplus
 
@@ -37,7 +38,7 @@ typedef struct
 
 SICONOS_EXPORT void compute_F(void* env, int n, double* restrict l, double* restrict F)
 {
-  data* d = (data*) env;
+  data* d = (data*) VI_get_env(problem);
 
   double xk0 = d->xk[0];
   double xk1 = d->xk[1];
@@ -58,7 +59,7 @@ SICONOS_EXPORT void compute_F(void* env, int n, double* restrict l, double* rest
 
 SICONOS_EXPORT void compute_nabla_F(void* env, int n, double* restrict l, double* restrict nabla_F)
 {
-  data* d = (data*) env;
+  data* d = (data*) VI_get_env(problem);
 
   double l0 = l[0];
   double l1 = l[1];

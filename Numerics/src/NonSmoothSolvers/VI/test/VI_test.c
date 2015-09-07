@@ -33,6 +33,7 @@ int main(void)
 {
 
   VariationalInequality vi;
+  variationalInequality_clear(&vi);
   
   vi.size=10;
   //vi.Callback = (CallbackVI *)malloc(sizeof(CallbackVI));

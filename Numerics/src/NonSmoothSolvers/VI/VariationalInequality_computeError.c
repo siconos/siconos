@@ -126,9 +126,9 @@ int variationalInequality_compute_error_box(
     }
     err += diff*diff;
   }
-  error[0] = err;
+  error[0] = sqrt(err);
 
-  if (err > tolerance)
+  if (error[0] > tolerance)
   {
     if (verbose > 1)
       printf(" Numerics - variationalInequality_compute_error: error = %g > tolerance = %g.\n", *error, tolerance);

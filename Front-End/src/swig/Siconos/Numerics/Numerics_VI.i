@@ -5,32 +5,12 @@
 
 %extend VariationalInequality_
 {
-  VariationalInequality_()
-   {
-     VariationalInequality_* vi;
-     vi = (VariationalInequality_ *) malloc(sizeof(VariationalInequality_));
-     vi->nabla_F = NULL;
-     vi->F = &call_py_compute_F;
-     vi->compute_nabla_F = &call_py_compute_nabla_F;
-     vi->env = NULL;
-
-     return vi;
-   }
 
   VariationalInequality_(PyObject* n)
   {
-     VariationalInequality_* vi;
-     vi =  (VariationalInequality_ *) malloc(sizeof(VariationalInequality_));
-
-     vi->size = (int) PyInt_AsLong(n);
-     vi->set = NULL;
-     vi->env = NULL;
-     vi->compute_nabla_F = NULL;
-     vi->ProjectionOnX = NULL;
-     vi->nabla_F = NULL;
-     vi->normVI = std::numeric_limits<double>::quiet_NaN();
-     vi->istheNormVIset = 0;
-
+     VariationalInequality_* vi = variationalInequality_new((int) PyInt_AsLong(n));
+     vi->F = &call_py_compute_F;
+     vi->compute_nabla_F = &call_py_compute_nabla_F;
 
      if (vi->size < 1)
      {
@@ -47,7 +27,7 @@
   VariationalInequality_(PyObject* n, PyObject* py_compute)
   {
 
-     VariationalInequality_* vi = new_VariationalInequality___SWIG_1(n);
+     VariationalInequality_* vi = variationalInequality_new((int) PyInt_AsLong(n));
 
      PyObject* method_compute_F = PyObject_GetAttrString(py_compute, "compute_F");
      PyObject* method_compute_nabla_F = PyObject_GetAttrString(py_compute, "compute_nabla_F");

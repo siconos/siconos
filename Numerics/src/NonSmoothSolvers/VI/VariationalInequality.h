@@ -121,12 +121,25 @@ extern "C"
    */
   void freeVariationalInequalityProblem(VariationalInequality* problem);
 
+  /** Clear VariationalInequality structure: set all pointeurs to NULL, double and int to 0.
+   * \param vi the problem to clear
+   */
+  void variationalInequality_clear(VariationalInequality* vi);
 
-  /* /\** new VariationalInequality  from minimal set of data */
-  /*  * */
-  /*  *\/ */
-  /* VariationalInequality* variationalInequality_new(int size, CallbackVI * callback); */
+  /** new VariationalInequality problem
+    * \param size size of the ambient space for the VI
+    * \return a initialized VariationalInequality struct
+    */
+  VariationalInequality* variationalInequality_new(int size);
 
+  /** get the environment from the struct
+   * \param problem a VariationalInequality problem
+   * \return the environment from the struct
+   */
+  static inline void* VI_get_env(void* problem)
+  {
+    return ((VariationalInequality*) problem)->env;
+  }
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

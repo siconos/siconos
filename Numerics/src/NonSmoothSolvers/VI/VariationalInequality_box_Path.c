@@ -52,7 +52,7 @@ CB_FUNC(int) vi_box_PATH_function_eval(void* id, int n, double*z, double *f)
 {
   VariationalInequality* vi_box = (VariationalInequality*)((SN_generic_path_env*) id)->problem;
 
-  vi_box->F(vi_box->env, n, z, f);
+  vi_box->F(vi_box, n, z, f);
   return 0;
 }
 
@@ -67,11 +67,11 @@ CB_FUNC(int) vi_box_PATH_jacobian_eval(void *id, int n, double *z, int wantf,
 
   if (wantf) {
     //err += 
-    vi_box->F(vi_box->env, n, z, f);
+    vi_box->F(vi_box, n, z, f);
   }
 
   // err += to be added
-  vi_box->compute_nabla_F(vi_box->env, n, z, vi_box->nabla_F);
+  vi_box->compute_nabla_F(vi_box, n, z, vi_box->nabla_F);
 
   /* Write the jacobian in a Path-Sparse format */
   convertToPathSparse(n, n, vi_box->nabla_F, col_start, col_len, row, data);

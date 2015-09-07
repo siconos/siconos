@@ -51,11 +51,24 @@ void freeVariationalInequalityProblem(VariationalInequality* problem)
   assert(problem);
 }
 
-/* VariationalInequality* variationalInequalityProblem_new( int dim, void (* F)(void *vi, double *,double *)  ) */
-/* { */
-/*   VariationalInequality* fvi = (VariationalInequality*) malloc(sizeof(VariationalInequality)); */
+void variationalInequality_clear(VariationalInequality* vi)
+{
+  vi->size = 0;
+  vi->env = NULL;
+  vi->F = NULL;
+  vi->compute_nabla_F = NULL;
+  vi->ProjectionOnX = NULL;
+  vi->normVI = 0.;
+  vi->istheNormVIset =0.;
+  vi->set = NULL;
+  vi->nabla_F = NULL;
+}
 
-/*   fvi->size = dim; */
-/*   fvi->F = Callback; */
-/*   return fvi; */
-/* } */
+VariationalInequality* variationalInequality_new(int size)
+{
+  VariationalInequality* fvi = (VariationalInequality*) malloc(sizeof(VariationalInequality)); 
+  variationalInequality_clear(fvi);
+  fvi->size = size;
+
+  return fvi;
+}

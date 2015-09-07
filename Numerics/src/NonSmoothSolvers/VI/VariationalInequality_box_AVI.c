@@ -33,12 +33,12 @@ static void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, do
 {
   VariationalInequality* vi_pb = (VariationalInequality*) problem;
   int n = vi_pb->size;
-  vi_pb->F(vi_pb->env, n, z, F);
+  vi_pb->F(vi_pb, n, z, F);
   RelayProblem* relay_pb = ((vi_box_AVI_LSA_data*)options->solverData)->relay_pb;
 
   NM_assert(NM_DENSE, relay_pb->M);
 
-  vi_pb->compute_nabla_F(vi_pb->env, n, z, relay_pb->M);
+  vi_pb->compute_nabla_F(vi_pb, n, z, relay_pb->M);
 
   cblas_dcopy(n, F, 1, relay_pb->q, 1);
   prodNumericsMatrix(n, n, -1.0, relay_pb->M, z, 1.0, relay_pb->q);

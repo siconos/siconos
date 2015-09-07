@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
+#include <math.h>
 
 #include "NumericsOptions.h"
 #include "VariationalInequality_Solvers.h"
@@ -139,14 +140,14 @@ int checkTrivialCase_vi(VariationalInequality* problem, double* x,
   }
   cblas_daxpy(n, -1.0,x, 1, w , 1);
   double nnorm = cblas_dnrm2(n,w,1);
-  if (nnorm < 1e-12)
+  if (nnorm < fmin(options->dparam[0], 1e-12))
     return 1;
-  
+
   problem->F(problem,n,x,w);
   nnorm = cblas_dnrm2(n,w,1);
-  if (nnorm < 1e-12)
+  if (nnorm < fmin(options->dparam[0], 1e-12))
     return 1;
-  
+
   if (verbose == 1)
     printf("variationalInequality driver, trivial solution F(x) = 0, x in X.\n");
   return 0;
