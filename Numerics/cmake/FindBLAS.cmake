@@ -212,7 +212,7 @@ if(NOT BLAS_FOUND)
       set(WITH_BLAS "mkl" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
       set(BLAS_LIBRARIES ${MKL_LIBRARIES})
       ## FindMKL also sets MKL_LAPACK_LIBRARIES
-      set(BLAS_INCLUDE_DIR ${MKL_INCLUDE_DIR})
+      set(INCLUDE_DIR_HINTS ${MKL_INCLUDE_DIR})
       set(BLAS_VERSION ${MKL_VERSION})
       set(BLAS_HEADER mkl_cblas.h CACHE STRING "Blas header name")
     endif(MKL_FOUND)

@@ -194,9 +194,10 @@ if(NOT LAPACK_FOUND)
       set(WITH_LAPACK "mkl" CACHE STRING "Lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
       set(LAPACK_DIR ${BLAS_DIR} CACHE PATH "lapack implementation location." FORCE)
       set(LAPACKE_HEADER mkl_lapacke.h)
-      set(LAPACK_INCLUDE_DIR ${MKL_INCLUDE_DIR})
+      set(HAS_LAPACKE TRUE)
       set(LAPACK_VERSION ${MKL_VERSION})
       set(LAPACK_LIBRARY_DIR ${BLAS_LIBRARY_DIR} CACHE PATH "Lapack libraries location." FORCE)
+      set(LAPACK_INCLUDE_DIRS ${BLAS_INCLUDE_DIRS} CACHE PATH "Lapack header location." FORCE)
       set(LAPACK_LIBRARIES ${MKL_LAPACK_LIBRARIES})
       ## Apple accelerate 
     elseif(WITH_BLAS STREQUAL "accelerate")
@@ -410,6 +411,7 @@ if(NOT LAPACK_FOUND)
 	if(LAPACKE_HEADER)
 	  find_path(LAPACK_INCLUDE_DIRS 
 	    NAMES ${LAPACKE_HEADER}
+	    HINTS ${LAPACK_DIR} ${LAPACK_INC_DIR}
 	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
 	    )
 	  if(LAPACK_INCLUDE_DIRS)
@@ -420,6 +422,7 @@ if(NOT LAPACK_FOUND)
 	if(NOT LAPACK_INCLUDE_DIRS)
 	  find_path(LAPACK_INCLUDE_DIRS 
 	    NAMES ${CLAPACK_HEADER}
+	    HINTS ${LAPACK_DIR} ${LAPACK_INC_DIR}
 	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
 	    )
 	  if(LAPACK_INCLUDE_DIRS)
@@ -429,7 +432,7 @@ if(NOT LAPACK_FOUND)
 	endif()
       endif()
       if(LAPACK_INCLUDE_DIRS)
-	set(LAPACK_FOUND 1)
+	set(LAPACK_FOUND 1 CACHE BOOL "Found lapack headers dir.")
       endif()
       
     endif()
