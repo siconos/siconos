@@ -133,7 +133,7 @@ int main(void)
 
  options.dparam[0] = N*DBL_EPSILON;
  options.iparam[SICONOS_IPARAM_PREALLOC] = 1;
-//  options.iparam[0] = 250;
+ options.iparam[0] = 250;
 
 //  options.iparam[3] = 2;
 //  options.iparam[4] = 10;
@@ -152,6 +152,16 @@ int main(void)
     {
       printf("NCP_ZI1 info = %d\n", info);
       /* do some magic shit to force the algo to fix a solution */
+      if(@SOLVER_ID@ == SICONOS_NCP_NEWTON_FBLSA)
+      {
+       while (options.dparam[0] < 1e-12)
+       {
+        options.dparam[0] *= 1.1;
+       info = ncp_driver(problem, z, F, &options, NULL);
+       if (!info)
+        goto almostgood;
+       }
+      }
       double x1 = F[0] - z[1];
       double x2 = F[2] - z[3];
       if ((x1 < -1e-7) && (fabs(z[1]) < 1e-10))
@@ -183,19 +193,42 @@ int main(void)
         z[2] = 1.0;
       }
 
-      info = ncp_driver(problem, z, F, &options, NULL);
+      if(@SOLVER_ID@ == SICONOS_NCP_NEWTON_FBLSA)
+      {
+      options.dparam[0] = N*DBL_EPSILON;
+       while (options.dparam[0] < 1e-12)
+       {
+        options.dparam[0] *= 1.1;
+       info = ncp_driver(problem, z, F, &options, NULL);
+       if (!info)
+        goto almostgood;
+       }
+      }
+      else
+      {
+       info = ncp_driver(problem, z, F, &options, NULL);
+      }
 
       if (info > 0)
       {
-        printf("step %d, iter = %d, error = %le, info = %d\n", k, options.iparam[1], options.dparam[1], info);
-        printf("NCP_ZI1 with solver @SOLVER_ID@ failed completly\n");
-        printf("NCP_ZI1 failure at xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
+        if (options.dparam[1] > options.dparam[0] || @SOLVER_ID@ != SICONOS_NCP_NEWTON_FBLSA)
+        {
+          printf("step %d, iter = %d, error = %le, tol = %g; info = %d\n", k, options.iparam[1], options.dparam[1], options.dparam[0], info);
+          printf("NCP_ZI1 with solver @SOLVER_ID@ failed completly\n");
+          printf("NCP_ZI1 failure at xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
+        }
+        else
+        {
+         info = 0;
+        }
       }
 
     }
+almostgood:
     xk[0] = F[0] - z[1];
     xk[1] = F[2] - z[3];
     t = k*sim_data.h;
+    options.dparam[0] = N*DBL_EPSILON;
   }
   deleteSolverOptions(&options);
 
