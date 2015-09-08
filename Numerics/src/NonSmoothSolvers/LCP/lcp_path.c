@@ -54,7 +54,7 @@ void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *
   FortranToPathSparse(n, M, 1.0e-18, m_i, m_j, m_ij);
   for (i = 0; i < n; i++)
   {
-    lb[i] = -tol;
+    lb[i] = 0.;
     ub[i] = 1.e20;
   }
   SimpleLCP(n, nnz, m_i, m_j, m_ij, q, lb, ub,
@@ -99,34 +99,4 @@ void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *
 
 
   return;
-}
-int linearComplementarity_path_setDefaultSolverOptions(SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the PATH Solver\n");
-  }
-
-
-  /* strcpy(options->solverName,"PATH");*/
-  options->solverId = SICONOS_LCP_PATH;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  null_SolverOptions(options);
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->dparam[0] = 1e-6;
-
-
-  return 0;
 }

@@ -558,12 +558,6 @@ extern "C"
   */
   void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-      \param options the pointer to the array of options to set
-  */
-  int linearComplementarity_path_setDefaultSolverOptions(SolverOptions* options);
-
-
   /** enumerative solver
   * \param[in] problem structure that represents the LCP (M, q...)
   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.

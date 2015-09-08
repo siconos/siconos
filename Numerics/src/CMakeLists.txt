@@ -115,6 +115,10 @@ IF(GAMS_DIR)
     "-Wno-error=conversion")
   ENDIF()
 
+  # GAMS distributes Cplex ...
+  IF(GAMS_FOUND AND NOT Cplex_LIBRARY_DIRECTORY)
+    SET(Cplex_LIBRARY_DIRECTORY ${GAMS_DIR})
+   ENDIF(GAMS_FOUND AND NOT Cplex_LIBRARY_DIRECTORY)
 ENDIF(GAMS_DIR)
 
 # the following library may be found in a GAMS install -> we search for them

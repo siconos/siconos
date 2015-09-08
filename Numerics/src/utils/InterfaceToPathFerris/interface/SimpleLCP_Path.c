@@ -165,7 +165,7 @@ static MCP_Interface mcp_interface =
 {
   NULL,
   problem_size, bounds,
-  function_evaluation, jacobian_evaluation,
+  function_evaluation, jacobian_evaluation, NULL,
   start, NULL,
   NULL, NULL,
   NULL
@@ -266,12 +266,9 @@ static void create(int variables,
                    int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
                    double *z, double *lb, double *ub)
 {
-  double inf;
   int m_index;
   int m_count;
   int i;
-
-  inf = 1e20;
 
   problem.n = variables;
   problem.nnz = m_nnz;
@@ -467,7 +464,7 @@ void SimpleLCP(int variables,
   install_interface(m);
 
   Options_Read(o, "path.opt");
-  Options_SetDouble(o, "con_tol", 1e-10);
+  Options_SetDouble(o, "con_tol", 1e-12);
   Options_Display(o);
 
 
@@ -479,7 +476,7 @@ void SimpleLCP(int variables,
 
   x = MCP_GetX(m);
 
-  for (i = 0; i < variables; i++)
+  for (i = 0; i < problem.n; i++)
   {
     z[i] = x[i];
   }

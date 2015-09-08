@@ -28,7 +28,7 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-CB_FUNC(void) PATH_problem_size(void* restrict id, int* restrict n, int* restrict nnz)
+static CB_FUNC(void) PATH_problem_size(void* restrict id, int* restrict n, int* restrict nnz)
 {
   SN_generic_path_env* env = (SN_generic_path_env*) id;
   *n = env->n;
@@ -36,7 +36,7 @@ CB_FUNC(void) PATH_problem_size(void* restrict id, int* restrict n, int* restric
   return;
 }
 
-CB_FUNC(void) vi_box_PATH_bounds(void* restrict id, int n, double* restrict z, double* restrict lb, double* restrict ub)
+static CB_FUNC(void) vi_box_PATH_bounds(void* restrict id, int n, double* restrict z, double* restrict lb, double* restrict ub)
 {
   SN_generic_path_env* env = (SN_generic_path_env*) id;
 
@@ -48,7 +48,7 @@ CB_FUNC(void) vi_box_PATH_bounds(void* restrict id, int n, double* restrict z, d
   return;
 }
 
-CB_FUNC(int) vi_box_PATH_function_eval(void* id, int n, double*z, double *f)
+static CB_FUNC(int) vi_box_PATH_function_eval(void* id, int n, double*z, double *f)
 {
   VariationalInequality* vi_box = (VariationalInequality*)((SN_generic_path_env*) id)->problem;
 
@@ -56,7 +56,7 @@ CB_FUNC(int) vi_box_PATH_function_eval(void* id, int n, double*z, double *f)
   return 0;
 }
 
-CB_FUNC(int) vi_box_PATH_jacobian_eval(void *id, int n, double *z, int wantf, 
+static CB_FUNC(int) vi_box_PATH_jacobian_eval(void *id, int n, double *z, int wantf, 
                                         double *f, int *nnz,
                                         int *col_start, int *col_len, 
                                         int *row, double *data)
@@ -74,7 +74,9 @@ CB_FUNC(int) vi_box_PATH_jacobian_eval(void *id, int n, double *z, int wantf,
   vi_box->compute_nabla_F(vi_box, n, z, vi_box->nabla_F);
 
   /* Write the jacobian in a Path-Sparse format */
-  convertToPathSparse(n, n, vi_box->nabla_F, col_start, col_len, row, data);
+  assert(vi_box->nabla_F->matrix0);
+  assert(vi_box->nabla_F->storageType == NM_DENSE);
+  convertToPathSparse(n, n, vi_box->nabla_F->matrix0, col_start, col_len, row, data);
   (*nnz) = env->nnz;
   return err;
 }

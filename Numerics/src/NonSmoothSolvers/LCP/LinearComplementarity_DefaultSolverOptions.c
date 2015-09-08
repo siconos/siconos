@@ -81,11 +81,6 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
     info =    linearComplementarity_lexicolemke_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_LCP_PATH:
-  {
-    info =    linearComplementarity_path_setDefaultSolverOptions(options);
-    break;
-  }
   case SICONOS_LCP_ENUM:
   {
     info =    linearComplementarity_enum_setDefaultSolverOptions(problem, options);
@@ -96,6 +91,7 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
     info =    linearComplementarity_newton_min_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_LCP_PATH:
   case SICONOS_LCP_AVI_CAOFERRIS:
   case SICONOS_LCP_BARD:
   case SICONOS_LCP_MURTY:

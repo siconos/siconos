@@ -1,8 +1,29 @@
+/* Siconos-Numerics, Copyright INRIA 2005-2015
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+ */
+
 
 
 #include <stdio.h>
 #include "NonlinearComplementarityProblem.h"
 #include "SolverOptions.h"
+
+#include "NumericsConfig.h"
 
 #include "NCP_Solvers.h"
 
@@ -28,7 +49,7 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-CB_FUNC(void) ncp_PATH_problem_size(void* restrict id, int* restrict n, int* restrict nnz)
+static CB_FUNC(void) ncp_PATH_problem_size(void* restrict id, int* restrict n, int* restrict nnz)
 {
   SN_generic_path_env* env = (SN_generic_path_env*) id;
   *n = env->n;
@@ -36,7 +57,7 @@ CB_FUNC(void) ncp_PATH_problem_size(void* restrict id, int* restrict n, int* res
   return;
 }
 
-CB_FUNC(void) ncp_PATH_bounds(void* restrict id, int n, double* restrict z, double* restrict lb, double* restrict ub)
+static CB_FUNC(void) ncp_PATH_bounds(void* restrict id, int n, double* restrict z, double* restrict lb, double* restrict ub)
 {
   SN_generic_path_env* env = (SN_generic_path_env*) id;
 
@@ -48,7 +69,7 @@ CB_FUNC(void) ncp_PATH_bounds(void* restrict id, int n, double* restrict z, doub
   return;
 }
 
-CB_FUNC(int) ncp_PATH_function_eval(void* id, int n, double*z, double *f)
+static CB_FUNC(int) ncp_PATH_function_eval(void* id, int n, double*z, double *f)
 {
   NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)((SN_generic_path_env*) id)->problem;
 
@@ -56,7 +77,7 @@ CB_FUNC(int) ncp_PATH_function_eval(void* id, int n, double*z, double *f)
   return 0;
 }
 
-CB_FUNC(int) ncp_PATH_jacobian_eval(void *id, int n, double *z, int wantf, 
+static CB_FUNC(int) ncp_PATH_jacobian_eval(void *id, int n, double *z, int wantf, 
                                         double *f, int *nnz,
                                         int *col_start, int *col_len, 
                                         int *row, double *data)
@@ -71,7 +92,7 @@ CB_FUNC(int) ncp_PATH_jacobian_eval(void *id, int n, double *z, int wantf,
   }
 
   // err += to be added
-  ncp->compute_nabla_F(ncp->env, n, z, ncp->nabla_F->matrix0);
+  ncp->compute_nabla_F(ncp->env, n, z, ncp->nabla_F);
 
   /* Write jacobianFGlocker in a Path-Sparse format */
   convertToPathSparse(n, n, ncp->nabla_F->matrix0, col_start, col_len, row, data);

@@ -417,17 +417,20 @@ void set_SolverOptions(SolverOptions* options, int solverId)
 
  switch (solverId)
  {
+  case SICONOS_LCP_PATH:
+  {
+    tol = 1e-12;
+  }
   case SICONOS_LCP_PGS:
   case SICONOS_LCP_CPG:
   case SICONOS_LCP_NEWTONMIN:
-  case SICONOS_LCP_PATH:
   case SICONOS_LCP_QP:
   case SICONOS_LCP_NSQP:
   {
     iSize = 2;
     dSize = 2;
     iter_max = 1000;
-    tol = 1e-8;
+    tol = tol == 0. ? 1e-8 : tol;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
     break;
   }
