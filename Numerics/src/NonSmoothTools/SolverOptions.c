@@ -533,6 +533,9 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     break;
 
   case SICONOS_LCP_GAMS:
+  {
+    tol = 1e-12;
+  }
   case SICONOS_FRICTION_3D_GAMS_PATH:
   case SICONOS_FRICTION_3D_GAMS_PATHVI:
   case SICONOS_FRICTION_3D_GLOBAL_GAMS_PATH:
@@ -542,7 +545,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     iSize = 2;
     dSize = 2;
     iter_max = 10000;
-    tol = 1e-9;
+    tol = tol == 0. ? 1e-9 : tol;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
     if (!options->solverParameters)
     {
@@ -563,7 +566,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     iSize = 2;
     dSize = 2;
     iter_max = 10000;
-    tol = 1e-10;
+    tol = 1e-12;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
     break;
   default:

@@ -60,7 +60,7 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
   }
 
   if (! optCreateD (&solverOptPtr, sysdir, msg, sizeof(msg))) {
-    printf("Could not create opt object: %s\n", msg);
+    printf("Could not create solver opt object: %s\n", msg);
     return;
   }
 
@@ -71,7 +71,7 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   getGamsSolverOpt(solverOptPtr, sysdir, "path");
   optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
-  optWriteParameterFile(solverOptPtr, "./path.opt");
+  optWriteParameterFile(solverOptPtr, "path.opt");
 
   getGamsOpt(Optr, sysdir);
 

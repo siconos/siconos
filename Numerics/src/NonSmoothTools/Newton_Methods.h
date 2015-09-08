@@ -132,6 +132,7 @@ extern "C"
  void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat);
 
  /** Check whether the solver uses the Newton_LSA framework or not
+  * \param solverId the solver id
   * \return true if the solver is using newton_LSA, false otherwise
   */
  bool newton_LSA_check_solverId(int solverId);
