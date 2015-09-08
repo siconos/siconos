@@ -17,7 +17,7 @@ We first import the needed classes:
 
 
 Prior to the construction of a time stepping scheme, we define a time
-discretisation by the construction of a TimeDiscretisation object. We
+discretization by the construction of a TimeDiscretisation object. We
 provide the starting time :math:`0` and a fixed time step
 :math:`0.05`:
 
@@ -26,7 +26,7 @@ provide the starting time :math:`0` and a fixed time step
    td = TimeDiscretisation(0, 0.05)
 
 
-A time stepping simulation object is built with the time discretisation:
+A time stepping simulation object is built with the time discretization:
 
 .. testcode::
 
@@ -62,7 +62,7 @@ optimization problems. In our case, it is a linear complementarity problem
 
    lcp = LCP()
 
-The default solver for LCP is Lemke. As the one step integrator
+The default solver for an LCP is Lemke. As the one step integrator
 object, it needs to be attached to the simulation:
 
 .. testcode::
@@ -82,7 +82,7 @@ The simulation is now ready for execution.
 The simulation object provides methods in order to do the computation at each timestep:
 
   - `simulation.hasNextEvent()` to check if some computation remains to be done.
-  - `simulation.computeOneStep()` to perform the computation a the current timestep.
+  - `simulation.computeOneStep()` to perform the computation at the current timestep.
   - `simulation.nextStep()` to increment the current timestep.
 
 
@@ -115,7 +115,7 @@ imported:
    from Siconos.Kernel import \
        TimeStepping, MoreauJeanOSI, TimeDiscretisation, LCP
 
-And the time stepping simulation object built with a time discretisation
+And the time stepping simulation object built with a time discretization
 object and the one-step integrator object are the same:
 
 .. testcode::

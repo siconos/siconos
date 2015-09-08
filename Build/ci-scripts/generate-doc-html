@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# You need the following extra package
+# doc, h5py
+
+
 WORK_DIR=$1
 
 cd $WORK_DIR/Front-End/doc/python

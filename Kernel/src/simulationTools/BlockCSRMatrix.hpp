@@ -75,7 +75,7 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix)
  * resulting matrix has 4 X 4 blocks, with 8 non-null blocks and looks
  * like:
  *
- * \f{eqnarray*}
+ * \f{equation*}
    M=\left\lbrace\begin{array}{cccc}
     b11 & b13 & 0 & b18 \\
     b31 & b22 & 0 & 0 \\

@@ -8,7 +8,7 @@ Usage :
 Example of the modelisation of a bouncing ball:
 +++++++++++++++++++++++++++++++++++++++++++++++
 
-A ball bouncing on the ground may be defined as a linear lagrangian time
+A ball bouncing on the ground may be defined as a linear Lagrangian time
 invariant dynamical system with one degree of freedom. 
 
 .. math::
@@ -16,11 +16,11 @@ invariant dynamical system with one degree of freedom.
       M \ddot q = F_{ext} + p
 
 
-where :
- - :math:`q` is the state vector. :math:`q \in \mathbb{R}^{1}`. The only coordinate
+where:
+ - :math:`q` is the state vector. Here, we have :math:`q \in \mathbb{R}^{1}` as the only required coordinate
    corresponds to the height of the center of the ball.
- - :math:`M` is the time invariant mass matrix. :math:`M` is a 1 x 1 matrix.
- - :math:`F_{ext}` contains the external forces. Here the gravity is applied.
+ - :math:`M` is the time invariant mass matrix. In this example :math:`M` is a 1 x 1 matrix.
+ - :math:`F_{ext}` contains the external forces. Here, the gravity is applied.
  - :math:`p` is the reaction force due to the nonsmooth interaction with the floor.
 
 We first import the needed classes from `Siconos.Kernel` module:
@@ -53,7 +53,7 @@ matrix is defined as a 1 x 1 matrix.
   
   ball = LagrangianLinearTIDS(position, velocity, M)
 
-The gravity is expressed in the coordinates choosen for the ball. It is then
+The gravity is expressed in the coordinates chosen for the ball. It is then
 applied as a constant external force.
 
 .. testcode::
@@ -95,7 +95,7 @@ object:
   inter = Interaction(nslaw,    
                       relation) 
 
-We finally build a `Model` object to gather the dynamical sytems we
+We finally build a `Model` object to gather the dynamical systems we
 have defined (here just the ball) and link the interactions to them.
 
 .. testcode::
@@ -127,8 +127,8 @@ This is an example of an electrical circuit involving:
 
 Expected behavior:
 
-The initial state (Vc = 10 V , IL = 0) of the oscillator provides
-an initial energy. The period is 2 Pi sqrt(LC) ~ 0,628 ms.
+The initial state (:math:`v_c = 10` V , :math:`i_L = 0`) of the oscillator provides
+an initial energy. The period is :math:`2 \pi \sqrt(LC) \equiv 0,628` ms.
 
 The non smooth system is a full wave rectifier: each phase (positive
 and negative) of the oscillation allows current to flow through the
@@ -143,11 +143,11 @@ Since there is only one dynamical system, the interaction is defined
 by :
 
  - complementarity laws between diodes current and voltage. Depending
-   on the diode position in the bridge, y stands for the reverse
+   on the diode position in the bridge, :math:`y` stands for the reverse
    voltage across the diode or for the diode current (see figure in
    the template file)
- - a linear time invariant relation between the state variables and y
-   and lambda (derived from Kirchhoff laws)
+ - a linear time invariant relation between the state variables and :math:`y`
+   and :math:`\lambda` (derived from Kirchhoff laws)
 
 The oscillator is a time-invariant linear dynamical system, and using
 the Kirchhoff current and voltage laws and branch constitutive
@@ -155,10 +155,10 @@ equations, its dynamics is written as:
 
 .. math::
    
-   \dot x = A.x + r
+   \dot x = A.x + r,
    
 
-where :math:`x = \left[\begin{array}{c}  v_L\\ i_L \end{array}\right]`, :math:`\lambda = \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right]`, :math:`A=\left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right]` and :math:`r= \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right].\lambda`
+where :math:`x = \left[\begin{array}{c}  v_L\\ i_L \end{array}\right]`, :math:`\lambda = \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right]`, :math:`A=\left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right]` and :math:`r= \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right]\lambda`
 
 
 We first import the needed classes for the construction of the model:
@@ -195,7 +195,7 @@ The linear relations between voltage and current given by:
 
 :math:`y = Cx + D\lambda`, where :math:`y=\left[ \begin{array}{c} i_{DR1}\\ i_{DF2}\\ -v_{DF1}\\ -v_{DR2} \end{array} \right]`, :math:`C = \left[ \begin{array}{cc} 0 & 0\\ 0 & 0\\ -1 & 0\\ 1 & 0 \end{array} \right]` :math:`D = \left[ \begin{array}{cccc} \frac{1}{R} & \frac{1}{R} & -1 & 0\\ \frac{1}{R} & \frac{1}{R} & 0 & -1\\ 1 & 0 & 0 & 0\\ 0 & 1 & 0 & 0 \end{array} \right]` and :math:`\lambda =\left[ \begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array} \right]`
 
-Are provided with the help of a `FirstOrderLinearTIR` object:
+are encoded as a `FirstOrderLinearTIR` object:
 
 .. testcode::
 

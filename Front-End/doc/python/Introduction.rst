@@ -14,6 +14,7 @@ modules. To import all Siconos modules, one may write for example:
   import Siconos.Kernel
   import Siconos.IO
   import Siconos.Mechanics
+  import Siconos.Control
 
 
 
@@ -50,7 +51,7 @@ with
 and
 
 .. math::
-   
+
    q = \begin{pmatrix}
         -5 \\
         -6
@@ -99,7 +100,7 @@ output parameter, numpy array *must* be used!
 
 With the ``Kernel`` and ``Mechanics`` modules every ``SimpleMatrix``
 and ``SiconosVector`` may be replaced by ``python`` standard sequences
-or ``numpy`` arrays. For example, we can build a lagrangian dynamical
+or ``numpy`` arrays. For example, we can build a Lagrangian dynamical
 system with 3 degrees of freedom like this:
 
 .. testcode::
@@ -131,7 +132,7 @@ It is possible to use ``SimpleMatrix`` and ``SiconosVector`` arguments:
   
 Please note that ``Kernel.SimpleMatrix`` and ``Kernel.SiconosVector``
 objects cannot be used as arguments to ``Numerics`` module functions.
-The instanciation of previous ``Numerics.LCP`` can only be done with
+The instantiation of previous ``Numerics.LCP`` can only be done with
 standard ``python`` sequences or ``numpy`` arrays.
 
 
@@ -167,7 +168,7 @@ Omitted parameters
 
 This concerns the ``C`` API of the ``Numerics`` library:
 
- 1. Where the size of a an input vector may be infered, the size must not be given in the arguments list. 
+ 1. Where the size of an input vector may be inferred, the size must not be given in the arguments list. 
 
  2. Output only parameters given in the argument list in the ``C`` API are ``python`` return parameters
 
@@ -223,7 +224,7 @@ C++ Visitors
 Shared pointers
 ---------------
 
-For ``Siconos`` C++ libraries (``Kernel``, ``IO``, ``Mechanics``) the
+For ``Siconos`` C++ libraries (``Kernel``, ``IO``, ``Mechanics``, ``Control``) the
 shared pointer mechanisms is totally hidden and the namespaces SP,
 SPC, SPA are not present in the ``Python`` modules.
 

@@ -15,8 +15,9 @@ Contents:
    modules/Numerics
    modules/Kernel
    modules/Mechanics
+   modules/Control
    modules/IO
-  
+
 
 Indices and tables
 ==================
