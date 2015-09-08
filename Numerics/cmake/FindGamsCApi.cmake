@@ -1,13 +1,9 @@
 # Find the Path Ferris includes and libraries.
 # The following variables are set if Ferris is found.  If Ferris is not
-# found, PathFerris_FOUND is set to false.
-#  PathFerris_FOUND        - True when the PathFerris include directory is found.
-#  PathFerris_INCLUDE_DIRS - the path to where the Path Ferris include files are.
-#  PathFerris_LIBRARY_DIRS - The path to where the Path library files are.
-#  PathFerris_LIBRARIES    - The libraries to link against Path Ferris
+# found, GAMS_FOUND is set to false.
+#  GAMS_FOUND        - True when the GAMS include directory is found.
+#  GAMS_C_API_INCLUDE_DIRS - the path to where the Path Ferris include files are.
 
-# One may want to use a specific Ferris Library by setting
-# PathFerris_LIBRARY_DIRECTORY before FIND_PACKAGE(PathFerris)
 INCLUDE(FindPackageHandleStandardArgs)
 
 SET(FILES_TO_CHECK "idxcc.c;optcc.c;gamsxcc.c;gmomcc.c")
@@ -29,7 +25,8 @@ ENDFOREACH(_F ${FILES_TO_CHECK})
 
 IF(GAMS_C_API_OK)
   SET(GAMS_C_API_INCLUDE_DIRS ${GAMS_DIR}/${GAMS_C_API_DIR})
-  SET(HAVE_GAMS_C_API 1)
+  SET(HAVE_GAMS_C_API TRUE BOOL "The GAMS C API has been found")
+  SET(GAMS_FOUND TRUE CACHE BOOL "A GAMS install has been found")
 ELSE(GAMS_C_API_OK)
   IF(GAMS_C_API_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR

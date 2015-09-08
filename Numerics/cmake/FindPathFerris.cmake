@@ -10,10 +10,18 @@
 # PathFerris_LIBRARY_DIRECTORY before FIND_PACKAGE(PathFerris)
 INCLUDE(FindPackageHandleStandardArgs)
 
+IF(NOT PathFerris_VERSION)
+  SET(PathFerris_VERSION "47")
+ENDIF(NOT PathFerris_VERSION)
+
+IF(NOT PathFerris_LIBRARY_DIRECTORY AND GAMS_FOUND)
+  SET(PathFerris_LIBRARY_DIRECTORY $GAMS_DIR})
+ENDIF(NOT PathFerris_LIBRARY_DIRECTORY AND GAMS_FOUND)
+
 IF(PathFerris_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(PathFerris_LIBRARY path46 PATHS "${PathFerris_LIBRARY_DIRECTORY}")
+  FIND_LIBRARY(PathFerris_LIBRARY path${PathFerris_VERSION} PATHS "${PathFerris_LIBRARY_DIRECTORY}")
 ELSE(PathFerris_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(PathFerris_LIBRARY path46)
+  FIND_LIBRARY(PathFerris_LIBRARY path${PathFerris_VERSION})
 ENDIF(PathFerris_LIBRARY_DIRECTORY)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PathFerris
@@ -30,7 +38,7 @@ IF(PathFerris_LIBRARY)
 ELSE(PathFerris_LIBRARY)
   IF(PathFerris_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
-      "Required path46 library not found. Please specify library location in PathFerris_LIBRARY_DIRECTORY")
+      "Required path${PathFerris_VERSION} library not found. Please specify library location in PathFerris_LIBRARY_DIRECTORY")
   ENDIF(PathFerris_FIND_REQUIRED)
-  
+
 ENDIF(PathFerris_LIBRARY)
