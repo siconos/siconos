@@ -115,6 +115,14 @@ IF(GAMS_DIR)
     "-Wno-error=conversion")
   ENDIF()
 
+  # XXX hack for now ...
+  COMPILE_WITH(PathVI)
+  IF(HAVE_PATHVI)
+    SET(HAVE_GAMS_PATHVI TRUE)
+  ELSE(HAVE_PATHVI)
+    SET(HAVE_GAMS_PATHVI FALSE)
+  ENDIF(HAVE_PATHVI)
+
   # GAMS distributes Cplex ...
   IF(GAMS_FOUND AND NOT Cplex_LIBRARY_DIRECTORY)
     SET(Cplex_LIBRARY_DIRECTORY ${GAMS_DIR})
