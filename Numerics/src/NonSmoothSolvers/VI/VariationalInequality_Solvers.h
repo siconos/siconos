@@ -87,7 +87,15 @@ extern "C"
       \param info return 0 if the solution is found
       \param options the solver options :
       iparam[0] : Maximum iteration number
-      dparam[3] : rho >0
+      iparam[1] : Choice of the line search
+           0 : default choice. Armijo rule with update in the loop
+           1 : std choice. Armijo rule without update in the loop (std)
+           2 : Armijo rule without update in the loop and usinf min(1,rho_k*a1/a2)
+           3 : Armijo rule with the Solodov Tseng criteria.
+      dparam[3] : rho parameter.
+         If rho >0, then self-adaptive (Armijo like) procedure.
+         If rho <0, then constant rho parameter  (rho <-- -rho)
+
   */
   void variationalInequality_FixedPointProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options);
 
