@@ -79,7 +79,7 @@ INCLUDE(${SWIG_USE_FILE})
 
 # Numerics + Kernel 
 COMPILE_WITH(SiconosNumerics REQUIRED)
-COMPILE_WITH(SiconosKernel REQUIRED)
+COMPILE_WITH(SiconosKernel)
 
 
 COMPILE_WITH(SiconosMechanics)

@@ -199,7 +199,10 @@ SET(SWIG_MODULE_Kernel_EXTRA_DEPS
 
 ADD_SUBDIRECTORY(Numerics)
 
+IF(SiconosKernel_FOUND)
 ADD_SUBDIRECTORY(Kernel)
+ENDIF(SiconosKernel_FOUND)
+
 
 IF(WITH_FCLIB)
   ADD_SUBDIRECTORY(FCLib)
@@ -222,7 +225,10 @@ ENDIF(HAVE_SICONOS_CONTROL)
 #
 IF(DOXYGEN_FOUND)
   ADD_DEPENDENCIES(${SWIG_MODULE_Numerics_DEPNAME} numerics_docstrings)
-  ADD_DEPENDENCIES(${SWIG_MODULE_Kernel_DEPNAME} kernel_docstrings)
+  IF(SiconosKernel_FOUND)
+    ADD_DEPENDENCIES(${SWIG_MODULE_Kernel_DEPNAME} kernel_docstrings)
+  ENDIF(SiconosKernel_FOUND)
+
 ENDIF()
 
 #
@@ -235,7 +241,7 @@ MESSAGE(STATUS "Link libraries : ${${PROJECT_NAME}_LINK_LIBRARIES}")
 # Generate plugins for tests here since if we put it in runtest.py,
 # the siconos command is launched with the same directory multiple times
 # and we then meet our dear friend "race condition"
-IF(WITH_TESTING)
+IF(WITH_TESTING AND SiconosKernel_FOUND)
   IF(CMAKE_TOOLCHAIN_FILE)
     ADD_CUSTOM_TARGET(siconos_plugins
       COMMAND ${SiconosKernel_EXE_DIR}/siconos
@@ -279,8 +285,9 @@ MESSAGE(STATUS "swig modules: ${SWIG_MODULE_Numerics_DEPNAME}, ${SWIG_MODULE_Ker
 #INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/KernelRegistration.i DESTINATION include/Siconos/FrontEnd)
 #INSTALL(FILES ${CMAKE_BINARY_DIR}/src/swig/Siconos/Kernel-docstrings.i DESTINATION include/Siconos/FrontEnd)
 
-GET_FILENAME_COMPONENT(SiconosKernel_DIR ${SiconosKernel_EXE_DIR} PATH)
-SET(SiconosKernel_XML_SCHEMA "${SiconosKernel_DIR}/share/siconos-kernel")
+IF(SiconosKernel_FOUND)
+  GET_FILENAME_COMPONENT(SiconosKernel_DIR ${SiconosKernel_EXE_DIR} PATH)
+  SET(SiconosKernel_XML_SCHEMA "${SiconosKernel_DIR}/share/siconos-kernel")
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/functions/fromXml.py.in
   ${CMAKE_BINARY_DIR}/src/swig/fromXml.py)
@@ -291,6 +298,7 @@ INSTALL(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/functions/SiconosXMLParser.py
 INSTALL(PROGRAMS ${CMAKE_BINARY_DIR}/src/swig/fromXml.py
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos/functions)
 
+ENDIF(SiconosKernel_FOUND)
 
 ENABLE_TESTING()
 
@@ -309,12 +317,20 @@ ADD_TEST(mcp ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIV
 ADD_TEST(mcp2 ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_mcp2.py)
 ADD_TEST(vi ${PYTHON_EXECUTABLE}  ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_vi.py)
 ADD_TEST(sparse ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_sparse.py)
-ADD_TEST(Kernel ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_Kernel.py)
 ADD_TEST(friction_contact ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
-ADD_TEST(bouncing_ball ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_bouncing_ball.py)
-ADD_TEST(diode_bridge ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diode_bridge.py)
-ADD_TEST(matrix_exp ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
-ADD_TEST(xml ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
+
+IF(SiconosKernel_FOUND)
+  ADD_TEST(Kernel ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_Kernel.py)
+  ADD_TEST(bouncing_ball ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_bouncing_ball.py)
+  ADD_TEST(diode_bridge ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diode_bridge.py)
+  ADD_TEST(matrix_exp ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
+  ADD_TEST(xml ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
+
+  SET_TESTS_PROPERTIES(Kernel PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
+  SET_TESTS_PROPERTIES(bouncing_ball PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
+  SET_TESTS_PROPERTIES(matrix_exp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
+
+ENDIF(SiconosKernel_FOUND)
 
 IF(HAVE_SICONOS_CONTROL)
   ADD_TEST(smc ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_smc.py)
@@ -329,12 +345,8 @@ SET_TESTS_PROPERTIES(lcp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;f
 SET_TESTS_PROPERTIES(mlcp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
 SET_TESTS_PROPERTIES(mcp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
 SET_TESTS_PROPERTIES(sparse PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
-SET_TESTS_PROPERTIES(Kernel PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
-
 SET_TESTS_PROPERTIES(friction_contact PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;ERROR;Assertion")
 
-SET_TESTS_PROPERTIES(bouncing_ball PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
-SET_TESTS_PROPERTIES(matrix_exp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
 
 SUBDIRS(tests)
 
