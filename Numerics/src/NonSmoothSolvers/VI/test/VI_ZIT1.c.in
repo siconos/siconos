@@ -176,6 +176,9 @@ int main(void)
   printf("VI_ZIT2 final values xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
   deleteSolverOptions(&options);
 
+  free(problem->nabla_F);
+  problem->nabla_F = NULL;
   free(problem);
+  problem = NULL;
   return info;
 }

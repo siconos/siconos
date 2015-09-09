@@ -173,6 +173,9 @@ int main(void)
   }
   deleteSolverOptions(&options);
 
+  free(problem->nabla_F);
+  problem->nabla_F = NULL;
   free(problem);
+  problem = NULL;
   return info;
 }
