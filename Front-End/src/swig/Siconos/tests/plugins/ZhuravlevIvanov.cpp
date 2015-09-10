@@ -36,7 +36,7 @@ typedef struct
   unsigned int nabla_eval;
 } data;
 
-SICONOS_EXPORT void compute_F(void* env, int n, double* restrict l, double* restrict F)
+SICONOS_EXPORT void compute_F(void* problem, int n, double* restrict l, double* restrict F)
 {
   data* d = (data*) VI_get_env(problem);
 
@@ -57,7 +57,7 @@ SICONOS_EXPORT void compute_F(void* env, int n, double* restrict l, double* rest
 
 }
 
-SICONOS_EXPORT void compute_nabla_F(void* env, int n, double* restrict l, double* restrict nabla_F)
+SICONOS_EXPORT void compute_nabla_F(void* problem, int n, double* restrict l, double* restrict nabla_F)
 {
   data* d = (data*) VI_get_env(problem);
 
