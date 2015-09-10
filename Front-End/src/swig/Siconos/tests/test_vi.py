@@ -127,7 +127,7 @@ def test_vi_C_interface():
 
     if cffi_is_present:
         h = 1e-5
-        T = 2.0
+        T = 1.0
         t = 0.0
 
         theta = 1.0
@@ -160,7 +160,7 @@ def test_vi_C_interface():
         data_struct.kappa = kappa
 
         vi = SN.VI(2)
-        D = ffi.dlopen(SN._Numerics.__file__)
+        D = ffi.dlopen(SN.__path__[0] + '/_Numerics.so')
         D.set_cstruct(vi.get_env_as_long(), ffi.cast('void*', data_struct))
         vi.set_compute_F_and_nabla_F_as_C_functions('ZhuravlevIvanov.so', 'compute_F', 'compute_nabla_F')
 
