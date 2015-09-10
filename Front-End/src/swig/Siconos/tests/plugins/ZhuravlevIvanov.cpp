@@ -57,9 +57,10 @@ SICONOS_EXPORT void compute_F(void* problem, int n, double* restrict l, double* 
 
 }
 
-SICONOS_EXPORT void compute_nabla_F(void* problem, int n, double* restrict l, double* restrict nabla_F)
+SICONOS_EXPORT void compute_nabla_F(void* problem, int n, double* restrict l, NumericsMatrix* restrict nabla_F_mat)
 {
   data* d = (data*) VI_get_env(problem);
+  double* restrict nabla_F = nabla_F_mat->matrix0;
 
   double l0 = l[0];
   double l1 = l[1];
