@@ -569,15 +569,10 @@ struct IsDense : public Question<bool>
     return tmp;
   }
 
-  if (!swig_argp)
-  {
-    return (SP::SiconosVector) c_result;
-  }
-  else
+  if (swig_argp)
   {
     c_result = *(reinterpret_cast< SP::SiconosVector * >(swig_argp));
     if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosVector * >(swig_argp);
-    return (SP::SiconosVector) c_result;
   }
 }
 
@@ -605,15 +600,10 @@ struct IsDense : public Question<bool>
     return tmp;
   }
 
-  if (!swig_argp)
-  {  
-    return (SP::SiconosMatrix) c_result;
-  }
-  else
+  if (swig_argp)
   {
     c_result = *(reinterpret_cast< SP::SiconosMatrix * >(swig_argp));
     if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
-    return (SP::SiconosMatrix) c_result;
   }
 }
 
@@ -641,15 +631,10 @@ struct IsDense : public Question<bool>
     return tmp;
   }
 
-  if (!swig_argp)
-  {  
-    return (SP::SimpleMatrix) c_result;
-  }
-  else
+  if (swig_argp)
   {
     c_result = *(reinterpret_cast< SP::SimpleMatrix * >(swig_argp));
     if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SimpleMatrix * >(swig_argp);
-    return (SP::SimpleMatrix) c_result;
   }
 }
 
