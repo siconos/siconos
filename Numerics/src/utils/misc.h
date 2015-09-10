@@ -21,6 +21,8 @@
 
 #include "NumericsConfig.h"
 #include <errno.h>
+#include <stdint.h>
+#include <stddef.h>
 
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 extern "C"
@@ -49,17 +51,17 @@ void printm(unsigned int nl, unsigned int nc, double *m);
   {                                                                     \
     if (!EXPR)                                                          \
     {                                                                   \
-      int * _arr_[] = {__VA_ARGS__};                                    \
+      int * _arr_[] = {NULL, __VA_ARGS__};                              \
       if (errno != 0)                                                   \
       {                                                                 \
         perror(#EXPR);                                                  \
         fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d\n", #EXPR, __FILE__, __LINE__); \
-        if (sizeof(_arr_)) { *_arr_[0] = errno; }                       \
+        if (sizeof(_arr_) == 2*sizeof(intptr_t)) { *_arr_[1] = errno; } \
       }                                                                 \
       else                                                              \
       {                                                                 \
         fprintf (stderr, "Siconos Numerics unknown error for %s, %s:%d\n", #EXPR, __FILE__, __LINE__); \
-        if (sizeof(_arr_)) { *_arr_[0] = 1; }                           \
+        if (sizeof(_arr_) == 2*sizeof(intptr_t)) { *_arr_[1] = 1; }                           \
       }                                                                 \
     }                                                                   \
   } while (0)
