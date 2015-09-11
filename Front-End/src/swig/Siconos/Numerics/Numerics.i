@@ -26,6 +26,16 @@
 // generated docstrings from doxygen xml output
 %include Numerics-docstrings.i
 
+%include <typemaps/swigmacros.swg>
+
+%define %SN_INPUT_CHECK_RETURN(var, output, type_)
+{ void* _ptr = NULL; if (!SWIG_IsOK(SWIG_ConvertPtr(var, &_ptr, SWIGTYPE_p_##type_, 0 |  0 ))) {
+    char errmsg[1024];
+    snprintf(errmsg, sizeof(errmsg), "Argument check failed! Argument %s has the wrong type, should be %s", #var, #type_);
+    PyErr_SetString(PyExc_TypeError, errmsg); PyErr_PrintEx(0); return NULL; }
+    output = %static_cast(_ptr, type_*);
+   }
+%enddef
 
 %{
 #include "SiconosNumerics.h"
@@ -232,10 +242,13 @@
         (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
       if (frictionContact_newFromFile(problem,finput))
       {
-      fprintf(stderr, "frictionContactProblemFromFile: cannot load %s\n",filename);
+      char* msg[1024];
+      snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot load %s\n",filename);
+      PyErr_SetString(PyExc_RuntimeError, msg);
+      PyErr_PrintEx(0);
       free(problem);
       fclose(finput);
-      return 0;
+      return NULL;
       }
       else
       {
@@ -245,8 +258,11 @@
     }
     else
     {
-      fprintf(stderr, "frictionContactProblemFromFile: cannot open %s\n",filename);
-      return 0;
+      char* msg[1024];
+      snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot open %s\n",filename);
+      PyErr_SetString(PyExc_RuntimeError, msg);
+      PyErr_PrintEx(0);
+      return NULL;
     }
     
   }
@@ -817,9 +833,9 @@
     void * vp;
     FrictionContactProblem* fcp;
     FrictionContactProblem* FCP;
-    int res = SWIG_ConvertPtr(o, &vp,SWIGTYPE_p_FrictionContactProblem, 0 |  0 );
-    if (!SWIG_IsOK(res)) return 0;
-    fcp = (FrictionContactProblem *) vp;
+
+    %SN_INPUT_CHECK_RETURN(o, fcp, FrictionContactProblem);
+
     FCP = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
     FCP->dimension = fcp->dimension;
     FCP->M = fcp->M;
@@ -839,24 +855,9 @@
     FC->dimension = PyInt_AsLong(dim);
     FC->numberOfContacts = PyInt_AsLong(numberOfContacts);
 
-    {
-      void * _M;
-      int res = SWIG_ConvertPtr(M, &_M,SWIGTYPE_p_NumericsMatrix, 0 |  0 );
-      if (!SWIG_IsOK(res)) return 0;
-      FC->M = (NumericsMatrix *) _M;
-    }
-    {
-      void * _q;
-      int res = SWIG_ConvertPtr(M, &_q,SWIGTYPE_p_double, 0 |  0 );
-      if (!SWIG_IsOK(res)) return 0;
-      FC->q = (double *) _q;
-    }
-    {
-      void * _mu;
-      int res = SWIG_ConvertPtr(M, &_mu,SWIGTYPE_p_double, 0 |  0 );
-      if (!SWIG_IsOK(res)) return 0;
-      FC->mu = (double *) _mu;
-    }
+    %SN_INPUT_CHECK_RETURN(q, FC->M, NumericsMatrix);
+    %SN_INPUT_CHECK_RETURN(q, FC->q, double);
+    %SN_INPUT_CHECK_RETURN(mu, FC->mu, double);
 
     return FC;
 

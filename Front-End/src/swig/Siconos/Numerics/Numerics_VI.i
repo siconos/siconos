@@ -129,6 +129,7 @@
     else
     {
       PyErr_SetString(PyExc_TypeError, "All arguments should be strings");
+      PyErr_PrintEx(0);
     }
   }
 
@@ -156,7 +157,10 @@
           break;
         }
         default:
+        {
           PyErr_SetString(PyExc_TypeError, "unknown set type");
+          PyErr_PrintEx(0);
+        }
       }
       free($self->set);
       $self->set = NULL;
