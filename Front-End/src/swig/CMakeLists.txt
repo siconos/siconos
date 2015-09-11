@@ -30,6 +30,9 @@ ENDIF()
 # Note: SWIG warnings should be fixed first!
 INCLUDE(SiconosCompilerFlags)
 
+COMPILE_WITH(BLAS)
+COMPILE_WITH(LAPACK)
+
 if(APPLE)
   find_package(PythonFull REQUIRED)
   include(FindPythonModule)

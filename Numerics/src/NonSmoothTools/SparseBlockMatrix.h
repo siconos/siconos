@@ -45,28 +45,28 @@
     Reference :
     http://ublas.sourceforge.net/refdoc/classboost_1_1numeric_1_1ublas_1_1compressed__matrix.html
 
-    \param nbblocks         : the total number of non null blocks
+    \param nbblocks         the total number of non null blocks
     \param **block : *block contains the double values of one block in
                       Fortran storage (column by column) **block is
     the list of non null blocks
-    \param blocknumber0 : the first dimension of the block matrix
+    \param blocknumber0 the first dimension of the block matrix
     (number of block rows)
-    \param blocknumber1 : the second dimension of the block matrix
+    \param blocknumber1 the second dimension of the block matrix
     (number of block columns)
-    \param *blocksize0 : the list of sums of the number of rows of the
+    \param *blocksize0 the list of sums of the number of rows of the
     first column of blocks of M: blocksize0[i] = blocksize0[i-1] +
     ni,\n ni being the number of rows of the block at row i
-    *blocksize1 : the list of sums of the number of columns of the
+    *blocksize1 the list of sums of the number of columns of the
     first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,\n
     ni being the number of columns of the block at column i
-    \param filled1 : index of the last non empty line + 1
-    \param filled2 : number of non null blocks
-    \param index1_data : index1_data is of size equal to number of non
+    \param filled1 index of the last non empty line + 1
+    \param filled2 number of non null blocks
+    \param index1_data index1_data is of size equal to number of non
     empty lines + 1. A block with number blockNumber inside a row
-    numbered rowNumber verify : index1_data[rowNumber]<= blockNumber
+    numbered rowNumber verify index1_data[rowNumber]<= blockNumber
     <index1_data[rowNumber+1]`
 
-    \param index2_data : index2_data is of size filled2
+    \param index2_data index2_data is of size filled2
     index2_data[blockNumber] -> columnNumber.
 
 

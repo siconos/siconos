@@ -1,25 +1,222 @@
-/*
-   Use this command to compile the example:
-   cl xp_example2.c api/gdxcc.c api/optcc.c api/gamsxcc.c -Iapi
-   */
-
-/*
-   This program performs the following steps:
-   1. Generate a gdx file with demand data
-   2. Calls GAMS to solve a simple transportation model
-   (The GAMS model writes the solution to a gdx file)
-   3. The solution is read from the gdx file
-   */
-
 /* GAMS stuff */
+
+#include <stdbool.h>
+
+/** Simply linked list of bool option for GAMS
+ */
+
+typedef struct GAMS_opt_bool_ {
+  char* name; /**< Name of the option */
+  bool value; /** Value of the option */
+  struct GAMS_opt_bool_* next_opt; /** Link to the next option*/
+} GAMS_opt_bool;
+
+/** Simply linked list of integer option for GAMS
+ */
+typedef struct GAMS_opt_int_ {
+  char* name; /**< Name of the option */
+  int value; /** Value of the option */
+  struct GAMS_opt_int_* next_opt; /** Link to the next option*/
+} GAMS_opt_int;
+
+/** Simply linked list of double option for GAMS
+ */
+typedef struct GAMS_opt_double_ {
+  char* name; /**< Name of the option */
+  double value; /** Value of the option */
+  struct GAMS_opt_double_* next_opt; /** Link to the next option*/
+} GAMS_opt_double;
+
+/** Simply linked list of string option for GAMS
+ */
+typedef struct GAMS_opt_str_ {
+  char* name; /**< Name of the option */
+  char* value; /** Value of the option */
+  struct GAMS_opt_str_* next_opt; /** Link to the next option*/
+} GAMS_opt_str;
 
 /** Parameters for GAMS */
 typedef struct {
   char* model_dir; /**<  Directory where the GAMS model are */
   char* gams_dir;  /**<  GAMS directory */
+  char* filename; /**< name of the gdx file */
+  GAMS_opt_str* opt_str_list; /**< list of string options */
+  GAMS_opt_bool* opt_bool_list; /**< list of boolean options */
+  GAMS_opt_int* opt_int_list; /**< list of integer options */
+  GAMS_opt_double* opt_double_list; /**< list of double options */
 } SN_GAMSparams;
 
+static inline SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir)
+{
+  SN_GAMSparams* GP = (SN_GAMSparams*) malloc(sizeof(SN_GAMSparams));
 
+  GP->model_dir = model_dir;
+  GP->gams_dir = gams_dir;
+  GP->filename = NULL;
+  GP->opt_str_list = NULL;
+  GP->opt_bool_list = NULL;
+  GP->opt_int_list = NULL;
+  GP->opt_double_list = NULL;
+
+  return GP;
+}
+
+static inline void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value)
+{
+   GAMS_opt_str* next_opt = GP->opt_str_list;
+   GAMS_opt_str* new_opt;
+   if (next_opt)
+   {
+     do
+     {
+       next_opt = next_opt->next_opt;
+     }
+     while (next_opt->next_opt);
+     next_opt->next_opt = (GAMS_opt_str*)malloc(sizeof(GAMS_opt_str));
+     new_opt = next_opt->next_opt;
+   }
+   else
+   {
+     next_opt = (GAMS_opt_str*)malloc(sizeof(GAMS_opt_str));
+     new_opt = next_opt;
+   }
+   new_opt->name = name;
+   new_opt->value = value;
+   new_opt->next_opt = NULL;
+}
+
+static inline void add_GAMS_opt_bool(SN_GAMSparams* GP, char* name, bool value)
+{
+   GAMS_opt_bool* next_opt = GP->opt_bool_list;
+   GAMS_opt_bool* new_opt;
+   if (next_opt)
+   {
+     do
+     {
+       next_opt = next_opt->next_opt;
+     }
+     while (next_opt->next_opt);
+     next_opt->next_opt = (GAMS_opt_bool*)malloc(sizeof(GAMS_opt_bool));
+     new_opt = next_opt->next_opt;
+   }
+   else
+   {
+     next_opt = (GAMS_opt_bool*)malloc(sizeof(GAMS_opt_bool));
+     new_opt = next_opt;
+   }
+   new_opt->name = name;
+   new_opt->value = value;
+   new_opt->next_opt = NULL;
+}
+
+static inline void add_GAMS_opt_int(SN_GAMSparams* GP, char* name, int value)
+{
+   GAMS_opt_int* next_opt = GP->opt_int_list;
+   GAMS_opt_int* new_opt;
+   if (next_opt)
+   {
+     do
+     {
+       next_opt = next_opt->next_opt;
+     }
+     while (next_opt->next_opt);
+     next_opt->next_opt = (GAMS_opt_int*)malloc(sizeof(GAMS_opt_int));
+     new_opt = next_opt->next_opt;
+   }
+   else
+   {
+     next_opt = (GAMS_opt_int*)malloc(sizeof(GAMS_opt_int));
+     new_opt = next_opt;
+   }
+   new_opt->name = name;
+   new_opt->value = value;
+   new_opt->next_opt = NULL;
+}
+
+static inline void add_GAMS_opt_double(SN_GAMSparams* GP, char* name, double value)
+{
+   GAMS_opt_double* next_opt = GP->opt_double_list;
+   GAMS_opt_double* new_opt;
+   if (next_opt)
+   {
+     do
+     {
+       next_opt = next_opt->next_opt;
+     }
+     while (next_opt->next_opt);
+     next_opt->next_opt = (GAMS_opt_double*)malloc(sizeof(GAMS_opt_double));
+     new_opt = next_opt->next_opt;
+   }
+   else
+   {
+     next_opt = (GAMS_opt_double*)malloc(sizeof(GAMS_opt_double));
+     new_opt = next_opt;
+   }
+   new_opt->name = name;
+   new_opt->value = value;
+   new_opt->next_opt = NULL;
+}
+
+static inline void deleteGAMSparams(SN_GAMSparams* GP)
+{
+  if (GP->opt_str_list)
+  {
+    GAMS_opt_str* next_opt = GP->opt_str_list;
+    do 
+    {
+      GAMS_opt_str* str_opt = next_opt;
+      next_opt = str_opt->next_opt;
+      str_opt->name = NULL;
+      str_opt->value = NULL;
+      str_opt->next_opt = NULL;
+      free(str_opt);
+    }
+    while (next_opt);
+  }
+  if (GP->opt_bool_list)
+  {
+    GAMS_opt_bool* next_opt = GP->opt_bool_list;
+    do 
+    {
+      GAMS_opt_bool* bool_opt = next_opt;
+      next_opt = bool_opt->next_opt;
+      bool_opt->name = NULL;
+      bool_opt->value = false;
+      bool_opt->next_opt = NULL;
+      free(bool_opt);
+    }
+    while (next_opt);
+  }
+  if (GP->opt_int_list)
+  {
+    GAMS_opt_int* next_opt = GP->opt_int_list;
+    do 
+    {
+      GAMS_opt_int* int_opt = next_opt;
+      next_opt = int_opt->next_opt;
+      int_opt->name = NULL;
+      int_opt->value = 0;
+      int_opt->next_opt = NULL;
+      free(int_opt);
+    }
+    while (next_opt);
+  }
+  if (GP->opt_double_list)
+  {
+    GAMS_opt_double* next_opt = GP->opt_double_list;
+    do 
+    {
+      GAMS_opt_double* double_opt = next_opt;
+      next_opt = double_opt->next_opt;
+      double_opt->name = NULL;
+      double_opt->value = 0.;
+      double_opt->next_opt = NULL;
+      free(double_opt);
+    }
+    while (next_opt);
+  }
+  free(GP);
+}
 
 #ifdef HAVE_GAMS_C_API
 

@@ -21,7 +21,7 @@
 
 extern "C" {
 #include <mkl_cblas.h>
-#include <mkl_service.h>
+//#include <mkl_service.h>
 //
 // mkl_types.h defines P4 macro which breaks MPL, undefine it here.
 //
