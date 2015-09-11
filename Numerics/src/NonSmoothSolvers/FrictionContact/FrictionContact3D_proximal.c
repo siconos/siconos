@@ -64,12 +64,12 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  double rho = dparam[3];
+  double alpha = dparam[3];
   if (dparam[3] < 1e-12)
   {
     dparam[3] = 1.0;
   }
-  /* parameters to set the value of rho */
+  /* parameters to set the value of alpha */
   double sigma = options->dparam[4];
   double nu = options->dparam[5];
 
@@ -151,7 +151,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   internalsolver_options->dparam[0] = options->dparam[0];
   internalsolver_options->dparam[0] = error;
 
-  rho = sigma*pow(error,nu);
+  alpha = sigma*pow(error,nu);
 
 
   DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
@@ -164,19 +164,19 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     ++iter;
     cblas_dcopy(n , reaction , 1 , reactionold , 1);
     //Add proximal regularization on q
-    cblas_daxpy(n, -rho, reactionold, 1, problem->q , 1) ;
+    cblas_daxpy(n, -alpha, reactionold, 1, problem->q , 1) ;
 
     //Add proximal regularization on M
     if (M->storageType == 0)
     {
-      for (int i = 0 ; i < n ; i++) M->matrix0[i + i * n] += rho;
+      for (int i = 0 ; i < n ; i++) M->matrix0[i + i * n] += alpha;
     }
     else if (M->storageType == 1)
     {
       for (int ic = 0 ; ic < nc ; ic++)
       {
         int diagPos = getDiagonalBlockPos(M->matrix1, ic);
-        for (int i = 0 ; i < 3 ; i++) M->matrix1->block[diagPos][i + 3 * i] += rho ;
+        for (int i = 0 ; i < 3 ; i++) M->matrix1->block[diagPos][i + 3 * i] += alpha ;
       }
     }
     // internal solver for the regularized problem
@@ -185,29 +185,29 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     /* internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]); */
     //internalsolver_options->dparam[0] = options->dparam[0];
 
-    internalsolver_options->dparam[0] = rho*error;
+    internalsolver_options->dparam[0] = alpha*error;
     DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
     /* **** Criterium convergence **** */
     //substract proximal regularization on q
-    cblas_daxpy(n, rho, reactionold, 1, problem->q, 1) ;
+    cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1) ;
     //substract proximal regularization on M
     if (M->storageType == 0)
     {
-      for (int i = 0 ; i < n ; i++) M->matrix0[i + i * n] -= rho;
+      for (int i = 0 ; i < n ; i++) M->matrix0[i + i * n] -= alpha;
     }
     else if (M->storageType == 1)
     {
       for (int ic = 0 ; ic < nc ; ic++)
       {
         int diagPos = getDiagonalBlockPos(M->matrix1, ic);
-        for (int i = 0 ; i < 3 ; i++) M->matrix1->block[diagPos][i + 3 * i] -= rho ;
+        for (int i = 0 ; i < 3 ; i++) M->matrix1->block[diagPos][i + 3 * i] -= alpha ;
       }
     }
 
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
-    //update the rho with respect to the number of internal iterations.
+    //update the alpha with respect to the number of internal iterations.
 
     int iter_internalsolver = internalsolver_options->iparam[iter_iparam];
     options->iparam[6] +=iter_internalsolver;
@@ -217,19 +217,19 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
 
     /* if (iter_internalsolver < options->iparam[2])// || (*info == 0))  */
     /* { */
-    /*   rho = rho/sigma; */
-    /*   DEBUG_PRINTF("We decrease rho = %8.4e\n",rho); */
+    /*   alpha = alpha/sigma; */
+    /*   DEBUG_PRINTF("We decrease alpha = %8.4e\n",alpha); */
     /* } */
     /* else if (iter_internalsolver > options->iparam[3]) */
     /* { */
-    /*   rho = sigma *rho; */
-    /*   DEBUG_PRINTF("We increase rho = %8.4e\n",rho); */
+    /*   alpha = sigma *alpha; */
+    /*   DEBUG_PRINTF("We increase alpha = %8.4e\n",alpha); */
     /* } */
 
-    rho = sigma*pow(error,nu);
+    alpha = sigma*pow(error,nu);
 
 
-    DEBUG_PRINTF("rho = %8.4e\n",rho);
+    DEBUG_PRINTF("alpha = %8.4e\n",alpha);
 
     if (options->callback)
     {
@@ -239,7 +239,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     }
 
     if (verbose > 0)
-      printf("------------------------ FC3D - PROXIMAL - Iteration %i Error = %14.7e with rho = %12.8e\n\n", iter, error, rho);
+      printf("------------------------ FC3D - PROXIMAL - Iteration %i Error = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
@@ -291,13 +291,17 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
     options->dparam[i] = 0.0;
   }
   options->iparam[0] = 1000;
-  options->iparam[2] = 5;   // Default Mimimun iteration of the internal solver for decreasing rho
-  options->iparam[3] = 15;  // Default Maximum iteration of the internal solver for increasing rho
-
+  options->iparam[2] = 5;    /* Default mimimun iteration of the internal
+                                solver for decreasing alpha */
+  options->iparam[3] = 15;   /* Default maximum iteration of the internal
+                                solver for increasing alpha */
+  options->iparam[8] = 0;    /* no overrelaxation by default */
   options->dparam[0] = 1e-4;
-  options->dparam[3] = 1.e4; // default value for proximal parameter;
-  options->dparam[4] = 5.0; // default value for sigma;
-  options->dparam[5] = 1.0; // default value for nu;
+  options->dparam[3] = 1.e4; /* default value for proximal parameter alpha; */
+  options->dparam[4] = 5.0;  /* default value for sigma; */
+  options->dparam[5] = 1.0;  /* default value for nu; */
+  options->dparam[8] = 1.5;  /* default value for relaxation parameter omega */
+
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   options->internalSolvers->solverId = SICONOS_FRICTION_3D_LOCALAC;
   frictionContact3D_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);

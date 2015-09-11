@@ -45,7 +45,7 @@ int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId)
   /*   info =    soclcp_nsgs_velocity_setDefaultSolverOptions(options); */
   /*   break; */
   /* } */
-  /* case SICONOS_SOCLCP_
+  /* case SICONOS_SOCLCP_*/
   /* { */
   /*   info =    soclcp_proximal_setDefaultSolverOptions(options); */
   /*   break; */

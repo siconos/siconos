@@ -34,7 +34,9 @@ int main(void)
   info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_VI_FPP);
   options->dparam[3] = -1e1; // optimal guessed value
   options->dparam[0] = 1e-8; //
-  options->iparam[1] = 0; //
+  options->iparam[1] = 2; //
+  options->iparam[2] = 0; //
+  options->iparam[3] = 0; //
 
   info = frictionContact_test_function(finput, options);
 
