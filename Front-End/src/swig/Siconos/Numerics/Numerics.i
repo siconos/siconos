@@ -242,7 +242,7 @@
         (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
       if (frictionContact_newFromFile(problem,finput))
       {
-      char* msg[1024];
+      char msg[1024];
       snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot load %s\n",filename);
       PyErr_SetString(PyExc_RuntimeError, msg);
       PyErr_PrintEx(0);
@@ -258,7 +258,7 @@
     }
     else
     {
-      char* msg[1024];
+      char msg[1024];
       snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot open %s\n",filename);
       PyErr_SetString(PyExc_RuntimeError, msg);
       PyErr_PrintEx(0);
