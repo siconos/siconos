@@ -148,8 +148,8 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   _M.nz = nzM;
   _M.m = M.size0;
   _M.n = M.size1;
-  _M.p = (int *) _colM;
-  _M.i = (int *) _rowM;
+  _M.p = (csi *) _colM;
+  _M.i = (csi *) _rowM;
   _M.x = Mdata;
 
 
@@ -167,8 +167,8 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   _H.m = H.size0;
   _H.n = H.size1;
 
-  _H.p = (int *) _colH;
-  _H.i = (int *) _rowH;
+  _H.p = (csi *) _colH;
+  _H.i = (csi *) _rowH;
   _H.x = Hdata;
 
   M.matrix2->triplet = &_M;
