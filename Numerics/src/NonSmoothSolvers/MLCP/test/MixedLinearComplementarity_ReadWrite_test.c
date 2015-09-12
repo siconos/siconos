@@ -29,7 +29,7 @@ int write_newformat(char *filename)
   printf("Test on %s\n", filename);
   int info = 0;
   size_t sizeoffilename = strlen(filename);
-  printf("sizeoffilename %zu\n",  sizeoffilename);
+  printf("sizeoffilename " SN_SIZE_T_F "\n",  sizeoffilename);
   char  extension[4] = "ext";
   strncpy(extension, &filename[sizeoffilename - 3], 3);
   printf("extension %s\n",  extension);

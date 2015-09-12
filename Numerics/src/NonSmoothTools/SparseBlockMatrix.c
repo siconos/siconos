@@ -781,20 +781,20 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
         nbColumns -= m->blocksize1[colNumber - 1];
       assert(nbColumns);
 
-      printf("block[%zu] of size %dX%d\n", blockNum, nbRows, nbColumns);
+      printf("block[" SN_SIZE_T_F "] of size %dX%d\n", blockNum, nbRows, nbColumns);
       if ((nbRows <= sizemax) & (nbColumns <= sizemax))
       {
         for (unsigned int i = 0; i < nbRows; i++)
         {
           for (unsigned int j = 0; j < nbColumns; j++)
           {
-            printf("block[%zu](%i,%i) = %12.8e\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
+            printf("block[" SN_SIZE_T_F "](%i,%i) = %12.8e\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
           }
         }
       }
       else
       {
-        printf("Block[%zu] is too large to be displayed\n", blockNum);
+        printf("Block[" SN_SIZE_T_F "] is too large to be displayed\n", blockNum);
       }
 
     }
@@ -862,7 +862,7 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
       if (colNumber != 0)
         nbColumns -= m->blocksize1[colNumber - 1];
       //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
-      fprintf(file, "%zu\n", blockNum);
+      fprintf(file, SN_SIZE_T_F "\n", blockNum);
       for (unsigned int i = 0; i < nbRows * nbColumns; i++)
       {
         fprintf(file, "%32.24e\n", m->block[blockNum][i]);
@@ -938,7 +938,7 @@ void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * 
       if (colNumber != 0)
         nbColumns -= m->blocksize1[colNumber - 1];
       //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
-      fprintf(file, "block%zu = [ \n", blockNum);
+      fprintf(file, "block" SN_SIZE_T_F " = [ \n", blockNum);
 
       for (unsigned int i = 0; i < nbRows; i++)
       {

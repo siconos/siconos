@@ -19,6 +19,16 @@
 #ifndef _SICONOS_COMPAT
 #define _SICONOS_COMPAT
 
+#if defined(_MSC_VER) || defined(__MINGW32__) // check other mingw
+    #define SN_SIZE_T_F    "%Iu"
+    #define SN_SSIZE_T_F   "%Id"
+    #define SN_PTRDIFF_T_F "%Id"
+#else
+    #define SN_SIZE_T_F    "%zu"
+    #define SN_SSIZE_T_F   "%zd"
+    #define SN_PTRDIFF_T_F "%zd"
+#endif
+
 #if defined(_MSC_VER)
 // for M_PI
 #define _USE_MATH_DEFINES

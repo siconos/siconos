@@ -439,12 +439,12 @@ int newFromFile(NumericsMatrix* const m, FILE *file)
   void* data = NULL;
 
   CHECK_IO(fscanf(file, "%d", &storageType), &info);
-  CHECK_IO(fscanf(file, "%zu", &size0), &info);
-  CHECK_IO(fscanf(file, "%zu", &size1), &info);
+  CHECK_IO(fscanf(file, SN_SIZE_T_F, &size0), &info);
+  CHECK_IO(fscanf(file, SN_SIZE_T_F, &size1), &info);
 
   if (storageType == NM_DENSE)
   {
-    CHECK_IO(fscanf(file, "%zu\t%zu\n", &size0, &size1), &info);
+    CHECK_IO(fscanf(file, SN_SIZE_T_F "\t" SN_SIZE_T_F "\n", &size0, &size1), &info);
 
     data = malloc(size1 * size0 * sizeof(double));
     double* data_d = (double*) data;
