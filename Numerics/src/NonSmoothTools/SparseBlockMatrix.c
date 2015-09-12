@@ -808,6 +808,7 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
     fprintf(stderr, "Numerics, SparseBlockStructuredMatrix printInFileSBM failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
+  assert(file);
   fprintf(file, "%i\n", m->nbblocks);
   if (m->nbblocks == 0)  return;
 
@@ -879,6 +880,7 @@ void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * 
     fprintf(stderr, "Numerics, SparseBlockStructuredMatrix printInFileSBM failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
+  assert(file);
   fprintf(file, "nbblock = %i;\n", m->nbblocks);
   if (m->nbblocks == 0)  return;
 
@@ -992,6 +994,7 @@ void newFromFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
     fprintf(stderr, "Numerics, SparseBlockStructuredMatrix readInFileSBM failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
+  assert(file);
   CHECK_IO(fscanf(file, "%d", &(m->nbblocks)));
 
   if (m->nbblocks == 0)  return;
@@ -1077,6 +1080,7 @@ void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
     fprintf(stderr, "Numerics, SparseBlockStructuredMatrix readInFileSBM failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
+  assert(file);
   CHECK_IO(fscanf(file, "%d", &(m->nbblocks)));
 
   if (m->nbblocks == 0)  return;
