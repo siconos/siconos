@@ -1,134 +1,152 @@
 #ifndef _CS_H
 #define _CS_H
-
+#include <stdlib.h>
+#include <limits.h>
+#include <math.h>
+#include <stdio.h>
+#include <stddef.h>
 #ifdef MATLAB_MEX_FILE
 #include "mex.h"
 #endif
-#define CS_VER 1		    /* CSparse Version 1.2.0 */
-#define CS_SUBVER 2
-#define CS_SUBSUB 0
-#define CS_DATE "Mar 6, 2006"	    /* CSparse release date */
-#define CS_COPYRIGHT "Copyright (c) Timothy A. Davis, 2006"
+#define CS_VER 3                    /* CSparse Version */
+#define CS_SUBVER 1
+#define CS_SUBSUB 4
+#define CS_DATE "Oct 10, 2014"    /* CSparse release date */
+#define CS_COPYRIGHT "Copyright (c) Timothy A. Davis, 2006-2014"
+
+#ifdef MATLAB_MEX_FILE
+#undef csi
+#define csi mwSignedIndex
+#endif
+#ifndef csi
+#define csi ptrdiff_t
+#endif
 
 /* --- primary CSparse routines and data structures ------------------------- */
 typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
 {
-  int nzmax ;	    /* maximum number of entries */
-  int m ;	    /* number of rows */
-  int n ;	    /* number of columns */
-  int *p ;	    /* column pointers (size n+1) or col indices (size nzmax) */
-  int *i ;	    /* row indices, size nzmax */
-  double *x ;	    /* numerical values, size nzmax */
-  int nz ;	    /* # of entries in triplet matrix, -1 for compressed-col */
+    csi nzmax ;     /* maximum number of entries */
+    csi m ;         /* number of rows */
+    csi n ;         /* number of columns */
+    csi *p ;        /* column pointers (size n+1) or col indices (size nzmax) */
+    csi *i ;        /* row indices, size nzmax */
+    double *x ;     /* numerical values, size nzmax */
+    csi nz ;        /* # of entries in triplet matrix, -1 for compressed-col */
 } cs ;
 
-cs *cs_add(const cs *A, const cs *B, double alpha, double beta) ;
-int cs_cholsol(const cs *A, double *b, int order) ;
-int cs_dupl(cs *A) ;
-int cs_entry(cs *T, int i, int j, double x) ;
-int cs_lusol(const cs *A, double *b, int order, double tol) ;
-int cs_gaxpy(const cs *A, const double *x, double *y) ;
-cs *cs_multiply(const cs *A, const cs *B) ;
-int cs_qrsol(const cs *A, double *b, int order) ;
-cs *cs_transpose(const cs *A, int values) ;
-cs *cs_triplet(const cs *T) ;
-double cs_norm(const cs *A) ;
-int cs_print(const cs *A, int brief) ;
-cs *cs_load(FILE *f) ;
+cs *cs_add (const cs *A, const cs *B, double alpha, double beta) ;
+csi cs_cholsol (csi order, const cs *A, double *b) ;
+cs *cs_compress (const cs *T) ;
+csi cs_dupl (cs *A) ;
+csi cs_entry (cs *T, csi i, csi j, double x) ;
+csi cs_gaxpy (const cs *A, const double *x, double *y) ;
+cs *cs_load (FILE *f) ;
+csi cs_lusol (csi order, const cs *A, double *b, double tol) ;
+cs *cs_multiply (const cs *A, const cs *B) ;
+double cs_norm (const cs *A) ;
+csi cs_print (const cs *A, csi brief) ;
+csi cs_qrsol (csi order, const cs *A, double *b) ;
+cs *cs_transpose (const cs *A, csi values) ;
 /* utilities */
-void *cs_calloc(int n, size_t size) ;
-void *cs_free(void *p) ;
-void *cs_realloc(void *p, int n, size_t size, int *ok) ;
-cs *cs_spalloc(int m, int n, int nzmax, int values, int triplet) ;
-cs *cs_spfree(cs *A) ;
-int cs_sprealloc(cs *A, int nzmax) ;
-void *cs_malloc(int n, size_t size) ;
+void *cs_calloc (csi n, size_t size) ;
+void *cs_free (void *p) ;
+void *cs_realloc (void *p, csi n, size_t size, csi *ok) ;
+cs *cs_spalloc (csi m, csi n, csi nzmax, csi values, csi triplet) ;
+cs *cs_spfree (cs *A) ;
+csi cs_sprealloc (cs *A, csi nzmax) ;
+void *cs_malloc (csi n, size_t size) ;
 
 /* --- secondary CSparse routines and data structures ----------------------- */
 typedef struct cs_symbolic  /* symbolic Cholesky, LU, or QR analysis */
 {
-  int *Pinv ;	    /* inverse row perm. for QR, fill red. perm for Chol */
-  int *Q ;	    /* fill-reducing column permutation for LU and QR */
-  int *parent ;   /* elimination tree for Cholesky and QR */
-  int *cp ;	    /* column pointers for Cholesky, row counts for QR */
-  int m2 ;	    /* # of rows for QR, after adding fictitious rows */
-  int lnz ;	    /* # entries in L for LU or Cholesky; in V for QR */
-  int unz ;	    /* # entries in U for LU; in R for QR */
+    csi *pinv ;     /* inverse row perm. for QR, fill red. perm for Chol */
+    csi *q ;        /* fill-reducing column permutation for LU and QR */
+    csi *parent ;   /* elimination tree for Cholesky and QR */
+    csi *cp ;       /* column pointers for Cholesky, row counts for QR */
+    csi *leftmost ; /* leftmost[i] = min(find(A(i,:))), for QR */
+    csi m2 ;        /* # of rows for QR, after adding fictitious rows */
+    csi lnz ;    /* # entries in L for LU or Cholesky; in V for QR */
+    csi unz ;    /* # entries in U for LU; in R for QR */
 } css ;
 
 typedef struct cs_numeric   /* numeric Cholesky, LU, or QR factorization */
 {
-  cs *L ;	    /* L for LU and Cholesky, V for QR */
-  cs *U ;	    /* U for LU, R for QR, not used for Cholesky */
-  int *Pinv ;	    /* partial pivoting for LU */
-  double *B ;	    /* beta [0..n-1] for QR */
+    cs *L ;         /* L for LU and Cholesky, V for QR */
+    cs *U ;         /* U for LU, R for QR, not used for Cholesky */
+    csi *pinv ;     /* partial pivoting for LU */
+    double *B ;     /* beta [0..n-1] for QR */
 } csn ;
 
 typedef struct cs_dmperm_results    /* cs_dmperm or cs_scc output */
 {
-  int *P ;	    /* size m, row permutation */
-  int *Q ;	    /* size n, column permutation */
-  int *R ;	    /* size nb+1, block k is rows R[k] to R[k+1]-1 in A(P,Q) */
-  int *S ;	    /* size nb+1, block k is cols S[k] to S[k+1]-1 in A(P,Q) */
-  int nb ;	    /* # of blocks in fine dmperm decomposition */
-  int rr [5] ;    /* coarse row decomposition */
-  int cc [5] ;    /* coarse column decomposition */
+    csi *p ;        /* size m, row permutation */
+    csi *q ;        /* size n, column permutation */
+    csi *r ;        /* size nb+1, block k is rows r[k] to r[k+1]-1 in A(p,q) */
+    csi *s ;        /* size nb+1, block k is cols s[k] to s[k+1]-1 in A(p,q) */
+    csi nb ;        /* # of blocks in fine dmperm decomposition */
+    csi rr [5] ;    /* coarse row decomposition */
+    csi cc [5] ;    /* coarse column decomposition */
 } csd ;
 
-int *cs_amd(const cs *A, int order) ;
-csn *cs_chol(const cs *A, const css *S) ;
-csd *cs_dmperm(const cs *A) ;
-int cs_droptol(cs *A, double tol) ;
-int cs_dropzeros(cs *A) ;
-int cs_happly(const cs *V, int i, double beta, double *x) ;
-int cs_ipvec(int n, const int *P, const double *b, double *x) ;
-int cs_lsolve(const cs *L, double *x) ;
-int cs_ltsolve(const cs *L, double *x) ;
-csn *cs_lu(const cs *A, const css *S, double tol) ;
-cs *cs_permute(const cs *A, const int *P, const int *Q, int values) ;
-int *cs_pinv(const int *P, int n) ;
-int cs_pvec(int n, const int *P, const double *b, double *x) ;
-csn *cs_qr(const cs *A, const css *S) ;
-css *cs_schol(const cs *A, int order) ;
-css *cs_sqr(const cs *A, int order, int qr) ;
-cs *cs_symperm(const cs *A, const int *Pinv, int values) ;
-int cs_usolve(const cs *U, double *x) ;
-int cs_utsolve(const cs *U, double *x) ;
-int cs_updown(cs *L, int sigma, const cs *C, const int *parent) ;
+csi *cs_amd (csi order, const cs *A) ;
+csn *cs_chol (const cs *A, const css *S) ;
+csd *cs_dmperm (const cs *A, csi seed) ;
+csi cs_droptol (cs *A, double tol) ;
+csi cs_dropzeros (cs *A) ;
+csi cs_happly (const cs *V, csi i, double beta, double *x) ;
+csi cs_ipvec (const csi *p, const double *b, double *x, csi n) ;
+csi cs_lsolve (const cs *L, double *x) ;
+csi cs_ltsolve (const cs *L, double *x) ;
+csn *cs_lu (const cs *A, const css *S, double tol) ;
+cs *cs_permute (const cs *A, const csi *pinv, const csi *q, csi values) ;
+csi *cs_pinv (const csi *p, csi n) ;
+csi cs_pvec (const csi *p, const double *b, double *x, csi n) ;
+csn *cs_qr (const cs *A, const css *S) ;
+css *cs_schol (csi order, const cs *A) ;
+css *cs_sqr (csi order, const cs *A, csi qr) ;
+cs *cs_symperm (const cs *A, const csi *pinv, csi values) ;
+csi cs_updown (cs *L, csi sigma, const cs *C, const csi *parent) ;
+csi cs_usolve (const cs *U, double *x) ;
+csi cs_utsolve (const cs *U, double *x) ;
 /* utilities */
-css *cs_sfree(css *S) ;
-csn *cs_nfree(csn *N) ;
-csd *cs_dfree(csd *D) ;
+css *cs_sfree (css *S) ;
+csn *cs_nfree (csn *N) ;
+csd *cs_dfree (csd *D) ;
 
 /* --- tertiary CSparse routines -------------------------------------------- */
-int *cs_counts(const cs *A, const int *parent, const int *post, int ata) ;
-int cs_cumsum(int *p, int *c, int n) ;
-int cs_dfs(int j, cs *L, int top, int *xi, int *pstack, const int *Pinv) ;
-int *cs_etree(const cs *A, int ata) ;
-int cs_fkeep(cs *A, int (*fkeep)(int, int, double, void *), void *other) ;
-double cs_house(double *x, double *beta, int n) ;
-int *cs_maxtrans(const cs *A) ;
-int *cs_post(int n, const int *parent) ;
-int cs_reach(cs *L, const cs *B, int k, int *xi, const int *Pinv) ;
-csd *cs_scc(cs *A) ;
-int cs_scatter(const cs *A, int j, double beta, int *w, double *x, int mark,
-               cs *C, int nz) ;
-int cs_splsolve(cs *L, const cs *B, int k, int *xi, double *x,
-                const int *Pinv) ;
-int cs_tdfs(int j, int k, int *head, const int *next, int *post,
-            int *stack) ;
+csi *cs_counts (const cs *A, const csi *parent, const csi *post, csi ata) ;
+double cs_cumsum (csi *p, csi *c, csi n) ;
+csi cs_dfs (csi j, cs *G, csi top, csi *xi, csi *pstack, const csi *pinv) ;
+csi cs_ereach (const cs *A, csi k, const csi *parent, csi *s, csi *w) ;
+csi *cs_etree (const cs *A, csi ata) ;
+csi cs_fkeep (cs *A, csi (*fkeep) (csi, csi, double, void *), void *other) ;
+double cs_house (double *x, double *beta, csi n) ;
+csi cs_leaf (csi i, csi j, const csi *first, csi *maxfirst, csi *prevleaf,
+    csi *ancestor, csi *jleaf) ;
+csi *cs_maxtrans (const cs *A, csi seed) ;
+csi *cs_post (const csi *parent, csi n) ;
+csi *cs_randperm (csi n, csi seed) ;
+csi cs_reach (cs *G, const cs *B, csi k, csi *xi, const csi *pinv) ;
+csi cs_scatter (const cs *A, csi j, double beta, csi *w, double *x, csi mark,
+    cs *C, csi nz) ;
+csd *cs_scc (cs *A) ;
+csi cs_spsolve (cs *G, const cs *B, csi k, csi *xi, double *x,
+    const csi *pinv, csi lo) ;
+csi cs_tdfs (csi j, csi k, csi *head, const csi *next, csi *post,
+    csi *stack) ;
 /* utilities */
-csd *cs_dalloc(int m, int n) ;
-cs *cs_done(cs *C, void *w, void *x, int ok) ;
-int *cs_idone(int *p, cs *C, void *w, int ok) ;
-csn *cs_ndone(csn *N, cs *C, void *w, void *x, int ok) ;
-csd *cs_ddone(csd *D, cs *C, void *w, int ok) ;
+csd *cs_dalloc (csi m, csi n) ;
+csd *cs_ddone (csd *D, cs *C, void *w, csi ok) ;
+cs *cs_done (cs *C, void *w, void *x, csi ok) ;
+csi *cs_idone (csi *p, cs *C, void *w, csi ok) ;
+csn *cs_ndone (csn *N, cs *C, void *w, void *x, csi ok) ;
 
 #define CS_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define CS_MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define CS_FLIP(i) (-(i)-2)
 #define CS_UNFLIP(i) (((i) < 0) ? CS_FLIP(i) : (i))
-#define CS_MARKED(Ap,j) (Ap [j] < 0)
-#define CS_MARK(Ap,j) { Ap [j] = CS_FLIP (Ap [j]) ; }
-#define CS_OVERFLOW(n,size) (n > INT_MAX / (int) size)
+#define CS_MARKED(w,j) (w [j] < 0)
+#define CS_MARK(w,j) { w [j] = CS_FLIP (w [j]) ; }
+#define CS_CSC(A) (A && (A->nz == -1))
+#define CS_TRIPLET(A) (A && (A->nz >= 0))
 #endif

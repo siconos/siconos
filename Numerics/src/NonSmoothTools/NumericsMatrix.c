@@ -928,7 +928,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     if (B_ ->nzmax < A_ ->nzmax)
     {
       B_->x = (double *) realloc(B_->x, A_->nzmax * sizeof(double));
-      B_->i = (int *) realloc(B_->i, A_->nzmax * sizeof(int));
+      B_->i = (csi *) realloc(B_->i, A_->nzmax * sizeof(csi));
     }
     else if (!(B_->x))
     {
@@ -938,14 +938,14 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     if (A_->nz >= 0)
     {
       /* triplet */
-      B_->p = (int *) realloc(B_->p, A_->nzmax * sizeof(int));
+      B_->p = (csi *) realloc(B_->p, A_->nzmax * sizeof(csi));
     }
     else
     {
       if (B_->n < A_->n)
       {
         /* csc */
-        B_-> p = (int *) realloc(B_->p, (A_->n + 1) * sizeof(int));
+        B_-> p = (csi *) realloc(B_->p, (A_->n + 1) * sizeof(csi));
       }
     }
 
@@ -955,15 +955,15 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     B_->n = A_->n;
 
     memcpy(B_->x, A_->x, A_->nzmax * sizeof(double));
-    memcpy(B_->i, A_->i, A_->nzmax * sizeof(int));
+    memcpy(B_->i, A_->i, A_->nzmax * sizeof(csi));
 
     if (A_->nz >= 0)
     {
-      memcpy(B_->p, A_->p, A_->nzmax * sizeof(int));
+      memcpy(B_->p, A_->p, A_->nzmax * sizeof(csi));
     }
     else
     {
-      memcpy(B_->p, A_->p, (A_->n + 1) * sizeof(int));
+      memcpy(B_->p, A_->p, (A_->n + 1) * sizeof(csi));
     }
 
 
@@ -1014,7 +1014,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
     {
 
       /* Invalidation of previously constructed csc storage. */
-      /* If we want to avoid this -> rewrite cs_triplet with reallocation. */
+      /* If we want to avoid this -> rewrite cs_compress with reallocation. */
       NM_clearCSC(A);
       NM_clearCSCTranspose(A);
 
@@ -1078,7 +1078,7 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
   if(!NM_sparse(A)->csc)
   {
     assert(A->matrix2);
-    A->matrix2->csc = cs_triplet(NM_triplet(A)); /* triplet -> csc
+    A->matrix2->csc = cs_compress(NM_triplet(A)); /* triplet -> csc
                                                   * with allocation */
 
     assert(A->matrix2->csc);
@@ -1185,8 +1185,8 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     NM_clearSparseStorage(C);
 
     NM_sparse(C)->csc = result;
-    C->size0 = C->matrix2->csc->m;
-    C->size1 = C->matrix2->csc->n;
+    C->size0 = (int)C->matrix2->csc->m;
+    C->size1 = (int)C->matrix2->csc->n;
     break;
   }
   }
@@ -1421,7 +1421,7 @@ int NM_gesv(NumericsMatrix* A, double *b)
     switch (NM_linearSolverParams(A)->solver)
     {
     case NS_CS_LUSOL:
-      info = !cs_lusol(NM_csc(A), b, 1, DBL_EPSILON);
+      info = !cs_lusol(1, NM_csc(A), b, DBL_EPSILON);
       break;
 
 #ifdef WITH_MUMPS
