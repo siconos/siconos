@@ -193,7 +193,7 @@ int main(void)
         z[2] = 1.0;
       }
 
-      if(@SOLVER_ID@ == SICONOS_NCP_NEWTON_FBLSA)
+#if @SOLVER_ID@ == SICONOS_NCP_NEWTON_FBLSA
       {
       options.dparam[0] = N*DBL_EPSILON;
        while (options.dparam[0] < 1e-12)
@@ -204,11 +204,11 @@ int main(void)
         goto almostgood;
        }
       }
-      else
+#else
       {
        info = ncp_driver(problem, z, F, &options, NULL);
       }
-
+#endif
       if (info > 0)
       {
         if (options.dparam[1] > options.dparam[0] || @SOLVER_ID@ != SICONOS_NCP_NEWTON_FBLSA)
