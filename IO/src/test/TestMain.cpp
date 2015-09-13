@@ -24,6 +24,10 @@
 #include <cstring>
 using namespace std;
 
+CppUnit::Test* GetTest(CppUnit::Test* tests, const std::string& name);
+void CdashDumpTest(CppUnit::Test *test, char* myname);
+int CdashDump(CppUnit::Test *tests, char* myname);
+
 /* get a test pointer in the test suite */
 
 CppUnit::Test* GetTest(CppUnit::Test* tests, const std::string& name)

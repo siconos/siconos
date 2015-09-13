@@ -136,8 +136,12 @@ struct GetVelocity : public SiconosVisitor
 
 struct ForMu : public Question<double>
 {
-  ANSWER(NewtonImpactFrictionNSL, mu());
-  ANSWER_V(NewtonImpactNSL, 0.);
+  {
+    ANSWER(NewtonImpactFrictionNSL, mu());
+  }
+  {
+    ANSWER_V(NewtonImpactNSL, 0.);
+  }
 };
 
 /* template partial specilization is not possible inside struct, so we
