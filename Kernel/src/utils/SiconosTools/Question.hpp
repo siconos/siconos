@@ -152,6 +152,12 @@ void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
     answer = CODE;                              \
   }
 
+#define ANSWER_V_NOUSING(T,CODE)                \
+  void visit(const T& ds)                       \
+  {                                             \
+    answer = CODE;                              \
+  }
+
 #define ANSWER_F(T,CODE)                        \
   using SiconosVisitor::visit;                  \
   void visit(const T& ds)                       \
