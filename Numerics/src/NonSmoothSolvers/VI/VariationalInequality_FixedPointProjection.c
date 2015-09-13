@@ -284,7 +284,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           if (!success)
           {
             /* if (iparam[3]) rho_k = rho_k * tau * min(1.0,a2*a2/(rho_k*a1)); */
-            /* else rho_k = */ rho_k * tau ;
+            /* else */ rho_k = rho_k * tau ;
           }
           ls_iter++;
         }
