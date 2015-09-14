@@ -15,8 +15,6 @@ struct StaticObjects :
 
 struct ForStaticObjects : public Question< SP::StaticObjects >
 {
-  using SiconosVisitor::visit;
-
   ANSWER(BulletSpaceFilter, staticObjects());
 };
 

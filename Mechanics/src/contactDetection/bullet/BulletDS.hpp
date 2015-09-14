@@ -118,16 +118,12 @@ private:
 
 struct ForCollisionObjects : public Question<SP::CollisionObjects>
 {
-  using SiconosVisitor::visit;
-
   ANSWER(BulletDS, collisionObjects());
 };
 
 
 struct ForWeightedShape : public Question<SP::BulletWeightedShape>
 {
-  using SiconosVisitor::visit;
-
   ANSWER(BulletDS, weightedShape());
 };
 

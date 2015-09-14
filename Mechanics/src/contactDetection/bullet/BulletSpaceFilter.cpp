@@ -77,8 +77,6 @@ bool contactProcess(btManifoldPoint& cp, void *body0, void *body1)
 
 struct ForPosition : public Question<SP::SiconosVector>
 {
-  using SiconosVisitor::visit;
-
   ANSWER(BulletDS, q());
 };
 

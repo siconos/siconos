@@ -115,8 +115,6 @@ public:
 
 struct ForCollisionWorld : public Question<SP::btCollisionWorld>
 {
-  using SiconosVisitor::visit;
-
   ANSWER(BulletSpaceFilter, collisionWorld());
 };
 
@@ -126,13 +124,11 @@ struct ForCollisionWorld : public Question<SP::btCollisionWorld>
 
 struct ForContactPoint : public Question<SP::btManifoldPoint>
 {
-  using SiconosVisitor::visit;
-
+  ANSWER(BulletR, contactPoint());
+  ANSWER_NOUSING(BulletFrom1DLocalFrameR, contactPoint());
   void visit(const NewtonEulerR&)
   {
   }
-  ANSWER(BulletR, contactPoint());
-  ANSWER(BulletFrom1DLocalFrameR, contactPoint());
 };
 
 #endif
