@@ -36,12 +36,13 @@ def usage():
     print('{0} [--namespace=<namespace>] -I<path> [-I<path> ...] \
                [--targets=<Mod1>[,Mod2[,...]]] \
                [--output=<filename>] \
+               [--source=<siconos source dir>] \
                header'.format(myname))
 
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'I:', ['help', 'namespace=',
-                                                    'targets=', 'output='])
+                                                    'targets=', 'output=', 'source='])
 except getopt.GetoptError as err:
     print(str(err))
     usage()
@@ -49,6 +50,7 @@ except getopt.GetoptError as err:
 
 targets = []
 generated_file = None
+source_dir = None
 
 for opt, arg in opts:
     if opt == '--targets':
@@ -62,10 +64,17 @@ for opt, arg in opts:
         sys.exit(0)
     if opt == '--output':
         generated_file = arg
+    if opt == '--source':
+        source_dir = arg
 
 if generated_file is None:
     usage()
     print('{0} --ouput option is mandatory.'.format(myname))
+    sys.exit(1)
+
+if source_dir is None:
+    usage()
+    print('{0} --source  option is mandatory.'.format(myname))
     sys.exit(1)
 
 generated_header = os.path.splitext(os.path.basename(generated_file))[0]
@@ -127,6 +136,68 @@ def replace_by_typedef(some_type):
             return rep_typedef
     return str(some_type)
 
+# try to provide an ordering for registering a class
+# The main issue is with the Model and the NonSmoothDynamicalSystem, Topology,
+# DSG, ...
+# If this is not done, the compiler may fail (like Clang) because of too many
+# recursive template instantiations
+# The logic is the following one:
+# - give priority based on the module
+# - for the Kernel give priority based on the folder
+# - some hacks are needed to get the Topology & co done properly
+# the returned priority is used to sort the list of classes to register
+def get_priority(type_, name):
+    module_prio = (('Numerics', 100),
+                   ('Kernel', 200),
+                   ('Mechanics', 300),
+                   ('Control', 400))
+
+    Kernel_prio = (('utils/SiconosException', 0),
+                   ('utils/Memory', 1),
+                   ('utils/SiconosAlgebra', 2),
+                   ('utils/SiconosTools', 3),
+                   ('utils', 4),
+                   ('plugin', 5),
+                   ('modelingTools', 6),
+                   ('simulationTools', 7),
+                   ('model', 8),
+                   (r'.*', 9))
+
+    big_hack_prio = {'GraphProperties': 1e-3,
+                     'SystemProperties': 2e-3,
+                     'InteractionProperties': 3e-3,
+                     'MatrixIntegrator': 4e-3,
+                     'DynamicalSystemsGraph': 5e-3,
+                     'InteractionsGraph': 6e-3,
+                     'Topology': 7e-3}
+
+    if name in big_hack_prio.keys():
+        return 200 + 5 + big_hack_prio[name]
+    header = type_.location.file_name
+    prio = type_.location.line/10000.
+    for e in sorted(module_prio, key=lambda k: k[1]):
+        if e[0] in header:
+            prio += e[1]
+            if e[0] is 'Kernel':
+                header_file = os.path.basename(header)
+                # print('walking {:}, looking for {:}'.format(source_dir + '/Kernel/src', header_file))
+                for path, dirlist, filelist in os.walk(source_dir + '/Kernel/src'):
+                    files = [i for i in filelist if i == header_file]
+                    if len(files) == 1:
+                        # print('Found {:} in {:}'.format(header_file, path))
+                        for ee in sorted(Kernel_prio, key=lambda k: k[1]):
+                            if ee[0] in path:
+                                prio += ee[1]
+                                return prio
+                    elif len(files) >1:
+                        print(files)
+                print('Error while finding {:}, found no match'.format(header_file))
+            else:
+                return prio
+    print('Error proccessing header {:}'.format(header))
+
+
+
 # main loop
 config = parser.config_t(include_paths=include_paths, ignore_gccxml_output=True)
 
@@ -173,7 +244,7 @@ with open(generated_file, 'a') as dest_file:
                 class_ = class_names['::' + str(type_.type)]
             except:
                 class_ = None
-        # with the serializabe tag
+        # with the serializable tag
         # (could not find friend functions with pygccxml)
         if class_ is not None and \
             is_serializable(class_) and \
@@ -182,7 +253,7 @@ with open(generated_file, 'a') as dest_file:
             if not unwanted(class_.name):
 
                 if not class_.is_abstract:
-                    with_base += [class_.name]
+                    with_base.append((class_.name, get_priority(type_, class_.name)))
 
                 # print registration macros depending on inheritance
                 if class_.bases == []:
@@ -223,6 +294,7 @@ with open(generated_file, 'a') as dest_file:
     # some unwanted classes are necessary
     # (the ones in SiconosFull.hpp) others not (xml)
     # some leads to compilation errors.
+    with_base_s = zip(*sorted(with_base, key=lambda k: k[1]))[0]
     dest_file.write('\n')
     dest_file.write('template <class Archive>\n')
     dest_file.write('void siconos_io_register_generated(Archive& ar)\n')
@@ -230,6 +302,6 @@ with open(generated_file, 'a') as dest_file:
                     .format('\n'
                             .join(
                                 '  ar.register_type(static_cast<{0}*>(NULL));'
-                                .format(x) for x in with_base)))
+                                .format(x) for x in with_base_s)))
     dest_file.write('#endif\n')
     dest_file.write('#endif\n')

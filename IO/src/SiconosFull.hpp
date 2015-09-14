@@ -361,15 +361,16 @@ namespace boost { namespace serialization {
 template <class Archive>
 void siconos_io_register_Kernel(Archive& ar)
 {
+  ar.register_type(static_cast<SimpleMatrix*>(NULL));
+  ar.register_type(static_cast<SiconosVector*>(NULL));
+
   siconos_io_register_generated(ar);
 
   ar.register_type(static_cast<_DynamicalSystemsGraph*>(NULL));
-  ar.register_type(static_cast<SimpleMatrix*>(NULL));
-  ar.register_type(static_cast<SiconosVector*>(NULL));
+  ar.register_type(static_cast<_InteractionsGraph*>(NULL));
   ar.register_type(static_cast<DynamicalSystemsSet*>(NULL));
   ar.register_type(static_cast<std::basic_ofstream<char>*>(NULL));
 
-  ar.register_type(static_cast<_InteractionsGraph*>(NULL));
   //  ar.register_type(static_cast<PluginHandle*>(NULL));
   ar.register_type(static_cast<__mpz_struct*>(NULL));
   ar.register_type(static_cast<FrictionContact*>(NULL));

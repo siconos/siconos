@@ -168,7 +168,9 @@ IF(WITH_SERIALIZATION)
       ENDFOREACH()
     ENDIF()
 
-    SET(GENERATED_COMMAND COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py ${GENERATED_TARGETS} ${GENERATED_INCLUDES} --output=${GENERATED_HEADER})
+    SET(GENERATED_COMMAND COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py
+      ${GENERATED_TARGETS} ${GENERATED_INCLUDES} --output=${GENERATED_HEADER}
+      --source="${CMAKE_SOURCE_DIR}/../")
 
     ADD_CUSTOM_COMMAND(
       OUTPUT ${GENERATED_HEADER}
@@ -188,7 +190,8 @@ INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp DESTINATION inclu
 ADD_CUSTOM_TARGET(SerializersGeneration ALL
   DEPENDS ${GENERATED_HEADER})
 
-SET(SiconosIO_SRCS SiconosRestart.cpp MechanicsIO.cpp)
+SET(SiconosIO_SRCS RegisterModelIbin.cpp RegisterModelObin.cpp
+  RegisterModelIxml.cpp RegisterModelOxml.cpp  SiconosRestart.cpp MechanicsIO.cpp)
 
 
 # set library target

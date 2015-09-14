@@ -19,21 +19,13 @@
 
 #include "IOConfig.h"
 #ifdef WITH_SERIALIZATION
-#include "SiconosFull.hpp"
 #include "SiconosRestart.hpp"
-
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/bindings/ublas/vector_sparse.hpp>
-#include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
 
 #include <boost/filesystem.hpp>
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
+#include "RegisterModel.hpp"
 
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/archive/xml_oarchive.hpp>
+#include <Model.hpp>
 
 namespace Siconos
 {
@@ -50,18 +42,12 @@ namespace Siconos
     {
       if (destf.extension() == ".xml")
       {
-        boost::archive::xml_oarchive oa(ofs);
-        siconos_io_register_Numerics(oa);
-        siconos_io_register_Kernel(oa);
-        oa << NVP(model);
+        RegisterModelOxml(ofs, model);
       }
 
       else if (destf.extension() == ".bin")
       {
-        boost::archive::binary_oarchive oa(ofs);
-        siconos_io_register_Numerics(oa);
-        siconos_io_register_Kernel(oa);
-        oa << NVP(model);  // fix: NVP not necessary for binary archives
+        RegisterModelObin(ofs, model);
       }
     }
 
@@ -80,17 +66,11 @@ namespace Siconos
     {
       if (boost::filesystem::path(filename).extension() == ".xml")
       {
-        boost::archive::xml_iarchive ia(ifs);
-        siconos_io_register_Numerics(ia);
-        siconos_io_register_Kernel(ia);
-        ia >> NVP(model);
+        RegisterModelIxml(ifs, model);
       }
       else if (boost::filesystem::path(filename).extension() == ".bin")
       {
-        boost::archive::binary_iarchive ia(ifs);
-        siconos_io_register_Numerics(ia);
-        siconos_io_register_Kernel(ia);
-        ia >> NVP(model);
+        RegisterModelIbin(ifs, model);
       }
     }
     return model;
