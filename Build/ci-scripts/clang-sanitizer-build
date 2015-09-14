@@ -18,7 +18,7 @@ cmake $WORK_DIR/Build \
     -DON_DASHBOARD=1 \
     -DMODE=Continuous \
     -DDEV_MODE=ON \
-    -DWITH_IO=0 \
+    -DWITH_IO=1 -DWITH_GENERATION=0 \
     -DWITH_MECHANICS=1 \
     -DWITH_CONTROL=1 \
     -DWITH_EXAMPLES=1 \
