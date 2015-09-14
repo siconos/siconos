@@ -4,11 +4,11 @@ $if not set filename $set filename 'fc3d_avi-condensed.gdx'
 set j /1 * 2/;
 
 sets i, p;
-parameter W(i,i), E(i,i), Wt(i, i), q(i), qt(i), Ak(p,i);
+parameter W(i,i), E(i,i), Wt(i, i), q(i), qt(i), Ak(p,i), guess_r(i), guess_y(i);
 
 $gdxin '%filename%';
 
-$loadIdx W E Wt Ak q qt
+$loadIdx W E Wt Ak q qt guess_r guess_y
 
 $gdxin
 
@@ -22,6 +22,11 @@ variables r(l), y(l);
 equations  F_r(l), F_y(l), cons_r(p), cons_y(p);
 
 parameter reaction(l), velocity(l), infos(j);
+
+r.l(i) = guess_r(i);
+y.l(i) = guess_y(i);
+
+display r.l;
 
 F_r(l)..
   sum(i, W(l,i)*r(i)) + sum(i, E(l, i)*y(i)) + q(l) =n= 0;
@@ -44,8 +49,6 @@ solve vi using emp;
 
 reaction(i) = r.l(i);
 velocity(i) = r.m(i);
-
-* display r.l, y.l
 
 infos('1') = vi.modelstat;
 infos('2') = vi.solvestat;

@@ -129,7 +129,7 @@ static int SN_rm_normal_part(int i, int j, double val, void* env)
   }
 }
 
-static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, double* restrict reaction, double* restrict velocity, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
+static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, double* restrict reaction, double* restrict velocity, double* restrict tmpq, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
 {
 
   char msg[GMS_SSSIZE];
@@ -173,10 +173,10 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
   DEBUG_PRINT("FC3D_AVI_GAMS :: W matrix written\n");
 
 
-  cblas_dcopy(W->size0, q, 1, reaction, 1);
+  cblas_dcopy(W->size0, q, 1, tmpq, 1);
   for (unsigned i = 0; i < size; i += 3)
   {
-    reaction[i] = 0.;
+    tmpq[i] = 0.;
   }
 
 
@@ -209,6 +209,18 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
     return -ETERMINATE;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: qt vector written\n");
+
+  if ((status=NV_to_GDX(Xptr, "guess_r", "guess for r", reaction, size))) {
+    printf("Model data not written\n");
+    return -ETERMINATE;
+  }
+  DEBUG_PRINT("FC3D_AVI_GAMS :: guess_r vector written\n");
+
+  if ((status=NV_to_GDX(Xptr, "guess_y", "guess for y", velocity, size))) {
+    printf("Model data not written\n");
+    return -ETERMINATE;
+  }
+  DEBUG_PRINT("FC3D_AVI_GAMS :: guess_y vector written\n");
 
   if (idxClose(Xptr))
     idxerrorR(idxGetLastError(Xptr), "idxClose");
@@ -358,6 +370,11 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   else // only for path
   {
 //    optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+    optSetIntStr(solverOptPtr, "output_linear_model", 1);
+    optSetDblStr(solverOptPtr, "proximal_perturbation", 0.);
+    optSetStrStr(solverOptPtr, "crash_method", "none");
+    optSetIntStr(solverOptPtr, "crash_perturb", 0);
+    optSetDblStr(solverOptPtr, "expand_delta", 1e-10);
 
   }
   optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
@@ -391,6 +408,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
 
   FC3D_gams_generate_first_constraints(&Akmat, problem->mu);
 
+  double* tmpq = (double*)malloc(size * sizeof(double));
   bool done = false;
   double total_residual = 0.;
   double old_residual = 1e20;
@@ -403,7 +421,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   {
     iter++;
     total_residual = 0.;
-    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, reaction, velocity, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
+    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, reaction, velocity, tmpq, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
     DEBUG_PRINT_VEC(reaction, size);
     DEBUG_PRINT_VEC(velocity, size);
 
@@ -500,6 +518,8 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
         cs_entry(Ak_triplet, offset_row, i3 + 2, -M_SQRT2/2);
 
         offset_row++;
+
+        /* Leave ri as-is  */
       }
       else if (ri[0] > TOL_RN) // if r= 0 :(
       {
@@ -576,6 +596,16 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
 
         offset_row += p + 2;
 #endif
+
+        /* update ri =   */
+        DEBUG_PRINTF("old r[i] = %g %g %g\n", ri[0], ri[1], ri[2]);
+        ri[1] = -ri[0]*mu*cos(minus_r_angle + delta_angle/2);
+        ri[2] = -ri[0]*mu*sin(minus_r_angle + delta_angle/2);
+        DEBUG_PRINTF("new r[i] = %g %g %g\n", ri[0], ri[1], ri[2]);
+        ui[0] = (-ui[1])*ri[1] + (-ui[2])*ri[2];
+        ui[1] = ri[1];
+        ui[2] = ri[2];
+        DEBUG_PRINTF("new y[i] = %g %g %g\n", ui[0], ui[1], ui[2]);
         DEBUG_PRINTF("contact %d, row entry %d, last_entry: angle = %g, norm = %g; coeff = %g, %g, %g\n", i, p + offset_row, rad2deg(atan2(middle_point[1], middle_point[0])), hypot(middle_point[0], middle_point[1]), -mu*hypot(middle_point[0], middle_point[1]), -middle_point[0], -middle_point[1]);
         double xx[] = {1, -middle_point[0]/((1+hypot(middle_point[0], middle_point[1]))/2), -middle_point[1]/((hypot(middle_point[0], middle_point[1]) + 1)/2)};
         xtmp[i3] = 1./mu; xtmp[i3+1] = xx[1]; xtmp[i3+2] = xx[2];
