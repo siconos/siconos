@@ -41,13 +41,12 @@ void siconos_io(Archive& ar, _SolverOptions&v, unsigned int version)
 
   if (Archive::is_loading::value)
   {
+    null_SolverOptions(&v);
     v.iparam = (int *) malloc(v.iSize * sizeof(int));
     v.dparam = (double *) malloc(v.dSize * sizeof(double));
     v.internalSolvers = (SolverOptions *) malloc(v.numberOfInternalSolvers * sizeof(SolverOptions));
     v.numericsOptions = (NumericsOptions *) malloc(sizeof(NumericsOptions));
     v.callback = (Callback *) malloc(sizeof(Callback));
-    v.iWork = NULL;
-    v.dWork = NULL;
   }
   SERIALIZE(v, (numericsOptions)(callback), ar);
 
