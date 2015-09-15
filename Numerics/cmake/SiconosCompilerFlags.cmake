@@ -106,10 +106,11 @@ IF(CMAKE_C_COMPILER)
  ADD_C_OPTIONS("-Wno-string-plus-int" "Clang")
  ADD_C_OPTIONS("-Werror=unreachable-code" "Clang")
 
- # too many errors right now ...
- #IF(C_HAVE_MISS)
- #  APPEND_C_FLAGS("-Wmissing-prototypes")
- #ENDIF(C_HAVE_MISS)
+ IF(USE_SANITIZER MATCHES "asan")
+   APPEND_C_FLAGS("-fsanitize=leak -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer")
+ ELSEIF(USE_SANITIZER MATCHES "msan")
+   APPEND_C_FLAGS("-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer")
+ ENDIF(USE_SANITIZER MATCHES "asan")
 
 ENDIF(CMAKE_C_COMPILER)
 
@@ -174,5 +175,11 @@ IF(CMAKE_CXX_COMPILER_WORKS)
   
   ADD_CXX_OPTIONS("-Wno-string-plus-int" "Clang")
   ADD_CXX_OPTIONS("-Werror=unreachable-code" "Clang")
-  
+
+ IF(USE_SANITIZER MATCHES "asan")
+   APPEND_CXX_FLAGS("-fsanitize=leak -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer")
+ ELSEIF(USE_SANITIZER MATCHES "msan")
+   APPEND_CXX_FLAGS("-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer")
+ ENDIF(USE_SANITIZER MATCHES "asan")
+
 ENDIF(CMAKE_CXX_COMPILER_WORKS)

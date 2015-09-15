@@ -28,6 +28,7 @@ cmake $WORK_DIR/Build \
     -DINSTALL_COMMAND="make;-ik;install" \
     -DFROM_REPO=0 -DCTEST_OPTIONS='-j2;-V' \
     -DBUILD_TYPE=Debug \
-    -Dproject_CMAKE_ARGS="-DWITH_SERIALIZATION=0;-DWITH_BULLET=1" \
+    -DUSE_SANITIZER=$2 \
+    -DWITH_BULLET=1 \
     -DBUILDNAME_OPTIONS="${EXTRA_NAME}"
 

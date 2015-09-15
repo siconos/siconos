@@ -134,6 +134,12 @@ SET(SiconosIO_LINK_LIBRARIES ${_LL})
 
 SET(SiconosIO_LINKER_LANGUAGE CXX)
 
+# Right now boost::serialization does some nasty things... so we have to
+# disable some undefined behavior checks ...
+IF(USE_SANITIZER MATCHES "asan")
+  APPEND_CXX_FLAGS("-fno-sanitize=vptr -fno-sanitize=alignment -fno-sanitize=null")
+ENDIF(USE_SANITIZER MATCHES "asan")
+
 SET(GENERATED_HEADER ${CMAKE_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
 
 IF(WITH_SERIALIZATION)
