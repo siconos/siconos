@@ -182,4 +182,11 @@ IF(CMAKE_CXX_COMPILER_WORKS)
    APPEND_CXX_FLAGS("-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer")
  ENDIF(USE_SANITIZER MATCHES "asan")
 
+ IF(USE_LIBCXX)
+  APPEND_CXX_FLAGS("-stdlib=libc++ -I${USE_LIBCXX}/include -I${USE_LIBCXX}/include/c++/v1")
+  LIST(APPEND CMAKE_EXE_LINKER_FLAGS "-L${USE_LIBCXX}/lib -lc++abi -Wl,-rpath,${USE_LIBCXX}/lib")
+  LIST(APPEND CMAKE_MODULE_LINKER_FLAGS "-L${USE_LIBCXX}/lib -lc++abi -Wl,-rpath,${USE_LIBCXX}/lib")
+  LIST(APPEND CMAKE_SHARED_LINKER_FLAGS "-L${USE_LIBCXX}/lib -lc++abi -Wl,-rpath,${USE_LIBCXX}/lib")
+ ENDIF(USE_LIBCXX)
+
 ENDIF(CMAKE_CXX_COMPILER_WORKS)
