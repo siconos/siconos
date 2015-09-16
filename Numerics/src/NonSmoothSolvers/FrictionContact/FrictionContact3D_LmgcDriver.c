@@ -24,7 +24,8 @@ int frictionContact3D_LmgcDriver(double *reaction,
                                  double tolerance,
                                  int itermax,
                                  int verbose,
-                                 int outputFile)
+                                 int outputFile,
+                                 int freq_output)
 {
 
   SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(nc, nc, nb, row, column, W);
@@ -42,7 +43,21 @@ int frictionContact3D_LmgcDriver(double *reaction,
 
   numerics_options.verboseMode = verbose; // turn verbose mode to off by default
 
-  //  uncomment to save FrictionContactProblem
+
+
+  SolverOptions numerics_solver_options;
+
+  frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, solver_id);
+
+  numerics_solver_options.dparam[0] = tolerance;
+  numerics_solver_options.iparam[0] = itermax;
+
+  int info = frictionContact3D_driver(FC,
+                                      reaction , velocity,
+                                      &numerics_solver_options, &numerics_options);
+
+
+//  uncomment to save FrictionContactProblem
 
   if (outputFile == 1)
   {
@@ -95,9 +110,8 @@ int frictionContact3D_LmgcDriver(double *reaction,
   else if (outputFile == 2)
   {
     char fname[256];
-    sprintf(fname, "LMGC_FrictionContactProblem%.5d.dat", fccounter++);
-    printf("Dump of LMGC_FrictionContactProblem%.5d.dat", fccounter);
-
+    sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.dat", numerics_solver_options.iparam[7], nc, fccounter++);
+    printf("LMGC_FC3D-i%.5d-%i-%.5d.dat", numerics_solver_options.iparam[7], nc, fccounter++);
     FILE * foutput  =  fopen(fname, "w");
     frictionContact_printInFile(FC, foutput);
     fclose(foutput);
@@ -105,47 +119,43 @@ int frictionContact3D_LmgcDriver(double *reaction,
   else if (outputFile == 3)
   {
 #ifdef WITH_FCLIB
-    char fname[256];
-    sprintf(fname, "LMGC_FrictionContactProblem%.5d.hdf5", fccounter++);
-    printf("Dump of LMGC_FrictionContactProblem%.5d.hdf5", fccounter);
+    fccounter ++;
+    if (fccounter % freq_output == 0)
+    {
+      char fname[256];
+      sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[7], nc, fccounter);
+      printf("Dump LMGC_FC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[7], nc, fccounter);
 
-    FILE * foutput  =  fopen(fname, "w");
-    int n = 100;
-    char * title = (char *)malloc(n * sizeof(char *));
-    strcpy(title, "LMGC dump in hdf5");
-    char * description = (char *)malloc(n * sizeof(char *));
+      FILE * foutput  =  fopen(fname, "w");
+      int n = 100;
+      char * title = (char *)malloc(n * sizeof(char *));
+      strcpy(title, "LMGC dump in hdf5");
+      char * description = (char *)malloc(n * sizeof(char *));
 
-    strcat(description, "Rewriting in hdf5 through siconos of  ");
-    strcat(description, fname);
-    strcat(description, " in FCLIB format");
-    char * mathInfo = (char *)malloc(n * sizeof(char *));
-    strcpy(mathInfo,  "unknown");
+      strcat(description, "Rewriting in hdf5 through siconos of  ");
+      strcat(description, fname);
+      strcat(description, " in FCLIB format");
+      char * mathInfo = (char *)malloc(n * sizeof(char *));
+      strcpy(mathInfo,  "unknown");
 
-    frictionContact_fclib_write(FC,
-                                title,
-                                description,
-                                mathInfo,
-                                fname);
+      frictionContact_fclib_write(FC,
+                                  title,
+                                  description,
+                                  mathInfo,
+                                  fname);
 
-
-
-    fclose(foutput);
+      fclose(foutput);
+    }
 #else
     printf("Fclib is not available ...\n");
 #endif
 
   }
 
-  SolverOptions numerics_solver_options;
 
-  frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, solver_id);
 
-  numerics_solver_options.dparam[0] = tolerance;
-  numerics_solver_options.iparam[0] = itermax;
 
-  int info = frictionContact3D_driver(FC,
-                                      reaction , velocity,
-                                      &numerics_solver_options, &numerics_options);
+
 
 
   freeSparseBlockCoordinateMatrix3x3fortran(MC);
