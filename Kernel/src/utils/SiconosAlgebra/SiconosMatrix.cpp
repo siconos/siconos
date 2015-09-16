@@ -23,7 +23,7 @@
 #include "BlockMatrix.hpp"
 
 // Constructor with the type-number
-SiconosMatrix::SiconosMatrix(unsigned int newNum): num(newNum)
+SiconosMatrix::SiconosMatrix(unsigned int type): num(type)
 {}
 
 const SP::Index SiconosMatrix::tabRow() const
