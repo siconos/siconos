@@ -12,6 +12,17 @@ INCLUDE(FindPackageHandleStandardArgs)
 
 MACRO(FIND_SICONOS_COMPONENT _project _header_file)
 
+  # We should try to use Windows-GNU to some extend ... --xhub
+  IF(CMAKE_SYSTEM_NAME MATCHES Windows)
+    if (NOT MINGW)
+      SET(CMAKE_FIND_LIBRARY_PREFIXES "lib" "" ${CMAKE_FIND_LIBRARY_PREFIXES})
+      SET(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} ".dll.a" ".a")
+    endif()
+    SET(EXE_EXT ".exe")
+  ELSE()
+    SET(EXE_EXT)
+  ENDIF()
+
   IF(Siconos${_project}_LIBRARY_DIRECTORY)
     MESSAGE(STATUS "Looking for ${_project} library in ${Siconos${_project}_LIBRARY_DIRECTORY}")
     FIND_LIBRARY(Siconos${_project}_LIBRARY Siconos${_project} PATHS "${Siconos${_project}_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
