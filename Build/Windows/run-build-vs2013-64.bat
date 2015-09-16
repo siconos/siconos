@@ -8,7 +8,7 @@ rm -rf E:/install-vs2013-amd64
 mkdir E:\build-vs2013-amd64
 cd /D E:\build-vs2013-amd64
 
-call C:\Users\ci\build-siconos-vs2013-64.bat %1\Build
+call %~dp0\build-siconos-vs2013-64.bat %1\Build
 
 cd /D E:\
 call zip -r siconos-vs2013-amd64.zip install-vs2013-amd64
