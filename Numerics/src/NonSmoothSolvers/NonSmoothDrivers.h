@@ -176,6 +176,7 @@ extern "C"
    *  \param[in] itermax the maximum number of iteration
    *  \param[in] verbose level 0 : nothing, 1: mid level 2: high level
    *  \param[in] outputFile outputFile option 0 : nothing 1 : dat file 2: FCLIB HDF5 file if FCLIB is found
+   *  \param[in] freq_output
    *  \return result (0 if successful otherwise 1).
    *
    */
@@ -192,7 +193,8 @@ extern "C"
                                    double tolerance,
                                    int itermax,
                                    int verbose,
-                                   int outputFile);
+                                   int outputFile,
+                                   int freq_output);
 
   /** LMGC interface to solvers for global friction-contact 3D problem
    *  \param[in,out] reaction global vector (nc*3)

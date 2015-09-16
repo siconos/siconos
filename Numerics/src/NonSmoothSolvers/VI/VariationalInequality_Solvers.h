@@ -68,14 +68,22 @@ extern "C"
       \param info return 0 if the solution is found
       \param options the solver options :
       iparam[0] : Maximum iteration number
-      dparam[3] : rho >0
+      dparam[3] : rho  parameter.
+         If rho >0, then self-adaptive (Armijo like) procedure.
+         If rho <0, then constant rho parameter  (rho <-- -rho)
+      Adaptive step-size parameters:
+      Adaptive step-size parameters:
+      dparam[4] = 2/3.0;  tau
+      dparam[5] = 3.0/2.0;  tauinv
+      dparam[6] = 0.9;   L
+      dparam[7] = 0.3;   Lmin
   */
   void variationalInequality_ExtraGradient(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for EG
     \param options the pointer to the array of options to set
   */
-  
+
   int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
 
 
@@ -96,6 +104,11 @@ extern "C"
       dparam[3] : rho parameter.
          If rho >0, then self-adaptive (Armijo like) procedure.
          If rho <0, then constant rho parameter  (rho <-- -rho)
+      Adaptive step-size parameters:
+      dparam[4] = 2/3.0;  tau
+      dparam[5] = 3.0/2.0;  tauinv
+      dparam[6] = 0.9;   L
+      dparam[7] = 0.3;   Lmin
 
   */
   void variationalInequality_FixedPointProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options);
@@ -125,7 +138,7 @@ extern "C"
   int variationalInequality_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options);
 
 
-  /** VI Solver based on a merit function minimization with a line-search type algorithm 
+  /** VI Solver based on a merit function minimization with a line-search type algorithm
    * \param problem the variational inequality problem to solve
    * \param[in,out] x as input, the initial guess; as output the solution if
    * the algorithm is successful

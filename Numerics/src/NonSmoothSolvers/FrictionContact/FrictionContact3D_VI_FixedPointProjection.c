@@ -78,15 +78,19 @@ void frictionContact3D_VI_FixedPointProjection(FrictionContactProblem* problem, 
   {
     printf("size prolem in frictionContact3D_VI_FixedPointProjection\n");
   }
-  int i;
-  for (i = 0; i < isize; i++)
-  {
-    visolver_options->iparam[i] = options->iparam[i] ;
-  }
-  for (i = 0; i < dsize; i++)
-  {
-    visolver_options->dparam[i] = options->dparam[i] ;
-  }
+  /* int i; */
+  /* for (i = 0; i < isize; i++) */
+  /* { */
+  /*   visolver_options->iparam[i] = options->iparam[i] ; */
+  /* } */
+  /* for (i = 0; i < dsize; i++) */
+  /* { */
+  /*   visolver_options->dparam[i] = options->dparam[i] ; */
+  /* } */
+
+  visolver_options->iparam[0] = options->iparam[0];
+  visolver_options->dparam[0] = options->dparam[0];
+
 
   variationalInequality_FixedPointProjection(vi, reaction, velocity , info , visolver_options);
 

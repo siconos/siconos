@@ -104,14 +104,14 @@ void frictionContact3D_SOCLCP(FrictionContactProblem* problem, double *reaction,
   }
   internalsolver_options->dparam[0]=options->dparam[0];
   internalsolver_options->iparam[0]=options->iparam[0];
-  
+
   (*internalsolver)(soclcp, reaction , velocity , info , internalsolver_options);
 
   error = internalsolver_options->dparam[1];
 
 
   double real_error=0.0;
-  
+
   FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &real_error);
 
   if (options->callback)
@@ -119,8 +119,8 @@ void frictionContact3D_SOCLCP(FrictionContactProblem* problem, double *reaction,
     options->callback->collectStatsIteration(options->callback->env, nc * 3,
                                              reaction, velocity, error, NULL);
   }
-  
-  if (verbose > -1)
+
+  if (verbose > 0)
   {
     printf("----------------------------------- FC3D - SOCLCP - # Iteration %i Final Error = %14.7e\n", internalsolver_options->iparam[7], error);
     printf("----------------------------------- FC3D - SOCLCP - #              error of the real problem = %14.7e\n", real_error );
@@ -134,7 +134,7 @@ void frictionContact3D_SOCLCP(FrictionContactProblem* problem, double *reaction,
 
   if (internalsolver_options->internalSolvers != NULL)
     internalsolver_options->internalSolvers->dWork = NULL;
-  
+
   dparam[0] = tolerance;
   dparam[1] = error;
   dparam[2] = fabs(real_error-error);

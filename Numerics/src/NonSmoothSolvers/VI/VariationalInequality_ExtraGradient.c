@@ -72,7 +72,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
     {
       printf("----------------------------------- VI - Extra Gradient (EG) - Variable stepsize with starting rho = %14.7e \n", rho);
     }
-     
+
   }
 
   /* Variable for Line_search */
@@ -80,7 +80,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   double error_k;
   int ls_iter = 0;
   int ls_itermax = 10;
-  double tau=0.6, L= 0.9, Lmin =0.3, taumin=0.7;
+  double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7];
   double a1=0.0, a2=0.0;
   double * x_k =0;
   double * w_k =0;
@@ -104,16 +104,16 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
       /* wtmp <- F(xtmp) */
       problem->F(problem, n, xtmp,wtmp);
-      
+
       /* xtmp <- xtmp - F(xtmp) */
       cblas_daxpy(n, -1.0, wtmp , 1, xtmp , 1) ;
-      
+
       /* wtmp <-  ProjectionOnX(xtmp) */
       problem->ProjectionOnX(problem,xtmp,wtmp);
-      
+
       /* x <- x - wtmp */
       cblas_daxpy(n, -1.0, wtmp , 1, x , 1) ;
-      
+
       /* x <-  ProjectionOnX(x) */
       cblas_dcopy(n , xtmp , 1 , x, 1);
 
@@ -146,105 +146,222 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
   if (isVariable)
   {
-    while ((iter < itermax) && (hasNotConverged > 0))
+    if (iparam[1]==0)
     {
-      ++iter;
-
-
-      /* Store the error */
-      error_k = error;
-
-      /* x_k <-- x store the x at the beginning of the iteration */
-      cblas_dcopy(n , x , 1 , x_k, 1);
-
-      problem->F(problem, n, x, w_k);
-
-      ls_iter = 0 ;
-      success =0;
-
-      while (!success && (ls_iter < ls_itermax))
+      while ((iter < itermax) && (hasNotConverged > 0))
       {
+        ++iter;
 
-        rho_k = rho * pow(tau,ls_iter);
 
-        /* x <- x - rho_k*  w_k */
-        cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
-        
+        /* Store the error */
+        error_k = error;
+
+        /* x_k <-- x store the x at the beginning of the iteration */
+        cblas_dcopy(n , x , 1 , x_k, 1);
+
+        problem->F(problem, n, x, w_k);
+
+        ls_iter = 0 ;
+        success =0;
+        rho_k=rho / tau;
+
+        while (!success && (ls_iter < ls_itermax))
+        {
+
+          /* if (iparam[3] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2/(rho_k*a1)); */
+          /* else */ rho_k = rho_k * tau ;
+
+          /* x <- x_k  for the std apprach*/
+          if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
+          /* x <- x - rho_k*  w_k */
+          cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
+
+          /* wtmp <-  ProjectionOnX(xtmp) */
+          cblas_dcopy(n , x , 1 , xtmp, 1);
+          problem->ProjectionOnX(problem,xtmp,x);
+
+          problem->F(problem, n, x, w);
+
+          DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
+                         {
+                           printf("x[%i]=%12.8e\t",i,x[i]);    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+                         }
+            );
+
+          /* velocitytmp <- velocity - velocity_k   */
+          cblas_dcopy(n, w, 1, wtmp , 1) ;
+          cblas_daxpy(n, -1.0, w_k , 1, wtmp , 1) ;
+          a1 = cblas_dnrm2(n, wtmp, 1);
+          DEBUG_PRINTF("a1 = %12.8e\n", a1);
+
+          /* reactiontmp <- reaction */
+          cblas_dcopy(n, x, 1,xtmp , 1) ;
+
+          /* reactiontmp <- reaction - reaction_k   */
+          cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
+          a2 = cblas_dnrm2(n, xtmp, 1) ;
+          DEBUG_PRINTF("a2 = %12.8e\n", a2);
+
+          success = (rho_k*a1 < L * a2)?1:0;
+
+          /* printf("rho_k = %12.8e\t", rho_k); */
+          /* printf("a1 = %12.8e\t", a1); */
+          /* printf("a2 = %12.8e\t", a2); */
+          /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
+          /* printf("success = %i\n", success); */
+
+          ls_iter++;
+        }
+        /* velocitytmp <- q  */
+        /* cblas_dcopy(n , q , 1 , velocitytmp, 1); */
+        /* prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp); */
+
+        problem->F(problem, n, x,wtmp);
+
+        /* x <- x - rho_k*  wtmp */
+        cblas_daxpy(n, -rho_k, wtmp , 1, x , 1) ;
+
         /* wtmp <-  ProjectionOnX(xtmp) */
         cblas_dcopy(n , x , 1 , xtmp, 1);
         problem->ProjectionOnX(problem,xtmp,x);
-        
-        problem->F(problem, n, x, w);
-
         DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
                        {
                          printf("x[%i]=%12.8e\t",i,x[i]);    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
                        }
           );
 
-        /* velocitytmp <- velocity - velocity_k   */
-        cblas_dcopy(n, w, 1, wtmp , 1) ;
-        cblas_daxpy(n, -1.0, w_k , 1, wtmp , 1) ;
-        a1 = cblas_dnrm2(n, wtmp, 1);
-        DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
-        /* reactiontmp <- reaction */
-        cblas_dcopy(n, x, 1,xtmp , 1) ;
 
-        /* reactiontmp <- reaction - reaction_k   */
-        cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
-        a2 = cblas_dnrm2(n, xtmp, 1) ;
-        DEBUG_PRINTF("a2 = %12.8e\n", a2);
+        /* **** Criterium convergence **** */
+        variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+        DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
+        /*Update rho*/
+        if ((rho_k*a1 < Lmin * a2) && (error < error_k))
+        {
+          rho =rho_k*tauinv;
+        }
+        else
+          rho =rho_k;
 
-        success = (rho_k*a1 < L * a2)?1:0;
 
-        /* printf("rho_k = %12.8e\t", rho_k); */
-        /* printf("a1 = %12.8e\t", a1); */
-        /* printf("a2 = %12.8e\t", a2); */
-        /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
-        /* printf("success = %i\n", success); */
-
-        ls_iter++;
+        if (verbose > 0)
+        {
+          printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+        }
+        if (error < tolerance) hasNotConverged = 0;
+        *info = hasNotConverged;
       }
-      /* velocitytmp <- q  */
-      /* cblas_dcopy(n , q , 1 , velocitytmp, 1); */
-      /* prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp); */
+    }// end iparam[1]==0
 
-      problem->F(problem, n, x,wtmp);
-
-      /* x <- x - rho_k*  wtmp */
-      cblas_daxpy(n, -rho_k, wtmp , 1, x , 1) ;
-      
-      /* wtmp <-  ProjectionOnX(xtmp) */
-      cblas_dcopy(n , x , 1 , xtmp, 1);
-      problem->ProjectionOnX(problem,xtmp,x);
-      DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
-                     {
-                       printf("x[%i]=%12.8e\t",i,x[i]);    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
-                     }
-        );
-
-
-
-      /* **** Criterium convergence **** */
-      variationalInequality_computeError(problem, x , w, tolerance, options, &error);
-      DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
-      /*Update rho*/
-      if ((rho_k*a1 < Lmin * a2) && (error < error_k))
+    if (iparam[1]==1)
+    {
+      while ((iter < itermax) && (hasNotConverged > 0))
       {
-        rho =rho_k/taumin;
-      }
-      else
-        rho =rho_k;
+        ++iter;
 
 
-      if (verbose > 0)
-      {
-        printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+        /* Store the error */
+        error_k = error;
+
+        /* x_k <-- x store the x at the beginning of the iteration */
+        cblas_dcopy(n , x , 1 , x_k, 1);
+
+        problem->F(problem, n, x, w_k);
+
+        ls_iter = 0 ;
+        success =0;
+        rho_k=rho / tau;
+
+        while (!success && (ls_iter < ls_itermax))
+        {
+
+          /* if (iparam[3] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2*a2/(rho_k*a1)); */
+          /* else */ rho_k = rho_k * tau ;
+
+          /* x <- x_k  for the std approach*/
+          if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
+          /* x <- x - rho_k*  w_k */
+          cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
+
+          /* wtmp <-  ProjectionOnX(xtmp) */
+          cblas_dcopy(n , x , 1 , xtmp, 1);
+          problem->ProjectionOnX(problem,xtmp,x);
+
+          problem->F(problem, n, x, w);
+
+          DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
+                         {
+                           printf("x[%i]=%12.8e\t",i,x[i]);    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+                         }
+            );
+
+          /* velocitytmp <- velocity - velocity_k   */
+          cblas_dcopy(n, w, 1, wtmp , 1) ;
+          cblas_daxpy(n, -1.0, w_k , 1, wtmp , 1) ;
+          a1 = cblas_ddot(n, xtmp, 1, w, 1);
+          DEBUG_PRINTF("a1 = %12.8e\n", a1);
+
+          /* reactiontmp <- reaction */
+          cblas_dcopy(n, x, 1,xtmp , 1) ;
+
+          /* reactiontmp <- reaction - reaction_k   */
+          cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
+          a2 = cblas_dnrm2(n, xtmp, 1) ;
+          DEBUG_PRINTF("a2 = %12.8e\n", a2);
+          DEBUG_PRINTF("test rho_k*a1 < L * a2 * a2 = %e < %e\n", rho_k*a1 , L * a2 * a2 ) ;
+          success = (rho_k*a1 < L * a2 * a2)?1:0;
+
+          /* printf("rho_k = %12.8e\t", rho_k); */
+          /* printf("a1 = %12.8e\t", a1); */
+          /* printf("a2 = %12.8e\t", a2); */
+          /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
+          /* printf("success = %i\n", success); */
+
+          ls_iter++;
+        }
+        /* velocitytmp <- q  */
+        /* cblas_dcopy(n , q , 1 , velocitytmp, 1); */
+        /* prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp); */
+
+        problem->F(problem, n, x,wtmp);
+
+        /* x <- x - rho_k*  wtmp */
+        cblas_daxpy(n, -rho_k, wtmp , 1, x , 1) ;
+
+        /* wtmp <-  ProjectionOnX(xtmp) */
+        cblas_dcopy(n , x , 1 , xtmp, 1);
+        problem->ProjectionOnX(problem,xtmp,x);
+        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
+                       {
+                         printf("x[%i]=%12.8e\t",i,x[i]);    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+                       }
+          );
+
+
+
+        /* **** Criterium convergence **** */
+        variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+        DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
+        /*Update rho*/
+        if ((rho_k*a1 < Lmin * a2) && (error < error_k))
+        {
+          rho =rho_k*tauinv;
+        }
+        else
+          rho =rho_k;
+
+
+        if (verbose > 0)
+        {
+          printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+        }
+        if (error < tolerance) hasNotConverged = 0;
+        *info = hasNotConverged;
       }
-      if (error < tolerance) hasNotConverged = 0;
-      *info = hasNotConverged;
-    }
+    }// end iparam[1]==1
+
+
+
     free(x_k);
     free(w_k);
   }
@@ -291,7 +408,11 @@ int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* o
   options->dparam[0] = 1e-3;
   options->dparam[3] = 1e-3;
   options->dparam[3] = -1.0; // rho is variable by default
-  
+  options->dparam[4] = 2/3.0;  /* tau */
+  options->dparam[5] = 3.0/2.0;  /*tauinv */
+  options->dparam[6] = 0.9;  /* L */
+  options->dparam[7] = 0.3;  /* Lmin */
+
   options->internalSolvers = NULL;
 
   return 0;

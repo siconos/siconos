@@ -74,19 +74,19 @@ void computeSparseAWpB(
   NumericsMatrix *AWpB)
 {
 
-  unsigned int problemSize = W->size0;
+  /* unsigned int problemSize = W->size0; */
 
   SparseBlockStructuredMatrix* Wb = W->matrix1;
 
-  assert(problemSize >= 3);
-  assert(problemSize / 3 >= Wb->filled1 - 1);
+  assert((unsigned)W->size0 >= 3);
+  assert((unsigned)W->size0 / 3 >= Wb->filled1 - 1);
 
   double Ai[9], Bi[9], tmp[9];
 
   for (unsigned int row = 0, ip9 = 0, i0 = 0;
        row < Wb->filled1 - 1; ++row, ip9 += 9, i0 += 3)
   {
-    assert(ip9 < 3 * problemSize - 8);
+    assert(ip9 < 3 *  (unsigned)W->size0 - 8);
 
     extract3x3(3, ip9, 0, A, Ai);
     extract3x3(3, ip9, 0, B, Bi);
@@ -465,6 +465,10 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
                                       int* info,
                                       SolverOptions* options)
 {
+
+
+
+
   assert(equation);
 
   FrictionContactProblem* problem = equation->problem;
@@ -510,6 +514,8 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
 
   double tolerance = options->dparam[0];
   assert(tolerance > 0);
+  if (verbose > 0)
+    printf("------------------------ FC3D - NonsmoothEqnSolve - Start with tolerance = %g\n", tolerance);
 
   unsigned int _3problemSize = 3 * problemSize;
 
@@ -732,7 +738,6 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
        }
        info[0] = 2;
        break;
-
     }
 
     if (options->dparam[1] < tolerance)
@@ -746,12 +751,10 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   if (verbose > 0)
   {
     if (!info[0])
-      printf("fc3d_esolve: convergence after %d iterations, residual : %g\n",
-             iter, options->dparam[1]);
+      printf("------------------------ FC3D - NonsmoothEqnSolve - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
     else
     {
-      printf("fc3d_esolve: no convergence after %d iterations, residual : %g\n",
-             iter, options->dparam[1]);
+      printf("------------------------ FC3D - NonsmoothEqnSolve - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
     }
   }
 
@@ -776,4 +779,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     free(AWpB);
     free(AWpB_backup);
   }
+  if (verbose > 0)
+    printf("------------------------ FC3D - NonsmoothEqnSolve - End\n");
+
 }

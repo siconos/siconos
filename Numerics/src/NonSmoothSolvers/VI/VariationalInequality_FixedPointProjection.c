@@ -24,8 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-/* #define DEBUG_STDOUT  */
-/* #define DEBUG_MESSAGES  */
+/* #define DEBUG_STDOUT   */
+/* #define DEBUG_MESSAGES   */
 #include "debug.h"
 /* #define min(a,b) (a<=b?a:b) */
 
@@ -77,7 +77,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   double error_k;
   int ls_iter = 0;
   int ls_itermax = 10;
-  double tau=2/3.0, L= 0.90, Lmin = 0.3, tauinv=1.0/tau;
+  double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7];
+  DEBUG_PRINTF("tau=%g, tauinv=%g, L= %g, Lmin = %g",dparam[4], dparam[5],  dparam[6], dparam[7] ) ;
   double a1=0.0, a2=0.0;
   double * x_k = NULL;
   double * w_k = NULL;
@@ -137,11 +138,14 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         ls_iter = 0 ;
         success =0;
-        rho_k=rho;
+        rho_k=rho / tau;
+
         while (!success && (ls_iter < ls_itermax))
         {
+          /* if (iparam[3] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2/(rho_k*a1)); */
+          /* else */ rho_k = rho_k * tau ;
 
-          /* x <- x_k  for the std apprach*/
+          /* x <- x_k  for the std approach*/
           if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
@@ -179,11 +183,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* printf("a2 = %12.8e\t", a2); */
           /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
           /* printf("success = %i\n", success); */
-          if (!success)
-          {
-            /* if (iparam[3]) rho_k = rho_k * tau * min(1.0,a2/(rho_k*a1)); */
-            /* else */ rho_k = rho_k * tau ;
-          }
+
           ls_iter++;
         }
 
@@ -240,10 +240,14 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         ls_iter = 0 ;
         success =0;
-        rho_k=rho;
+        rho_k=rho/tau;
         while (!success && (ls_iter < ls_itermax))
         {
-           /* x <- x_k  for the std apprach*/
+
+          /* if (iparam[3] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2*a2/(rho_k*a1)); */
+          /* else */ rho_k = rho_k * tau ;
+
+           /* x <- x_k  for the std approach*/
           if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
@@ -281,11 +285,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* printf("a2 = %12.8e\t", a2); */
           /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
           /* printf("success = %i\n", success); */
-          if (!success)
-          {
-            /* if (iparam[3]) rho_k = rho_k * tau * min(1.0,a2*a2/(rho_k*a1)); */
-            /* else */ rho_k = rho_k * tau ;
-          }
+
           ls_iter++;
         }
 
@@ -342,10 +342,13 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
         ls_iter = 0 ;
         success =0;
-        rho_k=rho;
+        rho_k=rho/tau;
         while (!success && (ls_iter < ls_itermax))
         {
-          /* x <- x_k  for the std apprach*/
+          /* if (iparam[3] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a1/(rho_k*a2*a2)); */
+          /* else */ rho_k = rho_k * tau ;
+
+          /* x <- x_k  for the std approach*/
           if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
@@ -383,11 +386,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* printf("a2 = %12.8e\t", a2); */
           /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
           /* printf("success = %i\n", success); */
-          if (!success)
-          {
-            /* if (iparam[3]) rho_k = rho_k * tau * min(1.0,a1/(rho_k*a2*a2)); */
-            /* else */ rho_k = rho_k * tau ;
-          }
+
           ls_iter++;
         }
 
@@ -478,9 +477,15 @@ int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOpt
     options->dparam[i] = 0.0;
   }
   options->iparam[0] = 20000;
+
   options->dparam[0] = 1e-3;
   options->dparam[3] = 1e-3;
-  options->dparam[3] = -1.0; // rho is variable by default
+  options->dparam[3] = -1.0;  /* rho is variable by default */
+  options->dparam[4] = 2.0/3.0;  /* tau */
+  options->dparam[5] = 3.0/2.0;  /* tauinv */
+  options->dparam[6] = 0.9;  /* L */
+  options->dparam[7] = 0.3;  /* Lmin */
+
 
   options->internalSolvers = NULL;
 
