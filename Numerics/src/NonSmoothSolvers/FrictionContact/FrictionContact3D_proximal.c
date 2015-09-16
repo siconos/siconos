@@ -31,6 +31,10 @@
 
 void frictionContact3D_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
+  if (verbose>0)
+    printf(" ========================== Start PROX (Proximal Point Algortihm) solver for Friction-Contact 3D problem ==========================\n");
+
+
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -104,6 +108,10 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     }
     else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALAC)
     {
+      if (verbose>0)
+      {
+        printf(" ========================== with LOCALAC internal solver                                                ==========================\n");
+      }
       internalsolver = &frictionContact3D_localAlartCurnier;
 
 #ifdef HAVE_MPI
@@ -120,9 +128,14 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     }
     else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALFB)
     {
+      if (verbose>0)
+      {
+        printf(" ========================== with LOCALFB internal solver                                                ==========================\n");
+      }
+      internalsolver = &frictionContact3D_localFischerBurmeister;
       if (internalsolver_options->iparam[13] == 1)   /* MUMPS */
       {
-        internalsolver = &frictionContact3D_localFischerBurmeister;
+
 
 #ifdef HAVE_MPI
         if (internalsolver_options->solverData == MPI_COMM_NULL) /* default */
@@ -150,9 +163,31 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
 
   internalsolver_options->dparam[0] = options->dparam[0];
   internalsolver_options->dparam[0] = error;
-
   alpha = sigma*pow(error,nu);
 
+  double max_diag =0.0;
+  if (M->storageType == 0)
+  {
+    for (int i = 0 ; i < n ; i++) max_diag = max(max_diag,M->matrix0[i + i * n]);
+  }
+  else if (M->storageType == 1)
+  {
+    for (int ic = 0 ; ic < nc ; ic++)
+    {
+      int diagPos = getDiagonalBlockPos(M->matrix1, ic);
+      for (int i = 0 ; i < 3 ; i++) max_diag = max(max_diag,M->matrix1->block[diagPos][i + 3 * i]) ;
+    }
+  }
+
+  alpha = max_diag;
+  internalsolver_options->dparam[0] = options->dparam[0]/10.0;
+  if (verbose > 0)
+  {
+    printf(
+      "------------------------ FC3D - PROXIMAL - Iteration %i Error = %14.7e \n", iter, error);
+    printf(
+      "                          with alpha = %7.4e and internal solver tolerance = %7.4e \n", alpha, internalsolver_options->dparam[0]);
+  }
 
   DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
   DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
@@ -185,11 +220,15 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     /* internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]); */
     //internalsolver_options->dparam[0] = options->dparam[0];
 
-    internalsolver_options->dparam[0] = alpha*error;
+    /* internalsolver_options->dparam[0] = alpha*error; */
+    /*internalsolver_options->dparam[0] = error/100.0; */
+    internalsolver_options->dparam[0] = options->dparam[0]/1000.0;
+
     DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
     /* **** Criterium convergence **** */
+
     //substract proximal regularization on q
     cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1) ;
     //substract proximal regularization on M
