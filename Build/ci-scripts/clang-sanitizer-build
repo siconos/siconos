@@ -18,11 +18,19 @@ EXTRA_NAME=${1:-sanitizer}
 
 shift
 
+# with msan, we use libc++ and therefore external libraries (in c++) may fail to link.
+# This is the case with boost lib, so we must disable IO --xhub
+if [ "${EXTRA_NAME#msan}" != "${EXTRA_NAME}" ]; then
+    WITH_IO=1
+else
+    WITH_IO=0
+fi
+
 cmake $WORK_DIR/Build \
     -DON_DASHBOARD=1 \
     -DMODE=Continuous \
     -DDEV_MODE=ON \
-    -DWITH_IO=1 -DWITH_GENERATION=0 \
+    -DWITH_IO=${WITH_IO} -DWITH_GENERATION=0 \
     -DWITH_MECHANICS=1 \
     -DWITH_CONTROL=1 \
     -DWITH_EXAMPLES=1 \
