@@ -42,7 +42,7 @@ void MyDS::computeJacobianfx(double t, bool  b)
   _jacobianfx->setValue(0, 0, 0);
 }
 
-void MyDS::computeJacobianfx(double t, SP::SiconosVector v)
+void MyDS::computeJacobianfx(double t, const SiconosVector& v)
 {
   _jacobianfx->setValue(0, 0, 0);
 
