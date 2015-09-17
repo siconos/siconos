@@ -86,6 +86,10 @@ STRING(REGEX REPLACE "__11__" "\"" EXTRA_CMAKE_ARGS_L "${EXTRA_CMAKE_ARGS_L}" )
 STRING(REGEX REPLACE "__22__" ":" EXTRA_CMAKE_ARGS_L "${EXTRA_CMAKE_ARGS_L}" )
 STRING(REGEX REPLACE "___" ";" EXTRA_CMAKE_ARGS_L "${EXTRA_CMAKE_ARGS_L}" )
 
+if(TEST_TIMEOUT)
+  set(CTEST_TEST_TIMEOUT ${TEST_TIMEOUT})
+endif(TEST_TIMEOUT)
+
 #MESSAGE( "EXTRA_CMAKE_ARGS_L :: ${EXTRA_CMAKE_ARGS_L}")
 
 
@@ -117,13 +121,22 @@ set( dashboard_cache "
      "
   )
 
+include(ProcessorCount)
+ProcessorCount(N)
+if(NOT N EQUAL 0)
+  IF(NOT MODULE MATCHES "IO")
+    set(CTEST_BUILD_FLAGS -j${N})
+  ENDIF()
+  #  set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
+endif()
+
 ctest_start("${MODE}")
 if(FROM_REPO)
   ctest_update()
 endif()
 ctest_configure()
 ctest_build()
-ctest_test()
+ctest_test(PARALLEL_LEVEL ${N})
 if (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
   ctest_coverage()
 endif (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
