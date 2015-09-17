@@ -123,12 +123,12 @@ set( dashboard_cache "
 
 include(ProcessorCount)
 ProcessorCount(N)
-if(NOT N EQUAL 0)
-  IF(NOT MODULE MATCHES "IO")
-    set(CTEST_BUILD_FLAGS -j${N})
-  ENDIF()
+#if(NOT N EQUAL 0)
+  #  IF(NOT MODULE MATCHES "IO")
+  #    set(CTEST_BUILD_FLAGS -j${N})
+  #  ENDIF()
   #  set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
-endif()
+  #endif()
 
 ctest_start("${MODE}")
 if(FROM_REPO)
