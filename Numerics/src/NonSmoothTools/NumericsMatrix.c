@@ -828,7 +828,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       B->matrix1 = newSBM();
       B_ = B->matrix1;
 
-      B_->block = (double **) malloc(A_->nbblocks * sizeof(double));
+      B_->block = (double **) malloc(A_->nbblocks * sizeof(double *));
       B_->nbblocks = A_->nbblocks;
 
       B_->blocksize0 = (unsigned int*) malloc(A_->blocknumber0 * sizeof(unsigned int));
