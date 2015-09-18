@@ -21,9 +21,9 @@ shift
 # with msan, we use libc++ and therefore external libraries (in c++) may fail to link.
 # This is the case with boost lib, so we must disable IO --xhub
 if [ "${EXTRA_NAME#msan}" != "${EXTRA_NAME}" ]; then
-    WITH_IO=1
-else
     WITH_IO=0
+else
+    WITH_IO=1
 fi
 
 cmake $WORK_DIR/Build \
