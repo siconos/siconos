@@ -33,7 +33,6 @@ Documentation to be done
 
 #include "NumericsConfig.h"
 
-#include <stdio.h> /* for csparse */
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif
@@ -119,7 +118,7 @@ extern "C"
    * \return integer value : 1 if the absolute value is less than
    * DBL_EPSILON, otherwise the return value of cs_entry.
    */
-  int cs_zentry(CSparseMatrix *T, int i, int j, double x);
+  csi cs_zentry(CSparseMatrix *T, csi i, csi j, double x);
 
   /** Create dense matrix from a CSparseMatrix.
    * \param A the CSparseMatrix
