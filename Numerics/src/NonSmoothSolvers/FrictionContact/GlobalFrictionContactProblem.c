@@ -42,6 +42,7 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FI
   {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
+  fprintf(file, "\n");
   for (i = 0; i < problem->H->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->b[i]);
@@ -131,5 +132,54 @@ void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
 
   if (problem->env) assert(0 && "freeGlobalFrictionContactProblem :: problem->env != NULL, don't know what to do");
   free(problem);
+
+}
+void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
+{
+
+  assert(problem);
+  int i, n = problem->dimension * problem->numberOfContacts;
+  printf("GlobalFrictionContact Display :\n-------------\n");
+  printf("dimension :%d \n", problem->dimension);
+  printf("numberOfContacts:%d \n", problem->numberOfContacts);
+  int m = problem->M->size0;
+  if (problem->M)
+  {
+    printf("M matrix:\n");
+    display(problem->M);
+  }
+  else
+    printf("No M matrix:\n");
+  if (problem->H)
+  {
+    printf("H matrix:\n");
+    display(problem->H);
+  }
+  else
+    printf("No H matrix:\n");
+
+  if (problem->q)
+  {
+    printf("q vector:\n");
+    for (i = 0; i < m; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
+  }
+  else
+    printf("No q vector:\n");
+
+  if (problem->b)
+  {
+    printf("b vector:\n");
+    for (i = 0; i < n; i++) printf("b[ %i ] = %12.8e\n", i, problem->b[i]);
+  }
+  else
+    printf("No q vector:\n");
+
+  if (problem->mu)
+  {
+    printf("mu vector:\n");
+    for (i = 0; i < problem->numberOfContacts; i++) printf("mu[ %i ] = %12.8e\n", i, problem->mu[i]);
+  }
+  else
+    printf("No mu vector:\n");
 
 }

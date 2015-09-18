@@ -140,6 +140,10 @@ typedef struct
 extern "C"
 {
 #endif
+
+  void globalFrictionContact_display(GlobalFrictionContactProblem*  problem);
+
+
   int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file);
 
   int globalFrictionContact_newFromFile(GlobalFrictionContactProblem*  problem, FILE* file);

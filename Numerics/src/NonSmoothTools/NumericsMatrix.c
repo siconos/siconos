@@ -27,7 +27,8 @@
 #include "SiconosLapack.h"
 #include "misc.h"
 #include "GlobalFrictionContact3D_AlartCurnier.h"
-
+#define DEBUG_MESSAGES
+#include "debug.h"
 void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, const double* const x, double beta, double* y)
 {
 
@@ -229,7 +230,7 @@ void displayMat(double * m, int nRow, int nCol, int lDim)
   int lin, col;
   if (lDim == 0)
     lDim = nRow;
-  printf("Matrix of size\t%d\t%d =\n[", nRow, nCol);
+  printf("Matrix of size\t%d\t x \t%d =\n[", nRow, nCol);
   if (nRow == 0)
   {
     printf("]\n");
@@ -262,11 +263,14 @@ void display(const NumericsMatrix* const m)
     fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
+  printf("\n ========== Numerics Matrix\n");
+  printf("\n ========== storageType = %i\n", m->storageType);
+
   switch (m->storageType)
   {
   case NM_DENSE:
   {
-    printf("\n ========== Numerics Matrix\n");
+
     displayMat(m->matrix0, m->size0, m->size1, m->size0);
     break;
   }
@@ -324,9 +328,65 @@ void displayRowbyRow(const NumericsMatrix* const m)
   else if (storageType == 1)
     printSBM(m->matrix1);
 }
+int cs_printInFile(const cs *A, int brief, FILE* file);
+/* print a sparse matrix */
+int cs_printInFile(const cs *A, int brief, FILE* file)
+{
+  int p, j, m, n, nzmax, nz, *Ap, *Ai ;
+  double *Ax ;
+  if(!A)
+  {
+    fprintf(file,"(null)\n") ;
+    return (0) ;
+  }
+  m = A->m ;
+  n = A->n ;
+  Ap = A->p ;
+  Ai = A->i ;
+  Ax = A->x ;
+  nzmax = A->nzmax ;
+  nz = A->nz ;
+  fprintf(file,"CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER,
+         CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ;
+  if(nz < 0)
+  {
+    fprintf(file,"%d-by-%d, nzmax: %d nnz: %d, 1-norm: %g\n", m, n, nzmax,
+           Ap [n], cs_norm(A)) ;
+    for(j = 0 ; j < n ; j++)
+    {
+      fprintf(file,"    col %d : locations %d to %d\n", j, Ap [j], Ap [j+1]-1);
+      for(p = Ap [j] ; p < Ap [j+1] ; p++)
+      {
+        fprintf(file,"      %d : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
+        if(brief && p > 20)
+        {
+          fprintf(file,"  ...\n") ;
+          return (1) ;
+        }
+      }
+    }
+  }
+  else
+  {
+    fprintf(file,"triplet: %d-by-%d, nzmax: %d nnz: %d\n", m, n, nzmax, nz) ;
+    for(p = 0 ; p < nz ; p++)
+    {
+      fprintf(file,"    %d %d : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
+      if(brief && p > 20)
+      {
+        fprintf(file,"  ...\n") ;
+        return (1) ;
+      }
+    }
+  }
+  return (1) ;
+}
+
 
 void printInFile(const NumericsMatrix* const m, FILE* file)
 {
+  DEBUG_PRINT("\n  ========== printInFile(const NumericsMatrix* const m, FILE* file) start\n");
+
   if (! m)
   {
     fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, NULL input.\n");
@@ -336,8 +396,11 @@ void printInFile(const NumericsMatrix* const m, FILE* file)
   fprintf(file, "%d\n", m->storageType);
   fprintf(file, "%d\n", m->size0);
   fprintf(file, "%d\n", m->size1);
+  DEBUG_PRINTF("\n ========== storageType = %i\n", m->storageType);
 
-  if (storageType == 0)
+  switch (m->storageType)
+  {
+  case NM_DENSE:
   {
     fprintf(file, "%i\t%i\n", m->size0, m->size1);
     for (int i = 0; i < m->size1 * m->size0; i++)
@@ -346,9 +409,43 @@ void printInFile(const NumericsMatrix* const m, FILE* file)
       if ((i + 1) % m->size1 == 0)
         fprintf(file, "\n");
     }
+    break;
   }
-  else if (storageType == 1)
+  case NM_SPARSE_BLOCK:
+  {
+    assert(m->matrix1);
     printInFileSBM(m->matrix1, file);
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(m->matrix2);
+    if (m->matrix2->triplet)
+    {
+      cs_printInFile(m->matrix2->triplet, 0, file);
+    }
+    else if (m->matrix2->csc)
+    {
+      cs_printInFile(m->matrix2->csc, 0, file);
+    }
+    else if (m->matrix2->trans_csc)
+    {
+      cs_printInFile(m->matrix2->trans_csc, 0, file);
+    }
+    else
+    {
+      fprintf(stderr, "display for sparse matrix: no matrix found!\n");
+    }
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, unknown storage type .\n");
+    exit(EXIT_FAILURE);
+  }
+  }
+  DEBUG_PRINT("\n  ========== printInFile(const NumericsMatrix* const m, FILE* file) end\n");
+
 }
 
 void printInFileForScilab(const NumericsMatrix* const m, FILE* file)

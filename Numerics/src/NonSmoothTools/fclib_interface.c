@@ -21,7 +21,9 @@
 #include "NonSmoothDrivers.h"
 #include "NumericsConfig.h"
 
+#define DEBUG_MESSAGES
 
+#include "debug.h"
 #ifdef WITH_FCLIB
 #include "fclib_interface.h"
 
@@ -84,8 +86,6 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   fclib_problem->spacedim = problem->dimension;
   fclib_problem->mu =  problem->mu;
   fclib_problem->q =  problem->q;
-
-
 
   fclib_problem->s =  NULL;
 
@@ -156,6 +156,137 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   free(fclib_problem);
 
   return info;
+
+}
+
+
+GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib_problem)
+{
+  GlobalFrictionContactProblem* problem;
+
+  problem = malloc(sizeof(GlobalFrictionContactProblem));
+
+  problem->dimension = fclib_problem->spacedim;
+  problem->mu = fclib_problem->mu;
+  problem->q = fclib_problem->f;
+  problem->b = fclib_problem->w;
+
+  problem->numberOfContacts = fclib_problem->H->n / fclib_problem->spacedim; /* cf fclib spec */
+
+  problem->M = newNumericsMatrix();
+  problem->M->storageType = 2; /* sparse */
+  problem->M->size0 = fclib_problem->M->m;
+  problem->M->size1 = fclib_problem->M->n;
+  problem->M->matrix2 = newNumericsSparseMatrix();
+  problem->M->matrix2->triplet=(CSparseMatrix*)fclib_problem->M;
+  problem->M->matrix0 = NULL;
+  problem->M->matrix1 = NULL;
+
+  problem->H = newNumericsMatrix();
+  problem->H->storageType = 2; /* sparse */
+  problem->H->size0 = fclib_problem->H->m;
+  problem->H->size1 = fclib_problem->H->n;
+  problem->H->matrix2 = newNumericsSparseMatrix();
+  problem->H->matrix2->triplet=(CSparseMatrix*)fclib_problem->H;
+  problem->H->matrix0 = NULL;
+  problem->H->matrix1 = NULL;
+
+  return problem;
+
+}
+
+
+GlobalFrictionContactProblem* globalFrictionContact_fclib_read(const char *path)
+{
+
+  struct fclib_global   *fclib_problem;
+
+  fclib_problem = fclib_read_global(path);
+
+  if (!fclib_problem)
+  {
+    return NULL;
+  }
+
+  return from_fclib_global(fclib_problem);
+}
+
+
+int globalFrictionContact_fclib_write(
+  GlobalFrictionContactProblem* problem,
+  char * title,
+  char * description,
+  char * mathInfo,
+  const char *path);
+int globalFrictionContact_fclib_write(
+  GlobalFrictionContactProblem* problem,
+  char * title,
+  char * description,
+  char * mathInfo,
+  const char *path)
+{
+  int rinfo = 0;
+
+
+  globalFrictionContact_display(problem);
+  FILE * file  =  fopen("toto.dat", "w");
+  globalFrictionContact_printInFile(problem, file);
+  DEBUG_PRINT("construcion of fclib_problem\n");
+  struct fclib_global *fclib_problem;
+  fclib_problem = malloc(sizeof(struct fclib_global));
+
+  fclib_problem->info = malloc(sizeof(struct fclib_info)) ;
+
+  fclib_problem->info->title = title;
+  fclib_problem->info->description = description;
+  fclib_problem->info->math_info = mathInfo;
+
+
+
+  fclib_problem->spacedim = problem->dimension;
+  fclib_problem->mu = problem->mu;
+  fclib_problem->w =  problem->b;
+  fclib_problem->f =  problem->q;
+
+  /* only coordinates */
+  assert(problem->M->matrix2);
+  assert(problem->H->matrix2);
+
+  fclib_problem->M = malloc(sizeof(struct fclib_matrix));
+  fclib_problem->M->n = problem->M->matrix2->triplet->n;
+  fclib_problem->M->m = problem->M->matrix2->triplet->m;
+  fclib_problem->M->nzmax= problem->M->matrix2->triplet->nzmax;
+  fclib_problem->M->p= problem->M->matrix2->triplet->p;
+  fclib_problem->M->i= problem->M->matrix2->triplet->i;
+  fclib_problem->M->x= problem->M->matrix2->triplet->x;
+  fclib_problem->M->nz= problem->M->matrix2->triplet->nz;
+  fclib_problem->M->info=NULL;
+  fclib_problem->H = malloc(sizeof(struct fclib_matrix));
+  fclib_problem->H->n = problem->H->matrix2->triplet->n;
+  fclib_problem->H->m = problem->H->matrix2->triplet->m;
+  fclib_problem->H->nzmax= problem->H->matrix2->triplet->nzmax;
+  fclib_problem->H->p= problem->H->matrix2->triplet->p;
+  fclib_problem->H->i= problem->H->matrix2->triplet->i;
+  fclib_problem->H->x= problem->H->matrix2->triplet->x;
+  fclib_problem->H->nz= problem->H->matrix2->triplet->nz;
+  fclib_problem->H->info=NULL;
+
+
+  fclib_problem->G = NULL;
+  fclib_problem->b = NULL;
+
+
+
+  DEBUG_PRINT("write in fclib of fclib_problem\n");
+
+  rinfo = fclib_write_global(fclib_problem, path);
+  DEBUG_PRINT("end of write in fclib of fclib_problem\n");
+  /* free(fclib_problem->H); */
+  /* free(fclib_problem->M); */
+  /* free(fclib_problem->info); */
+  /* free(fclib_problem); */
+
+  return rinfo;
 
 }
 

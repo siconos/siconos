@@ -20,21 +20,28 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "globalFrictionContact_test_function.h"
+#include "fclib_interface.h"
 
 
-int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
+
+int main(void)
 {
 
+  char filename[51] = "./data/LMGC_GlobalFrictionContactProblem00000.hdf5";
+
+  printf("Test on %s\n", filename);
+
+  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
+
+  globalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_AC);
+
   int k, info = -1 ;
-  GlobalFrictionContactProblem* problem = (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
 
-  info = globalFrictionContact_newFromFile(problem, f);
+  GlobalFrictionContactProblem* problem = globalFrictionContact_fclib_read(filename);
   globalFrictionContact_display(problem);
-
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = globalFrictionContact_printInFile(problem, foutput);
-
 
   NumericsOptions global_options;
   setDefaultNumericsOptions(&global_options);
@@ -43,7 +50,6 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
   int n = problem->M->size1;
-
 
   double *reaction = (double*)malloc(dim * NC * sizeof(double));
   double *velocity = (double*)malloc(dim * NC * sizeof(double));
@@ -94,9 +100,11 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 
   freeGlobalFrictionContactProblem(problem);
 
+  deleteSolverOptions(options);
+  free(options);
+
+  printf("End of test on %s\n", filename);
+
 
   return info;
-
 }
-
-
