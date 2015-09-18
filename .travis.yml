@@ -12,8 +12,12 @@ before_script:
   - sudo apt-get purge cmake -qq
   - sudo apt-get -y install aptitude
   - sudo aptitude -y install libboost-graph1.55-dev libboost-filesystem1.55-dev libboost-serialization1.55-dev
-  - sudo aptitude -y install cmake gfortran gcc doxygen libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-py make g++ git gccxml python-pygccxml python-lxml swig3.0
+  - sudo aptitude -y install cmake gfortran gcc doxygen libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-py make g++ git gccxml python-pygccxml python-lxml swig3.0 lp-solve liblpsolve55-dev
   - sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
+  - sudo dd if=/dev/zero of=/swapfile bs=1M count=1024
+  - sudo chmod 600 /swapfile
+  - sudo mkswap /swapfile
+  - sudo swapon /swapfile
   - ./Build/ci-scripts/gcc-release-build $TRAVIS_BUILD_DIR libatlas -DDART_TESTING_TIMEOUT=60
   - cd $TRAVIS_BUILD_DIR/build-dir
 
