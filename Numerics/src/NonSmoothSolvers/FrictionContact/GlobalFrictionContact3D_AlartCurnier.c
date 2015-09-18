@@ -760,7 +760,7 @@ void globalFrictionContact3D_AlartCurnier(
     }
 #else
     /* use csparse LU factorization */
-    /* CHECK_RETURN(cs_lusol(Jcsc, rhs, 1, DBL_EPSILON)); */
+    CHECK_RETURN(cs_lusol(Jcsc, rhs, 1, DBL_EPSILON));
 
 #endif
 
