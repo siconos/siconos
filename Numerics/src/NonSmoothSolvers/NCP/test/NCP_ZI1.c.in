@@ -211,11 +211,13 @@ int main(void)
 #endif
       if (info > 0)
       {
-        if (options.dparam[1] > options.dparam[0] || @SOLVER_ID@ != SICONOS_NCP_NEWTON_FBLSA)
+        if (options.dparam[1] > options.dparam[0])
         {
+#if @SOLVER_ID@ != SICONOS_NCP_NEWTON_FBLSA
           printf("step %d, iter = %d, error = %le, tol = %g; info = %d\n", k, options.iparam[1], options.dparam[1], options.dparam[0], info);
           printf("NCP_ZI1 with solver @SOLVER_ID@ failed completly\n");
           printf("NCP_ZI1 failure at xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
+#endif
         }
         else
         {
