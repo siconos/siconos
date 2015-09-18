@@ -37,8 +37,8 @@
 #include "sanitizer.h"
 
 #define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 #define NB_APPROX 10
@@ -129,7 +129,7 @@ static int SN_rm_normal_part(int i, int j, double val, void* env)
   }
 }
 
-static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, double* restrict reaction, double* restrict velocity, double* restrict tmpq, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
+static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, double* restrict reaction, double* restrict velocity, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
 {
 
   char msg[GMS_SSSIZE];
@@ -173,7 +173,7 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
   DEBUG_PRINT("FC3D_AVI_GAMS :: W matrix written\n");
 
 
-  cblas_dcopy(W->size0, q, 1, tmpq, 1);
+  cblas_dcopy_msan(size, q, 1, tmpq, 1);
   for (unsigned i = 0; i < size; i += 3)
   {
     tmpq[i] = 0.;
@@ -204,7 +204,7 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: q vector written\n");
 
-  if ((status=NV_to_GDX(Xptr, "qt", "qt vector", reaction, size))) {
+  if ((status=NV_to_GDX(Xptr, "qt", "qt vector", tmpq, size))) {
     printf("Model data not written\n");
     return -ETERMINATE;
   }
@@ -221,6 +221,18 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
     return -ETERMINATE;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: guess_y vector written\n");
+
+  if ((status=NV_to_GDX(Xptr, "guess_lambda_r", "guess for lambda_r", lambda_r, Akmat->size0))) {
+    printf("Model data not written\n");
+    return -ETERMINATE;
+  }
+  DEBUG_PRINT("FC3D_AVI_GAMS :: lambda_r vector written\n");
+
+  if ((status=NV_to_GDX(Xptr, "guess_lambda_y", "guess for lambda_y", lambda_y, Akmat->size0))) {
+    printf("Model data not written\n");
+    return -ETERMINATE;
+  }
+  DEBUG_PRINT("FC3D_AVI_GAMS :: lambda_y vector written\n");
 
   if (idxClose(Xptr))
     idxerrorR(idxGetLastError(Xptr), "idxClose");
@@ -370,13 +382,14 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   else // only for path
   {
 //    optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
-    optSetIntStr(solverOptPtr, "output_linear_model", 1);
+//    optSetIntStr(solverOptPtr, "output_linear_model", 1);
     optSetDblStr(solverOptPtr, "proximal_perturbation", 0.);
     optSetStrStr(solverOptPtr, "crash_method", "none");
     optSetIntStr(solverOptPtr, "crash_perturb", 0);
     optSetDblStr(solverOptPtr, "expand_delta", 1e-10);
 
   }
+//  optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
   optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
   optWriteParameterFile(solverOptPtr, msg);
 
@@ -409,6 +422,9 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   FC3D_gams_generate_first_constraints(&Akmat, problem->mu);
 
   double* tmpq = (double*)malloc(size * sizeof(double));
+  unsigned size_l = (NB_APPROX+2)*problem->numberOfContacts;
+  double* lambda_r = (double*)calloc(size_l, sizeof(double));
+  double* lambda_y = (double*)calloc(size_l, sizeof(double));
   bool done = false;
   double total_residual = 0.;
   double old_residual = 1e20;
@@ -421,7 +437,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   {
     iter++;
     total_residual = 0.;
-    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, reaction, velocity, tmpq, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
+    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, reaction, velocity, tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
     DEBUG_PRINT_VEC(reaction, size);
     DEBUG_PRINT_VEC(velocity, size);
 
@@ -467,6 +483,10 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
       projectionOnCone(&reaction[i3], mu);
       DEBUG_PRINTF("contact %d, after projection: theta_r = %g\n", i, rad2deg(atan2(reaction[i3+2],reaction[i3+1])));
     }
+
+    memset(lambda_r, 0, size_l * sizeof(double));
+    memset(lambda_y, 0, size_l * sizeof(double));
+
     /************************************************
      * (Re)compute the local velocities
      ************************************************/
@@ -550,6 +570,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
 
         /* Generate the supporting hyperplanes  */
         double angle = minus_r_angle;
+        unsigned offset_row_bck = offset_row;
         for (unsigned row_indx = offset_row; row_indx < p + offset_row; ++row_indx)
         {
           DEBUG_PRINTF("contact %d, row entry %d, picking a point at the angle %g\n", i, row_indx, rad2deg(angle));
@@ -598,15 +619,31 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
 #endif
 
         /* update ri =   */
+        unsigned pos = (p-1)/2;
+        double angle_pos = minus_r_angle + pos*slice_angle;
         DEBUG_PRINTF("old r[i] = %g %g %g\n", ri[0], ri[1], ri[2]);
-        ri[1] = -ri[0]*mu*cos(minus_r_angle + delta_angle/2);
-        ri[2] = -ri[0]*mu*sin(minus_r_angle + delta_angle/2);
+        ri[1] = -ri[0]*mu*cos(minus_r_angle + pos*slice_angle);
+        ri[2] = -ri[0]*mu*sin(minus_r_angle + pos*slice_angle);
         DEBUG_PRINTF("new r[i] = %g %g %g\n", ri[0], ri[1], ri[2]);
-        ui[0] = (-ui[1])*ri[1] + (-ui[2])*ri[2];
-        ui[1] = ri[1];
-        ui[2] = ri[2];
+        DEBUG_PRINTF("new \bar{r}[i] = %g %g %g\n", ri[0]*mu/ri[0], ri[1]*mu/ri[0], ri[2]*mu/ri[0]);
+
+//        lambda_r[offset_row_bck + pos] = -(ui[0]*ri[0] + ui[1]*ri[1] + ui[2]*ri[2])/sqrt(1 + mu*mu);
+        lambda_r[offset_row_bck + pos] = sqrt(ui[1]*ui[1] + ui[2]*ui[2]);
+
+        lambda_y[offset_row_bck + pos] = ((-ui[1])*ri[1] + (-ui[2])*ri[2])/(ri[0]*mu);
+        DEBUG_PRINTF("contact %d, lambda_r = %g; lambda_y = %g\n", i, lambda_r[offset_row_bck + pos], lambda_y[offset_row_bck + pos]);
+        DEBUG_PRINTF("contact %d, ui = [%g; %g; %g]\n", i, ui[0], ui[1], ui[2]);
+        DEBUG_PRINTF("contact %d, ui_res = [%g; %g; %g]\n", i, -lambda_r[offset_row_bck + pos]*mu + (ui[0] + mu*lambda_y[offset_row_bck + pos]), -lambda_r[offset_row_bck + pos]*cos(angle_pos) + ui[1], -lambda_r[offset_row_bck + pos]*sin(angle_pos) + ui[2]);
+        double norm_rt = ri[0]*mu;
+        DEBUG_PRINTF("contact %d, yi_res = [%g; %g; %g]\n", i, -lambda_y[offset_row_bck + pos]*mu + ((-ui[1])*ri[1] + (-ui[2])*ri[2])/ri[0], -lambda_y[offset_row_bck + pos]*cos(angle_pos) + ui[1], -lambda_y[offset_row_bck + pos]*sin(angle_pos) + ui[2]);
+        /* now we write the estimate for y here */
+        ui[0] = ((-ui[1])*ri[1] + (-ui[2])*ri[2])/ri[0];
+        ui[1] = ui[0]*ri[1]/ri[0];
+        ui[2] = ui[0]*ri[2]/ri[0];
         DEBUG_PRINTF("new y[i] = %g %g %g\n", ui[0], ui[1], ui[2]);
-        DEBUG_PRINTF("contact %d, row entry %d, last_entry: angle = %g, norm = %g; coeff = %g, %g, %g\n", i, p + offset_row, rad2deg(atan2(middle_point[1], middle_point[0])), hypot(middle_point[0], middle_point[1]), -mu*hypot(middle_point[0], middle_point[1]), -middle_point[0], -middle_point[1]);
+        DEBUG_PRINTF("new \bar{y}[i] = %g %g %g\n", ui[0]*mu/ui[0], ui[1]*mu/ui[0], ui[2]*mu/ui[0]);
+        DEBUG_PRINTF(" ||y_t|| = %g <= %g = mu*y_n; diff = %g\n", sqrt(ui[1]*ui[1] + ui[2]*ui[2]), ui[0]*mu, ui[0]*mu-sqrt(ui[1]*ui[1] + ui[2]*ui[2]));
+        DEBUG_PRINTF("contact %d, row entry %d, last_entry: angle = %g, norm = %g; coeff = %g, %g, %g\n", i, offset_row, rad2deg(atan2(middle_point[1], middle_point[0])), hypot(middle_point[0], middle_point[1]), -mu*hypot(middle_point[0], middle_point[1]), -middle_point[0], -middle_point[1]);
         double xx[] = {1, -middle_point[0]/((1+hypot(middle_point[0], middle_point[1]))/2), -middle_point[1]/((hypot(middle_point[0], middle_point[1]) + 1)/2)};
         xtmp[i3] = 1./mu; xtmp[i3+1] = xx[1]; xtmp[i3+2] = xx[2];
 /*         Akmat.size0 = offset_row + p + 1;
@@ -673,6 +710,8 @@ bad_angle:
     free(xtmp);
     free(xtmp2);
     total_residual = sqrt(total_residual);
+//    optSetDblStr(solverOptPtr, "expand_delta", fmin(1e-8, total_residual*1e-3));
+//    optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
     DEBUG_PRINTF("FrictionContact3D_AVI_gams :: residual = %g\n", total_residual);
 //    done = (total_residual < options->dparam[0]);
     done = (total_residual < 1e-8);
@@ -710,6 +749,9 @@ TERMINATE:
   freeNumericsMatrix(&Emat);
   freeNumericsMatrix(&Akmat);
 
+  free(tmpq);
+  free(lambda_r);
+  free(lambda_y);
   //status = FrictionContact3D_compute_error(problem, reaction, velocity, options->dparam[0], options, &(options->dparam[1]));
   if (done)
   {
