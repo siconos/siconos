@@ -788,8 +788,9 @@ IF(WITH_TESTING)
   NEW_TEST(GFC3D_test15 GlobalFrictionContact3D_test15.c)
   NEW_TEST(GFC3D_test16 GlobalFrictionContact3D_test16.c)
 
+  IF(WITH_FCLIB)
   NEW_TEST(GFC3D_test20 GlobalFrictionContact3D_test20.c)
-
+  ENDIF(WITH_FCLIB)
   
   ## Alart Curnier functions
   NEW_TEST(AlartCurnierFunctions_test FrictionContact3D_AlartCurnierFunctions_test.c)
