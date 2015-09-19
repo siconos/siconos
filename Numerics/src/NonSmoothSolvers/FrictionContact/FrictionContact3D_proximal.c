@@ -279,13 +279,13 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
+  options->iSize = 10;
+  options->dSize = 10;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   null_SolverOptions(options);
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < 10; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;

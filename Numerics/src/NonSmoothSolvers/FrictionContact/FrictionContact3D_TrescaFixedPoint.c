@@ -184,6 +184,8 @@ int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* op
   options->internalSolvers->iparam[0]=1000;
 
   SolverOptions * subsubsolver = options->internalSolvers->internalSolvers;
+  subsubsolver->iparam = (int *)malloc(options->iSize * sizeof(int));
+  subsubsolver->dparam = (double *)malloc(options->dSize * sizeof(double));
 
   subsubsolver->iparam[0] = 50;
   subsubsolver->dparam[0] = 1e-14;
