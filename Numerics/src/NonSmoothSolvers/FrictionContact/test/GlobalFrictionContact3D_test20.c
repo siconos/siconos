@@ -27,7 +27,7 @@
 int main(void)
 {
 
-  char filename[51] = "./data/LMGC_GlobalFrictionContactProblem00000.hdf5";
+  char filename[51] = "./data/LMGC_GlobalFrictionContactProblem00046.hdf5";
 
   printf("Test on %s\n", filename);
 

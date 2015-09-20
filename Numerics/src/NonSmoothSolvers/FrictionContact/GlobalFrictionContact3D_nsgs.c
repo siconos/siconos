@@ -127,6 +127,11 @@ void globalFrictionContact3D_nsgs(GlobalFrictionContactProblem* problem, double 
     Global_MisLU = 1;
     assert(!infoDGETRF);
   }
+  else
+  {
+    fprintf(stderr, "Numerics, GlobalFrictionContactProblem_nsgs failed M->storageType not compatible.\n");
+    exit(EXIT_FAILURE);
+  }
 
   dparam[0] = dparam[2]; // set the tolerance for the local solver
   double* qtmp = (double*)malloc(n * sizeof(double));

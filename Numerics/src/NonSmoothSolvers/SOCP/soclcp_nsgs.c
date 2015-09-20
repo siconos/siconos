@@ -622,11 +622,13 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
   /***** Free memory *****/
   (*freeSolver)(problem,localproblem,localsolver_options);
-  if(problem->M->storageType == 0 && localproblem->M->matrix0 != NULL)
-  {
-    free(localproblem->M->matrix0);
-  }
-  localproblem->M->matrix0 = NULL;
+  freeNumericsMatrix(localproblem->M);
+  
+  /* if(problem->M->storageType == 0 && localproblem->M->matrix0 != NULL) */
+  /* { */
+  /*   free(localproblem->M->matrix0); */
+  /* } */
+  /* localproblem->M->matrix0 = NULL; */
   freeSecondOrderConeLinearComplementarityProblem(localproblem);
 
   if(scones)  /* shuffle */

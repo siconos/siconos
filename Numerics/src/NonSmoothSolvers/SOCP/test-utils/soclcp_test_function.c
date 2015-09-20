@@ -30,6 +30,9 @@ int soclcp_test_function(FILE * f, SolverOptions * options)
   int k, info = -1 ;
   SecondOrderConeLinearComplementarityProblem* problem = (SecondOrderConeLinearComplementarityProblem *)malloc(sizeof(SecondOrderConeLinearComplementarityProblem));
 
+  assert(f);
+  assert(problem);
+  
   info = secondOrderConeLinearComplementarityProblem_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");

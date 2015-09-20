@@ -27,7 +27,7 @@
 #include "SiconosLapack.h"
 #include "misc.h"
 #include "GlobalFrictionContact3D_AlartCurnier.h"
-#define DEBUG_MESSAGES
+//#define DEBUG_MESSAGES
 #include "debug.h"
 void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, const double* const x, double beta, double* y)
 {

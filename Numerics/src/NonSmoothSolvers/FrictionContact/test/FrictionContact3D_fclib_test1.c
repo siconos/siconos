@@ -16,23 +16,26 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT_TEST_FUNCTION_H
-#define FRICTIONCONTACT_TEST_FUNCTION_H
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
+#include "frictionContact_test_function.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
+
+int main(void)
 {
-#endif
+  int info = 0 ;
+  printf("Test on ./data/Capsules-i125-1213.hdf5\n");
 
-  int frictionContact_test_function(FILE * f, SolverOptions * options);
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_LOCALFB);
+  options->dparam[0] = 1e-08;
+  options->iparam[0] = 10000;
 
-#if defined(WITH_FCLIB)
-  int frictionContact_test_function_hdf5(const char * path, SolverOptions * options);
-#endif
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+  info = frictionContact_test_function_hdf5("./data/Capsules-i125-1213.hdf5", options);
+
+  deleteSolverOptions(options);
+  free(options);
+  printf("\nEnd of test on ./data/Capsules-i125-1213.hdf5\n");
+  return info;
 }
-#endif
-
-#endif
-
-

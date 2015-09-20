@@ -82,11 +82,13 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
   int i;
   for (i = 0; i < isize; i++)
   {
-    visolver_options->iparam[i] = options->iparam[i] ;
+    if (options->iparam[i] != 0 )
+      visolver_options->iparam[i] = options->iparam[i] ;
   }
   for (i = 0; i < dsize; i++)
   {
-    visolver_options->dparam[i] = options->dparam[i] ;
+    if (fabs(options->dparam[i]) >= 1e-24 )
+      visolver_options->dparam[i] = options->dparam[i] ;
   }
 
   variationalInequality_ExtraGradient(vi, reaction, velocity , info , visolver_options);

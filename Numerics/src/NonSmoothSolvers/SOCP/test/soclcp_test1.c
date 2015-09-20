@@ -28,7 +28,7 @@ int main(void)
   int info = 0 ;
   printf("Test on ./data/Example1_SOCLCP_SBM.dat\n");
 
-  FILE * finput  =  fopen("output.dat", "r");
+  FILE * finput  =  fopen("./data/Example1_SOCLCP_SBM.dat", "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = soclcp_setDefaultSolverOptions(options, SICONOS_SOCLCP_NSGS);
   options->dparam[0] = 1e-16;

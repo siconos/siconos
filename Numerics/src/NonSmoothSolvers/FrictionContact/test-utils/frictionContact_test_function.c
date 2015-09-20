@@ -21,6 +21,11 @@
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 
+#if defined(WITH_FCLIB)
+#include <fclib.h>
+#include <fclib_interface.h>
+#endif
+
 
 int frictionContact_test_function(FILE * f, SolverOptions * options)
 {
@@ -107,3 +112,91 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 }
 
 
+#if defined(WITH_FCLIB)
+int frictionContact_test_function_hdf5(const char * path, SolverOptions * options)
+{
+
+  int k, info = -1 ;
+  /* FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem)); */
+  /* info = frictionContact_newFromFile(problem, f); */
+  
+  FrictionContactProblem* problem = frictionContact_fclib_read(path);
+  FILE * foutput  =  fopen("checkinput.dat", "w");
+  info = frictionContact_printInFile(problem, foutput);
+
+  
+  NumericsOptions global_options;
+  setDefaultNumericsOptions(&global_options);
+  global_options.verboseMode = 1; // turn verbose mode to off by default
+
+  int NC = problem->numberOfContacts;
+  int dim = problem->dimension;
+  //int dim = problem->numberOfContacts;
+  
+  double *reaction = (double*)calloc(dim * NC, sizeof(double));
+  double *velocity = (double*)calloc(dim * NC, sizeof(double));
+
+  if (dim == 2)
+  {
+    info = frictionContact2D_driver(problem,
+                                    reaction , velocity,
+                                    options, &global_options);
+  }
+  else if (dim == 3)
+  {
+    info = frictionContact3D_driver(problem,
+                                    reaction , velocity,
+                                    options, &global_options);
+  }
+  else
+  {
+    info = 1;
+  }
+  printf("\n");
+
+  int print_size =10;
+
+  if  (dim * NC >= print_size)
+  {
+    printf("First values (%i)\n", print_size);
+    for (k = 0 ; k < print_size; k++)
+    {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    }
+    printf(" ..... \n");
+  }
+  else
+  {
+    for (k = 0 ; k < dim * NC; k++)
+    {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    }
+    printf("\n");
+  }
+
+  /* for (k = 0 ; k < dim * NC; k++) */
+  /* { */
+  /*   printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]); */
+  /* } */
+  /* printf("\n"); */
+
+  if (!info)
+  {
+    printf("test successful, residual = %g\n", options->dparam[1]);
+  }
+  else
+  {
+    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
+  }
+  free(reaction);
+  free(velocity);
+
+  freeFrictionContactProblem(problem);
+  fclose(foutput);
+
+  return info;
+
+}
+
+
+#endif
