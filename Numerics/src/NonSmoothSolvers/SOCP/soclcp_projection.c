@@ -408,7 +408,7 @@ int soclcp_projection_setDefaultSolverOptions(SolverOptions* options)
     options->dparam[i] = 0.0;
   }
 
-  options->iparam[0] = 100;
+  options->iparam[0] = 1000;
   options->dparam[0] = 1e-16;
   return 0;
 }

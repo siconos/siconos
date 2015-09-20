@@ -267,7 +267,7 @@ int globalLineSearchGP(
   }
   if (verbose > 0)
   {
-    printf("global line search failed. max number of iteration reached  = %i  with alpha = %.10e \n", maxiter_ls, alpha[0]);
+    printf("global line search reached the  max number of iteration  = %i  with alpha = %.10e \n", maxiter_ls, alpha[0]);
   }
 
   return -1;
@@ -452,7 +452,7 @@ int frictionContactFBLSA(
 
   if (verbose > 0)
   {
-    printf("fc3d FBLSA failed. max number of iteration reached  = %i\n", maxiter_ls);
+    printf("fc3d FBLSA reached the max number of iteration reached  = %i\n", maxiter_ls);
   }
 
   return -1;

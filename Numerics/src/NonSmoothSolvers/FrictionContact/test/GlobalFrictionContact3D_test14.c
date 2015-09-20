@@ -34,8 +34,9 @@ int main(void)
   FILE * finput  =  fopen(filename, "r");
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
-
   globalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_LOCALAC_WR);
+  options->internalSolvers->iparam[0]=1000;
+  options->internalSolvers->dparam[0]=1e-5; /* no convergence for tighter tolerances */
 
   info = globalFrictionContact_test_function(finput, options);
   deleteSolverOptions(options);

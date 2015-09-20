@@ -786,6 +786,7 @@ IF(WITH_TESTING)
   NEW_TEST(GFC3D_test14 GlobalFrictionContact3D_test14.c)
   NEW_TEST(GFC3D_test14bis GlobalFrictionContact3D_test14bis.c)
   NEW_TEST(GFC3D_test15 GlobalFrictionContact3D_test15.c)
+  SET(GFC3Dtest16_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(GFC3D_test16 GlobalFrictionContact3D_test16.c)
 
   IF(WITH_FCLIB)

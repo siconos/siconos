@@ -803,6 +803,7 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
 }
 void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
 {
+  DEBUG_PRINT("printInFileSBM\n");
   if (! m)
   {
     fprintf(stderr, "Numerics, SparseBlockStructuredMatrix printInFileSBM failed, NULL input.\n");
@@ -848,6 +849,10 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
   unsigned int nbRows, nbColumns;
   for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
   {
+    DEBUG_PRINTF("currentRowNumber = %i\n", currentRowNumber);
+    DEBUG_PRINTF(" m->index1_data[currentRowNumber] = %i\n",  m->index1_data[currentRowNumber]);
+    DEBUG_PRINTF(" m->index1_data[currentRowNumber+1] = %i\n",  m->index1_data[currentRowNumber+1]);
+
     for (size_t blockNum = m->index1_data[currentRowNumber];
          blockNum < m->index1_data[currentRowNumber + 1]; ++blockNum)
     {
@@ -864,8 +869,11 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
         nbColumns -= m->blocksize1[colNumber - 1];
       //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
       fprintf(file, SN_SIZE_T_F "\n", blockNum);
+      DEBUG_PRINTF("nbRows * nbColumns = %i\n", nbRows * nbColumns);
+      assert(m->block[blockNum]);
       for (unsigned int i = 0; i < nbRows * nbColumns; i++)
       {
+        DEBUG_PRINTF("i = %i, blockNum = %i,  m->block[%i][%i] = %g\n ", i, blockNum, blockNum, i, m->block[blockNum][i] );
         fprintf(file, "%32.24e\n", m->block[blockNum][i]);
       }
 

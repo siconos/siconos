@@ -278,6 +278,7 @@ void uint_swap(unsigned int *a, unsigned int *b);
 void uint_shuffle(unsigned int *a, unsigned int n);
 
 
+
 void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options)
 {
   /* int and double parameters */
@@ -341,7 +342,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
     }
     else
     {
-      localproblem->M = createNumericsMatrix(NM_DENSE, dim_max, dim_max);
+      localproblem->M = newNumericsMatrix();
     }
   }
   else
@@ -622,13 +623,14 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
   /***** Free memory *****/
   (*freeSolver)(problem,localproblem,localsolver_options);
-  freeNumericsMatrix(localproblem->M);
+  /* freeNumericsMatrix(localproblem->M); */
   
-  /* if(problem->M->storageType == 0 && localproblem->M->matrix0 != NULL) */
-  /* { */
-  /*   free(localproblem->M->matrix0); */
-  /* } */
-  /* localproblem->M->matrix0 = NULL; */
+  if(problem->M->storageType == 0 && localproblem->M->matrix0 != NULL)
+  {
+    free(localproblem->M->matrix0);
+  }
+  localproblem->M->matrix0 = NULL;
+  
   freeSecondOrderConeLinearComplementarityProblem(localproblem);
 
   if(scones)  /* shuffle */

@@ -28,9 +28,22 @@ int main(void)
   printf("Test on ./data/Capsules-i125-1213.hdf5\n");
 
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_LOCALFB);
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
   options->dparam[0] = 1e-08;
   options->iparam[0] = 10000;
+  /* options->iparam[11] = 1; */
+  
+  /* SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions)); */
+  /* info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_LOCALFB); */
+  /* options->dparam[0] = 1e-08; */
+  /* options->iparam[0] = 10000; */
+  /* /\* options->iparam[11] = 1; *\/ */
+
+  /* info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_ACLMFP);   */
+  /* options->dparam[0] = 1e-08; */
+  /* options->iparam[0] = 100; */
+  /* options->internalSolvers->iparam[0]=100; */
+
 
   info = frictionContact_test_function_hdf5("./data/Capsules-i125-1213.hdf5", options);
 

@@ -121,7 +121,7 @@ void frictionContact3D_ACLMFixedPoint(FrictionContactProblem* problem, double *r
       normUT = sqrt(velocity[ic*3+1] * velocity[ic*3+1] + velocity[ic*3+2] * velocity[ic*3+2]);
       soclcp->q[3*ic] = problem->q[3*ic] + problem->mu[ic]*normUT;
     }
-    secondOrderConeLinearComplementarityProblem_printInFilename(soclcp,"output.dat");
+    //secondOrderConeLinearComplementarityProblem_printInFilename(soclcp,"output.dat");
     // DEBUG_EXPR(for (int ic = 0 ; ic < nc ; ic++) printf("problem->q[%i] = %le\n", 3*ic, problem->q[3*ic]);
     //  for (int ic = 0 ; ic < nc ; ic++) printf("q[%i] = %le\n", 3*ic, soclcp->q[3*ic]); );
     if (iparam[1] == 0 )
