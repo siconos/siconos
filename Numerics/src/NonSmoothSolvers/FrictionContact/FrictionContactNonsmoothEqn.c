@@ -195,7 +195,7 @@ int globalLineSearchGP(
   {
     if (verbose > 0)
     {
-      fprintf(stderr, "global line search failed. q0 is not a finite number.\n");
+      fprintf(stderr, "global line search warning. q0 is not a finite number.\n");
     }
     return -1;
   }
@@ -224,7 +224,7 @@ int globalLineSearchGP(
 
     if (isnan(q) || isinf(q))
     {
-      printf("global line search failed. q is not a finite number.\n");
+      printf("global line search warning. q is not a finite number.\n");
       return -1;
     }
 
@@ -639,7 +639,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     {
       if (verbose > 0)
       {
-        fprintf(stderr, "fc3d esolve: warning! linear solver failed with code = %d\n", lsi);
+        fprintf(stderr, "fc3d esolve: warning! linear solver exit with code = %d\n", lsi);
       }
     }
 
