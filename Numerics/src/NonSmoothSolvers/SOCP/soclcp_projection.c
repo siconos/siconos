@@ -29,6 +29,7 @@
 #include <math.h>
 #include <float.h>
 
+#include "sanitizer.h"
 #define VERBOSE_DEBUG
 
 void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem * problem,
@@ -256,10 +257,10 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
     localerror_k = localerror;
 
     /* store r at the beginning of the iteration */
-    cblas_dcopy(nLocal , r , 1 , r_k, 1);
+    cblas_dcopy_msan(nLocal , r , 1 , r_k, 1);
 
     /* velocity_k <- q  */
-    cblas_dcopy(nLocal , qLocal , 1 , v_k, 1);
+    cblas_dcopy_msan(nLocal , qLocal , 1 , v_k, 1);
 
     /* velocity_k <- q + M * reaction  */
     cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, r, incx, 1.0, v_k, incy);

@@ -365,7 +365,7 @@ int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactPr
 
 
     /* velocity_k <- q  */
-    cblas_dcopy(nLocal , qLocal , 1 , velocity_k, 1);
+    cblas_dcopy_msan(nLocal , qLocal , 1 , velocity_k, 1);
 
     /* velocity_k <- q + M * reaction  */
     cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocity_k, incy);
@@ -706,10 +706,10 @@ int frictionContact3D_projectionOnCylinderWithLocalIteration_solve(FrictionConta
     localerror_k = localerror;
 
     /* store the reaction at the beginning of the iteration */
-    cblas_dcopy(nLocal , reaction , 1 , reaction_k, 1);
+    cblas_dcopy_msan(nLocal , reaction , 1 , reaction_k, 1);
 
     /* velocity_k <- q  */
-    cblas_dcopy(nLocal , qLocal , 1 , velocity_k, 1);
+    cblas_dcopy_msan(nLocal , qLocal , 1 , velocity_k, 1);
 
     /* velocity_k <- q + M * reaction  */
     cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocity_k, incy);

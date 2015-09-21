@@ -96,7 +96,7 @@ int soclcp_compute_error(
   {
     dim_max=max(dim_max,problem->coneIndex[i+1]-problem->coneIndex[i]);
   }
-  double *worktmp = (double *)malloc(dim_max*sizeof(double));
+  double *worktmp = (double *)calloc(dim_max*sizeof(double),0.0);
 
   for(ic = 0 ; ic < nc ; ic++)
   {
