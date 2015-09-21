@@ -6,6 +6,8 @@
 #include <math.h>
 #include "misc.h"
 //#define DEBUG_MESSAGES 1
+//#define DEBUG_STDOUT 1
+//#define DEBUG_NOCOLOR 1
 #include "debug.h"
 
 //#define VERBOSE_DEBUG
@@ -1825,17 +1827,21 @@ void freeSBMFromSBCM(SparseBlockStructuredMatrix* M)
 
 int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlockStructuredMatrix* A)
 {
+  DEBUG_PRINT("sparseToSBM start\n")
   assert(sparseMat);
   assert(sparseMat->p);
   assert(sparseMat->i);
   assert(sparseMat->x);
+  /* assert(sparseMat->nz == -2); */
 
   assert(sparseMat->m % blocksize == 0);
   assert(sparseMat->n % blocksize == 0);
 
   unsigned int bnrow = sparseMat->m / blocksize;
   unsigned int bncol = sparseMat->n / blocksize;
-
+  DEBUG_PRINTF("sparseToSBM. bnrow =%i\n", bnrow);
+  DEBUG_PRINTF("sparseToSBM. bncol =%i\n", bncol);
+    
   A->blocknumber0 = bnrow;
   A->blocknumber1 = bncol;
 
@@ -1868,22 +1874,26 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
   {
     int row = it.first;
     int col = it.second;
-
+    DEBUG_PRINTF("it.first = %i, it.second = %i \n", row, col );
+    DEBUG_PRINTF("it.third = %g,  \n", it.third );
+    
     int brow = row / blocksize;
     int bcol = col / blocksize;
 
     int blockindex = brow * bncol + bcol;
 
-    if ( (int)it.third && (blockindex > blockindexmax - 1))
+    if (fabs(it.third) > 0 && (blockindex > blockindexmax - 1))
     {
       blockindexmax = blockindex + 1;
     };
 
-    if ((int)it.third && brow > (blocklinemax - 1))
+    if (fabs(it.third) > 0 && brow > (blocklinemax - 1))
     {
       blocklinemax = brow + 1;
     }
   }
+  DEBUG_PRINTF("sparseToSBM. blockindexmax =%i\n",blockindexmax);
+  DEBUG_PRINTF("sparseToSBM. blocklinemax=%i\n", blocklinemax);
 
   // assert(blockindexmax <= bnrow + bncol * bnrow + 1);
   // assert(blocklinemax <= bnrow + 1);
@@ -1913,7 +1923,7 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
 
     int blockindex = brow * bncol + bcol;
 
-    if ((int)it.third)
+    if (fabs(it.third) >0)
     {
       assert(blockindex < blockindexmax);
       blocknum[blockindex] = -2;
@@ -1968,7 +1978,8 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
       A->filled1++;
     }
   }
-
+  DEBUG_PRINTF("A->filled1 =%i\n",A->filled1);
+  DEBUG_PRINTF("A->filled2 =%i\n",A->filled2);
   /* 7: allocate memory for index data */
   assert(A->index1_data == NULL);
   assert(A->index2_data == NULL);
@@ -2041,6 +2052,7 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
   /* 9: free temp memory */
   free(blocknum);
   free(blockline);
+  DEBUG_PRINT("sparseToSBM end\n")
 
   return 0;
 
