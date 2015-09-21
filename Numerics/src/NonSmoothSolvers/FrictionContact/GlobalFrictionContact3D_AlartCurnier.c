@@ -378,7 +378,7 @@ int _globalLineSearchSparseGP(
   }
   if(verbose > 0)
   {
-    printf("global line search failed.\n");
+    printf("global line search unsuccessfull.\n");
     printf("max number of iteration reached  = %i  with alpha = %.10e \n",
            maxiter_ls, alpha[0]);
   }

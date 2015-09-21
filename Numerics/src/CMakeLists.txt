@@ -786,7 +786,7 @@ IF(WITH_TESTING)
   NEW_TEST(GFC3D_test14 GlobalFrictionContact3D_test14.c)
   NEW_TEST(GFC3D_test14bis GlobalFrictionContact3D_test14bis.c)
   NEW_TEST(GFC3D_test15 GlobalFrictionContact3D_test15.c)
-  SET(GFC3Dtest16_PROPERTIES WILL_FAIL TRUE)
+  SET(GFC3D_test16_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(GFC3D_test16 GlobalFrictionContact3D_test16.c)
 
   IF(WITH_FCLIB)
@@ -858,6 +858,7 @@ IF(WITH_TESTING)
   NEW_TEST(VI_test1 VI_test1.c)
   NEW_TEST(VI_testFC3D1 VI_testFC3D1.c)
   NEW_TEST(VI_testFC3D2 VI_testFC3D2.c)
+  SET(VI_testFC3D3_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(VI_testFC3D3 VI_testFC3D3.c)
 
 

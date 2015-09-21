@@ -1882,12 +1882,12 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
 
     int blockindex = brow * bncol + bcol;
 
-    if (fabs(it.third) > 0 && (blockindex > blockindexmax - 1))
+    if ((fabs(it.third) > 0.0) && (blockindex > blockindexmax - 1))
     {
       blockindexmax = blockindex + 1;
     };
 
-    if (fabs(it.third) > 0 && brow > (blocklinemax - 1))
+    if ((fabs(it.third) > 0.0) && brow > (blocklinemax - 1))
     {
       blocklinemax = brow + 1;
     }
@@ -1923,7 +1923,7 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
 
     int blockindex = brow * bncol + bcol;
 
-    if (fabs(it.third) >0)
+    if (fabs(it.third) > 0)
     {
       assert(blockindex < blockindexmax);
       blocknum[blockindex] = -2;

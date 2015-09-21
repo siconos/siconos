@@ -25,13 +25,20 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/Capsules-i125-1213.hdf5\n");
+  /* char filename[50] = "./data/LMGC_100_PR_PerioBox-i01747-155-09310.hdf5"; */
+  char filename[50] = "./data/Capsules-i125-1213.hdf5";
+  printf("Test on %s\n", filename);
 
+  /* SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions)); */
+  /* info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS); */
+  /* options->dparam[0] = 1e-08; */
+  /* options->iparam[0] = 10000; */
+  
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PROX);
   options->dparam[0] = 1e-08;
-  options->iparam[0] = 10000;
-  /* options->iparam[11] = 1; */
+  options->iparam[0] = 100;
+  options->internalSolvers->iparam[3]= 100;
   
   /* SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions)); */
   /* info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_LOCALFB); */
@@ -45,10 +52,10 @@ int main(void)
   /* options->internalSolvers->iparam[0]=100; */
 
 
-  info = frictionContact_test_function_hdf5("./data/Capsules-i125-1213.hdf5", options);
+  info = frictionContact_test_function_hdf5(filename, options);
 
   deleteSolverOptions(options);
   free(options);
-  printf("\nEnd of test on ./data/Capsules-i125-1213.hdf5\n");
+  printf("\nEnd of test on %s\n",filename);
   return info;
 }
