@@ -49,7 +49,7 @@ int variationalInequality_computeError(
   *error = 0.;
   if (!options->dWork)
   {
-    options->dWork = (double*)calloc(2*n* sizeof(double),0.0);
+    options->dWork = (double*)calloc(2*n,sizeof(double));
   }
   double *ztmp =  options->dWork;
   double *wtmp =  &(options->dWork[n]);
