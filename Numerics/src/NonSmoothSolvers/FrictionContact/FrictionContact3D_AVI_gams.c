@@ -116,6 +116,22 @@ static int cp(const char *to, const char *from)
 
 static inline double rad2deg(double rad) { return rad*180/M_PI; }
 
+static void setDashedOptions(const char* optName, const char* optValue, const char* paramFileName)
+{
+  FILE* f = fopen(paramFileName, "a");
+  if (f)
+  {
+    fprintf(f, optName);
+    fprintf(f, " ");
+    fprintf(f, paramFileName);
+    fprintf(f, "\n");
+    fclose(f);
+  }
+  else
+  {
+    printf("Failed to create option %s with value %s in %s\n", optName, optValue, paramFileName);
+  }
+}
 
 static int SN_rm_normal_part(int i, int j, double val, void* env)
 {
@@ -129,12 +145,13 @@ static int SN_rm_normal_part(int i, int j, double val, void* env)
   }
 }
 
-static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, double* restrict reaction, double* restrict velocity, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
+static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, const char* base_name, double* restrict reaction, double* restrict velocity, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
 {
 
   char msg[GMS_SSSIZE];
   int status;
   unsigned size = (unsigned)W->size0;
+  double infos[] = {0., 0.};
   /* Create objects */
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating gamsx object\n");
   if (! gamsxCreateD (&Gptr, sysdir, msg, sizeof(msg))) {
@@ -155,20 +172,45 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
   }
 
   char gdxFileName[GMS_SSSIZE];
-  char iterStr[4];
-  sprintf(iterStr, "%d", iter);
-  strncpy(gdxFileName, "fc3d_avi-condensed", sizeof(gdxFileName));
-  strncat(gdxFileName, iterStr, sizeof(iterStr));
-  strncat(gdxFileName, ".gdx", sizeof(gdxFileName));
+  char solFileName[GMS_SSSIZE];
+//  char paramFileName[GMS_SSSIZE];
+  char iterStr[6];
+  sprintf(iterStr, "-i%d", iter);
+  if (base_name)
+  {
+    strncpy(gdxFileName, base_name, sizeof(gdxFileName));
+  }
+  else
+  {
+    strncpy(gdxFileName, "fc3d_avi-condensed", sizeof(gdxFileName));
+  }
 
-  idxOpenWrite(Xptr, "fc3d_avi-condensed.gdx", "Siconos/Numerics NM_to_GDX", &status);
+  strncat(gdxFileName, iterStr, sizeof(iterStr));
+  /* copy the name without extension to creation the   */
+//  strncpy(paramFileName, gdxFileName, sizeof(paramFileName));
+
+  strncpy(solFileName, gdxFileName, sizeof(solFileName));
+  strncat(solFileName, "_sol", sizeof(solFileName));
+
+  strncat(gdxFileName, ".gdx", sizeof(gdxFileName));
+  strncat(solFileName, ".gdx", sizeof(solFileName));
+//  strncat(paramFileName, ".txt", sizeof(paramFileName));
+
+  /* XXX ParmFile is not a string option */
+//  optSetStrStr(Optr, "ParmFile", paramFileName);
+//  setDashedOptions("filename", gdxFileName, paramFileName);
+   optSetStrStr(Optr, "User1", gdxFileName);
+   optSetStrStr(Optr, "User2", solFileName);
+
+  idxOpenWrite(Xptr, gdxFileName, "Siconos/Numerics NM_to_GDX", &status);
   if (status)
     idxerrorR(status, "idxOpenWrite");
   DEBUG_PRINT("FC3D_AVI_GAMS :: fc3d_avi-condensed.gdx opened\n");
 
   if ((status=NM_to_GDX(Xptr, "W", "W matrix", W))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: W matrix written\n");
 
@@ -182,55 +224,64 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
 
   if ((status=NM_to_GDX(Xptr, "Wt", "Wt matrix", Wtmat))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: Wt matrix written\n");
 
   if ((status=NM_to_GDX(Xptr, "E", "E matrix", Emat))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: E matrix written\n");
 
   if ((status=NM_to_GDX(Xptr, "Ak", "Ak matrix", Akmat))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: Ak matrix written\n");
 
   if ((status=NV_to_GDX(Xptr, "q", "q vector", q, size))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: q vector written\n");
 
   if ((status=NV_to_GDX(Xptr, "qt", "qt vector", tmpq, size))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: qt vector written\n");
 
   if ((status=NV_to_GDX(Xptr, "guess_r", "guess for r", reaction, size))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: guess_r vector written\n");
 
   if ((status=NV_to_GDX(Xptr, "guess_y", "guess for y", velocity, size))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: guess_y vector written\n");
 
   if ((status=NV_to_GDX(Xptr, "guess_lambda_r", "guess for lambda_r", lambda_r, Akmat->size0))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: lambda_r vector written\n");
 
   if ((status=NV_to_GDX(Xptr, "guess_lambda_y", "guess for lambda_y", lambda_y, Akmat->size0))) {
     printf("Model data not written\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
   DEBUG_PRINT("FC3D_AVI_GAMS :: lambda_y vector written\n");
 
@@ -241,14 +292,15 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
 
   if ((status=CallGams(Gptr, Optr, sysdir, model))) {
     printf("Call to GAMS failed\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
 
 
   /************************************************
    * Read back solution
    ************************************************/
-  idxOpenRead(Xptr, "fc3d_avi-condensed_sol.gdx", &status);
+  idxOpenRead(Xptr, solFileName, &status);
   if (status)
     idxerrorR(status, "idxOpenRead");
 
@@ -256,19 +308,21 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
   memset(reaction, 0, size*sizeof(double));
   if ((status=GDX_to_NV(Xptr, "reaction", reaction, size))) {
     printf("Model data not read\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
 
   memset(velocity, 0, size*sizeof(double));
   if ((status=GDX_to_NV(Xptr, "velocity", velocity, size))) {
     printf("Model data not read\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
 
-  double infos[] = {0., 0.};
   if ((status=GDX_to_NV(Xptr, "infos", infos, 2))) {
     printf("Model data not read\n");
-    return -ETERMINATE;
+    infos[1] = (double)-ETERMINATE;
+    goto fail;
   }
 
   if (idxClose(Xptr))
@@ -280,6 +334,7 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
   gmoGetSolveStatusTxt(gmoPtr, (int)infos[1], msg);
   printf(msg);
 
+fail:
   idxFree(&Xptr);
   gamsxFree(&Gptr);
   gmoFree(&gmoPtr);
@@ -344,6 +399,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   DEBUG_PRINT("FC3D_AVI_GAMS :: seeting basic directories\n");
   SN_Gams_set_dirs(options->solverParameters, defModel, defGAMSdir, model, sysdir, "/fc_vi-condensed.gms");
 
+  const char* filename = GAMSP_get_filename(options->solverParameters);
 
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating opt object\n");
   if (! optCreateD (&Optr, sysdir, msg, sizeof(msg))) {
@@ -437,7 +493,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   {
     iter++;
     total_residual = 0.;
-    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, reaction, velocity, tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
+    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, filename, reaction, velocity, tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
     DEBUG_PRINT_VEC(reaction, size);
     DEBUG_PRINT_VEC(velocity, size);
 

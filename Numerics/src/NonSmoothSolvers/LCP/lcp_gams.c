@@ -69,13 +69,35 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
     return;
   }
 
+  char gdxFileName[GMS_SSSIZE];
+  char solFileName[GMS_SSSIZE];
+  const char* base_name = GAMSP_get_filename(options->solverParameters);
+  if (base_name)
+  {
+    strncpy(gdxFileName, base_name, sizeof(gdxFileName));
+  }
+  else
+  {
+    strncpy(gdxFileName, "lcp", sizeof(gdxFileName));
+  }
+
+  strncpy(solFileName, gdxFileName, sizeof(solFileName));
+  strncat(solFileName, "_sol", sizeof(solFileName));
+
+  strncat(gdxFileName, ".gdx", sizeof(gdxFileName));
+  strncat(solFileName, ".gdx", sizeof(solFileName));
+
+  getGamsOpt(Optr, sysdir);
+
+  optSetStrStr(Optr, "User1", gdxFileName);
+  optSetStrStr(Optr, "User2", solFileName);
+
   getGamsSolverOpt(solverOptPtr, sysdir, "path");
   optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
   optWriteParameterFile(solverOptPtr, "path.opt");
 
-  getGamsOpt(Optr, sysdir);
 
-  idxOpenWrite(Xptr, "lcp.gdx", "Siconos/Numerics NM_to_GDX", &status);
+  idxOpenWrite(Xptr, gdxFileName, "Siconos/Numerics NM_to_GDX", &status);
   if (status)
     idxerror(status, "idxOpenWrite");
 
@@ -102,7 +124,7 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
   /************************************************
    * Read back solution
    ************************************************/
-  idxOpenRead(Xptr, "lcp_sol.gdx", &status);
+  idxOpenRead(Xptr, solFileName, &status);
   if (status)
     idxerror(status, "idxOpenRead");
 

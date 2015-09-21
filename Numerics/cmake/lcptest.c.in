@@ -31,7 +31,7 @@ int main(int argc, char ** argv)
     exit(EXIT_FAILURE);
   }
   char filename[50];
-  strncpy(filename, argv[1], 49);
+  strncpy(filename, argv[1], sizeof(filename));
   printf("Test on %s\n", filename);
 
   FILE * finput  =  fopen(filename, "r");
@@ -40,7 +40,7 @@ int main(int argc, char ** argv)
     printf("Error! Could not open filename %s\n", filename);
     exit(EXIT_FAILURE);
   }
-  info = lcp_test_function(finput, @TEST_SOLVER@);
+  info = lcp_test_function(finput, @TEST_SOLVER@, filename);
 
   fclose(finput);
   printf("\nEnd of test on %s\n", filename);

@@ -1,5 +1,8 @@
 $if not set filename $set filename 'fc3d_avi-condensed.gdx'
+$if not %gams.user1% == "" $set filename %gams.user1%
 
+$if not set outfile $set outfile 'fc3d_avi-condensed_sol.gdx'
+$if not %gams.user2% == "" $set outfile %gams.user2%
 
 set j /1 * 2/;
 
@@ -70,4 +73,4 @@ infos('2') = vi.solvestat;
 display vi.modelstat;
 display vi.solvestat;
 
-execute_unloadIdx 'fc3d_avi-condensed_sol.gdx', reaction, velocity, infos;
+execute_unloadIdx '%outfile%', reaction, velocity, infos;

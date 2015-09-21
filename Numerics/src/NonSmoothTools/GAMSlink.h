@@ -7,39 +7,39 @@
 
 typedef struct GAMS_opt_bool_ {
   char* name; /**< Name of the option */
-  bool value; /** Value of the option */
-  struct GAMS_opt_bool_* next_opt; /** Link to the next option*/
+  bool value; /**< Value of the option */
+  struct GAMS_opt_bool_* next_opt; /**< Link to the next option*/
 } GAMS_opt_bool;
 
 /** Simply linked list of integer option for GAMS
  */
 typedef struct GAMS_opt_int_ {
   char* name; /**< Name of the option */
-  int value; /** Value of the option */
-  struct GAMS_opt_int_* next_opt; /** Link to the next option*/
+  int value; /**< Value of the option */
+  struct GAMS_opt_int_* next_opt; /**< Link to the next option*/
 } GAMS_opt_int;
 
 /** Simply linked list of double option for GAMS
  */
 typedef struct GAMS_opt_double_ {
   char* name; /**< Name of the option */
-  double value; /** Value of the option */
-  struct GAMS_opt_double_* next_opt; /** Link to the next option*/
+  double value; /**< Value of the option */
+  struct GAMS_opt_double_* next_opt; /**< Link to the next option*/
 } GAMS_opt_double;
 
 /** Simply linked list of string option for GAMS
  */
 typedef struct GAMS_opt_str_ {
   char* name; /**< Name of the option */
-  char* value; /** Value of the option */
-  struct GAMS_opt_str_* next_opt; /** Link to the next option*/
+  char* value; /**< Value of the option */
+  struct GAMS_opt_str_* next_opt; /**< Link to the next option*/
 } GAMS_opt_str;
 
 /** Parameters for GAMS */
 typedef struct {
   char* model_dir; /**<  Directory where the GAMS model are */
   char* gams_dir;  /**<  GAMS directory */
-  char* filename; /**< name of the gdx file */
+  char* filename; /**< name of the problem (used as a gdx filename) */
   GAMS_opt_str* opt_str_list; /**< list of string options */
   GAMS_opt_bool* opt_bool_list; /**< list of boolean options */
   GAMS_opt_int* opt_int_list; /**< list of integer options */
@@ -218,6 +218,11 @@ static inline void deleteGAMSparams(SN_GAMSparams* GP)
   free(GP);
 }
 
+static inline const char* GAMSP_get_filename(const SN_GAMSparams* GP)
+{
+  return GP->filename;
+}
+
 #ifdef HAVE_GAMS_C_API
 
 #include "gclgms.h"
@@ -334,7 +339,7 @@ static inline int CallGams(const gamsxHandle_t Gptr, const optHandle_t Optr, con
 //  optSetDblStr(Optr,"OptCA", 1e-12);
 
   if (gamsxRunExecDLL(Gptr, Optr, sysdir, 1, msg)) {
-    printf ("Could not execute RunExecDLL: %s", msg);
+    printf ("Could not execute RunExecDLL: %s\n", msg);
     return 1;
   }
 

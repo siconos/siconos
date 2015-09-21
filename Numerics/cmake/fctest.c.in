@@ -54,6 +54,7 @@ int main(void)
     assert(options->solverParameters);
     SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
     GP->model_dir = GAMS_MODELS_SOURCE_DIR;
+    GP->filename = "@TEST_DATA@";
   }
 #endif
 

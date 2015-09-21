@@ -98,7 +98,7 @@ void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, Line
 
 
 
-int lcp_test_function(FILE * f, int solverId)
+int lcp_test_function(FILE * f, int solverId, char* filename)
 {
 
   int i, info = 0 ;
@@ -122,6 +122,8 @@ int lcp_test_function(FILE * f, int solverId)
     SN_GAMSparams* GP = (SN_GAMSparams*)options.solverParameters;
     assert(GP);
     GP->model_dir = GAMS_MODELS_SOURCE_DIR;
+    assert(filename);
+    GP->filename = filename;
   }
 #endif
 

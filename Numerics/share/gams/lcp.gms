@@ -1,9 +1,14 @@
+$if not set filename $set filename 'lcp.gdx'
+$if not %gams.user1% == "" $set filename %gams.user1%
+
+$if not set outfile $set outfile 'lcp_sol.gdx'
+$if not %gams.user2% == "" $set outfile %gams.user2%
 
 Set i;
 
 parameters M(i, i), q(i), sol(i);
 
-$GDXIN lcp.gdx
+$GDXIN '%filename%';
 $loadIdx M, q
 $GDXIN
 
@@ -23,4 +28,4 @@ solve foo using mcp;
 
 sol(i) = x.l(i)
 
-execute_unloadIdx 'lcp_sol.gdx', sol;
+execute_unloadIdx '%outfile%', sol;
