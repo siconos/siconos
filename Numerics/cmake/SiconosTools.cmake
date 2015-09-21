@@ -142,6 +142,7 @@ MACRO(BEGIN_TEST _D)
     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
     *.mat 
     *.dat
+    *.hdf5
     *.xml
     *.DAT
     *.INI)
