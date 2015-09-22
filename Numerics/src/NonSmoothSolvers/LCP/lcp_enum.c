@@ -321,6 +321,7 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
   }
 
 
+  null_SolverOptions(options);
   options->solverId = SICONOS_LCP_ENUM;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
@@ -347,7 +348,6 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
 
   options->dparam[0] = 1e-12;
 
-  null_SolverOptions(options);
 
 
   return 0;

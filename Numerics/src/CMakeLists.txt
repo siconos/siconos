@@ -372,6 +372,8 @@ IF(WITH_TESTING)
   SET(test-LCP_NEWTONMIN-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
   SET(test-LCP_NEWTONMIN-lcp_CPS_5_PROPERTIES WILL_FAIL TRUE)
 
+  # Work on not, very sensitive numerically
+  RM_TEST2(SICONOS_LCP_NEWTONMIN "lcp_mmc.dat")
   # XXX fix this !
   SET(test-LCP_NEWTON_FBLSA-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
   # those test cannot be solved with an algorithm that requires non-zero
@@ -400,7 +402,7 @@ IF(WITH_TESTING)
 
   NEW_LCP_TEST(SICONOS_LCP_LEMKE lcp_tobenna.dat)
   # XXX Not good enough precision
-  SET_LCP_TEST_AS_FAILED("lcp_tobenna" "LEMKE")
+  SET(test-LCP_LEMKE-lcp_tobenna_PROPERTIES WILL_FAIL TRUE)
 
   # XXX Not working 
   #NEW_LCP_TEST(SICONOS_LCP_PIVOT lcp_tobenna.dat)

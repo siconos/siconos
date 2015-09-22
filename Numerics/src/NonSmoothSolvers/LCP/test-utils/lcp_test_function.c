@@ -22,82 +22,6 @@
 #include "lcp_test_function.h"
 #include "GAMSlink.h"
 
-void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, LinearComplementarityProblem* problem)
-{
-  int maxIter = 1001;
-  double tolerance = 1e-8;
-  double lighttolerance = 1e-8;
-
-  switch (solverId)
-  {
-  case SICONOS_LCP_PGS:
-  case SICONOS_LCP_CPG:
-  case SICONOS_LCP_LEMKE:
-  case SICONOS_LCP_PIVOT:
-  case SICONOS_LCP_BARD:
-  case SICONOS_LCP_MURTY:
-  case SICONOS_LCP_AVI_CAOFERRIS:
-  case SICONOS_LCP_NEWTONMIN:
-  case SICONOS_LCP_NEWTON_FBLSA:
-  case SICONOS_LCP_NEWTON_MINFBLSA:
-  {
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-    break;
-  }
-  case SICONOS_LCP_RPGS:
-  {
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-    options->dparam[2] = 1.0;
-    break;
-  }
-  case SICONOS_LCP_LATIN :
-  {
-    options->iparam[0] = maxIter;
-    options->dparam[0] = lighttolerance;
-    options->dparam[2] = 1.0;
-    break;
-  }
-  case SICONOS_LCP_LATIN_W:
-  {
-    options->iparam[0] = maxIter;
-    options->dparam[0] = lighttolerance;
-    options->dparam[2] = 0.3;
-    options->dparam[3] = 1.0;
-    break;
-  }
-  case SICONOS_LCP_PATH:
-  case SICONOS_LCP_QP:
-  case SICONOS_LCP_NSQP:
-  {
-    options->dparam[0] = tolerance;
-    break;
-  }
-  case SICONOS_LCP_ENUM:
-  {
-    /*       options->dparam[0]=tolerance; */
-    /*       options->dWork=(double*) malloc((3*problem->size +problem->size*problem->size)*sizeof(double)); */
-    /*       options->iWork=(int*) malloc(2*problem->size*sizeof(int)); */
-
-    if (options->iparam != NULL)
-      free(options->iparam);
-    if (options->dparam != NULL)
-      free(options->dparam);
-
-    linearComplementarity_enum_setDefaultSolverOptions(problem,  options);
-
-    break;
-  }
-  default:
-    ;
-  }
-
-
-}
-
-
-
 int lcp_test_function(FILE * f, int solverId, char* filename)
 {
 
@@ -185,9 +109,7 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
   info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSGS_SBM);
 
-  options->internalSolvers->solverId = solverId;
-
-  fillParamWithRespectToSolver_SBM(options->internalSolvers, solverId, problem);
+  set_SolverOptions(options->internalSolvers, solverId);
 
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)

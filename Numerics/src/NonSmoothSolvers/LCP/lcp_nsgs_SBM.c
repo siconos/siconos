@@ -230,7 +230,5 @@ int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(SolverOptions* option
   options->dparam[0] = 1e-6;
   options->internalSolvers = (SolverOptions*)malloc(options->numberOfInternalSolvers * sizeof(SolverOptions));
 
-  linearComplementarity_pgs_setDefaultSolverOptions(options->internalSolvers);
-
   return 0;
 }

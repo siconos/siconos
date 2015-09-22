@@ -35,6 +35,8 @@ int main(void)
 
 
   info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSGS_SBM);
+  assert(options->internalSolvers);
+  set_SolverOptions(options->internalSolvers, SICONOS_LCP_LEMKE);
   printSolverOptions(options);
   deleteSolverOptions(options);
 
