@@ -332,7 +332,7 @@ int cs_printInFile(const cs *A, int brief, FILE* file);
 /* print a sparse matrix */
 int cs_printInFile(const cs *A, int brief, FILE* file)
 {
-  int p, j, m, n, nzmax, nz, *Ap, *Ai ;
+  ptrdiff_t m, n, nzmax, nz, p, j, *Ap, *Ai ;
   double *Ax ;
   if(!A)
   {
@@ -350,14 +350,14 @@ int cs_printInFile(const cs *A, int brief, FILE* file)
          CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ;
   if(nz < 0)
   {
-    fprintf(file,"%d-by-%d, nzmax: %d nnz: %d, 1-norm: %g\n", m, n, nzmax,
+    fprintf(file,"%ld-by-%ld, nzmax: %ld nnz: %ld, 1-norm: %g\n", m, n, nzmax,
            Ap [n], cs_norm(A)) ;
     for(j = 0 ; j < n ; j++)
     {
-      fprintf(file,"    col %d : locations %d to %d\n", j, Ap [j], Ap [j+1]-1);
+      fprintf(file,"    col %ld : locations %ld to %ld\n", j, Ap [j], Ap [j+1]-1);
       for(p = Ap [j] ; p < Ap [j+1] ; p++)
       {
-        fprintf(file,"      %d : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
+        fprintf(file,"      %ld : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
         if(brief && p > 20)
         {
           fprintf(file,"  ...\n") ;
@@ -368,10 +368,10 @@ int cs_printInFile(const cs *A, int brief, FILE* file)
   }
   else
   {
-    fprintf(file,"triplet: %d-by-%d, nzmax: %d nnz: %d\n", m, n, nzmax, nz) ;
+    fprintf(file,"triplet: %ld-by-%ld, nzmax: %ld nnz: %ld\n", m, n, nzmax, nz) ;
     for(p = 0 ; p < nz ; p++)
     {
-      fprintf(file,"    %d %d : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
+      fprintf(file,"    %ld %ld : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
       if(brief && p > 20)
       {
         fprintf(file,"  ...\n") ;
@@ -392,7 +392,7 @@ void printInFile(const NumericsMatrix* const m, FILE* file)
     fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  int storageType = m->storageType;
+
   fprintf(file, "%d\n", m->storageType);
   fprintf(file, "%d\n", m->size0);
   fprintf(file, "%d\n", m->size1);
@@ -1366,42 +1366,42 @@ int* NM_MUMPS_irn(NumericsMatrix* A)
   if (NM_sparse(A)->triplet)
   {
     CSparseMatrix* triplet = NM_sparse(A)->triplet;
-    int nz = triplet->nz;
+    csi nz = triplet->nz;
 
-    int* iWork = NM_iWork(A, 2*nz + 1);
+    int* iWork = NM_iWork(A, (int) (2*nz) + 1);
 
     for (int k=0; k<nz; ++k)
     {
-      iWork [k + nz] = triplet->p [k] + 1;
-      iWork [k]      = triplet->i [k] + 1;
+      iWork [k + nz] = (int) (triplet->p [k]) + 1;
+      iWork [k]      = (int) (triplet->i [k]) + 1;
     }
 
-    iWork [2*nz] = nz;
+    iWork [2*nz] = (int) nz;
   }
   else
   {
     CSparseMatrix* csc = NM_sparse(A)->csc;
-    int nzmax = csc->nzmax ;
+    csi nzmax = csc->nzmax ;
 
-    int* iWork = NM_iWork(A, 2*nzmax + 1);
+    int* iWork = NM_iWork(A, (int) (2*nzmax) + 1);
 
-    int n = csc->n ;
-    int nz = 0;
-    int* csci = csc->i ;
-    int* cscp = csc->p ;
+    csi n = csc->n ;
+    csi nz = 0;
+    csi* csci = csc->i ;
+    csi* cscp = csc->p ;
 
-    for (int j=0; j<n; ++j)
+    for (csi j=0; j<n; ++j)
     {
-      for (int p = cscp [j]; p < cscp [j+1]; ++p)
+      for (csi p = cscp [j]; p < cscp [j+1]; ++p)
       {
         assert (csc->x [p] != 0.);
         nz++;
-        iWork [p + nzmax] = j;
-        iWork [p]         = csci [p];
+        iWork [p + nzmax] = (int) j;
+        iWork [p]         = (int) csci [p];
       }
     }
 
-    iWork [2*nzmax] = nz;
+    iWork [2*nzmax] = (int) nz;
   }
 
   return NM_iWork(A, 0);
@@ -1416,7 +1416,7 @@ int* NM_MUMPS_jcn(NumericsMatrix* A)
   }
   else
   {
-    int nzmax = NM_csc(A)->nzmax;
+    ptrdiff_t nzmax = NM_csc(A)->nzmax;
     return NM_iWork(A, 0) + nzmax;
   }
 }
@@ -1480,14 +1480,14 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 
   }
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
-  mumps_id->n = NM_triplet(A)->n;
+  mumps_id->n = (int) NM_triplet(A)->n;
   mumps_id->irn = NM_MUMPS_irn(A);
   mumps_id->jcn = NM_MUMPS_jcn(A);
 
   int nz;
   if (NM_sparse(A)->triplet)
   {
-    nz = NM_sparse(A)->triplet->nz;
+    nz = (int) NM_sparse(A)->triplet->nz;
     mumps_id->nz = nz;
     mumps_id->a = NM_sparse(A)->triplet->x;
   }

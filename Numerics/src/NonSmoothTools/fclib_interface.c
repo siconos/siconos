@@ -125,7 +125,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
     spmat = malloc(sizeof(CSparseMatrix));
     int MAYBE_UNUSED res = SBMtoSparseInitMemory(problem ->M->matrix1, spmat);
     res = SBMtoSparse(problem->M->matrix1, spmat);
-    fclib_problem->W->nzmax = spmat->nzmax;
+    fclib_problem->W->nzmax = (int) spmat->nzmax;
     fclib_problem->W->x = spmat->x;
     fclib_problem->W->p = spmat->p;
     fclib_problem->W->i = spmat->i;
@@ -253,22 +253,22 @@ int globalFrictionContact_fclib_write(
   assert(problem->H->matrix2);
 
   fclib_problem->M = malloc(sizeof(struct fclib_matrix));
-  fclib_problem->M->n = problem->M->matrix2->triplet->n;
-  fclib_problem->M->m = problem->M->matrix2->triplet->m;
-  fclib_problem->M->nzmax= problem->M->matrix2->triplet->nzmax;
+  fclib_problem->M->n = (int) problem->M->matrix2->triplet->n;
+  fclib_problem->M->m = (int) problem->M->matrix2->triplet->m;
+  fclib_problem->M->nzmax= (int) problem->M->matrix2->triplet->nzmax;
   fclib_problem->M->p= problem->M->matrix2->triplet->p;
   fclib_problem->M->i= problem->M->matrix2->triplet->i;
   fclib_problem->M->x= problem->M->matrix2->triplet->x;
-  fclib_problem->M->nz= problem->M->matrix2->triplet->nz;
+  fclib_problem->M->nz= (int) problem->M->matrix2->triplet->nz;
   fclib_problem->M->info=NULL;
   fclib_problem->H = malloc(sizeof(struct fclib_matrix));
-  fclib_problem->H->n = problem->H->matrix2->triplet->n;
-  fclib_problem->H->m = problem->H->matrix2->triplet->m;
-  fclib_problem->H->nzmax= problem->H->matrix2->triplet->nzmax;
+  fclib_problem->H->n = (int) problem->H->matrix2->triplet->n;
+  fclib_problem->H->m = (int) problem->H->matrix2->triplet->m;
+  fclib_problem->H->nzmax= (int) problem->H->matrix2->triplet->nzmax;
   fclib_problem->H->p= problem->H->matrix2->triplet->p;
   fclib_problem->H->i= problem->H->matrix2->triplet->i;
   fclib_problem->H->x= problem->H->matrix2->triplet->x;
-  fclib_problem->H->nz= problem->H->matrix2->triplet->nz;
+  fclib_problem->H->nz= (int) problem->H->matrix2->triplet->nz;
   fclib_problem->H->info=NULL;
 
 

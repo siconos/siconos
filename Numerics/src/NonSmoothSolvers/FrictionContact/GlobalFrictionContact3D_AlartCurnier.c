@@ -679,10 +679,10 @@ void globalFrictionContact3D_AlartCurnier(
 
 
 #ifdef WITH_MUMPS
-  mumps_id->n = J->m;
-  mumps_id->nz = J->nz;
-  mumps_id->irn = J->i;
-  mumps_id->jcn = J->p;
+  mumps_id->n = (int) J->m;
+  mumps_id->nz = (int) J->nz;
+  mumps_id->irn = (int) J->i;
+  mumps_id->jcn = (int) J->p;
   mumps_id->a = J->x;
   mumps_id->rhs = rhs;
 
@@ -723,8 +723,8 @@ void globalFrictionContact3D_AlartCurnier(
     /* Solve: J X = -psi */
 
 #ifdef WITH_MUMPS
-    mumps_id->n = J->m;
-    mumps_id->nz = J->nz;
+    mumps_id->n = (int) J->m;
+    mumps_id->nz = (int) J->nz;
 
     /* set fortran indices in place so we do not have to bother with
      * yet another heap allocation */
