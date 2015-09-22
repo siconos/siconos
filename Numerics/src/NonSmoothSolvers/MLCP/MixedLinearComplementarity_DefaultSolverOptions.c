@@ -79,15 +79,13 @@ void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplemen
   // Todo : fix this ...
   //if (pOptions->callback)
   //  free(pOptions->callback);
-  pOptions->iparam = NULL;
-  pOptions->dparam = NULL;
-  pOptions->iWork = NULL;   pOptions->callback = NULL;
-  pOptions->dWork = NULL;
+  null_SolverOptions(pOptions);
 
 }
 
 int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions)
 {
+  null_SolverOptions(pOptions);
   int info = -1;
 
   switch (pOptions->solverId)

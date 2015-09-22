@@ -181,13 +181,28 @@ int secondOrderConeLinearComplementarityProblem_newFromFilename(SecondOrderConeL
 void freeSecondOrderConeLinearComplementarityProblem(SecondOrderConeLinearComplementarityProblem* problem)
 {
 
-  freeNumericsMatrix(problem->M);
-  free(problem->M);
-  free(problem->mu);
-  free(problem->q);
-  free(problem->coneIndex);
+  if (problem->M)
+  {
+    freeNumericsMatrix(problem->M);
+    free(problem->M);
+    problem->M = NULL;
+  }
+  if (problem->mu)
+  {
+    free(problem->mu);
+    problem->mu = NULL;
+  }
+  if (problem->q)
+  {
+    free(problem->q);
+    problem->q = NULL;
+  }
+  if (problem->coneIndex)
+  {
+    free(problem->coneIndex);
+    problem->coneIndex = NULL;
+  }
   free(problem);
-  problem = NULL;
 
 }
 

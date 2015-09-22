@@ -19,7 +19,7 @@
 #ifndef SOCLCPProjection_H
 #define SOCLCPProjection_H
 
-/*!\file SOCLCP_projection.h
+/*!\file soclcp_projection.h
   \brief Typedef and functions declarations related to projection solver for SOCLCP
 
   Each solver must have 4 functions in its interface:

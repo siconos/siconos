@@ -28,14 +28,7 @@
 
 int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
-  options->iparam = NULL;
-  options->dparam = NULL;
-  options->dWork = NULL;
-  options->iWork = NULL;
-  options->internalSolvers = NULL;
-  options->numericsOptions = NULL;
-  options->callback = NULL;
-  options->solverParameters = NULL;
+  null_SolverOptions(options);
 
   int info = -1;
   switch (solverId)
