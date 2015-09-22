@@ -481,6 +481,9 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   unsigned size_l = (NB_APPROX+2)*problem->numberOfContacts;
   double* lambda_r = (double*)calloc(size_l, sizeof(double));
   double* lambda_y = (double*)calloc(size_l, sizeof(double));
+  double* reaction_old = (double*)calloc(size, sizeof(double));
+  double* velocity_old = (double*)calloc(size, sizeof(double));
+
   bool done = false;
   double total_residual = 0.;
   double old_residual = 1e20;
@@ -535,9 +538,10 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
     {
       double mu = problem->mu[i];
       /* Step 1. project r on the cone */
-      DEBUG_PRINTF("contact %d, before projection: theta_r = %g\n", i, rad2deg(atan2(reaction[i3+2],reaction[i3+1])));
+
+//      DEBUG_PRINTF("contact %d, before projection: theta_r = %.*e\n", i, DECIMAL_DIG, rad2deg(atan2(reaction[i3+2], reaction[i3+1])));
       projectionOnCone(&reaction[i3], mu);
-      DEBUG_PRINTF("contact %d, after projection: theta_r = %g\n", i, rad2deg(atan2(reaction[i3+2],reaction[i3+1])));
+//      DEBUG_PRINTF("contact %d, after projection:  theta_r = %.*e\n", i, DECIMAL_DIG, rad2deg(atan2(reaction[i3+2], reaction[i3+1])));
     }
 
     memset(lambda_r, 0, size_l * sizeof(double));
@@ -565,17 +569,24 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
       /* Step 2. recompute the local velocities and  */
       double* ri = &reaction[i3];
       double* ui = &velocity[i3];
+      DEBUG_PRINTF("Contact %d, old r = [%.*e; %.*e; %.*e]\n", i, DECIMAL_DIG, reaction_old[i3+0], DECIMAL_DIG, reaction_old[i3+1], DECIMAL_DIG, reaction_old[i3+2]);
+      DEBUG_PRINTF("Contact %d, new r = [%.*e; %.*e; %.*e]\n", i, DECIMAL_DIG, ri[0], DECIMAL_DIG, ri[1], DECIMAL_DIG, ri[2]);
+      DEBUG_PRINTF("Contact %d, del r = [%.*e; %.*e; %.*e]\n", i, DECIMAL_DIG, reaction_old[i3+0]-ri[0], DECIMAL_DIG, reaction_old[i3+1]-ri[1], DECIMAL_DIG, reaction_old[i3+2]-ri[2]);
       assert(i < (unsigned)problem->numberOfContacts);
       double mu = problem->mu[i];
       FrictionContact3D_unitary_compute_and_add_error(ri, ui, mu, &res);
+      DEBUG_EXPR_WE(if (res > old_residual) { printf("Contact %d, res = %g > %g = old_residual\n", i, sqrt(res), old_residual); });
       total_residual += res;
       unsigned p = 10;
       /* TODO we may want to revisit this, since err < TOL2 should be enough to
        * really reduce the number of constraints ...*/
       /* Well we do not want to mess with the sliding case ( both r and u on
        * the boundaries)*/
-      if ((res < TOL2) && ((ri[0] < TOL_RN) || ((ri[1]*ri[1] + ri[2]*ri[2]) < mu*mu * ri[0]*ri[0])))
+      if ((res < TOL2) && ((ri[0] < TOL_RN) || ((ri[1]*ri[1] + ri[2]*ri[2]) < (1.-10*DBL_EPSILON)*mu*mu * ri[0]*ri[0])))
       {
+        DEBUG_PRINTF("Contact %d, res = %g\n", i, sqrt(res));
+        DEBUG_EXPR_WE(if (ri[0] < TOL_RN) { printf("ri[0] = %g < %g = tol", ri[0], TOL_RN); });
+        DEBUG_EXPR_WE(if ((ri[1]*ri[1] + ri[2]*ri[2]) < mu*mu * ri[0]*ri[0]) { printf("||r_t||^2 = %g < %g = mu^2 r_n^2; diff = %g\n", (ri[1]*ri[1] + ri[2]*ri[2]), mu*mu * ri[0]*ri[0], (ri[1]*ri[1] + ri[2]*ri[2])-(mu*mu * ri[0]*ri[0]));});
       /* 3 hyperplanes (because we don't want a lineality space for now */
         cs_entry(Ak_triplet, offset_row, i3, mu);
         cs_entry(Ak_triplet, offset_row, i3 + 1, 1.);
@@ -619,7 +630,8 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
             delta_angle = (delta_angle + 2*M_PI);
           }
         }
-        DEBUG_PRINTF("contact %d, delta angle = %g, theta_r = %g, theta_u = %g\n", i, rad2deg(delta_angle), rad2deg(atan2(ri[2],ri[1])), rad2deg(atan2(ui[2], ui[1])));
+        DEBUG_PRINTF("contact %d, delta angle = %g, theta_r = %.*e, theta_u = %.*e\n", i, rad2deg(delta_angle), DECIMAL_DIG, rad2deg(atan2(ri[2],ri[1])), 
+            DECIMAL_DIG, rad2deg(atan2(ui[2], ui[1])));
         /* now compute minus the angle, since we want to compute the constraints  */
         double slice_angle = delta_angle/(p-1);
         DEBUG_PRINTF("contact %d, slice_angle = %g\n", i, rad2deg(slice_angle));
@@ -677,7 +689,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
         /* update ri =   */
         unsigned pos = (p-1)/2;
         double angle_pos = minus_r_angle + pos*slice_angle;
-        DEBUG_PRINTF("old r[i] = %g %g %g\n", ri[0], ri[1], ri[2]);
+        DEBUG_PRINTF("old r[i] = %.*e %.*e %.*e\n", DECIMAL_DIG, ri[0], DECIMAL_DIG, ri[1], DECIMAL_DIG, ri[2]);
         ri[1] = -ri[0]*mu*cos(minus_r_angle + pos*slice_angle);
         ri[2] = -ri[0]*mu*sin(minus_r_angle + pos*slice_angle);
         DEBUG_PRINTF("new r[i] = %g %g %g\n", ri[0], ri[1], ri[2]);
@@ -765,6 +777,10 @@ bad_angle:
     }
     free(xtmp);
     free(xtmp2);
+
+    cblas_dcopy(size, reaction, 1, reaction_old, 1);
+    cblas_dcopy(size, velocity, 1, velocity_old, 1);
+
     total_residual = sqrt(total_residual);
 //    optSetDblStr(solverOptPtr, "expand_delta", fmin(1e-8, total_residual*1e-3));
 //    optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
@@ -805,6 +821,8 @@ TERMINATE:
   freeNumericsMatrix(&Emat);
   freeNumericsMatrix(&Akmat);
 
+  free(reaction_old);
+  free(velocity_old);
   free(tmpq);
   free(lambda_r);
   free(lambda_y);
