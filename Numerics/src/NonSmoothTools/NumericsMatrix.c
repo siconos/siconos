@@ -1546,16 +1546,13 @@ int NM_gesv(NumericsMatrix* A, double *b)
       /* clean the mumps instance */
       mumps_id->job = -2;
       dmumps_c(mumps_id);
-      free(NM_linearSolverParams(A)->solver_data);
-      NM_linearSolverParams(A)->solver_data = NULL;
-
       info = mumps_id->info[0];
 
-      if (mumps_id->info[0] > 0)
+      if (info > 0)
       {
         if (verbose > 0)
         {
-          printf("NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", mumps_id->info[0], mumps_id->info[1]);
+          printf("NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
         }
       }
       if (verbose > 1)
@@ -1564,6 +1561,11 @@ int NM_gesv(NumericsMatrix* A, double *b)
         printf("MUMPS : component wise scaled residual %g\n", mumps_id->rinfog[6]);
         printf("MUMPS : \n");
       }
+
+      /* Here we free mumps_id ...  */
+      free(NM_linearSolverParams(A)->solver_data);
+      NM_linearSolverParams(A)->solver_data = NULL;
+
       break;
     }
 #endif
