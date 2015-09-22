@@ -63,7 +63,8 @@ unsigned int sizeOfPsi(
   CSparseMatrix* M,
   CSparseMatrix* H)
 {
-  return M->n + H->n + H->m;
+  assert(M->n + H->n + H->m >= 0);
+  return (unsigned)(M->n + H->n + H->m);
 }
 
 /* compute psi function */
@@ -121,7 +122,7 @@ void ACPsi(
 
 
 /* init memory for jacobian */
-int initACPsiJacobian(
+csi initACPsiJacobian(
   CSparseMatrix* M,
   CSparseMatrix* H,
   CSparseMatrix *A,
@@ -172,7 +173,7 @@ int initACPsiJacobian(
   }
 
   /* keep A start indice for update */
-  int Astart = J->nz;
+  csi Astart = J->nz;
 
   /* A */
   for(int e = 0; e < A->nz; ++e)
@@ -196,7 +197,7 @@ void updateACPsiJacobian(
   CSparseMatrix *A,
   CSparseMatrix *B,
   CSparseMatrix *J,
-  int Astart)
+  csi Astart)
 {
   /* only triplet matrix */
   assert(M->nz>=0);
@@ -549,7 +550,7 @@ void globalFrictionContact3D_AlartCurnier(
   unsigned int ACProblemSize = sizeOfPsi(NM_triplet(problem->M),
                                          NM_triplet(problem->H));
 
-  unsigned int globalProblemSize = NM_triplet(problem->M)->m;
+  unsigned int globalProblemSize = (unsigned)NM_triplet(problem->M)->m;
 
   unsigned int localProblemSize = problem->H->size1;
 
@@ -624,10 +625,11 @@ void globalFrictionContact3D_AlartCurnier(
   double * tmp2 = rhs + ACProblemSize;
   double * solution = tmp2 + ACProblemSize;
 
-  int * iA = options->iWork;
-  int * iB = iA + 3 * localProblemSize;
-  int * pA = iB + 3 * localProblemSize;
-  int * pB = pA + 3 * localProblemSize;
+  /* XXX big hack --xhub*/
+  csi * iA = (csi *)options->iWork;
+  csi * iB = iA + 3 * localProblemSize;
+  csi * pA = iB + 3 * localProblemSize;
+  csi * pB = pA + 3 * localProblemSize;
 
   CSparseMatrix A_;
   CSparseMatrix B_;
@@ -658,7 +660,7 @@ void globalFrictionContact3D_AlartCurnier(
     problem->mu, rho,
     F, A, B);
 
-  int Astart = initACPsiJacobian(NM_triplet(problem->M),
+  csi Astart = initACPsiJacobian(NM_triplet(problem->M),
                                  NM_triplet(problem->H),
                                  &A_, &B_, J);
 
@@ -716,7 +718,7 @@ void globalFrictionContact3D_AlartCurnier(
     cblas_dscal(ACProblemSize, -1., rhs, 1);
 
     /* get compress column storage for linear ops */
-    CSparseMatrix* Jcsc = cs_triplet(J);
+    CSparseMatrix* Jcsc = cs_compress(J);
 
     /* Solve: J X = -psi */
 
@@ -760,7 +762,7 @@ void globalFrictionContact3D_AlartCurnier(
     }
 #else
     /* use csparse LU factorization */
-    CHECK_RETURN(cs_lusol(Jcsc, rhs, 1, DBL_EPSILON));
+    CHECK_RETURN(cs_lusol(1, Jcsc, rhs, DBL_EPSILON));
 
 #endif
 

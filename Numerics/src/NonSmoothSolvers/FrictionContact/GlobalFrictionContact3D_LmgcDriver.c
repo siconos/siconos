@@ -21,12 +21,16 @@ static double * alloc_memory_double(unsigned int size, double *p)
   return r;
 }
 
-static unsigned int * alloc_memory_int(unsigned int size, unsigned int *p)
+static csi * alloc_memory_csi(unsigned int size, unsigned int *p)
 {
-  unsigned int * r = (unsigned int *) malloc (size * sizeof(unsigned int));
-  memcpy(r, p, size * sizeof(int));
+  csi * r = (csi *) malloc (size * sizeof(csi));
+  for(unsigned int i=0; i<size; ++i)
+  {
+    r[i] = (csi) p[i];
+  }
   return r;
 }
+
 int globalFrictionContact_fclib_write(
   GlobalFrictionContactProblem* problem,
   char * title,
@@ -76,36 +80,36 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   SM->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _M = SM->triplet;
 
-  unsigned int * _colM = alloc_memory_int(nzM, colM);
-  unsigned int * _rowM = alloc_memory_int(nzM, rowM);
+  csi * _colM = alloc_memory_csi(nzM, colM);
+  csi * _rowM = alloc_memory_csi(nzM, rowM);
 
   _M->nzmax = nzM;
   _M->nz = nzM;
   _M->m = M->size0;
   _M->n = M->size1;
-  _M->p = (int *) _colM;
-  _M->i = (int *) _rowM;
+  _M->p = (csi *) _colM;
+  _M->i = (csi *) _rowM;
   double * _Mdata = alloc_memory_double(nzM, Mdata);
   _M->x = _Mdata;
 
-  DEBUG_PRINTF("_M->n=%i\t",_M->n);
-  DEBUG_PRINTF("_M->m=%i\n",_M->m);
+  DEBUG_PRINTF("_M->n=%li\t",_M->n);
+  DEBUG_PRINTF("_M->m=%li\n",_M->m);
 
   NumericsSparseMatrix * SH =newNumericsSparseMatrix();
   H->matrix2 = SH;
   SH->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _H = SH->triplet;
 
-  unsigned int * _colH = alloc_memory_int(nzH, colH);
-  unsigned int * _rowH = alloc_memory_int(nzH, rowH);
+  csi * _colH = alloc_memory_csi(nzH, colH);
+  csi * _rowH = alloc_memory_csi(nzH, rowH);
 
   _H->nzmax = nzH;
   _H->nz = nzH;
   _H->m = H->size0;
   _H->n = H->size1;
 
-  _H->p = (int *) _colH;
-  _H->i = (int *) _rowH;
+  _H->p = (csi *) _colH;
+  _H->i = (csi *) _rowH;
   double * _Hdata = alloc_memory_double(nzH, Hdata);
   _H->x = _Hdata;
 

@@ -5,10 +5,12 @@
 #include <math.h>
 #include <float.h>
 
+#include "SiconosCompat.h"
+
 //#define VERBOSE_DEBUG
 
 /* add an entry to triplet matrix only if value is not (nearly) null */
-int cs_zentry(CSparseMatrix *T, int i, int j, double x)
+csi cs_zentry(CSparseMatrix *T, csi i, csi j, double x)
 {
   if(fabs(x) >= DBL_EPSILON)
   {
@@ -23,13 +25,13 @@ int cs_zentry(CSparseMatrix *T, int i, int j, double x)
 /* from sparse to dense */
 double* cs_dense(CSparseMatrix *A)
 {
-  int m = A->m;
-  int n = A->n;
-  int *Ap = A->p;
-  int *Ai = A->i;
+  csi m = A->m;
+  csi n = A->n;
+  csi *Ap = A->p;
+  csi *Ai = A->i;
   double *Ax = A->x;
-  int nzmax = A->nzmax;
-  int nz = A->nz;
+  csi nzmax = A->nzmax;
+  csi nz = A->nz;
   double *r = (double*) malloc(A->m * A->n * sizeof(double));
   for(int i = 0; i<m*n; ++i)
   {
@@ -39,20 +41,21 @@ double* cs_dense(CSparseMatrix *A)
   {
     for(int j = 0 ; j < n ; j++)
     {
-      printf("    col %d : locations %d to %d\n", j, Ap [j], Ap [j+1]-1);
-      for(int p = Ap [j] ; p < Ap [j+1] ; p++)
+      printf("    col %d : locations " SN_PTRDIFF_T_F " to " SN_PTRDIFF_T_F "\n", j, Ap [j], Ap [j+1]-1);
+      for(csi p = Ap [j] ; p < Ap [j+1] ; p++)
       {
-        printf("      %d : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
+        printf("      " SN_PTRDIFF_T_F " : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
         r[Ai[p] + j*m] = Ax ? Ax [p] : 1;
       }
     }
   }
   else
   {
-    printf("triplet: %d-by-%d, nzmax: %d nnz: %d\n", m, n, nzmax, nz) ;
+    printf("triplet: " SN_PTRDIFF_T_F "-by-" SN_PTRDIFF_T_F ", nzmax: " \
+        SN_PTRDIFF_T_F " nnz: " SN_PTRDIFF_T_F "\n", m, n, nzmax, nz) ;
     for(int p = 0 ; p < nz ; p++)
     {
-      printf("    %d %d : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
+      printf("    " SN_PTRDIFF_T_F " " SN_PTRDIFF_T_F " : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
       r[Ai[p] + Ap[p] * m] = Ax ? Ax[p] : 1;
     }
   }
@@ -63,7 +66,8 @@ double* cs_dense(CSparseMatrix *A)
 int cs_aaxpy(const double alpha, const cs *A, const double *x,
              const double beta, double *y)
 {
-  int p, j, n, *Ap, *Ai ;
+  csi p, n, *Ap, *Ai ;
+  int j;
   double *Ax ;
   if(!A || !x || !y) return (0) ;	     /* check inputs */
   n = A->n ;
