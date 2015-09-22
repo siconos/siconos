@@ -52,7 +52,7 @@ void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMa
      sum over all non-diagonal blocks, rowM being the current
      row of blocks of M
   */
-  cblas_dcopy(local_problem->size, &q[pos], 1, local_problem->q, 1);
+  cblas_dcopy_msan(local_problem->size, &q[pos], 1, local_problem->q, 1);
   rowProdNoDiagSBM(blmat->blocksize0[blmat->blocknumber0 - 1], local_problem->size, rowNumber, blmat, z, local_problem->q, 0);
 
 }
