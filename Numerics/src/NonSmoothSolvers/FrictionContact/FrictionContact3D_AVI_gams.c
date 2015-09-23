@@ -434,6 +434,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   if (strcmp(solverName, "path"))
   {
     optSetStrStr(Optr, "emp", solverName);
+    optSetStrStr(solverOptPtr, "avi_start", "regular");
   }
   else // only for path
   {

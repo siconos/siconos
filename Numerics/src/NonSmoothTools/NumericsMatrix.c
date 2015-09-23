@@ -332,7 +332,7 @@ int cs_printInFile(const cs *A, int brief, FILE* file);
 /* print a sparse matrix */
 int cs_printInFile(const cs *A, int brief, FILE* file)
 {
-  ptrdiff_t m, n, nzmax, nz, p, j, *Ap, *Ai ;
+  csi m, n, nzmax, nz, p, j, *Ap, *Ai ;
   double *Ax ;
   if(!A)
   {
@@ -1416,7 +1416,7 @@ int* NM_MUMPS_jcn(NumericsMatrix* A)
   }
   else
   {
-    ptrdiff_t nzmax = NM_csc(A)->nzmax;
+    csi nzmax = NM_csc(A)->nzmax;
     return NM_iWork(A, 0) + nzmax;
   }
 }

@@ -56,11 +56,7 @@ display r_r, r_y, r_lr, r_ly;
 model vi / all /;
 
 file fx /"%emp.info%"/;
-put fx 'vi F_r r F_y y';
-put fx / '* l_y(p) = cons_y.m(p)' / ;
-put fx / '* l_r(p) = cons_r.m(p)' /;
-put fx / '* dualvar l_y cons_y' /;
-putclose / fx '* dualvar l_r cons_r' /;
+putclose fx 'vi F_r r F_y y';
 
 solve vi using emp;
 

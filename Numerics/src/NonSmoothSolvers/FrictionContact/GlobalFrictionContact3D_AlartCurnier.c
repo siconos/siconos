@@ -601,12 +601,13 @@ void globalFrictionContact3D_AlartCurnier(
                         ACProblemSize + /* tmp2 */
                         ACProblemSize   /* solution */) *  sizeof(double));
 
+    /* XXX big hack here */
     options->iWork = (int *) malloc(
                        (3 * localProblemSize + /* iA */
                         3 * localProblemSize + /* iB */
                         3 * localProblemSize + /* pA */
                         3 * localProblemSize)  /* pB */
-                       * sizeof(int));
+                       * sizeof(csi));
 
     options->iparam[9] = 1;
 
