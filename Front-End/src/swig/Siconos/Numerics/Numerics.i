@@ -1112,15 +1112,16 @@
     throw(std::invalid_argument(BOOST_PP_STRINGIZE(need a ATTR attr))); \
   }
 
+/* I'm not sure it's a good idea to duplicate thise here ... it is already defined in csparse.h */
 typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
 {
-  int nzmax ;	    /* maximum number of entries */
-  int m ;	    /* number of rows */
-  int n ;	    /* number of columns */
+  csi nzmax ;	    /* maximum number of entries */
+  csi m ;	    /* number of rows */
+  csi n ;	    /* number of columns */
   csi *p ;	    /* column pointers (size n+1) or col indices (size nzmax) */
   csi *i ;	    /* row indices, size nzmax */
   double *x ;	    /* numerical values, size nzmax */
-  int nz ;	    /* # of entries in triplet matrix, -1 for compressed-col */
+  csi nz ;	    /* # of entries in triplet matrix, -1 for compressed-col */
 } cs ;
 
 %extend cs_sparse
@@ -1173,12 +1174,12 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
 
       for(unsigned int i = 0; i < (M->m+1); i++)
       {
-        M->p[i] = ((csi *) array_data(array_indptr)) [i];
+        M->p[i] = ((int *) array_data(array_indptr)) [i];
       }
 
       for(unsigned int i = 0; i< M->nzmax; i++)
       {
-        M->i[i] = ((csi *) array_data(array_indices)) [i];
+        M->i[i] = ((int *) array_data(array_indices)) [i];
       }
 
       memcpy(M->x, (double *) array_data(array_data), M->nzmax * sizeof(double));

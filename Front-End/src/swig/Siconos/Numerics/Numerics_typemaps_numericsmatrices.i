@@ -367,12 +367,12 @@
 
     for(unsigned int i = 0; i < (M->m+1); i++)
     {
-      M->p[i] = ((csi *) array_data(array_indptr_)) [i];
+      M->p[i] = ((int *) array_data(array_indptr_)) [i];
     }
     
     for(unsigned int i = 0; i < M->nzmax; i++)
     {
-      M->i[i] = ((csi *) array_data(array_indices_)) [i];
+      M->i[i] = ((int *) array_data(array_indices_)) [i];
     }
     
     memcpy(M->x, (double *) array_data(array_data_), M->nzmax * sizeof(double));
