@@ -1117,8 +1117,8 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
   int nzmax ;	    /* maximum number of entries */
   int m ;	    /* number of rows */
   int n ;	    /* number of columns */
-  int *p ;	    /* column pointers (size n+1) or col indices (size nzmax) */
-  int *i ;	    /* row indices, size nzmax */
+  csi *p ;	    /* column pointers (size n+1) or col indices (size nzmax) */
+  csi *i ;	    /* row indices, size nzmax */
   double *x ;	    /* numerical values, size nzmax */
   int nz ;	    /* # of entries in triplet matrix, -1 for compressed-col */
 } cs ;
@@ -1167,18 +1167,18 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
 
       M->nz = -2; // csr only for the moment
 
-      M->p = (int *) malloc((M->m+1) * sizeof(int));
-      M->i = (int *) malloc(M->nzmax * sizeof(int));
+      M->p = (csi *) malloc((M->m+1) * sizeof(csi));
+      M->i = (csi *) malloc(M->nzmax * sizeof(csi));
       M->x = (double *) malloc(M->nzmax * sizeof(double));
 
       for(unsigned int i = 0; i < (M->m+1); i++)
       {
-        M->p[i] = ((int *) array_data(array_indptr)) [i];
+        M->p[i] = ((csi *) array_data(array_indptr)) [i];
       }
 
       for(unsigned int i = 0; i< M->nzmax; i++)
       {
-        M->i[i] = ((int *) array_data(array_indices)) [i];
+        M->i[i] = ((csi *) array_data(array_indices)) [i];
       }
 
       memcpy(M->x, (double *) array_data(array_data), M->nzmax * sizeof(double));
