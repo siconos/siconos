@@ -26,6 +26,7 @@
 #include <assert.h>
 #include "SiconosBlas.h"
 
+#include "sanitizer.h"
 
 void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {

@@ -400,7 +400,7 @@ static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
     assert(cs->p);
     assert(cs->i);
     assert(cs->x);
-    idxDataWriteSparseColMajor(Xptr, cs->p, cs->i, cs->x);
+    idxDataWriteSparseColMajor(Xptr, (int*)cs->p, (int*)cs->i, cs->x);
   }
 
 

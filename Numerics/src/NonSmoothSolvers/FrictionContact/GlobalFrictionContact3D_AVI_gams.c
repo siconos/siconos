@@ -32,7 +32,7 @@
 #define DEBUG_MESSAGES
 #include "debug.h"
 
-static int SN_rm_normal_part(int i, int j, double val, void* env)
+static ptrdiff_t SN_rm_normal_part(ptrdiff_t i, ptrdiff_t j, double val, void* env)
 {
   if (i%3 == 0)
   {

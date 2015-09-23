@@ -511,8 +511,8 @@ void set_SolverOptions(SolverOptions* options, int solverId)
 
   case SICONOS_NCP_PATH:
   case SICONOS_VI_BOX_PATH:
-    iSize = 2;
-    dSize = 2;
+    iSize = 6;
+    dSize = 3;
     iter_max = 10000;
     tol = 1e-12;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
