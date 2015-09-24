@@ -269,10 +269,10 @@
     PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x);
     if(!out_data) SWIG_fail;
 
-    PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims,NPY_INT,M->i);
+    PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims,NPY_INT64,M->i);
     if(!out_indices) SWIG_fail;
 
-    PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims,NPY_INT,M->p);
+    PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims,NPY_INT64,M->p);
     if(!out_indptr) SWIG_fail;
 
     /* Warning ! m is the number of rows, n the number of columns ! --xhub */
@@ -312,6 +312,47 @@
 
 }
 
+%define %SAFE_CAST_INT(pyvar, len, indvar, dest_array)
+{
+    int array_pyvartype_ = PyArray_TYPE((PyArrayObject *)pyvar);
+    switch (array_pyvartype_)
+    {
+      case NPY_INT32:
+      {
+        PyArrayObject* array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT32, &indvar);
+        if (!array_pyvar) { SWIG_fail; }
+
+        for(unsigned int i = 0; i < len; i++)
+        {
+          dest_array[i] = ((int32_t *) array_data(array_pyvar)) [i];
+        }
+        break;
+      }
+      case NPY_INT64:
+      {
+        PyArrayObject* array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT64, &indvar);
+        if (!array_pyvar) { SWIG_fail; }
+
+        for(unsigned int i = 0; i < len; i++)
+        {
+          dest_array[i] = ((int64_t *) array_data(array_pyvar)) [i];
+        }
+        break;
+      }
+      default:
+      {
+        PyObject *errmsg;
+        errmsg = PyUString_FromString("Unknown type ");
+        PyUString_ConcatAndDel(&errmsg, PyObject_Repr((PyObject *)PyArray_DESCR((PyArrayObject *)pyvar)));
+        PyUString_ConcatAndDel(&errmsg, PyUString_FromFormat(" for variable " #pyvar));
+        PyErr_SetObject(PyExc_TypeError, errmsg);
+        Py_DECREF(errmsg);
+        SWIG_fail;
+      }
+    }
+}
+%enddef
+
 %typemap(in) (cs_sparse* M) 
   (PyObject *shape_ = NULL,
    PyObject *nnz_ = NULL,
@@ -345,10 +386,6 @@
 //      GET_INT(nnz,nzmax); fail: type is numpy.int32!
     nzmax = PyInt_AsLong(nnz_);
     
-    array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, &is_new_object1);
-    array_indices_ = obj_to_array_allow_conversion(indices_, NPY_INT32, &is_new_object2);
-    array_indptr_ = obj_to_array_allow_conversion(indptr_, NPY_INT32, &is_new_object3);
-    
     M->m = dim0;
     M->n = dim1;
     
@@ -357,26 +394,23 @@
     M->nz = -2; // csr only for the moment
     
     M->p = (csi *) malloc((M->m+1) * sizeof(csi));
-    if(!M->p) SWIG_fail;
-
     M->i = (csi *) malloc(M->nzmax * sizeof(csi));
-    if(!M->i) SWIG_fail;
-
     M->x = (double *) malloc(M->nzmax * sizeof(double));
+
+    // if we return NULL here, the matrix M is going to be freed. It will miserably fail if
+    // M has not been "completly" initialized --xhub
+    if(!M->p) SWIG_fail;
+    if(!M->i) SWIG_fail;
     if(!M->x) SWIG_fail;
 
-    for(unsigned int i = 0; i < (M->m+1); i++)
-    {
-      M->p[i] = ((int *) array_data(array_indptr_)) [i];
-    }
-    
-    for(unsigned int i = 0; i < M->nzmax; i++)
-    {
-      M->i[i] = ((int *) array_data(array_indices_)) [i];
-    }
-    
+    array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, &is_new_object1);
+    if (!array_data_) { SWIG_fail; }
+
     memcpy(M->x, (double *) array_data(array_data_), M->nzmax * sizeof(double));
-    
+
+    %SAFE_CAST_INT(indptr_, dim0 + 1, is_new_object2, M->p);
+    %SAFE_CAST_INT(indices_, nzmax, is_new_object3, M->i);
+
     $1 = M;
   }
   catch (const std::invalid_argument& e)

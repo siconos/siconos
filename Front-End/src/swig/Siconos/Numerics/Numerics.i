@@ -54,6 +54,8 @@
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
 #include "SiconosSets.h"
+#include <numpy/npy_3kcompat.h>
+
 
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/preprocessor/cat.hpp>
@@ -1157,9 +1159,13 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
 //      GET_INT(nnz,nzmax); fail: type is numpy.int32!
       nzmax = PyInt_AsLong(nnz);
 
+      // the return NULL is a hack, we should raise an exception, but I'm lazy --xhub
       array_data = obj_to_array_allow_conversion(data, NPY_DOUBLE, &is_new_object1);
+      if (!array_data) { return NULL; }
       array_indices = obj_to_array_allow_conversion(indices, NPY_INT32, &is_new_object2);
+      if (!array_indices) { return NULL; }
       array_indptr = obj_to_array_allow_conversion(indptr, NPY_INT32, &is_new_object3);
+      if (!array_indptr) { return NULL; }
 
       M->m = dim0;
       M->n = dim1;

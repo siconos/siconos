@@ -435,6 +435,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   {
     optSetStrStr(Optr, "emp", solverName);
     optSetStrStr(solverOptPtr, "avi_start", "regular");
+    optSetStrStr(solverOptPtr, "ratio_tester", "expand");
   }
   else // only for path
   {
@@ -443,9 +444,9 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
     optSetDblStr(solverOptPtr, "proximal_perturbation", 0.);
     optSetStrStr(solverOptPtr, "crash_method", "none");
     optSetIntStr(solverOptPtr, "crash_perturb", 0);
-    optSetDblStr(solverOptPtr, "expand_delta", 1e-10);
 
   }
+  optSetDblStr(solverOptPtr, "expand_delta", 1e-10);
 //  optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
   optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
   optWriteParameterFile(solverOptPtr, msg);
