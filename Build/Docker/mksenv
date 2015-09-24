@@ -1,0 +1,234 @@
+#!/usr/bin/env python
+
+#
+# Make software environment
+#
+
+import getopt
+import yaml
+import sys
+import shlex
+
+class OutputMode:
+    Script, Docker, Vagrant = range(3)
+
+def is_list(a):
+    return isinstance(a, list)
+
+def is_dict(a):
+    return isinstance(a, dict)
+
+def is_atom(a):
+    return not (hasattr(a, '__iter__'))
+
+def pkg_entries(spec=None, distrib=None, distrib_version=None, pkg=None):
+    """
+    Find recursively entries for pkg and distribution distrib in a
+    specification spec.
+    """
+
+    distrib_full = '{0}-{1}'.format(distrib, distrib_version)
+
+    result = None
+
+    if pkg in spec['pkgs']:
+
+
+        if distrib_full in spec['pkgs'][pkg]:
+            result =  spec['pkgs'][pkg][distrib_full]
+
+        elif distrib in spec['pkgs'][pkg]:
+            result = spec['pkgs'][pkg][distrib]
+
+        elif distrib in spec['match']:
+            match_distrib = spec['match'][distrib]
+            if match_distrib in spec['pkgs'][pkg]:
+                result = spec['pkgs'][pkg][match_distrib]
+
+        elif spec['wildcard'] in spec['pkgs'][pkg]:
+            result =  spec['pkgs'][pkg][spec['wildcard']]
+
+        else:
+            result = None
+
+    # atom or dictionary
+    if result is None:
+        return [result]
+
+    elif is_dict(result):
+        return [result]
+    else:
+
+        if is_atom(result):
+            result = [result]
+        r = list()
+
+        for e in result:
+
+            ne = pkg_entries(spec=spec, distrib=distrib,
+                             distrib_version=distrib_version, pkg=e)
+
+            if ne == [None]:
+                r.append(e)
+
+            else:
+                r += ne
+
+        return r
+
+def begin(distrib=None, distrib_version=None, output_mode=None):
+    """
+    Distribution preamble.
+    """
+    if output_mode == OutputMode.Docker:
+        sys.stdout.write('FROM {0}:{1}\n'.format(distrib, distrib_version))
+
+def run(installer=None, command=None, pkg=None, pkgs=None, output_mode=OutputMode.Script):
+    """
+    Format an install command according to output mode.
+    """
+
+    if output_mode == OutputMode.Docker:
+        tokens = ['RUN']
+
+    else:
+        if output_mode == OutputMode.Script:
+            tokens = []
+
+        else:
+            sys.stderr.write('output mode {0} is not implemented\n'.format(output_mode))
+            exit(1)
+
+    if installer is not None:
+        tokens.append(installer)
+
+    if command is not None:
+        if '&&' in command:
+            coms = command.split('&&')
+            tokens += ['{0} &&'.format(c.lstrip().rstrip()) for c in coms[:-1]]
+            tokens.append(coms[-1].lstrip().rstrip())
+        else:
+            tokens.append(command)
+
+    if pkg is not None:
+        tokens.append(pkg)
+
+    if pkgs is not None:
+       tokens += pkgs
+
+    sys.stdout.write('{0}\n'.format(' \\ \n  '.join(tokens)))
+
+
+
+try:
+    opts, args = getopt.gnu_getopt(sys.argv[1:], '',
+                                   ['pkg=',
+                                    'pkgs=',
+                                    'script',
+                                    'docker',
+                                    'vagrant',
+                                    'split=',
+                                    'distrib='])
+
+except getopt.GetoptError, err:
+        sys.stderr.write('{0}\n'.format(str(err)))
+        usage()
+        exit(2)
+
+distrib = None
+distrib_version = None
+pkgs = list()
+
+output_mode = OutputMode.Script
+split = False
+
+for o, a in opts:
+    if o == '--distrib':
+        if ':' in a:
+            distrib, distrib_version = a.split(':')
+        else:
+            distrib = a
+    elif o == '--pkg':
+        pkgs.append(a)
+    elif o == '--pkgs':
+        pkgs += a.split(',')
+    elif o == '--script':
+        output_mode = OutputMode.Script
+    elif o == '--docker':
+        output_mode = OutputMode.Docker
+    elif o == '--vagrant':
+        output_mode = OutputMode.Vagrant
+    elif o == '--split':
+        split = a.lower() in ['true','yes','1']
+
+
+specfilename = args[0]
+
+def build_tasks(spec, pkgs, by_installer, by_command):
+    for pkg in pkgs:
+
+        entries = pkg_entries(spec=spec, distrib=distrib,
+                              distrib_version=distrib_version, pkg=pkg)
+
+        for entry in entries:
+            if entry is not None:
+                if hasattr(entry, 'has_key'):
+                    if 'command' in entry:
+                        by_command.append(entry['command'])
+                elif hasattr(entry, 'sort'):
+                    by_installer += entry
+                else:
+                    by_installer.append(entry)
+            else:
+                by_installer.append(pkg)
+
+
+with open(specfilename) as specfile:
+
+    spec = yaml.load(specfile.read())
+
+    by_installer = list()
+    by_command = list()
+
+    for pkg in pkgs:
+
+        entries = pkg_entries(spec=spec, distrib=distrib,
+                            distrib_version=distrib_version, pkg=pkg)
+
+        for entry in entries:
+            if entry is not None:
+                if hasattr(entry, 'has_key'):
+                    if 'command' in entry:
+                        by_command.append(entry['command'])
+                elif hasattr(entry, 'sort'):
+                    by_installer += entry
+                else:
+                    by_installer.append(entry)
+            else:
+                by_installer.append(pkg)
+
+
+    begin(distrib=distrib, distrib_version=distrib_version,
+          output_mode=output_mode)
+
+    distrib_full = '{0}-{1}'.format(distrib, distrib_version)
+
+    if distrib_full in spec['distrib'] and \
+       'updater' in spec['distrib'][distrib_full]:
+        run(command=spec['distrib'][distrib_full]['updater'],
+            output_mode=output_mode)
+
+    if 'updater' in spec['distrib'][distrib]:
+        run(command=spec['distrib'][distrib]['updater'],
+            output_mode=output_mode)
+        
+    if split:
+        for pkg in by_installer:
+            run(installer=spec['distrib'][distrib]['installer'],
+                pkg = pkg, output_mode=output_mode)
+    else:
+        run(installer=spec['distrib'][distrib]['installer'],
+            pkgs = by_installer, output_mode=output_mode)
+
+    for command in by_command:
+        run(command=command, output_mode=output_mode)

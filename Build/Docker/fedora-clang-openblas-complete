@@ -1,6 +1,6 @@
 # -*- dockerfile -*-
  
-FROM fedora
+FROM @DOCKER_DISTRIB@
 
 RUN dnf install -y \
      cmake \
@@ -19,7 +19,26 @@ RUN dnf install -y \
      python-devel \
      python-lxml \
      pytest \
-     swig
+     swig \
+     openmpi-devel \
+     scalapack-openmpi \
+     MUMPS-openmpi-devel
 
-ENV CC /usr/bin/gcc
-ENV CXX /usr/bin/c++
+
+RUN dnf install -y subversion
+RUN dnf install -y hdf5 hdf5-devel h5py
+
+RUN dnf install -y ptscotch-openmpi 
+RUN dnf install -y ptscotch-openmpi-devel 
+RUN dnf install -y blacs-openmpi-devel
+
+# fclib
+# note : install in /usr is mandatory as /usr/local is mounted during docker run
+RUN svn checkout svn://scm.gforge.inria.fr/svnroot/fclib/ && \
+    cd fclib/trunk && \
+    cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release && \
+    make && \
+    make install
+
+ENV CC /usr/bin/clang
+ENV CXX /usr/bin/clang++

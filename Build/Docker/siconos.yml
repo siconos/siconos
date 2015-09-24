@@ -1,0 +1,106 @@
+# use mksenv --distrib=<distrib> --pkgs=pkg1,pkg2,pkg3,... --split=[true,false] <database.yml> [--docker,--script]
+
+wildcard: any
+
+match:
+  ubuntu: debian
+
+distrib:
+  fedora:
+    installer: dnf install -y
+
+  debian:
+    updater: apt-get update -y 
+    installer: apt-get install -y
+
+
+pkgs:
+
+  numerics-minimal:
+    any:
+      - make
+      - cmake 
+      - gcc
+      - gfortran
+      - doxygen
+
+  gfortran:
+    fedora: gcc-gfortran
+
+  c++:
+    fedora: gcc-c++
+  
+  boost:
+    fedora: boost-devel
+      
+  gmp:
+    fedora: gmp-devel
+
+  cppunit:
+    fedora: 
+      - cppunit
+      - cppunit-devel
+
+  hdf5:
+    fedora: hdf5-devel
+    debian: libhdf5-dev
+
+  h5py:
+    fedora: h5py
+    debian: python-h5py
+
+  openblas-lapacke:
+    debian:
+      - libopenblas-dev
+      - liblapacke-dev
+    fedora:
+      - openblas-devel
+      - lapack-devel
+
+  atlas-lapack:
+    debian:
+      - libblas-dev
+      - liblapack-dev
+      - libatlas-base-dev
+      - libatlas-dev
+
+  oce:
+    debian:
+      - liboce-foundation-dev
+      - liboce-modeling-dev
+      - liboce-ocaf-dev
+      - liboce-visualization-dev
+      - oce-draw
+
+  mumps:
+    debian-7.8:
+      - libopenmpi-dev
+      - openssh-client
+      - libscalapack-mpi-dev
+      - libscotchmetis-dev
+      - libmumps-dev
+
+    debian:
+      - libopenmpi-dev
+      - openssh-client
+      - libscalapack-mpi-dev
+      - libmetis-dev
+      - libmumps-dev
+
+    fedora:
+      - ptscotch-openmpi 
+      - ptscotch-openmpi-devel 
+      - blacs-openmpi-devel
+      - openmpi-devel
+      - scalapack-openmpi
+      - MUMPS-openmpi-devel
+    
+  fclib:
+    any:
+      command: svn checkout svn://scm.gforge.inria.fr/svnroot/fclib/ &&
+               cd fclib/trunk &&
+               cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release &&
+               make &&
+               make install
+
+
