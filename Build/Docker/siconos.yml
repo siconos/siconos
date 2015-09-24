@@ -1,29 +1,47 @@
-# use mksenv --distrib=<distrib> --pkgs=pkg1,pkg2,pkg3,... --split=[true,false] <database.yml> [--docker,--script]
+#
+# use mksenv --distrib=<distrib> --pkgs=pkg1,pkg2,pkg3,... --split=[true,false] <thisfile.yml> [--docker,--script]
+#
 
+##############################################################################
 wildcard: any
 
 match:
   ubuntu: debian
+##############################################################################
+installer:
+  any:
+    fedora: dnf install -y
+    debian: apt-get install -y
 
-distrib:
-  fedora:
-    installer: dnf install -y
-
-  debian:
-    updater: apt-get update -y 
-    installer: apt-get install -y
-
-
+updater:
+  any:
+    debian: apt-get update -y 
+##############################################################################
+env:
+  clang:
+    any:
+      CC=/usr/bin/clang
+##############################################################################
 pkgs:
 
-  numerics-minimal:
+  # Numerics minimal build environments
+  # needs -DWITH_DOXYGEN_WARNINGS=0
+  numerics-minimal-gcc:
     any:
       - make
       - cmake 
       - gcc
       - gfortran
-      - doxygen
+      - atlas-lapack
 
+  numerics-minimal-clang:
+    any:
+      - make
+      - cmake 
+      - clang
+      - gfortran
+      - atlas-lapack
+##############################################################################
   gfortran:
     fedora: gcc-gfortran
 
@@ -71,6 +89,8 @@ pkgs:
       - liboce-ocaf-dev
       - liboce-visualization-dev
       - oce-draw
+
+    fedora:
 
   mumps:
     debian-7.8:
