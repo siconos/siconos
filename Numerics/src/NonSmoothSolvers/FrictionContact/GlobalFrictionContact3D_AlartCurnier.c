@@ -47,17 +47,6 @@
 #include <debug.h>
 
 
-#ifdef WITH_MUMPS
-#include <mpi.h>
-#include <dmumps_c.h>
-
-#define JOB_INIT -1
-#define JOB_END -2
-#define USE_COMM_WORLD -987654
-#define ICNTL(I) icntl[(I)-1]
-#define CNTL(I) cntl[(I)-1]
-#endif
-
 /* size of whole problem */
 unsigned int sizeOfPsi(
   CSparseMatrix* M,
@@ -619,7 +608,6 @@ void globalFrictionContact3D_AlartCurnier(
   for(unsigned int i = 0; i < ACProblemSize; ++i) rhs[i] = 0.;
 
 
-#ifdef WITH_MUMPS
 
   // quick hack to make things work
   // need to use the functions from NumericsMatrix --xhub
@@ -628,7 +616,6 @@ void globalFrictionContact3D_AlartCurnier(
   NumericsSparseMatrix* SM = newNumericsSparseMatrix();
   SM->triplet = J;
   fillNumericsMatrix(&AA, NM_SPARSE, (int)J->m, (int)J->n, SM);
-#endif
 
   info[0] = 1;
 
@@ -772,9 +759,7 @@ void globalFrictionContact3D_AlartCurnier(
   }
 #endif
 
-  {
-    freeNumericsMatrix(&AA);
-  }
+  freeNumericsMatrix(&AA);
 }
 
 
