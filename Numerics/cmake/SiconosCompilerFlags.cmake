@@ -94,6 +94,10 @@ IF(CMAKE_C_COMPILER)
  ADD_C_OPTIONS("-Werror=format-invalid-specifier")
  ADD_C_OPTIONS("-Werror=type-limits")
  ADD_C_OPTIONS("-Werror=incompatible-pointer-types")
+ ADD_C_OPTIONS("-Werror=empty-body")
+ ADD_C_OPTIONS("-Werror=implicit")
+ ADD_C_OPTIONS("-Werror=pointer-to-int-cast")
+ ADD_C_OPTIONS("-Werror=int-to-pointer-cast")
  # C specific
  ADD_C_OPTIONS("-Werror=missing-prototypes")
 

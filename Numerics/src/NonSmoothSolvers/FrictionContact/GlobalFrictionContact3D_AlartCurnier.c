@@ -429,36 +429,6 @@ int globalFrictionContact3D_AlartCurnier_setDefaultSolverOptions(
 void globalFrictionContact3D_sparseGlobalAlartCurnierInit(
   SolverOptions *SO)
 {
-#ifdef WITH_MUMPS
-  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)malloc(sizeof(DMUMPS_STRUC_C));
-
-  // SO with void pointers ?
-  SO->dparam[7] = (double) (long long) mumps_id;
-
-  // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
-  mumps_id->job = JOB_INIT;
-  mumps_id->par = 1;
-  mumps_id->sym = 0;
-  mumps_id->comm_fortran = USE_COMM_WORLD;
-  dmumps_c(mumps_id);
-
-  if(verbose > 1)
-  {
-    mumps_id->ICNTL(4) = 0;
-    mumps_id->ICNTL(10) = 1;
-    mumps_id->ICNTL(11) = 1;
-  }
-  else
-  {
-    mumps_id->ICNTL(1) = -1;
-    mumps_id->ICNTL(2) = -1;
-    mumps_id->ICNTL(3) = -1;
-  }
-
-  mumps_id->ICNTL(24) = 1; /* Null pivot row detection see also
-                              CNTL(3) & CNTL(5) */
-
-#endif
 }
 
 /* Alart & Curnier solver for sparse global problem */
@@ -506,36 +476,6 @@ void globalFrictionContact3D_AlartCurnier(
     /* output a warning here */
     erritermax = 1;
   }
-
-#ifdef WITH_MUMPS
-  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
-  int mumps_com = options->iparam[8];
-
-  if(mumps_com<0)
-  {
-    /* we suppose mpi init has not been done */
-    int ierr MAYBE_UNUSED;
-    int myid;
-    /* c99 mandates that argv[argc] = NULL --xhub */
-    /* Also where are we calling MPI_Finalize ?  */
-    int argc = 0;
-    char * argv0 = NULL;
-    char ** argv = &argv0;
-    ierr = MPI_Init(&argc, &argv);
-    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    globalFrictionContact3D_sparseGlobalAlartCurnierInit(options);
-    mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
-  }
-  else /* an mpi communicator is passed through iparam[8] so mpi init
-        * has been done */
-  {
-    globalFrictionContact3D_sparseGlobalAlartCurnierInit(options);
-    mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
-    mumps_id->comm_fortran = mumps_com;
-  }
-
-  assert(mumps_id);
-#endif
 
   assert(itermax > 0);
   assert(options->iparam[3] > 0);
@@ -680,14 +620,14 @@ void globalFrictionContact3D_AlartCurnier(
 
 
 #ifdef WITH_MUMPS
-  mumps_id->n = (int) J->m;
-  mumps_id->nz = (int) J->nz;
-  mumps_id->irn = (int) J->i;
-  mumps_id->jcn = (int) J->p;
-  mumps_id->a = J->x;
-  mumps_id->rhs = rhs;
 
-  mumps_id->job = 6;
+  // quick hack to make things work
+  // need to use the functions from NumericsMatrix --xhub
+
+  NumericsMatrix AA;
+  NumericsSparseMatrix* SM = newNumericsSparseMatrix();
+  SM->triplet = J;
+  fillNumericsMatrix(&AA, NM_SPARSE, (int)J->m, (int)J->n, SM);
 #endif
 
   info[0] = 1;
@@ -724,43 +664,7 @@ void globalFrictionContact3D_AlartCurnier(
     /* Solve: J X = -psi */
 
 #ifdef WITH_MUMPS
-    mumps_id->n = (int) J->m;
-    mumps_id->nz = (int) J->nz;
-
-    /* set fortran indices in place so we do not have to bother with
-     * yet another heap allocation */
-    for(int e = 0 ; e < J->nz ; ++e)
-    {
-      J->i[e]++;
-      J->p[e]++;
-    }
-
-    dmumps_c(mumps_id);
-
-    /* come back to C indices */
-    for(int e = 0 ; e < J->nz ; ++e)
-    {
-      J->i[e]--;
-      J->p[e]--;
-    }
-
-    assert(mumps_id->info[0] >= 0);
-
-    if(mumps_id->info[0] > 0)
-      /*if (verbose>0)*/
-      printf("GLOBALAC: MUMPS warning : info(1)=%d, info(2)=%d\n",
-             mumps_id->info[0], mumps_id->info[1]);
-
-
-    if(verbose > 1)
-    {
-
-      printf("mumps : condition number %g\n", mumps_id->rinfog[9]);
-      printf("mumps : component wise scaled residual %g\n",
-             mumps_id->rinfog[6]);
-      printf("mumps : \n");
-
-    }
+    NM_gesv(&AA, rhs);
 #else
     /* use csparse LU factorization */
     CHECK_RETURN(cs_lusol(1, Jcsc, rhs, DBL_EPSILON));
@@ -869,7 +773,7 @@ void globalFrictionContact3D_AlartCurnier(
 #endif
 
   {
-    cs_spfree(J);
+    freeNumericsMatrix(&AA);
   }
 }
 
