@@ -10,9 +10,9 @@ cs *cs_add (const cs *A, const cs *B, double alpha, double beta)
     if (A->m != B->m || A->n != B->n) return (NULL) ;
     m = A->m ; anz = A->p [A->n] ;
     n = B->n ; Bp = B->p ; Bx = B->x ; bnz = Bp [n] ;
-    w = cs_calloc (m, sizeof (csi)) ;                       /* get workspace */
+    w = (csi*) cs_calloc (m, sizeof (csi)) ;                       /* get workspace */
     values = (A->x != NULL) && (Bx != NULL) ;
-    x = values ? cs_malloc (m, sizeof (double)) : NULL ;    /* get workspace */
+    x = values ? (double*) cs_malloc (m, sizeof (double)) : NULL ;    /* get workspace */
     C = cs_spalloc (m, n, anz + bnz, values, 0) ;           /* allocate result*/
     if (!C || !w || (values && !x)) return (cs_done (C, w, x, 0)) ;
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
@@ -87,8 +87,8 @@ csi *cs_amd (csi order, const cs *A)  /* order 0:natural, 1:Chol, 2:LU, 3:QR */
     cs_fkeep (C, &cs_diag, NULL) ;          /* drop diagonal entries */
     Cp = C->p ;
     cnz = Cp [n] ;
-    P = cs_malloc (n+1, sizeof (csi)) ;     /* allocate result */
-    W = cs_malloc (8*(n+1), sizeof (csi)) ; /* get workspace */
+    P = (csi*) cs_malloc (n+1, sizeof (csi)) ;     /* allocate result */
+    W = (csi*) cs_malloc (8*(n+1), sizeof (csi)) ; /* get workspace */
     t = cnz + cnz/5 + 2*n ;                 /* add elbow room to C */
     if (!P || !W || !cs_sprealloc (C, t)) return (cs_idone (P, C, W, 0)) ;
     len  = W           ; nv     = W +   (n+1) ; next   = W + 2*(n+1) ;
@@ -399,9 +399,9 @@ csn *cs_chol (const cs *A, const css *S)
     csn *N ;
     if (!CS_CSC (A) || !S || !S->cp || !S->parent) return (NULL) ;
     n = A->n ;
-    N = cs_calloc (1, sizeof (csn)) ;       /* allocate result */
-    c = cs_malloc (2*n, sizeof (csi)) ;     /* get csi workspace */
-    x = cs_malloc (n, sizeof (double)) ;    /* get double workspace */
+    N = (csn*) cs_calloc (1, sizeof (csn)) ;       /* allocate result */
+    c = (csi*) cs_malloc (2*n, sizeof (csi)) ;     /* get csi workspace */
+    x = (double*) cs_malloc (n, sizeof (double)) ;    /* get double workspace */
     cp = S->cp ; pinv = S->pinv ; parent = S->parent ;
     C = pinv ? cs_symperm (A, pinv, 1) : ((cs *) A) ;
     E = pinv ? C : NULL ;           /* E is alias for A, or a copy E=A(p,p) */
@@ -458,7 +458,7 @@ csi cs_cholsol (csi order, const cs *A, double *b)
     n = A->n ;
     S = cs_schol (order, A) ;               /* ordering and symbolic analysis */
     N = cs_chol (A, S) ;                    /* numeric Cholesky factorization */
-    x = cs_malloc (n, sizeof (double)) ;    /* get workspace */
+    x = (double*) cs_malloc (n, sizeof (double)) ;    /* get workspace */
     ok = (S && N && x) ;
     if (ok)
     {
@@ -481,7 +481,7 @@ cs *cs_compress (const cs *T)
     if (!CS_TRIPLET (T)) return (NULL) ;                /* check inputs */
     m = T->m ; n = T->n ; Ti = T->i ; Tj = T->p ; Tx = T->x ; nz = T->nz ;
     C = cs_spalloc (m, n, nz, Tx != NULL, 0) ;          /* allocate result */
-    w = cs_calloc (n, sizeof (csi)) ;                   /* get workspace */
+    w = (csi*) cs_calloc (n, sizeof (csi)) ;                   /* get workspace */
     if (!C || !w) return (cs_done (C, w, NULL, 0)) ;    /* out of memory */
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     for (k = 0 ; k < nz ; k++) w [Tj [k]]++ ;           /* column counts */
@@ -516,8 +516,8 @@ csi *cs_counts (const cs *A, const csi *parent, const csi *post, csi ata)
     if (!CS_CSC (A) || !parent || !post) return (NULL) ;    /* check inputs */
     m = A->m ; n = A->n ;
     s = 4*n + (ata ? (n+m+1) : 0) ;
-    delta = colcount = cs_malloc (n, sizeof (csi)) ;    /* allocate result */
-    w = cs_malloc (s, sizeof (csi)) ;                   /* get workspace */
+    delta = colcount = (csi*) cs_malloc (n, sizeof (csi)) ;    /* allocate result */
+    w = (csi*) cs_malloc (s, sizeof (csi)) ;                   /* get workspace */
     AT = cs_transpose (A, 0) ;                          /* AT = A' */
     if (!AT || !colcount || !w) return (cs_idone (colcount, AT, w, 0)) ;
     ancestor = w ; maxfirst = w+n ; prevleaf = w+2*n ; first = w+3*n ;
@@ -770,7 +770,7 @@ csi cs_dupl (cs *A)
     double *Ax ;
     if (!CS_CSC (A)) return (0) ;               /* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
-    w = cs_malloc (m, sizeof (csi)) ;           /* get workspace */
+    w = (csi*) cs_malloc (m, sizeof (csi)) ;           /* get workspace */
     if (!w) return (0) ;                        /* out of memory */
     for (i = 0 ; i < m ; i++) w [i] = -1 ;      /* row i not yet seen */
     for (j = 0 ; j < n ; j++)
@@ -836,8 +836,8 @@ csi *cs_etree (const cs *A, csi ata)
     csi i, k, p, m, n, inext, *Ap, *Ai, *w, *parent, *ancestor, *prev ;
     if (!CS_CSC (A)) return (NULL) ;        /* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ;
-    parent = cs_malloc (n, sizeof (csi)) ;              /* allocate result */
-    w = cs_malloc (n + (ata ? m : 0), sizeof (csi)) ;   /* get workspace */
+    parent = (csi*) cs_malloc (n, sizeof (csi)) ;              /* allocate result */
+    w = (csi*) cs_malloc (n + (ata ? m : 0), sizeof (csi)) ;   /* get workspace */
     if (!w || !parent) return (cs_idone (parent, NULL, w, 0)) ;
     ancestor = w ; prev = w + n ;
     if (ata) for (i = 0 ; i < m ; i++) prev [i] = -1 ;
@@ -1026,13 +1026,13 @@ csn *cs_lu (const cs *A, const css *S, double tol)
     if (!CS_CSC (A) || !S) return (NULL) ;          /* check inputs */
     n = A->n ;
     q = S->q ; lnz = S->lnz ; unz = S->unz ;
-    x = cs_malloc (n, sizeof (double)) ;            /* get double workspace */
-    xi = cs_malloc (2*n, sizeof (csi)) ;            /* get csi workspace */
-    N = cs_calloc (1, sizeof (csn)) ;               /* allocate result */
+    x = (double*) cs_malloc (n, sizeof (double)) ;            /* get double workspace */
+    xi = (csi*) cs_malloc (2*n, sizeof (csi)) ;            /* get csi workspace */
+    N = (csn*) cs_calloc (1, sizeof (csn)) ;               /* allocate result */
     if (!x || !xi || !N) return (cs_ndone (N, NULL, xi, x, 0)) ;
     N->L = L = cs_spalloc (n, n, lnz, 1, 0) ;       /* allocate result L */
     N->U = U = cs_spalloc (n, n, unz, 1, 0) ;       /* allocate result U */
-    N->pinv = pinv = cs_malloc (n, sizeof (csi)) ;  /* allocate result pinv */
+    N->pinv = pinv = (csi*) cs_malloc (n, sizeof (csi)) ;  /* allocate result pinv */
     if (!L || !U || !pinv) return (cs_ndone (N, NULL, xi, x, 0)) ;
     Lp = L->p ; Up = U->p ;
     for (i = 0 ; i < n ; i++) x [i] = 0 ;           /* clear workspace */
@@ -1112,7 +1112,7 @@ csi cs_lusol (csi order, const cs *A, double *b, double tol)
     n = A->n ;
     S = cs_sqr (order, A, 0) ;              /* ordering and symbolic analysis */
     N = cs_lu (A, S, tol) ;                 /* numeric LU factorization */
-    x = cs_malloc (n, sizeof (double)) ;    /* get workspace */
+    x = (double*) cs_malloc (n, sizeof (double)) ;    /* get workspace */
     ok = (S && N && x) ;
     if (ok)
     {
@@ -1209,7 +1209,7 @@ csi *cs_maxtrans (const cs *A, csi seed)  /*[jmatch [0..m-1]; imatch [0..n-1]]*/
     cs *C ;
     if (!CS_CSC (A)) return (NULL) ;                /* check inputs */
     n = A->n ; m = A->m ; Ap = A->p ; Ai = A->i ;
-    w = jimatch = cs_calloc (m+n, sizeof (csi)) ;   /* allocate result */
+    w = jimatch = (csi*) cs_calloc (m+n, sizeof (csi)) ;   /* allocate result */
     if (!jimatch) return (NULL) ;
     for (k = 0, j = 0 ; j < n ; j++)    /* count nonempty rows and columns */
     {
@@ -1235,7 +1235,7 @@ csi *cs_maxtrans (const cs *A, csi seed)  /*[jmatch [0..m-1]; imatch [0..n-1]]*/
     n = C->n ; m = C->m ; Cp = C->p ;
     jmatch = (m2 < n2) ? jimatch + n : jimatch ;
     imatch = (m2 < n2) ? jimatch : jimatch + m ;
-    w = cs_malloc (5*n, sizeof (csi)) ;             /* get workspace */
+    w = (csi*) cs_malloc (5*n, sizeof (csi)) ;             /* get workspace */
     if (!w) return (cs_idone (jimatch, (m2 < n2) ? C : NULL, w, 0)) ;
     cheap = w + n ; js = w + 2*n ; is = w + 3*n ; ps = w + 4*n ;
     for (j = 0 ; j < n ; j++) cheap [j] = Cp [j] ;  /* for cheap assignment */
@@ -1261,9 +1261,9 @@ cs *cs_multiply (const cs *A, const cs *B)
     if (A->n != B->m) return (NULL) ;
     m = A->m ; anz = A->p [A->n] ;
     n = B->n ; Bp = B->p ; Bi = B->i ; Bx = B->x ; bnz = Bp [n] ;
-    w = cs_calloc (m, sizeof (csi)) ;                    /* get workspace */
+    w = (csi*) cs_calloc (m, sizeof (csi)) ;                    /* get workspace */
     values = (A->x != NULL) && (Bx != NULL) ;
-    x = values ? cs_malloc (m, sizeof (double)) : NULL ; /* get workspace */
+    x = values ? (double*) cs_malloc (m, sizeof (double)) : NULL ; /* get workspace */
     C = cs_spalloc (m, n, anz + bnz, values, 0) ;        /* allocate result */
     if (!C || !w || (values && !x)) return (cs_done (C, w, x, 0)) ;
     Cp = C->p ;
@@ -1328,7 +1328,7 @@ csi *cs_pinv (csi const *p, csi n)
 {
     csi k, *pinv ;
     if (!p) return (NULL) ;                     /* p = NULL denotes identity */
-    pinv = cs_malloc (n, sizeof (csi)) ;        /* allocate result */
+    pinv = (csi*) cs_malloc (n, sizeof (csi)) ;        /* allocate result */
     if (!pinv) return (NULL) ;                  /* out of memory */
     for (k = 0 ; k < n ; k++) pinv [p [k]] = k ;/* invert the permutation */
     return (pinv) ;                             /* return result */
@@ -1338,8 +1338,8 @@ csi *cs_post (const csi *parent, csi n)
 {
     csi j, k = 0, *post, *w, *head, *next, *stack ;
     if (!parent) return (NULL) ;                        /* check inputs */
-    post = cs_malloc (n, sizeof (csi)) ;                /* allocate result */
-    w = cs_malloc (3*n, sizeof (csi)) ;                 /* get workspace */
+    post = (csi*) cs_malloc (n, sizeof (csi)) ;                /* allocate result */
+    w = (csi*) cs_malloc (3*n, sizeof (csi)) ;                 /* get workspace */
     if (!w || !post) return (cs_idone (post, NULL, w, 0)) ;
     head = w ; next = w + n ; stack = w + 2*n ;
     for (j = 0 ; j < n ; j++) head [j] = -1 ;           /* empty linked lists */
@@ -1414,15 +1414,15 @@ csn *cs_qr (const cs *A, const css *S)
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     q = S->q ; parent = S->parent ; pinv = S->pinv ; m2 = S->m2 ;
     vnz = S->lnz ; rnz = S->unz ; leftmost = S->leftmost ;
-    w = cs_malloc (m2+n, sizeof (csi)) ;            /* get csi workspace */
-    x = cs_malloc (m2, sizeof (double)) ;           /* get double workspace */
-    N = cs_calloc (1, sizeof (csn)) ;               /* allocate result */
+    w = (csi*) cs_malloc (m2+n, sizeof (csi)) ;            /* get csi workspace */
+    x = (double*) cs_malloc (m2, sizeof (double)) ;           /* get double workspace */
+    N = (csn*) cs_calloc (1, sizeof (csn)) ;               /* allocate result */
     if (!w || !x || !N) return (cs_ndone (N, NULL, w, x, 0)) ;
     s = w + m2 ;                                    /* s is size n */
     for (k = 0 ; k < m2 ; k++) x [k] = 0 ;          /* clear workspace x */
     N->L = V = cs_spalloc (m2, n, vnz, 1, 0) ;      /* allocate result V */
     N->U = R = cs_spalloc (m2, n, rnz, 1, 0) ;      /* allocate result R */
-    N->B = Beta = cs_malloc (n, sizeof (double)) ;  /* allocate result Beta */
+    N->B = Beta = (double*) cs_malloc (n, sizeof (double)) ;  /* allocate result Beta */
     if (!R || !V || !Beta) return (cs_ndone (N, NULL, w, x, 0)) ;
     Rp = R->p ; Ri = R->i ; Rx = R->x ;
     Vp = V->p ; Vi = V->i ; Vx = V->x ;
@@ -1489,7 +1489,7 @@ csi cs_qrsol (csi order, const cs *A, double *b)
     {
         S = cs_sqr (order, A, 1) ;          /* ordering and symbolic analysis */
         N = cs_qr (A, S) ;                  /* numeric QR factorization */
-        x = cs_calloc (S ? S->m2 : 1, sizeof (double)) ;    /* get workspace */
+        x = (double*) cs_calloc (S ? S->m2 : 1, sizeof (double)) ;    /* get workspace */
         ok = (S && N && x) ;
         if (ok)
         {
@@ -1507,7 +1507,7 @@ csi cs_qrsol (csi order, const cs *A, double *b)
         AT = cs_transpose (A, 1) ;          /* Ax=b is underdetermined */
         S = cs_sqr (order, AT, 1) ;         /* ordering and symbolic analysis */
         N = cs_qr (AT, S) ;                 /* numeric QR factorization of A' */
-        x = cs_calloc (S ? S->m2 : 1, sizeof (double)) ;    /* get workspace */
+        x = (double*) cs_calloc (S ? S->m2 : 1, sizeof (double)) ;    /* get workspace */
         ok = (AT && S && N && x) ;
         if (ok)
         {
@@ -1533,7 +1533,7 @@ csi *cs_randperm (csi n, csi seed)
 {
     csi *p, k, j, t ;
     if (seed == 0) return (NULL) ;      /* return p = NULL (identity) */
-    p = cs_malloc (n, sizeof (csi)) ;   /* allocate result */
+    p = (csi*) cs_malloc (n, sizeof (csi)) ;   /* allocate result */
     if (!p) return (NULL) ;             /* out of memory */
     for (k = 0 ; k < n ; k++) p [k] = n-k-1 ;
     if (seed == -1) return (p) ;        /* return reverse permutation */
@@ -1596,7 +1596,7 @@ csd *cs_scc (cs *A)     /* matrix A temporarily modified, then restored */
     n = A->n ; Ap = A->p ;
     D = cs_dalloc (n, 0) ;                          /* allocate result */
     AT = cs_transpose (A, 0) ;                      /* AT = A' */
-    xi = cs_malloc (2*n+1, sizeof (csi)) ;          /* get workspace */
+    xi = (csi*) cs_malloc (2*n+1, sizeof (csi)) ;          /* get workspace */
     if (!D || !AT || !xi) return (cs_ddone (D, AT, xi, 0)) ;
     Blk = xi ; rcopy = pstack = xi + n ;
     p = D->p ; r = D->r ; ATp = AT->p ;
@@ -1634,7 +1634,7 @@ css *cs_schol (csi order, const cs *A)
     css *S ;
     if (!CS_CSC (A)) return (NULL) ;        /* check inputs */
     n = A->n ;
-    S = cs_calloc (1, sizeof (css)) ;       /* allocate result S */
+    S = (css*) cs_calloc (1, sizeof (css)) ;       /* allocate result S */
     if (!S) return (NULL) ;                 /* out of memory */
     P = cs_amd (order, A) ;                 /* P = amd(A+A'), or natural */
     S->pinv = cs_pinv (P, n) ;              /* find inverse permutation */
@@ -1646,7 +1646,7 @@ css *cs_schol (csi order, const cs *A)
     c = cs_counts (C, S->parent, post, 0) ; /* find column counts of chol(C) */
     cs_free (post) ;
     cs_spfree (C) ;
-    S->cp = cs_malloc (n+1, sizeof (csi)) ; /* allocate result S->cp */
+    S->cp = (csi*) cs_malloc (n+1, sizeof (csi)) ; /* allocate result S->cp */
     S->unz = S->lnz = (csi)cs_cumsum (S->cp, c, n) ; /* find column pointers for L */
     cs_free (c) ;
     return ((S->lnz >= 0) ? S : cs_sfree (S)) ;
@@ -1683,9 +1683,9 @@ static csi cs_vcount (const cs *A, css *S)
 {
     csi i, k, p, pa, n = A->n, m = A->m, *Ap = A->p, *Ai = A->i, *next, *head,
         *tail, *nque, *pinv, *leftmost, *w, *parent = S->parent ;
-    S->pinv = pinv = cs_malloc (m+n, sizeof (csi)) ;        /* allocate pinv, */
-    S->leftmost = leftmost = cs_malloc (m, sizeof (csi)) ;  /* and leftmost */
-    w = cs_malloc (m+3*n, sizeof (csi)) ;   /* get workspace */
+    S->pinv = pinv = (csi*) cs_malloc (m+n, sizeof (csi)) ;        /* allocate pinv, */
+    S->leftmost = leftmost = (csi*) cs_malloc (m, sizeof (csi)) ;  /* and leftmost */
+    w = (csi*) cs_malloc (m+3*n, sizeof (csi)) ;   /* get workspace */
     if (!pinv || !w || !leftmost)
     {
         cs_free (w) ;                       /* pinv and leftmost freed later */
@@ -1742,7 +1742,7 @@ css *cs_sqr (csi order, const cs *A, csi qr)
     css *S ;
     if (!CS_CSC (A)) return (NULL) ;        /* check inputs */
     n = A->n ;
-    S = cs_calloc (1, sizeof (css)) ;       /* allocate result S */
+    S = (css*) cs_calloc (1, sizeof (css)) ;       /* allocate result S */
     if (!S) return (NULL) ;                 /* out of memory */
     S->q = cs_amd (order, A) ;              /* fill-reducing ordering */
     if (order && !S->q) return (cs_sfree (S)) ;
@@ -1773,7 +1773,7 @@ cs *cs_symperm (const cs *A, const csi *pinv, csi values)
     if (!CS_CSC (A)) return (NULL) ;                    /* check inputs */
     n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     C = cs_spalloc (n, n, Ap [n], values && (Ax != NULL), 0) ; /* alloc result*/
-    w = cs_calloc (n, sizeof (csi)) ;                   /* get workspace */
+    w = (csi*) cs_calloc (n, sizeof (csi)) ;                   /* get workspace */
     if (!C || !w) return (cs_done (C, w, NULL, 0)) ;    /* out of memory */
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     for (j = 0 ; j < n ; j++)           /* count entries in each column of C */
@@ -1834,7 +1834,7 @@ cs *cs_transpose (const cs *A, csi values)
     if (!CS_CSC (A)) return (NULL) ;    /* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     C = cs_spalloc (n, m, Ap [n], values && Ax, 0) ;       /* allocate result */
-    w = cs_calloc (m, sizeof (csi)) ;                      /* get workspace */
+    w = (csi*) cs_calloc (m, sizeof (csi)) ;                      /* get workspace */
     if (!C || !w) return (cs_done (C, w, NULL, 0)) ;       /* out of memory */
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     for (p = 0 ; p < Ap [n] ; p++) w [Ai [p]]++ ;          /* row counts */
@@ -1858,7 +1858,7 @@ csi cs_updown (cs *L, csi sigma, const cs *C, const csi *parent)
     Lp = L->p ; Li = L->i ; Lx = L->x ; n = L->n ;
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     if ((p = Cp [0]) >= Cp [1]) return (1) ;        /* return if C empty */
-    w = cs_malloc (n, sizeof (double)) ;            /* get workspace */
+    w = (double*) cs_malloc (n, sizeof (double)) ;            /* get workspace */
     if (!w) return (0) ;                            /* out of memory */
     f = Ci [p] ;
     for ( ; p < Cp [1] ; p++) f = CS_MIN (f, Ci [p]) ;  /* f = min (find (C)) */
@@ -1905,15 +1905,15 @@ csi cs_usolve (const cs *U, double *x)
 /* allocate a sparse matrix (triplet form or compressed-column form) */
 cs *cs_spalloc (csi m, csi n, csi nzmax, csi values, csi triplet)
 {
-    cs *A = cs_calloc (1, sizeof (cs)) ;    /* allocate the cs struct */
+    cs *A = (cs*) cs_calloc (1, sizeof (cs)) ;    /* allocate the cs struct */
     if (!A) return (NULL) ;                 /* out of memory */
     A->m = m ;                              /* define dimensions and nzmax */
     A->n = n ;
     A->nzmax = nzmax = CS_MAX (nzmax, 1) ;
     A->nz = triplet ? 0 : -1 ;              /* allocate triplet or comp.col */
-    A->p = cs_malloc (triplet ? nzmax : n+1, sizeof (csi)) ;
-    A->i = cs_malloc (nzmax, sizeof (csi)) ;
-    A->x = values ? cs_malloc (nzmax, sizeof (double)) : NULL ;
+    A->p = (csi*) cs_malloc (triplet ? nzmax : n+1, sizeof (csi)) ;
+    A->i = (csi*) cs_malloc (nzmax, sizeof (csi)) ;
+    A->x = values ? (double*) cs_malloc (nzmax, sizeof (double)) : NULL ;
     return ((!A->p || !A->i || (values && !A->x)) ? cs_spfree (A) : A) ;
 }
 
@@ -1923,9 +1923,9 @@ csi cs_sprealloc (cs *A, csi nzmax)
     csi ok, oki, okj = 1, okx = 1 ;
     if (!A) return (0) ;
     if (nzmax <= 0) nzmax = (CS_CSC (A)) ? (A->p [A->n]) : A->nz ;
-    A->i = cs_realloc (A->i, nzmax, sizeof (csi), &oki) ;
-    if (CS_TRIPLET (A)) A->p = cs_realloc (A->p, nzmax, sizeof (csi), &okj) ;
-    if (A->x) A->x = cs_realloc (A->x, nzmax, sizeof (double), &okx) ;
+    A->i = (csi*) cs_realloc (A->i, nzmax, sizeof (csi), &oki) ;
+    if (CS_TRIPLET (A)) A->p = (csi*) cs_realloc (A->p, nzmax, sizeof (csi), &okj) ;
+    if (A->x) A->x = (double*) cs_realloc (A->x, nzmax, sizeof (double), &okx) ;
     ok = (oki && okj && okx) ;
     if (ok) A->nzmax = nzmax ;
     return (ok) ;
@@ -1968,12 +1968,12 @@ css *cs_sfree (css *S)
 csd *cs_dalloc (csi m, csi n)
 {
     csd *D ;
-    D = cs_calloc (1, sizeof (csd)) ;
+    D = (csd*) cs_calloc (1, sizeof (csd)) ;
     if (!D) return (NULL) ;
-    D->p = cs_malloc (m, sizeof (csi)) ;
-    D->r = cs_malloc (m+6, sizeof (csi)) ;
-    D->q = cs_malloc (n, sizeof (csi)) ;
-    D->s = cs_malloc (n+6, sizeof (csi)) ;
+    D->p = (csi*) cs_malloc (m, sizeof (csi)) ;
+    D->r = (csi*) cs_malloc (m+6, sizeof (csi)) ;
+    D->q = (csi*) cs_malloc (n, sizeof (csi)) ;
+    D->s = (csi*) cs_malloc (n+6, sizeof (csi)) ;
     return ((!D->p || !D->r || !D->q || !D->s) ? cs_dfree (D) : D) ;
 }
 
