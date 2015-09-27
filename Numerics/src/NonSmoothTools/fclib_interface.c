@@ -84,6 +84,12 @@ FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem
     W.p = (csi*) malloc(sizeof(csi)*(W.n+1));
     int_to_csi(fclib_problem->W->p, W.p, (unsigned) (W.n+1));
   }
+  else if (fclib_problem->W->nz == -2)
+  {
+    /* compressed rows */
+    fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
+    exit(EXIT_FAILURE); ;
+  }
   else
   {
     /* triplet */
@@ -244,19 +250,89 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   problem->M->size0 = fclib_problem->M->m;
   problem->M->size1 = fclib_problem->M->n;
   problem->M->matrix2 = newNumericsSparseMatrix();
-  problem->M->matrix2->triplet=(CSparseMatrix*)fclib_problem->M;
   problem->M->matrix0 = NULL;
   problem->M->matrix1 = NULL;
 
+  CSparseMatrix * M = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
+  M->nzmax = (csi) fclib_problem->M->nzmax;
+  M->m = (csi) fclib_problem->M->m;
+  M->n = (csi) fclib_problem->M->n;
+  M->nz = (csi) fclib_problem->M->nz;
+  M->x =  fclib_problem->M->x;
+  
+  if (fclib_problem->M->nz == -1)
+  {
+    /* compressed colums */
+    problem->M->matrix2->csc= M;
+    problem->M->matrix2->triplet=NULL;
+    M->p = (csi*) malloc(sizeof(csi)*(M->n+1));
+    int_to_csi(fclib_problem->M->p, M->p, (unsigned) (M->n+1));
+  }
+  else if (fclib_problem->M->nz == -2)
+  {
+    /* compressed rows */
+
+    fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
+    exit(EXIT_FAILURE); ;
+  }
+  else
+  {
+    /* triplet */
+    problem->M->matrix2->triplet=M;
+    problem->M->matrix2->csc=NULL;
+    M->p = (csi*) malloc(sizeof(csi)*M->nzmax);
+    int_to_csi(fclib_problem->M->p, M->p, (unsigned) M->nzmax);
+  }
+  M->i = (csi*) malloc(sizeof(csi)*M->nzmax);
+  int_to_csi(fclib_problem->M->i, M->i, (unsigned) M->nzmax);
+
+  
   problem->H = newNumericsMatrix();
   problem->H->storageType = 2; /* sparse */
   problem->H->size0 = fclib_problem->H->m;
   problem->H->size1 = fclib_problem->H->n;
   problem->H->matrix2 = newNumericsSparseMatrix();
-  problem->H->matrix2->triplet=(CSparseMatrix*)fclib_problem->H;
   problem->H->matrix0 = NULL;
   problem->H->matrix1 = NULL;
+  
+  CSparseMatrix * H = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));;
 
+  H->nzmax = (csi) fclib_problem->H->nzmax;
+  H->m = (csi) fclib_problem->H->m;
+  H->n = (csi) fclib_problem->H->n;
+  H->nz = (csi) fclib_problem->H->nz;
+  H->x =  fclib_problem->H->x;
+
+  if (fclib_problem->H->nz == -1)
+  {
+    /* compressed colums */
+    problem->H->matrix2->csc= H;
+    problem->H->matrix2->triplet=NULL;
+    H->p = (csi*) malloc(sizeof(csi)*(H->n+1));
+    int_to_csi(fclib_problem->H->p, H->p, (unsigned) (H->n+1));
+  }
+  else if (fclib_problem->H->nz == -2)
+  {
+    /* compressed rows */
+
+    fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
+    exit(EXIT_FAILURE); ;
+  }
+  else
+  {
+    /* triplet */
+    problem->H->matrix2->triplet=H;
+    problem->H->matrix2->csc=NULL;
+    H->p = (csi*) malloc(sizeof(csi)*H->nzmax);
+    int_to_csi(fclib_problem->H->p, H->p, (unsigned) H->nzmax);
+  }
+
+  H->i = (csi*) malloc(sizeof(csi)*H->nzmax);
+  int_to_csi(fclib_problem->H->i, H->i, (unsigned) H->nzmax);
+
+
+
+  
   return problem;
 
 }
@@ -284,6 +360,7 @@ int globalFrictionContact_fclib_write(
   char * description,
   char * mathInfo,
   const char *path);
+
 int globalFrictionContact_fclib_write(
   GlobalFrictionContactProblem* problem,
   char * title,
