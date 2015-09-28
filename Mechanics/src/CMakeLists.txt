@@ -18,8 +18,10 @@ SET(SiconosMechanics_DIRS
   contactDetection/basicBroadphase)
 
 IF(WITH_OCC)
-  COMPILE_WITH(OCE REQUIRED)
-  LIST(REMOVE_ITEM SiconosMechanics_LINK_LIBRARIES DRAWEXE)
+  IF(NOT WITH_MECHANISMS)
+    COMPILE_WITH(OCE REQUIRED)
+    LIST(REMOVE_ITEM SiconosMechanics_LINK_LIBRARIES DRAWEXE)
+  ENDIF()
   SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS} occ)
 ENDIF()
 
