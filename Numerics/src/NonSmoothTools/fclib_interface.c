@@ -78,18 +78,18 @@ FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem
   W.m = (csi) fclib_problem->W->m;
   W.n = (csi) fclib_problem->W->n;
 
-  if (fclib_problem->W->nz == -1)
+  if (fclib_problem->W->nz == -1 || fclib_problem->W->nz == -2 ) /* We assume that the matrix is symmetric and square */
   {
     /* compressed colums */
     W.p = (csi*) malloc(sizeof(csi)*(W.n+1));
     int_to_csi(fclib_problem->W->p, W.p, (unsigned) (W.n+1));
   }
-  else if (fclib_problem->W->nz == -2)
-  {
-    /* compressed rows */
-    fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
-    exit(EXIT_FAILURE); ;
-  }
+  /* else if (fclib_problem->W->nz == -2) */
+  /* { */
+  /*   /\* compressed rows *\/ */
+  /*   fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n"); */
+  /*   exit(EXIT_FAILURE); ; */
+  /* } */
   else
   {
     /* triplet */
@@ -314,7 +314,6 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   else if (fclib_problem->H->nz == -2)
   {
     /* compressed rows */
-
     fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
     exit(EXIT_FAILURE); ;
   }
