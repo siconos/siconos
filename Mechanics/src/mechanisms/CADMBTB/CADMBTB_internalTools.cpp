@@ -32,7 +32,13 @@
 #include <assert.h>
 #include "BRepClass_FaceClassifier.hxx"
 #include "TopAbs_State.hxx"
-#include "Visual3d_ViewOrientation.hxx"
+
+#include <Standard_Version.hxx>
+#if (OCC_VERSION_MAJOR >= 6 && OCC_VERSION_MINOR >= 8) || (OCC_VERSION_MAJOR == 6 && OCC_VERSION_MINOR == 7 && OCC_VERSION_MAINTENANCE >= 1)
+#include <Visual3d_View.hxx>
+#else
+#include <Visual3d_ViewOrientation.hxx>
+#endif
 #include "gp_Lin.hxx"
 #include "BRepBuilderAPI_MakeEdge.hxx"
 #include "AIS_InteractiveContext.hxx"
