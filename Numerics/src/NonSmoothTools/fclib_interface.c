@@ -185,10 +185,17 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
     fclib_problem->W->n = (int) spmat->n;
     fclib_problem->W->x = spmat->x;
 
-    if (spmat->n == -1)
+
+
+    if (spmat->nz == -1)
     {
       fclib_problem->W->p = (int*) malloc(sizeof(int)*(spmat->n+1));
       csi_to_int(spmat->p, fclib_problem->W->p, (unsigned) (spmat->n+1));
+    }
+    else if (spmat->nz == -2)
+    {
+      fclib_problem->W->p = (int*) malloc(sizeof(int)*(spmat->m+1));
+      csi_to_int(spmat->p, fclib_problem->W->p, (unsigned) (spmat->m+1));
     }
     else
     {
@@ -221,10 +228,11 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   {
     cs_spfree(spmat);
   }
-  free(fclib_problem->W);
-  free(fclib_problem->info);
   free(fclib_problem->W->p);
   free(fclib_problem->W->i);
+  free(fclib_problem->W);
+  free(fclib_problem->info);
+
   free(fclib_problem);
 
   return info;
