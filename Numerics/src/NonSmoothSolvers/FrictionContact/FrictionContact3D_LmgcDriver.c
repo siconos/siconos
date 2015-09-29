@@ -25,7 +25,8 @@ int frictionContact3D_LmgcDriver(double *reaction,
                                  int itermax,
                                  int verbose,
                                  int outputFile,
-                                 int freq_output)
+                                 int freq_output,
+                                 int ndof)
 {
 
   SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(nc, nc, nb, row, column, W);
@@ -125,17 +126,25 @@ int frictionContact3D_LmgcDriver(double *reaction,
       char fname[256];
       sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[7], nc, fccounter);
       printf("Dump LMGC_FC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[7], nc, fccounter);
+      /* printf("ndof = %i.\n", ndof); */
 
       FILE * foutput  =  fopen(fname, "w");
       int n = 100;
-      char * title = (char *)malloc(n * sizeof(char *));
-      strcpy(title, "LMGC dump in hdf5");
-      char * description = (char *)malloc(n * sizeof(char *));
 
-      strcat(description, "Rewriting in hdf5 through siconos of  ");
+
+
+      char * title = (char *)malloc(n * sizeof(char));
+
+      strcpy(title, "LMGC dump in hdf5");
+
+
+
+
+      char * description = (char *)malloc(n * sizeof(char));
+      strcpy(description, "Rewriting in hdf5 through siconos of  ");
       strcat(description, fname);
       strcat(description, " in FCLIB format");
-      char * mathInfo = (char *)malloc(n * sizeof(char *));
+      char * mathInfo = (char *)malloc(n * sizeof(char));
       strcpy(mathInfo,  "unknown");
 
       frictionContact_fclib_write(FC,
@@ -171,4 +180,3 @@ int frictionContact3D_LmgcDriver(double *reaction,
 
   return info;
 }
-

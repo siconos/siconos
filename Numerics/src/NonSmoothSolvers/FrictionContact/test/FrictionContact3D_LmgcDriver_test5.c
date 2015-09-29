@@ -92,7 +92,7 @@ int main(void)
                                       tolerance,
                                       itermax,
                                       2,
-                                      2, 0);
+                                      2, 0, 0);
   printf("reaction:");
   printm(1, 3 * nc, reaction);
 
