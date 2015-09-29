@@ -177,6 +177,7 @@ extern "C"
    *  \param[in] verbose level 0 : nothing, 1: mid level 2: high level
    *  \param[in] outputFile outputFile option 0 : nothing 1 : dat file 2: FCLIB HDF5 file if FCLIB is found
    *  \param[in] freq_output
+   *  \param[in] ndof the numbe of dof in the dynamical systems involved in contact (for output in file.)
    *  \return result (0 if successful otherwise 1).
    *
    */
@@ -194,7 +195,8 @@ extern "C"
                                    int itermax,
                                    int verbose,
                                    int outputFile,
-                                   int freq_output);
+                                   int freq_output,
+                                   int ndof);
 
   /** LMGC interface to solvers for global friction-contact 3D problem
    *  \param[in,out] reaction global vector (nc*3)
