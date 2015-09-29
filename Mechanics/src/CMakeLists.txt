@@ -19,7 +19,7 @@ SET(SiconosMechanics_DIRS
 
 IF(WITH_OCC)
   IF(NOT WITH_MECHANISMS)
-    COMPILE_WITH(OCE REQUIRED)
+    COMPILE_WITH(OCE 0.15 REQUIRED)
     LIST(REMOVE_ITEM SiconosMechanics_LINK_LIBRARIES DRAWEXE)
   ENDIF()
   SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS} occ)
@@ -97,7 +97,7 @@ IF(WITH_MECHANISMS)
   SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
 
   message(STATUS "Searching for OCE ....")
-  compile_with(OCE COMPONENTS ${OCE_TOOLKITS})
+  compile_with(OCE 0.15 COMPONENTS ${OCE_TOOLKITS})
   LIST(REMOVE_ITEM ${PROJECT_NAME}_LINK_LIBRARIES DRAWEXE)
 
   if(OCE_FOUND)
