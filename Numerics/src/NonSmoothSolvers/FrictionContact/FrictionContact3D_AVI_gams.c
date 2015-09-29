@@ -35,6 +35,7 @@
 #include <math.h>
 
 #include "sanitizer.h"
+#include "op3x3.h"
 
 #define DEBUG_NOCOLOR
 //#define DEBUG_STDOUT
@@ -444,8 +445,11 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
     optSetDblStr(solverOptPtr, "proximal_perturbation", 0.);
     optSetStrStr(solverOptPtr, "crash_method", "none");
     optSetIntStr(solverOptPtr, "crash_perturb", 0);
+    optSetIntStr(solverOptPtr, "output_minor_iterations_frequency", 1);
+    optSetIntStr(solverOptPtr, "output_linear_model", 1);
 
   }
+  optSetIntStr(solverOptPtr, "minor_iteration_limit", 100000);
   optSetDblStr(solverOptPtr, "expand_delta", 1e-10);
 //  optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
   optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
@@ -480,7 +484,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   FC3D_gams_generate_first_constraints(&Akmat, problem->mu);
 
   double* tmpq = (double*)malloc(size * sizeof(double));
-  unsigned size_l = (NB_APPROX+2)*problem->numberOfContacts;
+  unsigned size_l = (NB_APPROX+3)*problem->numberOfContacts;
   double* lambda_r = (double*)calloc(size_l, sizeof(double));
   double* lambda_y = (double*)calloc(size_l, sizeof(double));
   double* reaction_old = (double*)calloc(size, sizeof(double));
@@ -579,12 +583,13 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
       FrictionContact3D_unitary_compute_and_add_error(ri, ui, mu, &res);
       DEBUG_EXPR_WE(if (res > old_residual) { printf("Contact %d, res = %g > %g = old_residual\n", i, sqrt(res), old_residual); });
       total_residual += res;
-      unsigned p = 10;
+      unsigned p = NB_APPROX;
       /* TODO we may want to revisit this, since err < TOL2 should be enough to
        * really reduce the number of constraints ...*/
       /* Well we do not want to mess with the sliding case ( both r and u on
        * the boundaries)*/
-      if ((res < TOL2) && ((ri[0] < TOL_RN) || ((ri[1]*ri[1] + ri[2]*ri[2]) < (1.-10*DBL_EPSILON)*mu*mu * ri[0]*ri[0])))
+      //if ((res < TOL2) && ((ri[0] < TOL_RN) || ((ri[1]*ri[1] + ri[2]*ri[2]) < (1.-10*DBL_EPSILON)*mu*mu * ri[0]*ri[0])))
+      if (false)
       {
         DEBUG_PRINTF("Contact %d, res = %g\n", i, sqrt(res));
         DEBUG_EXPR_WE(if (ri[0] < TOL_RN) { printf("ri[0] = %g < %g = tol", ri[0], TOL_RN); });
@@ -634,6 +639,8 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
         }
         DEBUG_PRINTF("contact %d, delta angle = %g, theta_r = %.*e, theta_u = %.*e\n", i, rad2deg(delta_angle), DECIMAL_DIG, rad2deg(atan2(ri[2],ri[1])), 
             DECIMAL_DIG, rad2deg(atan2(ui[2], ui[1])));
+        if (fabs(delta_angle) < 1e-12) { printf("Contact %d, delta_angle too small %g; set to 1e-12", i, delta_angle); delta_angle = copysign(1e-12, delta_angle);}
+
         /* now compute minus the angle, since we want to compute the constraints  */
         double slice_angle = delta_angle/(p-1);
         DEBUG_PRINTF("contact %d, slice_angle = %g\n", i, rad2deg(slice_angle));
@@ -754,16 +761,91 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
       else // r = 0, or r in int(cone) but other interactions moved u
 bad_angle:
       {
-        double angle = 2*M_PI/(NB_APPROX + 1);
-        DEBUG_PRINTF("angle: %g\n", angle);
+        double offset_angle = 0.;
+        double slice_angle = 2*M_PI/(NB_APPROX + 1);
+        DEBUG_PRINTF("angle: %g\n", slice_angle);
+        if (ri[0] < TOL_RN)
+        {
+          /* Make sure that r = 0 amd not some small negative number ...*/
+          ri[0] = 0.;
+          ri[1] = 0.;
+          ri[2] = 0.;
+
+          /*  Pick 3 contraints as basis */
+          /*  The dual variable u is very likely to be non-zero
+           *  y is then also likely to be non-zero
+           *  Let's make our life easier dans choose as
+           *  outer approximation*/
+          double offset_angle = -atan2(ui[2], ui[1]);
+          unsigned pieces = (NB_APPROX/3);
+          double k1 = pieces*slice_angle;
+          double k2 = 2*k1;
+
+          /* The transpose of the square submatrix of constraints, in col-major */
+          const double mat[9] = {mu, cos(offset_angle),      sin(offset_angle),
+                           mu, cos(offset_angle + k1), sin(offset_angle + k1),
+                           mu, cos(offset_angle + k2), sin(offset_angle + k2)};
+          double b[3];
+
+/*          b[0] = problem->q[i3];
+          b[1] = problem->q[i3+1];
+          b[2] = problem->q[i3+2];*/
+
+          b[0] = ui[0];
+          b[1] = ui[1];
+          b[2] = ui[2];
+          /* now the dual var: u = A^T \lambda_r */
+          solve_3x3_gepp(mat, b);
+          assert(isfinite(b[0]) && b[0] > 0.);
+          assert(isfinite(b[1]) && b[1] > 0.);
+          assert(isfinite(b[2]) && b[2] > 0.);
+          lambda_r[offset_row] = b[0];
+          lambda_r[offset_row+pieces] = b[1];
+          lambda_r[offset_row+2*pieces] = b[2];
+          /* now we write the estimate for y here = (mu \|u_t\|, -mu^2*ut)^T */
+          /* Before that, we save ut for later in b[1:3] */
+          b[1] = ui[1];
+          b[2] = ui[2];
+
+          ui[0] = mu*sqrt(ui[1]*ui[1] + ui[2]*ui[2]);
+          ui[1] = -mu*mu*ui[1];
+          ui[2] = -mu*mu*ui[2];
+
+          /* now the dual var: A^T \lambda_y = (y_n, u_t) */
+          b[0] = ui[0];
+          /*  XXX mat is not changed, so we should not have any trouble here */
+          solve_3x3_gepp(mat, b);
+          assert(isfinite(b[0]) && b[0] > 0.);
+          assert(isfinite(b[1]) && b[1] > 0.);
+          assert(isfinite(b[2]) && b[2] > 0.);
+          lambda_y[offset_row] = b[0];
+          lambda_y[offset_row+pieces] = b[1];
+          lambda_y[offset_row+2*pieces] = b[2];
+
+          DEBUG_PRINTF("new y[i] = %g %g %g\n", ui[0], ui[1], ui[2]);
+        }
+        else if ((ri[1]*ri[1] + ri[2]*ri[2]) < (1.+1e-10)*mu*mu * ri[0]*ri[0]) /* We should have r \in int K and u = y = 0 = dual(y) */
+        {
+          /* TODO? update r based on the changes in the contact forces  */
+          ui[0] = 0.;
+          ui[1] = 0.;
+          ui[2] = 0.;
+          /* lambda_r and lambda_y is already set to 0 */
+        }
+        else
+        {
+          printf("bad_angle case\n");
+        }
 
         for (unsigned k = 0; k < NB_APPROX; ++k)
         {
           cs_entry(Ak_triplet, k + offset_row, i3, mu);
-          cs_entry(Ak_triplet, k + offset_row, i3 + 1, cos(k*angle));
-          cs_entry(Ak_triplet, k + offset_row, i3 + 2, sin(k*angle));
+          cs_entry(Ak_triplet, k + offset_row, i3 + 1, cos(offset_angle));
+          cs_entry(Ak_triplet, k + offset_row, i3 + 2, sin(offset_angle));
+          offset_angle += slice_angle;
         }
         offset_row += NB_APPROX;
+
       }
 
       /* Update the dimension of Ak */
@@ -784,8 +866,10 @@ bad_angle:
     cblas_dcopy(size, velocity, 1, velocity_old, 1);
 
     total_residual = sqrt(total_residual);
-//    optSetDblStr(solverOptPtr, "expand_delta", fmin(1e-8, total_residual*1e-3));
+    optSetDblStr(solverOptPtr, "expand_delta", fmax(1e-13, fmin(1e-10, total_residual*1e-7)));
+    optWriteParameterFile(solverOptPtr, msg);
 //    optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
+    printf("FrictionContact3D_AVI_gams :: residual = %g\n", total_residual);
     DEBUG_PRINTF("FrictionContact3D_AVI_gams :: residual = %g\n", total_residual);
 //    done = (total_residual < options->dparam[0]);
     done = (total_residual < 1e-8);
@@ -805,6 +889,11 @@ bad_angle:
       {
 //        current_nb_approx += 5;
       }
+    }
+
+    if (!strcmp(solverName, "pathvi"))
+    {
+      optSetStrStr(solverOptPtr, "avi_start", "regular");
     }
   }
 

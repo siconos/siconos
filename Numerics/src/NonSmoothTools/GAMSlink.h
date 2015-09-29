@@ -333,7 +333,7 @@ static inline int CallGams(const gamsxHandle_t Gptr, const optHandle_t Optr, con
   assert(Gptr); assert(Optr);
 
   optSetStrStr(Optr, "input", model);
-  optSetIntStr(Optr, "logoption", 2);
+  optSetIntStr(Optr, "logoption", 4);
 //  optSetIntStr(Optr, "keep", 1);
   optSetIntStr(Optr, "optfile", 1);
 //  optSetDblStr(Optr,"OptCA", 1e-12);
@@ -400,9 +400,11 @@ static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
     assert(cs->p);
     assert(cs->i);
     assert(cs->x);
-    int* p_int = (int*)malloc((cs->m+1) * sizeof(int));
+    int* p_int = (int*)malloc((cs->n+1) * sizeof(int));
     int* i_int = (int*)malloc(cs->nzmax * sizeof(int));
-    for (unsigned i = 0; i < cs->m+1; ++i)
+    assert(cs->n == M->size1);
+    assert(cs->m == M->size0);
+    for (unsigned i = 0; i < cs->n+1; ++i)
     {
       p_int[i] = (int) cs->p[i];
     }

@@ -651,7 +651,7 @@ static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az,
  * \param[in,out] b on input, the right-hand side; on output the solution x
  * \return 0 if ok, otherwise the column where no pivot could be selected
  */
-static inline int solve_3x3_gepp(double* restrict a, double* restrict b)
+static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
 {
   double lp0, lp1, lp2, lm1, lm2, ln1, ln2;
   double bl, bm, bn;
