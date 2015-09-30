@@ -80,18 +80,18 @@ FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem
   W.m = (csi) fclib_problem->W->m;
   W.n = (csi) fclib_problem->W->n;
 
-  if (fclib_problem->W->nz == -1 || fclib_problem->W->nz == -2 ) /* We assume that the matrix is symmetric and square */
+  if (fclib_problem->W->nz == -1)
   {
     /* compressed colums */
     W.p = (csi*) malloc(sizeof(csi)*(W.n+1));
     int_to_csi(fclib_problem->W->p, W.p, (unsigned) (W.n+1));
   }
-  /* else if (fclib_problem->W->nz == -2) */
-  /* { */
-  /*   /\* compressed rows *\/ */
-  /*   fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n"); */
-  /*   exit(EXIT_FAILURE); ; */
-  /* } */
+  else if (fclib_problem->W->nz == -2)
+  {
+    /* compressed rows */
+    W.p = (csi*) malloc(sizeof(csi)*(W.m+1));
+    int_to_csi(fclib_problem->W->p, W.p, (unsigned) (W.m+1));
+  }
   else
   {
     /* triplet */
@@ -157,7 +157,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
   fclib_problem->W->m = problem->M->size0;
   fclib_problem->W->n = problem->M->size1;
-  fclib_problem->W->nz = -2;
+
 
   CSparseMatrix * spmat = NULL;
   if (problem ->M->storageType == 0) /* Dense Matrix */
@@ -186,8 +186,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
     fclib_problem->W->m = (int) spmat->m;
     fclib_problem->W->n = (int) spmat->n;
     fclib_problem->W->x = spmat->x;
-
-
+    fclib_problem->W->nz = (int) spmat->nz; 
 
     if (spmat->nz == -1)
     {
@@ -272,7 +271,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   M->nzmax = (csi) fclib_problem->M->nzmax;
   M->m = (csi) fclib_problem->M->m;
   M->n = (csi) fclib_problem->M->n;
-  M->nz = (csi) fclib_problem->M->nz;
+ 
   M->x =  fclib_problem->M->x;
   
   if (fclib_problem->M->nz == -1)
@@ -280,13 +279,21 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
     /* compressed colums */
     problem->M->matrix2->csc= M;
     problem->M->matrix2->triplet=NULL;
+    problem->M->matrix2->trans_csc=NULL;
+    M->nz = (csi) fclib_problem->M->nz;
     M->p = (csi*) malloc(sizeof(csi)*(M->n+1));
     int_to_csi(fclib_problem->M->p, M->p, (unsigned) (M->n+1));
   }
   else if (fclib_problem->M->nz == -2)
   {
     /* compressed rows */
-
+    M->nz = (csi) fclib_problem->M->nz;
+    M->p = (csi*) malloc(sizeof(csi)*(M->m+1));
+    int_to_csi(fclib_problem->M->p, M->p, (unsigned) (M->m+1));
+    /* since  problem->M->matrix2->csr does not exist, we need
+       to fill transform M into a triplet or csc before returning
+     */
+    
     fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
     exit(EXIT_FAILURE); ;
   }
@@ -295,6 +302,8 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
     /* triplet */
     problem->M->matrix2->triplet=M;
     problem->M->matrix2->csc=NULL;
+    problem->M->matrix2->trans_csc=NULL;
+    M->nz = (csi) fclib_problem->M->nz;
     M->p = (csi*) malloc(sizeof(csi)*M->nzmax);
     int_to_csi(fclib_problem->M->p, M->p, (unsigned) M->nzmax);
   }
@@ -323,6 +332,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
     /* compressed colums */
     problem->H->matrix2->csc= H;
     problem->H->matrix2->triplet=NULL;
+    problem->H->matrix2->trans_csc=NULL;
     H->p = (csi*) malloc(sizeof(csi)*(H->n+1));
     int_to_csi(fclib_problem->H->p, H->p, (unsigned) (H->n+1));
   }
@@ -337,6 +347,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
     /* triplet */
     problem->H->matrix2->triplet=H;
     problem->H->matrix2->csc=NULL;
+    problem->H->matrix2->trans_csc=NULL;
     H->p = (csi*) malloc(sizeof(csi)*H->nzmax);
     int_to_csi(fclib_problem->H->p, H->p, (unsigned) H->nzmax);
   }
@@ -405,38 +416,56 @@ int globalFrictionContact_fclib_write(
   fclib_problem->w =  problem->b;
   fclib_problem->f =  problem->q;
 
-  /* only coordinates */
+  /* only sparse storage */
   assert(problem->M->matrix2);
   assert(problem->H->matrix2);
 
-  fclib_problem->M = malloc(sizeof(struct fclib_matrix));
-  fclib_problem->M->n = (int) problem->M->matrix2->triplet->n;
-  fclib_problem->M->m = (int) problem->M->matrix2->triplet->m;
-  fclib_problem->M->nzmax= (int) problem->M->matrix2->triplet->nzmax;
+  
+  /* only coordinates (triplet) */
+  if (problem->M->matrix2->triplet)
+  {
+    fclib_problem->M = malloc(sizeof(struct fclib_matrix));
+    fclib_problem->M->n = (int) problem->M->matrix2->triplet->n;
+    fclib_problem->M->m = (int) problem->M->matrix2->triplet->m;
+    fclib_problem->M->nzmax= (int) problem->M->matrix2->triplet->nzmax;
 
-  fclib_problem->M->p= (int*) malloc(sizeof(int)*(problem->M->matrix2->triplet->nzmax));
-  csi_to_int(problem->M->matrix2->triplet->p, fclib_problem->M->p,
-             (unsigned) problem->M->matrix2->triplet->nzmax);
-  fclib_problem->M->i= (int*) malloc(sizeof(int)*(problem->M->matrix2->triplet->nzmax));
-  csi_to_int(problem->M->matrix2->triplet->i, fclib_problem->M->i,
-             (unsigned) problem->M->matrix2->triplet->nzmax);
-  fclib_problem->M->x= problem->M->matrix2->triplet->x;
-  fclib_problem->M->nz= (int) problem->M->matrix2->triplet->nz;
-  fclib_problem->M->info=NULL;
-  fclib_problem->H = malloc(sizeof(struct fclib_matrix));
-  fclib_problem->H->n = (int) problem->H->matrix2->triplet->n;
-  fclib_problem->H->m = (int) problem->H->matrix2->triplet->m;
-  fclib_problem->H->nzmax= (int) problem->H->matrix2->triplet->nzmax;
-  fclib_problem->H->p= (int*) malloc(sizeof(int)*problem->H->matrix2->triplet->nzmax);
-  csi_to_int(problem->H->matrix2->triplet->p, fclib_problem->H->p,
-             (unsigned) problem->H->matrix2->triplet->nzmax);
-  fclib_problem->H->i= (int*) malloc(sizeof(int)*problem->H->matrix2->triplet->nzmax);
-  csi_to_int(problem->H->matrix2->triplet->i, fclib_problem->H->i,
-             (unsigned) problem->H->matrix2->triplet->nzmax);
-  fclib_problem->H->x= problem->H->matrix2->triplet->x;
-  fclib_problem->H->nz= (int) problem->H->matrix2->triplet->nz;
-  fclib_problem->H->info=NULL;
-
+    fclib_problem->M->p= (int*) malloc(sizeof(int)*(problem->M->matrix2->triplet->nzmax));
+    csi_to_int(problem->M->matrix2->triplet->p, fclib_problem->M->p,
+               (unsigned) problem->M->matrix2->triplet->nzmax);
+    fclib_problem->M->i= (int*) malloc(sizeof(int)*(problem->M->matrix2->triplet->nzmax));
+    csi_to_int(problem->M->matrix2->triplet->i, fclib_problem->M->i,
+               (unsigned) problem->M->matrix2->triplet->nzmax);
+    fclib_problem->M->x= problem->M->matrix2->triplet->x;
+    fclib_problem->M->nz= (int) problem->M->matrix2->triplet->nz;
+    fclib_problem->M->info=NULL;
+  }
+  else
+  {
+    fprintf(stderr, "globalFrictionContact_fclib_write only implemented for triplet storage.\n");
+    exit(EXIT_FAILURE); ;
+  }
+  
+  if (problem->H->matrix2->triplet)
+  {
+    fclib_problem->H = malloc(sizeof(struct fclib_matrix));
+    fclib_problem->H->n = (int) problem->H->matrix2->triplet->n;
+    fclib_problem->H->m = (int) problem->H->matrix2->triplet->m;
+    fclib_problem->H->nzmax= (int) problem->H->matrix2->triplet->nzmax;
+    fclib_problem->H->p= (int*) malloc(sizeof(int)*problem->H->matrix2->triplet->nzmax);
+    csi_to_int(problem->H->matrix2->triplet->p, fclib_problem->H->p,
+               (unsigned) problem->H->matrix2->triplet->nzmax);
+    fclib_problem->H->i= (int*) malloc(sizeof(int)*problem->H->matrix2->triplet->nzmax);
+    csi_to_int(problem->H->matrix2->triplet->i, fclib_problem->H->i,
+               (unsigned) problem->H->matrix2->triplet->nzmax);
+    fclib_problem->H->x= problem->H->matrix2->triplet->x;
+    fclib_problem->H->nz= (int) problem->H->matrix2->triplet->nz;
+    fclib_problem->H->info=NULL;
+  }
+  else
+  {
+    fprintf(stderr, "globalFrictionContact_fclib_write only implemented for triplet storage.\n");
+    exit(EXIT_FAILURE); ;
+  }
 
   fclib_problem->G = NULL;
   fclib_problem->b = NULL;

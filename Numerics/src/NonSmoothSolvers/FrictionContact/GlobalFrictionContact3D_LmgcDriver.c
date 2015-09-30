@@ -9,8 +9,8 @@
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
 
-#define DEBUG_MESSAGES 1
-#define DEBUG_STDOUT
+/* #define DEBUG_MESSAGES 1 */
+/* #define DEBUG_STDOUT */
 #include "debug.h"
 
 static int fccounter =0;
@@ -65,7 +65,7 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
 
   /* NumericsMatrix M, H; */
   NumericsMatrix * M =newNumericsMatrix();
-  M->storageType = 2; /* csc */
+  M->storageType = 2; /* sparse */
   M->size0 = n;
   M->size1 = n;
 
