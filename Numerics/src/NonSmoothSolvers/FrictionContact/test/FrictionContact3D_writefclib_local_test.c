@@ -75,7 +75,7 @@ int write_test_fclib(char * filename)
                               title,
                               description,
                               mathInfo,
-                              basename);
+                              basename,0);
 
   /* read fclib problem */
   FrictionContactProblem* problem1 = frictionContact_fclib_read(basename);

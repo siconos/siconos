@@ -151,7 +151,7 @@ int frictionContact3D_LmgcDriver(double *reaction,
                                   title,
                                   description,
                                   mathInfo,
-                                  fname);
+                                  fname,ndof);
 
       fclose(foutput);
     }

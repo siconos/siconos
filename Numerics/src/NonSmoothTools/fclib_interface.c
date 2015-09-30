@@ -27,6 +27,8 @@
 #ifdef WITH_FCLIB
 #include "fclib_interface.h"
 
+
+
 void int_to_csi(int* o, csi* d, unsigned int n);
 void int_to_csi(int* o, csi* d, unsigned int n)
 {
@@ -130,7 +132,7 @@ FrictionContactProblem* frictionContact_fclib_read(const char *path)
 }
 
 int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description, char * mathInfo,
-                                const char *path)
+                                const char *path, int ndof)
 {
   int info = 0;
 
@@ -215,6 +217,11 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   }
 
   info = fclib_write_local(fclib_problem, path);
+
+  info = fclib_create_int_attributes_in_info(path, "numberOfDegreeOfFreedom",
+                                             ndof);
+
+
 
   /*   fclib_delete_local (fclib_problem); */
 

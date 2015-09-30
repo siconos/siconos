@@ -39,7 +39,7 @@ extern "C"
   int frictionContact_fclib_write(FrictionContactProblem* problem,
                                   char * title, char * description,
                                   char * mathInfo,
-                                  const char *path);
+                                  const char *path, int ndof);
 
   GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global *fclib_problem);
 
