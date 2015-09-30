@@ -155,10 +155,10 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   /* for (int i=0; i<dsize; ++i) */
   /*   numerics_solver_options.dparam[i] = dparam[i]; */
 
-  printSolverOptions(&numerics_solver_options);
-  FILE * file  =  fopen("toto.dat", "w");
-  globalFrictionContact_printInFile(problem, file);
-  fclose(file);
+  /* printSolverOptions(&numerics_solver_options); */
+  /* FILE * file  =  fopen("toto.dat", "w"); */
+  /* globalFrictionContact_printInFile(problem, file); */
+  /* fclose(file); */
   int rinfo =  globalFrictionContact3D_driver(problem,
                                              reaction,
                                              velocity,
@@ -166,9 +166,9 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
                                              &numerics_solver_options,
                                              &numerics_options);
 
-  FILE * file1  =  fopen("tutu.dat", "w");
-  globalFrictionContact_printInFile(problem, file1);
-  fclose(file1);
+  /* FILE * file1  =  fopen("tutu.dat", "w"); */
+  /* globalFrictionContact_printInFile(problem, file1); */
+  /* fclose(file1); */
   if(outputFile == 1)
   {
     /* dump in C format */

@@ -222,7 +222,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
                                              ndof);
 
 
-
+  
   /*   fclib_delete_local (fclib_problem); */
 
   if (problem ->M->storageType == 0) /* Dense Matrix */
@@ -385,9 +385,9 @@ int globalFrictionContact_fclib_write(
   int rinfo = 0;
 
 
-  globalFrictionContact_display(problem);
-  FILE * file  =  fopen("toto.dat", "w");
-  globalFrictionContact_printInFile(problem, file);
+  /* globalFrictionContact_display(problem); */
+  /* FILE * file  =  fopen("toto.dat", "w"); */
+  /* globalFrictionContact_printInFile(problem, file); */
   DEBUG_PRINT("construcion of fclib_problem\n");
   struct fclib_global *fclib_problem;
   fclib_problem = malloc(sizeof(struct fclib_global));
