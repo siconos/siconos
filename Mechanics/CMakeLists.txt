@@ -1,31 +1,81 @@
-# Set minimum version for cmake
-cmake_minimum_required(VERSION 2.8.7)
+#================================================================
+# cmake utilities to build mechanics component
+#================================================================
 
-# MACOSX_RPATH required from cmake 3.0.
-# See http://www.kitware.com/blog/home/post/510
-if(POLICY CMP0042)
-  cmake_policy(SET CMP0042 OLD)
+set(COMPONENT mechanics)
+message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
+# Name used for the target to be built
+set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
+
+# --- Search component dependencies ---
+
+# --- Sources and headers ---
+# source directories for numerics
+set(${COMPONENT}_DIRS
+  src/.
+  src/bodies
+  src/joints
+  src/contactDetection/basicBroadphase
+  )
+
+if(WITH_OCC)
+  list(APPEND ${COMPONENT}_DIRS src/occ)
 endif()
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-include(SiconosTools)
-get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
+if(WITH_BULLET)
+  list(APPEND ${COMPONENT}_DIRS src/contactDetection/bullet)
+endif()
 
-option(WITH_OCC "compilation with OpenCascade Bindings. Default = OFF" OFF)
-option(WITH_MECHANISMS "compilation with OpenCascade Bindings. Default = OFF" OFF)
-option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
+if(WITH_MECHANISMS)
+  list(APPEND ${COMPONENT}_DIRS
+    mechanisms/CADMBTB
+    mechanisms/MBTB
+    mechanisms/TIMERMBTB
+    mechanisms/frontEnd)
+endif()
 
-include(SiconosProject)
+# Unstable sources. Will be included only
+# if WITH_${COMPONENT}_UNSTABLE is true.
+set(${COMPONENT}_Unstable_SRCS
+  )
 
-enable_language(C)
-enable_language(CXX)
-enable_language(Fortran) # see lapack macros
+# List of directories of headers not to be installed
+set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 
-set(PACKAGE_DESCRIPTION_SUMMARY
-  "Siconos/Mechanics is dedicated to the modeling and the simulation of nonsmooth mechanical systems")
+# python_bindings - Set extra dependencies
+if(WITH_${COMPONENT}_PYTHON_BINDINGS)
+  set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
+  # List of modules to be built in the python bindings
+  set(${COMPONENT}_PYTHON_MODULES "Bodies;Joints")
+  if(WITH_OCC)
+    set(${COMPONENT}_PYTHON_MODULES "Bodies;Joints;OccWrap")
+  endif()
+endif()
 
-set(PACKAGE_DESCRIPTION
-  "The present package, Siconos/Mechanics, is dedicated to the modeling and
-the simulation of Non Smooth Mechanical Systems")
+include(WindowsMechanicsSetup)
 
-siconos_project(Mechanics)
+# ---- Final setup for the library ----
+# --- set linked libraries and linker language ---
+set(${COMPONENT}_LINKER_LANGUAGE CXX)
+set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} kernel)
+include(LibraryProjectSetup)
+library_project_setup()
+
+print_var(${COMPONENT}_SRCS)
+# --- specific install ----
+
+
+# if(WITH_${COMPONENT}_PYTHON_BINDINGS)
+#   # Contact detection
+#   install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/swig_files/contact_detection/Tools.py
+#   DESTINATION ${PYTHON_DIST_PACKAGES}/siconos/mechanics/contact_detection)
+
+#   if(WITH_OCC)
+#     install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/swig_files/occ/__init__.py
+#       DESTINATION ${SICONOS_PYTHON_INSTALL_DIR}}/mechanics/occ)
+#   endif()
+# endif()
+
+# --- tests ---
+include(${COMPONENT}_tests.cmake)
