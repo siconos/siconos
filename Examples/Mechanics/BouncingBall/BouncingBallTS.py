@@ -19,9 +19,9 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 #
 
-from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
-     LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI, TimeDiscretisation,\
-     LCP, TimeStepping
+from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
+    LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
+    TimeDiscretisation, LCP, TimeStepping
 
 from numpy import eye, empty
 
@@ -143,7 +143,7 @@ while s.hasNextEvent():
 #
 # comparison with the reference file
 #
-from Siconos.Kernel import SimpleMatrix, getMatrix
+from siconos.kernel import SimpleMatrix, getMatrix
 from numpy.linalg import norm
 
 ref = getMatrix(SimpleMatrix("result.ref"))
