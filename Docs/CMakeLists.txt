@@ -1,125 +1,133 @@
-# Set minimum version for cmake
-cmake_minimum_required(VERSION 2.8.7)
+# ============================================================
+# Prepare  config to generate siconos documentation :
+#
+# - automatic doxygen documentation, from source code
+# - sphinx documentation for manuals
+# 
+# ============================================================
 
-# MACOSX_RPATH required from cmake 3.0.
-# See http://www.kitware.com/blog/home/post/510
-if(POLICY CMP0042)
-  cmake_policy(SET CMP0042 OLD)
+#  ====== doxygen documentation setup ======
+# This setup is required if one at least of
+# the following is needed:
+# - doxygen warnings (see WITH_DOXYGEN_WARNINGS)
+# - python docstrings from doxygen (xml) (see WITH_DOXY2SWIG)
+# - doxygen documentation generated from source files (see WITH_DOCUMENTATION)
+if(USE_DOXYGEN)
+  find_package(Doxygen REQUIRED)
+
+  # Output path for doxygen documentation
+  if(NOT DOXYGEN_OUTPUT)
+    set(DOXYGEN_OUTPUT ${CMAKE_BINARY_DIR}/Docs/build_doxy CACHE INTERNAL "Path to doxygen outputs.")
+  endif()
+  file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/Tags)
+  file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
+  
+  # --- Config file and its options. --
+  # --> one for doxygen warnings (from doxy_warnings.config.in)
+  # --> one for documentation and python docstrings (from doxy.config.in)
+  
+  # == set configuration file for doxygen warnings ==
+  #  - Results in binary_dir/doxygen_warnings
+  #  - input config from config/doxy_warnings.config
+  #  - only xml output.
+  if(WITH_DOXYGEN_WARNINGS)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doxygen_warnings)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doxygen_warnings/man)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doxygen_warnings/xml)
+    set(DOXY_WARNINGS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/config/doxy_warnings.config.in CACHE INTERNAL "config file for doxygen warnings output.")
+    # All the configure process will be done for each component
+    # thanks to 'include(doxygen_warnings)'. See LibraryProjectSetup.
+  endif()
+
+  # == set configuration file for doxygen doc from sources ==
+  #  - Results in binary_dir/Docs/
+  #  - input config from config/doxy.config
+  #  - only html output (add option for latex?)
+  # 'inputs' are updated by each component, during call to update_xml_doxy_config_file macro.
+  # Doc will be built when 'make doxygen' is called.
+  if(WITH_DOCUMENTATION)
+    # config file name
+    set(DOXY_CONFIG "${CMAKE_BINARY_DIR}/Docs/config/doxy.config" CACHE INTERNAL "Doxygen configuration file for doc from sources.")
+
+    # The generation of the config and the creation of the target will be done later,
+    # after the update of inputs by each component, with macro 'finalize_doxygen'
+    
+  endif()
+    
+  # == set configuration file for doxy2swig (use doxygen ouput to create docstrings) ==
+  #  - Results in binary_dir/Docs/
+  #  - input config from config/<component_name>doxy.config
+  #  - only xml output
+  # 'inputs' are updated by each component, during call to update_xml_doxy_config_file macro.
+  # The xml doc is built for each component, during call to build_doc_xml macro.
+  # Here, we just need to create a target to create xml files for a given component
+  # for example --> make numerics_xml to create xml files for numerics.
+  if(WITH_DOXY2SWIG)
+    foreach(comp ${COMPONENTS_NAMES})
+      set(DOXY_CONFIG_XML ${CMAKE_CURRENT_BINARY_DIR}/config/${comp}doxy.config.xml)
+      add_custom_target(${comp}_xml ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Docs/
+	COMMENT "Build xml documentation files.")
+    endforeach()
+  endif()
+
 endif()
-if(POLICY CMP0011)
-  cmake_policy(SET CMP0011 NEW)
-endif(POLICY CMP0011)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+  
+#  ====== Create a Target to generate sphinx documentation ======
+if(USE_SPHINX)
+  # find_python_module(breathe REQUIRED)
+  find_python_module(sphinx REQUIRED)
 
-include(SiconosTools)
-get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
+  # --- conf.py describes sphinx setup ---
+  configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/conf.py.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/conf.py" @ONLY)
 
-INCLUDE(SiconosProject)
-OPTION(WITH_DOCUMENTATION "Build doxygen documentation with 'make doc'" ON)
+  configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/index.rst.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/index.rst" @ONLY)
 
-SET(PACKAGE_DESCRIPTION_SUMMARY 
-  "Siconos/Docs is the main Siconos documentation")
+  configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/reference/siconos_api_reference.rst.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/reference/siconos_api_reference.rst" @ONLY)
+  
+  # --- Build a target for sphinx ---
+  # --> use make html or make latex ... to build documentation.
+  set(SPHINX_EXECUTABLE sphinx-build)
 
-SET(PACKAGE_DESCRIPTION 
-  "Siconos is a program dedicated to modeling, simulation and control of
-Non Smooth Dynamical Systems (NSDS). The present package,
-Siconos/Docs provides the main user documentation.")
+  # html doc
+  set(SPHINX_PARAMETERS
+    -b html # html output
+    -d build/doctrees # path to doctree files
+    ${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources  # path to rst source
+    )
 
-COMPILE_WITH(Doxygen REQUIRED)
+  add_custom_target(html
+    COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS}
+    ${CMAKE_CURRENT_BINARY_DIR}/build/html
+    )
+  #add_dependencies(html doxygen)
+  
+  # latex doc
+  set(SPHINX_LATEX_PARAMETERS
+    -b latex # latex output
+    -d build/doctrees # path to doctree files
+    ${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources  # path to rst source
+    )
+  
+  add_custom_target(latex
+    COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_LATEX_PARAMETERS}
+    ${CMAKE_CURRENT_BINARY_DIR}/build/latex
+    )
 
-SICONOS_PROJECT(Docs)
+  # python api auto doc
+  set(SPHINX_APIDOC sphinx-apidoc)
+  set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx_sources/reference)
+  set(APIDOC_PARAMETERS -e -P -o ${GENERATED_DOC})
 
-# main documentation specificities
-SET(DOCUMENTATION_DIRECTORIES
-  DevNotes
-  HomePage
-  SiconosProjectOverview
-  User/UsersGuide
-  User/InstallGuide
-  User/GettingStarted)
+  add_custom_target(apidoc
+    COMMAND ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
+    ${CMAKE_BINARY_DIR}/python_bindings/${SICONOS_PYTHON_PACKAGE}
+    )
 
-
-FILE(MAKE_DIRECTORY ${DOXYGEN_OUTPUT})
-FILE(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/Draft)
-
-
-
-# css
-# FILE(GLOB CSS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/css/*.css)
-# FILE(GLOB HTML_FILES ${CMAKE_CURRENT_SOURCE_DIR}/css/*.html)
-# FILE(GLOB PNG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/css/*.png)
-
-# FOREACH(_F ${CSS_FILES} ${HTML_FILES} ${PNG_FILES})
-#   FILE(RELATIVE_PATH _RF ${CMAKE_CURRENT_SOURCE_DIR} ${_F})
-#   MESSAGE(STATUS "Copy " ${_F} " to " ${CMAKE_CURRENT_BINARY_DIR}/${_RF})
-#   CONFIGURE_FILE(${_F}
-#     ${CMAKE_CURRENT_BINARY_DIR}/${_RF}
-#     @ONLY)
-# ENDFOREACH(_F ${CSS_FILES} ${HTML_FILES} ${PNG_FILES})
-
-
-# CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/css/logo_bipop.png 
-#   ${DOXYGEN_OUTPUT}/HomePage/logo_bipop.png COPYONLY)
-
-
-FOREACH(_D ${DOCUMENTATION_DIRECTORIES})
-  FILE(GLOB SRC_CFG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/${_D}/config/*.cfg)
-  FOREACH(_F ${SRC_CFG_FILES})
-    LIST(APPEND DOXY_SRC_CFG_FILES ${_F})
-  ENDFOREACH(_F ${SRC_CFG_FILES})
-  FILE(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/${_D})
-ENDFOREACH(_D ${DOCUMENTATION_DIRECTORIES})
-
-
-
-SET(TARGET_DIRECTORIES
-  DevNotes
-  HomePage
-  UsersGuide
-  InstallGuide
-  GettingStarted)
-
-
-FOREACH(_D ${TARGET_DIRECTORIES})
-  FILE(GLOB CSS_FILES ${CMAKE_SOURCE_DIR}/../Docs/css/*.css)
-  FILE(GLOB HTML_FILES ${CMAKE_SOURCE_DIR}/../Docs/css/*.html)
-  FILE(GLOB PNG_FILES ${CMAKE_SOURCE_DIR}/../Docs/css/*.png)
-  FOREACH(FILE ${CSS_FILES} ${HTML_FILES} ${PNG_FILES})
-    IF(NOT IS_DIRECTORY ${FILE})
-      FILE(RELATIVE_PATH RFILE ${CMAKE_SOURCE_DIR}/../Docs/css/ ${FILE})
-      MESSAGE(STATUS "Copy " ${FILE} " to " ${DOXYGEN_OUTPUT}/${_D}/${RFILE})
-      # MESSAGE(STATUS "$FILE =" ${FILE})
-      # MESSAGE(STATUS "$CMAKE_SOURCE_DIR/../Docs/css/ =" ${CMAKE_SOURCE_DIR}/../Docs/css/)
-      # MESSAGE(STATUS "$DOXYGEN_OUTPUT =" ${DOXYGEN_OUTPUT})
-      # MESSAGE(STATUS "$_D =" ${_D})
-      # MESSAGE(STATUS "$RFILE=" ${RFILE})
-      CONFIGURE_FILE(${FILE} ${DOXYGEN_OUTPUT}/${_D}/${RFILE} COPYONLY)
-    ENDIF(NOT IS_DIRECTORY ${FILE})
-  ENDFOREACH(FILE ${CSS_FILES} ${HTML_FILES} ${PNG_FILES})
-ENDFOREACH(_D ${TARGET_DIRECTORIES})
-
-
-
-
-
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/runDoxygen ${CMAKE_CURRENT_BINARY_DIR}/runDoxygen)
-
-SET(WITH_TESTING FALSE)
-
-IF(DOXY_SRC_CFG_FILES)
-  FOREACH(_F ${DOXY_SRC_CFG_FILES})
-    FILE(RELATIVE_PATH _RF ${CMAKE_CURRENT_SOURCE_DIR} ${_F})
-    CONFIGURE_FILE(${_F}
-      ${CMAKE_CURRENT_BINARY_DIR}/${_RF}
-      @ONLY)
-
-    LIST(APPEND DOXY_CFG_FILES ${CMAKE_CURRENT_BINARY_DIR}/${_RF})
-
-  ENDFOREACH(_F ${DOXY_SRC_CFG_FILES})
-
-  ADD_CUSTOM_TARGET(doc_internal COMMAND ${CMAKE_CURRENT_BINARY_DIR}/runDoxygen ${DOXYGEN_EXECUTABLE} ${DOXY_CFG_FILES})
-
-  ADD_DEPENDENCIES(doc doc_internal)
-
-ENDIF(DOXY_SRC_CFG_FILES)
+endif()
