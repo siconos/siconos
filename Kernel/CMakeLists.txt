@@ -1,47 +1,63 @@
-# Set minimum version for cmake
-cmake_minimum_required(VERSION 2.8.7)
+#================================================================
+# cmake utilities to build kernel component
+#================================================================
 
-# MACOSX_RPATH required from cmake 3.0.
-# See http://www.kitware.com/blog/home/post/510
-if(POLICY CMP0042)
-  cmake_policy(SET CMP0042 OLD)
-endif()
+set(COMPONENT kernel)
+message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
+# Name used for the target to be built
+set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+# --- Search component dependencies ---
 
-include(SiconosTools)
-get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
+# --- Sources and headers ---
+# source directories for numerics
+set(${COMPONENT}_DIRS
+  src/.
+  src/utils
+  src/utils/numeric_bindings
+  src/utils/contract
+  src/utils/SiconosAlgebra
+  src/utils/SiconosException
+  src/utils/SiconosMemory
+  src/utils/SiconosSharedLibrary
+  src/utils/SiconosTools
+  src/model
+  src/plugin
+  src/modelingTools
+  src/simulationTools
+)
 
-INCLUDE(SiconosProject)
+# Unstable sources. Will be included only
+# if WITH_${COMPONENT}_UNSTABLE is true.
+set(${COMPONENT}_Unstable_SRCS
+  src/simulationTools/GlobalFrictionContact.cpp
+  src/simulationTools/MLCP2.cpp
+  )
 
-ENABLE_LANGUAGE(C)
-ENABLE_LANGUAGE(CXX)
-ENABLE_LANGUAGE(Fortran) # see lapack macros
- 
-SET(PACKAGE_DESCRIPTION_SUMMARY 
-  "Siconos/Kernel is dedicated to the modeling and the simulation of NSDS.")
+# List of directories of headers not to be installed
+set(${COMPONENT}_HDRS_EXCLUDE_DIR src/SOL/lumod-c)
 
-SET(PACKAGE_DESCRIPTION 
-  "The present package, Siconos/Kernel, is dedicated to the modeling and
-the simulation of Non Smooth Dynamical Systems (NSDS), with high level
-description and numerical solving strategies.  It relies on
-Siconos/Numerics which provides low-level algorithms to compute basic
-well-identified problems.")
+# List of directories for which no doxygen doc will be generated
+# By default all directories matching "test" are excluded.
+set(${COMPONENT}_EXCLUDE_DOXY
+  src/utils/numeric_bindings src/utils/AtlasLocal
+  )
+
+# ---- Final setup for the library ----
+# --- set linked libraries and linker language ---
+set(${COMPONENT}_LINKER_LANGUAGE CXX)
+set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} numerics)
+
+include(LibraryProjectSetup)
+library_project_setup()
+
+include(WindowsKernelSetup)
+
+# --- specific install ----
+install(FILES ${BOOST_HDRS} 
+  DESTINATION include/${PROJECT_NAME}/boost/numeric/bindings/)
 
 
-IF(PIPOL_IMAGE MATCHES "etch")
-  SET(DEBIAN_PACKAGE_DEPENDS 
-    "g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers, libboost-dev, libboost-graph-dev, libgfortran1-dev, libgmp3-dev, siconos-numerics")
-ENDIF(PIPOL_IMAGE MATCHES "etch")
-
-IF(PIPOL_IMAGE MATCHES "lenny\\|ubuntu")
-  SET(DEBIAN_PACKAGE_DEPENDS
-    "g++, gfortran, libatlas-base-dev, libatlas-headers, libboost-dev, libboost-graph-dev, libgmp3-dev, siconos-numerics")
-ENDIF(PIPOL_IMAGE MATCHES "lenny\\|ubuntu")  
-
-#IF(APPLE)
-#  SET (CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
-#ENDIF(APPLE)
-
-SICONOS_PROJECT(Kernel)
-
+# --- tests ---
+include(${COMPONENT}_tests.cmake)

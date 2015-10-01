@@ -56,7 +56,11 @@ set(${COMPONENT}_HDRS_EXCLUDE_DIR src/SOL/lumod-c)
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
 set(${COMPONENT}_EXCLUDE_DOXY
-  src/netlib)
+  src/netlib
+  src/hairer
+  src/NonSmoothSolvers/InterfaceToPathFerris/include
+  src/NonSmoothSolvers/Unstable_or_deprecated
+  src/utils/f2c.h )
 
 # Windows stuff
 include(WindowsNumericsSetup)
