@@ -2,11 +2,13 @@
 # Some convenience macros
 #
 
-# Basic list manipulation
+# -- Basic list manipulation --
+# Get first element of list var
 MACRO(CAR var)
   SET(${var} ${ARGV1})
 ENDMACRO(CAR)
 
+# get elements in list var minus the first one.
 MACRO(CDR var junk)
   SET(${var} ${ARGN})
 ENDMACRO(CDR)
@@ -31,38 +33,98 @@ MACRO(APPEND_Fortran_FLAGS)
   APPEND_FLAGS(CMAKE_Fortran_FLAGS ${ARGV})
 ENDMACRO(APPEND_Fortran_FLAGS)
 
-# Do them once and remember the values for other projects (-> tests)
-MACRO(REMEMBER_INCLUDE_DIRECTORIES _DIRS)
-  FOREACH(_D ${_DIRS})
-    IF(NOT ${PROJECT_NAME}_REMEMBER_INC_${_D})
-      SET(${PROJECT_NAME}_REMEMBER_INC_${_D} TRUE)
-      LIST(APPEND ${PROJECT_NAME}_INCLUDE_DIRECTORIES ${_D})
-      INCLUDE_DIRECTORIES(${_DIRS})
-    ENDIF(NOT ${PROJECT_NAME}_REMEMBER_INC_${_D})
-  ENDFOREACH(_D ${_DIRS})
-ENDMACRO(REMEMBER_INCLUDE_DIRECTORIES _DIRS)
+# Get a list of uninitialized cache variables and append
+# them to vars.
+macro(get_uninitialized_vars vars)
+  get_cmake_property(CACHE_VARS CACHE_VARIABLES)
+  foreach(CACHE_VAR ${CACHE_VARS})
+    get_property(CACHE_VAR_TYPE CACHE ${CACHE_VAR} PROPERTY TYPE)
+    if(CACHE_VAR_TYPE STREQUAL "UNINITIALIZED")
+      list(APPEND ${vars} -D${CACHE_VAR}=${${CACHE_VAR}})
+    endif()
+  endforeach()
+endmacro()
 
-MACRO(REMEMBER_LINK_DIRECTORIES _DIRS)
-  FOREACH(_D ${_DIRS})
-    IF(NOT ${PROJECT_NAME}_REMEMBER_LINK_${_D})
-      SET(${PROJECT_NAME}_REMEMBER_LINK_${_D} TRUE)
-      LIST(APPEND ${PROJECT_NAME}_LINK_DIRECTORIES ${_D})
-      LINK_DIRECTORIES(${_D})
-    ENDIF(NOT ${PROJECT_NAME}_REMEMBER_LINK_${_D})
-  ENDFOREACH(_D ${_DIRS})
-ENDMACRO(REMEMBER_LINK_DIRECTORIES _DIRS)
+# Scans DIRS (list of directories) and returns a list of all files in those dirs
+# matching extensions defined in SRC_EXTS list.
+# Results are saved in SOURCES_FILES
+#
+# Usage:
+# set(src_dirs dir1 dir2)
+# get_sources(src_dirs)
+macro(get_sources)
+  set(SOURCES_FILES)
+  foreach(DIR ${ARGV})
+    foreach(_EXT ${SRC_EXTS})
+      file(GLOB FILES_LIST ${DIR}/*.${_EXT})
+      if(FILES_LIST)
+	list(APPEND SOURCES_FILES ${FILES_LIST})
+      endif()
+    endforeach()
+  endforeach()
+  list(REMOVE_DUPLICATES SOURCES_FILES)
+endmacro()
 
-MACRO(REMEMBER_LINK_LIBRARIES _LIBS)
-  FOREACH(_LIB ${_LIBS})
-    IF(NOT ${PROJECT_NAME}_REMEMBER_LINK_LIBRARIES_${_LIB})
-      SET(${PROJECT_NAME}_REMEMBER_LINK_LIBRARIES_${_LIB} TRUE)
-      LIST(APPEND ${PROJECT_NAME}_LINK_LIBRARIES ${_LIB})
-    ENDIF(NOT ${PROJECT_NAME}_REMEMBER_LINK_LIBRARIES_${_LIB})
-  ENDFOREACH(_LIB ${_LIBS})
-ENDMACRO(REMEMBER_LINK_LIBRARIES _LIBS)
+# Scans DIRS (list of directories) and returns a list of all files in those dirs
+# matching extensions defined in HDR_EXTS list.
+# Results are saved in HDRS_FILES
+#
+# Usage:
+# set(src_dirs dir1 dir2)
+# get_headers(src_dirs)
+macro(get_headers DIRS)
+  set(HDRS_FILES)
+  foreach(DIR ${ARGV})
+    foreach(_EXT ${HDR_EXTS})
+      file(GLOB FILES_LIST ${DIR}/*.${_EXT})
+      if(FILES_LIST)
+	list(APPEND HDRS_FILES ${FILES_LIST})
+      endif()
+    endforeach()
+  endforeach()
+  list(REMOVE_DUPLICATES HDRS_FILES)
+endmacro()
 
-# link/include is done in the BLAS, LAPACK macros, but not in others.
+# -- returns a list of source files extension --
+# Results in var ALL_EXTS
+macro(get_standard_ext)
+  set(ALL_EXTS)
+  foreach(_EXT
+      ${CMAKE_CXX_SOURCE_FILE_EXTENSIONS}
+      ${CMAKE_C_SOURCE_FILE_EXTENSIONS}
+      ${CMAKE_Fortran_SOURCE_FILE_EXTENSIONS}
+      ${CMAKE_Java_SOURCE_FILE_EXTENSIONS}
+      ${CMAKE_RC_SOURCE_FILE_EXTENSIONS})
+    list(APPEND ALL_EXTS ${_EXT})
+  endforeach()
+  list(REMOVE_DUPLICATES ALL_EXTS)
+endmacro()
+
+# Print cmake variable 'V' value
+MACRO(PRINT_VAR V)
+  MESSAGE(STATUS "${V} = ${${V}}")
+ENDMACRO(PRINT_VAR V)
+
+
+# =======================================
+# For a given package name, try to find
+# corresponding headers and libraries and
+# add them to the include directories
+# and list of linked libraries.
+#
+# It sets (if found):
+# - SICONOS_INCLUDE_DIRECTORIES with the list
+# of directories of headers required for siconos to work with
+# - SICONOS_LINK_LIBRARIES with the list of external libraries
+# (full path!) needed by siconos project.
+#
+# Usage :
+#  compile_with(Packagename options)
+#
+# with the same 'options' as find_package
+# (see http://www.cmake.org/cmake/help/v3.0/command/find_package.html?highlight=find_package)
 MACRO(COMPILE_WITH)
+  # Get package name and extra args ...
   CAR(_NAME ${ARGV})
   CDR(_REST ${ARGV})
   CAR(_REQ ${_REST})
@@ -74,435 +136,107 @@ MACRO(COMPILE_WITH)
   LIST(APPEND _NAMES ${_NAME})
   LIST(APPEND _NAMES ${_UNAME})
   SET(_FOUND)
-  IF(_REQ STREQUAL STANDARD)
-  ELSE(_REQ STREQUAL STANDARD)
-    IF(_REQ STREQUAL REQUIRED)
-      FIND_PACKAGE(${_NAME} REQUIRED)
-    ELSE(_REQ STREQUAL REQUIRED)
-      FIND_PACKAGE(${ARGV})
-    ENDIF(_REQ STREQUAL REQUIRED)
-  ENDIF(_REQ STREQUAL STANDARD)
+  FIND_PACKAGE(${ARGV})
+  
   FOREACH(_N ${_NAMES})
     IF(${_N}_FOUND)
       SET(_FOUND TRUE)
-      IF(DEFINED ${_N}_INCLUDE_DIRS)
-	REMEMBER_INCLUDE_DIRECTORIES("${${_N}_INCLUDE_DIRS}")
-      ENDIF()
-      IF(DEFINED ${_N}_INCLUDE_DIR)
-        REMEMBER_INCLUDE_DIRECTORIES("${${_N}_INCLUDE_DIR}")
-      ENDIF()
-      IF(DEFINED ${_N}_INCLUDE_PATH)
-        REMEMBER_INCLUDE_DIRECTORIES("${${_N}_INCLUDE_PATH}")
-      ENDIF()
-      IF(DEFINED ${_N}_LIBRARY_DIRS)
-        REMEMBER_LINK_DIRECTORIES("${${_N}_LIBRARY_DIRS}")
-      ENDIF()
-      IF(DEFINED ${_N}_LIBRARIES)
-        REMEMBER_LINK_LIBRARIES("${${_N}_LIBRARIES}")
-      ENDIF()
-      IF(_COMP STREQUAL COMPLETE)
-        IF(COMPLETE_${_N}_LIBRARIES)	
-          REMEMBER_LINK_LIBRARIES("${COMPLETE_${_N}_LIBRARIES}")
-        ENDIF(COMPLETE_${_N}_LIBRARIES)
-      ENDIF(_COMP STREQUAL COMPLETE)
-      IF(DEFINED ${_N}_DEFINITIONS) # not Fortran is supposed
+      # add headers dirs into 'include' path
+      # INCLUDE_DIR var name depends on FindNAME
+      # We try to check the standard var names.
+      if(DEFINED ${_N}_INCLUDE_DIRS)
+	remember_include_directories("${${_N}_INCLUDE_DIRS}")
+      endif()
+      if(DEFINED ${_N}_INCLUDE_DIR)
+	remember_include_directories("${${_N}_INCLUDE_DIR}")
+      endif()
+      if(DEFINED ${_N}_INCLUDE_PATH)
+	remember_include_directories("${${_N}_INCLUDE_DIR}")
+      endif()
+      # Now we set list of libs that must be linked with.
+      if(DEFINED ${_N}_LIBRARIES)
+	set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES}
+	  ${${_N}_LIBRARIES})
+      endif()
+      # And the compiler flags
+      if(DEFINED ${_N}_DEFINITIONS)
         APPEND_C_FLAGS(${${_N}_DEFINITIONS})
-        APPEND_CXX_FLAGS(${${_N}_DEFINITIONS})
-      ENDIF()
-    ENDIF(${_N}_FOUND)
-  ENDFOREACH(_N ${_NAME} ${_UNAME})
-
-  IF(_REQ STREQUAL REQUIRED)
-    IF(_FOUND)
-    ELSE(_FOUND)
-      MESSAGE(FATAL_ERROR "${_NAME} NOT FOUND")
-    ENDIF(_FOUND)
-  ENDIF(_REQ STREQUAL REQUIRED)
-
-  # update NumericsConfig.h/KernelConfig.h
-  IF(NOT CONFIG_H_${_NAME}_CONFIGURED)
-    SET(CONFIG_H_${_NAME}_CONFIGURED 1 CACHE BOOL 
-      "${PROJECT_SHORT_NAME}Config.h generation for package ${_NAME}")
-    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake 
-      ${CMAKE_BINARY_DIR}/${PROJECT_SHORT_NAME}Config.h)
-  ENDIF(NOT CONFIG_H_${_NAME}_CONFIGURED)
-  SET(_N)
-  SET(_NAME) 
-  SET(_UNAME)
-  SET(_NAMES)
+	APPEND_CXX_FLAGS(${${_N}_DEFINITIONS})
+      endif()
+    endif()
+  endforeach()
+  list(REMOVE_DUPLICATES SICONOS_LINK_LIBRARIES)
+  set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES}
+    ${${_N}_LIBRARIES} CACHE INTERNAL "List of external libraries.")
+  set(_N)
+  set(_NAME) 
+  set(_UNAME)
+  set(_NAMES)
 ENDMACRO(COMPILE_WITH)
 
-# Tests
-MACRO(BEGIN_TEST _D)
-  SET(_CURRENT_TEST_DIRECTORY ${_D})
-  FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D})
+# ==== Save directories required for include_directory ===
+# 
+# Set variable SICONOS_INCLUDE_DIRECTORIES with the list
+# of directories of headers required for siconos to work with
+# its dependencies.
+# Usage :
+# set(dirs d1 d2 d3)
+# remember_include_directories(${dirs})
+#  --> save d1, d2, d3 into SICONOS_INCLUDE_DIRECTORIES
+# 
+MACRO(REMEMBER_INCLUDE_DIRECTORIES _DIRS)
+  FOREACH(_D ${_DIRS})
+    LIST(APPEND SICONOS_INCLUDE_DIRECTORIES ${_D})
+  ENDFOREACH()
+  list(REMOVE_DUPLICATES SICONOS_INCLUDE_DIRECTORIES)
+  set(SICONOS_INCLUDE_DIRECTORIES ${SICONOS_INCLUDE_DIRECTORIES}
+    CACHE INTERNAL "Include directories for external dependencies.")
 
-  # find and copy data files : *.mat, *.dat and *.xml, and etc.
-  FILE(GLOB_RECURSE _DATA_FILES 
-    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
-    *.mat 
-    *.dat
-    *.hdf5
-    *.xml
-    *.DAT
-    *.INI)
+ENDMACRO()
 
-  FOREACH(_F ${_DATA_FILES})
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
-  ENDFOREACH(_F ${_DATA_FILES})
-
-  IF(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
-    FILE(GLOB_RECURSE TEST_UTILS_${_CURRENT_TEST_DIRECTORY}
-      ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils/*.c)
-    SET(${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
-  ELSE()
-    SET(${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES)
-  ENDIF()
-
-  # configure test CMakeLists.txt (needed for a chdir before running test)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/CMakeListsForTests.cmake 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/CMakeLists.txt @ONLY)
-
-  SET(_EXE_LIST_${_CURRENT_TEST_DIRECTORY})
-ENDMACRO(BEGIN_TEST _D)
-
-# Tests
-MACRO(BEGIN_TEST2 _D)
-  SET(_CURRENT_TEST_DIRECTORY ${_D})
-  FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D})
-
-  # find and copy data files : *.mat, *.dat and *.xml, and etc.
-  FILE(GLOB_RECURSE _DATA_FILES 
-    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
-    *.mat 
-    *.dat
-    *.xml
-    *.DAT
-    *.INI)
-
-  IF(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
-    FILE(GLOB_RECURSE TEST_UTILS_${_CURRENT_TEST_DIRECTORY}
-      ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils/*.[ch])
-    SET(${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
-  ELSE()
-    SET(${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES)
-  ENDIF()
-
-  FOREACH(_F ${_DATA_FILES})
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
-  ENDFOREACH(_F ${_DATA_FILES})
-
-  # configure test CMakeLists.txt (needed for a chdir before running test)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/CMakeListsForTestsv2.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/CMakeLists.txt @ONLY)
-
-  SET(_EXE_LIST_${_CURRENT_TEST_DIRECTORY})
-
-ENDMACRO(BEGIN_TEST2 _D _L)
-
-# Declaration of a siconos test
-MACRO(NEW_TEST)
-  CAR(_EXE ${ARGV})
-  CDR(_SOURCES ${ARGV})
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${_EXE})
-  SET(${_EXE}_FSOURCES ${TEST_UTILS_${_CURRENT_TEST_DIRECTORY}})
-  FOREACH(_F ${_SOURCES})
-    LIST(APPEND ${_EXE}_FSOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${_CURRENT_TEST_DIRECTORY}/${_F})
-  ENDFOREACH(_F ${_SOURCES})
- 
-  IF(TEST_MAIN)
-    LIST(APPEND ${_EXE}_FSOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_MAIN})
-  ENDIF(TEST_MAIN)
-  
-  # pb env in ctest, see http://www.vtk.org/Bug/view.php?id=6391#bugnotes
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/ldwrap.c.in 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${_EXE}.ldwrap.c)
-  
-ENDMACRO(NEW_TEST)
-
-# Removal of a siconos test (test fails or takes forever)
-# Warning: the test is still compiled
-MACRO(RM_TEST)
-  CAR(_EXE ${ARGV})
-  CDR(_SOURCES ${ARGV})
-  LIST(REMOVE_ITEM _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${_EXE})
-ENDMACRO(RM_TEST)
-
-MACRO(RM_TEST2)
-  SET(TEST_SOLVER ${ARGV0})
-  SET(TEST_DATA ${ARGV1})
-
-  SET(TEST_SBM ${ARGV2})
-  SET(TEST_SBM_C "_SBM")
-  IF(NOT DEFINED TEST_SBM)
-    SET(TEST_SBM 0)
-    SET(TEST_SBM_C "")
-  ENDIF(NOT DEFINED TEST_SBM)
-
-  STRING(REGEX REPLACE SICONOS_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-  SET(TEST_EXE ${TEST_SOLVER_NAME}${TEST_SBM_C})
-  SET(TEST_NAME "test-${TEST_SOLVER_NAME}-${TEST_DATA_NAME}${TEST_SBM_C}")
-
-  LIST(REMOVE_ITEM ${TEST_EXE}_DATA_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_DATA})
-  LIST(REMOVE_ITEM ${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-ENDMACRO(RM_TEST2)
-
-MACRO(NEW_FC_TEST)
-  SET(TEST_SOLVER ${ARGV0})
-  SET(TEST_DATA ${ARGV1})
-  
-  SET(TEST_TOLERANCE ${ARGV2})
-  IF(NOT DEFINED TEST_TOLERANCE)
-    SET(TEST_TOLERANCE 0)
-  ENDIF(NOT DEFINED TEST_TOLERANCE)
-  
-  SET(TEST_MAXITER ${ARGV3})
-  IF(NOT DEFINED TEST_MAXITER)
-    SET(TEST_MAXITER 0)
-  ENDIF(NOT DEFINED TEST_MAXITER)
-  
-  SET(TEST_INTERNAL_SOLVER ${ARGV4})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER)
-    SET(TEST_INTERNAL_SOLVER 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER)
-  
-  SET(TEST_INTERNAL_SOLVER_TOLERANCE ${ARGV5})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER_TOLERANCE)
-    SET(TEST_INTERNAL_SOLVER_TOLERANCE 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER_TOLERANCE)
-  
-  SET(TEST_INTERNAL_SOLVER_MAXITER ${ARGV6})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER_MAXITER)
-    SET(TEST_INTERNAL_SOLVER_MAXITER 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER_MAXITER)
-  
-  STRING(REGEX REPLACE SICONOS_FRICTION_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
-  STRING(REGEX REPLACE SICONOS_FRICTION_ "" TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER})
-  STRING(REGEX REPLACE "0" "" TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER_NAME})
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-
-  SET(TEST_NAME "test-${TEST_SOLVER_NAME}${TEST_INTERNAL_SOLVER_NAME}-${TEST_DATA_NAME}")
-
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/fctest.c.in 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-  # include code from test-utils
-  SET(${TEST_NAME}_FSOURCES ${TEST_UTILS_${_CURRENT_TEST_DIRECTORY}})
-
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_FC_TEST)
-
-MACRO(NEW_PB_TEST)
-  SET(FILE_TO_CONF ${ARGV0})
-  SET(TEST_SOLVER ${ARGV1})
-  SET(TEST_DATA ${ARGV2})
-
-  SET(TEST_SBM ${ARGV3})
-  SET(TEST_SBM_C "_SBM")
-  IF(NOT DEFINED TEST_SBM)
-    SET(TEST_SBM 0)
-    SET(TEST_SBM_C "")
-  ENDIF(NOT DEFINED TEST_SBM)
+# ==== Save directories required for include_directory ===
+# 
+# Set variable ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES with the list
+# of directories of headers of each siconos component.
+#
+# Usage :
+# set(dirs d1 d2 d3)
+# remember_local_include(${dirs})
+#  --> save d1, d2, d3 into ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
+#
+# mind the ${CMAKE_CURRENT_SOURCE_DIR} below!
+macro(remember_local_include_directories _DIRS)
+  foreach(_D ${_DIRS})
+    list(APPEND ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
+      ${CMAKE_CURRENT_SOURCE_DIR}/${_D})
+  endforeach()
+  list(REMOVE_DUPLICATES ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES)
+  set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
+    ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES}
+    CACHE INTERNAL "Include directories for external dependencies.")
+endmacro()
 
 
-  STRING(REGEX REPLACE SICONOS_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-
-  SET(TEST_EXE ${TEST_SOLVER_NAME}${TEST_SBM_C})
-  SET(TEST_NAME "test-${TEST_SOLVER_NAME}-${TEST_DATA_NAME}${TEST_SBM_C}")
-
-
-  LIST(FIND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_EXE} ALREADY_CONF)
-  IF(ALREADY_CONF EQUAL -1)
-    # include code from test-utils
-    SET(${TEST_EXE}_FSOURCES ${TEST_UTILS_${_CURRENT_TEST_DIRECTORY}})
-
-    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/${FILE_TO_CONF}${TEST_SBM_C}.c.in
-      ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_EXE}.c)
-    LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_EXE})
-    LIST(APPEND ${TEST_EXE}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_EXE}.c)
-    SET(${TEST_EXE}_DATA_LIST_${_CURRENT_TEST_DIRECTORY})
-    SET(${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY})
-  ENDIF(ALREADY_CONF EQUAL -1)
-
-  LIST(APPEND ${TEST_EXE}_DATA_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_DATA})
-  LIST(APPEND ${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-
-ENDMACRO(NEW_PB_TEST)
-
-MACRO(NEW_LCP_TEST)
-  NEW_PB_TEST(lcptest ${ARGV})
-ENDMACRO(NEW_LCP_TEST)
-
-MACRO(NEW_RELAY_TEST)
-  NEW_PB_TEST(relaytest ${ARGV})
-ENDMACRO(NEW_RELAY_TEST)
-
-MACRO(NEW_NCP_TEST)
-  SET(FILE_TO_CONF ${ARGV0})
-  SET(TEST_SOLVER ${ARGV1})
-  STRING(REGEX REPLACE SICONOS_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
-  SET(TEST_EXE ${TEST_SOLVER_NAME}-${FILE_TO_CONF})
-  SET(TEST_NAME "test-${TEST_SOLVER_NAME}-${FILE_TO_CONF}")
-
-  # include code from test-utils
-  SET(${TEST_EXE}_FSOURCES ${TEST_UTILS_${_CURRENT_TEST_DIRECTORY}})
-
-  SET(SOLVER_ID ${TEST_SOLVER})
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_CURRENT_TEST_DIRECTORY}/${FILE_TO_CONF}.c.in
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_EXE}.c)
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_EXE})
-  LIST(APPEND ${TEST_EXE}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_EXE}.c)
-  SET(${TEST_EXE}_DATA_LIST_${_CURRENT_TEST_DIRECTORY} )
-  SET(${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY})
-ENDMACRO(NEW_NCP_TEST)
-
-MACRO(NEW_LS_TEST)
-  SET(TEST_SOLVER ${ARGV0})
-  SET(TEST_DATA ${ARGV1})
-
-  SET(TEST_SBM ${ARGV2})
-  SET(TEST_SBM_C "SBM")
-  IF(NOT DEFINED TEST_SBM)
-    SET(TEST_SBM 0)
-    SET(TEST_SBM_C "")
-  ENDIF(NOT DEFINED TEST_SBM)
-    
-  STRING(REGEX REPLACE SICONOS_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-
-  SET(TEST_NAME "test-${TEST_SOLVER_NAME}-${TEST_DATA_NAME}${TEST_SBM_C}")
-
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/lstest.c.in 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-  # include code from test-utils
-  SET(${TEST_NAME}_FSOURCES ${TEST_UTILS_${_CURRENT_TEST_DIRECTORY}})
-
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_LS_TEST)
-
-MACRO(NEW_GMP_TEST)
-  SET(TEST_SOLVER ${ARGV0})
-  SET(TEST_DATA ${ARGV1})
-  SET(TEST_GMP_REDUCED 1)
-  
-  SET(TEST_TOLERANCE ${ARGV2})
-  IF(NOT DEFINED TEST_TOLERANCE)
-    SET(TEST_TOLERANCE 0)
-  ENDIF(NOT DEFINED TEST_TOLERANCE)
-  
-  SET(TEST_MAXITER ${ARGV3})
-  IF(NOT DEFINED TEST_MAXITER)
-    SET(TEST_MAXITER 0)
-  ENDIF(NOT DEFINED TEST_MAXITER)
-  
-  SET(TEST_INTERNAL_SOLVER ${ARGV4})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER)
-    SET(TEST_INTERNAL_SOLVER 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER)
-  
-  SET(TEST_INTERNAL_SOLVER_TOLERANCE ${ARGV5})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER_TOLERANCE)
-    SET(TEST_INTERNAL_SOLVER_TOLERANCE 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER_TOLERANCE)
-  
-  SET(TEST_INTERNAL_SOLVER_MAXITER ${ARGV6})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER_MAXITER)
-    SET(TEST_INTERNAL_SOLVER_MAXITER 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER_MAXITER)
-
-  SET(TEST_GMP_REDUCED ${ARGV7})
-  IF(NOT DEFINED TEST_GMP_REDUCED)
-    SET(TEST_GMP_REDUCED 0)
-  ENDIF(NOT DEFINED TEST_GMP_REDUCED)
-  
-  STRING(REGEX REPLACE SICONOS_FRICTION_ "" TEST_SOLVER_NAME "REDUCED" ${TEST_GMP_REDUCED}_ ${TEST_SOLVER})
-  STRING(REGEX REPLACE SICONOS_FRICTION_ "" TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER})
-  STRING(REGEX REPLACE "0" "" TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER_NAME})
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-
-  SET(TEST_NAME "test-GMP-${TEST_SOLVER_NAME}${TEST_INTERNAL_SOLVER_NAME}-${TEST_DATA_NAME}")
-
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/gmptest.c.in 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-  # include code from test-utils
-  SET(${TEST_NAME}_FSOURCES ${TEST_UTILS_${_CURRENT_TEST_DIRECTORY}})
-
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_GMP_TEST)
-
-# add subdirs (i.e. CMakeLists.txt generated for tests) to the build
-MACRO(END_TEST)
-  ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY} ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY})
-ENDMACRO(END_TEST)
-
-# to prevent the reference of inside sources directories 
-MACRO(CHECK_INSTALL_INCLUDE_DIRECTORIES)
-  SET(CHECKED_${PROJECT_NAME}_INCLUDE_DIRECTORIES)
-  FOREACH(_D ${${PROJECT_NAME}_INCLUDE_DIRECTORIES})
-    IF(_D MATCHES "${CMAKE_SOURCE_DIR}")
-    ELSE(_D MATCHES "${CMAKE_SOURCE_DIR}")
-      LIST(APPEND CHECKED_${PROJECT_NAME}_INCLUDE_DIRECTORIES ${_D})
-    ENDIF(_D MATCHES "${CMAKE_SOURCE_DIR}")
-  ENDFOREACH(_D ${${PROJECT_NAME}_INCLUDE_DIRECTORIES})
-ENDMACRO(CHECK_INSTALL_INCLUDE_DIRECTORIES)
-
-# debug
-MACRO(PRINT_VAR V)
-  MESSAGE(STATUS "${V} = ${${V}}")
-ENDMACRO(PRINT_VAR V)
-
-# copy directory
-MACRO(COPY_DIR SRC DST)
-  FILE(GLOB_RECURSE FILES ${SRC} * *.*)
-  FOREACH(_F ${FILES})
-    MESSAGE(STATUS "COPY_DIR: COPYING ${_F} to ${DST}")
-    FILE(RELATIVE_PATH _BF ${SRC} ${_F})
-    CONFIGURE_FILE(${_F} ${DST}/${_BF} COPYONLY)
-  ENDFOREACH(_F ${FILES})
-ENDMACRO(COPY_DIR SRC DST)
-
-# copy pattern files
-MACRO(COPY_PATTERN SRC DST PATTERN)
-  FILE(GLOB_RECURSE FILES ${SRC} ${PATTERN})
-  FOREACH(_F ${FILES})
-    MESSAGE(STATUS "COPY_PATTERN: COPYING ${_F} to ${DST}")
-    FILE(RELATIVE_PATH _BF ${SRC} ${_F})
-    CONFIGURE_FILE(${_F} ${DST}/${_BF} COPYONLY)
-  ENDFOREACH(_F ${FILES})
-ENDMACRO(COPY_PATTERN SRC DST PATTERN)
-
-# check avaibility of python modules
-# adapted from http://www.cmake.org/pipermail/cmake/2011-January/041666.html
-function(find_python_module module)
-	string(TOUPPER ${module} module_upper)
-	if(NOT PY_${module_upper})
-		if(ARGC GREATER 1 AND ARGV1 STREQUAL "REQUIRED")
-			set(${module}_FIND_REQUIRED TRUE)
-		endif()
-		# A module's location is usually a directory, but for binary modules
-		# it's a .so file.
-		execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" 
-			"import re, ${module}; print re.compile('/__init__.py.*').sub('',${module}.__file__)"
-			RESULT_VARIABLE _${module}_status 
-			OUTPUT_VARIABLE _${module}_location
-			ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-		if(NOT _${module}_status)
-			set(PY_${module_upper} ${_${module}_location} CACHE STRING 
-				"Location of Python module ${module}")
-		endif(NOT _${module}_status)
-	endif(NOT PY_${module_upper})
-	find_package_handle_standard_args(PY_${module} DEFAULT_MSG PY_${module_upper})
-endfunction(find_python_module)
+MACRO(WRITE_NOTES)
+  IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
+    # a note file for the dashboard
+    FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Testing/Notes)
+    FILE(WRITE ${CMAKE_BINARY_DIR}/Testing/Notes/Build "git sha1 : ${SOURCE_ABBREV_GIT_SHA1}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "cmake version : ${CMAKE_VERSION}\n")
+    # the default buildname
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "System name : ${CMAKE_SYSTEM_NAME}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Processor   : ${CMAKE_SYSTEM_PROCESSOR}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler : ${CMAKE_C_COMPILER}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler version : ${C_COMPILER_VERSION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler : ${CMAKE_CXX_COMPILER}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler version : ${CXX_COMPILER_VERSION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler : ${CMAKE_Fortran_COMPILER}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler version : ${Fortran_COMPILER_VERSION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "BLAS libraries : ${BLAS_LIBRARIES}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "LAPACK libraries : ${LAPACK_LIBRARIES}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "all libraries : ${SICONOS_LINK_LIBRARIES}\n")
+  ENDIF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
+ENDMACRO(WRITE_NOTES)
 
 MACRO(ASSERT VAR)
   IF (NOT DEFINED ${VAR})
@@ -510,13 +244,42 @@ MACRO(ASSERT VAR)
   ENDIF()
 ENDMACRO()    
 
-# unitialized vars
-macro(get_uninitialized_vars vars)
-  get_cmake_property(CACHE_VARS CACHE_VARIABLES)
-  foreach(CACHE_VAR ${CACHE_VARS})
-    get_property(CACHE_VAR_TYPE CACHE ${CACHE_VAR} PROPERTY TYPE)
-    if(CACHE_VAR_TYPE STREQUAL "UNINITIALIZED")
-      list(APPEND ${vars} -D${CACHE_VAR}=${${CACHE_VAR}})
+
+# -------------------------------
+# Set WITH_COMPONENT_OPT value
+# depending on WITH_OPT value
+# and the -D... entries.
+#
+# Example :
+# cmake -DWITH_DOCUMENTATION = ON
+# will activate all WITH_component_DOCUMENTATION for enabled components.
+# while
+# cmake -DWITH_kernel_DOCUMENTATION=ON
+# will set WITH_DOCUMENTATION=ON and WITH_other_components=OFF
+# 
+# This will work (I hope ...) in standard cases but will probably
+# failed after several cmake . with schizophrenic options
+# like
+# cmake -DWITH_kernel_DOCUMENTATION=ON path_to_srcs
+# cmake -DWITH_DOCUMENTATION=OFF .
+# In that case, user needs to reset all WITH_component_OPT.
+#
+# -------------------------------
+macro(init_to_default_option OPT)
+  # Each "WITH_component_OPT" is set to default value == WITH_OPT value.
+  foreach(comp ${COMPONENTS_NAMES})
+    if(NOT WITH_${comp}_${OPT})
+      set(WITH_${comp}_${OPT} ${WITH_${OPT}} CACHE BOOL "initialize ${OPT} for component ${comp}.")
     endif()
-  endforeach()
+    # We don't want to see all with_comp_opt in the GUI.
+    mark_as_advanced(WITH_${comp}_${OPT})
+ endforeach()
+
+ # If one with_comp_opt is on, global with_opt must also be on
+ foreach(comp ${COMPONENTS_NAMES})
+   if(WITH_${comp}_${OPT})
+     set(WITH_${OPT} ON  CACHE BOOL "initialize ${OPT}." FORCE)
+     break()
+   endif()
+ endforeach()
 endmacro()

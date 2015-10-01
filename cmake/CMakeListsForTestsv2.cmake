@@ -3,11 +3,12 @@
 # built from @CMAKE_SOURCE_DIR@/cmake/CMakeListsForTests.cmake.in 
 SET(SOURCE_DIR @CMAKE_CURRENT_SOURCE_DIR@/@_CURRENT_TEST_DIRECTORY@)
 
+# Search for reference files and copy them to binary dir
 FILE(GLOB TESTS_REF ${SOURCE_DIR}/*.ref)
 FOREACH(_F ${TESTS_REF})
   GET_FILENAME_COMPONENT(TEST_REF ${_F} NAME)
-  MESSAGE(STATUS "Found ref file : ${_F}")
-  MESSAGE(STATUS "Configuring file : ${CMAKE_CURRENT_BINARY_DIR}/${TEST_REF}")
+  file(APPEND ${TESTS_LOGFILE} "Found ref file : ${_F} \n")
+  file(APPEND ${TESTS_LOGFILE} "Configuring file : ${CMAKE_CURRENT_BINARY_DIR}/${TEST_REF} \n")
   CONFIGURE_FILE(${_F} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_REF}  COPYONLY)
 ENDFOREACH(_F ${TESTS_REF})
 
@@ -18,23 +19,24 @@ ELSE()
 ENDIF()
 
 # For some environment variables (LD_LIBRARY_PATH, DYLD_LIBRARY_PATH, Path)
-GET_FILENAME_COMPONENT(SiconosNumerics_PATH "${SiconosNumerics_LIBRARY}" PATH)
-set(LIBFORTests ${SiconosNumerics_PATH}:${CMAKE_BINARY_DIR}/src/plugin/test)
+set(LIBFORTests @CMAKE_CURRENT_BINARY_DIR@)
 
 FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
-  MESSAGE(STATUS "Adding test suite ${_CURRENT_TEST_DIRECTORY}/${_EXE}")
-  SET(EXECUTABLE_OUTPUT_PATH @CMAKE_CURRENT_BINARY_DIR@/@_CURRENT_TEST_DIRECTORY@)
+  file(APPEND ${TESTS_LOGFILE} "Adding test suite ${_CURRENT_TEST_DIRECTORY}/${_EXE} \n")
 
-  FOREACH(_D ${${PROJECT_NAME}_INCLUDE_DIRECTORIES})
+  # Set include directories for the current test :
+  # all dirs from main project
+  FOREACH(_D ${SICONOS_INCLUDE_DIRECTORIES})
     INCLUDE_DIRECTORIES(${_D})
-  ENDFOREACH(_D ${${PROJECT_NAME}_INCLUDE_DIRECTORIES}) 
+  ENDFOREACH()
+
+  # Set extra include directories for the current test :
+  # 'test-utils' dir
   FOREACH(_D ${${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES})
     INCLUDE_DIRECTORIES(${_D})
   ENDFOREACH(_D ${${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES})
-  FOREACH(_D ${${PROJECT_NAME}_LINK_DIRECTORIES})
-    LINK_DIRECTORIES(${_D})
-  ENDFOREACH(_D ${${PROJECT_NAME}_LINK_DIRECTORIES})
 
+  # -- Build test executable and set its properties --- 
   IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
     ADD_EXECUTABLE(${_EXE} WIN32 ${${_EXE}_FSOURCES})
     SET_TARGET_PROPERTIES(${_EXE} PROPERTIES COMPILE_FLAGS "-DEMULATOR=\\\"wine\\\" -DWRAPPER=\\\"\\\"")
@@ -50,12 +52,12 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     FOREACH(_TF ${${_EXE}_FSOURCES})
       IF(${_TF} MATCHES "[.]c$")
         set_source_files_properties(${_TF} PROPERTIES LANGUAGE CXX)
-      ENDIF(${_TF} MATCHES "[.]c$")
+      ENDIF()
       IF(${_TF} MATCHES "[.]f$")
         SET(${_EXE}_FORTRAN TRUE)
       ENDIF()
     ENDFOREACH(_TF ${${_EXE}_FSOURCES})
-  ENDIF(BUILD_AS_CPP)
+  ENDIF()
 
   IF(MSVC AND ${_EXE}_FORTRAN)
     SET_TARGET_PROPERTIES(${_EXE} PROPERTIES LINK_FLAGS "-Wl,--as-needed")
@@ -65,27 +67,14 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     SET(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "")
   ENDIF(MSVC AND ${_EXE}_FORTRAN)
 
-  # project name shared or static lib
-  IF(${PROJECT_NAME}_SHARED_LIB_LINK)
-    ADD_DEPENDENCIES(${_EXE} ${PROJECT_NAME}_shared)
-    TARGET_LINK_LIBRARIES(${_EXE} ${${PROJECT_NAME}_SHARED_LIB_LINK})
-  ELSE(${PROJECT_NAME}_SHARED_LIB_LINK)
-    IF(${PROJECT_NAME}_STATIC_LIB)
-      ADD_DEPENDENCIES(${_EXE} ${PROJECT_NAME}_static)
-      TARGET_LINK_LIBRARIES(${_EXE} ${${PROJECT_NAME}_STATIC_LIB})
-    ENDIF(${PROJECT_NAME}_STATIC_LIB)
-  ENDIF(${PROJECT_NAME}_SHARED_LIB_LINK)
-  FOREACH(_L ${${PROJECT_NAME}_LINK_LIBRARIES})
-    IF(NOT ${_EXE}_FORTRAN)
-      TARGET_LINK_LIBRARIES(${_EXE} ${_L})
-    ELSE()
-      # Hack to remove unneeded library
-      IF(NOT (${_L} MATCHES "libgcc" OR ${_L} MATCHES "libgfortran"))
-        TARGET_LINK_LIBRARIES(${_EXE} ${_L})
-      ENDIF()
-    ENDIF()
-  ENDFOREACH(_L ${${PROJECT_NAME}_TARGET_LINK_LIBRARIES})
 
+  # -- link with current component and its dependencies --
+  add_dependencies(${_EXE} @COMPONENT@)
+  target_link_libraries(${_EXE} @COMPONENT@)
+  target_link_libraries(${_EXE} ${@COMPONENT@_LINK_LIBRARIES})
+
+
+  # Link and include for tests libraries (e.g. cppunit ...)
   FOREACH(_L ${TEST_LIBS})
     TARGET_LINK_LIBRARIES(${_EXE} ${_L})
   ENDFOREACH()
@@ -117,7 +106,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
     set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests})
     if(CMAKE_SYSTEM_NAME MATCHES Windows)
-      set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT "Path=@CMAKE_BINARY_DIR@/src\;@ENV_PATH@")
+      set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT "Path=@CMAKE_CURRENT_BINARY_DIR@/src\;@ENV_PATH@")
     endif()
     if(APPLE)
       set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests})

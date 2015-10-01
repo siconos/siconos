@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 PROJECT_NAME           = "Siconos - Doxygen Warnings"
-PROJECT_NUMBER         = 3.6.0
+PROJECT_NUMBER         = @SICONOS_VERSION@
 OUTPUT_DIRECTORY       = @CMAKE_BINARY_DIR@
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
@@ -25,7 +25,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
 ALWAYS_DETAILED_SEC    = YES
 INLINE_INHERITED_MEMB  = YES
 FULL_PATH_NAMES        = NO
-STRIP_FROM_PATH        = /home/maurice/S/Front-End
+STRIP_FROM_PATH        = @CMAKE_SOURCE_DIR@
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = YES

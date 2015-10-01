@@ -16,7 +16,7 @@
 #   PYTHON_EXECUTABLE          - python interpreter (full path)
 #   PYTHON_VERSION_STRING      - Python version found e.g. 2.5.2
 #   PYTHON_LIBRARIES           - full path to the python library
-#   PYTHON_INCLUDE_DIR         - full path to Python.h
+#   PYTHON_INCLUDE_DIRS        - full path to Python.h
 #   PYTHONLIBS_VERSION_STRING  - version of the Python libs found
 #
 # By default, we search for the current active python version first.
@@ -27,7 +27,7 @@
 set(PYTHON_FOUND FALSE)
 
 # Does nothing if vars are already in cache
-if(EXISTS "${PYTHON_INCLUDE_DIR}" AND EXISTS "${PYTHON_LIBRARY}" AND EXISTS "${PYTHON_SITE_PACKAGES_DIR}")
+if(EXISTS "${PYTHON_INCLUDE_DIRS}" AND EXISTS "${PYTHON_LIBRARY}" AND EXISTS "${PYTHON_SITE_PACKAGES_DIR}")
   set(PYTHON_FOUND TRUE)
 else()
   set(PYTHON_FOUND FALSE)
@@ -47,7 +47,7 @@ else()
   if(python_config)
     string(REGEX REPLACE ".*exec_prefix:([^\n]+).*$" "\\1" PYTHON_PREFIX ${python_config})
     string(REGEX REPLACE ".*\nversion:([^\n]+).*$" "\\1" PYTHON_VERSION ${python_config})
-    string(REGEX REPLACE ".*\npy_inc_dir:([^\n]+).*$" "\\1" PYTHON_INCLUDE_DIR ${python_config})
+    string(REGEX REPLACE ".*\npy_inc_dir:([^\n]+).*$" "\\1" PYTHON_INCLUDE_DIRS ${python_config})
     string(REGEX REPLACE ".*\nsite_packages_dir:([^\n]+).*$" "\\1" PYTHON_SITE_PACKAGES_DIR ${python_config})
     string(REGEX REPLACE "([0-9]+).([0-9]+)" "\\1\\2" PYTHON_VERSION_NO_DOTS ${PYTHON_VERSION})
     if(WIN32)
@@ -62,19 +62,13 @@ else()
       HINTS ${PYTHON_PREFIX} ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config
       PATH_SUFFIXES lib
       )
-    # find_library(PYTHON_LIBRARY
-    #   NAMES
-    #   python${PYTHON_VERSION_NO_DOTS} python${PYTHON_VERSION}
-    #   NO_DEFAULT_PATH
-    #   HINTS ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config
-    #   )
     set(PYTHON_LIBRARIES ${PYTHON_LIBRARY} CACHE FILEPATH "Python libraries" FORCE)
 
-    set(PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIR} CACHE FILEPATH "Path to Python.h" FORCE)
+    set(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS} CACHE FILEPATH "Path to Python.h" FORCE)
 
     # --- Extract python library version for further checks.
-    if(PYTHON_INCLUDE_DIR AND EXISTS "${PYTHON_INCLUDE_DIR}/patchlevel.h")
-      file(STRINGS "${PYTHON_INCLUDE_DIR}/patchlevel.h" python_version_str
+    if(PYTHON_INCLUDE_DIRS AND EXISTS "${PYTHON_INCLUDE_DIRS}/patchlevel.h")
+      file(STRINGS "${PYTHON_INCLUDE_DIRS}/patchlevel.h" python_version_str
         REGEX "^#define[ \t]+PY_VERSION[ \t]+\"[^\"]+\"")
       string(REGEX REPLACE "^#define[ \t]+PY_VERSION[ \t]+\"([^\"]+)\".*" "\\1"
         PYTHONLIBS_VERSION_STRING "${python_version_str}")
@@ -86,7 +80,7 @@ else()
   unset(PYTHON_FOUND)
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Python
-    REQUIRED_VARS PYTHON_LIBRARIES PYTHON_INCLUDE_DIR PYTHON_EXECUTABLE
+    REQUIRED_VARS PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS PYTHON_EXECUTABLE
     VERSION_VAR PYTHONLIBS_VERSION_STRING)
 
   if(PYTHON_FOUND)
@@ -94,7 +88,7 @@ else()
       message("-- Found Python executable: ${PYTHON_EXECUTABLE}")
       message("-- Found Python library: ${PYTHON_LIBRARIES}")
       message("-- Python version is : ${PYTHON_VERSION_STRING}")
-      message("-- Python include dir is : ${PYTHON_INCLUDE_DIR}")
+      message("-- Python include dir is : ${PYTHON_INCLUDE_DIRS}")
       message("-- Python Site package dir is : ${PYTHON_SITE_PACKAGES_DIR}\n")
     endif()
   else()
@@ -106,7 +100,7 @@ else()
 endif()
 
 if(NOT PYTHONLIBS_VERSION_STRING VERSION_EQUAL PYTHON_VERSION_STRING)
-  display(PYTHONLIBS_VERSION_STRING)
-  display(PYTHON_VERSION_STRING)
-  message(FATAL_ERROR "Python library and executable versions do not match.")
+  print_var(PYTHONLIBS_VERSION_STRING)
+  print_var(PYTHON_VERSION_STRING)
+  message(FATAL_ERROR "Python library and executable versions do not match. Please check your python installation.")
 endif()
