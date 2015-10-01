@@ -1,0 +1,183 @@
+# ============================================================
+# Prepare swig config to generate python bindings for siconos
+# ============================================================
+if(WITH_PYTHON_BINDINGS)
+  # Name of the generated Python package
+  set(SICONOS_PYTHON_PACKAGE ${PROJECT_NAME} CACHE INTERNAL "Name of the siconos python module.")
+  
+  # --------------- Python install setup ---------------
+  # Directory of all config files for python bindings.
+  
+  # get python dist-packages
+  # warning python may not know cmake_install_prefix
+  # installation in standard python dist package with:
+  # -DSTD_PYTHON_DIST_PACKAGES=TRUE 
+  #
+  # installation in specific place:
+  # -DPYTHON_DIST_PACKAGES=/my/specific/place
+  
+  IF(STD_PYTHON_DIST_PACKAGES)
+    EXECUTE_PROCESS ( COMMAND 
+      ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+      OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  ELSE(STD_PYTHON_DIST_PACKAGES)
+    IF(NOT PYTHON_DIST_PACKAGES)
+      EXECUTE_PROCESS ( COMMAND 
+	${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib;print(get_python_lib(0,0,\"\"))"
+	OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+    ENDIF(NOT PYTHON_DIST_PACKAGES)
+  ENDIF(STD_PYTHON_DIST_PACKAGES)
+  MESSAGE(STATUS "PYTHON_DIST_PACKAGES : ${PYTHON_DIST_PACKAGES}")
+
+  # Set path for siconos-python installation
+  set(SICONOS_PYTHON_INSTALL_DIR ${PYTHON_DIST_PACKAGES} CACHE INTERNAL "Install directory for python bindings.")
+  
+  #  ----------- swig -----------
+
+  # -- Swig flags --
+  if(WITH_SERIALIZATION)
+    set(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS};-DWITH_SERIALIZATION")
+  endif()
+
+  if(SYSTEM_ARCHITECTURE)
+    set(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS};-D__${SYSTEM_ARCHITECTURE}__")
+  endif()
+  
+  # -dirvtable      - Generate a pseudo virtual table for directors for faster dispatch
+  # - without "dirprot", swig wrap public methods and only the 
+  # protected methods needed to the interface to compile.
+  # - with "dirprot" swig will attemp to wrap all the public and protected methods at once.
+  set(SWIG_DEFS "-dirprot;-dirvtable;-Wall")
+  
+  if(WITH_FCLIB)
+    set(SWIG_DEFS "${SWIG_DEFS};-DWITH_FCLIB")
+  endif()
+  
+  if(HAVE_SICONOS_IO)
+    set(SWIG_DEFS "${SWIG_DEFS};-DWITH_IO")
+  endif()
+  # -- Swig files --
+  # i.e. .i files, common to all modules and submodules.
+  set(SICONOS_SWIG_SRC_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/swig_files
+    CACHE INTERNAL "Path to swig files common to all packages.")
+
+  # -- Output dir --
+  set(SICONOS_SWIG_ROOT_DIR ${CMAKE_CURRENT_BINARY_DIR}/${SICONOS_PYTHON_PACKAGE}
+    CACHE INTERNAL "Root path for swig outputs.")
+
+  # -- include dir --
+  set(SICONOS_SWIG_INCLUDE_DIRS ${SICONOS_SWIG_SRC_DIRS} ${SICONOS_SWIG_ROOT_DIR} ${PYTHON_INCLUDE_DIRS}
+    CACHE INTERNAL "Directories required for swig includes.")
+
+  foreach(_dir ${SICONOS_SWIG_INCLUDE_DIRS})
+    set(SWIG_DEFS "-I${_dir};${SWIG_DEFS}")
+  endforeach()
+
+  set(SWIG_DEFS "${SWIG_DEFS}" CACHE INTERNAL "Swig extra definitions.")
+
+  include_directories(${SICONOS_SWIG_INCLUDE_DIRS})
+
+  # ------------- Tests -------------
+  if(WITH_TESTING)
+    IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+      SET(EMULATOR "wine")
+      SET(DRIVE_LETTER "Z:")
+    ELSE()
+      SET(EMULATOR)
+      SET(DRIVE_LETTER)
+    ENDIF()
+    
+    find_python_module(pytest REQUIRED)
+    # -- Runner for tests --
+    set(TESTS_RUNNER ${CMAKE_CURRENT_BINARY_DIR}/runtests.py CACHE INTERNAL "driver for python tests")
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/runtests.py.in)
+      message(STATUS "Generate runtests.py file ...")
+      configure_file(runtests.py.in ${TESTS_RUNNER})
+    endif()
+    if(WITH_AGGRESSIVE_PYTHON_TESTS)
+      set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")
+    else()
+      set(pytest_opt "-v" CACHE INTERNAL "extra options for py.test")
+    endif()
+    
+    configure_file(tests_setup.py.in ${SICONOS_SWIG_ROOT_DIR}/tests_setup.py)
+    configure_file(set_tests_env.sh.in set_tests_env.sh)
+    configure_file(utils/__init__.py ${SICONOS_SWIG_ROOT_DIR}/tests/__init__.py)
+    add_custom_target(set_envtest ALL
+      COMMAND source ${CMAKE_CURRENT_BINARY_DIR}/set_tests_env.sh
+      COMMENT "set environment variables for python tests ...")
+    # todo if we need to add some 'global' tests for siconos (not component dependent)
+    # create a python_bindings/swig_files/tests dir and ...
+    #build_python_tests()
+  endif()
+
+  IF(CMAKE_SYSTEM_NAME MATCHES Windows)
+    SET(VAR_SEPARATOR ";")
+    APPEND_CXX_FLAGS("/bigobj")
+  ELSE()
+    SET(VAR_SEPARATOR ":")
+  ENDIF()
+    
+  # ====== Generates python files required for build/install process ======
+  
+  set(SICONOS_PYTHON_MODULES)
+  foreach(comp ${COMPONENTS_DIRS})
+    string(TOLOWER ${comp} comp_name)
+    if(WITH_${comp_name}_PYTHON_BINDINGS)
+      set(SICONOS_PYTHON_MODULES_DIRS "'${comp}', ${SICONOS_PYTHON_MODULES_DIRS}")
+      set(SICONOS_PYTHON_MODULES "'${comp_name}', ${SICONOS_PYTHON_MODULES}")
+    endif()
+  endforeach()
+  # setup.py --> CMAKE_BINARY_DIR
+  if(EXISTS  ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in)
+    message(STATUS "Generate setup.py file ...")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in setup.py)
+  endif()
+
+  # The file __init__.py will be generated from __init__.py.in.
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in)
+    message(STATUS "Generate __init__.py file ...")
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${SICONOS_PYTHON_PACKAGE}/__init__.py)
+      file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/${SICONOS_PYTHON_PACKAGE}/__init__.py)
+    endif()
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in
+      ${SICONOS_PYTHON_PACKAGE}/__init__.py)
+  endif()
+
+  # Some python files, that do not depend on siconos
+  # but may be useful ...
+  file(GLOB pyfiles ${CMAKE_CURRENT_SOURCE_DIR}/utils/*.py)
+  foreach(_file ${pyfiles})
+    get_filename_component(_filename ${_file} NAME)
+    configure_file(utils/${_filename} ${SICONOS_SWIG_ROOT_DIR}/${_filename} COPYONLY)
+  endforeach()
+
+  
+  configure_file(swig_files/path.i.in ${SICONOS_SWIG_ROOT_DIR}/path.i @ONLY)
+  # ====== Create (and setup) build target ======
+  
+  add_custom_target(python-build 
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py build
+    COMMENT "Build ${SICONOS_PYTHON_PACKAGE} package")
+
+  add_custom_target(python-install
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "build/install siconos package")
+  install(CODE "execute_process(COMMAND ${CMAKE_BUILD_TOOL} python-install WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")
+
+  # ====== Create a Target to clean sources (remove .pyc files) and build dir ======
+
+  file(GLOB_RECURSE PYCFILES "${CMAKE_SOURCE_DIR}/*.pyc")
+  add_custom_target(pyclean COMMAND rm -f ${PYCFILES}
+    COMMAND make clean
+    COMMAND rm -rf ${CMAKE_BINARY_DIR}/build
+    COMMENT "Clean sources and build.")
+
+  # ====== conf/copy file for docstrings generation from doxygen ====
+  if(WITH_DOXY2SWIG)
+    configure_file(doxy2swig.py ${CMAKE_BINARY_DIR}/share/doxy2swig.py COPYONLY)
+  endif()
+
+endif()
