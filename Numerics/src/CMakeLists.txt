@@ -66,7 +66,9 @@ SET(SiconosNumerics_Unstable_SRCS
 SET(SiconosNumerics_INSTALL_INCLUDE_DIR include/Siconos/Numerics)
 
 #Exclude some files
-SET(SiconosNumerics_HDRS_EXCLUDE_DIR SOL/lumod-c)
+SET(SiconosNumerics_HDRS_EXCLUDE_DIR "SOL/lumod-c")
+LIST(APPEND SiconosNumerics_HDRS_EXCLUDE_DIR "utils/InterfaceToPathFerris/include")
+LIST(APPEND SiconosNumerics_HDRS_EXCLUDE_DIR "utils/InterfaceToPathFerris/interface")
 
 # NumericsConfig.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/NumericsConfig.h DESTINATION include/Siconos/Numerics)
