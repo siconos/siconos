@@ -19,12 +19,12 @@
 //
 
 // Siconos.i - SWIG interface for Siconos
-%module(directors="1") Numerics
+%module(package="siconos", directors="1") numerics
 
 %include start.i
 
 // generated docstrings from doxygen xml output
-%include Numerics-docstrings.i
+%include numerics-docstrings.i
 
 %include <typemaps/swigmacros.swg>
 

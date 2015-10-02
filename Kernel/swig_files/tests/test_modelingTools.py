@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-
-from numpy import *
-import Siconos.Kernel as K
+import numpy as np
+import siconos.kernel as K
 
 t0 = 0
 T = 10
@@ -14,15 +13,15 @@ theta = 0.5
 h = 0.005
 
 
-q = array([1,0,0])
-v = array([0,0,0])
-mass = eye(3)
+q = np.array([1,0,0])
+v = np.array([0,0,0])
+mass = np.eye(3)
 mass[2,2]=3./5 * r * r
 
-weight = array([-m * g, 0, 0])
+weight = np.array([-m * g, 0, 0])
 
 def equalv(v1,v2):
-    return (linalg.norm(v1-v2) <= finfo(double).eps)
+    return (np.linalg.norm(v1-v2) <= np.finfo(np.double).eps)
     
 
 def test_LagrangianLinearTIDS():
@@ -41,7 +40,7 @@ def test_NewtonImpactNSL():
     assert(nslaw.e() == e)
 
 def test_LagrangianLinearTIR():
-    H = array([[1,0,0]])
+    H = np.array([[1,0,0]])
     relation = K.LagrangianLinearTIR(H)
     assert(equalv(relation.jachq(),H))
 

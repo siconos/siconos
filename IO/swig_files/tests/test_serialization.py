@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from Siconos.Kernel import SiconosVector
+from siconos.kernel import SiconosVector
 
 v1 = SiconosVector([1.0, 2.0, 3.0])
 
@@ -36,7 +36,7 @@ def test_serialization3():
     assert(v2.getValue(2) == 3.0)
 
 def test_serialization4():
-    from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL, \
+    from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL, \
         LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
 
     from numpy import array, eye, empty
@@ -118,7 +118,7 @@ def test_serialization4():
     #
     # save and load data from xml and .dat
     #
-    from Siconos.IO import save, load
+    from siconos.io import save, load
     save(first_bouncingBall, "bouncingBall.xml")
 
     bouncingBall = load("bouncingBall.xml")
@@ -167,7 +167,7 @@ def test_serialization4():
     #
     # comparison with the reference file
     #
-    from Siconos.Kernel import SimpleMatrix, getMatrix
+    from siconos.kernel import SimpleMatrix, getMatrix
     from numpy.linalg import norm
 
     ref = getMatrix(SimpleMatrix("result.ref"))

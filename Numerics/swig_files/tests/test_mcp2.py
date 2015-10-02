@@ -1,28 +1,28 @@
 #!/usr/bin/env python
 # Copyright (C) 2005, 2014 by INRIA
 
-from numpy import *
+import numpy as np
 
-# import Siconos.Numerics * fails with py.test!
-import Siconos.Numerics as SN
+# import siconos.numerics * fails with py.test!
+import siconos.numerics as SN
 
 def mcp_function(n1, n2, z, F):
-    M = array([[2., 1.],
+    M = np.array([[2., 1.],
                [1., 2.]])
 
-    q = array([-5., -6.])
+    q = np.array([-5., -6.])
     F[:] = dot(M,z) + q
     pass
 
 def mcp_Nablafunction (n1, n2, z, nabla_F):
-    M = array([[2., 1.],
+    M = np.array([[2., 1.],
                [1., 2.]])
     nabla_F[:] = M
     pass
 
 # solution
-zsol = array([4./3., 7./3.])
-wsol = array([0. , 0.])
+zsol = np.array([4./3., 7./3.])
+wsol = np.array([0. , 0.])
 
 # problem
 #mcp=N.MCP(1,1,mcp_function,mcp_Nablafunction)
@@ -37,24 +37,24 @@ def test_new():
 
 def test_mcp_newton_FBLSA():
     mcp = SN.MixedComplementarityProblem2(0, 2, mcp_function, mcp_Nablafunction)
-    z = array([0., 0.])
-    w = array([0., 0.])
+    z = np.array([0., 0.])
+    w = np.array([0., 0.])
 
     SO = SN.SolverOptions(mcp, SN.SICONOS_MCP_NEWTON_FBLSA)
     info = SN.mcp_newton_FBLSA(mcp, z, w, SO)
-    print("z = ", z)
-    print("w = ", w)
-    assert (linalg.norm(z-zsol) <= ztol)
+    #print("z = ", z)
+    #print("w = ", w)
+    assert (np.linalg.norm(z-zsol) <= ztol)
     assert not info
 
 def test_mcp_newton_minFBLSA():
     mcp = SN.MixedComplementarityProblem2(0, 2, mcp_function, mcp_Nablafunction)
-    z = array([0., 0.])
-    w = array([0., 0.])
+    z = np.array([0., 0.])
+    w = np.array([0., 0.])
 
     SO = SN.SolverOptions(mcp, SN.SICONOS_MCP_NEWTON_MINFBLSA)
     info = SN.mcp_newton_minFBLSA(mcp, z, w, SO)
-    print("z = ", z)
-    print("w = ", w)
-    assert (linalg.norm(z-zsol) <= ztol)
+    #print("z = ", z)
+    #print("w = ", w)
+    assert (np.linalg.norm(z-zsol) <= ztol)
     assert not info

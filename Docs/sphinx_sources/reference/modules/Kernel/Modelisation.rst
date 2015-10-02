@@ -23,7 +23,7 @@ where:
  - :math:`F_{ext}` contains the external forces. Here, the gravity is applied.
  - :math:`p` is the reaction force due to the nonsmooth interaction with the floor.
 
-We first import the needed classes from `Siconos.Kernel` module:
+We first import the needed classes from `siconos.kernel` module:
 
  - `LagrangianLinearTIDS`, for a Linear Lagrangian Time Invariant Dynamical System object.
  - `LagrangianLinearTIR`, for a Linear Lagrangian Time Invariant Relation object.
@@ -33,7 +33,7 @@ We first import the needed classes from `Siconos.Kernel` module:
 
 .. testcode::
 
-  from Siconos.Kernel import \
+  from siconos.kernel import \
       LagrangianLinearTIDS, LagrangianLinearTIR, NewtonImpactNSL, \
       Interaction, Model
 
@@ -165,7 +165,7 @@ We first import the needed classes for the construction of the model:
 
 .. testcode::
 
-   from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
+   from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
        ComplementarityConditionNSL, Interaction,\
        Model
 
@@ -256,5 +256,5 @@ Finally a `Model` object is built :
 Modelisation API
 ^^^^^^^^^^^^^^^^
 
-.. automodule:: Siconos.Kernel
+.. automodule:: siconos.kernel
   :members: :eval:`under_directory(['../../../Kernel/src/modelingTools'])`

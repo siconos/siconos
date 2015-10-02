@@ -12,7 +12,7 @@ We first import the needed classes:
 
 .. testcode::
 
-   from Siconos.Kernel import \
+   from siconos.kernel import \
        TimeStepping, MoreauJeanOSI, TimeDiscretisation, LCP
 
 
@@ -112,7 +112,7 @@ imported:
 
 .. testcode::
 
-   from Siconos.Kernel import \
+   from siconos.kernel import \
        TimeStepping, MoreauJeanOSI, TimeDiscretisation, LCP
 
 And the time stepping simulation object built with a time discretization
@@ -179,5 +179,5 @@ Then, the execution loop is similar to the one of the bouncing ball:
 Simulation API
 ^^^^^^^^^^^^^^
 
-.. automodule:: Siconos.Kernel
+.. automodule:: siconos.kernel
   :members: :eval:`under_directory(['../../../Kernel/src/simulationTools'])`

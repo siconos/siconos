@@ -4,12 +4,11 @@ LCP
 Usage
 ^^^^^
 
-In ``Front-End`` the LinearComplementarityProblem of ``Numerics`` C
-API is renamed in ``LCP``.
+In python the LinearComplementarityProblem from C API is renamed :index:`LCP`.
 
-The solution of the problem exposed in the introduction (:ref:`intro-lcp`)::
+The solution of the problem exposed in :ref:`intro-lcp`::
 
-  import Siconos.Numerics as Numerics
+  import siconos.numerics as Numerics
   lcp = Numerics.LCP([[2., 1.], [1., 2.]], [-5., -6.])
 
 can be reached with the ``Numerics`` module by first providing a guess. This guess is made of the two vectors ``z`` and ``w``. As it will be an input as well
@@ -59,6 +58,5 @@ We may then compute the error::
 LCP API
 ^^^^^^^
 
-.. automodule:: Siconos.Numerics
-  :members: :eval:`starting_with(['LCP','lcp'])`
-
+.. automodule:: siconos.numerics
+  :members: :eval:`starting_with(['LCP', 'lcp'])`

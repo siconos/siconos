@@ -19,12 +19,12 @@
 //
 
 // SWIG interface for Siconos Kernel
-%module(directors="1", allprotected="1") Kernel
+%module(directors="1", allprotected="1") kernel
 
 %include start.i
 
 // generated docstrings from doxygen xml output
-%include Kernel-docstrings.i
+%include kernel-docstrings.i
 
 %include picklable.i
 

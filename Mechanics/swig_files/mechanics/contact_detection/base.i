@@ -1,40 +1,8 @@
 // -*- c++ -*-
-%module(directors="1", allprotected="1") Base
+%module(package="contact_detection", directors="1", allprotected="1") base
 
-%include start.i
+%include MechanicsBase.i
 
-%include sharedPointers.i
-
-%{
-#include <MechanicsFwd.hpp>
-%}
-%include <MechanicsFwd.hpp>
-
-#undef WITH_IO
-#undef WITH_SERIALIZATION
-
-#ifdef WITH_IO
-%{
-#include <SiconosFull.hpp>
-%}
-#endif
-%include picklable.i
-
-%include path.i
-
-%include handleException.i
-
-%include stl.i
-
-%include KernelTypes.i
-%{
-#include <SiconosKernel.hpp>
-#include <boost/typeof/typeof.hpp>
-%}
-
-%import Kernel/Kernel.i
-
-%include pyRegister.i
 
 %fragment("NumPy_Fragments");
 

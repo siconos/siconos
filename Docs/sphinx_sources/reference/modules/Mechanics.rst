@@ -7,5 +7,5 @@ Usage
 Siconos Mechanics API
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: Siconos.Mechanics
+.. automodule:: siconos.mechanics
   :members:

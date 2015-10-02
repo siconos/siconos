@@ -1,25 +1,24 @@
 # Copyright (C) 2005, 2012 by INRIA
 #!/usr/bin/env python
 
-from numpy import *
+import numpy as np
 
-# import Siconos.Numerics * fails with py.test!
-import Siconos.Numerics as N
+import siconos.numerics as N
 
 # basic interface
 # Murty88, p2
-M = array([[2., 1.],
-           [1., 2.]])
+M = np.array([[2., 1.],
+              [1., 2.]])
 
-q = array([-5., -6.])
+q = np.array([-5., -6.])
 
-z = array([0., 0.])
+z = np.array([0., 0.])
 
-w = array([0., 0.])
+w = np.array([0., 0.])
 
 # solution
-zsol = array([4./3., 7./3.])
-wsol = array([0. , 0.])
+zsol = np.array([4. / 3., 7. / 3.])
+wsol = np.array([0., 0.])
 
 # problem
 mlcp=N.MLCP(1,M,q)
@@ -33,17 +32,17 @@ def test_mlcp_enum():
     N.mlcp_driver_reset(mlcp, SO)
     print("z = ", z)
     print("w = ", w)
-    assert (linalg.norm(z-zsol) <= ztol)
+    assert (np.linalg.norm(z-zsol) <= ztol)
     assert not info
 
-z = array([0., 0., 0., 0., 0., 0.,0.])
-zsol =array([  9.85185185e-01,   9.85185185e-01,  -0.00000000e+00,
+z = np.array([0., 0., 0., 0., 0., 0.,0.])
+zsol =np.array([  9.85185185e-01,   9.85185185e-01,  -0.00000000e+00,
          9.85185185e-04,   0.00000000e+00,   0.00000000e+00,
          9.85185185e-04]) 
 
-w = array([0., 0., 0., 0., 0., 0.,0.])
+w = np.array([0., 0., 0., 0., 0., 0.,0.])
 
-M = array([[  0.00000000e+00,  -1.00000000e-03,   1.00000000e-03,
+M = np.array([[  0.00000000e+00,  -1.00000000e-03,   1.00000000e-03,
           0.00000000e+00,   1.00000000e+00,   0.00000000e+00,
           1.00000000e+00],
        [  0.00000000e+00,   1.00000000e-03,  -1.00000000e-03,
@@ -66,7 +65,7 @@ M = array([[  0.00000000e+00,  -1.00000000e-03,   1.00000000e-03,
           0.00000000e+00]])
 
 
-q= array([[ 0.    ],
+q= np.array([[ 0.    ],
        [ 0.    ],
        [ 0.9975],
        [ 0.    ],
@@ -83,12 +82,12 @@ def test_mlcp_enum_large():
     N.mlcp_driver_reset(mlcp, SO)
     print("z = ", z)
     print("w = ", w)
-    assert (linalg.norm(z-zsol) <= ztol)
+    assert (np.linalg.norm(z-zsol) <= ztol)
     assert not info
-mlcp =0
+#mlcp =0
 mlcp=N.MLCP()
-N.mixedLinearComplementarity_newFromFilename(mlcp,"./data/diodeBridge_mlcp.dat")
-N.mixedLinearComplementarity_display(mlcp)
+N.mixedLinearComplementarity_newFromFilename(mlcp,"data/diodeBridge_mlcp.dat")
+#N.mixedLinearComplementarity_display(mlcp)
 
 def test_mlcp_enum_large_fromfile():
     SO=N.SolverOptions(mlcp,N.SICONOS_MLCP_ENUM)

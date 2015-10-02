@@ -1,5 +1,5 @@
 /* cadmbtb.i this file contains exported API of the CADMBTB library.*/
-%module cadmbtb
+%module(package="mechanisms") cadmbtb
 %{
 #include "CADMBTB_API.hpp"
 #include "CADMBTB_PYTHON_API.hpp"

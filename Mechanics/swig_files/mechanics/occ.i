@@ -1,44 +1,8 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/Occ
-%module(directors="1", allprotected="1") OccWrap
+%module(package="mechanics", directors="1", allprotected="1") occ
 
-%include start.i
-
-#undef WITH_IO
-#undef WITH_SERIALIZATION
-
-%include sharedPointers.i
-
-%{
-#include <MechanicsFwd.hpp>
-%}
-%include <MechanicsFwd.hpp>
-
-#ifdef WITH_IO
-%{
-#include <SiconosFull.hpp>
-%}
-#endif
-
-%include picklable.i
-
-%include path.i
-
-%{
-#include <SiconosKernel.hpp>
-%}
-
-%include handleException.i
-%include KernelTypes.i
-
-%import Kernel/Kernel.i
-
-%{
-#include <ExternalBody.hpp>
-%}
-%import ../ContactDetection/Base.i
-
-%include pyRegister.i
+%import contact_detection/base.i
 
 // do not wrap visitor visit : this leads to a huge amount of wrapper
 // code generation and this fails at compile time on shared_ptr freearg

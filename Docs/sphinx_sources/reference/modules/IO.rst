@@ -7,5 +7,5 @@ Usage
 Siconos IO API
 ^^^^^^^^^^^^^^
 
-.. automodule:: Siconos.IO
+.. automodule:: siconos.io
   :members:

@@ -4,6 +4,9 @@
 Test the xml input
 '''
 
+import os
+from siconos.tests_setup import working_dir
+
 try:
     import pytest
     xfail = pytest.mark.xfail
@@ -11,15 +14,15 @@ except:
     import py.test
     xfail = py.test.mark.xfail
 
-from fromXml import buildModelXML
-import Siconos.Kernel as SK
+from siconos.fromXml import buildModelXML
+import siconos.kernel as SK
 import numpy as np
 
 
 def test_xml1():
     ''' the BouncingBall '''
 
-    bouncingBall = buildModelXML('./data/BBallTS.xml')
+    bouncingBall = buildModelXML(os.path.join(working_dir, 'data/BBallTS.xml'))
     # --- Get the simulation ---
     s = bouncingBall.simulation()
 
@@ -60,7 +63,7 @@ def test_xml1():
     np.savetxt("BBallTS.dat", dataPlot)
 
     # Comparison with a reference file
-    dataPlotRef = SK.getMatrix(SK.SimpleMatrix('./data/BBallTSXML.ref'))
+    dataPlotRef = SK.getMatrix(SK.SimpleMatrix(os.path.join(working_dir, 'data/BBallTSXML.ref')))
     if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-12:
         print(dataPlot - dataPlotRef)
         print("ERROR: The result is rather different from the reference file.")
@@ -69,7 +72,8 @@ def test_xml1():
 def test_xml2():
     ''' BallInBowl '''
     # --- buildModelXML loading from xml file ---
-    bouncingBall = buildModelXML("./data/BallInBowl.xml")
+    bouncingBall = buildModelXML(os.path.join(working_dir,
+                                              'data/BallInBowl.xml'))
 
     # --- Get the simulation ---
     s = bouncingBall.simulation()
@@ -137,7 +141,8 @@ def test_xml2():
 def test_xml3():
     ''' DryFriction '''
     # --- buildModelXML loading from xml file ---
-    oscillator = buildModelXML("./data/DryFriction.xml")
+    oscillator = buildModelXML(os.path.join(working_dir,
+                                            'data/DryFriction.xml'))
 
     # --- Get the simulation ---
     s = oscillator.simulation()
@@ -198,7 +203,8 @@ def test_xml3():
 def test_xml4():
     ''' CamFollower '''
     # --- buildModelXML loading from xml file ---
-    CamFollower = buildModelXML("./data/CamFollower_TIDS.xml")
+    CamFollower = buildModelXML(os.path.join(working_dir,
+                                             'data/CamFollower_TIDS.xml'))
 
     # --- Get and initialize the simulation ---
     S = CamFollower.simulation()
@@ -277,7 +283,7 @@ def test_xml4():
 def test_xml5():
     ''' Bouncing Ball ED '''
     # --- buildModelXML loading from xml file ---
-    bouncingBall = buildModelXML("./data/BBallED.xml")
+    bouncingBall = buildModelXML(os.path.join(working_dir, 'data/BBallED.xml'))
 
     # --- Get and initialize the simulation ---
     s = bouncingBall.simulation()
@@ -335,7 +341,7 @@ def test_xml5():
     dataPlot.resize(k, outputSize)
     np.savetxt("BBallED.dat",  dataPlot)
     # Comparison with a reference file
-    dataPlotRef = SK.getMatrix(SK.SimpleMatrix("./data/BouncingBallEDXml.ref"))
+    dataPlotRef = SK.getMatrix(SK.SimpleMatrix(os.path.join(working_dir, 'data/BouncingBallEDXml.ref')))
 
     if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-11:
         print("Warning. The results is rather different from the reference file.")
@@ -346,7 +352,7 @@ def test_xml5():
 def test_xml6():
     ''' BeadPlan '''
     # --- buildModelXML loading from xml file ---
-    oscillator = buildModelXML("./data/BeadPlan.xml")
+    oscillator = buildModelXML(os.path.join(working_dir, 'data/BeadPlan.xml'))
 
     # --- Get and initialize the simulation ---
     s = oscillator.simulation()

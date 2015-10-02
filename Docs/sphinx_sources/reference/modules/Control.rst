@@ -7,6 +7,6 @@ Usage
 Control API
 ^^^^^^^^^^^
 
-.. automodule:: Siconos.Control
+.. automodule:: siconos.control
   :members:
 

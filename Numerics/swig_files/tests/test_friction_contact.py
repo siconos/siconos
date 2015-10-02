@@ -3,7 +3,7 @@
 import numpy as np
 
 # import Siconos.Numerics * fails with py.test!
-import Siconos.Numerics as N
+import siconos.numerics as N
 
 
 NC = 1

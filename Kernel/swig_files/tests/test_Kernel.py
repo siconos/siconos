@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+import numpy as np
+import siconos.kernel as K
 
 def test_autocast():
-    import Siconos.Kernel as K
     dsA = K.LagrangianDS([0],[0],[[1]])
     dsB = K.FirstOrderLinearDS([0],[[1]])
     model = K.Model(0, 0)
@@ -13,28 +14,21 @@ def test_autocast():
 
 
 def test_getVector():
-    from Siconos.Kernel import getVector, SiconosVector
-    from numpy import array
-
-    assert (getVector([1,2,3]) == array([1,2,3])).all()
-
-    v = SiconosVector(3)
+    assert (K.getVector([1,2,3]) == np.array([1,2,3])).all()
+    v = K.SiconosVector(3)
     v.setValue(0,1)
     v.setValue(1,2)
     v.setValue(2,4)
 
-    assert (getVector(v) != array([1,2,3])).any()
+    assert (K.getVector(v) != np.array([1,2,3])).any()
 
-    assert (getVector(v) == array([1,2,4])).all()
+    assert (K.getVector(v) == np.array([1,2,4])).all()
 
 
 def test_getMatrix():
-    from Siconos.Kernel import getMatrix, SimpleMatrix
-    from numpy import array
+    assert (K.getMatrix([[1,2,3]]) == np.array([[1,2,3]])).all()
 
-    assert (getMatrix([[1,2,3]]) == array([[1,2,3]])).all()
-
-    m = SimpleMatrix(1,3)
+    m = K.SimpleMatrix(1,3)
 
     m.setValue(0,0,1)
 
@@ -42,57 +36,45 @@ def test_getMatrix():
 
     m.setValue(0,2,3)
 
-    assert (getMatrix(m) == array([[1,2,3]])).all()
+    assert (K.getMatrix(m) == np.array([[1,2,3]])).all()
 
-    assert (getMatrix(m) != array([[1,0,3]])).any()
+    assert (K.getMatrix(m) != np.array([[1,0,3]])).any()
 
 
 def test_LagrangianDS_setMassPtr():
-    from Siconos.Kernel import LagrangianDS
-    from numpy import array
-
-    class LDS(LagrangianDS):
+    class LDS(K.LagrangianDS):
         pass
 
     lds = LDS()
 
     lds.setMassPtr([[1,2,3],[4,5,6]])
 
-    assert (lds.mass() == array([[1,2,3],[4,5,6]])).all()
+    assert (lds.mass() == np.array([[1,2,3],[4,5,6]])).all()
 
 
 def test_LagrangianScleronomousR_setJachqPtr():
-    import Siconos.Kernel as K
-    from numpy import array
-
     class Rel(K.LagrangianScleronomousR):
         pass
 
     r = Rel()
-    j = array([[1,2,3],[4,5,6]])
+    j = np.array([[1,2,3],[4,5,6]])
     r.setJachqPtr(j)
-
-    import numpy as np
-
     # C is transposed()
     r.C()
 
-    assert np.max(r.C() - array([[1,2,3],[4,5,6]])) == 0.
-    assert np.max(r.C() - array([[0,2,3],[4,5,6]])) == 1.
+    assert np.max(r.C() - np.array([[1,2,3],[4,5,6]])) == 0.
+    assert np.max(r.C() - np.array([[0,2,3],[4,5,6]])) == 1.
 
     r.setJachqPtr(r.C())
 
     r.C()
 
-    assert np.max(r.C() - array([[1,2,3],[4,5,6]])) == 0.
-    assert np.max(r.C() - array([[0,2,3],[4,5,6]])) == 1.
+    assert np.max(r.C() - np.array([[1,2,3],[4,5,6]])) == 0.
+    assert np.max(r.C() - np.array([[0,2,3],[4,5,6]])) == 1.
 
 
 def test_SolverOption():
-
-    from Siconos.Kernel import LCP
-
-    lcp = LCP()
+    lcp = K.LCP()
 
     i0 = lcp.numericsSolverOptions().iparam[0]
 
@@ -113,9 +95,7 @@ def test_SolverOption():
 
 
 def test_BoundaryCondition():
-    from Siconos.Kernel import BoundaryCondition
-
-    B = BoundaryCondition([1,2,3])
+    B = K.BoundaryCondition([1,2,3])
 
     print(B)
 
@@ -124,6 +104,3 @@ def test_BoundaryCondition():
     B.velocityIndices()[2]=5
 
     assert (B.velocityIndices() == [1, 2, 5]).all()
-
-def test_Sensor():
-    pass

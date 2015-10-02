@@ -18,11 +18,11 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
-import Siconos.Kernel as SK
-import Siconos.Numerics as SN
+import siconos.kernel as SK
+import siconos.numerics as SN
 import numpy as np
 from scipy.linalg import expm
-from functions import compute_dt_matrices
+from siconos.functions import compute_dt_matrices
 
 kmax = 10 if SN.compiled_in_debug_mode() else 100
 

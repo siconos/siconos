@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-
+from siconos.tests_setup import working_dir
+import os
 def test_bouncing_ball1():
 
-    from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL, \
+    from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL, \
         LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
 
     from numpy import array, eye, empty
@@ -86,12 +87,12 @@ def test_bouncing_ball1():
     # save and load data from xml and .dat
     #
     try:
-        from Siconos.IO import save
+        from siconos.io import save
         save(bouncingBall, "bouncingBall.xml")
         save(bouncingBall, "bouncingBall.bin")
 
     except:
-        print("Warning : could not import save from Siconos.IO")
+        print("Warning : could not import save from siconos.io")
 
     # the number of time steps
     N = (T-t0)/h+1
@@ -131,16 +132,16 @@ def test_bouncing_ball1():
         dataPlot[k, 4] = lambda_[0]
 
         k += 1
-        print(s.nextTime())
+        #print(s.nextTime())
         s.nextStep()
 
     #
     # comparison with the reference file
     #
-    from Siconos.Kernel import SimpleMatrix, getMatrix
+    from siconos.kernel import SimpleMatrix, getMatrix
     from numpy.linalg import norm
 
-    ref = getMatrix(SimpleMatrix("result.ref"))
+    ref = getMatrix(SimpleMatrix(os.path.join(working_dir, "result.ref")))
 
     assert (norm(dataPlot - ref) < 1e-12)
 
@@ -157,7 +158,7 @@ def xtest_bouncing_ball_from_binary():
 
 def test_bouncing_ball2():
 
-    import Siconos.Kernel as K
+    import siconos.kernel as K
     from numpy import array, eye, empty
 
     t0 = 0       # start time
@@ -187,7 +188,7 @@ def test_bouncing_ball2():
     # a ball with its own computeFExt
     class Ball(K.LagrangianLinearTIDS):
         def computeFExt(self, t):
-            print("computing FExt at t=", t)
+            #print("computing FExt at t=", t)
             weight = array([-m * g, 0, 0])
             self.setFExtPtr(weight)
 
@@ -310,7 +311,7 @@ def test_bouncing_ball2():
 
         assert dataPlot[k, 1] == dataPlot_d[k, 1]
 
-        print(s.nextTime())
+        #print(s.nextTime())
         k += 1
         s.nextStep()
         s_d.nextStep()

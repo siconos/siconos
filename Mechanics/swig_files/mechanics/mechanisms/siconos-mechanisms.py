@@ -9,15 +9,17 @@ import array
 import os
 import sys
 
-from Siconos.Mechanics.Mechanisms import mbtb
-from Siconos.Mechanics.Mechanisms import cadmbtb
+from siconos.mechanics.mechanisms import mbtb
+from siconos.mechanics.mechanisms import cadmbtb
 
 # simple hdf5 output
 # a dummy SpaceFilter is needed for model encapsulation
 # a (pseudo) Contactor class is needed for the object-shape association.
-from Siconos.Mechanics.ContactDetection import SpaceFilter
-from Siconos.Mechanics import IO
-from Siconos.Mechanics.ContactDetection import Avatar, Contactor
+from siconos.mechanics.contact_detection import SpaceFilter
+with_io = @HAVE_SICONOS_IO@ is ON
+if with_io:
+    from siconos.mechanics import IO
+from siconos.mechanics.contact_detection import Avatar, Contactor
 
 install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
 print("install_path :", install_path)
@@ -182,254 +184,255 @@ import atexit
 atexit.register(remove_run_id_dir)
 
 # Hdf5 IO setup
-with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
+if with_io:
+    with IO.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
 
-    def _run(nsteps):
-        fp = mbtb._MBTB_open('simu.txt', 'a')
-        currentTimerCmp = mbtb.cvar.sTimerCmp
-        for i in range(nsteps):
-            mbtb.cvar.sTimerCmp += 1
-            if mbtb.cvar.sTimerCmp % mbtb.cvar.sFreqOutput == 0:
-                print('STEP Number =',mbtb.cvar.sTimerCmp, '<', nsteps+currentTimerCmp);
-            mbtb._MBTB_STEP()
-            mbtb._MBTB_displayStep()
-            io.outputDynamicObjects()
-            io.outputVelocities()
-            io.outputContactForces()
-            io.outputSolverInfos()
-            if mbtb.cvar.sTimerCmp % mbtb.cvar.sFreqOutput == 0:
-                mbtb._MBTB_printStep(fp);
-        mbtb._MBTB_close(fp)
-        mbtb.ACE_PRINT_TIME()
-
-
-    def STEP(event=None):
-        mbtb.MBTB_step()
-        io.outputDynamicObjects()
-        io.outputVelocities()
-        io.outputContactForces()
-        io.outputSolverInfos()
+        def _run(nsteps):
+            fp = mbtb._MBTB_open('simu.txt', 'a')
+            currentTimerCmp = mbtb.cvar.sTimerCmp
+            for i in range(nsteps):
+                mbtb.cvar.sTimerCmp += 1
+                if mbtb.cvar.sTimerCmp % mbtb.cvar.sFreqOutput == 0:
+                    print('STEP Number =',mbtb.cvar.sTimerCmp, '<', nsteps+currentTimerCmp);
+                mbtb._MBTB_STEP()
+                mbtb._MBTB_displayStep()
+                io.outputDynamicObjects()
+                io.outputVelocities()
+                io.outputContactForces()
+                io.outputSolverInfos()
+                if mbtb.cvar.sTimerCmp % mbtb.cvar.sFreqOutput == 0:
+                    mbtb._MBTB_printStep(fp);
+            mbtb._MBTB_close(fp)
+            mbtb.ACE_PRINT_TIME()
 
 
-    def STEP_1000(event=None):
-        ii=0
-        while ii < 1000:
+        def STEP(event=None):
             mbtb.MBTB_step()
             io.outputDynamicObjects()
             io.outputVelocities()
             io.outputContactForces()
             io.outputSolverInfos()
+
+
+        def STEP_1000(event=None):
+            ii=0
+            while ii < 1000:
+                mbtb.MBTB_step()
+                io.outputDynamicObjects()
+                io.outputVelocities()
+                io.outputContactForces()
+                io.outputSolverInfos()
+                cadmbtb.CADMBTB_DumpGraphic()
+                ii=ii+1
+
+
+        def RUN10(event=None):
+            _run(10)
+
+        def RUN(event=None):
+            _run(stepNumber)
+
+        def RUN100(event=None):
+            _run(100)
+
+        def RUN400(event=None):
+            _run(400)
+
+
+        def RUN1000(event=None):
+            _run(1000)
+
+        def RUN7000(event=None):
+            _run(7000)
+
+
+        def RUN10000(event=None):
+            _run(10000)
+
+        def RUN50000(event=None):
+            _run(50000)
+
+        def RUN300000(event=None):
+            _run(300000)
+
+        def QUIT(event=None):
+            exit();
+
+
+        def GRAPHIC_ON(event=None):
+            cadmbtb.CADMBTB_setGraphicContext(display.Context)
+            v = display.GetView().GetObject()
+            cadmbtb.CADMBTB_setGraphicView(v)
+
+
+        def GRAPHIC_OFF(event=None):
+            cadmbtb.CADMBTB_disableGraphic()
+
+        def DISABLE_PROJ(event=None):
+            mbtb.MBTB_doProj(0)
+
+        def ENABLE_PROJ(event=None):
+            mbtb.MBTB_doProj(1)
+
+        def DISABLE_ONLYPROJ(event=None):
+            mbtb.MBTB_doOnlyProj(0)
+
+        def ENABLE_ONLYPROJ(event=None):
+            mbtb.MBTB_doOnlyProj(1)
+
+        def GRAPHIC_DUMP(event=None):
             cadmbtb.CADMBTB_DumpGraphic()
-            ii=ii+1
+
+        def ENABLE_VERBOSE_MBTB_PRINT_DIST(event=None):
+            mbtb.MBTB_print_dist(1)
+            cadmbtb.CADMBTB_print_dist(1)
+
+        def DISABLE_VERBOSE_MBTB_PRINT_DIST(event=None):
+            mbtb.MBTB_print_dist(0)
+            cadmbtb.CADMBTB_print_dist(0)
+
+        def ENABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES(event=None):
+            mbtb.MBTB_displayStep_bodies(1)
+
+        def DISABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES(event=None):
+            mbtb.MBTB_displayStep_bodies(0)
+
+        def ENABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS(event=None):
+            mbtb.MBTB_displayStep_joints(1)
+
+        def DISABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS(event=None):
+            mbtb.MBTB_displayStep_joints(0)
+
+        def ENABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS(event=None):
+            mbtb.MBTB_displayStep_contacts(1)
+
+        def DISABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS(event=None):
+            mbtb.MBTB_displayStep_contacts(0)
+
+        def VIEW_TOP(event=None):
+            display.View_Top()
+        def VIEW_BOTTOM(event=None):
+            display.View_Bottom()
+        def VIEW_LEFT(event=None):
+            display.View_Left()
+        def VIEW_RIGHT(event=None):
+            display.View_Right()
+        def VIEW_REAR(event=None):
+            display.View_Rear()
+        def VIEW_FRONT(event=None):
+            display.View_Front()
+        def VIEW_ISO(event=None):
+            display.View_Iso()
+        def VIEW_FITALL(event=None):
+            display.FitAll()
+
+        def VIEW_TOP(event=None):
+            display.View_Top()
+
+        assoc_shapes = dict()
+        offset = dict()
+        for idBody in range(NBBODIES):
+            shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
+
+            offset[idBody] = [-v for v in initCenterMass[idBody]]
+
+            io.addShapeDataFromFile(shape_name, afile[idBody])
+
+            assoc_shapes[idBody] = [Avatar(shape_name,
+                                          relative_translation=offset[idBody])]
+    #        io.addObject('obj-{0}'.format(shape_name),
+    #                     [Avatar(shape_name, relative_translation=offset)],
+    #                     mass=1,
+    #                     translation=[0, 0, 0])
+
+        for idContact in range(NBCONTACTS):
+            shape_name1 = os.path.basename(os.path.splitext(afileContact1[idContact])[0])
+            shape_name2 = os.path.basename(os.path.splitext(afileContact2[idContact])[0])
+
+            io.addShapeDataFromFile(shape_name1, afileContact1[idContact])
+            io.addShapeDataFromFile(shape_name2, afileContact2[idContact])
+
+            print contactBody1[idContact], contactBody2[idContact]
+
+            assoc_shapes[contactBody1[idContact]] += [Contactor(shape_name1,
+                                                               relative_translation=offset[contactBody1[idContact]])]
+
+            if contactBody2[idContact] >= 0:
+                assoc_shapes[contactBody2[idContact]] += [Contactor(shape_name2,
+                                                                    relative_translation=offset[contactBody2[idContact]])]
 
 
-    def RUN10(event=None):
-        _run(10)
+        for idArtefact in range(NBARTEFACTS):
+            shape_name = os.path.basename(os.path.splitext(Artefactfile[idArtefact])[0])
 
-    def RUN(event=None):
-        _run(stepNumber)
-
-    def RUN100(event=None):
-        _run(100)
-
-    def RUN400(event=None):
-        _run(400)
+            io.addShapeDataFromFile(shape_name, Artefactfile[idArtefact])
 
 
-    def RUN1000(event=None):
-        _run(1000)
+        for idBody in range(NBBODIES):
+            shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
 
-    def RUN7000(event=None):
-        _run(7000)
-
-
-    def RUN10000(event=None):
-        _run(10000)
-
-    def RUN50000(event=None):
-        _run(50000)
-
-    def RUN300000(event=None):
-        _run(300000)
-
-    def QUIT(event=None):
-        exit();
+            io.addObject('obj-{0}'.format(shape_name),
+                         assoc_shapes[idBody],
+                         mass=1,
+                         translation=[0, 0, 0])
 
 
-    def GRAPHIC_ON(event=None):
-        cadmbtb.CADMBTB_setGraphicContext(display.Context)
-        v = display.GetView().GetObject()
-        cadmbtb.CADMBTB_setGraphicView(v)
+        for idArtefact in range(NBARTEFACTS):
+
+            shape_name = os.path.basename(os.path.splitext(Artefactfile[idArtefact])[0])
+
+            io.addObject('artefact-{0}'.format(shape_name),
+                         [Avatar(shape_name)], 
+                         mass=0,
+                         translation=[0, 0, 0])
 
 
-    def GRAPHIC_OFF(event=None):
-        cadmbtb.CADMBTB_disableGraphic()
+        io.outputStaticObjects()
 
-    def DISABLE_PROJ(event=None):
-        mbtb.MBTB_doProj(0)
-
-    def ENABLE_PROJ(event=None):
-        mbtb.MBTB_doProj(1)
-
-    def DISABLE_ONLYPROJ(event=None):
-        mbtb.MBTB_doOnlyProj(0)
-
-    def ENABLE_ONLYPROJ(event=None):
-        mbtb.MBTB_doOnlyProj(1)
-
-    def GRAPHIC_DUMP(event=None):
-        cadmbtb.CADMBTB_DumpGraphic()
-
-    def ENABLE_VERBOSE_MBTB_PRINT_DIST(event=None):
-        mbtb.MBTB_print_dist(1)
-        cadmbtb.CADMBTB_print_dist(1)
-
-    def DISABLE_VERBOSE_MBTB_PRINT_DIST(event=None):
-        mbtb.MBTB_print_dist(0)
-        cadmbtb.CADMBTB_print_dist(0)
-
-    def ENABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES(event=None):
-        mbtb.MBTB_displayStep_bodies(1)
-
-    def DISABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES(event=None):
-        mbtb.MBTB_displayStep_bodies(0)
-
-    def ENABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS(event=None):
-        mbtb.MBTB_displayStep_joints(1)
-
-    def DISABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS(event=None):
-        mbtb.MBTB_displayStep_joints(0)
-
-    def ENABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS(event=None):
-        mbtb.MBTB_displayStep_contacts(1)
-
-    def DISABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS(event=None):
-        mbtb.MBTB_displayStep_contacts(0)
-
-    def VIEW_TOP(event=None):
-        display.View_Top()
-    def VIEW_BOTTOM(event=None):
-        display.View_Bottom()
-    def VIEW_LEFT(event=None):
-        display.View_Left()
-    def VIEW_RIGHT(event=None):
-        display.View_Right()
-    def VIEW_REAR(event=None):
-        display.View_Rear()
-    def VIEW_FRONT(event=None):
-        display.View_Front()
-    def VIEW_ISO(event=None):
-        display.View_Iso()
-    def VIEW_FITALL(event=None):
-        display.FitAll()
-
-    def VIEW_TOP(event=None):
-        display.View_Top()
-
-    assoc_shapes = dict()
-    offset = dict()
-    for idBody in range(NBBODIES):
-        shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
-
-        offset[idBody] = [-v for v in initCenterMass[idBody]]
-
-        io.addShapeDataFromFile(shape_name, afile[idBody])
-
-        assoc_shapes[idBody] = [Avatar(shape_name,
-                                      relative_translation=offset[idBody])]
-#        io.addObject('obj-{0}'.format(shape_name),
-#                     [Avatar(shape_name, relative_translation=offset)],
-#                     mass=1,
-#                     translation=[0, 0, 0])
-
-    for idContact in range(NBCONTACTS):
-        shape_name1 = os.path.basename(os.path.splitext(afileContact1[idContact])[0])
-        shape_name2 = os.path.basename(os.path.splitext(afileContact2[idContact])[0])
-
-        io.addShapeDataFromFile(shape_name1, afileContact1[idContact])
-        io.addShapeDataFromFile(shape_name2, afileContact2[idContact])
-
-        print contactBody1[idContact], contactBody2[idContact]
-
-        assoc_shapes[contactBody1[idContact]] += [Contactor(shape_name1,
-                                                           relative_translation=offset[contactBody1[idContact]])]
-
-        if contactBody2[idContact] >= 0:
-            assoc_shapes[contactBody2[idContact]] += [Contactor(shape_name2,
-                                                                relative_translation=offset[contactBody2[idContact]])]
-
-
-    for idArtefact in range(NBARTEFACTS):
-        shape_name = os.path.basename(os.path.splitext(Artefactfile[idArtefact])[0])
-
-        io.addShapeDataFromFile(shape_name, Artefactfile[idArtefact])
-
-
-    for idBody in range(NBBODIES):
-        shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
-
-        io.addObject('obj-{0}'.format(shape_name),
-                     assoc_shapes[idBody],
-                     mass=1,
-                     translation=[0, 0, 0])
-
-
-    for idArtefact in range(NBARTEFACTS):
-
-        shape_name = os.path.basename(os.path.splitext(Artefactfile[idArtefact])[0])
-
-        io.addObject('artefact-{0}'.format(shape_name),
-                     [Avatar(shape_name)], 
-                     mass=0,
-                     translation=[0, 0, 0])
-
-
-    io.outputStaticObjects()
-
-    if with3D and __name__ == '__main__':
-        cadmbtb.CADMBTB_setIParam(0,dumpGraphic)
-        mbtb.MBTB_ContactSetIParam(2,0,0,drawMode)
-        add_menu('MBTB')
-        add_menu('OPTION')
-        add_menu('VERBOSE')
-        add_menu('DISPLAY')
-        add_menu('VIEW')
-        add_function_to_menu('MBTB', STEP)
-        add_function_to_menu('MBTB', RUN)
-        add_function_to_menu('MBTB', RUN10)
-        add_function_to_menu('MBTB', RUN100)
-        add_function_to_menu('MBTB', RUN400)
-        add_function_to_menu('MBTB', RUN1000)
-        add_function_to_menu('MBTB', RUN7000)
-        add_function_to_menu('MBTB', RUN10000)
-        add_function_to_menu('MBTB', RUN50000)
-        add_function_to_menu('MBTB', RUN300000)
-        add_function_to_menu('MBTB', QUIT)
-        add_function_to_menu('DISPLAY',GRAPHIC_OFF)
-        add_function_to_menu('DISPLAY',GRAPHIC_ON)
-        add_function_to_menu('DISPLAY',GRAPHIC_DUMP)
-        add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_PRINT_DIST)
-        add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_PRINT_DIST)
-        add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
-        add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
-        add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
-        add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
-        add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
-        add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
-        add_function_to_menu('OPTION',DISABLE_PROJ)
-        add_function_to_menu('OPTION',ENABLE_PROJ)
-        add_function_to_menu('OPTION',DISABLE_ONLYPROJ)
-        add_function_to_menu('OPTION',ENABLE_ONLYPROJ)
-        add_function_to_menu('VIEW',VIEW_TOP)
-        add_function_to_menu('VIEW',VIEW_BOTTOM)
-        add_function_to_menu('VIEW',VIEW_RIGHT)
-        add_function_to_menu('VIEW',VIEW_LEFT)
-        add_function_to_menu('VIEW',VIEW_FRONT)
-        add_function_to_menu('VIEW',VIEW_REAR)
-        add_function_to_menu('VIEW',VIEW_ISO)
-        add_function_to_menu('VIEW',VIEW_FITALL)
-        start_display()
-    else:
-        _run(stepNumber)
+        if with3D and __name__ == '__main__':
+            cadmbtb.CADMBTB_setIParam(0,dumpGraphic)
+            mbtb.MBTB_ContactSetIParam(2,0,0,drawMode)
+            add_menu('MBTB')
+            add_menu('OPTION')
+            add_menu('VERBOSE')
+            add_menu('DISPLAY')
+            add_menu('VIEW')
+            add_function_to_menu('MBTB', STEP)
+            add_function_to_menu('MBTB', RUN)
+            add_function_to_menu('MBTB', RUN10)
+            add_function_to_menu('MBTB', RUN100)
+            add_function_to_menu('MBTB', RUN400)
+            add_function_to_menu('MBTB', RUN1000)
+            add_function_to_menu('MBTB', RUN7000)
+            add_function_to_menu('MBTB', RUN10000)
+            add_function_to_menu('MBTB', RUN50000)
+            add_function_to_menu('MBTB', RUN300000)
+            add_function_to_menu('MBTB', QUIT)
+            add_function_to_menu('DISPLAY',GRAPHIC_OFF)
+            add_function_to_menu('DISPLAY',GRAPHIC_ON)
+            add_function_to_menu('DISPLAY',GRAPHIC_DUMP)
+            add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_PRINT_DIST)
+            add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_PRINT_DIST)
+            add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
+            add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
+            add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
+            add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
+            add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
+            add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
+            add_function_to_menu('OPTION',DISABLE_PROJ)
+            add_function_to_menu('OPTION',ENABLE_PROJ)
+            add_function_to_menu('OPTION',DISABLE_ONLYPROJ)
+            add_function_to_menu('OPTION',ENABLE_ONLYPROJ)
+            add_function_to_menu('VIEW',VIEW_TOP)
+            add_function_to_menu('VIEW',VIEW_BOTTOM)
+            add_function_to_menu('VIEW',VIEW_RIGHT)
+            add_function_to_menu('VIEW',VIEW_LEFT)
+            add_function_to_menu('VIEW',VIEW_FRONT)
+            add_function_to_menu('VIEW',VIEW_REAR)
+            add_function_to_menu('VIEW',VIEW_ISO)
+            add_function_to_menu('VIEW',VIEW_FITALL)
+            start_display()
+        else:
+            _run(stepNumber)
 
 

@@ -2,11 +2,12 @@
 # scipy csr => 1x1 block
 from numpy import finfo, double
 eps = finfo(double).eps
-
+from siconos.tests_setup import working_dir
+import os
 
 def test_from_csr1():
 
-    from Siconos.Numerics import sparseToSBM, getValueSBM
+    from siconos.numerics import sparseToSBM, getValueSBM
     from scipy.sparse.csr import csr_matrix
     
     M = csr_matrix([[1,2,3],
@@ -32,7 +33,7 @@ def test_from_csr1():
 # scipy csr 3x3 block
 def test_from_csr2():
 
-    from Siconos.Numerics import sparseToSBM, getValueSBM
+    from siconos.numerics import sparseToSBM, getValueSBM
     from scipy.sparse.csr import csr_matrix
     
     M = csr_matrix([[1,2,3],
@@ -57,10 +58,10 @@ def test_from_csr2():
 
 
 def test_SBMtoSparse1():
-    from Siconos.Numerics import getValueSBM, newFromFileSBM, printSBM, SBMtoSparse
+    from siconos.numerics import getValueSBM, newFromFileSBM, printSBM, SBMtoSparse
     from scipy.sparse.csr import csr_matrix
 
-    SBM=newFromFileSBM('SBM1.dat')
+    SBM=newFromFileSBM(os.path.join(working_dir, 'SBM1.dat'))
 
     printSBM(SBM)
 
@@ -72,7 +73,7 @@ def test_SBMtoSparse1():
 
 
 def test_sparseToSBM1():
-    from Siconos.Numerics import sparseToSBM,getValueSBM, newFromFileSBM, printSBM, SBMtoSparse
+    from siconos.numerics import sparseToSBM,getValueSBM, newFromFileSBM, printSBM, SBMtoSparse
     from scipy.sparse import csr_matrix, lil_matrix
 
     A = lil_matrix((100, 100))
@@ -91,10 +92,10 @@ def test_sparseToSBM1():
 
 def test_SBMtoSparseToSBM():
 
-    from Siconos.Numerics import getValueSBM, newFromFileSBM, printSBM, SBMtoSparse, sparseToSBM
+    from siconos.numerics import getValueSBM, newFromFileSBM, printSBM, SBMtoSparse, sparseToSBM
     from scipy.sparse.csr import csr_matrix
 
-    SBM1=newFromFileSBM('SBM1.dat')
+    SBM1=newFromFileSBM(os.path.join(working_dir, 'SBM1.dat'))
 
     printSBM(SBM1)
 

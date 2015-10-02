@@ -2,6 +2,8 @@
 // Base SWIG interface for Siconos Control
 
 %include start.i
+// generated docstrings from doxygen xml output
+%include control-docstrings.i
 
 #undef WITH_IO
 #undef WITH_SERIALIZATION
@@ -27,7 +29,7 @@
 %{
   #include <SiconosKernel.hpp>
 %}
-%import Kernel/Kernel.i
+%import kernel.i
 
 %{
 #include <SiconosControlFwd.hpp>

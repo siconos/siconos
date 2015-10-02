@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // SWIG interface for Siconos IO
-%module(directors="1", allprotected="1") IO
+%module(package="siconos", directors="1", allprotected="1") io
 
 %include start.i
 
@@ -15,7 +15,7 @@
 
 %include KernelTypes.i
 
-%import ../Kernel/Kernel.i
+%import kernel.i
 
 %include "SiconosRestart.hpp"
 

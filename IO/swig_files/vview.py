@@ -11,7 +11,7 @@ import random
 
 import getopt
 
-from Siconos.Mechanics import IO
+from siconos.mechanics import IO
 
 def usage():
     """

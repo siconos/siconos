@@ -7,6 +7,6 @@ Usage
 AVI API
 ^^^^^^^
 
-.. automodule:: Siconos.Numerics
+.. automodule:: siconos.numerics
   :members: :eval:`starting_with(['AffineVariationalInequalities','AVI','avi'])`
 

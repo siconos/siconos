@@ -7,6 +7,6 @@ Usage
 FrictionContact API
 ^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: Siconos.Numerics
+.. automodule:: siconos.numerics
   :members: :eval:`starting_with(['FrictionContact', 'frictionContact'])`
 

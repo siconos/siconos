@@ -1,5 +1,5 @@
 // -*- c++ -*-
-%module(directors="1", allprotected="1") Controller
+%module(package="control", directors="1", allprotected="1") controller
 
 %include ControlBase.i
 

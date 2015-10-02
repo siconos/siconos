@@ -1,5 +1,5 @@
 /* mbtb.i this file contains exported API of the MBTB library.*/
-%module mbtb
+%module(package="mechanisms") mbtb
 
 %include start.i
 #undef WITH_IO
@@ -21,7 +21,7 @@
 %include sharedPointers.i
 %include KernelTypes.i
 
-%import Kernel/Kernel.i
+%import kernel.i
 
 %include <MBTB_DATA.hpp>
 %include <MBTB_internalTool.hpp>

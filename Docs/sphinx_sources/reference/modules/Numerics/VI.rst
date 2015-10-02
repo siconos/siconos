@@ -7,6 +7,6 @@ Usage
 VI API
 ^^^^^^
 
-.. automodule:: Siconos.Numerics
+.. automodule:: siconos.numerics
   :members: :eval:`starting_with(['VariationalInequality','VI', 'vi'])`
 

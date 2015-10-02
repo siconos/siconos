@@ -1,13 +1,14 @@
-
+import os
+from siconos.tests_setup import working_dir
 
 # need a ref file.
 def test_diodebridge1():
-    from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
+    from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                                ComplementarityConditionNSL, Interaction,\
                                Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
                                TimeStepping
     from numpy import empty
-    from Siconos.Kernel import SimpleMatrix, getMatrix
+    from siconos.kernel import SimpleMatrix, getMatrix
     from numpy.linalg import norm
 
     t0 = 0.0
@@ -160,7 +161,7 @@ def test_diodebridge1():
     #
     # comparison with the reference file
     #
-    ref = getMatrix(SimpleMatrix("diode_bridge.ref"))
+    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,"diode_bridge.ref")))
 
     print(norm(dataPlot - ref))
     assert (norm(dataPlot - ref) < 1e-12)
@@ -168,12 +169,12 @@ def test_diodebridge1():
 
 
 def test_diodebridge2():
-    from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearR, \
+    from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearR, \
                                ComplementarityConditionNSL, Interaction,\
                                Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
                                TimeStepping, SiconosVector
     from numpy import empty
-    from Siconos.Kernel import SimpleMatrix, getMatrix
+    from siconos.kernel import SimpleMatrix, getMatrix
     from numpy.linalg import norm
 
     t0 = 0.0
@@ -341,7 +342,7 @@ def test_diodebridge2():
     # comparison with the reference file
     #
 
-    ref = getMatrix(SimpleMatrix("diode_bridge.ref"))
+    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,"diode_bridge.ref")))
 
     assert (norm(dataPlot - ref) < 1e-12)
 

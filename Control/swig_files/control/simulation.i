@@ -1,5 +1,5 @@
 // -*- c++ -*-
-%module(directors="1", allprotected="1") Simulation
+%module(package="control", directors="1", allprotected="1") simulation
 
 %include ControlBase.i
 

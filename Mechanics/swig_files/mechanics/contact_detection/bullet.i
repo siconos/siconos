@@ -1,49 +1,8 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/ContactDetection/Bullet
-%module(directors="1", allprotected="1") BulletWrap
+%module(package="contact_detection", directors="1", allprotected="1") bullet
 
-%include start.i
-
-#undef WITH_IO
-#undef WITH_SERIALIZATION
-
-%include sharedPointers.i
-
-%{
-#include <MechanicsFwd.hpp>
-%}
-%include <MechanicsFwd.hpp>
-
-#ifdef WITH_IO
-%{
-#include <SiconosFull.hpp>
-%}
-#endif
-%include picklable.i
-
-%include path.i
-
-%include handleException.i
-
-%include stl.i
-
-%include KernelTypes.i
-
-%{
-#include <SiconosKernel.hpp>
-#include <boost/typeof/typeof.hpp>
-
-// need this one
-#include <ExternalBody.hpp>
-%}
-
-%import Kernel/Kernel.i
-
-%import ../Base.i
-
-%include pyRegister.i
-
-%fragment("NumPy_Fragments");
+%include base.i
 
 // due to undefined private copy constructors
 %feature("notabstract") BulletTimeStepping;

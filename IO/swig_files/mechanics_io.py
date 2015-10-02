@@ -20,19 +20,19 @@ try:
 except:
     pass
 
-from Siconos.Mechanics.ContactDetection import Contactor
+from siconos.mechanics.contact_detection import Contactor
 
-from Siconos.Mechanics import Joints
+from siconos.mechanics import joints
 
 try:
-    from Siconos.Mechanics.ContactDetection.Bullet import \
+    from siconos.mechanics.contact_detection.bullet import \
         BulletDS, BulletWeightedShape, \
         btCollisionObject, btQuaternion, btTransform, btVector3, quatRotate
 
-    from Siconos.Mechanics.ContactDetection.Bullet import \
+    from siconos.mechanics.contact_detection.bullet import \
         cast_BulletR
 
-    from Siconos.Mechanics.ContactDetection.Bullet.BulletWrap import \
+    from siconos.mechanics.contact_detection.bullet import \
         __mul__ as mul
 
     from ContactDetection.Bullet import btVector3, \
@@ -56,14 +56,14 @@ try:
 except:
     pass
 
-from Siconos.Kernel import \
+from siconos.kernel import \
     cast_NewtonImpactFrictionNSL, EqualityConditionNSL, Interaction
 
-import Siconos.Kernel as Kernel
+import siconos.kernel as Kernel
 
-from Siconos.IO import MechanicsIO
+from siconos.io import MechanicsIO
 
-import Siconos.Numerics as Numerics
+import siconos.numerics as Numerics
 
 from scipy import constants
 
@@ -1214,13 +1214,13 @@ class Hdf5():
 
         """
 
-        from Siconos.Kernel import \
+        from siconos.kernel import \
             Model, MoreauJeanOSI, TimeDiscretisation,\
             GenericMechanical, FrictionContact, NewtonImpactFrictionNSL
 
-        from Siconos.Numerics import SICONOS_FRICTION_3D_AlartCurnierNewton
+        from Siconos.numerics import SICONOS_FRICTION_3D_AlartCurnierNewton
 
-        from Siconos.Mechanics.ContactDetection.Bullet import \
+        from siconos.mechanics.contact_detection.bullet import \
             btConvexHullShape, btCollisionObject, \
             btBoxShape, btQuaternion, btTransform, btConeShape, \
             BulletSpaceFilter, cast_BulletR, \

@@ -1,5 +1,5 @@
 // -*- c++ -*-
-%module(directors="1", allprotected="1") Sensor
+%module(package="control", directors="1", allprotected="1") sensor
 
 %include ControlBase.i
 

@@ -3,8 +3,8 @@
 
 import numpy as np
 
-# import Siconos.Numerics * fails with py.test!
-import Siconos.Numerics as SN
+# import siconos.numerics * fails with py.test!
+import siconos.numerics as SN
 
 def vi_function_1D(n, x, F):
     F[0] = 1.0 + x[0]

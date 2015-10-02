@@ -1,12 +1,12 @@
 
-import Siconos.Numerics as SN
-import Siconos.Kernel as SK
-import SiconosXMLParser
+import siconos.numerics as SN
+import siconos.kernel as SK
+import siconos.xml_parser as xml_parser
 import numpy as np
 import sys
 import os
 
-xsdfile = '${SiconosKernel_XML_SCHEMA}/SiconosModelSchema-V3.7.xsd'
+xsdfile = '@SICONOS_XML_SCHEMA@'
 
 
 if not os.path.exists(xsdfile):
@@ -19,7 +19,6 @@ if not os.path.exists(xsdfile):
     if tried_folder == 10:
         sys.stderr.write('No XML Schema found, stopping!')
         sys.exit(1)
-    xsdfile = os.path.join(python_path, 'share', 'siconos-kernel', 'SiconosModelSchema-V3.7.xsd')
 
 nsSiconos = {"xsd": "http://www.w3.org/2001/XMLSchema", "cArg": "X-Constructor_Arguments"}
 
@@ -259,7 +258,7 @@ def _parseReferenceXMLSchema(xsdFile):
     :type xsdFile: string
     '''
 
-    etree = SiconosXMLParser.etree_
+    etree = xml_parser.etree_
     xmlschema_doc = etree.parse(open(xsdFile))
 
     xsd = etree.XMLSchema(xmlschema_doc)
@@ -309,7 +308,7 @@ def _parseReferenceXMLSchema(xsdFile):
     return (constructorArgsDS, constructorArgsR, pluginsDS, pluginsR, dataNSL, dataOSI, dataOSNSP)
 
 
-# do the fucking validation
+# do the validation
 def _validateXML(xmlFile, strict=True):
     '''
     Validate the input XML file against the schema
@@ -320,7 +319,7 @@ def _validateXML(xmlFile, strict=True):
     program exists if this is not the case
     :type strict: bool
     '''
-    etree = SiconosXMLParser.etree_
+    etree = xml_parser.etree_
     xsd_doc = etree.parse(xsdfile)
     xsd = etree.XMLSchema(xsd_doc)
     xml = etree.parse(xmlFile)
@@ -343,7 +342,7 @@ def buildModelXML(xmlFile):
     (constructorArgsDS, constructorArgsR, pluginsDS, pluginsR, dataNSL, dataOSI, dataOSNSP) = _parseReferenceXMLSchema(xsdfile)
 
     #  Built DOMtree
-    modelxml = SiconosXMLParser.parse(xmlFile, silence=True)
+    modelxml = xml_parser.parse(xmlFile, silence=True)
 
     T = modelxml.Time.T
     t0 = modelxml.Time.t0
