@@ -161,7 +161,7 @@ def test_diodebridge1():
     #
     # comparison with the reference file
     #
-    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,"diode_bridge.ref")))
+    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,"data/diode_bridge.ref")))
 
     print(norm(dataPlot - ref))
     assert (norm(dataPlot - ref) < 1e-12)
@@ -342,7 +342,7 @@ def test_diodebridge2():
     # comparison with the reference file
     #
 
-    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,"diode_bridge.ref")))
+    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,"data/diode_bridge.ref")))
 
     assert (norm(dataPlot - ref) < 1e-12)
 

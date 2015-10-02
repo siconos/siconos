@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 from siconos.kernel import SiconosVector
+import sys
+from siconos.tests_setup import working_dir
 
 v1 = SiconosVector([1.0, 2.0, 3.0])
 
@@ -170,7 +172,8 @@ def test_serialization4():
     from siconos.kernel import SimpleMatrix, getMatrix
     from numpy.linalg import norm
 
-    ref = getMatrix(SimpleMatrix("result.ref"))
+    ref = getMatrix(SimpleMatrix(sys.path.join(working_dir,
+                                               "data/result.ref")))
 
     assert (norm(dataPlot - ref) < 1e-12)
 

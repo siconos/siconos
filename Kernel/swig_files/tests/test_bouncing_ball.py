@@ -141,7 +141,7 @@ def test_bouncing_ball1():
     from siconos.kernel import SimpleMatrix, getMatrix
     from numpy.linalg import norm
 
-    ref = getMatrix(SimpleMatrix(os.path.join(working_dir, "result.ref")))
+    ref = getMatrix(SimpleMatrix(os.path.join(working_dir, "data/result.ref")))
 
     assert (norm(dataPlot - ref) < 1e-12)
 
