@@ -1,9 +1,0 @@
-SICONOS_SWIG_SUBMODULE(Mechanics "mbtb;" Mechanisms/MBTB)
-
-SET(MBTB_LINK_LIBRARIES ${SiconosMechanics_LIBRARIES} ${SiconosKernel_LIBRARIES} ${SiconosNumerics_LIBRARIES} ${PYTHON_LIBRARIES})
-
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
-  ${SiconosMechanics_INCLUDE_DIRS}/MBTB ${SiconosKernel_INCLUDE_DIRS}
-  ${SiconosNumerics_INCLUDE_DIRS} ${ATLAS_INCLUDE_DIR})
-
-INCLUDE(SiconosSwigHelper)

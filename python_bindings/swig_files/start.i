@@ -19,7 +19,6 @@
 #undef c_pow
 #undef c_abs
 #endif
-#include "FrontEndConfig.h"
 
 #include <assert.h>
 //#define DEBUG_MESSAGES 1
@@ -43,8 +42,6 @@
 
 #endif
 %}
-
-%include "FrontEndConfig.h"
 
 // numpy macros
 %include numpy.i 	

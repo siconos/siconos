@@ -1,6 +1,6 @@
 """ Useful set of functions using some siconos functions """
 
-import Siconos.Kernel as SK
+import siconos.kernel as SK
 import numpy as np
 
 

@@ -4,5 +4,5 @@
 %pythoncode %{
 import sys
 import os
-sys.path.append(os.path.join('@CMAKE_INSTALL_PREFIX@','@PYTHON_DIST_PACKAGES@','Siconos'))
+sys.path.append('@SICONOS_SWIG_ROOT_DIR@')
 %}
