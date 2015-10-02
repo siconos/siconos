@@ -9,6 +9,9 @@
 #include "FischerBurmeisterGenerated.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wlogical-op-parentheses"
+#endif
 
 #define RESULT_CHECK(X)
 #define VALUE_CHECK(X)
