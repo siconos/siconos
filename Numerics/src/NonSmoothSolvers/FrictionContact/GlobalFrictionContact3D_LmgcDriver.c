@@ -13,7 +13,7 @@
 /* #define DEBUG_STDOUT */
 #include "debug.h"
 
-static int fccounter =0;
+static int fccounter =-1;
 static double * alloc_memory_double(unsigned int size, double *p)
 {
   double * r = (double *) malloc (size * sizeof(double));
@@ -60,7 +60,8 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
                                        int dsize,
                                        double *dparam,
                                        int verbose,
-                                       int outputFile)
+                                       int outputFile,
+                                       int freq_output)
 {
 
   /* NumericsMatrix M, H; */
@@ -180,30 +181,35 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   else if (outputFile == 3)
   {
 #ifdef WITH_FCLIB
-    char fname[256];
-    sprintf(fname, "LMGC_GlobalFrictionContactProblem%.5d.hdf5", fccounter++);
-    printf("Dump of LMGC_GlobalFrictionContactProblem%.5d.hdf5", fccounter);
+    fccounter++;
+    if (fccounter % freq_output == 0)
+    {
+      char fname[256];
+      sprintf(fname, "LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[7], nc, fccounter);
+      printf("Dump LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[7], nc, fccounter);
+      /* printf("ndof = %i.\n", ndof); */
 
-    FILE * foutput  =  fopen(fname, "w");
-    int n = 100;
-    char * title = (char *)malloc(n * sizeof(char *));
-    strcpy(title, "LMGC dump in hdf5");
-    char * description = (char *)malloc(n * sizeof(char *));
+      FILE * foutput  =  fopen(fname, "w");
+      int n = 100;
+      char * title = (char *)malloc(n * sizeof(char *));
+      strcpy(title, "LMGC dump in hdf5");
+      char * description = (char *)malloc(n * sizeof(char *));
 
-    strcat(description, "Rewriting in hdf5 through siconos of  ");
-    strcat(description, fname);
-    strcat(description, " in FCLIB format");
-    char * mathInfo = (char *)malloc(n * sizeof(char *));
-    strcpy(mathInfo,  "unknown");
+      strcat(description, "Rewriting in hdf5 through siconos of  ");
+      strcat(description, fname);
+      strcat(description, " in FCLIB format");
+      char * mathInfo = (char *)malloc(n * sizeof(char *));
+      strcpy(mathInfo,  "unknown");
 
-    globalFrictionContact_fclib_write(problem,
-                                      title,
-                                      description,
-                                      mathInfo,
-                                      fname);
+      globalFrictionContact_fclib_write(problem,
+                                        title,
+                                        description,
+                                        mathInfo,
+                                        fname);
 
 
-    fclose(foutput);
+      fclose(foutput);
+    }
 #else
     printf("Fclib is not available ...\n");
 #endif

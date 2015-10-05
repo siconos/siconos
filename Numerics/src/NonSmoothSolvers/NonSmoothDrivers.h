@@ -222,6 +222,7 @@ extern "C"
    *  \param[in] dparam double parameters array
    *  \param[in] verbose level 0 : nothing, 1: mid level 2: high level
    *  \param[in] outputFile outputFile option 0 : nothing 1 : C file , 1 :  dat file 3: FCLIB HDF5 file if FCLIB is found
+   *  \param[in] freq_output
    *  \return result (0 if successful otherwise 1).
    *
    */
@@ -247,7 +248,8 @@ extern "C"
                                          int dsize,
                                          double *dparam,
                                          int verbose,
-                                         int outputFile);
+                                         int outputFile,
+                                         int freq_output);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
