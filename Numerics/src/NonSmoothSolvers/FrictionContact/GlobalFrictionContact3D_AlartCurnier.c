@@ -483,9 +483,9 @@ void globalFrictionContact3D_AlartCurnier(
 
   unsigned int localProblemSize = problem->H->size1;
 
-  assert(localProblemSize == problem->numberOfContacts * problem->dimension);
+  assert((int)localProblemSize == problem->numberOfContacts * problem->dimension);
 
-  assert(globalProblemSize == problem->H->size0); /* size(velocity) ==
+  assert((int)globalProblemSize == problem->H->size0); /* size(velocity) ==
                                                    * Htrans*globalVelocity */
 
 

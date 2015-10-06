@@ -99,7 +99,6 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
     options->dparam[i] = 0.0;
   }
   options->iparam[0] = 200;
-  options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
   options->iparam[7] = 1;      /* erritermax */
