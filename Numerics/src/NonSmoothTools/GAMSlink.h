@@ -292,9 +292,9 @@ static inline int getGamsSolverOpt(const optHandle_t Optr, const char* sysdir, c
   char deffile[GMS_SSSIZE];
   char msg[GMS_SSSIZE];
   strncpy(deffile, sysdir, sizeof(deffile));
-  strncat(deffile, "/opt", sizeof(deffile));
-  strncat(deffile, solverDefName, sizeof(deffile));
-  strncat(deffile, ".def", sizeof(deffile));
+  strncat(deffile, "/opt", sizeof(deffile) - strlen(deffile) - 1);
+  strncat(deffile, solverDefName, sizeof(deffile) - strlen(deffile) - 1);
+  strncat(deffile, ".def", sizeof(deffile) - strlen(deffile) - 1);
 
   if (optReadDefinition(Optr,deffile)) {
     int itype;
@@ -311,7 +311,7 @@ static inline int getGamsOpt(const optHandle_t Optr, const char *sysdir)
   char msg[GMS_SSSIZE];
   char deffile[GMS_SSSIZE];
   strncpy(deffile, sysdir, sizeof(deffile));
-  strncat(deffile, "/optgams.def", sizeof(deffile));
+  strncat(deffile, "/optgams.def", sizeof(deffile) - strlen(deffile) - 1);
 
   if (optReadDefinition(Optr,deffile)) {
     int itype;

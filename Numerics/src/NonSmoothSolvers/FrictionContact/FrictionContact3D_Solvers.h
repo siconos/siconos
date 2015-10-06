@@ -110,9 +110,14 @@ extern "C"
           0 : Complete error computation with velocity computation
           1: Light error computation with incremental values on reaction verification of absolute error at the end
           2: only light error computation (velocity not computed)
+      [in] iparam[4] : method uses overrelaxation
+      [in] iparam[5] : shuffle the contact indices in the loop
+           1 : only at the beginning
+           2: in each iteration
+      [in] iparam[6] : seed for the random genrator in shuffling  contacts
       [out]iparam[7] = iter number of performed iterations
-      [in] iparam[8] : method uses overrelaxation
-      [in] iparam[9] : shuffle the contact indices in the loop
+
+
 
       [in]  dparam[0]  user tolerance on the loop
       [in]  dparam[8]  the relaxation parameter omega

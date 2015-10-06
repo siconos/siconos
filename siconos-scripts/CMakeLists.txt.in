@@ -11,7 +11,7 @@
 # - CALL_PWD : path to input source.
 # - MAIN_SOURCE : full path to main source file
 # - BUILD_MAIN : true if an executable must be created (i.e. input file == c or cpp)
-# - PLUGINS_DIRECTORIES : path to extra source files used to build some plugins (may be empty)
+# - PLUGIN_DIRECTORIES : path to extra source files used to build some plugins (may be empty)
 # - SOURCES_DIRECTORIES : path to extra source files used to build the executable (may be empty)
 # - COMPILER_OPTIONS : user-defined option for compiler (-I dir, -O3 ...)
 # - COMMAND_LINE_LINKER_OPTIONS : user defined linker options
@@ -226,10 +226,10 @@ if(_EXE)
   set(_install TRUE)
 endif()
 
-# === Build a library from sources in PLUGINS_DIRECTORIES (if any) ===
-# Note : one library for each dir in PLUGINS_DIRECTORIES, named dir.so
-if(PLUGINS_DIRECTORIES)
-  foreach(_D ${PLUGINS_DIRECTORIES})
+# === Build a library from sources in PLUGIN_DIRECTORIES (if any) ===
+# Note : one library for each dir in PLUGIN_DIRECTORIES, named dir.so
+if(PLUGIN_DIRECTORIES)
+  foreach(_D ${PLUGIN_DIRECTORIES})
     get_filename_component(_PLUGINNAME ${_D} NAME_WE)
     get_sources("${_D}")
     if(SOURCES_FILES)

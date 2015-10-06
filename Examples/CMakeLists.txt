@@ -41,6 +41,13 @@ set(EXAMPLES_DIRECTORIES
 
 set(NO_TEST_FILES QGL tools)
 
+if(NOT HAVE_SICONOS_MECHANICS)
+  list(APPEND NO_TEST_FILES
+    JointsTests)
+  list(APPEND NO_TEST_FILES
+    NewtonEuler)
+endif()
+
 # sharing a double between an executable and a library is hackisch
 IF(MSVC)
   SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock Pendulum)
@@ -49,8 +56,12 @@ ENDIF(MSVC)
 # --- Search siconos package path ---
 # --> based on path to script run_siconos
 find_file(SICONOS_SCRIPT run_siconos)
+message("============================================================================================")
+message("Found siconos script : ${SICONOS_SCRIPT}")
 get_filename_component(SICONOS_INSTALL_DIR ${SICONOS_SCRIPT} DIRECTORY)
 get_filename_component(SICONOS_INSTALL_DIR ${SICONOS_INSTALL_DIR} DIRECTORY)
+message("The examples will be run with siconos installed in : ${SICONOS_INSTALL_DIR}")
+message("============================================================================================")
 
 list(APPEND CMAKE_MODULE_PATH ${SICONOS_INSTALL_DIR}/share/siconos/cmake)
 
@@ -89,16 +100,16 @@ foreach(_D ${EXAMPLES_DIRECTORIES})
 	    get_filename_component(EXAMPLE_DIR ${_RP} DIRECTORY)
 	    get_filename_component(EXAMPLE_NAME ${_RP} NAME_WE)
 	    get_filename_component(ext ${_P} EXT)
-	    message("Add ${_D}/${_dir}/${EXAMPLE_NAME} ---- ---- ")
+	    message("Add ${_D}/${_dir}/${EXAMPLE_NAME}")
 	    set(bin_dir ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_dir}/${EXAMPLE_NAME})
 	    file(MAKE_DIRECTORY ${bin_dir})
 	    foreach(datafile ${EXAMPLES_DATA})
 	      configure_file(${datafile} ${bin_dir})
 	    endforeach()
 	    if(ext MATCHES ".py")
- 	      set(target_name ${EXAMPLE_NAME}_py)
+ 	      set(target_name ${_dir}_${EXAMPLE_NAME}_py)
  	    else()
-	      set(target_name ${EXAMPLE_NAME})
+	      set(target_name ${_dir}_${EXAMPLE_NAME})
 	      add_custom_target(${target_name}_build ALL ${CMAKE_COMMAND} -E chdir ${bin_dir} ${SICONOS_SCRIPT} --noexec --silent ${_P}
 		WORKING_DIRECTORY ${bin_dir})
 	      # 	      add_dependencies(build_all ${target_name}_build)

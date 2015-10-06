@@ -122,10 +122,7 @@ static void setDashedOptions(const char* optName, const char* optValue, const ch
   FILE* f = fopen(paramFileName, "a");
   if (f)
   {
-    fprintf(f, optName);
-    fprintf(f, " ");
-    fprintf(f, paramFileName);
-    fprintf(f, "\n");
+    fprintf(f, "%s %s\n", optName, paramFileName);
     fclose(f);
   }
   else
@@ -186,15 +183,15 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
     strncpy(gdxFileName, "fc3d_avi-condensed", sizeof(gdxFileName));
   }
 
-  strncat(gdxFileName, iterStr, sizeof(iterStr));
+  strncat(gdxFileName, iterStr, sizeof(gdxFileName) - strlen(gdxFileName) - 1);
   /* copy the name without extension to creation the   */
 //  strncpy(paramFileName, gdxFileName, sizeof(paramFileName));
 
   strncpy(solFileName, gdxFileName, sizeof(solFileName));
-  strncat(solFileName, "_sol", sizeof(solFileName));
+  strncat(solFileName, "_sol", sizeof(solFileName) - strlen(solFileName) - 1);
 
-  strncat(gdxFileName, ".gdx", sizeof(gdxFileName));
-  strncat(solFileName, ".gdx", sizeof(solFileName));
+  strncat(gdxFileName, ".gdx", sizeof(gdxFileName) - strlen(gdxFileName) - 1);
+  strncat(solFileName, ".gdx", sizeof(solFileName) - strlen(solFileName) - 1);
 //  strncat(paramFileName, ".txt", sizeof(paramFileName));
 
   /* XXX ParmFile is not a string option */
@@ -331,9 +328,9 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
 
   printf("SolveStat = %d, ModelStat = %d\n", (int)infos[1], (int)infos[0]);
   gmoGetModelStatusTxt(gmoPtr, (int)infos[0], msg);
-  printf(msg);
+  DEBUG_PRINTF("%s\n", msg);
   gmoGetSolveStatusTxt(gmoPtr, (int)infos[1], msg);
-  printf(msg);
+  DEBUG_PRINTF("%s\n", msg);
 
 fail:
   idxFree(&Xptr);
@@ -417,13 +414,13 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   getGamsSolverOpt(solverOptPtr, sysdir, solverName);
   //  strncpy(msg, "./", sizeof(deffile));
   strncpy(msg, solverName, sizeof(msg));
-  strncat(msg, ".opt", sizeof(msg));
+  strncat(msg, ".opt", sizeof(msg) - strlen(msg) - 1);
 
   FILE* f = fopen("jams.opt", "w");
   if (f)
   {
     char contents[] = "subsolveropt 1";
-    fprintf(f, contents);
+    fprintf(f, "%s\n", contents);
     fclose(f);
   }
   else

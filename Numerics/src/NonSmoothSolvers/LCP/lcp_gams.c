@@ -82,10 +82,10 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
   }
 
   strncpy(solFileName, gdxFileName, sizeof(solFileName));
-  strncat(solFileName, "_sol", sizeof(solFileName));
+  strncat(solFileName, "_sol", sizeof(solFileName) - strlen(solFileName) - 1);
 
-  strncat(gdxFileName, ".gdx", sizeof(gdxFileName));
-  strncat(solFileName, ".gdx", sizeof(solFileName));
+  strncat(gdxFileName, ".gdx", sizeof(gdxFileName) - strlen(gdxFileName) - 1);
+  strncat(solFileName, ".gdx", sizeof(solFileName) - strlen(solFileName) - 1);
 
   getGamsOpt(Optr, sysdir);
 

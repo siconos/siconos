@@ -95,14 +95,14 @@ static int globalFrictionContact3D_AVI_gams_base(GlobalFrictionContactProblem* p
   optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
 //  strncpy(msg, "./", sizeof(deffile));
   strncpy(msg, solverName, sizeof(msg));
-  strncat(msg, ".opt", sizeof(msg));
+  strncat(msg, ".opt", sizeof(msg) - strlen(msg) - 1);
   optWriteParameterFile(solverOptPtr, msg);
 
   FILE* f = fopen("jams.opt", "w");
   if (f)
   {
     char contents[] = "subsolveropt 1";
-    fprintf(f, contents);
+    fprintf(f, "%s\n", contents);
     fclose(f);
   }
   else

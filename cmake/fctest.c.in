@@ -49,13 +49,12 @@ int main(void)
   }
 
 #ifdef HAVE_GAMS_C_API
-  if (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATH || @TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATHVI)
-  {
-    assert(options->solverParameters);
-    SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
-    GP->model_dir = GAMS_MODELS_SOURCE_DIR;
-    GP->filename = "@TEST_DATA@";
-  }
+#if (@TEST_SOLVER@ != SICONOS_FRICTION_3D_GAMS_PATH) && (@TEST_SOLVER@ != SICONOS_FRICTION_3D_GAMS_PATHVI)
+  assert(options->solverParameters);
+  SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
+  GP->model_dir = GAMS_MODELS_SOURCE_DIR;
+  GP->filename = "@TEST_DATA@";
+#endif
 #endif
 
   info = frictionContact_test_function(finput,options);

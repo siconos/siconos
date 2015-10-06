@@ -9,7 +9,7 @@
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
 
-static int fccounter = 0;
+static int fccounter = -1;
 
 int frictionContact3D_LmgcDriver(double *reaction,
                                  double *velocity,

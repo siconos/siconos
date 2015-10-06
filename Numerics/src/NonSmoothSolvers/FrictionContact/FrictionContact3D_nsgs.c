@@ -304,6 +304,7 @@ void uint_swap (unsigned int *a, unsigned int *b)
 
 /* shuffle an unsigned array */
 void uint_shuffle (unsigned int *a, unsigned int n) {
+
   for (unsigned int i = 0; i < n - 1; i++)
   {
     uint_swap  (&a[i], &a[i + rand()%(n - i)]);
@@ -372,21 +373,23 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
   unsigned int *scontacts = NULL;
 
-  if (iparam[9]) /* shuffle */
+  if (iparam[5]) /* shuffle */
   {
+    srand((unsigned int)iparam[6]);
     scontacts = (unsigned int *) malloc(nc * sizeof(unsigned int));
     for (unsigned int i = 0; i<nc ; ++i)
     {
       scontacts[i] = i;
     }
     uint_shuffle(scontacts, nc);
+    /* for (unsigned int i = 0; i<nc ; ++i) */
+    /* { */
+    /*   printf("scontacts[%i] = %i\n",i, scontacts[i]); */
+    /* } */
+    /* printf("\n"); */
   }
-
-
-
-
+  
   /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
-
   if (iparam[1] == 1 || iparam[1] == 2)
   {
     double reactionold[3];
@@ -400,7 +403,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
       for (unsigned int i= 0 ; i < nc ; ++i)
       {
-        if (iparam[9])
+        if (iparam[5])
         {
           contact = scontacts[i];
         }
@@ -450,10 +453,9 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   }
   else
   {
-
-    if (iparam[9])
+    if (iparam[5] == 1) /* shuffle */
     {
-      int withRelaxation=iparam[8];
+      int withRelaxation=iparam[4];
       if (withRelaxation)
       {
         double reactionold[3];
@@ -498,14 +500,56 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
                                                      reaction, velocity,
                                                      error, NULL);
           }
-        }
-
+        } /* end while loop */
       }
-      else
+      else /* without relaxation but shuffle */
       {
         while ((iter < itermax) && (hasNotConverged > 0))
         {
           ++iter;
+          /* Loop through the contact points */
+          //cblas_dcopy( n , q , incx , velocity , incy );
+
+          for (unsigned int i= 0 ; i < nc ; ++i)
+          {
+            contact = scontacts[i];
+
+            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
+            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+            localsolver_options->iparam[4] = contact;
+            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+
+          }
+
+          /* **** Criterium convergence **** */
+          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+
+          if (verbose > 0)
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
+          if (error < tolerance) hasNotConverged = 0;
+          *info = hasNotConverged;
+
+          if (options->callback)
+          {
+            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
+                                                     reaction, velocity,
+                                                     error, NULL);
+          }
+        }
+      }
+    }
+    else if (iparam[5] == 2) /* shuffle in each loop */
+    {
+      int withRelaxation=iparam[4];
+      if (withRelaxation)
+      {
+        double reactionold[3];
+
+        double omega = dparam[8];
+        while ((iter < itermax) && (hasNotConverged > 0))
+        {
+          ++iter;
+          uint_shuffle(scontacts, nc);
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
           for (unsigned int i= 0 ; i < nc ; ++i)
@@ -513,12 +557,18 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
             contact = scontacts[i];
 
+            reactionold[0] = reaction[3 * contact];
+            reactionold[1] = reaction[3 * contact + 1];
+            reactionold[2] = reaction[3 * contact + 2];
 
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
             localsolver_options->iparam[4] = contact;
             (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
 
+            reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
+            reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
+            reaction[3 * contact+2] = omega*reaction[3 * contact+2]+(1.0-omega)*reactionold[2];
           }
 
           /* **** Criterium convergence **** */
@@ -539,12 +589,44 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
         }
 
       }
+      else
+      {
+        while ((iter < itermax) && (hasNotConverged > 0))
+        {
+          ++iter;
+          uint_shuffle(scontacts, nc);
 
+          /* Loop through the contact points */
+          //cblas_dcopy( n , q , incx , velocity , incy );
+          for (unsigned int i= 0 ; i < nc ; ++i)
+          {
+            contact = scontacts[i];
+            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
+            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+            localsolver_options->iparam[4] = contact;
+            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+          }
+          /* **** Criterium convergence **** */
+          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
+          if (verbose > 0)
+            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
+
+          if (error < tolerance) hasNotConverged = 0;
+          *info = hasNotConverged;
+
+          if (options->callback)
+          {
+            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
+                                                     reaction, velocity,
+                                                     error, NULL);
+          }
+        }
+      }
     }
     else
     {
-      int withRelaxation=iparam[8];
+      int withRelaxation=iparam[4];
       if(withRelaxation)
       {
         double reactionold[3];
@@ -627,14 +709,8 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
                                                      error, NULL);
           }
         }
-
       }
     }
-
-
-
-
-
   }
   dparam[0] = tolerance;
   dparam[1] = error;

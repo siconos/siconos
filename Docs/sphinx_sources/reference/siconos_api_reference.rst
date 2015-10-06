@@ -8,5 +8,5 @@ Documentation is automatically generated from C/C++ source files of siconos, tha
 
 `C/C++ API documentation`_.
 
-.. _C/C++ API documentation: file:///Users/Franck/Softs/build/clang/sico-new/Docs/build_doxy/html/index.html
+.. _C/C++ API documentation: file:///Users/Franck/Softs/build/clang/sico-review/Docs/build_doxy/html/index.html
 
