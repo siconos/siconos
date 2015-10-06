@@ -319,6 +319,7 @@ int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactPr
   /* at = an; */
   /* as = an; */
   double rho=   options->dWork[options->iparam[4]] , rho_k;
+
   /* printf ("saved rho = %14.7e\n",rho );  */
   /* printf ("options->iparam[4] = %i\n",options->iparam[4] );  */
 
@@ -435,9 +436,9 @@ int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactPr
 
     }
 
-    options->dWork[options->iparam[4]] =rho;
 
   }
+  options->dWork[options->iparam[4]] =rho;
 
   if (localerror > localtolerance)
     return 1;

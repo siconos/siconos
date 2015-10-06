@@ -138,8 +138,6 @@ void frictionContact3D_AC_initialize(FrictionContactProblem* problem, FrictionCo
   localFC3D = localproblem;
   globalFC3D = problem;
 
-
-
 }
 
 void frictionContact3D_AC_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
@@ -454,7 +452,6 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
   options->dSize = 5;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
   null_SolverOptions(options);
   for (i = 0; i < 5; i++)
   {
