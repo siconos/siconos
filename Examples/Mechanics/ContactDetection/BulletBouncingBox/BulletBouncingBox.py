@@ -19,7 +19,7 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 #
 
-from Siconos.Kernel import \
+from siconos.kernel import \
     Model, MoreauJeanOSI, TimeDiscretisation, \
     FrictionContact, NewtonImpactFrictionNSL
 
@@ -186,7 +186,7 @@ while(simulation.hasNextEvent()):
 #
 # comparison with the reference file
 #
-from Siconos.Kernel import SimpleMatrix, getMatrix
+from siconos.kernel import SimpleMatrix, getMatrix
 from numpy.linalg import norm
 
 ref = getMatrix(SimpleMatrix("result.ref"))

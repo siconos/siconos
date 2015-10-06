@@ -33,7 +33,7 @@ withPlot=True
 if (withPlot) :
     from matplotlib.pyplot import subplot, title, plot, grid, show
 
-from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
+from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            RelayNSL, Interaction,\
                            Model, EulerMoreauOSI, TimeDiscretisation, Relay,  \
                            TimeStepping

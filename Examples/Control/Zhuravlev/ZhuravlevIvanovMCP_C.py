@@ -1,4 +1,4 @@
-import Siconos.Numerics as SN
+import siconos.numerics as SN
 
 import numpy as np
 import matplotlib.pyplot as plt

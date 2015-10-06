@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
   (*x0)(3) = y0;
 
   // Dynamical Systems
-  SP::FirstOrderNonLinearDS plant(new FirstOrderNonLinearDS(x0, "electro_pneumatic_nantes:computef", "electro_pneumatic_nantes:computeJacfx"));
+  SP::FirstOrderNonLinearDS plant(new FirstOrderNonLinearDS(x0, "electro_pneumatic_nantesPlugin:computef", "electro_pneumatic_nantesPlugin:computeJacfx"));
   plant->setzPtr(param);
 
   // -------------
@@ -86,12 +86,12 @@ int main(int argc, char* argv[])
   // add the sliding mode controller
   SP::Twisting twisting(new Twisting(sensor, hControl));
 
-  twisting->seth("electro_pneumatic_nantes:computeh");
-  twisting->setg("electro_pneumatic_nantes:computeg");
-  twisting->setJachx("electro_pneumatic_nantes:computeJachx");
-  twisting->setJachlambda("electro_pneumatic_nantes:computeJachlambda");
-  twisting->setJacgx("electro_pneumatic_nantes:computeJacgx");
-  twisting->setJacglambda("electro_pneumatic_nantes:computeJacglambda");
+  twisting->seth("electro_pneumatic_nantesPlugin:computeh");
+  twisting->setg("electro_pneumatic_nantesPlugin:computeg");
+  twisting->setJachx("electro_pneumatic_nantesPlugin:computeJachx");
+  twisting->setJachlambda("electro_pneumatic_nantesPlugin:computeJachlambda");
+  twisting->setJacgx("electro_pneumatic_nantesPlugin:computeJacgx");
+  twisting->setJacglambda("electro_pneumatic_nantesPlugin:computeJacglambda");
 
   simLsodar->addSensor(sensor, hControl);
   simLsodar->addActuator(twisting, hControl);

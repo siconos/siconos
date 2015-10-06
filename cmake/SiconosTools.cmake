@@ -62,7 +62,9 @@ macro(get_sources)
       endif()
     endforeach()
   endforeach()
-  list(REMOVE_DUPLICATES SOURCES_FILES)
+  if(SOURCES_FILES)
+    list(REMOVE_DUPLICATES SOURCES_FILES)
+  endif()
 endmacro()
 
 # Scans DIRS (list of directories) and returns a list of all files in those dirs
@@ -282,4 +284,37 @@ macro(init_to_default_option OPT)
      break()
    endif()
  endforeach()
+endmacro()
+
+
+# ------------------------------------
+# Append a directory _N into
+# the list of Examples executed by
+# target 'example'
+# ------------------------------------
+macro(ADD_EXAMPLE_DIRECTORY _N)
+  message("Adding example directory ${_N}")
+  # create binary dir and configure a CMakeLists.txt
+  set(current_dir ${CMAKE_CURRENT_BINARY_DIR}/${_N})
+  message("current dir is ... ${current_dir}")
+  file(MAKE_DIRECTORY ${current_dir})
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/CMakeListsForExamples.cmake
+    ${current_dir}/CMakeLists.txt @ONLY)
+  # add the created directory to the build
+  add_subdirectory(${current_dir} ${current_dir})
+endmacro()
+
+# ------------------------------------
+# Get the list of subdirectories
+# of a given dir
+# ------------------------------------
+macro(get_subdirectories result current_dir)
+  file(GLOB subdirs RELATIVE ${current_dir} ${current_dir}/*)
+  set(dirs "")
+  foreach(_dir ${subdirs})
+    if(IS_DIRECTORY ${current_dir}/${_dir})
+      list(APPEND dirs ${_dir})
+    endif()
+  endforeach()
+  set(${result} ${dirs})
 endmacro()

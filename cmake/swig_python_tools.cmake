@@ -131,11 +131,10 @@ macro(add_siconos_swig_sub_module fullname)
 
   # --- install python files and target ---
   # install path ...
-  set(DEST ${SICONOS_PYTHON_INSTALL_DIR}/${SICONOS_PYTHON_PACKAGE}/${_path})
+  set(DEST "${SICONOS_PYTHON_INSTALL_DIR}/${SICONOS_PYTHON_PACKAGE}/${_path}")
 
   # done by python setup.py ...
   #install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${_name}.py DESTINATION ${DEST})
-  
   install(TARGETS ${SWIG_MODULE_${_name}_REAL_NAME} DESTINATION ${DEST})
   
 endmacro()

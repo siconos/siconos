@@ -199,8 +199,9 @@ config = Configuration(
     packages=packages,
     py_modules=[],
     include_dirs=include_dirs,
-    cmdclass={'test': PyTest},
+    cmdclass={'test': PyTest,
               'bench': run_benchmarks,
-              'clean': clean)
+              'clean': clean}
+)
 
 setup(**config.todict())

@@ -62,7 +62,7 @@ withPlot = True
 if withPlot:
     from matplotlib.pyplot import subplot, title, plot, grid, show
 
-from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
+from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
     ComplementarityConditionNSL, Interaction,\
     Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
     TimeStepping
@@ -206,7 +206,7 @@ while (k < N):
     aTS.nextStep()
 
 # comparison with reference file
-from Siconos.Kernel import SimpleMatrix, getMatrix
+from siconos.kernel import SimpleMatrix, getMatrix
 from numpy.linalg import norm
 
 ref = getMatrix(SimpleMatrix("result.ref"))

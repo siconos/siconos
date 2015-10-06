@@ -27,6 +27,7 @@ import getopt
 import tempfile
 import shlex
 import posixpath
+import glob
 
 # Path to siconos installation
 siconos_prefix = os.getenv('SICONOSPATH', default='@CMAKE_INSTALL_PREFIX@')
@@ -169,12 +170,10 @@ Options are:
 
 if __name__ == '__main__':
 
-    cartridge()
-
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'acghO:I:j:l:L:D:P:v',
                                        ['build-dir=', 'clean-build', 'clean',
-                                        'help', 'noexec', 'nocomp', 'src-dir=',
+                                        'help', 'noexec', 'nocomp', 'silent', 'src-dir=',
                                         'opt=', 'ldopt=',
                                         'plugins-dir=', 'generator='])
     except getopt.GetoptError as err:
@@ -191,12 +190,21 @@ if __name__ == '__main__':
     compiler_options = []
     # Path to user-defined plugin sources. Default = plugins.
     plugins_directories = []
-    if os.path.isdir('plugins'):
-        plugins_directories.append('plugins')
+    src_dir = os.path.join(call_pwd, args[0])
+    path_to_src = os.path.dirname(src_dir)
+    plugin_dirs = glob.glob('*Plugin*')
+    for dd in plugin_dirs:
+        if os.path.isdir(dd):
+            plugins_directories.append(os.path.join(path_to_src, dd))
+    pg_dir = os.path.join(path_to_src, 'plugins')
+    if os.path.isdir(pg_dir):
+        plugins_directories.append(pg_dir)
+
     # Some user-defined extra directories for input sources
     sources_directories = []
-    if os.path.isdir('src'):
-        sources_directories.append('src')
+    extra_src_dir = os.path.join(path_to_src, 'src')
+    if os.path.isdir(extra_src_dir):
+        sources_directories.append(extra_src_dir)
     tmp_build = False
     build_directory = '.siconos'
     clean_build = False
@@ -207,6 +215,7 @@ if __name__ == '__main__':
     source_is_python = False
     extra_cmake_args = []
     cmake_generator = None
+    silent = False
 
     for o, a in opts:
 
@@ -241,6 +250,9 @@ if __name__ == '__main__':
         if o == '--noexec':
             exec_ = False
 
+        if o == '--silent':
+            silent = True
+
         if o == '--nocomp':
             comp = False
 
@@ -269,16 +281,19 @@ if __name__ == '__main__':
             linker_options.append(a)
 
         if o == '--plugins-dir':
-            plugins_directories.append(a)
+            plugins_directories.append(os.path.join(path_to_src, a))
 
         if o == '--src-dir':
-            sources_directories.append(a)
+            sources_directories.append(os.path.join(path_to_src, a))
 
         if o == '--generator':
             cmake_generator = a
 
         if o == '-v':
             make_args.append('VERBOSE=1')
+
+    if not silent:
+        cartridge()
 
     if len(args) == 0:
         sys.stderr.write('{0} : need a file\n'.format(myname))
@@ -300,15 +315,19 @@ if __name__ == '__main__':
     with WorkDir(directory=siconos_build_dir, tmp=tmp_build) as work_dir:
 
         assert(len(args) > 0)
-        # full path to main source file
+        # File type (i.e. extension)
+        source_type = os.path.splitext(args[0])[1]
+        # file == python file --> exe_name = full path to source file
         main_source = os.path.join(call_pwd, args[0])
-        main_source_splitext = os.path.splitext(main_source)
-        if main_source_splitext[1] == '.py':
+        assert os.path.exists(main_source)
+        if source_type == '.py':
             exe_full_path = main_source
-            exe_dir = os.path.dirname(main_source)
+            exe_dir = call_pwd
             source_is_python = True
         else:
-            exe_full_path = main_source_splitext[0]
+            # create an exe in binary dir, from source file
+            exe_name = os.path.splitext(os.path.basename(args[0]))[0]
+            exe_full_path = os.path.join(call_pwd, exe_name)
 
         env = os.environ
         env['LD_LIBRARY_PATH'] = \

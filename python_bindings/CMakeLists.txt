@@ -21,18 +21,20 @@ if(WITH_PYTHON_BINDINGS)
       ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
       OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
       OUTPUT_STRIP_TRAILING_WHITESPACE)
-  ELSE(STD_PYTHON_DIST_PACKAGES)
+  ELSE()
     IF(NOT PYTHON_DIST_PACKAGES)
       EXECUTE_PROCESS ( COMMAND 
 	${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib;print(get_python_lib(0,0,\"\"))"
 	OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
 	OUTPUT_STRIP_TRAILING_WHITESPACE)
-    ENDIF(NOT PYTHON_DIST_PACKAGES)
-  ENDIF(STD_PYTHON_DIST_PACKAGES)
+    ENDIF()
+  ENDIF()
   MESSAGE(STATUS "PYTHON_DIST_PACKAGES : ${PYTHON_DIST_PACKAGES}")
 
   # Set path for siconos-python installation
-  set(SICONOS_PYTHON_INSTALL_DIR ${PYTHON_DIST_PACKAGES} CACHE INTERNAL "Install directory for python bindings.")
+  include(PythonInstallSetup)
+  set_python_install_path()
+  #set(SICONOS_PYTHON_INSTALL_DIR ${PYTHON_DIST_PACKAGES} CACHE INTERNAL "Install directory for python bindings.")
   
   #  ----------- swig -----------
 
@@ -163,7 +165,7 @@ if(WITH_PYTHON_BINDINGS)
     COMMENT "Build ${SICONOS_PYTHON_PACKAGE} package")
 
   add_custom_target(python-install
-    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install ${python_install_options}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "build/install siconos package")
   install(CODE "execute_process(COMMAND ${CMAKE_BUILD_TOOL} python-install WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")
 

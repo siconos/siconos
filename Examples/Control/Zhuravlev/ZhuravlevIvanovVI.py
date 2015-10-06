@@ -1,5 +1,5 @@
-import Siconos.Kernel as SK
-import Siconos.Numerics as SN
+import siconos.kernel as SK
+import siconos.numerics as SN
 
 import numpy as np
 import matplotlib.pyplot as plt

@@ -1,5 +1,5 @@
 try:
-    import Siconos.Kernel as SK
+    import siconos.kernel as SK
 
 except (ImportError):
     print('Could not import Siconos.* module')

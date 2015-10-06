@@ -18,7 +18,7 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
-from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
+from siconos.kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
     TimeStepping, ZeroOrderHoldOSI, ControlManager, LinearSensor, LinearSMCOT2, \
     getMatrix, SimpleMatrix
 from matplotlib.pyplot import subplot, title, plot, grid, show

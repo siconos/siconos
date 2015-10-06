@@ -22,8 +22,8 @@
 
 from matplotlib.pyplot import subplot, title, plot, grid, show
 from numpy import array, eye, empty, zeros, savetxt
-from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL, \
-NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
+from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL,\
+    NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
 Interaction, Relay
 from math import ceil
 

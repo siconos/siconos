@@ -45,6 +45,8 @@ set(${PACKAGE_NAME}_EXTERNAL_LIBRARIES "@SICONOS_LINK_LIBRARIES@")
 # include siconos project targets
 include("@CMAKE_INSTALL_PREFIX@/share/@PROJECT_NAME@/cmake/@PROJECT_NAME@Targets.cmake")
 
+set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
+
 # siconos libs are appended as targets.
 # Note that thanks to the include above, this will add all external libraries on which
 # the targets depend to the linker.
