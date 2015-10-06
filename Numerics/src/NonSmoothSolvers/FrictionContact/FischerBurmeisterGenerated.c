@@ -11,7 +11,7 @@
 #define RESULT_CHECK(X)
 #define VALUE_CHECK(X)
 
-# sqrt(DBL_EPSILON)
+// sqrt(DBL_EPSILON)
 #define ZERO 1.490116119384766e-08
 #define NOT_ZERO(x) fabs(x) > 0
 #define IS_NOT_ZERO(x) fabs(x) > 0
