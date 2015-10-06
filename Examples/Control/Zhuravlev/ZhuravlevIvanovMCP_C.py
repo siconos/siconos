@@ -50,7 +50,7 @@ if __name__ == '__main__':
     data_struct.g = g
     data_struct.kappa = kappa
 
-    D = ffi.dlopen(SN._Numerics.__file__)
+    D = ffi.dlopen(SN._numerics.__file__)
     D.set_cstruct(mcp.get_env_as_long(), ffi.cast('void*', data_struct))
     mcp.set_compute_F_and_nabla_F_as_C_functions('ZhuravlevIvanov.so', 'compute_Fmcp', 'compute_nabla_Fmcp')
 

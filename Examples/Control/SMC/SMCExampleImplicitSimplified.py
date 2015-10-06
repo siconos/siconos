@@ -19,7 +19,8 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
 from siconos.kernel import ControlFirstOrderLinearDS, LinearSMC, getMatrix, \
-    TimeDiscretisation, LinearSensor, SimpleMatrix
+    TimeDiscretisation, SimpleMatrix
+from siconos.control.sensor import LinearSensor
 from matplotlib.pyplot import subplot, title, plot, grid, show
 from numpy import eye, zeros, savetxt
 from math import ceil

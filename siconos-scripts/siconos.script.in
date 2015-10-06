@@ -191,22 +191,21 @@ if __name__ == '__main__':
     plugin_directories = []
     src_dir = os.path.join(call_pwd, args[0])
     path_to_src = os.path.dirname(src_dir)
-    #plugin_dirs = glob.glob(os.path.join(path_to_src, '*Plugin*'))
-    plugin_dirs = glob.glob('*Plugin*')
-    print "iiuaezouaizuo iaoizeu", plugin_dirs
+    # default plugin dirs = *Plugin*, plugin 
+    plugin_dirs = glob.glob(os.path.join(path_to_src, '*Plugin*'))
     for dd in plugin_dirs:
         if os.path.isdir(dd):
-            plugin_directories.append(os.path.join(path_to_src, dd))
+            plugin_directories.append(dd)
     pg_dir = os.path.join(path_to_src, 'plugin')
     if os.path.isdir(pg_dir):
         plugin_directories.append(pg_dir)
 
-    print 'pg dir ...', plugin_directories
     # Some user-defined extra directories for input sources
-    sources_directories = []
+    extra_sources_directories = []
+    # default extra src dir ...
     extra_src_dir = os.path.join(path_to_src, 'src')
     if os.path.isdir(extra_src_dir):
-        sources_directories.append(extra_src_dir)
+        extra_sources_directories.append(extra_src_dir)
     tmp_build = False
     build_directory = '.siconos'
     clean_build = False
@@ -286,7 +285,7 @@ if __name__ == '__main__':
             plugin_directories.append(os.path.join(path_to_src, a))
 
         if o == '--src-dir':
-            sources_directories.append(os.path.join(path_to_src, a))
+            extra_sources_directories.append(os.path.join(path_to_src, a))
 
         if o == '--generator':
             cmake_generator = a
@@ -340,11 +339,8 @@ if __name__ == '__main__':
                                        os.path.join(siconos_prefix, 'bin'))
         if 'install' in make_targets:
 
-            plugin_directories = \
-                [os.path.join(call_pwd, d) for d in plugin_directories]
-
             if all_srcs:
-                sources_directories.append(os.path.dirname(main_source))
+                extra_sources_directories.append(os.path.dirname(main_source))
 
             full_definitions = []
             kwd_definitions = []
@@ -363,9 +359,7 @@ if __name__ == '__main__':
                 extra_cmake_args.append('-G' + cmake_generator)
 
             # No compilation required if only python files ...
-            if source_is_python and \
-               plugin_directories == [] and \
-               not os.path.exists(os.path.join(exe_dir, 'plugin')):
+            if source_is_python and len(plugin_directories) == 0:
                 comp = False
 
             if comp:
@@ -386,7 +380,7 @@ if __name__ == '__main__':
                         '-DPLUGIN_DIRECTORIES={0}'.format(
                             ';'.join(plugin_directories)),
                         '-DSOURCES_DIRECTORIES={0}'.format(
-                            ';'.join(sources_directories)),
+                            ';'.join(extra_sources_directories)),
                         '-DCOMPILER_OPTIONS={0}'.format(
                             ';'.join(compiler_options)),
                         '-DCOMMAND_LINE_LINKER_OPTIONS={0}'.format(

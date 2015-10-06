@@ -30,8 +30,10 @@ Integer = int
 
 # Other import
 from siconos.kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-    TimeStepping, ZeroOrderHoldOSI, ControlManager, LinearSensor, LinearSMCOT2, \
-    getMatrix, SimpleMatrix
+    TimeStepping, ZeroOrderHoldOSI, getMatrix, SimpleMatrix
+from siconos.control.simulation import ControlManager
+from siconos.control.sensor import LinearSensor
+from siconos.control.controller import LinearSMCOT2
 from matplotlib.pyplot import subplot, title, plot, grid, show
 from numpy import array, eye, empty, zeros, savetxt
 from math import ceil, sin

@@ -3,7 +3,6 @@ import siconos.numerics as SN
 
 import numpy as np
 import matplotlib.pyplot as plt
-
     ## \brief Constructor
     #
     # \param  is a  (optional)

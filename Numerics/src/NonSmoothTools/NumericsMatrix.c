@@ -1448,24 +1448,41 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 
     dmumps_c(mumps_id);
 
-    if (verbose > 1)
+    if (verbose == 1)
+    {
+      mumps_id->ICNTL(1) = -1; // Error messages, standard output stream.
+      mumps_id->ICNTL(2) = -1; // Diagnostics,    standard output stream.
+      mumps_id->ICNTL(3) = -1; // Global infos,   standard output stream.
+
+      mumps_id->ICNTL(11) = 1; // Error analysis
+
+    }
+    else if (verbose == 2)
+    {
+      mumps_id->ICNTL(1) = -1; // Error messages, standard output stream.
+      mumps_id->ICNTL(2) = -1; // Diagnostics,    standard output stream.
+      mumps_id->ICNTL(3) = 6; // Global infos,   standard output stream.
+
+//      mumps_id->ICNTL(4) = 4; // Errors, warnings and information on
+                              // input, output parameters printed.
+
+//      mumps_id->ICNTL(10) = 1; // One step of iterative refinment
+      mumps_id->ICNTL(11) = 1; // Error analysis
+    }
+    else if (verbose >= 3)
     {
       mumps_id->ICNTL(1) = 6; // Error messages, standard output stream.
       mumps_id->ICNTL(2) = 6; // Diagnostics,    standard output stream.
       mumps_id->ICNTL(3) = 6; // Global infos,   standard output stream.
 
-      mumps_id->ICNTL(4) = 4; // Errors, warnings and information on
+//      mumps_id->ICNTL(4) = 4; // Errors, warnings and information on
                               // input, output parameters printed.
 
 //      mumps_id->ICNTL(10) = 1; // One step of iterative refinment
       mumps_id->ICNTL(11) = 1; // Error analysis
-
     }
     else
     {
-//      mumps_id->ICNTL(10) = 5;
-//      mumps_id->CNTL(2) = 1e-14;
-
       mumps_id->ICNTL(1) = -1;
       mumps_id->ICNTL(2) = -1;
       mumps_id->ICNTL(3) = -1;

@@ -18,7 +18,10 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 from siconos.kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-    TimeStepping, ZeroOrderHoldOSI, ControlManager, LinearSensor, LinearSMCOT2
+    TimeStepping, ZeroOrderHoldOSI
+from siconos.control.simulation import ControlManager
+from siconos.control.sensor import LinearSensor
+from siconos.control.controller import LinearSMCOT2
 from matplotlib.pyplot import subplot, title, plot, grid, show, xlabel, ylabel
 import matplotlib.pyplot as plt
 from numpy import eye, empty, zeros, savetxt

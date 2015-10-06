@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     (*velocity0)(2) = omega_S_0;
 
     SP::LagrangianDS dynamicalSystem(new LagrangianLinearTIDS(q0, velocity0, Mass, K, C));
-    dynamicalSystem->setComputeFExtFunction("plugins", "FExt");
+    dynamicalSystem->setComputeFExtFunction("WoodPeckerPlugin", "FExt");
 
     // --------------------
     // --- Interactions ---
