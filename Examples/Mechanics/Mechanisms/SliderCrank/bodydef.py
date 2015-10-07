@@ -79,10 +79,10 @@ afile=numpy.array(['./CAD/body1.step',
                    './CAD/Slider.step'])
 
 ## REQUIRED the library for the plugged forces.
-if apple :
-    plugin="SliderCrankPlugin.dylib"
-else :
-    plugin="SliderCrankPlugin.so"
+#if apple :
+#    plugin="SliderCrankPlugin.dylib"
+#else :
+plugin="SliderCrankPlugin.so"
 
 ## REQUIRED the external forces.
 fctfext=numpy.array(['externalForcesB1','externalForcesB2','externalForcesS'])

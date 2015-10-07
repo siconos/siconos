@@ -1,4 +1,4 @@
-Siconos.Mechanics
+siconos.mechanics
 =================
 
 Usage

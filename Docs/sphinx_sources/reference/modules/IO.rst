@@ -1,4 +1,4 @@
-Siconos.IO
+siconos.io
 ==========
 
 Usage

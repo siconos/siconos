@@ -1,4 +1,4 @@
-Siconos.Numerics
+siconos.numerics
 ================
 
 Nonsmooth problems:

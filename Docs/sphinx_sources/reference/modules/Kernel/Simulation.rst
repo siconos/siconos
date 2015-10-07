@@ -180,4 +180,4 @@ Simulation API
 ^^^^^^^^^^^^^^
 
 .. automodule:: siconos.kernel
-  :members: :eval:`under_directory(['../../../Kernel/src/simulationTools'])`
+  :members: :eval:`under_directory(['src/simulationTools'])`

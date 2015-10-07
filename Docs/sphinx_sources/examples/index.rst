@@ -1,8 +1,8 @@
-.. _siconos_devel_guide:
+.. _siconos_examples:
 
 
-Siconos Examples Manual
-========================
+Examples' Manual
+================
 
 Foreword
 --------

@@ -7,7 +7,7 @@
 # for each header of the current component
 #
 # A config file is generated for each header, from ${DOXY_WARNINGS_CONFIG} file
-# set in doxygen_setup.cmake.
+# set Docs/CMakeLists.txt
 # ===========================================================================
 
 if(WITH_${COMPONENT}_DOXYGEN_WARNINGS)

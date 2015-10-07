@@ -14,10 +14,12 @@
 
 import sys
 import os
-import shlex
+import re
+import importlib
 
-
-
+# append siconos package build path to sys
+siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'python_bindings')
+sys.path.append(siconos_pythonpath)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -328,18 +330,21 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
 
-import re
+path_to_numerics = os.path.join('@CMAKE_SOURCE_DIR@', 'Numerics')
 
 def starting_with(prefixes):
     return ','.join([','.join([
-        fun for fun in dir(__import__("siconos.numerics"))
+        fun for fun in dir(importlib.import_module('siconos.numerics'))
         if fun.startswith(prefix)]) for prefix in prefixes])
+
+
+path_to_kernel = os.path.join('@CMAKE_SOURCE_DIR@', 'Kernel')
 
 def under_directory(dirs):
     return ','.join(
         [','.join([
-            cls for cls in dir(__import__("siconos.kernel"))
-            if os.path.exists(os.path.join(d, '{0}.hpp'.format(cls)))])
+            cls for cls in dir(importlib.import_module('siconos.kernel'))
+            if os.path.exists(os.path.join(os.path.join(path_to_kernel, d), '{0}.hpp'.format(cls)))])
          for d in dirs])
 
 def source_read(app, docname, source):

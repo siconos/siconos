@@ -53,6 +53,10 @@ IF(MSVC)
   SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock Pendulum)
 ENDIF(MSVC)
 
+if(WITH_PYTHON_BINDINGS)
+  find_python_module(matplotlib)
+endif()
+
 # --- Search siconos package path ---
 # --> based on path to script run_siconos
 find_file(SICONOS_SCRIPT run_siconos)

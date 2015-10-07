@@ -257,4 +257,4 @@ Modelisation API
 ^^^^^^^^^^^^^^^^
 
 .. automodule:: siconos.kernel
-  :members: :eval:`under_directory(['../../../Kernel/src/modelingTools'])`
+  :members: :eval:`under_directory(['src/modelingTools'])`

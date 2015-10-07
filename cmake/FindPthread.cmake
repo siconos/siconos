@@ -25,7 +25,7 @@ IF(Pthread_LIBRARY)
   GET_FILENAME_COMPONENT(Pthread_LIBRARY_DIRS ${Pthread_LIBRARY} PATH)
   GET_FILENAME_COMPONENT(Pthread_LIBRARIES ${Pthread_LIBRARY} NAME)
   GET_FILENAME_COMPONENT(Pthread_LIBRARY_DIRS_DIR ${Pthread_LIBRARY_DIRS} PATH)
-  SET(Pthread_INCLUDE_DIRS ${Pthread_LIBRARY_DIRS_DIR}/include)
+  # SET(Pthread_INCLUDE_DIRS ${Pthread_LIBRARY_DIRS_DIR}/include)  Note FP: failed on ubuntu because of suffix after lib ... and useless anyway.
 ELSE(Pthread_LIBRARY)
   IF(Pthread_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR

@@ -150,4 +150,17 @@ if(WITH_PYTHON_BINDINGS)
     set(SWIG_USE_FILE ${CMAKE_SOURCE_DIR}/cmake/UseSWIG.cmake)
   endif()
   include(${SWIG_USE_FILE})
+  find_python_module(numpy REQUIRED)
+  find_python_module(scipy REQUIRED) # for sparse
+endif()
+
+
+#
+# Fedora13 https://fedoraproject.org/wiki/UnderstandingDSOLinkChange
+if(UNIX)
+  # add -lm to linker
+  CHECK_C_COMPILER_FLAG("-lm" C_HAVE_LINKER_M)
+  if(C_HAVE_LINKER_M)
+    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
+  endif()
 endif()

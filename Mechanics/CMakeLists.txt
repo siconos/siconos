@@ -22,10 +22,6 @@ if(WITH_OCC)
   list(APPEND ${COMPONENT}_DIRS src/occ)
 endif()
 
-if(WITH_BULLET)
-  list(APPEND ${COMPONENT}_DIRS src/contactDetection/bullet)
-endif()
-
 if(WITH_MECHANISMS)
   list(APPEND ${COMPONENT}_DIRS
     src/mechanisms/CADMBTB
@@ -48,6 +44,12 @@ include(WindowsMechanicsSetup)
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
 set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
 set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} kernel)
+if(WITH_BULLET)
+  list(APPEND ${COMPONENT}_DIRS src/contactDetection/bullet)
+  include_directories(${BULLET_INCLUDE_DIRS})
+  set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${BULLET_LIBRARIES})
+endif()
+
 include(LibraryProjectSetup)
 library_project_setup()
 

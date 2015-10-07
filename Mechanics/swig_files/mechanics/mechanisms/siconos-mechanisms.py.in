@@ -11,7 +11,7 @@ import sys
 
 siconos_pythonpath = "@SICONOS_PYTHON_INSTALL_DIR@"
 sys.path.append(siconos_pythonpath)
-
+mechanisms_path = os.path.join(siconos_pythonpath, 'siconos/mechanics/mechanisms')
 from siconos.mechanics.mechanisms import mbtb
 from siconos.mechanics.mechanisms import cadmbtb
 
@@ -22,7 +22,7 @@ from siconos.mechanics.contact_detection.base import SpaceFilter
 with_io = "'@HAVE_SICONOS_IO@" is "TRUE"
 if with_io:
     from siconos.mechanics import IO
-from siconos.mechanics.contact_detection.base import Avatar, Contactor
+from siconos.mechanics.contact_detection.tools import Avatar, Contactor
 
 install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
 print("install_path :", install_path)
@@ -32,18 +32,15 @@ from math import pi
 # why this truncation is needed ?
 my_PI=3.14159265
 
-# would be better in install_path/share ...
-# would be better in install_path/share ...
-from siconos import mbtbDefaultOptions
+default_options = os.path.join(mechanisms_path, 'mbtbDefaultOptions.py')
+local_options = os.path.join(os.getcwd(), 'mbtbLocalOptions.py')
 
-#exec(compile(open(install_path+"/mbtbDefaultOptions.py").read(), install_path+"/mbtbDefaultOptions.py", 'exec'))
+exec(compile(open(default_options).read(), default_options, 'exec'))
 #print("siconos-mechanisms.py, info:", install_path+"/mbtbDefaultOptions.py loaded")
 
-#try:
-#    exec(compile(open("mbtbLocalOptions.py").read(), "mbtbLocalOptions.py", 'exec'))
-#    print("siconos-mechanisms.py, info: mbtbLocalOptions.py loaded")
-#except :
-#    print("siconos-mechanisms.py, info: mbtbLocalOptions.py not defined")
+if os.path.exists(local_options):
+    exec(compile(open(local_options).read(), local_options, 'exec'))
+    print("siconos-mechanisms.py, info: mbtbLocalOptions.py loaded")
 
 exec(compile(open("bodydef.py").read(), "bodydef.py", 'exec'))
 print("siconos-mechanisms.py, info: bodydef.py loaded")

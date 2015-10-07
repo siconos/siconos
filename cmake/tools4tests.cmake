@@ -314,6 +314,16 @@ MACRO(END_TEST)
 ENDMACRO(END_TEST)
 
 
+# Build plugins required for python tests
+macro(build_plugin plug)
+  get_filename_component(plug_name ${plug} NAME_WE)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/)
+  add_library(${plug_name} MODULE ${plug})
+  set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
+  set_target_properties(${plug_name} PROPERTIES PREFIX "")
+  add_dependencies(${COMPONENT} ${plug_name})
+endmacro()
+
 # ----------------------------------------
 # Prepare python tests for the current
 # component
@@ -377,4 +387,5 @@ macro(add_python_test test_name test_file)
   #    WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
   set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/python_bindings")
+  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_BINARY_DIR}/python_bindings/siconos/tests") # for plugins
 endmacro()

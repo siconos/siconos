@@ -9,7 +9,7 @@
 # ============= Global 'standard' cmake Settings =============
 
 # Set minimum version for cmake
-cmake_minimum_required(VERSION 2.8.7)
+cmake_minimum_required(VERSION 2.8.9)
 
 # Set policies (see http://www.cmake.org/cmake/help/v3.0/manual/cmake-policies.7.html)
 # MACOSX_RPATH required from cmake 3.0.
@@ -19,7 +19,7 @@ if(POLICY CMP0042)
 endif()
 
 # Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/user_options)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/UserOptionsExamples)
 
 # Force out-of-source build
 include(OutOfSourcesBuild)
@@ -45,7 +45,7 @@ if(USER_OPTIONS_FILE)
   else()
     message(FATAL_ERROR "Cannot find file ${USER_OPTIONS_FILE}")
   endif()
-  message("\n !!!!! Load user-defined options set from file ${CMAKE_SOURCE_DIR}/${input_file} !!!!! \n")
+  message("\n !!!!! Load user-defined options set from file ${filefound} !!!!! \n")
   include(${input_file})
   # copy user file to binary dir, just for 'visual' check.
   configure_file(${input_file} ${input_file} COPYONLY)
@@ -131,12 +131,10 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/siconos-scripts/CMakeLists.txt.in)
   configure_file(${CMAKE_BINARY_DIR}/siconos-scripts/CMakeLists-temp.txt ${CMAKE_BINARY_DIR}/siconos-scripts/CMakeLists.txt @ONLY)
   install(FILES ${CMAKE_BINARY_DIR}/siconos-scripts/CMakeLists.txt DESTINATION share/${PROJECT_NAME})
 endif()
-if(EXISTS ${CMAKE_SOURCE_DIR}/siconos-scripts/siconos.script.in)
+if(EXISTS ${CMAKE_SOURCE_DIR}/siconos-scripts/run_siconos.py.in)
   message("-- Generate siconos script ...")
   configure_file(siconos-scripts/run_siconos.py.in siconos-scripts/run_siconos @ONLY)
-  install(FILES ${CMAKE_BINARY_DIR}/siconos-scripts/run_siconos DESTINATION bin
-    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ 
-    OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+  install(PROGRAMS ${CMAKE_BINARY_DIR}/siconos-scripts/run_siconos DESTINATION bin)
 endif()
 
 # ============= Save config for other cmake projects ============

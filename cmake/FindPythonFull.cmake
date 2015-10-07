@@ -82,8 +82,8 @@ else()
   find_package_handle_standard_args(Python
     REQUIRED_VARS PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS PYTHON_EXECUTABLE
     VERSION_VAR PYTHONLIBS_VERSION_STRING)
-
   if(PYTHON_FOUND)
+    set(PYTHONFULL_FOUND TRUE)
     if(NOT PythonFull_FIND_QUIETLY)
       message("-- Found Python executable: ${PYTHON_EXECUTABLE}")
       message("-- Found Python library: ${PYTHON_LIBRARIES}")

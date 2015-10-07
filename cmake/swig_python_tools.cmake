@@ -12,6 +12,8 @@
 # -----------------------------------
 macro(doxy2swig_docstrings COMP)
   if(WITH_${COMPONENT}_DOXY2SWIG)
+    update_xml_doxy_config_file(${COMP})
+    build_doc_xml(${COMP})
     set(DOCSTRINGS_FILES)
     # for each header of the current component ...
     foreach(_F ${${COMP}_HDRS})
@@ -50,8 +52,6 @@ macro(doxy2swig_docstrings COMP)
     
     add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
   endif()
-  # Doxygen doc must be built before a call to the targets above.
-  #add_dependencies(${COMP}_OUTPUT doc)
 endmacro()
 
 # ----------------------------------------------------------------------
@@ -114,7 +114,7 @@ macro(add_siconos_swig_sub_module fullname)
 
   # set dep between docstrings and python bindings
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT}_docstrings)
-
+  
   # set dependency of sphinx apidoc to this target
   if(USE_SPHINX)
     add_dependencies(apidoc ${SWIG_MODULE_${_name}_REAL_NAME})
@@ -137,15 +137,6 @@ macro(add_siconos_swig_sub_module fullname)
   #install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${_name}.py DESTINATION ${DEST})
   install(TARGETS ${SWIG_MODULE_${_name}_REAL_NAME} DESTINATION ${DEST})
   
-endmacro()
-
-macro(build_plugin plug)
-  get_filename_component(plug_name ${plug} NAME_WE)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/)
-  add_library(${plug_name} MODULE ${plug})
-  set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/plugins)
-  set_target_properties(${plug_name} PROPERTIES PREFIX "")
-  add_dependencies(${COMPONENT} ${plug_name})
 endmacro()
 
 macro(swig_module_setup modules_list)

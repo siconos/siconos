@@ -1,20 +1,23 @@
 # Default values for bodies and contact parameters. Should be change in bodydef.py if needed.
-mbtb.MBTB_MAX_BODIES_NUMBER 
+from siconos.mechanics.mechanisms import mbtb
+import numpy as np
+import array
+mbtb.MBTB_MAX_BODIES_NUMBER
 mbtb.MBTB_MAX_CONTACTS_NUMBER
 mbtb.MBTB_MAX_JOINTS_NUMBER
 
-initVel=numpy.array([(0,0,0,0,0,0) for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-fctfext=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-fctmext=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-fctfint=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-fctmint=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-fctfintjacq=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-fctmintjacq=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-fctfintjacv=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-fctmintjacv=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+initVel=np.array([(0,0,0,0,0,0) for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctfext=np.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctmext=np.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctfint=np.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctmint=np.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctfintjacq=np.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctmintjacq=np.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctfintjacv=np.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+fctmintjacv=np.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
 
-boundaryCondition=numpy.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-boundaryConditionIndex=numpy.array([numpy.array([],dtype=int) for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+boundaryCondition=np.array(['' for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+boundaryConditionIndex=np.array([np.array([],dtype=int) for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
 
 NBARTEFACTS=0
 

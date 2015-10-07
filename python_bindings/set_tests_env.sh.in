@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -l
+#!/bin/bash
 
 export PYTHONPATH=${PYTHONPATH}"@CMAKE_CURRENT_BINARY_DIR@":${PYTHONPATH}
 

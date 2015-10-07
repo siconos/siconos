@@ -130,4 +130,6 @@ if(USE_SPHINX)
     ${CMAKE_BINARY_DIR}/python_bindings/${SICONOS_PYTHON_PACKAGE}
     )
 
+  add_custom_target(doc
+    DEPENDS doxygen html)
 endif()

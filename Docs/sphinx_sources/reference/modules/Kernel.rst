@@ -1,4 +1,4 @@
-Siconos.Kernel
+siconos.kernel
 ==============
 
 .. toctree::

@@ -34,7 +34,7 @@ set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
 set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/Kernel/swig_files)
 
-configure_file(mechanics/contact_detection/Tools.py ${SICONOS_SWIG_ROOT_DIR}/mechanics/contact_detection/tools.py)
+configure_file(mechanics/contact_detection/tools.py ${SICONOS_SWIG_ROOT_DIR}/mechanics/contact_detection/tools.py)
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 build_python_tests()
@@ -43,6 +43,6 @@ build_python_tests()
 # siconos mechanisms script
 if(WITH_MECHANISMS)
   configure_file(mechanics/mechanisms/siconos-mechanisms.py.in ${CMAKE_BINARY_DIR}/siconos-scripts/siconos-mechanisms.py)
-  configure_file(mechanics/mechanisms/mbtbDefaultOptions.py ${SICONOS_SWIG_ROOT_DIR}/mbtbDefaultOptions.py)
+  configure_file(mechanics/mechanisms/mbtbDefaultOptions.py ${SICONOS_SWIG_ROOT_DIR}/mechanics/mechanisms/mbtbDefaultOptions.py)
   install(PROGRAMS ${CMAKE_BINARY_DIR}/siconos-scripts/siconos-mechanisms.py DESTINATION bin)
 endif()

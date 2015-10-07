@@ -1,5 +1,5 @@
-Control
--------
+siconos.control
+===============
 
 Usage
 ^^^^^
