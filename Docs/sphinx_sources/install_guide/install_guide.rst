@@ -193,6 +193,9 @@ CMake options for Siconos installation
 Most options are like '-DWITH_XXX=ON or OFF to enable or disable some behavior or some interface to other libraries.
 If ON, the cmake system will search for XXX libraries, headers, or anything required on your system and will end up in error if not found. 
 
+Most common options
+^^^^^^^^^^^^^^^^^^^
+
 * CMAKE_INSTALL_PREFIX=some_path : to change the default path of Siconos installation. Default depends on your system. For example on unix-like
   system, it is usually /usr/local.
 
@@ -202,6 +205,11 @@ If ON, the cmake system will search for XXX libraries, headers, or anything requ
 
 * WITH_CMAKE_BUILD_TYPE=Debug, Release, ... : to choose the build mode, i.e. the default compiler flags used to build siconos.
 
+* WITH_TESTING : to enable/disable tests
+
+Developers or advanced users options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
 * DEV_MODE=ON (OFF) : activate developper mode, which means for example some more aggressive options for compilations, more outputs and so on
 
 * WITH_MUMPS=ON/OFF : to enable/disable mumps library (http://mumps.enseeiht.fr)
@@ -209,8 +217,6 @@ If ON, the cmake system will search for XXX libraries, headers, or anything requ
 * WITH_FCLIB=ON/OFF : to enable/disable fclib interface
 
 * WITH_DOXYGEN_WARNINGS=ON/OFF : verbose mode to explore doxygen warnings generated for siconos
-
-* WITH_TESTING : to enable/disable tests
 
 * WITH_SERIALIZATION :
 
@@ -284,7 +290,11 @@ Here is an example, to build numerics and kernel, with documentation, no tests .
   option(WITH_FREECAD "Use FreeCAD" OFF)
   option(WITH_MECHANISMS "Generation of bindings for Saladyn Mechanisms toolbox" OFF)
   option(WITH_XML "Enable xml files i/o. Default = ON" ON)
-
+  # Set python install mode:
+  # - user --> behave as 'python setup.py install --user'
+  # - standard --> install in python site-package (ie behave as python setup.py install)
+  # - prefix --> install in python CMAKE_INSTALL_PREFIX (ie behave as python setup.py install --prefix=CMAKE_INSTALL_PREFIX)
+  set(siconos_python_install "user" CACHE STRING "Install mode for siconos python package")
   # List of components to build and installed
   # List of siconos component to be installed
   # complete list = Numerics Kernel Control Mechanics IO
@@ -301,5 +311,15 @@ When all the installation process is done, you can test your installation by run
 (for non-standard installation path, mind :ref:`siconos_install_note`.). Try one of the numerous files
 provided in Siconos Examples package::
 
-  siconos BouncingBallTS.cpp
+  run_siconos BouncingBallTS.cpp
 
+
+You can also test all examples in a raw::
+
+  cd another_build_directory
+  cmake path_to_sources/Examples
+  make -jN
+  make test
+
+
+This will compile, link and execute all the examples distributed with siconos.
