@@ -122,9 +122,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   }
   else if (isVariable)
   {
-    if (iparam[1]==0)
+    if (iparam[1]==0) /* Armijo rule with Khotbotov ratio (default)   */
     {
-      DEBUG_PRINT("Variable step size method with special line-search ... \n");
+      DEBUG_PRINT("Variable step size method with Armijo rule with Khotbotov ratio (default) \n");
       while ((iter < itermax) && (hasNotConverged > 0))
       {
         ++iter;
@@ -144,7 +144,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         {
           /* if (iparam[3] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2/(rho_k*a1)); */
           /* else */ rho_k = rho_k * tau ;
-
+ 
           /* x <- x_k  for the std approach*/
           if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
 
@@ -222,9 +222,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
     }
 
-    if (iparam[1] == 1)
+    if (iparam[1] == 1) /* Armijo rule with Solodov.Tseng ratio */
     {
-      DEBUG_PRINT("Variable step size method with standard line-search ... \n");
+      DEBUG_PRINT("Variable step size method with Armijo rule with Solodov.Tseng ratio \n");
       while ((iter < itermax) && (hasNotConverged > 0))
       {
         ++iter;
@@ -324,9 +324,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
     }
 
-    if (iparam[1] == 2)
+    if (iparam[1] == 2) /* Armijo rule with Han.Sun ratio */
     {
-      DEBUG_PRINT("Variable step size method with standard line-search ... \n");
+      DEBUG_PRINT("Variable step size method with Armijo rule with Han.Sun ratio \n");
       while ((iter < itermax) && (hasNotConverged > 0))
       {
         ++iter;
