@@ -172,7 +172,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
           /* else */ rho_k = rho_k * tau ;
 
           /* x <- x_k  for the std apprach*/
-          if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[2]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
 
@@ -279,7 +279,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
           /* else */ rho_k = rho_k * tau ;
 
           /* x <- x_k  for the std approach*/
-          if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[2]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
 

@@ -68,6 +68,12 @@ extern "C"
       \param info return 0 if the solution is found
       \param options the solver options :
       iparam[0] : Maximum iteration number
+      iparam[1] : Choice of the line search
+           0 : Armijo rule with Khotbotov ratio (default)
+           1 : Armijo rule with Solodov.Tseng ratio
+      iparam[2] : bool activate the update in the loop (0:false default choice)
+      iparam[3] : use rho_k * tau * min(1.0,a2/(rho_k*a1)) to decrease rho; commented in the code
+
       dparam[3] : rho  parameter.
          If rho >0, then self-adaptive (Armijo like) procedure.
          If rho <0, then constant rho parameter  (rho <-- -rho)
@@ -99,7 +105,7 @@ extern "C"
            0 : Armijo rule with Khotbotov ratio (default)
            1 : Armijo rule with Solodov.Tseng ratio
            2 : Armijo rule with Han.Sun ratio
-      iparam[2] : bool desactivate the update in the loop (0:false default choice)
+      iparam[2] : bool activate the update in the loop (0:false default choice)
       iparam[3] : use rho_k * tau * min(1.0,a2/(rho_k*a1)) to decrease rho; commented in the code
       dparam[3] : rho parameter.
          If rho >0, then self-adaptive (Armijo like) procedure.
