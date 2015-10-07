@@ -33,7 +33,3 @@ build_python_tests()
 
 configure_file(fromXml.py.in ${SICONOS_SWIG_ROOT_DIR}/fromXml.py @ONLY)
 
-## install(FILES ${SICONOS_SWIG_SRC_DIRS}/KernelTypes.i
-##  ${CMAKE_CURRENT_SOURCE_DIR}/kernel.i
-##  ${CMAKE_CURRENT_SOURCE_DIR}/addons.hpp
-##  DESTINATION ${SICONOS_SWIG_ROOT_DIR})
