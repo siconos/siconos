@@ -43,7 +43,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'numpydoc',
+    #'numpydoc',
     'sphinx.ext.intersphinx', 'sphinxcontrib.bibtex',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.todo',

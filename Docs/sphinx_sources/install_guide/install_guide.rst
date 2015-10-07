@@ -194,7 +194,7 @@ Most options are like '-DWITH_XXX=ON or OFF to enable or disable some behavior o
 If ON, the cmake system will search for XXX libraries, headers, or anything required on your system and will end up in error if not found. 
 
 Most common options
-^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""
 
 * CMAKE_INSTALL_PREFIX=some_path : to change the default path of Siconos installation. Default depends on your system. For example on unix-like
   system, it is usually /usr/local.
@@ -208,7 +208,7 @@ Most common options
 * WITH_TESTING : to enable/disable tests
 
 Developers or advanced users options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""
   
 * DEV_MODE=ON (OFF) : activate developper mode, which means for example some more aggressive options for compilations, more outputs and so on
 

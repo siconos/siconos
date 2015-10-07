@@ -77,7 +77,8 @@ endif()
 if(USE_SPHINX)
   # find_python_module(breathe REQUIRED)
   find_python_module(sphinx REQUIRED)
-
+  find_python_module(sphinx-rtd-theme REQUIRED)
+  
   # --- conf.py describes sphinx setup ---
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/conf.py.in"
