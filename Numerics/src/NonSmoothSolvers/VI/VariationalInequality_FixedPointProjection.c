@@ -166,10 +166,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           a1 = cblas_dnrm2(n, w, 1);
           DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
-          /* reactiontmp <- reaction */
+          /* xtmp <- x */
           cblas_dcopy(n, xtmp, 1,x , 1) ;
 
-          /* reactiontmp <- reaction - reaction_k   */
+          /* xtmp <- x - x_k   */
           cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
 
           a2 = cblas_dnrm2(n, xtmp, 1) ;
@@ -181,7 +181,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* printf("rho_k = %12.8e\t", rho_k); */
           /* printf("a1 = %12.8e\t", a1); */
           /* printf("a2 = %12.8e\t", a2); */
-          /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
+          /* printf("norm x = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
           /* printf("success = %i\n", success); */
 
           ls_iter++;
@@ -283,7 +283,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* printf("rho_k = %12.8e\t", rho_k); */
           /* printf("a1 = %12.8e\t", a1); */
           /* printf("a2 = %12.8e\t", a2); */
-          /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
+          /* printf("norm x = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
           /* printf("success = %i\n", success); */
 
           ls_iter++;
@@ -384,7 +384,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* printf("rho_k = %12.8e\t", rho_k); */
           /* printf("a1 = %12.8e\t", a1); */
           /* printf("a2 = %12.8e\t", a2); */
-          /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
+          /* printf("norm x = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
           /* printf("success = %i\n", success); */
 
           ls_iter++;
