@@ -319,6 +319,7 @@ int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactPr
   /* at = an; */
   /* as = an; */
   double rho=   options->dWork[options->iparam[4]] , rho_k;
+
   /* printf ("saved rho = %14.7e\n",rho );  */
   /* printf ("options->iparam[4] = %i\n",options->iparam[4] );  */
 
@@ -342,7 +343,8 @@ int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactPr
   double localerror_k;
   int ls_iter = 0;
   int ls_itermax = 10;
-  double tau=0.6, L= 0.9, Lmin =0.3, taumin=0.7;
+  /* double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7]; */
+  double tau=2.0/3.0, tauinv = 3.0/2.0,  L= 0.9, Lmin =0.3;
 
 
 
@@ -373,15 +375,26 @@ int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactPr
 
     ls_iter = 0 ;
     success =0;
+    rho_k=rho / tau;
 
     normUT = sqrt(velocity_k[1] * velocity_k[1] + velocity_k[2] * velocity_k[2]);
     while (!success && (ls_iter < ls_itermax))
     {
+      rho_k = rho_k * tau ;
+      /* reaction <- reaction_k  for the std approach (default: unstd)*/
+      if (iparam[2])
+      {
+        reaction[0] = reaction_k[0] - rho_k * (velocity_k[0] + mu_i * normUT);
+        reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
+        reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
+      }
+      else
+      {
+        reaction[0] = reaction[0] - rho_k * (velocity_k[0] + mu_i * normUT);
+        reaction[1] = reaction[1] - rho_k * velocity_k[1];
+        reaction[2] = reaction[2] - rho_k * velocity_k[2];
+      }
 
-      rho_k = rho * pow(tau,ls_iter);
-      reaction[0] = reaction_k[0] -  rho_k * (velocity_k[0] + mu_i * normUT);
-      reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
-      reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
 
       projectionOnCone(&reaction[0], mu_i);
 
@@ -424,7 +437,7 @@ int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactPr
     /*Update rho*/
       if ((rho_k*a1 < Lmin * a2) && (localerror < localerror_k))
       {
-        rho =rho_k/taumin;
+        rho =rho_k*tauinv;
       }
       else
         rho =rho_k;
@@ -435,9 +448,9 @@ int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactPr
 
     }
 
-    options->dWork[options->iparam[4]] =rho;
 
   }
+  options->dWork[options->iparam[4]] =rho;
 
   if (localerror > localtolerance)
     return 1;
@@ -689,7 +702,8 @@ int frictionContact3D_projectionOnCylinderWithLocalIteration_solve(FrictionConta
   double localerror_k;
   int ls_iter = 0;
   int ls_itermax = 10;
-  double tau=0.6, L= 0.9, Lmin =0.3, taumin=0.7;
+  /* double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7]; would be better */
+  double tau=2.0/3.0, tauinv = 3.0/2.0,  L= 0.9, Lmin =0.3;
 
   double R  = localproblem->mu[options->iparam[4]];
 
@@ -717,13 +731,27 @@ int frictionContact3D_projectionOnCylinderWithLocalIteration_solve(FrictionConta
 
     ls_iter = 0 ;
     success =0;
+    rho_k=rho / tau;
+
+
     while (!success && (ls_iter < ls_itermax))
     {
+      rho_k = rho_k * tau ;
 
-      rho_k = rho * pow(tau,ls_iter);
-      reaction[0] = reaction_k[0] - rho_k * velocity_k[0];
-      reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
-      reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
+      /* reaction <- reaction_k  for the std approach(default: unstd) */
+      if (iparam[2])
+      {
+        reaction[0] = reaction_k[0] - rho_k * velocity_k[0];
+        reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
+        reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
+      }
+      else
+      {
+        reaction[0] = reaction[0] - rho_k * velocity_k[0];
+        reaction[1] = reaction[1] - rho_k * velocity_k[1];
+        reaction[2] = reaction[2] - rho_k * velocity_k[2];
+      }
+
 
       projectionOnCylinder(&reaction[0], R);
 
@@ -766,7 +794,7 @@ int frictionContact3D_projectionOnCylinderWithLocalIteration_solve(FrictionConta
     /*Update rho*/
       if ((rho_k*a1 < Lmin * a2) && (localerror < localerror_k))
       {
-        rho =rho_k/taumin;
+        rho =rho_k*tauinv;
       }
       else
         rho =rho_k;

@@ -312,6 +312,7 @@ void uint_shuffle (unsigned int *a, unsigned int n) {
 }
 
 
+
 void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
@@ -372,23 +373,25 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   unsigned int contact; /* Number of the current row of blocks in M */
 
   unsigned int *scontacts = NULL;
-
   if (iparam[5]) /* shuffle */
   {
-    srand((unsigned int)iparam[6]);
+    if (iparam[6] >0)
+    {
+      srand((unsigned int)iparam[6]);
+    }
+    else
+      srand(1);
     scontacts = (unsigned int *) malloc(nc * sizeof(unsigned int));
     for (unsigned int i = 0; i<nc ; ++i)
     {
       scontacts[i] = i;
     }
     uint_shuffle(scontacts, nc);
-    /* for (unsigned int i = 0; i<nc ; ++i) */
-    /* { */
-    /*   printf("scontacts[%i] = %i\n",i, scontacts[i]); */
-    /* } */
+    /* printf("scontacts :\t"); */
+    /* for (unsigned int i = 0; i<nc ; ++i) printf("%i\t", scontacts[i]); */
     /* printf("\n"); */
   }
-  
+
   /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
   if (iparam[1] == 1 || iparam[1] == 2)
   {
@@ -550,8 +553,10 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
         {
           ++iter;
           uint_shuffle(scontacts, nc);
+
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
+
           for (unsigned int i= 0 ; i < nc ; ++i)
           {
 
@@ -563,7 +568,9 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
+
+            localsolver_options->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
+
             (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
 
             reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
@@ -595,7 +602,6 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
         {
           ++iter;
           uint_shuffle(scontacts, nc);
-
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
           for (unsigned int i= 0 ; i < nc ; ++i)
@@ -603,7 +609,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
             contact = scontacts[i];
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
+            localsolver_options->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
             (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
           }
           /* **** Criterium convergence **** */

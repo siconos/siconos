@@ -4,7 +4,7 @@
 
 # python_bindings - Set extra dependencies
 set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS
-  ${CMAKE_SOURCE_DIR}/Kernel/swig_files/Kernel.i
+  ${CMAKE_SOURCE_DIR}/Kernel/swig_files/kernel.i
   ControlBase.i
   ControlTypemaps.i
   )

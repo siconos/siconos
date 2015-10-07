@@ -216,7 +216,7 @@ if(_EXE)
   include_directories(${SOURCES_DIRECTORIES})
   include_directories(${_MAIN_DIR})
   
-  add_executable("${_EXE}" "${_ALL_EXE_SRCS}")
+  add_executable("${_EXE}" ${_ALL_EXE_SRCS})
 
   # === Linked libraries ===
   link_setup(${_EXE})

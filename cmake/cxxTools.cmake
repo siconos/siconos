@@ -88,7 +88,7 @@ endfunction()
 # cf http://stackoverflow.com/questions/435708/any-way-in-cmake-to-require-gcc-version-4
 # with cmake version >= 2.8.8 we can use CMAKE_C_COMPILER_VERSION and
 # CMAKE_CXX_COMPILER_VERSION
-function(detect_cxx_compiler_version output_var)
+function(detect_cxx_compiler_version gcc_compiler_version)
   if(CMAKE_VERSION VERSION_LESS 3.0.0)
     exec_program(
       ${CMAKE_CXX_COMPILER}
@@ -96,10 +96,10 @@ function(detect_cxx_compiler_version output_var)
       OUTPUT_VARIABLE _compiler_output)
     string(REGEX REPLACE ".*([0-9]\\.[0-9]\\.[0-9]).*" "\\1"
       compiler_version ${_compiler_output})
-    message(STATUS "C++ compiler version: ${gcc_compiler_version} [${CMAKE_CXX_COMPILER}]")
+    set(${gcc_compiler_version} ${compiler_version} PARENT_SCOPE)
+    message(STATUS "C++ compiler version: ${compiler_version} [${}CMAKE_CXX_COMPILER}]")
   else()
-    set(${output_var} ${CMAKE_CXX_COMPILER_VERSION})
+    set(${gcc_compiler_version} ${CMAKE_CXX_COMPILER_VERSION} PARENT_SCOPE)
   endif()
 endfunction()
-
 

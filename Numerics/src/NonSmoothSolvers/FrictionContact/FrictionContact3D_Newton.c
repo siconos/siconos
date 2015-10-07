@@ -87,7 +87,7 @@ void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, Fricti
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_AlartCurnierNewton)
   {
     Fsize = 3;
-    frictionContact3D_AC_initialize(problem, localproblem);
+    frictionContact3D_AC_initialize(problem, localproblem,localsolver_options);
     F = &F_AC;
     jacobianF = &jacobianF_AC;
     /*     updateSolver = &frictionContact3D_AC_update; */
@@ -98,7 +98,7 @@ void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, Fricti
   else if (localsolver_options->solverId == SICONOS_FRICTION_3D_DampedAlartCurnierNewton)
   {
     Fsize = 3;
-    frictionContact3D_AC_initialize(problem, localproblem);
+    frictionContact3D_AC_initialize(problem, localproblem,localsolver_options);
     F = &F_AC;
     jacobianF = &jacobianF_AC;
     /*     updateSolver = &frictionContact3D_AC_update; */

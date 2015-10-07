@@ -59,8 +59,9 @@ extern "C"
   /** Initialize friction-contact 3D Alart-Curnier formulation
       \param problem the global problem to solve
       \param localproblem the local problem to solve
+      \param options of the solver
   */
-  void frictionContact3D_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem);
+  void frictionContact3D_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options );
 
   /** Update friction-contact 3D problem: formalize local problem for one contact
       \param problem the global problem to solve

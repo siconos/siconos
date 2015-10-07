@@ -7,34 +7,9 @@ if(WITH_PYTHON_BINDINGS)
   
   # --------------- Python install setup ---------------
   # Directory of all config files for python bindings.
-  
-  # get python dist-packages
-  # warning python may not know cmake_install_prefix
-  # installation in standard python dist package with:
-  # -DSTD_PYTHON_DIST_PACKAGES=TRUE 
-  #
-  # installation in specific place:
-  # -DPYTHON_DIST_PACKAGES=/my/specific/place
-  
-  IF(STD_PYTHON_DIST_PACKAGES)
-    EXECUTE_PROCESS ( COMMAND 
-      ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
-      OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-  ELSE()
-    IF(NOT PYTHON_DIST_PACKAGES)
-      EXECUTE_PROCESS ( COMMAND 
-	${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib;print(get_python_lib(0,0,\"\"))"
-	OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
-	OUTPUT_STRIP_TRAILING_WHITESPACE)
-    ENDIF()
-  ENDIF()
-  MESSAGE(STATUS "PYTHON_DIST_PACKAGES : ${PYTHON_DIST_PACKAGES}")
-
   # Set path for siconos-python installation
   include(PythonInstallSetup)
   set_python_install_path()
-  #set(SICONOS_PYTHON_INSTALL_DIR ${PYTHON_DIST_PACKAGES} CACHE INTERNAL "Install directory for python bindings.")
   
   #  ----------- swig -----------
 

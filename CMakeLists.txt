@@ -36,7 +36,7 @@ option(USE_MECHANICS "Use full mechanics package (oce ...). Default: OFF" OFF)
 
 if(USER_OPTIONS_FILE)
   get_filename_component(input_file ${USER_OPTIONS_FILE} NAME)
-  get_filename_component(path_to_file ${USER_OPTIONS_FILE} DIRECTORY)
+  get_filename_component(path_to_file ${USER_OPTIONS_FILE} PATH)
   find_file(filefound NAMES ${input_file}
     PATHS ${path_to_file} ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
     )
@@ -58,8 +58,13 @@ set(PROJECT_NAME siconos)
 
 # Set target names from components list
 assert(COMPONENTS_DIRS)
+set(AVAILABLE_COMPONENTS "Numerics Kernel Control Mechanics IO")
 foreach(component_name ${COMPONENTS_DIRS})
   string(TOUPPER ${component_name} upname)
+  list(FIND ${AVAILABLE_COMPONENTS} ${upname} comp_exists)
+  if(NOT comp_exists)
+    message(FATAL_ERROR "Unknown siconos component : ${component_name}")
+  endif()
   set(HAVE_SICONOS_${upname} TRUE)
   string(TOLOWER ${component_name} component)
   list(APPEND COMPONENTS_NAMES ${component})
@@ -128,7 +133,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/siconos-scripts/CMakeLists.txt.in)
 endif()
 if(EXISTS ${CMAKE_SOURCE_DIR}/siconos-scripts/siconos.script.in)
   message("-- Generate siconos script ...")
-  configure_file(siconos-scripts/siconos.script.in siconos-scripts/run_siconos @ONLY)
+  configure_file(siconos-scripts/run_siconos.py.in siconos-scripts/run_siconos @ONLY)
   install(FILES ${CMAKE_BINARY_DIR}/siconos-scripts/run_siconos DESTINATION bin
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ 
     OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)

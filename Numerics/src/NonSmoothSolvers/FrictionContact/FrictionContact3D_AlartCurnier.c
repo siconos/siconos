@@ -26,6 +26,7 @@
 #include "op3x3.h"
 #include "SiconosBlas.h"
 #include "SiconosBlas.h"
+#include "AlartCurnierGenerated.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -34,27 +35,12 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
 //#define VERBOSE_DEBUG
 //#define AC_STD
 //#define AC_Generated
-#define AC_JeanMoreau // Christensen & Pang
+//#define AC_JeanMoreau // Christensen & Pang
 
 // Set the function for computing F and its gradient
 // \todo should nbe done in initialization
-#ifdef AC_STD
-computeNonsmoothFunction  Function = &(computeAlartCurnierSTD);
-#endif
-#ifdef AC_JeanMoreau
-computeNonsmoothFunction  Function = &(computeAlartCurnierJeanMoreau);
-#endif
 
-// computeAlartCurnier[JeanMoreau] == AC_Generated
-
-#ifdef AC_Generated
-computeNonsmoothFunction  Function = &(frictionContact3D_AlartCurnierFunctionGenerated);
-#endif
-
-// HandMade not done
-#ifdef AC_HandMade
-computeNonsmoothFunction  Function = &(frictionContact3D_AlartCurnierFunctionHandMade);
-#endif
+computeNonsmoothFunction  Function = NULL;
 
 
 #define OPTI_RHO
@@ -127,7 +113,7 @@ void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * lo
 
 }
 
-void frictionContact3D_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem)
+void frictionContact3D_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options)
 {
   /*
     In initialize, these operators are "connected" to their corresponding static variables, that will be used to build local problem
@@ -138,7 +124,45 @@ void frictionContact3D_AC_initialize(FrictionContactProblem* problem, FrictionCo
   localFC3D = localproblem;
   globalFC3D = problem;
 
+  if (options->iparam[10] == 0 )
+  {
+    Function = &(computeAlartCurnierSTD);
+  }
+  else if (options->iparam[10] == 1 )
+  {
+    Function = &(computeAlartCurnierJeanMoreau);
+  }
+  else if (options->iparam[10] == 2 )
+  {
+    Function = &(frictionContact3D_AlartCurnierFunctionGenerated);
+  }
+  else if (options->iparam[10] == 3 )
+  {
+    Function = &frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated;;
+  }
+  else if (options->iparam[10] == 4 )
+  {
+    Function = NULL;
+  }
 
+
+/* #ifdef AC_STD */
+/* computeNonsmoothFunction  Function = &(computeAlartCurnierSTD); */
+/* #endif */
+/* #ifdef AC_JeanMoreau */
+/* computeNonsmoothFunction  Function = &(computeAlartCurnierJeanMoreau); */
+/* #endif */
+
+/* // computeAlartCurnier[JeanMoreau] == AC_Generated */
+
+/* #ifdef AC_Generated */
+/* computeNonsmoothFunction  Function = &(frictionContact3D_AlartCurnierFunctionGenerated); */
+/* #endif */
+
+/* // HandMade not done */
+/* #ifdef AC_HandMade */
+/* computeNonsmoothFunction  Function = &(frictionContact3D_AlartCurnierFunctionHandMade); */
+/* #endif */
 
 }
 
@@ -450,21 +474,24 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 14;
+  options->dSize = 14;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
   null_SolverOptions(options);
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 14; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
 
   options->iparam[0] = 10;
-  options->iparam[1] = 10;
+
   options->dparam[0] = 1e-16;
+  options->iparam[10] = 0;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[11] = 0;     /* 0 GoldsteinPrice line search, 1 FBLSA */
+  options->iparam[12] = 10;   /* max iter line search */
+
   return 0;
 }
 
@@ -1165,38 +1192,48 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
     Function(R, velocity, mu, rho, F, A, B);
 
-#ifndef AC_Generated
+/* #ifndef AC_Generated */
 #ifndef NDEBUG
-    double Fg[3] = {0., 0., 0.};
-    double Ag[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
-    double Bg[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
     double AWpB[9];
+    if (iparam[10] != 3 && iparam[10] != 4)
+    {
+      double Fg[3] = {0., 0., 0.};
+      double Ag[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+      double Bg[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
 
+      
 
-    assert(*rho > 0. && *(rho + 1) > 0. && *(rho + 2) > 0.);
+      assert(*rho > 0. && *(rho + 1) > 0. && *(rho + 2) > 0.);
 
-#ifdef AC_STD
-    frictionContact3D_AlartCurnierFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+/* #ifdef AC_STD */
+      if  (iparam[10] == 0 )
+      {
+        frictionContact3D_AlartCurnierFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+      }
+    
+/* #endif */
+
+/* #ifdef AC_JeanMoreau */
+      if  (iparam[10] == 1 )
+      {
+        frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+      }
+/* #endif */
+
+      sub3(F, Fg);
+      sub3x3(A, Ag);
+      sub3x3(B, Bg);
+      
+      assert(hypot3(Fg) <= 1e-7);
+      assert(hypot9(Ag) <= 1e-7);
+      assert(hypot9(Bg) <= 1e-7);
+      cpy3x3(A, Ag);
+      cpy3x3(B, Bg);
+      mm3x3(A, MLocal, AWpB);
+      add3x3(B, AWpB);
+    }
 #endif
-
-#ifdef AC_JeanMoreau
-    frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
-#endif
-
-    sub3(F, Fg);
-    sub3x3(A, Ag);
-    sub3x3(B, Bg);
-
-    assert(hypot3(Fg) <= 1e-7);
-    assert(hypot9(Ag) <= 1e-7);
-    assert(hypot9(Bg) <= 1e-7);
-    cpy3x3(A, Ag);
-    cpy3x3(B, Bg);
-    mm3x3(A, MLocal, AWpB);
-    add3x3(B, AWpB);
-
-#endif
-#endif
+/* #endif */
 
 
     // compute -(A MLocal +B)
@@ -1213,13 +1250,17 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
       }
     }
 
-#ifdef AC_STD
+/* #ifdef AC_STD */
+
 #ifndef NDEBUG
-    scal3x3(-1., AWpB);
-    sub3x3(AWplusB, AWpB);
-    assert(hypot9(AWpB) <= 1e-7);
+    if (iparam[10]==0)
+    {
+      scal3x3(-1., AWpB);
+      sub3x3(AWplusB, AWpB);
+      assert(hypot9(AWpB) <= 1e-7);
+    }
 #endif
-#endif
+/* #endif */
 
     // Solve the linear system
     solv3x3(AWplusB, dR, F);
@@ -1450,7 +1491,7 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
 
   double Tol = dparam[0];
   double itermax = iparam[0];
-  int LSitermax = iparam[1];
+  int LSitermax = iparam[12];
 
 
   int i, j, k, inew;

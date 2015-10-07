@@ -44,7 +44,7 @@
  * \f}
  * with
  * \f{eqnarray}{
- *    C^\alpha_{\mu} = \{ r \mid \|[r_1,\ldots,r_{n^\alpha}]\| \leq \mu^\alpha * r_0   \} \subset {\mathrm{I\!R}}^{n^\alpha}
+ *    C^\alpha_{\mu} = \{ r \mid \|[r_1,\ldot,r_{n^\alpha}]\| \leq \mu^\alpha * r_0   \} \subset {\mathrm{I\!R}}}^{n^\alpha}
  * \f}
  *
  *  \section SOCLCPSolversList Available solvers for SOCCLP
@@ -76,7 +76,7 @@
  * \begin{cases}
  *   u = M r + q \\
  *   C_{\mu} = \{ r \} =  \prod_{\alpha =1}^{n_c} C^\alpha_{\mu} \\
- *   C^\alpha_{\mu} = \{ r \mid \|[r_1,\ldots,r_{n^\alpha}]\| \leq \mu^\alpha * r_0   \} \subset {\mathrm{I\!R}}^{n^\alpha}
+ *   C^\alpha_{\mu} = \{ r \mid \|[r_1,\ldot,r_{n^\alpha}]\| \leq \mu^\alpha * r_0   \} \subset {\mathrm{I\!R}}}^{n^\alpha}
  *   C^\star_{\mu} \ni  {u} \perp r \in C_{\mu}
  * \end{cases}
  * \f}

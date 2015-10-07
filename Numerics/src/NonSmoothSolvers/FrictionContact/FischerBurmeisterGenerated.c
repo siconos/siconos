@@ -11,7 +11,8 @@
 #define RESULT_CHECK(X)
 #define VALUE_CHECK(X)
 
-#define ZERO 1e-13
+// sqrt(DBL_EPSILON)
+#define ZERO 1.490116119384766e-08
 #define NOT_ZERO(x) fabs(x) > 0
 #define IS_NOT_ZERO(x) fabs(x) > 0
 #define IS_POSITIVE(x) 1
@@ -45,7 +46,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 
 // hack, should be prevented in sage/sympy/maple or in code generation
-#define sqrt(x) ((x < 0) && ( x > -1000* DBL_EPSILON) ? 0 : (assert(x>=0),sqrt(x)))
+#define sqrt(x) ((x < 0) && ( x > - ZERO) ? 0 : (assert(x>=0),sqrt(x)))
 
 void frictionContact3D_FischerBurmeisterFABGenerated(
   double rn,
@@ -79,7 +80,7 @@ void frictionContact3D_FischerBurmeisterFABGenerated(
     x12=x2*x8;
     x13=x4*x4;
     x30=(assert(IS_POSITIVE(x11 + x12 + x13)), sqrt(x11 + x12 + x13));
-    x31=x30 <= ZERO;
+    x31=x30 <= 0;
     double x6;
     double x7;
     double x9;
@@ -124,7 +125,7 @@ void frictionContact3D_FischerBurmeisterFABGenerated(
     x24=x14 - x23;
     x27=x14 + x23;
     x41=fabs(x24);
-    x42=x22 <= ZERO || x27 <= ZERO || x41 <= ZERO;
+    x42=x22 <= 0 || x27 <= 0 || x41 <= 0;
     int x54;
     double x5;
     double x43;
@@ -138,7 +139,7 @@ void frictionContact3D_FischerBurmeisterFABGenerated(
     double x51;
     double x52;
     double x53;
-    x54=x3 <= ZERO;
+    x54=x3 <= 0;
     int x63;
     int x64;
     int x65;
@@ -155,24 +156,24 @@ void frictionContact3D_FischerBurmeisterFABGenerated(
     double x60;
     double x61;
     double x62;
-    x63=x3 > ZERO;
-    x64=x30 > ZERO;
-    x65=x22 > ZERO;
-    x66=x27 > ZERO;
-    x67=x41 > ZERO;
+    x63=x3 > 0;
+    x64=x30 > 0;
+    x65=x22 > 0;
+    x66=x27 > 0;
+    x67=x41 > 0;
     x68=x63 && x64 && x65 && x66 && x67;
     double x99;
     int x100;
     x43=x6 + x7;
     x99=(assert(IS_POSITIVE(x10 + x43)), sqrt(x10 + x43));
-    x100=x99 <= ZERO;
+    x100=x99 <= 0;
     int x107;
     int x108;
     double x103;
     double x104;
     double x105;
     double x106;
-    x107=x99 > ZERO;
+    x107=x99 > 0;
     x108=x107 && x65 && x66 && x67;
     int x121;
     double x26;
@@ -2721,7 +2722,7 @@ void frictionContact3D_FischerBurmeisterABGenerated(
     x7=mu*x6 + un;
     x8=x7*x7;
     x9=(assert(IS_POSITIVE(x3 + x5 + x8)), sqrt(x3 + x5 + x8));
-    x10=x9 <= ZERO;
+    x10=x9 <= 0;
     double x20;
     double x21;
     double x22;
@@ -2764,7 +2765,7 @@ void frictionContact3D_FischerBurmeisterABGenerated(
     x33=x31 + x32;
     x34=x31 - x32;
     x35=fabs(x34);
-    x36=x26 <= ZERO || x33 <= ZERO || x35 <= ZERO;
+    x36=x26 <= 0 || x33 <= 0 || x35 <= 0;
     int x49;
     double x37;
     double x38;
@@ -2778,7 +2779,7 @@ void frictionContact3D_FischerBurmeisterABGenerated(
     double x46;
     double x47;
     double x48;
-    x49=x6 <= ZERO;
+    x49=x6 <= 0;
     int x62;
     int x63;
     int x64;
@@ -2797,24 +2798,24 @@ void frictionContact3D_FischerBurmeisterABGenerated(
     double x59;
     double x60;
     double x61;
-    x62=x6 > ZERO;
-    x63=x9 > ZERO;
-    x64=x26 > ZERO;
-    x65=x33 > ZERO;
-    x66=x35 > ZERO;
+    x62=x6 > 0;
+    x63=x9 > 0;
+    x64=x26 > 0;
+    x65=x33 > 0;
+    x66=x35 > 0;
     x67=x62 && x63 && x64 && x65 && x66;
     double x98;
     int x99;
     x38=x27 + x28;
     x98=(assert(IS_POSITIVE(x30 + x38)), sqrt(x30 + x38));
-    x99=x98 <= ZERO;
+    x99=x98 <= 0;
     int x106;
     int x107;
     double x102;
     double x103;
     double x104;
     double x105;
-    x106=x98 > ZERO;
+    x106=x98 > 0;
     x107=x106 && x64 && x65 && x66;
     int x130;
     int x131;

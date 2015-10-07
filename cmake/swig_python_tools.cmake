@@ -70,7 +70,7 @@ endmacro()
 # ----------------------------------------------------------------------
 macro(add_siconos_swig_sub_module fullname)
   get_filename_component(_name ${fullname} NAME)
-  get_filename_component(_path ${fullname} DIRECTORY)
+  get_filename_component(_path ${fullname} PATH)
   
   message(" -- Build module ${_name} in directory ${_path} for parent ${COMPONENT}")
   # Add component dependencies to the current submodule deps.
