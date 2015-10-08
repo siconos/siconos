@@ -54,16 +54,6 @@ macro(LIBRARY_PROJECT_SETUP)
   # --- Append local includes to ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES ---
   remember_local_include_directories("${${COMPONENT}_DIRS}")
 
-  # COMPONENTConfig.h generation and include
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
-      ${CMAKE_CURRENT_BINARY_DIR}/${COMPONENT_NAME}Config.h)
-  endif()
-  set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
-    ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES}
-    ${CMAKE_CURRENT_BINARY_DIR}
-    CACHE INTERNAL "Include directories for external dependencies.")
-
   include(doxygen_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)

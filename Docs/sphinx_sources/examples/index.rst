@@ -3,33 +3,60 @@
 
 Examples' Manual
 ================
+This document is a collection of some examples of modelisation and simulation of nonsmooth systems with Siconos.
+ALl of them are distributed with siconos package and are the results of several contributions (which means that depending on each author(s) the documentation
+may be more or less detailed ...)
 
-Foreword
---------
+Click on one of the images below to find details about the system and its simulation or check in the table of contents at the bottom of this page to find
+an example that fits with your interests.
 
-This document is a collection of the descriptions of some examples avalaible in the Siconos platform. 
-The examples are the results of several contributions, and depending on each author(s) the documentation may be more or less detailed.
 
-To each example is associated a page with the author(s), some keywords and the list of the main source files (with links). Sometimes, a detailed description of the physical problem and some comments on the corresponding implementation are provided.
+Portfolio
 
-In the page below, some simple examples are first presented in Basic Examples. They are usefull to get a short view of Siconos functionnalities and for understanding, cut and paste to write your own example. 
-Then you get a list of all the other examples in More examples. 
-The last part, About this documentation is dedicated to people who whish to add their own example in the Siconos-release. This section and the provided links give details on how you must write the documentation and how this pages are generated.
+.. image:: /figures/Mechanics/BouncingBall/BouncingBall.*
+   :scale: 50%
+   :target: :ref:`bouncing_ball_example`
 
-Basic examples
---------------
+.. image:: /figures/Electronics/CircuitRLCD/SchemaCircuitRLCD.*
+   :scale: 50%
+   :target: :ref:`circuit_RLCD_example`
 
-.. figure:: /figures/BouncingBall.*
-   :scales: 50%
-   :caption: :ref:`EMBouncingBall`
-	     
-.. figure:: /figures/SchemaCircuitRLCD.*
-   :scales: 50%
-   :caption: :ref:`EMCircuitRLCD`
+.. image:: /figures/Mechanics/Woodpecker/woodpeckerphoto.png	   
+   :scale: 50%
+   :target: :ref:`woodpecker_example`
+
+.. image:: /figures/Electronics/DiodeBridge/SchemaDiodeBridge.*
+   :scale: 50%
+   :target: :ref:`diode_bridge_example`
 	    
-	   
-   
-   
+.. image:: /figures/Mechanics/MultiBeads/BeadsColumn.*	   
+   :scale: 50%
+   :target: :ref:`beads_column_example`
+
+.. image:: /figures/Control/Two-linkManipulator/two-linkManipulatorResults2.*
+   :scale: 50%
+   :target: :ref:`two_link_manipulator_example`
+	    
+.. image:: /figures/Electronics/PowerConverter/PRC_fig2.*	   
+   :scale: 50%
+   :target: :ref:`power_converter_example`
+
+.. image:: /figures/Control/ObserverLCS/ObserverLCS.*	   
+   :scale: 50%
+   :target: :ref:`observer_example`
+
+* .. image:: /figures/ Mechanics/Billiard/Billiard.*  
+     :scale: 50%
+     :target: :ref:`billiard_example`
+  
+	    
+.. toctree::
+   :maxdepth: 2
+   :caption: Siconos examples from Electronics
+   electronics_examples
 
 .. toctree::
    :maxdepth: 2
+   :caption: Siconos examples from Mechanics
+   mechanics_examples
+

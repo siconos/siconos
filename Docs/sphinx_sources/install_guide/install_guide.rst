@@ -9,7 +9,7 @@ Whatever your system is, you will need first to :
 * Create anywhere (but not in *path_to_sources*) a build directory.
 * Check :ref:`siconos_dependencies`. Most of them are commonly or at least easily installed
   on many standard systems.
- 
+* Check the list of :ref:`siconos_valid_platforms` on which siconos has been succesfully installed.
 The quick way
 -------------
 If you do not want to bother with all installations details and only need a 'standard' siconos install, just do ::
@@ -100,29 +100,6 @@ Siconos software is made of 4 components:
 	   
 TODO : describe siconos distribution (main directories, files and so on)
   
-.. _siconos_dependencies:
-
-Siconos required and optional dependencies
-------------------------------------------
-
-* a compiler suite, with c++, c and gfortran compilers.
-* boost
-* blas and lapack
-* cmake (version > 2.8.7, 3.x will be better)
-
-To generate the documentation, you will need :
-
-* doxygen
-* sphinx
-
-For the python bindings:
-
-* python (>= 2.7)
-* swig (>= 2.0)
-
-To run tests:
-
-* cppunit
 
 .. _siconos_run_tests:
 
