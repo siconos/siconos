@@ -27,6 +27,8 @@ if(LpSolve_FOUND)
   set(HAS_ONE_LP_SOLVER TRUE)
   set(HAS_EXTREME_POINT_ALGO TRUE)
   set(WITH_LPSOLVE TRUE)
+  string(REPLACE "-Werror=conversion" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+  string(REPLACE "-Werror=conversion" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
 endif(LpSolve_FOUND)
 
 
