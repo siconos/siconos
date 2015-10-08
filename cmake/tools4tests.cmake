@@ -361,9 +361,9 @@ macro(build_python_tests)
     
     # copy test dir to binary dir (inside siconos package)
     # ---> allows py.test run in binary dir
-    file(GLOB data4tests ${CMAKE_CURRENT_SOURCE_DIR}/data/*)
+    file(GLOB data4tests ${CMAKE_CURRENT_SOURCE_DIR}/tests/data/*)
     foreach(datafile ${data4tests})
-      configure_file(${datafile} ${SICONOS_SWIG_ROOT_DIR}/tests/data/${datafile} COPYONLY)
+      configure_file(${datafile} ${SICONOS_SWIG_ROOT_DIR}/tests/data/ COPYONLY)
     endforeach()
       
     file(GLOB testfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py)
