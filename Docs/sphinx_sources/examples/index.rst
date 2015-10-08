@@ -19,23 +19,23 @@ an example that fits with your interests.
 Gallery
 -------
 
-.. image:: /figures/Mechanics/BouncingBall/BouncingBall.*
+.. image:: /figures/mechanics/BouncingBall/BouncingBall.*
    :scale: 50%
    :target: :ref:`bouncing_ball_example`
 
-.. image:: /figures/Electronics/CircuitRLCD/SchemaCircuitRLCD.*
+.. image:: /figures/electronics/CircuitRLCD/SchemaCircuitRLCD.*
    :scale: 50%
    :target: :ref:`RLCD_example`
 
-.. image:: /figures/Mechanics/Woodpecker/woodpeckerphoto.png	   
+.. image:: /figures/mechanics/Woodpecker/woodpeckerphoto.png	   
    :scale: 50%
    :target: :ref:`woodpecker_example`
 
-.. image:: /figures/Electronics/DiodeBridge/SchemaDiodeBridge.*
+.. image:: /figures/electronics/DiodeBridge/SchemaDiodeBridge.*
    :scale: 50%
    :target: :ref:`diode_bridge_example`
 	    
-.. image:: /figures/Mechanics/MultiBeads/BeadsColumn.*	   
+.. image:: /figures/mechanics/MultiBeads/BeadsColumn.*	   
    :scale: 50%
    :target: :ref:`beads_column_example`
 
@@ -43,11 +43,11 @@ Gallery
    :scale: 50%
    :target: :ref:`two_link_manipulator_example`
 	    
-.. image:: /figures/Electronics/PowerConverter/PRC_fig2.*	   
+.. image:: /figures/electronics/PowerConverter/PRC_fig2.*	   
    :scale: 50%
    :target: :ref:`power_converter_example`
 
-.. image:: /figures/ Mechanics/Billiard/Billiard.*  
+.. image:: /figures/ mechanics/Billiard/Billiard.*  
      :scale: 50%
      :target: :ref:`billiard_example`
 

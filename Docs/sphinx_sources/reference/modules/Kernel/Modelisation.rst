@@ -123,7 +123,7 @@ This is an example of an electrical circuit involving:
   - a non smooth system (a 1000 Ohm resistor supplied through a 4
     diodes bridge) in parallel with the oscillator
 
-.. image:: ../../../../../Examples/figures/Electronics/DiodeBridge/SchemaDiodeBridge.png
+.. image:: /figures/electronics/DiodeBridge/SchemaDiodeBridge.*
 
 Expected behavior:
 
