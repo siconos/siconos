@@ -113,8 +113,7 @@ macro(LIBRARY_PROJECT_SETUP)
   # ---- Installation ---
   # Headers
   install(FILES ${${COMPONENT}_HDRS} DESTINATION include/${PROJECT_NAME})
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${COMPONENT_NAME}Config.h
-    DESTINATION include/${PROJECT_NAME})
+  
   # libraries
   install(TARGETS ${COMPONENT}
     EXPORT ${PROJECT_NAME}Targets
