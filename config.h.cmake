@@ -1,4 +1,4 @@
-#ifndef SICONOSSCONFIG_H
+#ifndef SICONOSCONFIG_H
 #define SICONOSCONFIG_H
 
 #define WITH_CMAKE
