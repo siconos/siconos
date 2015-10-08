@@ -1,6 +1,11 @@
 .. _siconos_examples:
 
 
+.. toctree::
+   :maxdepth: 2
+
+   electronics_examples
+
 Examples' Manual
 ================
 This document is a collection of some examples of modelisation and simulation of nonsmooth systems with Siconos.
@@ -11,7 +16,8 @@ Click on one of the images below to find details about the system and its simula
 an example that fits with your interests.
 
 
-Portfolio
+Gallery
+-------
 
 .. image:: /figures/Mechanics/BouncingBall/BouncingBall.*
    :scale: 50%
@@ -19,7 +25,7 @@ Portfolio
 
 .. image:: /figures/Electronics/CircuitRLCD/SchemaCircuitRLCD.*
    :scale: 50%
-   :target: :ref:`circuit_RLCD_example`
+   :target: :ref:`RLCD_example`
 
 .. image:: /figures/Mechanics/Woodpecker/woodpeckerphoto.png	   
    :scale: 50%
@@ -41,22 +47,40 @@ Portfolio
    :scale: 50%
    :target: :ref:`power_converter_example`
 
+.. image:: /figures/ Mechanics/Billiard/Billiard.*  
+     :scale: 50%
+     :target: :ref:`billiard_example`
+
 .. image:: /figures/Control/ObserverLCS/ObserverLCS.*	   
    :scale: 50%
    :target: :ref:`observer_example`
 
-* .. image:: /figures/ Mechanics/Billiard/Billiard.*  
-     :scale: 50%
-     :target: :ref:`billiard_example`
-  
-	    
-.. toctree::
-   :maxdepth: 2
-   :caption: Siconos examples from Electronics
-   electronics_examples
+
+Table of contents 
+-----------------
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: Siconos examples from Mechanics
-   mechanics_examples
 
+   electronics/index
+
+.. toctree::
+   :maxdepth: 2
+
+   mechanics/index
+
+.. toctree::
+   :maxdepth: 2
+
+   control/index
+
+.. toctree::
+   :maxdepth: 2
+
+   robotics/index
+
+.. toctree::
+   :maxdepth: 2
+
+   biology/index

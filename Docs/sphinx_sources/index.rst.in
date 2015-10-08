@@ -10,7 +10,7 @@ Welcome to @PROJECT_NAME@'s home page!
    :maxdepth: 3
 
    documentation_index
-   siconos_examples
+   examples/index
    download
    contacts
 
