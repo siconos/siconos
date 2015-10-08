@@ -54,6 +54,11 @@ macro(LIBRARY_PROJECT_SETUP)
   # --- Append local includes to ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES ---
   remember_local_include_directories("${${COMPONENT}_DIRS}")
 
+  set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
+    ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    CACHE INTERNAL "Include directories for external dependencies.")
+
   include(doxygen_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)
