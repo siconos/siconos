@@ -20,7 +20,7 @@
 #ifndef SiconosFullNumerics_hpp
 #define SiconosFullNumerics_hpp
 
-#include "IOConfig.h"
+#include "NumericsConfig.h"
 #ifdef WITH_SERIALIZATION
 #include "Register.hpp"
 

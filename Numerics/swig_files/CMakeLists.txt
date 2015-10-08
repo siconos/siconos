@@ -21,6 +21,7 @@ if(WITH_FCLIB)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "./fclib")
 endif()
 include(swig_python_tools)
+
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
 build_python_tests()

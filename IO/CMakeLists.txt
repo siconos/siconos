@@ -87,14 +87,21 @@ if(WITH_${COMPONENT}_PYTHON_BINDINGS)
   set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
   # List of modules to be built in the python bindings
   set(${COMPONENT}_PYTHON_MODULES "${COMPONENT}")
-endif()
+endif()#
 
 
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
 set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} kernel mechanics)
+list(APPEND ${COMPONENT}_LINK_LIBRARIES kernel)
+
+if(HAVE_SICONOS_CONTROL)
+  list(APPEND ${COMPONENT}_LINK_LIBRARIES control)
+endif()
+if(HAVE_SICONOS_MECHANICS)
+  list(APPEND ${COMPONENT}_LINK_LIBRARIES mechanics)
+endif()
 
 # remove debug & optimized inside LINK_LIBRARIES...
 foreach(_L ${${COMPONENT}_LINK_LIBRARIES})
@@ -111,6 +118,7 @@ add_custom_target(SerializersGeneration ALL
   DEPENDS ${GENERATED_HEADER})
 
 include(LibraryProjectSetup)
+
 library_project_setup()
 
 add_dependencies(${COMPONENT} SerializersGeneration)
