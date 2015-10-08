@@ -114,7 +114,7 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
 
 */
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "NumericsOptions.h"
 
 /** \struct Callback SolverOptions.h

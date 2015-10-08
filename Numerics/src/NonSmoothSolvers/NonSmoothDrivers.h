@@ -26,7 +26,7 @@
 #ifndef NonSmoothSolvers_H
 #define NonSmoothSolvers_H
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #include "mlcp_cst.h"
 #include "MCP_cst.h"

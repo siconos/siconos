@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #ifdef WITH_TIMERS
 #define TIMER_FFTW_CYCLE
 #endif

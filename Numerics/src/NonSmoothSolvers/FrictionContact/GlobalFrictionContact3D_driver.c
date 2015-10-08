@@ -24,7 +24,7 @@
 #include <assert.h>
 
 #include "NumericsOptions.h"
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "GlobalFrictionContact3D_Solvers.h"
 int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;

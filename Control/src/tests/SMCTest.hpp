@@ -24,7 +24,7 @@
 #include "SiconosControlFwd.hpp"
 #include <FirstOrderLinearTIDS.hpp>
 
-#include <NumericsConfig.h>
+#include <SiconosConfig.h>
 
 class SMCTest : public CppUnit::TestFixture
 {

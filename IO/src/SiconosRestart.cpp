@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "IOConfig.h"
+#include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
 #include "SiconosRestart.hpp"
 

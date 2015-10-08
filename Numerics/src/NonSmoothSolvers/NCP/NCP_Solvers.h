@@ -43,7 +43,7 @@
 #include "SparseBlockMatrix.h"
 #include "NCP_FixedP.h"
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "SolverOptions.h"
 #include "NonlinearComplementarityProblem.h"
 

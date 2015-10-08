@@ -35,7 +35,7 @@ typedef struct
   functions_LSA* lsa_functions; /**< functions for the search */
 } pathsearch_data;
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

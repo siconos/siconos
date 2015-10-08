@@ -1,7 +1,11 @@
-#ifndef NUMERICSCONFIG_H
-#define NUMERICSCONFIG_H
-#define WITH_CMAKE
+#ifndef SICONOSSCONFIG_H
+#define SICONOSCONFIG_H
 
+#define WITH_CMAKE
+#cmakedefine HAVE_SICONOS_KERNEL
+#cmakedefine HAVE_SICONOS_IO
+#cmakedefine HAVE_SICONOS_MECHANICS
+#cmakedefine HAVE_SICONOS_CONTROL
 #cmakedefine HAVE_PATHFERRIS
 #cmakedefine HAVE_MLCPSIMPLEX
 #cmakedefine HAVE_TIME_H
@@ -14,8 +18,11 @@
 #cmakedefine BUILD_AS_CPP
 #cmakedefine WITH_LPSOLVE
 #cmakedefine HAS_EXTREME_POINT_ALGO
-#cmakedefine WITH_GENERATION
-#cmakedefine WITH_SERIALIZATION
+#cmakedefine HAVE_VTK
+#cmakedefine HAVE_BULLET
+#cmakedefine HAVE_OCC
+#cmakedefine HAVE_SERIALIZATION
+#cmakedefine HAVE_GENERATION
 
 // Is cblas available? 
 #cmakedefine HAS_CBLAS
@@ -39,10 +46,23 @@
 #cmakedefine HAS_LAPACK_DTRTRS
 #cmakedefine HAS_LAPACK_DGELS
 
+// Some definitions required for boost numeric_bindings
+#if defined(HAS_CBLAS)
+#define BOOST_NUMERIC_BINDINGS_BLAS_CBLAS
+#endif
+
+#if defined(HAS_MKL_CBLAS)
+#define BOOST_NUMERIC_BINDINGS_BLAS_MKL
+#endif
+
 // Gams stuff
 #cmakedefine GAMS_MODELS_SOURCE_DIR "@GAMS_MODELS_SOURCE_DIR@"
 #cmakedefine GAMS_MODELS_SHARE_DIR "@GAMS_MODELS_SHARE_DIR@"
 #cmakedefine GAMS_DIR "@GAMS_DIR@"
 #cmakedefine HAVE_GAMS_C_API
+
+// Which version of C++ was used to compile siconos, needed for swig
+#define SICONOS_CXXVERSION @CXXVERSION@
+
 
 #endif

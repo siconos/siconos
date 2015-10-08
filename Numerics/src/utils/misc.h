@@ -19,7 +19,7 @@
 #ifndef _NUMERICS_MISC_H_
 #define _NUMERICS_MISC_H_
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include <errno.h>
 #include <stdint.h>
 #include <stddef.h>

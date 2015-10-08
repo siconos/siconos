@@ -166,3 +166,15 @@ if(UNIX)
     set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
   endif()
 endif()
+
+
+# SiconosConfig.h generation and include
+if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+  configure_file(${CMAKE_SOURCE_DIR}/config.h.cmake
+    ${CMAKE_BINARY_DIR}/SiconosConfig.h)
+endif()
+
+set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
+  ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES}
+  ${CMAKE_BINARY_DIR}
+  CACHE INTERNAL "Include directories for external dependencies.")

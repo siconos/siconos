@@ -27,7 +27,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "NumericsMatrix.h"
 #include "SiconosLapack.h"
 #include "numericsMatrixTestFunction.h"

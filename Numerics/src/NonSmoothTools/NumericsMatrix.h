@@ -114,7 +114,7 @@ The following linear algebra operation are supported:
 #include <stdlib.h>
 #include <assert.h>
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
 

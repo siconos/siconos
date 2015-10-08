@@ -32,7 +32,7 @@
  */
 
 #include "SolverOptions.h"
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "NumericsMatrix.h"
 
 #include <stdbool.h>

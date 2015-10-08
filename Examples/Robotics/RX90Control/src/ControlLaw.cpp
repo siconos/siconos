@@ -40,7 +40,7 @@ extern "C" {
 #include "LagrangianModel.h"
 #include "LagrangianDefinitions.h"
 }
-#include "KernelConfig.h"
+#include "SiconosConfig.h"
 
 #ifndef FRAMEWORK_BLAS
 #define OUTSIDE_FRAMEWORK_BLAS

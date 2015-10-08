@@ -392,7 +392,7 @@ if(NOT BLAS_FOUND)
     endif()
   endif()
 
-  if(BLAS_FOUND) # NumericsConfig.h setup
+  if(BLAS_FOUND) # SiconosConfig.h setup
     set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
 
     if(WITH_BLAS STREQUAL "mkl")

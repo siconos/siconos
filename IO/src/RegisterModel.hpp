@@ -20,7 +20,7 @@
 #ifndef RegisterModel_hpp
 #define RegisterModel_hpp
 
-#include "IOConfig.h"
+#include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
 
 #include <fstream>

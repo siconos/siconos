@@ -19,7 +19,7 @@
 #ifndef LCP_ENUM_H
 #define LCP_ENUM_H
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 

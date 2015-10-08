@@ -23,7 +23,7 @@
 #include "NonlinearComplementarityProblem.h"
 #include "SolverOptions.h"
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #include "NCP_Solvers.h"
 

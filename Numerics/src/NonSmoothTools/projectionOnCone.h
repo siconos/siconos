@@ -20,7 +20,7 @@
 #ifndef ProjectionOnCone_H
 #define ProjectionOnCone_H
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include <stdio.h>
 #include <stdlib.h>
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

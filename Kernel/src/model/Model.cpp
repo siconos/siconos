@@ -18,7 +18,7 @@
  */
 
 #include "Model.hpp"
-#include "KernelConfig.h"
+#include "SiconosConfig.h"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"

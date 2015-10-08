@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #define DEBUG_MESSAGES
 

@@ -1,5 +1,5 @@
 
-#include "IOConfig.h"
+#include "SiconosConfig.h"
 
 #include "MechanicsIO.hpp"
 

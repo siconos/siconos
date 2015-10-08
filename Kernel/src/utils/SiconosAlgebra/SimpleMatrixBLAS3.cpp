@@ -19,7 +19,7 @@
 
 
 
-#include "KernelConfig.h"
+#include "SiconosConfig.h"
 #include <boost/numeric/bindings/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/bindings/trans.hpp>

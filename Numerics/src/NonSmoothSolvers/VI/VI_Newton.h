@@ -23,7 +23,7 @@
  * \brief Functions for solving VI using Newton method
  */
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "NumericsMatrix.h"
 
 #if defined(__cplusplus)

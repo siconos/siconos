@@ -25,7 +25,7 @@
 #ifndef PIVOT_UTILS_H
 #define PIVOT_UTILS_H
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "lumod_wrapper.h"
 
 #ifdef __cplusplus

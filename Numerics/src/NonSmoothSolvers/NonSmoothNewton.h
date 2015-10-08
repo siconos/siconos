@@ -34,7 +34,7 @@
 /* Pointer to function that corresponds to the function \f$ \phi \f$ */
 typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

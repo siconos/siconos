@@ -438,7 +438,7 @@ if(NOT LAPACK_FOUND)
     endif()
   endif()
 
-   if(LAPACK_FOUND) # NumericsConfig.h setup
+   if(LAPACK_FOUND) # SiconosConfig.h setup
      if(NOT LAPACK_LIBRARIES MATCHES "lapacke.*") # atlas can be the BLAS provider
       ## If lapack was found as "generic" but is part of atlas. 
       if(LAPACK_LIBRARIES MATCHES "atlas.*") 

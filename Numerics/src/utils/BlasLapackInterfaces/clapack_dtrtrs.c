@@ -1,4 +1,4 @@
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 //#if defined(HAS_ATLAS_LAPACK)
 #include "SiconosLapack.h"

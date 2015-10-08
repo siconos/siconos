@@ -5,12 +5,12 @@
 #define SWIG_SHARED_PTR_NAMESPACE std11
 %include boost_shared_ptr.i
 
-%import KernelConfig.h
+%import SiconosConfig.h
 
-#if (KERNEL_CXXVERSION >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#if (SICONOS_CXXVERSION >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 #define STD11 std
 #undef __cplusplus
-#define __cplusplus KERNEL_CXXVERSION
+#define __cplusplus SICONOS_CXXVERSION
 
 // from g++-v4/bits/shared_ptr.h
 // not sure if this is needed, but we can't use '#include <memory>'

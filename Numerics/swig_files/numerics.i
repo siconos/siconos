@@ -39,7 +39,7 @@
 
 %{
 #include "SiconosNumerics.h"
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "SolverOptions.h"
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
@@ -73,7 +73,7 @@
 %include "std_string.i"
 
  // needed macros
- %include "NumericsConfig.h"
+ %include "SiconosConfig.h"
 
 
 
