@@ -144,7 +144,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         {
           /* if (iparam[3] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2/(rho_k*a1)); */
           /* else */ rho_k = rho_k * tau ;
- 
+
           /* x <- x_k  for the std approach*/
           if (iparam[2]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
 
@@ -163,6 +163,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* velocity <- velocity - velocity_k   */
           cblas_daxpy(n, -1.0, w_k , 1, w , 1) ;
 
+
+          /* a1 =  ||w - w_k|| */
           a1 = cblas_dnrm2(n, w, 1);
           DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
@@ -172,6 +174,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* xtmp <- x - x_k   */
           cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
 
+          /* a2 =  || x - x_k || */
           a2 = cblas_dnrm2(n, xtmp, 1) ;
           DEBUG_PRINTF("a2 = %12.8e\n", a2);
 
@@ -265,15 +268,15 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* w <- w - w_k   */
           cblas_daxpy(n, -1.0, w_k , 1, w , 1) ;
 
-          /* xtmp <- x */
-          cblas_dcopy(n, xtmp, 1,x , 1) ;
-
           /* xtmp <- x - x_k   */
+          cblas_dcopy(n, xtmp, 1,x , 1) ;
           cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
 
+          /* a1 =  (w - w_k)^T(x - x_k) */
           a1 = cblas_ddot(n, xtmp, 1, w, 1);
           DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
+          /* a2 =  || x - x_k || */
           a2 = cblas_dnrm2(n, xtmp, 1) ;
           DEBUG_PRINTF("a2 = %12.8e\n", a2);
 
