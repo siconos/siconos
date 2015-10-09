@@ -124,8 +124,8 @@ macro(LIBRARY_PROJECT_SETUP)
     DESTINATION share/${PROJECT_NAME}/cmake)
 
   # --- python bindings ---
-  if(WITH_${COMPONENT}_PYTHON_BINDINGS)
-    add_subdirectory(swig_files)
+  if(WITH_${COMPONENT}_PYTHON_WRAPPER)
+    add_subdirectory(swig)
   endif()
 
   

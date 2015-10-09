@@ -133,7 +133,7 @@ Or in verbose mode::
 Just a specific python test::
   
   cd path_to_build
-  py.test -s -v python_bindings/siconos/tests/test_lcp.py
+  py.test -s -v wrap/siconos/tests/test_lcp.py
 
 Concerning py.test, see http://pytest.org/latest/ or::
   py.test -h
@@ -150,7 +150,7 @@ For *siconos_install_path* being the value you choose for siconos install, runni
 * *siconos_install_path*/lib/ with all shared libraries of the siconos components you asked for.
 * *siconos_install_path*/include/siconos/ with all headers files needed by siconos
 * *siconos_install_path*/share/siconos/ : extra files like cmake configuration, doc or anything that may be required at runtime
-* *siconos_install_path*/bin/run_siconos : a script to run siconos simulation (see :ref:`siconos_runexample`).
+* *siconos_install_path*/bin/siconos : a script to run siconos simulation (see :ref:`siconos_runexample`).
 
 .. _siconos_install_note:
 
@@ -178,7 +178,7 @@ Most common options
 
 * WITH_DOCUMENTATION=ON (OFF) : to enable (disable) the generation of siconos source code documentation and manuals generation.
 
-* WITH_PYTHON_BINDINGS=ON (OFF) : to enable (disable) the generation of a python interface to siconos.
+* WITH_PYTHON_WRAPPER=ON (OFF) : to enable (disable) the generation of a python interface to siconos.
 
 * WITH_CMAKE_BUILD_TYPE=Debug, Release, ... : to choose the build mode, i.e. the default compiler flags used to build siconos.
 
@@ -216,7 +216,7 @@ Developers or advanced users options
 For example, to build siconos with documentation for all components, no python bindings and an installation in '/home/myname/mysiconos', just run::
 
   cd build_directory
-  cmake -DCMAKE_INSTALL_PREFIX='/home/myname/mysiconos' -DWITH_PYTHON_BINDINGS=OFF -DWITH_DOCUMENTATION=ON *path_to_sources*
+  cmake -DCMAKE_INSTALL_PREFIX='/home/myname/mysiconos' -DWITH_PYTHON_WRAPPER=OFF -DWITH_DOCUMENTATION=ON *path_to_sources*
 
 But when you need a lot of options, this may get a bit tedious, with very long command line. To avoid this, you can use
 :ref:`siconos_install_with_user_options`.
@@ -240,7 +240,6 @@ Warnings:
     cmake -DUSER_OPTIONS_FILE=/home/myname/myoptions_for_siconos.cmake path_to_sources
 
 To write your own file, just copy the file default_options.cmake (in *path_to_sources*/cmake) and modify it according to your needs.
-Some 'standard' configurations are also provided as examples in *path_to_sources*/UserOptionsExamples.
 
 Here is an example, to build numerics and kernel, with documentation, no tests ...::
 
@@ -248,7 +247,7 @@ Here is an example, to build numerics and kernel, with documentation, no tests .
   # Use cmake -DOPTION_NAME=some-value ... to modify default value.
   # !!! Warning : do not suppress any line below, just set ON/OFF value !!!
   option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)
-  option(WITH_PYTHON_BINDINGS "Build python bindings using swig. Default = ON" ON)
+  option(WITH_PYTHON_WRAPPER "Build python bindings using swig. Default = ON" ON)
   option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings." OFF)
   option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = ON." OFF)
   option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = off." OFF)
@@ -288,7 +287,7 @@ When all the installation process is done, you can test your installation by run
 (for non-standard installation path, mind :ref:`siconos_install_note`.). Try one of the numerous files
 provided in Siconos Examples package::
 
-  run_siconos BouncingBallTS.cpp
+  siconos BouncingBallTS.cpp
 
 
 You can also test all examples in a raw::
@@ -301,4 +300,4 @@ You can also test all examples in a raw::
 
 This will compile, link and execute all the examples distributed with siconos.
 
-Check :ref:`running_siconos` for more details on *run_siconos* script.
+Check :ref:`running_siconos` for more details on *siconos* script.

@@ -44,7 +44,7 @@ if(DEV_MODE)
   add_c_options("-Werror=incompatible-pointer-types")
   add_c_options("-Werror=missing-prototypes")
   
-  if((NOT WITH_MECHANISMS) AND (NOT WITH_PYTHON_BINDINGS))
+  if((NOT WITH_MECHANISMS) AND (NOT WITH_PYTHON_WRAPPER))
     add_c_options("-Werror=missing-declarations")
   endif()
   add_c_options("-Werror=overloaded-virtual")

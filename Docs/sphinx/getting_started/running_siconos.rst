@@ -11,7 +11,7 @@ At this step, you must have :
 
 Then, simply use siconos script on you driver (driver.cpp or driver.py)::
 
-  run_siconos driver.cpp
+  siconos driver.cpp
 
 
 

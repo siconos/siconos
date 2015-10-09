@@ -143,7 +143,7 @@ if(WITH_FREECAD)
 endif()
 
 # -- Python bindings --
-if(WITH_PYTHON_BINDINGS)
+if(WITH_PYTHON_WRAPPER)
   compile_With(Python_Numpy REQUIRED)
   find_package(SWIG 2.0.7 REQUIRED)
   # WARNING FP : for cmake < 3.0 UseSWIG.cmake

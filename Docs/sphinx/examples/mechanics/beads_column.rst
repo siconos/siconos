@@ -481,7 +481,7 @@ Results
 
 You can now run in a terminal::
 
-  run_siconos multiBeadsTS.cpp
+  siconos multiBeadsTS.cpp
 
 and then plot with for example gnuplot::
 

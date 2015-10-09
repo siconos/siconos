@@ -140,7 +140,7 @@ macro(add_siconos_swig_sub_module fullname)
 endmacro()
 
 macro(swig_module_setup modules_list)
-  if(WITH_${COMPONENT}_PYTHON_BINDINGS)
+  if(WITH_${COMPONENT}_PYTHON_WRAPPER)
     # we should use lowercase name for python module (pep8 ...)
     message(" -- Prepare python bindings for component ${COMPONENT} ...")
     # build python bindings

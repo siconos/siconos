@@ -2,7 +2,7 @@
 # cmake utilities to build python-bindings for io component
 #================================================================
 
-# python_bindings - Set extra dependencies
+# wrap - Set extra dependencies
 set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
 
 # List of modules to be built in the python bindings
@@ -12,7 +12,7 @@ set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
 
 set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
 set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
-  ${CMAKE_SOURCE_DIR}/Kernel/swig_files)
+  ${CMAKE_SOURCE_DIR}/Kernel/swig)
 
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)

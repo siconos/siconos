@@ -333,17 +333,17 @@ endmacro()
 # path_to_tests is relative to the current source dir.
 # Most of the time, path_to_tests = 'tests'.
 # For instance, in mechanics, tests are called in CMakeLists.txt
-# in swig_files, current source dir is thus source_dir/mechanics/swig_files
-# and source_dir/mechanics/swig_files/tests contains all the python files for tests.
+# in swig, current source dir is thus source_dir/mechanics/swig
+# and source_dir/mechanics/swig/tests contains all the python files for tests.
 #
 # This routine copy the directory of tests to binary dir to allow 'py.test' run in the build.
 # 
 # binary dir will then look like :
-# python_bindings/siconos
-# python_bindings/siconos/mechanics
-# python_bindings/siconos/mechanics/tests
+# wrap/siconos
+# wrap/siconos/mechanics
+# wrap/siconos/mechanics/tests
 #
-# and running py.tests in python_bindings dir will end up with a run of
+# and running py.tests in wrap dir will end up with a run of
 # all mechanics tests.
 macro(build_python_tests)
   if(WITH_${COMPONENT}_TESTING)
@@ -389,6 +389,6 @@ macro(add_python_test test_name test_file)
   add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
   #    WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
-  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/python_bindings")
-  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_BINARY_DIR}/python_bindings/siconos/tests") # for plugins
+  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/wrap")
+  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_BINARY_DIR}/wrap/siconos/tests") # for plugins
 endmacro()

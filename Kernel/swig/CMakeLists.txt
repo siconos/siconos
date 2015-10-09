@@ -2,7 +2,7 @@
 # cmake utilities to build python-bindings for kernel component
 #================================================================
 
-# python_bindings - Set extra dependencies
+# wrap - Set extra dependencies
 set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS
   ${SICONOS_SWIG_SRC_DIRS}/KernelTypes.i
   KernelRegistration.i

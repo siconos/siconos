@@ -5,7 +5,7 @@
 # cmake path-to-sources
 #  --> to keep default value
 # 
-# cmake path-to-sources -DWITH_PYTHON_BINDINGS=ON
+# cmake path-to-sources -DWITH_PYTHON_WRAPPER=ON
 #  --> to enable (ON), or disable (OFF) the concerned option.
 #
 # For details about all these options check siconos install guide.
@@ -14,7 +14,7 @@
 # --------- User-defined options ---------
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" OFF)
-option(WITH_PYTHON_BINDINGS "Build python bindings using swig. Default = ON" ON)
+option(WITH_PYTHON_WRAPPER "Build python bindings using swig. Default = ON" ON)
 option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings." OFF)
 option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." OFF)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = off." OFF)

@@ -80,16 +80,16 @@ if(USE_SPHINX)
   
   # --- conf.py describes sphinx setup ---
   configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/conf.py.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/conf.py" @ONLY)
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/conf.py.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/conf.py" @ONLY)
 
   configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/index.rst.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/index.rst" @ONLY)
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst" @ONLY)
 
   configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/reference/siconos_api_reference.rst.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources/reference/siconos_api_reference.rst" @ONLY)
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/reference/siconos_api_reference.rst.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/reference/siconos_api_reference.rst" @ONLY)
   
   # --- Build a target for sphinx ---
   # --> use make html or make latex ... to build documentation.
@@ -99,7 +99,7 @@ if(USE_SPHINX)
   set(SPHINX_PARAMETERS
     -b html # html output
     -d build/doctrees # path to doctree files
-    ${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources  # path to rst source
+    ${CMAKE_CURRENT_SOURCE_DIR}/sphinx  # path to rst source
     )
 
   add_custom_target(html
@@ -112,7 +112,7 @@ if(USE_SPHINX)
   set(SPHINX_LATEX_PARAMETERS
     -b latex # latex output
     -d build/doctrees # path to doctree files
-    ${CMAKE_CURRENT_SOURCE_DIR}/sphinx_sources  # path to rst source
+    ${CMAKE_CURRENT_SOURCE_DIR}/sphinx  # path to rst source
     )
   
   add_custom_target(latex
@@ -122,12 +122,12 @@ if(USE_SPHINX)
 
   # python api auto doc
   set(SPHINX_APIDOC sphinx-apidoc)
-  set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx_sources/reference)
+  set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
   set(APIDOC_PARAMETERS -e -P -o ${GENERATED_DOC})
 
   add_custom_target(apidoc
     COMMAND ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
-    ${CMAKE_BINARY_DIR}/python_bindings/${SICONOS_PYTHON_PACKAGE}
+    ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
     )
 
   add_custom_target(doc

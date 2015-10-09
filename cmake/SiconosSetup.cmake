@@ -144,7 +144,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(WindowsSiconosSetup)
 
 # init all common options for enabled components
-set(common_options DOCUMENTATION TESTING UNSTABLE PYTHON_BINDINGS
+set(common_options DOCUMENTATION TESTING UNSTABLE PYTHON_WRAPPER
   DOXYGEN_WARNINGS DOXY2SWIG)
 foreach(opt ${common_options})
   init_to_default_option(${opt})

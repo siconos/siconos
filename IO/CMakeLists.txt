@@ -85,8 +85,8 @@ if(WITH_SERIALIZATION)
   endif()
 endif()
 
-# python_bindings - Set extra dependencies
-if(WITH_${COMPONENT}_PYTHON_BINDINGS)
+# wrap - Set extra dependencies
+if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
   # List of modules to be built in the python bindings
   set(${COMPONENT}_PYTHON_MODULES "${COMPONENT}")

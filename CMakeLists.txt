@@ -19,7 +19,7 @@ if(POLICY CMP0042)
 endif()
 
 # Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/UserOptionsExamples)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # Force out-of-source build
 include(OutOfSourcesBuild)
@@ -119,8 +119,8 @@ else()
   include(siconos_find_common_dep)
   
   # ========= Python bindings =========
-  if(WITH_PYTHON_BINDINGS)
-    add_subdirectory(python_bindings)
+  if(WITH_PYTHON_WRAPPER)
+    add_subdirectory(wrap)
   endif()
   
   # ========= Tests setup =========
@@ -150,15 +150,15 @@ else()
   feature_summary(WHAT ALL)
   
   # =========== Generate siconos scripts ===========
-  if(EXISTS ${CMAKE_SOURCE_DIR}/siconos-scripts/CMakeLists.txt.in)
-    configure_file(siconos-scripts/CMakeLists.txt.in siconos-scripts/CMakeLists-temp.txt @ONLY)
-    configure_file(${CMAKE_BINARY_DIR}/siconos-scripts/CMakeLists-temp.txt ${CMAKE_BINARY_DIR}/siconos-scripts/CMakeLists.txt @ONLY)
-    install(FILES ${CMAKE_BINARY_DIR}/siconos-scripts/CMakeLists.txt DESTINATION share/${PROJECT_NAME})
+  if(EXISTS ${CMAKE_SOURCE_DIR}/scripts/CMakeLists.txt.in)
+    configure_file(scripts/CMakeLists.txt.in scripts/CMakeLists-temp.txt @ONLY)
+    configure_file(${CMAKE_BINARY_DIR}/scripts/CMakeLists-temp.txt ${CMAKE_BINARY_DIR}/scripts/CMakeLists.txt @ONLY)
+    install(FILES ${CMAKE_BINARY_DIR}/scripts/CMakeLists.txt DESTINATION share/${PROJECT_NAME})
   endif()
-  if(EXISTS ${CMAKE_SOURCE_DIR}/siconos-scripts/run_siconos.py.in)
+  if(EXISTS ${CMAKE_SOURCE_DIR}/scripts/siconos.py.in)
     message("-- Generate siconos script ...")
-    configure_file(siconos-scripts/run_siconos.py.in siconos-scripts/run_siconos @ONLY)
-    install(PROGRAMS ${CMAKE_BINARY_DIR}/siconos-scripts/run_siconos DESTINATION bin)
+    configure_file(scripts/siconos.py.in scripts/siconos @ONLY)
+    install(PROGRAMS ${CMAKE_BINARY_DIR}/scripts/siconos DESTINATION bin)
   endif()
   
   # ============= Save config for other cmake projects ============
@@ -198,7 +198,7 @@ else()
   message(STATUS "Python libraries are ${PYTHON_LIBRARIES}")
   message(STATUS "All linking libraries are : ${SICONOS_LINK_LIBRARIES}.")
   message(STATUS "The project will be installed in ${CMAKE_INSTALL_PREFIX}")
-  if(WITH_PYTHON_BINDINGS)
+  if(WITH_PYTHON_WRAPPER)
     message(STATUS "${SICONOS_PYTHON_PACKAGE} python package will be installed in ${SICONOS_PYTHON_INSTALL_DIR}")
   endif()
   message(STATUS "To get more information about dependencies, config or else, ")

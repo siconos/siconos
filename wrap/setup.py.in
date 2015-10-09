@@ -100,7 +100,7 @@ class TestSiconos(Command):
     def run(self):
         from subprocess import call
         # hu?
-        call("py.test" + " siconos/tests", shell=True, env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/python_bindings/"})
+        call("py.test" + " siconos/tests", shell=True, env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/wrap/"})
 
 
 class run_benchmarks(Command):
@@ -170,15 +170,15 @@ packages += packages_for_tests
 DISTUTILS_DEBUG = 1
 
 # C files and swig interface
-# swig_files =''
+# swig =''
 # for mod in packages_src_dirs:
-#     swig_dir = os.path.join(os.path.join('@CMAKE_SOURCE_DIR@', mod), 'swig_files')
+#     swig_dir = os.path.join(os.path.join('@CMAKE_SOURCE_DIR@', mod), 'swig')
 
 #extra_link_args = ['-lopenblas', '-lgomp']
 #swig_opts = ['-modern', '-I./']
 
 
-#swig_ext = Extension('_numerics', swig_files, language='c++',
+#swig_ext = Extension('_numerics', swig, language='c++',
 #                     swig_opts=swig_opts,
 #                     extra_link_args=extra_link_args,
 #                     extra_compile_args=[''])

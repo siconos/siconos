@@ -1,7 +1,7 @@
 # ============================================================
 # Prepare swig config to generate python bindings for siconos
 # ============================================================
-if(WITH_PYTHON_BINDINGS)
+if(WITH_PYTHON_WRAPPER)
   # Name of the generated Python package
   set(SICONOS_PYTHON_PACKAGE ${PROJECT_NAME} CACHE INTERNAL "Name of the siconos python module.")
   
@@ -37,7 +37,7 @@ if(WITH_PYTHON_BINDINGS)
   endif()
   # -- Swig files --
   # i.e. .i files, common to all modules and submodules.
-  set(SICONOS_SWIG_SRC_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/swig_files
+  set(SICONOS_SWIG_SRC_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/swig
     CACHE INTERNAL "Path to swig files common to all packages.")
 
   # -- Output dir --
@@ -86,7 +86,7 @@ if(WITH_PYTHON_BINDINGS)
       COMMAND sh ${CMAKE_CURRENT_BINARY_DIR}/set_tests_env.sh
       COMMENT "set environment variables for python tests ...")
     # todo if we need to add some 'global' tests for siconos (not component dependent)
-    # create a python_bindings/swig_files/tests dir and ...
+    # create a wrap/swig/tests dir and ...
     #build_python_tests()
   endif()
 
@@ -102,7 +102,7 @@ if(WITH_PYTHON_BINDINGS)
   set(SICONOS_PYTHON_MODULES)
   foreach(comp ${COMPONENTS_DIRS})
     string(TOLOWER ${comp} comp_name)
-    if(WITH_${comp_name}_PYTHON_BINDINGS)
+    if(WITH_${comp_name}_PYTHON_WRAPPER)
       set(SICONOS_PYTHON_MODULES_DIRS "'${comp}', ${SICONOS_PYTHON_MODULES_DIRS}")
       set(SICONOS_PYTHON_MODULES "'${comp_name}', ${SICONOS_PYTHON_MODULES}")
     endif()
@@ -132,7 +132,7 @@ if(WITH_PYTHON_BINDINGS)
   endforeach()
 
   
-  configure_file(swig_files/path.i.in ${SICONOS_SWIG_ROOT_DIR}/path.i @ONLY)
+  configure_file(swig/path.i.in ${SICONOS_SWIG_ROOT_DIR}/path.i @ONLY)
   # ====== Create (and setup) build target ======
   
   add_custom_target(python-build 

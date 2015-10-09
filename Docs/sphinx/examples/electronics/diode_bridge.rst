@@ -451,7 +451,7 @@ Results
 
 You can now run in a terminal::
   
-  run_siconos DiodeBridge.cpp
+  siconos DiodeBridge.cpp
 
 Results are given on the figure below:
 

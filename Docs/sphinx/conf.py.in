@@ -18,7 +18,7 @@ import re
 import importlib
 
 # append siconos package build path to sys
-siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'python_bindings')
+siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'wrap')
 sys.path.append(siconos_pythonpath)
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -58,7 +58,7 @@ numpydoc_class_members_toctree = True
 #breathe_default_project = "@PROJECT_NAME@"
 
 #import glob
-# autosummary_generate = glob.glob("@CMAKE_CURRENT_BINARY_DIR@/sphinx_source/reference/*.rst")
+# autosummary_generate = glob.glob("@CMAKE_CURRENT_BINARY_DIR@/sphinx/reference/*.rst")
 
 doxylink = {
     'doxysiconos':
@@ -155,7 +155,7 @@ html_theme = 'siconos'
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['@CMAKE_CURRENT_SOURCE_DIR@/sphinx_sources/sphinx_themes']
+html_theme_path = ['@CMAKE_CURRENT_SOURCE_DIR@/sphinx/sphinx_themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
