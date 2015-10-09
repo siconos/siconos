@@ -300,3 +300,5 @@ You can also test all examples in a raw::
 
 
 This will compile, link and execute all the examples distributed with siconos.
+
+Check :ref:`running_siconos` for more details on *run_siconos* script.
