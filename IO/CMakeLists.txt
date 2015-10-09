@@ -138,7 +138,7 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosRestart.hpp
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFull.hpp
     DESTINATION include/${PROJECT_NAME})
 if(HAVE_SICONOS_MECHANICS)
-  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/MechanicsIO.hpp
+  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/mechanics/MechanicsIO.hpp
     DESTINATION include/${PROJECT_NAME})
 endif()
 

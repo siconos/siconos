@@ -189,23 +189,23 @@ if __name__ == '__main__':
     compiler_options = []
     # Path to user-defined plugin sources. Default = plugin.
     plugin_directories = []
-    src_dir = os.path.join(call_pwd, args[0])
-    path_to_src = os.path.dirname(src_dir)
-    # default plugin dirs = *Plugin*, plugin 
-    plugin_dirs = glob.glob(os.path.join(path_to_src, '*Plugin*'))
-    for dd in plugin_dirs:
-        if os.path.isdir(dd):
-            plugin_directories.append(dd)
-    pg_dir = os.path.join(path_to_src, 'plugin')
-    if os.path.isdir(pg_dir):
-        plugin_directories.append(pg_dir)
-
     # Some user-defined extra directories for input sources
     extra_sources_directories = []
-    # default extra src dir ...
-    extra_src_dir = os.path.join(path_to_src, 'src')
-    if os.path.isdir(extra_src_dir):
-        extra_sources_directories.append(extra_src_dir)
+    if args[0] is not None:
+        path_to_src = os.path.dirname(os.path.join(call_pwd, args[0]))
+        # default plugin dirs = *Plugin*, plugin
+        plugin_dirs = glob.glob(os.path.join(path_to_src, '*Plugin*'))
+        for dd in plugin_dirs:
+            if os.path.isdir(dd):
+                plugin_directories.append(dd)
+        pg_dir = os.path.join(path_to_src, 'plugin')
+        if os.path.isdir(pg_dir):
+            plugin_directories.append(pg_dir)
+
+        # default extra src dir ...
+        extra_src_dir = os.path.join(path_to_src, 'src')
+        if os.path.isdir(extra_src_dir):
+            extra_sources_directories.append(extra_src_dir)
     tmp_build = False
     build_directory = '.siconos'
     clean_build = False

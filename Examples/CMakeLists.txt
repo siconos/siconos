@@ -59,7 +59,15 @@ endif()
 
 # --- Search siconos package path ---
 # --> based on path to script siconos
-find_file(SICONOS_SCRIPT siconos)
+find_file(SICONOS_SCRIPT siconos
+  PATHS ENV PATH
+  NO_CMAKE_PATH
+  NO_DEFAULT_PATH)
+
+if(SICONOS_SCRIPT_NOT_FOUND)
+  message(FATAL_ERROR "Can not find siconos script. Please set your PATH environment variable properly.")
+endif()
+
 message("============================================================================================")
 message("Found siconos script : ${SICONOS_SCRIPT}")
 get_filename_component(SICONOS_INSTALL_DIR ${SICONOS_SCRIPT} PATH)
