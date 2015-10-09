@@ -1,6 +1,6 @@
 # Compilations and tests inside docker containers
 
-# DOCKER_IMAGE specifications in ${CMAKE_SOURCE_DIR}/../Build/Docker/${DOCKER_IMAGE}
+# DOCKER_IMAGE specifications in ${CMAKE_SOURCE_DIR}/Build/Docker/${DOCKER_IMAGE}
 # DOCKER_SHARED_DIRECTORIES : directories visibles in the container (source directory and binary directory are visibles)
 # DOCKER_CMAKE_FLAGS : flags passed to cmake 
 # DOCKER_MAKE_FLAGS  : flags passed to make
