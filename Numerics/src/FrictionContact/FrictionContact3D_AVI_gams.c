@@ -37,6 +37,8 @@
 #include "sanitizer.h"
 #include "op3x3.h"
 
+#include "hdf5_logger.h"
+
 #define DEBUG_NOCOLOR
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -49,6 +51,8 @@
 #define TOL2 1e-20
 
 #define ETERMINATE 4242
+
+enum { TAKEOFF_CASE, STICKING_CASE, SLIDING_CASE };
 
 //#define SMALL_APPROX
 
@@ -131,7 +135,7 @@ static void setDashedOptions(const char* optName, const char* optValue, const ch
   }
 }
 
-static ptrdiff_t SN_rm_normal_part(ptrdiff_t i, ptrdiff_t j, double val, void* env)
+static csi SN_rm_normal_part(csi i, csi j, double val, void* env)
 {
   if (i%3 == 0)
   {
@@ -141,6 +145,22 @@ static ptrdiff_t SN_rm_normal_part(ptrdiff_t i, ptrdiff_t j, double val, void* e
   {
     return 1;
   }
+}
+
+static void filename_datafiles(int iter, const char* base_name, unsigned len, char* template_name)
+{
+  char iterStr[6];
+  sprintf(iterStr, "-i%d", iter);
+  if (base_name)
+  {
+    strncpy(template_name, base_name, len);
+  }
+  else
+  {
+    strncpy(template_name, "fc3d_avi-condensed", len);
+  }
+
+  strncat(template_name, iterStr, len - strlen(template_name) - 1);
 }
 
 static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, const char* base_name, double* restrict reaction, double* restrict velocity, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
@@ -169,25 +189,16 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
     return 1;
   }
 
+  /* create input and output gdx names*/
   char gdxFileName[GMS_SSSIZE];
   char solFileName[GMS_SSSIZE];
 //  char paramFileName[GMS_SSSIZE];
-  char iterStr[6];
-  sprintf(iterStr, "-i%d", iter);
-  if (base_name)
-  {
-    strncpy(gdxFileName, base_name, sizeof(gdxFileName));
-  }
-  else
-  {
-    strncpy(gdxFileName, "fc3d_avi-condensed", sizeof(gdxFileName));
-  }
 
-  strncat(gdxFileName, iterStr, sizeof(gdxFileName) - strlen(gdxFileName) - 1);
   /* copy the name without extension to creation the   */
 //  strncpy(paramFileName, gdxFileName, sizeof(paramFileName));
 
-  strncpy(solFileName, gdxFileName, sizeof(solFileName));
+  strncpy(gdxFileName, base_name, sizeof(gdxFileName));
+  strncpy(solFileName, base_name, sizeof(solFileName));
   strncat(solFileName, "_sol", sizeof(solFileName) - strlen(solFileName) - 1);
 
   strncat(gdxFileName, ".gdx", sizeof(gdxFileName) - strlen(gdxFileName) - 1);
@@ -380,7 +391,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   gmoHandle_t gmoPtr = NULL;
 
   int status;
-  char sysdir[GMS_SSSIZE], model[GMS_SSSIZE], msg[GMS_SSSIZE];
+  char sysdir[GMS_SSSIZE], model[GMS_SSSIZE], msg[GMS_SSSIZE], template_filename[GMS_SSSIZE], hdf5_filename[GMS_SSSIZE];
   const char defModel[] = SPACE_CONC(GAMS_MODELS_SHARE_DIR, "/fc_vi-condensed.gms");
   const char defGAMSdir[] = GAMS_DIR;
 
@@ -487,6 +498,18 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   double* reaction_old = (double*)calloc(size, sizeof(double));
   double* velocity_old = (double*)calloc(size, sizeof(double));
 
+  double* predicted_angles = (double*)calloc(problem->numberOfContacts, sizeof(double));
+  double* delta_angles = (double*)calloc(problem->numberOfContacts, sizeof(double));
+  double* real_angles = (double*)calloc(problem->numberOfContacts, sizeof(double));
+  double* residual_contact = (double*)calloc(problem->numberOfContacts, sizeof(double));
+
+  /* save what is the current solution:
+   * - 0 => r = 0
+   * - 1 => r ∈ int K
+   * - 2 => r ∈ bdry K \ {0} 
+   */
+  size_t* type_contact = (size_t*)calloc(problem->numberOfContacts, sizeof(size_t));
+
   bool done = false;
   double total_residual = 0.;
   double old_residual = 1e20;
@@ -495,13 +518,47 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
 
   unsigned iter = 0;
   unsigned maxiter = 20;
+
+  /* Logger starting  */
+  if (filename)
+  {
+    strncpy(hdf5_filename, filename, sizeof(hdf5_filename));
+  }
+  else
+  {
+    strncpy(hdf5_filename, "logger", sizeof(hdf5_filename));
+  }
+
+  strncat(hdf5_filename, ".hdf5", sizeof(hdf5_filename) - strlen(hdf5_filename) - 1);
+
+  SN_logh5* logger_s = SN_logh5_init(hdf5_filename, maxiter);
+
   while (!done && (iter < maxiter))
   {
     iter++;
     total_residual = 0.;
-    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, filename, reaction, velocity, tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
-    DEBUG_PRINT_VEC(reaction, size);
-    DEBUG_PRINT_VEC(velocity, size);
+    filename_datafiles(iter, filename, sizeof(template_filename), template_filename);
+
+    SN_logh5_new_iter(iter, logger_s);
+
+    SN_logh5_scalar_double(old_residual, "old_residual", logger_s->group);
+    SN_logh5_vec_double(size, reaction, "reaction_guess", logger_s->group);
+    SN_logh5_vec_double(size, velocity, "velocity_guess", logger_s->group);
+
+    SN_logh5_vec_double(Akmat.size0, lambda_r, "lambda_r", logger_s->group);
+    SN_logh5_vec_double(Akmat.size0, lambda_y, "lambda_y", logger_s->group);
+
+
+    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, template_filename, reaction, velocity, tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
+    //DEBUG_PRINT_VEC(reaction, size);
+    //DEBUG_PRINT_VEC(velocity, size);
+
+    // CSC form should be OK
+    SN_logh5_NM(&Akmat, "Akmat", logger_s);
+    SN_logh5_vec_double(size, reaction, "reaction_approx", logger_s->group);
+    SN_logh5_vec_double(size, velocity, "velocity_approx", logger_s->group);
+
+    SN_logh5_vec_double(problem->numberOfContacts, predicted_angles, "predicted_angles", logger_s->group);
 
     switch (solverStat)
     {
@@ -556,6 +613,13 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
     cblas_dcopy(size, problem->q, 1, velocity, 1);
     NM_gemv(1., problem->M, reaction, 1., velocity);
 
+    SN_logh5_vec_double(size, reaction, "reaction_proj", logger_s->group);
+    SN_logh5_vec_double(size, velocity, "velocity_proj", logger_s->group);
+
+    /*  BEGIN CLEANUP */
+    memset(predicted_angles, 0, problem->numberOfContacts * sizeof(double));
+    memset(delta_angles, 0, problem->numberOfContacts * sizeof(double));
+    memset(real_angles, 0, problem->numberOfContacts * sizeof(double));
     /* TODO we should zero out the storage and the content, but not deallocate the matrix ! */
     NM_clearSparseStorage(&Akmat);
     /* This is now a upper bound ...  */
@@ -578,6 +642,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
       assert(i < (unsigned)problem->numberOfContacts);
       double mu = problem->mu[i];
       FrictionContact3D_unitary_compute_and_add_error(ri, ui, mu, &res);
+      residual_contact[i] = sqrt(res);
       DEBUG_EXPR_WE(if (res > old_residual) { printf("Contact %d, res = %g > %g = old_residual\n", i, sqrt(res), old_residual); });
       total_residual += res;
       unsigned p = NB_APPROX;
@@ -617,6 +682,8 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
         //double delta_angle = atan2(-ri[1]*ui[2] + ui[1]*ri[2], ri[1]*ri[2] + ui[1]*ui[2]);
         double minus_r_angle = atan2(ri[2], ri[1])+ M_PI;
         double delta_angle = atan2(ui[2], ui[1]) - minus_r_angle;
+        delta_angles[i] = rad2deg(delta_angle);
+        real_angles[i] = rad2deg(-minus_r_angle);
         if ((fabs(delta_angle) > M_PI/2))
         {
           if (fabs(delta_angle+2*M_PI) > M_PI/2)
@@ -634,6 +701,9 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
             delta_angle = (delta_angle + 2*M_PI);
           }
         }
+
+        /* Ok so here we support that we are in the sliding case */
+        type_contact[i] = SLIDING_CASE;
         DEBUG_PRINTF("contact %d, delta angle = %g, theta_r = %.*e, theta_u = %.*e\n", i, rad2deg(delta_angle), DECIMAL_DIG, rad2deg(atan2(ri[2],ri[1])), 
             DECIMAL_DIG, rad2deg(atan2(ui[2], ui[1])));
         if (fabs(delta_angle) < 1e-12) { printf("Contact %d, delta_angle too small %g; set to 1e-12", i, delta_angle); delta_angle = copysign(1e-12, delta_angle);}
@@ -695,6 +765,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
         /* update ri =   */
         unsigned pos = (p-1)/2;
         double angle_pos = minus_r_angle + pos*slice_angle;
+        predicted_angles[i] = rad2deg(-angle_pos);
         DEBUG_PRINTF("old r[i] = %.*e %.*e %.*e\n", DECIMAL_DIG, ri[0], DECIMAL_DIG, ri[1], DECIMAL_DIG, ri[2]);
         ri[1] = -ri[0]*mu*cos(minus_r_angle + pos*slice_angle);
         ri[2] = -ri[0]*mu*sin(minus_r_angle + pos*slice_angle);
@@ -763,6 +834,7 @@ bad_angle:
         DEBUG_PRINTF("angle: %g\n", slice_angle);
         if (ri[0] < TOL_RN)
         {
+          type_contact[i] = TAKEOFF_CASE;
           /* Make sure that r = 0 amd not some small negative number ...*/
           ri[0] = 0.;
           ri[1] = 0.;
@@ -788,14 +860,20 @@ bad_angle:
           b[1] = problem->q[i3+1];
           b[2] = problem->q[i3+2];*/
 
+          /* now the dual var: u = A^T \lambda_r */
           b[0] = ui[0];
           b[1] = ui[1];
           b[2] = ui[2];
-          /* now the dual var: u = A^T \lambda_r */
           solve_3x3_gepp(mat, b);
-          assert(isfinite(b[0]) && b[0] > 0.);
-          assert(isfinite(b[1]) && b[1] > 0.);
-          assert(isfinite(b[2]) && b[2] > 0.);
+
+          assert(isfinite(b[0]));
+          assert(isfinite(b[1]));
+          assert(isfinite(b[2]));
+          /* XXX Project on the dual, review if this is correct and does not
+           * hurt  */
+          if (b[0] < 0.) { b[0] = 0.; }
+          if (b[1] < 0.) { b[1] = 0.; }
+          if (b[2] < 0.) { b[2] = 0.; }
           lambda_r[offset_row] = b[0];
           lambda_r[offset_row+pieces] = b[1];
           lambda_r[offset_row+2*pieces] = b[2];
@@ -812,9 +890,14 @@ bad_angle:
           b[0] = ui[0];
           /*  XXX mat is not changed, so we should not have any trouble here */
           solve_3x3_gepp(mat, b);
-          assert(isfinite(b[0]) && b[0] > 0.);
-          assert(isfinite(b[1]) && b[1] > 0.);
-          assert(isfinite(b[2]) && b[2] > 0.);
+          assert(isfinite(b[0]));
+          assert(isfinite(b[1]));
+          assert(isfinite(b[2]));
+          /* XXX Project on the dual, review if this is correct and does not
+           * hurt  */
+          if (b[0] < 0.) { b[0] = 0.; }
+          if (b[1] < 0.) { b[1] = 0.; }
+          if (b[2] < 0.) { b[2] = 0.; }
           lambda_y[offset_row] = b[0];
           lambda_y[offset_row+pieces] = b[1];
           lambda_y[offset_row+2*pieces] = b[2];
@@ -823,6 +906,7 @@ bad_angle:
         }
         else if ((ri[1]*ri[1] + ri[2]*ri[2]) < (1.+1e-10)*mu*mu * ri[0]*ri[0]) /* We should have r \in int K and u = y = 0 = dual(y) */
         {
+          type_contact[i] = STICKING_CASE;
           /* TODO? update r based on the changes in the contact forces  */
           ui[0] = 0.;
           ui[1] = 0.;
@@ -892,6 +976,13 @@ bad_angle:
     {
       optSetStrStr(solverOptPtr, "avi_start", "regular");
     }
+
+    SN_logh5_vec_double(problem->numberOfContacts, delta_angles, "delta_angles", logger_s->group);
+    SN_logh5_vec_double(problem->numberOfContacts, real_angles, "real_angles", logger_s->group);
+    SN_logh5_vec_double(problem->numberOfContacts, residual_contact, "residual_contact", logger_s->group);
+    /*  XXX buggy here, implement a SN_logh5_vec_integer */
+    SN_logh5_vec_int64(problem->numberOfContacts, type_contact, "type_contact", logger_s->group);
+    SN_logh5_end_iter(logger_s);
   }
 
   /********************************************************
@@ -903,6 +994,18 @@ bad_angle:
    ********************************************************/
 
 TERMINATE:
+
+  /* save useful data here. W should also be in the right format now  */
+  SN_logh5_scalar_uinteger(iter, "iter", logger_s->file);
+  SN_logh5_scalar_uinteger(done, "status", logger_s->file);
+  SN_logh5_scalar_uinteger(problem->numberOfContacts, "number_contacts", logger_s->file);
+  SN_logh5_vec_double(size, problem->q, "q", logger_s->file);
+  SN_logh5_NM(problem->M, "W", logger_s);
+
+  /*  Truly, truly, this is the end */
+  SN_logh5_end(logger_s);
+
+
   optFree(&Optr);
   optFree(&solverOptPtr);
   freeNumericsMatrix(&Wtmat);
@@ -914,7 +1017,11 @@ TERMINATE:
   free(tmpq);
   free(lambda_r);
   free(lambda_y);
-  //status = FrictionContact3D_compute_error(problem, reaction, velocity, options->dparam[0], options, &(options->dparam[1]));
+  free(predicted_angles);
+  free(delta_angles); //status = FrictionContact3D_compute_error(problem, reaction, velocity, options->dparam[0], options, &(options->dparam[1]));
+  free(real_angles);
+  free(residual_contact);
+  free(type_contact);
   if (done)
   {
     status = 0;

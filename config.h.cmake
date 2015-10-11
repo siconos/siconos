@@ -23,6 +23,7 @@
 #cmakedefine HAVE_OCC
 #cmakedefine HAVE_SERIALIZATION
 #cmakedefine HAVE_GENERATION
+#cmakedefine WITH_HDF5
 
 // Is cblas available? 
 #cmakedefine HAS_CBLAS
