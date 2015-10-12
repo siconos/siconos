@@ -11,9 +11,15 @@
 # Please note that we are using lpsolve 5.5
 # -----------------------------------------
 include(LibFindMacros)
-#
-# Header
-# first, search in user-defined LpSolve_DIR
+
+# ----------------------------------------
+# Header == lp_lib.h 
+# First, search in (optionnaly) user-defined LpSolve_DIR
+# Try : 
+# LpSolve_DIR/
+# LpSolve_DIR/include
+# LpSolve_DIR/lpsolve
+# ----------------------------------------
 if(LpSolve_DIR)
   find_path(LpSolve_INCLUDE_DIR
     NAMES lp_lib.h
@@ -21,7 +27,9 @@ if(LpSolve_DIR)
     PATH_SUFFIXES lpsolve include
     NO_DEFAULT_PATH)
 endif()
-# else, standard path
+
+# if LpSolve_DIR not set or header not found, try standard path
+# 
 find_path(
   LpSolve_INCLUDE_DIR
   NAMES lp_lib.h
@@ -31,12 +39,21 @@ find_path(
 IF (NOT LpSolve_INCLUDE_DIR)
   MESSAGE(STATUS "Cannot find LPSOLVE headers")
 ELSE()
+  # ----------------------------------------
+  # Library == lpsolve55 
+  # First, search in (optionnaly) user-defined LpSolve_DIR
+  # Try:
+  # - Lp_Solve_DIR
+  # - Lp_Solve_DIR/lib
+  # - Lp_Solve_DIR/lib/CMAKE_LIBRARY_ARCHITECTURE (for example on Debian like system : lib/x86_64-linux-gnu
   if(LpSolve_DIR)
     find_library(LpSolve_LIBRARY lpsolve55
       PATHS ${Lp_Solve_DIR}
       PATH_SUFFIXES lib lib/${CMAKE_LIBRARY_ARCHITECTURE} 
       )
   endif()
+  # If not found, try standard path.
+  
   # debian nonsense: see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=503314
   if(EXISTS "/etc/debian_version")
     FIND_LIBRARY(LpSolve_LIBRARY lpsolve55 PATH_SUFFIXES "lp_solve")
@@ -49,12 +66,12 @@ ELSE()
       PATHS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
       )
   ENDIF()
-  
+
+  # Set LpSolve_LIBRARY_DIRS and LpSolve_LIBRARIES for libfindprocess
+  # see Using LibFindMacros : https://cmake.org/Wiki/CMake:How_To_Find_Libraries
   IF (LpSolve_LIBRARY)
     GET_FILENAME_COMPONENT(LpSolve_LIBRARY_DIRS ${LpSolve_LIBRARY} PATH)
     GET_FILENAME_COMPONENT(LpSolve_LIBRARIES ${LpSolve_LIBRARY} REALPATH)
-  #ELSE(LpSolve_LIBRARY)
-  #  MESSAGE("Cannot find LPSOLVE libraries!")
   endif()
   IF (NOT LpSolve_FIND_QUIETLY)
     MESSAGE(STATUS "Found LpSolve: ${LpSolve_LIBRARY}")
@@ -62,7 +79,7 @@ ELSE()
   ENDIF (NOT LpSolve_FIND_QUIETLY)
   
 ENDIF (NOT LpSolve_INCLUDE_DIR)
-
+# Final check :
 set(LpSolve_PROCESS_LIBS LpSolve_LIBRARIES)
 set(LpSolve_PROCESS_INCLUDES LpSolve_INCLUDE_DIR)
 libfind_process(LpSolve)
