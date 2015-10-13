@@ -29,7 +29,7 @@
  * \author Olivier Huber
  */
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #include <float.h>
 

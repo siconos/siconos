@@ -20,7 +20,7 @@
 #ifndef Register_hpp
 #define Register_hpp
 
-#include "IOConfig.h"
+#include "SiconosConfig.h"
 
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>

@@ -1,6 +1,6 @@
 try:
-    import Siconos.Kernel as SK
-    import Siconos.Numerics as N
+    import siconos.kernel as SK
+    import siconos.numerics as N
 
 except (ImportError):
     print 'Could not import Siconos.* module'

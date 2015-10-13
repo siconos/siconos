@@ -66,7 +66,7 @@ typedef struct
 
 enum SICONOS_SET_ID { SICONOS_SET_POSITIVE_ORTHANT, SICONOS_SET_BOX, SICONOS_SET_POLYHEDRON };
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

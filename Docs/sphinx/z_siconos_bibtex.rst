@@ -1,0 +1,2 @@
+.. bibliography:: siconos.bib
+   :cited:

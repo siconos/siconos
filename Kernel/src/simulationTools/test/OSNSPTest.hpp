@@ -32,7 +32,7 @@
 #include "AVI.hpp"
 #include "EulerMoreauOSI.hpp"
 
-#include <NumericsConfig.h>
+#include <SiconosConfig.h>
 
 class OSNSPTest : public CppUnit::TestFixture
 {

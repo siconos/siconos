@@ -19,7 +19,7 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #define PATHFERRIS_LOG_IN_FILE
 

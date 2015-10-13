@@ -1,2 +1,0 @@
-INCLUDE(FindSiconosGeneric)
-FIND_SICONOS_COMPONENT(Numerics SiconosNumerics.h)

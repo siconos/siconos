@@ -20,7 +20,7 @@
 #ifndef Fixe_H
 #define Fixe_H
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "NonSmoothNewton.h"
 
 /*!\file NCP_FixedP.h

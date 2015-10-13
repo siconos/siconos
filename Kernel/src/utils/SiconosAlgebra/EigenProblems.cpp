@@ -29,7 +29,7 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/bindings/std/vector.hpp>
 
-#include "KernelConfig.h"
+#include "SiconosConfig.h"
 
 // Typedef to define interface to boost ublas.
 //#include "SiconosAlgebraTypeDef.hpp"

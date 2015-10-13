@@ -19,9 +19,9 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 #
 
-from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
-     LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI, TimeDiscretisation,\
-     LCP, TimeStepping
+from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
+    LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
+    TimeDiscretisation, LCP, TimeStepping
 
 from numpy import eye, empty
 
@@ -143,7 +143,7 @@ while s.hasNextEvent():
 #
 # comparison with the reference file
 #
-from Siconos.Kernel import SimpleMatrix, getMatrix
+from siconos.kernel import SimpleMatrix, getMatrix
 from numpy.linalg import norm
 
 ref = getMatrix(SimpleMatrix("result.ref"))
@@ -155,22 +155,22 @@ if (norm(dataPlot - ref) > 1e-12):
 #
 # plots
 #
-from matplotlib.pyplot import subplot, title, plot, grid, show
-
-subplot(411)
-title('position')
-plot(dataPlot[:, 0], dataPlot[:, 1])
-grid()
-subplot(412)
-title('velocity')
-plot(dataPlot[:, 0], dataPlot[:, 2])
-grid()
-subplot(413)
-plot(dataPlot[:, 0], dataPlot[:, 3])
-title('reaction')
-grid()
-subplot(414)
-plot(dataPlot[:, 0], dataPlot[:, 4])
-title('lambda')
-grid()
-show()
+import matplotlib.pyplot as plt
+plt.ion()
+plt.subplot(411)
+plt.title('position')
+plt.plot(dataPlot[:, 0], dataPlot[:, 1])
+plt.grid()
+plt.subplot(412)
+plt.title('velocity')
+plt.plot(dataPlot[:, 0], dataPlot[:, 2])
+plt.grid()
+plt.subplot(413)
+plt.plot(dataPlot[:, 0], dataPlot[:, 3])
+plt.title('reaction')
+plt.grid()
+plt.subplot(414)
+plt.plot(dataPlot[:, 0], dataPlot[:, 4])
+plt.title('lambda')
+plt.grid()
+plt.show()

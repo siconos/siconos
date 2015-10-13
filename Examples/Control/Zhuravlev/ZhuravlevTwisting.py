@@ -23,7 +23,7 @@
 import matplotlib.pyplot as plt
 from numpy import array, eye, empty, zeros, savetxt
 import numpy as np
-from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL, \
+from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL, \
 NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
 Interaction, Relay
 from math import ceil

@@ -1,0 +1,437 @@
+#!/usr/bin/env python
+
+# Siconos-Kernel version @SICONOS_VERSION@, Copyright INRIA 2005-2014
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+
+import os
+import sys
+import shutil
+import platform
+import subprocess
+import getopt
+import tempfile
+import shlex
+import posixpath
+import glob
+
+# Path to siconos installation
+siconos_prefix = os.getenv('SICONOSPATH', default='@CMAKE_INSTALL_PREFIX@')
+
+lib_dir = '@CMAKE_INSTALL_LIBDIR@'
+
+msvc = '@MSVC@' != ''
+exec_ = True
+comp = True
+myname = sys.argv[0]
+call_pwd = os.getcwd()
+
+
+class WorkDir(object):
+    ''' a context manager for a workdir that may be temporary '''
+    def __init__(self, directory, tmp=False):
+        self.directory = directory
+        self.tmp = tmp
+        self.enter_wdir = os.getcwd()
+
+    def __enter__(self):
+
+        if self.tmp:
+            self.directory = tempfile.mkdtemp()
+
+        else:
+            if not os.path.exists(self.directory):
+                os.makedirs(self.directory)
+
+        try:
+            os.chdir(self.directory)
+        except OSError as e:
+            sys.stderr.write('{0} : {1}\n'.format(myname, str(e)))
+            exit(2)
+
+        return self.directory
+
+    def __exit__(self, xtype, value, traceback):
+
+        os.chdir(self.enter_wdir)
+
+        if os.listdir(self.directory) == []:
+
+            os.rmdir(self.directory)
+
+        if self.tmp:
+            shutil.rmtree(self.directory)
+
+
+def silent_try(command, *_args):
+    try:
+        command(*_args)
+    except Exception as e:
+        sys.stderr.write('{0} : {1}'.format(myname, e))
+
+
+def cartridge():
+    sys.stdout.write("""
+|=============================================================================|
+|          Siconos-Kernel version {0}.{1}.{2}, Copyright INRIA 2005-2015      |
+|                                                                             |
+|                 Free software under GNU General Public License.             |
+|=============================================================================|
+""".format(@MAJOR_VERSION@, @MINOR_VERSION@, '@PATCH_VERSION@'.ljust(3)))
+
+
+def usage():
+    sys.stdout.write("""
+The siconos command compiles, links and runs a Siconos program.
+
+Usage: {0} [options] [YourExample.{{cpp,py}}|location/YourExample.{{cpp,py}}] [Arguments]
+
+
+ --> If your main file needs other source files (*.c, *.cpp, *.f), put them in
+     ./src or use option src_dir (see below)
+
+ --> To create a library (to get a plugin for instance), create
+    a ./plugin (--> will build plugin.so) directory or some
+    directories xxxPluginxxx (---> will build xxxPluginxxx.so) or
+    use -plugin_dir option below. In all case, all files in 'plugin dir'
+    will be used to compute 'pluginname.so'.
+
+Options are:
+
+ -a : to find and compile all sources files in YourExample.cpp
+      directory.
+
+ --build-dir <dir> : build is done in <dir>. Under /tmp, a temp
+                     directory is created
+
+ --clean-build : clean build directory.
+
+ -c | --clean : to clean the current directory (deletes binary files,
+               etc.).
+
+ -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.
+
+ -g : to compile with debug informations.
+
+ -h | --help : to print this help.
+
+ -j<n>   : parrallel compilation with n jobs
+
+ -I<dir> : add directory <dir> to the list of paths to include headers.
+
+ -L<dir> : add directory <dir> to the list from with the linker search
+           for libraries.
+
+ -l<lib> : link with library <lib>.
+
+ --noexec : compile only.
+
+ --nocomp : execute only.
+
+ -O<n> : set compiler optimization.
+
+ --opt <opt> : add option <opt> to compiler.
+
+ --ldopt <opt> : add option <opt> to linker.
+
+ -P prefix_command : to add a prefix command (time, valgrind, gdb,
+                     etc.).
+
+ --plugin-dir <plugin_directory> (default = plugins): create a library
+ named plugin_directory.so built with all files in plugin_directory.
+
+ --src-dir <source_directory> (default = src): all sources files under
+    <source_directory> (Warning: absolute path!!)  to the executable.
+
+ -v : to print 'make' commands as they are executed.
+
+ --generator <Generator Name>: set the generator for cmake (the default is
+     plateform dependent, but usually "Unix Makefiles" under *nix and MacOs).
+     This is mainly useful for Windows users.
+
+ """.format(myname))
+
+
+if __name__ == '__main__':
+
+    try:
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'acghO:I:j:l:L:D:P:v',
+                                       ['build-dir=', 'clean-build', 'clean',
+                                        'help', 'noexec', 'nocomp', 'silent',
+                                        'src-dir=',
+                                        'opt=', 'ldopt=',
+                                        'plugin-dir=', 'generator='])
+    except getopt.GetoptError as err:
+        sys.stderr.write('{0} : {1}\n'.format(myname, str(err)))
+        usage()
+        sys.exit(2)
+
+    definitions = []
+    # User defined libraries
+    linker_libraries = []
+    linker_directories = []
+    linker_options = []
+    exec_prefix = []
+    compiler_options = []
+    # Path to user-defined plugin sources. Default = plugin.
+    plugin_directories = []
+    # Some user-defined extra directories for input sources
+    extra_sources_directories = []
+    if args[0] is not None:
+        path_to_src = os.path.dirname(os.path.join(call_pwd, args[0]))
+        # default plugin dirs = *Plugin*, plugin
+        plugin_dirs = glob.glob(os.path.join(path_to_src, '*Plugin*'))
+        for dd in plugin_dirs:
+            if os.path.isdir(dd):
+                plugin_directories.append(dd)
+        pg_dir = os.path.join(path_to_src, 'plugin')
+        if os.path.isdir(pg_dir):
+            plugin_directories.append(pg_dir)
+
+        # default extra src dir ...
+        extra_src_dir = os.path.join(path_to_src, 'src')
+        if os.path.isdir(extra_src_dir):
+            extra_sources_directories.append(extra_src_dir)
+    tmp_build = False
+    build_directory = '.siconos'
+    clean_build = False
+    all_srcs = False
+    main_source = None
+    make_targets = ['install']
+    make_args = []
+    source_is_python = False
+    extra_cmake_args = []
+    cmake_generator = None
+    silent = False
+
+    for o, a in opts:
+
+        if o == '-a':
+            all_srcs = True
+
+        if o == '--build-dir':
+            if os.path.commonprefix([a, '/tmp']) == '/tmp':
+                tmp_build = True
+            build_directory = a
+
+        if o == '--clean-build':
+            tmp_build = True
+
+        if o == '-c' or o == '--clean':
+            make_targets = ['clean']
+            if len(args) == 0:
+                args = ['.']  # as : siconos -c .
+            clean_build = True
+            exec_ = False
+
+        if o == '-D':
+            definitions.append(a)
+
+        if o == '--g':
+            definitions.append('CMAKE_BUILD_TYPE=Debug')
+
+        if o == '-h' or o == '--help':
+            usage()
+            sys.exit(0)
+
+        if o == '--noexec':
+            exec_ = False
+
+        if o == '--silent':
+            silent = True
+
+        if o == '--nocomp':
+            comp = False
+
+        if o == '-I':
+            compiler_options.append('-I{0}'.format(a))
+
+        if o == '-j':
+            make_args.append('-j{0}'.format(a))
+
+        if o == '-l':
+            linker_libraries.append(a)
+
+        if o == '-L':
+            linker_directories.append(a)
+
+        if o == '-P':
+            exec_prefix += shlex.split(a)
+
+        if o == '-O':
+            compiler_options.append('-O{0}'.format(a))
+
+        if o == '--opt':
+            compiler_options.append(a)
+
+        if o == '--ldopt':
+            linker_options.append(a)
+
+        if o == '--plugin-dir':
+            plugin_directories.append(os.path.join(path_to_src, a))
+
+        if o == '--src-dir':
+            extra_sources_directories.append(os.path.join(path_to_src, a))
+
+        if o == '--generator':
+            cmake_generator = a
+
+        if o == '-v':
+            make_args.append('VERBOSE=1')
+
+    if not silent:
+        cartridge()
+
+    if len(args) == 0:
+        sys.stderr.write('{0} : need a file\n'.format(myname))
+        usage()
+        sys.exit(1)
+
+    if not os.path.exists(args[0]):
+        sys.stderr.write('{0} : cannot open {1}\n'.format(myname, args[0]))
+        usage()
+        sys.exit(1)
+
+    siconos_build_dir = os.getenv('SICONOS_BUILD_DIR', default=build_directory)
+
+    if msvc and 'Windows' in platform.uname():
+        cmake_cmd = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cmake-vc.bat')
+    else:
+        cmake_cmd = 'cmake'
+
+    with WorkDir(directory=siconos_build_dir, tmp=tmp_build) as work_dir:
+
+        assert(len(args) > 0)
+        # File type (i.e. extension)
+        source_type = os.path.splitext(args[0])[1]
+        # file == python file --> exe_name = full path to source file
+        main_source = os.path.join(call_pwd, args[0])
+        assert os.path.exists(main_source)
+        if source_type == '.py':
+            exe_full_path = main_source
+            exe_dir = call_pwd
+            source_is_python = True
+        else:
+            # create an exe in binary dir, from source file
+            exe_name = os.path.splitext(os.path.basename(args[0]))[0]
+            exe_full_path = os.path.join(call_pwd, exe_name)
+
+        env = os.environ
+        env['LD_LIBRARY_PATH'] = \
+            '{0}:{1}:.'.\
+            format(os.getenv('LD_LIBRARY_PATH'),
+                   os.path.join(siconos_prefix, lib_dir))
+        env['Path'] = '{0};{1}'.format(os.getenv('Path'),
+                                       os.path.join(siconos_prefix, 'bin'))
+        if 'install' in make_targets:
+
+            if all_srcs:
+                extra_sources_directories.append(os.path.dirname(main_source))
+
+            full_definitions = []
+            kwd_definitions = []
+            for d in definitions:
+                if '=' not in d:
+                    full_definitions.append('{0}=1'.format(d))
+                    kwd_definitions.append(d)
+                else:
+                    full_definitions.append(d)
+                    kwd_definitions.append(d.split('=')[0])
+
+            extra_defs = ['-D{0}'.format(d) for d in full_definitions]
+            all_extra_defs = kwd_definitions
+
+            if cmake_generator is not None and 'Windows' in platform.uname():
+                extra_cmake_args.append('-G' + cmake_generator)
+
+            # No compilation required if only python files ...
+            if source_is_python and len(plugin_directories) == 0:
+                comp = False
+
+            if comp:
+                # for macos : the linker doesn't allow undefined
+                # symbol by default -- xhub
+                if 'Darwin' in platform.uname():
+                    linker_options.append('-undefined dynamic_lookup')
+                # Compiling on Windows is not an easy thing --xhub
+                try:
+                    cmake_boolean = {True: '1', False: '0'}
+                    subprocess.check_call([
+                        cmake_cmd, posixpath.join(siconos_prefix,
+                                                  'share/siconos'),
+                        '-DCALL_PWD={0}'.format(call_pwd),
+                        '-DMAIN_SOURCE={0}'.format(main_source),
+                        '-DBUILD_MAIN={0}'.format(cmake_boolean[
+                            not source_is_python]),
+                        '-DPLUGIN_DIRECTORIES={0}'.format(
+                            ';'.join(plugin_directories)),
+                        '-DSOURCES_DIRECTORIES={0}'.format(
+                            ';'.join(extra_sources_directories)),
+                        '-DCOMPILER_OPTIONS={0}'.format(
+                            ';'.join(compiler_options)),
+                        '-DCOMMAND_LINE_LINKER_OPTIONS={0}'.format(
+                            ';'.join(linker_options)),
+                        '-DLINKER_DIRECTORIES={0}'.format(
+                            ';'.join(linker_directories)),
+                        '-DLINKER_LIBRARIES={0}'.format(
+                            ';'.join(linker_libraries)),
+                        '-DALL_EXTRA_DEFINITIONS={0}'.format(
+                            ';'.join(all_extra_defs))] +
+                        extra_defs + extra_cmake_args,
+                        stderr=subprocess.STDOUT,
+                        env=env)
+                except Exception as exception:
+                    sys.stderr.write(
+                        '{0}: {1} build configuration failed, {2}\n'.format(
+                            myname, exe_full_path, exception))
+                    sys.exit(1)
+
+        if comp:
+            try:
+                assert(len(make_targets) > 0)
+                build_command = [cmake_cmd, '--build', '.',
+                                 '--target', make_targets[0], '--'] + make_args
+                subprocess.check_call(build_command)
+            except Exception as exception:
+                sys.stderr.write('{0}: {1} build failed, {2}'.format(
+                    myname, exe_full_path, exception))
+                sys.exit(1)
+
+    # execution
+    if exec_:
+        os.chdir(call_pwd)
+        if source_is_python:
+            exec_prefix.append('python')
+            if 'Windows' in platform.uname():
+                var_separator = ';'
+            else:
+                var_separator = ':'
+            siconos_pythonpath = "@SICONOS_PYTHON_INSTALL_DIR@"
+            env['PYTHONPATH'] = '{0}{1}{2}'.format(
+                os.path.join(siconos_prefix, siconos_pythonpath),
+                var_separator, os.getenv('PYTHONPATH'))
+
+        try:
+            subprocess.check_call(exec_prefix +
+                                  [exe_full_path] +
+                                  args[1:],
+                                  env=env)
+        except Exception as exception:
+            sys.stderr.write('{0}: {1} failed, {2}\n'.format(myname,
+                                                             exe_full_path,
+                                                             exception))
+            sys.exit(1)

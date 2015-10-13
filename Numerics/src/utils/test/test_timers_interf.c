@@ -2,7 +2,7 @@
 /* to be compared with :
    valgrind --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes  --simulate-cache=yes */
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #ifdef WITH_TIMERS
 #define TIMER_FFTW_CYCLE

@@ -42,7 +42,7 @@
   - mcp_FB(), nonsmooth Newton method based on Fisher-Burmeister function.
 */
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "NumericsMatrix.h"
 
 /** type for user defined function used to compute Fmcp and its jacobian.

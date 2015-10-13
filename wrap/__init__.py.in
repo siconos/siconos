@@ -1,0 +1,12 @@
+"""Python package dedicated to nonsmooth systems modelisation and simulation.
+
+"""
+__version__=0
+import sys
+
+version = '@SICONOS_VERSION@'
+__all__ = [@SICONOS_PYTHON_MODULES@]
+msg_start = '\nStarting @SICONOS_PYTHON_PACKAGE@, version '
+msg_start += str(version) + '.'
+print msg_start
+

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "KernelConfig.h"
+#include "SiconosConfig.h"
 #include <boost/numeric/bindings/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/bindings/trans.hpp>

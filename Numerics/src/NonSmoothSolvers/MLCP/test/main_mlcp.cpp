@@ -47,7 +47,7 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #include <stdio.h>
 #include <stdlib.h>

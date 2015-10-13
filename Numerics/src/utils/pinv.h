@@ -20,7 +20,7 @@
 #ifndef Pinv_H
 #define Pinv_H
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

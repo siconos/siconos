@@ -37,7 +37,7 @@
 
 
  */
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "FrictionContactProblem.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

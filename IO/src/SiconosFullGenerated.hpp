@@ -1,7 +1,7 @@
 // generated with the command : /home/xhub/siconos/IO/tools/builder.py --targets=Mechanics,Kernel,Control -I/install/usr/include/Siconos/Numerics -I/install/usr/include/Siconos/Kernel -I/install/usr/include/Siconos/Mechanics -I/install/usr/include/Siconos/Control -I/usr/include --output=/home/xhub/siconos/IO/src/SiconosFullGenerated.hpp --source=/home/xhub/siconos/IO/../
 #ifndef SiconosFullGenerated_hpp
 #define SiconosFullGenerated_hpp
-#include <IOConfig.h>
+#include <SiconosConfig.h>
 #ifdef WITH_SERIALIZATION
 #include "MechanicsFwd.hpp"
 #include "SpaceFilter.hpp"

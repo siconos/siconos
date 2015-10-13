@@ -1,0 +1,207 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+setup.py file for @SICONOS_PYTHON_PACKAGE@ python package
+
+This uses Distutils (http://python.org/sigs/distutils-sig/) the standard
+python mechanism for installing packages. For the easiest installation
+just type the command (you'll probably need root privileges for that):
+
+    python setup.py install
+
+This will install the library in the default location. For instructions on
+how to customize the install procedure read the output of:
+
+    python setup.py --help install
+
+In addition, there are some other commands:
+
+    python setup.py clean -> will clean all trash (*.pyc and stuff)
+    python setup.py test  -> will run the complete test suite
+    python setup.py bench -> will run the complete benchmark suite
+
+To get a full list of avaiable commands, read the output of:
+
+    python setup.py --help-commands
+
+"""
+from numpy.distutils.core import setup, Extension, Command
+from numpy.distutils.misc_util import Configuration
+import numpy as np
+import glob
+import os
+import sys
+
+# Make sure I have the right Python version.
+if sys.version_info[:2] < (2,6):
+    print "Siconos requires Python 2.6 or newer. Python %d.%d detected" % \
+        sys.version_info[:2]
+    sys.exit(-1)
+
+
+class PyTest(Command):
+    """To run tests using 'python setup.py test'
+    """
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import subprocess
+        import sys
+        errno = subprocess.call([sys.executable, 'runtests.py', 'build', '-s'])
+        raise SystemExit(errno)
+
+class clean(Command):
+    """Cleans *.pyc and debian trashs, so you should get the same copy as
+    is in the VCS.
+    """
+
+    description = "remove build files"
+    user_options = [("all","a","the same")]
+
+    def initialize_options(self):
+        self.all = None
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import os
+        os.system("py.cleanup")
+        os.system("rm -f python-build-stamp-2.4")
+        os.system("rm -f MANIFEST")
+        os.system("rm -rf build")
+        os.system("rm -rf dist")
+        os.system("rm -rf doc/_build")
+
+
+class TestSiconos(Command):
+    """Runs all tests under the tests/ folder
+    """
+
+    description = "Run all tests and doctests; also see bin/test and bin/doctest"
+    user_options = []  # distutils complains if this is not here.
+
+    def __init__(self, *args):
+        self.args = args[0] # so we can pass it to other classes
+        Command.__init__(self, *args)
+
+    def initialize_options(self):  # distutils wants this
+        pass
+
+    def finalize_options(self):    # this too
+        pass
+
+    def run(self):
+        from subprocess import call
+        # hu?
+        call("py.test" + " siconos/tests", shell=True, env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/wrap/"})
+
+
+class run_benchmarks(Command):
+    """Runs all SymPy benchmarks"""
+
+    description = "run all benchmarks"
+    user_options = []  # distutils complains if this is not here.
+
+    def __init__(self, *args):
+        self.args = args[0] # so we can pass it to other classes
+        Command.__init__(self, *args)
+
+    def initialize_options(self):  # distutils wants this
+        pass
+
+    def finalize_options(self):    # this too
+        pass
+
+    # we use py.test like architecture:
+    #
+    # o collector   -- collects benchmarks
+    # o runner      -- executes benchmarks
+    # o presenter   -- displays benchmarks results
+    #
+    # this is done in sympy.utilities.benchmarking on top of py.test
+    def run(self):
+        from sympy.utilities import benchmarking
+        benchmarking.main(['sympy'])
+
+
+# Full package name
+name = '@SICONOS_PYTHON_PACKAGE@'
+# List of python modules (directories) to be included
+packages = ['siconos',
+            ]
+
+with_component = {}
+components_list = "@SICONOS_PYTHON_MODULES@"
+
+# kernel, numerics and io are just 'so' in siconos.
+# This will probably change if we split each python interface for those packages.
+#with_component['numerics'] = True
+#with_component['kernel'] = "@HAVE_SICONOS_KERNEL@" is "TRUE"
+with_component['control'] = "@HAVE_SICONOS_CONTROL@" is "TRUE"
+with_component['mechanics'] = "@HAVE_SICONOS_MECHANICS@" is "TRUE"
+with_component['io'] = "@HAVE_SICONOS_IO@" is "TRUE"
+with_mechanisms = "@WITH_MECHANISMS@" is "ON"
+with_bullet = "@WITH_BULLET@" is "ON"
+with_occ = "@WITH_OCC@" is "ON"
+
+packages_for_tests =['siconos.tests']
+
+for comp in with_component.keys():
+    if with_component[comp]:
+        packages.append('siconos.' + comp)
+
+if with_component['mechanics']:
+    packages.append('siconos.mechanics.contact_detection')
+
+if with_mechanisms:
+    packages.append('siconos.mechanics.mechanisms')
+
+
+packages += packages_for_tests
+
+# Enable this to get debug info
+DISTUTILS_DEBUG = 1
+
+# C files and swig interface
+# swig =''
+# for mod in packages_src_dirs:
+#     swig_dir = os.path.join(os.path.join('@CMAKE_SOURCE_DIR@', mod), 'swig')
+
+#extra_link_args = ['-lopenblas', '-lgomp']
+#swig_opts = ['-modern', '-I./']
+
+
+#swig_ext = Extension('_numerics', swig, language='c++',
+#                     swig_opts=swig_opts,
+#                     extra_link_args=extra_link_args,
+#                     extra_compile_args=[''])
+
+ext_modules = []
+include_dirs = [np.get_include()]
+descr = 'Python bindings for @PROJECT_NAME@ software.'
+authors = 'Siconos team.'
+config = Configuration(
+    name=name,
+    version='@PACKAGE_VERSION@',
+    description=descr,
+    author=authors,
+    author_email='siconos-team@lists.gforge.fr',
+    url='http://siconos.gforge.inria.fr',
+    package_dir={'': '@CMAKE_CURRENT_BINARY_DIR@'},
+    ext_modules=ext_modules,
+    packages=packages,
+    py_modules=[],
+    include_dirs=include_dirs,
+    cmdclass={'test': PyTest,
+              'bench': run_benchmarks,
+              'clean': clean}
+)
+
+setup(**config.todict())

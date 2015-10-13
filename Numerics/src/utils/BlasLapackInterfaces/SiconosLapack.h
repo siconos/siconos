@@ -58,7 +58,7 @@ extern "C"
 // 
 // Thus, we define some macros in the headers below, to set a common interface for Siconos
 // calls to lapack functions. 
-// The HAS_... variables are set by cmake and defined in NumericsConfig.h and
+// The HAS_... variables are set by cmake and defined in SiconosConfig.h and
 // the interfaces to SiconosLapack functions are listed at the bottom of this file. 
 //
 // Each include defines : 

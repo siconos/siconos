@@ -1,0 +1,643 @@
+.. _diode_bridge_example:
+
+Tutorial: A 4-diodes bridge wave rectifier
+==========================================
+
+.. highlight:: c++
+	       
+In this tutorial, we will describe the step-by-step building of a Non
+Smooth Dynamical System and its simulation, to represent the system on
+the figure below:
+
+.. image:: /figures/electronics/DiodeBridge/diodeBridge.*
+
+In this sample, a LC oscillator initialized with a given voltage
+across the capacitor and a null current through the inductor provides
+the energy to a load resistance through a full-wave rectifier
+consisting of a 4 ideal diodes bridge. Both waves of the oscillating
+voltage across the LC are provided to the resistor with current
+flowing always in the same direction. The energy is dissipated in the
+resistor resulting in a damped oscillation.
+
+To run your own simulation using Siconos, you need to describe your
+system in a C++ file, let us call it diodeBridge.cpp.  First of all,
+create wherever you want a new directory, say \e DiodeBridge, where
+you save as diodeBridge.cpp the template given \ref tutGCtemplate
+"here".
+
+There are three main stages in the writing process:
+* the description of your Non Smooth Dynamical System
+* the description of the way it will be simulated (which discretization, which integrators, solvers ...)
+* the simulation loop writing.
+
+Steps 1 and 2 lead to the building of a Model, which behavior is simulated in step 3.
+
+Building a NonSmoothDynamicalSystem
+-----------------------------------
+
+To build a NonSmoothDynamicalSystem, you need to clearly identify some
+DynamicalSystems and some Interactions, the last one being composed
+with Relations and Non Smooth Law.
+
+In the present case, the oscillator is a time-invariant linear
+dynamical system, and using the Kirchhoff current and voltage laws and
+branch constitutive equations, its Dynamics is written as:
+
+.. math::
+
+   \left[\begin{array}{c} 
+   \dot v_L\\
+   \dot i_L
+   \end{array}\right]=
+   \left[\begin{array}{cc} 
+   0 & \frac{-1}{C}\\
+   \frac{1}{L} & 0
+   \end{array}\right].
+   \left[\begin{array}{c} 
+   v_L\\
+   i_L
+   \end{array}\right]
+   +
+   \left[\begin{array}{cccc} 
+   0 & 0 & \frac{-1}{C} & \frac{1}{C}\\
+   0 & 0 & 0 & 0
+   \end{array}\right].
+   \left[\begin{array}{c} 
+   -v_{DR1}\\
+   -v_{DF2}\\
+   i_{DF1}\\
+   i_{DR2}
+   \end{array}\right]
+
+and if we denote:
+
+.. math::
+
+   x = \left[\begin{array}{c} 
+   \dot v_L\\
+   \dot i_L
+   \end{array}\right]
+
+   \lambda = \left[\begin{array}{c} 
+   -v_{DR1}\\
+   -v_{DF2}\\
+   i_{DF1}\\
+   i_{DR2}
+   \end{array}\right] \f$, \f$ A=\left[\begin{array}{cc} 
+   0 & \frac{-1}{C}\\
+   \frac{1}{L} & 0
+   \end{array}\right] \f$ and \f$ r= \left[\begin{array}{cccc} 
+   0 & 0 & \frac{-1}{C} & \frac{1}{C}\\
+   0 & 0 & 0 & 0
+   \end{array}\right].\lambda
+   
+it results in
+
+:math:`\dot x = A.x + r`
+
+which fits with formalism proposed by \ref doc_ltids "FirstOrderLinearTIDS" class. 
+
+Then in DiodeBridge.cpp, you can start the construction of your
+DynamicalSystem. First define the required parameters, matrices and
+vectors::
+
+  // User-defined parameters
+  unsigned int ndof = 2;  // number of degrees of freedom of your system 
+  double Lvalue = 1e-2;   // inductance
+  double Cvalue = 1e-6;   // capacitance
+  double Rvalue = 1e3;    // resistance 
+  // DynamicalSystem(s)
+  
+  // All components of A are automatically set to 0.
+  SP::SiconosMatrix A(new SimpleMatrix(ndof,ndof)); 
+  (*A)(0,1) = -1.0/Cvalue;
+  (*A)(1,0) = 1.0/Lvalue;
+
+In the Doxygen documentation of class FirstOrderLinearTIDS, you can
+find a constructor with A, initial condition and a number that
+identify the system::
+
+  // User-defined parameters
+  double Vinit = 10.0;    // initial voltage
+  
+  // -- DynamicalSystem(s) --
+  // initial conditions vector
+  SP::SiconosVector x0(new SimpleVector(ndof));
+  (*x0)(0) = Vinit;
+  // 
+  SP::DynamicalSystem oscillator(new FirstOrderLinearTIDS(1,x0,A));
+
+From this point you have access to all the methods of FirstOrderLinearTIDS for oscillator, like::
+
+  oscillator->display(); 
+  oscillator->getNumber();
+  oscillator->getAPtr(); 
+
+To build A it is also possible to use an external file of data. See
+\ref matIO for details on that point.
+
+
+You now need to describe some Interactions. \n
+First, there are some linear relations between voltage and current inside the diode, given by
+
+.. math::
+
+   \left[ \begin{array}{c}
+   i_{DR1}\\
+   i_{DF2}\\
+   -v_{DF1}\\
+   -v_{DR2}
+   \end{array} \right]
+   = 
+   \left[ \begin{array}{cc}
+   0 & 0\\
+   0 & 0\\
+   -1 & 0\\
+   1 & 0
+   \end{array} \right]
+   \cdot
+   \left[ \begin{array}{c}
+   v_L\\
+   i_L
+   \end{array} \right]
+   +
+   \left[ \begin{array}{cccc}
+   \frac{1}{R} & \frac{1}{R} & -1 & 0\\
+   \frac{1}{R} & \frac{1}{R} & 0 & -1\\
+   1 & 0 & 0 & 0\\
+   0 & 1 & 0 & 0
+   \end{array} \right]
+   \cdot
+   \left[ \begin{array}{c}
+   -v_{DR1}\\
+   -v_{DF2}\\
+   i_{DF1}\\
+   i_{DR2}
+   \end{array} \right] 
+
+equivalent to :math:`y = Cx + D\lambda \f$, with \f$ y=\left[ \begin{array}{c}i_{DR1}\\i_{DF2}\\-v_{DF1}\\-v_{DR2}\end{array} \right]`,
+:math:`C = \left[ \begin{array}{cccc}\frac{1}{R} & \frac{1}{R} & -1 & 0\\ \frac{1}{R} & \frac{1}{R} & 0 & -1\\1 & 0 & 0 & 0\\0 & 1 & 0 & 0\end{array} \right]`
+and :math:`D=\left[ \begin{array}{c}-v_{DR1}\\-v_{DF2}\\i_{DF1}\\i_{DR2}\end{array} \right]`
+
+Completed by the relation between r and :math:`\lambda`, this
+corresponds to a Siconos \ref docRelationLTI "LinearTIR".
+
+Looking into LinearTIR class doxygen documentation, you will a find
+constructor with matrices B and C and another one with B, C, D, e and
+F. Choose the first one, D will be set later::
+
+     // -- Interaction --
+     // - Relations - 
+     unsigned int ninter = 4; // dimension of your Interaction = size of y and lambda vectors
+     SP::SiconosMatrix B(new SimpleMatrix(ndof,ninter));
+     (*B)(0,2) = -1.0/Cvalue ; 
+     (*B)(0,3) = 1.0/Cvalue;
+     SP::Siconos C(new SimpleMatrix(ninter,ndof));
+     (*C)(2,0) = -1.0;
+     (*C)(3,0) = 1.0;
+
+     // the Relation:
+     SP::FirstOrderLinearTIR myRelation(new FirstOrderLinearTIR(C,B));   
+     \endcode
+
+If we stop here, all other potential components of the relation (D, F etc) are not build, that is to say they are equal to 0.  So we need to
+build and set D.::
+
+  SP::SiconosMatrix D(new SimpleMatrix(ninter,ninter));
+  (*D)(0,0) = 1.0/Rvalue;  (*D)(0,1) = 1.0/Rvalue; (*D)(0,2) = -1.0; 
+  (*D)(1,0) = 1.0/Rvalue;  (*D)(1,1) = 1.0/Rvalue; (*D)(1,3) = -1.0;  
+  (*D)(2,0) = 1.0; 
+  (*D)(3,1) = 1.0; 
+  
+  myRelation->setDPtr(D); 
+
+OK, now you have a relation but to complete the Interaction, you need
+a non-smooth law. 
+
+On the figure below, the left-hand sketch displays the ideal diode
+characteristic and the right-hand sketch displays the usual
+exponential characteristic as stated by Shockley's law.
+
+.. image:: /figures/electronics/diodeNonSmooth.*
+
+Thus the behavior of each diode of the bridge, supposed to be ideal,
+can be described with a complementarity condition between current and
+reverse voltage (variables (\f$ y,\lambda \f$) ). Depending on the
+diode position in the bridge, y stands for the reverse voltage across
+the diode or for the diode current. \n Then, the complementarity
+conditions, results of the ideal diodes characteristics are given
+by:
+
+.. math::
+
+   \begin{array}{l}
+   0 \leq -v_{DR1} \, \perp \, i_{DR1} \geq 0\\
+   0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\
+   0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\
+   0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0
+   \end{array} \ \ \ \ \ \ or \ \ \ \ \ \  0 \leq y \, \perp \, \lambda \geq 0
+
+You will then use a ComplementarityConditionNSL object for your non-smooth law::
+
+  unsigned int nslawSize = 4; 
+  SP::NonSmoothLaw myNslaw(new ComplementarityConditionNSL(nslawSize));
+
+In that case, nslawSize is equivalent of the Interaction size. At this
+point you do not need to know more about that but if you need details
+on nslawSize meaning see \ref docNSL.
+
+You are now ready to build the Interaction. As usual, you will find
+the required constructor in the doxygen documentation of
+Interaction. As input, you need the Relation and NonSmoothLaw
+pointers, a set of DynamicalSystems, the interaction size and some ids
+(a string and a number).::
+
+  SP::Interaction myInteraction(new Interaction(ninter, myNslaw, myRelation));        
+
+This is the end of the first step, you have now a dynamical system and
+an interaction. Before dealing with the Simulation, first create the
+Model, the object that handles the NonSmoothDynamicalSystem and the
+Simulation. Building a Model is an easy thing: just give some time
+boundaries for the future simulation and insert in the
+NonSmoothDynamicalSystem held by the Model the dynamical systems, then
+link together interactions and dynamical systems.::
+
+  // Model
+  double t0 = 0; // Initial time
+  double T = 10; // Total simulation time
+  SP::Model diodeBridge(new Model(t0,T));
+  diodebridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(oscillator);
+  diodebridge->nonSmoothDynamicalSystem()->link(myInteraction,oscillator);
+
+The Simulation
+--------------
+
+You need now to define the way the behavior of you
+NonSmoothDynamicalSystem will be computed. That is the role of
+Simulation object.  Two different strategies are available at the
+time: TimeStepping or EventDriven. It's up to you to find the most
+adapted to your problem.  For details on both of them, see \ref
+docSimu. 
+
+Other important objects of the simulation that are to be defined are
+the time discretisation, some integrators for the Dynamics and a
+method to formalize and solve the non smooth problem. 
+
+
+For the Diode Bridge example, a TimeStepping strategy will be used,
+with a Moreau integrator and a LCP (Linear Complementarity Problem)
+formulation.
+
+First of all, you have to define the one-step integrator for all the
+DynamicalSystems. For TimeStepping scheme, the only available one is
+Moreau where the integration of the equations over the time steps is
+based on a \f$ \theta \f$ method (see \ref docSimuMoreauTS for
+details).::
+
+  double theta = 0.5;
+  // One Step Integrator  
+  SP::Moreau myIntegrator(new Moreau(oscillator,theta))   ;
+
+Then you can create the TimeDiscretisation. There are different
+constructors, depending on what you want to fix: step size, number of
+time steps ...  Choose for example the one with the size of the time
+step. Since t0 and T are fixed in the Model, the time discretisation
+is then clearly defined.::
+
+  double h_step =  1.0e-6;  // Time step       
+  SP::TimeDiscretisation td(new TimeDiscretisation(h_step));
+
+After the integration of the Dynamics, the system is written as a
+Linear Complementarity Problem (see \ref docSimuLCP), and solved
+thanks to a solver algorithm of type NSQP (Non Smooth Quadratic
+Programming).::
+
+  // One Step non smooth problem
+  OneStepNSProblem* myLCP = new LCP("NSQP");
+
+The default solver options may be modified this way ::
+
+  \\ max number of iteration
+  myLCP->numericsSolverOptions()->iparam[0]=101;
+
+  \\ tolerance
+  myLCP->numericsSolverOptions()->dparam[0]=1e-4;
+
+See the solvers documentation.
+
+Finaly, we create the Simulation object with the Model the
+OneStepIntegrator and OneStepNSProblem::
+  
+  SP::Simulation s(new TimeStepping(DiodeBridge, myIntegrator, myLCP));
+
+The Model is now complete and the NonSmoothDynamicalSystem ready to be
+computed. This is the end of the second step.
+
+Leading the Simulation Process
+------------------------------
+
+From now on, you will work on the NonSmoothDynamicalSystem by calling
+some specific functions of the Simulation. \n The first and compulsory
+step of any simulation process in Siconos is the initialization of the
+Simulation::
+
+  diodeBridge->initialize(s);
+
+If something is wrong in your Model, that may be the point where error
+messages occur ...
+
+Then the easiest way to run your simulation is to call::
+
+  s->run()
+
+But after that you only have access to values computed at the last
+time step, which might not be enough ...  So that may be better to
+write a complete time loop like::
+
+  int k = 0; // Current step 
+  int N = td->getNSteps(); // Number of time steps
+  for(k = 1 ; k < N ; ++k)
+  {	
+      s->computeOneStep();
+      s->nextStep();
+  }  
+
+nextStep is mainly used to increment the time step and say that last
+computed values will be initial values for the next step. 
+
+computeOneStep performs computation over the current time step. In the
+Moreau's time stepping case, it will first integrate the dynamics to
+obtain the so-called free-state, that is without non-smooth effect,
+then it formalizes and solves a LCP before re-integrate the dynamics
+using the LCP results.  (This is a quite simplified view of the Time
+Stepping process so for details check \ref docSimuMoreauTS). \n The
+problem of output still remains. To answer that, we create a matrix
+where required output data will be save::
+
+  // Before simulation loop
+  int k = 0;
+  int N = td->getNSteps(); // Number of time steps
+  unsigned int outputSize = 7; // number of required data
+  SimpleMatrix dataPlot(N,outputSize);
+  // We get values for the initial time step: 
+  // time
+  dataPlot(k, 0) = t0;
+  
+  // inductor voltage
+  dataPlot(k, 1) = (*x)(0);
+  
+  // inductor current
+  dataPlot(k, 2) = (*x)(1);
+  
+  // diode R1 current
+  dataPlot(k, 3) = (*y)(0);
+  
+  // diode R1 voltage
+  dataPlot(k, 4) = -(*lambda)(0);
+  
+  // diode F2 voltage 
+  dataPlot(k, 5) = -(*lambda)(1);
+  
+  // diode F1 current
+  dataPlot(k, 6) = (*lambda)(2);
+  
+  
+  // --- Time loop  ---
+  for(k = 1 ; k < N ; ++k)
+  {
+        // solve ... 
+	s->computeOneStep();
+
+	// --- Get values to be plotted ---
+	// time
+    	dataPlot(k, 0) = s->nextTime();
+    
+    	// inductor voltage
+    	dataPlot(k, 1) = (*x)(0);
+
+    	// inductor current
+    	dataPlot(k, 2) = (*x)(1);
+    
+    	// diode R1 current
+    	dataPlot(k, 3) = (*y)(0);
+
+    	// diode R1 voltage
+    	dataPlot(k, 4) = -(*lambda)(0);
+
+	// diode F2 voltage 
+   	dataPlot(k, 5) = -(*lambda)(1);
+	
+    	// diode F1 current
+    	dataPlot(k, 6) = (*lambda)(2);
+
+	s->nextStep();
+	
+  }    
+
+  // Write the results into the file "DiodeBridge.dat"
+  ioMatrix io("DiodeBridge.dat", "ascii");
+  io.write(dataPlot);
+
+To complete DiodeBridge.cpp, you need to include the Siconos Kernel
+header file.::
+
+  // Header files
+  #include "SiconosKernel.hpp"
+
+The full cpp file is available here: \ref GSDiodeBridgeEx
+
+Results
+-------
+
+You can now run in a terminal::
+  
+  siconos DiodeBridge.cpp
+
+Results are given on the figure below:
+
+.. image:: /figures/electronics/DiodeBridge/diodeBridgeResult.*
+
+
+The complete program
+--------------------
+
+.. code::
+   
+   #include "SiconosKernel.hpp"
+
+   // main program
+   int main(int argc, char* argv[])
+   {
+   // Exception handling
+   try
+   {
+    // == User-defined parameters ==
+    unsigned int ndof = 2;  // number of degrees of freedom of your
+                            // system
+    double Lvalue = 1e-2;   // inductance
+    double Cvalue = 1e-6;   // capacitance
+    double Rvalue = 1e3;    // resistance
+    double Vinit = 10.0;    // initial voltage
+    double t0 = 0.0;
+    double T = 5e-3;        // Total simulation time
+    double h_step = 1.0e-6;      // Time step
+
+    // ================= Creation of the model =======================
+
+    // == Creation of the NonSmoothDynamicalSystem ==
+    // DynamicalSystem(s)
+
+    // All components of A are automatically set to 0.
+    SP::SiconosMatrix A(new SimpleMatrix(ndof,ndof)); 
+    (*A)(0,1) = -1.0/Cvalue;
+    (*A)(1,0) = 1.0/Lvalue;
+    SP::SiconosVector x0(new SimpleVector(ndof));
+    (*x0)(0) = Vinit;
+    SP::DynamicalSystem oscillator(new FirstOrderLinearTIDS(x0,A));
+
+    // Relations
+    unsigned int ninter = 4; // dimension of your Interaction = size
+                             // of y and lambda vectors
+    SP::SiconosMatrix B(new SimpleMatrix(ndof,ninter));
+    (*B)(0,2) = -1.0/Cvalue ;
+    (*B)(0,3) = 1.0/Cvalue;
+    SP::SiconosMatrix C(new SimpleMatrix(ninter,ndof));
+    (*C)(2,0) = -1.0;
+    (*C)(3,0) = 1.0;
+    SP::FirstOrderLinearTIR myRelation(new FirstOrderLinearTIR(C,B));
+    SP::SiconosMatrix D(new SimpleMatrix(ninter,ninter));
+    (*D)(0,0) = 1.0/Rvalue;
+    (*D)(0,1) = 1.0/Rvalue;
+    (*D)(0,2) = -1.0;
+    (*D)(1,0) = 1.0/Rvalue;
+    (*D)(1,1) = 1.0/Rvalue;
+    (*D)(1,3) = -1.0;
+    (*D)(2,0) = 1.0;
+    (*D)(3,1) = 1.0;
+    myRelation->setDPtr(D);
+
+    // NonSmoothLaw
+    unsigned int nslawSize = 4;
+    SP::NonSmoothLaw myNslaw(new ComplementarityConditionNSL(nslawSize));
+
+    SP::Interaction myInteraction(new Interaction(ninter, myNslaw, myRelation));
+
+    // Model
+    SP::Model DiodeBridge(new Model(t0,T));
+    DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(oscillator);
+    DiodeBridge->nonSmoothDynamicalSystem()->link(myInteraction,oscillator);
+
+    // == Creation of the Simulation ==
+
+    // -- (1) OneStepIntegrators --
+    double theta = 0.5;
+    SP::Moreau myIntegrator(new Moreau(oscillator,theta));
+
+    // -- (2) Time discretisation --
+    SP::TimeDiscretisation td(new TimeDiscretisation(t0, h_step));
+
+    // -- (3) one step non smooth problem
+    SP::OneStepNSProblem myLCP(new LCP());
+
+    // -- (4) Simulation setup with (1) (2) (3)
+    SP::TimeStepping s(new TimeStepping(td,myIntegrator,myLCP));
+
+
+    // ====================== Computation ============================
+
+    // --- Initialisation of the simulation ---
+    DiodeBridge->initialize(s);
+
+    std::cout << " ---> End of initialization." << std::endl;
+
+    int k = 0;
+    double h = s->timeStep();
+    int N = (int)((T-t0)/h); // Number of time steps
+
+    // --- Get the values to be plotted ---
+    // -> saved in a matrix dataPlot
+    SimpleMatrix dataPlot(N, 7);
+
+    SP::SiconosVector x = oscillator->x();
+    SP::SiconosVector y = myInteraction->y(0);
+    SP::SiconosVector lambda = myInteraction->lambda(0);
+
+    // For the initial time step:
+    // time
+    dataPlot(k, 0) = t0;
+
+    // inductor voltage
+    dataPlot(k, 1) = (*x)(0);
+
+    // inductor current
+    dataPlot(k, 2) = (*x)(1);
+
+    // diode R1 current
+    dataPlot(k, 3) = (*y)(0);
+
+    // diode R1 voltage
+    dataPlot(k, 4) = -(*lambda)(0);
+
+    // diode F2 voltage
+    dataPlot(k, 5) = -(*lambda)(1);
+
+    // diode F1 current
+    dataPlot(k, 6) = (*lambda)(2);
+
+    boost::timer t;
+    t.restart();
+
+    // --- Time loop  ---
+    for (k = 1 ; k < N ; ++k)
+    {
+      // solve ...
+      s->computeOneStep();
+
+      // --- Get values to be plotted ---
+      // time
+      dataPlot(k, 0) = s->nextTime();
+
+      // inductor voltage
+      dataPlot(k, 1) = (*x)(0);
+
+      // inductor current
+      dataPlot(k, 2) = (*x)(1);
+
+      // diode R1 current
+      dataPlot(k, 3) = (*y)(0);
+
+      // diode R1 voltage
+      dataPlot(k, 4) = -(*lambda)(0);
+
+      // diode F2 voltage
+      dataPlot(k, 5) = -(*lambda)(1);
+
+      // diode F1 current
+      dataPlot(k, 6) = (*lambda)(2);
+
+      s->nextStep();
+
+    }
+
+
+    // --- elapsed time computing ---
+    std::cout<<"time = "<<t.elapsed()<<std::endl;
+
+    // Number of time iterations
+    std::cout<<"Number of iterations done: "<<k<<std::endl;
+
+    // dataPlot (ascii) output
+    ioMatrix io("DiodeBridge.dat", "ascii");
+    io.write(dataPlot,"noDim");
+  }
+
+  // --- Exceptions handling ---
+  catch (SiconosException e)
+  {
+    std::cout << e.report() << std::endl;
+  }
+  catch (...)
+  {
+    std::cout << "Exception caught " << std::endl;
+  }
+  }

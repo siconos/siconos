@@ -1,0 +1,8 @@
+// insert path of Siconos module for the importation of main modules
+// in submodules
+
+%pythoncode %{
+import sys
+import os
+sys.path.append('@SICONOS_SWIG_ROOT_DIR@')
+%}

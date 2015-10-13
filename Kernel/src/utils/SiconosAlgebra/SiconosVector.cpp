@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "KernelConfig.h"
+#include "SiconosConfig.h"
 
 #include "SiconosAlgebraTypeDef.hpp"
 

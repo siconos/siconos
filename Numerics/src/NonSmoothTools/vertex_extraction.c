@@ -40,7 +40,7 @@
 #include "debug.h"
 
 #ifdef WITH_LPSOLVE
-#include "lpsolve/lp_lib.h"
+#include "lp_lib.h"
 
 void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
 {

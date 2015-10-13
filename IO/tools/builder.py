@@ -223,7 +223,7 @@ with open(generated_file, 'a') as dest_file:
                     .format(' '.join(sys.argv)))
     dest_file.write('#ifndef {0}_hpp\n'.format(generated_header))
     dest_file.write('#define {0}_hpp\n'.format(generated_header))
-    dest_file.write('#include <IOConfig.h>\n'.format(generated_header))
+    dest_file.write('#include <SiconosConfig.h>\n'.format(generated_header))
     dest_file.write('#ifdef WITH_SERIALIZATION\n'.format(generated_header))
 
     for header in all_headers:

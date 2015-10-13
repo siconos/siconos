@@ -31,7 +31,7 @@ Documentation to be done
   \brief Structure definition and functions related to sparse matrix storage in Numerics
 */
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #ifdef HAVE_MPI
 #include <mpi.h>

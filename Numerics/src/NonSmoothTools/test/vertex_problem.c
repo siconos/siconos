@@ -18,7 +18,7 @@
  */
 
 #include <stdio.h>
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #ifdef WITH_LPSOLVE
 #include "vertex_extraction.h"

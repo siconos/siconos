@@ -1,3 +1,0 @@
-#ifndef EXAMPLECONFIG_H
-
-#endif EXAMPLECONFIG_H

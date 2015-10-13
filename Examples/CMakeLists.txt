@@ -6,9 +6,16 @@ cmake_minimum_required(VERSION 2.8.7)
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
 endif()
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+# Force out-of-source build
+include(OutOfSourcesBuild)
+
+# Some usefull macros
 include(SiconosTools)
+
+# Check/set uninitialized cache variables (--> for docker config)
 get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
 
 IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -18,101 +25,114 @@ IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
   STRING(REGEX REPLACE "\"" "" ENV_PATH "${ENV_PATH}")
 ENDIF()
 
-INCLUDE(SiconosProject)
+project(siconos_examples CXX)
+include(CXXCompilerSetup)
+include(CCompilerSetup)
 
-ENABLE_LANGUAGE(C)
-ENABLE_LANGUAGE(CXX)
-
-SET(EXAMPLES_DIRECTORIES
+set(EXAMPLES_DIRECTORIES
   Biology
   Control
   Electronics
   Mechanics
+  Mechanics/Pendulum
   Numerics
   Robotics/HuMAns_pa10
 )
 
-SET(NO_TEST_FILES QGL)
+set(NO_TEST_FILES QGL tools)
+
+if(NOT HAVE_SICONOS_MECHANICS)
+  list(APPEND NO_TEST_FILES
+    JointsTests)
+  list(APPEND NO_TEST_FILES
+    NewtonEuler)
+endif()
 
 # sharing a double between an executable and a library is hackisch
 IF(MSVC)
   SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock Pendulum)
 ENDIF(MSVC)
 
-COMPILE_WITH(SiconosNumerics REQUIRED)
-COMPILE_WITH(SiconosKernel REQUIRED)
-COMPILE_WITH(SiconosMechanics)
+if(WITH_PYTHON_WRAPPER)
+  find_python_module(matplotlib)
+endif()
 
-IF(SiconosKernel_CMAKE_DIR)
-  LIST(APPEND CMAKE_MODULE_PATH ${SiconosKernel_CMAKE_DIR})
-  INCLUDE(NumericsCmakeConfig)
-  IF(NOT HAS_ONE_LP_SOLVER)
-    SET(NO_TEST_FILES ${NO_TEST_FILES} SMCElectroPneumaticItw Twisting)
-  ENDIF(NOT HAS_ONE_LP_SOLVER)
-ENDIF(SiconosKernel_CMAKE_DIR)
+# --- Search siconos package path ---
+# --> based on path to script siconos
+find_file(SICONOS_SCRIPT siconos
+  PATHS ENV PATH
+  NO_CMAKE_PATH
+  NO_DEFAULT_PATH)
 
-SICONOS_PROJECT(Examples)
+if(SICONOS_SCRIPT_NOT_FOUND)
+  message(FATAL_ERROR "Can not find siconos script. Please set your PATH environment variable properly.")
+endif()
 
+message("============================================================================================")
+message("Found siconos script : ${SICONOS_SCRIPT}")
+get_filename_component(SICONOS_INSTALL_DIR ${SICONOS_SCRIPT} PATH)
+get_filename_component(SICONOS_INSTALL_DIR ${SICONOS_INSTALL_DIR} PATH)
+message("The examples will be run with siconos installed in : ${SICONOS_INSTALL_DIR}")
+message("============================================================================================")
 
+list(APPEND CMAKE_MODULE_PATH ${SICONOS_INSTALL_DIR}/share/siconos/cmake)
 
-MACRO(ADD_EXAMPLE_DIRECTORY _N)
-  MESSAGE("Adding example directory ${_N}")
-  FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_N})
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/CMakeListsForExamples.cmake 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_N}/CMakeLists.txt @ONLY)
-  ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/${_N} 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_N})
-ENDMACRO(ADD_EXAMPLE_DIRECTORY _N)
+# include siconos config
+find_package(siconos 3.8.1 REQUIRED)
 
-FOREACH(_D ${EXAMPLES_DIRECTORIES})
-  FILE(GLOB EXAMPLES_P ${CMAKE_SOURCE_DIR}/${_D}/*/*.cpp )
-  IF(EXAMPLES_P)
-    FOREACH(_P ${EXAMPLES_P})
-      GET_FILENAME_COMPONENT(_RP ${_P} ABSOLUTE)
-      LIST(APPEND EXAMPLES ${_RP})
-    ENDFOREACH(_P ${EXAMPLES_P})
-  ENDIF(EXAMPLES_P)
-ENDFOREACH(_D ${EXAMPLES_DIRECTORIES})
+include(CTest)
 
-FOREACH(EXAMPLE ${EXAMPLES})
-  IF(NOT EXAMPLE MATCHES Plugin)
-    SET(TEST_ME TRUE)
-    FOREACH(_NT ${NO_TEST_FILES})
-      IF(EXAMPLE MATCHES "${_NT}")
-        SET(TEST_ME FALSE)
-      ENDIF(EXAMPLE MATCHES "${_NT}")
-    ENDFOREACH(_NT ${NO_TEST_FILES})
-    IF(TEST_ME)
-      GET_FILENAME_COMPONENT(EXAMPLE_DIR ${EXAMPLE} PATH)
-      GET_FILENAME_COMPONENT(EXAMPLE_UPDIR ${EXAMPLE_DIR} NAME)
-      GET_FILENAME_COMPONENT(EXAMPLE_NAME ${EXAMPLE} NAME_WE)
-      ADD_EXAMPLE_DIRECTORY(${EXAMPLE_UPDIR}/${EXAMPLE_NAME})
-    ENDIF(TEST_ME)
-  ENDIF(NOT EXAMPLE MATCHES Plugin)
-ENDFOREACH(EXAMPLE ${EXAMPLES})
+# Exclude some tests if LpSolve has not been found
+if(NOT HAS_ONE_LP_SOLVER)
+  set(NO_TEST_FILES ${NO_TEST_FILES} SMCElectroPneumaticItw Twisting)
+endif()
 
-FOREACH(_D ${EXAMPLES_DIRECTORIES})
-  FILE(GLOB EXAMPLES_PY ${CMAKE_SOURCE_DIR}/${_D}/*/*.py )
-  IF(EXAMPLES_PY)
-    FOREACH(_PY ${EXAMPLES_PY})
-      GET_FILENAME_COMPONENT(_RPY ${_PY} ABSOLUTE)
-      LIST(APPEND EXAMPLES_PY ${_RPY})
-    ENDFOREACH(_PY ${EXAMPLES_PY})
-  ENDIF(EXAMPLES_PY)
-ENDFOREACH(_D ${EXAMPLES_DIRECTORIES})
+# Scan each dir in examples_directories and collect source files
+foreach(_D ${EXAMPLES_DIRECTORIES})
+  message("Scan example directory ${_D}")
+  set(dirlist)
+  get_subdirectories(dirlist ${CMAKE_CURRENT_SOURCE_DIR}/${_D})
+  foreach(_dir ${dirlist})
+    set(src_dir ${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_dir})
+    file(GLOB EXAMPLES_P ${src_dir}/*.cpp ${src_dir}/*.py)
+    file(GLOB EXAMPLES_DATA ${src_dir}/*.ref)
+    if(EXAMPLES_P)
+      foreach(_P ${EXAMPLES_P})
+	# Full path to current file ...
+	get_filename_component(_RP ${_P} ABSOLUTE)
+	if(NOT _RP MATCHES Plugin) # To exclude plugins
+	  set(TEST_ME TRUE)
+	  # Exclude 'no test' files
+	  foreach(_NT ${NO_TEST_FILES})
+	    if(_RP MATCHES "${_NT}")
+	      set(TEST_ME FALSE)
+	    endif()
+	  endforeach()
+	  if(TEST_ME)
+	    get_filename_component(EXAMPLE_DIR ${_RP} PATH)
+	    get_filename_component(EXAMPLE_NAME ${_RP} NAME_WE)
+	    get_filename_component(ext ${_P} EXT)
+	    message("Add ${_D}/${_dir}/${EXAMPLE_NAME}")
+	    set(bin_dir ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_dir}/${EXAMPLE_NAME})
+	    file(MAKE_DIRECTORY ${bin_dir})
+	    foreach(datafile ${EXAMPLES_DATA})
+	      configure_file(${datafile} ${bin_dir})
+	    endforeach()
+	    if(ext MATCHES ".py")
+ 	      set(target_name ${_dir}_${EXAMPLE_NAME}_py)
+ 	    else()
+	      set(target_name ${_dir}_${EXAMPLE_NAME})
+	      add_custom_target(${target_name}_build ALL ${CMAKE_COMMAND} -E chdir ${bin_dir} ${SICONOS_SCRIPT} --noexec --silent ${_P}
+		WORKING_DIRECTORY ${bin_dir})
+	    endif()
+ 	    add_test(${target_name} ${CMAKE_COMMAND} -E chdir ${bin_dir} ${SICONOS_SCRIPT} ${_P})
+ 	  endif()
+	endif()
+      endforeach()
+    endif()
+  endforeach()
+endforeach()
 
-FOREACH(EXAMPLE ${EXAMPLES_PY})
-  SET(TEST_ME TRUE)
-  FOREACH(_NT ${NO_TEST_FILES})
-    IF(EXAMPLE MATCHES "${_NT}")
-      SET(TEST_ME FALSE)
-    ENDIF(EXAMPLE MATCHES "${_NT}")
-  ENDFOREACH(_NT ${NO_TEST_FILES})
-  IF(TEST_ME)
-    GET_FILENAME_COMPONENT(EXAMPLE_NAME ${EXAMPLE} NAME_WE)
-    ADD_EXAMPLE_DIRECTORY(${EXAMPLE_NAME})
-  ENDIF(TEST_ME)
-ENDFOREACH(EXAMPLE ${EXAMPLES_PY})
 
 # The following should work, but isn't ... so I used NO_TEST_FILES -- xhub
 #SET_TESTS_PROPERTIES("SliderCrankD1MinusLinear" PROPERTIES WILL_FAIL TRUE)

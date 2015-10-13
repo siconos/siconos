@@ -19,7 +19,7 @@
 #ifndef FCLIB_INTERFACE_H
 #define FCLIB_INTERFACE_H
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #if defined(WITH_FCLIB)
 #include <fclib.h>

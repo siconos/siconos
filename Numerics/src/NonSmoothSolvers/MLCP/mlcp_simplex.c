@@ -28,7 +28,7 @@ dim(v)=nn
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "MLCP_Solvers.h"
 #include <math.h>
 

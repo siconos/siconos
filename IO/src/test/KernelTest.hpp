@@ -1,7 +1,7 @@
 #ifndef KERNEL_TEST_HPP
 #define KERNEL_TEST_HPP
 
-#include "IOConfig.h"
+#include "SiconosConfig.h"
 #include <cppunit/extensions/HelperMacros.h>
 
 class KernelTest : public CppUnit::TestFixture

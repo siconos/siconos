@@ -25,7 +25,7 @@
 
 */
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #ifdef __cplusplus
 #undef restrict

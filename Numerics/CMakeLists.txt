@@ -1,40 +1,92 @@
-# Set minimum version for cmake
-cmake_minimum_required(VERSION 2.8.7)
+#================================================================
+# cmake utilities to build numerics component
+#================================================================
 
-# MACOSX_RPATH required from cmake 3.0.
-# See http://www.kitware.com/blog/home/post/510
-if(POLICY CMP0042)
-  cmake_policy(SET CMP0042 OLD)
-endif()
+set(COMPONENT numerics)
+message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
+# Name used for the target to be built
+set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-include(SiconosTools)
-get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
-
-option(WITH_CXX "Enable CXX compiler for Numerics. Default=OFF" OFF)
-
-include(SiconosProject)
-
-set(PACKAGE_DESCRIPTION_SUMMARY 
-  "Siconos/Numerics provides low-level algorithms (NSDS field).")
-
-set(PACKAGE_DESCRIPTION 
-  "Siconos is a program dedicated to modeling, simulation and control of
-Non Smooth Dynamical Systems (NSDS). The present package,
-Siconos/Numerics provides low-level algorithms to compute basic
-well-identified problems.")
-
-if(FAT_BINARY)
-  set(CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
-endif()
-
-if(WITH_CXX)
-  project(SiconosNumerics C CXX Fortran)
+# Define a Fortran interface file (FCMangle.hpp)
+#FortranCInterface_VERIFY(QUIET)
+if(NOT FortranCInterface_VERIFIED_C)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DefaultMangle.h.in ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h)
 else()
-  project(SiconosNumerics C Fortran)
+  FortranCInterface_HEADER(${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h
+    MACRO_NAMESPACE "myF2C" 
+    SYMBOL_NAMESPACE "myF2C"
+    )
 endif()
 
-siconos_project(Numerics)
+# --- Sources and headers ---
+# source directories for numerics
+set(${COMPONENT}_DIRS
+  src/.
+  src/hairer
+  src/netlib/odepack
+  src/netlib/dftemplates
+  src/SOL/lumod-c
+  src/utils
+  src/utils/BlasLapackInterfaces
+  src/utils/InterfaceToPathFerris/include
+  src/utils/InterfaceToPathFerris/interface
+  src/NonSmoothTools
+  src/NonSmoothSolvers
+  src/NonSmoothSolvers/AVI
+  src/NonSmoothSolvers/LCP
+  src/NonSmoothSolvers/MLCP
+  src/NonSmoothSolvers/SOCP
+  src/NonSmoothSolvers/LinearSystem
+  src/NonSmoothSolvers/QP
+  src/NonSmoothSolvers/Relay
+  src/NonSmoothSolvers/FrictionContact
+  src/NonSmoothSolvers/NCP
+  src/NonSmoothSolvers/MCP
+  src/NonSmoothSolvers/GenericMechanical
+  src/NonSmoothSolvers/VI
+)
+
+# Unstable sources. Will be included only
+# if WITH_${COMPONENT}_UNSTABLE is true.
+set(${COMPONENT}_Unstable_SRCS)
+
+# List of directories of headers not to be installed
+set(${COMPONENT}_HDRS_EXCLUDE_DIR src/SOL/lumod-c)
+
+# List of directories for which no doxygen doc will be generated
+# By default all directories matching "test" are excluded.
+set(${COMPONENT}_EXCLUDE_DOXY
+  src/netlib
+  src/hairer
+  src/NonSmoothSolvers/InterfaceToPathFerris/include
+  src/NonSmoothSolvers/Unstable_or_deprecated
+  src/utils/f2c.h )
+
+# Windows stuff
+include(WindowsNumericsSetup)
+
+# ---- Final setup for the library ----
+# --- set linked libraries and linker language ---
+set(${COMPONENT}_LINKER_LANGUAGE C)
+# but CXX may be needed with MlcpSimplex
+if(MLCPSIMPLEX_FOUND) 
+  set(${COMPONENT}_LINKER_LANGUAGE CXX)
+endif()
+set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+include(LibraryProjectSetup)
+library_project_setup()
+
+if(BUILD_AS_CPP)
+  file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
+  set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
+endif()
 
 
 
+
+# --- specific install ----
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include/${PROJECT_NAME})
+
+
+# --- tests ---
+include(${COMPONENT}_tests.cmake)

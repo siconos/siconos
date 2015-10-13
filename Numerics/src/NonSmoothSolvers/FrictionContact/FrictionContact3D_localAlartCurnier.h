@@ -44,7 +44,7 @@
   Two different storages are available for M: dense and sparse block.
 
  */
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "FrictionContactProblem.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

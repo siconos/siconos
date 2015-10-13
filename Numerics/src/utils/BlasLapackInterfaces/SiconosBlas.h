@@ -20,7 +20,7 @@
 #ifndef SiconosBlas_H
 #define SiconosBlas_H
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus)
 #include <algorithm>

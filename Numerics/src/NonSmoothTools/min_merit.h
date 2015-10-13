@@ -31,7 +31,7 @@
   \f}
 */
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "NumericsMatrix.h"
 
 #ifdef __cplusplus

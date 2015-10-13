@@ -22,7 +22,7 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #include "GlobalFrictionContact3D_AlartCurnier.h"
 #include "GlobalFrictionContact3D_Solvers.h"

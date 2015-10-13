@@ -37,7 +37,7 @@ sum_{k=0:n} p[k] x^(n-k) =0
 Assume p[0]<>0 (overflows otherwise)
 **/
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

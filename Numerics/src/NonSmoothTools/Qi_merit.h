@@ -19,7 +19,7 @@
 #ifndef QI_MERIT_H
 #define QI_MERIT_H
 
-#include "NumericsConfig.h"
+#include "SiconosConfig.h"
 #include "NumericsMatrix.h"
 
 #ifdef __cplusplus

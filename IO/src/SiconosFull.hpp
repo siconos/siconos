@@ -19,7 +19,7 @@
 
 #ifndef SiconosFull_hpp
 #define SiconosFull_hpp
-#include "IOConfig.h"
+#include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
 #include "Register.hpp"
 
