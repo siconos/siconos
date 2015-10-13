@@ -15,6 +15,7 @@ macro(add_docker_targets)
     string(REPLACE "," ";" DOCKER_TEMPLATES_LIST ${DOCKER_TEMPLATES})
 
     string(REPLACE "," "-" DOCKER_IMAGE ${DOCKER_TEMPLATES})
+    string(REPLACE "+" "x" DOCKER_IMAGE ${DOCKER_IMAGE})
   endif()    
 
   if(DOCKER_TEMPLATE)
@@ -27,6 +28,7 @@ macro(add_docker_targets)
   else()
     string(REPLACE ":" "-" DOCKER_IMAGE_AS_DIR ${DOCKER_IMAGE})
     string(REPLACE "." "-" DOCKER_IMAGE_AS_DIR ${DOCKER_IMAGE_AS_DIR})
+    string(REPLACE "+" "x" DOCKER_IMAGE_AS_DIR ${DOCKER_IMAGE_AS_DIR})
   endif()
   
   if(NOT DOCKER_IMAGE_DIR)
