@@ -1,4 +1,4 @@
-# Siconos-Numerics version 3.0.0, Copyright INRIA 2005-2008.
+# Siconos-Numerics version 3.8.-, Copyright INRIA 2005-2008.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -16,27 +16,3 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
-
-------------------------------------
-  README File for Siconos Numerics
-------------------------------------
-
-This project belongs to the European project SICONOS, dedicated to the
-modeling, the control the analysis and the simulation of the so-called
-``Non Smooth Dynamical system'' NSDS. More details on this European
-project can be found on the website of the Project
-http://siconos.inrialpes.fr.
-
-The present package, Siconos/Numerics provides low-level algorithms to
-compute basic well-identified problems.
-
-More details are available on software documentation pages, Doc/Devel
-directory of the current distribution, in "design" chapter, or on
-http://siconos.gforge.inria.fr/
-
-------------------------------------
-
-Software install and loading: see INSTALL file. 
-Last changes/update: see ChangeLog file.
-
-------------------------------------
