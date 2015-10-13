@@ -122,9 +122,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   }
   else if (isVariable)
   {
-    if (iparam[1]==0)
+    if (iparam[1]==0) /* Armijo rule with Khotbotov ratio (default)   */
     {
-      DEBUG_PRINT("Variable step size method with special line-search ... \n");
+      DEBUG_PRINT("Variable step size method with Armijo rule with Khotbotov ratio (default) \n");
       while ((iter < itermax) && (hasNotConverged > 0))
       {
         ++iter;
@@ -146,7 +146,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* else */ rho_k = rho_k * tau ;
 
           /* x <- x_k  for the std approach*/
-          if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[2]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
@@ -163,15 +163,18 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* velocity <- velocity - velocity_k   */
           cblas_daxpy(n, -1.0, w_k , 1, w , 1) ;
 
+
+          /* a1 =  ||w - w_k|| */
           a1 = cblas_dnrm2(n, w, 1);
           DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
-          /* reactiontmp <- reaction */
+          /* xtmp <- x */
           cblas_dcopy(n, xtmp, 1,x , 1) ;
 
-          /* reactiontmp <- reaction - reaction_k   */
+          /* xtmp <- x - x_k   */
           cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
 
+          /* a2 =  || x - x_k || */
           a2 = cblas_dnrm2(n, xtmp, 1) ;
           DEBUG_PRINTF("a2 = %12.8e\n", a2);
 
@@ -181,7 +184,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* printf("rho_k = %12.8e\t", rho_k); */
           /* printf("a1 = %12.8e\t", a1); */
           /* printf("a2 = %12.8e\t", a2); */
-          /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
+          /* printf("norm x = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
           /* printf("success = %i\n", success); */
 
           ls_iter++;
@@ -222,9 +225,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
     }
 
-    if (iparam[1] == 1)
+    if (iparam[1] == 1) /* Armijo rule with Solodov.Tseng ratio */
     {
-      DEBUG_PRINT("Variable step size method with standard line-search ... \n");
+      DEBUG_PRINT("Variable step size method with Armijo rule with Solodov.Tseng ratio \n");
       while ((iter < itermax) && (hasNotConverged > 0))
       {
         ++iter;
@@ -248,7 +251,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* else */ rho_k = rho_k * tau ;
 
            /* x <- x_k  for the std approach*/
-          if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[2]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
@@ -265,15 +268,15 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* w <- w - w_k   */
           cblas_daxpy(n, -1.0, w_k , 1, w , 1) ;
 
-          /* xtmp <- x */
-          cblas_dcopy(n, xtmp, 1,x , 1) ;
-
           /* xtmp <- x - x_k   */
+          cblas_dcopy(n, xtmp, 1,x , 1) ;
           cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
 
+          /* a1 =  (w - w_k)^T(x - x_k) */
           a1 = cblas_ddot(n, xtmp, 1, w, 1);
           DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
+          /* a2 =  || x - x_k || */
           a2 = cblas_dnrm2(n, xtmp, 1) ;
           DEBUG_PRINTF("a2 = %12.8e\n", a2);
 
@@ -283,7 +286,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* printf("rho_k = %12.8e\t", rho_k); */
           /* printf("a1 = %12.8e\t", a1); */
           /* printf("a2 = %12.8e\t", a2); */
-          /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
+          /* printf("norm x = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
           /* printf("success = %i\n", success); */
 
           ls_iter++;
@@ -324,9 +327,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
     }
 
-    if (iparam[1] == 2)
+    if (iparam[1] == 2) /* Armijo rule with Han.Sun ratio */
     {
-      DEBUG_PRINT("Variable step size method with standard line-search ... \n");
+      DEBUG_PRINT("Variable step size method with Armijo rule with Han.Sun ratio \n");
       while ((iter < itermax) && (hasNotConverged > 0))
       {
         ++iter;
@@ -349,7 +352,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* else */ rho_k = rho_k * tau ;
 
           /* x <- x_k  for the std approach*/
-          if (iparam[2]) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[2]==0)  cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
@@ -384,7 +387,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* printf("rho_k = %12.8e\t", rho_k); */
           /* printf("a1 = %12.8e\t", a1); */
           /* printf("a2 = %12.8e\t", a2); */
-          /* printf("norm reaction = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
+          /* printf("norm x = %12.8e\t",cblas_dnrm2(n, x, 1) ); */
           /* printf("success = %i\n", success); */
 
           ls_iter++;
