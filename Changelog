@@ -17,6 +17,26 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 #
 
+
+This is the changelog for the Siconos package, www.siconos.gforge.inria.fr.
+Entries are written backwards. That is, items at the bottom
+of the file were added first, and each subsequent addition is placed on a line
+before it.
+
+
+--------------------------------------------------------------------------------
+  v3.8.0
+--------------------------------------------------------------------------------
+Main Changes:
+	* NewtonEulerDS Add internal forces and associated jacobians to improve
+	the convergence of the Newton loop. Remove adhoc update of T and MObjToAbs
+	* MoreauJeanOSI Add a correct treatment of NewtonEuler DS with the Newton
+	Loop
+	* Creation of the Control module in Siconos
+
+
+################## Old Changelog files before merge
+
 This is the changelog for the Siconos/Numerics package, www.siconos.gforge.inria.fr.
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
@@ -319,14 +339,7 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
---------------------------------------------------------------------------------
-  v3.8.0
---------------------------------------------------------------------------------
-Main Changes:
-	* NewtonEulerDS Add internal forces and associated jacobians to improve
-	the convergence of the Newton loop. Remove adhoc update of T and MObjToAbs
-	* MoreauJeanOSI Add a correct treatment of NewtonEuler DS with the Newton
-	Loop
+
 --------------------------------------------------------------------------------
   v3.7.0
 --------------------------------------------------------------------------------
@@ -1126,14 +1139,7 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
---------------------------------------------------------------------------------
-  v3.8.0
---------------------------------------------------------------------------------
-Main Changes:
-	* NewtonEulerDS Add internal forces and associated jacobians to improve
-	the convergence of the Newton loop. Remove adhoc update of T and MObjToAbs
-	* MoreauJeanOSI Add a correct treatment of NewtonEuler DS with the Newton
-	Loop
+
 --------------------------------------------------------------------------------
   v3.7.0
 --------------------------------------------------------------------------------
@@ -1635,13 +1641,6 @@ Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
-
---------------------------------------------------------------------------------
-  v3.8.0
---------------------------------------------------------------------------------
-Main Changes:
-
-	* Creation of the Control module in Siconos
 
 # Siconos-Mechanics, Copyright INRIA 2013.
 # Siconos is a program dedicated to modeling, simulation and control
