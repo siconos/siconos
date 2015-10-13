@@ -61,3 +61,33 @@ If the process failed or if you need a specific implementation, the following va
 * LAPACK_LIBRARY_DIR : path to blas libraries
 * LAPACK_INCLUDE_DIRS : blas headers location(s)
 
+
+About Boost
+===========
+
+Boost provides a lot of useful C++ binaries, especially Ublas, a C++ template class library that provides BLAS level 1, 2, 3 functionalities 
+for dense, packed and sparse matrices.
+
+Ublas is used in Siconos for matrices and vectors definition and implementation.
+
+About Boost: http://www.boost.org/
+
+About Ublas: http://www.boost.org/libs/numeric/ublas/doc/index.htm
+
+Install (note that an adequate Boost version comes with most linux distributions and thus no more install is required.)
+
+To know how to get and install Boost, see 
+Boost Getting Started.
+
+Note that we also use boost-bindings:
+"Boost Bindings is a bindings library (not just) for Boost.Ublas. It offers an easy way of calling BLAS, LAPACK, UMFPACK, MUMPS and many other mature legacy numerical codes from within C++."
+
+They are distributed and installed with the Siconos but you can also get the last version here: 
+http://mathema.tician.de/software/boost-bindings
+
+GMP
+===
+
+"GMP is a free library for arbitrary precision arithmetic, operating on signed integers, rational numbers, and floating point numbers ... "
+
+This library usually comes with gcc. If not see http://gmplib.org/ for download and installation instructions.

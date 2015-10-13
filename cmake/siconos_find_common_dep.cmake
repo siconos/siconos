@@ -144,7 +144,7 @@ endif()
 
 # -- Python bindings --
 if(WITH_PYTHON_WRAPPER)
-  compile_With(Python_Numpy REQUIRED)
+  compile_With(Numpy REQUIRED)
   find_package(SWIG 2.0.7 REQUIRED)
   # WARNING FP : for cmake < 3.0 UseSWIG.cmake
   # does not work properly (bug for swig outdir)
@@ -152,7 +152,6 @@ if(WITH_PYTHON_WRAPPER)
     set(SWIG_USE_FILE ${CMAKE_SOURCE_DIR}/cmake/UseSWIG.cmake)
   endif()
   include(${SWIG_USE_FILE})
-  find_python_module(numpy REQUIRED)
   find_python_module(scipy REQUIRED) # for sparse
 endif()
 
