@@ -5,37 +5,7 @@ set(TEST_WRAP)
 
 if(WITH_${COMPONENT}_TESTING)
   
-  BEGIN_TEST(src/netlib/odepack/test)
-  IF(NOT USE_SANITIZER)
-    NEW_TEST(odepacktest1 DLSODES-test.f)
-    NEW_TEST(odepacktest2 DLSODAR-test.f)
-    NEW_TEST(odepacktest3 DLSODI-test.f)
-    NEW_TEST(odepacktest4 DLSODPK-test.f)
-    NEW_TEST(odepacktest5 DLSODA-test.f)
-    NEW_TEST(odepacktest6 DLSODE-test.f)
-    NEW_TEST(odepacktest7 DLSODIS-test.f)
-    NEW_TEST(odepacktest8 DLSODKR-test.f)
-    NEW_TEST(odepacktest9 DLSOIBT-test.f)
-  ENDIF(NOT USE_SANITIZER)
-  if(WITH_CXX)
-    NEW_TEST(odepacktest10 test-funcC-inC.cpp funC.cpp)
-  endif()
-  END_TEST()
-
-  IF(NOT USE_SANITIZER)
-    BEGIN_TEST(src/hairer/test)
-    NEW_TEST(dr_iso1 dr_iso.f)
-    NEW_TEST(dr_iso1sp dr_isosp.f)
-    NEW_TEST(dr1_radau5 dr1_radau5.f)
-    NEW_TEST(dr2_radau5 dr2_radau5.f)
-    NEW_TEST(dr_radau dr_radau.f)
-    NEW_TEST(dr_radaup dr_radaup.f)
-    NEW_TEST(dr_rodas dr_rodas.f)
-    NEW_TEST(dr_seulex dr_seulex.f)
-    END_TEST()
-  ENDIF(NOT USE_SANITIZER)
-  
-  BEGIN_TEST(src/utils/test)
+  BEGIN_TEST(src/tools/test)
   if(HAS_LAPACK_DGESVD)
     NEW_TEST(pinvtest testpinv.c)
   endif()
@@ -50,9 +20,6 @@ if(WITH_${COMPONENT}_TESTING)
     NEW_TEST(test_dgels test_dgels.c)
   endif()
   NEW_TEST(test_dpotrf test_dpotrf.c)
-  END_TEST()
-
-  BEGIN_TEST(src/NonSmoothTools/test) 
   #NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
   NEW_TEST(NumericsMatrixTest0 NumericsMatrix_test0.c)
   NEW_TEST(NumericsMatrixTest1 NumericsMatrix_test1.c)
@@ -72,7 +39,7 @@ if(WITH_${COMPONENT}_TESTING)
   ENDIF(HAS_ONE_LP_SOLVER)
  END_TEST()
 
- BEGIN_TEST2(src/NonSmoothSolvers/LCP/test)
+ BEGIN_TEST2(src/LCP/test)
 
   MACRO(SET_LCP_TEST_AS_FAILED DATASET_LCP_DIAG FAILING_ALGO)
    FOREACH(_DS ${DATASET_LCP_DIAG})
@@ -167,16 +134,16 @@ if(WITH_${COMPONENT}_TESTING)
 
   NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
 
-  END_TEST(NonSmoothSolvers/LCP/test)
+  END_TEST(LCP/test)
 
-  BEGIN_TEST(src/NonSmoothSolvers/LinearSystem/test)
+  BEGIN_TEST(src/LinearSystem/test)
 
   NEW_LS_TEST(SICONOS_LS_0 ls_trivial.dat)
   SET(test-LS_0-ls_inf_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
   NEW_LS_TEST(SICONOS_LS_0 ls_inf_sol_perturbed.dat)
   END_TEST()
 
-  BEGIN_TEST2(src/NonSmoothSolvers/Relay/test)
+  BEGIN_TEST2(src/Relay/test)
 
   SET(DATA_SET "relay1.dat;relay_2x2.dat;relay_4x4.dat;relay_simple2.dat;step_1x1.dat;step_2x2.dat;step_4x4.dat")
   SET(SICONOS_RELAY_SOLVERS "ENUM;LEMKE;PGS;AVI_CAOFERRIS")
@@ -216,7 +183,7 @@ if(WITH_${COMPONENT}_TESTING)
   END_TEST()
 
 
-  BEGIN_TEST(src/NonSmoothSolvers/MLCP/test)
+  BEGIN_TEST(src/MLCP/test)
   IF(HAVE_SYSTIMES_H)
     if(WITH_CXX)
       NEW_TEST(MLCPtest main_mlcp.cpp)
@@ -225,12 +192,12 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(ReadWrite_MLCPtest MixedLinearComplementarity_ReadWrite_test.c)
   END_TEST()
 
-  BEGIN_TEST(src/NonSmoothSolvers/MCP/test)
+  BEGIN_TEST(src/MCP/test)
   NEW_TEST(MCPtest MCP_test.c)
   NEW_TEST(MCPtest1 MCP_test1.c)
   END_TEST()
 
-  BEGIN_TEST(src/NonSmoothSolvers/NCP/test)
+  BEGIN_TEST(src/NCP/test)
   SET(SICONOS_NCP_SOLVERS "NEWTON_FBLSA;NEWTON_MINFBLSA;PATHSEARCH")
   IF(PATHFERRIS_FOUND)
     LIST(APPEND SICONOS_NCP_SOLVERS "PATH")
@@ -253,13 +220,13 @@ if(WITH_${COMPONENT}_TESTING)
 
   END_TEST() # NCP
 
-  BEGIN_TEST(src/NonSmoothSolvers/FrictionContact/test)
+  BEGIN_TEST(src/FrictionContact/test)
   
   #NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
   NEW_TEST(FC3D_DefaultSolverOptionstest FrictionContact3D_DefaultSolverOptions_test.c)
   
   
-  # (see NonSmoothSolvers/FrictionContact/test/README for short details)
+  # (see FrictionContact/test/README for short details)
   NEW_TEST(FC3Dtest1 FrictionContact3D_test1.c)
   NEW_TEST(FC3Dtest2 FrictionContact3D_test2.c)
   NEW_TEST(FC3Dtest3 FrictionContact3D_test3.c)
@@ -561,7 +528,7 @@ if(WITH_${COMPONENT}_TESTING)
 
 
   
-  BEGIN_TEST(src/NonSmoothSolvers/GenericMechanical/test)
+  BEGIN_TEST(src/GenericMechanical/test)
   NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP0.dat)
   NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP1.dat)
   NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP2.dat)
@@ -597,10 +564,10 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP6.dat 0 0 0 0 0 3)
 
   END_TEST()
-  #BEGIN_TEST(src/NonSmoothSolvers/GenericMechanical/test)
+  #BEGIN_TEST(src/GenericMechanical/test)
   #NEW_TEST(GMP_FAILED GenericMechanical_test1.c)
   #END_TEST()
-  BEGIN_TEST(src/NonSmoothSolvers/VI/test)
+  BEGIN_TEST(src/VI/test)
   NEW_TEST(VI_test0 VI_test.c)
   NEW_TEST(VI_test1 VI_test1.c)
   NEW_TEST(VI_testFC3D1 VI_testFC3D1.c)
@@ -624,16 +591,16 @@ if(WITH_${COMPONENT}_TESTING)
   ENDFOREACH()
  END_TEST()
 
-  BEGIN_TEST(src/NonSmoothSolvers/AVI/test)
+  BEGIN_TEST(src/AVI/test)
 
   IF(HAS_ONE_LP_SOLVER)
    NEW_TEST(AVI_twisting implicit_twisting.c)
   ENDIF(HAS_ONE_LP_SOLVER)
 
-  END_TEST(NonSmoothSolvers/AVI/test)
+  END_TEST(AVI/test)
 
 
-  BEGIN_TEST(src/NonSmoothSolvers/SOCP/test)
+  BEGIN_TEST(src/SOCP/test)
     NEW_TEST(SOCLCP_test1 soclcp_test1.c)
     NEW_TEST(SOCLCP_test2 soclcp_test2.c)
     NEW_TEST(SOCLCP_test3 soclcp_test3.c)
@@ -643,6 +610,6 @@ if(WITH_${COMPONENT}_TESTING)
     #NEW_TEST(SOCLCP_test4 soclcp_test4.c)
     #NEW_TEST(SOCLCP_test5 soclcp_test5.c)
     NEW_TEST(SOCLCP_fc3d_to_soclcp  fc3d_to_soclcp.c)
-  END_TEST(NonSmoothSolvers/SOCP/test)
+  END_TEST(SOCP/test)
 
 endif()

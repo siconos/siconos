@@ -43,5 +43,5 @@ set(siconos_python_install "standard" CACHE STRING "Install mode for siconos pyt
 
 # List of components to build and installed
 # List of siconos component to be installed
-# complete list = Numerics Kernel Control Mechanics IO
-set(COMPONENTS_DIRS Numerics Kernel Control Mechanics IO CACHE INTERNAL "List of siconos components to build and install")
+# complete list = externals Numerics Kernel Control Mechanics IO
+set(COMPONENTS_DIRS externals Numerics Kernel Control Mechanics IO CACHE INTERNAL "List of siconos components to build and install")
