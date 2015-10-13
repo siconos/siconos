@@ -18,7 +18,7 @@
 // Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 //
 
-%module fclib(package="siconos",
+%module fclib(package="siconos") fclib
 
 %include start.i
 %fragment("NumPy_Fragments");
