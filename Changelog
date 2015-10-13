@@ -1,0 +1,1725 @@
+# Siconos, Copyright INRIA 2005-2015
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+#
+
+This is the changelog for the Siconos/Numerics package, www.siconos.gforge.inria.fr.
+Entries are written backwards. That is, items at the bottom
+of the file were added first, and each subsequent addition is placed on a line
+before it.
+Do not hesitate to use the emacs mode Change Log for editing this file
+
+--------------------------------------------------------------------------------
+  v3.7.0
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* add generic Newton-based with linesearch solvers for MCP and NCP
+	* rework LCP Solvers: fix some of them (FB and min merit functions) and add
+	new algorithm like Bard-type and Murty's rule.
+	* new AVI solver based on the work by Cao & Ferris. It is also used to
+	solve Relay problem
+	* new solver for box VI based on a merit function.
+	* add a callback mechanism to gather solver informations.
+
+--------------------------------------------------------------------------------
+  v3.6.0
+--------------------------------------------------------------------------------
+
+Changes:
+	* Cleaning Doxygen warning
+	* Numerics/src/hairer/ Add E. Hairer ode solvers (RADAU, HEM5)
+	* Numerics/src/NonSmoothSolvers/MLCP/MLCP_Solvers.h New mlcp pgs SBM solver (not stable)
+	* Numerics/src/NonSmoothSolvers/FrictionContact/GlobalFrictionContact3D rename
+	Primal Friction Cintact problem into Global Friction Contact problem
+	* GLOBALAC -> LOCALAC: former Sparse Global Alart Curnier 3D
+	friction contact solver, added in 3.4.0, is renamed  Local Alart
+	Curnier : LOCALAC ("Global" word conflicts with Global coordinates)
+	* GlobalFrictionContact: add Sparse global Alart Curnier solver
+	(GLOBALAC) : use MUMPS if present (compilation with
+	-DWITH_MUMPS=ON) otherwise use embedded Timothy Davis lusol
+	* support for sparse matrices (coordinates and csc) in NumericsMatrix
+
+--------------------------------------------------------------------------------
+ v3.5.0 25/10/2012
+--------------------------------------------------------------------------------
+
+Changes:
+	* MixedComplementarity.* add structure and first test with FB algorithm
+	* MixedLinearComplementarity.* change the data structure to take into
+	account two storage types (M,q) and (A,B,C,D,a,b)
+	* Relay Fix huge bug in Relay with lb!=-1 and ub!=1
+	* FrictionContact Add LMGC driver.  Add FrictionContact2D
+	solvers based on LCP reformulation and LEMKE and ENUM solvers
+	* LA.h: transform macros used to wrap LAPACK/BLAS functions into
+	static inline functions. This should not induced any loss of
+	performance
+	* Enable Numerics to be build with a C++ Compiler (needed by Visual
+	Studio). In this case it sets BUILD_AS_CPP.
+	* Misc changes for crosscompiling to Windows using mingw and Visual
+	Studio. The files SiconosCompat.h and SiconosCompat.c contains some
+	functions not defined by VS (most of them are C99)
+
+
+--------------------------------------------------------------------------------
+  v3.4.0
+--------------------------------------------------------------------------------
+
+Changes:
+	* Sparse Global Alart Curnier : MUMPS verbose if Numerics verbose
+      	mode is on (icntl(4)=0, icntl(10)=1, icntl(11)=1)
+	* some signatures updates for swig interface
+	* *.h update Doxygen documentation.
+	* FrictionContact renumbering FrictionContact Solver.
+
+--------------------------------------------------------------------------------
+  v3.3.0
+--------------------------------------------------------------------------------
+
+Changes:
+	* FrictionContact3D Add ExtraGradient and HyperPlaneProjection
+	methods for solving 3D frictional contact problems as VI.
+	* FrictionContact3D Add tests and clean up old test series.
+	* lcp_enum deals with degenerated systems using dgels or dgesv.
+	* GenericMechanicalProblem: Build a reduced equivalent problem,
+	equalities are either substituted or written in one block.
+	* Sparse global Alart Curnier (with MUMPS solver) & gp line search.
+
+--------------------------------------------------------------------------------
+  v3.2.0 - r2330
+--------------------------------------------------------------------------------
+
+Changes:
+
+2010-09 Maurice Bremond <Maurice.Bremond@inrialpes.fr>
+	* Global Alart Curnier (dense version only)
+	with line search (GP)
+
+2010-09 Vincent Acary <vincent.Acary@Inrialpes.Fr>
+	* fix bugs in Alart Curnier CKPS and STD
+	* line search (GP) added
+
+2010  Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* MLCP: Blocks of equalities and inequalities can be mixed.
+	* Solver name is replaced by an interger id.
+	* GenericMechanicalProblem: a problem where the equalities, inequalities and friction contact 3D are mixed.
+	* Quartic formulation of a unitary friction contact 3D like a polynome(artan(theta)) or a polynome of nu.
+
+
+--------------------------------------------------------------------------------
+  v3.0.0 -
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+2010-01-12 Vincent Acary <vincent.acary@inrialpes.fr>
+	* Start  Relay solver with ENUM and Lemke scheme
+
+
+2008-01-01 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* NonSmoothSolvers Add MLCP solvers.
+
+
+2008-01 Franck Perignon <Franck.Perignon@inrialpes.fr>
+	* NSSpack: split into several dir (one for each solver/formulation)
+	  => create NSSTools, LCP ...
+	* Add header files
+
+
+2007-11-12 Franck Perignon <Franck.Perignon@inrialpes.fr>
+
+	* NSSPack.h: split into lcp_solvers.h, pfc_3D_solvers.h ...
+	* Add utilities to handle with blocks-matrices in pfc_3D solvers
+
+--------------------------------------------------------------------------------
+  v2.1.1 - August, 23rd 2007 (release 839)
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+--------------------------------------------------------------------------------
+  v2.1.0 - June, 28th 2007 (release 809)
+-------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2007-03-02 Vincent Acary <vincent,acary@inrialpes.fr>
+
+	* lcp_solver : Modification of the convergence criteria
+	* lcp_solver : Renaming lcp_nlgs into lcp_pgs
+	* lcp_solver : Renaming lcp_sor into lcp_psor
+
+--------------------------------------------------------------------------------
+  v2.0.1 - December, 14th 2006 (release 626)
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+
+--------------------------------------------------------------------------------
+  v2.0.0 - November, 30th 2006
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Remove lemke routines and keep only lexicoLemke
+
+--------------------------------------------------------------------------------
+  v1.3.0 - 07 september 2006 (release 567)
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2006-09-07 Pascal Denoyelle <pascal.denoyelle@inrialpes.fr>
+
+	* Add LCP solver for block matrices
+	* Review convergence criteria for LCP solvers
+
+--------------------------------------------------------------------------------
+  v1.2.0 - (release 508)
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2006-03-24 Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* INSTALL, src/Makefile.am, src/dummy.cpp
+	  First draft of a linking strategy on MacOsX
+
+2006-03-22 Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* lcp_solver.c, lcp_sor.c, lcp_newton_FB.c, NSSpack.h
+	  Removing not reliable solvers.
+	  Adding Draft version of the sor algorihm and the newton based on
+	  Fischer-Bursmeister function.
+
+2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* configure.ac -> run autoupdate to remove obsolete macros.
+	  Warning: must add insure related part after.
+	  Keep configure.ac.old to work with older
+	  autotools version.
+
+
+2006-02-24 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Makefile.am -> make install also install doc in @prefix@
+
+--------------------------------------------------------------------------------
+  v1.1.1 - 15 February 2006 (release 421)
+--------------------------------------------------------------------------------
+
+Notes:
+
+Changes:
+2006-02-15   Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* /macros/ac_f77_library_ldflags.m4 : This file is added and
+	replaced the system defined macro. A small correction is done
+	to neglect -lcrt2.o option at linking on MacOsX. This bug will
+	be normally corrected in further version of autoconf.
+
+2006-02-13   Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* /src/NSSpack/test/Makefile.am
+	Use of the variable XFAIL_TESTS for tests expected failures
+
+2006-02-10   Franck Perignon <franck.perignon@inrialpes.fr>
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * Update macros m4 for cppunit => the same as in kernel
+	  (this to correct install bug 494)
+	  Minor changes in configure.ac, (--with-name rather than
+	  --with-local-name)
+	* Update obsolete keywords in Doxygen config file
+	* Changes in headers files for odepack: add usefull functions
+	  for Lsodar solver in Kernel.
+
+--------------------------------------------------------------------------------
+  v1.1.0 - February 2006 (release 385)
+--------------------------------------------------------------------------------
+
+Notes:
+
+Changes:
+
+2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr>
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * rename reconf.sh in autogen.sh and m4 directory in macros
+	  Use standard acx_blas and lapack macros.
+	  Warning: new options for configure ( -> configure --help for details )
+
+
+2006-01-20   Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * configure.ac, src/utils/blaslapack.h, f2c.h: Add workaround for
+	gcc-4.0.2 gfortran-4.0.2 and so on. Use of a local f2c.h for gcc4.
+	use of the macro AC_F77_LIBRARY_LDFLAGS for linking gcc and gfortran
+	compiled codes
+
+--------------------------------------------------------------------------------
+  v1.0 - November 2005 (release 341)
+--------------------------------------------------------------------------------
+
+        - Solverpack renamed in NSSPack
+        - Fixed warnings on invalid pointer type due to integer types
+        - Matlab interface
+
+--------------------------------------------------------------------------------
+  v1.0 - October 2005 (release 304)
+--------------------------------------------------------------------------------
+
+        Numerical algorihtms for:
+	- ODE time integration (odepack directory)
+	- LCP solvers    (solverpack directory)
+	- Relay solvers  ( "             "    )
+	- 2D and 3D contact friction solvers ( " )
+# Siconos-Kernel, Copyright INRIA 2005-2014
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+#
+This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
+Entries are written backwards. That is, items at the bottom
+of the file were added first, and each subsequent addition is placed on a line
+before it.
+Do not hesitate to use the emacs mode Change Log for editing this file
+
+--------------------------------------------------------------------------------
+  v3.8.0
+--------------------------------------------------------------------------------
+Main Changes:
+	* NewtonEulerDS Add internal forces and associated jacobians to improve
+	the convergence of the Newton loop. Remove adhoc update of T and MObjToAbs
+	* MoreauJeanOSI Add a correct treatment of NewtonEuler DS with the Newton
+	Loop
+--------------------------------------------------------------------------------
+  v3.7.0
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* unify Relation API + rework computeh and computeg such that they
+	have no hidden side-effect
+	* First Order Relations are now stateless
+	* Fix newton-loop for First Order Systems + relations. The fully
+	non-linear case is now supported
+	* translation of siconos script in Python to improve portability.
+	* Removal of XML-related code
+
+--------------------------------------------------------------------------------
+  v3.6.0 October 2013
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* Update ublas bindings.
+	* Add interface to eigenproblems solvers from boost ublas (bindings)
+	* Fix bug in interactions (lambda's reset)
+	* Remove using namespace std to obtain compatible signature between .hpp and *.cpp.
+	Start to clean doxygen warning
+	* Add lambdaMemory in interaction and
+	rename Interaction swapInMemory --> swapInOldVariables
+	rename Interaction swapInTimeStepInMemory --> swapInMemory
+	* Complete implementation of D1MinusLinear for LagrangianDS and NewtonEulerDS.
+	work on serevral nonlinear examples. SliderCrank, RockingBLock, ...
+	* /Kernel/src/modelingTools/DynamicalSystem.cpp Rename _workspace in DS
+	* /Kernel/src/simulationTools/Hem5.hpp First HEM5 integration
+	* /Kernel/src/simulationTools/MLCP.hpp New mlcp pgs SBM solver (not stable)
+	* move multibodyTools in a new module : Mechanics
+	* Add VisitorMaker for the creation of visitors on base classes
+	(example of usage in Mechanics/MechanicsIO.cpp)
+	* Support boost up to version 1.53
+	* EventsManager has been rewritten and the drift in time has been
+	removed
+	* Sliding Mode Controller have been updated and improved
+	* SiconosAlgebra has been reworked: the interface has been clean up
+	and SimpleMatrix.cpp has been splitted to lower the memory used during
+	the compilation
+
+--------------------------------------------------------------------------------
+  v3.5.0 October 2012
+--------------------------------------------------------------------------------
+Main Changes:
+	* Remove unneeded Plugin class
+	* Include C++ header instead of C ones (math.h -> cmath, ...)
+	* Misc. changes to enable crosscompilation to windows with mingw and
+	Visual Studio
+	* Transform some classes into namespace (ioMatrix, iovector, SSL).
+	Split SSL in 2 : SSL and SSLH (SSL Helper). The latter is the one used
+	in the code, the former contains the Plateform specific part.
+	* Remove UnitaryRelation
+	* SiconosAlgebra. SimpleVector is removed and now is SiconosVector.
+	* TimeSteppingProjectOnConstraints, TimeSteppingCombinedProjection
+	Rewrite entirely the code the use lambda[0] mand p[0].
+	Add MoreauProjectOnConstraintsOSI to use a temporary vector for
+	storing q before projection.
+	* FirstOrderType2Radd computation of computeInput
+	* TimeStepping add _isNewtonConverge 
+
+--------------------------------------------------------------------------------
+  v3.4.0 March 2012
+--------------------------------------------------------------------------------
+Main Changes:
+	* serialization hooks & some minor modifications to be boost serializable
+	* controlTools: add some new Actuator (PID and various SMC) and Sensor
+	(LinearSensor). API is not fixed yet.
+	* modelingTools: add a new objets ControlDynamicalSystem and
+	ControlFirstOrderLinearSystem aiming at providing a class handling
+	most details that are of no interest for control engineers
+	* modelingTools, simulationTools: add a bunch of copy contructor
+	(First Order Systems, Timediscretisation, ...)
+	* Fix a bug in the way we compute levels
+	* TimeSteppingProjectOnConstraints add treatment of Lagrangian system
+	Correct a bug in the construction of the Jacobian Matrix in the projection
+	operator.
+	* LagrangianR, NewtonEulerR remove useless attributes (_yProj)
+	* SchatzmanPaoli Add a draft (for linear systems) of the Schatzman-Paoli 
+	scheme
+
+--------------------------------------------------------------------------------
+  v3.3.0
+--------------------------------------------------------------------------------
+Main Changes:
+	* NewtonEuler: Fix a bug in nablaqT computation.
+	* NewtonEuler: Include nabla _v (Omega I Omega) in the OSNSP
+	formulation.
+	* computeFreeOutput in OSI. Complete move of SiconosVisitor from
+	LinearOSNS in OSI concerning the computation of free outputs
+	* FirstOrderLinearDS and Moreau OSI. Correct some evaluations for
+	FirstOrderLinearDS
+	* Moreau. Add ThetaGamma schemes (x2) for FirstOrderDS
+	* NSDS. Review the computation of IsLinear
+	* Topology. Review and change isTimeInvariant
+	* Moreau. Start Sparse tests for LagrangianDS
+	* Newton in Timestepping. Review of th global process
+	* MultibodyTools : interface with Bullet collision
+	detection (broad phase and narrow phase)
+	* fix a bug with multiple edges in UnitaryRelations graph and the
+	computation of unitary blocks
+
+--------------------------------------------------------------------------------
+  v3.2.0 - r2330
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+
+2010 Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* Newton Euler Spheres under multibodyTools/3D
+	* unitary blocks stored on graph vertices and edges
+
+2010 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* Add some examples using the NewtonEuler approach.
+	* GenericMechanicalProblem, a new OSNSP using the corresponding solver in Numerics.
+
+2010-01-12 Vincent Acary <vincent.acary@inrialpes.fr>
+	* Add the BoundaryCondition classe to deal with the boundary conditions.
+	* Start RelayNSL and Relay ONSNS
+ 	* Plug Relay Driver for PGS, ENUM and Lemke scheme
+
+--------------------------------------------------------------------------------
+  v3.1.0 - March 2009
+--------------------------------------------------------------------------------
+
+2009 October Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* from get<Member>Ptr() to member()
+	* member prefix with _
+
+[...]
+
+2009 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* Add FirsrtOrderType2R, a type of first order relation.
+	* Add NewtonEulerDS, NewtonEulerR and a bouncing ball example based on the NewtonEuler.
+	* Add an electrical example using ideal switch.
+
+2009 March Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* Add SiconosGraph, to replace maps of DynamicalSystems and maps
+	of UnitaryRelations.
+
+2008 December Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* Sparse Matrix : from siconos coordinates storage to boost storage
+	with compress Row
+
+2008 October Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add DynamicalSystem Factory
+	* Add M(x) in FirstOrder DS
+	* Add Relation Factory
+	* Remove DefaultPlugin lib/file
+	* Remove Model from TimeDiscretisation
+	 + review of building/initialization process (to avoid cycling)
+
+2008 September Maurice Bremond <Maurice.Bremond@inrialpes.fr>, Franck Perignon <franck.perignon@inrialpes.fr>
+	* Use Smart pointers utilities for memory management
+	 => review all files
+
+--------------------------------------------------------------------------------
+  v3.0.0 - August 2008
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2007 September Franck Perignon <franck.perignon@inrialpes.fr>
+	* Review event-driven
+	* Review "sets" management
+	* Replace Interaction/UnitaryRelation/DynamicalSystem/Set classes
+	with a template class SiconosSet
+
+--------------------------------------------------------------------------------
+  v2.1.1 - August, 23rd 2007 (release 839)
+--------------------------------------------------------------------------------
+
+Notes:
+
+Changes:
+
+2007 July Franck Perignon <franck.perignon@inrialpes.fr>
+	* Review SiconosAlgebra tool to improve computation times
+	  (use ublas or ublas/atlas functions in a better way ...)
+
+--------------------------------------------------------------------------------
+  v2.1.0 - June, 28th 2007 (release 809)
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2007-02-28 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Add LagrangianRheonomousR and LagrangianCompliantR Relations.
+
+2007-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Review Relations organization: add/rename LinearTIR in FirstOrderLinearTIR,
+	  add derived classes for LagrangianR.
+
+2007-02-08 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add a module controlTools
+	* Add Sensor, SensorFactory and SensorEvents in controlTools
+	* Add an EventsFactory
+	* Add EventsManager in Simulation (before: only present in EventDriven case)
+	* Create a "main" header file for each XXXTools location + one "SiconosKernel.h"
+
+2007-01-30 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add an abstract DynamicalSystem class, base of FirstOrder, Lagrangian ...
+	* Rename DynamicalSystem in FirstOrderDynamicalSystem, LinearDS in FirstOrderLinearDynamicalSystem
+	* Add a z, vector of parameters, ("discret" state) in DS
+	* Remove control (u,T) from DS. (future version: actuators/sensors to handle control, from outside, through z parameter)
+
+2007-01-23 Vincent  Acary <Vincent.Acary@inrialpes.fr>
+	* configure.ac, MakefilePluginSample.in, ... :
+	Change the name of the variable SICONOS_EXT_LDFLAGS into
+	SICONOS_EXT_LIBS. Change MakefilePluginSample.am to avoid the use of
+	KernelCOnfig.sh (future remove).  Add some bad tricks to allow the use
+	of the original ATLAS sources. Compilation and execution works on
+	MacOsX(intel).
+
+2007-01-16 Vincent  Acary <Vincent.Acary@inrialpes.fr>
+	* configure.ac :
+	Move check for Lapack and Blas into the check macro for Numerics.
+	Should be replaced in future by only Atlas checking
+
+
+2007-01-10 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add Control class + resulting changes in DynamicalSystem, NSDS ...
+
+--------------------------------------------------------------------------------
+  v2.0.1 -  December, 14th 2006 (release 626)
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+
+2006-12-14 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Updates for gcc4.1.1 compatibility (-ffriend-injection, ...)
+
+--------------------------------------------------------------------------------
+  v2.0.0 - 30 November 2006 (release 616)
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+
+2006-10-11 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Remove all lapack++ depencies; replace them by Boost-Ublas
+	  Thus Vectors and Matrices are now fully based on Boost
+	* Review/update Doxygen doc - Based on v1.5.1.
+	  Model/reference file for doc: Interaction.h
+	* Add boost/bindings in the sources (src/boost)
+
+2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Add cppunit tests for MySimple and MyBlock matrices (boost)
+
+2006-09-26 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Add Boost matrices and vectors in Kernel (from Aziz branch)
+	  (MySiconosMatrix, MySimpleMatrix, MyBlockMatrix, MySiconosVector,
+	   ioMatrix, ioVector classes)
+
+-------------------------------------------------------------------------------
+  v1.3.0 - 07 september 2006 (release 567)
+--------------------------------------------------------------------------------
+
+Main Changes:
+
+2006-09-07 Franck Perignon <franck.perignon@inrialpes.fr>
+        * EventDriven for Lagrangian systems
+
+2006-07-10 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Temporary blockVector version with copy of contain to provide contiguous save of
+	  values in Memory
+	* Remove InteractionLink class
+	* Update TimeStepping/OSNS/OSI (use of indexSets)
+	* Update all samples
+	* add "size" arg. in non smooth law
+
+2006-06-28 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Review constructors for Interaction, Relation and NonSmooth Law
+
+2006-06-22 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Strategy renamed Simulation
+
+2006-06-07 Franck Perignon <franck.perignon@inrialpes.fr>
+        * add UnitaryRelation class
+	* add UnitaryRelationsSet class -> IndexSets management in Topology
+
+--------------------------------------------------------------------------------
+  v1.2.0 - (release 508)
+--------------------------------------------------------------------------------
+
+Main Changes:
+
+2006-05-21 Franck Perignon <franck.perignon@inrialpes.fr>
+        * add InteractionsSet class to manage set of Interactions for NSDS, Interaction, OSI ...
+
+2006-05-17 Franck Perignon <franck.perignon@inrialpes.fr>
+        * add DSSet class to manage set of Dynamical Systems for NSDS, Interaction, OSI ...
+	* Change the way relation and nslaw are handled by Interaction. See Doc/Dev_Notes/Interaction for details
+	* add Doc/Dev_Notes/Interaction
+
+2006-05-15 Franck Perignon <franck.perignon@inrialpes.fr>
+        * remove all nana related files and functions
+
+2006-05-02 Franck Perignon <franck.perignon@inrialpes.fr>
+        * various changes in SiconosDOMTreeTools, StrategyXML and OSIXML.
+	* review Moreau/Lsodar/OSI
+	* add SiconosTemplates directory in src/utils
+
+2006-04-10 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Review DS and derived classes: remove vectorField/xDot
+	   -> rhs (right-hand side) = f(x,t) + Tu
+	  add computeRhs and computeJacobianXRhs in all derived classes,
+	  plug-in for f(x,t) and its Jacobian.
+	  Add/correct initialize(t) function in all DS classes, to compute/reset
+	  state at time t.
+
+2006-03-28 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Add LinearTIDS class
+
+2006-03-22 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Set correct links between DynamicalSystem and its derived classes.
+	* Add tests for DS and derived classes.
+
+2006-03-21 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Add BlockMatrix class, derived from SiconosMatrix.
+	* Add test functions for Matrices
+
+2006-03-16 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Add SimpleMatrix class, derived from SiconosMatrix.
+	      SiconosMatrix is now an abstract class
+	* Rename Composite in Block
+
+2006-03-13 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* lapackpp2.4.7 is now required
+
+2006-03-02 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* general review of Model/Strategy and TimeDiscretisation
+
+2006-02-28 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* global_Tests -> add this directory and related files
+	  to allow "global" tests, ie automatic running of chosen
+	  samples.
+
+2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* configure.ac -> run autoupdate to remove obsolete macros.
+	  Warning: must add insure related part after.
+	  Keep configure.ac.old to work with older
+	  autotools version.
+
+--------------------------------------------------------------------------------
+  v1.1.2 -  (release 428)
+--------------------------------------------------------------------------------
+Notes:  bugs fixing version
+
+Changes:
+
+2006-02-24 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * add Event, EventsComparison and EventsManager
+	  classes in simulation tools
+	=> used in EventDriven strategy
+	* Makefile.am -> make install also install doc in @prefix@
+	* Remove Adams class
+
+2006-02-22   Vincent Acary <vincent.acary@inrialpes.fr>
+             Franck Perignon <franck.perignon@inrialpes.fr>
+	* update configure.ac to generate automatically
+	  siconos/siconos, siconos/MakefilePluginSample,
+	  KernelConfig.sh.
+
+2006-02-19   Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* /macros/ac_f77_library_ldflags.m4 : This file is added and
+	replaced the system defined macro. A small correction is done
+	to neglect -lcrt2.o option at linking on MacOsX. This bug will
+	be normally corrected in further version of autoconf.
+--------------------------------------------------------------------------------
+  v1.1.1 - February 2006 (release 421)
+--------------------------------------------------------------------------------
+
+Notes:
+
+Changes:
+
+2006-02-13 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * corrections in Moreau in order to handle u plug-in
+	  for linear DS.
+
+2006-02-10 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * update Doxygen config file
+	* minor changes in m4 files and configure.ac (see install bug 495)
+	* prepare Event-Driven and Lsodar (Warning: first version, unstable!!)
+	  and review of other related classes (OneStepIntegrator, xml ...)
+
+--------------------------------------------------------------------------------
+  v1.1.0 - February 2006 (release 388)
+--------------------------------------------------------------------------------
+
+Notes:
+
+   This new version includes friction modeling and simulation for
+	Lagrangian systems in 2D (3D version in devel)
+
+Changes:
+
+2006-02-02 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * Add macros/acx_lapackpp.m4 (corresponding to lapackpp 2.4.6)
+
+2006-02-01 Vincent Acary <vincent.acary@inrialpes.fr>  Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * Upgrade SiconosModelXml, configure and make to allow "make check" without install or setenv ...
+
+2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr>
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * rename reconf.sh in autogen.sh and m4 directory in macros
+	  Use standard acx_blas and lapack macros.
+	  Warning: new options for configure ( -> configure --help for details )
+
+2006-01-30 Vincent Acary <vincent.acary@inrialpes.fr>  Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * configure.ac, plugin_test/Makefile plugin/test/Makefile, preparation
+	of the version v1.1.0
+	* plugin_test -> plugin/test
+
+2006-01-20 Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * configure.ac: Add workaround for gcc-4.0.2 gfortran-4.0.2.
+	Use of the macro AC_F77_LIBRARY_LDFLAGS for linking gcc and
+	gfortran compiled codes
+
+2006-15-01 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * src/simulationTools: review non-smooth problem solvers management
+
+2005-12-22  Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * src/simulationTools: add friction problem simulation tools (2D)
+	* src/xml: add xml files for friction problems (2D)
+
+
+--------------------------------------------------------------------------------
+  v1.0 - October 2005 (release 341)
+--------------------------------------------------------------------------------
+
+       - add modeling of Lagrangian (non linear) relations + related simulation part
+	 and cppunit tests + general review of all kind of relations.
+       - Insure tests ok
+       - add user-defined parameters list in all plug-in
+       - add samples "Ball in a bowl", "robotic arm",
+       - Fix various bugs in configure and m4 files (local libraries loading)
+
+--------------------------------------------------------------------------------
+  v1.0 - October 2005 (release 304)
+--------------------------------------------------------------------------------
+
+	Modeling of:
+	- Linear Complementarity systems
+	- Lagrangian dynamical systems with unilateral constraints
+	- Linear relations
+	- Complementarity conditions and Newton impact law.
+
+	Simulation:
+	- Moreau Time-stepping scheme
+	- Newton-Raphson
+	- Linear Complementarity Problems
+# Siconos-Numerics, Copyright INRIA 2005-2014
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+#
+
+This is the changelog for the Siconos/Numerics package, www.siconos.gforge.inria.fr.
+Entries are written backwards. That is, items at the bottom
+of the file were added first, and each subsequent addition is placed on a line
+before it.
+Do not hesitate to use the emacs mode Change Log for editing this file
+
+--------------------------------------------------------------------------------
+  v3.7.0
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* add generic Newton-based with linesearch solvers for MCP and NCP
+	* rework LCP Solvers: fix some of them (FB and min merit functions) and add
+	new algorithm like Bard-type and Murty's rule.
+	* new AVI solver based on the work by Cao & Ferris. It is also used to
+	solve Relay problem
+	* new solver for box VI based on a merit function.
+	* add a callback mechanism to gather solver informations.
+
+--------------------------------------------------------------------------------
+  v3.6.0
+--------------------------------------------------------------------------------
+
+Changes:
+	* Cleaning Doxygen warning
+	* Numerics/src/hairer/ Add E. Hairer ode solvers (RADAU, HEM5)
+	* Numerics/src/NonSmoothSolvers/MLCP/MLCP_Solvers.h New mlcp pgs SBM solver (not stable)
+	* Numerics/src/NonSmoothSolvers/FrictionContact/GlobalFrictionContact3D rename
+	Primal Friction Cintact problem into Global Friction Contact problem
+	* GLOBALAC -> LOCALAC: former Sparse Global Alart Curnier 3D
+	friction contact solver, added in 3.4.0, is renamed  Local Alart
+	Curnier : LOCALAC ("Global" word conflicts with Global coordinates)
+	* GlobalFrictionContact: add Sparse global Alart Curnier solver
+	(GLOBALAC) : use MUMPS if present (compilation with
+	-DWITH_MUMPS=ON) otherwise use embedded Timothy Davis lusol
+	* support for sparse matrices (coordinates and csc) in NumericsMatrix
+
+--------------------------------------------------------------------------------
+ v3.5.0 25/10/2012
+--------------------------------------------------------------------------------
+
+Changes:
+	* MixedComplementarity.* add structure and first test with FB algorithm
+	* MixedLinearComplementarity.* change the data structure to take into
+	account two storage types (M,q) and (A,B,C,D,a,b)
+	* Relay Fix huge bug in Relay with lb!=-1 and ub!=1
+	* FrictionContact Add LMGC driver.  Add FrictionContact2D
+	solvers based on LCP reformulation and LEMKE and ENUM solvers
+	* LA.h: transform macros used to wrap LAPACK/BLAS functions into
+	static inline functions. This should not induced any loss of
+	performance
+	* Enable Numerics to be build with a C++ Compiler (needed by Visual
+	Studio). In this case it sets BUILD_AS_CPP.
+	* Misc changes for crosscompiling to Windows using mingw and Visual
+	Studio. The files SiconosCompat.h and SiconosCompat.c contains some
+	functions not defined by VS (most of them are C99)
+
+
+--------------------------------------------------------------------------------
+  v3.4.0
+--------------------------------------------------------------------------------
+
+Changes:
+	* Sparse Global Alart Curnier : MUMPS verbose if Numerics verbose
+      	mode is on (icntl(4)=0, icntl(10)=1, icntl(11)=1)
+	* some signatures updates for swig interface
+	* *.h update Doxygen documentation.
+	* FrictionContact renumbering FrictionContact Solver.
+
+--------------------------------------------------------------------------------
+  v3.3.0
+--------------------------------------------------------------------------------
+
+Changes:
+	* FrictionContact3D Add ExtraGradient and HyperPlaneProjection
+	methods for solving 3D frictional contact problems as VI.
+	* FrictionContact3D Add tests and clean up old test series.
+	* lcp_enum deals with degenerated systems using dgels or dgesv.
+	* GenericMechanicalProblem: Build a reduced equivalent problem,
+	equalities are either substituted or written in one block.
+	* Sparse global Alart Curnier (with MUMPS solver) & gp line search.
+
+--------------------------------------------------------------------------------
+  v3.2.0 - r2330
+--------------------------------------------------------------------------------
+
+Changes:
+
+2010-09 Maurice Bremond <Maurice.Bremond@inrialpes.fr>
+	* Global Alart Curnier (dense version only)
+	with line search (GP)
+
+2010-09 Vincent Acary <vincent.Acary@Inrialpes.Fr>
+	* fix bugs in Alart Curnier CKPS and STD
+	* line search (GP) added
+
+2010  Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* MLCP: Blocks of equalities and inequalities can be mixed.
+	* Solver name is replaced by an interger id.
+	* GenericMechanicalProblem: a problem where the equalities, inequalities and friction contact 3D are mixed.
+	* Quartic formulation of a unitary friction contact 3D like a polynome(artan(theta)) or a polynome of nu.
+
+
+--------------------------------------------------------------------------------
+  v3.0.0 -
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+2010-01-12 Vincent Acary <vincent.acary@inrialpes.fr>
+	* Start  Relay solver with ENUM and Lemke scheme
+
+
+2008-01-01 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* NonSmoothSolvers Add MLCP solvers.
+
+
+2008-01 Franck Perignon <Franck.Perignon@inrialpes.fr>
+	* NSSpack: split into several dir (one for each solver/formulation)
+	  => create NSSTools, LCP ...
+	* Add header files
+
+
+2007-11-12 Franck Perignon <Franck.Perignon@inrialpes.fr>
+
+	* NSSPack.h: split into lcp_solvers.h, pfc_3D_solvers.h ...
+	* Add utilities to handle with blocks-matrices in pfc_3D solvers
+
+--------------------------------------------------------------------------------
+  v2.1.1 - August, 23rd 2007 (release 839)
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+--------------------------------------------------------------------------------
+  v2.1.0 - June, 28th 2007 (release 809)
+-------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2007-03-02 Vincent Acary <vincent,acary@inrialpes.fr>
+
+	* lcp_solver : Modification of the convergence criteria
+	* lcp_solver : Renaming lcp_nlgs into lcp_pgs
+	* lcp_solver : Renaming lcp_sor into lcp_psor
+
+--------------------------------------------------------------------------------
+  v2.0.1 - December, 14th 2006 (release 626)
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+
+--------------------------------------------------------------------------------
+  v2.0.0 - November, 30th 2006
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Remove lemke routines and keep only lexicoLemke
+
+--------------------------------------------------------------------------------
+  v1.3.0 - 07 september 2006 (release 567)
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2006-09-07 Pascal Denoyelle <pascal.denoyelle@inrialpes.fr>
+
+	* Add LCP solver for block matrices
+	* Review convergence criteria for LCP solvers
+
+--------------------------------------------------------------------------------
+  v1.2.0 - (release 508)
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2006-03-24 Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* INSTALL, src/Makefile.am, src/dummy.cpp
+	  First draft of a linking strategy on MacOsX
+
+2006-03-22 Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* lcp_solver.c, lcp_sor.c, lcp_newton_FB.c, NSSpack.h
+	  Removing not reliable solvers.
+	  Adding Draft version of the sor algorihm and the newton based on
+	  Fischer-Bursmeister function.
+
+2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* configure.ac -> run autoupdate to remove obsolete macros.
+	  Warning: must add insure related part after.
+	  Keep configure.ac.old to work with older
+	  autotools version.
+
+
+2006-02-24 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Makefile.am -> make install also install doc in @prefix@
+
+--------------------------------------------------------------------------------
+  v1.1.1 - 15 February 2006 (release 421)
+--------------------------------------------------------------------------------
+
+Notes:
+
+Changes:
+2006-02-15   Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* /macros/ac_f77_library_ldflags.m4 : This file is added and
+	replaced the system defined macro. A small correction is done
+	to neglect -lcrt2.o option at linking on MacOsX. This bug will
+	be normally corrected in further version of autoconf.
+
+2006-02-13   Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* /src/NSSpack/test/Makefile.am
+	Use of the variable XFAIL_TESTS for tests expected failures
+
+2006-02-10   Franck Perignon <franck.perignon@inrialpes.fr>
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * Update macros m4 for cppunit => the same as in kernel
+	  (this to correct install bug 494)
+	  Minor changes in configure.ac, (--with-name rather than
+	  --with-local-name)
+	* Update obsolete keywords in Doxygen config file
+	* Changes in headers files for odepack: add usefull functions
+	  for Lsodar solver in Kernel.
+
+--------------------------------------------------------------------------------
+  v1.1.0 - February 2006 (release 385)
+--------------------------------------------------------------------------------
+
+Notes:
+
+Changes:
+
+2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr>
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * rename reconf.sh in autogen.sh and m4 directory in macros
+	  Use standard acx_blas and lapack macros.
+	  Warning: new options for configure ( -> configure --help for details )
+
+
+2006-01-20   Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * configure.ac, src/utils/blaslapack.h, f2c.h: Add workaround for
+	gcc-4.0.2 gfortran-4.0.2 and so on. Use of a local f2c.h for gcc4.
+	use of the macro AC_F77_LIBRARY_LDFLAGS for linking gcc and gfortran
+	compiled codes
+
+--------------------------------------------------------------------------------
+  v1.0 - November 2005 (release 341)
+--------------------------------------------------------------------------------
+
+        - Solverpack renamed in NSSPack
+        - Fixed warnings on invalid pointer type due to integer types
+        - Matlab interface
+
+--------------------------------------------------------------------------------
+  v1.0 - October 2005 (release 304)
+--------------------------------------------------------------------------------
+
+        Numerical algorihtms for:
+	- ODE time integration (odepack directory)
+	- LCP solvers    (solverpack directory)
+	- Relay solvers  ( "             "    )
+	- 2D and 3D contact friction solvers ( " )
+# Siconos-Kernel, Copyright INRIA 2005-2014
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+#
+This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
+Entries are written backwards. That is, items at the bottom
+of the file were added first, and each subsequent addition is placed on a line
+before it.
+Do not hesitate to use the emacs mode Change Log for editing this file
+
+--------------------------------------------------------------------------------
+  v3.8.0
+--------------------------------------------------------------------------------
+Main Changes:
+	* NewtonEulerDS Add internal forces and associated jacobians to improve
+	the convergence of the Newton loop. Remove adhoc update of T and MObjToAbs
+	* MoreauJeanOSI Add a correct treatment of NewtonEuler DS with the Newton
+	Loop
+--------------------------------------------------------------------------------
+  v3.7.0
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* unify Relation API + rework computeh and computeg such that they
+	have no hidden side-effect
+	* First Order Relations are now stateless
+	* Fix newton-loop for First Order Systems + relations. The fully
+	non-linear case is now supported
+	* translation of siconos script in Python to improve portability.
+	* Removal of XML-related code
+
+--------------------------------------------------------------------------------
+  v3.6.0 October 2013
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* Update ublas bindings.
+	* Add interface to eigenproblems solvers from boost ublas (bindings)
+	* Fix bug in interactions (lambda's reset)
+	* Remove using namespace std to obtain compatible signature between .hpp and *.cpp.
+	Start to clean doxygen warning
+	* Add lambdaMemory in interaction and
+	rename Interaction swapInMemory --> swapInOldVariables
+	rename Interaction swapInTimeStepInMemory --> swapInMemory
+	* Complete implementation of D1MinusLinear for LagrangianDS and NewtonEulerDS.
+	work on serevral nonlinear examples. SliderCrank, RockingBLock, ...
+	* /Kernel/src/modelingTools/DynamicalSystem.cpp Rename _workspace in DS
+	* /Kernel/src/simulationTools/Hem5.hpp First HEM5 integration
+	* /Kernel/src/simulationTools/MLCP.hpp New mlcp pgs SBM solver (not stable)
+	* move multibodyTools in a new module : Mechanics
+	* Add VisitorMaker for the creation of visitors on base classes
+	(example of usage in Mechanics/MechanicsIO.cpp)
+	* Support boost up to version 1.53
+	* EventsManager has been rewritten and the drift in time has been
+	removed
+	* Sliding Mode Controller have been updated and improved
+	* SiconosAlgebra has been reworked: the interface has been clean up
+	and SimpleMatrix.cpp has been splitted to lower the memory used during
+	the compilation
+
+--------------------------------------------------------------------------------
+  v3.5.0 October 2012
+--------------------------------------------------------------------------------
+Main Changes:
+	* Remove unneeded Plugin class
+	* Include C++ header instead of C ones (math.h -> cmath, ...)
+	* Misc. changes to enable crosscompilation to windows with mingw and
+	Visual Studio
+	* Transform some classes into namespace (ioMatrix, iovector, SSL).
+	Split SSL in 2 : SSL and SSLH (SSL Helper). The latter is the one used
+	in the code, the former contains the Plateform specific part.
+	* Remove UnitaryRelation
+	* SiconosAlgebra. SimpleVector is removed and now is SiconosVector.
+	* TimeSteppingProjectOnConstraints, TimeSteppingCombinedProjection
+	Rewrite entirely the code the use lambda[0] mand p[0].
+	Add MoreauProjectOnConstraintsOSI to use a temporary vector for
+	storing q before projection.
+	* FirstOrderType2Radd computation of computeInput
+	* TimeStepping add _isNewtonConverge 
+
+--------------------------------------------------------------------------------
+  v3.4.0 March 2012
+--------------------------------------------------------------------------------
+Main Changes:
+	* serialization hooks & some minor modifications to be boost serializable
+	* controlTools: add some new Actuator (PID and various SMC) and Sensor
+	(LinearSensor). API is not fixed yet.
+	* modelingTools: add a new objets ControlDynamicalSystem and
+	ControlFirstOrderLinearSystem aiming at providing a class handling
+	most details that are of no interest for control engineers
+	* modelingTools, simulationTools: add a bunch of copy contructor
+	(First Order Systems, Timediscretisation, ...)
+	* Fix a bug in the way we compute levels
+	* TimeSteppingProjectOnConstraints add treatment of Lagrangian system
+	Correct a bug in the construction of the Jacobian Matrix in the projection
+	operator.
+	* LagrangianR, NewtonEulerR remove useless attributes (_yProj)
+	* SchatzmanPaoli Add a draft (for linear systems) of the Schatzman-Paoli 
+	scheme
+
+--------------------------------------------------------------------------------
+  v3.3.0
+--------------------------------------------------------------------------------
+Main Changes:
+	* NewtonEuler: Fix a bug in nablaqT computation.
+	* NewtonEuler: Include nabla _v (Omega I Omega) in the OSNSP
+	formulation.
+	* computeFreeOutput in OSI. Complete move of SiconosVisitor from
+	LinearOSNS in OSI concerning the computation of free outputs
+	* FirstOrderLinearDS and Moreau OSI. Correct some evaluations for
+	FirstOrderLinearDS
+	* Moreau. Add ThetaGamma schemes (x2) for FirstOrderDS
+	* NSDS. Review the computation of IsLinear
+	* Topology. Review and change isTimeInvariant
+	* Moreau. Start Sparse tests for LagrangianDS
+	* Newton in Timestepping. Review of th global process
+	* MultibodyTools : interface with Bullet collision
+	detection (broad phase and narrow phase)
+	* fix a bug with multiple edges in UnitaryRelations graph and the
+	computation of unitary blocks
+
+--------------------------------------------------------------------------------
+  v3.2.0 - r2330
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+
+2010 Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* Newton Euler Spheres under multibodyTools/3D
+	* unitary blocks stored on graph vertices and edges
+
+2010 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* Add some examples using the NewtonEuler approach.
+	* GenericMechanicalProblem, a new OSNSP using the corresponding solver in Numerics.
+
+2010-01-12 Vincent Acary <vincent.acary@inrialpes.fr>
+	* Add the BoundaryCondition classe to deal with the boundary conditions.
+	* Start RelayNSL and Relay ONSNS
+ 	* Plug Relay Driver for PGS, ENUM and Lemke scheme
+
+--------------------------------------------------------------------------------
+  v3.1.0 - March 2009
+--------------------------------------------------------------------------------
+
+2009 October Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* from get<Member>Ptr() to member()
+	* member prefix with _
+
+[...]
+
+2009 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* Add FirsrtOrderType2R, a type of first order relation.
+	* Add NewtonEulerDS, NewtonEulerR and a bouncing ball example based on the NewtonEuler.
+	* Add an electrical example using ideal switch.
+
+2009 March Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* Add SiconosGraph, to replace maps of DynamicalSystems and maps
+	of UnitaryRelations.
+
+2008 December Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* Sparse Matrix : from siconos coordinates storage to boost storage
+	with compress Row
+
+2008 October Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add DynamicalSystem Factory
+	* Add M(x) in FirstOrder DS
+	* Add Relation Factory
+	* Remove DefaultPlugin lib/file
+	* Remove Model from TimeDiscretisation
+	 + review of building/initialization process (to avoid cycling)
+
+2008 September Maurice Bremond <Maurice.Bremond@inrialpes.fr>, Franck Perignon <franck.perignon@inrialpes.fr>
+	* Use Smart pointers utilities for memory management
+	 => review all files
+
+--------------------------------------------------------------------------------
+  v3.0.0 - August 2008
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2007 September Franck Perignon <franck.perignon@inrialpes.fr>
+	* Review event-driven
+	* Review "sets" management
+	* Replace Interaction/UnitaryRelation/DynamicalSystem/Set classes
+	with a template class SiconosSet
+
+--------------------------------------------------------------------------------
+  v2.1.1 - August, 23rd 2007 (release 839)
+--------------------------------------------------------------------------------
+
+Notes:
+
+Changes:
+
+2007 July Franck Perignon <franck.perignon@inrialpes.fr>
+	* Review SiconosAlgebra tool to improve computation times
+	  (use ublas or ublas/atlas functions in a better way ...)
+
+--------------------------------------------------------------------------------
+  v2.1.0 - June, 28th 2007 (release 809)
+--------------------------------------------------------------------------------
+Notes:
+
+Changes:
+
+2007-02-28 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Add LagrangianRheonomousR and LagrangianCompliantR Relations.
+
+2007-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Review Relations organization: add/rename LinearTIR in FirstOrderLinearTIR,
+	  add derived classes for LagrangianR.
+
+2007-02-08 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add a module controlTools
+	* Add Sensor, SensorFactory and SensorEvents in controlTools
+	* Add an EventsFactory
+	* Add EventsManager in Simulation (before: only present in EventDriven case)
+	* Create a "main" header file for each XXXTools location + one "SiconosKernel.h"
+
+2007-01-30 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add an abstract DynamicalSystem class, base of FirstOrder, Lagrangian ...
+	* Rename DynamicalSystem in FirstOrderDynamicalSystem, LinearDS in FirstOrderLinearDynamicalSystem
+	* Add a z, vector of parameters, ("discret" state) in DS
+	* Remove control (u,T) from DS. (future version: actuators/sensors to handle control, from outside, through z parameter)
+
+2007-01-23 Vincent  Acary <Vincent.Acary@inrialpes.fr>
+	* configure.ac, MakefilePluginSample.in, ... :
+	Change the name of the variable SICONOS_EXT_LDFLAGS into
+	SICONOS_EXT_LIBS. Change MakefilePluginSample.am to avoid the use of
+	KernelCOnfig.sh (future remove).  Add some bad tricks to allow the use
+	of the original ATLAS sources. Compilation and execution works on
+	MacOsX(intel).
+
+2007-01-16 Vincent  Acary <Vincent.Acary@inrialpes.fr>
+	* configure.ac :
+	Move check for Lapack and Blas into the check macro for Numerics.
+	Should be replaced in future by only Atlas checking
+
+
+2007-01-10 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add Control class + resulting changes in DynamicalSystem, NSDS ...
+
+--------------------------------------------------------------------------------
+  v2.0.1 -  December, 14th 2006 (release 626)
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+
+2006-12-14 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Updates for gcc4.1.1 compatibility (-ffriend-injection, ...)
+
+--------------------------------------------------------------------------------
+  v2.0.0 - 30 November 2006 (release 616)
+--------------------------------------------------------------------------------
+Notes:
+
+Main Changes:
+
+2006-10-11 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Remove all lapack++ depencies; replace them by Boost-Ublas
+	  Thus Vectors and Matrices are now fully based on Boost
+	* Review/update Doxygen doc - Based on v1.5.1.
+	  Model/reference file for doc: Interaction.h
+	* Add boost/bindings in the sources (src/boost)
+
+2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Add cppunit tests for MySimple and MyBlock matrices (boost)
+
+2006-09-26 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Add Boost matrices and vectors in Kernel (from Aziz branch)
+	  (MySiconosMatrix, MySimpleMatrix, MyBlockMatrix, MySiconosVector,
+	   ioMatrix, ioVector classes)
+
+-------------------------------------------------------------------------------
+  v1.3.0 - 07 september 2006 (release 567)
+--------------------------------------------------------------------------------
+
+Main Changes:
+
+2006-09-07 Franck Perignon <franck.perignon@inrialpes.fr>
+        * EventDriven for Lagrangian systems
+
+2006-07-10 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Temporary blockVector version with copy of contain to provide contiguous save of
+	  values in Memory
+	* Remove InteractionLink class
+	* Update TimeStepping/OSNS/OSI (use of indexSets)
+	* Update all samples
+	* add "size" arg. in non smooth law
+
+2006-06-28 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Review constructors for Interaction, Relation and NonSmooth Law
+
+2006-06-22 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Strategy renamed Simulation
+
+2006-06-07 Franck Perignon <franck.perignon@inrialpes.fr>
+        * add UnitaryRelation class
+	* add UnitaryRelationsSet class -> IndexSets management in Topology
+
+--------------------------------------------------------------------------------
+  v1.2.0 - (release 508)
+--------------------------------------------------------------------------------
+
+Main Changes:
+
+2006-05-21 Franck Perignon <franck.perignon@inrialpes.fr>
+        * add InteractionsSet class to manage set of Interactions for NSDS, Interaction, OSI ...
+
+2006-05-17 Franck Perignon <franck.perignon@inrialpes.fr>
+        * add DSSet class to manage set of Dynamical Systems for NSDS, Interaction, OSI ...
+	* Change the way relation and nslaw are handled by Interaction. See Doc/Dev_Notes/Interaction for details
+	* add Doc/Dev_Notes/Interaction
+
+2006-05-15 Franck Perignon <franck.perignon@inrialpes.fr>
+        * remove all nana related files and functions
+
+2006-05-02 Franck Perignon <franck.perignon@inrialpes.fr>
+        * various changes in SiconosDOMTreeTools, StrategyXML and OSIXML.
+	* review Moreau/Lsodar/OSI
+	* add SiconosTemplates directory in src/utils
+
+2006-04-10 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Review DS and derived classes: remove vectorField/xDot
+	   -> rhs (right-hand side) = f(x,t) + Tu
+	  add computeRhs and computeJacobianXRhs in all derived classes,
+	  plug-in for f(x,t) and its Jacobian.
+	  Add/correct initialize(t) function in all DS classes, to compute/reset
+	  state at time t.
+
+2006-03-28 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Add LinearTIDS class
+
+2006-03-22 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Set correct links between DynamicalSystem and its derived classes.
+	* Add tests for DS and derived classes.
+
+2006-03-21 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Add BlockMatrix class, derived from SiconosMatrix.
+	* Add test functions for Matrices
+
+2006-03-16 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Add SimpleMatrix class, derived from SiconosMatrix.
+	      SiconosMatrix is now an abstract class
+	* Rename Composite in Block
+
+2006-03-13 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* lapackpp2.4.7 is now required
+
+2006-03-02 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* general review of Model/Strategy and TimeDiscretisation
+
+2006-02-28 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* global_Tests -> add this directory and related files
+	  to allow "global" tests, ie automatic running of chosen
+	  samples.
+
+2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* configure.ac -> run autoupdate to remove obsolete macros.
+	  Warning: must add insure related part after.
+	  Keep configure.ac.old to work with older
+	  autotools version.
+
+--------------------------------------------------------------------------------
+  v1.1.2 -  (release 428)
+--------------------------------------------------------------------------------
+Notes:  bugs fixing version
+
+Changes:
+
+2006-02-24 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * add Event, EventsComparison and EventsManager
+	  classes in simulation tools
+	=> used in EventDriven strategy
+	* Makefile.am -> make install also install doc in @prefix@
+	* Remove Adams class
+
+2006-02-22   Vincent Acary <vincent.acary@inrialpes.fr>
+             Franck Perignon <franck.perignon@inrialpes.fr>
+	* update configure.ac to generate automatically
+	  siconos/siconos, siconos/MakefilePluginSample,
+	  KernelConfig.sh.
+
+2006-02-19   Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* /macros/ac_f77_library_ldflags.m4 : This file is added and
+	replaced the system defined macro. A small correction is done
+	to neglect -lcrt2.o option at linking on MacOsX. This bug will
+	be normally corrected in further version of autoconf.
+--------------------------------------------------------------------------------
+  v1.1.1 - February 2006 (release 421)
+--------------------------------------------------------------------------------
+
+Notes:
+
+Changes:
+
+2006-02-13 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * corrections in Moreau in order to handle u plug-in
+	  for linear DS.
+
+2006-02-10 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * update Doxygen config file
+	* minor changes in m4 files and configure.ac (see install bug 495)
+	* prepare Event-Driven and Lsodar (Warning: first version, unstable!!)
+	  and review of other related classes (OneStepIntegrator, xml ...)
+
+--------------------------------------------------------------------------------
+  v1.1.0 - February 2006 (release 388)
+--------------------------------------------------------------------------------
+
+Notes:
+
+   This new version includes friction modeling and simulation for
+	Lagrangian systems in 2D (3D version in devel)
+
+Changes:
+
+2006-02-02 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * Add macros/acx_lapackpp.m4 (corresponding to lapackpp 2.4.6)
+
+2006-02-01 Vincent Acary <vincent.acary@inrialpes.fr>  Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * Upgrade SiconosModelXml, configure and make to allow "make check" without install or setenv ...
+
+2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr>
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * rename reconf.sh in autogen.sh and m4 directory in macros
+	  Use standard acx_blas and lapack macros.
+	  Warning: new options for configure ( -> configure --help for details )
+
+2006-01-30 Vincent Acary <vincent.acary@inrialpes.fr>  Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * configure.ac, plugin_test/Makefile plugin/test/Makefile, preparation
+	of the version v1.1.0
+	* plugin_test -> plugin/test
+
+2006-01-20 Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * configure.ac: Add workaround for gcc-4.0.2 gfortran-4.0.2.
+	Use of the macro AC_F77_LIBRARY_LDFLAGS for linking gcc and
+	gfortran compiled codes
+
+2006-15-01 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * src/simulationTools: review non-smooth problem solvers management
+
+2005-12-22  Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * src/simulationTools: add friction problem simulation tools (2D)
+	* src/xml: add xml files for friction problems (2D)
+
+
+--------------------------------------------------------------------------------
+  v1.0 - October 2005 (release 341)
+--------------------------------------------------------------------------------
+
+       - add modeling of Lagrangian (non linear) relations + related simulation part
+	 and cppunit tests + general review of all kind of relations.
+       - Insure tests ok
+       - add user-defined parameters list in all plug-in
+       - add samples "Ball in a bowl", "robotic arm",
+       - Fix various bugs in configure and m4 files (local libraries loading)
+
+--------------------------------------------------------------------------------
+  v1.0 - October 2005 (release 304)
+--------------------------------------------------------------------------------
+
+	Modeling of:
+	- Linear Complementarity systems
+	- Lagrangian dynamical systems with unilateral constraints
+	- Linear relations
+	- Complementarity conditions and Newton impact law.
+
+	Simulation:
+	- Moreau Time-stepping scheme
+	- Newton-Raphson
+	- Linear Complementarity Problems
+# Siconos-Kernel, Copyright INRIA 2005-2014
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+#
+This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
+Entries are written backwards. That is, items at the bottom
+of the file were added first, and each subsequent addition is placed on a line
+before it.
+Do not hesitate to use the emacs mode Change Log for editing this file
+
+--------------------------------------------------------------------------------
+  v3.8.0
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* Creation of the Control module in Siconos
+
+# Siconos-Mechanics, Copyright INRIA 2013.
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+#
+This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
+Entries are written backwards. That is, items at the bottom
+of the file were added first, and each subsequent addition is placed on a line
+before it.
+Do not hesitate to use the emacs mode Change Log for editing this file
+
+--------------------------------------------------------------------------------
+  v3.7.0
+--------------------------------------------------------------------------------
+Main Changes:
+
+	* add the possibility of multiples contactors (bullet collision
+          objects) for one Newton Euleur dynamical system.
+	* add the possibility of multiples nslaws between collision groups.
+	* BulletDS : inertia matrix may be modified by the user.
+
+--------------------------------------------------------------------------------
+  v3.6.0 - October 2013
+--------------------------------------------------------------------------------
+	* Mechanics is a new Siconos module which gather former classes
+	from Kernel/multibodyTools
+	* Clean doxygen warning
+	* Add computation of the second derivative in time in some joints.
+	* Brute-force import of Multibody Toolbox for mechanisms from CAD software
+# Siconos-Kernel, Copyright INRIA 2005-2010.
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+#
+This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
+Entries are written backwards. That is, items at the bottom
+of the file were added first, and each subsequent addition is placed on a line
+before it.
+Do not hesitate to use the emacs mode Change Log for editing this file
+
+
+3.7.0
+	* MechanicsIO : bugs fixes in positions and contact forces output.
+
+3.6.0
+	* MechanicsIO get positions velocities and contact points
+	informations (positions, normals, contact forces)
+
+3.4.0
+	* boost serialization of a Siconos Model with two functions :
+	save(SP::Model&,std::string filename)
+	load(std::string filename)
+
+
