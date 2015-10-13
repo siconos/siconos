@@ -1,2 +1,5 @@
 include(CI/default.cmake)
-set(WITH_PYTHON_WRAPPER OFF CACHE BOOL "Python" Force)
+set(WITH_PYTHON_WRAPPER OFF CACHE BOOL "Python" FORCE)
+foreach(component "numerics;kernel;control;mechanics;io")
+  set(WITH_${component}_PYTHON_WRAPPER OFF CACHE BOOL "Python" FORCE)
+endforeach()

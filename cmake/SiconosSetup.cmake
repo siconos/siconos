@@ -79,8 +79,10 @@ endif()
 
 # ---- Python ---
 # (interp and lib)
-find_package(PythonFull REQUIRED)
-include(FindPythonModule)
+if(WITH_PYTHON_WRAPPER)
+  find_package(PythonFull REQUIRED)
+  include(FindPythonModule)
+endif()
 
 # --- xml schema. Used in tests. ---
 if(WITH_XML)
