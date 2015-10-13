@@ -19,10 +19,10 @@
 Authors and maintainers of Siconos/Numerics version 3.8.0 are 
 
 Vincent Acary <vincent.acary@inria.fr>
-Olivier Huber <olivier.huber@inria.fr>
 Maurice Bremond <Maurice.Bremond@inria.fr>
+Olivier Huber <olivier.huber@inria.fr>
 Franck Perignon <franck.perignon@imag.fr>
-Roger Pissard Gibollet <roger.pissard-gibollet@inria.fr>
+Roger Pissard-Gibollet <roger.pissard-gibollet@inria.fr>
 
 Contributors to previous versions of Siconos:
 
@@ -36,5 +36,7 @@ Jean-Michel Barbier
 Shéhérazade Nineb
 Houari Khenous
 Hakim Majidi
+Abdel-Aziz Ndiaye
+
 
 
