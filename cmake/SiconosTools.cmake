@@ -318,3 +318,13 @@ macro(get_subdirectories result current_dir)
   endforeach()
   set(${result} ${dirs})
 endmacro()
+
+# set an option from script
+macro(set_option var value)
+  get_property(CACHE_VAR_TYPE CACHE ${var} PROPERTY TYPE)
+  if(CACHE_VAR_TYPE)
+    set_property(CACHE ${var} PROPERTY VALUE ${value})
+  else()
+    set(${var} ${value} CACHE BOOL "${var} is set from script")
+  endif()
+endmacro()

@@ -1,3 +1,8 @@
+sudo: required
+
+services:
+  - docker
+
 language: cpp
 
 compiler:
@@ -19,5 +24,5 @@ before_script:
   - cd ${TRAVIS_BUILD_DIR}/build
 
 script:
-  - ctest -DCI_CONFIG=no_python -DMODE=Continuous -S ../CI/CTestDriver.cmake 
+  - ctest -DCI_CONFIG=default -DWITH_DOCKER=1 -DDOCKER_TEMPLATES=siconos-gcc -DDOCKER_DISTRIB=ubuntu:14.04 -S ../CI/CTestDriver.cmake 
 

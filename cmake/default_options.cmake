@@ -33,6 +33,7 @@ option(WITH_FCLIB "link with fclib when this mode is enable. Default = OFF" OFF)
 option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
 option(WITH_MECHANISMS "Generation of bindings for Saladyn Mechanisms toolbox. Default = OFF" OFF)
 option(WITH_XML "Enable xml files i/o. Default = ON" ON)
+option(WITH_DOCKER "Build inside a docker container. Default = OFF" OFF)
 
 # Set python install mode:
 # - user --> behave as 'python setup.py install --user'

@@ -44,8 +44,8 @@ def get_entry(spec=None, distrib=None, distrib_version=None, pkg=None,
                 return spec[section][pkg][match_distrib]
             
 
-        if spec['wildcard'] in spec[section][pkg]:
-            return spec[section][pkg][spec['wildcard']]
+        if wildcard in spec[section][pkg]:
+            return spec[section][pkg][wildcard]
 
         else:
             return None
@@ -195,6 +195,12 @@ with open(specfilename) as specfile:
 
     spec = yaml.load(specfile.read())
 
+    wildcard = None
+    if 'wildcard' in spec:
+        wildcard = spec['wildcard']
+    else:
+        wildcard = 'any'
+
     by_installer = list()
     by_command = list()
     definitions = list()
@@ -225,13 +231,14 @@ with open(specfilename) as specfile:
     begin(distrib=distrib, distrib_version=distrib_version,
           output_mode=output_mode)
 
-    updater = get_entry(spec, distrib, distrib_version, 'any', 'updater')
+    updater = get_entry(spec, distrib, distrib_version, wildcard, 'updater')
 
     if updater is not None:
 
         run(command=updater, output_mode=output_mode)
         
-    installer = get_entry(spec, distrib, distrib_version, 'any', 'installer')
+    installer = get_entry(spec, distrib, distrib_version, wildcard,
+                          'installer')
 
     assert installer is not None
 

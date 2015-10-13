@@ -41,18 +41,51 @@ pkgs:
       - clang
       - gfortran
       - atlas-lapack
-##############################################################################
+
+  siconos-gcc:
+    ubuntu:
+      - libboost-dev
+      - libgmp-dev
+      - numerics-minimal-gcc
+      - g++
+      - python
+      - python-dev
+      - python-lxml
+      - python-pytest
+      - python-scipy
+      - swig
+      - libcppunit-dev
+
+  cmake:
+    ubuntu-12.04:
+       - python-software-properties
+       - cmake-2.8.12
+
+  cmake-2.8.12:
+    ubuntu-12.04:
+      command:
+        add-apt-repository ppa:smspillaz/cmake-2.8.12 -y &&
+        add-apt-repository ppa:teward/swig3.0 -y &&
+        add-apt-repository ppa:boost-latest/ppa -y &&
+        apt-get update -qq &&
+        apt-get purge cmake -qq &&
+        apt-get -y install cmake
+
   gfortran:
     fedora: gcc-gfortran
 
-  c++:
+  gnu-c++:
+    debian: g++
     fedora: gcc-c++
   
   boost:
+    debian: libboost-dev
     fedora: boost-devel
       
   gmp:
+    debian: libgmp-dev
     fedora: gmp-devel
+
 
   cppunit:
     fedora: 

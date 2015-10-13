@@ -29,16 +29,38 @@ include(SiconosTools)
 
 # Check/set uninitialized cache variables (--> for docker config)
 get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
+
 # cmake project name
 set(PROJECT_NAME siconos)
 
-option(WITH_DOCKER "Build inside a docker container." OFF)
+if(USER_OPTIONS_FILE)
+  get_filename_component(input_file ${USER_OPTIONS_FILE} NAME)
+  get_filename_component(path_to_file ${USER_OPTIONS_FILE} PATH)
+  find_file(filefound NAMES ${input_file}
+    PATHS ${path_to_file} ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
+    )
+  if(NOT ${filefound}-NOTFOUND)
+    configure_file(${path_to_file}/${input_file} ${CMAKE_SOURCE_DIR}/${input_file})
+  else()
+    message(FATAL_ERROR "Cannot find file ${USER_OPTIONS_FILE}")
+  endif()
+  message("\n !!!!! Load user-defined options set from file ${filefound} !!!!! \n")
+  include(${input_file})
+  # copy user file to binary dir, just for 'visual' check.
+  configure_file(${input_file} ${input_file} COPYONLY)
+else()
+  include(default_options)
+endif()
+
+# Configurations used for continuous integration
+if(CI_CONFIG)
+  include(CI/${CI_CONFIG}.cmake)
+endif()
 
 # ---------- Docker or not docker ... ------------------------
 if(WITH_DOCKER)
   find_program(HAVE_DOCKER docker)
   if(HAVE_DOCKER)
-    
     set(DOCKER_IMAGE_DIR ${CMAKE_SOURCE_DIR}/Build/Docker)
     set(DOCKER_MKSENV_COMMAND ${CMAKE_SOURCE_DIR}/Build/Docker/mksenv)
     set(DOCKER_MKSENV_INPUT ${CMAKE_SOURCE_DIR}/Build/Docker/siconos.yml)
@@ -54,37 +76,12 @@ if(WITH_DOCKER)
       DOCKER_REPOSITORY ${DOCKER_REPOSITORY}
       DOCKER_CMAKE_FLAGS ${DOCKER_CMAKE_FLAGS}
       DOCKER_SHARED_DIRECTORIES ${DOCKER_SHARED_DIRECTORIES})
-    
+      
     project(${PROJECT_NAME} NONE)
   else()
     message(FATAL_ERROR "Cannot find docker.")
   endif()
 else()
-
-  if(USER_OPTIONS_FILE)
-    get_filename_component(input_file ${USER_OPTIONS_FILE} NAME)
-    get_filename_component(path_to_file ${USER_OPTIONS_FILE} PATH)
-    find_file(filefound NAMES ${input_file}
-      PATHS ${path_to_file} ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
-      )
-    if(NOT ${filefound}-NOTFOUND)
-      configure_file(${path_to_file}/${input_file} ${CMAKE_SOURCE_DIR}/${input_file})
-    else()
-      message(FATAL_ERROR "Cannot find file ${USER_OPTIONS_FILE}")
-    endif()
-    message("\n !!!!! Load user-defined options set from file ${filefound} !!!!! \n")
-    include(${input_file})
-    # copy user file to binary dir, just for 'visual' check.
-    configure_file(${input_file} ${input_file} COPYONLY)
-  else()
-    include(default_options)
-  endif()
-
-  # Configurations used for continuous integration
-  if(CI_CONFIG)
-    include(CI/${CI_CONFIG}.cmake)
-  endif()
-
   # Set target names from components list
   assert(COMPONENTS_DIRS)
   set(AVAILABLE_COMPONENTS "Numerics Kernel Control Mechanics IO")
