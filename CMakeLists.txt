@@ -80,6 +80,11 @@ else()
     include(default_options)
   endif()
 
+  # Configurations used for continuous integration
+  if(CI_CONFIG)
+    include(CI/${CI_CONFIG}.cmake)
+  endif()
+
   # Set target names from components list
   assert(COMPONENTS_DIRS)
   set(AVAILABLE_COMPONENTS "Numerics Kernel Control Mechanics IO")
@@ -125,7 +130,7 @@ else()
   
   # ========= Tests setup =========
   if(WITH_TESTING)
-    enable_testing()
+    include(CTest)
     # log file for tests setup
     file(WRITE ${CMAKE_BINARY_DIR}/tests.log "--- Siconos tests setup --- \n")
   endif()

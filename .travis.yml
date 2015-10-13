@@ -15,8 +15,10 @@ before_script:
   - sudo aptitude -y install cmake gfortran gcc doxygen libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-py make g++ git gccxml python-pygccxml python-lxml swig3.0 lp-solve liblpsolve55-dev
   - sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
   - sudo free -m
-  - ./Build/ci-scripts/gcc-release-build $TRAVIS_BUILD_DIR libatlas -DDART_TESTING_TIMEOUT=60
-  - cd $TRAVIS_BUILD_DIR/build-dir
+  - mkdir -p ${TRAVIS_BUILD_DIR}/build
+  - cd ${TRAVIS_BUILD_DIR}/build
+  - cmake -DCI_CONFIG=default ${TRAVIS_BUILD_DIR}
 
 script:
-  - time make -ik
+  - cd ${TRAVIS_BUILD_DIR}/build
+  - time make continuous

@@ -1,0 +1,6 @@
+set(DEV_MODE ON)
+set(WITH_TESTING ON CACHE BOOL "Testing" FORCE)
+set(WITH_SYSTEM_INFO ON)
+foreach(component "numerics;kernel;control;mechanics;io")
+  set(WITH_${component}_TESTING ON CACHE BOOL "Testing" FORCE)
+endforeach()
