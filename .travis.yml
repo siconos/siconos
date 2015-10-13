@@ -20,5 +20,4 @@ before_script:
   - cmake -DCI_CONFIG=no_python ${TRAVIS_BUILD_DIR}
 
 script:
-  - cd ${TRAVIS_BUILD_DIR}/build
-  - time make continuous
+  - time make Continuous
