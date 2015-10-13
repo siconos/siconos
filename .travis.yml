@@ -17,7 +17,7 @@ before_script:
   - sudo free -m
   - mkdir -p ${TRAVIS_BUILD_DIR}/build
   - cd ${TRAVIS_BUILD_DIR}/build
-  - cmake -DCI_CONFIG=no_python ${TRAVIS_BUILD_DIR}
 
 script:
-  - time make Continuous
+  - ctest -DCI_CONFIG=no_python -DMODE=Continuous -S ../CI/CTestDriver.cmake 
+

@@ -1,0 +1,7 @@
+Here are configurations for continuous integration.
+
+cmake -DCI_CONFIG=CI/<configuration>.cmake <siconos source directory>
+
+make help
+
+make Continuous
