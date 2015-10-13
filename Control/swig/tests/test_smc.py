@@ -161,7 +161,7 @@ def test_smc2():
     tmpData = sim.data()
     dataPlot = tmpData
     # compare with the reference
-    ref = np.loadtxt(os.path.join(working_dir, "smc_2.ref.gz"), skiprows=1)
+    ref = np.loadtxt(os.path.join(working_dir, "data/smc_2.ref.gz"), skiprows=1)
     np.savetxt("smc_2.dat", dataPlot)
     print("%e" % norm(dataPlot - ref))
     if (norm(dataPlot - ref) > 5e-12):
