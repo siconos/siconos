@@ -8,11 +8,13 @@ message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
 # --- Search component dependencies ---
-find_package(Boost 1.47 COMPONENTS serialization REQUIRED)
-# cmake 2.8.12.2 (ubuntu 14.04) need this
-set(${COMPONENT}_LINK_LIBRARIES  "${${COMPONENT}_LINK_LIBRARIES};${Boost_LIBRARIES}")
-find_package(Boost 1.47 COMPONENTS filesystem REQUIRED)
-# Right now boost::serialization does some nasty things... so we have to
+if(WITH_SERIALIZATION)
+  find_package(Boost 1.47 COMPONENTS serialization REQUIRED)
+  find_package(Boost 1.47 COMPONENTS filesystem REQUIRED)
+  # cmake 2.8.12.2 (ubuntu 14.04) need this
+  set(${COMPONENT}_LINK_LIBRARIES  "${${COMPONENT}_LINK_LIBRARIES};${Boost_LIBRARIES}")
+  # Right now boost::serialization does some nasty things... so we have to
+endif()
 # disable some undefined behavior checks ...
 IF(USE_SANITIZER MATCHES "asan")
   APPEND_CXX_FLAGS("-fno-sanitize=vptr -fno-sanitize=alignment -fno-sanitize=null")
