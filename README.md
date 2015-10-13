@@ -2,13 +2,13 @@ Siconos
 ================
 A software for modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
 
-Siconos is an Open Source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems :
- * Mechanical systems (Rigid body or solid) with unilateral contact and Coulomb friction and impact (Nonsmooth mechanics, 
+Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems :
+ * Mechanical systems (rigid or solid) with unilateral contact and Coulomb friction and impact (Nonsmooth mechanics, 
 contact dynamics, multibody systems dynamics or granular materials). 
- * Switched Electrical Circuit such as electrical circuits with ideal and piecewise linear components: Power converter, Rectifier, Phase-locked loop (PLL) or Analog-to-digital converter.
+ * Switched Electrical Circuit such as electrical circuits with ideal and piecewise linear components: power converter, rectifier, Phase-Locked Loop (PLL) or Analog-to-Digital converter.
  * Sliding mode control systems.
  * Biology (Gene regulatory network). 
- * Other applications are found in Systems and Control (hybrid systems, differential inclusions,
+ Other applications are found in Systems and Control (hybrid systems, differential inclusions,
 optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), 
 Fluid Mechanics, Computer graphics, ...
 
