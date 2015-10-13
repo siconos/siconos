@@ -39,4 +39,3 @@
 #include "Tools.hpp"
 #include "Cmp.hpp"
 #include "SiconosSet.hpp"
-#include "check.hpp"
