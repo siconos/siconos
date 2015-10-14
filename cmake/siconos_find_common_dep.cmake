@@ -17,11 +17,14 @@ endif()
 # --- Numerics optional dependencies ---
 compile_with(MlcpSimplex)
 compile_with(Pthread)
-include(gams_setup)
-# the following library may be found in a GAMS install -> we search for them
-# after
+IF(GAMS_DIR)
+  SET(GAMS_C_API_FIND_REQUIRED TRUE)
+  COMPILE_WITH(GamsCApi)
+  # needed for siconosconfig.h
+  SET(GAMS_MODELS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Numerics/share/gams")
+  SET(GAMS_MODELS_SHARE_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/gams")
+ENDIF(GAMS_DIR)
 compile_with(PathFerris)
-compile_with(Cplex)
 compile_with(LpSolve)
 if(LpSolve_FOUND)
   set(HAS_ONE_LP_SOLVER TRUE)
@@ -30,7 +33,6 @@ if(LpSolve_FOUND)
   string(REPLACE "-Werror=conversion" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
   string(REPLACE "-Werror=conversion" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
 endif(LpSolve_FOUND)
-
 
 # --- Mumps ---
 if(WITH_MUMPS)
@@ -141,6 +143,13 @@ ENDIF()
 if(WITH_FREECAD)
   compile_with(FreeCAD COMPONENTS Part REQUIRED)
 endif()
+
+
+# -- HDF5 --
+# For loggin in Numerics
+IF(WITH_HDF5)
+  COMPILE_WITH(HDF5 REQUIRED)
+ENDIF(WITH_HDF5)
 
 # -- Python bindings --
 if(WITH_PYTHON_WRAPPER)
