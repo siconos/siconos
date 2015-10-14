@@ -9,6 +9,7 @@ compiler:
   - gcc
 
 before_script:
+  - sudo rm -vf /var/lib/apt/lists/*
   - sudo apt-get -y install software-properties-common
   - sudo add-apt-repository ppa:smspillaz/cmake-2.8.12 -y
   - sudo add-apt-repository ppa:teward/swig3.0 -y
