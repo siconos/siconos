@@ -9,7 +9,11 @@
 macro(add_docker_targets)
 
   set(options)
-  set(oneValueArgs DOCKER_TEMPLATES DOCKER_TEMPLATE DOCKER_IMAGE DOCKER_IMAGE_DIR DOCKER_REPOSITORY DOCKER_FILE DOCKER_WORKDIR DOCKER_HOST_INSTALL_PREFIX DOCKER_SHARED_DIRECTORIES DOCKER_CMAKE_FLAGS DOCKER_MAKE_FLAGS DOCKER_MAKE_TEST_FLAGS DOCKER_CTEST_DRIVER)
+  set(oneValueArgs DOCKER_TEMPLATES DOCKER_TEMPLATE DOCKER_IMAGE DOCKER_IMAGE_DIR DOCKER_REPOSITORY DOCKER_FILE DOCKER_WORKDIR DOCKER_HOST_INSTALL_PREFIX DOCKER_SHARED_DIRECTORIES DOCKER_CMAKE_FLAGS DOCKER_MAKE_FLAGS DOCKER_MAKE_TEST_FLAGS DOCKER_CTEST_DRIVER DOCKER_HOSTNAME DOCKER_COMMAND)
+
+  if(NOT DOCKER_COMMAND)
+    find_program(DOCKER_COMMAND docker)
+  endif()
 
   if(DOCKER_TEMPLATES)
     string(REPLACE "," ";" DOCKER_TEMPLATES_LIST ${DOCKER_TEMPLATES})
@@ -76,21 +80,27 @@ macro(add_docker_targets)
     endif()
   endforeach()
 
-  message(STATUS "Docker cmake flags : ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER}")
-  message(STATUS "Docker make flags : ${DOCKER_MAKE_FLAGS}")
-  message(STATUS "Docker make test flags : ${DOCKER_MAKE_TEST_FLAGS}")
-
-  set(DOCKER_VFLAGS)
+   set(DOCKER_VFLAGS)
   foreach(_D ${DOCKER_SHARED_DIRECTORIES};${CMAKE_SOURCE_DIR})
     set(DOCKER_VFLAGS ${DOCKER_VFLAGS} -v ${_D}:${_D})
   endforeach()
-  
+
+  if(NOT DOCKER_HOSTNAME)
+    execute_process(COMMAND hostname OUTPUT_VARIABLE DOCKER_EXEC_HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(DOCKER_HOSTNAME ${DOCKER_EXEC_HOSTNAME}-${DOCKER_IMAGE_AS_DIR})
+  endif()
+ 
+  message(STATUS "Docker cmake flags : ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER}")
+  message(STATUS "Docker make flags : ${DOCKER_MAKE_FLAGS}")
+  message(STATUS "Docker make test flags : ${DOCKER_MAKE_TEST_FLAGS}")
+  message(STATUS "Docker hostname : ${DOCKER_HOSTNAME}")
+ 
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-clean
     COMMENT "Docker clean : ${DOCKER_IMAGE}"
-    COMMAND docker rm -f ${DOCKER_WORKDIR_AS_NAME}
-    COMMAND docker rm -f ${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local
-    COMMAND docker rmi -f ${DOCKER_REPOSITORY}/${DOCKER_IMAGE}
+    COMMAND ${DOCKER_COMMAND} rm -f ${DOCKER_WORKDIR_AS_NAME}
+    COMMAND ${DOCKER_COMMAND} rm -f ${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local
+    COMMAND ${DOCKER_COMMAND} rmi -f ${DOCKER_REPOSITORY}/${DOCKER_IMAGE}
     )
 
   add_custom_target(
@@ -103,44 +113,44 @@ macro(add_docker_targets)
     TARGET ${DOCKER_IMAGE_AS_DIR}-build
     PRE_BUILD 
     COMMENT "docker create workdir"
-    COMMAND docker create --name=${DOCKER_WORKDIR_AS_NAME} -v ${DOCKER_WORKDIR} -i -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} true 2>/dev/null  && echo done || echo already done)
+    COMMAND ${DOCKER_COMMAND} create --name=${DOCKER_WORKDIR_AS_NAME} -v ${DOCKER_WORKDIR} -i -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} true 2>/dev/null  && echo done || echo already done)
   
   add_custom_command(
     TARGET ${DOCKER_IMAGE_AS_DIR}-build
     PRE_BUILD 
     COMMENT "docker create /usr/local"
-    COMMAND docker create --name=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local -v /usr/local -i -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} true 2>/dev/null && echo done || echo already done
+    COMMAND ${DOCKER_COMMAND} create --name=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local -v /usr/local -i -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} true 2>/dev/null && echo done || echo already done
     )
   
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-cmake
     COMMENT "Docker cmake : ${DOCKER_IMAGE}"
-    COMMAND docker run --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} cmake ${CMAKE_SOURCE_DIR} ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER})
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} cmake ${CMAKE_SOURCE_DIR} ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER})
   
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make
     COMMENT "Docker make : ${DOCKER_IMAGE}"
-    COMMAND docker run --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_FLAGS})
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_FLAGS})
   
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make-test
     COMMENT "Docker make test : ${DOCKER_IMAGE}"
-    COMMAND docker run --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_TEST_FLAGS} test)
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_TEST_FLAGS} test)
   
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make-install
     COMMENT "Docker make install : ${DOCKER_IMAGE}"
-    COMMAND docker run --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_INSTALL_FLAGS} install)
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_INSTALL_FLAGS} install)
   
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make-clean
     COMMENT "Docker make clean : ${DOCKER_IMAGE}"
-    COMMAND docker run --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_CLEAN_FLAGS} clean)
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_CLEAN_FLAGS} clean)
 
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-ctest
     COMMENT "Docker ctest : ${DOCKER_IMAGE}"
-    COMMAND docker run --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ctest -DCTEST_SOURCE_DIRECTORY=${CMAKE_SOURCE_DIR} -DCTEST_BINARY_DIRECTORY=. -S ${DOCKER_CTEST_DRIVER} ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER})
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ctest -DCTEST_SOURCE_DIRECTORY=${CMAKE_SOURCE_DIR} -DCTEST_BINARY_DIRECTORY=. -S ${DOCKER_CTEST_DRIVER} ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER})
 
   if(NOT TARGET docker-clean)
     add_custom_target(

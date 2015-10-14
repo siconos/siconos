@@ -25,6 +25,6 @@ before_script:
   - cd build
   
 script:
-  - cmake -DCI_CONFIG=default -DWITH_DOCKER=1 -DDOCKER_TEMPLATES=siconos-gcc -DDOCKER_DISTRIB=ubuntu:14.04 ..
+  - cmake -DMODE=Continuous -DCI_CONFIG=default -DWITH_DOCKER=1 -DDOCKER_TEMPLATES=siconos-gcc -DDOCKER_DISTRIB=ubuntu:14.04 ..
   - make docker-build
   - travis_wait make docker-ctest
