@@ -54,8 +54,7 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
 
   if (verbose > 0)
   {
-    printf("Local solver data :");
-    printSolverOptions(internalsolver_options);
+    printSolverOptions(options);
   }
 
 

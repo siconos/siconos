@@ -42,6 +42,7 @@ char * SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration_STR = "F3D_Project
 char * SICONOS_FRICTION_3D_projectionOnConeWithRegularization_STR = "F3D_projectionOnConeWithRegularization";
 char * SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR = "F3D_NCPGlockerFBPATH";
 char * SICONOS_FRICTION_3D_projectionOnCylinder_STR = "F3D_projectionOnCylinder";
+char * SICONOS_FRICTION_3D_projectionOnCylinderWithLocalIteration_STR =  "F3D_projectionOnCylinderWithLocalIteration";
 char * SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR = "F3D_ProjectionOnCone_velocity";
 char * SICONOS_FRICTION_3D_PGoC_STR = "F3D_PGoC";
 char * SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR = "F3D_DeSaxceFixedPoint";
