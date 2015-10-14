@@ -5,7 +5,8 @@
 # - sphinx documentation for manuals
 # 
 # ============================================================
-
+include(FindPythonModule)
+include(FindSphinxModule)
 #  ====== doxygen documentation setup ======
 # This setup is required if one at least of
 # the following is needed:
@@ -77,6 +78,8 @@ endif()
 if(USE_SPHINX)
   # find_python_module(breathe REQUIRED)
   find_python_module(sphinx REQUIRED)
+  find_sphinx_module(sphinxcontrib bibtex REQUIRED)
+  find_sphinx_module(sphinxcontrib doxylink REQUIRED)
   
   # --- conf.py describes sphinx setup ---
   configure_file (
