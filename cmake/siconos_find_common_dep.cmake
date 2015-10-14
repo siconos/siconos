@@ -161,6 +161,7 @@ if(WITH_PYTHON_WRAPPER)
     set(SWIG_USE_FILE ${CMAKE_SOURCE_DIR}/cmake/UseSWIG.cmake)
   endif()
   include(${SWIG_USE_FILE})
+  include(FindPythonModule)
   find_python_module(scipy REQUIRED) # for sparse
 endif()
 

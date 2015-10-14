@@ -39,7 +39,7 @@ void project_on_set(int n, double* restrict x, void* restrict set)
   switch(set_id)
   {
     case SICONOS_SET_POSITIVE_ORTHANT:
-      for (unsigned i = 0; i < n; ++i)
+      for (int i = 0; i < n; ++i)
       {
         if (x[i] < 0.0)
           x[i] = 0.0;
@@ -50,7 +50,7 @@ void project_on_set(int n, double* restrict x, void* restrict set)
       box_constraints* box = (box_constraints*) set;
       assert(box->lb);
       assert(box->ub);
-      for (unsigned i = 0; i < n; ++i)
+      for (int i = 0; i < n; ++i)
         x[i] = x[i] >= box->lb[i] ? (x[i] <= box->ub[i] ? x[i] : box->ub[i]) : box->lb[i];
       break;
       }

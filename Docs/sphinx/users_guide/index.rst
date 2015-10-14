@@ -5,7 +5,9 @@ Siconos users' guide
 ==========================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
+
+   modeling
 
 	      
    * Dynamical Systems formulations in Siconos

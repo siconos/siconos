@@ -1,16 +1,4 @@
-/** \mainpage Siconos software - API Documentation
-\anchor doxysiconos
+/** \mainpage C++ API reference.
 
-\section doxysiconosIntro Introduction
-
-Siconos is a free (GNU license) software, dedicated to modeling,
-simulation and control of Non Smooth Dynamical Systems.
-
-This API documentation is automatically generated from the software
-sources (.h and .cpp) thanks to doxygen tools.
-
-You can also find other tools and documents (installation guide, tutorial ...) \n
-on \ref siconosHomePage "Siconos Home Page" (see tabs list on top of this page).\n 
-
-
+This C++ API documentation is automatically generated from the c++/c sources and headers thanks to doxygen.
 */

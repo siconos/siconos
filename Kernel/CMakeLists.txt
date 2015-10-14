@@ -15,7 +15,6 @@ set(${COMPONENT}_DIRS
   src/.
   src/utils
   src/utils/numeric_bindings
-  src/utils/contract
   src/utils/SiconosAlgebra
   src/utils/SiconosException
   src/utils/SiconosMemory

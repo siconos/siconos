@@ -47,8 +47,9 @@ extensions = [
     'sphinx.ext.intersphinx', 'sphinxcontrib.bibtex',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.todo',
+    'sphinxcontrib.doxylink'
 ]
-    
+
 numpydoc_class_members_toctree = True
 # -----------------------------------------------------------------------------
 # Autosummary
@@ -62,8 +63,8 @@ numpydoc_class_members_toctree = True
 
 doxylink = {
     'doxysiconos':
-    ('@CMAKE_CURRENT_BINARY_DIR@/Tags/@PROJECT_NAME@.tag',
-     '@CMAKE_CURRENT_BINARY_DIR@/doxy/'),
+    ('@CMAKE_CURRENT_BINARY_DIR@/build/Tags/@PROJECT_NAME@.tag',
+     '@CMAKE_CURRENT_BINARY_DIR@/build/doxygen/html'),
 }
 
 autoclass_content = 'init'

@@ -4,7 +4,7 @@
 .. toctree::
    :maxdepth: 2
 
-   electronics_examples
+   electronics
 
 Examples' Manual
 ================

@@ -17,9 +17,9 @@ if(USE_DOXYGEN)
 
   # Output path for doxygen documentation
   if(NOT DOXYGEN_OUTPUT)
-    set(DOXYGEN_OUTPUT ${CMAKE_BINARY_DIR}/Docs/build_doxy CACHE INTERNAL "Path to doxygen outputs.")
+    set(DOXYGEN_OUTPUT ${CMAKE_BINARY_DIR}/Docs/build/doxygen CACHE INTERNAL "Path to doxygen outputs.")
   endif()
-  file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/Tags)
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Docs/build/tags)
   file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
   
   # --- Config file and its options. --

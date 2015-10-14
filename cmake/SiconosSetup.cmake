@@ -15,7 +15,7 @@ endif()
 # Siconos current version
 set(MAJOR_VERSION 3)
 set(MINOR_VERSION 8)
-set(PATCH_VERSION 1)
+set(PATCH_VERSION 0)
 set(SICONOS_VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
 
 # File used to print tests setup messages.

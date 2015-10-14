@@ -116,7 +116,7 @@ Next, it is necessary to define the external forces, the gravity, applied on eac
       fExt[0] = -m*g;
   } 
 
-*Warning
+Warning
 
 * gravity must be an " extern "C" " function, and code is C, not C++. 
 * the name of the plugin file, BeadsPlugin.cpp here, must be xxxPlugin.cpp, xxx being whatever you want. 
@@ -352,7 +352,7 @@ Concerning the output, we save the position and velocity of all balls::
       i++;
   }
 
-Note that we use a "DSIterator", which is no more than a pointer on a set of DynamicalSystems; allDS.begin() is a pointer on the first object handled by allDS and allDS.end() a pointer "just after" the last object handled by allDS. The current pointed system is then *it ("content of the pointer"). Thus, in the loop above, we sweep through all the DynamicalSystems and get the corresponding q and v. \n
+Note that we use a "DSIterator", which is no more than a pointer on a set of DynamicalSystems; allDS.begin() is a pointer on the first object handled by allDS and allDS.end() a pointer "just after" the last object handled by allDS. The current pointed system is then *it ("content of the pointer"). Thus, in the loop above, we sweep through all the DynamicalSystems and get the corresponding q and v.
 A static_cast is also required since allDS contains DynamicalSystem whereas we need functions specific to LagrangianDS (getQ ...). 
 
 Next, we write::
@@ -491,6 +491,6 @@ result.gp being a command file (see example in mechanics/MultiBeadsColumn)
 
 Results are given on the figure below:
 
-.. image:: multiBeadsResults.png
+.. image:: /figures/mechanics/multiBeadsResults.*
 
 .. highlight:: python

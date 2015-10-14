@@ -6,27 +6,55 @@ Download siconos
 Binaries
 --------
 
-See https://gforge.inria.fr/frs/?group_id=9
+Binaries generated for different platforms can be download here: https://gforge.inria.fr/frs/?group_id=9
 
 Sources
 -------
 
-Github ...
+Siconos project is hosted on github : https://github.com/siconos/siconos
 
-If you are a developer of the platform, you can use the git revision control and source code management system to get the software.
-First you need to log in on Gforge, join the Siconos project, add your ssh-key and follow the instructions at https://gforge.inria.fr/scm/?group_id=9 .
+and the whole sources can be freely downloaded. Try for example::
 
-Some useful commands:
+  git clone git@github.com:siconos/siconos.git
 
-* git pull --rebase: bring your working copy "up-to-date" with the Gforge repository.
-* git commit file1 file2: commit the new version of your file(s) to your local repository.
-* git status: show you the state of any item in your working copy
-  (option -uno: list only the files under version control)
-* git add filename: filename (file or directory) will now be under version control (after the next commit).
-* git rm name: delete name (next commit)
-* git diff: see your current changes (w.r.t. the lastest commit on your repo) in diff form.
-* git push: propagate your changes to the main repository on Gforge.
-* git *item* --help: help on item
+As user, you will probably only need to clone the repository (as shown above) once for all and then just update your local copy to
+include the last revision::
 
-For details on git see the on-line documentation at http://git-scm.com/.
+  cd path-to-siconos
+  git pull
 
+As developper, you will need to learn more about git. Check for example https://git-scm.com/book/en/v1/Getting-Started-About-Version-Control.
+
+Just below, you can find a short git reminder::
+  
+* bring your working copy "up-to-date" with the Gforge repository::
+    
+    git pull --rebase
+
+* commit the new version of your file(s) to your local repository::
+    
+    git commit -a -m "some comments"
+    
+* control the state of your local repository::
+
+    git status
+
+* add a file to the index::
+
+    git add filename
+
+* remove a file from the index::
+
+    git rm filename
+
+* see diff between your branch (here master) and another one (here the remote origin)::
+
+    git diff origin master
+
+* see the list of files which differ::
+
+    git diff origin master --stat
+    
+* propagate your changes to the main repository::
+
+    git push

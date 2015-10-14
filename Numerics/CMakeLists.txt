@@ -16,7 +16,6 @@ include(gams_setup)
 set(${COMPONENT}_DIRS
   src/.
   src/tools
-  src/tools/BlasLapackInterfaces
   src/tools/InterfaceToPathFerris/include
   src/tools/InterfaceToPathFerris/interface
   src/AVI
