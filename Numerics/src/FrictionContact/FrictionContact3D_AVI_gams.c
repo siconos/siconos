@@ -443,7 +443,7 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
   if (strcmp(solverName, "path"))
   {
     optSetStrStr(Optr, "emp", solverName);
-    optSetStrStr(solverOptPtr, "avi_start", "regular");
+    optSetStrStr(solverOptPtr, "avi_start", "ray_first");
     optSetStrStr(solverOptPtr, "ratio_tester", "expand");
   }
   else // only for path
@@ -453,8 +453,8 @@ static int frictionContact3D_AVI_gams_base(FrictionContactProblem* problem, doub
     optSetDblStr(solverOptPtr, "proximal_perturbation", 0.);
     optSetStrStr(solverOptPtr, "crash_method", "none");
     optSetIntStr(solverOptPtr, "crash_perturb", 0);
-    optSetIntStr(solverOptPtr, "output_minor_iterations_frequency", 1);
-    optSetIntStr(solverOptPtr, "output_linear_model", 1);
+//    optSetIntStr(solverOptPtr, "output_minor_iterations_frequency", 1);
+//    optSetIntStr(solverOptPtr, "output_linear_model", 1);
 
   }
   optSetIntStr(solverOptPtr, "minor_iteration_limit", 100000);
@@ -974,7 +974,7 @@ bad_angle:
 
     if (!strcmp(solverName, "pathvi"))
     {
-      optSetStrStr(solverOptPtr, "avi_start", "regular");
+//      optSetStrStr(solverOptPtr, "avi_start", "regular");
     }
 
     SN_logh5_vec_double(problem->numberOfContacts, delta_angles, "delta_angles", logger_s->group);
