@@ -9,7 +9,7 @@ compiler:
   - gcc
 
 before_script:
-  - sudo apt-get -y install python-software-properties
+  - sudo apt-get -y install software-properties-common
   - sudo add-apt-repository ppa:smspillaz/cmake-2.8.12 -y
   - sudo add-apt-repository ppa:teward/swig3.0 -y
   - sudo add-apt-repository ppa:boost-latest/ppa -y
