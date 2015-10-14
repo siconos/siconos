@@ -9,7 +9,7 @@
 macro(add_docker_targets)
 
   set(options)
-  set(oneValueArgs DOCKER_TEMPLATES DOCKER_TEMPLATE DOCKER_IMAGE DOCKER_IMAGE_DIR DOCKER_REPOSITORY DOCKER_FILE DOCKER_WORKDIR DOCKER_HOST_INSTALL_PREFIX DOCKER_SHARED_DIRECTORIES DOCKER_CMAKE_FLAGS DOCKER_MAKE_FLAGS DOCKER_MAKE_TEST_FLAGS)
+  set(oneValueArgs DOCKER_TEMPLATES DOCKER_TEMPLATE DOCKER_IMAGE DOCKER_IMAGE_DIR DOCKER_REPOSITORY DOCKER_FILE DOCKER_WORKDIR DOCKER_HOST_INSTALL_PREFIX DOCKER_SHARED_DIRECTORIES DOCKER_CMAKE_FLAGS DOCKER_MAKE_FLAGS DOCKER_MAKE_TEST_FLAGS DOCKER_CTEST_DRIVER)
 
   if(DOCKER_TEMPLATES)
     string(REPLACE "," ";" DOCKER_TEMPLATES_LIST ${DOCKER_TEMPLATES})
@@ -137,6 +137,11 @@ macro(add_docker_targets)
     COMMENT "Docker make clean : ${DOCKER_IMAGE}"
     COMMAND docker run --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_CLEAN_FLAGS} clean)
 
+  add_custom_target(
+    ${DOCKER_IMAGE_AS_DIR}-ctest
+    COMMENT "Docker ctest : ${DOCKER_IMAGE}"
+    COMMAND docker run --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_AS_NAME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ctest -DCTEST_SOURCE_DIRECTORY=${CMAKE_SOURCE_DIR} -DCTEST_BINARY_DIRECTORY=${CMAKE_BINARY_DIR} -S ${DOCKER_CTEST_DRIVER} ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER})
+
   if(NOT TARGET docker-clean)
     add_custom_target(
       docker-clean
@@ -146,21 +151,21 @@ macro(add_docker_targets)
 
   if(NOT TARGET docker-build)
     add_custom_target(
-      docker-build
+      docker-build ALL
       COMMENT "Docker build"
       )
   endif()
 
   if(NOT TARGET docker-cmake)
     add_custom_target(
-      docker-cmake
+      docker-cmake ALL
       COMMENT "Docker cmake"
       )
   endif()
 
   if(NOT TARGET docker-make)
     add_custom_target(
-      docker-make
+      docker-make ALL
       COMMENT "Docker make"
       )
   endif()
@@ -186,6 +191,13 @@ macro(add_docker_targets)
       )
   endif()
 
+  if(NOT TARGET docker-ctest)
+    add_custom_target(
+      docker-ctest
+      COMMENT "Docker ctest"
+      )
+  endif()
+
   add_dependencies(docker-clean ${DOCKER_IMAGE_AS_DIR}-clean)
   add_dependencies(docker-build ${DOCKER_IMAGE_AS_DIR}-build)
   add_dependencies(docker-cmake ${DOCKER_IMAGE_AS_DIR}-cmake)
@@ -193,5 +205,6 @@ macro(add_docker_targets)
   add_dependencies(docker-make-test ${DOCKER_IMAGE_AS_DIR}-make-test)
   add_dependencies(docker-make-install ${DOCKER_IMAGE_AS_DIR}-make-install)
   add_dependencies(docker-make-clean ${DOCKER_IMAGE_AS_DIR}-make-clean)
-  
+  add_dependencies(docker-ctest ${DOCKER_IMAGE_AS_DIR}-ctest)
+
 endmacro()

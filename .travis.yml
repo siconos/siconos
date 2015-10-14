@@ -9,6 +9,9 @@ compiler:
   - gcc
 
 before_script:
+  # notes : here we only need to install cmake/ctest and make
+  # siconos packages are managed in siconos.yml
+  # DOCKER_TEMPLATES contains the list (comma separated) of packages to install
   - sudo rm -vf /var/lib/apt/lists/*
   - sudo apt-get -o Acquire::CompressionTypes::Order::=bz2 update
   - sudo apt-get -y install software-properties-common
@@ -16,14 +19,12 @@ before_script:
   - sudo add-apt-repository ppa:teward/swig3.0 -y
   - sudo apt-get update -qq
   - sudo apt-get purge cmake -qq
-  - sudo apt-get -y install aptitude
-  - sudo aptitude -y install libboost-graph1.55-dev libboost-filesystem1.55-dev libboost-serialization1.55-dev
-  - sudo aptitude -y install cmake gfortran gcc doxygen libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-py make g++ git gccxml python-pygccxml python-lxml swig3.0 lp-solve liblpsolve55-dev python-logilab-common
-  - sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
+  - sudo apt-get -y install cmake make
   - sudo free -m
   - mkdir -p ${TRAVIS_BUILD_DIR}/build
   - cd ${TRAVIS_BUILD_DIR}/build
-
+  
 script:
-  - ctest -DCI_CONFIG=default -DWITH_DOCKER=1 -DDOCKER_TEMPLATES=siconos-gcc -DDOCKER_DISTRIB=ubuntu:14.04 -S ../CI/CTestDriver.cmake 
-
+  - cmake -DCI_CONFIG=default -DWITH_DOCKER=1 -DDOCKER_TEMPLATES=siconos-gcc -DDOCKER_DISTRIB=ubuntu:14.04 ~/S
+  - make docker-build
+  - make docker-ctest
