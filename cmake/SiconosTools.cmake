@@ -271,7 +271,7 @@ ENDMACRO()
 # -------------------------------
 macro(init_to_default_option OPT)
   # Each "WITH_component_OPT" is set to default value == WITH_OPT value.
-  foreach(comp ${COMPONENTS_NAMES})
+  foreach(comp ${COMPONENTS})
     if(NOT WITH_${comp}_${OPT})
       set(WITH_${comp}_${OPT} ${WITH_${OPT}} CACHE BOOL "initialize ${OPT} for component ${comp}.")
     endif()
@@ -280,7 +280,7 @@ macro(init_to_default_option OPT)
  endforeach()
 
  # If one with_comp_opt is on, global with_opt must also be on
- foreach(comp ${COMPONENTS_NAMES})
+ foreach(comp ${COMPONENTS})
    if(WITH_${comp}_${OPT})
      set(WITH_${OPT} ON  CACHE BOOL "initialize ${OPT}." FORCE)
      break()

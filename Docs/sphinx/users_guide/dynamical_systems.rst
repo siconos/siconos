@@ -82,7 +82,7 @@ Second case::
   ds->computeFInt(time); 
   // compute fInt value at time for the current state
 
-Note that the signature (\e ie the number and type of arguments) of the function you use in your plugin  must be exactly the same as the one given in Kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
+Note that the signature (\e ie the number and type of arguments) of the function you use in your plugin  must be exactly the same as the one given in kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
 
 General non linear first order dynamical systems
 ------------------------------------------------

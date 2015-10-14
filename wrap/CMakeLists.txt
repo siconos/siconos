@@ -100,11 +100,9 @@ if(WITH_PYTHON_WRAPPER)
   # ====== Generates python files required for build/install process ======
   
   set(SICONOS_PYTHON_MODULES)
-  foreach(comp ${COMPONENTS_DIRS})
-    string(TOLOWER ${comp} comp_name)
-    if(WITH_${comp_name}_PYTHON_WRAPPER)
-      set(SICONOS_PYTHON_MODULES_DIRS "'${comp}', ${SICONOS_PYTHON_MODULES_DIRS}")
-      set(SICONOS_PYTHON_MODULES "'${comp_name}', ${SICONOS_PYTHON_MODULES}")
+  foreach(comp ${COMPONENTS})
+    if(WITH_${comp}_PYTHON_WRAPPER)
+      set(SICONOS_PYTHON_MODULES "'${comp}', ${SICONOS_PYTHON_MODULES}")
     endif()
   endforeach()
   # setup.py --> CMAKE_BINARY_DIR

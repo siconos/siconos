@@ -331,7 +331,7 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
 
-path_to_numerics = os.path.join('@CMAKE_SOURCE_DIR@', 'Numerics')
+path_to_numerics = os.path.join('@CMAKE_SOURCE_DIR@', 'numerics')
 
 def starting_with(prefixes):
     return ','.join([','.join([
@@ -339,7 +339,7 @@ def starting_with(prefixes):
         if fun.startswith(prefix)]) for prefix in prefixes])
 
 
-path_to_kernel = os.path.join('@CMAKE_SOURCE_DIR@', 'Kernel')
+path_to_kernel = os.path.join('@CMAKE_SOURCE_DIR@', 'kernel')
 
 def under_directory(dirs):
     return ','.join(

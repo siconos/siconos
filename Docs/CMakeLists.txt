@@ -64,7 +64,7 @@ if(USE_DOXYGEN)
   # Here, we just need to create a target to create xml files for a given component
   # for example --> make numerics_xml to create xml files for numerics.
   if(WITH_DOXY2SWIG)
-    foreach(comp ${COMPONENTS_NAMES})
+    foreach(comp ${COMPONENTS})
       set(DOXY_CONFIG_XML ${CMAKE_CURRENT_BINARY_DIR}/config/${comp}doxy.config.xml)
       add_custom_target(${comp}_xml ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Docs/
 	COMMENT "Build xml documentation files.")

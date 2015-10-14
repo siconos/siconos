@@ -4,9 +4,9 @@ siconos.numerics
 Nonsmooth problems:
 
 .. toctree::
-   Numerics/LCP
-   Numerics/MCP
-   Numerics/MLCP
-   Numerics/AVI
-   Numerics/VI
-   Numerics/FrictionContact
+   numerics/LCP
+   numerics/MCP
+   numerics/MLCP
+   numerics/AVI
+   numerics/VI
+   numerics/FrictionContact

@@ -10,11 +10,11 @@ This is the documentation of `python <https://www.python.org/>`_ interface to Si
    :maxdepth: 2
 
    introduction
-   modules/Numerics
-   modules/Kernel
-   modules/Mechanics
-   modules/Control
-   modules/IO
+   modules/numerics
+   modules/kernel
+   modules/mechanics
+   modules/control
+   modules/io
 
 
 

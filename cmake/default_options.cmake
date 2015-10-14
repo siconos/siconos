@@ -22,7 +22,7 @@ option(WITH_TESTING "Enable 'make test' target" OFF)
 option(WITH_GIT "Consider sources are under GIT" OFF)
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
 option(WITH_GENERATION "Generation of serialization functions with gccxml. Default = OFF" OFF)
-option(WITH_CXX "Enable CXX compiler for Numerics. Default = ON" ON)
+option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
 option(WITH_UNSTABLE "Enable this to include all 'unstable' sources. Default=OFF" OFF)
 option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
 option(DEV_MODE "Compilation flags setup for developpers. Default = OFF" OFF)
@@ -44,5 +44,5 @@ set(siconos_python_install "standard" CACHE STRING "Install mode for siconos pyt
 
 # List of components to build and installed
 # List of siconos component to be installed
-# complete list = externals Numerics Kernel Control Mechanics IO
-set(COMPONENTS_DIRS externals Numerics Kernel Control Mechanics IO CACHE INTERNAL "List of siconos components to build and install")
+# complete list = externals numerics kernel control mechanics io
+set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")

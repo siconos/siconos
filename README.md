@@ -13,16 +13,16 @@ optimal control with state constraints), Optimization (Complementarity systems a
 Fluid Mechanics, Computer graphics, ...
 
 Siconos contains
-   * Siconos/Numerics. Collection of low-level algorithms for solving basic Algebra and optimization problem arising in the simulation of nonsmooth dynamical systems:
+   * Siconos/numerics. Collection of low-level algorithms for solving basic Algebra and optimization problem arising in the simulation of nonsmooth dynamical systems:
      * Complementarity problems (LCP, MLCP, NCP)
      * Friction-contact problems (2D or 3D)
      * Second-order cone programming (SOCP)
      * Primal or Dual Relay problems
      * Variational inequality (VI)
-   * Siconos/Kernel.  Modeling and simulation of the nonsmooth dynamical systems. it contains :
+   * Siconos/kernel.  Modeling and simulation of the nonsmooth dynamical systems. it contains :
      * Dynamical systems classes : first order and Lagrangian systems, Newton-Euler systems
      * Nonsmooth laws : complementarity, Relay, FrictionContact, impact
      * Numerical integration techniques : Event-detecting (event-driven) and Event-Capturing schemes
-   * Siconos/Mechanics
-   * Siconos/Control
-   * Siconos/IO
+   * Siconos/mechanics
+   * Siconos/control
+   * Siconos/io

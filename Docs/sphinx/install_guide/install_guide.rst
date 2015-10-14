@@ -273,8 +273,8 @@ Here is an example, to build numerics and kernel, with documentation, no tests .
   set(siconos_python_install "user" CACHE STRING "Install mode for siconos python package")
   # List of components to build and installed
   # List of siconos component to be installed
-  # complete list = Numerics Kernel Control Mechanics IO
-  set(COMPONENTS_DIRS Numerics Kernel CACHE INTERNAL "List of siconos components to build and install")
+  # complete list = externals numerics kernel control mechanics io
+  set(COMPONENTS externals numerics kernel CACHE INTERNAL "List of siconos components to build and install")
 
   
 

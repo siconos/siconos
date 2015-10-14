@@ -27,6 +27,7 @@ set(${COMPONENT}_DIRS
   netlib/odepack
   netlib/dftemplates
   SOL/lumod-c
+  numeric_bindings
 )
 
 # Unstable sources. Will be included only

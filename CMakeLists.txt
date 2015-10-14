@@ -66,7 +66,7 @@ if(WITH_DOCKER)
     set(DOCKER_MKSENV_INPUT ${CMAKE_SOURCE_DIR}/Build/Docker/siconos.yml)
     set(DOCKER_REPOSITORY siconos)
     set(DOCKER_CMAKE_FLAGS ${CMAKE_ARGS_FROM_CACHE};-DWITH_DOCKER=0)
-    set(DOCKER_SHARED_DIRECTORIES ${CMAKE_SOURCE_DIR}/cmake;${CMAKE_SOURCE_DIR}/Examples/Control/PID;${CMAKE_SOURCE_DIR}/Kernel/src/model/test;${DOCKER_SHARED_DIRECTORIES})
+    set(DOCKER_SHARED_DIRECTORIES ${CMAKE_SOURCE_DIR}/cmake;${CMAKE_SOURCE_DIR}/examples/control/PID;${CMAKE_SOURCE_DIR}/kernel/src/model/test;${DOCKER_SHARED_DIRECTORIES})
     set(DOCKER_CTEST_DRIVER ${CMAKE_SOURCE_DIR}/CI/CTestDriver.cmake)
     include(Docker)
     
@@ -85,17 +85,15 @@ if(WITH_DOCKER)
   endif()
 else()
   # Set target names from components list
-  assert(COMPONENTS_DIRS)
-  set(AVAILABLE_COMPONENTS "Numerics Kernel Control Mechanics IO")
-  foreach(component_name ${COMPONENTS_DIRS})
+  assert(COMPONENTS)
+  set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics io")
+  foreach(component_name ${COMPONENTS})
     string(TOUPPER ${component_name} upname)
-    list(FIND ${AVAILABLE_COMPONENTS} ${upname} comp_exists)
+    list(FIND ${AVAILABLE_COMPONENTS} ${component_name} comp_exists)
     if(NOT comp_exists)
       message(FATAL_ERROR "Unknown siconos component : ${component_name}")
     endif()
     set(HAVE_SICONOS_${upname} TRUE)
-    string(TOLOWER ${component_name} component)
-    list(APPEND COMPONENTS_NAMES ${component})
   endforeach()
   
   # ============= The project =============
@@ -108,7 +106,7 @@ else()
     # Set CXX compilation flags
     project(${PROJECT_NAME} CXX C Fortran)
     include(CXXCompilerSetup)
-  else() # we may need to compile only Numerics and only in C.
+  else() # we may need to compile only numerics and only in C.
     project(${PROJECT_NAME} C Fortran)
   endif()
   # Set C compilation flags
@@ -142,10 +140,9 @@ else()
   add_subdirectory(Docs)
   
   # ========= Setup each required component =========
-  foreach(COMPONENT_NAME ${COMPONENTS_DIRS})
+  foreach(COMPONENT ${COMPONENTS})
     message("\n--------------------------------------------------")
-    add_subdirectory(${COMPONENT_NAME})
-    message("\n--------------------------------------------------\n")
+    add_subdirectory(${COMPONENT})
   endforeach()
   
   finalize_doxygen()
