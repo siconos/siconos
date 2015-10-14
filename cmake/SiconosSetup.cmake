@@ -82,12 +82,13 @@ endif()
 if(WITH_PYTHON_WRAPPER)
   find_package(PythonFull REQUIRED)
   include(FindPythonModule)
-endif()
 
-# --- xml schema. Used in tests. ---
-if(WITH_XML)
-  set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/config/xmlschema/SiconosModelSchema-V3.7.xsd")
-  find_python_module(lxml REQUIRED)
+  # --- xml schema. Used in tests. ---
+  if(WITH_XML)
+    set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/config/xmlschema/SiconosModelSchema-V3.7.xsd")
+    find_python_module(lxml REQUIRED)
+  endif()
+
 endif()
 
 
