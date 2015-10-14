@@ -134,5 +134,5 @@ if(USE_SPHINX)
     )
 
   add_custom_target(doc
-    DEPENDS doxygen html)
+    DEPENDS doxygen html update_css)
 endif()
