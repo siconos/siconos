@@ -86,7 +86,9 @@ macro(add_docker_targets)
   endforeach()
 
   if(NOT DOCKER_HOSTNAME)
-    set(DOCKER_HOSTNAME ${DOCKER_IMAGE_AS_DIR})
+    string(REPLACE ":" "-" DOCKER_DISTRIB_AS_NAME ${DOCKER_DISTRIB})
+    string(REPLACE "." "-" DOCKER_DISTRIB_AS_NAME ${DOCKER_DISTRIB_AS_NAME})
+    set(DOCKER_HOSTNAME ${DOCKER_DISTRIB_AS_NAME}-${DOCKER_IMAGE_AS_DIR})
   endif()
  
   message(STATUS "Docker cmake flags : ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER}")

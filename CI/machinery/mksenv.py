@@ -210,7 +210,11 @@ with open(specfilename) as specfile:
         definition = get_entry(spec, distrib, distrib_version, pkg, 'env')
         
         if definition is not None:
-            definitions.append(definition)
+            if is_list(definition):
+                for iter_def in definition:
+                    definitions.append(iter_def)
+            else:
+                definitions.append(definition)
 
         entries = pkg_entries(spec=spec, distrib=distrib,
                             distrib_version=distrib_version, pkg=pkg)

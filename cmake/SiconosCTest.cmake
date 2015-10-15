@@ -50,22 +50,17 @@ ELSE()
 ENDIF()
 
 
-IF(PIPOL_IMAGE)
-  SET(BUILDNAME "${BUILDNAME}-${PIPOL_IMAGE_NAME}")
-  SET(SITE ${PIPOL_SITE})
-ELSE(PIPOL_IMAGE)
-  SET(BUILDNAME "${BUILDNAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_PROCESSOR}")
-  IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
-    SET(BUILDNAME "${BUILDNAME}-CrossCompilingFromLinuxToWindows")
-  ENDIF()
-ENDIF(PIPOL_IMAGE)
-
+set(BUILDNAME "${BUILDNAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_PROCESSOR}")
+if(CROSSCOMPILING_LINUX_TO_WINDOWS)
+  set(BUILDNAME "${BUILDNAME}-CrossCompilingFromLinuxToWindows")
+endif()
   
 # Tests coverage (taken from ViSp)
     
 #
 # Note: all of this is done with a recent cmake version (>2.6.0) with:
 # cmake -DCMAKE_BUILD_TYPE=Profile
+#
 #
 IF(WITH_TESTS_COVERAGE)
   # Add build options for test coverage. Currently coverage is only supported

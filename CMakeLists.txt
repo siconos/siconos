@@ -127,6 +127,7 @@ else()
   # ========= Tests setup =========
   if(WITH_TESTING)
     include(CTest)
+    include(SiconosCTest)
     # log file for tests setup
     file(WRITE ${CMAKE_BINARY_DIR}/tests.log "--- Siconos tests setup --- \n")
   endif()

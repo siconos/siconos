@@ -20,12 +20,18 @@ updater:
 ##############################################################################
 env:
   clang:
+    any: CC=/usr/bin/clang
+
+  mumps:
     any:
-      CC=/usr/bin/clang
+      - CC=mpicc
+      - FC=mpif90
+      - CXX=mpicxx
+
 ##############################################################################
 pkgs:
 
-  siconos-default:
+  build-base:
     any:
       - make
       - cmake 
