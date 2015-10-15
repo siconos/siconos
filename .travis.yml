@@ -9,7 +9,7 @@ compiler:
   - gcc
 
 before_script:
-  # notes : here we only need to install cmake/ctest and make
+  # notes : here we only need to install python-yaml (for docker spec parsing), cmake/ctest and make
   # siconos packages are managed in siconos.yml
   # DOCKER_TEMPLATES contains the list (comma separated) of packages to install
   - sudo rm -vf /var/lib/apt/lists/*
@@ -19,7 +19,7 @@ before_script:
   - sudo add-apt-repository ppa:teward/swig3.0 -y
   - sudo apt-get update -qq
   - sudo apt-get purge cmake -qq
-  - sudo apt-get -y install cmake make
+  - sudo apt-get -y install cmake make python-yaml
   - sudo free -m
   - mkdir -p build
   - cd build
