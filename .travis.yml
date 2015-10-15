@@ -8,6 +8,9 @@ language: cpp
 compiler:
   - gcc
 
+install:
+  - pip install --user PyYAML
+
 before_script:
   # notes : here we only need to install python-yaml (for docker spec parsing), cmake/ctest and make
   # siconos packages are managed in siconos.yml
@@ -20,11 +23,10 @@ before_script:
   - sudo apt-get update -qq
   - sudo apt-get purge cmake -qq
   - sudo apt-get -y install cmake make
-  - pip install PyYAML
   - sudo free -m
   - mkdir -p build
   - cd build
-  
+
 script:
   - cmake -DMODE=Continuous -DCI_CONFIG=default -DWITH_DOCKER=1 -DDOCKER_TEMPLATES=siconos-gcc -DDOCKER_DISTRIB=ubuntu:14.04 ..
   - make docker-build
