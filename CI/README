@@ -1,4 +1,5 @@
-Here are configurations for continuous integration that works with: 
+Under config directory, configurations for continuous integration that
+works with:
 
 - cmake:
 cmake -DCI_CONFIG=<configuration> <siconos source directory>

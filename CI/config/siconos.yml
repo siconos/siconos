@@ -1,5 +1,6 @@
 #
-# use mksenv --distrib=<distrib> --pkgs=pkg1,pkg2,pkg3,... --split=[true,false] <thisfile.yml> [--docker,--script]
+# use mksenv --distrib=<distrib> --pkgs=pkg1,pkg2,pkg3,... \
+#     --split=[true,false] <thisfile.yml> [--docker,--script]
 #
 
 ##############################################################################
@@ -24,30 +25,12 @@ env:
 ##############################################################################
 pkgs:
 
-  # Numerics minimal build environments
-  # needs -DWITH_DOXYGEN_WARNINGS=0
-  numerics-minimal-gcc:
+  siconos-default:
     any:
       - make
       - cmake 
-      - gcc
-      - gfortran
-      - atlas-lapack
-
-  numerics-minimal-clang:
-    any:
-      - make
-      - cmake 
-      - clang
-      - gfortran
-      - atlas-lapack
-
-  siconos-gcc:
-    ubuntu:
-      - libboost-dev
-      - libgmp-dev
-      - numerics-minimal-gcc
-      - g++
+      - boost
+      - gmp
       - python
       - python-dev
       - python-lxml
@@ -88,6 +71,9 @@ pkgs:
 
 
   cppunit:
+    debian:
+      - libcppunit-dev
+
     fedora: 
       - cppunit
       - cppunit-devel

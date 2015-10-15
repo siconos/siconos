@@ -1,3 +1,5 @@
+
+mksenv.py : 
 Generation of dockerfiles from siconos.yml
 
 cmake -DWITH_DOCKER=1 -DDOCKER_TEMPLATES="numerics-minimal,mumps" -DDOCKER_DISTRIB=debian:7.8

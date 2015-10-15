@@ -54,20 +54,19 @@ endif()
 
 # Configurations used for continuous integration
 if(CI_CONFIG)
-  include(CI/${CI_CONFIG}.cmake)
+  include(CI/config/${CI_CONFIG}.cmake)
 endif()
 
 # ---------- Docker or not docker ... ------------------------
 if(WITH_DOCKER)
   find_program(HAVE_DOCKER docker)
   if(HAVE_DOCKER)
-    set(DOCKER_IMAGE_DIR ${CMAKE_SOURCE_DIR}/Build/Docker)
-    set(DOCKER_MKSENV_COMMAND ${CMAKE_SOURCE_DIR}/Build/Docker/mksenv)
-    set(DOCKER_MKSENV_INPUT ${CMAKE_SOURCE_DIR}/Build/Docker/siconos.yml)
+    set(DOCKER_MKSENV_COMMAND ${CMAKE_SOURCE_DIR}/CI/machinery/mksenv.py)
+    set(DOCKER_MKSENV_INPUT ${CMAKE_SOURCE_DIR}/CI/config/siconos.yml)
     set(DOCKER_REPOSITORY siconos)
-    set(DOCKER_CMAKE_FLAGS ${CMAKE_ARGS_FROM_CACHE};-DWITH_DOCKER=0)
-    set(DOCKER_SHARED_DIRECTORIES ${CMAKE_SOURCE_DIR}/cmake;${CMAKE_SOURCE_DIR}/examples/control/PID;${CMAKE_SOURCE_DIR}/kernel/src/model/test;${DOCKER_SHARED_DIRECTORIES})
-    set(DOCKER_CTEST_DRIVER ${CMAKE_SOURCE_DIR}/CI/CTestDriver.cmake)
+    set(DOCKER_CMAKE_FLAGS ${CMAKE_ARGS_FROM_CACHE};-DWITH_DOCKER=0;-V)
+    set(DOCKER_SHARED_DIRECTORIES ${CMAKE_SOURCE_DIR}/cmake;${CMAKE_SOURCE_DIR}/Examples/Control/PID;${CMAKE_SOURCE_DIR}/Kernel/src/model/test;${DOCKER_SHARED_DIRECTORIES})
+    set(DOCKER_CTEST_DRIVER ${CMAKE_SOURCE_DIR}/CI/machinery/CTestDriver.cmake)
     include(Docker)
     
     add_docker_targets(

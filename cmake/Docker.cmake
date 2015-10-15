@@ -36,7 +36,7 @@ macro(add_docker_targets)
   endif()
   
   if(NOT DOCKER_IMAGE_DIR)
-    message(FATAL_ERROR "Docker : DOCKER_IMAGE_DIR unset")
+    set(DOCKER_IMAGE_DIR .)
   endif()
   
   if(NOT DOCKER_REPOSITORY)
