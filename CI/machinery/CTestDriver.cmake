@@ -10,7 +10,7 @@ if(NOT CI_CONFIG)
 endif()
 
 
-set(BUILDNAME Siconos)
+set(BUILDNAME Siconos-${CI_CONFIG})
 
 if(NOT CTEST_SOURCE_DIRECTORY)
   # assume build directory is under source directory

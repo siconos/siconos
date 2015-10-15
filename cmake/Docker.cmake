@@ -86,8 +86,7 @@ macro(add_docker_targets)
   endforeach()
 
   if(NOT DOCKER_HOSTNAME)
-    execute_process(COMMAND hostname OUTPUT_VARIABLE DOCKER_EXEC_HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(DOCKER_HOSTNAME ${DOCKER_EXEC_HOSTNAME}-${DOCKER_IMAGE_AS_DIR})
+    set(DOCKER_HOSTNAME ${DOCKER_IMAGE_AS_DIR})
   endif()
  
   message(STATUS "Docker cmake flags : ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER}")
