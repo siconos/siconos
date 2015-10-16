@@ -20,7 +20,7 @@ try:
 except:
     pass
 
-from siconos.mechanics.contact_detection import Contactor
+from siconos.mechanics.contact_detection.tools import Contactor
 
 from siconos.mechanics import joints
 
@@ -60,8 +60,7 @@ from siconos.kernel import \
     cast_NewtonImpactFrictionNSL, EqualityConditionNSL, Interaction
 
 import siconos.kernel as Kernel
-
-from siconos.io import MechanicsIO
+from siconos.io.io_base import MechanicsIO
 
 import siconos.numerics as Numerics
 
