@@ -20,7 +20,9 @@ updater:
 ##############################################################################
 env:
   clang:
-    any: CC=/usr/bin/clang
+    any: 
+      - CC=/usr/bin/clang
+      - CXX=/usr/bin/clang
 
   mumps:
     any:
@@ -43,7 +45,7 @@ pkgs:
       - python-pytest
       - python-scipy
       - swig
-      - libcppunit-dev
+      - cppunit
 
   cmake:
     ubuntu-12.04:
