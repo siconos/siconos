@@ -21,7 +21,7 @@ from siconos.mechanics.mechanisms import cadmbtb
 from siconos.mechanics.contact_detection.base import SpaceFilter
 with_io = "@HAVE_SICONOS_IO@" is "TRUE"
 if with_io:
-    from siconos.mechanics import IO
+    from siconos.mechanics import io
 from siconos.mechanics.contact_detection.tools import Avatar, Contactor
 
 install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
