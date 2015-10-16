@@ -70,7 +70,12 @@ pkgs:
   boost:
     debian: libboost-dev
     fedora: boost-devel
-      
+
+  serialization:
+    debian:
+      libboost-filesystem-dev
+      libboost-serialization-dev
+
   gmp:
     debian: libgmp-dev
     fedora: gmp-devel

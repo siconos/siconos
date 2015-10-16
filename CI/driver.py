@@ -35,6 +35,10 @@ for task in tasks:
         check_call(['make'] + ['docker-ctest'],
                    cwd=task._ci_config)
 
+        if not task._fast:
+            check_call(['make'] + ['docker-clean'],
+                       cwd=task._ci_config)
+
     except CalledProcessError as error:
         return_code = 1
         print error

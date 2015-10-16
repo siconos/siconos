@@ -11,7 +11,7 @@ if(WITH_${COMPONENT}_TESTING)
   # the main test driver
   SET(TEST_MAIN src/test/TestMain.cpp)
 
-  BEGIN_TEST(test)
+  BEGIN_TEST(src/test)
 
   SET(TEST_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

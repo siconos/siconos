@@ -4,8 +4,10 @@ class CiTask():
                 mode='Continuous',
                 distrib='ubuntu:14.04',
                 ci_config='default',
+                fast=False,
                 cmake_args=[],
                 pkgs=['build-base','gcc', 'gfortran', 'g++', 'atlas-lapack']):
+      self._fast=fast
       self._distrib=distrib
       self._mode=mode
       self._ci_config=ci_config
