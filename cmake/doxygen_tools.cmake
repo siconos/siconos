@@ -84,14 +84,14 @@ macro(finalize_doxygen)
     configure_file(${CMAKE_SOURCE_DIR}/Docs/config/doxy.config.in ${DOXY_CONFIG} @ONLY)
     # Doxygen css comes from sphinx setup
     # --> link to sphinx
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Docs/build/html)
+    #file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Docs/build/html)
     add_custom_target(update_css
       COMMAND rm -f ${DOXYGEN_OUTPUT}/html/sphinx
-      COMMAND ln -s ${CMAKE_BINARY_DIR}/Docs/build/html ${DOXYGEN_OUTPUT}/html/sphinx)
+      COMMAND ln -s ${CMAKE_BINARY_DIR}/Docs/build/html ${DOXYGEN_OUTPUT}/html/sphinx
+      DEPENDS html)
     add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
     #      DEPENDS update_css)
     add_dependencies(html doxygen)
-    # doxygen depends on sphinx for css.
 
   endif()
 endmacro()

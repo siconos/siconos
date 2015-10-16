@@ -14,8 +14,8 @@ As usual, a complete description of the interface (members and methods) of these
 Note that :doxysiconos:`DynamicalSystem` is an abstract class, and no object of this type can be implemented. It just provides a generic interface for all systems.
 
   
-General interface for Dynamical Systems
----------------------------------------
+Overview
+--------
 
 The most general way to write dynamical systems in Siconos is
 
@@ -84,8 +84,12 @@ Second case::
 
 Note that the signature (\e ie the number and type of arguments) of the function you use in your plugin  must be exactly the same as the one given in kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
 
-General non linear first order dynamical systems
-------------------------------------------------
+First order dynamical systems
+-----------------------------
+
+Non linear
+""""""""""
+
 :doxysiconos:`FirstOrderNonLinearDS`
 
 They are described by the following set:
@@ -119,8 +123,8 @@ Other variables are those of :doxysiconos:`DynamicalSystem` class, but some of t
 
 * g and its gradients
 
-First order linear dynamical systems
-------------------------------------
+Linear
+""""""
 
 :doxysiconos:`FirstOrderLinearDS`
 
@@ -148,9 +152,8 @@ And we have:
    rhs &=& M^{-1}(A(t,z)x(t)+b(t,z)) \\
    \nabla_x rhs&=& M^{-1}(A(t,z)
 
-
-First order time-invariant linear dynamical systems
----------------------------------------------------
+Linear and time-invariant
+"""""""""""""""""""""""""
 
  class FirstOrderLinearTIDS
 
@@ -163,8 +166,11 @@ Derived from FirstOrderLinearDS, described by the set of n equations and initial
 
 Same as for FirstOrderLinearDS but with A and b constant (ie no plug-in).
 
-Second order non linear Lagrangian dynamical systems
-----------------------------------------------------
+Second order (Lagrangian) systems
+---------------------------------
+
+Non linear
+""""""""""
 
 :doxysiconos:`LagrangianDS`, derived from :doxysiconos:`DynamicalSystem`.
 
@@ -223,8 +229,8 @@ And we have:
 
 I: identity matrix.
 
-Second order linear and time-invariant Lagrangian dynamical systems
--------------------------------------------------------------------
+Linear and time-invariant
+"""""""""""""""""""""""""
 
 class LagrangianLinearTIDS, derived from LagrangianDS.
 

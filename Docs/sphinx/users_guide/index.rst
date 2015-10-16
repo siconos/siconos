@@ -2,7 +2,7 @@
 
 
 Siconos users' guide
-==========================
+====================
 
 .. toctree::
    :maxdepth: 4

@@ -5,6 +5,7 @@
 #================================================================
 
 # --- Blas Lapack ---
+include(BlasLapackSetup)
 compile_with(BLAS REQUIRED)
 compile_with(LAPACK REQUIRED)
 if(NOT BLAS_INCLUDE_DIRS)

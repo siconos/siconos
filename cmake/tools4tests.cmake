@@ -361,28 +361,31 @@ macro(build_python_tests)
     
     # copy test dir to binary dir (inside siconos package)
     # ---> allows py.test run in binary dir
-    file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/data
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/data/*)
-    foreach(datafile ${data4tests})
-      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/data/${datafile}
-	${SICONOS_SWIG_ROOT_DIR}/tests/data/${datafile} COPYONLY)
-    endforeach()
-      
-    file(GLOB testfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py)
-    foreach(excluded_test ${${COMPONENT}_python_excluded_tests})
-      list(REMOVE_ITEM testfiles ${excluded_test})
-    endforeach()
-    foreach(file ${testfiles})
-      get_filename_component(testname ${file} NAME_WE)
-      get_filename_component(exename ${file} NAME)
-      # Each file is copy to siconos/tests.
-      # Maybe we can create a 'tests' dir for each subpackage?
-      # --> Easier to deal with plugins and data if only one package
-      configure_file(${file} ${SICONOS_SWIG_ROOT_DIR}/tests COPYONLY)
-      set(name "python_${testname}")
-      set(exename ${SICONOS_SWIG_ROOT_DIR}/tests/${exename})
-      add_python_test(${name}, ${exename})
-    endforeach()
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/data)
+      file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/data
+	${CMAKE_CURRENT_SOURCE_DIR}/tests/data/*)
+      foreach(datafile ${data4tests})
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/data/${datafile}
+	  ${SICONOS_SWIG_ROOT_DIR}/tests/data/${datafile} COPYONLY)
+      endforeach()
+    endif()
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+      file(GLOB testfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py)
+      foreach(excluded_test ${${COMPONENT}_python_excluded_tests})
+	list(REMOVE_ITEM testfiles ${excluded_test})
+      endforeach()
+      foreach(file ${testfiles})
+	get_filename_component(testname ${file} NAME_WE)
+	get_filename_component(exename ${file} NAME)
+	# Each file is copy to siconos/tests.
+	# Maybe we can create a 'tests' dir for each subpackage?
+	# --> Easier to deal with plugins and data if only one package
+	configure_file(${file} ${SICONOS_SWIG_ROOT_DIR}/tests COPYONLY)
+	set(name "python_${testname}")
+	set(exename ${SICONOS_SWIG_ROOT_DIR}/tests/${exename})
+	add_python_test(${name}, ${exename})
+      endforeach()
+    endif()
   endif()
 endmacro()
 
