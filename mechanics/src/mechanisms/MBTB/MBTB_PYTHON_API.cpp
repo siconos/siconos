@@ -662,7 +662,7 @@ void  MBTB_initSimu(double hTS, int withProj)
   }
 
   // --- Simulation initialization ---
-  cout <<"====> Initialisation ..." <<endl<<endl;
+  cout <<"\n====> Initialisation ..." <<endl<<endl;
   myModel->initialize(sSimu);
 
   printf("====> COMPUTE H OF INTERATIONS: (just for display)\n");
@@ -686,7 +686,7 @@ void  MBTB_initSimu(double hTS, int withProj)
   NumericsOptions global_options;
   global_options.verboseMode=0;
   setNumericsOptions(&global_options);
-
+  cout <<"====> end of initialisation" <<endl<<endl;
 }
 SP::Model MBTB_model()
 {
