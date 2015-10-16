@@ -25,8 +25,6 @@ for task in tasks:
                   '-DDOCKER_DISTRIB={0}'.format(task._distrib),
                   '-DDOCKER_TEMPLATES={0}'.format(task.templates())]
 
-    cmake_args += task._cmake_args
-
     try:
         check_call(['cmake'] + cmake_args + [os.path.join('..', '..')],
                    cwd=task._ci_config)

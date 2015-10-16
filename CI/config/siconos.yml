@@ -39,13 +39,23 @@ pkgs:
       - cmake 
       - boost
       - gmp
+      - python-env
+      - swig
+      - cppunit
+
+  python-env:
+    debian:
       - python
       - python-dev
       - python-lxml
       - python-pytest
       - python-scipy
-      - swig
-      - cppunit
+    fedora:
+      - python
+      - python-devel
+      - python-lxml
+      - pytest
+      - scipy
 
   cmake:
     ubuntu-12.04:
@@ -113,6 +123,11 @@ pkgs:
       - liblapack-dev
       - libatlas-base-dev
       - libatlas-dev
+
+    fedora:
+      - blas
+      - blas-devel
+      - atlas-devel
 
   oce:
     debian:

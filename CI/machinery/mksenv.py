@@ -74,14 +74,15 @@ def pkg_entries(spec=None, distrib=None, distrib_version=None, pkg=None):
 
         for e in result:
 
-            ne = pkg_entries(spec=spec, distrib=distrib,
-                             distrib_version=distrib_version, pkg=e)
+            if e != pkg:
+                ne = pkg_entries(spec=spec, distrib=distrib,
+                                 distrib_version=distrib_version, pkg=e)
 
-            if ne == [None]:
-                r.append(e)
+                if ne == [None]:
+                    r.append(e)
 
-            else:
-                r += ne
+                else:
+                    r += ne
 
         return r
 

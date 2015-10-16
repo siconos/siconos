@@ -58,7 +58,7 @@ macro(add_docker_targets)
   endforeach()
 
   if(NOT DOCKER_MKSENV_SPLIT)
-    set(DOCKER_MKSENV_SPLIT true)
+    set(DOCKER_MKSENV_SPLIT false)
   endif()
 
   execute_process(COMMAND ${DOCKER_MKSENV_COMMAND} --docker --distrib ${DOCKER_DISTRIB} --pkgs ${DOCKER_TEMPLATES} --split=${DOCKER_MKSENV_SPLIT} ${DOCKER_MKSENV_INPUT} OUTPUT_VARIABLE _contents_)
