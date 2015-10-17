@@ -243,12 +243,8 @@ if(NOT BLAS_FOUND)
       # to ensure that std::complex<double> can be casted to double* and produces good results we should enfore std=c++11
       # Right now openblas ships with a cblas.h header which uses double* as type for pointer to double complex, which makes ublas cry since it
       # want to pass std::complex<double>*
-      if(BUILDNAME MATCHES ".*Kernel.*")
-        set(BLAS_INCLUDE_SUFFIXES AtlasLocal/atlas/)
-        set(INCLUDE_DIR_HINTS ${CMAKE_SOURCE_DIR}/src/utils/)
-      else(BUILDNAME MATCHES ".*Kernel.*")
-        set(BLAS_INCLUDE_SUFFIXES openblas)
-      endif(BUILDNAME MATCHES ".*Kernel.*")
+      set(BLAS_INCLUDE_SUFFIXES cblas_header)
+      set(INCLUDE_DIR_HINTS ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
     endif(BLAS_LIBRARIES)
   endif()
   
