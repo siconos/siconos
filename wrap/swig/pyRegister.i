@@ -178,7 +178,6 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
 
     if (!array)
     {
-      void *argp;
       SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
     }
     else
@@ -240,7 +239,6 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
 
     if (!array)
     {
-      void *argp;
       SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
     }
     else
@@ -305,7 +303,6 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
 
     if (!array)
     {
-      void *argp;
       SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
     }
     else
@@ -359,7 +356,6 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
 
     if (!array)
     {
-      void *argp;
       SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
     }
     else

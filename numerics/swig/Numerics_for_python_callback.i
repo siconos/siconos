@@ -8,7 +8,6 @@ static PyObject *my_callback_NablaFmcp = NULL;
 static PyObject * set_my_callback_NablaFmcp(PyObject *o)
 {
   PyObject *result = NULL;
-  PyObject *temp;
   if (!PyCallable_Check(o)) {
     PyErr_SetString(PyExc_TypeError, "parameter must be callable");
     return NULL;
@@ -43,6 +42,8 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
   else
   {
     PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+    PyErr_PrintEx(0);
+    return;
   }
 
    // PyTuple_SetItem steals a reference to the object
@@ -100,7 +101,6 @@ static PyObject *my_callback_Fmcp = NULL;
 static PyObject * set_my_callback_Fmcp(PyObject *o1)
 {
   PyObject *result = NULL;
-  PyObject *temp;
   if (!PyCallable_Check(o1)) {
     PyErr_SetString(PyExc_TypeError, "parameter must be callable");
     return NULL;
@@ -136,6 +136,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   else
   {
     PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+    PyErr_PrintEx(0);
+    return;
   }
 
   // PyTuple_SetItem steals a reference to the object

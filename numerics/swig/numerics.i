@@ -1134,7 +1134,11 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
   cs_sparse(PyObject *obj)
   {
 
-    PyObject *shape,*nnz,*data,*indices,*indptr;
+    PyObject *shape = NULL;
+    PyObject *nnz = NULL;
+    PyObject *data = NULL;
+    PyObject *indices = NULL;
+    PyObject *indptr = NULL;
     int is_new_object1=0;
     int is_new_object2=0;
     int is_new_object3=0;

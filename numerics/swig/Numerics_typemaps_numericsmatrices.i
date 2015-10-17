@@ -85,19 +85,17 @@
 
 // SBM handling
 
-
-%typemap(in) (const SparseBlockStructuredMatrix* const A) 
-  (npy_intp dims[2])
+%typemap(in) (const SparseBlockStructuredMatrix* const A, double *denseMat)
+(npy_intp dims[2])
 {
   int res1=0;
-  int newmem = 0;
-  void* temp = 0;
-  res1 = SWIG_ConvertPtr($input, &temp, SWIGTYPE_p_SparseBlockStructuredMatrix, 0 |  0);
-  if (!SWIG_IsOK(res1)) 
+  void* temp = NULL;
+  res1 = SWIG_ConvertPtr($input, &temp, $1_descriptor, 0 |  0);
+  if (!SWIG_IsOK(res1))
   {
     SWIG_exception_fail(SWIG_ArgError(res1), 
                         "in method '" 
-                        BOOST_PP_STRINGIZE($symname)
+                        " $symname "
                         "', argument " "1"" of type '" "SparseBlockStructuredMatrix *""'");
   };
   SparseBlockStructuredMatrix* A = (SparseBlockStructuredMatrix *) 0;
@@ -106,23 +104,9 @@
   dims[0] = A->blocksize0[A->blocknumber0-1];
   dims[1] = A->blocksize0[A->blocknumber0-1];
   $1 = A;
-}
 
-%typemap(in, numinputs=0) (double *denseMat)
-{
-  // %typemap(in, numinputs=0) (double *denseMat)
-  // before %typemap(in) (const SparseBlockStructuredMatrix* const A) 
-  // ... but
+  $2 = (double *) malloc(dims[0] * dims[1] * sizeof(double));
 }
-
-%typemap(check) (double *denseMat) 
-{
-  // yes! ...  %typemap(check) (double *denseMat) 
-  // before %typemap(in) (const SparseBlockStructuredMatrix* const A) 
-  // ... what a mess
-  $1 = (double *) malloc(dims1[0] * dims1[1] * sizeof(double));
-}
-
 
 // FIX: do not work
 %newobject SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
@@ -469,4 +453,6 @@
   }
 %}
 
-
+// issue with typemap out and is useless for now
+// convert matrix to scipy.sparse.csc and do the job there
+%ignore SBMRowToDense;

@@ -5,9 +5,7 @@
 
   array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
 
-  if (!array
-      || !require_native(array) )
-    SWIG_fail;
+  if (!array || !require_native(array) || !require_contiguous(array) || !require_fortran(array)) SWIG_fail;
 
   $1 = (double *) array_data(array);
 
@@ -286,33 +284,21 @@
   }
 }
 
-
 // vectors of size numberOfContacts
-%typemap(in) (double *mu) (PyArrayObject* array=NULL, int is_new_object=0) {
-
-  npy_intp array_len[2] = {0,0};
-
-  if (number_of_contacts1)
+%typemap(memberin) (double *mu) {
+  // Still some dark magic :( --xhub
+  if (arg1->numberOfContacts !=  array_size(array2, 0))
   {
-    array_len[0] = number_of_contacts1;
-    array_len[1] = 1;
-
-    array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-
-    if (!array
-        || !require_native(array) || !require_contiguous(array) || !require_fortran(array)
-        || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
-
-    $1 = (double *) array_data(array);
-
+    char msg[1024];
+    snprintf(msg, sizeof(msg), "Size of mu is %ld, but the number of contacts is %d! Both should be equal!\n", array_size(array2, 0), arg1->numberOfContacts);
+    PyErr_SetString(PyExc_RuntimeError, msg);
+    PyErr_PrintEx(0);
+    SWIG_fail;
   }
- }
 
-%typemap(freearg) (double *mu)
-{
-  if (is_new_object$argnum && array$argnum)
-    { Py_DECREF(array$argnum); }
-}
+  $1 = arg2;
+
+ }
 
 %typemap(in, numinputs=0) (double *output3) 
 {
@@ -345,6 +331,8 @@
 %apply (double *z) { (double *reaction) };
 
 %apply (double *z) { (double *velocity) };
+
+%apply (double *z) { (double *mu) };
 
 %apply (double *blocklist3) { (double *vect3D) };
 

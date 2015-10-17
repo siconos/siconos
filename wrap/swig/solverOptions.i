@@ -136,15 +136,6 @@ static int convert_darray(PyObject *input, double *ptr) {
   $result = PyFloat_FromDouble(*$1);
  }
 
-
-%typemap(in) (int iSize) ($1_type iparam_size) {
-  iparam_size = PyInt_AsLong($input);
- }
-
-%typemap(in) (int dSize) ($1_type dparam_size) {
-  dparam_size = PyInt_AsLong($input);
- }
-
 %typemap(in) (int *iparam) {
   
   $1_type temp;
