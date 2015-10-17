@@ -481,8 +481,8 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
 void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, int id)
 {
   options->solverId = SICONOS_GENERIC_MECHANICAL_NSGS;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->numberOfInternalSolvers = 2;
   options->dWork = NULL;
   null_SolverOptions(options);
@@ -497,10 +497,12 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
   options->dparam[1] = 1.0;
   options->dparam[2] = 1e-7;
   options->dparam[3] = 1e-7;
-  options->dparam[2] = 1e-7;
-  options->dparam[3] = 1e-7;
+
   options->internalSolvers = (SolverOptions *)malloc(2 * sizeof(SolverOptions));;
+
   linearComplementarity_setDefaultSolverOptions(0, options->internalSolvers, SICONOS_LCP_LEMKE);
+
+
   switch (id)
   {
   case SICONOS_FRICTION_3D_QUARTIC:
@@ -509,7 +511,9 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
     break;
   case SICONOS_FRICTION_3D_AlartCurnierNewton:
   case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
-    frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
+    frictionContact3D_nsgs_setDefaultSolverOptions(&options->internalSolvers[1]);
+    /* frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]); */
+    /* Fix the setting in a correct way V.A. 15/05/2015 */
     break;
   default:
     printf("FC3D_solverId unknown :%d\n", id);
