@@ -11,7 +11,7 @@ def mcp_function(n1, n2, z, F):
                [1., 2.]])
 
     q = np.array([-5., -6.])
-    F[:] = dot(M,z) + q
+    F[:] = np.dot(M,z) + q
     pass
 
 def mcp_Nablafunction (n1, n2, z, nabla_F):
