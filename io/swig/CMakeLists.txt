@@ -17,9 +17,13 @@ set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
 if(HAVE_SICONOS_MECHANICS)
   configure_file(io/mechanics_io.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py @ONLY)
   configure_file(io/vview.py ${SICONOS_SWIG_ROOT_DIR}/io/vview.py @ONLY)
+  configure_file(io/pprocess.py ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py @ONLY)
+  configure_file(io/SimpleGui.py ${SICONOS_SWIG_ROOT_DIR}/io/SimpleGui.py @ONLY)
 
   install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/vview.py
     DESTINATION bin RENAME vview)
+  install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py
+    DESTINATION bin RENAME pprocess)
 endif()
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
