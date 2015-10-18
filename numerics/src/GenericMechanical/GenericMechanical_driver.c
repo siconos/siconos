@@ -31,8 +31,8 @@
 #include "FrictionContact3D_unitary_enumerative.h"
 #include "GMPReduced.h"
 #include "SiconosBlas.h"
-/* #define GENERICMECHANICAL_DEBUG */
-/* #define GENERICMECHANICAL_DEBUG2 */
+/* #define GENERICMECHANICAL_DEBUG  */
+/* #define GENERICMECHANICAL_DEBUG2  */
 /* #define GENERICMECHANICAL_DEBUG_CMP */
 /* #define GENERICMECHANICAL_DEBUG_COMPUTE_ERROR */
 /* #define GENERICMECHANICAL_FC3D */
@@ -207,6 +207,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 #ifdef GENERICMECHANICAL_DEBUG_CMP
   SScmp++;
 #endif
+  verbose=1;
   listNumericsProblem * curProblem = 0;
   int storageType = pGMP->M->storageType;
   SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
@@ -383,6 +384,9 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     {
       tolViolate = GenericMechanical_compute_error(pGMP, reaction, velocity, tol, options, err);
     }
+    if (verbose > 0)
+      printf("----------------------------------- GMP - GS - Iteration %i Error = %14.7e <= %7.3e\n", it, *err, options->dparam[0]);
+
     //tolViolate=GenericMechanical_compute_error(pGMP,reaction,velocity,tol,options,&err);
     /*next GS it*/
     it++;
