@@ -24,11 +24,24 @@
 #include <stdint.h>
 
 #include "NumericsMatrix.h"
+#include "NumericsMatrix_private.h"
 #include "SiconosLapack.h"
 #include "misc.h"
 #include "GlobalFrictionContact3D_AlartCurnier.h"
 //#define DEBUG_MESSAGES
 #include "debug.h"
+
+#ifdef WITH_MUMPS
+#include <mpi.h>
+#include <dmumps_c.h>
+
+#define JOB_INIT -1
+#define JOB_END -2
+#define USE_COMM_WORLD -987654
+#define ICNTL(I) icntl[(I)-1]
+#define CNTL(I) cntl[(I)-1]
+#endif
+
 void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, const double* const x, double beta, double* y)
 {
 
@@ -631,7 +644,7 @@ NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat)
       data = malloc(sizeof(CSparseMatrix));
       break;
     default:
-      printf("createNumericsMatrix :: storageType value %d not implemented yet !", mat->storageType);
+      printf("duplicateNumericsMatrix :: storageType value %d not implemented yet !", mat->storageType);
       exit(EXIT_FAILURE);
   }
 

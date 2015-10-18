@@ -118,17 +118,6 @@ The following linear algebra operation are supported:
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
 
-#ifdef WITH_MUMPS
-#include <mpi.h>
-#include <dmumps_c.h>
-
-#define JOB_INIT -1
-#define JOB_END -2
-#define USE_COMM_WORLD -987654
-#define ICNTL(I) icntl[(I)-1]
-#define CNTL(I) cntl[(I)-1]
-#endif
-
 typedef struct
 {
   int iWorkSize;
@@ -500,19 +489,6 @@ extern "C"
     A->matrix2 = NULL;
     A->internalData = NULL;
   }
-
-#ifdef WITH_MUMPS
-  /** Get the MPI communicator. Call MPI_Init if needed.
-   * \param[in,out] A a NumericsMatrix.
-   * \return the MPI communicator.
-   */
-  MPI_Comm NM_MPI_com(NumericsMatrix* A);
-
-  int* NM_MUMPS_irn(NumericsMatrix* A);
-  int* NM_MUMPS_jcn(NumericsMatrix* A);
-
-  DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A);
-#endif
 
 
 

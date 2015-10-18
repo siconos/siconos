@@ -29,6 +29,8 @@
 #include "debug.h"
 #include <math.h>
 
+#include "NumericsMatrix_private.h"
+
 void frictionContact3D_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */

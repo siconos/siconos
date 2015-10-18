@@ -2,6 +2,8 @@
 
 #include "FrictionContactNonsmoothEqn.h"
 
+#include "NumericsMatrix_private.h"
+
 #define DEBUG_MESSAGES 1
 #include "debug.h"
 #include "op3x3.h"
