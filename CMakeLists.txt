@@ -24,7 +24,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 # Force out-of-source build
 include(OutOfSourcesBuild)
 
-# Some usefull macros
+# Some useful macros
 include(SiconosTools)
 
 # Check/set uninitialized cache variables (--> for docker config)
