@@ -160,7 +160,6 @@ struct IsDense : public Question<bool>
 
     if (!array)
     {
-      void *argp;
       SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
     }
     else
@@ -349,7 +348,6 @@ struct IsDense : public Question<bool>
 
     if (!array)
     {
-      void *argp;
       SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
     }
     else
@@ -495,7 +493,7 @@ struct IsDense : public Question<bool>
   }
 }
 
-%typemap(out) TYPE (bool upcall=false)
+%typemap(out) TYPE
 {
   // %typemap(out) TYPE
 
@@ -665,7 +663,7 @@ struct IsDense : public Question<bool>
 %}  
 
 
-%typemap(out) std11::shared_ptr<std::vector<unsigned int> > (bool upcall=false)
+%typemap(out) std11::shared_ptr<std::vector<unsigned int> >
 {
   // %typemap(out) std11::shared_ptr<SiconosVector>
 

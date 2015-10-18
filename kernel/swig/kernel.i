@@ -182,7 +182,7 @@ namespace std
     else if($1->matrix1)
     {
       // matrix is sparse : return opaque pointer
-      $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), SWIGTYPE_p_SparseBlockStructuredMatrix, 0);
+      $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), $descriptor(SparseBlockStructuredMatrix *), 0);
     }
     else // failing silently does not seem a good option
     {

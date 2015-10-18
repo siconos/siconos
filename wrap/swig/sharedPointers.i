@@ -94,6 +94,17 @@ namespace STD11 {
      PyCObject_FromVoidPtr((void*) savedSharedPtr, &sharedPointerKeeperDelete);
   */
 
+#ifdef SWIGPY_USE_CAPSULE
+
+  static  void sharedPointerKeeperDeleteCap(PyObject * cap)
+  {
+    DEBUG_PRINT("sharedPointerKeeperDeleteCap\n");
+    void* o = (void*) PyCapsule_GetPointer(cap,SWIGPY_CAPSULE_NAME);
+    delete static_cast<SharedPointerKeeper *>(o);
+    return;
+  };
+
+#else
   /* note PyCObject is deprecated for Python >= 2.7 ... */
   static  void sharedPointerKeeperDelete(void * o)
   {
@@ -103,13 +114,8 @@ namespace STD11 {
     return;
   };
 
-  static  void sharedPointerKeeperDeleteCap(PyObject * cap)
-  {
-    DEBUG_PRINT("sharedPointerKeeperDeleteCap\n");
-    void* o = (void*) PyCapsule_GetPointer(cap,SWIGPY_CAPSULE_NAME);
-    delete static_cast<SharedPointerKeeper *>(o);
-    return;
-  };
+#endif
+
 
 %}
 
