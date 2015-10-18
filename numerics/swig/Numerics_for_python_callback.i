@@ -275,12 +275,12 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     // the called functions "handle" it and exit.
 
     char* name_str;
-    PyObject* tmp_ascii;
     void* handle_lib;
 
 #if PY_MAJOR_VERSION < 3
     name_str = PyString_AsString(lib_name);
 #else
+    PyObject* tmp_ascii;
     tmp_ascii = PyUnicode_AsASCIIString(lib_name);
     name_str = PyBytes_AsString(tmp_ascii);
 #endif

@@ -159,7 +159,7 @@
     void* p_compute_nabla_F;
 
     // TODO: save this lib_handle somewhere and close it !
-    void* lib_handle = get_c_functions(lib_name, compute_F_name, compute_nabla_F_name, &p_compute_F, &p_compute_nabla_F);
+    get_c_functions(lib_name, compute_F_name, compute_nabla_F_name, &p_compute_F, &p_compute_nabla_F);
 
     $self->compute_Fmcp = (ptrFunctionMCP2)p_compute_F;
     $self->compute_nabla_Fmcp = (ptrFunctionMCP_nabla)p_compute_nabla_F;

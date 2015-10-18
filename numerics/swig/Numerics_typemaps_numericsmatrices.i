@@ -48,7 +48,7 @@
     else if($1->matrix1)
     {
       // matrix is sparse : return opaque pointer
-      $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), SWIGTYPE_p_SparseBlockStructuredMatrix, 0);
+      $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), $descriptor(SparseBlockStructuredMatrix *), 0);
     }
     else
       SWIG_fail;
@@ -65,9 +65,9 @@
 
   dims[0] = arg1->size;
   dims[1] = 1;
-  if (arg1->q)
+  if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, arg1->q);
+    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1);
     PyArrayObject *array = (PyArrayObject*) obj;
     if (!array || !require_fortran(array)) SWIG_fail;
     $result = obj;
@@ -81,7 +81,7 @@
 
 %apply (NumericsMatrix *A) { (NumericsMatrix *m) };
 %apply (NumericsMatrix *A) { (NumericsMatrix *M) };
-%apply (NumericsMatrix *M) { (NumericsMatrix *H) };
+%apply (NumericsMatrix *A) { (NumericsMatrix *H) };
 
 // SBM handling
 
@@ -175,8 +175,7 @@
   if(!$1) SWIG_fail;
 
   $result = SWIG_Python_AppendOutput($result,
-                                     SWIG_NewPointerObj(SWIG_as_voidptr($1), 
-                                                        SWIGTYPE_p_SparseBlockStructuredMatrix, 0));
+                                     SWIG_NewPointerObj(SWIG_as_voidptr($1), $1_descriptor, 0));
 }
 
 
@@ -202,7 +201,7 @@
 %typemap(in) (const SparseBlockStructuredMatrix* const A, cs_sparse *outSparseMat)
 {
   void *swig_arp;
-  int swig_res = SWIG_ConvertPtr($input,&swig_arp,SWIGTYPE_p_SparseBlockStructuredMatrix, 0 | 0);
+  int swig_res = SWIG_ConvertPtr($input,&swig_arp,$1_descriptor, 0 | 0);
 
   if (SWIG_IsOK(swig_res))
   {

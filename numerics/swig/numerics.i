@@ -212,9 +212,9 @@
 
   dims[0] = arg1->m + arg1->n;
   dims[1] = 1;
-  if (arg1->q)
+  if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, arg1->q);
+    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1);
     PyArrayObject *array = (PyArrayObject*) obj;
     if (!array || !require_fortran(array)) SWIG_fail;
     $result = obj;
@@ -592,12 +592,6 @@
 
 };
 
-// %callback("%s_cb");
-// void tutu(double z);
-// %nocallback;
-
-
-
 
 %extend MixedComplementarityProblem
 {
@@ -742,9 +736,9 @@
 
   dims[0] = arg1->dimension * arg1->numberOfContacts;
   dims[1] = 1;
-  if (arg1->q)
+  if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, arg1->q);
+    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1);
     PyArrayObject *array = (PyArrayObject*) obj;
     if (!array || !require_fortran(array)) SWIG_fail;
     $result = obj;
@@ -761,9 +755,9 @@
 
   dims[0] = arg1->numberOfContacts;
   dims[1] = 1;
-  if (arg1->q)
+  if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, arg1->mu);
+    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1);
     PyArrayObject *array = (PyArrayObject*) obj;
     if (!array || !require_fortran(array)) SWIG_fail;
     $result = obj;
@@ -832,7 +826,6 @@
   /* copy constructor */
   FrictionContactProblem(PyObject *o)
   {
-    void * vp;
     FrictionContactProblem* fcp;
     FrictionContactProblem* FCP;
 
