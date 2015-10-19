@@ -149,7 +149,7 @@ void computeAWpB(
 }
 
 int globalLineSearchGP(
-  FrictionContact_nonsmooth_Newton_solvers* equation,
+  FrictionContact3D_nonsmooth_Newton_solvers* equation,
   double *reaction,
   double *velocity,
   double *mu,
@@ -165,7 +165,7 @@ int globalLineSearchGP(
   double alpha[1],
   unsigned int maxiter_ls);
 int globalLineSearchGP(
-  FrictionContact_nonsmooth_Newton_solvers* equation,
+  FrictionContact3D_nonsmooth_Newton_solvers* equation,
   double *reaction,
   double *velocity,
   double *mu,
@@ -309,7 +309,7 @@ void frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated(
 /* cf Fachicchinei & Pang, Finite-Dimensional Variational Inequalities
  * and Complementarity Problems, Volume II, p 805. */
 int frictionContactFBLSA(
-  FrictionContact_nonsmooth_Newton_solvers* equation,
+  FrictionContact3D_nonsmooth_Newton_solvers* equation,
   double *reaction,
   double *velocity,
   double *mu,
@@ -325,7 +325,7 @@ int frictionContactFBLSA(
   double alpha[1],
   unsigned int maxiter_ls);
 int frictionContactFBLSA(
-  FrictionContact_nonsmooth_Newton_solvers* equation,
+  FrictionContact3D_nonsmooth_Newton_solvers* equation,
   double *reaction,
   double *velocity,
   double *mu,
@@ -461,7 +461,7 @@ int frictionContactFBLSA(
 }
 
 
-void frictionContact_nonsmooth_Newton_solvers_solve(FrictionContact_nonsmooth_Newton_solvers* equation,
+void frictionContact3D_nonsmooth_Newton_solvers_solve(FrictionContact3D_nonsmooth_Newton_solvers* equation,
                                       double* reaction,
                                       double* velocity,
                                       int* info,

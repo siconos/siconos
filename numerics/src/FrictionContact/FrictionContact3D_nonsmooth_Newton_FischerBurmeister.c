@@ -264,13 +264,13 @@ void frictionContact3D_nonsmooth_Newton_FischerBurmeister(
   }
   }
 
-  FrictionContact_nonsmooth_Newton_solvers equation;
+  FrictionContact3D_nonsmooth_Newton_solvers equation;
 
   equation.problem = problem;
   equation.data = (void *) &acparams;
   equation.function = &nonsmoothEqnFischerBurmeisterFun;
 
-  frictionContact_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info,
+  frictionContact3D_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info,
                                    options);
 
 }

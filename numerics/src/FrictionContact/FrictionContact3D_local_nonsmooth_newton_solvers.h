@@ -21,7 +21,6 @@
 
 /*!\file FrictionContact3D_local_nonsmooth_Newton_solvers.h
   \brief Typedef and functions declarations related to Newton solver for 3 dimension frictional contact problems.
-  \author Houari Khenous, Franck Perignon
 
   Each solver must have 4 functions in its interface:
   - initialize: link local static variables to the global ones (M,q,...)
@@ -37,6 +36,9 @@
 extern "C"
 {
 #endif
+
+typedef void (*computeNonsmoothFunction)(double *, double * , double , double * , double *, double *, double *);
+
   /** initialize friction-contact 3D Newton solver
    * \param problem to solve
    * \param localproblem to solve
@@ -63,6 +65,44 @@ extern "C"
    *   \param output_error
    */
   void frictionContact3D_local_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity, double*reaction, double * output_error);
+
+  /** Initialize friction-contact 3D Alart-Curnier formulation
+      \param problem the global problem to solve
+      \param localproblem the local problem to solve
+      \param options of the solver
+  */
+  void frictionContact3D_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options );
+
+  /** Update friction-contact 3D problem: formalize local problem for one contact
+      \param problem the global problem to solve
+      \param localproblem the local problem to solve
+      \param number (position in global matrix) of the considered contact
+      \param reaction global reaction (only the block corresponding to the
+      current contact will be modified
+      \param options of the solver
+
+      the rest is used to formalize the local problem)
+  */
+  void frictionContact3D_AC_update(int number, FrictionContactProblem* problem, FrictionContactProblem* localproblem ,
+                                   double * reaction, SolverOptions* options);
+
+  /** Retrieve global reaction vector using local problem solution
+      \param contactnumber (position in global matrix) of the considered contact
+      \param reaction global reaction
+  */
+  void frictionContact3D_AC_post(int contactnumber, double * reaction);
+
+
+
+  /** free memory for friction contact 3D Alart-Curnier solver */
+  void frictionContact3D_AC_free(void);
+
+  int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem,
+                                 double * R, int *iparam, double *dparam);
+
+  int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem,
+                                       double * R, int *iparam, double *dparam);
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

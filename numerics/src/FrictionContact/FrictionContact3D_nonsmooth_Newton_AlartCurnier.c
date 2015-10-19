@@ -216,13 +216,13 @@ void frictionContact3D_nonsmooth_Newton_AlartCurnier(
   }
   }
 
-  FrictionContact_nonsmooth_Newton_solvers equation;
+  FrictionContact3D_nonsmooth_Newton_solvers equation;
 
   equation.problem = problem;
   equation.data = (void *) &acparams;
   equation.function = &nonsmoothEqnAlartCurnierFun;
 
-  frictionContact_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info,
+  frictionContact3D_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info,
                                    options);
 
 }

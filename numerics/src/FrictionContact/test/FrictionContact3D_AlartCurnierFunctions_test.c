@@ -11,7 +11,7 @@
 #include "timers_interf.h"
 #include "op3x3.h"
 #include "NonSmoothDrivers.h"
-#include "FrictionContact3D_AlartCurnier.h"
+#include "FrictionContact3D_AlartCurnier_functions.h"
 #include "FrictionContact3D_nonsmooth_Newton_AlartCurnier.h"
 #include "AlartCurnierGenerated.h"
 

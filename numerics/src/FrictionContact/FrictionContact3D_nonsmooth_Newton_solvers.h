@@ -39,7 +39,7 @@
 /** The nonsmooth function signature.
 [...]
  */
-typedef void (*FrictionContact_nonsmooth_Newton_solversFunPtr)
+typedef void (*FrictionContact3D_nonsmooth_Newton_solversFunPtr)
 (void* data,
  unsigned int problem_size,
  double* reaction,
@@ -67,8 +67,8 @@ typedef struct
 {
   FrictionContactProblem* problem;
   void* data;
-  FrictionContact_nonsmooth_Newton_solversFunPtr function;
-} FrictionContact_nonsmooth_Newton_solvers;
+  FrictionContact3D_nonsmooth_Newton_solversFunPtr function;
+} FrictionContact3D_nonsmooth_Newton_solvers;
 
 /** Solve the equation. The only implemented method is a nonsmooth
     Newton method with a Goldstein Price or a FBLSA line search.
@@ -80,7 +80,7 @@ typedef struct
     \param info the return info. 0 success, 1 failure.
     \param options the SolverOptions parameter.
  */
-void frictionContact_nonsmooth_Newton_solvers_solve(FrictionContact_nonsmooth_Newton_solvers* equation,
+void frictionContact3D_nonsmooth_Newton_solvers_solve(FrictionContact3D_nonsmooth_Newton_solvers* equation,
                                       double* reaction,
                                       double* velocity,
                                       int* info,

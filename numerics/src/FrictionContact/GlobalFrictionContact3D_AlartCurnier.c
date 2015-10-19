@@ -28,7 +28,7 @@
 #include "GlobalFrictionContact3D_Solvers.h"
 #include "GlobalFrictionContact3D_compute_error.h"
 #include "AlartCurnierGenerated.h"
-#include "FrictionContact3D_AlartCurnier.h"
+#include "FrictionContact3D_AlartCurnier_functions.h"
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
 #include "misc.h"
