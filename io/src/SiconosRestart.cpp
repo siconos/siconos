@@ -90,6 +90,8 @@ namespace Siconos
   SP::Model load(std::string filename)
   {
     RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
+    /* Dummy return to make every compiler happy  */
+    return std11::shared_ptr<Model>();
   }
 }
 #endif
