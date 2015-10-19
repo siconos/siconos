@@ -47,7 +47,7 @@ For each solver, the input argument are:
 #include "SolverOptions.h"
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_projection.h"
-#include "FrictionContact3D_Newton.h"
+#include "FrictionContact3D_local_nonsmooth_Newton_solvers.h"
 #include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "FrictionContact3D2NCP_Glocker.h"
 #include "FrictionContact3D_nonsmooth_Newton_AlartCurnier.h"

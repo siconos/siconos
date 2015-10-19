@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT3DNewton_H
-#define FRICTIONCONTACT3DNewton_H
+#ifndef FRICTIONCONTACT3D_local_nonsmooth_Newton_solvers_H
+#define FRICTIONCONTACT3D_local_nonsmooth_Newton_solvers_H
 
-/*!\file FrictionContact3D_Newton.h
+/*!\file FrictionContact3D_local_nonsmooth_Newton_solvers.h
   \brief Typedef and functions declarations related to Newton solver for 3 dimension frictional contact problems.
   \author Houari Khenous, Franck Perignon
 
@@ -37,24 +37,24 @@
 extern "C"
 {
 #endif
-  /** Initialize friction-contact 3D Newton solver
+  /** initialize friction-contact 3D Newton solver
    * \param problem to solve
    * \param localproblem to solve
    * \param options of the solver
    */
-  void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options);
+  void frictionContact3D_local_nonsmooth_Newton_solvers_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options);
 
   /** solve friction-contact 3D problem with Newton
    * \param localproblem to solve
    * \param options of the solver
    * \return 0 iff successful.
    */
-  int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*, SolverOptions * options);
+  int frictionContact3D_local_nonsmooth_Newton_solvers_solve(FrictionContactProblem* localproblem, double*, SolverOptions * options);
 
   /** free memory for friction contact 3D Newton solver
    * \param localproblem for freeing matrix0
    */
-  void frictionContact3D_Newton_free(FrictionContactProblem* localproblem);
+  void frictionContact3D_local_nonsmooth_Newton_solvers_free(FrictionContactProblem* localproblem);
 
   /** compute error for friction-contact 3D problem with Newton
    *  \param dimension of the global problem
@@ -62,7 +62,7 @@ extern "C"
    *   \param reaction global reaction vector
    *   \param output_error
    */
-  void frictionContact3D_Newton_computeError(int dimension, double* velocity, double*reaction, double * output_error);
+  void frictionContact3D_local_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity, double*reaction, double * output_error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

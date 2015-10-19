@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "FrictionContact3D_Newton.h"
+#include "FrictionContact3D_local_nonsmooth_Newton_solvers.h"
 #include "FrictionContact3D_Path.h"
 #include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "FrictionContact3D_projection.h"
@@ -114,31 +114,31 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
   /* Newton solver (Alart-Curnier) */
   case SICONOS_FRICTION_3D_AlartCurnierNewton:
   {
-    *solve = &frictionContact3D_Newton_solve;
+    *solve = &frictionContact3D_local_nonsmooth_Newton_solvers_solve;
     *update = &frictionContact3D_AC_update;
-    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_Newton_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_local_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
-    frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
+    frictionContact3D_local_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
   case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
   {
-    *solve = &frictionContact3D_Newton_solve;
+    *solve = &frictionContact3D_local_nonsmooth_Newton_solvers_solve;
     *update = &frictionContact3D_AC_update;
-    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_Newton_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_local_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
-    frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
+    frictionContact3D_local_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
   /* Newton solver (Glocker-Fischer-Burmeister)*/
   case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
   {
-    *solve = &frictionContact3D_Newton_solve;
+    *solve = &frictionContact3D_local_nonsmooth_Newton_solvers_solve;
     *update = &NCPGlocker_update;
-    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_Newton_free;
+    *freeSolver = (FreeSolverNSGSPtr)&frictionContact3D_local_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     // *computeError = &fake_compute_error;
-    frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
+    frictionContact3D_local_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
   /* Path solver (Glocker Formulation) */

@@ -73,7 +73,7 @@ void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jac
 }
 
 
-void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem,    SolverOptions * localsolver_options)
+void frictionContact3D_local_nonsmooth_Newton_solvers_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem,    SolverOptions * localsolver_options)
 {
 
   /*
@@ -125,7 +125,7 @@ void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, Fricti
   }
 }
 
-int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
+int frictionContact3D_local_nonsmooth_Newton_solvers_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
 {
 
 
@@ -164,7 +164,7 @@ int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*
   /*  (*postSolver)(contact,reaction); */
 }
 
-void frictionContact3D_Newton_free(FrictionContactProblem* localproblem)
+void frictionContact3D_local_nonsmooth_Newton_solvers_free(FrictionContactProblem* localproblem)
 {
   F = NULL;
   jacobianF = NULL;
@@ -173,7 +173,7 @@ void frictionContact3D_Newton_free(FrictionContactProblem* localproblem)
   (*freeSolver)();
 }
 
-void frictionContact3D_Newton_computeError(int n, double* velocity, double*reaction, double * error)
+void frictionContact3D_local_nonsmooth_Newton_solvers_computeError(int n, double* velocity, double*reaction, double * error)
 {
   /*   int numberOfContacts = n/3; */
   /*   int sizeGlobal = numberOfContacts*FSize; */

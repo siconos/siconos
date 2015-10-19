@@ -239,7 +239,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   {
     snPrintf(1, options, 
             " ========================== Call Newton-based solver for Friction-Contact 3D problem ==========================\n");
-    info = frictionContact3D_Newton_solve(problem, reaction , options);
+    info = frictionContact3D_local_nonsmooth_Newton_solvers_solve(problem, reaction , options);
     break;
   }
   case SICONOS_FRICTION_3D_GAMS_PATH:
