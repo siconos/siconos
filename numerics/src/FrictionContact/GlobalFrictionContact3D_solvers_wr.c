@@ -482,10 +482,10 @@ int globalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(Solver
 
   if (verbose > 0)
   {
-    printf("Set the Default SolverOptions for the LOCALAC_WR Solver\n");
+    printf("Set the Default SolverOptions for the NSN_AC_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_GLOBAL_LOCALAC_WR;
+  options->solverId = SICONOS_FRICTION_3D_GLOBAL_NSN_AC_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;

@@ -30,7 +30,7 @@ int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;
 int  Global_MisLU = 0;
 char *SICONOS_FRICTION_3D_GLOBAL_NSGS_WR_STR = "F3DP_NSGS_WR";
-char *SICONOS_FRICTION_3D_GLOBAL_LOCALAC_WR_STR = "F3DP_LOCALAC_WR";
+char *SICONOS_FRICTION_3D_GLOBAL_NSN_AC_WR_STR = "F3DP_NSN_AC_WR";
 char *SICONOS_FRICTION_3D_GLOBAL_NSGSV_WR_STR = "F3DP_NSGSV_WR";
 char *SICONOS_FRICTION_3D_GLOBAL_PROX_WR_STR = "F3DP_PROX_WR";
 char *SICONOS_FRICTION_3D_GLOBAL_DSFP_WR_STR = "F3DP_DSFP_WR";
@@ -90,10 +90,10 @@ int globalFrictionContact3D_driver(GlobalFrictionContactProblem* problem, double
     globalFrictionContact3D_nsgs_velocity_wr(problem, reaction , velocity, globalVelocity, &info, options);
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_LOCALAC_WR:
+  case SICONOS_FRICTION_3D_GLOBAL_NSN_AC_WR:
   {
     if (verbose == 1)
-      printf(" ========================== Call LOCALAC_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+      printf(" ========================== Call NSN_AC_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;

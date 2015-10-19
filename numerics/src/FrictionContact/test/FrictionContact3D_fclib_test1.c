@@ -41,7 +41,7 @@ int main(void)
   options->internalSolvers->iparam[3]= 100;
   
   /* SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions)); */
-  /* info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_LOCALFB); */
+  /* info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSN_FB); */
   /* options->dparam[0] = 1e-08; */
   /* options->iparam[0] = 10000; */
   /* /\* options->iparam[11] = 1; *\/ */

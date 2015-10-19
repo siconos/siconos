@@ -140,10 +140,10 @@ int frictionContact3D_FischerBurmeister_setDefaultSolverOptions(
 {
   if (verbose > 0)
   {
-    printf("Set the default solver options for the LOCALFB Solver\n");
+    printf("Set the default solver options for the NSN_FB Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_LOCALFB;
+  options->solverId = SICONOS_FRICTION_3D_NSN_FB;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

@@ -29,8 +29,8 @@
 char *  SICONOS_SOCLCP_NSGS_STR = "SOCLCP_NSGS";
 char *  SICONOS_SOCLCP_NSGSV_STR = "SOCLCP_NSGSV";
 char *  SICONOS_SOCLCP_TFP_STR = "SOCLCP_TFP";
-char *  SICONOS_SOCLCP_LOCALAC_STR = "SOCLCP_LOCALAC";
-char *  SICONOS_SOCLCP_LOCALFB_STR = "SOCLCP_LOCALFB";
+char *  SICONOS_SOCLCP_NSN_AC_STR = "SOCLCP_NSN_AC";
+char *  SICONOS_SOCLCP_NSN_FB_STR = "SOCLCP_NSN_FB";
 char *  SICONOS_SOCLCP_DSFP_STR = "SOCLCP_DeSaxceFixedPoint";
 char *  SICONOS_SOCLCP_NCPGlockerFBFixedPoint_STR = "SOCLCP_NCPGlockerFBFixedPoint";
 char *  SICONOS_SOCLCP_AlartCurnierNewton_STR = "SOCLCP_AlartCurnierNewton";
@@ -153,7 +153,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   /*   break; */
   /* } */
   /* /\* Alart Curnier in local coordinates *\/ */
-  /* case SICONOS_SOCLCP_LOCALAC: */
+  /* case SICONOS_SOCLCP_NSN_AC: */
   /* { */
   /*   snPrintf(1, options,  */
   /*            " ========================== Call Alart Curnier solver for Second Order Cone LCP problem ==========================\n"); */
@@ -168,7 +168,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   /*   break; */
   /* } */
   /* /\* Fischer Burmeister in local coordinates *\/ */
-  /* case SICONOS_SOCLCP_LOCALFB: */
+  /* case SICONOS_SOCLCP_NSN_FB: */
   /* { */
   /*   snPrintf(1, options,  */
   /*            " ========================== Call Fischer Burmeister solver for Second Order Cone LCP problem ==========================\n"); */

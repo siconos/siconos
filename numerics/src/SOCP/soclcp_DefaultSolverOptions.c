@@ -85,12 +85,12 @@ int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId)
   /*   info =    soclcp_HyperplaneProjection_setDefaultSolverOptions(options); */
   /*   break; */
   /* } */
-  /* case SICONOS_SOCLCP_LOCALAC: */
+  /* case SICONOS_SOCLCP_NSN_AC: */
   /* { */
   /*   info =    soclcp_AlartCurnier_setDefaultSolverOptions(options); */
   /*   break; */
   /* } */
-  /* case SICONOS_SOCLCP_LOCALFB: */
+  /* case SICONOS_SOCLCP_NSN_FB: */
   /* { */
   /*   info =    soclcp_FischerBurmeister_setDefaultSolverOptions(options); */
   /*   break; */

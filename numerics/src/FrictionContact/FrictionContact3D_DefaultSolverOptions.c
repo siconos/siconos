@@ -93,12 +93,12 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
     info =    frictionContact3D_HyperplaneProjection_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_LOCALAC:
+  case SICONOS_FRICTION_3D_NSN_AC:
   {
     info =    frictionContact3D_AlartCurnier_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_LOCALFB:
+  case SICONOS_FRICTION_3D_NSN_FB:
   {
     info =    frictionContact3D_FischerBurmeister_setDefaultSolverOptions(options);
     break;

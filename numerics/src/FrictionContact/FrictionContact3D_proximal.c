@@ -104,7 +104,8 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     {
       internalsolver = &frictionContact3D_ExtraGradient;
     }
-    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALAC)
+    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALAC ||
+             internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_AC)
     {
       internalsolver = &frictionContact3D_nonsmooth_Newton_AlartCurnier;
 
@@ -120,7 +121,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
 #endif
       iter_iparam =1;
     }
-    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALFB)
+    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_FB)
     {
       
       internalsolver = &frictionContact3D_nonsmooth_Newton_FischerBurmeister;
@@ -307,7 +308,7 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
   options->dparam[8] = 1.5;  /* default value for relaxation parameter omega */
 
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  options->internalSolvers->solverId = SICONOS_FRICTION_3D_LOCALAC;
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_NSN_AC;
   frictionContact3D_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }

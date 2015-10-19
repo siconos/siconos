@@ -103,10 +103,7 @@ void frictionContact3D_local_nonsmooth_Newton_solvers_initialize(FrictionContact
 int frictionContact3D_local_nonsmooth_Newton_solvers_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
 {
 
-
   /*  (*updateSolver)(contact, reaction); */
-
-
   double * reactionBlock = reaction;
 
   int * iparam = options->iparam;
@@ -121,8 +118,6 @@ int frictionContact3D_local_nonsmooth_Newton_solvers_solve(FrictionContactProble
   {
     info = DampedLocalNonsmoothNewtonSolver(localproblem, reactionBlock, iparam, dparam);
   }
-
-
   else
   {
     info = nonSmoothDirectNewton(Fsize, reactionBlock, &F, &jacobianF, iparam, dparam);
@@ -131,7 +126,7 @@ int frictionContact3D_local_nonsmooth_Newton_solvers_solve(FrictionContactProble
   {
     if (verbose > 0)
     {
-      printf("Numerics, FrictionContact3D_Newton, warning. reached max. number of iterations without convergence. Error = %12.8e\n", dparam[1]);
+      printf("Numerics, frictionContact3D_local_nonsmooth_Newton_solvers_solve, warning. reached max. number of iterations without convergence. Error = %12.8e\n", dparam[1]);
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
   }

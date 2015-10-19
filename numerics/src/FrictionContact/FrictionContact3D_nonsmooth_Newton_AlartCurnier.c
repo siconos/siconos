@@ -80,10 +80,10 @@ int frictionContact3D_AlartCurnier_setDefaultSolverOptions(
 {
   if (verbose > 0)
   {
-    printf("Set the default solver options for the LOCALAC Solver\n");
+    printf("Set the default solver options for the NSN_AC Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_LOCALAC;
+  options->solverId = SICONOS_FRICTION_3D_NSN_AC;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

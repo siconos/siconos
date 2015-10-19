@@ -31,6 +31,8 @@ char *  SICONOS_FRICTION_3D_NSGSV_STR = "F3D_NSGSV";
 char *  SICONOS_FRICTION_3D_TFP_STR = "F3D_TFP";
 char *  SICONOS_FRICTION_3D_LOCALAC_STR = "F3D_LOCALAC";
 char *  SICONOS_FRICTION_3D_LOCALFB_STR = "F3D_LOCALFB";
+char *  SICONOS_FRICTION_3D_NSN_AC_STR = "F3D_NSN_AC";
+char *  SICONOS_FRICTION_3D_NSN_FB_STR = "F3D_NSN_FB";
 char *  SICONOS_FRICTION_3D_DSFP_STR = "F3D_DeSaxceFixedPoint";
 char *  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR = "F3D_NCPGlockerFBFixedPoint";
 char *  SICONOS_FRICTION_3D_AlartCurnierNewton_STR = "F3D_AlartCurnierNewton";
@@ -204,7 +206,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     break;
   }
   /* Alart Curnier in local coordinates */
-  case SICONOS_FRICTION_3D_LOCALAC:
+  case SICONOS_FRICTION_3D_NSN_AC:
   {
     snPrintf(1, options, 
             " ========================== Call Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
@@ -219,7 +221,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     break;
   }
   /* Fischer Burmeister in local coordinates */
-  case SICONOS_FRICTION_3D_LOCALFB:
+  case SICONOS_FRICTION_3D_NSN_FB:
   {
     snPrintf(1, options, 
             " ========================== Call Fischer Burmeister solver for Friction-Contact 3D problem ==========================\n");

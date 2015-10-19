@@ -91,7 +91,7 @@
  *       SolverId : SICONOS_FRICTION_3D_TFP =503,</li>
  *
  * <li> frictionContact3D_globalAlartCurnier() : Global Alart--Curnier solver
- *       SolverId : SICONOS_FRICTION_3D_LOCALAC =504,</li>
+ *       SolverId : SICONOS_FRICTION_3D_NSN_AC =504,</li>
  *
  * <li> frictionContact3D_DeSaxceFixedPoint() : Fixed Point solver for friction-contact 3D problem
  *      based on the De Saxce Formulation
