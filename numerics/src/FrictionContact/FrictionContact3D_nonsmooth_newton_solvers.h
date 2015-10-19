@@ -16,12 +16,12 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT3D_NONSMOOTHEQN_H
-#define FRICTIONCONTACT3D_NONSMOOTHEQN_H
+#ifndef FRICTIONCONTACT3D_NONSMOOTH_NEWTON_SOLVERS_H
+#define FRICTIONCONTACT3D_NONSMOOTH_NEWTON_SOLVERS_H
 
-/*!\file FrictionContactNonsmoothEqn.h
+/*!\file FrictionContact_nonsmooth_Newton_solvers.h
 
-  \brief Formulation of a FrictionContactProblem as a nonsmooth equation.
+  \brief Non Smooth Newton Solvers for FC3D
   [...]
  */
 
@@ -39,7 +39,7 @@
 /** The nonsmooth function signature.
 [...]
  */
-typedef void (*FrictionContactNonsmoothEqnFunPtr)
+typedef void (*FrictionContact_nonsmooth_Newton_solversFunPtr)
 (void* data,
  unsigned int problem_size,
  double* reaction,
@@ -67,8 +67,8 @@ typedef struct
 {
   FrictionContactProblem* problem;
   void* data;
-  FrictionContactNonsmoothEqnFunPtr function;
-} FrictionContactNonsmoothEqn;
+  FrictionContact_nonsmooth_Newton_solversFunPtr function;
+} FrictionContact_nonsmooth_Newton_solvers;
 
 /** Solve the equation. The only implemented method is a nonsmooth
     Newton method with a Goldstein Price or a FBLSA line search.
@@ -80,7 +80,7 @@ typedef struct
     \param info the return info. 0 success, 1 failure.
     \param options the SolverOptions parameter.
  */
-void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
+void frictionContact_nonsmooth_Newton_solvers_solve(FrictionContact_nonsmooth_Newton_solvers* equation,
                                       double* reaction,
                                       double* velocity,
                                       int* info,

@@ -106,7 +106,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     }
     else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALAC)
     {
-      internalsolver = &frictionContact3D_localAlartCurnier;
+      internalsolver = &frictionContact3D_nonsmooth_Newton_AlartCurnier;
 
 #ifdef HAVE_MPI
       if (internalsolver_options->iparam[13] == 1)   /* MUMPS */
@@ -123,7 +123,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
     else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALFB)
     {
       
-      internalsolver = &frictionContact3D_localFischerBurmeister;
+      internalsolver = &frictionContact3D_nonsmooth_Newton_FischerBurmeister;
 
       if (internalsolver_options->iparam[13] == 1)   /* MUMPS */
       {

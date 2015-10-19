@@ -1,6 +1,6 @@
 /* Factorisation with Newton_Methods.c is needed */
 
-#include "FrictionContactNonsmoothEqn.h"
+#include "FrictionContact3D_nonsmooth_Newton_solvers.h"
 
 #include "NumericsMatrix_private.h"
 
@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
-#include "FrictionContactNonsmoothEqn.h"
+
 #include "sanitizer.h"
 
 void computeDenseAWpB(
@@ -149,7 +149,7 @@ void computeAWpB(
 }
 
 int globalLineSearchGP(
-  FrictionContactNonsmoothEqn* equation,
+  FrictionContact_nonsmooth_Newton_solvers* equation,
   double *reaction,
   double *velocity,
   double *mu,
@@ -165,7 +165,7 @@ int globalLineSearchGP(
   double alpha[1],
   unsigned int maxiter_ls);
 int globalLineSearchGP(
-  FrictionContactNonsmoothEqn* equation,
+  FrictionContact_nonsmooth_Newton_solvers* equation,
   double *reaction,
   double *velocity,
   double *mu,
@@ -309,7 +309,7 @@ void frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated(
 /* cf Fachicchinei & Pang, Finite-Dimensional Variational Inequalities
  * and Complementarity Problems, Volume II, p 805. */
 int frictionContactFBLSA(
-  FrictionContactNonsmoothEqn* equation,
+  FrictionContact_nonsmooth_Newton_solvers* equation,
   double *reaction,
   double *velocity,
   double *mu,
@@ -325,7 +325,7 @@ int frictionContactFBLSA(
   double alpha[1],
   unsigned int maxiter_ls);
 int frictionContactFBLSA(
-  FrictionContactNonsmoothEqn* equation,
+  FrictionContact_nonsmooth_Newton_solvers* equation,
   double *reaction,
   double *velocity,
   double *mu,
@@ -461,7 +461,7 @@ int frictionContactFBLSA(
 }
 
 
-void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
+void frictionContact_nonsmooth_Newton_solvers_solve(FrictionContact_nonsmooth_Newton_solvers* equation,
                                       double* reaction,
                                       double* velocity,
                                       int* info,
@@ -517,7 +517,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   double tolerance = options->dparam[0];
   assert(tolerance > 0);
   if (verbose > 0)
-    printf("------------------------ FC3D - NonsmoothEqnSolve - Start with tolerance = %g\n", tolerance);
+    printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - Start with tolerance = %g\n", tolerance);
 
   unsigned int _3problemSize = 3 * problemSize;
 
@@ -590,7 +590,7 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
           }
 
 #else
-          numericsError("frictionContactNonsmoothEqnSolve", "MUMPS solver needs a MPI installation.\n");
+          numericsError("frictionContact_nonsmooth_Newton_solversSolve", "MUMPS solver needs a MPI installation.\n");
 #endif
           break;
         }
@@ -753,10 +753,10 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
   if (verbose > 0)
   {
     if (!info[0])
-      printf("------------------------ FC3D - NonsmoothEqnSolve - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
+      printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
     else
     {
-      printf("------------------------ FC3D - NonsmoothEqnSolve - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
+      printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
     }
   }
 
@@ -782,6 +782,6 @@ void frictionContactNonsmoothEqnSolve(FrictionContactNonsmoothEqn* equation,
     free(AWpB_backup);
   }
   if (verbose > 0)
-    printf("------------------------ FC3D - NonsmoothEqnSolve - End\n");
+    printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - End\n");
 
 }

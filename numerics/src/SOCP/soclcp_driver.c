@@ -159,11 +159,11 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   /*            " ========================== Call Alart Curnier solver for Second Order Cone LCP problem ==========================\n"); */
   /*   if (problem->M->matrix0) */
   /*   { */
-  /*     soclcp_localAlartCurnier(problem, r , v , &info , options); */
+  /*     soclcp_nonsmooth_Newton_AlartCurnier(problem, r , v , &info , options); */
   /*   } */
   /*   else */
   /*   { */
-  /*     soclcp_localAlartCurnier(problem, r , v , &info , options); */
+  /*     soclcp_nonsmooth_Newton_AlartCurnier(problem, r , v , &info , options); */
   /*   } */
   /*   break; */
   /* } */
@@ -172,7 +172,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   /* { */
   /*   snPrintf(1, options,  */
   /*            " ========================== Call Fischer Burmeister solver for Second Order Cone LCP problem ==========================\n"); */
-  /*   soclcp_localFischerBurmeister(problem, r , v , &info , options); */
+  /*   soclcp_nonsmooth_Newton_FischerBurmeister(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* case SICONOS_SOCLCP_QUARTIC_NU: */

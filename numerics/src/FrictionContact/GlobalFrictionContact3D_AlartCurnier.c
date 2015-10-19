@@ -38,7 +38,7 @@
 #include <math.h>
 
 #include "SparseMatrix.h"
-#include "FrictionContact3D_localAlartCurnier.h"
+#include "FrictionContact3D_nonsmooth_Newton_AlartCurnier.h"
 
 #include "GlobalFrictionContact3D_compute_error.h"
 #include "SiconosBlas.h"

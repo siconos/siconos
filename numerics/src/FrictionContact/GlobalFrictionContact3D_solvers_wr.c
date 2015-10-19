@@ -469,7 +469,7 @@ void  globalFrictionContact3D_globalAlartCurnier_wr(GlobalFrictionContactProblem
 
 
   //
-  frictionContact3D_localAlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
+  frictionContact3D_nonsmooth_Newton_AlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
 
   computeGlobalVelocity(problem, reaction, globalVelocity);
   freeLocalProblem(localproblem);

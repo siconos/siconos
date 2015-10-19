@@ -51,8 +51,8 @@ For each solver, the input argument are:
 /* #include "soclcp_AlartCurnier.h" */
 /* #include "soclcp_NCPGlockerFixedPoint.h" */
 /* #include "soclcp2NCP_Glocker.h" */
-/* #include "soclcp_localAlartCurnier.h" */
-/* #include "soclcp_localFischerBurmeister.h" */
+/* #include "soclcp_nonsmooth_Newton_AlartCurnier.h" */
+/* #include "soclcp_nonsmooth_Newton_FischerBurmeister.h" */
 /* #include "soclcp_unitary_enumerative.h" */
 
 #include "SOCLCP_cst.h"

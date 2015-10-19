@@ -24,8 +24,8 @@
 #include "FrictionContactProblem.h"
 #include "FrictionContact3D_compute_error.h"
 #include "FischerBurmeisterGenerated.h"
-#include "FrictionContactNonsmoothEqn.h"
-#include "FrictionContact3D_localFischerBurmeister.h"
+#include "FrictionContact3D_nonsmooth_Newton_solvers.h"
+#include "FrictionContact3D_nonsmooth_Newton_FischerBurmeister.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -227,7 +227,7 @@ void nonsmoothEqnFischerBurmeisterFun(void* arg,
 
 
 
-void frictionContact3D_localFischerBurmeister(
+void frictionContact3D_nonsmooth_Newton_FischerBurmeister(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,
@@ -264,14 +264,13 @@ void frictionContact3D_localFischerBurmeister(
   }
   }
 
-  FrictionContactNonsmoothEqn equation;
+  FrictionContact_nonsmooth_Newton_solvers equation;
 
   equation.problem = problem;
   equation.data = (void *) &acparams;
   equation.function = &nonsmoothEqnFischerBurmeisterFun;
 
-  frictionContactNonsmoothEqnSolve(&equation, reaction, velocity, info,
+  frictionContact_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info,
                                    options);
 
 }
-

@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT3D_localAlartCurnier_H
-#define FRICTIONCONTACT3D_localAlartCurnier_H
+#ifndef FRICTIONCONTACT3D_nonsmooth_Newton_AlartCurnier_H
+#define FRICTIONCONTACT3D_nonsmooth_Newton_AlartCurnier_H
 
-/*!\file FrictionContact3D_localAlartCurnier.h
+/*!\file FrictionContact3D_nonsmooth_Newton_AlartCurnier.h
 
   \brief Typedef and functions declarations related to Alart-Curnier
   formulation for 3 dimension frictional contact problems in Local Coordinates.
@@ -70,7 +70,7 @@ extern "C"
    * \param info returned info
    * \param options  the solver options
    */
-  void frictionContact3D_localAlartCurnier(
+  void frictionContact3D_nonsmooth_Newton_AlartCurnier(
     FrictionContactProblem* problem,
     double *reaction,
     double *velocity,

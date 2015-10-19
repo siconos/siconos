@@ -80,9 +80,6 @@ void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, Fricti
      Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen formulation.
   */
 
-
-
-
   /* Alart-Curnier formulation */
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_AlartCurnierNewton)
   {
@@ -149,8 +146,6 @@ int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*
   {
     info = DampedLocalNonsmoothNewtonSolver(localproblem, reactionBlock, iparam, dparam);
   }
-
-
 
 
   else

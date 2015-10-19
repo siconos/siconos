@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT3D_localFischerBurmeister_H
-#define FRICTIONCONTACT3D_localFischerBurmeister_H
+#ifndef FRICTIONCONTACT3D_nonsmooth_Newton_FischerBurmeister_H
+#define FRICTIONCONTACT3D_nonsmooth_Newton_FischerBurmeister_H
 
-/*!\file FrictionContact3D_localFischerBurmeister.h
+/*!\file FrictionContact3D_nonsmooth_Newton_FischerBurmeister.h
 
   \brief Typedef and functions declarations related to Fischer-Burmeister
   formulation for 3 dimension frictional contact problems in Local Coordinates.
@@ -63,7 +63,7 @@ extern "C"
    * \param info returned info
    * \param options  the solver options
    */
-  void frictionContact3D_localFischerBurmeister(
+  void frictionContact3D_nonsmooth_Newton_FischerBurmeister(
     FrictionContactProblem* problem,
     double *reaction,
     double *velocity,
