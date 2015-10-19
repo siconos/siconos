@@ -67,7 +67,7 @@ def init_display(backend_str=None, size=(1024, 768)):
 
         class AppFrame(wx.Frame):
             def __init__(self, parent):
-                wx.Frame.__init__(self, parent, -1, "pythonOCC-%s 3d viewer ('wx' backend)" % VERSION, style=wx.DEFAULT_FRAME_STYLE, size=size)
+                wx.Frame.__init__(self, parent, -1, "Siconos mechanisms visualization based on pythonOCC-%s 3d viewer ('wx' backend)" % VERSION, style=wx.DEFAULT_FRAME_STYLE, size=size)
                 self.canva = wxViewer3d(self)
                 self.menuBar = wx.MenuBar()
                 self._menus = {}
@@ -113,7 +113,7 @@ def init_display(backend_str=None, size=(1024, 768)):
             def __init__(self, *args):
                 QtGui.QMainWindow.__init__(self, *args)
                 self.canva = qtViewer3d(self)
-                self.setWindowTitle("pythonOCC-%s 3d viewer ('%s' backend)" % (VERSION, USED_BACKEND))
+                self.setWindowTitle("Siconos mechanisms visualization based on  pythonOCC-%s 3d viewer ('%s' backend)" % (VERSION, USED_BACKEND))
                 self.resize(size[0], size[1])
                 self.setCentralWidget(self.canva)
                 if not sys.platform == 'darwin':
