@@ -398,15 +398,6 @@
     set_SolverOptions(SO, id);
     return SO;
   }
-  // SolverOptions(FRICTION_SOLVER id)
-  // {
-  //   return BOOST_PP_CAT(FE_SWIG_INTERNAL_MEMBER,SolverOptions_makeSolverOptions)(NULL, NULL, id);
-  // }
-
-  // SolverOptions(FrictionContactProblem* fcp, FRICTION_SOLVER id)
-  // {
-  //   return BOOST_PP_CAT(FE_SWIG_INTERNAL_MEMBER,SolverOptions_makeSolverOptions)(NULL, fcp, id);
-  // }
 
   ~_SolverOptions()
     {
@@ -1101,10 +1092,10 @@
 
 
 #define GET_ATTR(OBJ,ATTR)                                              \
-  ATTR = PyObject_GetAttrString(OBJ,BOOST_PP_STRINGIZE(ATTR));          \
+  ATTR = PyObject_GetAttrString(OBJ,#ATTR);          \
   if(!ATTR)                                                             \
   {                                                                     \
-    throw(std::invalid_argument(BOOST_PP_STRINGIZE(need a ATTR attr))); \
+    throw(std::invalid_argument("need a " #ATTR "attr")); \
   }
 
 /* I'm not sure it's a good idea to duplicate thise here ... it is already defined in csparse.h */

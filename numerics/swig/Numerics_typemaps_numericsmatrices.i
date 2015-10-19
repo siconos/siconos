@@ -143,10 +143,7 @@
   %#endif
   if (!$1)
   {
-    SWIG_exception_fail(SWIG_IOError, 
-                        "in method '" 
-                        BOOST_PP_STRINGIZE($symname)
-                        "cannot fopen file");
+    SWIG_exception_fail(SWIG_IOError, "in method '" "$symname" "' cannot fopen file");
   }
 }
 
@@ -182,7 +179,7 @@
 #define GET_INT(OBJ,VAR)                                                \
   if(!PyInt_Check(OBJ))                                                 \
   {                                                                     \
-    throw(std::invalid_argument(BOOST_PP_STRINGIZE(OBJ: expecting an int))); \
+    throw(std::invalid_argument(#OBJ ": expecting an int")); \
   }                                                                     \
   VAR = PyInt_AsLong(OBJ)
 
@@ -192,7 +189,7 @@
   if (!PyInt_Check(_TEMP##VAR))                                         \
   {                                                                     \
     Py_XDECREF(_TEMP##VAR);                                             \
-    throw(std::invalid_argument(BOOST_PP_STRINGIZE(OBJ: expecting an int))); \
+    throw(std::invalid_argument(#OBJ ": expecting an int")); \
   }                                                                     \
   VAR = PyInt_AsLong(_TEMP##VAR);                                   \
   Py_DECREF(_TEMP##VAR)
