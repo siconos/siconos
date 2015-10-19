@@ -25,15 +25,25 @@ before it.
 
 
 --------------------------------------------------------------------------------
-  v3.8.0
+  v3.8.0 (in development branch siconos/master)
 --------------------------------------------------------------------------------
 Main Changes:
-	* NewtonEulerDS Add internal forces and associated jacobians to improve
+	
+	* [kernel] Add Boundary conditions for the NewtonEulerDS and fix a bug in the 
+	LagrangianDS boundary condition
+	* [kernel] Development of D1MinusLinear for NEwtonEulerDS and LagrangianDS
+	with Half explicit scheme at the velocity level. See paper with T. Schindler
+	in CMAME 2015
+	* [kernel] NewtonEulerDS Add internal forces and associated jacobians to improve
 	the convergence of the Newton loop. Remove adhoc update of T and MObjToAbs
-	* MoreauJeanOSI Add a correct treatment of NewtonEuler DS with the Newton
+	* [kernel] MoreauJeanOSI Add a correct treatment of NewtonEuler DS with the Newton
 	Loop
-	* Creation of the Control module in Siconos
-
+	* [control] Creation of the Control module in Siconos
+	* [numerics] Add relaxation in NSGS solvers for FC3D
+	* [numerics] Add SOCLCP solvers
+	* [numerics] Improve updating rule for FP and EG solvers for VI
+	* [numerics] Update LMGC drivers for GFC3D 
+	
 
 ################## Old Changelog files before merge
 
