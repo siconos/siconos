@@ -16,8 +16,7 @@ include(gams_setup)
 set(${COMPONENT}_DIRS
   src/.
   src/tools
-  src/tools/InterfaceToPathFerris/include
-  src/tools/InterfaceToPathFerris/interface
+  src/tools/InterfaceToPathFerris
   src/AVI
   src/LCP
   src/MLCP
@@ -42,11 +41,7 @@ set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
 set(${COMPONENT}_EXCLUDE_DOXY
-  src/netlib
-  src/hairer
-  src/InterfaceToPathFerris/include
-  src/Unstable_or_deprecated
-  src/tools/f2c.h )
+  src/Unstable_or_deprecated)
 
 # Windows stuff
 include(WindowsNumericsSetup)

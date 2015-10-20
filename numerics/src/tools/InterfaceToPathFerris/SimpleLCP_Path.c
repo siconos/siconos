@@ -27,17 +27,17 @@
 
 #ifdef HAVE_PATHFERRIS
 
-#include "InterfaceToPathFerris/include/MCP_Interface.h"
+#include "PATH_SDK/include/MCP_Interface.h"
 
-#include "InterfaceToPathFerris/include/Path.h"
-#include "InterfaceToPathFerris/include/PathOptions.h"
+#include "PATH_SDK/include/Path.h"
+#include "PATH_SDK/include/PathOptions.h"
 
-#include "InterfaceToPathFerris/include/Error.h"
-#include "InterfaceToPathFerris/include/Macros.h"
-#include "InterfaceToPathFerris/include/Memory.h"
-#include "InterfaceToPathFerris/include/Output.h"
-#include "InterfaceToPathFerris/include/Options.h"
-#include "InterfaceToPathFerris/include/Output_Interface.h"
+#include "PATH_SDK/include/Error.h"
+#include "PATH_SDK/include/Macros.h"
+#include "PATH_SDK/include/Memory.h"
+#include "PATH_SDK/include/Output.h"
+#include "PATH_SDK/include/Options.h"
+#include "PATH_SDK/include/Output_Interface.h"
 typedef struct
 {
   int variables;
@@ -492,7 +492,7 @@ void SimpleLCP(int variables,
 }
 #else
 
-#include "InterfaceToPathFerris/include/Types.h"
+#include "PATH_SDK/include/Types.h"
 
 void SimpleLCP(int variables,
                int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,

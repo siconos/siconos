@@ -49,7 +49,7 @@
 #ifndef SIMPLELCP_H
 #define SIMPLELCP_H
 
-#include "InterfaceToPathFerris/include/Types.h"
+#include "PATH_SDK/include/Types.h"
 /*because libpath46.so*/
 
 #include <stdint.h>

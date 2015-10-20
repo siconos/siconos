@@ -21,6 +21,7 @@ endif()
 # --- Sources and headers ---
 # source directories for numerics
 set(${COMPONENT}_DIRS
+  .
   blas_lapack
   hairer
   netlib/dftemplates
@@ -37,13 +38,15 @@ set(${COMPONENT}_DIRS
 set(${COMPONENT}_Unstable_SRCS)
 
 # List of directories of headers not to be installed
-set(${COMPONENT}_HDRS_EXCLUDE_DIR SOL/lumod-c)
+set(${COMPONENT}_HDRS_EXCLUDE_DIR PATH_SDK/include SOL/lumod-c)
 
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
 set(${COMPONENT}_EXCLUDE_DOXY
   netlib
-  hairer)
+  hairer
+  PATH_SDK/include
+  tools)
 
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
