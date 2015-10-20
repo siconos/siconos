@@ -28,6 +28,7 @@ set(${COMPONENT}_DIRS
   numeric_bindings
   ql0001
   SOL/lumod-c
+  SuiteSparse/CSparse
   tools
 )
 
