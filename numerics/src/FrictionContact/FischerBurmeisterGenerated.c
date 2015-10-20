@@ -48,7 +48,7 @@
 // hack, should be prevented in sage/sympy/maple or in code generation
 #define sqrt(x) ((x < 0) && ( x > - ZERO) ? 0 : (assert(x>=0),sqrt(x)))
 
-void frictionContact3D_FischerBurmeisterFABGenerated(
+void fc3d_FischerBurmeisterFABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -2568,7 +2568,7 @@ void frictionContact3D_FischerBurmeisterFABGenerated(
         x220=random2*x122;result[20] = -x117*x220 + x118*x220 + 1;
     }
 }
-void frictionContact3D_FischerBurmeisterFGenerated(
+void fc3d_FischerBurmeisterFGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -2690,7 +2690,7 @@ void frictionContact3D_FischerBurmeisterFGenerated(
         x21=random2*x16;result[2] = x10*x21 - x11*x21 + x19;
     }
 }
-void frictionContact3D_FischerBurmeisterABGenerated(
+void fc3d_FischerBurmeisterABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -5317,7 +5317,7 @@ void frictionContact3D_FischerBurmeisterABGenerated(
     }
 }
 
-void frictionContact3D_FischerBurmeisterFMeritGenerated(
+void fc3d_FischerBurmeisterFMeritGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -5367,7 +5367,7 @@ void frictionContact3D_FischerBurmeisterFMeritGenerated(
     x17=((x13) ? (x12*x7): (random2*x14));
     result[0] = 0.5*(mu*rn - x10 - x11 + x3)*(mu*rn - x10 - x11 + x3) + 0.5*(mu*ut1 + rt1 + x10*x16 - x11*x16)*(mu*ut1 + rt1 + x10*x16 - x11*x16) + 0.5*(mu*ut2 + rt2 + x10*x17 - x11*x17)*(mu*ut2 + rt2 + x10*x17 - x11*x17);
 }
-void frictionContact3D_FischerBurmeisterGradFMeritGenerated(
+void fc3d_FischerBurmeisterGradFMeritGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -5937,7 +5937,7 @@ void frictionContact3D_FischerBurmeisterGradFMeritGenerated(
 
 
 
-void frictionContact3D_FischerBurmeisterFunctionGenerated(
+void fc3d_FischerBurmeisterFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,
@@ -5960,7 +5960,7 @@ void frictionContact3D_FischerBurmeisterFunctionGenerated(
   if (f && A && B)
   {
 
-    frictionContact3D_FischerBurmeisterFABGenerated(
+    fc3d_FischerBurmeisterFABGenerated(
       *reaction0, *reaction1, *reaction2,
       *velocity0, *velocity1, *velocity2,
       mu,
@@ -5975,7 +5975,7 @@ void frictionContact3D_FischerBurmeisterFunctionGenerated(
   {
     if (f)
     {
-      frictionContact3D_FischerBurmeisterFGenerated(
+      fc3d_FischerBurmeisterFGenerated(
         *reaction0, *reaction1, *reaction2,
         *velocity0, *velocity1, *velocity2,
         mu,
@@ -5986,7 +5986,7 @@ void frictionContact3D_FischerBurmeisterFunctionGenerated(
 
     if (A && B)
     {
-      frictionContact3D_FischerBurmeisterABGenerated(
+      fc3d_FischerBurmeisterABGenerated(
         *reaction0, *reaction1, *reaction2,
         *velocity0, *velocity1, *velocity2,
         mu,
@@ -5998,7 +5998,7 @@ void frictionContact3D_FischerBurmeisterFunctionGenerated(
   }
 }
 
-void frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated(
+void fc3d_FischerBurmeisterGradMeritFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,
@@ -6015,7 +6015,7 @@ void frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated(
   SET3(velocity);
   SET3(rho);
 
-  frictionContact3D_FischerBurmeisterGradFMeritGenerated(
+  fc3d_FischerBurmeisterGradFMeritGenerated(
     *reaction0, *reaction1, *reaction2,
     *velocity0, *velocity1, *velocity2,
     mu,

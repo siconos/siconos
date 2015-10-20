@@ -223,35 +223,35 @@ if(WITH_${COMPONENT}_TESTING)
   BEGIN_TEST(src/FrictionContact/test)
   
   #NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
-  NEW_TEST(FC3D_DefaultSolverOptionstest FrictionContact3D_DefaultSolverOptions_test.c)
+  NEW_TEST(FC3D_DefaultSolverOptionstest fc3d_DefaultSolverOptions_test.c)
   
   
   # (see FrictionContact/test/README for short details)
-  NEW_TEST(FC3Dtest1 FrictionContact3D_test1.c)
-  NEW_TEST(FC3Dtest2 FrictionContact3D_test2.c)
-  NEW_TEST(FC3Dtest3 FrictionContact3D_test3.c)
-  NEW_TEST(FC3Dtest4 FrictionContact3D_test4.c)
+  NEW_TEST(FC3Dtest1 fc3d_test1.c)
+  NEW_TEST(FC3Dtest2 fc3d_test2.c)
+  NEW_TEST(FC3Dtest3 fc3d_test3.c)
+  NEW_TEST(FC3Dtest4 fc3d_test4.c)
   SET(FC3Dtest5_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest5 FrictionContact3D_test5.c)
+  NEW_TEST(FC3Dtest5 fc3d_test5.c)
   
   IF(PATHFERRIS_FOUND)
-    NEW_TEST(FC3Dtest6 FrictionContact3D_test6.c)
+    NEW_TEST(FC3Dtest6 fc3d_test6.c)
     SET(FC3Dtest6_PROPERTIES WILL_FAIL TRUE)
   ENDIF(PATHFERRIS_FOUND)
   
   SET(FC3Dtest7_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest7 FrictionContact3D_test7.c)
+  NEW_TEST(FC3Dtest7 fc3d_test7.c)
   
   
-  NEW_TEST(FC3Dtest9 FrictionContact3D_test9.c)
+  NEW_TEST(FC3Dtest9 fc3d_test9.c)
 
 
 
-  NEW_TEST(FC3Dtest10 FrictionContact3D_test10.c)
-  NEW_TEST(FC3Dtest11 FrictionContact3D_test11.c)
-  NEW_TEST(FC3Dtest12 FrictionContact3D_test12.c)
-  NEW_TEST(FC3Dtest13 FrictionContact3D_test13.c)
-  NEW_TEST(FC3Dtest14 FrictionContact3D_test14.c)
+  NEW_TEST(FC3Dtest10 fc3d_test10.c)
+  NEW_TEST(FC3Dtest11 fc3d_test11.c)
+  NEW_TEST(FC3Dtest12 fc3d_test12.c)
+  NEW_TEST(FC3Dtest13 fc3d_test13.c)
+  NEW_TEST(FC3Dtest14 fc3d_test14.c)
 
   SET(NSGS_TOL 1e-6)
   SET(NSGS_NB_IT 10000)
@@ -288,42 +288,42 @@ if(WITH_${COMPONENT}_TESTING)
 
   SET(FC3Dtest20_PROPERTIES WILL_FAIL TRUE)
 
-  NEW_TEST(FC3Dtest20 FrictionContact3D_test20.c) 
-  NEW_TEST(FC3Dtest21 FrictionContact3D_test21.c)
-  NEW_TEST(FC3Dtest22 FrictionContact3D_test22.c)
-  NEW_TEST(FC3Dtest23 FrictionContact3D_test23.c)
+  NEW_TEST(FC3Dtest20 fc3d_test20.c) 
+  NEW_TEST(FC3Dtest21 fc3d_test21.c)
+  NEW_TEST(FC3Dtest22 fc3d_test22.c)
+  NEW_TEST(FC3Dtest23 fc3d_test23.c)
   
-  NEW_TEST(FC3Dtest30 FrictionContact3D_test30.c)
-  NEW_TEST(FC3Dtest31 FrictionContact3D_test31.c)
-  NEW_TEST(FC3Dtest32 FrictionContact3D_test32.c)
+  NEW_TEST(FC3Dtest30 fc3d_test30.c)
+  NEW_TEST(FC3Dtest31 fc3d_test31.c)
+  NEW_TEST(FC3Dtest32 fc3d_test32.c)
   
-  NEW_TEST(FC3Dtest33 FrictionContact3D_test33.c) # DSFP converges with specific rho
+  NEW_TEST(FC3Dtest33 fc3d_test33.c) # DSFP converges with specific rho
 
-  NEW_TEST(FC3Dtest3400 FrictionContact3D_test3400.c) # EG 
-  NEW_TEST(FC3Dtest35 FrictionContact3D_test35.c)     # EG
+  NEW_TEST(FC3Dtest3400 fc3d_test3400.c) # EG 
+  NEW_TEST(FC3Dtest35 fc3d_test35.c)     # EG
 
-  NEW_TEST(FC3Dtest36 FrictionContact3D_test36.c) #TFP with NSGS and projection on cylinder
+  NEW_TEST(FC3Dtest36 fc3d_test36.c) #TFP with NSGS and projection on cylinder
 
   #SET(FC3Dtest37_PROPERTIES WILL_FAIL TRUE)
-  #NEW_TEST(FC3Dtest37 FrictionContact3D_test37.c) #TFP with ProjectedGradientOnCylinder is not working ...
+  #NEW_TEST(FC3Dtest37 fc3d_test37.c) #TFP with ProjectedGradientOnCylinder is not working ...
 
-  #NEW_TEST(FC3Dtest38 FrictionContact3D_test38.c) # HP is not converging
+  #NEW_TEST(FC3Dtest38 fc3d_test38.c) # HP is not converging
 
-  NEW_TEST(FC3Dtest40 FrictionContact3D_test40.c) # VI_EG 
-  NEW_TEST(FC3Dtest41 FrictionContact3D_test41.c) # VI_FPP
-  NEW_TEST(FC3Dtest42 FrictionContact3D_test42.c) # VI_FPP
-  NEW_TEST(FC3Dtest43 FrictionContact3D_test43.c) # DSFP converges with specific rho
-  NEW_TEST(FC3Dtest44 FrictionContact3D_test44.c) # VI_EG
-  NEW_TEST(FC3Dtest45 FrictionContact3D_test45.c) # VI_EG
+  NEW_TEST(FC3Dtest40 fc3d_test40.c) # VI_EG 
+  NEW_TEST(FC3Dtest41 fc3d_test41.c) # VI_FPP
+  NEW_TEST(FC3Dtest42 fc3d_test42.c) # VI_FPP
+  NEW_TEST(FC3Dtest43 fc3d_test43.c) # DSFP converges with specific rho
+  NEW_TEST(FC3Dtest44 fc3d_test44.c) # VI_EG
+  NEW_TEST(FC3Dtest45 fc3d_test45.c) # VI_EG
   
-  NEW_TEST(FC3Dtest46 FrictionContact3D_test46.c) # FPP
-  NEW_TEST(FC3Dtest47 FrictionContact3D_test47.c) # EG
+  NEW_TEST(FC3Dtest46 fc3d_test46.c) # FPP
+  NEW_TEST(FC3Dtest47 fc3d_test47.c) # EG
 
   SET(FC3Dtest50_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest50 FrictionContact3D_test50.c)
+  NEW_TEST(FC3Dtest50 fc3d_test50.c)
   
 
-  NEW_TEST(FC3Dtest60 FrictionContact3D_test60.c)
+  NEW_TEST(FC3Dtest60 fc3d_test60.c)
 
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_AC Example1_Fc3D_SBM.dat)
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_FB Example1_Fc3D_SBM.dat)
@@ -345,49 +345,49 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_AC Capsules-i100-889.dat)
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_FB Capsules-i100-889.dat)
   
-  NEW_TEST(FC3Dtest70 FrictionContact3D_test70.c) # DSFP
-  NEW_TEST(FC3Dtest71 FrictionContact3D_test71.c) # DSFP
-  NEW_TEST(FC3Dtest72 FrictionContact3D_test72.c)	
-  NEW_TEST(FC3Dtest73 FrictionContact3D_test73.c)
-  NEW_TEST(FC3Dtest74 FrictionContact3D_test74.c)
+  NEW_TEST(FC3Dtest70 fc3d_test70.c) # DSFP
+  NEW_TEST(FC3Dtest71 fc3d_test71.c) # DSFP
+  NEW_TEST(FC3Dtest72 fc3d_test72.c)	
+  NEW_TEST(FC3Dtest73 fc3d_test73.c)
+  NEW_TEST(FC3Dtest74 fc3d_test74.c)
   
-  NEW_TEST(FC3Dtest80 FrictionContact3D_test80.c) # Proximal
-  NEW_TEST(FC3Dtest81 FrictionContact3D_test81.c) # Proximal
-  NEW_TEST(FC3Dtest83 FrictionContact3D_test83.c) # Proximal
+  NEW_TEST(FC3Dtest80 fc3d_test80.c) # Proximal
+  NEW_TEST(FC3Dtest81 fc3d_test81.c) # Proximal
+  NEW_TEST(FC3Dtest83 fc3d_test83.c) # Proximal
 
-  NEW_TEST(FC3Dtest82 FrictionContact3D_test82.c) # Proximal
+  NEW_TEST(FC3Dtest82 fc3d_test82.c) # Proximal
   SET(FC3Dtest90_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest90 FrictionContact3D_test90.c) # TFP with cycling
+  NEW_TEST(FC3Dtest90 fc3d_test90.c) # TFP with cycling
 
-  NEW_TEST(FC3DNewFromFortranData FrictionContact3D_newFromFortranData.c)
-  NEW_TEST(FC3DLmgcDriver1 FrictionContact3D_LmgcDriver_test1.c)
-  NEW_TEST(FC3DLmgcDriver2 FrictionContact3D_LmgcDriver_test2.c)
-  NEW_TEST(FC3DLmgcDriver3 FrictionContact3D_LmgcDriver_test3.c)
+  NEW_TEST(FC3DNewFromFortranData fc3d_newFromFortranData.c)
+  NEW_TEST(FC3DLmgcDriver1 fc3d_LmgcDriver_test1.c)
+  NEW_TEST(FC3DLmgcDriver2 fc3d_LmgcDriver_test2.c)
+  NEW_TEST(FC3DLmgcDriver3 fc3d_LmgcDriver_test3.c)
 
-  NEW_TEST(FC3DLmgcDriver4 FrictionContact3D_LmgcDriver_test4.c)
+  NEW_TEST(FC3DLmgcDriver4 fc3d_LmgcDriver_test4.c)
 
-  NEW_TEST(FC3DLmgcDriver5 FrictionContact3D_LmgcDriver_test5.c)
+  NEW_TEST(FC3DLmgcDriver5 fc3d_LmgcDriver_test5.c)
 
-  NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)# TFP
-  NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)# TFP
+  NEW_TEST(FC3Dtest100 fc3d_test100.c)# TFP
+  NEW_TEST(FC3Dtest110 fc3d_test110.c)# TFP
 
-  NEW_TEST(FC3Dtest120 FrictionContact3D_test120.c) # TFP
-  NEW_TEST(FC3Dtest121 FrictionContact3D_test121.c) # DSFP
+  NEW_TEST(FC3Dtest120 fc3d_test120.c) # TFP
+  NEW_TEST(FC3Dtest121 fc3d_test121.c) # DSFP
 
-  NEW_TEST(FC3Dtest122 FrictionContact3D_test122.c) # ACLMFP
-  NEW_TEST(FC3Dtest123 FrictionContact3D_test123.c) # SOCLCP
-  NEW_TEST(FC3Dtest124 FrictionContact3D_test124.c) # NSGS
+  NEW_TEST(FC3Dtest122 fc3d_test122.c) # ACLMFP
+  NEW_TEST(FC3Dtest123 fc3d_test123.c) # SOCLCP
+  NEW_TEST(FC3Dtest124 fc3d_test124.c) # NSGS
 
-  NEW_TEST(FC3Dtest125 FrictionContact3D_test125.c) # TFP with other strategy for internal solver
-  NEW_TEST(FC3Dtest126 FrictionContact3D_test126.c) # ACLMFPwith other strategy for internal solver
+  NEW_TEST(FC3Dtest125 fc3d_test125.c) # TFP with other strategy for internal solver
+  NEW_TEST(FC3Dtest126 fc3d_test126.c) # ACLMFPwith other strategy for internal solver
  
 
-  NEW_TEST(FC3Dtest130 FrictionContact3D_test130.c)
+  NEW_TEST(FC3Dtest130 fc3d_test130.c)
 
-  NEW_TEST(FC3Dtest200 FrictionContact3D_test200.c)
-  NEW_TEST(FC3Dtest210 FrictionContact3D_test210.c)
+  NEW_TEST(FC3Dtest200 fc3d_test200.c)
+  NEW_TEST(FC3Dtest210 fc3d_test210.c)
 
-  NEW_TEST(FC3Dtest300 FrictionContact3D_test300.c)
+  NEW_TEST(FC3Dtest300 fc3d_test300.c)
 
 
   # Global Alart Curnier + Rover ok.
@@ -447,67 +447,67 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_FB NESpheres_30_1.dat)
 
   ## test from the Rover Example
-  NEW_TEST(FC3Dtest501 FrictionContact3D_Rover2.c) ## test ok without LineSearch
-  NEW_TEST(FC3Dtest503 FrictionContact3D_Rover3.c) ## LineSearch is needed 
+  NEW_TEST(FC3Dtest501 fc3d_Rover2.c) ## test ok without LineSearch
+  NEW_TEST(FC3Dtest503 fc3d_Rover3.c) ## LineSearch is needed 
 
 
   ## test 2D dense on two differents files
-  NEW_TEST(FrictionContact2D_Problemtest1 FrictionContact2D_test1.c)
-  NEW_TEST(FrictionContact2D_Problemtest2 FrictionContact2D_test2.c)
-  NEW_TEST(FrictionContact2D_Problemtest3 FrictionContact2D_test3.c)
+  NEW_TEST(fc2d_Problemtest1 fc2d_test1.c)
+  NEW_TEST(fc2d_Problemtest2 fc2d_test2.c)
+  NEW_TEST(fc2d_Problemtest3 fc2d_test3.c)
   
   
-  NEW_TEST(FrictionContact2D_Problemtest10 FrictionContact2D_test10.c)
-  NEW_TEST(FrictionContact2D_Problemtest11 FrictionContact2D_test11.c)
-  NEW_TEST(FrictionContact2D_Problemtest12 FrictionContact2D_test12.c)
+  NEW_TEST(fc2d_Problemtest10 fc2d_test10.c)
+  NEW_TEST(fc2d_Problemtest11 fc2d_test11.c)
+  NEW_TEST(fc2d_Problemtest12 fc2d_test12.c)
   
 
   ## test 2D sparse on 4 differents files
-  NEW_TEST(FrictionContact2D_Problemtest20 FrictionContact2D_test20.c)
-  NEW_TEST(FrictionContact2D_Problemtest21 FrictionContact2D_test21.c)
-  NEW_TEST(FrictionContact2D_Problemtest22 FrictionContact2D_test22.c)
-  NEW_TEST(FrictionContact2D_Problemtest23 FrictionContact2D_test23.c)
+  NEW_TEST(fc2d_Problemtest20 fc2d_test20.c)
+  NEW_TEST(fc2d_Problemtest21 fc2d_test21.c)
+  NEW_TEST(fc2d_Problemtest22 fc2d_test22.c)
+  NEW_TEST(fc2d_Problemtest23 fc2d_test23.c)
 
   ## test 2D dense with Lemke NSGS failed on it
-  NEW_TEST(FrictionContact2D_Problemtest30 FrictionContact2D_test30.c)
-  NEW_TEST(FrictionContact2D_Problemtest31 FrictionContact2D_test31.c)
-  #SET(FrictionContact2D_Problemtest32 WILL_FAIL TRUE)
-  #NEW_TEST(FrictionContact2D_Problemtest32 FrictionContact2D_test32.c)
+  NEW_TEST(fc2d_Problemtest30 fc2d_test30.c)
+  NEW_TEST(fc2d_Problemtest31 fc2d_test31.c)
+  #SET(fc2d_Problemtest32 WILL_FAIL TRUE)
+  #NEW_TEST(fc2d_Problemtest32 fc2d_test32.c)
 
 
 
 
   ## test 2D dense with Enum Lemke failed on 41 !!
-  NEW_TEST(FrictionContact2D_Problemtest40 FrictionContact2D_test40.c)
-  NEW_TEST(FrictionContact2D_Problemtest41 FrictionContact2D_test41.c)
+  NEW_TEST(fc2d_Problemtest40 fc2d_test40.c)
+  NEW_TEST(fc2d_Problemtest41 fc2d_test41.c)
 
 
-  NEW_TEST(GFC3D_test1 GlobalFrictionContact3D_test1.c)
-  NEW_TEST(GFC3D_test2 GlobalFrictionContact3D_test2.c)
-  NEW_TEST(GFC3D_test3 GlobalFrictionContact3D_test3.c)
-  NEW_TEST(GFC3D_test4 GlobalFrictionContact3D_test4.c)
-  NEW_TEST(GFC3D_test5 GlobalFrictionContact3D_test5.c)
+  NEW_TEST(GFC3D_test1 gfc3d_test1.c)
+  NEW_TEST(GFC3D_test2 gfc3d_test2.c)
+  NEW_TEST(GFC3D_test3 gfc3d_test3.c)
+  NEW_TEST(GFC3D_test4 gfc3d_test4.c)
+  NEW_TEST(GFC3D_test5 gfc3d_test5.c)
 
 
   SET(GFC3D_test6_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(GFC3D_test6 GlobalFrictionContact3D_test6.c)
+  NEW_TEST(GFC3D_test6 gfc3d_test6.c)
   
-  NEW_TEST(GFC3D_test7 GlobalFrictionContact3D_test7.c)
+  NEW_TEST(GFC3D_test7 gfc3d_test7.c)
   
-  NEW_TEST(GFC3D_test10 GlobalFrictionContact3D_test10.c)
-  NEW_TEST(GFC3D_test11 GlobalFrictionContact3D_test11.c)
-  NEW_TEST(GFC3D_test12 GlobalFrictionContact3D_test12.c)
-  NEW_TEST(GFC3D_test13 GlobalFrictionContact3D_test13.c)
-  NEW_TEST(GFC3D_test14 GlobalFrictionContact3D_test14.c)
-  NEW_TEST(GFC3D_test14bis GlobalFrictionContact3D_test14bis.c)
-  NEW_TEST(GFC3D_test15 GlobalFrictionContact3D_test15.c)
-  NEW_TEST(GFC3D_test16 GlobalFrictionContact3D_test16.c)
+  NEW_TEST(GFC3D_test10 gfc3d_test10.c)
+  NEW_TEST(GFC3D_test11 gfc3d_test11.c)
+  NEW_TEST(GFC3D_test12 gfc3d_test12.c)
+  NEW_TEST(GFC3D_test13 gfc3d_test13.c)
+  NEW_TEST(GFC3D_test14 gfc3d_test14.c)
+  NEW_TEST(GFC3D_test14bis gfc3d_test14bis.c)
+  NEW_TEST(GFC3D_test15 gfc3d_test15.c)
+  NEW_TEST(GFC3D_test16 gfc3d_test16.c)
 
   
   ## Alart Curnier functions
-  NEW_TEST(AlartCurnierFunctions_test FrictionContact3D_AlartCurnierFunctions_test.c)
+  NEW_TEST(AlartCurnierFunctions_test fc3d_AlartCurnierFunctions_test.c)
   IF(WITH_FCLIB)
-  NEW_TEST(FCLIB_test1 FrictionContact3D_writefclib_local_test.c)
+  NEW_TEST(FCLIB_test1 fc3d_writefclib_local_test.c)
   ENDIF(WITH_FCLIB)
   SET(FC3D_DATA_SET
    "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;Example1_Fc3D.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;NESpheres_10_1.dat;NESpheres_30_1.dat;OneObject-i100000-499.hdf5.dat;Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;Rover4396.dat;Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;KaplasTower-i1061-4.hdf5.dat;Confeti-ex13-Fc3D-SBM.dat;BoxesStack1-i100000-32.hdf5.dat;FrictionContactProblem00237.dat;FrictionContactProblem00727.dat")

@@ -55,7 +55,7 @@
 // this file consists of generated code
 //#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
-void frictionContact3D_AlartCurnierFABGenerated(
+void fc3d_AlartCurnierFABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -505,7 +505,7 @@ void frictionContact3D_AlartCurnierFABGenerated(
         result[20] = x30 - x35;
     }
 }
-void frictionContact3D_AlartCurnierFGenerated(
+void fc3d_AlartCurnierFGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -607,7 +607,7 @@ void frictionContact3D_AlartCurnierFGenerated(
         result[2] = rt2 - x12*(rt2 - x6);
     }
 }
-void frictionContact3D_AlartCurnierABGenerated(
+void fc3d_AlartCurnierABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -990,7 +990,7 @@ void frictionContact3D_AlartCurnierABGenerated(
     }
 }
 
-void frictionContact3D_AlartCurnierFunctionGenerated(
+void fc3d_AlartCurnierFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,
@@ -1013,7 +1013,7 @@ void frictionContact3D_AlartCurnierFunctionGenerated(
   if (f && A && B)
   {
 
-    frictionContact3D_AlartCurnierFABGenerated(
+    fc3d_AlartCurnierFABGenerated(
       *reaction0, *reaction1, *reaction2,
       *velocity0, *velocity1, *velocity2,
       mu,
@@ -1028,7 +1028,7 @@ void frictionContact3D_AlartCurnierFunctionGenerated(
   {
     if (f)
     {
-      frictionContact3D_AlartCurnierFGenerated(
+      fc3d_AlartCurnierFGenerated(
         *reaction0, *reaction1, *reaction2,
         *velocity0, *velocity1, *velocity2,
         mu,
@@ -1039,7 +1039,7 @@ void frictionContact3D_AlartCurnierFunctionGenerated(
 
     if (A && B)
     {
-      frictionContact3D_AlartCurnierABGenerated(
+      fc3d_AlartCurnierABGenerated(
         *reaction0, *reaction1, *reaction2,
         *velocity0, *velocity1, *velocity2,
         mu,
@@ -1051,7 +1051,7 @@ void frictionContact3D_AlartCurnierFunctionGenerated(
   }
 }
 
-void frictionContact3D_AlartCurnierJeanMoreauFABGenerated(
+void fc3d_AlartCurnierJeanMoreauFABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -1468,7 +1468,7 @@ void frictionContact3D_AlartCurnierJeanMoreauFABGenerated(
         result[20] = x31 - x35;
     }
 }
-void frictionContact3D_AlartCurnierJeanMoreauFGenerated(
+void fc3d_AlartCurnierJeanMoreauFGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -1570,7 +1570,7 @@ void frictionContact3D_AlartCurnierJeanMoreauFGenerated(
         result[2] = rt2 - x12*(rt2 - x5);
     }
 }
-void frictionContact3D_AlartCurnierJeanMoreauABGenerated(
+void fc3d_AlartCurnierJeanMoreauABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -1920,7 +1920,7 @@ void frictionContact3D_AlartCurnierJeanMoreauABGenerated(
     }
 }
 
-void frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(
+void fc3d_AlartCurnierJeanMoreauFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,
@@ -1943,7 +1943,7 @@ void frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(
   if (f && A && B)
   {
 
-    frictionContact3D_AlartCurnierJeanMoreauFABGenerated(
+    fc3d_AlartCurnierJeanMoreauFABGenerated(
       *reaction0, *reaction1, *reaction2,
       *velocity0, *velocity1, *velocity2,
       mu,
@@ -1958,7 +1958,7 @@ void frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(
   {
     if (f)
     {
-      frictionContact3D_AlartCurnierJeanMoreauFGenerated(
+      fc3d_AlartCurnierJeanMoreauFGenerated(
         *reaction0, *reaction1, *reaction2,
         *velocity0, *velocity1, *velocity2,
         mu,
@@ -1969,7 +1969,7 @@ void frictionContact3D_AlartCurnierJeanMoreauFunctionGenerated(
 
     if (A && B)
     {
-      frictionContact3D_AlartCurnierJeanMoreauABGenerated(
+      fc3d_AlartCurnierJeanMoreauABGenerated(
         *reaction0, *reaction1, *reaction2,
         *velocity0, *velocity1, *velocity2,
         mu,

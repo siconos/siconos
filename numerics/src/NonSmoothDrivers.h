@@ -21,7 +21,7 @@
   \brief This file provides all generic functions (drivers), interfaces to the different formulations for Non-Smooth Problems available in Numerics.
   \todo solve_qp does not exist
 
-  Use FrictionContact3D tools.
+  Use fc3d tools.
 */
 #ifndef NonSmoothSolvers_H
 #define NonSmoothSolvers_H
@@ -49,9 +49,9 @@
 #include "MCP_Solvers.h"
 #include "LinearSystemProblem.h"
 #include "MixedComplementarityProblem.h"
-#include "FrictionContact2D_Solvers.h"
-#include "FrictionContact3D_Solvers.h"
-#include "GlobalFrictionContact3D_Solvers.h"
+#include "fc2d_Solvers.h"
+#include "fc3d_Solvers.h"
+#include "gfc3d_Solvers.h"
 #include "GenericMechanical_Solvers.h"
 
 #include "NonSmoothNewton.h"
@@ -95,7 +95,7 @@ extern "C"
    *  \param[in] global_options for Numerics (verbose mode ...)
    *  \return result (0 if successful otherwise 1).
    */
-  int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
+  int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
 
 
   /** General interface to solvers for friction-contact 3D problem
@@ -106,7 +106,7 @@ extern "C"
    *  \param[in] global_options for Numerics (verbose mode ...)
    *  \return result (0 if successful otherwise 1).
    */
-  int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
+  int fc3d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
 
  /** General interface to solvers for friction-contact 3D problem
    *  \param[in] problem the structure which handles the Friction-Contact problem
@@ -181,7 +181,7 @@ extern "C"
    *  \return result (0 if successful otherwise 1).
    *
    */
-  int frictionContact3D_LmgcDriver(double *reaction,
+  int fc3d_LmgcDriver(double *reaction,
                                    double *velocity,
                                    double *q,
                                    double *mu,
@@ -226,7 +226,7 @@ extern "C"
    *  \return result (0 if successful otherwise 1).
    *
    */
-  int globalFrictionContact3D_LmgcDriver(double *reaction,
+  int gfc3d_LmgcDriver(double *reaction,
                                          double *velocity,
                                          double *globalVelocity,
                                          double *q,

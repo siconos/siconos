@@ -64,7 +64,7 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   }
   else if (dim == 3)
   {
-    info = globalFrictionContact3D_driver(problem,
+    info = gfc3d_driver(problem,
                                           reaction , velocity, globalvelocity,
                                           options, &global_options);
   }

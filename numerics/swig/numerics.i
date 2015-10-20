@@ -43,14 +43,14 @@
 #include "SolverOptions.h"
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
-#include "FrictionContact3D_Solvers.h"
+#include "fc3d_Solvers.h"
 #include "Friction_cst.h"
-#include "FrictionContact3D_AlartCurnier_functions.h"
-#include "FrictionContact3D_nonsmooth_Newton_AlartCurnier.h"
-#include "FrictionContact3D_nonsmooth_Newton_FischerBurmeister.h"
+#include "fc3d_AlartCurnier_functions.h"
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"
+#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
 #include "AlartCurnierGenerated.h"
 #include "FischerBurmeisterGenerated.h"
-#include "FrictionContact3D_compute_error.h"
+#include "fc3d_compute_error.h"
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
 #include "SiconosSets.h"
@@ -331,13 +331,14 @@
     /* cf Friction_cst.h */
     if(id >= 400 && id < 500)
     {
-      frictionContact2D_setDefaultSolverOptions(SO, id);
+      fc3d_setDefaultSolverOptions(SO, id);
     }
     else
     {
-      frictionContact3D_setDefaultSolverOptions(SO, id);
+      fc3d_setDefaultSolverOptions(SO, id);
     }
 
+    
     return SO;
   }
 
@@ -778,24 +779,24 @@
 // Callback (see SolverOptions.i) needed here
 %typemap(in, numinputs=0) (FischerBurmeisterFun3x3Ptr computeACFun3x3) () {
   // Callback (see SolverOptions.i) needed here
-  $1 = &frictionContact3D_FischerBurmeisterFunctionGenerated;
+  $1 = &fc3d_FischerBurmeisterFunctionGenerated;
  }
 
 %typemap(in, numinputs=0) (AlartCurnierFun3x3Ptr computeACFun3x3) () {
   // Callback (see SolverOptions.i) needed here
-  $1 = &frictionContact3D_AlartCurnierFunctionGenerated;
+  $1 = &fc3d_AlartCurnierFunctionGenerated;
  }
 
-%include "FrictionContact3D_Solvers.h"
-%include "FrictionContact3D_unitary_enumerative.h"
-%include "FrictionContact2D_Solvers.h"
+%include "fc3d_Solvers.h"
+%include "fc3d_unitary_enumerative.h"
+%include "fc2d_Solvers.h"
 %include "Friction_cst.h"
-%include "FrictionContact3D_AlartCurnier_functions.h"
-%include "FrictionContact3D_nonsmooth_Newton_AlartCurnier.h"
-%include "FrictionContact3D_nonsmooth_Newton_FischerBurmeister.h"
+%include "fc3d_AlartCurnier_functions.h"
+%include "fc3d_nonsmooth_Newton_AlartCurnier.h"
+%include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
 %include "AlartCurnierGenerated.h"
 %include "FischerBurmeisterGenerated.h"
-%include "FrictionContact3D_compute_error.h"
+%include "fc3d_compute_error.h"
 %include "fclib_interface.h"
 
 

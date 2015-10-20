@@ -27,7 +27,7 @@
 #include "NumericsMatrix_private.h"
 #include "SiconosLapack.h"
 #include "misc.h"
-#include "GlobalFrictionContact3D_AlartCurnier.h"
+#include "gfc3d_AlartCurnier.h"
 //#define DEBUG_MESSAGES
 #include "debug.h"
 

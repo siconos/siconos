@@ -24,8 +24,8 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "OSNSMatrix.hpp"
 
-#include <FrictionContact2D_Solvers.h>
-#include <FrictionContact3D_Solvers.h>
+#include <fc2d_Solvers.h>
+#include <fc3d_Solvers.h>
 
 using namespace RELATION;
 
@@ -39,13 +39,13 @@ FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
 
   if (dimPb == 2)
   {
-    frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
-    _frictionContact_driver = &frictionContact2D_driver;
+    fc2d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
+    _frictionContact_driver = &fc2d_driver;
   }
   else if (dimPb == 3)
   {
-    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
-    _frictionContact_driver = &frictionContact3D_driver;
+    fc3d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
+    _frictionContact_driver = &fc3d_driver;
   }
   else
     RuntimeException::selfThrow("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");

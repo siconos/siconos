@@ -60,7 +60,7 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
 
   soclcp_as_vi->vi = vi;
   soclcp_as_vi->soclcp = problem;
-  /* frictionContact_display(fc3d_as_vi->fc3d); */
+  /* soclcp_display(fc3d_as_vi->fc3d); */
 
   SolverOptions * visolver_options = (SolverOptions *) malloc(sizeof(SolverOptions));
   variationalInequality_setDefaultSolverOptions(visolver_options,
@@ -73,11 +73,11 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
 
   if (isize != vi_isize )
   {
-    printf("size prolem in frictionContact3D_VI_ExtraGradient\n");
+    printf("size prolem in soclcp_VI_ExtraGradient\n");
   }
   if (dsize != vi_dsize )
   {
-    printf("size prolem in frictionContact3D_VI_ExtraGradient\n");
+    printf("size prolem in soclcp_VI_ExtraGradient\n");
   }
   int i;
   for (i = 0; i < isize; i++)

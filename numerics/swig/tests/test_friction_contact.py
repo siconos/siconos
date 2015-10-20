@@ -25,7 +25,7 @@ def test_fc3dnsgs():
     N.setNumericsVerbose(2)
     FCP = N.FrictionContactProblem(3,M,q,mu)
     SO=N.SolverOptions(N.SICONOS_FRICTION_3D_NSGS)
-    r=N.frictionContact3D_nsgs(FCP, reactions, velocities, SO)
+    r=N.fc3d_nsgs(FCP, reactions, velocities, SO)
     assert SO.dparam[1] < 1e-10
     assert not r
 
@@ -35,7 +35,7 @@ def test_fc3dlocalac():
     FCP = N.FrictionContactProblem(3,M,q,mu)
     SO=N.SolverOptions(N.SICONOS_FRICTION_3D_NSN_AC)
 
-    r = N.frictionContact3D_nonsmooth_Newton_AlartCurnier(FCP, reactions, velocities, SO)
+    r = N.fc3d_nonsmooth_Newton_AlartCurnier(FCP, reactions, velocities, SO)
     assert SO.dparam[1] < 1e-10
     assert not r
 
@@ -45,6 +45,6 @@ def test_fc3dfischer():
     FCP = N.FrictionContactProblem(3,M,q,mu)
     SO=N.SolverOptions(N.SICONOS_FRICTION_3D_NSN_FB)
 
-    r = N.frictionContact3D_nonsmooth_Newton_FischerBurmeister(FCP, reactions, velocities, SO)
+    r = N.fc3d_nonsmooth_Newton_FischerBurmeister(FCP, reactions, velocities, SO)
     assert SO.dparam[1] < 1e-10
     assert not r

@@ -51,13 +51,13 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 
   if (dim == 2)
   {
-    info = frictionContact2D_driver(problem,
+    info = fc2d_driver(problem,
                                     reaction , velocity,
                                     options, &global_options);
   }
   else if (dim == 3)
   {
-    info = frictionContact3D_driver(problem,
+    info = fc3d_driver(problem,
                                     reaction , velocity,
                                     options, &global_options);
   }
@@ -138,13 +138,13 @@ int frictionContact_test_function_hdf5(const char * path, SolverOptions * option
 
   if (dim == 2)
   {
-    info = frictionContact2D_driver(problem,
+    info = fc2d_driver(problem,
                                     reaction , velocity,
                                     options, &global_options);
   }
   else if (dim == 3)
   {
-    info = frictionContact3D_driver(problem,
+    info = fc3d_driver(problem,
                                     reaction , velocity,
                                     options, &global_options);
   }

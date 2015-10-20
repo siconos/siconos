@@ -73,56 +73,56 @@
  *  a C structure FrictionContactProblem .
  *
  *  \section fc3DSolversList Available solvers for Friction Contact 3D (see Friction_cst.h)
- * Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
+ * Use the generic function fc3d_driver() to call one the the specific solvers listed below:
  *
  * <ul>
  *
- * <li> frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver.
+ * <li> fc3d_nsgs() : non-smooth Gauss-Seidel solver.
  *       SolverId : SICONOS_FRICTION_3D_NSGS =500, </li>
  *
- * <li> frictionContact3D_nsgs_velocity() : non-smooth Gauss-Seidel solver  based on velocity updates
+ * <li> fc3d_nsgs_velocity() : non-smooth Gauss-Seidel solver  based on velocity updates
  *       SolverId : SICONOS_FRICTION_3D_NSGSV =501, </li>
  *
- * <li> frictionContact3D_proximal() : Proximal point solver for friction-contact 3D problem
+ * <li> fc3d_proximal() : Proximal point solver for friction-contact 3D problem
  *       SolverId : SICONOS_FRICTION_3D_PROX =502,</li>
  *
- * <li> frictionContact3D_TrescaFixedPoint() : Fixed point solver for friction-contact
+ * <li> fc3d_TrescaFixedPoint() : Fixed point solver for friction-contact
  *      3D problem based on the Tresca problem with fixed friction threshold
  *       SolverId : SICONOS_FRICTION_3D_TFP =503,</li>
  *
- * <li> frictionContact3D_globalAlartCurnier() : Global Alart--Curnier solver
+ * <li> fc3d_globalAlartCurnier() : Global Alart--Curnier solver
  *       SolverId : SICONOS_FRICTION_3D_NSN_AC =504,</li>
  *
- * <li> frictionContact3D_DeSaxceFixedPoint() : Fixed Point solver for friction-contact 3D problem
+ * <li> fc3d_DeSaxceFixedPoint() : Fixed Point solver for friction-contact 3D problem
  *      based on the De Saxce Formulation
  *        SolverId : SICONOS_FRICTION_3D_DSFP=505, </li>
  *
- * <li> frictionContact3D_ExtraGradient() : Extra Gradient solver for friction-contact 3D problem
+ * <li> fc3d_ExtraGradient() : Extra Gradient solver for friction-contact 3D problem
  *        based on the De Saxce Formulation</li>
  *        SolverId : SICONOS_FRICTION_3D_EG=506, </li>
  *
- * <li> frictionContact3D_HyperplaneProjection() : Hyperplane Projection solver for friction-contact 3D
+ * <li> fc3d_HyperplaneProjection() : Hyperplane Projection solver for friction-contact 3D
  *         problem based on the De Saxce Formulation
  *        SolverId : SICONOS_FRICTION_3D_HP=507, </li>
  *
  * </ul>
- * (see the functions/solvers list in FrictionContact3D_Solvers.h)
+ * (see the functions/solvers list in fc3d_Solvers.h)
  *
  * \section fc3DParam Required and optional parameters
- * FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver()
+ * fc3d problems needs some specific parameters, given to the fc3d_driver()
  * function thanks to a SolverOptions structure. \n
  *
  * \section fc2DSolversList Available solvers for Friction Contact 2D
  * <ul>
- * <li> FrictionContact2D_nsgs(), Non Linear Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_NSGS =400,
+ * <li> fc2d_nsgs(), Non Linear Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_NSGS =400,
  * </li>
- * <li> FrictionContact2D_cpg(), conjugate projected gradient SolverId SICONOS_FRICTION_2D_CPG =401,
+ * <li> fc2d_cpg(), conjugate projected gradient SolverId SICONOS_FRICTION_2D_CPG =401,
  * </li>
- * <li> FrictionContact2D_pgs(), projected Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_PGS =402,
+ * <li> fc2d_pgs(), projected Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_PGS =402,
  * </li>
- * <li> FrictionContact2D_latin(), latin solver. SolverId SICONOS_FRICTION_2D_LATIN =403, </li>
+ * <li> fc2d_latin(), latin solver. SolverId SICONOS_FRICTION_2D_LATIN =403, </li>
  * </li>
- * <li> FrictionContact2D_lexicolemke(), lemke solver. SolverId SICONOS_FRICTION_2D_LMEKE =404, </li>
+ * <li> fc2d_lexicolemke(), lemke solver. SolverId SICONOS_FRICTION_2D_LMEKE =404, </li>
  * </ul>
  *
  */

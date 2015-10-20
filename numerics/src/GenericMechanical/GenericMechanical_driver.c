@@ -27,8 +27,8 @@
 #include "GenericMechanical_Solvers.h"
 #include "GenericMechanical_cst.h"
 #include "NonSmoothDrivers.h"
-#include "FrictionContact3D_compute_error.h"
-#include "FrictionContact3D_unitary_enumerative.h"
+#include "fc3d_compute_error.h"
+#include "fc3d_unitary_enumerative.h"
 #include "GMPReduced.h"
 #include "SiconosBlas.h"
 /* #define GENERICMECHANICAL_DEBUG  */
@@ -158,7 +158,7 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     {
       FrictionContactProblem * fcProblem = (FrictionContactProblem *)curProblem->problem;
       localError = 0.;
-      FrictionContact3D_unitary_compute_and_add_error(reaction + posInX, velocity + posInX, fcProblem->mu[0], &localError);
+      fc3d_unitary_compute_and_add_error(reaction + posInX, velocity + posInX, fcProblem->mu[0], &localError);
       localError = sqrt(localError) / (1 + cblas_dnrm2(curSize , curProblem->q , 1));
       if (localError > *err)
         *err = localError ;
@@ -330,8 +330,8 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         }
         else
           rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, fcProblem->q, 0);
-        resLocalSolver = frictionContact3D_driver(fcProblem, sol, w, &options->internalSolvers[1], numerics_options);
-        //resLocalSolver=frictionContact3D_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
+        resLocalSolver = fc3d_driver(fcProblem, sol, w, &options->internalSolvers[1], numerics_options);
+        //resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
         break;
       }
       default:
@@ -445,7 +445,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
     SolverOptions* options, NumericsOptions* numerics_options)
 {
   // if (options == NULL )
-  //  numericsError("FrictionContact3D_driver", "null input for solver options");
+  //  numericsError("fc3d_driver", "null input for solver options");
 
   /* If the options for solver have not been set, read default values in .opt file */
 
@@ -511,18 +511,18 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
   {
   case SICONOS_FRICTION_3D_QUARTIC:
   case SICONOS_FRICTION_3D_QUARTIC_NU:
-    frictionContact3D_unitary_enumerative_setDefaultSolverOptions(&options->internalSolvers[1]);
+    fc3d_unitary_enumerative_setDefaultSolverOptions(&options->internalSolvers[1]);
     break;
   case SICONOS_FRICTION_3D_AlartCurnierNewton:
   case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
-    frictionContact3D_nsgs_setDefaultSolverOptions(&options->internalSolvers[1]);
-    /* frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]); */
+    fc3d_nsgs_setDefaultSolverOptions(&options->internalSolvers[1]);
+    /* fc3d_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]); */
     /* Fix the setting in a correct way V.A. 15/05/2015 */
     break;
   default:
     printf("FC3D_solverId unknown :%d\n", id);
   }
-  //frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
+  //fc3d_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
 }
 
 /*Alloc memory iff options->iWork options->dWork and are  null.

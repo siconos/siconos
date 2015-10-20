@@ -34,7 +34,7 @@ int main(void)
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   double testTolerance = @TEST_TOLERANCE@;
   int testInternalSolver = @TEST_INTERNAL_SOLVER@;
-  info=frictionContact3D_setDefaultSolverOptions(options,@TEST_SOLVER@);
+  info=fc3d_setDefaultSolverOptions(options,@TEST_SOLVER@);
   if (testTolerance > 0.)
   {
     options->dparam[0]=@TEST_TOLERANCE@;

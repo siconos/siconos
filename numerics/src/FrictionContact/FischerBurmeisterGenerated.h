@@ -5,7 +5,7 @@ extern "C"
 {
 #endif
 
-void frictionContact3D_FischerBurmeisterFABGenerated(
+void fc3d_FischerBurmeisterFABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -19,7 +19,7 @@ void frictionContact3D_FischerBurmeisterFABGenerated(
   double *result);
 
 
-void frictionContact3D_FischerBurmeisterFGenerated(
+void fc3d_FischerBurmeisterFGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -32,7 +32,7 @@ void frictionContact3D_FischerBurmeisterFGenerated(
   double rhot2,
   double *result);
 
-void frictionContact3D_FischerBurmeisterABGenerated(
+void fc3d_FischerBurmeisterABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -45,7 +45,7 @@ void frictionContact3D_FischerBurmeisterABGenerated(
   double rhot2,
   double *result);
 
-void frictionContact3D_FischerBurmeisterFunctionGenerated(
+void fc3d_FischerBurmeisterFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,
@@ -54,7 +54,7 @@ void frictionContact3D_FischerBurmeisterFunctionGenerated(
   double *A,
   double *B);
 
-void frictionContact3D_FischerBurmeisterFMeritGenerated(
+void fc3d_FischerBurmeisterFMeritGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -67,7 +67,7 @@ void frictionContact3D_FischerBurmeisterFMeritGenerated(
   double rhot2,
   double *result);
 
-void frictionContact3D_FischerBurmeisterGradFMeritGenerated(
+void fc3d_FischerBurmeisterGradFMeritGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -80,7 +80,7 @@ void frictionContact3D_FischerBurmeisterGradFMeritGenerated(
   double rhot2,
   double *result);
 
-void frictionContact3D_FischerBurmeisterGradMeritFunctionGenerated(
+void fc3d_FischerBurmeisterGradMeritFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,

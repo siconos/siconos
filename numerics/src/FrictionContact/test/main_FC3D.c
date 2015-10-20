@@ -82,7 +82,7 @@ int test_Series_nsgs(FrictionContactProblem* problem,
     numerics_solver_options.dparam[3] = 0.0 ;
     numerics_solver_options.dparam[4] = 0.0 ;
 
-    info = frictionContact3D_driver(problem,
+    info = fc3d_driver(problem,
                                     reaction , velocity,
                                     &numerics_solver_options, &numerics_options);
 
@@ -176,13 +176,13 @@ int main(void)
     file = fopen(testfile[i], "r");
     if (file)
     {
-      frictionContact3D_newFromFile(testproblem, file);
+      fc3d_newFromFile(testproblem, file);
     }
     fclose(file);
 
 
     /*    file = fopen("test.dat","w");     */
-    /*    frictionContact3D_printInFile(testproblem,file ); */
+    /*    fc3d_printInFile(testproblem,file ); */
     /*    fclose(file); */
 
 
