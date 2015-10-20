@@ -172,12 +172,12 @@ int main(int argc, char* argv[])
   SolverOptions * numerics_solver_options = (SolverOptions *)malloc(sizeof(SolverOptions)) ;
   //char solvername[10]= "NSGS";
   /*\warning Must be adpated  for future globalFrictionContact3D_setDefaultSolverOptions*/
-  globalFrictionContact3D_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_GLOBAL_NSGS);
+  gfc3d_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_GLOBAL_NSGS);
   numerics_solver_options->dparam[0] = 1e-14;
   numerics_solver_options->iparam[0] = 100000;
   //Driver call
   i = 0;
-  info = globalFrictionContact3D_driver(&numericsProblem,
+  info = gfc3d_driver(&numericsProblem,
                                         reaction , velocity, globalVelocity,
                                         numerics_solver_options, &numerics_options);
 

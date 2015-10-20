@@ -111,13 +111,13 @@ int main(int argc, char* argv[])
 
   SolverOptions *numerics_solver_options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
-  frictionContact3D_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_NSGS);
+  fc3d_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_NSGS);
 
   numerics_solver_options->dparam[0] = 1e-16;
 
 
   //Driver call
-  frictionContact3D_driver(&NumericsProblem,
+  fc3d_driver(&NumericsProblem,
                            reaction , velocity,
                            numerics_solver_options, &numerics_options);
 
