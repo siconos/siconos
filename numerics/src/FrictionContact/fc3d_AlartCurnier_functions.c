@@ -36,7 +36,6 @@ extern computeNonsmoothFunction Function;
 //#define AC_JeanMoreau // Christensen & Pang
 
 
-#define OPTI_RHO
 
 /*Static variables */
 /* Local problem operators */
@@ -56,15 +55,15 @@ static double velocityLocal[3];
 /* static const double* qGlobal = NULL; */
 /* static const double* mu = NULL; */
 
-static FrictionContactProblem* localFC3D = NULL;
-static FrictionContactProblem* globalFC3D = NULL;
+/* static FrictionContactProblem* localFC3D = NULL; */
+/* static FrictionContactProblem* globalFC3D = NULL; */
 
 
-static double an;
-static double at;
-static double projN;
-static double projT;
-static double projS;
+/* static double an; */
+/* static double at; */
+/* static double projN; */
+/* static double projT; */
+/* static double projS; */
 // Set the function for computing F and its gradient
 // \todo should nbe done in initialization
 

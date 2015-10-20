@@ -56,6 +56,7 @@ extern "C"
 {
 #endif
 
+  void computerho(FrictionContactProblem* localproblem, double * rho);
 
   void computeAlartCurnierSTD(double reaction[3], double velocity[3],
                               double mu, double rho[3],

@@ -28,6 +28,7 @@
 #include "fc3d_GlockerFischerBurmeister_functions.h"
 #include "op3x3.h"
 
+#define OPTI_RHO
 
 static computeNonsmoothFunction  Function = NULL;
 static NewtonFunctionPtr F = NULL;
@@ -330,10 +331,6 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
   double * MLocal = localproblem->M->matrix0;
 
-
-
-
-
   double Tol = dparam[0];
   double itermax = iparam[0];
 
@@ -461,11 +458,11 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
 
 
-    if (verbose > 1) printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
+    if (verbose > 1) printf("-----------------------------------    LocalNonsmoothNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
 
     if (dparam[1] < Tol)
     {
-      /*    printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \t error2 = %.10e \n",inew,dparam[1], dparam[2]); */
+      /*    printf("-----------------------------------    LocalNonsmoothNewtonSolver number of iteration = %i  error = %.10e \t error2 = %.10e \n",inew,dparam[1], dparam[2]); */
 
       return 0;
     }
@@ -661,8 +658,6 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
   return -1;
 }
 
-
-
 int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
 {
   double mu = localproblem->mu[0];
@@ -762,7 +757,7 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
     Function(R, velocity, mu, rho, F, NULL, NULL);
     dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
 
-    if (verbose > 1) printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
+    if (verbose > 1) printf("-----------------------------------    DampedLocalNonsmoothNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
     if (dparam[1] < Tol) return 0;
 
 
