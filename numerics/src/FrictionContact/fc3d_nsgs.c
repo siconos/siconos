@@ -115,7 +115,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
   case SICONOS_FRICTION_3D_AlartCurnierNewton:
   {
     *solve = &fc3d_local_nonsmooth_Newton_solvers_solve;
-    *update = &fc3d_AC_update;
+    *update = &fc3d_local_nonsmooth_Newton_AC_update;
     *freeSolver = (FreeSolverNSGSPtr)&fc3d_local_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&fc3d_compute_error;
     fc3d_local_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
@@ -124,7 +124,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
   case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
   {
     *solve = &fc3d_local_nonsmooth_Newton_solvers_solve;
-    *update = &fc3d_AC_update;
+    *update = &fc3d_local_nonsmooth_Newton_AC_update;
     *freeSolver = (FreeSolverNSGSPtr)&fc3d_local_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&fc3d_compute_error;
     fc3d_local_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);

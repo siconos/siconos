@@ -66,13 +66,6 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
    */
   void fc3d_local_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity, double*reaction, double * output_error);
 
-  /** Initialize friction-contact 3D Alart-Curnier formulation
-      \param problem the global problem to solve
-      \param localproblem the local problem to solve
-      \param options of the solver
-  */
-  void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options );
-
   /** Update friction-contact 3D problem: formalize local problem for one contact
       \param problem the global problem to solve
       \param localproblem the local problem to solve
@@ -83,24 +76,13 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
 
       the rest is used to formalize the local problem)
   */
-  void fc3d_AC_update(int number, FrictionContactProblem* problem, FrictionContactProblem* localproblem ,
+  void fc3d_local_nonsmooth_Newton_AC_update(int number, FrictionContactProblem* problem, FrictionContactProblem* localproblem ,
                                    double * reaction, SolverOptions* options);
 
-  /** Retrieve global reaction vector using local problem solution
-      \param contactnumber (position in global matrix) of the considered contact
-      \param reaction global reaction
-  */
-  void fc3d_AC_post(int contactnumber, double * reaction);
-
-
-
-  /** free memory for friction contact 3D Alart-Curnier solver */
-  void fc3d_AC_free(void);
-
-  int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem,
+  int fc3d_local_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem,
                                  double * R, int *iparam, double *dparam);
 
-  int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem,
+  int fc3d_local_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem,
                                        double * R, int *iparam, double *dparam);
 
 
