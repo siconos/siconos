@@ -21,7 +21,7 @@
 #include "FrictionContact3D_GlockerFischerBurmeister_functions.h"
 #include "NonSmoothNewton.h"
 #include "FrictionContact3D_Solvers.h"
-
+#include "FischerBurmeister.h"
 /* size of a block */
 static int Fsize;
 
