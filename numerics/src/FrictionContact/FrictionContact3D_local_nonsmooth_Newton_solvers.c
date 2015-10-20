@@ -25,7 +25,7 @@
 #include "FischerBurmeister.h"
 #include "SiconosBlas.h"
 #include "AlartCurnierGenerated.h"
-#include "Frictioncontact3D_GlockerFischerBurmeister_functions.h"
+#include "FrictionContact3D_GlockerFischerBurmeister_functions.h"
 #include "op3x3.h"
 
 
@@ -170,7 +170,7 @@ void frictionContact3D_local_nonsmooth_Newton_solvers_computeError(int n, double
 }
 
 
-void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact)
+static void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact)
 {
 
   NumericsMatrix * MGlobal = problem->M;
@@ -479,7 +479,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
 
 
-int  LineSearchGP(FrictionContactProblem* localproblem,
+static int LineSearchGP(FrictionContactProblem* localproblem,
                   computeNonsmoothFunction  Function,
                   double * t_opt,
                   double R[3],
