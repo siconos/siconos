@@ -21,13 +21,14 @@ endif()
 # --- Sources and headers ---
 # source directories for numerics
 set(${COMPONENT}_DIRS
-  tools
   blas_lapack
   hairer
-  netlib/odepack
   netlib/dftemplates
-  SOL/lumod-c
+  netlib/odepack
   numeric_bindings
+  ql0001
+  SOL/lumod-c
+  tools
 )
 
 # Unstable sources. Will be included only
