@@ -94,7 +94,7 @@ extern "C"
     double *output_blocklist3x3_1,
     double *output_blocklist3x3_2);
 
-  /* Set the default solver options for the NSN_AC Solver
+  /* Set the default solver options for the NSN_FB Solver
    * Some default values:
    * options.iparam[0] = 200 is the maximum number of iterations.
    * options.iparam[3] = 100000 is the nzmax parameter for sparse matrices.

@@ -100,6 +100,7 @@ extern "C"
     double *output_blocklist3x3_1,
     double *output_blocklist3x3_2);
 
+  int fc3d_AlartCurnier_setDefaultSolverOptions(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
