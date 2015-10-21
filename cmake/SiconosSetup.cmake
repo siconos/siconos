@@ -10,6 +10,9 @@ if(NOT CMAKE_BUILD_TYPE)
     FORCE)
 endif()
 
+# =========== Windows stuff ... ===========
+include(WindowsSiconosSetup)
+
 # --------- CMake project internal variables ---------
 
 # Siconos current version
@@ -142,9 +145,6 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 # don't add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# =========== Windows stuff ... ===========
-include(WindowsSiconosSetup)
 
 # init all common options for enabled components
 set(common_options DOCUMENTATION TESTING UNSTABLE PYTHON_WRAPPER

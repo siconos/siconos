@@ -38,6 +38,8 @@ set(${COMPONENT}_LINKER_LANGUAGE CXX)
 set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
 set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} numerics)
 
+include(WindowsKernelSetup)
+
 include(LibraryProjectSetup)
 library_project_setup()
 
