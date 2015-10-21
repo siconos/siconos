@@ -1,6 +1,6 @@
 #include "SiconosConfig.h"
 
-//#if defined(HAS_ATLAS_LAPACK)
+#ifndef HAS_LAPACK_DTRTRS
 #include "SiconosLapack.h"
 
 
@@ -168,5 +168,6 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #endif
 /* clapack_dtrtrs */
 
-//#endif /* HAS_ATLAS_LAPACK
+#endif /* HAS_LAPACK_DTRTRS */
+
 
