@@ -28,11 +28,6 @@
 #include "BoundaryCondition.hpp"
 #include "SiconosConst.hpp"
 
-/** Pointer to function for plug-in. For FGyr and its jacobian. */
-typedef void (*FPtr5)(unsigned int, double*, double*, double*, unsigned int, double*);
-typedef void (*FPtrMass)(unsigned int, double*, double*, unsigned int, double*);
-typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
-
 typedef std::vector<SP::SiconosMemory> VectorOfMemories;
 
 /** Lagrangian non linear dynamical systems - Derived from DynamicalSystem -

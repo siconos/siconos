@@ -78,7 +78,8 @@ message("=======================================================================
 list(APPEND CMAKE_MODULE_PATH ${SICONOS_INSTALL_DIR}/share/siconos/cmake)
 
 # include siconos config
-find_package(siconos 3.8.1 REQUIRED)
+include(SiconosVersion)
+find_package(siconos ${SICONOS_VERSION} REQUIRED)
 
 include(CTest)
 

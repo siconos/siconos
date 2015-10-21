@@ -21,41 +21,45 @@ Gallery
 
 .. image:: /figures/mechanics/BouncingBall/BouncingBall.*
    :scale: 50%
-   :target: :ref:`bouncing_ball_example`
+   :target: mechanics/bouncing_ball.html
 
 .. image:: /figures/electronics/CircuitRLCD/SchemaCircuitRLCD.*
    :scale: 50%
-   :target: :ref:`RLCD_example`
+   :target: electronics/RLCD.html
 
 .. image:: /figures/mechanics/Woodpecker/woodpeckerphoto.png	   
    :scale: 50%
-   :target: :ref:`woodpecker_example`
+   :target: :ref:`woodpecker_example`_
 
 .. image:: /figures/electronics/DiodeBridge/SchemaDiodeBridge.*
    :scale: 50%
-   :target: :ref:`diode_bridge_example`
-	    
+   :target: electronics/diode_bridge.html
+
 .. image:: /figures/mechanics/MultiBeads/BeadsColumn.*	   
    :scale: 50%
-   :target: :ref:`beads_column_example`
+   :target: mechanics/beads_column.html
 
 .. image:: /figures/Control/Two-linkManipulator/two-linkManipulatorResults2.*
    :scale: 50%
-   :target: :ref:`two_link_manipulator_example`
+   :target: :ref:`two_link_manipulator_example`_
 	    
 .. image:: /figures/electronics/PowerConverter/PRC_fig2.*	   
    :scale: 50%
-   :target: :ref:`power_converter_example`
+   :target: :ref:`power_converter_example`_
 
-.. image:: /figures/ mechanics/Billiard/Billiard.*  
-     :scale: 50%
-     :target: :ref:`billiard_example`
+.. image:: /figures/mechanics/Billiard/Billiard.*  
+   :scale: 50%
+   :target: :ref:`billiard_example`_
 
 .. image:: /figures/Control/ObserverLCS/ObserverLCS.*	   
    :scale: 50%
-   :target: :ref:`observer_example`
+   :target: :ref:`siconos_examples`_
 
-
+.. image:: /figures/mechanics/slider_crank/slider_crank.*
+   :scale: 10%
+   :target: mechanics/mechanisms/slider_crank.html
+	    
+	    
 Table of contents 
 -----------------
 

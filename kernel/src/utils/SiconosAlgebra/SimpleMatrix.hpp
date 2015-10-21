@@ -28,10 +28,6 @@
 /**Input parameter for copy and transpose constructor.*/
 const std::string transpose = "transpose";
 
-/** A STL vector of int */
-typedef std::vector<int> VInt;
-
-
 /**  Matrix (embedded various types of Boost matrices of double)
  *
  *  \author SICONOS Development Team - copyright INRIA

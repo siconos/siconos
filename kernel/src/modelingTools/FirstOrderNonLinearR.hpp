@@ -27,11 +27,7 @@
 #include "FirstOrderR.hpp"
 #include "Interaction.hpp"
 
-/** Pointer to function for plug-in for operators related to output and its gradients.*/
-typedef void (*OutPtr)(unsigned int, double*, double, unsigned int, double*, double*, unsigned int, double*);
-
 /** Pointer to function for plug-in for operators related to input and its gradients.*/
-typedef void (*InPtr)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
 
 /** FirstOrder Non Linear Relation.
  *  \author SICONOS Development Team - copyright INRIA

@@ -24,19 +24,7 @@
 
 #include "Relation.hpp"
 #include "Interaction.hpp"
-
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int, double*);
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr3)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr5bis)(unsigned int, double*, unsigned int, double*, unsigned int, double*, unsigned int, double*);
+#include "PluginTypes.hpp"
 
 /** Lagrangian (Non Linear) Relation (generic interface)
  *

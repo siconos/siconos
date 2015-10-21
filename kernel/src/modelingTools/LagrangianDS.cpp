@@ -466,7 +466,7 @@ void LagrangianDS::computeMass()
   DEBUG_EXPR(_q[0]->display());
   if (_pluginMass->fPtr)
   {
-    ((FPtrMass)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
+    ((FPtr7)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
     _mass->resetLU();
   }
   DEBUG_EXPR(_mass->display());
@@ -476,7 +476,7 @@ void LagrangianDS::computeMass(SP::SiconosVector q2)
 {
   if (_pluginMass->fPtr)
   {
-    ((FPtrMass)_pluginMass->fPtr)(_ndof, &(*q2)(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
+    ((FPtr7)_pluginMass->fPtr)(_ndof, &(*q2)(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
     _mass->resetLU();
   }
 }
@@ -495,7 +495,7 @@ void LagrangianDS::computeFInt(double time, SP::SiconosVector q2, SP::SiconosVec
 void LagrangianDS::computeFExt(double time)
 {
   if (_pluginFExt->fPtr)
-    ((FPtrFExt)_pluginFExt->fPtr)(time, _ndof, &(*_fExt)(0), _z->size(), &(*_z)(0));
+    ((VectorFunctionOfTime)_pluginFExt->fPtr)(time, _ndof, &(*_fExt)(0), _z->size(), &(*_z)(0));
 }
 
 void LagrangianDS::computeFGyr()

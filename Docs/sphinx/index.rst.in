@@ -13,7 +13,8 @@ Welcome to @PROJECT_NAME@'s home page!
    examples/index
    download
    contacts
-
+   related_projects
+   z_siconos_bibtex
 
 .. image:: /figures/buck.*
    :height: 200 px

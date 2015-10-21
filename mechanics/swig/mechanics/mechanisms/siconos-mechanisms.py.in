@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 
+import os
+import sys
+
 print('##################################################################')
 print('############## Siconos/Mechanics mechanisms module ###############')
 print('##################################################################')
 
-import numpy
-import array
-import os
-import sys
-
 siconos_pythonpath = "@SICONOS_PYTHON_INSTALL_DIR@"
 sys.path.append(siconos_pythonpath)
-mechanisms_path = os.path.join(siconos_pythonpath, 'siconos/mechanics/mechanisms')
+mechanisms_path = os.path.join(siconos_pythonpath,
+                               'siconos/mechanics/mechanisms')
 from siconos.mechanics.mechanisms import mbtb
 from siconos.mechanics.mechanisms import cadmbtb
 
@@ -24,19 +23,11 @@ if with_io:
     from siconos.io import mechanics_io as io
 from siconos.mechanics.contact_detection.tools import Avatar, Contactor
 
-install_path= "@CMAKE_INSTALL_PREFIX@"+"/bin"
-print("install_path :", install_path)
-
-from math import pi
-
-# why this truncation is needed ?
-my_PI=3.14159265
-
+install_path = os.path.join('@CMAKE_INSTALL_PREFIX@', 'bin')
 default_options = os.path.join(mechanisms_path, 'mbtbDefaultOptions.py')
 local_options = os.path.join(os.getcwd(), 'mbtbLocalOptions.py')
 
 exec(compile(open(default_options).read(), default_options, 'exec'))
-#print("siconos-mechanisms.py, info:", install_path+"/mbtbDefaultOptions.py loaded")
 
 if os.path.exists(local_options):
     exec(compile(open(local_options).read(), local_options, 'exec'))
@@ -49,20 +40,19 @@ try:
     print(" run id: ", run_id )
     os.mkdir(run_id)
     os.chdir(run_id)
-    os.symlink(os.path.join('..','CAD'), 'CAD')
-    os.symlink(os.path.join('..','plugins'), 'plugins')
+    os.symlink(os.path.join('..', 'CAD'), 'CAD')
+    os.symlink(os.path.join('..', 'plugins'), 'plugins')
     with_run_id = True
 
 except:
     with_run_id = False
-
 
 if with3D:
     from OCC.BRepPrimAPI import *
     from OCC.gp import *
     from OCC.TopLoc import *
     from OCC.AIS import *
-    from OCC.Display.SimpleGui import *
+    from OCC.Display.SimpleGui import init_display
     display, start_display, add_menu, add_function_to_menu = init_display()
     cadmbtb.CADMBTB_setGraphicContext(display.Context)
     v = display.GetView().GetObject()

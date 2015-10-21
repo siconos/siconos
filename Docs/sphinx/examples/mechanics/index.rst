@@ -8,4 +8,4 @@ Mechanics
    bouncing_ball
    beads_column
    billiard
-
+   mechanisms/slider_crank

@@ -38,6 +38,7 @@ typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, uns
 
 /** */
 typedef void (*FPtr3)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
+
 typedef void (*FPtr4bis)(unsigned int, double*, unsigned int, double*, unsigned int, double*, unsigned int, double*);
 
 /** */
@@ -46,10 +47,16 @@ typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsi
 /** */
 typedef void (*FPtr5)(unsigned int, double*, double*, double*, unsigned int, double*);
 
+typedef void (*FPtr5bis)(unsigned int, double*, unsigned int, double*, unsigned int, double*, unsigned int, double*);
+
 /** */
 typedef void (*FPtr6)(double, unsigned int, double*, double*, double*, unsigned int, double*);
 
 /** */
 typedef void (*FPtr7)(unsigned int, double*, double*, unsigned int, double*);
+
+typedef void (*OutPtr)(unsigned int, double*, double, unsigned int, double*, double*, unsigned int, double*);
+
+typedef void (*InPtr)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
 
 #endif

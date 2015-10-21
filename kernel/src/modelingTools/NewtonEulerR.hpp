@@ -23,15 +23,7 @@
 #define NEWTONEULERRELATION_H
 
 #include "Relation.hpp"
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int, double*);
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr3)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
+#include "PluginTypes.hpp"
 
 /** NewtonEuler (Non Linear) Relation (generic interface)
  *
@@ -52,7 +44,6 @@ typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsi
  * In corresponding derived classes, h and Gi are connected to plug-in functions (user-defined).
  * For more details, see the DevNotes.pdf, chapter NewtonEuler.
  */
-
 
 class NewtonEulerR : public Relation
 {

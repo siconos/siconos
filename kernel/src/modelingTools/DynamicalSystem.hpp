@@ -38,11 +38,6 @@
 #include "PluginTypes.hpp"
 #include "SiconosVisitor.hpp"
 
-/** Pointer to function for plug-in. */
-typedef void (*FPtr6)(double, unsigned int, double*, double*, double*, unsigned int, double*);
-
-/** */
-
 /**  Abstract class to handle Dynamical Systems => interface for
    derived classes (First Order or Lagrangian systems)
 

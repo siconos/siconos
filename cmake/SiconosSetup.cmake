@@ -16,10 +16,7 @@ include(WindowsSiconosSetup)
 # --------- CMake project internal variables ---------
 
 # Siconos current version
-set(MAJOR_VERSION 3)
-set(MINOR_VERSION 8)
-set(PATCH_VERSION 0)
-set(SICONOS_VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
+include(SiconosVersion)
 
 # File used to print tests setup messages.
 set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
@@ -124,11 +121,13 @@ endforeach()
 
 # =========== uninstall target ===========
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+  IMMEDIATE @ONLY)
 
 add_custom_target(uninstall
+  echo >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
+  COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/python_install_manifest.txt >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 # =========== RPATH stuff ===========

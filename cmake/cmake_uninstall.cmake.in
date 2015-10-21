@@ -26,10 +26,3 @@ foreach(file ${files})
   endif(IS_SYMLINK "$ENV{DESTDIR}${file}" OR EXISTS "$ENV{DESTDIR}${file}")
 endforeach(file)
 
-# Python package
-message(STATUS "Uninstalling siconos python package (@SICONOS_PYTHON_INSTALL_DIR@/@SICONOS_PYTHON_PACKAGE@)")
-exec_program(
-  "@CMAKE_COMMAND@" ARGS "-E remove @SICONOS_PYTHON_INSTALL_DIR@/@SICONOS_PYTHON_PACKAGE@\""
-  OUTPUT_VARIABLE rm_out
-  RETURN_VALUE rm_retval
-  )
