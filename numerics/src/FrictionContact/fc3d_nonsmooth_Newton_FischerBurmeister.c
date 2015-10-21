@@ -77,7 +77,7 @@ void fc3d_FischerBurmeisterFunction(
 }
 
 
-int fc3d_FischerBurmeister_compute_error(
+int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
     FrictionContactProblem* problem,
     double *z , double *w, double tolerance,
     SolverOptions * options, double * error)
@@ -135,7 +135,7 @@ int fc3d_FischerBurmeister_compute_error(
   }
 }
 
-int fc3d_FischerBurmeister_setDefaultSolverOptions(
+int fc3d_nonsmooth_Newton_FischerBurmeister_setDefaultSolverOptions(
   SolverOptions* options)
 {
   if (verbose > 0)

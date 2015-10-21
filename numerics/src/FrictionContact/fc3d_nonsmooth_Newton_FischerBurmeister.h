@@ -101,11 +101,11 @@ extern "C"
    * options.dparam[0] = 1e-3 precision.
    * \param options  the solver options
    */
-  int fc3d_FischerBurmeister_setDefaultSolverOptions(
+  int fc3d_nonsmooth_Newton_FischerBurmeister_setDefaultSolverOptions(
     SolverOptions* options);
 
 
-  int fc3d_FischerBurmeister_compute_error(
+  int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
     FrictionContactProblem* problem,
     double *z , double *w, double tolerance,
     SolverOptions * options, double * error);

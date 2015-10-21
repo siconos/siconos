@@ -497,7 +497,7 @@ int gfc3d_globalAlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
   options->dWork = NULL;
   null_SolverOptions(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  gfc3d_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
+  gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
 

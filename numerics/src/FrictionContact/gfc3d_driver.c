@@ -146,7 +146,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   }
   case SICONOS_FRICTION_3D_GLOBAL_AC:
   {
-    gfc3d_AlartCurnier(problem, reaction , velocity, 
+    gfc3d_nonsmooth_Newton_AlartCurnier(problem, reaction , velocity,
                                          globalVelocity, &info , options);
     break;
 

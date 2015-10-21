@@ -77,6 +77,9 @@ extern "C"
     int *info,
     SolverOptions *options);
 
+  int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(SolverOptions* options);
+
+
   /** The Alart & Curnier function for several contacts.
       On each contact, the specified Alart Curnier function in iparam[9] is called.
       \param problemSize the number of contacts.
@@ -84,7 +87,7 @@ extern "C"
       \param reaction3D the reactions at each contact (size: 3 x problemSize)
       \param velocity3D the velocities at each contact (size: 3 x problemSize)
       \param mu the mu parameter (size : problemSize)
-      \param rho3D the rho parameters (size : 3 x problemSize)
+      \param rho3Dx the rho parameters (size : 3 x problemSize)
       \param output_blocklist3 the computed Alart & Curnier function (size : 3 x problemSize)
       \param output_blocklist3x3_1 the computed A part of gradient (size : 9 x problemSize)
       \param output_blocklist3x3_2 the computed B param of gradient (size : 9 x problemSize)
@@ -99,8 +102,6 @@ extern "C"
     double *output_blocklist3,
     double *output_blocklist3x3_1,
     double *output_blocklist3x3_2);
-
-  int fc3d_AlartCurnier_setDefaultSolverOptions(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

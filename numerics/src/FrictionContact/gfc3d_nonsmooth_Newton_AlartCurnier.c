@@ -24,7 +24,7 @@
 
 #include "SiconosConfig.h"
 
-#include "gfc3d_AlartCurnier.h"
+#include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"
 #include "AlartCurnierGenerated.h"
@@ -144,7 +144,7 @@ csi initACPsiJacobian(
   assert(M->n == H->m);
   for(int e = 0; e < H->nz; ++e)
   {
-    DEBUG_PRINTF("e=%d, H->i[e]=%d, H->p[e] + M->n + A->n=%d, H->x[e]=%g\n", 
+    DEBUG_PRINTF("e=%d, H->i[e]=%d, H->p[e] + M->n + A->n=%d, H->x[e]=%g\n",
                  e, H->i[e], H->p[e] + M->n + A->n , H->x[e]);
     CHECK_RETURN(cs_zentry(J, H->i[e], H->p[e] + M->n + A->n, H->x[e]));
   }
@@ -376,7 +376,7 @@ int _globalLineSearchSparseGP(
   return -1;
 }
 
-int gfc3d_AlartCurnier_setDefaultSolverOptions(
+int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   SolverOptions* options)
 {
   if(verbose > 0)
@@ -421,7 +421,7 @@ void gfc3d_sparseGlobalAlartCurnierInit(
 }
 
 /* Alart & Curnier solver for sparse global problem */
-void gfc3d_AlartCurnier(
+void gfc3d_nonsmooth_Newton_AlartCurnier(
   GlobalFrictionContactProblem* problem,
   double *reaction,
   double *velocity,
@@ -761,6 +761,3 @@ void gfc3d_AlartCurnier(
 
   freeNumericsMatrix(&AA);
 }
-
-
-

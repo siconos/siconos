@@ -95,12 +95,12 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
   }
   case SICONOS_FRICTION_3D_NSN_AC:
   {
-    info =    fc3d_AlartCurnier_setDefaultSolverOptions(options);
+    info =    fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options);
     break;
   }
   case SICONOS_FRICTION_3D_NSN_FB:
   {
-    info =    fc3d_FischerBurmeister_setDefaultSolverOptions(options);
+    info =    fc3d_nonsmooth_Newton_FischerBurmeister_setDefaultSolverOptions(options);
     break;
   }
   case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:

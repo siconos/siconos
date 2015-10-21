@@ -75,7 +75,7 @@ void fc3d_AlartCurnierFunction(
   }
 }
 
-int fc3d_AlartCurnier_setDefaultSolverOptions(
+int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   SolverOptions* options)
 {
   if (verbose > 0)

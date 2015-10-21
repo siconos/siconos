@@ -28,7 +28,6 @@
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
 #include <math.h>
-
 #include "NumericsMatrix_private.h"
 
 void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
@@ -308,6 +307,7 @@ int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options)
   options->dparam[8] = 1.5;  /* default value for relaxation parameter omega */
 
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);
+  fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
+
   return 0;
 }

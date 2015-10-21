@@ -47,7 +47,7 @@ For each solver, the input argument are:
 #include "NumericsOptions.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"
-#include "gfc3d_AlartCurnier.h"
+#include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
 
 typedef void (*SolverGlobalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverGlobalPtr)(int, double*);

@@ -85,7 +85,7 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
   int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem,
                                        double * R, int *iparam, double *dparam);
 
-  /* Set the default solver options for the NSN_AC Solver
+  /* Set the default solver options for the ONECONTACT_NSN_AC Solver
    * Some default values:
    * options.iparam[0] = 200 is the maximum number of iterations.
    * options.iparam[3] = 100000 is the nzmax parameter for sparse matrices.

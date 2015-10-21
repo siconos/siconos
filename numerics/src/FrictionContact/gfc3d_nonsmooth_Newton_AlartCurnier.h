@@ -17,25 +17,25 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#ifndef gfc3d_AlartCurnier_h
-#define gfc3d_AlartCurnier_h
+#ifndef gfc3d_nonsmooth_Newton_AlartCurnier_h
+#define gfc3d_nonsmooth_Newton_AlartCurnier_h
 
 #include "SolverOptions.h"
 #include "GlobalFrictionContactProblem.h"
 
-int gfc3d_AlartCurnier_setDefaultSolverOptions(
+int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   SolverOptions* options);
 
 
 void gfc3d_sparseGlobalAlartCurnierInit(
   SolverOptions *SO);
 
-void gfc3d_AlartCurnier(
+void gfc3d_nonsmooth_Newton_AlartCurnier(
   GlobalFrictionContactProblem* problem,
-  double *reaction, 
-  double *velocity, 
+  double *reaction,
+  double *velocity,
   double *globalVelocity,
-  int *info, 
+  int *info,
   SolverOptions* options);
 
 #endif
