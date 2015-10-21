@@ -42,7 +42,7 @@ extern computeNonsmoothFunction Function;
 /* static const int nLocal = 3; */
 /* static double* MLocal; */
 /* static int isMAllocatedIn = 0; /\* True if a malloc is done for MLocal, else false *\/ */
-static double velocityLocal[3];
+/* static double velocityLocal[3]; */
 /* static double qLocal[3]; */
 /* static double mu_i = 0.0; */
 

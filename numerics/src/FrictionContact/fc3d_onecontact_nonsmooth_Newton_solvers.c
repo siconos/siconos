@@ -92,10 +92,11 @@ void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem*
 /* #endif */
 
 }
-void fc3d_AC_free();
+
+void fc3d_AC_free(void);
+
 void fc3d_AC_free()
 {
-
 }
 void fc3d_AC_post(int contact, double* reaction);
 void fc3d_AC_post(int contact, double* reaction)

@@ -23,7 +23,7 @@
 #include "fc3d_Solvers.h"
 #include "FischerBurmeister.h"
 /* size of a block */
-static int Fsize;
+/* static int Fsize; */
 
 /* static void F_GlockerFischerBurmeister(int sizeF, double* reaction, double* FVector, int up2Date); */
 /* static void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jacobianFMatrix, int up2Date); */
