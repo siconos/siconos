@@ -39,7 +39,7 @@ static FreeSolverPtr freeSolver = NULL;
 
 /* size of a block */
 static int Fsize;
-
+void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options);
 void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options)
 {
   /*
@@ -92,11 +92,12 @@ void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem*
 /* #endif */
 
 }
-
+void fc3d_AC_free();
 void fc3d_AC_free()
 {
 
 }
+void fc3d_AC_post(int contact, double* reaction);
 void fc3d_AC_post(int contact, double* reaction)
 {
   /* This function is required in the interface but useless in Alart-Curnier case */
