@@ -52,6 +52,7 @@ else()
     string(REGEX REPLACE "([0-9]+).([0-9]+)" "\\1\\2" PYTHON_VERSION_NO_DOTS ${PYTHON_VERSION})
     if(WIN32)
       string(REPLACE "\\" "/" PYTHON_SITE_PACKAGES_DIR ${PYTHON_SITE_PACKAGES_DIR})
+      string(REPLACE "\\" "/" PYTHON_PREFIX ${PYTHON_PREFIX})
     endif(WIN32)
 
     # --- Search python library corresponding to python exec.
@@ -60,8 +61,9 @@ else()
       python${PYTHON_VERSION_NO_DOTS} python${PYTHON_VERSION}
       NO_DEFAULT_PATH
       HINTS ${PYTHON_PREFIX} ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config-${CMAKE_LIBRARY_ARCHITECTURE}
-      PATH_SUFFIXES lib
+      PATH_SUFFIXES lib libs
       )
+
     set(PYTHON_LIBRARIES ${PYTHON_LIBRARY} CACHE FILEPATH "Python libraries" FORCE)
 
     set(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS} CACHE FILEPATH "Path to Python.h" FORCE)
