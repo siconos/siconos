@@ -35,17 +35,17 @@ char *  SICONOS_FRICTION_3D_NSN_AC_STR = "F3D_NSN_AC";
 char *  SICONOS_FRICTION_3D_NSN_FB_STR = "F3D_NSN_FB";
 char *  SICONOS_FRICTION_3D_DSFP_STR = "F3D_DeSaxceFixedPoint";
 char *  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR = "F3D_NCPGlockerFBFixedPoint";
-char *  SICONOS_FRICTION_3D_AlartCurnierNewton_STR = "F3D_AlartCurnierNewton";
-char *  SICONOS_FRICTION_3D_DampedAlartCurnierNewton_STR = "F3D_DampedAlartCurnierNewton";
+char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_STR = "F3D_LOCAL_NSN_AC";
+char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_STR = "F3D_LOCAL_NSN_AC_GP";
 char *  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR = "F3D_NCPGlockerFBNewton";
-char * SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR = "F3D_ProjectionOnConeWithDiagonalization";
-char * SICONOS_FRICTION_3D_ProjectionOnCone_STR = "F3D_ProjectionOnCone";
-char * SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration_STR = "F3D_ProjectionOnConeWithLocalIteration";
-char * SICONOS_FRICTION_3D_projectionOnConeWithRegularization_STR = "F3D_projectionOnConeWithRegularization";
+char * SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization_STR = "F3D_ProjectionOnConeWithDiagonalization";
+char * SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR = "F3D_ProjectionOnCone";
+char * SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR = "F3D_ProjectionOnConeWithLocalIteration";
+char * SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization_STR = "F3D_projectionOnConeWithRegularization";
 char * SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR = "F3D_NCPGlockerFBPATH";
-char * SICONOS_FRICTION_3D_projectionOnCylinder_STR = "F3D_projectionOnCylinder";
-char * SICONOS_FRICTION_3D_projectionOnCylinderWithLocalIteration_STR =  "F3D_projectionOnCylinderWithLocalIteration";
-char * SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR = "F3D_ProjectionOnCone_velocity";
+char * SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR = "F3D_projectionOnCylinder";
+char * SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration_STR =  "F3D_projectionOnCylinderWithLocalIteration";
+char * SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR = "F3D_ProjectionOnCone_velocity";
 char * SICONOS_FRICTION_3D_PGoC_STR = "F3D_PGoC";
 char * SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR = "F3D_DeSaxceFixedPoint";
 char * SICONOS_FRICTION_3D_EG_STR = "F3D_ExtraGradient";
@@ -56,8 +56,8 @@ char * SICONOS_FRICTION_3D_HP_STR = "F3D_HyperplaneProjection";
 char * SICONOS_FRICTION_3D_PROX_STR = "F3D_PROX";
 char * SICONOS_FRICTION_3D_GAMS_PATH_STR = "F3D_GAMS_PATH";
 char * SICONOS_FRICTION_3D_GAMS_PATHVI_STR = "F3D_GAMS_PATHVI";
-char * SICONOS_FRICTION_3D_QUARTIC_STR = "F3D_QUARTIC";
-char * SICONOS_FRICTION_3D_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
+char * SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR = "F3D_QUARTIC";
+char * SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
 char *  SICONOS_FRICTION_3D_ACLMFP_STR = "F3D_ACLMFP";
 char *  SICONOS_FRICTION_3D_SOCLCP_STR = "F3D_SOCLCP";
 
@@ -228,20 +228,20 @@ int fc3d_driver(FrictionContactProblem* problem,
     fc3d_nonsmooth_Newton_FischerBurmeister(problem, reaction , velocity , &info , options);
     break;
   }
-  case SICONOS_FRICTION_3D_QUARTIC_NU:
-  case SICONOS_FRICTION_3D_QUARTIC:
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU:
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
   {
     snPrintf(1, options, 
             " ========================== Call Quartic solver for Friction-Contact 3D problem ==========================\n");
     fc3d_unitary_enumerative(problem, reaction , velocity , &info , options);
     break;
   }
-  case SICONOS_FRICTION_3D_AlartCurnierNewton:
-  case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
+  /* case SICONOS_FRICTION_3D_DampedAlartCurnierNewton: */
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP:
   {
     snPrintf(1, options, 
             " ========================== Call Newton-based solver for Friction-Contact 3D problem ==========================\n");
-    info = fc3d_local_nonsmooth_Newton_solvers_solve(problem, reaction , options);
+    info = fc3d_onecontact_nonsmooth_Newton_solvers_solve(problem, reaction , options);
     break;
   }
   case SICONOS_FRICTION_3D_GAMS_PATH:

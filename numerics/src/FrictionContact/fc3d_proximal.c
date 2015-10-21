@@ -308,7 +308,6 @@ int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options)
   options->dparam[8] = 1.5;  /* default value for relaxation parameter omega */
 
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  options->internalSolvers->solverId = SICONOS_FRICTION_3D_NSN_AC;
-  fc3d_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
+  fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }

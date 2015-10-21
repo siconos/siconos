@@ -509,12 +509,12 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
 
   switch (id)
   {
-  case SICONOS_FRICTION_3D_QUARTIC:
-  case SICONOS_FRICTION_3D_QUARTIC_NU:
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU:
     fc3d_unitary_enumerative_setDefaultSolverOptions(&options->internalSolvers[1]);
     break;
-  case SICONOS_FRICTION_3D_AlartCurnierNewton:
-  case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP:
     fc3d_nsgs_setDefaultSolverOptions(&options->internalSolvers[1]);
     /* fc3d_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]); */
     /* Fix the setting in a correct way V.A. 15/05/2015 */

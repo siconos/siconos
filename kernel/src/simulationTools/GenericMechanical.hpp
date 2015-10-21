@@ -61,7 +61,7 @@ public:
   /** Basic constructor, from numerics solver id.
    *  \param FC3D_Solver_Id int type of FC3D solver
    */
-  GenericMechanical(int FC3D_Solver_Id = SICONOS_FRICTION_3D_QUARTIC);
+  GenericMechanical(int FC3D_Solver_Id = SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
 
   /** destructor
    */

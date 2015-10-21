@@ -32,7 +32,7 @@ int main(void)
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
   options->dparam[0] = 1e-16;
-  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration;
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration;
   options->internalSolvers->iparam[0] = 10;
   options->internalSolvers->dparam[0] = 1e-3;
 

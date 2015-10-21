@@ -32,7 +32,7 @@ int main(void)
   info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
   options->dparam[0] = 1e-12;
   options->iparam[0] = 10000;
-  options->internalSolvers->solverId = SICONOS_FRICTION_3D_AlartCurnierNewton;
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ONECONTACT_NSN_AC;
   options->internalSolvers->iparam[0] = 10;
   options->internalSolvers->iparam[1] = 0;
   options->internalSolvers->dparam[0] = 1e-18;

@@ -37,7 +37,7 @@ int main(void)
 
   gfc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_NSGS);
 
-  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ProjectionOnCone;
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone;
   options->internalSolvers->iparam[0] = 0;
   options->internalSolvers->dparam[0] = 0.0;
 

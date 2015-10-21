@@ -38,7 +38,7 @@ int main(void)
   gfc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_NSGS_WR);
 
 
-  options->internalSolvers->internalSolvers->solverId = SICONOS_FRICTION_3D_DampedAlartCurnierNewton;
+  options->internalSolvers->internalSolvers->solverId = SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP;
   options->internalSolvers->internalSolvers->iparam[1] = 10;
 
 

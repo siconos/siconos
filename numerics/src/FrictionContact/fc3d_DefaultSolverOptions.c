@@ -103,15 +103,15 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    fc3d_FischerBurmeister_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_QUARTIC:
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
   {
     info =    fc3d_unitary_enumerative_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_QUARTIC_NU:
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU:
   {
     info =    fc3d_unitary_enumerative_setDefaultSolverOptions(options);
-    options->solverId = SICONOS_FRICTION_3D_QUARTIC_NU;
+    options->solverId = SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU;
     break;
   }
   default:

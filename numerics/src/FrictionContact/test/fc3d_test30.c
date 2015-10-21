@@ -34,7 +34,7 @@ int main(void)
   info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
   options->dparam[0] = 1e-2;
   options->iparam[0] = 10000;
-  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ProjectionOnCone;
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone;
   options->internalSolvers->iparam[0] = 0;
   options->internalSolvers->dparam[0] = 0.0;
 

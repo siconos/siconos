@@ -19,6 +19,7 @@
 
 #include "fc3d_projection.h"
 #include "fc3d_Solvers.h"
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
 #include "fc3d_compute_error.h"
 
 #include <stdio.h>
@@ -37,7 +38,7 @@ void initializeLocalSolver_nsgs_velocity(SolverPtr* solve, FreeSolverPtr* freeSo
 
   /** Connect to local solver */
   /* Projection */
-  if (localsolver_options->solverId == SICONOS_FRICTION_3D_ProjectionOnCone_velocity)
+  if (localsolver_options->solverId == SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity)
   {
     *solve = &fc3d_projectionOnCone_velocity_solve;
     *freeSolver = (FreeSolverPtr)&fc3d_projection_free;
@@ -189,7 +190,7 @@ int fc3d_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_AlartCurnierNewton_setDefaultSolverOptions(options->internalSolvers);
+  fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);
 
   return 0;
 }

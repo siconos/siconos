@@ -285,7 +285,7 @@ int fc3d_unitary_enumerative(FrictionContactProblem* problem, double * reaction,
 #ifdef FC3D_UE_DEBUG
   printf("FC3D: Not a trivial case, sliding?\n");
 #endif
-  if (options->solverId == SICONOS_FRICTION_3D_QUARTIC_NU)
+  if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU)
   {
     *info = fc3d_unitary_enumerative_solve_poly_nu_sliding(problem, reaction, options);
   }
@@ -608,7 +608,7 @@ int fc3d_unitary_enumerative_setDefaultSolverOptions(
     printf("Setting default options for unitary enumerative solver.\n");
   }
 
-  options->solverId =  SICONOS_FRICTION_3D_QUARTIC;
+  options->solverId =  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

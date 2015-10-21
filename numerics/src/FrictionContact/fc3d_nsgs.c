@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "fc3d_local_nonsmooth_Newton_solvers.h"
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
 #include "fc3d_Path.h"
 #include "fc3d_NCPGlockerFixedPoint.h"
 #include "fc3d_projection.h"
@@ -75,7 +75,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
   switch (localsolver_options->solverId)
   {
     /* Projection */
-  case SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization:
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization:
   {
     *solve = &fc3d_projectionWithDiagonalization_solve;
     *update = &fc3d_projectionWithDiagonalization_update;
@@ -84,7 +84,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     fc3d_projection_initialize(problem, localproblem);
     break;
   }
-  case SICONOS_FRICTION_3D_ProjectionOnCone:
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone:
   {
     *solve = &fc3d_projectionOnCone_solve;
     *update = &fc3d_projection_update;
@@ -93,7 +93,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     fc3d_projection_initialize(problem, localproblem);
     break;
   }
-  case SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration:
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration:
   {
     *solve = &fc3d_projectionOnConeWithLocalIteration_solve;
     *update = &fc3d_projection_update;
@@ -102,7 +102,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,localsolver_options );
     break;
   }
-  case SICONOS_FRICTION_3D_projectionOnConeWithRegularization:
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization:
   {
     *solve = &fc3d_projectionOnCone_solve;
     *update = &fc3d_projection_update_with_regularization;
@@ -112,33 +112,33 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     break;
   }
   /* Newton solver (Alart-Curnier) */
-  case SICONOS_FRICTION_3D_AlartCurnierNewton:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC:
   {
-    *solve = &fc3d_local_nonsmooth_Newton_solvers_solve;
-    *update = &fc3d_local_nonsmooth_Newton_AC_update;
-    *freeSolver = (FreeSolverNSGSPtr)&fc3d_local_nonsmooth_Newton_solvers_free;
+    *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
+    *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;
+    *freeSolver = (FreeSolverNSGSPtr)&fc3d_onecontact_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&fc3d_compute_error;
-    fc3d_local_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+    fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
-  case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP:
   {
-    *solve = &fc3d_local_nonsmooth_Newton_solvers_solve;
-    *update = &fc3d_local_nonsmooth_Newton_AC_update;
-    *freeSolver = (FreeSolverNSGSPtr)&fc3d_local_nonsmooth_Newton_solvers_free;
+    *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
+    *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;
+    *freeSolver = (FreeSolverNSGSPtr)&fc3d_onecontact_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&fc3d_compute_error;
-    fc3d_local_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+    fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
   /* Newton solver (Glocker-Fischer-Burmeister)*/
   case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
   {
-    *solve = &fc3d_local_nonsmooth_Newton_solvers_solve;
+    *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
     *update = &NCPGlocker_update;
-    *freeSolver = (FreeSolverNSGSPtr)&fc3d_local_nonsmooth_Newton_solvers_free;
+    *freeSolver = (FreeSolverNSGSPtr)&fc3d_onecontact_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&fc3d_compute_error;
     // *computeError = &fake_compute_error;
-    fc3d_local_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+    fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
   /* Path solver (Glocker Formulation) */
@@ -164,7 +164,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     break;
   }
   /*iparam[4] > 10 are reserved for Tresca resolution */
-  case SICONOS_FRICTION_3D_projectionOnCylinder:
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder:
   {
     *solve = &fc3d_projectionOnCylinder_solve;
     *update = &fc3d_projectionOnCylinder_update;
@@ -174,7 +174,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     break;
   }
     /*iparam[4] > 10 are reserved for Tresca resolution */
-  case SICONOS_FRICTION_3D_projectionOnCylinderWithLocalIteration:
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration:
   {
     *solve = &fc3d_projectionOnCylinderWithLocalIteration_solve;
     *update = &fc3d_projectionOnCylinder_update;
@@ -183,7 +183,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     fc3d_projectionOnCylinderWithLocalIteration_initialize(problem, localproblem, options, localsolver_options );
     break;
   }
-  case SICONOS_FRICTION_3D_QUARTIC:
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
   {
     *solve = &fc3d_unitary_enumerative_solve;
     *update = &fc3d_nsgs_update;
@@ -192,7 +192,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     fc3d_unitary_enumerative_initialize(localproblem);
     break;
   }
-  case SICONOS_FRICTION_3D_QUARTIC_NU:
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU:
   {
     *solve = &fc3d_unitary_enumerative_solve;
     *update = &fc3d_nsgs_update;
@@ -765,7 +765,7 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_AlartCurnierNewton_setDefaultSolverOptions(options->internalSolvers);
+  fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);
 
   return 0;
 }

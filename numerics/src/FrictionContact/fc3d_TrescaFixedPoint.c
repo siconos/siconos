@@ -187,7 +187,7 @@ int fc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   subsubsolver->iparam[0] = 50;
   subsubsolver->dparam[0] = 1e-14;
 
-  subsubsolver->solverId = SICONOS_FRICTION_3D_projectionOnCylinderWithLocalIteration;
+  subsubsolver->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration;
 
   return 0;
 }

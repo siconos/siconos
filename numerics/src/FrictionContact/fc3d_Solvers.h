@@ -47,7 +47,7 @@ For each solver, the input argument are:
 #include "SolverOptions.h"
 #include "fc3d_AlartCurnier_functions.h"
 #include "fc3d_projection.h"
-#include "fc3d_local_nonsmooth_Newton_solvers.h"
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
 #include "fc3d_NCPGlockerFixedPoint.h"
 #include "fc3d_2NCP_Glocker.h"
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"
@@ -359,10 +359,6 @@ extern "C"
   */
   int fc3d_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for AlartCurnierNewton
-    \param options the pointer to the array of options to set
-  */
-  int fc3d_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* options);
 
   /** Check for trivial solution in the friction-contact 3D problem
       \param problem FrictionContactProblem*  the problem

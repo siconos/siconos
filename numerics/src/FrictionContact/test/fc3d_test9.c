@@ -35,7 +35,7 @@ int main(void)
   options->iparam[0] = 1000000;
   options->dparam[8] = 1.0;
   options->iparam[8] = 1;
-  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration;
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration;
   options->internalSolvers->iparam[0] = 20;
   options->internalSolvers->dparam[0] = 1e-16;
 

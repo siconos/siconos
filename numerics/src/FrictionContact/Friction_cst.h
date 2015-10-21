@@ -37,21 +37,21 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_SOCLCP = 517,
 
   /** 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
-  SICONOS_FRICTION_3D_AlartCurnierNewton = 550,
-  SICONOS_FRICTION_3D_NCPGlockerFBNewton = 551,
-  SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization = 552,
-  SICONOS_FRICTION_3D_ProjectionOnCone = 553,
-  SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration = 554,
-  SICONOS_FRICTION_3D_projectionOnConeWithRegularization = 555,
-  SICONOS_FRICTION_3D_NCPGlockerFBPATH = 556,
-  SICONOS_FRICTION_3D_projectionOnCylinder = 557,
-  SICONOS_FRICTION_3D_ProjectionOnCone_velocity = 558,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC= 550,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP = 551,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone = 552,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 553,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization = 554,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization = 555,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity = 558,
   SICONOS_FRICTION_3D_PGoC = 559,
   SICONOS_FRICTION_3D_DeSaxceFixedPoint = 560,
-  SICONOS_FRICTION_3D_DampedAlartCurnierNewton = 561,
-  SICONOS_FRICTION_3D_QUARTIC = 562,
-  SICONOS_FRICTION_3D_QUARTIC_NU = 563,
-  SICONOS_FRICTION_3D_projectionOnCylinderWithLocalIteration = 564,
+  SICONOS_FRICTION_3D_NCPGlockerFBPATH = 556,
+  SICONOS_FRICTION_3D_NCPGlockerFBNewton = 561,
+  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC = 562,
+  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU = 563,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder = 557,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration = 564,
 
   /** 3D Frictional contact local solvers on global formulation */
   SICONOS_FRICTION_3D_GLOBAL_NSGS_WR = 600,
@@ -89,16 +89,16 @@ extern char *  SICONOS_FRICTION_3D_EG_STR ;
 extern char *  SICONOS_FRICTION_3D_FPP_STR ;
 extern char *  SICONOS_FRICTION_3D_HP_STR ;
 extern char *  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR;
-extern char *  SICONOS_FRICTION_3D_AlartCurnierNewton_STR;
-extern char *  SICONOS_FRICTION_3D_DampedAlartCurnierNewton_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_STR;
 extern char *  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR;
-extern char *  SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR;
-extern char *  SICONOS_FRICTION_3D_ProjectionOnCone_STR;
-extern char *  SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration_STR;
-extern char *  SICONOS_FRICTION_3D_projectionOnConeWithRegularization_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization_STR;
 extern char *  SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR;
-extern char *  SICONOS_FRICTION_3D_projectionOnCylinder_STR;
-extern char *  SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR;
 extern char *  SICONOS_FRICTION_3D_PGoC_STR;
 extern char *  SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR;
 extern char *  SICONOS_FRICTION_3D_GAMS_PATH_STR;
@@ -113,7 +113,7 @@ extern char *  SICONOS_FRICTION_3D_GLOBAL_NSN_AC_WR_STR ;
 extern char *  SICONOS_FRICTION_3D_GLOBAL_AC_STR;
 extern char *  SICONOS_FRICTION_3D_GLOBAL_GAMS_PATH_STR;
 extern char *  SICONOS_FRICTION_3D_GLOBAL_GAMS_PATHVI_STR;
-extern char *  SICONOS_FRICTION_3D_QUARTIC_STR ;
-extern char *  SICONOS_FRICTION_3D_QUARTIC_NU_STR ;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 
 #endif

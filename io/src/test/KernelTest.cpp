@@ -125,10 +125,10 @@ void KernelTest::t3()
 {
   SP::SolverOptions so(new SolverOptions);
   SP::SolverOptions sor(new SolverOptions);
-  fill_SolverOptions(so.get(), SICONOS_FRICTION_3D_LOCALAC, 10, 10, 0, 0.);
+  fill_SolverOptions(so.get(), SICONOS_FRICTION_3D_NSN_AC, 10, 10, 0, 0.);
   so->numberOfInternalSolvers = 1;
   so->internalSolvers = (_SolverOptions *) malloc(sizeof(_SolverOptions) * so->numberOfInternalSolvers);
-  fill_SolverOptions(so->internalSolvers, SICONOS_FRICTION_3D_LOCALAC, 10, 10, 0, 0.);  
+  fill_SolverOptions(so->internalSolvers, SICONOS_FRICTION_3D_NSN_AC, 10, 10, 0, 0.);  
 
   std::ofstream ofs("SolverOptions.xml");
   {

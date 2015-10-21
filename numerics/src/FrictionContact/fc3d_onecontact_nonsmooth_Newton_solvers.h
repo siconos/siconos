@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT3D_local_nonsmooth_Newton_solvers_H
-#define FRICTIONCONTACT3D_local_nonsmooth_Newton_solvers_H
+#ifndef FRICTIONCONTACT3D_onecontact_nonsmooth_Newton_solvers_H
+#define FRICTIONCONTACT3D_onecontact_nonsmooth_Newton_solvers_H
 
-/*!\file fc3d_local_nonsmooth_Newton_solvers.h
+/*!\file fc3d_onecontact_nonsmooth_Newton_solvers.h
   \brief Typedef and functions declarations related to Newton solver for 3 dimension frictional contact problems.
 
   Each solver must have 4 functions in its interface:
@@ -44,19 +44,19 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
    * \param localproblem to solve
    * \param options of the solver
    */
-  void fc3d_local_nonsmooth_Newton_solvers_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options);
+  void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options);
 
   /** solve friction-contact 3D problem with Newton
    * \param localproblem to solve
    * \param options of the solver
    * \return 0 iff successful.
    */
-  int fc3d_local_nonsmooth_Newton_solvers_solve(FrictionContactProblem* localproblem, double*, SolverOptions * options);
+  int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* localproblem, double*, SolverOptions * options);
 
   /** free memory for friction contact 3D Newton solver
    * \param localproblem for freeing matrix0
    */
-  void fc3d_local_nonsmooth_Newton_solvers_free(FrictionContactProblem* localproblem);
+  void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* localproblem);
 
   /** compute error for friction-contact 3D problem with Newton
    *  \param dimension of the global problem
@@ -64,7 +64,7 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
    *   \param reaction global reaction vector
    *   \param output_error
    */
-  void fc3d_local_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity, double*reaction, double * output_error);
+  void fc3d_onecontact_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity, double*reaction, double * output_error);
 
   /** Update friction-contact 3D problem: formalize local problem for one contact
       \param problem the global problem to solve
@@ -76,15 +76,25 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
 
       the rest is used to formalize the local problem)
   */
-  void fc3d_local_nonsmooth_Newton_AC_update(int number, FrictionContactProblem* problem, FrictionContactProblem* localproblem ,
+  void fc3d_onecontact_nonsmooth_Newton_AC_update(int number, FrictionContactProblem* problem, FrictionContactProblem* localproblem ,
                                    double * reaction, SolverOptions* options);
 
-  int fc3d_local_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem,
+  int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem,
                                  double * R, int *iparam, double *dparam);
 
-  int fc3d_local_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem,
+  int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem,
                                        double * R, int *iparam, double *dparam);
 
+  /* Set the default solver options for the NSN_AC Solver
+   * Some default values:
+   * options.iparam[0] = 200 is the maximum number of iterations.
+   * options.iparam[3] = 100000 is the nzmax parameter for sparse matrices.
+   * options.iparam[10] = 0 : stands for STD Alart & Curnier function
+   *  (other values may be 1 for JeanMoreau, 2 for STD generated, 3 for JeanMoreau generated)
+   * options.dparam[0] = 1e-3 precision.
+   * \param options  the solver options
+   */
+  int fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
