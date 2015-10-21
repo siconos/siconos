@@ -34,6 +34,7 @@
 #endif
 
 #define PIVOT_PATHSEARCH_SUCCESS -2
+#define BASIS_OFFSET 1
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -170,6 +171,9 @@ void do_pivot_driftless2(double* mat, unsigned int dim, unsigned int dim2, unsig
   void init_M_least_index(double* restrict mat, double* restrict M, unsigned int dim, double* restrict q);
   int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, double* restrict M, double* restrict q, int* restrict basis, double* restrict cov_vec);
 
+  char* basis_to_name(unsigned nb, unsigned n);
+  unsigned basis_to_number(unsigned nb, unsigned n);
+    
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

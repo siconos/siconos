@@ -29,8 +29,9 @@ int SICONOS_LS_0 = 0;
 
 static int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOptions* options);
 static int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options);
+#ifdef LINEARSYSTEM_DEBUG
 static void displayLS(LinearSystemProblem* p);
-
+#endif
 //#define LINEARSYSTEM_DEBUG
 
 /*
@@ -230,7 +231,7 @@ int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, Sol
   }
   return res;
 }
-
+#ifdef LINEARSYSTEM_DEBUG
 void displayLS(LinearSystemProblem* p)
 {
   printf("Numerics LinearSystem DISPLAY:\n-------------\n");
@@ -258,6 +259,7 @@ void displayLS(LinearSystemProblem* p)
     printf("No q:\n");
 
 }
+#endif
 int LinearSystem_newFromFile(LinearSystemProblem* problem, FILE* file)
 {
   int n = 0;

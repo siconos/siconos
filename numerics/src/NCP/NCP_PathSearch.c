@@ -51,7 +51,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
  * - call modified lemke
 */
 
-  int n = problem->n;
+  unsigned int n = problem->n;
   unsigned int preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
 

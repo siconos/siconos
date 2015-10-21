@@ -40,10 +40,8 @@
 
 #define WARN_ONLY_SMALL_PIVOT
 #include "lcp_pivot.h"
-
+#include "pivot-utils.h"
 #define LEXICO_TOL 1e3*DBL_EPSILON
-
-#define BASIS_OFFSET 1
 
 DEBUG_GLOBAL_VAR_DECL(unsigned * basis_global;);
 
@@ -71,9 +69,6 @@ inline static double* get_cov_vec(double* mat, unsigned n)
 {
   return &mat[(n+3)*n];
 }
-
-inline static char* basis_to_name(unsigned nb, unsigned n) { if (nb < n + 1) return "w"; else if (nb > n +1) return "z"; else return "e";};
-inline static unsigned basis_to_number(unsigned nb, unsigned n) { if (nb < n + 1) return nb; else if (nb > n +1) return nb - n -1; else return 0;};
 
 void lcp_pivot_lumod(LinearComplementarityProblem* problem, double* u , double* s, int *info , SolverOptions* options)
 {
@@ -112,15 +107,15 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, doub
   assert(itermax > 0 && "lcp_pivot_lumod_covering_vector itermax == 0, the algorithm will not run");
   double pivot;
   double tmp;
-  double theta;
   unsigned* basis = (unsigned*) malloc(dim*sizeof(unsigned));
   DEBUG_EXPR_WE(basis_global = basis;);
   unsigned* candidate_indx = (unsigned*) malloc(dim*sizeof(unsigned));
   int basis_init = 0; /* 0 if basis was not initialized, 1 otherwise*/
   unsigned t_indx = 0;
   unsigned aux_indx = 0;
+#if 0
   double* t_stack = NULL;
-
+#endif
   /* This matrix contains q, the solution to the linear system Hk x = driving_col,
    * the matrix for the lexicographic ordering and the solution to the linear
    * system H x = driving_col. */

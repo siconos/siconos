@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <float.h>
 #include "LCP_Solvers.h"
+#include "pivot-utils.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -32,22 +33,6 @@
 //#define INV_PIVOT
 
 #include "debug.h"
-
-#define BASIS_OFFSET 1
-
-inline static char* basis_to_name(unsigned nb, unsigned n)
-{
-  if (nb < n + BASIS_OFFSET) return "w";
-  else if (nb > n + BASIS_OFFSET) return "z"; 
-  else return "e";
-}
-
-inline static unsigned basis_to_number(unsigned nb, unsigned n)
-{
-  if (nb < n + BASIS_OFFSET) return nb + 1 - BASIS_OFFSET;
-  else if (nb > n + BASIS_OFFSET) return nb - n - BASIS_OFFSET;
-  else return 0;
-}
 
 void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , double *wlem , int *info , SolverOptions* options)
 {

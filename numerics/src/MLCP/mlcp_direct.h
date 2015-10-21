@@ -18,5 +18,5 @@ void mlcp_direct_reset(void);
 
 int mlcp_direct_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 int mlcp_direct_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-
+  
 #endif //MLCP_DIRECT_H

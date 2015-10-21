@@ -59,8 +59,6 @@ void gfc3d_FixedPointCadoux(
 
   assert(problem->M->size0 == problem->H->size0);
 
-  unsigned int iter = 0;
-  unsigned int itermax = options->iparam[0];
   unsigned int erritermax = options->iparam[7];
 
   if (erritermax == 0)
@@ -69,11 +67,10 @@ void gfc3d_FixedPointCadoux(
     erritermax = 1;
   }
 
-  assert(itermax > 0);
+  assert(options->iparam[0] > 0);
   assert(options->iparam[3] > 0);
 
-  double tolerance = options->dparam[0];
-  assert(tolerance > 0);
+  assert(options->dparam[0] > 0);
 
   /* sparse triplet storage */
 //  NM_setup(problem->M);

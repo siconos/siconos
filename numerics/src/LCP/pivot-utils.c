@@ -37,7 +37,7 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
-
+#include "pivot-utils.h"
 #define TOL_LEXICO DBL_EPSILON*10000
 #define MIN_INCREASE 10
 #define SMALL_PIVOT 1e-10
@@ -46,14 +46,14 @@
 
 #define BASIS_OFFSET 1
 
-inline static char* basis_to_name(unsigned nb, unsigned n)
+char* basis_to_name(unsigned nb, unsigned n)
 {
   if (nb < n + BASIS_OFFSET) return "w";
   else if (nb > n + BASIS_OFFSET) return "z"; 
   else return "e";
 }
 
-inline static unsigned basis_to_number(unsigned nb, unsigned n)
+unsigned basis_to_number(unsigned nb, unsigned n)
 {
   if (nb < n + BASIS_OFFSET) return nb + 1 - BASIS_OFFSET;
   else if (nb > n + BASIS_OFFSET) return nb - n - BASIS_OFFSET;

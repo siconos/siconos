@@ -59,10 +59,10 @@ static NewtonFunctionPtr* sFjacobianPhi;
 
 
 static void plotMerit(double *z, double psi_k, double descentCondition);
-static void plotMeritToZsol(double *z);
+//static void plotMeritToZsol(double *z);
 static int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition);
-static int lineSearch_Wolfe(double *z, double qp_0);
-static int NonMonotomnelineSearch(double *z, double Rk);
+//static int lineSearch_Wolfe(double *z, double qp_0);
+//static int NonMonotomnelineSearch(double *z, double Rk);
 
 
 /************************************************************************/
@@ -143,53 +143,53 @@ void plotMerit(double *z, double psi_k, double descentCondition)
     fclose(fp);
   }
 }
-void plotMeritToZsol(double *z)
-{
-  int incx = 1, incy = 1;
-  double q_0, q_tk;
-  /*   double merit_k;  */
-  /*  double tmin = 1e-12; */
-  double tk = 1;
-  /*   double m1=0.5; */
-  double aux;
-  int i = 0;
-  int ii;
-  if (!sPlotMerit || !sZsol)
-    return;
-  FILE *fp;
+/* void plotMeritToZsol(double *z) */
+/* { */
+/*   int incx = 1, incy = 1; */
+/*   double q_0, q_tk; */
+/*   /\*   double merit_k;  *\/ */
+/*   /\*  double tmin = 1e-12; *\/ */
+/*   double tk = 1; */
+/*   /\*   double m1=0.5; *\/ */
+/*   double aux; */
+/*   int i = 0; */
+/*   int ii; */
+/*   if (!sPlotMerit || !sZsol) */
+/*     return; */
+/*   FILE *fp; */
 
-  for (ii = 0; ii < sN; ii++)
-    szzaux[ii] = sZsol[ii] - z[ii];
+/*   for (ii = 0; ii < sN; ii++) */
+/*     szzaux[ii] = sZsol[ii] - z[ii]; */
 
 
 
-  if (sPlotMerit)
-  {
-    /*    sPlotMerit=0;*/
-    strcpy(fileName, "outputLSZsol");
-    (*sFphi)(sN, z, sphi_z, 0);
-    q_0 =  cblas_dnrm2(sN, sphi_z , incx);
-    q_0 = 0.5 * q_0 * q_0;
+/*   if (sPlotMerit) */
+/*   { */
+/*     /\*    sPlotMerit=0;*\/ */
+/*     strcpy(fileName, "outputLSZsol"); */
+/*     (*sFphi)(sN, z, sphi_z, 0); */
+/*     q_0 =  cblas_dnrm2(sN, sphi_z , incx); */
+/*     q_0 = 0.5 * q_0 * q_0; */
 
-    fp = fopen(fileName, "w");
+/*     fp = fopen(fileName, "w"); */
 
-    /*    sPlotMerit=0;*/
-    tk = 1;
-    aux = -tk;
-    for (i = 0; i < 2e3; i++)
-    {
-      cblas_dcopy(sN, z, incx, sz2, incx);
-      cblas_daxpy(sN , aux , szzaux , incx , sz2 , incy);
-      (*sFphi)(sN, sz2, sphi_z, 0);
-      q_tk =  cblas_dnrm2(sN, sphi_z , incx);
-      q_tk = 0.5 * q_tk * q_tk;
-      fprintf(fp, "%e %e\n", aux, q_tk);
-      aux += tk / 1e3;
-    }
+/*     /\*    sPlotMerit=0;*\/ */
+/*     tk = 1; */
+/*     aux = -tk; */
+/*     for (i = 0; i < 2e3; i++) */
+/*     { */
+/*       cblas_dcopy(sN, z, incx, sz2, incx); */
+/*       cblas_daxpy(sN , aux , szzaux , incx , sz2 , incy); */
+/*       (*sFphi)(sN, sz2, sphi_z, 0); */
+/*       q_tk =  cblas_dnrm2(sN, sphi_z , incx); */
+/*       q_tk = 0.5 * q_tk * q_tk; */
+/*       fprintf(fp, "%e %e\n", aux, q_tk); */
+/*       aux += tk / 1e3; */
+/*     } */
 
-    fclose(fp);
-  }
-}
+/*     fclose(fp); */
+/*   } */
+/* }*/
 
 /************************************************************************/
 
@@ -286,115 +286,115 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
 }
 
 
-int lineSearch_Wolfe(double *z, double qp_0)
-{
-  int incx = 1, incy = 1;
-  double q_0, q_tk, qp_tk;
-  double tmin = 1e-12;
-  int maxiter = 100;
-  int niter = 0;
-  double tk = 1;
-  double tg, td;
-  double m1 = 0.1;
-  double m2 = 0.9;
+/* int lineSearch_Wolfe(double *z, double qp_0) */
+/* { */
+/*   int incx = 1, incy = 1; */
+/*   double q_0, q_tk, qp_tk; */
+/*   double tmin = 1e-12; */
+/*   int maxiter = 100; */
+/*   int niter = 0; */
+/*   double tk = 1; */
+/*   double tg, td; */
+/*   double m1 = 0.1; */
+/*   double m2 = 0.9; */
 
 
-  (*sFphi)(sN, z, sphi_z, 0);
-  q_0 =  cblas_dnrm2(sN, sphi_z , incx);
-  q_0 = 0.5 * q_0 * q_0;
+/*   (*sFphi)(sN, z, sphi_z, 0); */
+/*   q_0 =  cblas_dnrm2(sN, sphi_z , incx); */
+/*   q_0 = 0.5 * q_0 * q_0; */
 
-  tg = 0;
-  td = 10e5;
+/*   tg = 0; */
+/*   td = 10e5; */
 
-  tk = (tg + td) / 2.0;
+/*   tk = (tg + td) / 2.0; */
 
-  while (niter < maxiter || (td - tg) < tmin)
-  {
-    niter++;
-    /*q_tk = 0.5*|| phi(z+tk*d) ||*/
-    cblas_dcopy(sN, z, incx, sz2, incx);
-    cblas_daxpy(sN , tk , sdir_descent , incx , sz2 , incy);
-    (*sFphi)(sN, sz2, sphi_z, 0);
-    q_tk =  cblas_dnrm2(sN, sphi_z , incx);
-    q_tk = 0.5 * q_tk * q_tk;
+/*   while (niter < maxiter || (td - tg) < tmin) */
+/*   { */
+/*     niter++; */
+/*     /\*q_tk = 0.5*|| phi(z+tk*d) ||*\/ */
+/*     cblas_dcopy(sN, z, incx, sz2, incx); */
+/*     cblas_daxpy(sN , tk , sdir_descent , incx , sz2 , incy); */
+/*     (*sFphi)(sN, sz2, sphi_z, 0); */
+/*     q_tk =  cblas_dnrm2(sN, sphi_z , incx); */
+/*     q_tk = 0.5 * q_tk * q_tk; */
 
-    (*sFjacobianPhi)(sN, sz2, sjacobianPhi_z, 1);
-    /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
-    cblas_dgemv(CblasColMajor,CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx, 0.0, sgrad_psi_z, incx);
-    qp_tk = cblas_ddot(sN, sgrad_psi_z, 1, sdir_descent, 1);
-    if (qp_tk <  m2 * qp_0 && q_tk < q_0 + m1 * tk * qp_0)
-    {
-      /*too small*/
-      if (niter == 1)
-        break;
-      tg = tk;
-      tk = (tg + td) / 2.0;
-      continue;
-    }
-    else if (q_tk > q_0 + m1 * tk * qp_0)
-    {
-      /*too big*/
-      td = tk;
-      tk = (tg + td) / 2.0;
-      continue;
-    }
-    else
-      break;
-  }
+/*     (*sFjacobianPhi)(sN, sz2, sjacobianPhi_z, 1); */
+/*     /\* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector *\/ */
+/*     cblas_dgemv(CblasColMajor,CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx, 0.0, sgrad_psi_z, incx); */
+/*     qp_tk = cblas_ddot(sN, sgrad_psi_z, 1, sdir_descent, 1); */
+/*     if (qp_tk <  m2 * qp_0 && q_tk < q_0 + m1 * tk * qp_0) */
+/*     { */
+/*       /\*too small*\/ */
+/*       if (niter == 1) */
+/*         break; */
+/*       tg = tk; */
+/*       tk = (tg + td) / 2.0; */
+/*       continue; */
+/*     } */
+/*     else if (q_tk > q_0 + m1 * tk * qp_0) */
+/*     { */
+/*       /\*too big*\/ */
+/*       td = tk; */
+/*       tk = (tg + td) / 2.0; */
+/*       continue; */
+/*     } */
+/*     else */
+/*       break; */
+/*   } */
 
-  cblas_dcopy(sN, sz2, incx, z, incx);
+/*   cblas_dcopy(sN, sz2, incx, z, incx); */
 
-  if ((td - tg) <= tmin)
-  {
-    printf("NonSmoothNewton2::lineSearchWolfe warning, resulting tk < tmin, linesearch stopped.\n");
-    return 0;
-  }
-  return 1;
+/*   if ((td - tg) <= tmin) */
+/*   { */
+/*     printf("NonSmoothNewton2::lineSearchWolfe warning, resulting tk < tmin, linesearch stopped.\n"); */
+/*     return 0; */
+/*   } */
+/*   return 1; */
 
-}
+/* } */
 
-int NonMonotomnelineSearch(double *z, double Rk)
-{
-  int incx = 1, incy = 1;
-  double q_0, q_tk;
-  /*   double merit_k;  */
-  double tmin = 1e-12;
-  double tmax = 1000;
-  double tk = 1;
-  /*   double m1=0.5; */
-
-
-
-  (*sFphi)(sN, z, sphi_z, 0);
-  q_0 =  cblas_dnrm2(sN, sphi_z , incx);
-  q_0 = 0.5 * q_0 * q_0;
+/* nt NonMonotomnelineSearch(double *z, double Rk) */
+/* { */
+/*   int incx = 1, incy = 1; */
+/*   double q_0, q_tk; */
+/*   /\*   double merit_k;  *\/ */
+/*   double tmin = 1e-12; */
+/*   double tmax = 1000; */
+/*   double tk = 1; */
+/*   /\*   double m1=0.5; *\/ */
 
 
-  while ((tmax - tmin) > 1e-1)
-  {
-    tk = (tmax + tmin) / 2;
-    /*q_tk = 0.5*|| phi(z+tk*d) ||*/
-    cblas_dcopy(sN, z, incx, sz2, incx);
-    cblas_daxpy(sN , tk , sdir_descent , incx , sz2 , incy);
-    (*sFphi)(sN, sz2, sphi_z, 0);
-    q_tk =  cblas_dnrm2(sN, sphi_z , incx);
-    q_tk = 0.5 * q_tk * q_tk;
-    if (fabs(q_tk - q_0) < Rk)
-      tmin = tk;
-    else
-      tmax = tk;
-  }
-  printf("NonMonotomnelineSearch, tk = %e\n", tk);
-  cblas_dcopy(sN, sz2, incx, z, incx);
 
-  if (tk <= tmin)
-  {
-    printf("NonMonotomnelineSearch warning, resulting tk < tmin, linesearch stopped.\n");
-    return 0;
-  }
-  return 1;
+/*   (*sFphi)(sN, z, sphi_z, 0); */
+/*   q_0 =  cblas_dnrm2(sN, sphi_z , incx); */
+/*   q_0 = 0.5 * q_0 * q_0; */
 
-}
+
+/*   while ((tmax - tmin) > 1e-1) */
+/*   { */
+/*     tk = (tmax + tmin) / 2; */
+/*     /\*q_tk = 0.5*|| phi(z+tk*d) ||*\/ */
+/*     cblas_dcopy(sN, z, incx, sz2, incx); */
+/*     cblas_daxpy(sN , tk , sdir_descent , incx , sz2 , incy); */
+/*     (*sFphi)(sN, sz2, sphi_z, 0); */
+/*     q_tk =  cblas_dnrm2(sN, sphi_z , incx); */
+/*     q_tk = 0.5 * q_tk * q_tk; */
+/*     if (fabs(q_tk - q_0) < Rk) */
+/*       tmin = tk; */
+/*     else */
+/*       tmax = tk; */
+/*   } */
+/*   printf("NonMonotomnelineSearch, tk = %e\n", tk); */
+/*   cblas_dcopy(sN, sz2, incx, z, incx); */
+
+/*   if (tk <= tmin) */
+/*   { */
+/*     printf("NonMonotomnelineSearch warning, resulting tk < tmin, linesearch stopped.\n"); */
+/*     return 0; */
+/*   } */
+/*   return 1; */
+
+/* } */
 
 
 int nonSmoothNewtonNeigh_getNbIWork(int n, int m)

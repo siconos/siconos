@@ -66,7 +66,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   double *workV1, *workV2;
   double *JacThetaF_merit, *F_merit;
-  int itermax = options->iparam[0];
+  unsigned int itermax = options->iparam[0];
   double tol = options->dparam[0];
 
   incx = 1;

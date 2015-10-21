@@ -258,7 +258,6 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
   unsigned int itermax = options->iparam[0];
   unsigned aux_indx = 0;
 
-  double z0, zb, dblock;
   double pivot, pivot_inv;
   double tmp;
   unsigned int* basis;
@@ -372,7 +371,7 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
   for (unsigned int i = dim*(drive + 1); i < dim2*dim ; i += dim) mat[block + i] *= pivot_inv;
 
   /* Update other columns*/
-  for (unsigned int i = 0; i < block; ++i)
+  for (int i = 0; i < block; ++i)
   {
     tmp = mat[i + drive*dim];
     for (unsigned int j = 0; j < dim2*dim; j += dim) mat[i + j] -= tmp*mat[block + j];
@@ -436,7 +435,7 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
     for (unsigned int i = dim*(drive + 1); i < dim2*dim ; i += dim) mat[block + i] *= pivot_inv;
 
     /* Update other columns*/
-    for (unsigned int i = 0; i < block; ++i)
+    for (int i = 0; i < block; ++i)
     {
       tmp = mat[i + drive*dim];
       for (unsigned int j = 0; j < dim2*dim; j += dim) mat[i + j] -= tmp*mat[block + j];

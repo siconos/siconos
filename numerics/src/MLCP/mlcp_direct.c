@@ -76,7 +76,7 @@ static int * myiMalloc(int n);
 static int internalPrecompute(MixedLinearComplementarityProblem* problem);
 static int internalAddConfig(MixedLinearComplementarityProblem* problem, int * zw, int init);
 static int solveWithCurConfig(MixedLinearComplementarityProblem* problem);
-static int nbConfig(struct dataComplementarityConf * pC);
+//static int nbConfig(struct dataComplementarityConf * pC);
 
 double * mydMalloc(int n)
 {
@@ -325,7 +325,7 @@ int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
  * double *w : size n+m
  * info : output. info == 0 if success
  */
-int nbConfig(struct dataComplementarityConf * pC)
+/*int nbConfig(struct dataComplementarityConf * pC)
 {
   struct dataComplementarityConf * paux = pC;
   int nb = 0;
@@ -338,6 +338,7 @@ int nbConfig(struct dataComplementarityConf * pC)
   return nb;
 
 }
+*/
 
 void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

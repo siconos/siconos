@@ -193,9 +193,6 @@ watchdog_step:
       exit(EXIT_FAILURE);
   }
 
-/* going back to bestpoint */
-projected_gradient_step:
-
   /* compute the gradient JacThetaF_merit at the bestpoint z_b(0)*/
   functions->compute_F(data, NMS_bestpoint(data_NMS, n), F);
   functions->compute_H(data, NMS_bestpoint(data_NMS, n), F, workV1, workV2, Htmp);

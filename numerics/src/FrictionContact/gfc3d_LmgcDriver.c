@@ -13,7 +13,9 @@
 /* #define DEBUG_STDOUT */
 #include "debug.h"
 
+#ifdef WITH_FCLIB
 static int fccounter =-1;
+#endif
 static double * alloc_memory_double(unsigned int size, double *p)
 {
   double * r = (double *) malloc (size * sizeof(double));

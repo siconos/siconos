@@ -55,7 +55,7 @@ typedef void (*ptrFunctionJacNCP)(void* env, int n, double* z, NumericsMatrix* j
  */
 typedef struct
 {
-  int n; /**< size of the problem */
+  unsigned int n; /**< size of the problem */
   ptrFunctionNCP compute_F; /**< pointer to the function used to compute \f$F(z)\f$ */
   ptrFunctionJacNCP compute_nabla_F; /**< pointer to the function used to compute \f$\nabla_z F(z)\f$ */
   NumericsMatrix* nabla_F; /**< storage for \f$\nabla_z F\f$*/
