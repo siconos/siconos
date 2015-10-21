@@ -48,6 +48,8 @@ set(${COMPONENT}_EXCLUDE_DOXY
   PATH_SDK/include
   tools)
 
+
+
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE C)
@@ -56,13 +58,19 @@ if(MLCPSIMPLEX_FOUND)
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
 set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-include(LibraryProjectSetup)
-library_project_setup()
+
+# Windows stuff
+include(WindowsExternalsSetup)
 
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
 endif()
+
+include(LibraryProjectSetup)
+library_project_setup()
+
+
 
 # --- specific install ----
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include/${PROJECT_NAME})

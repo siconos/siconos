@@ -10,13 +10,13 @@ if(BUILD_SHARED_LIBS)
     IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
       ADD_CUSTOM_COMMAND(TARGET ${COMPONENT}
         PRE_BUILD
-        COMMAND ${CMAKE_NM} ARGS @${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${COMPONENT}_shared.dir/objects1.rsp
+        COMMAND ${CMAKE_NM} ARGS @${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${COMPONENT}.dir/objects1.rsp
         | egrep ' "(D|T|B)" ' | cut -f 3 -d ' ' | sed  's,^_,,' | sed '1iEXPORTS' > ${${COMPONENT}_SHARED_LIB_WE}.def
         ) # gruik gruik
     ELSE()
       ADD_CUSTOM_COMMAND(TARGET ${COMPONENT}
         PRE_BUILD
-        COMMAND ${CMAKE_NM} ARGS @${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${COMPONENT}_shared.dir/objects1.rsp
+        COMMAND ${CMAKE_NM} ARGS @${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${COMPONENT}.dir/objects1.rsp
         | bash ${CMAKE_SOURCE_DIR}/cmake/export_filter.sh > ${${COMPONENT}_SHARED_LIB_WE}.def
         ) # gruik gruik
     ENDIF()
