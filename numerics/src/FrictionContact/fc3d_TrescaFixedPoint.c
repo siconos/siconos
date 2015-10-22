@@ -1,4 +1,3 @@
-
 /* Siconos-Numerics, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.

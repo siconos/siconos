@@ -77,6 +77,8 @@ extern "C"
     int *info,
     SolverOptions *options);
 
+  
+
   int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(SolverOptions* options);
 
 

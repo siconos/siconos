@@ -241,7 +241,7 @@ int globalLineSearchGP(
     {
       if (verbose > 0)
       {
-        printf("global line search success. Number of iteration = %i  alpha = %.10e, q = %.10e\n", iter, alpha[0], q);
+        printf("             globalLineSearchGP. success. ls_iter = %i  alpha = %.10e, q = %.10e\n", iter, alpha[0], q);
       }
 
       return 0;
@@ -469,8 +469,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 {
 
 
-
-
   assert(equation);
 
   FrictionContactProblem* problem = equation->problem;
@@ -608,7 +606,9 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   // velocity <- M*reaction + qfree
   cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
   NM_gemv(1., problem->M, reaction, 1., velocity);
-
+  
+  double linear_solver_residual=0.0;
+  
   while (iter++ < itermax)
   {
 
@@ -617,12 +617,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
                        reaction, velocity, equation->problem->mu,
                        rho,
                        F, Ax, Bx);
-
-
-    if (verbose > 0)
-    {
-      printf("fc3d esolve: ||F||=%g\n", cblas_dnrm2(problemSize, F, 1));
-    }
 
     // AW + B
     computeAWpB(Ax, problem->M, Bx, AWpB);
@@ -649,9 +643,9 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     {
       cblas_dcopy_msan(problemSize, F, 1, tmp3, 1);
       NM_gemv(1., AWpB, tmp1, 1., tmp3);
-
-      fprintf(stderr, "fc3d esolve: linear equation residual = %g\n",
-              cblas_dnrm2(problemSize, tmp3, 1));
+      linear_solver_residual = cblas_dnrm2(problemSize, tmp3, 1);
+      /* fprintf(stderr, "fc3d esolve: linear equation residual = %g\n", */
+      /*         cblas_dnrm2(problemSize, tmp3, 1)); */
       /* for the component wise scaled residual: cf mumps &
        * http://www.netlib.org/lapack/lug/node81.html */
     }
@@ -723,7 +717,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
                          reaction, velocity, equation->problem->mu, rho,
                          F, NULL, NULL);
 
-      printf("fc3d_esolve: iteration %d : residual=%g, ||F||=%g\n", iter, options->dparam[1],cblas_dnrm2(problemSize, F, 1));
+      printf("   ---- fc3d_nonsmooth_Newton_solvers_solve: iteration %d : , linear solver residual =%g, residual=%g, ||F||=%g\n", iter, linear_solver_residual, options->dparam[1],cblas_dnrm2(problemSize, F, 1));
     }
 
     if (options->callback)
@@ -736,7 +730,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     {
        if (verbose > 0)
        {
-         printf("fc3d_esolve: iteration %d : computed residual is not a number, stop.\n", iter);
+         printf("            fc3d_nonsmooth_Newton_solvers_solve: iteration %d : computed residual is not a number, stop.\n", iter);
        }
        info[0] = 2;
        break;
@@ -753,10 +747,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   if (verbose > 0)
   {
     if (!info[0])
-      printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
+      printf("------------------------ FC3D - NSN - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
     else
     {
-      printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
+      printf("------------------------ FC3D - NSN - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
     }
   }
 
@@ -782,6 +776,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     free(AWpB_backup);
   }
   if (verbose > 0)
-    printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - End\n");
+    printf("------------------------ FC3D - NSN - End\n");
 
 }
