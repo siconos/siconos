@@ -389,16 +389,16 @@ void Lprod_dense ( int mode, int maxmod, int n,
    ------------------------------------------------------------------ */
 
   if (mode == 1) {
-     for (unsigned i = 0, ll = 0; i < n; ++i, ll += maxmod) {
+    for (int i = 0, ll = 0; i < n; ++i, ll += maxmod) {
         z[i]  = cblas_ddot ( n, &L[ll], 1, y, 1 );
      }
   }
   else {
 /*        call dzero ( n, z, 1 ) */
-     for (unsigned i = 0; i<n; ++i)
+     for (int i = 0; i<n; ++i)
         z[i]  = 0.;
 
-     for (unsigned i = 0, ll = 0; i < n; ++i, ll += maxmod) {
+     for (int i = 0, ll = 0; i < n; ++i, ll += maxmod) {
         cblas_daxpy ( n, y[i], &L[ll], 1, z, 1 );
      }
   }
@@ -429,7 +429,7 @@ void Usolve_dense ( int mode, int maxmod, int n, double* restrict U, double* res
      incu   = maxmod + 1 - n;
      nu     = 0;
 
-     for (unsigned i = n-1; i>=1; --i) {
+     for (int i = n-1; i>=1; --i) {
         nu++;
         incu++;
         lu   -= incu;
@@ -443,7 +443,7 @@ void Usolve_dense ( int mode, int maxmod, int n, double* restrict U, double* res
      incu   = maxmod;
      nu     = n - 1;
 
-     for (unsigned i = 1; i<n; ++i) {
+     for (int i = 1; i<n; ++i) {
         hold = U[lu];
         y[i] /= hold;
         cblas_daxpy ( nu, -y[i], &U[lu] + ADDR_OFFSET, 1, &y[i] + ADDR_OFFSET, 1 );

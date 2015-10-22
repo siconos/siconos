@@ -12,7 +12,7 @@
 sparseMatrix *createMatrix(int dimLimit, int lenLimit, int initVectors)
 {
   int          initsize;
-  sparseMatrix *matrix;
+  sparseMatrix *matrix = NULL;
 
   if(initVectors < 0)
     initVectors = 0;
@@ -98,7 +98,7 @@ void printMatrix(int n, sparseMatrix *matrix, int modulo, MYBOOL showEmpty)
 
 sparseVector *createVector(int dimLimit, int initSize)
 {
-  sparseVector *newitem;
+  sparseVector *newitem = NULL;
   CALLOC(newitem, 1);
   newitem->limit = dimLimit;
   initSize = resizeVector(newitem, initSize);
@@ -146,8 +146,6 @@ int resizeVector(sparseVector *sparse, int newSize)
 
 void moveVector(sparseVector *sparse, int destPos, int sourcePos, int itemCount)
 {
-  int i;
-  
   if(itemCount <= 0 || sourcePos == destPos)
     return;
 
@@ -169,7 +167,7 @@ void moveVector(sparseVector *sparse, int destPos, int sourcePos, int itemCount)
     }
   } */
 #else
-  for(i = 1; i<=itemCount; i++) {
+  for(int i = 1; i<=itemCount; i++) {
     sparse->value[destPos] = sparse->value[sourcePos];
     sparse->index[destPos] = sparse->index[sourcePos];
     destPos++;
@@ -810,7 +808,7 @@ void daxpyVector3(sparseVector *sparse1, REAL scalar, sparseVector *sparse2, int
 void dswapVector1(sparseVector *sparse, REAL *dense, int indexStart, int indexEnd)
 {
   int i, d, n;
-  REAL *x;
+  REAL *x = NULL;
 
   if(indexStart <= 0)
     indexStart = 1;
@@ -847,7 +845,7 @@ void dswapVector2(REAL *dense, sparseVector *sparse, int indexStart, int indexEn
 void dswapVector3(sparseVector *sparse1, sparseVector *sparse2, int indexStart, int indexEnd)
 {
 
-  REAL *dense1, *dense2;
+  REAL *dense1 = NULL, *dense2 = NULL;
 
   if(indexStart<=0)
     indexStart = 1;

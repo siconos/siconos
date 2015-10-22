@@ -690,7 +690,7 @@ void blockWriteINT(FILE *output, char *label, int *myvector, int first, int last
 {
   int i, k = 0;
 
-  fprintf(output, label);
+  fprintf(output, "%s", label);
   fprintf(output, "\n");
   for(i = first; i <= last; i++) {
     fprintf(output, " %5d", myvector[i]);
@@ -709,7 +709,7 @@ void blockWriteBOOL(FILE *output, char *label, MYBOOL *myvector, int first, int 
 {
   int i, k = 0;
 
-  fprintf(output, label);
+  fprintf(output, "%s", label);
   fprintf(output, "\n");
   for(i = first; i <= last; i++) {
     if(asRaw)
@@ -731,7 +731,7 @@ void blockWriteREAL(FILE *output, char *label, REAL *myvector, int first, int la
 {
   int i, k = 0;
 
-  fprintf(output, label);
+  fprintf(output, "%s", label);
   fprintf(output, "\n");
   for(i = first; i <= last; i++) {
     fprintf(output, " %18g", myvector[i]);
