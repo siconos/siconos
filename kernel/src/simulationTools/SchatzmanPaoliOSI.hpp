@@ -104,14 +104,10 @@ protected:
 
 public:
 
-  DEPRECATED_OSI_API(SchatzmanPaoliOSI(SP::DynamicalSystem, double));
-
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
   SchatzmanPaoliOSI(double theta);
-
-  DEPRECATED_OSI_API(SchatzmanPaoliOSI(SP::DynamicalSystem, double, double));
 
   /** constructor from theta value only
    *  \param theta value for all these DS.

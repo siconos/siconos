@@ -88,8 +88,6 @@ public:
   /** Default constructor */
   LsodarOSI();
 
-  DEPRECATED_OSI_API(LsodarOSI(SP::DynamicalSystem ds));
-
   /** destructor
    */
   ~LsodarOSI() {};

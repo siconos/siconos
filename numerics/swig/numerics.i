@@ -1126,7 +1126,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
     int is_new_object1=0;
     int is_new_object2=0;
     int is_new_object3=0;
-    PyArrayObject *array_data, *array_indices, *array_indptr;
+    PyArrayObject *array_data = NULL, *array_indices = NULL, *array_indptr = NULL;
     cs_sparse* M;
 
     try
@@ -1140,7 +1140,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
       GET_ATTR(obj,indices);
       GET_ATTR(obj,indptr);
 
-      int dim0, dim1, nzmax;
+      unsigned int dim0 = 0, dim1 = 0, nzmax = 0;
 
       GET_INTS(shape,0,dim0);
       GET_INTS(shape,1,dim1);

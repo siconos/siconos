@@ -32,31 +32,11 @@
 
 using namespace RELATION;
 
-// --- constructor from a minimum set of data ---
-SchatzmanPaoliOSI::SchatzmanPaoliOSI(SP::DynamicalSystem newDS, double theta) :
-  OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
-{
-  OSIDynamicalSystems->insert(newDS);
-  _theta = theta;
-  _sizeMem = SCHATZMANPAOLISTEPSINMEMORY ;
-}
-
 // --- constructor from a set of data ---
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta):
   OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   _theta = theta;
-  _sizeMem = SCHATZMANPAOLISTEPSINMEMORY ;
-}
-
-// --- constructor from a minimum set of data ---
-SchatzmanPaoliOSI::SchatzmanPaoliOSI(SP::DynamicalSystem newDS, double theta, double gamma) :
-  OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _useGammaForRelation(false)
-{
-  OSIDynamicalSystems->insert(newDS);
-  _theta = theta;
-  _gamma = gamma;
-  _useGamma = true;
   _sizeMem = SCHATZMANPAOLISTEPSINMEMORY ;
 }
 

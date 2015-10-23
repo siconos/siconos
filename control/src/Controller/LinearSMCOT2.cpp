@@ -141,7 +141,7 @@ void LinearSMCOT2::actuate()
   // XXX small hack here
   SP::SiconosVector CS(new SiconosVector(_B->size(0)));
   _Csurface->getRow(0, *CS);
-  _coeff = -1 / (CS->sum() * hCurrent);
+  _coeff = -1 / (CS->vector_sum() * hCurrent);
   double uEq = inner_prod(*CS, _coeff * (*_XPhi + *_X - *_Xhat));
   double uEqP;
   // We need to project

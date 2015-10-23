@@ -43,23 +43,6 @@
 
 
 using namespace RELATION;
-// --- constructor from a minimum set of data ---
-MoreauJeanOSI::MoreauJeanOSI(SP::DynamicalSystem ds, double theta, double gamma) :
-  OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false)
-{
-  OSIDynamicalSystems->insert(ds);
-  _theta = theta;
-  if (!isnan(gamma))
-  {
-    _gamma = gamma;
-    _useGamma = true;
-  }
-  else
-  {
-    _gamma = 1.0;
-    _useGamma = false;
-  }
-}
 
 // --- constructor from a set of data ---
 MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):

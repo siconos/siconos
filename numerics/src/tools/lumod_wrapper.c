@@ -19,15 +19,13 @@
 #define BASIS_OFFSET 1
 #define DEEP_DEBUG_Ck
 #include <fenv.h>
+#include "pivot-utils.h"
 
 /* TODO :
  *  - Yk should be row-major (be careful with gemv and lda)
  *  - in solve, we should try to better handle the resolution with C
  *  - the solution to Hx = col should be saved only when col correspond to a
  *  driving variable not in the factorized basis*/ 
-
-inline static char* basis_to_name(unsigned nb, unsigned n) { if (nb < n + 1) return "w"; else if (nb > n +1) return "z"; else return "e";};
-inline static unsigned basis_to_number(unsigned nb, unsigned n) { if (nb < n + 1) return nb; else if (nb > n +1) return nb - n -1; else return 0;};
 
 inline static void lumod_full_check(SN_lumod_dense_data* lumod_data)
 {

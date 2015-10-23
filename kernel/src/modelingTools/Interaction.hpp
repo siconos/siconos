@@ -31,7 +31,6 @@
 #include "SiconosPointers.hpp"
 #include "SiconosFwd.hpp"
 #include <vector>
-typedef std::vector<SP::SiconosMemory> VectorOfMemories;
 
 /**  An Interaction describes the non-smooth interactions
  *  several Dynamical Systems.
@@ -75,7 +74,6 @@ private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Interaction);
-
   /**initialization flag */
   bool _initialized;
 

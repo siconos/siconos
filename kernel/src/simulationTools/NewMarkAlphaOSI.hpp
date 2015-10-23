@@ -63,11 +63,6 @@ protected:
   NewMarkAlphaOSI() {};
 
 public:
-
-  DEPRECATED_OSI_API(NewMarkAlphaOSI(SP::DynamicalSystem, double, double, double, double, bool));
-
-  DEPRECATED_OSI_API(NewMarkAlphaOSI(SP::DynamicalSystem, double, bool));
-
   /** constructor with only parameters beta, gamma, alpha_m, alpha_f
   * \param beta double
   * \param gamma double

@@ -62,3 +62,5 @@
 
 // mandatory !
 %rename (lambda_) lambda;
+
+%include ignored_functions.i

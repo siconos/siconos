@@ -374,7 +374,7 @@ BandedMat*  BlockMatrix::banded(unsigned int row, unsigned int col) const
   return (tmp->banded());
 }
 
-ZeroMat*  BlockMatrix::zero(unsigned int row, unsigned int col) const
+ZeroMat*  BlockMatrix::zero_mat(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
@@ -382,7 +382,7 @@ ZeroMat*  BlockMatrix::zero(unsigned int row, unsigned int col) const
   {
     SiconosMatrixException::selfThrow("ZeroMat* BlockMatrix::zero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
   }
-  return (tmp->zero(row, col));
+  return (tmp->zero_mat(row, col));
 }
 
 IdentityMat*  BlockMatrix::identity(unsigned int row, unsigned int col) const

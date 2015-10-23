@@ -1,11 +1,30 @@
 // -*- c++ -*-
 
 %{
-#include <SiconosGraph.hpp>
+#include <SimulationGraphs.hpp>
 
   struct no_property{};
 %}
 
+//%include <SimulationGraphs.hpp>
+
+%extend Siconos::Properties
+{
+  Siconos::Properties::reference __getitem__(const Siconos::Properties::key_type& v)
+  {
+    return (*self[v]);
+  };
+};
+
+%extend Siconos::SubProperties
+{
+  Siconos::SubProperties::reference __getitem__(const Siconos::SubProperties::key_type& v)
+  {
+    return (*self[v]);
+  };
+};
+
+struct InteractionsGraph{};
 %extend InteractionsGraph
 {
 
@@ -56,7 +75,7 @@
 
 }
 
-
+struct DynamicalSystemsGraph{};
 %extend DynamicalSystemsGraph
 {
 

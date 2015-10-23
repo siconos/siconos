@@ -26,11 +26,6 @@
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
-
-//using namespace RELATION;
-
-MoreauJeanCombinedProjectionOSI::MoreauJeanCombinedProjectionOSI(SP::DynamicalSystem ds, double theta) : MoreauJeanOSI(ds, theta) {}
-
 void MoreauJeanCombinedProjectionOSI::initialize()
 {
 

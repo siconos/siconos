@@ -100,7 +100,7 @@
    (data[myEvent])["myDS_X"] =
    model->nonSmoothDynamicalSystem()->dynamicalSystem()->x()
 
-   See \ref SicControl for details on how to define its own Sensor.
+   See users' manual for details on how to define its own Sensor.
 
  */
 class Sensor

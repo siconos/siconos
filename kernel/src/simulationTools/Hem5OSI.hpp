@@ -116,8 +116,6 @@ public:
    */
   Hem5OSI();
 
-  DEPRECATED_OSI_API(Hem5OSI(SP::DynamicalSystem ds));
-
   /** destructor
    */
   ~Hem5OSI() {};

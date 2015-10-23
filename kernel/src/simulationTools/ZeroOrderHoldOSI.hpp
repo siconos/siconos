@@ -33,7 +33,7 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
  *
  *  \author SICONOS Development Team - copyright INRIA
  *
- * See User's guide, \ref docSimuZeroOrderHoldOSITS for details.
+ * See User's guide for details.
  *
  * ZeroOrderHoldOSI class is used to define some time-integrators methods for a
  * list of dynamical systems.
@@ -65,9 +65,6 @@ public:
   /** basic constructor
    */
   ZeroOrderHoldOSI();
-
-  
-  DEPRECATED_OSI_API(ZeroOrderHoldOSI(SP::DynamicalSystem ds));
 
   /** destructor
   */

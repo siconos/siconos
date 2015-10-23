@@ -105,7 +105,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  *
  * - updateState(): computes x (q,v), the complete dynamical systems
  *    states.
- * See User's guide, \ref docSimuMoreauJeanOSITS for details.
+ * See User's guide for details.
  *
  */
 class MoreauJeanOSI : public OneStepIntegrator
@@ -145,8 +145,6 @@ protected:
   friend struct _NSLEffectOnFreeOutput;
 
 public:
-
-  DEPRECATED_OSI_API(MoreauJeanOSI(SP::DynamicalSystem ds, double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN()));
 
   /** constructor from theta value only
    *  \param theta value for the theta parameter (default = 0.5)

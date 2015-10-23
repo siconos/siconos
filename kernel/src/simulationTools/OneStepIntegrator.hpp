@@ -165,7 +165,6 @@ public:
     return OSIDynamicalSystems->end();
   };
 
-
   DEPRECATED_OSI_API(virtual void insertDynamicalSystem(SP::DynamicalSystem ds));
 
 /** get _sizeMem value

@@ -49,7 +49,7 @@ extern "C"
    * \return 0 if success, 1 if failure
    * \author Olivier Huber
    */
-  int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* u , double* s, double* d, unsigned size_x, unsigned* A, SolverOptions* options);
+  int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* u, double* s, double* d, unsigned size_x, unsigned* A, SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

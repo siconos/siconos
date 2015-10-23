@@ -136,10 +136,6 @@ public:
     _mIsLinear = ((ds)->isLinear() && _mIsLinear);
   };
 
-  /** set the one step integrator for this Dynamical System
-   * \param ds a pointer to the system
-   * \param OSI the integrator to use for this DS
-   */
   inline void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
   {
     _topology->setOSI(ds, OSI);

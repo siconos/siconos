@@ -198,7 +198,7 @@ public:
    *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  ZeroMat* zero(unsigned int row = 0, unsigned int col = 0) const;
+  ZeroMat* zero_mat(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get a pointer on Identity matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix

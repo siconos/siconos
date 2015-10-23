@@ -28,8 +28,6 @@
 #include "BoundaryCondition.hpp"
 #include "SiconosConst.hpp"
 
-typedef std::vector<SP::SiconosMemory> VectorOfMemories;
-
 /** Lagrangian non linear dynamical systems - Derived from DynamicalSystem -
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -137,8 +135,6 @@ protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(LagrangianDS);
-
-
   // -- MEMBERS --
 
   /** number of degrees of freedom of the system */

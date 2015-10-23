@@ -47,7 +47,7 @@ const std::string transpose = "transpose";
  *   See SandBox/Algebra/TestOperators to know which the most performant op. on your system.
  *   axpy_prod is only efficient for sparse or for large objects. For small matrices and vectors it is slower.
  *
- *  See also Siconos Algebra's page in Users Guide, \ref UMsiconosAlgebra.
+ *  See also Siconos Algebra's page in Users Guide.
  *
  *
  */
@@ -363,7 +363,7 @@ public:
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  ZeroMat* zero(unsigned int row = 0, unsigned int col = 0) const;
+  ZeroMat* zero_mat(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get a pointer on Identity matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
@@ -676,7 +676,7 @@ public:
 
   friend bool operator!= (const SiconosMatrix&, const SiconosMatrix&);
 
-  friend const SimpleMatrix pow(const SimpleMatrix&, unsigned int);
+  friend const SimpleMatrix matrix_pow(const SimpleMatrix&, unsigned int);
 
   friend const SimpleMatrix prod(const SiconosMatrix&, const SiconosMatrix&);
 

@@ -9,6 +9,7 @@ set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS
   ${SICONOS_SWIG_SRC_DIRS}/solverOptions.i
   ${SICONOS_SWIG_SRC_DIRS}/handleException.i
   ${SICONOS_SWIG_SRC_DIRS}/start.i
+  ${SICONOS_SWIG_SRC_DIRS}/ignored_functions.i
   ${SICONOS_SWIG_SRC_DIRS}/end.i
   ${SICONOS_SWIG_SRC_DIRS}/numpy.i
   ${SICONOS_SWIG_SRC_DIRS}/pyRegister.i

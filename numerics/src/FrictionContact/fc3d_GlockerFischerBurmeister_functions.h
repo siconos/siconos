@@ -19,7 +19,7 @@
 #ifndef FRICTIONCONTACT3D_GlockerFischerBurmeister_functions_H
 #define FRICTIONCONTACT3D_GlockerFischerBurmeister_functions_H
 
-/*!\file fc3d_GlockerFischerBurmeister_function.h
+/*!\file fc3d_GlockerFischerBurmeister_functions.h
 
   \brief Typedef and functions declarations related GlockerFischerBurmeister
  */

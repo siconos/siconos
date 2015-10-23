@@ -52,10 +52,10 @@ private:
   //  /** contains the data of the QP, according to siconos/numerics */
   //  QPStructure QPMethod;
 
+public:
+
   /* default constructor */
   QP() {};
-
-public:
 
   /** Destructor */
   ~QP();

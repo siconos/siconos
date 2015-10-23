@@ -169,10 +169,6 @@ public:
    */
   D1MinusLinearOSI(unsigned int type);
 
-  /** constructor from one dynamical system
-   */
-  DEPRECATED_OSI_API(D1MinusLinearOSI(SP::DynamicalSystem newDS));
-
   /** destructor */
   virtual ~D1MinusLinearOSI() {};
 

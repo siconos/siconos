@@ -75,15 +75,11 @@ public:
    */
   explicit MoreauJeanDirectProjectionOSI(double theta);
 
-  DEPRECATED_OSI_API(MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds, double theta));
-
   /** constructor from theta value only
     *  \param theta value for all these DS.
     *  \param gamma value for all these DS.
     */
   explicit MoreauJeanDirectProjectionOSI(double theta, double gamma);
-
-  DEPRECATED_OSI_API(MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds, double theta, double gamma));
 
   /** destructor
    */

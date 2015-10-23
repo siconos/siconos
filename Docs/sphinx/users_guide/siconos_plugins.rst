@@ -37,5 +37,12 @@ of the variables that can be plugged is given in :ref:`ds_plugins` and :ref:`rel
     // --> call external_forces with time == 2.
     
 
-    
-    
+Plugins overview
+----------------
+
+==================================== ==================== ============= ====================================================================
+Class Name                            operator             plugin name   signature 
+==================================== ==================== ============= ====================================================================
+:doxysiconos:`LagrangianLinearTIDS`  :math:`F_{Ext}(t,z)       FExt        (double time, int size, double* fext, int zsize, double *z)
+:doxysiconos:`LagrangianLinearTIDS`  :math:`F_{Ext}(t,z)       FExt        (double time, int size, double* fext, int zsize, double *z)
+==================================== ==================== ============= ====================================================================

@@ -2703,33 +2703,33 @@ void SimpleMatrixTest::testOperators13()
 
 void SimpleMatrixTest::testPow()
 {
-  std::cout << "--> Test: pow." <<std::endl;
+  std::cout << "--> Test: matrix_pow." <<std::endl;
   // Dense
   SP::SiconosMatrix tmp1(new SimpleMatrix(*D));
   SP::SiconosMatrix res(new SimpleMatrix(2, 2));
-  *res = pow(*tmp1, 3);
+  *res = matrix_pow(*tmp1, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp1, prod(*tmp1, *tmp1)), true);
   // Triang
   SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
   res.reset(new SimpleMatrix(3, 3, TRIANGULAR));
-  *res = pow(*tmp2, 3);
+  *res = matrix_pow(*tmp2, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp2, prod(*tmp2, *tmp2)), true);
   // Sym
   SP::SiconosMatrix tmp3(new SimpleMatrix(*S));
   res.reset(new SimpleMatrix(3, 3, SYMMETRIC));
-  *res = pow(*tmp3, 3);
+  *res = matrix_pow(*tmp3, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp3, prod(*tmp3, *tmp3)), true);
   // Sparse
   SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
   res.reset(new SimpleMatrix(4, 4, Siconos::SPARSE));
-  *res = pow(*tmp4, 3);
+  *res = matrix_pow(*tmp4, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp4, prod(*tmp4, *tmp4)), true);
   // Banded
   SP::SiconosMatrix tmp5(new SimpleMatrix(*Band));
   res.reset(new SimpleMatrix(4, 4));
-  *res = pow(*tmp5, 3);
+  *res = matrix_pow(*tmp5, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp5, prod(*tmp5, *tmp5)), true);
-  std::cout << "-->  test pow ended with success." <<std::endl;
+  std::cout << "-->  test matrix_pow ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testProd() // y = A*x

@@ -69,8 +69,6 @@ public:
    */
   explicit MoreauJeanCombinedProjectionOSI(double theta) : MoreauJeanOSI(theta) {}  ;
 
-  DEPRECATED_OSI_API(MoreauJeanCombinedProjectionOSI(SP::DynamicalSystem ds, double theta));
-
   /** destructor
    */
   virtual ~MoreauJeanCombinedProjectionOSI() {};

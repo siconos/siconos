@@ -71,14 +71,6 @@ D1MinusLinearOSI::D1MinusLinearOSI(unsigned int type) :
   setTypeOfD1MinusLinearOSI(type);
 }
 
-
-D1MinusLinearOSI::D1MinusLinearOSI(SP::DynamicalSystem newDS) :
-  OneStepIntegrator(OSI::D1MINUSLINEAROSI), _typeOfD1MinusLinearOSI(halfexplicit_acceleration_level)
-{
-  OSIDynamicalSystems->insert(newDS);
-}
-
-
 void D1MinusLinearOSI::setTypeOfD1MinusLinearOSI(unsigned int type)
 {
   if (type < numberOfTypeOfD1MinusLinearOSI )

@@ -59,7 +59,7 @@ if(DEV_MODE)
   if(NOT WITH_OCC AND NOT WITH_MECHANISMS)
     add_cxx_options("-Werror=overloaded-virtual")
   endif()
-
+  add_cxx_options("-Wc++11-compat-deprecated-writable-strings")
 endif()
 
 # add_cxx_options("-static -static-libgcc -static-libstdc++" "GNU;Clang")

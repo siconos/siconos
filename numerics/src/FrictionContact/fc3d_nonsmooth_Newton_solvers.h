@@ -19,7 +19,7 @@
 #ifndef FRICTIONCONTACT3D_NONSMOOTH_NEWTON_SOLVERS_H
 #define FRICTIONCONTACT3D_NONSMOOTH_NEWTON_SOLVERS_H
 
-/*!\file FrictionContact_nonsmooth_Newton_solvers.h
+/*!\file fc3d_nonsmooth_Newton_solvers.h
 
   \brief Non Smooth Newton Solvers for FC3D
   [...]

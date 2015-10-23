@@ -651,12 +651,12 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
   /* covering vector for the auxiliary variable */
   double* d = &mat[(n+1)*n];
   if (cov_vec) cblas_dcopy_msan(n, cov_vec, 1, d, 1);
-  else for (unsigned int i = 0; i < n; ++i) d[i] = 1.0;
+  else for (int i = 0; i < n; ++i) d[i] = 1.0;
 
   /* take care of M */
   double* mat_basic = &mat[n];
   double* mat_nonbasic = &mat[(n+2)*n];
-  for (unsigned int i = 0; i < n; ++i)
+  for (int i = 0; i < n; ++i)
   {
     if (u[i] > DBL_EPSILON) // M_bas[:, i] = M[:, i]
     {
@@ -705,7 +705,7 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
 
   /* set the identity part in the matrix (for the lexicographic ordering) */
   memset(mat_basic, 0, sizeof(double) * n * n);
-  for (unsigned int i = 0; i < n; ++i) mat[i + n*(i + 1)] =  1.0;
+  for (int i = 0; i < n; ++i) mat[i + n*(i + 1)] =  1.0;
 
   free(ipiv);
   return info;
@@ -852,13 +852,13 @@ void do_pivot_lumod(SN_lumod_dense_data* restrict lumod_data, NumericsMatrix* re
       assert(index_col <= 0);
       SN_lumod_delete_row_col(lumod_data, index_row, -index_col);
       /*  update the index, since a row and col were deleted */
-      if (index_row < lumod_data->k)
+      if (index_row < (int)lumod_data->k)
       {
         unsigned changed_row = SN_lumod_find_arg_var(lumod_data->row_col_indx, lumod_data->k, n);
         DEBUG_PRINTF("Changing row for variable %d to %d\n", changed_row, index_row);
         lumod_data->row_col_indx[changed_row] = index_row;
       }
-      if (-index_col < lumod_data->k)
+      if (-index_col < (int)lumod_data->k)
       {
         unsigned changed_col = SN_lumod_find_arg_var(lumod_data->row_col_indx, -lumod_data->k, n);
         DEBUG_PRINTF("Changing col for variable %d to %d\n", changed_col, index_col);

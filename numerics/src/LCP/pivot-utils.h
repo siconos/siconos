@@ -145,7 +145,7 @@ void do_pivot_driftless2(double* mat, unsigned int dim, unsigned int dim2, unsig
  * \param block the blocking or leaving variable
  * \param drive the driving or entering variable
  */
-  void do_pivot(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
+void do_pivot(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive);
 
 /** Do the pivot <block, drive> with block-LU updates
  * \param lumod_data lumod data
@@ -158,7 +158,7 @@ void do_pivot_driftless2(double* mat, unsigned int dim, unsigned int dim2, unsig
  * \param block the blocking or leaving variable
  * \param drive the driving or entering variable
  */
-  void do_pivot_lumod(SN_lumod_dense_data* lumod_data, NumericsMatrix* M, double* q_tilde, double* lexico_mat, double* col_drive, double* col_tilde, unsigned* basis, unsigned block, unsigned drive);
+void do_pivot_lumod(SN_lumod_dense_data* lumod_data, NumericsMatrix* M, double* q_tilde, double* lexico_mat, double* col_drive, double* col_tilde, unsigned* basis, unsigned block, unsigned drive);
 
   /** print a diagnostic of the info value
    * \param info the value given by the algorithm

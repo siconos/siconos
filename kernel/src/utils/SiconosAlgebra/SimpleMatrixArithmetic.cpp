@@ -332,7 +332,7 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
           else if (numA == 5)
             *C.dense() = *A.banded() - *B.dense();
           else if (numA == 6)
-            *C.dense() = *A.zero() - *B.dense();
+            *C.dense() = *A.zero_mat() - *B.dense();
           else //if(numA==7)
             *C.dense() = *A.identity() - *B.dense();
         }
@@ -507,19 +507,19 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             switch (numB)
             {
             case 1:
-              noalias(*C.dense()) = *A.zero() - *B.dense();
+              noalias(*C.dense()) = *A.zero_mat() - *B.dense();
               break;
             case 2:
-              noalias(*C.dense()) = *A.zero() - *B.triang();
+              noalias(*C.dense()) = *A.zero_mat() - *B.triang();
               break;
             case 3:
-              noalias(*C.dense()) = *A.zero() - *B.sym();
+              noalias(*C.dense()) = *A.zero_mat() - *B.sym();
               break;
             case 4:
-              noalias(*C.dense()) = *A.zero() - *B.sparse();
+              noalias(*C.dense()) = *A.zero_mat() - *B.sparse();
               break;
             case 7:
-              noalias(*C.dense()) = *A.zero() - *B.identity();
+              noalias(*C.dense()) = *A.zero_mat() - *B.identity();
               break;
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");

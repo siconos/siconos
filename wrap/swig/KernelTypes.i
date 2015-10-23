@@ -377,7 +377,7 @@ struct IsDense : public Question<bool>
 //  {
 //    // try a conversion from numpy
 //    PyArrayObject* array = NULL;
-//    int is_new_object;
+//    int is_new_object = 0;
 //    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 //    if (!require_dimensions(array,2) ||
 //        !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
@@ -554,7 +554,7 @@ struct IsDense : public Question<bool>
   {
     // try a conversion from numpy
     PyArrayObject* array = NULL;
-    int is_new_object;
+    int is_new_object = 0;
     array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
     if (!require_dimensions(array,1) ||
         !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
@@ -585,7 +585,7 @@ struct IsDense : public Question<bool>
   {
     // try a conversion from numpy
     PyArrayObject* array = NULL;
-    int is_new_object;
+    int is_new_object = 0;
     array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
     if (!require_dimensions(array,2) ||
         !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
@@ -616,7 +616,7 @@ struct IsDense : public Question<bool>
   {
     // try a conversion from numpy
     PyArrayObject* array = NULL;
-    int is_new_object;
+    int is_new_object = 0;
     array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
     if (!require_dimensions(array,2) ||
         !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();

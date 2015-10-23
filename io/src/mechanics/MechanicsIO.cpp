@@ -3,7 +3,7 @@
 
 #include "MechanicsIO.hpp"
 
-#define DUMMY(X, Y) struct X : public Y {}
+#define DUMMY(X, Y) class X : public Y {}
 
 #undef BULLET_CLASSES
 #undef OCC_CLASSES

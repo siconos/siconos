@@ -413,10 +413,10 @@ BandedMat* SimpleMatrix::banded(unsigned int, unsigned int) const
   return mat.Banded;
 }
 
-ZeroMat* SimpleMatrix::zero(unsigned int, unsigned int) const
+ZeroMat* SimpleMatrix::zero_mat(unsigned int, unsigned int) const
 {
   if (num != 6)
-    SiconosMatrixException::selfThrow("ZeroMat* SimpleMatrix::zero(): the current matrix is not a Zero matrix");
+    SiconosMatrixException::selfThrow("ZeroMat* SimpleMatrix::zero_mat(): the current matrix is not a Zero matrix");
 
   return mat.Zero;
 }

@@ -20,7 +20,7 @@
 #ifndef FC3D2NCP_GLOCKER_H
 #define FC3D2NCP_GLOCKER_H
 
-/*!\file fc3d2NCP_Glocker.h
+/*!\file fc3d_2NCP_Glocker.h
   \brief interface to functions used to write the Friction-Contact 3D problem
   as a NCP, using Glocker formulation.
 

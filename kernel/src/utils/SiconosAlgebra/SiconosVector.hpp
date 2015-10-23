@@ -47,7 +47,7 @@ union VECTOR_UBLAS_TYPE
  *
  * Two possible types: Siconos::DENSE (default) and SPARSE.
  *
- * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
+ * You can find an overview on how to build and use vectors and matrices in siconos users' guide .
  *
  */
 class SiconosVector : public std11::enable_shared_from_this<SiconosVector>
@@ -198,7 +198,7 @@ public:
   /** return the sum of all elements of the vector
    * \return a double
    */
-  double sum() const;
+  double vector_sum() const;
 
   /** display data on standard output
    */

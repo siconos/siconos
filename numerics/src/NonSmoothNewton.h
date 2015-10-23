@@ -41,9 +41,9 @@ extern "C"
 {
 #endif
   /** Armijo Linesearch
-   *  \param n  size of the vector z
+   *  \param n size of the vector z
    *  \param z unknown vector
-   *  \param dir  search direction
+   *  \param dir search direction
    *  \param psi_k initial value of the merit function
    *  \param descentCondition descent condition
    *  \param phi pointer to function used to compute phi(z)
@@ -53,25 +53,8 @@ extern "C"
 
 
   /** Newton solver with line Search
-   \param n size of the vector z
-   \param z the vector z, unknown vector, in-out argument
-   \param phi pointer to \f$ \phi \f$ function
-   \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
-   \param iparam vector of int parameters:\n
-     - [0] : max. number of iterations
-     - [1] : number of iterations processed
-   \param dparam vector of double parameters:\n
-     - [0]: tolerance
-     - [1]: error
-   \return 0 if ok
-  */
-  int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi,
-                      NewtonFunctionPtr* jacobianPhi,
-                      int* iparam, double* dparam);
-
-  /** Newton solver without line Search
   \param n size of the vector z
-  \param z the vector z, unknown vector, in-out argument
+  \param z unknown vector, in-out argument
   \param phi pointer to \f$ \phi \f$ function
   \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
   \param iparam vector of int parameters:\n
@@ -80,8 +63,24 @@ extern "C"
   \param dparam vector of double parameters:\n
    - [0]: tolerance
    - [1]: error
-  \return 0 if ok
+  \return int 0 if ok
+  */
+  int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi,
+                      NewtonFunctionPtr* jacobianPhi,
+                      int* iparam, double* dparam);
 
+  /** Newton solver without line Search
+  \param n size of the vector z
+  \param z unknown vector, in-out argument
+  \param phi pointer to \f$ \phi \f$ function
+  \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
+  \param iparam vector of int parameters:\n
+   - [0] : max. number of iterations
+   - [1] : number of iterations processed
+  \param dparam vector of double parameters:\n
+   - [0]: tolerance
+   - [1]: error
+  \return int 0 if ok
   */
   int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
                             NewtonFunctionPtr* jacobianPhi,

@@ -118,18 +118,6 @@ Hem5OSI::Hem5OSI():
   _timeStep = INITIAL_GUESS_TS;
 }
 
-Hem5OSI::Hem5OSI(SP::DynamicalSystem ds):
-  OneStepIntegrator(OSI::HEM5OSI), _idid(0)
-{
-  // add ds in the set
-  OSIDynamicalSystems->insert(ds);
-  _intData.resize(9);
-  for (int i = 0; i < 9; i++) _intData[i] = 0;
-  _sizeMem = 2;
-  _timeStep = INITIAL_GUESS_TS;
-}
-
-
 void Hem5OSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
 {
   _intData[4] = newItol; // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of

@@ -78,17 +78,6 @@ LsodarOSI::LsodarOSI():
   _sizeMem = 2;
 }
 
-LsodarOSI::LsodarOSI(SP::DynamicalSystem ds):
-  OneStepIntegrator(OSI::LSODAROSI)
-{
-  // add ds in the set
-  OSIDynamicalSystems->insert(ds);
-
-  _intData.resize(9);
-  for (int i = 0; i < 9; i++) _intData[i] = 0;
-  _sizeMem = 2;
-}
-
 void LsodarOSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
 {
   //            The input parameters ITOL, RTOL, and ATOL determine

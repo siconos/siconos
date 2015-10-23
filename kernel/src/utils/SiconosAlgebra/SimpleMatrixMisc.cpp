@@ -179,12 +179,12 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
 
 
 
-const SimpleMatrix pow(const SimpleMatrix& m, unsigned int power)
+const SimpleMatrix matrix_pow(const SimpleMatrix& m, unsigned int power)
 {
   if (m.isBlock())
     SiconosMatrixException::selfThrow("Matrix, pow function: not yet implemented for BlockMatrix.");
   if ( m.size(0) != m.size(1))
-    SiconosMatrixException::selfThrow("pow(SimpleMatrix), matrix is not square.");
+    SiconosMatrixException::selfThrow("matrix_pow(SimpleMatrix), matrix is not square.");
 
   if (power > 0)
   {

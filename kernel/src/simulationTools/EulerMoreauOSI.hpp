@@ -155,15 +155,10 @@ protected:
   EulerMoreauOSI() {};
 
 public:
-  
-  DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem ds, double theta));
-
   /** constructor from theta value only
    *  \param theta value for all DS.
    */
   EulerMoreauOSI(double theta);
-
-  DEPRECATED_OSI_API(EulerMoreauOSI(SP::DynamicalSystem ds, double theta, double gamma));
 
   /** constructor from theta value only
    *  \param theta value for all these DS.

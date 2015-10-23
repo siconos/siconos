@@ -54,7 +54,7 @@ TYPEDEF_SPTR(VInt)
  *
  *  In Siconos, a "matrix" can be either a SimpleMatrix or a BlockMatrix, ie a container of several pointers to SiconosMatrix
  *
- * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
+ * You can find an overview on how to build and use vectors and matrices in siconos users guide .
  *
  */
 class SiconosMatrix : public std11::enable_shared_from_this<SiconosMatrix>
@@ -247,7 +247,7 @@ public:
    *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  virtual ZeroMat* zero(unsigned int row = 0, unsigned int col = 0) const = 0;
+  virtual ZeroMat* zero_mat(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on Identity matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix

@@ -48,15 +48,6 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta) : Mor
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds , double d): MoreauJeanOSI(ds , d)
-{
-  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
-  _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
-  _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
-  _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
-  _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
-}
-
 MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, double gamma) : MoreauJeanOSI(theta, gamma)
 {
   integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
@@ -65,16 +56,6 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, doubl
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
-
-MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(SP::DynamicalSystem ds , double d, double gamma): MoreauJeanOSI(ds , d, gamma)
-{
-  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
-  _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
-  _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
-  _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
-  _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
-}
-
 
 void MoreauJeanDirectProjectionOSI::initialize()
 {

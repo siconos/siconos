@@ -28,32 +28,6 @@
 #include "OneStepNSProblem.hpp"
 
 using namespace RELATION;
-//#define DEBUG_NEWMARK
-
-NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool flag = false) :
-  OneStepIntegrator(OSI::NEWMARKALPHAOSI)
-{
-  OSIDynamicalSystems->insert(newDS);
-  _beta = new_beta;
-  _gamma = new_gamma;
-  _alpha_m = new_alpha_m;
-  _alpha_f = new_alpha_f;
-  _orderDenseOutput = 5;
-  _IsVelocityLevel = flag;
-}
-
-
-NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double _rho_infty, bool flag = false) :
-  OneStepIntegrator(OSI::NEWMARKALPHAOSI)
-{
-  OSIDynamicalSystems->insert(newDS);
-  _alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
-  _alpha_f = _rho_infty / (_rho_infty + 1);
-  _gamma = 0.5 + _alpha_f - _alpha_m;
-  _beta = 0.25 * std::pow((_gamma + 0.5), 2);
-  _orderDenseOutput = 5.0;
-  _IsVelocityLevel = flag;
-}
 
 NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)

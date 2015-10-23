@@ -157,5 +157,9 @@ public:
   void display() const;
 
 };
+
+
+typedef std::vector<SP::SiconosMemory> VectorOfMemories;
+
 #endif
 

@@ -130,7 +130,7 @@ bool operator != (const SiconosMatrix& A, const SiconosMatrix& B);
  * \param e the exponent (an unsigned int)
  * \return a SimpleMatrix
  */
-const SimpleMatrix pow(const SimpleMatrix& A, unsigned int e);
+const SimpleMatrix matrix_pow(const SimpleMatrix& A, unsigned int e);
 
 /** product of two matrices, C = A*B
   \param A a SiconosMatrix

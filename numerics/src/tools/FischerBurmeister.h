@@ -95,7 +95,7 @@ extern "C"
       \param[in] sizeEq number of equality constraints.
       \param[in] sizeIneq number of complementarity constraints.
       \param[in] z vector \f$z\f$
-      \param[in] F(z) vector \f$F(z)\f$
+      \param[in] F vector \f$F(z)\f$
       \param[in] jacobianF \f$ \nabla_z F(z) \f$
       \param[in,out] jacobianPhi \f$ \nabla_z \phi(z,F(z)) \f$ .
       \warning this function looks broken !

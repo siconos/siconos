@@ -35,7 +35,7 @@
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
- * See User's guide, \ref docSimuMoreauJeanOSITS for details.
+ * See User's guide for details.
  *
  * MoreauJeanOSI class is used to define some time-integrators methods for a list of dynamical systems.
  * Each DynamicalSystem is associated to a SiconosMatrix, named "W", and a double, "theta", through two

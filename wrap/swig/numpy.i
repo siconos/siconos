@@ -965,7 +965,7 @@
   npy_intp size[2] = { -1, -1 };
   PyArrayObject* temp_array;
   Py_ssize_t i;
-  int is_new_object;
+  int is_new_object = 0;
 
   /* length of the list */
   $2 = PyList_Size($input);
@@ -1200,7 +1200,7 @@
   npy_intp size[3] = { -1, -1, -1 };
   PyArrayObject* temp_array;
   Py_ssize_t i;
-  int is_new_object;
+  int is_new_object = 0;
 
   /* length of the list */
   $2 = PyList_Size($input);

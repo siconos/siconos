@@ -214,7 +214,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
   /*     for (i = 0 ; i< Bfilled4; i++) printf("blockMap[%i]= %i\t", i,blockMap[i] );printf("\n"); */
   /*     printf("\n"); */
   size_t colNumberAA;
-  int rowNumberBB;
+  size_t rowNumberBB;
   C->nbblocks = -1;
   C->filled2 = -1;
   /*     \warning The implementation is chosen to optimize cpu effort rather than memory. Otherwise a two loops are needed */
@@ -390,7 +390,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
     }
   }
   size_t colNumberAA;
-  int rowNumberBB;
+  size_t rowNumberBB;
 
   int Cnbblocks = -1;
 
@@ -2031,7 +2031,7 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
       /* index1_data[rowNumber]<= blockNumber */
 
       assert(brow < A->filled1);
-      if (A->index1_data[brow] > blocknum[blockindex])
+      if (A->index1_data[brow] > (size_t)blocknum[blockindex])
       {
         A->index1_data[brow] = blocknum[blockindex];
       }

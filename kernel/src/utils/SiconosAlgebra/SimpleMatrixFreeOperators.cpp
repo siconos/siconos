@@ -414,15 +414,15 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
     else if (numA == 6)
     {
       if (numB == 1)
-        return (DenseMat)(*A.zero() - *B.dense());
+        return (DenseMat)(*A.zero_mat() - *B.dense());
       else if (numB == 2)
-        return (DenseMat)(*A.zero() - *B.triang());
+        return (DenseMat)(*A.zero_mat() - *B.triang());
       else if (numB == 3)
-        return (DenseMat)(*A.zero() - *B.sym());
+        return (DenseMat)(*A.zero_mat() - *B.sym());
       else if (numB == 4)
-        return (DenseMat)(*A.zero() - *B.sparse());
+        return (DenseMat)(*A.zero_mat() - *B.sparse());
       else //if(numB ==7)
-        return (DenseMat)(*A.zero() - *B.identity());
+        return (DenseMat)(*A.zero_mat() - *B.identity());
     }
     else //if(numA==7)
     {

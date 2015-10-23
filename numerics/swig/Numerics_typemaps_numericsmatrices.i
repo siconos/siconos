@@ -360,7 +360,7 @@
     indices_ = PyObject_GetAttrString(obj,"indices");
     indptr_ = PyObject_GetAttrString(obj,"indptr");
 
-    int dim0, dim1, nzmax;
+    unsigned int dim0 = 0, dim1 = 0, nzmax = 0;
     GET_INTS(shape_,0,dim0);
     GET_INTS(shape_,1,dim1);
 //      GET_INT(nnz,nzmax); fail: type is numpy.int32!

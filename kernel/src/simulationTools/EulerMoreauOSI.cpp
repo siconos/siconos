@@ -36,29 +36,11 @@
 
 using namespace RELATION;
 
-// --- constructor from a minimum set of data ---
-EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem ds, double theta) :
-  OneStepIntegrator(OSI::EULERMOREAUOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
-{
-  OSIDynamicalSystems->insert(ds);
-  _theta = theta;
-}
-
 // --- constructor with theta parameter value  ---
 EulerMoreauOSI::EulerMoreauOSI(double theta):
   OneStepIntegrator(OSI::EULERMOREAUOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   _theta = theta;
-}
-
-// --- constructor from a minimum set of data ---
-EulerMoreauOSI::EulerMoreauOSI(SP::DynamicalSystem ds, double theta, double gamma) :
-  OneStepIntegrator(OSI::EULERMOREAUOSI), _useGammaForRelation(false)
-{
-  OSIDynamicalSystems->insert(ds);
-  _theta = theta;
-  _gamma = gamma;
-  _useGamma = true;
 }
 
 // --- constructor from a set of data ---
