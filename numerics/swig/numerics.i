@@ -54,7 +54,6 @@
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
 #include "SiconosSets.h"
-#include <numpy/npy_3kcompat.h>
 
 
 #include <boost/preprocessor/stringize.hpp>
