@@ -49,6 +49,12 @@ set(${COMPONENT}_EXCLUDE_DOXY
   tools)
 
 
+SET(${COMPONENT}_EXCLUDE_SRCS "SOL/lumod-c/sparselib.c" "SOL/lumod-c/lumod_sparse.c")
+
+if(NOT HAS_ATLAS_LAPACK)
+  set(${COMPONENT}_EXCLUDE_SRCS ${${COMPONENT}_EXCLUDE_SRCS} "blas_lapack/clapack_dtrtrs.c")
+endif()
+
 
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
