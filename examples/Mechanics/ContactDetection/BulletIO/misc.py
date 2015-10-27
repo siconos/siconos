@@ -5,11 +5,11 @@
 #
 
 
-from Siconos.Mechanics.ContactDetection import Contactor
-from Siconos.Mechanics import IO
+from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.io.mechanics_io import Hdf5
 
 # Creation of the hdf5 file for input/output
-with IO.Hdf5(mode='w') as io:
+with Hdf5(mode='w') as io:
 
     # Definition of two boxes shape
     io.addPrimitiveShape('BigBox', 'Box', (3, 5, 2))
@@ -53,7 +53,7 @@ with IO.Hdf5(mode='w') as io:
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with IO.Hdf5(mode='r+') as io:
+with Hdf5(mode='r+') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

@@ -4,8 +4,8 @@
 # Example of a double pendulum
 #
 
-from Siconos.Mechanics.ContactDetection import Contactor
-from Siconos.Mechanics import IO
+from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.io.mechanics_io import Hdf5
 
 from math import pi
 
@@ -39,7 +39,7 @@ by = 2
 bz = 2
 
 # Creation of the hdf5 file for input/output
-with IO.Hdf5() as io:
+with Hdf5() as io:
 
     #
     io.addPrimitiveShape('Arm1', 'Cylinder', (.3, l1))
@@ -113,6 +113,6 @@ with IO.Hdf5() as io:
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with IO.Hdf5(mode='r+') as io:
+with Hdf5(mode='r+') as io:
 
     io.run()

@@ -11,7 +11,7 @@ import random
 
 import getopt
 
-from siconos.mechanics import io
+from siconos.io.mechanics_io import Hdf5
 
 def usage():
     """
@@ -243,7 +243,7 @@ shape = dict()
 pos = dict()
 instances = dict()
 
-with io.Hdf5(io_filename=io_filename, mode='r') as io:
+with Hdf5(io_filename=io_filename, mode='r') as io:
 
     def load():
 

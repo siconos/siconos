@@ -4,11 +4,11 @@
 # Example of one object under gravity with one contactor and a ground
 #
 
-from Siconos.Mechanics.ContactDetection import Contactor
-from Siconos.Mechanics import IO
+from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.io.mechanics_io import Hdf5
 
 # Creation of the hdf5 file for input/output
-with IO.Hdf5() as io:
+with Hdf5() as io:
 
     # Definition of a cube as a convex shape
     io.addConvexShape('Cube', [
@@ -49,7 +49,7 @@ with IO.Hdf5() as io:
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with IO.Hdf5(mode='r+') as io:
+with Hdf5(mode='r+') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

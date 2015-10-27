@@ -35,7 +35,7 @@ try:
     from siconos.mechanics.contact_detection.bullet import \
         __mul__ as mul
 
-    from siconons.mechanics.contact_detection.bullet import btVector3, \
+    from siconos.mechanics.contact_detection.bullet import btVector3, \
         btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, \
         btConeShape, btCapsuleShape, btCompoundShape, btTriangleIndexVertexArray, \
         btGImpactMeshShape
@@ -696,7 +696,7 @@ class Hdf5():
             topo = self._broadphase.model().nonSmoothDynamicalSystem().\
                    topology()
 
-            joint_class = getattr(Joints,
+            joint_class = getattr(joints,
                                  self.joints()[name].attrs['type'])
 
             joint_nslaw = EqualityConditionNSL(5)
@@ -1217,7 +1217,7 @@ class Hdf5():
             Model, MoreauJeanOSI, TimeDiscretisation,\
             GenericMechanical, FrictionContact, NewtonImpactFrictionNSL
 
-        from siconos.numerics import SICONOS_FRICTION_3D_AlartCurnierNewton
+        from siconos.numerics import SICONOS_FRICTION_3D_NSN_AC
 
         from siconos.mechanics.contact_detection.bullet import \
             btConvexHullShape, btCollisionObject, \
@@ -1247,7 +1247,7 @@ class Hdf5():
         timedisc = TimeDiscretisation(t0, h)
 
         if len(joints) > 0:
-            osnspb = GenericMechanical(SICONOS_FRICTION_3D_AlartCurnierNewton)
+            osnspb = GenericMechanical(SICONOS_FRICTION_3D_NSN_AC)
         else:
             osnspb = FrictionContact(3, solver)
 
