@@ -8,8 +8,8 @@ environment:
     - MSYS2_ARCH: x86_64
 install:
   - C:\msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -S gcc gcc-fortran swig && break || sleep 15; done"
-  - set PATH=C:\Python27\scripts;%PATH%
-  - pip install lxml numpy scipy pytest
+    #  - set PATH=C:\Python27\scripts;%PATH%
+    #  - pip install lxml numpy scipy pytest
   - appveyor DownloadFile "http://siconos.gforge.inria.fr/windows/siconos-dep.zip"
   - 7z x siconos-dep.zip
 
