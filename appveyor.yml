@@ -12,7 +12,8 @@ install:
   - 7z x siconos-dep.zip
 
 build_script:
-  - C:\msys64\usr\bin\bash -lc "/c/projects/siconos/Build/Windows/build-siconos-appveyor.bat C:/projects/siconos"
+  - set PATH=%PATH%;C:\msys64\usr\local\bin;C:\msys64\usr\bin;C:\msys64\bin\opt\bin
+  - C:\projects\siconos\Build\Windows\build-siconos-appveyor.bat C:\projects\siconos"
 
 
 os: Visual Studio 2015
