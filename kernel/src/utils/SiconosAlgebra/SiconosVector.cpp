@@ -480,18 +480,14 @@ void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned in
 {
   // To copy a subBlock of the vector (from position startIn to startIn+sizeB) into vOut (from pos. startOut to startOut+sizeB).
   // Check dim ...
-  unsigned int sizeOut = vOut.size();
-
   assert(startIn < size() && "vector toBlock(v1,v2,...): start position in input vector is out of range.");
 
-  assert(startOut < sizeOut && "vector toBlock(v1,v2,...): start position in output vector is out of range.");
+  assert(startOut < vOut.size() && "vector toBlock(v1,v2,...): start position in output vector is out of range.");
 
-  unsigned int endIn = startIn + sizeB;
+  assert(startIn + sizeB <= size() && "vector toBlock(v1,v2,...): end position in input vector is out of range.");
+  assert(startOut + sizeB <= vOut.size() && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
+
   unsigned int endOut = startOut + sizeB;
-
-  assert(endIn <= size()! && "vector toBlock(v1,v2,...): end position in input vector is out of range.");
-  assert(endOut <= sizeOut && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
-
   unsigned int numIn = getNum();
   unsigned int numOut = vOut.getNum();
 

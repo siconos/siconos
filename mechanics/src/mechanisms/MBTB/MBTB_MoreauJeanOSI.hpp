@@ -15,10 +15,10 @@ public:
   double _activateYVelThreshold;
 public:
   /** constructor from a minimum set of data: one DS and its theta
-   *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param theta value
+   *  \param theta value for the theta parameter (default = 0.5)
+   *  \param gamma value for the gamma parameter (default = NaN and gamma is not used)
    */
-  MBTB_MoreauJeanOSI(SP::DynamicalSystem ds , double theta);
+  MBTB_MoreauJeanOSI(double theta = 0.5 , double gamma = std::numeric_limits<double>::quiet_NaN());
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i

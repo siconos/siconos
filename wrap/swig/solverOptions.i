@@ -39,7 +39,7 @@
 // int
 %{
   static int convert_iarray(PyObject *input, int *ptr) {
-  int i;
+  int i = 0;
   if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
       return 0;
@@ -64,7 +64,7 @@
 // double
 %{
 static int convert_darray(PyObject *input, double *ptr) {
-  int i;
+  int i = 0;
   if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
       return 0;

@@ -393,7 +393,7 @@
                            int            n)
   {
     int success = 0;
-    int i;
+    int i = 0;
     char dims_str[255] = "";
     char s[255];
     for (i = 0; i < n && !success; i++)
@@ -428,9 +428,9 @@
                    npy_intp*      size,
                    int            n)
   {
-    int i;
+    int i = 0;
     int success = 1;
-    int len;
+    int len = 0;
     char desired_dims[255] = "[";
     char s[255];
     char actual_dims[255] = "[";
@@ -480,7 +480,7 @@
   {
     int success = 1;
     int nd = array_numdims(ary);
-    int i;
+    int i = 0;
     npy_intp * strides = array_strides(ary);
     if (array_is_fortran(ary)) return success;
     /* Set the Fortran ordered flag */

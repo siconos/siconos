@@ -34,7 +34,7 @@ if(DEV_MODE)
   if(NOT MSVC)
     add_cxx_options("-Wall")
   endif()
-
+  add_cxx_options("-Wuninitialized")
   add_cxx_options("-Werror=unknown-warning-option" Clang)
 
   # --- Options for any compiler ----

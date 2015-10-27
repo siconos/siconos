@@ -9,13 +9,10 @@
 #define FIRSTWAY_ACTIVATION
 
 
-MBTB_MoreauJeanOSI::MBTB_MoreauJeanOSI(SP::DynamicalSystem ds , double d):MoreauJeanOSI(ds ,d)
-{
-  _deactivateYPosThreshold= 1e-4;
-  _deactivateYVelThreshold=0;
-  _activateYPosThreshold=0;
-  _activateYVelThreshold=100; 
-}
+MBTB_MoreauJeanOSI::MBTB_MoreauJeanOSI(double theta, double gamma):
+  MoreauJeanOSI(theta, gamma), _deactivateYPosThreshold(1e-4), _deactivateYVelThreshold(0),
+  _activateYPosThreshold(0), _activateYVelThreshold(100)
+{}
 
 #ifdef STANDARD_ACTIVATION
 bool MBTB_MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)

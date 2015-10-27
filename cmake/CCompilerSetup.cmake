@@ -20,10 +20,12 @@ if(DEV_MODE)
   #add_c_options("-Weverything" Clang) # like Wall and more
   #add_c_options("-Werror=unreachable-code" "Clang")
   add_c_options("-Wno-string-plus-int" "Clang")
+
   # --- All compilers but MSVC (Microsoft Visual C) ---
   if(NOT MSVC)
     add_c_options("-Wall")
   endif()
+  add_cxx_options("-Wuninitialized")
 
   add_c_options("-Werror=unknown-warning-option" Clang)
 

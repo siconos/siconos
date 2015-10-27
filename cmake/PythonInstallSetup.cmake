@@ -74,7 +74,7 @@ function(set_python_install_path)
   else()
     # Default case : siconos_python_install=standard
     set(PYTHON_COMMAND_GET_INSTALL_DIR
-      "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+      "import site; print(site.getsitepackages()[0])")
     # Set the SICONOS_PYTHON_INSTALL_DIR to the proper path
     execute_process(
       COMMAND ${PYTHON_EXECUTABLE} -c "${PYTHON_COMMAND_GET_INSTALL_DIR}"

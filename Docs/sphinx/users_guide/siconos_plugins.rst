@@ -40,9 +40,10 @@ of the variables that can be plugged is given in :ref:`ds_plugins` and :ref:`rel
 Plugins overview
 ----------------
 
-==================================== ==================== ============= ====================================================================
-Class Name                            operator             plugin name   signature 
-==================================== ==================== ============= ====================================================================
-:doxysiconos:`LagrangianLinearTIDS`  :math:`F_{Ext}(t,z)       FExt        (double time, int size, double* fext, int zsize, double *z)
-:doxysiconos:`LagrangianLinearTIDS`  :math:`F_{Ext}(t,z)       FExt        (double time, int size, double* fext, int zsize, double *z)
-==================================== ==================== ============= ====================================================================
+.. csv-table:: plugins in siconos classes
+   :header: "Class Name", "operator", "plugin name", "signature"
+   :widths: 10 5 5 40
+
+   :doxysiconos:`DynamicalSystem`, ":math:`g(\dot x, x, t, z)`", g, "``(double time, int size, double* fext, int zsize, double *z)``"
+   :doxysiconos:`LagrangianLinearTIDS`, ":math:`F_{Ext}(t,z)`", FExt, "``(double time, int size, double* fext, int zsize, double *z)``"
+   :doxysiconos:`FirstOrderR`, ":math:`h(x,t,\lambda,z)`", h, "``(double time, int x.size, double * x, int lambda.size, double * lambda, double * y, int z.size, double * z)``"

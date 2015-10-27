@@ -724,7 +724,6 @@ struct IsDense : public Question<bool>
     PyObject *input, 
     std11::shared_ptr<std::vector<unsigned int> > ptr) 
   {
-    int i;
     if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
       return 0;
@@ -732,7 +731,7 @@ struct IsDense : public Question<bool>
     
     assert(ptr);
     
-    for (i =0; i <  PyObject_Length(input); i++) 
+    for (int i =0; i <  PyObject_Length(input); i++) 
     {
       PyObject *o = PySequence_GetItem(input,i);
       if (!PyInt_Check(o)) {
