@@ -47,7 +47,7 @@ macro(doxy2swig_docstrings COMP)
   else()
     add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       DEPENDS ${DOCSTRINGS_FILES}
-      COMMAND printf "" > ${COMP}-docstrings.i
+      COMMAND ${CMAKE_COMMAND} -E echo "" > ${COMP}-docstrings.i
       )
     
     add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
