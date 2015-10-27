@@ -25,50 +25,21 @@ if(HAVE_SICONOS_MECHANICS)
   message(STATUS "output ${SICONOS_SWIG_ROOT_DIR}/io/SimpleGui.py")
 
 
-  file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/io/swig/io/ io/img/*.*)
-  message(STATUS "------------------------------ ${rendererFiles}")
+  file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/externals  ${CMAKE_SOURCE_DIR}/externals/img/*.*)
   foreach(rendererFile ${rendererFiles})
-    set(srcRendererPath ${CMAKE_SOURCE_DIR}/io/swig/io/${rendererFile})
+    set(srcRendererPath ${CMAKE_SOURCE_DIR}/externals/${rendererFile})
     if(NOT IS_DIRECTORY ${srcRendererPath})     
-      message(STATUS "          ")
-      #message(STATUS "Configuring file ${rendererFile}")
-      
-      #message(STATUS "input   ${srcRendererPath}")
-      #message(STATUS "output  ${SICONOS_SWIG_ROOT_DIR}/io/${rendererFile}")
-      # configure_file(
-      #   ${srcRendererPath}
-      # 	${SICONOS_SWIG_ROOT_DIR}/io/${rendererFile}
-      #   @ONLY)
-      message(STATUS "Installing file ${rendererFile}")      
-      message(STATUS "input   ${srcRendererPath}")
-      message(STATUS "output  bin/img   ")    
       install(FILES  ${srcRendererPath} DESTINATION share/siconos/img)
     endif(NOT IS_DIRECTORY ${srcRendererPath})
   endforeach(rendererFile)
 
-  file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/io/swig/io/ io/threeJS_libraries/*.*)
-  message(STATUS "------------------------------ ${rendererFiles}")
+  file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/externals  ${CMAKE_SOURCE_DIR}/externals/threeJS_libraries/*.*)
   foreach(rendererFile ${rendererFiles})
-    set(srcRendererPath ${CMAKE_SOURCE_DIR}/io/swig/io/${rendererFile})
+    set(srcRendererPath ${CMAKE_SOURCE_DIR}/externals/${rendererFile})
     if(NOT IS_DIRECTORY ${srcRendererPath})     
-      message(STATUS "          ")
-      #message(STATUS "Configuring file ${rendererFile}")
-      
-      #message(STATUS "input   ${srcRendererPath}")
-      #message(STATUS "output  ${SICONOS_SWIG_ROOT_DIR}/io/${rendererFile}")
-      # configure_file(
-      #   ${srcRendererPath}
-      # 	${SICONOS_SWIG_ROOT_DIR}/io/${rendererFile}
-      #   @ONLY)
-      message(STATUS "Installing file ${rendererFile}")      
-      message(STATUS "input   ${srcRendererPath}")
-      message(STATUS "output  bin/threeJS_libraries")    
       install(FILES  ${srcRendererPath} DESTINATION share/siconos/threeJS_libraries  )
     endif(NOT IS_DIRECTORY ${srcRendererPath})
   endforeach(rendererFile)  
-
-  #configure_file(io/img ${SICONOS_SWIG_ROOT_DIR}/io/img @ONLY)
-  #configure_file(io/threeJS_libraries ${SICONOS_SWIG_ROOT_DIR}/io/threeJS_libraries  @ONLY)
 
   install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/vview.py
     DESTINATION bin RENAME vview)
