@@ -13,8 +13,8 @@ install:
 
 build_script:
   - set PATH=%PATH%;C:\msys64\usr\local\bin;C:\msys64\usr\bin;C:\msys64\bin\opt\bin
-  - mkdir build
-  - cd build
+  - mkdir builddir
+  - cd builddir
   - C:\projects\siconos\Build\Windows\build-siconos-appveyor.bat C:\projects\siconos
 
 
