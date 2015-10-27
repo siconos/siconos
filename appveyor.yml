@@ -11,7 +11,7 @@ install:
   - appveyor DownloadFile "http://siconos.gforge.inria.fr/windows/siconos-dep.zip"
   - 7z x siconos-dep.zip
 
-build:
+build_script:
   - msys64\usr\bin\bash -lc "/c/projects/siconos/Build/Windows/build-siconos-appveyor.bat C:/projects/siconos"
 
 
