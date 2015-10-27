@@ -293,7 +293,7 @@ endmacro()
 #
 macro(SWIG_LINK_LIBRARIES name)
   if(SWIG_MODULE_${name}_REAL_NAME)
-    target_link_libraries(${SWIG_MODULE_${name}_REAL_NAME} ${ARGN})
+    target_link_libraries(${SWIG_MODULE_${name}_REAL_NAME} PUBLIC ${ARGN})
   else()
     message(SEND_ERROR "Cannot find Swig library \"${name}\".")
   endif()

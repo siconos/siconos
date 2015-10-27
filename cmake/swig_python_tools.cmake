@@ -115,7 +115,7 @@ macro(add_siconos_swig_sub_module fullname)
 
   # Check dependencies and then link ...
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
-  swig_link_libraries(${_name} ${PYTHON_LIBRARIES} ${SICONOS_LINK_LIBRARIES} ${COMPONENT})
+  swig_link_libraries(${_name} ${PYTHON_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
 
   # set dep between docstrings and python bindings
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT}_docstrings)

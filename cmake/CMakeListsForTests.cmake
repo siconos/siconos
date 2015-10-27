@@ -93,7 +93,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
   # Link and include for tests libraries (e.g. cppunit ...)
   FOREACH(_L ${TEST_LIBS})
-    TARGET_LINK_LIBRARIES(${_EXE} ${_L})
+    TARGET_LINK_LIBRARIES(${_EXE} PRIVATE ${_L})
   ENDFOREACH()
   FOREACH(_D ${TEST_INCLUDE_DIR})
     include_directories(${_D})

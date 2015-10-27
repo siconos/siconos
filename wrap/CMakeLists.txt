@@ -78,7 +78,7 @@ if(WITH_PYTHON_WRAPPER)
     else()
       set(pytest_opt "-v" CACHE INTERNAL "extra options for py.test")
     endif()
-    
+    file(MAKE_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
     configure_file(tests_setup.py.in ${SICONOS_SWIG_ROOT_DIR}/tests_setup.py)
     configure_file(set_tests_env.sh.in set_tests_env.sh)
     configure_file(utils/__init__.py ${SICONOS_SWIG_ROOT_DIR}/tests/__init__.py)
