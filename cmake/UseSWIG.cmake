@@ -299,3 +299,12 @@ macro(SWIG_LINK_LIBRARIES name)
   endif()
 endmacro()
 
+macro(SWIG_COMPILE_FLAG name)
+  if(SWIG_MODULE_${name}_REAL_NAME)
+    set_source_files_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES COMPILE_FLAGS ${ARGN})
+  else()
+    message(SEND_ERROR "Cannot find Swig library \"${name}\".")
+  endif()
+endmacro()
+
+

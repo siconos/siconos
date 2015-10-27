@@ -20,6 +20,14 @@ ENDIF()
 
 # For some environment variables (LD_LIBRARY_PATH, DYLD_LIBRARY_PATH, Path)
 set(LIBFORTests @CMAKE_CURRENT_BINARY_DIR@)
+if(CMAKE_SYSTEM_NAME MATCHES Windows)
+  set(COMPONENT_BIN_DIR)
+  get_filename_component(BASE_BIN_DIR "@CMAKE_CURRENT_BINARY_DIR@" PATH)
+  foreach(_C "externals" "numerics" "kernel" "mechanics" "control" "io")
+    set(COMPONENT_BIN_DIR "${COMPONENT_BIN_DIR}\;${BASE_BIN_DIR}/${_C}")
+  endforeach()
+  SET(COMPONENT_PATH "${COMPONENT_BIN_DIR}\;@ENV_PATH@")
+endif()
 
 FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   
@@ -80,8 +88,8 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
   # -- link with current component and its dependencies --
   add_dependencies(${_EXE} @COMPONENT@)
-  target_link_libraries(${_EXE} @COMPONENT@)
-  target_link_libraries(${_EXE} ${@COMPONENT@_LINK_LIBRARIES})
+  target_link_libraries(${_EXE} PRIVATE @COMPONENT@)
+  target_link_libraries(${_EXE} PRIVATE ${@COMPONENT@_LINK_LIBRARIES})
 
   # Link and include for tests libraries (e.g. cppunit ...)
   FOREACH(_L ${TEST_LIBS})
@@ -153,7 +161,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
     set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests})
     if(CMAKE_SYSTEM_NAME MATCHES Windows)
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=@CMAKE_CURRENT_BINARY_DIR@/src\;@ENV_PATH@")
+            set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=${COMPONENT_PATH}")
     endif()
     if(APPLE)
       set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests})

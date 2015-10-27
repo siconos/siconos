@@ -19,11 +19,11 @@ FIND_PATH(CPPUNIT_INCLUDE_DIR cppunit/TestCase.h
 
 # With Win32, important to have both
 IF(WIN32)
-  FIND_LIBRARY(CPPUNIT_LIBRARY cppunit
+  FIND_LIBRARY(CPPUNIT_LIBRARY cppunit_dll
     ${CPPUNIT_INCLUDE_DIR}/../lib
     /usr/local/lib
     /usr/lib)
-  FIND_LIBRARY(CPPUNIT_DEBUG_LIBRARY cppunitd
+  FIND_LIBRARY(CPPUNIT_DEBUG_LIBRARY cppunitd_dll
     ${CPPUNIT_INCLUDE_DIR}/../lib
     /usr/local/lib
     /usr/lib)

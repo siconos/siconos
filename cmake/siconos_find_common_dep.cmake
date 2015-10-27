@@ -61,7 +61,6 @@ ENDIF()
 
 # --- Boost ---
 compile_with(Boost REQUIRED)
-compile_with(GMP REQUIRED)
 
 # --- Bullet ---
 IF(WITH_BULLET)

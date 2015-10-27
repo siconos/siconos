@@ -18,12 +18,7 @@ include(SiconosTools)
 # Check/set uninitialized cache variables (--> for docker config)
 get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
 
-IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
-  STRING(REGEX REPLACE "\\\;" ";" ENV_PATH "$ENV{PATH}")
-  STRING(REGEX REPLACE "\\\\" "/" ENV_PATH "${ENV_PATH}")
-  STRING(REGEX REPLACE "\;" "\\\;" ENV_PATH "${ENV_PATH}")
-  STRING(REGEX REPLACE "\"" "" ENV_PATH "${ENV_PATH}")
-ENDIF()
+include(WindowsSiconosSetup)
 
 project(siconos_examples CXX)
 include(CXXCompilerSetup)

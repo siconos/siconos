@@ -122,12 +122,12 @@ if(NOT BLAS_FOUND)
       # Test this combination of libraries.
       set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_thread})
       # add gfortran if we have static libs + gfortran
-      if (BLA_STATIC AND CMAKE_COMPILER_IS_GNUG77)
-        if (NOT GFORTRAN_LIB)
-          set(GFORTRAN_LIB "gfortran")
-        endif()
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${GFORTRAN_LIB})
-      endif()
+      #      if (BLA_STATIC AND CMAKE_COMPILER_IS_GNUG77)
+      #        if (NOT GFORTRAN_LIB)
+      #   set(GFORTRAN_LIB "gfortran")
+      #  endif()
+      #  set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${GFORTRAN_LIB})
+      #endif()
       #else()
       ## First we check cblas interface
       check_function_exists("cblas_${_name}" ${_prefix}${_combined_name}_WORKS)

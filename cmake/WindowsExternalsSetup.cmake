@@ -11,6 +11,6 @@ IF(MSVC AND "${CMAKE_Fortran_COMPILER}" MATCHES "gfortran")
   IF(NOT CMAKE_AR)
     SET(CMAKE_AR "${GFORTRAN_DIR}/ar")
   ENDIF(NOT CMAKE_AR)
-  APPEND_Fortran_FLAGS("-static -static-libgcc -static-libgfortran") # XXX No test :( -- xhub
+  APPEND_Fortran_FLAGS("-static -static-libgcc -static-libgfortran -fno-stack-check -fno-stack-protector -mno-stack-arg-probe") # XXX No test :( -- xhub
 ENDIF()
 

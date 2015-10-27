@@ -100,7 +100,7 @@ macro(LIBRARY_PROJECT_SETUP)
   include(WindowsLibrarySetup)
 
   # Link target with external libs ...
-  target_link_libraries(${COMPONENT} ${${COMPONENT}_LINK_LIBRARIES})
+  target_link_libraries(${COMPONENT} PRIVATE ${${COMPONENT}_LINK_LIBRARIES})
   
   if(BUILD_SHARED_LIBS)
     if(LINK_STATICALLY) # static linking is a nightmare

@@ -90,13 +90,6 @@ if(WITH_PYTHON_WRAPPER)
     #build_python_tests()
   endif()
 
-  IF(CMAKE_SYSTEM_NAME MATCHES Windows)
-    SET(VAR_SEPARATOR ";")
-    APPEND_CXX_FLAGS("/bigobj")
-  ELSE()
-    SET(VAR_SEPARATOR ":")
-  ENDIF()
-    
   # ====== Generates python files required for build/install process ======
   
   set(SICONOS_PYTHON_MODULES)

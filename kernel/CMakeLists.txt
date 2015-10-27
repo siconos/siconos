@@ -32,6 +32,8 @@ set(${COMPONENT}_Unstable_SRCS
   src/simulationTools/MLCP2.cpp
   )
 
+compile_with(GMP REQUIRED)
+
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
