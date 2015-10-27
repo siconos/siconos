@@ -11,7 +11,6 @@ set LIB=C:\externals-siconos\lib;%LIB%
 set INCLUDE=C:\externals-siconos\include;%INCLUDE%
 
 REM We might have to switch boost version --xhub
-set BOOST_INCLUDEDIR=C:/Libraries/boost/include
 set CMAKE_INSTALL_PREFIX=C:/install-vs2015-amd64
 set REL_TYPE="Release"
 

@@ -4,7 +4,8 @@ platform:
   - x64
 
 environment:
-  matrix:
+  BOOST_ROOT: C:\Libraries\boost
+  BOOST_LIBRARYDIR: C:\Libraries\boost\stage\lib  matrix:
     - MSYS2_ARCH: x86_64
 install:
   - C:\msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -S gcc gcc-fortran swig && break || sleep 15; done"
