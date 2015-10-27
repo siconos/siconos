@@ -13,7 +13,7 @@ install:
 
 build_script:
   - set PATH=%PATH%;C:\msys64\usr\local\bin;C:\msys64\usr\bin;C:\msys64\bin\opt\bin
-  - C:\projects\siconos\Build\Windows\build-siconos-appveyor.bat C:\projects\siconos"
+  - C:\projects\siconos\Build\Windows\build-siconos-appveyor.bat C:\projects\siconos
 
 
 os: Visual Studio 2015
