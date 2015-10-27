@@ -7,7 +7,7 @@ environment:
   matrix:
     - MSYS2_ARCH: x86_64
 install:
-  - C:\msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -Suy gcc gcc-fortran && break || sleep 15; done"
+  - C:\msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -S gcc gcc-fortran && break || sleep 15; done"
   - appveyor DownloadFile "http://siconos.gforge.inria.fr/windows/siconos-dep.zip"
   - 7z x siconos-dep.zip
 
