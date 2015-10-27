@@ -31,7 +31,7 @@ set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
 set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} kernel)
+set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} numerics kernel)
 
 include(WindowsControlSetup)
 
