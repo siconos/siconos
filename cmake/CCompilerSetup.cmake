@@ -25,7 +25,7 @@ if(DEV_MODE)
   if(NOT MSVC)
     add_c_options("-Wall")
   endif()
-  add_cxx_options("-Wuninitialized")
+  add_c_options("-Wuninitialized")
 
   add_c_options("-Werror=unknown-warning-option" Clang)
 

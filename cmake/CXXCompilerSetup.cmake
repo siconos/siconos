@@ -65,6 +65,12 @@ endif()
 # add_cxx_options("-static -static-libgcc -static-libstdc++" "GNU;Clang")
 # way too verbose with MSVC
 
+if(USE_SANITIZER MATCHES "asan")
+  APPEND_CXX_FLAGS("-fsanitize=leak -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer")
+elseif(USE_SANITIZER MATCHES "msan")
+  APPEND_CXX_FLAGS("-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer")
+endif()
+
 
 # === Others options ===
 if(NOT CXXVERSION STRLESS "201102L" AND DEV_MODE)
