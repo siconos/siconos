@@ -29,7 +29,7 @@
 namespace FirstOrderRHelpers
 {
 
-static inline void JacglambdaSetter(FirstOrderR& rel, SP::SimpleMatrix B, std::string& pluginName)
+static inline void JacglambdaSetter(FirstOrderR& rel, SP::SiconosMatrix B, std::string& pluginName)
 {
   if (B)
   {
@@ -43,7 +43,7 @@ static inline void JacglambdaSetter(FirstOrderR& rel, SP::SimpleMatrix B, std::s
     RuntimeException::selfThrow("FirstOrderRHelpers::JacglambdaSetter no B or pluginJacglambda given");
 }
 
-static inline void JachxSetter(FirstOrderR& rel, SP::SimpleMatrix C, std::string& pluginName)
+static inline void JachxSetter(FirstOrderR& rel, SP::SiconosMatrix C, std::string& pluginName)
 {
   if (C)
   {
@@ -59,7 +59,7 @@ static inline void JachxSetter(FirstOrderR& rel, SP::SimpleMatrix C, std::string
   }
 }
 
-static inline void JachlambdaSetter(FirstOrderR& rel, SP::SimpleMatrix D, std::string& pluginName)
+static inline void JachlambdaSetter(FirstOrderR& rel, SP::SiconosMatrix D, std::string& pluginName)
 {
   if (D)
   {

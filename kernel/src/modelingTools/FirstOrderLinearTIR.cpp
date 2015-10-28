@@ -36,7 +36,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR():
 }
 
 // Minimum data (C, B as pointers) constructor
-FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B):
+FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix B):
   FirstOrderR(LinearTIR)
 {
   _C = C;
@@ -44,7 +44,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B)
 }
 
 // Constructor from a complete set of data
-FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e, SP::SimpleMatrix B):
+FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e, SP::SiconosMatrix B):
   FirstOrderR(LinearTIR)
 {
   _C = C;

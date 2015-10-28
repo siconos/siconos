@@ -85,12 +85,12 @@ protected:
 
   virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
 
-  SP::SimpleMatrix _C;
-  SP::SimpleMatrix _D;
-  SP::SimpleMatrix _F;
+  SP::SiconosMatrix _C;
+  SP::SiconosMatrix _D;
+  SP::SiconosMatrix _F;
 
-  SP::SimpleMatrix _B;
-  SP::SimpleMatrix _K;
+  SP::SiconosMatrix _B;
+  SP::SiconosMatrix _K;
 
 public:
 
@@ -109,7 +109,7 @@ public:
   /** set C to pointer newC
   *  \param newC the C matrix
   */
-  inline void setCPtr(SP::SimpleMatrix newC)
+  inline void setCPtr(SP::SiconosMatrix newC)
   {
     _C = newC;
   }
@@ -117,7 +117,7 @@ public:
   /** set B to pointer newB
   *  \param newB the B matrix
   */
-  inline void setBPtr(SP::SimpleMatrix newB)
+  inline void setBPtr(SP::SiconosMatrix newB)
   {
     _B = newB;
   }
@@ -125,7 +125,7 @@ public:
   /** set D to pointer newPtr
   *  \param newD the D matrix
   */
-  inline void setDPtr(SP::SimpleMatrix newD)
+  inline void setDPtr(SP::SiconosMatrix newD)
   {
     _D = newD;
   }
@@ -133,7 +133,7 @@ public:
   /** set F to pointer newPtr
   *  \param newF the F matrix
   */
-  inline void setFPtr(SP::SimpleMatrix newF)
+  inline void setFPtr(SP::SiconosMatrix newF)
   {
     _F = newF;
   }
@@ -141,7 +141,7 @@ public:
   /** get C
   *  \return C matrix
   */
-  inline SP::SimpleMatrix C() const
+  inline SP::SiconosMatrix C() const
   {
     return _C;
   }
@@ -149,7 +149,7 @@ public:
   /** get D
   *  \return D matrix
   */
-  inline SP::SimpleMatrix D() const
+  inline SP::SiconosMatrix D() const
   {
     return _D;
   }
@@ -157,7 +157,7 @@ public:
   /** get F
   *  \return F matrix
   */
-  inline SP::SimpleMatrix F() const
+  inline SP::SiconosMatrix F() const
   {
     return _F;
   }
@@ -165,7 +165,7 @@ public:
   /** get B
   *  \return B matrix
   */
-  inline SP::SimpleMatrix B() const
+  inline SP::SiconosMatrix B() const
   {
     return _B;
   }
@@ -173,7 +173,7 @@ public:
   /** get K
   *  \return K matrix
   */
-  inline SP::SimpleMatrix K() const
+  inline SP::SiconosMatrix K() const
   {
     return _K;
   }

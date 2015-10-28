@@ -1,351 +1,145 @@
+"""Diode Bridge simulation. See examples manual.
+Test purpose --> compare with reference results.
+"""
 import os
 from siconos.tests_setup import working_dir
+from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
+    ComplementarityConditionNSL, Interaction, Model, EulerMoreauOSI, \
+    TimeDiscretisation, LCP, TimeStepping
+from numpy import empty
+from siconos.kernel import SimpleMatrix, getMatrix
+from numpy.linalg import norm
 
-# need a ref file.
-def test_diodebridge1():
-    from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
-                               ComplementarityConditionNSL, Interaction,\
-                               Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
-                               TimeStepping
-    from numpy import empty
-    from siconos.kernel import SimpleMatrix, getMatrix
-    from numpy.linalg import norm
 
-    t0 = 0.0
-    T = 5.0e-3       # Total simulation time
-    h_step = 1.0e-6  # Time step
-    Lvalue = 1e-2  # inductance
-    Cvalue = 1e-6   # capacitance
-    Rvalue = 1e3    # resistance
-    Vinit = 10.0    # initial voltage
-    Modeltitle = "DiodeBridge"
+# Common data
+t0 = 0.0
+total_time = 5.0e-3
+time_step = 1.0e-6
+inductance = 1e-2
+capacitance = 1e-6
+resistance = 1e3
+initial_voltage = 10.0
+model_title = "DiodeBridge"
+init_state = [initial_voltage, 0]
 
-    #
+A = [[0, -1.0 / capacitance], [1.0 / inductance, 0]]
+
+C = [[0., 0.], [0, 0.], [-1., 0.], [1., 0.]]
+
+D = [[1. / resistance, 1. / resistance, -1., 0.],
+     [1. / resistance, 1. / resistance, 0., -1.],
+     [1., 0., 0., 0.],
+     [0., 1., 0., 0.]]
+
+B = [[0., 0., -1. / capacitance, 1. / capacitance],
+     [0., 0., 0., 0.]]
+
+
+def test_diode_bridge():
+    """Build diode bridge model"""
     # dynamical system
-    #
+    bridge_ds = FirstOrderLinearDS(init_state, A)
+    # interaction
+    diode_bridge_relation = FirstOrderLinearTIR(C, B)
+    diode_bridge_relation.setDPtr(D)
 
-    init_state = [Vinit, 0]
+    nslaw = ComplementarityConditionNSL(4)
+    bridge_interaction = Interaction(4, nslaw, diode_bridge_relation, 1)
 
-    A = [[0,          -1.0/Cvalue],
-         [1.0/Lvalue, 0          ]]
-
-    LSDiodeBridge=FirstOrderLinearDS(init_state, A)
-
-    #
-    # Interactions
-    #
-
-    C = [[0.,   0.],
-         [0,    0.],
-         [-1.,  0.],
-         [1.,   0.]]
-
-    D = [[1./Rvalue, 1./Rvalue, -1.,  0.],
-         [1./Rvalue, 1./Rvalue,  0., -1.],
-         [1.,        0.,         0.,  0.],
-         [0.,        1.,         0.,  0.]]
-
-    B = [[0.,        0., -1./Cvalue, 1./Cvalue],
-         [0.,        0.,  0.,        0.       ]]
-
-    LTIRDiodeBridge=FirstOrderLinearTIR(C, B)
-    LTIRDiodeBridge.setDPtr(D)
-
-    LTIRDiodeBridge.display()
-    nslaw=ComplementarityConditionNSL(4)
-    InterDiodeBridge=Interaction(4, nslaw, LTIRDiodeBridge, 1)
-
-
-    #
     # Model
-    #
-    DiodeBridge=Model(t0, T, Modeltitle)
+    diode_bridge = Model(t0, total_time, model_title)
 
-    #   add the dynamical system in the non smooth dynamical system
-    DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(LSDiodeBridge)
+    #  add the dynamical system in the non smooth dynamical system
+    diode_bridge.nonSmoothDynamicalSystem().insertDynamicalSystem(bridge_ds)
 
     #   link the interaction and the dynamical system
-    DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
+    diode_bridge.nonSmoothDynamicalSystem().link(bridge_interaction, bridge_ds)
 
-    #
     # Simulation
-    #
 
     # (1) OneStepIntegrators
     theta = 0.5
-    aOSI = EulerMoreauOSI(LSDiodeBridge, theta)
+    integrator = EulerMoreauOSI(theta)
+    integrator.insertDynamicalSystem(bridge_ds)
 
     # (2) Time discretisation
-    aTiDisc = TimeDiscretisation(t0, h_step)
+    time_discretisation = TimeDiscretisation(t0, time_step)
 
     # (3) Non smooth problem
-    aLCP = LCP()
+    non_smooth_problem = LCP()
 
     # (4) Simulation setup with (1) (2) (3)
-    aTS = TimeStepping(aTiDisc, aOSI, aLCP)
-
-    # end of model definition
-
-    #
-    # computation
-    #
+    bridge_simulation = TimeStepping(time_discretisation,
+                                     integrator, non_smooth_problem)
 
     # simulation initialization
-    DiodeBridge.initialize(aTS)
-
+    diode_bridge.initialize(bridge_simulation)
     k = 0
-    h = aTS.timeStep()
-    print("Timestep : ", h)
+    h = bridge_simulation.timeStep()
     # Number of time steps
-    N = (T-t0)/h
-    print("Number of steps : ", N)
+    N = (total_time - t0) / h
 
     # Get the values to be plotted
     # ->saved in a matrix dataPlot
+    data_plot = empty([N, 8])
 
-    dataPlot = empty([N, 8])
-
-    x = LSDiodeBridge.x()
+    x = bridge_ds.x()
     print("Initial state : ", x)
-    y = InterDiodeBridge.y(0)
+    y = bridge_interaction.y(0)
     print("First y : ", y)
-    lambda_ = InterDiodeBridge.lambda_(0)
+    lambda_ = bridge_interaction.lambda_(0)
 
     # For the initial time step:
     # time
-    dataPlot[k, 0] = t0
+    data_plot[k, 0] = t0
 
     #  inductor voltage
-    dataPlot[k, 1] = x[0]
+    data_plot[k, 1] = x[0]
 
     # inductor current
-    dataPlot[k, 2] = x[1]
+    data_plot[k, 2] = x[1]
 
     # diode R1 current
-    dataPlot[k, 3] = y[0]
+    data_plot[k, 3] = y[0]
 
     # diode R1 voltage
-    dataPlot[k, 4] = - lambda_[0]
+    data_plot[k, 4] = - lambda_[0]
 
     # diode F2 voltage
-    dataPlot[k, 5] = - lambda_[1]
+    data_plot[k, 5] = - lambda_[1]
 
     # diode F1 current
-    dataPlot[k, 6] = lambda_[2]
+    data_plot[k, 6] = lambda_[2]
 
     # resistor current
-    dataPlot[k, 7] = y[0] + lambda_[2]
+    data_plot[k, 7] = y[0] + lambda_[2]
 
     k += 1
-    while (k < N):
-        aTS.computeOneStep()
-        #aLCP.display()
-        dataPlot[k, 0] = aTS.nextTime()
+    while k < N:
+        bridge_simulation.computeOneStep()
+        #non_smooth_problem.display()
+        data_plot[k, 0] = bridge_simulation.nextTime()
         #  inductor voltage
-        dataPlot[k, 1] = x[0]
+        data_plot[k, 1] = x[0]
         # inductor current
-        dataPlot[k, 2] = x[1]
+        data_plot[k, 2] = x[1]
         # diode R1 current
-        dataPlot[k, 3] = y[0]
+        data_plot[k, 3] = y[0]
         # diode R1 voltage
-        dataPlot[k, 4] = - lambda_[0]
+        data_plot[k, 4] = - lambda_[0]
         # diode F2 voltage
-        dataPlot[k, 5] = - lambda_[1]
+        data_plot[k, 5] = - lambda_[1]
         # diode F1 current
-        dataPlot[k, 6] = lambda_[2]
+        data_plot[k, 6] = lambda_[2]
         # resistor current
-        dataPlot[k, 7] = y[0] + lambda_[2]
+        data_plot[k, 7] = y[0] + lambda_[2]
         k += 1
-        aTS.nextStep()
+        bridge_simulation.nextStep()
 
     #
     # comparison with the reference file
     #
-    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,"data/diode_bridge.ref")))
-
-    print(norm(dataPlot - ref))
-    assert (norm(dataPlot - ref) < 1e-12)
-    return ref, dataPlot
-
-
-def test_diodebridge2():
-    from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearR, \
-                               ComplementarityConditionNSL, Interaction,\
-                               Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
-                               TimeStepping, SiconosVector
-    from numpy import empty
-    from siconos.kernel import SimpleMatrix, getMatrix
-    from numpy.linalg import norm
-
-    t0 = 0.0
-    T = 5.0e-3       # Total simulation time
-    h_step = 1.0e-6  # Time step
-    Lvalue = 1e-2  # inductance
-    Cvalue = 1e-6   # capacitance
-    Rvalue = 1e3    # resistance
-    Vinit = 10.0    # initial voltage
-    Modeltitle = "DiodeBridge"
-
-
-    #
-    # dynamical system
-    #
-    init_state = [Vinit, 0]
-
-    A = [[0,          -1.0/Cvalue],
-         [1.0/Lvalue, 0          ]]
-
-    LSDiodeBridge=FirstOrderLinearDS(init_state, A)
-
-    #
-    # Interactions
-    #
-
-    C = [[0.,   0.],
-         [0,    0.],
-         [-1.,  0.],
-         [1.,   0.]]
-
-    D = [[1./Rvalue, 1./Rvalue, -1.,  0.],
-         [1./Rvalue, 1./Rvalue,  0., -1.],
-         [1.,        0.,         0.,  0.],
-         [0.,        1.,         0.,  0.]]
-
-    B = [[0.,        0., -1./Cvalue, 1./Cvalue],
-         [0.,        0.,  0.,        0.       ]]
-
-    class VoltageSource(FirstOrderLinearR):
-
-        omega = 1e4
-        Voffset = 0.0
-
-        def __init__(self, *args):
-            super(VoltageSource, self).__init__(*args)
-
-        def initcomponents(self, inter, DSlink, workV, workM):
-            super(VoltageSource, self).initcomponents(inter, DSlink, workV, workM)
-            self._e = SiconosVector(inter.getSizeOfY())
-
-#        def computee(self, z, e):
-            # then compute self._e
-
-    LTIRDiodeBridge=VoltageSource(C, B)
-    LTIRDiodeBridge.setDPtr(D)
-
-    nslaw=ComplementarityConditionNSL(4)
-    InterDiodeBridge=Interaction(4, nslaw, LTIRDiodeBridge, 1)
-
-
-    #
-    # Model
-    #
-    DiodeBridge=Model(t0, T, Modeltitle)
-
-    #   add the dynamical system in the non smooth dynamical system
-    DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(LSDiodeBridge)
-
-    #   link the interaction and the dynamical system
-    DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
-
-    #
-    # Simulation
-    #
-
-    # (1) OneStepIntegrators
-    theta = 0.5
-    aOSI = EulerMoreauOSI(LSDiodeBridge, theta)
-
-    # (2) Time discretisation
-    aTiDisc = TimeDiscretisation(t0, h_step)
-
-    # (3) Non smooth problem
-    aLCP = LCP()
-
-    # (4) Simulation setup with (1) (2) (3)
-    aTS = TimeStepping(aTiDisc, aOSI, aLCP)
-
-    # end of model definition
-
-    #
-    # computation
-    #
-
-    # simulation initialization
-    DiodeBridge.initialize(aTS)
-
-    k = 0
-    h = aTS.timeStep()
-    print("Timestep : ", h)
-    # Number of time steps
-    N = (T-t0)/h
-    print("Number of steps : ", N)
-
-    # Get the values to be plotted
-    # ->saved in a matrix dataPlot
-
-    dataPlot = empty([N, 8])
-
-    x = LSDiodeBridge.x()
-    print("Initial state : ", x)
-    y = InterDiodeBridge.y(0)
-    print("First y : ", y)
-    lambda_ = InterDiodeBridge.lambda_(0)
-
-    # For the initial time step:
-    # time
-    dataPlot[k, 0] = t0
-
-    #  inductor voltage
-    dataPlot[k, 1] = x[0]
-
-    # inductor current
-    dataPlot[k, 2] = x[1]
-
-    # diode R1 current
-    dataPlot[k, 3] = y[0]
-
-    # diode R1 voltage
-    dataPlot[k, 4] = - lambda_[0]
-
-    # diode F2 voltage
-    dataPlot[k, 5] = - lambda_[1]
-
-    # diode F1 current
-    dataPlot[k, 6] = lambda_[2]
-
-    # resistor current
-    dataPlot[k, 7] = y[0] + lambda_[2]
-
-    k += 1
-    while (k < N):
-        aTS.computeOneStep()
-        #aLCP.display()
-        dataPlot[k, 0] = aTS.nextTime()
-        #  inductor voltage
-        dataPlot[k, 1] = x[0]
-        # inductor current
-        dataPlot[k, 2] = x[1]
-        # diode R1 current
-        dataPlot[k, 3] = y[0]
-        # diode R1 voltage
-        dataPlot[k, 4] = - lambda_[0]
-        # diode F2 voltage
-        dataPlot[k, 5] = - lambda_[1]
-        # diode F1 current
-        dataPlot[k, 6] = lambda_[2]
-        # resistor current
-        dataPlot[k, 7] = y[0] + lambda_[2]
-        k += 1
-        aTS.nextStep()
-
-    #
-    # comparison with the reference file
-    #
-
-    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,"data/diode_bridge.ref")))
-
-    assert (norm(dataPlot - ref) < 1e-12)
-
-#test_diodebridge2()
-
-#test_diodebridge1()
+    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,
+                                              "data/diode_bridge.ref")))
+    assert norm(data_plot - ref) < 1e-12
+    return ref, data_plot

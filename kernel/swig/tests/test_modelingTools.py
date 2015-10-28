@@ -1,3 +1,6 @@
+"""A few tests for classes and functions from kernel/modelingtools
+
+"""
 #!/usr/bin/env python
 
 import numpy as np
@@ -13,46 +16,37 @@ theta = 0.5
 h = 0.005
 
 
-q = np.array([1,0,0])
-v = np.array([0,0,0])
+q = np.array([1, 0, 0])
+v = np.array([0, 0, 0])
 mass = np.eye(3)
-mass[2,2]=3./5 * r * r
+mass[2, 2] = 3. / 5 * r * r
 
 weight = np.array([-m * g, 0, 0])
+tol = np.finfo(np.double).eps
 
-def equalv(v1,v2):
-    return (np.linalg.norm(v1-v2) <= np.finfo(np.double).eps)
-    
 
 def test_LagrangianLinearTIDS():
-    ball = K.LagrangianLinearTIDS(q,v,mass)
-    assert (equalv(ball.q(),q))
-    assert (equalv(ball.velocity(),v))
-    assert (equalv(ball.mass(),mass))
-
+    ball = K.LagrangianLinearTIDS(q, v, mass)
+    assert np.allclose(ball.q(), q, rtol=tol, atol=tol)
+    assert np.allclose(ball.velocity(), v, rtol=tol, atol=tol)
+    assert np.allclose(ball.mass(), mass, rtol=tol, atol=tol)
     ball.setFExtPtr(weight)
-
-    assert(equalv(ball.fExt(),weight))
+    assert np.allclose(ball.fExt(), weight, rtol=tol, atol=tol)
 
 
 def test_NewtonImpactNSL():
     nslaw = K.NewtonImpactNSL(e)
-    assert(nslaw.e() == e)
+    assert nslaw.e() == e
+
 
 def test_LagrangianLinearTIR():
-    H = np.array([[1,0,0]])
-    relation = K.LagrangianLinearTIR(H)
-    assert(equalv(relation.jachq(),H))
+    H = np.array([[1, 0, 0]])
+    b = np.zeros(1)
+    relation = K.LagrangianLinearTIR(H, b)
+    assert np.allclose(relation.jachq(), H, rtol=tol, atol=tol)
+
 
 def test_Model():
-    bouncingBall = K.Model(t0,T)
-    assert (bouncingBall.t0() == t0)
-
-def test_display():
-    ball = K.LagrangianLinearTIDS(q,v,mass)
-    ball.display()
-
-def test_number():
-    ball = K.LagrangianLinearTIDS(q,v,mass)
-    print(ball.number())
+    bouncing_ball = K.Model(t0, T)
+    assert bouncing_ball.t0() == t0
 

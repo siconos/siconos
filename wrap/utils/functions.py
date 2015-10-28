@@ -1,4 +1,4 @@
-""" Useful set of functions using some siconos functions """
+"""Set of functions used in python tests"""
 
 import siconos.kernel as SK
 import numpy as np
@@ -10,41 +10,42 @@ def compute_dt_matrices(A, B, h, TV=False):
     T = 1  # end time
     n, m = B.shape
 
-     # Matrix declaration
+    # Matrix declaration
     x0 = np.random.random(n)
     Csurface = np.random.random((m, n))
 
     # Declaration of the Dynamical System
     if TV:
-        processDS = SK.FirstOrderLinearDS(x0, A)
+        process_ds = SK.FirstOrderLinearDS(x0, A)
     else:
-        processDS = SK.FirstOrderLinearTIDS(x0, A)
+        process_ds = SK.FirstOrderLinearTIDS(x0, A)
     # Model
     process = SK.Model(t0, T)
-    process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
+    process.nonSmoothDynamicalSystem().insertDynamicalSystem(process_ds)
     # time discretisation
-    processTD = SK.TimeDiscretisation(t0, h)
+    process_time_discretisation = SK.TimeDiscretisation(t0, h)
     # Creation of the Simulation
-    processSimulation = SK.TimeStepping(processTD, 0)
-    processSimulation.setName("plant simulation")
+    process_simu = SK.TimeStepping(process_time_discretisation, 0)
+    process_simu.setName("plant simulation")
     # Declaration of the integrator
-    processIntegrator = SK.ZeroOrderHoldOSI(processDS)
-    processSimulation.insertIntegrator(processIntegrator)
+    process_integrator = SK.ZeroOrderHoldOSI()
+    process_integrator.insertDynamicalSystem(process_ds)
+    process_simu.insertIntegrator(process_integrator)
 
     rel = SK.FirstOrderLinearTIR(Csurface, B)
     nslaw = SK.RelayNSL(m)
     inter = SK.Interaction(m, nslaw, rel)
 
     #process.nonSmoothDynamicalSystem().insertInteraction(inter, True)
-    process.nonSmoothDynamicalSystem().link(inter, processDS)
+    process.nonSmoothDynamicalSystem().link(inter, process_ds)
     process.nonSmoothDynamicalSystem().setControlProperty(inter, True)
     # Initialization
-    process.initialize(processSimulation)
+    process.initialize(process_simu)
 
     # Main loop
-    processSimulation.computeOneStep()
-    Ad = SK.getMatrix(processIntegrator.Ad(processDS)).copy()
-    Bd = SK.getMatrix(processIntegrator.Bd(processDS)).copy()
+    process_simu.computeOneStep()
+    Ad = SK.getMatrix(process_integrator.Ad(process_ds)).copy()
+    Bd = SK.getMatrix(process_integrator.Bd(process_ds)).copy()
 
     return (Ad, Bd)
 

@@ -320,20 +320,21 @@ void SiconosGraphTest::t7()
   CPPUNIT_ASSERT(g.state_assert());
 #endif
 
-   std::cout << "g:\n";
+  std::cout << "g:\n";
   g.display();
 
-   std::cout << "ag:\n";
+  std::cout << "ag:\n";
   ag.display();
 
   AG::AVIterator ui, uiend;
-   std::cout << "adjacent to 100:\n";
+  std::cout << "adjacent to 100:\n";
   int tot = 0, k = 1;
   for (std11::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
   {
+    std::cout << "yo " << ag.bundle(*ui) << std::endl;
     tot += k * ag.bundle(*ui);
   }
-
+  std::cout << tot << std::endl;
   CPPUNIT_ASSERT(tot == 300541);
 
 }

@@ -79,7 +79,7 @@ public:
   /** create the Relation from a set of data
   *  \param C the matrix C
   */
-  LagrangianLinearTIR(SP::SimpleMatrix C);
+  LagrangianLinearTIR(SP::SiconosMatrix C);
 
   /** create the Relation from a set of data
   *  \param C the matrix C
@@ -87,18 +87,18 @@ public:
   *  \param F the matrix F
   *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e);
+  LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e);
 
   /** create the Relation from a set of data
   *  \param C the matrix C
   *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e);
+  LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosVector e);
 
   /** create the Relation from a set of data
   *  \param C SiconosMatrix : the matrix C
   */
-  LagrangianLinearTIR(const SimpleMatrix& C);
+  LagrangianLinearTIR(const SiconosMatrix& C);
 
   /** create the Relation from a set of data
   *  \param C SiconosMatrix
@@ -106,13 +106,13 @@ public:
   *  \param F SiconosMatrix
   *  \param e SiconosVector
   */
-  LagrangianLinearTIR(const SimpleMatrix& C, const SiconosMatrix& D, const SiconosMatrix& F, const SiconosVector& e);
+  LagrangianLinearTIR(const SiconosMatrix& C, const SiconosMatrix& D, const SiconosMatrix& F, const SiconosVector& e);
 
   /** create the Relation from a set of data
   *  \param C SiconosMatrix
   *  \param e SiconosVector
   */
-  LagrangianLinearTIR(const SimpleMatrix& C, const SiconosVector& e);
+  LagrangianLinearTIR(const SiconosMatrix& C, const SiconosVector& e);
 
   /** destructor
   */
@@ -174,7 +174,7 @@ public:
   /** get C
    *  \return pointer on a plugged matrix
    */
-  inline SP::SimpleMatrix C() const
+  inline SP::SiconosMatrix C() const
   {
     return _jachq;
   }
@@ -183,7 +183,7 @@ public:
   /** set C to pointer newPtr
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setCPtr(SP::SimpleMatrix newPtr)
+  inline void setCPtr(SP::SiconosMatrix newPtr)
   {
     _jachq = newPtr;
   }

@@ -80,12 +80,12 @@ void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
   DEBUG_PRINT("NewtonEulerR::initComponents(Interaction& inter) ends\n");
 }
 
-void NewtonEulerR::setJachq(SP::SimpleMatrix newJachq)
+void NewtonEulerR::setJachq(SP::SiconosMatrix newJachq)
 {
   _jachq = newJachq;
 }
 
-void NewtonEulerR::setJachqPtr(SP::SimpleMatrix newPtr)
+void NewtonEulerR::setJachqPtr(SP::SiconosMatrix newPtr)
 {
   _jachq = newPtr ;
 }

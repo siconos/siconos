@@ -87,7 +87,7 @@ protected:
   /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
    *  i.e. \f[\nabla^\top_q h(t,q,\dot q,\ldots)\f]
    */
-  SP::SimpleMatrix _jachq;
+  SP::SiconosMatrix _jachq;
 
   /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
    *  i.e. \f[\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f]
@@ -160,7 +160,7 @@ public:
     _jachq = newPtr ;
   }
 
-  inline SP::SimpleMatrix C() const
+  inline SP::SiconosMatrix C() const
   {
     return _jachq;
   }

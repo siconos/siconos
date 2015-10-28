@@ -64,7 +64,7 @@ protected:
   /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
    *  i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
    */
-  SP::SimpleMatrix _jachq;
+  SP::SiconosMatrix _jachq;
 
   /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
    *  i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
@@ -119,13 +119,13 @@ public:
   /** get a pointer on matrix Jach[index]
   *  \return a pointer on a SiconosMatrix
   */
-  inline SP::SimpleMatrix jachq() const
+  inline SP::SiconosMatrix jachq() const
   {
     return _jachq;
   }
 
-  //proj_with_q  inline SP::SimpleMatrix jachqProj() const { return _jachqProj; }
-  void setJachq(SP::SimpleMatrix newJachq);
+  //proj_with_q  inline SP::SiconosMatrix jachqProj() const { return _jachqProj; }
+  void setJachq(SP::SiconosMatrix newJachq);
 
   inline SP::SiconosMatrix jachqDot() const
   {
@@ -168,7 +168,7 @@ public:
   /** set Jach[index] to pointer newPtr (pointer link)
   *  \param newPtr the new matrix
   */
-  void setJachqPtr(SP::SimpleMatrix newPtr);
+  void setJachqPtr(SP::SiconosMatrix newPtr);
 
   /** Plugin object for the time--derivative of Jacobian i.e.
   * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
@@ -312,9 +312,9 @@ public:
   /**
   * return a SP on the C matrix.
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
-  * \return SP::SimpleMatrix
+  * \return SP::SiconosMatrix
   */
-  virtual inline SP::SimpleMatrix C() const
+  virtual inline SP::SiconosMatrix C() const
   {
     return _jachq;
   }

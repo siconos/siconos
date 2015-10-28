@@ -328,7 +328,7 @@ void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGra
     InteractionsGraph& indexSet = *topo.indexSet(0);
     DynamicalSystemsGraph::OEIterator oei, oeiend;
     InteractionsGraph::VDescriptor ivd;
-    SP::SimpleMatrix K;
+    SP::SiconosMatrix K;
     SP::Interaction inter;
     for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
     {

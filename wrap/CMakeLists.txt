@@ -82,7 +82,7 @@ if(WITH_PYTHON_WRAPPER)
     configure_file(tests_setup.py.in ${SICONOS_SWIG_ROOT_DIR}/tests_setup.py)
     configure_file(set_tests_env.sh.in set_tests_env.sh)
     configure_file(utils/__init__.py ${SICONOS_SWIG_ROOT_DIR}/tests/__init__.py)
-    add_custom_target(set_envtest ALL
+    add_custom_target(set_envtest numerics
       COMMAND sh ${CMAKE_CURRENT_BINARY_DIR}/set_tests_env.sh
       COMMENT "set environment variables for python tests ...")
     # todo if we need to add some 'global' tests for siconos (not component dependent)

@@ -112,20 +112,20 @@ public:
   *  \param lambda
   *  \param C the matrix used to store the jacobian
   */
-  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
-//  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C);
+  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& C);
+//  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& z, SiconosMatrix& C);
 
 
 //  virtual void computeJachz(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-//  virtual void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& D);
+//  virtual void computeJachz(double time, SiconosVector& x, SiconosVector& z, SiconosMatrix& D);
 
   /** default function to compute jacobianG according to lambda
   *  \param time current time (not used)
   *  \param lambda the nonsmooth input used to evaluate the jacobian
   *  \param B the matrix used to store the jacobian
   */
-  virtual void computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B);
-//  virtual void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
+  virtual void computeJacglambda(double time, SiconosVector& lambda, SiconosMatrix& B);
+//  virtual void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SiconosMatrix& B);
 
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)
@@ -153,7 +153,7 @@ public:
 
   virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
 
-  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
+  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& D);
 
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
