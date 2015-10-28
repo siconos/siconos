@@ -26,13 +26,6 @@ import os
 import tempfile
 
 
-
-tempfile.tempdir=os.getcwd()
-
-bin_path = os.path.dirname(os.path.realpath(__file__)) 
-share_path = os.path.join(bin_path, "../share/siconos/")
-
-
 import subprocess
 from OCC import VERSION
 from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion,gp_Vec, gp_XYZ
@@ -61,6 +54,31 @@ from collections import Counter, defaultdict
 from itertools import groupby
 from operator import itemgetter
 from timeit import timeit
+
+# update_progress() : Displays or updates a console progress bar
+## Accepts a float between 0 and 1. Any int will be converted to a float.
+## A value under 0 represents a 'halt'.
+## A value at 1 or bigger represents 100%
+def update_progress(progress):
+    barLength = 50 # Modify this to change the length of the progress bar
+    status = ""
+    if isinstance(progress, int):
+        progress = float(progress)
+    if not isinstance(progress, float):
+        progress = 0
+        status = "error: progress var must be float\r\n"
+    if progress < 0:
+        progress = 0
+        status = "Halt...\r\n"
+    if progress >= 1:
+        progress = 1
+        status = "Done...\r\n"
+    block = int(round(barLength*progress))
+    text = "\rPercent: [{0}] {1}% {2}".format( "#"*block + "-"*(barLength-block), progress*100, status)
+    sys.stdout.write(text)
+    sys.stdout.flush()
+
+
 
 HEADER = """
 <head>
@@ -2312,7 +2330,7 @@ class ThreejsRenderer(object):
             self._path = path
 
         self._js_filename = os.path.join(self._path, "shape.js")
-        self._html_filename = os.path.join("index.html"    )
+        self._html_filename = os.path.join(output_path,"index.html"    )
         self._background_color = background_color
         self._vertex_shader = vertex_shader
         self._fragment_shader = fragment_shader
@@ -2393,12 +2411,42 @@ class ThreejsRenderer(object):
                           self._uniforms, interstellar = self._interstellar,longueur = self._longueur, numberOfVectors = self._numberOfVectors, numberStaticObjects = self._numberStaticObjects, interstellarVectors = self._interstellarVectors, ren_path = self._path ).get_str())
         fp.write("</html>\n")
         fp.close()
-
+def usage():
+    print(' usage :  renderer --help --share_path=xxx --output_path=xxx file.hdf5')
+   
 #-----------------------------MODIFICATIONS------------------------------------#
 if __name__ == "__main__":
 
+    output_path=os.getcwd()
+    bin_path = os.path.dirname(os.path.realpath(__file__)) 
+    share_path = os.path.join(bin_path, "../share/siconos/")
+    import sys, getopt
+    try:
+        if len(sys.argv) < 2:
+            raise RuntimeError("an hdf5 file is needed")
+        opts, args = getopt.getopt(sys.argv[1:],"",["help","share_path=","output_path="])
+        print(opts,args)
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    except RuntimeError as e :
+        print("-->", e)
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        print(opt,arg)
+        if opt == '-h':
+            usage()
+            sys.exit()
+        elif opt in ("--share_path"):
+            share_path = arg
+        elif opt in ("--output_path"):
+            output_path = os.path.join(arg)
+
+    print(sys.argv[-1])
+    tempfile.tempdir=output_path
     from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox
-    with IO.Hdf5(sys.argv[1], 'r') as io:    #sys.argv[1]
+    with IO.Hdf5(sys.argv[-1], 'r') as io:    #sys.argv[1]
         nbobjs = len(filter(lambda x: io.instances()[x].attrs['id'] >= 0, io.instances()))                # number of moving objects
         numberStaticObjects = len(filter(lambda x: io.instances()[x].attrs['id'] < 0, io.instances()))    # number of static objects
         longueur = nbobjs
@@ -2581,8 +2629,8 @@ if __name__ == "__main__":
                 interstellar[_id][ "quaternionZ" ] = orientation[_id][ 3 ]
                 interstellar[_id][ "quaternionW" ] = orientation[_id][ 0 ]
 
-        print("interstellar:  %s" % interstellar )
-        print("interstellarFix:  %s" % interstellar )
+        #print("interstellar:  %s" % interstellar )
+        #print("interstellarFix:  %s" % interstellar )
 
         zeroIN = False                                          # we check if _id = 0 exists or not
         for instance in io.instances():
@@ -2593,9 +2641,10 @@ if __name__ == "__main__":
 
 
         for timestep in range(numberOfTimeSteps):
-            print("\nNumber of Time Steps: %d" % numberOfTimeSteps)
+            #print("\nNumber of Time Steps: %d" % numberOfTimeSteps)
+            update_progress(timestep/float(numberOfTimeSteps))
             positions = dpos_data[nbobjs*timestep:nbobjs*timestep+nbobjs, 2:]
-            print("\nPositions: %s" % positions)             #Positions of all objects at timestep
+            #print("\nPositions: %s" % positions)             #Positions of all objects at timestep
             for instance in io.instances():
                  _id = io.instances()[instance].attrs['id']
                  _idTab = _id
@@ -2603,7 +2652,7 @@ if __name__ == "__main__":
                     if ( zeroIN ):
                         _idTab += 1                                                                 # if _id=0 present then we have to be careful that positions[0] returns positions of object id=0 whereas if _id=0 NOT PRESENT then position[0] returns positions of object id=1
                     q0, q1, q2, q3, q4, q5, q6 = [float(x) for x in positions[_idTab-1,:]]           # positions and quaternions of the object at timestep
-                    print("orientation["+str(_id)+"]",orientation[_id])
+                    #print("orientation["+str(_id)+"]",orientation[_id])
                                                                                                   # position coordinates and quaternions are gathered in interstellar
                     interstellar[_id][ "positionX" ].append(q0)
                     interstellar[_id][ "positionY" ].append(q1)
