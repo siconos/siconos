@@ -15,7 +15,7 @@
 ##
 ##You should have received a copy of the GNU Lesser General Public License
 ##along with pythonOCC.  If not, see <http://www.gnu.org/licenses/>.
-#---------------------Converting interstellar into JSON--------------------#
+#---------------------Converting interstellar into IOJSON--------------------#
 from __future__ import print_function
 from OCC import STEPControl
 import webbrowser
@@ -48,7 +48,8 @@ vtkmath = vtk.vtkMath()
 from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion,gp_Vec, gp_XYZ
 from OCC.TopLoc import TopLoc_Location
 
-from Siconos.Mechanics import IO
+#from Siconos.Mechanics import IO
+import siconos.io.mechanics_io as IO
 from Quaternion import Quat
 from collections import Counter, defaultdict
 from itertools import groupby
@@ -2413,12 +2414,12 @@ class ThreejsRenderer(object):
         fp.close()
 def usage():
     print(' usage :  renderer --help --share_path=xxx --output_path=xxx file.hdf5')
-   
+
 #-----------------------------MODIFICATIONS------------------------------------#
 if __name__ == "__main__":
 
     output_path=os.getcwd()
-    bin_path = os.path.dirname(os.path.realpath(__file__)) 
+    bin_path = os.path.dirname(os.path.realpath(__file__))
     share_path = os.path.join(bin_path, "../share/siconos/")
     import sys, getopt
     try:
