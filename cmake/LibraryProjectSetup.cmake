@@ -108,9 +108,6 @@ macro(LIBRARY_PROJECT_SETUP)
 
   # windows stuff ...
   include(WindowsLibrarySetup)
-
-  message("oiaeoepzoeziopezpoieaz ${PRIVATE}")
-  
   # Link target with external libs ...
   target_link_libraries(${COMPONENT} ${PRIVATE} ${${COMPONENT}_LINK_LIBRARIES})
   
