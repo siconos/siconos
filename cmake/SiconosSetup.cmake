@@ -60,6 +60,8 @@ else()
   set(PUBLIC PUBLIC CACHE INTERNAL "")
 endif()
 
+set(tests_timeout 5} CACHE INTERNAL "Limit time for tests (in seconds)")
+
 # extensions of source files that must be taken into account
 get_standard_ext()
 set(SRC_EXTS ${ALL_EXTS})
