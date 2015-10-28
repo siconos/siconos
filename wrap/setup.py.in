@@ -103,34 +103,6 @@ class TestSiconos(Command):
         call("py.test" + " siconos/tests", shell=True, env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/wrap/"})
 
 
-class run_benchmarks(Command):
-    """Runs all SymPy benchmarks"""
-
-    description = "run all benchmarks"
-    user_options = []  # distutils complains if this is not here.
-
-    def __init__(self, *args):
-        self.args = args[0] # so we can pass it to other classes
-        Command.__init__(self, *args)
-
-    def initialize_options(self):  # distutils wants this
-        pass
-
-    def finalize_options(self):    # this too
-        pass
-
-    # we use py.test like architecture:
-    #
-    # o collector   -- collects benchmarks
-    # o runner      -- executes benchmarks
-    # o presenter   -- displays benchmarks results
-    #
-    # this is done in sympy.utilities.benchmarking on top of py.test
-    def run(self):
-        from sympy.utilities import benchmarking
-        benchmarking.main(['sympy'])
-
-
 # Full package name
 name = '@SICONOS_PYTHON_PACKAGE@'
 # List of python modules (directories) to be included
@@ -150,8 +122,10 @@ with_component['io'] = "@HAVE_SICONOS_IO@" is "TRUE"
 with_mechanisms = "@WITH_MECHANISMS@" is "ON"
 with_bullet = "@WITH_BULLET@" is "ON"
 with_occ = "@WITH_OCC@" is "ON"
-
-packages_for_tests =['siconos.tests']
+packages_for_tests = []
+with_testing = '@WITH_TESTING@' is 'ON'
+if with_testing:
+    packages_for_tests.append('siconos.tests')
 
 for comp in with_component.keys():
     if with_component[comp]:
@@ -200,7 +174,6 @@ config = Configuration(
     py_modules=[],
     include_dirs=include_dirs,
     cmdclass={'test': PyTest,
-              'bench': run_benchmarks,
               'clean': clean}
 )
 
