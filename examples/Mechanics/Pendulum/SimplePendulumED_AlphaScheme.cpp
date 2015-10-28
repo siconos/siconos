@@ -107,7 +107,8 @@ int main(int argc, char* argv[])
     //1. Time discretization
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(t0, h));
     //2. Integration solver for one step
-    SP::OneStepIntegrator OSI(new NewMarkAlphaOSI(simplependulum, _rho, IsHandleVelConstraint));
+    SP::OneStepIntegrator OSI(new NewMarkAlphaOSI( _rho, IsHandleVelConstraint));
+    OSI->insertDynamicalSystem(simplependulum);
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem acceleration(new LCP());

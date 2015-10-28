@@ -110,11 +110,12 @@ int main(int argc, char* argv[])
 //#define LSODAR
 #define HEM5
 #ifdef LSODAR
-    SP::OneStepIntegrator OSI(new LsodarOSI(ball));
+    SP::OneStepIntegrator OSI(new LsodarOSI());
 #endif
 #ifdef HEM5
-    SP::OneStepIntegrator OSI(new Hem5OSI(ball));
+    SP::OneStepIntegrator OSI(new Hem5OSI());
 #endif
+    OSI->insertDynamicalSystem(ball);
       // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 

@@ -112,7 +112,8 @@ int main(int argc, char* argv[])
     //1. Time discretization
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(TimeInitial, StepSize));
     //2. Integration solver for one step
-    SP::OneStepIntegrator OSI(new LsodarOSI(RockingBlock));
+    SP::OneStepIntegrator OSI(new LsodarOSI());
+    OSI->insertDynamicalSystem(RockingBlock);
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem acceleration(new LCP());

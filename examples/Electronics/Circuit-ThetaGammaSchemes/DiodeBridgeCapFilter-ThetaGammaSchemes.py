@@ -136,7 +136,7 @@ DiodeBridgeCapFilter.nonSmoothDynamicalSystem().link(InterDiodeBridgeCapFilter, 
 # (1) OneStepIntegrators
 theta = 0.5
 gamma = 1.0
-aOSI = Moreau(theta, gamma)
+aOSI = EulerMoreauOSI(theta, gamma)
 aOSI.insertDynamicalSystem(LS1DiodeBridgeCapFilter)
 aOSI.insertDynamicalSystem(LS2DiodeBridgeCapFilter)
 aOSI.setUseGammaForRelation(True)

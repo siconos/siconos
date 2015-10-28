@@ -99,7 +99,7 @@ LTIRDiodeBridge.setDPtr(D)
 
 nslaw = ComplementarityConditionNSL(4)
 InterDiodeBridge = Interaction(4, nslaw, LTIRDiodeBridge, 1)
-InterDiodeBridge.insert(LSDiodeBridge)
+
 
 #
 # Model
@@ -119,7 +119,8 @@ DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
 # (1) OneStepIntegrators
 theta = 0.5
 gamma = 0.5
-aOSI = Moreau(LSDiodeBridge, theta, gamma)
+aOSI = EulerMoreauOSI(theta, gamma)
+aOSI.insertDynamicalSystem(LSDiodeBridge)
 #aOSI.setUseGammaForRelation(True)
 
 # (2) Time discretisation
