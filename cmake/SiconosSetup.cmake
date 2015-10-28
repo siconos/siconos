@@ -52,6 +52,14 @@ set(${PROJECT_NAME}_LOCAL_LIBRARIES
 set(installed_targets ${installed_targets}
   CACHE INTERNAL "List of installed libraries for the siconos project.")
 
+if(CMAKE_VERSION VERSION_LESS 3)
+  set(PRIVATE LINK_PRIVATE CACHE INTERNAL "")
+  set(PUBLIC LINK_PUBLIC CACHE INTERNAL "")
+else()
+  set(PRIVATE PRIVATE CACHE INTERNAL "")
+  set(PUBLIC PUBLIC CACHE INTERNAL "")
+endif()
+
 # extensions of source files that must be taken into account
 get_standard_ext()
 set(SRC_EXTS ${ALL_EXTS})

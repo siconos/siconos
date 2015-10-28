@@ -109,14 +109,16 @@ macro(LIBRARY_PROJECT_SETUP)
   # windows stuff ...
   include(WindowsLibrarySetup)
 
+  message("oiaeoepzoeziopezpoieaz ${PRIVATE}")
+  
   # Link target with external libs ...
-  target_link_libraries(${COMPONENT} PRIVATE ${${COMPONENT}_LINK_LIBRARIES})
+  target_link_libraries(${COMPONENT} ${PRIVATE} ${${COMPONENT}_LINK_LIBRARIES})
   
   if(BUILD_SHARED_LIBS)
     if(LINK_STATICALLY) # static linking is a nightmare
       set(REVERSE_LIST ${${COMPONENT}_LINK_LIBRARIES})
       LIST(REVERSE REVERSE_LIST)
-      TARGET_LINK_LIBRARIES(${COMPONENT} ${REVERSE_LIST})
+      target_link_libraries(${COMPONENT} ${PRIVATE} ${REVERSE_LIST})
     endif()
   endif()    
 

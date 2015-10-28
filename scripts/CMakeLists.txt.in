@@ -147,11 +147,11 @@ ENDIF(WithOpenGL)
 #
 macro(link_setup _TARGET)
   # link with libraries required by @PROJECT_NAME@
-  target_link_libraries(${_TARGET} PRIVATE ${${PACKAGE_NAME}_LIBRARIES})
+  target_link_libraries(${_TARGET} ${PRIVATE} ${${PACKAGE_NAME}_LIBRARIES})
 
   # link with user-defined libraries
   foreach(_L ${LINKER_LIBRARIES})
-    target_link_libraries(${_TARGET} PRIVATE ${_L})
+    target_link_libraries(${_TARGET} ${PRIVATE} ${_L})
   endforeach()
 
   set(_LINKER_OPTIONS)
