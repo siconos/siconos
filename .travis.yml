@@ -4,14 +4,16 @@ services:
   - docker
 
 before_install:
-  - [ "$TRAVIS" == true ] && pip install --user PyYAML
-  - [ "$TRAVIS" == true ] && sudo apt-get -o Acquire::CompressionTypes::Order::=bz2 update
-  - [ "$TRAVIS" == true ] && sudo apt-get -y install software-properties-common
-  - [ "$TRAVIS" == true ] && sudo add-apt-repository ppa:smspillaz/cmake-2.8.12 -y
-  - [ "$TRAVIS" == true ] && sudo apt-get update -qq
-  - [ "$TRAVIS" == true ] && sudo apt-get purge cmake -qq
-  - [ "$TRAVIS" == true ] && sudo apt-get -y install cmake make
-  - [ "$TRAVIS" == true ] && sudo free -m
+  - if [[ "$TRAVIS" == true ]]; then 
+      pip install --user PyYAML;
+      sudo apt-get -o Acquire::CompressionTypes::Order::=bz2 update;
+      sudo apt-get -y install software-properties-common;
+      sudo add-apt-repository ppa:smspillaz/cmake-2.8.12 -y;
+      sudo apt-get update -qq;
+      sudo apt-get purge cmake -qq;
+      sudo apt-get -y install cmake make;
+      sudo free -m;
+    fi
   - mkdir -p build
   - cd build
 
