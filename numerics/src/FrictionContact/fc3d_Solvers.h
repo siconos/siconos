@@ -354,6 +354,24 @@ extern "C"
   */
   void fc3d_AVI_gams_pathvi(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
+  /** solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
+      \param problem the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options
+  */
+  void fc3d_lcp_gams_path(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+  /** solver using PATHVI (via GAMS) for friction-contact 3D problem based on an AVI reformulation
+      \param problem the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options
+  */
+  void fc3d_lcp_gams_pathvi(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
   /** set the default solver parameters and perform memory allocation for EG
     \param options the pointer to the array of options to set
   */

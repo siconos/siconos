@@ -22,12 +22,13 @@
 #include <float.h>
 #include <math.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "NumericsMatrix.h"
 #include "NumericsMatrix_private.h"
 #include "SiconosLapack.h"
+#include "NumericsOptions.h"
 #include "misc.h"
-#include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
@@ -1120,7 +1121,10 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
   if (!NM_sparse(A)->triplet)
   {
-    if (A->storageType == NM_SPARSE_BLOCK || A->storageType == NM_DENSE)
+    switch(A->storageType)
+    {
+    case NM_DENSE:
+    case NM_SPARSE_BLOCK:
     {
 
       /* Invalidation of previously constructed csc storage. */
@@ -1175,7 +1179,21 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
         fprintf(stderr, "NM_triplet: sparse matrix cannot be constructed.\n");
         exit(EXIT_FAILURE);
       }
+      break;
     }
+    case NM_SPARSE:
+    {
+      /* we should allocate a dummy triplet  */
+      A->matrix2->triplet = cs_spalloc(A->size0, A->size1, 1, 1, 1);
+      break;
+    }
+    default:
+    {
+      fprintf(stderr, "NM_triplet: unknown matrix type\n");
+      exit(EXIT_FAILURE);
+    }
+    }
+
   }
   assert (A->matrix2->triplet);
 
@@ -1266,10 +1284,24 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
 void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
              const double beta, NumericsMatrix* C)
 {
-  switch(A->storageType)
+  size_t storageType;
+  /* At the time of writing, we are able to transform anything into NM_SPARSE,
+   * hence we use this format whenever possible */
+  if (A->storageType == NM_SPARSE || B->storageType == NM_SPARSE || C->storageType == NM_SPARSE)
+  {
+    storageType = NM_SPARSE;
+  }
+  else
+  {
+    storageType = A->storageType;
+  }
+  switch(storageType)
   {
   case NM_DENSE:
   {
+    assert(A->matrix0);
+    assert(B->matrix0);
+    assert(C->matrix0);
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, B->size1, alpha, A->matrix0, A->size0, B->matrix0, B->size0, beta, C->matrix0, A->size0);
 
     NM_clearSparseBlock(C);
@@ -1279,6 +1311,9 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
   }
   case NM_SPARSE_BLOCK:
   {
+    assert(A->matrix1);
+    assert(B->matrix1);
+    assert(C->matrix1);
     prodNumericsMatrixNumericsMatrix(alpha, A, B, beta, C);
 
     NM_clearDense(C);
@@ -1287,9 +1322,15 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
   }
   case NM_SPARSE:
   {
-    CSparseMatrix* result = cs_add(cs_multiply(NM_csc(A), NM_csc(B)),
+    /* We need to free the allocated data here, hence we have to save the
+     * matrix pointer. Otherwise, we have a memleak */
+    CSparseMatrix* tmp_matrix = cs_multiply(NM_csc(A), NM_csc(B));
+    assert(tmp_matrix && "NM_gemm :: cs_multiply failed");
+    CSparseMatrix* result = cs_add(tmp_matrix,
                                    NM_csc(C), alpha, beta);
+    assert(result && "NM_gemm :: cs_add failed");
 
+    cs_spfree(tmp_matrix);
     NM_clearDense(C);
     NM_clearSparseBlock(C);
     NM_clearSparseStorage(C);
@@ -1617,4 +1658,48 @@ int NM_gesv(NumericsMatrix* A, double *b)
    * problems, but the calling function has to check the return code.*/
 //  CHECK_RETURN(info);
   return info;
+}
+
+void NM_update_size(NumericsMatrix* A)
+{
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    /* Can't do anything here ...  */
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    DEBUG_PRINT("NM_synchronize_sizes :: to be implemented for NM_SPARSE_BLOCK");
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(A->matrix2);
+    if (A->matrix2->csc)
+    {
+      A->size0 = (int)A->matrix2->csc->m;
+      A->size1 = (int)A->matrix2->csc->n;
+    }
+    else if (A->matrix2->triplet)
+    {
+      A->size0 = (int)A->matrix2->triplet->m;
+      A->size1 = (int)A->matrix2->triplet->n;
+    }
+    else
+    {
+      assert(0 && "NM_update_size :: sparse matrice but neither csc nor triplet are != NULL");
+    }
+    break;
+  }
+  default:
+    DEBUG_PRINT("NM_synchronize_sizes :: default case");
+  }
+}
+
+void NM_csc_alloc(NumericsMatrix* A, csi nzmax)
+{
+  NM_sparse(A)->csc = cs_spalloc(A->size0, A->size1, nzmax, 1, 0);
+
 }

@@ -120,8 +120,8 @@ The following linear algebra operation are supported:
 
 typedef struct
 {
-  int iWorkSize;
-  int *iWork;
+  int iWorkSize; /**< size of iWork */
+  int *iWork; /** integer workspace */
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h
@@ -138,14 +138,14 @@ typedef struct
   int storageType; /**< the type of storage:
                       0: dense (double*),
                       1: SparseBlockStructuredMatrix,
-                      2: compressed sparse column (csc) */
+                      2: compressed sparse column (csc) via CSparse (from T. Davis)*/
   int size0; /**< number of rows */
   int size1; /**< number of columns */
   double* matrix0; /**< dense storage */
   SparseBlockStructuredMatrix* matrix1; /**< sparse block storage */
   NumericsSparseMatrix* matrix2; /**< csc storage */
 
-  NumericsMatrixInternalData* internalData;
+  NumericsMatrixInternalData* internalData; /**< internal storage used for workspace amoung other */
 
 } NumericsMatrix;
 
@@ -278,7 +278,7 @@ extern "C"
    * \param[in] m a NumericsMatrix
    * \param[in] numBlockRow the number of the block Row. Useful only in sparse case
    * \param[in] numRow the starting row. Useful only in dense case.
-   * \param[in] size of the diag block.Useful only in dense case.
+   * \param[in] size of the diag block. Only useful in dense case.
    * \param[out] Bout the target. In the dense case (*Bout) must be allocated by caller.
    *   In case of sparse case **Bout contains the resulting block (from the SBM).
    */
@@ -413,7 +413,7 @@ extern "C"
 
   /** Creation, if needed, of the transposed compress column storage
    * from compress column storage.
-   * \param[in,out] A a NumericsMatrix with spare block storage.
+   * \param[in,out] A a NumericsMatrix with sparse block storage.
    * \return the transposed compressed column matrix created in A.
    */
   CSparseMatrix* NM_csc_trans(NumericsMatrix* A);
@@ -479,7 +479,7 @@ extern "C"
    */
   int* NM_iWork(NumericsMatrix *A, int size);
 
-  /** set NumericsMatrix fiels to NULL
+  /** set NumericsMatrix fields to NULL
    * \param A a matrix
    */
   static inline void NM_null(NumericsMatrix* A)
@@ -490,13 +490,9 @@ extern "C"
     A->internalData = NULL;
   }
 
-
-
-
-
-
-
-
+  /** update the size of the matrix based on the matrix data
+   * \param[in,out] A the matrix which size is updated*/
+  void NM_update_size(NumericsMatrix* A);
 
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type 
@@ -533,6 +529,13 @@ extern "C"
     M->internalData->iWorkSize = 0;
     M->internalData->iWork = NULL;
   }
+
+  /** Allocate a csc matrix in A
+   * \param A the matrix
+   * \param nzmax number of non-zero elements
+   */
+  void NM_csc_alloc(NumericsMatrix* A, csi nzmax);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

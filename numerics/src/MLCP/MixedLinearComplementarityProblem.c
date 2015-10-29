@@ -244,6 +244,7 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* pr
 int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem, FILE* file)
 {
   int info = 0;
+  assert(file);
   if (! problem)
   {
     fprintf(stderr, "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");

@@ -182,6 +182,15 @@ static inline void scal3x3(double scal, double m[9])
   OP3X3(*m++ *= scal);
 }
 
+/** diagonal scaling of a vector
+ * \param[in] scal diagonal part of a matrix
+ * \param[in,out] v a 3D vector 
+ */
+static inline void diag_scal3(double* restrict scal_coeffs, double* restrict v)
+{
+  OP3(*v++ *= *scal_coeffs++);
+}
+
 /** scalar multiplication of a vector3
  * \param[in] scal double scalar
  * \param[in,out] v v[3]
@@ -196,7 +205,7 @@ static inline void scal3(double scal, double* v)
  * \param[in] a *a
  * \param[out] b transpose(*a)
  */
-static inline void cpytr3x3(double* a, double* b)
+static inline void cpytr3x3(double* restrict a, double* restrict b)
 {
   SET3X3(a);
   SET3X3(b);
@@ -212,9 +221,9 @@ static inline void cpytr3x3(double* a, double* b)
 }
 
 /** matrix vector multiplication
- * \param[in] a a[9]
- * \param[in] v v[3]
- * \param[out] r r[3]
+ * \param[in] a 3 by 3 matrix in col-major
+ * \param[in] v 3 dimensional vector
+ * \param[out] r \f$r = a*v\f$
  */
 static inline void mv3x3(double* restrict a, double* restrict v, double* restrict r)
 {
@@ -240,6 +249,32 @@ static inline void mv3x3(double* restrict a, double* restrict v, double* restric
   *pr++ += *a++ * *v++;
 }
 
+/** transpose(matrix) vector multiplication
+ * \param[in] a 3 by 3 matrix in col-major
+ * \param[in] v 3 dimensional vector
+ * \param[out] r \f$r = a^T*v\f$
+ */
+static inline void mtv3x3(double* restrict a, double* restrict v, double* restrict r)
+{
+
+  double* pv = v;
+
+  *r = *a++ * *pv++;
+  *r += *a++ * *pv++;
+  *r++ += *a++ * *pv;
+
+  pv = v;
+
+  *r = *a++ * *pv++;
+  *r += *a++ * *pv++;
+  *r++ += *a++ * *pv;
+
+  pv = v;
+
+  *r = *a++ * *pv++;
+  *r += *a++ * *pv++;
+  *r += *a * *pv;
+}
 
 /** add a matrix vector multiplication
  * \param[in] a a[9]
@@ -270,6 +305,62 @@ static inline void mvp3x3(double* restrict a, double* restrict v, double* restri
   *pr++ += *a++ * *v++;
 }
 
+/** minux the result a matrix vector multiplication
+ * \param[in] a matrix
+ * \param[in] v vector
+ * \param[out] r the result of r -= av
+ */
+static inline void mvm3x3(double* restrict a, double* restrict v, double* restrict r)
+{
+
+  double* pr;
+
+  pr = r;
+
+  *pr++ -= *a++ * *v;
+  *pr++ -= *a++ * *v;
+  *pr++ -= *a++ * *v++;
+
+  pr = r;
+
+  *pr++ -= *a++ * *v;
+  *pr++ -= *a++ * *v;
+  *pr++ -= *a++ * *v++;
+
+  pr = r;
+
+  *pr++ -= *a++ * *v;
+  *pr++ -= *a++ * *v;
+  *pr++ -= *a++ * *v++;
+}
+
+
+/** transpose(matrix) vector multiplication
+ * \param[in] a 3 by 3 matrix in col-major
+ * \param[in] v 3 dimensional vector
+ * \param[out] r \f$r = a^T*v\f$
+ */
+static inline void mtvm3x3(double* restrict a, double* restrict v, double* restrict r)
+{
+
+  double* pv = v;
+
+  *r -= *a++ * *pv++;
+  *r -= *a++ * *pv++;
+  *r++ -= *a++ * *pv;
+
+  pv = v;
+
+  *r -= *a++ * *pv++;
+  *r -= *a++ * *pv++;
+  *r++ -= *a++ * *pv;
+
+  pv = v;
+
+  *r -= *a++ * *pv++;
+  *r -= *a++ * *pv++;
+  *r -= *a * *pv;
+}
 /** matrix matrix multiplication : c = a * b
  * \param[in] a  a[9]
  * \param[in] b b[9]

@@ -53,7 +53,8 @@ int main(void)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunreachable-code"
 #endif /*  __clang__  */
-  if ((@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATH) || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATHVI))
+  if ((@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATH) || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATHVI)
+      || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_LCP_PATH) || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI))
   {
     assert(options->solverParameters);
     SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;

@@ -56,6 +56,8 @@ char * SICONOS_FRICTION_3D_HP_STR = "F3D_HyperplaneProjection";
 char * SICONOS_FRICTION_3D_PROX_STR = "F3D_PROX";
 char * SICONOS_FRICTION_3D_GAMS_PATH_STR = "F3D_GAMS_PATH";
 char * SICONOS_FRICTION_3D_GAMS_PATHVI_STR = "F3D_GAMS_PATHVI";
+char * SICONOS_FRICTION_3D_GAMS_LCP_PATH_STR = "F3D_GAMS_LCP_PATH";
+char * SICONOS_FRICTION_3D_GAMS_LCP_PATHVI_STR = "F3D_GAMS_LCP_PATHVI";
 char * SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR = "F3D_QUARTIC";
 char * SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
 char *  SICONOS_FRICTION_3D_ACLMFP_STR = "F3D_ACLMFP";
@@ -256,6 +258,20 @@ int fc3d_driver(FrictionContactProblem* problem,
     snPrintf(1, options, 
             " ========================== Call PATHVI solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
     fc3d_AVI_gams_pathvi(problem, reaction , velocity, &info, options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_GAMS_LCP_PATH:
+  {
+    snPrintf(1, options, 
+            " ========================== Call PATH solver via GAMS for an LCP-based reformulation of the AVI Friction-Contact 3D problem ==========================\n");
+    fc3d_lcp_gams_path(problem, reaction , velocity, &info, options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_GAMS_LCP_PATHVI:
+  {
+    snPrintf(1, options, 
+            " ========================== Call PATHVI solver via GAMS for an LCP-based reformulation of the AVI Friction-Contact 3D problem ==========================\n");
+    fc3d_lcp_gams_pathvi(problem, reaction , velocity, &info, options);
     break;
   }
   default:
