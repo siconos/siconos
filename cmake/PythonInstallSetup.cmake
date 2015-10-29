@@ -82,12 +82,10 @@ function(set_python_install_path)
     configure_file(fake/__init__.py tmp/fake/__init__.py)
     configure_file(find_python_install.py tmp/find_python_install.py)
     execute_process(
-      COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}/tmp/
       COMMAND ${PYTHON_EXECUTABLE} find_python_install.py
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tmp/
       OUTPUT_VARIABLE PY_INSTALL_DIR)
   endif()
-  assert(PY_INSTALL_DIR)
   string(STRIP ${PY_INSTALL_DIR} PY_INSTALL_DIR)
   set(SICONOS_PYTHON_INSTALL_DIR ${PY_INSTALL_DIR}
     CACHE PATH "Install directory for python bindings." FORCE)
