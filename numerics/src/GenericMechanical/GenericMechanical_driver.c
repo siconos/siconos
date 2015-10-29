@@ -38,6 +38,12 @@
 /* #define GENERICMECHANICAL_FC3D */
 /* #define GMP_WRITE_FAILED_PRB */
 /* #define GMP_WRITE_PRB */
+
+
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
@@ -251,11 +257,12 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     curProblem =  pGMP->firstListElem;
     int  posInX = 0;
     int curSize = 0;
-#ifdef GENERICMECHANICAL_DEBUG
-    printf("GS it %d, initial value:\n", it);
-    for (int ii = 0; ii < pGMP->size; ii++)
-      printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
-#endif
+    
+    DEBUG_PRINTF("GS it %d, initial value:\n", it);
+    DEBUG_EXPR(
+      for (int ii = 0; ii < pGMP->size; ii++)
+        printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
+      );
 
     while (curProblem)
     {
@@ -330,6 +337,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         }
         else
           rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, fcProblem->q, 0);
+        fc3d_onecontact_nonsmooth_Newton_solvers_initialize(fcProblem, fcProblem, &options->internalSolvers[1]);
         resLocalSolver = fc3d_driver(fcProblem, sol, w, &options->internalSolvers[1], numerics_options);
         //resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
         break;
@@ -339,13 +347,13 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       }
       if (resLocalSolver)
         printf("Local solver FAILED, GS continue\n");
-#ifdef GENERICMECHANICAL_DEBUG
-      printf("GS it %d, the line number is %d:\n", it, currentRowNumber);
-      for (int ii = 0; ii < pGMP->size; ii++)
-        printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
-      if (resLocalSolver)
-        printf("Numerics:GenericMechanical_drivers Local solver failed\n");
-#endif
+
+      DEBUG_PRINTF("GS it %d, the line number is %d:\n", it, currentRowNumber);
+      DEBUG_EXPR(for (int ii = 0; ii < pGMP->size; ii++)
+                   printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
+                 if (resLocalSolver)
+                   printf("Numerics:GenericMechanical_drivers Local solver failed\n");
+        );
       posInX += curProblem->size;
       curProblem = curProblem->nextProblem;
       currentRowNumber++;
@@ -359,10 +367,10 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       for (int i = 0; i < pGMP->size; i++)
         pPrevReaction[i] = reaction[i] + (*pCoefLS) * (reaction[i] - pPrevReaction[i]);
       tolViolateLS = GenericMechanical_compute_error(pGMP, pPrevReaction, velocity, tol, options, errLS);
-#ifdef GENERICMECHANICAL_DEBUG
-      printf("GMD :noscale error=%e error LS=%e\n", *err, *errLS);
-      printf("GMD :scale ceoef=%e\n", *pCoefLS);
-#endif
+
+      DEBUG_PRINTF("GMP :noscale error=%e error LS=%e\n", *err, *errLS);
+      DEBUG_PRINTF("GMP :scale coeff=%e\n", *pCoefLS);
+
       if (*errLS < *err)
       {
         if ((*pCoefLS) < 10.0)
@@ -442,7 +450,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
  * options->iparam[2] == 3 Try to solve like a MLCP (==> No FC3d)
  */
 int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity,
-    SolverOptions* options, NumericsOptions* numerics_options)
+                             SolverOptions* options, NumericsOptions* numerics_options)
 {
   // if (options == NULL )
   //  numericsError("fc3d_driver", "null input for solver options");
@@ -450,10 +458,10 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   /* If the options for solver have not been set, read default values in .opt file */
 
   int info = 0;
-#ifdef GENERICMECHANICAL_DEBUG
-  display(problem->M);
-  displayGMP(problem);
-#endif
+  DEBUG_EXPR(
+    display(problem->M);
+    displayGMP(problem);
+    );
   if (!options->iparam[2])
   {
     genericMechanicalProblem_GS(problem, reaction, velocity, &info, options, numerics_options);
@@ -474,7 +482,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   {
     printf("genericMechanical_driver error, options->iparam[2] wrong value. (0, 1 or 2).\n");
   }
-
+  
   return info;
 
 }
@@ -515,9 +523,12 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
     break;
   case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC:
   case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP:
-    fc3d_nsgs_setDefaultSolverOptions(&options->internalSolvers[1]);
-    /* fc3d_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]); */
     /* Fix the setting in a correct way V.A. 15/05/2015 */
+    /* fc3d_nsgs_setDefaultSolverOptions(&options->internalSolvers[1]); */
+    /* options->internalSolvers[1].dparam[0] = 1e-14; */
+    /* options->internalSolvers[1].iparam[0] = 10; */
+    /* options->internalSolvers[1].internalSolvers->iparam[10]=1; */
+    fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(&options->internalSolvers[1]); 
     break;
   default:
     printf("FC3D_solverId unknown :%d\n", id);

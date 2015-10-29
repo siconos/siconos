@@ -3,7 +3,8 @@
 #include "SiconosKernel.hpp"
 #include "CADMBTB_API.hpp"
 #include "ace.h"
-
+#include "MBTB_TimeSteppingProj.hpp"
+#include "MBTB_TimeSteppingCombinedProj.hpp"
 
 void _MBTB_updateContactFromDS()
 {
@@ -215,10 +216,27 @@ void _MBTB_STEP()
   double * dd =   sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam;
   int * ii =   sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam;
 
-  std::cout<< " reached accuracy ="<< dd[2] << " < " << dd [0] <<  std::endl;
-  std::cout<< " nb iterations ="<< ii[3] << " < " << ii [0] <<  std::endl;
-  std::cout<< " Number of Newton iterations = " << sSimu->getNewtonNbIterations() <<std::endl;
-
+  std::cout<< "     OSNS reached accuracy ="<< dd[2] << " < " << dd [0] <<  std::endl;
+  std::cout<< "     OSNS nb iterations ="<< ii[3] << " < " << ii [0] <<  std::endl;
+  std::cout<< "     Number of Newton iterations = " << sSimu->getNewtonNbIterations() <<std::endl;
+  Type::Siconos  simuType;
+  simuType = Type::value(*sSimu);
+  if (simuType == Type::TimeStepping)
+  {
+    
+  }
+  else if (simuType == Type::TimeSteppingDirectProjection)
+  {
+  }
+  else if (simuType == Type::TimeSteppingCombinedProjection)
+  {
+    std::cout<< "     Number of projection iterations = " <<  (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbProjectionIteration() <<std::endl;
+    std::cout<< "     Number of cumulated Newton iterations = " <<  (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->cumulatedNewtonNbIterations() <<std::endl;
+    std::cout<< "     Number of set  iterations = " <<  (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbIndexSetsIteration() <<std::endl;
+    std::cout<< "     Max violation unilateral = " <<  (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationUnilateral()  <<std::endl;
+    std::cout<< "     Max violation equality = " <<  (boost::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationEquality() <<std::endl;
+  }
+  
   //sSimu->oneStepNSProblem(0)->display();
   ACE_times[ACE_TIMER_SICONOS].stop();
 

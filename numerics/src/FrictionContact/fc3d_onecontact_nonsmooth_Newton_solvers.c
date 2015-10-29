@@ -30,6 +30,10 @@
 
 #define OPTI_RHO
 
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
 static computeNonsmoothFunction  Function = NULL;
 static NewtonFunctionPtr F = NULL;
 static NewtonFunctionPtr jacobianF = NULL;
@@ -489,6 +493,8 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
                   double * B,
                   double * velocity)
 {
+  DEBUG_PRINT("LineSearchGP -- Start Line search\n");
+
   double alpha = *t_opt;
 
   double inf = 1e20;
@@ -661,6 +667,14 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
 
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
 {
+
+
+  assert(localproblem);
+  assert(localproblem->q);
+  assert(localproblem->mu);
+  assert(localproblem->M);
+  assert(localproblem->M->matrix0);
+  
   double mu = localproblem->mu[0];
   double * qLocal = localproblem->q;
   double * MLocal = localproblem->M->matrix0;
@@ -679,7 +693,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   double A[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
   double B[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
 
-  // store the serach direction
+  // store the search direction
   double dR[3] = {0., 0., 0.};
 
   // path length
@@ -699,14 +713,14 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
 
   // compute the velocity
   double velocity[3] = {0., 0., 0.};
-
   //cpy3(qLocal,velocity);
   //mvp3x3(MLocal,velocity)
 
   for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
                                           + MLocal[i + 1 * 3] * R[1] +
                                           + MLocal[i + 2 * 3] * R[2] ;
-
+  DEBUG_PRINT("fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped -- Start Newton iteration\n");
+  assert(Function);
   for (inew = 0 ; inew < itermax ; ++inew) // Newton iteration
   {
     //Update function and gradient

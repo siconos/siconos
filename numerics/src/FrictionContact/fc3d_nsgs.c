@@ -435,9 +435,18 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
       /* **** Criterium convergence **** */
       error = sqrt(error);
-      if (verbose > 0)
-        printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
-      if (error < tolerance) hasNotConverged = 0;
+
+      if (error < tolerance)
+      {
+        hasNotConverged = 0;
+        if (verbose > 0)
+          printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
+      }
+      else
+      {
+        if (verbose > 0)
+          printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
+      }
       *info = hasNotConverged;
     }
 
@@ -491,10 +500,19 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           /* **** Criterium convergence **** */
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
-          if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
 
-          if (error < tolerance) hasNotConverged = 0;
+          if (error < tolerance)
+          {
+            hasNotConverged = 0;
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
+          }
+          else
+          {
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
+          }
+
           *info = hasNotConverged;
 
           if (options->callback)
@@ -581,10 +599,18 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           /* **** Criterium convergence **** */
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
-          if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
+          if (error < tolerance)
+          {
+            hasNotConverged = 0;
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
+          }
+          else
+          {
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
+          }
 
-          if (error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
 
           if (options->callback)
@@ -615,10 +641,19 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           /* **** Criterium convergence **** */
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
-          if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
 
-          if (error < tolerance) hasNotConverged = 0;
+          if (error < tolerance)
+          {
+            hasNotConverged = 0;
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
+          }
+          else
+          {
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
+          }
+
           *info = hasNotConverged;
 
           if (options->callback)
@@ -666,10 +701,19 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           /* **** Criterium convergence **** */
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
-          if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
 
-          if (error < tolerance) hasNotConverged = 0;
+          if (error < tolerance)
+          {
+            hasNotConverged = 0;
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
+          }
+          else
+          {
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
+          }
+
           *info = hasNotConverged;
 
           if (options->callback)
@@ -703,9 +747,18 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           /* **** Criterium convergence **** */
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
-          if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
-          if (error < tolerance) hasNotConverged = 0;
+          if (error < tolerance)
+          {
+            hasNotConverged = 0;
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
+          }
+          else
+          {
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
+          }
+
           *info = hasNotConverged;
 
           if (options->callback)
