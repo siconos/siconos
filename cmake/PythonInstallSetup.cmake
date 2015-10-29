@@ -73,11 +73,18 @@ function(set_python_install_path)
     set(PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
   else()
     # Default case : siconos_python_install=standard
-    set(PYTHON_COMMAND_GET_INSTALL_DIR
-      "import site; print(site.getsitepackages()[0])")
+    #set(PYTHON_COMMAND_GET_INSTALL_DIR   
+    #  "import site; print(site.getsitepackages()[0])")
+    # --> this does not work properly: the order in resulting
+    # list depends on the OS, the python version ...
     # Set the SICONOS_PYTHON_INSTALL_DIR to the proper path
+    configure_file(fake_setup.py tmp/setup.py)
+    configure_file(fake/__init__.py tmp/fake/__init__.py)
+    configure_file(find_python_install.py tmp/find_python_install.py)
     execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -c "${PYTHON_COMMAND_GET_INSTALL_DIR}"
+      COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}/tmp/
+      COMMAND ${PYTHON_EXECUTABLE} find_python_install.py
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tmp/
       OUTPUT_VARIABLE PY_INSTALL_DIR)
   endif()
   string(STRIP ${PY_INSTALL_DIR} PY_INSTALL_DIR)
