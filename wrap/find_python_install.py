@@ -2,7 +2,7 @@
 """
 import subprocess
 
-output = subprocess.Popen(["python", "setup.py", "install", "--dry-run"],
+output = subprocess.Popen(["python", "setup.py", "--dry-run", "install"],
                           stdout=subprocess.PIPE).communicate()[0]
 output = output.split('\n')
 for line in output:
