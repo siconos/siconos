@@ -645,7 +645,6 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
       residual_contact[i] = sqrt(res);
       DEBUG_EXPR_WE(if (res > old_residual) { printf("Contact %d, res = %g > %g = old_residual\n", i, sqrt(res), old_residual); });
       total_residual += res;
-      unsigned p = NB_APPROX;
       /* TODO we may want to revisit this, since err < TOL2 should be enough to
        * really reduce the number of constraints ...*/
       /* Well we do not want to mess with the sliding case ( both r and u on
@@ -709,6 +708,12 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
         if (fabs(delta_angle) < 1e-12) { printf("Contact %d, delta_angle too small %g; set to 1e-12", i, delta_angle); delta_angle = copysign(1e-12, delta_angle);}
 
         /* now compute minus the angle, since we want to compute the constraints  */
+        unsigned p;
+#ifdef SMALL_APPROX
+        p = NB_APPROX-1;
+#else
+        p = NB_APPROX-2;
+#endif
         double slice_angle = delta_angle/(p-1);
         DEBUG_PRINTF("contact %d, slice_angle = %g\n", i, rad2deg(slice_angle));
 
