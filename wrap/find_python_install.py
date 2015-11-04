@@ -1,10 +1,14 @@
 """
 """
 import subprocess
+import locale
+
+encoding = locale.getdefaultlocale()[1]
 
 output = subprocess.Popen(["python", "setup.py", "--dry-run", "install"],
                           stdout=subprocess.PIPE).communicate()[0]
-output = output.split('\n')
+
+output = output.decode(encoding).split('\n')
 for line in output:
     if line.count('egg') and line.count('fake'):
         result = line
@@ -15,4 +19,4 @@ for line in result:
         result = line
         break
 result = result.split('fake')[0]
-print result
+print(result)

@@ -77,7 +77,7 @@ Py_XDECREF(py_out);
 // --xhub
 //////////////////////////////////////////////////////////////////////////////
 
-#if defined(NPY_PY3K)
+#if PY_MAJOR_VERSION >= 3
 
 #define PyString_Type PyBytes_Type
 #define PyString_Check PyBytes_Check
