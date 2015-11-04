@@ -123,6 +123,17 @@ void OSNSPTest::testAVI()
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   ioMatrix::read("testAVI.ref", "ascii", dataPlotRef);
-  std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAVI : ", (dataPlot - dataPlotRef).normInf() < _tol, true);
+  SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
+  (dataPlot - dataPlotRef).normInfByColumn(err);
+  err->display();
+
+  double maxErr = err->getValue(0) > err->getValue(1) ? (err->getValue(0) > err->getValue(2) ? err->getValue(0) : err->getValue(2)) : (err->getValue(1) > err->getValue(2) ? err->getValue(1) : err->getValue(2));
+
+  std::cout << "------- Integration Ok, error = " << maxErr << " -------" <<std::endl;
+  if (maxErr > _tol)
+  {
+    dataPlot.display();
+    (dataPlot - dataPlotRef).display();
+  }
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAVI : ",  maxErr < _tol, true);
 }
