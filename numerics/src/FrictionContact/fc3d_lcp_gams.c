@@ -961,7 +961,11 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     double* change_basis = NM_csc(&Ab)->x;
     for (unsigned i3 = 0, indxMat = 0; i3 < size; i3 += 3, indxMat += 9)
     {
+#ifdef WITH_ITER_RAFF
+      solve_iterative_refinement3x3(&change_basis[indxMat], 
+#else
       mv3x3(&change_basis[indxMat], &slack_r[i3], &reaction[i3]);
+#endif
     }
     //DEBUG_PRINT_VEC(reaction, size);
     //DEBUG_PRINT_VEC(velocity, size);

@@ -8,7 +8,11 @@ encoding = locale.getdefaultlocale()[1]
 output = subprocess.Popen(["python", "setup.py", "--dry-run", "install"],
                           stdout=subprocess.PIPE).communicate()[0]
 
-output = output.decode(encoding).split('\n')
+if encoding:
+    output = output.decode(encoding).split('\n')
+else:  # let's cross fingers here ...
+    output = output.split('\n')
+
 for line in output:
     if line.count('egg') and line.count('fake'):
         result = line
