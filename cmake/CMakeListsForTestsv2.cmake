@@ -73,6 +73,12 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT@)
   target_link_libraries(${_EXE} ${PRIVATE} ${@COMPONENT@_LINK_LIBRARIES})
 
+  set(COMPONENT_TEST_LIB_ @COMPONENT_TEST_LIB@)
+  if(COMPONENT_TEST_LIB_)
+    add_dependencies(${_EXE} @COMPONENT_TEST_LIB@)
+    target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT_TEST_LIB@)
+  endif()
+
 
   # Link and include for tests libraries (e.g. cppunit ...)
   FOREACH(_L ${TEST_LIBS})

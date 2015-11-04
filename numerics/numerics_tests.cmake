@@ -614,4 +614,5 @@ if(WITH_${COMPONENT}_TESTING)
     NEW_TEST(SOCLCP_fc3d_to_soclcp  fc3d_to_soclcp.c)
   END_TEST(SOCP/test)
 
+  add_library(numerics-test SHARED ${TEST_UTILS_SOURCES})
 endif()

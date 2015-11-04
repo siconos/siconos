@@ -54,6 +54,7 @@ if(MLCPSIMPLEX_FOUND)
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
 set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} externals)
+set(COMPONENT_TEST_LIB "numerics-test")
 include(LibraryProjectSetup)
 library_project_setup()
 
