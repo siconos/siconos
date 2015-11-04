@@ -17,9 +17,12 @@ if(WITH_SERIALIZATION)
 endif()
 # disable some undefined behavior checks ...
 IF(USE_SANITIZER MATCHES "asan")
-  APPEND_CXX_FLAGS("-fno-sanitize=vptr -fno-sanitize=alignment -fno-sanitize=null")
+  ADD_CXX_OPTIONS("-fno-sanitize=vptr")
+  ADD_CXX_OPTIONS("-fno-sanitize=alignment")
+  ADD_CXX_OPTIONS("-fno-sanitize=null")
 ENDIF(USE_SANITIZER MATCHES "asan")
 # Note FP : we should move this to CXXCompilerSetup?
+# Answer xhub : no this is local, because boost::serialization is hackish
 
 # --- Sources and headers ---
 # source directories for numerics
