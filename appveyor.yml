@@ -30,19 +30,18 @@ install:
   - echo %PATH%
   - cd C:\
   - ps: |
-    if ( -Not (Test-Path "C:\mingw64")) {
-      # Install MinGW.
-      Invoke-WebRequest -UserAgent wget -Uri "http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/5.2.0/threads-posix/seh/x86_64-5.2.0-release-posix-seh-rt_v4-rev0.7z/download" -OutFile "mingw64-toolchain.7z"
-      &7z x -oC:\ "mingw64-toolchain.7z" > $null
+      if ( -Not (Test-Path "C:\mingw64")) {
+        # Install MinGW.
+        Invoke-WebRequest -UserAgent wget -Uri "http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/5.2.0/threads-posix/seh/x86_64-5.2.0-release-posix-seh-rt_v4-rev0.7z/download" -OutFile "mingw64-toolchain.7z"
+        &7z x -oC:\ "mingw64-toolchain.7z" > $null
+        }
+      if ( -Not (Test-Path "C:\externals-siconos")) {
+        $file = "siconos-dep-mingw64-msys1.zip"
+        $url = "http://siconos.gforge.inria.fr/windows/"
+        $url += $file
+        Invoke-WebRequest -UserAgent wget -Uri $url -OutFile $file
+        &7z x -oC:\ $file > $null
       }
-
-    if ( -Not (Test-Path "C:\externals-siconos")) {
-      $file = "siconos-dep-mingw64-msys1.zip"
-      $url = "http://siconos.gforge.inria.fr/windows/"
-      $url += $file
-      Invoke-WebRequest -UserAgent wget -Uri $url -OutFile $file
-      &7z x -oC:\ $file > $null
-    }
 
 build_script:
   - echo %cd%
