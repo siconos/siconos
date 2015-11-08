@@ -58,7 +58,7 @@ test_script:
 
 artifacts:
   - path: '**\*.def'
-  - name: DefFiles
+    name: DefFiles
 
 notifications:
 - provider: Email
