@@ -108,6 +108,7 @@ macro(LIBRARY_PROJECT_SETUP)
 
   # windows stuff ...
   include(WindowsLibrarySetup)
+  windows_library_extra_setup(${COMPONENT_LIBRARY_NAME} ${COMPONENT})
   # Link target with external libs ...
   target_link_libraries(${COMPONENT} ${PRIVATE} ${${COMPONENT}_LINK_LIBRARIES})
   
