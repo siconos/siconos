@@ -50,14 +50,19 @@ build_script:
   - mkdir builddir
   - cd builddir
   - C:\projects\siconos\Build\Windows\build-siconos-appveyor.bat C:\projects\siconos
+  - 7z a debugFiles.zip '**\*.def'
+  - 7z a debugFiles.zip '**\*.rsp'
 
 test_script:
   - ctest -D ExperimentalStart
   - ctest -D ExperimentalTest -j2
   - ctest -D ExperimentalSubmit
 
+after_build:
+  - appveyor PushArtifact debugFiles.zip
+
 artifacts:
-  - path: '**\*.def'
+  - path: debugFiles.zip
     name: DefFiles
 
 notifications:
