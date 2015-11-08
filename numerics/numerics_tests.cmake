@@ -615,6 +615,8 @@ if(WITH_${COMPONENT}_TESTING)
   END_TEST(SOCP/test)
 
   add_library(numerics-test SHARED ${TEST_UTILS_SOURCES})
+  set_target_properties("numerics-test" PROPERTIES
+   LINKER_LANGUAGE "C")
   include(WindowsLibrarySetup)
   windows_library_extra_setup("numerics-test" "numerics-test")
   target_link_libraries(numerics-test ${PRIVATE} ${COMPONENT})

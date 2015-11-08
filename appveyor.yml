@@ -56,6 +56,10 @@ test_script:
   - ctest -D ExperimentalTest -j2
   - ctest -D ExperimentalSubmit
 
+artifacts:
+  - path: '**\*.def'
+  - name: DefFiles
+
 notifications:
 - provider: Email
   to:
