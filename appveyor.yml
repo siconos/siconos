@@ -13,6 +13,10 @@ environment:
   matrix:
     - MSYS2_ARCH: x86_64
 
+cache:
+  - C:\mingw64
+  - C:\externals-siconos -> appveyor.yml
+
 init:
   # Disable popups
   - reg add "HKLM\SYSTEM\CurrentControlSet\Control\Windows" /f /v ErrorMode /d 2
@@ -25,18 +29,33 @@ install:
     #  - pip install lxml numpy scipy pytest
   - echo %PATH%
   - cd C:\
-  - appveyor DownloadFile "http://siconos.gforge.inria.fr/windows/siconos-dep.zip"
-  - 7z x siconos-dep.zip
-  - echo %cd%
+  - ps: |
+    if ( -Not (Test-Path "C:\mingw64")) {
+      # Install MinGW.
+      Invoke-WebRequest -UserAgent wget -Uri "http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/5.2.0/threads-posix/seh/x86_64-5.2.0-release-posix-seh-rt_v4-rev0.7z/download" -OutFile "mingw64-toolchain.7z"
+      &7z x -oC:\ "mingw64-toolchain.7z" > $null
+      }
+
+    if ( -Not (Test-Path "C:\externals-siconos")) {
+      $file = "siconos-dep-mingw64-msys1.zip"
+      $url = "http://siconos.gforge.inria.fr/windows/"
+      $url += $file
+      Invoke-WebRequest -UserAgent wget -Uri $url -OutFile $file
+      &7z x -oC:\ $file > $null
+    }
 
 build_script:
   - echo %cd%
     #  - set PATH=%PATH%;C:\msys64\usr\local\bin;C:\msys64\usr\bin;C:\msys64\bin\opt\bin
-  - set PATH=%PATH%;C:\MinGW\msys\1.0\bin;C:\MinGW\bin
+  - set PATH=C:\mingw64;%PATH%;C:\MinGW\msys\1.0\bin
   - mkdir builddir
   - cd builddir
   - C:\projects\siconos\Build\Windows\build-siconos-appveyor.bat C:\projects\siconos
 
+test_script:
+  - ctest -D ExperimentalStart
+  - ctest -D ExperimentalTest -j2
+  - ctest -D ExperimentalSubmit
 
 notifications:
 - provider: Email
