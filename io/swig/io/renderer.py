@@ -178,8 +178,8 @@ HEADER = """
             margin: 20px;
             padding: 0px;
             position: absolute;
-            left: 0px;
-            top: 45%;
+            right: 0%;
+            bottom: 15%;
             z-index: 100;
         }
 
@@ -191,48 +191,27 @@ HEADER = """
             margin: 20px;
             padding: 0px;
             position: absolute;
-            left: 0px;
-            top: 61%;
+            right: 0%;
+            bottom: 3.8%;
             z-index: 100;
         }
 /*---------------------------Progression Bar (end)----------------------------*/
 
 /*-----------------------------Coordinates (begin)----------------------------*/
         #coordinates  {
-            width: 210px;
-            height: 410px;
+            width: 87%;
+            height: 8%;
             background-color: #fff; /* or transparent; will show through only if renderer alpha: true */
             border: 2px solid green; /* or none; */
             margin: 10px;
             padding: 0px;
             position: absolute;
-            right: 3%;
-            top: 42%;
+            left: 1%;
+            bottom: 2%;
             z-index: 100;
         }
 
-        #vectorCoordinates  {
-            width: 210px;
-            height: 410px;
-            background-color: #fff; /* or transparent; will show through only if renderer alpha: true */
-            border: 2px solid green; /* or none; */
-            margin: 10px;
-            padding: 0px;
-            position: absolute;
-            left: 2%;
-            top: 12%;
-            z-index: 100;
-            }
 /*------------------------------Coordinates (end)-----------------------------*/
-        #download {
-            margin: 20px;
-            height: 45px;
-            padding: 0px;
-            position: absolute;
-            right: 2%;
-            bottom: 20%;
-            text-align:center;
-        }
 
 /*-------------------------------Camera (begin)-------------------------------*/
         #film_camera {
@@ -250,8 +229,8 @@ HEADER = """
             margin: 20px;
             padding: 0px;
             position: absolute;
-            right: 2%;
-            top: 2%;
+            left: 4.2%;
+            top: -5.8%;
             text-align:center;
         }
 
@@ -391,8 +370,8 @@ HEADER = """
             margin: 20px;
             padding: 0px;
             position: absolute;
-            right: 12%;
-            top: 4%;
+            left: 14.4%;
+            top: -3.1956%;
             text-align:center;
         }
 
@@ -547,37 +526,29 @@ BODY = """
         </div>
     </div>
 
-    <div id="pythonocc_rocks">
-        <b>pythonOCC @VERSION@ WebGL renderer</b><hr>
-        CAD in a browser
-        <a style="font-size:14px;" href=http://www.pythonocc.org>http://www.pythonocc.org</a>
-    </div>
-
     <div id="inset"></div>
     <div id="label"><font color="red">X : RED</font> </br> <font color="green">Y : GREEN</font> </br> <font color="blue">Z : BLUE</font></br></div> <!-- to remember which axis is X, which is Y, and so on.. -->
 
-    <div id="coordinates"><strong><font color="green">Coordinates</font></strong></br>    <!-- gives the coordinates of the raycasted object, vector,.. by the mouse -->
-        <ul id="coordinatesList">
-            <li><strong id = "coordinatesListPositionXTest">PositionX: </strong></br> <div id = "coordinatesListPositionX"></div><li>
-            <li><strong id = "coordinatesListPositionYTest">PositionY: </strong></br> <div id="coordinatesListPositionY"></div><li>
-            <li><strong id = "coordinatesListPositionZTest">PositionZ: </strong></br> <div id="coordinatesListPositionZ"></div><li>
-            <li><strong id = "coordinatesListQuaternionXTest">QuaternionX: </strong></br> <div id="coordinatesListQuaternionX"></div><li>
-            <li><strong id = "coordinatesListQuaternionYTest">QuaternionY: </strong></br> <div id="coordinatesListQuaternionY"></div><li>
-            <li><strong id = "coordinatesListQuaternionZTest">QuaternionZ: </strong></br> <div id="coordinatesListQuaternionZ"></div><li>
-            <li><strong id = "coordinatesListQuaternionWTest">QuaternionW: </strong></br> <div id="coordinatesListQuaternionW"></div><li>
-        </ul>
-    </div>
-    <div id="vectorCoordinates"><strong><font color="green">Coordinates</font></strong></br> <!-- gives the coordinates of the previous raycasted vector by the mouse: allows one to follow in real time a precise vector  -->
-        <ul id="coordinatesList">
-            <li><strong id = "vectorCoordinatesListDirectionXTest">DirectionX: </strong></br> <div id="vectorCoordinatesListDirectionX"></div><li>
-            <li><strong id = "vectorCoordinatesListDirectionYTest">DirectionY: </strong></br> <div id="vectorCoordinatesListDirectionY"></div><li>
-            <li><strong id = "vectorCoordinatesListDirectionZTest">DirectionZ: </strong></br> <div id="vectorCoordinatesListDirectionZ"></div><li>
-            <li><strong id = "vectorCoordinatesListFromWhereXTest">PositionX: </strong></br> <div id ="vectorCoordinatesListFromWhereX"></div><li>
-            <li><strong id = "vectorCoordinatesListFromWhereYTest">PositionY: </strong></br> <div id ="vectorCoordinatesListFromWhereY"></div><li>
-            <li><strong id = "vectorCoordinatesListFromWhereZTest">PositionZ: </strong></br> <div id ="vectorCoordinatesListFromWhereZ"></div><li>
-            <li><a href="#" onclick="stopFollowingVector()"> <button type="button">Not to follow the vector anymore</button> </a> <li>
-        </ul>
-    </div>
+    <table  id="coordinates">
+        <tr>
+            <td id = "coordinatesListPositionXTest">PositionX: </td>
+            <td id = "coordinatesListPositionYTest">PositionY: </td>
+            <td id = "coordinatesListPositionZTest">PositionZ: </td>
+            <td id = "coordinatesListQuaternionXTest">QuaternionX: </td>
+            <td id = "coordinatesListQuaternionYTest">QuaternionY: </td>
+            <td id = "coordinatesListQuaternionZTest">QuaternionZ: </td>
+            <td id = "coordinatesListQuaternionWTest">QuaternionW: </td>
+        </tr>
+        <tr>
+            <td id = "coordinatesListPositionX"></td>
+            <td id = "coordinatesListPositionY"></td>
+            <td id = "coordinatesListPositionZ"></td>
+            <td id="coordinatesListQuaternionX"></td>
+            <td id="coordinatesListQuaternionY"></td>
+            <td id="coordinatesListQuaternionZ"></td>
+            <td id="coordinatesListQuaternionW"></td>
+        </tr>
+    </table>
 
     <ul id="menu-demo3" >
         <li><a id="addAndRemove" href="#">Add and Remove</a>                                                                 <!-- change the camera view -->
@@ -602,7 +573,6 @@ BODY = """
         </li>
     </ul>
 
-    <a href="../../python_file.rar" id="download"> <img value="Download python file" src="../../img/download.png" /></a>     <!-- download button -->
 
 
 <!--------------------------Progression Bar (begin)---------------------------->
