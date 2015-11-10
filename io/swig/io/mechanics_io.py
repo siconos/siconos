@@ -1217,7 +1217,7 @@ class Hdf5():
             Model, MoreauJeanOSI, TimeDiscretisation,\
             GenericMechanical, FrictionContact, NewtonImpactFrictionNSL
 
-        from siconos.numerics import SICONOS_FRICTION_3D_NSN_AC
+        from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN_AC
 
         from siconos.mechanics.contact_detection.bullet import \
             btConvexHullShape, btCollisionObject, \
@@ -1247,7 +1247,7 @@ class Hdf5():
         timedisc = TimeDiscretisation(t0, h)
 
         if len(joints) > 0:
-            osnspb = GenericMechanical(SICONOS_FRICTION_3D_NSN_AC)
+            osnspb = GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN_AC)
         else:
             osnspb = FrictionContact(3, solver)
 
