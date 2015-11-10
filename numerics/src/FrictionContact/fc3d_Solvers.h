@@ -55,7 +55,7 @@ For each solver, the input argument are:
 #include "fc3d_unitary_enumerative.h"
 #include "Friction_cst.h"
 #include "SiconosCompat.h"
-
+#include "fc3d_nonsmooth_Newton_natural_map.h"
 
 /** pointer to function used to call local solver */
 typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions *);
@@ -387,6 +387,9 @@ extern "C"
   */
   int checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
 
+
+
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

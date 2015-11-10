@@ -23,7 +23,7 @@ from siconos.kernel import \
     Model, MoreauJeanOSI, TimeDiscretisation, \
     FrictionContact, NewtonImpactFrictionNSL
 
-from Siconos.Mechanics.ContactDetection.Bullet import \
+from siconos.mechanics.contact_detection.bullet import \
      btBoxShape, btSphereShape, btConvexHullShape, btVector3, btCollisionObject, \
      btBoxShape, btMatrix3x3, \
      BulletSpaceFilter, \
