@@ -231,6 +231,13 @@ int fc3d_driver(FrictionContactProblem* problem,
     fc3d_nonsmooth_Newton_FischerBurmeister(problem, reaction , velocity , &info , options);
     break;
   }
+  case SICONOS_FRICTION_3D_NSN_NM:
+  {
+    snPrintf(1, options, 
+            " ========================== Call natural map solver for Friction-Contact 3D problem ==========================\n");
+    fc3d_nonsmooth_Newton_NaturalMap(problem, reaction , velocity , &info , options);
+    break;
+  }
   case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU:
   case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
   {

@@ -140,10 +140,10 @@ int fc3d_nonsmooth_Newton_NaturalMap_setDefaultSolverOptions(
 {
   if (verbose > 0)
   {
-    printf("Set the default solver options for the NSN_FB Solver\n");
+    printf("Set the default solver options for the NSN_NM Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_NSN_FB;
+  options->solverId = SICONOS_FRICTION_3D_NSN_NM;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
