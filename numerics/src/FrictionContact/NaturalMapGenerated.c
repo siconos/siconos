@@ -6,7 +6,7 @@
 //#define DEBUG_MESSAGES 1
 //#include <stdio.h>
 #include <debug.h>
-#include "FischerBurmeisterGenerated.h"
+#include "NaturalMapGenerated.h"
 
 #define RESULT_CHECK(X)
 #define VALUE_CHECK(X)
