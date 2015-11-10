@@ -48,8 +48,10 @@
 #include "fc3d_AlartCurnier_functions.h"
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
+#include "fc3d_nonsmooth_Newton_natural_map.h"
 #include "AlartCurnierGenerated.h"
 #include "FischerBurmeisterGenerated.h"
+#include "NaturalMapGenerated.h"
 #include "fc3d_compute_error.h"
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
@@ -786,6 +788,11 @@
   $1 = &fc3d_AlartCurnierFunctionGenerated;
  }
 
+%typemap(in, numinputs=0) (NaturalMapFun3x3Ptr computeACFun3x3) () {
+  // Callback (see SolverOptions.i) needed here
+  $1 = &fc3d_NaturalMapFunctionGenerated;
+ }
+
 %include "fc3d_Solvers.h"
 %include "fc3d_unitary_enumerative.h"
 %include "fc2d_Solvers.h"
@@ -793,8 +800,10 @@
 %include "fc3d_AlartCurnier_functions.h"
 %include "fc3d_nonsmooth_Newton_AlartCurnier.h"
 %include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
+%include "fc3d_nonsmooth_Newton_natural_map.h"
 %include "AlartCurnierGenerated.h"
 %include "FischerBurmeisterGenerated.h"
+%include "NaturalMapGenerated.h"
 %include "fc3d_compute_error.h"
 %include "fclib_interface.h"
 

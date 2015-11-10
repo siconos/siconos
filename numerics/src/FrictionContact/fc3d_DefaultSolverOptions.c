@@ -103,6 +103,11 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    fc3d_nonsmooth_Newton_FischerBurmeister_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_NSN_NM:
+  {
+    info =    fc3d_nonsmooth_Newton_NaturalMap_setDefaultSolverOptions(options);
+    break;
+  }
   case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
   {
     info =    fc3d_unitary_enumerative_setDefaultSolverOptions(options);
