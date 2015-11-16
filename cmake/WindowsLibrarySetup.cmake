@@ -16,7 +16,7 @@ if(BUILD_SHARED_LIBS)
         | egrep ' "(D|T|B)" ' | cut -f 3 -d ' ' | sed  's,^_,,' | sed '1iEXPORTS' > ${SHARED_LIB_WE}.def
         ) # gruik gruik
     ELSE()
-      ADD_CUSTOM_COMMAND(TARGET ${COMPONENT}
+      ADD_CUSTOM_COMMAND(TARGET ${TARGET}
         PRE_BUILD
         COMMAND ${CMAKE_NM} ARGS @${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET}.dir/objects1.rsp
         | bash ${CMAKE_SOURCE_DIR}/cmake/export_filter.sh > ${SHARED_LIB_WE}.def
