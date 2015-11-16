@@ -49,13 +49,16 @@ install:
 build_script:
   - echo %cd%
     #  - set PATH=%PATH%;C:\msys64\usr\local\bin;C:\msys64\usr\bin;C:\msys64\bin\opt\bin
-  - set PATH=C:\mingw64\bin;%PATH%
+  - set PATH=C:\externals-siconos\bin;C:\mingw64\bin;%PATH%
+  - dir C:\
+  - dir C:\externals-siconos
+  - dir C:\externals-siconos\bin
   - mkdir builddir
   - cd builddir
   - C:\projects\siconos\Build\Windows\build-siconos-appveyor.bat C:\projects\siconos
   - 7z a debugFiles.zip '**\*.def'
   - 7z a debugFiles.zip '**\*.rsp'
-  - 7z a siconos_install.zip -r 'C:/install-vs2015-amd64'
+  - 7z a siconos_install.zip -r 'C:\install-vs2015-amd64'
 
 test_script:
   - ctest -D ExperimentalStart

@@ -4,5 +4,5 @@ IF(MSVC)
   CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/scripts/cmake-vc.bat.in
     ${CMAKE_BINARY_DIR}/cmake-vc.bat)
   INSTALL(FILES ${CMAKE_BINARY_DIR}/cmake-vc.bat DESTINATION bin)
-  INSTALL(FILES ${CMAKE_SOURCE_DIR}/siconos/siconos.bat DESTINATION bin)
+  INSTALL(FILES ${CMAKE_SOURCE_DIR}/scripts/siconos.bat DESTINATION bin)
 ENDIF(MSVC)
