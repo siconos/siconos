@@ -34,4 +34,4 @@ call cmake %* ^
 -DCMAKE_Fortran_COMPILER_FORCED=1;
 
 call nmake.exe /I
-call nmake.exe install
+call nmake.exe /I install
