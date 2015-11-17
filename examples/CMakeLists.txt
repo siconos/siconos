@@ -27,6 +27,7 @@ include(CCompilerSetup)
 set(EXAMPLES_DIRECTORIES
   Biology
   Control
+  Control/Relay
   Electronics
   Mechanics
   Mechanics/Pendulum

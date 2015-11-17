@@ -6,6 +6,6 @@ Nonsmooth dynamical systems modeling
    :maxdepth: 2
 	      
    dynamical_systems
-   non_smooth_laws
+   interactions
    siconos_plugins
    

@@ -2671,22 +2671,22 @@ if __name__ == "__main__":
         for instance in io.instances():
             _id = io.instances()[instance].attrs['id']
             if ( _id >= 0 ):
-                subprocess.call(["sed -i 's/Shape/Shape"+str(_id)+"/g' "+my_ren._path+"/shape"+str(_id)+".js"],shell=True)                          # replace Shape in the Shape1 file by Shape1, same for Shape2, Shape3,...
+                subprocess.call(["sed -i old 's/Shape/Shape"+str(_id)+"/g' "+my_ren._path+"/shape"+str(_id)+".js"],shell=True)                          # replace Shape in the Shape1 file by Shape1, same for Shape2, Shape3,...
             if ( _id < 0 ):
-                subprocess.call(["sed -i 's/Shape/Shape_"+ str( abs(_id) ) +"/g' "+my_ren._path+"/shape_"+ str( abs(_id) ) +".js"],shell=True)          # replace Shape in the Shape_1 file by Shape_1, same for Shape_2, Shape_3,.. those are static objects
+                subprocess.call(["sed -i old 's/Shape/Shape_"+ str( abs(_id) ) +"/g' "+my_ren._path+"/shape_"+ str( abs(_id) ) +".js"],shell=True)          # replace Shape in the Shape_1 file by Shape_1, same for Shape_2, Shape_3,.. those are static objects
 
         #---------------------Converting interstellar into JSON--------------------#
         import json
         writting = json.dumps(interstellar,ensure_ascii=False)                                                                                  # add "var dataInterstellar =" at the begining of the interstellar.json file and a "; at the end"
         with open(my_ren._path+'/interstellar.json', 'w') as outfile:
             json.dump(interstellar, outfile, indent=4)
-        subprocess.call(['sed -i "1i\ var dataInterstellar =" '+my_ren._path+"/interstellar.json"],shell=True)
+        subprocess.call(['sed -i old "1s/^/ var dataInterstellar =/" '+os.path.join(my_ren._path, 'interstellar.json')],shell=True)
         subprocess.call(['echo ";" '+">> "+my_ren._path+"/interstellar.json"],shell=True)
 
         writting = json.dumps(interstellarVectors,ensure_ascii=True)                                                                                  # add "var dataInterstellarVectors =" at the begining of the interstellarVectors.json file and a "; at the end"
         with open(my_ren._path+'/interstellarVectors.json', 'w') as outfile:
             json.dump(interstellarVectors, outfile, indent=4)
-        subprocess.call(['sed -i "1i\ var dataInterstellarVectors =" '+my_ren._path+"/interstellarVectors.json"],shell=True)
+        subprocess.call(['sed -i old "1s/^/ var dataInterstellarVectors =/" '+my_ren._path+"/interstellarVectors.json"],shell=True)
         subprocess.call(['echo ";" '+">> "+my_ren._path+"/interstellarVectors.json"],shell=True)
 
         #---Move the files to directory SliderCrank/Shape -------------------------#

@@ -8,7 +8,7 @@ Siconos users' guide
    :maxdepth: 4
 
    modeling
-   siconos_plugins
+   simulation
 	      
    * Dynamical Systems formulations in Siconos
 
@@ -19,3 +19,5 @@ Siconos users' guide
    * Siconos Control Toolbox
 
    * Siconos Algebra
+
+ 
