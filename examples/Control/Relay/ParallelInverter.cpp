@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     (*D)(2, 0) = 0.0;
     (*D)(2, 1) = 0.0;
     (*D)(2, 2) = 0.0;
-    myProcessRelation->setComputeEFunction("ParallelInverterPlugin", "eLDS");
+    myProcessRelation->setComputeEFunction("plugins", "eLDS");
 
     myProcessRelation->setDPtr(D);
     //myProcessRelation->setComputeEFunction("ObserverLCSPlugin","computeE");

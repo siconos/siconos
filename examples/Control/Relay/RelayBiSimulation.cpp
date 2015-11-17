@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     (*x0)(1) = -Vinit;
 
     SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
-    processDS->setComputebFunction("RelayPlugin", "computeB");
+    processDS->setComputebFunction("plugins", "computeB");
 
     SP::FirstOrderLinearDS controllerDS(new FirstOrderLinearDS(x0, A));
 
