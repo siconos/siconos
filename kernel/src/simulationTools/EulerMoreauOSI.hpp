@@ -161,8 +161,8 @@ public:
   EulerMoreauOSI(double theta);
 
   /** constructor from theta value only
-   *  \param theta value for all these DS.
-   *  \param gamma value for all these DS.
+   *  \param theta value for all linked DS.
+   *  \param gamma value for all linked DS.
    */
   EulerMoreauOSI(double theta, double gamma);
 
@@ -180,8 +180,7 @@ public:
   const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get W corresponding to DynamicalSystem ds
-   * \param ds a pointer to DynamicalSystem, optional,
-   *      default = NULL  get W[0] in that case
+   * \param ds a pointer to DynamicalSystem
    * \return pointer to a SiconosMatrix
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
@@ -342,11 +341,6 @@ public:
    * \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
-
-  //virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
-
-  //virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
-
 
   /** computes all the W matrices
    * \param time current time

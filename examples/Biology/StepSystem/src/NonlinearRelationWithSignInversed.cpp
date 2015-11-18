@@ -59,7 +59,7 @@ void NonlinearRelationWithSignInversed::computeg(double t, SiconosVector& lambda
 
 }
 
-void NonlinearRelationWithSignInversed::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
+void NonlinearRelationWithSignInversed::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& D)
 {
   //    double *h = &(*_jachlambda)(0,0);
 #ifdef SICONOS_DEBUG
@@ -69,7 +69,7 @@ void NonlinearRelationWithSignInversed::computeJachlambda(double t, SiconosVecto
 
 }
 
-void NonlinearRelationWithSignInversed::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
+void NonlinearRelationWithSignInversed::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& C)
 {
   C.setValue(0, 0, 1);
   C.setValue(0, 1, 0);
@@ -88,7 +88,7 @@ void NonlinearRelationWithSignInversed::computeJachx(double t, SiconosVector& x,
 
 }
 
-void NonlinearRelationWithSignInversed::computeJacglambda(double t, SiconosVector& lambda, SimpleMatrix& B)
+void NonlinearRelationWithSignInversed::computeJacglambda(double t, SiconosVector& lambda, SiconosMatrix& B)
 {
   B.setValue(0, 0, 0);
   B.setValue(1, 0, -10.0 * (1 + lambda(3)));

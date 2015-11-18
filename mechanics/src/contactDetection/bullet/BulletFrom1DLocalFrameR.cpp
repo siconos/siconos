@@ -20,7 +20,7 @@
 #include "BulletFrom1DLocalFrameR.hpp"
 
 #include <Interaction.hpp>
-#include <bullet/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
+#include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 BulletFrom1DLocalFrameR::BulletFrom1DLocalFrameR(SP::btManifoldPoint point) : NewtonEulerFrom1DLocalFrameR(), _contactPoints(point)

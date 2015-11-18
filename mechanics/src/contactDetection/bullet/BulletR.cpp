@@ -31,7 +31,7 @@
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 
-#include <bullet/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
+#include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 #include <btBulletCollisionCommon.h>

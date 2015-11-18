@@ -23,7 +23,7 @@
 # to the ideal diode behavior currently (12/09/2005) modeled in the Siconos sample.
 #----------------------------------------------------------------------------------
 
-#set  term X11 
+set term X11 
 
 resultfile = "CircuitRLCD.dat"
 

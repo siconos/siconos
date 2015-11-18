@@ -55,53 +55,44 @@ int main(int argc, char *argv[])
 
   int NBStep = (int) floor(sTf/sStep);
   // NBStep =1;
-//*****BUILD THE DYNAMICAL SYSTEM
-
-  SP::MyDS aDS ;
-  aDS.reset(new MyDS(xti));
-
-  DynamicalSystemsSet  Inter_DS ;
-  Inter_DS.insert(aDS);
+  //*****BUILD THE DYNAMICAL SYSTEM
+  
+  SP::MyDS aDS(new MyDS(xti));
 
 //******BUILD THE RELATION
 //  SP::NonlinearRelationWithSign aR;
 //  aR.reset(new NonlinearRelationWithSign());
-  SP::NonlinearRelationWithSignInversed aR;
-  aR.reset(new NonlinearRelationWithSignInversed());
+  SP::NonlinearRelationWithSignInversed aR(new NonlinearRelationWithSignInversed());
 
 //*****BUILD THE NSLAW
-  SP::NonSmoothLaw aNSL;
-  RelayNSL * rNSL = new RelayNSL(sNSLawSize);
-  aNSL.reset(rNSL); //nr de lambda din pb LCP
-  rNSL->setLb(-1.0);
-  rNSL->setUb(1.0);
-// unsigned int sNSLawSize = 4;
-
-//****BUILD THE INTERACTION
+  double ub = -1.;
+  double lb = 1.;
+  SP::NonSmoothLaw aNSL(new RelayNSL(sNSLawSize, lb, ub));
+  
+  //****BUILD THE INTERACTION
   SP::Interaction aI(new Interaction(sNSLawSize,aNSL,aR));
 
-//****BUILD THE SYSTEM
+//****BUILD THE model
   SP::Model  aM(new Model(0,sTf));
   aM->nonSmoothDynamicalSystem()->insertDynamicalSystem(aDS);
   aM->nonSmoothDynamicalSystem()->link(aI,aDS);
 
-// -- (1) OneStepIntegrators --
-  SP::OneStepIntegrator  aEulerMoreauOSI ;
-  aEulerMoreauOSI.reset(new EulerMoreauOSI(0.5));
+  // -- (1) OneStepIntegrators --
+  SP::OneStepIntegrator  aEulerMoreauOSI(new EulerMoreauOSI(0.5));
   aEulerMoreauOSI->insertDynamicalSystem(aDS);
 
-// -- (2) Time discretisation --
+  // -- (2) Time discretisation --
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0,sStep));
 
-// -- (3) Non smooth problem
+  // -- (3) Non smooth problem
   SP::Relay osnspb(new Relay(SICONOS_RELAY_LEMKE));
   osnspb->numericsSolverOptions()->dparam[0]=1e-08;
   osnspb->numericsSolverOptions()->iparam[0]=0;  // Multiple solutions 0 or 1
-//  osnspb->numericsSolverOptions()->iparam[3]=48;
+  //osnspb->numericsSolverOptions()->iparam[3]=48;
 
   osnspb->setNumericsVerboseMode(0);
 
-// -- (4) Simulation setup with (1) (2) (3)
+  // -- (4) Simulation setup with (1) (2) (3)
   SP::TimeStepping aS(new TimeStepping(aTD,aEulerMoreauOSI,osnspb));
   aS->setComputeResiduY(true);
   aS->setUseRelativeConvergenceCriteron(false);
@@ -120,10 +111,6 @@ int main(int argc, char *argv[])
 
   unsigned int outputSize = 9;
   SimpleMatrix dataPlot(NBStep+1,outputSize);
-
-
-
-
 
   cout << "=== Start of simulation: "<<NBStep<<" steps ===" << endl;
 

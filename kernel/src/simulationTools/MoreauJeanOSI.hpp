@@ -147,8 +147,8 @@ protected:
 public:
 
   /** constructor from theta value only
-   *  \param theta value for the theta parameter (default = 0.5)
-   *  \param gamma value for the gamma parameter (default = NaN and gamma is not used)
+   *  \param theta value for all linked DS (default = 0.5).
+   *  \param gamma value for all linked DS (default = NaN and gamma is not used).
    */
   MoreauJeanOSI(double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN());
 
@@ -166,8 +166,7 @@ public:
   const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get W corresponding to DynamicalSystem ds
-   * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get W[0] in that case
+   * \param ds a pointer to DynamicalSystem
    * \return pointer to a SiconosMatrix
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
