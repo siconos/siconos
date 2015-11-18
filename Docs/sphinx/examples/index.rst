@@ -1,11 +1,5 @@
 .. _siconos_examples:
 
-
-.. toctree::
-   :maxdepth: 2
-
-   electronics
-
 Examples' Manual
 ================
 This document is a collection of some examples of modelisation and simulation of nonsmooth systems with Siconos.

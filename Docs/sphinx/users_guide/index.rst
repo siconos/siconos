@@ -9,15 +9,3 @@ Siconos users' guide
 
    modeling
    simulation
-	      
-   * Dynamical Systems formulations in Siconos
-
-   * Siconos Interactions and related objects
-
-   * Siconos Simulation and related objects
-
-   * Siconos Control Toolbox
-
-   * Siconos Algebra
-
- 

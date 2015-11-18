@@ -97,11 +97,10 @@ For 'event-driven' simulation strategy. Integrator based on LSODAR (https://comp
 In Siconos, Lsodar is used for event-driven algorithm, to integrate the dynamics with stops at new non-smooth events (violation of a constraint)
 
 * Hem5 (:doxysiconos:`Hem5OSI`)
+
 For 'event-driven' simulation strategy. Based on Ernst Hairer HEM5 integrator (http://www.unige.ch/~hairer/software.html)
 
-* Newmark (:doxysiconos:`NewmarkAlphaOSI`)
-
-
+* Newmark (:doxysiconos:`NewMarkAlphaOSI`)
 
 Nonsmooth problems formulation and solve
 ----------------------------------------
@@ -115,6 +114,7 @@ Linear nonsmooth problems
 .. math::
 
    w =  q + M z, M \in R^{n \times n }, q \in R^{n}
+
 where :math:`w \in R^{n}, z \in R^{n}` are the unknowns.
 
 * Linear Complementarity Problems (:doxysiconos:`LCP`)
@@ -172,3 +172,8 @@ With :math:`velocity \in R^{n}, reaction \in R^{n}, localVelocity \in R^{m}, loc
 * Generic mechanical problem (:doxysiconos:`GenericMechanical`)
   
 Complete problem with bilateral equality, complementarity, impact and friction.
+
+.. toctree::
+   :maxdepth: 4
+
+   numerics_solvers
