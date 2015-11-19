@@ -83,13 +83,13 @@ int main(int argc, char* argv[])
     (*q0)(1) = 0.2;
 
     /*REGULAR PLUGINS - uncomment to use*/
-    SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "plugins:mass"));
-    doublependulum->setComputeFGyrFunction("plugins", "FGyr");
-    doublependulum->setComputeJacobianFGyrqDotFunction("plugins", "jacobianVFGyr");
-    doublependulum->setComputeJacobianFGyrqFunction("plugins", "jacobianFGyrq");
-    doublependulum->setComputeFIntFunction("plugins", "FInt");
-    doublependulum->setComputeJacobianFIntqDotFunction("plugins", "jacobianVFInt");
-    doublependulum->setComputeJacobianFIntqFunction("plugins", "jacobianFIntq");
+    SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumPlugin:mass"));
+    doublependulum->setComputeFGyrFunction("DoublePendulumPlugin", "FGyr");
+    doublependulum->setComputeJacobianFGyrqDotFunction("DoublePendulumPlugin", "jacobianVFGyr");
+    doublependulum->setComputeJacobianFGyrqFunction("DoublePendulumPlugin", "jacobianFGyrq");
+    doublependulum->setComputeFIntFunction("DoublePendulumPlugin", "FInt");
+    doublependulum->setComputeJacobianFIntqDotFunction("DoublePendulumPlugin", "jacobianVFInt");
+    doublependulum->setComputeJacobianFIntqFunction("DoublePendulumPlugin", "jacobianFIntq");
 
     /*SYMPY PLUGINS - uncomment to use*/
     // SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumSymPyPlugin:mass"));
@@ -103,14 +103,14 @@ int main(int argc, char* argv[])
 
     // -- relations --
 
-    string G = "plugins:G0";
+    string G = "DoublePendulumPlugin:G0";
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
-    SP::Relation relation(new LagrangianScleronomousR("plugins:h0", G));
+    SP::Relation relation(new LagrangianScleronomousR("DoublePendulumPlugin:h0", G));
     SP::Interaction inter(new Interaction(1, nslaw, relation));
 
-    string G1 = "plugins:G1";
+    string G1 = "DoublePendulumPlugin:G1";
     SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(e1));
-    SP::Relation relation1(new LagrangianScleronomousR("plugins:h1", G1));
+    SP::Relation relation1(new LagrangianScleronomousR("DoublePendulumPlugin:h1", G1));
     SP::Interaction inter1(new Interaction(1, nslaw1, relation1));
 
     // -------------

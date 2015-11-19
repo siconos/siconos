@@ -1,7 +1,7 @@
 .. _numerics_solver:
 
-Solvers definition in Numerics
-==============================
+Solvers definition (numerics)
+=============================
 
 To define a non-smooth problem in Numerics, the structure :doxysiconos:`SolverOptions` is used. It handles the name of the solver and its input-output parameters.
 

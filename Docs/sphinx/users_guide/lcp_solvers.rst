@@ -35,11 +35,7 @@ quadratic programm formulation for solving a LCP with a symmetric matrix M.
 
 The QP we solve is
 
-  Minimize:
-  
-  :math:`z^T (M z + q)`
-
-  subject to :math:`Mz  + q  \geq  0`
+  Minimize: :math:`z^T (M z + q)` subject to :math:`Mz  + q  \geq  0`
 
   which is the classical reformulation that can be found
   in Cottle, Pang and Stone (2009).
@@ -48,7 +44,7 @@ The QP we solve is
 
 function: :doxysiconos:`lcp_qp()`
 
- parameters:
+parameters:
 
 * dparam[0] (in): tolerance
 

@@ -17,8 +17,7 @@ method = "result"
 #set terminal pdf
 #set output "figure1.pdf"
 
-if (X11==1) set term X11 0 
-if (aqua==1) set term aqua 0
+set term X11 0 
 set multiplot layout 2,2
 set ylabel '$x$' 
 

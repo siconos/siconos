@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
-    SP::Relation relation(new LagrangianScleronomousR("plugins:h0", "plugins:G0", "plugins:G0dot"));
+    SP::Relation relation(new LagrangianScleronomousR("SimplePendulumBilateralConstraintPlugin:h0", "SimplePendulumBilateralConstraintPlugin:G0", "SimplePendulumBilateralConstraintPlugin:G0dot"));
     SP::Interaction inter(new Interaction(1, nslaw, relation));
 
     // -------------

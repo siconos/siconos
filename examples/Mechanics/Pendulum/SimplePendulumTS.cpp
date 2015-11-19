@@ -80,12 +80,12 @@ int main(int argc, char* argv[])
 
 
     // external plug-in
-    //simplependulum->setComputeMassFunction("plugins","mass");
+    //simplependulum->setComputeMassFunction("SimplePendulumPlugin","mass");
 
 
-    simplependulum->setComputeFIntFunction("plugins", "FInt");
-    simplependulum->setComputeJacobianFIntqDotFunction("plugins", "jacobianVFInt");
-    simplependulum->setComputeJacobianFIntqFunction("plugins", "jacobianFIntq");
+    simplependulum->setComputeFIntFunction("SimplePendulumPlugin", "FInt");
+    simplependulum->setComputeJacobianFIntqDotFunction("SimplePendulumPlugin", "jacobianVFInt");
+    simplependulum->setComputeJacobianFIntqFunction("SimplePendulumPlugin", "jacobianFIntq");
 
     // -------------------
     // --- Interactions---
@@ -109,9 +109,9 @@ int main(int argc, char* argv[])
     //     Interaction inter =  new Interaction("floor-mass1", allDS,1,1, nslaw, relation);)
 
 
-    string G = "plugins:G0";
+    string G = "SimplePendulumPlugin:G0";
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
-    SP::Relation relation(new LagrangianScleronomousR("plugins:h0", G));
+    SP::Relation relation(new LagrangianScleronomousR("SimplePendulumPlugin:h0", G));
     SP::Interaction inter(new Interaction(1, nslaw, relation));
 
     // -------------

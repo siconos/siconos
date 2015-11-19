@@ -27,12 +27,12 @@ include(CCompilerSetup)
 set(EXAMPLES_DIRECTORIES
   Biology
   Control
-  Control/Relay
   Electronics
   Mechanics
-  Mechanics/Pendulum
   Numerics
   Robotics/HuMAns_pa10
+  Spheres/Lagrangian
+  Spheres/NewtonEuler
 )
 
 set(NO_TEST_FILES QGL tools)

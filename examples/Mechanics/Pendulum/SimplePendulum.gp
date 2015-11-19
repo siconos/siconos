@@ -40,6 +40,5 @@ set origin 0.0,winheight*2.0+heightoff-0.01
 set xrange [-0.0:2]
 set yrange [-2:2]
 
-plot\
-"SimplePendulumResult.dat" u 4:5 t "Mass 1 trajectory" w l
+plot "SimplePendulumResult.dat" u 4:5 t "Mass 1 trajectory" w l
 

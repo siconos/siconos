@@ -41,13 +41,13 @@ set multiplot
 set size winratio,winheight
 
 set origin 0.0,winheight*3.0+heightoff
-set ylabel "V" 1
+set ylabel "V"
 plot \
   "DiodeBridgePowSupTRAP1us.dat" u 1:2 t      "Supply voltage , SICONOS ref TRAP 1us" w l,\
   "DiodeBridgePowSup.dat"        u 1:2 t      "Supply voltage , SICONOS new TRAP 1us" w l
 
 set origin 0.0,winheight*2.0+heightoff
-set ylabel "A" 1
+set ylabel "A"
 plot\
   "DiodeBridgePowSupTRAP1us.dat" u 1:7 t      "diode F1 current , SICONOS ref TRAP 1us" w l,\
   "DiodeBridgePowSup.dat"        u 1:7 t      "diode F1 current , SICONOS new TRAP 1us" w l
@@ -62,7 +62,7 @@ set format
 set xtics axis
 set xlabel "time in s"
 set origin 0.0,0.0+heightoff
-set ylabel "V" 1
+set ylabel "V"
 plot\
   "DiodeBridgePowSupTRAP1us.dat" u 1:(-($5 + $6)) t    "resistor voltage , SICONOS ref TRAP 1us" w l,\
   "DiodeBridgePowSup.dat"        u 1:(-($5 + $6)) t    "resistor voltage , SICONOS new TRAP 1us" w l
