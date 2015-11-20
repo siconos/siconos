@@ -2,8 +2,10 @@
 #include <assert.h>
 #include <op3x3.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 //#define DEBUG_MESSAGES 1
+//#define DEBUG_WHERE_MESSAGES 1
 //#include <stdio.h>
 #include <debug.h>
 #include "FischerBurmeisterGenerated.h"
@@ -11,20 +13,22 @@
 #define RESULT_CHECK(X)
 #define VALUE_CHECK(X)
 
-#define ZERO 0
-#define FIX(X)
-
-#define NOT_ZERO(x) fabs(x) > 0
-#define IS_NOT_ZERO(x) fabs(x) > 0
-#define IS_POSITIVE(x) 1
-
 #define Sign(x) ((x>0) - (x<0))
 #define Max fmax
 #define Heaviside(x) (.5*Sign(x) + .5)
 #define Rand(x) ((double) rand()/ (double) RAND_MAX)
 
-#define random1 .5
-#define random2 .5
+#define ZERO 0
+#define FIX(x) do { if (!isfinite(x)) { DEBUG_PRINTF("%s is not finite\n", #x); x=0; }} while(0)
+
+#define NOT_ZERO(x) fabs(x) > 0
+#define IS_NOT_ZERO(x) fabs(x) > 0
+#define IS_POSITIVE(x) 1
+
+
+
+#define random1 sqrt(2)/2
+#define random2 sqrt(2)/2
 
 #ifdef __cplusplus
 #include <cmath>

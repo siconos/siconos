@@ -13,7 +13,7 @@
 
 // sqrt(DBL_EPSILON)
 #define ZERO 0
-#define FIX(x)
+#define FIX(x) do { if (!isfinite(x)) { DEBUG_PRINTF("%s is not finite\n", #x); x=0; }} while(0)
 #define NOT_ZERO(x) fabs((double) x) > ZERO
 #define IS_NOT_ZERO(x) fabs((double) x) > ZERO
 #define IS_POSITIVE(x) 1
@@ -47,7 +47,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 
 // hack, should be prevented in sage/sympy/maple or in code generation
-#define sqrt(x) ((x < 0) && ( x > - DBL_EPSILON) ? 0 : (assert(x>=0),sqrt(x)))
+#define sqrt(x) ((x < 0) && ( x > - sqrt(DBL_EPSILON)) ? 0 : (assert(x>=0),sqrt(x)))
 
 // ./nm2.py --ccode --ccodefac --ccodeAB --wrapper
 void fc3d_NaturalMapFABGenerated(
