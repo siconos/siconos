@@ -103,9 +103,9 @@ macro(add_docker_targets)
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-clean
     COMMENT "Docker clean : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} rm -f ${DOCKER_WORKDIR_AS_NAME}
-    COMMAND ${DOCKER_COMMAND} rm -f ${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local
-    COMMAND ${DOCKER_COMMAND} rmi -f ${DOCKER_REPOSITORY}/${DOCKER_IMAGE}
+    COMMAND ${DOCKER_COMMAND} rm -f -v ${DOCKER_WORKDIR_AS_NAME}
+    COMMAND ${DOCKER_COMMAND} rm -f -v ${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local
+    COMMAND ${DOCKER_COMMAND} rmi -f -v ${DOCKER_REPOSITORY}/${DOCKER_IMAGE}
     )
 
   add_custom_target(
