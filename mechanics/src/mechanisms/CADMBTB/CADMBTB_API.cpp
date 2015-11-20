@@ -252,7 +252,7 @@ void CADMBTB_moveObjectFromQ(unsigned int id,double& x,double& y, double& z, dou
 
 void CADMBTB_loadCADFile(unsigned int id, const char * fileName)
 {
-  assert(id >=0 && id < sNumberOfObj && "CADMBTB_loadCADFile id out of range");
+  assert(id < sNumberOfObj && "CADMBTB_loadCADFile id out of range");
   bool affected =false;
   printf("CADMBTB_loadCADFile id = %d using file %s.\n",id,fileName);
   STEPControl_Reader aReader;
@@ -328,7 +328,7 @@ void CADMBTB_buildGraphicalModel(unsigned int id)
 {
   if(!pAIS_InteractiveContext)
     return;
-  assert(id >=0 && id < sNumberOfObj && "CADMBTB_buildGraphicModel id out of range");
+  assert(id < sNumberOfObj && "CADMBTB_buildGraphicModel id out of range");
   spAISToposDS[id] = new AIS_Shape(sTopoDS[id]);
   //  spAISToposDS[id]->SetColor(Quantity_NOC_PINK);
   //spAISToposDS[id]->SetColor(Quantity_NOC_BLUE1);
