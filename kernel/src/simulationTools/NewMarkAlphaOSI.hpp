@@ -278,5 +278,4 @@ public:
 
 };
 
-TYPEDEF_SPTR(NewMarkAlphaOSI);
 #endif // NEWMARKALPHAOSI_H

@@ -383,14 +383,6 @@ public:
     return _model.lock();
   }
 
-  /** set the Model which contains the Simulation
-      \param m the new Model
-   */
-  inline void setModelPtr(SP::Model m)
-  {
-    _model = std11::weak_ptr<Model>(m);
-  }
-
   /** get tolerance
    *  \return a double
    */
@@ -470,11 +462,6 @@ public:
    *  \param level lambda order used to compute input
    */
   virtual void update(unsigned int level) = 0;
-
-  /** update input, state of each dynamical system and output for all
-      levels between levelMin and levelMax
-   */
-  virtual void update();
 
   /** run the simulation, from t0 to T
    * with default parameters if any particular settings has been done

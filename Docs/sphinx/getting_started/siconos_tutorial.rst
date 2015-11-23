@@ -1,8 +1,8 @@
 .. _siconos_tutorials:
 
 
-Siconos tutorial
-================
+Siconos tutorials
+=================
 
 Check the :ref:`siconos_examples` and examples marked as tutorial ...
 

@@ -371,6 +371,4 @@ public:
 
 };
 
-TYPEDEF_SPTR(EulerMoreauOSI)
-
 #endif // EulerMoreauOSI_H

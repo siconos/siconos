@@ -1,12 +1,9 @@
 .. _relations:
 
 Relations
-=========
+---------
 
 Relations are used to link local variables of the Interaction and global variables of the DynamicalSystems, and thus define constraints in the systems.
-
-Building a Relation
--------------------
 
 :doxysiconos:`Relation` is an abstract class which provides a generic interface for all types of relations.
 Each relation has a type which correspond to the types of dynamical systems they fit with (FirstOrder or Lagrangian), a sub-type, (linear, non linear, scleronomous...).
@@ -19,10 +16,10 @@ Available classes: :doxysiconos:`FirstOrderR`, :doxysiconos:`FirstOrderLinearR`,
 .. image:: classRelation.*
 
 First Order Relations
-"""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^
 
-Non Linear Relations 
-^^^^^^^^^^^^^^^^^^^^
+Non Linear
+""""""""""
 
 .. math::
    
@@ -43,7 +40,7 @@ See the doxygen documentation of the class to have a list of the set/get/compute
 Note: for the signification of X, Z, R see :ref:_`interactions`
 
 Linear
-^^^^^^
+""""""
 
 FirstOrderLinearR 
 
@@ -54,8 +51,8 @@ FirstOrderLinearR
 
 Plug-in functions are available for all operators.
 
-Linear Relations with Time Invariant Coefficients
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Linear with Time Invariant Coefficients
+"""""""""""""""""""""""""""""""""""""""
 
 Class FirstOrderLinearTIR 
 
@@ -65,10 +62,11 @@ Class FirstOrderLinearTIR
    R &=& B \lambda
 
 Lagrangian (second order) Relations
-"""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Scleronomous
-^^^^^^^^^^^^
+""""""""""""
+
 Class: LagrangianScleronomousR
 
 The constraints depend only on the state,
@@ -86,7 +84,8 @@ with
     G_0(Q,Z) = \nabla_Q h(Q,Z)
 
 Rheonomous
-^^^^^^^^^^
+""""""""""
+
 Class: LagrangianRheonomousR
 
 The constraints depend on time and state, 
@@ -104,7 +103,7 @@ with
    hdot(Q,t,Z) = \frac{\partial h}{\partial t}(Q,t,Z) 
 
 Compliant
-^^^^^^^^^
+"""""""""
 
 Class: LagrangianCompliantR
 
@@ -124,7 +123,8 @@ with
    G_1(Q,\lambda(t),Z) = \nabla_{\lambda(t)}h(Q,\lambda(t),Z)
 
 Linear and Time Invariant Coefficients
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""
+
 Class:  LagrangianLinearR
 
 Lagrangian linear relations with time-invariant coefficients. 
@@ -135,7 +135,7 @@ Lagrangian linear relations with time-invariant coefficients.
    P &=& H^t \lambda 
 
 Relations plug-in functions
-"""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * FirstOrderR: :math:`h(X,t,\lambda,Z), \ \ g(\lambda,t,Z)`
 * FirstOrderLinearR: :math:`C(t,Z), \ \ F(t,Z), \ \ , D(t,Z), \ \ e(t,Z), B(t,Z)`

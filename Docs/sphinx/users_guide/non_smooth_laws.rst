@@ -1,13 +1,10 @@
 .. _non_smooth_laws:
 
 Non Smooth Laws
-===============
+---------------
 
 A non-smooth law is an object used to define the behavior of the systems involved in an Interaction, when a non-smooth event occurs.
 For example, in the case of an impact, a Newton impact law will link the pre and post velocities at impact in something like "post-velocity = -e X pre-velocity".
-
-Building a NonSmooth Law ?
---------------------------
 
 Each non-smooth law is characterized by:
 
@@ -22,7 +19,7 @@ Nonsmooth laws are defined in classes which name ends with "NSL". All of them ar
 .. image:: /figures/classNonSmoothLaw.*
 	   
 Complementarity Condition
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nsLawSize: 1.
 no specific parameters.
@@ -32,7 +29,7 @@ no specific parameters.
    0 \leq y \perp \lambda\geq 0
 
 Newton Impact
--------------
+^^^^^^^^^^^^^
 
 nsLawSize: 1.
 
@@ -43,7 +40,7 @@ parameter: *e*, the Newton normal coefficient of restitution.
    if \ y(t)=0,\ 0 \leq \dot y(t^+) +e   \dot y(t^-) \perp \lambda\geq 0
 
 Newton Impact-Friction
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 nsLawSize: 2 or 3 (2 or 3 dimensional friction).
 
@@ -64,7 +61,7 @@ and so on .
 Note also that usually only normal part definition is required for y[0]. 
 
 Relay
------
+^^^^^
 
 nsLawSize: 1.
 

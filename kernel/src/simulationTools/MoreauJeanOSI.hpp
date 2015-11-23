@@ -383,6 +383,4 @@ public:
 
 };
 
-TYPEDEF_SPTR(MoreauJeanOSI)
-
 #endif // MoreauJeanOSI_H

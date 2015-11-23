@@ -336,6 +336,4 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-
-
 #endif // D1MINUSLINEAR_H

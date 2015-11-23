@@ -20,7 +20,9 @@ int main(int argc, char *argv[])
 
   char  filename[50] = "sign.";
 
-//***** Set the initial condition
+  //***** Set the initial condition
+  // default, x0 = (1, 6)
+  // else read from command line
   SP::SiconosVector xti(new SiconosVector(dimX));
   if (argc==1)
   {
@@ -132,6 +134,9 @@ int main(int argc, char *argv[])
   boost::timer time;
   time.restart();
 
+  
+  std::cout << NBStep << std::endl;
+  NBStep = 10;
   for(int k = 0 ; k < NBStep ; k++)
   {
 #ifdef SICONOS_DEBUG

@@ -289,8 +289,6 @@ public:
 
   void updateSmoothState();
 
-  using Simulation::update;
-
   /** update input, output and indexSets.
    *  \param level of lambda  used to compute input
    */

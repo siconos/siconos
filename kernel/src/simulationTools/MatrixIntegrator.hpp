@@ -31,9 +31,6 @@
 
 #include "SiconosFwd.hpp"
 
-#include "OneStepIntegratorTypes.hpp"
-
-
 class MatrixIntegrator
 {
 private:

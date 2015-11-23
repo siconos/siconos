@@ -349,13 +349,6 @@ void Simulation::pushInteractionsInMemory()
       indexSet0->bundle(*ui)->swapInOldVariables();
       indexSet0->bundle(*ui)->swapInMemory();
     }
-
-    //OSNSIterator itOsns;
-    //for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    //{
-    // (*itOsns)->saveInOldVariables();
-    //  (*itOsns)->saveInMemory();
-    //}
   }
 }
 
@@ -366,13 +359,6 @@ int Simulation::computeOneStepNSProblem(int Id)
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + Id);
 
   return (*_allNSProblems)[Id]->compute(model()->currentTime());
-}
-
-void Simulation::update()
-{
-  assert(0);
-  // for(unsigned int i = 1; i<_levelMax; ++i)
-  //   update(i);
 }
 
 void Simulation::updateInput(unsigned int level)

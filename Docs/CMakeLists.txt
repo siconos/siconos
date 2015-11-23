@@ -7,6 +7,9 @@
 # ============================================================
 include(FindPythonModule)
 include(FindSphinxModule)
+
+set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/Docs/build/html/ CACHE INTERNAL "Root path to documentation - Corresponds to 'htdocs' on gforge page.")
+
 #  ====== doxygen documentation setup ======
 # This setup is required if one at least of
 # the following is needed:
@@ -18,9 +21,9 @@ if(USE_DOXYGEN)
 
   # Output path for doxygen documentation
   if(NOT DOXYGEN_OUTPUT)
-    set(DOXYGEN_OUTPUT ${CMAKE_BINARY_DIR}/Docs/build/doxygen CACHE INTERNAL "Path to doxygen outputs.")
+    set(DOXYGEN_OUTPUT ${DOC_ROOT_DIR}/doxygen CACHE INTERNAL "Path to doxygen outputs.")
   endif()
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Docs/build/tags)
+  file(MAKE_DIRECTORY ${DOC_ROOT_DIR}/tags)
   file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
   
   # --- Config file and its options. --
@@ -66,7 +69,7 @@ if(USE_DOXYGEN)
   if(WITH_DOXY2SWIG)
     foreach(comp ${COMPONENTS})
       set(DOXY_CONFIG_XML ${CMAKE_CURRENT_BINARY_DIR}/config/${comp}doxy.config.xml)
-      add_custom_target(${comp}_xml ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Docs/
+      add_custom_target(${comp}_xml ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML} WORKING_DIRECTORY ${DOC_ROOT_DIR}
 	COMMENT "Build xml documentation files.")
     endforeach()
   endif()
@@ -134,5 +137,5 @@ if(USE_SPHINX)
     )
 
   add_custom_target(doc
-    DEPENDS doxygen html update_css)
+    DEPENDS doxygen html)
 endif()

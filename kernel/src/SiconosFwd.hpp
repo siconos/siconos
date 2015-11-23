@@ -89,12 +89,25 @@ DEFINE_SPTR(NewtonEulerR)
 DEFINE_SPTR(NewtonEulerFrom1DLocalFrameR)
 DEFINE_SPTR(NewtonEulerFrom3DLocalFrameR)
 
+// OSI
+DEFINE_SPTR(EulerMoreauOSI)
+DEFINE_SPTR(MoreauJeanOSI)
+DEFINE_SPTR(MoreauJeanOSI2)
+DEFINE_SPTR(MoreauJeanCombinedProjectionOSI)
+DEFINE_SPTR(MoreauJeanDirectProjectionOSI)
+DEFINE_SPTR(LsodarOSI)
+DEFINE_SPTR(Hem5OSI)
+DEFINE_SPTR(D1MinusLinearOSI)
+DEFINE_SPTR(SchatzmanPaoliOSI)
+DEFINE_SPTR(ZeroOrderHoldOSI)
+DEFINE_SPTR(NewMarkAlphaOSI);
+
+
 // Graph thing
 DEFINE_SPTR_STRUCT(InteractionProperties)
 DEFINE_SPTR_STRUCT(GraphProperties)
 DEFINE_SPTR_STRUCT(DynamicalSystemsGraph)
 DEFINE_SPTR_STRUCT(InteractionsGraph)
-
 
 // Fortran
 #include <f2c.h>

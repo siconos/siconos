@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0,sStep));
 
   // -- (3) Non smooth problem
-  SP::Relay osnspb(new Relay(SICONOS_RELAY_LEMKE));
+  SP::Relay osnspb(new Relay(SICONOS_RELAY_ENUM));
   osnspb->numericsSolverOptions()->dparam[0]=1e-08;
   osnspb->numericsSolverOptions()->iparam[0]=0;  // Multiple solutions 0 or 1
   //osnspb->numericsSolverOptions()->iparam[3]=48;
@@ -131,7 +131,6 @@ int main(int argc, char *argv[])
 
   boost::timer time;
   time.restart();
-
   for(int k = 0 ; k < NBStep ; k++)
 //  while(aS->hasNextEvent())
   {
@@ -140,7 +139,7 @@ int main(int argc, char *argv[])
 #endif
     cmp++;
 
-    aS->newtonSolve(5e-14, 20);
+    aS->newtonSolve(5e-4, 20);
 
     dataPlot(cmp, 0) = aS->nextTime();
     dataPlot(cmp, 1) = x->getValue(0);
@@ -171,8 +170,8 @@ int main(int argc, char *argv[])
 
   dataPlot.resize(cmp,outputSize);
   ioMatrix::write(filename, "ascii", dataPlot, "noDim");
-
-  if (argc==1)
+  //  if (argc==1)
+  if(argc== 10)
   {
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();

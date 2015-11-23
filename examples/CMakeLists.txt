@@ -25,11 +25,11 @@ include(CXXCompilerSetup)
 include(CCompilerSetup)
 
 set(EXAMPLES_DIRECTORIES
+  Numerics
   Biology
   Control
   Electronics
   Mechanics
-  Numerics
   Robotics/HuMAns_pa10
   Spheres/Lagrangian
   Spheres/NewtonEuler

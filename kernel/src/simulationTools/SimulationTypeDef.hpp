@@ -43,43 +43,10 @@
 /** Map of SP::SimpleMatrix; key = the number of the related DS*/
 typedef std::map<unsigned int, SP::SimpleMatrix> MapOfDSMatrices;
 
-/** Iterator through a map of matrices */
-typedef MapOfDSMatrices::iterator MatIterator;
-
-/** Const iterator through a map of matrices */
-typedef MapOfDSMatrices::const_iterator ConstMatIterator;
-
 // ================== Objects to handle Interactions ==================
-
-/** Map of SiconosMatrices with a Interactions as a key - Used for diagonal interactionBlock-terms in assembled matrices of LCP etc ...*/
-typedef std::map< SP::Interaction, SP::SiconosMatrix>  MapOfInteractionMatrices;
-
-/** Iterator through a MapOfInteractionMatrices */
-typedef MapOfInteractionMatrices::iterator InteractionMatrixColumnIterator ;
-
-/** Const iterator through a MapOfInteractionMatrices */
-typedef MapOfInteractionMatrices::const_iterator ConstInteractionMatrixColumnIterator;
-
-/** Map of MapOfDSInteractionMatrices with a DynamicalSystem as a key - Used for interactionBlock-terms indexed by a DynamicalSystem and an Interaction in assembled matrices of LCP etc ..*/
-typedef std::map< SP::DynamicalSystem , MapOfInteractionMatrices >  MapOfDSMapOfInteractionMatrices;
-
-/** Iterator through a MapOfDSMapOfInteractionMatrices */
-typedef MapOfDSMapOfInteractionMatrices::iterator DSInteractionMatrixRowIterator ;
-
-/** Const iterator through a MapOfDSMapOfInteractionMatrices */
-typedef MapOfDSMapOfInteractionMatrices::const_iterator ConstDSInteractionMatrixRowIterator ;
-
-
-
 
 /** Map of MapOfInteractionMapOfDSMatrices with a DynamicalSystem as a key - Used for interactionBlock-terms indexed by a DynamicalSystem and an Interaction in assembled matrices of LCP etc ..*/
 typedef std::map< SP::Interaction , MapOfDSMatrices >  MapOfInteractionMapOfDSMatrices;
-
-/** Iterator through a MapOfInteractionMapOfDSMatrices */
-typedef MapOfInteractionMapOfDSMatrices::iterator InteractionDSMatrixRowIterator ;
-
-/** Const iterator through a MapOfInteractionMapOfDSMatrices */
-typedef MapOfInteractionMapOfDSMatrices::const_iterator ConstInteractionDSMatrixRowIterator ;
 
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;
@@ -126,12 +93,7 @@ struct GraphProperties
   ACCEPT_SERIALIZATION(GraphProperties);
 };
 
-
-
-
-
 // ================== Objects to handle OSI ==================
-
 
 /** Vector of OneStepIntegrator */
 typedef std::set<SP::OneStepIntegrator> OSISet;
@@ -141,23 +103,16 @@ typedef OSISet::iterator OSIIterator;
 /** A map that links DynamicalSystems and their OneStepIntegrator. */
 typedef std::map<SP::DynamicalSystem, SP::OneStepIntegrator> DSOSIMap;
 
-/** Iterator through a DSOSIMap. */
-typedef DSOSIMap::iterator DSOSIIterator;
-
 /** Const Iterator through a DSOSIMap. */
 typedef DSOSIMap::const_iterator DSOSIConstIterator;
 
 // ================== Objects to handle OSNS ==================
 
 /** Map of OSNS */
-//typedef std::map<std::string, SP::OneStepNSProblem > OneStepNSProblems;
 typedef std::vector<SP::OneStepNSProblem> OneStepNSProblems;
 
 /** Iterator through OneStepNSProblems */
 typedef OneStepNSProblems::iterator OSNSIterator;
-
-/** Const iterator through OneStepNSProblems */
-typedef OneStepNSProblems::const_iterator ConstOSNSIterator;
 
 // ================== Misc ==================
 

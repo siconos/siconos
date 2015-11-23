@@ -13,6 +13,8 @@ Siconos documentation
 
 **First steps with siconos ...**
 
+*Start here to get a first glimpse of siconos, with short introduction and tutorials.*
+
 .. toctree::
    :maxdepth: 1
 
@@ -27,6 +29,8 @@ Siconos documentation
    examples/index
 
 **Siconos API reference:**
+
+*There you can find details about all methods and classes implemented in Siconos.*
 
 .. toctree::
    :maxdepth: 1

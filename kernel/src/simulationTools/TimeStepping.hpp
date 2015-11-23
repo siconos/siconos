@@ -73,8 +73,8 @@ protected:
    *  SICONOS_TS_LINEAR or SICONOS_TS_LINEAR_IMPLICIT SICONOS_TS_NONLINEAR will force a single iteration of the Newton Solver
    * SICONOS_TS_NONLINEAR (default) will perform the newton iteration up to convergence
    */
-
   unsigned int _newtonOptions;
+
   /** Maximum Residual for the Dynamical system */
   double _newtonResiduDSMax;
 
@@ -84,17 +84,17 @@ protected:
   /** Maximum Residual for the input of the relation */
   double _newtonResiduRMax;
 
-  /** boolean variable to known whether the ResiduY has to be computed or not
+  /** boolean variable to know whether the ResiduY has to be computed or not
    *  if true, the ResiduY is computed and the convergence is checked
    */
   bool _computeResiduY;
 
-  /** boolean variable to known whether the ResiduR has to be computed or not
+  /** boolean variable to know whether the ResiduR has to be computed or not
    *  if true, the ResiduR is computed and the convergence is checked
    */
   bool _computeResiduR;
 
-  /** boolean variable to known whether Newton iterations converges or not
+  /** boolean variable to know whether Newton iterations converge or not
    */
   bool _isNewtonConverge;
 
@@ -147,8 +147,6 @@ public:
 
   /** increment model current time according to User TimeDiscretisation and call SaveInMemory. */
   virtual void nextStep();
-
-  using Simulation::update;
 
   /** update input, state of each dynamical system and output
    *  \param levelInput lambda order used to compute input

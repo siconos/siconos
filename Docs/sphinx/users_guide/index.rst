@@ -1,11 +1,11 @@
 .. _siconos_users_guide:
 
-
+####################
 Siconos users' guide
-====================
+####################
 
 .. toctree::
-   :maxdepth: 4
-
+   :maxdepth: 3
+	      
    modeling
    simulation

@@ -56,15 +56,4 @@ enum TYPES
 };
 
 }
-
-// please note: TYPEDEF_SPTR(X) Better at the end of X.hhp
-// (compilation issues with swig -> TYPEDEF_SPTR(MoreauJeanOSI) moved in
-// MoreauJeanOSI.hpp)
-DEFINE_SPTR(MoreauJeanDirectProjectionOSI)
-DEFINE_SPTR(MoreauJeanCombinedProjectionOSI)
-DEFINE_SPTR(LsodarOSI)
-DEFINE_SPTR(Hem5OSI)
-DEFINE_SPTR(D1MinusLinearOSI)
-DEFINE_SPTR(SchatzmanPaoliOSI)
-DEFINE_SPTR(ZeroOrderHoldOSI)
 #endif

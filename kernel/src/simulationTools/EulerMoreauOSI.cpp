@@ -156,13 +156,8 @@ void EulerMoreauOSI::initialize()
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
-    // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
-    // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
-
     // W initialization
     initW(t0, *itDS);
-
-    //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
   }
 }
