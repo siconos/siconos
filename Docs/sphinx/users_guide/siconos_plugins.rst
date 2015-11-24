@@ -1,7 +1,8 @@
 .. _siconos_plugins:
 
+
 User-defined plugins
-====================
+--------------------
 
 *Work in progress ...*
 
@@ -38,7 +39,7 @@ of the variables that can be plugged is given in :ref:`ds_plugins` and :ref:`rel
     
 
 Plugins overview
-----------------
+""""""""""""""""
 
 .. csv-table:: plugins in siconos classes
    :header: "Class Name", "operator", "plugin name", "signature"
@@ -47,3 +48,53 @@ Plugins overview
    :doxysiconos:`DynamicalSystem`, ":math:`g(\dot x, x, t, z)`", g, "``(double time, int size, double* fext, int zsize, double *z)``"
    :doxysiconos:`LagrangianLinearTIDS`, ":math:`F_{Ext}(t,z)`", FExt, "``(double time, int size, double* fext, int zsize, double *z)``"
    :doxysiconos:`FirstOrderR`, ":math:`h(x,t,\lambda,z)`", h, "``(double time, int x.size, double * x, int lambda.size, double * lambda, double * y, int z.size, double * z)``"
+
+
+Example
+"""""""
+
+
+.. highlight:: c++
+
+	     
+Suppose that you defined a LagrangianDS named lds, and want to set two parameters in the external forces, say mu and lambda.
+
+Then cpp input file looks like::
+
+  // In the main file:
+  double mu , lambda;
+  // ... give mu and lambda the required values
+  // ... declare and built your dynamical system
+  SP::DynamicalSystem lds(new LagrangianDS(...));
+  // Link with the plug-in function
+  lds->setComputeFExtFunction("myPlugin.so", "myFExt");
+
+  
+  // === First way, with setZ function (copy) ===
+  // declare and built a SimpleVector of size 2
+  SimpleVector myZ(2);
+  myZ(0) = mu;
+  myZ(1) = lambda;
+
+  lds->setZ(myZ);
+  // In this case, if parameters values are change after this step,
+  // this won't affect param values inside the dynamical system. 
+  //
+  //=== Second way, with setZPtr function (pointer link) ===
+  // declare and built a pointer to SimpleVector of size 2
+  SP::SimpleVector myZPtr(new SimpleVector(2));
+  (*myZPtr)(0) = mu;
+  (*myZPtr)(1) = lambda;
+
+  lds->setZPtr(myZPtr);
+
+  // Warning: in that case, from this point any change in parameters
+  // will affect param value in the dynamical system.
+  //
+  // Then in the plug-in file, you have access to the parameter values:
+  extern "C" void myFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeOfZ, double *z)
+  {
+  for(unsigned int i = 0; i<sizeOfq;++i)
+  fExt[i] = cos(z[1]*time) + z[0] ;
+  // this means that Fext = cos(lambda t) + mu
+  }

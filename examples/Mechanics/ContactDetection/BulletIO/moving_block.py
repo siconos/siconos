@@ -93,4 +93,4 @@ with Hdf5(mode='r+') as io:
     # of the International System of Units.
     # Because of fixed collision margins used in the collision detection,
     # sizes of small objects may need to be expressed in cm or mm.
-    io.run(T=10.)
+    io.run(T=30.)

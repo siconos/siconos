@@ -55,17 +55,30 @@ will compile, link and execute, while::
 
 will execute your python script.
 
-Note that siconos can obviously be used in an interactive python session or notebook. This is probably the easiest way to proceed with this tutorial.
+Siconos can obviously be used in an interactive python session or notebook. This is probably the easiest way to proceed with this tutorial.
 
+*Remarks:*
+
+    * *this example is available in siconos examples package under Electronics/DiodeBridge directory, in C++, python and as a notebook.
+      For the latter just run*::
+
+	ipython notebook DiodeBridge.ipynb
+
+      *to interactively run this tutorial.*
+
+    * *In this tutorial, we assume that siconos is properly installed on you system, as explained in* :ref:`siconos_install_guide`.
 
 Let us start with a short description of the three main steps always required to run a simulation.
 
-#. First of all, you will need to describe properly the system as a nonsmooth dynamical system, i.e. define the ordinary differential equations set (the **Dynamical Systems**) that represent the dynamics and define the 'nonsmooth' part of the system, through **nonsmooth laws**  and **relations** between variables that may constraint the state.
-#. Then you will need to choose a simulation strategy, that is how the nonsmooth system will be integrate over a time step : which discretisation and integrators for the dynamics (**one-step integrators**), which formulation and solvers for the **nonsmooth problem** and so on.
+#. First of all, you will need to describe properly the system as a nonsmooth dynamical system, i.e. :
+   
+   * define the ordinary differential equations set (the **Dynamical Systems**) that represent the dynamics,
+   * define the 'nonsmooth' part of the system, through **nonsmooth laws**  and **relations** between variables that may constraint the state.
+
+#. Then you will need to choose a simulation strategy, to define how the nonsmooth system will be integrated over a time step : which discretisation and integrators for the dynamics (**one-step integrators**), which formulation and solvers for the **nonsmooth problem** and so on.
 #. Finally, you will need to run your simulation and post-process the results.
 
  
-*Note that this example is available in siconos examples package under Electronics/DiodeBridge directory, in C++ and in python.*
 
 .. contents::
    :backlinks: entry
@@ -126,12 +139,18 @@ and if we denote
    0 & 0 & 0 & 0
    \end{array}\right].\lambda
    
-we get
+we get a first order linear system
 
-:math:`\dot x = A.x + r` with the unknowns :math:`x` and :math:`r`.
+.. math::
+   
+   \dot x = A.x + r
+
+with the unknowns :math:`x` and :math:`r`.
 
 To represent this kind of ordinary differential equations, siconos has a class :doxysiconos:`FirstOrderLinearTIDS` (TIDS stands for time-invariant coefficients dynamical system)
-which inherits from :doxysiconos:`DynamicalSystem`. Check :ref:`dynamical_systems` to find a complete review of all the dynamical systems formalisms available in the software.::
+which inherits from :doxysiconos:`DynamicalSystem`. Check :ref:`dynamical_systems` to find a complete review of all the dynamical systems formalisms available in the software.
+
+::
 
    # import siconos package
    import siconos.kernel as sk
@@ -153,22 +172,23 @@ which inherits from :doxysiconos:`DynamicalSystem`. Check :ref:`dynamical_system
 
 A few remarks:
 
-* in pyton you can use either lists or numpy arrays to build vector or matrices used in siconos methods arguments.
-* help can be found on siconos object with the standard python help function. For example, to find how
-  ds can be build::
+* in python you can use either lists or numpy arrays to build vectors or matrices used as siconos methods arguments.
+* help can be found on siconos objects with the standard python help function. For example, to find how
+  the system can be build::
 
     help(sk.FirstOrderLinearTIDS)
 
- or by checking the :ref:`_siconos_api_reference` or :ref:`siconos_python_reference` documention.
+ or by checking the :ref:`siconos_api_reference` or :ref:`siconos_python_reference` documention.
 
 Modeling the interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Now, the nonsmooth part of the system must be defined, namely what are the nonsmooth laws and constraints between the variables.
-In Siconos, the definition of a **nonsmooth law** and a **relation** between one or two dynamical systems is called an **Interaction**.
+In Siconos, the definition of a **nonsmooth law** and a **relation** between one or two dynamical systems is called an **Interaction**
+(see :ref:`interactions`).
 Thus, the definition of a set of dynamical systems and of interactions between them will lead to the complete nonsmooth dynamical system.
 
-For the oscillator of figure :ref:`fig_diode_bridge`, there exist some linear relations between voltage and current inside the diode, given by
+For the oscillator of :ref:`fig_diode_bridge`, there exist some linear relations (constraints) between voltage and current inside the diode, given by
 
 .. math::
 
@@ -233,8 +253,7 @@ this is equivalent to the linear relation between :math:`(x, r)` and :math:`(y, 
 
 .. math::
    
-   y &=& Cx + D\lambda
-   r = B\lambda
+   y &=& Cx + D\lambda, \ \ \ r = B\lambda
 
 To represent this kind of algebraic equations, siconos has a class :doxysiconos:`FirstOrderLinearTIR` (TIR stands for time-invariant coefficients relations)
 which inherits from :doxysiconos:`Relation`. Check :ref:`relations` to find a complete review of all the relations formalisms available in the software.
@@ -258,10 +277,14 @@ which inherits from :doxysiconos:`Relation`. Check :ref:`relations` to find a co
    B = [[0.,        0., -1./Cvalue, 1./Cvalue],
        [0.,        0.,  0.,        0.       ]]
 
+   # set relation type
    relation= sk.FirstOrderLinearTIR(C, B)
    relation.setDPtr(D)
 
+   # set nonsmooth law
    nonsmooth_law = sk.ComplementarityConditionNSL(interaction_size)
+
+   # nslaw + relation == interaction
    interaction = sk.Interaction(nonsmooth_law, relation)
        
 Notice that a complete :doxysiconos:`FirstOrderLinearTIR` writes
@@ -298,7 +321,7 @@ Then, back to our circuit, the complementarity conditions, results of the ideal 
    0 \leq -v_{DR1} \, \perp \, i_{DR1} \geq 0\\
    0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\
    0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\
-   0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0
+   0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0\\
    \end{array} \ \ \ \ \ \ or \ \ \ \ \ \  0 \leq y \, \perp \, \lambda \geq 0
 
 with the previously defined :math:`y` and :math:`\lambda`. Note that depending on the diode position in the bridge, :math:`y_i` stands for the reverse voltage across
@@ -335,8 +358,8 @@ set the time window for the simulation, include dynamical systems and link them 
    DiodeBridge.nonSmoothDynamicalSystem().link(interaction, ds)
 
 
-Simulation of the nonsmooth dynamical system
---------------------------------------------
+Describing the simulation of the nonsmooth dynamical system
+-----------------------------------------------------------
 
 You need now to define how the nonsmooth dynamical system will be integrated over time. This is the role of the simulation, which must set:
 
@@ -376,20 +399,20 @@ Considering the following discretization of the previously defined relations and
    
    y_{i+1} &=& C(t_{i+1})x_{i+1} + D(t_{i+1})\lambda_{i+1} \\	
    R_{i+1} &=& B(t_{i+1})\lambda_{i+1}\\
-   0 \leq y-{i+1}\ &\perp&  \lambda_{i+1} \geq 0  \\
+   0 \leq y_{i+1}\ &\perp&  \lambda_{i+1} \geq 0  \\
 
 we get
 
 .. math::
 
-   y_{i+1} = q + M\lambda_{i+1} \\
+   y_{i+1} &=& q + M\lambda_{i+1} \\
    0 \leq y_{i+1}\ &\perp&  \lambda_{i+1} \geq 0  \\
   
 with
 
 .. math::
 
-   q = \left[Cx^{free}_{i+1},    M = \left[ hC\hat W B + D \right]
+   q = Cx^{free}_{i+1},    M = hCW^{-1}B + D
 
 This is known as a Linear Complementarity Problem, written in siconos thanks to :doxysiconos:`LCP` class, which inherits from :doxysiconos:`OneStepNSProblem`.
 As usual, check :ref:`osns_problems` for a complete review of the nonsmooth problems formulations available in Siconos.
@@ -408,7 +431,7 @@ Then the last step consists in the simulation creation, with its time discretisa
   td = sk.TimeDiscretisation(t0, time_step)
   simu = sk.TimeStepping(td, osi, osnspb)
 
-Then, the simulation is used to initialize the model, which is now complete and ready to run::
+Finally, the simulation is used to initialize the model, which is now complete and ready to run::
 
   DiodeBridge.initialize(simu)
 
@@ -423,7 +446,7 @@ The easiest way to run your simulation is to call::
 But after that you only have access to values computed at the last
 time step, which might not be enough ...
 
-We will save :math:`x, y \ and \ \lambda` at each time step::
+For the present case, :math:`x, y \ and \ \lambda` at each time step are needed for postprocessing. Here is an example on how to get and save them in a numpy array::
 
   N = (T - t0) / time_step
   data_plot = np.zeros((N, 8))
@@ -431,34 +454,31 @@ We will save :math:`x, y \ and \ \lambda` at each time step::
   lamb = interaction.lambda_(0)
   x = ds.x()
   k = 0
-  dataPlot[k, 1] = x[0] #  inductor voltage
-  dataPlot[k, 2] = x[1] # inductor current
-  dataPlot[k, 3] = y[0] # diode R1 current
-  dataPlot[k, 4] = - lambda_[0] # diode R1 voltage
-  dataPlot[k, 5] = - lambda_[1] # diode F2 voltage 
-  dataPlot[k, 6] = lambda_[2] # diode F1 current
-  dataPlot[k, 7] = y[0] + lambda_[2] # resistor current
+  data_plot[k, 1] = x[0] #  inductor voltage
+  data_plot[k, 2] = x[1] # inductor current
+  data_plot[k, 3] = y[0] # diode R1 current
+  data_plot[k, 4] = - lambda_[0] # diode R1 voltage
+  data_plot[k, 5] = - lambda_[1] # diode F2 voltage 
+  data_plot[k, 6] = lambda_[2] # diode F1 current
+  data_plot[k, 7] = y[0] + lambda_[2] # resistor current
   while simu.hasNextEvent():
       k += 1
       simu.computeOneStep()
-      dataPlot[k, 0] = simu.nextTime()
-      dataPlot[k, 1] = x[0]
-      dataPlot[k, 2] = x[1]
-      dataPlot[k, 3] = y[0]
-      dataPlot[k, 4] = - lambda_[0]
-      dataPlot[k, 5] = - lambda_[1]
-      dataPlot[k, 6] = lambda_[2]
-      dataPlot[k, 7] = y[0] + lambda_[2]
+      data_plot[k, 0] = simu.nextTime()
+      data_plot[k, 1] = x[0]
+      data_plot[k, 2] = x[1]
+      data_plot[k, 3] = y[0]
+      data_plot[k, 4] = - lambda_[0]
+      data_plot[k, 5] = - lambda_[1]
+      data_plot[k, 6] = lambda_[2]
+      data_plot[k, 7] = y[0] + lambda_[2]
       simu.nextStep()
 
-nextStep is mainly used to increment the time step and say that last
-computed values will be initial values for the next step. 
 
-computeOneStep performs computation over the current time step. In the
-Moreau's time stepping case, it will first integrate the dynamics to
-obtain the so-called free-state, that is without non-smooth effect,
-then it formalizes and solves a LCP before re-integrate the dynamics
-using the LCP results. 
+* :doxysiconos:`hasNextEvent()` is true as long as there are events to be considered, i.e. until T is reached
+* :doxysiconos:`nextStep()` is mainly used to increment the time step, save current state and prepare initial values for next step.
+* :doxysiconos:`computeOneStep()` performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to
+  obtain the so-called free-state, that is without non-smooth effects, then it will formalize and solve a LCP before re-integrate the dynamics using the LCP results. 
 
 The results can now be postprocessed, with matplotlib for example::
 
@@ -481,8 +501,6 @@ The results can now be postprocessed, with matplotlib for example::
   plt.plot(data_plot[0:k - 1, 0], data_plot[0:k - 1, 7])
   plt.grid()
 
-
-Results are given on the figure below:
 
 .. image:: /figures/electronics/DiodeBridge/diodeBridgeResult.*
 

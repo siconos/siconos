@@ -3,12 +3,11 @@
 Getting Started with Siconos
 ============================
 
-This manual aims at giving user a short overview of the software functionnalities.
-It is also supposed to provide some guidelines on how to build its own simulation.
-However, this manual does not give a full description of all the Siconos classes, functions etc.
-For this, you need to check directly :ref:`siconos_api_reference` or :ref:`siconos_python_reference`, depending on the interface you choose.
+This manual aims at giving user a short overview of the software functionnalities and to provide some guidelines for your first steps with nonsmooth systems
+simulation with siconos.
 
-For more details on specific topics see :ref:`siconos_users_guide`.
+However, this manual does not give a full description of all the Siconos concepts, classes, functions and so on.
+For this, check directly :ref:`siconos_users_guide`, :ref:`siconos_api_reference` or :ref:`siconos_python_reference`, depending on the interface you choose.
 
 .. toctree::
    :maxdepth: 2
