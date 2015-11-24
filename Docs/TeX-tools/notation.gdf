@@ -1,3 +1,0 @@
-%$Id: notation.gdf,v 1.2 2004/03/03 16:26:47 acary Exp $
-@entry{Matrixnn, $\mathcal M^{n\times n}$, the  vector space of matrices in $\RR^{n \times n}$}
-@entry{RRn, $\RR^{n}$, the real $n$-dimensional space}
