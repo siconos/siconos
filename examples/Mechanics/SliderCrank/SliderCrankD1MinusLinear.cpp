@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
 
 
 //    while ((s->hasNextEvent()) && (k <= 500))
-    while ((s->hasNextEvent()))
+ while ((s->hasNextEvent()))
     {
 
       // std::cout <<"=====================================================" <<std::endl;
@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
       // std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
       // std::cout <<"=====================================================" <<std::endl;
 
-
+ std::cout << k << std::endl;
       s->advanceToEvent();
 
       // --- Get values to be plotted ---

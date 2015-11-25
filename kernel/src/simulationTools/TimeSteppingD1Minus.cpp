@@ -115,6 +115,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip)
     /* loop over ALL vertices in indexSet0 */
   {
+
     SP::Interaction inter = indexSet0->bundle(*uip);
     SP::OneStepIntegrator Osi = indexSetCurrent->properties(*uip).osi;
     if ((!indexSetCurrent->is_vertex(inter))
@@ -154,7 +155,6 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
 
   }
-
   DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);
   DEBUG_PRINTF(" indexSet0 size : %ld\n", indexSet0->size());
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());

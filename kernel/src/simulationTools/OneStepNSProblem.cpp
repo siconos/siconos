@@ -105,7 +105,6 @@ void OneStepNSProblem::updateInteractionBlocks()
   // Get index set from Simulation
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
-
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   // we put diagonal informations on vertices
@@ -186,7 +185,6 @@ void OneStepNSProblem::updateInteractionBlocks()
         initialized[indexSet->index(ed1)] = true;
         currentInteractionBlock->zero();
       }
-
       if (!isLinear || !_hasBeenUpdated)
       {
         {
@@ -224,7 +222,6 @@ void OneStepNSProblem::updateInteractionBlocks()
   }
   else // not symmetric => follow out_edges for each vertices
   {
-
     InteractionsGraph::VIterator vi, viend;
     for (std11::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
@@ -273,12 +270,9 @@ void OneStepNSProblem::updateInteractionBlocks()
 
 
 
-
-
       for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
-
         /* on adjoint graph there is at most 2 edges between source and target */
         InteractionsGraph::EDescriptor ed1, ed2;
         std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
@@ -329,7 +323,6 @@ void OneStepNSProblem::updateInteractionBlocks()
           initialized[currentInteractionBlock] = true;
           currentInteractionBlock->zero();
         }
-
 
         if (!isLinear || !_hasBeenUpdated)
         {
