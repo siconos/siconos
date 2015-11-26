@@ -34,11 +34,11 @@
 
 #include <NumericsOptions.h>
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
-//#define OSNS_DEBUG
+
 
 OneStepNSProblem::OneStepNSProblem():
   _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
@@ -79,6 +79,7 @@ bool OneStepNSProblem::hasInteractions() const
 
 void OneStepNSProblem::updateInteractionBlocks()
 {
+  DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks() starts\n");
   // The present functions checks various conditions and possibly
   // compute interactionBlocks matrices.
   //
@@ -113,6 +114,7 @@ void OneStepNSProblem::updateInteractionBlocks()
 
   if (indexSet->properties().symmetric)
   {
+    DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Symmetric case");
     InteractionsGraph::VIterator vi, viend;
     for (std11::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
@@ -222,10 +224,14 @@ void OneStepNSProblem::updateInteractionBlocks()
   }
   else // not symmetric => follow out_edges for each vertices
   {
+    DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Non symmetric case\n");
+
     InteractionsGraph::VIterator vi, viend;
+
     for (std11::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
+      DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Computation of diaganal block\n");
       SP::Interaction inter = indexSet->bundle(*vi);
       unsigned int nslawSize = inter->nonSmoothLaw()->size();
       if (! indexSet->properties(*vi).block)
@@ -268,11 +274,11 @@ void OneStepNSProblem::updateInteractionBlocks()
 
       }
 
-
-
       for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
+        DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Computation of extra-diaganal block\n");
+
         /* on adjoint graph there is at most 2 edges between source and target */
         InteractionsGraph::EDescriptor ed1, ed2;
         std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
@@ -334,9 +340,10 @@ void OneStepNSProblem::updateInteractionBlocks()
     }
   }
 
-#ifdef OSNS_DEBUG
-  displayBlocks(indexSet);
-#endif
+
+  DEBUG_EXPR(displayBlocks(indexSet););
+
+  DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks() ends\n");
 
 
 }

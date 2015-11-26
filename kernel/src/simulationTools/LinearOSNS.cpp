@@ -42,9 +42,8 @@
 #include "Tools.hpp"
 
 using namespace RELATION;
-// #define LINEAROSNS_DEBUG
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 LinearOSNS::LinearOSNS(): OneStepNSProblem(), _MStorageType(0), _keepLambdaAndYState(true)
