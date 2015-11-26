@@ -28,8 +28,11 @@
 #include "fc3d_GlockerFischerBurmeister_functions.h"
 #include "op3x3.h"
 
-#define OPTI_RHO
 
+#define DEBUG_CHECK
+
+
+#define OPTI_RHO
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "debug.h"
@@ -54,7 +57,7 @@ void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem*
 
   /* localFC3D = localproblem; */
   /* globalFC3D = problem; */
-
+  DEBUG_PRINTF("fc3d_AC_initialize starts with options->iparam[10] = %i\n", options->iparam[10]);
   if (options->iparam[10] == 0 )
   {
     Function = &(computeAlartCurnierSTD);
@@ -321,7 +324,10 @@ int fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(SolverOptions* opti
   options->iparam[0] = 10;
 
   options->dparam[0] = 1e-16;
-  options->iparam[10] = 0;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[10] = 0;     /* 0 STD AlartCurnier,
+                                  1 JeanMoreau,
+                                  2 STD generated,
+                                  3 JeanMoreau generated */
   options->iparam[11] = 0;     /* 0 GoldsteinPrice line search, 1 FBLSA */
   options->iparam[12] = 10;   /* max iter line search */
 
@@ -359,6 +365,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
   double rho[3] = {1., 1., 1.};
 #ifdef OPTI_RHO
   computerho(localproblem, rho);
+  DEBUG_PRINTF("rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e \n", rho[0], rho[1], rho[2]);
 #endif
 
   // compute the velocity
@@ -375,7 +382,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
     Function(R, velocity, mu, rho, F, A, B);
 
 /* #ifndef AC_Generated */
-#ifndef NDEBUG
+#ifndef DEBUG_CHECK
     double AWpB[9];
     if (iparam[10] != 3 && iparam[10] != 4)
     {
@@ -434,7 +441,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
 
 /* #ifdef AC_STD */
 
-#ifndef NDEBUG
+#ifndef DEBUG_CHECK
     if (iparam[10]==0)
     {
       scal3x3(-1., AWpB);
@@ -548,7 +555,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
     }
   }
 
-#ifdef VERBOSE_DEBUG
+#ifdef DEBUG_MESSAGES
   for (int l = 0; l < 3; l++)
   {
     for (int k = 0; k < 3; k++)
@@ -576,7 +583,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
   {
     dqdt0 += F[i] * tmp[i];
   }
-#ifdef VERBOSE_DEBUG
+#ifdef DEBUG_MESSAGES
   printf("q0 = %12.8e \n", q0);
   printf("dqdt0 = %12.8e \n", dqdt0);
   for (int i = 0; i < 3; i++)
@@ -606,7 +613,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
 
     double slope = (q - q0) / alpha;
 
-#ifdef VERBOSE_DEBUG
+#ifdef DEBUG_MESSAGES
     printf("q = %12.8e \n", q);
     printf("slope = %12.8e \n", slope);
 #endif
@@ -617,9 +624,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
 
     if (C1 && C2)
     {
-#ifdef VERBOSE_DEBUG
-      printf("Sucess in LS: alpha = %12.8e\n", alpha);
-#endif
+      DEBUG_PRINTF("Success in LS: alpha = %12.8e\n", alpha);
       *t_opt = alpha;
       if (verbose > 1)
       {
@@ -630,7 +635,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
     }
     else if (!C1)
     {
-#ifdef VERBOSE_DEBUG
+#ifdef DEBUG_MESSAGES
       printf("LS: alpha too small = %12.8e\t, slope =%12.8e\n", alpha, slope);
       printf(" m1*dqdt0 =%12.8e\t, m2*dqdt0 =%12.8e\n ", m1 * dqdt0 , m2 * dqdt0);
 #endif
@@ -639,7 +644,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
     }
     else   // not(C2)
     {
-#ifdef VERBOSE_DEBUG
+#ifdef DEBUG_MESSAGES
       printf("LS: alpha too big = %12.8e\t, slope =%12.8e\n", alpha, slope);
       printf(" m1*dqdt0 =%12.8e\t, m2*dqdt0 =%12.8e\n ", m1 * dqdt0 , m2 * dqdt0);
 #endif
@@ -667,17 +672,19 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
 
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
 {
-
+  DEBUG_PRINT("fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped() starts \n");
+  DEBUG_EXPR(verbose=3;);
 
   assert(localproblem);
   assert(localproblem->q);
   assert(localproblem->mu);
   assert(localproblem->M);
   assert(localproblem->M->matrix0);
-  
+
   double mu = localproblem->mu[0];
   double * qLocal = localproblem->q;
   double * MLocal = localproblem->M->matrix0;
+
 
   double Tol = dparam[0];
   double itermax = iparam[0];
@@ -709,6 +716,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   double rho[3] = {1., 1., 1.};
 #ifdef OPTI_RHO
   computerho(localproblem, rho);
+  DEBUG_PRINTF("rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e \n", rho[0], rho[1], rho[2]);
 #endif
 
   // compute the velocity
@@ -719,12 +727,17 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
                                           + MLocal[i + 1 * 3] * R[1] +
                                           + MLocal[i + 2 * 3] * R[2] ;
+
+  DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",i,R[i],i,velocity[i]););
   DEBUG_PRINT("fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped -- Start Newton iteration\n");
   assert(Function);
+
   for (inew = 0 ; inew < itermax ; ++inew) // Newton iteration
   {
     //Update function and gradient
     Function(R, velocity, mu, rho, F, A, B);
+
+    DEBUG_EXPR_WE(for ( int i =0 ; i < 3; i++) printf("F[%i]=%12.8e\t",i,F[i]); printf("\n"););
 
     // compute -(A MLocal +B)
     for (i = 0; i < 3; i++)

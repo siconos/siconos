@@ -30,12 +30,16 @@
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 extern computeNonsmoothFunction Function;
-//#define VERBOSE_DEBUG
-//#define AC_STD
-//#define AC_Generated
-//#define AC_JeanMoreau // Christensen & Pang
+/* #define VERBOSE_DEBUG */
+
+/* #define AC_STD */
+/* #define AC_Generated */
+/* #define AC_JeanMoreau  Christensen & Pang */
 
 
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
 
 /*Static variables */
 /* Local problem operators */
@@ -556,6 +560,9 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
 /* Alart & Curnier version (Radius = mu*max(0,RVN)) */
 void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
 {
+  DEBUG_PRINT("computeAlartCurnierSTD starts\n");
+  DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++)printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",i,R[i],i,velocity[i]););
+
   SET3(R);
   SET3(velocity);
   SET3(rho);
@@ -599,11 +606,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
 
   if (RVN > 0.0)
   {
-
-#ifdef VERBOSE_DEBUG
-    printf("Normal part in the cone\n");
-#endif
-
+    DEBUG_PRINT("Normal part in the cone\n");
 
     Radius = mu * RVN;
     *F0 = RhoN * *velocity0;
@@ -615,9 +618,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   }
   else
   {
-#ifdef VERBOSE_DEBUG
-    printf("Normal part out the cone\n");
-#endif
+    DEBUG_PRINT("Normal part out the cone\n");
     Radius = 0.0;
     *F0 = *R0;
     if (A00 && B00)
@@ -630,16 +631,14 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
 
 
-#ifdef VERBOSE_DEBUG
-  printf("Radius=%le\n", Radius);
-  printf("RV=%le\n", RV);
-#endif
+  DEBUG_PRINTF("Radius=%le\n", Radius);
+  DEBUG_PRINTF("RV=%le\n", RV);
 
   if (RV <= Radius) // We are in the disk and Radius is positive
   {
-#ifdef VERBOSE_DEBUG
-    printf("We are in the disk\n");
-#endif
+
+    DEBUG_PRINT("We are in the disk\n");
+
     *F1 = RhoT * *velocity1;
     *F2 = RhoT * *velocity2;
     if (A00 && B00)
@@ -661,9 +660,8 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
 
     if (Radius > 0)
     {
-#ifdef VERBOSE_DEBUG
-      printf("We are out the disk and Radius is positive\n");
-#endif
+
+      DEBUG_PRINT("We are out the disk and Radius is positive\n");
       RV1 = 1.0 / RV;
       *F1 = *R1 - Radius * RVT * RV1;
       *F2 = *R2 - Radius * RVS * RV1;
@@ -699,9 +697,10 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
     }
     else
     {
-#ifdef VERBOSE_DEBUG
-      printf("We are out the disk and Radius is zero\n");
-#endif
+
+
+      DEBUG_PRINT("We are out the disk and Radius is zero\n");
+
 
       *F1 = *R1 ;
       *F2 = *R2 ;
@@ -970,14 +969,3 @@ void computerho(FrictionContactProblem* localproblem, double * rho)
 #endif
 }
 
-
-#ifndef NDEBUG
-void fc3d_AlartCurnierJeanMoreauFunctionGenerated(
-  double *reaction,
-  double *velocity,
-  double mu,
-  double *rho,
-  double *f,
-  double *A,
-  double *B);
-#endif
