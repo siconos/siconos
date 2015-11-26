@@ -40,8 +40,8 @@
 /* #define GMP_WRITE_PRB */
 
 
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
+//#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
 #include "debug.h"
 
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
@@ -213,7 +213,6 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 #ifdef GENERICMECHANICAL_DEBUG_CMP
   SScmp++;
 #endif
-  verbose=1;
   listNumericsProblem * curProblem = 0;
   int storageType = pGMP->M->storageType;
   SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
@@ -257,11 +256,11 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     curProblem =  pGMP->firstListElem;
     int  posInX = 0;
     int curSize = 0;
-    
+
     DEBUG_PRINTF("GS it %d, initial value:\n", it);
     DEBUG_EXPR(
       for (int ii = 0; ii < pGMP->size; ii++)
-        printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
+        printf("R[%i]=%e | V[%i]=%e \n", ii, reaction[ii], ii, velocity[ii]);
       );
 
     while (curProblem)
@@ -329,15 +328,25 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       case SICONOS_NUMERICS_PROBLEM_FC3D:
       {
         FrictionContactProblem * fcProblem = (FrictionContactProblem *)curProblem->problem;
+        assert(fcProblem);
+        assert(fcProblem->M);
+        assert(fcProblem->q);
         fcProblem->M->matrix0 = diagBlock;
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+
+        DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++) printf("curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,curProblem->q[i],i,fcProblem->q[i]););
+
         if (storageType == 0)
         {
           rowProdNoDiag(pGMP->size, curSize, posInX, numMat, reaction, fcProblem->q, 0);
         }
         else
           rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, fcProblem->q, 0);
+
+        DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++)  printf("reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,reaction[i],i,fcProblem->q[i]););
+        (&options->internalSolvers[1])->iparam[10]=1; /* VA 26/11/2015 For robustness reasons on mechanisms, we chose the JeanMoreau formulation */
         fc3d_onecontact_nonsmooth_Newton_solvers_initialize(fcProblem, fcProblem, &options->internalSolvers[1]);
+
         resLocalSolver = fc3d_driver(fcProblem, sol, w, &options->internalSolvers[1], numerics_options);
         //resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
         break;
@@ -349,11 +358,11 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         printf("Local solver FAILED, GS continue\n");
 
       DEBUG_PRINTF("GS it %d, the line number is %d:\n", it, currentRowNumber);
-      DEBUG_EXPR(for (int ii = 0; ii < pGMP->size; ii++)
-                   printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
-                 if (resLocalSolver)
-                   printf("Numerics:GenericMechanical_drivers Local solver failed\n");
-        );
+      /* DEBUG_EXPR(for (int ii = 0; ii < pGMP->size; ii++) */
+      /*              printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]); */
+      /*            if (resLocalSolver) */
+      /*              printf("Numerics:GenericMechanical_drivers Local solver failed\n"); */
+      /*   ); */
       posInX += curProblem->size;
       curProblem = curProblem->nextProblem;
       currentRowNumber++;
@@ -482,7 +491,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   {
     printf("genericMechanical_driver error, options->iparam[2] wrong value. (0, 1 or 2).\n");
   }
-  
+
   return info;
 
 }
@@ -528,7 +537,7 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
     /* options->internalSolvers[1].dparam[0] = 1e-14; */
     /* options->internalSolvers[1].iparam[0] = 10; */
     /* options->internalSolvers[1].internalSolvers->iparam[10]=1; */
-    fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(&options->internalSolvers[1]); 
+    fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(&options->internalSolvers[1]);
     break;
   default:
     printf("FC3D_solverId unknown :%d\n", id);
