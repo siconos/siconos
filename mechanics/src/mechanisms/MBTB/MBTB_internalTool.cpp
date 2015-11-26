@@ -219,6 +219,7 @@ void _MBTB_STEP()
   std::cout<< "     OSNS reached accuracy ="<< dd[2] << " < " << dd [0] <<  std::endl;
   std::cout<< "     OSNS nb iterations ="<< ii[3] << " < " << ii [0] <<  std::endl;
   std::cout<< "     Number of Newton iterations = " << sSimu->getNewtonNbIterations() <<std::endl;
+
   Type::Siconos  simuType;
   simuType = Type::value(*sSimu);
   if (simuType == Type::TimeStepping)

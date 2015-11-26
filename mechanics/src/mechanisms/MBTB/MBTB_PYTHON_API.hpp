@@ -174,11 +174,6 @@ SP::Model MBTB_model();
   \param [in] nbSteps int , the number of run step.
  */
 void MBTB_run(int nbSteps);
-//! It does one step.
-/*!
-  It consists in doing one step, including the graphic and output update.
- */
-void MBTB_step();
 
 //! It is a warm start.
 /*!

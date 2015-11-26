@@ -181,8 +181,7 @@ if with_io:
             currentTimerCmp = mbtb.cvar.sTimerCmp
             for i in range(nsteps):
                 mbtb.cvar.sTimerCmp += 1
-                if mbtb.cvar.sTimerCmp % mbtb.cvar.sFreqOutput == 0:
-                    print('STEP Number =',mbtb.cvar.sTimerCmp, '<', nsteps+currentTimerCmp);
+                print('STEP Number =',mbtb.cvar.sTimerCmp, '<', nsteps+currentTimerCmp);
                 mbtb._MBTB_STEP()
                 mbtb._MBTB_displayStep()
                 io.outputDynamicObjects()
@@ -196,24 +195,7 @@ if with_io:
 
 
         def STEP(event=None):
-            mbtb.MBTB_step()
-            io.outputDynamicObjects()
-            io.outputVelocities()
-            io.outputContactForces()
-            io.outputSolverInfos()
-
-
-        def STEP_1000(event=None):
-            ii=0
-            while ii < 1000:
-                mbtb.MBTB_step()
-                io.outputDynamicObjects()
-                io.outputVelocities()
-                io.outputContactForces()
-                io.outputSolverInfos()
-                cadmbtb.CADMBTB_DumpGraphic()
-                ii=ii+1
-
+            _run(1)
 
         def RUN10(event=None):
             _run(10)
@@ -224,16 +206,11 @@ if with_io:
         def RUN100(event=None):
             _run(100)
 
-        def RUN400(event=None):
-            _run(400)
-
+        def RUN500(event=None):
+            _run(500)
 
         def RUN1000(event=None):
             _run(1000)
-
-        def RUN7000(event=None):
-            _run(7000)
-
 
         def RUN10000(event=None):
             _run(10000)
@@ -241,8 +218,8 @@ if with_io:
         def RUN50000(event=None):
             _run(50000)
 
-        def RUN300000(event=None):
-            _run(300000)
+        def RUN100000(event=None):
+            _run(100000)
 
         def QUIT(event=None):
             exit();
@@ -381,45 +358,47 @@ if with_io:
         if with3D and __name__ == '__main__':
             cadmbtb.CADMBTB_setIParam(0,dumpGraphic)
             mbtb.MBTB_ContactSetIParam(2,0,0,drawMode)
-            add_menu('MBTB')
-            add_menu('OPTION')
-            add_menu('VERBOSE')
-            add_menu('DISPLAY')
-            add_menu('VIEW')
-            add_function_to_menu('MBTB', STEP)
-            add_function_to_menu('MBTB', RUN)
-            add_function_to_menu('MBTB', RUN10)
-            add_function_to_menu('MBTB', RUN100)
-            add_function_to_menu('MBTB', RUN400)
-            add_function_to_menu('MBTB', RUN1000)
-            add_function_to_menu('MBTB', RUN7000)
-            add_function_to_menu('MBTB', RUN10000)
-            add_function_to_menu('MBTB', RUN50000)
-            add_function_to_menu('MBTB', RUN300000)
-            add_function_to_menu('MBTB', QUIT)
-            add_function_to_menu('DISPLAY',GRAPHIC_OFF)
-            add_function_to_menu('DISPLAY',GRAPHIC_ON)
-            add_function_to_menu('DISPLAY',GRAPHIC_DUMP)
-            add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_PRINT_DIST)
-            add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_PRINT_DIST)
-            add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
-            add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
-            add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
-            add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
-            add_function_to_menu('VERBOSE',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
-            add_function_to_menu('VERBOSE',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
-            add_function_to_menu('OPTION',DISABLE_PROJ)
-            add_function_to_menu('OPTION',ENABLE_PROJ)
-            add_function_to_menu('OPTION',DISABLE_ONLYPROJ)
-            add_function_to_menu('OPTION',ENABLE_ONLYPROJ)
-            add_function_to_menu('VIEW',VIEW_TOP)
-            add_function_to_menu('VIEW',VIEW_BOTTOM)
-            add_function_to_menu('VIEW',VIEW_RIGHT)
-            add_function_to_menu('VIEW',VIEW_LEFT)
-            add_function_to_menu('VIEW',VIEW_FRONT)
-            add_function_to_menu('VIEW',VIEW_REAR)
-            add_function_to_menu('VIEW',VIEW_ISO)
-            add_function_to_menu('VIEW',VIEW_FITALL)
+            add_menu('Siconos Mechanisms')
+            add_menu('Options')
+            add_menu('Verbose')
+            add_menu('Display')
+            add_menu('View')
+            add_function_to_menu('Siconos Mechanisms', STEP)
+
+            add_function_to_menu('Siconos Mechanisms', RUN10)
+            add_function_to_menu('Siconos Mechanisms', RUN100)
+            add_function_to_menu('Siconos Mechanisms', RUN500)
+            add_function_to_menu('Siconos Mechanisms', RUN1000)
+            add_function_to_menu('Siconos Mechanisms', RUN10000)
+            add_function_to_menu('Siconos Mechanisms', RUN50000)
+            add_function_to_menu('Siconos Mechanisms', RUN100000)
+
+            add_function_to_menu('Siconos Mechanisms', RUN)
+            add_function_to_menu('Siconos Mechanisms', QUIT)
+
+            add_function_to_menu('Display',GRAPHIC_OFF)
+            add_function_to_menu('Display',GRAPHIC_ON)
+            add_function_to_menu('Display',GRAPHIC_DUMP)
+            add_function_to_menu('Verbose',ENABLE_VERBOSE_MBTB_PRINT_DIST)
+            add_function_to_menu('Verbose',DISABLE_VERBOSE_MBTB_PRINT_DIST)
+            add_function_to_menu('Verbose',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
+            add_function_to_menu('Verbose',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
+            add_function_to_menu('Verbose',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
+            add_function_to_menu('Verbose',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
+            add_function_to_menu('Verbose',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
+            add_function_to_menu('Verbose',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
+            add_function_to_menu('Options',DISABLE_PROJ)
+            add_function_to_menu('Options',ENABLE_PROJ)
+            add_function_to_menu('Options',DISABLE_ONLYPROJ)
+            add_function_to_menu('Options',ENABLE_ONLYPROJ)
+            add_function_to_menu('View',VIEW_TOP)
+            add_function_to_menu('View',VIEW_BOTTOM)
+            add_function_to_menu('View',VIEW_RIGHT)
+            add_function_to_menu('View',VIEW_LEFT)
+            add_function_to_menu('View',VIEW_FRONT)
+            add_function_to_menu('View',VIEW_REAR)
+            add_function_to_menu('View',VIEW_ISO)
+            add_function_to_menu('View',VIEW_FITALL)
             start_display()
         else:
             _run(stepNumber)

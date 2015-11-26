@@ -505,26 +505,29 @@ void  MBTB_initSimu(double hTS, int withProj)
 
     if(sContacts[numC]->_indexBody2!=-1)
     {
+      DEBUG_PRINT("MBTB_initSimu(double hTS, int withProj). Link contact with two bodies\n");
       myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
-						sDS[sContacts[numC]->_indexBody1],
+                                                sDS[sContacts[numC]->_indexBody1],
                                                 sDS[sContacts[numC]->_indexBody2]);
       // sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody2]  );
 
     }
     else
-      {
-	myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
-						  sDS[sContacts[numC]->_indexBody1]);
-	// std::cout <<"link(sInterContacts[numC],       sDS[sContacts[numC]->_indexBody1]); " << std::endl;
-	// std::cout <<  "============"<<   sInterContacts[numC] <<std::endl;
-	// sInterContacts[numC]->display();
-	// std::cout << sDS[sContacts[numC]->_indexBody1] << std::endl;
-	// sDS[sContacts[numC]->_indexBody1]->display();
-	// sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody1]  );
-	// sInterContacts[numC]->display();
+    {
+      DEBUG_PRINT("MBTB_initSimu(double hTS, int withProj). Link contact with one body\n");
+      myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
+                                                sDS[sContacts[numC]->_indexBody1]);
 
-	//    sInterContacts[numC]->dynamicalSystem(0)->display();
-      }
+
+      // std::cout <<"link(sInterContacts[numC],       sDS[sContacts[numC]->_indexBody1]); " << std::endl;
+      // std::cout <<  "============"<<   sInterContacts[numC] <<std::endl;
+      // sInterContacts[numC]->display();
+      // std::cout << sDS[sContacts[numC]->_indexBody1] << std::endl;
+      // sDS[sContacts[numC]->_indexBody1]->display();
+      // sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody1]  );
+      // sInterContacts[numC]->display();
+      //    sInterContacts[numC]->dynamicalSystem(0)->display();
+    }
   }
 
 
@@ -751,24 +754,6 @@ void MBTB_run(int NbSteps)
   //QList<MDIWindow*>::iterator i;
 }
 
-void MBTB_step()
-{
-  FILE *fp;
-  fp = fopen("simu.txt", "a");
-  sTimerCmp++;
-  printf("STEP Number = %d \n",sTimerCmp);
-
-  _MBTB_STEP();
-  _MBTB_displayStep();
-
-  if(sTimerCmp%sFreqOutput==0)
-  {
-    _MBTB_printStep(fp);
-  }
-
-
-  fclose(fp) ;
-}
 void MBTB_moveBodyToPosWithSpeed(unsigned int numDS, SP::SiconosVector aPos, SP::SiconosVector aVel)
 {
   SP::SiconosVector q = sDS[numDS]->q();
