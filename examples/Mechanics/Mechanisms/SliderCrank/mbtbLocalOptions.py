@@ -87,7 +87,7 @@ withReduced=2
 ## Solver option
 solverTol=1e-10
 ## Solver option
-solverIt=100000
+solverIt=1000
 
 gotoPos=0
 
