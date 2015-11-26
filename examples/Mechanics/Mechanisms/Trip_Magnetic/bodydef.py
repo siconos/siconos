@@ -88,7 +88,7 @@ afile=numpy.array(['./CAD/C60/manette.stp',
 #		   './CAD/C60/J1/couvercle.stp' # porte_contact.stp=> (0,0,0,0,0,1, -69*my_PI/180.0),
 ])
 ###### FORCES and MOMENTS acting on the bodies##################################################
-plugin='plugin.so'
+plugin='plugins.so'
 
 fctfext=numpy.array(['',
                   '',
@@ -719,7 +719,7 @@ contacten=array.array('d',[
 
 ######SIMULATION PARAMETER DESCRIPTIONS#################################################################
 #3D parameters
-with3D=0
+with3D=1
 freqUpdate=100
 freqOutput=2
 stepNumber=20000
@@ -731,7 +731,7 @@ withProj=0
 withReduced=2
 et=0.0
 solverTol=1e-8
-solverIt=1000
+solverIt=10000
 
 #TSdeactivateYPosThreshold=1e-5
 #TSdeactivateYVelThreshold=0.0
