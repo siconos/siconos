@@ -43,19 +43,19 @@ siconos_with_mumps = siconos_default.copy()(
     add_pkgs=['mumps'])
 
 # dispatch based on hostname
-known_tasks = {'fedora18-x86-64':
+known_tasks = {'siconos---vm0':
                [siconos_fedora_latest,
                 siconos_openblas_lapacke,
                 siconos_with_mumps],
 
-               'siconos---fedora20':
+               'siconos---vm1':
                [siconos_clang,
                 siconos_serialization],
 
                'siconos---ubuntu-12-04-amd64': 
                [siconos_default_profiling],
 
-               'siconos---vm0':
+               'siconos---vm2':
                [siconos_ubuntu_15_10,
                 siconos_ubuntu_15_04, 
                 siconos_ubuntu_14_10]}
