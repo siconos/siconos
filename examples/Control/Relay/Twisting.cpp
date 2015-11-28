@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
     }
     dataPlot->resize(k, dataPlot->size(1));
 
-    cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
+    cout << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
@@ -176,25 +176,21 @@ int main(int argc, char* argv[])
     dataPlotRef->zero();
     ioMatrix::read("Twisting.ref", "ascii", *dataPlotRef);
     // We do not compare the Lagrange multiplier that are very sensitive to numerical approximations
-    SP::SiconosMatrix  reduceddataPlotRef(new SimpleMatrix(k,3));
-    SP::SiconosMatrix  reduceddataPlot (new SimpleMatrix(k,3));
-    Index *dim = new Index(2);
-    Index *start =new Index(4);
-    (*dim)[0]=dataPlot->size(0);
-    (*dim)[1]=3;
-    start->assign(4,0);
-    setBlock(dataPlot,reduceddataPlot,*dim,*start);
-    setBlock(dataPlotRef,reduceddataPlotRef,*dim,*start);
+    Index * coord= new Index(4);
+    (*coord)[0]= 0;
+    (*coord)[1]= k;
+    (*coord)[2]= 0;
+    (*coord)[3]= 3;
+    SP::SiconosMatrix  stateDataPlot(new SimpleMatrix(*dataPlot, *coord));
+    SP::SiconosMatrix  stateDataPlotRef(new SimpleMatrix(*dataPlotRef, *coord));
 
-    double error =  (*reduceddataPlot-*reduceddataPlotRef).normInf() ;
+    double error =  (*stateDataPlotRef-*stateDataPlot).normInf() ;
     std::cout << "Error =" << error <<std::endl;
     if (error > 1e-12)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       return 1;
     }
-    free(dim);
-    free(start);
 
   }
 

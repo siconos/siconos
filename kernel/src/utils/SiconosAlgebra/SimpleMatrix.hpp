@@ -193,6 +193,11 @@ public:
    *  \param smat the matrix to copy
    */
   SimpleMatrix(const SimpleMatrix& smat);
+  
+  /** copy constructor of a block given by the coord = [r0A r1A c0A c1A]
+   *  \param A the matrix for extracting the block
+   */
+  SimpleMatrix(const SimpleMatrix& A , const Index& coord );
 
   /** copy constructor
    *  \param m the matrix to copy

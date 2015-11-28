@@ -188,6 +188,56 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum(
     mat.Identity = new IdentityMat(smat.size(0), smat.size(1));
 }
 
+/** copy constructor of a block given by the coord = [r0A r1A c0A c1A]
+ *  \param A the matrix for extracting the block
+ */
+SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ):  SiconosMatrix(A.getNum()), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+{
+  if (coord[0]>=coord[1])
+    SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). Empty row range coord[0]>= coord[1]");
+  if (coord[2]>=coord[3])
+    SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). Empty column range coord[2]>= coord[3]");
+  if (coord[1] > A.size(0) )
+    SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). row index too large.");
+  if (coord[3] > A.size(1) )
+    SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). column index too large.");
+
+  if (num== 1)
+  {
+    ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
+    mat.Dense=new DenseMat(subA);
+  }
+  else if (num == 2)
+  {
+    ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
+    mat.Triang=new TriangMat(subA);
+  }
+  else if (num == 3)
+  {
+    ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
+    mat.Sym=new SymMat(subA);
+  }
+  else if (num == 4)
+  {
+    ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
+    mat.Sparse=new SparseMat(subA);
+  }
+  else if (num == 5)
+  {
+    ublas::matrix_range<BandedMat> subA(*A.banded(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
+    mat.Banded=new BandedMat(subA);
+  }
+  else if (num == 6)
+  {
+    mat.Zero = new ZeroMat(coord[1]-coord[0], coord[3]-coord[2]);
+  }
+  else// if(num == 7)
+    mat.Identity = new IdentityMat(coord[1]-coord[0], coord[3]-coord[2] );
+}
+
+
+
+
 SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum()), _isPLUFactorized(), _isQRFactorized(false), _isPLUInversed(false)
 {
   // num is set in SiconosMatrix constructor with m.getNum() ... must be changed if m is Block
