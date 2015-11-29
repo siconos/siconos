@@ -71,7 +71,8 @@ filippov.setNonSmoothDynamicalSystemPtr(myNSDS)
 td = TimeDiscretisation(t0, h)
 s = TimeStepping(td)
 
-myIntegrator = EulerMoreauOSI(process, theta)
+myIntegrator = EulerMoreauOSI(theta)
+myIntegrator.insertDynamicalSystem(process)
 s.insertIntegrator(myIntegrator)
 
 
