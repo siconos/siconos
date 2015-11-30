@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-import os
-from subprocess import check_call, check_output, CalledProcessError
 from socket import gethostname
 
 from tasks import siconos_default, known_tasks
+from subprocess import check_output
 
 hostname = gethostname().split('.')[0]
 
@@ -16,38 +15,11 @@ else:
 return_code = 0
 for task in tasks:
 
-    if not os.path.exists(task._ci_config):
-        os.makedirs(task._ci_config)
+    return_code += task.run()
 
-    cmake_args = ['-DMODE={0}'.format(task._mode),
-                  '-DCI_CONFIG={0}'.format(task._ci_config),
-                  '-DWITH_DOCKER=1',
-                  '-DBUILD_CONFIGURATION={0}'.format(
-                      task._build_configuration),
-                  '-DDOCKER_DISTRIB={0}'.format(task._distrib),
-                  '-DDOCKER_TEMPLATES={0}'.format(task.templates())]
+for task in tasks:
 
-    try:
-        check_call(['cmake'] + cmake_args + [os.path.join('..', '..')],
-                   cwd=task._ci_config)
-        check_call(['make'] + ['docker-build'],
-                   cwd=task._ci_config)
-        check_call(['make'] + ['docker-ctest'],
-                   cwd=task._ci_config)
-
-    except CalledProcessError as error:
-        return_code = 1
-        print error
-
-        if not task._fast:
-
-            try:
-                check_call(['make'] + ['docker-clean'],
-                           cwd=task._ci_config)
-
-            except CalledProcessError as error:
-                print error
-
+    task.clean()
 
 # clean everything (-> maybe once a week?)
 def mklist(sstr):

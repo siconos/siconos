@@ -1,9 +1,12 @@
+import os
 from machinery.ci_task import CiTask
 
 siconos_default = CiTask(
     ci_config='default',
     distrib='ubuntu:14.04',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack'])
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack'],
+    srcs=['.'],
+    targets={'.': ['docker-build', 'docker-ctest']})
 
 siconos_default_profiling = siconos_default.copy()(
     build_configuration='Profiling')
@@ -42,6 +45,13 @@ siconos_with_mumps = siconos_default.copy()(
     ci_config='with_mumps',
     add_pkgs=['mumps'])
 
+siconos_default_examples = siconos_default.copy()(
+    ci_config='examples',
+    add_srcs=['examples'],
+    targets={'.': ['docker-build', 'docker-cmake', 'docker-make', 'docker-make-install'],
+             'examples': ['docker-build', 'docker-ctest']})
+
+
 # dispatch based on hostname
 known_tasks = {'siconos---vm0':
                [siconos_fedora_latest,
@@ -53,7 +63,8 @@ known_tasks = {'siconos---vm0':
                 siconos_serialization],
 
                'siconos---ubuntu-12-04-amd64': 
-               [siconos_default_profiling],
+               [siconos_default_examples,
+                siconos_default_profiling],
 
                'siconos---vm2':
                [siconos_ubuntu_15_10,
