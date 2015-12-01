@@ -122,7 +122,9 @@ int main()
 
   // do simulation while events remains in the "future events" list of events manager.
   cout << " ==== Start of  simulation : " << NBStep << " steps====" << endl;
-
+  boost::progress_display show_progress(NBStep);
+  boost::timer time;
+  time.restart();
   unsigned int k = 0;
   while (aS->hasNextEvent())
   {
@@ -131,10 +133,10 @@ int main()
     // setNumericsVerbose(à);
     //      else if (cmp==151)
     setNumericsVerbose(1);
-
+    ++show_progress;
 
     cmp++;
-    printf("%d ", cmp);
+
     // solve ...
 //    aS->computeOneStep();
 
@@ -155,24 +157,24 @@ int main()
 
   }
 
+  cout << "===== End of simulation. ==== " << endl;
   dataPlot.resize(k+1, 9);
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
   ioMatrix::write("OptimalControl.dat", "ascii", dataPlot, "noDim");
 
-  // Comparison with a reference file
+  std::cout << "Comparison with a reference file: " ;
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   ioMatrix::read("OptimalControl.ref", "ascii", dataPlotRef);
-  std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
+  std::cout << "error="<< (dataPlot-dataPlotRef).normInf() <<std::endl;
   if ((dataPlot - dataPlotRef).normInf() > 5e-11)
   {
     std::cout << "Warning. The results is rather different from the reference file." << std::endl;
     return 1;
   }
 
-  cout << "===== End of simulation. ==== " << endl;
   return 0;
 
 }
