@@ -45,10 +45,12 @@ siconos_with_mumps = siconos_default.copy()(
     ci_config='with_mumps',
     add_pkgs=['mumps'])
 
+
 siconos_default_examples = siconos_default.copy()(
     ci_config='examples',
-    add_srcs=['examples'],
-    targets={'.': ['docker-build', 'docker-cmake', 'docker-make', 'docker-make-install'],
+    srcs=['.', 'examples'],
+    targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
+                   'docker-make-install'],
              'examples': ['docker-build', 'docker-ctest']})
 
 
@@ -70,3 +72,5 @@ known_tasks = {'siconos---vm0':
                [siconos_ubuntu_15_10,
                 siconos_ubuntu_15_04, 
                 siconos_ubuntu_14_10]}
+
+
