@@ -61,16 +61,14 @@ known_tasks = {'siconos---vm0':
                 siconos_with_mumps],
 
                'siconos---vm1':
-               [siconos_clang,
-                siconos_serialization],
-
-               'siconos---ubuntu-12-04-amd64': 
                [siconos_default_examples,
-                siconos_default_profiling],
+                siconos_clang,
+                siconos_serialization],
 
                'siconos---vm2':
                [siconos_ubuntu_15_10,
                 siconos_ubuntu_15_04, 
-                siconos_ubuntu_14_10]}
+                siconos_ubuntu_14_10,
+                siconos_default_profiling]}
 
 
