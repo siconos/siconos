@@ -10,15 +10,18 @@
 #include <debug.h>
 #include "FischerBurmeisterGenerated.h"
 
-#define RESULT_CHECK(X)
-#define VALUE_CHECK(X)
-
 #define Sign(x) ((x>0) - (x<0))
 #define Max fmax
 #define Heaviside(x) (.5*Sign(x) + .5)
 #define Rand(x) ((double) rand()/ (double) RAND_MAX)
 
-#define ZERO 0
+/* Round-off errors: for values supposed to be >=0,  value = 0 is replaced by value <= ZERO */
+/* Note:
+ * ZERO=DBL_EPSILON*100 (too small) => test-3D_NSN_FB-NESpheres_30_1 fails (division by 0)
+ * ZERO=1e-10 (too big) => test-3D_NSN_FB-OneObject-i100000-499.hdf5 fails (no convergence)
+ */
+#define ZERO DBL_EPSILON*500
+
 #define POST_CHECK_POW(x) assert(isfinite(x))
 #define POST_CHECK_ADD(x) assert(isfinite(x))
 #define POST_CHECK_MUL(x) assert(isfinite(x))
@@ -51,12 +54,10 @@
 #define pow(x,y) pow((double)x, (double)y)
 #endif
 
-#define sqrt(x) fabs((double)x)<1e-12 ? 0 : sqrt(x)
-
 #pragma GCC diagnostic ignored "-Wconversion"
 
 // hack, should be prevented in sage/sympy/maple or in code generation
-//#define sqrt(x) ((x < 0) ? 0 : (assert(x>=0),sqrt(x)))
+#define sqrt(x) ((fabs((double)x) <= ZERO) ? 0 : (assert(x>=0), sqrt(x)))
 
 // ./fb2.py --ccode --ccodefac --ccodeAB --wrapper --merit
 void fc3d_FischerBurmeisterFABGenerated(
@@ -140,10 +141,10 @@ void fc3d_FischerBurmeisterFABGenerated(
     x21=sqrt(x20); POST_CHECK_POW(x21);
     x22=2*x21; POST_CHECK_MUL(x22);
     x23=x13 - x22; POST_CHECK_ADD(x23);
-    x37=x21 <= 0; POST_CHECK(x37);
+    x37=x21 <= ZERO; POST_CHECK(x37);
     x38=fabs(x23); POST_CHECK(x38);
     /*@ assert (x38) >= 0.;*/
-    x39=x37 || x38 <= 0; POST_CHECK(x39);
+    x39=x37 || x38 <= ZERO; POST_CHECK(x39);
     int x49;
     double x40;
     double x41;
@@ -154,7 +155,7 @@ void fc3d_FischerBurmeisterFABGenerated(
     double x46;
     double x47;
     double x48;
-    x49=x3 <= 0; POST_CHECK(x49);
+    x49=x3 <= ZERO; POST_CHECK(x49);
     int x58;
     int x59;
     int x60;
@@ -3408,7 +3409,7 @@ void fc3d_FischerBurmeisterFGenerated(
     int x21;
     double x19;
     double x20;
-    x21=x11 <= 0; POST_CHECK(x21);
+    x21=x11 <= ZERO; POST_CHECK(x21);
     if (x18)
     {
         x5=mu*mu; POST_CHECK_POW(x5);
@@ -3591,7 +3592,7 @@ void fc3d_FischerBurmeisterABGenerated(
     x21=x18 + x20; POST_CHECK_ADD(x21);
     /*@ assert (x21) >= 0.;*/
     x22=sqrt(x21); POST_CHECK_POW(x22);
-    x23=x22 <= 0; POST_CHECK(x23);
+    x23=x22 <= ZERO; POST_CHECK(x23);
     x24=rt1*rt1; POST_CHECK_POW(x24);
     /*@ assert (x24) >= 0.;*/
     x25=rt2*rt2; POST_CHECK_POW(x25);
@@ -3606,7 +3607,7 @@ void fc3d_FischerBurmeisterABGenerated(
     x32=x30 - x31; POST_CHECK_ADD(x32);
     x33=fabs(x32); POST_CHECK(x33);
     /*@ assert (x33) >= 0.;*/
-    x34=x23 || x33 <= 0; POST_CHECK(x34);
+    x34=x23 || x33 <= ZERO; POST_CHECK(x34);
     int x44;
     double x35;
     double x36;
@@ -3617,7 +3618,7 @@ void fc3d_FischerBurmeisterABGenerated(
     double x41;
     double x42;
     double x43;
-    x44=x14 <= 0; POST_CHECK(x44);
+    x44=x14 <= ZERO; POST_CHECK(x44);
     int x57;
     int x58;
     int x59;
@@ -6992,7 +6993,7 @@ void fc3d_FischerBurmeisterFMeritGenerated(
     /*@ assert (random1*random1 + random2*random2) >= 0.;*/
     /*@ assert (random1*random1 + random2*random2) != 0.;*/
     x17=pow(random1*random1 + random2*random2, -1.0/2.0); POST_CHECK_POW(x17);
-    x18=x11 <= 0; POST_CHECK(x18);
+    x18=x11 <= ZERO; POST_CHECK(x18);
     x19=((x16) ? (x8*x15): (random1*x17)); POST_CHECK(x19);
     x20=((x16) ? (x10*x15): (random2*x17)); POST_CHECK(x20);
     *result = 0.5*(rt1 + x13*x19 - x14*x19 + x7)*(rt1 + x13*x19 - x14*x19 + x7) + 0.5*(rt2 + x13*x20 - x14*x20 + x9)*(rt2 + x13*x20 - x14*x20 + x9) + 0.5*(x4 - x13 - x14 + x3)*(x4 - x13 - x14 + x3);
@@ -7081,7 +7082,7 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(
     double x51;
     double x52;
     double x53;
-    x54=x13 <= 0; POST_CHECK(x54);
+    x54=x13 <= ZERO; POST_CHECK(x54);
     if (x46)
     {
         x4=mu*mu; POST_CHECK_POW(x4);
