@@ -64,7 +64,8 @@ numpydoc_class_members_toctree = True
 doxylink = {
     'doxysiconos':
     ('@CMAKE_CURRENT_BINARY_DIR@/build/html/Tags/@PROJECT_NAME@.tag',
-     '@CMAKE_CURRENT_BINARY_DIR@/build/html/doxygen/html'),
+     'doxygen/html'),
+#     '@CMAKE_CURRENT_BINARY_DIR@/build/html/doxygen/html'),
 }
 
 autoclass_content = 'init'
