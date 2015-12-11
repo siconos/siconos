@@ -175,7 +175,7 @@ def plot_results():
     plt.plot(time, v, label='v')
     plt.ylabel('v')
     plt.xlabel('time')
-    plt.show()
+    plt.savefig('train_brakes.png')
 
 
 # --- Uncomment lines below to plot interesting stuff ---

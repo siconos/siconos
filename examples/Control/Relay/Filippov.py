@@ -20,7 +20,7 @@
 #
 
 
-from matplotlib.pyplot import subplot, title, plot, grid, show
+from matplotlib.pyplot import subplot, title, plot, grid, savefig
 from numpy import array, eye, empty, zeros, savetxt
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL, \
 NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
@@ -111,9 +111,9 @@ subplot(313)
 plot(dataPlot[:,0], dataPlot[:,3])
 title('lambda')
 grid()
-show()
+savefig("filipov1.png")
 
 plot(dataPlot[:,1], dataPlot[:,2])
 grid()
-show()
+savefig("filipov2.png")
 

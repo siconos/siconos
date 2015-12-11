@@ -50,17 +50,21 @@ pkgs:
       - python-lxml
       - python-pytest
       - python-scipy
+      - python-matplotlib
     fedora:
       - python
       - python-devel
       - python-lxml
       - pytest
       - scipy
+      - python-matplotlib
 
   cmake:
     ubuntu-12.04:
        - python-software-properties
        - cmake-2.8.12
+       - python-matplotlib
+
 
   cmake-2.8.12:
     ubuntu-12.04:

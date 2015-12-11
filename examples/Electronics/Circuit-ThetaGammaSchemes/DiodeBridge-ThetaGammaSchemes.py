@@ -60,7 +60,7 @@ Modeltitle = "DiodeBridge"
 
 withPlot = True
 if (withPlot):
-    from matplotlib.pyplot import subplot, title, plot, grid, show
+    from matplotlib.pyplot import subplot, title, plot, grid, show, savefig
 
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\
@@ -246,4 +246,4 @@ if (withPlot):
     if (withRef):
         plot(dataPlot[0:k - 1, 0], ref[0:k - 1, 3] + ref[0:k - 1, 6]  )
     grid()
-    show()
+    plt.savefig("diode_brige_tgs.png")

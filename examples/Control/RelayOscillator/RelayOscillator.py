@@ -31,7 +31,7 @@ Modeltitle = "RelayOscillator"
 
 withPlot=True
 if (withPlot) :
-    from matplotlib.pyplot import subplot, title, plot, grid, show
+    from matplotlib.pyplot import subplot, title, plot, grid, savefig
 
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            RelayNSL, Interaction,\
@@ -169,5 +169,5 @@ if (withPlot) :
     title('lambda')
     plot(dataPlot[0:k-1,0], dataPlot[0:k-1,5])
     grid()
-    show()
+    savefig("relay_oscillator.png")
 

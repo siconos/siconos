@@ -28,8 +28,6 @@ if(WITH_MECHANISMS)
     "mechanics/mechanisms/mbtb")
 endif()
 
-set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
-
 set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
 set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/kernel/swig)

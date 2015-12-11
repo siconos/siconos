@@ -70,7 +70,7 @@ Modeltitle = "DiodeBridge"
 
 withPlot = True
 if (withPlot):
-    from matplotlib.pyplot import subplot, title, plot, grid, show
+    from matplotlib.pyplot import subplot, title, plot, grid, show, savefig
 
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\
@@ -265,4 +265,4 @@ if (withPlot):
     if (withRef):
         plot(dataPlot[0:k - 1, 0], -ref[0:k - 1, 4] - ref[0:k - 1, 5]  )
     grid()
-    show()
+    savefig("diode_bridge_capfilter_tgs.png")

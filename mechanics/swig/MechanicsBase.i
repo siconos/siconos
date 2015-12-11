@@ -25,8 +25,6 @@
 
 %include picklable.i
 
-%include path.i
-
 %include handleException.i
 %include stl.i
 %include KernelTypes.i

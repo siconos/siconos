@@ -57,7 +57,7 @@ Modeltitle = "CircuitRLCD"
 
 withPlot = True
 if (withPlot):
-    from matplotlib.pyplot import subplot, title, plot, grid, show
+    from matplotlib.pyplot import subplot, title, plot, grid, show, savefig
 
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\
@@ -206,4 +206,4 @@ if (withPlot):
     subplot(414)
     title('diode current')
     plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 4])
-    show()
+    savefig("circuit_rlcd.png")

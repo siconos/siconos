@@ -107,7 +107,7 @@ subplot(212)
 title('velocity')
 plot(dataPlot[:,0], dataPlot[:,2])
 grid()
-show()
+savefig("pid.png")
 # TODO
 # compare with the reference
 #ref = getMatrix(SimpleMatrix("result.ref"))

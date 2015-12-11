@@ -49,6 +49,17 @@
 #
 # -----------------------------------------------------------------------
 
+with_plot = True
+if with_plot:
+    import matplotlib.pyplot as plt
+    
+from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
+    ComplementarityConditionNSL, Interaction,\
+    Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
+    TimeStepping
+
+
+
 t0 = 0.0
 T = 5.0e-3       # Total simulation time
 h_step = 1.0e-6  # Time step
@@ -57,15 +68,6 @@ Cvalue = 1e-6    # capacitance
 Rvalue = 1e3     # resistance
 Vinit = 10.0     # initial voltage
 Modeltitle = "DiodeBridge"
-
-withPlot = True
-if withPlot:
-    from matplotlib.pyplot import subplot, title, plot, grid, show
-
-from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
-    ComplementarityConditionNSL, Interaction,\
-    Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
-    TimeStepping
 
 #
 # dynamical system
@@ -213,25 +215,27 @@ ref = getMatrix(SimpleMatrix("result.ref"))
 
 assert (norm(dataPlot - ref) < 1e-12)
 
-if (withPlot):
+if with_plot:
     #
     # plots
     #
-    subplot(411)
-    title('inductor voltage')
-    plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 1])
-    grid()
-    subplot(412)
-    title('inductor current')
-    plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 2])
-    grid()
-    subplot(413)
-    title('diode R1 (blue) and F2 (green) voltage')
-    plot(dataPlot[0:k - 1, 0], -dataPlot[0:k - 1, 4])
-    plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 5])
-    grid()
-    subplot(414)
-    title('resistor current')
-    plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 7])
-    grid()
-    show()
+    #plt.ion()
+    plt.subplot(411)
+    plt.title('inductor voltage')
+    plt.plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 1])
+    plt.grid()
+    plt.subplot(412)
+    plt.title('inductor current')
+    plt.plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 2])
+    plt.grid()
+    plt.subplot(413)
+    plt.title('diode R1 (blue) and F2 (green) voltage')
+    plt.plot(dataPlot[0:k - 1, 0], -dataPlot[0:k - 1, 4])
+    plt.plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 5])
+    plt.grid()
+    plt.subplot(414)
+    plt.title('resistor current')
+    plt.plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 7])
+    plt.grid()
+    plt.savefig("diode_bridge.png")
+

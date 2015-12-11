@@ -157,7 +157,6 @@ if (norm(dataPlot - ref) > 1e-12):
 # plots
 #
 import matplotlib.pyplot as plt
-plt.ion()
 plt.subplot(411)
 plt.title('position')
 plt.plot(dataPlot[:, 0], dataPlot[:, 1])
@@ -174,4 +173,4 @@ plt.subplot(414)
 plt.plot(dataPlot[:, 0], dataPlot[:, 4])
 plt.title('lambda')
 plt.grid()
-plt.show()
+plt.savefig("bbts.png")
