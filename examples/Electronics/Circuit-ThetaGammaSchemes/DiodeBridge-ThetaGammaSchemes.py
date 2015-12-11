@@ -246,4 +246,4 @@ if (withPlot):
     if (withRef):
         plot(dataPlot[0:k - 1, 0], ref[0:k - 1, 3] + ref[0:k - 1, 6]  )
     grid()
-    plt.savefig("diode_brige_tgs.png")
+    savefig("diode_brige_tgs.png")

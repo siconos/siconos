@@ -108,7 +108,7 @@ def plot_results():
     z = data_plot[:, 3]
     ax.plot(x, y, z, label='z = f(x, y)')
     ax.legend()
-    plt.show()
+    plt.savefig('helical.png')
 
 
 # --- Uncomment lines below to plot interesting stuff ---
