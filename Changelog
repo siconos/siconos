@@ -28,7 +28,15 @@ before it.
   v3.8.0 (in development branch siconos/master)
 --------------------------------------------------------------------------------
 Main Changes:
-	
+
+	* [control] Creation of the Control module in Siconos
+	* [control] add new simulation wrapper to simplify the creation of a
+	simulation
+
+	* [externals] Create new externals module, a collection of codes
+	usesd in Siconos, but written by other people. This includes CSparse,
+	HEM5, LSODAR, LUMOD, ...
+
 	* [kernel] Add Boundary conditions for the NewtonEulerDS and fix a bug in the 
 	LagrangianDS boundary condition
 	* [kernel] Development of D1MinusLinear for NEwtonEulerDS and LagrangianDS
@@ -38,12 +46,21 @@ Main Changes:
 	the convergence of the Newton loop. Remove adhoc update of T and MObjToAbs
 	* [kernel] MoreauJeanOSI Add a correct treatment of NewtonEuler DS with the Newton
 	Loop
-	* [control] Creation of the Control module in Siconos
+
 	* [numerics] Add relaxation in NSGS solvers for FC3D
 	* [numerics] Add SOCLCP solvers
 	* [numerics] Improve updating rule for FP and EG solvers for VI
 	* [numerics] Update LMGC drivers for GFC3D 
-	
+	* [numerics] add GAMS interface + new solvers for FC3D based on AVI
+	reformulation
+	* [numerics] update PATH (from M. Ferris & co) glue code
+	* [numerics] partial fix for lexicographic Lemke. Thanks to Tobenna Peter, Igwe
+	for reporting the issue. Only LCP_LEMKE is fixed for now
+	* [numerics] new Lemke solver with rank-one updates. Currently
+	experimental (unstable). This uses LUMOD from M. Saunders, SOL, Stanford
+	* [numerics] enhance NumericsMatrix API
+	* [numerics] add an HDF5 logger
+
 
 ################## Old Changelog files before merge
 
