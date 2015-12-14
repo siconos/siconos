@@ -50,6 +50,10 @@ if(HAVE_SICONOS_MECHANICS)
 endif()
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
-build_python_tests()
+
+# right now the only tests we have require serialization
+IF(WITH_SERIALIZATION)
+  build_python_tests()
+ENDIF(WITH_SERIALIZATION)
 
 
