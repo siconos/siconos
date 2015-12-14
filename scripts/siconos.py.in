@@ -422,7 +422,7 @@ if __name__ == '__main__':
                 var_separator = ':'
             siconos_pythonpath = "@SICONOS_PYTHON_INSTALL_DIR@"
             env['PYTHONPATH'] = '{0}{1}{2}'.format(
-                os.path.join(siconos_prefix, siconos_pythonpath),
+                siconos_pythonpath,
                 var_separator, os.getenv('PYTHONPATH'))
 
         try:

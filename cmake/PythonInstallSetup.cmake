@@ -42,12 +42,15 @@ function(set_python_install_path)
     if(ENABLE_USER) # --user works ...
       # Find install path for --user (site.USER_SITE)
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-	"import site; print site.USER_BASE" OUTPUT_VARIABLE USER_BASE)
+       "import site; print site.USER_BASE" OUTPUT_VARIABLE USER_BASE)
       list(APPEND python_install_options --prefix=${USER_BASE})
       # Get python user site and install path = USER_SITE + project_name
       set(PYTHON_COMMAND_GET_INSTALL_DIR
-	"import site, os, sys ; print os.path.join(site.USER_BASE, os.path.join(\"lib\", os.path.join(\"python\" + str(sys.version_info.major) + '.' + str(sys.version_info.minor),
+       "import site, os, sys ; print os.path.join(site.USER_BASE, os.path.join(\"lib\", os.path.join(\"python\" + str(sys.version_info.major) + '.' + str(sys.version_info.minor),
  \"site-packages\")))")
+    execute_process(
+      COMMAND ${PYTHON_EXECUTABLE} -c "${PYTHON_COMMAND_GET_INSTALL_DIR}"
+      OUTPUT_VARIABLE PY_INSTALL_DIR)
 
     else()
       # user site not included in the path,
@@ -55,22 +58,20 @@ function(set_python_install_path)
       # Command to find 'global' site-packages
       # default path will probably be ok --> no options
       set(GET_SITE_PACKAGE
-	"from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+       "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-	"${GET_SITE_PACKAGE}" OUTPUT_VARIABLE GLOBAL_SITE_PACKAGE)
-      string(STRIP ${GLOBAL_SITE_PACKAGE} GLOBAL_SITE_PACKAGE)
-      set(PYTHON_COMMAND_GET_INSTALL_DIR ${GET_SITE_PACKAGE})
+       "${GET_SITE_PACKAGE}" OUTPUT_VARIABLE PY_INSTALL_DIR)
     endif()
     # Set the SICONOS_PYTHON_INSTALL_DIR to the proper path
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -c "${PYTHON_COMMAND_GET_INSTALL_DIR}"
-      OUTPUT_VARIABLE PY_INSTALL_DIR)
 
   elseif(siconos_python_install STREQUAL prefix)
     # Case 2 : siconos_python_install=prefix
     # we use CMAKE_INSTALL_PREFIX as the path for python install
     list(APPEND python_install_options --prefix=${CMAKE_INSTALL_PREFIX})
-    set(PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
+      set(GET_SITE_PACKAGE
+       "from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix='${CMAKE_INSTALL_PREFIX}'))")
+      execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+       "${GET_SITE_PACKAGE}" OUTPUT_VARIABLE PY_INSTALL_DIR)
   else()
     # Default case : siconos_python_install=standard
     #set(PYTHON_COMMAND_GET_INSTALL_DIR   

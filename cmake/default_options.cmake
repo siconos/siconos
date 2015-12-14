@@ -39,7 +39,13 @@ option(WITH_DOCKER "Build inside a docker container. Default = OFF" OFF)
 # - user --> behave as 'python setup.py install --user'
 # - standard --> install in python site-package (ie behave as python setup.py install)
 # - prefix --> install in python CMAKE_INSTALL_PREFIX (ie behave as python setup.py install --prefix=CMAKE_INSTALL_PREFIX)
-set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
+IF(UNIX)
+  # on unix, there is no reason to use the standard option. By default, CMAKE_INSTALL_PREFIX is set to /usr/local and therefore,
+  # the python packages should be installed in /usr/local/...
+  set(siconos_python_install "prefix" CACHE STRING "Install mode for siconos python package")
+ELSE(UNIX)
+  set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
+ENDIF(UNIX)
 
 
 # List of components to build and installed
