@@ -38,7 +38,9 @@ set(CMAKE_MODULE_PATH ${@PROJECT_NAME@_ROOT_DIR}/share/@PROJECT_NAME@/cmake)
 include(SiconosTools)
 
 # Search @PROJECT_NAME@ package components
-find_package(@PROJECT_NAME@ @MAJOR_VERSION@.@MINOR_VERSION@.@PATCH_VERSION@ REQUIRED)
+# without @PROJECT_NAME@_DIR, the search for the config fails with a custom prefix
+set(@PROJECT_NAME@_DIR ${@PROJECT_NAME@_ROOT_DIR}/share/@PROJECT_NAME@/cmake)
+find_package(@PROJECT_NAME@ @MAJOR_VERSION@.@MINOR_VERSION@.@PATCH_VERSION@ CONFIG REQUIRED)
 
 # === Check required inputs ===
 # Get the name of the main file => name of the executable
