@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
     # \param  is a  (optional)
 hh = 1e-3
 
-withPlot = True
+withPlot = False
 
 #A = np.array(((1, h), (0, 1)))
 xk = np.empty((2,))
@@ -91,7 +91,7 @@ def mcp_Nablafunction(n1, n2, z, nabla_Fmcp):
 
 if __name__ == '__main__':
 
-    print('This is an experimental file !)
+    print('This is an experimental file !')
     xk[0] = 1.
     xk[1] = 10.
 

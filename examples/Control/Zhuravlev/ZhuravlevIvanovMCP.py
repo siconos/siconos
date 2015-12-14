@@ -79,7 +79,7 @@ class ZI(object):
 if __name__ == '__main__':
     xk = np.array((1., 10.))
 
-    T = 10.0
+    T = 1.0
     t = 0.0
     z = np.zeros((4,))
     w = np.empty((4,))

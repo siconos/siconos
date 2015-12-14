@@ -20,6 +20,8 @@
 #
 
 
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib.pyplot import subplot, title, plot, grid, savefig
 from numpy import array, eye, empty, zeros, savetxt
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL,\
@@ -125,4 +127,3 @@ savefig("Filipov_NL1.png")
 plot(dataPlot[:,1], dataPlot[:,2])
 grid()
 savefig("Filipov_NL2.png")
-

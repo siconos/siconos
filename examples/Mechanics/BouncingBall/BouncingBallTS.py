@@ -181,8 +181,5 @@ plt.grid()
 
 if havedisplay:
     plt.show()
-else:    
+else:
     plt.savefig("bbts.png")
-
-
-

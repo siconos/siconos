@@ -2,7 +2,7 @@
 
 # /* Siconos-sample , Copyright INRIA 2005-2011.
 #  * Siconos is a program dedicated to modeling, simulation and control
-#  * of non smooth dynamical systems.	
+#  * of non smooth dynamical systems.
 #  * Siconos is a free software; you can redistribute it and/or modify
 #  * it under the terms of the GNU General Public License as published by
 #  * the Free Software Foundation; either version 2 of the License, or
@@ -16,7 +16,7 @@
 #  * along with Siconos; if not, write to the Free Software
 #  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #  *
-#  * Contact: Vincent ACARY vincent.acary@inrialpes.fr 
+#  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 # */
 # //-----------------------------------------------------------------------
 # //-----------------------------------------------------------------------
@@ -30,7 +30,9 @@ xinit = 3.0*math.sqrt(2.0)/(2.0*math.pi)    # initial voltage
 Modeltitle = "RelayOscillator"
 
 withPlot=True
-if (withPlot) :
+if withPlot:
+    import matplotlib
+    matplotlib.use('Agg')
     from matplotlib.pyplot import subplot, title, plot, grid, savefig
 
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
@@ -41,7 +43,7 @@ from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
 #
 # dynamical system
 #
-init_state = [0.0,xinit,0] 
+init_state = [0.0,xinit,0]
 
 A = [[0,          1.0,     0.0],
      [0.0,        0.0,     1.0],
@@ -117,7 +119,7 @@ print "Timestep : ",h
 N = (T-t0)/h
 print "Number of steps : ",N
 
-# Get the values to be plotted 
+# Get the values to be plotted
 # ->saved in a matrix dataPlot
 
 from numpy import empty
@@ -129,7 +131,7 @@ y = InterRelayOscillator.y(0)
 print "First y : ",y
 lambda_ = InterRelayOscillator.lambda_(0)
 
-while (k < N):    
+while (k < N):
     aTS.computeOneStep()
     #aLCP.display()
     dataPlot[k, 0] = aTS.nextTime()

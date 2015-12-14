@@ -2,44 +2,24 @@ import siconos.kernel as SK
 import siconos.numerics as SN
 
 import numpy as np
+
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
     ## \brief Constructor
     #
     # \param  is a  (optional)
-_kappa = .7
+_kappa = .3
 _g = 9.81
 
-h = 1e-7
+h = 1e-4
 
 theta = 1.0
 gamma = 1.0
 
 r = np.empty((2,))
-def computeg(l):
-    #print 'call computeg'
-    #print(l)
-    #print(R)
-    r[1] = _g*l[0]/(1.0 - _kappa*l[0]*l[1])
-    v_gamma = ((1.0 - gamma)*xk[1] + gamma*(xk[1] + h*r[1]))
-    r[0] = -_kappa*l[0]*l[1]*(v_gamma)
-    #print(R)
-    #print('computeg done')
-    return r
-
 
 B = np.empty((2, 2))
-def computeJacg(l):
-    #print('call computeJacglambda')
-    #print(B)
-    invR = 1/(1.0 - _kappa*l0*l1)
-    invR2 = invR*invR
-    rr1 = _g*l0*invR
-    v_gamma = xk1 + gamma*h*rr1
-    B[1, 0] = _g*invR2
-    B[1, 1] = (_g*_kappa*l0**2)/invR2
-    B[0, 0] = -_kappa*l1*v_gamma - gamma*h*_kappa*l0*l1*B[1, 0]
-    B[0, 1] = -_kappa*l0*v_gamma - gamma*h*_kappa*l0*l1*B[1, 1]
-    return B
 
 A = np.array(((1, h), (0, 1)))
 xk = np.empty((2,))
@@ -86,7 +66,7 @@ if __name__ == '__main__':
     xk[0] = 1.
     xk[1] = 10.
 
-    T = 2.0
+    T = 1.0
     t = 0.0
     vi = SN.VI(2, vi_function)
     vi.set_compute_nabla_F(vi_nabla_function)
@@ -100,7 +80,7 @@ if __name__ == '__main__':
 
     N = int(T/h + 10)
     print(N)
-    SO.dparam[0] = 1e-24
+    SO.dparam[0] = 1e-16
     SO.iparam[0] = 50
     SO.iparam[3] = 0
     SO.iparam[4] = 10
@@ -198,7 +178,7 @@ if __name__ == '__main__':
 #    plt.title('control input')
 #    plt.plot(dataPlot[:,0], control)
 #    plt.grid()
-    plt.show()
+    plt.savefig('Zhuravlev_pv.png')
 
 #    indx = np.nonzero(dataPlot[:, 0]>30)
 #    ttt = dataPlot[indx, 0].flatten()

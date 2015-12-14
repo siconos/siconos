@@ -5,9 +5,14 @@ import siconos.numerics as SN
 import numpy as np
 import matplotlib.pyplot as plt
 
-withPlot = True
+withPlot = False
 
-from cffi import FFI
+try:
+    from cffi import FFI
+except:
+    import sys
+    print('no cffi module installed, exiting')
+    sys.exit(0)
 
 if __name__ == '__main__':
 

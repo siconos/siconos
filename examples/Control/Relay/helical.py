@@ -2,7 +2,9 @@
 from B. Caillaud,
 http://www.irisa.fr/prive/Benoit.Caillaud/cours-hybride-2014/Cours_modelisation_des_systemes_hybrides/Cours/Cours.html
 """
-from mpl_toolkits.mplot3d import Axes3D
+
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 import siconos.kernel as sk

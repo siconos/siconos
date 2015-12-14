@@ -20,10 +20,12 @@
 #
 
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from numpy import array, eye, empty, zeros, savetxt
 import numpy as np
-from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL, \
+from siconos.kernel import FirstOrderLinearDS, RelayNSL, \
 NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
 Interaction, Relay
 from math import ceil
@@ -126,19 +128,19 @@ plt.subplot(414)
 plt.plot(dataPlot[:,0], dataPlot[:,4])
 plt.title('lambda2')
 plt.grid()
-plt.show()
+plt.savefig('Zhuravlev_all.png')
 
 plt.plot(dataPlot[:,1], dataPlot[:,2])
 plt.xlabel('s')
 plt.xlabel('v')
 plt.grid()
-plt.show()
+plt.savefig('Zhuravlev_sv.png')
 
 plt.plot(dataPlot[:,3], dataPlot[:,4])
 plt.xlabel('lambda1')
 plt.xlabel('lambda2')
 plt.grid()
-plt.show()
+plt.savefig('Zhuravlev_lambdas.png')
 
 pos = np.abs(dataPlot[:,1])
 velocity = (1-myProcessRelation._kappa*np.sign(dataPlot[:,1]*dataPlot[:,2]))*dataPlot[:, 2]*np.sign(dataPlot[:,1])
@@ -155,7 +157,7 @@ plt.subplot(313)
 plt.title('control input')
 plt.plot(dataPlot[:,0], control)
 plt.grid()
-plt.show()
+plt.savefig('Zhuravlev_pv.png')
 
 indx = np.nonzero(dataPlot[:, 0]>30)
 ttt = dataPlot[indx, 0].flatten()
@@ -172,4 +174,4 @@ plt.subplot(313)
 plt.title('control input')
 plt.plot(ttt, control[indx])
 plt.grid()
-plt.show()
+plt.savefig('Zhuravlev_pv_z.png')

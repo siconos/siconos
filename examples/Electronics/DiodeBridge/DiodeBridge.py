@@ -51,8 +51,10 @@
 
 with_plot = True
 if with_plot:
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
-    
+
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
     ComplementarityConditionNSL, Interaction,\
     Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \

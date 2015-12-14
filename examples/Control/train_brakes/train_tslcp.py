@@ -17,11 +17,12 @@ Equations are ::
     j_n is a constant
 
 """
-from mpl_toolkits.mplot3d import Axes3D
+
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 import siconos.kernel as sk
-import siconos.numerics as sn
 from math import ceil
 
 # == User-defined parameters ==

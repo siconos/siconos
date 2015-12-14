@@ -20,8 +20,10 @@
 #
 
 
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib.pyplot import subplot, title, plot, grid, savefig
-from numpy import array, eye, empty, zeros, savetxt
+from numpy import eye, empty, zeros, savetxt
 from siconos.kernel import FirstOrderNonLinearDS, FirstOrderLinearTIR, RelayNSL, \
 NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
 Interaction, Relay
@@ -88,7 +90,7 @@ myIntegrator = EulerMoreauOSI(theta)
 myIntegrator.insertDynamicalSystem(process)
 s.insertIntegrator(myIntegrator)
 
-print 'initialization'
+print('initialization')
 #TODO python <- SICONOS_RELAY_LEMKE
 # access dparam
 
@@ -107,7 +109,7 @@ dataPlot[0, 3] = myProcessInteraction.lambda_(0)[0]
 # time loop
 k = 1
 while(s.hasNextEvent()):
-     #print 'iteration k'			
+     #print 'iteration k'
      s.computeOneStep()
      dataPlot[k, 0] = s.nextTime()
      dataPlot[k, 1] = process.x()[0]
@@ -115,7 +117,7 @@ while(s.hasNextEvent()):
      dataPlot[k, 3] = myProcessInteraction.lambda_(0)[0]
      k += 1
      s.nextStep()
-     
+
 # save to disk
 savetxt('output.txt', dataPlot)
 # plot interesting stuff
@@ -136,4 +138,3 @@ savefig("SOSM1.png")
 plot(dataPlot[:,1], dataPlot[:,2])
 grid()
 savefig("SOSM1.png")
-

@@ -22,6 +22,9 @@ from siconos.kernel import FirstOrderLinearDS
 from siconos.control.simulation import ControlZOHSimulation
 from siconos.control.sensor import LinearSensor
 from siconos.control.controller import LinearSMC
+
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib.pyplot import subplot, title, plot, grid, savefig, xlabel, ylabel
 from numpy import eye, empty, zeros, savetxt
 from math import ceil
@@ -58,8 +61,8 @@ if h > hControl:
 # Declaration of the Dynamical System
 processDS = FirstOrderLinearDS(x0, A)
 processDS.setComputebFunction("RelayPlugin", "computeB")
-# Model
-# time discretisation
+
+# Control simulation
 sim = ControlZOHSimulation(t0, T, h)
 sim.setSaveOnlyMainSimulation(True)
 sim.addDynamicalSystem(processDS)

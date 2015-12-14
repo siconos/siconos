@@ -20,6 +20,8 @@
 #
 
 
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib.pyplot import subplot, title, plot, grid, savefig
 from numpy import array, eye, empty, zeros, savetxt
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL, \

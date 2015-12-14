@@ -60,7 +60,9 @@ Modeltitle = "DiodeBridge"
 
 withPlot = True
 if (withPlot):
-    from matplotlib.pyplot import subplot, title, plot, grid, show, savefig
+    import matplotlib
+    matplotlib.use('Agg')
+    from matplotlib.pyplot import subplot, title, plot, grid, savefig
 
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\

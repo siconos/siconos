@@ -23,18 +23,25 @@
 from __future__ import print_function
 
 import sys
-from sage.all import *
-# this is needed since sage uses mpfr by default ...
-RealNumber = float
-Integer = int
+
+try:
+    from sage.all import *
+    # this is needed since sage uses mpfr by default ...
+    RealNumber = float
+    Integer = int
+except ImportError:
+    print('sage is not installed, exiting')
+    sys.exit(0)
 
 # Other import
-from siconos.kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-    TimeStepping, ZeroOrderHoldOSI, getMatrix, SimpleMatrix
-from siconos.control.simulation import ControlManager
+from siconos.kernel import FirstOrderLinearDS, getMatrix
+from siconos.control.simulation import ControlZOHSimulation
 from siconos.control.sensor import LinearSensor
 from siconos.control.controller import LinearSMCOT2
-from matplotlib.pyplot import subplot, title, plot, grid, show
+
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib.pyplot import subplot, title, plot, grid, savefig
 from numpy import array, eye, empty, zeros, savetxt
 from math import ceil, sin
 from numpy.linalg import norm
@@ -85,56 +92,28 @@ if h > hControl:
 processDS = MyFOLDS(x0, A)
 # XXX b is not automatically created ...
 processDS.setb([0, 0])
-# Model
-process = Model(t0, T)
-process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
-# time discretization
-processTD = TimeDiscretisation(t0, h)
-tSensor = TimeDiscretisation(t0, hControl)
-tActuator = TimeDiscretisation(t0, hControl)
-# Creation of the Simulation
-processSimulation = TimeStepping(processTD, 0)
-processSimulation.setName("plant simulation")
-# Declaration of the integrator
-processIntegrator = ZeroOrderHoldOSI(processDS)
-processSimulation.insertIntegrator(processIntegrator)
+
+# Control Simulation
+sim = ControlZOHSimulation(t0, T, h)
+sim.setSaveOnlyMainSimulation(True)
+sim.addDynamicalSystem(processDS)
 # Actuator, Sensor & ControlManager
-control = ControlManager(process)
-sens = LinearSensor(tSensor, processDS, sensorC)
-control.addSensorPtr(sens)
-act = LinearSMCOT2(tActuator, processDS)
-act.setCsurfacePtr(Csurface)
-act.addSensorPtr(sens)
-control.addActuatorPtr(act)
+sens = LinearSensor(processDS, sensorC)
+sim.addSensor(sens, hControl)
+act = LinearSMCOT2(sens)
+act.setCsurface(Csurface)
+act.setB(Brel)
+sim.addActuator(act, hControl)
 
 # Initialization
-process.initialize(processSimulation)
-control.initialize()
-# This is not working right now
-#eventsManager = s.eventsManager()
+sim.initialize()
 
-# Matrix for data storage
-dataPlot = empty((3*(N+1), outputSize))
-dataPlot[0, 0] = t0
-dataPlot[0, 1] = processDS.x()[0]
-dataPlot[0, 2] = processDS.x()[1]
-dataPlot[0, 3] = processDS.z()[0]
-dataPlot[0, 4] = processDS.z()[1]
+# Run simulation
+sim.run()
 
-# Main loop
-k = 1
-while(processSimulation.hasNextEvent()):
-    processSimulation.computeOneStep()
-    dataPlot[k, 0] = processSimulation.nextTime()
-    dataPlot[k, 1] = processDS.x()[0]
-    dataPlot[k, 2] = processDS.x()[1]
-    dataPlot[k, 3] = processDS.z()[0]
-    dataPlot[k, 4] = processDS.z()[1]
-    k += 1
-    processSimulation.nextStep()
-#    print processSimulation.nextTime()
-# Resize matrix
-dataPlot.resize(k, outputSize)
+# Get data
+dataPlot = sim.data()
+
 # Save to disk
 savetxt('SMCExampleImplicitOT2-noCplugin-sage-py.dat', dataPlot)
 # Plot interesting data
@@ -147,13 +126,9 @@ title('x2')
 plot(dataPlot[:, 0], dataPlot[:, 2])
 grid()
 subplot(413)
-title('u1')
+title('u')
 plot(dataPlot[:, 0], dataPlot[:, 3])
-grid()
-subplot(414)
-title('u2')
-plot(dataPlot[:, 0], dataPlot[:, 4])
-show()
+savefig('ismcOT2_x_u.png')
 
 # compare with the reference
 ref = getMatrix(SimpleMatrix("SMCExampleImplicitOT2-py.ref"))
