@@ -1,4 +1,5 @@
 #include "KernelTest.hpp"
+#include "SiconosKernel.hpp"
 
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/bindings/ublas/vector.hpp>
