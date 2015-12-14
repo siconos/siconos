@@ -18,12 +18,11 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
-from siconos.kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-    TimeStepping, ZeroOrderHoldOSI
-from siconos.control.simulation import ControlManager
+from siconos.kernel import FirstOrderLinearDS
+from siconos.control.simulation import ControlZOHSimulation
 from siconos.control.sensor import LinearSensor
 from siconos.control.controller import LinearSMC
-from matplotlib.pyplot import subplot, title, plot, grid, show, xlabel, ylabel
+from matplotlib.pyplot import subplot, title, plot, grid, savefig, xlabel, ylabel
 from numpy import eye, empty, zeros, savetxt
 from math import ceil
 from matplotlib import rc
@@ -58,79 +57,32 @@ if h > hControl:
 
 # Declaration of the Dynamical System
 processDS = FirstOrderLinearDS(x0, A)
+processDS.setComputebFunction("RelayPlugin", "computeB")
 # Model
-process = Model(t0, T)
-process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
 # time discretisation
-processTD = TimeDiscretisation(t0, h)
-tSensor = TimeDiscretisation(t0, hControl)
-tActuator = TimeDiscretisation(t0, hControl)
-# Creation of the Simulation
-processSimulation = TimeStepping(processTD, 0)
-processSimulation.setName("plant simulation")
-# Declaration of the integrator
-processIntegrator = ZeroOrderHoldOSI(processDS)
-processSimulation.insertIntegrator(processIntegrator)
+sim = ControlZOHSimulation(t0, T, h)
+sim.setSaveOnlyMainSimulation(True)
+sim.addDynamicalSystem(processDS)
 # Actuator, Sensor & ControlManager
-control = ControlManager(process)
-sens = LinearSensor(tSensor, processDS, sensorC)
-control.addSensorPtr(sens)
-act = LinearSMC(tActuator, processDS)
-act.setCsurfacePtr(Csurface)
-act.setBPtr(Brel)
-#act.setDPtr(Drel)
-act.addSensorPtr(sens)
-control.addActuatorPtr(act)
+sens = LinearSensor(processDS, sensorC)
+sim.addSensor(sens, hControl)
+act = LinearSMC(sens)
+act.setCsurface(Csurface)
+act.setB(Brel)
+sim.addActuator(act, hControl)
 
 # Initialization
-process.initialize(processSimulation)
-control.initialize()
-# This is not working right now
-#eventsManager = s.eventsManager()
+sim.initialize()
 
-# Matrix for data storage
-dataPlot = empty((3*(N+1), outputSize))
-#dataPlot[0, 0] = processDS.t0()
-dataPlot[0, 0] = t0
-dataPlot[0, 1] = processDS.x()[0]
-dataPlot[0, 2] = processDS.x()[1]
-dataPlot[0, 3] = processDS.z()[0]
-dataPlot[0, 4] = processDS.z()[1]
+# Run simulation
+sim.run()
 
+# Get data
+dataPlot = sim.data()
 
-# Main loop
-k = 1
-while(processSimulation.hasNextEvent()):
-    processSimulation.computeOneStep()
-    dataPlot[k, 0] = processSimulation.nextTime()
-    dataPlot[k, 1] = processDS.x()[0]
-    dataPlot[k, 2] = processDS.x()[1]
-    dataPlot[k, 3] = processDS.z()[0]
-    dataPlot[k, 4] = processDS.z()[1]
-    k += 1
-    processSimulation.nextStep()
-# Resize
-dataPlot.resize(k, outputSize)
 # Save to disk
 savetxt('SMCExampleImplicit-py.dat', dataPlot)
 # Plot interesting data
-
-#subplot(411)
-#title('x1')
-#plot(dataPlot[:, 0], dataPlot[:, 1])
-#grid()
-#subplot(412)
-#title('x2')
-#plot(dataPlot[:, 0], dataPlot[:, 2])
-#grid()
-#subplot(413)
-#title('u1')
-#plot(dataPlot[:, 0], dataPlot[:, 3])
-#grid()
-#subplot(414)
-#title('u2')
-#plot(dataPlot[:, 0], dataPlot[:, 4])
-#show()
 
 subplot(211)
 ylabel(r'$\sigma$')
@@ -141,8 +93,8 @@ subplot(212)
 ylabel(r'$\bar{u}^s$')
 xlabel(r't')
 plt.ylim(-2.1, 2.1)
-plot(dataPlot[:, 0], dataPlot[:, 4])
-show()
+plot(dataPlot[:, 0], dataPlot[:, 3])
+savefig("ismc_sigma_u.png")
 
 subplot(211)
 ylabel(r'$\sigma$')
@@ -156,14 +108,14 @@ ylabel(r'$\bar{u}^s$')
 xlabel(r't')
 plt.ylim(-2.1, 2.1)
 plt.xlim(xmin=.49)
-p1 = plot(dataPlot[4900:, 0], dataPlot[4900:, 4])
+p1 = plot(dataPlot[4900:, 0], dataPlot[4900:, 3])
 #p2 = plot(dataPlot[4900:, 0], np.sin(50*dataPlot[4900:, 0]))
 #plt.legend((p1[0], p2[0]), (r'$\bar{u}^s(t)$', r'$-\rho(t)$'), ncol=2)
-show()
+savefig("ismc_sigma_u_z.png")
 
-u_z = dataPlot[5100:, 4]
+u_z = dataPlot[5100:, 3]
 n = len(u_z)
-Y = scipy.fft(dataPlot[5100:, 4])/n
+Y = scipy.fft(dataPlot[5100:, 3])/n
 k = arange(n)
 T = n*h
 frq = k/T
@@ -172,7 +124,7 @@ Y = Y[range(n/2)]
 plot(frq, abs(Y), 'r')
 xlabel(r'freq (Hz)')
 title(r'Frequency spectrum of $\bar{u}^s$')
-show()
+savefig("ismc_u_freq.png")
 
 # TODO
 # compare with the reference
