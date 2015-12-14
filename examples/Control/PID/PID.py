@@ -23,7 +23,9 @@ from siconos.control.simulation import ControlManager
 from siconos.control.sensor import LinearSensor
 from siconos.control.controller import PID
 
-from matplotlib.pyplot import subplot, title, plot, grid, show
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib.pyplot import subplot, title, plot, grid, savefig
 from numpy import array, eye, empty, zeros, savetxt
 from math import ceil
 from numpy.linalg import norm
@@ -40,13 +42,13 @@ outputSize = 5 # number of variable to store at each time step
 # Matrix declaration
 A = zeros((2,2))
 A[0,1] = 1
-B = zeros(2)
+B = [[0], [1]]
 x0 = [10.,10.]
 C = [[1., 0]] # we have to specify ndmin=2, so it's understood as
 K = [.25, .125, 2]
 
 # Declaration of the Dynamical System
-doubleIntegrator = FirstOrderLinearTIDS(x0, A, B)
+doubleIntegrator = FirstOrderLinearTIDS(x0, A)
 # Model
 process = Model(t0, T)
 process.nonSmoothDynamicalSystem().insertDynamicalSystem(doubleIntegrator)
@@ -65,6 +67,7 @@ control = ControlManager(s)
 sens = LinearSensor(doubleIntegrator, C)
 control.addSensorPtr(sens, tSensor)
 act = PID(sens)
+act.setB(B)
 control.addActuatorPtr(act, tActuator)
 
 # Initialization
