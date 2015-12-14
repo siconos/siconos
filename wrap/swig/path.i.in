@@ -4,5 +4,5 @@
 %pythoncode %{
 import sys
 import os
-sys.path.append(os.path.join('@CMAKE_INSTALL_PREFIX@','@PYTHON_DIST_PACKAGES@','siconos'))
+sys.path.append(os.path.join('@SICONOS_PYTHON_INSTALL_DIR@','siconos'))
 %}
