@@ -3,8 +3,16 @@ import siconos.numerics as SN
 import numpy as np
 #import ctypes
 
-from numba import jit
+try:
+    from numba import jit
+except:
+    import sys
+    print('numba not found, exiting')
+    sys.exit(0)
 #import numba
+
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 

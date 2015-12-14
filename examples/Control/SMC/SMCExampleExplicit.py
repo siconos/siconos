@@ -32,7 +32,11 @@ from matplotlib import rc
 import matplotlib.pyplot as plt
 import scipy
 from scipy import arange
-rc('text', usetex=True)
+
+import distutils.spawn
+if distutils.spawn.find_executable('latex'):
+    rc('text', usetex=True)
+
 # variable declaration
 ndof = 2   # Number of degrees of freedom of your system
 t0 = 0.0   # start time

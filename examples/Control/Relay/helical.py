@@ -5,6 +5,7 @@ http://www.irisa.fr/prive/Benoit.Caillaud/cours-hybride-2014/Cours_modelisation_
 
 import matplotlib
 matplotlib.use('Agg')
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import matplotlib.pyplot as plt
 import siconos.kernel as sk
