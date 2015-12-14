@@ -28,14 +28,14 @@ public:
    *  \param double : current time
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  virtual void computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& C);
-  virtual void computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& D);
+  virtual void computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
+  virtual void computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
 
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  virtual void computeJacglambda(double t, SiconosVector& lambda, SiconosMatrix& B);
+  virtual void computeJacglambda(double t, SiconosVector& lambda, SimpleMatrix& B);
 
 
   double source(double t);

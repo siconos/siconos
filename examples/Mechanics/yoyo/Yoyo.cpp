@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
     (*H)(0, 1) = 0;
     (*H)(0, 2) = 0;
     SP::NonSmoothLaw loi0(new NewtonImpactNSL(e));
-    SP::Relation relation0(new LagrangianLinearTIR(*H));
+    SP::Relation relation0(new LagrangianLinearTIR(H));
 
 
     // pramètres du solveur siconos

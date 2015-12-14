@@ -31,12 +31,12 @@ void NonlinearRelationReduced2::computeg(double t, SiconosVector& lambda, Sicono
   r(1) = 40.0 * (1 - lambda(1));
  }
 
-void NonlinearRelationReduced2::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& D)
+void NonlinearRelationReduced2::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
   D.zero();
 }
 
-void NonlinearRelationReduced2::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& C)
+void NonlinearRelationReduced2::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
 
   C.setValue(0, 0, -1);
@@ -47,7 +47,7 @@ void NonlinearRelationReduced2::computeJachx(double t, SiconosVector& x, Siconos
 }
 
 
-void NonlinearRelationReduced2::computeJacglambda(double t, SiconosVector& lambda, SiconosMatrix& B)
+void NonlinearRelationReduced2::computeJacglambda(double t, SiconosVector& lambda, SimpleMatrix& B)
 {
 
   B.setValue(0, 0, -40.0);

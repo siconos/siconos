@@ -86,7 +86,7 @@ void elecRelation::computeg(double t, SiconosVector& lambda, SiconosVector& r)
  *  \param double : current time
  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
  */
-void elecRelation::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& C)
+void elecRelation::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
 
   double* h = C.getArray();
@@ -112,7 +112,7 @@ void elecRelation::computeJachx(double t, SiconosVector& x, SiconosVector& lambd
 #endif
 
 }
-void elecRelation::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& D)
+void elecRelation::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
 
   double* h = D.getArray();
@@ -223,7 +223,7 @@ void elecRelation::computeJachlambda(double t, SiconosVector& x, SiconosVector& 
 
 }
 
-void elecRelation::computeJacglambda(double time, SiconosVector& lambda, SiconosMatrix& B)
+void elecRelation::computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B)
 {
 
   double *g = B.getArray();

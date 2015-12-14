@@ -61,7 +61,7 @@ void NonlinearRelationWithSign::computeg(double t, SiconosVector& lambda, Sicono
 
 }
 
-void NonlinearRelationWithSign::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& C)
+void NonlinearRelationWithSign::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
   C.setValue(0, 0, -1);
   C.setValue(0, 1, 0);
@@ -80,12 +80,12 @@ void NonlinearRelationWithSign::computeJachx(double t, SiconosVector& x, Siconos
 
 }
 
-void NonlinearRelationWithSign::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& D)
+void NonlinearRelationWithSign::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
   D.zero();
 }
 
-void NonlinearRelationWithSign::computeJacglambda(double t, SiconosVector& lambda, SiconosMatrix& B)
+void NonlinearRelationWithSign::computeJacglambda(double t, SiconosVector& lambda, SimpleMatrix& B)
 {
 
   //  double *g = &(*Jacglambda)(0,0);

@@ -59,7 +59,7 @@ void NonlinearRelation::computeg(double t, SiconosVector& lambda, SiconosVector&
 
 }
 
-void NonlinearRelation::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& D)
+void NonlinearRelation::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
   //    double *h = &(*_jachlambda)(0,0);
   /*
@@ -70,7 +70,7 @@ void NonlinearRelation::computeJachlambda(double t, SiconosVector& x, SiconosVec
   D.zero();
 }
 
-void NonlinearRelation::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& C)
+void NonlinearRelation::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
   C.setValue(0, 0, -1);
   C.setValue(0, 1, 0);
@@ -83,7 +83,7 @@ void NonlinearRelation::computeJachx(double t, SiconosVector& x, SiconosVector& 
 
 }
 
-void NonlinearRelation::computeJacglambda(double t, SiconosVector& lambda, SiconosMatrix& B)
+void NonlinearRelation::computeJacglambda(double t, SiconosVector& lambda, SimpleMatrix& B)
 {
 
   //  double *g = &(*Jacglambda)(0,0);
