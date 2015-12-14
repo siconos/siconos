@@ -125,7 +125,7 @@ void FirstOrderType1R::computeInput(double time, Interaction& inter, Interaction
   *DSlink[FirstOrderR::z] = workZ;
 }
 
-void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector& z, SiconosMatrix& C)
+void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C)
 {
   //
   assert(_pluginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
@@ -134,14 +134,14 @@ void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector
 
 }
 
-void FirstOrderType1R::computeJachz(double time, SiconosVector& x, SiconosVector& z, SiconosMatrix& F)
+void FirstOrderType1R::computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& F)
 {
   if (_pluginJachz && _pluginJachz->fPtr)
     ((Type1Ptr)(_pluginJachz->fPtr))(x.size(), &(x)(0), F.size(0), F.getArray(), z.size(), &(z)(0));
 
 }
 
-void FirstOrderType1R::computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SiconosMatrix& B)
+void FirstOrderType1R::computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
 {
   assert(_pluginJacglambda && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
 

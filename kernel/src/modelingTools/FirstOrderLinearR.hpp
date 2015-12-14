@@ -94,7 +94,7 @@ public:
   *  \param C the C matrix
   *  \param B the B matrix
   */
-  FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix B);
+  FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix B);
 
   /** create the Relation from a set of data
   *  \param C the C matrix
@@ -103,7 +103,7 @@ public:
   *  \param e the e matrix
   *  \param B the B matrix
   */
-  FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e, SP::SiconosMatrix B);
+  FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e, SP::SimpleMatrix B);
 
   /** destructor
   */
@@ -143,21 +143,21 @@ public:
    * \param z the auxiliary input vector
    * \param C the C matrix
   */
-  void computeC(double time, SiconosVector& z, SiconosMatrix& C);
+  void computeC(double time, SiconosVector& z, SimpleMatrix& C);
 
   /** Function to compute the matrix D
    * \param time the current time
    * \param z the auxiliary input vector
    * \param D the D matrix
   */
-  void computeD(double time, SiconosVector& z, SiconosMatrix& D);
+  void computeD(double time, SiconosVector& z, SimpleMatrix& D);
 
   /** Function to compute the matrix F
    * \param time the current time
    * \param z the auxiliary input vector
    * \param F the F matrix
   */
-  void computeF(double time, SiconosVector& z, SiconosMatrix& F);
+  void computeF(double time, SiconosVector& z, SimpleMatrix& F);
 
   /** Function to compute the vector e
    * \param time the current time
@@ -171,7 +171,7 @@ public:
    * \param z the auxiliary input vector
    * \param B the B matrix
   */
-  void computeB(double time, SiconosVector& z, SiconosMatrix& B);
+  void computeB(double time, SiconosVector& z, SimpleMatrix& B);
 
   /** default function to compute h
   *  \param time current time

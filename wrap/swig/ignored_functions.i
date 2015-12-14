@@ -41,9 +41,3 @@
 %ignore operator +(SiconosVector const &,SiconosVector const &);
 %ignore operator -(SiconosVector const &,SiconosVector const &);
 %ignore operator -(SiconosMatrix const &,SiconosMatrix const &);
-%ignore LagrangianLinearTIR::LagrangianLinearTIR(SimpleMatrix const &);
-%ignore LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix);
-%ignore LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix,SP::SiconosVector);
-%ignore LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix,SP::SiconosMatrix,SP::SiconosMatrix,SP::SiconosVector);
-%ignore LagrangianLinearTIR::LagrangianLinearTIR(SimpleMatrix const &,SiconosMatrix const &,SiconosMatrix const &,SiconosVector const &);
-

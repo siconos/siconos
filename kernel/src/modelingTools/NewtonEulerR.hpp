@@ -64,12 +64,12 @@ protected:
   /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
    *  i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
    */
-  SP::SiconosMatrix _jachq;
+  SP::SimpleMatrix _jachq;
 
   /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
    *  i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
    */
-  SP::SiconosMatrix _jachqDot;
+  SP::SimpleMatrix _jachqDot;
 
   /**The time-derivative of Jacobian of the constraints with respect
      to the generalized coordinates  \f$ q\f$
@@ -77,10 +77,10 @@ protected:
    * This value is useful to compute the second-order
    * time--derivative of the constraints with respect to time.
    */
-  SP::SiconosMatrix _dotjachq;
+  SP::SimpleMatrix _dotjachq;
 
-  SP::SiconosMatrix _jachlambda;
-  SP::SiconosMatrix _jacglambda;
+  SP::SimpleMatrix _jachlambda;
+  SP::SimpleMatrix _jacglambda;
 
   /**vector e*/
   SP::SiconosVector _e;
@@ -92,7 +92,7 @@ protected:
   /**updated in computeJachqT:
   In the case of the bilateral constrains, it is _jachq._T.
   In the case of a local frame, _jachqT is built from the geometrical datas(local frame, point of contact).*/
-  SP::SiconosMatrix _jachqT;
+  SP::SimpleMatrix _jachqT;
 
   /** basic constructor
   \param lagType the sub-type of the relation
@@ -117,21 +117,21 @@ public:
   // -- Jach --
 
   /** get a pointer on matrix Jach[index]
-  *  \return a pointer on a SiconosMatrix
+  *  \return a pointer on a SimpleMatrix
   */
-  inline SP::SiconosMatrix jachq() const
+  inline SP::SimpleMatrix jachq() const
   {
     return _jachq;
   }
 
-  //proj_with_q  inline SP::SiconosMatrix jachqProj() const { return _jachqProj; }
-  void setJachq(SP::SiconosMatrix newJachq);
+  //proj_with_q  inline SP::SimpleMatrix jachqProj() const { return _jachqProj; }
+  void setJachq(SP::SimpleMatrix newJachq);
 
-  inline SP::SiconosMatrix jachqDot() const
+  inline SP::SimpleMatrix jachqDot() const
   {
     return _jachqDot;
   }
-  inline SP::SiconosMatrix dotJachq() const
+  inline SP::SimpleMatrix dotJachq() const
   {
     assert(_dotjachq);
     return _dotjachq;
@@ -143,11 +143,11 @@ public:
     return _secondOrderTimeDerivativeTerms;
   };
 
-  inline SP::SiconosMatrix jachlambda() const
+  inline SP::SimpleMatrix jachlambda() const
   {
     return _jachlambda;
   }
-  inline SP::SiconosMatrix jacglambda() const
+  inline SP::SimpleMatrix jacglambda() const
   {
     return _jacglambda;
   }
@@ -156,11 +156,11 @@ public:
     _e = newE;
   }
 
-  inline SP::SiconosMatrix jachqT() const
+  inline SP::SimpleMatrix jachqT() const
   {
     return _jachqT;
   }
-  inline void setJachqT(SP::SiconosMatrix newJachqT)
+  inline void setJachqT(SP::SimpleMatrix newJachqT)
   {
     _jachqT = newJachqT;
   }
@@ -168,7 +168,7 @@ public:
   /** set Jach[index] to pointer newPtr (pointer link)
   *  \param newPtr the new matrix
   */
-  void setJachqPtr(SP::SiconosMatrix newPtr);
+  void setJachqPtr(SP::SimpleMatrix newPtr);
 
   /** Plugin object for the time--derivative of Jacobian i.e.
   * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
@@ -312,27 +312,27 @@ public:
   /**
   * return a SP on the C matrix.
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
-  * \return SP::SiconosMatrix
+  * \return SP::SimpleMatrix
   */
-  virtual inline SP::SiconosMatrix C() const
+  virtual inline SP::SimpleMatrix C() const
   {
     return _jachq;
   }
   /**
   * return a SP on the D matrix.
   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
-  * \return SP::SiconosMatrix
+  * \return SP::SimpleMatrix
   */
-  virtual inline SP::SiconosMatrix D() const
+  virtual inline SP::SimpleMatrix D() const
   {
     return _jachlambda;
   }
   /**
   * return a SP on the B matrix.
   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
-  * \return SP::SiconosMatrix
+  * \return SP::SimpleMatrix
   */
-  virtual inline SP::SiconosMatrix B() const
+  virtual inline SP::SimpleMatrix B() const
   {
     return _jacglambda;
   }

@@ -262,7 +262,7 @@ public:
    */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
 
-  virtual SP::SiconosMatrix C() const = 0;
+  virtual SP::SimpleMatrix C() const = 0;
 
   /** return true if the relation is linear.
       \return bool

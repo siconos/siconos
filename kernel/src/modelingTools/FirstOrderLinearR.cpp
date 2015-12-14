@@ -54,7 +54,7 @@ FirstOrderLinearR::FirstOrderLinearR(const std::string& Cname, const std::string
 }
 
 // Minimum data (C, B as pointers) constructor
-FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix B):
+FirstOrderLinearR::FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix B):
   FirstOrderR(LinearR)
 {
   _C = C;
@@ -62,7 +62,7 @@ FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix B):
 }
 
 // // Constructor from a complete set of data
-FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector E, SP::SiconosMatrix B):
+FirstOrderLinearR::FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector E, SP::SimpleMatrix B):
   FirstOrderR(LinearR)
 {
   _C = C;
@@ -146,7 +146,7 @@ void FirstOrderLinearR::initComponents(Interaction& inter, VectorOfBlockVectors&
   }
 }
 
-void FirstOrderLinearR::computeC(double time, SiconosVector& z, SiconosMatrix& C)
+void FirstOrderLinearR::computeC(double time, SiconosVector& z, SimpleMatrix& C)
 {
   if (_pluginJachx->fPtr)
   {
@@ -154,7 +154,7 @@ void FirstOrderLinearR::computeC(double time, SiconosVector& z, SiconosMatrix& C
   }
 }
 
-void FirstOrderLinearR::computeD(double time, SiconosVector& z, SiconosMatrix& D)
+void FirstOrderLinearR::computeD(double time, SiconosVector& z, SimpleMatrix& D)
 {
   if (_pluginJachlambda->fPtr)
   {
@@ -162,7 +162,7 @@ void FirstOrderLinearR::computeD(double time, SiconosVector& z, SiconosMatrix& D
   }
 }
 
-void FirstOrderLinearR::computeF(double time, SiconosVector& z, SiconosMatrix& F)
+void FirstOrderLinearR::computeF(double time, SiconosVector& z, SimpleMatrix& F)
 {
   if (_pluginf->fPtr)
   {
@@ -179,7 +179,7 @@ void FirstOrderLinearR::computee(double time, SiconosVector& z, SiconosVector& e
   }
 }
 
-void FirstOrderLinearR::computeB(double time, SiconosVector& z, SiconosMatrix& B)
+void FirstOrderLinearR::computeB(double time, SiconosVector& z, SimpleMatrix& B)
 {
   if (_pluginJacglambda->fPtr)
   {

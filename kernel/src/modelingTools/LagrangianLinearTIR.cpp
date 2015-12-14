@@ -28,14 +28,14 @@
 using namespace RELATION;
 
 // Minimum data (C as pointer) constructor
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C):
   LagrangianR(LinearTIR)
 {
   _jachq = C;
 }
 
 // Constructor from a complete set of data
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e):
   LagrangianR(LinearTIR)
 {
   _jachq = C;
@@ -45,38 +45,11 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix 
 }
 
 // Minimum data (C, e as pointers) constructor
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosVector e):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e):
   LagrangianR(LinearTIR)
 {
   _jachq = C;
   _e = e;
-}
-
-// Minimum data (C as matrix) constructor
-LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC):
-  LagrangianR(LinearTIR)
-{
-  _jachq.reset(new SimpleMatrix(newC));
-}
-
-// Constructor from a complete set of data (matrices)
-LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD, const SiconosMatrix& newF, const SiconosVector& newE):
-  LagrangianR(LinearTIR)
-{
-  RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
-  _jachq.reset(new SimpleMatrix(newC));
-  _jachlambda.reset(new SimpleMatrix(newD));
-  _F.reset(new SimpleMatrix(newF));
-  _e.reset(new SiconosVector(newE));
-}
-
-// Constructor from C and e as matrix/vector
-LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const SiconosVector& newE):
-  LagrangianR(LinearTIR)
-{
-  RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
-  _jachq.reset(new SimpleMatrix(newC));
-  _e.reset(new SiconosVector(newE));
 }
 
 void LagrangianLinearTIR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)

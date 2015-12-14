@@ -39,11 +39,11 @@
  *  Class name = type+subType.
  *
  * If \f$y = h(t,q,\dot q,\ldots)\f$ describes the constraint (the relation) , all the gradients of h
- * are handled by the following SiconosMatrix and SiconosVector objects.
+ * are handled by the following SimpleMatrix and SiconosVector objects.
  *
  * <ul>
  * <li> The Jacobian of the constraints with respect to the coodinates  \f$q\f$
- * i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]  is stored in  SP::SiconosMatrix _jachq .
+ * i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]  is stored in  SP::SimpleMatrix _jachq .
  *
  * This Jacobian is mainly used for Newton linearization and to compute the time-derivative of the constraint \f$y = h(q,\ldots)\f$ that is
  *  \f[\dot y (t) = \nabla^T_q h(t,q,\dot q,\ldots) (q) \dot q +\ldots\f]
@@ -51,10 +51,10 @@
  * more general linearized part of the gap function. If \f$y=h(q)\f$ models a gap function, then the time--derivative
  * can be generically  written as
  * \f[\dot y (t) = H(q,\ldots) \dot q  +\ldots. \f]
- * The matrix \f$H(q,\ldots) \f$ is also stored in   SP::SiconosMatrix _jachq </li>
+ * The matrix \f$H(q,\ldots) \f$ is also stored in   SP::SimpleMatrix _jachq </li>
  *
  * <li> The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
- *  i.e. \f[\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f] is stored in  SP::SiconosMatrix _jachqDot </li>
+ *  i.e. \f[\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f] is stored in  SP::SimpleMatrix _jachqDot </li>
  *
  * <li>The time-derivative of Jacobian of the constraints with respect to the generalized coordinates  \f$ q\f$
  *  i.e. \f[\frac{d}{dt} \nabla^\top_{q} h(t,q,\dot q,\ldots).\f]. This value is useful to compute the second-order
@@ -82,17 +82,17 @@ protected:
 
   /** Jacobian matrices of \f$y = h(t,q,\dot q,\ldots)\f$ */
 
-  SP::SiconosMatrix _jachlambda;
+  SP::SimpleMatrix _jachlambda;
 
   /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
    *  i.e. \f[\nabla^\top_q h(t,q,\dot q,\ldots)\f]
    */
-  SP::SiconosMatrix _jachq;
+  SP::SimpleMatrix _jachq;
 
   /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
    *  i.e. \f[\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f]
    */
-  SP::SiconosMatrix _jachqDot;
+  SP::SimpleMatrix _jachqDot;
 
   /**The time-derivative of Jacobian of the constraints with respect
      to the generalized coordinates  \f$ q\f$
@@ -100,7 +100,7 @@ protected:
    * This value is useful to compute the second-order
    * time--derivative of the constraints with respect to time.
    */
-  SP::SiconosMatrix _dotjachq;
+  SP::SimpleMatrix _dotjachq;
 
   SP::PluggedObject _pluginJachq;
 
@@ -133,21 +133,21 @@ public:
   */
 
   /** get a pointer on matrix Jach[index]
-  *  \return a pointer on a SiconosMatrix
+  *  \return a pointer on a SimpleMatrix
   */
-  inline SP::SiconosMatrix jachq() const
+  inline SP::SimpleMatrix jachq() const
   {
     return _jachq;
   }
-  inline SP::SiconosMatrix jachqDot() const
+  inline SP::SimpleMatrix jachqDot() const
   {
     return _jachqDot;
   }
-  inline SP::SiconosMatrix dotJachq() const
+  inline SP::SimpleMatrix dotJachq() const
   {
     return _dotjachq;
   }
-  inline SP::SiconosMatrix jachlambda() const
+  inline SP::SimpleMatrix jachlambda() const
   {
     return _jachlambda;
   }
@@ -160,7 +160,7 @@ public:
     _jachq = newPtr ;
   }
 
-  inline SP::SiconosMatrix C() const
+  inline SP::SimpleMatrix C() const
   {
     return _jachq;
   }

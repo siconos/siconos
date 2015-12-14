@@ -81,7 +81,7 @@ void FirstOrderNonLinearR::computeg(double time, SiconosVector& x, SiconosVector
   }
 }
 
-void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosMatrix& C)
+void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& C)
 {
   if (_pluginJachx)
   {
@@ -91,7 +91,7 @@ void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVe
     RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachx, you need to derive this function in order to use it");
 }
 
-void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosMatrix& D)
+void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& D)
 {
   if (_pluginJachlambda)
   {
@@ -101,7 +101,7 @@ void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, Sico
     RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachlambda, you need to either provide a matrix D or derive this function in order to use it");
 }
 
-void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosMatrix& B)
+void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
 {
   if (_pluginJacglambda)
   {
@@ -111,7 +111,7 @@ void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, Sico
     RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacglambda, you need to either provide a matrix B or derive this function in order to use it");
 }
 
-void FirstOrderNonLinearR::computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosMatrix& K)
+void FirstOrderNonLinearR::computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& K)
 {
   if (_pluginJacgx)
   {

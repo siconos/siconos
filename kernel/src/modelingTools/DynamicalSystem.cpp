@@ -81,7 +81,8 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   if (_pluginJacxDotG)
     _pluginJacxDotG.reset(new PluggedObject(*(ds.getPluginJacXDotG())));
 
-  _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
+  if (ds.xMemory())
+    _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
   _stepsInMemory = ds.getStepsInMemory();
 
   _workspace.resize(sizeWorkV);

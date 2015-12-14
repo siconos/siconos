@@ -111,7 +111,7 @@ void computeg(double time, SiconosVector& lambda, SiconosVector& z, SiconosVecto
   *  \param z the extra input used to evaluate the jacobian
   *  \param C the matrix used to store the jacobian
   */
-void computeJachx(double time, SiconosVector& x, SiconosVector& z, SiconosMatrix& C);
+void computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C);
 
   /** default function to compute \f$\nabla_z h\f$
   *  \param time current time (not used)
@@ -119,7 +119,7 @@ void computeJachx(double time, SiconosVector& x, SiconosVector& z, SiconosMatrix
   *  \param z the extra input used to evaluate the jacobian
   *  \param F the matrix used to store the jacobian
   */
-void computeJachz(double time, SiconosVector& x, SiconosVector& z, SiconosMatrix& F);
+void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& F);
 
   /** default function to compute jacobianG according to lambda
   *  \param time current time (not used)
@@ -127,7 +127,7 @@ void computeJachz(double time, SiconosVector& x, SiconosVector& z, SiconosMatrix
   *  \param z the extra input used to evaluate the jacobian
   *  \param B the matrix used to store the jacobian
   */
-void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SiconosMatrix& B);
+void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
 
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)

@@ -80,12 +80,12 @@ void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
   DEBUG_PRINT("NewtonEulerR::initComponents(Interaction& inter) ends\n");
 }
 
-void NewtonEulerR::setJachq(SP::SiconosMatrix newJachq)
+void NewtonEulerR::setJachq(SP::SimpleMatrix newJachq)
 {
   _jachq = newJachq;
 }
 
-void NewtonEulerR::setJachqPtr(SP::SiconosMatrix newPtr)
+void NewtonEulerR::setJachqPtr(SP::SimpleMatrix newPtr)
 {
   _jachq = newPtr ;
 }
@@ -175,7 +175,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
 
     NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (ds);
     d.computeTdot();
-    SiconosMatrix& Tdot = *d.Tdot();
+    SimpleMatrix& Tdot = *d.Tdot();
 
     DEBUG_EXPR(d.display());
     DEBUG_EXPR((d.Tdot())->display());
@@ -385,7 +385,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP
     setBlock(_jachq, auxBloc, dimIndex, startIndex);
 
     NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (ds);
-    SiconosMatrix& T = *d.T();
+    SimpleMatrix& T = *d.T();
 
     DEBUG_EXPR(d.display());
     DEBUG_EXPR((d.T())->display());

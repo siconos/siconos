@@ -59,13 +59,13 @@ protected:
 
 
   /** C*/
-  //SP::SiconosMatrix C;
+  //SP::SimpleMatrix C;
 
   /** D matrix, coefficient of lambda in y */
-  //SP::SiconosMatrix D;
+  //SP::SimpleMatrix D;
 
   /** F matrix, coefficient of z */
-  SP::SiconosMatrix _F;
+  SP::SimpleMatrix _F;
 
   /** e*/
   SP::SiconosVector _e;
@@ -79,7 +79,7 @@ public:
   /** create the Relation from a set of data
   *  \param C the matrix C
   */
-  LagrangianLinearTIR(SP::SiconosMatrix C);
+  LagrangianLinearTIR(SP::SimpleMatrix C);
 
   /** create the Relation from a set of data
   *  \param C the matrix C
@@ -87,32 +87,13 @@ public:
   *  \param F the matrix F
   *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e);
+  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e);
 
   /** create the Relation from a set of data
   *  \param C the matrix C
   *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SiconosMatrix C, SP::SiconosVector e);
-
-  /** create the Relation from a set of data
-  *  \param C SiconosMatrix : the matrix C
-  */
-  LagrangianLinearTIR(const SiconosMatrix& C);
-
-  /** create the Relation from a set of data
-  *  \param C SiconosMatrix
-  *  \param D SiconosMatrix
-  *  \param F SiconosMatrix
-  *  \param e SiconosVector
-  */
-  LagrangianLinearTIR(const SiconosMatrix& C, const SiconosMatrix& D, const SiconosMatrix& F, const SiconosVector& e);
-
-  /** create the Relation from a set of data
-  *  \param C SiconosMatrix
-  *  \param e SiconosVector
-  */
-  LagrangianLinearTIR(const SiconosMatrix& C, const SiconosVector& e);
+  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e);
 
   /** destructor
   */
@@ -174,7 +155,7 @@ public:
   /** get C
    *  \return pointer on a plugged matrix
    */
-  inline SP::SiconosMatrix C() const
+  inline SP::SimpleMatrix C() const
   {
     return _jachq;
   }
@@ -183,7 +164,7 @@ public:
   /** set C to pointer newPtr
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setCPtr(SP::SiconosMatrix newPtr)
+  inline void setCPtr(SP::SimpleMatrix newPtr)
   {
     _jachq = newPtr;
   }
@@ -193,7 +174,7 @@ public:
   /** get D
    *  \return pointer on a plugged matrix
    */
-  inline SP::SiconosMatrix D() const
+  inline SP::SimpleMatrix D() const
   {
     return _jachlambda;
   }
@@ -202,7 +183,7 @@ public:
   /** set D to pointer newPtr
    * \param newPtr a SP to plugged matrix
    */
-  inline void setDPtr(SP::SiconosMatrix newPtr)
+  inline void setDPtr(SP::SimpleMatrix newPtr)
   {
     _jachlambda = newPtr;
   }
@@ -212,7 +193,7 @@ public:
   /** get F
   *  \return pointer on a plugged matrix
   */
-  inline SP::SiconosMatrix F() const
+  inline SP::SimpleMatrix F() const
   {
     return _F;
   }
@@ -220,7 +201,7 @@ public:
   /** set F to pointer newPtr
    * \param newPtr a SP to plugged matrix
    */
-  inline void setFPtr(SP::SiconosMatrix newPtr)
+  inline void setFPtr(SP::SimpleMatrix newPtr)
   {
     _F = newPtr;
   }
@@ -244,7 +225,7 @@ public:
   }
 
   /** get a pointer on matrix Jach[index]
-   *  \return a pointer on a SiconosMatrix
+   *  \return a pointer on a SimpleMatrix
    */
 
   /** print the data to the screen

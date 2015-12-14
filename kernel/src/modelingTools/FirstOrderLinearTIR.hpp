@@ -68,7 +68,7 @@ public:
   *  \param C the matrix C
   *  \param B the matrix B
   */
-  FirstOrderLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix B);
+  FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B);
 
   /** create the Relation from a set of data
    *  \param C the C matrix
@@ -77,7 +77,7 @@ public:
    *  \param e the e matrix
    *  \param B the B matrix
    */
-  FirstOrderLinearTIR(SP::SiconosMatrix C, SP::SiconosMatrix D, SP::SiconosMatrix F, SP::SiconosVector e, SP::SiconosMatrix B);
+  FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e, SP::SimpleMatrix B);
 
   /** destructor
    */

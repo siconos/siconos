@@ -210,11 +210,11 @@ void FirstOrderType2R::prepareNewtonIteration(Interaction& inter, InteractionPro
   *DSlink[FirstOrderR::xPartialNS] -= *workV[FirstOrderR::vec_x];
 }
 
-void FirstOrderType2R::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& D)
+void FirstOrderType2R::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJachlambda must be overload.");
 }
-void FirstOrderType2R::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosMatrix& C)
+void FirstOrderType2R::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
 }
@@ -238,7 +238,7 @@ void FirstOrderType2R::computeJach(double time, Interaction& inter, InteractionP
   }
 }
 
-void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, SiconosMatrix& B)
+void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
 }
