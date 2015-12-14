@@ -58,7 +58,7 @@ build_script:
   - C:\projects\siconos\Build\Windows\build-siconos-appveyor.bat C:\projects\siconos
   - 7z a debugFiles.zip '**\*.def'
   - 7z a debugFiles.zip '**\*.rsp'
-  - 7z a siconos_install.zip -r 'C:\install-vs2015-amd64'
+  - 7z a siconos_install.zip -rC:\install-vs2015-amd64
 
 test_script:
   - ctest -D ExperimentalStart
