@@ -156,6 +156,11 @@ if (norm(dataPlot - ref) > 1e-12):
 #
 # plots
 #
+import matplotlib,os
+havedisplay = "DISPLAY" in os.environ
+if not havedisplay:
+    matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 plt.subplot(411)
 plt.title('position')
@@ -173,4 +178,11 @@ plt.subplot(414)
 plt.plot(dataPlot[:, 0], dataPlot[:, 4])
 plt.title('lambda')
 plt.grid()
-plt.savefig("bbts.png")
+
+if havedisplay:
+    plt.show()
+else:    
+    plt.savefig("bbts.png")
+
+
+
