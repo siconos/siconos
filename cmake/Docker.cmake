@@ -75,7 +75,7 @@ macro(add_docker_targets)
   endif()
   file(MAKE_DIRECTORY ${DOCKER_WORKDIR})
   
-  string(REPLACE "/" "-" DOCKER_WORKDIR_AS_NAME "workdir-${DOCKER_WORKDIR}")
+  string(REPLACE "/" "-" DOCKER_WORKDIR_AS_NAME "workdir-${DOCKER_IMAGE_AS_DIR}")
 
   set(DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER)
   foreach(_f ${DOCKER_CMAKE_FLAGS})

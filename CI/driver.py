@@ -4,7 +4,7 @@ import sys
 from socket import gethostname
 
 from tasks import siconos_default, known_tasks
-from subprocess import check_output
+from subprocess import check_output, check_call
 
 from getopt import gnu_getopt, GetoptError
 

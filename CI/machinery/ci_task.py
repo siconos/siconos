@@ -21,6 +21,9 @@ class CiTask():
         self._srcs = srcs
         self._targets = targets
 
+    def build_dir(self, src):
+        return src.replace('.', '_') + self._distrib + '_' + self._ci_config
+
     def templates(self):
         return ','.join(self._pkgs)
 
@@ -61,8 +64,7 @@ class CiTask():
 
         for src in self._srcs:
 
-            bdir = src.replace('.', '_')
-            bdir += self._distrib + '_' + self._ci_config
+            bdir = self.build_dir(src)
 
             if not os.path.exists(bdir):
                 os.makedirs(bdir)
@@ -94,8 +96,8 @@ class CiTask():
 
         for src in self._srcs:
 
-            bdir = src.replace('.', '_')
-            bdir += '_' + self._ci_config
+            bdir = self.build_dir(src)
+
             if not self._fast:
 
                 try:
