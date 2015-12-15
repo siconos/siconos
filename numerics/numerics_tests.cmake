@@ -110,7 +110,7 @@ if(WITH_${COMPONENT}_TESTING)
   RM_TEST2(SICONOS_LCP_ENUM "lcp_enum_fails.dat")
 
   # TODO backup path when GDESV fails
-  SET(test-LCP_NEWTON_FBLSA-lcp_CPS_1 WILL_FAIL TRUE)
+  SET(test-LCP_NEWTON_FBLSA-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
 
   # special tests
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol.dat)
