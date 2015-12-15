@@ -71,7 +71,7 @@ macro(add_docker_targets)
   file(APPEND ${GENERATED_DOCKER_FILE} "RUN mkdir -p /usr/local\n")
 
   if(NOT DOCKER_WORKDIR)
-    set(DOCKER_WORKDIR /workdir)
+    set(DOCKER_WORKDIR ${CMAKE_SOURCE_DIR}/docker-workdir)
   endif()
   
   set(DOCKER_WORKDIR_VOLUME "workdir-${DOCKER_IMAGE_AS_DIR}")
