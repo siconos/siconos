@@ -81,7 +81,10 @@ if(WITH_${COMPONENT}_TESTING)
   SET(test-LCP_CPG-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
 
   # problem with Cholesky here
-  SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2;ortiz" "LATIN;LATIN_W")
+  SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2" "LATIN;LATIN_W")
+  RM_TEST2(SICONOS_LCP_LATIN "lcp_ortiz.dat")
+  RM_TEST2(SICONOS_LCP_LATIN_W "lcp_ortiz.dat")
+
   # QP reformulation does not always work when the matrix is not symmetric
   # Use NSQP
   SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2;ortiz;enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "QP")
