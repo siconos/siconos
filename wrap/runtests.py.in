@@ -3071,8 +3071,15 @@ woBuKMrAISzXfraKRP1B9r41n8Q1ZSkCPbYqsJ/5NgGhwD6obEMyqfqNv3fe/u/74f8DvfV3SQ==
 import sys
 import base64
 import zlib
+# this is a joke, but we have a module siconos.io
+# since we have to prioritize the binary dir here, if the "real" io module is
+# imported later, the io component is instead loaded ... and kaboom --xhub
+import io
 
-sys.path.append("@CMAKE_CURRENT_BINARY_DIR@")
+# use insert(0, ...) here to prioritize the siconos version in the binary dir,
+# and not one that could be already installed --xhub
+sys.path.insert(0, "@CMAKE_CURRENT_BINARY_DIR@")
+sys.path.insert(0, "@CMAKE_CURRENT_BINARY_DIR@/siconos")
 
 class DictImporter(object):
     def __init__(self, sources):
