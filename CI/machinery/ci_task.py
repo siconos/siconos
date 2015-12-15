@@ -21,7 +21,6 @@ class CiTask():
         self._srcs = srcs
         self._targets = targets
 
-
     def templates(self):
         return ','.join(self._pkgs)
 
@@ -63,7 +62,7 @@ class CiTask():
         for src in self._srcs:
 
             bdir = src.replace('.', '_')
-            bdir += '_' + self._ci_config
+            bdir += self._distrib + '_' + self._ci_config
 
             if not os.path.exists(bdir):
                 os.makedirs(bdir)
