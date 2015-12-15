@@ -10,13 +10,13 @@ from getopt import gnu_getopt, GetoptError
 
 def usage():
     print """
-{0} [--tasks=<task1>,<task2>,...] [--show-tasks] 
+{0} [--tasks=<task1>,<task2>,...] [--show-tasks] [--do-not-clean] 
     """.format(sys.argv[0])
 
 
 try:
     opts, args = gnu_getopt(sys.argv[1:], '',
-                        ['tasks=', 'show-tasks'])
+                            ['tasks=', 'show-tasks', 'do-not-clean'])
 
 except GetoptError, err:
 
@@ -26,6 +26,7 @@ except GetoptError, err:
 
 
 tasks = None
+clean = True
 for o, a in opts:
     if o in ('--tasks',):
         import tasks
@@ -38,6 +39,9 @@ for o, a in opts:
             if isinstance(getattr(tasks, s), CiTask):
                 print s
         exit(0)
+
+    if o in ('--do-not-clean',):
+        clean = False
 
 hostname = gethostname().split('.')[0]
 
@@ -57,20 +61,22 @@ for task in tasks:
 
     task.clean()
 
-# clean everything (-> maybe once a week?)
-def mklist(sstr):
-    return filter(lambda s: s!='', sstr.strip().split('\n'))
+if clean:
+    # clean everything (-> maybe once a week?)
+    def mklist(sstr):
+        return filter(lambda s: s!='', sstr.strip().split('\n'))
 
-running_containers=mklist(check_output(['docker', 'ps', '-q']))
-if len(running_containers)>0:
-    check_call(['docker', 'kill'] + running_containers)
+    running_containers = mklist(check_output(['docker', 'ps', '-q']))
 
-containers=mklist(check_output(['docker', 'ps', '-a', '-q']))
-if len(containers)>0:
-    check_call(['docker', 'rm'] + containers)
+    if len(running_containers)>0:
+        check_call(['docker', 'kill'] + running_containers)
 
-images=mklist(check_output(['docker', 'images', '-q']))[1:]
-if len(images)>0:
-    check_call(['docker', 'rmi'] + images)
+    containers = mklist(check_output(['docker', 'ps', '-a', '-q']))
+    if len(containers)>0:
+        check_call(['docker', 'rm'] + containers)
 
-exit(return_code)
+    images = mklist(check_output(['docker', 'images', '-q']))[1:]
+    if len(images)>0:
+        check_call(['docker', 'rmi'] + images)
+
+    exit(return_code)
