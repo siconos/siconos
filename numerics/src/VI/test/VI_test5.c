@@ -11,7 +11,7 @@ void Ftest(void * viIn, int n, double *x, double *F)
   VariationalInequality * vi = (VariationalInequality* ) viIn;
   for (i =0; i< vi->size ; i++)
   {
-    F[i] = x[i]-i+4;
+    F[i] = x[i]-4;
   }
 }
 void PXtest(void *viIn, double *x, double *PX)
@@ -21,7 +21,7 @@ void PXtest(void *viIn, double *x, double *PX)
   for (i =0; i< vi->size ; i++)
   {
     PX[i] = x[i];
-    if (PX[i] < 1.0) PX[i]=1.0;
+    if (PX[i] < 0.0) PX[i]=0.0;
   }
 }
 
@@ -34,7 +34,7 @@ int main(void)
   VariationalInequality vi;
   variationalInequality_clear(&vi);
 
-  vi.size=10;
+  vi.size=1;
   //vi.Callback = (CallbackVI *)malloc(sizeof(CallbackVI));
 
   vi.env = &vi;
@@ -43,8 +43,8 @@ int main(void)
   vi.ProjectionOnX = &PXtest ;
 
   /* Call the callback */
-  double x[10], F[10], PX[10];
-  int i, n=10;
+  double x[1], F[1], PX[1];
+  int i, n=1;
   for (i =0; i< n ; i++)
   {
     x[i] = i-5;
@@ -62,8 +62,8 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_HP);
-  options->dparam[0]=1e-02;
-  options->iparam[0]=100000; 
+  options->dparam[0]=1e-10;
+  options->iparam[0]=50000000;
   
 
   info = variationalInequality_driver(&vi,
