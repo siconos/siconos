@@ -25,6 +25,8 @@
 
 #include "NumericsOptions.h"
 #include "VariationalInequality_Solvers.h"
+#include "VariationalInequality_computeError.h"
+
 #include "NonSmoothDrivers.h"
 #include "SiconosBlas.h"
 #include "SiconosSets.h"
@@ -35,6 +37,11 @@ char *  SICONOS_VI_HP_STR = "VI_HP";
 char *  SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-function";
 char *  SICONOS_VI_BOX_AVI_LSA_STR = "Box VI solver based on the Newton-Josephy method";
 char *  SICONOS_VI_BOX_PATH_STR = "Box VI solver based on PATH solver";
+
+/* #define DEBUG_MESSAGES */
+/* #define DEBUT_STDOUT */
+#include "debug.h"
+
 
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
@@ -68,10 +75,12 @@ int variationalInequality_driver(VariationalInequality* problem,
 
   /* Check for trivial case */
   info = checkTrivialCase_vi(problem, x, w, options);
-
-  if (info == 0)
+  if (info == 0){
+    double error;
+    variationalInequality_computeError(problem, x , w, options->dparam[0], options, &error);
+    printf("variationalInequality_driver. error = %8.4e\n", error);
     return info;
-
+  }
 
   switch (options->solverId)
   {
@@ -140,12 +149,16 @@ int checkTrivialCase_vi(VariationalInequality* problem, double* x,
   }
   cblas_daxpy(n, -1.0,x, 1, w , 1);
   double nnorm = cblas_dnrm2(n,w,1);
-  if (nnorm < fmin(options->dparam[0], 1e-12))
+  DEBUG_PRINTF("checkTrivialCase_vi, nnorm = %6.4e\n",nnorm);
+  
+  if (nnorm > fmin(options->dparam[0], 1e-12))
     return 1;
 
   problem->F(problem,n,x,w);
   nnorm = cblas_dnrm2(n,w,1);
-  if (nnorm < fmin(options->dparam[0], 1e-12))
+  DEBUG_PRINTF("checkTrivialCase_vi, nnorm = %6.4e\n",nnorm);
+
+  if (nnorm > fmin(options->dparam[0], 1e-12))
     return 1;
 
   if (verbose == 1)

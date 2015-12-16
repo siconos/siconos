@@ -1,4 +1,6 @@
-#include "VariationalInequality.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
 #include "stdlib.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -7,22 +9,19 @@ void Ftest(void * viIn, int n, double *x, double *F)
 {
   int i;
   VariationalInequality * vi = (VariationalInequality* ) viIn;
-  printf("Size of vi :%i\n", vi->size);
-
   for (i =0; i< vi->size ; i++)
   {
-    F[i] = x[i];
+    F[i] = x[i]-i+4;
   }
 }
 void PXtest(void *viIn, double *x, double *PX)
 {
   VariationalInequality * vi = (VariationalInequality* ) viIn;
-  printf("Size of vi :%i\n", vi->size);
   int i;
   for (i =0; i< vi->size ; i++)
   {
     PX[i] = x[i];
-    if (PX[i] <0) PX[i]=0.0;
+    if (PX[i] < 1.0) PX[i]=1.0;
   }
 }
 
@@ -57,6 +56,28 @@ int main(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("F[%i]=%f\t",i,F[i]);    printf("PX[%i]=%f\n",i,PX[i]);
   }
 
+  NumericsOptions global_options;
+  setDefaultNumericsOptions(&global_options);
+  global_options.verboseMode = 1; // turn verbose mode to off by default
 
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
+  int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_HP);
+  options->dparam[0]=1e-10;
+  
 
+  info = variationalInequality_driver(&vi,
+                                      x,
+                                      F,
+                                      options,
+                                      &global_options);
+
+  for (i =0; i< n ; i++)
+  {
+    printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
+  }
+
+  deleteSolverOptions(options);
+  free(options);
+
+  return info;
 }

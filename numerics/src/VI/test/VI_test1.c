@@ -33,15 +33,15 @@ int main(void)
 
   VariationalInequality vi;
   variationalInequality_clear(&vi);
-  
+
   vi.size=10;
   //vi.Callback = (CallbackVI *)malloc(sizeof(CallbackVI));
-  
+
   vi.env = &vi;
-  
+
   vi.F = &Ftest;
   vi.ProjectionOnX = &PXtest ;
-  
+
   /* Call the callback */
   double x[10], F[10], PX[10];
   int i, n=10;
@@ -62,14 +62,15 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_EG);
+  options->dparam[0]=1e-10;
   
-   
-  info = variationalInequality_driver(&vi, 
-                                      x, 
-                                      F, 
-                                      options, 
+
+  info = variationalInequality_driver(&vi,
+                                      x,
+                                      F,
+                                      options,
                                       &global_options);
-  
+
   for (i =0; i< n ; i++)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
