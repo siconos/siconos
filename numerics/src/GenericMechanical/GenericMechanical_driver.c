@@ -31,6 +31,7 @@
 #include "fc3d_unitary_enumerative.h"
 #include "GMPReduced.h"
 #include "SiconosBlas.h"
+
 /* #define GENERICMECHANICAL_DEBUG  */
 /* #define GENERICMECHANICAL_DEBUG2  */
 /* #define GENERICMECHANICAL_DEBUG_CMP */
@@ -344,9 +345,8 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
           rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, fcProblem->q, 0);
 
         DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++)  printf("reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,reaction[i],i,fcProblem->q[i]););
-        (&options->internalSolvers[1])->iparam[10]=1; /* VA 26/11/2015 For robustness reasons on mechanisms, we chose the JeanMoreau formulation */
-        fc3d_onecontact_nonsmooth_Newton_solvers_initialize(fcProblem, fcProblem, &options->internalSolvers[1]);
 
+        /* We call the generic driver (rather than the specific) since we may choose between various local solvers */
         resLocalSolver = fc3d_driver(fcProblem, sol, w, &options->internalSolvers[1], numerics_options);
         //resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
         break;
@@ -426,7 +426,8 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 #endif
   if (tolViolate)
   {
-    printf("---GenericalMechanical_drivers, FAILED***************************************\n");
+    printf("genericMechanicalProblem_GS failed with Iteration %i Error = %14.7e <= %7.3e\n", it, *err, options->dparam[0]);
+
 #ifdef GMP_WRITE_FAILED_PRB
     FILE * toto  = fopen("GMP_FAILED.txt", "w");
     genericMechanical_printInFile(pGMP, toto);
@@ -523,7 +524,6 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
 
   linearComplementarity_setDefaultSolverOptions(0, options->internalSolvers, SICONOS_LCP_LEMKE);
 
-
   switch (id)
   {
   case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
@@ -531,17 +531,37 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
     fc3d_unitary_enumerative_setDefaultSolverOptions(&options->internalSolvers[1]);
     break;
   case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC:
-  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP:
-    /* Fix the setting in a correct way V.A. 15/05/2015 */
-    /* fc3d_nsgs_setDefaultSolverOptions(&options->internalSolvers[1]); */
-    /* options->internalSolvers[1].dparam[0] = 1e-14; */
-    /* options->internalSolvers[1].iparam[0] = 10; */
-    /* options->internalSolvers[1].internalSolvers->iparam[10]=1; */
     fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(&options->internalSolvers[1]);
+    (&options->internalSolvers[1])->solverId=SICONOS_FRICTION_3D_ONECONTACT_NSN_AC;
+    (&options->internalSolvers[1])->iparam[10]=1; /* VA 26/11/2015 For robustness reasons on mechanisms, we chose the JeanMoreau formulation */
+    break;
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP:
+    fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(&options->internalSolvers[1]);
+    (&options->internalSolvers[1])->iparam[10]=1; /* VA 26/11/2015 For robustness reasons on mechanisms, we chose the JeanMoreau formulation */
+    break;
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration:
+    (&options->internalSolvers[1])->solverId=SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration;
+    (&options->internalSolvers[1])->numberOfInternalSolvers = 0;
+    (&options->internalSolvers[1])->isSet = 1;
+    (&options->internalSolvers[1])->filterOn = 1;
+    (&options->internalSolvers[1])->iSize = 5;
+    (&options->internalSolvers[1])->dSize = 5;
+    (&options->internalSolvers[1])->iparam = (int *)malloc(options->iSize * sizeof(int));
+    (&options->internalSolvers[1])->dparam = (double *)malloc(options->dSize * sizeof(double));
+    null_SolverOptions((&options->internalSolvers[1]));
+    for (int i = 0; i < 5; i++)
+    {
+      (&options->internalSolvers[1])->iparam[i] = 0;
+      (&options->internalSolvers[1])->dparam[i] = 0.0;
+    }
+    (&options->internalSolvers[1])->iparam[0] = 100;
+    (&options->internalSolvers[1])->dparam[0] = 1e-12;
     break;
   default:
-    printf("FC3D_solverId unknown :%d\n", id);
+    printf("genericMechanicalProblem_setDefaultSolverOptions : fc3d_solverId unknown :%d\n", id);
   }
+
+
   //fc3d_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
 }
 
