@@ -8,7 +8,7 @@ class CiTask():
                  build_configuration='Release',
                  distrib=None,
                  ci_config=None,
-                 fast=False,
+                 fast=True,
                  pkgs=None,
                  srcs=None,
                  targets=None):
@@ -58,11 +58,14 @@ class CiTask():
                           pkgs, srcs, targets)
         return init
 
-    def run(self):
+    def run(self, targets_override=None):
 
         return_code = 0
 
         for src in self._srcs:
+
+            if targets_override is not None:
+                self._targets[src] = targets_override
 
             bdir = self.build_dir(src)
 

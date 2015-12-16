@@ -10,13 +10,15 @@ from getopt import gnu_getopt, GetoptError
 
 def usage():
     print """
-{0} [--tasks=<task1>,<task2>,...] [--show-tasks] [--do-not-clean] 
+{0} [--tasks=<task1>,<task2>,...] [--show-tasks] [--targets] \
+    [--brutal-docker-clean] 
     """.format(sys.argv[0])
 
 
 try:
     opts, args = gnu_getopt(sys.argv[1:], '',
-                            ['tasks=', 'show-tasks', 'do-not-clean'])
+                            ['tasks=', 'show-tasks', 'targets=',
+                             'brutal-docker-clean'])
 
 except GetoptError, err:
 
@@ -26,7 +28,8 @@ except GetoptError, err:
 
 
 tasks = None
-clean = True
+brutal_clean = False
+targets_override=None
 for o, a in opts:
     if o in ('--tasks',):
         import tasks
@@ -40,8 +43,11 @@ for o, a in opts:
                 print s
         exit(0)
 
-    if o in ('--do-not-clean',):
-        clean = False
+    if o in ('--targets',):
+        targets_override = a.split(',')
+
+    if o in ('--brutal-docker-clean',):
+        brutal_clean = True
 
 hostname = gethostname().split('.')[0]
 
@@ -55,13 +61,14 @@ if tasks is None:
 return_code = 0
 for task in tasks:
 
-    return_code += task.run()
+    return_code += task.run(targets_override=targets_override)
 
 for task in tasks:
 
     task.clean()
 
-if clean:
+if brutal_clean:
+
     # clean everything (-> maybe once a week?)
     def mklist(sstr):
         return filter(lambda s: s!='', sstr.strip().split('\n'))
