@@ -159,7 +159,8 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverN
     *solve = &fc3d_FixedP_solve;
     *update = &NCPGlocker_update;
     *freeSolver = (FreeSolverNSGSPtr)&fc3d_FixedP_free;
-    *computeError = &fake_compute_error_nsgs;
+    /* *computeError = &fake_compute_error_nsgs; */
+    *computeError = (ComputeErrorPtr)&fc3d_compute_error;
     fc3d_FixedP_initialize(problem, localproblem, localsolver_options);
     break;
   }
