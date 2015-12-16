@@ -330,16 +330,16 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       DEBUG_PRINTF("iter_internalsolver = %i\n",iter_internalsolver);
       DEBUG_PRINTF("info = %i\n",*info);
       DEBUG_PRINTF("options->iparam[1] = %i\n",options->iparam[1]);
-      if (verbose >0 && info)
-        printf("------------------------ FC3D - PROXIMAL - internalsolver not converged");
+      if (verbose >0 && *info)
+        printf("------------------------ FC3D - PROXIMAL - internalsolver not converged\n");
       if (isVariable)
       {
-        if (info){
+        if (*info){
           alpha = alpha*10;
         }
         else{
           alpha = sigma*pow(error,nu);
-        }
+        } 
       }
 
       DEBUG_PRINTF("alpha = %8.4e\n",alpha);
