@@ -35,7 +35,7 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
-  gfc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_NSGS_WR);
+  gfc3d_setDefaultSolverOptions(options, SICONOS_GLOBAL_FRICTION_3D_NSGS_WR);
 
 
   options->internalSolvers->internalSolvers->solverId = SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP;

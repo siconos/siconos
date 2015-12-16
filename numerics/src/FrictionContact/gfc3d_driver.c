@@ -29,16 +29,17 @@
 int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;
 int  Global_MisLU = 0;
-char *SICONOS_FRICTION_3D_GLOBAL_NSGS_WR_STR = "F3DP_NSGS_WR";
-char *SICONOS_FRICTION_3D_GLOBAL_NSN_AC_WR_STR = "F3DP_NSN_AC_WR";
-char *SICONOS_FRICTION_3D_GLOBAL_NSGSV_WR_STR = "F3DP_NSGSV_WR";
-char *SICONOS_FRICTION_3D_GLOBAL_PROX_WR_STR = "F3DP_PROX_WR";
-char *SICONOS_FRICTION_3D_GLOBAL_DSFP_WR_STR = "F3DP_DSFP_WR";
-char *SICONOS_FRICTION_3D_GLOBAL_TFP_WR_STR = "F3DP_TFP_WR";
-char *SICONOS_FRICTION_3D_GLOBAL_NSGS_STR = "F3DP_NSGS";
-char *SICONOS_FRICTION_3D_GLOBAL_AC_STR = "F3DP_AC";
-char * SICONOS_FRICTION_3D_GLOBAL_GAMS_PATH_STR = "F3D_GAMS_PATH";
-char * SICONOS_FRICTION_3D_GLOBAL_GAMS_PATHVI_STR = "F3D_GAMS_PATHVI";
+
+char *SICONOS_GLOBAL_FRICTION_3D_NSGS_WR_STR = "GFC3D_NSGS_WR";
+char *SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR_STR = "GFC3D_NSN_AC_WR";
+char *SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR_STR = "GFC3D_NSGSV_WR";
+char *SICONOS_GLOBAL_FRICTION_3D_PROX_WR_STR = "GFC3D_PROX_WR";
+char *SICONOS_GLOBAL_FRICTION_3D_DSFP_WR_STR = "GFC3D_DSFP_WR";
+char *SICONOS_GLOBAL_FRICTION_3D_TFP_WR_STR = "GFC3D_TFP_WR";
+char *SICONOS_GLOBAL_FRICTION_3D_NSGS_STR = "GFC3D_NSGS";
+char *SICONOS_GLOBAL_FRICTION_3D_NSN_AC_STR = "GFC3D_NSN_AC";
+char * SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR = "GFC3D_GAMS_PATH";
+char * SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR = "GFC3D_GAMS_PATHVI";
 
 
 int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options, NumericsOptions* global_options)
@@ -69,7 +70,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   /* Non Smooth Gauss Seidel (NSGS) */
   switch (options->solverId)
   {
-  case SICONOS_FRICTION_3D_GLOBAL_NSGS_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call NSGS_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -80,7 +81,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     break;
 
   }
-  case SICONOS_FRICTION_3D_GLOBAL_NSGSV_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call NSGSV_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -90,7 +91,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     gfc3d_nsgs_velocity_wr(problem, reaction , velocity, globalVelocity, &info, options);
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_NSN_AC_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call NSN_AC_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -101,7 +102,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     break;
 
   }
-  case SICONOS_FRICTION_3D_GLOBAL_PROX_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_PROX_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call PROX_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -112,7 +113,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     break;
 
   }
-  case SICONOS_FRICTION_3D_GLOBAL_DSFP_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_DSFP_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call DSFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -123,7 +124,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     break;
 
   }
-  case SICONOS_FRICTION_3D_GLOBAL_TFP_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_TFP_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call TFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -134,7 +135,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     break;
 
   }
-  case SICONOS_FRICTION_3D_GLOBAL_NSGS:
+  case SICONOS_GLOBAL_FRICTION_3D_NSGS:
   {
     Global_ipiv = NULL;
     Global_MisInverse = 0;
@@ -144,20 +145,20 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     break;
 
   }
-  case SICONOS_FRICTION_3D_GLOBAL_AC:
+  case SICONOS_GLOBAL_FRICTION_3D_NSN_AC:
   {
     gfc3d_nonsmooth_Newton_AlartCurnier(problem, reaction , velocity,
                                          globalVelocity, &info , options);
     break;
 
   }
-  case SICONOS_FRICTION_3D_GLOBAL_GAMS_PATH:
+  case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH:
   {
     printf(" ========================== Call PATH solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
     gfc3d_AVI_gams_path(problem, reaction , velocity, &info, options);
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_GAMS_PATHVI:
+  case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI:
   {
     printf(" ========================== Call PATHVI solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
     gfc3d_AVI_gams_pathvi(problem, reaction , velocity, &info, options);

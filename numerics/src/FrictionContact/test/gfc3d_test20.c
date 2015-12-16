@@ -33,7 +33,7 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
-  gfc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_AC);
+  gfc3d_setDefaultSolverOptions(options, SICONOS_GLOBAL_FRICTION_3D_NSN_AC);
 
   int k, info = -1 ;
 

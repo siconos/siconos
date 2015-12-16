@@ -422,7 +422,7 @@ int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the NSGS_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_GLOBAL_NSGS_WR;
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSGS_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -485,7 +485,7 @@ int gfc3d_globalAlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the NSN_AC_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_GLOBAL_NSN_AC_WR;
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -543,7 +543,7 @@ int gfc3d_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the NSGSV_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_GLOBAL_NSGSV_WR;
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -584,7 +584,7 @@ int gfc3d_proximal_wr_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the PROX_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_GLOBAL_PROX_WR;
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_PROX_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -623,7 +623,7 @@ int gfc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_GLOBAL_DSFP_WR;
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_DSFP_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -663,7 +663,7 @@ int gfc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_GLOBAL_TFP_WR;
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_TFP_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;

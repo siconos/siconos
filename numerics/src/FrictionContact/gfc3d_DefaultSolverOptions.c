@@ -33,43 +33,43 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
   int info = -1;
   switch (solverId)
   {
-  case SICONOS_FRICTION_3D_GLOBAL_NSGS:
+  case SICONOS_GLOBAL_FRICTION_3D_NSGS:
   {
     info =    fc3d_nsgs_setDefaultSolverOptions(options);
-    options->solverId = SICONOS_FRICTION_3D_GLOBAL_NSGS;
+    options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSGS;
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_NSN_AC_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR:
   {
     info =    gfc3d_globalAlartCurnier_wr_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_NSGS_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR:
   {
     info =    gfc3d_nsgs_wr_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_NSGSV_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR:
   {
     info =    gfc3d_nsgs_velocity_wr_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_PROX_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_PROX_WR:
   {
     info =    gfc3d_proximal_wr_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_DSFP_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_DSFP_WR:
   {
     info =    gfc3d_DeSaxceFixedPoint_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_TFP_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_TFP_WR:
   {
     info =    gfc3d_TrescaFixedPoint_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_AC:
+  case SICONOS_GLOBAL_FRICTION_3D_NSN_AC:
   {
     info =    gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options);
     break;

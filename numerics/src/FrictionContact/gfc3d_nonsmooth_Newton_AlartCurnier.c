@@ -37,13 +37,17 @@
 #include <assert.h>
 #include <math.h>
 
+#include "sanitizer.h"
+
 #include "SparseMatrix.h"
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"
 
 #include "gfc3d_compute_error.h"
 #include "SiconosBlas.h"
 
-//#define DEBUG_MESSAGES 1
+
+/* #define DEBUG_MESSAGES 1 */
+/* #define DEBUG_STDOUT */
 #include <debug.h>
 
 
@@ -136,7 +140,7 @@ csi initACPsiJacobian(
   /* - M */
   for(int e = 0; e < M->nz; ++e)
   {
-    DEBUG_PRINTF("e=%d, M->i[e]=%d, M->p[e]=%d, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]);
+    DEBUG_PRINTF("e=%d, M->i[e]=%td, M->p[e]=%td, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]);
     CHECK_RETURN(cs_zentry(J, M->i[e], M->p[e], - M->x[e]));
   }
 
@@ -144,7 +148,7 @@ csi initACPsiJacobian(
   assert(M->n == H->m);
   for(int e = 0; e < H->nz; ++e)
   {
-    DEBUG_PRINTF("e=%d, H->i[e]=%d, H->p[e] + M->n + A->n=%d, H->x[e]=%g\n",
+    DEBUG_PRINTF("e=%d, H->i[e]=%td, H->p[e] + M->n + A->n=%td, H->x[e]=%g\n",
                  e, H->i[e], H->p[e] + M->n + A->n , H->x[e]);
     CHECK_RETURN(cs_zentry(J, H->i[e], H->p[e] + M->n + A->n, H->x[e]));
   }
@@ -337,8 +341,7 @@ int _globalLineSearchSparseGP(
     {
       if(verbose > 0)
       {
-        printf("global line search success.\n");
-        printf("Number of iteration = %i  alpha = %.10e, q = %.10e\n",
+        printf("------------------------ GFC3D - NSN_AC - global line search success. Number of ls iteration = %i  alpha = %.10e, q = %.10e\n",
                iter,
                alpha[0], q);
       }
@@ -368,8 +371,7 @@ int _globalLineSearchSparseGP(
   }
   if(verbose > 0)
   {
-    printf("global line search unsuccessfull.\n");
-    printf("max number of iteration reached  = %i  with alpha = %.10e \n",
+    printf("------------------------ GFC3D - NSN_AC - global line search unsuccessfull. Max number of ls iteration reached  = %i  with alpha = %.10e \n",
            maxiter_ls, alpha[0]);
   }
 
@@ -381,10 +383,10 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
 {
   if(verbose > 0)
   {
-    printf("Set the default solver options for the GLOBALAC Solver\n");
+    printf("Set the default solver options for the GLOBAL_AC Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_GLOBAL_AC;
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSN_AC;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
@@ -405,7 +407,7 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
 
   options->iparam[9] = 0;      /* > 0 memory is allocated */
 
-  options->iparam[10] = 0;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[10] = 1;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
 
   options->dparam[0] = 1e-10;
 
@@ -472,6 +474,10 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   double tolerance = options->dparam[0];
   assert(tolerance > 0);
 
+  if (verbose > 0)
+    printf("------------------------ GFC3D - _nonsmooth_Newton_AlartCurnier - Start with tolerance = %g\n", tolerance);
+
+  
   /* sparse triplet storage */
   NM_triplet(problem->M);
   NM_triplet(problem->H);
@@ -528,6 +534,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                         ACProblemSize + /* psi */
                         ACProblemSize + /* rhs */
                         ACProblemSize + /* tmp2 */
+                        ACProblemSize + /* tmp3 */
                         ACProblemSize   /* solution */) *  sizeof(double));
 
     /* XXX big hack here */
@@ -553,7 +560,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   double * psi = rho + localProblemSize;
   double * rhs = psi + ACProblemSize;
   double * tmp2 = rhs + ACProblemSize;
-  double * solution = tmp2 + ACProblemSize;
+  double * tmp3 = tmp2 + ACProblemSize;
+  double * solution = tmp3 + ACProblemSize;
 
   /* XXX big hack --xhub*/
   csi * iA = (csi *)options->iWork;
@@ -623,7 +631,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   /* an assertion ? */
   cblas_dcopy(localProblemSize, problem->b, 1, velocity, 1);
   NM_tgemv(1., problem->H, globalVelocity, 1, velocity);
-
+  double linear_solver_residual=0.0;
   while(iter++ < itermax)
   {
 
@@ -632,10 +640,10 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
     /* compute A & B */
     fc3d_AlartCurnierFunction(localProblemSize,
-                                           computeACFun3x3,
-                                           reaction, velocity,
-                                           problem->mu, rho,
-                                           F, A, B);
+                              computeACFun3x3,
+                              reaction, velocity,
+                              problem->mu, rho,
+                              F, A, B);
     /* update J */
     updateACPsiJacobian(NM_triplet(problem->M),
                         NM_triplet(problem->H),
@@ -650,14 +658,27 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
     /* Solve: J X = -psi */
 
-#ifdef WITH_MUMPS
+/* #ifdef WITH_MUMPS */
+/*     NM_gesv(&AA, rhs); */
+/* #else */
+/*     /\* use csparse LU factorization *\/ */
+/*     CHECK_RETURN(cs_lusol(1, Jcsc, rhs, DBL_EPSILON)); */
+/* #endif */
+    
     NM_gesv(&AA, rhs);
-#else
-    /* use csparse LU factorization */
-    CHECK_RETURN(cs_lusol(1, Jcsc, rhs, DBL_EPSILON));
 
-#endif
-
+    /* Check the quality of the solution */
+    if (verbose > 0)
+    {
+      cblas_dcopy_msan(ACProblemSize, psi, 1, tmp3, 1);
+      NM_gemv(1., &AA, rhs, 1., tmp3);
+      linear_solver_residual = cblas_dnrm2(ACProblemSize, tmp3, 1);
+      /* fprintf(stderr, "fc3d esolve: linear equation residual = %g\n", */
+      /*         cblas_dnrm2(problemSize, tmp3, 1)); */
+      /* for the component wise scaled residual: cf mumps &
+       * http://www.netlib.org/lapack/lug/node81.html */
+    }
+    
     /* line search */
     double alpha = 1;
 
@@ -672,6 +693,19 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
       solution[i+globalProblemSize+localProblemSize] = reaction[i];
     }
 
+    DEBUG_EXPR_WE(
+      for(unsigned int i = 0; i < globalProblemSize; ++i)
+      {
+        printf("globalVelocity[%i] = %6.4e\n",i,globalVelocity[i]);
+      }
+      for(unsigned int i = 0; i < localProblemSize; ++i)
+      {
+        printf("velocity[%i] = %6.4e\t",i,velocity[i]);
+        printf("reaction[%i] = %6.4e\n",i,reaction[i]);
+      }
+      );
+
+    
     int info_ls = _globalLineSearchSparseGP(problem,
                                             computeACFun3x3,
                                             solution,
@@ -683,7 +717,6 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
 
     cs_spfree(Jcsc);
-
     if(!info_ls)
     {
       cblas_daxpy(ACProblemSize, alpha, rhs, 1, solution, 1);
@@ -721,7 +754,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     }
 
     if(verbose > 0)
-      printf("GLOBALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
+      printf("------------------------ GFC3D - NSN_AC - iteration %d,  error=%g, linear solver residual =%g \n", iter, options->dparam[1],linear_solver_residual);
 
     if(options->dparam[1] < tolerance)
     {
@@ -735,11 +768,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   if(verbose > 0)
   {
     if(!info[0])
-      printf("GLOBALAC: convergence after %d iterations, error : %g\n",
+      printf("------------------------ GFC3D - NSN_AC - convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
     else
     {
-      printf("GLOBALAC: no convergence after %d iterations, error : %g\n",
+      printf("------------------------ GFC3D - NSN_AC - no convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
     }
   }

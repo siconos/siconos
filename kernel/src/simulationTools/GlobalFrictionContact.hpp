@@ -114,7 +114,7 @@ public:
    */
   GlobalFrictionContact(int dimPb,
                         const int numericsSolverId =
-                        SICONOS_FRICTION_3D_GLOBAL_NSGS,
+                        SICONOS_GLOBAL_FRICTION_3D_NSGS,
                         const std::string& newId = "unamed_primal_friction_contact_problem");
 
   /** destructor
