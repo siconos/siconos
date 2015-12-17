@@ -68,8 +68,10 @@ if(CTEST_BUILD_CONFIGURATION MATCHES "Profiling")
 endif()
 
 #######################################################################
+ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY}/)
 
-#ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
+# !!
+#file(REMOVE_RECURSE ${CTEST_BINARY_DIRECTORY})
 
 find_program(CTEST_GIT_COMMAND NAMES git)
 find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
