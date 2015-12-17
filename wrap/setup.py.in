@@ -159,11 +159,11 @@ DISTUTILS_DEBUG = 1
 
 ext_modules = []
 include_dirs = [np.get_include()]
-descr = 'Python bindings for @PROJECT_NAME@ software.'
+descr = 'Python bindings for the @PROJECT_NAME@ software.'
 authors = 'Siconos team.'
 config = Configuration(
     name=name,
-    version='@PACKAGE_VERSION@',
+    version='@SICONOS_VERSION@',
     description=descr,
     author=authors,
     author_email='siconos-team@lists.gforge.fr',
@@ -174,7 +174,13 @@ config = Configuration(
     py_modules=[],
     include_dirs=include_dirs,
     cmdclass={'test': PyTest,
-              'clean': clean}
+              'clean': clean},
+    classifiers=['License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
+                 'Operating System :: MacOS',
+                 'Operating System :: Microsoft :: Windows',
+                 'Operating System :: POSIX :: Linux',
+                 'Topic :: Scientific/Engineering :: Mathematics',
+                 'Topic :: Scientific/Engineering :: Physics']
 )
 
 setup(**config.todict())
