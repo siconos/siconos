@@ -34,10 +34,6 @@ void Globalfc3d_projection_free(GlobalFrictionContactProblem* problem);
 void Globalfc3d_projection_free(GlobalFrictionContactProblem* problem)
 {
   assert(problem->M);
-  if (problem->M->storageType == 0)
-  {
-    free(Global_ipiv);
-  }
 }
 
 void initializeGlobalLocalSolver(int n, SolverGlobalPtr* solve, FreeSolverGlobalPtr* freeSolver, ComputeErrorGlobalPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam);
