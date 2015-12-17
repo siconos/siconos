@@ -51,59 +51,19 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction 
   double* globalVelocitytmp = (double*)malloc(n * sizeof(double));
   cblas_dcopy(n, q, 1, qtmp, 1);
 
-  double alpha = 1.0;
-  double beta = 1.0;
-  prodNumericsMatrix(m, n, alpha, H, reaction , beta, qtmp);
+  NM_gemv(1.0, H, reaction, 1.0, qtmp);
 
-  /* dense */
-  if (M->storageType == 0)
-  {
-    int infoDGETRS = -1;
-    cblas_dcopy(n, qtmp, 1, globalVelocitytmp, 1);
-    assert(Global_MisLU);
-    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocitytmp , n, &infoDGETRS);
-    assert(!infoDGETRS);
-  }
-  /* SBM */
-  else if (M->storageType == 1)
-  {
-    beta = 0.0;
-    if (!Global_MisInverse)
-    {
-      inverseDiagSBM(M->matrix1);
-      Global_MisInverse = 1;
-    }
-    prodNumericsMatrix(n, n, alpha, M, qtmp , beta, globalVelocitytmp);
-
-  }
-  /* coordinate */
-  else if (M->storageType == 2)
-  {
-    cblas_dcopy(n, qtmp, 1, globalVelocitytmp, 1);
-    cs_lusol(1, NM_triplet(M), globalVelocitytmp, DBL_EPSILON);
-  }
-
+  cblas_dcopy(n, qtmp, 1, globalVelocitytmp, 1);
+  NM_gesv(M, globalVelocitytmp);
 
   cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
+
   *error =   cblas_dnrm2(n , globalVelocitytmp , 1);
   free(qtmp);
   free(globalVelocitytmp);
 
   cblas_dcopy(m, problem->b, 1, velocity, 1);
-  if (H->storageType == 1)
-  {
-    beta = 1.0;
-    SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-    transposeSBM(H->matrix1, Htrans);
-    prodSBM(n, m, alpha, Htrans, globalVelocity , beta, velocity);
-    freeSBM(Htrans);
-    free(Htrans);
-  }
-  else if (H->storageType == 0)
-  {
-    cblas_dgemv(CblasColMajor,CblasTrans, n, m, 1.0, H->matrix0 , n, globalVelocity , 1, 1.0, velocity, 1);
-  }
-
+  NM_tgemv(1, H, globalVelocity, 1, velocity);
 
   double worktmp[3];
   double normUT;
@@ -121,7 +81,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction 
     worktmp[2] = reaction[ic * 3 + 2] -  worktmp[2];
     *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
   }
-  /*   *error = sqrt(*error); */
+  *error = sqrt(*error);
 
   /* Computes error */
   double normq = cblas_dnrm2(n , problem->q , incx);
