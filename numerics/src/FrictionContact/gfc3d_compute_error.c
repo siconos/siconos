@@ -33,6 +33,11 @@ extern int  Global_MisLU;
 
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error)
 {
+
+  NumericsMatrix* Mwork = createNumericsMatrix(problem->M->storageType,
+                                               problem->M->size0,
+                                               problem->M->size1);
+
   /* Checks inputs */
   if (problem == NULL || reaction == NULL || velocity == NULL || globalVelocity == NULL)
     numericsError("gfc3d_compute_error", "null input");
@@ -54,7 +59,12 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction 
   NM_gemv(1.0, H, reaction, 1.0, qtmp);
 
   cblas_dcopy(n, qtmp, 1, globalVelocitytmp, 1);
-  NM_gesv(M, globalVelocitytmp);
+
+  NM_copy(M, Mwork);
+  NM_gesv(Mwork, globalVelocitytmp);
+
+  freeNumericsMatrix(Mwork);
+  free(Mwork);
 
   cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
 

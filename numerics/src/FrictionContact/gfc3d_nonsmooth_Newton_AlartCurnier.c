@@ -623,9 +623,6 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
   NumericsMatrix *AA_work = createNumericsMatrix(NM_SPARSE,  (int)J->m, (int)J->n);
 
-  NumericsMatrix *M_backup = createNumericsMatrix(NM_SPARSE_BLOCK, problem->M->size0,
-                                           problem->M->size1);
-
   NumericsSparseMatrix* SM = newNumericsSparseMatrix();
   SM->triplet = J;
   fillNumericsMatrix(AA, NM_SPARSE, (int)J->m, (int)J->n, SM);
@@ -747,12 +744,10 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     if(!(iter % erritermax))
     {
 
-      NM_copy(problem->M, M_backup);
       gfc3d_compute_error(problem,
                           reaction, velocity, globalVelocity,
                           tolerance,
                           &(options->dparam[1]));
-      NM_copy(M_backup, problem->M);
     }
 
     if(verbose > 0)
@@ -798,6 +793,4 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   free(AA);
   freeNumericsMatrix(AA_work);
   free(AA_work);
-  freeNumericsMatrix(M_backup);
-  free(M_backup);
 }

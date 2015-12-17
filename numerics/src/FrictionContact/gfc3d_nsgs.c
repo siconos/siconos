@@ -28,9 +28,6 @@
 #include <assert.h>
 #include <math.h>
 
-extern int *Global_ipiv;
-extern int  Global_MisInverse;
-extern int  Global_MisLU;
 
 void Globalfc3d_projection_free(GlobalFrictionContactProblem* problem);
 
@@ -84,6 +81,10 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
   /* Tolerance */
   double tolerance = dparam[0];
 
+  NumericsMatrix* Mwork = createNumericsMatrix(problem->M->storageType,
+                                               problem->M->size0,
+                                               problem->M->size1);
+
   /* Check for trivial case */
   *info = checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
 
@@ -103,7 +104,6 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
   int hasNotConverged = 1;
 
   int contact; /* Number of the current row of blocks in M */
-  SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
 
   if (H->storageType != M->storageType)
   {
@@ -111,33 +111,10 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
     fprintf(stderr, "Numerics, gfc3d_nsgs. H->storageType != M->storageType :This case is not taken into account.\n");
     exit(EXIT_FAILURE);
   }
-  else if (M->storageType == 1)
-  {
-    inverseDiagSBM(M->matrix1);
-    Global_MisInverse = 1;
-    transposeSBM(H->matrix1, Htrans);
-  }
-  else if (M->storageType == 0)
-  {
-    /*  Assume that M is not already LU */
-    int infoDGETRF = -1;
-    Global_ipiv = (int *)malloc(n * sizeof(int));
-    assert(!Global_MisLU);
-    DGETRF(n, n, M->matrix0, n, Global_ipiv, &infoDGETRF);
-    Global_MisLU = 1;
-    assert(!infoDGETRF);
-  }
-  else
-  {
-    fprintf(stderr, "Numerics, GlobalFrictionContactProblem_nsgs failed M->storageType not compatible.\n");
-    exit(EXIT_FAILURE);
-  }
 
   dparam[0] = dparam[2]; // set the tolerance for the local solver
   double* qtmp = (double*)malloc(n * sizeof(double));
   for (int i = 0; i < n; i++) qtmp[i] = 0.0;
-
-
 
   while ((iter < itermax) && (hasNotConverged > 0))
   {
@@ -147,40 +124,20 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
     /* qtmp <--q */
     cblas_dcopy(n, q, 1, qtmp, 1);
 
-    double alpha = 1.0;
-    double beta = 1.0;
     /*qtmp = H reaction +qtmp */
-    prodNumericsMatrix(m, n, alpha, H, reaction , beta, qtmp);
+    NM_gemv(1., H, reaction, 1., qtmp);
 
-    if (M->storageType == 1)
-    {
-      beta = 0.0;
-      assert(Global_MisInverse);
-      /*  globalVelocity = M^-1 qtmp */
-      prodNumericsMatrix(n, n, alpha, M, qtmp , beta, globalVelocity);
-    }
-    else if (M->storageType == 0)
-    {
-      int infoDGETRS = -1;
-      cblas_dcopy(n, qtmp, 1, globalVelocity, 1);
-      assert(Global_MisLU);
-      DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocity , n, &infoDGETRS);
-      assert(!infoDGETRS);
-    }
+    cblas_dcopy(n, qtmp, 1, globalVelocity, 1);
+
+    NM_copy(M, Mwork);
+    NM_gesv(Mwork, globalVelocity);
+
     /* Compute current local velocity */
     /*      velocity <--b */
     cblas_dcopy(m, b, 1, velocity, 1);
 
-    if (H->storageType == 1)
-    {
-      /* velocity <-- H^T globalVelocity + velocity*/
-      beta = 1.0;
-      prodSBM(n, m, alpha, Htrans, globalVelocity , beta, velocity);
-    }
-    else if (H->storageType == 0)
-    {
-      cblas_dgemv(CblasColMajor,CblasTrans, n, m, 1.0, H->matrix0 , n, globalVelocity , 1, 1.0, velocity, 1);
-    }
+    /* velocity <-- H^T globalVelocity + velocity*/
+    NM_tgemv(1., H, globalVelocity, 1., velocity);
 
     /* Loop through the contact points */
 
@@ -213,11 +170,8 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
     *info = hasNotConverged;
   }
 
-  if (H->storageType == 1)
-  {
-    freeSBM(Htrans);
-  }
-  free(Htrans);
+  freeNumericsMatrix(Mwork);
+  free(Mwork);
   free(qtmp);
   /*   free(Global_ipiv); */
   dparam[0] = tolerance;
