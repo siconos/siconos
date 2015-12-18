@@ -28,6 +28,8 @@
 #include "SiconosFullGenerated.hpp"
 #include "SiconosFullNumerics.hpp"
 
+#include <fc2d_Solvers.h>
+#include <fc3d_Solvers.h>
 /* hand written */
 
 
@@ -90,9 +92,9 @@ void siconos_io(Archive& ar, FrictionContact &v, unsigned int version)
   if (Archive::is_loading::value)
   {
     if (v._contactProblemDim == 2)
-      v._frictionContact_driver = &frictionContact2D_driver;
+      v._frictionContact_driver = &fc2d_driver;
     else
-      v._frictionContact_driver = &frictionContact3D_driver;
+      v._frictionContact_driver = &fc3d_driver;
   }
 
   ar & boost::serialization::make_nvp("LinearOSNS",

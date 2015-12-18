@@ -22,6 +22,7 @@
 #cmakedefine HAVE_BULLET
 #cmakedefine HAVE_OCC
 #cmakedefine HAVE_SERIALIZATION
+#cmakedefine WITH_SERIALIZATION
 #cmakedefine HAVE_GENERATION
 #cmakedefine WITH_HDF5
 

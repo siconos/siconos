@@ -1,3 +1,10 @@
+#include "SiconosConfig.h"
+#define WITH_SERIALIZATION
+
+#ifdef HAVE_SICONOS_MECHANICS
+#include "MechanicsIO.hpp"
+#endif
+
 #include "KernelTest.hpp"
 #include "SiconosKernel.hpp"
 
@@ -5,10 +12,6 @@
 #include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/bindings/ublas/vector_sparse.hpp>
 #include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
-
-#ifdef HAVE_SICONOS_MECHANICS
-#include "MechanicsIO.hpp"
-#endif
 
 #define DEBUG_MESSAGES 1
 #include "../SiconosFull.hpp"
