@@ -3,7 +3,6 @@
 
 %include MechanicsBase.i
 
-
 %fragment("NumPy_Fragments");
 
 // suppress warning
@@ -12,4 +11,7 @@
 
 PY_FULL_REGISTER(SpaceFilter);
 PY_FULL_REGISTER(SiconosBodies);
-PY_FULL_REGISTER(ExternalBody);
+
+// ExternalBody is an astract class and serializers are not generated
+// by builder.py
+// PY_FULL_REGISTER(ExternalBody);

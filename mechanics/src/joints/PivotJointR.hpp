@@ -33,7 +33,7 @@ protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(PivotJointR);
-
+  PivotJointR() : KneeJointR() {};
 
   /*Axis coordonates*/
   double _Ax, _Ay, _Az;
@@ -77,5 +77,4 @@ public:
 
 
 };
-TYPEDEF_SPTR(PivotJointR)
 #endif // PivotJointRELATION_H

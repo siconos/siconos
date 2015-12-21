@@ -21,6 +21,9 @@
   REGISTER(SphereNEDSSphereNEDSR)               \
   REGISTER(SphereLDSPlanR)                      \
   REGISTER(SphereLDSSphereLDSR)                 \
+  REGISTER(KneeJointR)                          \
+  REGISTER(PivotJointR)                         \
+  REGISTER(PrismaticJointR)                     \
   REGISTER(FMatrix)                             \
   REGISTER(NSLawMatrix)                         \
   REGISTER(OccR)                                \

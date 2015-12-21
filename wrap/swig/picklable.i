@@ -4,6 +4,7 @@
 
 #ifdef WITH_SERIALIZATION
 %{
+#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <SiconosFull.hpp>
 
 #include <boost/archive/binary_oarchive.hpp>

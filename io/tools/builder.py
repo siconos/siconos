@@ -79,7 +79,7 @@ input_headers = dict()
 
 input_headers['kernel'] = ["SiconosKernel.hpp"]
 
-input_headers['Mechanics'] = ["MechanicsFwd.hpp", "SpaceFilter.hpp", "SpaceFilter_impl.hpp",
+input_headers['mechanics'] = ["MechanicsFwd.hpp", "SpaceFilter.hpp", "SpaceFilter_impl.hpp",
                              "ExternalBody.hpp",
                              "Disk.hpp", "Circle.hpp", "DiskDiskR.hpp",
                              "DiskMovingPlanR.hpp",
@@ -89,7 +89,8 @@ input_headers['Mechanics'] = ["MechanicsFwd.hpp", "SpaceFilter.hpp", "SpaceFilte
                              "SphereNEDSPlanR.hpp",
                              "SphereNEDSSphereNEDSR.hpp",
                              "SiconosBodies.hpp",
-                             "CircleCircleR.hpp", "CircularDS.hpp"
+                             "CircleCircleR.hpp", "CircularDS.hpp",
+                              "KneeJointR.hpp", "PivotJointR.hpp", "PrismaticJointR.hpp"
                              ]
 
 # fix missing forwards for Control

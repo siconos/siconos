@@ -53,6 +53,8 @@ if(WITH_SERIALIZATION)
     FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
 
     set(io_targets ${COMPONENTS})
+
+    # REMOVE_item not on cmake 2.8 ...
     list(REMOVE_item io_targets numerics io)
     print_var(io_targets)
     # header generation
@@ -69,7 +71,7 @@ if(WITH_SERIALIZATION)
     endif()
     
     # append local headers directories to GENERATED_INCLUDES)
-    foreach(_DIR ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES)
+    foreach(_DIR ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES})
       list(APPEND GENERATED_INCLUDES -I${_DIR})
     endforeach()
     

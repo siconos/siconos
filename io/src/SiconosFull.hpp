@@ -28,6 +28,8 @@
 #include "SiconosFullGenerated.hpp"
 #include "SiconosFullNumerics.hpp"
 
+#include <SimpleMatrix.hpp>
+#include <SiconosVector.hpp>
 #include <fc2d_Solvers.h>
 #include <fc3d_Solvers.h>
 /* hand written */
@@ -380,6 +382,5 @@ void siconos_io_register_Kernel(Archive& ar)
 
 
 }
-
 #endif
 #endif

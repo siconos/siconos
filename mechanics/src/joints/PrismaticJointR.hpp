@@ -22,7 +22,9 @@
 #ifndef PrismaticJointRELATION_H
 #define PrismaticJointRELATION_H
 
-#include "NewtonEulerR.hpp"
+#include <MechanicsFwd.hpp>
+#include <SiconosFwd.hpp>
+#include <NewtonEulerR.hpp>
 
 /** \class PrismaticJointR
  *  \brief This class implements a prismatic joint between one or two Newton/Euler Dynamical system
@@ -35,6 +37,12 @@
  */
 class PrismaticJointR : public NewtonEulerR
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(PrismaticJointR);
+  PrismaticJointR(): NewtonEulerR() {};
+
 public:
   /** Axis of the prismatic point in the inertial frame of reference
    */
@@ -147,7 +155,4 @@ public:
   static unsigned int numberOfConstraints() { return 5; }
 
 };
-
-
-TYPEDEF_SPTR(PrismaticJointR)
 #endif  //PrismaticJointRELATION_H

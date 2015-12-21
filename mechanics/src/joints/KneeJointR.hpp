@@ -21,8 +21,10 @@
 #ifndef KneeJointRELATION_H
 #define KneeJointRELATION_H
 
+#include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
 #include <NewtonEulerR.hpp>
+
 /** \class KneeJointR
  *  \brief This class implements a knee joint between one or two Newton/Euler Dynamical system
  *
@@ -33,6 +35,7 @@ protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(KneeJointR);
+  KneeJointR(): NewtonEulerR() {};
 
   /** Coordinate of the knee point in the body frame of the first dynamical system _d1
    */
@@ -109,8 +112,4 @@ protected:
   double Hz(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
             double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
 };
-
-
-
-TYPEDEF_SPTR(KneeJointR)
 #endif // KneeJointRELATION_H

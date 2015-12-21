@@ -7,15 +7,6 @@
 
 %include path.i
 
-#undef WITH_IO
-#undef WITH_SERIALIZATION
-
-#ifdef WITH_IO
-%{
-#include <SiconosFull.hpp>
-%}
-#endif
-
 %include sharedPointers.i
 
 %{

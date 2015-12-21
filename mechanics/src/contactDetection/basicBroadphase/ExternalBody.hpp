@@ -38,6 +38,10 @@ public:
   virtual void selfFindInteractions(SP::SpaceFilter) = 0;
 
   ACCEPT_BASE_VISITORS(LagrangianDS);
+
+protected:
+  ACCEPT_SERIALIZATION(ExternalBody);
+
 };
 
 
