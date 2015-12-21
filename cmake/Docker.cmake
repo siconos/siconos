@@ -162,6 +162,11 @@ macro(add_docker_targets)
     COMMENT "Docker ctest : ${DOCKER_IMAGE}"
     COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ctest -DCTEST_SOURCE_DIRECTORY=${CMAKE_SOURCE_DIR} -DCTEST_BINARY_DIRECTORY=${DOCKER_WORKDIR} -S ${DOCKER_CTEST_DRIVER} -DSITE=${DOCKER_HOSTNAME} ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER})
 
+  add_custom_target(
+    ${DOCKER_IMAGE_AS_DIR}-interactive
+    COMMENT "Docker interactive : ${DOCKER_IMAGE}"
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -i -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} /bin/bash)
+
   if(NOT TARGET docker-clean)
     add_custom_target(
       docker-clean
@@ -218,6 +223,13 @@ macro(add_docker_targets)
       )
   endif()
 
+  if(NOT TARGET docker-interactive)
+    add_custom_target(
+      docker-interactive
+      COMMENT "Docker interactive"
+      )
+  endif()
+
   add_dependencies(docker-clean ${DOCKER_IMAGE_AS_DIR}-clean)
   add_dependencies(docker-build ${DOCKER_IMAGE_AS_DIR}-build)
   add_dependencies(docker-cmake ${DOCKER_IMAGE_AS_DIR}-cmake)
@@ -226,5 +238,6 @@ macro(add_docker_targets)
   add_dependencies(docker-make-install ${DOCKER_IMAGE_AS_DIR}-make-install)
   add_dependencies(docker-make-clean ${DOCKER_IMAGE_AS_DIR}-make-clean)
   add_dependencies(docker-ctest ${DOCKER_IMAGE_AS_DIR}-ctest)
+  add_dependencies(docker-interactive ${DOCKER_IMAGE_AS_DIR}-interactive)
 
 endmacro()
