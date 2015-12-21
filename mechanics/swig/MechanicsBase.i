@@ -14,6 +14,11 @@
 %}
 %include <MechanicsFwd.hpp>
 
+#ifdef WITH_SERIALIZATION
+%{
+#include <SiconosFull.hpp>
+%}
+#endif
 %include picklable.i
 
 %include handleException.i

@@ -8,7 +8,7 @@
 #undef WITH_IO
 #undef WITH_SERIALIZATION
 
-#ifdef WITH_IO
+#ifdef WITH_SERIALIZATION
 %{
 #include <SiconosFull.hpp>
 %}

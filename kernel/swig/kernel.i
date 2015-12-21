@@ -26,6 +26,12 @@
 // generated docstrings from doxygen xml output
 %include kernel-docstrings.i
 
+#ifdef WITH_SERIALIZATION
+%{
+#define KERNEL_ONLY
+#include <SiconosFull.hpp>
+%}
+#endif
 %include picklable.i
 
 %{

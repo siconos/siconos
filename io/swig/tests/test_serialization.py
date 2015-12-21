@@ -120,7 +120,7 @@ def test_serialization4():
     #
     # save and load data from xml and .dat
     #
-    from siconos.io import save, load
+    from siconos.io.io_base import save, load
     save(first_bouncingBall, "bouncingBall.xml")
 
     bouncingBall = load("bouncingBall.xml")

@@ -1,12 +1,9 @@
-
 #ifndef PICKLABLE_i
 #define PICKLABLE_i
 
 #ifdef WITH_SERIALIZATION
 %{
 #include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <SiconosFull.hpp>
-
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
@@ -56,8 +53,8 @@
     siconos_io_register_ ## COMPONENT(ar);
     ar >> ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
   }
-  
- 
+
+
   void binary_import(std::string const& from_str)
   {
     std::stringstream ss(from_str);
@@ -65,7 +62,7 @@
     siconos_io_register_ ## COMPONENT(ar);
     ar >> ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
   }
-  
+
  }
 %enddef
 #endif

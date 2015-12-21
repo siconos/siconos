@@ -25,7 +25,12 @@
 
 #define NVP(X) BOOST_SERIALIZATION_NVP(X)
 
+#ifdef KERNEL_ONLY
+#include "SiconosFullKernelGenerated.hpp"
+#else
+//only kernel+mechanics here! <- need dispatch for kernel+control, etc.
 #include "SiconosFullGenerated.hpp"
+#endif
 #include "SiconosFullNumerics.hpp"
 
 #include <SimpleMatrix.hpp>

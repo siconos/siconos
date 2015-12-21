@@ -14,10 +14,6 @@ if(WITH_PYTHON_WRAPPER)
   #  ----------- swig -----------
 
   # -- Swig flags --
-  if(WITH_SERIALIZATION)
-    set(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS};-DWITH_SERIALIZATION")
-  endif()
-
   if(SYSTEM_ARCHITECTURE)
     set(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS};-D__${SYSTEM_ARCHITECTURE}__")
   endif()
@@ -34,6 +30,9 @@ if(WITH_PYTHON_WRAPPER)
   
   if(HAVE_SICONOS_IO)
     set(SWIG_DEFS "${SWIG_DEFS};-DWITH_IO")
+    if(WITH_SERIALIZATION)
+      set(SWIG_DEFS "${SWIG_DEFS};-DWITH_SERIALIZATION")
+    endif()
   endif()
   # -- Swig files --
   # i.e. .i files, common to all modules and submodules.

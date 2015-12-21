@@ -64,12 +64,12 @@
 #include <limits>
 %}
 
-#ifdef WITH_IO
+#ifdef WITH_SERIALIZATION
 %{
 #include <SiconosFullNumerics.hpp>
 %}
 #endif
-%include "picklable.i"
+%include picklable.i
 
 %include "std_string.i"
 
@@ -1249,13 +1249,11 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
   }
 }
 
-
-#ifdef WITH_IO
-%include picklable.i
-
+#ifdef WITH_SERIALIZATION
 %make_picklable(Callback, Numerics);
 %make_picklable(_SolverOptions, Numerics);
 %make_picklable(FrictionContactProblem, Numerics);
 %make_picklable(NumericsMatrix, Numerics);
 %make_picklable(SparseBlockStructuredMatrix, Numerics);
 #endif
+
