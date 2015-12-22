@@ -126,20 +126,50 @@ ENDMACRO(PRINT_VAR V)
 # with the same 'options' as find_package
 # (see http://www.cmake.org/cmake/help/v3.0/command/find_package.html?highlight=find_package)
 MACRO(COMPILE_WITH)
+  
+  set(options REQUIRED)
+  set(oneValueArgs)
+  set(multiValueArgs COMPONENTS)
+
+  cmake_parse_arguments(COMPILE_WITH "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  set(_NAME)
+  set(_NAME_VERSION)
+
   # Get package name and extra args ...
-  CAR(_NAME ${ARGV})
-  CDR(_REST ${ARGV})
-  CAR(_REQ ${_REST})
-  IF(_REST)
-    CDR(_RREST ${_REST})
-    CAR(_COMP ${_RREST})
-  ENDIF(_REST)
+  CAR(_NAME ${COMPILE_WITH_UNPARSED_ARGUMENTS})
+  CDR(_NAME_VERSION ${COMPILE_WITH_UNPARSED_ARGUMENTS})
+
+  SET(_NAMES)
   STRING(TOUPPER ${_NAME} _UNAME)
   LIST(APPEND _NAMES ${_NAME})
   LIST(APPEND _NAMES ${_UNAME})
   SET(_FOUND)
-  FIND_PACKAGE(${ARGV})
-  
+
+  IF(COMPILE_WITH_COMPONENTS)
+    SET(_COMPONENTS COMPONENTS ${COMPILE_WITH_COMPONENTS})
+    SET(_COMPONENTS_STR "components ${COMPILE_WITH_COMPONENTS} of the package")
+  ELSE()
+    SET(_COMPONENTS)
+    SET(_COMPONENTS_STR "package")
+  ENDIF()
+
+  IF(${COMPILE_WITH_REQUIRED})
+    SET(_REQUIRED REQUIRED)
+    SET(_REQUIRED_STR "required")
+  ELSE()
+    SET(_REQUIRED)
+    SET(_REQUIRED_STR "optional")
+  ENDIF()
+
+  IF(_NAME_VERSION)
+    SET(_NAME_VERSION_STR "version ${_NAME_VERSION}")
+  ELSE()
+    SET(_NAME_VERSION_STR "")
+  ENDIF()
+
+  FIND_PACKAGE(${_NAME} ${_COMPONENTS} ${_REQUIRED})
+
   FOREACH(_N ${_NAMES})
     IF(${_N}_FOUND)
       SET(_FOUND TRUE)
@@ -172,10 +202,27 @@ MACRO(COMPILE_WITH)
   list(REMOVE_DUPLICATES SICONOS_LINK_LIBRARIES)
   set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES}
     ${${_N}_LIBRARIES} CACHE INTERNAL "List of external libraries.")
+
+
+  IF (_FOUND)
+    MESSAGE(STATUS "Compilation with ${_REQUIRED_STR} ${_COMPONENTS_STR} ${_NAME} ${_NAME_VERSION_STR}")
+  ELSE()
+    MESSAGE(STATUS "Compilation without ${_REQUIRED_STR} ${_COMPONENTS_STR} ${_NAME} ${_NAME_VERSION_STR}")
+  ENDIF()
+
   set(_N)
   set(_NAME) 
+  set(_NAME_VERSION)
+  set(_NAME_VERSION_STR)
   set(_UNAME)
   set(_NAMES)
+  set(_FOUND)
+  set(_REQUIRED)
+  set(_REQUIRED_STR)
+  set(_COMPONENTS)
+  set(_COMPONENTS_STR)
+  set(_VERSION_STR)
+
 ENDMACRO(COMPILE_WITH)
 
 # ==== Save directories required for include_directory ===

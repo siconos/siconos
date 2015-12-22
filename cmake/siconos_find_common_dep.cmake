@@ -151,6 +151,13 @@ IF(WITH_HDF5)
   COMPILE_WITH(HDF5 REQUIRED)
 ENDIF(WITH_HDF5)
 
+#
+# -- Serialization --
+#
+if(WITH_SERIALIZATION)
+  COMPILE_WITH(Boost 1.47 COMPONENTS serialization filesystem REQUIRED)
+endif()
+
 # -- Python bindings --
 if(WITH_PYTHON_WRAPPER)
   compile_With(Numpy REQUIRED)
