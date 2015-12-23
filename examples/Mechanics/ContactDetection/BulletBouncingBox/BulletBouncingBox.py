@@ -130,7 +130,7 @@ broadphase.collisionConfiguration().setPlaneConvexMultipointIterations()
 broadphase.addStaticObject(ground, 0)
 
 # (6) Simulation setup with (1) (2) (3) (4) (5)
-simulation = BulletTimeStepping(timedisc, broadphase)
+simulation = BulletTimeStepping(timedisc)
 #simulation.setNewtonOptions(1)
 simulation.insertIntegrator(osi)
 simulation.insertNonSmoothProblem(osnspb)
