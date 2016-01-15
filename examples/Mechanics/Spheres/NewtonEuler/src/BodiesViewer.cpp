@@ -509,7 +509,7 @@ void BodiesViewer::drawPolyg(unsigned int nvertices, double *coor, float *c)
 
 void BodiesViewer::print(float x, float y, const char *s, int size)
 {
-  float coor[3];
+  qreal coor[3];
   int i, j, ps1, ps2;
   coor[0] = x;
   coor[1] = y;

@@ -22,6 +22,7 @@
 #define BodiesViewer_hpp
 
 /* Siconos */
+#include <SiconosBodies.hpp>
 #include <SiconosKernel.hpp>
 
 #include <Disk.hpp>
@@ -51,6 +52,7 @@
 
 /* QGLViewer */
 #include <qglviewer.h>
+#include <manipulatedCameraFrame.h>
 #include <qapplication.h>
 
 #include <qevent.h>

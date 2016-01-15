@@ -25,6 +25,7 @@
 */
 
 // Siconos
+#include <SiconosBodies.hpp>
 #include <SiconosPointers.hpp>
 
 #include <TimeStepping.hpp>
