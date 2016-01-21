@@ -45,9 +45,11 @@
 #endif
 
 #include "SiconosBodies.hpp"
+#include "SiconosKernel.hpp"
 
 /* QGLViewer */
 #include <qglviewer.h>
+#include <manipulatedCameraFrame.h>
 #include <qapplication.h>
 
 #include <qevent.h>

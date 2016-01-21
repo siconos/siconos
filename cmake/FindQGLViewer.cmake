@@ -13,6 +13,8 @@ FOREACH(_D QGLViewer;qglviewer-qt4)
     $ENV{QGLVIEWER_INCLUDE_DIR}
     /usr/include/${_D}
     /usr/local/include/${_D}
+    ${siconos_ROOT_DIR}/include/${_D}
+    ${CMAKE_INSTALL_PREFIX}/include/${_D}
     )
 ENDFOREACH(_D QGLViewer;qglviewer-qt4)
 
@@ -21,6 +23,8 @@ FIND_LIBRARY(QGLVIEWER_LIBRARY NAMES QGLViewer
   $ENV{QGLVIEWER_LIB_DIR}
   /usr/lib
   /usr/local/lib
+  ${siconos_ROOT_DIR}/lib
+  ${CMAKE_INSTALL_PREFIX}/lib
 )
 
 IF(NOT QGLVIEWER_LIBRARY)
@@ -29,6 +33,8 @@ IF(NOT QGLVIEWER_LIBRARY)
     $ENV{QLGLVIEWER_LIB_DIR}
     /usr/lib
     /usr/local/lib
+    ${siconos_ROOT_DIR}/lib
+    ${CMAKE_INSTALL_PREFIX}/lib
   )
 ENDIF(NOT QGLVIEWER_LIBRARY)
 
@@ -38,6 +44,8 @@ IF(NOT QGLVIEWER_LIBRARY)
     $ENV{QLGLVIEWER_LIB_DIR}
     /usr/lib
     /usr/local/lib
+    ${siconos_ROOT_DIR}/lib
+    ${CMAKE_INSTALL_PREFIX}/lib
   )
 ENDIF(NOT QGLVIEWER_LIBRARY)
 

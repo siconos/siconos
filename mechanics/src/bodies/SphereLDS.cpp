@@ -44,7 +44,7 @@ void SphereLDS::computeMass()
   SP::SiconosVector qold;
 
 
-  if (qMemory())
+  if (qMemory() && qMemory()->nbVectorsInMemory() >= 1)
     qold = qMemory()->getSiconosVector(0);
 
   normalize(q(), 3);

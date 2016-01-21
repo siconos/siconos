@@ -96,6 +96,29 @@ FOREACH(_DEF ${ALL_EXTRA_DEFINITIONS})
   ENDIF()
 ENDFOREACH()
 
+# === Check if build is required ===
+if(BUILD_MAIN) # False for python input file
+  get_filename_component(_EXE ${MAIN_SOURCE} NAME_WE)
+endif()
+# Path to main source file
+get_filename_component(_MAIN_DIR ${MAIN_SOURCE} PATH)
+assert(_MAIN_DIR)
+get_standard_ext()
+set(SRC_EXTS ${ALL_EXTS})
+
+# === Include target ===
+if(_EXE)
+  # include optional user-defined cmake commands in ${_EXE}.cmake 
+  if(EXISTS ${_EXE}.cmake)
+    message(STATUS "Including ${_EXE}.cmake")
+    include(${_EXE}.cmake)
+  endif()
+  if(EXISTS ${_MAIN_DIR}/${_EXE}.cmake)
+    message(STATUS "Including ${_MAIN_DIR}/${_EXE}.cmake")
+    include(${_MAIN_DIR}/${_EXE}.cmake)
+  endif()
+endif(_EXE)
+
 # === Check some optional external libraries ===
 IF(WithQGLViewer)
   FIND_PACKAGE(X11 REQUIRED)
@@ -117,11 +140,14 @@ IF(WithQGLViewer)
   INCLUDE(${QT_USE_FILE})
   # not set by UseQt4:
   INCLUDE_DIRECTORIES(${QT_INCLUDES})
-  set(${LINKER_LIBRARIES} ${${LINKER_LIBRARIES}}
-    ${QGLVIEWER_LIBRARY} ${QT_QTXML_LIBRARY}
+  foreach(_L ${QGLVIEWER_LIBRARY} ${QT_QTXML_LIBRARY}
     ${QT_QTCORE_LIBRARY} ${QT_QTASSISTANT_LIBRARY}
     ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY}
     ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
+    if (NOT (("${_L}" STREQUAL "optimized") OR ("${_L}" STREQUAL "debug")))
+      set(LINKER_LIBRARIES ${LINKER_LIBRARIES} ${_L})
+    endif()
+  endforeach()
   
 ENDIF(WithQGLViewer)
 
@@ -136,8 +162,11 @@ IF(WithOpenGL)
     ENDIF (OPENGL_FIND_REQUIRED)	 
   ENDIF (OPENGL_FOUND) 
   INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
-  set(${LINKER_LIBRARIES} ${${LINKER_LIBRARIES}} ${OPENGL_LIBRARIES})
-
+  foreach(_L ${OPENGL_LIBRARIES})
+    if (NOT (("${_L}" STREQUAL "optimized") OR ("${_L}" STREQUAL "debug")))
+      set(LINKER_LIBRARIES ${LINKER_LIBRARIES} ${_L})
+    endif()
+  endforeach()
 ENDIF(WithOpenGL)
 
 
@@ -187,17 +216,6 @@ endforeach()
 
 # === Define target ===
 if(_EXE)
-
-  # include optional user-defined cmake commands in ${_EXE}.cmake 
-  if(EXISTS ${_EXE}.cmake)
-    message(STATUS "Including ${_EXE}.cmake")
-    include(${_EXE}.cmake)
-  endif()
-  if(EXISTS ${_MAIN_DIR}/${_EXE}.cmake)
-    message(STATUS "Including ${_MAIN_DIR}/${_EXE}.cmake")
-    include(${_MAIN_DIR}/${_EXE}.cmake)
-  endif()
-
   # if some extra directories for sources have
   # been defined by user, collect input files
   if(SOURCES_DIRECTORIES)
