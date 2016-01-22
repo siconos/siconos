@@ -43,7 +43,12 @@
 #include <limits>
 #include <boost/numeric/ublas/fwd.hpp>
 
-#if __cplusplus >= 201103L
+#include "SiconosConfig.h"
+#ifndef SICONOS_CXXVERSION
+#error SICONOS_CXXVERSION is not defined in SiconosConfig.h
+#endif
+
+#if SICONOS_CXXVERSION >= 201103L
 #include <array>
 #else
 #include <boost/array.hpp>

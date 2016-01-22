@@ -40,7 +40,12 @@
 #include <boost/config.hpp>
 #include <boost/version.hpp>
 
-#if (__cplusplus >= 201103L) && !defined(USE_MAP_FOR_HASH)
+#include <SiconosConfig.h>
+#ifndef SICONOS_CXXVERSION
+#error SICONOS_CXXVERSION is not defined in SiconosConfig.h
+#endif
+
+#if (SICONOS_CXXVERSION >= 201103L) && !defined(USE_MAP_FOR_HASH)
 #include <unordered_map>
 #else
 #include <map>
@@ -67,7 +72,7 @@ using std::size_t;
 #pragma clang diagnostic pop
 #endif
 
-#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#if (SICONOS_CXXVERSION >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 namespace std11 = std;
 #else
 namespace std11 = boost;
@@ -189,7 +194,7 @@ public:
   //  typedef typename
   //  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
-#if (__cplusplus >= 201103L) && !defined(USE_MAP_FOR_HASH)
+#if (SICONOS_CXXVERSION >= 201103L) && !defined(USE_MAP_FOR_HASH)
   typedef std::unordered_map<V, VDescriptor> VMap;
 #else
   typedef std::map<V, VDescriptor> VMap;
@@ -697,7 +702,7 @@ public:
 
       if (vdx == vd2) endl = true;
 
-#if (__cplusplus >= 201103L) && !defined(USE_MAP_FOR_HASH)
+#if (SICONOS_CXXVERSION >= 201103L) && !defined(USE_MAP_FOR_HASH)
       std::unordered_map<E, EDescriptor> Edone;
 #else
       std::map<E, EDescriptor> Edone;

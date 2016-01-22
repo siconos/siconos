@@ -28,8 +28,11 @@
 
 #include "SimulationTypeDef.hpp"
 
-
-#if (__cplusplus >= 201103L)
+#include <SiconosConfig.h>
+#ifndef SICONOS_CXXVERSION
+#error SICONOS_CXXVERSION is not defined in SiconosConfig.h
+#endif
+#if (SICONOS_CXXVERSION >= 201103L)
 #define TO_STR(x) std::to_string(x)
 #else
 #include <boost/lexical_cast.hpp>

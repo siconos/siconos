@@ -44,7 +44,10 @@
 
 #include "SiconosVisitor.hpp"
 
-#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#ifndef SICONOS_CXXVERSION
+#error SICONOS_CXXVERSION is not defined
+#endif
+#if (SICONOS_CXXVERSION >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 #include <type_traits>
 #include <array>
 #else
