@@ -313,12 +313,13 @@
   {
     NumericsOptions *numerics_options;
     numerics_options = (NumericsOptions *) malloc(sizeof(NumericsOptions));
+    setDefaultNumericsOptions(numerics_options);
     return numerics_options;
   }
 
   ~NumericsOptions()
   {
-    delete($self);
+    free($self);
   }
 }
 
