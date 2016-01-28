@@ -224,15 +224,15 @@
 }
 
 
-%typemap(argout) (cs_sparse *outSparseMat)
+%inline %{
+
+int cs_sparse_to_csc_matrix(cs_sparse *M, PyObject** csc_matrix)
 {
-
-  cs_sparse *M=$1;
-
   if (!M)
   {
     Py_INCREF(Py_None);
-    $result = Py_None;
+    *csc_matrix = Py_None;
+    return 0;
   }
   else
   {
@@ -245,7 +245,7 @@
     if (!csr_mod)
     {
       PyErr_SetString(PyExc_RuntimeError, "Did you import scipy.sparse.csr?");
-      SWIG_fail;
+      return 1;
     }
 
     npy_intp this_M_x_dims[1];
@@ -258,27 +258,27 @@
     this_M_p_dims[0] = M->m+1;
 
     PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x);
-    if(!out_data) SWIG_fail;
+    if(!out_data) { PyErr_SetString(PyExc_RuntimeError, "Could not extract M->x"); return 1; };
 
     PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims,NPY_INT64,M->i);
-    if(!out_indices) SWIG_fail;
+    if(!out_indices) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->i"); return 1; };
 
     PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims,NPY_INT64,M->p);
-    if(!out_indptr) SWIG_fail;
+    if(!out_indptr) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->p"); return 1; };
 
     /* Warning ! m is the number of rows, n the number of columns ! --xhub */
     PyObject* out_shape = PyTuple_Pack(2,PyInt_FromLong(M->m),PyInt_FromLong(M->n));
-    if(!out_shape) SWIG_fail;
+    if(!out_shape) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->m or M->n"); return 1; };
 
     PyObject* out_nnz = PyInt_FromLong(M->nzmax);
-    if(!out_nnz) SWIG_fail;
+    if(!out_nnz) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->nzmax"); return 1; };
 
     /* call the class inside the csr module */
-    %#if PY_MAJOR_VERSION < 3
+#if PY_MAJOR_VERSION < 3
     PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyString_FromString((char *)"csr_matrix"), out_shape, NULL);
-    %#else
+#else
     PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyUnicode_FromString((char *)"csr_matrix"), out_shape, NULL);
-    %#endif
+#endif
 
     if(out_csr)
     {
@@ -292,14 +292,30 @@
       Py_XDECREF(auto_nnz);
 #endif
 
-      $result = SWIG_Python_AppendOutput($result,out_csr);
+      *csc_matrix = SWIG_Python_AppendOutput(*csc_matrix, out_csr);
+      return 0;
     }
     else
     {
       PyErr_SetString(PyExc_RuntimeError, "Could not create csr matrix");
-      SWIG_fail;
+      return 1;
     }
   }
+
+}
+
+%}
+
+
+%typemap(argout) (cs_sparse *outSparseMat)
+{
+  if (cs_sparse_to_csc_matrix($1, &$result)) SWIG_fail;
+
+}
+
+%typemap(out) (cs_sparse *)
+{
+  if (cs_sparse_to_csc_matrix($1, &$result)) SWIG_fail;
 
 }
 
