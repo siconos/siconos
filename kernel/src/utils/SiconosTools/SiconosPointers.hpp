@@ -62,7 +62,8 @@ More documentation on smart pointers and reference counting:
 
 #include <boost/shared_array.hpp>
 
-#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#include <SiconosConfig.h>
+#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 namespace std11 = std;
 #include <memory>
 #else

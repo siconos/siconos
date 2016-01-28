@@ -130,7 +130,7 @@ void BulletDS::addCollisionObject(SP::btCollisionObject cobj,
                                   SP::SiconosVector ori,
                                   int group)
 {
-  boost::array<double, 7> xpos = { (*pos)(0), (*pos)(1), (*pos)(2),
+  std11::array<double, 7> xpos = { (*pos)(0), (*pos)(1), (*pos)(2),
                                    (*ori)(0), (*ori)(1), (*ori)(2), (*ori)(3)};
 
   (*_collisionObjects)[&*cobj] =  boost::tuple<SP::btCollisionObject,

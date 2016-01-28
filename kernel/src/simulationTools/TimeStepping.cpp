@@ -38,7 +38,8 @@
 #include "NewtonEulerR.hpp"
 #include "FirstOrderR.hpp"
 
-#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#include <SiconosConfig.h>
+#if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <functional>
 using namespace std::placeholders;
 #else

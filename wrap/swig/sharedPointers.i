@@ -7,7 +7,7 @@
 
 %import SiconosConfig.h
 
-#if (SICONOS_CXXVERSION >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #define STD11 std
 #undef __cplusplus
 #define __cplusplus SICONOS_CXXVERSION

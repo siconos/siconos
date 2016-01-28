@@ -44,7 +44,8 @@
 
 #include "SiconosVisitor.hpp"
 
-#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#include <SiconosConfig.h>
+#if defined(SICONOS_STD_ARRAY) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <type_traits>
 #include <array>
 #else

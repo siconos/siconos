@@ -28,7 +28,7 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/nvp.hpp>
 
-#if __cplusplus >= 201103L
+#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <boost/serialization/ser_shared_ptr.hpp>
 #else
 #include <boost/serialization/shared_ptr.hpp>

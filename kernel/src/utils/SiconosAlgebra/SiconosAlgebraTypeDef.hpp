@@ -43,7 +43,8 @@
 #include <limits>
 #include <boost/numeric/ublas/fwd.hpp>
 
-#if __cplusplus >= 201103L
+#include "SiconosConfig.h"
+#if defined(SICONOS_STD_ARRAY) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <array>
 #else
 #include <boost/array.hpp>

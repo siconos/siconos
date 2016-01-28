@@ -24,7 +24,8 @@ Classes related to object ordering in SiconosSet.
 #ifndef CMP_H
 #define CMP_H
 
-#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#include <SiconosConfig.h>
+#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <memory>
 namespace std11 = std;
 #else

@@ -65,6 +65,13 @@
 
 // Which version of C++ was used to compile siconos, needed for swig
 #define SICONOS_CXXVERSION @CXXVERSION@
-
+#cmakedefine SICONOS_USE_BOOST_FOR_CXX11
+#cmakedefine SICONOS_USE_MAP_FOR_HASH
+#cmakedefine SICONOS_STD_SHARED_PTR
+#cmakedefine SICONOS_STD_ARRAY
+#cmakedefine SICONOS_STD_UNORDERED_MAP
+#cmakedefine SICONOS_STD_TUPLE
+#cmakedefine SICONOS_STD_TO_STRING
+#cmakedefine SICONOS_STD_FUNCTIONAL
 
 #endif
