@@ -54,6 +54,12 @@
 
 enum { TAKEOFF_CASE, STICKING_CASE, SLIDING_CASE };
 
+#define TOTAL_TIME_USED 2
+
+#define TOTAL_ITER 2
+#define LAST_MODEL_STATUS 3
+#define LAST_SOLVE_STATUS 4
+
 //#define SMALL_APPROX
 
 #include <fcntl.h>
@@ -147,29 +153,33 @@ static csi SN_rm_normal_part(csi i, csi j, double val, void* env)
   }
 }
 
-static void filename_datafiles(int iter, const char* base_name, unsigned len, char* template_name)
+static void filename_datafiles(const int iter, const int solverId, const char* base_name, unsigned len, char* template_name, char* log_filename)
 {
-  char iterStr[6];
-  sprintf(iterStr, "-i%d", iter);
+  char iterStr[40];
+  snprintf(iterStr, sizeof(iterStr), "-i%d-%s", iter, idToName(solverId));
   if (base_name)
   {
     strncpy(template_name, base_name, len);
+    strncpy(log_filename, base_name, len);
   }
   else
   {
     strncpy(template_name, "fc3d_avi-condensed", len);
+    strncpy(log_filename, "fc3d_avi-condense-log", len);
   }
 
   strncat(template_name, iterStr, len - strlen(template_name) - 1);
+  strncat(log_filename, iterStr, len - strlen(log_filename) - 1);
+  strncat(log_filename, ".log", len - strlen(log_filename) - 1);
 }
 
-static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, const char* base_name, double* restrict reaction, double* restrict velocity, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat)
+static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, const char* base_name, double* restrict reaction, double* restrict velocity, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat, SolverOptions* options)
 {
 
   char msg[GMS_SSSIZE];
   int status;
   unsigned size = (unsigned)W->size0;
-  double infos[] = {0., 0.};
+  double infos[4] = {0.};
   /* Create objects */
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating gamsx object\n");
   if (! gamsxCreateD (&Gptr, sysdir, msg, sizeof(msg))) {
@@ -328,7 +338,7 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
     goto fail;
   }
 
-  if ((status=GDX_to_NV(Xptr, "infos", infos, 2))) {
+  if ((status=GDX_to_NV(Xptr, "infos", infos, sizeof(infos)/sizeof(double)))) {
     printf("Model data not read\n");
     infos[1] = (double)-ETERMINATE;
     goto fail;
@@ -337,6 +347,10 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
   if (idxClose(Xptr))
     idxerrorR(idxGetLastError(Xptr), "idxClose");
 
+  options->iparam[TOTAL_ITER] += (int)infos[2];
+  options->iparam[LAST_MODEL_STATUS] = (int)infos[0];
+  options->iparam[LAST_SOLVE_STATUS] = (int)infos[1];
+  options->dparam[TOTAL_TIME_USED] += infos[3];
   printf("SolveStat = %d, ModelStat = %d\n", (int)infos[1], (int)infos[0]);
   gmoGetModelStatusTxt(gmoPtr, (int)infos[0], msg);
   DEBUG_PRINTF("%s\n", msg);
@@ -390,8 +404,12 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   optHandle_t solverOptPtr = NULL;
   gmoHandle_t gmoPtr = NULL;
 
+  /* Cleanup previous value */
+  options->dparam[TOTAL_TIME_USED] = 0.;
+  options->iparam[TOTAL_ITER] = 0;
+
   int status;
-  char sysdir[GMS_SSSIZE], model[GMS_SSSIZE], msg[GMS_SSSIZE], template_filename[GMS_SSSIZE], hdf5_filename[GMS_SSSIZE];
+  char sysdir[GMS_SSSIZE], model[GMS_SSSIZE], msg[GMS_SSSIZE], template_filename[GMS_SSSIZE], hdf5_filename[GMS_SSSIZE], log_filename[GMS_SSSIZE];
   const char defModel[] = SPACE_CONC(GAMS_MODELS_SHARE_DIR, "/fc_vi-condensed.gms");
   const char defGAMSdir[] = GAMS_DIR;
 
@@ -409,6 +427,19 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   SN_Gams_set_dirs(options->solverParameters, defModel, defGAMSdir, model, sysdir, "/fc_vi-condensed.gms");
 
   const char* filename = GAMSP_get_filename(options->solverParameters);
+
+  /* Logger starting  */
+  if (filename)
+  {
+    strncpy(hdf5_filename, filename, sizeof(hdf5_filename));
+  }
+  else
+  {
+    strncpy(hdf5_filename, "logger", sizeof(hdf5_filename));
+  }
+
+  strncat(hdf5_filename, ".hdf5", sizeof(hdf5_filename) - strlen(hdf5_filename) - 1);
+
 
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating opt object\n");
   if (! optCreateD (&Optr, sysdir, msg, sizeof(msg))) {
@@ -440,27 +471,38 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   }
 
   getGamsOpt(Optr, sysdir);
+
+  optHandle_t Opts[] = {Optr, solverOptPtr};
+  SN_Gams_set_options(options->solverParameters, Opts);
+
   if (strcmp(solverName, "path"))
   {
     optSetStrStr(Optr, "emp", solverName);
-    optSetStrStr(solverOptPtr, "avi_start", "ray_first");
+/*    optSetStrStr(solverOptPtr, "avi_start", "ray_first");
     optSetStrStr(solverOptPtr, "ratio_tester", "expand");
+    optSetDblStr(solverOptPtr, "expand_eps", 0.);*/
+//    optSetIntStr(solverOptPtr, "scheduler_decompose", 1);
+//    optSetStrStr(solverOptPtr, "lemke_factorization_method", "minos_blu");
   }
   else // only for path
   {
-//    optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
-//    optSetIntStr(solverOptPtr, "output_linear_model", 1);
+/*     optSetIntStr(solverOptPtr, "linear_model_perturb", 0);
     optSetDblStr(solverOptPtr, "proximal_perturbation", 0.);
     optSetStrStr(solverOptPtr, "crash_method", "none");
     optSetIntStr(solverOptPtr, "crash_perturb", 0);
+    optSetIntStr(solverOptPtr, "restart_limit", 0);
+    optSetStrStr(solverOptPtr, "lemke_start", "first"); */
+//    optSetIntStr(solverOptPtr, "output_linear_model", 1);
 //    optSetIntStr(solverOptPtr, "output_minor_iterations_frequency", 1);
 //    optSetIntStr(solverOptPtr, "output_linear_model", 1);
 
   }
-  optSetIntStr(solverOptPtr, "minor_iteration_limit", 100000);
-  optSetDblStr(solverOptPtr, "expand_delta", 1e-10);
+/*  optSetIntStr(solverOptPtr, "minor_iteration_limit", 100000);
+  optSetIntStr(solverOptPtr, "major_iteration_limit", 20);
+  optSetDblStr(solverOptPtr, "expand_delta", 1e-10);*/
 //  optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
   optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+
   optWriteParameterFile(solverOptPtr, msg);
 
   optSetIntStr(Optr, "Keep", 0);
@@ -509,6 +551,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
    * - 2 => r ∈ bdry K \ {0} 
    */
   size_t* type_contact = (size_t*)calloc(problem->numberOfContacts, sizeof(size_t));
+  size_t* type_contact_avi = (size_t*)calloc(problem->numberOfContacts, sizeof(size_t));
 
   bool done = false;
   double total_residual = 0.;
@@ -517,19 +560,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   double current_nb_approx = NB_APPROX;
 
   unsigned iter = 0;
-  unsigned maxiter = 20;
-
-  /* Logger starting  */
-  if (filename)
-  {
-    strncpy(hdf5_filename, filename, sizeof(hdf5_filename));
-  }
-  else
-  {
-    strncpy(hdf5_filename, "logger", sizeof(hdf5_filename));
-  }
-
-  strncat(hdf5_filename, ".hdf5", sizeof(hdf5_filename) - strlen(hdf5_filename) - 1);
+  unsigned maxiter = options->iparam[0];
 
   SN_logh5* logger_s = SN_logh5_init(hdf5_filename, maxiter);
 
@@ -537,7 +568,8 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   {
     iter++;
     total_residual = 0.;
-    filename_datafiles(iter, filename, sizeof(template_filename), template_filename);
+    filename_datafiles(iter, options->solverId, filename, sizeof(template_filename), template_filename, log_filename);
+    optSetStrStr(Optr, "LogFile", log_filename);
 
     SN_logh5_new_iter(iter, logger_s);
 
@@ -549,7 +581,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
     SN_logh5_vec_double(Akmat.size0, lambda_y, "lambda_y", logger_s->group);
 
 
-    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, template_filename, reaction, velocity, tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat);
+    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, template_filename, reaction, velocity, tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat, options);
     //DEBUG_PRINT_VEC(reaction, size);
     //DEBUG_PRINT_VEC(velocity, size);
 
@@ -596,12 +628,48 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
 
     for (unsigned i3 = 0, i = 0; i3 < size; ++i, i3 += 3)
     {
+      /************************************************
+       * save contact type based on result from AVI
+       ************************************************/
+      if (reaction[i3] < TOL_RN)
+      {
+        type_contact_avi[i] = TAKEOFF_CASE;
+      }
+      else if (velocity[i3] < 1e-9)
+      {
+        type_contact_avi[i] = STICKING_CASE;
+      }
+      else
+      {
+        type_contact_avi[i] = SLIDING_CASE;
+      }
+
       double mu = problem->mu[i];
       /* Step 1. project r on the cone */
 
 //      DEBUG_PRINTF("contact %d, before projection: theta_r = %.*e\n", i, DECIMAL_DIG, rad2deg(atan2(reaction[i3+2], reaction[i3+1])));
-      projectionOnCone(&reaction[i3], mu);
+      unsigned proj_type = projectionOnCone(&reaction[i3], mu);
 //      DEBUG_PRINTF("contact %d, after projection:  theta_r = %.*e\n", i, DECIMAL_DIG, rad2deg(atan2(reaction[i3+2], reaction[i3+1])));
+
+      double* lri = &reaction[i3];
+      if (reaction[i3] < TOL_RN)
+      {
+        type_contact[i] = TAKEOFF_CASE;
+      }
+      else if (type_contact_avi[i] == SLIDING_CASE)
+      {
+        type_contact[i] = SLIDING_CASE;
+      }
+      else if (proj_type == PROJCONE_INSIDE)
+      {
+        type_contact[i] = STICKING_CASE;
+      }
+      else
+      {
+        assert(proj_type == PROJCONE_BOUNDARY);
+        type_contact[i] = SLIDING_CASE;
+      }
+
     }
 
     memset(lambda_r, 0, size_l * sizeof(double));
@@ -676,33 +744,42 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
 
         /* Leave ri as-is  */
       }
-      else if (ri[0] > TOL_RN) // if r= 0 :(
+//      else if (ri[0] > TOL_RN) // if r= 0 :(
+      else if (type_contact[i] == SLIDING_CASE)
       {
         //double delta_angle = atan2(-ri[1]*ui[2] + ui[1]*ri[2], ri[1]*ri[2] + ui[1]*ui[2]);
-        double minus_r_angle = atan2(ri[2], ri[1])+ M_PI;
+        double minus_r_angle = atan2(ri[2], ri[1]);
+        if (minus_r_angle >= 0.)
+        {
+          minus_r_angle -= M_PI;
+        }
+        else if (minus_r_angle < 0.)
+        {
+          minus_r_angle += M_PI;
+        }
         double delta_angle = atan2(ui[2], ui[1]) - minus_r_angle;
+        if (delta_angle > M_PI)
+        {
+          delta_angle -= 2*M_PI;
+        }
+        else if (delta_angle < -M_PI)
+        {
+          delta_angle += 2*M_PI;
+        }
         delta_angles[i] = rad2deg(delta_angle);
         real_angles[i] = rad2deg(-minus_r_angle);
         if ((fabs(delta_angle) > M_PI/2))
         {
-          if (fabs(delta_angle+2*M_PI) > M_PI/2)
+          printf("Contact %d, something bad happened, angle value is %g (rad) or %g (deg)\n", i, delta_angle, rad2deg(delta_angle));
+          printf("r = [%g; %g; %g]\tu = [%g; %g; %g]\tres = %g\n", ri[0], ri[1], ri[2], ui[0], ui[1], ui[2], sqrt(res));
+          if (((ri[1]*ri[1] + ri[2]*ri[2]) < mu*mu * ri[0]*ri[0]))
           {
-            printf("Contact %d, something bad happened, angle value is %g (rad) or %g (deg)\n", i, delta_angle, rad2deg(delta_angle));
-            printf("r = [%g; %g; %g]\tu = [%g; %g; %g]\tres = %g\n", ri[0], ri[1], ri[2], ui[0], ui[1], ui[2], sqrt(res));
-            if (((ri[1]*ri[1] + ri[2]*ri[2]) < mu*mu * ri[0]*ri[0]))
-            {
-              printf("r is the in the interior of the cone ... |r_r| = %g < %g = r_n*mu\n", sqrt((ri[1]*ri[1] + ri[2]*ri[2])), sqrt(mu*mu * ri[0]*ri[0]));
-            }
-            goto bad_angle;
+            printf("r is the in the interior of the cone ... |r_t| = %g < %g = r_n*mu\n", sqrt((ri[1]*ri[1] + ri[2]*ri[2])), sqrt(mu*mu * ri[0]*ri[0]));
           }
-          else
-          {
-            delta_angle = (delta_angle + 2*M_PI);
-          }
+          goto bad_angle;
         }
 
         /* Ok so here we support that we are in the sliding case */
-        type_contact[i] = SLIDING_CASE;
         DEBUG_PRINTF("contact %d, delta angle = %g, theta_r = %.*e, theta_u = %.*e\n", i, rad2deg(delta_angle), DECIMAL_DIG, rad2deg(atan2(ri[2],ri[1])), 
             DECIMAL_DIG, rad2deg(atan2(ui[2], ui[1])));
         if (fabs(delta_angle) < 1e-12) { printf("Contact %d, delta_angle too small %g; set to 1e-12", i, delta_angle); delta_angle = copysign(1e-12, delta_angle);}
@@ -834,12 +911,20 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
       else // r = 0, or r in int(cone) but other interactions moved u
 bad_angle:
       {
-        double offset_angle = 0.;
+        double offset_angle = atan2(ri[2], ri[1]);
+        if (offset_angle >= 0.)
+        {
+          offset_angle -= M_PI;
+        }
+        else if (offset_angle < 0.)
+        {
+          offset_angle += M_PI;
+        }
+
         double slice_angle = 2*M_PI/(NB_APPROX + 1);
         DEBUG_PRINTF("angle: %g\n", slice_angle);
         if (ri[0] < TOL_RN)
         {
-          type_contact[i] = TAKEOFF_CASE;
           /* Make sure that r = 0 amd not some small negative number ...*/
           ri[0] = 0.;
           ri[1] = 0.;
@@ -911,7 +996,6 @@ bad_angle:
         }
         else if ((ri[1]*ri[1] + ri[2]*ri[2]) < (1.+1e-10)*mu*mu * ri[0]*ri[0]) /* We should have r \in int K and u = y = 0 = dual(y) */
         {
-          type_contact[i] = STICKING_CASE;
           /* TODO? update r based on the changes in the contact forces  */
           ui[0] = 0.;
           ui[1] = 0.;
@@ -921,6 +1005,13 @@ bad_angle:
         else
         {
           printf("bad_angle case\n");
+          ri[0] = 0.;
+          ri[1] = 0.;
+          ri[2] = 0.;
+
+          ui[0] = 0.;
+          ui[1] = 0.;
+          ui[2] = 0.;
         }
 
         for (unsigned k = 0; k < NB_APPROX; ++k)
@@ -952,7 +1043,7 @@ bad_angle:
     cblas_dcopy(size, velocity, 1, velocity_old, 1);
 
     total_residual = sqrt(total_residual);
-    optSetDblStr(solverOptPtr, "expand_delta", fmax(1e-13, fmin(1e-10, total_residual*1e-7)));
+//    optSetDblStr(solverOptPtr, "expand_delta", fmax(1e-13, fmin(1e-10, total_residual*1e-7)));
     optWriteParameterFile(solverOptPtr, msg);
 //    optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
     printf("fc3d_AVI_gams :: residual = %g\n", total_residual);
@@ -979,7 +1070,7 @@ bad_angle:
 
     if (!strcmp(solverName, "pathvi"))
     {
-//      optSetStrStr(solverOptPtr, "avi_start", "regular");
+      optSetStrStr(solverOptPtr, "avi_start", "regular");
     }
 
     SN_logh5_vec_double(problem->numberOfContacts, delta_angles, "delta_angles", logger_s->group);
@@ -987,6 +1078,7 @@ bad_angle:
     SN_logh5_vec_double(problem->numberOfContacts, residual_contact, "residual_contact", logger_s->group);
     /*  XXX buggy here, implement a SN_logh5_vec_integer */
     SN_logh5_vec_int64(problem->numberOfContacts, type_contact, "type_contact", logger_s->group);
+    SN_logh5_vec_int64(problem->numberOfContacts, type_contact_avi, "type_contact_avi", logger_s->group);
     SN_logh5_end_iter(logger_s);
   }
 
@@ -1005,6 +1097,7 @@ TERMINATE:
   SN_logh5_scalar_uinteger(done, "status", logger_s->file);
   SN_logh5_scalar_uinteger(problem->numberOfContacts, "number_contacts", logger_s->file);
   SN_logh5_vec_double(size, problem->q, "q", logger_s->file);
+  SN_logh5_vec_double((unsigned)problem->numberOfContacts, problem->mu, "mu", logger_s->file);
   SN_logh5_NM(problem->M, "W", logger_s);
 
   /*  Truly, truly, this is the end */
@@ -1027,6 +1120,8 @@ TERMINATE:
   free(real_angles);
   free(residual_contact);
   free(type_contact);
+  free(type_contact_avi);
+
   if (done)
   {
     status = 0;
@@ -1037,6 +1132,8 @@ TERMINATE:
     status = 1;
     options->dparam[1] = old_residual;
   }
+
+  options->iparam[1] = iter;
   return status;
 }
 

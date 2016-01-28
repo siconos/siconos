@@ -46,10 +46,3 @@ velocity(l) = v.l(l)
 display v.l, r.l, y.l
 
 $exit
-
-* following only works if Q is symmetric
-equation defobj; variable obj;
-defobj.. obj =e= 0.5*sum(k, x(k)*sum(j, Q(k,j)*x(j))) + sum(k, c(k)*x(k)); 
-
-model qp / defobj, cons /;
-solve qp using qcp min obj;

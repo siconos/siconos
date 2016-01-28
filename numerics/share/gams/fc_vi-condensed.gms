@@ -4,7 +4,7 @@ $if not %gams.user1% == "" $set filename %gams.user1%
 $if not set outfile $set outfile 'fc3d_avi-condensed_sol.gdx'
 $if not %gams.user2% == "" $set outfile %gams.user2%
 
-set j /1 * 2/;
+set j /1 * 4/;
 
 sets i, p;
 parameter W(i,i), E(i,i), Wt(i, i), q(i), qt(i), Ak(p,i), guess_r(i), guess_y(i), guess_lambda_r(p), guess_lambda_y(p);
@@ -15,9 +15,9 @@ $loadIdx W E Wt Ak q qt guess_r guess_y guess_lambda_r guess_lambda_y
 
 $gdxin
 
-display Ak, W, E, Wt, q, qt;
+*display Ak, W, E, Wt, q, qt;
 
-display i, p;
+*display i, p;
 
 alias(i,l);
 
@@ -51,7 +51,7 @@ r_y(l) = sum(i, Wt(l,i)*r.l(i)) + sum(i, E(l, i)*y.l(i)) + qt(l) - sum(p, Ak(p,l
 r_lr(p) = sum(i, Ak(p,i)*r.l(i));
 r_ly(p) = sum(i, Ak(p,i)*y.l(i));
 
-display r_r, r_y, r_lr, r_ly;
+*display r_r, r_y, r_lr, r_ly;
 
 model vi / all /;
 
@@ -61,12 +61,11 @@ putclose fx 'vi F_r r F_y y';
 solve vi using emp;
 
 reaction(i) = r.l(i);
-velocity(i) = r.m(i);
+velocity(i) = sum(l, W(i,l)*r.l(l)) + q(i) + sum(l, E(i, l)*y.l(l));
 
 infos('1') = vi.modelstat;
 infos('2') = vi.solvestat;
-
-display vi.modelstat;
-display vi.solvestat;
+infos('3') = vi.iterusd;
+infos('4') = vi.Resusd;
 
 execute_unloadIdx '%outfile%', reaction, velocity, infos;

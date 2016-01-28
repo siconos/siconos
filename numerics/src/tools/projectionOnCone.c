@@ -19,7 +19,7 @@
 #include <math.h>
 #include "projectionOnCone.h"
 
-void projectionOnCone(double* r, double  mu)
+unsigned projectionOnCone(double* r, double  mu)
 {
   double normT = hypot(r[1], r[2]);
   if (mu * normT <= - r[0])
@@ -27,11 +27,11 @@ void projectionOnCone(double* r, double  mu)
     r[0] = 0.0;
     r[1] = 0.0;
     r[2] = 0.0;
-    return ;
+    return PROJCONE_DUAL;
   }
   else if (normT <= mu * r[0])
   {
-    return ;
+    return PROJCONE_INSIDE;
   }
   else
   {
@@ -39,7 +39,7 @@ void projectionOnCone(double* r, double  mu)
     r[0] = (mu * normT + r[0]) / (mu2 + 1.0);
     r[1] = mu * r[0] * r[1] / normT;
     r[2] = mu * r[0] * r[2] / normT;
-    return;
+    return PROJCONE_BOUNDARY;
   }
 }
 

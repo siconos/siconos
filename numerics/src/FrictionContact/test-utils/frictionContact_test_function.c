@@ -27,6 +27,45 @@
 #endif
 
 
+void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
+{
+  if (solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
+      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
+      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI
+      )
+  {
+    add_GAMS_opt_str(GP, "avi_start", "ray_first", GAMS_OPT_SOLVER);
+    add_GAMS_opt_str(GP, "ratio_tester", "expand", GAMS_OPT_SOLVER);
+    add_GAMS_opt_double(GP, "expand_eps", 0., GAMS_OPT_SOLVER);
+//    add_GAMS_opt_int(GP, "scheduler_decompose", 1, GAMS_OPT_SOLVER);
+//    add_GAMS_opt_str(GP, "lemke_factorization_method", "minos_blu", GAMS_OPT_SOLVER);
+  }
+  else if (solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
+      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
+      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH
+      )
+  {
+    add_GAMS_opt_int(GP, "linear_model_perturb", 0, GAMS_OPT_SOLVER);
+    add_GAMS_opt_double(GP, "proximal_perturbation", 0., GAMS_OPT_SOLVER);
+    add_GAMS_opt_str(GP, "crash_method", "none", GAMS_OPT_SOLVER);
+    add_GAMS_opt_int(GP, "crash_perturb", 0, GAMS_OPT_SOLVER);
+    add_GAMS_opt_int(GP, "restart_limit", 0, GAMS_OPT_SOLVER);
+//    add_GAMS_opt_str(GP, "lemke_start", "first", GAMS_OPT_SOLVER);
+//    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
+//    add_GAMS_opt_int(GP, "output_minor_iterations_frequency", 1, GAMS_OPT_SOLVER);
+//    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
+
+  }
+  else
+  {
+    fprintf(stderr, "frictionContact_test_gams_opts :: ERROR unkown solverId = %d e.g. solver named %s", solverId, idToName(solverId));
+  }
+  add_GAMS_opt_int(GP, "minor_iteration_limit", 100000, GAMS_OPT_SOLVER);
+  add_GAMS_opt_int(GP, "major_iteration_limit", 20, GAMS_OPT_SOLVER);
+  add_GAMS_opt_double(GP, "expand_delta", 1e-10, GAMS_OPT_SOLVER);
+
+}
+
 int frictionContact_test_function(FILE * f, SolverOptions * options)
 {
 

@@ -1,13 +1,19 @@
 /* GAMS stuff */
 
+#ifndef GAMSLINK_H
+#define GAMSLINK_H
+
 #include <stdbool.h>
 
 /** Simply linked list of bool option for GAMS
  */
 
+enum { GAMS_OPT_GENERAL, GAMS_OPT_SOLVER };
+
 typedef struct GAMS_opt_bool_ {
   char* name; /**< Name of the option */
   bool value; /**< Value of the option */
+  unsigned type; /** Type of option (general or solver-specific)*/
   struct GAMS_opt_bool_* next_opt; /**< Link to the next option*/
 } GAMS_opt_bool;
 
@@ -16,6 +22,7 @@ typedef struct GAMS_opt_bool_ {
 typedef struct GAMS_opt_int_ {
   char* name; /**< Name of the option */
   int value; /**< Value of the option */
+  unsigned type; /** Type of option (general or solver-specific)*/
   struct GAMS_opt_int_* next_opt; /**< Link to the next option*/
 } GAMS_opt_int;
 
@@ -24,6 +31,7 @@ typedef struct GAMS_opt_int_ {
 typedef struct GAMS_opt_double_ {
   char* name; /**< Name of the option */
   double value; /**< Value of the option */
+  unsigned type; /** Type of option (general or solver-specific)*/
   struct GAMS_opt_double_* next_opt; /**< Link to the next option*/
 } GAMS_opt_double;
 
@@ -32,6 +40,7 @@ typedef struct GAMS_opt_double_ {
 typedef struct GAMS_opt_str_ {
   char* name; /**< Name of the option */
   char* value; /**< Value of the option */
+  unsigned type; /** Type of option (general or solver-specific)*/
   struct GAMS_opt_str_* next_opt; /**< Link to the next option*/
 } GAMS_opt_str;
 
@@ -61,100 +70,46 @@ static inline SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir)
   return GP;
 }
 
-static inline void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value)
+#define GAMS_ADD_OPT(GAMSP_OPT_L, GAMSP_OPT_T) \
+GAMSP_OPT_T* next_opt = GAMSP_OPT_L; \
+GAMSP_OPT_T* new_opt; \
+if (next_opt) \
+{ \
+  while (next_opt->next_opt) \
+  { \
+    next_opt = next_opt->next_opt; \
+  } \
+  next_opt->next_opt = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T)); \
+  new_opt = next_opt->next_opt; \
+} \
+else \
+{ \
+  GAMSP_OPT_L = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T)); \
+  new_opt = GAMSP_OPT_L; \
+} \
+new_opt->name = name; \
+new_opt->value = value; \
+new_opt->type = type; \
+new_opt->next_opt = NULL; \
+
+static inline void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value, unsigned type)
 {
-   GAMS_opt_str* next_opt = GP->opt_str_list;
-   GAMS_opt_str* new_opt;
-   if (next_opt)
-   {
-     do
-     {
-       next_opt = next_opt->next_opt;
-     }
-     while (next_opt->next_opt);
-     next_opt->next_opt = (GAMS_opt_str*)malloc(sizeof(GAMS_opt_str));
-     new_opt = next_opt->next_opt;
-   }
-   else
-   {
-     next_opt = (GAMS_opt_str*)malloc(sizeof(GAMS_opt_str));
-     new_opt = next_opt;
-   }
-   new_opt->name = name;
-   new_opt->value = value;
-   new_opt->next_opt = NULL;
+   GAMS_ADD_OPT(GP->opt_str_list, GAMS_opt_str);
 }
 
-static inline void add_GAMS_opt_bool(SN_GAMSparams* GP, char* name, bool value)
+static inline void add_GAMS_opt_bool(SN_GAMSparams* GP, char* name, bool value, unsigned type)
 {
-   GAMS_opt_bool* next_opt = GP->opt_bool_list;
-   GAMS_opt_bool* new_opt;
-   if (next_opt)
-   {
-     do
-     {
-       next_opt = next_opt->next_opt;
-     }
-     while (next_opt->next_opt);
-     next_opt->next_opt = (GAMS_opt_bool*)malloc(sizeof(GAMS_opt_bool));
-     new_opt = next_opt->next_opt;
-   }
-   else
-   {
-     next_opt = (GAMS_opt_bool*)malloc(sizeof(GAMS_opt_bool));
-     new_opt = next_opt;
-   }
-   new_opt->name = name;
-   new_opt->value = value;
-   new_opt->next_opt = NULL;
+   GAMS_ADD_OPT(GP->opt_bool_list, GAMS_opt_bool);
 }
 
-static inline void add_GAMS_opt_int(SN_GAMSparams* GP, char* name, int value)
+static inline void add_GAMS_opt_int(SN_GAMSparams* GP, char* name, int value, unsigned type)
 {
-   GAMS_opt_int* next_opt = GP->opt_int_list;
-   GAMS_opt_int* new_opt;
-   if (next_opt)
-   {
-     do
-     {
-       next_opt = next_opt->next_opt;
-     }
-     while (next_opt->next_opt);
-     next_opt->next_opt = (GAMS_opt_int*)malloc(sizeof(GAMS_opt_int));
-     new_opt = next_opt->next_opt;
-   }
-   else
-   {
-     next_opt = (GAMS_opt_int*)malloc(sizeof(GAMS_opt_int));
-     new_opt = next_opt;
-   }
-   new_opt->name = name;
-   new_opt->value = value;
-   new_opt->next_opt = NULL;
+   GAMS_ADD_OPT(GP->opt_int_list, GAMS_opt_int);
 }
 
-static inline void add_GAMS_opt_double(SN_GAMSparams* GP, char* name, double value)
+static inline void add_GAMS_opt_double(SN_GAMSparams* GP, char* name, double value, unsigned type)
 {
-   GAMS_opt_double* next_opt = GP->opt_double_list;
-   GAMS_opt_double* new_opt;
-   if (next_opt)
-   {
-     do
-     {
-       next_opt = next_opt->next_opt;
-     }
-     while (next_opt->next_opt);
-     next_opt->next_opt = (GAMS_opt_double*)malloc(sizeof(GAMS_opt_double));
-     new_opt = next_opt->next_opt;
-   }
-   else
-   {
-     next_opt = (GAMS_opt_double*)malloc(sizeof(GAMS_opt_double));
-     new_opt = next_opt;
-   }
-   new_opt->name = name;
-   new_opt->value = value;
-   new_opt->next_opt = NULL;
+   GAMS_ADD_OPT(GP->opt_double_list, GAMS_opt_double);
 }
 
 static inline void deleteGAMSparams(SN_GAMSparams* GP)
@@ -172,6 +127,7 @@ static inline void deleteGAMSparams(SN_GAMSparams* GP)
       free(str_opt);
     }
     while (next_opt);
+    GP->opt_str_list = NULL;
   }
   if (GP->opt_bool_list)
   {
@@ -186,6 +142,7 @@ static inline void deleteGAMSparams(SN_GAMSparams* GP)
       free(bool_opt);
     }
     while (next_opt);
+    GP->opt_bool_list = NULL;
   }
   if (GP->opt_int_list)
   {
@@ -200,6 +157,7 @@ static inline void deleteGAMSparams(SN_GAMSparams* GP)
       free(int_opt);
     }
     while (next_opt);
+    GP->opt_int_list = NULL;
   }
   if (GP->opt_double_list)
   {
@@ -214,13 +172,19 @@ static inline void deleteGAMSparams(SN_GAMSparams* GP)
       free(double_opt);
     }
     while (next_opt);
+    GP->opt_double_list = NULL;
   }
   free(GP);
 }
 
-static inline const char* GAMSP_get_filename(const SN_GAMSparams* GP)
+static inline const char* GAMSP_get_filename(const void* GP)
 {
-  return GP->filename;
+  return ((SN_GAMSparams*) GP)->filename;
+}
+
+static inline void GAMSP_set_filename(void* GP, char* filename)
+{
+  ((SN_GAMSparams*) GP)->filename = filename;
 }
 
 #ifdef HAVE_GAMS_C_API
@@ -282,6 +246,30 @@ static inline void SN_Gams_set_dirs(const SN_GAMSparams* solverParameters, const
     GAMSdir[GMS_SSSIZE-1] = '\0';
   }
 }
+
+#define WALK_GAMSP_OPTS(GAMSP_OPT_L, GAMSP_OPT_T, GAMS_OPT_FUN) \
+  if (GAMSP_OPT_L) \
+  { \
+    GAMSP_OPT_T* next_opt = GAMSP_OPT_L; \
+    do \
+    { \
+      GAMSP_OPT_T* opt = next_opt; \
+      next_opt = opt->next_opt; \
+      GAMS_OPT_FUN(Opts[opt->type], opt->name, opt->value); \
+    } \
+    while (next_opt); \
+  }
+
+static inline void SN_Gams_set_options(const SN_GAMSparams* GP, optHandle_t* Opts)
+{
+  assert(GP);
+  assert(Opts);
+  WALK_GAMSP_OPTS(GP->opt_str_list, GAMS_opt_str, optSetStrStr);
+  WALK_GAMSP_OPTS(GP->opt_bool_list, GAMS_opt_bool, optSetIntStr);
+  WALK_GAMSP_OPTS(GP->opt_int_list, GAMS_opt_int, optSetIntStr);
+  WALK_GAMSP_OPTS(GP->opt_double_list, GAMS_opt_double, optSetDblStr);
+}
+
 
 static inline int getGamsSolverOpt(const optHandle_t Optr, const char* sysdir, const char* solverDefName)
 {
@@ -454,3 +442,5 @@ static inline int GDX_to_NV(idxHandle_t Xptr, const char* name, double* vector, 
 #else
 
 #endif
+
+#endif /* GAMSLINK_H  */

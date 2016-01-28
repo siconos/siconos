@@ -19,12 +19,15 @@
 #ifndef FRICTIONCONTACT_TEST_FUNCTION_H
 #define FRICTIONCONTACT_TEST_FUNCTION_H
 
+#include "GAMSlink.h"
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
   int frictionContact_test_function(FILE * f, SolverOptions * options);
+  void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId);
 
 #if defined(WITH_FCLIB)
   int frictionContact_test_function_hdf5(const char * path, SolverOptions * options);

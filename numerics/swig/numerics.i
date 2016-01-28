@@ -56,6 +56,7 @@
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
 #include "SiconosSets.h"
+#include "GAMSlink.h"
 
 
 #include <boost/preprocessor/stringize.hpp>
@@ -807,7 +808,7 @@
 %include "NaturalMapGenerated.h"
 %include "fc3d_compute_error.h"
 %include "fclib_interface.h"
-
+%include "GAMSlink.h"
 
 
 
@@ -1007,6 +1008,22 @@
   ~GlobalFrictionContactProblem()
   {
     freeGlobalFrictionContactProblem($self);
+  }
+
+};
+
+%extend SN_GAMSparams
+{
+
+  SN_GAMSparams(SolverOptions* SO)
+  {
+    assert(SO->solverParameters);
+    return (SN_GAMSparams*) SO->solverParameters;
+  }
+
+  ~SN_GAMSparams()
+  {
+    //do nothing
   }
 
 };

@@ -54,6 +54,10 @@
 
 #define MIN_DELTA_ANGLE 1e-12
 
+#define TOL_REFI 1e-12
+#define NM_ITER_REFI 10
+#define WITH_ITER_REFI
+
 enum { TAKEOFF_CASE, STICKING_CASE, SLIDING_CASE };
 
 //#define SMALL_APPROX
@@ -880,6 +884,8 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   double* slack_r = (double*)calloc(size, sizeof(double));
   double* slack_y = (double*)calloc(size, sizeof(double));
 
+  double* coeffs = (double*)calloc(size, sizeof(double));
+
   double* predicted_angles = (double*)calloc(problem->numberOfContacts, sizeof(double));
   double* delta_angles = (double*)calloc(problem->numberOfContacts, sizeof(double));
   double* real_angles = (double*)calloc(problem->numberOfContacts, sizeof(double));
@@ -959,14 +965,16 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     SN_logh5_vec_double(size, slack_y, "velocity_slack", logger_s->group);
 
     double* change_basis = NM_csc(&Ab)->x;
+/*     double* change_basis_inv = NM_csc(&Ab_real)->x;
     for (unsigned i3 = 0, indxMat = 0; i3 < size; i3 += 3, indxMat += 9)
     {
-#ifdef WITH_ITER_RAFF
-      solve_iterative_refinement3x3(&change_basis[indxMat], 
+#ifdef WITH_ITER_REFI
+      solve_iterative_refinement3x3(&change_basis[indxMat], &change_basis_inv[indxMat], &reaction[i3], &slack_r[i3], coeffs[i3], NB_ITER_REFI, TOL_REFI);
 #else
       mv3x3(&change_basis[indxMat], &slack_r[i3], &reaction[i3]);
 #endif
     }
+    */
     //DEBUG_PRINT_VEC(reaction, size);
     //DEBUG_PRINT_VEC(velocity, size);
 

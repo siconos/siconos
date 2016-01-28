@@ -492,17 +492,14 @@ void set_SolverOptions(SolverOptions* options, int solverId)
   case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI:
   {
 #ifdef HAVE_GAMS_C_API
-    iSize = 2;
-    dSize = 2;
+    iSize = 5;
+    dSize = 3;
     iter_max = 10000;
     tol = tol == 0. ? 1e-9 : tol;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
     if (!options->solverParameters)
     {
-      options->solverParameters = malloc(sizeof(SN_GAMSparams));
-      SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
-      GP->model_dir = GAMS_MODELS_SHARE_DIR;
-      GP->gams_dir = GAMS_DIR;
+      options->solverParameters = createGAMSparams(GAMS_MODELS_SHARE_DIR, GAMS_DIR);
     }
     break;
 #else

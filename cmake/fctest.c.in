@@ -19,9 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
+#include "GAMSlink.h"
+
 #include "frictionContact_test_function.h"
 
-#include "GAMSlink.h"
 
 int main(void)
 {
@@ -60,6 +61,7 @@ int main(void)
     SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
     GP->model_dir = GAMS_MODELS_SOURCE_DIR;
     GP->filename = "@TEST_DATA@";
+    frictionContact_test_gams_opts(GP, @TEST_SOLVER@);
   }
 #ifdef __clang__
 #pragma clang diagnostic pop
