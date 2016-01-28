@@ -3,21 +3,32 @@
 (NumericsMatrix* A) 
 (PyArrayObject* array=NULL, 
  int is_new_object=0,
+ int res = 0,
+ void* argp = NULL,
 
  // free in typemap(freearg)
- NumericsMatrix *nummat = newNumericsMatrix())
+ NumericsMatrix *nummat = NULL)
 {
-  array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+  res = SWIG_ConvertPtr($input, &argp, $descriptor(NumericsMatrix *), %convertptr_flags);
+  if (SWIG_IsOK(res))
+  {
+    $1 = %reinterpret_cast(argp, NumericsMatrix *);
+  }
+  else
+  {
+    nummat = newNumericsMatrix();
+    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
-  if (!array || !require_dimensions(array,2) ||
-      !require_native(array) || !require_fortran(array)) SWIG_fail;
+    if (!array || !require_dimensions(array,2) ||
+        !require_native(array) || !require_fortran(array)) SWIG_fail;
 
-  nummat->storageType = NM_DENSE;
-  nummat->size0 =  array_size(array,0);
-  nummat->size1 =  array_size(array,1);
+    nummat->storageType = NM_DENSE;
+    nummat->size0 =  array_size(array,0);
+    nummat->size1 =  array_size(array,1);
 
-  nummat->matrix0 = (double *)array_data(array);
-  $1 = nummat;
+    nummat->matrix0 = (double *)array_data(array);
+    $1 = nummat;
+  }
 }
 
 %typemap(freearg) (double *z)
@@ -27,7 +38,7 @@
 
 %typemap(freearg) (NumericsMatrix* A) {
   // %typemap(freearg) (NumericsMatrix* A)
-  free(nummat$argnum);
+  if (nummat$argnum) { free(nummat$argnum); }
   if (is_new_object$argnum && array$argnum)
   { Py_DECREF(array$argnum); }
 }
