@@ -168,11 +168,12 @@ MACRO(COMPILE_WITH)
     SET(_NAME_VERSION_STR "")
   ENDIF()
 
-  FIND_PACKAGE(${_NAME} ${_COMPONENTS} ${_REQUIRED})
+  FIND_PACKAGE(${_NAME} ${_NAME_VERSION} ${_COMPONENTS} ${_REQUIRED})
 
   FOREACH(_N ${_NAMES})
     IF(${_N}_FOUND)
       SET(_FOUND TRUE)
+      SET(_NAME_VERSION_STR "version ${${_N}_VERSION}")
       # add headers dirs into 'include' path
       # INCLUDE_DIR var name depends on FindNAME
       # We try to check the standard var names.
