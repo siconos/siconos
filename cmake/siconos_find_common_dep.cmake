@@ -60,7 +60,7 @@ IF(WITH_FCLIB)
 ENDIF()
 
 # --- Boost ---
-compile_with(Boost REQUIRED)
+compile_with(Boost 1.47 REQUIRED)
 
 # --- Bullet ---
 IF(WITH_BULLET)
