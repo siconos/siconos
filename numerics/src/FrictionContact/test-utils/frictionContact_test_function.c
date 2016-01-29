@@ -37,6 +37,7 @@ void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
     add_GAMS_opt_str(GP, "avi_start", "ray_first", GAMS_OPT_SOLVER);
     add_GAMS_opt_str(GP, "ratio_tester", "expand", GAMS_OPT_SOLVER);
     add_GAMS_opt_double(GP, "expand_eps", 0., GAMS_OPT_SOLVER);
+    add_GAMS_opt_bool(GP, "ratio_tester_tfirst", false, GAMS_OPT_SOLVER);
 //    add_GAMS_opt_int(GP, "scheduler_decompose", 1, GAMS_OPT_SOLVER);
 //    add_GAMS_opt_str(GP, "lemke_factorization_method", "minos_blu", GAMS_OPT_SOLVER);
   }
@@ -47,6 +48,7 @@ void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
   {
     add_GAMS_opt_int(GP, "linear_model_perturb", 0, GAMS_OPT_SOLVER);
     add_GAMS_opt_double(GP, "proximal_perturbation", 0., GAMS_OPT_SOLVER);
+    add_GAMS_opt_double(GP, "proximal_initial_maximum", 0., GAMS_OPT_SOLVER);
     add_GAMS_opt_str(GP, "crash_method", "none", GAMS_OPT_SOLVER);
     add_GAMS_opt_int(GP, "crash_perturb", 0, GAMS_OPT_SOLVER);
     add_GAMS_opt_int(GP, "restart_limit", 0, GAMS_OPT_SOLVER);

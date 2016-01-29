@@ -13,7 +13,7 @@ enum { GAMS_OPT_GENERAL, GAMS_OPT_SOLVER };
 typedef struct GAMS_opt_bool_ {
   char* name; /**< Name of the option */
   bool value; /**< Value of the option */
-  unsigned type; /** Type of option (general or solver-specific)*/
+  unsigned type; /**< Type of option (general or solver-specific)*/
   struct GAMS_opt_bool_* next_opt; /**< Link to the next option*/
 } GAMS_opt_bool;
 
@@ -22,7 +22,7 @@ typedef struct GAMS_opt_bool_ {
 typedef struct GAMS_opt_int_ {
   char* name; /**< Name of the option */
   int value; /**< Value of the option */
-  unsigned type; /** Type of option (general or solver-specific)*/
+  unsigned type; /**< Type of option (general or solver-specific)*/
   struct GAMS_opt_int_* next_opt; /**< Link to the next option*/
 } GAMS_opt_int;
 
@@ -31,7 +31,7 @@ typedef struct GAMS_opt_int_ {
 typedef struct GAMS_opt_double_ {
   char* name; /**< Name of the option */
   double value; /**< Value of the option */
-  unsigned type; /** Type of option (general or solver-specific)*/
+  unsigned type; /**< Type of option (general or solver-specific)*/
   struct GAMS_opt_double_* next_opt; /**< Link to the next option*/
 } GAMS_opt_double;
 
@@ -40,7 +40,7 @@ typedef struct GAMS_opt_double_ {
 typedef struct GAMS_opt_str_ {
   char* name; /**< Name of the option */
   char* value; /**< Value of the option */
-  unsigned type; /** Type of option (general or solver-specific)*/
+  unsigned type; /**< Type of option (general or solver-specific)*/
   struct GAMS_opt_str_* next_opt; /**< Link to the next option*/
 } GAMS_opt_str;
 
@@ -49,6 +49,7 @@ typedef struct {
   char* model_dir; /**<  Directory where the GAMS model are */
   char* gams_dir;  /**<  GAMS directory */
   char* filename; /**< name of the problem (used as a gdx filename) */
+  char* filename_suffix; /**< suffix for the filename. Useful when solving the same problem with the same solver, but different options */
   GAMS_opt_str* opt_str_list; /**< list of string options */
   GAMS_opt_bool* opt_bool_list; /**< list of boolean options */
   GAMS_opt_int* opt_int_list; /**< list of integer options */
@@ -62,6 +63,7 @@ static inline SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir)
   GP->model_dir = model_dir;
   GP->gams_dir = gams_dir;
   GP->filename = NULL;
+  GP->filename_suffix = NULL;
   GP->opt_str_list = NULL;
   GP->opt_bool_list = NULL;
   GP->opt_int_list = NULL;
@@ -185,6 +187,16 @@ static inline const char* GAMSP_get_filename(const void* GP)
 static inline void GAMSP_set_filename(void* GP, char* filename)
 {
   ((SN_GAMSparams*) GP)->filename = filename;
+}
+
+static inline const char* GAMSP_get_filename_suffix(const void* GP)
+{
+  return ((SN_GAMSparams*) GP)->filename_suffix;
+}
+
+static inline void GAMSP_set_filename_suffix(void* GP, char* filename_suffix)
+{
+  ((SN_GAMSparams*) GP)->filename_suffix = filename_suffix;
 }
 
 #ifdef HAVE_GAMS_C_API

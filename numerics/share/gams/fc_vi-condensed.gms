@@ -4,6 +4,9 @@ $if not %gams.user1% == "" $set filename %gams.user1%
 $if not set outfile $set outfile 'fc3d_avi-condensed_sol.gdx'
 $if not %gams.user2% == "" $set outfile %gams.user2%
 
+$if not set additional_constr $set additional_constr 'none'
+$if not "%gams.user3%" == "" $set additional_constr %gams.user3%
+
 set j /1 * 4/;
 
 sets i, p;
@@ -22,6 +25,12 @@ $gdxin
 alias(i,l);
 
 variables r(l), y(l);
+
+$ifthen %additional_constr% == 'normal_pos'
+  r.lo(l)$(mod(ord(l), 3) = 1) = 0.;
+  y.lo(l)$(mod(ord(l), 3) = 1) = 0.;
+$endif
+
 equations  F_r(l), F_y(l), cons_r(p), cons_y(p);
 
 parameter reaction(l), velocity(l), infos(j);

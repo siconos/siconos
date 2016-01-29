@@ -409,7 +409,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   options->iparam[TOTAL_ITER] = 0;
 
   int status;
-  char sysdir[GMS_SSSIZE], model[GMS_SSSIZE], msg[GMS_SSSIZE], template_filename[GMS_SSSIZE], hdf5_filename[GMS_SSSIZE], log_filename[GMS_SSSIZE];
+  char sysdir[GMS_SSSIZE], model[GMS_SSSIZE], msg[GMS_SSSIZE], template_filename[GMS_SSSIZE], hdf5_filename[GMS_SSSIZE], log_filename[GMS_SSSIZE], base_filename[GMS_SSSIZE];
   const char defModel[] = SPACE_CONC(GAMS_MODELS_SHARE_DIR, "/fc_vi-condensed.gms");
   const char defGAMSdir[] = GAMS_DIR;
 
@@ -432,10 +432,22 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   if (filename)
   {
     strncpy(hdf5_filename, filename, sizeof(hdf5_filename));
+    strncpy(base_filename, filename, sizeof(base_filename));
+
+    const char* suffix = GAMSP_get_filename_suffix(options->solverParameters);
+
+    if (suffix)
+    {
+      strncat(hdf5_filename, "_", sizeof(hdf5_filename) - strlen(hdf5_filename) - 1);
+      strncat(hdf5_filename, suffix, sizeof(hdf5_filename) - strlen(hdf5_filename) - 1);
+      strncat(base_filename, "_", sizeof(base_filename) - strlen(base_filename) - 1);
+      strncat(base_filename, suffix, sizeof(base_filename) - strlen(base_filename) - 1);
+    }
   }
   else
   {
     strncpy(hdf5_filename, "logger", sizeof(hdf5_filename));
+    strncpy(base_filename, "output", sizeof(base_filename));
   }
 
   strncat(hdf5_filename, ".hdf5", sizeof(hdf5_filename) - strlen(hdf5_filename) - 1);
@@ -568,7 +580,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   {
     iter++;
     total_residual = 0.;
-    filename_datafiles(iter, options->solverId, filename, sizeof(template_filename), template_filename, log_filename);
+    filename_datafiles(iter, options->solverId, base_filename, sizeof(template_filename), template_filename, log_filename);
     optSetStrStr(Optr, "LogFile", log_filename);
 
     SN_logh5_new_iter(iter, logger_s);
