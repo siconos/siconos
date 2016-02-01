@@ -2058,16 +2058,16 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
 
 }
 
-int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix *sparseMat)
+int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix *outSparseMat)
 {
   assert(A);
   assert(A->blocksize0);
   assert(A->blocksize1);
 
-  assert(sparseMat);
-  assert(sparseMat->p);
-  assert(sparseMat->i);
-  assert(sparseMat->x);
+  assert(outSparseMat);
+  assert(outSparseMat->p);
+  assert(outSparseMat->i);
+  assert(outSparseMat->x);
 
   /* Row (block) position of the current block */
   unsigned int currentRowNumber ;
@@ -2079,7 +2079,7 @@ int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix *spar
   int nnz = 0;
   int isparserowend, isparserowstart, isparserow;
   int isparsecolumnend, isparsecolumnstart, isparsecolumn;
-  sparseMat->p[0] = 0; /* We assume that the first row is non empty */
+  outSparseMat->p[0] = 0; /* We assume that the first row is non empty */
   for (currentRowNumber = 0 ; currentRowNumber < (unsigned int) A->filled1 - 1; ++currentRowNumber)
   {
 
@@ -2109,7 +2109,7 @@ int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix *spar
     {
 
 
-      sparseMat->p[isparserow + 1] =  sparseMat->p[isparserow];
+      outSparseMat->p[isparserow + 1] =  outSparseMat->p[isparserow];
 
       for (size_t blockNum = A->index1_data[currentRowNumber];
            blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
@@ -2129,7 +2129,7 @@ int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix *spar
 
         assert((nbColumns >= 0));
 
-        sparseMat->p[isparserow + 1] += nbColumns  ;
+        outSparseMat->p[isparserow + 1] += nbColumns  ;
 
 #ifdef VERBOSE_DEBUG
         printf("isparsecolumnstart = %i\t", isparsecolumnstart);
@@ -2146,7 +2146,7 @@ int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix *spar
           printf("isparserow = %i \t", isparserow);
           printf("isparsecolumn = %i \t", isparsecolumn);
 #endif
-          sparseMat->i[nnz] = isparsecolumn;
+          outSparseMat->i[nnz] = isparsecolumn;
 
           int rowintheblock = isparserow;
           if (currentRowNumber != 0)
@@ -2168,7 +2168,7 @@ int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix *spar
           printf("colintheblock = %i \n", colintheblock);
 #endif
 
-          sparseMat->x[nnz] = A->block[blockNum][colintheblock * nbRows + rowintheblock];
+          outSparseMat->x[nnz] = A->block[blockNum][colintheblock * nbRows + rowintheblock];
           nnz++;
         }
 #ifdef VERBOSE_DEBUG
