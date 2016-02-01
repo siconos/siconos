@@ -256,6 +256,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   problem->mu = fclib_problem->mu;
   problem->q = fclib_problem->f;
   problem->b = fclib_problem->w;
+  problem->env = NULL;
 
   problem->numberOfContacts = fclib_problem->H->n / fclib_problem->spacedim; /* cf fclib spec */
 

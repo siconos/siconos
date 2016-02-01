@@ -985,6 +985,7 @@
       FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
       memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
 
+      FC->env = NULL;
 
       // python mem management
       if(is_new_object1 && array)

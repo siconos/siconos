@@ -135,6 +135,7 @@ int gfc3d_LmgcDriver(double *reaction,
 
   problem->dimension = 3;
   problem->numberOfContacts = nc;
+  problem->env = NULL;
 
   problem->M = M;
   problem->H = H;
