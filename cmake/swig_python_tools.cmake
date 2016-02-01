@@ -116,12 +116,12 @@ macro(add_siconos_swig_sub_module fullname)
   # Check dependencies and then link ...
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
 
-  IF(UNIX)
+  IF(UNIX AND NOT APPLE)
     # do not link against the Python library on unix, it is useless
     swig_link_libraries(${_name} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
-  ELSE(UNIX)
+  ELSE(UNIX AND NOT APPLE)
     swig_link_libraries(${_name} ${PYTHON_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
-  ENDIF(UNIX)
+  ENDIF(UNIX AND NOT APPLE)
 
   # set dep between docstrings and python bindings
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT}_docstrings)
