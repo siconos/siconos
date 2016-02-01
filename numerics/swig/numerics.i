@@ -1050,24 +1050,23 @@
 
   NumericsMatrix(int nrows, int ncols, double *data)
     {
-      NumericsMatrix *M;
-
-      // return pointer : free by std swig destructor
-      M = newNumericsMatrix();
-      M->storageType = 0;
-      M->size0 = nrows;
-      M->size1 = ncols;
-      M->matrix0 = data;
+      NumericsMatrix *M = createNumericsMatrixFromData(NM_DENSE, nrows, ncols, data);
+      if (!M)
+      {
+        PyErr_SetString(PyExc_RuntimeError, "NumericsMatrix creation via createNumericsMatrixFromData failed!");
+      }
       return M;
     }
 
   void set_matrix0(int i, int j, double v)
   {
+    assert(self->matrix0);
     self->matrix0[i+j*self->size1] = v;
   }
 
   double get_matrix0(int i, int j)
   {
+    assert(self->matrix0);
     return self->matrix0[i+j*self->size1];
   }
 
@@ -1075,6 +1074,11 @@
   PyObject * __setitem__(PyObject* index, double v)
   {
     int i, j;
+    if (!self->matrix0)
+    {
+      PyErr_SetString(PyExc_RuntimeError, "The given matrix is not dense (matrix0 == NULL). For now only items on dense matrices can be set.");
+      return NULL;
+    }
     if (!PyArg_ParseTuple(index, "ii:NumericsMatrix___setitem__",&i,&j)) return NULL;
     NumericsMatrix_set_matrix0(self,i,j,v);
     return Py_BuildValue("");
@@ -1083,6 +1087,11 @@
   PyObject * __getitem__(PyObject * index)
   {
     int i, j;
+    if (!self->matrix0)
+    {
+      PyErr_SetString(PyExc_RuntimeError, "The given matrix is not dense (matrix0 == NULL). For now only items on dense matrices can be requested.");
+      return NULL;
+    }
     if (!PyArg_ParseTuple(index, "ii:NumericsMatrix___getitem__",&i,&j)) return NULL;
     return SWIG_From_double(NumericsMatrix_get_matrix0(self,i,j));
   }
@@ -1094,6 +1103,11 @@
 
   PyObject * __str__()
   {
+    if (!self->matrix0)
+    {
+      PyErr_SetString(PyExc_RuntimeError, "The given matrix is not dense (matrix0 == NULL). Only dense matrix can be displayed");
+      return NULL;
+    }
     std::stringstream result;
     result << "[ ";
     for (int i=0; i < self->size0; ++i)
