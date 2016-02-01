@@ -43,7 +43,7 @@
   { Py_DECREF(array$argnum); }
 }
 
-%typemap(out) (NumericsMatrix* M) {
+%typemap(out) (NumericsMatrix* A) {
   if ($1)
   {
     npy_intp dims[2];
@@ -61,15 +61,26 @@
       // matrix is sparse : return opaque pointer
       $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), $descriptor(SparseBlockStructuredMatrix *), 0);
     }
+    else if($1->matrix2)
+    {
+      if (!$1->matrix2->csc)
+      {
+        PyErr_Warn(PyExc_UserWarning, "Performance warning: the given sparse matrix has no csc representation, we have to perform a conversion");
+      }
+      if (cs_sparse_to_csc_matrix(NM_csc($1), &$result)) SWIG_fail;
+    }
     else
+    {
+      PyErr_SetString(PyExc_RuntimeError, "The given matrix is of unknown type. Please file a bug");
       SWIG_fail;
-   }
-   else
-   {
+    }
+  }
+  else
+  {
      Py_INCREF(Py_None);
      $result = Py_None;
-   }
   }
+}
 
 %typemap(out) (double* q) {
   npy_intp dims[2];
@@ -226,82 +237,92 @@
 
 %inline %{
 
-int cs_sparse_to_csc_matrix(cs_sparse *M, PyObject** csc_matrix)
-{
-  if (!M)
-  {
-    Py_INCREF(Py_None);
-    *csc_matrix = Py_None;
-    return 0;
-  }
-  else
-  {
-    /* get sys.modules dict */
-    PyObject* sys_mod_dict = PyImport_GetModuleDict();
-
-    /* get the csr module object */
-    PyObject* csr_mod = PyMapping_GetItemString(sys_mod_dict, (char *)"scipy.sparse.csr");
-
-    if (!csr_mod)
-    {
-      PyErr_SetString(PyExc_RuntimeError, "Did you import scipy.sparse.csr?");
-      return 1;
-    }
-
-    npy_intp this_M_x_dims[1];
-    this_M_x_dims[0] = M->nzmax;
-
-    npy_intp this_M_i_dims[1];
-    this_M_i_dims[0] = M->nzmax;
-
-    npy_intp this_M_p_dims[1];
-    this_M_p_dims[0] = M->m+1;
-
-    PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x);
-    if(!out_data) { PyErr_SetString(PyExc_RuntimeError, "Could not extract M->x"); return 1; };
-
-    PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims,NPY_INT64,M->i);
-    if(!out_indices) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->i"); return 1; };
-
-    PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims,NPY_INT64,M->p);
-    if(!out_indptr) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->p"); return 1; };
-
-    /* Warning ! m is the number of rows, n the number of columns ! --xhub */
-    PyObject* out_shape = PyTuple_Pack(2,PyInt_FromLong(M->m),PyInt_FromLong(M->n));
-    if(!out_shape) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->m or M->n"); return 1; };
-
-    PyObject* out_nnz = PyInt_FromLong(M->nzmax);
-    if(!out_nnz) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->nzmax"); return 1; };
-
-    /* call the class inside the csr module */
-#if PY_MAJOR_VERSION < 3
-    PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyString_FromString((char *)"csr_matrix"), out_shape, NULL);
-#else
-    PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyUnicode_FromString((char *)"csr_matrix"), out_shape, NULL);
-#endif
-
-    if(out_csr)
-    {
-      PyObject_SetAttrString(out_csr,"data",out_data);
-      PyObject_SetAttrString(out_csr,"indices",out_indices);
-      PyObject_SetAttrString(out_csr,"indptr",out_indptr);
-
 #ifndef NDEBUG
-      PyObject *auto_nnz = PyObject_GetAttrString(out_csr,"nnz");
-      assert(PyInt_AsLong(auto_nnz) == M->nzmax);
-      Py_XDECREF(auto_nnz);
+static inline void _sn_check_nnz(PyObject* mat, cs_sparse *M)
+{
+  PyObject *auto_nnz = PyObject_GetAttrString(mat,"nnz");
+  assert(PyInt_AsLong(auto_nnz) == M->nzmax);
+  Py_XDECREF(auto_nnz);
+}
+#else
+static inline void _sn_check_nnz(PyObject* mat, cs_sparse *M) {};
 #endif
 
-      *csc_matrix = SWIG_Python_AppendOutput(*csc_matrix, out_csr);
-      return 0;
-    }
-    else
-    {
-      PyErr_SetString(PyExc_RuntimeError, "Could not create csr matrix");
-      return 1;
-    }
+
+#define CS_TO_SCIPY(TYPE, INDICES, INDPTR) \
+  if (!M) \
+  { \
+    Py_INCREF(Py_None); \
+    *scipy_matrix = Py_None; \
+    return 0; \
+  } \
+  else \
+  { \
+    /* get sys.modules dict */ \
+    PyObject* sys_mod_dict = PyImport_GetModuleDict(); \
+\
+    /* get the csr module object */ \
+    PyObject* scipy_mod = PyMapping_GetItemString(sys_mod_dict, (char *)"scipy.sparse." #TYPE);\
+\
+    if (!scipy_mod) \
+    { \
+      PyErr_SetString(PyExc_RuntimeError, "Did you import scipy.sparse." #TYPE "?"); \
+      return 1; \
+    } \
+\
+    npy_intp this_M_x_dims[1]; \
+    this_M_x_dims[0] = M->nzmax; \
+\
+    npy_intp this_M_i_dims[1]; \
+    this_M_i_dims[0] = M->nzmax; \
+\
+    npy_intp this_M_p_dims[1]; \
+    this_M_p_dims[0] = M->n+1; \
+\
+    PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x); \
+    if(!out_data) { PyErr_SetString(PyExc_RuntimeError, "Could not extract M->x"); return 1; }; \
+\
+    PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims,NPY_INT64,M->i); \
+    if(!out_indices) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->i"); return 1; }; \
+\
+    PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims,NPY_INT64,M->p); \
+    if(!out_indptr) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->p"); return 1; }; \
+\
+    /* Warning ! m is the number of rows, n the number of columns ! --xhub */ \
+    PyObject* out_shape = PyTuple_Pack(2,PyInt_FromLong(M->m),PyInt_FromLong(M->n)); \
+    if(!out_shape) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->m or M->n"); return 1; }; \
+\
+    PyObject* out_nnz = PyInt_FromLong(M->nzmax); \
+    if(!out_nnz) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->nzmax"); return 1; }; \
+\
+    /* call the class inside the csr module */ \
+    PyObject* out_mat = PyObject_CallMethodObjArgs(scipy_mod, PyString_FromString((char *) #TYPE "_matrix"), out_shape, NULL); \
+\
+    if(out_mat) \
+    { \
+      PyObject_SetAttrString(out_mat,"data",out_data); \
+      PyObject_SetAttrString(out_mat,"indices",out_indices); \
+      PyObject_SetAttrString(out_mat,"indptr",out_indptr); \
+\
+      _sn_check_nnz(out_mat, M); \
+\
+      *scipy_matrix = SWIG_Python_AppendOutput(*scipy_matrix, out_mat); \
+      return 0; \
+    } \
+    else \
+    { \
+      PyErr_SetString(PyExc_RuntimeError, "Could not create " #TYPE " matrix"); \
+      return 1; \
+    } \
   }
 
+int cs_sparse_to_csr_matrix(cs_sparse *M, PyObject** scipy_matrix)
+{
+  CS_TO_SCIPY(csr, i, p);
+}
+int cs_sparse_to_csc_matrix(cs_sparse *M, PyObject** scipy_matrix)
+{
+  CS_TO_SCIPY(csc, i, p);
 }
 
 %}
@@ -309,14 +330,12 @@ int cs_sparse_to_csc_matrix(cs_sparse *M, PyObject** csc_matrix)
 
 %typemap(argout) (cs_sparse *outSparseMat)
 {
-  if (cs_sparse_to_csc_matrix($1, &$result)) SWIG_fail;
-
+  if (cs_sparse_to_csr_matrix($1, &$result)) SWIG_fail;
 }
 
 %typemap(out) (cs_sparse *)
 {
   if (cs_sparse_to_csc_matrix($1, &$result)) SWIG_fail;
-
 }
 
 %define %SAFE_CAST_INT(pyvar, len, indvar, dest_array)
@@ -327,7 +346,7 @@ int cs_sparse_to_csc_matrix(cs_sparse *M, PyObject** csc_matrix)
       case NPY_INT32:
       {
         PyArrayObject* array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT32, &indvar);
-        if (!array_pyvar) { SWIG_fail; }
+        if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable" #pyvar); SWIG_fail; }
 
         for(unsigned int i = 0; i < len; i++)
         {
@@ -338,7 +357,7 @@ int cs_sparse_to_csc_matrix(cs_sparse *M, PyObject** csc_matrix)
       case NPY_INT64:
       {
         PyArrayObject* array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT64, &indvar);
-        if (!array_pyvar) { SWIG_fail; }
+        if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable " #pyvar); SWIG_fail; }
 
         for(unsigned int i = 0; i < len; i++)
         {
@@ -380,7 +399,7 @@ int cs_sparse_to_csc_matrix(cs_sparse *M, PyObject** csc_matrix)
     if(!M) SWIG_fail;
 
     PyObject *obj = $input;
-    
+
     shape_ = PyObject_GetAttrString(obj,"shape");
     nnz_ = PyObject_GetAttrString(obj,"nnz");
     data_ = PyObject_GetAttrString(obj,"data");
@@ -392,30 +411,31 @@ int cs_sparse_to_csc_matrix(cs_sparse *M, PyObject** csc_matrix)
     GET_INTS(shape_,1,dim1);
 //      GET_INT(nnz,nzmax); fail: type is numpy.int32!
     nzmax = PyInt_AsLong(nnz_);
-    
+
     M->m = dim0;
     M->n = dim1;
-    
+
     M->nzmax = nzmax;
-    
+
     M->nz = -2; // csr only for the moment
-    
+
     M->p = (csi *) malloc((M->m+1) * sizeof(csi));
     M->i = (csi *) malloc(M->nzmax * sizeof(csi));
     M->x = (double *) malloc(M->nzmax * sizeof(double));
 
     // if we return NULL here, the matrix M is going to be freed. It will miserably fail if
     // M has not been "completly" initialized --xhub
-    if(!M->p) SWIG_fail;
-    if(!M->i) SWIG_fail;
-    if(!M->x) SWIG_fail;
+    if(!M->p) { PyErr_SetString(PyExc_RuntimeError, "Allocation of p failed"); SWIG_fail; }
+    if(!M->i) { PyErr_SetString(PyExc_RuntimeError, "Allocation of i failed"); SWIG_fail; }
+    if(!M->x) { PyErr_SetString(PyExc_RuntimeError, "Allocation of x failed");  SWIG_fail; }
 
     array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, &is_new_object1);
-    if (!array_data_) { SWIG_fail; }
+    if (!array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); SWIG_fail; }
 
     memcpy(M->x, (double *) array_data(array_data_), M->nzmax * sizeof(double));
 
     %SAFE_CAST_INT(indptr_, dim0 + 1, is_new_object2, M->p);
+
     %SAFE_CAST_INT(indices_, nzmax, is_new_object3, M->i);
 
     $1 = M;
