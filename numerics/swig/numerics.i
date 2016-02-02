@@ -918,6 +918,7 @@
 
 };
 
+%include "gfc3d_Solvers.h"
 
 %extend GlobalFrictionContactProblem
 {
