@@ -6,7 +6,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include "BulletDS.hpp"
-typedef boost::array<double, 7> OffSet;
+typedef std11::array<double, 7> OffSet;
 
 class CollisionObjects :
   public std::map<const btCollisionObject*,

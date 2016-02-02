@@ -28,7 +28,10 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/nvp.hpp>
 
-#if __cplusplus >= 201103L
+#ifndef SICONOS_CXXVERSION
+#error SICONOS_CXXVERSION is not defined in SiconosConfig.h
+#endif
+#if SICONOS_CXXVERSION >= 201103L
 #include <boost/serialization/ser_shared_ptr.hpp>
 #else
 #include <boost/serialization/shared_ptr.hpp>

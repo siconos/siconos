@@ -65,16 +65,42 @@ function(detect_cxx_standard output_var)
 
         enable_language(CXX)
 
-        try_run(
+        option(USE_CXX11 "Prefer C++11 features over BOOST whenever possible" OFF)
+
+        if(USE_CXX11)
+          try_run(
             run_result_unused
             compile_result_unused
             "${CMAKE_BINARY_DIR}"
             "${CMAKE_BINARY_DIR}/cxxversion.cpp"
+            COMPILE_DEFINITIONS "-std=c++11" # Try first with C++11 features enabled
             COMPILE_OUTPUT_VARIABLE CXXVERSION
-        )
+          )
+        endif(USE_CXX11)
 
         # Parse the architecture name from the compiler output
         string(REGEX MATCH "CXXVERSION ([a-zA-Z0-9_]+)" CXXVERSION "${CXXVERSION}")
+
+        if(NOT CXXVERSION)
+          if(USE_CXX11)
+            message(FATAL_ERROR "C++11 features were requested (USE_CXX11=ON), but trying -std=c++11 failed.")
+          endif(USE_CXX11)
+
+          try_run(
+              run_result_unused
+              compile_result_unused
+              "${CMAKE_BINARY_DIR}"
+              "${CMAKE_BINARY_DIR}/cxxversion.cpp"
+              COMPILE_OUTPUT_VARIABLE CXXVERSION
+          )
+
+          # Parse the architecture name from the compiler output
+          string(REGEX MATCH "CXXVERSION ([a-zA-Z0-9_]+)" CXXVERSION "${CXXVERSION}")
+        else(NOT CXXVERSION)
+
+          # Turn on C++11 features if they can be specified this way
+          SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
+        endif(NOT CXXVERSION)
 
         # Get rid of the value marker leaving just the architecture name
         string(REPLACE "CXXVERSION " "" CXXVERSION "${CXXVERSION}")
