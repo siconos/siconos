@@ -27,50 +27,36 @@
 #include <math.h>
 #include <assert.h>
 #include <float.h>
-extern int *Global_ipiv;
-extern int  Global_MisInverse;
-extern int  Global_MisLU;
+#include "sanitizer.h"
 
-int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error)
+int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict reaction , double* restrict velocity, double* restrict globalVelocity, double tolerance, double* restrict error)
 {
-
-  NumericsMatrix* Mwork = createNumericsMatrix(problem->M->storageType,
-                                               problem->M->size0,
-                                               problem->M->size1);
 
   /* Checks inputs */
   if (problem == NULL || reaction == NULL || velocity == NULL || globalVelocity == NULL)
     numericsError("gfc3d_compute_error", "null input");
 
+  gfc3d_init_workspace(problem);
+  NumericsMatrix* factorized_M = problem->workspace->factorized_M;
+  double* globalVelocitytmp = problem->workspace->globalVelocity;
+
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
-  int incx = 1;
   int nc = problem->numberOfContacts;
   int m = nc * 3;
   int n = problem->M->size0;
   double *mu = problem->mu;
   double *q = problem->q;
   NumericsMatrix *H = problem->H;
-  NumericsMatrix *M = problem->M;
 
-  double* qtmp = (double*)malloc(n * sizeof(double));
-  double* globalVelocitytmp = (double*)malloc(n * sizeof(double));
-  cblas_dcopy(n, q, 1, qtmp, 1);
+  cblas_dcopy_msan(n, q, 1, globalVelocitytmp, 1);
 
-  NM_gemv(1.0, H, reaction, 1.0, qtmp);
+  NM_gemv(1.0, H, reaction, 1.0, globalVelocitytmp);
 
-  cblas_dcopy(n, qtmp, 1, globalVelocitytmp, 1);
-
-  NM_copy(M, Mwork);
-  NM_gesv(Mwork, globalVelocitytmp);
-
-  freeNumericsMatrix(Mwork);
-  free(Mwork);
+  CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocitytmp, true));
 
   cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
 
   *error =   cblas_dnrm2(n , globalVelocitytmp , 1);
-  free(qtmp);
-  free(globalVelocitytmp);
 
   cblas_dcopy(m, problem->b, 1, velocity, 1);
   NM_tgemv(1, H, globalVelocity, 1, velocity);
@@ -94,7 +80,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction 
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = cblas_dnrm2(n , problem->q , incx);
+  double normq = cblas_dnrm2(n , problem->q , 1);
   *error = *error / (normq + 1.0);
 
   if (*error > tolerance)

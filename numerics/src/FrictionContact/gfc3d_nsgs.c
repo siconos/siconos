@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include "sanitizer.h"
 
 
 void Globalfc3d_projection_free(GlobalFrictionContactProblem* problem);
@@ -74,18 +75,24 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
 
   /* Maximum number of iterations */
   int itermax = iparam[0];
+  unsigned int erritermax = options->iparam[7];
+  if (erritermax == 0)
+  {
+    fprintf(stderr, "gfc3d_nsgs :: erritermax is 0, something is wrong\n");
+  }
   /* Tolerance */
   double tolerance = dparam[0];
-
-  NumericsMatrix* Mwork = createNumericsMatrix(problem->M->storageType,
-                                               problem->M->size0,
-                                               problem->M->size1);
 
   /* Check for trivial case */
   *info = checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
 
   if (*info == 0)
     return;
+
+  gfc3d_init_workspace(problem);
+
+  NumericsMatrix* factorized_M = problem->workspace->factorized_M;
+  double* qtmp = problem->workspace->globalVelocity;
 
   SolverGlobalPtr local_solver = NULL;
   FreeSolverGlobalPtr freeSolver = NULL;
@@ -109,8 +116,6 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
   }
 
   dparam[0] = dparam[2]; // set the tolerance for the local solver
-  double* qtmp = (double*)malloc(n * sizeof(double));
-  for (int i = 0; i < n; i++) qtmp[i] = 0.0;
 
   while ((iter < itermax) && (hasNotConverged > 0))
   {
@@ -118,15 +123,14 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
     /* Solve the first part with the current reaction */
 
     /* qtmp <--q */
-    cblas_dcopy(n, q, 1, qtmp, 1);
+    cblas_dcopy_msan(n, q, 1, qtmp, 1);
 
     /*qtmp = H reaction +qtmp */
     NM_gemv(1., H, reaction, 1., qtmp);
 
     cblas_dcopy(n, qtmp, 1, globalVelocity, 1);
 
-    NM_copy(M, Mwork);
-    NM_gesv(Mwork, globalVelocity);
+    CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocity, true));
 
     /* Compute current local velocity */
     /*      velocity <--b */
@@ -166,10 +170,12 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
     *info = hasNotConverged;
   }
 
-  freeNumericsMatrix(Mwork);
-  free(Mwork);
-  free(qtmp);
-  /*   free(Global_ipiv); */
+  /*  One last error computation in case where are at the very end */
+  if (iter == itermax)
+  {
+    (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, &error);
+  }
+
   dparam[0] = tolerance;
   dparam[1] = error;
 

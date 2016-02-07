@@ -92,6 +92,7 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
 
 fail:
   problem->env = NULL;
+  problem->workspace = NULL;
   return info;
 }
 
@@ -131,6 +132,9 @@ void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
   }
 
   if (problem->env) assert(0 && "freeGlobalFrictionContactProblem :: problem->env != NULL, don't know what to do");
+
+  gfc3d_free_workspace(problem);
+
   free(problem);
 
 }
@@ -182,4 +186,52 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
   else
     printf("No mu vector:\n");
 
+}
+
+void gfc3d_init_workspace(GlobalFrictionContactProblem* problem)
+{
+  assert(problem);
+  assert(problem->M);
+
+  if (!problem->workspace)
+  {
+    problem->workspace = (GFC3D_workspace*) malloc(sizeof(GFC3D_workspace));
+    problem->workspace->factorized_M = NULL;
+    problem->workspace->globalVelocity = NULL;
+  }
+
+  if (!problem->workspace->factorized_M)
+  {
+    problem->workspace->factorized_M = createNumericsMatrix(problem->M->storageType,
+                                               problem->M->size0,
+                                               problem->M->size1);
+    NM_copy(problem->M, problem->workspace->factorized_M);
+  }
+
+  if (!problem->workspace->globalVelocity)
+  {
+    problem->workspace->globalVelocity = (double*)malloc(problem->M->size1 * sizeof(double));
+  }
+}
+
+void gfc3d_free_workspace(GlobalFrictionContactProblem* problem)
+{
+  if (problem->workspace)
+  {
+    if (problem->workspace->factorized_M)
+    {
+      freeNumericsMatrix(problem->workspace->factorized_M);
+      free(problem->workspace->factorized_M);
+      problem->workspace->factorized_M = NULL;
+    }
+
+    if (problem->workspace->globalVelocity)
+    {
+      free(problem->workspace->globalVelocity);
+      problem->workspace->globalVelocity = NULL;
+    }
+
+    free(problem->workspace);
+    problem->workspace = NULL;
+  }
 }

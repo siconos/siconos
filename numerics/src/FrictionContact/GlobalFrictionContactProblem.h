@@ -94,6 +94,16 @@
 
 #include "NumericsMatrix.h"
 
+/** \struct GFC3D_workspace GlobalFrictionContactProblem.h
+ * Workspace for GFC3D computations: factorized M (since we compute multiples
+ * time the global velocity*/
+
+typedef struct
+{
+  NumericsMatrix* factorized_M; /**< factorized mass matrix*/
+  double* globalVelocity; /**<  vector of size factorized_M->size0 */
+} GFC3D_workspace;
+
 /** \struct GlobalFrictionContactProblem GlobalFrictionContactProblem.h
  * The structure that defines a Friction-Contact (3D or 2D ) problem \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
  * \f{eqnarray*}{
@@ -134,6 +144,8 @@ typedef struct
   double* mu;
   /** opaque environment, solver specific */
   void* env; 
+  /** workspace */
+  GFC3D_workspace* workspace;
 } GlobalFrictionContactProblem;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -149,6 +161,10 @@ extern "C"
   int globalFrictionContact_newFromFile(GlobalFrictionContactProblem*  problem, FILE* file);
 
   void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem);
+
+  void gfc3d_init_workspace(GlobalFrictionContactProblem* problem);
+
+  void gfc3d_free_workspace(GlobalFrictionContactProblem* problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
