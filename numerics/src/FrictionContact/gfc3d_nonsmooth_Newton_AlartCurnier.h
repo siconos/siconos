@@ -30,12 +30,4 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
 void gfc3d_sparseGlobalAlartCurnierInit(
   SolverOptions *SO);
 
-void gfc3d_nonsmooth_Newton_AlartCurnier(
-  GlobalFrictionContactProblem* problem,
-  double *reaction,
-  double *velocity,
-  double *globalVelocity,
-  int *info,
-  SolverOptions* options);
-
 #endif
