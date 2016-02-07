@@ -107,7 +107,7 @@ int fc3d_driver(FrictionContactProblem* problem,
 
 
   if (info == 0)
-    return info;
+    goto exit;
 
 
   switch (options->solverId)
@@ -300,6 +300,8 @@ int fc3d_driver(FrictionContactProblem* problem,
 
   }
   }
+
+exit:
 
   if (setnumericsoptions)
   {
