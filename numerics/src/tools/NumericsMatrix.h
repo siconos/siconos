@@ -113,6 +113,7 @@ The following linear algebra operation are supported:
 */
 #include <stdlib.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "SiconosConfig.h"
 #include "SparseMatrix.h"
@@ -451,6 +452,21 @@ extern "C"
                 double *y);
 
   /** Direct computation of the solution of a real system of linear
+   * equations: A x = b. The factorized matrix A is kept for future solve.
+   * If A is already factorized, the solve the linear system from it
+   * \warning this is not enable for all the solvers, your mileage may vary
+   * \param[in,out] A a NumericsMatrix. On a dense factorisation
+   * A.iWork is initialized.
+   * \param[in,out] b pointer on a dense vector of size A->size1
+   * \param keep if true, keep all the info related to the factorization to
+   * allow for future solves. If A is already factorized, just solve the linear
+   * system
+   * \return 0 if successful, else the error is specific to the backend solver
+   * used
+   */
+  int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep);
+
+  /** Direct computation of the solution of a real system of linear
    * equations: A x = b.
    * \param[in,out] A a NumericsMatrix. On a dense factorisation
    * A.iWork is initialized.
@@ -458,7 +474,10 @@ extern "C"
    * \return 0 if successful, else the error is specific to the backend solver
    * used
    */
-  int NM_gesv(NumericsMatrix* A, double *b);
+  static inline int NM_gesv(NumericsMatrix* A, double *b)
+  {
+    return NM_gesv_expert(A, b, false);
+  }
 
   /** Get linear solver parameters with initialization if needed.
    * \param[in,out] A a NumericsMatrix.

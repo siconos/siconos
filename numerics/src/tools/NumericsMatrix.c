@@ -32,17 +32,6 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-#ifdef WITH_MUMPS
-#include <mpi.h>
-#include <dmumps_c.h>
-
-#define JOB_INIT -1
-#define JOB_END -2
-#define USE_COMM_WORLD -987654
-#define ICNTL(I) icntl[(I)-1]
-#define CNTL(I) cntl[(I)-1]
-#endif
-
 void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, const double* const x, double beta, double* y)
 {
 
@@ -1381,202 +1370,7 @@ int* NM_iWork(NumericsMatrix* A, int size)
   return A->internalData->iWork;
 }
 
-#ifdef WITH_MUMPS
-
-
-MPI_Comm NM_MPI_com(NumericsMatrix* A)
-{
-  if (!A || (A && NM_linearSolverParams(A)->mpi_com == MPI_COMM_NULL))
-  {
-    int myid;
-    int argc = 0;
-    /* C99 requires that argv[argc] == NULL. With openmpi 1.8, we get a
-     * segfault if this is not true */
-    char *argv0 = NULL;
-    char **argv = &argv0;
-    CHECK_MPI(MPI_Init(&argc, &argv));
-    CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
-
-    if (A)
-    {
-      NM_linearSolverParams(A)->mpi_com = MPI_COMM_WORLD;
-      NM_linearSolverParams(A)->mpi_com_init = 1;
-    }
-  }
-
-  if(A)
-  {
-    return NM_linearSolverParams(A)->mpi_com;
-  }
-  else
-  {
-    return MPI_COMM_WORLD;
-  }
-}
-
-int* NM_MUMPS_irn(NumericsMatrix* A)
-{
-
-  if (NM_sparse(A)->triplet)
-  {
-    CSparseMatrix* triplet = NM_sparse(A)->triplet;
-    csi nz = triplet->nz;
-
-    int* iWork = NM_iWork(A, (int) (2*nz) + 1);
-
-    for (int k=0; k<nz; ++k)
-    {
-      iWork [k + nz] = (int) (triplet->p [k]) + 1;
-      iWork [k]      = (int) (triplet->i [k]) + 1;
-    }
-
-    iWork [2*nz] = (int) nz;
-  }
-  else
-  {
-    CSparseMatrix* csc = NM_sparse(A)->csc;
-    csi nzmax = csc->nzmax ;
-
-    int* iWork = NM_iWork(A, (int) (2*nzmax) + 1);
-
-    csi n = csc->n ;
-    csi nz = 0;
-    csi* csci = csc->i ;
-    csi* cscp = csc->p ;
-
-    for (csi j=0; j<n; ++j)
-    {
-      for (csi p = cscp [j]; p < cscp [j+1]; ++p)
-      {
-        assert (csc->x [p] != 0.);
-        nz++;
-        iWork [p + nzmax] = (int) j;
-        iWork [p]         = (int) csci [p];
-      }
-    }
-
-    iWork [2*nzmax] = (int) nz;
-  }
-
-  return NM_iWork(A, 0);
-}
-
-
-int* NM_MUMPS_jcn(NumericsMatrix* A)
-{
-  if (NM_sparse(A)->triplet)
-  {
-    return NM_iWork(A, 0) + NM_sparse(A)->triplet->nz;
-  }
-  else
-  {
-    csi nzmax = NM_csc(A)->nzmax;
-    return NM_iWork(A, 0) + nzmax;
-  }
-}
-
-
-DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
-{
-  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
-
-  if (!params->solver_data)
-  {
-    params->solver_data = malloc(sizeof(DMUMPS_STRUC_C));
-
-    DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
-
-    // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
-    mumps_id->job = JOB_INIT;
-    mumps_id->par = 1;
-    mumps_id->sym = 0;
-
-    if (NM_MPI_com(A) == MPI_COMM_WORLD)
-    {
-      mumps_id->comm_fortran = USE_COMM_WORLD;
-    }
-    else
-    {
-      mumps_id->comm_fortran = MPI_Comm_c2f(NM_MPI_com(A));
-    }
-
-    dmumps_c(mumps_id);
-
-    if (verbose == 1)
-    {
-      mumps_id->ICNTL(1) = -1; // Error messages, standard output stream.
-      mumps_id->ICNTL(2) = -1; // Diagnostics,    standard output stream.
-      mumps_id->ICNTL(3) = -1; // Global infos,   standard output stream.
-
-      mumps_id->ICNTL(11) = 1; // Error analysis
-
-    }
-    else if (verbose == 2)
-    {
-      mumps_id->ICNTL(1) = -1; // Error messages, standard output stream.
-      mumps_id->ICNTL(2) = -1; // Diagnostics,    standard output stream.
-      mumps_id->ICNTL(3) = 6; // Global infos,   standard output stream.
-
-//      mumps_id->ICNTL(4) = 4; // Errors, warnings and information on
-                              // input, output parameters printed.
-
-//      mumps_id->ICNTL(10) = 1; // One step of iterative refinment
-      mumps_id->ICNTL(11) = 1; // Error analysis
-    }
-    else if (verbose >= 3)
-    {
-      mumps_id->ICNTL(1) = 6; // Error messages, standard output stream.
-      mumps_id->ICNTL(2) = 6; // Diagnostics,    standard output stream.
-      mumps_id->ICNTL(3) = 6; // Global infos,   standard output stream.
-
-//      mumps_id->ICNTL(4) = 4; // Errors, warnings and information on
-                              // input, output parameters printed.
-
-//      mumps_id->ICNTL(10) = 1; // One step of iterative refinment
-      mumps_id->ICNTL(11) = 1; // Error analysis
-    }
-    else
-    {
-      mumps_id->ICNTL(1) = -1;
-      mumps_id->ICNTL(2) = -1;
-      mumps_id->ICNTL(3) = -1;
-    }
-
-    mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
-    // ok for a cube on a plane & four contact points
-    // computeAlartCurnierSTD != generated in this case...
-
-    //mumps_id->CNTL(3) = ...;
-    //mumps_id->CNTL(5) = ...;
-
-  }
-  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
-  mumps_id->n = (int) NM_triplet(A)->n;
-  mumps_id->irn = NM_MUMPS_irn(A);
-  mumps_id->jcn = NM_MUMPS_jcn(A);
-
-  int nz;
-  if (NM_sparse(A)->triplet)
-  {
-    nz = (int) NM_sparse(A)->triplet->nz;
-    mumps_id->nz = nz;
-    mumps_id->a = NM_sparse(A)->triplet->x;
-  }
-  else
-  {
-    nz = NM_linearSolverParams(A)->iWork[2 * NM_csc(A)->nzmax];
-    mumps_id->nz = nz;
-    mumps_id->a = NM_sparse(A)->csc->x;
-  }
-
-
-
-
-  return (DMUMPS_STRUC_C*) params->solver_data;
-}
-#endif
-
-int NM_gesv(NumericsMatrix* A, double *b)
+int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
 {
   assert(A->size0 == A->size1);
 
@@ -1596,7 +1390,8 @@ int NM_gesv(NumericsMatrix* A, double *b)
   case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
   case NM_SPARSE:
   {
-    switch (NM_linearSolverParams(A)->solver)
+    NumericsSparseLinearSolverParams* p = NM_linearSolverParams(A);
+    switch (p->solver)
     {
     case NS_CS_LUSOL:
       info = !cs_lusol(1, NM_csc(A), b, DBL_EPSILON);
@@ -1605,44 +1400,53 @@ int NM_gesv(NumericsMatrix* A, double *b)
 #ifdef WITH_MUMPS
     case NS_MUMPS:
     {
+      if (verbose >= 2)
+      {
+        printf("NM_gesv: using MUMPS\n" );
+      }
       /* the mumps instance is initialized (call with job=-1) */
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
       mumps_id->rhs = b;
-      mumps_id->job = 6;
+
+      if (!keep || mumps_id->job == -1)
+      {
+        mumps_id->job = 6;
+      }
+      else
+      {
+        mumps_id->job = 3;
+      }
+
 
       /* compute the solution */
       dmumps_c(mumps_id);
 
-      /* clean the mumps instance */
-      mumps_id->job = -2;
-      dmumps_c(mumps_id);
       info = mumps_id->info[0];
 
-      if (info > 0)
+      /* MUMPS can return info codes with negative value */
+      if (info)
       {
         if (verbose > 0)
         {
           printf("NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
         }
       }
-      if (verbose > 1)
+      if (!keep)
       {
-        printf("MUMPS : condition number %g\n", mumps_id->rinfog[9]);
-        printf("MUMPS : component wise scaled residual %g\n", mumps_id->rinfog[6]);
-        printf("MUMPS : \n");
+        NM_MUMPS_free(p);
       }
-
-      /* Here we free mumps_id ...  */
-      free(NM_linearSolverParams(A)->solver_data);
-      NM_linearSolverParams(A)->solver_data = NULL;
+      else if (!p->solver_free_hook)
+      {
+        p->solver_free_hook = &NM_MUMPS_free;
+      }
 
       break;
     }
 #endif
     default:
     {
-      fprintf(stderr, "NM_gesv: unknown sparse linearsolver : %d\n", NM_linearSolverParams(A)->solver);
+      fprintf(stderr, "NM_gesv: unknown sparse linearsolver : %d\n", p->solver);
       exit(EXIT_FAILURE);
     }
     }

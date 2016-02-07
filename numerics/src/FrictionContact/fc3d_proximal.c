@@ -28,7 +28,6 @@
 //#define DEBUG_MESSAGES */
 #include "debug.h"
 #include <math.h>
-#include "NumericsMatrix_private.h"
 
 void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -48,10 +47,6 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   /* Tolerance */
   double tolerance = dparam[0];
 
-#ifdef HAVE_MPI
-  /* Flag to keep track of mpi initialization */
-  int mpi_init = 0;
-#endif
   if (verbose > 0){
     printSolverOptions(options);
   }
@@ -156,35 +151,12 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
              internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_AC)
     {
       internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier;
-
-#ifdef HAVE_MPI
-      if (internalsolver_options->iparam[13] == 1)   /* MUMPS */
-      {
-        if (internalsolver_options->solverData == MPI_COMM_NULL) /* default */
-        {
-          internalsolver_options->solverData = NM_MPI_com(NULL);
-          mpi_init = 1;
-        }
-      }
-#endif
       iter_iparam =1;
     }
     else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_FB)
     {
 
       internalsolver = &fc3d_nonsmooth_Newton_FischerBurmeister;
-
-      if (internalsolver_options->iparam[13] == 1)   /* MUMPS */
-      {
-
-#ifdef HAVE_MPI
-        if (internalsolver_options->solverData == MPI_COMM_NULL) /* default */
-        {
-          internalsolver_options->solverData = NM_MPI_com(NULL);
-          mpi_init = 1;
-        }
-#endif
-      }
       iter_iparam =1;
     }
   }
@@ -373,13 +345,6 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   dparam[1] = error;
 
   free(reactionold);
-
-#ifdef HAVE_MPI
-  if (mpi_init)
-  {
-      MPI_Finalize();
-  }
-#endif
 
 }
 

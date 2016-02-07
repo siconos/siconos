@@ -579,12 +579,11 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
           if ((MPI_Comm) options->solverData == MPI_COMM_NULL)
           {
-            options->solverData = NM_MPI_com(AWpB);
+            options->solverData = NM_MPI_com(MPI_COMM_NULL);
           }
           else
           {
-            NM_linearSolverParams(AWpB)->mpi_com = (MPI_Comm) options->solverData;
-            NM_linearSolverParams(AWpB)->mpi_com_init = 0;
+            NM_MPI_com((MPI_Comm) options->solverData);
           }
 
 #else

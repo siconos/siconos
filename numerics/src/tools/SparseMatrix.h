@@ -87,11 +87,8 @@ extern "C"
     double* dparam;
     double dSize;
 
-#ifdef HAVE_MPI
-    int mpi_com_init;
-    MPI_Comm mpi_com;
-#endif
     void* solver_data;
+    freeNSLSP solver_free_hook; /**< Solver specific hook to free solver_data  */
 
     int* iWork; /**< integer work vector array (internal) */
     int iWorkSize; /**< size of integer work vector array */

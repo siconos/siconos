@@ -20,18 +20,44 @@
 #ifndef NumericsMatrix_private_H
 #define NumericsMatrix_private_H
 
+#include "SiconosConfig.h"
+#include "NumericsMatrix.h"
+
 #ifdef WITH_MUMPS
+#include <mpi.h>
 #include <dmumps_c.h>
+
+#define JOB_INIT -1
+#define JOB_END -2
+#define USE_COMM_WORLD -987654
+#define ICNTL(I) icntl[(I)-1]
+#define CNTL(I) cntl[(I)-1]
+#define RINFOG(I) rinfog[(I)-1]
+
   /** Get the MPI communicator. Call MPI_Init if needed.
-   * \param[in,out] A a NumericsMatrix.
+   * \param[in] m an MPI communicator
    * \return the MPI communicator.
    */
-  MPI_Comm NM_MPI_com(NumericsMatrix* A);
+  MPI_Comm NM_MPI_com(MPI_Comm m);
 
   int* NM_MUMPS_irn(NumericsMatrix* A);
   int* NM_MUMPS_jcn(NumericsMatrix* A);
 
+  /** Get (and create if necessary) the working data for MUMPS
+   * \param A the matrix to be factorized
+   */
   DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A);
+
+  /** Free the working data for MUMPS
+   * \param p a NumericsSparseLinearSolverParams object holding the data
+   */
+  void NM_MUMPS_free(void* p);
+
+  /** Display extra information about the solve
+   * \param mumps_id the working space of MUMPS
+   */
+  void NM_MUMPS_extra_display(DMUMPS_STRUC_C* mumps_id);
+
 #endif
 
 #endif
