@@ -1394,7 +1394,29 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
     switch (p->solver)
     {
     case NS_CS_LUSOL:
-      info = !cs_lusol(1, NM_csc(A), b, DBL_EPSILON);
+      if (verbose >= 2)
+      {
+        printf("NM_gesv: using CSparse\n" );
+      }
+      if (keep)
+      {
+        if (!(NM_csparse_workspace(p) && NM_csparse_lu_factors(p)))
+        {
+          assert(!NM_csparse_workspace(p));
+          assert(!NM_csparse_lu_factors(p));
+          assert(!p->solver_free_hook);
+
+          p->solver_free_hook = &NM_csparse_free;
+          p->dWork = (double*) malloc(A->size1 * sizeof(double));
+          CHECK_RETURN(cs_lu_factorization(1, NM_csc(A), DBL_EPSILON, p));
+        }
+
+        info = !cs_solve(NM_csparse_lu_factors(p), NM_csparse_workspace(p), b);
+      }
+      else
+      {
+        info = !cs_lusol(1, NM_csc(A), b, DBL_EPSILON);
+      }
       break;
 
 #ifdef WITH_MUMPS

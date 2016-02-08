@@ -71,10 +71,19 @@ int nz ;      : # of entries in triplet matrix;
 
 #define CSparseMatrix struct cs_sparse
 
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
+
+  typedef struct {
+    csi n;       /**< size of linear system */
+    css* S;      /**< symbolic analysis */
+    csn* N;      /**< numerics factorization */
+  } cs_lu_factors;
+
+  typedef void (*freeNSLSP)(void* p);
 
   typedef enum { NS_CS_LUSOL, NS_MUMPS } NumericsSparseLinearSolver;
 
@@ -116,6 +125,12 @@ extern "C"
    * DBL_EPSILON, otherwise the return value of cs_entry.
    */
   csi cs_zentry(CSparseMatrix *T, csi i, csi j, double x);
+
+  /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
+   * \param T the sparse matrix to check
+   * \return 0 if the matrix is fine, 1 otherwise
+   * */
+  int cs_check_triplet(CSparseMatrix *T);
 
   /** Create dense matrix from a CSparseMatrix.
    * \param A the CSparseMatrix
@@ -164,6 +179,36 @@ extern "C"
    */
   NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A);
 
+  /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
+   * \param cs_lu_A contains the LU factors of A, permutation information
+   * \param x workspace
+   * \param[in,out] b on input RHS of the linear system; on output the solution
+   * \return 0 if failed, 1 otherwise*/
+  csi cs_solve (cs_lu_factors* cs_lu_A, double* x, double *b);
+
+  /** compute a LU factorization of A and store it in a workspace
+   * \param order control if ordering is used
+   * \param A the matrix
+   * \param tol the tolerance
+   * \param p the parameter structure that eventually holds the factors
+   * \return 1 if the factorization was sucessful, 1 otherwise
+   */
+  int cs_lu_factorization(csi order, const cs *A, double tol, NumericsSparseLinearSolverParams* p);
+
+  /* Free a workspace related to a LU factorization
+   * \param p the structure to free
+   */
+  void NM_csparse_free(void* p);
+
+  static inline cs_lu_factors* NM_csparse_lu_factors(NumericsSparseLinearSolverParams* p)
+  {
+    return (cs_lu_factors*)p->solver_data;
+  }
+
+  static inline double* NM_csparse_workspace(NumericsSparseLinearSolverParams* p)
+  {
+    return p->dWork;
+  }
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
