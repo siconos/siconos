@@ -122,7 +122,7 @@ The following linear algebra operation are supported:
 typedef struct
 {
   int iWorkSize; /**< size of iWork */
-  int *iWork; /** integer workspace */
+  int *iWork; /**< integer workspace */
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h

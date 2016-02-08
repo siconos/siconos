@@ -191,29 +191,11 @@ void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMat
 void freeNumericsMatrix(NumericsMatrix* m)
 {
   assert(m && "freeNumericsMatrix, m == NULL");
-  if (m->storageType == 0)
-  {
-    if (m->matrix0)
-    {
-      free(m->matrix0);
-      m->matrix0 = NULL;
-    }
-  }
-  else
-  {
-    if (m->matrix1)
-    {
-      freeSBM(m->matrix1);
-      free(m->matrix1);
-      m->matrix1 = NULL;
-    }
-    if (m->matrix2)
-    {
-      freeNumericsSparseMatrix(m->matrix2);
-      free(m->matrix2);
-      m->matrix2 = NULL;
-    }
-  }
+
+  NM_clearDense(m);
+  NM_clearSparseBlock(m);
+  NM_clearSparse(m);
+
   if (m->internalData)
   {
     if (m->internalData->iWork)
@@ -331,9 +313,8 @@ void displayRowbyRow(const NumericsMatrix* const m)
   else if (storageType == 1)
     printSBM(m->matrix1);
 }
-int cs_printInFile(const cs *A, int brief, FILE* file);
-/* print a sparse matrix */
-int cs_printInFile(const cs *A, int brief, FILE* file)
+
+static int cs_printInFile(const cs *A, int brief, FILE* file)
 {
   csi m, n, nzmax, nz, p, j, *Ap, *Ai ;
   double *Ax ;
@@ -518,7 +499,6 @@ void readInFile(NumericsMatrix* const m, FILE *file)
   }
   else if (storageType == 1)
   {
-    m->matrix0 = NULL;
     readInFileSBM(m->matrix1, file);
   }
 }
@@ -530,6 +510,11 @@ int newFromFile(NumericsMatrix* const m, FILE *file)
   {
     fprintf(stderr, "Numerics, NumericsMatrix newFromFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
+  }
+
+  if (m->storageType >= 0)
+  {
+    freeNumericsMatrix(m);
   }
 
   int storageType;
@@ -559,6 +544,10 @@ int newFromFile(NumericsMatrix* const m, FILE *file)
     data = newSBM();
     newFromFileSBM((SparseBlockStructuredMatrix*)data, file);
   }
+  else
+  {
+    fprintf(stderr, "newFromFile :: storageType %d not supported yet", storageType);
+  }
 
   fillNumericsMatrix(m, storageType, (int)size0, (int)size1, data);
 
@@ -568,7 +557,7 @@ int newFromFile(NumericsMatrix* const m, FILE *file)
 void readInFileName(NumericsMatrix* const m, const char *filename)
 {
   FILE* finput = fopen(filename, "r");
-  printInFile(m, finput);
+  newFromFile(m, finput);
   fclose(finput);
 }
 
@@ -634,7 +623,7 @@ NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat)
       data = malloc(sizeof(CSparseMatrix));
       break;
     default:
-      printf("duplicateNumericsMatrix :: storageType value %d not implemented yet !", mat->storageType);
+      fprintf(stderr, "duplicateNumericsMatrix :: storageType value %d not implemented yet !", mat->storageType);
       exit(EXIT_FAILURE);
   }
 
@@ -672,7 +661,7 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
       data = newNumericsSparseMatrix();
       break;
     default:
-      printf("createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
+      fprintf(stderr, "createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
       exit(EXIT_FAILURE);
   }
 
@@ -685,6 +674,7 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
 void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1, void* data)
 {
 
+  assert(M);
   M->storageType = storageType;
   M->size0 = size0;
   M->size1 = size1;
@@ -1237,10 +1227,20 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
      break;
   }
 
+  case NM_SPARSE:
   default:
   {
     assert(A->storageType == NM_SPARSE);
-    CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, beta, y));
+    // if possible use the much simpler version provided by CSparse
+    // Also at the time of writing, cs_aaxpy is bugged --xhub
+    if (fabs(alpha - 1.) < 100*DBL_EPSILON && fabs(beta - 1.) < 100*DBL_EPSILON)
+    {
+      CHECK_RETURN(cs_gaxpy(NM_csc(A), x, y));
+    }
+    else
+    {
+      CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, beta, y));
+    }
   }
   }
 }
