@@ -412,7 +412,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       /* **** Criterium convergence **** */
       error = sqrt(error);
       if(verbose > 0)
-        printf("----------------------------------- SOCLP - NSGS - Iteration %i Error = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+        printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
      if(error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
@@ -425,7 +425,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       {
         if(absolute_error > error)
         {
-          printf("----------------------------------- SOCLCP - NSGS - Warning absolute Error = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
+          printf("----------------------------------- SOCLCP - NSGS - Warning absolute Residual = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
         }
       }
     }
@@ -470,7 +470,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- SOCLP - NSGS - Iteration %i Error = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -508,7 +508,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- SOCLP - NSGS - Iteration %i Error = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -561,7 +561,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- SOCLP - NSGS - Iteration %i Error = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -597,7 +597,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- SOCLP - NSGS - Iteration %i Error = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;

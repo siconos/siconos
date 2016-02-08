@@ -232,7 +232,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 
 
   if (verbose > 0)
-    printf("----------------------------------- FC3D - Fixed Point Projection (FPP) - #Iteration %i Final Error = %14.7e\n", iter, error);
+    printf("----------------------------------- FC3D - Fixed Point Projection (FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   iparam[7] = iter;
   dparam[0] = tolerance;
   dparam[1] = error;

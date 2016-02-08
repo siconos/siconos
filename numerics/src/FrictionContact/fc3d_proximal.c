@@ -230,7 +230,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       }
 
       if (verbose > 0)
-        printf("------------------------ FC3D - PROXIMAL - Iteration %i Error = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
+        printf("------------------------ FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
       if (isVariable)
       {
         alpha_old =alpha;
@@ -324,7 +324,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       }
 
       if (verbose > 0)
-        printf("------------------------ FC3D - PROXIMAL - Iteration %i Error = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
+        printf("------------------------ FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
@@ -336,7 +336,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
 
   if (verbose > 0)
   {
-    printf("------------------------ FC3D - PROXIMAL - # Iteration %i Final Error = %14.7e  \n", iter, error);
+    printf("------------------------ FC3D - PROXIMAL - # Iteration %i Final Residual = %14.7e  \n", iter, error);
     printf("------------------------ FC3D - PROXIMAL - # Iteration of internal solver %i \n", options->iparam[6]);
   }
 

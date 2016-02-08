@@ -207,7 +207,7 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
 
   if (verbose > 0)
   {
-    printf("----------------------------------- VI - Hyperplane Projection (HP) - #Iteration %i Final Error = %14.7e\n", iter, error);
+    printf("----------------------------------- VI - Hyperplane Projection (HP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   dparam[0] = tolerance;
   dparam[1] = error;

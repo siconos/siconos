@@ -310,7 +310,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
 
   if (verbose > 0)
   {
-    printf("----------------------------------- FC3D -  Extra Gradient (EG) - #Iteration %i Final Error = %14.7e\n", iter, error);
+    printf("----------------------------------- FC3D -  Extra Gradient (EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   dparam[0] = tolerance;
   dparam[1] = error;

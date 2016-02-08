@@ -162,7 +162,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
       (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, &error);
 
       if (verbose > 0)
-        printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e Tol = %g\n", iter, error, tolerance);
+        printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e Tol = %g\n", iter, error, tolerance);
     }
 
     if (error < tolerance) hasNotConverged = 0;

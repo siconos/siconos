@@ -130,7 +130,7 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
   *info = nonSmoothNewtonNeigh(sN + sM, z, &F, &jacobianF, options->iparam, options->dparam);
   if (*info > 0)
   {
-    fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Error = %f\n", options->dparam[1]);
+    fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[1]);
     /*ONLY FOR DEBUG
       mixedLinearComplementarity_display(problem);
     printf("with z init;\n");

@@ -374,7 +374,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
   if (verbose > 0)
   {
-    printf("----------------------------------- VI - Extra Gradient (EG) - #Iteration %i Final Error = %14.7e\n", iter, error);
+    printf("----------------------------------- VI - Extra Gradient (EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   dparam[0] = tolerance;
   dparam[1] = error;

@@ -127,13 +127,13 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
     }
 
     if (verbose > 0)
-      printf("------------------------ FC3D - TFP - Iteration %i Error = %14.7e\n", iter, error);
+      printf("------------------------ FC3D - TFP - Iteration %i Residual = %14.7e\n", iter, error);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
   if (verbose > 0){
-    printf("----------------------------------- FC3D - TFP - # Iteration %i Final Error = %14.7e\n", iter, error);
+    printf("----------------------------------- FC3D - TFP - # Iteration %i Final Residual = %14.7e\n", iter, error);
     printf("----------------------------------- FC3D - TFP - #              Internal iteration = %i\n", cumul_internal);
   }
   free(options->dWork);

@@ -758,7 +758,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     }
 
     if(verbose > 0)
-      printf("------------------------ GFC3D - NSN_AC - iteration %d,  error=%g, linear solver residual =%g, tolerance =%g \n", iter, options->dparam[1],linear_solver_residual, tolerance);
+      printf("------------------------ GFC3D - NSN_AC - iteration %d, residual = %g, linear solver residual = %g, tolerance = %g \n", iter, options->dparam[1],linear_solver_residual, tolerance);
 
     if(options->dparam[1] < tolerance)
     {
@@ -772,11 +772,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   if(verbose > 0)
   {
     if(!info[0])
-      printf("------------------------ GFC3D - NSN_AC - convergence after %d iterations, error : %g\n",
+      printf("------------------------ GFC3D - NSN_AC - convergence after %d iterations, residual = %g\n",
              iter, options->dparam[1]);
     else
     {
-      printf("------------------------ GFC3D - NSN_AC - no convergence after %d iterations, error : %g\n",
+      printf("------------------------ GFC3D - NSN_AC - no convergence after %d iterations, residual = %g\n",
              iter, options->dparam[1]);
     }
   }

@@ -249,7 +249,7 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
 
 
 
-  printf("----------------------------------- FC3D - Projected Gradient On Cylinder (PGoC)- #Iteration %i Final Error = %14.7e\n", iter, error);
+  printf("----------------------------------- FC3D - Projected Gradient On Cylinder (PGoC)- #Iteration %i Final Residual = %14.7e\n", iter, error);
   dparam[0] = tolerance;
   dparam[1] = error;
   free(velocitytmp);

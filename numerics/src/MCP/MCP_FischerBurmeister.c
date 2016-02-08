@@ -101,7 +101,7 @@ void mcp_FischerBurmeister(MixedComplementarityProblem* problem, double *z, doub
 
   // Check output
   if (*info > 0)
-    fprintf(stderr, "Numerics, mcp_FB failed, reached max. number of iterations without convergence. Error = %f\n", options->dparam[1]);
+    fprintf(stderr, "Numerics, mcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[1]);
 
   return;
 }

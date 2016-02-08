@@ -437,7 +437,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
   if (verbose > 0)
   {
-    printf("----------------------------------- VI - Fixed Point Projection (FPP) - #Iteration %i Final Error = %14.7e\n", iter, error);
+    printf("----------------------------------- VI - Fixed Point Projection (FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
 
   if (isVariable)
