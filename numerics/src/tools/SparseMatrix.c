@@ -183,7 +183,11 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   NumericsSparseLinearSolverParams* p = (NumericsSparseLinearSolverParams*)
     malloc(sizeof(NumericsSparseLinearSolverParams));
 
+#ifdef WITH_MUMPS
+  p->solver = NS_MUMPS;
+#else
   p->solver = NS_CS_LUSOL;
+#endif
 
   p->iparam = NULL;
   p->dparam = NULL;
