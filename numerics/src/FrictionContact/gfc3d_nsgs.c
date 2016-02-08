@@ -29,17 +29,12 @@
 #include <math.h>
 #include "sanitizer.h"
 
-
-void Globalfc3d_projection_free(GlobalFrictionContactProblem* problem);
-
-void Globalfc3d_projection_free(GlobalFrictionContactProblem* problem)
+static void Globalfc3d_projection_free(GlobalFrictionContactProblem* problem)
 {
   assert(problem->M);
 }
 
-void initializeGlobalLocalSolver(int n, SolverGlobalPtr* solve, FreeSolverGlobalPtr* freeSolver, ComputeErrorGlobalPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam);
-
-void initializeGlobalLocalSolver(int n, SolverGlobalPtr* solve, FreeSolverGlobalPtr* freeSolver, ComputeErrorGlobalPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
+static void initializeGlobalLocalSolver(int n, SolverGlobalPtr* solve, FreeSolverGlobalPtr* freeSolver, ComputeErrorGlobalPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
 {
   /** Connect to local solver */
   /* Projection */
@@ -58,7 +53,7 @@ void initializeGlobalLocalSolver(int n, SolverGlobalPtr* solve, FreeSolverGlobal
 }
 
 
-void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double *globalVelocity, int* info, SolverOptions* options)
+void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict reaction, double* restrict velocity, double* restrict globalVelocity, int* restrict info, SolverOptions* restrict options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -161,10 +156,14 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double 
 
 
     /* **** Criterium convergence **** */
-    (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, &error);
+    /* this is very expensive to check, you better chek it only once in a while  */
+    if (!(iter % erritermax))
+    {
+      (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, &error);
 
-    if (verbose > 0)
-      printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+      if (verbose > 0)
+        printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e Tol = %g\n", iter, error, tolerance);
+    }
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;

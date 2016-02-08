@@ -37,6 +37,7 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
   {
     info =    fc3d_nsgs_setDefaultSolverOptions(options);
     options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSGS;
+    options->iparam[7] = 10;
     break;
   }
   case SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR:
