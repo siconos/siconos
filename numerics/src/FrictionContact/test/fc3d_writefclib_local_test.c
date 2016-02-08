@@ -22,23 +22,22 @@
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
 
-int write_test_fclib(char * filename);
-int write_test_fclib(char * filename)
+static int write_test_fclib(char * filename)
 {
   printf("\n Start of test \n");
   printf("Test on %s\n", filename);
   int info = 0;
   size_t sizeoffilename = strlen(filename);
   printf("sizeoffilename %ld\n",  sizeoffilename);
-  char  extension[4];
-  strncpy(extension, &filename[sizeoffilename - 4], 4);
+  char  extension[5]; // Don't forget the NUL byte ... --xhub
+  strncpy(extension, &filename[sizeoffilename - sizeof(extension) + 1], sizeof(extension));
   char * basename;
 
   if (strcmp(extension, ".dat") == 0)
   {
-    basename = (char *)malloc((sizeoffilename + 1) * sizeof(char *));
+    basename = (char *)malloc((sizeoffilename + 2) * sizeof(char *));
     strcpy(basename, filename);
-    strncpy(&basename[sizeoffilename - 4], ".hdf5", 5);
+    strncpy(&basename[sizeoffilename - 5], ".hdf5", 6);
     printf("basename %s\n",  basename);
 
   }
@@ -62,14 +61,14 @@ int write_test_fclib(char * filename)
 
   int n = 100;
   char * title = (char *)malloc(n * sizeof(char *));
-  strcpy(title, "Confeti-ex03-Fc3D-SBM");
+  strncpy(title, "Confeti-ex03-Fc3D-SBM", n);
   char * description = (char *)malloc(n * sizeof(char *));
 
-  strcat(description, "Rewriting Siconos Numerics test ");
-  strcat(description, filename);
-  strcat(description, " in FCLIB format");
+  strncpy(description, "Rewriting Siconos Numerics test ", n);
+  strncat(description, filename, n - strlen(description) - 1);
+  strncat(description, " in FCLIB format", n - strlen(description) - 1);
   char * mathInfo = (char *)malloc(n * sizeof(char *));
-  strcpy(mathInfo,  "unknown");
+  strncpy(mathInfo,  "unknown", n);
 
   frictionContact_fclib_write(problem,
                               title,
@@ -114,6 +113,7 @@ int write_test_fclib(char * filename)
     }*/
 
   freeFrictionContactProblem(problem);
+  freeFrictionContactProblem(problem1);
   free(basename);
   free(title);
   free(description);

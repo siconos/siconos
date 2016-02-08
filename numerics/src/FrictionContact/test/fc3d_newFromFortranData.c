@@ -58,6 +58,8 @@ int main(void)
   free(M->index2_data);
   free(M);
   freeSparseBlockCoordinateMatrix3x3fortran(MC);
+  free(MC);
+  free(FC);
 
   return info;
 }
