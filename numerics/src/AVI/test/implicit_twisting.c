@@ -58,6 +58,7 @@ int main(void)
   double beta = .1;
   NumericsMatrix num_mat;
   double M[4] = { G*TS*TS/2.0, G*TS, beta*G*TS*TS/2.0, beta*G*TS };
+  NM_null(&num_mat);
   fillNumericsMatrix(&num_mat, NM_DENSE, 2, 2, M);
 
   double q[2] = { x[0] + TS*x[1], x[1] };
