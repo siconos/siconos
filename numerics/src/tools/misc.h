@@ -44,6 +44,7 @@ void printm(unsigned int nl, unsigned int nc, double *m);
     }                                                                   \
   } while (0)
 
+
 /** check IO
  */
 #define CHECK_IO(EXPR, ...)                                             \
@@ -56,12 +57,12 @@ void printm(unsigned int nl, unsigned int nc, double *m);
       {                                                                 \
         perror(#EXPR);                                                  \
         fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d\n", #EXPR, __FILE__, __LINE__); \
-        if (sizeof(_arr_) == 2*sizeof(intptr_t)) { *_arr_[1] = errno; } \
+        if (sizeof(_arr_) == 2*sizeof(intptr_t)) { *_arr_[sizeof(_arr_)/sizeof(intptr_t)-1] = errno; } \
       }                                                                 \
       else                                                              \
       {                                                                 \
-        fprintf (stderr, "Siconos Numerics unknown error for %s, %s:%d\n", #EXPR, __FILE__, __LINE__); \
-        if (sizeof(_arr_) == 2*sizeof(intptr_t)) { *_arr_[1] = 1; }                           \
+        fprintf (stderr, "Siconos Numerics: Unknown error for %s, %s:%d\n", #EXPR, __FILE__, __LINE__); \
+        if (sizeof(_arr_) == 2*sizeof(intptr_t)) { *_arr_[sizeof(_arr_)/sizeof(intptr_t)-1] = 1; }                           \
       }                                                                 \
     }                                                                   \
   } while (0)
