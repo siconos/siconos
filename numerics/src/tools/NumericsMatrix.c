@@ -1408,6 +1408,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
 
           p->solver_free_hook = &NM_csparse_free;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
+          p->dWorkSize = A->size1;
           CHECK_RETURN(cs_lu_factorization(1, NM_csc(A), DBL_EPSILON, p));
         }
 
