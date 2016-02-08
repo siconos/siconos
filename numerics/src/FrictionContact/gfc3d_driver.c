@@ -161,12 +161,12 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI:
   {
     printf(" ========================== Call PATHVI solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
-    gfc3d_AVI_gams_pathvi(problem, reaction , velocity, &info, options);
+    gfc3d_AVI_gams_pathvi(problem, reaction , globalVelocity, &info, options);
     break;
   }
   default:
   {
-    fprintf(stderr, "Numerics, gfc3d_driver failed. Unknown solver.\n");
+    fprintf(stderr, "Numerics, gfc3d_driver failed. Unknown solver %d.\n", options->solverId);
     exit(EXIT_FAILURE);
 
   }

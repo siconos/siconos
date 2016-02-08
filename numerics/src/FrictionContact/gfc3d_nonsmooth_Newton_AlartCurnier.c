@@ -370,7 +370,7 @@ int _globalLineSearchSparseGP(
   }
   if(verbose > 0)
   {
-    printf("------------------------ GFC3D - NSN_AC - global line search unsuccessfull. Max number of ls iteration reached  = %i  with alpha = %.10e \n",
+    printf("------------------------ GFC3D - NSN_AC - global line search unsuccessful. Max number of ls iteration reached  = %i  with alpha = %.10e \n",
            maxiter_ls, alpha[0]);
   }
 
@@ -663,7 +663,14 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     /* Solve: AWpB X = -F */
     NM_copy(AA, AA_work);
 
-    NM_gesv(AA_work, rhs);
+    int info_solver = NM_gesv(AA_work, rhs);
+    if (info_solver > 0)
+    {
+      fprintf(stderr, "------------------------ GFC3D - NSN_AC - solver failed info = %d\n", info_solver);
+      break;
+      info[0] = 2;
+      CHECK_RETURN(!cs_check_triplet(NM_triplet(AA_work)));
+    }
 
     /* Check the quality of the solution */
     if (verbose > 0)
@@ -751,7 +758,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     }
 
     if(verbose > 0)
-      printf("------------------------ GFC3D - NSN_AC - iteration %d,  error=%g, linear solver residual =%g \n", iter, options->dparam[1],linear_solver_residual);
+      printf("------------------------ GFC3D - NSN_AC - iteration %d,  error=%g, linear solver residual =%g, tolerance =%g \n", iter, options->dparam[1],linear_solver_residual, tolerance);
 
     if(options->dparam[1] < tolerance)
     {

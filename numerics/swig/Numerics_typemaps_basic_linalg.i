@@ -332,6 +332,8 @@
 
 %apply (double *z) { (double *velocity) };
 
+%apply (double *z) { (double *globalVelocity) };
+
 %apply (double *z) { (double *mu) };
 
 %apply (double *blocklist3) { (double *vect3D) };
