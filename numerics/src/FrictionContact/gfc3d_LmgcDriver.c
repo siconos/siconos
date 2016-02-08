@@ -111,8 +111,8 @@ int gfc3d_LmgcDriver(double *reaction,
   _H->m = H->size0;
   _H->n = H->size1;
 
-  _H->p = (csi *) _colH;
-  _H->i = (csi *) _rowH;
+  _H->p = _colH;
+  _H->i =  _rowH;
   double * _Hdata = alloc_memory_double(nzH, Hdata);
   _H->x = _Hdata;
 
@@ -136,6 +136,7 @@ int gfc3d_LmgcDriver(double *reaction,
   problem->dimension = 3;
   problem->numberOfContacts = nc;
   problem->env = NULL;
+  problem->workspace = NULL;
 
   problem->M = M;
   problem->H = H;
@@ -151,13 +152,13 @@ int gfc3d_LmgcDriver(double *reaction,
 
   gfc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id);
 
-  assert(isize <= numerics_solver_options.iSize);
-  assert(dsize <= numerics_solver_options.dSize);
-  /* for (int i=0; i<isize; ++i) */
-  /*   numerics_solver_options.iparam[i] = iparam[i]; */
+  int iSize_min = fmin(isize,  numerics_solver_options.iSize);
+  for (int i = 0; i < iSize_min; ++i) 
+    numerics_solver_options.iparam[i] = iparam[i];
 
-  /* for (int i=0; i<dsize; ++i) */
-  /*   numerics_solver_options.dparam[i] = dparam[i]; */
+  int dSize_min = fmin(dsize,  numerics_solver_options.dSize);
+  for (int i=0; i < dSize_min; ++i)
+    numerics_solver_options.dparam[i] = dparam[i];
 
   /* printSolverOptions(&numerics_solver_options); */
   /* FILE * file  =  fopen("toto.dat", "w"); */
@@ -188,21 +189,19 @@ int gfc3d_LmgcDriver(double *reaction,
     if (fccounter % freq_output == 0)
     {
       char fname[256];
-      sprintf(fname, "LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[7], nc, fccounter);
+      snprintf(fname, sizeof(fname), "LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[7], nc, fccounter);
       printf("Dump LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[7], nc, fccounter);
       /* printf("ndof = %i.\n", ndof); */
 
       FILE * foutput  =  fopen(fname, "w");
       int n = 100;
       char * title = (char *)malloc(n * sizeof(char *));
-      strcpy(title, "LMGC dump in hdf5");
+      strncpy(title, "LMGC dump in hdf5", n);
       char * description = (char *)malloc(n * sizeof(char *));
 
-      strcat(description, "Rewriting in hdf5 through siconos of  ");
-      strcat(description, fname);
-      strcat(description, " in FCLIB format");
+      snprintf(description, n, "Rewriting in hdf5 through siconos of %s in FCLIB format", fname);
       char * mathInfo = (char *)malloc(n * sizeof(char *));
-      strcpy(mathInfo,  "unknown");
+      strncpy(mathInfo, "unknown", n);
 
       globalFrictionContact_fclib_write(problem,
                                         title,
@@ -222,6 +221,8 @@ int gfc3d_LmgcDriver(double *reaction,
 
   freeNumericsMatrix(M);
   freeNumericsMatrix(H);
+  free(M);
+  free(H);
   free(problem);
 
   /* free(_colM); */
