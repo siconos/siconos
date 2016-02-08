@@ -459,7 +459,9 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
 
 void fc3d_projectionOnCylinder_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* options)
 {
-    localproblem->mu = options->dWork;
+  assert(localproblem);
+  assert(!localproblem->mu);
+  localproblem->mu = options->dWork;
 }
 
 void fc3d_projectionOnCylinder_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
@@ -641,6 +643,7 @@ void fc3d_projectionOnCylinderWithLocalIteration_initialize(
 {
   int nc = problem->numberOfContacts;
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
+  assert(!localproblem->mu);
   localproblem->mu = options->dWork;
 
   if (!localsolver_options->dWork)

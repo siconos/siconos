@@ -778,7 +778,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
   /***** Free memory *****/
   (*freeSolver)(problem,localproblem,localsolver_options);
-  if (problem->M->storageType == 0 && localproblem->M->matrix0 != NULL)
+  if (problem->M->storageType == NM_DENSE && localproblem->M->matrix0)
   {
     free(localproblem->M->matrix0);
   }
