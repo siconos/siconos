@@ -152,11 +152,11 @@ int gfc3d_LmgcDriver(double *reaction,
 
   gfc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id);
 
-  int iSize_min = fmin(isize,  numerics_solver_options.iSize);
+  int iSize_min = isize < numerics_solver_options.iSize ? isize : numerics_solver_options.iSize;
   for (int i = 0; i < iSize_min; ++i) 
     numerics_solver_options.iparam[i] = iparam[i];
 
-  int dSize_min = fmin(dsize,  numerics_solver_options.dSize);
+  int dSize_min = dsize <  numerics_solver_options.dSize ? dsize : numerics_solver_options.dSize;
   for (int i=0; i < dSize_min; ++i)
     numerics_solver_options.dparam[i] = dparam[i];
 
