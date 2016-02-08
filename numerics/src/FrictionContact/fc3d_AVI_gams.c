@@ -153,26 +153,6 @@ static csi SN_rm_normal_part(csi i, csi j, double val, void* env)
   }
 }
 
-static void filename_datafiles(const int iter, const int solverId, const char* base_name, unsigned len, char* template_name, char* log_filename)
-{
-  char iterStr[40];
-  snprintf(iterStr, sizeof(iterStr), "-i%d-%s", iter, idToName(solverId));
-  if (base_name)
-  {
-    strncpy(template_name, base_name, len);
-    strncpy(log_filename, base_name, len);
-  }
-  else
-  {
-    strncpy(template_name, "fc3d_avi-condensed", len);
-    strncpy(log_filename, "fc3d_avi-condense-log", len);
-  }
-
-  strncat(template_name, iterStr, len - strlen(template_name) - 1);
-  strncat(log_filename, iterStr, len - strlen(log_filename) - 1);
-  strncat(log_filename, ".log", len - strlen(log_filename) - 1);
-}
-
 static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, const char* base_name, double* restrict reaction, double* restrict velocity, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* W, double* restrict q, NumericsMatrix* Wtmat, NumericsMatrix* Emat, NumericsMatrix* Akmat, SolverOptions* options)
 {
 

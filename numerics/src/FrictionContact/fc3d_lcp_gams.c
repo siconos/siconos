@@ -28,7 +28,8 @@
 #include "fc3d_compute_error.h"
 #include "projectionOnCone.h"
 
-#ifdef HAVE_GAMS_C_API
+#if 0
+//#ifdef HAVE_GAMS_C_API
 
 #include "GAMSlink.h"
 
@@ -126,20 +127,6 @@ static int cp(const char *to, const char *from)
 }
 
 static inline double rad2deg(double rad) { return rad*180/M_PI; }
-
-static void setDashedOptions(const char* optName, const char* optValue, const char* paramFileName)
-{
-  FILE* f = fopen(paramFileName, "a");
-  if (f)
-  {
-    fprintf(f, "%s %s\n", optName, paramFileName);
-    fclose(f);
-  }
-  else
-  {
-    printf("Failed to create option %s with value %s in %s\n", optName, optValue, paramFileName);
-  }
-}
 
 static csi SN_rm_normal_part(csi i, csi j, double val, void* env)
 {
@@ -244,22 +231,6 @@ static double solve_iterative_refinement3x3_t(double* restrict A, double* restri
   }
 
   return res_l1;
-}
-
-static void filename_datafiles(int iter, const char* base_name, unsigned len, char* template_name)
-{
-  char iterStr[6];
-  sprintf(iterStr, "-i%d", iter);
-  if (base_name)
-  {
-    strncpy(template_name, base_name, len);
-  }
-  else
-  {
-    strncpy(template_name, "fc3d_lcp-condensed", len);
-  }
-
-  strncat(template_name, iterStr, len - strlen(template_name) - 1);
 }
 
 static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, const char* base_name, double* restrict slack_r, double* restrict slack_y, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* tildeW, double* restrict tilde_omega, double* restrict tilde_omegat, NumericsMatrix* tildeWt, NumericsMatrix* Emat, NumericsMatrix* Akmat)
