@@ -4,6 +4,7 @@
 #define GAMSLINK_H
 
 #include <stdbool.h>
+#include "SolverOptions.h"
 
 /** Simply linked list of bool option for GAMS
  */
@@ -197,6 +198,121 @@ static inline const char* GAMSP_get_filename_suffix(const void* GP)
 static inline void GAMSP_set_filename_suffix(void* GP, char* filename_suffix)
 {
   ((SN_GAMSparams*) GP)->filename_suffix = filename_suffix;
+}
+
+
+typedef struct SN_GAMS_NM_gdx_
+{
+  NumericsMatrix* mat;
+  char* name;
+  struct SN_GAMS_NM_gdx_* next;
+} SN_GAMS_NM_gdx;
+
+typedef struct SN_GAMS_NV_gdx_
+{
+  double* vec;
+  char* name;
+  unsigned size;
+  struct SN_GAMS_NV_gdx_* next;
+} SN_GAMS_NV_gdx;
+
+typedef struct
+{
+  SN_GAMS_NM_gdx* mat_for_gdx;
+  SN_GAMS_NV_gdx* vec_for_gdx;
+  SN_GAMS_NV_gdx* vec_from_gdx;
+} SN_GAMS_gdx;
+
+#define SN_FREE_TILL_NEXT(X, T, ELT) \
+  while(X) { T* next = X->next; X->ELT = NULL; X->name = NULL; X->next = NULL;\
+    free(X); X = next; }
+  
+
+static inline void SN_free_SN_GAMS_gdx(SN_GAMS_gdx* gdx_data)
+{
+  assert(gdx_data);
+
+  SN_GAMS_NM_gdx* mat_for_gdx = gdx_data->mat_for_gdx;
+  SN_GAMS_NV_gdx* vec_for_gdx = gdx_data->vec_for_gdx;
+  SN_GAMS_NV_gdx* vec_from_gdx = gdx_data->vec_from_gdx;
+  SN_FREE_TILL_NEXT(mat_for_gdx, SN_GAMS_NM_gdx, mat);
+  SN_FREE_TILL_NEXT(vec_for_gdx, SN_GAMS_NV_gdx, vec);
+  SN_FREE_TILL_NEXT(vec_from_gdx, SN_GAMS_NV_gdx, vec);
+
+}
+
+
+static inline void SN_GAMS_add_NM_to_gdx(SN_GAMS_gdx* gdx_data, NumericsMatrix* M, char* name)
+{
+  assert(gdx_data);
+  assert(M);
+  assert(name);
+
+  SN_GAMS_NM_gdx* mat_for_gdx;
+
+  if (gdx_data->mat_for_gdx)
+  {
+    mat_for_gdx = gdx_data->mat_for_gdx;
+    while (mat_for_gdx->next)
+    {
+      mat_for_gdx = mat_for_gdx->next;
+    }
+    mat_for_gdx->next = (SN_GAMS_NM_gdx*)malloc(sizeof(SN_GAMS_NM_gdx));
+
+    mat_for_gdx = mat_for_gdx->next;
+  }
+  else
+  {
+    gdx_data->mat_for_gdx = (SN_GAMS_NM_gdx*)malloc(sizeof(SN_GAMS_NM_gdx));
+    mat_for_gdx = gdx_data->mat_for_gdx;
+  }
+
+  mat_for_gdx->mat = M;
+  mat_for_gdx->name = name;
+  mat_for_gdx->next = NULL;
+}
+
+#define SN_GAMS_ADD_GDX(X) \
+  SN_GAMS_NV_gdx* X; \
+ \
+  if (gdx_data->X) \
+  { \
+    X = gdx_data->X; \
+    while (X->next) \
+    { \
+      X = X->next; \
+    } \
+    X->next = (SN_GAMS_NV_gdx*)malloc(sizeof(SN_GAMS_NV_gdx)); \
+ \
+    X = X->next; \
+  } \
+  else \
+  { \
+    gdx_data->X = (SN_GAMS_NV_gdx*)malloc(sizeof(SN_GAMS_NV_gdx)); \
+    X = gdx_data->X; \
+  } \
+ \
+  X->vec = vec; \
+  X->name = name; \
+  X->size = size; \
+  X->next = NULL;
+
+static inline void SN_GAMS_add_NV_to_gdx(SN_GAMS_gdx* gdx_data, double* vec, char* name, unsigned size)
+{
+  assert(gdx_data);
+  assert(vec);
+  assert(name);
+
+  SN_GAMS_ADD_GDX(vec_for_gdx)
+}
+
+static inline void SN_GAMS_add_NV_from_gdx(SN_GAMS_gdx* gdx_data, double* vec, char* name, unsigned size)
+{
+  assert(gdx_data);
+  assert(vec);
+  assert(name);
+
+  SN_GAMS_ADD_GDX(vec_from_gdx)
 }
 
 #ifdef HAVE_GAMS_C_API
@@ -450,6 +566,10 @@ static inline int GDX_to_NV(idxHandle_t Xptr, const char* name, double* vector, 
   return 0;
 }
 
+
+int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data);
+
+void filename_datafiles(const int iter, const int solverId, const char* base_name, unsigned len, char* template_name, char* log_filename);
 
 #else
 
