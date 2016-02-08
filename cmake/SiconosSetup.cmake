@@ -89,7 +89,7 @@ endif()
 
 # ---- Python ---
 # (interp and lib)
-if(WITH_PYTHON_WRAPPER)
+if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
   find_package(PythonFull REQUIRED)
   include(FindPythonModule)
 
