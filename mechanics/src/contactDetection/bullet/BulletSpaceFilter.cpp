@@ -26,6 +26,7 @@
 #include <NonSmoothDynamicalSystem.hpp>
 #include <SimulationTypeDef.hpp>
 #include <NonSmoothLaw.hpp>
+#include <OneStepIntegrator.hpp>
 
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
@@ -386,4 +387,37 @@ void BulletSpaceFilter::buildInteractions(double time)
 void BulletSpaceFilter::addStaticObject(SP::btCollisionObject co, unsigned int id)
 {
   (*_staticObjects)[&*co]= std::pair<SP::btCollisionObject, int>(co, id);
+}
+
+void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
+                                         SP::Simulation simulation,
+                                         SP::OneStepIntegrator osi)
+{
+  if (!osi && simulation->oneStepIntegrators()
+      && simulation->oneStepIntegrators()->size() > 0)
+  {
+      osi = *(simulation->oneStepIntegrators()->begin());
+  }
+  else if (!osi) {
+      RuntimeException::selfThrow(
+          "BulletSpaceFilter::addDynamicObject -- no OSI found");
+  }
+
+  /* Insert the new DS into the OSI, model, and simulation. */
+  osi->insertDynamicalSystem(ds);
+  this->model()->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
+  simulation->addInOSIMap(ds, osi);
+
+  /* Initialize the DS at the current time */
+  ds->initialize(simulation->nextTime(), osi->getSizeMem());
+
+  /* Partially re-initialize the simulation. */
+  simulation->initialize(this->model(), false);
+
+  /* Re-create the world from scratch */
+  _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
+  _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase,
+                                             &*_collisionConfiguration));
+  _dynamicCollisionsObjectsInserted = false;
+  _staticCollisionsObjectsInserted = false;
 }

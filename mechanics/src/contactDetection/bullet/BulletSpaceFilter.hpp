@@ -83,6 +83,15 @@ public:
    */
   void addStaticObject(SP::btCollisionObject co, unsigned int id);
 
+  /** dynamically add a bullet dynamical system
+   * \param ds a BulletDS to be added
+   * \param simulation a simulation to which ds shall belong
+   * \param osi a OneStepIntegrator to use, or if NULL, simulation's first OSI is used.
+   */
+  void addDynamicObject(SP::BulletDS ds,
+                        SP::Simulation simulation,
+                        SP::OneStepIntegrator osi = NULL);
+
   /** execute the broadphase contact detection and build indexSet0
    */
   void buildInteractions(double);
