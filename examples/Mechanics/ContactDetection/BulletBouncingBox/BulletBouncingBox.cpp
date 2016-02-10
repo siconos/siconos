@@ -25,6 +25,7 @@
 
 */
 
+#include <SiconosBodies.hpp>
 #include <SiconosKernel.hpp>
 
 #include <BulletSpaceFilter.hpp>
@@ -183,8 +184,8 @@ int main()
     space_filter->addStaticObject(ground, 0);
 
     // -- MoreauJeanOSI Time Stepping with Bullet Dynamical Systems
-    SP::BulletTimeStepping simulation(new BulletTimeStepping(timedisc,
-                                      space_filter));
+    SP::BulletTimeStepping simulation(new BulletTimeStepping(timedisc));
+
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
 
