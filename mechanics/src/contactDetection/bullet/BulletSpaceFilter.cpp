@@ -125,6 +125,7 @@ void BulletSpaceFilter::setCollisionConfiguration(
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
   _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase, &*_collisionConfiguration));
   _dynamicCollisionsObjectsInserted = false;
+  _staticCollisionsObjectsInserted = false;
 }
 
 void BulletSpaceFilter::buildInteractions(double time)
