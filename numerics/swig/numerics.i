@@ -26,6 +26,9 @@
 // generated docstrings from doxygen xml output
 %include numerics-docstrings.i
 
+// list of functions that returns objects that they have created
+%include numerics_newobjects.i
+
 %include <typemaps/swigmacros.swg>
 
 %define %SN_INPUT_CHECK_RETURN(var, output, type_)
