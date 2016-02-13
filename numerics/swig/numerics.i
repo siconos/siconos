@@ -214,13 +214,12 @@
 
 // redefine typemap on q for MLCP
 %typemap(out) (double* q) {
-  npy_intp dims[2];
+  npy_intp dims[1];
 
   dims[0] = arg1->m + arg1->n;
-  dims[1] = 1;
   if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1);
+    PyObject *obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, $1);
     PyArrayObject *array = (PyArrayObject*) obj;
     if (!array || !require_fortran(array)) SWIG_fail;
     $result = obj;
@@ -731,13 +730,14 @@
 %include Numerics_VI.i
 
 %typemap(out) (double* q) {
-  npy_intp dims[2];
+  npy_intp dims[1];
 
-  dims[0] = arg1->dimension * arg1->numberOfContacts;
-  dims[1] = 1;
+  if (!arg1->M) { PyErr_SetString(PyExc_TypeError, "M is not present, don't known the size"); SWIG_fail; }
+
+  dims[0] = arg1->M->size0;
   if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1);
+    PyObject *obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, $1);
     PyArrayObject *array = (PyArrayObject*) obj;
     if (!array || !require_fortran(array)) SWIG_fail;
     $result = obj;
@@ -745,18 +745,16 @@
   else
     SWIG_fail;
  }
-
-// for b in GlobalFrictionContact
-%apply (double* q) { (double* b) };
 
 %typemap(out) (double* mu) {
-  npy_intp dims[2];
+  npy_intp dims[1];
+
+  if (arg1->numberOfContacts <= 0) { PyErr_SetString(PyExc_TypeError, "numberOfContacts is not set"); SWIG_fail; }
 
   dims[0] = arg1->numberOfContacts;
-  dims[1] = 1;
   if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1);
+    PyObject *obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, $1);
     PyArrayObject *array = (PyArrayObject*) obj;
     if (!array || !require_fortran(array)) SWIG_fail;
     $result = obj;
@@ -765,6 +763,48 @@
     SWIG_fail;
  }
 
+
+// for b in GlobalFrictionContact
+%typemap(out) (double* b) {
+  npy_intp dims[1];
+
+  if (!arg1->H) { PyErr_SetString(PyExc_TypeError, "H is not present, don't known the size"); SWIG_fail; }
+
+  dims[0] = arg1->H->size1;
+  if ($1)
+  {
+    PyObject *obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, $1);
+    PyArrayObject *array = (PyArrayObject*) obj;
+    if (!array || !require_fortran(array)) SWIG_fail;
+    $result = obj;
+  }
+  else
+    SWIG_fail;
+ }
+
+// vectors of size col(H)
+%typemap(memberin) (double *b) {
+  // Still some dark magic :( --xhub
+ char msg[1024];
+  assert(arg1);
+  if (!arg1->H)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "H is not initialized, it sould be done first!");
+    SWIG_fail;
+  }
+
+  int size = arg1->H->size1;
+  if (size !=  array_size(array2, 0))
+  {
+    snprintf(msg, sizeof(msg), "Size of b is %ld, but the size of H is %d! Both should be equal!\n", array_size(array2, 0), size);
+    PyErr_SetString(PyExc_RuntimeError, msg);
+    SWIG_fail;
+  }
+
+  if (!$1) { $1 = (double*)malloc(size * sizeof(double)); }
+  memcpy($1, $input, size * sizeof(double));
+
+}
 
 
 
