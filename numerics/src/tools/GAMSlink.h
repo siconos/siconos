@@ -567,9 +567,18 @@ static inline int GDX_to_NV(idxHandle_t Xptr, const char* name, double* vector, 
 }
 
 
-int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data);
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
 
-void filename_datafiles(const int iter, const int solverId, const char* base_name, unsigned len, char* template_name, char* log_filename);
+  int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data);
+
+  void filename_datafiles(const int iter, const int solverId, const char* base_name, unsigned len, char* template_name, char* log_filename);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif
 
 #else
 
