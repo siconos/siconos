@@ -504,7 +504,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
   {
 #ifdef HAVE_GAMS_C_API
     iSize = 5;
-    dSize = 3;
+    dSize = 4; // stupid thing in checkTrivialCase in fc3d_driver.c
     iter_max = 10000;
     tol = tol == 0. ? 1e-9 : tol;
     fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
