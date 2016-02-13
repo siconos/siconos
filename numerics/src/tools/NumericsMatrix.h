@@ -555,6 +555,12 @@ extern "C"
    */
   void NM_csc_alloc(NumericsMatrix* A, csi nzmax);
 
+  /** Allocate a triplet matrix in A
+   * \param A the matrix
+   * \param nzmax maximum number of non-zero elements
+   */
+  void NM_triplet_alloc(NumericsMatrix* A, csi nzmax);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -840,6 +840,8 @@ void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
 
 void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
 {
+  assert(A);
+  assert(B);
   int sizeA = A->size0 * A->size1;
   int sizeB = B->size0 * B->size1;
   B->size0 = A->size0;
@@ -1498,7 +1500,7 @@ void NM_update_size(NumericsMatrix* A)
   }
   case NM_SPARSE_BLOCK:
   {
-    DEBUG_PRINT("NM_synchronize_sizes :: to be implemented for NM_SPARSE_BLOCK");
+    DEBUG_PRINT("NM_update_size :: to be implemented for NM_SPARSE_BLOCK");
     break;
   }
   case NM_SPARSE:
@@ -1521,7 +1523,7 @@ void NM_update_size(NumericsMatrix* A)
     break;
   }
   default:
-    DEBUG_PRINT("NM_synchronize_sizes :: default case");
+    DEBUG_PRINT("NM_update_size :: default case");
   }
 }
 
@@ -1529,4 +1531,9 @@ void NM_csc_alloc(NumericsMatrix* A, csi nzmax)
 {
   NM_sparse(A)->csc = cs_spalloc(A->size0, A->size1, nzmax, 1, 0);
 
+}
+
+void NM_triplet_alloc(NumericsMatrix* A, csi nzmax)
+{
+  NM_sparse(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
 }
