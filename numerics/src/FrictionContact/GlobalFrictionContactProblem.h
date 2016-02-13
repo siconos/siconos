@@ -160,7 +160,21 @@ extern "C"
 
   int globalFrictionContact_newFromFile(GlobalFrictionContactProblem*  problem, FILE* file);
 
-  void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem);
+  static inline void globalFrictionContact_null(GlobalFrictionContactProblem*  problem)
+  {
+    problem->M = NULL;
+    problem->H = NULL;
+    problem->q = NULL;
+    problem->b = NULL;
+    problem->mu = NULL;
+    problem->env = NULL;
+    problem->workspace = NULL;
+    problem->numberOfContacts = 0;
+    problem->dimension = 0;
+
+  }
+
+ void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem);
 
   void gfc3d_init_workspace(GlobalFrictionContactProblem* problem);
 

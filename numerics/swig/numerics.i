@@ -56,6 +56,7 @@
 #include "FischerBurmeisterGenerated.h"
 #include "NaturalMapGenerated.h"
 #include "fc3d_compute_error.h"
+#include "gfc3d_compute_error.h"
 #include "fclib_interface.h"
 #include "Numerics_functions.h"
 #include "SiconosSets.h"
@@ -810,6 +811,7 @@
 %include "FischerBurmeisterGenerated.h"
 %include "NaturalMapGenerated.h"
 %include "fc3d_compute_error.h"
+%include "gfc3d_compute_error.h"
 %include "fclib_interface.h"
 %include "GAMSlink.h"
 
@@ -933,14 +935,7 @@
       // return pointer : free by std swig destructor
       FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
 
-      FC->M = NULL;
-      FC->H = NULL;
-      FC->q = NULL;
-      FC->b = NULL;
-      FC->mu = NULL;
-      FC->env = NULL;
-      FC->numberOfContacts = 0;
-      FC->dimension = 0;
+      globalFrictionContact_null(FC);
 
       return FC;
     }
@@ -952,13 +947,7 @@
       // return pointer : free by std swig destructor
       FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
 
-      FC->M = NULL;
-      FC->H = NULL;
-      FC->q = NULL;
-      FC->b = NULL;
-      FC->mu = NULL;
-      FC->env = NULL;
-      FC->numberOfContacts = 0;
+      globalFrictionContact_null(FC);
       FC->dimension = (int) PyInt_AsLong(dim);
 
       return FC;
@@ -974,9 +963,9 @@
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
       PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3);
-      GlobalFrictionContactProblem *FC;
-      // return pointer : free by std swig destructor
-      FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
+      GlobalFrictionContactProblem * FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
+      globalFrictionContact_null(FC);
+
       size_t size0 = array_size(array,0);
       size_t size1 = array_size(array,1);
       FC->M = createNumericsMatrix(NM_DENSE, size0, size1);
@@ -988,8 +977,6 @@
       memcpy(FC->q,array_data(vector),size0*sizeof(double));
       FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
       memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
-
-      FC->env = NULL;
 
       // python mem management
       if(is_new_object1 && array)
