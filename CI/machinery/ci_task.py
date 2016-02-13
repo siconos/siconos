@@ -1,6 +1,7 @@
 import os
 from subprocess import check_call, CalledProcessError
 
+
 class CiTask():
 
     def __init__(self,
@@ -40,19 +41,19 @@ class CiTask():
                 pkgs = self._pkgs + add_pkgs
 
             if remove_pkgs is not None:
-                pkgs = filter(lambda p: p not in remove_pkgs, pkgs)
+                pkgs = list(filter(lambda p: p not in remove_pkgs, pkgs))
 
             if add_srcs is not None:
                 srcs += self._srcs + add_srcs
 
             if remove_srcs is not None:
-                srcs = filter(lambda p: p not in remove_srcs, srcs)
+                srcs = list(filter(lambda p: p not in remove_srcs, srcs))
 
             if add_targets is not None:
                 targets += self._targets + add_targets
 
             if remove_targets is not None:
-                targets = filter(lambda p: p not in remove_targets, targets)
+                targets = list(filter(lambda p: p not in remove_targets, targets))
 
             return CiTask(mode, build_configuration, distrib, ci_config, fast,
                           pkgs, srcs, targets)
@@ -81,7 +82,7 @@ class CiTask():
                           '-DDOCKER_TEMPLATES={0}'.format(self.templates())]
 
             try:
-                check_call(['cmake'] + cmake_args + [os.path.join('..','..',src)],
+                check_call(['cmake'] + cmake_args + [os.path.join('..', '..', src)],
                            cwd=bdir)
 
                 for target in self._targets[src]:
@@ -90,10 +91,9 @@ class CiTask():
 
             except CalledProcessError as error:
                 return_code = 1
-                print error
+                print(error)
 
         return return_code
-
 
     def clean(self):
 
@@ -108,4 +108,8 @@ class CiTask():
                                cwd=bdir)
 
                 except CalledProcessError as error:
-                    print error
+                    print(error)
+
+    def display(self):
+        for attr, value in self.__dict__.items():
+            print('\t{:} = {:}'.format(attr, value))

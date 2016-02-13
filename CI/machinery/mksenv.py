@@ -9,17 +9,29 @@ import yaml
 import sys
 import shlex
 
+
+def usage():
+    print("""
+{0} [--pkg=<pkg>] [--pkgs=<pkg1,pkg2>,...] [--script] \
+[--docker] [--vagrant] [--split=...] [--distrib=...] \
+    """.format(sys.argv[0]))
+
+
 class OutputMode:
     Script, Docker, Vagrant = range(3)
+
 
 def is_list(a):
     return isinstance(a, list)
 
+
 def is_dict(a):
     return isinstance(a, dict)
 
+
 def is_atom(a):
     return not (hasattr(a, '__iter__'))
+
 
 def get_entry(spec=None, distrib=None, distrib_version=None, pkg=None,
               section=None):
@@ -42,7 +54,7 @@ def get_entry(spec=None, distrib=None, distrib_version=None, pkg=None,
             match_distrib = spec['match'][distrib]
             if match_distrib in spec[section][pkg]:
                 return spec[section][pkg][match_distrib]
-            
+
 
         if wildcard in spec[section][pkg]:
             return spec[section][pkg][wildcard]
@@ -86,12 +98,14 @@ def pkg_entries(spec=None, distrib=None, distrib_version=None, pkg=None):
 
         return r
 
+
 def begin(distrib=None, distrib_version=None, output_mode=None):
     """
     Distribution preamble.
     """
     if output_mode == OutputMode.Docker:
         sys.stdout.write('FROM {0}:{1}\n'.format(distrib, distrib_version))
+
 
 def env(definitions=None, output_mode=None):
     """
@@ -108,6 +122,7 @@ def env(definitions=None, output_mode=None):
         items += definitions
 
         sys.stdout.write('{0}\n'.format(' \\ \n  '.join(items)))
+
 
 def run(installer=None, command=None, pkg=None, pkgs=None,
         output_mode=OutputMode.Script):
@@ -142,11 +157,9 @@ def run(installer=None, command=None, pkg=None, pkgs=None,
         items.append(pkg)
 
     if pkgs is not None:
-       items += pkgs
+        items += pkgs
 
     sys.stdout.write('{0}\n'.format(' \\ \n  '.join(items)))
-
-
 
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
@@ -187,7 +200,7 @@ for o, a in opts:
     elif o == '--vagrant':
         output_mode = OutputMode.Vagrant
     elif o == '--split':
-        split = a.lower() in ['true','yes','1']
+        split = a.lower() in ['true', 'yes', '1']
 
 
 specfilename = args[0]
@@ -209,7 +222,7 @@ with open(specfilename) as specfile:
     for pkg in pkgs:
 
         definition = get_entry(spec, distrib, distrib_version, pkg, 'env')
-        
+
         if definition is not None:
             if is_list(definition):
                 for iter_def in definition:
@@ -218,7 +231,7 @@ with open(specfilename) as specfile:
                 definitions.append(definition)
 
         entries = pkg_entries(spec=spec, distrib=distrib,
-                            distrib_version=distrib_version, pkg=pkg)
+                              distrib_version=distrib_version, pkg=pkg)
 
         for entry in entries:
             if entry is not None:
@@ -232,16 +245,15 @@ with open(specfilename) as specfile:
             else:
                 by_installer.append(pkg)
 
-
     begin(distrib=distrib, distrib_version=distrib_version,
           output_mode=output_mode)
 
     updater = get_entry(spec, distrib, distrib_version, wildcard, 'updater')
 
-    if updater is not None:
+    if updater:
 
         run(command=updater, output_mode=output_mode)
-        
+
     installer = get_entry(spec, distrib, distrib_version, wildcard,
                           'installer')
 
@@ -250,13 +262,12 @@ with open(specfilename) as specfile:
     if split:
         for pkg in by_installer:
             run(installer=installer,
-                pkg = pkg, output_mode=output_mode)
+                pkg=pkg, output_mode=output_mode)
     else:
         run(installer=installer,
-            pkgs = by_installer, output_mode=output_mode)
+            pkgs=by_installer, output_mode=output_mode)
 
     for command in by_command:
         run(command=command, output_mode=output_mode)
 
     env(definitions, output_mode)
-        

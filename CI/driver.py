@@ -8,20 +8,20 @@ from subprocess import check_output, check_call
 
 from getopt import gnu_getopt, GetoptError
 
+
 def usage():
-    print """
-{0} [--tasks=<task1>,<task2>,...] [--show-tasks] [--targets] \
-    [--brutal-docker-clean] 
-    """.format(sys.argv[0])
+    print("""
+{0} [-v] [--tasks=<task1>,<task2>,...] [--show-tasks] [--targets] \
+    [--brutal-docker-clean]
+    """.format(sys.argv[0]))
 
 
 try:
-    opts, args = gnu_getopt(sys.argv[1:], '',
+    opts, args = gnu_getopt(sys.argv[1:], 'v',
                             ['tasks=', 'show-tasks', 'targets=',
                              'brutal-docker-clean'])
 
-except GetoptError, err:
-
+except GetoptError as err:
     sys.stderr.write(str(err))
     usage()
     exit(2)
@@ -30,7 +30,11 @@ except GetoptError, err:
 tasks = None
 brutal_clean = False
 targets_override=None
+verbose=False
+
 for o, a in opts:
+    if o in ('-v',):
+        verbose=True
     if o in ('--tasks',):
         import tasks
         tasks = [getattr(tasks, s) for s in a.split(',')]
@@ -40,7 +44,10 @@ for o, a in opts:
         from machinery.ci_task import CiTask
         for s in dir(tasks):
             if isinstance(getattr(tasks, s), CiTask):
-                print s
+                print(s)
+                if verbose:
+                    t = getattr(tasks, s)
+                    t.display()
         exit(0)
 
     if o in ('--targets',):
