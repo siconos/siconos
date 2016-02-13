@@ -176,4 +176,7 @@ pkgs:
                make &&
                make install
 
-
+  libcxx_msan:
+    any:
+      command: wget http://siconos.gforge.inria.fr/build-42/libcxx_msan.tar.xz &&
+               tar xJf libcxx_msan.tar.xz -C /

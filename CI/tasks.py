@@ -36,13 +36,14 @@ siconos_clang = siconos_ubuntu_15_10.copy()(
     add_pkgs=['clang'])
 
 siconos_clang_asan = siconos_clang.copy()(
-    ci_config='with_asan',
+    ci_config='with_asan_clang',
     add_pkgs=['mumps', 'hdf5'])
 
 siconos_clang_msan = siconos_clang.copy()(
-    ci_config='with_msan')
+    ci_config='with_msan',
+    add_pkgs=['libcxx_msan'])
 
-siconos_gcc_asan = siconos_openblas_lapacke.copy()(
+siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config='with_asan',
     add_pkgs=['mumps', 'hdf5'])
 
@@ -75,8 +76,8 @@ known_tasks = {'siconos---vm0':
                [siconos_default_examples,
                 siconos_clang,
                 siconos_serialization,
-                siconos_clang_asan],
-               #  siconos_clang_msan], not ready yet
+                siconos_clang_asan,
+                siconos_clang_msan],
 
                'siconos---vm2':
                [siconos_ubuntu_15_10,
