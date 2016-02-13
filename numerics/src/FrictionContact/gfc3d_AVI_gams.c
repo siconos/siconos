@@ -219,6 +219,14 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
    optSetStrStr(Optr, "LogFile", log_filename);
    status = SN_gams_solve(iter, Optr, sysdir, model, template_filename, options, gdx_data);
 
+
+  SN_free_SN_GAMS_gdx(gdx_data);
+  free(gdx_data);
+  freeNumericsMatrix(&Htmat);
+  freeNumericsMatrix(&Emat);
+  freeNumericsMatrix(&Akmat);
+  optFree(&Optr);
+  optFree(&solverOptPtr);
   return status;
 }
 

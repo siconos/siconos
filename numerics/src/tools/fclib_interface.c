@@ -254,7 +254,6 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
 
   problem->numberOfContacts = fclib_problem->H->n / fclib_problem->spacedim; /* cf fclib spec */
 
-  problem->M = newNumericsMatrix();
   problem->M = createNumericsMatrix(NM_SPARSE, fclib_problem->M->m, fclib_problem->M->n);
 
   CSparseMatrix * M = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
