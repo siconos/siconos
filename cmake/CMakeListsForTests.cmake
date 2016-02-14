@@ -124,8 +124,11 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     ELSE()
       ADD_CUSTOM_COMMAND(TARGET ${_EXE}
         POST_BUILD
-        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT}
-        ARGS --cdash-prepare ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT} > ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}.cmake
+        COMMAND env 
+        ARGS "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS}"
+        "ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}"
+        ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT}
+        --cdash-prepare ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT} > ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}.cmake
         COMMENT "Generating ${_EXE}.cmake")
     ENDIF()
     
@@ -134,18 +137,24 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "MACRO(ADD_CPPUNIT_TEST)\n")
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  ADD_TEST(\${ARGV})\n")
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET(_EXE \${ARGV0})\n")
+
     IF(APPLE)
-      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET_TESTS_PROPERTIES(\${_EXE} PROPERTIES ENVIRONMENT \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}\")\n")
+      SET(ENV_PPTY "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}")
     ELSEIF(CMAKE_SYSTEM_NAME MATCHES Windows)
-      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET_TESTS_PROPERTIES(\${_EXE} PROPERTIES ENVIRONMENT \"Path=${COMPONENT_PATH}\;\")\n")
+      SET(ENV_PPTY "Path=${COMPONENT_PATH}")
     ELSE() # unix
-      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET_TESTS_PROPERTIES(\${_EXE} PROPERTIES ENVIRONMENT \"LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}\")\n")
+      SET(ENV_PPTY "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
     ENDIF()
-    
+
     IF(USE_SANITIZER MATCHES "asan")
-      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET_TESTS_PROPERTIES(\${_EXE} PROPERTIES ENVIRONMENT \"ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}\")\n")
-      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET_TESTS_PROPERTIES(\${_EXE} PROPERTIES ENVIRONMENT \"LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS}\")\n")
+      SET(ENV_PPTY "${ENV_PPTY};ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}")
+      SET(ENV_PPTY "${ENV_PPTY};LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS}")
     ENDIF(USE_SANITIZER MATCHES "asan")
+
+    IF(ENV_PPTY)
+      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET_TESTS_PROPERTIES(\${_EXE} PROPERTIES ENVIRONMENT \"${ENV_PPTY}\")\n")
+    ENDIF(ENV_PPTY)
+
 
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "ENDMACRO(ADD_CPPUNIT_TEST)\n")
 
@@ -167,22 +176,21 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
         ADD_TEST(${_EXE} ${_EXE}${EXE_EXT})
       ENDIF()
     ENDIF()
-    
+
     SET_TESTS_PROPERTIES(${_EXE} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
 
-    set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests})
-    if(CMAKE_SYSTEM_NAME MATCHES Windows)
-            set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=${COMPONENT_PATH}")
-    endif()
     if(APPLE)
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests})
+      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}")
+    elseif(CMAKE_SYSTEM_NAME MATCHES Windows)
+      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=${COMPONENT_PATH}")
+    else() #unix
+      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
     endif()
 
     IF(USE_SANITIZER MATCHES "asan")
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}")
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS}")
+      set_property(TEST ${_EXE} APPEND PROPERTY ENVIRONMENT ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS})
+      set_property(TEST ${_EXE} APPEND PROPERTY ENVIRONMENT LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS})
     ENDIF(USE_SANITIZER MATCHES "asan")
-
 
     IF(${_EXE}_PROPERTIES)
       SET_TESTS_PROPERTIES(${_EXE} PROPERTIES ${${_EXE}_PROPERTIES})

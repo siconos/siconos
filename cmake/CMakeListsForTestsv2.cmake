@@ -114,20 +114,25 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
     SET_TESTS_PROPERTIES(${_TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
 
-    set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests})
-
-    IF(CMAKE_SYSTEM_NAME MATCHES Windows)
-      set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT "Path=${COMPONENT_BIN_DIR}\;@ENV_PATH@")
-    ENDIF()
-
     if(APPLE)
-      set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests})
+      set(ENV_PPTY "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}")
+    elseif(CMAKE_SYSTEM_NAME MATCHES Windows)
+      set(ENV_PPTY "Path=${COMPONENT_BIN_DIR}\;@ENV_PATH@")
+    else() #unix
+      set(ENV_PPTY "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
     endif()
 
-    IF(USE_SANITIZER MATCHES "asan")
-      set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}")
-      set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS}")
-    ENDIF(USE_SANITIZER MATCHES "asan")
+    SET(LOCAL_USE_SANITIZER "@USE_SANITIZER@")
+
+    IF(LOCAL_USE_SANITIZER MATCHES "asan")
+      set(ENV_PPTY "${ENV_PPTY};ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}")
+      set(ENV_PPTY "${ENV_PPTY};LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS}")
+    ENDIF(LOCAL_USE_SANITIZER MATCHES "asan")
+
+    IF(ENV_PPTY)
+      set_tests_properties(${_TEST_NAME} PROPERTIES ENVIRONMENT "${ENV_PPTY}")
+    ENDIF(ENV_PPTY)
+
 
     IF(${_TEST_NAME}_PROPERTIES)
       SET_TESTS_PROPERTIES(${_TEST_NAME} PROPERTIES ${${_TEST_NAME}_PROPERTIES})
