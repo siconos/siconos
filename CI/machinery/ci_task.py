@@ -1,4 +1,5 @@
 import os
+import shutil
 from subprocess import check_call, CalledProcessError
 
 
@@ -12,7 +13,8 @@ class CiTask():
                  fast=True,
                  pkgs=None,
                  srcs=None,
-                 targets=None):
+                 targets=None,
+                 cmake_cmd='cmake'):
         self._fast = fast
         self._distrib = distrib
         self._mode = mode
@@ -21,19 +23,23 @@ class CiTask():
         self._pkgs = pkgs
         self._srcs = srcs
         self._targets = targets
+        self._cmake_cmd = cmake_cmd
 
     def build_dir(self, src):
         return src.replace('.', '_') + self._distrib + '_' + self._ci_config
 
     def templates(self):
-        return ','.join(self._pkgs)
+        # remove build-base, gnu-c++, gfortran, it is redundant
+        redundants = ['build-base', 'gfortran', 'gnu-c++']
+        templ_list = [p for p in self._pkgs if p not in redundants]
+        return ','.join(templ_list)
 
     def copy(self):
         def init(mode=self._mode,
                  build_configuration=self._build_configuration,
                  distrib=self._distrib,
                  ci_config=self._ci_config, fast=self._fast, pkgs=self._pkgs,
-                 srcs=self._srcs, targets=self._targets,
+                 srcs=self._srcs, targets=self._targets, cmake_cmd=self._cmake_cmd,
                  add_pkgs=None, remove_pkgs=None, add_srcs=None,
                  remove_srcs=None, add_targets=None, remove_targets=None):
 
@@ -70,8 +76,10 @@ class CiTask():
 
             bdir = self.build_dir(src)
 
-            if not os.path.exists(bdir):
-                os.makedirs(bdir)
+            if os.path.exists(bdir):
+                shutil.rmtree(bdir, ignore_errors=True)
+
+            os.makedirs(bdir)
 
             cmake_args = ['-DMODE={0}'.format(self._mode),
                           '-DCI_CONFIG={0}'.format(self._ci_config),
@@ -82,7 +90,7 @@ class CiTask():
                           '-DDOCKER_TEMPLATES={0}'.format(self.templates())]
 
             try:
-                check_call(['cmake'] + cmake_args + [os.path.join('..', '..', src)],
+                check_call([self._cmake_cmd] + cmake_args + [os.path.join('..', '..', src)],
                            cwd=bdir)
 
                 for target in self._targets[src]:

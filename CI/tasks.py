@@ -45,6 +45,7 @@ siconos_clang_msan = siconos_clang.copy()(
 
 siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config='with_asan',
+    cmake_cmd='../../Build/ci-scripts/fedora-mpi.sh',
     add_pkgs=['mumps', 'hdf5'])
 
 siconos_serialization = siconos_default.copy()(
