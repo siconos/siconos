@@ -14,3 +14,4 @@ leak:boost::archive::detail::basic_iarchive::load_object
 
 #MUMPS
 leak:libdmumps
+leak:orte_util_print_jobids
