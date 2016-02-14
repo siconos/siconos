@@ -80,7 +80,7 @@ class CiTask():
             os.makedirs(bdir)
 
             redundants = ['build-base', 'gfortran', 'gnu-c++']
-            templ_list = [p for p in self._pkgs if p not in redundants]
+            templ_list = [p.replace('+', 'x') for p in self._pkgs if p not in redundants]
 
             cmake_args = ['-DMODE={0}'.format(self._mode),
                           '-DCI_CONFIG={0}'.format(self._ci_config),
@@ -89,7 +89,7 @@ class CiTask():
                               self._build_configuration),
                           '-DDOCKER_DISTRIB={0}'.format(self._distrib),
                           '-DDOCKER_TEMPLATES={0}'.format(self.templates()),
-                          '-DDOCKER_TEMPLATE={0}'.format(templ_list)]
+                          '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list))]
 
             try:
                 check_call([self._cmake_cmd] + cmake_args + [os.path.join('..', '..', src)],
