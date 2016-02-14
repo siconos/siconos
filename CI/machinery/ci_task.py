@@ -30,9 +30,7 @@ class CiTask():
 
     def templates(self):
         # remove build-base, gnu-c++, gfortran, it is redundant
-        redundants = ['build-base', 'gfortran', 'gnu-c++']
-        templ_list = [p for p in self._pkgs if p not in redundants]
-        return ','.join(templ_list)
+        return ','.join(self._pkgs)
 
     def copy(self):
         def init(mode=self._mode,
@@ -81,13 +79,17 @@ class CiTask():
 
             os.makedirs(bdir)
 
+            redundants = ['build-base', 'gfortran', 'gnu-c++']
+            templ_list = [p for p in self._pkgs if p not in redundants]
+
             cmake_args = ['-DMODE={0}'.format(self._mode),
                           '-DCI_CONFIG={0}'.format(self._ci_config),
                           '-DWITH_DOCKER=1',
                           '-DBUILD_CONFIGURATION={0}'.format(
                               self._build_configuration),
                           '-DDOCKER_DISTRIB={0}'.format(self._distrib),
-                          '-DDOCKER_TEMPLATES={0}'.format(self.templates())]
+                          '-DDOCKER_TEMPLATES={0}'.format(self.templates()),
+                          '-DDOCKER_TEMPLATE={0}'.format(templ_list)]
 
             try:
                 check_call([self._cmake_cmd] + cmake_args + [os.path.join('..', '..', src)],

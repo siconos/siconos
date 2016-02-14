@@ -16,7 +16,7 @@ installer:
 
 updater:
   any:
-    debian: apt-get update -y 
+    debian: apt-get update -y
 ##############################################################################
 env:
   clang:

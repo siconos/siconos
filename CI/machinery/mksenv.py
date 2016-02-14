@@ -171,7 +171,7 @@ try:
                                     'split=',
                                     'distrib='])
 
-except getopt.GetoptError, err:
+except getopt.GetoptError as err:
         sys.stderr.write('{0}\n'.format(str(err)))
         usage()
         exit(2)
