@@ -26,7 +26,7 @@ class CiTask():
         self._cmake_cmd = cmake_cmd
 
     def build_dir(self, src):
-        return src.replace('.', '_') + self._distrib + '_' + self._ci_config
+        return src.replace('.', '_') + self._distrib.replace(':', '-') + '_' + self._ci_config
 
     def templates(self):
         # remove build-base, gnu-c++, gfortran, it is redundant
