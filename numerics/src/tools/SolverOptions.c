@@ -287,7 +287,7 @@ void free_solver_specific_data(SolverOptions* options)
     case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH:
     case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI:
     {
-      deleteGAMSparams(options->solverParameters);
+      deleteGAMSparams((SN_GAMSparams *)options->solverParameters);
       options->solverParameters = NULL;
       break;
     }

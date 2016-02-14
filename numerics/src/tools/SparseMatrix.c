@@ -41,7 +41,8 @@ void NM_csparse_free(void* p)
 {
   assert(p);
 
-  cs_lu_factors* cs_lu_A = NM_csparse_lu_factors(p);
+  NumericsSparseLinearSolverParams* ptr = (NumericsSparseLinearSolverParams*) p;
+  cs_lu_factors* cs_lu_A = NM_csparse_lu_factors(ptr);
   if (cs_lu_A)
   {
     cs_lu_A->n = -1;
@@ -54,7 +55,7 @@ void NM_csparse_free(void* p)
 
     free(cs_lu_A);
   }
-  ((NumericsSparseLinearSolverParams*) p)->solver_data = NULL;
+  ptr->solver_data = NULL;
 }
 
 /* Solve Ax = b with the factorization of A stored in the cs_lu_A
