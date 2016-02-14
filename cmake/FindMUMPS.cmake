@@ -49,6 +49,7 @@ IF(NOT MUMPS_INCLUDE_DIR)
   find_path(MUMPS_INCLUDE_DIR dmumps_c.h
     HINTS
     ${MUMPS_LIBRARY_DIR_DIR}/include
+    $ENV{MPI_INCLUDE}
     )
 ENDIF()
 
