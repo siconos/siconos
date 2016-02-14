@@ -168,6 +168,11 @@ pkgs:
       - scalapack-openmpi
       - MUMPS-openmpi-devel
 
+  asan:
+    fedora:
+      - libasan
+      - libubsan
+
   fclib:
     any:
       command: svn checkout svn://scm.gforge.inria.fr/svnroot/fclib/ &&
