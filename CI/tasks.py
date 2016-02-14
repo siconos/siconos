@@ -29,7 +29,7 @@ siconos_fedora_latest = siconos_default.copy()(
     add_pkgs=['openblas-lapacke'])
 
 siconos_openblas_lapacke = siconos_default.copy()(
-    remove_pkgs=['atlas_lapack'],
+    remove_pkgs=['atlas-lapack'],
     add_pkgs=['openblas-lapacke'])
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
