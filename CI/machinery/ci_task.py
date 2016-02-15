@@ -14,7 +14,7 @@ class CiTask():
                  pkgs=None,
                  srcs=None,
                  targets=None,
-                 cmake_cmd='cmake'):
+                 cmake_cmd=None):
         self._fast = fast
         self._distrib = distrib
         self._mode = mode
@@ -60,7 +60,7 @@ class CiTask():
                 targets = list(filter(lambda p: p not in remove_targets, targets))
 
             return CiTask(mode, build_configuration, distrib, ci_config, fast,
-                          pkgs, srcs, targets)
+                          pkgs, srcs, targets, cmake_cmd)
         return init
 
     def run(self, targets_override=None):
@@ -91,8 +91,12 @@ class CiTask():
                           '-DDOCKER_TEMPLATES={0}'.format(self.templates()),
                           '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list))]
 
+            if self._cmake_cmd:
+                src_absolute_dir = os.path.normpath(os.path.abspath(__file__) + '../../../..')
+                cmake_args += ['-DDOCKER_CMAKE_WRAPPER={:}/{:}'.format(src_absolute_dir, self._cmake_cmd)]
+
             try:
-                check_call([self._cmake_cmd] + cmake_args + [os.path.join('..', '..', src)],
+                check_call(['cmake'] + cmake_args + [os.path.join('..', '..', src)],
                            cwd=bdir)
 
                 for target in self._targets[src]:
