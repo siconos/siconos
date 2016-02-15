@@ -24,14 +24,14 @@ env:
       - CC=/usr/bin/clang-3.7
       - CXX=/usr/bin/clang++-3.7
       - OMPI_CC=/usr/bin/clang-3.7
-      - OMPI_CXX=usr/bin/clang++-3.7
+      - OMPI_CXX=/usr/bin/clang++-3.7
 
   clang:
     any:
       - CC=/usr/bin/clang
       - CXX=/usr/bin/clang++
       - OMPI_CC=/usr/bin/clang
-      - OMPI_CXX=usr/bin/clang++
+      - OMPI_CXX=/usr/bin/clang++
 
   mumps:
     any:
@@ -181,6 +181,7 @@ pkgs:
       - openmpi-devel
       - scalapack-openmpi
       - MUMPS-openmpi-devel
+      - environment-modules
 
   asan:
     fedora:
