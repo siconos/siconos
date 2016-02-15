@@ -14,7 +14,7 @@ def usage():
     print("""
 {0} [--pkg=<pkg>] [--pkgs=<pkg1,pkg2>,...] [--script] \
 [--docker] [--vagrant] [--split=...] [--distrib=...] \
-    """.format(sys.argv[0]))
+    /path/to/<example>.yml""".format(sys.argv[0]))
 
 
 class OutputMode:
@@ -248,16 +248,15 @@ with open(specfilename) as specfile:
     begin(distrib=distrib, distrib_version=distrib_version,
           output_mode=output_mode)
 
-    updater = get_entry(spec, distrib, distrib_version, wildcard, 'updater')
-
-    if updater:
-
-        run(command=updater, output_mode=output_mode)
-
     installer = get_entry(spec, distrib, distrib_version, wildcard,
                           'installer')
 
     assert installer is not None
+
+    updater = get_entry(spec, distrib, distrib_version, wildcard, 'updater')
+
+    if updater:
+        installer = '{0} && {1}'.format(updater, installer)
 
     if split:
         for pkg in by_installer:
