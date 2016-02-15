@@ -3,7 +3,7 @@ from machinery.ci_task import CiTask
 siconos_default = CiTask(
     ci_config='default',
     distrib='ubuntu:14.04',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack'],
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack', 'lpsolve'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
@@ -39,14 +39,22 @@ siconos_clang_asan = siconos_clang.copy()(
     ci_config='with_asan_clang',
     add_pkgs=['mumps', 'hdf5'])
 
+# <clang-3.7.1 does not support linux 4.2
+# This will likely hurt you
 siconos_clang_msan = siconos_clang.copy()(
     ci_config='with_msan',
-    add_pkgs=['libcxx_msan'])
+    add_pkgs=['libcxx_msan', 'wget', 'xz'])
 
 siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config='with_asan',
-    cmake_cmd='../../Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5'])
+    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
+    add_pkgs=['mumps', 'hdf5', 'asan'])
+
+siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
+    ci_config='with_asan',
+    distrib='fedora:rawhide',
+    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
+    add_pkgs=['mumps', 'hdf5', 'asan'])
 
 siconos_serialization = siconos_default.copy()(
     ci_config='with_serialization',
@@ -84,4 +92,5 @@ known_tasks = {'siconos---vm0':
                [siconos_ubuntu_15_10,
                 siconos_ubuntu_15_04,
                 siconos_ubuntu_14_10,
-                siconos_default_profiling]}
+                siconos_default_profiling,
+                siconos_gcc_asan_latest]}

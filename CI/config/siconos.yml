@@ -11,7 +11,7 @@ match:
 ##############################################################################
 installer:
   any:
-    fedora: dnf install -y
+    fedora: dnf --setopt=deltarpm=false install -y
     debian: apt-get install -y
 
 updater:
@@ -19,8 +19,15 @@ updater:
     debian: apt-get update -y
 ##############################################################################
 env:
+  clang-3.7:
+    any:
+      - CC=/usr/bin/clang-3.7
+      - CXX=/usr/bin/clang++-3.7
+      - OMPI_CC=/usr/bin/clang-3.7
+      - OMPI_CXX=usr/bin/clang++-3.7
+
   clang:
-    any: 
+    any:
       - CC=/usr/bin/clang
       - CXX=/usr/bin/clang++
       - OMPI_CC=/usr/bin/clang
@@ -44,6 +51,13 @@ pkgs:
       - python-env
       - swig
       - cppunit
+
+  lpsolve:
+    debian:
+      - lp-solve
+      - liblpsolve55-dev
+    fedora:
+      - lpsolve-devel
 
   python-env:
     debian:
@@ -172,6 +186,10 @@ pkgs:
     fedora:
       - libasan
       - libubsan
+
+  xz:
+    debian:
+      - xz-utils
 
   fclib:
     any:
