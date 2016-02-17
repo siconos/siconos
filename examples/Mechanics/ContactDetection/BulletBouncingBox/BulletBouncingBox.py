@@ -23,8 +23,10 @@ from siconos.kernel import \
     Model, MoreauJeanOSI, TimeDiscretisation, \
     FrictionContact, NewtonImpactFrictionNSL
 
+import siconos.kernel as sk
+
 from siconos.mechanics.contact_detection.bullet import \
-     btBoxShape, btSphereShape, btConvexHullShape, btVector3, btCollisionObject, \
+     btConvexHullShape, btVector3, btCollisionObject, \
      btBoxShape, btMatrix3x3, \
      BulletSpaceFilter, \
      BulletWeightedShape, BulletDS, BulletTimeStepping
@@ -173,12 +175,11 @@ while(simulation.hasNextEvent()):
     if (broadphase.collisionWorld().getDispatcher().getNumManifolds() > 0):
         if bouncingBox.nonSmoothDynamicalSystem().topology().\
           numberOfIndexSet() > 1:
-            index1 = simulation.indexSet(1)
-            if (index1.size() == 4):
-                dataPlot[k, 3] = norm(index1.interactions()[0].lambda_(1)) + \
-                norm(index1.interactions()[1].lambda_(1)) + \
-                norm(index1.interactions()[2].lambda_(1)) + \
-                norm(index1.interactions()[3].lambda_(1))
+            index1 = sk.interactions(simulation.indexSet(1))
+            if (len(index1) == 4):
+                dataPlot[k, 3] = norm(index1[0].lambda_(1)) + \
+                norm(index1[1].lambda_(1)) + norm(index1[2].lambda_(1)) + \
+                norm(index1[3].lambda_(1))
 
     k += 1
     simulation.nextStep()
@@ -191,7 +192,7 @@ from numpy.linalg import norm
 
 ref = getMatrix(SimpleMatrix("result.ref"))
 
-print "norm(dataPlot - ref) = {0}".format(norm(dataPlot - ref))
+print("norm(dataPlot - ref) = {0}".format(norm(dataPlot - ref)))
 if (norm(dataPlot - ref) > 1e-11):
     print("Warning. The result is rather different from the reference file.")
 
