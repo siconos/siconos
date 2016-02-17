@@ -92,7 +92,7 @@ known_tasks = {'siconos---vm0':
                (siconos_ubuntu_15_10,
                 siconos_ubuntu_15_04,
                 siconos_ubuntu_14_10,
-                siconos_default_profiling),
+                siconos_profiling),
 
                'siconos---vm3':
                (siconos_debian_latest,
