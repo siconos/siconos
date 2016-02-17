@@ -9,6 +9,7 @@ siconos_default = CiTask(
 
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',
+    add_pkgs(['bullet']),
     distrib='debian:latest')
 
 siconos_ubuntu_14_10 = siconos_default.copy()(
@@ -35,7 +36,7 @@ siconos_openblas_lapacke = siconos_default.copy()(
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
     ci_config='with_bullet',
-    add_pkgs=['clang'])
+    add_pkgs=['clang', 'bullet'])
 
 siconos_clang_asan = siconos_clang.copy()(
     ci_config='with_asan_clang',
