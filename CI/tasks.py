@@ -9,7 +9,7 @@ siconos_default = CiTask(
 
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',
-    add_pkgs(['bullet']),
+    add_pkgs=['bullet'],
     distrib='debian:latest')
 
 siconos_ubuntu_14_10 = siconos_default.copy()(
