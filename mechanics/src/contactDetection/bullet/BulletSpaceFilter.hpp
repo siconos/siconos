@@ -90,7 +90,7 @@ public:
    */
   void addDynamicObject(SP::BulletDS ds,
                         SP::Simulation simulation,
-                        SP::OneStepIntegrator osi = NULL);
+                        SP::OneStepIntegrator osi = std11::shared_ptr<OneStepIntegrator>());
 
   /** execute the broadphase contact detection and build indexSet0
    */
