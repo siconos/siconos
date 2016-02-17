@@ -24,6 +24,9 @@
   };
 };
 
+%shared_ptr(InteractionsGraph);
+%feature("director") InteractionsGraph;
+
 struct InteractionsGraph{};
 %extend InteractionsGraph
 {
@@ -74,6 +77,9 @@ struct InteractionsGraph{};
   };
 
 }
+
+%feature("director") DynamicalSystemsGraph;
+%shared_ptr(DynamicalSystemsGraph);
 
 struct DynamicalSystemsGraph{};
 %extend DynamicalSystemsGraph
@@ -158,12 +164,6 @@ TYPEDEF_SPTR(_InteractionsGraph);
                           std11::shared_ptr<DynamicalSystem>,
                           InteractionProperties, SystemProperties,
                           GraphProperties >);
-
-%feature("director") DynamicalSystemsGraph;
-%shared_ptr(DynamicalSystemsGraph);
-
-%feature("director") InteractionsGraph;
-%shared_ptr(InteractionsGraph);
 
 // must be specified after %shared_ptr, if ever needed
 %template(_DynamicalSystemsGraph) SiconosGraph<
