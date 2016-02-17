@@ -183,6 +183,11 @@ pkgs:
       - MUMPS-openmpi-devel
       - environment-modules
 
+  bullet:
+    debian:
+      - libbullet-dev
+
+
   asan:
     fedora:
       - libasan

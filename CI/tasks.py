@@ -7,10 +7,8 @@ siconos_default = CiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
-siconos_default_profiling = siconos_default.copy()(
-    build_configuration='Profiling')
-
 siconos_debian_latest = siconos_default.copy()(
+    ci_config='with_bullet',
     distrib='debian:latest')
 
 siconos_ubuntu_14_10 = siconos_default.copy()(
@@ -21,6 +19,9 @@ siconos_ubuntu_15_04 = siconos_default.copy()(
 
 siconos_ubuntu_15_10 = siconos_default.copy()(
     distrib='ubuntu:15.10')
+
+siconos_profiling = siconos_ubuntu_15_10.copy()(
+    build_configuration='Profiling')
 
 # note fedora/atlas-lapack in siconos.yml -> cmake does not detect blas
 siconos_fedora_latest = siconos_default.copy()(
@@ -33,6 +34,7 @@ siconos_openblas_lapacke = siconos_default.copy()(
     add_pkgs=['openblas-lapacke'])
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
+    ci_config='with_bullet',
     add_pkgs=['clang'])
 
 siconos_clang_asan = siconos_clang.copy()(
@@ -73,24 +75,27 @@ siconos_default_examples = siconos_default.copy()(
              'examples': ['docker-build', 'docker-ctest']})
 
 
-# dispatch based on hostname
+# dispatch based on hostname and distrib type (to min. disk requirement)
+
 known_tasks = {'siconos---vm0':
-               [siconos_fedora_latest,
-                siconos_openblas_lapacke,
-                siconos_with_mumps,
+               (siconos_fedora_latest,
                 siconos_gcc_asan,
-                siconos_debian_latest],
+                siconos_gcc_asan_latest),
 
                'siconos---vm1':
-               [siconos_default_examples,
+               (siconos_default_examples,
                 siconos_clang,
-                siconos_serialization,
                 siconos_clang_asan,
-                siconos_clang_msan],
+                siconos_clang_msan),
 
                'siconos---vm2':
-               [siconos_ubuntu_15_10,
+               (siconos_ubuntu_15_10,
                 siconos_ubuntu_15_04,
                 siconos_ubuntu_14_10,
-                siconos_default_profiling,
-                siconos_gcc_asan_latest]}
+                siconos_default_profiling),
+
+               'siconos---vm3':
+               (siconos_debian_latest,
+                siconos_openblas_lapacke,
+                siconos_serialization,
+                siconos_with_mumps)}
