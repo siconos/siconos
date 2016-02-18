@@ -24,6 +24,8 @@
   };
 };
 
+// Must be before declaration of struct InteractionsGraph
+// otherwise swig doesn't associate shared_ptr type!
 %shared_ptr(InteractionsGraph);
 %feature("director") InteractionsGraph;
 
@@ -78,6 +80,8 @@ struct InteractionsGraph{};
 
 }
 
+// Must be before declaration of struct DynamicalSystemsGraph
+// otherwise swig doesn't associate shared_ptr type!
 %feature("director") DynamicalSystemsGraph;
 %shared_ptr(DynamicalSystemsGraph);
 
