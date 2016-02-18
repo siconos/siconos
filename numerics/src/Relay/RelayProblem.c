@@ -131,11 +131,15 @@ int relay_newFromFile(RelayProblem* problem, FILE* file)
 
 void freeRelay_problem(RelayProblem* problem)
 {
-  freeNumericsMatrix(problem->M);
-  free(problem->M);
-  free(problem->q);
-  free(problem->lb);
-  free(problem->ub);
+  assert(problem);
+  if (problem->M)
+  {
+    freeNumericsMatrix(problem->M);
+    free(problem->M);
+  }
+  if (problem->q)  { free(problem->q); }
+  if (problem->lb) { free(problem->lb); }
+  if (problem->ub) { free(problem->ub); }
   free(problem);
 }
 
