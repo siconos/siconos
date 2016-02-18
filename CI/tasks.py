@@ -41,10 +41,11 @@ siconos_clang_asan = siconos_clang.copy()(
 
 # <clang-3.7.1 does not support linux 4.2
 # This will likely hurt you
-siconos_clang_msan = siconos_clang.copy()(
+siconos_clang_msan = siconos_default.copy()(
+    distrib='debian:jessie',
     ci_config='with_msan',
-    remove_pkgs=['cppunit_clang'],
-    add_pkgs=['libcxx_msan', 'wget', 'xz'])
+    build_configuration='Debug',
+    add_pkgs=['clang-3.8', 'libcxx_msan', 'wget', 'xz'])
 
 siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config='with_asan',

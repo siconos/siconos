@@ -12,19 +12,22 @@ match:
 installer:
   any:
     fedora: dnf --setopt=deltarpm=false install -y
-    debian: apt-get install -y
+    debian: apt-get install -y --force-yes
 
 updater:
   any:
+    debian-sid: printf "deb http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main\ndeb-src http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main" >> /etc/apt/sources.list && apt-get update -y
+    debian-jessie: printf "deb http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main\ndeb-src http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main" >> /etc/apt/sources.list && apt-get update -y
     debian: apt-get update -y
 ##############################################################################
 env:
-  clang-3.7:
+  clang-3.8:
     any:
-      - CC=/usr/bin/clang-3.7
-      - CXX=/usr/bin/clang++-3.7
-      - OMPI_CC=/usr/bin/clang-3.7
-      - OMPI_CXX=/usr/bin/clang++-3.7
+      - CC=/usr/bin/clang-3.8
+      - CXX=/usr/bin/clang++-3.8
+      - OMPI_CC=/usr/bin/clang-3.8
+      - OMPI_CXX=/usr/bin/clang++-3.8
+      - LLVM_SYMBOLIZER=llvm-symbolizer-3.8
 
   clang:
     any:
@@ -205,6 +208,9 @@ pkgs:
                make &&
                make install
 
+  clang:
+    debian-jessie:
+      - clang-3.8
 # Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
 # has been compiled with a different string impl ...
   cppunit_clang:
