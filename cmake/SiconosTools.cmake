@@ -2,6 +2,8 @@
 # Some convenience macros
 #
 
+include(CMakeParseArguments)
+
 # -- Basic list manipulation --
 # Get first element of list var
 MACRO(CAR var)
