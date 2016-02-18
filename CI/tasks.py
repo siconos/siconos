@@ -12,9 +12,6 @@ siconos_debian_latest = siconos_default.copy()(
     add_pkgs=['bullet'],
     distrib='debian:latest')
 
-siconos_ubuntu_14_10 = siconos_default.copy()(
-    distrib='ubuntu:14.10')
-
 siconos_ubuntu_15_04 = siconos_default.copy()(
     distrib='ubuntu:15.04')
 
@@ -92,7 +89,6 @@ known_tasks = {'siconos---vm0':
                'siconos---vm2':
                (siconos_ubuntu_15_10,
                 siconos_ubuntu_15_04,
-                siconos_ubuntu_14_10,
                 siconos_profiling),
 
                'siconos---vm3':
