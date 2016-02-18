@@ -169,6 +169,16 @@ extern "C"
    */
   void vi_box_AVI_extra_SolverOptions(SolverOptions* options);
 
+  /** free the specific solverData
+   * \param options the struct to modify
+   */
+  void vi_box_AVI_free_solverData(SolverOptions* options);
+
+  /** Get the set from the VariationalInequality
+   * \param problem the VI
+   */
+  void* vi_get_set(void* problem);
+
   /** Solver for box constrainted VI using PATH.
    * \param problem the variational inequality problem to solve
    * \param[in,out] z as input, the initial guess; as output the solution if

@@ -450,16 +450,20 @@ bool newton_LSA_check_solverId(int solverId)
 
 void newton_LSA_free_solverOptions(SolverOptions* options)
 {
-  assert(options->solverParameters);
-  free(options->solverParameters);
-  options->solverParameters = NULL;
+  if(options->solverParameters)
+  {
+    free(options->solverParameters);
+    options->solverParameters = NULL;
+  }
 
-  assert(options->solverData);
-  newton_LSA_data* sd = (newton_LSA_data*) options->solverData;
-  assert(sd->H);
-  freeNumericsMatrix(sd->H);
-  free(sd->H);
-  free(sd);
-  options->solverData = NULL;
+  if (options->solverData)
+  {
+    newton_LSA_data* sd = (newton_LSA_data*) options->solverData;
+    assert(sd->H);
+    freeNumericsMatrix(sd->H);
+    free(sd->H);
+    free(sd);
+    options->solverData = NULL;
+  }
 
 }

@@ -53,7 +53,6 @@ static void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, do
 //  for (unsigned int i = 0; i<n; ++i) x[i] = s_vec[A[i]-1] + problem->lb[i];
 }
 
-void * vi_get_set(void* problem);
 void * vi_get_set(void* problem)
 {
   return ((VariationalInequality*) problem)->set;
@@ -64,21 +63,19 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
 
   int n = problem->size;
 
-  RelayProblem relay_pb;
-  relay_pb.size = n;
-  NumericsMatrix num_mat;
-  relay_pb.M = &num_mat;
-  fillNumericsMatrix(&num_mat, NM_DENSE, n, n, malloc(n * n * sizeof(double)));
-  relay_pb.q = (double*) malloc(n * sizeof(double));
-
-  box_constraints* box = (box_constraints*) problem->set;
-  relay_pb.lb = box->lb;
-  relay_pb.ub = box->ub;
   if (!options->solverData)
   {
+    RelayProblem* relay_pb = malloc(sizeof(RelayProblem));
+    relay_pb->size = n;
+    relay_pb->M = createNumericsMatrixFromData(NM_DENSE, n, n, malloc(n * n * sizeof(double)));;
+    relay_pb->q = (double*) malloc(n * sizeof(double));
+
+    box_constraints* box = (box_constraints*) problem->set;
+    relay_pb->lb = box->lb;
+    relay_pb->ub = box->ub;
     vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)malloc(sizeof(vi_box_AVI_LSA_data));
     sData->mat = (NumericsMatrix*)duplicateNumericsMatrix(problem->nabla_F);
-    sData->relay_pb = &relay_pb;
+    sData->relay_pb = relay_pb;
     options->solverData = sData;
   }
 
@@ -93,9 +90,6 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->size, z, F, info, (void *)problem, options, &functions_AVI_LSA);
 
-
-  freeNumericsMatrix(&num_mat);
-  free(relay_pb.q);
 }
 
 void vi_box_AVI_extra_SolverOptions(SolverOptions* options)
@@ -103,4 +97,21 @@ void vi_box_AVI_extra_SolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 1;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   relay_avi_caoferris_setDefaultSolverOptions(options->internalSolvers);
+}
+
+void vi_box_AVI_free_solverData(SolverOptions* options)
+{
+  assert(options);
+  assert(options->solverData);
+
+  vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)options->solverData;
+  freeNumericsMatrix(sData->mat);
+  free(sData->mat);
+  sData->mat = NULL;
+  sData->relay_pb->lb = NULL;
+  sData->relay_pb->ub = NULL;
+  freeRelay_problem(sData->relay_pb);
+
+  free(sData);
+  options->solverData = NULL;
 }

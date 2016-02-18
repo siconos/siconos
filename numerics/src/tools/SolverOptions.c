@@ -266,12 +266,6 @@ void printSolverOptions(SolverOptions* options)
 void free_solver_specific_data(SolverOptions* options)
 {
   int id = options->solverId;
-  if (newton_LSA_check_solverId(id))
-  {
-    assert(options->solverData);
-    assert(options->solverParameters);
-    newton_LSA_free_solverOptions(options);
-  }
   switch (id)
   {
     case SICONOS_NCP_PATHSEARCH:
@@ -291,15 +285,24 @@ void free_solver_specific_data(SolverOptions* options)
       options->solverParameters = NULL;
       break;
     }
+    case SICONOS_VI_BOX_AVI_LSA:
+    {
+     vi_box_AVI_free_solverData(options);
+     break;
+    }
     default:
       {
        if (options->solverParameters)
        {
-        free(options->solverParameters);
-        options->solverParameters = NULL;
+         free(options->solverParameters);
+         options->solverParameters = NULL;
        }
       }
-      ;
+  }
+
+  if (newton_LSA_check_solverId(id))
+  {
+    newton_LSA_free_solverOptions(options);
   }
 }
 
