@@ -33,7 +33,7 @@ siconos_openblas_lapacke = siconos_default.copy()(
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
     ci_config='with_bullet',
-    add_pkgs=['clang', 'bullet'])
+    add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz'])
 
 siconos_clang_asan = siconos_clang.copy()(
     ci_config='with_asan_clang',
@@ -43,6 +43,7 @@ siconos_clang_asan = siconos_clang.copy()(
 # This will likely hurt you
 siconos_clang_msan = siconos_clang.copy()(
     ci_config='with_msan',
+    remove_pkgs=['cppunit_clang'],
     add_pkgs=['libcxx_msan', 'wget', 'xz'])
 
 siconos_gcc_asan = siconos_fedora_latest.copy()(

@@ -205,7 +205,15 @@ pkgs:
                make &&
                make install
 
+# Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
+# has been compiled with a different string impl ...
+  cppunit_clang:
+    ubuntu-15.10:
+      command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-ubuntu-15.10.tar.xz &&
+                tar xJf cppunit-clang-ubuntu-15.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/
+
+# this is for msan. It also contains the so files for cppunit compiled with msan
   libcxx_msan:
     any:
-      command: wget http://siconos.gforge.inria.fr/build-42/libcxx_msan.tar.xz &&
-               tar xJf libcxx_msan.tar.xz -C /
+      command: wget http://siconos.gforge.inria.fr/build-42/libcxx_msan-clang-3.6.tar.xz &&
+               tar xJf libcxx_msan-clang-3.6.tar.xz -C /

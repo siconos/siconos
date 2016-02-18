@@ -79,7 +79,7 @@ class CiTask():
 
             os.makedirs(bdir)
 
-            redundants = ['build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz', 'asan']
+            redundants = ['build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz', 'asan', 'cppunit_clang']
             templ_list = [p.replace('+', 'x') for p in self._pkgs if p not in redundants]
 
             cmake_args = ['-DMODE={0}'.format(self._mode),
