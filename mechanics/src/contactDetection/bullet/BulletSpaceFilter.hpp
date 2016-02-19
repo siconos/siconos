@@ -45,6 +45,10 @@ protected:
 public:
   BulletSpaceFilter(SP::Model model);
 
+  /** Destructor.
+   */
+  virtual ~BulletSpaceFilter();
+
   /** get Bullet collision configuration
       \return a pointer on a Bullet collision configuration
   */

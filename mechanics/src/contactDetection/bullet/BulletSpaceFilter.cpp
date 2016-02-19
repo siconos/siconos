@@ -119,6 +119,17 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model) :
 
 }
 
+BulletSpaceFilter::~BulletSpaceFilter()
+{
+    // btCollisionObjects contain pointers to _broadphase (so-called
+    // "broadphase handles") that are referenced during the
+    // _collisionWorld destructor, therefore if _broadphase is
+    // destroyed too early we get a segfault.  Avoid this by
+    // explicitly destroying _collisionWorld before automatic
+    // shared_ptr destruction.
+    _collisionWorld.reset();
+}
+
 void BulletSpaceFilter::setCollisionConfiguration(
   SP::btDefaultCollisionConfiguration collisionConfig)
 {
