@@ -293,12 +293,12 @@ int main()
     // --- Output files ---
     std::cout << "====> Output file writing ..." << std::endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("result_dynamic.dat", "ascii", dataPlot, "noDim");
 
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("result.ref", "ascii", dataPlotRef);
+    ioMatrix::read("result_dynamic.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
