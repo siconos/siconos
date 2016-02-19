@@ -145,7 +145,7 @@ bouncingBox.initialize(simulation)
 # ->saved in a matrix dataPlot
 
 N = (T - t0) / h
-dataPlot = zeros((N+2, 4))
+dataPlot = zeros((N+1, 4))
 
 #
 # numpy pointers on dense Siconos vectors
