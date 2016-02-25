@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N, 7);
+    SimpleMatrix dataPlot(N, 8);
 
     // For the initial time step:
 
@@ -184,6 +184,11 @@ int main(int argc, char* argv[])
 
     // diode F1 current
     dataPlot(k, 6) = (InterDiodeBridgeCapFilter->getLambda(0))(2);
+
+    // load voltage
+    dataPlot(k, 7) = (*LS2DiodeBridgeCapFilter->x())(0);
+
+
 
     // --- Compute elapsed time ---
     boost::timer t;
@@ -218,6 +223,10 @@ int main(int argc, char* argv[])
 
       // diode F1 current
       dataPlot(k, 6) = (InterDiodeBridgeCapFilter->getLambda(0))(2);
+
+       // load voltage
+      dataPlot(k, 7) = (*LS2DiodeBridgeCapFilter->x())(0);
+
 
       aTS->nextStep();
 
