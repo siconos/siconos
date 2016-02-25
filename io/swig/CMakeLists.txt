@@ -42,11 +42,11 @@ if(HAVE_SICONOS_MECHANICS)
   endforeach(rendererFile)  
 
   install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/vview.py
-    DESTINATION bin RENAME vview)
+    DESTINATION bin RENAME siconos_vview)
   install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py
-    DESTINATION bin RENAME pprocess)
+    DESTINATION bin RENAME siconos_pprocess)
   install(PROGRAMS io/renderer.py
-    DESTINATION bin RENAME renderer)
+    DESTINATION bin RENAME siconos_renderer)
 endif()
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
