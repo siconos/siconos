@@ -370,6 +370,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C.size0 = M1->size0;
   C.size1 = M1->size1;
   C.matrix0 = (double *)malloc(C.size0 * C.size1 * sizeof(double));
+  MSAN_INIT_VAR(C.matrix0, C.size0 * C.size1);
   prodNumericsMatrixNumericsMatrix(alpha, M1, M1, beta,  &C);
 
   double * Cref = (double *)malloc(C.size0 * C.size1 * sizeof(double));
@@ -419,6 +420,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C2.size0 = M1->size0;
   C2.size1 = M3->size1;
   C2.matrix0 = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
+  MSAN_INIT_VAR(C2.matrix0, C2.size0 * C2.size1);
   prodNumericsMatrixNumericsMatrix(alpha, M1, M3, beta,  &C2);
 
   double * C2ref = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));

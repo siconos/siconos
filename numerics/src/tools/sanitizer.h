@@ -18,11 +18,14 @@
  */
 
 
+#ifndef SN_SANITIZER_H
+#define SN_SANITIZER_H
+
 #include "SiconosBlas.h"
 
 #if defined(__has_feature) 
 #if  __has_feature(memory_sanitizer)
-#define MSAN_INIT_VAR(v, n) for (size_t ii = 0; ii < (size_t)n; ++ii) v[ii] = 0;
+#define MSAN_INIT_VAR(v, n) for (size_t ii = 0; ii < (size_t)n; ++ii) v[ii] = 0.;
 
 #else
 
@@ -49,3 +52,4 @@ static inline void cblas_dcopy_msan(int n, double* src, int inc_src, double* des
   cblas_dcopy(n, src, inc_src, dest, inc_dest);
 }
 
+#endif
