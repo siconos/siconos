@@ -267,8 +267,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   {
     /* compressed colums */
     problem->M->matrix2->csc= M;
-    problem->M->matrix2->triplet=NULL;
-    problem->M->matrix2->trans_csc=NULL;
+    problem->M->matrix2->origin = NS_CSC;
     M->nz = (csi) fclib_problem->M->nz;
     M->p = (csi*) malloc(sizeof(csi)*(M->n+1));
     int_to_csi(fclib_problem->M->p, M->p, (unsigned) (M->n+1));
@@ -290,8 +289,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   {
     /* triplet */
     problem->M->matrix2->triplet=M;
-    problem->M->matrix2->csc=NULL;
-    problem->M->matrix2->trans_csc=NULL;
+    problem->M->matrix2->origin = NS_TRIPLET;
     M->nz = (csi) fclib_problem->M->nz;
     M->p = (csi*) malloc(sizeof(csi)*M->nzmax);
     int_to_csi(fclib_problem->M->p, M->p, (unsigned) M->nzmax);
@@ -314,8 +312,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   {
     /* compressed colums */
     problem->H->matrix2->csc= H;
-    problem->H->matrix2->triplet=NULL;
-    problem->H->matrix2->trans_csc=NULL;
+    problem->H->matrix2->origin = NS_CSC;
     H->p = (csi*) malloc(sizeof(csi)*(H->n+1));
     int_to_csi(fclib_problem->H->p, H->p, (unsigned) (H->n+1));
   }
@@ -329,8 +326,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   {
     /* triplet */
     problem->H->matrix2->triplet=H;
-    problem->H->matrix2->csc=NULL;
-    problem->H->matrix2->trans_csc=NULL;
+    problem->H->matrix2->origin = NS_TRIPLET;
     H->p = (csi*) malloc(sizeof(csi)*H->nzmax);
     int_to_csi(fclib_problem->H->p, H->p, (unsigned) H->nzmax);
   }

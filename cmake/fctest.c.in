@@ -53,6 +53,7 @@ int main(void)
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunreachable-code"
+#pragma clang diagnostic ignored  "-Wtautological-compare"
 #endif /*  __clang__  */
   if ((@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATH) || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATHVI)
       || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_LCP_PATH) || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI))

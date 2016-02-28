@@ -49,6 +49,11 @@ if(WITH_MUMPS)
   compile_with(MUMPS REQUIRED)
 endif()
 
+# --- UMFPACK ---
+if(WITH_UMFPACK)
+  compile_with(Umfpack REQUIRED)
+endif()
+
 # --- Fclib ---
 IF(WITH_FCLIB)
   COMPILE_WITH(FCLIB REQUIRED)   

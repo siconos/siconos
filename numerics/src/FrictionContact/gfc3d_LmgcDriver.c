@@ -82,6 +82,7 @@ int gfc3d_LmgcDriver(double *reaction,
   M->matrix2 = SM;
   SM->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _M = SM->triplet;
+  SM->origin = NS_TRIPLET;
 
   csi * _colM = alloc_memory_csi(nzM, colM);
   csi * _rowM = alloc_memory_csi(nzM, rowM);
@@ -102,6 +103,7 @@ int gfc3d_LmgcDriver(double *reaction,
   H->matrix2 = SH;
   SH->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _H = SH->triplet;
+  SH->origin = NS_TRIPLET;
 
   csi * _colH = alloc_memory_csi(nzH, colH);
   csi * _rowH = alloc_memory_csi(nzH, rowH);

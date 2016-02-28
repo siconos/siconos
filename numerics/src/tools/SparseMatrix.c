@@ -168,15 +168,18 @@ int cs_aaxpy(const double alpha, const cs *A, const double *x,
       y [Ai [p]] += alpha * Ax [p] * x [j] ;
     }
   }
-  return (1) ;
+  return 1;
 }
 
 CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A)
 {
-  if(!A) return (NULL) ;	/* do nothing if A already NULL */
-  cs_free(A->p) ;
-  cs_free(A->i) ;
-  cs_free(A->x) ;
+  if(!A) return NULL; /* do nothing if A already NULL */
+  cs_free(A->p);
+  A->p = NULL;
+  cs_free(A->i);
+  A->i = NULL;
+  cs_free(A->x);
+  A->x = NULL;
   return NULL;
 }
 
@@ -185,8 +188,12 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   NumericsSparseLinearSolverParams* p = (NumericsSparseLinearSolverParams*)
     malloc(sizeof(NumericsSparseLinearSolverParams));
 
-#ifdef WITH_MUMPS
+#if defined(WITH_MKL) && 0
+  p->solver = NS_PARDISO;
+#elif defined(WITH_MUMPS)
   p->solver = NS_MUMPS;
+#elif defined(WITH_UMFPACK)
+  p->solver = NS_UMFPACK;
 #else
   p->solver = NS_CS_LUSOL;
 #endif
@@ -209,6 +216,7 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
 
 NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p)
 {
+  /* First free solver_data if some additional information has been given  */
   if (p->solver_free_hook)
     (*p->solver_free_hook)(p);
   p->solver_free_hook = NULL;
@@ -247,16 +255,23 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
   return NULL;
 }
 
+void NM_sparse_null(NumericsSparseMatrix* A)
+{
+  A->linearSolverParams = NULL;
+  A->triplet = NULL;
+  A->csc = NULL;
+  A->trans_csc = NULL;
+  A->csr = NULL;
+  A->origin = NS_UNKNOWN;
+}
+
 NumericsSparseMatrix* newNumericsSparseMatrix(void)
 {
   NumericsSparseMatrix* p = (NumericsSparseMatrix*)
     malloc(sizeof(NumericsSparseMatrix));
 
+  NM_sparse_null(p);
   p->linearSolverParams = newNumericsSparseLinearSolverParams();
-
-  p->triplet = NULL;
-  p->csc = NULL;
-  p->trans_csc = NULL;
 
   return p;
 }
@@ -282,6 +297,11 @@ NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)
   {
     cs_spfree(A->trans_csc);
     A->trans_csc = NULL;
+  }
+  if (A->csr)
+  {
+    cs_spfree(A->csr);
+    A->csr = NULL;
   }
   return NULL;
 }

@@ -284,52 +284,6 @@
   }
 }
 
-// vectors of size numberOfContacts
-%typemap(memberin) (double *mu) {
-  // Still some dark magic :( --xhub
-  if (arg1->numberOfContacts <= 0)
-  {
-    PyErr_SetString(PyExc_RuntimeError, "numberOfContacts is not set, it sould be done first!");
-    SWIG_fail;
-  }
-
-  if (arg1->numberOfContacts !=  array_size(array2, 0))
-  {
-    char msg[1024];
-    snprintf(msg, sizeof(msg), "Size of mu is %ld, but the number of contacts is %d! Both should be equal!\n", array_size(array2, 0), arg1->numberOfContacts);
-    PyErr_SetString(PyExc_RuntimeError, msg);
-    SWIG_fail;
-  }
-
-  if (!$1) { $1 = (double*)malloc(arg1->numberOfContacts * sizeof(double)); }
-  memcpy($1, $input, arg1->numberOfContacts * sizeof(double));
-
- }
-
-// vectors of size M
-%typemap(memberin) (double *q) {
-  // Still some dark magic :( --xhub
- char msg[1024];
-  assert(arg1);
-  if (!arg1->M)
-  {
-    PyErr_SetString(PyExc_RuntimeError, "M is not initialized, it sould be done first!");
-    SWIG_fail;
-  }
-
-  int size = arg1->M->size0;
-  if (size !=  array_size(array2, 0))
-  {
-    snprintf(msg, sizeof(msg), "Size of q is %ld, but the size of M is %d! Both should be equal!\n", array_size(array2, 0), size);
-    PyErr_SetString(PyExc_RuntimeError, msg);
-    SWIG_fail;
-  }
-
-  if (!$1) { $1 = (double*)malloc(size * sizeof(double)); }
-  memcpy($1, $input, size * sizeof(double));
-
- }
-
 %typemap(in, numinputs=0) (double *output3) 
 {
 }

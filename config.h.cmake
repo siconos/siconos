@@ -12,6 +12,7 @@
 #cmakedefine HAVE_SYSTIMES_H
 #cmakedefine HAVE_MPI
 #cmakedefine WITH_MUMPS
+#cmakedefine WITH_UMFPACK
 #cmakedefine WITH_TIMERS
 #cmakedefine DUMP_PROBLEM
 #cmakedefine WITH_FCLIB
@@ -73,5 +74,8 @@
 #cmakedefine SICONOS_STD_TUPLE
 #cmakedefine SICONOS_STD_TO_STRING
 #cmakedefine SICONOS_STD_FUNCTIONAL
+
+// are int 64 bits longs
+#cmakedefine SICONOS_INT64
 
 #endif

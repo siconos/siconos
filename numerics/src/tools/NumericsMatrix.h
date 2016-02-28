@@ -372,13 +372,25 @@ extern "C"
     */
   void NM_clearCSCTranspose(NumericsMatrix* A);
 
+  /** Clear compressed row storage, if it is existent.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearCSR(NumericsMatrix* A);
+
   /** Clear triplet, csc, csc transposed storage, if they are existent.
     * Linear solver parameters are preserved.
     * \param[in,out] A a Numericsmatrix
     */
   void NM_clearSparseStorage(NumericsMatrix *A);
 
-  /** Copy a NumericsMatrix inside another NumericsMatrix.
+  /** Copy a CSparseMatrix inside another CSparseMatrix.
+   *  Reallocations are performed if B cannot hold a copy of A
+   * \param[in] A a CSparseMatrix
+   * \param[in,out] B a CSparseMatrix
+   */
+  void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B);
+
+  /** Copy a NumericsMatrix inside another NumericsMatrix (deep).
    *  Reallocations are performed if B cannot hold a copy of A
    * \param[in] A a NumericsMatrix
    * \param[in,out] B a NumericsMatrix
@@ -406,8 +418,7 @@ extern "C"
    */
   CSparseMatrix* NM_triplet(NumericsMatrix* A);
 
-  /** Creation, if needed, of compress column storage of a
-   * NumericsMatrix from triplet storage.
+  /** Creation, if needed, of compress column storage of a NumericsMatrix.
    * \param[in,out] A a NumericsMatrix with sparse block storage initialized
    * \return the compressed column CSparseMatrix created in A.
    */
@@ -419,6 +430,13 @@ extern "C"
    * \return the transposed compressed column matrix created in A.
    */
   CSparseMatrix* NM_csc_trans(NumericsMatrix* A);
+
+  /** Creation, if needed, of compress row storage of a NumericsMatrix
+   * \warning This rely on the MKL
+   * \param[in,out] A a NumericsMatrix with sparse block storage initialized
+   * \return the compressed row CSparseMatrix created in A.
+   */
+  CSparseMatrix* NM_csr(NumericsMatrix *A);
 
   /** Matrix vector multiplication : y = alpha A x + beta y
    * \param[in] alpha scalar
@@ -561,6 +579,12 @@ extern "C"
    * \param nzmax maximum number of non-zero elements
    */
   void NM_triplet_alloc(NumericsMatrix* A, csi nzmax);
+
+  /** Allocate a csr matrix in A
+   * \param A the matrix
+   * \param nzmax number of non-zero elements
+   */
+  void NM_csr_alloc(NumericsMatrix* A, csi nzmax);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
