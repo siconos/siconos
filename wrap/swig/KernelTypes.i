@@ -781,8 +781,31 @@ TYPEMAP_MATRIX(std11::shared_ptr<SimpleMatrix>, SWIGTYPE_p_std11__shared_ptrT_Si
 
 // cast to get the right class in Python
 
-// from factory.swg, but with dynamic_pointer_cast instead of dynamic_cast
 %define %_factory_dispatch_SP(TYPE)
+if (!dcast) {
+  SP::TYPE dobj = std11::dynamic_pointer_cast<TYPE>(ds);
+  if (dobj) {
+    dcast = 1;
+    SP::TYPE *dobjp = new SP::TYPE(dobj);
+    *_tmpobj = SWIG_NewPointerObj(%as_voidptr(dobjp),$descriptor(SP::TYPE *), SWIG_POINTER_OWN);
+  }
+}%enddef
+
+%define %convert_sp_ds(mds, resultobj)
+  int dcast = 0;
+  SP::DynamicalSystem ds = mds;
+  PyObject** _tmpobj = &resultobj;
+  %formacro(%_factory_dispatch_SP, FirstOrderLinearTIDS, FirstOrderLinearDS, FirstOrderNonLinearDS)
+  %formacro(%_factory_dispatch_SP, LagrangianLinearTIDS, LagrangianDS)
+  %formacro(%_factory_dispatch_SP, NewtonEulerDS)
+  if (!dcast) {
+    SP::DynamicalSystem *pds = new SP::DynamicalSystem(ds);
+    resultobj = SWIG_NewPointerObj(%as_voidptr(pds), $descriptor(SP::DynamicalSystem *), SWIG_POINTER_OWN);
+  }
+%enddef
+
+// from factory.swg, but with dynamic_pointer_cast instead of dynamic_cast
+%define %_factory_dispatch_SP_output(TYPE)
 if (!dcast) {
   SP::TYPE dobj = std11::dynamic_pointer_cast<TYPE>($1);
   if (dobj) {
@@ -795,9 +818,9 @@ if (!dcast) {
 %typemap(out) SP::DynamicalSystem
 {
   int dcast = 0;
-  %formacro(%_factory_dispatch_SP, FirstOrderLinearTIDS, FirstOrderLinearDS, FirstOrderNonLinearDS)
-  %formacro(%_factory_dispatch_SP, LagrangianLinearTIDS, LagrangianDS)
-  %formacro(%_factory_dispatch_SP, NewtonEulerDS)
+  %formacro(%_factory_dispatch_SP_output, FirstOrderLinearTIDS, FirstOrderLinearDS, FirstOrderNonLinearDS)
+  %formacro(%_factory_dispatch_SP_output, LagrangianLinearTIDS, LagrangianDS)
+  %formacro(%_factory_dispatch_SP_output, NewtonEulerDS)
   if (!dcast) {
     %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(SP::DynamicalSystem *), $owner | %newpointer_flags));
   }
@@ -806,7 +829,7 @@ if (!dcast) {
 %typemap(out) SP::Simulation
 {
    int dcast = 0;
-   %formacro(%_factory_dispatch_SP, TimeSteppingCombinedProjection, TimeSteppingDirectProjection, TimeStepping, TimeSteppingD1Minus, EventDriven)
+   %formacro(%_factory_dispatch_SP_output, TimeSteppingCombinedProjection, TimeSteppingDirectProjection, TimeStepping, TimeSteppingD1Minus, EventDriven)
    if (!dcast) {
       %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(SP::Type *), $owner | %newpointer_flags));
    }
@@ -815,9 +838,9 @@ if (!dcast) {
 %typemap(out) SP::Relation
 {
    int dcast = 0;
-   %formacro(%_factory_dispatch_SP, FirstOrderLinearTIR, FirstOrderLinearR, FirstOrderType1R, FirstOrderType2R, FirstOrderNonLinearR, FirstOrderR)
-   %formacro(%_factory_dispatch_SP, LagrangianLinearTIR, LagrangianCompliantR, LagrangianRheonomousR, LagrangianScleronomousR, LagrangianR)
-   %formacro(%_factory_dispatch_SP, NewtonEulerFrom3DLocalFrameR, NewtonEulerFrom1DLocalFrameR, NewtonEulerR)
+   %formacro(%_factory_dispatch_SP_output, FirstOrderLinearTIR, FirstOrderLinearR, FirstOrderType1R, FirstOrderType2R, FirstOrderNonLinearR, FirstOrderR)
+   %formacro(%_factory_dispatch_SP_output, LagrangianLinearTIR, LagrangianCompliantR, LagrangianRheonomousR, LagrangianScleronomousR, LagrangianR)
+   %formacro(%_factory_dispatch_SP_output, NewtonEulerFrom3DLocalFrameR, NewtonEulerFrom1DLocalFrameR, NewtonEulerR)
    if (!dcast) {
       %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(SP::Type *), $owner | %newpointer_flags));
    }

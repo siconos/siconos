@@ -33,49 +33,34 @@ struct InteractionsGraph{};
 %extend InteractionsGraph
 {
 
-  // const std::vector<InteractionsGraph::VDescriptor> vertices()
-  // {
-  //   std::vector<InteractionsGraph::VDescriptor> r;
-  //   InteractionsGraph::VIterator ui, uiend;
-  //   for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
-  //   {
-  //     r.push_back(*ui);
-  //   };
-  //   return r;
-  // };
-
-  // const std::vector<InteractionsGraph::EDescriptor> edges()
-  // {
-  //   std::vector<InteractionsGraph::EDescriptor> r;
-  //   InteractionsGraph::EIterator ui, uiend;
-  //   for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
-  //   {
-  //     r.push_back(*ui);
-  //   };
-  //   return r;
-  // };
-
-  const std::vector<SP::Interaction> interactions()
+  PyObject* interactions()
   {
-    std::vector<SP::Interaction> r;
+    PyObject* py_tuple = PyTuple_New($self->size());
     InteractionsGraph::VIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
+    PyObject* resultobj;
+    size_t i = 0;
+    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui, ++i)
     {
-      r.push_back($self->bundle(*ui));
+      SP::Interaction * nptr = new SP::Interaction($self->bundle(*ui));
+      resultobj = SWIG_NewPointerObj(%as_voidptr(nptr), $descriptor(SP::Interaction *), SWIG_POINTER_OWN);
+      PyTuple_SetItem(py_tuple, i, resultobj);
     };
-    return r;
+    return py_tuple;
   };
 
 
-  const std::vector<SP::DynamicalSystem> dynamicalSystems()
+  PyObject* dynamicalSystems()
   {
-    std::vector<SP::DynamicalSystem> r;
+    PyObject* py_tuple = PyTuple_New($self->edges_number());
     InteractionsGraph::EIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
+    PyObject* resultobj;
+    size_t i = 0;
+    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui, ++i)
     {
-      r.push_back($self->bundle(*ui));
+      %convert_sp_ds($self->bundle(*ui), resultobj);
+      PyTuple_SetItem(py_tuple, i, resultobj);
     };
-    return r;
+    return py_tuple;
   };
 
 }
@@ -89,54 +74,68 @@ struct DynamicalSystemsGraph{};
 %extend DynamicalSystemsGraph
 {
 
-  // const std::vector<DynamicalSystemsGraph::VDescriptor> vertices()
-  // {
-  //   std::vector<DynamicalSystemsGraph::VDescriptor> r;
-  //   DynamicalSystemsGraph::VIterator ui, uiend;
-  //   for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
-  //   {
-  //     r.push_back(*ui);
-  //   };
-  //   return r;
-  // };
-
-
-  // const std::vector<DynamicalSystemsGraph::EDescriptor> edges()
-  // {
-  //   std::vector<DynamicalSystemsGraph::EDescriptor> r;
-  //   DynamicalSystemsGraph::EIterator ui, uiend;
-  //   for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
-  //   {
-  //     r.push_back(*ui);
-  //   };
-  //   return r;
-  // };
-
-  const std::vector<SP::DynamicalSystem> dynamicalSystems()
+  PyObject* interactions()
   {
-    std::vector<SP::DynamicalSystem> r;
-    DynamicalSystemsGraph::VIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
+    PyObject* py_tuple = PyTuple_New($self->edges_number());
+    DynamicalSystemsGraph::EIterator ui, uiend;
+    PyObject* resultobj;
+    size_t i = 0;
+    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui, ++i)
     {
-      r.push_back($self->bundle(*ui));
+      SP::Interaction * nptr = new SP::Interaction($self->bundle(*ui));
+      resultobj = SWIG_NewPointerObj(%as_voidptr(nptr), $descriptor(SP::Interaction *), SWIG_POINTER_OWN);
+      PyTuple_SetItem(py_tuple, i, resultobj);
     };
-    return r;
+    return py_tuple;
   };
 
-  const std::vector<SP::Interaction> interactions()
+
+  PyObject* dynamicalSystems()
   {
-    std::vector<SP::Interaction> r;
-    DynamicalSystemsGraph::EIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
+    PyObject* py_tuple = PyTuple_New($self->size());
+    InteractionsGraph::VIterator ui, uiend;
+    PyObject* resultobj;
+    size_t i = 0;
+    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui, ++i)
     {
-      r.push_back($self->bundle(*ui));
+      %convert_sp_ds($self->bundle(*ui), resultobj);
+      PyTuple_SetItem(py_tuple, i, resultobj);
     };
-    return r;
+    return py_tuple;
   };
 
 }
 
+%typemap(out) (std::vector<SP::DynamicalSystem>)
+{
+  PyObject* py_tuple = PyTuple_New($1.size());
+  if (!py_tuple) SWIG_fail;
+  PyObject* tmpobj;
 
+  for (size_t i = 0; i < $1.size(); ++i)
+  {
+    %convert_sp_ds($1.at(i), tmpobj);
+    PyTuple_SetItem(py_tuple, i, tmpobj);
+  }
+
+  $result = py_tuple;
+}
+
+%typemap(out) (std::vector<SP::Interaction>)
+{
+  PyObject* py_tuple = PyTuple_New($1.size());
+  if (!py_tuple) SWIG_fail;
+  PyObject* tmpobj;
+
+  for (size_t i = 0; i < $1.size(); ++i)
+  {
+    SP::Interaction * nptr = new SP::Interaction($1.at(i));
+    tmpobj = SWIG_NewPointerObj(%as_voidptr(nptr), $descriptor(SP::Interaction *), SWIG_POINTER_OWN);
+    PyTuple_SetItem(py_tuple, i, tmpobj);
+  }
+
+  $result = py_tuple;
+}
 
  /* swig has difficulties with this macro in SiconosProperties */
 #undef INSTALL_GRAPH_PROPERTIES
@@ -198,9 +197,6 @@ TYPEDEF_SPTR(_InteractionsGraph);
 %ignore DynamicalSystemsGraph::edges;
 %ignore InteractionsGraph::vertices;
 %ignore InteractionsGraph::edges;
-
-%template (ig_interactions) std::vector<std11::shared_ptr<Interaction> >;
-%template (ig_dynamicalSystems) std::vector<std11::shared_ptr<DynamicalSystem> >;
 
 
 /* missing in generated file, why ? */
