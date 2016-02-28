@@ -90,8 +90,14 @@ class CiTask():
             redundants = ['build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz', 'asan', 'cppunit_clang']
             templ_list = [p.replace('+', 'x') for p in self._pkgs if p not in redundants]
 
+            # hm python is so lovely
+            if isinstance(self._ci_config, str):
+                ci_config_args = self._ci_config
+            else:
+                ci_config_args = ','.join(self._ci_config)
+
             cmake_args = ['-DMODE={0}'.format(self._mode),
-                          '-DCI_CONFIG={0}'.format(','.join(self._ci_config)),
+                          '-DCI_CONFIG={0}'.format(ci_config_args),
                           '-DWITH_DOCKER=1',
                           '-DBUILD_CONFIGURATION={0}'.format(
                               self._build_configuration),
