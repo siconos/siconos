@@ -109,6 +109,26 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (const TYPE&)
   $1 = 1;
 }
+// swig does not apply properly the typemap
+// TODO fix this
+%typemap(in, fragment="SiconosMatrix")
+  const TYPE &
+  (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
+{
+   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   if (!ok) SWIG_fail;
+}
+
+// swig does not apply properly the typemap
+// TODO fix this
+%typemap(in, fragment="SiconosMatrix") 
+  TYPE &
+  (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
+{
+   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   if (!ok) SWIG_fail;
+}
+
 %typemap(directorin) TYPE& ()
 %{
   // %typemap(directorin) (TYPE&) ()
@@ -116,7 +136,7 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   {
     SP::TYPE myptemp(createSPtr##TYPE($1));
     $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
-                                SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0);
+                                $descriptor(SP::TYPE *), 0);
   }
 %}
 
@@ -127,10 +147,9 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   {
     SP::TYPE myptemp(createSPtr##TYPE($1));
     $result = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
-                                 SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0);
+                                 $descriptor(SP::TYPE *), 0);
   }
 %}
-
 
 %enddef
 
@@ -142,242 +161,53 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (const TYPE&)
   $1 = 1;
 }
-// numpy or TYPE on input -> TYPE 
-%typemap(in,fragment="NumPy_Fragments") 
-  TYPE &
-(PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SimpleMatrix> keeper)
-{
-  // %typemap(in,fragment="NumPy_Fragments")
-  // %TYPE (PyArrayObject* array=NULL, int
-  // %is_new_object)
-  void *argp1=0;
-  int res1=0;
-  int newmem = 0;
-  TYPE temp1 ;
-  TYPE *smartarg1 = 0 ;
- 
-  // try a conversion from TYPE
-  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, $descriptor(TYPE *), 0 |  0 , &newmem);
-  if (SWIG_IsOK(res1)) 
-  {
-    if (newmem & SWIG_CAST_NEW_MEMORY) 
-    {
-      // taken from generated code
-      temp1 = *reinterpret_cast< TYPE * >(argp1);
-      delete reinterpret_cast< TYPE * >(argp1);
-      $1 = &temp1;
-    } 
-    else {
-      smartarg1 = reinterpret_cast< TYPE * >(argp1);
-      $1 = smartarg1;
-    }
-  }
-  else
-  {
-    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-
-    if (!array)
-    {
-      SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
-    }
-    else
-    {
-      if (!require_dimensions(array,2) ||
-          !require_native(array) || !require_fortran(array)) SWIG_fail;
-
-      SP::SimpleMatrix tmp(new SimpleMatrix(array_size(array,0), array_size(array,1)));
-      // copy : with SiconosVector based on resizable std::vector there is
-      // no other way
-      memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*array_size(array,1)*sizeof(double));
-      $1 = &*tmp;
-      keeper.push_back(tmp);
-    }
-  }
-}
-%enddef
-
-%define PY_REGISTER_WITHOUT_DIRECTOR_REF_BASEMAT(TYPE)
-PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
-%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
-(const TYPE&)
-{
-  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (const TYPE&)
-  $1 = 1;
-}
-%typemap(in,fragment="NumPy_Fragments") 
+%typemap(in, fragment="SiconosMatrix")
   const TYPE &
-(PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosMatrix> keeper)
+  (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
 {
-  // %typemap(in,fragment="NumPy_Fragments")
-  // %TYPE (PyArrayObject* array=NULL, int
-  // %is_new_object)
-  void *argp1=0;
-  int res1=0;
-  int newmem = 0;
-  TYPE temp1 ;
-  TYPE *smartarg1 = 0 ;
- 
-  // try a conversion from TYPE
-  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0 |  0 , &newmem);
-  if (SWIG_IsOK(res1)) 
-  {
-    if (newmem & SWIG_CAST_NEW_MEMORY) 
-    {
-      // taken from generated code
-      temp1 = *reinterpret_cast< TYPE * >(argp1);
-      delete reinterpret_cast< TYPE * >(argp1);
-      $1 = &temp1;
-    } 
-    else {
-      smartarg1 = reinterpret_cast< TYPE * >(argp1);
-      $1 = smartarg1;
-    }
-  }
-  else
-  {
-    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   if (!ok) SWIG_fail;
+}
 
-    if (!array)
-    {
-      SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
-    }
-    else
-    {
-      if (!require_dimensions(array,1) ||
-          !require_native(array) || !require_fortran(array)) SWIG_fail;
-      
-      SP::SimpleMatrix tmp(new SimpleMatrix(array_size(array,0), array_size(array,1)));
-      // copy : with SiconosVector based on resizable std::vector there is
-      // no other way
-      memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double)*array_size(array,1));
-      $1 = &*tmp;
-      keeper.push_back(tmp);
-    }
-  }
+%typemap(in, fragment="SiconosMatrix") 
+  TYPE &
+  (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
+{
+   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   if (!ok) SWIG_fail;
 }
 
 %enddef
 
 %define PY_REGISTER_WITHOUT_DIRECTOR_REF(TYPE)
 PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
-%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
-(const TYPE&)
+
+// swig does not apply properly the typemap
+// TODO fix this
+%typemap(in,fragment="SiconosVector")
+  const SiconosVector &
+  (PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosVector> keeper)
 {
-  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (const TYPE&)
-  $1 = 1;
+  // %typemap(in,fragment="NumPy_Fragments")
+  // %TYPE (PyArrayObject* array=NULL, int
+  // %is_new_object)
+  $1 = SiconosVector_in($input, array, &is_new_object, keeper);
+  if (!$1) SWIG_fail;
 }
 
-// numpy or TYPE on input -> TYPE 
-%typemap(in,fragment="NumPy_Fragments") 
-  const TYPE &
+// swig does not apply properly the typemap
+// TODO fix this
+%typemap(in,fragment="SiconosVector") SiconosVector &
 (PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosVector> keeper)
 {
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
   // %is_new_object)
-  void *argp1=0;
-  int res1=0;
-  int newmem = 0;
-  TYPE temp1 ;
-  TYPE *smartarg1 = 0 ;
- 
-  // try a conversion from TYPE
-  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0 |  0 , &newmem);
-  if (SWIG_IsOK(res1)) 
-  {
-    if (newmem & SWIG_CAST_NEW_MEMORY) 
-    {
-      // taken from generated code
-      temp1 = *reinterpret_cast< TYPE * >(argp1);
-      delete reinterpret_cast< TYPE * >(argp1);
-      $1 = &temp1;
-    } 
-    else {
-      smartarg1 = reinterpret_cast< TYPE * >(argp1);
-      $1 = smartarg1;
-    }
-  }
-  else
-  {
-    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-
-    if (!array)
-    {
-      SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
-    }
-    else
-    {
-      if (!require_dimensions(array,1) ||
-          !require_native(array) || !require_fortran(array)) SWIG_fail;
-      
-      SP::SiconosVector tmp(new SiconosVector(array_size(array,0)));
-      // copy : with SiconosVector based on resizable std::vector there is
-      // no other way
-      memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
-      $1 = &*tmp;
-      keeper.push_back(tmp);
-    }
-  }
+  $1 = SiconosVector_in($input, array, &is_new_object, keeper);
+  if (!$1) SWIG_fail;
 }
 
-// numpy or TYPE on input -> TYPE 
-%typemap(in,fragment="NumPy_Fragments") 
-  TYPE &
-(PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosVector> keeper)
-{
-  // %typemap(in,fragment="NumPy_Fragments")
-  // %TYPE (PyArrayObject* array=NULL, int
-  // %is_new_object)
-  void *argp1=0;
-  int res1=0;
-  int newmem = 0;
-  TYPE temp1 ;
-  TYPE *smartarg1 = 0 ;
- 
-  // try a conversion from TYPE
-  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0 |  0 , &newmem);
-  if (SWIG_IsOK(res1)) 
-  {
-    if (newmem & SWIG_CAST_NEW_MEMORY) 
-    {
-      // taken from generated code
-      temp1 = *reinterpret_cast< TYPE * >(argp1);
-      delete reinterpret_cast< TYPE * >(argp1);
-      $1 = &temp1;
-    } 
-    else {
-      smartarg1 = reinterpret_cast< TYPE * >(argp1);
-      $1 = smartarg1;
-    }
-  }
-  else
-  {
-    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
-    if (!array)
-    {
-      SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
-    }
-    else
-    {
-      if (!require_dimensions(array,1) ||
-          !require_native(array) || !require_fortran(array)) SWIG_fail;
-      
-      SP::SiconosVector tmp(new SiconosVector(array_size(array,0)));
-      // copy : with SiconosVector based on resizable std::vector there is
-      // no other way
-      memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
-      $1 = &*tmp;
-      keeper.push_back(tmp);
-    }
-  }
-}
-
-%typemap(freearg) (const TYPE &)
-{
-  if (is_new_object$argnum && array$argnum)
-    { Py_DECREF(array$argnum); }
-}
 %enddef
 
 %define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
