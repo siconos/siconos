@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// Siconos-Front-End , Copyright INRIA 2005-2012.
+// Siconos-Front-End , Copyright INRIA 2005-2016
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 // Siconos is a free software; you can redistribute it and/or modify
@@ -47,6 +47,21 @@
 
 // ignores
 %ignore nullDeleter;
+// remove the visitor stuff, I see no use of it in Python for now --xhub
+%ignore *::acceptSerializer;
+%ignore *::acceptType;
+%ignore *::accept;
+%ignore *::acceptSP;
+// do not wrap visitor visit : this lead to a huge amount of wrapper
+// code generation and this fail at compile time on shared_ptr freearg
+%ignore SiconosVisitor;
+
+%ignore visit;
+
+%ignore Type::str;
+
+// cannot compile wrapper
+%ignore statOut;
 
 // defined in SiconosVector.cpp
 %ignore setBlock;
@@ -76,16 +91,6 @@
 %ignore getInvMSimple;
 %ignore getInvMBlock;
 
-// do not wrap visitor visit : this lead to a huge amount of wrapper
-// code generation and this fail at compile time on shared_ptr freearg
-%ignore SiconosVisitor::visit;
-
-%ignore visit;
-
-%ignore Type::str;
-
-// cannot compile wrapper
-%ignore statOut;
 
 
  // common declarations with upper modules : Mechanics, IO, ...
@@ -161,7 +166,7 @@ namespace std
 %shared_ptr(FrictionContactProblem);
 %shared_ptr(GlobalFrictionContactProblem);
 
-%include NumericsOptions.h
+%import NumericsOptions.h
 %include solverOptions.i
 
 // access NumericsMatrix cf Numerics.i
@@ -197,9 +202,9 @@ namespace std
     }
   }
 }
-%include NumericsMatrix.h
-%include SparseMatrix.h
-%include SparseBlockMatrix.h
+%import NumericsMatrix.h
+%import SparseMatrix.h
+%import SparseBlockMatrix.h
 
  // segfaults...
  // we cannot share data struct
