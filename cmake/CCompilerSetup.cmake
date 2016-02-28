@@ -45,7 +45,8 @@ if(DEV_MODE)
   add_c_options("-Werror=type-limits")
   add_c_options("-Werror=incompatible-pointer-types")
   add_c_options("-Werror=missing-prototypes")
-  
+  add_c_options("-Werror=return-type")
+
   if((NOT WITH_MECHANISMS) AND (NOT WITH_PYTHON_WRAPPER))
     add_c_options("-Werror=missing-declarations")
   endif()
@@ -63,6 +64,8 @@ if(USE_SANITIZER MATCHES "asan")
   APPEND_C_FLAGS("-fsanitize=leak -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer")
 elseif(USE_SANITIZER MATCHES "msan")
   APPEND_C_FLAGS("-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer")
+elseif(USE_SANITIZER MATCHES "cfi")
+  APPEND_C_FLAGS("-fsanitize=cfi -flto -fno-omit-frame-pointer -B ${CLANG_LD_HACK}")
 endif()
 
 # === Others options ===
