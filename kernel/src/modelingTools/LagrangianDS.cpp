@@ -472,11 +472,11 @@ void LagrangianDS::computeMass()
   DEBUG_EXPR(_mass->display());
 }
 
-void LagrangianDS::computeMass(SP::SiconosVector q2)
+void LagrangianDS::computeMass(SP::SiconosVector position)
 {
   if (_pluginMass->fPtr)
   {
-    ((FPtr7)_pluginMass->fPtr)(_ndof, &(*q2)(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
+    ((FPtr7)_pluginMass->fPtr)(_ndof, &(*position)(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
     _mass->resetLU();
   }
 }
@@ -486,10 +486,10 @@ void LagrangianDS::computeFInt(double time)
   if (_pluginFInt->fPtr)
     ((FPtr6)_pluginFInt->fPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_fInt)(0), _z->size(), &(*_z)(0));
 }
-void LagrangianDS::computeFInt(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
+void LagrangianDS::computeFInt(double time, SP::SiconosVector position, SP::SiconosVector velocity)
 {
   if (_pluginFInt->fPtr)
-    ((FPtr6)_pluginFInt->fPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_fInt)(0), _z->size(), &(*_z)(0));
+    ((FPtr6)_pluginFInt->fPtr)(time, _ndof, &(*position)(0), &(*velocity)(0), &(*_fInt)(0), _z->size(), &(*_z)(0));
 }
 
 void LagrangianDS::computeFExt(double time)
@@ -504,10 +504,10 @@ void LagrangianDS::computeFGyr()
     ((FPtr5)_pluginFGyr->fPtr)(_ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_fGyr)(0), _z->size(), &(*_z)(0));
 }
 
-void LagrangianDS::computeFGyr(SP::SiconosVector q2, SP::SiconosVector velocity2)
+void LagrangianDS::computeFGyr(SP::SiconosVector position, SP::SiconosVector velocity)
 {
   if (_pluginFGyr->fPtr)
-    ((FPtr5)_pluginFGyr->fPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_fGyr)(0), _z->size(), &(*_z)(0));
+    ((FPtr5)_pluginFGyr->fPtr)(_ndof, &(*position)(0), &(*velocity)(0), &(*_fGyr)(0), _z->size(), &(*_z)(0));
 }
 
 void LagrangianDS::computeJacobianFIntq(double time)
@@ -525,19 +525,20 @@ void LagrangianDS::computeJacobianFIntqDot(double time)
 //       (computeJacobianZFIntPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFInt[i])(0,0), _z->size(), &(*_z)(0));
 // }
 
-void LagrangianDS::computeJacobianFIntq(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
+void LagrangianDS::computeJacobianFIntq(double time, SP::SiconosVector position, SP::SiconosVector velocity)
 {
   if (_pluginJacqFInt->fPtr)
-    ((FPtr6)_pluginJacqFInt->fPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianFIntq)(0, 0), _z->size(), &(*_z)(0));
+    ((FPtr6)_pluginJacqFInt->fPtr)(time, _ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFIntq)(0, 0), _z->size(), &(*_z)(0));
 }
-void LagrangianDS::computeJacobianFIntqDot(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
+void LagrangianDS::computeJacobianFIntqDot(double time, SP::SiconosVector position, SP::SiconosVector velocity)
 {
   if (_pluginJacqDotFInt->fPtr)
-    ((FPtr6)_pluginJacqDotFInt->fPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianFIntqDot)(0, 0), _z->size(), &(*_z)(0));
+    ((FPtr6)_pluginJacqDotFInt->fPtr)(time, _ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFIntqDot)(0, 0), _z->size(), &(*_z)(0));
 }
-// void LagrangianDS::computeJacobianZFInt( double time, SP::SiconosVector q2, SP::SiconosVector velocity2){
+
+// void LagrangianDS::computeJacobianZFInt( double time, SP::SiconosVector position, SP::SiconosVector velocity){
 //   if(computeJacobianZFIntPtr)
-//       (computeJacobianZFIntPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianFInt[i])(0,0), _z->size(), &(*_z)(0));
+//       (computeJacobianZFIntPtr)(time, _ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFInt[i])(0,0), _z->size(), &(*_z)(0));
 // }
 
 void LagrangianDS::computeJacobianFGyrq()
@@ -555,19 +556,19 @@ void LagrangianDS::computeJacobianFGyrqDot()
 //       (computeJacobianZFGyrPtr)(_ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFGyr[i])(0,0), _z->size(), &(*_z)(0));
 // }
 
-void LagrangianDS::computeJacobianFGyrq(SP::SiconosVector q2, SP::SiconosVector velocity2)
+void LagrangianDS::computeJacobianFGyrq(SP::SiconosVector position, SP::SiconosVector velocity)
 {
   if (_pluginJacqFGyr->fPtr)
-    ((FPtr5)_pluginJacqFGyr->fPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianFGyrq)(0, 0), _z->size(), &(*_z)(0));
+    ((FPtr5)_pluginJacqFGyr->fPtr)(_ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFGyrq)(0, 0), _z->size(), &(*_z)(0));
 }
-void LagrangianDS::computeJacobianFGyrqDot(SP::SiconosVector q2, SP::SiconosVector velocity2)
+void LagrangianDS::computeJacobianFGyrqDot(SP::SiconosVector position, SP::SiconosVector velocity)
 {
   if (_pluginJacqDotFGyr->fPtr)
-    ((FPtr5)_pluginJacqDotFGyr->fPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianFGyrqDot)(0, 0), _z->size(), &(*_z)(0));
+    ((FPtr5)_pluginJacqDotFGyr->fPtr)(_ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFGyrqDot)(0, 0), _z->size(), &(*_z)(0));
 }
-// void LagrangianDS::computeJacobianZFGyr(unsigned int i, SP::SiconosVector q2, SP::SiconosVector velocity2){
+// void LagrangianDS::computeJacobianZFGyr(unsigned int i, SP::SiconosVector position, SP::SiconosVector velocity){
 //   if(computeJacobianZFGyrPtr)
-//     (computeJacobianZFGyrPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianFGyr[i])(0,0), _z->size(), &(*_z)(0));
+//     (computeJacobianZFGyrPtr)(_ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFGyr[i])(0,0), _z->size(), &(*_z)(0));
 // }
 
 void LagrangianDS::computeRhs(double time, bool isDSup)
@@ -631,7 +632,7 @@ void LagrangianDS::computeForces(double time)
   computeForces(time, _q[0], _q[1]);
 }
 
-void LagrangianDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2)
+void LagrangianDS::computeForces(double time, SP::SiconosVector position, SP::SiconosVector velocity)
 {
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
   if (!_forces)
@@ -639,9 +640,9 @@ void LagrangianDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosV
     _forces.reset(new SiconosVector(_ndof));
   }
   // 1 - Computes the required functions
-  computeFInt(time, q2, v2);
+  computeFInt(time, position, velocity);
   computeFExt(time);
-  computeFGyr(q2, v2);
+  computeFGyr(position, velocity);
 
   // seems ok.
   if (_forces.use_count() == 1)

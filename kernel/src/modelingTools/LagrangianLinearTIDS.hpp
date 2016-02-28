@@ -105,9 +105,9 @@ public:
   LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M, SP::SiconosMatrix K, SP::SiconosMatrix C);
 
   /** constructor from a set of data
-   *  \param q0 : initial coordinates of this DynamicalSystem
-   *  \param v0 : initial velocity of this DynamicalSystem
-   *  \param M : mass matrix of this DynamicalSystem
+   *  \param q0 initial coordinates of this DynamicalSystem
+   *  \param v0 initial velocity of this DynamicalSystem
+   *  \param M mass matrix of this DynamicalSystem
    */
   LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M);
 
@@ -197,9 +197,9 @@ public:
   void computeRhs(double t, bool isDup = false);
 
   /** function to compute forces with some specific values for q and velocity (ie not those of the current state).
-   *  \param t : the current time
-   *  \param q : pointer to positions vector
-   *  \param v : pointer to velocities vector
+   *  \param t the current time
+   *  \param q pointer to positions vector
+   *  \param v pointer to velocities vector
    */
   void computeForces(double t, SP::SiconosVector q, SP::SiconosVector v);
 

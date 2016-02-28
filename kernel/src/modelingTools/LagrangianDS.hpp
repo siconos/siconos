@@ -747,7 +747,6 @@ public:
   void setComputeMassFunction(FPtr7 fct)
   {
     _pluginMass->setComputeFunction((void*)fct);
-    //    computeMassPtr=fct;
   }
 
   /** allow to set a specified function to compute FInt
@@ -863,27 +862,27 @@ public:
   virtual void computeMass();
 
   /** function to compute the mass
-   *  \param time double : the current time
+   *  \param position value used to evaluate the mass matrix
    */
-  virtual void computeMass(SP::SiconosVector time);
+  virtual void computeMass(SP::SiconosVector position);
 
   /** default function to compute the internal strengths
-   *  \param time double : the current time
+   *  \param time the current time
    */
   virtual void computeFInt(double time);
 
   /** function to compute the internal strengths
    *  with some specific values for position and velocity (ie not those of the current state).
-   *  \param time double : the current time,
-   *  \param position SP::SiconosVector
-   *  \param velocity SP::SiconosVector
+   *  \param time the current time,
+   *  \param position value used to evaluate the internal forces
+   *  \param velocity value used to evaluate the internal forces
    */
   virtual void computeFInt(double time,
                            SP::SiconosVector position,
                            SP::SiconosVector velocity);
 
   /** default function to compute the external strengths
-   *  \param time double : the current time
+   *  \param time the current time
    */
   virtual void computeFExt(double time);
 
@@ -893,34 +892,34 @@ public:
 
   /** function to compute the inertia
    *  with some specific values for q and velocity (ie not those of the current state).
-   *  \param position SP::SiconosVector
-   *  \param velocity SP::SiconosVector
+   *  \param position value used to evaluate the inertia forces
+   *  \param velocity value used to evaluate the inertia forces
    */
   virtual void computeFGyr(SP::SiconosVector position,
                           SP::SiconosVector velocity);
 
   /** To compute the jacobian w.r.t q of the internal forces
-   *  \param time double : the current time
+   *  \param time the current time
    */
   virtual void computeJacobianFIntq(double time);
   /** To compute the jacobian w.r.t qDot of the internal forces
-   *  \param time double : the current time
+   *  \param time the current time
    */
   virtual void computeJacobianFIntqDot(double time);
 
   /** To compute the jacobian w.r.t q of the internal forces
-   *  \param time double : the current time,
-   * \param position SP::SiconosVector
-   * \param velocity SP::SiconosVector
+   *  \param time the current time
+   *  \param position value used to evaluate the jacobian
+   *  \param velocity value used to evaluate the jacobian
    */
   virtual void computeJacobianFIntq(double time,
                                     SP::SiconosVector position,
                                     SP::SiconosVector velocity);
 
   /** To compute the jacobian w.r.t. qDot of the internal forces
-   *  \param time double: the current time
-   * \param position SP::SiconosVector
-   * \param velocity SP::SiconosVector
+   *  \param time the current time
+   *  \param position value used to evaluate the jacobian
+   *  \param velocity value used to evaluate the jacobian
    */
   virtual void computeJacobianFIntqDot(double time,
                                        SP::SiconosVector position,
@@ -935,36 +934,36 @@ public:
   virtual void computeJacobianFGyrqDot();
 
   /** function to compute the jacobian w.r.t. q of the inertia forces
-   * \param q SP::SiconosVector
-   * \param velocity SP::SiconosVector
+   *  \param position value used to evaluate the jacobian
+   *  \param velocity value used to evaluate the jacobian
    */
-  virtual void computeJacobianFGyrq(SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianFGyrq(SP::SiconosVector position, SP::SiconosVector velocity);
 
   /** function to compute the jacobian w.r.t. qDot of the inertia forces
-   * \param q SP::SiconosVector
-   * \param velocity SP::SiconosVector
+   *  \param position value used to evaluate the jacobian
+   *  \param velocity value used to evaluate the jacobian
    */
-  virtual void computeJacobianFGyrqDot(SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianFGyrqDot(SP::SiconosVector position, SP::SiconosVector velocity);
 
   /** Default function to compute the right-hand side term
-   *  \param time double : current time
-   *  \param isDSup bool : flag to avoid recomputation of operators
+   *  \param time current time
+   *  \param isDSup flag to avoid recomputation of operators
    */
   virtual void computeRhs(double time, bool isDSup = false);
 
   /** Default function to compute jacobian of the right-hand side term according to x
-   *  \param time double : current time
-   *  \param isDSup bool : flag to avoid recomputation of operators
+   *  \param time the current time
+   *  \param isDSup flag to avoid recomputation of operators
    */
   virtual void computeJacobianRhsx(double time, bool isDSup = false);
 
   /** Default function to compute forces
-   *  \param time double, the current time
+   *  \param time the current time
    */
   virtual void computeForces(double time);
 
   /** function to compute forces with some specific values for q and velocity (ie not those of the current state).
-   *  \param time double : the current time
+   *  \param time the current time
    *  \param q SP::SiconosVector: pointers on q
    *  \param velocity SP::SiconosVector: pointers on velocity
    */
@@ -973,11 +972,12 @@ public:
                              SP::SiconosVector velocity);
 
   /** Default function to compute the jacobian w.r.t. q of forces
-   *  \param time double, the current time
+   *  \param time the current time
    */
   virtual void computeJacobianqForces(double time);
+
   /** Default function to compute the jacobian w.r.t. qDot of forces
-   *  \param time double, the current time
+   *  \param time the current time
    */
   virtual void computeJacobianqDotForces(double time);
 
@@ -1016,6 +1016,7 @@ public:
    * Used in EventDriven (LsodarOSI->updateState)
    */
   void computePostImpactVelocity();
+
   /** set Boundary Conditions
    *  \param newbd BoundaryConditions
    */
