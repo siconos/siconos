@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#define max(a,b) (a>=b?a:b)
 //#define VERBOSE_DEBUG
 #include "Friction_cst.h"
 
