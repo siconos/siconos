@@ -54,7 +54,10 @@ endif()
 
 # Configurations used for continuous integration
 if(CI_CONFIG)
-  include(CI/config/${CI_CONFIG}.cmake)
+  string(REPLACE "," ";" CI_CONFIG_LIST ${CI_CONFIG})
+  FOREACH(_CI ${CI_CONFIG_LIST})
+    include(CI/config/${_CI}.cmake)
+  ENDFOREACH(_CI CI_CONFIG_LIST)
 endif()
 
 # ---------- Docker or not docker ... ------------------------

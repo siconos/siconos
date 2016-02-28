@@ -27,7 +27,9 @@ env:
       - CXX=/usr/bin/clang++-3.8
       - OMPI_CC=/usr/bin/clang-3.8
       - OMPI_CXX=/usr/bin/clang++-3.8
-      - LLVM_SYMBOLIZER=llvm-symbolizer-3.8
+      - LLVM_SYMBOLIZER=/usr/lib/llvm-3.8/bin/llvm-symbolizer
+      - ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.8/bin/llvm-symbolizer
+      - MSAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.8/bin/llvm-symbolizer
 
   clang:
     any:
@@ -48,7 +50,7 @@ pkgs:
   build-base:
     any:
       - make
-      - cmake 
+      - cmake
       - boost
       - gmp
       - python-env
@@ -78,6 +80,23 @@ pkgs:
       - scipy
       - python-matplotlib
 
+  python3-env:
+    debian:
+      - python3
+      - python3-dev
+      - python3-lxml
+      - python3-pytest
+      - python3-scipy
+      - python3-matplotlib
+    fedora:
+      - python3
+      - python3-devel
+      - python3-lxml
+      - python3-scipy
+      - python3-pytest
+      - python3-scipy
+      - python3-matplotlib
+
   cmake:
     ubuntu-12.04:
        - python-software-properties
@@ -101,7 +120,7 @@ pkgs:
   gnu-c++:
     debian: g++
     fedora: gcc-c++
-  
+
   boost:
     debian: libboost-dev
     fedora: boost-devel
@@ -110,6 +129,9 @@ pkgs:
     debian:
       libboost-filesystem-dev
       libboost-serialization-dev
+    fedora:
+      boost-filesystem
+      boost-serialization
 
   gmp:
     debian: libgmp-dev
@@ -223,3 +245,8 @@ pkgs:
     any:
       command: wget http://siconos.gforge.inria.fr/build-42/libcxx_msan-clang-3.6.tar.xz &&
                tar xJf libcxx_msan-clang-3.6.tar.xz -C /
+
+# dummy target
+  cfi:
+    any:
+      command: mkdir /tmp/clang && ln -s /usr/bin/ld.gold /tmp/clang/ld

@@ -26,7 +26,7 @@ class CiTask():
         self._cmake_cmd = cmake_cmd
 
     def build_dir(self, src):
-        return src.replace('.', '_') + self._distrib.replace(':', '-') + '_' + self._ci_config
+        return src.replace('.', '_') + self._distrib.replace(':', '-') + '_' + '-'.join(self._ci_config)
 
     def templates(self):
         # remove build-base, gnu-c++, gfortran, it is redundant
@@ -39,7 +39,8 @@ class CiTask():
                  ci_config=self._ci_config, fast=self._fast, pkgs=self._pkgs,
                  srcs=self._srcs, targets=self._targets, cmake_cmd=self._cmake_cmd,
                  add_pkgs=None, remove_pkgs=None, add_srcs=None,
-                 remove_srcs=None, add_targets=None, remove_targets=None):
+                 remove_srcs=None, add_targets=None, remove_targets=None,
+                 with_examples=False):
 
             if add_pkgs is not None:
                 pkgs = self._pkgs + add_pkgs
@@ -48,7 +49,7 @@ class CiTask():
                 pkgs = list(filter(lambda p: p not in remove_pkgs, pkgs))
 
             if add_srcs is not None:
-                srcs += self._srcs + add_srcs
+                srcs += add_srcs
 
             if remove_srcs is not None:
                 srcs = list(filter(lambda p: p not in remove_srcs, srcs))
@@ -58,6 +59,13 @@ class CiTask():
 
             if remove_targets is not None:
                 targets = list(filter(lambda p: p not in remove_targets, targets))
+
+            if with_examples:
+                if 'examples' not in srcs:
+                    srcs += ['examples']
+                    targets.update({'.': ['docker-build', 'docker-cmake', 'docker-make',
+                                          'docker-make-install'],
+                                    'examples': ['docker-build', 'docker-ctest']})
 
             return CiTask(mode, build_configuration, distrib, ci_config, fast,
                           pkgs, srcs, targets, cmake_cmd)
@@ -83,7 +91,7 @@ class CiTask():
             templ_list = [p.replace('+', 'x') for p in self._pkgs if p not in redundants]
 
             cmake_args = ['-DMODE={0}'.format(self._mode),
-                          '-DCI_CONFIG={0}'.format(self._ci_config),
+                          '-DCI_CONFIG={0}'.format(','.join(self._ci_config)),
                           '-DWITH_DOCKER=1',
                           '-DBUILD_CONFIGURATION={0}'.format(
                               self._build_configuration),

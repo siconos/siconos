@@ -29,15 +29,18 @@ siconos_fedora_latest = siconos_default.copy()(
 
 siconos_openblas_lapacke = siconos_default.copy()(
     remove_pkgs=['atlas-lapack'],
-    add_pkgs=['openblas-lapacke'])
+    add_pkgs=['openblas-lapacke'],
+    with_examples=True)
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
     ci_config='with_bullet',
+    with_examples=True,
     add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz'])
 
 siconos_clang_asan = siconos_clang.copy()(
-    ci_config='with_asan_clang',
-    add_pkgs=['mumps', 'hdf5'])
+    ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization'),
+    add_pkgs=['mumps', 'hdf5', 'serialization'],
+    with_examples=True)
 
 # <clang-3.7.1 does not support linux 4.2
 # This will likely hurt you
@@ -45,18 +48,26 @@ siconos_clang_msan = siconos_default.copy()(
     distrib='debian:jessie',
     ci_config='with_msan',
     build_configuration='Debug',
-    add_pkgs=['clang-3.8', 'libcxx_msan', 'wget', 'xz'])
+    add_pkgs=['clang-3.8', 'libcxx_msan', 'wget', 'xz'],
+    with_examples=True)
+
+siconos_clang_cfi = siconos_default.copy()(
+    distrib='debian:jessie',
+    ci_config='with_cfi',
+    build_configuration='Debug',
+    add_pkgs=['clang-3.8', 'mumps', 'hdf5', 'cfi'])
 
 siconos_gcc_asan = siconos_fedora_latest.copy()(
-    ci_config='with_asan',
+    ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5', 'asan'])
+    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization'],
+    with_examples=True)
 
 siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
-    ci_config='with_asan',
+    ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     distrib='fedora:rawhide',
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5', 'asan'])
+    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization'])
 
 siconos_serialization = siconos_default.copy()(
     ci_config='with_serialization',
@@ -69,10 +80,7 @@ siconos_with_mumps = siconos_default.copy()(
 
 siconos_default_examples = siconos_default.copy()(
     ci_config='examples',
-    srcs=['.', 'examples'],
-    targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
-                   'docker-make-install'],
-             'examples': ['docker-build', 'docker-ctest']})
+    with_examples=True)
 
 
 # dispatch based on hostname and distrib type (to min. disk requirement)
