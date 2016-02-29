@@ -152,7 +152,11 @@ add_custom_target(uninstall
 
 # =========== RPATH stuff ===========
 # do not skip the full RPATH for the build tree
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
+if(FORCE_SKIP_RPATH)
+  set(CMAKE_SKIP_BUILD_RPATH TRUE)
+else(FORCE_SKIP_RPATH)
+  set(CMAKE_SKIP_BUILD_RPATH FALSE)
+endif(FORCE_SKIP_RPATH)
 
 # when building, don't use the install RPATH already
 # (but later on when installing)
