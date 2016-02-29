@@ -58,7 +58,11 @@ else()
     # --- Search python library corresponding to python exec.
     find_library(PYTHON_LIBRARY
       NAMES
-      python${PYTHON_VERSION_NO_DOTS} python${PYTHON_VERSION}
+      python${PYTHON_VERSION_NO_DOTS}
+      python${PYTHON_VERSION}mu
+      python${PYTHON_VERSION}m
+      python${PYTHON_VERSION}u
+      python${PYTHON_VERSION}
       NO_DEFAULT_PATH
       HINTS ${PYTHON_PREFIX} ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config-${CMAKE_LIBRARY_ARCHITECTURE}
       PATH_SUFFIXES lib libs
