@@ -110,6 +110,8 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     bool ret;
     PyObject* res = PyObject_CallMethodObjArgs(scipy_mod, PyString_FromString("issparse"), o, NULL);
 
+    if (!res) return false;
+
     ret = (res == Py_True);
     Py_DECREF(res);
 
@@ -302,7 +304,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     {
       PyErr_Warn(PyExc_UserWarning, "Performance warning: the given sparse matrix is neither csc or coo, we have to perform a conversion to coo");
       coo = PyObject_CallMethodObjArgs(scipy_mod, PyString_FromString("coo_matrix"), obj, NULL);
-      if (!coo) { PyErr_SetString(PyExc_RuntimeError, "Conversion to coo failed!"); return 0; }
+      if (!coo) { if (!PyErr_Occurred()) { PyErr_SetString(PyExc_RuntimeError, "Conversion to coo failed!"); }; return 0; }
       coo_new_alloc = 1;
     }
     else

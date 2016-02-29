@@ -80,18 +80,13 @@ Py_XDECREF(py_out);
 #if PY_MAJOR_VERSION >= 3
 
 #define PyString_Type PyBytes_Type
-#define PyString_Check PyBytes_Check
 #define PyStringObject PyBytesObject
-#define PyString_FromString PyBytes_FromString
 #define PyString_FromStringAndSize PyBytes_FromStringAndSize
-#define PyString_AS_STRING PyBytes_AS_STRING
 #define PyString_AsStringAndSize PyBytes_AsStringAndSize
 #define PyString_FromFormat PyBytes_FromFormat
 #define PyString_Concat PyBytes_Concat
 #define PyString_ConcatAndDel PyBytes_ConcatAndDel
-#define PyString_AsString PyBytes_AsString
 #define PyString_GET_SIZE PyBytes_GET_SIZE
-#define PyString_Size PyBytes_Size
 
 #define PyUString_Type PyUnicode_Type
 #define PyUString_Check PyUnicode_Check
