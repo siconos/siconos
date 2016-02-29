@@ -213,7 +213,7 @@ pkgs:
 
   umfpack:
     debian:
-      - libsuitesparse-metis-dev
+      - libsuitesparse-dev
     fedora:
       - suitesparse-devel
 
