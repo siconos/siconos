@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import sys
-print sys.path
 import numpy as np
 
 # import Siconos.Numerics * fails with py.test!
@@ -26,8 +24,6 @@ lcp = N.LCP(M, q)
 
 ztol = 1e-4
 
-import sys
-print sys.path
 def test_lcp_pgs():
     SO=N.SolverOptions(lcp,N.SICONOS_LCP_PGS)
     info  = N.lcp_pgs(lcp,z,w,SO)
