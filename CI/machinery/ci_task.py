@@ -123,7 +123,7 @@ class CiTask():
 
                 for target in self._targets[src]:
 
-                    check_call(['make'] + '-ki' + [target], cwd=bdir)
+                    check_call(['make'] + ['-ki'] + [target], cwd=bdir)
 
             except CalledProcessError as error:
                 return_code = 1
