@@ -53,7 +53,6 @@ pkgs:
       - cmake
       - boost
       - gmp
-      - python-env
       - swig
       - cppunit
 
