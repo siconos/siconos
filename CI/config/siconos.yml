@@ -212,6 +212,11 @@ pkgs:
     debian:
       - libbullet-dev
 
+  umfpack:
+    debian:
+      - libsuitesparse-metis-dev
+    fedora:
+      - suitesparse-devel
 
   asan:
     fedora:
