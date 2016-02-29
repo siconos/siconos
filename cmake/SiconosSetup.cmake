@@ -92,6 +92,7 @@ endif()
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
   find_package(PythonFull REQUIRED)
   include(FindPythonModule)
+  get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 
   # --- xml schema. Used in tests. ---
   if(WITH_XML)

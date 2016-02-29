@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON_EXE_NAME@
 
-# Siconos-Kernel version @SICONOS_VERSION@, Copyright INRIA 2005-2014
+# Siconos-Kernel version @SICONOS_VERSION@, Copyright INRIA 2005-2016
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 # Siconos is a free software; you can redistribute it and/or modify
@@ -88,7 +88,7 @@ def silent_try(command, *_args):
 def cartridge():
     sys.stdout.write("""
 |=============================================================================|
-|          Siconos-Kernel version {0}.{1}.{2}, Copyright INRIA 2005-2015      |
+|          Siconos-Kernel version {0}.{1}.{2}      Copyright INRIA 2005-2016      |
 |                                                                             |
 |                 Free software under GNU General Public License.             |
 |=============================================================================|
@@ -342,7 +342,7 @@ if __name__ == '__main__':
             '{0}:{1}:.'.\
             format(os.getenv('LD_LIBRARY_PATH'),
                    os.path.join(siconos_prefix, lib_dir))
-       
+
         env['Path'] = '{0};{1}'.format(os.getenv('Path'),
                                        os.path.join(siconos_prefix, 'bin'))
         if 'install' in make_targets:
