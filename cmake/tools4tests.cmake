@@ -9,8 +9,9 @@ MACRO(BEGIN_TEST _D)
   # find and copy data files : *.mat, *.dat and *.xml, and etc.
   FILE(GLOB_RECURSE _DATA_FILES 
     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
-    *.mat 
+    *.mat
     *.dat
+    *.hdf5
     *.xml
     *.DAT
     *.INI)
@@ -44,6 +45,7 @@ MACRO(BEGIN_TEST2 _D)
     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
     *.mat 
     *.dat
+    *.hdf5
     *.xml
     *.DAT
     *.INI)
