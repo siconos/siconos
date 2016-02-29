@@ -26,7 +26,11 @@ class CiTask():
         self._cmake_cmd = cmake_cmd
 
     def build_dir(self, src):
-        return src.replace('.', '_') + self._distrib.replace(':', '-') + '_' + '-'.join(self._ci_config)
+        if isinstance(self._ci_config, str):
+            ci_config_name = self._ci_config
+        else:
+            ci_config_name = '-'.join(self._ci_config)
+        return src.replace('.', '_') + self._distrib.replace(':', '-') + '_' + ci_config_name
 
     def templates(self):
         # remove build-base, gnu-c++, gfortran, it is redundant
@@ -63,7 +67,7 @@ class CiTask():
             if with_examples:
                 if 'examples' not in srcs:
                     srcs += ['examples']
-                    targets.update({'.': ['docker-build', 'docker-cmake', 'docker-make',
+                    targets.update({'.': ['docker-build', 'docker-ctest',
                                           'docker-make-install'],
                                     'examples': ['docker-build', 'docker-ctest']})
 
@@ -87,14 +91,18 @@ class CiTask():
 
             os.makedirs(bdir)
 
-            redundants = ['build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz', 'asan', 'cppunit_clang']
+            redundants = ['build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz', 'asan', 'cppunit_clang', 'python-env']
             templ_list = [p.replace('+', 'x') for p in self._pkgs if p not in redundants]
 
-            # hm python is so lovely
-            if isinstance(self._ci_config, str):
-                ci_config_args = self._ci_config
+            # special case for examples
+            if src is 'examples':
+                ci_config_args = 'examples'
             else:
-                ci_config_args = ','.join(self._ci_config)
+                # hm python is so lovely
+                if isinstance(self._ci_config, str):
+                    ci_config_args = self._ci_config
+                else:
+                    ci_config_args = ','.join(self._ci_config)
 
             cmake_args = ['-DMODE={0}'.format(self._mode),
                           '-DCI_CONFIG={0}'.format(ci_config_args),
@@ -115,7 +123,7 @@ class CiTask():
 
                 for target in self._targets[src]:
 
-                    check_call(['make'] + [target], cwd=bdir)
+                    check_call(['make'] + '-ki' + [target], cwd=bdir)
 
             except CalledProcessError as error:
                 return_code = 1

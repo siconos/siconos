@@ -3,7 +3,7 @@ from machinery.ci_task import CiTask
 siconos_default = CiTask(
     ci_config='default',
     distrib='ubuntu:14.04',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack', 'lpsolve'],
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack', 'lpsolve', 'python-env'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
@@ -16,26 +16,31 @@ siconos_ubuntu_15_04 = siconos_default.copy()(
     distrib='ubuntu:15.04')
 
 siconos_ubuntu_15_10 = siconos_default.copy()(
+    ci_config='with_unfpack',
+    add_pkgs=('umfpack',),
     distrib='ubuntu:15.10')
 
 siconos_profiling = siconos_ubuntu_15_10.copy()(
-    build_configuration='Profiling')
+    build_configuration='Profiling',
+    add_pkgs=('valgrind',))
 
 # note fedora/atlas-lapack in siconos.yml -> cmake does not detect blas
 siconos_fedora_latest = siconos_default.copy()(
     distrib='fedora:latest',
-    remove_pkgs=['atlas-lapack'],
-    add_pkgs=['openblas-lapacke'])
+    remove_pkgs=['atlas-lapack', 'python-env'],
+    add_pkgs=['openblas-lapacke', 'python3-env'])
 
 siconos_openblas_lapacke = siconos_default.copy()(
+    ci_config='with_unfpack',
     remove_pkgs=['atlas-lapack'],
-    add_pkgs=['openblas-lapacke'],
+    add_pkgs=['openblas-lapacke', 'umfpack'],
     with_examples=True)
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
     ci_config='with_bullet',
     with_examples=True,
-    add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz'])
+    remove_pkgs=('python-env',),
+    add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz', 'python3-env'])
 
 siconos_clang_asan = siconos_clang.copy()(
     ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization'),
