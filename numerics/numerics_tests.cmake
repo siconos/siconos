@@ -540,6 +540,8 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(AlartCurnierFunctions_test fc3d_AlartCurnierFunctions_test.c)
   IF(WITH_FCLIB)
   NEW_TEST(FCLIB_test1 fc3d_writefclib_local_test.c)
+  NEW_TEST(FCLIB_GFC3D_test1 gfc3d_fclib_cubeH8.c)
+  NEW_TEST(FCLIB_GFC3D_test2 gfc3d_test20.c)
   ENDIF(WITH_FCLIB)
   SET(FC3D_DATA_SET
    "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;Example1_Fc3D.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;NESpheres_10_1.dat;NESpheres_30_1.dat;OneObject-i100000-499.hdf5.dat;Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;Rover4396.dat;Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;KaplasTower-i1061-4.hdf5.dat;Confeti-ex13-Fc3D-SBM.dat;BoxesStack1-i100000-32.hdf5.dat;FrictionContactProblem00237.dat;FrictionContactProblem00727.dat")

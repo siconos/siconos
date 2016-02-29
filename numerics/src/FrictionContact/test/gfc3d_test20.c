@@ -51,18 +51,9 @@ int main(void)
   int dim = problem->dimension;
   int n = problem->M->size1;
 
-  double *reaction = (double*)malloc(dim * NC * sizeof(double));
-  double *velocity = (double*)malloc(dim * NC * sizeof(double));
-  double *globalvelocity = (double*)malloc(n * sizeof(double));
-  for (k = 0 ; k < dim * NC; k++)
-  {
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
-  }
-  for (k = 0 ; k < n; k++)
-  {
-    globalvelocity[k] = 0.0;
-  }
+  double *reaction = (double*)calloc(dim * NC, sizeof(double));
+  double *velocity = (double*)calloc(dim * NC, sizeof(double));
+  double *globalvelocity = (double*)calloc(n, sizeof(double));
 
   if (dim == 2)
   {

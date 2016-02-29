@@ -16,27 +16,27 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT_TEST_FUNCTION_H
-#define FRICTIONCONTACT_TEST_FUNCTION_H
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
+#include "frictionContact_test_function.h"
 
-#include "GAMSlink.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
+int main(void)
 {
-#endif
+  int info = 0 ;
+  char filename[50] = "./data/CubeH8.hdf5";
+  printf("Test on %s\n", filename);
 
-  int frictionContact_test_function(FILE * f, SolverOptions * options);
-  void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId);
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
+  info = gfc3d_setDefaultSolverOptions(options, SICONOS_GLOBAL_FRICTION_3D_NSGS);
+  options->dparam[0] = 1e-08;
+  options->iparam[0] = 100000;
 
-#if defined(WITH_FCLIB)
-  int frictionContact_test_function_hdf5(const char * path, SolverOptions * options);
-  int gfc3d_test_function_hdf5(const char* path, SolverOptions* options);
-#endif
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+  info = gfc3d_test_function_hdf5(filename, options);
+
+  deleteSolverOptions(options);
+  free(options);
+  printf("\nEnd of test on %s\n",filename);
+  return info;
 }
-#endif
-
-#endif
-
-
