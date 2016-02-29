@@ -16,7 +16,7 @@ siconos_ubuntu_15_04 = siconos_default.copy()(
     distrib='ubuntu:15.04')
 
 siconos_ubuntu_15_10 = siconos_default.copy()(
-    ci_config='with_unfpack',
+    ci_config='with_umfpack',
     add_pkgs=['umfpack'],
     distrib='ubuntu:15.10')
 
@@ -27,11 +27,12 @@ siconos_profiling = siconos_ubuntu_15_10.copy()(
 # note fedora/atlas-lapack in siconos.yml -> cmake does not detect blas
 siconos_fedora_latest = siconos_default.copy()(
     distrib='fedora:latest',
+    ci_config='with_umfpack',
     remove_pkgs=['atlas-lapack', 'python-env'],
-    add_pkgs=['openblas-lapacke', 'python3-env'])
+    add_pkgs=['openblas-lapacke', 'python3-env', 'umfpack'])
 
 siconos_openblas_lapacke = siconos_default.copy()(
-    ci_config='with_unfpack',
+    ci_config='with_umfpack',
     remove_pkgs=['atlas-lapack'],
     add_pkgs=['openblas-lapacke', 'umfpack'],
     with_examples=True)
