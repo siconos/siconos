@@ -36,6 +36,7 @@ option(WITH_MECHANISMS "Generation of bindings for Saladyn Mechanisms toolbox. D
 option(WITH_XML "Enable xml files i/o. Default = ON" ON)
 option(WITH_DOCKER "Build inside a docker container. Default = OFF" OFF)
 option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)
+option(NO_RUNTIME_BUILD_DEP "Do not cehck for runtime dependencies. Useful only for packaging. Default = OFF" OFF)
 
 # Set python install mode:
 # - user --> behave as 'python setup.py install --user'

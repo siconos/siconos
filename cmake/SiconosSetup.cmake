@@ -96,7 +96,9 @@ if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
   # --- xml schema. Used in tests. ---
   if(WITH_XML)
     set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/config/xmlschema/SiconosModelSchema-V3.7.xsd")
-    find_python_module(lxml REQUIRED)
+    IF(NOT NO_RUNTIME_BUILD_DEP)
+      find_python_module(lxml REQUIRED)
+    ENDIF(NOT NO_RUNTIME_BUILD_DEP)
   endif()
 
 endif()
