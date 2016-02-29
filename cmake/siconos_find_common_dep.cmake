@@ -174,7 +174,9 @@ if(WITH_PYTHON_WRAPPER)
   endif()
   include(${SWIG_USE_FILE})
   include(FindPythonModule)
-  find_python_module(scipy REQUIRED) # for sparse
+  if(NOT NO_RUNTIME_BUILD_DEP)
+    find_python_module(scipy REQUIRED) # for sparse
+  ENDIF(NOT NO_RUNTIME_BUILD_DEP)
 endif()
 
 
