@@ -33,10 +33,6 @@ Documentation to be done
 
 #include "SiconosConfig.h"
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

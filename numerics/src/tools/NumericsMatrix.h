@@ -118,7 +118,6 @@ The following linear algebra operation are supported:
 #include "SiconosConfig.h"
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
-#include "sanitizer.h"
 
 typedef struct
 {

@@ -100,7 +100,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
     for (int ic = 0 ; ic < nc ; ic++) mu[ic] = fmax(0.0, problem->mu[ic] *  reaction [ic * 3]);
     if (iparam[1] == 0 )
     {
-      internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]/problem->numberOfContacts);
+      internalsolver_options->dparam[0] = fmax(error/10.0, options->dparam[0]/problem->numberOfContacts);
     }
     else if (iparam[1] ==1)
     {

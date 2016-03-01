@@ -28,7 +28,7 @@
 #include <math.h>
 //#define VERBOSE_DEBUG
 #include "Friction_cst.h"
-
+#include "sanitizer.h"
 
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
