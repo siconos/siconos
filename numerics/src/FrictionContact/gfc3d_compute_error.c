@@ -56,7 +56,9 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict 
 
   cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
 
-  *error =   cblas_dnrm2(n , globalVelocitytmp , 1);
+  /* We first accumulate the square terms and at the end we take the square
+   * root */
+  *error = cblas_ddot(n, globalVelocitytmp, 1, globalVelocitytmp, 1);
 
   cblas_dcopy(m, problem->b, 1, velocity, 1);
   NM_tgemv(1, H, globalVelocity, 1, velocity);
@@ -77,6 +79,8 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict 
     worktmp[2] = reaction[ic * 3 + 2] -  worktmp[2];
     *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
   }
+
+  /* Done, taking the square root */
   *error = sqrt(*error);
 
   /* Computes error */
