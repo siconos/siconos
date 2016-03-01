@@ -142,6 +142,7 @@ int main(int argc, char* argv[])
   int n = Ndof;
 
   GlobalFrictionContactProblem numericsProblem;
+  globalFrictionContact_null(&numericsProblem);
   numericsProblem.numberOfContacts = NC;
   numericsProblem.dimension = 3;
   numericsProblem.mu = mu;
@@ -150,13 +151,12 @@ int main(int argc, char* argv[])
 
   numericsProblem.M = newNumericsMatrix();
   NumericsMatrix *MM =  numericsProblem.M;
-  MM->storageType = 1;
+  MM->storageType = NM_SPARSE_BLOCK;
   MM->size0 = Ndof;
   MM->size1 = Ndof;
 
 
   MM->matrix1 = newSBM();
-  MM->matrix0 = NULL;
   SparseBlockStructuredMatrix *MBlockMatrix = MM->matrix1;
   MBlockMatrix->nbblocks = 3;
   double * block[3] = {M11, M22, M33};
@@ -181,7 +181,6 @@ int main(int argc, char* argv[])
   HH->size1 = 3 * NC;
 
   HH->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-  HH->matrix0 = NULL;
   SparseBlockStructuredMatrix *HBlockMatrix = HH->matrix1;
   HBlockMatrix->nbblocks = 2;
   double * hblock[3] = {H00, H20};
@@ -206,22 +205,13 @@ int main(int argc, char* argv[])
 
   // Unknown Declaration
 
-  double *reaction = (double*)malloc(m * sizeof(double));
-  double *velocity = (double*)malloc(m * sizeof(double));
-  double *globalVelocity = (double*)malloc(n * sizeof(double));
-  for (k = 0 ; k < m; k++)
-  {
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
-  };
-  for (k = 0 ; k < n; k++)
-  {
-    globalVelocity[k] = 0.0;
-  };
+  double *reaction = (double*)calloc(m, sizeof(double));
+  double *velocity = (double*)calloc(m, sizeof(double));
+  double *globalVelocity = (double*)calloc(n, sizeof(double));
   // Numerics and Solver Options
 
   NumericsOptions numerics_options;
-  numerics_options.verboseMode = 1; // turn verbose mode to off by default
+  numerics_options.verboseMode = 4; // turn verbose mode to off by default
 
 
 
@@ -256,9 +246,14 @@ int main(int argc, char* argv[])
   //     freeSBM(MM->matrix1);
   //     freeSBM(HH->matrix1);
   free(MM->matrix1);
+  MM->matrix1 = NULL;
   free(HH->matrix1);
+  HH->matrix1 = NULL;
+  freeNumericsMatrix(MM);
+  freeNumericsMatrix(HH);
   free(MM);
   free(HH);
+  gfc3d_free_workspace(&numericsProblem);
 
 
   /*     while (1) sleep(60); */

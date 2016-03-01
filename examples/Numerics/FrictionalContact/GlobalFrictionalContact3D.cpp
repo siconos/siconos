@@ -119,6 +119,7 @@ int main(int argc, char* argv[])
   int i = 0, k = 0;
 
   GlobalFrictionContactProblem numericsProblem;
+  globalFrictionContact_null(&numericsProblem);
   numericsProblem.numberOfContacts = NC;
   numericsProblem.dimension = 3;
   numericsProblem.mu = mu;
@@ -128,7 +129,7 @@ int main(int argc, char* argv[])
 
   numericsProblem.M = newNumericsMatrix();
   NumericsMatrix *MM = numericsProblem.M ;
-  MM->storageType = 0;
+  MM->storageType = NM_DENSE;
   MM->matrix0 = M;
   MM->size0 = n;
   MM->size1 = n;
@@ -136,7 +137,7 @@ int main(int argc, char* argv[])
 
   numericsProblem.H  = newNumericsMatrix();
   NumericsMatrix *HH = numericsProblem.H;
-  HH->storageType = 0;
+  HH->storageType = NM_DENSE;
   HH->matrix0 = H;
   HH->size0 = n;
   HH->size1 = m;
@@ -150,18 +151,9 @@ int main(int argc, char* argv[])
 
   // Unknown Declaration
 
-  double *reaction = (double*)malloc(m * sizeof(double));
-  double *velocity = (double*)malloc(m * sizeof(double));
-  double *globalVelocity = (double*)malloc(n * sizeof(double));
-  for (k = 0 ; k < m; k++)
-  {
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
-  };
-  for (k = 0 ; k < n; k++)
-  {
-    globalVelocity[k] = 0.0;
-  };
+  double *reaction = (double*)calloc(m, sizeof(double));
+  double *velocity = (double*)calloc(m, sizeof(double));
+  double *globalVelocity = (double*)calloc(n, sizeof(double));
 
   // Numerics and Solver Options
 
@@ -194,6 +186,7 @@ int main(int argc, char* argv[])
   free(globalVelocity);
   free(numericsProblem.M);
   free(numericsProblem.H);
+  gfc3d_free_workspace(&numericsProblem);
   return info;
 
 
