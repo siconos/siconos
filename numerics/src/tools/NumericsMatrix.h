@@ -119,10 +119,16 @@ The following linear algebra operation are supported:
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
 
+/** \struct NumericsMatrixInternalData NumericsMatrix.h 
+ * Structure for simple workspaces
+ */
 typedef struct
 {
   int iWorkSize; /**< size of iWork */
   int *iWork; /**< integer workspace */
+  int dWorkSize; /**< size of dWork */
+  double *dWork; /**< double workspace */
+  bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h
@@ -139,12 +145,12 @@ typedef struct
   int storageType; /**< the type of storage:
                       0: dense (double*),
                       1: SparseBlockStructuredMatrix,
-                      2: compressed sparse column (csc) via CSparse (from T. Davis)*/
+                      2: classical sparse (csc, csr or triplet) via CSparse (from T. Davis)*/
   int size0; /**< number of rows */
   int size1; /**< number of columns */
   double* matrix0; /**< dense storage */
   SparseBlockStructuredMatrix* matrix1; /**< sparse block storage */
-  NumericsSparseMatrix* matrix2; /**< csc storage */
+  NumericsSparseMatrix* matrix2; /**< csc, csr or triplet storage */
 
   NumericsMatrixInternalData* internalData; /**< internal storage used for workspace amoung other */
 
@@ -512,9 +518,16 @@ extern "C"
   /** Integer work vector initialization, if needed.
    * \param[in,out] A pointer on a NumericsMatrix.
    * \param[in] size the size of needed space.
-   * \return pointer on A->iWork allocated space of size A->size0.
+   * \return pointer on A->iWork allocated space of with the right size
    */
   int* NM_iWork(NumericsMatrix *A, int size);
+
+  /** Double workspace initialization, if needed.
+   * \param[in,out] A pointer on a NumericsMatrix.
+   * \param[in] size the size of needed space.
+   * \return pointer on A->dWork allocated space of with the right size
+   */
+  double* NM_dWork(NumericsMatrix *A, int size);
 
   /** set NumericsMatrix fields to NULL
    * \param A a matrix

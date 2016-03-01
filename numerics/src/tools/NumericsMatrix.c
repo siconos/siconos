@@ -30,6 +30,7 @@
 #include "SiconosLapack.h"
 #include "NumericsOptions.h"
 #include "misc.h"
+#include "sanitizer.h"
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
@@ -188,6 +189,27 @@ void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMat
   }
 }
 
+void NM_internalData_free(NumericsMatrix* m)
+{
+  assert(m && "NM_internalData_free, m == NULL");
+  if (m->internalData)
+  {
+    if (m->internalData->iWork)
+    {
+      assert (m->internalData->iWorkSize > 0);
+      free(m->internalData->iWork);
+      m->internalData->iWork = NULL;
+    }
+    if (m->internalData->dWork)
+    {
+      assert (m->internalData->dWorkSize > 0);
+      free(m->internalData->dWork);
+      m->internalData->dWork = NULL;
+    }
+    free(m->internalData);
+    m->internalData = NULL;
+  }
+}
 
 void freeNumericsMatrix(NumericsMatrix* m)
 {
@@ -197,17 +219,7 @@ void freeNumericsMatrix(NumericsMatrix* m)
   NM_clearSparseBlock(m);
   NM_clearSparse(m);
 
-  if (m->internalData)
-  {
-    if (m->internalData->iWork)
-    {
-      assert (m->internalData->iWorkSize > 0);
-      free(m->internalData->iWork);
-      m->internalData->iWork = NULL;
-    }
-    free(m->internalData);
-    m->internalData = NULL;
-  }
+  NM_internalData_free(m);
 }
 
 
@@ -1400,7 +1412,16 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
     case NM_SPARSE_BLOCK:
     case NM_SPARSE:
       {
-        CHECK_RETURN(cs_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
+        /* if possible use the much simpler version provided by CSparse
+         Also at the time of writing, cs_aaxpy is bugged --xhub */
+        if (fabs(alpha - 1.) < 100*DBL_EPSILON && fabs(beta - 1.) < 100*DBL_EPSILON)
+        {
+          CHECK_RETURN(cs_gaxpy(NM_csc_trans(A), x, y));
+        }
+        else
+        {
+          CHECK_RETURN(cs_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
+        }
         break;
       }
     default:
@@ -1479,6 +1500,8 @@ NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
     NM_alloc_internalData(A);
     A->internalData->iWork = NULL;
     A->internalData->iWorkSize = 0;
+    A->internalData->dWork = NULL;
+    A->internalData->dWorkSize = 0;
   }
   return A->internalData;
 }
@@ -1510,6 +1533,33 @@ int* NM_iWork(NumericsMatrix* A, int size)
   return A->internalData->iWork;
 }
 
+double* NM_dWork(NumericsMatrix* A, int size)
+{
+  if (!NM_internalData(A)->dWork)
+  {
+    assert(A->internalData);
+
+    assert(A->internalData->dWorkSize == 0);
+    A->internalData->dWork = (double *) malloc(size * sizeof(double));
+    A->internalData->dWorkSize = size;
+  }
+  else
+  {
+    assert(A->internalData);
+
+    if (size > A->internalData->dWorkSize)
+    {
+      A->internalData->dWork = (double *) realloc(A->internalData->dWork, size * sizeof(double));
+      A->internalData->dWorkSize = size;
+    }
+  }
+
+  assert(A->internalData->dWork);
+  assert(A->internalData->dWorkSize >= size);
+
+  return A->internalData->dWork;
+}
+
 int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
 {
   assert(A->size0 == A->size1);
@@ -1522,8 +1572,45 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
   {
     assert(A->matrix0);
 
-    DGESV(A->size0, 1, A->matrix0, A->size0, NM_iWork(A, A->size0), b,
+    if (keep)
+    {
+      double* wkspace = NM_dWork(A, A->size0*A->size1);
+      int* ipiv = NM_iWork(A, A->size0);
+      if (!NM_internalData(A)->isLUfactorized)
+      {
+        cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
+        DGETRF(A->size0, A->size1, wkspace, A->size0, ipiv, &info);
+        if (info > 0)
+        {
+          if (verbose >= 2)
+          {
+            printf("NM_gesv: LU factorisation DGETRF failed. The %d-th diagonal element is 0\n", info);
+          }
+        }
+        else if (info < 0)
+        {
+          fprintf(stderr, "NM_gesv: LU factorisation DGETRF failed. The %d-th argument has an illegal value, stopping\n", -info);
+        }
+
+        if (info) { NM_internalData_free(A); return info; }
+
+        NM_internalData(A)->isLUfactorized = true;
+      }
+
+      DGETRS(LA_NOTRANS, A->size0, 1, wkspace, A->size0, ipiv, b, A->size0, &info);
+      if (info < 0)
+      {
+        if (verbose >= 2)
+        {
+          printf("NM_gesv: dense LU solve DGETRS failed. The %d-th argument has an illegal value, stopping\n", -info);
+        }
+      }
+    }
+    else
+    {
+      DGESV(A->size0, 1, A->matrix0, A->size0, NM_iWork(A, A->size0), b,
           A->size0, &info);
+    }
     break;
   }
 

@@ -28,6 +28,10 @@ extern "C"
 {
 #endif
 
+  /** Free the internalData of a NumericsMatrix
+   * \param m the matrix */
+  void NM_internalData_free(NumericsMatrix* m);
+
 
 #ifdef WITH_MUMPS
 #include <mpi.h>
