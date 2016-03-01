@@ -98,7 +98,6 @@
    Memcheck:Leak
    fun:realloc
    fun:_PyObject_GC_Resize
-   fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
 }
 
 {
@@ -106,7 +105,6 @@
    Memcheck:Leak
    fun:malloc
    fun:_PyObject_GC_New
-   fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
 }
 
 {
@@ -114,7 +112,13 @@
    Memcheck:Leak
    fun:malloc
    fun:_PyObject_GC_NewVar
-   fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
+}
+
+{
+   Siconos added this
+   Memcheck:Cond
+   fun:_PyObject_GC_Resize
+   fun:PyFrame_New
 }
 
 #
@@ -147,6 +151,12 @@
 {
    ADDRESS_IN_RANGE/Invalid read of size 4
    Memcheck:Value4
+   fun:PyObject_Free
+}
+
+{
+   ADDRESS_IN_RANGE/Invalid read of size 4
+   Memcheck:Value8
    fun:PyObject_Free
 }
 
