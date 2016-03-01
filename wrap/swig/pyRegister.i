@@ -115,7 +115,7 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   const TYPE &
   (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
 {
-   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok) SWIG_fail;
 }
 
@@ -125,7 +125,7 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   TYPE &
   (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
 {
-   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok) SWIG_fail;
 }
 
@@ -165,7 +165,7 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   const TYPE &
   (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
 {
-   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok) SWIG_fail;
 }
 
@@ -173,7 +173,7 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   TYPE &
   (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
 {
-   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok) SWIG_fail;
 }
 
@@ -191,7 +191,7 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
   // %is_new_object)
-  $1 = SiconosVector_in($input, array, &is_new_object, keeper);
+  $1 = SiconosVector_in($input, &array, &is_new_object, keeper);
   if (!$1) SWIG_fail;
 }
 
@@ -203,7 +203,7 @@ PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
   // %is_new_object)
-  $1 = SiconosVector_in($input, array, &is_new_object, keeper);
+  $1 = SiconosVector_in($input, &array, &is_new_object, keeper);
   if (!$1) SWIG_fail;
 }
 

@@ -130,7 +130,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
    cs_sparse Mtmp;
    cs_sparse* Mtmp_p = &Mtmp;
 
-   int res = cs_convert_from_scipy_sparse(obj, &Mtmp_p, array_data_, &array_data_ctrl_, array_i_, &array_i_ctrl_, array_p_, &array_p_ctrl_, &alloc_ctrl_);
+   int res = cs_convert_from_scipy_sparse(obj, &Mtmp_p, &array_data_, &array_data_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
 
 
    if (!res) { SWIG_fail; }

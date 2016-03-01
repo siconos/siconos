@@ -149,9 +149,9 @@ struct IsDense : public Question<bool>
     return lresult;
   }
 
-  SP::SiconosVector SP_SiconosVector_from_numpy(PyObject* vec, PyArrayObject* array, int* is_new_object)
+  SP::SiconosVector SP_SiconosVector_from_numpy(PyObject* vec, PyArrayObject** array_p, int* is_new_object)
   {
-    array = obj_to_array_fortran_allow_conversion(vec, NPY_DOUBLE, is_new_object);
+    PyArrayObject* array = obj_to_array_fortran_allow_conversion(vec, NPY_DOUBLE, is_new_object);
 
     if (!array)
     {
@@ -170,11 +170,14 @@ struct IsDense : public Question<bool>
       // copy : with SiconosVector based on resizable std::vector there is
       // no other way
       memcpy(tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
+
+      // for cleanup
+      *array_p = array;
       return tmp;
     }
   }
 
-  SP::SiconosVector SP_SiconosVector_in(PyObject* vec, PyArrayObject* array, int* is_new_object)
+  SP::SiconosVector SP_SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object)
   {
     void *argp1=0;
     int res1=0;
@@ -200,11 +203,11 @@ struct IsDense : public Question<bool>
     }
     else
     {
-      return SP_SiconosVector_from_numpy(vec, array, is_new_object);
+      return SP_SiconosVector_from_numpy(vec, array_p, is_new_object);
     }
   }
 
-  SiconosVector* SiconosVector_in(PyObject* vec, PyArrayObject* array, int* is_new_object, std::vector<SP::SiconosVector>& keeper)
+  SiconosVector* SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object, std::vector<SP::SiconosVector>& keeper)
   {
     void *argp1=0;
     int res1=0;
@@ -220,7 +223,7 @@ struct IsDense : public Question<bool>
     }
     else
     {
-      SP::SiconosVector tmp = SP_SiconosVector_from_numpy(vec, array, is_new_object);
+      SP::SiconosVector tmp = SP_SiconosVector_from_numpy(vec, array_p, is_new_object);
       keeper.push_back(tmp);
       return tmp.get();
     }
@@ -285,7 +288,8 @@ struct IsDense : public Question<bool>
       // try a conversion from numpy
       PyArrayObject* array = NULL;
       int is_new_object = 0;
-      c_result = SP_SiconosVector_from_numpy(obj, array, &is_new_object);
+      c_result = SP_SiconosVector_from_numpy(obj, &array, &is_new_object);
+      if (array && is_new_object) { Py_DECREF(array); }
     }
     else if (swig_argp)
     {
@@ -419,9 +423,9 @@ struct IsDense : public Question<bool>
     }
   }
 
-  SP::SimpleMatrix SimpleMatrix_from_numpy(PyObject* obj, PyArrayObject* array, int* is_new_object)
+  SP::SimpleMatrix SimpleMatrix_from_numpy(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
-    array = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, is_new_object);
+    PyArrayObject* array = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, is_new_object);
     if (!require_dimensions(array,2) ||
         !require_native(array) || !require_fortran(array))
       return std11::shared_ptr<SimpleMatrix>();
@@ -429,10 +433,12 @@ struct IsDense : public Question<bool>
     SP::SimpleMatrix result = SP::SimpleMatrix(new SimpleMatrix(array_size(array,0), array_size(array,1)));
     // copy this is due to SimpleMatrix based on resizable std::vector
     memcpy(result->getArray(), array_data(array), array_size(array,0)*array_size(array,1)*sizeof(double));
+    // for cleanup
+    *array_p = array;
     return result;
   }
 
-  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject* array, int* is_new_object, SP::SimpleMatrix* c_result)
+  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SP::SimpleMatrix* c_result)
   {
     void * swig_argp;
 
@@ -441,7 +447,7 @@ struct IsDense : public Question<bool>
     if (!SWIG_IsOK(swig_res))
     {
       // try a conversion from numpy
-      *c_result = SimpleMatrix_from_numpy(obj, array, is_new_object);
+      *c_result = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
       if (!c_result) { return false; }
     }
     else if (swig_argp)
@@ -452,14 +458,14 @@ struct IsDense : public Question<bool>
     return true;
   }
 
-  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject* array, int* is_new_object, SP::SiconosMatrix* c_result)
+  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SP::SiconosMatrix* c_result)
   {
     void * swig_argp;
     int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SiconosMatrix *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
-      *c_result = SimpleMatrix_from_numpy(obj, array, is_new_object);
+      *c_result = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
       if (!c_result) { return false; }
     }
     else if (swig_argp)
@@ -470,14 +476,14 @@ struct IsDense : public Question<bool>
     return true;
   }
 
-  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject* array, int* is_new_object, SiconosMatrix** c_result, std::vector<SP::SiconosMatrix>& keeper)
+  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SiconosMatrix** c_result, std::vector<SP::SiconosMatrix>& keeper)
   {
     void * swig_argp;
     int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SiconosMatrix *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
-      SP::SiconosMatrix tmp = SimpleMatrix_from_numpy(obj, array, is_new_object);
+      SP::SiconosMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
       if (!tmp) { return false; }
       keeper.push_back(tmp);
       *c_result = tmp.get();
@@ -490,14 +496,14 @@ struct IsDense : public Question<bool>
     return true;
   }
 
- bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject* array, int* is_new_object, SimpleMatrix** c_result, std::vector<SP::SimpleMatrix>& keeper)
+ bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SimpleMatrix** c_result, std::vector<SP::SimpleMatrix>& keeper)
   {
     void * swig_argp;
     int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SimpleMatrix *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
-      SP::SimpleMatrix tmp = SimpleMatrix_from_numpy(obj, array, is_new_object);
+      SP::SimpleMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
       if (!tmp) { return false; }
       keeper.push_back(tmp);
       *c_result = tmp.get();
@@ -517,7 +523,7 @@ struct IsDense : public Question<bool>
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
   // %is_new_object)
-  $1 = SP_SiconosVector_in($input, array, &is_new_object);
+  $1 = SP_SiconosVector_in($input, &array, &is_new_object);
   if (!$1) SWIG_fail;
 }
 
@@ -685,7 +691,7 @@ struct IsDense : public Question<bool>
   }
   else
   {
-    bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1);
+    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1);
     if (!ok) SWIG_fail;
   }
 }
@@ -694,7 +700,7 @@ struct IsDense : public Question<bool>
   const TYPE &
   (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
 {
-   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok) SWIG_fail;
 }
 
@@ -702,7 +708,7 @@ struct IsDense : public Question<bool>
   TYPE&
   (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
 {
-   bool ok = SiconosMatrix_from_python($input, array, &is_new_object, &$1, keeper);
+   bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok) SWIG_fail;
 }
 
@@ -744,7 +750,7 @@ struct IsDense : public Question<bool>
   // %typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SiconosMatrix> ()
   PyArrayObject* array_dout = NULL;
   int is_new_object_dout;
-  bool ok = SiconosMatrix_from_python($input, array_dout, &is_new_object_dout, &c_result);
+  bool ok = SiconosMatrix_from_python($input, &array_dout, &is_new_object_dout, &c_result);
   if (!ok) throw Swig::DirectorMethodException();
 }
 

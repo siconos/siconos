@@ -185,7 +185,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
 
 %fragment("NumericsMatrix", "header", fragment="NumPy_Fragments")
 {
-  int cs_convert_from_scipy_sparse(PyObject* obj, CSparseMatrix** m, PyArrayObject* array_data_, int* array_data_ctrl_, PyArrayObject* array_i_, int* array_i_ctrl_, PyArrayObject* array_p_, int* array_p_ctrl_, int* alloc_ctrl)
+  int cs_convert_from_scipy_sparse(PyObject* obj, CSparseMatrix** m, PyArrayObject** array_data_, int* array_data_ctrl_, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
   {
 
   assert(m);
@@ -238,16 +238,16 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
       PyObject* indices_ = PyObject_GetAttrString(obj, "indices");
       PyObject* indptr_ = PyObject_GetAttrString(obj, "indptr");
 
-      array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, array_data_ctrl_);
-      if (!array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); return 0; }
+      *array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, array_data_ctrl_);
+      if (!*array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); return 0; }
 
-      M->x = (double*)array_data(array_data_);
+      M->x = (double*)array_data(*array_data_);
 
       bool alloc_p = false;
-      %SAFE_CAST_INT(indptr_, M->n + 1, M->p, array_p_, array_p_ctrl_, alloc_p);
+      %SAFE_CAST_INT(indptr_, M->n + 1, M->p, *array_p_, array_p_ctrl_, alloc_p);
       if (alloc_p) { *alloc_ctrl |= ALLOC_CTRL_P; };
       bool alloc_i = false;
-      %SAFE_CAST_INT(indices_, nzmax, M->i, array_i_, array_i_ctrl_, alloc_i);
+      %SAFE_CAST_INT(indices_, nzmax, M->i, *array_i_, array_i_ctrl_, alloc_i);
       if (alloc_i) { *alloc_ctrl |= ALLOC_CTRL_I; };
 
       return 1;
@@ -278,16 +278,16 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
       PyObject* indices_ = PyObject_GetAttrString(obj, "indices");
       PyObject* indptr_ = PyObject_GetAttrString(obj, "indptr");
 
-      array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, array_data_ctrl_);
-      if (!array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); return 0; }
+      *array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, array_data_ctrl_);
+      if (!*array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); return 0; }
 
-      M->x = (double*)array_data(array_data_);
+      M->x = (double*)array_data(*array_data_);
 
       bool alloc_p = false;
-      %SAFE_CAST_INT(indptr_, nrows + 1, M->p, array_p_, array_p_ctrl_, alloc_p);
+      %SAFE_CAST_INT(indptr_, nrows + 1, M->p, *array_p_, array_p_ctrl_, alloc_p);
       if (alloc_p) { *alloc_ctrl |= ALLOC_CTRL_P; };
       bool alloc_i = false;
-      %SAFE_CAST_INT(indices_, nzmax, M->i, array_i_, array_i_ctrl_, alloc_i);
+      %SAFE_CAST_INT(indices_, nzmax, M->i, *array_i_, array_i_ctrl_, alloc_i);
       if (alloc_i) { *alloc_ctrl |= ALLOC_CTRL_I; };
 
       return 1;
@@ -328,16 +328,16 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     PyObject* row_ = PyObject_GetAttrString(coo, "row");
     PyObject* col_ = PyObject_GetAttrString(coo, "col");
 
-    array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, array_data_ctrl_);
-    if (!array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); return 0; }
+    *array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, array_data_ctrl_);
+    if (!*array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); return 0; }
 
-    M->x = (double*)array_data(array_data_);
+    M->x = (double*)array_data(*array_data_);
 
     bool alloc_p = false;
-    %SAFE_CAST_INT(col_, nnz, M->p, array_p_, array_p_ctrl_, alloc_p);
+    %SAFE_CAST_INT(col_, nnz, M->p, *array_p_, array_p_ctrl_, alloc_p);
     if (alloc_p) { *alloc_ctrl |= ALLOC_CTRL_P; };
     bool alloc_i = false;
-    %SAFE_CAST_INT(row_, nnz, M->i, array_i_, array_i_ctrl_, alloc_i);
+    %SAFE_CAST_INT(row_, nnz, M->i, *array_i_, array_i_ctrl_, alloc_i);
     if (alloc_i) { *alloc_ctrl |= ALLOC_CTRL_I; };
 
     if (coo_new_alloc)
@@ -349,7 +349,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
   }
   }
 
-  int NM_convert_from_scipy_sparse(PyObject* obj, NumericsMatrix* m, PyArrayObject* array_data_, int* array_data_ctrl_, PyArrayObject* array_i_, int* array_i_ctrl_, PyArrayObject* array_p_, int* array_p_ctrl_, int* alloc_ctrl)
+  int NM_convert_from_scipy_sparse(PyObject* obj, NumericsMatrix* m, PyArrayObject** array_data_, int* array_data_ctrl_, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
   {
     CSparseMatrix* csm = NULL;
     int res = cs_convert_from_scipy_sparse(obj, &csm, array_data_, array_data_ctrl_, array_i_, array_i_ctrl_, array_p_, array_p_ctrl_, alloc_ctrl);
@@ -382,7 +382,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
   }
 
 
-  NumericsMatrix* NM_convert_from_python(PyObject* obj, NumericsMatrix* tmpmat, PyArrayObject* array_data_, int* array_ctrl, PyArrayObject* array_i_, int* array_i_ctrl_, PyArrayObject* array_p_, int* array_p_ctrl_, int* alloc_ctrl)
+  NumericsMatrix* NM_convert_from_python(PyObject* obj, NumericsMatrix* tmpmat, PyArrayObject** array_data_, int* array_ctrl, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
   {
   void* argp = NULL;
   NumericsMatrix* out = NULL;
@@ -398,15 +398,17 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     if (!sp_conv) { return NULL; }
     else if (sp_conv < 0)
     {
-      array_data_ = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, array_ctrl);
+      PyArrayObject* array_data = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, array_ctrl);
 
-      if (!array_data_ || !require_dimensions(array_data_, 2) ||
-          !require_native(array_data_) || !require_fortran(array_data_)) return NULL;
+      if (!array_data || !require_dimensions(array_data, 2) ||
+          !require_native(array_data) || !require_fortran(array_data)) return NULL;
 
       tmpmat->storageType = NM_DENSE;
-      tmpmat->size0 =  array_size(array_data_, 0);
-      tmpmat->size1 =  array_size(array_data_, 1);
-      tmpmat->matrix0 = (double *)array_data(array_data_);
+      tmpmat->size0 =  array_size(array_data, 0);
+      tmpmat->size1 =  array_size(array_data, 1);
+      tmpmat->matrix0 = (double *)array_data(array_data);
+
+      *array_data_ = array_data;
     }
 
     out = tmpmat;
@@ -604,7 +606,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
  int alloc_ctrl_ = 0,
  NumericsMatrix *nummat = NULL)
 {
-   $1 = NM_convert_from_python($input, nummat, array_, &array_ctrl_, array_i_, &array_i_ctrl_, array_p_, &array_p_ctrl_, &alloc_ctrl_);
+   $1 = NM_convert_from_python($input, nummat, &array_, &array_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
 }
 
 
@@ -798,7 +800,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
     M = (cs_sparse *) malloc(sizeof(cs_sparse));
     if(!M) { PyErr_SetString(PyExc_RuntimeError, "Failed to allocate a cs_sparse"); SWIG_fail; }
 
-    int res = cs_convert_from_scipy_sparse($input, &M, array_data_, &array_data_ctrl_, array_i_, &array_i_ctrl_, array_p_, &array_p_ctrl_, &alloc_ctrl_);
+    int res = cs_convert_from_scipy_sparse($input, &M, &array_data_, &array_data_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
 
     if (!res) { SWIG_fail; }
     else if (res < 0) { PyErr_SetString(PyExc_RuntimeError, "Error the matrix is not sparse!"); SWIG_fail; }
