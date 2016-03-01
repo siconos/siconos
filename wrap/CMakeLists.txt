@@ -129,6 +129,9 @@ if(WITH_PYTHON_WRAPPER)
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py build
     COMMENT "Build ${SICONOS_PYTHON_PACKAGE} package")
 
+  IF(UNIX AND NOT APPLE)
+    LIST(APPEND python_install_options "--root=$(DESTDIR)/")
+  ENDIF(UNIX AND NOT APPLE)
   add_custom_target(python-install
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install ${python_install_options}
     VERBATIM
