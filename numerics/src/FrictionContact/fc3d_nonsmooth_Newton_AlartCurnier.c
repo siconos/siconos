@@ -32,6 +32,9 @@
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
 
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
 
 void fc3d_AlartCurnierFunction(
   unsigned int problemSize,

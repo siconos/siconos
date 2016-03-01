@@ -33,6 +33,10 @@
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
 
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
 void fc3d_NaturalMapFunction(
   unsigned int problemSize,
   NaturalMapFun3x3Ptr computeACFun3x3,
