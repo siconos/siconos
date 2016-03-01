@@ -427,7 +427,7 @@ if __name__ == '__main__':
     if exec_:
         os.chdir(call_pwd)
         if source_is_python:
-            exec_prefix.append('python')
+            exec_prefix.append('@PYTHON_EXE_NAME@')
             if 'Windows' in platform.uname():
                 var_separator = ';'
             else:
