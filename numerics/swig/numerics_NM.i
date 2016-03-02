@@ -174,4 +174,11 @@ fail:
  }
 }
 
-
+%extend SparseBlockStructuredMatrix
+{
+ ~SparseBlockStructuredMatrix()
+ {
+   freeSBM($self);
+   free($self);
+ }
+}

@@ -1825,3 +1825,32 @@ void NM_triplet_alloc(NumericsMatrix* A, csi nzmax)
 {
   NM_sparse(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
 }
+
+CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m)
+{
+  assert(m);
+  CSparseMatrix* out = NULL;
+  if (m->nz >= 0) /* triplet  */
+  {
+    out = cs_spalloc(m->m, m->n, m->nzmax, 1, 1);
+  }
+  else if (m->nz == -1) /* csc */
+  {
+    out = cs_spalloc(m->m, m->n, m->nzmax, 1, 0);
+  }
+  else if (m->nz == -2) /* csr  */
+  {
+    out = cs_spalloc(m->n, m->m, m->nzmax, 1, 0);
+    out->nz = -2;
+    out->m = m->m;
+    out->n = m->n;
+  }
+  else
+  {
+    fprintf(stderr, "NM_copy :: error unknown type %d for CSparse matrix\n", m->nz);
+    exit(EXIT_FAILURE);
+  }
+
+  return out;
+}
+

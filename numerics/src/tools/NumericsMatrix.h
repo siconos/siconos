@@ -598,6 +598,12 @@ extern "C"
    */
   void NM_csr_alloc(NumericsMatrix* A, csi nzmax);
 
+  /** Allocate a CSparse matrix for future copy (as in NM_sparse_copy)
+   * \param m the matrix used as model
+   * \return an newly allocated matrix
+   */
+  CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

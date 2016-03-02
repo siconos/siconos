@@ -673,7 +673,7 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
   if (blmat->blocksize1)
   {
     free(blmat->blocksize1);
-    blmat->blocksize0 = NULL;
+    blmat->blocksize1 = NULL;
   }
 
   for (unsigned int i = 0 ; i < blmat->nbblocks ; i++)
@@ -681,6 +681,7 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
     if (blmat->block[i])
     {
       free(blmat->block[i]);
+      blmat->block[i] = NULL;
     }
   }
 

@@ -230,7 +230,13 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
       size_t nzmax = PyInt_AsLong(nnz_);
       Py_DECREF(nnz_);
 
-      CSparseMatrix* M = cs_spalloc(nrows, ncols, nzmax, 1, 0);
+      CSparseMatrix* M = (CSparseMatrix*) calloc(1, sizeof(CSparseMatrix));
+      if(!M) { PyErr_SetString(PyExc_RuntimeError, "Failed to allocate a cs_sparse"); return 0; }
+
+      M->nz = -1;
+      M->m = nrows;
+      M->n = ncols;
+      M->nzmax = nzmax;
       *m = M;
       if(!M) { PyErr_SetString(PyExc_RuntimeError, "Allocation of the csc matrix failed"); return 0; };
 
@@ -266,8 +272,11 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
       size_t nzmax = PyInt_AsLong(nnz_);
       Py_DECREF(nnz_);
 
-      CSparseMatrix* M = cs_spalloc(ncols, nrows, nzmax, 1, 0);
+      CSparseMatrix* M = (CSparseMatrix*) calloc(1, sizeof(CSparseMatrix));
+      if(!M) { PyErr_SetString(PyExc_RuntimeError, "Failed to allocate a cs_sparse"); return 0; }
+
       M->nz = -2;
+      M->nzmax = nzmax;
       M->m = nrows;
       M->n = ncols;
       *m = M;
@@ -318,7 +327,13 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     size_t nnz = PyInt_AsLong(nnz_);
     Py_DECREF(nnz_);
 
-    CSparseMatrix* M = cs_spalloc(nrows, ncols, nnz, 1, 1);
+
+    CSparseMatrix* M = (CSparseMatrix*) calloc(1, sizeof(CSparseMatrix));
+    if(!M) { PyErr_SetString(PyExc_RuntimeError, "Failed to allocate a cs_sparse"); return 0; }
+
+    M->m = nrows;
+    M->n = ncols;
+    M->nzmax = nnz;
     *m = M;
     M->nz = nnz;
 
@@ -553,13 +568,25 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
   void NM_clean_cs(CSparseMatrix* m, int alloc_ctrl)
   {
     assert(m);
-    if (alloc_ctrl & ALLOC_CTRL_P) { assert(m->p); free(m->p); m->p = NULL; }
-    if (alloc_ctrl & ALLOC_CTRL_I) { assert(m->i); free(m->i); m->i = NULL; }
+    if (alloc_ctrl & ALLOC_CTRL_P) { assert(m->p); free(m->p); }
+    if (alloc_ctrl & ALLOC_CTRL_I) { assert(m->i); free(m->i); }
+    // We do not own any data (we steal it from a numpy array)
+    m->p = NULL;
+    m->i = NULL;
+    m->x = NULL;
   }
 
   int NM_clean(NumericsMatrix* M, int alloc_ctrl)
   {
-    if (M->storageType == NM_SPARSE)
+    switch (M->storageType)
+    {
+    case NM_DENSE:
+    {
+      // We do not own the data
+      M->matrix0 = NULL;
+      break;
+    }
+    case NM_SPARSE:
     {
       assert(M->matrix2);
       switch (M->matrix2->origin)
@@ -585,6 +612,18 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
         return 0;
       }
       }
+    }
+    case NM_SPARSE_BLOCK:
+    {
+      // We do not own the data
+      M->matrix1 = NULL;
+      break;
+    }
+    default:
+    {
+      PyErr_SetString(PyExc_RuntimeError, "NM_clean: unknown matrix storageType!");
+      return 0;
+    }
     }
     return 1;
 
@@ -619,12 +658,15 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
 
 %typemap(freearg) (NumericsMatrix* A) {
   // %typemap(freearg) (NumericsMatrix* A)
-  if (nummat$argnum) { free(nummat$argnum); }
   if (array_ctrl_$argnum && array_$argnum) { Py_DECREF(array_$argnum); }
   if (array_i_ctrl_$argnum && array_i_$argnum) { Py_DECREF(array_i_$argnum); }
   if (array_p_ctrl_$argnum && array_p_$argnum) { Py_DECREF(array_p_$argnum); }
 
-  if (!NM_clean(nummat$argnum, alloc_ctrl_$argnum)) { return NULL;} 
+  if (nummat$argnum)
+  {
+    if (!NM_clean(nummat$argnum, alloc_ctrl_$argnum)) { return NULL; }
+    freeNumericsMatrix(nummat$argnum);
+  }
 
 }
 
@@ -749,7 +791,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
   if(!$1) SWIG_fail;
 
   $result = SWIG_Python_AppendOutput($result,
-                                     SWIG_NewPointerObj(SWIG_as_voidptr($1), $1_descriptor, 0));
+                                     SWIG_NewPointerObj(SWIG_as_voidptr($1), $1_descriptor, SWIG_POINTER_OWN));
 }
 
 
@@ -777,6 +819,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
   PyObject* csrm = cs_sparse_to_csr_matrix($1);
   if (!csrm) { SWIG_fail; }
   $result = SWIG_Python_AppendOutput($result, csrm);
+  free($1);
 }
 
 %typemap(out) (cs_sparse *)
@@ -797,9 +840,6 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
 {
   try
   {
-    M = (cs_sparse *) malloc(sizeof(cs_sparse));
-    if(!M) { PyErr_SetString(PyExc_RuntimeError, "Failed to allocate a cs_sparse"); SWIG_fail; }
-
     int res = cs_convert_from_scipy_sparse($input, &M, &array_data_, &array_data_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
 
     if (!res) { SWIG_fail; }
@@ -813,18 +853,21 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
   }
 }
 
+%typemap(memberin) (cs_sparse* M)
+{
+ // perform a deep copy
+ if (!$1) { $1 = NM_csparse_alloc_for_copy($input); }
+ NM_copy_sparse($input, $1);
+}
+
 %typemap(freearg) (cs_sparse* M)
 {
 
   if (array_data_$argnum && array_data_ctrl_$argnum) { Py_DECREF(array_data_$argnum); }
-
   if (array_i_$argnum && array_i_ctrl_$argnum) { Py_DECREF(array_i_$argnum); }
-
   if (array_p_$argnum && array_p_ctrl_$argnum) { Py_DECREF(array_p_$argnum); }
 
-  NM_clean_cs(M$argnum, alloc_ctrl_$argnum);
-
-  if(M$argnum) { cs_spfree(M$argnum); }
+  if(M$argnum) { NM_clean_cs(M$argnum, alloc_ctrl_$argnum); cs_spfree(M$argnum); }
 }
 
 %apply (cs_sparse *M) {(const cs_sparse const * m)};
