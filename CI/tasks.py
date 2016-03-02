@@ -7,6 +7,13 @@ siconos_default = CiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
+siconos_test_deb = CiTask(
+    ci_config='examples',
+    distrib='ubuntu:15.10',
+    pkgs=['siconos'],
+    srcs=['examples'],
+    targets={'examples': ['docker-build', 'docker-ctest']})
+
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',
     add_pkgs=['bullet'],
