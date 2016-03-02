@@ -189,7 +189,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
   {
     if (verbose > 0)
     {
-      printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, warning. reached max. number of iterations without convergence. Residual = %12.8e\n", dparam[1]);
+      printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, warning. reached max. number of iterations without convergence for contact %i. Residual = %12.8e\n", options->iparam[4], dparam[1]);
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
   }
