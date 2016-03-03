@@ -40,6 +40,26 @@ static inline void _sn_check_nnz(PyObject* mat, cs_sparse *M) {};
 #define NPY_INT_TYPE NPY_INT32
 #endif
 
+#if defined(SICONOS_FORCE_NPY_INT32) && defined(SICONOS_INT64)
+
+#define INT_TO_NPY_INT(dim, intp, out) \
+  { \
+  int32_t* int32p = (int32_t*) malloc(dim[0] * sizeof(int32_t)); \
+  if (!int32p) {  PyErr_SetString(PyExc_RuntimeError, "Could not allocate memory to convert " # intp "to 32 bits"); return NULL; }; \
+  for (size_t i = 0; i < dim[0]; ++i) { int32p[i] = intp[i]; } \
+  out  = PyArray_SimpleNewFromData(1, dim, NPY_INT_TYPE, int32p); \
+  if(!out) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract " # intp); return NULL; }; \
+  PyArray_UpdateFlags((PyArrayObject*)out, NPY_ARRAY_OWNDATA); \
+  }
+
+#else
+
+#define INT_TO_NPY_INT(dim, intp, out) \
+  out  = PyArray_SimpleNewFromData(1, dim, NPY_INT_TYPE, intp); \
+  if(!out) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract " # intp); return NULL; };
+
+#endif
+
 #define ALLOC_CTRL_I 0x1
 #define ALLOC_CTRL_P 0x2
 
@@ -72,11 +92,11 @@ static inline void _sn_check_nnz(PyObject* mat, cs_sparse *M) {};
     PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x); \
     if(!out_data) { PyErr_SetString(PyExc_RuntimeError, "Could not extract M->x"); return NULL; }; \
 \
-    PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims, NPY_INT_TYPE, M->i); \
-    if(!out_indices) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->i"); return NULL; }; \
+    PyObject* out_indices; \
+    INT_TO_NPY_INT(this_M_i_dims, M->i, out_indices); \
 \
-    PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims, NPY_INT_TYPE,M->p); \
-    if(!out_indptr) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->p"); return NULL; }; \
+    PyObject* out_indptr ; \
+    INT_TO_NPY_INT(this_M_p_dims, M->p, out_indptr); \
 \
     /* Warning ! m is the number of rows, n the number of columns ! --xhub */ \
     PyObject* out_shape = PyTuple_Pack(2, PyInt_FromLong(M->m), PyInt_FromLong(M->n)); \
@@ -471,11 +491,11 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
     PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x);
     if(!out_data) { PyErr_SetString(PyExc_RuntimeError, "Could not extract M->x"); return NULL; };
 
-    PyObject* col_indices = PyArray_SimpleNewFromData(1,this_M_i_dims, NPY_INT_TYPE, M->i);
-    if(!col_indices) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->i"); return NULL; };
+    PyObject* col_indices;
+    INT_TO_NPY_INT(this_M_i_dims, M->i, col_indices);
 
-    PyObject* row_indices = PyArray_SimpleNewFromData(1,this_M_p_dims, NPY_INT_TYPE,M->p);
-    if(!row_indices) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->p"); return NULL; };
+    PyObject* row_indices;
+    INT_TO_NPY_INT(this_M_p_dims, M->p, row_indices);
 
     PyObject* out_shape = PyTuple_Pack(2, PyInt_FromLong(M->m), PyInt_FromLong(M->n));
     if(!out_shape) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->m or M->n"); return NULL; };
