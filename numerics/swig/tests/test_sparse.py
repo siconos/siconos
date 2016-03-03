@@ -9,7 +9,7 @@ def test_from_csr1():
 
     from siconos.numerics import sparseToSBM, getValueSBM
     from scipy.sparse.csr import csr_matrix
-    
+
     M = csr_matrix([[1,2,3],
                     [4,5,6],
                     [7,8,9]])
@@ -25,17 +25,17 @@ def test_from_csr1():
     assert getValueSBM(SBM,0,2) == 3
     assert getValueSBM(SBM,1,0) == 4
     assert getValueSBM(SBM,1,1) == 5
-    assert getValueSBM(SBM,1,2) == 6    
+    assert getValueSBM(SBM,1,2) == 6
     assert getValueSBM(SBM,2,0) == 7
     assert getValueSBM(SBM,2,1) == 8
-    assert getValueSBM(SBM,2,2) == 9    
+    assert getValueSBM(SBM,2,2) == 9
 
 # scipy csr 3x3 block
 def test_from_csr2():
 
     from siconos.numerics import sparseToSBM, getValueSBM
     from scipy.sparse.csr import csr_matrix
-    
+
     M = csr_matrix([[1,2,3],
                     [4,5,6],
                     [7,8,9]])
@@ -51,10 +51,10 @@ def test_from_csr2():
     assert getValueSBM(SBM,0,2) == 3
     assert getValueSBM(SBM,1,0) == 4
     assert getValueSBM(SBM,1,1) == 5
-    assert getValueSBM(SBM,1,2) == 6    
+    assert getValueSBM(SBM,1,2) == 6
     assert getValueSBM(SBM,2,0) == 7
     assert getValueSBM(SBM,2,1) == 8
-    assert getValueSBM(SBM,2,2) == 9    
+    assert getValueSBM(SBM,2,2) == 9
 
 
 def test_SBMtoSparse1():
@@ -62,8 +62,6 @@ def test_SBMtoSparse1():
     from scipy.sparse.csr import csr_matrix
 
     SBM=newFromFileSBM(os.path.join(working_dir, 'data/SBM1.dat'))
-
-    printSBM(SBM)
 
     r,A = SBMtoSparse(SBM)
 
@@ -87,7 +85,6 @@ def test_sparseToSBM1():
 
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
-            print(i,j, getValueSBM(SBM,i,j), M[i,j])
             assert abs(getValueSBM(SBM,i,j) - M[i,j]) < eps
 
 def test_SBMtoSparseToSBM():
@@ -97,13 +94,9 @@ def test_SBMtoSparseToSBM():
 
     SBM1=newFromFileSBM(os.path.join(working_dir, 'data/SBM1.dat'))
 
-    printSBM(SBM1)
-
     r,SPARSE = SBMtoSparse(SBM1)
 
     v,SBM2 = sparseToSBM(3,SPARSE)
-
-    printSBM(SBM2)
 
     assert SBM1.nbblocks == SBM2.nbblocks
     assert SBM1.blocknumber0 == SBM2.blocknumber0
@@ -111,7 +104,6 @@ def test_SBMtoSparseToSBM():
 
     for i in range(SPARSE.shape[0]):
         for j in range(SPARSE.shape[1]):
-            print(i,j, getValueSBM(SBM1,i,j), getValueSBM(SBM2,i,j))
             assert (getValueSBM(SBM1,i,j) - getValueSBM(SBM2,i,j)) < eps
 
 
