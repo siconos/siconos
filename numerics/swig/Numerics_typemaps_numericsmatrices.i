@@ -140,7 +140,6 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
 
 %}
 
-
 %define %SAFE_CAST_INT(pyvar, len, dest_array, array_pyvar, indvar, alloc)
 {
     int array_pyvartype_ = PyArray_TYPE((PyArrayObject *)pyvar);
@@ -149,7 +148,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
       case NPY_INT32:
       {
         array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT32, indvar);
-        if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable" #pyvar); return 0; }
+        if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable" #pyvar); PyObject_Print(pyvar, stderr, 0); return 0; }
 
 %#ifdef SICONOS_INT64
         PyErr_Warn(PyExc_UserWarning, "Performance warning: the vector of indices or pointers is in int32, but siconos has 64-bits integers: we have to perform a conversion. Consider given sparse matrix in the right format");
@@ -170,7 +169,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
       case NPY_INT64:
       {
         array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT64, indvar);
-        if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable " #pyvar); return 0; }
+        if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable " #pyvar);  PyObject_Print(pyvar, stderr, 0); return 0; }
 
 %#ifdef SICONOS_INT64
         dest_array = (int64_t *) array_data(array_pyvar);
@@ -265,7 +264,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
       PyObject* indptr_ = PyObject_GetAttrString(obj, "indptr");
 
       *array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, array_data_ctrl_);
-      if (!*array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); return 0; }
+      if (!*array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array");  PyObject_Print(data_, stderr, 0); return 0; }
 
       M->x = (double*)array_data(*array_data_);
 
@@ -308,7 +307,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
       PyObject* indptr_ = PyObject_GetAttrString(obj, "indptr");
 
       *array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, array_data_ctrl_);
-      if (!*array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); return 0; }
+      if (!*array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array");  PyObject_Print(data_, stderr, 0); return 0; }
 
       M->x = (double*)array_data(*array_data_);
 
@@ -364,7 +363,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     PyObject* col_ = PyObject_GetAttrString(coo, "col");
 
     *array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, array_data_ctrl_);
-    if (!*array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array"); return 0; }
+    if (!*array_data_) { PyErr_SetString(PyExc_RuntimeError, "Could not get a pointer to the data array");  PyObject_Print(data_, stderr, 0); return 0; }
 
     M->x = (double*)array_data(*array_data_);
 
@@ -435,8 +434,20 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     {
       PyArrayObject* array_data = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, array_ctrl);
 
-      if (!array_data || !require_dimensions(array_data, 2) ||
-          !require_native(array_data) || !require_fortran(array_data)) return NULL;
+      if (!array_data)
+      {
+        PyErr_SetString(PyExc_TypeError, "Could not get array obj from the python object");
+        PyObject_Print(obj, stderr, 0);
+        return NULL;
+      }
+
+      if (!require_dimensions(array_data, 2) || !require_native(array_data) || !require_fortran(array_data))
+      {
+        PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a 2 dimensional array (or list, tuple, ...)");
+        PyObject_Print(obj, stderr, 0);
+        return NULL;
+      }
+
 
       tmpmat->storageType = NM_DENSE;
       tmpmat->size0 =  array_size(array_data, 0);

@@ -1,11 +1,37 @@
+
+
+%inline %{
+
+#define CHECK_ARRAY(X) \
+!require_native(X) || !require_contiguous(X)
+
+#define CHECK_ARRAY_VECTOR(X) \
+!require_native(X) || !require_contiguous(X) || !require_fortran(X) || !require_dimensions(X, 1)
+
+#define CHECK_ARRAY_MATRIX(X) \
+!require_native(X) || !require_contiguous(X) || !require_fortran(X) || !require_dimensions(X, 2)
+
+%}
+
 // vectors of size problem_size from given *Problem as first input
 // no conversion => inout array XXX FIX issue here
-%typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object=0) {
-  //typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object=0)
+%typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object = 0) {
 
   array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
 
-  if (!array || !require_native(array) || !require_contiguous(array) || !require_fortran(array)) SWIG_fail;
+  if (!array)
+  {
+   PyErr_SetString(PyExc_TypeError, "Could not get a PyArrayObject from the python object");
+   PyObject_Print($input, stderr, 0);
+   SWIG_fail;
+  }
+
+  if (CHECK_ARRAY_VECTOR(array))
+  {
+   PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a vector (or list, tuple, ...)");
+   PyObject_Print($input, stderr, 0);
+   SWIG_fail;
+  }
 
   $1 = (double *) array_data(array);
 
@@ -21,6 +47,20 @@
 %typemap(in) (double *blocklist3x3) (PyArrayObject* array=NULL, int is_new_object=0) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+
+  if (!array)
+  {
+   PyErr_SetString(PyExc_TypeError, "Could not get a PyArrayObject from the python object");
+   PyObject_Print($input, stderr, 0);
+   SWIG_fail;
+  }
+
+  if (CHECK_ARRAY(array))
+  {
+   PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a vector (or list, tuple, ...)");
+   PyObject_Print($input, stderr, 0);
+   SWIG_fail;
+  }
 
   npy_intp array_len[2] = {0,0};
 
@@ -77,6 +117,20 @@
 %typemap(in) (double *blockarray3x3) (PyArrayObject* array=NULL, int is_new_object=0) {
 
   array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+  if (!array)
+  {
+   PyErr_SetString(PyExc_TypeError, "Could not get a PyArrayObject from the python object");
+   PyObject_Print($input, stderr, 0);
+   SWIG_fail;
+  }
+
+  if (CHECK_ARRAY(array))
+  {
+   PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a vector (or list, tuple, ...)");
+   PyObject_Print($input, stderr, 0);
+   SWIG_fail;
+  }
+
 
   npy_intp array_len[2] = {0,0};
 
@@ -132,6 +186,20 @@
 %typemap(in) (double *blocklist3) (PyArrayObject* array=NULL, int is_new_object=0) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+  if (!array)
+  {
+   PyErr_SetString(PyExc_TypeError, "Could not get a PyArrayObject from the python object");
+   PyObject_Print($input, stderr, 0);
+   SWIG_fail;
+  }
+
+  if (CHECK_ARRAY(array))
+  {
+   PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a vector (or list, tuple, ...)");
+   PyObject_Print($input, stderr, 0);
+   SWIG_fail;
+  }
+
 
   npy_intp array_len[2] = {0,0};
 

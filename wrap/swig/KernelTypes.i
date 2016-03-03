@@ -155,26 +155,27 @@ struct IsDense : public Question<bool>
 
     if (!array)
     {
+     PyErr_SetString(PyExc_TypeError, "Could not get array obj from the python object");
+     PyObject_Print(vec, stderr, 0);
+     return std11::shared_ptr<SiconosVector>();
+    }
+    if (!require_dimensions(array,1) ||
+      !require_native(array) || !require_fortran(array))
+    {
+      PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expecg a 1 dimensional array (or list, tuple, ...)");
+      PyObject_Print(vec, stderr, 0);
       return std11::shared_ptr<SiconosVector>();
     }
-    else
-    {
-      if (!require_dimensions(array,1) ||
-          !require_native(array) || !require_fortran(array))
-      {
-        return std11::shared_ptr<SiconosVector>();
-      }
 
-      SP::SiconosVector tmp;
-      tmp.reset(new SiconosVector(array_size(array,0)));
-      // copy : with SiconosVector based on resizable std::vector there is
-      // no other way
-      memcpy(tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
+    SP::SiconosVector tmp;
+    tmp.reset(new SiconosVector(array_size(array,0)));
+    // copy : with SiconosVector based on resizable std::vector there is
+    // no other way
+    memcpy(tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
 
-      // for cleanup
-      *array_p = array;
-      return tmp;
-    }
+    // for cleanup
+    *array_p = array;
+    return tmp;
   }
 
   SP::SiconosVector SP_SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object)
@@ -426,9 +427,20 @@ struct IsDense : public Question<bool>
   SP::SimpleMatrix SimpleMatrix_from_numpy(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
     PyArrayObject* array = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, is_new_object);
+    if (!array)
+    {
+      PyErr_SetString(PyExc_TypeError, "Could not get array obj from the python object");
+      PyObject_Print(obj, stderr, 0);
+      return std11::shared_ptr<SimpleMatrix>();
+    }
+
     if (!require_dimensions(array,2) ||
         !require_native(array) || !require_fortran(array))
+    {
+      PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expecg a 2 dimensional array (or list, tuple, ...)");
+      PyObject_Print(obj, stderr, 0);
       return std11::shared_ptr<SimpleMatrix>();
+    }
 
     SP::SimpleMatrix result = SP::SimpleMatrix(new SimpleMatrix(array_size(array,0), array_size(array,1)));
     // copy this is due to SimpleMatrix based on resizable std::vector
