@@ -42,7 +42,17 @@
   REGISTER(BulletSpaceFilter)                   \
   REGISTER(BulletTimeStepping)                  \
   REGISTER(MBTB_FC3DContactRelation)            \
-  REGISTER(MBTB_ContactRelation)
+  REGISTER(MBTB_ContactRelation)                \
+                                                \
+  /* Proposed new Mechanics API */              \
+  REGISTER(BodyDS)                              \
+  REGISTER(Contactor)                           \
+  REGISTER(SiconosShape)                        \
+  REGISTER(SiconosSphere)                       \
+  REGISTER(SiconosBox)                          \
+  REGISTER(SiconosBroadphase)                   \
+  REGISTER(BulletBroadphase)                    \
+  REGISTER(SiconosShapeHandler)
 
 #include <SiconosVisitables.hpp>
 

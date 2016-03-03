@@ -16,6 +16,7 @@ set(${COMPONENT}_DIRS
   src/bodies
   src/joints
   src/contactDetection/basicBroadphase
+  src/proposed
   )
 
 if(WITH_OCC)
