@@ -34,8 +34,8 @@ import sys
 
 # Make sure I have the right Python version.
 if sys.version_info[:2] < (2,6):
-    print "Siconos requires Python 2.6 or newer. Python %d.%d detected" % \
-        sys.version_info[:2]
+    print("Siconos requires Python 2.6 or newer. Python %d.%d detected".format(
+        sys.version_info[0], sys.version_info[1]))
     sys.exit(-1)
 
 
