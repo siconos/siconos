@@ -19,7 +19,15 @@
 #define csi mwSignedIndex
 #endif
 #ifndef csi
-#define csi ptrdiff_t
+#include "SiconosConfig.h"
+#include <stdint.h>
+
+#ifdef SICONOS_INT64
+#define csi int64_t
+#else
+#define csi int32_t
+#endif
+//#define csi ptrdiff_t
 #endif
 
 /* --- primary CSparse routines and data structures ------------------------- */

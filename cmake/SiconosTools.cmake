@@ -130,9 +130,9 @@ ENDMACRO(PRINT_VAR V)
 MACRO(COMPILE_WITH)
   
   set(options REQUIRED)
-  set(oneValueArgs)
+  set(oneValueArgs ONLY)
   set(multiValueArgs COMPONENTS)
-
+  
   cmake_parse_arguments(COMPILE_WITH "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   set(_NAME)
@@ -172,6 +172,7 @@ MACRO(COMPILE_WITH)
 
   FIND_PACKAGE(${_NAME} ${_NAME_VERSION} ${_COMPONENTS} ${_REQUIRED})
 
+  set(_LINK_LIBRARIES)
   FOREACH(_N ${_NAMES})
     IF(${_N}_FOUND)
       SET(_FOUND TRUE)
@@ -190,8 +191,7 @@ MACRO(COMPILE_WITH)
       endif()
       # Now we set list of libs that must be linked with.
       if(DEFINED ${_N}_LIBRARIES)
-	set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES}
-	  ${${_N}_LIBRARIES})
+	list(APPEND _LINK_LIBRARIES ${${_N}_LIBRARIES})
       endif()
       # And the compiler flags
       if(DEFINED ${_N}_DEFINITIONS)
@@ -202,10 +202,17 @@ MACRO(COMPILE_WITH)
       endif()
     endif()
   endforeach()
-  list(REMOVE_DUPLICATES SICONOS_LINK_LIBRARIES)
-  set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES}
-    ${${_N}_LIBRARIES} CACHE INTERNAL "List of external libraries.")
-
+  if(_LINK_LIBRARIES)
+    list(REMOVE_DUPLICATES _LINK_LIBRARIES)
+  endif()
+  if(COMPILE_WITH_ONLY)
+    set(_sico_component ${COMPILE_WITH_ONLY})
+    set(${_sico_component}_LINK_LIBRARIES ${${_sico_component}_LINK_LIBRARIES}
+      ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries for ${_sico_component}.")
+  else()
+    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES}
+      ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries.")
+  endif()
 
   IF (_FOUND)
     MESSAGE(STATUS "Compilation with ${_REQUIRED_STR} ${_COMPONENTS_STR} ${_NAME} ${_NAME_VERSION_STR}")

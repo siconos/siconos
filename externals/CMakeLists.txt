@@ -26,12 +26,16 @@ set(${COMPONENT}_DIRS
   hairer
   netlib/dftemplates
   netlib/odepack
-  numeric_bindings
   ql0001
   SOL/lumod-c
   SuiteSparse/CSparse
   tools
 )
+
+if(WITH_CXX)
+  list(APPEND ${COMPONENT}_DIRS numeric_bindings)
+endif()
+
 
 # Unstable sources. Will be included only
 # if WITH_${COMPONENT}_UNSTABLE is true.
