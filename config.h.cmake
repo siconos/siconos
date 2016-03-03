@@ -78,4 +78,7 @@
 // are int 64 bits longs
 #cmakedefine SICONOS_INT64
 
+// use to force 32 bits int when creating numpy array
+// Useful to support old scipy version (< 0.14.0)
+#cmakedefine SICONOS_FORCE_NPY_INT32
 #endif

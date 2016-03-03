@@ -34,7 +34,7 @@ static inline void _sn_check_nnz(PyObject* mat, cs_sparse *M) {};
 
 #include "SiconosConfig.h"
 
-#ifdef SICONOS_INT64
+#if defined(SICONOS_INT64) && !defined(SICONOS_FORCE_NPY_INT32)
 #define NPY_INT_TYPE NPY_INT64
 #else
 #define NPY_INT_TYPE NPY_INT32
