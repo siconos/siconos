@@ -163,10 +163,10 @@ DiodeBridgeCapFilter.initialize(aTS)
 
 k = 0
 h = aTS.timeStep()
-print "Timestep : ", h
+print("Timestep : ", h)
 # Number of time steps
 N = (T - t0) / h
-print "Number of steps : ", N
+print("Number of steps : ", N)
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
@@ -175,9 +175,9 @@ from numpy import zeros
 dataPlot = zeros([N-1, 10])
 
 x = LS1DiodeBridgeCapFilter.x()
-print "Initial state : ", x
+print("Initial state : ", x)
 y = InterDiodeBridgeCapFilter.y(0)
-print "First y : ", y
+print("First y : ", y)
 lambda_ = InterDiodeBridgeCapFilter.lambda_(0)
 
 # For the initial time step:
@@ -232,7 +232,7 @@ from numpy.linalg import norm
 ref = getMatrix(SimpleMatrix("DiodeBridgeCapFilter.ref"))
 
 error = norm(dataPlot[:,0:6] - ref[:,0:6])
-print "error = " , error
+print("error = " , error)
 
 #assert (error < 1e-09)
 withRef = False

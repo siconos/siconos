@@ -50,7 +50,7 @@ Brel = [[0], [2]]
 
 # Simple check
 if h > hControl:
-    print "hControl must be bigger than h"
+    print("hControl must be bigger than h")
     exit(1)
 
 # Declaration of the Dynamical System

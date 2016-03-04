@@ -144,10 +144,10 @@ DiodeBridge.initialize(aTS)
 
 k = 0
 h = aTS.timeStep()
-print "Timestep : ", h
+print("Timestep : ", h)
 # Number of time steps
 N = (T - t0) / h
-print "Number of steps : ", N
+print("Number of steps : ", N)
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
@@ -156,9 +156,9 @@ from numpy import zeros
 dataPlot = zeros([N, 8])
 
 x = LSDiodeBridge.x()
-print "Initial state : ", x
+print("Initial state : ", x)
 y = InterDiodeBridge.y(0)
-print "First y : ", y
+print("First y : ", y)
 lambda_ = InterDiodeBridge.lambda_(0)
 
 # For the initial time step:

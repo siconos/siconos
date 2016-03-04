@@ -1,8 +1,8 @@
-print """
+print("""
 
 FEM simulation using getfem++ and siconos.
 
-"""
+""")
 
 import siconos.kernel as kernel
 import getfemtosiconos as gts

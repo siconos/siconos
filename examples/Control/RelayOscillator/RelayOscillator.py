@@ -114,10 +114,10 @@ RelayOscillator.initialize(aTS)
 
 k = 0
 h = aTS.timeStep();
-print "Timestep : ",h
+print("Timestep : ",h)
 # Number of time steps
 N = (T-t0)/h
-print "Number of steps : ",N
+print("Number of steps : ",N)
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
@@ -126,9 +126,9 @@ from numpy import empty
 dataPlot = empty([N+1,8])
 
 x = LSRelayOscillator.x()
-print "Initial state : ",x
+print("Initial state : ",x)
 y = InterRelayOscillator.y(0)
-print "First y : ",y
+print("First y : ",y)
 lambda_ = InterRelayOscillator.lambda_(0)
 
 while (k < N):
@@ -145,7 +145,7 @@ while (k < N):
 
     k += 1
     if k%1000==0:
-        print "step =", k, " < ", N
+        print("step =", k, " < ", N)
     aTS.nextStep()
 
 if (withPlot) :

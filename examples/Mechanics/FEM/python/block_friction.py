@@ -1,8 +1,8 @@
-print """
+print("""
 
 FEM simulation using getfem++ and siconos.
 
-"""
+""")
 
 import siconos.kernel as kernel
 import numpy as np
@@ -81,28 +81,28 @@ mff.set_fem(gf.Fem('FEM_PK_DISCONTINUOUS(3,1,0.01)'))
 mim = gf.MeshIm(m,gf.Integ('IM_TETRAHEDRON(5)'))
 
 # ==== Summary ==== 
-print ' ==================================== \n Mesh details: '
-print ' Problem dimension:', mfu.qdim(), '\n Number of elements: ', m.nbcvs(), '\n Number of nodes: ', m.nbpts()
-print ' Number of dof: ', mfu.nbdof(), '\n Element type: ', mfu.fem()[0].char()
-print ' ===================================='
+print(' ==================================== \n Mesh details: ')
+print(' Problem dimension:', mfu.qdim(), '\n Number of elements: ', m.nbcvs(), '\n Number of nodes: ', m.nbpts())
+print(' Number of dof: ', mfu.nbdof(), '\n Element type: ', mfu.fem()[0].char())
+print(' ====================================')
 
 # ==== Boundaries detection ==== 
 allPoints = m.pts()
 # Bottom points and faces 
 cbot = (abs(allPoints[2,:])  < 1e-6)
-pidbot = np.compress(cbot,range(0,m.nbpts()))
+pidbot = np.compress(cbot,list(range(0,m.nbpts())))
 fbot = m.faces_from_pid(pidbot)
 BOTTOM = 1
 m.set_region(BOTTOM,fbot)
 # Top points and faces
 ctop = (abs(allPoints[2,:]) > dimZ-stepZ)
-pidtop = np.compress(ctop,range(0,m.nbpts()))
+pidtop = np.compress(ctop,list(range(0,m.nbpts())))
 ftop = m.faces_from_pid(pidtop)
 TOP = 2
 m.set_region(TOP,ftop)
 # Left points and faces
 cleft = (abs(allPoints[0,:]) < 1e-6)
-pidleft = np.compress(cleft,range(0,m.nbpts()))
+pidleft = np.compress(cleft,list(range(0,m.nbpts())))
 fleft= m.faces_from_pid(pidleft)
 LEFT = 3
 m.set_region(LEFT,fleft)

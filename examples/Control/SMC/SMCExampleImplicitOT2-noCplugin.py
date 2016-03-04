@@ -58,7 +58,7 @@ Brel = [[0], [2]]
 
 # Simple check
 if h > hControl:
-    print "hControl must be bigger than h"
+    print("hControl must be bigger than h")
     exit(1)
 
 # Declaration of the Dynamical System
@@ -107,5 +107,5 @@ savefig('ismcOT2-noCplugin.png')
 ref = getMatrix(SimpleMatrix("SMCExampleImplicitOT2-py.ref"))
 print("%e" % norm(dataPlot - ref))
 if (norm(dataPlot - ref) > 1e-12):
-    print dataPlot - ref
+    print(dataPlot - ref)
     print("Warning. The result is rather different from the reference file.")

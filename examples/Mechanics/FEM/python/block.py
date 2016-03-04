@@ -1,8 +1,8 @@
-print """
+print("""
 
 FEM simulation using getfem++ and siconos.
 
-"""
+""")
 
 import siconos.kernel as kernel
 import getfemtosiconos as gts
@@ -129,7 +129,7 @@ while(s.hasNextEvent()):
     U = fem_model.variable('u')
     sl = gf.Slice(('boundary',),sico.mfu,1)
     sl.export_to_vtk(name, sico.mfu, U,'Displacement')
-    print s.nextTime()
+    print(s.nextTime())
     
 
 subplot(211)

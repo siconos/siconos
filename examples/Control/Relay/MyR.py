@@ -3,7 +3,7 @@ try:
     import siconos.numerics as N
 
 except (ImportError):
-    print 'Could not import Siconos.* module'
+    print('Could not import Siconos.* module')
 
 import numpy
 
@@ -20,7 +20,7 @@ class MyR(SK.FirstOrderType2R):
 
     def computeh(self,time, x, l, y):
         # should be called in the new Olivier Version
-        print 'call computeh'
+        print('call computeh')
         print(x)
         print(y)
         #numpy.copyto(y, numpy.dot(self.C(), x))
@@ -30,7 +30,7 @@ class MyR(SK.FirstOrderType2R):
 
     def computeg(self,time, l, R):
         # should be called in the new Olivier Version
-        print 'call computeg'
+        print('call computeg')
         print(l)
         print(R)
         #numpy.copyto(R, numpy.dot(self.B(), l))

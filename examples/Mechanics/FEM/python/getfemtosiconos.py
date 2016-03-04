@@ -53,10 +53,10 @@ def import_fem(sico):
     mim = gf.MeshIm(m,gf.Integ('IM_TETRAHEDRON(5)'))
 
     # Summary
-    print ' ==================================== \n Mesh details: '
-    print ' Problem dimension:', mfu.qdim(), '\n Number of elements: ', m.nbcvs(), '\n Number of nodes: ', m.nbpts()
-    print ' Number of dof: ', mfu.nbdof(), '\n Element type: ', mfu.fem()[0].char()
-    print ' ===================================='
+    print(' ==================================== \n Mesh details: ')
+    print(' Problem dimension:', mfu.qdim(), '\n Number of elements: ', m.nbcvs(), '\n Number of nodes: ', m.nbpts())
+    print(' Number of dof: ', mfu.nbdof(), '\n Element type: ', mfu.fem()[0].char())
+    print(' ====================================')
 
     ###########################
     # Set the parameters
@@ -76,22 +76,22 @@ def import_fem(sico):
     allPoints = m.pts()
     # Bottom points and faces 
     cbot = (abs(allPoints[2,:])  < 1e-6)
-    pidbot = np.compress(cbot,range(0,m.nbpts()))
+    pidbot = np.compress(cbot,list(range(0,m.nbpts())))
     fbot = m.faces_from_pid(pidbot)
     BOTTOM = 1
     m.set_region(BOTTOM,fbot)
     # Top points and faces
     ctop = (abs(allPoints[2,:]) > dimZ-stepZ)
-    pidtop = np.compress(ctop,range(0,m.nbpts()))
+    pidtop = np.compress(ctop,list(range(0,m.nbpts())))
     ftop = m.faces_from_pid(pidtop)
     TOP = 2
     m.set_region(TOP,ftop)
     # Top-Left points and faces
     cleft = (abs(allPoints[1,:]) < 1e-6)
     clefttop=cleft*ctop
-    pidlefttop = np.compress(clefttop,range(0,m.nbpts()))
+    pidlefttop = np.compress(clefttop,list(range(0,m.nbpts())))
     flefttop = m.faces_from_pid(pidlefttop)
-    pidleft = np.compress(cleft,range(0,m.nbpts()))
+    pidleft = np.compress(cleft,list(range(0,m.nbpts())))
     fleft= m.faces_from_pid(pidleft)
     LEFTTOP = 3
     m.set_region(LEFTTOP,flefttop)
@@ -190,10 +190,10 @@ def import_fem2(sico):
     mim = gf.MeshIm(m,gf.Integ('IM_TETRAHEDRON(5)'))
 
     # Summary
-    print ' ==================================== \n Mesh details: '
-    print ' Problem dimension:', mfu.qdim(), '\n Number of elements: ', m.nbcvs(), '\n Number of nodes: ', m.nbpts()
-    print ' Number of dof: ', mfu.nbdof(), '\n Element type: ', mfu.fem()[0].char()
-    print ' ===================================='
+    print(' ==================================== \n Mesh details: ')
+    print(' Problem dimension:', mfu.qdim(), '\n Number of elements: ', m.nbcvs(), '\n Number of nodes: ', m.nbpts())
+    print(' Number of dof: ', mfu.nbdof(), '\n Element type: ', mfu.fem()[0].char())
+    print(' ====================================')
 
     ###########################
     # Set the parameters
@@ -212,22 +212,22 @@ def import_fem2(sico):
     allPoints = m.pts()
     # Bottom points and faces 
     cbot = (abs(allPoints[2,:])  < 1e-6)
-    pidbot = np.compress(cbot,range(0,m.nbpts()))
+    pidbot = np.compress(cbot,list(range(0,m.nbpts())))
     fbot = m.faces_from_pid(pidbot)
     BOTTOM = 1
     m.set_region(BOTTOM,fbot)
     # Top points and faces
     ctop = (abs(allPoints[2,:]) > dimZ-stepZ)
-    pidtop = np.compress(ctop,range(0,m.nbpts()))
+    pidtop = np.compress(ctop,list(range(0,m.nbpts())))
     ftop = m.faces_from_pid(pidtop)
     TOP = 2
     m.set_region(TOP,ftop)
     # Top-Left points and faces
     cleft = (abs(allPoints[1,:]) < 1e-6)
     clefttop=cleft*ctop
-    pidlefttop = np.compress(clefttop,range(0,m.nbpts()))
+    pidlefttop = np.compress(clefttop,list(range(0,m.nbpts())))
     flefttop = m.faces_from_pid(pidlefttop)
-    pidleft = np.compress(cleft,range(0,m.nbpts()))
+    pidleft = np.compress(cleft,list(range(0,m.nbpts())))
     fleft= m.faces_from_pid(pidleft)
     LEFTTOP = 3
     m.set_region(LEFTTOP,flefttop)

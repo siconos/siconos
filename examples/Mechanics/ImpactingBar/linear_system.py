@@ -39,10 +39,10 @@ class LinearSystem(object):
         
         t0 = time.clock()
         omeg0, phi0 = LA.eigh(system0)
-        print "elapsed with eig ...", time.clock()-t0
+        print("elapsed with eig ...", time.clock()-t0)
         t0 = time.clock()
         omeg2,phi = LA.eigh(system)
-        print "elapsed with eigh ...", time.clock()-t0
+        print("elapsed with eigh ...", time.clock()-t0)
         
         # freq00 = np.sqrt(eigenFreq)/(2.*pi)
         # freq01 = np.sqrt(eigenFreq2)/(2.*pi)

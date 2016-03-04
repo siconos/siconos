@@ -20,7 +20,7 @@
 
 # We have first to import sage, so it won't shadow some function (like plot...)
 # You need the env. variable DOT_SAGE to point to the right location !
-from __future__ import print_function
+
 
 import sys
 

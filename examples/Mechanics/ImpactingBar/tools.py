@@ -13,7 +13,7 @@ def computeBigH(H,Nfft):
     ## print sfft
     ## print sfft.shape
     bigH = np.zeros(np.asarray(H.shape)*Nfft,dtype='complex64')
-    print "shape of bigH:", bigH.shape
+    print("shape of bigH:", bigH.shape)
 
     nc = H.shape[0]
     ndof = H.shape[1]

@@ -14,7 +14,7 @@ _lambda=_lambda.reshape((3,1))
 np.dot(J.transpose(),_lambda)
 p1  = np.array([-3.156737e+01,0.000000e+00,3.594686e+00,0.000000e+00,-9.889838e+00,0.000000e+00]).reshape(6,1)
 
-print p1 - np.dot(J.transpose(),_lambda)
+print(p1 - np.dot(J.transpose(),_lambda))
 
 newv =np.array([3.496586e+00,0.000000e+00,3.496586e+00,0.000000e+00,-9.889838e+00,0.000000e+00]).reshape(6,1)
 
@@ -26,23 +26,23 @@ W =np.array([ 2.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+
               0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 1.000000e+00, 0.000000e+00,
               0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 0.000000e+00, 1.000000e+00]).reshape(6,6)
 
-print
+print()
 M= np.dot(J,np.linalg.solve(W,J.transpose()))
-print "M=", np.dot(J,np.linalg.solve(W,J.transpose()))
+print("M=", np.dot(J,np.linalg.solve(W,J.transpose())))
 
 np.linalg.solve(W,p1)
 
 vfree= np.array([1.928027e+01,0.000000e+00,-9.810000e-02,0.000000e+00,0.000000e+00,0.000000e+00]).reshape(6,1)
 
 q= np.dot(J,vfree)
-print "q=", np.dot(J,vfree)
+print("q=", np.dot(J,vfree))
 
 z= np.linalg.solve(M,q)
 
-print "z=", z
+print("z=", z)
 newv_verif =vfree + np.linalg.solve(W,p1)
-print
-print  newv_verif - newv
+print()
+print(newv_verif - newv)
 
 _fInt =np.array([-3.535534e+03,0.000000e+00,0.000000e+00]).reshape(3,1)
 

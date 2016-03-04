@@ -12,9 +12,9 @@ def computeOneStepExplicit(x,ti,tf,A,B,C,D,a):
     xi=numpy.array(x)
     h=tf-ti
     y=numpy.dot(C,xi)+D
-    print "y=", y
+    print("y=", y)
     sigma = numpy.array(y)
-    print numpy.size(x)
+    print(numpy.size(x))
     for i in range(numpy.size(y)):
         if (y[i] > 0.0) :
             sigma[i] = +1.0
@@ -24,12 +24,12 @@ def computeOneStepExplicit(x,ti,tf,A,B,C,D,a):
             sigma[i] = 0.5
     
     xtmp = xi + h*numpy.dot(A,xi) +h* a  + h*numpy.dot(B,sigma) 
-    print "xtmp=",xtmp      
+    print("xtmp=",xtmp)      
     for i in range(numpy.size(y)):
         x[i]=xtmp[i]
     
         
-    print "sigma =" , sigma
+    print("sigma =" , sigma)
 
-    print "x=",x
+    print("x=",x)
     return info 

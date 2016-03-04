@@ -23,7 +23,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from numpy import array, eye, empty, zeros, savetxt
+from numpy import array, eye, empty, zeros
 import numpy as np
 from siconos.kernel import FirstOrderLinearDS, RelayNSL, \
 NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
@@ -110,7 +110,8 @@ while(s.hasNextEvent()):
      #print s.nextTime()
 
 # save to disk
-np.savetxt('output.txt', dataPlot)
+np.savetxt('ZI_Twisting.txt', dataPlot)
+np.savetxt('ZI_Twisting_u.txt', control)
 # plot interesting stuff
 plt.subplot(411)
 plt.title('s')
@@ -128,19 +129,19 @@ plt.subplot(414)
 plt.plot(dataPlot[:,0], dataPlot[:,4])
 plt.title('lambda2')
 plt.grid()
-plt.savefig('Zhuravlev_all.png')
+plt.savefig('ZI_Twisting_all.png')
 
 plt.plot(dataPlot[:,1], dataPlot[:,2])
 plt.xlabel('s')
 plt.xlabel('v')
 plt.grid()
-plt.savefig('Zhuravlev_sv.png')
+plt.savefig('ZI_Twisting_sv.png')
 
 plt.plot(dataPlot[:,3], dataPlot[:,4])
 plt.xlabel('lambda1')
 plt.xlabel('lambda2')
 plt.grid()
-plt.savefig('Zhuravlev_lambdas.png')
+plt.savefig('ZI_Twisting_lambdas.png')
 
 pos = np.abs(dataPlot[:,1])
 velocity = (1-myProcessRelation._kappa*np.sign(dataPlot[:,1]*dataPlot[:,2]))*dataPlot[:, 2]*np.sign(dataPlot[:,1])
@@ -157,7 +158,7 @@ plt.subplot(313)
 plt.title('control input')
 plt.plot(dataPlot[:,0], control)
 plt.grid()
-plt.savefig('Zhuravlev_pv.png')
+plt.savefig('ZI_Twisting_pv.png')
 
 indx = np.nonzero(dataPlot[:, 0]>30)
 ttt = dataPlot[indx, 0].flatten()
@@ -174,4 +175,4 @@ plt.subplot(313)
 plt.title('control input')
 plt.plot(ttt, control[indx])
 plt.grid()
-plt.savefig('Zhuravlev_pv_z.png')
+plt.savefig('ZI_Twisting_pv_z.png')

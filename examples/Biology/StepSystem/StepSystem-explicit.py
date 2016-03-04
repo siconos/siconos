@@ -48,7 +48,7 @@ try :
     k = 0     
     dataPlot[k, 0] = t0
 
-    print "x", x
+    print("x", x)
     dataPlot[k, 1] = x[0]
     dataPlot[k, 2] = x[1]
 
@@ -59,12 +59,12 @@ try :
     ti=t0
     tf=ti+h
     while ((tf <= T + 1e-10 ) and k < N) :
-        print "=========== Iteration k ===============", k, ti, tf 
+        print("=========== Iteration k ===============", k, ti, tf) 
         info = computeOneStepExplicit(x,ti,tf,A,B,C,D,a) 
             
         dataPlot[k+1, 0] = tf
         # print "xd", xd(tf)
-        print "x", x
+        print("x", x)
         dataPlot[k+1, 1] = x[0]
         dataPlot[k+1, 2] = x[1]
         
@@ -77,5 +77,5 @@ try :
     
 
 except :
-    print "Unexpected error:", sys.exc_info()[0]
+    print("Unexpected error:", sys.exc_info()[0])
     raise

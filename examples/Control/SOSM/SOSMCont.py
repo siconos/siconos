@@ -99,7 +99,7 @@ s.insertNonSmoothProblem(osnspb)
 
 filippov.initialize(s);
 
-print 'end of initialization'
+print('end of initialization')
 # matrix to save data
 dataPlot = empty((N+1,4))
 dataPlot[0, 0] = t0
