@@ -109,6 +109,10 @@ else()
     set(NO_TEST_FILES ${NO_TEST_FILES} SMCElectroPneumaticItw Twisting)
   endif()
   
+  IF(HAS_BULLET)
+    LIST(APPEND EXAMPLES_DIRECTORIES Mechanics/ContactDetection)
+  ENDIF(HAS_BULLET)
+
   # Scan each dir in examples_directories and collect source files
   foreach(_D ${EXAMPLES_DIRECTORIES})
     message("Scan example directory ${_D}")
