@@ -14,6 +14,12 @@
 
 %fragment("NumPy_Backward_Compatibility", "header")
 {
+
+%#if defined(__GNUC__)
+%#pragma GCC diagnostic push
+%#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+%#endif
+
 %#if NPY_API_VERSION < 0x00000007
 %#define NPY_ARRAY_DEFAULT NPY_DEFAULT
 %#define NPY_ARRAY_FARRAY  NPY_FARRAY
@@ -140,7 +146,6 @@
     if (array != NULL) free(array);
   }
 %#endif
-
 
 }
 
@@ -502,6 +507,9 @@
           fragment="NumPy_Object_to_Array",
           fragment="NumPy_Array_Requirements")
 {
+%#ifdef __GNUC__
+%#pragma GCC diagnostic pop
+%#endif
 }
 
 /* End John Hunter translation (with modifications by Bill Spotz)

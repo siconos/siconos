@@ -3,8 +3,8 @@
 {
   MixedComplementarityProblem2_()
    {
-     MixedComplementarityProblem2_* MCP;
-     MCP = (MixedComplementarityProblem2_ *) malloc(sizeof(MixedComplementarityProblem2_));
+     MixedComplementarityProblem2* MCP;
+     MCP = (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
      MCP->nabla_Fmcp = NULL;
      MCP->compute_Fmcp = &call_py_compute_Fmcp;
      MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
@@ -15,8 +15,8 @@
 
   MixedComplementarityProblem2_(PyObject* n1, PyObject* n2)
   {
-     MixedComplementarityProblem2_* MCP;
-     MCP =  (MixedComplementarityProblem2_ *) malloc(sizeof(MixedComplementarityProblem2_));
+     MixedComplementarityProblem2* MCP;
+     MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
 
      MCP->compute_Fmcp = &call_py_compute_Fmcp;
      MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
@@ -41,8 +41,8 @@
 
   MixedComplementarityProblem2_(PyObject* n1, PyObject* n2, PyObject* py_compute_class)
   {
-     MixedComplementarityProblem2_* MCP;
-     MCP =  (MixedComplementarityProblem2_ *) malloc(sizeof(MixedComplementarityProblem2_));
+     MixedComplementarityProblem2* MCP;
+     MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
 
      MCP->compute_Fmcp = &call_py_compute_Fmcp;
      MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
@@ -89,8 +89,8 @@
 
   MixedComplementarityProblem2_(PyObject* n1, PyObject* n2, PyObject* py_compute_Fmcp, PyObject* py_compute_nabla_Fmcp)
   {
-     MixedComplementarityProblem2_* MCP;
-     MCP =  (MixedComplementarityProblem2_ *) malloc(sizeof(MixedComplementarityProblem2_));
+     MixedComplementarityProblem2* MCP;
+     MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
 
      MCP->compute_Fmcp = &call_py_compute_Fmcp;
      MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;

@@ -94,10 +94,12 @@ macro(add_siconos_swig_sub_module fullname)
   foreach(_dir ${${COMPONENT}_SWIG_INCLUDE_DIRECTORIES})
     set(${COMPONENT}_SWIG_DEFS "-I${_dir};${${COMPONENT}_SWIG_DEFS}")
   endforeach()
-      
-  set_source_files_properties(${swig_file}
-    PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS}" CPLUSPLUS ON)
-  
+
+  IF(WITH_CXX OR NOT ${COMPONENT} MATCHES "numerics")
+    set_source_files_properties(${swig_file}
+      PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS}" CPLUSPLUS ON)
+  ENDIF(WITH_CXX OR NOT ${COMPONENT} MATCHES "numerics")
+
   # --- build swig module ---
   swig_add_module(${_name} python ${swig_file})
 

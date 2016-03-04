@@ -60,35 +60,36 @@
     return self->size0 * self->size1;
   }
 
-  PyObject * __str__()
-  {
-    if (!self->matrix0)
-    {
-      PyErr_SetString(PyExc_RuntimeError, "The given matrix is not dense (matrix0 == NULL). Only dense matrix can be displayed");
-      return NULL;
-    }
-    std::stringstream result;
-    result << "[ ";
-    for (int i=0; i < self->size0; ++i)
-      {
-        if (i > 0) result << "  ";
-        result << "[";
-        for (int j=0; j < self->size1; ++j)
-          {
-            result << " " << NumericsMatrix_get_matrix0(self,i,j);
-            if (j < self->size1-1) result << ",";
-          }
-        result << " ]";
-        if (i < self->size0-1) result << "," << std::endl;
-      }
-    result << " ]" << std::endl;
-    %#if PY_MAJOR_VERSION < 3
-    return PyString_FromString(result.str().c_str());
-    %#else
-    return PyUnicode_FromString(result.str().c_str());
-    %#endif
-  }
-
+// useful? -- xhub
+//  PyObject * __str__()
+//  {
+//    if (!self->matrix0)
+//    {
+//      PyErr_SetString(PyExc_RuntimeError, "The given matrix is not dense (matrix0 == NULL). Only dense matrix can be displayed");
+//      return NULL;
+//    }
+//    std::stringstream result;
+//    result << "[ ";
+//    for (int i=0; i < self->size0; ++i)
+//      {
+//        if (i > 0) result << "  ";
+//        result << "[";
+//        for (int j=0; j < self->size1; ++j)
+//          {
+//            result << " " << NumericsMatrix_get_matrix0(self,i,j);
+//            if (j < self->size1-1) result << ",";
+//          }
+//        result << " ]";
+//        if (i < self->size0-1) result << "," << std::endl;
+//      }
+//    result << " ]" << std::endl;
+//    %#if PY_MAJOR_VERSION < 3
+//    return PyString_FromString(result.str().c_str());
+//    %#else
+//    return PyUnicode_FromString(result.str().c_str());
+//    %#endif
+//  }
+//
 };
 
 
@@ -118,25 +119,22 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
  // from a scipy.sparse matrix
  cs_sparse(PyObject *obj)
  {
-  int array_data_ctrl_ = 0;
-  int array_i_ctrl_ = 0;
-  int array_p_ctrl_ = 0;
-  int alloc_ctrl_ = 0;
-  PyArrayObject *array_data_ = NULL, *array_i_ = NULL, *array_p_ = NULL;
-  cs_sparse* M = NULL;
+   int array_data_ctrl_ = 0;
+   int array_i_ctrl_ = 0;
+   int array_p_ctrl_ = 0;
+   int alloc_ctrl_ = 0;
+   PyArrayObject *array_data_ = NULL, *array_i_ = NULL, *array_p_ = NULL;
+   CSparseMatrix* M = NULL;
 
-  try
-  {
-   cs_sparse Mtmp;
-   cs_sparse* Mtmp_p = &Mtmp;
+   CSparseMatrix Mtmp;
+   CSparseMatrix* Mtmp_p = &Mtmp;
 
    int res = cs_convert_from_scipy_sparse(obj, &Mtmp_p, &array_data_, &array_data_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
-
 
    if (!res) { SWIG_fail; }
    else if (res < 0) { PyErr_SetString(PyExc_RuntimeError, "Error the matrix is not sparse!"); goto fail; }
 
-   M = (cs_sparse *) malloc(sizeof(cs_sparse));
+   M = (CSparseMatrix *) malloc(sizeof(CSparseMatrix));
    if(!M) { PyErr_SetString(PyExc_RuntimeError, "Failed to allocate a cs_sparse"); goto fail; }
 
    // perform a deep copy since we do not have any mechanism to record the fact we use data from the python object
@@ -151,21 +149,6 @@ fail:
 
    return M;
 
-  }
-  catch (const std::invalid_argument& e)
-  {
-
-   if (array_data_ && array_data_ctrl_) { Py_DECREF(array_data_); }
-   if (array_i_ && array_i_ctrl_) { Py_DECREF(array_i_); }
-   if (array_p_ && array_p_ctrl_) { Py_DECREF(array_p_); }
-
-   assert(!M->p);
-   assert(!M->i);
-   assert(!M->x);
-   assert(M);
-   free(M);
-   throw(e);
-  }
  }
 
  ~cs_sparse()

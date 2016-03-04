@@ -19,9 +19,10 @@
 //
 
 // Siconos.i - SWIG interface for Siconos
-%module(package="siconos", directors="1") numerics
+%module(package="siconos") numerics
 
 %include start.i
+
 
 // generated docstrings from doxygen xml output
 %include numerics-docstrings.i
@@ -63,10 +64,6 @@
 #include "GAMSlink.h"
 
 
-#include <boost/preprocessor/stringize.hpp>
-#include <boost/preprocessor/cat.hpp>
-
-#include <limits>
 %}
 
 #ifdef WITH_SERIALIZATION
@@ -76,10 +73,8 @@
 #endif
 %include picklable.i
 
-%include "std_string.i"
-
- // needed macros
- %include "SiconosConfig.h"
+// needed macros
+%include "SiconosConfig.h"
 
 
 
@@ -132,24 +127,6 @@
  {(double B[9])}
 
 
- // Handle standard exceptions
- %include "exception.i"
- %exception
- {
-   try
-   {
-     $action
-   }
-   catch (const std::invalid_argument& e)
-   {
-     SWIG_exception(SWIG_ValueError, e.what());
-   }
-   catch (const std::out_of_range& e)
-   {
-     SWIG_exception(SWIG_IndexError, e.what());
-   }
- }
-
 %include solverOptions.i
 
 %include Numerics_typemaps_problems.i
@@ -167,7 +144,7 @@
 
 %inline
 %{
- unsigned int isqrt(unsigned int n)
+ static unsigned int isqrt(unsigned int n)
   {
     unsigned int c = 0x8000;
     unsigned int g = 0x8000;
@@ -183,7 +160,7 @@
     }
   }
 
-  int compiled_in_debug_mode()
+  static int compiled_in_debug_mode()
   {
 #ifdef NDEBUG
     return 0;
@@ -192,10 +169,16 @@
 #endif
   }
 
-  extern "C" void set_cstruct(uintptr_t p_env, void* p_struct)
+#ifdef __cplusplus
+  extern "C" {
+#endif
+  static void set_cstruct(uintptr_t p_env, void* p_struct)
   {
     *(void**)p_env = p_struct;
   }
+#ifdef __cplusplus
+}
+#endif
 %}
 
 %fragment("NumPy_Fragments");
@@ -299,7 +282,7 @@
 
 
 #include <stdio.h>
-  FrictionContactProblem* frictionContactProblemFromFile
+  static FrictionContactProblem* frictionContactProblemFromFile
     (const char * filename)
   {
     FILE * finput = fopen(filename, "r");
@@ -334,7 +317,7 @@
     
   }
 
-  MixedLinearComplementarityProblem* mixedLinearComplementarityProblemFromFile
+  static MixedLinearComplementarityProblem* mixedLinearComplementarityProblemFromFile
     (const char * filename)
   {
     FILE * finput = fopen(filename, "r");

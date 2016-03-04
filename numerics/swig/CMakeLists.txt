@@ -4,18 +4,20 @@
 
 # wrap - Set extra dependencies
 set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS
-  ${SICONOS_SWIG_SRC_DIRS}/KernelTypes.i
   ${SICONOS_SWIG_SRC_DIRS}/solverOptions.i
   ${SICONOS_SWIG_SRC_DIRS}/start.i
   ${SICONOS_SWIG_SRC_DIRS}/end.i
-  ${SICONOS_SWIG_SRC_DIRS}/numpy.i
-  ${SICONOS_SWIG_SRC_DIRS}/pyRegister.i)
+  ${SICONOS_SWIG_SRC_DIRS}/numpy.i)
 
 # List of modules to be built in the python bindings
 set(${COMPONENT}_PYTHON_MODULES "./${COMPONENT}")
 
 set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
+# numerics is not written in C++
 set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
+IF(NOT WITH_CXX)
+  list(REMOVE_ITEM ${COMPONENT}_SWIG_DEFS "-dirvtable")
+ENDIF(NOT WITH_CXX)
 
 if(WITH_FCLIB)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "./fclib")

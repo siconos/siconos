@@ -13,8 +13,8 @@ if(WITH_SERIALIZATION)
   find_package(Boost 1.47 COMPONENTS filesystem REQUIRED)
   # cmake 2.8.12.2 (ubuntu 14.04) need this
   set(${COMPONENT}_LINK_LIBRARIES  "${${COMPONENT}_LINK_LIBRARIES};${Boost_LIBRARIES}")
-  # Right now boost::serialization does some nasty things... so we have to
 endif()
+# Right now boost::serialization does some nasty things... so we have to
 # disable some undefined behavior checks ...
 IF(USE_SANITIZER MATCHES "asan")
   ADD_CXX_OPTIONS("-fno-sanitize=vptr")

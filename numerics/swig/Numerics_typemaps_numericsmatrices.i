@@ -1,9 +1,9 @@
-#define GET_INT(OBJ,VAR)                                                \
-  if(!PyInt_Check(OBJ))                                                 \
-  {                                                                     \
-    throw(std::invalid_argument(#OBJ ": expecting an int")); \
-  }                                                                     \
-  VAR = PyInt_AsLong(OBJ)
+//#define GET_INT(OBJ,VAR)                                                \
+//  if(!PyInt_Check(OBJ))                                                 \
+//  {                                                                     \
+//    throw(std::invalid_argument(#OBJ ": expecting an int")); \
+//  }                                                                     \
+//  VAR = PyInt_AsLong(OBJ)
 
 // need a PySequence_Check
 #define GET_INTS(OBJ,INDEX,VAR)                                          \
@@ -11,7 +11,9 @@
   if (!PyInt_Check(_TEMP##VAR))                                         \
   {                                                                     \
     Py_XDECREF(_TEMP##VAR);                                             \
-    throw(std::invalid_argument(#OBJ ": expecting an int")); \
+    PyErr_SetString(PyExc_RuntimeError, "expecting an int for " # VAR);       \
+    PyObject_Print(OBJ, stderr, 0);                                     \
+    return 0;                                                           \
   }                                                                     \
   VAR = PyInt_AsLong(_TEMP##VAR);                                   \
   Py_DECREF(_TEMP##VAR)
@@ -21,15 +23,17 @@
 
 %inline %{
 
+#include "csparse.h"
+
 #ifndef NDEBUG
-static inline void _sn_check_nnz(PyObject* mat, cs_sparse *M)
+static inline void _sn_check_nnz(PyObject* mat, CSparseMatrix *M)
 {
   PyObject *auto_nnz = PyObject_GetAttrString(mat,"nnz");
   assert(PyInt_AsLong(auto_nnz) == M->nzmax);
   Py_XDECREF(auto_nnz);
 }
 #else
-static inline void _sn_check_nnz(PyObject* mat, cs_sparse *M) {};
+static inline void _sn_check_nnz(PyObject* mat, CSparseMatrix *M) {};
 #endif
 
 #include "SiconosConfig.h"
@@ -204,7 +208,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
 
 %fragment("NumericsMatrix", "header", fragment="NumPy_Fragments")
 {
-  int cs_convert_from_scipy_sparse(PyObject* obj, CSparseMatrix** m, PyArrayObject** array_data_, int* array_data_ctrl_, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
+  static int cs_convert_from_scipy_sparse(PyObject* obj, CSparseMatrix** m, PyArrayObject** array_data_, int* array_data_ctrl_, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
   {
 
   assert(m);
@@ -383,7 +387,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
   }
   }
 
-  int NM_convert_from_scipy_sparse(PyObject* obj, NumericsMatrix* m, PyArrayObject** array_data_, int* array_data_ctrl_, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
+  static int NM_convert_from_scipy_sparse(PyObject* obj, NumericsMatrix* m, PyArrayObject** array_data_, int* array_data_ctrl_, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
   {
     CSparseMatrix* csm = NULL;
     int res = cs_convert_from_scipy_sparse(obj, &csm, array_data_, array_data_ctrl_, array_i_, array_i_ctrl_, array_p_, array_p_ctrl_, alloc_ctrl);
@@ -416,14 +420,14 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
   }
 
 
-  NumericsMatrix* NM_convert_from_python(PyObject* obj, NumericsMatrix* tmpmat, PyArrayObject** array_data_, int* array_ctrl, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
+  static NumericsMatrix* NM_convert_from_python(PyObject* obj, NumericsMatrix* tmpmat, PyArrayObject** array_data_, int* array_ctrl, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
   {
   void* argp = NULL;
   NumericsMatrix* out = NULL;
   int res = SWIG_ConvertPtr(obj, &argp, $descriptor(NumericsMatrix *), %convertptr_flags);
   if (SWIG_IsOK(res))
   {
-    out = %reinterpret_cast(argp, NumericsMatrix *);
+    out = (NumericsMatrix *)argp;
   }
   else
   {
@@ -464,17 +468,17 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
 
   }
 
-PyObject* cs_sparse_to_csr_matrix(cs_sparse *M)
+static PyObject* cs_sparse_to_csr_matrix(CSparseMatrix *M)
 {
   CS_TO_SCIPY(csr, M->m);
 }
 
-PyObject* cs_sparse_to_csc_matrix(cs_sparse *M)
+static PyObject* cs_sparse_to_csc_matrix(CSparseMatrix *M)
 {
   CS_TO_SCIPY(csc, M->n);
 }
 
-PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
+static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
 {
   if (!M)
   {
@@ -541,7 +545,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
 
 }
 
-  PyObject* NM_to_python(NumericsMatrix* m)
+  static PyObject* NM_to_python(NumericsMatrix* m)
   {
   if (m)
   {
@@ -596,7 +600,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
   }
   }
 
-  void NM_clean_cs(CSparseMatrix* m, int alloc_ctrl)
+  static void NM_clean_cs(CSparseMatrix* m, int alloc_ctrl)
   {
     assert(m);
     if (alloc_ctrl & ALLOC_CTRL_P) { assert(m->p); free(m->p); }
@@ -607,7 +611,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
     m->x = NULL;
   }
 
-  int NM_clean(NumericsMatrix* M, int alloc_ctrl)
+  static int NM_clean(NumericsMatrix* M, int alloc_ctrl)
   {
     switch (M->storageType)
     {
@@ -748,8 +752,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
                         " $symname "
                         "', argument " "1"" of type '" "SparseBlockStructuredMatrix *""'");
   };
-  SparseBlockStructuredMatrix* A = (SparseBlockStructuredMatrix *) 0;
-  A = reinterpret_cast< SparseBlockStructuredMatrix * >(temp);
+  SparseBlockStructuredMatrix* A = (SparseBlockStructuredMatrix *)temp;
   assert(A);
   dims[0] = A->blocksize0[A->blocknumber0-1];
   dims[1] = A->blocksize0[A->blocknumber0-1];
@@ -826,8 +829,14 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
 }
 
 
+#ifdef __cplusplus
+#define CSparseMatrix cs_sparse
+#else
+#define CSparseMatrix struct cs_sparse
+#endif
 
-%typemap(in) (const SparseBlockStructuredMatrix* const A, cs_sparse *outSparseMat)
+
+%typemap(in) (const SparseBlockStructuredMatrix* const A, CSparseMatrix *outSparseMat)
 {
   void *swig_arp;
   int swig_res = SWIG_ConvertPtr($input,&swig_arp,$1_descriptor, 0 | 0);
@@ -835,7 +844,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
   if (SWIG_IsOK(swig_res))
   {
     $1 = (SparseBlockStructuredMatrix*) swig_arp;
-    $2 = (cs_sparse*) malloc(sizeof(cs_sparse));
+    $2 = (CSparseMatrix*) malloc(sizeof(CSparseMatrix));
     if(!$2) SWIG_fail;
 
     SBMtoSparseInitMemory($1,$2);
@@ -845,7 +854,7 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
 }
 
 
-%typemap(argout) (cs_sparse *outSparseMat)
+%typemap(argout) (CSparseMatrix *outSparseMat)
 {
   PyObject* csrm = cs_sparse_to_csr_matrix($1);
   if (!csrm) { SWIG_fail; }
@@ -853,13 +862,30 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
   free($1);
 }
 
-%typemap(out) (cs_sparse *)
+%typemap(out) (CSparseMatrix *)
 {
-  $result = cs_sparse_to_csc_matrix($1);
-  if (!$result) { SWIG_fail; }
+  if ($1->nz == -1)
+  {
+    $result = cs_sparse_to_csc_matrix($1);
+  }
+  else if ($1->nz == -2)
+  {
+    $result = cs_sparse_to_csr_matrix($1);
+  }
+  else if ($1->nz >= 0)
+  {
+    $result = cs_sparse_to_coo_matrix($1);
+  }
+  else
+  {
+    PyErr_SetString(PyExc_RuntimeError, "The given sparse matrix is of unknown type. Please file a bug");
+    SWIG_fail;
+  }
+
+ if (!$result) { SWIG_fail; }
 }
 
-%typemap(in) (cs_sparse* M)
+%typemap(in) (CSparseMatrix*)
    (int array_data_ctrl_ = 0,
    int array_i_ctrl_ = 0,
    int array_p_ctrl_ = 0,
@@ -867,31 +893,24 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
    PyArrayObject *array_i_ = NULL,
    PyArrayObject *array_p_ = NULL,
    int alloc_ctrl_ = 0,
-   cs_sparse *M = NULL)
+   CSparseMatrix *M = NULL)
 {
-  try
-  {
-    int res = cs_convert_from_scipy_sparse($input, &M, &array_data_, &array_data_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
+  int res = cs_convert_from_scipy_sparse($input, &M, &array_data_, &array_data_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
 
-    if (!res) { SWIG_fail; }
-    else if (res < 0) { PyErr_SetString(PyExc_RuntimeError, "Error the matrix is not sparse!"); SWIG_fail; }
+  if (!res) { SWIG_fail; }
+  else if (res < 0) { PyErr_SetString(PyExc_RuntimeError, "Error the matrix is not sparse!"); SWIG_fail; }
 
-    $1 = M;
-  }
-  catch (const std::invalid_argument& e)
-  {
-    SWIG_exception(SWIG_ValueError, e.what());
-  }
+  $1 = M;
 }
 
-%typemap(memberin) (cs_sparse* M)
+%typemap(memberin) (CSparseMatrix*)
 {
  // perform a deep copy
  if (!$1) { $1 = NM_csparse_alloc_for_copy($input); }
  NM_copy_sparse($input, $1);
 }
 
-%typemap(freearg) (cs_sparse* M)
+%typemap(freearg) (CSparseMatrix*)
 {
 
   if (array_data_$argnum && array_data_ctrl_$argnum) { Py_DECREF(array_data_$argnum); }
@@ -901,26 +920,15 @@ PyObject* cs_sparse_to_coo_matrix(cs_sparse *M)
   if(M$argnum) { NM_clean_cs(M$argnum, alloc_ctrl_$argnum); cs_spfree(M$argnum); }
 }
 
-%apply (cs_sparse *M) {(const cs_sparse const * m)};
-
-%apply (cs_sparse *M) {(cs_sparse const * m)};
-
-%apply (cs_sparse *M) {(const cs_sparse * m)};
-
-%apply (cs_sparse *M) {(cs_sparse * m)};
-
-%apply (cs_sparse *M) {(const cs_sparse const *sparseMat)};
-
-%apply (cs_sparse *M) {(cs_sparse *sparseMat)};
-
-
 %inline
 %{
-  void getSBM(SparseBlockStructuredMatrix* M, SparseBlockStructuredMatrix* outSBM)
+  static void getSBM(SparseBlockStructuredMatrix* M, SparseBlockStructuredMatrix* outSBM)
   {
     outSBM=M;
   }
 %}
+
+#undef CSparseMatrix
 
 // issue with typemap out and is useless for now
 // convert matrix to scipy.sparse.csc and do the job there

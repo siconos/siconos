@@ -23,10 +23,16 @@
 %include start.i
 %fragment("NumPy_Fragments");
 %{
+#ifdef __cplusplus
 extern "C"
 {
+#endif
+
 #include "fclib.h"
+
+#ifdef __cplusplus
 }
+#endif
 %}
 
  /* fclib_solution */
@@ -57,7 +63,7 @@ extern "C"
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of fclib_solution");
         return 0;
       }
-      ptr[i] = *(reinterpret_cast<fclib_solution*>(argp1));
+      ptr[i] = *(struct fclib_solution*)(argp1);
 
 //      if (ptr[i] == -1 && PyErr_Occurred())
 //        return 0;
