@@ -21,6 +21,9 @@ ENDIF(NOT WITH_CXX)
 
 if(WITH_FCLIB)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "./fclib")
+else()
+   list(APPEND ${COMPONENT}_python_excluded_tests
+     ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_fclib.py)
 endif()
 include(swig_python_tools)
 
