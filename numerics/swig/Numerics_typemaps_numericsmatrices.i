@@ -648,16 +648,22 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
       case NS_CSC:
       {
         NM_clean_cs(M->matrix2->csc, alloc_ctrl);
+        free(M->matrix2->csc);
+        M->matrix2->csc = NULL;
         break;
       }
       case NS_CSR:
       {
         NM_clean_cs(M->matrix2->csr, alloc_ctrl);
+        free(M->matrix2->csr);
+        M->matrix2->csr = NULL;
         break;
       }
       case NS_TRIPLET:
       {
         NM_clean_cs(M->matrix2->triplet, alloc_ctrl);
+        free(M->matrix2->triplet);
+        M->matrix2->triplet = NULL;
         break;
       }
       default:
@@ -666,6 +672,12 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
         return 0;
       }
       }
+      if (M->matrix2->trans_csc) { free(M->matrix2->trans_csc); M->matrix2->trans_csc = NULL; }
+      if (M->matrix2->csc) { free(M->matrix2->csc); M->matrix2->csc = NULL; }
+      if (M->matrix2->csr) { free(M->matrix2->csr); M->matrix2->csr = NULL;}
+      if (M->matrix2->triplet) { free(M->matrix2->triplet); M->matrix2->triplet = NULL;}
+      NM_clearSparse(M);
+      break;
     }
     case NM_SPARSE_BLOCK:
     {
