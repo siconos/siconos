@@ -530,21 +530,22 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
     INT_TO_NPY_INT(this_M_i_dims, M->i, row_indices);
     INT_TO_NPY_INT(this_M_p_dims, M->p, col_indices);
 
-    PyObject* out_shape = PyTuple_Pack(2, PyInt_FromLong(M->m), PyInt_FromLong(M->n));
-    if(!out_shape) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->m or M->n"); return NULL; };
+    PyObject* out_indx = PyTuple_Pack(2, row_indices, col_indices);
+    if(!out_indx) { PyErr_SetString(PyExc_RuntimeError, "Could not build (row, col)"); return NULL; };
+    PyObject* out_all =  PyTuple_Pack(2, out_data, out_indx);
+    if(!out_all) { PyErr_SetString(PyExc_RuntimeError, "Could not build (data, (row, col))"); return NULL; };
 
     PyObject* out_nnz = PyInt_FromLong(M->nz);
     if(!out_nnz) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->nz"); return NULL; };
 
     /* call the class inside the csr module */
-    PyObject* out_mat = PyObject_CallMethodObjArgs(scipy_mod, PyString_FromString((char *) "coo_matrix"), out_shape, NULL);
+    PyObject* out_mat = PyObject_CallMethodObjArgs(scipy_mod, PyString_FromString((char *) "coo_matrix"), out_all, NULL);
+
+   Py_DECREF(out_indx);
+   Py_DECREF(out_all);
 
     if(out_mat)
     {
-      PyObject_SetAttrString(out_mat, "data", out_data);
-      PyObject_SetAttrString(out_mat, "row", row_indices);
-      PyObject_SetAttrString(out_mat, "col", col_indices);
-
 #ifndef NDEBUG
       PyObject *auto_nnz = PyObject_GetAttrString(out_mat, "nnz");
       assert(PyInt_AsLong(auto_nnz) == M->nz);
@@ -574,7 +575,7 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
     {
       PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, m->matrix0);
       PyArrayObject *array = (PyArrayObject*) obj;
-      if (!array || !require_fortran(array)) { return NULL; }
+      if (!array) { PyErr_SetString(PyExc_RuntimeError, "Could not create an array from matrix0. Please file a bug"); return NULL; }
       return obj;
     }
     else if(m->matrix1)
