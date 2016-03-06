@@ -1237,28 +1237,22 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
     }
     case NM_SPARSE:
     {
-      /* we should allocate a dummy triplet  */
-      A->matrix2->triplet = cs_spalloc(A->size0, A->size1, 1, 1, 1);
       switch (A->matrix2->origin)
       {
-      case NS_UNKNOWN:
-      {
-        A->matrix2->origin = NS_TRIPLET;
-        break;
-      }
       case NS_CSC:
       {
         assert(A->matrix2->csc);
-        NM_csc_to_triplet(A->matrix2->csc);
+        A->matrix2->triplet = NM_csc_to_triplet(A->matrix2->csc);
         break;
       }
       case NS_CSR:
       {
         assert(A->matrix2->csr);
-        NM_csr_to_triplet(A->matrix2->csr);
+        A->matrix2->triplet = NM_csr_to_triplet(A->matrix2->csr);
         break;
       }
       default:
+      case NS_UNKNOWN:
       {
         NS_UNKNOWN_ERR("NM_triplet", A->matrix2->origin);
         exit(EXIT_FAILURE);

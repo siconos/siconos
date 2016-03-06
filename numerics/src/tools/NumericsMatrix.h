@@ -156,8 +156,7 @@ typedef struct
 
 } NumericsMatrix;
 
-/** Possible types of matrices for NumericsMatrix */
-
+/*! Types of matrices for NumericsMatrix */
 enum NumericsMatrix_types {
   NM_DENSE,        /**< dense format */
   NM_SPARSE_BLOCK, /**< sparse block format */
@@ -214,6 +213,7 @@ extern "C"
 
   /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
+      Note that this function does not free m.
       \param m the matrix to be deleted.
    */
   void freeNumericsMatrix(NumericsMatrix* m);
