@@ -6,16 +6,38 @@
 // some extensions but numpy arrays should be used instead
 %extend NumericsMatrix
 {
+%fragment("NumericsMatrix");
 
-  NumericsMatrix(int nrows, int ncols, double *data)
+  NumericsMatrix(PyObject* o)
+  {
+    PyArrayObject* array_ = NULL;
+    int array_ctrl_ = 0;
+    PyArrayObject* array_i_ = NULL;
+    int array_i_ctrl_ = 0;
+    PyArrayObject* array_p_ = NULL;
+    int array_p_ctrl_ = 0;
+    int alloc_ctrl_ = 0;
+
+    NumericsMatrix *tmpmat = NULL;
+    NumericsMatrix *Mtmp = NM_convert_from_python(o, &tmpmat, &array_, &array_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
+
+    if (!Mtmp) { return NULL; }
+
+    NumericsMatrix *M = createNumericsMatrix(Mtmp->storageType, Mtmp->size0, Mtmp->size1);
+    NM_copy(Mtmp, M);
+
+    if (array_ctrl_ && array_) { Py_DECREF(array_); }
+    if (array_i_ctrl_ && array_i_) { Py_DECREF(array_i_); }
+    if (array_p_ctrl_ && array_p_) { Py_DECREF(array_p_); }
+
+    if (tmpmat)
     {
-      NumericsMatrix *M = createNumericsMatrixFromData(NM_DENSE, nrows, ncols, data);
-      if (!M)
-      {
-        PyErr_SetString(PyExc_RuntimeError, "NumericsMatrix creation via createNumericsMatrixFromData failed!");
-      }
-      return M;
+      if (!NM_clean(tmpmat, alloc_ctrl_)) { return NULL; }
+      free(tmpmat);
     }
+
+    return M;
+  }
 
   void set_matrix0(int i, int j, double v)
   {
@@ -90,6 +112,13 @@
 //    %#endif
 //  }
 //
+
+  ~NumericsMatrix()
+  {
+    freeNumericsMatrix($self);
+    free($self);
+  }
+
 };
 
 

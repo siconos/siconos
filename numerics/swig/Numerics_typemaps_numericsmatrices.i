@@ -688,7 +688,7 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
 
 
 // Numpy array -> NumericsMatrix
-%typemap(in, fragment="NumericsMatrix") (NumericsMatrix* A) 
+%typemap(in, fragment="NumericsMatrix") (NumericsMatrix*) 
  // free in typemap(freearg)
  (PyArrayObject* array_ = NULL,
  int array_ctrl_ = 0,
@@ -704,15 +704,15 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
 }
 
 
-%typemap(memberin) (NumericsMatrix* A) {
- //  %typemap(memberin) (NumericsMatrix* A)
+%typemap(memberin) (NumericsMatrix*) {
+ //  %typemap(memberin) (NumericsMatrix*)
  // perform a deep copy
  if (!$1) { $1 = createNumericsMatrix($input->storageType, $input->size0, $input->size1); }
  NM_copy($input, $1);
 }
 
-%typemap(freearg) (NumericsMatrix* A) {
-  // %typemap(freearg) (NumericsMatrix* A)
+%typemap(freearg) (NumericsMatrix*) {
+  // %typemap(freearg) (NumericsMatrix*)
   if (array_ctrl_$argnum && array_$argnum) { Py_DECREF(array_$argnum); }
   if (array_i_ctrl_$argnum && array_i_$argnum) { Py_DECREF(array_i_$argnum); }
   if (array_p_ctrl_$argnum && array_p_$argnum) { Py_DECREF(array_p_$argnum); }
@@ -721,13 +721,21 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
   {
     if (!NM_clean(nummat$argnum, alloc_ctrl_$argnum)) { return NULL; }
     freeNumericsMatrix(nummat$argnum);
+    free(nummat$argnum);
   }
 
 }
 
-%typemap(out, fragment="NumericsMatrix") (NumericsMatrix* A) {
-  $result = NM_to_python($1);
-  if (!$result) SWIG_fail;
+%typemap(out, fragment="NumericsMatrix") (NumericsMatrix*) {
+  if (strcmp("$symname", "new_NumericsMatrix"))
+  {
+    $result = NM_to_python($1);
+    if (!$result) SWIG_fail;
+  }
+  else
+  {
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), SWIG_POINTER_NEW |  0 );
+  }
 }
 
 %typemap(freearg) (double *z)
@@ -752,10 +760,6 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
      $result = Py_None;
    }
  }
-
-%apply (NumericsMatrix *A) { (NumericsMatrix *m) };
-%apply (NumericsMatrix *A) { (NumericsMatrix *M) };
-%apply (NumericsMatrix *A) { (NumericsMatrix *H) };
 
 // SBM handling
 
@@ -816,6 +820,8 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
   %#endif
   if (!$1)
   {
+    printf(PyString_AsString($input));
+    printf("\n");
     SWIG_exception_fail(SWIG_IOError, "in method '" "$symname" "' cannot fopen file");
   }
 }
