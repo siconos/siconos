@@ -424,7 +424,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
   }
 
 
-  static NumericsMatrix* NM_convert_from_python(PyObject* obj, NumericsMatrix* tmpmat, PyArrayObject** array_data_, int* array_ctrl, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
+  static NumericsMatrix* NM_convert_from_python(PyObject* obj, NumericsMatrix** tmpmat, PyArrayObject** array_data_, int* array_ctrl, PyArrayObject** array_i_, int* array_i_ctrl_, PyArrayObject** array_p_, int* array_p_ctrl_, int* alloc_ctrl)
   {
   void* argp = NULL;
   NumericsMatrix* out = NULL;
@@ -435,18 +435,19 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
   }
   else
   {
-    tmpmat = newNumericsMatrix();
-    int sp_conv = NM_convert_from_scipy_sparse(obj, tmpmat, array_data_, array_ctrl, array_i_, array_i_ctrl_, array_p_, array_p_ctrl_, alloc_ctrl);
+    *tmpmat = newNumericsMatrix();
+    out = *tmpmat;
+    int sp_conv = NM_convert_from_scipy_sparse(obj, out, array_data_, array_ctrl, array_i_, array_i_ctrl_, array_p_, array_p_ctrl_, alloc_ctrl);
     if (!sp_conv) { return NULL; }
     else if (sp_conv < 0)
     {
       if (SWIG_IsOK(SWIG_ConvertPtr(obj, &argp, $descriptor(SparseBlockStructuredMatrix *), %convertptr_flags)))
       {
-        tmpmat->matrix1 = (SparseBlockStructuredMatrix *)argp;
-        tmpmat->storageType = NM_SPARSE_BLOCK;
-        NM_update_size(tmpmat);
+        out->matrix1 = (SparseBlockStructuredMatrix *)argp;
+        out->storageType = NM_SPARSE_BLOCK;
+        NM_update_size(out);
       }
-      else
+      else if (is_array(obj))
       {
         PyArrayObject* array_data = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, array_ctrl);
 
@@ -464,16 +465,21 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
           return NULL;
         }
 
-        tmpmat->storageType = NM_DENSE;
-        tmpmat->size0 =  array_size(array_data, 0);
-        tmpmat->size1 =  array_size(array_data, 1);
-        tmpmat->matrix0 = (double *)array_data(array_data);
+        out->storageType = NM_DENSE;
+        out->size0 =  array_size(array_data, 0);
+        out->size1 =  array_size(array_data, 1);
+        out->matrix0 = (double *)array_data(array_data);
 
         *array_data_ = array_data;
       }
+      else
+      {
+        free(out);
+        PyObject_Print(obj, stderr, 0);
+        PyErr_SetString(PyExc_TypeError, "Cannot build a NumericsMatrix from the given python object");
+        return NULL;
+      }
     }
-
-    out = tmpmat;
   }
 
   return out;
@@ -692,7 +698,7 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
  int alloc_ctrl_ = 0,
  NumericsMatrix *nummat = NULL)
 {
-   $1 = NM_convert_from_python($input, nummat, &array_, &array_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
+   $1 = NM_convert_from_python($input, &nummat, &array_, &array_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
    if (!$1) { SWIG_fail; }
 }
 
