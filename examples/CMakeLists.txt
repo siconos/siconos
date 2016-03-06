@@ -111,7 +111,14 @@ else()
   
   IF(HAS_BULLET)
     LIST(APPEND EXAMPLES_DIRECTORIES Mechanics/ContactDetection)
-  ENDIF(HAS_BULLET)
+
+    if(WITH_PYTHON_WRAPPER)
+      find_python_module(h5py)
+      if(NOT h5py_FOUND)
+        LIST(APPEND NO_TEST_FILES "BulletIO")
+      endif(NOT h5py_FOUND)
+    endif(WITH_PYTHON_WRAPPER)
+ENDIF(HAS_BULLET)
 
   # Scan each dir in examples_directories and collect source files
   foreach(_D ${EXAMPLES_DIRECTORIES})
