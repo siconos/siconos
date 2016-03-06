@@ -32,9 +32,19 @@
     {
       fc2d_setDefaultSolverOptions(SO, id);
     }
-    else
+    else if (id >= 500 && id < 600)
     {
       fc3d_setDefaultSolverOptions(SO, id);
+    }
+    else if (id >= 600 && id < 700)
+    {
+      gfc3d_setDefaultSolverOptions(SO, id);
+    }
+    else
+    {
+      PyErr_SetString(PyExc_RuntimeError, "Unknown friction contact problem solver");
+      free(SO);
+      return NULL;
     }
 
 
