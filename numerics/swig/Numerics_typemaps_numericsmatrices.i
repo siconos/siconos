@@ -436,29 +436,37 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     if (!sp_conv) { return NULL; }
     else if (sp_conv < 0)
     {
-      PyArrayObject* array_data = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, array_ctrl);
-
-      if (!array_data)
+      if (SWIG_IsOK(SWIG_ConvertPtr(obj, &argp, $descriptor(SparseBlockStructuredMatrix *), %convertptr_flags)))
       {
-        PyErr_SetString(PyExc_TypeError, "Could not get array obj from the python object");
-        PyObject_Print(obj, stderr, 0);
-        return NULL;
+        tmpmat->matrix1 = (SparseBlockStructuredMatrix *)argp;
+        tmpmat->storageType = NM_SPARSE_BLOCK;
+        NM_update_size(tmpmat);
       }
-
-      if (!require_dimensions(array_data, 2) || !require_native(array_data) || !require_fortran(array_data))
+      else
       {
-        PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a 2 dimensional array (or list, tuple, ...)");
-        PyObject_Print(obj, stderr, 0);
-        return NULL;
+        PyArrayObject* array_data = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, array_ctrl);
+
+        if (!array_data)
+        {
+          PyErr_SetString(PyExc_TypeError, "Could not get array obj from the python object");
+          PyObject_Print(obj, stderr, 0);
+          return NULL;
+        }
+
+        if (!require_dimensions(array_data, 2) || !require_native(array_data) || !require_fortran(array_data))
+        {
+          PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a 2 dimensional array (or list, tuple, ...)");
+          PyObject_Print(obj, stderr, 0);
+          return NULL;
+        }
+
+        tmpmat->storageType = NM_DENSE;
+        tmpmat->size0 =  array_size(array_data, 0);
+        tmpmat->size1 =  array_size(array_data, 1);
+        tmpmat->matrix0 = (double *)array_data(array_data);
+
+        *array_data_ = array_data;
       }
-
-
-      tmpmat->storageType = NM_DENSE;
-      tmpmat->size0 =  array_size(array_data, 0);
-      tmpmat->size1 =  array_size(array_data, 1);
-      tmpmat->matrix0 = (double *)array_data(array_data);
-
-      *array_data_ = array_data;
     }
 
     out = tmpmat;

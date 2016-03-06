@@ -1770,6 +1770,11 @@ void NM_update_size(NumericsMatrix* A)
   }
   case NM_SPARSE_BLOCK:
   {
+    assert(A->matrix1);
+    assert(A->matrix1->blocknumber0 > 0);
+    assert(A->matrix1->blocknumber1 > 0);
+    A->size0 = A->matrix1->blocksize0[A->matrix1->blocknumber0-1];
+    A->size1 = A->matrix1->blocksize1[A->matrix1->blocknumber1-1];
     DEBUG_PRINT("NM_update_size :: to be implemented for NM_SPARSE_BLOCK");
     break;
   }
