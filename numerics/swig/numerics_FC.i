@@ -1,10 +1,23 @@
+%{
+#include "FrictionContactProblem.h"
+#include "fc3d_Solvers.h"
+#include "fc3d_compute_error.h"
+#include "Friction_cst.h"
+#ifdef WITH_FCLIB
+#include "fclib_interface.h"
+#endif
+%}
+
+%include "FrictionContactProblem.h"
+#ifdef WITH_FCLIB
+%include fclib_interface.h
+#endif
+
 %include "fc3d_Solvers.h"
 %include "fc3d_unitary_enumerative.h"
 %include "fc2d_Solvers.h"
 %include "Friction_cst.h"
 %include "fc3d_compute_error.h"
-
-
 
 %extend FrictionContactProblem
 {
@@ -112,4 +125,42 @@
 
 };
 
+%inline %{
 
+#include <stdio.h>
+  static FrictionContactProblem* frictionContactProblemFromFile
+    (const char * filename)
+  {
+    FILE * finput = fopen(filename, "r");
+    if (finput)
+    {
+      FrictionContactProblem* problem =
+        (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+      if (frictionContact_newFromFile(problem,finput))
+      {
+      char msg[1024];
+      snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot load %s\n",filename);
+      PyErr_SetString(PyExc_RuntimeError, msg);
+      PyErr_PrintEx(0);
+      free(problem);
+      fclose(finput);
+      return NULL;
+      }
+      else
+      {
+        fclose(finput);
+        return problem;
+      }
+    }
+    else
+    {
+      char msg[1024];
+      snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot open %s\n",filename);
+      PyErr_SetString(PyExc_RuntimeError, msg);
+      PyErr_PrintEx(0);
+      return NULL;
+    }
+    
+  }
+
+%}

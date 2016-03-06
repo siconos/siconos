@@ -1,3 +1,6 @@
+
+%apply (double *b) { (double *b_bck_gfc3d) };
+
 // for b in GlobalFrictionContact
 %typemap(out) (double* b) {
   npy_intp dims[1];
@@ -40,6 +43,11 @@
 
 }
 
+%{
+#include "GlobalFrictionContactProblem.h"
+%}
+
+%include "GlobalFrictionContactProblem.h"
 %include "gfc3d_Solvers.h"
 %include "gfc3d_compute_error.h"
 
@@ -125,3 +133,5 @@
 
 // remove typemaps for b
 %clear double* b;
+%apply (double *b_bck_gfc3d) { (double *b) };
+

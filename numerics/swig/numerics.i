@@ -47,8 +47,6 @@
 #include "SolverOptions.h"
 #include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
-#include "fc3d_Solvers.h"
-#include "Friction_cst.h"
 #include "fc3d_AlartCurnier_functions.h"
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
@@ -56,14 +54,10 @@
 #include "AlartCurnierGenerated.h"
 #include "FischerBurmeisterGenerated.h"
 #include "NaturalMapGenerated.h"
-#include "fc3d_compute_error.h"
 #include "gfc3d_compute_error.h"
-#include "fclib_interface.h"
 #include "Numerics_functions.h"
 #include "SiconosSets.h"
 #include "GAMSlink.h"
-
-
 %}
 
 #ifdef WITH_SERIALIZATION
@@ -277,45 +271,7 @@
 %include numerics_LCP.i
 %include Numerics_AVI.i
 
-
 %inline %{
-
-
-#include <stdio.h>
-  static FrictionContactProblem* frictionContactProblemFromFile
-    (const char * filename)
-  {
-    FILE * finput = fopen(filename, "r");
-    if (finput)
-    {
-      FrictionContactProblem* problem =
-        (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-      if (frictionContact_newFromFile(problem,finput))
-      {
-      char msg[1024];
-      snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot load %s\n",filename);
-      PyErr_SetString(PyExc_RuntimeError, msg);
-      PyErr_PrintEx(0);
-      free(problem);
-      fclose(finput);
-      return NULL;
-      }
-      else
-      {
-        fclose(finput);
-        return problem;
-      }
-    }
-    else
-    {
-      char msg[1024];
-      snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot open %s\n",filename);
-      PyErr_SetString(PyExc_RuntimeError, msg);
-      PyErr_PrintEx(0);
-      return NULL;
-    }
-    
-  }
 
   static MixedLinearComplementarityProblem* mixedLinearComplementarityProblemFromFile
     (const char * filename)
@@ -363,8 +319,6 @@
 %ignore DampedLocalNonsmoothNewtonSolver; // signature problem idem.
 
 %ignore frictionContactProblem_new; // signature issue with mu param
-
-%include FrictionContactProblem.i
 
 %include "typemaps.i"
 
