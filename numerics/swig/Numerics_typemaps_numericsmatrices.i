@@ -394,18 +394,22 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     if (res > 0)
     {
       m->storageType = NM_SPARSE;
+      m->matrix2 = newNumericsSparseMatrix();
 
       if (csm->nz > 0)
       {
         m->matrix2->triplet = csm;
+        m->matrix2->origin = NS_TRIPLET;
       }
       else if (csm->nz == -1)
       {
         m->matrix2->csc = csm;
+        m->matrix2->origin = NS_CSC;
       }
       else if (csm->nz == -2)
       {
         m->matrix2->csr = csm;
+        m->matrix2->origin = NS_CSR;
       }
       else
       {
@@ -514,11 +518,11 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
     PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x);
     if(!out_data) { PyErr_SetString(PyExc_RuntimeError, "Could not extract M->x"); return NULL; };
 
-    PyObject* col_indices;
-    INT_TO_NPY_INT(this_M_i_dims, M->i, col_indices);
-
     PyObject* row_indices;
-    INT_TO_NPY_INT(this_M_p_dims, M->p, row_indices);
+    PyObject* col_indices;
+
+    INT_TO_NPY_INT(this_M_i_dims, M->i, row_indices);
+    INT_TO_NPY_INT(this_M_p_dims, M->p, col_indices);
 
     PyObject* out_shape = PyTuple_Pack(2, PyInt_FromLong(M->m), PyInt_FromLong(M->n));
     if(!out_shape) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract M->m or M->n"); return NULL; };
@@ -689,6 +693,7 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M)
  NumericsMatrix *nummat = NULL)
 {
    $1 = NM_convert_from_python($input, nummat, &array_, &array_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
+   if (!$1) { SWIG_fail; }
 }
 
 
