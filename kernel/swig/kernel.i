@@ -102,7 +102,7 @@
 %include stl.i
 
 // 1. Vector and Matrix <=> numpy array (dense only)
-%include KernelTypes.i
+%include SiconosAlgebra.i
 
 
 // 2. try to hide SP::Type on python side
@@ -131,19 +131,6 @@ namespace std
   typedef size_t size_t;
 }
 
-
-
-// SimpleMatrix operators
-%rename  (__add__) operator+;
-%rename  (__less__) operator-;
-%rename  (__mul__) operator*;
-%rename  (__div__) operator/;
-%rename  (__iadd__) operator+=;
-%rename  (__iless__) operator-=;
-%rename  (__imul__) operator*=;
-%rename  (__idiv__) operator/=;
-%rename  (__eq__) operator==;
-%rename  (__ne__) operator!=;
 
 
 // swig see those classes as abstract => no wrappers for constructors

@@ -24,6 +24,11 @@ def test_getVector():
 
     assert (K.getVector(v) == np.array([1,2,4])).all()
 
+    v1 = K.SiconosVector([1, 2, 3])
+    v2 = K.SiconosVector(np.asarray([1, 2, 3]))
+
+    assert (K.getVector(v1) == K.getVector(v2)).all()
+
 
 def test_getMatrix():
     assert (K.getMatrix([[1,2,3]]) == np.array([[1,2,3]])).all()
@@ -40,6 +45,9 @@ def test_getMatrix():
 
     assert (K.getMatrix(m) != np.array([[1,0,3]])).any()
 
+    m1 = K.SimpleMatrix(((1,2,3), (4,5,6)))
+    m2 = K.SimpleMatrix(np.array([[1,2,3],[4,5,6]]))
+    assert (K.getMatrix(m1) == K.getMatrix(K.SimpleMatrix(m2))).all()
 
 def test_LagrangianDS_setMassPtr():
     class LDS(K.LagrangianDS):

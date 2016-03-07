@@ -81,5 +81,7 @@ SWIG_init(void);
 %rename (lambda_) lambda;
 
 #ifdef __cplusplus
+
 %include ignored_functions.i
+
 #endif

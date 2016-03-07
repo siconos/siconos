@@ -29,6 +29,7 @@
 %ignore BlockVector::tabIndexEnd() const;
 %ignore OneStepIntegrator::dynamicalSystemsBegin() const;
 %ignore OneStepIntegrator::dynamicalSystemsEnd() const;
+%ignore *::ACCEPT_NONVIRTUAL_VISITORS;
 
 %ignore operator *(double,SiconosVector const &);
 %ignore operator *(double,SiconosMatrix const &);
