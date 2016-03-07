@@ -918,8 +918,7 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M, bool copy)
   %#endif
   if (!$1)
   {
-    printf(PyString_AsString($input));
-    printf("\n");
+    puts(PyString_AsString($input));
     SWIG_exception_fail(SWIG_IOError, "in method '" "$symname" "' cannot fopen file");
   }
 }

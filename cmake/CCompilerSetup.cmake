@@ -50,8 +50,12 @@ if(DEV_MODE)
   if((NOT WITH_MECHANISMS) AND (NOT WITH_PYTHON_WRAPPER))
     add_c_options("-Werror=missing-declarations")
   endif()
+
   add_c_options("-Werror=overloaded-virtual")
-  
+
+  # ubuntu (at least) build with those
+  add_c_options("-Wformat=2")
+  add_c_options("-Werror=format-security")
 endif()
 
 # Compiler Specific
