@@ -34,6 +34,73 @@
 //
 // with this macro : ok
 
+// SimpleMatrix operators
+%rename  (__add__) operator+;
+%rename  (__less__) operator-;
+%rename  (__mul__) operator*;
+%rename  (__div__) operator/;
+%rename  (__iadd__) operator+=;
+%rename  (__iless__) operator-=;
+%rename  (__imul__) operator*=;
+%rename  (__idiv__) operator/=;
+%rename  (__eq__) operator==;
+%rename  (__ne__) operator!=;
+
+
+#undef PY_REGISTER_WITHOUT_DIRECTOR
+
+%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
+%inline
+%{
+#include "TYPE.hpp"
+%}
+%rename  (__getitem__) TYPE ## ::operator[];
+%rename  (__add__) TYPE ## ::operator+;
+%rename  (__mul__) TYPE ## ::operator*;
+%rename  (__div__) TYPE ## ::operator/;
+%rename  (__iadd__) TYPE ## ::operator+=;
+%rename  (__imul__) TYPE ## ::operator*=;
+%rename  (__idiv__) TYPE ## ::operator/=;
+%rename  (__eq__) TYPE ## ::operator==;
+%rename  (__ne__) TYPE ## ::operator!=;
+%rename  (__copy__) TYPE ## ::operator=;
+%ignore STD11::enable_shared_from_this<TYPE>;
+%shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
+%template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
+%shared_ptr(TYPE);
+%make_picklable(TYPE, Kernel);
+%enddef
+
+
+//%typemap(directorin) TYPE& ()
+//%{
+//  // %typemap(directorin) (TYPE&) ()
+//  // swig issue shared pointer check in wrappers even if arg is a ref
+//  {
+//    SP::TYPE myptemp(createSPtr##TYPE($1));
+//    $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
+//                                $descriptor(SP::TYPE *), 0);
+//  }
+//%}
+//
+//%typemap(directorout) TYPE& ()
+//%{
+//  // %typemap(directorout) (TYPE&) ()
+//  // swig issue shared pointer check in wrappers even if arg is a ref
+//  {
+//    SP::TYPE myptemp(createSPtr##TYPE($1));
+//    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
+//                                 $descriptor(SP::TYPE *), 0);
+//  }
+//%}
+//
+
+
+PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix);
+PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);
+PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector);
+PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);
+
 // set the base of the pyarray to a PyCapsule or PyCObject created from the shared_ptr
 %{
 static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* savedSharedPointer)
@@ -575,7 +642,7 @@ struct IsDense : public Question<bool>
 }
 
 %typemap(in,fragment="SiconosVector")
-  const SiconosVector&
+  const SiconosVector &
   (PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosVector> keeper)
 {
   // %typemap(in,fragment="NumPy_Fragments")
