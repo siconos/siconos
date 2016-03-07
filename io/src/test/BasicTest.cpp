@@ -17,6 +17,7 @@ class point
 {
 public:
   virtual void dummy() {};
+  virtual ~point() {};
   int x;
   int y;
 };
@@ -25,6 +26,7 @@ class colored_point : public point
 {
 public:
   virtual void dummy() {};
+  virtual ~colored_point() {};
   std::string color;
 };
 
@@ -242,6 +244,7 @@ class A
 {
 public:
   virtual void get() = 0;
+  virtual ~A() {};
 
   int labelA;
 };
@@ -251,6 +254,7 @@ class B : public A
 public:
   void get() { };
   int labelB;
+  virtual ~B() {};
 };
 
 SICONOS_IO_REGISTER(A, (labelA));
