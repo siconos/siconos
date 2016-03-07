@@ -29,7 +29,7 @@ siconos_ubuntu_15_10 = siconos_default.copy()(
 
 siconos_profiling = siconos_ubuntu_15_10.copy()(
     build_configuration='Profiling',
-    add_pkgs=['valgrind'])
+    add_pkgs=['profiling'])
 
 # note fedora/atlas-lapack in siconos.yml -> cmake does not detect blas
 siconos_fedora_latest = siconos_default.copy()(
