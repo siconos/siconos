@@ -57,7 +57,7 @@ public:
 
   /** destructor
    */
-  ~Circle();
+  virtual ~Circle();
 
   /** visitors hook */
   ACCEPT_BASE_SP_VISITORS(LagrangianDS);

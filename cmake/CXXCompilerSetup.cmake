@@ -86,6 +86,7 @@ if(DEV_MODE)
   add_cxx_options("-Wformat=2")
   add_cxx_options("-Werror=format-security")
 
+  add_cxx_options("-Werror=non-virtual-dtor")
 endif()
 
 # add_cxx_options("-static -static-libgcc -static-libstdc++" "GNU;Clang")

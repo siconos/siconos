@@ -119,6 +119,8 @@ struct Object {
 
   VIRTUAL_ACCEPT_VISITORS();
 
+  virtual ~Object() {};
+
 };
 
 struct ObjectA : public Object
@@ -127,6 +129,8 @@ struct ObjectA : public Object
   int dummya;
 
   ACCEPT_STD_VISITORS();
+  virtual ~ObjectA() {};
+
 };
 
 struct ObjectB : public Object
@@ -135,6 +139,8 @@ struct ObjectB : public Object
   int dummyb;
 
   ACCEPT_STD_VISITORS();
+  virtual ~ObjectB() {};
+
 };
 
 #define VISITOR_CLASSES()\

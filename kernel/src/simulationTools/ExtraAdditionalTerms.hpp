@@ -57,7 +57,8 @@ public:
    */
   virtual void addJacobianRhsContribution(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double h, SiconosMatrix& jacRhs) = 0;
 
-
+  /** Desctructor */
+  virtual ~ExtraAdditionalTerms() {};
 };
 
 #endif

@@ -47,7 +47,7 @@ public:
 
   CircularDS(double, double, SP::SiconosVector, SP::SiconosVector);
 
-  ~CircularDS();
+  virtual ~CircularDS() {};
 
   inline double getQ(unsigned int pos)
   {

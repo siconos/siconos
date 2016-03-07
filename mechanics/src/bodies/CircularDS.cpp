@@ -28,6 +28,3 @@ CircularDS::CircularDS(double r, double m,
 {
   _ndof = 3;
 }
-
-CircularDS::~CircularDS()
-{}

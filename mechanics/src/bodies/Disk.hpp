@@ -56,7 +56,7 @@ public:
 
   /** destructor
    */
-  ~Disk();
+  virtual ~Disk();
 
 
   /** visitors hook
