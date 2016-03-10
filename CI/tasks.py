@@ -80,7 +80,8 @@ siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     distrib='fedora:rawhide',
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization'])
+    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization'],
+    fast=False)
 
 siconos_serialization = siconos_default.copy()(
     ci_config='with_serialization',
