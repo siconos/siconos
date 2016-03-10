@@ -25,14 +25,14 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "MCP_Interface.h"
+#include "PATH_SDK/include/MCP_Interface.h"
 
-#include "Path.h"
-#include "PathOptions.h"
+#include "PATH_SDK/include/Path.h"
+#include "PATH_SDK/include/PathOptions.h"
 
-#include "Macros.h"
-#include "Output_Interface.h"
-#include "Options.h"
+#include "PATH_SDK/include/Macros.h"
+#include "PATH_SDK/include/Output_Interface.h"
+#include "PATH_SDK/include/Options.h"
 
 #include "NonlinearComplementarityProblem.h"
 #include "PathAlgebra.h"
