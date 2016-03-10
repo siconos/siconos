@@ -29,16 +29,16 @@ find_library(PathFerris_LIBRARY path${PathFerris_VERSION}
   PATH_SUFFIXES lib lib/${CMAKE_LIBRARY_ARCHITECTURE} 
   )
 else(PathFerris_DIR)
-find_library(PathFerris_LIBRARY path${PathFerris_VERSION}
-  )
+  find_library(PathFerris_LIBRARY path${PathFerris_VERSION} PATHS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
 endif(PathFerris_DIR)
 # If not found, try standard path.
 
 # Set PathFerris_LIBRARY_DIRS and PathFerris_LIBRARIES for libfindprocess
 # see Using LibFindMacros : https://cmake.org/Wiki/CMake:How_To_Find_Libraries
 IF (PathFerris_LIBRARY)
-  GET_FILENAME_COMPONENT(PathFerris_LIBRARY_DIRS ${PathFerris_LIBRARY} PATH)
   GET_FILENAME_COMPONENT(PathFerris_LIBRARIES ${PathFerris_LIBRARY} REALPATH)
+  SET(HAVE_PATHFERRIS TRUE)
+  SET(PathFerris_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/externals/PATH_SDK/include/)
 endif()
 IF (NOT PathFerris_FIND_QUIETLY)
   MESSAGE(STATUS "Found PathFerris: ${PathFerris_LIBRARY}")

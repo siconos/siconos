@@ -24,7 +24,7 @@
 #include "relay_cst.h"
 
 #ifdef HAVE_PATHFERRIS
-#include "PATH_SDK/interface/SimpleLCP.h"
+#include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 
 void relay_path(RelayProblem* problem, double *z, double *w, int *info , SolverOptions* options)
