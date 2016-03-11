@@ -1186,7 +1186,8 @@ class Hdf5():
             set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=100000,
-            tolerance=1e-8):
+            tolerance=1e-8,
+            numerics_verbose=False):
         """
         Run a simulation from inputs in hdf5 file.
         parameters are:
@@ -1255,7 +1256,7 @@ class Hdf5():
         osnspb.numericsSolverOptions().dparam[0] = tolerance
         osnspb.setMaxSize(16384)
         osnspb.setMStorageType(1)
-        #osnspb.setNumericsVerboseMode(False)
+        osnspb.setNumericsVerboseMode(numerics_verbose)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
@@ -1290,7 +1291,7 @@ class Hdf5():
 
         while simulation.hasNextEvent():
 
-            print ('step', k)
+            print ('step', k, '<', int((T-t0)/h))
 
             log(self._broadphase.buildInteractions, with_timer)\
                 (model.currentTime())
