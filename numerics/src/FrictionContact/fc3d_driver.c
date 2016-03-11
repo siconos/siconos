@@ -91,7 +91,7 @@ int fc3d_driver(FrictionContactProblem* problem,
   if (!NoDefaultOptions)
     readSolverOptions(3, options);
 
-  if (verbose > 0)
+  if (verbose > 1)
     printSolverOptions(options);
 
   /* Solver name */
