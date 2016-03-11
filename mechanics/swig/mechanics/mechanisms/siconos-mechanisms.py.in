@@ -11,6 +11,20 @@ siconos_pythonpath = "@SICONOS_PYTHON_INSTALL_DIR@"
 sys.path.append(siconos_pythonpath)
 mechanisms_path = os.path.join(siconos_pythonpath,
                                'siconos/mechanics/mechanisms')
+
+print('############## Enrironment variable                ###############')
+
+
+print("sys.executable: ",sys.executable)
+print("sys.path: ",sys.path)
+
+print('DYLD_LIBRARY_PATH:',os.getenv('DYLD_LIBRARY_PATH'))
+print('LD_LIBRARY_PATH:',os.getenv('LD_LIBRARY_PATH'))
+
+
+print('############## Loading of definition files         ###############')
+
+
 from siconos.mechanics.mechanisms import mbtb
 from siconos.mechanics.mechanisms import cadmbtb
 
@@ -35,6 +49,7 @@ if os.path.exists(local_options):
 
 exec(compile(open("bodydef.py").read(), "bodydef.py", 'exec'))
 print("siconos-mechanisms.py, info: bodydef.py loaded")
+
 
 try:
     print(" run id: ", run_id )
