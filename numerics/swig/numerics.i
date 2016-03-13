@@ -166,7 +166,9 @@
 #ifdef __cplusplus
   extern "C" {
 #endif
-  static void set_cstruct(uintptr_t p_env, void* p_struct)
+  // this can't be static --xhub
+  void set_cstruct(uintptr_t p_env, void* p_struct);
+  void set_cstruct(uintptr_t p_env, void* p_struct)
   {
     *(void**)p_env = p_struct;
   }
