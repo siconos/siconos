@@ -27,33 +27,6 @@
 %ignore btFace::m_plane;
 
 
-%{
-#ifndef BT_INFINITY
-  struct btInfMaskConverter
-  {
-    union {
-      float mask;
-      int intmask;
-    };
-    btInfMaskConverter(int mask=0x7F800000)
-      :intmask(mask)
-    {
-    }
-  };
-  static btInfMaskConverter btInfinityMask = 0x7F800000;
-#define BT_INFINITY (btInfinityMask.mask)
-  inline int btGetInfinityMask()//suppress stupid compiler warning
-  {
-    return btInfinityMask.intmask;
-  }
-#endif
-#undef BT_INFINITY
-#include <LinearMath/btScalar.h>
-%}
-%include LinearMath/btScalar.h
-
-
-
 
 
 #undef PY_REGISTER_BULLET_COLLISION_DETECTION
@@ -107,6 +80,11 @@
 %shared_ptr(btPolyhedralConvexAabbCachingShape);
 %shared_ptr(btConvexHullShape);
 
+
+%{
+#include <LinearMath/btScalar.h>
+%}
+%import LinearMath/btScalar.h
 
 PY_REGISTER_BULLET_LINEAR_MATH(btVector3);
 PY_REGISTER_BULLET_LINEAR_MATH(btMatrix3x3);
