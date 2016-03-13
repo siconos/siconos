@@ -46,6 +46,11 @@ env:
       - FC=mpif90
       - CXX=mpicxx
 
+# see http://pages.cs.wisc.edu/~ferris/path/LICENSE
+  path:
+    any:
+      - PATH_LICENSE_STRING="3413119131&Courtesy&&&USR&54784&12_1_2016&1000&PATH&GEN&31_12_2017&0_0_0&5000&0_0"
+
 ##############################################################################
 pkgs:
 
@@ -264,3 +269,9 @@ pkgs:
   cfi:
     any:
       command: mkdir /tmp/clang && ln -s /usr/bin/ld.gold /tmp/clang/ld
+
+  path:
+    debian:
+      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib/x86_64-linux-gnu/libpath47.so
+    fedora:
+      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib64/libpath47.so
