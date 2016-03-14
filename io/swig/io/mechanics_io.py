@@ -234,7 +234,7 @@ class ShapeCollection():
         self._shapes = dict()
 
         if bullet_is_here:
-        
+
             self._primitive = {'Cylinder': btCylinderShape,
                                'Sphere': btSphereShape,
                                'Box': btBoxShape,
@@ -243,7 +243,7 @@ class ShapeCollection():
                                'Capsule': btCapsuleShape}
         else:
             self._primitive = dict()
-            
+
     def shape(self, shape_name):
         return self._io.shapes()[shape_name]
 
@@ -472,6 +472,7 @@ class Hdf5():
         self._number_of_dynamic_objects = 0
         self._number_of_static_objects = 0
         self._length_scale = length_scale
+        self._output_frequency = 1
         self._keep = []
 
     def __enter__(self):
@@ -960,7 +961,7 @@ class Hdf5():
                 # __getstate__ as with pythonocc
                 shape[:] = shape_data[0]
                 shape.attrs['occ_indx'] = shape_data[1]
-                
+
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'brep'
 
@@ -1187,7 +1188,8 @@ class Hdf5():
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=100000,
             tolerance=1e-8,
-            numerics_verbose=False):
+            numerics_verbose=False,
+            output_frequency=None):
         """
         Run a simulation from inputs in hdf5 file.
         parameters are:
@@ -1234,6 +1236,10 @@ class Hdf5():
 
         if space_filter is None:
             space_filter = BulletSpaceFilter
+
+
+        if output_frequency is not  None:
+            self._output_frequency=output_frequency
 
         # Model
         #
@@ -1289,6 +1295,7 @@ class Hdf5():
         self.outputStaticObjects()
         self.outputDynamicObjects()
 
+
         while simulation.hasNextEvent():
 
             print ('step', k, '<', int((T-t0)/h))
@@ -1298,17 +1305,21 @@ class Hdf5():
 
             log(simulation.computeOneStep, with_timer)()
 
-            log(self.outputDynamicObjects, with_timer)()
+            #if (k%self._output_frequency == 0) :
+            if (k%self._output_frequency == 0) or (k==1) :
+                print ('output in hdf5 file at step ', k)
 
-            log(self.outputVelocities, with_timer)()
+                log(self.outputDynamicObjects, with_timer)()
 
-            log(self.outputContactForces, with_timer)()
+                log(self.outputVelocities, with_timer)()
 
-            log(self.outputSolverInfos, with_timer)()
+                log(self.outputContactForces, with_timer)()
+
+                log(self.outputSolverInfos, with_timer)()
+
+                log(self._out.flush)()
 
             log(simulation.nextStep, with_timer)()
-
-            log(self._out.flush)()
 
             print ('')
             k += 1
