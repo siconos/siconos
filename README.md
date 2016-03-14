@@ -18,7 +18,7 @@ Fluid Mechanics, Computer graphics, ...
 
 Each component can be used either from a low-level language like C/C++ or from Python.
 
-## Siconos/numerics (C)
+## siconos/numerics (C)
 
 Collection of low-level algorithms for solving optimization problems arising in the simulation of nonsmooth dynamical systems:
 
@@ -28,7 +28,7 @@ Collection of low-level algorithms for solving optimization problems arising in 
   * Primal or Dual Relay problems
   * Finite dimensional [Variational Inequality](https://en.wikipedia.org/wiki/Variational_inequality) (AVI and VI)
 
-## Siconos/kernel (C++)
+## siconos/kernel (C++)
 
 Library for the modeling and simulation of the nonsmooth dynamical systems.
 
@@ -36,14 +36,16 @@ Library for the modeling and simulation of the nonsmooth dynamical systems.
   * Numerical integration techniques: Event-detecting (event-driven) and Event-Capturing (time-stepping) schemes
   * Nonsmooth laws: complementarity, Relay, Friction Contact, Newton impact
 
-## Siconos/mechanics (C++)
+## siconos/mechanics (C++)
 
-Component for rigid body systems.
+Component for the simualtion of mechanical systems in interaction with their environment:
+* Contact detection procedure between simple primitive (homemade) and meshes [bullet3](https://github.com/bulletphysics/bullet3)
+* Contact detection between Brep representation based  [oce. Open CASCADE Community Edition](https://github.com/tpaviot/oce) and [pythonOCC](https://github.com/tpaviot/pythonocc) 3D CAD/CAM package for python 
 
-## Siconos/control (C++)
+## siconos/control (C++)
 
 Library to add a controller to a simulation. For now the almost all implemented control scheme are based on sliding modes with an implicit discretization.
 
-## Siconos/io (C++)
+## siconos/io (C++)
 
 This component can be used to serialize almost any simulation.
