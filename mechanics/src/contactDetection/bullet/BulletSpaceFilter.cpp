@@ -282,90 +282,83 @@ void BulletSpaceFilter::buildInteractions(double time)
 
         nslaw = (*_nslaws)(gid1, gid2);
 
-        if (!nslaw)
+        if (nslaw)
         {
-          RuntimeException::selfThrow(
-            (boost::format("Cannot find nslaw for collision between group %1% and %2%") %
-             gid1 % gid2).str());
-        }
+          std::map<btManifoldPoint*, bool>::iterator itc;
+          itc = contactPoints.find(&*cpoint);
 
-        assert(nslaw);
+          DEBUG_EXPR(if (itc == contactPoints.end())
+                     {
+                       DEBUG_PRINT("contact point not found\n");
+                       for(std::map<btManifoldPoint*, bool>::iterator itd=contactPoints.begin();
+                           itd != contactPoints.end(); ++itd)
+                       {
+                         DEBUG_PRINTF("-->%p != %p\n", &*cpoint, &*(*itd).first);
+                       }
+                     });
 
-        std::map<btManifoldPoint*, bool>::iterator itc;
-        itc = contactPoints.find(&*cpoint);
 
-        DEBUG_EXPR(if (itc == contactPoints.end())
-        {
-          DEBUG_PRINT("contact point not found\n");
-          for(std::map<btManifoldPoint*, bool>::iterator itd=contactPoints.begin();
-              itd != contactPoints.end(); ++itd)
+          if (itc == contactPoints.end() || !cpoint->m_userPersistentData)
           {
-            DEBUG_PRINTF("-->%p != %p\n", &*cpoint, &*(*itd).first);
-          }
-        });
+            /* new interaction */
 
-
-        if (itc == contactPoints.end() || !cpoint->m_userPersistentData)
-        {
-          /* new interaction */
-
-          SP::Interaction inter;
-          if (nslaw->size() == 3)
-          {
-            SP::BulletR rel(new BulletR(cpoint, createSPtrbtPersistentManifold(*contactManifold)));
-            inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
-          }
-          else
-          {
-            if (nslaw->size() == 1)
+            SP::Interaction inter;
+            if (nslaw->size() == 3)
             {
+              SP::BulletR rel(new BulletR(cpoint, createSPtrbtPersistentManifold(*contactManifold)));
+              inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
+            }
+            else
+            {
+              if (nslaw->size() == 1)
+              {
               SP::BulletFrom1DLocalFrameR rel(new BulletFrom1DLocalFrameR(cpoint));
               inter.reset(new Interaction(1, nslaw, rel, 4 * i + z));
+              }
             }
-          }
 
-          if (obB->getUserPointer())
-          {
-            SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
-
-            if (dsa != dsb)
+            if (obB->getUserPointer())
             {
-              DEBUG_PRINTF("LINK obA:%p obB:%p inter:%p\n", obA, obB, &*inter);
+              SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
+
+              if (dsa != dsb)
+              {
+                DEBUG_PRINTF("LINK obA:%p obB:%p inter:%p\n", obA, obB, &*inter);
+                assert(inter);
+
+                cpoint->m_userPersistentData = &*inter;
+                link(inter, dsa, dsb);
+              }
+              /* else collision shapes belong to the same object do nothing */
+            }
+            else
+            {
+              DEBUG_PRINTF("LINK obA:%p inter :%p\n", obA, &*inter);
               assert(inter);
 
               cpoint->m_userPersistentData = &*inter;
-              link(inter, dsa, dsb);
+              link(inter, dsa);
             }
-            /* else collision shapes belong to the same object do nothing */
+          }
+
+          if (cpoint->m_userPersistentData)
+          {
+            activeInteractions[static_cast<Interaction *>(cpoint->m_userPersistentData)] = true;
+            DEBUG_PRINTF("Interaction %p = true\n", static_cast<Interaction *>(cpoint->m_userPersistentData));
+            DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
           }
           else
           {
-            DEBUG_PRINTF("LINK obA:%p inter :%p\n", obA, &*inter);
-            assert(inter);
-
-            cpoint->m_userPersistentData = &*inter;
-            link(inter, dsa);
+            assert(false);
+            DEBUG_PRINT("cpoint->m_userPersistentData is empty\n");
           }
-        }
 
-        if (cpoint->m_userPersistentData)
-        {
-          activeInteractions[static_cast<Interaction *>(cpoint->m_userPersistentData)] = true;
-          DEBUG_PRINTF("Interaction %p = true\n", static_cast<Interaction *>(cpoint->m_userPersistentData));
+          contactPoints[&*cpoint] = true;
           DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
         }
-        else
-        {
-          assert(false);
-          DEBUG_PRINT("cpoint->m_userPersistentData is empty\n");
-        }
-
-        contactPoints[&*cpoint] = true;
-        DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
       }
     }
   }
-
   // 4. remove old contact points
   std11::tie(ui0, ui0end) = indexSet0->vertices();
   for (v0next = ui0 ;
