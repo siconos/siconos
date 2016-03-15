@@ -28,6 +28,7 @@
 #include "MechanicsFwd.hpp"
 #include <SiconosSerialization.hpp>
 #include <SiconosVisitor.hpp>
+#include <SiconosVector.hpp>
 
 class SiconosShapeHandler
 {
@@ -44,12 +45,29 @@ protected:
   ACCEPT_SERIALIZATION(SiconosShape);
 
   SP::SiconosShapeHandler _handler;
-  
-  float _x, _y, _z;
+
+  virtual void onChanged() = 0;
+
+  SP::SiconosVector _position;
 
   SiconosShape(float x, float y, float z)
-    : _x(x), _y(y), _z(z) {}
-  
+    : _position(new SiconosVector(3))
+  {
+    (*_position)(0) = x;
+    (*_position)(1) = y;
+    (*_position)(2) = z;
+  }
+
+  SP::SiconosVector position() const { return _position; }
+
+  void setPosition(SP::SiconosVector pos)
+  {
+    (*_position)(0) = (*pos)(0);
+    (*_position)(1) = (*pos)(1);
+    (*_position)(2) = (*pos)(2);
+    onChanged();
+  }
+
   // TODO orientation
 
 public:
@@ -69,14 +87,14 @@ struct SiconosSphere : public SiconosShape, public std11::enable_shared_from_thi
 protected:
   float _radius;
 
-  void setDirty()
+  virtual void onChanged()
     { if (_handler) _handler->onChanged(shared_from_this()); }
 
 public:
   SiconosSphere(float x, float y, float z, float radius)
     : SiconosShape(x,y,z), _radius(radius) {}
   float radius() const { return _radius; }
-  void setRadius(float r) { _radius = r; setDirty(); }
+  void setRadius(float r) { _radius = r; onChanged(); }
 
   /** visitors hook
    */
@@ -87,18 +105,30 @@ struct SiconosBox : public SiconosShape, public std11::enable_shared_from_this<S
 {
 protected:
 
-  float _width;
-  float _height;
-  float _depth;
+  SP::SiconosVector _dimensions;
 
-  void setDirty()
-    { /*if (_handler) _handler->onChanged(shared_from_this());*/ }
+  void onChanged()
+    { if (_handler) _handler->onChanged(shared_from_this()); }
 
 public:
   SiconosBox(float x, float y, float z,
              float width, float height, float depth)
-    : SiconosShape(x,y,z),
-      _width(width), _height(height), _depth(depth) {}
+    : SiconosShape(x,y,z), _dimensions(new SiconosVector(3))
+  {
+    (*_dimensions)(0) = width;
+    (*_dimensions)(1) = height;
+    (*_dimensions)(2) = depth;
+  }
+
+  SP::SiconosVector dimensions() const { return _dimensions; }
+
+  void setDimensions(SP::SiconosVector pos)
+  {
+    (*_dimensions)(0) = (*pos)(0);
+    (*_dimensions)(1) = (*pos)(1);
+    (*_dimensions)(2) = (*pos)(2);
+    onChanged();
+  }
 };
 
 #endif /* SiconosShape_h */
