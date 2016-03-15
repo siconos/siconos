@@ -9,13 +9,12 @@ contact dynamics, multibody systems dynamics or granular materials).
   * _Switched Electrical Circuit_ such as electrical circuits with ideal and piecewise linear components: power converter, rectifier, Phase-Locked Loop (PLL) or Analog-to-Digital converter.
   * _Sliding mode control_ systems.
   * _Biology_ Gene regulatory network. 
-
+ 
 Other applications are found in Systems and Control (hybrid systems, differential inclusions,
 optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), 
 Fluid Mechanics, Computer graphics, ...
 
 Read more about Siconos at the [Siconos homepage](http://siconos.gforge.inria.fr)
-
 # Main components
 
 Each component can be used either from a low-level language like C/C++ or from Python.
@@ -51,9 +50,63 @@ Library to add a controller to a simulation. For now the almost all implemented 
 ## siconos/io (C++)
 
 This component can be used to 
-* serialize almost any simulation using boost::archive
+* serialize almost any simulation using [boost::serialization](http://www.boost.org/doc/libs/1_60_0/libs/serialization/doc/index.html)
 * generate mechanical examples from hdf5 and to write hdf5 in view of vizualization through [vtk](http://www.vtk.org)
 
 # License
 
 Siconos is currently distributed under GPL license (v2).
+
+### The archetype example: "The bouncing ball"
+    from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
+        LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
+        TimeDiscretisation, LCP, TimeStepping
+    from numpy import eye, empty
+    
+    t0 = 0       # start time
+    T = 10       # end time
+    h = 0.005    # time step
+    r = 0.1      # ball radius
+    g = 9.81     # gravity
+    m = 1        # ball mass
+    e = 0.9      # restitution coeficient
+    theta = 0.5  # theta scheme
+    
+    # the dynamical system
+    x = [1, 0, 0]    # initial position
+    v = [0, 0, 0]    # initial velocity
+    mass = eye(3)  # mass matrix
+    mass[2, 2] = 2. / 5 * r * r
+    ball = LagrangianLinearTIDS(x, v, mass)
+    weight = [-m * g, 0, 0] 
+    ball.setFExtPtr(weight) #set external forces
+    # Interaction ball-floor
+    H = [[1, 0, 0]]
+    nslaw = NewtonImpactNSL(e)
+    relation = LagrangianLinearTIR(H)
+    inter = Interaction(nslaw, relation)
+    # Model
+    bouncingBall = Model(t0, T)
+    # add the dynamical system to the non smooth dynamical system
+    bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
+    # link the interaction and the dynamical system
+    bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
+    # Simulation
+    # (1) OneStepIntegrators
+    OSI = MoreauJeanOSI(theta)
+    OSI.insertDynamicalSystem(ball)
+    # (2) Time discretisation 
+    t = TimeDiscretisation(t0, h)
+    # (3) one step non smooth problem
+    osnspb = LCP()
+    # (4) Simulation setup with (1) (2) (3)
+    s = TimeStepping(t, OSI, osnspb)
+    # end of model definition
+    
+    # computation
+    bouncingBall.initialize(s) # simulation initialization
+    N = (T - t0) / h # the number of time steps
+    # time loop
+    while s.hasNextEvent():
+        s.computeOneStep()
+        s.nextStep()
