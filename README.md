@@ -14,7 +14,9 @@ Other applications are found in Systems and Control (hybrid systems, differentia
 optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), 
 Fluid Mechanics, Computer graphics, ...
 
-# Siconos components
+Read more about Siconos at the [Siconos homepage](http://siconos.gforge.inria.fr)
+
+# Main components
 
 Each component can be used either from a low-level language like C/C++ or from Python.
 
@@ -32,15 +34,15 @@ Collection of low-level algorithms for solving optimization problems arising in 
 
 Library for the modeling and simulation of the nonsmooth dynamical systems.
 
-  * Dynamical systems formalism: first order, Lagrangian and Newton-Euler
+  * Dynamical systems formalism: first order systems, Lagrangian and Newton-Euler formulations
   * Numerical integration techniques: Event-detecting (event-driven) and Event-Capturing (time-stepping) schemes
-  * Nonsmooth laws: complementarity, Relay, Friction Contact, Newton impact
+  * Nonsmooth laws: complementarity, Relay, normal cone inclusion, Friction Contact, Newton impact, multiple impact law.
 
 ## siconos/mechanics (C++)
 
 Component for the simualtion of mechanical systems in interaction with their environment:
-* Contact detection procedure between simple primitive (homemade) and meshes [bullet3](https://github.com/bulletphysics/bullet3)
-* Contact detection between Brep representation based  [oce. Open CASCADE Community Edition](https://github.com/tpaviot/oce) and [pythonOCC](https://github.com/tpaviot/pythonocc) 3D CAD/CAM package for python 
+* Contact detection procedure between simple primitives (homemade) and meshes [bullet3](https://github.com/bulletphysics/bullet3)
+* Contact detection between Brep representation based on [oce. Open CASCADE Community Edition](https://github.com/tpaviot/oce) and on [pythonOCC](https://github.com/tpaviot/pythonocc) 3D CAD/CAM package for python 
 
 ## siconos/control (C++)
 
@@ -48,4 +50,10 @@ Library to add a controller to a simulation. For now the almost all implemented 
 
 ## siconos/io (C++)
 
-This component can be used to serialize almost any simulation.
+This component can be used to 
+* serialize almost any simulation using boost::archive
+* generate mechanical examples from hdf5 and to write hdf5 in view of vizualization through [vtk](http://www.vtk.org)
+
+# License
+
+Siconos is currently distributed under GPL license (v2).
