@@ -1,3 +1,4 @@
+// -*- compile-command: "make -C ~/projects/siconos/bld/mechanics && valgrind --leak-check=full --suppressions=$HOME/projects/siconos/cmake/valgrind.supp ~/projects/siconos/bld/mechanics/src/proposed/testContact ContactTest" -*-
 
 #include "testContact.hpp"
 
@@ -76,7 +77,8 @@ void ContactTest::t2()
   {
     // User-defined main parameters
     double t0 = 0;                   // initial computation time
-    double T = 20.0;                 // end of computation time
+    //double T = 20.0;                 // end of computation time
+    double T = 0.020;                 // end of computation time
     double h = 0.005;                // time step
     double position_init = 10.0;     // initial position
     double velocity_init = 0.0;      // initial velocity
@@ -103,6 +105,7 @@ void ContactTest::t2()
     SP::SiconosVector q1(new SiconosVector(7));
     SP::SiconosVector v1(new SiconosVector(6));
     q1->zero();
+    (*q1)(3) = 1.0;
     v1->zero();
 
     /////////

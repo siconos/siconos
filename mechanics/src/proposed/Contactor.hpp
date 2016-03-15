@@ -34,6 +34,16 @@
 
 #include "SiconosShape.hpp"
 
+// NEW APPROACH: No inheritance on Contactor/Sphere, etc.  Just create Contactor
+// and Shape descriptors, then in buildInteractions, "compile" this down to a
+// Bullet-specific graph.
+
+// Can we share Contactors between BodyDS instances?  It would be best if the
+// Contactor did *not* have pointers back to the BodyDS.  And yet, a
+// btCollisionShape must be associated with each shape...
+
+// Support groups, NSLs per surface, ..
+
 class Contactor : public std11::enable_shared_from_this<Contactor>
 {
 protected:
@@ -49,6 +59,8 @@ public:
     { return _shapes; }
 
   virtual void addShape(SP::SiconosShape shape);
+
+  void setPosition(const SP::SiconosVector position);
 
   /** visitors hook
    */

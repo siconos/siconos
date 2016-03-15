@@ -181,16 +181,31 @@ void BulletBroadphase::visit(SP::SiconosSphere sphere)
 
 void BulletBroadphase::update(SP::SiconosSphere sphere)
 {
-  printf("updating sphere: %p(%ld)\n",
-         &*sphere,sphere.use_count());
+  const SP::SiconosVector pos = sphere->position();
+  printf("updating sphere: %p(%ld) - %f, %f, %f\n",
+         &*sphere,sphere.use_count(),
+         (*pos)(0), (*pos)(1), (*pos)(2));
 
+  // Update shape parameters
   SP::btSphereShape btsphere(impl->sphereMap[sphere]);
-
-  // TODO ASSERT btsphere!=null
+  assert(btsphere
+         && "BulletBroadphase::update(), sphere not found in sphereMap.");
 
   btsphere->setLocalScaling(btVector3(sphere->radius(),
                                       sphere->radius(),
                                       sphere->radius()));
+
+  // Update object parameters
+  SP::btCollisionObject btobject(impl->objectMap[sphere]);
+  assert(btsphere
+         && "BulletBroadphase::update(), sphere not found in objectMap.");
+
+  btTransform transform;
+  transform.setIdentity();
+  transform.setRotation(btQuaternion((*pos)(3), (*pos)(4),
+                                     (*pos)(5), (*pos)(6)));
+  transform.setOrigin(btVector3((*pos)(0), (*pos)(1), (*pos)(2)));
+  btobject->setWorldTransform(transform);
 }
 
 void BulletBroadphase::visit(SP::SiconosPlane plane)
@@ -271,12 +286,10 @@ void BulletBroadphase::updateGraph()
 {
   if (!impl->dirtyPlanes.empty())
   {
-    printf("dirty planes:\n");
     std::vector<SP::SiconosPlane>::iterator it;
     for (it=impl->dirtyPlanes.begin();
          it!=impl->dirtyPlanes.end(); it++)
     {
-      printf("  %p\n", &**it);
       update(*it);
     }
     impl->dirtyPlanes.clear();
@@ -284,12 +297,10 @@ void BulletBroadphase::updateGraph()
 
   if (!impl->dirtySpheres.empty())
   {
-    printf("dirty spheres:\n");
     std::vector<SP::SiconosSphere>::iterator it;
     for (it=impl->dirtySpheres.begin();
          it!=impl->dirtySpheres.end(); it++)
     {
-      printf("  %p\n", &**it);
       update(*it);
     }
     impl->dirtySpheres.clear();
@@ -297,12 +308,10 @@ void BulletBroadphase::updateGraph()
 
   if (!impl->dirtyBoxes.empty())
   {
-    printf("dirty boxes:\n");
     std::vector<SP::SiconosBox>::iterator it;
     for (it=impl->dirtyBoxes.begin();
          it!=impl->dirtyBoxes.end(); it++)
     {
-      printf("  %p\n", &**it);
       update(*it);
     }
     impl->dirtyBoxes.clear();

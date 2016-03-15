@@ -20,9 +20,20 @@
 #include "MechanicsTimeStepping.hpp"
 #include "MechanicsFwd.hpp"
 #include "BodyDS.hpp"
+#include "Contactor.hpp"
 
 #include <Model.hpp>
 #include <NonSmoothDynamicalSystem.hpp>
+
+struct CollisionUpdater : public SiconosVisitor
+{
+  using SiconosVisitor::visit;
+
+  void visit(const BodyDS& bds)
+  {
+    bds.contactor()->setPosition(bds.q());
+  }
+};
 
 void MechanicsTimeStepping::updateWorldFromDS()
 {
@@ -30,11 +41,12 @@ void MechanicsTimeStepping::updateWorldFromDS()
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   std11::tie(dsi, dsiend) = dsg.vertices();
 
-  // can't do it this way, because BodyDS requires knowledge of Bullet..
-  // static UpdateCollisionObjects up;
+  // can't do it this way, because BodyDS and MechanicsTimeStepping require
+  // knowledge of Bullet..
+  CollisionUpdater up;
 
   for (; dsi != dsiend; ++dsi)
   {
-    //dsg.bundle(*dsi)->accept(up);
+    dsg.bundle(*dsi)->accept(up);
   }
 }

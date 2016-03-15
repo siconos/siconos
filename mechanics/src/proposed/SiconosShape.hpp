@@ -54,21 +54,21 @@ protected:
   SP::SiconosVector _position;
 
   SiconosShape(float x, float y, float z)
-    : _position(new SiconosVector(3))
+    : _position(new SiconosVector(7))
   {
-    (*_position)(0) = x;
+    _position->zero();
+    (*_position)(0) = x; // position
     (*_position)(1) = y;
     (*_position)(2) = z;
+    (*_position)(3) = 1.0; // quaternion
   }
 
 public:
   SP::SiconosVector position() const { return _position; }
 
-  void setPosition(SP::SiconosVector pos)
+  void setPosition(const SP::SiconosVector pos)
   {
-    (*_position)(0) = (*pos)(0);
-    (*_position)(1) = (*pos)(1);
-    (*_position)(2) = (*pos)(2);
+    (*_position) = (*pos);
     onChanged();
   }
 
