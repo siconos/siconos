@@ -30,30 +30,12 @@
 #include <SiconosShape.hpp>
 #include <Contactor.hpp>
 
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
-#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
-#include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
-#include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
-
-DEFINE_SPTR(btCollisionWorld);
-DEFINE_SPTR(btCollisionObject);
-DEFINE_SPTR(btDefaultCollisionConfiguration);
-DEFINE_SPTR(btCollisionDispatcher);
-DEFINE_SPTR(btBroadphaseInterface);
-
-DEFINE_SPTR(BulletShapeHandler);
+DEFINE_SPTR(BulletBroadphase_impl);
 
 class BulletBroadphase : public SiconosBroadphase, public std11::enable_shared_from_this<BulletBroadphase>
 {
 protected:
-  SP::btCollisionWorld _collisionWorld;
-  SP::btDefaultCollisionConfiguration _collisionConfiguration;
-  SP::btCollisionDispatcher _dispatcher;
-  SP::btBroadphaseInterface _broadphase;
-
-  SP::Contactor currentContactor;
-
-  SP::BulletShapeHandler handler;
+  SP::BulletBroadphase_impl impl;
 
 public:
   BulletBroadphase();

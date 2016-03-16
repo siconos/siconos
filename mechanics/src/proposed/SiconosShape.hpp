@@ -44,7 +44,9 @@ protected:
    */
   ACCEPT_SERIALIZATION(SiconosShape);
 
-  SP::SiconosShapeHandler _handler;
+  /* We use a weak_ptr to avoid cycles, since _handler may point back to the
+   * structures which contain references to shapes. */
+  std11::weak_ptr<SiconosShapeHandler> _handler;
 
   virtual void onChanged() = 0;
 
@@ -82,13 +84,15 @@ public:
   virtual void acceptSP(SP::SiconosVisitor tourist) = 0;
 };
 
+#include <stdio.h>
 struct SiconosSphere : public SiconosShape, public std11::enable_shared_from_this<SiconosSphere>
 {
 protected:
   float _radius;
 
   virtual void onChanged()
-    { if (_handler) _handler->onChanged(shared_from_this()); }
+    { SP::SiconosShapeHandler h(_handler.lock());
+      if (h) h->onChanged(shared_from_this()); }
 
 public:
   SiconosSphere(float x, float y, float z, float radius)
@@ -107,8 +111,9 @@ protected:
 
   SP::SiconosVector _dimensions;
 
-  void onChanged()
-    { if (_handler) _handler->onChanged(shared_from_this()); }
+  virtual void onChanged()
+    { SP::SiconosShapeHandler h(_handler.lock());
+      if (h) h->onChanged(shared_from_this()); }
 
 public:
   SiconosBox(float x, float y, float z,
