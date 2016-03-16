@@ -41,7 +41,7 @@ siconos_fedora_latest = siconos_default.copy()(
 siconos_openblas_lapacke = siconos_default.copy()(
     ci_config='with_umfpack',
     remove_pkgs=['atlas-lapack'],
-    add_pkgs=['openblas-lapacke', 'umfpack', 'path'],
+    add_pkgs=['openblas-lapacke', 'umfpack', 'path', 'wget'],  # wget for path
     with_examples=True)
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
@@ -72,14 +72,14 @@ siconos_clang_cfi = siconos_default.copy()(
 siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path'],
+    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
     with_examples=True)
 
 siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     distrib='fedora:rawhide',
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path'],
+    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
     fast=False)
 
 siconos_serialization = siconos_default.copy()(
