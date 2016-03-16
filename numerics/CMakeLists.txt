@@ -25,6 +25,7 @@ set(${COMPONENT}_DIRS
   src/QP
   src/Relay
   src/FrictionContact
+  src/FrictionContact/Generated
   src/NCP
   src/MCP
   src/GenericMechanical
