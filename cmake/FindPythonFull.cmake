@@ -55,16 +55,24 @@ else()
       string(REPLACE "\\" "/" PYTHON_PREFIX ${PYTHON_PREFIX})
     endif(WIN32)
 
+    set(PY_VARIANTS "mu;m;u")
+    set(PYLIB_NAMES python${PYTHON_VERSION_NO_DOTS})
+    set(PYLIB_HINTS ${PYTHON_PREFIX})
+    foreach(_PY_V ${PY_VARIANTS})
+      set(_PY_N  python${PYTHON_VERSION}${_PY_V})
+      list(APPEND PYLIB_NAMES ${_PY_N})
+      list(APPEND PYLIB_HINTS ${PYTHON_PREFIX}/lib/${_PY_N}/config) # I'm not sure this one is used anywhere, but it doesn't hurt to add it
+      list(APPEND PYLIB_HINTS ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config-${PYTHON_VERSION}${_PY_V}-${CMAKE_LIBRARY_ARCHITECTURE})
+    endforeach(_PY_V ${PY_VARIANTS})
+    list(APPEND PYLIB_NAMES python${PYTHON_VERSION})
+    list(APPEND PYLIB_HINTS ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config)
+    list(APPEND PYLIB_HINTS ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config-${CMAKE_LIBRARY_ARCHITECTURE})
+
     # --- Search python library corresponding to python exec.
     find_library(PYTHON_LIBRARY
-      NAMES
-      python${PYTHON_VERSION_NO_DOTS}
-      python${PYTHON_VERSION}mu
-      python${PYTHON_VERSION}m
-      python${PYTHON_VERSION}u
-      python${PYTHON_VERSION}
+      NAMES ${PYLIB_NAMES}
       NO_DEFAULT_PATH
-      HINTS ${PYTHON_PREFIX} ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config ${PYTHON_PREFIX}/lib/python${PYTHON_VERSION}/config-${CMAKE_LIBRARY_ARCHITECTURE}
+      HINTS ${PYLIB_HINTS}
       PATH_SUFFIXES lib libs
       )
 
