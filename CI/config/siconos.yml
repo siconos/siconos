@@ -169,6 +169,9 @@ pkgs:
     fedora: h5py
     debian: python-h5py
 
+  h5py3:
+    any: python3-h5py
+
   openblas-lapacke:
     debian:
       - libopenblas-dev
