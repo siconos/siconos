@@ -74,7 +74,7 @@ else()
     SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock Pendulum)
   ENDIF(MSVC)
   
-  if(WITH_PYTHON_WRAPPER)
+  if(HAS_PYTHON_WRAPPER)
     find_python_module(matplotlib)
   endif()
   
@@ -112,12 +112,14 @@ else()
   IF(HAS_BULLET)
     LIST(APPEND EXAMPLES_DIRECTORIES Mechanics/ContactDetection)
 
-    if(WITH_PYTHON_WRAPPER)
+    if(HAS_PYTHON_WRAPPER)
       find_python_module(h5py)
       if(NOT h5py_FOUND)
         LIST(APPEND NO_TEST_FILES "BulletIO")
       endif(NOT h5py_FOUND)
-    endif(WITH_PYTHON_WRAPPER)
+    else(HAS_PYTHON_WRAPPER)
+      LIST(APPEND NO_TEST_FILES "BulletIO")
+    endif(HAS_PYTHON_WRAPPER)
 ENDIF(HAS_BULLET)
 
   # Scan each dir in examples_directories and collect source files
