@@ -35,6 +35,7 @@ class SiconosShapeHandler
 public:
   virtual void onChanged(SP::SiconosSphere) = 0;
   virtual void onChanged(SP::SiconosBox) = 0;
+  virtual void onChanged(SP::SiconosPlane) = 0;
 };
 
 class SiconosShape
@@ -60,6 +61,7 @@ protected:
     (*_position)(2) = z;
   }
 
+public:
   SP::SiconosVector position() const { return _position; }
 
   void setPosition(SP::SiconosVector pos)
@@ -70,9 +72,16 @@ protected:
     onChanged();
   }
 
+  void setPosition(float x, float y, float z)
+  {
+    (*_position)(0) = x;
+    (*_position)(1) = y;
+    (*_position)(2) = z;
+    onChanged();
+  }
+
   // TODO orientation
 
-public:
   void setHandler(SP::SiconosShapeHandler handler)
     { _handler = handler; }
 
@@ -84,7 +93,28 @@ public:
   virtual void acceptSP(SP::SiconosVisitor tourist) = 0;
 };
 
-#include <stdio.h>
+struct SiconosPlane : public SiconosShape, public std11::enable_shared_from_this<SiconosPlane>
+{
+protected:
+  float _distance;
+
+  virtual void onChanged()
+    { SP::SiconosShapeHandler h(_handler.lock());
+      if (h) h->onChanged(shared_from_this()); }
+
+public:
+  SiconosPlane(float x, float y, float z, float distance)
+    : SiconosShape(x,y,z), _distance(distance) {}
+  float distance() const { return _distance; }
+  void setDistance(float d) { _distance = d; onChanged(); }
+  SP::SiconosVector normal() { return position(); }
+  void setNormal(float x, float y, float z) { setPosition(x,y,z); }
+
+  /** visitors hook
+   */
+  ACCEPT_BASE_VISITORS(SiconosShape);
+};
+
 struct SiconosSphere : public SiconosShape, public std11::enable_shared_from_this<SiconosSphere>
 {
 protected:

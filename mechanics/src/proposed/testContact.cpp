@@ -20,15 +20,23 @@ void ContactTest::t1()
     // A BodyDS with a contactor consisting of a single sphere.
     SP::BodyDS body(new BodyDS());
     SP::Contactor contactor(new Contactor());
-    SP::SiconosSphere sphere(new SiconosSphere(1,2,3,1.0));
+    SP::SiconosSphere sphere(new SiconosSphere(0,0,10,1.0));
     contactor->addShape(sphere);
     body->setContactor(contactor);
+
+    // A BodyDS with a contactor consisting of a plane
+    SP::BodyDS body2(new BodyDS());
+    SP::Contactor contactor2(new Contactor());
+    SP::SiconosPlane plane(new SiconosPlane(0,0,1,0.0));
+    contactor2->addShape(plane);
+    body2->setContactor(contactor2);
 
     // Object to manage the Bullet implementation of broadphase
     SP::BulletBroadphase broadphase(new BulletBroadphase());
 
     // Build Bullet representational mirror of contactors
     broadphase->buildGraph(contactor);
+    broadphase->buildGraph(contactor2);
 
     // Perform Bullet broadphase, generates IndexSet1
     broadphase->performBroadphase();

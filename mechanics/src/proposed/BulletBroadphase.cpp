@@ -31,6 +31,7 @@
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 
+#include <BulletCollision/CollisionShapes/btStaticPlaneShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 
@@ -41,6 +42,7 @@ DEFINE_SPTR(btBroadphaseInterface);
 DEFINE_SPTR(btCollisionWorld);
 DEFINE_SPTR(btCollisionObject);
 DEFINE_SPTR(btCollisionShape);
+DEFINE_SPTR(btStaticPlaneShape);
 DEFINE_SPTR(btSphereShape);
 DEFINE_SPTR(btBoxShape);
 
@@ -54,21 +56,31 @@ protected:
 
   SP::Contactor currentContactor;
 
+  std::vector<SP::SiconosPlane> dirtyPlanes;
   std::vector<SP::SiconosSphere> dirtySpheres;
   std::vector<SP::SiconosBox> dirtyBoxes;
 
-  std::vector<SP::btCollisionObject> objects;
+  std::map<SP::SiconosShape, SP::btCollisionObject> objectMap;
+  std::map<SP::SiconosPlane, SP::btStaticPlaneShape> planeMap;
   std::map<SP::SiconosSphere, SP::btSphereShape> sphereMap;
 
 public:
   BulletBroadphase_impl() {}
   ~BulletBroadphase_impl() {}
 
+  virtual void onChanged(SP::SiconosPlane plane);
   virtual void onChanged(SP::SiconosSphere sphere);
   virtual void onChanged(SP::SiconosBox box);
 
   friend class BulletBroadphase;
 };
+
+void BulletBroadphase_impl::onChanged(SP::SiconosPlane plane)
+{
+  dirtyPlanes.push_back(plane);
+  printf("pushed plane: %p(%ld)\n",
+         &*plane,plane.use_count());
+}
 
 void BulletBroadphase_impl::onChanged(SP::SiconosSphere sphere)
 {
@@ -106,21 +118,101 @@ void BulletBroadphase::visit(SP::SiconosSphere sphere)
          &*sphere,sphere.use_count());
 
   // create corresponding Bullet object and shape
-  btCollisionObject *btobject = new btCollisionObject();
-  btSphereShape *btsphere = new btSphereShape(sphere->radius());
-  btobject->setCollisionShape(btsphere);
+  SP::btCollisionObject btobject(new btCollisionObject());
+
+  // track association (and to keep a reference)
+  impl->objectMap[sphere] = SP::btCollisionObject(btobject);
+
+  // set radius to 1.0 and use scaling instead of setting radius
+  // directly, makes it easier to change during update
+  SP::btSphereShape btsphere(new btSphereShape(1.0));
+
+  // associate the shape with the object
+  btobject->setCollisionShape(&*btsphere);
+
+  // track association (and to keep a reference)
+  impl->sphereMap[sphere] = btsphere;
+
+  // initial update of the sphere properties
+  update(sphere);
 
   // put it in the world
-  impl->_collisionWorld->addCollisionObject(btobject);
-
-  // track pointers to ensure memory is freed
-  impl->objects.push_back(SP::btCollisionObject(btobject));
+  impl->_collisionWorld->addCollisionObject(&*btobject);
 
   // install handler for updates
   sphere->setHandler(impl);
+}
 
-  // put it in the handler's hash map
-  impl->sphereMap[sphere] = SP::btSphereShape(btsphere);
+void BulletBroadphase::update(SP::SiconosSphere sphere)
+{
+  printf("updating sphere: %p(%ld)\n",
+         &*sphere,sphere.use_count());
+
+  SP::btSphereShape btsphere(impl->sphereMap[sphere]);
+
+  // TODO ASSERT btsphere!=null
+
+  btsphere->setLocalScaling(btVector3(sphere->radius(),
+                                      sphere->radius(),
+                                      sphere->radius()));
+}
+
+void BulletBroadphase::visit(SP::SiconosPlane plane)
+{
+  printf("contactor: %p, ", impl->currentContactor);
+  printf("plane: %p(%ld)\n",
+         &*plane,plane.use_count());
+
+  // create corresponding Bullet object and shape
+  SP::btCollisionObject btobject(new btCollisionObject());
+
+  // track association (and to keep a reference)
+  impl->objectMap[plane] = SP::btCollisionObject(btobject);
+
+  // create the initial plane with default parameters
+  SP::btStaticPlaneShape btplane(
+    new btStaticPlaneShape(btVector3(0, 0, 1), 1.0));
+
+  // associate the shape with the object
+  btobject->setCollisionShape(&*btplane);
+
+  // track association (and to keep a reference)
+  impl->planeMap[plane] = btplane;
+
+  // initial update of the plane properties
+  update(plane);
+
+  // put it in the world
+  impl->_collisionWorld->addCollisionObject(&*btobject);
+
+  // install handler for updates
+  plane->setHandler(impl);
+}
+
+void BulletBroadphase::update(SP::SiconosPlane plane)
+{
+  printf("updating plane: %p(%ld)\n",
+         &*plane,plane.use_count());
+
+  SP::btCollisionObject btobject(impl->objectMap[plane]);
+
+  // TODO ASSERT btobject!=null
+
+  // TODO: orientation
+  btTransform tr;
+  tr.setIdentity();
+  tr.setOrigin(btVector3((*plane->position())(0),
+                         (*plane->position())(1),
+                         (*plane->position())(2)));
+  btobject->setWorldTransform(tr);
+}
+
+void BulletBroadphase::visit(SP::SiconosBox box)
+{
+}
+
+void BulletBroadphase::update(SP::SiconosBox box)
+{
 }
 
 void BulletBroadphase::visit(SP::Contactor contactor)
@@ -143,23 +235,41 @@ void BulletBroadphase::buildGraph(SP::Contactor contactor)
 
 void BulletBroadphase::updateGraph()
 {
-  printf("dirty spheres:\n");
-  std::vector<SP::SiconosSphere>::iterator it;
-  for (it=impl->dirtySpheres.begin();
-       it!=impl->dirtySpheres.end(); it++)
+  printf("dirty planes:\n");
   {
-    printf("  %p\n", &**it);
+    std::vector<SP::SiconosPlane>::iterator it;
+    for (it=impl->dirtyPlanes.begin();
+         it!=impl->dirtyPlanes.end(); it++)
+    {
+      printf("  %p\n", &**it);
+      update(*it);
+    }
+    impl->dirtyPlanes.clear();
   }
-  impl->dirtySpheres.clear();
+
+  printf("dirty spheres:\n");
+  {
+    std::vector<SP::SiconosSphere>::iterator it;
+    for (it=impl->dirtySpheres.begin();
+         it!=impl->dirtySpheres.end(); it++)
+    {
+      printf("  %p\n", &**it);
+      update(*it);
+    }
+    impl->dirtySpheres.clear();
+  }
 
   printf("dirty boxes:\n");
-  std::vector<SP::SiconosBox>::iterator it2;
-  for (it2=impl->dirtyBoxes.begin();
-       it2!=impl->dirtyBoxes.end(); it2++)
   {
-    printf("  %p\n", &**it2);
+    std::vector<SP::SiconosBox>::iterator it;
+    for (it=impl->dirtyBoxes.begin();
+         it!=impl->dirtyBoxes.end(); it++)
+    {
+      printf("  %p\n", &**it);
+      update(*it);
+    }
+    impl->dirtyBoxes.clear();
   }
-  impl->dirtyBoxes.clear();
 }
 
 void BulletBroadphase::performBroadphase()

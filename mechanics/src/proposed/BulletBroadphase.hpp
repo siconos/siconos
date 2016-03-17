@@ -30,6 +30,8 @@
 #include <SiconosShape.hpp>
 #include <Contactor.hpp>
 
+#include <map>
+
 DEFINE_SPTR(BulletBroadphase_impl);
 
 class BulletBroadphase : public SiconosBroadphase, public std11::enable_shared_from_this<BulletBroadphase>
@@ -42,8 +44,14 @@ public:
   ~BulletBroadphase();
 
 protected:
+  virtual void visit(SP::SiconosPlane plane);
   virtual void visit(SP::SiconosSphere sphere);
+  virtual void visit(SP::SiconosBox box);
   virtual void visit(SP::Contactor contactor);
+
+  virtual void update(SP::SiconosPlane plane);
+  virtual void update(SP::SiconosSphere sphere);
+  virtual void update(SP::SiconosBox box);
 
 public:
   virtual void buildGraph(SP::Contactor contactor);

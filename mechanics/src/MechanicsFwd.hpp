@@ -50,6 +50,7 @@
   REGISTER(SiconosShape)                        \
   REGISTER(SiconosSphere)                       \
   REGISTER(SiconosBox)                          \
+  REGISTER(SiconosPlane)                        \
   REGISTER(SiconosBroadphase)                   \
   REGISTER(BulletBroadphase)                    \
   REGISTER(SiconosShapeHandler)
