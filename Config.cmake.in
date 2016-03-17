@@ -49,6 +49,7 @@ set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
 set(HAS_BULLET @WITH_BULLET@)
 
 set(HAS_PYTHON_WRAPPER @WITH_PYTHON_WRAPPER@)
+set(SICONOS_PYTHON_EXECUTABLE @PYTHON_EXECUTABLE@)
 
 # siconos libs are appended as targets.
 # Note that thanks to the include above, this will add all external libraries on which

@@ -74,10 +74,6 @@ else()
     SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock Pendulum)
   ENDIF(MSVC)
   
-  if(HAS_PYTHON_WRAPPER)
-    find_python_module(matplotlib)
-  endif()
-  
   # --- Search siconos package path ---
   # --> based on path to script siconos
   find_file(SICONOS_SCRIPT siconos
@@ -103,12 +99,20 @@ else()
   find_package(siconos ${SICONOS_VERSION} REQUIRED)
   
   include(CTest)
-  
+
+  # python specific part
+  if(HAS_PYTHON_WRAPPER)
+    set(PYTHON_EXECUTABLE ${SICONOS_PYTHON_EXECUTABLE})
+    include(FindPackageHandleStandardArgs)
+    include(FindPythonModule)
+    find_python_module(matplotlib)
+  endif(HAS_PYTHON_WRAPPER)
+
   # Exclude some tests if LpSolve has not been found
   if(NOT HAS_ONE_LP_SOLVER)
     set(NO_TEST_FILES ${NO_TEST_FILES} SMCElectroPneumaticItw Twisting)
   endif()
-  
+
   IF(HAS_BULLET)
     LIST(APPEND EXAMPLES_DIRECTORIES Mechanics/ContactDetection)
 
