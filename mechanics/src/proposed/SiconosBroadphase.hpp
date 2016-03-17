@@ -30,8 +30,11 @@
 class SiconosBroadphase : public SiconosVisitor
 {
 protected:
+  virtual void visit(SP::SiconosPlane plane) = 0;
   virtual void visit(SP::SiconosSphere sphere) = 0;
+  virtual void visit(SP::SiconosBox box) = 0;
   virtual void visit(SP::Contactor contactor) = 0;
+
 public:
   virtual void buildGraph(SP::Contactor contactor) = 0;
   virtual void updateGraph() = 0;
