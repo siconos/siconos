@@ -16,7 +16,7 @@ siconos_test_deb = CiTask(
 
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',
-    add_pkgs=['bullet'],
+    add_pkgs=['bullet', 'h5py'],  # for mechanics.io
     distrib='debian:latest')
 
 siconos_ubuntu_15_04 = siconos_default.copy()(
@@ -48,7 +48,7 @@ siconos_clang = siconos_ubuntu_15_10.copy()(
     ci_config=('with_bullet', 'with_py3'),
     with_examples=True,
     remove_pkgs=['python-env'],
-    add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz', 'python3-env', 'path'])
+    add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz', 'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
 
 siconos_clang_asan = siconos_clang.copy()(
     ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization', 'with_py3'),
