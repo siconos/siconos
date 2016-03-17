@@ -63,6 +63,7 @@ protected:
   std::map<SP::SiconosShape, SP::btCollisionObject> objectMap;
   std::map<SP::SiconosPlane, SP::btStaticPlaneShape> planeMap;
   std::map<SP::SiconosSphere, SP::btSphereShape> sphereMap;
+  std::map<SP::SiconosBox, SP::btBoxShape> boxMap;
 
 public:
   BulletBroadphase_impl() {}
@@ -111,36 +112,44 @@ BulletBroadphase::~BulletBroadphase() {
   impl->_collisionWorld.reset();
 }
 
+template<typename ST, typename BT>
+void BulletBroadphase::visit_helper(ST& shape, BT& btshape,
+                                    std::map<ST,BT>& shapemap)
+{
+  // create corresponding Bullet object and shape
+  SP::btCollisionObject btobject(new btCollisionObject());
+
+  // track association (and to keep a reference)
+  impl->objectMap[shape] = SP::btCollisionObject(btobject);
+
+  // associate the shape with the object
+  btobject->setCollisionShape(&*btshape);
+
+  // track association (and to keep a reference)
+  shapemap[shape] = btshape;
+
+  // put it in the world
+  impl->_collisionWorld->addCollisionObject(&*btobject);
+
+  // install handler for updates
+  shape->setHandler(impl);
+  
+  // initial update of the shape properties
+  update(shape);
+}
+
 void BulletBroadphase::visit(SP::SiconosSphere sphere)
 {
   printf("contactor: %p, ", impl->currentContactor);
   printf("sphere: %p(%ld)\n",
          &*sphere,sphere.use_count());
 
-  // create corresponding Bullet object and shape
-  SP::btCollisionObject btobject(new btCollisionObject());
-
-  // track association (and to keep a reference)
-  impl->objectMap[sphere] = SP::btCollisionObject(btobject);
-
   // set radius to 1.0 and use scaling instead of setting radius
   // directly, makes it easier to change during update
   SP::btSphereShape btsphere(new btSphereShape(1.0));
 
-  // associate the shape with the object
-  btobject->setCollisionShape(&*btsphere);
-
-  // track association (and to keep a reference)
-  impl->sphereMap[sphere] = btsphere;
-
-  // initial update of the sphere properties
-  update(sphere);
-
-  // put it in the world
-  impl->_collisionWorld->addCollisionObject(&*btobject);
-
-  // install handler for updates
-  sphere->setHandler(impl);
+  // initialization
+  visit_helper(sphere, btsphere, impl->sphereMap);
 }
 
 void BulletBroadphase::update(SP::SiconosSphere sphere)
@@ -163,30 +172,12 @@ void BulletBroadphase::visit(SP::SiconosPlane plane)
   printf("plane: %p(%ld)\n",
          &*plane,plane.use_count());
 
-  // create corresponding Bullet object and shape
-  SP::btCollisionObject btobject(new btCollisionObject());
-
-  // track association (and to keep a reference)
-  impl->objectMap[plane] = SP::btCollisionObject(btobject);
-
   // create the initial plane with default parameters
   SP::btStaticPlaneShape btplane(
     new btStaticPlaneShape(btVector3(0, 0, 1), 1.0));
 
-  // associate the shape with the object
-  btobject->setCollisionShape(&*btplane);
-
-  // track association (and to keep a reference)
-  impl->planeMap[plane] = btplane;
-
-  // initial update of the plane properties
-  update(plane);
-
-  // put it in the world
-  impl->_collisionWorld->addCollisionObject(&*btobject);
-
-  // install handler for updates
-  plane->setHandler(impl);
+  // initialization
+  visit_helper(plane, btplane, impl->planeMap);
 }
 
 void BulletBroadphase::update(SP::SiconosPlane plane)
@@ -209,10 +200,31 @@ void BulletBroadphase::update(SP::SiconosPlane plane)
 
 void BulletBroadphase::visit(SP::SiconosBox box)
 {
+  printf("contactor: %p, ", impl->currentContactor);
+  printf("box: %p(%ld)\n",
+         &*box,box.use_count());
+
+  // create the initial plane with default 1.0 parameters
+  SP::btBoxShape btbox(
+    new btBoxShape(btVector3(1, 1, 1)));
+
+  // initialization
+  visit_helper(box, btbox, impl->boxMap);
 }
 
 void BulletBroadphase::update(SP::SiconosBox box)
 {
+  printf("updating box: %p(%ld)\n",
+         &*box,box.use_count());
+
+  SP::btBoxShape btbox(impl->boxMap[box]);
+
+  // TODO ASSERT btobject!=null
+
+  // TODO: orientation
+  btbox->setLocalScaling(btVector3((*box->dimensions())(0),
+                                   (*box->dimensions())(1),
+                                   (*box->dimensions())(2)));
 }
 
 void BulletBroadphase::visit(SP::Contactor contactor)

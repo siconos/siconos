@@ -53,6 +53,10 @@ protected:
   virtual void update(SP::SiconosSphere sphere);
   virtual void update(SP::SiconosBox box);
 
+  template<typename ST, typename BT>
+  void visit_helper(ST& shape, BT& btshape,
+                    std::map<ST,BT>& shapemap);
+
 public:
   virtual void buildGraph(SP::Contactor contactor);
   virtual void updateGraph();
