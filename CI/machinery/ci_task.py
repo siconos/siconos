@@ -91,7 +91,7 @@ class CiTask():
 
             os.makedirs(bdir)
 
-            redundants = ['build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz', 'asan', 'cppunit_clang', 'python-env', 'profiling', 'python3-env', 'path']
+            redundants = ['build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz', 'asan', 'cppunit_clang', 'python-env', 'profiling', 'python3-env', 'path', 'h5py3']
             templ_list = [p.replace('+', 'x') for p in self._pkgs if p not in redundants]
 
             # special case for examples
