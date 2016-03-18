@@ -232,7 +232,8 @@ if(WITH_${COMPONENT}_TESTING)
   #NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
   NEW_TEST(FC3D_DefaultSolverOptionstest fc3d_DefaultSolverOptions_test.c)
   
-  
+  NEW_TEST(FC3D_sparse_test fc3d_sparse_test.c)
+
   # (see FrictionContact/test/README for short details)
   NEW_TEST(FC3Dtest1 fc3d_test1.c)
   NEW_TEST(FC3Dtest2 fc3d_test2.c)
