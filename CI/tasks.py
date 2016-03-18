@@ -27,6 +27,10 @@ siconos_ubuntu_15_10 = siconos_default.copy()(
     add_pkgs=['umfpack'],
     distrib='ubuntu:15.10')
 
+siconos_numerics_only = siconos_ubuntu_15_10.copy()(
+    ci_config='no_cxx',
+    remove_pkgs=['gnu-c++'])
+
 siconos_profiling = siconos_ubuntu_15_10.copy()(
     build_configuration='Profiling',
     add_pkgs=['profiling'])
@@ -104,7 +108,7 @@ known_tasks = {'siconos---vm0':
                 siconos_gcc_asan_latest),
 
                'siconos---vm1':
-               (siconos_default_examples,
+               (siconos_numerics_only,
                 siconos_clang,
                 siconos_clang_asan,
                 siconos_clang_msan),
