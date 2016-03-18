@@ -79,20 +79,16 @@ public:
 void BulletBroadphase_impl::onChanged(SP::SiconosPlane plane)
 {
   dirtyPlanes.push_back(plane);
-  printf("pushed plane: %p(%ld)\n",
-         &*plane,plane.use_count());
 }
 
 void BulletBroadphase_impl::onChanged(SP::SiconosSphere sphere)
 {
   dirtySpheres.push_back(sphere);
-  printf("pushed sphere: %p(%ld)\n",
-         &*sphere,sphere.use_count());
 }
 
 void BulletBroadphase_impl::onChanged(SP::SiconosBox box)
 {
-    dirtyBoxes.push_back(box);
+  dirtyBoxes.push_back(box);
 }
 
 BulletBroadphase::BulletBroadphase() {
@@ -247,8 +243,9 @@ void BulletBroadphase::buildGraph(SP::Contactor contactor)
 
 void BulletBroadphase::updateGraph()
 {
-  printf("dirty planes:\n");
+  if (!impl->dirtyPlanes.empty())
   {
+    printf("dirty planes:\n");
     std::vector<SP::SiconosPlane>::iterator it;
     for (it=impl->dirtyPlanes.begin();
          it!=impl->dirtyPlanes.end(); it++)
@@ -259,8 +256,9 @@ void BulletBroadphase::updateGraph()
     impl->dirtyPlanes.clear();
   }
 
-  printf("dirty spheres:\n");
+  if (!impl->dirtySpheres.empty())
   {
+    printf("dirty spheres:\n");
     std::vector<SP::SiconosSphere>::iterator it;
     for (it=impl->dirtySpheres.begin();
          it!=impl->dirtySpheres.end(); it++)
@@ -271,8 +269,9 @@ void BulletBroadphase::updateGraph()
     impl->dirtySpheres.clear();
   }
 
-  printf("dirty boxes:\n");
+  if (!impl->dirtyBoxes.empty())
   {
+    printf("dirty boxes:\n");
     std::vector<SP::SiconosBox>::iterator it;
     for (it=impl->dirtyBoxes.begin();
          it!=impl->dirtyBoxes.end(); it++)

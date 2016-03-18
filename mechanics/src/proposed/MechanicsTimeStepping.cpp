@@ -17,42 +17,24 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file BodyDS.hpp
-  \brief Definition of an abstract body
-*/
-
-
-#ifndef BodyDS_h
-#define BodyDS_h
-
+#include "MechanicsTimeStepping.hpp"
 #include "MechanicsFwd.hpp"
-#include "NewtonEulerDS.hpp"
+#include "BodyDS.hpp"
 
-class BodyDS : public NewtonEulerDS, public std11::enable_shared_from_this<BodyDS>
+#include <Model.hpp>
+#include <NonSmoothDynamicalSystem.hpp>
+
+void MechanicsTimeStepping::updateWorldFromDS()
 {
-protected:
-  /** serialization hooks
-  */
-  ACCEPT_SERIALIZATION(BodyDS);
+  DynamicalSystemsGraph& dsg = *model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  DynamicalSystemsGraph::VIterator dsi, dsiend;
+  std11::tie(dsi, dsiend) = dsg.vertices();
 
-  SP::Contactor _contactor;
-  
-public:
+  // can't do it this way, because BodyDS requires knowledge of Bullet..
+  // static UpdateCollisionObjects up;
 
-  BodyDS(SP::SiconosVector position,
-         SP::SiconosVector velocity,
-         double mass);
-
-  virtual ~BodyDS();
-
-  void setContactor(SP::Contactor contactor)
-    { _contactor = contactor; }
-
-  SP::Contactor contactor() { return _contactor; }
-
-  /** visitors hook
-   */
-  ACCEPT_BASE_VISITORS(NewtonEulerDS);
-};
-
-#endif /* BodyDS_h */
+  for (; dsi != dsiend; ++dsi)
+  {
+    //dsg.bundle(*dsi)->accept(up);
+  }
+}

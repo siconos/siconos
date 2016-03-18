@@ -17,42 +17,20 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file BodyDS.hpp
-  \brief Definition of an abstract body
-*/
-
-
-#ifndef BodyDS_h
-#define BodyDS_h
+#ifndef MechanicsTimeStepping_hpp
+#define MechanicsTimeStepping_hpp
 
 #include "MechanicsFwd.hpp"
-#include "NewtonEulerDS.hpp"
+#include "TimeStepping.hpp"
 
-class BodyDS : public NewtonEulerDS, public std11::enable_shared_from_this<BodyDS>
+class MechanicsTimeStepping : public TimeStepping
 {
-protected:
-  /** serialization hooks
-  */
-  ACCEPT_SERIALIZATION(BodyDS);
-
-  SP::Contactor _contactor;
-  
 public:
+  MechanicsTimeStepping(SP::TimeDiscretisation t) :
+    TimeStepping(t) {};
 
-  BodyDS(SP::SiconosVector position,
-         SP::SiconosVector velocity,
-         double mass);
-
-  virtual ~BodyDS();
-
-  void setContactor(SP::Contactor contactor)
-    { _contactor = contactor; }
-
-  SP::Contactor contactor() { return _contactor; }
-
-  /** visitors hook
-   */
-  ACCEPT_BASE_VISITORS(NewtonEulerDS);
+  virtual void updateWorldFromDS();
 };
 
-#endif /* BodyDS_h */
+#endif
+

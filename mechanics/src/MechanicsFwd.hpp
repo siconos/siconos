@@ -53,7 +53,8 @@
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosBroadphase)                   \
   REGISTER(BulletBroadphase)                    \
-  REGISTER(SiconosShapeHandler)
+  REGISTER(SiconosShapeHandler)                 \
+  REGISTER(MechanicsTimeStepping)
 
 #include <SiconosVisitables.hpp>
 
