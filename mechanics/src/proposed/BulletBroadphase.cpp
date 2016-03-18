@@ -21,10 +21,22 @@
   \brief Implementation of a Bullet-based broadphase algorithm.
 */
 
+#include <MechanicsFwd.hpp>
+
 #include "BulletBroadphase.hpp"
+#include "BodyDS.hpp"
 
 #include <map>
 #include <stdio.h>
+
+#include <Model.hpp>
+#include <Simulation.hpp>
+#include <NonSmoothDynamicalSystem.hpp>
+#include <SimulationTypeDef.hpp>
+#include <NonSmoothLaw.hpp>
+#include <OneStepIntegrator.hpp>
+
+#include <Question.hpp>
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
@@ -106,6 +118,25 @@ BulletBroadphase::BulletBroadphase() {
 BulletBroadphase::~BulletBroadphase() {
   // must be the first de-allocated, otherwise segfault
   impl->_collisionWorld.reset();
+}
+
+void BulletBroadphase::buildGraph(SP::Model model)
+{
+  DynamicalSystemsGraph& dsg =
+    *(model->nonSmoothDynamicalSystem()->dynamicalSystems());
+
+  DynamicalSystemsGraph::VIterator dsi, dsiend;
+  std11::tie(dsi, dsiend) = dsg.vertices();
+  for (; dsi != dsiend; ++dsi)
+  {
+    SP::Contactor contactor = ask<ForContactor>(*dsg.bundle(*dsi));
+    visit(contactor);
+  }
+}
+
+void BulletBroadphase::buildGraph(SP::Contactor contactor)
+{
+  visit(contactor);
 }
 
 template<typename ST, typename BT>
@@ -234,11 +265,6 @@ void BulletBroadphase::visit(SP::Contactor contactor)
   {
     (*it)->acceptSP(shared_from_this());
   }
-}
-
-void BulletBroadphase::buildGraph(SP::Contactor contactor)
-{
-  contactor->acceptSP(shared_from_this());
 }
 
 void BulletBroadphase::updateGraph()

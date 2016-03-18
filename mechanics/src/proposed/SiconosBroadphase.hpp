@@ -26,6 +26,7 @@
 
 #include <SiconosVisitor.hpp>
 #include <MechanicsFwd.hpp>
+#include <Model.hpp>
 
 class SiconosBroadphase : public SiconosVisitor
 {
@@ -34,8 +35,10 @@ protected:
   virtual void visit(SP::SiconosSphere sphere) = 0;
   virtual void visit(SP::SiconosBox box) = 0;
   virtual void visit(SP::Contactor contactor) = 0;
+  virtual void visit(SP::BodyDS body);
 
 public:
+  virtual void buildGraph(SP::Model model) = 0;
   virtual void buildGraph(SP::Contactor contactor) = 0;
   virtual void updateGraph() = 0;
   virtual void performBroadphase() = 0;

@@ -177,8 +177,7 @@ void ContactTest::t2()
     SP::BulletBroadphase broadphase(new BulletBroadphase());
 
     // Build Bullet representational mirror of contactors
-    broadphase->buildGraph(contactor);
-    broadphase->buildGraph(contactor2);
+    broadphase->buildGraph(model);
 
     std::cout << "====> End of initialisation ..." << std::endl << std::endl;
 

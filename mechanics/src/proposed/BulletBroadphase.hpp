@@ -58,7 +58,11 @@ protected:
                     std::map<ST,BT>& shapemap);
 
 public:
+  // TODO: default implementations of these to SiconosBroadphase?
+  //       encountered weird visitor error when doing so.
+  virtual void buildGraph(SP::Model model);
   virtual void buildGraph(SP::Contactor contactor);
+
   virtual void updateGraph();
   virtual void performBroadphase();
 };

@@ -27,6 +27,7 @@
 
 #include "MechanicsFwd.hpp"
 #include "NewtonEulerDS.hpp"
+#include <Question.hpp>
 
 class BodyDS : public NewtonEulerDS, public std11::enable_shared_from_this<BodyDS>
 {
@@ -48,11 +49,16 @@ public:
   void setContactor(SP::Contactor contactor)
     { _contactor = contactor; }
 
-  SP::Contactor contactor() { return _contactor; }
+  SP::Contactor contactor() const { return _contactor; }
 
   /** visitors hook
    */
-  ACCEPT_BASE_VISITORS(NewtonEulerDS);
+  ACCEPT_BASE_STD_VISITORS(NewtonEulerDS);
+};
+
+struct ForContactor : public Question<SP::Contactor>
+{
+  ANSWER(BodyDS, contactor());
 };
 
 #endif /* BodyDS_h */
