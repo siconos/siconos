@@ -1088,7 +1088,7 @@ class Hdf5():
 
     def addObject(self, name, shapes,
                   translation,
-                  orientation=[1, 0, 0, 0],
+                  orientation=[0, 1, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, inertia=None):
         """

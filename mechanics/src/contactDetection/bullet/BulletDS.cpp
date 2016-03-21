@@ -180,6 +180,6 @@ void BulletDS::setRelativeTransform(SP::btCollisionObject cobj,
                                         base_translation.y() + rboffset.y(),
                                         base_translation.z() + rboffset.z()));
 
-  cobj->getWorldTransform().getBasis().setRotation(
+  cobj->getWorldTransform().setRotation(
     base_rotation * offset_rotation);
 }

@@ -76,18 +76,6 @@ def random_color():
     return r, g, b
 
 
-def axis_angle(q):
-    w, v = q[0], q[1:]
-    nv = norm(v)
-    theta = 2 * atan2(nv, w)
-
-    if nv != 0.:
-        v = [iv / nv for iv in v]
-    else:
-        v = [0., 0., 0.]
-    return v, theta
-
-axis_anglev = numpy.vectorize(axis_angle)
 transforms = dict()
 contactors = dict()
 offsets = dict()
@@ -139,9 +127,6 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
         transform.Translate(q0 + p[0], q1 + p[1], q2 + p[2])
 
         axis, angle = r.axisAngle()
-
-
-#        axis, angle = axis_angle((q3, q4, q5, q6))
 
         transform.RotateWXYZ(angle * 180./pi,
                              axis[0],
@@ -227,14 +212,6 @@ def brep_reader(brep_string, indx):
 def usage():
     print """{0}
     """.format(sys.argv[0])
-
-
-ref_filename = 'ref.txt'
-cfg_filename = 'shapes.cfg'
-bind_filename = 'bindings.dat'
-dpos_filename = 'dpos.dat'
-spos_filename = 'spos.dat'
-cf_filename = 'cf.dat'
 
 refs = []
 refs_attrs = []
@@ -391,15 +368,6 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     times.sort()
 
     ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
-
-    if len(spos_data) > 0:
-        nstatic = len(numpy.where(spos_data[:, 0] == times[0]))
-    #    instances = set(dpos_data[:, 1]).union(set(spos_data[:, 1]))
-    else:
-        nstatic = 0
-    #    instances = set(dpos_data[:, 1])
-
-
 
     cf_prov._time = min(times[:])
 
@@ -610,7 +578,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 add_compatiblity_methods(mapper)
                 mapper.SetInputConnection(normals.GetOutputPort())
                 mapper.ScalarVisibilityOff()
-               # delayed (see the one in brep)
+                # delayed (see the one in brep)
                 # note: "lambda : mapper" fails (dynamic scope)
                 # and (x for x in [mapper]) is ok.
                 mappers[shape_name] = (x for x in [mapper])
@@ -799,11 +767,13 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
 
-    if nstatic > 0:
-        pos_data = numpy.concatenate((spos_data, dpos_data))
-    else:
-        pos_data = dpos_data[:].copy()
+    pos_data = dpos_data[:].copy()
+    spos_data = spos_data[:].copy()
 
+#    set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
+#                  spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
+#                  spos_data[:, 7], spos_data[:, 8])
+        
     set_positionv(pos_data[id_t0, 1], pos_data[id_t0, 2], pos_data[id_t0, 3],
                   pos_data[id_t0, 4], pos_data[id_t0, 5], pos_data[id_t0, 6],
                   pos_data[id_t0, 7], pos_data[id_t0, 8])
@@ -946,7 +916,13 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             # arrow_glyph.Update()
             #gmapper.Update()
 
+#            set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
+#                          spos_data[:, 4],
+#                          spos_data[:, 5], spos_data[:, 6], spos_data[:, 7],
+#                          spos_data[:, 8])
+
             id_t = numpy.where(pos_data[:, 0] == self._times[index])
+            
             set_positionv(pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
                           pos_data[id_t, 4],
                           pos_data[id_t, 5], pos_data[id_t, 6], pos_data[id_t, 7],
@@ -990,10 +966,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 times.sort()
                 ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
                 if len(spos_data) > 0:
-                    nstatic = len(numpy.where(spos_data[:, 0] == times[0]))
                     instances = set(dpos_data[:, 1]).union(set(spos_data[:, 1]))
                 else:
-                    nstatic = 0
                     instances = set(dpos_data[:, 1])
                 cf_prov._time = min(times[:])
                 cf_prov.method()
@@ -1004,10 +978,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
                 contact_pos_force.Update()
                 contact_pos_norm.Update()
-                if nstatic > 0:
-                    pos_data = numpy.concatenate((spos_data, dpos_data))
-                else:
-                    pos_data = dpos_data[:].copy()
+
+                pos_data = dpos_data[:].copy()
                 min_time = times[0]
 
                 max_time = times[len(times) - 1]
