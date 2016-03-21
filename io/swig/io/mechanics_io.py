@@ -625,36 +625,42 @@ class Hdf5():
                                      orientation[3],
                                      orientation[0])
 
+                tbase = btVector3(translation[0],
+                                  translation[1],
+                                  translation[2])
+                
                 for c in contactors:
-                    (w, x, y, z) = c.orientation
-                    c_orientation = btQuaternion(x, y, z, w)
-                    rc_orientation = mul(rbase, c_orientation)
 
+                    c_orientation = btQuaternion(c.orientation[1],
+                                                 c.orientation[2],
+                                                 c.orientation[3],
+                                                 c.orientation[0])
+                    
                     c_origin = btVector3(c.translation[0],
                                          c.translation[1],
                                          c.translation[2])
 
-                    rc_origin = quatRotate(rbase, c_origin)
-
-                    rc_sorigin = btVector3(rc_origin.x() + translation[0],
-                                           rc_origin.y() + translation[1],
-                                           rc_origin.z() + translation[2])
-
                     static_cobj = btCollisionObject()
+
+                    BulletDS.setRelativeTransform(static_cobj,
+                                                  tbase,
+                                                  rbase,
+                                                  c_origin,
+                                                  c_orientation)
+
                     static_cobj.setCollisionFlags(
                         btCollisionObject.CF_STATIC_OBJECT)
 
-                    self._static_origins.append(rc_sorigin)
+                    self._static_origins.append(static_cobj.getWorldTransform().getOrigin())
 
-                    self._static_orientations.append(rc_orientation)
-                    transform = btTransform(rc_orientation)
-                    transform.setOrigin(rc_sorigin)
-                    self._static_transforms.append(transform)
-                    static_cobj.setWorldTransform(transform)
+                    self._static_orientations.append(static_cobj.getWorldTransform().getRotation())
+
+                    self._static_transforms.append(static_cobj.getWorldTransform())
 
                     static_cobj.setCollisionShape(
                         self._shape.get(c.name))
                     self._static_cobjs.append(static_cobj)
+
                     self._broadphase.addStaticObject(static_cobj,
                                                      int(c.group))
 

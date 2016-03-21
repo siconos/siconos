@@ -93,6 +93,15 @@ public:
    */
   void updateCollisionObjects() const;
 
+
+  static void setRelativeTransform(SP::btCollisionObject cobj,
+                                   const btVector3& base_translation,
+                                   const btQuaternion& base_rotation,
+                                   const btVector3& offset_translation,
+                                   const btQuaternion& offset_rotation);
+
+
+
   /** visitor hook
    */
   ACCEPT_BASE_STD_VISITORS(NewtonEulerDS);
