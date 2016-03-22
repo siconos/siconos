@@ -94,6 +94,13 @@ public:
   void updateCollisionObjects() const;
 
 
+  /** compute and set a relative transformation of a collision object
+   * \param cobj the collision object
+   * \param base_translation the reference frame translation
+   * \param base_rotation the reference frame rotation
+   * \param offset_translation the translation from the reference frame
+   * \param offset_rotation the rotation from the reference frame
+   */
   static void setRelativeTransform(SP::btCollisionObject cobj,
                                    const btVector3& base_translation,
                                    const btQuaternion& base_rotation,
