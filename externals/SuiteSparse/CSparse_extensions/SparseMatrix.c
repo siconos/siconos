@@ -25,8 +25,6 @@ csi cs_zentry(CSparseMatrix *T, csi i, csi j, double x)
 int cs_lu_factorization(csi order, const cs *A, double tol, cs_lu_factors * cs_lu_A )
 {
   assert(A);
-
-  cs_lu_A = (cs_lu_factors*) malloc(sizeof(cs_lu_factors));
   cs_lu_A->n = A->n;
   css* S = cs_sqr (order, A, 0);
   cs_lu_A->S = S;

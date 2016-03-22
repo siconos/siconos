@@ -1630,9 +1630,11 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
           p->solver_free_hook = &NM_sparse_free;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
-          cs_lu_factors * cs_lu_A ;
+	  printf("p_>solver_data %p",p->solver_data);
+	  cs_lu_factors* cs_lu_A = (cs_lu_factors*) malloc(sizeof(cs_lu_factors));
           CHECK_RETURN(cs_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
-          p->solver_data = cs_lu_A;
+	  p->solver_data = cs_lu_A;
+	  printf("p_>solver_data %p",p->solver_data);
         }
 
         info = !cs_solve(NM_sparse_solver_data(p), NM_sparse_workspace(p), b);
