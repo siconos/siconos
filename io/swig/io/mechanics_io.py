@@ -910,6 +910,31 @@ class Hdf5():
 
         self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
+    def printSolverInfos(self):
+        """
+        Outputs solver #iterations & precision reached
+        """
+
+        time = self._broadphase.model().simulation().nextTime()
+        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
+            numericsSolverOptions()
+
+        current_line = self._solv_data.shape[0]
+        self._solv_data.resize(current_line + 1, 0)
+        if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
+            iterations = so.iparam[3]
+            precision = so.dparam[2]
+            local_precision = so.dparam[3]
+        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
+            iterations = so.iparam[7]
+            precision = so.dparam[1]
+            local_precision = 0.
+        # maybe wrong for others
+        else:
+            iterations = so.iparam[1]
+            precision = so.dparam[1]
+            local_precision = so.dparam[2]
+        print('SolverInfos at time :',time, 'iterations= ',iterations,' precision=',precision,'local_precision=',local_precision)
 
     def addMeshFromString(self, name, shape_data):
         """
@@ -1322,8 +1347,11 @@ class Hdf5():
                 log(self.outputContactForces, with_timer)()
 
                 log(self.outputSolverInfos, with_timer)()
-
+                    
                 log(self._out.flush)()
+            print('number of contact',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
+            self.printSolverInfos()
+        
 
             log(simulation.nextStep, with_timer)()
 
