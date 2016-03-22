@@ -765,23 +765,32 @@ class Hdf5():
         # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
 
-            for (name, obj) in self._input.items():
+            for (name, obj) in sorted(self._input.items(),
+                                      key = lambda x:x[0]):
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
 
                 # cold restart if output previously done
-                if mass > 0 and self.dynamic_data() is not None and len(self.dynamic_data())>0:
+                if mass > 0 and self.dynamic_data() is not None and \
+                        len(self.dynamic_data()) > 0:
                     dpos_data = self.dynamic_data()
                     max_time = max(dpos_data[:, 0])
-                    id_last = np.where(dpos_data[:, 0] == max_time)
-                    id_last_inst = np.where(dpos_data[id_last, 1] == self.instances()[name].attrs['id'])
+                    id_last = np.where(
+                        abs(dpos_data[:, 0] - max_time) < 1e-9)[0]
+                    id_last_inst = np.where(
+                        dpos_data[id_last, 1] ==
+                        self.instances()[name].attrs['id'])[0]
                     xpos = dpos_data[id_last[id_last_inst[0]], :]
                     translation = (xpos[2], xpos[3], xpos[4])
                     orientation = (xpos[5], xpos[6], xpos[7], xpos[8])
 
                     velocities = self.velocities_data()
-                    id_vlast = np.where(velocities[:, 0] == max_time)
-                    id_vlast_inst = np.where(velocities[id_vlast, 1] == self.instances()[name].attrs['id'])
+                    id_vlast = np.where(
+                        abs(velocities[:, 0] - max_time) < 1e-9)[0]
+
+                    id_vlast_inst = np.where(
+                        velocities[id_vlast, 1] ==
+                        self.instances()[name].attrs['id'])[0]
                     xvel = velocities[id_vlast[id_vlast_inst[0]], :]
                     velocity = (xvel[2], xvel[3], xvel[4])
 
@@ -810,7 +819,7 @@ class Hdf5():
                         name, floatv(translation), floatv(orientation),
                         floatv(
                             velocity), contactors, float(
-                                mass),
+                        mass),
                         inertia, body_class, shape_class, face_class, edge_class)
                 else:
                     # Bullet object
@@ -868,11 +877,7 @@ class Hdf5():
         times = np.empty((positions.shape[0], 1))
         times.fill(time)
 
-        tidd = np.arange(1,
-                         positions.shape[0] + 1).reshape(
-                             positions.shape[0], 1)
-
-        self._dynamic_data[current_line:, :] = np.concatenate((times, tidd,
+        self._dynamic_data[current_line:, :] = np.concatenate((times,
                                                                positions),
                                                                axis=1)
 
@@ -892,12 +897,7 @@ class Hdf5():
         times = np.empty((velocities.shape[0], 1))
         times.fill(time)
 
-        tidd = np.arange(1,
-                         velocities.shape[0] + 1).reshape(
-                             velocities.shape[0],
-                             1)
-
-        self._velocities_data[current_line:, :] = np.concatenate((times, tidd,
+        self._velocities_data[current_line:, :] = np.concatenate((times,
                                                                   velocities),
                                                                   axis=1)
 
@@ -1309,13 +1309,14 @@ class Hdf5():
             self._output_frequency = output_frequency
 
         # cold restart
+        times = set()
         if self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
             dpos_data = self.dynamic_data()
-            t0 = float(max(dpos_data[:, 0]))
+            times = set(dpos_data[:, 0])
+            t0 = float(max(times))
             T = float(t0 + T)
             print ('Restart from previous simulation at t0={0}'.format(t0))
             print ('Run until T={0}'.format(T))
-
 
         # Model
         #
@@ -1362,7 +1363,8 @@ class Hdf5():
         simulation.insertNonSmoothProblem(osnspb)
         simulation.setNewtonMaxIteration(Newton_max_iter)
 
-        k = 1
+        k0 = 1 + len(times)
+        k = k0
 
         self.importScene(body_class, shape_class, face_class, edge_class)
 
@@ -1373,7 +1375,7 @@ class Hdf5():
 
         while simulation.hasNextEvent():
 
-            print ('step', k, '<', int((T - t0) / h))
+            print ('step', k, '<', k0 - 1 + int((T - t0) / h))
 
             log(self._broadphase.buildInteractions, with_timer)\
                 (model.currentTime())
