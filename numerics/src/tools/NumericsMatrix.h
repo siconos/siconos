@@ -117,6 +117,7 @@ The following linear algebra operation are supported:
 
 #include "SiconosConfig.h"
 #include "SparseMatrix.h"
+#include "NumericsSparseMatrix.h"
 #include "SparseBlockMatrix.h"
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h 

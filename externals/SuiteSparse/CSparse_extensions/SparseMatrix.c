@@ -22,27 +22,22 @@ csi cs_zentry(CSparseMatrix *T, csi i, csi j, double x)
   }
 }
 
-int cs_lu_factorization(csi order, const cs *A, double tol, NumericsSparseLinearSolverParams* p)
+int cs_lu_factorization(csi order, const cs *A, double tol, cs_lu_factors * cs_lu_A )
 {
   assert(A);
-  assert(p);
 
-  cs_lu_factors* cs_lu_A = (cs_lu_factors*) malloc(sizeof(cs_lu_factors));
+  cs_lu_A = (cs_lu_factors*) malloc(sizeof(cs_lu_factors));
   cs_lu_A->n = A->n;
   css* S = cs_sqr (order, A, 0);
   cs_lu_A->S = S;
   cs_lu_A->N = cs_lu(A, S, tol);
 
-  p->solver_data = cs_lu_A;
   return (S && cs_lu_A->N);
 }
 
-void NM_csparse_free(void* p)
+void cs_sparse_free(cs_lu_factors* cs_lu_A)
 {
-  assert(p);
-
-  NumericsSparseLinearSolverParams* ptr = (NumericsSparseLinearSolverParams*) p;
-  cs_lu_factors* cs_lu_A = NM_csparse_lu_factors(ptr);
+  assert(cs_lu_A);
   if (cs_lu_A)
   {
     cs_lu_A->n = -1;
@@ -55,7 +50,6 @@ void NM_csparse_free(void* p)
 
     free(cs_lu_A);
   }
-  ptr->solver_data = NULL;
 }
 
 /* Solve Ax = b with the factorization of A stored in the cs_lu_A
@@ -182,127 +176,3 @@ CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A)
   A->x = NULL;
   return NULL;
 }
-
-NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
-{
-  NumericsSparseLinearSolverParams* p = (NumericsSparseLinearSolverParams*)
-    malloc(sizeof(NumericsSparseLinearSolverParams));
-
-#if defined(WITH_MKL) && 0
-  p->solver = NS_PARDISO;
-#elif defined(WITH_MUMPS)
-  p->solver = NS_MUMPS;
-#elif defined(WITH_UMFPACK)
-  p->solver = NS_UMFPACK;
-#else
-  p->solver = NS_CS_LUSOL;
-#endif
-
-  p->iparam = NULL;
-  p->dparam = NULL;
-  p->iWork = NULL;
-  p->dWork = NULL;
-
-  p->solver_data = NULL;
-  p->solver_free_hook = NULL;
-
-  p->iSize = 0;
-  p->dSize = 0;
-  p->iWorkSize = 0;
-  p->dWorkSize = 0;
-
-  return p;
-}
-
-NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p)
-{
-  /* First free solver_data if some additional information has been given  */
-  if (p->solver_free_hook)
-    (*p->solver_free_hook)(p);
-  p->solver_free_hook = NULL;
-
-  if (p->iparam)
-  {
-    assert(p->iSize>0);
-    free(p->iparam);
-    p->iparam = NULL;
-  }
-  if (p->dparam)
-  {
-    assert(p->dSize>0);
-    free(p->dparam);
-    p->dparam = NULL;
-  }
-  if (p->iWork)
-  {
-    assert(p->iWorkSize>0);
-    free(p->iWork);
-    p->iWork = NULL;
-  }
-  if (p->dWork)
-  {
-    assert(p->dWorkSize>0);
-    free(p->dWork);
-    p->dWork = NULL;
-  }
-  if (p->solver_data)
-  {
-    free(p->solver_data);
-    p->solver_data = NULL;
-  }
-
-  free(p);
-  return NULL;
-}
-
-void NM_sparse_null(NumericsSparseMatrix* A)
-{
-  A->linearSolverParams = NULL;
-  A->triplet = NULL;
-  A->csc = NULL;
-  A->trans_csc = NULL;
-  A->csr = NULL;
-  A->origin = NS_UNKNOWN;
-}
-
-NumericsSparseMatrix* newNumericsSparseMatrix(void)
-{
-  NumericsSparseMatrix* p = (NumericsSparseMatrix*)
-    malloc(sizeof(NumericsSparseMatrix));
-
-  NM_sparse_null(p);
-  p->linearSolverParams = newNumericsSparseLinearSolverParams();
-
-  return p;
-}
-
-NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)
-{
-  if (A->linearSolverParams)
-  {
-    freeNumericsSparseLinearSolverParams(A->linearSolverParams);
-    A->linearSolverParams = NULL;
-  }
-  if (A->triplet)
-  {
-    cs_spfree(A->triplet);
-    A->triplet = NULL;
-  }
-  if (A->csc)
-  {
-    cs_spfree(A->csc);
-    A->csc = NULL;
-  }
-  if (A->trans_csc)
-  {
-    cs_spfree(A->trans_csc);
-    A->trans_csc = NULL;
-  }
-  if (A->csr)
-  {
-    cs_spfree(A->csr);
-    A->csr = NULL;
-  }
-  return NULL;
-}
-

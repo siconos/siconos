@@ -1621,16 +1621,17 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
       }
       if (keep)
       {
-        if (!(NM_csparse_workspace(p) && NM_csparse_lu_factors(p)))
+        if (!(p->dWork && p->solver_data))
         {
           assert(!NM_csparse_workspace(p));
           assert(!NM_csparse_lu_factors(p));
           assert(!p->solver_free_hook);
 
-          p->solver_free_hook = &NM_csparse_free;
+          p->solver_free_hook = &NM_sparse_free;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
-          CHECK_RETURN(cs_lu_factorization(1, NM_csc(A), DBL_EPSILON, p));
+          cs_lu_factors * cs_lu_A = p->solver_data;
+          CHECK_RETURN(cs_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
         }
 
         info = !cs_solve(NM_csparse_lu_factors(p), NM_csparse_workspace(p), b);

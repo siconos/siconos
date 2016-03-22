@@ -29,6 +29,7 @@ set(${COMPONENT}_DIRS
   ql0001
   SOL/lumod-c
   SuiteSparse/CSparse
+  SuiteSparse/CSparse_extensions
   tools
 )
 
