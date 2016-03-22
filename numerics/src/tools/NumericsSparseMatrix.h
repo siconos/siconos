@@ -86,14 +86,14 @@ extern "C"
    * \param p the structure holding the data for the solver
    */
 
-  static inline cs_lu_factors* NM_csparse_lu_factors(NumericsSparseLinearSolverParams* p)
+  static inline void* NM_sparse_solver_data(NumericsSparseLinearSolverParams* p)
   {
-    return (cs_lu_factors*)p->solver_data;
+    return p->solver_data;
   }
   /** Get the workspace for the sparse solver
    * \param p the structure holding the data for the solver
    */
-  static inline double* NM_csparse_workspace(NumericsSparseLinearSolverParams* p)
+  static inline double* NM_sparse_workspace(NumericsSparseLinearSolverParams* p)
 
   {
     return p->dWork;

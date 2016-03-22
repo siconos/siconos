@@ -1623,8 +1623,8 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
       {
         if (!(p->dWork && p->solver_data))
         {
-          assert(!NM_csparse_workspace(p));
-          assert(!NM_csparse_lu_factors(p));
+          assert(!NM_sparse_workspace(p));
+          assert(!NM_sparse_solver_data(p));
           assert(!p->solver_free_hook);
 
           p->solver_free_hook = &NM_sparse_free;
@@ -1634,7 +1634,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
           CHECK_RETURN(cs_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
         }
 
-        info = !cs_solve(NM_csparse_lu_factors(p), NM_csparse_workspace(p), b);
+        info = !cs_solve(NM_sparse_solver_data(p), NM_sparse_workspace(p), b);
       }
       else
       {
