@@ -11,9 +11,9 @@ import siconos.numerics as Numerics
 
 import random
 
-n_cube=10
-n_row=2
-n_col=2
+n_cube=30
+n_row=20
+n_col=20
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
     for i in range(n_row):
@@ -32,7 +32,7 @@ with Hdf5() as io:
 
 
     # Alternative to the previous convex shape definition.
-    io.addPrimitiveShape('CubePrim', 'Box', (2, 2, 2))
+    #io.addPrimitiveShape('CubePrim', 'Box', (2, 2, 2))
 
     # Definition of the ground shape
     io.addPrimitiveShape('Ground', 'Box', (200, 200, .5))
@@ -73,7 +73,7 @@ with Hdf5() as io:
     # not given, it is a static object only involved in contact
     # detection.
     io.addObject('ground', [Contactor('Ground')],
-                 translation=[0, 0, 0])
+                 translation=[50, 50, 0])
     # io.addObject('left', [Contactor('Left')],
     #              translation=[0, 50., 25.])
     # io.addObject('right', [Contactor('Right')],
@@ -86,6 +86,10 @@ with Hdf5() as io:
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
+
+
+nstep=20000
+step=0.0005
 with Hdf5(mode='r+') as io:
 
     # By default earth gravity is applied and the units are those
@@ -101,8 +105,8 @@ with Hdf5(mode='r+') as io:
            edge_class=None,
            length_scale=1,
            t0=0,
-           T=10.0,
-           h=0.0005,
+           T=nstep*step,
+           h=step,
            multipoints_iterations=True,
            theta=0.50001,
            Newton_max_iter=1,
@@ -111,4 +115,4 @@ with Hdf5(mode='r+') as io:
            itermax=100,
            tolerance=1e-4,
            numerics_verbose=False,
-           output_frequency=10)
+           output_frequency=100)
