@@ -57,6 +57,7 @@ siconos_clang = siconos_ubuntu_15_10.copy()(
 siconos_clang_asan = siconos_clang.copy()(
     ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization', 'with_py3'),
     add_pkgs=['mumps', 'hdf5', 'serialization'],
+    build_configuration='Debug',
     with_examples=True)
 
 # <clang-3.7.1 does not support linux 4.2
@@ -77,6 +78,7 @@ siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
     add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
+    build_configuration='Debug',
     with_examples=True)
 
 siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
@@ -84,6 +86,7 @@ siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     distrib='fedora:rawhide',
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
     add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
+    build_configuration='Debug',
     fast=False)
 
 siconos_serialization = siconos_default.copy()(
