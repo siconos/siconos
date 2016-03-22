@@ -13,6 +13,7 @@ Here's a list, more or less chronological
 * Maurice Brémond, 2008 --
 * Olivier Huber, 2011 --
 * Stephen Sinclair, 2016 --
+* Narandra Akakdhar, 2012 --
 * Charles-Edouard Ladari. 2015
 * Roger Pissard--Gibollet 2004--2013
 * Olivier Bonnefon, 2007--2009
@@ -22,7 +23,8 @@ Here's a list, more or less chronological
 * Hakim Majidi, 2008
 * Abdelaziz N'Diaye, 2006
 * Remy Mozul, 2006
-* Tomasz Toczek, 2066
+* Pierre-Brice Wieber, 2006
+* Tomasz Toczek, 2006
 * Francois Garrigues, 2006
 * Frédéric Dubois, 2004--2006
 * Mathieu Renouf, 2005
