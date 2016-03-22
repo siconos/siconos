@@ -21,7 +21,7 @@ def usage():
     print '{0}: Usage'.format(sys.argv[0])
     print """
     {0} [--help] [tmin=<float value>] [tmax=<float value>]
-        [--cf-scale=<float value>] <hdf5 file>
+        [--cf-scale=<float value>] [--vtk-export] <hdf5 file>
     """
 
 
@@ -39,7 +39,7 @@ def add_compatiblity_methods(obj):
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                    ['help', 'dat', 'tmin=', 'tmax=',
-                                    'cf-scale='])
+                                    'cf-scale=', 'vtk-export'])
 except getopt.GetoptError, err:
         sys.stderr.write('{0}\n'.format(str(err)))
         usage()
@@ -48,6 +48,8 @@ except getopt.GetoptError, err:
 min_time = None
 max_time = None
 scale_factor = 1
+vtk_export_mode = False
+
 for o, a in opts:
 
     if o == '--help':
@@ -62,6 +64,9 @@ for o, a in opts:
 
     elif o == '--cf-scale':
         scale_factor = float(a)
+
+    elif o == '--vtk-export':
+        vtk_export_mode = True
 
 
 if len(args) > 0:
@@ -80,6 +85,15 @@ def random_color():
 
 
 transforms = dict()
+transf_filters = dict()
+
+big_data_source = vtk.vtkMultiBlockDataGroupFilter()
+add_compatiblity_methods(big_data_source)
+
+big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
+add_compatiblity_methods(big_data_writer)
+big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
+
 contactors = dict()
 offsets = dict()
 
@@ -411,6 +425,13 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         contact_pos_force[mu].Update()
         contact_pos_norm[mu].Update()
 
+        big_data_source.AddInputConnection(contact_posa[mu].GetOutputPort())
+        big_data_source.AddInputConnection(contact_posb[mu].GetOutputPort())
+        big_data_source.AddInputConnection(
+            contact_pos_force[mu].GetOutputPort())
+        big_data_source.AddInputConnection(
+            contact_pos_norm[mu].GetOutputPort())
+
         cone[mu] = vtk.vtkConeSource()
         cone[mu].SetResolution(40)
 
@@ -560,7 +581,6 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     readers = dict()
     mappers = dict()
     actors = []
-
     vtk_reader = {'vtp': vtk.vtkXMLPolyDataReader,
                   'stl': vtk.vtkSTLReader}
 
@@ -753,6 +773,14 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             actors.append(actor)
             renderer.AddActor(actor)
             transform = vtk.vtkTransform()
+            transf_filter = vtk.vtkTransformFilter()
+            transf_filter.SetInputConnection(
+                readers[contactor_name].GetOutputPort())
+            transf_filter.SetTransform(transform)
+            transf_filters[contactor_name] = transf_filter
+
+            big_data_source.AddInputConnection(transf_filter.GetOutputPort())
+
             actor.SetUserTransform(transform)
             transforms[instance].append(transform)
             offsets[instance].append(
@@ -761,180 +789,498 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                  contactor_instance_name].attrs['translation'],
                     io.instances()[instance_name][contactor_instance_name].attrs['orientation']))
 
-    for mu in cf_prov._mu_coefs:
-        renderer.AddActor(gactor[mu])
-        renderer.AddActor(cactor[mu])
-
-        renderer.AddActor(clactor[mu])
-        renderer.AddActor(sactora[mu])
-        renderer.AddActor(sactorb[mu])
-
-    import imp
-    try:
-        imp.load_source('myview', 'myview.py')
-        import myview
-        this_view = myview.MyView(renderer)
-    except IOError as e:
-        pass
-
-    id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
-
     pos_data = dpos_data[:].copy()
     spos_data = spos_data[:].copy()
 
-#    set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
-#                  spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
-#                  spos_data[:, 7], spos_data[:, 8])
+    if not vtk_export_mode:
+        for mu in cf_prov._mu_coefs:
+            renderer.AddActor(gactor[mu])
+            renderer.AddActor(cactor[mu])
 
-    set_positionv(pos_data[id_t0, 1], pos_data[id_t0, 2], pos_data[id_t0, 3],
-                  pos_data[id_t0, 4], pos_data[id_t0, 5], pos_data[id_t0, 6],
-                  pos_data[id_t0, 7], pos_data[id_t0, 8])
+            renderer.AddActor(clactor[mu])
+            renderer.AddActor(sactora[mu])
+            renderer.AddActor(sactorb[mu])
 
-    renderer_window.AddRenderer(renderer)
-    interactor_renderer.SetRenderWindow(renderer_window)
-    interactor_renderer.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
+        import imp
+        try:
+            imp.load_source('myview', 'myview.py')
+            import myview
+            this_view = myview.MyView(renderer)
+        except IOError as e:
+            pass
 
-    # http://www.itk.org/Wiki/VTK/Depth_Peeling ?
+        id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
 
-    # Use a render window with alpha bits (as initial value is 0 (false) ):
-    renderer_window.SetAlphaBitPlanes(1)
+    #    set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
+    #                  spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
+    #                  spos_data[:, 7], spos_data[:, 8])
 
-    # Force to not pick a framebuffer with a multisample buffer ( as initial
-    # value is 8):
-    renderer_window.SetMultiSamples(0)
+        set_positionv(
+            pos_data[id_t0, 1], pos_data[id_t0, 2], pos_data[id_t0, 3],
+            pos_data[id_t0, 4], pos_data[
+                id_t0, 5], pos_data[id_t0, 6],
+            pos_data[id_t0, 7], pos_data[id_t0, 8])
 
-    # Choose to use depth peeling (if supported) (initial value is 0 (false) )
-    renderer.SetUseDepthPeeling(1)
+        renderer_window.AddRenderer(renderer)
+        interactor_renderer.SetRenderWindow(renderer_window)
+        interactor_renderer.GetInteractorStyle(
+        ).SetCurrentStyleToTrackballCamera()
 
-    # Set depth peeling parameters.
-    renderer.SetMaximumNumberOfPeels(100)
+        # http://www.itk.org/Wiki/VTK/Depth_Peeling ?
 
-    # Set the occlusion ratio (initial value is 0.0, exact image)
-    renderer.SetOcclusionRatio(0.1)
+        # Use a render window with alpha bits (as initial value is 0 (false) ):
+        renderer_window.SetAlphaBitPlanes(1)
 
-    # callback maker for scale manipulation
-    def make_scale_observer(glyphs):
+        # Force to not pick a framebuffer with a multisample buffer ( as initial
+        # value is 8):
+        renderer_window.SetMultiSamples(0)
 
-        def scale_observer(obj, event):
-            slider_repres = obj.GetRepresentation()
-            scale_at_pos = slider_repres.GetValue()
-            for glyph in glyphs:
-                for k in glyph:
-                    glyph[k].SetScaleFactor(
-                        scale_at_pos * glyph[k]._scale_fact)
+        # Choose to use depth peeling (if supported) (initial value is 0
+        # (false) )
+        renderer.SetUseDepthPeeling(1)
 
-        return scale_observer
+        # Set depth peeling parameters.
+        renderer.SetMaximumNumberOfPeels(100)
 
-    # callback maker for time scale manipulation
-    def make_time_scale_observer(time_slider_repres, time_observer):
+        # Set the occlusion ratio (initial value is 0.0, exact image)
+        renderer.SetOcclusionRatio(0.1)
 
-        delta_time = max_time - min_time
+        # callback maker for scale manipulation
+        def make_scale_observer(glyphs):
 
-        def time_scale_observer(obj, event):
-            slider_repres = obj.GetRepresentation()
-            time_scale_at_pos = 1. - slider_repres.GetValue()
+            def scale_observer(obj, event):
+                slider_repres = obj.GetRepresentation()
+                scale_at_pos = slider_repres.GetValue()
+                for glyph in glyphs:
+                    for k in glyph:
+                        glyph[k].SetScaleFactor(
+                            scale_at_pos * glyph[k]._scale_fact)
 
-            current_time = time_observer._time
+            return scale_observer
 
-            shift = (current_time - min_time) / delta_time
+        # callback maker for time scale manipulation
+        def make_time_scale_observer(time_slider_repres, time_observer):
 
-            xmin_time = min_time + time_scale_at_pos / 2. * delta_time
-            xmax_time = max_time - time_scale_at_pos / 2. * delta_time
+            delta_time = max_time - min_time
 
-            xdelta_time = xmax_time - xmin_time
+            def time_scale_observer(obj, event):
+                slider_repres = obj.GetRepresentation()
+                time_scale_at_pos = 1. - slider_repres.GetValue()
 
-            new_mintime = max(min_time, current_time - xdelta_time)
-            new_maxtime = min(max_time, current_time + xdelta_time)
+                current_time = time_observer._time
 
-            time_slider_repres.SetMinimumValue(new_mintime)
-            time_slider_repres.SetMaximumValue(new_maxtime)
+                shift = (current_time - min_time) / delta_time
 
-        return time_scale_observer
+                xmin_time = min_time + time_scale_at_pos / 2. * delta_time
+                xmax_time = max_time - time_scale_at_pos / 2. * delta_time
 
-    # make a slider widget and its representation
-    def make_slider(title, observer, interactor,
-                    startvalue, minvalue, maxvalue, cx1, cy1, cx2, cy2):
+                xdelta_time = xmax_time - xmin_time
+
+                new_mintime = max(min_time, current_time - xdelta_time)
+                new_maxtime = min(max_time, current_time + xdelta_time)
+
+                time_slider_repres.SetMinimumValue(new_mintime)
+                time_slider_repres.SetMaximumValue(new_maxtime)
+
+            return time_scale_observer
+
+        # make a slider widget and its representation
+        def make_slider(title, observer, interactor,
+                        startvalue, minvalue, maxvalue, cx1, cy1, cx2, cy2):
+            slider_repres = vtk.vtkSliderRepresentation2D()
+            slider_repres.SetMinimumValue(
+                minvalue - (maxvalue - minvalue) / 100)
+            slider_repres.SetMaximumValue(
+                maxvalue + (maxvalue - minvalue) / 100)
+            slider_repres.SetValue(startvalue)
+            slider_repres.SetTitleText(title)
+            slider_repres.GetPoint1Coordinate().\
+                SetCoordinateSystemToNormalizedDisplay()
+            slider_repres.GetPoint1Coordinate().SetValue(cx1, cy1)
+            slider_repres.GetPoint2Coordinate().\
+                SetCoordinateSystemToNormalizedDisplay()
+            slider_repres.GetPoint2Coordinate().SetValue(cx2, cy2)
+
+            slider_repres.SetSliderLength(0.02)
+            slider_repres.SetSliderWidth(0.03)
+            slider_repres.SetEndCapLength(0.01)
+            slider_repres.SetEndCapWidth(0.03)
+            slider_repres.SetTubeWidth(0.005)
+            slider_repres.SetLabelFormat('%f')
+            slider_repres.SetTitleHeight(0.02)
+            slider_repres.SetLabelHeight(0.02)
+
+            slider_widget = vtk.vtkSliderWidget()
+            slider_widget.SetInteractor(interactor)
+            slider_widget.SetRepresentation(slider_repres)
+            slider_widget.KeyPressActivationOff()
+            slider_widget.SetAnimationModeToAnimate()
+            slider_widget.SetEnabled(True)
+            slider_widget.AddObserver('InteractionEvent', observer)
+
+            return slider_widget, slider_repres
+
+        image_maker = vtk.vtkWindowToImageFilter()
+        image_maker.SetInput(renderer_window)
+
+        recorder = vtk.vtkOggTheoraWriter()
+        recorder.SetQuality(2)
+        recorder.SetRate(25)
+        recorder.SetFileName('xout.avi')
+        recorder.SetInputConnection(image_maker.GetOutputPort())
+
+        writer = vtk.vtkPNGWriter()
+        writer.SetInputConnection(image_maker.GetOutputPort())
+
+        class InputObserver():
+
+            def __init__(self, times, slider_repres):
+                self._stimes = set(times)
+                self._opacity = 1.0
+                self._time_step = (max(self._stimes) - min(self._stimes)) \
+                    / len(self._stimes)
+                self._time = min(times)
+                self._slider_repres = slider_repres
+                self._current_id = vtk.vtkIdTypeArray()
+                self._renderer = renderer
+                self._renderer_window = renderer_window
+                self._times = times
+                self._image_counter = 0
+
+                self._recording = False
+
+            def update(self):
+                index = bisect.bisect_left(self._times, self._time)
+                index = max(0, index)
+                index = min(index, len(self._times) - 1)
+                cf_prov._time = self._times[index]
+                cf_prov.method()
+
+        #        contact_posa.Update()
+
+        #        contact_posb.Update()
+
+                # contact_pos_force.Update()
+                # arrow_glyph.Update()
+                # gmapper.Update()
+
+    #            set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
+    #                          spos_data[:, 4],
+    #                          spos_data[:, 5], spos_data[:, 6], spos_data[:, 7],
+    #                          spos_data[:, 8])
+
+                id_t = numpy.where(pos_data[:, 0] == self._times[index])
+
+                set_positionv(
+                    pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
+                    pos_data[id_t, 4],
+                    pos_data[id_t, 5], pos_data[
+                        id_t, 6], pos_data[id_t, 7],
+                    pos_data[id_t, 8])
+
+                self._slider_repres.SetValue(self._time)
+                renderer_window.Render()
+
+                self._current_id.SetNumberOfValues(1)
+                self._current_id.SetValue(0, index)
+
+                self._iter_plot.SetSelection(self._current_id)
+                self._prec_plot.SetSelection(self._current_id)
+                self._iter_plot_view.Update()
+                self._prec_plot_view.Update()
+                self._iter_plot_view.GetRenderer().GetRenderWindow().Render()
+                self._prec_plot_view.GetRenderer().GetRenderWindow().Render()
+
+            def object_pos(self, id_):
+                index = bisect.bisect_left(self._times, self._time)
+                index = max(0, index)
+                index = min(index, len(self._times) - 1)
+
+                id_t = numpy.where(pos_data[:, 0] == self._times[index])
+                return (pos_data[id_t[0][id_], 2], pos_data[id_t[0][id_], 3], pos_data[id_t[0][id_], 4])
+
+            def set_opacity(self):
+                for instance, actor in zip(instances, actors):
+                    if instance >= 0:
+                        actor.GetProperty().SetOpacity(self._opacity)
+
+            def key(self, obj, event):
+                key = obj.GetKeySym()
+                print 'key', key
+
+                if key == 'r':
+                    spos_data, dpos_data, cf_data, solv_data = load()
+                    cf_prov = CFprov(cf_data)
+                    times = list(set(dpos_data[:, 0]))
+                    times.sort()
+                    ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
+                    if len(spos_data) > 0:
+                        instances = set(dpos_data[:, 1]).union(
+                            set(spos_data[:, 1]))
+                    else:
+                        instances = set(dpos_data[:, 1])
+                    cf_prov._time = min(times[:])
+                    cf_prov.method()
+                    contact_posa.SetInputData(cf_prov._output)
+                    contact_posa.Update()
+                    contact_posb.SetInputData(cf_prov._output)
+                    contact_posb.Update()
+                    id_t0 = numpy.where(
+                        dpos_data[:, 0] == min(dpos_data[:, 0]))
+                    contact_pos_force.Update()
+                    contact_pos_norm.Update()
+
+                    pos_data = dpos_data[:].copy()
+                    min_time = times[0]
+
+                    max_time = times[len(times) - 1]
+
+                    self._slider_repres.SetMinimumValue(min_time)
+                    self._slider_repres.SetMaximumValue(max_time)
+                    self.update()
+
+                if key == 'p':
+                    self._image_counter += 1
+                    image_maker.Update()
+                    writer.SetFileName(
+                        'vview-{0}.png'.format(self._image_counter))
+                    writer.Write()
+
+                if key == 'Up':
+                        self._time_step = self._time_step * 2.
+                        self._time += self._time_step
+
+                if key == 'Down':
+                        self._time_step = self._time_step / 2.
+                        self._time -= self._time_step
+
+                if key == 'Left':
+                        self._time -= self._time_step
+
+                if key == 'Right':
+                        self._time += self._time_step
+
+                if key == 't':
+                        self._opacity -= .1
+                        self.set_opacity()
+
+                if key == 'T':
+                        self._opacity += .1
+                        self.set_opacity()
+
+                if key == 'c':
+                        print 'camera position:', self._renderer.GetActiveCamera().GetPosition()
+                        print 'camera focal point', self._renderer.GetActiveCamera().GetFocalPoint()
+                        print 'camera clipping plane', self._renderer.GetActiveCamera().GetClippingRange()
+
+                if key == 's':
+                    if not self._recording:
+                        recorder.Start()
+                        self._recording = True
+
+                if key == 'e':
+                    if self._recording:
+                        self._recording = False
+                        recorder.End()
+
+                if key == 'C':
+                        this_view.action(self)
+                self.update()
+
+            def time(self, obj, event):
+                slider_repres = obj.GetRepresentation()
+                self._time = slider_repres.GetValue()
+                self.update()
+
+                # observer on 2D chart
+            def iter_plot_observer(self, obj, event):
+
+                if self._iter_plot.GetSelection() is not None:
+                    # just one selection at the moment!
+                    if self._iter_plot.GetSelection().GetMaxId() >= 0:
+                        self._time = self._times[
+                            self._iter_plot.GetSelection().GetValue(0)]
+                        # -> recompute index ...
+                        self.update()
+
+            def prec_plot_observer(self, obj, event):
+                if self._prec_plot.GetSelection() is not None:
+                    # just one selection at the moment!
+                    if self._prec_plot.GetSelection().GetMaxId() >= 0:
+                        self._time = self._times[
+                            self._prec_plot.GetSelection().GetValue(0)]
+                        # -> recompute index ...
+                        self.update()
+
+            def recorder_observer(self, obj, event):
+                if self._recording:
+                    image_maker.Modified()
+                    recorder.Write()
+
         slider_repres = vtk.vtkSliderRepresentation2D()
-        slider_repres.SetMinimumValue(minvalue - (maxvalue - minvalue) / 100)
-        slider_repres.SetMaximumValue(maxvalue + (maxvalue - minvalue) / 100)
-        slider_repres.SetValue(startvalue)
-        slider_repres.SetTitleText(title)
-        slider_repres.GetPoint1Coordinate().\
-            SetCoordinateSystemToNormalizedDisplay()
-        slider_repres.GetPoint1Coordinate().SetValue(cx1, cy1)
-        slider_repres.GetPoint2Coordinate().\
-            SetCoordinateSystemToNormalizedDisplay()
-        slider_repres.GetPoint2Coordinate().SetValue(cx2, cy2)
+
+        if min_time is None:
+            min_time = times[0]
+
+        if max_time is None:
+            max_time = times[len(times) - 1]
+
+        slider_repres.SetMinimumValue(min_time)
+        slider_repres.SetMaximumValue(max_time)
+        slider_repres.SetValue(min_time)
+        slider_repres.SetTitleText("time")
+        slider_repres.GetPoint1Coordinate(
+        ).SetCoordinateSystemToNormalizedDisplay()
+        slider_repres.GetPoint1Coordinate().SetValue(0.4, 0.9)
+        slider_repres.GetPoint2Coordinate(
+        ).SetCoordinateSystemToNormalizedDisplay()
+        slider_repres.GetPoint2Coordinate().SetValue(0.9, 0.9)
 
         slider_repres.SetSliderLength(0.02)
         slider_repres.SetSliderWidth(0.03)
         slider_repres.SetEndCapLength(0.01)
         slider_repres.SetEndCapWidth(0.03)
         slider_repres.SetTubeWidth(0.005)
-        slider_repres.SetLabelFormat('%f')
+        slider_repres.SetLabelFormat("%3.4lf")
         slider_repres.SetTitleHeight(0.02)
         slider_repres.SetLabelHeight(0.02)
 
         slider_widget = vtk.vtkSliderWidget()
-        slider_widget.SetInteractor(interactor)
+        slider_widget.SetInteractor(interactor_renderer)
         slider_widget.SetRepresentation(slider_repres)
         slider_widget.KeyPressActivationOff()
         slider_widget.SetAnimationModeToAnimate()
         slider_widget.SetEnabled(True)
-        slider_widget.AddObserver('InteractionEvent', observer)
 
-        return slider_widget, slider_repres
+        input_observer = InputObserver(times, slider_repres)
 
-    image_maker = vtk.vtkWindowToImageFilter()
-    image_maker.SetInput(renderer_window)
+        slider_widget.AddObserver("InteractionEvent", input_observer.time)
 
-    recorder = vtk.vtkOggTheoraWriter()
-    recorder.SetQuality(2)
-    recorder.SetRate(25)
-    recorder.SetFileName('xout.avi')
-    recorder.SetInputConnection(image_maker.GetOutputPort())
+        interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
 
-    writer = vtk.vtkPNGWriter()
-    writer.SetInputConnection(image_maker.GetOutputPort())
+        # Create a vtkLight, and set the light parameters.
+        light = vtk.vtkLight()
+        light.SetFocalPoint(0, 0, 0)
+        light.SetPosition(0, 0, 500)
+        # light.SetLightTypeToHeadlight()
+        renderer.AddLight(light)
 
-    class InputObserver():
+        hlight = vtk.vtkLight()
+        hlight.SetFocalPoint(0, 0, 0)
+        # hlight.SetPosition(0, 0, 500)
+        hlight.SetLightTypeToHeadlight()
+        renderer.AddLight(hlight)
 
-        def __init__(self, times, slider_repres):
-            self._stimes = set(times)
-            self._opacity = 1.0
-            self._time_step = (max(self._stimes) - min(self._stimes)) \
-                / len(self._stimes)
-            self._time = min(times)
-            self._slider_repres = slider_repres
-            self._current_id = vtk.vtkIdTypeArray()
-            self._renderer = renderer
-            self._renderer_window = renderer_window
-            self._times = times
-            self._image_counter = 0
+        # Warning! numpy support offer a view on numpy array
+        # the numpy array must not be garbage collected!
+        nxtime = solv_data[:, 0].copy()
+        nxiters = solv_data[:, 1].copy()
+        nprecs = solv_data[:, 2].copy()
+        xtime = numpy_support.numpy_to_vtk(nxtime)
+        xiters = numpy_support.numpy_to_vtk(nxiters)
+        xprecs = numpy_support.numpy_to_vtk(nprecs)
 
-            self._recording = False
+        xtime.SetName('time')
+        xiters.SetName('iterations')
+        xprecs.SetName('precisions')
 
-        def update(self):
-            index = bisect.bisect_left(self._times, self._time)
+        table = vtk.vtkTable()
+        table.AddColumn(xtime)
+        table.AddColumn(xiters)
+        table.AddColumn(xprecs)
+        # table.Dump()
+
+        tview_iter = vtk.vtkContextView()
+        tview_prec = vtk.vtkContextView()
+
+        chart_iter = vtk.vtkChartXY()
+        chart_prec = vtk.vtkChartXY()
+        tview_iter.GetScene().AddItem(chart_iter)
+        tview_prec.GetScene().AddItem(chart_prec)
+        iter_plot = chart_iter.AddPlot(vtk.vtkChart.LINE)
+        iter_plot.SetLabel('Solver iterations')
+        iter_plot.GetXAxis().SetTitle('time')
+        iter_plot.GetYAxis().SetTitle('iterations')
+
+        prec_plot = chart_prec.AddPlot(vtk.vtkChart.LINE)
+        prec_plot.SetLabel('Solver precisions')
+        prec_plot.GetXAxis().SetTitle('time')
+        prec_plot.GetYAxis().SetTitle('precisions')
+
+        add_compatiblity_methods(iter_plot)
+        add_compatiblity_methods(prec_plot)
+
+        iter_plot.SetInputData(table, 'time', 'iterations')
+        prec_plot.SetInputData(table, 'time', 'precisions')
+        iter_plot.SetWidth(5.0)
+        prec_plot.SetWidth(5.0)
+        iter_plot.SetColor(0, 255, 0, 255)
+        prec_plot.SetColor(0, 255, 0, 255)
+
+        input_observer._iter_plot = iter_plot
+        input_observer._prec_plot = prec_plot
+        input_observer._iter_plot_view = tview_iter
+        input_observer._prec_plot_view = tview_prec
+
+        tview_iter.GetInteractor().AddObserver('RightButtonReleaseEvent',
+                                               input_observer.iter_plot_observer)
+
+        tview_prec.GetInteractor().AddObserver('RightButtonReleaseEvent',
+                                               input_observer.prec_plot_observer)
+
+        # screen_size = renderer_window.GetScreenSize()
+        renderer_window.SetSize(600, 600)
+        tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
+        tview_prec.GetRenderer().GetRenderWindow().SetSize(600, 200)
+
+        tview_iter.GetInteractor().Initialize()
+        # tview_iter.GetInteractor().Start()
+        tview_iter.GetRenderer().SetBackground(.9, .9, .9)
+        tview_iter.GetRenderer().Render()
+
+        tview_prec.GetInteractor().Initialize()
+        # tview_prec.GetInteractor().Start()
+        tview_prec.GetRenderer().SetBackground(.9, .9, .9)
+        tview_prec.GetRenderer().Render()
+
+        slwsc, slrepsc = make_slider('Scale',
+                                     make_scale_observer([cone_glyph, cylinder_glyph, sphere_glypha, sphere_glyphb, arrow_glyph]
+                                                         ),
+                                     interactor_renderer,
+                                     scale_factor, scale_factor -
+                                     scale_factor / 2,
+                                     scale_factor + scale_factor / 2,
+                                     0.01, 0.01, 0.01, 0.7)
+
+        xslwsc, xslrepsc = make_slider('Time scale',
+                                       make_time_scale_observer(
+                                           slider_repres, input_observer),
+                                       interactor_renderer,
+                                       scale_factor, scale_factor -
+                                       scale_factor / 2,
+                                       scale_factor + scale_factor / 2,
+                                       0.1, 0.9, 0.3, 0.9)
+
+        renderer_window.Render()
+        interactor_renderer.Initialize()
+
+        timer_id = interactor_renderer.CreateRepeatingTimer(40)   # 25 fps
+        interactor_renderer.AddObserver(
+            'TimerEvent', input_observer.recorder_observer)
+
+        interactor_renderer.Start()
+
+    else:
+        # vtk export
+        for time in times:
+            index = bisect.bisect_left(times, time)
             index = max(0, index)
-            index = min(index, len(self._times) - 1)
-            cf_prov._time = self._times[index]
+            index = min(index, len(times) - 1)
+
+            cf_prov._time = times[index]
             cf_prov.method()
 
-    #        contact_posa.Update()
-
-    #        contact_posb.Update()
-
-            # contact_pos_force.Update()
-            # arrow_glyph.Update()
-            # gmapper.Update()
-
-#            set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
-#                          spos_data[:, 4],
-#                          spos_data[:, 5], spos_data[:, 6], spos_data[:, 7],
-#                          spos_data[:, 8])
-
-            id_t = numpy.where(pos_data[:, 0] == self._times[index])
+            id_t = numpy.where(pos_data[:, 0] == times[index])
 
             set_positionv(
                 pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
@@ -943,291 +1289,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     id_t, 6], pos_data[id_t, 7],
                 pos_data[id_t, 8])
 
-            self._slider_repres.SetValue(self._time)
-            renderer_window.Render()
-
-            self._current_id.SetNumberOfValues(1)
-            self._current_id.SetValue(0, index)
-
-            self._iter_plot.SetSelection(self._current_id)
-            self._prec_plot.SetSelection(self._current_id)
-            self._iter_plot_view.Update()
-            self._prec_plot_view.Update()
-            self._iter_plot_view.GetRenderer().GetRenderWindow().Render()
-            self._prec_plot_view.GetRenderer().GetRenderWindow().Render()
-
-        def object_pos(self, id_):
-            index = bisect.bisect_left(self._times, self._time)
-            index = max(0, index)
-            index = min(index, len(self._times) - 1)
-
-            id_t = numpy.where(pos_data[:, 0] == self._times[index])
-            return (pos_data[id_t[0][id_], 2], pos_data[id_t[0][id_], 3], pos_data[id_t[0][id_], 4])
-
-        def set_opacity(self):
-            for instance, actor in zip(instances, actors):
-                if instance >= 0:
-                    actor.GetProperty().SetOpacity(self._opacity)
-
-        def key(self, obj, event):
-            key = obj.GetKeySym()
-            print 'key', key
-
-            if key == 'r':
-                spos_data, dpos_data, cf_data, solv_data = load()
-                cf_prov = CFprov(cf_data)
-                times = list(set(dpos_data[:, 0]))
-                times.sort()
-                ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
-                if len(spos_data) > 0:
-                    instances = set(dpos_data[:, 1]).union(
-                        set(spos_data[:, 1]))
-                else:
-                    instances = set(dpos_data[:, 1])
-                cf_prov._time = min(times[:])
-                cf_prov.method()
-                contact_posa.SetInputData(cf_prov._output)
-                contact_posa.Update()
-                contact_posb.SetInputData(cf_prov._output)
-                contact_posb.Update()
-                id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
-                contact_pos_force.Update()
-                contact_pos_norm.Update()
-
-                pos_data = dpos_data[:].copy()
-                min_time = times[0]
-
-                max_time = times[len(times) - 1]
-
-                self._slider_repres.SetMinimumValue(min_time)
-                self._slider_repres.SetMaximumValue(max_time)
-                self.update()
-
-            if key == 'p':
-                self._image_counter += 1
-                image_maker.Update()
-                writer.SetFileName('vview-{0}.png'.format(self._image_counter))
-                writer.Write()
-
-            if key == 'Up':
-                    self._time_step = self._time_step * 2.
-                    self._time += self._time_step
-
-            if key == 'Down':
-                    self._time_step = self._time_step / 2.
-                    self._time -= self._time_step
-
-            if key == 'Left':
-                    self._time -= self._time_step
-
-            if key == 'Right':
-                    self._time += self._time_step
-
-            if key == 't':
-                    self._opacity -= .1
-                    self.set_opacity()
-
-            if key == 'T':
-                    self._opacity += .1
-                    self.set_opacity()
-
-            if key == 'c':
-                    print 'camera position:', self._renderer.GetActiveCamera().GetPosition()
-                    print 'camera focal point', self._renderer.GetActiveCamera().GetFocalPoint()
-                    print 'camera clipping plane', self._renderer.GetActiveCamera().GetClippingRange()
-
-            if key == 's':
-                if not self._recording:
-                    recorder.Start()
-                    self._recording = True
-
-            if key == 'e':
-                if self._recording:
-                    self._recording = False
-                    recorder.End()
-
-            if key == 'C':
-                    this_view.action(self)
-            self.update()
-
-        def time(self, obj, event):
-            slider_repres = obj.GetRepresentation()
-            self._time = slider_repres.GetValue()
-            self.update()
-
-            # observer on 2D chart
-        def iter_plot_observer(self, obj, event):
-
-            if self._iter_plot.GetSelection() is not None:
-                # just one selection at the moment!
-                if self._iter_plot.GetSelection().GetMaxId() >= 0:
-                    self._time = self._times[
-                        self._iter_plot.GetSelection().GetValue(0)]
-                    # -> recompute index ...
-                    self.update()
-
-        def prec_plot_observer(self, obj, event):
-            if self._prec_plot.GetSelection() is not None:
-                # just one selection at the moment!
-                if self._prec_plot.GetSelection().GetMaxId() >= 0:
-                    self._time = self._times[
-                        self._prec_plot.GetSelection().GetValue(0)]
-                    # -> recompute index ...
-                    self.update()
-
-        def recorder_observer(self, obj, event):
-            if self._recording:
-                image_maker.Modified()
-                recorder.Write()
-
-    slider_repres = vtk.vtkSliderRepresentation2D()
-
-    if min_time is None:
-        min_time = times[0]
-
-    if max_time is None:
-        max_time = times[len(times) - 1]
-
-    slider_repres.SetMinimumValue(min_time)
-    slider_repres.SetMaximumValue(max_time)
-    slider_repres.SetValue(min_time)
-    slider_repres.SetTitleText("time")
-    slider_repres.GetPoint1Coordinate(
-    ).SetCoordinateSystemToNormalizedDisplay()
-    slider_repres.GetPoint1Coordinate().SetValue(0.4, 0.9)
-    slider_repres.GetPoint2Coordinate(
-    ).SetCoordinateSystemToNormalizedDisplay()
-    slider_repres.GetPoint2Coordinate().SetValue(0.9, 0.9)
-
-    slider_repres.SetSliderLength(0.02)
-    slider_repres.SetSliderWidth(0.03)
-    slider_repres.SetEndCapLength(0.01)
-    slider_repres.SetEndCapWidth(0.03)
-    slider_repres.SetTubeWidth(0.005)
-    slider_repres.SetLabelFormat("%3.4lf")
-    slider_repres.SetTitleHeight(0.02)
-    slider_repres.SetLabelHeight(0.02)
-
-    slider_widget = vtk.vtkSliderWidget()
-    slider_widget.SetInteractor(interactor_renderer)
-    slider_widget.SetRepresentation(slider_repres)
-    slider_widget.KeyPressActivationOff()
-    slider_widget.SetAnimationModeToAnimate()
-    slider_widget.SetEnabled(True)
-
-    input_observer = InputObserver(times, slider_repres)
-
-    slider_widget.AddObserver("InteractionEvent", input_observer.time)
-
-    interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
-
-    # Create a vtkLight, and set the light parameters.
-    light = vtk.vtkLight()
-    light.SetFocalPoint(0, 0, 0)
-    light.SetPosition(0, 0, 500)
-    # light.SetLightTypeToHeadlight()
-    renderer.AddLight(light)
-
-    hlight = vtk.vtkLight()
-    hlight.SetFocalPoint(0, 0, 0)
-    # hlight.SetPosition(0, 0, 500)
-    hlight.SetLightTypeToHeadlight()
-    renderer.AddLight(hlight)
-
-    # Warning! numpy support offer a view on numpy array
-    # the numpy array must not be garbage collected!
-    nxtime = solv_data[:, 0].copy()
-    nxiters = solv_data[:, 1].copy()
-    nprecs = solv_data[:, 2].copy()
-    xtime = numpy_support.numpy_to_vtk(nxtime)
-    xiters = numpy_support.numpy_to_vtk(nxiters)
-    xprecs = numpy_support.numpy_to_vtk(nprecs)
-
-    xtime.SetName('time')
-    xiters.SetName('iterations')
-    xprecs.SetName('precisions')
-
-    table = vtk.vtkTable()
-    table.AddColumn(xtime)
-    table.AddColumn(xiters)
-    table.AddColumn(xprecs)
-    # table.Dump()
-
-    tview_iter = vtk.vtkContextView()
-    tview_prec = vtk.vtkContextView()
-
-    chart_iter = vtk.vtkChartXY()
-    chart_prec = vtk.vtkChartXY()
-    tview_iter.GetScene().AddItem(chart_iter)
-    tview_prec.GetScene().AddItem(chart_prec)
-    iter_plot = chart_iter.AddPlot(vtk.vtkChart.LINE)
-    iter_plot.SetLabel('Solver iterations')
-    iter_plot.GetXAxis().SetTitle('time')
-    iter_plot.GetYAxis().SetTitle('iterations')
-
-    prec_plot = chart_prec.AddPlot(vtk.vtkChart.LINE)
-    prec_plot.SetLabel('Solver precisions')
-    prec_plot.GetXAxis().SetTitle('time')
-    prec_plot.GetYAxis().SetTitle('precisions')
-
-    add_compatiblity_methods(iter_plot)
-    add_compatiblity_methods(prec_plot)
-
-    iter_plot.SetInputData(table, 'time', 'iterations')
-    prec_plot.SetInputData(table, 'time', 'precisions')
-    iter_plot.SetWidth(5.0)
-    prec_plot.SetWidth(5.0)
-    iter_plot.SetColor(0, 255, 0, 255)
-    prec_plot.SetColor(0, 255, 0, 255)
-
-    input_observer._iter_plot = iter_plot
-    input_observer._prec_plot = prec_plot
-    input_observer._iter_plot_view = tview_iter
-    input_observer._prec_plot_view = tview_prec
-
-    tview_iter.GetInteractor().AddObserver('RightButtonReleaseEvent',
-                                           input_observer.iter_plot_observer)
-
-    tview_prec.GetInteractor().AddObserver('RightButtonReleaseEvent',
-                                           input_observer.prec_plot_observer)
-
-    # screen_size = renderer_window.GetScreenSize()
-    renderer_window.SetSize(600, 600)
-    tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
-    tview_prec.GetRenderer().GetRenderWindow().SetSize(600, 200)
-
-    tview_iter.GetInteractor().Initialize()
-    # tview_iter.GetInteractor().Start()
-    tview_iter.GetRenderer().SetBackground(.9, .9, .9)
-    tview_iter.GetRenderer().Render()
-
-    tview_prec.GetInteractor().Initialize()
-    # tview_prec.GetInteractor().Start()
-    tview_prec.GetRenderer().SetBackground(.9, .9, .9)
-    tview_prec.GetRenderer().Render()
-
-    slwsc, slrepsc = make_slider('Scale',
-                                 make_scale_observer([cone_glyph, cylinder_glyph, sphere_glypha, sphere_glyphb, arrow_glyph]
-                                                     ),
-                                 interactor_renderer,
-                                 scale_factor, scale_factor - scale_factor / 2,
-                                 scale_factor + scale_factor / 2,
-                                 0.01, 0.01, 0.01, 0.7)
-
-    xslwsc, xslrepsc = make_slider('Time scale',
-                                   make_time_scale_observer(
-                                       slider_repres, input_observer),
-                                   interactor_renderer,
-                                   scale_factor, scale_factor -
-                                   scale_factor / 2,
-                                   scale_factor + scale_factor / 2,
-                                   0.1, 0.9, 0.3, 0.9)
-
-    renderer_window.Render()
-    interactor_renderer.Initialize()
-
-    timer_id = interactor_renderer.CreateRepeatingTimer(40)   # 25 fps
-    interactor_renderer.AddObserver(
-        'TimerEvent', input_observer.recorder_observer)
-
-    interactor_renderer.Start()
+            big_data_writer.SetFileName('{0}-{1}.{2}'.format(os.path.splitext(
+                                        os.path.basename(io_filename))[0],
+                index, big_data_writer.GetDefaultFileExtension()))
+            big_data_writer.SetTimeStep(times[index])
+            big_data_source.Update()
+            big_data_writer.Write()
