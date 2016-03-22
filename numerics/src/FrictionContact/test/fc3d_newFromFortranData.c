@@ -26,14 +26,14 @@ int main(void)
 {
   int info = 0 ;
 
-  double q[9] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
-  double mu[3] = {0.1, 0.1, 0.1};
+  double q[] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
+  double mu[] = {0.1, 0.1, 0.1};
 
-  unsigned int row[3] = {1, 2, 3};
-  unsigned int column[3] = {1, 2, 3};
+  unsigned int row[] = {1, 2, 3};
+  unsigned int column[] = {1, 2, 3};
   int m = 3;
   int n = 3;
-  double W[27] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1};
+  double W[] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 
   SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(m, n, 3, row, column, W);
