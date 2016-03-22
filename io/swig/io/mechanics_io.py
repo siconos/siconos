@@ -536,9 +536,15 @@ class Hdf5():
 
     def dynamic_data(self):
         """
-        Coordinates and orientations of dynamics objects.
+        Coordinates and orientations of dynamic objects.
         """
         return self._dynamic_data
+
+    def velocities_data(self):
+        """
+        Velocities of dynamic objects
+        """
+        return self._velocities_data
 
     def contact_forces_data(self):
         """
@@ -762,9 +768,29 @@ class Hdf5():
             for (name, obj) in self._input.items():
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
-                translation = obj.attrs['translation']
-                orientation = obj.attrs['orientation']
-                velocity = obj.attrs['velocity']
+
+                # cold restart if output previously done
+                if mass > 0 and self.dynamic_data() is not None and len(self.dynamic_data())>0:
+                    dpos_data = self.dynamic_data()
+                    max_time = max(dpos_data[:, 0])
+                    id_last = np.where(dpos_data[:, 0] == max_time)
+                    id_last_inst = np.where(dpos_data[id_last, 1] == self.instances()[name].attrs['id'])
+                    xpos = dpos_data[id_last[id_last_inst[0]], :]
+                    translation = (xpos[2], xpos[3], xpos[4])
+                    orientation = (xpos[5], xpos[6], xpos[7], xpos[8])
+
+                    velocities = self.velocities_data()
+                    id_vlast = np.where(velocities[:, 0] == max_time)
+                    id_vlast_inst = np.where(velocities[id_vlast, 1] == self.instances()[name].attrs['id'])
+                    xvel = velocities[id_vlast[id_vlast_inst[0]], :]
+                    velocity = (xvel[2], xvel[3], xvel[4])
+
+                # start from initial conditions
+                else:
+                    translation = obj.attrs['translation']
+                    orientation = obj.attrs['orientation']
+                    velocity = obj.attrs['velocity']
+
                 contactors = [Contactor(ctr.attrs['name'],
                                         int(ctr.attrs['group']),
                                         floatv(ctr.attrs['translation']),
@@ -1281,6 +1307,15 @@ class Hdf5():
 
         if output_frequency is not None:
             self._output_frequency = output_frequency
+
+        # cold restart
+        if self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
+            dpos_data = self.dynamic_data()
+            t0 = float(max(dpos_data[:, 0]))
+            T = float(t0 + T)
+            print ('Restart from previous simulation at t0={0}'.format(t0))
+            print ('Run until T={0}'.format(T))
+
 
         # Model
         #
