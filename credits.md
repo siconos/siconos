@@ -2,9 +2,9 @@
 Credits
 *******
 
-The Siconos project was started by Vincent Acary and the members of the Bipop Team at INRIA Grenovle Rhone Alpes. It wa the otucome of 
-a FP5 European project   Many other people have since contributed their talents to help make Siconos what it is today.  
-Here's a list, more or less chronological
+The Siconos project was started by Vincent Acary and the members of the Bipop Team at INRIA Grenoble Rhone Alpes. It was the outcome of 
+an FP5 European project.  Many other people have since contributed their talents to help make Siconos what it is today.  
+Here's a list, more or less chronological:
 
 .. this is modeled directly, and shamelessly, on: http://eigen.tuxfamily.org/index.php?title=Main_Page#Credits
 
