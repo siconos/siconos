@@ -19,6 +19,9 @@ Here's a list, more or less chronological
 * Olivier Bonnefon, 2007--2009
 * Pascal Denoyelle, 2005--2008
 * Jan Michalcsyk, 2012--2014
+* Ngoc-Son Nguyen 2012
+* Aneel Tanwani 2012
+* Thorsten Schindler 2010--2012
 * Hong Ha Do, 2012
 * Hakim Majidi, 2008
 * Abdelaziz N'Diaye, 2006
