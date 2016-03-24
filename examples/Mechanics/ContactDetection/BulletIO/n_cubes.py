@@ -11,9 +11,9 @@ import siconos.numerics as Numerics
 
 import random
 
-n_cube=30
-n_row=20
-n_col=20
+n_cube=3
+n_row=2
+n_col=2
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
     for i in range(n_row):
