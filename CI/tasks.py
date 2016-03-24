@@ -27,6 +27,11 @@ siconos_ubuntu_15_10 = siconos_default.copy()(
     add_pkgs=['umfpack'],
     distrib='ubuntu:15.10')
 
+siconos_ubuntu_15_10_with_mechanisms = siconos_default.copy()(
+    ci_config='with_mechanisms',
+    add_pkgs=['pythonocc'],
+    distrib='ubuntu:15.10')
+
 siconos_numerics_only = siconos_ubuntu_15_10.copy()(
     ci_config='no_cxx',
     remove_pkgs=['gnu-c++'])
@@ -108,7 +113,8 @@ siconos_default_examples = siconos_default.copy()(
 known_tasks = {'siconos---vm0':
                (siconos_fedora_latest,
                 siconos_gcc_asan,
-                siconos_gcc_asan_latest),
+                siconos_gcc_asan_latest,
+                siconos_ubuntu_15_10_with_mechanisms),
 
                'siconos---vm1':
                (siconos_numerics_only,

@@ -279,3 +279,13 @@ pkgs:
       command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib/x86_64-linux-gnu/libpath47.so
     fedora:
       command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib64/libpath47.so
+
+  pythonocc:
+    ubuntu:
+    command:	wget -O https://github.com/tpaviot/pythonocc-core/archive/0.16.3.tar.gz
+    	       	tar xvfz 0.16.3.tar.gz
+		cd pythonocc-core
+		mkdir build; cd build
+		cmake ..
+		make &&
+		make install
