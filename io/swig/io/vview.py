@@ -85,7 +85,7 @@ def random_color():
 
 
 transforms = dict()
-transf_filters = dict()
+transformers = dict()
 
 big_data_source = vtk.vtkMultiBlockDataGroupFilter()
 add_compatiblity_methods(big_data_source)
@@ -579,6 +579,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     interactor_renderer = vtk.vtkRenderWindowInteractor()
 
     readers = dict()
+    datasets = dict()
     mappers = dict()
     actors = []
     vtk_reader = {'vtp': vtk.vtkXMLPolyDataReader,
@@ -667,18 +668,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 convex.GetCellType(), convex.GetPointIds())
             convex_grid.SetPoints(points)
 
-            source = vtk.vtkProgrammableSource()
+            # not a source!
+            datasets[shape_name] = convex_grid
 
-            def sourceExec():
-                output = source.GetUnstructuredGridOutput()
-                output.Allocate(1, 1)
-                output.InsertNextCell(
-                    convex.GetCellType(), convex.GetPointIds())
-                output.SetPoints(points)
-
-            source.SetExecuteMethod(sourceExec)
-
-            readers[shape_name] = source
             mapper = vtk.vtkDataSetMapper()
             add_compatiblity_methods(mapper)
             mapper.SetInputData(convex_grid)
@@ -772,14 +764,20 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             actor.SetMapper(fixed_mappers[contactor_name])
             actors.append(actor)
             renderer.AddActor(actor)
-            transform = vtk.vtkTransform()
-            transf_filter = vtk.vtkTransformFilter()
-            transf_filter.SetInputConnection(
-                readers[contactor_name].GetOutputPort())
-            transf_filter.SetTransform(transform)
-            transf_filters[contactor_name] = transf_filter
 
-            big_data_source.AddInputConnection(transf_filter.GetOutputPort())
+            transform = vtk.vtkTransform()
+            transformer = vtk.vtkTransformFilter()
+
+            if contactor_name in readers:
+                transformer.SetInputConnection(
+                    readers[contactor_name].GetOutputPort())
+            else:
+                transformer.SetInputData(datasets[contactor_name])
+
+            transformer.SetTransform(transform)
+            transformers[contactor_name] = transformer
+
+            big_data_source.AddInputConnection(transformer.GetOutputPort())
 
             actor.SetUserTransform(transform)
             transforms[instance].append(transform)
