@@ -1,6 +1,7 @@
 import os
 import shutil
 from subprocess import check_call, CalledProcessError
+import copy
 
 
 class CiTask():
@@ -46,6 +47,9 @@ class CiTask():
                  remove_srcs=None, add_targets=None, remove_targets=None,
                  with_examples=False):
 
+            # WARNING: remember that default arg are mutable in python
+            # http://docs.python-guide.org/en/latest/writing/gotchas/
+
             if add_pkgs is not None:
                 pkgs = self._pkgs + add_pkgs
 
@@ -53,20 +57,21 @@ class CiTask():
                 pkgs = list(filter(lambda p: p not in remove_pkgs, pkgs))
 
             if add_srcs is not None:
-                srcs += add_srcs
+                srcs = self._srcs + add_srcs
 
             if remove_srcs is not None:
                 srcs = list(filter(lambda p: p not in remove_srcs, srcs))
 
             if add_targets is not None:
-                targets += self._targets + add_targets
+                targets = self._targets + add_targets
 
             if remove_targets is not None:
                 targets = list(filter(lambda p: p not in remove_targets, targets))
 
             if with_examples:
                 if 'examples' not in srcs:
-                    srcs += ['examples']
+                    srcs = srcs + ['examples']
+                    targets = copy.deepcopy(targets)
                     targets.update({'.': ['docker-build', 'docker-ctest',
                                           'docker-make-install'],
                                     'examples': ['docker-build', 'docker-ctest']})
