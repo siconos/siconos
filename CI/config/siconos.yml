@@ -281,11 +281,30 @@ pkgs:
       command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib64/libpath47.so
 
   pythonocc:
-    ubuntu:
-    command:	wget -O https://github.com/tpaviot/pythonocc-core/archive/0.16.3.tar.gz
-    	       	tar xvfz 0.16.3.tar.gz
-		cd pythonocc-core
-		mkdir build; cd build
-		cmake ..
-		make &&
-		make install
+    any:
+      command: wget https://github.com/tpaviot/pythonocc-core/archive/0.16.3.tar.gz &&
+               tar xvfz 0.16.3.tar.gz &&
+               cd pythonocc-core-0.16.3 &&
+               mkdir build &&
+               cd build &&
+               cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release &&
+               make -j2 &&
+               make install
+
+  pythonocc-conda:
+    any:
+      command: wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh &&
+               bash ./Miniconda-latest-Linux-x86_64.sh -b -p /opt/conda &&
+               /opt/conda/bin/conda install numpy scipy lxml pytest matplotlib &&
+               /opt/conda/bin/conda install -c https://conda.anaconda.org/dlr-sc pythonocc-core &&
+               rm /opt/conda/lib/libgfortran.so*
+
+               #echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh &&
+               #echo 'export PATH=/opt/conda/bin:$PATH' >> $HOME/.profile &&
+
+  pythonocc-conda-dep:
+    debian:
+      - libgl1-mesa-glx
+      - libglu1-mesa
+      - libsm6
+      - libice6

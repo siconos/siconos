@@ -29,8 +29,9 @@ siconos_ubuntu_15_10 = siconos_default.copy()(
 
 siconos_ubuntu_15_10_with_mechanisms = siconos_default.copy()(
     ci_config='with_mechanisms',
-    add_pkgs=['pythonocc'],
-    distrib='ubuntu:15.10')
+    add_pkgs=['pythonocc-conda', 'wget', 'bash', 'bzip2', 'pythonocc-conda-dep'],
+    cmake_cmd='Build/ci-scripts/conda.sh',
+    distrib='debian:stretch')
 
 siconos_numerics_only = siconos_ubuntu_15_10.copy()(
     ci_config='no_cxx',
