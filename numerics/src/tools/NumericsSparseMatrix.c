@@ -136,7 +136,7 @@ void NM_sparse_free(void *p)
 {
   assert(p);
   NumericsSparseLinearSolverParams* ptr = (NumericsSparseLinearSolverParams*) p;
-  cs_lu_factors* cs_lu_A = NM_sparse_solver_data(ptr);
+  cs_lu_factors* cs_lu_A = (cs_lu_factors*)NM_sparse_solver_data(ptr);
 
   cs_sparse_free(cs_lu_A);
 

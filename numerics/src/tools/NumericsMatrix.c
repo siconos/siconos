@@ -1635,7 +1635,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
           p->solver_data = cs_lu_A;
         }
 
-        info = !cs_solve(NM_sparse_solver_data(p), NM_sparse_workspace(p), b);
+        info = !cs_solve((cs_lu_factors *)NM_sparse_solver_data(p), NM_sparse_workspace(p), b);
       }
       else
       {
