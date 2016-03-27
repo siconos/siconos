@@ -194,8 +194,11 @@ else(APPLE)
   # (but later on when installing)
   set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
 
-  # the RPATH to be used when installing
-  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+  # when building a binary package, it makes no sense to add this rapth
+  if(NOT FORCE_SKIP_RPATH)
+    # the RPATH to be used when installing
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+  endif(NOT FORCE_SKIP_RPATH)
 
   # don't add the automatically determined parts of the RPATH
   # which point to directories outside the build tree to the install RPATH
