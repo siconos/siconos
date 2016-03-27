@@ -18,11 +18,11 @@ set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
 
 if(HAVE_SICONOS_MECHANICS)
   configure_file(io/mechanics_io.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py @ONLY)
-  configure_file(io/vview.py ${SICONOS_SWIG_ROOT_DIR}/io/vview.py @ONLY)
-  configure_file(io/pprocess.py ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py @ONLY)
-  configure_file(io/SimpleGui.py ${SICONOS_SWIG_ROOT_DIR}/io/SimpleGui.py @ONLY)
-  message(STATUS "input   io/SimpleGui.py ")
-  message(STATUS "output ${SICONOS_SWIG_ROOT_DIR}/io/SimpleGui.py")
+  configure_file(io/vview.py ${CMAKE_BINARY_DIR}/io/vview.py @ONLY)
+  configure_file(io/pprocess.py ${CMAKE_BINARY_DIR}/io/pprocess.py @ONLY)
+  # This files is not installed as a program, even though it is one.
+  # Remove the comment if you know how it should be installed --xhub
+  #  configure_file(io/SimpleGui.py ${SICONOS_SWIG_ROOT_DIR}/io/SimpleGui.py @ONLY) 
 
 
   file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/externals  ${CMAKE_SOURCE_DIR}/externals/img/*.*)
@@ -41,9 +41,9 @@ if(HAVE_SICONOS_MECHANICS)
     endif(NOT IS_DIRECTORY ${srcRendererPath})
   endforeach(rendererFile)  
 
-  install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/vview.py
+  install(PROGRAMS ${CMAKE_BINARY_DIR}/io/vview.py
     DESTINATION bin RENAME siconos_vview)
-  install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py
+  install(PROGRAMS ${CMAKE_BINARY_DIR}/io/pprocess.py
     DESTINATION bin RENAME siconos_pprocess)
   install(PROGRAMS io/renderer.py
     DESTINATION bin RENAME siconos_renderer)
