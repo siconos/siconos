@@ -27,6 +27,10 @@
 
 #ifdef WITH_MUMPS
 
+#ifdef HAVE_MPI
+
+/* thread_local madness for the MPI communicator */
+
 #ifndef __cplusplus
 
   #if __STDC_VERSION__ >= 201112L
@@ -56,6 +60,7 @@
   #endif
 
 #endif
+
 
 
 /* MPI_INIT should be called only once. Therefore we have to remember if this
@@ -113,6 +118,8 @@ MPI_Comm NM_MPI_com(MPI_Comm m)
   return NM_mpi_com;
 
 }
+
+#endif /* WITH_MPI */
 
 int* NM_MUMPS_irn(NumericsMatrix* A)
 {
@@ -194,6 +201,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
     mumps_id->par = 1;
     mumps_id->sym = 0;
 
+#ifdef HAVE_MPI
     if (NM_MPI_com(MPI_COMM_NULL) == MPI_COMM_WORLD)
     {
       mumps_id->comm_fortran = (MUMPS_INT) USE_COMM_WORLD;
@@ -202,6 +210,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
     {
       mumps_id->comm_fortran = (MUMPS_INT) MPI_Comm_c2f(NM_MPI_com(MPI_COMM_NULL));
     }
+#endif /* WITH_MPI */
 
     dmumps_c(mumps_id);
 
