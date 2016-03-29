@@ -2,4 +2,4 @@
 PATH=/opt/conda/bin:$PATH
 export PATH
 
-cmake $*
+cmake "$@"
