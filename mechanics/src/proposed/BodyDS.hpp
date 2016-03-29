@@ -56,9 +56,4 @@ public:
   ACCEPT_BASE_STD_VISITORS(NewtonEulerDS);
 };
 
-struct ForContactor : public Question<SP::Contactor>
-{
-  ANSWER(BodyDS, contactor());
-};
-
 #endif /* BodyDS_h */

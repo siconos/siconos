@@ -27,6 +27,8 @@ DEFINE_SPTR(btCollisionShape);
 DEFINE_SPTR(btBoxShape);
 DEFINE_SPTR(btCylinderShape);
 DEFINE_SPTR(btManifoldPoint);
+DEFINE_SPTR(btStaticPlaneShape);
+DEFINE_SPTR(btSphereShape);
 
 DEFINE_SPTR(btTriangleIndexVertexMaterialArray);
 

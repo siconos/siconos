@@ -41,8 +41,6 @@ void MechanicsTimeStepping::updateWorldFromDS()
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   std11::tie(dsi, dsiend) = dsg.vertices();
 
-  // can't do it this way, because BodyDS and MechanicsTimeStepping require
-  // knowledge of Bullet..
   CollisionUpdater up;
 
   for (; dsi != dsiend; ++dsi)

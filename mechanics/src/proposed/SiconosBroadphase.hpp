@@ -34,14 +34,24 @@ protected:
   virtual void visit(SP::SiconosPlane plane) = 0;
   virtual void visit(SP::SiconosSphere sphere) = 0;
   virtual void visit(SP::SiconosBox box) = 0;
-  virtual void visit(SP::Contactor contactor) = 0;
-  virtual void visit(SP::BodyDS body);
+  //  virtual void visit(SP::BodyDS body) = 0;
+  virtual void visit(const BodyDS &body) = 0;
+
+  SP::Model _model;
+  
+  void link(SP::Interaction inter,
+            SP::DynamicalSystem ds1,
+            SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+
+  void unlink(SP::Interaction inter);
 
 public:
   virtual void buildGraph(SP::Model model) = 0;
-  virtual void buildGraph(SP::Contactor contactor) = 0;
+  virtual void buildGraph(std::vector<SP::BodyDS> bodies) = 0;
   virtual void updateGraph() = 0;
   virtual void performBroadphase() = 0;
+
+  SP::Model model() { return _model; }
 };
 
 #endif /* SiconosBroadphase_h */

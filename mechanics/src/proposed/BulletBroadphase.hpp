@@ -39,32 +39,36 @@ class BulletBroadphase : public SiconosBroadphase, public std11::enable_shared_f
 protected:
   SP::BulletBroadphase_impl impl;
 
+  // callback for contact point removal, and a global for context
+  static bool bulletContactClear(void* userPersistentData);
+  static BulletBroadphase *gBulletBroadphase;
+
 public:
   BulletBroadphase();
   ~BulletBroadphase();
 
 protected:
-  virtual void visit(SP::SiconosPlane plane);
-  virtual void visit(SP::SiconosSphere sphere);
-  virtual void visit(SP::SiconosBox box);
-  virtual void visit(SP::Contactor contactor);
+  void visit(SP::SiconosPlane plane);
+  void visit(SP::SiconosSphere sphere);
+  void visit(SP::SiconosBox box);
+  void visit(const BodyDS &body);
 
-  virtual void update(SP::SiconosPlane plane);
-  virtual void update(SP::SiconosSphere sphere);
-  virtual void update(SP::SiconosBox box);
+  void update(SP::SiconosPlane plane);
+  void update(SP::SiconosSphere sphere);
+  void update(SP::SiconosBox box);
 
   template<typename ST, typename BT>
   void visit_helper(ST& shape, BT& btshape,
                     std::map<ST,BT>& shapemap);
-
+  
 public:
-  // TODO: default implementations of these to SiconosBroadphase?
-  //       encountered weird visitor error when doing so.
-  virtual void buildGraph(SP::Model model);
-  virtual void buildGraph(SP::Contactor contactor);
+  // TODO: default implementations of buildGraph to SiconosBroadphase?
+  //       encountered problems with shared_from_this() when doing so.
+  void buildGraph(SP::Model model);
+  void buildGraph(std::vector<SP::BodyDS> bodies);
 
-  virtual void updateGraph();
-  virtual void performBroadphase();
+  void updateGraph();
+  void performBroadphase();
 };
 
 #endif /* BulletBroadphase.hpp */

@@ -138,7 +138,6 @@ public:
 struct SiconosBox : public SiconosShape, public std11::enable_shared_from_this<SiconosBox>
 {
 protected:
-
   SP::SiconosVector _dimensions;
 
   virtual void onChanged()
@@ -157,13 +156,17 @@ public:
 
   SP::SiconosVector dimensions() const { return _dimensions; }
 
-  void setDimensions(SP::SiconosVector pos)
+  void setDimensions(SP::SiconosVector dim)
   {
-    (*_dimensions)(0) = (*pos)(0);
-    (*_dimensions)(1) = (*pos)(1);
-    (*_dimensions)(2) = (*pos)(2);
+    (*_dimensions)(0) = (*dim)(0);
+    (*_dimensions)(1) = (*dim)(1);
+    (*_dimensions)(2) = (*dim)(2);
     onChanged();
   }
+
+  /** visitors hook
+   */
+  ACCEPT_BASE_VISITORS(SiconosShape);
 };
 
 #endif /* SiconosShape_h */

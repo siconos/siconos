@@ -20,6 +20,8 @@ void ContactTest::t1()
 {
   try
   {
+    printf("\n==== t1\n");
+
     // Initial state
     SP::SiconosVector pos(new SiconosVector(7));
     SP::SiconosVector vel(new SiconosVector(6));
@@ -47,8 +49,10 @@ void ContactTest::t1()
     SP::BulletBroadphase broadphase(new BulletBroadphase());
 
     // Build Bullet representational mirror of contactors
-    broadphase->buildGraph(contactor);
-    broadphase->buildGraph(contactor2);
+    std::vector<SP::BodyDS> bodies;
+    bodies.push_back(body);
+    bodies.push_back(body2);
+    broadphase->buildGraph(bodies);
 
     // Perform Bullet broadphase, generates IndexSet1
     broadphase->performBroadphase();
@@ -71,16 +75,19 @@ void ContactTest::t1()
   CPPUNIT_ASSERT(1);
 }
 
+#include <bullet/BulletCollision/btBulletCollisionCommon.h>
 void ContactTest::t2()
 {
   try
   {
+    printf("\n==== t2\n");
+    
     // User-defined main parameters
     double t0 = 0;                   // initial computation time
-    //double T = 20.0;                 // end of computation time
-    double T = 0.020;                 // end of computation time
+    double T = 20.0;                 // end of computation time
+    //double T = 0.020;                 // end of computation time
     double h = 0.005;                // time step
-    double position_init = 10.0;     // initial position
+    double position_init = 0.8;     // initial position
     double velocity_init = 0.0;      // initial velocity
 
     double g = 9.81;
@@ -116,7 +123,7 @@ void ContactTest::t2()
     // A BodyDS with a contactor consisting of a single sphere.
     SP::BodyDS body(new BodyDS(q0, v0, 1.0));
     SP::Contactor contactor(new Contactor());
-    SP::SiconosSphere sphere(new SiconosSphere(0,0,10,1.0));
+    SP::SiconosSphere sphere(new SiconosSphere(0,0,position_init,1.0));
     contactor->addShape(sphere);
     body->setContactor(contactor);
 
@@ -126,6 +133,14 @@ void ContactTest::t2()
     SP::SiconosPlane plane(new SiconosPlane(0,0,1,0.0));
     contactor2->addShape(plane);
     body2->setContactor(contactor2);
+
+    // A BodyDS with a contactor consisting of a box
+    SP::BodyDS body3(new BodyDS(q0, v0, 1.0));
+    SP::Contactor contactor3(new Contactor());
+    SP::SiconosBox box3(new SiconosBox(0.8,0,position_init,
+                                       1.0,1.0,1.0));
+    contactor3->addShape(box3);
+    body3->setContactor(contactor3);
 
     /////////
 
@@ -137,9 +152,13 @@ void ContactTest::t2()
     FExt->setValue(2, - g * mass);
     body->setFExtPtr(FExt);
 
-    // -- Add the dynamical system in the non smooth dynamical system
+    // -- Add the dynamical systems into the non smooth dynamical system
     osi->insertDynamicalSystem(body);
+    osi->insertDynamicalSystem(body2);
+    osi->insertDynamicalSystem(body3);
     model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body2);
+    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body3);
 
     // -- Time discretisation --
     SP::TimeDiscretisation timedisc(new TimeDiscretisation(t0, h));
