@@ -31,7 +31,8 @@ class CiTask():
             ci_config_name = self._ci_config
         else:
             ci_config_name = '-'.join(self._ci_config)
-        return src.replace('.', '_') + self._distrib.replace(':', '-') + '_' + ci_config_name
+        return src.replace('.', '_') + self._distrib.replace(':', '-') + '_' +\
+            ci_config_name
 
     def templates(self):
         # remove build-base, gnu-c++, gfortran, it is redundant
@@ -42,7 +43,8 @@ class CiTask():
                  build_configuration=self._build_configuration,
                  distrib=self._distrib,
                  ci_config=self._ci_config, fast=self._fast, pkgs=self._pkgs,
-                 srcs=self._srcs, targets=self._targets, cmake_cmd=self._cmake_cmd,
+                 srcs=self._srcs, targets=self._targets,
+                 cmake_cmd=self._cmake_cmd,
                  add_pkgs=None, remove_pkgs=None, add_srcs=None,
                  remove_srcs=None, add_targets=None, remove_targets=None,
                  with_examples=False):
@@ -66,7 +68,8 @@ class CiTask():
                 targets = self._targets + add_targets
 
             if remove_targets is not None:
-                targets = list(filter(lambda p: p not in remove_targets, targets))
+                targets = list(
+                    filter(lambda p: p not in remove_targets, targets))
 
             if with_examples:
                 if 'examples' not in srcs:
@@ -96,8 +99,12 @@ class CiTask():
 
             os.makedirs(bdir)
 
-            redundants = ['build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz', 'asan', 'cppunit_clang', 'python-env', 'profiling', 'python3-env', 'path', 'h5py3']
-            templ_list = [p.replace('+', 'x') for p in self._pkgs if p not in redundants]
+            redundants = [
+                'build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz',
+                'asan', 'cppunit_clang', 'python-env', 'profiling',
+                'python3-env', 'path', 'h5py3']
+            templ_list = [p.replace('+', 'x')
+                          for p in self._pkgs if p not in redundants]
 
             # special case for examples
             if src is 'examples':
@@ -119,12 +126,15 @@ class CiTask():
                           '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list))]
 
             if self._cmake_cmd:
-                src_absolute_dir = os.path.normpath(os.path.abspath(__file__) + '../../../..')
-                cmake_args += ['-DDOCKER_CMAKE_WRAPPER={:}/{:}'.format(src_absolute_dir, self._cmake_cmd)]
+                src_absolute_dir = os.path.normpath(
+                    os.path.abspath(__file__) + '../../../..')
+                cmake_args += [
+                    '-DDOCKER_CMAKE_WRAPPER={:}/{:}'.format(src_absolute_dir, self._cmake_cmd)]
 
             try:
-                check_call(['cmake'] + cmake_args + [os.path.join('..', '..', src)],
-                           cwd=bdir)
+                check_call(
+                    ['cmake'] + cmake_args + [os.path.join('..', '..', src)],
+                    cwd=bdir)
 
                 for target in self._targets[src]:
 
@@ -142,13 +152,16 @@ class CiTask():
 
             bdir = self.build_dir(src)
 
-            if not self._fast:
+            try:
+                check_call(['make'] + ['docker-clean-usr-local'],
+                           cwd=bdir)
 
-                try:
+                if not self._fast:
+
                     check_call(['make'] + ['docker-clean'],
                                cwd=bdir)
 
-                except CalledProcessError as error:
+            except CalledProcessError as error:
                     print(error)
 
     def display(self):

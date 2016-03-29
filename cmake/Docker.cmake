@@ -112,10 +112,16 @@ macro(add_docker_targets)
   message(STATUS "Docker hostname : ${DOCKER_HOSTNAME}")
  
   add_custom_target(
+    ${DOCKER_IMAGE_AS_DIR}-clean-usr-local
+    COMMENT "Docker clean usr-local : ${DOCKER_IMAGE}"
+    COMMAND ${DOCKER_COMMAND} rm -f -v ${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local || /bin/true
+    )
+
+  add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-clean
     COMMENT "Docker clean : ${DOCKER_IMAGE}"
+    DEPENDS ${DOCKER_IMAGE_AS_DIR}-clean-usr-local
     COMMAND ${DOCKER_COMMAND} rm -f -v ${DOCKER_WORKDIR_VOLUME} || /bin/true
-    COMMAND ${DOCKER_COMMAND} rm -f -v ${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local || /bin/true
     COMMAND ${DOCKER_COMMAND} rmi -f ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} || /bin/true
     )
 
@@ -172,6 +178,13 @@ macro(add_docker_targets)
     ${DOCKER_IMAGE_AS_DIR}-interactive
     COMMENT "Docker interactive : ${DOCKER_IMAGE}"
     COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -i -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} /bin/bash)
+
+  if(NOT TARGET docker-clean-usr-local)
+    add_custom_target(
+      docker-clean-usr-local
+      COMMENT "Docker clean"
+      )
+  endif()
 
   if(NOT TARGET docker-clean)
     add_custom_target(
@@ -236,6 +249,7 @@ macro(add_docker_targets)
       )
   endif()
 
+  add_dependencies(docker-clean-usr-local ${DOCKER_IMAGE_AS_DIR}-clean-usr-local)
   add_dependencies(docker-clean ${DOCKER_IMAGE_AS_DIR}-clean)
   add_dependencies(docker-build ${DOCKER_IMAGE_AS_DIR}-build)
   add_dependencies(docker-cmake ${DOCKER_IMAGE_AS_DIR}-cmake)
