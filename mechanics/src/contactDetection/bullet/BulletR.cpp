@@ -44,10 +44,9 @@
 
 #include <Interaction.hpp>
 
-BulletR::BulletR(SP::btManifoldPoint point, SP::btPersistentManifold contactManifold) :
+BulletR::BulletR(SP::btManifoldPoint point) :
   NewtonEulerFrom3DLocalFrameR(),
-  _contactPoints(point),
-  _contactManifold(contactManifold)
+  _contactPoints(point)
 {
   btVector3 posa = _contactPoints->getPositionWorldOnA();
   btVector3 posb = _contactPoints->getPositionWorldOnB();

@@ -305,7 +305,7 @@ void BulletSpaceFilter::buildInteractions(double time)
             SP::Interaction inter;
             if (nslaw->size() == 3)
             {
-              SP::BulletR rel(new BulletR(cpoint, createSPtrbtPersistentManifold(*contactManifold)));
+              SP::BulletR rel(new BulletR(cpoint));
               inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
             }
             else

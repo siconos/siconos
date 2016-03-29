@@ -30,11 +30,10 @@ private:
   */
   ACCEPT_SERIALIZATION(BulletR);
 
-  SP::btManifoldPoint _contactPoints;
-  SP::btPersistentManifold _contactManifold;
+  const SP::btManifoldPoint _contactPoints;
 
 public:
-  BulletR(SP::btManifoldPoint, SP::btPersistentManifold);
+  BulletR(SP::btManifoldPoint);
 
   SP::btManifoldPoint contactPoint() const
   {
