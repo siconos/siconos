@@ -85,9 +85,8 @@ void ContactTest::t2()
     // User-defined main parameters
     double t0 = 0;                   // initial computation time
     double T = 20.0;                 // end of computation time
-    //double T = 0.020;                 // end of computation time
     double h = 0.005;                // time step
-    double position_init = 0.8;     // initial position
+    double position_init = 3.0;      // initial position
     double velocity_init = 0.0;      // initial velocity
 
     double g = 9.81;
@@ -104,7 +103,6 @@ void ContactTest::t2()
     SP::SiconosVector v0(new SiconosVector(6));
     q0->zero();
     v0->zero();
-
     (*q0)(2) = position_init;
     (*q0)(3) = 1.0;
     (*v0)(2) = velocity_init;
@@ -123,31 +121,23 @@ void ContactTest::t2()
     // A BodyDS with a contactor consisting of a single sphere.
     SP::BodyDS body(new BodyDS(q0, v0, 1.0));
     SP::Contactor contactor(new Contactor());
-    SP::SiconosSphere sphere(new SiconosSphere(0,0,position_init,1.0));
+    SP::SiconosSphere sphere(new SiconosSphere(0,0,0,1.0));
     contactor->addShape(sphere);
     body->setContactor(contactor);
 
     // A BodyDS with a contactor consisting of a plane
-    SP::BodyDS body2(new BodyDS(q0, v0, 1.0));
+    SP::BodyDS body2(new BodyDS(q1, v1, 10000.0));
     SP::Contactor contactor2(new Contactor());
     SP::SiconosPlane plane(new SiconosPlane(0,0,1,0.0));
     contactor2->addShape(plane);
     body2->setContactor(contactor2);
-
-    // A BodyDS with a contactor consisting of a box
-    SP::BodyDS body3(new BodyDS(q0, v0, 1.0));
-    SP::Contactor contactor3(new Contactor());
-    SP::SiconosBox box3(new SiconosBox(0.8,0,position_init,
-                                       1.0,1.0,1.0));
-    contactor3->addShape(box3);
-    body3->setContactor(contactor3);
 
     /////////
 
     // -- Set external forces (weight) --
     float mass = 1.0;
     SP::SiconosVector FExt;
-    FExt.reset(new SiconosVector(3)); //
+    FExt.reset(new SiconosVector(3));
     FExt->zero();
     FExt->setValue(2, - g * mass);
     body->setFExtPtr(FExt);
@@ -155,10 +145,8 @@ void ContactTest::t2()
     // -- Add the dynamical systems into the non smooth dynamical system
     osi->insertDynamicalSystem(body);
     osi->insertDynamicalSystem(body2);
-    osi->insertDynamicalSystem(body3);
     model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
     model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body2);
-    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body3);
 
     // -- Time discretisation --
     SP::TimeDiscretisation timedisc(new TimeDiscretisation(t0, h));
@@ -221,6 +209,10 @@ void ContactTest::t2()
 
       // Update integrator and solve constraints
       simulation->computeOneStep();
+
+      printf("pos, %f, %f\n",
+             (*body->q())(2),
+             (*body2->q())(2));
 
       // Advance simulation
       simulation->nextStep();
