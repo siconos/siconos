@@ -2,11 +2,11 @@
 
 #include "testContact.hpp"
 
-#include "Contactor.hpp"
+#include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
 #include "BulletBroadphase.hpp"
 #include "BodyDS.hpp"
-#include "MechanicsTimeStepping.hpp"
+#include "BodyTimeStepping.hpp"
 
 #include "SiconosKernel.hpp"
 
@@ -32,7 +32,7 @@ void ContactTest::t1()
     // A BodyDS with a contactor consisting of a single sphere.
     (*pos)(2) = 10.0;
     SP::BodyDS body(new BodyDS(pos, vel, 1.0));
-    SP::Contactor contactor(new Contactor());
+    SP::SiconosContactor contactor(new SiconosContactor());
     SP::SiconosSphere sphere(new SiconosSphere(0,0,0,1.0));
     contactor->addShape(sphere);
     body->setContactor(contactor);
@@ -40,21 +40,21 @@ void ContactTest::t1()
     // A BodyDS with a contactor consisting of a plane
     (*pos)(2) = 0.0;
     SP::BodyDS body2(new BodyDS(pos, vel, 1.0));
-    SP::Contactor contactor2(new Contactor());
+    SP::SiconosContactor contactor2(new SiconosContactor());
     SP::SiconosPlane plane(new SiconosPlane(0,0,1,0.0));
     contactor2->addShape(plane);
     body2->setContactor(contactor2);
 
     // Object to manage the Bullet implementation of broadphase
-    SP::BulletBroadphase broadphase(new BulletBroadphase());
+    SP::SiconosBroadphase broadphase(new BulletBroadphase());
 
-    // Build Bullet representational mirror of contactors
+    // Build broadphase-specific mirror of contactor graph
     std::vector<SP::BodyDS> bodies;
     bodies.push_back(body);
     bodies.push_back(body2);
     broadphase->buildGraph(bodies);
 
-    // Perform Bullet broadphase, generates IndexSet1
+    // Perform broadphase, generates IndexSet0
     broadphase->performBroadphase();
 
     // Update a property
@@ -63,7 +63,7 @@ void ContactTest::t1()
     // Check for dirty objects and update the graph
     broadphase->updateGraph();
 
-    // Perform Bullet broadphase, generates IndexSet1
+    // Perform broadphase, generates IndexSet0
     broadphase->performBroadphase();
   }
   catch (SiconosException e)
@@ -75,7 +75,6 @@ void ContactTest::t1()
   CPPUNIT_ASSERT(1);
 }
 
-#include <bullet/BulletCollision/btBulletCollisionCommon.h>
 void ContactTest::t2()
 {
   try
@@ -120,14 +119,14 @@ void ContactTest::t2()
     // Set up a Siconos Mechanics environment:
     // A BodyDS with a contactor consisting of a single sphere.
     SP::BodyDS body(new BodyDS(q0, v0, 1.0));
-    SP::Contactor contactor(new Contactor());
+    SP::SiconosContactor contactor(new SiconosContactor());
     SP::SiconosSphere sphere(new SiconosSphere(0,0,0,1.0));
     contactor->addShape(sphere);
     body->setContactor(contactor);
 
     // A BodyDS with a contactor consisting of a plane
     SP::BodyDS body2(new BodyDS(q1, v1, 10000.0));
-    SP::Contactor contactor2(new Contactor());
+    SP::SiconosContactor contactor2(new SiconosContactor());
     SP::SiconosPlane plane(new SiconosPlane(0,0,1,0.0));
     contactor2->addShape(plane);
     body2->setContactor(contactor2);
@@ -175,8 +174,8 @@ void ContactTest::t2()
 
     // TODO pass nslaw to broadphase
 
-    // -- MoreauJeanOSI Time Stepping with Bullet Dynamical Systems
-    SP::MechanicsTimeStepping simulation(new MechanicsTimeStepping(timedisc));
+    // -- MoreauJeanOSI Time Stepping with Body-based Dynamical Systems
+    SP::BodyTimeStepping simulation(new BodyTimeStepping(timedisc));
 
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
@@ -184,9 +183,9 @@ void ContactTest::t2()
     model->initialize(simulation);
 
     // Object to manage the Bullet implementation of broadphase
-    SP::BulletBroadphase broadphase(new BulletBroadphase());
+    SP::SiconosBroadphase broadphase(new BulletBroadphase());
 
-    // Build Bullet representational mirror of contactors
+    // Build broadphase-specific mirror of contactor graph
     broadphase->buildGraph(model);
 
     std::cout << "====> End of initialisation ..." << std::endl << std::endl;
@@ -204,7 +203,7 @@ void ContactTest::t2()
       // Check for dirty objects and update the broadphase graph
       broadphase->updateGraph();
 
-      // Perform Bullet broadphase, generates IndexSet1
+      // Perform broadphase, generates IndexSet0
       broadphase->performBroadphase();
 
       // Update integrator and solve constraints

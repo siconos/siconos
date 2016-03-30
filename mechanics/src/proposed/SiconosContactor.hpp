@@ -17,13 +17,13 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file Contactor.hpp
+/*! \file SiconosContactor.hpp
   \brief Definition of an abstract contactor
 */
 
 
-#ifndef Contactor_h
-#define Contactor_h
+#ifndef SiconosContactor_h
+#define SiconosContactor_h
 
 #include <vector>
 
@@ -34,22 +34,22 @@
 
 #include "SiconosShape.hpp"
 
-// NEW APPROACH: No inheritance on Contactor/Sphere, etc.  Just create Contactor
+// NEW APPROACH: No inheritance on SiconosContactor/Sphere, etc.  Just create SiconosContactor
 // and Shape descriptors, then in buildInteractions, "compile" this down to a
 // Bullet-specific graph.
 
-// Can we share Contactors between BodyDS instances?  It would be best if the
-// Contactor did *not* have pointers back to the BodyDS.  And yet, a
+// Can we share SiconosContactors between BodyDS instances?  It would be best if the
+// SiconosContactor did *not* have pointers back to the BodyDS.  And yet, a
 // btCollisionShape must be associated with each shape...
 
 // Support groups, NSLs per surface, ..
 
-class Contactor : public std11::enable_shared_from_this<Contactor>
+class SiconosContactor : public std11::enable_shared_from_this<SiconosContactor>
 {
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(Contactor);
+  ACCEPT_SERIALIZATION(SiconosContactor);
 
   std::vector<SP::SiconosShape> _shapes;
 
@@ -67,4 +67,4 @@ public:
   ACCEPT_VISITORS();
 };
 
-#endif /* Contactor_h */
+#endif /* SiconosContactor_h */

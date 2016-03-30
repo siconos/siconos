@@ -17,16 +17,16 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#ifndef MechanicsTimeStepping_hpp
-#define MechanicsTimeStepping_hpp
+#ifndef BodyTimeStepping_hpp
+#define BodyTimeStepping_hpp
 
 #include "MechanicsFwd.hpp"
 #include "TimeStepping.hpp"
 
-class MechanicsTimeStepping : public TimeStepping
+class BodyTimeStepping : public TimeStepping
 {
 public:
-  MechanicsTimeStepping(SP::TimeDiscretisation t) :
+  BodyTimeStepping(SP::TimeDiscretisation t) :
     TimeStepping(t) {};
 
   virtual void updateWorldFromDS();

@@ -1,13 +1,13 @@
 
-#include "Contactor.hpp"
+#include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
 
-void Contactor::addShape(SP::SiconosShape shape)
+void SiconosContactor::addShape(SP::SiconosShape shape)
 {
   _shapes.push_back(shape);
 }
 
-void Contactor::setPosition(const SP::SiconosVector position)
+void SiconosContactor::setPosition(const SP::SiconosVector position)
 {
   std::vector<SP::SiconosShape>::iterator s;
   for (s = _shapes.begin();

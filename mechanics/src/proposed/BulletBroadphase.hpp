@@ -28,7 +28,7 @@
 
 #include <SiconosBroadphase.hpp>
 #include <SiconosShape.hpp>
-#include <Contactor.hpp>
+#include <SiconosContactor.hpp>
 
 #include <map>
 

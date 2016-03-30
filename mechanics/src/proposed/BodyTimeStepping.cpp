@@ -17,10 +17,10 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "MechanicsTimeStepping.hpp"
 #include "MechanicsFwd.hpp"
 #include "BodyDS.hpp"
-#include "Contactor.hpp"
+#include "BodyTimeStepping.hpp"
+#include "SiconosContactor.hpp"
 
 #include <Model.hpp>
 #include <NonSmoothDynamicalSystem.hpp>
@@ -35,7 +35,7 @@ struct CollisionUpdater : public SiconosVisitor
   }
 };
 
-void MechanicsTimeStepping::updateWorldFromDS()
+void BodyTimeStepping::updateWorldFromDS()
 {
   DynamicalSystemsGraph& dsg = *model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;

@@ -2,7 +2,7 @@
 #include "MechanicsFwd.hpp"
 #include "NewtonEulerDS.hpp"
 #include "BodyDS.hpp"
-#include "Contactor.hpp"
+#include "SiconosContactor.hpp"
 
 // TODO
 SP::SiconosMatrix identity_inertia()

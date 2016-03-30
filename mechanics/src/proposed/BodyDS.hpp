@@ -36,7 +36,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(BodyDS);
 
-  SP::Contactor _contactor;
+  SP::SiconosContactor _contactor;
   
 public:
 
@@ -46,10 +46,10 @@ public:
 
   virtual ~BodyDS();
 
-  void setContactor(SP::Contactor contactor)
+  void setContactor(SP::SiconosContactor contactor)
     { _contactor = contactor; }
 
-  SP::Contactor contactor() const { return _contactor; }
+  SP::SiconosContactor contactor() const { return _contactor; }
 
   /** visitors hook
    */

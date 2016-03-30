@@ -64,7 +64,7 @@ protected:
   SP::btCollisionDispatcher _dispatcher;
   SP::btBroadphaseInterface _broadphase;
 
-  SP::Contactor currentContactor;
+  SP::SiconosContactor currentContactor;
   const BodyDS *currentBodyDS;
 
   std::vector<SP::SiconosPlane> dirtyPlanes;
@@ -290,7 +290,7 @@ void BulletBroadphase::update(SP::SiconosBox box)
 
 void BulletBroadphase::visit(const BodyDS &bds)
 {
-  SP::Contactor contactor = bds.contactor();
+  SP::SiconosContactor contactor = bds.contactor();
   impl->currentBodyDS = &bds;
   impl->currentContactor = contactor;
 
