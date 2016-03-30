@@ -147,7 +147,7 @@ public:
   /** initialize the FrictionContact problem(compute topology ...)
       \param simulation the simulation, owner of this OSNSPB
    */
-  void initialize(SP::Simulation simulation);
+  virtual void initialize(SP::Simulation simulation);
 
   /**
    * \return the friction contact problem from Numerics

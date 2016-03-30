@@ -130,10 +130,6 @@ void LinearOSNS::initialize(SP::Simulation sim)
 
   initVectorsMemory();
 
-  // get topology
-  SP::Topology topology = simulation()->model()
-                          ->nonSmoothDynamicalSystem()->topology();
-
   // Note that _interactionBlocks is up to date since updateInteractionBlocks
   // has been called during OneStepNSProblem::initialize()
 
@@ -531,8 +527,6 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   OSI::TYPES  osiType = Osi->getType();
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
-  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
-
   if (osiType == OSI::EULERMOREAUOSI ||
       osiType == OSI::MOREAUJEANOSI ||
       osiType == OSI::MOREAUDIRECTPROJECTIONOSI ||
@@ -553,15 +547,6 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   else
     RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI of type " + osiType);
 
-  // Add "non-smooth law effect" on q only for the case LCP at velocity level and with the NewtonImpactNSL
-  if (osiType != OSI::LSODAROSI || ((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == this) // added by Son Nguyen
-  {
-    if (inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
-    {
-      //    SP::SiconosVisitor nslEffectOnSim(new _NSLEffectOnSim(this, inter, pos));
-      //       simulation()->accept(*nslEffectOnSim);
-    }
-  }
 }
 
 void LinearOSNS::computeq(double time)
@@ -571,8 +556,7 @@ void LinearOSNS::computeq(double time)
   _q->zero();
 
   // === Get index set from Simulation ===
-  SP::InteractionsGraph indexSet =
-    simulation()->indexSet(indexSetLevel());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   // === Loop through "active" Interactions (ie present in
   // indexSets[level]) ===
 
@@ -605,8 +589,7 @@ bool LinearOSNS::preCompute(double time)
   // and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation()->model()
-                          ->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;

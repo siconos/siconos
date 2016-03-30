@@ -32,7 +32,6 @@ Documentation to be done
 */
 
 #include "SiconosConfig.h"
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -52,15 +51,15 @@ extern "C"
 
    matrix in compressed row/column or triplet form :
 {
-int nzmax ;   : maximum number of entries 
-int m  ;      : number of rows 
-int n ;       : number of columns 
-int *p ;      : compressed: row (size m+1) or column (size n+1) pointers; triplet: row indices (size nz) 
-int *i ;      : compressed: column or row indices, size nzmax; triplet: column indices (size nz) 
-double *x ;   :  numerical values, size nzmax 
+int nzmax ;   : maximum number of entries
+int m  ;      : number of rows
+int n ;       : number of columns
+int *p ;      : compressed: row (size m+1) or column (size n+1) pointers; triplet: row indices (size nz)
+int *i ;      : compressed: column or row indices, size nzmax; triplet: column indices (size nz)
+double *x ;   :  numerical values, size nzmax
 int nz ;      : # of entries in triplet matrix;
 -1 for compressed columns;
--2 for compressed rows 
+-2 for compressed rows
 
 } */
 
@@ -86,44 +85,6 @@ extern "C"
   } cs_lu_factors;
 
   typedef void (*freeNSLSP)(void* p);
-
-  typedef enum { NS_CS_LUSOL, NS_MUMPS, NS_UMFPACK, NS_PARDISO } NumericsSparseLinearSolver;
-
-  /** \struct NumericsSparseLinearSolverParams SparseMatrix.h
-   * solver-specific parameters*/
-  typedef struct
-  {
-    NumericsSparseLinearSolver solver;
-
-    int* iparam;
-    double iSize;
-    double* dparam;
-    double dSize;
-
-    void* solver_data; /**< solver-specific data (or workspace) */
-    freeNSLSP solver_free_hook; /**< solver-specific hook to free solver_data  */
-
-    int* iWork; /**< integer work vector array (internal) */
-    int iWorkSize; /**< size of integer work vector array */
-    double* dWork;
-    int dWorkSize;
-  } NumericsSparseLinearSolverParams;
-
-  typedef enum { NS_UNKNOWN, NS_TRIPLET, NS_CSC, NS_CSR } NumericsSparseOrigin;
-
-  /** \struct NumericsSparseMatrix SparseMatrix.h
-   * Sparse matrix representation in Numerics. The supported format are:
-   * triplet (aka coordinate, COO), CSC (via CSparse) and CSR if MKL is used */
-  typedef struct
-  {
-    NumericsSparseLinearSolverParams* linearSolverParams;
-                               /**< solver-specific parameters */
-    CSparseMatrix* triplet;    /**< triplet format, aka coordinate */
-    CSparseMatrix* csc;        /**< csc matrix */
-    CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
-    CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
-    unsigned       origin;     /**< original format of the matrix */
-  } NumericsSparseMatrix;
 
 
   /** Add an entry to a triplet matrix only if the absolute value is
@@ -168,27 +129,11 @@ extern "C"
   */
   CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A);
 
-  /** New and empty NumericsSparseLinearSolverParams.
-   * \return a pointer on the allocated space.
-   */
-  NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void);
 
-  /** New and empty NumericsSparseMatrix with correctly initialized fields.
-   * \return a pointer on the allocated space.
-   */
-  NumericsSparseMatrix* newNumericsSparseMatrix(void);
 
-  /** Free allocated space for NumericsSparseLinearSolverParams.
-   * \param p a NumericsSparseLinearSolverParams
-   * \return NULL on success
-   */
-  NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p);
 
-  /** Free allocated space for a NumericsSparseMatrix.
-   * \param A a NumericsSparseMatrix
-   * \return NULL on success
-   */
-  NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A);
+
+
 
   /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
    * \param cs_lu_A contains the LU factors of A, permutation information
@@ -204,34 +149,15 @@ extern "C"
    * \param p the parameter structure that eventually holds the factors
    * \return 1 if the factorization was successful, 1 otherwise
    */
-  int cs_lu_factorization(csi order, const cs *A, double tol, NumericsSparseLinearSolverParams* p);
+  int cs_lu_factorization(csi order, const cs *A, double tol, cs_lu_factors * cs_lu_A);
 
   /** Free a workspace related to a LU factorization
    * \param p the structure to free
    */
-  void NM_csparse_free(void* p);
-
-  /** Get the LU factors for cs_lusol
-   * \param p the structure holding the data for the solver
-   */
-  static inline cs_lu_factors* NM_csparse_lu_factors(NumericsSparseLinearSolverParams* p)
-  {
-    return (cs_lu_factors*)p->solver_data;
-  }
-
-  /** Get the workspace for the sparse solver
-   * \param p the structure holding the data for the solver
-   */
-  static inline double* NM_csparse_workspace(NumericsSparseLinearSolverParams* p)
-  {
-    return p->dWork;
-  }
+  void cs_sparse_free(cs_lu_factors* cs_lu_A);
 
 
-  /** Initialize the fields of a NumericsSparseMatrix
-   * \param A the sparse matrix
-   */
-  void NM_sparse_null(NumericsSparseMatrix* A);
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

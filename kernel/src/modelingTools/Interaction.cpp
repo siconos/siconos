@@ -769,6 +769,8 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
       originalMatrix = BMat;
     else if (relationSubType != LinearTIR)
       originalMatrix = workM[FirstOrderR::mat_B];
+    else
+       RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, FirstOrderLinearTIR relation but no B matrix found!");
   }
   else if (relationType == Lagrangian || relationType == NewtonEuler)
   {

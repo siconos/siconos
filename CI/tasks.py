@@ -16,7 +16,7 @@ siconos_test_deb = CiTask(
 
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',
-    add_pkgs=['bullet'],
+    add_pkgs=['bullet', 'h5py'],  # for mechanics.io
     distrib='debian:latest')
 
 siconos_ubuntu_15_04 = siconos_default.copy()(
@@ -26,6 +26,16 @@ siconos_ubuntu_15_10 = siconos_default.copy()(
     ci_config='with_umfpack',
     add_pkgs=['umfpack'],
     distrib='ubuntu:15.10')
+
+siconos_ubuntu_15_10_with_mechanisms = siconos_default.copy()(
+    ci_config='with_mechanisms',
+    add_pkgs=['pythonocc-conda', 'wget', 'bash', 'bzip2', 'pythonocc-conda-dep'],
+    cmake_cmd='Build/ci-scripts/conda.sh',
+    distrib='debian:stretch')
+
+siconos_numerics_only = siconos_ubuntu_15_10.copy()(
+    ci_config='no_cxx',
+    remove_pkgs=['gnu-c++'])
 
 siconos_profiling = siconos_ubuntu_15_10.copy()(
     build_configuration='Profiling',
@@ -41,19 +51,20 @@ siconos_fedora_latest = siconos_default.copy()(
 siconos_openblas_lapacke = siconos_default.copy()(
     ci_config='with_umfpack',
     remove_pkgs=['atlas-lapack'],
-    add_pkgs=['openblas-lapacke', 'umfpack', 'path'],
+    add_pkgs=['openblas-lapacke', 'umfpack', 'path', 'wget'],  # wget for path
     with_examples=True)
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
     ci_config=('with_bullet', 'with_py3'),
     with_examples=True,
     remove_pkgs=['python-env'],
-    add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz', 'python3-env', 'path'])
+    add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz', 'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
 
 siconos_clang_asan = siconos_clang.copy()(
     ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization', 'with_py3'),
     add_pkgs=['mumps', 'hdf5', 'serialization'],
-    with_examples=True)
+    build_configuration='Debug',
+    with_examples=False)
 
 # <clang-3.7.1 does not support linux 4.2
 # This will likely hurt you
@@ -72,14 +83,16 @@ siconos_clang_cfi = siconos_default.copy()(
 siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path'],
-    with_examples=True)
+    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
+    build_configuration='Debug',
+    with_examples=False)
 
 siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     distrib='fedora:rawhide',
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path'],
+    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
+    build_configuration='Debug',
     fast=False)
 
 siconos_serialization = siconos_default.copy()(
@@ -101,10 +114,11 @@ siconos_default_examples = siconos_default.copy()(
 known_tasks = {'siconos---vm0':
                (siconos_fedora_latest,
                 siconos_gcc_asan,
-                siconos_gcc_asan_latest),
+                siconos_gcc_asan_latest,
+                siconos_ubuntu_15_10_with_mechanisms),
 
                'siconos---vm1':
-               (siconos_default_examples,
+               (siconos_numerics_only,
                 siconos_clang,
                 siconos_clang_asan,
                 siconos_clang_msan),

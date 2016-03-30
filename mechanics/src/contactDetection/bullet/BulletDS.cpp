@@ -87,6 +87,11 @@ SP::CollisionObjects BulletDS::collisionObjects() const
 void BulletDS::updateCollisionObjects() const
 {
 
+  SiconosVector& q = *_q;
+
+  btQuaternion rbase = btQuaternion(q(4), q(5), q(6), q(3));
+
+
   for(CollisionObjects::iterator ico = _collisionObjects->begin();
       ico != _collisionObjects->end(); ++ ico)
 
@@ -95,26 +100,32 @@ void BulletDS::updateCollisionObjects() const
     SP::btCollisionObject collisionObject = boost::get<0>((*ico).second);
     OffSet offset = boost::get<1>((*ico).second);
 
-    SiconosVector& q = *_q;
-
     DEBUG_EXPR(q.display());
 
     /* with 32bits input ... 1e-7 */
     assert(fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
                    pow(q(5), 2) +  pow(q(6), 2)) - 1.) < 1e-7);
 
-    btQuaternion rbase = btQuaternion(q(4), q(5), q(6), q(3));
 
-    btVector3 boffset = btVector3(offset[0], offset[1], offset[2]);
+
+/*    btVector3 boffset = btVector3(offset[0], offset[1], offset[2]);
 
     btVector3 rboffset = quatRotate(rbase, boffset);
 
-    collisionObject->getWorldTransform().setOrigin(btVector3(q(0)+rboffset[0],
-                                                             q(1)+rboffset[1],
-                                                             q(2)+rboffset[2]));
+    collisionObject->getWorldTransform().setOrigin(btVector3(q(0)+rboffset.x(),
+                                                             q(1)+rboffset.y(),
+                                                             q(2)+rboffset.z()));
     collisionObject->getWorldTransform().getBasis().
       setRotation(rbase * btQuaternion(offset[4], offset[5],
-                                       offset[6], offset[3]));
+      offset[6], offset[3]));*/
+
+    this->setRelativeTransform(collisionObject,
+                               btVector3(q(0), q(1), q(2)),
+                               rbase,
+                               btVector3(offset[0], offset[1], offset[2]),
+                               btQuaternion(offset[4], offset[5],
+                                            offset[6], offset[3]));
+
 
     /* is this needed ? */
     collisionObject->setActivationState(ACTIVE_TAG);
@@ -152,4 +163,23 @@ void BulletDS::addCollisionShape(SP::btCollisionShape shape,
   collisionObject->setCollisionShape(&*shape);
 
   addCollisionObject(collisionObject, pos, ori, group);
+}
+
+
+
+void BulletDS::setRelativeTransform(SP::btCollisionObject cobj,
+                                    const btVector3& base_translation,
+                                    const btQuaternion& base_rotation,
+                                    const btVector3& offset_translation,
+                                    const btQuaternion& offset_rotation)
+{
+  btVector3 rboffset = quatRotate(base_rotation, offset_translation);
+
+  cobj->getWorldTransform().setOrigin(btVector3(
+                                        base_translation.x() + rboffset.x(),
+                                        base_translation.y() + rboffset.y(),
+                                        base_translation.z() + rboffset.z()));
+
+  cobj->getWorldTransform().setRotation(
+    base_rotation * offset_rotation);
 }

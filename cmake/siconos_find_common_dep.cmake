@@ -39,7 +39,9 @@ endif(LpSolve_FOUND)
 
 # --- Mumps ---
 if(WITH_MUMPS)
-  compile_with(MPI REQUIRED)
+  if(NOT IDONTWANTMPI)
+    compile_with(MPI REQUIRED)
+  endif(NOT IDONTWANTMPI)
   if(MPI_FOUND)
     set(HAVE_MPI TRUE)
     # Fedora allow parallel install of MPI and vanilla version of MUMPS.

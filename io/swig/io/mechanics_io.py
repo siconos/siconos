@@ -81,18 +81,18 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None):
         fid.flush()
 
     class TmpFile:
+
         def __init__(self, fid, name):
             self.fid = fid
             self.name = name
 
         def __getitem__(self, n):
-            if n==0:
+            if n == 0:
                 return self.fid
-            elif n==1:
+            elif n == 1:
                 return self.name
             else:
                 raise IndexError
-
 
     r = TmpFile(fid, tfilename)
 
@@ -102,6 +102,7 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None):
 
 
 class Timer():
+
     def __init__(self):
         self._t0 = time.clock()
 
@@ -160,7 +161,7 @@ def data(h, name, nbcolumns):
 
 def add_line(dataset, line):
     dataset.resize(dataset.shape[0] + 1, 0)
-    dataset[dataset.shape[0]-1, :] = line
+    dataset[dataset.shape[0] - 1, :] = line
 
 
 def str_of_file(filename):
@@ -223,6 +224,7 @@ def loadMesh(shape_filename):
 
     return keep, shape
 
+
 class ShapeCollection():
 
     """
@@ -253,17 +255,16 @@ class ShapeCollection():
     def url(self, shape_name):
         if 'url' in self.attributes(shape_name):
             shape_url = self.shape(shape_name).\
-                        attrs['url']
+                attrs['url']
 
         elif 'filename' in self.attributes(shape_name):
             shape_url = self.shape(shape_name).\
-                        attrs['filename']
+                attrs['filename']
 
         else:
             shape_url = self.shape(shape_name)
 
         return shape_url
-
 
     def get(self, shape_name, shape_class=None, face_class=None, edge_class=None):
 
@@ -302,21 +303,22 @@ class ShapeCollection():
 
                         if status == IFSelect_RetDone:  # check status
                             failsonly = False
-                            step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
-                            step_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
+                            step_reader.PrintCheckLoad(
+                                failsonly, IFSelect_ItemsByEntity)
+                            step_reader.PrintCheckTransfer(
+                                failsonly, IFSelect_ItemsByEntity)
 
                             ok = step_reader.TransferRoot(1)
                             nbs = step_reader.NbShapes()
 
-                            l=[]
+                            l = []
 
-                            for i in range(1, nbs+1):
+                            for i in range(1, nbs + 1):
                                 shape = step_reader.Shape(i)
                                 builder.Add(comp, shape)
 
                             self._shapes[shape_name] = comp
                             self._io._keep.append(self._shapes[shape_name])
-
 
                 elif self.attributes(shape_name)['type'] in['brep']:
                     if not 'contact' in self.attributes(shape_name):
@@ -331,9 +333,11 @@ class ShapeCollection():
 
                             from OCC.BRepTools import BRepTools_ShapeSet
                             shape_set = BRepTools_ShapeSet()
-                            shape_set.ReadFromString(self.shape(shape_name)[:][0])
+                            shape_set.ReadFromString(
+                                self.shape(shape_name)[:][0])
                             the_shape = shape_set.Shape(shape_set.NbShapes())
-                            location = shape_set.Locations().Location(self.attributes(shape_name)['occ_indx'])
+                            location = shape_set.Locations().Location(
+                                self.attributes(shape_name)['occ_indx'])
                             the_shape.Location(location)
                             brep = brep_class()
                             brep.setData(the_shape)
@@ -341,7 +345,8 @@ class ShapeCollection():
                         else:
                             # raw brep
                             brep = brep_class()
-                            brep.importBRepFromString(self.shape(shape_name)[:][0])
+                            brep.importBRepFromString(
+                                self.shape(shape_name)[:][0])
 
                         self._shapes[shape_name] = brep
                         self._io._keep.append(self._shapes[shape_name])
@@ -353,7 +358,8 @@ class ShapeCollection():
                         assert 'brep' in self.attributes(shape_name)
                         contact_index = self.attributes(shape_name)['index']
 
-                        ref_brep = self.get(self.attributes(shape_name)['brep'], shape_class)
+                        ref_brep = self.get(
+                            self.attributes(shape_name)['brep'], shape_class)
 
                         if self.attributes(shape_name)['contact'] == 'Face':
                             if face_class is None:
@@ -385,7 +391,7 @@ class ShapeCollection():
                     self._shapes[shape_name] = convex
 
             elif isinstance(self.url(shape_name), str) and \
-                os.path.exists(self.url(shape_name)):
+                    os.path.exists(self.url(shape_name)):
                 self._tri[shape_name], self._shapes[shape_name] = loadMesh(
                     self.url(shape_name))
             else:
@@ -399,12 +405,15 @@ class ShapeCollection():
                 primitive = self._primitive[name]
 
                 if name in ['Box']:
-                    self._shapes[shape_name] = primitive(btVector3(attrs[0] / 2,
-                                                                   attrs[1] / 2,
+                    self._shapes[shape_name] = primitive(
+                        btVector3(attrs[0] / 2,
+                                                                   attrs[
+                                                                       1] / 2,
                                                                    attrs[2] / 2))
                 elif name in ['Cylinder']:
                     self._shapes[shape_name] = primitive(btVector3(attrs[0],
-                                                                   attrs[1] / 2,
+                                                                   attrs[
+                                                                       1] / 2,
                                                                    attrs[0]))
                 # elif name in ['Compound']:
                 #     obj1 = attrs[0]
@@ -422,6 +431,7 @@ class ShapeCollection():
 
 
 class Hdf5():
+
     """a Hdf5 context manager reads at instantiation the translations and
        orientations of collision objects from hdf5 file
 
@@ -437,7 +447,7 @@ class Hdf5():
 
     """
 
-    def __init__(self, io_filename = None, mode = 'w',
+    def __init__(self, io_filename=None, mode='w',
                  broadphase=None, osi=None, shape_filename=None,
                  set_external_forces=None, length_scale=None):
 
@@ -504,7 +514,6 @@ class Hdf5():
     def __exit__(self, type_, value, traceback):
         self._out.close()
 
-
     def apply_gravity(self, body):
         g = constants.g / self._length_scale
         weight = [0, 0, - body.massValue() * g]
@@ -527,9 +536,15 @@ class Hdf5():
 
     def dynamic_data(self):
         """
-        Coordinates and orientations of dynamics objects.
+        Coordinates and orientations of dynamic objects.
         """
         return self._dynamic_data
+
+    def velocities_data(self):
+        """
+        Velocities of dynamic objects
+        """
+        return self._velocities_data
 
     def contact_forces_data(self):
         """
@@ -589,7 +604,8 @@ class Hdf5():
             pass
 
         else:
-            body = body_class(translation + orientation, velocity, mass, inertia)
+            body = body_class(
+                translation + orientation, velocity, mass, inertia)
             for contactor in contactors:
 
                 # /!\ shared pointer <-> python ref ...
@@ -610,7 +626,6 @@ class Hdf5():
             nsds.setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
-
     def importObject(self, name, translation, orientation,
                      velocity, contactors, mass, inertia, body_class, shape_class):
 
@@ -625,36 +640,45 @@ class Hdf5():
                                      orientation[3],
                                      orientation[0])
 
+                tbase = btVector3(translation[0],
+                                  translation[1],
+                                  translation[2])
+
                 for c in contactors:
-                    (w, x, y, z) = c.orientation
-                    c_orientation = btQuaternion(x, y, z, w)
-                    rc_orientation = mul(rbase, c_orientation)
+
+                    c_orientation = btQuaternion(c.orientation[1],
+                                                 c.orientation[2],
+                                                 c.orientation[3],
+                                                 c.orientation[0])
 
                     c_origin = btVector3(c.translation[0],
                                          c.translation[1],
                                          c.translation[2])
 
-                    rc_origin = quatRotate(rbase, c_origin)
-
-                    rc_sorigin = btVector3(rc_origin.x() + translation[0],
-                                           rc_origin.y() + translation[1],
-                                           rc_origin.z() + translation[2])
-
                     static_cobj = btCollisionObject()
+
+                    BulletDS.setRelativeTransform(static_cobj,
+                                                  tbase,
+                                                  rbase,
+                                                  c_origin,
+                                                  c_orientation)
+
                     static_cobj.setCollisionFlags(
                         btCollisionObject.CF_STATIC_OBJECT)
 
-                    self._static_origins.append(rc_sorigin)
+                    self._static_origins.append(
+                        static_cobj.getWorldTransform().getOrigin())
 
-                    self._static_orientations.append(rc_orientation)
-                    transform = btTransform(rc_orientation)
-                    transform.setOrigin(rc_sorigin)
-                    self._static_transforms.append(transform)
-                    static_cobj.setWorldTransform(transform)
+                    self._static_orientations.append(
+                        static_cobj.getWorldTransform().getRotation())
+
+                    self._static_transforms.append(
+                        static_cobj.getWorldTransform())
 
                     static_cobj.setCollisionShape(
                         self._shape.get(c.name))
                     self._static_cobjs.append(static_cobj)
+
                     self._broadphase.addStaticObject(static_cobj,
                                                      int(c.group))
 
@@ -695,7 +719,7 @@ class Hdf5():
     def importJoint(self, name):
         if self._broadphase is not None:
             topo = self._broadphase.model().nonSmoothDynamicalSystem().\
-                   topology()
+                topology()
 
             joint_class = getattr(joints,
                                  self.joints()[name].attrs['type'])
@@ -741,12 +765,41 @@ class Hdf5():
         # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
 
-            for (name, obj) in self._input.items():
+            for (name, obj) in sorted(self._input.items(),
+                                      key = lambda x:x[0]):
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
-                translation = obj.attrs['translation']
-                orientation = obj.attrs['orientation']
-                velocity = obj.attrs['velocity']
+
+                # cold restart if output previously done
+                if mass > 0 and self.dynamic_data() is not None and \
+                        len(self.dynamic_data()) > 0:
+                    dpos_data = self.dynamic_data()
+                    max_time = max(dpos_data[:, 0])
+                    id_last = np.where(
+                        abs(dpos_data[:, 0] - max_time) < 1e-9)[0]
+                    id_last_inst = np.where(
+                        dpos_data[id_last, 1] ==
+                        self.instances()[name].attrs['id'])[0]
+                    xpos = dpos_data[id_last[id_last_inst[0]], :]
+                    translation = (xpos[2], xpos[3], xpos[4])
+                    orientation = (xpos[5], xpos[6], xpos[7], xpos[8])
+
+                    velocities = self.velocities_data()
+                    id_vlast = np.where(
+                        abs(velocities[:, 0] - max_time) < 1e-9)[0]
+
+                    id_vlast_inst = np.where(
+                        velocities[id_vlast, 1] ==
+                        self.instances()[name].attrs['id'])[0]
+                    xvel = velocities[id_vlast[id_vlast_inst[0]], :]
+                    velocity = (xvel[2], xvel[3], xvel[4])
+
+                # start from initial conditions
+                else:
+                    translation = obj.attrs['translation']
+                    orientation = obj.attrs['orientation']
+                    velocity = obj.attrs['velocity']
+
                 contactors = [Contactor(ctr.attrs['name'],
                                         int(ctr.attrs['group']),
                                         floatv(ctr.attrs['translation']),
@@ -758,19 +811,23 @@ class Hdf5():
                 else:
                     inertia = None
 
-
                 if True in ('type' in self.shapes()[ctr.attrs['name']].attrs
                             and self.shapes()[ctr.attrs['name']].attrs['type'] in ['brep', 'step']
                             for ctr in input_ctrs):
                     # Occ object
-                    self.importBRepObject(name, floatv(translation), floatv(orientation),
-                                          floatv(velocity), contactors, float(mass),
-                                          inertia, body_class, shape_class, face_class, edge_class)
+                    self.importBRepObject(
+                        name, floatv(translation), floatv(orientation),
+                        floatv(
+                            velocity), contactors, float(
+                        mass),
+                        inertia, body_class, shape_class, face_class, edge_class)
                 else:
                     # Bullet object
-                    self.importObject(name, floatv(translation), floatv(orientation),
-                                      floatv(velocity), contactors, float(mass),
-                                      inertia, body_class, shape_class)
+                    self.importObject(
+                        name, floatv(translation), floatv(orientation),
+                        floatv(
+                            velocity), contactors, float(mass),
+                        inertia, body_class, shape_class)
 
             # import nslaws
             for name in self._nslaws:
@@ -820,14 +877,9 @@ class Hdf5():
         times = np.empty((positions.shape[0], 1))
         times.fill(time)
 
-        tidd = np.arange(1,
-                         positions.shape[0] + 1).reshape(
-                         positions.shape[0], 1)
-
-        self._dynamic_data[current_line:, :] = np.concatenate((times, tidd,
+        self._dynamic_data[current_line:, :] = np.concatenate((times,
                                                                positions),
                                                                axis=1)
-
 
     def outputVelocities(self):
         """
@@ -845,16 +897,9 @@ class Hdf5():
         times = np.empty((velocities.shape[0], 1))
         times.fill(time)
 
-        tidd = np.arange(1,
-                         velocities.shape[0] + 1).reshape(
-                         velocities.shape[0],
-                         1)
-
-        self._velocities_data[current_line:, :] = np.concatenate((times, tidd,
+        self._velocities_data[current_line:, :] = np.concatenate((times,
                                                                   velocities),
                                                                   axis=1)
-
-
 
     def outputContactForces(self):
         """
@@ -904,6 +949,31 @@ class Hdf5():
 
         self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
+    def printSolverInfos(self):
+        """
+        Outputs solver #iterations & precision reached
+        """
+
+        time = self._broadphase.model().simulation().nextTime()
+        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
+            numericsSolverOptions()
+
+        current_line = self._solv_data.shape[0]
+        self._solv_data.resize(current_line + 1, 0)
+        if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
+            iterations = so.iparam[3]
+            precision = so.dparam[2]
+            local_precision = so.dparam[3]
+        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
+            iterations = so.iparam[7]
+            precision = so.dparam[1]
+            local_precision = 0.
+        # maybe wrong for others
+        else:
+            iterations = so.iparam[1]
+            precision = so.dparam[1]
+            local_precision = so.dparam[2]
+        print('SolverInfos at time :',time, 'iterations= ',iterations,' precision=',precision,'local_precision=',local_precision)
 
     def addMeshFromString(self, name, shape_data):
         """
@@ -933,7 +1003,7 @@ class Hdf5():
                 reader.Update()
 
                 with tmpfile() as tmpf:
-                    writer=vtk.vtkXMLPolyDataWriter()
+                    writer = vtk.vtkXMLPolyDataWriter()
                     writer.SetInputData(reader.GetOutput())
                     writer.SetFileName(tmpf[1])
                     writer.Write()
@@ -943,7 +1013,6 @@ class Hdf5():
             else:
                 assert os.path.splitext(filename)[-1][1:] == 'vtp'
                 shape_data = str_of_file(filename)
-
 
             self.addMeshShapeFromString(name, shape_data)
 
@@ -1015,7 +1084,6 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-
     def addContactFromBRep(self, name, brepname, contact_type,
                            index, collision_group=0, associated_shape=None):
         """
@@ -1082,7 +1150,7 @@ class Hdf5():
 
     def addObject(self, name, shapes,
                   translation,
-                  orientation=[1, 0, 0, 0],
+                  orientation=[0, 1, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, inertia=None):
         """
@@ -1122,7 +1190,7 @@ class Hdf5():
                 if hasattr(shape, 'group'):
                     dat.attrs['group'] = shape.group
                 if hasattr(shape, 'parameters') and \
-                    shape.parameters is not None:
+                        shape.parameters is not None:
                     dat.attrs['parameters'] = shape.parameters
                 dat.attrs['translation'] = shape.translation
                 dat.attrs['orientation'] = shape.orientation
@@ -1237,9 +1305,18 @@ class Hdf5():
         if space_filter is None:
             space_filter = BulletSpaceFilter
 
+        if output_frequency is not None:
+            self._output_frequency = output_frequency
 
-        if output_frequency is not  None:
-            self._output_frequency=output_frequency
+        # cold restart
+        times = set()
+        if self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
+            dpos_data = self.dynamic_data()
+            times = set(dpos_data[:, 0])
+            t0 = float(max(times))
+            T = float(t0 + T)
+            print ('Restart from previous simulation at t0={0}'.format(t0))
+            print ('Run until T={0}'.format(T))
 
         # Model
         #
@@ -1286,7 +1363,8 @@ class Hdf5():
         simulation.insertNonSmoothProblem(osnspb)
         simulation.setNewtonMaxIteration(Newton_max_iter)
 
-        k = 1
+        k0 = 1 + len(times)
+        k = k0
 
         self.importScene(body_class, shape_class, face_class, edge_class)
 
@@ -1295,18 +1373,17 @@ class Hdf5():
         self.outputStaticObjects()
         self.outputDynamicObjects()
 
-
         while simulation.hasNextEvent():
 
-            print ('step', k, '<', int((T-t0)/h))
+            print ('step', k, '<', k0 - 1 + int((T - t0) / h))
 
             log(self._broadphase.buildInteractions, with_timer)\
                 (model.currentTime())
 
             log(simulation.computeOneStep, with_timer)()
 
-            #if (k%self._output_frequency == 0) :
-            if (k%self._output_frequency == 0) or (k==1) :
+            # if (k%self._output_frequency == 0) :
+            if (k % self._output_frequency == 0) or (k == 1):
                 print ('output in hdf5 file at step ', k)
 
                 log(self.outputDynamicObjects, with_timer)()
@@ -1316,8 +1393,11 @@ class Hdf5():
                 log(self.outputContactForces, with_timer)()
 
                 log(self.outputSolverInfos, with_timer)()
-
+                    
                 log(self._out.flush)()
+            print('number of contact',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
+            self.printSolverInfos()
+        
 
             log(simulation.nextStep, with_timer)()
 
