@@ -14,6 +14,13 @@ siconos_test_deb = CiTask(
     srcs=['examples'],
     targets={'examples': ['docker-build', 'docker-ctest']})
 
+siconos_test_rpm = CiTask(
+    ci_config='examples',
+    distrib='fedora:latest',
+    pkgs=['siconos'],
+    srcs=['examples'],
+    targets={'examples': ['docker-build', 'docker-ctest']})
+
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',
     add_pkgs=['bullet', 'h5py'],  # for mechanics.io
@@ -56,7 +63,7 @@ siconos_openblas_lapacke = siconos_default.copy()(
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
     ci_config=('with_bullet', 'with_py3'),
-    with_examples=True,
+    with_examples=False,
     remove_pkgs=['python-env'],
     add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz', 'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
 
