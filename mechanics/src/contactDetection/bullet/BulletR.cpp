@@ -61,6 +61,9 @@ BulletR::BulletR(SP::btManifoldPoint point) :
   (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
   (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
   (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
+
+  assert(!((*nc())(0)==0 && (*nc())(1)==0 && (*nc())(2)==0)
+         && "nc = 0, problems..\n");
 }
 
 void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
