@@ -303,6 +303,7 @@ void BulletBroadphase::visit(const BodyDS &bds)
        it++)
   {
     (*it)->acceptSP(shared_from_this());
+    (*it)->setPosition(bds.q());
   }
 }
 
