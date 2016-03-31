@@ -195,8 +195,8 @@ void ContactTest::t2()
     int k=0;
     while (simulation->hasNextEvent())
     {
-      // Update a property at step 100
-      if (k==100) {
+      // Update a property at step 500
+      if (k==500) {
         sphere->setRadius(0.5);
       }
 
