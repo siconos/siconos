@@ -400,22 +400,17 @@ public:
     iterator()
       { numManifolds = 0;
         manifold_index = -1;
-        contact_index = 0;
+        contact_index = -1;
         numContacts = 0; }
 
     iterator& operator++() {
       if (numManifolds == 0)
         return *this;
       contact_index ++;
-      if (contact_index >= numContacts)
+      while (contact_index >= numContacts)
       {
-        manifold_index++;
-        if (manifold_index >= numManifolds)
-        {
-          numManifolds = 0;
-          return *this;
-        }
-        else
+        manifold_index ++;
+        if (manifold_index < numManifolds)
         {
           contactManifold = world->getDispatcher()->
             getManifoldByIndexInternal(manifold_index);
@@ -424,8 +419,14 @@ public:
           numContacts = contactManifold->getNumContacts();
           contact_index = 0;
         }
+        else
+        {
+          numManifolds = 0;
+          return *this;
+        }
       }
       data.point = &(contactManifold->getContactPoint(contact_index));
+      return *this;
     };
 
     bool operator!=(const iterator &it) {
