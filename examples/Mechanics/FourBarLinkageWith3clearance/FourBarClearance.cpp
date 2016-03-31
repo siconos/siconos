@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     unsigned int nDof = 7;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
     double T = 10.0;                   // final computation time
-    double h = 1e-6;                // time step
+    double h = 1e-4;                // time step
     //double criterion = 1e-6;
     //unsigned int maxIter = 2000;
     char  filename[50] = "simu_";
@@ -45,23 +45,52 @@ int main(int argc, char* argv[])
     double eT = 0.0;
     double mu = 0.1;
 
+    cout << "argc :" << argc << endl;
+    if (argc < 2)
+    {
+      cout << "Using default arguments" << endl;
 
-    ::r1 = atof(argv[1]);
-    ::r3 = atof(argv[2]);
-    ::r5 = atof(argv[3]);
-    ::Kp = atof(argv[4]);
-    ::lmd = atof(argv[5]);
-    int sizeofargv1 = strlen(argv[1]);
-    int sizeofargv2 = strlen(argv[2]);
-    int sizeofargv3 = strlen(argv[3]);
-    int sizeofargv4 = strlen(argv[4]);
-    int sizeofargv5 = strlen(argv[5]);
-    strncpy(&filename[5],argv[1],sizeofargv1);
-    strncpy(&filename[11],argv[2],sizeofargv2);
-    strncpy(&filename[17],argv[3],sizeofargv3);
-    strncpy(&filename[23],argv[4],sizeofargv4);
-    strncpy(&filename[26],argv[5],sizeofargv5);
+      ::r1 = 0.055;
+      ::r3 = 0.055;
+      ::r5 = 0.055;
+      ::Kp = 200;
+      ::lmd = 10;
+      int sizeofargv1 = strlen("0.055");
+      int sizeofargv2 = strlen("0.055");
+      int sizeofargv3 = strlen("0.055");
+      int sizeofargv4 = strlen("200");
+      int sizeofargv5 = strlen("10");
+      strncpy(&filename[5],"0.055",sizeofargv1);
+      strncpy(&filename[11],"0.055",sizeofargv2);
+      strncpy(&filename[17],"0.055",sizeofargv3);
+      strncpy(&filename[23],"200",sizeofargv4);
+      strncpy(&filename[26],"10",sizeofargv5);
 
+    }
+    else if (argc==6)
+    {
+
+      ::r1 = atof(argv[1]);
+      ::r3 = atof(argv[2]);
+      ::r5 = atof(argv[3]);
+      ::Kp = atof(argv[4]);
+      ::lmd = atof(argv[5]);
+      int sizeofargv1 = strlen(argv[1]);
+      int sizeofargv2 = strlen(argv[2]);
+      int sizeofargv3 = strlen(argv[3]);
+      int sizeofargv4 = strlen(argv[4]);
+      int sizeofargv5 = strlen(argv[5]);
+      strncpy(&filename[5],argv[1],sizeofargv1);
+      strncpy(&filename[11],argv[2],sizeofargv2);
+      strncpy(&filename[17],argv[3],sizeofargv3);
+      strncpy(&filename[23],argv[4],sizeofargv4);
+      strncpy(&filename[26],argv[5],sizeofargv5);
+    }
+    else
+    {
+      cout << "Wrong number of arguments" << endl;
+      return 1;
+    }
 
     // -> mind to set the initial conditions below.
 
@@ -289,8 +318,8 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       //k++;
-     // ++show_progress;
-      if (!(div(k,1000).rem))  cout <<"Step number "<< k << "\n";
+      // ++show_progress;
+      // if (!(div(k,1000).rem))  cout <<"Step number "<< k << "\n";
       s->advanceToEvent();
       // Solve problem
       //s->newtonSolve(criterion, maxIter); //2000000
@@ -302,9 +331,9 @@ int main(int argc, char* argv[])
       //std::cout << "*********************************" << std::endl;
       // Data Output
 
-	tt = s->nextTime();
-	if(((k%500)==0) && (k != 0)){
-cout << "size here " << kk << endl;
+      tt = s->nextTime();
+      if(((k%500)==0) && (k != 0)){
+        // cout << "size here " << kk << endl;
       dataPlot(kk, 0) = tt;
       dataPlot(kk, 1) = (*q)(0); // crank revolution
       dataPlot(kk, 2) = (*q)(1);
