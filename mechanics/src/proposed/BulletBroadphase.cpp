@@ -116,6 +116,9 @@ BulletBroadphase::BulletBroadphase() {
   impl->_collisionWorld.reset(
     new btCollisionWorld(&*impl->_dispatcher, &*impl->_broadphase,
                          &*impl->_collisionConfiguration));
+  btGImpactCollisionAlgorithm::registerAlgorithm(&*impl->_dispatcher);
+  impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;
+
   impl->nslaw.reset(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
 }
 
