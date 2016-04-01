@@ -219,7 +219,7 @@ void BulletBroadphase::update(SP::SiconosSphere sphere)
 
   // Update object parameters
   SP::btCollisionObject btobject(impl->objectMap[sphere]);
-  assert(btsphere
+  assert(btobject
          && "BulletBroadphase::update(), sphere not found in objectMap.");
 
   btTransform transform;
