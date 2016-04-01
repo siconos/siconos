@@ -156,6 +156,20 @@ void BulletBroadphase::buildGraph(std::vector<SP::BodyDS> bodies)
     (*it)->accept(*this);
 }
 
+void BulletBroadphase::buildGraph(SP::SiconosContactor contactor)
+{
+  impl->currentBodyDS = NULL;
+  impl->currentContactor = contactor;
+
+  std::vector<SP::SiconosShape>::const_iterator it;
+  for (it=contactor->shapes().begin();
+       it!=contactor->shapes().end();
+       it++)
+  {
+    (*it)->acceptSP(shared_from_this());
+  }
+}
+
 template<typename ST, typename BT>
 void BulletBroadphase::visit_helper(ST& shape, BT& btshape,
                                     std::map<ST,BT>& shapemap)
@@ -447,6 +461,24 @@ public:
   };
 };
 
+// Helper function for performBroadphase(): Return shared_ptrs to the BodyDSs,
+// or to only one of them if one is null.  May return two nulls, in which case
+// the two contactors are both static objects and the contact should be ignored.
+std11::tuple<SP::BodyDS, SP::BodyDS> getOneOrTwoBodyDSs(
+  BodyDS *bdsa, BodyDS *bdsb)
+{
+  if (bdsa && bdsb)
+    return std11::make_tuple(bdsa->shared_from_this(),
+                             bdsb->shared_from_this());
+  else if (bdsa)
+    return std11::make_tuple(bdsa->shared_from_this(),
+                             SP::BodyDS());
+  else if (bdsb)
+    return std11::make_tuple(bdsb->shared_from_this(),
+                             SP::BodyDS());
+  return std11::make_tuple(SP::BodyDS(), SP::BodyDS());
+}
+
 // called once for each contact point as it is destroyed
 BulletBroadphase* BulletBroadphase::gBulletBroadphase = NULL;
 bool BulletBroadphase::bulletContactClear(void* userPersistentData)
@@ -482,19 +514,24 @@ void BulletBroadphase::performBroadphase()
   DEBUG_PRINT("iterating contact points:\n");
   for (it=t.begin(); it!=itend; ++it)
   {
-    DEBUG_PRINTF("  -- %p, %p, %p\n", it->objectA, it->objectA, it->point);
+    DEBUG_PRINTF("  -- %p, %p, %p\n", it->objectA, it->objectB, it->point);
 
     // Get shared_ptrs to the BodyDSs.
-    SP::BodyDS dsa( ((BodyDS*)it->objectA->getUserPointer())
-                    ->shared_from_this() );
-    SP::BodyDS dsb( ((BodyDS*)it->objectB->getUserPointer())
-                    ->shared_from_this() );
+    SP::BodyDS dsa, dsb;
+    std11::tie(dsa, dsb) = getOneOrTwoBodyDSs(
+      (BodyDS*)it->objectA->getUserPointer(),
+      (BodyDS*)it->objectB->getUserPointer());
+
+    // If both bodies are static, no interaction is created.
+    if (!(dsa || dsb))
+      continue;
 
     if (it->point->m_userPersistentData)
     {
       // do what's needed for an interaction already present
       SP::Interaction *p_inter =
         (SP::Interaction*)it->point->m_userPersistentData;
+      // (note: nothing for now!)
     }
     else
     {

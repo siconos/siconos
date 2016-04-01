@@ -96,19 +96,13 @@ public:
 struct SiconosPlane : public SiconosShape, public std11::enable_shared_from_this<SiconosPlane>
 {
 protected:
-  float _distance;
-
   virtual void onChanged()
     { SP::SiconosShapeHandler h(_handler.lock());
       if (h) h->onChanged(shared_from_this()); }
 
 public:
-  SiconosPlane(float x, float y, float z, float distance)
-    : SiconosShape(x,y,z), _distance(distance) {}
-  float distance() const { return _distance; }
-  void setDistance(float d) { _distance = d; onChanged(); }
-  SP::SiconosVector normal() { return position(); }
-  void setNormal(float x, float y, float z) { setPosition(x,y,z); }
+  SiconosPlane(float x, float y, float z)
+    : SiconosShape(x,y,z) {}
 
   /** visitors hook
    */

@@ -48,6 +48,8 @@ protected:
 public:
   virtual void buildGraph(SP::Model model) = 0;
   virtual void buildGraph(std::vector<SP::BodyDS> bodies) = 0;
+  virtual void buildGraph(SP::SiconosContactor contactors) = 0;
+  void buildGraph(std::vector<SP::SiconosContactor> contactors);
   virtual void updateGraph() = 0;
   virtual void performBroadphase() = 0;
 

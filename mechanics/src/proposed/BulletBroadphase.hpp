@@ -65,7 +65,8 @@ public:
   // TODO: default implementations of buildGraph to SiconosBroadphase?
   //       encountered problems with shared_from_this() when doing so.
   void buildGraph(SP::Model model);
-  void buildGraph(std::vector<SP::BodyDS> bodies);
+  void buildGraph(std::vector<SP::BodyDS> body);
+  void buildGraph(SP::SiconosContactor contactor);
 
   void updateGraph();
   void performBroadphase();

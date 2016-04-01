@@ -41,7 +41,7 @@ void ContactTest::t1()
     (*pos)(2) = 0.0;
     SP::BodyDS body2(new BodyDS(pos, vel, 1.0));
     SP::SiconosContactor contactor2(new SiconosContactor());
-    SP::SiconosPlane plane(new SiconosPlane(0,0,1,0.0));
+    SP::SiconosPlane plane(new SiconosPlane(0,0,0));
     contactor2->addShape(plane);
     body2->setContactor(contactor2);
 
@@ -124,12 +124,10 @@ void ContactTest::t2()
     contactor->addShape(sphere);
     body->setContactor(contactor);
 
-    // A BodyDS with a contactor consisting of a plane
-    SP::BodyDS body2(new BodyDS(q1, v1, 10000.0));
-    SP::SiconosContactor contactor2(new SiconosContactor());
-    SP::SiconosPlane plane(new SiconosPlane(0,0,1,0.0));
-    contactor2->addShape(plane);
-    body2->setContactor(contactor2);
+    // A contactor with no body (static contactor) consisting of a plane
+    SP::SiconosContactor static_contactor(new SiconosContactor());
+    SP::SiconosPlane plane(new SiconosPlane(0,0,0));
+    static_contactor->addShape(plane);
 
     /////////
 
@@ -143,9 +141,7 @@ void ContactTest::t2()
 
     // -- Add the dynamical systems into the non smooth dynamical system
     osi->insertDynamicalSystem(body);
-    osi->insertDynamicalSystem(body2);
     model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
-    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body2);
 
     // -- Time discretisation --
     SP::TimeDiscretisation timedisc(new TimeDiscretisation(t0, h));
@@ -187,6 +183,7 @@ void ContactTest::t2()
 
     // Build broadphase-specific mirror of contactor graph
     broadphase->buildGraph(model);
+    broadphase->buildGraph(static_contactor);
 
     std::cout << "====> End of initialisation ..." << std::endl << std::endl;
 
@@ -209,9 +206,7 @@ void ContactTest::t2()
       // Update integrator and solve constraints
       simulation->computeOneStep();
 
-      printf("pos, %f, %f\n",
-             (*body->q())(2),
-             (*body2->q())(2));
+      printf("pos, %f\n", (*body->q())(2));
 
       // Advance simulation
       simulation->nextStep();

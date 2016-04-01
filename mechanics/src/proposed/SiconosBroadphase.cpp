@@ -40,3 +40,12 @@ void SiconosBroadphase::unlink(SP::Interaction inter)
 {
   model()->nonSmoothDynamicalSystem()->removeInteraction(inter);
 }
+
+void SiconosBroadphase::buildGraph(std::vector<SP::SiconosContactor> contactors)
+{
+  std::vector<SP::SiconosContactor>::iterator it;
+  for (it=contactors.begin(); it!=contactors.end(); ++it)
+  {
+    buildGraph(*it);
+  }
+}
