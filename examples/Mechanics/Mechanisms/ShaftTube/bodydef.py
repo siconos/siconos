@@ -1,5 +1,5 @@
 # Example 3 - Shaft and tube assembly for contact detection.
-
+import math
 # REQUIRED number of bodies
 NBBODIES=1
 ## Identifier of the word, an object attached to the referential frame.
@@ -10,7 +10,7 @@ PART1=0
 ## REQUIRED the name of the bodies
 body=numpy.array(['part1'])
 ## REQUIRED the initial position of the bodies
-initPos=numpy.array([(0,0,0, 1,0,0*my_PI/180.0,0*my_PI/180.0)]) #0*my_PI/180.0
+initPos=numpy.array([(0,0,0, 1,0,0*math.pi/180.0,0*math.pi/180.0)]) #0*math.pi/180.0
 ## REQUIRED the initial velocyties of the bodies
 initVel=numpy.array([(0,0,0,0,0,0)])
 
