@@ -305,6 +305,23 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   }
 }
 
+void Simulation::initializeInteraction(double time, SP::Interaction inter)
+{
+  assert(model() && "Simulation::initialize() must be called before "
+         "Simulation::initializeInteraction()");
+
+  // determine which (lower and upper) levels are required for this Interaction
+  // in this Simulation.
+  computeLevelsForInputAndOutput(inter);
+
+  // Get the interaction properties from the topology for initialization.
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
+
+  // This calls computeOutput() and initializes qMemory and q_k.
+  inter->initialize(time, indexSet0->properties(ui));
+}
+
 void Simulation::reset()
 {
   // r (or p) is set to zero in all DynamicalSystems.
