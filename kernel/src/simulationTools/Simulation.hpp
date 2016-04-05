@@ -434,6 +434,10 @@ public:
   */
   virtual void initialize(SP::Model m, bool init = true);
 
+  /** Initialize a single Interaction for this Simulation, used for dynamic
+   *  topology updates. */
+  virtual void initializeInteraction(double time, SP::Interaction inter);
+
   /** Set OSI (DS) non-smooth part to zero.
    */
   void reset();

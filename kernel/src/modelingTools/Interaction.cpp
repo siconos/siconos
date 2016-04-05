@@ -153,6 +153,8 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
     }
     _initialized = true;
   }
+
+  swapInMemory();
 }
 
 // Initialize and InitializeMemory are separated in two functions

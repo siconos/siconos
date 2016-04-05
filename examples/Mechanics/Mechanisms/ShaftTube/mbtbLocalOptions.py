@@ -4,6 +4,7 @@ This file is optional, if it doesn't exit, the default voptions will be use.
 
 @{
 """
+import numpy
 #bodies view Param
 ## To define if a body is drew.
 bodyDraw=array.array('I',[1,1,1,0])
