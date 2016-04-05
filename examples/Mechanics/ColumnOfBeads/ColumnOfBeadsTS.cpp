@@ -213,6 +213,7 @@ int main(int argc, char* argv[])
       // Rough contact detection
       for (unsigned int i = 0; i < nBeads - 1; i++)
       {
+        // Between first bead and plane
         if (abs(((beads[i])->q())->getValue(0) - R) < alert)
         {
           if (!inter)
@@ -222,25 +223,19 @@ int main(int argc, char* argv[])
 
             inter.reset(new Interaction(1, nslaw, relation));
             columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
-            s->computeLevelsForInputAndOutput(inter);
-            InteractionsGraph::VDescriptor ui = indexSet0.descriptor(inter);
-            inter->initialize(s->nextTime(), indexSet0.properties(ui));
-
+            s->initializeInteraction(s->nextTime(), inter);
 
             if (!isOSNSinitialized)
             {
               s->initOSNS();
               isOSNSinitialized = true;
             }
-            inter->computeOutput(s->nextTime(), indexSet0.properties(ui), 0);
-            assert(inter->y(0)->getValue(0) >= 0);
-            // std::cout<< "inter->y(0)->getValue(0)" <<inter->y(0)->getValue(0)   <<std::endl;
 
+            assert(inter->y(0)->getValue(0) >= 0);
           }
         }
 
-
-
+        // Between two beads
         if (abs(((beads[i + 1])->q())->getValue(0) - ((beads[i])->q())->getValue(0) - 2 * R) < alert)
         {
           //std::cout << "Alert distance for declaring contact = ";
@@ -254,17 +249,14 @@ int main(int argc, char* argv[])
             interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads[i]));
 
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
-            s->computeLevelsForInputAndOutput(interOfBeads[i]);
-            InteractionsGraph::VDescriptor ui = indexSet0.descriptor(interOfBeads[i]);
-            interOfBeads[i]->initialize(s->nextTime(), indexSet0.properties(ui));
+            s->initializeInteraction(s->nextTime(), interOfBeads[i]);
+
             if (!isOSNSinitialized)
             {
               s->initOSNS();
               isOSNSinitialized = true;
             }
 
-            interOfBeads[i]->computeOutput(s->nextTime(), indexSet0.properties(ui), 0);
-            // std::cout<< "interOfBeads["<<i<<"]->y(0)->getValue(0)" <<interOfBeads[i]->y(0)->getValue(0)   <<std::endl;
             assert(interOfBeads[i]->y(0)->getValue(0) >= 0);
           }
         }
