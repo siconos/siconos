@@ -34,14 +34,14 @@ if(WITH_${COMPONENT}_TESTING)
       file(GLOB EXAMPLES_FILES ${CMAKE_SOURCE_DIR}/examples/Mechanics/Mechanisms/${_dir}/bodydef.py
 	${CMAKE_SOURCE_DIR}/examples/Mechanics/Mechanisms/${_dir}/mbtbLocalOptions.py)
       foreach(_F ${EXAMPLES_FILES})
-	MESSAGE("${_F}")
+	#MESSAGE("${_F}")
 	configure_file(${_F} ${bin_dir})
 	file(READ ${_F} RESOURCES_FILE)
 	string(REGEX REPLACE
 	  "with3D=1"
 	  "with3D=0 # remove X output for test#"
 	  RESOURCES_FILE_MODIFIED ${RESOURCES_FILE})
-	MESSAGE(${RESOURCES_FILE_MODIFIED})
+	#MESSAGE(${RESOURCES_FILE_MODIFIED})
 	get_filename_component(_F_NAME ${_F} NAME)
 	file(WRITE ${bin_dir}/${_F_NAME} ${RESOURCES_FILE_MODIFIED})
       endforeach()
