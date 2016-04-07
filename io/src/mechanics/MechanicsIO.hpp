@@ -39,22 +39,24 @@ public:
    */
   MechanicsIO() {};
 
-  /** get all positions : translation (x,y,z) + orientation quaternion
+  /** get all positions: translation (x,y,z) + orientation quaternion
    * (qw, qx, qy, qz)
-   * \param model a SP::Model
+   * \param model the model
    * \return a SP::SimpleMatrix where the columns are x, y, z, qw, qx, qy, qz 
    */
   SP::SimpleMatrix positions(const Model& model) const;
 
-  /** get all velocities : translation (xdot, ydot, zdot) + orientation velocities 
+  /** get all velocities: translation (xdot, ydot, zdot) + orientation velocities 
       ox, oy, oz
-      \return a SP::SimpleMatrix where the columns are xdot, ydot, zdot,
+   * \param model the model
+      \return a matrix where the columns are xdot, ydot, zdot,
       ox, oy, oz
   */
   SP::SimpleMatrix velocities(const Model& model) const;
 
   /** get the coordinates of all contact points, normals, reactions and velocities
-      \return a SP::SimpleMatrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
+   * \param model the model
+      \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
   */
   SP::SimpleMatrix contactPoints(const Model& model) const;
 };

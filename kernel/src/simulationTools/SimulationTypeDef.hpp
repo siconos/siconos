@@ -59,16 +59,16 @@ TYPEDEF_SPTR(VectorOfSMatrices)
 /** \struct InteractionProperties mandatory properties for an Interaction  */
 struct InteractionProperties
 {
-  SP::SiconosMatrix block;    // diagonal block
+  SP::SiconosMatrix block;             /**< diagonal block */
   SP::DynamicalSystem source;
   unsigned int source_pos;
   SP::DynamicalSystem target;
   unsigned int target_pos;
   SP::OneStepIntegrator osi;
-  bool forControl;            /**< true if the relation is used to control the DS */
+  bool forControl;                     /**< true if the relation is used to add a control input to a DS */
   SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly x (or q), z, r (or p) */
   SP::VectorOfVectors workVectors;     /**< set of SiconosVector, mostly to have continuous memory vectors (not the case with BlockVector in DSlink) */
-  SP::VectorOfSMatrices workMatrices;   /**< To store jacobians */
+  SP::VectorOfSMatrices workMatrices;  /**< To store jacobians */
 
 
   ACCEPT_SERIALIZATION(InteractionProperties);
@@ -77,11 +77,13 @@ struct InteractionProperties
 /** \struct SystemProperties mandatory properties for a DynamicalSystems */
 struct SystemProperties
 {
-  SP::SiconosMatrix upper_block;   /**< i,j block i<j */
-  SP::SiconosMatrix lower_block;   /**< i,j block i>j */
-  SP::VectorOfVectors workVectors;     /**< Used for instance in Newton iteration */
-  SP::VectorOfMatrices workMatrices;   /**< Mostly for Lagrangian system */
-//  SP::SiconosMemory _xMemory       /**< old value of x, TBD */
+  SP::SiconosMatrix upper_block;        /**< i,j block i<j */
+  SP::SiconosMatrix lower_block;        /**< i,j block i>j */
+  SP::VectorOfVectors workVectors;      /**< Used for instance in Newton iteration */
+  SP::VectorOfMatrices workMatrices;    /**< Mostly for Lagrangian system */
+  SP::OneStepIntegrator osi;            /**< Integrator used for the given DynamicalSystem */
+  SP::SiconosMatrix W;                  /**< Matrix for integration */
+//  SP::SiconosMemory _xMemory          /**< old value of x, TBD */
 
   ACCEPT_SERIALIZATION(SystemProperties);
 };

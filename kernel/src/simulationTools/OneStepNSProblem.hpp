@@ -99,7 +99,7 @@ protected:
   unsigned int _indexSetLevel;
 
   /** level of input and output variables ofs osnsp.
-   *  We consider that the osnsp conputes y[_inputOutputLevel] and lambda[_inputOutputLevel]
+   *  We consider that the osnsp computes y[_inputOutputLevel] and lambda[_inputOutputLevel]
    */
   unsigned int _inputOutputLevel;
 

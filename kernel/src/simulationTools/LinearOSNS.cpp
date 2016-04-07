@@ -104,9 +104,16 @@ void LinearOSNS::initOSNSMatrix()
   // Default size for M = maxSize()
   if (! _M)
   {
-    if (_MStorageType == 0)
+    switch (_MStorageType)
+    {
+    case NM_DENSE:
+    case NM_SPARSE:
+    {
       _M.reset(new OSNSMatrix(maxSize(), _MStorageType));
-    else // if(_MStorageType == 1) size = number of _interactionBlocks
+      break;
+    }
+    case NM_SPARSE_BLOCK:
+    {
       // = number of Interactionin the largest considered indexSet
       if (indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
       {
@@ -116,6 +123,13 @@ void LinearOSNS::initOSNSMatrix()
       {
         _M.reset(new OSNSMatrix(1, _MStorageType));
       }
+      break;
+    }
+    {
+      default:
+        RuntimeException::selfThrow("LinearOSNS::initOSNSMatrix unknown _storageType");
+    }
+    }
   }
 }
 void LinearOSNS::initialize(SP::Simulation sim)
@@ -176,6 +190,8 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     DEBUG_PRINT("a single DS Interaction\n");
     DS1 = indexSet->properties(vd).source;
     DS2 = DS1;
+    // \warning this looks like some debug code, but it gets executed even with NDEBUG.
+    // may be compiler does something smarter, but still it should be rewritten. --xhub
     InteractionsGraph::OEIterator oei, oeiend;
     for (std11::tie(oei, oeiend) = indexSet->out_edges(vd);
          oei != oeiend; ++oei)
@@ -329,7 +345,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   DEBUG_PRINT("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 
   // Computes matrix _interactionBlocks[inter1][inter2] (and allocates memory if
-  // necessary) if inter1 and inter2 have commond DynamicalSystem.  How
+  // necessary) if inter1 and inter2 have common DynamicalSystem.  How
   // _interactionBlocks are computed depends explicitely on the type of
   // Relation of each Interaction.
 

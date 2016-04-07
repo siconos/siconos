@@ -4,15 +4,15 @@ import siconos.numerics as SN
 import numpy as np
 
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
     ## \brief Constructor
     #
     # \param  is a  (optional)
-_kappa = .3
+_kappa = .7
 _g = 9.81
 
-h = 1e-4
+h = 1e-3
 
 theta = 1.0
 gamma = 1.0
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     xk[0] = 1.
     xk[1] = 10.
 
-    T = 1.0
+    T = 4.0
     t = 0.0
     vi = SN.VI(2, vi_function)
     vi.set_compute_nabla_F(vi_nabla_function)
@@ -138,7 +138,7 @@ if __name__ == '__main__':
                 print(xk)
                 print(lambda_)
                 print(xkp1)
-                kaboom()
+                # kaboom()
 #        else:
 #            print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
 
@@ -178,7 +178,8 @@ if __name__ == '__main__':
 #    plt.title('control input')
 #    plt.plot(dataPlot[:,0], control)
 #    plt.grid()
-    plt.savefig('Zhuravlev_pv.png')
+    plt.show()
+    #plt.savefig('Zhuravlev_pv.png')
 
 #    indx = np.nonzero(dataPlot[:, 0]>30)
 #    ttt = dataPlot[indx, 0].flatten()

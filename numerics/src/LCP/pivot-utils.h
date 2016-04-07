@@ -173,7 +173,7 @@ void do_pivot_lumod(SN_lumod_dense_data* lumod_data, NumericsMatrix* M, double* 
 
   char* basis_to_name(unsigned nb, unsigned n);
   unsigned basis_to_number(unsigned nb, unsigned n);
-    
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

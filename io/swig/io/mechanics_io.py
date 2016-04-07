@@ -491,9 +491,9 @@ class Hdf5():
 
         #print('collision_margin in __init__', collision_margin)
         #print('self._collision_margin in __init__', self._collision_margin)
-        
 
-        
+
+
     def __enter__(self):
         if self._set_external_forces is None:
             self._set_external_forces = self.apply_gravity
@@ -516,7 +516,7 @@ class Hdf5():
         if self._shape_filename is None:
             if self._collision_margin:
                 self._shape = ShapeCollection(io=self, collision_margin=self._collision_margin)
-                
+
             else:
                 self._shape = ShapeCollection(io=self)
         else:
@@ -1217,7 +1217,7 @@ class Hdf5():
                 self._number_of_dynamic_objects += 1
 
     def addNewtonImpactFrictionNSL(self, name, mu, e=0, collision_group1=0,
-                                      collision_group2=0):
+                                   collision_group2=0):
         """
         Add a nonsmooth law for contact between 2 groups.
         Only NewtonImpactFrictionNSL are supported.
@@ -1295,6 +1295,8 @@ class Hdf5():
           solver : default Numerics.SICONOS_FRICTION_3D_NSGS
           itermax : maximum number of iteration for solver
           tolerance : friction contact solver tolerance
+          numerics_verbose : set verbose mode in numerics
+          output_frequency :
 
         """
 
@@ -1408,7 +1410,7 @@ class Hdf5():
                 log(self.outputContactForces, with_timer)()
 
                 log(self.outputSolverInfos, with_timer)()
-                    
+
                 log(self._out.flush)()
 
             print('number of contact',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
@@ -1419,7 +1421,7 @@ class Hdf5():
                 yplus=  np.zeros((2,len(y)))
                 yplus[0,:] = y
                 #print(yplus)
-                
+
                 if len(simulation.y(0,0)) >0 :
                     y=np.min(yplus,axis=1)
                     violation_max=np.max(-y)
@@ -1435,7 +1437,7 @@ class Hdf5():
                 #     velocity_max=np.max(v)
                 #     print('  velocity max :',np.max(v))
                 #     #print(simulation.output(1,0))
-        
+
 
             log(simulation.nextStep, with_timer)()
 

@@ -90,21 +90,19 @@ private:
 public:
 
   /** constructor from data
-  *  \param Solver* pointer to object that contains solver algorithm and formulation \n
-  *  (optional, default = NULL => read .opt file in Numerics)
-  *  \param std::string: id of the problem (default = "unamed")
+   * \param numericsSolverId solver to use (see numerics documentation for valid numbers)
   */
-  MLCP2(const std::string& , const std::string& = "unamed_mlcp");
+  MLCP2(int numericsSolverId = SICONOS_MLCP_PGS);;
 
   /** destructor
   */
-  ~MLCP2() {};
+  virtual ~MLCP2() {};
 
 
   /** To initialize the MLCP problem(computes topology ...)
      \param the simulation, owner of this OSNSPB
    */
-  void initialize(SP::Simulation);
+  virtual void initialize(SP::Simulation);
 
   /** compute vector q
   *  \param double : current time

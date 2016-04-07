@@ -763,6 +763,33 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
+SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) const
+{
+  RELATION::TYPES relationType = relation()->getType();
+  RELATION::SUBTYPES relationSubType = relation()->getSubType();
+
+  if (relationType == FirstOrder)
+  {
+    SP::SiconosMatrix CMat = std11::static_pointer_cast<FirstOrderR> (relation())->C();
+    if (CMat)
+      return *CMat;
+    else if (relationSubType != LinearTIR)
+      return *workM[FirstOrderR::mat_C];
+  }
+  else if (relationType == Lagrangian)
+  {
+    SP::LagrangianR r = std11::static_pointer_cast<LagrangianR> (relation());
+    return *r->jachq();
+  }
+  else if (relationType == NewtonEuler)
+  {
+    SP::NewtonEulerR r = std11::static_pointer_cast<NewtonEulerR> (relation());
+    return *r->jachqT();
+  }
+  else
+    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
+
+}
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   DEBUG_PRINT("Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) \n");

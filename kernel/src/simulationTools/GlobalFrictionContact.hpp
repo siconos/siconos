@@ -25,9 +25,12 @@
 #include "LinearOSNS.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
+#include "GlobalFrictionContactProblem.h"
+#include "Friction_cst.h"
 
 /** Pointer to function of the type used for drivers for GlobalFrictionContact problems in Numerics */
-typedef int (*PFC_Driver)(GlobalFrictionContactProblem*, double*, double*, SolverOptions*, NumericsOptions*);
+typedef int (*GFC3D_Driver)(GlobalFrictionContactProblem*, double*, double*, double*, SolverOptions*, NumericsOptions*);
+TYPEDEF_SPTR(GlobalFrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *
@@ -38,17 +41,16 @@ typedef int (*PFC_Driver)(GlobalFrictionContactProblem*, double*, double*, Solve
  * This class is devoted to the formalization and the resolution of
  * primal friction contact problems defined by :
  * \f{eqnarray*}
- *  M velocity =  q +  reaction \\
- *  localVelocity = H^T velocity + tildeLocalVelocity\\
- *  reaction = H localReaction \\
+ *  M velocity =  q + H reaction \\
+ *  globalVelocities = H^T velocity + tildeGlobalVelocities\\
  * \f}
- * and \f$localVelocity,localReaction\f$ belongs to the Coulomb friction law with unilateral contact.
+ * and \f$globalVelocities, reaction\f$ belongs to the Coulomb friction law with unilateral contact.
  *
  * With:
  *    - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ the unknowns,
  *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
- *    - \f$localVelocity \in R^{m} \f$  and \f$localReaction \in R^{m} \f$ the unknowns,
- *    - \f$tildeLocalVelocity \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k}\f$)
+ *    - \f$globalVelocities \in R^{m} \f$  and \f$reaction \in R^{m} \f$ the unknowns,
+ *    - \f$tildeGlobalVelocities \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k}\f$)
  *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *    - \f$H \in R^{n \times m } \f$
  *
@@ -85,41 +87,34 @@ protected:
   int _contactProblemDim;
 
   /** size of the local problem to solve */
-  unsigned int _sizeLocalOutput;
+  size_t _sizeGlobalOutput;
 
-  /** contains the vector localVelocity of a GlobalFrictionContact system */
-  SP::SiconosVector _localVelocity;
+  /** contains the vector globalVelocities of a GlobalFrictionContact system */
+  SP::SiconosVector _globalVelocities;
 
-  /** contains the vector localReaction of a GlobalFrictionContact system */
-  SP::SiconosVector _localReaction;
+  /** contains the impact contributions */
+  SP::SiconosVector _b;
 
-  /** contains the vector localVelocity of a GlobalFrictionContact system */
-  SP::SiconosVector _tildeLocalVelocity;
+  /** contains the matrix H of a GlobalFrictionContact system */
+  SP::OSNSMatrix _H;
 
-  /** contains the matrix M of a GlobalFrictionContact system */
-  SP::OSNSMatrix H;
-
-  /** contains the vector q of a GlobalFrictionContact system */
+  /** friction coefficients */
   SP::MuStorage _mu;
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
-  PFC_Driver primalFrictionContact_driver;
+  GFC3D_Driver _gfc_driver;
 
 public:
 
   /** constructor from data
    *  \param dimPb dimension (2D or 3D) of the friction-contact problem
-   *  \param numericsSolverId type of the solver to be used
-   *  \param newId id of the problem (optional)
+   *  \param numericsSolverId solver to be used (see the documentation of siconos/numerics)
    */
-  GlobalFrictionContact(int dimPb,
-                        const int numericsSolverId =
-                        SICONOS_GLOBAL_FRICTION_3D_NSGS,
-                        const std::string& newId = "unamed_primal_friction_contact_problem");
+  GlobalFrictionContact(int dimPb, int numericsSolverId = SICONOS_GLOBAL_FRICTION_3D_NSGS);
 
   /** destructor
    */
-  ~GlobalFrictionContact() {};
+  virtual ~GlobalFrictionContact() {};
 
   // GETTERS/SETTERS
 
@@ -134,111 +129,25 @@ public:
   /** get dimension of the problem
    *  \return an unsigned ing
    */
-  inline unsigned int getLocalSizeOutput() const
+  inline unsigned int getGlobalSizeOutput() const
   {
-    return _sizeLocalOutput;
+    return _sizeGlobalOutput;
   }
 
-  /** set the value of sizeOutput
-   *  \param an unsigned int
-   */
-  inline void setLocalSizeOutput(const unsigned int newVal)
-  {
-    _sizeLocalOutput = newVal;
-  }
-
-  // --- LocalVelocity ---
-  /** get the value of localVelocity, the initial state of the DynamicalSystem
-   *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
-   */
-  inline const SiconosVector getLocalVelocity() const
-  {
-    return *_localVelocity;
-  }
-
-  /** get localVelocity
+  /** get globalVelocities
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector localVelocity() const
+  inline SP::SiconosVector globalVelocities() const
   {
-    return _localVelocity;
+    return _globalVelocities;
   }
 
-  /** set the value of localVelocity to newValue
-   *  \param SiconosVector newValue
-   */
-  void setLocalVelocity(const SiconosVector&);
-
-  /** set localVelocity to pointer newPtr
+  /** set globalVelocities to pointer newPtr
    *  \param newPtr the new vector
    */
-  inline void setLocalVelocityPtr(SP::SiconosVector newPtr)
+  inline void setGlobalVelocities(SP::SiconosVector newPtr)
   {
-    _localVelocity = newPtr;
-  }
-
-  // --- Reaction ---
-  /** get the value of reaction, the initial state of the DynamicalSystem
-   *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
-   */
-  inline const SiconosVector getLocalReaction() const
-  {
-    return *_localReaction;
-  }
-
-  /** get localReaction, the initial state of the DynamicalSystem
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector localReaction() const
-  {
-    return _localReaction;
-  }
-
-  /** set the value of localReaction to newValue
-   *  \param SiconosVector newValue
-   */
-  void setLocalReaction(const SiconosVector&);
-
-  /** set localReaction to pointer newPtr
-   *  \param newPtr the new vector
-   */
-  inline void setLocalReactionPtr(SP::SiconosVector newPtr)
-  {
-    _localReaction = newPtr;
-  }
-
-  // --- TildeLocalVelocity ---
-
-  /** get the value of tildeLocalVelocity, the initial state of the DynamicalSystem
-   *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
-   */
-  inline const SiconosVector getTildeLocalVelocity() const
-  {
-    return *_tildeLocalVelocity;
-  }
-
-  /** get tildeLocalVelocity
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector tildeLocalVelocity() const
-  {
-    return _tildeLocalVelocity;
-  }
-
-  /** set the value of tildeLocalVelocity to newValue
-   *  \param SiconosVector newValue
-   */
-  void setTildeLocalVelocity(const SiconosVector&);
-
-  /** set tildeLocalVelocity to pointer newPtr
-   *  \param newPtr the new vector
-   */
-  inline void setTildeLocalVelocityPtr(SP::SiconosVector newPtr)
-  {
-    _tildeLocalVelocity = newPtr;
+    _globalVelocities = newPtr;
   }
 
   // --- H ---
@@ -246,32 +155,15 @@ public:
   /** get H
    *  \return pointer on a OSNSMatrix
    */
-  inline SP::OSNSMatrix h() const
+  inline SP::OSNSMatrix H() const
   {
-    return H;
+    return _H;
   }
 
-  /** set the value of H to newValue
-   *  \param  newValue
+  /** set the value of H
+   *  \param H the new matrix
    */
-  void setH(const OSNSMatrix &) {}
-
-  /** set H to pointer newPtr
-   *  \param newPtr the new OSNSMatrix
-   */
-  inline void setHPtr(SP::OSNSMatrix newPtr)
-  {
-    H = newPtr;
-  }
-
-  // --- Mu ---
-  /** get the vector mu, list of the friction coefficients
-   *  \return a vector of double
-   */
-  inline const std::vector<double> getMu() const
-  {
-    return *_mu;
-  }
+  void setH(SP::OSNSMatrix H) { _H = H;}
 
   /** get a pointer to mu, the list of the friction coefficients
    *  \return pointer on a std::vector<double>
@@ -282,72 +174,21 @@ public:
   }
 
   /** get the value of the component number i of mu, the vector of the friction coefficients
-   *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
+   *  \return the friction coefficient for the ith contact
    */
   inline double getMu(unsigned int i) const
   {
     return (*_mu)[i];
   }
 
-  /** set the driver-function used to solve the problem
-      \param a function of prototype Driver
-  */
-  inline void setNumericsDriver(PFC_Driver newFunction)
-  {
-    primalFrictionContact_driver = newFunction;
-  };
-
   // --- Others functions ---
 
   /** initialize the GlobalFrictionContact problem(compute topology ...)
     \param the simulation, owner of this OSNSPB
     */
-  void initialize(SP::Simulation);
+  virtual void initialize(SP::Simulation sim);
 
-  /** computes extra diagonal interactionBlock-matrix that corresponds to inter1 and inter2
-   *  Move this to Interaction class?
-   *  \param a pointer to Interaction
-   *  \param a pointer to Interaction
-   */
-  void computeInteractionBlock(SP::Interaction, SP::Interaction);
-
-  /** computes DSBlock-matrix that corresponds to DS1
-   *  Move this to Interaction class?
-   *  \param a pointer to DynamicalSystem DS1
-   */
-  void computeDSBlock(SP::DynamicalSystem);
-
-  /** computes  InteractionDSBlock-matrix that corresponds to inter1 and DS2
-   *  Move this to Interaction class?
-   *  \param a pointer to Interaction inter1
-   *  \param a pointer to DynamicalSystems DS2
-   */
-  void computeInteractionDSBlock(SP::Interaction, SP::DynamicalSystem);
-
-  /** To compute a part of the "q" vector of the OSNS
-      \param ds the Interaction which corresponds to the considered block
-       \param pos the position of the first element of yOut to be set
-  */
-  void computeqBlockDS(SP::DynamicalSystem ds, unsigned int pos);
-
-  /** compute vector q
-   *  \param time current time
-   */
-  void computeq(double time);
-
-  /** To compute a part of the "tildeLovalVelocity" vector of the OSNS
-      \param inter the Interaction which corresponds to the considered block
-       \param pos the position of the first element of yOut to be set
-  */
-  void computeTildeLocalVelocityBlock(SP::Interaction inter, unsigned int pos);
-
-  /** compute vector tildeLocalVelocity
-   *  \param time current time
-   */
-  void computeTildeLocalVelocity(double time);
-
-  /** pre-treatment for LCP
+  /** Construction of the problem
    *  \param time current time
    */
   virtual bool preCompute(double time);

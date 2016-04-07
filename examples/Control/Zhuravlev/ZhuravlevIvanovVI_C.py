@@ -54,12 +54,12 @@ if __name__ == '__main__':
     vi = SN.VI(2)
     D = ffi.dlopen(SN._numerics.__file__)
     D.set_cstruct(vi.get_env_as_long(), ffi.cast('void*', data_struct))
-    vi.set_compute_F_and_nabla_F_as_C_functions('ZhuravlevIvanovVI.so', 'compute_F', 'compute_nabla_F')
+    vi.set_compute_F_and_nabla_F_as_C_functions('ZhuravlevIvanov.so', 'compute_F', 'compute_nabla_F')
 
     lambda_ = np.zeros((2,))
     xkp1 = np.zeros((2,))
 
-    SO = SN.SolverOptions(vi, SN.SICONOS_VI_BOX_QI)
+    SO = SN.SolverOptions(vi, SN.SICONOS_VI_BOX_PATH)
     lb = np.array((-1.0, -1.0))
     ub = np.array((1.0, 1.0))
     vi.set_box_constraints(lb, ub)
@@ -81,7 +81,8 @@ if __name__ == '__main__':
 
     while t <= T:
         k += 1
-        info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
+        # info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
+        info = SN.vi_box_path(vi, lambda_, xkp1, SO)
         #print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
         #info = SN.mcp_newton_FBLSA(mcp, z, w, SO)
         if info > 0:
@@ -95,7 +96,8 @@ if __name__ == '__main__':
                 lambda_[1] = 0.01
                 print('ok lambda')
                 print(lambda_)
-            info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
+            # info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
+            info = SN.vi_box_path(vi, lambda_, xkp1, SO)
 #            info = SN.mcp_newton_minFBLSA(mcp, z, w, SO)
             print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
             if info >0:

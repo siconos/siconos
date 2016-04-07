@@ -44,7 +44,7 @@ Note that not all files from the current location are listed below, since some o
 #include "QP.hpp"
 #include "Relay.hpp"
 #include "FrictionContact.hpp"
-//#include "GlobalFrictionContact.hpp"
+#include "GlobalFrictionContact.hpp"
 
 #include "LsodarOSI.hpp"
 #include "Hem5OSI.hpp"
@@ -57,6 +57,8 @@ Note that not all files from the current location are listed below, since some o
 #include "D1MinusLinearOSI.hpp"
 #include "SchatzmanPaoliOSI.hpp"
 #include "ZeroOrderHoldOSI.hpp"
+
+#include "MoreauJeanGOSI.hpp"
 
 #include "NonSmoothEvent.hpp"
 #include "TimeDiscretisationEvent.hpp"

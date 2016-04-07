@@ -160,7 +160,7 @@ endif()
 
 
 # -- HDF5 --
-# For loggin in Numerics
+# For logging in Numerics
 IF(WITH_HDF5)
   COMPILE_WITH(HDF5 REQUIRED)
 ENDIF(WITH_HDF5)

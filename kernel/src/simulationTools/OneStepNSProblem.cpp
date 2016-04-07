@@ -89,7 +89,7 @@ void OneStepNSProblem::updateInteractionBlocks()
   //  1 - is the topology time invariant?
   //  2 - does interactionBlocks[interi][interj] already exists (ie has been
   //  computed in a previous time step)?
-  //  3 - do we need to compute this interactionBlock? A interactionBlock is
+  //  3 - do we need to compute this interactionBlock? An interactionBlock has
   //  to be computed if interi and interj are in IndexSet1 AND if interi and
   //  interj have common DynamicalSystems.
   //
@@ -97,10 +97,8 @@ void OneStepNSProblem::updateInteractionBlocks()
   //
   //  - If 1 and 2 are true then it does nothing. 3 is not checked.
   //  - If 1 == true, 2 == false, 3 == false, it does nothing.
-  //  - If 1 == true, 2 == false, 3 == true, it computes the
-  //    interactionBlock.
-  //  - If 1==false, 2 is not checked, and the interactionBlock is
-  //    computed if 3==true.
+  //  - If 1 == true, 2 == false, 3 == true, it computes the interactionBlock.
+  //  - If 1==false, 2 is not checked, and the interactionBlock is computed if 3==true.
   //
 
   // Get index set from Simulation

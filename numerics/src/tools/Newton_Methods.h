@@ -37,7 +37,7 @@
 
 #include <stdbool.h>
 
-typedef void (*compute_F_ptr) (void* data_opaque, double* z, double* w);
+typedef void (*compute_F_ptr) (void* data_opaque, double* z, double* F);
 typedef void (*compute_F_merit_ptr) (void* data_opaque, double* z, double* F, double* F_merit);
 
 /** \struct functions_LSA Newton_Methods.h
@@ -101,14 +101,12 @@ extern "C"
    */
   void newton_LSA(unsigned n, double *z, double *w, int *info, void* data, SolverOptions* options, functions_LSA* functions);
 
-  /** Set some default values in the SolverOption when the solver is based on
-   * newton_LSA()
+  /** Set some default values in the SolverOption when the solver is based on newton_LSA()
    * \param options the struct to modify
    */
   void newton_lsa_default_SolverOption(SolverOptions* options);
 
-  /** Set the functions to compute F and F_merit and all the other pointers to
-   * NULL
+  /** Set the functions to compute F and F_merit and all the other pointers to NULL
    * \param functions structure to fill
    * \param compute_F function to compute F
    * \param merit_function function to compute F_merit

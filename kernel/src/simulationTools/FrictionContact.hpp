@@ -74,6 +74,7 @@ protected:
   /** Type (dimension) of the contact problem (2D or 3D) */
   int _contactProblemDim;
 
+  /** * friction coefficients */
   SP::MuStorage _mu;
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */

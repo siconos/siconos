@@ -31,7 +31,7 @@ using namespace RELATION;
 GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
   LinearOSNS()
 {
-  _MStorageType = SICONOS_SPARSE;
+  _MStorageType = NM_SPARSE_BLOCK;
   _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
   genericMechanicalProblem_setDefaultSolverOptions(&*_numerics_solver_options, FC3D_Solver_Id);
 }

@@ -27,6 +27,7 @@
   REGISTER(OneStepIntegrator)                          \
   REGISTER(EulerMoreauOSI)                             \
   REGISTER(MoreauJeanOSI)                              \
+  REGISTER(MoreauJeanGOSI)                             \
   REGISTER(MoreauJeanDirectProjectionOSI)              \
   REGISTER(MoreauJeanCombinedProjectionOSI)            \
   REGISTER(LsodarOSI)                                  \
@@ -42,6 +43,7 @@
   REGISTER(MLCPProjectOnConstraints)                   \
   REGISTER(OSNSMultipleImpact)                         \
   REGISTER(FrictionContact)                            \
+  REGISTER(GlobalFrictionContact)                      \
   REGISTER(SiconosVector)                              \
   REGISTER(SimpleMatrix)                               \
   REGISTER(BlockVector)                                \

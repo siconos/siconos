@@ -22,6 +22,8 @@
  */
 #define ZERO DBL_EPSILON*500
 
+#define ZERO_SQR  ZERO * ZERO
+
 #define POST_CHECK_POW(x) assert(isfinite(x))
 #define POST_CHECK_ADD(x) assert(isfinite(x))
 #define POST_CHECK_MUL(x) assert(isfinite(x))
@@ -57,7 +59,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 
 // hack, should be prevented in sage/sympy/maple or in code generation
-#define sqrt(x) ((fabs((double)x) <= ZERO) ? 0 : (assert(x>=0), sqrt(x)))
+#define sqrt(x) ((( (double)x >= 0. && x <= ZERO_SQR) || ((double)x < 0. && (double)x >= -ZERO)) ? 0. : (assert(x>=0.), sqrt(x)))
 
 // ./fb2.py --ccode --ccodefac --ccodeAB --wrapper --merit
 void fc3d_FischerBurmeisterFABGenerated(

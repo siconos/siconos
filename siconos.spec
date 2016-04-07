@@ -8,6 +8,7 @@ URL:            http://siconos.gforge.inria.fr
 #Source0:        https://github.com/siconos/siconos/archive/master.tar.gz
 Source0:        master.tar.gz
 
+
 BuildRequires:  gcc-gfortran
 BuildRequires:  gcc-c++
 BuildRequires:	boost-devel
@@ -37,14 +38,11 @@ BuildRequires:  swig
 BuildRequires:  lpsolve-devel
 BuildRequires:  bullet-devel
 
-Requires:       gcc-c++
-Requires:       boost-devel
 Requires:       h5py
 Requires:       scipy
 Requires:       python-lxml
 Requires:       python-matplotlib
 Requires:       cmake
-Requires:       gmp-devel
 Requires:       vtk
 
 #Requires:	openmpi%{?_isa}
@@ -57,6 +55,19 @@ Requires:       vtk
 
 %description
 Siconos is a simulation platform dedicated to non-smooth dynamical systems
+
+
+%package devel
+Summary: The siconos headers and development-related files
+Group: Development/Libraries
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       gcc-c++
+Requires:       boost-devel
+Requires:       gmp-devel
+Requires:       bullet-devel
+%description devel
+Shared links and header files.
+
 
 %prep
 %autosetup -n %{name}-master
@@ -83,13 +94,17 @@ cd build
 %make_install
 
 
+%files devel
+%dir %{_includedir}/%{name}
+%{_includedir}/%{name}/*
+%{_libdir}/*.so
+
 %files
 #%doc README
 #%license LICENSE COPYING
 %{_bindir}/*
-%{_libdir}/*
+%{_libdir}/lib*so.%{version}
 %{python2_sitelib}/*
-%{_includedir}/%{name}/
 %{_datadir}/%{name}/
 
 

@@ -38,7 +38,7 @@ TYPEDEF_SPTR(AffineVariationalInequalities)
   \section AVIintro Aim of the AVI class
  
   This class is devoted to the formalization and the resolution of
-  Affine variational Inequalities (AVI): given a polytopic set \f$P\f$ and \f$q\in R^p\f$,
+  Affine variational Inequalities (AVI): given a polytopic set \f$P\f$, \f$M\in R^{p\times p}\f$ and \f$q\in R^p\f$,
   \f[
   \text{find z}\in P\text{such that for all x}\in P\quad \langle x-z, Mz+q\rangle \geq 0.
   \f]
@@ -52,7 +52,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(AVI);
 
-  /** contains the numerics proble for AVI system */
+  /** contains the numerics problem for the AVI system */
   SP::AffineVariationalInequalities _numerics_problem;
 
 public:

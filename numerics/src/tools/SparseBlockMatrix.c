@@ -1924,7 +1924,7 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
 
     csi blockindex = brow * bncol + bcol;
 
-    if (fabs(it.third) > 0)
+    if (fabs(it.third) > 0.)
     {
       assert(blockindex < blockindexmax);
       blocknum[blockindex] = -2;

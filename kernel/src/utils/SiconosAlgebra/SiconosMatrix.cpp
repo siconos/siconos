@@ -122,3 +122,88 @@ SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
   return m;
 }
 
+size_t SiconosMatrix::nnz(double tol)
+{
+  size_t nnz = 0;
+  if (num == 1) //dense
+  {
+    double* arr = getArray();
+    for (size_t i = 0; i < size(0)*size(1); ++i)
+    {
+      if (fabs(arr[i]) > tol) { nnz++; }
+    }
+  }
+  else if (num == 4)
+  {
+    nnz = sparse()->nnz();
+  }
+  else
+  {
+     SiconosMatrixException::selfThrow("SiconosMatrix::nnz not implemented for the given matrix type");
+  }
+
+  return nnz;
+
+}
+
+bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol)
+{
+  assert(csc);
+  double* Mx = csc->x; // data
+  csi* Mi = csc->i; // row indx
+  csi* Mp = csc->p; // column pointers
+
+  assert(csc->p[col_off] >= 0);
+  size_t nz = csc->p[col_off];
+
+  size_t nrow = size(0);
+  size_t ncol = size(1);
+
+  csi pval = Mp[col_off];
+
+  if (num == 1) //dense
+  {
+    double* arr = getArray();
+    for (size_t j = 0, joff = col_off; j < ncol; ++j)
+    {
+      for (size_t i = 0; i < nrow; ++i)
+      {
+        if (fabs(arr[i]) > tol)
+        {
+          Mx[pval] = arr[i];
+          Mi[pval] = i + row_off;
+          ++pval;
+        }
+      }
+      Mp[++joff] = pval;
+    }
+  }
+  else if (num == 4)
+  {
+    const Index& ptr = sparse()->index1_data();
+    const Index& indx = sparse()->index2_data();
+    const ublas::unbounded_array<double>& vals = sparse()->value_data();
+
+    size_t nnz =  sparse()->nnz();
+
+    assert(ptr.size() == ncol + 1);
+    assert(indx.size() == nnz);
+    assert(vals.size() == nnz);
+
+    for (size_t i = 0; i < nnz; ++i)
+    {
+      Mx[pval] = vals[i];
+      Mi[pval++] = row_off + indx[i];
+    }
+    for (size_t j = 1, joff = col_off + 1; j < ncol+1; ++j, ++joff)
+    {
+      Mp[joff] = nz + ptr[j];
+    }
+  }
+  else
+  {
+     SiconosMatrixException::selfThrow("SiconosMatrix::fillCSC not implemented for the given matrix type");
+  }
+
+  return true;
+}
