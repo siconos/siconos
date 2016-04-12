@@ -421,6 +421,38 @@ void Simulation::updateOutput(unsigned int level)
 
 }
 
+
+
+SP::SiconosVector Simulation::output(unsigned int level, unsigned int coor)
+{
+  // return output(level) (ie with y[level]) for all Interactions.
+  // assert(level>=0);
+
+  DEBUG_PRINTF("Simulation::output(unsigned int level, unsigned int coor) starts for level = %i\n", level);
+
+
+  double time = model()->currentTime();
+
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+
+  SP::SiconosVector y (new SiconosVector (model()->nonSmoothDynamicalSystem()->topology()->indexSet0()->size() ));
+  int i=0;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForOutput() <= level);
+    assert(inter->upperLevelForOutput() >= level);
+    y->setValue(i,inter->y(level)->getValue(coor));
+    i++;
+  }
+  return y;
+  DEBUG_PRINTF("Simulation::output(unsigned int level, unsigned int coor) ends for level = %i\n", level);
+
+
+}
+
 void Simulation::run()
 {
   unsigned int count = 0; // events counter.
@@ -977,7 +1009,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)
 {
   DEBUG_PRINT("Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)\n");
-  
+
  /** \warning. We test only for the first Dynamical of the interaction.
    * we assume that the osi(s) are consistent for one interaction
    */
