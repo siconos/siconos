@@ -7,7 +7,7 @@
 
 from siconos.mechanics.contact_detection.tools import Contactor
 
-from mechanics_io import Hdf5
+from siconos.io.mechanics_io import Hdf5
 
 import siconos.numerics as Numerics
 
@@ -97,7 +97,7 @@ with Hdf5(mode='r+',collision_margin=0.05) as io:
     # Because of fixed collision margins used in the collision detection,
     # sizes of small objects may need to be expressed in cm or mm.
 
-    io.run_debug(with_timer=False,
+    io.run(with_timer=False,
            time_stepping=None,
            space_filter=None,
            body_class=None,
