@@ -40,6 +40,7 @@
 #include <boost/format.hpp>
 #include <boost/typeof/typeof.hpp>
 
+//#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
@@ -142,6 +143,10 @@ void BulletSpaceFilter::setCollisionConfiguration(
 
 void BulletSpaceFilter::buildInteractions(double time)
 {
+  DEBUG_PRINT("-----start build interaction\n");
+  
+  DEBUG_PRINT("----- insert dynamic collision objects if needed\n");
+
 
   if (! _dynamicCollisionsObjectsInserted)
   {
@@ -175,13 +180,15 @@ void BulletSpaceFilter::buildInteractions(double time)
     _staticCollisionsObjectsInserted = true;
   }
 
-  DEBUG_PRINT("-----start build interaction\n");
-
-  // 1. perform bullet collision detection
+  //  1. perform bullet collision detection
+  DEBUG_PRINT("-----  1. perform bullet collision detection\n");
   gOrphanedInteractions.clear();
   _collisionWorld->performDiscreteCollisionDetection();
 
+
+  
   // 2. collect old contact points from Siconos graph
+  DEBUG_PRINT("-----  2. collect old contact points from Siconos graph\n");
   std::map<btManifoldPoint*, bool> contactPoints;
 
   std::map<Interaction*, bool> activeInteractions;
@@ -222,12 +229,9 @@ void BulletSpaceFilter::buildInteractions(double time)
       _collisionWorld->getDispatcher()->getManifoldByIndexInternal(i);
 
     DEBUG_PRINTF("processing manifold %d : %p\n", i, contactManifold);
-
+ 
     const btCollisionObject* obA = contactManifold->getBody0();
     const btCollisionObject* obB = contactManifold->getBody1();
-
-
-    DEBUG_PRINTF("object A : %p, object B: %p\n", obA, obB);
 
     //    contactManifold->refreshContactPoints(obA->getWorldTransform(),obB->getWorldTransform());
 
