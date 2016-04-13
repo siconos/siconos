@@ -832,6 +832,36 @@ Franck proposed to make the first draft in a new branch.
      specification help, example with beads column (without rebound du to
      primitive shape contact probably) or bouncing box.
 
+** <2016-04-13 Wed> Bullet Contact detection scouting
+
++ Influence of margin, gContactBreakingThreshold, (local) scaling. 
+  + margin has NO effect between primive (Box, Sphere, Plane) even if we call convexconvex Algo cf table
+  + gContactBreakingThreshold has an effect ONLY in the convexconvex Algo
+    + problem for BoxBox SphereSphere
+  + Sphere and Box when treated as convex hull are modified
+    + sphere is a point plus a margin equal to the radius
+    + Box: the margin is subtracted for obtaining "m_implicitShapeDimensions"
+
+TODO
+
+  + Understand what is handle,  support vertices ?
+  + scaling has to be studied
+  + thinking to the strategy
+    + conversion to convex hull shape ? external treatment or by rewriting m_doubleDispatch table ( built in btDefaultCollisionConfiguration.cpp)
+    + preprocessing of the convex shape 
+
+
+
+|-------------+----------------------------------+----------------------------+-------------------------|
+|             | Sphere                           | Box                        | ConvexShape             |
+|-------------+----------------------------------+----------------------------+-------------------------|
+| Sphere      | btSphereSphereCollisionAlgorithm | btConvexConvexAlgorithm    | btConvexConvexAlgorithm |
+| Box         | --                               | btBoxBoxCollisionAlgorithm | btConvexConvexAlgorithm |
+| ConvexShape | --                               | --                         | btConvexConvexAlgorithm |
+|-------------+----------------------------------+----------------------------+-------------------------| 
+
+
+
 
 * Code reviews 						 :SICONOS:CODEREVIEW:
 ** Review Meeting with OB <2011-09-01 Mer> 			   :OB:MB:VA:
