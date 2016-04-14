@@ -386,16 +386,6 @@ void BulletBroadphase::updateGraph()
   }
 }
 
-// Needed in performBroadphase() below
-struct ForContactPoint : public Question<SP::btManifoldPoint>
-{
-  // ANSWER(BulletR, contactPoint());
-  // ANSWER_NOUSING(BulletFrom1DLocalFrameR, contactPoint());
-  void visit(const NewtonEulerR&)
-  {
-  }
-};
-
 /** This class allows to iterate over all the contact points in a
  *  btCollisionWorld, returning a tuple containing the two btCollisionObjects
  *  and the btManifoldPoint.  To be called after
