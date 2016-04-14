@@ -57,6 +57,8 @@
 
 #define DEBUG_PRINTF(_fmt, ...)  DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)
 #define DEBUG_PRINT(M)  DEBUG_PRINTF("%s",M)
+#define DEBUG_BEGIN(M) DEBUG_PRINTF("==== BEGIN === %s",M)
+#define DEBUG_END(M)  DEBUG_PRINTF("===   END  === %s",M)
 #define DEBUG_EXPR(E) DEBUG_PRINTF("%s: ", #E) do { E ; } while(0)
 #define DEBUG_EXPR_WE(E) do { E ; } while(0)
 #define DEBUG_GLOBAL_VAR_DECL(D) D
@@ -64,6 +66,8 @@
 #else
 #define DEBUG_PRINTF(_fmt, ...)
 #define DEBUG_PRINT(M)
+#define DEBUG_BEGIN(M)
+#define DEBUG_END(M)
 #define DEBUG_EXPR(E)
 #define DEBUG_EXPR_WE(E)
 #define DEBUG_GLOBAL_VAR_DECL(D)
