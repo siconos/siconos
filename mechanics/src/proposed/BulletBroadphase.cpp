@@ -48,13 +48,17 @@
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
+#include <BulletCollision/BroadphaseCollision/btAxisSweep3.h>
 
 #include <BulletCollision/CollisionShapes/btStaticPlaneShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
+
+#define USE_CONVEXHULL_FOR_BOX 1
 
 class BulletBroadphase_impl : public SiconosShapeHandler
 {
@@ -74,7 +78,11 @@ protected:
   std::map<SP::SiconosShape, SP::btCollisionObject> objectMap;
   std::map<SP::SiconosPlane, SP::btStaticPlaneShape> planeMap;
   std::map<SP::SiconosSphere, SP::btSphereShape> sphereMap;
+#ifdef USE_CONVEXHULL_FOR_BOX
+  std::map<SP::SiconosBox, SP::btConvexHullShape> boxMap;
+#else
   std::map<SP::SiconosBox, SP::btBoxShape> boxMap;
+#endif
 
   std::map<Interaction*, bool> orphanedInteractions;
 
@@ -106,13 +114,20 @@ void BulletBroadphase_impl::onChanged(SP::SiconosBox box)
   dirtyBoxes.push_back(box);
 }
 
-BulletBroadphase::BulletBroadphase() {
+BulletBroadphase::BulletBroadphase(const BulletBroadphase::Options &_options)
+  : options(_options)
+{
   impl.reset(new BulletBroadphase_impl());
   impl->_collisionConfiguration.reset(
     new btDefaultCollisionConfiguration());
   impl->_dispatcher.reset(
     new btCollisionDispatcher(&*impl->_collisionConfiguration));
-  impl->_broadphase.reset(new btDbvtBroadphase());
+
+  if (options.use_axissweep3)
+    impl->_broadphase.reset(new btAxisSweep3(btVector3(), btVector3()));
+  else
+    impl->_broadphase.reset(new btDbvtBroadphase());
+
   impl->_collisionWorld.reset(
     new btCollisionWorld(&*impl->_dispatcher, &*impl->_broadphase,
                          &*impl->_collisionConfiguration));
@@ -297,10 +312,9 @@ void BulletBroadphase::visit(SP::SiconosBox box)
 #else
   SP::btBoxShape btbox(new btBoxShape(btVector3(1,1,1)));
 #endif
-    
-  // initialization
 
-    visit_helper(box, btbox, impl->boxMap);
+  // initialization
+  visit_helper(box, btbox, impl->boxMap);
 }
 
 void BulletBroadphase::update(SP::SiconosBox box)

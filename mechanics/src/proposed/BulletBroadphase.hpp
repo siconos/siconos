@@ -44,10 +44,22 @@ protected:
   static BulletBroadphase *gBulletBroadphase;
 
 public:
-  BulletBroadphase();
+  struct Options
+  {
+    Options()
+      : use_convexhull_for_primitives(true)
+      , use_axissweep3(false)
+      {}
+    bool use_convexhull_for_primitives;
+    bool use_axissweep3;
+  };
+
+  BulletBroadphase(const Options &options = Options());
   ~BulletBroadphase();
 
 protected:
+  Options options;
+
   void visit(SP::SiconosPlane plane);
   void visit(SP::SiconosSphere sphere);
   void visit(SP::SiconosBox box);
