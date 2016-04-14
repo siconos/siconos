@@ -17,7 +17,9 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-//#define DEBUG_MESSAGES 1
+
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES 1
 #include <debug.h>
 
 #include "BulletR.hpp"
@@ -65,6 +67,8 @@ BulletR::BulletR(SP::btManifoldPoint point) :
 
 void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
+  DEBUG_BEGIN("BulletR::computeh(...)\n");
+
   NewtonEulerR::computeh(time, q0, y);
 
   DEBUG_PRINT("start of computeh\n");
@@ -94,7 +98,7 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
   DEBUG_PRINTF("position on B : %g,%g,%g\n", posb[0], posb[1], posb[2]);
   DEBUG_PRINTF("normal on B   : %g,%g,%g\n", (*nc())(0), (*nc())(1), (*nc())(2));
 
-  DEBUG_PRINT("end of computeh\n");
+  DEBUG_END("BulletR::computeh(...)\n");
 
 
 }
