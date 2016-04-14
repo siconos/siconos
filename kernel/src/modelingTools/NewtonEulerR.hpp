@@ -49,7 +49,7 @@ class NewtonEulerR : public Relation
 {
 public:
 // add deltaq ??? -- xhub 30/03/2014
-  enum NewtonEulerRDS  {xfree, z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
+  enum NewtonEulerRDS  {xfree, z, q0, velocity, dotq, p0, p1, p2, MObjToAbs, DSlinkSize};
   // enum NewtonEulerRVec {xfree, z, q0, dotq, p0, p1, p2, workVecSize};
   // enum NewtonEulerRMat {C, D, F, workMatSize};
 
@@ -262,6 +262,7 @@ public:
      only one ds in the inter, call this function with ..., ds, ds)
   */
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
+  virtual void computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink );
 
   /** compute all the jacobian of h 
    * \param time current time

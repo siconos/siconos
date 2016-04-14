@@ -794,6 +794,7 @@ public:
    */
   void computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV) ;
 
+  
 
   /** Instantiate the link with the DynamicalSystem
    * \param DSlink the container of the link to DynamicalSystem attributes

@@ -63,6 +63,8 @@ protected:
 
   /*Matrix converting  the absolute coordinate to the contact coordinate.*/
   SP::SimpleMatrix _Mabs_C;
+  /*Matrix converting .*/
+  SP::SimpleMatrix _MObjToAbs;
   /*cross product matrices*/
   SP::SimpleMatrix _NPG1;
   SP::SimpleMatrix _NPG2;
@@ -70,8 +72,8 @@ protected:
   SP::SimpleMatrix _AUX1;
   SP::SimpleMatrix _AUX2;
 private:
-  void NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1);
-  void NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2);
+  void NIcomputeJachqTFromContacts(SP::SiconosVector q1);
+  void NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2);
 public:
 
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
@@ -95,7 +97,8 @@ public:
 
   virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
-
+  virtual void computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink );
+  
   inline SP::SiconosVector pc1() const
   {
     return _Pc1;
