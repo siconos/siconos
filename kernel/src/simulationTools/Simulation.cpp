@@ -171,7 +171,7 @@ SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
 void Simulation::updateIndexSets()
 {
 
-  DEBUG_PRINT("Simulation::updateIndexSets() starts\n");
+  DEBUG_BEGIN("Simulation::updateIndexSets()\n");
   // update I0 indices
   unsigned int nindexsets = model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize();
 
@@ -185,7 +185,7 @@ void Simulation::updateIndexSets()
       model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_edges_indices();
     }
   }
-  DEBUG_PRINT("Simulation::updateIndexSets() ends\n");
+  DEBUG_END("Simulation::updateIndexSets()\n");
 
 }
 
@@ -371,15 +371,24 @@ void Simulation::pushInteractionsInMemory()
 
 int Simulation::computeOneStepNSProblem(int Id)
 {
+  DEBUG_BEGIN("Simulation::computeOneStepNSProblem(int Id)\n");
+  DEBUG_PRINTF("with Id = %i\n", Id);
 
   if (!(*_allNSProblems)[Id])
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + Id);
 
   return (*_allNSProblems)[Id]->compute(model()->currentTime());
+  DEBUG_END("Simulation::computeOneStepNSProblem(int Id)\n");
+
 }
 
 void Simulation::updateInput(unsigned int level)
 {
+
+  DEBUG_BEGIN("Simulation::updateInput(unsigned int level)\n");
+  DEBUG_PRINTF("with level = %i\n", level);
+
+
   // To compute input(level) (ie with lambda[level]) for all Interactions.
   //  assert(level>=0);
   //  double time = nextTime();
@@ -398,6 +407,9 @@ void Simulation::updateInput(unsigned int level)
     assert(inter->upperLevelForInput() >= level);
     inter->computeInput(time, indexSet0->properties(*ui), level);
   }
+
+  DEBUG_END("Simulation::updateInput(unsigned int level)\n");
+
 }
 
 void Simulation::updateOutput(unsigned int level)
@@ -405,7 +417,8 @@ void Simulation::updateOutput(unsigned int level)
   // To compute output(level) (ie with y[level]) for all Interactions.
   //  assert(level>=0);
 
-  DEBUG_PRINTF("Simulation::updateOutput(unsigned int level) starts for level = %i\n", level);
+  DEBUG_BEGIN("Simulation::updateOutput(unsigned int level)\n");
+  DEBUG_PRINTF("with level = %i\n", level);
   double time = model()->currentTime();
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
@@ -417,7 +430,7 @@ void Simulation::updateOutput(unsigned int level)
     assert(inter->upperLevelForOutput() >= level);
     inter->computeOutput(time, indexSet0->properties(*ui), level);
   }
-  DEBUG_PRINTF("Simulation::updateOutput(unsigned int level) ends for level = %i\n", level);
+  DEBUG_END("Simulation::updateOutput(unsigned int level)\n");
 
 }
 
@@ -428,7 +441,8 @@ SP::SiconosVector Simulation::output(unsigned int level, unsigned int coor)
   // return output(level) (ie with y[level]) for all Interactions.
   // assert(level>=0);
 
-  DEBUG_PRINTF("Simulation::output(unsigned int level, unsigned int coor) starts for level = %i\n", level);
+  DEBUG_BEGIN("Simulation::output(unsigned int level, unsigned int coor)\n");
+  DEBUG_PRINTF("with level = %i and coor = %i \n", level,coor);
 
 
   double time = model()->currentTime();
@@ -447,11 +461,39 @@ SP::SiconosVector Simulation::output(unsigned int level, unsigned int coor)
     y->setValue(i,inter->y(level)->getValue(coor));
     i++;
   }
+  DEBUG_END("Simulation::output(unsigned int level, unsigned int coor)\n");
   return y;
-  DEBUG_PRINTF("Simulation::output(unsigned int level, unsigned int coor) ends for level = %i\n", level);
-
-
 }
+
+SP::SiconosVector Simulation::input(unsigned int level, unsigned int coor)
+{
+  // return input(level) (ie with lambda[level]) for all Interactions.
+  // assert(level>=0);
+
+  DEBUG_BEGIN("Simulation::input(unsigned int level, unsigned int coor)\n");
+  DEBUG_PRINTF("with level = %i and coor = %i \n", level,coor);
+
+
+  double time = model()->currentTime();
+
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+
+  SP::SiconosVector lambda (new SiconosVector (model()->nonSmoothDynamicalSystem()->topology()->indexSet0()->size() ));
+  int i=0;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForOutput() <= level);
+    assert(inter->upperLevelForOutput() >= level);
+    lambda->setValue(i,inter->lambda(level)->getValue(coor));
+    i++;
+  }
+  DEBUG_END("Simulation::input(unsigned int level, unsigned int coor)\n");
+  return lambda;
+}
+
 
 void Simulation::run()
 {
