@@ -30,7 +30,6 @@
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
-//#define NEFC3D_DEBUG
 /*
 See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'
 */
@@ -61,16 +60,12 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   double G1y = q1->getValue(1);
   double G1z = q1->getValue(2);
 
-
-
-#ifdef NEFC3D_DEBUG
-  DEBUG_PRINTF("contact normal:\n");
-  _Nc->display();
-  DEBUG_PRINTF("contact point :\n");
-  _Pc1->display();
-  DEBUG_PRINTF("center of mass :\n");
-  q1->display();
-#endif
+  DEBUG_PRINT("contact normal:\n");
+  DEBUG_EXPR(_Nc->display(););
+  DEBUG_PRINT("contact point :\n");
+  DEBUG_EXPR(_Pc1->display(););
+  DEBUG_PRINT("center of mass :\n");
+  DEBUG_EXPR(q1->display(););
 
   assert(_Nc->norm2() >0.0 && "NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Normal vector not consistent ") ;
 
@@ -87,10 +82,10 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   _Mabs_C->setValue(0, 2, Nz);
   _Mabs_C->setValue(1, 2, *(pt + 2));
   _Mabs_C->setValue(2, 2, *(pt + 5));
-#ifdef NEFC3D_DEBUG
-  DEBUG_PRINTF("_Mabs_C:\n");
-  _Mabs_C->display();
-#endif
+
+  DEBUG_PRINT("_Mabs_C:\n");
+  DEBUG_EXPR(_Mabs_C->display(););
+
   _NPG1->zero();
 
   (*_NPG1)(0, 0) = 0;
@@ -180,6 +175,18 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   double G2y = q2->getValue(1);
   double G2z = q2->getValue(2);
 
+
+  DEBUG_PRINT("contact normal:\n");
+  DEBUG_EXPR(_Nc->display(););
+  DEBUG_PRINT("contact point :\n");
+  DEBUG_EXPR(_Pc1->display(););
+  DEBUG_PRINT("center of mass :\n");
+  DEBUG_EXPR(q1->display(););
+
+
+
+
+  
   double t[6];
   double * pt = t;
   orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5);
