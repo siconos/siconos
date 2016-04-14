@@ -356,6 +356,7 @@ SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber)
   return ds;
 }
 
+
 SP::DynamicalSystem Topology::getDynamicalSystem(std::string name)
 {
   DynamicalSystemsGraph::VIterator vi, vdend;
@@ -420,4 +421,22 @@ unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
   }
 
   return return_value;
+}
+
+SP::Interaction Topology::getInteraction(unsigned int requiredNumber)
+{
+  InteractionsGraph::VIterator vi, vdend;
+  SP::Interaction inter;
+  unsigned int currentNumber;
+  for (std11::tie(vi, vdend) = _IG[0]->vertices(); vi != vdend; ++vi)
+  {
+    inter = _IG[0]->bundle(*vi);
+    currentNumber = inter->number();
+    if (currentNumber == requiredNumber)
+      return inter;
+  }
+
+  RuntimeException::selfThrow("Topology::getInteractiob(n) inter not found.");
+
+  return inter;
 }
