@@ -26,8 +26,8 @@
 
 #include "op3x3.h"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 //#define NEFC3D_DEBUG
