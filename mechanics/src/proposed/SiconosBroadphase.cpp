@@ -14,8 +14,12 @@ void SiconosBroadphase::link(SP::Interaction inter,
                              SP::DynamicalSystem ds2)
 {
   DEBUG_PRINTF("link interaction : %d\n", inter->number());
+
   model()->nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
-  model()->simulation()->computeLevelsForInputAndOutput(inter);
+
+  model()->simulation()->initializeInteraction(
+    model()->simulation()->nextTime(),
+    inter);
 
   // Note FP : ds init should probably be done once and only once for
   // all ds (like in simulation->initialize()) but where/when?
@@ -29,11 +33,6 @@ void SiconosBroadphase::link(SP::Interaction inter,
     if(has2DS)
       ds2->initializeNonSmoothInput(k);
   }
-
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
-
-  inter->initialize(model()->simulation()->nextTime(), indexSet0->properties(ui));
 }
 
 void SiconosBroadphase::unlink(SP::Interaction inter)
