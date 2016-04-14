@@ -109,6 +109,26 @@ public:
     return _topology->dSG(0);
   }
 
+  /** add a dynamical system
+   * \param ds a pointer to the system to add
+   */
+  inline void insertDynamicalSystem(SP::DynamicalSystem ds)
+  {
+    _topology->insertDynamicalSystem(ds);
+    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+  };
+
+  /** get Dynamical system number I
+   * \param nb the identifier of the DynamicalSystem to get
+   * \return a pointer on DynamicalSystem
+   */
+  inline SP::DynamicalSystem dynamicalSystem(int nb) const
+  {
+    return _topology->getDynamicalSystem(nb);
+  }
+
+
+  
   // === Interactions management ===
 
   /** get the number of Interactions present in the NSDS.
@@ -119,6 +139,15 @@ public:
     return _topology->indexSet0()->size();
   };
 
+  /** return the graph of  Interactions present in the NSDS.
+   *  \return SP::InteractionGraph
+   */
+  inline const SP::InteractionsGraph  interactions() const
+  {
+    return _topology->indexSet0();
+  };
+
+
   /** remove an interaction to the system
    * \param inter a pointer to the interaction to remove
    */
@@ -126,15 +155,27 @@ public:
   {
     _topology->removeInteraction(inter);
   };
-
-  /** add a dynamical system
-   * \param ds a pointer to the system to add
+  
+  /** get Interaction number I
+   * \param nb the identifier of the Interaction to get
+   * \return a pointer on Interaction
    */
-  inline void insertDynamicalSystem(SP::DynamicalSystem ds)
+  inline SP::Interaction interaction(int nb) const
   {
-    _topology->insertDynamicalSystem(ds);
-    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
-  };
+    return _topology->getInteraction(nb);
+  }
+
+
+  /** link an interaction to two dynamical systems
+   * \param inter the interaction
+   * \param ds1 a DynamicalSystem
+   * \param ds2 a DynamicalSystem (optional)
+   */
+  void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+
+  
+
+  
 
   inline void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
   {
@@ -151,12 +192,6 @@ public:
     _topology->setName(ds, name);
   };
 
-  /** link an interaction to two dynamical systems
-   * \param inter the interaction
-   * \param ds1 a DynamicalSystem
-   * \param ds2 a DynamicalSystem (optional)
-   */
-  void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
     /** specify id the given Interaction is for controlling the DS
    * \param inter the Interaction
@@ -168,14 +203,6 @@ public:
     _topology->setControlProperty(inter, isControlInteraction);
   }
 
-  /** get Dynamical system number I
-   * \param nb the identifier of the DynamicalSystem to get
-   * \return a pointer on DynamicalSystem
-   */
-  inline SP::DynamicalSystem dynamicalSystem(int nb) const
-  {
-    return _topology->getDynamicalSystem(nb);
-  }
 
   /** get the topology of the system
    *  \return a pointer on Topology
