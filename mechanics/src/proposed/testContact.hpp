@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-#ifndef MultiBodyTest_h
-#define MultiBodyTest_h
+#ifndef TestContact_h
+#define TestContact_h
 
 #include <cppunit/extensions/HelperMacros.h>
 
