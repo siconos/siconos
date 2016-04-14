@@ -238,12 +238,10 @@ void BulletBroadphase::update(SP::SiconosSphere sphere)
   assert(btobject
          && "BulletBroadphase::update(), sphere not found in objectMap.");
 
-  btTransform transform;
-  transform.setIdentity();
-  // transform.setRotation(btQuaternion((*pos)(3), (*pos)(4),
-  //                                    (*pos)(5), (*pos)(6)));
-  transform.setOrigin(btVector3((*pos)(0), (*pos)(1), (*pos)(2)));
-  btobject->setWorldTransform(transform);
+  SiconosVector &q = *sphere->position();
+  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
+                 btVector3(q(0), q(1), q(2)));
+  btobject->setWorldTransform(tr);
 }
 
 void BulletBroadphase::visit(SP::SiconosPlane plane)
@@ -265,16 +263,15 @@ void BulletBroadphase::update(SP::SiconosPlane plane)
   DEBUG_PRINTF("updating plane: %p(%ld)\n",
          &*plane,plane.use_count());
 
+
+  // Update object parameters
   SP::btCollisionObject btobject(impl->objectMap[plane]);
+  assert(btobject
+         && "BulletBroadphase::update(), plane not found in objectMap.");
 
-  // TODO ASSERT btobject!=null
-
-  // TODO: orientation
-  btTransform tr;
-  tr.setIdentity();
-  tr.setOrigin(btVector3((*plane->position())(0),
-                         (*plane->position())(1),
-                         (*plane->position())(2)));
+  SiconosVector &q = *plane->position();
+  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
+                 btVector3(q(0), q(1), q(2)));
   btobject->setWorldTransform(tr);
 }
 
@@ -284,27 +281,57 @@ void BulletBroadphase::visit(SP::SiconosBox box)
   DEBUG_PRINTF("box: %p(%ld)\n",
          &*box,box.use_count());
 
-  // create the initial plane with default 1.0 parameters
-  SP::btBoxShape btbox(
-    new btBoxShape(btVector3(1, 1, 1)));
-
+  // create the initial box with default 1.0 parameters
+#ifdef USE_CONVEXHULL_FOR_BOX
+  SP::btConvexHullShape btbox(new btConvexHullShape());
+  {
+    (btbox)->addPoint(btVector3(-1.0, 1.0, -1.0));
+    (btbox)->addPoint(btVector3(-1.0, -1.0, -1.0));
+    (btbox)->addPoint(btVector3(-1.0, -1.0, 1.0));
+    (btbox)->addPoint(btVector3(-1.0, 1.0, 1.0));
+    (btbox)->addPoint(btVector3(1.0, 1.0, 1.0));
+    (btbox)->addPoint(btVector3(1.0, 1.0, -1.0));
+    (btbox)->addPoint(btVector3(1.0, -1.0, -1.0));
+    (btbox)->addPoint(btVector3(1.0, -1.0, 1.0));
+  }
+#else
+  SP::btBoxShape btbox(new btBoxShape(btVector3(1,1,1)));
+#endif
+    
   // initialization
-  visit_helper(box, btbox, impl->boxMap);
+
+    visit_helper(box, btbox, impl->boxMap);
 }
 
 void BulletBroadphase::update(SP::SiconosBox box)
 {
-  DEBUG_PRINTF("updating box: %p(%ld)\n",
-         &*box,box.use_count());
+  const SP::SiconosVector pos = box->position();
+  DEBUG_PRINTF("updating box: %p(%ld) - %f, %f, %f\n",
+         &*box,box.use_count(),
+         (*pos)(0), (*pos)(1), (*pos)(2));
 
+  // Update shape parameters
+#ifdef USE_CONVEXHULL_FOR_BOX
+  SP::btConvexHullShape btbox(impl->boxMap[box]);
+#else
   SP::btBoxShape btbox(impl->boxMap[box]);
+#endif
+  assert(btbox
+         && "BulletBroadphase::update(), box not found in boxMap.");
 
-  // TODO ASSERT btobject!=null
-
-  // TODO: orientation
   btbox->setLocalScaling(btVector3((*box->dimensions())(0),
                                    (*box->dimensions())(1),
                                    (*box->dimensions())(2)));
+
+  // Update object parameters
+  SP::btCollisionObject btobject(impl->objectMap[box]);
+  assert(btobject
+         && "BulletBroadphase::update(), box not found in objectMap.");
+
+  SiconosVector &q = *box->position();
+  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
+                 btVector3(q(0), q(1), q(2)));
+  btobject->setWorldTransform(tr);
 }
 
 void BulletBroadphase::visit(const BodyDS &bds)
