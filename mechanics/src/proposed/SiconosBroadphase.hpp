@@ -24,6 +24,8 @@
 #ifndef SiconosBroadphase_h
 #define SiconosBroadphase_h
 
+#include <vector>
+
 #include <SiconosVisitor.hpp>
 #include <MechanicsFwd.hpp>
 #include <Model.hpp>
