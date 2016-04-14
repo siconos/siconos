@@ -22,9 +22,73 @@
 #include <boost/math/quaternion.hpp>
 
 #include <iostream>
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <debug.h>
+
+
+void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
+{
+  DEBUG_BEGIN("void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
+  double q0 = q->getValue(3);
+  double q1 = q->getValue(4);
+  double q2 = q->getValue(5);
+  double q3 = q->getValue(6);
+
+  ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+  ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+  ::boost::math::quaternion<double>    quatx(0, 1, 0, 0);
+  ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
+  ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
+  ::boost::math::quaternion<double>    quatBuff;
+  /*See equation with label eq:newton_Mobjtoabs from the DevNote.pdf
+   * Chapter gradient computation, case of NewtonEuler formulation
+   * with quaternion
+   */
+  quatBuff = quatcQ * quatx * quatQ;
+  mObjToAbs->setValue(0, 0, quatBuff.R_component_2());
+  mObjToAbs->setValue(0, 1, quatBuff.R_component_3());
+  mObjToAbs->setValue(0, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ * quaty * quatQ;
+  mObjToAbs->setValue(1, 0, quatBuff.R_component_2());
+  mObjToAbs->setValue(1, 1, quatBuff.R_component_3());
+  mObjToAbs->setValue(1, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ * quatz * quatQ;
+  mObjToAbs->setValue(2, 0, quatBuff.R_component_2());
+  mObjToAbs->setValue(2, 1, quatBuff.R_component_3());
+  mObjToAbs->setValue(2, 2, quatBuff.R_component_4());
+  DEBUG_END("void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
+
+}
+
+void computeT(SP::SiconosVector q, SP::SimpleMatrix T)
+{
+
+  //  std::cout <<"\n NewtonEulerDS::computeT(SP::SiconosVector q)\n  " <<std::endl;
+  double q0 = q->getValue(3) / 2.0;
+  double q1 = q->getValue(4) / 2.0;
+  double q2 = q->getValue(5) / 2.0;
+  double q3 = q->getValue(6) / 2.0;
+  T->setValue(3, 3, -q1);
+  T->setValue(3, 4, -q2);
+  T->setValue(3, 5, -q3);
+  T->setValue(4, 3, q0);
+  T->setValue(4, 4, -q3);
+  T->setValue(4, 5, q2);
+  T->setValue(5, 3, q3);
+  T->setValue(5, 4, q0);
+  T->setValue(5, 5, -q1);
+  T->setValue(6, 3, -q2);
+  T->setValue(6, 4, q1);
+  T->setValue(6, 5, q0);
+
+}
+
+
+
+
+
+
 // Private function to set linked with members of Dynamical top class
 void NewtonEulerDS::connectToDS()
 {
@@ -766,65 +830,22 @@ void NewtonEulerDS::resetNonSmoothPart(unsigned int level)
 
 void NewtonEulerDS::computeT()
 {
-  computeT(_q);
+  ::computeT(_q,_T);
 }
 
 
-void NewtonEulerDS::computeT(SP::SiconosVector q)
-{
-
-  //  std::cout <<"\n NewtonEulerDS::computeT(SP::SiconosVector q)\n  " <<std::endl;
-  double q0 = q->getValue(3) / 2.0;
-  double q1 = q->getValue(4) / 2.0;
-  double q2 = q->getValue(5) / 2.0;
-  double q3 = q->getValue(6) / 2.0;
-  _T->setValue(3, 3, -q1);
-  _T->setValue(3, 4, -q2);
-  _T->setValue(3, 5, -q3);
-  _T->setValue(4, 3, q0);
-  _T->setValue(4, 4, -q3);
-  _T->setValue(4, 5, q2);
-  _T->setValue(5, 3, q3);
-  _T->setValue(5, 4, q0);
-  _T->setValue(5, 5, -q1);
-  _T->setValue(6, 3, -q2);
-  _T->setValue(6, 4, q1);
-  _T->setValue(6, 5, q0);
-
-}
 
 void NewtonEulerDS::computeTdot()
 {
-  computeTdot(_dotq);
-}
-
-void NewtonEulerDS::computeTdot(SP::SiconosVector dotq)
-{
-
   if (!_Tdot)
   {
     _Tdot.reset(new SimpleMatrix(_qDim, _n));
     _Tdot->zero();
   }
 
-  double q0 = dotq->getValue(3) / 2.0;
-  double q1 = dotq->getValue(4) / 2.0;
-  double q2 = dotq->getValue(5) / 2.0;
-  double q3 = dotq->getValue(6) / 2.0;
-  _Tdot->setValue(3, 3, -q1);
-  _Tdot->setValue(3, 4, -q2);
-  _Tdot->setValue(3, 5, -q3);
-  _Tdot->setValue(4, 3, q0);
-  _Tdot->setValue(4, 4, -q3);
-  _Tdot->setValue(4, 5, q2);
-  _Tdot->setValue(5, 3, q3);
-  _Tdot->setValue(5, 4, q0);
-  _Tdot->setValue(5, 5, -q1);
-  _Tdot->setValue(6, 3, -q2);
-  _Tdot->setValue(6, 4, q1);
-  _Tdot->setValue(6, 5, q0);
-
+  ::computeT(_dotq,_Tdot);
 }
+
 
 
 
@@ -841,39 +862,10 @@ void NewtonEulerDS::normalizeq()
 }
 void NewtonEulerDS::computeMObjToAbs()
 {
-  computeMObjToAbs(_q);
+  ::computeMObjToAbs(_q, _MObjToAbs);
 }
 
-void NewtonEulerDS::computeMObjToAbs(SP::SiconosVector q)
-{
-  double q0 = q->getValue(3);
-  double q1 = q->getValue(4);
-  double q2 = q->getValue(5);
-  double q3 = q->getValue(6);
 
-  ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
-  ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
-  ::boost::math::quaternion<double>    quatx(0, 1, 0, 0);
-  ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
-  ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
-  ::boost::math::quaternion<double>    quatBuff;
-  /*See equation with label eq:newton_Mobjtoabs from the DevNote.pdf
-   * Chapter gradient computation, case of NewtonEuler formulation
-   * with quaternion
-   */
-  quatBuff = quatcQ * quatx * quatQ;
-  _MObjToAbs->setValue(0, 0, quatBuff.R_component_2());
-  _MObjToAbs->setValue(0, 1, quatBuff.R_component_3());
-  _MObjToAbs->setValue(0, 2, quatBuff.R_component_4());
-  quatBuff = quatcQ * quaty * quatQ;
-  _MObjToAbs->setValue(1, 0, quatBuff.R_component_2());
-  _MObjToAbs->setValue(1, 1, quatBuff.R_component_3());
-  _MObjToAbs->setValue(1, 2, quatBuff.R_component_4());
-  quatBuff = quatcQ * quatz * quatQ;
-  _MObjToAbs->setValue(2, 0, quatBuff.R_component_2());
-  _MObjToAbs->setValue(2, 1, quatBuff.R_component_3());
-  _MObjToAbs->setValue(2, 2, quatBuff.R_component_4());
-}
 
 void NewtonEulerDS::setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
 {

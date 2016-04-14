@@ -31,6 +31,8 @@ typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int 
 typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
 
 
+void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
+void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 /** \class NewtonEulerDS
  *  \brief NewtonEuler non linear dynamical systems - Second Order Non Linear Dynamical Systems.
  *   NewtonEuler non linear dynamical systems - Derived from DynamicalSystem -
@@ -873,10 +875,9 @@ public:
 
 
   virtual void computeT();
-  virtual void computeT(SP::SiconosVector q);
 
   virtual void computeTdot();
-  virtual void computeTdot(SP::SiconosVector dotq);
+
 
 
   virtual void normalizeq();
@@ -954,10 +955,10 @@ public:
   /*update the _MObjToAbs from the current quaternion.*/
   void computeMObjToAbs();
 
-  /* update the _MObjToAbs from a given quaternion.
-   * \param q
-   */
-  void computeMObjToAbs(SP::SiconosVector q);
+  // /* update the _MObjToAbs from a given quaternion.
+  //  * \param q
+  //  */
+  // void computeMObjToAbs(SP::SiconosVector q);
 
   ACCEPT_STD_VISITORS();
 
