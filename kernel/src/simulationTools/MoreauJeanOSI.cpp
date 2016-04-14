@@ -466,8 +466,8 @@ void MoreauJeanOSI::computeInitialNewtonState()
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       //SP::SiconosVector q = d->q();
-      d->computeT(qold);
-      d->computeMObjToAbs(qold);
+      computeT(qold,d->T());
+      computeMObjToAbs(qold,d->MObjToAbs());
     }
 
     // The goal is to converge in one iteration of the system is almost linear
