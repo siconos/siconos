@@ -126,14 +126,12 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
     bool computeResidu = _relation->requireResidu();
     initializeMemory(computeResidu);
 
-    // prepare the gradients
-    _relation->computeJach(t0, *this, interProp);
 
 
 
     if (_steps > 1) // Multi--step methods
     {
-      // Comoyte the old Values of Output with stored values in Memory
+      // Compute the old Values of Output with stored values in Memory
       for (unsigned int k = 0; k < _steps - 1; k++)
       {
         /** ComputeOutput to fill the Memory
@@ -148,6 +146,11 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
         }
       }
     }
+    // Compute a first value for the output
+    computeOutput(t0, interProp, 0);
+
+    // prepare the gradients
+    _relation->computeJach(t0, *this, interProp);
 
     // Compute y values for t0
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
@@ -159,7 +162,7 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
 
   swapInMemory();
   DEBUG_END("Interaction::initialize(double t0, InteractionProperties& interProp ) \n");
-    
+
 }
 
 // Initialize and InitializeMemory are separated in two functions
