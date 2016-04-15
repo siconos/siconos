@@ -22,10 +22,14 @@
 #include "NewtonEulerDS.hpp"
 #include <boost/math/quaternion.hpp>
 #include "Interaction.hpp"
+#include "BlockVector.hpp"
 
 #include "op3x3.h"
 
-//#define NEFC3D_DEBUG
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
+
 /*
 See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'
 */
@@ -35,11 +39,15 @@ void NewtonEulerFrom3DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
   _jachq.reset(new SimpleMatrix(3, qSize));
+
+
+  /* VA 12/04/2016 All of what follows shoudl be put in WorkM*/
   _Mabs_C.reset(new SimpleMatrix(3, 3));
+  _MObjToAbs.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
 }
-void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
+void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 {
 
   double Nx = _Nc->getValue(0);
@@ -48,20 +56,16 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   double Px = _Pc1->getValue(0);
   double Py = _Pc1->getValue(1);
   double Pz = _Pc1->getValue(2);
-  double G1x = d1->q()->getValue(0);
-  double G1y = d1->q()->getValue(1);
-  double G1z = d1->q()->getValue(2);
+  double G1x = q1->getValue(0);
+  double G1y = q1->getValue(1);
+  double G1z = q1->getValue(2);
 
-
-
-#ifdef NEFC3D_DEBUG
-  printf("contact normal:\n");
-  _Nc->display();
-  printf("contact point :\n");
-  _Pc1->display();
-  printf("center of mass :\n");
-  d1->q()->display();
-#endif
+  DEBUG_PRINT("contact normal:\n");
+  DEBUG_EXPR(_Nc->display(););
+  DEBUG_PRINT("contact point :\n");
+  DEBUG_EXPR(_Pc1->display(););
+  DEBUG_PRINT("center of mass :\n");
+  DEBUG_EXPR(q1->display(););
 
   assert(_Nc->norm2() >0.0 && "NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Normal vector not consistent ") ;
 
@@ -78,10 +82,10 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   _Mabs_C->setValue(0, 2, Nz);
   _Mabs_C->setValue(1, 2, *(pt + 2));
   _Mabs_C->setValue(2, 2, *(pt + 5));
-#ifdef NEFC3D_DEBUG
-  printf("_Mabs_C:\n");
-  _Mabs_C->display();
-#endif
+
+  DEBUG_PRINT("_Mabs_C:\n");
+  DEBUG_EXPR(_Mabs_C->display(););
+
   _NPG1->zero();
 
   (*_NPG1)(0, 0) = 0;
@@ -95,35 +99,33 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   (*_NPG1)(2, 2) = 0;
 
 //  d1->computeMObjToAbs();
-  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
+//  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
+
+  computeMObjToAbs(q1,_MObjToAbs);
+ 
+  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _MObjToAbs:");
+  DEBUG_EXPR(_MObjToAbs->display(););
 
 
 
-#ifdef NEFC3D_DEBUG
-  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, Mobj1_abs:");
-  Mobj1_abs.display();
-#endif
+  prod(*_NPG1, *_MObjToAbs, *_AUX1, true);
 
+  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, *_MObjToAbs:");
+  DEBUG_EXPR_WE(_MObjToAbs->display(););
+  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX1:");
+  DEBUG_EXPR_WE(_AUX1->display(););
+  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX2:");
+  DEBUG_EXPR(_AUX2->display(););
 
-  prod(*_NPG1, Mobj1_abs, *_AUX1, true);
-#ifdef NEFC3D_DEBUG
-  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, Mobj1_abs:");
-  Mobj1_abs.display();
-  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX1:");
-  _AUX1->display();
-  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX2:");
-  _AUX2->display();
-#endif
 
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
-#ifdef NEFC3D_DEBUG
-  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, Mabs_C:");
-  _Mabs_C->display();
-  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX1:");
-  _AUX1->display();
-  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX2:");
-  _AUX2->display();
-#endif
+
+  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, Mabs_C:");
+  DEBUG_EXPR_WE(_Mabs_C->display(););
+  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX1:");
+  DEBUG_EXPR_WE(_AUX1->display(););
+  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX2:");
+  DEBUG_EXPR_WE(_AUX2->display(););
 
 
   for (unsigned int ii = 0; ii < 3; ii++)
@@ -133,29 +135,32 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
-#ifdef NEFC3D_DEBUG
-  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _jahcqT:\n");
-  _jachqT->display();
-  SP::SimpleMatrix jaux(new SimpleMatrix(*_jachqT));
-  jaux->trans();
-  SP::SiconosVector v(new SiconosVector(3));
-  SP::SiconosVector vRes(new SiconosVector(6));
-  v->zero();
-  v->setValue(0, 1);
-  prod(*jaux, *v, *vRes, true);
-  vRes->display();
-  v->zero();
-  v->setValue(1, 1);
-  prod(*jaux, *v, *vRes, true);
-  vRes->display();
-  v->zero();
-  v->setValue(2, 1);
-  prod(*jaux, *v, *vRes, true);
-  vRes->display();
-#endif
+
+
+  
+  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _jahcqT:\n");
+  DEBUG_EXPR(_jachqT->display(););
+  // DEBUG_EXPR_WE(
+  //   SP::SimpleMatrix jaux(new SimpleMatrix(*_jachqT));
+  //   jaux->trans();
+  //   SP::SiconosVector v(new SiconosVector(3));
+  //   SP::SiconosVector vRes(new SiconosVector(6));
+  //   v->zero();
+  //   v->setValue(0, 1);
+  //   prod(*jaux, *v, *vRes, true);
+  //   vRes->display();
+  //   v->zero();
+  //   v->setValue(1, 1);
+  //   prod(*jaux, *v, *vRes, true);
+  //   vRes->display();
+  //   v->zero();
+  //   v->setValue(2, 1);
+  //   prod(*jaux, *v, *vRes, true);
+  //   vRes->display();
+  //   );
 }
 
-void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
+void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)
 {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
@@ -163,13 +168,25 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   double Px = _Pc1->getValue(0);
   double Py = _Pc1->getValue(1);
   double Pz = _Pc1->getValue(2);
-  double G1x = d1->q()->getValue(0);
-  double G1y = d1->q()->getValue(1);
-  double G1z = d1->q()->getValue(2);
-  double G2x = d2->q()->getValue(0);
-  double G2y = d2->q()->getValue(1);
-  double G2z = d2->q()->getValue(2);
+  double G1x = q1->getValue(0);
+  double G1y = q1->getValue(1);
+  double G1z = q1->getValue(2);
+  double G2x = q2->getValue(0);
+  double G2y = q2->getValue(1);
+  double G2z = q2->getValue(2);
 
+
+  DEBUG_PRINT("contact normal:\n");
+  DEBUG_EXPR(_Nc->display(););
+  DEBUG_PRINT("contact point :\n");
+  DEBUG_EXPR(_Pc1->display(););
+  DEBUG_PRINT("center of mass :\n");
+  DEBUG_EXPR(q1->display(););
+
+
+
+
+  
   double t[6];
   double * pt = t;
   orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5);
@@ -209,11 +226,14 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   (*_NPG2)(2, 2) = 0;
 
 
+
+
 //  d1->computeMObjToAbs();
-  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
+//  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
+  computeMObjToAbs(q1,_MObjToAbs);
 
-  prod(*_NPG1, Mobj1_abs, *_AUX1, true);
+  prod(*_NPG1, *_MObjToAbs, *_AUX1, true);
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
 
 
@@ -226,9 +246,12 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
 //  d2->computeMObjToAbs();
-  SimpleMatrix& Mobj2_abs = *d2->MObjToAbs();
+//  SimpleMatrix& Mobj2_abs = *d2->MObjToAbs();
 
-  prod(*_NPG2, Mobj2_abs, *_AUX1, true);
+
+  computeMObjToAbs(q2,_MObjToAbs);
+  
+  prod(*_NPG2, *_MObjToAbs, *_AUX1, true);
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
 
   for (unsigned int ii = 0; ii < 3; ii++)
@@ -243,13 +266,37 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
 
 void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
+
+  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)\n");
   SP::NewtonEulerDS d1 =  std11::static_pointer_cast<NewtonEulerDS> (ds1);
   SP::NewtonEulerDS d2 =  std11::static_pointer_cast<NewtonEulerDS> (ds2);
-  if(d1 != d2)
-    FC3DcomputeJachqTFromContacts(d1, d2);
+ 
   
+  if(d1 != d2)
+    FC3DcomputeJachqTFromContacts(d1->q(), d2->q());
+
   else
   {
-    FC3DcomputeJachqTFromContacts(d1);
+    FC3DcomputeJachqTFromContacts(d1->q());
   }
+  DEBUG_END("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)\n");
+
+}
+
+
+void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink)
+{
+  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n")
+  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
+  if (inter.has2Bodies())
+  {
+    FC3DcomputeJachqTFromContacts((BlockX->getAllVect())[0], (BlockX->getAllVect())[1]);
+  }
+  else
+  {
+    FC3DcomputeJachqTFromContacts((BlockX->getAllVect())[0]);
+  }
+
+  DEBUG_END("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n");
+
 }

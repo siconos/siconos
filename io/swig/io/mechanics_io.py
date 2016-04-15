@@ -172,7 +172,7 @@ def str_of_file(filename):
 #
 # load .vtp file
 #
-def loadMesh(shape_filename):
+def loadMesh(shape_filename, collision_margin):
     """
     loads a vtk .vtp file and returns a Bullet concave shape
     WARNING triangles cells assumed!
@@ -219,6 +219,7 @@ def loadMesh(shape_filename):
             coors[points.GetTuple(i)] = 1
 
         shape = btConvexHullShape()
+        shape.setMargin(collision_margin)
         for p in coors:
                 shape.addPoint(btVector3(*p))
 
@@ -231,10 +232,11 @@ class ShapeCollection():
     Instantiation of added contact shapes
     """
 
-    def __init__(self, io):
+    def __init__(self, io, collision_margin=0.04):
         self._io = io
         self._shapes = dict()
-
+        self._collision_margin=collision_margin
+        print('self._collision_margin',self._collision_margin)
         if bullet_is_here:
 
             self._primitive = {'Cylinder': btCylinderShape,
@@ -281,7 +283,7 @@ class ShapeCollection():
                             tmpf[0].write(data)
                             tmpf[0].flush()
                             self._tri[index], self._shape[index] = loadMesh(
-                                tmpf[1])
+                                tmpf[1],self._collision_margin)
                     else:
                         assert False
                 elif self.attributes(shape_name)['type'] in['step']:
@@ -384,6 +386,8 @@ class ShapeCollection():
                 else:
                     # a convex point set
                     convex = btConvexHullShape()
+                    print('set collision margin to ', self._collision_margin)
+                    convex.setMargin(self._collision_margin)
                     for points in self.shape(shape_name):
                         convex.addPoint(btVector3(float(points[0]),
                                                   float(points[1]),
@@ -393,7 +397,7 @@ class ShapeCollection():
             elif isinstance(self.url(shape_name), str) and \
                     os.path.exists(self.url(shape_name)):
                 self._tri[shape_name], self._shapes[shape_name] = loadMesh(
-                    self.url(shape_name))
+                    self.url(shape_name),_collision_margin)
             else:
                 # it must be a primitive with attributes
                 if isinstance(self.url(shape_name), str):
@@ -449,7 +453,7 @@ class Hdf5():
 
     def __init__(self, io_filename=None, mode='w',
                  broadphase=None, osi=None, shape_filename=None,
-                 set_external_forces=None, length_scale=None):
+                 set_external_forces=None, length_scale=None, collision_margin=None):
 
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
@@ -482,9 +486,15 @@ class Hdf5():
         self._number_of_dynamic_objects = 0
         self._number_of_static_objects = 0
         self._length_scale = length_scale
+        self._collision_margin = collision_margin
         self._output_frequency = 1
         self._keep = []
 
+        print('collision_margin in __init__', collision_margin)
+        print('self._collision_margin in __init__', self._collision_margin)
+        
+
+        
     def __enter__(self):
         if self._set_external_forces is None:
             self._set_external_forces = self.apply_gravity
@@ -505,10 +515,16 @@ class Hdf5():
         self._nslaws = group(self._data, 'nslaws')
 
         if self._shape_filename is None:
-            self._shape = ShapeCollection(self)
+            if self._collision_margin:
+                self._shape = ShapeCollection(io=self, collision_margin=self._collision_margin)
+                
+            else:
+                self._shape = ShapeCollection(io=self)
         else:
-            self._shape = ShapeCollection(self._shape_filename)
-
+            if self._collision_margin:
+                self._shape = ShapeCollection(io=self._shape_filename, collision_margin=self._collision_margin)
+            else:
+                self._shape = ShapeCollection(io=self._shape_filename)
         return self
 
     def __exit__(self, type_, value, traceback):
@@ -825,8 +841,7 @@ class Hdf5():
                     # Bullet object
                     self.importObject(
                         name, floatv(translation), floatv(orientation),
-                        floatv(
-                            velocity), contactors, float(mass),
+                        floatv(velocity), contactors, float(mass),
                         inertia, body_class, shape_class)
 
             # import nslaws
@@ -1257,6 +1272,7 @@ class Hdf5():
             itermax=100000,
             tolerance=1e-8,
             numerics_verbose=False,
+            violation_verbose=False,
             output_frequency=None):
         """
         Run a simulation from inputs in hdf5 file.
@@ -1395,8 +1411,31 @@ class Hdf5():
                 log(self.outputSolverInfos, with_timer)()
                     
                 log(self._out.flush)()
+
             print('number of contact',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
             self.printSolverInfos()
+            if violation_verbose:
+                print('violation info')
+                y = simulation.output(0,0)
+                yplus=  np.zeros((2,len(y)))
+                yplus[0,:] = y
+                #print(yplus)
+                
+                if len(simulation.output(0,0)) >0 :
+                    y=np.min(yplus,axis=1)
+                    violation_max=np.max(-y)
+                    print('  violation max :',np.max(-y))
+                    if  (violation_max >= self._collision_margin):
+                        #print(simulation.output(0,0))
+                        print('  violation max is larger than the collision_margin')
+                # v = simulation.output(1,0)
+                # vplus=  np.zeros((2,len(v)))
+                # vplus[0,:] = v
+                # if len(simulation.output(1,0)) >0 :
+                #     v=np.max(vplus,axis=1)
+                #     velocity_max=np.max(v)
+                #     print('  velocity max :',np.max(v))
+                #     #print(simulation.output(1,0))
         
 
             log(simulation.nextStep, with_timer)()

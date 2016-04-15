@@ -40,7 +40,7 @@
     EventDriven.
 
     \author SICONOS Development Team - copyright INRIA
-    \version 3.0.0.
+    \version 3.8.0.
     \date (Creation) Apr 26, 2004
 
     !!! This is an abstract class !!!
@@ -48,10 +48,8 @@
     The available simulations are TimeStepping and EventDriven. See
     derived classes for more details.
 
-
-
   Rules:
-  - A Model must be given to the constructor, oterhwise an exception is thrown.
+  - A Model must be given to the constructor, otherwise an exception is thrown.
 */
 class Simulation : public std11::enable_shared_from_this<Simulation>
 {
@@ -541,6 +539,20 @@ public:
       \param level y min order to be computed
    */
   void updateOutput(unsigned int level = 0);
+
+  /** return input lambda[level](coor) for all the interactions
+      \param level lambda min order to be computed
+      \param coor the coordinate of interest
+      \return a SP::SiconosVector that contains the concatenated value
+   */
+  SP::SiconosVector input(unsigned int level = 0, unsigned int coor=0 );
+
+  /** return output y[level](coor) for all the interactions
+      \param level y min order to be computed
+      \param coor the coordinate of interest
+      \return a SP::SiconosVector that contains the concatenated value
+   */
+  SP::SiconosVector output(unsigned int level = 0, unsigned int coor=0 );
 
   /** call eventsManager processEvents.
    */

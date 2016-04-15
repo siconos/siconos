@@ -19,8 +19,8 @@
 #include <assert.h>
 #include <iostream>
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 #include "Interaction.hpp"
@@ -121,16 +121,17 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
 {
   if (!_initialized)
   {
-  DEBUG_PRINTF("Interaction::initialize(double t0) with t0 = %f \n", t0);
+  DEBUG_BEGIN("Interaction::initialize(double t0, InteractionProperties& interProp ) \n");
 
     bool computeResidu = _relation->requireResidu();
     initializeMemory(computeResidu);
 
-    // prepare the gradients
-    _relation->computeJach(t0, *this, interProp);
+
+
+
     if (_steps > 1) // Multi--step methods
     {
-      // Comoyte the old Values of Output with stored values in Memory
+      // Compute the old Values of Output with stored values in Memory
       for (unsigned int k = 0; k < _steps - 1; k++)
       {
         /** ComputeOutput to fill the Memory
@@ -145,6 +146,11 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
         }
       }
     }
+    // Compute a first value for the output
+    computeOutput(t0, interProp, 0);
+
+    // prepare the gradients
+    _relation->computeJach(t0, *this, interProp);
 
     // Compute y values for t0
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
@@ -155,6 +161,8 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
   }
 
   swapInMemory();
+  DEBUG_END("Interaction::initialize(double t0, InteractionProperties& interProp ) \n");
+
 }
 
 // Initialize and InitializeMemory are separated in two functions
@@ -354,6 +362,7 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
 
 void Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)
 {
+  DEBUG_BEGIN("Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)\n");
   DSlink.resize(NewtonEulerR::DSlinkSize);
   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
   DSlink[NewtonEulerR::q0].reset(new BlockVector()); // displacement
@@ -365,10 +374,13 @@ void Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)
   DSlink[NewtonEulerR::p0].reset(new BlockVector());
   DSlink[NewtonEulerR::p1].reset(new BlockVector());
   DSlink[NewtonEulerR::p2].reset(new BlockVector());
+  DEBUG_END("Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)\n");
+
 }
 
 void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)
 {
+  DEBUG_BEGIN("Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)\n");
   // check dynamical system type
   assert((Type::value(ds) == Type::NewtonEulerDS) && "Interaction initDSData failed, not implemented for dynamical system of that type.\n");
 
@@ -390,6 +402,8 @@ void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& wo
     DSlink[NewtonEulerR::p2]->insertPtr(lds.p(2));
 
   DSlink[NewtonEulerR::z]->insertPtr(lds.z());
+  DEBUG_END("Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)\n");
+
 }
 // --- GETTERS/SETTERS ---
 
@@ -626,39 +640,61 @@ void Interaction::swapInMemory()
 
 void Interaction::display() const
 {
-  std::cout << "======= Interaction display =======" <<std::endl;
+  std::cout << "======= Interaction display number " << _number <<" =======" <<std::endl;
 
   if (_initialized)
     std::cout << "The interaction is initialized" <<std::endl;
   else
     cout << "The interaction is not initialized" << endl;
-  cout << "| number : " << _number << endl;
   cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << endl;
   cout << "| upperLevelForOutput : " << _upperLevelForOutput << endl;
   cout << "| lowerLevelForInput : " << _lowerLevelForInput << endl;
   cout << "| upperLevelForInput : " << _upperLevelForInput << endl;
   cout << "| interactionSize : " << _interactionSize << endl;
-  cout << "|  _sizeOfDS : " << _sizeOfDS << endl;
+  cout << "| _sizeOfDS : " << _sizeOfDS << endl;
 
-  _relation->display();
+  cout << "| "  ; _relation->display();
   if (_initialized)
   {
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
-      std::cout << "| y[" << i  << "] : " <<std::endl;
-      if (_y[i]) _y[i]->display();
+
+      std::cout << "| y[" << i  << "] : ";
+      if (_y[i])
+      {
+        if (_y[i]->size() >= 5) std::cout <<std::endl;
+        _y[i]->display();
+      }
       else std::cout << "->NULL" <<std::endl;
     }
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
-      std::cout << "| yOld[" << i  << "] : " <<std::endl;
-      if (_yOld[i]) _yOld[i]->display();
+      std::cout << "| yOld[" << i  << "] : ";
+      if (_yOld[i])
+      {
+        if (_yOld[i]->size() >= 5) std::cout <<std::endl;
+        _yOld[i]->display();
+      }
+      else std::cout << "->NULL" <<std::endl;
+    }
+    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+    {
+      std::cout << "| y_k[" << i  << "] : ";
+      if (_y_k[i])
+      {
+        if (_y_k[i]->size() >= 5) std::cout <<std::endl;
+        _y_k[i]->display();
+      }
       else std::cout << "->NULL" <<std::endl;
     }
     for (unsigned int i = 0; i < _upperLevelForInput + 1; i++)
     {
-      std::cout << "| lambda[" << i  << "] : " <<std::endl;
-      if (_lambda[i]) _lambda[i]->display();
+      std::cout << "| lambda[" << i  << "] : ";
+      if (_lambda[i])
+      {
+        if (_lambda[i]->size() >= 5) std::cout <<std::endl;
+        _lambda[i]->display();
+      }
       else std::cout << "->NULL" <<std::endl;
     }
 
@@ -668,7 +704,13 @@ void Interaction::display() const
 
 void Interaction::computeOutput(double time, InteractionProperties& interProp, unsigned int derivativeNumber)
 {
+
+  DEBUG_BEGIN("Interaction::computeOutput(...)\n");
+  DEBUG_PRINTF("time= %f\t",time);
+  DEBUG_PRINTF("derivativeNumber= %i\n",derivativeNumber);
   relation()->computeOutput(time, *this, interProp, derivativeNumber);
+  DEBUG_END("Interaction::computeOutput(...)\n");
+
 }
 
 void Interaction::computeInput(double time, InteractionProperties& interProp, unsigned int level)

@@ -45,8 +45,8 @@ private:
   */
   ACCEPT_SERIALIZATION(NewtonEulerFrom3DLocalFrameR);
 
-  void FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1);
-  void FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2);
+  void FC3DcomputeJachqTFromContacts(SP::SiconosVector q1);
+  void FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2);
 
 protected:
   /** initialize components specific to derived classes.
@@ -70,7 +70,8 @@ public:
    * \param ds2
    */
   virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
-
+  virtual void computeJachqT(Interaction& inter,  VectorOfBlockVectors& DSlink);
+  
   ACCEPT_STD_VISITORS();
 };
 #endif // NEWTONEULERRELATIONFC3D_H

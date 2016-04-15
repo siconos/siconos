@@ -309,19 +309,29 @@ public:
   void setProperties();
 
   /** Get a dynamical system using its number
-      \warning O(n) complexity
-   \param requiredNumber the required number
-   \return a DynamicalSystem
-  */
+   *   \warning O(n) complexity
+   * \param requiredNumber the required number
+   * \return a DynamicalSystem
+   */
   SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber);
 
   /** Get a dynamical system using its name
-      \warning O(n) complexity
-   \param name the name of the dynamical system
-   \return a DynamicalSystem
-  */
+   *  \warning O(n) complexity
+   *  \param name the name of the dynamical system
+   * \return a DynamicalSystem
+   */
   SP::DynamicalSystem getDynamicalSystem(std::string name);
+  
 
+  /** Get a interaction using its number
+   *  \warning O(n) complexity
+   *  \param requiredNumber the required number
+   *  \return a Interaction
+   */
+  SP::Interaction getInteraction(unsigned int requiredNumber);
+
+
+  
 
   /** Helper to get the descriptor in DSG0 from a DynamicalSystem
    *  \param ds DynamicalSystem of which we want the descriptor

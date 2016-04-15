@@ -196,6 +196,9 @@ PY_FULL_REGISTER(BulletTimeSteppingDirectProjection);
 PY_FULL_REGISTER(BulletWeightedShape);
 PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 
+
+
+
 %inline
 {
   SP::BulletDS cast_BulletDS(SP::DynamicalSystem ds)
@@ -210,7 +213,25 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 
   extern bool gContactCalcArea3Points;
 
+
+  extern  btScalar gContactBreakingThreshold;
+
+  
+  void set_gContactBreakingThreshold(double x)
+  {
+    gContactBreakingThreshold = btScalar(x);
+  };
+  btScalar get_gContactBreakingThreshold()
+  {
+    return gContactBreakingThreshold;
+  };
+
+  
+  
 }
+
+
+
 
 %extend btCollisionObject
 {
