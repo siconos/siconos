@@ -41,7 +41,7 @@ void NewtonEulerFrom3DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
   _jachq.reset(new SimpleMatrix(3, qSize));
 
 
-
+  _Mabs_C.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
 }
@@ -100,7 +100,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 //  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
   computeMObjToAbs(q1,_MObjToAbs);
- 
+
   DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _MObjToAbs:");
   DEBUG_EXPR(_MObjToAbs->display(););
 
@@ -135,7 +135,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
 
-  
+
   DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _jahcqT:\n");
   DEBUG_EXPR(_jachqT->display(););
   // DEBUG_EXPR_WE(
@@ -184,7 +184,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 
 
-  
+
   double t[6];
   double * pt = t;
   orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5);
@@ -248,7 +248,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 
   computeMObjToAbs(q2,_MObjToAbs);
-  
+
   prod(*_NPG2, *_MObjToAbs, *_AUX1, true);
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
 
