@@ -169,6 +169,10 @@ void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   _jachq.reset(new SimpleMatrix(1, qSize));
+
+
+
+  /* VA 12/04/2016 All of what follows should be put in WorkM*/
   _Mabs_C.reset(new SimpleMatrix(1, 3));
   _MObjToAbs.reset(new SimpleMatrix(3, 3));
   _AUX1.reset(new SimpleMatrix(3, 3));
@@ -255,19 +259,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
   DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, ...) \n");
 
 }
-void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
-{
-  SP::NewtonEulerDS d1 =  std11::static_pointer_cast<NewtonEulerDS> (ds1);
-  SP::NewtonEulerDS d2 =  std11::static_pointer_cast<NewtonEulerDS> (ds2);
-  if(d1 != d2)
-  {
-    NIcomputeJachqTFromContacts(d1->q(), d2->q());
-  }
-  else
-  {
-    NIcomputeJachqTFromContacts(d1->q());
-  }
-}
+
 
 void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink)
 {

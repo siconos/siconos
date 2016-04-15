@@ -41,9 +41,7 @@ void NewtonEulerFrom3DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
   _jachq.reset(new SimpleMatrix(3, qSize));
 
 
-  /* VA 12/04/2016 All of what follows shoudl be put in WorkM*/
-  _Mabs_C.reset(new SimpleMatrix(3, 3));
-  _MObjToAbs.reset(new SimpleMatrix(3, 3));
+
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
 }
@@ -263,26 +261,6 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
       _jachqT->setValue(ii, jj + 6, -_AUX2->getValue(ii, jj - 3));
 
 }
-
-void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
-{
-
-  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)\n");
-  SP::NewtonEulerDS d1 =  std11::static_pointer_cast<NewtonEulerDS> (ds1);
-  SP::NewtonEulerDS d2 =  std11::static_pointer_cast<NewtonEulerDS> (ds2);
- 
-  
-  if(d1 != d2)
-    FC3DcomputeJachqTFromContacts(d1->q(), d2->q());
-
-  else
-  {
-    FC3DcomputeJachqTFromContacts(d1->q());
-  }
-  DEBUG_END("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)\n");
-
-}
-
 
 void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink)
 {

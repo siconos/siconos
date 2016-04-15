@@ -64,14 +64,16 @@ public:
   /** destructor
   */
   virtual ~NewtonEulerFrom3DLocalFrameR() {};
-  /* Default implementation consists in multiplying jachq and T
-   * \param inter
-   * \param ds1
-   * \param ds2
+
+
+  /* Default implementation consists in multiplying jachq and T (see NewtonEulerR::computeJachqT)
+   * but here we compute the operator from the the contact point locations
+   * and the local frame at contact
+   *  \param inter interaction that owns the relation
+   *  \param DSlink the container of the link to DynamicalSystem attributes
    */
-  virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
   virtual void computeJachqT(Interaction& inter,  VectorOfBlockVectors& DSlink);
-  
+
   ACCEPT_STD_VISITORS();
 };
 #endif // NEWTONEULERRELATIONFC3D_H

@@ -362,13 +362,6 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   {
     Interaction& inter = *_indexSet0->bundle(*ui);
     inter.relation()->computeJach(t, inter, _indexSet0->properties(*ui));
-    if (inter.relation()->getType() == NewtonEuler)
-    {
-      SP::DynamicalSystem ds1 = _indexSet0->properties(*ui).source;
-      SP::DynamicalSystem ds2 = _indexSet0->properties(*ui).target;
-      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter.relation()));
-      ner->computeJachqT(inter, ds1, ds2);
-    }
   }
 
   // solve a LCP at "acceleration" level if required

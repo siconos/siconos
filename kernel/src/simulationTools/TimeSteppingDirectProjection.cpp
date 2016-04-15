@@ -504,13 +504,7 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
     SP::Interaction inter = indexSet->bundle(*aVi);
     inter->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
     inter->relation()->computeJach(getTkp1(), *inter, indexSet->properties(*aVi));
-    if (inter->relation()->getType() == RELATION::NewtonEuler)
-    {
-      SP::DynamicalSystem ds1 = indexSet->properties(*aVi).source;
-      SP::DynamicalSystem ds2 = indexSet->properties(*aVi).target;
-      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
-      ner->computeJachqT(*inter, ds1, ds2);
-    }
+
     if (Type::value(*(inter->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {

@@ -193,13 +193,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       {
         inter = indexSet1->bundle(*ui);
         inter->relation()->computeJach(t, *inter, indexSet1->properties(*ui));
-        if (inter->relation()->getType() == NewtonEuler)
-        {
-          SP::DynamicalSystem ds1 = indexSet1->properties(*ui).source;
-          SP::DynamicalSystem ds2 = indexSet1->properties(*ui).target;
-          SP::NewtonEulerR ner = std11::static_pointer_cast<NewtonEulerR>(indexSet1->bundle(*ui)->relation());
-          ner->computeJachqT(*inter, ds1, ds2);
-        }
         inter->relation()->computeJacg(told, *inter, indexSet1->properties(*ui));
       }
 
@@ -603,13 +596,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       {
         inter = indexSet1->bundle(*ui);
         inter->relation()->computeJach(t, *inter, indexSet1->properties(*ui));
-        if (inter->relation()->getType() == NewtonEuler)
-        {
-          SP::DynamicalSystem ds1 = indexSet1->properties(*ui).source;
-          SP::DynamicalSystem ds2 = indexSet1->properties(*ui).target;
-          SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
-          ner->computeJachqT(*inter, ds1, ds2);
-        }
         inter->relation()->computeJacg(t, *inter, indexSet1->properties(*ui));
       }
       if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())

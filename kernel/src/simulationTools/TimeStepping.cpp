@@ -478,13 +478,6 @@ void   TimeStepping::prepareNewtonIteration()
     inter = indexSet0->bundle(*ui);
     InteractionProperties& interProp = indexSet0->properties(*ui);
     inter->relation()->computeJach(getTkp1(), *inter, interProp);
-    if (inter->relation()->getType() == NewtonEuler)
-    {
-      SP::DynamicalSystem ds1 = indexSet0->properties(*ui).source;
-      SP::DynamicalSystem ds2 = indexSet0->properties(*ui).target;
-      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
-      ner->computeJachqT(*inter, ds1, ds2);
-    }
     inter->relation()->computeJacg(getTkp1(), *inter, interProp);
 
     // Note FP : prepar call below is only useful for FirstOrderType2R.

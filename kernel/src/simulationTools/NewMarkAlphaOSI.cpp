@@ -344,14 +344,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
       {
         // Update Jacobian matrix
         inter->relation()->computeJach(t, *inter, indexSet->properties(vertex_inter));
-        if (inter->relation()->getType() == NewtonEuler)
-        {
-          SP::DynamicalSystem ds1 = indexSet->properties(vertex_inter).source;
-          SP::DynamicalSystem ds2 = indexSet->properties(vertex_inter).target;
-          SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
-          ner->computeJachqT(*inter, ds1, ds2);
-        }
-        // cumpute yForNSsolver = y_{n,k} + G*q_free
+        // compute yForNSsolver = y_{n,k} + G*q_free
         if (!_IsVelocityLevel) // output at the position level y_{n,k} = g_{n,k}
         {
           inter->computeOutput(t, indexSet->properties(vertex_inter), 0); // Update output of level 0

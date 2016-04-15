@@ -63,7 +63,7 @@ protected:
 
   /*Matrix converting  the absolute coordinate to the contact coordinate.*/
   SP::SimpleMatrix _Mabs_C;
-  /*Matrix converting .*/
+  /* Matrix converting */
   SP::SimpleMatrix _MObjToAbs;
   /*cross product matrices*/
   SP::SimpleMatrix _NPG1;
@@ -96,9 +96,15 @@ public:
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
   virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
-  virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
+
+  /* Default implementation consists in multiplying jachq and T (see NewtonEulerR::computeJachqT)
+   * but here we compute the operator from the the contact point locations
+   * and the local frame at contact
+   *  \param inter interaction that owns the relation
+   *  \param DSlink the container of the link to DynamicalSystem attributes
+   */
   virtual void computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink );
-  
+
   inline SP::SiconosVector pc1() const
   {
     return _Pc1;
