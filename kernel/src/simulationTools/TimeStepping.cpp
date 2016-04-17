@@ -479,8 +479,7 @@ void   TimeStepping::prepareNewtonIteration()
     InteractionProperties& interProp = indexSet0->properties(*ui);
     inter->relation()->computeJach(getTkp1(), *inter, interProp);
     inter->relation()->computeJacg(getTkp1(), *inter, interProp);
-
-    // Note FP : prepar call below is only useful for FirstOrderType2R.
+    // Note FP : prepare call below is only useful for FirstOrderType2R.
     // We should check if we really need this ...
     inter->relation()->prepareNewtonIteration(*inter, interProp);
   }
