@@ -27,6 +27,8 @@
 //#define NERI_DEBUG
 
 
+
+
 //#define NEFC3D_DEBUG
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -275,5 +277,20 @@ void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlo
   }
 
   DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n");
+
+}
+void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2 )
+{
+  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2 ) \n")
+  if (inter.has2Bodies())
+  {
+    NIcomputeJachqTFromContacts(q1,q2);
+  }
+  else
+  {
+    NIcomputeJachqTFromContacts(q1);
+  }
+
+  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2 ) \n");
 
 }

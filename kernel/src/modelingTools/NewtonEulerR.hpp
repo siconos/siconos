@@ -294,11 +294,10 @@ public:
    * this one in more consistent with the notion of function of q
    *
    *  \param inter interaction that owns the relation
-   *  \param ds1 dynamical system linked to this interaction (source)
-   *  \param ds2 second ds linked to this interaction (target). If there is
+   *  \param q1 dynamical system linked to this interaction (source)
+   *  \param q2 second ds linked to this interaction (target). If there is
    *  only one ds in the inter, call this function with ..., ds, ds)
   */
-
   virtual void computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2);
 
   /* default implementation consists in multiplying jachq and T with nearly the same interface as computeJachq

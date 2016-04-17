@@ -104,7 +104,8 @@ public:
    *  \param DSlink the container of the link to DynamicalSystem attributes
    */
   virtual void computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink );
-
+  virtual void computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2);
+  
   inline SP::SiconosVector pc1() const
   {
     return _Pc1;

@@ -278,3 +278,18 @@ void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlo
   DEBUG_END("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n");
 
 }
+void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2 )
+{
+  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter,  SP::SiconosVector q1, SP::SiconosVector q2) \n")
+  if (inter.has2Bodies())
+  {
+    FC3DcomputeJachqTFromContacts(q1,q2);
+  }
+  else
+  {
+    FC3DcomputeJachqTFromContacts(q1);
+  }
+
+  DEBUG_END("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2) \n");
+
+}
