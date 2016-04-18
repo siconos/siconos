@@ -34,7 +34,7 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
@@ -46,7 +46,7 @@ using namespace RELATION;
 
 // --- constructor from a set of data ---
 MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
-  OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false)
+  OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false),_explicitTForNewtonEulerDS(false)
 {
   _theta = theta;
   if (!isnan(gamma))
@@ -301,7 +301,7 @@ void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
   }
   else
     RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
-    DEBUG_END("MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds) \n");
+  DEBUG_END("MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds) \n");
 }
 
 
@@ -461,22 +461,23 @@ void MoreauJeanOSI::computeInitialNewtonState()
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
-    SP::DynamicalSystem ds = *it;
-    if (Type::value(*ds) == Type::NewtonEulerDS){
-      // The goal is to update T() and MObjToAbs() one time at the beginning of the Newton Loop
-      // We want to be explicit on this function since we do not compute their Jacobians.
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      //SP::SiconosVector q = d->q();
-      computeT(qold,d->T());
-      computeMObjToAbs(qold,d->MObjToAbs());
-    }
+     SP::DynamicalSystem ds = *it;
 
+     if (_explicitTForNewtonEulerDS)
+     {
+       if (Type::value(*ds) == Type::NewtonEulerDS){
+         // The goal is to update T() and MObjToAbs() one time at the beginning of the Newton Loop
+         // We want to be explicit on this function since we do not compute their Jacobians.
+         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+         //SP::SiconosVector q = d->q();
+         computeT(qold,d->T());
+         computeMObjToAbs(qold,d->MObjToAbs());
+       }
+     }
     // The goal is to converge in one iteration of the system is almost linear
     // we start the Newton loop q = q0+hv0
     updatePosition(ds);
-
-
   }
   DEBUG_END("MoreauJeanOSI::computeInitialNewtonState()\n");
 }
@@ -1402,16 +1403,13 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
 
     //q[3:6] must be normalized
     d->normalizeq();
-
-    /* \warning VA 02/06/2013.
-     * What is the reason of doing the following computation ?
-     */
-    // dotq->setValue(3, (q->getValue(3) - qold->getValue(3)) / h);
-    // dotq->setValue(4, (q->getValue(4) - qold->getValue(4)) / h);
-    // dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);
-    // dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
-
-    // d->computeT(); //  VA 09/06/2015. We prefer only compute T() every time--step for Newton convergence reasons.
+    
+    if (!_explicitTForNewtonEulerDS)
+    {
+      //  VA 09/06/2015. We prefer only compute T() every time--step for Newton convergence reasons.
+      computeT(q,d->T());
+      computeMObjToAbs(q,d->MObjToAbs());
+    }
   }
   DEBUG_END("MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)\n");
 

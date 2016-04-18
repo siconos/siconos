@@ -139,6 +139,10 @@ protected:
    */
   bool _useGammaForRelation;
 
+  /** a boolean to force the evaluation of T in an explicit way
+   */
+  bool _explicitTForNewtonEulerDS;
+
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
@@ -279,6 +283,21 @@ public:
     if (_useGammaForRelation) _useGamma = false;
   };
 
+  /** get boolean _explicitTForNewtonEulerDS for the relation
+   *  \return a Boolean
+   */
+  inline bool explicitTForNewtonEulerDS()
+  {
+    return _explicitTForNewtonEulerDS;
+  };
+
+  /** set the boolean to indicate that we use gamma for the relation
+   *  \param newUseGammaForRelation a Boolean
+   */
+  inline void setExplicitTForNewtonEulerDS(bool newExplicitTForNewtonEulerDS)
+  {
+    _explicitTForNewtonEulerDS = newExplicitTForNewtonEulerDS;
+  };
 
   // --- OTHER FUNCTIONS ---
 
