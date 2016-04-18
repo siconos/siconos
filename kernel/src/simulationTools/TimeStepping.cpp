@@ -345,12 +345,14 @@ void TimeStepping::nextStep()
 
 void TimeStepping::update(unsigned int levelInput)
 {
+  DEBUG_BEGIN("TimeStepping::update(unsigned int levelInput)\n");
   // 1 - compute input (lambda -> r)
   if (!_allNSProblems->empty())
     updateInput(levelInput);
 
-  // 2 - compute state for each dynamical system
 
+  
+  // 2 - compute state for each dynamical system
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
@@ -366,6 +368,8 @@ void TimeStepping::update(unsigned int levelInput)
          level++)
       updateOutput(level);
   }
+  DEBUG_END("TimeStepping::update(unsigned int levelInput)\n");
+
 }
 
 void TimeStepping::computeFreeState()
@@ -384,7 +388,7 @@ void TimeStepping::computeOneStep()
 
 void TimeStepping::initializeNewtonLoop()
 {
-  DEBUG_PRINT("TimeStepping::initializeNewtonLoop() starts\n");
+  DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
   double tkp1 = getTkp1();
   assert(!isnan(tkp1));
 
@@ -423,7 +427,7 @@ void TimeStepping::initializeNewtonLoop()
       indexSet0->bundle(*ui)->computeResiduY(tkp1);
     }
   }
-  DEBUG_PRINT("TimeStepping::initializeNewtonLoop() ends\n");
+  DEBUG_END("TimeStepping::initializeNewtonLoop()\n");
 }
 
 void TimeStepping::run()
@@ -464,6 +468,7 @@ void TimeStepping::advanceToEvent()
 /*discretisation of the Interactions */
 void   TimeStepping::prepareNewtonIteration()
 {
+  DEBUG_BEGIN("TimeStepping::prepareNewtonIteration()\n");
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
@@ -492,6 +497,7 @@ void   TimeStepping::prepareNewtonIteration()
       (*itOsns)->setHasBeenUpdated(false);
     }
   }
+  DEBUG_END("TimeStepping::prepareNewtonIteration()\n");
 }
 
 void TimeStepping::saveYandLambdaInOldVariables()
@@ -511,7 +517,7 @@ void TimeStepping::saveYandLambdaInOldVariables()
 
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
-  DEBUG_PRINT("TimeStepping::newtonSolve()\n");
+  DEBUG_BEGIN("TimeStepping::newtonSolve(double criterion, unsigned int maxStep)\n");
   _isNewtonConverge = false;
   _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
@@ -597,6 +603,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   }
   else
     RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
+  DEBUG_END("TimeStepping::newtonSolve(double criterion, unsigned int maxStep)\n");
+
 }
 
 bool TimeStepping::newtonCheckConvergence(double criterion)
