@@ -28,9 +28,9 @@
 
 #include <iostream>
 
-#define DEBUG_BEGIN_END_ONLY
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
