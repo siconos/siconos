@@ -34,10 +34,10 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-
-//#define DEBUG_STDOUT
-//#define DEBUG_NOCOLOR
-//#define DEBUG_MESSAGES
+//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
@@ -185,7 +185,7 @@ void MoreauJeanOSI::initialize()
 }
 void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
 {
-  DEBUG_PRINT("MoreauJeanOSI::initW starts\n");
+  DEBUG_BEGIN("MoreauJeanOSI::initW\n");
   // This function:
   // - allocate memory for a matrix W
   // - insert this matrix into WMap with ds as a key
@@ -254,7 +254,7 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
 
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
-  DEBUG_PRINT("MoreauJeanOSI::initW ends\n");
+  DEBUG_END("MoreauJeanOSI::initW\n");
 
 
 }
@@ -266,7 +266,7 @@ void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
   // - allocate memory for a matrix WBoundaryConditions
   // - insert this matrix into WBoundaryConditionsMap with ds as a key
 
-  DEBUG_PRINT("MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds) starts\n");
+  DEBUG_BEGIN("MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)\n");
   if (!ds)
     RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - ds == NULL");
 
@@ -301,7 +301,7 @@ void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
   }
   else
     RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
-    DEBUG_PRINT("MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds) ends \n");
+    DEBUG_END("MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds) \n");
 }
 
 
@@ -443,7 +443,9 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
       scal(-h * h * _theta * _theta, *buffer, *(d->luW()), false);
       //*W -= h*h*_theta*_theta**K;
     }
-    //DEBUG_EXPR(d->luW()->display(););
+    DEBUG_EXPR(d->luW()->display(););
+    DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " d->luW()->isPLUFactorized() = "<< d->luW()->isPLUFactorized() << std::endl;);
+
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(*ds));
   DEBUG_PRINT("MoreauJeanOSI::computeW ends\n");
@@ -453,7 +455,7 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
 
 void MoreauJeanOSI::computeInitialNewtonState()
 {
-  DEBUG_PRINT("MoreauJeanOSI::computeInitialNewtonState() starts\n");
+  DEBUG_BEGIN("MoreauJeanOSI::computeInitialNewtonState()\n");
   // Compute the position value giving the initial velocity.
   // The goal of to save one newton iteration for nearly linear system
   DSIterator it;
@@ -476,14 +478,14 @@ void MoreauJeanOSI::computeInitialNewtonState()
 
 
   }
-  DEBUG_PRINT("MoreauJeanOSI::computeInitialNewtonState() ends\n");
+  DEBUG_END("MoreauJeanOSI::computeInitialNewtonState()\n");
 }
 
 
 
 double MoreauJeanOSI::computeResidu()
 {
-  DEBUG_PRINT("\nMoreauJeanOSI::computeResidu(), start\n");
+  DEBUG_BEGIN("MoreauJeanOSI::computeResidu()\n");
   // This function is used to compute the residu for each "MoreauJeanOSI-discretized" dynamical system.
   // It then computes the norm of each of them and finally return the maximum
   // value for those norms.
@@ -899,12 +901,15 @@ double MoreauJeanOSI::computeResidu()
     if (normResidu > maxResidu) maxResidu = normResidu;
 
   }
+  DEBUG_END("MoreauJeanOSI::computeResidu()\n");
   return maxResidu;
+
+
 }
 
 void MoreauJeanOSI::computeFreeState()
 {
-  DEBUG_PRINT("\nMoreauJeanOSI::computeFreeState() starts\n");
+  DEBUG_BEGIN("MoreauJeanOSI::computeFreeState()\n");
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
@@ -1060,19 +1065,20 @@ void MoreauJeanOSI::computeFreeState()
     else
       RuntimeException::selfThrow("MoreauJeanOSI::computeFreeState - not yet implemented for Dynamical system of type: " +  Type::name(*ds));
   }
-  DEBUG_PRINT("MoreauJeanOSI::computeFreeState() ends\n");
+  DEBUG_END("MoreauJeanOSI::computeFreeState()\n");
 
 }
 
 void MoreauJeanOSI::prepareNewtonIteration(double time)
 {
-  DEBUG_PRINT(" MoreauJeanOSI::prepareNewtonIteration(double time) starts\n");
+  DEBUG_BEGIN(" MoreauJeanOSI::prepareNewtonIteration(double time)\n");
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
     computeW(time, *itDS);
   }
-  DEBUG_PRINT(" MoreauJeanOSI::prepareNewtonIteration(double time) ends\n");
+
+  DEBUG_END(" MoreauJeanOSI::prepareNewtonIteration(double time)\n");
 
 }
 
@@ -1333,7 +1339,7 @@ void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& no
 }
 void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
 {
-  DEBUG_PRINT("\nMoreauJeanOSI::updateState(SP::DynamicalSystem ds)\n");
+  DEBUG_BEGIN("MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)\n");
 
   double h = simulationLink->timeStep();
 
@@ -1406,14 +1412,15 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     // dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
 
     // d->computeT(); //  VA 09/06/2015. We prefer only compute T() every time--step for Newton convergence reasons.
-
   }
+  DEBUG_END("MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)\n");
+
 }
 
 void MoreauJeanOSI::updateState(const unsigned int level)
 {
 
-  DEBUG_PRINT("MoreauJeanOSI::updateState(const unsigned int level)\n");
+  DEBUG_BEGIN("MoreauJeanOSI::updateState(const unsigned int level)\n");
 
   double RelativeTol = simulationLink->relativeConvergenceTol();
   bool useRCC = simulationLink->useRelativeConvergenceCriteron();
@@ -1581,6 +1588,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
     else RuntimeException::selfThrow("MoreauJeanOSI::updateState - not yet implemented for Dynamical system of type: " +  Type::name(*ds));
 
   }
+  DEBUG_END("MoreauJeanOSI::updateState(const unsigned int level)\n");
 }
 
 
