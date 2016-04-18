@@ -18,7 +18,7 @@
  */
 #include <assert.h>
 #include <iostream>
-
+// #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -385,23 +385,23 @@ void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& wo
   assert((Type::value(ds) == Type::NewtonEulerDS) && "Interaction initDSData failed, not implemented for dynamical system of that type.\n");
 
   // convert vDS systems into NewtonEulerDS and put them in vLDS
-  NewtonEulerDS& lds = static_cast<NewtonEulerDS&>(ds);
+  NewtonEulerDS& neds = static_cast<NewtonEulerDS&>(ds);
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
 //  DSlink[NewtonEulerR::xfree]->insertPtr(workVDS[NewtonEulerDS::xfree]);
   DSlink[NewtonEulerR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
-  DSlink[NewtonEulerR::q0]->insertPtr(lds.q());
-  DSlink[NewtonEulerR::velocity]->insertPtr(lds.velocity());
-  //  DSlink[NewtonEulerR::deltaq]->insertPtr(lds.deltaq());
-  DSlink[NewtonEulerR::dotq]->insertPtr(lds.dotq());
-  //    data[NewtonEulerR::q2]->insertPtr( lds.acceleration());
-  if (lds.p(0))
-      DSlink[NewtonEulerR::p0]->insertPtr(lds.p(0));
-  if (lds.p(1))
-    DSlink[NewtonEulerR::p1]->insertPtr(lds.p(1));
-  if (lds.p(2))
-    DSlink[NewtonEulerR::p2]->insertPtr(lds.p(2));
+  DSlink[NewtonEulerR::q0]->insertPtr(neds.q());
+  DSlink[NewtonEulerR::velocity]->insertPtr(neds.velocity());
+  //  DSlink[NewtonEulerR::deltaq]->insertPtr(neds.deltaq());
+  DSlink[NewtonEulerR::dotq]->insertPtr(neds.dotq());
+  //    data[NewtonEulerR::q2]->insertPtr( neds.acceleration());
+  if (neds.p(0))
+      DSlink[NewtonEulerR::p0]->insertPtr(neds.p(0));
+  if (neds.p(1))
+    DSlink[NewtonEulerR::p1]->insertPtr(neds.p(1));
+  if (neds.p(2))
+    DSlink[NewtonEulerR::p2]->insertPtr(neds.p(2));
 
-  DSlink[NewtonEulerR::z]->insertPtr(lds.z());
+  DSlink[NewtonEulerR::z]->insertPtr(neds.z());
   DEBUG_END("Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)\n");
 
 }
