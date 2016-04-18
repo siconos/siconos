@@ -42,6 +42,7 @@
 #include "NonSmoothLaw.hpp"
 #include "TypeName.hpp"
 // for Debug
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include <debug.h>
@@ -414,6 +415,7 @@ void Simulation::updateInput(unsigned int level)
 
 void Simulation::updateOutput(unsigned int level)
 {
+
   // To compute output(level) (ie with y[level]) for all Interactions.
   //  assert(level>=0);
 
@@ -444,9 +446,6 @@ SP::SiconosVector Simulation::output(unsigned int level, unsigned int coor)
   DEBUG_BEGIN("Simulation::output(unsigned int level, unsigned int coor)\n");
   DEBUG_PRINTF("with level = %i and coor = %i \n", level,coor);
 
-
-  double time = model()->currentTime();
-
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
@@ -472,9 +471,6 @@ SP::SiconosVector Simulation::input(unsigned int level, unsigned int coor)
 
   DEBUG_BEGIN("Simulation::input(unsigned int level, unsigned int coor)\n");
   DEBUG_PRINTF("with level = %i and coor = %i \n", level,coor);
-
-
-  double time = model()->currentTime();
 
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
