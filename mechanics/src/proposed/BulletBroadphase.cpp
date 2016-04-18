@@ -58,7 +58,31 @@
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
-#define USE_CONVEXHULL_FOR_BOX 1
+// We can replace the primitives by alternative implementations.  To date,
+// everything works (under test conditions, very tentative) except
+// btStaticPlaneShape, so we replace it with a large box.
+
+// #define USE_CONVEXHULL_FOR_BOX 1
+// #define USE_CONVEXHULL_FOR_SPHERE 1
+#define USE_BOX_FOR_PLANE 1
+
+// This is added to object sizes in order to provide warnings that contacts are
+// going to occur.  It is in addition to Bullet's own setMargin(), since
+// setMargin() does not provide a warning in all cases.  (In particular,
+// box-sphere collisions.)
+static const double extra_margin = 0.1;
+
+// These constants are crazy -- it seems the convex hull margin (setMargin())
+// must be at least 0.3, better at 0.35, for collisions to work correctly in
+// tests, but then it needs to be compensated by subtracting 0.5 from the size
+// of the object (0.25 per side + 0.1 which is subtracted by BulletR.  They are
+// most certainly an overfitting, probably prohibit small objects, probably
+// break for different velocities, and therefore need further testing under
+// larger and smaller object interactions and various mass ratios.
+#ifdef USE_CONVEXHULL_FOR_BOX
+static const double box_convex_hull_margin = 0.35;
+static const double box_ch_added_margin = -0.5;
+#endif
 
 class BulletBroadphase_impl : public SiconosShapeHandler
 {
@@ -76,8 +100,18 @@ protected:
   std::vector<SP::SiconosBox> dirtyBoxes;
 
   std::map<SP::SiconosShape, SP::btCollisionObject> objectMap;
+#ifdef USE_BOX_FOR_PLANE
+  std::map<SP::SiconosPlane, SP::btBoxShape> planeMap;
+#else
   std::map<SP::SiconosPlane, SP::btStaticPlaneShape> planeMap;
+#endif
+
+#ifdef USE_CONVEXHULL_FOR_SPHERE
+  std::map<SP::SiconosSphere, SP::btConvexHullShape> sphereMap;
+#else
   std::map<SP::SiconosSphere, SP::btSphereShape> sphereMap;
+#endif
+
 #ifdef USE_CONVEXHULL_FOR_BOX
   std::map<SP::SiconosBox, SP::btConvexHullShape> boxMap;
 #else
@@ -226,7 +260,21 @@ void BulletBroadphase::visit(SP::SiconosSphere sphere)
 
   // set radius to 1.0 and use scaling instead of setting radius
   // directly, makes it easier to change during update
+
+#ifdef USE_CONVEXHULL_FOR_SPHERE
+  // A sphere can be represented as a convex hull of a single point, with the
+  // margin equal to the radius size
+  SP::btConvexHullShape btsphere(new btConvexHullShape());
+  {
+    btsphere->addPoint(btVector3(0.0, 0.0, 0.0));
+    btsphere->setMargin(1.0 + extra_margin);
+  }
+#else
   SP::btSphereShape btsphere(new btSphereShape(1.0));
+
+  // Internal margin
+  btsphere->setMargin(extra_margin);
+#endif
 
   // initialization
   visit_helper(sphere, btsphere, impl->sphereMap);
@@ -240,13 +288,19 @@ void BulletBroadphase::update(SP::SiconosSphere sphere)
          (*pos)(0), (*pos)(1), (*pos)(2), sphere->radius());
 
   // Update shape parameters
+#ifdef USE_CONVEXHULL_FOR_SPHERE
+  SP::btConvexHullShape btsphere(impl->sphereMap[sphere]);
+  assert(btsphere
+         && "BulletBroadphase::update(), sphere not found in sphereMap.");
+  btsphere->setMargin(sphere->radius() + extra_margin);
+#else
   SP::btSphereShape btsphere(impl->sphereMap[sphere]);
   assert(btsphere
          && "BulletBroadphase::update(), sphere not found in sphereMap.");
-
-  btsphere->setLocalScaling(btVector3(sphere->radius(),
-                                      sphere->radius(),
-                                      sphere->radius()));
+  btsphere->setLocalScaling(btVector3(sphere->radius() + extra_margin,
+                                      sphere->radius() + extra_margin,
+                                      sphere->radius() + extra_margin));
+#endif
 
   // Update object parameters
   SP::btCollisionObject btobject(impl->objectMap[sphere]);
@@ -266,8 +320,13 @@ void BulletBroadphase::visit(SP::SiconosPlane plane)
          &*plane,plane.use_count());
 
   // create the initial plane with default parameters
+#ifdef USE_BOX_FOR_PLANE
+  SP::btBoxShape btplane(
+    new btBoxShape(btVector3(1000,1000,1000)));
+#else
   SP::btStaticPlaneShape btplane(
     new btStaticPlaneShape(btVector3(0, 0, 1), 0.0));
+#endif
 
   // initialization
   visit_helper(plane, btplane, impl->planeMap);
@@ -278,15 +337,19 @@ void BulletBroadphase::update(SP::SiconosPlane plane)
   DEBUG_PRINTF("updating plane: %p(%ld)\n",
          &*plane,plane.use_count());
 
-
   // Update object parameters
   SP::btCollisionObject btobject(impl->objectMap[plane]);
   assert(btobject
          && "BulletBroadphase::update(), plane not found in objectMap.");
 
   SiconosVector &q = *plane->position();
+#ifdef USE_BOX_FOR_PLANE
+  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
+    btVector3(q(0), q(1), q(2)+(extra_margin - 1000)));
+#else
   btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
                  btVector3(q(0), q(1), q(2)));
+#endif
   btobject->setWorldTransform(tr);
 }
 
@@ -297,20 +360,32 @@ void BulletBroadphase::visit(SP::SiconosBox box)
          &*box,box.use_count());
 
   // create the initial box with default 1.0 parameters
+
 #ifdef USE_CONVEXHULL_FOR_BOX
-  SP::btConvexHullShape btbox(new btConvexHullShape());
-  {
-    (btbox)->addPoint(btVector3(-1.0, 1.0, -1.0));
-    (btbox)->addPoint(btVector3(-1.0, -1.0, -1.0));
-    (btbox)->addPoint(btVector3(-1.0, -1.0, 1.0));
-    (btbox)->addPoint(btVector3(-1.0, 1.0, 1.0));
-    (btbox)->addPoint(btVector3(1.0, 1.0, 1.0));
-    (btbox)->addPoint(btVector3(1.0, 1.0, -1.0));
-    (btbox)->addPoint(btVector3(1.0, -1.0, -1.0));
-    (btbox)->addPoint(btVector3(1.0, -1.0, 1.0));
-  }
+  const double half = 0.5;
+  const btScalar pts[] = {
+    -half, half, -half,
+    -half, -half, -half,
+    -half, -half, half,
+    -half, half, half,
+    half, half, half,
+    half, half, -half,
+    half, -half, -half,
+    half, -half, half,
+  };
+  SP::btConvexHullShape btbox(
+    new btConvexHullShape(pts, 8, sizeof(pts[0])*3));
+
+  // External margin (adds our extra margin plus what we take off)
+  btbox->setMargin(box_convex_hull_margin);
 #else
-  SP::btBoxShape btbox(new btBoxShape(btVector3(1,1,1)));
+  const double half = 0.5;
+  SP::btBoxShape btbox(new btBoxShape(btVector3(half,
+                                                half,
+                                                half)));
+
+  // Internal margin (unused since we add it by local scaling)
+  btbox->setMargin(0.0);
 #endif
 
   // initialization
@@ -333,9 +408,15 @@ void BulletBroadphase::update(SP::SiconosBox box)
   assert(btbox
          && "BulletBroadphase::update(), box not found in boxMap.");
 
-  btbox->setLocalScaling(btVector3((*box->dimensions())(0),
-                                   (*box->dimensions())(1),
-                                   (*box->dimensions())(2)));
+#ifdef USE_CONVEXHULL_FOR_BOX
+  btbox->setLocalScaling(btVector3((*box->dimensions())(0) + box_ch_added_margin,
+                                   (*box->dimensions())(1) + box_ch_added_margin,
+                                   (*box->dimensions())(2) + box_ch_added_margin));
+#else
+  btbox->setLocalScaling(btVector3((*box->dimensions())(0) + extra_margin*2,
+                                   (*box->dimensions())(1) + extra_margin*2,
+                                   (*box->dimensions())(2) + extra_margin*2));
+#endif
 
   // Update object parameters
   SP::btCollisionObject btobject(impl->objectMap[box]);
@@ -572,7 +653,17 @@ void BulletBroadphase::performBroadphase()
       SP::Interaction inter;
       if (impl->nslaw->size() == 3)
       {
-        SP::BulletR rel(new BulletR(createSPtrbtManifoldPoint(*it->point)));
+        // For now assume extra_margin around all objects, so we remove it
+        // twice.  TODO: This could be a property of individual contact shapes.
+        SP::BulletR rel(new BulletR(createSPtrbtManifoldPoint(*it->point),
+                                    extra_margin*2));
+
+        // We wish to be sure that no Interactions are created without
+        // sufficient warning before contact.  TODO: Replace with exception or
+        // flag.
+        assert((it->point->getDistance() + extra_margin*2) > 0.0
+               && "Interactions must be created with positive distance.");
+
         inter.reset(new Interaction(3, impl->nslaw, rel, 0 /*4 * i + z*/));
       }
       else

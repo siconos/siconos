@@ -120,14 +120,20 @@ void ContactTest::t2()
     // A BodyDS with a contactor consisting of a single sphere.
     SP::BodyDS body(new BodyDS(q0, v0, 1.0));
     SP::SiconosContactor contactor(new SiconosContactor());
-    SP::SiconosSphere sphere(new SiconosSphere(0,0,0,1.0));
+    SP::SiconosSphere sphere(new SiconosSphere(0,0,0, 0.5));
     contactor->addShape(sphere);
+    // SP::SiconosBox box(new SiconosBox(0,0,0,1.0,1.0,1.0));
+    // contactor->addShape(box);
     body->setContactor(contactor);
 
     // A contactor with no body (static contactor) consisting of a plane
     SP::SiconosContactor static_contactor(new SiconosContactor());
     SP::SiconosPlane plane(new SiconosPlane(0,0,0));
     static_contactor->addShape(plane);
+    // SP::SiconosBox floorbox(new SiconosBox(0,0,-50,10,10,100));
+    // static_contactor->addShape(floorbox);
+    // SP::SiconosSphere floorsphere(new SiconosSphere(0,0,-1.0,1.0));
+    // static_contactor->addShape(floorsphere);
 
     /////////
 
@@ -194,7 +200,7 @@ void ContactTest::t2()
     {
       // Update a property at step 500
       if (k==500) {
-        sphere->setRadius(0.5);
+        sphere->setRadius(0.3);
       }
 
       // Check for dirty objects and update the broadphase graph
@@ -206,7 +212,9 @@ void ContactTest::t2()
       // Update integrator and solve constraints
       simulation->computeOneStep();
 
-      printf("pos, %f\n", (*body->q())(2));
+      printf("pos, %f, (%f, %f, %f, %f)\n", (*body->q())(2),
+             (*body->q())(3), (*body->q())(4),
+             (*body->q())(5), (*body->q())(6));
 
       // Advance simulation
       simulation->nextStep();
