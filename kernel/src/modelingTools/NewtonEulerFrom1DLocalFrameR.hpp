@@ -96,7 +96,8 @@ public:
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
   virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
-
+  virtual void computeJachq(double time, Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2=SP::SiconosVector());
+  
   /* Default implementation consists in multiplying jachq and T (see NewtonEulerR::computeJachqT)
    * but here we compute the operator from the the contact point locations
    * and the local frame at contact
@@ -104,6 +105,7 @@ public:
    *  \param DSlink the container of the link to DynamicalSystem attributes
    */
   virtual void computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink );
+  
   virtual void computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2);
   
   inline SP::SiconosVector pc1() const
