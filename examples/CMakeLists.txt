@@ -61,13 +61,15 @@ else()
     )
   
   set(NO_TEST_FILES QGL tools)
-  
-  if(NOT HAVE_SICONOS_MECHANICS)
+
+  FIND_PACKAGE(Siconos)
+  STRING(FIND "${installed_targets}" "mechanics" mechanics_installed )
+  IF (${mechanics_installed} LESS 0)
     list(APPEND NO_TEST_FILES
       JointsTests)
     list(APPEND NO_TEST_FILES
       NewtonEuler)
-  endif()
+   endif()
   
   # sharing a double between an executable and a library is hackisch
   IF(MSVC)
