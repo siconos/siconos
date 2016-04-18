@@ -28,8 +28,10 @@
 #include "BlockVector.hpp"
 #include "SimulationTypeDef.hpp"
 
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_BEGIN_END_ONLY
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+
 #include <debug.h>
 
 
@@ -137,7 +139,7 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionPro
      *
      * 15/04/2016 Now we update JachqT !
      */
-    computeJachqT(inter, DSlink);
+    //computeJachqT(inter, DSlink);
 
     if (derivativeNumber == 1)
     {
@@ -185,7 +187,6 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProp
   {
     prod(lambda, *_jachqT, *_contactForce, true);
 
-
     DEBUG_PRINT("NewtonEulerR::computeInput contact force :\n");
     DEBUG_EXPR(_contactForce->display(););
 
@@ -193,15 +194,12 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProp
     /** false because it consists in doing a sum*/
     prod(lambda, *_jachqT, *DSlink[NewtonEulerR::p0 + level], false);
 
-
     DEBUG_EXPR(_jachqT->display(););
-
-
     DEBUG_EXPR(DSlink[NewtonEulerR::p0 + level]->display(););
-    DEBUG_EXPR(SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerR::p0 + level]->size()));
-               prod(lambda, *_jachqT, *buffer, true);
-               std::cout << "added part to p" << buffer <<  std::endl;
-               buffer->display(););
+    // DEBUG_EXPR(SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerR::p0 + level]->size()));
+    //            prod(lambda, *_jachqT, *buffer, true);
+    //            std::cout << "added part to p" << buffer <<  std::endl;
+    //            buffer->display(););
 
   }
 

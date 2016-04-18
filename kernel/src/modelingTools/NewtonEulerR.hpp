@@ -49,7 +49,7 @@ class NewtonEulerR : public Relation
 {
 public:
 // add deltaq ??? -- xhub 30/03/2014
-  enum NewtonEulerRDS  {xfree, z, q0, velocity, dotq, p0, p1, p2, MObjToAbs, DSlinkSize};
+  enum NewtonEulerRDS  {xfree, z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
   // enum NewtonEulerRVec {xfree, z, q0, dotq, p0, p1, p2, workVecSize};
   // enum NewtonEulerRMat {C, D, F, workMatSize};
 
@@ -219,6 +219,16 @@ public:
   {
     ;
   }
+  /** compute the jacobian of h w.r.t. q
+   * \param time current time
+   * \param inter the interaction using this relation
+   * \
+   */
+  virtual void computeJachq(double time, Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2=SP::SiconosVector())
+  {
+    ;
+  }
+
   /** compute the jacobian of h w.r.t. \f$\dot{q}\f$
    * \param time current time
    * \param inter the interaction using this relation
