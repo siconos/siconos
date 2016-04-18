@@ -42,23 +42,26 @@
 #endif
 
 #ifdef DEBUG_STDOUT
+extern unsigned int debug_counter;
 
 #ifdef DEBUG_NOCOLOR
-#define DEBUG_INTERNAL_PRINTF(...)      printf(__VA_ARGS__);
+#define DEBUG_INTERNAL_PRINTF(...)   printf(__VA_ARGS__);
 #else
-#define DEBUG_INTERNAL_PRINTF(...)      printf(ANSI_COLOR_RED); printf(__VA_ARGS__); printf(ANSI_COLOR_RESET);
+#define DEBUG_INTERNAL_PRINTF(...)   printf(ANSI_COLOR_RED); printf(__VA_ARGS__); printf(ANSI_COLOR_RESET);
 #endif
 #else
 
 #ifdef DEBUG_NOCOLOR
-#define DEBUG_INTERNAL_PRINTF(...)       fprintf(stderr, __VA_ARGS__);
+#define DEBUG_INTERNAL_PRINTF(...)    fprintf(stderr, __VA_ARGS__);
 #else
-#define DEBUG_INTERNAL_PRINTF(...)       fprintf(stderr, ANSI_COLOR_RED); fprintf(stderr, __VA_ARGS__); fprintf(stderr, ANSI_COLOR_RESET);
+#define DEBUG_INTERNAL_PRINTF(...)    fprintf(stderr, ANSI_COLOR_RED); fprintf(stderr, __VA_ARGS__); fprintf(stderr, ANSI_COLOR_RESET);
 #endif
 #endif
 
-#define DEBUG_BEGIN(M) DEBUG_INTERNAL_PRINTF("==== BEGIN === %s",M)
-#define DEBUG_END(M)  DEBUG_INTERNAL_PRINTF("===   END  === %s",M)
+
+
+#define DEBUG_BEGIN(M)   for (unsigned int i =0 ; i < debug_counter; i++) printf(" "); debug_counter++; DEBUG_INTERNAL_PRINTF("==== BEGIN === %s",M)
+#define DEBUG_END(M)  for (unsigned int i =0 ; i < debug_counter; i++) printf(" "); debug_counter--; DEBUG_INTERNAL_PRINTF("===   END  === %s",M)
 
 #ifdef DEBUG_BEGIN_END_ONLY
 #define DEBUG_PRINTF(_fmt, ...)
