@@ -26,7 +26,6 @@
 #include "DynamicalSystem.hpp"
 #include "BoundaryCondition.hpp"
 
-#include <iostream>
 /** Pointer to function for plug-in. */
 typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int size_z,  double* z);
 typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
@@ -905,7 +904,6 @@ public:
   }
   inline SP::SimpleMatrix T()
   {
-    std::cout << "call T()" << std::endl;
     return _T; 
   }
   inline SP::SimpleMatrix Tdot()
