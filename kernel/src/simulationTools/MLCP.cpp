@@ -27,7 +27,9 @@
 #include <MLCP_Solvers.h>
 
 using namespace RELATION;
-//#define MLCP_DEBUG
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 // Constructor from a set of data
 MLCP::MLCP(int numericsSolverId):
@@ -105,7 +107,7 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
 
 void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 {
-
+  DEBUG_BEGIN("MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n")
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   SP::Interaction inter1 = indexSet->bundle(indexSet->source(ed));
   SP::Interaction inter2 = indexSet->bundle(indexSet->target(ed));
@@ -115,6 +117,8 @@ void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 
   if (!_hasBeenUpdated || !isLinear)
     LinearOSNS::computeInteractionBlock(ed);
+  
+  DEBUG_END("MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n")
 }
 
 void MLCP::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
@@ -141,6 +145,7 @@ bool MLCP::preCompute(double time)
 
 int MLCP::compute(double time)
 {
+  DEBUG_BEGIN("MLCP::compute(double time)\n");
   int info = 0;
   // --- Prepare data for MLCP computing ---
   bool cont = preCompute(time);
@@ -148,9 +153,8 @@ int MLCP::compute(double time)
     return info;
   // cf GenericMechanical for the explanation of this line commented
   // _hasBeenUpdated=true;
-#ifdef MLCP_DEBUG
-  printf("MLCP::compute m n :%d,%d\n", _n, _m);
-#endif
+  DEBUG_PRINTF("MLCP::compute m n :%d,%d\n", _n, _m);
+
   /*If user has not allocted the working memory, do it. */
   int allocated = mlcp_alloc_working_memory(&_numerics_problem, &*_numerics_solver_options);
   // --- Call Numerics driver ---
@@ -165,18 +169,17 @@ int MLCP::compute(double time)
     _numerics_problem.q = _q->getArray();
 
     // Call MLCP Driver
-    //printf("MLCP display");
+    DEBUG_PRINT("MLCP display");
     //printf("n %d m %d",n,m);
     //displayNM(_numerics_problem.M);
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
+    DEBUG_EXPR(display(););
+
     try
     {
       info = mlcp_driver(&_numerics_problem, _z->getArray(), _w->getArray(),
                          &*_numerics_solver_options, &*_numerics_options);
-#ifdef MLCP_DEBUG
-      display();
-#endif
     }
     catch (...)
     {
@@ -193,12 +196,11 @@ int MLCP::compute(double time)
   }
   else
   {
-#ifdef MLCP_DEBUG
-    printf("MLCP::compute : sizeoutput is null\n");
-#endif
+    DEBUG_PRINT("MLCP::compute : sizeoutput is null\n");
   }
   if (allocated)
     mlcp_free_working_memory(&_numerics_problem, &*_numerics_solver_options);
+  DEBUG_END("MLCP::compute(double time)\n");
   return info;
 }
 
