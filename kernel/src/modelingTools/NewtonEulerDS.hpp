@@ -26,6 +26,7 @@
 #include "DynamicalSystem.hpp"
 #include "BoundaryCondition.hpp"
 
+#include <iostream>
 /** Pointer to function for plug-in. */
 typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int size_z,  double* z);
 typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
@@ -734,11 +735,23 @@ public:
    */
   virtual void computeFGyr(SP::SiconosVector velocity);
 
+  /** function to compute gyroscopic forces with some specific values for q and velocity (ie not those of the current state).
+   *  \param velocity SP::SiconosVector: pointers on  velocity vector
+   *  \param SP::SiconosVector fGyr
+   */
+  virtual void computeFGyr(SP::SiconosVector velocity, SP::SiconosVector fGyr);
+
 
   /** Default function to compute the jacobian following q of fGyr
    *  \param time the current time
    */
   virtual void computeJacobianFGyrv(double time);
+
+  /** Default function to compute the jacobian following q of fGyr
+   * by forward finite difference
+   *  \param time the current time
+   */
+  virtual void computeJacobianFGyrvByFD(double time, SP::SiconosVector q, SP::SiconosVector velocity);
 
   // /** Default function to compute the jacobian following v of fGyr
   //  *  \param time the current time
@@ -892,7 +905,8 @@ public:
   }
   inline SP::SimpleMatrix T()
   {
-    return _T;
+    std::cout << "call T()" << std::endl;
+    return _T; 
   }
   inline SP::SimpleMatrix Tdot()
   {
