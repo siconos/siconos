@@ -23,10 +23,13 @@
 
 #include <iostream>
 // #define DEBUG_NOCOLOR
-// //#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
+
 #include <debug.h>
+
+unsigned int debug_counter = 0;
 
 
 void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
@@ -641,15 +644,15 @@ void NewtonEulerDS::computeFGyr(SP::SiconosVector v, SP::SiconosVector fGyr)
     cross_product(bufOmega, bufIOmega, *fGyr);
   }
   DEBUG_EXPR(fGyr->display());
-  DEBUG_BEGIN("NewtonEulerDS::computeFGyr(SP::SiconosVector v, SP::SiconosVector fGyr)\n");
+  DEBUG_END("NewtonEulerDS::computeFGyr(SP::SiconosVector v, SP::SiconosVector fGyr)\n");
 
 }
 void NewtonEulerDS::computeFGyr(SP::SiconosVector v)
 {
   /*computation of \Omega times I \Omega*/
-  DEBUG_BEGIN("NewtonEulerDS::computeFGyr(SP::SiconosVector v)\n");
+  //DEBUG_BEGIN("NewtonEulerDS::computeFGyr(SP::SiconosVector v)\n");
   computeFGyr( v, _fGyr);
-  DEBUG_BEGIN("NewtonEulerDS::computeFGyr(SP::SiconosVector v)\n");
+  //DEBUG_END("NewtonEulerDS::computeFGyr(SP::SiconosVector v)\n");
 
 }
 

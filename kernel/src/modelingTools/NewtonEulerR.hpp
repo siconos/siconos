@@ -240,7 +240,7 @@ public:
      */
     assert(0) ;
   }
-  virtual void computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot);
+  virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
 
 
   /** compute the jacobian of h w.r.t. \f$\dot{q}\f$

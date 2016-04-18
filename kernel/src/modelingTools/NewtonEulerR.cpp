@@ -138,6 +138,8 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionPro
      *  but we use instead _jachqT which is not updated in this method !!
      *
      * 15/04/2016 Now we update JachqT !
+     * finally not to remain consistent with computeInput.
+     * this has to be fixed.
      */
     //computeJachqT(inter, DSlink);
 
@@ -459,7 +461,7 @@ void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionPrope
   DEBUG_END("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
 }
 
-void NewtonEulerR::computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot)
+void NewtonEulerR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
   if (_plugindotjacqh)
   {
@@ -485,17 +487,18 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
     _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
   }
   // Compute the product of the time derivative of the Jacobian with dotq
-  SiconosVector workQdot = *DSlink[NewtonEulerR::dotq]; // we assume that dotq is up to date !
-  SiconosVector workQ = *DSlink[NewtonEulerR::q0]; // we assume that dotq is up to date !
-  SiconosVector workZ = *DSlink[NewtonEulerR::z]; // we assume that dotq is up to date !
+  BlockVector workQdot = *DSlink[NewtonEulerR::dotq]; // we assume that dotq is up to date !
+  BlockVector workQ = *DSlink[NewtonEulerR::q0]; // we assume that dotq is up to date !
+  BlockVector workZ = *DSlink[NewtonEulerR::z]; // we assume that dotq is up to date !
   DEBUG_EXPR(workQdot.display(););
+
   computeDotJachq(time, workQ, workZ, workQdot);
+  
   _secondOrderTimeDerivativeTerms.reset(new SiconosVector(_dotjachq->size(0)));
 
   DEBUG_EXPR(_dotjachq->display(););
 
   prod(1.0,*_dotjachq, workQdot, *_secondOrderTimeDerivativeTerms, true);
-
 
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
 

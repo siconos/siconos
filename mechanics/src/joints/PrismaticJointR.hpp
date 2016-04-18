@@ -48,11 +48,6 @@ public:
    */
   SP::SiconosVector _axis0;
 
-  /** Pointers on the concerned dynamical systems*/
-  SP::NewtonEulerDS _d1;
-  SP::NewtonEulerDS _d2;
-
-
   /** _V1 is an unit vector that is orthogonal to the prismatic axis _axis0.
    * It forms with _V2 and _axis0 a base such that (_axis0,_V1,_v2) is an orthogonal
    * frame
@@ -101,7 +96,7 @@ public:
   PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis);
 
 
-  void computeFromInitialPosition();
+  void computeFromInitialPosition(SP::SiconosVector q2, SP::SiconosVector q1=SP::SiconosVector());
 
   void displayInitialPosition();
 
@@ -112,10 +107,13 @@ public:
   virtual ~PrismaticJointR() {};
 
   virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
+  
+  virtual void computeJachq(double time, Interaction& inter,
+                            SP::SiconosVector q2, SP::SiconosVector q1=SP::SiconosVector() );
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
-  virtual void computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot);
+  virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
 
   /* The options were    : operatorarrow */
   double H1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,

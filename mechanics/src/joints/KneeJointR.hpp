@@ -41,11 +41,6 @@ protected:
    */
   SP::SiconosVector _P0;
 
-  /** Pointers on the first concerned dynamical system*/
-  SP::NewtonEulerDS _d1;
-  /** Pointers on the second concerned dynamical system*/
-  SP::NewtonEulerDS _d2;
-
   /**Absolute coodinates of the vector  G1P0 when d1 is located in q=(0,0,0,1,0,0,0)
    * i.e. P0 in the body frame of d1.
    * These values are computed when the constructor is called.
@@ -92,7 +87,9 @@ public:
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
-  virtual void computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot);
+  virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
+
+  virtual void computeDotJachq(double time, SP::SiconosVector qdot1, SP::SiconosVector qdot2=SP::SiconosVector());
 
 protected:
 
