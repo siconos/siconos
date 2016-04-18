@@ -78,7 +78,7 @@ public:
   KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef = true);
   /** destructor
    */
-  void checkInitPos();
+  void checkInitPos(SP::SiconosVector q1, SP::SiconosVector q2);
   virtual ~KneeJointR() {};
 
   /** Get the number of constraints defined in the joint
@@ -87,6 +87,8 @@ public:
   static unsigned int numberOfConstraints() { return 3; }
 
   virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
+
+  virtual void computeJachq(double time, Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2=SP::SiconosVector());
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
