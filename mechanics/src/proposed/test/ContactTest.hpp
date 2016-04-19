@@ -31,12 +31,22 @@ private:
   // tests to be done ...
   CPPUNIT_TEST(t1);
   CPPUNIT_TEST(t2);
+  CPPUNIT_TEST(t3);
 
   CPPUNIT_TEST_SUITE_END();
 
   // Members
   void t1();
   void t2();
+  void t3();
+
+  double bounceTest(std::string moving,
+                    std::string ground,
+                    bool dynamic=false,
+                    bool trace=false,
+                    double size=1.0,
+                    double mass=1.0,
+                    double margin=0.1);
 
 public:
   void setUp();

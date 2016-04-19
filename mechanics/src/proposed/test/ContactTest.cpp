@@ -10,6 +10,8 @@
 
 #include "SiconosKernel.hpp"
 
+#include <string>
+
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(ContactTest);
 
@@ -75,12 +77,14 @@ void ContactTest::t1()
   CPPUNIT_ASSERT(1);
 }
 
-void ContactTest::t2()
+double ContactTest::bounceTest(std::string moving,
+                               std::string ground,
+                               bool trace,
+                               bool dynamic,
+                               double size,
+                               double mass,
+                               double margin)
 {
-  try
-  {
-    printf("\n==== t2\n");
-    
     // User-defined main parameters
     double t0 = 0;                   // initial computation time
     double T = 20.0;                 // end of computation time
@@ -116,29 +120,50 @@ void ContactTest::t2()
 
     // Bodies
 
+    printf("== Testing: %s falling on %s",
+           moving.c_str(), ground.c_str());
+    fflush(stdout);
+
+    // TODO: set the shape margin
+
     // Set up a Siconos Mechanics environment:
     // A BodyDS with a contactor consisting of a single sphere.
-    SP::BodyDS body(new BodyDS(q0, v0, 1.0));
+    SP::BodyDS body(new BodyDS(q0, v0, mass));
     SP::SiconosContactor contactor(new SiconosContactor());
-    SP::SiconosSphere sphere(new SiconosSphere(0,0,0, 0.5));
-    contactor->addShape(sphere);
-    // SP::SiconosBox box(new SiconosBox(0,0,0,1.0,1.0,1.0));
-    // contactor->addShape(box);
+    SP::SiconosSphere sphere;
+    if (moving=="sphere")
+    {
+      sphere.reset(new SiconosSphere(0,0,0, size/2));
+      contactor->addShape(sphere);
+    }
+    else if (moving=="box")
+    {
+      SP::SiconosBox box(new SiconosBox(0,0,0,size,size,size));
+      contactor->addShape(box);
+    }
     body->setContactor(contactor);
 
     // A contactor with no body (static contactor) consisting of a plane
     SP::SiconosContactor static_contactor(new SiconosContactor());
-    SP::SiconosPlane plane(new SiconosPlane(0,0,0));
-    static_contactor->addShape(plane);
-    // SP::SiconosBox floorbox(new SiconosBox(0,0,-50,10,10,100));
-    // static_contactor->addShape(floorbox);
-    // SP::SiconosSphere floorsphere(new SiconosSphere(0,0,-1.0,1.0));
-    // static_contactor->addShape(floorsphere);
+    if (ground=="plane")
+    {
+      SP::SiconosPlane plane(new SiconosPlane(0,0,0));
+      static_contactor->addShape(plane);
+    }
+    else if (ground=="box")
+    {
+      SP::SiconosBox floorbox(new SiconosBox(0,0,-50,10,10,100));
+      static_contactor->addShape(floorbox);
+    }
+    else if (ground=="sphere")
+    {
+      SP::SiconosSphere floorsphere(new SiconosSphere(0,0,-1.0,1.0));
+      static_contactor->addShape(floorsphere);
+    }
 
     /////////
 
     // -- Set external forces (weight) --
-    float mass = 1.0;
     SP::SiconosVector FExt;
     FExt.reset(new SiconosVector(3));
     FExt->zero();
@@ -168,8 +193,6 @@ void ContactTest::t2()
 
     // --- Simulation initialization ---
 
-    std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
-
     int N = ceil((T - t0) / h); // Number of time steps
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
@@ -191,15 +214,13 @@ void ContactTest::t2()
     broadphase->buildGraph(model);
     broadphase->buildGraph(static_contactor);
 
-    std::cout << "====> End of initialisation ..." << std::endl << std::endl;
-
     ///////
 
     int k=0;
     while (simulation->hasNextEvent())
     {
       // Update a property at step 500
-      if (k==500) {
+      if (dynamic && k==500 && moving=="sphere") {
         sphere->setRadius(0.3);
       }
 
@@ -212,6 +233,7 @@ void ContactTest::t2()
       // Update integrator and solve constraints
       simulation->computeOneStep();
 
+      if (trace)
       printf("pos, %f, (%f, %f, %f, %f)\n", (*body->q())(2),
              (*body->q())(3), (*body->q())(4),
              (*body->q())(5), (*body->q())(6));
@@ -221,7 +243,62 @@ void ContactTest::t2()
       k++;
     }
 
-    std::cout << std::endl << "End of computation - Number of iterations done: " << k - 1 << std::endl;
+    printf(" (done, iterations=%d)\n", k - 1);
+
+    return (*body->q())(2);
+}
+
+void ContactTest::t2()
+{
+  try
+  {
+    printf("\n==== t2\n");
+
+    bounceTest("box", "plane", true);
+  }
+  catch (SiconosException e)
+  {
+    std::cout << "SiconosException: " << e.report() << std::endl;
+    CPPUNIT_ASSERT(0);
+  }
+
+  CPPUNIT_ASSERT(1);
+}
+
+void ContactTest::t3()
+{
+  try
+  {
+    printf("\n==== t3\n");
+
+    double size = 0.3;
+    double mass = 1.0;
+    double margin = 0.1;
+
+    double results[2][3];
+
+    results[0][0] = bounceTest("sphere", "plane", false, false,
+                               size, mass, margin);
+    results[1][0] = bounceTest("box", "plane", false, false,
+                               size, mass, margin);
+    results[0][1] = bounceTest("sphere", "sphere", false, false,
+                               size, mass, margin);
+    results[1][1] = bounceTest("box", "sphere", false, false,
+                               size, mass, margin);
+    results[0][2] = bounceTest("sphere", "box", false, false,
+                               size, mass, margin);
+    results[1][2] = bounceTest("box", "box", false, false,
+                               size, mass, margin);
+
+    printf("\n");
+    printf("Final resting positions:\n");
+    printf("\n");
+    printf("       | sphere | box   | plane\n");
+    printf("-------+-------+--------+------\n");
+    printf("sphere |%7.3f |%6.3f |%6.3f\n",
+           results[0][0], results[0][1], results[0][2]);
+    printf("box    |%7.3f |%6.3f |%6.3f\n",
+           results[1][0], results[1][1], results[1][2]);
   }
   catch (SiconosException e)
   {
