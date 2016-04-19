@@ -124,7 +124,7 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionPro
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   SiconosVector& y = *inter.y(derivativeNumber);
   BlockVector q = *DSlink[NewtonEulerR::q0];
-  
+
 
   if (derivativeNumber == 0)
   {
@@ -132,14 +132,8 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionPro
   }
   else
   {
-    /* \warning V.A. 30/05/2013
-     *  This part is not very clear :
-     *  computeJachq should compute Jachq
-     *  but we use instead _jachqT which is not updated in this method !!
-     *
-     * 15/04/2016 Now we update JachqT !
-     * finally not to remain consistent with computeInput.
-     * this has to be fixed.
+    /* \warning  V.A. 15/04/2016
+     * We decide finally not to update the Jacobian there. To be discussed
      */
     // computeJachq(time, inter, DSlink[NewtonEulerR::q0]);
     // computeJachqT(inter, DSlink[NewtonEulerR::q0]);
@@ -171,8 +165,6 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionPro
 */
 void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
-
-
 
   DEBUG_BEGIN("NewtonEulerR::computeInput(...)\n")
   DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level);
@@ -330,7 +322,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   DEBUG_EXPR(workQdot.display(););
 
   computeDotJachq(time, workQ, workZ, workQdot);
-  
+
   _secondOrderTimeDerivativeTerms.reset(new SiconosVector(_dotjachq->size(0)));
 
   DEBUG_EXPR(_dotjachq->display(););
