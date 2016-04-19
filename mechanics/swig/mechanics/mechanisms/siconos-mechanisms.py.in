@@ -184,13 +184,10 @@ def remove_run_id_dir():
 
 import atexit
 atexit.register(remove_run_id_dir)
-print "coucou #######################################################################"
-print "with_io:", with_io
 
 # Hdf5 IO setup
 if with_io:
     with io.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
-        print "coucou #######################################################################"
         def _run(nsteps):
             fp = mbtb._MBTB_open('simu.txt', 'a')
             currentTimerCmp = mbtb.cvar.sTimerCmp

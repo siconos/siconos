@@ -236,7 +236,7 @@ class ShapeCollection():
         self._io = io
         self._shapes = dict()
         self._collision_margin=collision_margin
-        print('self._collision_margin',self._collision_margin)
+        #print('self._collision_margin',self._collision_margin)
         if bullet_is_here:
 
             self._primitive = {'Cylinder': btCylinderShape,
@@ -386,7 +386,6 @@ class ShapeCollection():
                 else:
                     # a convex point set
                     convex = btConvexHullShape()
-                    print('set collision margin to ', self._collision_margin)
                     convex.setMargin(self._collision_margin)
                     for points in self.shape(shape_name):
                         convex.addPoint(btVector3(float(points[0]),
@@ -490,8 +489,8 @@ class Hdf5():
         self._output_frequency = 1
         self._keep = []
 
-        print('collision_margin in __init__', collision_margin)
-        print('self._collision_margin in __init__', self._collision_margin)
+        #print('collision_margin in __init__', collision_margin)
+        #print('self._collision_margin in __init__', self._collision_margin)
         
 
         
