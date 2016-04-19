@@ -59,9 +59,11 @@ extern unsigned int debug_counter;
 #endif
 
 
+//#define DEBUG_PREFIX   printf("%i",debug_counter); for (unsigned int i =0 ; i < debug_counter; i++) printf(".");
+#define DEBUG_PREFIX    for (unsigned int i =0 ; i < debug_counter; i++) printf("..");
 
-#define DEBUG_BEGIN(M)   for (unsigned int i =0 ; i < debug_counter; i++) printf(" "); debug_counter++; DEBUG_INTERNAL_PRINTF("==== BEGIN === %s",M)
-#define DEBUG_END(M)  for (unsigned int i =0 ; i < debug_counter; i++) printf(" "); debug_counter--; DEBUG_INTERNAL_PRINTF("===   END  === %s",M)
+#define DEBUG_BEGIN(M)  DEBUG_PREFIX;  debug_counter++; DEBUG_INTERNAL_PRINTF("==== BEGIN === %s",M)
+#define DEBUG_END(M)    debug_counter-- ; DEBUG_PREFIX;   DEBUG_INTERNAL_PRINTF("===   END  === %s",M)
 
 #ifdef DEBUG_BEGIN_END_ONLY
 #define DEBUG_PRINTF(_fmt, ...)
