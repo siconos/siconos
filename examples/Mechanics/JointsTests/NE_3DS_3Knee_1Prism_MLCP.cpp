@@ -81,9 +81,6 @@ void tipTrajectories(SP::SiconosVector  q, double * traj, double length)
 }
 
 
-
-
-
 int main(int argc, char* argv[])
 {
   try
@@ -436,6 +433,7 @@ int main(int argc, char* argv[])
       fprintf(pFile, "\n");
       s->nextStep();
       ++show_progress;
+      //std::cout <<"s->getNewtonCumulativeNbIterations  for step k " << k<< "  = " << s->getNewtonCumulativeNbIterations() <<std::endl;
     }
     fprintf(pFile, "};");
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
@@ -444,7 +442,7 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP.dat", "ascii", dataPlot);
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP.dat", "ascii", dataPlot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_beam1.dat", "ascii", beam1Plot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_beam2.dat", "ascii", beam2Plot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_beam3.dat", "ascii", beam3Plot, "noDim");
