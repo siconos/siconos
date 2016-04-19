@@ -545,14 +545,14 @@ public:
       \param coor the coordinate of interest
       \return a SP::SiconosVector that contains the concatenated value
    */
-  SP::SiconosVector input(unsigned int level = 0, unsigned int coor=0 );
+  SP::SiconosVector lambda(unsigned int level = 0, unsigned int coor=0 );
 
   /** return output y[level](coor) for all the interactions
       \param level y min order to be computed
       \param coor the coordinate of interest
       \return a SP::SiconosVector that contains the concatenated value
    */
-  SP::SiconosVector output(unsigned int level = 0, unsigned int coor=0 );
+  SP::SiconosVector y(unsigned int level = 0, unsigned int coor=0 );
 
   /** call eventsManager processEvents.
    */

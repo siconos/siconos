@@ -29,12 +29,10 @@
 
 #include <debug.h>
 
-unsigned int debug_counter = 0;
-
 
 void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
 {
-  DEBUG_BEGIN("void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
+  DEBUG_BEGIN("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
   double q0 = q->getValue(3);
   double q1 = q->getValue(4);
   double q2 = q->getValue(5);
@@ -62,7 +60,7 @@ void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
   mObjToAbs->setValue(2, 0, quatBuff.R_component_2());
   mObjToAbs->setValue(2, 1, quatBuff.R_component_3());
   mObjToAbs->setValue(2, 2, quatBuff.R_component_4());
-  DEBUG_END("void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
+  DEBUG_END("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
 
 }
 

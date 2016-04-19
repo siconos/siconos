@@ -42,6 +42,7 @@
 #include "NonSmoothLaw.hpp"
 #include "TypeName.hpp"
 // for Debug
+// #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -378,8 +379,9 @@ int Simulation::computeOneStepNSProblem(int Id)
   if (!(*_allNSProblems)[Id])
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + Id);
 
-  return (*_allNSProblems)[Id]->compute(model()->currentTime());
   DEBUG_END("Simulation::computeOneStepNSProblem(int Id)\n");
+  return (*_allNSProblems)[Id]->compute(model()->currentTime());
+
 
 }
 
@@ -438,7 +440,7 @@ void Simulation::updateOutput(unsigned int level)
 
 
 
-SP::SiconosVector Simulation::output(unsigned int level, unsigned int coor)
+SP::SiconosVector Simulation::y(unsigned int level, unsigned int coor)
 {
   // return output(level) (ie with y[level]) for all Interactions.
   // assert(level>=0);
@@ -464,7 +466,7 @@ SP::SiconosVector Simulation::output(unsigned int level, unsigned int coor)
   return y;
 }
 
-SP::SiconosVector Simulation::input(unsigned int level, unsigned int coor)
+SP::SiconosVector Simulation::lambda(unsigned int level, unsigned int coor)
 {
   // return input(level) (ie with lambda[level]) for all Interactions.
   // assert(level>=0);

@@ -28,7 +28,7 @@
 #include "BlockVector.hpp"
 #include "SimulationTypeDef.hpp"
 
-//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 
@@ -269,7 +269,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
 
     k += 6;
   }
-  DEBUG_BEGIN("NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
+  DEBUG_END("NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
 }
 
 void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)

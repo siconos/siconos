@@ -75,6 +75,7 @@ protected:
    */
   unsigned int _newtonOptions;
 
+  
   /** Maximum Residual for the Dynamical system */
   double _newtonResiduDSMax;
 
@@ -98,6 +99,13 @@ protected:
    */
   bool _isNewtonConverge;
 
+  /** boolean variable to force an explicit evaluation of the Jacobians
+   * mapping of relations only at the beginning of the time--step and
+   * not in the Newton iteration
+   */
+
+  bool _explicitJacobiansOfRelation;
+  
   /** Default Constructor
    */
   TimeStepping() :
@@ -226,6 +234,17 @@ public:
   {
     return _isNewtonConverge;
   };
+
+  bool explicitJacobiansOfRelation()
+  {
+  return  _explicitJacobiansOfRelation;
+  }
+  
+  void setExplicitJacobiansOfRelation(bool newval)
+  {
+    _explicitJacobiansOfRelation = newval;
+  };
+  
   /** To specify if the output interaction residu must be computed.
    *  \param v set to true when the output interaction residu must be computed
    */

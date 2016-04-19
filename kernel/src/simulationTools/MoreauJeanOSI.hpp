@@ -141,7 +141,7 @@ protected:
 
   /** a boolean to force the evaluation of T in an explicit way
    */
-  bool _explicitTForNewtonEulerDS;
+  bool _explicitNewtonEulerDSOperators;
 
   /** nslaw effects
    */
@@ -283,20 +283,20 @@ public:
     if (_useGammaForRelation) _useGamma = false;
   };
 
-  /** get boolean _explicitTForNewtonEulerDS for the relation
+  /** get boolean _explicitNewtonEulerDSOperators for the relation
    *  \return a Boolean
    */
-  inline bool explicitTForNewtonEulerDS()
+  inline bool explicitNewtonEulerDSOperators()
   {
-    return _explicitTForNewtonEulerDS;
+    return _explicitNewtonEulerDSOperators;
   };
 
   /** set the boolean to indicate that we use gamma for the relation
    *  \param newUseGammaForRelation a Boolean
    */
-  inline void setExplicitTForNewtonEulerDS(bool newExplicitTForNewtonEulerDS)
+  inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators)
   {
-    _explicitTForNewtonEulerDS = newExplicitTForNewtonEulerDS;
+    _explicitNewtonEulerDSOperators = newExplicitNewtonEulerDSOperators;
   };
 
   // --- OTHER FUNCTIONS ---

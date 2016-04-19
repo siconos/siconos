@@ -47,6 +47,7 @@ using namespace std::placeholders;
 #include <boost/weak_ptr.hpp>
 #endif
 
+// #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
@@ -69,7 +70,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
     _newtonCumulativeNbIterations(0), _newtonOptions(SICONOS_TS_NONLINEAR),
     _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0),
     _computeResiduY(false),_computeResiduR(false),
-    _isNewtonConverge(false)
+    _isNewtonConverge(false), _explicitJacobiansOfRelation(false)
 {
 
   if (osi) insertIntegrator(osi);
@@ -83,7 +84,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
     _newtonCumulativeNbIterations(0), _newtonOptions(SICONOS_TS_NONLINEAR),
     _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false),
     _computeResiduR(false),
-    _isNewtonConverge(false)
+    _isNewtonConverge(false), _explicitJacobiansOfRelation(false)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -475,18 +476,21 @@ void   TimeStepping::prepareNewtonIteration()
     (*itosi)->prepareNewtonIteration(getTkp1());
   }
 
-  InteractionsGraph::VIterator ui, uiend;
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  SP::Interaction inter;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  if(!_explicitJacobiansOfRelation)
   {
-    inter = indexSet0->bundle(*ui);
-    InteractionProperties& interProp = indexSet0->properties(*ui);
-    inter->relation()->computeJach(getTkp1(), *inter, interProp);
-    inter->relation()->computeJacg(getTkp1(), *inter, interProp);
-    // Note FP : prepare call below is only useful for FirstOrderType2R.
-    // We should check if we really need this ...
-    inter->relation()->prepareNewtonIteration(*inter, interProp);
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+    SP::Interaction inter;
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      inter = indexSet0->bundle(*ui);
+      InteractionProperties& interProp = indexSet0->properties(*ui);
+      inter->relation()->computeJach(getTkp1(), *inter, interProp);
+      inter->relation()->computeJacg(getTkp1(), *inter, interProp);
+      // Note FP : prepare call below is only useful for FirstOrderType2R.
+      // We should check if we really need this ...
+      inter->relation()->prepareNewtonIteration(*inter, interProp);
+    }
   }
 
   bool topoHasChanged = model()->nonSmoothDynamicalSystem()->topology()->hasChanged();
@@ -517,6 +521,7 @@ void TimeStepping::saveYandLambdaInOldVariables()
 
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
+
   DEBUG_BEGIN("TimeStepping::newtonSolve(double criterion, unsigned int maxStep)\n");
   _isNewtonConverge = false;
   _newtonNbIterations = 0; // number of Newton iterations
@@ -554,6 +559,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     //  while((!_isNewtonConverge)&&(_newtonNbIterations < maxStep)&&(!info))
     while ((!_isNewtonConverge) && (_newtonNbIterations < maxStep))
     {
+      DEBUG_BEGIN("          \n");
+      DEBUG_END("          \n");
       _newtonNbIterations++;
       prepareNewtonIteration();
       computeFreeState();
