@@ -31,6 +31,8 @@
 #include "TypeName.hpp"
 
 
+unsigned int debug_counter = 0;
+
 // --- CONSTRUCTORS ---
 
 // --- Default (public) constructor ---
