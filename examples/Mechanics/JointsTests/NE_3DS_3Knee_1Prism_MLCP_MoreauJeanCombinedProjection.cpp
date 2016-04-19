@@ -225,8 +225,6 @@ int main(int argc, char* argv[])
     SP::NewtonEulerR relation0(new NewtonEulerR());
     relation0->setJachq(H);
     relation0->setE(eR);
-    cout << "main jacQH" << endl;
-    relation0->jachq()->display();
 
 
     // Interactions

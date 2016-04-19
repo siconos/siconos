@@ -50,8 +50,7 @@ void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink
 void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
 {
 
-  printf("checkInitPos x1:\n");
-  x1->display();
+  //x1->display();
   double X1 = x1->getValue(0);
   double Y1 = x1->getValue(1);
   double Z1 = x1->getValue(2);
@@ -68,8 +67,8 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
   double q23 = 0;
   if(x2)
   {
-    printf("checkInitPos x2:\n");
-    x2->display();
+    //printf("checkInitPos x2:\n");
+    //x2->display();
     X2 = x2->getValue(0);
     Y2 = x2->getValue(1);
     Z2 = x2->getValue(2);
@@ -79,9 +78,26 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
     q23 = x2->getValue(6);
   }
 
-  printf("checkInitPos Hx : %e\n", Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  printf("checkInitPos Hy : %e\n", Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  printf("checkInitPos Hz : %e\n", Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  if (Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
+  {
+    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
+    std::cout << " Hx is large :" << Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
+  }
+  if (Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
+  {
+    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
+    std::cout << " Hy is large :" << Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
+  }
+  if (Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
+  {
+    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
+    std::cout << " Hz is large :" << Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
+  }
+     
+  
+  // printf("checkInitPos Hx : %e\n", Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  // printf("checkInitPos Hy : %e\n", Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  // printf("checkInitPos Hz : %e\n", Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
 
 
 }
@@ -105,8 +121,8 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVe
   P0_abs.setValue(0, quatBuff.R_component_2() + q1->getValue(0));
   P0_abs.setValue(1, quatBuff.R_component_3() + q1->getValue(1));
   P0_abs.setValue(2, quatBuff.R_component_4() + q1->getValue(2));
-  std::cout << "KneeJoint: P0_abs in the initial position.\n";
-  P0_abs.display();
+  // std::cout << "KneeJoint: P0_abs in the initial position.\n";
+  // P0_abs.display();
 
   SP::SiconosVector q2 = d2->q0();
   SiconosVector G2_abs(3);
@@ -126,8 +142,8 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVe
   _G2P0y = quatBuff.R_component_3();
   _G2P0z = quatBuff.R_component_4();
 
-  std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
-  std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
+  // std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
+  // std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
 
   checkInitPos(q1,q2);
 
@@ -183,8 +199,8 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutR
     _G2P0y = q1->getValue(1) + quatBuff.R_component_3();
     _G2P0z = q1->getValue(2) + quatBuff.R_component_4();
   }
-  std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
-  std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
+  // std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
+  // std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
   SP::SiconosVector q2;
   checkInitPos(q1,q2);
 }
