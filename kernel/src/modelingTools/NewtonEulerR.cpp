@@ -141,8 +141,8 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionPro
      * finally not to remain consistent with computeInput.
      * this has to be fixed.
      */
-    // computeJachq(time, inter, DSlink);
-    // computeJachqT(inter, DSlink);
+    // computeJachq(time, inter, DSlink[NewtonEulerR::q0]);
+    // computeJachqT(inter, DSlink[NewtonEulerR::q0]);
 
     if (derivativeNumber == 1)
     {
