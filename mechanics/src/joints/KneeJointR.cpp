@@ -496,7 +496,7 @@ void KneeJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q
   }
   else
     Jd1(X1, Y1, Z1, q10, q11, q12, q13);
-  DEBUG_END("KneeJointR::computeJachq(double time, Interaction& inter,  SP::SiconosVector q1, SP::SiconosVector q2 ) \n");
+  DEBUG_END("KneeJointR::computeJachq(double time, Interaction& inter,  SP::BlockVector q0 ) \n");
 
 }
 
