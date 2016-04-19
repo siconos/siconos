@@ -185,30 +185,10 @@ void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
   //  _isContact=1;
 }
 
-void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
+void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)
 {
 
-  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, ...) \n");
-  DEBUG_PRINTF("with time =  %f\n",time);
-  DEBUG_PRINTF("with inter =  %p\n",&inter);
-
-  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
-  if (inter.has2Bodies())
-  {
-    computeJachq(time,inter,(BlockX->getAllVect())[0], (BlockX->getAllVect())[1]);
-  }
-  else
-  {
-    computeJachq(time,inter,(BlockX->getAllVect())[0]);
-  }
-
-  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, ...) \n");
-
-}
-void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2)
-{
-
-  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2) \n");
+  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 ) \n");
   DEBUG_PRINTF("with time =  %f\n",time);
   DEBUG_PRINTF("with inter =  %p\n",&inter);
 
@@ -223,27 +203,12 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
     _jachq->setValue(0, 9, -_Nc->getValue(2));
   }
 
-  
-  //SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
-  SP::SiconosVector q = q1;
-  int nds =1;
-  if (q2)
+  for (unsigned int iDS =0 ; iDS < q0->getNumberOfBlocks()  ; iDS++)
   {
-    nds=2;
-  }
-
-  for (int iDS = 0; iDS < nds; iDS++)
-  {
-
+    SP::SiconosVector q = (q0->getAllVect())[iDS];
     double sign = 1.0;
-    if (iDS == 1)
-    {
-      q=q2;
-    }
-
     DEBUG_PRINTF("NewtonEulerFrom1DLocalFrameR::computeJachq : ds%d->q :", iDS);
     DEBUG_EXPR_WE(q->display(););
-
 
     ::boost::math::quaternion<double>    quatGP;
     if (iDS == 0)
@@ -289,42 +254,23 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
   }
 
   DEBUG_EXPR(_jachq->display(););
-  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2) \n");
+  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 \n");
 
 }
 
-
-
-
-
-void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink)
+void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0 )
 {
-  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n")
-  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
-  if (inter.has2Bodies())
+  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0 \n")
+    
+  if (q0->getNumberOfBlocks()>1)
   {
-    NIcomputeJachqTFromContacts((BlockX->getAllVect())[0], (BlockX->getAllVect())[1]);
+    NIcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
   }
   else
   {
-    NIcomputeJachqTFromContacts((BlockX->getAllVect())[0]);
+    NIcomputeJachqTFromContacts((q0->getAllVect())[0]);
   }
 
-  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n");
-
-}
-void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2 )
-{
-  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2 ) \n")
-  if (inter.has2Bodies())
-  {
-    NIcomputeJachqTFromContacts(q1,q2);
-  }
-  else
-  {
-    NIcomputeJachqTFromContacts(q1);
-  }
-
-  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2 ) \n");
+  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
 
 }

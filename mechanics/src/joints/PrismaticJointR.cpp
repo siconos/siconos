@@ -59,10 +59,10 @@ void PrismaticJointR::computeFromInitialPosition(SP::SiconosVector q2, SP::Sicon
 {
   computeV1V2FromAxis();
   SP::SiconosVector q1int;
-  
+
   if(q1)
   {
-    q1int = q1; 
+    q1int = q1;
   }
   else
   {
@@ -70,7 +70,7 @@ void PrismaticJointR::computeFromInitialPosition(SP::SiconosVector q2, SP::Sicon
     q1int->zero();
     q1int->setValue(3, 1);
   }
-  
+
   ::boost::math::quaternion<double>    quat1(q1int->getValue(3), q1int->getValue(4), q1int->getValue(5), q1int->getValue(6));
   ::boost::math::quaternion<double>    quat2(q2->getValue(3), q2->getValue(4), q2->getValue(5), q2->getValue(6));
   ::boost::math::quaternion<double>    quat1_inv(q1int->getValue(3), -q1int->getValue(4), -q1int->getValue(5), -q1int->getValue(6));
@@ -127,32 +127,13 @@ void PrismaticJointR::computeV1V2FromAxis()
 
 }
 
-
-
-void PrismaticJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
+void PrismaticJointR::computeJachq(double time, Interaction& inter,  SP::BlockVector q0)
 {
 
-  DEBUG_BEGIN("PrismaticJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink) \n");
-  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
-  if (inter.has2Bodies())
-  {
-    computeJachq(time, inter, (BlockX->getAllVect())[0], (BlockX->getAllVect())[1]);
-  }
-  else
-  {
-    computeJachq(time, inter, (BlockX->getAllVect())[0]);
-  }
-  DEBUG_END("PrismaticJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink) \n")
-
-}
-
-void PrismaticJointR::computeJachq(double time, Interaction& inter,  SP::SiconosVector q2, SP::SiconosVector q1)
-{
-
-  DEBUG_PRINT("PrismaticJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink) \n");
+  DEBUG_PRINT("PrismaticJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 ) \n");
 
   _jachq->zero();
-
+  SP::SiconosVector q2 = (q0->getAllVect())[0];
   double X2 = q2->getValue(0);
   double Y2 = q2->getValue(1);
   double Z2 = q2->getValue(2);
@@ -168,8 +149,10 @@ void PrismaticJointR::computeJachq(double time, Interaction& inter,  SP::Siconos
   double q11 = 0;
   double q12 = 0;
   double q13 = 0;
-  if(q1)
+  if(q0->getNumberOfBlocks()>1)
+
   {
+    SP::SiconosVector q1 = (q0->getAllVect())[1];
     X1 = q1->getValue(0);
     Y1 = q1->getValue(1);
     Z1 = q1->getValue(2);
@@ -182,8 +165,8 @@ void PrismaticJointR::computeJachq(double time, Interaction& inter,  SP::Siconos
   else
     Jd2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
 
+  DEBUG_END("PrismaticJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 ) \n");
 }
-
 
 void PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
@@ -782,10 +765,8 @@ void PrismaticJointR::Jd2(double X1, double Y1, double Z1, double q10, double q1
 void PrismaticJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
   std::cout << "Warning:  PrismaticJointR::computeDotJachq(...) not yet implemented"<< std::cout;
-  
+
 }
-
-
 
 void PrismaticJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
                                double Xdot2, double Ydot2, double Zdot2, double qdot20, double qdot21, double qdot22, double qdot23)

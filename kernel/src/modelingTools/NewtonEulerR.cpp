@@ -234,9 +234,9 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProp
 
 /*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEulerFrom3DLocalFrameR and NewtonEulerFrom1DLocalFrameR)*/
 
-void NewtonEulerR::computeJachqT_old(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
+void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
 {
-  DEBUG_BEGIN("NewtonEulerR::computeJachqT_old(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2) \n");
+  DEBUG_BEGIN("NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
   DEBUG_PRINTF("with inter =  %p\n",&inter);
   DEBUG_EXPR(inter.display());
 
@@ -246,10 +246,10 @@ void NewtonEulerR::computeJachqT_old(Interaction& inter, SP::DynamicalSystem ds1
   SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));
   Index dimIndex(2);
   Index startIndex(4);
-  bool endl = false;
-  for (SP::DynamicalSystem ds = ds1; !endl; ds = ds2)
+
+  for (unsigned int i =0 ; i < q0->getNumberOfBlocks()  ; i++)
   {
-    endl = (ds == ds2);
+    SP::SiconosVector q = (q0->getAllVect())[i];
     startIndex[0] = 0;
     startIndex[1] = 7 * k / 6;
     startIndex[2] = 0;
@@ -257,129 +257,11 @@ void NewtonEulerR::computeJachqT_old(Interaction& inter, SP::DynamicalSystem ds1
     dimIndex[0] = ySize;
     dimIndex[1] = 7;
     setBlock(_jachq, auxBloc, dimIndex, startIndex);
-
-    NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (ds);
-    SimpleMatrix& T = *d.T();
-
-
-    DEBUG_EXPR(d.display());
-    DEBUG_EXPR((d.T())->display());
-
-    prod(*auxBloc, T, *auxBloc2);
-
-    startIndex[0] = 0;
-    startIndex[1] = 0;
-    startIndex[2] = 0;
-    startIndex[3] = k;
-    dimIndex[0] = ySize;
-    dimIndex[1] = 6;
-
-    setBlock(auxBloc2, _jachqT, dimIndex, startIndex);
-    DEBUG_EXPR(_jachqT->display());
-
-    k += ds->getDim();
-  }
-
-  DEBUG_END("NewtonEulerR::computeJachqT_old(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2) \n")
-}
-void NewtonEulerR::computeJachqT_new(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
-{
-  DEBUG_BEGIN("NewtonEulerR::computeJachqT_new(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2) \n");
-  DEBUG_PRINTF("with inter =  %p\n",&inter);
-  DEBUG_EXPR(inter.display());
-
-  unsigned int k = 0;
-  unsigned int ySize = inter.getSizeOfY();
-  SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
-  SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));
-  Index dimIndex(2);
-  Index startIndex(4);
-  bool endl = false;
-  for (SP::DynamicalSystem ds = ds1; !endl; ds = ds2)
-  {
-    endl = (ds == ds2);
-    startIndex[0] = 0;
-    startIndex[1] = 7 * k / 6;
-    startIndex[2] = 0;
-    startIndex[3] = 0;
-    dimIndex[0] = ySize;
-    dimIndex[1] = 7;
-    setBlock(_jachq, auxBloc, dimIndex, startIndex);
-
-    NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (ds);
-//    SimpleMatrix& T = *d.T();
-
-    DEBUG_EXPR(d.display());
-    DEBUG_EXPR((d.T())->display());
-
-    computeT(d.q(),_T);
-
-    DEBUG_EXPR(d.q()->display(););
-    DEBUG_EXPR(_T->display());
-
-    DEBUG_PRINTF("error :%f\n", (*_T-*(d.T())).normInf());
-
-    //assert((*_T-*(d.T())).normInf() < 1e-10);
-
-
-    prod(*auxBloc, *_T, *auxBloc2);
-
-    startIndex[0] = 0;
-    startIndex[1] = 0;
-    startIndex[2] = 0;
-    startIndex[3] = k;
-    dimIndex[0] = ySize;
-    dimIndex[1] = 6;
-
-    setBlock(auxBloc2, _jachqT, dimIndex, startIndex);
-    DEBUG_EXPR(_jachqT->display());
-
-    k += ds->getDim();
-  }
-
-  DEBUG_END("NewtonEulerR::computeJachqT_new(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2) \n")
-}
-void NewtonEulerR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2)
-{
-  DEBUG_BEGIN("NewtonEulerR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2) \n");
-  DEBUG_PRINTF("with inter =  %p\n",&inter);
-  DEBUG_EXPR(inter.display());
-
-  unsigned int k = 0;
-  unsigned int ySize = inter.getSizeOfY();
-  SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
-  SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));
-  Index dimIndex(2);
-  Index startIndex(4);
-  bool endl = false;
-
-
-
-  for (SP::SiconosVector q = q1; !endl; q = q2)
-  {
-    endl = (q == q2);
-    startIndex[0] = 0;
-    startIndex[1] = 7 * k / 6;
-    startIndex[2] = 0;
-    startIndex[3] = 0;
-    dimIndex[0] = ySize;
-    dimIndex[1] = 7;
-    setBlock(_jachq, auxBloc, dimIndex, startIndex);
-
-//    NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (ds);
-//    SimpleMatrix& T = *d.T();
-
-//    DEBUG_EXPR(d.display());
-//    DEBUG_EXPR((d.T())->display());
 
     computeT(q,_T);
 
     DEBUG_EXPR(q->display(););
     DEBUG_EXPR(_T->display());
-
-//    DEBUG_PRINTF("error :%f\n", (*_T-*(d.T())).normInf());
-
-    //assert((*_T-*(d.T())).normInf() < 1e-10);
 
     prod(*auxBloc, *_T, *auxBloc2);
 
@@ -395,53 +277,8 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::S
 
     k += 6;
   }
-
-  DEBUG_END("NewtonEulerR::computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2) \n")
+  DEBUG_BEGIN("NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
 }
-
-// void NewtonEulerR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
-// {
-//   DEBUG_BEGIN("NewtonEulerR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2) \n");
-//   DEBUG_PRINTF("with inter =  %p\n",&inter);
-//   DEBUG_EXPR(inter.display());
-
-
-//   DEBUG_PRINT("######################################################################################  \n")
-// //  computeJachqT_old(inter,  ds1,  ds2);
-
-// //  computeJachqT_new(inter,  ds1,  ds2);
-
-//   if (inter.has2Bodies())
-//   {
-//     computeJachqT(inter,  (std11::static_pointer_cast<NewtonEulerDS> (ds1))->q(),   (std11::static_pointer_cast<NewtonEulerDS> (ds2))->q());
-//   }
-//   else
-//   {
-//     computeJachqT(inter,  (std11::static_pointer_cast<NewtonEulerDS> (ds1))->q(),   (std11::static_pointer_cast<NewtonEulerDS> (ds1))->q());
-//   }
-
-//   DEBUG_END("NewtonEulerR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2) \n")
-// }
-
-void NewtonEulerR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink )
-{
-  DEBUG_BEGIN("NewtonEulerR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n");
-  DEBUG_PRINTF("with inter =  %p\n",&inter);
-
-  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
-  if (inter.has2Bodies())
-  {
-    computeJachqT(inter, (BlockX->getAllVect())[0], (BlockX->getAllVect())[1]);
-  }
-  else
-  {
-    computeJachqT(inter, (BlockX->getAllVect())[0],(BlockX->getAllVect())[0] );
-  }
-
-  DEBUG_END("NewtonEulerR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n");
-
-}
-
 
 void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
@@ -451,9 +288,9 @@ void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionPrope
 
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  computeJachq(time, inter, DSlink);
 
-  computeJachqT(inter, DSlink);
+  computeJachq(time, inter, DSlink[NewtonEulerR::q0]);
+  computeJachqT(inter, DSlink[NewtonEulerR::q0]);
 
   //computeJachqDot(time, inter); // This is not needed here
   //computeDotJachq(time, inter);

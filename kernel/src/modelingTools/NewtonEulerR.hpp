@@ -213,18 +213,9 @@ public:
   /** compute the jacobian of h w.r.t. q
    * \param time current time
    * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
+   * \param q0  the container of the block vector to the dynamical system
    */
-  virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
-  {
-    ;
-  }
-  /** compute the jacobian of h w.r.t. q
-   * \param time current time
-   * \param inter the interaction using this relation
-   * \
-   */
-  virtual void computeJachq(double time, Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2=SP::SiconosVector())
+  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0)
   {
     ;
   }
@@ -269,52 +260,15 @@ public:
   }
 
   /* default implementation consists in multiplying jachq and T
-   *  \param inter interaction that owns the relation
-   *  \param ds1 dynamical system linked to this interaction (source)
-   *  \param ds2 second ds linked to this interaction (target). If there is
-   *  only one ds in the inter, call this function with ..., ds, ds)
-  */
-  //virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
-
-  /* default implementation consists in multiplying jachq and T
-   * in the old implementation we use d->T() which is not necessarily consitent
-   * with rhe result of computeT(d-q())
-   *  \param inter interaction that owns the relation
-   *  \param ds1 dynamical system linked to this interaction (source)
-   *  \param ds2 second ds linked to this interaction (target). If there is
-   *  only one ds in the inter, call this function with ..., ds, ds)
-  */
-
-  virtual void computeJachqT_old(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
-
-  /* default implementation consists in multiplying jachq and T
-   * in the new implementation we use _T which is consitent
-   * with the result of computeT(d-q())
-   *  \param inter interaction that owns the relation
-   *  \param ds1 dynamical system linked to this interaction (source)
-   *  \param ds2 second ds linked to this interaction (target). If there is
-   *  only one ds in the inter, call this function with ..., ds, ds)
-  */
-
-  virtual void computeJachqT_new(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
-
-  /* default implementation consists in multiplying jachq and T
    * in this implementation we use _T which is consitent which directly
    * computed with computeT(q) when q is given
    * this one in more consistent with the notion of function of q
    *
    *  \param inter interaction that owns the relation
-   *  \param q1 dynamical system linked to this interaction (source)
-   *  \param q2 second ds linked to this interaction (target). If there is
-   *  only one ds in the inter, call this function with ..., ds, ds)
+   *  \param q0  the block vector to the dynamical system position
   */
-  virtual void computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2);
+  virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
 
-  /* default implementation consists in multiplying jachq and T with nearly the same interface as computeJachq
-   *  \param inter interaction that owns the relation
-   *  \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  virtual void computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink );
 
   /** compute all the jacobian of h
    * \param time current time

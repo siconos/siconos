@@ -443,30 +443,14 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
   }
 }
 
-
-
-void KneeJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
+void KneeJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)
 {
-  DEBUG_BEGIN("KneeJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink) \n");
-  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
-  if (inter.has2Bodies())
-  {
-    computeJachq(time, inter, (BlockX->getAllVect())[0], (BlockX->getAllVect())[1]);
-  }
-  else
-  {
-    computeJachq(time, inter, (BlockX->getAllVect())[0]);
-  }
-  DEBUG_END("KneeJointR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink) \n");
-
-}
-
-void KneeJointR::computeJachq(double time, Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2)
-{
-  DEBUG_BEGIN("KneeJointR::computeJachq(double time, Interaction& inter,  SP::SiconosVector q1, SP::SiconosVector q2 ) \n");
+  DEBUG_BEGIN("KneeJointR::computeJachq(double time, Interaction& inter,  SP::BlockVector q0) \n");
   
   _jachq->zero();
+  SP::SiconosVector q1 = (q0->getAllVect())[0];
 
+  
   double X1 = q1->getValue(0);
   double Y1 = q1->getValue(1);
   double Z1 = q1->getValue(2);
@@ -482,8 +466,9 @@ void KneeJointR::computeJachq(double time, Interaction& inter, SP::SiconosVector
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if(q2)
+  if(q0->getNumberOfBlocks()>1)
   {
+    SP::SiconosVector q2 = (q0->getAllVect())[1];
     X2 = q2->getValue(0);
     Y2 = q2->getValue(1);
     Z2 = q2->getValue(2);

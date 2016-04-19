@@ -70,10 +70,9 @@ public:
    * but here we compute the operator from the the contact point locations
    * and the local frame at contact
    *  \param inter interaction that owns the relation
-   *  \param DSlink the container of the link to DynamicalSystem attributes
+   *  \param q0  the block vector to the dynamical system position
    */
-  virtual void computeJachqT(Interaction& inter,  VectorOfBlockVectors& DSlink);
-  virtual void computeJachqT(Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2);
+  virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
 
   ACCEPT_STD_VISITORS();
 };

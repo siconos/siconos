@@ -81,10 +81,9 @@ public:
    */
   static unsigned int numberOfConstraints() { return 3; }
 
-  virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
+  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
-  virtual void computeJachq(double time, Interaction& inter, SP::SiconosVector q1, SP::SiconosVector q2=SP::SiconosVector());
-
+  
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
