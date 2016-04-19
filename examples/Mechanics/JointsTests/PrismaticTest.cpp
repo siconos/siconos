@@ -194,13 +194,13 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("PrismaticTest.dat", "ascii", dataPlot, "noDim");
 
     cout << "====> Comparison with a reference file ..." << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
 
-    ioMatrix::read("prismatic.ref", "ascii", dataPlotRef);
+    ioMatrix::read("PrismaticTest.ref", "ascii", dataPlotRef);
     double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
     std::cout << "Error = "<< error << std::endl;
     if (error > 1e-12)
