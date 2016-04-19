@@ -15,8 +15,8 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(testMultiBody MultiBodyTest.cpp)
   END_TEST()
 
-  BEGIN_TEST(src/proposed)
-  NEW_TEST(testContact testContact.cpp)
+  BEGIN_TEST(src/proposed/test)
+  NEW_TEST(testContact ContactTest.cpp)
   END_TEST()
 
   IF(WITH_OCC)

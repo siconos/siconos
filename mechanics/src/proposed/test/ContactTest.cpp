@@ -1,6 +1,6 @@
-// -*- compile-command: "make -C ~/projects/siconos/bld/mechanics && valgrind --leak-check=full --suppressions=$HOME/projects/siconos/cmake/valgrind.supp ~/projects/siconos/bld/mechanics/src/proposed/testContact ContactTest" -*-
+// -*- compile-command: "make -C ~/projects/siconos/bld/mechanics && valgrind --leak-check=full --suppressions=$HOME/projects/siconos/cmake/valgrind.supp ~/projects/siconos/bld/mechanics/src/proposed/test/testContact ContactTest" -*-
 
-#include "testContact.hpp"
+#include "ContactTest.hpp"
 
 #include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
