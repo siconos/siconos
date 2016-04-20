@@ -68,7 +68,7 @@ void TimeSteppingD1Minus::initOSNS()
 
     // update output
     for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
-      updateOutput(level);
+      model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),level);
   }
 }
 
@@ -165,7 +165,7 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
 {
   // compute input (lambda -> r)
   if (!_allNSProblems->empty())
-    updateInput(levelInput);
+    model()->nonSmoothDynamicalSystem()->updateInput(model()->currentTime(),levelInput);
 
   // compute state for each dynamical system
   for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
@@ -175,7 +175,7 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
   if (!_allNSProblems->empty())
   {
     for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
-      updateOutput(level);
+      model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),level);
   }
 }
 

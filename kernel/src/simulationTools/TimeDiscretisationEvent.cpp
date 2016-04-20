@@ -20,7 +20,8 @@
 #include "EventFactory.hpp"
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
-
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 using namespace EventFactory;
 
 // Default constructor
@@ -38,7 +39,10 @@ void TimeDiscretisationEvent::process(Simulation& simulation)
   // Update y[i] values in Interactions with new DS states.
   //simulation->updateOutput(0, 1);
   // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
-  simulation.saveInMemory();
+
+  simulation.model()->nonSmoothDynamicalSystem()->swapInMemory();  // To save pre-impact values
+  simulation.model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();  // To save pre-impact values
+
 }
 
 void TimeDiscretisationEvent::update(unsigned int k)

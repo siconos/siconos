@@ -192,8 +192,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       // Note Franck : at the time this results in a call to swapInMem of all Interactions of the NSDS
       // So let the simu do this.
       //(*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
-      simulationLink->pushInteractionsInMemory();
-      simulationLink->updateInput(2);
+      simulationLink->model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
+      simulationLink->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
 
       for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       {
@@ -363,7 +363,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     for (unsigned int level = simulationLink->levelMinForOutput();
          level < simulationLink->levelMaxForOutput(); level++)
     {
-      simulationLink->updateOutput(level);
+      simulationLink->model()->nonSmoothDynamicalSystem()->updateOutput(t,level);
     }
     simulationLink->updateIndexSets();
 
@@ -567,7 +567,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
         DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display(););
-        simulationLink->updateInput(2);
+        simulationLink->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
       }
     }
 

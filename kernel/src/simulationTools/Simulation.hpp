@@ -436,24 +436,6 @@ public:
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
 
-  /** Set OSI (DS) non-smooth part to zero.
-   */
-  void reset();
-
-  /** Set OSI (DS) non-smooth part to zero for a given level.
-   * \param level the level to will be zeroed
-   */
-  void reset(unsigned int level);
-
-  /** save DynamicalSystems and Interactions states in Memories
-      (through OSI and OSNS).
-   */
-  void saveInMemory();
-
-  /** save interaction states in memories. Applied to all interactions
-   of the connected topology (via model->nsds). */
-  void pushInteractionsInMemory();
-
   /** computes a one step NS problem
    *  \param nb the id of the OneStepNSProblem to be computed
    *  \return information about the solver convergence.
@@ -529,16 +511,6 @@ public:
   {
     return _relativeConvergenceCriterionHeld;
   };
-
-  /** compute r thanks to lambda[level] for all Interactions
-      \param level lambda level
-   */
-  virtual void updateInput(unsigned int level);
-
-  /** compute output for all the interactions
-      \param level y min order to be computed
-   */
-  void updateOutput(unsigned int level = 0);
 
   /** return input lambda[level](coor) for all the interactions
       \param level lambda min order to be computed
