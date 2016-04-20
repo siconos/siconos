@@ -169,7 +169,7 @@ void MoreauJeanOSI::initialize()
   {
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
     // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
-    
+
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     if (!checkOSI(dsi)) continue;
     // W initialization
@@ -196,9 +196,11 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
   if (!ds)
     RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds == NULL");
 
-  if (!OSIDynamicalSystems->isIn(ds))
+  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds does not belong to the OSI.");
-  unsigned int dsN = ds->number();
+
+
+   unsigned int dsN = ds->number();
   if (WMap.find(dsN) != WMap.end())
     RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
@@ -270,10 +272,11 @@ void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
   // - insert this matrix into WBoundaryConditionsMap with ds as a key
 
   DEBUG_BEGIN("MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)\n");
+
   if (!ds)
     RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - ds == NULL");
 
-  if (!OSIDynamicalSystems->isIn(ds))
+  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
 
   Type::Siconos dsType = Type::value(*ds);
@@ -461,23 +464,24 @@ void MoreauJeanOSI::computeInitialNewtonState()
   DEBUG_BEGIN("MoreauJeanOSI::computeInitialNewtonState()\n");
   // Compute the position value giving the initial velocity.
   // The goal of to save one newton iteration for nearly linear system
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-     SP::DynamicalSystem ds = *it;
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
-     if (_explicitNewtonEulerDSOperators)
-     {
-       if (Type::value(*ds) == Type::NewtonEulerDS){
-         // The goal is to update T() and MObjToAbs() one time at the beginning of the Newton Loop
-         // We want to be explicit on this function since we do not compute their Jacobians.
-         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-         //SP::SiconosVector q = d->q();
-         computeT(qold,d->T());
-         computeMObjToAbs(qold,d->MObjToAbs());
-       }
-     }
+    if (_explicitNewtonEulerDSOperators)
+    {
+      if (Type::value(*ds) == Type::NewtonEulerDS){
+        // The goal is to update T() and MObjToAbs() one time at the beginning of the Newton Loop
+        // We want to be explicit on this function since we do not compute their Jacobians.
+        SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+        SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+        //SP::SiconosVector q = d->q();
+        computeT(qold,d->T());
+        computeMObjToAbs(qold,d->MObjToAbs());
+      }
+    }
     // The goal is to converge in one iteration of the system is almost linear
     // we start the Newton loop q = q0+hv0
     updatePosition(ds);
@@ -511,16 +515,18 @@ double MoreauJeanOSI::computeResidu()
 
   // Iteration through the set of Dynamical Systems.
   //
-  DSIterator it;
   SP::DynamicalSystem ds; // Current Dynamical System.
   Type::Siconos dsType ; // Type of the current DS.
 
   double maxResidu = 0;
   double normResidu = maxResidu;
 
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    ds = *it; // the considered dynamical system
+    if (!checkOSI(dsi)) continue;
+    ds = _dynamicalSystemsGraph->bundle(*dsi);
+
     dsType = Type::value(*ds); // Its type
     SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu);
     // 3 - Lagrangian Non Linear Systems
@@ -926,14 +932,18 @@ void MoreauJeanOSI::computeFreeState()
 
   // Iteration through the set of Dynamical Systems.
   //
-  DSIterator it; // Iterator through the set of DS.
+
 
   SP::DynamicalSystem ds; // Current Dynamical System.
   SP::SiconosMatrix W; // W MoreauJeanOSI matrix of the current DS.
   Type::Siconos dsType ; // Type of the current DS.
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-  {
-    ds = *it; // the considered dynamical system
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+   {
+    if (!checkOSI(dsi)) continue;
+    ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
     W = WMap[ds->number()]; // Its W MoreauJeanOSI matrix of iteration.
     // 3 - Lagrangian Non Linear Systems
@@ -1076,18 +1086,25 @@ void MoreauJeanOSI::computeFreeState()
 void MoreauJeanOSI::prepareNewtonIteration(double time)
 {
   DEBUG_BEGIN(" MoreauJeanOSI::prepareNewtonIteration(double time)\n");
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
-  {
-    computeW(time, *itDS);
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+   {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    computeW(time, ds);
   }
 
   if (!_explicitNewtonEulerDSOperators)
   {
-    for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+    DynamicalSystemsGraph::VIterator dsi, dsend;
+
+    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
+      if (!checkOSI(dsi)) continue;
+
+      SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+
       //  VA <2016-04-19 Tue> We compute T and MObjToAbs to be consitent with the Jacobian at the beginning of the Newton iteration and not at the end
-      SP::DynamicalSystem ds = *itDS;
       Type::Siconos dsType = Type::value(*ds);
       if (dsType == Type::NewtonEulerDS)
       {
@@ -1099,7 +1116,7 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
 
   }
 
-  
+
   DEBUG_END(" MoreauJeanOSI::prepareNewtonIteration(double time)\n");
 
 }
@@ -1298,14 +1315,17 @@ void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& no
   double h = tend - tinit;
   tout = tend;
 
-  DSIterator it;
+
   SP::SiconosMatrix W;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem ds = *it;
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    
     W = WMap[ds->number()];
     Type::Siconos dsType = Type::value(*ds);
-
+    
     if (dsType == Type::LagrangianLinearTIDS)
     {
       // get the ds
@@ -1440,11 +1460,15 @@ void MoreauJeanOSI::updateState(const unsigned int level)
   if (useRCC)
     simulationLink->setRelativeConvergenceCriterionHeld(true);
 
-  DSIterator it;
   SP::SiconosMatrix W;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem ds = *it;
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+
+
     W = WMap[ds->number()];
     // Get the DS type
 
@@ -1659,14 +1683,20 @@ void MoreauJeanOSI::display()
   OneStepIntegrator::display();
 
   std::cout << "====== MoreauJeanOSI OSI display ======" <<std::endl;
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  if (_dynamicalSystemsGraph)
   {
-    std::cout << "--------------------------------" <<std::endl;
-    std::cout << "--> W of dynamical system number " << (*it)->number() << ": " <<std::endl;
-    if (WMap[(*it)->number()]) WMap[(*it)->number()]->display();
-    else std::cout << "-> NULL" <<std::endl;
-    std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
+    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    {
+      if (!checkOSI(dsi)) continue;
+      SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+
+      std::cout << "--------------------------------" <<std::endl;
+      std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
+      if (WMap[ds->number()]) WMap[ds->number()]->display();
+      else std::cout << "-> NULL" <<std::endl;
+      std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
+    }
   }
   std::cout << "================================" <<std::endl;
 }

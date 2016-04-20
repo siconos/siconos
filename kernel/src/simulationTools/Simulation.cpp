@@ -212,11 +212,11 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   _tinit = _eventsManager->startingTime();
   //===
 
-  
+
   if (withOSI)
   {
 
-    
+
     if (numberOfOSI() == 0)
       RuntimeException::selfThrow("Simulation::initialize No OSI !");
 
@@ -230,14 +230,13 @@ void Simulation::initialize(SP::Model m, bool withOSI)
       if (!osi)
       {
         // By default, if the user has not set the OSI, we assign the first OSI to all DS
-        (*_allOSI->begin())->display();
         model()->nonSmoothDynamicalSystem()->topology()->setOSI(ds,*_allOSI->begin());
-        std::cout << "By default, if the user has not set the OSI, we assign the first OSI to all DS"<<std::endl;
+        //std::cout << "By default, if the user has not set the OSI, we assign the first OSI to all DS"<<std::endl;
       }
       else
       {
       }
-      
+
       osi = DSG->osi[*dsi];
       ds->initialize(model()->t0(),
                      osi->getSizeMem());
@@ -989,7 +988,7 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   // Note FP :  we should probably connect osi and graph before, in simulation->initialize?
   DSOSIConstIterator it = _osiMap.find(ds);
   SP::OneStepIntegrator osi = it->second;
-  
+
   if (!osi)
     RuntimeException::selfThrow("Simulation::computeLevelsForInputAndOutput osi does not exists");
   indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;

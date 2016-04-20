@@ -52,7 +52,7 @@ void OneStepIntegrator::initialize()
   // a subgraph has to be implemented.
   _dynamicalSystemsGraph = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   
-  // Temporary build of the dynamicalSystems set
+  // Temporary build of the dynamicalystems set
   DynamicalSystemsGraph::VIterator dsi, dsend;
   SP::DynamicalSystemsGraph DSG = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)

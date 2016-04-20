@@ -132,6 +132,10 @@ public:
   {
     return  (_dynamicalSystemsGraph->osi[*dsi].get()) == this;
   };
+  inline bool checkOSI(DynamicalSystemsGraph::VDescriptor dsgv)
+  {
+    return  (_dynamicalSystemsGraph->osi[dsgv].get()) == this;
+  };
 
 /** get the set of DynamicalSystem associated with the Integrator
  *  \return a DynamicalSystemsSet
