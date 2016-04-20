@@ -79,9 +79,56 @@ static const double extra_margin = 0.1;
 // most certainly an overfitting, probably prohibit small objects, probably
 // break for different velocities, and therefore need further testing under
 // larger and smaller object interactions and various mass ratios.
+
+// Some further notes:
+
+//   * The 0.3 margin was needed because the object position was really changing
+//     at more than 0.2 per timestep, causing it to jump past the 0.2 value that
+//     was added to the distance reported by BulletR.
+
+//   * Subtracting from the true object size for a CH is bad, because it limits
+//     to objects of a certain size.
+
+//   * Adding to the true object size is pointless, since it makes the space
+//     between the object sides and the margin smaller, making it more likely to
+//     mess up the GJK algorithm.  Note that the GJK algorithm means that we
+//     simply can't have overlapping objects, overlapping must be limited to the
+//     margin.
+
+//   * In principle then the margin should just be made as large as possible,
+//     but in practice it would limit how far apart objects are allowed to be
+//     instantiated.  It does seem to more or less work, but resting behaviour
+//     does not seem to be quite correct.
+
+//   * However, for CH, contacts are provided more in advance if
+//     gContactBreakingThreshold is made larger.  Indeed, setting it to a large
+//     value (e.g. 1.0) is enough to get away with a small margin (0.1) and no
+//     change in the object's size.  Keeping margin to 0.1 also allows us to
+//     avoid having to track margin corrections per object in BulletR.
+
+// Therefore a possible approach is to keep margin at 0.1 for all objects,
+// always correcting the same amount for BulletR, and dynamically increasing as
+// necessary gContactBreakingThreshold to account for fast-moving small objects.
+
+// However:
+
+//   * For larger objects (at similar velocities), it's possible that larger
+//     margins are required, although it is not yet clear why.  (E.g. the
+//     current ContactTest fails for objects 1.0, but works for objects 0.1, the
+//     opposite of before.  It works if box_convex_hull_margin is set back to
+//     0.35, even if gContactBreakingThreshold is 1.0.  Why?)
+
+// These controls (setMargin, extra size, and dynamic gContactBreakingThreshold)
+// must be made available through an interface for simulations that might need
+// to be initialized in a particular configuration.  However, providing some
+// guidelines or "physical" semantics to this interface would be beneficial from
+// the point of view of someone developing such a simulation.  On the other
+// hand, for general purpose, good rules of thumb are needed to avoid problems
+// in the general case.
+
 #ifdef USE_CONVEXHULL_FOR_BOX
-static const double box_convex_hull_margin = 0.35;
-static const double box_ch_added_margin = -0.5;
+static const double box_convex_hull_margin = 0.1;
+static const double box_ch_added_margin = 0.0;
 #endif
 
 class BulletBroadphase_impl : public SiconosShapeHandler
@@ -610,6 +657,10 @@ void BulletBroadphase::performBroadphase()
   // 0. set up bullet callbacks
   gBulletBroadphase = this;
   gContactDestroyedCallback = this->bulletContactClear;
+
+  // TODO: This must be either configured dynamically or made available to the
+  // user.
+  gContactBreakingThreshold = 1.0;
 
   // 1. perform bullet collision detection
   impl->orphanedInteractions.clear();

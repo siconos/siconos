@@ -120,7 +120,7 @@ double ContactTest::bounceTest(std::string moving,
 
     // Bodies
 
-    printf("== Testing: %s falling on %s",
+    printf("== Testing: %s falling on %s .. ",
            moving.c_str(), ground.c_str());
     fflush(stdout);
 
@@ -254,7 +254,7 @@ void ContactTest::t2()
   {
     printf("\n==== t2\n");
 
-    bounceTest("box", "plane", true);
+    bounceTest("box", "plane", true, false, 1.0 /*size*/);
   }
   catch (SiconosException e)
   {
