@@ -173,15 +173,11 @@ public:
    */
   void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
-
-
-
-
-  inline void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
-  {
-    _topology->setOSI(ds, OSI);
-    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
-  };
+  // inline void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
+  // {
+  //   _topology->setOSI(ds, OSI);
+  //   _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+  // };
 
   /** set the name for this Dynamical System
    * \param ds a pointer to the system

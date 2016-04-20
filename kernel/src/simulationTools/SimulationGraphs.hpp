@@ -48,6 +48,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
 {
   /** optional properties : memory is allocated only on first access */
   INSTALL_GRAPH_PROPERTIES(DynamicalSystems,
+                           ((VertexSP, OneStepIntegrator, osi)) // for ZOH Integration
                            ((VertexSP, MatrixIntegrator, Ad)) // for ZOH Integration
                            ((VertexSP, MatrixIntegrator, AdInt)) // for ZOH Integration
                            ((VertexSP, MatrixIntegrator, Ld)) // For Observer (ZOH Integration)
@@ -74,6 +75,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
   // to be installed with INSTALL_GRAPH_PROPERTIES
   void eraseProperties(_DynamicalSystemsGraph::VDescriptor vd)
   {
+    osi._store->erase(vd);
     Ad._store->erase(vd);
     AdInt._store->erase(vd);
     Ld._store->erase(vd);

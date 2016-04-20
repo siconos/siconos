@@ -211,23 +211,52 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   _eventsManager->initialize(_T);
   _tinit = _eventsManager->startingTime();
   //===
+
+  
   if (withOSI)
   {
+
+    
     if (numberOfOSI() == 0)
       RuntimeException::selfThrow("Simulation::initialize No OSI !");
+
+
+    DynamicalSystemsGraph::VIterator dsi, dsend;
+    SP::DynamicalSystemsGraph DSG = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+    for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
+    {
+      SP::OneStepIntegrator osi = DSG->osi[*dsi];
+      SP::DynamicalSystem ds = DSG->bundle(*dsi);
+      if (!osi)
+      {
+        // By default, if the user has not set the OSI, we assign the first OSI to all DS
+        (*_allOSI->begin())->display();
+        model()->nonSmoothDynamicalSystem()->topology()->setOSI(ds,*_allOSI->begin());
+        std::cout << "By default, if the user has not set the OSI, we assign the first OSI to all DS"<<std::endl;
+      }
+      else
+      {
+      }
+      
+      osi = DSG->osi[*dsi];
+      ds->initialize(model()->t0(),
+                     osi->getSizeMem());
+      addInOSIMap(ds, osi);
+    }
+
+
     // === OneStepIntegrators initialization ===
     for (OSIIterator itosi = _allOSI->begin();
          itosi != _allOSI->end(); ++itosi)
     {
-
-      for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
-           itds != (*itosi)->dynamicalSystems()->end();
-           ++itds)
-      {
-        (*itds)->initialize(model()->t0(),
-                            (*itosi)->getSizeMem());
-        addInOSIMap(*itds, *itosi);
-      }
+      // for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
+      //      itds != (*itosi)->dynamicalSystems()->end();
+      //      ++itds)
+      // {
+      //   (*itds)->initialize(model()->t0(),
+      //                       (*itosi)->getSizeMem());
+      //   addInOSIMap(*itds, *itosi);
+      // }
 
       (*itosi)->setSimulationPtr(shared_from_this());
       (*itosi)->initialize();
@@ -429,6 +458,7 @@ void Simulation::processEvents()
   {
     dsGraph->bundle(*vi)->endStep();
   }
+
 }
 
 
@@ -959,6 +989,7 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   // Note FP :  we should probably connect osi and graph before, in simulation->initialize?
   DSOSIConstIterator it = _osiMap.find(ds);
   SP::OneStepIntegrator osi = it->second;
+  
   if (!osi)
     RuntimeException::selfThrow("Simulation::computeLevelsForInputAndOutput osi does not exists");
   indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;

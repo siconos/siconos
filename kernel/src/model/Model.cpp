@@ -61,7 +61,7 @@ Model::~Model()
     _strat->clear();
 }
 
-void Model::setSimulationPtr(SP::Simulation newPtr)
+void Model::setSimulation(SP::Simulation newPtr)
 {
   // Warning: this function may be used carefully because of the links
   // between Model and TimeDiscretisation The model of the simulation
@@ -74,9 +74,8 @@ void Model::setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   _nsds = newPtr;
 }
 
-void Model::initialize(SP::Simulation simulation)
+void Model::initialize()
 {
-  _strat = simulation;
 
   assert(_strat && "Model::initialize() error - The simulation object of this model is null.");
 

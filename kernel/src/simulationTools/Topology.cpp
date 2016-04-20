@@ -233,7 +233,9 @@ void Topology::setName(SP::Interaction inter, const std::string& name)
 void Topology::setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
 {
   // to be move on the graph
-  OSI->insertDynamicalSystem(ds);
+  //OSI->insertDynamicalSystem(ds);
+  DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->descriptor(ds);
+  _DSG[0]->osi.insert(dsgv,OSI);
 }
 
 void Topology::setControlProperty(SP::Interaction inter,

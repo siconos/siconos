@@ -159,7 +159,7 @@ public:
   /** set the Simulation of the Model
    *  \return a pointer on Simulation
    */
-  void setSimulationPtr(SP::Simulation);
+  void setSimulation(SP::Simulation);
 
   /** get the NonSmoothDynamicalSystem of the Model
    *  \return a pointer on NonSmoothDynamicalSystem
@@ -240,9 +240,8 @@ public:
 
   /** Complete initialization of the model (NonSmoothDynamicalSystem,
       Simulation)
-      \param sim Simulation for this Model
    */
-  void initialize(SP::Simulation sim);
+  void initialize();
 
    /** display the data of the Model
       \return void

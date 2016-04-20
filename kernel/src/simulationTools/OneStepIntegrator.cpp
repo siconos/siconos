@@ -41,11 +41,6 @@ OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
 }
 
-void OneStepIntegrator::insertDynamicalSystem(SP::DynamicalSystem ds)
-{
-  OSIDynamicalSystems->insert(ds);
-}
-
 void OneStepIntegrator::initialize()
 {
   if (_extraAdditionalTerms)
@@ -53,6 +48,26 @@ void OneStepIntegrator::initialize()
     Model& m = *simulationLink->model();
     _extraAdditionalTerms->init(*m.nonSmoothDynamicalSystem()->topology()->dSG(0), m);
   }
+
+  // a subgraph has to be implemented.
+  _dynamicalSystemsGraph = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  
+  // Temporary build of the dynamicalSystems set
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  SP::DynamicalSystemsGraph DSG = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
+  {
+    SP::OneStepIntegrator osi = DSG->osi[*dsi];
+    SP::DynamicalSystem ds = DSG->bundle(*dsi);
+      if (!osi)
+      {
+       RuntimeException::selfThrow("ds is linked with an osi");
+      }
+      else
+      {
+        OSIDynamicalSystems->insert(ds);
+      }
+    }
 }
 
 void OneStepIntegrator::saveInMemory()

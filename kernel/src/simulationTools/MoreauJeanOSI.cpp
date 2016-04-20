@@ -162,19 +162,22 @@ void MoreauJeanOSI::initialize()
   // Get initial time
   double t0 = simulationLink->model()->t0();
   // Compute W(t0) for all ds
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
     // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
-    SP::DynamicalSystem ds = *itDS;
-
+    
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    if (!checkOSI(dsi)) continue;
     // W initialization
     initW(t0, ds);
     Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
-      (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
+      ds->allocateWorkVector(DynamicalSystem::local_buffer, WMap[ds->number()]->size(0));
     }
   }
 

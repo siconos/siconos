@@ -57,7 +57,7 @@
  * At the time, available integrators are: MoreauJeanOSI, EulerMoreauOSI, LsodarOSI, Hem5OSI
  *
  */
-class OneStepIntegrator
+class OneStepIntegrator :public std11::enable_shared_from_this<OneStepIntegrator>
 {
 protected:
 /** serialization hooks
@@ -70,6 +70,9 @@ protected:
 
 /** a set of DynamicalSystem to integrate */
   SP::DynamicalSystemsSet OSIDynamicalSystems;
+
+/** a graph of dynamical to integrate */
+  SP::DynamicalSystemsGraph _dynamicalSystemsGraph; 
 
 /** size of the memory for the integrator */
   unsigned int _sizeMem;
@@ -123,13 +126,19 @@ public:
   inline void setType(const OSI::TYPES& newType)
   {
     integratorType = newType;
-  }
+  };
+
+  inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
+  {
+    return  (_dynamicalSystemsGraph->osi[*dsi].get()) == this;
+  };
 
 /** get the set of DynamicalSystem associated with the Integrator
  *  \return a DynamicalSystemsSet
  */
   inline SP::DynamicalSystemsSet dynamicalSystems() const
   {
+    std::cout << "call to dynamicalSystems()" << std::endl;
     return OSIDynamicalSystems;
   };
 
@@ -138,6 +147,7 @@ public:
  */
   inline DSIterator dynamicalSystemsBegin()
   {
+    std::cout << "call to dynamicalSystemsBegin()" << std::endl;
     return OSIDynamicalSystems->begin();
   };
 
@@ -146,6 +156,7 @@ public:
  */
   inline DSIterator dynamicalSystemsEnd()
   {
+    std::cout << "call to dynamicalSystemsEnd()" << std::endl;
     return OSIDynamicalSystems->end();
   };
 
@@ -154,6 +165,7 @@ public:
  */
   inline ConstDSIterator dynamicalSystemsBegin() const
   {
+    std::cout << "call to dynamicalSystemsBegin()" << std::endl;
     return OSIDynamicalSystems->begin();
   };
 
@@ -162,10 +174,9 @@ public:
  */
   inline ConstDSIterator dynamicalSystemsEnd() const
   {
+    std::cout << "call to dynamicalSystemsEnd()" << std::endl;
     return OSIDynamicalSystems->end();
   };
-
-  DEPRECATED_OSI_API(virtual void insertDynamicalSystem(SP::DynamicalSystem ds));
 
 /** get _sizeMem value
  *  \return an unsigned int
