@@ -423,17 +423,18 @@ void Simulation::updateOutput(unsigned int level)
 
   DEBUG_BEGIN("Simulation::updateOutput(unsigned int level)\n");
   DEBUG_PRINTF("with level = %i\n", level);
-  double time = model()->currentTime();
-  InteractionsGraph::VIterator ui, uiend;
-  SP::Interaction inter;
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    inter = indexSet0->bundle(*ui);
-    assert(inter->lowerLevelForOutput() <= level);
-    assert(inter->upperLevelForOutput() >= level);
-    inter->computeOutput(time, indexSet0->properties(*ui), level);
-  }
+  // double time = model()->currentTime();
+  // InteractionsGraph::VIterator ui, uiend;
+  // SP::Interaction inter;
+  // SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  // {
+  //   inter = indexSet0->bundle(*ui);
+  //   assert(inter->lowerLevelForOutput() <= level);
+  //   assert(inter->upperLevelForOutput() >= level);
+  //   inter->computeOutput(time, indexSet0->properties(*ui), level);
+  // }
+  model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),level );
   DEBUG_END("Simulation::updateOutput(unsigned int level)\n");
 
 }

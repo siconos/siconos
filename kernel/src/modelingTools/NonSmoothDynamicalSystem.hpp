@@ -247,11 +247,6 @@ public:
    */
   void reset(unsigned int level);
 
-  /** compute r thanks to lambda[level] for all Interactions
-   *   \param level lambda level
-   */
-  void updateInput(double time, unsigned int level);
-
   /** save DynamicalSystems and Interactions states in Memories
    */
   void swapInMemory();
@@ -261,6 +256,19 @@ public:
   */
   void pushInteractionsInMemory();
 
+  /** compute r thanks to lambda[level] for all Interactions
+    * \param time
+    *   \param level lambda level
+   */
+  void updateInput(double time, unsigned int level);
+
+  /** compute output for all the interactions
+   * \param time
+   *  \param level y min order to be computed
+   */
+  void updateOutput(double time, unsigned int level = 0);
+
+  
 };
 
 

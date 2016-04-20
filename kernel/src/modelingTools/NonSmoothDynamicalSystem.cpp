@@ -95,35 +95,7 @@ void NonSmoothDynamicalSystem::setSymmetric(bool val)
   _topology->setSymmetric(val);
 }
 
-void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
-{
 
-  DEBUG_BEGIN("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
-  DEBUG_PRINTF("with level = %i\n", level);
-
-
-  // To compute input(level) (ie with lambda[level]) for all Interactions.
-  //  assert(level>=0);
-  //  double time = nextTime();
-
-  // Set dynamical systems non-smooth part to zero.
-  reset(level);
-
-  // We compute input using lambda(level).
-  InteractionsGraph::VIterator ui, uiend;
-  SP::Interaction inter;
-  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    inter = indexSet0->bundle(*ui);
-    assert(inter->lowerLevelForInput() <= level);
-    assert(inter->upperLevelForInput() >= level);
-    inter->computeInput(time, indexSet0->properties(*ui), level);
-  }
-
-  DEBUG_END("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
-
-}
 void NonSmoothDynamicalSystem::reset()
 {
   DynamicalSystemsGraph::VIterator vi;
@@ -170,3 +142,58 @@ void NonSmoothDynamicalSystem::pushInteractionsInMemory()
     }
   }
 }
+
+void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
+{
+
+  DEBUG_BEGIN("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
+  DEBUG_PRINTF("with level = %i\n", level);
+
+
+  // To compute input(level) (ie with lambda[level]) for all Interactions.
+  //  assert(level>=0);
+  //  double time = nextTime();
+
+  // Set dynamical systems non-smooth part to zero.
+  reset(level);
+
+  // We compute input using lambda(level).
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForInput() <= level);
+    assert(inter->upperLevelForInput() >= level);
+    inter->computeInput(time, indexSet0->properties(*ui), level);
+  }
+
+  DEBUG_END("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
+
+}
+
+
+void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
+{
+
+  // To compute output(level) (ie with y[level]) for all Interactions.
+  //  assert(level>=0);
+  
+  DEBUG_BEGIN("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
+  DEBUG_PRINTF("with level = %i\n", level);
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForOutput() <= level);
+    assert(inter->upperLevelForOutput() >= level);
+    inter->computeOutput(time, indexSet0->properties(*ui), level);
+  }
+  DEBUG_END("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
+
+}
+
+
