@@ -128,7 +128,7 @@ public:
   }
 
 
-  
+
   // === Interactions management ===
 
   /** get the number of Interactions present in the NSDS.
@@ -155,7 +155,7 @@ public:
   {
     _topology->removeInteraction(inter);
   };
-  
+
   /** get Interaction number I
    * \param nb the identifier of the Interaction to get
    * \return a pointer on Interaction
@@ -173,9 +173,9 @@ public:
    */
   void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
-  
 
-  
+
+
 
   inline void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
   {
@@ -237,6 +237,31 @@ public:
    * \param val a bool
    */
   void setSymmetric(bool val);
+
+  /** Set all DS non-smooth part to zero.
+   */
+  void reset();
+
+  /** Set all DS non-smooth part to zero for a given level.
+   * \param level the level to will be zeroed
+   */
+  void reset(unsigned int level);
+
+  /** compute r thanks to lambda[level] for all Interactions
+   *   \param level lambda level
+   */
+  void updateInput(double time, unsigned int level);
+
+  /** save DynamicalSystems and Interactions states in Memories
+   */
+  void swapInMemory();
+
+  /** save interaction states in memories. Applied to all interactions
+   of the connected topology
+  */
+  void pushInteractionsInMemory();
+
 };
+
 
 #endif

@@ -23,6 +23,18 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "Relation.hpp"
 
+#include <SiconosConfig.h>
+#if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
+#include <functional>
+using namespace std::placeholders;
+#else
+#include <boost/bind.hpp>
+#include <boost/weak_ptr.hpp>
+#endif
+
+#include "debug.h"
+
+
 using namespace RELATION;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -83,3 +95,78 @@ void NonSmoothDynamicalSystem::setSymmetric(bool val)
   _topology->setSymmetric(val);
 }
 
+void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
+{
+
+  DEBUG_BEGIN("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
+  DEBUG_PRINTF("with level = %i\n", level);
+
+
+  // To compute input(level) (ie with lambda[level]) for all Interactions.
+  //  assert(level>=0);
+  //  double time = nextTime();
+
+  // Set dynamical systems non-smooth part to zero.
+  reset(level);
+
+  // We compute input using lambda(level).
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForInput() <= level);
+    assert(inter->upperLevelForInput() >= level);
+    inter->computeInput(time, indexSet0->properties(*ui), level);
+  }
+
+  DEBUG_END("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
+
+}
+void NonSmoothDynamicalSystem::reset()
+{
+  DynamicalSystemsGraph::VIterator vi;
+  for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
+  {
+    dynamicalSystems()->bundle(*vi)->resetNonSmoothPart(1);
+  }
+}
+
+void NonSmoothDynamicalSystem::reset(unsigned int level)
+{
+  DynamicalSystemsGraph::VIterator vi;
+  for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
+  {
+    dynamicalSystems()->bundle(*vi)->resetNonSmoothPart(level);
+  }
+}
+
+void NonSmoothDynamicalSystem::swapInMemory()
+{
+  //could be better to call bind method
+  DynamicalSystemsGraph::VIterator vi;
+  for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
+  {
+    dynamicalSystems()->bundle(*vi)->swapInMemory();
+  }
+}
+void NonSmoothDynamicalSystem::pushInteractionsInMemory()
+{
+  // Save Interactions state into Memory.
+
+  if (_topology->indexSet0()->size() > 0)
+  {
+    // Temp FP : saveInOldVar was called for each osns and each osns call
+    // swapInOldVar for all interactions in the nsds.
+    // ==> let's do it only once, by the simu.
+
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      indexSet0->bundle(*ui)->swapInOldVariables();
+      indexSet0->bundle(*ui)->swapInMemory();
+    }
+  }
+}

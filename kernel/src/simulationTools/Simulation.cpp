@@ -331,7 +331,6 @@ void Simulation::reset()
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart();
 }
-
 void Simulation::reset(unsigned int level)
 {
   // r (or p) is set to zero in all DynamicalSystems.
@@ -340,15 +339,14 @@ void Simulation::reset(unsigned int level)
     (*itOSI)->resetNonSmoothPart(level);
 }
 
-
 void Simulation::saveInMemory()
 {
-  // Save OSI state (DynamicalSystems) in Memory.
-  OSIIterator it;
-  for (it = _allOSI->begin(); it != _allOSI->end() ; ++it)
-    (*it)->saveInMemory();
-
-  pushInteractionsInMemory();
+  // // Save OSI state (DynamicalSystems) in Memory.
+  // OSIIterator it;
+  // for (it = _allOSI->begin(); it != _allOSI->end() ; ++it)
+  //   (*it)->saveInMemory();
+  model()->nonSmoothDynamicalSystem()->swapInMemory();
+  model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
 }
 
 void Simulation::pushInteractionsInMemory()
@@ -392,24 +390,26 @@ void Simulation::updateInput(unsigned int level)
   DEBUG_PRINTF("with level = %i\n", level);
 
 
-  // To compute input(level) (ie with lambda[level]) for all Interactions.
-  //  assert(level>=0);
-  //  double time = nextTime();
-  double time = model()->currentTime();
-  // Set dynamical systems non-smooth part to zero.
-  reset(level);
+  // // To compute input(level) (ie with lambda[level]) for all Interactions.
+  // //  assert(level>=0);
+  // //  double time = nextTime();
+  // double time = model()->currentTime();
+  // // Set dynamical systems non-smooth part to zero.
+  // reset(level);
 
-  // We compute input using lambda(level).
-  InteractionsGraph::VIterator ui, uiend;
-  SP::Interaction inter;
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    inter = indexSet0->bundle(*ui);
-    assert(inter->lowerLevelForInput() <= level);
-    assert(inter->upperLevelForInput() >= level);
-    inter->computeInput(time, indexSet0->properties(*ui), level);
-  }
+  // // We compute input using lambda(level).
+  // InteractionsGraph::VIterator ui, uiend;
+  // SP::Interaction inter;
+  // SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  // {
+  //   inter = indexSet0->bundle(*ui);
+  //   assert(inter->lowerLevelForInput() <= level);
+  //   assert(inter->upperLevelForInput() >= level);
+  //   inter->computeInput(time, indexSet0->properties(*ui), level);
+  // }
+
+  model()->nonSmoothDynamicalSystem()->updateInput(model()->currentTime(),level );
 
   DEBUG_END("Simulation::updateInput(unsigned int level)\n");
 
