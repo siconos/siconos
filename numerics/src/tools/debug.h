@@ -60,10 +60,13 @@ extern unsigned int debug_counter;
 
 
 //#define DEBUG_PREFIX   printf("%i",debug_counter); for (unsigned int i =0 ; i < debug_counter; i++) printf(".");
-#define DEBUG_PREFIX    for (unsigned int i =0 ; i < debug_counter; i++) printf("..");
+#define DEBUG_PREFIX                                          \
+  if (debug_counter > 0)                                      \
+    for (int i = 0 ; i < debug_counter-1; i++) printf("|  "); \
+  printf("-");
 
-#define DEBUG_BEGIN(M)  DEBUG_PREFIX;  debug_counter++; DEBUG_INTERNAL_PRINTF("==== BEGIN === %s",M)
-#define DEBUG_END(M)    debug_counter-- ; DEBUG_PREFIX;   DEBUG_INTERNAL_PRINTF("===   END  === %s",M)
+#define DEBUG_BEGIN(M)  DEBUG_PREFIX;  debug_counter++;   DEBUG_INTERNAL_PRINTF("= BEGIN ==== %s",M)
+#define DEBUG_END(M)    debug_counter-- ; DEBUG_PREFIX;   DEBUG_INTERNAL_PRINTF("= END   ==== %s",M)
 
 #ifdef DEBUG_BEGIN_END_ONLY
 #define DEBUG_PRINTF(_fmt, ...)
