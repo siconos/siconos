@@ -157,7 +157,7 @@ void CommonSMC::initialize(const Model& m)
   }
 
   _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
-  _SMC->nonSmoothDynamicalSystem()->setOSI(_DS_SMC, _integratorSMC);
+  _SMC->nonSmoothDynamicalSystem()->topology()->setOSI(_DS_SMC, _integratorSMC);
   _SMC->nonSmoothDynamicalSystem()->setName(_DS_SMC, "plant_SMC");
   _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
   _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);
@@ -169,7 +169,8 @@ void CommonSMC::initialize(const Model& m)
   //    std::cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] <<std::endl;
   _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);
   // Finally we can initialize everything ...
-  _SMC->initialize(_simulationSMC);
+  _SMC->setSimulation(_simulationSMC);
+  _SMC->initialize();
 
   // Handy
   _eventsManager = _simulationSMC->eventsManager();
