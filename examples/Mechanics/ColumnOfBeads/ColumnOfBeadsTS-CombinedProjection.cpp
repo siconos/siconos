@@ -147,7 +147,6 @@ int main(int argc, char* argv[])
     for (unsigned int i = 0; i < nBeads; i++)
     {
       columnOfBeads->nonSmoothDynamicalSystem()->insertDynamicalSystem(beads[i]);
-      OSI->insertDynamicalSystem(beads[i]);
     }
 
     // // link the interaction and the dynamical system
@@ -211,7 +210,6 @@ int main(int argc, char* argv[])
     time.restart();
     int ncontact = 0 ;
     bool isOSNSinitialized = false;
-    InteractionsGraph& indexSet0 = *columnOfBeads->nonSmoothDynamicalSystem()->topology()->indexSet0();
     while (s->hasNextEvent())
     {
       // Rough contact detection

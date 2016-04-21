@@ -147,7 +147,6 @@ int main(int argc, char* argv[])
     for (unsigned int i = 0; i < nBeads; i++)
     {
       columnOfBeads->nonSmoothDynamicalSystem()->insertDynamicalSystem(beads[i]);
-      OSI->insertDynamicalSystem(beads[i]);
     }
 
     // // link the interaction and the dynamical system
@@ -157,7 +156,7 @@ int main(int argc, char* argv[])
     //   columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i+1]);
     // }
 
-    
+
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
@@ -166,7 +165,9 @@ int main(int argc, char* argv[])
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-    
+
+    columnOfBeads->setSimulation(s);
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -174,7 +175,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    columnOfBeads->initialize(s);
+    columnOfBeads->initialize();
 
     int N = ceil((T - t0) / h); // Number of time steps
 
@@ -207,7 +208,6 @@ int main(int argc, char* argv[])
     time.restart();
     int ncontact = 0 ;
     bool isOSNSinitialized = false;
-    InteractionsGraph& indexSet0 = *columnOfBeads->nonSmoothDynamicalSystem()->topology()->indexSet0();
     while (s->hasNextEvent())
     {
       // Rough contact detection
@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
           }
         }
       }
-      
+
       s->computeOneStep();
 
       // --- Get values to be plotted ---
@@ -319,5 +319,3 @@ int main(int argc, char* argv[])
 
 
 }
-
-
