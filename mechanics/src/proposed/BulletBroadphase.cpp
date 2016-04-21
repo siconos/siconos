@@ -558,8 +558,11 @@ public:
     unsigned int contact_index;
     btPersistentManifold* contactManifold;
     iterator(SP::btCollisionWorld _world)
-      : iterator()
     {
+      numManifolds = 0;
+      manifold_index = -1;
+      contact_index = -1;
+      numContacts = 0;
       world = _world;
       numManifolds = world->getDispatcher()->getNumManifolds();
       ++(*this);
