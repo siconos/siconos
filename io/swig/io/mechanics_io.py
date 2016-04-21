@@ -1415,12 +1415,12 @@ class Hdf5():
             self.printSolverInfos()
             if violation_verbose:
                 print('violation info')
-                y = simulation.output(0,0)
+                y = simulation.y(0,0)
                 yplus=  np.zeros((2,len(y)))
                 yplus[0,:] = y
                 #print(yplus)
                 
-                if len(simulation.output(0,0)) >0 :
+                if len(simulation.y(0,0)) >0 :
                     y=np.min(yplus,axis=1)
                     violation_max=np.max(-y)
                     print('  violation max :',np.max(-y))
